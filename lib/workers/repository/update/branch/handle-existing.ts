@@ -42,7 +42,7 @@ export async function handleClosedPr(
     }
     if (await scm.branchExists(config.branchName)) {
       if (GlobalConfig.get('dryRun')) {
-        logger.info('DRY-RUN: Would delete branch ' + config.branchName);
+        logger.info(`DRY-RUN: Would delete branch ${config.branchName}`);
       } else {
         await scm.deleteBranch(config.branchName);
       }
@@ -59,10 +59,7 @@ export async function handleModifiedPr(
   }
 
   const editedPrCommentTopic = 'Edited/Blocked Notification';
-  const content =
-    'Renovate will not automatically rebase this PR, because it does not recognize the last commit author and assumes somebody else may have edited the PR.\n\n' +
-    'You can manually request rebase by checking the rebase/retry box above.\n\n' +
-    emojify(' :warning: **Warning**: custom changes will be lost.');
+  const content = `Renovate will not automatically rebase this PR, because it does not recognize the last commit author and assumes somebody else may have edited the PR.\n\nYou can manually request rebase by checking the rebase/retry box above.\n\n${emojify(' :warning: **Warning**: custom changes will be lost.')}`;
 
   const dependencyDashboardCheck =
     config.dependencyDashboardChecks?.[config.branchName];

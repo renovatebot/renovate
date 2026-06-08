@@ -78,4 +78,4 @@ function getNewValue({ currentValue, newVersion }: NewValueConfig): string {
   return cleanNewVersion;
 }
 
-export { toSemverRange, getNewValue };
+export { getNewValue, toSemverRange };

@@ -231,6 +231,9 @@ export async function lookup(
 ): Promise<ExtractResult> {
   await fetchVulnerabilities(config, packageFiles);
   await fetchUpdates(config, packageFiles);
+  // call this twice, as the second time, the updates will be availalbe for malicious package checks
+  // TODO: this will be refactored as part of #42423
+  await fetchVulnerabilities(config, packageFiles);
   memCache.cleanDatasourceKeys();
   calculateLibYears(config, packageFiles);
   const { branches, branchList } = await branchifyUpgrades(

@@ -116,28 +116,13 @@ describe('util/cache/package/impl/redis', () => {
     });
 
     describe('get', () => {
-      it('returns compressed cached value', async () => {
+      it('returns value from cache payload', async () => {
         const cache = await PackageCacheRedis.create('redis://host', 'p:');
         const value = { foo: 'bar' };
-        const compressed = await compressToBase64(JSON.stringify(value));
+        const payloadValue = await compressToBase64(JSON.stringify(value));
 
         const payload = JSON.stringify({
-          compress: true,
-          value: compressed,
-          expiry: DateTime.local().plus({ minutes: 5 }),
-        });
-        clientMock.get.mockResolvedValueOnce(payload);
-
-        expect(await cache.get('_test-namespace', 'key')).toEqual(value);
-      });
-
-      it('returns uncompressed value', async () => {
-        const cache = await PackageCacheRedis.create('redis://host', 'p:');
-        const value = { foo: 'bar' };
-
-        const payload = JSON.stringify({
-          compress: false,
-          value,
+          value: payloadValue,
           expiry: DateTime.local().plus({ minutes: 5 }),
         });
         clientMock.get.mockResolvedValueOnce(payload);
@@ -160,7 +145,7 @@ describe('util/cache/package/impl/redis', () => {
       it('returns undefined for missing expiry', async () => {
         const cache = await PackageCacheRedis.create('redis://host', 'p:');
 
-        const payload = JSON.stringify({ compress: false, value: 1234 });
+        const payload = JSON.stringify({ value: 1234 });
         clientMock.get.mockResolvedValueOnce(payload);
 
         expect(await cache.get('_test-namespace', 'key')).toBeUndefined();
@@ -171,7 +156,6 @@ describe('util/cache/package/impl/redis', () => {
         const cache = await PackageCacheRedis.create('redis://host', 'p:');
 
         const payload = JSON.stringify({
-          compress: false,
           value: 1234,
           expiry: 'not-a-date',
         });
@@ -199,16 +183,22 @@ describe('util/cache/package/impl/redis', () => {
     });
 
     describe('set', () => {
-      it('compresses and stores value', async () => {
+      it('stores payload with value and expiry', async () => {
         const cache = await PackageCacheRedis.create('redis://host', 'p:');
 
         await cache.set('_test-namespace', 'key', { foo: 'bar' }, 10);
 
+        const [, rawPayload] = vi.mocked(clientMock.set).mock.calls[0];
+        const payload = JSON.parse(rawPayload as string);
+
         expect(clientMock.set).toHaveBeenCalledWith(
           'p:_test-namespace-key',
-          expect.stringContaining('"compress":true'),
+          expect.any(String),
           { EX: 600 },
         );
+        expect(Object.keys(payload).sort()).toEqual(['expiry', 'value']);
+        expect(payload.value).toBeString();
+        expect(payload.expiry).toBeString();
       });
 
       it('deletes entry with negative TTL', async () => {

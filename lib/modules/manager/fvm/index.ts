@@ -1,4 +1,8 @@
+import type { Category } from '../../../constants/index.ts';
 import { FlutterVersionDatasource } from '../../datasource/flutter-version/index.ts';
+
+export const categories: Category[] = ['dart'];
+
 import * as semverVersioning from '../../versioning/semver/index.ts';
 
 export { extractPackageFile } from './extract.ts';

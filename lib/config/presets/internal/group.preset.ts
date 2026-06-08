@@ -386,6 +386,16 @@ const staticGroups = {
       },
     ],
   },
+  pnpm: {
+    description: 'Group pnpm packages together.',
+    packageRules: [
+      {
+        groupName: 'pnpm packages',
+        matchDatasources: ['docker', 'npm'],
+        matchPackageNames: ['pnpm', 'ghcr.io/pnpm/pnpm'],
+      },
+    ],
+  },
   polymer: {
     description: 'Group all `@polymer` packages together.',
     packageRules: [
@@ -798,6 +808,17 @@ const staticGroups = {
       {
         groupName: 'spring ws',
         matchPackageNames: ['org.springframework.ws:**'],
+      },
+    ],
+  },
+  stylelint: {
+    description: 'Group stylelint packages together.',
+    packageRules: [
+      {
+        extends: ['packages:stylelint'],
+        groupName: 'stylelint packages',
+        groupSlug: 'stylelint',
+        separateMajorMinor: false,
       },
     ],
   },

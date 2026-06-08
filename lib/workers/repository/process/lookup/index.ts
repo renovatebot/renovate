@@ -214,6 +214,7 @@ export async function lookupUpdates(
       let allVersions = dependency.releases.filter((release) =>
         versioningApi.isVersion(release.version),
       );
+      const allReleaseVersions = new Set(allVersions.map((r) => r.version));
       // istanbul ignore if
       if (allVersions.length === 0) {
         const message = `Found no results from datasource that look like a version`;
@@ -304,8 +305,12 @@ export async function lookupUpdates(
       let currentVersion: string;
       if (rangeStrategy === 'update-lockfile') {
         currentVersion = config.lockedVersion!;
-      } else if (allVersions.find((v) => v.version === compareValue)) {
-        currentVersion = compareValue!;
+      } else if (
+        compareValue &&
+        versioningApi.isSingleVersion(compareValue) &&
+        allVersions.find((v) => v.version === compareValue)
+      ) {
+        currentVersion = compareValue;
       }
       // TODO #22198
       currentVersion ??=
@@ -508,6 +513,7 @@ export async function lookupUpdates(
           config.lockedVersion ?? currentVersion!,
           bucket,
           release,
+          allReleaseVersions,
         );
 
         // #29034
@@ -776,9 +782,12 @@ export async function lookupUpdates(
 
     const release =
       res.updates.length > 0
-        ? dependency?.releases.find(
+        ? (dependency?.releases.find(
             (r) => r.version === res.updates[0].newValue,
-          )
+          ) ??
+          dependency?.releases.find(
+            (r) => r.version === res.updates[0].newVersion,
+          ))
         : null;
 
     if (release?.changelogContent) {

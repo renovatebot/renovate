@@ -26,16 +26,16 @@ export async function generatePlatforms(
       md += '\n\n';
 
       md += codeBlock`
-        <!-- prettier-ignore -->
         !!! warning "This feature is flagged as experimental"
-            Experimental features might be changed or even removed at any time.
+          Experimental features might be changed or even removed at any time.
       `;
       md += '\n\n';
 
       md += lines.slice(1).join('\n');
+    } else {
+      md += contents;
     }
 
-    md += contents;
     md += generateFeatureAndBugMarkdown(platformIssuesMap, id);
 
     await updateFile(`${dist}/modules/platform/${id}/index.md`, md);

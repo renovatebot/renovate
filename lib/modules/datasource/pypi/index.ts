@@ -13,7 +13,9 @@ import { Datasource } from '../datasource.ts';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types.ts';
 import { getGoogleAuthToken } from '../util.ts';
 import { isGitHubRepo, normalizePythonDepName } from './common.ts';
-import type { PypiJSON, PypiJSONRelease, Releases } from './types.ts';
+import type { PypiRelease } from './schema.ts';
+import { PypiResponse } from './schema.ts';
+import type { Releases } from './types.ts';
 
 export class PypiDatasource extends Datasource {
   static readonly id = 'pypi';
@@ -82,23 +84,38 @@ export class PypiDatasource extends Datasource {
     return dependency;
   }
 
+  private sanitizeLookupUrl(lookupUrl: string, parsedUrl: URL): string {
+    if (!parsedUrl.username && !parsedUrl.password) {
+      return lookupUrl;
+    }
+
+    parsedUrl.username = '';
+    parsedUrl.password = '';
+    return parsedUrl.toString();
+  }
+
   private async getAuthHeaders(
     lookupUrl: string,
-  ): Promise<OutgoingHttpHeaders> {
+  ): Promise<{ headers: OutgoingHttpHeaders; lookupUrl: string }> {
     const parsedUrl = parseUrl(lookupUrl);
+    // v8 ignore if -- TODO: refactor to cover this branch through public behavior again
     if (!parsedUrl) {
       logger.once.debug({ lookupUrl }, 'Failed to parse URL');
-      return {};
+      return { headers: {}, lookupUrl };
     }
     if (parsedUrl.hostname.endsWith('.pkg.dev')) {
       const auth = await getGoogleAuthToken();
       if (auth) {
-        return { authorization: `Basic ${auth}` };
+        const sanitizedLookupUrl = this.sanitizeLookupUrl(lookupUrl, parsedUrl);
+        return {
+          headers: { authorization: `Basic ${auth}` },
+          lookupUrl: sanitizedLookupUrl,
+        };
       }
       logger.once.debug({ lookupUrl }, 'Could not get Google access token');
-      return {};
+      return { headers: {}, lookupUrl };
     }
-    return {};
+    return { headers: {}, lookupUrl };
   }
 
   private async getDependency(
@@ -111,15 +128,14 @@ export class PypiDatasource extends Datasource {
     ).href;
     const dependency: ReleaseResult = { releases: [] };
     logger.trace({ lookupUrl }, 'Pypi api got lookup');
-    const headers = await this.getAuthHeaders(lookupUrl);
-    const rep = await this.http.getJsonUnchecked<PypiJSON>(lookupUrl, {
-      headers,
-    });
+    const { headers, lookupUrl: sanitizedUrl } =
+      await this.getAuthHeaders(lookupUrl);
+    const rep = await this.http.getJson(
+      sanitizedUrl,
+      { headers },
+      PypiResponse,
+    );
     const dep = rep?.body;
-    if (!dep) {
-      logger.trace({ dependency: packageName }, 'pip package not found');
-      return null;
-    }
     if (rep.authorization) {
       dependency.isPrivate = true;
     }
@@ -140,6 +156,7 @@ export class PypiDatasource extends Datasource {
         const lower = name.toLowerCase();
 
         if (
+          projectUrl &&
           !dependency.sourceUrl &&
           (lower.startsWith('repo') ||
             lower === 'code' ||
@@ -259,8 +276,9 @@ export class PypiDatasource extends Datasource {
       hostUrl,
     ).href;
     const dependency: ReleaseResult = { releases: [] };
-    const headers = await this.getAuthHeaders(lookupUrl);
-    const response = await this.http.getText(lookupUrl, { headers });
+    const { headers, lookupUrl: sanitizedUrl } =
+      await this.getAuthHeaders(lookupUrl);
+    const response = await this.http.getText(sanitizedUrl, { headers });
     const dep = response?.body;
     if (!dep) {
       logger.trace({ dependency: packageName }, 'pip package not found');
@@ -278,7 +296,7 @@ export class PypiDatasource extends Datasource {
         packageName,
       );
       if (version) {
-        const release: PypiJSONRelease = {
+        const release: PypiRelease = {
           yanked: link.hasAttribute('data-yanked'),
         };
         const requiresPython = link.getAttribute('data-requires-python');

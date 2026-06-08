@@ -84,6 +84,7 @@ describe('workers/repository/process/fetch', () => {
 
     it('fetches updates', async () => {
       config.rangeStrategy = 'auto';
+      // @ts-expect-error -- intentionally using invalid constraint names
       config.constraints = { some: 'different' };
       const packageFiles: any = {
         maven: [
@@ -111,6 +112,99 @@ describe('workers/repository/process/fetch', () => {
             packageFile: 'pom.xml',
           },
         ],
+      });
+    });
+
+    describe('constraintsVersioning', () => {
+      it('is merged from packageFile with config', async () => {
+        config.constraintsVersioning = { gomodMod: 'config-version' };
+        const packageFiles: any = {
+          maven: [
+            {
+              packageFile: 'pom.xml',
+              constraintsVersioning: {
+                gomodMod: 'pfile-version',
+                go: 'go-version',
+              },
+              deps: [{ datasource: MavenDatasource.id, depName: 'bbb' }],
+            },
+          ],
+        };
+        lookupUpdates.mockResolvedValue({ updates: [] } as never);
+
+        await fetchUpdates(config, packageFiles);
+
+        expect(lookupUpdates).toHaveBeenCalledWith(
+          expect.objectContaining({
+            constraintsVersioning: {
+              gomodMod: 'config-version',
+              go: 'go-version',
+            },
+          }),
+        );
+      });
+
+      it('is set from packageFile if only set on packageFile', async () => {
+        const packageFiles: any = {
+          maven: [
+            {
+              packageFile: 'pom.xml',
+              constraintsVersioning: { go: 'go-version' },
+              deps: [{ datasource: MavenDatasource.id, depName: 'bbb' }],
+            },
+          ],
+        };
+        lookupUpdates.mockResolvedValue({ updates: [] } as never);
+
+        await fetchUpdates(config, packageFiles);
+
+        expect(lookupUpdates).toHaveBeenCalledWith(
+          expect.objectContaining({
+            constraintsVersioning: { go: 'go-version' },
+          }),
+        );
+      });
+
+      it('is not set if neither config nor packageFile are set', async () => {
+        const packageFiles: any = {
+          maven: [
+            {
+              packageFile: 'pom.xml',
+              // no constraintsVersioning on pFile
+              deps: [{ datasource: MavenDatasource.id, depName: 'bbb' }],
+            },
+          ],
+        };
+        lookupUpdates.mockResolvedValue({ updates: [] } as never);
+
+        await fetchUpdates(config, packageFiles);
+
+        expect(lookupUpdates).toHaveBeenCalledWith(
+          expect.objectContaining({
+            constraintsVersioning: {},
+          }),
+        );
+      });
+
+      it('is set if config is set', async () => {
+        config.rangeStrategy = 'auto';
+        config.constraintsVersioning = { gomodMod: 'config-version' };
+        const packageFiles: any = {
+          maven: [
+            {
+              packageFile: 'pom.xml',
+              // no constraintsVersioning on pFile
+              deps: [{ datasource: MavenDatasource.id, depName: 'bbb' }],
+            },
+          ],
+        };
+        lookupUpdates.mockResolvedValue({ updates: [] } as never);
+        await fetchUpdates(config, packageFiles);
+        expect(lookupUpdates).toHaveBeenCalledWith(
+          expect.objectContaining({
+            constraintsVersioning: { gomodMod: 'config-version' },
+          }),
+        );
       });
     });
 

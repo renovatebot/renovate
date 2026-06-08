@@ -4,7 +4,10 @@ import { logger } from '../../../../logger/index.ts';
 import { scm } from '../../../../modules/platform/scm.ts';
 import { getInheritedOrGlobal } from '../../../../util/common.ts';
 import { toSha256 } from '../../../../util/hash.ts';
-import { getDefaultConfigFileName } from '../common.ts';
+import {
+  getDefaultConfigFileName,
+  getSemanticCommitPrTitle,
+} from '../common.ts';
 import { OnboardingCommitMessageFactory } from './commit-message.ts';
 import { getOnboardingConfigContents } from './config.ts';
 
@@ -15,7 +18,7 @@ export async function rebaseOnboardingBranch(
   logger.debug('Checking if onboarding branch needs rebasing');
 
   // skip platforms that do not support html comments in pr
-  const platform = GlobalConfig.get('platform')!;
+  const platform = GlobalConfig.get('platform');
   if (!['github', 'gitea', 'gitlab'].includes(platform)) {
     logger.debug(
       `Skipping rebase as ${platform} does not support html comments`,
@@ -47,6 +50,11 @@ export async function rebaseOnboardingBranch(
   );
   const commitMessage = commitMessageFactory.create();
 
+  const prTitle =
+    config.semanticCommits === 'enabled'
+      ? getSemanticCommitPrTitle(config)
+      : getInheritedOrGlobal('onboardingPrTitle')!;
+
   // TODO #22198
   return scm.commitAndPush({
     baseBranch: config.baseBranch,
@@ -60,6 +68,7 @@ export async function rebaseOnboardingBranch(
     ],
     message: commitMessage.toString(),
     platformCommit: config.platformCommit,
-    labels: config.labels,
+    // Only needed by Gerrit platform
+    prTitle,
   });
 }
