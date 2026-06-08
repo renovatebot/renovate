@@ -230,7 +230,12 @@
       }
     },
     {
-      "files": ["lib/util/git/index.ts", "tools/**/*.mjs", "lib/**/*.spec.ts"],
+      "files": [
+        "lib/util/git/index.ts",
+        "tools/**/*.mjs",
+        "tools/**/*.ts",
+        "lib/**/*.spec.ts"
+      ],
       "rules": {
         "no-restricted-imports": [
           "error",

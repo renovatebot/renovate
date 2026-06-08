@@ -33,6 +33,7 @@
       "!**/node_modules",
       "!.pnpm-store",
       "!.worktrees/**/*",
+      "!.claude/worktrees/**/*",
       "!**/dist",
       "!**/tmp",
       "!**/coverage",
