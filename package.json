@@ -146,7 +146,7 @@
   "homepage": "https://renovatebot.com",
   "engines": {
     "node": "^24.11.0",
-    "pnpm": "^10.0.0"
+    "pnpm": "^11.0.0"
   },
   "dependencies": {
     "@aws-sdk/client-codecommit": "3.1053.0",
@@ -349,7 +349,7 @@
     "vitest": "4.1.8",
     "vitest-mock-extended": "4.0.0"
   },
-  "packageManager": "pnpm@10.34.1",
+  "packageManager": "pnpm@11.5.2",
   "files": [
     "dist",
     "renovate-schema.json"
