@@ -151,40 +151,6 @@ describe('config/validation', () => {
       expect(errors).toBeEmptyArray();
     });
 
-    it('does not warn for valid platformConfig', async () => {
-      const config = {
-        platformConfig: 'auto',
-      };
-      const { warnings, errors } = await configValidation.validateConfig(
-        'repo',
-        // @ts-expect-error -- TODO: What is `platformConfig` type?
-        config,
-      );
-      expect(warnings).toBeEmptyArray();
-      expect(errors).toMatchObject([
-        {
-          message: 'Invalid configuration option: platformConfig',
-        },
-      ]);
-    });
-
-    it('warns for invalid platformConfig', async () => {
-      const config = {
-        platformConfig: 'invalid',
-      };
-      const { errors, warnings } = await configValidation.validateConfig(
-        'repo',
-        // @ts-expect-error -- TODO: What is `platformConfig` type?
-        config,
-      );
-      expect(errors).toMatchObject([
-        {
-          message: 'Invalid configuration option: platformConfig',
-        },
-      ]);
-      expect(warnings).toBeEmptyArray();
-    });
-
     it('catches invalid templates', async () => {
       const config = {
         commitMessage: '{{{something}}',
@@ -3058,6 +3024,33 @@ describe('config/validation', () => {
 
         expect(warnings).toBeEmptyArray();
         expect(errors).toBeEmptyArray();
+      });
+    });
+
+    describe('repositories', () => {
+      it('is validated', async () => {
+        const config: AllConfig = {
+          repositories: [
+            {
+              repository: 'valid/name',
+              // @ts-expect-error -- invalid config
+              dependencyDashboardHeader: true,
+            },
+          ],
+        };
+
+        const { errors, warnings } = await configValidation.validateConfig(
+          'global',
+          config,
+        );
+
+        expect(warnings).toBeEmptyArray();
+        expect(errors).toMatchObject([
+          {
+            message:
+              'Configuration option `repositories[0].dependencyDashboardHeader` should be a string',
+          },
+        ]);
       });
     });
   });

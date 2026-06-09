@@ -7,6 +7,7 @@
  *   targets           Files or directories to scope checks to
  *
  * Options:
+ *   --all             Run fixers first, then all lint checks and tests
  *   --fix             Run fixers only (oxlint-fix, biome-fix, prettier-fix)
  *   --no-test         Skip tests
  */
@@ -179,6 +180,7 @@ async function collectCoverage(args: CliArgs): Promise<CoverageInfo[]> {
 function parseCliArgs(): CliArgs {
   const { values, positionals } = parseArgs({
     options: {
+      all: { type: 'boolean', default: false },
       fix: { type: 'boolean', default: false },
       'no-test': { type: 'boolean', default: false },
     },
@@ -186,6 +188,7 @@ function parseCliArgs(): CliArgs {
   });
 
   return {
+    all: values.all ?? false,
     fix: values.fix ?? false,
     noTest: values['no-test'] ?? false,
     targets: positionals,
@@ -193,7 +196,7 @@ function parseCliArgs(): CliArgs {
 }
 
 function buildTestChecks(args: CliArgs): ParallelCheck[] {
-  if (args.noTest || args.fix) {
+  if (args.noTest || (args.fix && !args.all)) {
     return [];
   }
 
@@ -230,7 +233,16 @@ async function main(): Promise<void> {
   let fixChecks: ParallelCheck[];
   let lintChecks: ParallelCheck[];
 
-  if (args.fix) {
+  if (args.all) {
+    fixChecks =
+      args.targets.length > 0
+        ? buildTargetedChecks(args.targets, true)
+        : [...FIX_CHECKS];
+    lintChecks =
+      args.targets.length > 0
+        ? buildTargetedChecks(args.targets, false)
+        : [...FIXABLE_CHECKS, ...OTHER_CHECKS];
+  } else if (args.fix) {
     fixChecks =
       args.targets.length > 0
         ? buildTargetedChecks(args.targets, true)

@@ -1056,6 +1056,19 @@ async function validateGlobalConfig(
       }
     } else if (type === 'array') {
       if (isArray(val)) {
+        for (const [subIndex, subval] of val.entries()) {
+          if (isObject(subval)) {
+            const subValidation = await validateConfig(
+              'global',
+              subval as AllConfig,
+              false,
+              `${currentPath}[${subIndex}]`,
+            );
+            warnings.push(...subValidation.warnings);
+            errors.push(...subValidation.errors);
+          }
+        }
+
         if (isRegexOrGlobOption(key)) {
           warnings.push(
             ...regexOrGlobValidator.check({
