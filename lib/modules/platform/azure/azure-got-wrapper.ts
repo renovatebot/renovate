@@ -9,6 +9,7 @@ import type { IGitApi } from 'azure-devops-node-api/GitApi.js';
 import type { IRequestHandler } from 'azure-devops-node-api/interfaces/common/VsoBaseInterfaces.js';
 import type { IPolicyApi } from 'azure-devops-node-api/PolicyApi.js';
 import type { IWorkItemTrackingApi } from 'azure-devops-node-api/WorkItemTrackingApi.js';
+import { logger } from '../../../logger/index.ts';
 import type { HostRule } from '../../../types/index.ts';
 import * as hostRules from '../../../util/host-rules.ts';
 import { isProbablyJwt } from './util.ts';
@@ -22,8 +23,10 @@ function getAuthenticationHandler(config: HostRule): IRequestHandler {
   }
   // TODO: token can be undefined here (#22198)
   if (isProbablyJwt(config.token!)) {
+    logger.debug('Using Bearer authentication (JWT detected)');
     return getBearerHandler(config.token!, true);
   }
+  logger.debug('Using PAT authentication');
   return getPersonalAccessTokenHandler(config.token!, true);
 }
 
