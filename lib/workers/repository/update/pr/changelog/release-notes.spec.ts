@@ -1999,5 +1999,30 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
         str.replace('  # Version 3.2.0', '### Version 3.2.0'),
       );
     });
+
+    it('escapes gitlab MR references in release notes for gitlab projects', () => {
+      expect(
+        massageBody('Fixed in !123 and !456', 'https://gitlab.com/', 'gitlab'),
+      ).toBe('Fixed in `!123` and `!456`');
+    });
+
+    it('escapes gitlab issue references in release notes for gitlab projects', () => {
+      expect(
+        massageBody('Fixes #123 and #456', 'https://gitlab.com/', 'gitlab'),
+      ).toBe('Fixes `#123` and `#456`');
+    });
+
+    it('does not escape MR or issue references for non-gitlab projects', () => {
+      expect(
+        massageBody('Fixed in !123, see #456', 'https://github.com/', 'github'),
+      ).toBe('Fixed in !123, see #456');
+    });
+
+    it('does not escape gitlab references inside code fences', () => {
+      const str = 'See !123\n```\n!456 and #789\n```';
+      expect(massageBody(str, 'https://gitlab.com/', 'gitlab')).toBe(
+        'See `!123`\n```\n!456 and #789\n```',
+      );
+    });
   });
 });
