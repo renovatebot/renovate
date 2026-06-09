@@ -131,8 +131,8 @@ export function massageBody(
         part.startsWith('```')
           ? part
           : part
-              .replace(regEx(/![0-9]+/g), '`$&`')
-              .replace(regEx(/#[0-9]+/g), '`$&`'),
+              .replace(regEx(/(^|\s)(![0-9]+)/gm), '$1`$2`')
+              .replace(regEx(/(^|\s)(#[0-9]+)/gm), '$1`$2`'),
       )
       .join('');
   }

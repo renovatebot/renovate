@@ -2024,5 +2024,17 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
         'See `!123`\n```\n!456 and #789\n```',
       );
     });
+
+    it('does not escape # or ! when not preceded by whitespace', () => {
+      expect(
+        massageBody(
+          'some body #123, [#124](https://gitlab.com/some/repo/issues/124)',
+          'https://gitlab.com/',
+          'gitlab',
+        ),
+      ).toBe(
+        'some body `#123`, [#124](https://gitlab.com/some/repo/issues/124)',
+      );
+    });
   });
 });
