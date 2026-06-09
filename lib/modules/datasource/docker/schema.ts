@@ -53,6 +53,7 @@ export type OciImageConfig = z.infer<typeof OciImageConfig>;
 export const OciHelmConfig = z.object({
   name: z.string(),
   version: z.string(),
+  appVersion: z.string().nullish(),
   home: z.string().nullish(),
   sources: z.array(z.string()).nullish(),
 });

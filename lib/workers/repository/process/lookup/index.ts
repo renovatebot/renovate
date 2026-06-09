@@ -343,6 +343,9 @@ export async function lookupUpdates(
       }
 
       res.currentVersion = currentVersion!;
+      res.currentAppVersion = allVersions.find(
+        (v) => v.version === currentVersion,
+      )?.appVersion;
       const currentVersionTimestamp = await getTimestamp(
         config,
         allVersions,

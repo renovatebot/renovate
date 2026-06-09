@@ -3018,6 +3018,8 @@ const options: Readonly<RenovateOptions>[] = [
       References: '{{{references}}}',
       'Package file': '{{{packageFile}}}',
       Age: "{{#if newVersion}}![age](https://developer.mend.io/api/mc/badges/age/{{datasource}}/{{replace '/' '%2f' packageName}}/{{{newVersion}}}?slim=true){{/if}}",
+      'Current app version': '{{{currentAppVersion}}}',
+      'New app version': '{{{newAppVersion}}}',
 
       Adoption:
         "{{#if newVersion}}![adoption](https://developer.mend.io/api/mc/badges/adoption/{{datasource}}/{{replace '/' '%2f' packageName}}/{{{newVersion}}}?slim=true){{/if}}",

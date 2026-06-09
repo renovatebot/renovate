@@ -35,5 +35,12 @@ describe('modules/datasource/helm/schema', () => {
         },
       });
     });
+
+    it('extracts appVersion from index.yaml', () => {
+      const repo = Yaml.pipe(HelmRepository).parse(Fixtures.get('sample.yaml'));
+      expect(repo?.airflow?.releases[0].appVersion).toBe('2.1.3');
+      expect(repo?.coredns?.releases[0].appVersion).toBe('1.8.4');
+      expect(repo?.pgadmin4?.releases[0].appVersion).toBe('5.5');
+    });
   });
 });

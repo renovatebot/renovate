@@ -62,6 +62,7 @@ export interface UpdateResult {
   deprecationMessage?: string;
   sourceUrl?: string | null;
   currentVersion?: string;
+  currentAppVersion?: string;
   isSingleVersion?: boolean;
   lookupName?: string;
   skipReason?: SkipReason;

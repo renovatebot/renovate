@@ -79,3 +79,13 @@ Renovate now updates archives in the `/charts` folder.
   "postUpdateOptions": ["helmUpdateSubChartArchives"]
 }
 ```
+
+### appVersion support
+
+Renovate extracts the `appVersion` field from `Chart.yaml` and makes it available as `packageFileAppVersion`.
+For dependencies, Renovate also fetches the `appVersion` from the registry (both standard Helm and OCI) and makes it available as `currentAppVersion` and `newAppVersion` in templates.
+
+These can be used in your PR body, commit message, or dashboard using Handlebars templates:
+
+- `{{currentAppVersion}}`
+- `{{newAppVersion}}`

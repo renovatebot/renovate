@@ -1626,6 +1626,352 @@ describe('modules/datasource/docker/index', () => {
       expect(res).toBeNull();
     });
 
+    it('returns appVersion for helm oci charts', async () => {
+      const registryUrl = 'https://my-registry.io';
+      const packageName = 'my-chart-unique-1';
+      const tags = ['1.0.0', '1.1.0'];
+      const helmConfig = {
+        name: 'my-chart-unique-1',
+        version: '1.1.0',
+        appVersion: '2.0.0',
+      };
+      const manifest = {
+        schemaVersion: 2,
+        mediaType: 'application/vnd.oci.image.manifest.v1+json',
+        config: {
+          mediaType: 'application/vnd.cncf.helm.config.v1+json',
+          digest: 'sha256:config',
+        },
+      };
+
+      httpMock
+        .scope(`${registryUrl}/v2`)
+        .get('/my-chart-unique-1/tags/list?n=10000')
+        .reply(200, { tags })
+        .get('/my-chart-unique-1/tags/list?n=10000')
+        .reply(200, { tags })
+        .get('/')
+        .reply(200)
+        .get('/')
+        .reply(200)
+        .get('/my-chart-unique-1/manifests/1.1.0')
+        .reply(200, JSON.stringify(manifest), {
+          'content-type': 'application/vnd.oci.image.manifest.v1+json',
+        })
+        .get('/my-chart-unique-1/blobs/sha256:config')
+        .reply(200, helmConfig);
+
+      const res = await getPkgReleases({
+        datasource: 'docker',
+        registryUrls: [registryUrl],
+        packageName,
+      });
+
+      expect(res?.releases).toHaveLength(2);
+      const latestRelease = res?.releases.find((r) => r.version === '1.1.0');
+      expect(latestRelease?.appVersion).toBe('2.0.0');
+    });
+
+    it('returns currentAppVersion for oci charts if different from latest', async () => {
+      const registryUrl = 'https://my-registry.io';
+      const packageName = 'my-chart-unique-2';
+      const tags = ['1.0.0', '1.1.0'];
+      const manifest110 = {
+        schemaVersion: 2,
+        mediaType: 'application/vnd.oci.image.manifest.v1+json',
+        config: {
+          mediaType: 'application/vnd.cncf.helm.config.v1+json',
+          digest: 'sha256:config110',
+        },
+      };
+      const manifest100 = {
+        schemaVersion: 2,
+        mediaType: 'application/vnd.oci.image.manifest.v1+json',
+        config: {
+          mediaType: 'application/vnd.cncf.helm.config.v1+json',
+          digest: 'sha256:config100',
+        },
+      };
+      const helmConfig110 = {
+        name: 'my-chart-unique-2',
+        version: '1.1.0',
+        appVersion: '2.0.0',
+      };
+      const helmConfig100 = {
+        name: 'my-chart-unique-2',
+        version: '1.0.0',
+        appVersion: '1.9.0',
+      };
+
+      httpMock
+        .scope(`${registryUrl}/v2`)
+        .get('/my-chart-unique-2/tags/list?n=10000')
+        .reply(200, { tags })
+        .get('/my-chart-unique-2/tags/list?n=10000')
+        .reply(200, { tags })
+        .get('/')
+        .reply(200)
+        .get('/')
+        .reply(200)
+        .get('/')
+        .reply(200)
+        .get('/')
+        .reply(200)
+        .get('/my-chart-unique-2/manifests/1.1.0')
+        .reply(200, JSON.stringify(manifest110), {
+          'content-type': 'application/vnd.oci.image.manifest.v1+json',
+        })
+        .get('/my-chart-unique-2/blobs/sha256:config110')
+        .reply(200, helmConfig110)
+        .get('/my-chart-unique-2/manifests/1.0.0')
+        .reply(200, JSON.stringify(manifest100), {
+          'content-type': 'application/vnd.oci.image.manifest.v1+json',
+        })
+        .get('/my-chart-unique-2/blobs/sha256:config100')
+        .reply(200, helmConfig100);
+
+      const res = await getPkgReleases({
+        datasource: 'docker',
+        registryUrls: [registryUrl],
+        packageName,
+        currentValue: '1.0.0',
+      });
+
+      expect(res?.releases).toHaveLength(2);
+      expect(res?.releases.find((r) => r.version === '1.0.0')?.appVersion).toBe(
+        '1.9.0',
+      );
+      expect(res?.releases.find((r) => r.version === '1.1.0')?.appVersion).toBe(
+        '2.0.0',
+      );
+    });
+
+    it('uses appVersion from annotations if present', async () => {
+      const registryUrl = 'https://my-registry.io';
+      const packageName = 'my-chart';
+      const tags = ['1.0.0'];
+      const manifest = {
+        schemaVersion: 2,
+        mediaType: 'application/vnd.oci.image.manifest.v1+json',
+        config: {
+          mediaType: 'application/vnd.cncf.helm.config.v1+json',
+          digest: 'sha256:config',
+        },
+        annotations: {
+          appVersion: '3.0.0',
+          'org.opencontainers.image.source': 'https://github.com/org/repo',
+        },
+      };
+
+      httpMock
+        .scope(`${registryUrl}/v2`)
+        .get('/my-chart/tags/list?n=10000')
+        .reply(200, { tags })
+        .get('/my-chart/tags/list?n=10000')
+        .reply(200, { tags })
+        .get('/')
+        .reply(200)
+        .get('/my-chart/manifests/1.0.0')
+        .reply(200, JSON.stringify(manifest), {
+          'content-type': 'application/vnd.oci.image.manifest.v1+json',
+        });
+      // No call to /blobs/sha256:config should be made
+
+      const res = await getPkgReleases({
+        datasource: 'docker',
+        registryUrls: [registryUrl],
+        packageName,
+      });
+
+      expect(res?.releases[0].appVersion).toBe('3.0.0');
+    });
+
+    it('pulls config if appVersion is missing from annotations', async () => {
+      const registryUrl = 'https://my-registry.io';
+      const packageName = 'my-chart-partial';
+      const tags = ['1.0.0'];
+      const manifest = {
+        schemaVersion: 2,
+        mediaType: 'application/vnd.oci.image.manifest.v1+json',
+        config: {
+          mediaType: 'application/vnd.cncf.helm.config.v1+json',
+          digest: 'sha256:config',
+        },
+        annotations: {
+          'org.opencontainers.image.source': 'https://github.com/org/repo',
+        },
+      };
+      const helmConfig = {
+        name: 'my-chart-partial',
+        version: '1.0.0',
+        appVersion: '4.0.0',
+      };
+
+      httpMock
+        .scope(`${registryUrl}/v2`)
+        .get('/my-chart-partial/tags/list?n=10000')
+        .reply(200, { tags })
+        .get('/my-chart-partial/tags/list?n=10000')
+        .reply(200, { tags })
+        .get('/')
+        .reply(200)
+        .get('/my-chart-partial/manifests/1.0.0')
+        .reply(200, JSON.stringify(manifest), {
+          'content-type': 'application/vnd.oci.image.manifest.v1+json',
+        })
+        .get('/')
+        .reply(200)
+        .get('/my-chart-partial/blobs/sha256:config')
+        .reply(200, helmConfig);
+
+      const res = await getPkgReleases({
+        datasource: 'docker',
+        registryUrls: [registryUrl],
+        packageName,
+      });
+
+      expect(res?.releases[0].appVersion).toBe('4.0.0');
+      expect(res?.sourceUrl).toBe('https://github.com/org/repo');
+    });
+
+    it('handles missing appVersion for current value', async () => {
+      const registryUrl = 'https://my-registry.io';
+      const packageName = 'my-chart-unique-3';
+      const tags = ['1.0.0', '1.1.0'];
+      const manifest110 = {
+        schemaVersion: 2,
+        mediaType: 'application/vnd.oci.image.manifest.v1+json',
+        config: {
+          mediaType: 'application/vnd.cncf.helm.config.v1+json',
+          digest: 'sha256:config110',
+        },
+      };
+      const helmConfig110 = {
+        name: 'my-chart-unique-3',
+        version: '1.1.0',
+        appVersion: '2.0.0',
+      };
+
+      httpMock
+        .scope(`${registryUrl}/v2`)
+        .get('/my-chart-unique-3/tags/list?n=10000')
+        .reply(200, { tags })
+        .get('/my-chart-unique-3/tags/list?n=10000')
+        .reply(200, { tags })
+        .get('/')
+        .reply(200)
+        .get('/')
+        .reply(200)
+        .get('/')
+        .reply(200)
+        .get('/my-chart-unique-3/manifests/1.1.0')
+        .reply(200, JSON.stringify(manifest110), {
+          'content-type': 'application/vnd.oci.image.manifest.v1+json',
+        })
+        .get('/my-chart-unique-3/blobs/sha256:config110')
+        .reply(200, helmConfig110)
+        .get('/my-chart-unique-3/manifests/1.0.0')
+        .reply(404);
+
+      const res = await getPkgReleases({
+        datasource: 'docker',
+        registryUrls: [registryUrl],
+        packageName,
+        currentValue: '1.0.0',
+      });
+
+      expect(res?.releases).toHaveLength(2);
+      expect(
+        res?.releases.find((r) => r.version === '1.0.0')?.appVersion,
+      ).toBeUndefined();
+      expect(res?.releases.find((r) => r.version === '1.1.0')?.appVersion).toBe(
+        '2.0.0',
+      );
+    });
+
+    it('handles failed getHelmConfig', async () => {
+      const registryUrl = 'https://my-registry.io';
+      const packageName = 'my-chart-fail';
+      const tags = ['1.0.0'];
+      const manifest = {
+        schemaVersion: 2,
+        mediaType: 'application/vnd.oci.image.manifest.v1+json',
+        config: {
+          mediaType: 'application/vnd.cncf.helm.config.v1+json',
+          digest: 'sha256:config',
+        },
+      };
+
+      httpMock
+        .scope(`${registryUrl}/v2`)
+        .get('/my-chart-fail/tags/list?n=10000')
+        .reply(200, { tags })
+        .get('/my-chart-fail/tags/list?n=10000')
+        .reply(200, { tags })
+        .get('/')
+        .reply(200)
+        .get('/')
+        .reply(200)
+        .get('/my-chart-fail/manifests/1.0.0')
+        .reply(200, JSON.stringify(manifest), {
+          'content-type': 'application/vnd.oci.image.manifest.v1+json',
+        })
+        .get('/my-chart-fail/blobs/sha256:config')
+        .reply(404);
+
+      const res = await getPkgReleases({
+        datasource: 'docker',
+        registryUrls: [registryUrl],
+        packageName,
+      });
+
+      expect(res?.releases[0].appVersion).toBeUndefined();
+    });
+
+    it('handles missing config in image config blob', async () => {
+      const registryUrl = 'https://my-registry.io';
+      const packageName = 'my-image-no-config';
+      const tags = ['1.0.0'];
+      const manifest = {
+        schemaVersion: 2,
+        mediaType: 'application/vnd.docker.distribution.manifest.v2+json',
+        config: {
+          mediaType: 'application/vnd.docker.container.image.v1+json',
+          digest: 'sha256:config',
+        },
+      };
+      const config = {
+        // missing 'config' property
+        architecture: 'amd64',
+      };
+
+      httpMock
+        .scope(`${registryUrl}/v2`)
+        .get('/my-image-no-config/tags/list?n=10000')
+        .reply(200, { tags })
+        .get('/my-image-no-config/tags/list?n=10000')
+        .reply(200, { tags })
+        .get('/')
+        .reply(200)
+        .get('/')
+        .reply(200)
+        .get('/my-image-no-config/manifests/1.0.0')
+        .reply(200, JSON.stringify(manifest), {
+          'content-type':
+            'application/vnd.docker.distribution.manifest.v2+json',
+        })
+        .get('/my-image-no-config/blobs/sha256:config')
+        .reply(200, config);
+
+      const res = await getPkgReleases({
+        datasource: 'docker',
+        registryUrls: [registryUrl],
+        packageName,
+      });
+
+      expect(res?.releases[0].appVersion).toBeUndefined();
+    });
+
     it('uses custom registry with registryUrls', async () => {
       const tags = ['1.0.0'];
       httpMock
@@ -3064,20 +3410,27 @@ describe('modules/datasource/docker/index', () => {
         .get('/')
         .reply(200)
         .get('/node/manifests/2-alpine')
-        .reply(200, {
-          schemaVersion: 2,
-          mediaType: 'application/vnd.oci.image.manifest.v1+json',
-          config: {
-            digest: 'some-config-digest',
-            mediaType: 'application/vnd.cncf.helm.config.v1+json',
+        .reply(
+          200,
+          JSON.stringify({
+            schemaVersion: 2,
+            mediaType: 'application/vnd.oci.image.manifest.v1+json',
+            config: {
+              digest: 'some-config-digest',
+              mediaType: 'application/vnd.cncf.helm.config.v1+json',
+            },
+            annotations: {
+              'org.opencontainers.image.source':
+                'https://github.com/renovatebot/renovate',
+              'org.opencontainers.image.revision':
+                'ab7ddb5e3c5c3b402acd7c3679d4e415f8092dde',
+              appVersion: '1.2.3',
+            },
+          }),
+          {
+            'content-type': 'application/vnd.oci.image.manifest.v1+json',
           },
-          annotations: {
-            'org.opencontainers.image.source':
-              'https://github.com/renovatebot/renovate',
-            'org.opencontainers.image.revision':
-              'ab7ddb5e3c5c3b402acd7c3679d4e415f8092dde',
-          },
-        });
+        );
 
       expect(await ds.getLabels('https://ghcr.io', 'node', '2-alpine')).toEqual(
         {
@@ -3085,6 +3438,7 @@ describe('modules/datasource/docker/index', () => {
             'https://github.com/renovatebot/renovate',
           'org.opencontainers.image.revision':
             'ab7ddb5e3c5c3b402acd7c3679d4e415f8092dde',
+          appVersion: '1.2.3',
         },
       );
     });
@@ -3096,18 +3450,25 @@ describe('modules/datasource/docker/index', () => {
         .twice()
         .reply(200)
         .get('/harbor/manifests/16.7.2')
-        .reply(200, {
-          schemaVersion: 2,
-          mediaType: 'application/vnd.oci.image.manifest.v1+json',
-          config: {
-            digest: 'some-config-digest',
-            mediaType: 'application/vnd.cncf.helm.config.v1+json',
+        .reply(
+          200,
+          JSON.stringify({
+            schemaVersion: 2,
+            mediaType: 'application/vnd.oci.image.manifest.v1+json',
+            config: {
+              digest: 'some-config-digest',
+              mediaType: 'application/vnd.cncf.helm.config.v1+json',
+            },
+          }),
+          {
+            'content-type': 'application/vnd.oci.image.manifest.v1+json',
           },
-        })
+        )
         .get('/harbor/blobs/some-config-digest')
         .reply(200, {
           name: 'harbor',
           version: '16.7.2',
+          appVersion: '2.8.2',
           home: 'https://github.com/bitnami/charts/tree/main/bitnami/harbor',
         });
 
@@ -3115,6 +3476,7 @@ describe('modules/datasource/docker/index', () => {
         {
           'org.opencontainers.image.source':
             'https://github.com/bitnami/charts/tree/main/bitnami/harbor',
+          appVersion: '2.8.2',
         },
       );
     });

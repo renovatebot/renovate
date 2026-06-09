@@ -81,6 +81,7 @@ export interface PackageFileContent<
   lockFiles?: string[];
   npmrc?: string;
   packageFileVersion?: string;
+  packageFileAppVersion?: string;
   skipInstalls?: boolean | null;
   matchStrings?: string[];
   matchStringsStrategy?: MatchStringsStrategy;
@@ -117,6 +118,7 @@ export interface LookupUpdate {
   pendingChecks?: boolean;
   pendingVersions?: string[];
   newVersion?: string;
+  newAppVersion?: string;
   updateType?: UpdateType;
   /**
    *  where this is set?
@@ -167,6 +169,7 @@ export interface PackageDependency<
   bumpVersion?: ReleaseType;
   npmPackageAlias?: boolean;
   packageFileVersion?: string;
+  packageFileAppVersion?: string;
   gitRef?: boolean;
   sourceUrl?: string | null;
   pinDigests?: boolean;
@@ -191,6 +194,7 @@ export interface PackageDependency<
   skipStage?: StageName;
   sourceLine?: number;
   newVersion?: string;
+  currentAppVersion?: string;
   updates?: LookupUpdate[];
   replaceString?: string;
   autoReplaceStringTemplate?: string;

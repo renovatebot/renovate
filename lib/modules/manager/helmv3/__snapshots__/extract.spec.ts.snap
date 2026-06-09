@@ -19,6 +19,7 @@ exports[`modules/manager/helmv3/extract > extractPackageFile() > extract correct
       ],
     },
   ],
+  "packageFileAppVersion": "1.16.0",
   "packageFileVersion": "0.1.0",
 }
 `;
@@ -42,6 +43,7 @@ exports[`modules/manager/helmv3/extract > extractPackageFile() > parses simple C
       ],
     },
   ],
+  "packageFileAppVersion": "1.0",
   "packageFileVersion": "0.1.0",
 }
 `;
@@ -72,6 +74,7 @@ exports[`modules/manager/helmv3/extract > extractPackageFile() > resolves aliase
       "pinDigests": false,
     },
   ],
+  "packageFileAppVersion": "1.0",
   "packageFileVersion": "0.1.0",
 }
 `;
@@ -96,6 +99,7 @@ exports[`modules/manager/helmv3/extract > extractPackageFile() > skips invalid r
       "skipReason": "no-repository",
     },
   ],
+  "packageFileAppVersion": "1.0",
   "packageFileVersion": "0.1.0",
 }
 `;
@@ -117,6 +121,7 @@ exports[`modules/manager/helmv3/extract > extractPackageFile() > skips local dep
       "skipReason": "local-dependency",
     },
   ],
+  "packageFileAppVersion": "1.0",
   "packageFileVersion": "0.1.0",
 }
 `;
