@@ -73,7 +73,7 @@ export const Repo = DeepNullish(
     archived: z.boolean().optional(),
     clone_url: z.string().optional(),
     // catch unknown merge methods e.g. `manually-merged`
-    default_merge_style: PRMergeMethod.nullable().catch(null).optional(),
+    default_merge_style: PRMergeMethod.optional().catch(undefined),
     external_tracker: z.unknown().optional(),
     has_issues: z.boolean().optional().default(false),
     has_pull_requests: z.boolean().optional(),
