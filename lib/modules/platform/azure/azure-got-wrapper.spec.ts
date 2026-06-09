@@ -52,9 +52,10 @@ describe('modules/platform/azure/azure-got-wrapper', () => {
     });
 
     it('should set bearer token and endpoint', () => {
+      const token = buildJwt();
       hostRules.add({
         hostType: 'azure',
-        token: 'testtoken',
+        token,
         matchHost: 'https://dev.azure.com/renovate2',
       });
       azure.setEndpoint('https://dev.azure.com/renovate2');
@@ -67,7 +68,7 @@ describe('modules/platform/azure/azure-got-wrapper', () => {
       expect(res).toMatchObject({
         serverUrl: 'https://dev.azure.com/renovate2',
         authHandler: {
-          token: 'testtoken',
+          token,
         },
       });
     });
