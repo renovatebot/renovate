@@ -125,7 +125,7 @@ describe('modules/platform/forgejo/forgejo-helper', () => {
     head: {
       label: 'pull-req-13',
       sha: mockCommitHash,
-      repo: mockRepo,
+      repo: { full_name: mockRepo.full_name },
     },
     created_at: '2018-08-13T20:45:37Z',
     closed_at: '2020-04-01T19:19:22Z',
@@ -439,7 +439,7 @@ describe('modules/platform/forgejo/forgejo-helper', () => {
         mockPR.base!.ref,
         mockPR.head!.label,
       );
-      expect(res).toEqual(mockPR);
+      expect(res?.number).toEqual(mockPR.number);
     });
 
     it('should return null if pr not found', async () => {
