@@ -72,6 +72,7 @@ import type {
   StatusResult,
   StorageConfig,
 } from './types.ts';
+import { GitTreeMode } from './types.ts';
 import {
   getCachedUpdateDateResult,
   setCachedUpdateDateResult,
@@ -1579,13 +1580,14 @@ export async function getCommitTreeSha(
 }
 
 function treeTypeFromMode(mode: string): GitObjectType {
-  if (mode === '160000') {
-    return 'commit';
+  switch (mode) {
+    case GitTreeMode.Gitlink:
+      return 'commit';
+    case GitTreeMode.Directory:
+      return 'tree';
+    default:
+      return 'blob';
   }
-  if (mode === '040000') {
-    return 'tree';
-  }
-  return 'blob';
 }
 
 /**
