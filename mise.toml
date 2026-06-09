@@ -1,0 +1,18 @@
+[tools]
+node = "24.16.0"
+pdm  = "2.27.0"
+pnpm = "10.34.1"
+
+# needed for pipx backends e.g. pdm
+pipx   = "1.14.0"
+python = "3.14.5"
+
+[hooks]
+postinstall = '''
+pnpm install
+pdm install
+'''
+
+[settings]
+# needed for hooks
+experimental = true

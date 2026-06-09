@@ -96,6 +96,50 @@ describe('modules/manager/nuget/package-tree', () => {
       ]);
     });
 
+    it('returns projects for two projects with one reference and Directory.Build.props', async () => {
+      scm.getFileList.mockResolvedValue(['one/one.csproj', 'two/two.csproj']);
+      Fixtures.mock({
+        '/tmp/repo/one/one.csproj': Fixtures.get(
+          'two-one-reference-with-directory-build-props/one/one.csproj',
+        ),
+        '/tmp/repo/two/two.csproj': Fixtures.get(
+          'two-one-reference-with-directory-build-props/two/two.csproj',
+        ),
+        '/tmp/repo/Directory.Build.props': Fixtures.get(
+          'two-one-reference-with-directory-build-props/Directory.Build.props',
+        ),
+      });
+
+      expect(
+        await getDependentPackageFiles('Directory.Build.props', true),
+      ).toEqual([
+        { isLeaf: false, name: 'one/one.csproj' },
+        { isLeaf: true, name: 'two/two.csproj' },
+      ]);
+    });
+
+    it('returns only projects under nested Directory.Build.props directory', async () => {
+      scm.getFileList.mockResolvedValue([
+        'src/one/one.csproj',
+        'other/two.csproj',
+      ]);
+      Fixtures.mock({
+        '/tmp/repo/src/one/one.csproj': Fixtures.get(
+          'two-one-reference-with-directory-build-props/one/one.csproj',
+        ),
+        '/tmp/repo/other/two.csproj': Fixtures.get(
+          'two-one-reference-with-directory-build-props/one/one.csproj',
+        ),
+        '/tmp/repo/src/Directory.Build.props': Fixtures.get(
+          'two-one-reference-with-directory-build-props/Directory.Build.props',
+        ),
+      });
+
+      expect(
+        await getDependentPackageFiles('src/Directory.Build.props', true),
+      ).toEqual([{ isLeaf: true, name: 'src/one/one.csproj' }]);
+    });
+
     it('returns project for two projects with one reference and global.json', async () => {
       scm.getFileList.mockResolvedValue(['one/one.csproj', 'two/two.csproj']);
       Fixtures.mock({

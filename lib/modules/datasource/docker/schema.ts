@@ -1,4 +1,4 @@
-import { z } from 'zod/v3';
+import { z } from 'zod/v4';
 import { logger } from '../../../logger/index.ts';
 import { Json, LooseArray } from '../../../util/schema-utils/index.ts';
 
@@ -40,7 +40,9 @@ const OciPlatform = z
 export const OciImageConfig = z.object({
   // This is required by the spec, but probably not present in the wild.
   architecture: z.string().nullish(),
-  config: z.object({ Labels: z.record(z.string()).nullish() }).nullish(),
+  config: z
+    .object({ Labels: z.record(z.string(), z.string()).nullish() })
+    .nullish(),
 });
 export type OciImageConfig = z.infer<typeof OciImageConfig>;
 
@@ -72,7 +74,7 @@ export const OciImageManifest = ManifestObject.extend({
       'application/vnd.cncf.flux.config.v1+json',
     ]),
   }),
-  annotations: z.record(z.string()).nullish(),
+  annotations: z.record(z.string(), z.string()).nullish(),
 });
 export type OciImageManifest = z.infer<typeof OciImageManifest>;
 
@@ -92,7 +94,7 @@ export const OciImageIndexManifest = ManifestObject.extend({
       platform: OciPlatform,
     }),
   ),
-  annotations: z.record(z.string()).nullish(),
+  annotations: z.record(z.string(), z.string()).nullish(),
 });
 
 // Old Docker manifests
@@ -157,12 +159,19 @@ export const Manifest = ManifestObject.passthrough()
 export type Manifest = z.infer<typeof Manifest>;
 export const ManifestJson = Json.pipe(Manifest);
 
+export const DockerHubTagImage = z.object({
+  architecture: z.string().nullable().catch(null),
+  digest: z.string().nullable().catch(null),
+});
+export type DockerHubTagImage = z.infer<typeof DockerHubTagImage>;
+
 export const DockerHubTag = z.object({
   id: z.number(),
   last_updated: z.string().datetime(),
   name: z.string(),
   tag_last_pushed: z.string().datetime().nullable().catch(null),
   digest: z.string().nullable().catch(null),
+  images: z.array(DockerHubTagImage).catch([]),
 });
 export type DockerHubTag = z.infer<typeof DockerHubTag>;
 

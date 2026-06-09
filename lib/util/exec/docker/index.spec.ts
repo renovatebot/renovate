@@ -148,16 +148,7 @@ describe('util/exec/docker/index', () => {
       envVars,
     };
     const command = (img: string, vol?: string, opts?: string): string =>
-      `docker run --rm ` +
-      `--name=renovate_${img} ` +
-      `--label=renovate_child ` +
-      `--user=some-user ` +
-      (vol ? `${vol} ` : '') +
-      (opts ? `${opts} ` : '') +
-      `-e FOO -e BAR ` +
-      `-w "/tmp/foobar" ` +
-      `ghcr.io/renovatebot/base-image ` +
-      `bash -l -c "foo && bar"`;
+      `docker run --rm --name=renovate_${img} --label=renovate_child --user=some-user ${vol ? `${vol} ` : ''}${opts ? `${opts} ` : ''}-e FOO -e BAR -w "/tmp/foobar" ghcr.io/renovatebot/base-image bash -l -c "foo && bar"`;
 
     beforeEach(() => {
       GlobalConfig.set({

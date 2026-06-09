@@ -3,6 +3,7 @@ import * as memCache from './cache/memory/index.ts';
 import {
   AbandonedPackageStats,
   DatasourceCacheStats,
+  GetDatasourceReleasesStats,
   GitOperationStats,
   HttpCacheStats,
   HttpStats,
@@ -134,6 +135,436 @@ describe('util/stats', () => {
           maxMs: 400,
           medianMs: 200,
           totalMs: 700,
+        },
+      });
+    });
+  });
+
+  describe('GetDatasourceReleasesStats', () => {
+    beforeEach(() => {
+      vi.useFakeTimers();
+    });
+
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    it('returns empty report', () => {
+      const res = GetDatasourceReleasesStats.getReport();
+      expect(res).toEqual({
+        stats: {
+          avgMs: 0,
+          count: 0,
+          maxMs: 0,
+          medianMs: 0,
+          totalMs: 0,
+        },
+        datasources: {},
+      });
+    });
+
+    it('writes data points', () => {
+      GetDatasourceReleasesStats.write(
+        'npm',
+        'https://registry.npmjs.org',
+        'lodash',
+        100,
+      );
+      GetDatasourceReleasesStats.write(
+        'npm',
+        'https://registry.npmjs.org',
+        'lodash',
+        200,
+      );
+      GetDatasourceReleasesStats.write(
+        'npm',
+        'https://jfrog.company.com/artifactory',
+        'foo',
+        400,
+      );
+      GetDatasourceReleasesStats.write(
+        'docker',
+        'https://registry.docker.com',
+        'alpine',
+        1000,
+      );
+      GetDatasourceReleasesStats.write(
+        'docker',
+        'https://registry.docker.com',
+        'memcached',
+        2000,
+      );
+      GetDatasourceReleasesStats.write(
+        'docker',
+        'https://registry.docker.com',
+        'istio/pilot',
+        3000,
+      );
+
+      const res = GetDatasourceReleasesStats.getReport();
+      expect(res).toEqual({
+        stats: {
+          avgMs: 1117,
+          count: 6,
+          maxMs: 3000,
+          medianMs: 1000,
+          totalMs: 6700,
+        },
+        datasources: {
+          npm: {
+            stats: {
+              avgMs: 233,
+              count: 3,
+              maxMs: 400,
+              medianMs: 200,
+              totalMs: 700,
+            },
+            registryUrls: {
+              'https://registry.npmjs.org': {
+                stats: {
+                  avgMs: 150,
+                  count: 2,
+                  maxMs: 200,
+                  medianMs: 200,
+                  totalMs: 300,
+                },
+                packages: {
+                  lodash: {
+                    avgMs: 150,
+                    count: 2,
+                    maxMs: 200,
+                    medianMs: 200,
+                    totalMs: 300,
+                  },
+                },
+              },
+              'https://jfrog.company.com/artifactory': {
+                stats: {
+                  avgMs: 400,
+                  count: 1,
+                  maxMs: 400,
+                  medianMs: 400,
+                  totalMs: 400,
+                },
+                packages: {
+                  foo: {
+                    avgMs: 400,
+                    count: 1,
+                    maxMs: 400,
+                    medianMs: 400,
+                    totalMs: 400,
+                  },
+                },
+              },
+            },
+          },
+          docker: {
+            stats: {
+              avgMs: 2000,
+              count: 3,
+              maxMs: 3000,
+              medianMs: 2000,
+              totalMs: 6000,
+            },
+            registryUrls: {
+              'https://registry.docker.com': {
+                stats: {
+                  avgMs: 2000,
+                  count: 3,
+                  maxMs: 3000,
+                  medianMs: 2000,
+                  totalMs: 6000,
+                },
+                packages: {
+                  alpine: {
+                    avgMs: 1000,
+                    count: 1,
+                    maxMs: 1000,
+                    medianMs: 1000,
+                    totalMs: 1000,
+                  },
+                  memcached: {
+                    avgMs: 2000,
+                    count: 1,
+                    maxMs: 2000,
+                    medianMs: 2000,
+                    totalMs: 2000,
+                  },
+                  'istio/pilot': {
+                    avgMs: 3000,
+                    count: 1,
+                    maxMs: 3000,
+                    medianMs: 3000,
+                    totalMs: 3000,
+                  },
+                },
+              },
+            },
+          },
+        },
+      });
+    });
+
+    it('wraps a function', async () => {
+      const res = await GetDatasourceReleasesStats.wrap(
+        'npm',
+        'https://registry.npmjs.org',
+        'lodash',
+        () => {
+          vi.advanceTimersByTime(100);
+          return Promise.resolve('foo');
+        },
+      );
+
+      expect(res).toBe('foo');
+      expect(GetDatasourceReleasesStats.getReport()).toEqual({
+        stats: {
+          avgMs: 100,
+          count: 1,
+          maxMs: 100,
+          medianMs: 100,
+          totalMs: 100,
+        },
+        datasources: {
+          npm: {
+            stats: {
+              avgMs: 100,
+              count: 1,
+              maxMs: 100,
+              medianMs: 100,
+              totalMs: 100,
+            },
+            registryUrls: {
+              'https://registry.npmjs.org': {
+                stats: {
+                  avgMs: 100,
+                  count: 1,
+                  maxMs: 100,
+                  medianMs: 100,
+                  totalMs: 100,
+                },
+                packages: {
+                  lodash: {
+                    avgMs: 100,
+                    count: 1,
+                    maxMs: 100,
+                    medianMs: 100,
+                    totalMs: 100,
+                  },
+                },
+              },
+            },
+          },
+        },
+      });
+    });
+
+    it('logs report', () => {
+      GetDatasourceReleasesStats.write(
+        'npm',
+        'https://registry.npmjs.org',
+        'lodash',
+        100,
+      );
+      GetDatasourceReleasesStats.write(
+        'npm',
+        'https://registry.npmjs.org',
+        'lodash',
+        200,
+      );
+      GetDatasourceReleasesStats.write(
+        'npm',
+        'https://jfrog.company.com/artifactory',
+        'foo',
+        400,
+      );
+      GetDatasourceReleasesStats.write(
+        'docker',
+        'https://registry.docker.com',
+        'alpine',
+        1000,
+      );
+      GetDatasourceReleasesStats.write(
+        'docker',
+        'https://registry.docker.com',
+        'memcached',
+        2000,
+      );
+      GetDatasourceReleasesStats.write(
+        'docker',
+        'https://registry.docker.com',
+        'istio/pilot',
+        3000,
+      );
+
+      GetDatasourceReleasesStats.report();
+
+      expect(logger.logger.trace).toHaveBeenCalledTimes(1);
+      const [traceData, traceMsg] = logger.logger.trace.mock.calls[0];
+      expect(traceMsg).toBe('getReleases statistics with packages');
+      expect(traceData).toEqual({
+        stats: {
+          avgMs: 1117,
+          count: 6,
+          maxMs: 3000,
+          medianMs: 1000,
+          totalMs: 6700,
+        },
+        datasources: {
+          npm: {
+            stats: {
+              avgMs: 233,
+              count: 3,
+              maxMs: 400,
+              medianMs: 200,
+              totalMs: 700,
+            },
+            registryUrls: {
+              'https://registry.npmjs.org': {
+                stats: {
+                  avgMs: 150,
+                  count: 2,
+                  maxMs: 200,
+                  medianMs: 200,
+                  totalMs: 300,
+                },
+                packages: {
+                  lodash: {
+                    avgMs: 150,
+                    count: 2,
+                    maxMs: 200,
+                    medianMs: 200,
+                    totalMs: 300,
+                  },
+                },
+              },
+              'https://jfrog.company.com/artifactory': {
+                stats: {
+                  avgMs: 400,
+                  count: 1,
+                  maxMs: 400,
+                  medianMs: 400,
+                  totalMs: 400,
+                },
+                packages: {
+                  foo: {
+                    avgMs: 400,
+                    count: 1,
+                    maxMs: 400,
+                    medianMs: 400,
+                    totalMs: 400,
+                  },
+                },
+              },
+            },
+          },
+          docker: {
+            stats: {
+              avgMs: 2000,
+              count: 3,
+              maxMs: 3000,
+              medianMs: 2000,
+              totalMs: 6000,
+            },
+            registryUrls: {
+              'https://registry.docker.com': {
+                stats: {
+                  avgMs: 2000,
+                  count: 3,
+                  maxMs: 3000,
+                  medianMs: 2000,
+                  totalMs: 6000,
+                },
+                packages: {
+                  alpine: {
+                    avgMs: 1000,
+                    count: 1,
+                    maxMs: 1000,
+                    medianMs: 1000,
+                    totalMs: 1000,
+                  },
+                  memcached: {
+                    avgMs: 2000,
+                    count: 1,
+                    maxMs: 2000,
+                    medianMs: 2000,
+                    totalMs: 2000,
+                  },
+                  'istio/pilot': {
+                    avgMs: 3000,
+                    count: 1,
+                    maxMs: 3000,
+                    medianMs: 3000,
+                    totalMs: 3000,
+                  },
+                },
+              },
+            },
+          },
+        },
+      });
+
+      expect(logger.logger.debug).toHaveBeenCalledTimes(1);
+      const [debugData, debugMsg] = logger.logger.debug.mock.calls[0];
+      expect(debugMsg).toBe('getReleases statistics summary');
+      expect(debugData).toEqual({
+        stats: {
+          avgMs: 1117,
+          count: 6,
+          maxMs: 3000,
+          medianMs: 1000,
+          totalMs: 6700,
+        },
+        datasources: {
+          npm: {
+            stats: {
+              avgMs: 233,
+              count: 3,
+              maxMs: 400,
+              medianMs: 200,
+              totalMs: 700,
+            },
+            registryUrls: {
+              'https://registry.npmjs.org': {
+                stats: {
+                  avgMs: 150,
+                  count: 2,
+                  maxMs: 200,
+                  medianMs: 200,
+                  totalMs: 300,
+                },
+              },
+              'https://jfrog.company.com/artifactory': {
+                stats: {
+                  avgMs: 400,
+                  count: 1,
+                  maxMs: 400,
+                  medianMs: 400,
+                  totalMs: 400,
+                },
+              },
+            },
+          },
+          docker: {
+            stats: {
+              avgMs: 2000,
+              count: 3,
+              maxMs: 3000,
+              medianMs: 2000,
+              totalMs: 6000,
+            },
+            registryUrls: {
+              'https://registry.docker.com': {
+                stats: {
+                  avgMs: 2000,
+                  count: 3,
+                  maxMs: 3000,
+                  medianMs: 2000,
+                  totalMs: 6000,
+                },
+              },
+            },
+          },
         },
       });
     });

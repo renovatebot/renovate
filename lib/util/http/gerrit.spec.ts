@@ -11,7 +11,7 @@ describe('util/http/gerrit', () => {
     setBaseUrl(baseUrl);
   });
 
-  it.each(['some-url/', baseUrl + 'some-url/'])('get %p', async (pathOrUrl) => {
+  it.each(['some-url/', `${baseUrl}some-url/`])('get %p', async (pathOrUrl) => {
     const body = 'body result';
     httpMock
       .scope(baseUrl)

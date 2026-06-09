@@ -4,11 +4,10 @@ Generally speaking, all publicly released database versions are available for us
 However, new versions may not be available on RDS for a few weeks or months after their release while AWS tests them.
 In addition, AWS may pull existing versions if serious problems arise during their use.
 
-<!-- prettier-ignore -->
 !!! warning
-    The default versioning of the `aws-rds` datasource is _not_ compatible with [AWS Aurora](https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/CHAP_AuroraOverview.html)!
-    If you use AWS Aurora, you must set your own custom versioning.
-    Scroll down to see an example.
+  The default versioning of the `aws-rds` datasource is _not_ compatible with [AWS Aurora](https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/CHAP_AuroraOverview.html)!
+  If you use AWS Aurora, you must set your own custom versioning.
+  Scroll down to see an example.
 
 ### AWS API configuration
 
@@ -21,7 +20,7 @@ You can use common AWS configuration options, for example:
 
 Read the [AWS Developer Guide - Configuring the SDK for JavaScript](https://docs.aws.amazon.com/sdk-for-javascript/v3/developer-guide/configuring-the-jssdk.html) for more information on these configuration options.
 
-```json title="Minimal IAM privileges needed for this datasource"
+```{json title="Minimal IAM privileges needed for this datasource" configType=none}
 {
   "Sid": "AllowDBEngineVersionLookup",
   "Effect": "Allow",

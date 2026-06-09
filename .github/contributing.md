@@ -2,9 +2,13 @@
 
 ## Security / Disclosure
 
-If you find any bug with Renovate that may be a security problem, then e-mail us at: [renovate-disclosure@mend.io](mailto:renovate-disclosure@mend.io).
+If you find any bug with Renovate that may be a security problem, please report it through the [GitHub Security Advisories process](https://github.com/renovatebot/renovate/security/advisories).
 This way we can evaluate the bug and hopefully fix it before it gets abused.
 Please give us enough time to investigate the bug before you report it anywhere else.
+
+If you would like to discuss a potential finding before raising the Advisory, then e-mail us at: [renovate-disclosure@mend.io](mailto:renovate-disclosure@mend.io).
+
+For more information, see [security policy](https://github.com/renovatebot/renovate/security/policy) for how to report an issue that may be security-related.
 
 Please do not create GitHub issues for security-related doubts or problems.
 
@@ -102,7 +106,14 @@ For a local check that mirrors CI:
 pnpm check
 ```
 
-This runs all checks in parallel: auto-fixes, lint, type-check, and only the test shards affected by your changes.
+You can scope checks to specific files or directories for faster iteration:
+
+```bash
+pnpm check lib/util/http
+pnpm check lib/util/hash.ts
+```
+
+Use `--fix` to auto-fix (oxlint, biome, prettier) and `--no-test` to skip tests.
 
 ## Do not force push to your pull request branch
 

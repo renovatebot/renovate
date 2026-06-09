@@ -1,14 +1,17 @@
-import { z } from 'zod/v3';
+import { z } from 'zod/v4';
 import { Json, LooseRecord, Yaml } from '../../../util/schema-utils/index.ts';
 
 export const PnpmCatalogs = z.object({
-  catalog: z.optional(z.record(z.string())),
-  catalogs: z.optional(z.record(z.record(z.string()))),
+  catalog: z.optional(z.record(z.string(), z.string())),
+  catalogs: z.optional(z.record(z.string(), z.record(z.string(), z.string()))),
 });
+export type PnpmCatalogs = z.infer<typeof PnpmCatalogs>;
 
 export const YarnCatalogs = z.object({
-  catalog: z.optional(z.record(z.string())),
-  catalogs: z.optional(z.record(z.record(z.string()))).catch(undefined),
+  catalog: z.optional(z.record(z.string(), z.string())),
+  catalogs: z
+    .optional(z.record(z.string(), z.record(z.string(), z.string())))
+    .catch(undefined),
 });
 export type YarnCatalogs = z.infer<typeof YarnCatalogs>;
 
@@ -18,6 +21,7 @@ export const YarnConfig = Yaml.pipe(
       npmRegistryServer: z.string().optional(),
       npmScopes: z
         .record(
+          z.string(),
           z.object({
             npmRegistryServer: z.string().optional(),
           }),
@@ -28,13 +32,16 @@ export const YarnConfig = Yaml.pipe(
 );
 export type YarnConfig = z.infer<typeof YarnConfig>;
 
-export const PnpmWorkspaceFile = z
-  .object({
-    packages: z.array(z.string()),
-    minimumReleaseAge: z.number().nullish(),
-    minimumReleaseAgeExclude: z.array(z.string()).optional(),
-  })
-  .and(PnpmCatalogs);
+export const PnpmWorkspaceFile = Yaml.pipe(
+  z
+    .object({
+      packages: z.array(z.string()).optional(),
+      minimumReleaseAge: z.number().nullish(),
+      minimumReleaseAgeExclude: z.array(z.string()).optional(),
+      overrides: z.record(z.string(), z.string()).optional(),
+    })
+    .and(PnpmCatalogs),
+);
 export type PnpmWorkspaceFile = z.infer<typeof PnpmWorkspaceFile>;
 
 export const PackageManager = z

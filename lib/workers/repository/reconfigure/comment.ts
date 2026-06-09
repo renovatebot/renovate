@@ -45,11 +45,10 @@ export async function ensureReconfigurePrComment(
         managerFiles.map((file) => ` * \`${file.packageFile}\` (${manager})`),
       );
     }
-    prBody =
-      prBody.replace(
-        '{{PACKAGE FILES}}',
-        '### Detected Package Files\n\n' + files.join('\n'),
-      ) + '\n';
+    prBody = `${prBody.replace(
+      '{{PACKAGE FILES}}',
+      `### Detected Package Files\n\n${files.join('\n')}`,
+    )}\n`;
   } else {
     prBody = prBody.replace('{{PACKAGE FILES}}\n', '');
   }
@@ -67,7 +66,7 @@ export async function ensureReconfigurePrComment(
   prBody = prBody.replace('{{ERRORS}}\n', getErrors(config));
   prBody = prBody.replace('{{BASEBRANCH}}\n', getBaseBranchDesc(config));
   prBody = prBody.replace('{{PRLIST}}\n', getExpectedPrList(config, branches));
-  logger.trace('prBody:\n' + prBody);
+  logger.trace(`prBody:\n${prBody}`);
 
   prBody = platform.massageMarkdown(prBody);
 
