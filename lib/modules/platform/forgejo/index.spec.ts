@@ -28,7 +28,6 @@ import type {
   Label,
   PR,
   Repo,
-  RepoPermission,
   User,
 } from './schema.ts';
 
@@ -40,8 +39,10 @@ const FORGEJO_VERSION = '11.0.1-99-c504062+gitea-1.22.0';
 describe('modules/platform/forgejo/index', () => {
   function mockedRepo(opts: Partial<Repo>): Repo {
     return partial<Repo>({
-      permissions: partial<RepoPermission>({ push: true, pull: true }),
+      permissions: { push: true, pull: true, admin: false },
       has_pull_requests: true,
+      default_branch: 'master',
+      owner: partial<User>({ id: 0, username: 'some', full_name: '' }),
       ...opts,
     });
   }
@@ -66,6 +67,7 @@ describe('modules/platform/forgejo/index', () => {
     owner: partial<User>({
       id: 0,
       username: 'some',
+      full_name: '',
     }),
   });
 
@@ -271,7 +273,7 @@ describe('modules/platform/forgejo/index', () => {
     scope
       .get(`/repos/${repository}`)
       .reply(200, repoResult)
-      .get(`/orgs/${repoResult.owner!.username!}`)
+      .get(`/orgs/${repoResult.owner.username}`)
       .reply(orgCode, {});
     GlobalConfig.set({ ignorePrAuthor: true, ...config });
     await forgejo.initRepo({ repository });
@@ -1618,7 +1620,7 @@ describe('modules/platform/forgejo/index', () => {
         repo: partial<Repo>({ full_name: mockRepo.full_name }),
       },
       base: {
-        ref: mockRepo.default_branch!,
+        ref: mockRepo.default_branch,
       },
       diff_url: 'https://forgejo.renovatebot.com/some/repo/pulls/42.diff',
       title: 'pr-title',
@@ -3068,6 +3070,7 @@ describe('modules/platform/forgejo/index', () => {
         .scope('https://code.forgejo.org/api/v1')
         .get('/repos/some/repo/contents/file.json')
         .reply(200, {
+          path: 'file.json',
           content: toBase64(JSON.stringify(data)),
         });
       await initFakePlatform(scope);
@@ -3084,6 +3087,7 @@ describe('modules/platform/forgejo/index', () => {
         .scope('https://code.forgejo.org/api/v1')
         .get('/repos/different/repo/contents/file.json')
         .reply(200, {
+          path: 'file.json',
           content: toBase64(JSON.stringify(data)),
         });
       await initFakePlatform(scope);
@@ -3100,6 +3104,7 @@ describe('modules/platform/forgejo/index', () => {
         .scope('https://code.forgejo.org/api/v1')
         .get('/repos/some/repo/contents/file.json?ref=dev')
         .reply(200, {
+          path: 'file.json',
           content: toBase64(JSON.stringify(data)),
         });
       await initFakePlatform(scope);
@@ -3121,6 +3126,7 @@ describe('modules/platform/forgejo/index', () => {
         .scope('https://code.forgejo.org/api/v1')
         .get('/repos/some/repo/contents/file.json5')
         .reply(200, {
+          path: 'file.json5',
           content: toBase64(json5Data),
         });
       await initFakePlatform(scope);

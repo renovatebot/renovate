@@ -25,7 +25,10 @@ describe('modules/platform/forgejo/schema', () => {
   it('Repo degrades unrecognized default_merge_style to undefined', () => {
     const repo = Repo.parse({
       full_name: 'some/repo',
+      default_branch: 'main',
       default_merge_style: 'manually-merged',
+      owner: { id: 1, full_name: '', username: 'user' },
+      permissions: { admin: false, pull: true, push: true },
     });
     expect(repo.default_merge_style).toBeUndefined();
   });

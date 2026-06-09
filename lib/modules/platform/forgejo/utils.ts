@@ -159,7 +159,7 @@ export function usableRepo(repo: Repo): boolean {
     return false;
   }
 
-  if (repo.permissions?.pull === false || repo.permissions?.push === false) {
+  if (repo.permissions.pull === false || repo.permissions.push === false) {
     logger.debug(
       `Skipping repository ${repo.full_name} because of missing pull or push permissions`,
     );

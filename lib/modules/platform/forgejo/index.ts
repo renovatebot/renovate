@@ -299,7 +299,7 @@ const platform: Platform = {
       logger.debug('Repository is a mirror - aborting renovation');
       throw new Error(REPOSITORY_MIRRORED);
     }
-    if (repo.permissions?.pull === false || repo.permissions?.push === false) {
+    if (!repo.permissions.pull || !repo.permissions.push) {
       logger.debug(
         'Repository does not permit pull or push - aborting renovation',
       );
@@ -339,14 +339,14 @@ const platform: Platform = {
     }
 
     try {
-      config.isOrgRepo = await helper.isOrg(repo.owner!.username!);
+      config.isOrgRepo = await helper.isOrg(repo.owner.username);
     } catch (err) {
       logger.debug({ err }, 'Forgejo initRepo() error');
       throw err;
     }
 
     // Determine author email and branches
-    config.defaultBranch = repo.default_branch!;
+    config.defaultBranch = repo.default_branch;
     logger.debug(`${repository} default branch = ${config.defaultBranch}`);
 
     const url = getRepoUrl(repo, gitUrl, defaults.endpoint);
@@ -362,7 +362,7 @@ const platform: Platform = {
     config.labelList = null;
     config.hasIssuesEnabled =
       !repo.external_tracker && repo.has_issues !== false;
-    config.orgName = repo.owner!.username!;
+    config.orgName = repo.owner.username;
 
     return {
       defaultBranch: config.defaultBranch,

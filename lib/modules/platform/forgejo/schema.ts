@@ -4,6 +4,7 @@ import {
   LooseArray,
   Nullish,
 } from '../../../util/schema-utils/index.ts';
+import { fromBase64 } from '../../../util/string.ts';
 
 export const ContentsResponse = z.object({
   name: z.string(),
@@ -20,14 +21,14 @@ export const User = z.object({
   id: z.number(),
   email: Nullish(EmailAddress),
   full_name: Nullish(z.string()),
-  username: Nullish(z.string()),
+  username: z.string(),
 });
 export type User = z.infer<typeof User>;
 
 export const RepoPermission = z.object({
-  admin: Nullish(z.boolean()),
-  pull: Nullish(z.boolean()),
-  push: Nullish(z.boolean()),
+  admin: z.boolean(),
+  pull: z.boolean(),
+  push: z.boolean(),
 });
 export type RepoPermission = z.infer<typeof RepoPermission>;
 
@@ -56,13 +57,13 @@ export const Repo = z.object({
   has_issues: Nullish(z.boolean()),
   has_pull_requests: Nullish(z.boolean()),
   ssh_url: Nullish(z.string()),
-  default_branch: Nullish(z.string()),
+  default_branch: z.string(),
   empty: Nullish(z.boolean()),
   fork: Nullish(z.boolean()),
   full_name: z.string(),
   mirror: Nullish(z.boolean()),
-  owner: User.optional(),
-  permissions: RepoPermission.optional(),
+  owner: User,
+  permissions: RepoPermission,
 });
 export type Repo = z.infer<typeof Repo>;
 
@@ -188,11 +189,18 @@ export const RepoSearchResults = z.object({
   data: z.array(Repo),
 });
 
-export const RepoContents = z.object({
-  path: Nullish(z.string()),
-  content: Nullish(z.string()),
-  contentString: Nullish(z.string()),
-});
+export const RepoContents = z
+  .object({
+    path: z.string(),
+    content: Nullish(z.string()),
+  })
+  .transform((input) => {
+    return {
+      ...input,
+      contentString: input.content ? fromBase64(input.content) : undefined,
+    };
+  });
+
 export type RepoContents = z.infer<typeof RepoContents>;
 
 export const Version = z.object({

@@ -5,7 +5,6 @@ import type { BranchStatus } from '../../../types/index.ts';
 import { getCache } from '../../../util/cache/repository/index.ts';
 import type { ForgejoHttpOptions } from '../../../util/http/forgejo.ts';
 import { ForgejoHttp } from '../../../util/http/forgejo.ts';
-import { fromBase64 } from '../../../util/string.ts';
 import { getQueryString } from '../../../util/url.ts';
 import {
   Branch,
@@ -148,10 +147,6 @@ export async function getRepoContents(
     filePath,
   )}?${query}`;
   const res = await forgejoHttp.getJson(url, options, RepoContents);
-
-  if (res.body.content) {
-    res.body.contentString = fromBase64(res.body.content);
-  }
 
   return res.body;
 }
