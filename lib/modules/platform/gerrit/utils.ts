@@ -7,6 +7,7 @@ import { regEx } from '../../../util/regex.ts';
 import { joinUrlParts, parseUrl } from '../../../util/url.ts';
 import { hashBody } from '../pr-body.ts';
 import type { GitUrlOption, Pr } from '../types.ts';
+import type { GerritServerInfo } from './schema.ts';
 import type {
   GerritChange,
   GerritChangeStatus,
@@ -38,6 +39,7 @@ export function getGerritRepoUrl(
   repository: string,
   endpoint: string,
   gitUrl: GitUrlOption | undefined,
+  serverInfo: GerritServerInfo | undefined,
 ): string {
   const endpointUrl = parseUrl(endpoint);
   if (!endpointUrl) {
@@ -46,18 +48,44 @@ export function getGerritRepoUrl(
 
   const url =
     gitUrl === 'ssh'
-      ? createSshUrl(endpointUrl, repository)
-      : createHttpUrl(endpointUrl, endpoint, repository);
+      ? createSshUrl(endpointUrl, repository, serverInfo)
+      : createHttpUrl(endpointUrl, endpoint, repository, serverInfo);
   logger.trace({ url }, 'using URL based on configured endpoint');
 
   return url;
 }
 
-function createSshUrl(url: URL, repository: string): string {
-  return `ssh://${url.host}:${DEFAULT_SSH_PORT}/${repository}`;
+function createSshUrl(
+  url: URL,
+  repository: string,
+  serverInfo: GerritServerInfo | undefined,
+): string {
+  if (serverInfo?.download.schemes.ssh) {
+    const raw = serverInfo.download.schemes.ssh.url.replace(
+      // eslint-disable-next-line no-template-curly-in-string
+      '${project}',
+      repository,
+    );
+    const parsed = parseUrl(raw);
+    if (parsed) {
+      logger.debug(`Using SSH URL from server info: ${parsed.toString()}`);
+      return parsed.toString();
+    }
+    logger.debug(
+      `SSH URL from server info is invalid (${raw}), using fallback`,
+    );
+  }
+  const fallbackUrl = `ssh://${url.host}:${DEFAULT_SSH_PORT}/${repository}`;
+  logger.debug(`Using fallback SSH URL: ${fallbackUrl}`);
+  return fallbackUrl;
 }
 
-function createHttpUrl(url: URL, endpoint: string, repository: string): string {
+function createHttpUrl(
+  url: URL,
+  endpoint: string,
+  repository: string,
+  serverInfo: GerritServerInfo | undefined,
+): string {
   // Find options for current host and determine Git endpoint
   const opts = hostRules.find({
     hostType: 'gerrit',
@@ -70,6 +98,23 @@ function createHttpUrl(url: URL, endpoint: string, repository: string): string {
     );
   }
 
+  // Prefer HTTP scheme URL from server info when available
+  if (serverInfo?.download.schemes.http) {
+    const httpUrl = parseUrl(
+      serverInfo.download.schemes.http.url.replace(
+        // eslint-disable-next-line no-template-curly-in-string
+        '${project}',
+        encodeURIComponent(repository),
+      ),
+    );
+    if (httpUrl) {
+      httpUrl.username = opts.username;
+      httpUrl.password = opts.password;
+      logger.debug(`Using HTTP URL from server info: ${httpUrl.toString()}`);
+      return httpUrl.toString();
+    }
+  }
+
   url.username = opts.username;
   url.password = opts.password;
   url.pathname = joinUrlParts(
@@ -77,6 +122,7 @@ function createHttpUrl(url: URL, endpoint: string, repository: string): string {
     'a',
     encodeURIComponent(repository),
   );
+  logger.debug(`Using endpoint fallback HTTP URL: ${url.toString()}`);
   return url.toString();
 }
 

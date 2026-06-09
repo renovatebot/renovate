@@ -6,6 +6,10 @@ import { logger } from '../../../logger/index.ts';
 import { GerritHttp } from '../../../util/http/gerrit.ts';
 import type { HttpOptions } from '../../../util/http/types.ts';
 import { getQueryString } from '../../../util/url.ts';
+import {
+  type GerritServerInfo,
+  GerritServerInfo as GerritServerInfoSchema,
+} from './schema.ts';
 import type {
   GerritAccountInfo,
   GerritBranchInfo,
@@ -39,6 +43,14 @@ class GerritClient {
       'a/config/server/version',
       options,
       z.string(),
+    );
+    return res.body;
+  }
+
+  async getServerInfo(): Promise<GerritServerInfo> {
+    const res = await this.gerritHttp.getJson(
+      'a/config/server/info',
+      GerritServerInfoSchema,
     );
     return res.body;
   }

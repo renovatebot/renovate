@@ -1,4 +1,5 @@
 import { codeBlock } from 'common-tags';
+import { z } from 'zod/v4';
 import { git, hostRules, partial } from '~test/util.ts';
 import { REPOSITORY_ARCHIVED } from '../../../constants/error-messages.ts';
 import type { BranchStatus } from '../../../types/index.ts';
@@ -124,6 +125,9 @@ describe('modules/platform/gerrit/index', () => {
     };
 
     beforeEach(() => {
+      clientMock.getServerInfo.mockResolvedValueOnce({
+        download: { schemes: {}, archives: [] },
+      });
       clientMock.getBranchInfo.mockResolvedValueOnce({
         ref: 'sha-hash....',
         revision: 'main',
@@ -186,6 +190,57 @@ describe('modules/platform/gerrit/index', () => {
           'This change has been abandoned as it was voted with Code-Review -2.',
         ],
       ]);
+    });
+
+    it('initRepo() - falls back gracefully when getServerInfo fails', async () => {
+      clientMock.getServerInfo.mockReset();
+      clientMock.getServerInfo.mockRejectedValueOnce(
+        new Error('Permission denied'),
+      );
+      clientMock.getBranchInfo.mockResolvedValueOnce({
+        ref: 'sha-hash....',
+        revision: 'main',
+      });
+      clientMock.getProjectInfo.mockResolvedValueOnce(projectInfo);
+      clientMock.findChanges.mockResolvedValueOnce([]);
+
+      expect(await gerrit.initRepo({ repository: 'test/repo' })).toEqual({
+        defaultBranch: 'main',
+        isFork: false,
+        repoFingerprint: repoFingerprint('test/repo', `${gerritEndpointUrl}/`),
+      });
+      expect(git.initRepo).toHaveBeenCalledExactlyOnceWith({
+        url: 'https://user:pass@dev.gerrit.com/renovate/a/test%2Frepo',
+      });
+    });
+
+    it('initRepo() - falls back gracefully when server info has invalid schema', async () => {
+      clientMock.getServerInfo.mockReset();
+      clientMock.getServerInfo.mockRejectedValueOnce(
+        new z.ZodError([
+          {
+            code: 'invalid_type',
+            expected: 'object',
+            path: ['download'],
+            message: 'Expected object, received string',
+          },
+        ]),
+      );
+      clientMock.getBranchInfo.mockResolvedValueOnce({
+        ref: 'sha-hash....',
+        revision: 'main',
+      });
+      clientMock.getProjectInfo.mockResolvedValueOnce(projectInfo);
+      clientMock.findChanges.mockResolvedValueOnce([]);
+
+      expect(await gerrit.initRepo({ repository: 'test/repo' })).toEqual({
+        defaultBranch: 'main',
+        isFork: false,
+        repoFingerprint: repoFingerprint('test/repo', `${gerritEndpointUrl}/`),
+      });
+      expect(git.initRepo).toHaveBeenCalledExactlyOnceWith({
+        url: 'https://user:pass@dev.gerrit.com/renovate/a/test%2Frepo',
+      });
     });
   });
 

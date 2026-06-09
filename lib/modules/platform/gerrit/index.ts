@@ -135,6 +135,17 @@ export async function initRepo({
   gitUrl,
 }: RepoParams): Promise<RepoResult> {
   logger.debug(`initRepo(${repository}, ${gitUrl})`);
+
+  let serverInfo;
+  try {
+    serverInfo = await client.getServerInfo();
+  } catch (err) {
+    logger.debug(
+      { err },
+      'Failed to fetch server info, falling back to endpoint-based URL',
+    );
+  }
+
   const projectInfo = await client.getProjectInfo(repository);
   const branchInfo = await client.getBranchInfo(repository);
 
@@ -146,7 +157,7 @@ export async function initRepo({
     labels: projectInfo.labels ?? {},
   };
   const baseUrl = defaults.endpoint!;
-  const url = getGerritRepoUrl(repository, baseUrl, gitUrl);
+  const url = getGerritRepoUrl(repository, baseUrl, gitUrl, serverInfo);
   configureScm(repository, config.gerritUsername!);
   await git.initRepo({ url, cloneSubmodules, cloneSubmodulesFilter });
 
