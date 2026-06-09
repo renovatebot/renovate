@@ -3325,6 +3325,7 @@ const options: Readonly<RenovateOptions>[] = [
       'forgejo',
       'gerrit',
       'gitea',
+      'github',
       'gitlab',
       'scm-manager',
     ],

@@ -201,6 +201,77 @@ export function Nullish<Schema extends z.ZodTypeAny>(
     .optional();
 }
 
+function deepNullishRewrite(node: z.ZodTypeAny): z.ZodTypeAny {
+  if (node instanceof z.ZodOptional) {
+    return Nullish(deepNullishRewrite(node.unwrap() as z.ZodTypeAny));
+  }
+  if (node instanceof z.ZodObject) {
+    const shape: Record<string, z.ZodTypeAny> = {};
+    for (const [key, value] of Object.entries(node.shape)) {
+      shape[key] = deepNullishRewrite(value as z.ZodTypeAny);
+    }
+    return z.object(shape);
+  }
+  if (node instanceof z.ZodArray) {
+    return z.array(deepNullishRewrite(node.element as z.ZodTypeAny));
+  }
+  if (node instanceof z.ZodRecord) {
+    return z.record(
+      node.keyType,
+      deepNullishRewrite(node.valueType as z.ZodTypeAny),
+    );
+  }
+  if (node instanceof z.ZodUnion) {
+    const options = node.options as z.ZodTypeAny[];
+    return z.union(
+      options.map(deepNullishRewrite) as [
+        z.ZodTypeAny,
+        z.ZodTypeAny,
+        ...z.ZodTypeAny[],
+      ],
+    );
+  }
+  if (node instanceof z.ZodDefault) {
+    return deepNullishRewrite(node.unwrap() as z.ZodTypeAny).default(
+      node.def.defaultValue,
+    );
+  }
+  if (node instanceof z.ZodNullable) {
+    return z.nullable(deepNullishRewrite(node.unwrap() as z.ZodTypeAny));
+  }
+  if (node instanceof z.ZodPipe) {
+    return z.pipe(
+      node.def.in as z.ZodTypeAny,
+      deepNullishRewrite(node.def.out as z.ZodTypeAny),
+    );
+  }
+  return node;
+}
+
+/**
+ * Walks `schema` at build time and replaces every `.optional()` position with
+ * `Nullish` semantics — accepting `null`/`undefined`/absent and normalizing all
+ * to `undefined`. Recurses through `object`, `array`, `record`, `union`,
+ * `default`, `nullable`, and the **output side** of `pipe`/transform nodes
+ * (e.g. `Json.pipe(…)`).
+ *
+ * Intentional `.nullable()` fields are preserved (null kept), distinguishing
+ * this from a blunt null-stripping preprocessor.
+ *
+ * The pipe **input** side (the decoder, e.g. `Json`) is left untouched.
+ * **`LooseArray`/`LooseRecord` remain opaque** because their element schema is
+ * captured in a closure — wrap the inner schema directly for those
+ * (e.g. `LooseArray(DeepNullish(Inner))`).
+ *
+ * Object modifiers (`.strict()`/`.catchall()`/`.passthrough()`/object-level
+ * `.refine()`) are dropped by the `z.object(shape)` rebuild.
+ */
+export function DeepNullish<Schema extends z.ZodTypeAny>(
+  schema: Schema,
+): z.ZodType<z.output<Schema>> {
+  return deepNullishRewrite(schema) as z.ZodType<z.output<Schema>>;
+}
+
 export const Json = z.string().transform((str, ctx): unknown => {
   try {
     return JSON.parse(str);
