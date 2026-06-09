@@ -182,6 +182,8 @@ describe('modules/platform/forgejo/forgejo-helper', () => {
   };
 
   const mockContents: RepoContents = {
+    type: 'file',
+    name: 'dummy.txt',
     path: 'dummy.txt',
     content: toBase64('top secret'),
     contentString: 'top secret',

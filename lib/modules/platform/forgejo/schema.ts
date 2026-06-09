@@ -6,16 +6,35 @@ import {
 } from '../../../util/schema-utils/index.ts';
 import { fromBase64 } from '../../../util/string.ts';
 
-export const ContentsResponse = z.object({
+const ContentsCommon = z.object({
   name: z.string(),
   path: z.string(),
-  type: z.enum(['file', 'dir', 'symlink', 'submodule']),
-  content: Nullish(z.string()),
 });
 
-export type ContentsResponse = z.infer<typeof ContentsResponse>;
+const ContentsFile = ContentsCommon.extend({
+  type: z.literal('file'),
+  // Nullish: single-file endpoint fills `content`, directory listings return null.
+  content: Nullish(z.string()),
+}).transform((input) => ({
+  ...input,
+  contentString: input.content ? fromBase64(input.content) : undefined,
+}));
 
-export const ContentsListResponse = z.array(ContentsResponse);
+const ContentsDir = ContentsCommon.extend({ type: z.literal('dir') });
+const ContentsSymlink = ContentsCommon.extend({ type: z.literal('symlink') });
+const ContentsSubmodule = ContentsCommon.extend({
+  type: z.literal('submodule'),
+});
+
+export const RepoContents = z.discriminatedUnion('type', [
+  ContentsFile,
+  ContentsDir,
+  ContentsSymlink,
+  ContentsSubmodule,
+]);
+export type RepoContents = z.infer<typeof RepoContents>;
+
+export const ContentsListResponse = z.array(RepoContents);
 
 export const User = z.object({
   id: z.number(),
@@ -188,20 +207,6 @@ export const RepoSearchResults = z.object({
   ok: z.boolean(),
   data: z.array(Repo),
 });
-
-export const RepoContents = z
-  .object({
-    path: z.string(),
-    content: Nullish(z.string()),
-  })
-  .transform((input) => {
-    return {
-      ...input,
-      contentString: input.content ? fromBase64(input.content) : undefined,
-    };
-  });
-
-export type RepoContents = z.infer<typeof RepoContents>;
 
 export const Version = z.object({
   version: z.string(),

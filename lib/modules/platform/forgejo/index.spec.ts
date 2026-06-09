@@ -3070,6 +3070,8 @@ describe('modules/platform/forgejo/index', () => {
         .scope('https://code.forgejo.org/api/v1')
         .get('/repos/some/repo/contents/file.json')
         .reply(200, {
+          type: 'file',
+          name: 'file.json',
           path: 'file.json',
           content: toBase64(JSON.stringify(data)),
         });
@@ -3087,6 +3089,8 @@ describe('modules/platform/forgejo/index', () => {
         .scope('https://code.forgejo.org/api/v1')
         .get('/repos/different/repo/contents/file.json')
         .reply(200, {
+          type: 'file',
+          name: 'file.json',
           path: 'file.json',
           content: toBase64(JSON.stringify(data)),
         });
@@ -3104,6 +3108,8 @@ describe('modules/platform/forgejo/index', () => {
         .scope('https://code.forgejo.org/api/v1')
         .get('/repos/some/repo/contents/file.json?ref=dev')
         .reply(200, {
+          type: 'file',
+          name: 'file.json',
           path: 'file.json',
           content: toBase64(JSON.stringify(data)),
         });
@@ -3126,6 +3132,8 @@ describe('modules/platform/forgejo/index', () => {
         .scope('https://code.forgejo.org/api/v1')
         .get('/repos/some/repo/contents/file.json5')
         .reply(200, {
+          type: 'file',
+          name: 'file.json5',
           path: 'file.json5',
           content: toBase64(json5Data),
         });
@@ -3142,6 +3150,9 @@ describe('modules/platform/forgejo/index', () => {
         .scope('https://code.forgejo.org/api/v1')
         .get('/repos/some/repo/contents/file.json')
         .reply(200, {
+          type: 'file',
+          name: 'file.json',
+          path: 'file.json',
           content: toBase64('!@#'),
         });
       await initFakePlatform(scope);
@@ -3153,7 +3164,17 @@ describe('modules/platform/forgejo/index', () => {
       const scope = httpMock
         .scope('https://code.forgejo.org/api/v1')
         .get('/repos/some/repo/contents/file.json')
-        .reply(200, { path: 'file.json' });
+        .reply(200, { type: 'file', name: 'file.json', path: 'file.json' });
+      await initFakePlatform(scope);
+      await initFakeRepo(scope);
+      expect(await forgejo.getJsonFile('file.json')).toBeNull();
+    });
+
+    it('returns null for non-file entries', async () => {
+      const scope = httpMock
+        .scope('https://code.forgejo.org/api/v1')
+        .get('/repos/some/repo/contents/file.json')
+        .reply(200, { type: 'dir', name: 'file.json', path: 'file.json' });
       await initFakePlatform(scope);
       await initFakeRepo(scope);
       expect(await forgejo.getJsonFile('file.json')).toBeNull();

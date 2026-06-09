@@ -29,7 +29,8 @@ export async function fetchJSONFile(
     throw new Error(PRESET_DEP_NOT_FOUND);
   }
 
-  return parsePreset(res.contentString, fileName);
+  const contentString = res.type === 'file' ? res.contentString : undefined;
+  return parsePreset(contentString, fileName);
 }
 
 export function getPresetFromEndpoint(

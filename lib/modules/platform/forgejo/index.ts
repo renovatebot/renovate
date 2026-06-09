@@ -255,6 +255,9 @@ const platform: Platform = {
   ): Promise<string | null> {
     const repo = repoName ?? config.repository;
     const contents = await helper.getRepoContents(repo, fileName, branchOrTag);
+    if (contents.type !== 'file') {
+      return null;
+    }
     return contents.contentString ?? null;
   },
 
