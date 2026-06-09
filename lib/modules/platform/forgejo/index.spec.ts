@@ -1783,7 +1783,7 @@ describe('modules/platform/forgejo/index', () => {
         .query({ state: 'all', sort: 'recentupdate', limit: 100 })
         .reply(200, [mockNewPR])
         .patch('/repos/some/repo/pulls/42')
-        .reply(200);
+        .reply(200, mockNewPR);
       await initFakePlatform(scope);
       await initFakeRepo(scope);
 
@@ -2044,7 +2044,7 @@ describe('modules/platform/forgejo/index', () => {
           title: 'New Title',
           base: 'New Base',
         })
-        .reply(200);
+        .reply(200, mockPRs[0]);
       await initFakePlatform(scope);
       await initFakeRepo(scope);
 
@@ -2067,7 +2067,7 @@ describe('modules/platform/forgejo/index', () => {
           title: 'New Title',
           body: 'New Body',
         })
-        .reply(200);
+        .reply(200, mockPRs[0]);
       await initFakePlatform(scope);
       await initFakeRepo(scope);
 
@@ -2090,7 +2090,7 @@ describe('modules/platform/forgejo/index', () => {
           title: 'WIP: New Title',
           body: 'New Body',
         })
-        .reply(200);
+        .reply(200, mockPRs[2]);
       await initFakePlatform(scope);
       await initFakeRepo(scope);
 
@@ -2114,7 +2114,7 @@ describe('modules/platform/forgejo/index', () => {
           body: 'New Body',
           state: 'closed',
         })
-        .reply(200);
+        .reply(200, mockPRs[0]);
       await initFakePlatform(scope);
       await initFakeRepo(scope);
 
@@ -2375,7 +2375,7 @@ describe('modules/platform/forgejo/index', () => {
           body: mockIssue.body,
           title: mockIssue.title,
         })
-        .reply(200, { number: 42 });
+        .reply(200, { number: 42, title: mockIssue.title });
       await initFakePlatform(scope);
       await initFakeRepo(scope);
 
@@ -2410,7 +2410,7 @@ describe('modules/platform/forgejo/index', () => {
           title: 'new-title',
           labels: [1, 3],
         })
-        .reply(200, { number: 42 });
+        .reply(200, { number: 42, title: 'new-title' });
       await initFakePlatform(scope);
       await initFakeRepo(scope);
 
@@ -2430,7 +2430,7 @@ describe('modules/platform/forgejo/index', () => {
           body: closedIssue.body,
           title: closedIssue.title,
         })
-        .reply(200, { number: 42 });
+        .reply(200, { number: 42, title: closedIssue.title });
       await initFakePlatform(scope);
       await initFakeRepo(scope);
 
@@ -2645,7 +2645,7 @@ describe('modules/platform/forgejo/index', () => {
         .twice()
         .reply(200, mockIssues)
         .post('/repos/some/repo/issues')
-        .reply(200, { number: 42 });
+        .reply(200, { number: 42, title: 'new-title' });
       await initFakePlatform(scope);
       await initFakeRepo(scope);
 
@@ -2768,7 +2768,7 @@ describe('modules/platform/forgejo/index', () => {
         .post('/repos/some/repo/issues/1/comments', {
           body: '### other-topic\n\nother-content',
         })
-        .reply(200);
+        .reply(200, partial<Comment>({ id: 33, body: 'x' }));
       await initFakePlatform(scope);
       await initFakeRepo(scope);
 
@@ -2787,7 +2787,7 @@ describe('modules/platform/forgejo/index', () => {
         .get('/repos/some/repo/issues/1/comments')
         .reply(200, mockComments)
         .post('/repos/some/repo/issues/1/comments', { body: 'other-content' })
-        .reply(200);
+        .reply(200, partial<Comment>({ id: 33, body: 'x' }));
       await initFakePlatform(scope);
       await initFakeRepo(scope);
 
@@ -2808,7 +2808,7 @@ describe('modules/platform/forgejo/index', () => {
         .patch('/repos/some/repo/issues/comments/13', {
           body: '### some-topic\n\nsome-new-content',
         })
-        .reply(200, partial<Comment>({ id: 13 }));
+        .reply(200, partial<Comment>({ id: 13, body: 'x' }));
       await initFakePlatform(scope);
       await initFakeRepo(scope);
 
@@ -2979,7 +2979,7 @@ describe('modules/platform/forgejo/index', () => {
         .patch('/repos/some/repo/issues/1', {
           assignees: ['me', 'you'],
         })
-        .reply(200);
+        .reply(200, mockIssues[0]);
       await initFakePlatform(scope);
       await initFakeRepo(scope);
 

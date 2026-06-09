@@ -410,7 +410,7 @@ describe('modules/platform/forgejo/forgejo-helper', () => {
       httpMock
         .scope(baseUrl)
         .patch(`/repos/${mockRepo.full_name}/pulls/${mockPR.number}`)
-        .reply(200);
+        .reply(200, mockPR);
 
       await expect(closePR(mockRepo.full_name, mockPR.number)).toResolve();
     });
@@ -585,7 +585,7 @@ describe('modules/platform/forgejo/forgejo-helper', () => {
       httpMock
         .scope(baseUrl)
         .patch(`/repos/${mockRepo.full_name}/issues/${mockIssue.number}`)
-        .reply(200);
+        .reply(200, mockIssue);
 
       const res = await closeIssue(mockRepo.full_name, mockIssue.number);
       expect(res).toBeUndefined();

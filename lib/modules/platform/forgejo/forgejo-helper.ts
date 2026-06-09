@@ -22,6 +22,7 @@ import {
 } from './schema.ts';
 import type {
   CombinedCommitStatus,
+  CommentCreateParams,
   CommitStatusCreateParams,
   IssueCreateParams,
   IssueSearchParams,
@@ -157,10 +158,14 @@ export async function createPR(
   options?: ForgejoHttpOptions,
 ): Promise<PR> {
   const url = `${API_PATH}/repos/${repoPath}/pulls`;
-  const res = await forgejoHttp.postJson<PR>(url, {
-    ...options,
-    body: params,
-  });
+  const res = await forgejoHttp.postJson(
+    url,
+    {
+      ...options,
+      body: params,
+    },
+    PR,
+  );
 
   return res.body;
 }
@@ -172,10 +177,14 @@ export async function updatePR(
   options?: ForgejoHttpOptions,
 ): Promise<PR> {
   const url = `${API_PATH}/repos/${repoPath}/pulls/${idx}`;
-  const res = await forgejoHttp.patchJson<PR>(url, {
-    ...options,
-    body: params,
-  });
+  const res = await forgejoHttp.patchJson(
+    url,
+    {
+      ...options,
+      body: params,
+    },
+    PR,
+  );
 
   return res.body;
 }
@@ -252,10 +261,14 @@ export async function createIssue(
   options?: ForgejoHttpOptions,
 ): Promise<Issue> {
   const url = `${API_PATH}/repos/${repoPath}/issues`;
-  const res = await forgejoHttp.postJson<Issue>(url, {
-    ...options,
-    body: params,
-  });
+  const res = await forgejoHttp.postJson(
+    url,
+    {
+      ...options,
+      body: params,
+    },
+    Issue,
+  );
 
   return res.body;
 }
@@ -267,10 +280,14 @@ export async function updateIssue(
   options?: ForgejoHttpOptions,
 ): Promise<Issue> {
   const url = `${API_PATH}/repos/${repoPath}/issues/${idx}`;
-  const res = await forgejoHttp.patchJson<Issue>(url, {
-    ...options,
-    body: params,
-  });
+  const res = await forgejoHttp.patchJson(
+    url,
+    {
+      ...options,
+      body: params,
+    },
+    Issue,
+  );
 
   return res.body;
 }
@@ -282,10 +299,14 @@ export async function updateIssueLabels(
   options?: ForgejoHttpOptions,
 ): Promise<Label[]> {
   const url = `${API_PATH}/repos/${repoPath}/issues/${idx}/labels`;
-  const res = await forgejoHttp.putJson<Label[]>(url, {
-    ...options,
-    body: params,
-  });
+  const res = await forgejoHttp.putJson(
+    url,
+    {
+      ...options,
+      body: params,
+    },
+    z.array(Label),
+  );
 
   return res.body;
 }
@@ -366,12 +387,16 @@ export async function createComment(
   body: string,
   options?: ForgejoHttpOptions,
 ): Promise<Comment> {
-  const params = { body };
+  const params: CommentCreateParams = { body };
   const url = `${API_PATH}/repos/${repoPath}/issues/${issue}/comments`;
-  const res = await forgejoHttp.postJson<Comment>(url, {
-    ...options,
-    body: params,
-  });
+  const res = await forgejoHttp.postJson(
+    url,
+    {
+      ...options,
+      body: params,
+    },
+    Comment,
+  );
 
   return res.body;
 }
@@ -382,12 +407,16 @@ export async function updateComment(
   body: string,
   options?: ForgejoHttpOptions,
 ): Promise<Comment> {
-  const params = { body };
+  const params: CommentCreateParams = { body };
   const url = `${API_PATH}/repos/${repoPath}/issues/comments/${idx}`;
-  const res = await forgejoHttp.patchJson<Comment>(url, {
-    ...options,
-    body: params,
-  });
+  const res = await forgejoHttp.patchJson(
+    url,
+    {
+      ...options,
+      body: params,
+    },
+    Comment,
+  );
 
   return res.body;
 }
@@ -419,7 +448,7 @@ export async function createCommitStatus(
   options?: ForgejoHttpOptions,
 ): Promise<CommitStatus> {
   const url = `${API_PATH}/repos/${repoPath}/statuses/${branchCommit}`;
-  const res = await forgejoHttp.postJson<CommitStatus>(
+  const res = await forgejoHttp.postJson(
     url,
     {
       ...options,
