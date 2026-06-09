@@ -18,7 +18,10 @@ import {
   parseLinkHeader,
   parseUrl,
 } from '../../../util/url.ts';
-import { id as dockerVersioningId } from '../../versioning/docker/index.ts';
+import {
+  api as dockerVersioning,
+  id as dockerVersioningId,
+} from '../../versioning/docker/index.ts';
 import { Datasource } from '../datasource.ts';
 import type {
   DigestConfig,
@@ -86,7 +89,7 @@ export class DockerDatasource extends Datasource {
 
   override readonly releaseTimestampSupport = true;
   override readonly releaseTimestampNote =
-    'Only supported on Docker Hub: The release timestamp is determined from the `tag_last_pushed` field in the results. **NOTE**: Currently, digests will receive the same release timestamp as the `tag_last_pushed`, which means that digests may appear newer than they are - see https://github.com/renovatebot/renovate/issues/38659';
+    'Supported on Docker Hub and ECR. For Docker Hub: determined from the `tag_last_pushed` field. For ECR: determined from the `created` field in the image config blob. **NOTE**: Currently, digests will receive the same release timestamp as the `tag_last_pushed`, which means that digests may appear newer than they are - see https://github.com/renovatebot/renovate/issues/38659';
   override readonly sourceUrlSupport = 'package';
   override readonly sourceUrlNote =
     'The source URL is determined from the `org.opencontainers.image.source` and `org.label-schema.vcs-url` labels present in the metadata of the **latest stable** image found on the Docker registry.';
@@ -290,6 +293,59 @@ export class DockerDatasource extends Datasource {
       (await this.getManifest(registry, dockerRepository, tag))?.config
         ?.digest ?? null
     );
+  }
+
+  private async getCreatedTimestamp(
+    registryHost: string,
+    dockerRepository: string,
+    tag: string,
+  ): Promise<string | null> {
+    const manifest = await this.getManifest(
+      registryHost,
+      dockerRepository,
+      tag,
+    );
+    /* v8 ignore next 3 -- manifest fetch failure for a valid version tag is not expected */
+    if (!manifest) {
+      return null;
+    }
+
+    const { mediaType, digest } = manifest.config;
+    /* v8 ignore next 5 -- Helm and other non-image configs don't have a created timestamp */
+    if (
+      mediaType !== 'application/vnd.oci.image.config.v1+json' &&
+      mediaType !== 'application/vnd.docker.container.image.v1+json'
+    ) {
+      return null;
+    }
+
+    const headers = await getAuthHeaders(
+      this.http,
+      registryHost,
+      dockerRepository,
+    );
+    /* v8 ignore next 3 -- should never happen */
+    if (!headers) {
+      return null;
+    }
+
+    const url = joinUrlParts(
+      registryHost,
+      'v2',
+      dockerRepository,
+      'blobs',
+      digest,
+    );
+    const { body } = await this.http.getJson(
+      url,
+      { headers, noAuth: true },
+      OciImageConfig,
+    );
+    const created = body.created ?? null;
+    logger.debug(
+      `ECR image config blob created timestamp for ${dockerRepository}:${tag} -> ${created ?? 'null'}`,
+    );
+    return created;
   }
 
   private async getManifest(
@@ -1185,6 +1241,26 @@ export class DockerDatasource extends Datasource {
     if (dockerRepository !== packageName) {
       // This will be reused later if a getDigest() call is made
       ret.lookupName = dockerRepository;
+    }
+
+    if (ecrRegex.test(registryHost) || ecrPublicRegex.test(registryHost)) {
+      const validReleases = releases.filter(({ version }) =>
+        dockerVersioning.isVersion(version),
+      );
+      const createdDates = await Promise.all(
+        validReleases.map(({ version }) =>
+          this.getCreatedTimestamp(registryHost, dockerRepository, version),
+        ),
+      );
+      for (let i = 0; i < validReleases.length; i++) {
+        const ts = asTimestamp(createdDates[i]);
+        /* v8 ignore next 3 -- all valid ECR image versions have a created timestamp */
+        if (!ts) {
+          continue;
+        }
+        const idx = releases.indexOf(validReleases[i]);
+        releases[idx] = { ...releases[idx], releaseTimestamp: ts };
+      }
     }
 
     const tags = releases.map((release) => release.version);
