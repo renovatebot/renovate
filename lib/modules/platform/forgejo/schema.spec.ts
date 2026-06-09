@@ -7,7 +7,7 @@ describe('modules/platform/forgejo/schema', () => {
 
   it('ContentsListResponse accepts symlink and submodule entries', () => {
     const entries = [
-      { name: 'file.md', path: 'file.md', type: 'file', content: null },
+      { name: 'file.md', path: 'file.md', type: 'file', content: '' },
       { name: 'docs', path: 'docs', type: 'dir', content: null },
       { name: 'link', path: 'link', type: 'symlink', content: null },
       { name: 'sub', path: 'sub', type: 'submodule', content: null },
@@ -24,6 +24,7 @@ describe('modules/platform/forgejo/schema', () => {
 
   it('Repo degrades unrecognized default_merge_style to undefined', () => {
     const repo = Repo.parse({
+      id: 1,
       full_name: 'some/repo',
       default_branch: 'main',
       default_merge_style: 'manually-merged',

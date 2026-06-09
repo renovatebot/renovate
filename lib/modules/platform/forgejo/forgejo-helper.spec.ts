@@ -340,24 +340,6 @@ describe('modules/platform/forgejo/forgejo-helper', () => {
       );
       expect(res).toEqual(otherMockContents);
     });
-
-    it('should not fail if no content is returned', async () => {
-      httpMock
-        .scope(baseUrl)
-        .get(`/repos/${mockRepo.full_name}/contents/${mockContents.path}`)
-        .reply(200, {
-          ...mockContents,
-          content: undefined,
-          contentString: undefined,
-        });
-
-      const res = await getRepoContents(mockRepo.full_name, mockContents.path);
-      expect(res).toEqual({
-        ...mockContents,
-        content: undefined,
-        contentString: undefined,
-      });
-    });
   });
 
   describe('createPR', () => {

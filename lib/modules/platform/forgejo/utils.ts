@@ -2,6 +2,7 @@ import { isNonEmptyArray } from '@sindresorhus/is';
 import type { MergeStrategy } from '../../../config/types.ts';
 import { CONFIG_GIT_URL_UNAVAILABLE } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
+import { coerceArray } from '../../../util/array.ts';
 import type { LongCommitSha } from '../../../util/git/types.ts';
 import * as hostRules from '../../../util/host-rules.ts';
 import { regEx } from '../../../util/regex.ts';
@@ -118,9 +119,7 @@ export function toRenovatePR(data: PR, author: string | null): Pr | null {
     title = title.substring(DRAFT_PREFIX.length);
     isDraft = true;
   }
-  const labels = (data?.labels ?? [])
-    .map((l) => l.name)
-    .filter((n): n is string => n !== null && n !== undefined);
+  const labels = coerceArray(data.labels).map((l) => l.name);
 
   return {
     labels,
@@ -174,14 +173,14 @@ export function usableRepo(repo: Repo): boolean {
 export function isAllowed(style: PRMergeMethod, repo: Repo): boolean {
   switch (style) {
     case 'merge':
-      return repo.allow_merge_commits === true;
+      return repo.allow_merge_commits;
     case 'rebase':
-      return repo.allow_rebase === true;
+      return repo.allow_rebase;
     case 'rebase-merge':
-      return repo.allow_rebase_explicit === true;
+      return repo.allow_rebase_explicit;
     case 'squash':
-      return repo.allow_squash_merge === true;
+      return repo.allow_squash_merge;
     case 'fast-forward-only':
-      return repo.allow_fast_forward_only_merge === true;
+      return repo.allow_fast_forward_only_merge;
   }
 }

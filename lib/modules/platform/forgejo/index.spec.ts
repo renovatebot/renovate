@@ -39,7 +39,9 @@ const FORGEJO_VERSION = '11.0.1-99-c504062+gitea-1.22.0';
 describe('modules/platform/forgejo/index', () => {
   function mockedRepo(opts: Partial<Repo>): Repo {
     return partial<Repo>({
+      id: 0,
       permissions: { push: true, pull: true, admin: false },
+      has_issues: true,
       has_pull_requests: true,
       default_branch: 'master',
       owner: partial<User>({ id: 0, username: 'some', full_name: '' }),
@@ -3186,14 +3188,14 @@ describe('modules/platform/forgejo/index', () => {
       await expect(forgejo.getJsonFile('file.json')).rejects.toThrow();
     });
 
-    it('returns null on missing content', async () => {
+    it('throws when file content is missing', async () => {
       const scope = httpMock
         .scope('https://code.forgejo.org/api/v1')
         .get('/repos/some/repo/contents/file.json')
         .reply(200, { type: 'file', name: 'file.json', path: 'file.json' });
       await initFakePlatform(scope);
       await initFakeRepo(scope);
-      expect(await forgejo.getJsonFile('file.json')).toBeNull();
+      await expect(forgejo.getJsonFile('file.json')).rejects.toThrow();
     });
 
     it('returns null for non-file entries', async () => {

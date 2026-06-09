@@ -223,8 +223,8 @@ const platform: Platform = {
       const user = await helper.getCurrentUser({ token });
       // oxlint-disable-next-line typescript/prefer-nullish-coalescing -- `full_name` can be emtpy string
       gitAuthor = `${user.full_name || user.username} <${user.email}>`;
-      botUserID = user.id!;
-      botUserName = user.username!;
+      botUserID = user.id;
+      botUserName = user.username;
       const env = getEnv();
       /* v8 ignore if: experimental feature */
       if (semver.valid(env.RENOVATE_X_PLATFORM_VERSION)) {
@@ -363,14 +363,13 @@ const platform: Platform = {
     // Reset cached resources
     config.issueList = null;
     config.labelList = null;
-    config.hasIssuesEnabled =
-      !repo.external_tracker && repo.has_issues !== false;
+    config.hasIssuesEnabled = !repo.external_tracker && repo.has_issues;
     config.orgName = repo.owner.username;
 
     return {
       defaultBranch: config.defaultBranch,
       isFork: !!repo.fork,
-      repoFingerprint: repoFingerprint(repo.id!, defaults.endpoint),
+      repoFingerprint: repoFingerprint(repo.id, defaults.endpoint),
     };
   },
 

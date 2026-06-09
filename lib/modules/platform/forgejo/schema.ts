@@ -13,11 +13,10 @@ const ContentsCommon = z.object({
 
 const ContentsFile = ContentsCommon.extend({
   type: z.literal('file'),
-  // Nullish: single-file endpoint fills `content`, directory listings return null.
-  content: Nullish(z.string()),
+  content: z.string(),
 }).transform((input) => ({
   ...input,
-  contentString: input.content ? fromBase64(input.content) : undefined,
+  contentString: fromBase64(input.content),
 }));
 
 const ContentsDir = ContentsCommon.extend({ type: z.literal('dir') });
@@ -62,18 +61,18 @@ export type PRMergeMethod = z.infer<typeof PRMergeMethod>;
 
 // Lenient Repo schema - only validates fields Renovate reads, most are optional
 export const Repo = z.object({
-  id: z.number().optional(),
-  allow_fast_forward_only_merge: Nullish(z.boolean()),
-  allow_merge_commits: Nullish(z.boolean()),
-  allow_rebase: Nullish(z.boolean()),
-  allow_rebase_explicit: Nullish(z.boolean()),
-  allow_squash_merge: Nullish(z.boolean()),
+  id: z.number(),
+  allow_fast_forward_only_merge: z.boolean().default(false),
+  allow_merge_commits: z.boolean().default(false),
+  allow_rebase: z.boolean().default(false),
+  allow_rebase_explicit: z.boolean().default(false),
+  allow_squash_merge: z.boolean().default(false),
   archived: Nullish(z.boolean()),
   clone_url: Nullish(z.string()),
   // catch unknown merge methods e.g. `manually-merged`
   default_merge_style: Nullish(PRMergeMethod).catch(undefined),
   external_tracker: z.unknown().optional(),
-  has_issues: Nullish(z.boolean()),
+  has_issues: Nullish(z.boolean()).default(false),
   has_pull_requests: Nullish(z.boolean()),
   ssh_url: Nullish(z.string()),
   default_branch: z.string(),
@@ -85,11 +84,6 @@ export const Repo = z.object({
   permissions: RepoPermission,
 });
 export type Repo = z.infer<typeof Repo>;
-
-export const ForgejoLabel = z.object({
-  id: z.number().optional(),
-  name: Nullish(z.string()),
-});
 
 export const Label = z.object({
   id: z.number(),
@@ -146,10 +140,11 @@ export const PR = z.object({
       username: Nullish(z.string()),
     })
     .optional(),
-  labels: z.array(ForgejoLabel).optional(),
+  labels: z.array(Label).optional(),
 });
 export type PR = z.infer<typeof PR>;
 
+// TODO remove when the TEMPORARY_ERROR in pr-cache.ts is no longer needed
 export const NullablePR = PR.nullable();
 
 export const PRList = LooseArray(NullablePR);
