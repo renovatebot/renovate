@@ -217,6 +217,6 @@ export const QuayTagsResponse = z.object({
       name: z.string(),
     }),
   ),
-  has_additional: z.boolean(),
+  has_additional: z.boolean().default(false),
 });
 export type QuayTagsResponse = z.infer<typeof QuayTagsResponse>;
