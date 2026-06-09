@@ -6,7 +6,8 @@ const PackageResolvedPin = z.object({
   kind: z.string(),
   location: z.string(),
   state: z.object({
-    revision: z.string(),
+    // SE-0292 "registry" pins have no revision — only version.
+    revision: z.string().optional(),
     version: z.string().nullable().optional(),
     branch: z.string().nullable().optional(),
   }),

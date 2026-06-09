@@ -5,6 +5,7 @@ import { escapeRegExp, regEx } from '../../../util/regex.ts';
 import { trimTrailingSlash } from '../../../util/url.ts';
 import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
 import { getDigest } from '../../datasource/index.ts';
+import { SwiftPackageRegistryDatasource } from '../../datasource/swift-package-registry/index.ts';
 import { scm } from '../../platform/scm.ts';
 import type {
   PackageDependency,
@@ -44,6 +45,17 @@ function matchPinForDep(
   dep: PackageDependency,
   pins: PackageResolvedPin[],
 ): PackageResolvedPin | null {
+  // SE-0292 registry-form deps: match by identity (== scope.name).
+  // This also catches bridged setups where a registry-form dep maps to a
+  // legacy `kind: "remoteSourceControl"` pin written by older SwiftPM.
+  if (dep.datasource === SwiftPackageRegistryDatasource.id) {
+    const identity = dep.packageName ?? dep.depName;
+    if (!identity) {
+      return null;
+    }
+    return pins.find((pin) => pin.identity === identity) ?? null;
+  }
+
   let depUrl: string;
 
   if (dep.datasource === GitTagsDatasource.id) {
