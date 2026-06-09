@@ -11,10 +11,10 @@ Let Renovate use your PAT by doing _one_ of the following:
 
 Permissions for your PAT should be at minimum:
 
-| Scope        | Permission   | Description                       |
-| ------------ | ------------ | --------------------------------- |
-| `Code`       | Read & Write | Required                          |
-| `Work Items` | Read & write | Only needed for link to work item |
+| Scope        | Permission   | Description                                           |
+| ------------ | ------------ | ----------------------------------------------------- |
+| `Code`       | Read & Write | Required                                              |
+| `Work Items` | Read & write | Needed for link to work item and dependecy dashboards |
 
 Remember to set `platform=azure` somewhere in your Renovate config file.
 

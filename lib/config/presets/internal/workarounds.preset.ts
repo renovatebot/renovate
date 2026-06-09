@@ -278,6 +278,7 @@ export const presets: Record<string, Preset> = {
           '!docker.io/calico/node',
           '!ghcr.io/devcontainers/features/node',
           '!kindest/node',
+          '!docker.io/kindest/node',
         ],
         versionCompatibility: '^(?<version>[^-]+)(?<compatibility>-.*)?$',
         versioning: 'node',

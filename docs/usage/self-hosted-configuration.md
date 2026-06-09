@@ -157,11 +157,12 @@ For more details of where this may be found, see ["Trusting Repository Developer
 
 Allowed options:
 
-| Option          | Description                                                                   |
-| --------------- | ----------------------------------------------------------------------------- |
-| `bazelModDeps`  | Allows the `bazel mod deps` when perfoming bazelisk or bazel-module updates.  |
-| `goGenerate`    | Allows the `goGenerate` `postUpdateOption` to run after a go mod update.      |
-| `gradleWrapper` | Allows using `./gradlew` or `gradle.bat` when performing updates with Gradle. |
+| Option          | Description                                                                                   |
+| --------------- | --------------------------------------------------------------------------------------------- |
+| `bazelModDeps`  | Allows the `bazel mod deps` when perfoming bazelisk or bazel-module updates.                  |
+| `goGenerate`    | Allows the `goGenerate` `postUpdateOption` to run after a go mod update.                      |
+| `gradleWrapper` | Allows using `./gradlew` or `gradle.bat` when performing updates with Gradle.                 |
+| `mise`          | Allows running any `mise` commands, for instance `mise lock` when updating `mise.lock` files. |
 
 ## `autodiscover`
 
@@ -799,6 +800,11 @@ Possible values:
 - `default`: use HTTPS URLs provided by the platform for Git
 - `ssh`: use SSH URLs provided by the platform for Git
 - `endpoint`: ignore URLs provided by the platform and use the configured endpoint directly
+
+!!! note
+  On GitHub, `default` and `endpoint` are equivalent: both build the HTTPS URL from the configured endpoint with credentials embedded.
+  `ssh` uses the repository's `sshUrl` and authenticates via SSH key.
+  In fork mode (`forkToken` set with `forkCreation`), `ssh` applies to both the fork's working URL and the upstream URL.
 
 ## `githubTokenWarn`
 
