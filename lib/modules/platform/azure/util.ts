@@ -12,6 +12,7 @@ import type { MergeStrategy } from '../../../config/types.ts';
 import { logger } from '../../../logger/index.ts';
 import type { GitOptions } from '../../../types/git.ts';
 import type { HostRule, PrState } from '../../../types/index.ts';
+import { parseJsonc } from '../../../util/common.ts';
 import { addSecretForSanitizing } from '../../../util/sanitize.ts';
 import { toBase64 } from '../../../util/string.ts';
 import { getPrBodyStruct } from '../pr-body.ts';
@@ -134,7 +135,7 @@ export function isProbablyJwt(token: string): boolean {
   }
 
   try {
-    const header = JSON.parse(
+    const header = parseJsonc(
       Buffer.from(parts[0], 'base64url').toString('utf8'),
     );
     return isPlainObject(header) && ('typ' in header || 'alg' in header);
