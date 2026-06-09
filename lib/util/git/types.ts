@@ -113,18 +113,18 @@ export type GitObjectType = 'blob' | 'tree' | 'commit';
  * Git tree entry modes (octal file-type representations).
  * @see https://git-scm.com/docs/gitdatamodel
  */
-export enum GitTreeMode {
+export const GitTreeMode = {
   /** Regular non-executable file */
-  RegularFile = '100644',
+  RegularFile: '100644',
   /** Regular executable file */
-  ExecutableFile = '100755',
+  ExecutableFile: '100755',
   /** Symbolic link */
-  SymbolicLink = '120000',
+  SymbolicLink: '120000',
   /** Directory / subtree */
-  Directory = '040000',
+  Directory: '040000',
   /** Gitlink (submodule) */
-  Gitlink = '160000',
-}
+  Gitlink: '160000',
+} as const;
 
 export interface DiffTreeItem {
   path: string;
