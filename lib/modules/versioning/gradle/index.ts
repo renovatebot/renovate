@@ -28,7 +28,7 @@ const getMajor = (version: string): number | null => {
   if (tokens) {
     const majorToken = tokens?.[0];
     if (majorToken?.type === TokenType.Number) {
-      return majorToken.val as number;
+      return Number(majorToken.val);
     }
   }
   return null;
@@ -43,7 +43,7 @@ const getMinor = (version: string): number | null => {
       majorToken?.type === TokenType.Number &&
       minorToken?.type === TokenType.Number
     ) {
-      return minorToken.val as number;
+      return Number(minorToken.val);
     }
     return 0;
   }
@@ -61,7 +61,7 @@ const getPatch = (version: string): number | null => {
       minorToken?.type === TokenType.Number &&
       patchToken?.type === TokenType.Number
     ) {
-      return patchToken.val as number;
+      return Number(patchToken.val);
     }
     return 0;
   }
