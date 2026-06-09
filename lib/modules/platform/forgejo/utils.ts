@@ -90,10 +90,6 @@ export const DRAFT_PREFIX = 'WIP: ';
 const reconfigurePrRegex = regEx(/reconfigure$/g);
 
 export function toRenovatePR(data: PR, author: string | null): Pr | null {
-  if (!data) {
-    return null;
-  }
-
   if (
     !data.base?.ref ||
     !data.head?.label ||

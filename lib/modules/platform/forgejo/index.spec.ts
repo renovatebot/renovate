@@ -1818,6 +1818,24 @@ describe('modules/platform/forgejo/index', () => {
       ).rejects.toThrow();
     });
 
+    it('should abort when the created pull request author is not the bot', async () => {
+      const scope = httpMock
+        .scope('https://code.forgejo.org/api/v1')
+        .post('/repos/some/repo/pulls')
+        .reply(200, { ...mockNewPR, user: { username: 'not-the-bot' } });
+      await initFakePlatform(scope);
+      await initFakeRepo(scope);
+
+      await expect(
+        forgejo.createPr({
+          sourceBranch: mockNewPR.head.label,
+          targetBranch: 'master',
+          prTitle: mockNewPR.title,
+          prBody: mockNewPR.body,
+        }),
+      ).rejects.toThrow('Can not parse newly created Pull Request');
+    });
+
     it('should use platform automerge', async () => {
       const mergePR = vi.spyOn(helper, 'mergePR');
       const scope = httpMock
@@ -2375,7 +2393,11 @@ describe('modules/platform/forgejo/index', () => {
           body: mockIssue.body,
           title: mockIssue.title,
         })
-        .reply(200, { number: 42, title: mockIssue.title });
+        .reply(200, {
+          number: 42,
+          title: mockIssue.title,
+          body: mockIssue.body,
+        });
       await initFakePlatform(scope);
       await initFakeRepo(scope);
 
@@ -2410,7 +2432,7 @@ describe('modules/platform/forgejo/index', () => {
           title: 'new-title',
           labels: [1, 3],
         })
-        .reply(200, { number: 42, title: 'new-title' });
+        .reply(200, { number: 42, title: 'new-title', body: 'new-body' });
       await initFakePlatform(scope);
       await initFakeRepo(scope);
 
@@ -2430,13 +2452,17 @@ describe('modules/platform/forgejo/index', () => {
           body: closedIssue.body,
           title: closedIssue.title,
         })
-        .reply(200, { number: 42, title: closedIssue.title });
+        .reply(200, {
+          number: 42,
+          title: closedIssue.title,
+          body: closedIssue.body,
+        });
       await initFakePlatform(scope);
       await initFakeRepo(scope);
 
       const res = await forgejo.ensureIssue({
         title: closedIssue.title,
-        body: closedIssue.body!,
+        body: closedIssue.body,
         shouldReOpen: false,
         once: false,
       });
@@ -2578,7 +2604,7 @@ describe('modules/platform/forgejo/index', () => {
 
       const res = await forgejo.ensureIssue({
         title: closedIssue.title,
-        body: closedIssue.body!,
+        body: closedIssue.body,
         shouldReOpen: true,
         once: false,
       });
@@ -2598,7 +2624,7 @@ describe('modules/platform/forgejo/index', () => {
 
       const res = await forgejo.ensureIssue({
         title: closedIssue.title,
-        body: closedIssue.body!,
+        body: closedIssue.body,
         shouldReOpen: false,
         once: true,
       });
@@ -2629,7 +2655,7 @@ describe('modules/platform/forgejo/index', () => {
 
       const res = await forgejo.ensureIssue({
         title: first.title,
-        body: first.body!,
+        body: first.body,
         shouldReOpen: false,
         once: false,
       });
@@ -2645,7 +2671,7 @@ describe('modules/platform/forgejo/index', () => {
         .twice()
         .reply(200, mockIssues)
         .post('/repos/some/repo/issues')
-        .reply(200, { number: 42, title: 'new-title' });
+        .reply(200, { number: 42, title: 'new-title', body: 'new-body' });
       await initFakePlatform(scope);
       await initFakeRepo(scope);
 

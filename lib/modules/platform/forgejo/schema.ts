@@ -158,7 +158,7 @@ export const Issue = z.object({
   number: z.number(),
   state: IssueState.optional(),
   title: z.string(),
-  body: Nullish(z.string()),
+  body: z.string(),
   assignees: z.array(User).optional(),
   labels: z.array(Label).optional(),
 });
