@@ -213,11 +213,7 @@ describe('modules/datasource/docker/common', () => {
         'https://my.local.registry/v2/repo/tags/list?n=10000',
       );
 
-      expect(headers).toMatchInlineSnapshot(`
-        {
-          "authorization": "Bearer abc",
-        }
-      `);
+      expect(headers).toEqual({ authorization: 'Bearer abc' });
     });
 
     it('returns "authType token" if both provided', async () => {
