@@ -485,6 +485,8 @@ export async function ensurePr(
           },
           'PR title changed',
         );
+      } else if (config.autoApprove) {
+        logger.debug({ prTitle }, 'PR approval required');
       } else if (!config.committedFiles && !config.rebaseRequested) {
         logger.debug(
           {
