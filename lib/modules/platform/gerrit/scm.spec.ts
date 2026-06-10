@@ -2,17 +2,17 @@ import { DateTime } from 'luxon';
 import { git, partial } from '~test/util.ts';
 import type { LongCommitSha } from '../../../util/git/types.ts';
 import { client as _client } from './client.ts';
+import type {
+  GerritAccountInfo,
+  GerritChange,
+  GerritRevisionInfo,
+} from './schema.ts';
 import {
   GerritScm,
   configureScm,
   pendingChangeBranches,
   pushForReview,
 } from './scm.ts';
-import type {
-  GerritAccountInfo,
-  GerritChange,
-  GerritRevisionInfo,
-} from './types.ts';
 
 vi.mock('./client.ts');
 const clientMock = vi.mocked(_client);
