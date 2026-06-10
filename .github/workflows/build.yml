@@ -718,7 +718,7 @@ jobs:
           cache-python: true
 
       - name: Install uv dependencies
-        run: uv sync
+        run: uv sync --locked
 
       - name: Build
         run: pnpm build:docs
@@ -880,6 +880,9 @@ jobs:
           version: 0.11.19
           enable-cache: true
           cache-python: true
+
+      - name: Install uv dependencies
+        run: uv sync --locked
 
       - name: Check dry run
         run: |
