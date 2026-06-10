@@ -349,7 +349,7 @@
     "vitest": "4.1.8",
     "vitest-mock-extended": "4.0.0"
   },
-  "packageManager": "pnpm@11.5.3",
+  "packageManager": "pnpm@11.5.2",
   "files": [
     "dist",
     "renovate-schema.json"
