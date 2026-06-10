@@ -330,7 +330,7 @@ export type RenovateRepository =
       repository: string;
     });
 
-export type UseBaseBranchConfigType = 'merge' | 'none';
+export type UseBaseBranchConfigType = 'fallback' | 'merge' | 'none';
 export type ConstraintsFilter = 'strict' | 'none';
 export type MinimumReleaseAgeBehaviour =
   | 'timestamp-required'

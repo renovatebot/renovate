@@ -2,6 +2,7 @@
 import { GlobalConfig } from '../../../config/global.ts';
 import { mergeChildConfig } from '../../../config/index.ts';
 import { migrateAndValidate } from '../../../config/migrate-validate.ts';
+import { parseFileConfig } from '../../../config/parse.ts';
 import { resolveConfigPresets } from '../../../config/presets/index.ts';
 import type { RenovateConfig } from '../../../config/types.ts';
 import { CONFIG_VALIDATION } from '../../../constants/error-messages.ts';
@@ -11,6 +12,7 @@ import { addMeta, logger, removeMeta } from '../../../logger/index.ts';
 import type { PackageFile } from '../../../modules/manager/types.ts';
 import { platform } from '../../../modules/platform/index.ts';
 import { scm } from '../../../modules/platform/scm.ts';
+import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
 import { getCache } from '../../../util/cache/repository/index.ts';
 import { clone } from '../../../util/clone.ts';
 import { getBranchList } from '../../../util/git/index.ts';
@@ -65,7 +67,7 @@ export async function getBaseBranchConfig(
     }
 
     baseBranchConfig = await migrateAndValidate(config, baseBranchConfig);
-    if (baseBranchConfig.errors?.length) {
+    if (baseBranchConfig.errors.length) {
       const error = new Error(CONFIG_VALIDATION);
       error.validationSource = configFileName;
       error.validationError = `The renovate configuration file of branch ${baseBranch} contains some invalid settings`;
@@ -92,6 +94,80 @@ export async function getBaseBranchConfig(
     // baseBranches value should be based off the default branch
     baseBranchConfig.baseBranchPatterns = config.baseBranchPatterns;
     baseBranchConfig.baseBranches = config.baseBranches;
+  }
+
+  if (
+    config.useBaseBranchConfig === 'fallback' &&
+    baseBranch !== config.defaultBranch
+  ) {
+    logger.debug(
+      { baseBranch },
+      'Attempting to read branch-specific config because useBaseBranchConfig=fallback',
+    );
+
+    const cache = getCache();
+    // TODO: types (#22198)
+    const configFileName = cache.configFileName;
+
+    if (configFileName && configFileName !== 'package.json') {
+      let branchConfigRaw: string | null = null;
+      try {
+        branchConfigRaw = await platform.getRawFile(
+          configFileName,
+          config.repository,
+          baseBranch,
+        );
+      } catch (err) {
+        if (err instanceof ExternalHostError) {
+          throw err;
+        }
+        logger.debug(
+          { baseBranch, configFileName },
+          'No branch-specific config file found, using default branch config',
+        );
+      }
+
+      if (branchConfigRaw) {
+        const parseResult = parseFileConfig(configFileName, branchConfigRaw);
+        if (parseResult.success) {
+          // TODO: types (#22198)
+          const migratedConfig = await migrateAndValidate(
+            config,
+            parseResult.parsedContents as RenovateConfig,
+          );
+          if (migratedConfig.errors.length) {
+            logger.warn(
+              { baseBranch, errors: migratedConfig.errors },
+              'Branch-specific config has validation errors, using default branch config',
+            );
+          } else {
+            ({ config: baseBranchConfig } = await resolveConfigPresets(
+              migratedConfig,
+              config,
+            ));
+            baseBranchConfig = mergeChildConfig(config, baseBranchConfig);
+            baseBranchConfig.baseBranchPatterns = config.baseBranchPatterns;
+            baseBranchConfig.baseBranches = config.baseBranches;
+            logger.debug(
+              { baseBranch },
+              'Applied branch-specific renovate config',
+            );
+            // istanbul ignore if
+            if (config.printConfig) {
+              logger.info(
+                { config: baseBranchConfig },
+                'Base branch config after merge',
+              );
+            }
+          }
+        } else {
+          logger.warn(
+            { baseBranch, validationError: parseResult.validationError },
+            'Failed to parse branch-specific config, using default branch config',
+          );
+        }
+      }
+    }
   }
 
   if (isMultiBaseBranch(config)) {
