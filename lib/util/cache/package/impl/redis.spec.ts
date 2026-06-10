@@ -1,7 +1,11 @@
 import { createClient, createCluster } from '@redis/client';
 import { DateTime } from 'luxon';
+import { logger as _logger } from '~test/util.ts';
 import { compressToBase64 } from '../../../compress.ts';
+import { encodeEntry } from '../codec.ts';
 import { PackageCacheRedis, normalizeRedisUrl } from './redis.ts';
+
+const { logger } = _logger;
 
 vi.mock('@redis/client');
 
@@ -25,9 +29,11 @@ describe('util/cache/package/impl/redis', () => {
       set: vi.fn(),
       del: vi.fn(),
       destroy: vi.fn(),
+      withTypeMapping: vi.fn(),
     };
 
     beforeEach(() => {
+      clientMock.withTypeMapping.mockReturnValue(clientMock);
       vi.mocked(createClient).mockReturnValue(
         clientMock as unknown as ReturnType<typeof createClient>,
       );
@@ -46,6 +52,7 @@ describe('util/cache/package/impl/redis', () => {
           url: 'redis://host',
         });
         expect(clientMock.connect).toHaveBeenCalled();
+        expect(clientMock.withTypeMapping).toHaveBeenCalled();
 
         const reconnectStrategy = vi.mocked(createClient).mock.calls[0][0]!
           .socket!.reconnectStrategy as (retries: number) => number;
@@ -125,18 +132,32 @@ describe('util/cache/package/impl/redis', () => {
           value: payloadValue,
           expiry: DateTime.local().plus({ minutes: 5 }),
         });
-        clientMock.get.mockResolvedValueOnce(payload);
+        clientMock.get.mockResolvedValueOnce(Buffer.from(payload));
+
+        expect(await cache.get('_test-namespace', 'key')).toEqual(value);
+      });
+
+      it('returns value from envelope payload', async () => {
+        const cache = await PackageCacheRedis.create('redis://host', 'p:');
+        const value = { foo: 'bar' };
+
+        clientMock.get.mockResolvedValueOnce(
+          await encodeEntry(value, DateTime.local()),
+        );
 
         expect(await cache.get('_test-namespace', 'key')).toEqual(value);
       });
 
       it('removes expired cached entry', async () => {
         const cache = await PackageCacheRedis.create('redis://host', 'p:');
+        const value = { foo: 'bar' };
+        const payloadValue = await compressToBase64(JSON.stringify(value));
 
         const payload = JSON.stringify({
+          value: payloadValue,
           expiry: DateTime.local().minus({ minutes: 1 }),
         });
-        clientMock.get.mockResolvedValueOnce(payload);
+        clientMock.get.mockResolvedValueOnce(Buffer.from(payload));
 
         expect(await cache.get('_test-namespace', 'key')).toBeUndefined();
         expect(clientMock.del).toHaveBeenCalledWith('p:_test-namespace-key');
@@ -144,9 +165,11 @@ describe('util/cache/package/impl/redis', () => {
 
       it('returns undefined for missing expiry', async () => {
         const cache = await PackageCacheRedis.create('redis://host', 'p:');
+        const value = { foo: 'bar' };
+        const payloadValue = await compressToBase64(JSON.stringify(value));
 
-        const payload = JSON.stringify({ value: 1234 });
-        clientMock.get.mockResolvedValueOnce(payload);
+        const payload = JSON.stringify({ value: payloadValue });
+        clientMock.get.mockResolvedValueOnce(Buffer.from(payload));
 
         expect(await cache.get('_test-namespace', 'key')).toBeUndefined();
         expect(clientMock.del).toHaveBeenCalledWith('p:_test-namespace-key');
@@ -159,10 +182,36 @@ describe('util/cache/package/impl/redis', () => {
           value: 1234,
           expiry: 'not-a-date',
         });
-        clientMock.get.mockResolvedValueOnce(payload);
+        clientMock.get.mockResolvedValueOnce(Buffer.from(payload));
 
         expect(await cache.get('_test-namespace', 'key')).toBeUndefined();
         expect(clientMock.del).toHaveBeenCalledWith('p:_test-namespace-key');
+      });
+
+      it('removes invalid entries', async () => {
+        const cache = await PackageCacheRedis.create('redis://host', 'p:');
+
+        clientMock.get.mockResolvedValueOnce(Buffer.from('garbage'));
+
+        expect(await cache.get('_test-namespace', 'key')).toBeUndefined();
+        expect(logger.once.debug).toHaveBeenCalledWith(
+          { err: expect.any(Error) },
+          'Error while reading package cache value',
+        );
+        expect(clientMock.del).toHaveBeenCalledWith('p:_test-namespace-key');
+      });
+
+      it('returns undefined when invalid entry removal fails', async () => {
+        const cache = await PackageCacheRedis.create('redis://host', 'p:');
+
+        clientMock.get.mockResolvedValueOnce(Buffer.from('garbage'));
+        clientMock.del.mockRejectedValueOnce(new Error('delete failed'));
+
+        expect(await cache.get('_test-namespace', 'key')).toBeUndefined();
+        expect(logger.once.debug).toHaveBeenCalledWith(
+          { err: expect.any(Error) },
+          'Error while removing package cache value',
+        );
       });
 
       it('returns undefined on cache miss', async () => {

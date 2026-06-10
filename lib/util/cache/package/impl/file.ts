@@ -3,7 +3,7 @@ import { LRUCache } from 'lru-cache';
 import { DateTime } from 'luxon';
 import upath from 'upath';
 import { logger } from '../../../../logger/index.ts';
-import { compressToBase64, decompressFromBase64 } from '../../../compress.ts';
+import { compressToBase64 } from '../../../compress.ts';
 import type { PackageCacheNamespace } from '../types.ts';
 import { PackageCacheBase } from './base.ts';
 
@@ -29,39 +29,6 @@ export class PackageCacheFile extends PackageCacheBase {
 
   private getKey(namespace: PackageCacheNamespace, key: string): string {
     return `${namespace}-${key}`;
-  }
-
-  override async get<T = unknown>(
-    namespace: PackageCacheNamespace,
-    key: string,
-  ): Promise<T | undefined> {
-    try {
-      const entry = await cacache.get(
-        this.cacheFileName,
-        this.getKey(namespace, key),
-      );
-      const raw = entry.data.toString();
-      const cached = JSON.parse(raw);
-
-      if (!cached) {
-        return undefined;
-      }
-
-      const expiry = DateTime.fromISO(cached.expiry);
-      if (!expiry.isValid || DateTime.local() >= expiry) {
-        await this.rm(namespace, key);
-        return undefined;
-      }
-
-      logger.trace({ namespace, key }, 'Returning cached value');
-      this.expiryMap.set(this.getKey(namespace, key), expiry);
-
-      const json = await decompressFromBase64(cached.value);
-      return JSON.parse(json);
-    } catch {
-      logger.trace({ namespace, key }, 'Cache miss');
-    }
-    return undefined;
   }
 
   override async set(
@@ -139,11 +106,26 @@ export class PackageCacheFile extends PackageCacheBase {
     );
   }
 
-  private async rm(
+  protected override async readRaw(
+    namespace: PackageCacheNamespace,
+    key: string,
+  ): Promise<Buffer | undefined> {
+    const cacheKey = this.getKey(namespace, key);
+    try {
+      const entry = await cacache.get(this.cacheFileName, cacheKey);
+      return entry.data;
+    } catch {
+      return undefined;
+    }
+  }
+
+  protected override async rm(
     namespace: PackageCacheNamespace,
     key: string,
   ): Promise<void> {
     logger.trace({ namespace, key }, 'Removing cache entry');
-    await cacache.rm.entry(this.cacheFileName, this.getKey(namespace, key));
+    const cacheKey = this.getKey(namespace, key);
+    await cacache.rm.entry(this.cacheFileName, cacheKey);
+    this.expiryMap.delete(cacheKey);
   }
 }
