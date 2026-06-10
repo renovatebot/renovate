@@ -37,6 +37,10 @@ test/datasource/nuget/_fixtures/obj
 # uv
 /.venv
 
+# For old checkouts
+/.pdm-python
+/pdm.lock
+
 # local development directories
 /.agents
 /.opencode
