@@ -7,18 +7,25 @@ export const PuppetReleaseAbbreviated = z
   .object({
     version: z.string(),
     created_at: MaybeTimestamp,
+    deleted_at: z.string().optional().nullable(),
     file_uri: z.string().optional().nullable(),
   })
-  .transform(({ version, created_at, file_uri }): Release => {
-    const release: Release = { version };
-    if (file_uri) {
-      release.downloadUrl = file_uri;
-    }
-    if (created_at) {
-      release.releaseTimestamp = created_at;
-    }
-    return release;
-  });
+  .transform(
+    ({ version, created_at, deleted_at, file_uri }): Release | null => {
+      if (deleted_at) {
+        return null;
+      }
+
+      const release: Release = { version };
+      if (file_uri) {
+        release.downloadUrl = file_uri;
+      }
+      if (created_at) {
+        release.releaseTimestamp = created_at;
+      }
+      return release;
+    },
+  );
 
 export const PuppetModule = z
   .object({
@@ -27,7 +34,10 @@ export const PuppetModule = z
     deprecated_for: z.string().optional().nullable(),
   })
   .transform((module): ReleaseResult => {
-    const result: ReleaseResult = { releases: module.releases };
+    const releases = module.releases.filter(
+      (release): release is Release => release !== null,
+    );
+    const result: ReleaseResult = { releases };
     if (module.homepage_url) {
       result.homepage = module.homepage_url;
     }
