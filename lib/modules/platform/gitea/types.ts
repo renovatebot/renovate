@@ -50,7 +50,7 @@ export interface PR {
     login?: string;
   };
   assignees?: any[];
-  user?: { username?: string };
+  user?: { login?: string };
 
   // labels returned from the Gitea API are represented as an array of objects
   // ref: https://docs.gitea.com/api/1.20/#tag/repository/operation/repoGetPullRequest
@@ -70,7 +70,7 @@ export interface User {
   id: number;
   email: EmailAddress;
   full_name?: string;
-  username: string;
+  login: string;
 }
 
 export interface Repo {
@@ -138,7 +138,7 @@ export interface Commit {
 export interface CommitUser {
   name: string;
   email: EmailAddress;
-  username: string;
+  login: string;
 }
 
 export interface CommitStatus {
