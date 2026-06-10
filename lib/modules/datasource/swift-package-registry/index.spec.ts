@@ -146,6 +146,22 @@ describe('modules/datasource/swift-package-registry/index', () => {
       ).toBeNull();
     });
 
+    it('returns null when the releases entries fail zod validation', async () => {
+      // Each release entry's `url` must be a string per the schema; a number
+      // forces safeParse to fail rather than coerce.
+      httpMock
+        .scope(baseUrl)
+        .get('/acme/somelib')
+        .reply(200, { releases: { '1.0.0': { url: 12345 } } });
+      expect(
+        await getPkgReleases({
+          datasource,
+          packageName,
+          registryUrls: [baseUrl],
+        }),
+      ).toBeNull();
+    });
+
     it('returns null on 404', async () => {
       httpMock.scope(baseUrl).get('/acme/somelib').reply(404);
       expect(

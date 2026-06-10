@@ -39,6 +39,15 @@ describe('modules/manager/swift/index', () => {
         extractPackageFile(`dependencies:[.package(url:.package(`),
       ).toBeNull();
       expect(extractPackageFile(`dependencies:[.package(url:]`)).toBeNull();
+      // Mirror the url-form malformed-input coverage for the SE-0292 id form.
+      expect(extractPackageFile(`dependencies:[.package(id],`)).toBeNull();
+      expect(
+        extractPackageFile(`dependencies:[.package(id.package(]`),
+      ).toBeNull();
+      expect(
+        extractPackageFile(`dependencies:[.package(id:.package(`),
+      ).toBeNull();
+      expect(extractPackageFile(`dependencies:[.package(id:]`)).toBeNull();
       expect(extractPackageFile(`dependencies:[.package(url:"fo`)).toBeNull();
       expect(extractPackageFile(`dependencies:[.package(url:"fo]`)).toBeNull();
       expect(
@@ -185,6 +194,13 @@ describe('modules/manager/swift/index', () => {
 
     it('skips unreadable Package.swift files', async () => {
       fs.readLocalFile.mockResolvedValueOnce(null);
+      expect(
+        await extractAllPackageFiles({} as never, ['Package.swift']),
+      ).toBeNull();
+    });
+
+    it('skips Package.swift files that have content but yield no deps', async () => {
+      fs.readLocalFile.mockResolvedValueOnce('// no deps here');
       expect(
         await extractAllPackageFiles({} as never, ['Package.swift']),
       ).toBeNull();

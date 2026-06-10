@@ -995,6 +995,26 @@ describe('modules/manager/swift/artifacts', () => {
       expect(result).toBeNull();
     });
 
+    it('returns null when a registry-form dep has neither packageName nor depName', async () => {
+      scm.getFileList.mockResolvedValue(['Package.resolved']);
+      fs.readLocalFile.mockResolvedValue(registryFixture);
+
+      const result = await updateArtifacts({
+        packageFileName: 'Package.swift',
+        updatedDeps: [
+          {
+            datasource: SwiftPackageRegistryDatasource.id,
+            newVersion: '1.5.0',
+            newValue: 'from: "1.5.0"',
+          },
+        ],
+        newPackageFileContent: '',
+        config: {},
+      });
+
+      expect(result).toBeNull();
+    });
+
     it('falls back to depName when packageName is absent on the dep', async () => {
       scm.getFileList.mockResolvedValue(['Package.resolved']);
       fs.readLocalFile.mockResolvedValue(registryFixture);

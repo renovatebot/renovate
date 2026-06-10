@@ -13,9 +13,11 @@ describe('modules/manager/swift/registries-json', () => {
     });
 
     it('returns empty for JSON that does not match the schema', () => {
-      expect(parseRegistriesJson(JSON.stringify({ foo: 'bar' }))).toEqual({
-        named: {},
-      });
+      // version must be a number per the schema — passing a string forces
+      // a zod safeParse failure.
+      expect(
+        parseRegistriesJson(JSON.stringify({ version: 'not-a-number' })),
+      ).toEqual({ named: {} });
     });
 
     it('returns empty for unrecognized version', () => {
