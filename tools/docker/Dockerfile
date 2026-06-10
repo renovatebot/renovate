@@ -25,7 +25,7 @@ RUN install-tool node 24.16.0
 
 # corepack is too buggy 😞
 # renovate: datasource=npm
-RUN install-tool pnpm 10.34.1
+RUN install-tool pnpm 11.5.2
 
 WORKDIR /usr/local/renovate
 
@@ -52,8 +52,8 @@ RUN set -ex; \
   true
 
 # prepare pnpm env
-ENV CI=1 npm_config_modules_cache_max_age=0 \
-  npm_config_loglevel=info
+ENV CI=1 pnpm_config_modules_cache_max_age=0 \
+  pnpm_config_loglevel=info
 
 # replace `amd64` with `x64` for `node`
 ENV ARCH=${TARGETARCH/amd64/x64}
@@ -61,7 +61,6 @@ ENV ARCH=${TARGETARCH/amd64/x64}
 # set `npm_config_platform_arch` for `install-artifact-from-github`
 ENV npm_config_arch=${ARCH} npm_config_platform_arch=${ARCH}
 
-COPY --link .npmrc ./
 COPY --link patches ./patches
 COPY --link pnpm-lock.yaml ./
 COPY --link pnpm-workspace.yaml ./

@@ -770,11 +770,7 @@ jobs:
         run: pnpm test-e2e:pack
 
       - name: Install dependencies
-        run: |
-          # as `--ignore-workspace` doesn't seem to apply to `minimumReleaseAge`, forcibly delete our workspace
-          rm pnpm-workspace.yaml
-
-          pnpm test-e2e:install
+        run: pnpm test-e2e:install
 
       - name: E2E Test
         run: pnpm test-e2e:run
