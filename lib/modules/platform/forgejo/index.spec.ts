@@ -1247,7 +1247,7 @@ describe('modules/platform/forgejo/index', () => {
           sha: 'other-head-sha' as LongCommitSha,
           repo: partial<Repo>({ full_name: mockRepo.full_name }),
         },
-        user: { login: 'not-renovate' },
+        user: { id: 2, login: 'not-renovate' },
       });
 
       const scope = httpMock
@@ -1258,7 +1258,7 @@ describe('modules/platform/forgejo/index', () => {
           thirdPartyPr,
           ...mockPRs.map((pr) => ({
             ...pr,
-            user: { login: 'renovate' },
+            user: { id: 1, login: 'renovate' },
           })),
         ]);
       await initFakePlatform(scope);
@@ -1824,7 +1824,7 @@ describe('modules/platform/forgejo/index', () => {
       const scope = httpMock
         .scope('https://code.forgejo.org/api/v1')
         .post('/repos/some/repo/pulls')
-        .reply(200, { ...mockNewPR, user: { login: 'not-the-bot' } });
+        .reply(200, { ...mockNewPR, user: { id: 2, login: 'not-the-bot' } });
       await initFakePlatform(scope);
       await initFakeRepo(scope);
 

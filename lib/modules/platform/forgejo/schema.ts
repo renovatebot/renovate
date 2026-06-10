@@ -134,17 +134,9 @@ export const PR = DeepNullish(
         repo: PartialRepo.optional(),
       })
       .optional(),
-    assignee: z
-      .object({
-        login: z.string().optional(),
-      })
-      .optional(),
-    assignees: z.array(z.any()).optional(),
-    user: z
-      .object({
-        login: z.string().optional(),
-      })
-      .optional(),
+    assignee: User.optional(),
+    assignees: z.array(User).optional(),
+    user: User.optional(),
     labels: z.array(Label).optional(),
   }),
 );
@@ -188,17 +180,8 @@ export const CommitStatus = DeepNullish(
 );
 export type CommitStatus = z.infer<typeof CommitStatus>;
 
-const CommitUser = DeepNullish(
-  z.object({
-    name: z.string().optional(),
-    email: EmailAddress.optional(),
-    login: z.string().optional(),
-  }),
-);
-
 export const Commit = z.object({
   id: z.string(),
-  author: CommitUser,
 });
 export type Commit = z.infer<typeof Commit>;
 

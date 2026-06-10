@@ -164,11 +164,6 @@ describe('modules/platform/forgejo/forgejo-helper', () => {
 
   const mockCommit: Commit = {
     id: mockCommitHash,
-    author: {
-      name: otherMockUser.full_name,
-      email: otherMockUser.email,
-      login: otherMockUser.login,
-    },
   };
 
   const mockBranch: Branch = {
