@@ -28,7 +28,7 @@ describe('modules/platform/forgejo/schema', () => {
       full_name: 'some/repo',
       default_branch: 'main',
       default_merge_style: 'manually-merged',
-      owner: { id: 1, full_name: '', username: 'user' },
+      owner: { id: 1, full_name: '', login: 'user' },
       permissions: { admin: false, pull: true, push: true },
     });
     expect(repo.default_merge_style).toBeUndefined();

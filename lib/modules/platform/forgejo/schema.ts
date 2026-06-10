@@ -40,7 +40,7 @@ export const User = DeepNullish(
     id: z.number(),
     email: EmailAddress.optional(),
     full_name: z.string().optional(),
-    username: z.string(),
+    login: z.string(),
   }),
 );
 export type User = z.infer<typeof User>;
@@ -142,7 +142,7 @@ export const PR = DeepNullish(
     assignees: z.array(z.any()).optional(),
     user: z
       .object({
-        username: z.string().optional(),
+        login: z.string().optional(),
       })
       .optional(),
     labels: z.array(Label).optional(),
@@ -192,7 +192,7 @@ const CommitUser = DeepNullish(
   z.object({
     name: z.string().optional(),
     email: EmailAddress.optional(),
-    username: z.string().optional(),
+    login: z.string().optional(),
   }),
 );
 

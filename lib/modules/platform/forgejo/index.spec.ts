@@ -44,7 +44,7 @@ describe('modules/platform/forgejo/index', () => {
       has_issues: true,
       has_pull_requests: true,
       default_branch: 'master',
-      owner: partial<User>({ id: 0, username: 'some', full_name: '' }),
+      owner: partial<User>({ id: 0, login: 'some', full_name: '' }),
       ...opts,
     });
   }
@@ -54,7 +54,7 @@ describe('modules/platform/forgejo/index', () => {
 
   const mockUser: User = {
     id: 1,
-    username: 'renovate',
+    login: 'renovate',
     full_name: 'Renovate Bot',
     email: 'renovate@example.com',
   };
@@ -68,7 +68,7 @@ describe('modules/platform/forgejo/index', () => {
     full_name: 'some/repo',
     owner: partial<User>({
       id: 0,
-      username: 'some',
+      login: 'some',
       full_name: '',
     }),
   });
@@ -275,7 +275,7 @@ describe('modules/platform/forgejo/index', () => {
     scope
       .get(`/repos/${repository}`)
       .reply(200, repoResult)
-      .get(`/orgs/${repoResult.owner.username}`)
+      .get(`/orgs/${repoResult.owner.login}`)
       .reply(orgCode, {});
     GlobalConfig.set({ ignorePrAuthor: true, ...config });
     await forgejo.initRepo({ repository });
@@ -347,7 +347,7 @@ describe('modules/platform/forgejo/index', () => {
       });
     });
 
-    it('should use username as author name if full name is missing', async () => {
+    it('should use login as author name if full name is missing', async () => {
       const scope = httpMock.scope('https://code.forgejo.org/api/v1');
       scope
         .get('/user')
@@ -1247,7 +1247,7 @@ describe('modules/platform/forgejo/index', () => {
           sha: 'other-head-sha' as LongCommitSha,
           repo: partial<Repo>({ full_name: mockRepo.full_name }),
         },
-        user: { username: 'not-renovate' },
+        user: { login: 'not-renovate' },
       });
 
       const scope = httpMock
@@ -1258,7 +1258,7 @@ describe('modules/platform/forgejo/index', () => {
           thirdPartyPr,
           ...mockPRs.map((pr) => ({
             ...pr,
-            user: { username: 'renovate' },
+            user: { login: 'renovate' },
           })),
         ]);
       await initFakePlatform(scope);
@@ -1282,7 +1282,7 @@ describe('modules/platform/forgejo/index', () => {
           state: 'all',
           sort: 'recentupdate',
           limit: 100,
-          poster: mockUser.username,
+          poster: mockUser.login,
         })
         .reply(200, mockPRs.slice(0, 2), {
           // test correct pagination handling, domain should be ignored
@@ -1824,7 +1824,7 @@ describe('modules/platform/forgejo/index', () => {
       const scope = httpMock
         .scope('https://code.forgejo.org/api/v1')
         .post('/repos/some/repo/pulls')
-        .reply(200, { ...mockNewPR, user: { username: 'not-the-bot' } });
+        .reply(200, { ...mockNewPR, user: { login: 'not-the-bot' } });
       await initFakePlatform(scope);
       await initFakeRepo(scope);
 
