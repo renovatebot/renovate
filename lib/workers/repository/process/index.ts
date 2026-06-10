@@ -67,7 +67,7 @@ export async function getBaseBranchConfig(
     }
 
     baseBranchConfig = await migrateAndValidate(config, baseBranchConfig);
-    if (baseBranchConfig.errors.length) {
+    if (baseBranchConfig.errors?.length) {
       const error = new Error(CONFIG_VALIDATION);
       error.validationSource = configFileName;
       error.validationError = `The renovate configuration file of branch ${baseBranch} contains some invalid settings`;
@@ -135,7 +135,7 @@ export async function getBaseBranchConfig(
             config,
             parseResult.parsedContents as RenovateConfig,
           );
-          if (migratedConfig.errors.length) {
+          if (migratedConfig.errors?.length) {
             logger.warn(
               { baseBranch, errors: migratedConfig.errors },
               'Branch-specific config has validation errors, using default branch config',
