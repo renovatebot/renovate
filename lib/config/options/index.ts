@@ -126,6 +126,7 @@ const options: Readonly<RenovateOptions>[] = [
     subType: 'string',
     default: [],
     globalOnly: true,
+    patternMatch: true,
   },
   {
     name: 'bumpVersions',
@@ -145,6 +146,7 @@ const options: Readonly<RenovateOptions>[] = [
     type: 'string',
     parents: ['bumpVersions'],
     allowedValues: ['major', 'minor', 'patch', 'sync'],
+    supportsTemplating: true,
   },
   {
     name: 'filePatterns',
@@ -678,7 +680,7 @@ const options: Readonly<RenovateOptions>[] = [
     description:
       'Change this value to override the default Renovate sidecar image.',
     type: 'string',
-    default: 'ghcr.io/renovatebot/base-image:13.56.2',
+    default: 'ghcr.io/renovatebot/base-image:13.58.0',
     globalOnly: true,
     deprecationMsg:
       'The usage of `binarySource=docker` is deprecated, and will be removed in the future',
@@ -1174,6 +1176,7 @@ const options: Readonly<RenovateOptions>[] = [
     allowString: true,
     default: null,
     globalOnly: true,
+    patternMatch: true,
   },
   {
     name: 'autodiscoverNamespaces',
@@ -1234,6 +1237,7 @@ const options: Readonly<RenovateOptions>[] = [
     subType: 'string',
     stage: 'package',
     cli: false,
+    patternMatch: true,
   },
   {
     name: 'useBaseBranchConfig',
@@ -1298,6 +1302,7 @@ const options: Readonly<RenovateOptions>[] = [
     subType: 'string',
     stage: 'repository',
     default: [],
+    patternMatch: true,
   },
   {
     name: 'ignorePaths',
@@ -1308,6 +1313,7 @@ const options: Readonly<RenovateOptions>[] = [
     subType: 'string',
     stage: 'repository',
     default: ['**/node_modules/**', '**/bower_components/**'],
+    patternMatch: true,
   },
   {
     name: 'excludeCommitPaths',
@@ -1317,6 +1323,7 @@ const options: Readonly<RenovateOptions>[] = [
     subType: 'string',
     default: [],
     advancedUse: true,
+    patternMatch: true,
   },
   {
     name: 'executionTimeout',
@@ -1478,6 +1485,7 @@ const options: Readonly<RenovateOptions>[] = [
     mergeable: true,
     cli: false,
     env: false,
+    patternMatch: true,
   },
   {
     name: 'matchRepositories',
@@ -1505,6 +1513,7 @@ const options: Readonly<RenovateOptions>[] = [
     mergeable: true,
     cli: false,
     env: false,
+    patternMatch: true,
   },
   {
     name: 'matchManagers',
@@ -1532,6 +1541,7 @@ const options: Readonly<RenovateOptions>[] = [
     mergeable: true,
     cli: false,
     env: false,
+    patternMatch: true,
   },
   {
     name: 'matchDepTypes',
@@ -1545,6 +1555,7 @@ const options: Readonly<RenovateOptions>[] = [
     mergeable: true,
     cli: false,
     env: false,
+    patternMatch: true,
   },
   {
     name: 'matchPackageNames',
@@ -1558,6 +1569,7 @@ const options: Readonly<RenovateOptions>[] = [
     mergeable: true,
     cli: false,
     env: false,
+    patternMatch: true,
   },
   {
     name: 'matchDepNames',
@@ -1571,6 +1583,7 @@ const options: Readonly<RenovateOptions>[] = [
     mergeable: true,
     cli: false,
     env: false,
+    patternMatch: true,
   },
   {
     name: 'matchCurrentValue',
@@ -1582,6 +1595,7 @@ const options: Readonly<RenovateOptions>[] = [
     mergeable: true,
     cli: false,
     env: false,
+    patternMatch: true,
   },
   {
     name: 'matchCurrentVersion',
@@ -1604,6 +1618,7 @@ const options: Readonly<RenovateOptions>[] = [
     mergeable: true,
     cli: false,
     env: false,
+    patternMatch: true,
   },
   {
     name: 'sourceUrl',
@@ -1636,6 +1651,7 @@ const options: Readonly<RenovateOptions>[] = [
     mergeable: true,
     cli: false,
     env: false,
+    patternMatch: true,
   },
   {
     name: 'matchRegistryUrls',
@@ -1748,17 +1764,19 @@ const options: Readonly<RenovateOptions>[] = [
     mergeable: true,
     cli: false,
     env: false,
+    patternMatch: true,
   },
   {
     name: 'matchFileNames',
     description:
-      'List of strings to do an exact match against package and lock files with full path. Only works inside a `packageRules` object.',
+      'List of patterns to match against package and lock file paths. Valid only within a `packageRules` object.',
     type: 'array',
     subType: 'string',
     stage: 'repository',
     parents: ['packageRules'],
     cli: false,
     env: false,
+    patternMatch: true,
   },
   {
     name: 'matchJsonata',
@@ -2540,7 +2558,6 @@ const options: Readonly<RenovateOptions>[] = [
     default: {
       enabled: false,
       recreateWhen: 'always',
-      rebaseStalePrs: true,
       branchTopic: 'lock-file-maintenance',
       commitMessageAction: 'Lock file maintenance',
       commitMessageTopic: null,
@@ -3322,6 +3339,7 @@ const options: Readonly<RenovateOptions>[] = [
       'forgejo',
       'gerrit',
       'gitea',
+      'github',
       'gitlab',
       'scm-manager',
     ],
