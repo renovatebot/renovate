@@ -1,3 +1,5 @@
+import type { AutomergeType } from '../config/allowed-values.generated.ts';
+
 export type {
   MergeStrategy,
   RenovateSplit,
@@ -23,7 +25,7 @@ export type { PrState } from './pr-state.ts';
 export type { SkipReason, StageName } from './skip-reason.ts';
 export type { RangeStrategy } from './versioning.ts';
 
-export type AutoMergeType = 'branch' | 'pr' | 'pr-comment';
+export type AutoMergeType = AutomergeType;
 
 type Val = NonNullable<unknown>;
 

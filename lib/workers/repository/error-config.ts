@@ -1,4 +1,5 @@
 // TODO #22198
+import type { SuppressNotification } from '../../config/allowed-values.generated.ts';
 import { GlobalConfig } from '../../config/global.ts';
 import type { RenovateConfig } from '../../config/types.ts';
 import { logger } from '../../logger/index.ts';
@@ -30,7 +31,7 @@ export function raiseCredentialsWarningIssue(
 
 async function raiseWarningIssue(
   config: RenovateConfig,
-  notificationName: string,
+  notificationName: SuppressNotification,
   title: string,
   initialBody: string,
   error: Error,

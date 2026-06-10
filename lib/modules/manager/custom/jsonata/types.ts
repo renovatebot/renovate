@@ -1,3 +1,4 @@
+import type { FileFormat } from '../../../../config/allowed-values.generated.ts';
 import type { ExtractConfig } from '../../types.ts';
 
 export interface JSONataManagerTemplates {
@@ -13,12 +14,12 @@ export interface JSONataManagerTemplates {
 }
 
 export interface JSONataManagerConfig extends JSONataManagerTemplates {
-  fileFormat: string;
+  fileFormat: FileFormat;
   matchStrings: string[];
 }
 
 export interface JsonataExtractConfig
   extends ExtractConfig, JSONataManagerTemplates {
-  fileFormat: string;
+  fileFormat: FileFormat;
   matchStrings: string[];
 }

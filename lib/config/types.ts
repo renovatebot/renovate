@@ -23,6 +23,37 @@ import type {
 import type { GitNoVerifyOption } from '../util/git/types.ts';
 import type { MergeConfidence } from '../util/merge-confidence/types.ts';
 import type { Timestamp } from '../util/timestamp.ts';
+import type {
+  AllowedUnsafeExecution,
+  AutomergeStrategy,
+  BinarySource,
+  BumpType,
+  CommitMessageLowerCase,
+  ConstraintsFiltering,
+  DependencyDashboardOSVVulnerabilitySummary,
+  DryRun,
+  ExecutionMode,
+  FetchChangeLogs,
+  ForkProcessing,
+  InternalChecksFilter,
+  MatchStringsStrategy,
+  MatchUpdateType,
+  MergeConfidenceDatasource,
+  MinimumReleaseAgeBehaviour,
+  Mode,
+  OnboardingNoDeps,
+  PlatformCommit,
+  PostUpdateOption,
+  PrCreation,
+  RebaseWhen,
+  RecreateWhen,
+  ReportType,
+  RepositoryCache,
+  RequireConfig,
+  SemanticCommits,
+  SuppressNotification,
+  UseBaseBranchConfig,
+} from './allowed-values.generated.ts';
 
 export type RenovateConfigStage =
   | 'global'
@@ -39,20 +70,18 @@ export type RenovateSplit =
   | 'lookup'
   | 'update';
 
-export type RepositoryCacheConfig = 'disabled' | 'enabled' | 'reset';
+export type RepositoryCacheConfig = RepositoryCache;
 export type RepositoryCacheType = 'local' | (string & {});
-export type DryRunConfig = 'extract' | 'lookup' | 'full';
-export type RequiredConfig = 'required' | 'optional' | 'ignored';
+export type DryRunConfig = DryRun;
+export type RequiredConfig = RequireConfig;
 
 export interface GroupConfig extends Record<string, unknown> {
   branchName?: string;
   branchTopic?: string;
 }
 
-export type RecreateWhen = 'auto' | 'never' | 'always';
-export type PlatformCommitOptions = 'auto' | 'disabled' | 'enabled';
-
-export type BinarySource = 'docker' | 'global' | 'install' | 'hermit';
+export type PlatformCommitOptions = PlatformCommit;
+export type { BinarySource, RecreateWhen };
 
 // TODO: Proper typings
 /**
@@ -87,7 +116,7 @@ export interface RenovateSharedConfig {
   commitMessage?: string;
   commitMessageAction?: string;
   commitMessageExtra?: string;
-  commitMessageLowerCase?: 'auto' | 'never';
+  commitMessageLowerCase?: CommitMessageLowerCase;
   commitMessagePrefix?: string;
   commitMessageTopic?: string;
   confidential?: boolean;
@@ -115,7 +144,7 @@ export interface RenovateSharedConfig {
   ignoreUnstable?: boolean;
   includePaths?: string[];
   internalChecksAsSuccess?: boolean;
-  internalChecksFilter?: 'strict' | 'flexible' | 'none';
+  internalChecksFilter?: InternalChecksFilter;
   keepUpdatedLabel?: string;
   labels?: string[];
   manager?: string;
@@ -133,7 +162,7 @@ export interface RenovateSharedConfig {
   prBodyDefinitions?: Record<string, string>;
   prBodyHeadingDefinitions?: Record<string, string>;
   prBodyNotes?: string[];
-  prCreation?: 'immediate' | 'not-pending' | 'status-success' | 'approval';
+  prCreation?: PrCreation;
   prFooter?: string;
   prHeader?: string;
   prPriority?: number;
@@ -143,7 +172,7 @@ export interface RenovateSharedConfig {
   pruneBranchAfterAutomerge?: boolean;
   rangeStrategy?: RangeStrategy;
   rebaseLabel?: string;
-  rebaseWhen?: string;
+  rebaseWhen?: RebaseWhen;
   recreateClosed?: boolean;
   recreateWhen?: RecreateWhen;
   repository?: string;
@@ -154,14 +183,14 @@ export interface RenovateSharedConfig {
   schedule?: string[];
   semanticCommitScope?: string | null;
   semanticCommitType?: string;
-  semanticCommits?: 'auto' | 'enabled' | 'disabled';
+  semanticCommits?: SemanticCommits;
   separateMajorMinor?: boolean;
   separateMinorPatch?: boolean;
   separateMultipleMajor?: boolean;
   separateMultipleMinor?: boolean;
   skipArtifactsUpdate?: boolean;
   stopUpdatingLabel?: string;
-  suppressNotifications?: string[];
+  suppressNotifications?: SuppressNotification[];
   timezone?: string;
   unicodeEmoji?: boolean;
   updateNotScheduled?: boolean;
@@ -181,7 +210,7 @@ export interface GlobalInheritableConfig {
   onboardingCommitMessage?: string;
   onboardingConfig?: RenovateConfig;
   onboardingConfigFileName?: string;
-  onboardingNoDeps?: 'auto' | 'enabled' | 'disabled';
+  onboardingNoDeps?: OnboardingNoDeps;
   onboardingPrTitle?: string;
   requireConfig?: RequiredConfig;
 }
@@ -206,7 +235,7 @@ export interface GlobalOnlyConfigLegacy {
   gitPrivateKey?: string;
   gitPrivateKeyPassphrase?: string;
   globalExtends?: string[];
-  mergeConfidenceDatasources?: string[];
+  mergeConfidenceDatasources?: MergeConfidenceDatasource[];
   mergeConfidenceEndpoint?: string;
   platform?: PlatformId;
   processEnv?: Record<string, string>;
@@ -290,7 +319,7 @@ export interface LegacyAdminConfig {
 
   onboarding?: boolean;
   onboardingBranch?: string;
-  onboardingNoDeps?: 'auto' | 'enabled' | 'disabled';
+  onboardingNoDeps?: OnboardingNoDeps;
   onboardingRebaseCheckbox?: boolean;
   onboardingConfig?: RenovateConfig;
   onboardingConfigFileName?: string;
@@ -308,7 +337,7 @@ export interface LegacyAdminConfig {
   writeDiscoveredRepos?: string;
 }
 
-export type ExecutionMode = 'branch' | 'update';
+export type { ExecutionMode };
 
 export interface PostUpgradeTasks {
   commands?: string[];
@@ -329,11 +358,9 @@ export type RenovateRepository =
       repository: string;
     });
 
-export type UseBaseBranchConfigType = 'merge' | 'none';
-export type ConstraintsFilter = 'strict' | 'none';
-export type MinimumReleaseAgeBehaviour =
-  | 'timestamp-required'
-  | 'timestamp-optional';
+export type UseBaseBranchConfigType = UseBaseBranchConfig;
+export type ConstraintsFilter = ConstraintsFiltering;
+export type { MinimumReleaseAgeBehaviour };
 
 export const allowedStatusCheckStrings = [
   'minimumReleaseAge',
@@ -380,7 +407,7 @@ export interface RenovateConfig
   s3PathStyle?: boolean;
   reportFormatting?: boolean;
   reportPath?: string;
-  reportType?: 'logging' | 'file' | 's3' | null;
+  reportType?: ReportType | null;
   depName?: string;
   /** user configurable base branch patterns*/
   baseBranchPatterns?: string[];
@@ -394,7 +421,7 @@ export interface RenovateConfig
   detectGlobalManagerConfig?: boolean;
   errors?: ValidationMessage[];
   forkModeDisallowMaintainerEdits?: boolean;
-  forkProcessing?: 'auto' | 'enabled' | 'disabled';
+  forkProcessing?: ForkProcessing;
   forkToken?: string;
 
   gitAuthor?: string;
@@ -418,12 +445,12 @@ export interface RenovateConfig
   dependencyDashboardHeader?: string;
   dependencyDashboardFooter?: string;
   dependencyDashboardLabels?: string[];
-  dependencyDashboardOSVVulnerabilitySummary?: 'none' | 'all' | 'unresolved';
+  dependencyDashboardOSVVulnerabilitySummary?: DependencyDashboardOSVVulnerabilitySummary;
   dependencyDashboardReportAbandonment?: boolean;
-  mode?: 'silent' | 'full';
+  mode?: Mode;
   packageFile?: string;
   packageRules?: PackageRule[];
-  postUpdateOptions?: string[];
+  postUpdateOptions?: PostUpdateOption[];
   branchConcurrentLimit?: number | null;
   parentOrg?: string;
   prConcurrentLimit?: number;
@@ -530,18 +557,7 @@ export interface AssigneesAndReviewersConfig {
   filterUnavailableUsers?: boolean;
 }
 
-export type UpdateType =
-  | 'major'
-  | 'minor'
-  | 'patch'
-  | 'pin'
-  | 'digest'
-  | 'pinDigest'
-  | 'lockFileMaintenance'
-  | 'lockfileUpdate'
-  | 'rollback'
-  | 'bump'
-  | 'replacement';
+export type UpdateType = MatchUpdateType;
 
 // These are the update types which can have configuration
 export const UpdateTypesOptions = [
@@ -549,33 +565,22 @@ export const UpdateTypesOptions = [
   'minor',
   'patch',
   'pin',
-  'digest',
   'pinDigest',
+  'digest',
   'lockFileMaintenance',
   'rollback',
   'replacement',
-] as const;
+] as const satisfies readonly Exclude<MatchUpdateType, 'bump'>[];
 
 export type UpdateTypeOptions = (typeof UpdateTypesOptions)[number];
 
-export type FetchChangeLogsOptions = 'off' | 'branch' | 'pr';
+export type FetchChangeLogsOptions = FetchChangeLogs;
 
-export type MatchStringsStrategy = 'any' | 'recursive' | 'combination';
+export type { MatchStringsStrategy };
 
-export type MergeStrategy =
-  | 'auto'
-  | 'fast-forward'
-  | 'merge-commit'
-  | 'rebase'
-  | 'rebase-merge'
-  | 'squash';
+export type MergeStrategy = AutomergeStrategy;
 
-// This list should be added to as any new unsafe execution commands should be permitted
-export type AllowedUnsafeExecution =
-  | 'bazelModDeps'
-  | 'goGenerate'
-  | 'gradleWrapper'
-  | 'mise';
+export type { AllowedUnsafeExecution };
 
 // TODO: Proper typings
 export interface PackageRule
@@ -833,7 +838,7 @@ export interface ValidationResult {
 }
 
 export interface BumpVersionConfig {
-  bumpType?: string;
+  bumpType?: BumpType;
   filePatterns: string[];
   matchStrings: string[];
   name?: string;
