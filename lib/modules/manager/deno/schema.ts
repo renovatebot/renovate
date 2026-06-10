@@ -1,5 +1,5 @@
 import validateNpmPackageName from 'validate-npm-package-name';
-import { z } from 'zod/v3';
+import { z } from 'zod/v4';
 import { regEx } from '../../../util/regex.ts';
 import {
   Json,
@@ -247,9 +247,9 @@ const DenoPackageFile = z
     lock: z.optional(Lock),
     workspace: z.optional(Workspace),
     importMap: z.string().optional(),
-    imports: z.optional(Imports).default({}),
-    scopes: z.optional(Scopes).default({}),
-    tasks: z.optional(Tasks).default({}),
+    imports: z.optional(Imports).default([]),
+    scopes: z.optional(Scopes).default([]),
+    tasks: z.optional(Tasks).default([]),
     compilerOptions: z
       .optional(
         z.object({
@@ -258,8 +258,8 @@ const DenoPackageFile = z
           jsxImportSourceTypes: CompilerOptionsJsxImportSourceTypes,
         }),
       )
-      .default({}),
-    lint: z.optional(Lint).default({}),
+      .default({ types: [], jsxImportSource: [], jsxImportSourceTypes: [] }),
+    lint: z.optional(Lint).default([]),
   })
   .transform(
     ({
@@ -297,8 +297,8 @@ export type DenoExtract = z.infer<typeof DenoExtract>;
 
 export const ImportMapExtract = Json.pipe(
   z.object({
-    imports: z.optional(Imports).default({}),
-    scopes: z.optional(Scopes).default({}),
+    imports: z.optional(Imports).default([]),
+    scopes: z.optional(Scopes).default([]),
   }),
 ).transform(({ imports, scopes }) => ({
   dependencies: [...imports, ...scopes],

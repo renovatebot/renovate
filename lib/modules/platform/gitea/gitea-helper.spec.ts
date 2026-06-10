@@ -57,14 +57,14 @@ describe('modules/platform/gitea/gitea-helper', () => {
 
   const mockUser: User = {
     id: 1,
-    username: 'admin',
+    login: 'admin',
     full_name: 'The Administrator',
     email: 'admin@example.com',
   };
 
   const otherMockUser: User & Required<Pick<User, 'full_name'>> = {
     ...mockUser,
-    username: 'renovate',
+    login: 'renovate',
     full_name: 'Renovate Bot',
     email: 'renovate@example.com',
   };
@@ -166,7 +166,7 @@ describe('modules/platform/gitea/gitea-helper', () => {
     author: {
       name: otherMockUser.full_name,
       email: otherMockUser.email,
-      username: otherMockUser.username,
+      login: otherMockUser.login,
     },
   };
 
@@ -352,7 +352,7 @@ describe('modules/platform/gitea/gitea-helper', () => {
         body: mockPR.body,
         base: mockPR.base?.ref,
         head: mockPR.head?.label,
-        assignees: [mockUser.username],
+        assignees: [mockUser.login],
         labels: [mockLabel.id],
       });
       expect(res).toEqual(mockPR);
@@ -377,7 +377,7 @@ describe('modules/platform/gitea/gitea-helper', () => {
         state: 'closed',
         title: 'new-title',
         body: 'new-body',
-        assignees: [otherMockUser.username],
+        assignees: [otherMockUser.login],
         labels: [otherMockLabel.id],
       });
       expect(res).toEqual(updatedMockPR);
@@ -505,7 +505,7 @@ describe('modules/platform/gitea/gitea-helper', () => {
         state: mockIssue.state,
         title: mockIssue.title,
         body: mockIssue.body,
-        assignees: [mockUser.username],
+        assignees: [mockUser.login],
       });
       expect(res).toEqual(mockIssue);
     });
@@ -530,7 +530,7 @@ describe('modules/platform/gitea/gitea-helper', () => {
         state: 'closed',
         title: 'new-title',
         body: 'new-body',
-        assignees: [otherMockUser.username],
+        assignees: [otherMockUser.login],
       });
       expect(res).toEqual(updatedMockIssue);
     });
@@ -623,10 +623,10 @@ describe('modules/platform/gitea/gitea-helper', () => {
     it('should call /api/v1/orgs/[org]/labels endpoint', async () => {
       httpMock
         .scope(baseUrl)
-        .get(`/orgs/${mockRepo.owner.username}/labels`)
+        .get(`/orgs/${mockRepo.owner.login}/labels`)
         .reply(200, [mockLabel, otherMockLabel]);
 
-      const res = await getOrgLabels(mockRepo.owner.username);
+      const res = await getOrgLabels(mockRepo.owner.login);
       expect(res).toEqual([mockLabel, otherMockLabel]);
     });
   });

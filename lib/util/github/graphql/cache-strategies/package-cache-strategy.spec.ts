@@ -8,7 +8,7 @@ import type {
 } from '../types.ts';
 import { GithubGraphqlPackageCacheStrategy } from './package-cache-strategy.ts';
 
-const isoTs = (t: string) => (t.replace(' ', 'T') + ':00.000Z') as Timestamp;
+const isoTs = (t: string) => `${t.replace(' ', 'T')}:00.000Z` as Timestamp;
 
 const mockTime = (input: string): void => {
   const now = DateTime.fromISO(isoTs(input)).valueOf();

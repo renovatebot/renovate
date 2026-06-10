@@ -305,8 +305,12 @@ export async function lookupUpdates(
       let currentVersion: string;
       if (rangeStrategy === 'update-lockfile') {
         currentVersion = config.lockedVersion!;
-      } else if (allVersions.find((v) => v.version === compareValue)) {
-        currentVersion = compareValue!;
+      } else if (
+        compareValue &&
+        versioningApi.isSingleVersion(compareValue) &&
+        allVersions.find((v) => v.version === compareValue)
+      ) {
+        currentVersion = compareValue;
       }
       // TODO #22198
       currentVersion ??=
@@ -338,11 +342,18 @@ export async function lookupUpdates(
         return Result.ok(res);
       }
 
-      res.currentVersion = currentVersion!;
+      res.currentVersion = currentVersion;
+
+      // Use lockedVersion for the timestamp lookup when available, because
+      // res.currentVersion is later overwritten to lockedVersion (see below).
+      // Without this, strategies like "replace" would compute the timestamp
+      // for the highest satisfying version (e.g. 1.4.1) while the reported
+      // currentVersion ends up being the locked one (e.g. 1.0.0).
+      const versionForTimestamp = config.lockedVersion ?? currentVersion;
       const currentVersionTimestamp = await getTimestamp(
         config,
         allVersions,
-        currentVersion,
+        versionForTimestamp,
         versioningApi,
       );
 
@@ -778,9 +789,12 @@ export async function lookupUpdates(
 
     const release =
       res.updates.length > 0
-        ? dependency?.releases.find(
+        ? (dependency?.releases.find(
             (r) => r.version === res.updates[0].newValue,
-          )
+          ) ??
+          dependency?.releases.find(
+            (r) => r.version === res.updates[0].newVersion,
+          ))
         : null;
 
     if (release?.changelogContent) {

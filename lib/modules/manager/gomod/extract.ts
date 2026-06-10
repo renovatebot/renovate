@@ -11,12 +11,12 @@ function findMatchingModule(
   deps: PackageDependency[],
 ): PackageDependency | undefined {
   let bestMatch: PackageDependency | undefined;
-  const normalizedTool = tool.depName! + '/';
+  const normalizedTool = `${tool.depName!}/`;
 
   // Find the longest matching prefix for the tool within the dependencies
   for (const dep of deps) {
     if (
-      normalizedTool.startsWith(dep.depName! + '/') &&
+      normalizedTool.startsWith(`${dep.depName!}/`) &&
       dep.depName!.length > (bestMatch?.depName!.length ?? 0)
     ) {
       bestMatch = dep;
@@ -107,7 +107,9 @@ export function extractPackageFile(content: string): PackageFileContent | null {
   return packageFile;
 }
 
-function convertGoDirectiveToSemVerRange(goDirective: string | undefined):
+export function convertGoDirectiveToSemVerRange(
+  goDirective: string | undefined,
+):
   | {
       version: string;
       versioning: string;

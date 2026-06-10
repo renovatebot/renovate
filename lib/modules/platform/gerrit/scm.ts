@@ -1,5 +1,5 @@
+import { randomUUID } from 'node:crypto';
 import { isNonEmptyArray } from '@sindresorhus/is';
-import { randomUUID } from 'crypto';
 import { DateTime } from 'luxon';
 import { logger } from '../../../logger/index.ts';
 import * as git from '../../../util/git/index.ts';
@@ -259,5 +259,5 @@ export class GerritScm extends DefaultGitScm {
  * TODO: Gerrit don't accept longer Change-IDs (sha256), but what happens with this https://git-scm.com/docs/hash-function-transition/ ?
  */
 function generateChangeId(): string {
-  return 'I' + hash(randomUUID(), 'sha1');
+  return `I${hash(randomUUID(), 'sha1')}`;
 }

@@ -22,7 +22,7 @@ body:
     id: describe-proposed-changes
     attributes:
       label: Describe the proposed change(s).
-      description: 'Do not report any security concerns here. Email renovate-disclosure@mend.io instead.'
+      description: 'Do not report any security concerns here. See our [security policy](https://github.com/renovatebot/renovate/security/policy) for how to report an issue that may be security-related.'
     validations:
       required: true
 

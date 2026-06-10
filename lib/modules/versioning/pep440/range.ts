@@ -193,9 +193,7 @@ export function getNewValue({
       // Valid rangeStrategy values are: bump, extend, pin, replace.
       // https://docs.renovatebot.com/modules/versioning/#pep440-versioning
       logger.debug(
-        'Unsupported rangeStrategy: ' +
-          rangeStrategy +
-          '. Using "replace" instead.',
+        `Unsupported rangeStrategy: ${rangeStrategy}. Using "replace" instead.`,
       );
       return getNewValue({
         currentValue,
@@ -280,7 +278,7 @@ function handleLowerBound(range: Range, newVersion: string): string | null {
   if (['>', '>='].includes(range.operator)) {
     if (lte(newVersion, range.version)) {
       // this looks like a rollback
-      return '>=' + newVersion;
+      return `>=${newVersion}`;
     }
     // otherwise, treat it same as exclude
     return range.operator + range.version;
@@ -328,7 +326,7 @@ function updateRangeValue(
       newVersion,
       range.version,
     ).join('.');
-    return range.operator + futureVersion + '.*';
+    return `${range.operator}${futureVersion}.*`;
   }
   if (range.operator === '~=') {
     const baseVersion = coerceArray(parseVersion(range.version)?.release);
@@ -499,7 +497,7 @@ function handleReplaceStrategy(
     if (['>', '>='].includes(range.operator)) {
       if (lte(newVersion, range.version)) {
         // this looks like a rollback
-        return '>=' + newVersion;
+        return `>=${newVersion}`;
       }
       // update the lower bound to reflect the accepted new version
       const lowerBound = coerceArray(parseVersion(range.version)?.release);

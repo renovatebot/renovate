@@ -9,9 +9,6 @@ import type {
 import { GitDatasource } from './base.ts';
 import type { RawRefs } from './types.ts';
 
-// git will prompt for known hosts or passwords, unless we activate BatchMode
-process.env.GIT_SSH_COMMAND = 'ssh -o BatchMode=yes';
-
 export class GitRefsDatasource extends GitDatasource {
   static override readonly id = 'git-refs';
 

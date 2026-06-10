@@ -31,6 +31,10 @@ jobs:
        labels: ubuntu-20.04-16core
   test10:
       runs-on: abc-123
+  test11:
+      runs-on: windows-11-arm
+  test12:
+      runs-on: ubuntu-22.04-arm
 `;
 
 describe('modules/manager/github-actions/extract', () => {
@@ -142,6 +146,18 @@ describe('modules/manager/github-actions/extract', () => {
       GlobalConfig.set({
         platform: 'github',
         endpoint: 'https://api.github.com',
+      });
+      const res = extractPackageFile(
+        Fixtures.get('workflow_2.yml'),
+        'workflow_2.yml',
+      );
+      expect(res?.deps[0].registryUrls).toBeUndefined();
+    });
+
+    it('returns undefined registryUrls when endpoint is invalid URL', () => {
+      GlobalConfig.set({
+        platform: 'github',
+        endpoint: 'not-a-valid-url',
       });
       const res = extractPackageFile(
         Fixtures.get('workflow_2.yml'),
@@ -732,10 +748,26 @@ describe('modules/manager/github-actions/extract', () => {
           datasource: 'github-runners',
           autoReplaceStringTemplate: '{{depName}}-{{newValue}}',
         },
+        {
+          depName: 'windows',
+          currentValue: '11-arm',
+          replaceString: 'windows-11-arm',
+          depType: 'github-runner',
+          datasource: 'github-runners',
+          autoReplaceStringTemplate: '{{depName}}-{{newValue}}',
+        },
+        {
+          depName: 'ubuntu',
+          currentValue: '22.04-arm',
+          replaceString: 'ubuntu-22.04-arm',
+          depType: 'github-runner',
+          datasource: 'github-runners',
+          autoReplaceStringTemplate: '{{depName}}-{{newValue}}',
+        },
       ]);
       expect(
         res?.deps.filter((d) => d.datasource === 'github-runners'),
-      ).toHaveLength(7);
+      ).toHaveLength(9);
     });
 
     it('extracts x-version from actions/setup-x', () => {
@@ -1588,7 +1620,7 @@ describe('modules/manager/github-actions/extract', () => {
         {
           currentValue: 'v27.1.0',
           datasource: 'github-releases',
-          depName: 'docker/setup-docker-action',
+          depName: 'docker',
           depType: 'uses-with',
           packageName: 'moby/moby',
           extractVersion: '^docker-(?<version>.+)$',
