@@ -68,6 +68,38 @@ describe('modules/datasource/npm/schema', () => {
     });
   });
 
+  it('drops non-string `time` entries (e.g. Artifactory `unpublished: null`)', () => {
+    const result = NpmResponse.parse({
+      name: 'mypackage',
+      'dist-tags': { latest: '1.1.0' },
+      versions: { '1.0.0': {}, '1.1.0': {} },
+      time: {
+        unpublished: null,
+        created: '2026-01-22T23:58:45.285Z',
+        modified: '2026-06-02T00:59:50.138Z',
+        '1.0.0': '2026-01-23T01:23:37.982Z',
+        '1.1.0': '2026-04-15T18:50:36.431Z',
+      },
+    });
+    expect(result.time).toEqual({
+      created: '2026-01-22T23:58:45.285Z',
+      modified: '2026-06-02T00:59:50.138Z',
+      '1.0.0': '2026-01-23T01:23:37.982Z',
+      '1.1.0': '2026-04-15T18:50:36.431Z',
+    });
+  });
+
+  it('drops non-string `time` entries for the cached packument', () => {
+    const result = CachedPackument.parse({
+      time: {
+        unpublished: null,
+        '1.0.0': '2026-01-23T01:23:37.982Z',
+      },
+      versions: { '1.0.0': {} },
+    });
+    expect(result.time).toEqual({ '1.0.0': '2026-01-23T01:23:37.982Z' });
+  });
+
   describe('NpmResponseSchema', () => {
     it('parses a full npm registry response and preserves extra version fields', () => {
       const input = {
