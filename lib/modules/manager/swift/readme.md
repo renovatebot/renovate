@@ -24,7 +24,7 @@ Renovate recognizes the SE-0292 identity form alongside the URL form:
 
 Identity-form dependencies are resolved against the `swift-package-registry` datasource. Registry URLs are auto-discovered from `.swiftpm/configuration/registries.json` in the same directory as the `Package.swift`:
 
-```json
+```json {title="Example registries.json" configType=none}
 {
   "registries": {
     "[default]": { "url": "https://registry.example.com" }
