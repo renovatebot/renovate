@@ -55,6 +55,12 @@ describe('modules/manager/swift/registries-json', () => {
       });
     });
 
+    it('returns empty when the registries field is omitted', () => {
+      expect(parseRegistriesJson(JSON.stringify({ version: 1 }))).toEqual({
+        named: {},
+      });
+    });
+
     it('extracts default + named together', () => {
       const content = JSON.stringify({
         registries: {

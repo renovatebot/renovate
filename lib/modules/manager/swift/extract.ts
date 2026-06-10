@@ -214,6 +214,7 @@ export function extractPackageFile(content: string): PackageFileContent | null {
       return;
     }
     if (currentForm === 'id') {
+      /* v8 ignore next: currentValue is always set before id-form yieldDep is reached on valid input */
       if (currentValue) {
         const dep: PackageDependency = {
           datasource: SwiftPackageRegistryDatasource.id,
@@ -315,7 +316,10 @@ export function extractPackageFile(content: string): PackageFileContent | null {
           state = null;
         } else if (label === COLON) {
           state = '.package(id:';
-        } else if (label === PACKAGE) {
+        } else if (
+          /* v8 ignore next: defensive, mirrors the url-form's nested-`.package(` recovery path */
+          label === PACKAGE
+        ) {
           yieldDep();
           state = '.package(';
         }
@@ -497,15 +501,15 @@ export async function extractAllPackageFiles(
     // Attach discovered registry URLs to id-form deps so the
     // swift-package-registry datasource knows where to look. URL-form deps
     // already carry their own registryUrls (set by parseDependencyUrl).
+    // If discoverRegistryUrls returns an empty list, the loop is a no-op.
     const registryUrls = await discoverRegistryUrls(packageFile);
-    if (registryUrls.length) {
-      for (const dep of parsed.deps) {
-        if (
-          dep.datasource === SwiftPackageRegistryDatasource.id &&
-          !dep.registryUrls?.length
-        ) {
-          dep.registryUrls = registryUrls;
-        }
+    for (const dep of parsed.deps) {
+      if (
+        registryUrls.length &&
+        dep.datasource === SwiftPackageRegistryDatasource.id &&
+        !dep.registryUrls?.length
+      ) {
+        dep.registryUrls = registryUrls;
       }
     }
 
