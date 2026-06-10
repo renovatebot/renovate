@@ -7,12 +7,8 @@ import { regEx } from '../../../util/regex.ts';
 import { joinUrlParts, parseUrl } from '../../../util/url.ts';
 import { hashBody } from '../pr-body.ts';
 import type { GitUrlOption, Pr } from '../types.ts';
-import type {
-  GerritChange,
-  GerritChangeStatus,
-  GerritLabelTypeInfo,
-  GerritRequestDetail,
-} from './types.ts';
+import type { GerritChange, GerritLabelTypeInfo } from './schema.ts';
+import type { GerritChangeStatus, GerritRequestDetail } from './types.ts';
 
 export const MIN_GERRIT_VERSION = '3.0.0';
 

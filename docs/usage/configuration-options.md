@@ -4007,6 +4007,11 @@ If enabled Renovate will pin Docker images or GitHub Actions by means of their S
   [GitHub docs, require status checks before merging](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/defining-the-mergeability-of-pull-requests/about-protected-branches#require-status-checks-before-merging)
   If you're using another platform, search their documentation for a similar feature.
 
+<!-- prettier-ignore -->
+!!! note
+  If you mark `renovate/artifacts` as a required status check in your branch protection rules, you must also set [`statusCheckWhen.artifactError`](#statuscheckwhen) to `"always"`.
+  The default `"failed"` only sets the check when artifact updates fail, so a required check rule would block every PR that has no artifact errors (the check would never appear). Setting it to `"always"` makes Renovate report green when there are no errors and red when there are, which is what branch protection requires.
+
 If you have enabled `automerge` and set `automergeType=pr` in the Renovate config, then leaving `platformAutomerge` as `true` speeds up merging via the platform's native automerge functionality.
 
 On Bitbucket Server, GitHub and GitLab, Renovate re-enables the PR for platform-native automerge whenever it's rebased.
@@ -4809,6 +4814,35 @@ This option is mergeable, which means you only have to specify the status checks
   "statusCheckNames": {
     "minimumReleaseAge": "custom/stability-days",
     "mergeConfidence": "custom/merge-confidence-level"
+  }
+}
+```
+
+## `statusCheckWhen`
+
+Control when each Renovate status check is set on branches.
+The keys match those available in [`statusCheckNames`](#statuschecknames).
+This option is mergeable, so you only need to specify the checks you want to change.
+
+Allowed values per key:
+
+- `always`: Renovate always sets the status check on every branch commit — green on success, red on failure.
+- `never`: Renovate never sets this status check. Use this to skip a check entirely.
+- `failed`: Renovate only sets the status check when there is a failure. Successes are silent (no green check).
+
+Default values:
+
+<!-- status-check-when-defaults-begin -->
+
+For example, to make `renovate/artifacts` a required check, set `artifactError` to `"always"` so it always reports green/red, allowing you to mark it as required in your branch protection rules.
+To skip a check entirely, set any key to `"never"` to suppress that status check.
+To only report failures for stability, set `minimumReleaseAge` to `"failed"` if you only care about the red/pending status.
+
+```json title="Example: always set artifacts check, skip merge confidence"
+{
+  "statusCheckWhen": {
+    "artifactError": "always",
+    "mergeConfidence": "never"
   }
 }
 ```
