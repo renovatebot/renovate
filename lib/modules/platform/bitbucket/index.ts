@@ -1,4 +1,5 @@
 import { isNonEmptyArray, isNonEmptyString } from '@sindresorhus/is';
+import type { JsonObject } from 'type-fest';
 import { GlobalConfig } from '../../../config/global.ts';
 import { REPOSITORY_NOT_FOUND } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
@@ -1209,11 +1210,14 @@ export async function updatePr({
 
   let updatedPrRes: PrResponse;
   try {
-    const body: any = {
+    const body: JsonObject = {
       title,
-      description: sanitize(description),
       reviewers: pr.reviewers,
     };
+    const sanitizedDesc = sanitize(description);
+    if (sanitizedDesc) {
+      body.description = sanitizedDesc;
+    }
     if (targetBranch) {
       body.destination = {
         branch: {
