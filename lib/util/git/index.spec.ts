@@ -398,6 +398,15 @@ describe('util/git/index', { timeout: 30000 }, () => {
       ).toBeFalse();
     });
 
+    it('should return false when author matches ignored regex', async () => {
+      git.setUserRepoConfig({
+        gitIgnoredAuthors: ['/^custom@e.+\\.com$/'],
+      });
+      expect(
+        await git.isBranchModified('renovate/custom_author', defaultBranch),
+      ).toBeFalse();
+    });
+
     it('should return true when non-ignored authors commit followed by an ignored author', async () => {
       git.setUserRepoConfig({
         gitIgnoredAuthors: ['author1@example.com'],

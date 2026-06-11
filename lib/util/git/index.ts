@@ -36,7 +36,7 @@ import { getEnv } from '../env.ts';
 import type { ExtraEnv } from '../exec/types.ts';
 import { getChildEnv } from '../exec/utils.ts';
 import { newlineRegex, regEx } from '../regex.ts';
-import { matchRegexOrGlobList } from '../string-match.ts';
+import { isRegexMatch, matchRegexOrGlobList } from '../string-match.ts';
 import { logWarningIfUnicodeHiddenCharactersInPackageFile } from '../unicode.ts';
 import { getGitEnvironmentVariables } from './auth.ts';
 import { parseGitAuthor } from './author.ts';
@@ -874,16 +874,15 @@ export async function isBranchModified(
   }
   const { gitAuthorEmail, ignoredAuthors } = config;
 
-  const includedAuthors = new Set(committedAuthors);
-
-  // v8 ignore else -- TODO: add test #40625
-  if (gitAuthorEmail) {
-    includedAuthors.delete(gitAuthorEmail);
-  }
-
-  for (const ignoredAuthor of ignoredAuthors) {
-    includedAuthors.delete(ignoredAuthor);
-  }
+  const includedAuthors = new Set(
+    [...committedAuthors].filter(
+      (committedAuthor) =>
+        committedAuthor !== gitAuthorEmail &&
+        !ignoredAuthors.some((ignoredAuthor) =>
+          matchesIgnoredAuthor(committedAuthor, ignoredAuthor),
+        ),
+    ),
+  );
 
   if (includedAuthors.size === 0) {
     // authors all match - branch has not been modified
@@ -921,6 +920,27 @@ export async function isBranchModified(
   config.branchIsModified[branchName] = true;
   setCachedModifiedResult(branchName, true);
   return true;
+}
+
+function matchesIgnoredAuthor(
+  committedAuthor: string,
+  ignoredAuthor: string,
+): boolean {
+  if (!isRegexMatch(ignoredAuthor)) {
+    return committedAuthor === ignoredAuthor;
+  }
+
+  const flags = ignoredAuthor.endsWith('/i') ? 'i' : '';
+  const pattern = ignoredAuthor.slice(
+    1,
+    ignoredAuthor.length - 1 - flags.length,
+  );
+
+  try {
+    return regEx(pattern, flags).test(committedAuthor);
+  } catch {
+    return false;
+  }
 }
 
 export async function isBranchConflicted(
