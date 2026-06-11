@@ -84,6 +84,13 @@ describe('modules/manager/vendir/extract', () => {
             packageName: 'test/test',
             datasource: 'github-releases',
           },
+          {
+            currentValue: 'latest',
+            packageName:
+              'https://raw.githubusercontent.com/mend/renovate-ce-ee/refs/heads/main/docs/openapi-community.yaml',
+            depType: 'HttpSource',
+            skipReason: 'unsupported-datasource',
+          },
         ],
       });
       // git-refs datasource does not support custom registries

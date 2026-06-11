@@ -216,16 +216,17 @@ const platform: Platform = {
       baseEndpoint = ensureTrailingSlash(baseEndpoint);
       defaults.endpoint = baseEndpoint;
     } else {
-      logger.debug('Using default Gitea endpoint: ' + defaults.endpoint);
+      logger.debug(`Using default Gitea endpoint: ${defaults.endpoint}`);
     }
     setBaseUrl(defaults.endpoint);
 
     let gitAuthor: string;
     try {
       const user = await helper.getCurrentUser({ token });
-      gitAuthor = `${user.full_name ?? user.username} <${user.email}>`;
+      // oxlint-disable-next-line typescript/prefer-nullish-coalescing -- `full_name` can be emtpy string
+      gitAuthor = `${user.full_name || user.login} <${user.email}>`;
       botUserID = user.id;
-      botUserName = user.username;
+      botUserName = user.login;
       const env = getEnv();
       /* v8 ignore next: experimental feature */
       if (semver.valid(env.RENOVATE_X_PLATFORM_VERSION)) {
@@ -288,7 +289,7 @@ const platform: Platform = {
     config.repository = repository;
     config.cloneSubmodules = !!cloneSubmodules;
     config.cloneSubmodulesFilter = cloneSubmodulesFilter;
-    config.ignorePrAuthor = GlobalConfig.get('ignorePrAuthor', false);
+    config.ignorePrAuthor = GlobalConfig.get('ignorePrAuthor');
 
     // Try to fetch information about repository
     try {
@@ -1085,7 +1086,7 @@ export function maxBodyLength(): number {
   return 1000000;
 }
 
-/* eslint-disable @typescript-eslint/unbound-method */
+/* oxlint-disable typescript/unbound-method */
 export const {
   addAssignees,
   addReviewers,

@@ -6,7 +6,7 @@ import * as _repositoryCache from '../../../util/cache/repository/index.ts';
 import type { BranchConfig } from '../../types.ts';
 import * as limits from './limits.ts';
 
-vi.mock('../../../util/cache/repository');
+vi.mock('../../../util/cache/repository/index.ts');
 const repositoryCache = vi.mocked(_repositoryCache);
 
 let config: RenovateConfig;

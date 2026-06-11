@@ -19,6 +19,7 @@ const adminConfig: RepoGlobalConfig = {
   cacheDir: upath.join('/tmp/cache'),
   containerbaseDir: upath.join('/tmp/cache/containerbase'),
   dockerSidecarImage: 'ghcr.io/renovatebot/base-image',
+  binarySource: 'global',
 };
 
 describe('modules/manager/conan/artifacts', () => {
@@ -337,7 +338,7 @@ describe('modules/manager/conan/artifacts', () => {
         config: { ...config, updateType: 'lockFileMaintenance' },
       }),
     ).toEqual([
-      { artifactError: { lockFile: 'conan.lock', stderr: errorMessage } },
+      { artifactError: { fileName: 'conan.lock', stderr: errorMessage } },
     ]);
   });
 });

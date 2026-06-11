@@ -27,7 +27,7 @@ export async function updateArtifacts(
     return [
       {
         artifactError: {
-          lockFile: `from: ${execErr.from}, to: ${execErr.to}`,
+          fileName: `from: ${execErr.from}, to: ${execErr.to}`,
           stderr: execErr.stderr,
         },
       },

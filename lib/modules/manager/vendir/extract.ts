@@ -12,17 +12,17 @@ import type {
   PackageFileContent,
 } from '../types.ts';
 import type {
-  GitRefDefinition,
-  GithubReleaseDefinition,
-  HelmChartDefinition,
-  VendirDefinition,
+  GitRef,
+  GithubRelease,
+  HelmChart,
+  HttpRelease,
 } from './schema.ts';
 import { Vendir } from './schema.ts';
 
 export function extractHelmChart(
-  helmChart: HelmChartDefinition,
+  helmChart: HelmChart,
   aliases?: Record<string, string>,
-): PackageDependency | null {
+): PackageDependency {
   if (isOCIRegistry(helmChart.repository.url)) {
     const dep = getDep(
       `${removeOCIPrefix(helmChart.repository.url)}/${helmChart.name}:${helmChart.version}`,
@@ -47,9 +47,7 @@ export function extractHelmChart(
   };
 }
 
-export function extractGitSource(
-  gitSource: GitRefDefinition,
-): PackageDependency | null {
+export function extractGitSource(gitSource: GitRef): PackageDependency {
   const httpUrl = getHttpUrl(gitSource.url);
   return {
     depName: httpUrl,
@@ -60,8 +58,8 @@ export function extractGitSource(
 }
 
 export function extractGithubReleaseSource(
-  githubRelease: GithubReleaseDefinition,
-): PackageDependency | null {
+  githubRelease: GithubRelease,
+): PackageDependency {
   return {
     depName: githubRelease.slug,
     packageName: githubRelease.slug,
@@ -71,10 +69,21 @@ export function extractGithubReleaseSource(
   };
 }
 
+export function extractHttpReleaseSource(
+  httpRelease: HttpRelease,
+): PackageDependency {
+  return {
+    packageName: httpRelease.url,
+    currentValue: 'latest',
+    depType: 'HttpSource',
+    skipReason: 'unsupported-datasource',
+  };
+}
+
 export function parseVendir(
   content: string,
   packageFile?: string,
-): VendirDefinition | null {
+): Vendir | null {
   try {
     return parseSingleYaml(content, {
       customSchema: Vendir,
@@ -102,21 +111,21 @@ export function extractPackageFile(
   // grab the helm charts
   const contents = pkg.directories.flatMap((directory) => directory.contents);
   for (const content of contents) {
+    // v8 ignore else -- hard to test
     if ('helmChart' in content && content.helmChart) {
       const dep = extractHelmChart(content.helmChart, config.registryAliases);
-      if (dep) {
-        deps.push(dep);
-      }
+      deps.push(dep);
     } else if ('git' in content && content.git) {
       const dep = extractGitSource(content.git);
-      if (dep) {
-        deps.push(dep);
-      }
+      deps.push(dep);
     } else if ('githubRelease' in content && content.githubRelease) {
       const dep = extractGithubReleaseSource(content.githubRelease);
-      if (dep) {
-        deps.push(dep);
-      }
+      deps.push(dep);
+    }
+    // v8 ignore else -- hard to test
+    else if ('http' in content && content.http) {
+      const dep = extractHttpReleaseSource(content.http);
+      deps.push(dep);
     }
   }
 

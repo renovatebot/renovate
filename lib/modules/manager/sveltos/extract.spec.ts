@@ -167,6 +167,36 @@ spec:
     chartName:        oci://custom-registry:443/charts/vault-sidecar
     chartVersion:     0.5.0
 `;
+const validClusterPromotion = codeBlock`
+---
+apiVersion: config.projectsveltos.io/v1beta1
+kind: ClusterPromotion
+metadata:
+  name: baseline
+spec:
+  profileSpec:
+    helmCharts:
+    - repositoryURL:    https://prometheus-community.github.io/helm-charts
+      repositoryName:   prometheus-community
+      chartName:        prometheus-community/prometheus
+      chartVersion:     "23.4.0"
+    - repositoryURL:    https://kyverno.github.io/kyverno/
+      repositoryName:   kyverno
+      chartName:        kyverno/kyverno
+      chartVersion:     "v3.2.5"
+---
+apiVersion: config.projectsveltos.io/v1beta1
+kind: ClusterPromotion
+metadata:
+  name: vault
+spec:
+  profileSpec:
+    helmCharts:
+    - repositoryURL:    oci://registry-1.docker.io/bitnamicharts/vault
+      repositoryName:   oci-vault
+      chartName:        oci://registry-1.docker.io/bitnamicharts/vault
+      chartVersion:     0.7.2
+`;
 const malformedProfiles = codeBlock`
 ---
 # malformed eventtrigger as the source is null
@@ -204,6 +234,20 @@ apiVersion: config.projectsveltos.io/v1beta1
 kind: Profile
 spec:
   helmCharts: null
+---
+# malformed clusterPromotion as the sources array is empty
+apiVersion: config.projectsveltos.io/v1beta1
+kind: ClusterPromotion
+spec:
+  profileSpec:
+    helmCharts: []
+---
+# malformed clusterPromotion as the source is null
+apiVersion: config.projectsveltos.io/v1beta1
+kind: ClusterPromotion
+spec:
+  profileSpec:
+    helmCharts: null
 `;
 const randomManifest = codeBlock`
 apiVersion: apps/v1
@@ -466,6 +510,42 @@ describe('modules/manager/sveltos/extract', () => {
             packageName: 'docker.proxy.test/some/path/bitnamicharts/vault',
             datasource: 'docker',
             depType: 'ClusterProfile',
+          },
+        ],
+      });
+    });
+
+    it('supports clusterpromotions', () => {
+      const result = extractPackageFile(
+        validClusterPromotion,
+        'clusterpromotions.yml',
+      );
+      expect(result).toEqual({
+        deps: [
+          {
+            currentValue: '23.4.0',
+            datasource: 'helm',
+            depType: 'ClusterPromotion',
+            depName: 'prometheus-community/prometheus',
+            packageName: 'prometheus',
+            registryUrls: [
+              'https://prometheus-community.github.io/helm-charts',
+            ],
+          },
+          {
+            currentValue: 'v3.2.5',
+            datasource: 'helm',
+            depType: 'ClusterPromotion',
+            depName: 'kyverno/kyverno',
+            packageName: 'kyverno',
+            registryUrls: ['https://kyverno.github.io/kyverno/'],
+          },
+          {
+            currentValue: '0.7.2',
+            datasource: 'docker',
+            depType: 'ClusterPromotion',
+            depName: 'oci://registry-1.docker.io/bitnamicharts/vault',
+            packageName: 'registry-1.docker.io/bitnamicharts/vault',
           },
         ],
       });

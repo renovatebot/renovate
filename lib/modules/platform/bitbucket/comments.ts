@@ -122,7 +122,7 @@ export async function ensureComment({
       await editComment(config, prNo, commentId, body);
       logger.debug({ repository: config.repository, prNo }, 'Comment updated');
     } else {
-      logger.debug('Comment is already update-to-date');
+      logger.debug('Comment is already up-to-date');
     }
     return true;
   } catch (err) /* v8 ignore next */ {

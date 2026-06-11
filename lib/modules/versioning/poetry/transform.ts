@@ -51,7 +51,7 @@ export function poetry2semver(
   // trim leading zeros from valid numbers
   const releaseParts = matchGroups.release
     .split('.')
-    .map((segment) => parseInt(segment));
+    .map((segment) => parseInt(segment, 10));
   while (padRelease && releaseParts.length < 3) {
     releaseParts.push(0);
   }
@@ -155,7 +155,7 @@ export function npm2poetry(range: string): string {
   const operators = ['^', '~', '=', '>', '<', '<=', '>='];
   for (let i = 0; i < res.length - 1; i += 1) {
     if (operators.includes(res[i])) {
-      const newValue = res[i] + ' ' + res[i + 1];
+      const newValue = `${res[i]} ${res[i + 1]}`;
       res.splice(i, 2, newValue);
     }
   }

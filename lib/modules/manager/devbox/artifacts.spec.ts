@@ -12,6 +12,7 @@ vi.mock('../../../util/fs/index.ts');
 
 const globalConfig: RepoGlobalConfig = {
   localDir: '',
+  binarySource: 'global',
 };
 
 const devboxJson = codeBlock`
@@ -468,7 +469,7 @@ describe('modules/manager/devbox/artifacts', () => {
       ).toEqual([
         {
           artifactError: {
-            lockFile: 'devbox.lock',
+            fileName: 'devbox.lock',
             stderr: "Cannot read properties of undefined (reading 'stdout')",
           },
         },

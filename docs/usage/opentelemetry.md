@@ -5,11 +5,10 @@ description: How to use OpenTelemetry with Renovate
 
 # OpenTelemetry and Renovate
 
-<!-- prettier-ignore -->
 !!! warning "This feature is flagged as experimental"
-    Experimental features might be changed at any time.
-    <br /> <br />
-    Renovate's OpenTelemetry support is stable enough to use in production, but there may be changes that rename attributes or fix bugs in a breaking, even in non-major version updates.
+  Experimental features might be changed at any time.
+  <br /> <br />
+  Renovate's OpenTelemetry support is stable enough to use in production, but there may be changes that rename attributes or fix bugs in a way that could be breaking to users, even in non-major version updates.
 
 Renovate supports the [OpenTelemetry](https://opentelemetry.io/) monitoring and observability standard.
 
@@ -19,11 +18,10 @@ OpenTelemetry has three types of observability data it supports within the OpenT
 - metrics
 - logs
 
-<!-- prettier-ignore -->
 !!! note
-    While the OpenTelemetry Protocol (OTLP) support traces, metrics, and logs, Renovate only supports traces, and some metrics.
-    <br /> <br />
-    This means Renovate does not support other observability data like: stats on caching, error events, number of found updates, and so on.
+  While the OpenTelemetry Protocol (OTLP) support traces, metrics, and logs, Renovate only supports traces, and some metrics.
+  <br /> <br />
+  This means Renovate does not support other observability data like: stats on caching, error events, number of found updates, and so on.
 
 Renovate uses [`@opentelemetry/exporter-trace-otlp-http`](https://www.npmjs.com/package/@opentelemetry/exporter-trace-otlp-http) under the hood.
 This means that Renovate sends traces via [OTLP/HTTP](https://opentelemetry.io/docs/reference/specification/protocol/otlp/#otlphttp) in JSON-encoded protobuf format only.
@@ -53,6 +51,18 @@ The following resource detectors are used:
 - `GcpDetector` from [@opentelemetry/resource-detector-gcp](https://www.npmjs.com/package/@opentelemetry/resource-detector-gcp) Users hosting on GCP
 - `AzureDetector` from [@opentelemetry/resource-detector-azure](https://www.npmjs.com/package/@opentelemetry/resource-detector-azure) Users hosting on Azure
 
+You can disable all cloud detectors by setting the `RENOVATE_USE_CLOUD_METADATA_SERVICES` environment variable to `false`.
+Then only the `EnvDetector` will be used.
+
+Additionally you can use `OTEL_NODE_RESOURCE_DETECTORS` environment variable to control which resource detectors are used.
+The default values is `all`, which means all of the above detectors are used. Set it to `none` to disable all detectors, or a comma-separated list of the following values to specify which detectors to use:
+
+- `aws`
+- `azure`
+- `gcp`
+- `github`
+- `env`
+
 ## Supported OTLP data
 
 ### Traces
@@ -65,6 +75,7 @@ Renovate provides instrumentation through traces for (non-exhaustively):
 - Any Git operations
 - Per-manager traces when performing the `lookup` and `extract` splits
 - Per-branch traces when performing the `update` split
+- Cache lifecycle operations (repository cache load/save, package cache init/destroy)
 - Important functions (more instrumentation be added)
 
 As well as following [OpenTelemetry's semantic conventions](https://opentelemetry.io/docs/specs/semconv/) where possible, Renovate defines several Custom Attributes, which can be found in [`lib/instrumentation/types.ts`](https://github.com/renovatebot/renovate/blob/main/lib/instrumentation/types.ts).
@@ -83,6 +94,8 @@ Renovate does not currently support logging in an OTLP format.
 
 To help you debug, you can print the telemetry to the console.
 Use the environment variable `RENOVATE_TRACING_CONSOLE_EXPORTER`.
+
+You can also set `OTEL_LOG_LEVEL` to control the log level of OpenTelemetry's internal [diagnostics](https://opentelemetry.io/docs/languages/js/getting-started/nodejs/#troubleshooting), which can be helpful for debugging.
 
 ## Help wanted
 

@@ -80,22 +80,41 @@ export function updateDependency({
     }
     let newLine: string;
     if (upgrade.updateType === 'digest') {
-      const newDigestRightSized = upgrade.newDigest!.substring(
-        0,
-        upgrade.currentDigest!.length,
-      );
-      if (lineToChange.includes(newDigestRightSized)) {
-        return fileContent;
+      // Since the 2024 goproxy datasource changes, newValue and newDigest are
+      // both extracted from the same proxy version string and always reference
+      // the same commit, so newValue can be written directly for pseudo-versions.
+      if (upgrade.newValue?.startsWith('v0.0.0-')) {
+        logger.debug(
+          { depName: currentName, lineToChange, newValue: upgrade.newValue },
+          'gomod: updating pseudo-version digest',
+        );
+        newLine = lineToChange.replace(
+          // TODO: can be undefined? (#22198)
+          updateLineExp!,
+          `$<depPart>$<divider>${upgrade.newValue}`,
+        );
+      } else {
+        // Defensive fallback for non-pseudo-version digest updates.
+        // Unreachable for gomod in practice: currentDigest is only extracted
+        // for pseudo-versions, and the gomod override in lookup/index.ts that
+        // sets updateType='digest' requires newValue to start with 'v0.0.0-'.
+        const newDigestRightSized = upgrade.newDigest!.substring(
+          0,
+          upgrade.currentDigest!.length,
+        );
+        if (lineToChange.includes(newDigestRightSized)) {
+          return fileContent;
+        }
+        logger.debug(
+          { depName: currentName, lineToChange, newDigestRightSized },
+          'gomod: need to update digest',
+        );
+        newLine = lineToChange.replace(
+          // TODO: can be undefined? (#22198)
+          updateLineExp!,
+          `$<depPart>$<divider>${newDigestRightSized}`,
+        );
       }
-      logger.debug(
-        { depName: currentName, lineToChange, newDigestRightSized },
-        'gomod: need to update digest',
-      );
-      newLine = lineToChange.replace(
-        // TODO: can be undefined? (#22198)
-        updateLineExp!,
-        `$<depPart>$<divider>${newDigestRightSized}`,
-      );
     } else {
       newLine = lineToChange.replace(
         // TODO: can be undefined? (#22198)
@@ -120,7 +139,7 @@ export function updateDependency({
       ) {
         if (currentName === currentNameNoVersion) {
           // If package currently has no version, pin to latest one.
-          newLine = newLine.replace(
+          newLine = newLine.replaceAll(
             currentName,
             `${currentName}/v${upgrade.newMajor}`,
           );

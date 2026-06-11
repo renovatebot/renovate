@@ -225,12 +225,31 @@ export async function doAutoReplace(
   if (reuseExistingBranch) {
     return await checkExistingBranch(upgrade, existingContent);
   }
-  const replaceWithoutReplaceString =
+  const valueChanging =
+    isString(currentValue) && isString(newValue) && currentValue !== newValue;
+  const digestChanging =
+    isString(currentDigest) &&
+    isString(newDigest) &&
+    currentDigest !== newDigest;
+  let replaceWithoutReplaceString =
     isString(newName) &&
     newName !== depName &&
     (isUndefined(upgrade.replaceString) ||
       !upgrade.replaceString?.includes(depName!));
-  const replaceString = upgrade.replaceString ?? currentValue ?? currentDigest;
+  // fallback must contain the field being updated, else the replacement is
+  // a no-op for managers where value and digest live in separate tokens
+  let replaceString = upgrade.replaceString;
+  if (isUndefined(replaceString)) {
+    if (valueChanging && digestChanging) {
+      // no single fallback covers both — use the per-field path
+      replaceWithoutReplaceString = true;
+      replaceString = currentValue;
+    } else if (digestChanging) {
+      replaceString = currentDigest;
+    } else {
+      replaceString = currentValue ?? currentDigest;
+    }
+  }
   logger.trace({ depName, replaceString }, 'autoReplace replaceString');
   let searchIndex: number;
   if (replaceWithoutReplaceString) {

@@ -9,6 +9,7 @@ describe('modules/manager/flux/artifacts', () => {
   beforeAll(() => {
     GlobalConfig.set({
       localDir: '',
+      binarySource: 'global',
     });
   });
 
@@ -141,7 +142,7 @@ describe('modules/manager/flux/artifacts', () => {
     expect(res).toStrictEqual([
       {
         artifactError: {
-          lockFile: 'clusters/my-cluster/flux-system/gotk-components.yaml',
+          fileName: 'clusters/my-cluster/flux-system/gotk-components.yaml',
           stderr: 'failed',
         },
       },
@@ -162,7 +163,7 @@ describe('modules/manager/flux/artifacts', () => {
     expect(res).toStrictEqual([
       {
         artifactError: {
-          lockFile: 'clusters/my-cluster/flux-system/gotk-components.yaml',
+          fileName: 'clusters/my-cluster/flux-system/gotk-components.yaml',
           stderr: 'Error',
         },
       },

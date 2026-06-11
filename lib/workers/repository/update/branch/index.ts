@@ -59,6 +59,12 @@ import { shouldReuseExistingBranch } from './reuse.ts';
 import { isScheduledNow } from './schedule.ts';
 import { setConfidence, setStability } from './status-checks.ts';
 
+async function setBranchStatusChecks(config: BranchConfig): Promise<void> {
+  await setArtifactErrorStatus(config);
+  await setStability(config);
+  await setConfidence(config);
+}
+
 async function rebaseCheck(
   config: RenovateConfig,
   branchPr: Pr,
@@ -621,6 +627,9 @@ export async function processBranch(
       config.artifactErrors = (config.artifactErrors ?? []).concat(
         additionalFiles.artifactErrors,
       );
+      config.artifactNotices = (config.artifactNotices ?? []).concat(
+        additionalFiles.artifactNotices ?? [],
+      );
       config.updatedArtifacts = (config.updatedArtifacts ?? []).concat(
         additionalFiles.updatedArtifacts,
       );
@@ -642,9 +651,11 @@ export async function processBranch(
       } else {
         logger.debug('No updated lock files in branch');
       }
-      if (config.fetchChangeLogs === 'branch') {
-        await embedChangelogs(config.upgrades);
-      }
+
+      await embedChangelogs({
+        upgrades: config.upgrades,
+        stage: 'branch',
+      });
 
       const postUpgradeCommandResults =
         await executePostUpgradeCommands(config);
@@ -662,7 +673,7 @@ export async function processBranch(
 
       if (config.artifactErrors?.length) {
         if (config.releaseTimestamp) {
-          logger.debug(`Branch timestamp: ` + config.releaseTimestamp);
+          logger.debug(`Branch timestamp: ${config.releaseTimestamp}`);
           const releaseTimestamp = DateTime.fromISO(config.releaseTimestamp);
           if (releaseTimestamp.plus({ hours: 2 }) < DateTime.local()) {
             logger.debug(
@@ -723,7 +734,7 @@ export async function processBranch(
           },
         )}`;
 
-        logger.trace(`commitMessage: ` + JSON.stringify(config.commitMessage));
+        logger.trace(`commitMessage: ${JSON.stringify(config.commitMessage)}`);
       }
 
       commitSha = await commitFilesToBranch(config);
@@ -765,11 +776,7 @@ export async function processBranch(
       const action = branchExists ? 'updated' : 'created';
       logger.info({ commitSha }, `Branch ${action}`);
     }
-    // Set branch statuses
-    await setArtifactErrorStatus(config);
-    await setStability(config);
-    await setConfidence(config);
-
+    await setBranchStatusChecks(config);
     // new commit means status check are pretty sure pending but maybe not reported yet
     // if PR has not been created + new commit + prCreation !== immediate skip
     // but do not break when there are artifact errors
@@ -797,7 +804,7 @@ export async function processBranch(
       logger.debug(`mergeStatus=${mergeStatus}`);
       if (mergeStatus === 'automerged') {
         if (GlobalConfig.get('dryRun')) {
-          logger.info('DRY-RUN: Would delete branch' + config.branchName);
+          logger.info(`DRY-RUN: Would delete branch${config.branchName}`);
         } else {
           await deleteBranchSilently(config.branchName);
         }
@@ -997,6 +1004,11 @@ export async function processBranch(
     if (ensurePrResult.type === 'with-pr') {
       const { pr } = ensurePrResult;
       branchPr = pr;
+      // Retry setting branch statuses after PR/MR creation so that
+      // platforms using MR pipelines (e.g. GitLab) have a pipeline to
+      // associate the status with. The earlier call may have been
+      // skipped if no pipeline existed yet.
+      await setBranchStatusChecks(config);
       if (config.artifactErrors?.length) {
         logger.warn(
           { artifactErrors: config.artifactErrors },
@@ -1023,7 +1035,7 @@ export async function processBranch(
         content += '\n\nThe artifact failure details are included below:\n\n';
         // TODO: types (#22198)
         config.artifactErrors.forEach((error) => {
-          content += `##### File name: ${error.lockFile!}\n\n`;
+          content += `##### File name: ${error.fileName!}\n\n`;
           content += `\`\`\`\n${error.stderr!}\n\`\`\`\n\n`;
         });
         content = platform.massageMarkdown(content, config.rebaseLabel);

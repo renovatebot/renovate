@@ -1,5 +1,4 @@
 import { isNonEmptyString, isString } from '@sindresorhus/is';
-import { parse } from 'auth-header';
 import {
   HOST_DISABLED,
   PAGE_NOT_FOUND_ERROR,
@@ -18,6 +17,8 @@ import type {
   HttpResponse,
   OutgoingHttpHeaders,
 } from '../../../util/http/types.ts';
+import type { ParamsChallenge } from '../../../util/http/www-authenticate.ts';
+import { BearerScheme, parse } from '../../../util/http/www-authenticate.ts';
 import { regEx } from '../../../util/regex.ts';
 import { addSecretForSanitizing } from '../../../util/sanitize.ts';
 import {
@@ -86,10 +87,6 @@ export async function getAuthHeaders(
       return null;
     }
 
-    const authenticateHeader = parse(
-      apiCheckResponse.headers['www-authenticate'],
-    );
-
     const rule = hostRules.find({
       hostType: dockerDatasourceId,
       url: apiCheckUrl,
@@ -149,15 +146,21 @@ export async function getAuthHeaders(
       opts.headers = { authorization: `${authType} ${rule.token}` };
     }
 
+    const challenges = parse(apiCheckResponse.headers['www-authenticate']);
+    const authenticateHeader = challenges.find(
+      (c): c is ParamsChallenge => c.scheme === BearerScheme,
+    );
+
     // If realm isn't an url, we should directly use auth header
     // Can happen when we get a Basic auth or some other auth type
     // * WWW-Authenticate: Basic realm="Artifactory Realm"
     // * Www-Authenticate: Basic realm="https://123456789.dkr.ecr.eu-central-1.amazonaws.com/",service="ecr.amazonaws.com"
     // * www-authenticate: Bearer realm="https://ghcr.io/token",service="ghcr.io",scope="repository:user/image:pull"
     // * www-authenticate: Bearer realm="https://auth.docker.io/token",service="registry.docker.io"
+    // * www-authenticate: Bearer realm="https://codeberg.org/v2/token",service="container_registry",scope="*",Basic realm="https://codeberg.org/v2",service="container_registry",scope="*"
     if (
-      authenticateHeader.scheme.toUpperCase() !== 'BEARER' ||
-      !isString(authenticateHeader.params.realm) ||
+      !authenticateHeader ||
+      !isString(authenticateHeader.params?.realm) ||
       parseUrl(authenticateHeader.params.realm) === null
     ) {
       logger.once.debug(`hostRules: testing direct auth for ${registryHost}`);
@@ -168,7 +171,8 @@ export async function getAuthHeaders(
       return opts.headers ?? null;
     }
 
-    const authUrl = new URL(`${authenticateHeader.params.realm}`);
+    // already guarded by above clause
+    const authUrl = parseUrl(`${authenticateHeader.params.realm}`)!;
 
     // repo isn't known to server yet, so causing wrong scope `repository:user/image:pull`
     if (
@@ -277,9 +281,12 @@ export function getRegistryRepository(
       }
       let dockerRepository = packageName.replace(registryEndingWithSlash, '');
       const fullUrl = `${registryHost}/${dockerRepository}`;
-      const { origin, pathname } = parseUrl(fullUrl)!;
-      registryHost = origin;
-      dockerRepository = pathname.substring(1);
+      const parsedFullUrl = parseUrl(fullUrl);
+      if (!parsedFullUrl) {
+        return { registryHost, dockerRepository };
+      }
+      registryHost = parsedFullUrl.origin;
+      dockerRepository = parsedFullUrl.pathname.substring(1);
       return {
         registryHost,
         dockerRepository,
@@ -318,7 +325,7 @@ export function getRegistryRepository(
     registryHost = registryHost.replace('https', 'http');
   }
   if (registryHost.endsWith('.docker.io') && !dockerRepository.includes('/')) {
-    dockerRepository = 'library/' + dockerRepository;
+    dockerRepository = `library/${dockerRepository}`;
   }
   return {
     registryHost,
@@ -329,7 +336,7 @@ export function getRegistryRepository(
 export function extractDigestFromResponseBody(
   manifestResponse: HttpResponse,
 ): string {
-  return 'sha256:' + toSha256(manifestResponse.body);
+  return `sha256:${toSha256(manifestResponse.body)}`;
 }
 
 export function findLatestStable(tags: string[]): string | null {

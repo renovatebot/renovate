@@ -2,26 +2,31 @@
 
 import 'source-map-support/register.js';
 import './punycode.cjs';
-import {
-  instrument,
-  shutdown as telemetryShutdown,
-} from './instrumentation/index.ts'; // has to be imported before logger and other libraries which are instrumentalised
-import { logger } from './logger/index.ts';
-import { bootstrap } from './proxy.ts';
-import { start } from './workers/global/index.ts';
-
-/* v8 ignore next 3 -- not easily testable */
-process.on('unhandledRejection', (err) => {
-  logger.error({ err }, 'unhandledRejection');
-});
-
-bootstrap();
 
 void (async (): Promise<void> => {
-  process.exitCode = await instrument('run', () => start());
-  await telemetryShutdown(); //gracefully shutdown OpenTelemetry
+  // ⚠️ Don't add code before this!
+  // This has to be imported before logger and other libraries which are instrumented.
+  const otel = await import('./instrumentation/index.ts');
+  otel.init();
+  (await import('./proxy.ts')).bootstrap();
 
-  /* v8 ignore next 3 -- no test required */
+  // prints and exits the process if --version or --help is passed
+  const { parseEarlyFlags } =
+    await import('./workers/global/config/parse/cli.ts');
+  parseEarlyFlags();
+
+  const logger = await import('./logger/index.ts');
+  /* v8 ignore next -- not easily testable */
+  process.on('unhandledRejection', (err) => {
+    logger.logger.error({ err }, 'unhandledRejection');
+  });
+  await logger.init();
+
+  const { start } = await import('./workers/global/index.ts');
+  process.exitCode = await otel.instrument('run', start);
+  await otel.shutdown(); //gracefully shutdown OpenTelemetry
+
+  /* v8 ignore if -- no test required */
   if (process.env.RENOVATE_X_HARD_EXIT) {
     process.exit(process.exitCode);
   }

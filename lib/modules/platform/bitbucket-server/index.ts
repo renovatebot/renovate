@@ -1,7 +1,7 @@
+import { setTimeout } from 'node:timers/promises';
 import { isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
 import ignore from 'ignore';
 import semver from 'semver';
-import { setTimeout } from 'timers/promises';
 import type { PartialDeep } from 'type-fest';
 import { GlobalConfig } from '../../../config/global.ts';
 import {
@@ -41,8 +41,10 @@ import type {
   Issue,
   MergePRConfig,
   PlatformParams,
+  PlatformPrOptions,
   PlatformResult,
   Pr,
+  ReattemptPlatformAutomergeConfig,
   RepoParams,
   RepoResult,
   UpdatePrConfig,
@@ -144,7 +146,7 @@ export async function initPlatform({
       );
       config.username = headers['x-ausername'];
     }
-    logger.debug('Bitbucket Server version is: ' + bitbucketServerVersion);
+    logger.debug(`Bitbucket Server version is: ${bitbucketServerVersion}`);
 
     // v8 ignore else -- TODO: add test #40625
     if (semver.valid(bitbucketServerVersion)) {
@@ -224,9 +226,7 @@ export async function getRawFile(
 ): Promise<string | null> {
   const repo = repoName ?? config.repository;
   const [project, slug] = repo.split('/');
-  const fileUrl =
-    `./rest/api/1.0/projects/${project}/repos/${slug}/browse/${fileName}?limit=20000` +
-    (branchOrTag ? '&at=' + branchOrTag : '');
+  const fileUrl = `./rest/api/1.0/projects/${project}/repos/${slug}/browse/${fileName}?limit=20000${branchOrTag ? `&at=${branchOrTag}` : ''}`;
   const res = await bitbucketServerHttp.getJsonUnchecked<FileData>(fileUrl);
   const { isLastPage, lines, size } = res.body;
   if (isLastPage) {
@@ -267,7 +267,7 @@ export async function initRepo({
     repository,
     prVersions: new Map<number, number>(),
     username: opts.username,
-    ignorePrAuthor: GlobalConfig.get('ignorePrAuthor', false),
+    ignorePrAuthor: GlobalConfig.get('ignorePrAuthor'),
   } as any;
 
   try {
@@ -457,7 +457,7 @@ export async function findPr({
   if (pr) {
     logger.debug(`Found PR #${pr.number}`);
   } else {
-    logger.debug(`Renovate did not find a PR for branch #${branchName}`);
+    logger.debug(`Renovate did not find a PR for branch ${branchName}`);
   }
   return pr ?? null;
 }
@@ -792,7 +792,15 @@ async function updatePRAndAddReviewers(
         const filteredReviewers = reviewers.filter(
           (name) => !invalidReviewers.includes(name),
         );
-        await updatePRAndAddReviewers(prNo, filteredReviewers);
+        if (filteredReviewers.length < reviewers.length) {
+          await updatePRAndAddReviewers(prNo, filteredReviewers);
+        } else {
+          logger.warn(
+            { invalidReviewers, reviewers },
+            'Could not filter invalid reviewers from list, aborting to prevent infinite recursion',
+          );
+          throw err;
+        }
       } else {
         logger.debug(
           '409 response to adding reviewers - has repository changed?',
@@ -954,7 +962,7 @@ export async function ensureComment({
         'Comment updated',
       );
     } else {
-      logger.debug('Comment is already update-to-date');
+      logger.debug('Comment is already up-to-date');
     }
     return true;
   } catch (err) /* v8 ignore next */ {
@@ -1081,11 +1089,28 @@ export async function createPr({
     pr,
   );
 
-  if (platformPrOptions?.usePlatformAutomerge) {
-    await tryPrAutomerge(pr.number, pr.version!);
-  }
+  await tryPrAutomerge(pr.number, pr.version!, platformPrOptions);
 
   return pr;
+}
+
+export async function reattemptPlatformAutomerge({
+  number,
+  platformPrOptions,
+}: ReattemptPlatformAutomergeConfig): Promise<void> {
+  logger.debug(`reattemptPlatformAutomerge(${number})`);
+
+  try {
+    const pr = await getPr(number, true);
+    if (!pr) {
+      throw new Error(REPOSITORY_NOT_FOUND);
+    }
+    await tryPrAutomerge(pr.number, pr.version!, platformPrOptions);
+
+    logger.debug(`PR platform automerge re-attempted...prNo: ${number}`);
+  } catch (err) {
+    logger.warn({ err }, 'Error re-attempting PR platform automerge');
+  }
 }
 
 export async function updatePr({
@@ -1234,8 +1259,13 @@ export async function mergePr({
 async function tryPrAutomerge(
   prNumber: number,
   prVersion: number,
+  platformPrOptions?: PlatformPrOptions,
 ): Promise<void> {
-  logger.debug(`automergePr(${prNumber})`);
+  if (!platformPrOptions?.usePlatformAutomerge) {
+    return;
+  }
+
+  logger.debug(`tryPrAutomerge(${prNumber})`);
 
   if (semver.lt(defaults.version, '8.15.0')) {
     logger.debug(

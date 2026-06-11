@@ -26,19 +26,19 @@ export function parseVersion(input: string): NugetVersion | null {
 
   const res: NugetVersion = {
     type: 'nuget-version',
-    major: Number.parseInt(major),
+    major: Number.parseInt(major, 10),
   };
 
   if (minor) {
-    res.minor = Number.parseInt(minor);
+    res.minor = Number.parseInt(minor, 10);
   }
 
   if (patch) {
-    res.patch = Number.parseInt(patch);
+    res.patch = Number.parseInt(patch, 10);
   }
 
   if (revision) {
-    res.revision = Number.parseInt(revision);
+    res.revision = Number.parseInt(revision, 10);
   }
 
   if (prerelease) {
@@ -58,7 +58,7 @@ const floatingRangeRegex = regEx(
 
 function parseFloatingComponent(input: string): number {
   const [int] = input.split('*');
-  return int ? 10 * Number.parseInt(int) : 0;
+  return int ? 10 * Number.parseInt(int, 10) : 0;
 }
 
 export function parseFloatingRange(input: string): NugetFloatingRange | null {
@@ -96,7 +96,7 @@ export function parseFloatingRange(input: string): NugetFloatingRange | null {
     };
   }
 
-  const majorNum = Number.parseInt(major);
+  const majorNum = Number.parseInt(major, 10);
   if (!Number.isNaN(majorNum)) {
     res = { ...res, major: majorNum };
   }
@@ -109,7 +109,7 @@ export function parseFloatingRange(input: string): NugetFloatingRange | null {
     };
   }
 
-  const minorNum = Number.parseInt(minor);
+  const minorNum = Number.parseInt(minor, 10);
   if (!Number.isNaN(minorNum)) {
     res = { ...res, minor: minorNum };
   }
@@ -122,7 +122,7 @@ export function parseFloatingRange(input: string): NugetFloatingRange | null {
     };
   }
 
-  const patchNum = Number.parseInt(patch);
+  const patchNum = Number.parseInt(patch, 10);
   if (!Number.isNaN(patchNum)) {
     res = { ...res, patch: patchNum };
   }
@@ -135,7 +135,7 @@ export function parseFloatingRange(input: string): NugetFloatingRange | null {
     };
   }
 
-  const revisionNum = Number.parseInt(revision);
+  const revisionNum = Number.parseInt(revision, 10);
   if (!Number.isNaN(revisionNum)) {
     res = { ...res, revision: revisionNum };
   }

@@ -24,7 +24,7 @@ describe('modules/manager/hermit/artifacts', () => {
       lstatsMock.mockResolvedValue(true);
 
       readlinkMock.mockResolvedValue('hermit');
-      GlobalConfig.set({ localDir: '' });
+      GlobalConfig.set({ localDir: '', binarySource: 'global' });
 
       const execSnapshots = mockExecAll();
       getRepoStatusMock.mockResolvedValue(
@@ -141,7 +141,7 @@ describe('modules/manager/hermit/artifacts', () => {
       lstatsMock.mockResolvedValue(true);
 
       readlinkMock.mockResolvedValue('hermit');
-      GlobalConfig.set({ localDir: '' });
+      GlobalConfig.set({ localDir: '', binarySource: 'global' });
 
       const execSnapshots = mockExecAll();
       getRepoStatusMock.mockResolvedValue(
@@ -247,7 +247,7 @@ describe('modules/manager/hermit/artifacts', () => {
       lstatsMock.mockResolvedValue(true);
 
       readlinkMock.mockResolvedValue('hermit');
-      GlobalConfig.set({ localDir: '' });
+      GlobalConfig.set({ localDir: '', binarySource: 'global' });
 
       const execSnapshots = mockExecAll();
       getRepoStatusMock.mockResolvedValue(
@@ -322,7 +322,7 @@ describe('modules/manager/hermit/artifacts', () => {
       lstatsMock.mockResolvedValue(true);
 
       readlinkMock.mockResolvedValue(null);
-      GlobalConfig.set({ localDir: '' });
+      GlobalConfig.set({ localDir: '', binarySource: 'global' });
 
       mockExecAll(
         new ExecError('', {
@@ -361,7 +361,7 @@ describe('modules/manager/hermit/artifacts', () => {
       expect(res).toEqual([
         {
           artifactError: {
-            lockFile: 'from: openjdk-17.0.3, to: openjdk',
+            fileName: 'from: openjdk-17.0.3, to: openjdk',
             stderr: 'error executing hermit uninstall',
           },
         },
@@ -372,7 +372,7 @@ describe('modules/manager/hermit/artifacts', () => {
       lstatsMock.mockResolvedValue(true);
 
       readlinkMock.mockResolvedValue(null);
-      GlobalConfig.set({ localDir: '' });
+      GlobalConfig.set({ localDir: '', binarySource: 'global' });
       mockExecAll();
 
       getRepoStatusMock.mockResolvedValue(
@@ -448,7 +448,7 @@ describe('modules/manager/hermit/artifacts', () => {
       expect(res).toStrictEqual([
         {
           artifactError: {
-            lockFile: 'from: go-1.17 jq-1.5, to: go-1.17.1 jq-1.6',
+            fileName: 'from: go-1.17 jq-1.5, to: go-1.17.1 jq-1.6',
             stderr: 'error executing hermit install',
           },
         },
@@ -471,7 +471,7 @@ describe('modules/manager/hermit/artifacts', () => {
       expect(res).toStrictEqual([
         {
           artifactError: {
-            lockFile: 'from: -1.17, to: -1.17.1',
+            fileName: 'from: -1.17, to: -1.17.1',
             stderr: `invalid package to update`,
           },
         },
@@ -492,7 +492,7 @@ describe('modules/manager/hermit/artifacts', () => {
       expect(res).toStrictEqual([
         {
           artifactError: {
-            lockFile: 'from: go-, to: go-1.17.1',
+            fileName: 'from: go-, to: go-1.17.1',
             stderr: `invalid package to update`,
           },
         },
@@ -513,7 +513,7 @@ describe('modules/manager/hermit/artifacts', () => {
       expect(res).toStrictEqual([
         {
           artifactError: {
-            lockFile: 'from: go-1.17, to: go-',
+            fileName: 'from: go-1.17, to: go-',
             stderr: `invalid package to update`,
           },
         },
@@ -524,7 +524,7 @@ describe('modules/manager/hermit/artifacts', () => {
       lstatsMock.mockResolvedValue(true);
 
       readlinkMock.mockResolvedValue('hermit');
-      GlobalConfig.set({ localDir: '' });
+      GlobalConfig.set({ localDir: '', binarySource: 'global' });
       const execSnapshots = mockExecAll();
       await updateArtifacts({
         updatedDeps: [

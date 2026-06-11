@@ -29,7 +29,7 @@ export class MergeConfidenceMatcher extends Matcher {
       error.validationSource = 'MatchConfidence Authenticator';
       error.validationError = 'Missing credentials';
       error.validationMessage =
-        'The `matchConfidence` matcher in `packageRules` requires authentication. Please refer to the [documentation](https://docs.renovatebot.com/configuration-options/#matchconfidence) and add the required host rule.';
+        'The `matchConfidence` matcher in `packageRules` requires authentication. Please refer to the [documentation](https://docs.renovatebot.com/configuration-options/#packagerulesmatchconfidence) and add the required host rule.';
       throw error;
     }
 

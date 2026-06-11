@@ -109,7 +109,7 @@ function compileCommitMessage(upgrade: BranchUpgradeConfig): string {
     upgrade.commitMessage = splitMessage.join('\n');
   }
 
-  logger.trace(`commitMessage: ` + JSON.stringify(upgrade.commitMessage));
+  logger.trace(`commitMessage: ${JSON.stringify(upgrade.commitMessage)}`);
   return upgrade.commitMessage;
 }
 
@@ -141,23 +141,28 @@ function compilePrTitle(
   if (!upgrade.prTitleStrict) {
     upgrade.prTitle += upgrade.hasBaseBranches ? ' ({{baseBranch}})' : '';
     if (upgrade.isGroup) {
-      upgrade.prTitle +=
-        upgrade.updateType === 'major' && upgrade.separateMajorMinor
-          ? ' (major)'
-          : '';
-      upgrade.prTitle +=
-        upgrade.updateType === 'minor' && upgrade.separateMinorPatch
-          ? ' (minor)'
-          : '';
-      upgrade.prTitle +=
-        upgrade.updateType === 'patch' && upgrade.separateMinorPatch
-          ? ' (patch)'
-          : '';
+      const hasVersionInTitle = !!semver.coerce(
+        template.compile(upgrade.commitMessageExtra ?? '', upgrade),
+      );
+      if (!hasVersionInTitle) {
+        upgrade.prTitle +=
+          upgrade.updateType === 'major' && upgrade.separateMajorMinor
+            ? ' (major)'
+            : '';
+        upgrade.prTitle +=
+          upgrade.updateType === 'minor' && upgrade.separateMinorPatch
+            ? ' (minor)'
+            : '';
+        upgrade.prTitle +=
+          upgrade.updateType === 'patch' && upgrade.separateMinorPatch
+            ? ' (patch)'
+            : '';
+      }
     }
   }
   // Compile again to allow for nested templates
   upgrade.prTitle = template.compile(upgrade.prTitle, upgrade);
-  logger.trace(`prTitle: ` + JSON.stringify(upgrade.prTitle));
+  logger.trace(`prTitle: ${JSON.stringify(upgrade.prTitle)}`);
 }
 
 function getMinimumGroupSize(upgrades: BranchUpgradeConfig[]): number {
@@ -270,7 +275,9 @@ export function generateBranchConfig(
   const typesGroup =
     depNames.length > 1 && !hasGroupName && isTypesGroup(branchUpgrades);
   logger.trace(`groupEligible: ${groupEligible}`);
-  const useGroupSettings = hasGroupName && groupEligible;
+  const useGroupSettings =
+    hasGroupName &&
+    (groupEligible || branchUpgrades[0].groupSingleUpdates === true);
   logger.trace(`useGroupSettings: ${useGroupSettings}`);
   let releaseTimestamp: Timestamp;
 
@@ -529,7 +536,7 @@ export function generateBranchConfig(
       seenRows.add(key);
       table.push(row);
     }
-    config.commitMessage += '\n\n' + markdownTable(table) + '\n';
+    config.commitMessage += `\n\n${markdownTable(table)}\n`;
   }
   const additionalReviewers = uniq(
     config.upgrades

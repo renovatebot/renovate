@@ -1,44 +1,46 @@
 import { isUndefined } from '@sindresorhus/is';
-import { z } from 'zod/v3';
+import { z } from 'zod/v4';
 import { logger } from '../../../logger/index.ts';
 import { LooseArray, LooseRecord } from '../../../util/schema-utils/index.ts';
 import { MaybeTimestamp } from '../../../util/timestamp.ts';
 import type { Release, ReleaseResult } from '../types.ts';
 
-export const MinifiedArray = z.array(z.record(z.unknown())).transform((xs) => {
-  // Ported from: https://github.com/composer/metadata-minifier/blob/main/src/MetadataMinifier.php#L17
-  if (xs.length === 0) {
+export const MinifiedArray = z
+  .array(z.record(z.string(), z.unknown()))
+  .transform((xs) => {
+    // Ported from: https://github.com/composer/metadata-minifier/blob/main/src/MetadataMinifier.php#L17
+    if (xs.length === 0) {
+      return xs;
+    }
+
+    const prevVals: Record<string, unknown> = {};
+    for (const x of xs) {
+      for (const key of Object.keys(x)) {
+        prevVals[key] ??= undefined;
+      }
+
+      for (const key of Object.keys(prevVals)) {
+        const val = x[key];
+        if (val === '__unset') {
+          delete x[key];
+          prevVals[key] = undefined;
+          continue;
+        }
+
+        if (!isUndefined(val)) {
+          prevVals[key] = val;
+          continue;
+        }
+
+        if (!isUndefined(prevVals[key])) {
+          x[key] = prevVals[key];
+          continue;
+        }
+      }
+    }
+
     return xs;
-  }
-
-  const prevVals: Record<string, unknown> = {};
-  for (const x of xs) {
-    for (const key of Object.keys(x)) {
-      prevVals[key] ??= undefined;
-    }
-
-    for (const key of Object.keys(prevVals)) {
-      const val = x[key];
-      if (val === '__unset') {
-        delete x[key];
-        prevVals[key] = undefined;
-        continue;
-      }
-
-      if (!isUndefined(val)) {
-        prevVals[key] = val;
-        continue;
-      }
-
-      if (!isUndefined(prevVals[key])) {
-        x[key] = prevVals[key];
-        continue;
-      }
-    }
-  }
-
-  return xs;
-});
+  });
 export type MinifiedArray = z.infer<typeof MinifiedArray>;
 
 export const ComposerRelease = z.object({
@@ -62,7 +64,7 @@ export const ComposerPackagesResponse = z
   .object({
     packageName: z.string(),
     packagesResponse: z.object({
-      packages: z.record(z.unknown()),
+      packages: z.record(z.string(), z.unknown()),
     }),
   })
   .transform(
@@ -190,7 +192,7 @@ export const PackagistFile = PackagesResponse.merge(
 export type PackagistFile = z.infer<typeof PackagistFile>;
 
 export const RegistryMeta = z
-  .record(z.unknown())
+  .record(z.string(), z.unknown())
   .catch({})
   .pipe(
     PackagistFile.merge(

@@ -1,6 +1,5 @@
 import type { Category } from '../../../constants/index.ts';
 import { MavenDatasource } from '../../datasource/maven/index.ts';
-import { id as versioning } from '../../versioning/maven/index.ts';
 
 export { updateArtifacts } from './artifacts.ts';
 export { extractPackageFile } from './extract.ts';
@@ -13,7 +12,6 @@ export const defaultConfig = {
     '/(^|\\/).mvn/wrapper/maven-wrapper.properties$/',
     '/(^|\\/)mvnw(.cmd)?$/',
   ],
-  versioning,
 };
 
 export const supportedDatasources = [MavenDatasource.id];

@@ -28,6 +28,7 @@ const adminConfig: RepoGlobalConfig = {
   localDir: upath.join('/tmp/github/some/repo'), // `join` fixes Windows CI
   cacheDir: upath.join('/tmp/renovate/cache'),
   containerbaseDir: upath.join('/tmp/renovate/cache/containerbase'),
+  binarySource: 'global',
 };
 
 const config: UpdateArtifactsConfig = {};
@@ -268,7 +269,7 @@ describe('modules/manager/helmv3/artifacts', () => {
     ).toMatchObject([
       {
         artifactError: {
-          lockFile: 'Chart.lock',
+          fileName: 'Chart.lock',
           stderr: 'not found',
         },
       },
@@ -1143,7 +1144,7 @@ describe('modules/manager/helmv3/artifacts', () => {
     const password = 'pass>word';
     mockEcrAuthResolve({
       authorizationData: [
-        { authorizationToken: toBase64(username + ':' + password) },
+        { authorizationToken: toBase64(`${username}:${password}`) },
       ],
     });
 

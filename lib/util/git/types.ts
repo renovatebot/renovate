@@ -90,8 +90,6 @@ export interface CommitFilesConfig {
   prTitle?: string;
   /** Only needed by Gerrit platform */
   autoApprove?: boolean;
-  /** Only needed by Gerrit platform */
-  labels?: string[];
 }
 
 export interface PushFilesConfig {
@@ -109,11 +107,30 @@ export interface CommitResult {
   files: FileChange[];
 }
 
-export interface TreeItem {
+export type GitObjectType = 'blob' | 'tree' | 'commit';
+
+/**
+ * Git tree entry modes (octal file-type representations).
+ * @see https://git-scm.com/docs/gitdatamodel
+ */
+export const GitTreeMode = {
+  /** Regular non-executable file */
+  RegularFile: '100644',
+  /** Regular executable file */
+  ExecutableFile: '100755',
+  /** Symbolic link */
+  SymbolicLink: '120000',
+  /** Directory / subtree */
+  Directory: '040000',
+  /** Gitlink (submodule) */
+  Gitlink: '160000',
+} as const;
+
+export interface DiffTreeItem {
   path: string;
   mode: string;
-  type: string;
-  sha: LongCommitSha;
+  type: GitObjectType;
+  sha: LongCommitSha | null;
 }
 
 /**

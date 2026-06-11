@@ -31,7 +31,7 @@ class AzureRestApiVersioningApi extends GenericVersioningApi {
     const { year, month, day, prerelease } = matchGroups;
 
     return {
-      release: [parseInt(`${year}${month}${day}`), 0, 0],
+      release: [parseInt(`${year}${month}${day}`, 10), 0, 0],
       prerelease,
     };
   }

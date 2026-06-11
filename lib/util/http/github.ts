@@ -338,7 +338,8 @@ export class GithubHttp extends HttpBase<GithubHttpOptions> {
     opts: InternalHttpOptions & GithubBaseHttpOptions,
   ): void {
     if (!opts.token) {
-      const authUrl = new URL(url);
+      // create a mutable copy of `url`
+      const authUrl = parseUrl(url.toString())!;
 
       if (opts.repository) {
         // set authUrl to https://api.github.com/repos/org/repo or https://gihub.domain.com/api/v3/repos/org/repo
@@ -403,7 +404,7 @@ export class GithubHttp extends HttpBase<GithubHttpOptions> {
       const next = linkHeader?.next;
       const env = getEnv();
       if (next?.url && linkHeader?.last?.page) {
-        let lastPage = parseInt(linkHeader.last.page);
+        let lastPage = parseInt(linkHeader.last.page, 10);
         // v8 ignore else -- TODO: add test #40625
         if (!env.RENOVATE_PAGINATE_ALL && httpOptions.paginate !== 'all') {
           lastPage = Math.min(pageLimit, lastPage);
@@ -421,7 +422,7 @@ export class GithubHttp extends HttpBase<GithubHttpOptions> {
         const queue = [...range(2, lastPage)].map(
           (pageNumber) => (): Promise<HttpResponse<T>> => {
             // copy before modifying searchParams
-            const nextUrl = new URL(firstPageUrl);
+            const nextUrl = parseUrl(firstPageUrl.toString())!;
             nextUrl.searchParams.set('page', String(pageNumber));
             return super.requestJsonUnsafe<T>(method, {
               ...opts,

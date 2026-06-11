@@ -375,6 +375,16 @@ exports[`modules/manager/tekton/extract > extractPackageFile() > extracts deps f
       "packageName": "example.com/triggertemplate/spec/resourcetemplates/0/taskrun/spec/taskSpec/steps/0/image",
       "replaceString": "example.com/triggertemplate/spec/resourcetemplates/0/taskrun/spec/taskSpec/steps/0/image",
     },
+    {
+      "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+      "currentDigest": undefined,
+      "currentValue": undefined,
+      "datasource": "docker",
+      "depName": "example.com/triggertemplate/spec/resourcetemplates/0/taskrun/spec/taskSpec/steps/0/image",
+      "depType": "tekton-step-image",
+      "packageName": "example.com/triggertemplate/spec/resourcetemplates/0/taskrun/spec/taskSpec/steps/0/image",
+      "replaceString": "example.com/triggertemplate/spec/resourcetemplates/0/taskrun/spec/taskSpec/steps/0/image",
+    },
   ],
 }
 `;

@@ -210,6 +210,22 @@ export const qStringValueAsSymbol = q.str((ctx: Ctx, node: lexer.Token) => {
   return ctx;
 });
 
+// https://docs.gradle.org/current/javadoc/org/gradle/api/provider/Provider.html#get()
+export const qProviderValue = q
+  .tree({
+    maxDepth: 1,
+    type: 'wrapped-tree',
+    startsWith: '(',
+    endsWith: ')',
+    search: q.begin<Ctx>().end(),
+  })
+  .handler((ctx) => {
+    if (ctx.varTokens.length > 1 && ctx.varTokens.at(-1)?.value === 'get') {
+      ctx.varTokens.pop();
+    }
+    return ctx;
+  });
+
 // foo.bar["baz"] = "1.2.3"
 export const qVariableAssignmentIdentifier = q
   .sym(storeVarToken)
@@ -237,6 +253,7 @@ export const qVariableAccessIdentifier = q
     return ctx;
   })
   .join(qVariableAssignmentIdentifier)
+  .opt(qProviderValue)
   .handler(coalesceVariable)
   .handler((ctx) => {
     ctx.varTokens = [

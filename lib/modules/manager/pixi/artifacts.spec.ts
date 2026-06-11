@@ -54,6 +54,7 @@ const adminConfig: RepoGlobalConfig = {
   cacheDir: upath.join('/tmp/cache'),
   containerbaseDir: upath.join('/tmp/cache/containerbase'),
   dockerSidecarImage: 'ghcr.io/renovatebot/base-image',
+  binarySource: 'global',
 };
 
 const config: UpdateArtifactsConfig = {};
@@ -340,7 +341,7 @@ describe('modules/manager/pixi/artifacts', () => {
           newPackageFileContent: '{}',
           config,
         }),
-      ).toMatchObject([{ artifactError: { lockFile: 'pixi.lock' } }]);
+      ).toMatchObject([{ artifactError: { fileName: 'pixi.lock' } }]);
       expect(execSnapshots).toMatchObject([]);
     });
 

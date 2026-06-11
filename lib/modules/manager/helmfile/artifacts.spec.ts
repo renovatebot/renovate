@@ -25,6 +25,7 @@ const adminConfig: RepoGlobalConfig = {
   cacheDir: upath.join('/tmp/renovate/cache'),
   containerbaseDir: upath.join('/tmp/renovate/cache/containerbase'),
   dockerSidecarImage: 'ghcr.io/renovatebot/base-image',
+  binarySource: 'global',
 };
 
 const config: UpdateArtifactsConfig = {};
@@ -411,7 +412,7 @@ describe('modules/manager/helmfile/artifacts', () => {
     ).toEqual([
       {
         artifactError: {
-          lockFile: 'helmfile.lock',
+          fileName: 'helmfile.lock',
           stderr: errorMessage,
         },
       },

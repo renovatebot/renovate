@@ -171,6 +171,11 @@ function getNewValue({
     return newVersion;
   }
   const options = getOptions(currentValue);
+  // Wildcard-equivalent ranges (*, >=*, x, empty) match all versions —
+  // nothing to bump/replace/widen
+  if (semver.validRange(cleanRange, options) === '*') {
+    return currentValue;
+  }
   let newValue: any = '';
 
   if (rangeStrategy === 'widen') {

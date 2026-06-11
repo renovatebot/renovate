@@ -12,8 +12,10 @@ import type {
   GradleManagerData,
   GradleVersionCatalogVersion,
   GradleVersionPointerTarget,
+  PackageVariables,
   VersionPointer,
 } from '../types.ts';
+import { isTOMLFile } from '../utils.ts';
 
 function findVersionIndex(
   content: string,
@@ -245,7 +247,7 @@ function extractDependency({
 export function parseCatalog(
   packageFile: string,
   content: string,
-): PackageDependency<GradleManagerData>[] {
+): { vars: PackageVariables; deps: PackageDependency<GradleManagerData>[] } {
   const tomlContent = parseToml(massage(content)) as GradleCatalog;
   const versions = tomlContent.versions ?? {};
   const libs = tomlContent.libraries ?? {};
@@ -254,6 +256,25 @@ export function parseCatalog(
   const versionStartIndex = content.indexOf('versions');
   const versionSubContent = content.slice(versionStartIndex);
   const extractedDeps: PackageDependency<GradleManagerData>[] = [];
+  const vars: PackageVariables = {};
+
+  for (const [key, version] of Object.entries(versions)) {
+    const { currentValue, fileReplacePosition } = extractLiteralVersion({
+      version,
+      depStartIndex: versionStartIndex,
+      depSubContent: versionSubContent,
+      sectionKey: key,
+    });
+    if (currentValue && fileReplacePosition !== undefined) {
+      vars[normalizeAlias(key)] = {
+        key: normalizeAlias(key),
+        value: currentValue,
+        fileReplacePosition,
+        packageFile,
+      };
+    }
+  }
+
   for (const libraryName of Object.keys(libs)) {
     const libDescriptor = libs[libraryName];
     const dependency = extractDependency({
@@ -308,5 +329,42 @@ export function parseCatalog(
   const deps = extractedDeps.map((dep) => {
     return deepmerge(dep, { managerData: { packageFile } });
   });
-  return deps;
+  return { vars, deps };
+}
+
+function makeCatalogGroupKey(
+  dep: PackageDependency<GradleManagerData>,
+): string {
+  return `${dep.managerData!.packageFile}:${dep.managerData!.fileReplacePosition}`;
+}
+
+export function unifyCatalogSharedVariableNames(
+  deps: PackageDependency<GradleManagerData>[],
+): void {
+  const aliasMap: Record<string, string[]> = {};
+  const catalogDeps: PackageDependency<GradleManagerData>[] = [];
+
+  for (const dep of deps) {
+    const packageFile = dep.managerData?.packageFile;
+    if (
+      packageFile &&
+      dep.managerData?.fileReplacePosition !== undefined &&
+      dep.sharedVariableName &&
+      isTOMLFile(packageFile)
+    ) {
+      catalogDeps.push(dep);
+
+      const key = makeCatalogGroupKey(dep);
+      (aliasMap[key] ??= []).push(dep.sharedVariableName);
+    }
+  }
+
+  for (const dep of catalogDeps) {
+    const key = makeCatalogGroupKey(dep);
+    const aliases = aliasMap[key];
+    if (aliases.length > 1) {
+      const name = aliases[0];
+      dep.sharedVariableName = name.replace(regEx(/^[^.]+\.versions\./), '');
+    }
+  }
 }

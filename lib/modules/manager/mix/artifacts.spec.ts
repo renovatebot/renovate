@@ -4,6 +4,7 @@ import { envMock, mockExecAll } from '~test/exec-util.ts';
 import { env, fs, hostRules } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import type { RepoGlobalConfig } from '../../../config/types.ts';
+import type { ConstraintName } from '../../../util/exec/types.ts';
 import { getPkgReleases as _getPkgReleases } from '../../datasource/index.ts';
 import type { UpdateArtifactsConfig } from '../types.ts';
 import { updateArtifacts } from './index.ts';
@@ -20,13 +21,14 @@ const adminConfig: RepoGlobalConfig = {
   localDir: upath.join('/tmp/github/some/repo'),
   cacheDir: upath.join('/tmp/cache'),
   containerbaseDir: upath.join('/tmp/cache/containerbase'),
+  binarySource: 'global',
 };
 
 // support install mode
 process.env.CONTAINERBASE = 'true';
 
 const config: UpdateArtifactsConfig = {};
-const constraints: Record<string, string> = {
+const constraints: Partial<Record<ConstraintName, string>> = {
   erlang: '25.0.0.0',
   elixir: 'v1.13.4',
 };
@@ -478,7 +480,7 @@ describe('modules/manager/mix/artifacts', () => {
         config,
       }),
     ).toEqual([
-      { artifactError: { lockFile: 'mix.lock', stderr: 'not found' } },
+      { artifactError: { fileName: 'mix.lock', stderr: 'not found' } },
     ]);
   });
 
@@ -494,7 +496,7 @@ describe('modules/manager/mix/artifacts', () => {
         config,
       }),
     ).toEqual([
-      { artifactError: { lockFile: 'mix.lock', stderr: 'exec-error' } },
+      { artifactError: { fileName: 'mix.lock', stderr: 'exec-error' } },
     ]);
   });
 
@@ -512,7 +514,7 @@ describe('modules/manager/mix/artifacts', () => {
     ).toEqual([
       {
         artifactError: {
-          lockFile: 'mix.lock',
+          fileName: 'mix.lock',
           stderr: 'Error reading mix.lock',
         },
       },
@@ -536,7 +538,7 @@ describe('modules/manager/mix/artifacts', () => {
     ).toEqual([
       {
         artifactError: {
-          lockFile: 'mix.lock',
+          fileName: 'mix.lock',
           stderr: 'Error reading mix.lock',
         },
       },

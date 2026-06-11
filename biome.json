@@ -4,6 +4,9 @@
     "enabled": true,
     "rules": {
       "recommended": false,
+      "correctness": {
+        "noUndeclaredDependencies": "error"
+      },
       "style": {
         "noParameterProperties": "error"
       }
@@ -21,12 +24,16 @@
       }
     }
   },
+  "formatter": {
+    "enabled": false
+  },
   "files": {
     "includes": [
       "**",
       "!**/node_modules",
       "!.pnpm-store",
       "!.worktrees/**/*",
+      "!.claude/worktrees/**/*",
       "!**/dist",
       "!**/tmp",
       "!**/coverage",

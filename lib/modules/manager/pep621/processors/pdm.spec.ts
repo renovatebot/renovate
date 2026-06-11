@@ -22,6 +22,7 @@ const adminConfig: RepoGlobalConfig = {
   localDir: upath.join('/tmp/github/some/repo'),
   cacheDir: upath.join('/tmp/cache'),
   containerbaseDir: upath.join('/tmp/cache/containerbase'),
+  binarySource: 'global',
 };
 
 const processor = new PdmProcessor();
@@ -127,7 +128,7 @@ describe('modules/manager/pep621/processors/pdm', () => {
         parsePyProject('')!,
       );
       expect(result).toEqual([
-        { artifactError: { lockFile: 'pdm.lock', stderr: 'test error' } },
+        { artifactError: { fileName: 'pdm.lock', stderr: 'test error' } },
       ]);
       expect(execSnapshots).toEqual([]);
     });

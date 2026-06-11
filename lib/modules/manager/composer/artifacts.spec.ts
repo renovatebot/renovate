@@ -34,6 +34,7 @@ const adminConfig: RepoGlobalConfig = {
   cacheDir: upath.join('/tmp/renovate/cache'),
   containerbaseDir: upath.join('/tmp/renovate/cache/containerbase'),
   dockerSidecarImage: 'ghcr.io/renovatebot/base-image',
+  binarySource: 'global',
 };
 
 const repoStatus = partial<StatusResult>({
@@ -927,7 +928,7 @@ describe('modules/manager/composer/artifacts', () => {
     ).toEqual([
       {
         artifactError: {
-          lockFile: 'composer.lock',
+          fileName: 'composer.lock',
           stderr: 'not found',
         },
       },
@@ -950,7 +951,7 @@ describe('modules/manager/composer/artifacts', () => {
         newPackageFileContent: '{}',
         config,
       }),
-    ).toEqual([{ artifactError: { lockFile: 'composer.lock', stderr } }]);
+    ).toEqual([{ artifactError: { fileName: 'composer.lock', stderr } }]);
     expect(execSnapshots).toBeEmptyArray();
   });
 

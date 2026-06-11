@@ -29,6 +29,7 @@ const adminConfig: RepoGlobalConfig = {
   localDir: upath.join('/tmp/github/some/repo'),
   cacheDir: upath.join('/tmp/cache'),
   containerbaseDir: upath.join('/tmp/cache/containerbase'),
+  binarySource: 'global',
 };
 
 const processor = new UvProcessor();
@@ -480,7 +481,7 @@ describe('modules/manager/pep621/processors/uv', () => {
         parsePyProject('')!,
       );
       expect(result).toEqual([
-        { artifactError: { lockFile: 'uv.lock', stderr: 'test error' } },
+        { artifactError: { fileName: 'uv.lock', stderr: 'test error' } },
       ]);
       expect(execSnapshots).toEqual([]);
     });

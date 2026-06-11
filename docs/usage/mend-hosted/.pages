@@ -6,3 +6,4 @@ nav:
   - 'Credentials': 'credentials.md'
   - 'Migrating Secrets': 'migrating-secrets.md'
   - 'Github.com Token': 'github-com-token.md'
+  - 'FAQs': 'faq.md'

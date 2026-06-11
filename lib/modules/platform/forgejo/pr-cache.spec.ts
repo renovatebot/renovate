@@ -33,7 +33,7 @@ const pr1: PR = {
     sha: 'other-head-sha' as LongCommitSha,
     repo: partial<Repo>({ full_name: 'SOME/repo' }),
   },
-  user: { username: 'some-author' },
+  user: { login: 'some-author' },
 };
 
 const pr2: PR = {
@@ -52,7 +52,7 @@ const pr2: PR = {
     sha: 'other-head-sha' as LongCommitSha,
     repo: partial<Repo>({ full_name: 'SOME/repo' }),
   },
-  user: { username: 'some-author' },
+  user: { login: 'some-author' },
 };
 
 describe('modules/platform/forgejo/pr-cache', () => {

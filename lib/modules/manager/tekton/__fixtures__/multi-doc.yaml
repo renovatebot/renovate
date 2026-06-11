@@ -211,3 +211,7 @@ spec:
           steps:
             - image: example.com/triggertemplate/spec/resourcetemplates/0/taskrun/spec/taskSpec/steps/0/image
 ---
+kind: StepAction
+spec:
+  image: example.com/triggertemplate/spec/resourcetemplates/0/taskrun/spec/taskSpec/steps/0/image
+---

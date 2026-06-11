@@ -34,7 +34,7 @@ exports[`modules/datasource/crate/index > getReleases > processes real data: ame
 {
   "dependencyUrl": "https://crates.io/crates/amethyst",
   "homepage": "https://amethyst.rs/",
-  "registryUrl": "https://crates.io",
+  "registryUrl": "sparse+https://index.crates.io",
   "releases": [
     {
       "version": "0.1.0",
@@ -102,7 +102,7 @@ exports[`modules/datasource/crate/index > getReleases > processes real data: ame
 exports[`modules/datasource/crate/index > getReleases > processes real data: libc 1`] = `
 {
   "dependencyUrl": "https://crates.io/crates/libc",
-  "registryUrl": "https://crates.io",
+  "registryUrl": "sparse+https://index.crates.io",
   "releases": [
     {
       "version": "0.1.0",

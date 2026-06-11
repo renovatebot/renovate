@@ -1,10 +1,8 @@
 import { isTruthy } from '@sindresorhus/is';
-import { simpleGit } from 'simple-git';
 import { logger } from '../../../logger/index.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
-import { getChildEnv } from '../../../util/exec/utils.ts';
 import { getGitEnvironmentVariables } from '../../../util/git/auth.ts';
-import { simpleGitConfig } from '../../../util/git/config.ts';
+import { createSimpleGit } from '../../../util/git/index.ts';
 import { getRemoteUrlWithToken } from '../../../util/git/url.ts';
 import { newlineRegex, regEx } from '../../../util/regex.ts';
 import { Datasource } from '../datasource.ts';
@@ -30,8 +28,7 @@ export abstract class GitDatasource extends Datasource {
     const gitSubmoduleAuthEnvironmentVariables = getGitEnvironmentVariables([
       this.id,
     ]);
-    const gitEnv = getChildEnv({ env: gitSubmoduleAuthEnvironmentVariables });
-    const git = simpleGit(simpleGitConfig()).env(gitEnv);
+    const git = createSimpleGit({ env: gitSubmoduleAuthEnvironmentVariables });
 
     // fetch remote tags
     const lsRemote = await git.listRemote([
@@ -41,7 +38,7 @@ export abstract class GitDatasource extends Datasource {
       return null;
     }
 
-    const refs = lsRemote
+    const allRefs = lsRemote
       .trim()
       .split(newlineRegex)
       .map((line) => line.trim())
@@ -66,7 +63,32 @@ export abstract class GitDatasource extends Datasource {
         return null;
       })
       .filter(isTruthy)
-      .filter((ref) => ref.type !== 'pull' && !ref.value.endsWith('^{}'));
+      .filter((ref) => ref.type !== 'pull');
+
+    // For annotated tags, git ls-remote returns two entries:
+    // 1. The tag object hash: refs/tags/v1.0.0
+    // 2. The dereferenced commit hash: refs/tags/v1.0.0^{}
+    // We need to use the dereferenced commit hash (^{}) for annotated tags
+    // to match what `git submodule status` returns (the actual commit hash).
+    // This prevents false-positive updates that result in empty commits.
+    const dereferencedTags: Record<string, string> = {};
+    for (const ref of allRefs) {
+      if (ref.value.endsWith('^{}')) {
+        // Store the commit hash for the base tag name (without ^{})
+        dereferencedTags[ref.value.slice(0, -3)] = ref.hash;
+      }
+    }
+
+    const refs = allRefs
+      .filter((ref) => !ref.value.endsWith('^{}'))
+      .map((ref) => {
+        // For annotated tags, use the dereferenced commit hash
+        const dereferencedHash = dereferencedTags[ref.value];
+        if (dereferencedHash) {
+          return { ...ref, hash: dereferencedHash };
+        }
+        return ref;
+      });
 
     return refs;
   }

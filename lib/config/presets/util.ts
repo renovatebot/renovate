@@ -22,7 +22,7 @@ export async function fetchPreset({
   fetch,
 }: FetchPresetConfig): Promise<Nullish<Preset>> {
   // TODO: fix me, can be undefiend #22198
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+  // oxlint-disable-next-line typescript/no-unnecessary-type-assertion
   const endpoint = ensureTrailingSlash(_endpoint!);
   const [fileName, presetName, subPresetName] = filePreset.split('/');
   const pathPrefix = presetPath ? `${presetPath}/` : '';
@@ -61,7 +61,7 @@ export async function fetchPreset({
     jsonContent = await fetch(
       repo,
       buildFilePath(
-        regEx(/\.json5?$/).test(fileName) ? fileName : `${fileName}.json`,
+        regEx(/\.json[5c]?$/).test(fileName) ? fileName : `${fileName}.json`,
       ),
       endpoint,
       tag,

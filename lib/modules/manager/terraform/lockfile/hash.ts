@@ -1,5 +1,5 @@
 import crypto from 'node:crypto';
-import extract from 'extract-zip';
+import AdmZip from 'adm-zip';
 import upath from 'upath';
 import { logger } from '../../../../logger/index.ts';
 import {
@@ -13,7 +13,7 @@ import { ensureCacheDir } from '../../../../util/fs/index.ts';
 import { Http } from '../../../../util/http/index.ts';
 import * as p from '../../../../util/promises.ts';
 import { TerraformProviderDatasource } from '../../../datasource/terraform-provider/index.ts';
-import type { TerraformBuild } from '../../../datasource/terraform-provider/types.ts';
+import type { TerraformBuild } from '../../../datasource/terraform-provider/schema.ts';
 
 export class TerraformProviderHash {
   static http = new Http(TerraformProviderDatasource.id);
@@ -86,9 +86,8 @@ export class TerraformProviderHash {
     zipFilePath: string,
     extractPath: string,
   ): Promise<string> {
-    await extract(zipFilePath, {
-      dir: extractPath,
-    });
+    const zip = new AdmZip(zipFilePath);
+    zip.extractAllTo(extractPath);
     const hash = await this.hashOfDir(extractPath);
     // delete extracted files
     await fs.rmCache(extractPath);

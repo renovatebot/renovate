@@ -31,11 +31,11 @@ export class NixPkgsVersioning extends RegExpVersioningApi {
     const release = [];
 
     if (major) {
-      release.push(Number.parseInt(major));
+      release.push(Number.parseInt(major, 10));
     }
 
     if (minor) {
-      release.push(Number.parseInt(minor));
+      release.push(Number.parseInt(minor, 10));
     }
 
     const compatibility = isNonEmptyStringAndNotWhitespace(suffix)

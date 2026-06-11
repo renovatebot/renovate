@@ -4,12 +4,13 @@ import { mockClient } from 'aws-sdk-client-mock';
 import * as _googleAuth from 'google-auth-library';
 import { mockDeep } from 'vitest-mock-extended';
 import * as httpMock from '~test/http-mock.ts';
-import { logger } from '~test/util.ts';
+import { logger, partial } from '~test/util.ts';
 import { range } from '../../../../lib/util/range.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages.ts';
 import * as _hostRules from '../../../util/host-rules.ts';
 import { getDigest, getPkgReleases } from '../index.ts';
+import { DockerHubCache } from './dockerhub-cache.ts';
 import { DockerDatasource } from './index.ts';
 
 const hostRules = vi.mocked(_hostRules);
@@ -215,6 +216,35 @@ describe('modules/datasource/docker/index', () => {
         'some-tag',
       );
       expect(res).toBeNull();
+    });
+
+    it('does not cache null digest results', async () => {
+      const registryUrl = 'https://registry.company.com/v2';
+      const packageName = 'registry.company.com/cache-poison';
+
+      httpMock
+        .scope(registryUrl)
+        .get('/', undefined, { badheaders: ['authorization'] })
+        .reply(401, '', {
+          'www-authenticate': 'Basic realm="My Private Docker Registry Server"',
+        })
+        .head('/cache-poison/manifests/some-tag')
+        .reply(403);
+      httpMock
+        .scope(registryUrl)
+        .get('/', undefined, { badheaders: ['authorization'] })
+        .reply(401, '', {
+          'www-authenticate': 'Basic realm="My Private Docker Registry Server"',
+        })
+        .head('/cache-poison/manifests/some-tag')
+        .reply(200, '', { 'docker-content-digest': 'sha256:some-digest' });
+
+      expect(
+        await getDigest({ datasource: 'docker', packageName }, 'some-tag'),
+      ).toBeNull();
+      expect(
+        await getDigest({ datasource: 'docker', packageName }, 'some-tag'),
+      ).toBe('sha256:some-digest');
     });
 
     it.each(amazonHosts)(
@@ -734,12 +764,12 @@ describe('modules/datasource/docker/index', () => {
           'www-authenticate':
             'Bearer realm="https://auth.docker.io/token",service="registry.docker.io",scope="repository:library/some-dep:pull"',
         })
-        .head('/library/some-dep/manifests/' + currentDigest)
+        .head(`/library/some-dep/manifests/${currentDigest}`)
         .reply(200, '', {
           'content-type':
             'application/vnd.docker.distribution.manifest.v2+json',
         })
-        .get('/library/some-dep/manifests/' + currentDigest)
+        .get(`/library/some-dep/manifests/${currentDigest}`)
         .reply(200, {
           schemaVersion: 2,
           mediaType: 'application/vnd.docker.distribution.manifest.v2+json',
@@ -832,12 +862,12 @@ describe('modules/datasource/docker/index', () => {
           'www-authenticate':
             'Bearer realm="https://auth.docker.io/token",service="registry.docker.io",scope="repository:library/some-dep:pull"',
         })
-        .head('/library/some-dep/manifests/' + currentDigest)
+        .head(`/library/some-dep/manifests/${currentDigest}`)
         .reply(200, '', {
           'content-type':
             'application/vnd.docker.distribution.manifest.v2+json',
         })
-        .get('/library/some-dep/manifests/' + currentDigest)
+        .get(`/library/some-dep/manifests/${currentDigest}`)
         .reply(200, {
           schemaVersion: 2,
           mediaType: 'application/vnd.docker.distribution.manifest.v2+json',
@@ -909,12 +939,12 @@ describe('modules/datasource/docker/index', () => {
           'www-authenticate':
             'Bearer realm="https://auth.docker.io/token",service="registry.docker.io",scope="repository:library/some-dep:pull"',
         })
-        .head('/library/some-dep/manifests/' + currentDigest)
+        .head(`/library/some-dep/manifests/${currentDigest}`)
         .reply(200, '', {
           'content-type':
             'application/vnd.docker.distribution.manifest.v2+json',
         })
-        .get('/library/some-dep/manifests/' + currentDigest)
+        .get(`/library/some-dep/manifests/${currentDigest}`)
         .reply(200, {
           schemaVersion: 2,
           mediaType: 'application/vnd.docker.distribution.manifest.v2+json',
@@ -1008,12 +1038,12 @@ describe('modules/datasource/docker/index', () => {
           'www-authenticate':
             'Bearer realm="https://auth.docker.io/token",service="registry.docker.io",scope="repository:library/some-dep:pull"',
         })
-        .head('/library/some-dep/manifests/' + currentDigest)
+        .head(`/library/some-dep/manifests/${currentDigest}`)
         .reply(200, '', {
           'content-type':
             'application/vnd.docker.distribution.manifest.v2+json',
         })
-        .get('/library/some-dep/manifests/' + currentDigest)
+        .get(`/library/some-dep/manifests/${currentDigest}`)
         .reply(200, {
           schemaVersion: 2,
           mediaType: 'application/vnd.docker.distribution.manifest.v2+json',
@@ -1074,11 +1104,11 @@ describe('modules/datasource/docker/index', () => {
           'www-authenticate':
             'Bearer realm="https://auth.docker.io/token",service="registry.docker.io",scope="repository:library/some-dep:pull"',
         })
-        .head('/library/some-dep/manifests/' + currentDigest)
+        .head(`/library/some-dep/manifests/${currentDigest}`)
         .reply(200, '', {
           'content-type': 'application/vnd.oci.image.manifest.v1+json',
         })
-        .get('/library/some-dep/manifests/' + currentDigest)
+        .get(`/library/some-dep/manifests/${currentDigest}`)
         .reply(200, {
           schemaVersion: 2,
           mediaType: 'application/vnd.oci.image.manifest.v1+json',
@@ -1153,11 +1183,11 @@ describe('modules/datasource/docker/index', () => {
           'www-authenticate':
             'Bearer realm="https://auth.docker.io/token",service="registry.docker.io",scope="repository:library/some-dep:pull"',
         })
-        .head('/library/some-dep/manifests/' + currentDigest)
+        .head(`/library/some-dep/manifests/${currentDigest}`)
         .reply(200, '', {
           'content-type': 'application/vnd.oci.image.manifest.v1+json',
         })
-        .get('/library/some-dep/manifests/' + currentDigest)
+        .get(`/library/some-dep/manifests/${currentDigest}`)
         .reply(200, {
           schemaVersion: 2,
           config: {
@@ -1224,12 +1254,12 @@ describe('modules/datasource/docker/index', () => {
           'www-authenticate':
             'Bearer realm="https://auth.docker.io/token",service="registry.docker.io",scope="repository:library/some-dep:pull"',
         })
-        .head('/library/some-dep/manifests/' + currentDigest)
+        .head(`/library/some-dep/manifests/${currentDigest}`)
         .reply(200, '', {
           'content-type':
             'application/vnd.docker.distribution.manifest.v2+json',
         })
-        .get('/library/some-dep/manifests/' + currentDigest)
+        .get(`/library/some-dep/manifests/${currentDigest}`)
         .reply(404, {});
       httpMock
         .scope(baseUrl)
@@ -1308,11 +1338,11 @@ describe('modules/datasource/docker/index', () => {
           'www-authenticate':
             'Bearer realm="https://auth.docker.io/token",service="registry.docker.io",scope="repository:library/some-dep:pull"',
         })
-        .head('/library/some-dep/manifests/' + currentDigest)
+        .head(`/library/some-dep/manifests/${currentDigest}`)
         .reply(200, '', {
           'content-type': 'application/vnd.oci.image.manifest.v1+json',
         })
-        .get('/library/some-dep/manifests/' + currentDigest)
+        .get(`/library/some-dep/manifests/${currentDigest}`)
         .reply(200, {
           schemaVersion: 2,
           config: {
@@ -1418,6 +1448,77 @@ describe('modules/datasource/docker/index', () => {
       expect(res).toBe(newDigest);
     });
 
+    it('uses Docker Hub tag cache digest without HEAD request', async () => {
+      vi.spyOn(DockerHubCache, 'init').mockResolvedValueOnce(
+        partial<DockerHubCache>({
+          getDigestForTag: vi.fn().mockReturnValue('sha256:cached-digest'),
+          getArchDigestForTag: vi.fn().mockReturnValue(null),
+        }),
+      );
+
+      const res = await getDigest(
+        { datasource: 'docker', packageName: 'some-dep' },
+        'some-tag',
+      );
+
+      expect(res).toBe('sha256:cached-digest');
+    });
+
+    it('uses Docker Hub tag cache arch digest when currentDigest is arch-specific', async () => {
+      const currentDigest =
+        'sha256:0101010101010101010101010101010101010101010101010101010101010101';
+
+      httpMock
+        .scope(authUrl)
+        .get(
+          '/token?service=registry.docker.io&scope=repository:library/some-dep:pull',
+        )
+        .times(3)
+        .reply(200, { token: 'some-token' });
+      httpMock
+        .scope(baseUrl)
+        .get('/')
+        .times(3)
+        .reply(401, '', {
+          'www-authenticate':
+            'Bearer realm="https://auth.docker.io/token",service="registry.docker.io",scope="repository:library/some-dep:pull"',
+        })
+        .head(`/library/some-dep/manifests/${currentDigest}`)
+        .reply(200, '', {
+          'content-type': 'application/vnd.oci.image.manifest.v1+json',
+        })
+        .get(`/library/some-dep/manifests/${currentDigest}`)
+        .reply(200, {
+          schemaVersion: 2,
+          config: {
+            digest: 'some-config-digest',
+            mediaType: 'application/vnd.oci.image.config.v1+json',
+          },
+        })
+        .get('/library/some-dep/blobs/some-config-digest')
+        .reply(200, {
+          architecture: 'amd64',
+        });
+
+      vi.spyOn(DockerHubCache, 'init').mockResolvedValueOnce(
+        partial<DockerHubCache>({
+          getDigestForTag: vi.fn().mockReturnValue(null),
+          getArchDigestForTag: vi.fn().mockReturnValue('sha256:cached-amd64'),
+        }),
+      );
+
+      const res = await getDigest(
+        {
+          datasource: 'docker',
+          packageName: 'some-dep',
+          currentDigest,
+        },
+        'some-tag',
+      );
+
+      expect(res).toBe('sha256:cached-amd64');
+    });
+
     it('falls back to library/ prefix on non-namespaced images without existing digest', async () => {
       const newDigest =
         'sha256:1111111111111111111111111111111111111111111111111111111111111111';
@@ -1447,6 +1548,64 @@ describe('modules/datasource/docker/index', () => {
       );
 
       expect(res).toBe(newDigest);
+    });
+  });
+
+  describe('getImageArchitecture', () => {
+    it('does not cache null architecture results', async () => {
+      const datasource = new DockerDatasource();
+      const registryHost = 'https://registry.company.com';
+      const dockerRepository = 'cache-arch';
+      const currentDigest =
+        'sha256:0101010101010101010101010101010101010101010101010101010101010101';
+
+      httpMock
+        .scope(`${registryHost}/v2`)
+        .get('/')
+        .reply(200)
+        .head(`/cache-arch/manifests/${currentDigest}`)
+        .reply(200, '', {
+          'content-type':
+            'application/vnd.docker.distribution.manifest.list.v2+json',
+        });
+      httpMock
+        .scope(`${registryHost}/v2`)
+        .get('/')
+        .times(3)
+        .reply(200)
+        .head(`/cache-arch/manifests/${currentDigest}`)
+        .reply(200, '', {
+          'content-type':
+            'application/vnd.docker.distribution.manifest.v2+json',
+        })
+        .get(`/cache-arch/manifests/${currentDigest}`)
+        .reply(200, {
+          schemaVersion: 2,
+          mediaType: 'application/vnd.docker.distribution.manifest.v2+json',
+          config: {
+            digest: 'sha256:config-digest',
+            mediaType: 'application/vnd.docker.container.image.v1+json',
+          },
+        })
+        .get('/cache-arch/blobs/sha256:config-digest')
+        .reply(200, {
+          architecture: 'amd64',
+        });
+
+      expect(
+        await datasource.getImageArchitecture(
+          registryHost,
+          dockerRepository,
+          currentDigest,
+        ),
+      ).toBeNull();
+      expect(
+        await datasource.getImageArchitecture(
+          registryHost,
+          dockerRepository,
+          currentDigest,
+        ),
+      ).toBe('amd64');
     });
   });
 
@@ -2264,17 +2423,18 @@ describe('modules/datasource/docker/index', () => {
       expect(res?.releases).toMatchObject([
         {
           version: '0.9.0',
-          newDigest: 'bbb',
           releaseTimestamp: '2020-01-01T00:00:00.000Z',
         },
         {
           version: '1.0.0',
-          newDigest: 'aaa',
           // no releaseTimestamp
         },
       ]);
 
-      expect(res?.releases[1].releaseTimestamp).toBeUndefined();
+      // Digest is not propagated — getDigest() resolves per-arch at lookup time
+      expect(res?.releases[0]).not.toHaveProperty('newDigest');
+      expect(res?.releases[1]).not.toHaveProperty('newDigest');
+      expect(res?.releases[1]).not.toHaveProperty('releaseTimestamp');
     });
 
     it('adds no library/ prefix for other registries', async () => {
@@ -2811,7 +2971,7 @@ describe('modules/datasource/docker/index', () => {
         .twice()
         .reply(401, '', {
           'www-authenticate':
-            'Bearer realm="https://ghcr.io/token",service="ghcr.io",scope="repository:user/image:pull',
+            'Bearer realm="https://ghcr.io/token",service="ghcr.io",scope="repository:user/image:pull"',
         })
         .get('/visualon/drone-git/tags/list?n=10000')
         .reply(401, '', {

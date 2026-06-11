@@ -2,10 +2,11 @@ import { GlobalConfig } from '../../config/global.ts';
 import * as _datasource from '../../modules/datasource/index.ts';
 import {
   generateInstallCommands,
+  getToolConfig,
   isDynamicInstall,
   resolveConstraint,
 } from './containerbase.ts';
-import type { ToolConstraint } from './types.ts';
+import type { ToolConstraint, ToolName } from './types.ts';
 
 vi.mock('../../modules/datasource/index.ts');
 
@@ -32,6 +33,7 @@ describe('util/exec/containerbase', () => {
       process.env.CONTAINERBASE = 'true';
       const toolConstraints: ToolConstraint[] = [
         { toolName: 'node' },
+        // @ts-expect-error -- intentionally using invalid constraint names
         { toolName: 'invalid' },
       ];
       expect(isDynamicInstall(toolConstraints)).toBeFalse();
@@ -42,6 +44,22 @@ describe('util/exec/containerbase', () => {
       process.env.CONTAINERBASE = 'true';
       const toolConstraints: ToolConstraint[] = [{ toolName: 'npm' }];
       expect(isDynamicInstall(toolConstraints)).toBeTrue();
+    });
+  });
+
+  describe('getToolConfig()', () => {
+    it('returns config for a known tool', () => {
+      const config = getToolConfig('npm');
+      expect(config).toBeDefined();
+      expect(config).toMatchObject({
+        datasource: expect.toBeString(),
+        versioning: expect.toBeString(),
+      });
+    });
+
+    it('returns undefined for an unknown tool', () => {
+      // @ts-expect-error -- intentionally using invalid tool name
+      expect(getToolConfig('unknown-tool')).toBeUndefined();
     });
   });
 
@@ -107,9 +125,9 @@ describe('util/exec/containerbase', () => {
     });
 
     it('throws for unknown tools', async () => {
-      await expect(resolveConstraint({ toolName: 'whoops' })).rejects.toThrow(
-        'Invalid tool to install: whoops',
-      );
+      await expect(
+        resolveConstraint({ toolName: 'whoops' as ToolName }),
+      ).rejects.toThrow('Invalid tool to install: whoops');
     });
 
     it('throws no releases', async () => {

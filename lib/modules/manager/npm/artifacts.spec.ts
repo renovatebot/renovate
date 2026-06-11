@@ -18,6 +18,7 @@ const adminConfig: RepoGlobalConfig = {
   localDir: upath.join('/tmp/github/some/repo'),
   cacheDir: upath.join('/tmp/renovate/cache'),
   containerbaseDir: upath.join('/tmp/renovate/cache/containerbase'),
+  binarySource: 'global',
 };
 const dockerAdminConfig = {
   ...adminConfig,
@@ -701,6 +702,168 @@ minimumReleaseAgeExclude:
       });
       // no updates are needed, as they're at the same version
       expect(res).toBeNull();
+    });
+
+    it('replaces malformed minimumReleaseAgeExclude entries from prior Renovate bug', async () => {
+      fs.getSiblingFileName.mockReturnValueOnce('pnpm-workspace.yaml');
+      fs.localPathExists.mockResolvedValueOnce(true);
+      fs.readLocalFile.mockResolvedValueOnce(
+        codeBlock`minimumReleaseAge: 4320
+minimumReleaseAgeExclude:
+  - fast-xml-parser@<=5.3.5@5.5.7`,
+      );
+      const res = await updateArtifacts({
+        packageFileName: 'package.json',
+        updatedDeps: [
+          {
+            ...validDepUpdate,
+            depName: 'fast-xml-parser@<=5.3.5',
+            packageName: 'fast-xml-parser',
+            depType: 'pnpm.overrides',
+            currentValue: '5.3.5',
+            newVersion: '5.5.7',
+            managerData: { pnpmShrinkwrap: 'pnpm-lock.yaml' },
+            isVulnerabilityAlert: true,
+          },
+        ],
+        newPackageFileContent: 'some new content',
+        config,
+      });
+      expect(res).toStrictEqual([
+        {
+          file: {
+            type: 'addition',
+            path: 'pnpm-workspace.yaml',
+            contents: `${codeBlock`
+              minimumReleaseAge: 4320
+              minimumReleaseAgeExclude:
+                # Renovate security update: fast-xml-parser@5.5.7
+                - fast-xml-parser@5.5.7
+            `}\n`,
+          },
+        },
+      ]);
+    });
+
+    it('appends to valid minimumReleaseAgeExclude when malformed entry also exists', async () => {
+      fs.getSiblingFileName.mockReturnValueOnce('pnpm-workspace.yaml');
+      fs.localPathExists.mockResolvedValueOnce(true);
+      fs.readLocalFile.mockResolvedValueOnce(
+        codeBlock`minimumReleaseAge: 4320
+minimumReleaseAgeExclude:
+  - fast-xml-parser@5.5.6
+  - fast-xml-parser@<=5.3.5@5.5.7`,
+      );
+      const res = await updateArtifacts({
+        packageFileName: 'package.json',
+        updatedDeps: [
+          {
+            ...validDepUpdate,
+            depName: 'fast-xml-parser@<=5.3.5',
+            packageName: 'fast-xml-parser',
+            depType: 'pnpm.overrides',
+            currentValue: '5.5.6',
+            newVersion: '5.5.7',
+            managerData: { pnpmShrinkwrap: 'pnpm-lock.yaml' },
+            isVulnerabilityAlert: true,
+          },
+        ],
+        newPackageFileContent: 'some new content',
+        config,
+      });
+      expect(res).toStrictEqual([
+        {
+          file: {
+            type: 'addition',
+            path: 'pnpm-workspace.yaml',
+            contents: `${codeBlock`
+              minimumReleaseAge: 4320
+              minimumReleaseAgeExclude:
+                # Renovate security update: fast-xml-parser@5.5.7
+                - fast-xml-parser@5.5.6 || 5.5.7
+            `}\n`,
+          },
+        },
+      ]);
+    });
+
+    it('uses packageName (bare package name) for pnpm overrides with range selectors', async () => {
+      fs.getSiblingFileName.mockReturnValueOnce('pnpm-workspace.yaml');
+      fs.localPathExists.mockResolvedValueOnce(true);
+      fs.readLocalFile.mockResolvedValueOnce(
+        codeBlock`minimumReleaseAge: 4320`,
+      ); // for pnpm-workspace.yaml
+      const res = await updateArtifacts({
+        packageFileName: 'package.json',
+        updatedDeps: [
+          {
+            ...validDepUpdate,
+            depName: 'fast-xml-parser@<=5.3.5',
+            packageName: 'fast-xml-parser',
+            depType: 'pnpm.overrides',
+            currentValue: '5.3.5',
+            newVersion: '5.5.7',
+            managerData: { pnpmShrinkwrap: 'pnpm-lock.yaml' },
+            isVulnerabilityAlert: true,
+          },
+        ],
+        newPackageFileContent: 'some new content',
+        config,
+      });
+      expect(res).toStrictEqual([
+        {
+          file: {
+            type: 'addition',
+            path: 'pnpm-workspace.yaml',
+            contents: `${codeBlock`
+              minimumReleaseAge: 4320
+              minimumReleaseAgeExclude:
+                # Renovate security update: fast-xml-parser@5.5.7
+                - fast-xml-parser@5.5.7
+            `}\n`,
+          },
+        },
+      ]);
+    });
+
+    it('preserves catalog changes in pnpm-workspace.yaml when adding minimumReleaseAgeExclude', async () => {
+      fs.localPathExists.mockResolvedValueOnce(true);
+      fs.readLocalFile.mockResolvedValueOnce(
+        codeBlock`
+          minimumReleaseAge: 10080
+          catalog:
+            effect: ^3.19.0`,
+      );
+      const newPackageFileContent = codeBlock`
+        minimumReleaseAge: 10080
+        catalog:
+          effect: ^3.20.0`;
+      const res = await updateArtifacts({
+        packageFileName: 'pnpm-workspace.yaml',
+        updatedDeps: [
+          {
+            ...validDepUpdate,
+            depName: 'effect',
+            depType: 'pnpm.catalog.default',
+            currentValue: '^3.19.0',
+            newVersion: '3.20.0',
+            managerData: { pnpmShrinkwrap: 'pnpm-lock.yaml' },
+            isVulnerabilityAlert: true,
+          },
+        ],
+        newPackageFileContent,
+        config,
+      });
+      expect(res).toStrictEqual([
+        {
+          file: {
+            type: 'addition',
+            path: 'pnpm-workspace.yaml',
+            contents:
+              'minimumReleaseAge: 10080\ncatalog:\n  effect: ^3.20.0\nminimumReleaseAgeExclude:\n  # Renovate security update: effect@3.20.0\n  - effect@3.20.0\n',
+          },
+        },
+      ]);
     });
 
     it('handles multiple security upgrades correctly (bug fix test)', async () => {

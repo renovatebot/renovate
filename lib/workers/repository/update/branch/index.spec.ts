@@ -11,10 +11,8 @@ import {
 } from '../../../../constants/error-messages.ts';
 import { logger } from '../../../../logger/index.ts';
 import * as _npmPostExtract from '../../../../modules/manager/npm/post-update/index.ts';
-import type {
-  ArtifactError,
-  WriteExistingFilesResult,
-} from '../../../../modules/manager/npm/post-update/types.ts';
+import type { WriteExistingFilesResult } from '../../../../modules/manager/npm/post-update/types.ts';
+import type { ArtifactError } from '../../../../modules/manager/types.ts';
 import type {
   EnsureCommentConfig,
   Pr,
@@ -38,6 +36,7 @@ import type {
   BranchUpgradeConfig,
   CacheFingerprintMatchResult,
 } from '../../../types.ts';
+import * as _changelog from '../../changelog/index.ts';
 import * as _prAutomerge from '../pr/automerge.ts';
 import type { ResultWithPr } from '../pr/index.ts';
 import * as _prWorker from '../pr/index.ts';
@@ -81,6 +80,7 @@ const exec = vi.mocked(_exec);
 const sanitize = vi.mocked(_sanitize);
 const limits = vi.mocked(_limits);
 const repoCache = vi.mocked(_repoCache);
+const changelog = vi.mocked(_changelog);
 
 const adminConfig: RepoGlobalConfig = { localDir: '', cacheDir: '' };
 
@@ -1032,6 +1032,70 @@ describe('workers/repository/update/branch/index', () => {
       });
     });
 
+    it('retries setting branch status checks after PR creation', async () => {
+      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce(
+        partial<PackageFilesResult>({
+          updatedPackageFiles: [partial<FileChange>()],
+        }),
+      );
+      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+        artifactErrors: [],
+        updatedArtifacts: [partial<FileChange>()],
+      });
+      scm.branchExists.mockResolvedValue(true);
+      commit.commitFilesToBranch.mockResolvedValueOnce(null);
+      automerge.tryBranchAutomerge.mockResolvedValueOnce('failed');
+      prWorker.ensurePr.mockResolvedValueOnce({
+        type: 'with-pr',
+        pr: partial<Pr>({ number: 5 }),
+      });
+      platform.getBranchStatusCheck.mockResolvedValue(null);
+      await branchWorker.processBranch({
+        ...config,
+        stabilityStatus: 'green',
+        statusCheckNames: {
+          minimumReleaseAge: 'renovate/stability-days',
+          mergeConfidence: null,
+          configValidation: null,
+          artifactError: null,
+        },
+      });
+      // Called twice: once before ensurePr, once after PR creation
+      expect(platform.setBranchStatus).toHaveBeenCalledTimes(2);
+    });
+
+    it('does not retry setting branch status checks when PR is not created', async () => {
+      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce(
+        partial<PackageFilesResult>({
+          updatedPackageFiles: [partial<FileChange>()],
+        }),
+      );
+      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+        artifactErrors: [],
+        updatedArtifacts: [partial<FileChange>()],
+      });
+      scm.branchExists.mockResolvedValue(true);
+      commit.commitFilesToBranch.mockResolvedValueOnce(null);
+      automerge.tryBranchAutomerge.mockResolvedValueOnce('failed');
+      prWorker.ensurePr.mockResolvedValueOnce({
+        type: 'without-pr',
+        prBlockedBy: 'AwaitingTests',
+      });
+      platform.getBranchStatusCheck.mockResolvedValue(null);
+      await branchWorker.processBranch({
+        ...config,
+        stabilityStatus: 'green',
+        statusCheckNames: {
+          minimumReleaseAge: 'renovate/stability-days',
+          mergeConfidence: null,
+          configValidation: null,
+          artifactError: null,
+        },
+      });
+      // Called only once before ensurePr
+      expect(platform.setBranchStatus).toHaveBeenCalledTimes(1);
+    });
+
     it('returns if branch exists but updated', async () => {
       expect.assertions(3);
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce(
@@ -1158,6 +1222,25 @@ describe('workers/repository/update/branch/index', () => {
         `,
         number: 123,
         topic: 'ℹ️ Artifact update notice',
+      });
+    });
+
+    it('fetches changelogs for the "branch" stage', async () => {
+      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce(
+        partial<PackageFilesResult>({
+          updatedPackageFiles: [partial<FileChange>()],
+        }),
+      );
+      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+        artifactErrors: [],
+        updatedArtifacts: [partial<FileChange>()],
+      });
+
+      await branchWorker.processBranch({ ...config });
+
+      expect(changelog.embedChangelogs).toHaveBeenCalledExactlyOnceWith({
+        upgrades: config.upgrades,
+        stage: 'branch',
       });
     });
 

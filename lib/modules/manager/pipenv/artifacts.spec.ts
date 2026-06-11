@@ -46,6 +46,7 @@ const adminConfig: RepoGlobalConfig = {
   localDir: upath.join(upath.join('/tmp/github/some/repo')),
   cacheDir: upath.join(upath.join('/tmp/renovate/cache')),
   containerbaseDir: upath.join(upath.join('/tmp/renovate/cache/containerbase')),
+  binarySource: 'global',
 };
 const dockerAdminConfig = {
   ...adminConfig,
@@ -774,7 +775,7 @@ describe('modules/manager/pipenv/artifacts', () => {
         config,
       }),
     ).toEqual([
-      { artifactError: { lockFile: 'Pipfile.lock', stderr: 'not found' } },
+      { artifactError: { fileName: 'Pipfile.lock', stderr: 'not found' } },
     ]);
 
     expect(fsExtra.ensureDir.mock.calls).toEqual([]);

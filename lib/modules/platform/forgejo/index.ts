@@ -220,16 +220,17 @@ const platform: Platform = {
       baseEndpoint = ensureTrailingSlash(baseEndpoint);
       defaults.endpoint = baseEndpoint;
     } else {
-      logger.debug('Using default Forgejo endpoint: ' + defaults.endpoint);
+      logger.debug(`Using default Forgejo endpoint: ${defaults.endpoint}`);
     }
     setBaseUrl(defaults.endpoint);
 
     let gitAuthor: string;
     try {
       const user = await helper.getCurrentUser({ token });
-      gitAuthor = `${user.full_name ?? user.username} <${user.email}>`;
+      // oxlint-disable-next-line typescript/prefer-nullish-coalescing -- `full_name` can be emtpy string
+      gitAuthor = `${user.full_name || user.login} <${user.email}>`;
       botUserID = user.id;
-      botUserName = user.username;
+      botUserName = user.login;
       const env = getEnv();
       /* v8 ignore if: experimental feature */
       if (semver.valid(env.RENOVATE_X_PLATFORM_VERSION)) {
@@ -285,7 +286,7 @@ const platform: Platform = {
     config.repository = repository;
     config.cloneSubmodules = !!cloneSubmodules;
     config.cloneSubmodulesFilter = cloneSubmodulesFilter;
-    config.ignorePrAuthor = GlobalConfig.get('ignorePrAuthor', false);
+    config.ignorePrAuthor = GlobalConfig.get('ignorePrAuthor');
 
     // Try to fetch information about repository
     try {
@@ -344,7 +345,7 @@ const platform: Platform = {
     }
 
     try {
-      config.isOrgRepo = await helper.isOrg(repo.owner.username);
+      config.isOrgRepo = await helper.isOrg(repo.owner.login);
     } catch (err) {
       logger.debug({ err }, 'Forgejo initRepo() error');
       throw err;
@@ -366,7 +367,7 @@ const platform: Platform = {
     config.issueList = null;
     config.labelList = null;
     config.hasIssuesEnabled = !repo.external_tracker && repo.has_issues;
-    config.orgName = repo.owner.username;
+    config.orgName = repo.owner.login;
 
     return {
       defaultBranch: config.defaultBranch,
@@ -1096,7 +1097,7 @@ export function maxBodyLength(): number {
   return 1000000;
 }
 
-/* eslint-disable @typescript-eslint/unbound-method */
+/* oxlint-disable typescript/unbound-method */
 export const {
   addAssignees,
   addReviewers,

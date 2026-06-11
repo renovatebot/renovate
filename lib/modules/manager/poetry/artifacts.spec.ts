@@ -41,6 +41,7 @@ const adminConfig: RepoGlobalConfig = {
   localDir: upath.join('/tmp/github/some/repo'),
   cacheDir: upath.join('/tmp/cache'),
   containerbaseDir: upath.join('/tmp/cache/containerbase'),
+  binarySource: 'global',
 };
 
 const config: UpdateArtifactsConfig = {};
@@ -665,7 +666,7 @@ describe('modules/manager/poetry/artifacts', () => {
           newPackageFileContent: '{}',
           config,
         }),
-      ).toMatchObject([{ artifactError: { lockFile: 'poetry.lock' } }]);
+      ).toMatchObject([{ artifactError: { fileName: 'poetry.lock' } }]);
       expect(execSnapshots).toMatchObject([]);
     });
 

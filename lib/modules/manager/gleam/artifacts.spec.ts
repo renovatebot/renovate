@@ -11,6 +11,7 @@ vi.mock('../../../util/fs/index.ts');
 
 const globalConfig: RepoGlobalConfig = {
   localDir: '',
+  binarySource: 'global',
 };
 
 describe('modules/manager/gleam/artifacts', () => {
@@ -157,7 +158,7 @@ describe('modules/manager/gleam/artifacts', () => {
       expect(await updateArtifacts(updateArtifact)).toEqual([
         {
           artifactError: {
-            lockFile: 'manifest.toml',
+            fileName: 'manifest.toml',
             stderr: 'fake_gleam_failure',
           },
         },

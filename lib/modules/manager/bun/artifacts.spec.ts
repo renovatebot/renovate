@@ -15,6 +15,7 @@ const fs = vi.mocked(_fs);
 
 const globalConfig: RepoGlobalConfig = {
   localDir: '',
+  binarySource: 'global',
 };
 
 describe('modules/manager/bun/artifacts', () => {
@@ -187,7 +188,7 @@ describe('modules/manager/bun/artifacts', () => {
         fs.readFile.mockResolvedValueOnce(oldLock as never);
         exec.mockRejectedValueOnce(execError);
         expect(await updateArtifacts(updateArtifact)).toEqual([
-          { artifactError: { lockFile: 'bun.lockb', stderr: 'nope' } },
+          { artifactError: { fileName: 'bun.lockb', stderr: 'nope' } },
         ]);
       });
     });
@@ -305,7 +306,7 @@ describe('modules/manager/bun/artifacts', () => {
         fs.readFile.mockResolvedValueOnce(oldLock as never);
         exec.mockRejectedValueOnce(execError);
         expect(await updateArtifacts(updateArtifact)).toEqual([
-          { artifactError: { lockFile: 'bun.lock', stderr: 'nope' } },
+          { artifactError: { fileName: 'bun.lock', stderr: 'nope' } },
         ]);
       });
     });

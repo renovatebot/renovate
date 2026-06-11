@@ -7,6 +7,7 @@ import type {
 } from '../../../../config/types.ts';
 import { logger } from '../../../../logger/index.ts';
 import { clone } from '../../../../util/clone.ts';
+import { getInheritedOrGlobal } from '../../../../util/common.ts';
 import {
   EditorConfig,
   JSONWriter,
@@ -15,7 +16,7 @@ import {
 async function getOnboardingConfig(
   config: RenovateConfig,
 ): Promise<RenovateSharedConfig | undefined> {
-  let onboardingConfig = clone(config.onboardingConfig);
+  let onboardingConfig = clone(getInheritedOrGlobal('onboardingConfig'));
 
   // TODO #22198 fix types
   const foundPreset = await searchDefaultOnboardingPreset(config.repository!);
@@ -75,8 +76,7 @@ async function searchDefaultOnboardingPreset(
 
     const orgName = repoPathParts[0];
 
-    // TODO: types (#22198)
-    const platform = GlobalConfig.get('platform')!;
+    const platform = GlobalConfig.get('platform');
     try {
       const repo = `${orgName}/.${platform}`;
       const presetName = 'renovate-config';

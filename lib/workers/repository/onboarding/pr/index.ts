@@ -134,21 +134,35 @@ export async function ensureOnboardingPr(
     return;
   }
 
-  const onboardingConfigHashComment =
-    await getOnboardingConfigHashComment(config);
+  const onboardingConfigHashComment = await getOnboardingConfigHashComment();
   const rebaseCheckBox = getRebaseCheckbox(config.onboardingRebaseCheckbox);
   logger.debug('Filling in onboarding PR template');
   let prTemplate = `Welcome to [Renovate](${
     config.productLinks!.homepage
   })! This is an onboarding PR to help you understand and configure settings before regular Pull Requests begin.\n\n`;
   prTemplate +=
-    config.requireConfig === 'required'
+    getInheritedOrGlobal('requireConfig') === 'required'
       ? emojify(
           `:vertical_traffic_light: To activate Renovate, merge this Pull Request. To disable Renovate, simply close this Pull Request unmerged.\n\n`,
         )
       : emojify(
           `:vertical_traffic_light: Renovate will begin keeping your dependencies up-to-date only once you merge or close this Pull Request.\n\n`,
         );
+
+  prTemplate += emojify(
+    `:books: See our [Reading List](https://docs.renovatebot.com/reading-list/) for relevant documentation you may be interested in reading.\n\n`,
+  );
+
+  const configFile = getDefaultConfigFileName();
+  prTemplate += emojify(
+    `:abcd: Do you want to change how Renovate upgrades your dependencies?`,
+  );
+  prTemplate += ` Add your custom config to \`${configFile}\` in this branch${
+    config.onboardingRebaseCheckbox
+      ? ' and select the Retry/Rebase checkbox below'
+      : ''
+  }. Renovate will update the Pull Request description the next time it runs.`;
+  prTemplate += '\n\n';
   // TODO #22198
   prTemplate += emojify(
     `
@@ -180,11 +194,10 @@ If you need any further assistance then you can also [request help here](${
         managerFiles.map((file) => ` * \`${file.packageFile}\` (${manager})`),
       );
     }
-    prBody =
-      prBody.replace(
-        '{{PACKAGE FILES}}',
-        '### Detected Package Files\n\n' + files.join('\n'),
-      ) + '\n';
+    prBody = `${prBody.replace(
+      '{{PACKAGE FILES}}',
+      `### Detected Package Files\n\n${files.join('\n')}`,
+    )}\n`;
   } else {
     prBody = prBody.replace('{{PACKAGE FILES}}\n', '');
   }
@@ -212,7 +225,7 @@ If you need any further assistance then you can also [request help here](${
 
   prBody += onboardingConfigHashComment;
 
-  logger.trace('prBody:\n' + prBody);
+  logger.trace(`prBody:\n${prBody}`);
 
   prBody = platform.massageMarkdown(prBody, config.rebaseLabel);
 
@@ -247,7 +260,7 @@ If you need any further assistance then you can also [request help here](${
       const prTitle =
         config.semanticCommits === 'enabled'
           ? getSemanticCommitPrTitle(config)
-          : config.onboardingPrTitle!;
+          : getInheritedOrGlobal('onboardingPrTitle')!;
       const pr = await platform.createPr({
         sourceBranch: onboardingBranch,
         targetBranch: config.defaultBranch!,
@@ -292,10 +305,8 @@ function getRebaseCheckbox(onboardingRebaseCheckbox?: boolean): string {
   return rebaseCheckBox;
 }
 
-async function getOnboardingConfigHashComment(
-  config: RenovateConfig,
-): Promise<string> {
-  const configFile = getDefaultConfigFileName(config);
+async function getOnboardingConfigHashComment(): Promise<string> {
+  const configFile = getDefaultConfigFileName();
   const existingContents =
     (await getFile(configFile, getInheritedOrGlobal('onboardingBranch'))) ?? '';
   const hash = toSha256(existingContents);

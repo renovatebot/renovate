@@ -220,6 +220,35 @@ function getNewValue({
     }
   }
 
+  const mavenRange = parseMavenBasedRange(currentValue);
+  if (mavenRange?.preferredVal) {
+    const { leftVal, rightVal, preferredVal } = mavenRange;
+    const baseRange = currentValue.slice(
+      0,
+      currentValue.lastIndexOf(`!!${preferredVal}`),
+    );
+    const newBaseRange = mavenVersion.getNewValue({
+      currentValue: baseRange,
+      rangeStrategy,
+      newVersion,
+    });
+    // v8 ignore if: the implementation has a non-null return type
+    if (newBaseRange === null) {
+      return null;
+    }
+
+    const preferredIsBoundary =
+      preferredVal === leftVal || preferredVal === rightVal;
+    const newParsed = parseMavenBasedRange(newBaseRange);
+    const preferredStillPresent =
+      newParsed?.leftVal === preferredVal ||
+      newParsed?.rightVal === preferredVal;
+    const newPreferredVal =
+      preferredIsBoundary && !preferredStillPresent ? newVersion : preferredVal;
+
+    return `${newBaseRange}!!${newPreferredVal}`;
+  }
+
   return mavenVersion.getNewValue({ currentValue, rangeStrategy, newVersion });
 }
 

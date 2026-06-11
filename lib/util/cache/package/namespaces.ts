@@ -5,7 +5,6 @@
  * backwards-incompatible changes in non-major releases
  */
 
-/* v8 ignore next -- BTW don't forget to update `self-hosted-configuration.md` */
 export const packageCacheNamespaces = [
   '_test-namespace',
   'changelog-bitbucket-notes@v2',
@@ -49,6 +48,7 @@ export const packageCacheNamespaces = [
   'datasource-docker-releases-v2',
   'datasource-docker-tags',
   'datasource-dotnet-version',
+  'datasource-elm-package',
   'datasource-endoflife-date',
   'datasource-galaxy-collection',
   'datasource-galaxy',
@@ -78,6 +78,8 @@ export const packageCacheNamespaces = [
   'datasource-jenkins-plugins',
   'datasource-jsr',
   'datasource-maven:cache-provider',
+  'datasource-maven:metadata-not-found',
+  'datasource-maven:pom-cache-provider',
   'datasource-maven:postprocess-reject',
   'datasource-nextcloud',
   'datasource-node-version',
@@ -91,6 +93,7 @@ export const packageCacheNamespaces = [
   'datasource-rpm',
   'datasource-ruby-version',
   'datasource-rubygems',
+  'datasource-rust-version',
   'datasource-sbt-package',
   'datasource-terraform-module',
   'datasource-terraform-provider',
@@ -106,7 +109,7 @@ export const packageCacheNamespaces = [
   'preset',
   'terraform-provider-hash',
   'url-sha256',
-] as const; /* v8 ignore stop -- BTW don't forget to update `self-hosted-configuration.md` */
+] as const;
 
 export type PackageCacheNamespace =
   | (typeof packageCacheNamespaces)[number]
