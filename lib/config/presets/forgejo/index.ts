@@ -4,7 +4,12 @@ import type { RepoContents } from '../../../modules/platform/forgejo/schema.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
 import type { Nullish } from '../../../types/index.ts';
 import type { Preset, PresetConfig } from '../types.ts';
-import { PRESET_DEP_NOT_FOUND, fetchPreset, parsePreset } from '../util.ts';
+import {
+  PRESET_DEP_NOT_FOUND,
+  PRESET_INVALID,
+  fetchPreset,
+  parsePreset,
+} from '../util.ts';
 
 export const Endpoint = 'https://code.forgejo.org/';
 
@@ -29,7 +34,15 @@ export async function fetchJSONFile(
     throw new Error(PRESET_DEP_NOT_FOUND);
   }
 
-  const contentString = res.type === 'file' ? res.contentString : undefined;
+  let contentString: string;
+  if (res.type === 'file') {
+    contentString = res.contentString;
+  } else {
+    logger.debug(
+      `Preset ${fileName} has unexpected type '${res.type}'. Only \`file\` is supported`,
+    );
+    throw new Error(PRESET_INVALID);
+  }
   return parsePreset(contentString, fileName);
 }
 

@@ -3,7 +3,11 @@ import * as httpMock from '~test/http-mock.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
 import { setBaseUrl } from '../../../util/http/forgejo.ts';
 import { toBase64 } from '../../../util/string.ts';
-import { PRESET_INVALID_JSON, PRESET_NOT_FOUND } from '../util.ts';
+import {
+  PRESET_INVALID,
+  PRESET_INVALID_JSON,
+  PRESET_NOT_FOUND,
+} from '../util.ts';
 import * as forgejo from './index.ts';
 
 const forgejoApiHost = forgejo.Endpoint;
@@ -74,6 +78,26 @@ describe('config/presets/forgejo/index', () => {
         null,
       );
       expect(res).toEqual({ from: 'api' });
+    });
+
+    it('throws for non-file response', async () => {
+      httpMock
+        .scope(forgejoApiHost)
+        .get(`${basePath}/some-filename.json`)
+        .reply(200, {
+          type: 'dir',
+          name: 'some-filename.json',
+          path: 'some-filename.json',
+        });
+
+      await expect(
+        forgejo.fetchJSONFile(
+          'some/repo',
+          'some-filename.json',
+          forgejoApiHost,
+          null,
+        ),
+      ).rejects.toThrow(PRESET_INVALID);
     });
 
     it('throws external host error', async () => {
