@@ -29,6 +29,7 @@
     "biome-fix": "biome check --write .",
     "generate": "run-s 'generate:*'",
     "generate:imports": "node tools/generate-imports.mjs",
+    "update-npm-shrinkwrap": "node tools/generate-npm-shrinkwrap.mjs",
     "git-check": "node tools/check-git-version.mjs",
     "jest": "GIT_ALLOW_PROTOCOL=file GIT_CONFIG_GLOBAL=/dev/null GIT_CONFIG_SYSTEM=/dev/null LOG_LEVEL=fatal vitest run --logHeapUsage",
     "vitest": "GIT_ALLOW_PROTOCOL=file GIT_CONFIG_GLOBAL=/dev/null GIT_CONFIG_SYSTEM=/dev/null LOG_LEVEL=fatal vitest run --logHeapUsage",
@@ -352,6 +353,7 @@
   "packageManager": "pnpm@11.5.2",
   "files": [
     "dist",
+    "npm-shrinkwrap.json",
     "renovate-schema.json"
   ]
 }
