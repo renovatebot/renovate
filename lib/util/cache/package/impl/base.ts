@@ -1,7 +1,7 @@
 import { DateTime } from 'luxon';
 import { logger } from '../../../../logger/index.ts';
 import type { MaybePromise } from '../../../../types/index.ts';
-import { decodeEntry, isEnvelope } from '../codec.ts';
+import { decodeEntry, encodeEntry, isEnvelope } from '../codec.ts';
 import type { LegacyEntry } from '../legacy.ts';
 import { decodeLegacyEntry } from '../legacy.ts';
 import type { PackageCacheNamespace } from '../types.ts';
@@ -31,6 +31,8 @@ export abstract class PackageCacheBase {
         return entry.value as T;
       }
 
+      // TODO: Delete this legacy cache fallback once pre-envelope entries have
+      // expired.
       const entry = await decodeLegacyEntry(raw);
       if (isExpiredLegacyEntry(entry)) {
         await this.removeInvalidEntry(namespace, key);
@@ -46,12 +48,32 @@ export abstract class PackageCacheBase {
     }
   }
 
-  abstract set(
+  async set(
     namespace: PackageCacheNamespace,
     key: string,
     value: unknown,
     hardTtlMinutes: number,
-  ): Promise<void>;
+  ): Promise<void> {
+    logger.trace({ namespace, key, hardTtlMinutes }, 'Saving cached value');
+
+    const ttlSeconds = Math.floor(hardTtlMinutes * 60);
+
+    try {
+      if (ttlSeconds <= 0) {
+        await this.rm(namespace, key);
+        return;
+      }
+
+      await this.writeRaw(
+        namespace,
+        key,
+        await encodeEntry(value, DateTime.local()),
+        ttlSeconds,
+      );
+    } catch (err) {
+      logger.once.warn({ err }, 'Error while setting package cache value');
+    }
+  }
 
   abstract destroy(): Promise<void>;
 
@@ -59,6 +81,13 @@ export abstract class PackageCacheBase {
     namespace: PackageCacheNamespace,
     key: string,
   ): MaybePromise<Buffer | undefined>;
+
+  protected abstract writeRaw(
+    namespace: PackageCacheNamespace,
+    key: string,
+    data: Buffer,
+    ttlSeconds: number,
+  ): MaybePromise<void>;
 
   protected abstract rm(
     namespace: PackageCacheNamespace,
@@ -77,6 +106,8 @@ export abstract class PackageCacheBase {
   }
 }
 
+// TODO: Delete with the legacy JSON-wrapper decoder; envelopes use
+// backend-native TTL.
 function isExpiredLegacyEntry(entry: LegacyEntry): boolean {
   const { expiry } = entry;
   return (
