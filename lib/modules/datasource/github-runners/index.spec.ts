@@ -18,6 +18,8 @@ describe('modules/datasource/github-runners/index', () => {
           { version: '22.04' },
           { version: '24.04-arm' },
           { version: '24.04' },
+          { version: '26.04-arm', isStable: false },
+          { version: '26.04', isStable: false },
         ],
         sourceUrl: 'https://github.com/actions/runner-images',
       });
