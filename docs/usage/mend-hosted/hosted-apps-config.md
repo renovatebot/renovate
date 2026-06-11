@@ -5,9 +5,8 @@ This page:
 - covers all non-default Renovate behavior of these Mend-hosted apps
 - is a supplement to the CLI documentation
 
-<!-- prettier-ignore -->
 !!! note
-    For general configuration of the Renovate CLI, read the main [Configuration/Overview](../config-overview.md) section.
+  For general configuration of the Renovate CLI, read the main [Configuration/Overview](../config-overview.md) section.
 
 ## Finding the logs
 
@@ -37,18 +36,17 @@ Follow these steps to see which version the Mend Renovate app used for a specifi
    ```
    INFO: Renovate started
    {
-     "renovateVersion": "43.182.1"
+     "renovateVersion": "43.214.5"
    }
    ...
    INFO: Repository started
    {
-     "renovateVersion": "43.182.1"
+     "renovateVersion": "43.214.5"
    }
    ```
 
-<!-- prettier-ignore -->
 !!! tip
-    The PRs that Renovate creates have a link to the "repository job log" in the footer of the PR body text.
+  The PRs that Renovate creates have a link to the "repository job log" in the footer of the PR body text.
 
 ## Onboarding behavior
 
@@ -115,15 +113,13 @@ You can find the allowed `postUpgradeTasks` commands in Renovate's log output, w
 
 As noted in [Validation of Renovate config change PRs](../config-validation.md#validation-of-renovate-config-change-prs), Renovate will automagically validate your configuration changes when pushing to the "reconfigure" branch.
 
-<!-- prettier-ignore -->
 !!! tip
-    When using a Mend-hosted app, the "reconfigure" branch defaults to `renovate/reconfigure`.
+  When using a Mend-hosted app, the "reconfigure" branch defaults to `renovate/reconfigure`.
 
 When pushing to this specific branch name, Renovate will run its validation and report a status check to the Platform whether this passes/fails validation.
 
-<!-- prettier-ignore -->
 !!! note
-    The reconfigure branch **must** be pushed to the source repository that Renovate runs against, not a fork.
+  The reconfigure branch **must** be pushed to the source repository that Renovate runs against, not a fork.
 
 If you have a Pull Request open from this branch (including draft PRs), Renovate will comment on the PR to note:
 

@@ -454,6 +454,7 @@ export class DockerDatasource extends Datasource {
         namespace: 'datasource-docker-architecture',
         key: `${registryHost}:${dockerRepository}@${currentDigest}`,
         ttlMinutes: 1440 * 28,
+        shouldCacheResult: isNonEmptyString,
       },
       () =>
         this._getImageArchitecture(
@@ -1062,6 +1063,7 @@ export class DockerDatasource extends Datasource {
         namespace: 'datasource-docker-digest',
         key: `${registryHost}:${dockerRepository}:${newTag}${digest}`,
         fallback: true,
+        shouldCacheResult: isNonEmptyString,
       },
       () => this._getDigest(config, newValue),
     );

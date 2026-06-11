@@ -57,7 +57,7 @@ function scheduleToString(
   timezone: string | undefined,
 ): string {
   const scheduleLines = [];
-  if (schedule && schedule[0] !== 'at any time') {
+  if (schedule?.length && schedule[0] !== 'at any time') {
     const r = getReadableCronSchedule(schedule);
     if (r) {
       scheduleLines.push(...r);

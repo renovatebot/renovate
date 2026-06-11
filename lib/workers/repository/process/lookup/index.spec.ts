@@ -22,6 +22,7 @@ import { id as composerVersioningId } from '../../../../modules/versioning/compo
 import { id as debianVersioningId } from '../../../../modules/versioning/debian/index.ts';
 import { id as dockerVersioningId } from '../../../../modules/versioning/docker/index.ts';
 import { id as gitVersioningId } from '../../../../modules/versioning/git/index.ts';
+import { id as githubActionsVersioningId } from '../../../../modules/versioning/github-actions/index.ts';
 import { id as mavenVersioningId } from '../../../../modules/versioning/maven/index.ts';
 import { id as nodeVersioningId } from '../../../../modules/versioning/node/index.ts';
 import { id as npmVersioningId } from '../../../../modules/versioning/npm/index.ts';
@@ -3817,6 +3818,26 @@ describe('workers/repository/process/lookup/index', () => {
       expect(res.updates).toHaveLength(0);
     });
 
+    it('uses lockedVersion timestamp when lockedVersion differs from currentVersion', async () => {
+      config.currentValue = '^1.0.0';
+      config.lockedVersion = '1.0.0';
+      config.rangeStrategy = 'replace';
+      config.packageName = 'q';
+      config.datasource = NpmDatasource.id;
+      httpMock.scope('https://registry.npmjs.org').get('/q').reply(200, qJson);
+
+      const res = await Result.wrap(
+        lookup.lookupUpdates(config),
+      ).unwrapOrThrow();
+
+      // currentVersion should be the lockedVersion
+      expect(res.currentVersion).toBe('1.0.0');
+      // currentVersionTimestamp should be 1.0.0's timestamp, not 1.4.1's
+      expect(res.currentVersionTimestamp).toBe(
+        '2014-01-04T17:39:35.181Z' as Timestamp,
+      );
+    });
+
     it('ignores deprecated when it is not the latest', async () => {
       config.currentValue = '1.3.0';
       config.packageName = 'q2';
@@ -4372,6 +4393,37 @@ describe('workers/repository/process/lookup/index', () => {
           },
         ],
         versioning: 'npm',
+        warnings: [],
+      });
+    });
+
+    it('handles pin for github actions', async () => {
+      config.currentValue = 'v8';
+      config.rangeStrategy = 'pin';
+      config.packageName = 'actions/checkout';
+      config.versioning = githubActionsVersioningId;
+      config.datasource = GithubTagsDatasource.id;
+      getGithubTags.mockResolvedValueOnce({
+        releases: [{ version: 'v8.0.1' }, { version: 'v8' }],
+      });
+
+      const res = await Result.wrap(
+        lookup.lookupUpdates(config),
+      ).unwrapOrThrow();
+
+      expect(res).toEqual({
+        currentVersion: 'v8.0.1',
+        registryUrl: 'https://github.com',
+        updates: [
+          {
+            isPin: true,
+            newMajor: 8,
+            newValue: 'v8.0.1',
+            newVersion: 'v8.0.1',
+            updateType: 'pin',
+          },
+        ],
+        versioning: 'github-actions',
         warnings: [],
       });
     });
@@ -5669,6 +5721,54 @@ describe('workers/repository/process/lookup/index', () => {
           },
         ],
         versioning: 'npm',
+        warnings: [],
+      });
+    });
+
+    it('handles changelog with content for ranges', async () => {
+      config.currentValue = '[8.0,8.1)';
+      config.packageName = 'node';
+      config.datasource = DockerDatasource.id;
+      config.versioning = 'maven';
+      getDockerReleases.mockResolvedValueOnce({
+        releases: [
+          {
+            version: '8.0.0',
+          },
+          {
+            changelogContent: 'testContent',
+            changelogUrl: 'http://testChangelogUrl',
+            version: '8.1.0',
+          },
+        ],
+      });
+
+      const res = await Result.wrap(
+        lookup.lookupUpdates(config),
+      ).unwrapOrThrow();
+
+      expect(res).toEqual({
+        changelogContent: 'testContent',
+        changelogUrl: 'http://testChangelogUrl',
+        currentVersion: '8.0.0',
+        isSingleVersion: false,
+        registryUrl: 'https://index.docker.io',
+        sourceUrl: 'https://github.com/nodejs/node',
+        updates: [
+          {
+            bucket: 'non-major',
+            isBreaking: false,
+            isRange: true,
+            newMajor: 8,
+            newMinor: 1,
+            newPatch: 0,
+            newValue: '[8.0,8.2)',
+            newVersion: '8.1.0',
+            updateType: 'minor',
+            hasAttestation: undefined,
+          },
+        ],
+        versioning: 'maven',
         warnings: [],
       });
     });

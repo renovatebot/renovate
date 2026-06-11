@@ -198,21 +198,20 @@ Add `"docker:enableMajor"` to your `extends` array.
 Add `"default:pinDigestsDisabled"` to your `extends` array.
 
 <!-- markdownlint-disable MD046 -->
-<!-- prettier-ignore -->
 !!! note
-    This preset only sets the global default for the [digest pinning flag](./configuration-options.md#pindigests) to `false`.
-    If you have configured package rules that set `pinDigests` to `true`, those will still apply.
-    This is also the case if you use the [`docker:pinDigests` preset](./presets-docker.md#dockerpindigests), which adds a package rule that sets `pinDigests` to `true` for all packages from the docker datasource.
+  This preset only sets the global default for the [digest pinning flag](./configuration-options.md#pindigests) to `false`.
+  If you have configured package rules that set `pinDigests` to `true`, those will still apply.
+  This is also the case if you use the [`docker:pinDigests` preset](./presets-docker.md#dockerpindigests), which adds a package rule that sets `pinDigests` to `true` for all packages from the docker datasource.
 
-    If you want to disable the `docker:pinDigests` preset (e.g. if you want to use `config:best-practices` but not have digest pinning enabled),
-    ignore the preset like this:
+If you want to disable the `docker:pinDigests` preset (e.g. if you want to use `config:best-practices` but not have digest pinning enabled),
+ignore the preset like this:
 
-    ```json
-    {
-      "extends": ["config:best-practices"],
-      "ignorePresets": ["docker:pinDigests"]
-    }
-    ```
+```json
+{
+  "extends": ["config:best-practices"],
+  "ignorePresets": ["docker:pinDigests"]
+}
+```
 
 <!-- markdownlint-enable MD046 -->
 
@@ -506,7 +505,7 @@ Make sure to install the Google Cloud SDK into the custom image, as you need the
 For example:
 
 ```Dockerfile
-FROM renovate/renovate:43.182.1
+FROM renovate/renovate:43.214.5
 # Include the "Docker tip" which you can find here https://cloud.google.com/sdk/docs/install
 # under "Installation" for "Debian/Ubuntu"
 RUN ...

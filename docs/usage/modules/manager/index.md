@@ -65,7 +65,7 @@ Most managers are enabled by default.
 For those that aren't, typically because they are considered experimental, you can opt-in manually.
 If there was a manager called `some-new-manager` you would enable it like this:
 
-```json
+```json {configType=none}
 {
   "some-new-manager": {
     "enabled": true

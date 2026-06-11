@@ -9,7 +9,9 @@ permissions:
 
 jobs:
   slack:
-    if: contains(github.event.label.name, 'mend-app')
+    if: >
+      contains(github.event.label.name, 'mend-app') ||
+      contains(github.event.discussion.labels.*.name, 'mend-app')
     runs-on: ubuntu-latest
     steps:
       - name: Calculate time ago

@@ -1,5 +1,5 @@
 // TODO fix mocks
-import _timers from 'timers/promises';
+import _timers from 'node:timers/promises';
 import { mockDeep } from 'vitest-mock-extended';
 import * as httpMock from '~test/http-mock.ts';
 import { git, hostRules, logger } from '~test/util.ts';

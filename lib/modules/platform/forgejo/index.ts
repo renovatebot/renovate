@@ -228,9 +228,9 @@ const platform: Platform = {
     try {
       const user = await helper.getCurrentUser({ token });
       // oxlint-disable-next-line typescript/prefer-nullish-coalescing -- `full_name` can be emtpy string
-      gitAuthor = `${user.full_name || user.username} <${user.email}>`;
+      gitAuthor = `${user.full_name || user.login} <${user.email}>`;
       botUserID = user.id;
-      botUserName = user.username;
+      botUserName = user.login;
       const env = getEnv();
       /* v8 ignore if: experimental feature */
       if (semver.valid(env.RENOVATE_X_PLATFORM_VERSION)) {
@@ -345,7 +345,7 @@ const platform: Platform = {
     }
 
     try {
-      config.isOrgRepo = await helper.isOrg(repo.owner.username);
+      config.isOrgRepo = await helper.isOrg(repo.owner.login);
     } catch (err) {
       logger.debug({ err }, 'Forgejo initRepo() error');
       throw err;
@@ -367,7 +367,7 @@ const platform: Platform = {
     config.issueList = null;
     config.labelList = null;
     config.hasIssuesEnabled = !repo.external_tracker && repo.has_issues;
-    config.orgName = repo.owner.username;
+    config.orgName = repo.owner.login;
 
     return {
       defaultBranch: config.defaultBranch,

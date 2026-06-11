@@ -108,7 +108,7 @@ export function toRenovatePR(data: PR, author: string | null): Pr | null {
     return null;
   }
 
-  const createdBy = data.user?.username;
+  const createdBy = data.user?.login;
   if (
     createdBy &&
     author &&

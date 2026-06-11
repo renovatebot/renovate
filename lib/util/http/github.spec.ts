@@ -326,6 +326,8 @@ describe('util/http/github', () => {
           .get(url)
           .reply(
             code,
+            // nock's reply callback binds `this.req` to the request object, requires regular function
+            // eslint-disable-next-line prefer-arrow-callback
             function reply() {
               // https://github.com/nock/nock/issues/1979
               if (typeof body === 'object' && 'message' in body) {
@@ -419,6 +421,8 @@ describe('util/http/github', () => {
             .get(url)
             .reply(
               code,
+              // nock's reply callback binds `this.req` to the request object, requires regular function
+              // eslint-disable-next-line prefer-arrow-callback
               function reply() {
                 // https://github.com/nock/nock/issues/1979
                 if (typeof body === 'object' && 'message' in body) {

@@ -23,6 +23,7 @@ import { isConstraintName, isToolName } from '../util/exec/types.ts';
 import { getExpression } from '../util/jsonata.ts';
 import { regEx } from '../util/regex.ts';
 import {
+  anyMatchRegexOrGlobList,
   getRegexPredicate,
   isRegexMatch,
   matchRegexOrGlobList,
@@ -716,6 +717,32 @@ export async function validateConfig(
                   continue;
                 }
               }
+            } else if (key === 'statusCheckWhen') {
+              const allowedWhenValues = ['always', 'never', 'failed'];
+              for (const [statusCheckKey, statusCheckValue] of Object.entries(
+                val,
+              )) {
+                if (
+                  !allowedStatusCheckStrings.includes(
+                    statusCheckKey as StatusCheckKey,
+                  )
+                ) {
+                  errors.push({
+                    topic: 'Configuration Error',
+                    message: `Invalid \`${currentPath}.${key}.${statusCheckKey}\` configuration: key is not allowed.`,
+                  });
+                }
+                if (
+                  !isString(statusCheckValue) ||
+                  !allowedWhenValues.includes(statusCheckValue)
+                ) {
+                  errors.push({
+                    topic: 'Configuration Error',
+                    message: `Invalid \`${currentPath}.${statusCheckKey}\` configuration: value must be one of "always", "never", or "failed".`,
+                  });
+                  continue;
+                }
+              }
             } else if (key === 'customDatasources') {
               const allowedKeys = [
                 'description',
@@ -1055,6 +1082,19 @@ async function validateGlobalConfig(
       }
     } else if (type === 'array') {
       if (isArray(val)) {
+        for (const [subIndex, subval] of val.entries()) {
+          if (isObject(subval)) {
+            const subValidation = await validateConfig(
+              'global',
+              subval as AllConfig,
+              false,
+              `${currentPath}[${subIndex}]`,
+            );
+            warnings.push(...subValidation.warnings);
+            errors.push(...subValidation.errors);
+          }
+        }
+
         if (isRegexOrGlobOption(key)) {
           warnings.push(
             ...regexOrGlobValidator.check({
@@ -1123,7 +1163,11 @@ async function validateGlobalConfig(
             );
 
             if (
-              !(packageCacheNamespaces as readonly string[]).includes(subKey)
+              !(packageCacheNamespaces as readonly string[]).includes(subKey) &&
+              !anyMatchRegexOrGlobList(
+                packageCacheNamespaces as unknown as string[],
+                [subKey],
+              )
             ) {
               errors.push({
                 message: `${currentPath}: namespace \`${subKey}\` does not exist`,
