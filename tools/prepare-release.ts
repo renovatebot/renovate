@@ -119,13 +119,7 @@ async function preparePackageVersion(
   }
   const res = await exec(
     'pnpm',
-    [
-      'version',
-      version,
-      '--no-git-tag-version',
-      '--allow-same-version',
-      '--ignore-scripts',
-    ],
+    ['version', version, '--no-git-tag-version', '--allow-same-version'],
     { reject: false },
   );
 
