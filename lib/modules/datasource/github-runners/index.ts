@@ -18,6 +18,8 @@ export class GithubRunnersDatasource extends Datasource {
    */
   private static readonly releases: Record<string, Release[] | undefined> = {
     ubuntu: [
+      { version: '26.04', isStable: false },
+      { version: '26.04-arm', isStable: false },
       { version: '24.04' },
       { version: '24.04-arm' },
       { version: '22.04' },
