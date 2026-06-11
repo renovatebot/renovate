@@ -407,6 +407,24 @@ describe('util/git/index', { timeout: 30000 }, () => {
       ).toBeFalse();
     });
 
+    it('should return false when author matches ignored case-insensitive regex', async () => {
+      git.setUserRepoConfig({
+        gitIgnoredAuthors: ['/^CUSTOM@E.+\\.COM$/i'],
+      });
+      expect(
+        await git.isBranchModified('renovate/custom_author', defaultBranch),
+      ).toBeFalse();
+    });
+
+    it('should return true when ignored regex is invalid', async () => {
+      git.setUserRepoConfig({
+        gitIgnoredAuthors: ['/(invalid/'],
+      });
+      expect(
+        await git.isBranchModified('renovate/custom_author', defaultBranch),
+      ).toBeTrue();
+    });
+
     it('should return true when non-ignored authors commit followed by an ignored author', async () => {
       git.setUserRepoConfig({
         gitIgnoredAuthors: ['author1@example.com'],
