@@ -649,18 +649,14 @@ jobs:
     steps:
       - run: df -h
 
-      # Ensure docker is using /mnt/docker for data storage on x86_64 runners to avoid disk space issues
-      - name: Prepare docker
-        run: |
-          echo '{"data-root": "/mnt/docker"}' | sudo tee /etc/docker/daemon.json
-          sudo systemctl restart docker
-          docker info
-
       - name: Checkout code
         uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
           persist-credentials: false
           show-progress: false
+
+      - name: Setup Docker
+        uses: ./.github/actions/setup-docker
 
       - name: Download dist
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
@@ -820,15 +816,6 @@ jobs:
             gh run cancel "$RUN_ID"
           fi
 
-      - run: df -h
-
-      # Ensure docker is using /mnt/docker for data storage on x86_64 runners to avoid disk space issues
-      - name: Prepare docker
-        run: |
-          echo '{"data-root": "/mnt/docker"}' | sudo tee /etc/docker/daemon.json
-          sudo systemctl restart docker
-          docker info
-
       - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
           persist-credentials: false
@@ -836,27 +823,28 @@ jobs:
           filter: blob:none # we don't need all blobs, only the full tree
           show-progress: false
 
-      # To avoid disk space issues when performing a release, we can clear up some disk space ahead of time
-      - name: Free Disk Space
-        uses: jlumbroso/free-disk-space@54081f138730dfa15788a46383842cd2f914a1be # v1.3.1
-        with:
-          # we're likely already using some of the globally installed tools
-          tool-cache: false
-          # there are no images by default
-          docker-images: false
-          # but we're definitely not using these
-          android: true
-          dotnet: true
-          haskell: true
-          # and shouldn't be using swap storage
-          swap-storage: true
+      - name: Setup Docker
+        uses: ./.github/actions/setup-docker
 
       - run: df -h
 
-      - name: docker-config
-        uses: containerbase/internal-tools@48c73faf3c402a86025b22e5cf762fdc4c90a940 # v4.6.43
-        with:
-          command: docker-config
+      # We currently don't neexd it, the runner changed and has now 89G available
+      # To avoid disk space issues when performing a release, we can clear up some disk space ahead of time
+      # - name: Free Disk Space
+      #   uses: jlumbroso/free-disk-space@54081f138730dfa15788a46383842cd2f914a1be # v1.3.1
+      #   with:
+      #     # we're likely already using some of the globally installed tools
+      #     tool-cache: false
+      #     # there are no images by default
+      #     docker-images: false
+      #     # but we're definitely not using these
+      #     android: true
+      #     dotnet: true
+      #     haskell: true
+      #     # and shouldn't be using swap storage
+      #     swap-storage: true
+
+      # - run: df -h
 
       - name: Setup Node.js
         uses: ./.github/actions/setup-node
