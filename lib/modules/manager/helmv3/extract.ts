@@ -65,6 +65,15 @@ export async function extractPackageFile(
       return res;
     }
 
+    if (dep.repository.startsWith('git+')) {
+      logger.debug(
+        { repository: dep.repository, packageFile },
+        `Skipping unsupported helm-git repository.`,
+      );
+      res.skipReason = 'unknown-registry';
+      return res;
+    }
+
     const repository = resolveAlias(dep.repository, config.registryAliases!);
     if (!repository) {
       res.skipReason = 'placeholder-url';
