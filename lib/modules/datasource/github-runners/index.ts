@@ -30,8 +30,10 @@ export class GithubRunnersDatasource extends Datasource {
     ],
     macos: [
       { version: '26' },
+      { version: '26-intel' },
       { version: '26-xlarge' },
       { version: '15' },
+      { version: '15-intel' },
       { version: '15-large' },
       { version: '15-xlarge' },
       { version: '14' },
