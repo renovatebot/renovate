@@ -1,5 +1,4 @@
 import { z } from 'zod/v4';
-import { PagedResult } from '../../platform/bitbucket/schema.ts';
 import { LooseArray } from '../../../util/schema-utils/index.ts';
 
 export const BitbucketTag = z.object({
@@ -23,16 +22,9 @@ export const BitbucketCommit = z.object({
   hash: z.string(),
   date: z.string().optional(),
 });
-export type BitbucketCommit = z.infer<typeof BitbucketCommit>;
 
 export const BitbucketCommits = z
   .object({
     values: LooseArray(BitbucketCommit),
   })
   .transform((body) => body.values);
-export const BitbucketCommitsResult = PagedResult(BitbucketCommit);
-
-export const BitbucketTagsResult = PagedResult(BitbucketTag);
-
-
-

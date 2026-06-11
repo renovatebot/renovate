@@ -602,14 +602,12 @@ async function findOpenIssues(title: string): Promise<BbIssue[]> {
     const filter = encodeURIComponent(filters.join(' AND '));
     // v8 ignore next -- TODO: add test #40625
     return (
-      (
-        await bitbucketHttp.getJson(
-          `/2.0/repositories/${config.repository}/issues?q=${filter}`,
-          { cacheProvider: aggressiveRepoCacheProvider },
-          PagedResult(BbIssue),
-        )
-      ).body.values || []
-    );
+      await bitbucketHttp.getJson(
+        `/2.0/repositories/${config.repository}/issues?q=${filter}`,
+        { cacheProvider: aggressiveRepoCacheProvider },
+        PagedResult(BbIssue),
+      )
+    ).body.values;
   } catch (err) /* v8 ignore next */ {
     logger.warn({ err }, 'Error finding issues');
     return [];
@@ -861,7 +859,7 @@ export async function getIssueList(): Promise<Issue[]> {
       },
       PagedResult(BbIssue),
     );
-    return res.body.values || [];
+    return res.body.values;
   } catch (err) {
     logger.warn({ err }, 'Error finding issues');
     return [];

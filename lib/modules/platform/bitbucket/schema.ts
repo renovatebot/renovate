@@ -1,9 +1,17 @@
 import { z } from 'zod/v4';
 import { logger } from '../../../logger/index.ts';
-import { LooseArray } from '../../../util/schema-utils/index.ts';
+import { DeepNullish, LooseArray } from '../../../util/schema-utils/index.ts';
 
 // Reusable paged result wrapper
-export const PagedResult = <T extends z.ZodTypeAny>(item: T) =>
+export const PagedResult = <T extends z.ZodTypeAny>(
+  item: T,
+): z.ZodType<{
+  page?: number;
+  pagelen?: number;
+  size?: number;
+  next?: string;
+  values: z.TypeOf<T>[];
+}> =>
   z.object({
     page: z.number().optional(),
     pagelen: z.number().optional(),
@@ -49,10 +57,24 @@ export const BranchResponse = z.object({
 });
 export type BranchResponse = z.infer<typeof BranchResponse>;
 
+export const BitbucketBranchState = z.enum([
+  'SUCCESSFUL',
+  'FAILED',
+  'INPROGRESS',
+]);
+export type BitbucketBranchState = z.infer<typeof BitbucketBranchState>;
+
+export const BitbucketMergeStrategy = z.enum([
+  'fast_forward',
+  'merge_commit',
+  'squash',
+]);
+export type BitbucketMergeStrategy = z.infer<typeof BitbucketMergeStrategy>;
+
 // BitbucketStatus schema
 export const BitbucketStatus = z.object({
   key: z.string(),
-  state: z.enum(['SUCCESSFUL', 'FAILED', 'INPROGRESS']),
+  state: BitbucketBranchState,
 });
 export type BitbucketStatus = z.infer<typeof BitbucketStatus>;
 
@@ -120,20 +142,11 @@ const SourceResults = z.object({
   }),
 });
 
-const Paged = z.object({
-  page: z.number().optional(),
-  pagelen: z.number(),
-  size: z.number().optional(),
-  next: z.string().optional(),
-});
+export const PagedSourceResults = PagedResult(SourceResults);
 
-export const PagedSourceResults = Paged.extend({
-  values: z.array(SourceResults),
-});
-
-export const RepoInfo = z
-  .object({
-    parent: z.unknown().optional().catch(undefined),
+export const RepoInfo = DeepNullish(
+  z.object({
+    parent: z.unknown().optional(),
     mainbranch: z.object({
       name: z.string(),
     }),
@@ -155,25 +168,24 @@ export const RepoInfo = z
       .object({
         name: z.string(),
       })
-      .nullable()
-      .catch(null),
-  })
-  .transform((repoInfoBody) => {
-    const isFork = !!repoInfoBody.parent;
-    const [owner, name] = repoInfoBody.full_name.split('/');
+      .optional(),
+  }),
+).transform((repoInfoBody) => {
+  const isFork = !!repoInfoBody.parent;
+  const [owner, name] = repoInfoBody.full_name.split('/');
 
-    return {
-      isFork,
-      owner,
-      name,
-      mainbranch: repoInfoBody.mainbranch.name,
-      mergeMethod: 'merge',
-      has_issues: repoInfoBody.has_issues,
-      uuid: repoInfoBody.uuid,
-      is_private: repoInfoBody.is_private,
-      projectName: repoInfoBody.project?.name,
-    };
-  });
+  return {
+    isFork,
+    owner,
+    name,
+    mainbranch: repoInfoBody.mainbranch.name,
+    mergeMethod: 'merge',
+    has_issues: repoInfoBody.has_issues,
+    uuid: repoInfoBody.uuid,
+    is_private: repoInfoBody.is_private,
+    projectName: repoInfoBody.project?.name,
+  };
+});
 export type RepoInfo = z.infer<typeof RepoInfo>;
 
 export const Repositories = z

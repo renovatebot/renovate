@@ -5,9 +5,9 @@ import type { Pr } from '../types.ts';
 import type {
   BitbucketBranchState,
   BitbucketMergeStrategy,
-  MergeRequestBody,
   PrResponse,
-} from './types.ts';
+} from './schema.ts';
+import type { MergeRequestBody } from './types.ts';
 
 const bitbucketMergeStrategies = new Map<MergeStrategy, BitbucketMergeStrategy>(
   [
