@@ -67,15 +67,7 @@ describe('modules/platform/bitbucket/comments', () => {
           values: [prComment],
         });
 
-      expect(await comments.reopenComments(config, 5)).toMatchObject([
-        {
-          content: { raw: 'reopen! comment' },
-          user: {
-            display_name: 'Bob Smith',
-            uuid: '{d2238482-2e9f-48b3-8630-de22ccb9e42f}',
-          },
-        },
-      ]);
+      expect(await comments.reopenComments(config, 5)).toEqual([prComment]);
     });
 
     it('finds no reopen comment', async () => {
@@ -111,6 +103,7 @@ describe('modules/platform/bitbucket/comments', () => {
             {
               id: 5,
               content: { raw: '### some-subject\n\nsome\nobsolete\ncontent' },
+              user: { uuid: '{d2238482-2e9f-48b3-8630-de22ccb9e42f}' },
             },
           ],
         })
@@ -135,6 +128,7 @@ describe('modules/platform/bitbucket/comments', () => {
             {
               id: 5,
               content: { raw: 'blablabla' },
+              user: { uuid: '{d2238482-2e9f-48b3-8630-de22ccb9e42f}' },
             },
           ],
         });
@@ -175,6 +169,7 @@ describe('modules/platform/bitbucket/comments', () => {
             {
               id: 5,
               content: { raw: '### some-subject\n\nsome-content' },
+              user: { uuid: '{d2238482-2e9f-48b3-8630-de22ccb9e42f}' },
             },
           ],
         })
@@ -200,6 +195,7 @@ describe('modules/platform/bitbucket/comments', () => {
             {
               id: 5,
               content: { raw: '\n\nsome-content\n\n' },
+              user: { uuid: '{d2238482-2e9f-48b3-8630-de22ccb9e42f}' },
             },
           ],
         })

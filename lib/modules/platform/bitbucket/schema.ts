@@ -26,6 +26,7 @@ export const Account = z.object({
   uuid: z.string(),
   nickname: z.string().optional(),
   account_status: z.string().optional(),
+  account_id: z.string().optional(),
 });
 export type Account = z.infer<typeof Account>;
 
@@ -103,7 +104,7 @@ export const PrResponse = z.object({
   }),
   reviewers: z.array(Account).default([]),
   created_on: z.string(),
-  updated_on: z.string().optional(),
+  updated_on: z.string(),
 });
 export type PrResponse = z.infer<typeof PrResponse>;
 
@@ -119,7 +120,7 @@ export type EffectiveReviewer = z.infer<typeof EffectiveReviewer>;
 export const Comment = z.object({
   content: z.object({ raw: z.string() }),
   id: z.number().optional(),
-  user: Account.optional(),
+  user: Account,
 });
 export type Comment = z.infer<typeof Comment>;
 

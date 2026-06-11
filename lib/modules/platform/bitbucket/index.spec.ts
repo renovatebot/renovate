@@ -20,6 +20,7 @@ const pr = {
   summary: { raw: 'summary' },
   state: 'OPEN',
   created_on: '2018-07-02T07:02:25.275030+00:00',
+  updated_on: '2018-07-02T07:02:25.275030+00:00',
 };
 
 describe('modules/platform/bitbucket/index', () => {
@@ -904,6 +905,7 @@ describe('modules/platform/bitbucket/index', () => {
               title: 'title',
               state: 'OPEN',
               created_on: '2018-07-02T07:02:25.275030+00:00',
+              updated_on: '2018-07-02T07:02:25.275030+00:00',
             },
           ],
         });
@@ -955,6 +957,7 @@ describe('modules/platform/bitbucket/index', () => {
               title: 'title',
               state: 'closed',
               created_on: '2018-07-02T07:02:25.275030+00:00',
+              updated_on: '2018-07-02T07:02:25.275030+00:00',
             },
           ],
         })
@@ -993,6 +996,7 @@ describe('modules/platform/bitbucket/index', () => {
               title: 'title',
               state: 'closed',
               created_on: '2018-07-02T07:02:25.275030+00:00',
+              updated_on: '2018-07-02T07:02:25.275030+00:00',
             },
           ],
         })
@@ -1033,6 +1037,7 @@ describe('modules/platform/bitbucket/index', () => {
               title: 'title',
               state: 'closed',
               created_on: '2018-07-02T07:02:25.275030+00:00',
+              updated_on: '2018-07-02T07:02:25.275030+00:00',
             },
           ],
         })
@@ -1077,6 +1082,7 @@ describe('modules/platform/bitbucket/index', () => {
               title: 'title',
               state: 'closed',
               created_on: '2018-07-02T07:02:25.275030+00:00',
+              updated_on: '2018-07-02T07:02:25.275030+00:00',
             },
           ],
         })
@@ -1685,6 +1691,7 @@ describe('modules/platform/bitbucket/index', () => {
           summary: { raw: 'summary' },
           state: 'OPEN',
           created_on: '2018-07-02T07:02:25.275030+00:00',
+          updated_on: '2018-07-02T07:02:25.275030+00:00',
         })
         .get('/2.0/repositories/some/repo/pullrequests/5')
         .reply(200, pr);
@@ -2180,6 +2187,7 @@ describe('modules/platform/bitbucket/index', () => {
               title: 'title',
               state: 'OPEN',
               created_on: '2018-07-02T07:02:25.275030+00:00',
+              updated_on: '2018-07-02T07:02:25.275030+00:00',
             },
           ],
         })
@@ -2230,6 +2238,7 @@ describe('modules/platform/bitbucket/index', () => {
               state: 'OPEN',
               title: 'title',
               created_on: '2018-07-02T07:02:25.275030+00:00',
+              updated_on: '2018-07-02T07:02:25.275030+00:00',
             },
           ],
         })

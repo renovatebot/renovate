@@ -10,7 +10,6 @@ export const BitbucketTag = z.object({
     })
     .optional(),
 });
-export type BitbucketTag = z.infer<typeof BitbucketTag>;
 
 export const BitbucketTags = z
   .object({
@@ -18,7 +17,7 @@ export const BitbucketTags = z
   })
   .transform((body) => body.values);
 
-export const BitbucketCommit = z.object({
+const BitbucketCommit = z.object({
   hash: z.string(),
   date: z.string().optional(),
 });

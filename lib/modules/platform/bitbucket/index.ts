@@ -404,10 +404,7 @@ export async function findPr({
       }
 
       for (const comment of reopenComments) {
-        if (
-          comment.user &&
-          (await isAccountMemberOfWorkspace(comment.user, config.repository))
-        ) {
+        if (await isAccountMemberOfWorkspace(comment.user, config.repository)) {
           logger.debug(
             `Found '${comments.REOPEN_PR_COMMENT_KEYWORD}' comment from workspace member. Renovate will reopen PR ${pr.number} as a new PR`,
           );

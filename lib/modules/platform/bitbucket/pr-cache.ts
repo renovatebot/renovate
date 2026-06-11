@@ -104,9 +104,7 @@ export class BitbucketPrCache {
       const oldItem = oldItems[id];
       const newItem = prInfo(rawItem);
 
-      const itemNewTime = rawItem.updated_on
-        ? DateTime.fromISO(rawItem.updated_on)
-        : null;
+      const itemNewTime = DateTime.fromISO(rawItem.updated_on);
 
       if (!dequal(oldItem, newItem)) {
         oldItems[id] = newItem;
@@ -114,8 +112,8 @@ export class BitbucketPrCache {
 
       const cacheOldTime = updated_on ? DateTime.fromISO(updated_on) : null;
       // v8 ignore else -- TODO: add test #40625
-      if (itemNewTime && (!cacheOldTime || itemNewTime > cacheOldTime)) {
-        updated_on = rawItem.updated_on ?? null;
+      if (!cacheOldTime || itemNewTime > cacheOldTime) {
+        updated_on = rawItem.updated_on;
       }
     }
 
