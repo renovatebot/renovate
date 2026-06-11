@@ -259,7 +259,7 @@ export async function initRepo({
           `/2.0/repositories/${repository}/branching-model`,
           RepoBranchingModel,
         )
-      ).body.development?.branch?.name;
+      ).body.development.branch?.name;
 
       if (developmentBranch) {
         mainBranch = developmentBranch;
@@ -430,11 +430,6 @@ export async function getPr(prNo: number): Promise<Pr | null> {
     )
   ).body;
 
-  /* v8 ignore next */
-  if (!pr) {
-    return null;
-  }
-
   const res: Pr = {
     ...utils.prInfo(pr),
   };
@@ -531,7 +526,7 @@ export async function getBranchStatus(
     !internalChecksAsSuccess &&
     statuses.every(
       (status) =>
-        status.state === 'SUCCESSFUL' && status.key?.startsWith('renovate/'),
+        status.state === 'SUCCESSFUL' && status.key.startsWith('renovate/'),
     )
   ) {
     logger.debug(
@@ -1258,7 +1253,7 @@ export async function updatePr({
     }
   }
 
-  if (state === 'closed' && pr) {
+  if (state === 'closed') {
     await bitbucketHttp.postJson(
       `/2.0/repositories/${config.repository}/pullrequests/${prNo}/decline`,
     );
