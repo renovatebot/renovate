@@ -34,7 +34,6 @@ env:
   # are we on a release branch?
   DO_RELEASE: ${{ github.ref_name == github.event.repository.default_branch || github.ref_name == 'next' || startsWith(github.ref_name, 'maint/')}}
   NODE_VERSION: 24
-  PDM_VERSION: 2.27.0 # renovate: datasource=pypi depName=pdm
   DRY_RUN: true
   TEST_LEGACY_DECRYPTION: true
   SPARSE_CHECKOUT: |-
@@ -711,15 +710,15 @@ jobs:
           node-version: ${{ needs.setup-build.outputs.node-version }}
           os: ${{ runner.os }}
 
-      - name: Setup PDM
-        uses: pdm-project/setup-pdm@973541a5febeafcfdadf8a51211435be6ecfd90f # v4.5
+      - name: Setup uv
+        uses: astral-sh/setup-uv@fac544c07dec837d0ccb6301d7b5580bf5edae39 # v8.2.0
         with:
-          python-version-file: .python-version
-          version: ${{ env.PDM_VERSION }}
-          cache: true
+          version: 0.11.20
+          enable-cache: true
+          cache-python: true
 
-      - name: Install pdm dependencies
-        run: pdm install
+      - name: Install uv dependencies
+        run: uv sync --locked
 
       - name: Build
         run: pnpm build:docs
@@ -771,11 +770,7 @@ jobs:
         run: pnpm test-e2e:pack
 
       - name: Install dependencies
-        run: |
-          # as `--ignore-workspace` doesn't seem to apply to `minimumReleaseAge`, forcibly delete our workspace
-          rm pnpm-workspace.yaml
-
-          pnpm test-e2e:install
+        run: pnpm test-e2e:install
 
       - name: E2E Test
         run: pnpm test-e2e:run
@@ -859,7 +854,7 @@ jobs:
       - run: df -h
 
       - name: docker-config
-        uses: containerbase/internal-tools@c0acd0557771a8c771b458770c0956193ee916e4 # v4.6.42
+        uses: containerbase/internal-tools@48c73faf3c402a86025b22e5cf762fdc4c90a940 # v4.6.43
         with:
           command: docker-config
 
@@ -879,15 +874,15 @@ jobs:
           echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
           echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.repository_owner }} --password-stdin
 
-      - name: Setup PDM
-        uses: pdm-project/setup-pdm@973541a5febeafcfdadf8a51211435be6ecfd90f # v4.5
+      - name: Setup uv
+        uses: astral-sh/setup-uv@fac544c07dec837d0ccb6301d7b5580bf5edae39 # v8.2.0
         with:
-          python-version-file: .python-version
-          version: ${{ env.PDM_VERSION }}
-          cache: true
+          version: 0.11.20
+          enable-cache: true
+          cache-python: true
 
-      - name: Install pdm dependencies
-        run: pdm install
+      - name: Install uv dependencies
+        run: uv sync --locked
 
       - name: Check dry run
         run: |
