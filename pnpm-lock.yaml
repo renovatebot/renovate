@@ -299,8 +299,8 @@ importers:
         specifier: 3.8.1
         version: 3.8.1
       protobufjs:
-        specifier: 8.5.0
-        version: 8.5.0
+        specifier: 8.6.0
+        version: 8.6.0
       punycode:
         specifier: 2.3.1
         version: 2.3.1
@@ -4717,8 +4717,8 @@ packages:
   proto-list@1.2.4:
     resolution: {integrity: sha512-vtK/94akxsTMhe0/cbfpR+syPuszcuwhqVjJq26CuNDgFGj682oRBXOP5MJpv2r7JtE8MsiepGIqvvOTBwn2vA==}
 
-  protobufjs@8.5.0:
-    resolution: {integrity: sha512-df1jWDPA5VIBNRtuAHjqr09f2qN5D4Vke1wYqOQg1XJ7ZDpA7BD6L7E4tyChgGRLB5hqk2m79Zsy0WHwV9a84A==}
+  protobufjs@8.6.0:
+    resolution: {integrity: sha512-PIOO89BMGMXGz2333TVv/OqPNVWm7w30ll/4FtLbtLBaonzJMYwTbAZSSlobjIy9MoUgIAxSVUpK7aP7EpTtkg==}
     engines: {node: '>=12.0.0'}
 
   protocols@2.0.2:
@@ -10056,7 +10056,7 @@ snapshots:
 
   proto-list@1.2.4: {}
 
-  protobufjs@8.5.0:
+  protobufjs@8.6.0:
     dependencies:
       long: 5.3.2
 
