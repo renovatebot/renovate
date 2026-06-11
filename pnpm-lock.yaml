@@ -9,7 +9,7 @@ overrides:
   '@aws-sdk/xml-builder@3.972.4>fast-xml-parser': ^5.3.6
   '@yarnpkg/core@4.5.0>tar': 7.5.16
   esbuild: 0.28.0
-  protobufjs@8.0.1: 8.5.0
+  protobufjs@8.0.1: 8.6.0
   vite: 8.0.16
 
 importers:
