@@ -1164,7 +1164,7 @@ describe('modules/platform/bitbucket/index', () => {
           values: [projectReviewer, repoReviewer],
         })
         .post('/2.0/repositories/some/repo/pullrequests')
-        .reply(200, { id: 5 })
+        .reply(200, pr)
         .get(`/2.0/repositories/some/repo/pullrequests`)
         .query(true)
         .reply(200, {
@@ -1247,7 +1247,7 @@ describe('modules/platform/bitbucket/index', () => {
           account_status: 'inactive',
         })
         .post('/2.0/repositories/some/repo/pullrequests')
-        .reply(200, { id: 5 })
+        .reply(200, pr)
         .get(`/2.0/repositories/some/repo/pullrequests`)
         .query(true)
         .reply(200, {
@@ -1310,7 +1310,7 @@ describe('modules/platform/bitbucket/index', () => {
         )
         .reply(200)
         .post('/2.0/repositories/some/repo/pullrequests')
-        .reply(200, { id: 5 })
+        .reply(200, pr)
         .get(`/2.0/repositories/some/repo/pullrequests`)
         .query(true)
         .reply(200, {
@@ -1413,7 +1413,7 @@ describe('modules/platform/bitbucket/index', () => {
           },
         })
         .post('/2.0/repositories/some/repo/pullrequests')
-        .reply(200, { id: 5 })
+        .reply(200, pr)
         .get(`/2.0/repositories/some/repo/pullrequests`)
         .query(true)
         .reply(200, {
@@ -1550,7 +1550,7 @@ describe('modules/platform/bitbucket/index', () => {
       const scope = await initRepoMock();
       scope
         .post('/2.0/repositories/some/repo/pullrequests')
-        .reply(200, { id: 5 })
+        .reply(200, pr)
         .get(`/2.0/repositories/some/repo/pullrequests`)
         .query(true)
         .reply(200, {
@@ -1591,7 +1591,7 @@ describe('modules/platform/bitbucket/index', () => {
       const scope = await initRepoMock();
       scope
         .post('/2.0/repositories/some/repo/pullrequests')
-        .reply(200, { id: 5 })
+        .reply(200, pr)
         .get(`/2.0/repositories/some/repo/pullrequests`)
         .query(true)
         .reply(200, {
@@ -1633,7 +1633,7 @@ describe('modules/platform/bitbucket/index', () => {
       const scope = await initRepoMock();
       scope
         .post('/2.0/repositories/some/repo/pullrequests')
-        .reply(200, { id: 5 })
+        .reply(200, pr)
         .get(`/2.0/repositories/some/repo/pullrequests`)
         .query(true)
         .reply(200, {
@@ -1961,7 +1961,7 @@ describe('modules/platform/bitbucket/index', () => {
           account_status: 'inactive',
         })
         .put('/2.0/repositories/some/repo/pullrequests/5')
-        .reply(200, { id: 5 })
+        .reply(200, pr)
         .get(`/2.0/repositories/some/repo/pullrequests`)
         .query(true)
         .reply(200, {
@@ -2009,7 +2009,7 @@ describe('modules/platform/bitbucket/index', () => {
         )
         .reply(200)
         .put('/2.0/repositories/some/repo/pullrequests/5')
-        .reply(200, { id: 5 })
+        .reply(200, pr)
         .get(`/2.0/repositories/some/repo/pullrequests`)
         .query(true)
         .reply(200, {
@@ -2190,7 +2190,7 @@ describe('modules/platform/bitbucket/index', () => {
           values: [projectReviewer, repoReviewer],
         })
         .post('/2.0/repositories/some/repo/pullrequests')
-        .reply(200, { id: 5 });
+        .reply(200, pr);
 
       await bitbucket.getPrList(); // cache is now initialized
 
@@ -2236,7 +2236,7 @@ describe('modules/platform/bitbucket/index', () => {
         .get('/2.0/repositories/some/repo/pullrequests/5')
         .reply(200, { ...pr, reviewers: [reviewer] })
         .put('/2.0/repositories/some/repo/pullrequests/5')
-        .reply(200, { id: 5, title: 'newTitle' });
+        .reply(200, { ...pr, title: 'newTitle' });
 
       const oldPrList = await bitbucket.getPrList(); // cache is now initialized
       expect(oldPrList.find((pr) => pr.title === 'title')).toBeDefined();

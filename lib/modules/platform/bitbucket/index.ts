@@ -1096,11 +1096,12 @@ export async function createPr({
 
   try {
     const prRes = (
-      await bitbucketHttp.postJson<PrResponse>(
+      await bitbucketHttp.postJson(
         `/2.0/repositories/${config.repository}/pullrequests`,
         {
           body,
         },
+        PrResponse,
       )
     ).body;
     const pr = utils.prInfo(prRes);
@@ -1123,7 +1124,7 @@ export async function createPr({
       throw err;
     } else {
       const prRes = (
-        await bitbucketHttp.postJson<PrResponse>(
+        await bitbucketHttp.postJson(
           `/2.0/repositories/${config.repository}/pullrequests`,
           {
             body: {
@@ -1131,6 +1132,7 @@ export async function createPr({
               reviewers: sanitizedReviewers,
             },
           },
+          PrResponse,
         )
       ).body;
       const pr = utils.prInfo(prRes);
@@ -1227,9 +1229,10 @@ export async function updatePr({
     }
 
     updatedPrRes = (
-      await bitbucketHttp.putJson<PrResponse>(
+      await bitbucketHttp.putJson(
         `/2.0/repositories/${config.repository}/pullrequests/${prNo}`,
         { body },
+        PrResponse,
       )
     ).body;
   } catch (err) {
@@ -1240,7 +1243,7 @@ export async function updatePr({
       throw err;
     } else {
       updatedPrRes = (
-        await bitbucketHttp.putJson<PrResponse>(
+        await bitbucketHttp.putJson(
           `/2.0/repositories/${config.repository}/pullrequests/${prNo}`,
           {
             body: {
@@ -1249,6 +1252,7 @@ export async function updatePr({
               reviewers: sanitizedReviewers,
             },
           },
+          PrResponse,
         )
       ).body;
     }
