@@ -405,6 +405,7 @@
       "https://github.com/uber/mock"
     ],
     "google-api-dotnet-client": "https://github.com/googleapis/google-api-dotnet-client",
+    "google-cloud-rust": "https://github.com/googleapis/google-cloud-rust",
     "grafana": "https://github.com/grafana/grafana",
     "graphiql": "https://github.com/graphql/graphiql",
     "graphql-hive-gateway": "https://github.com/graphql-hive/gateway",
