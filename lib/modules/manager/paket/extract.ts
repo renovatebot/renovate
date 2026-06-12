@@ -31,7 +31,7 @@ function convertToPackageDependency(
   dependencies: LockFileDependency[],
   group: DependenciesFileGroup,
   p: DependenciesFilePackage,
-): PackageDependency {
+): PackageDependency<PaketPackage> {
   const lockVersion = searchPackageVersion(dependencies, group, p);
 
   const version = lockVersion?.version;
@@ -49,7 +49,7 @@ function convertToPackageDependency(
 function convertLockFileDependencyToPackageDependency(
   parsedPackageFile: DependenciesFile,
   parsedLockFile: LockFileDependency[],
-): PackageDependency[] {
+): PackageDependency<PaketPackage>[] {
   return parsedPackageFile.groups.flatMap((group) => {
     return group.nugetPackages.map((p) => {
       return convertToPackageDependency(parsedLockFile, group, p);
@@ -73,7 +73,7 @@ export async function extractPackageFile(
   const parsedPackageFile = parseDependenciesFile(content);
   const parsedLockFile = parseLockFile(lockFileContent);
 
-  const deps: PackageDependency[] =
+  const deps: PackageDependency<PaketPackage>[] =
     convertLockFileDependencyToPackageDependency(
       parsedPackageFile,
       parsedLockFile,
