@@ -272,6 +272,16 @@ const options: Readonly<RenovateOptions>[] = [
     cli: false,
   },
   {
+    name: 'gitShallowCloneDepth',
+    description:
+      'If set to a positive integer, Renovate performs a shallow clone with the given depth instead of a blobless clone.',
+    type: 'integer',
+    default: null,
+    globalOnly: true,
+    experimental: true,
+    experimentalIssues: [39667],
+  },
+  {
     name: 'onboardingCommitMessage',
     description:
       'Change this value to override the default onboarding commit message.',
