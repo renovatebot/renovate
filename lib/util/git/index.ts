@@ -474,6 +474,16 @@ export const syncGit = withInstrumenting(
           const durationMs = Math.round(Date.now() - fetchStart);
           logger.info({ durationMs }, 'git fetch completed');
           clone = false;
+          // Check if repo is shallow and unshallow if needed
+          const isShallow = (
+            await git.raw(['rev-parse', '--is-shallow-repository'])
+          ).trim();
+          if (isShallow === 'true') {
+            logger.debug('Repository is shallow, performing unshallow fetch');
+            await gitRetry(() => git.fetch(['--unshallow', 'origin']));
+            GitOperationStats.setUnshallowed();
+            logger.debug('Unshallow fetch completed');
+          }
         } catch (err) /* v8 ignore next -- TODO: add test #40625 */ {
           if (err.message === REPOSITORY_EMPTY) {
             throw err;
