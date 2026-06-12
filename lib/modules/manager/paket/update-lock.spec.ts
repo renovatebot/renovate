@@ -3,7 +3,7 @@ import type { UpdateLockedConfig } from '../types.ts';
 import * as tool from './tool.ts';
 import { updateLockedDependency } from './update-lock.ts';
 
-vi.mock('../../../util/fs');
+vi.mock('../../../util/fs/index.ts');
 
 describe('modules/manager/paket/update-lock', () => {
   const packageFileName = '/app/test/paket.dependencies';

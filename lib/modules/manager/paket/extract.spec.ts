@@ -4,7 +4,7 @@ import { NugetDatasource } from '../../datasource/nuget/index.ts';
 import type { ExtractConfig } from '../types.ts';
 import { extractPackageFile } from './extract.ts';
 
-vi.mock('../../../util/fs');
+vi.mock('../../../util/fs/index.ts');
 
 describe('modules/manager/paket/extract', () => {
   const packageFileName = '/app/test/paket.dependencies';

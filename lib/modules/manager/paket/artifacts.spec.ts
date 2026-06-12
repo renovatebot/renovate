@@ -3,7 +3,7 @@ import type { UpdateArtifact } from '../types.ts';
 import { updateArtifacts } from './artifacts.ts';
 import * as tool from './tool.ts';
 
-vi.mock('../../../util/fs');
+vi.mock('../../../util/fs/index.ts');
 
 describe('modules/manager/paket/artifacts', () => {
   const packageFileName = '/app/test/paket.dependencies';
