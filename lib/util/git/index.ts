@@ -36,6 +36,7 @@ import { getEnv } from '../env.ts';
 import type { ExtraEnv } from '../exec/types.ts';
 import { getChildEnv } from '../exec/utils.ts';
 import { newlineRegex, regEx } from '../regex.ts';
+import { GitOperationStats } from '../stats.ts';
 import { matchRegexOrGlobList } from '../string-match.ts';
 import { logWarningIfUnicodeHiddenCharactersInPackageFile } from '../unicode.ts';
 import { getGitEnvironmentVariables } from './auth.ts';
@@ -489,8 +490,17 @@ export const syncGit = withInstrumenting(
           if (config.defaultBranch) {
             opts.push('-b', config.defaultBranch);
           }
+          const { gitShallowCloneDepth } = GlobalConfig.get();
           if (config.fullClone) {
             logger.debug('Performing full clone');
+            if (gitShallowCloneDepth) {
+              logger.warn(
+                'gitShallowCloneDepth is ignored when fullClone is required by the platform',
+              );
+            }
+          } else if (gitShallowCloneDepth) {
+            logger.debug({ gitShallowCloneDepth }, 'Performing shallow clone');
+            opts.push(`--depth=${gitShallowCloneDepth}`);
           } else {
             logger.debug('Performing blobless clone');
             opts.push('--filter=blob:none');
@@ -519,6 +529,11 @@ export const syncGit = withInstrumenting(
             throw err;
           }
           throw new ExternalHostError(err, 'git');
+        }
+        GitOperationStats.setCloned();
+        const { gitShallowCloneDepth: shallowDepth } = GlobalConfig.get();
+        if (shallowDepth) {
+          GitOperationStats.setGitShallowCloneDepth(shallowDepth);
         }
         const durationMs = Math.round(Date.now() - cloneStart);
         logger.debug({ durationMs }, 'git clone completed');

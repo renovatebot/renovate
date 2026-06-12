@@ -1618,6 +1618,43 @@ describe('util/git/index', { timeout: 30000 }, () => {
       delete process.env.RENOVATE_X_CLEAR_HOOKS;
     });
 
+    it('should use shallow clone when gitShallowCloneDepth is set', async () => {
+      tmpDir = await tmp.dir({ unsafeCleanup: true });
+      GlobalConfig.set({
+        localDir: tmpDir.path,
+        gitShallowCloneDepth: 2,
+      });
+      await git.initRepo({
+        url: `file://${origin.path}`,
+      });
+      await git.syncGit();
+
+      const tmpGit = simpleGit(tmpDir.path);
+      const isShallow = (
+        await tmpGit.raw(['rev-parse', '--is-shallow-repository'])
+      ).trim();
+      expect(isShallow).toBe('true');
+    });
+
+    it('should ignore gitShallowCloneDepth when fullClone is true', async () => {
+      tmpDir = await tmp.dir({ unsafeCleanup: true });
+      GlobalConfig.set({
+        localDir: tmpDir.path,
+        gitShallowCloneDepth: 2,
+      });
+      await git.initRepo({
+        url: `file://${origin.path}`,
+        fullClone: true,
+      });
+      await git.syncGit();
+
+      const tmpGit = simpleGit(tmpDir.path);
+      const isShallow = (
+        await tmpGit.raw(['rev-parse', '--is-shallow-repository'])
+      ).trim();
+      expect(isShallow).toBe('false');
+    });
+
     it('should not inherit unsafe git environment variables from process.env', async () => {
       process.env.GIT_CONFIG_COUNT = '1';
       process.env.GIT_CONFIG_KEY_0 = 'core.hooksPath';
