@@ -38,10 +38,13 @@ describe('modules/versioning/versioning-metadata', () => {
     });
 
     it('contains mandatory fields', async () => {
+      const goodUrlRegex = /\[[^\]]+\]\([^)]+\)/;
       const Base = z.object({
         id: z.string(),
         displayName: z.string(),
-        urls: z.array(z.unknown()),
+        urls: z.array(
+          z.string().regex(goodUrlRegex, 'url must be a markdown link'),
+        ),
       });
       const VersioningMetadata = z.discriminatedUnion('supportsRanges', [
         Base.extend({
