@@ -1111,7 +1111,10 @@ describe('util/stats', () => {
 
     it('returns empty report', () => {
       const res = GitOperationStats.getReport();
-      expect(res).toEqual({});
+      expect(res).toEqual({
+        cloned: false,
+        unshallowed: false,
+      });
     });
 
     it('writes data points', () => {
@@ -1135,6 +1138,8 @@ describe('util/stats', () => {
           medianMs: 50000,
           totalMs: 50100,
         },
+        cloned: false,
+        unshallowed: false,
       });
     });
 
@@ -1155,6 +1160,8 @@ describe('util/stats', () => {
           // NOTE that the total is rounded toward the ceiling
           totalMs: 2207,
         },
+        cloned: false,
+        unshallowed: false,
       });
     });
 
@@ -1176,7 +1183,40 @@ describe('util/stats', () => {
           medianMs: 4000,
           totalMs: 20_000,
         },
+        cloned: false,
+        unshallowed: false,
       });
+    });
+
+    it('returns cloned and unshallowed as false by default', () => {
+      const report = GitOperationStats.getReport();
+      expect(report).toMatchObject({
+        cloned: false,
+        unshallowed: false,
+      });
+    });
+
+    it('reports cloned flag', () => {
+      GitOperationStats.setCloned();
+      const report = GitOperationStats.getReport();
+      expect(report).toMatchObject({ cloned: true });
+    });
+
+    it('reports unshallowed flag', () => {
+      GitOperationStats.setUnshallowed();
+      const report = GitOperationStats.getReport();
+      expect(report).toMatchObject({ unshallowed: true });
+    });
+
+    it('reports gitShallowCloneDepth when set', () => {
+      GitOperationStats.setGitShallowCloneDepth(2);
+      const report = GitOperationStats.getReport();
+      expect(report).toMatchObject({ gitShallowCloneDepth: 2 });
+    });
+
+    it('does not include gitShallowCloneDepth when not set', () => {
+      const report = GitOperationStats.getReport();
+      expect(report).not.toHaveProperty('gitShallowCloneDepth');
     });
   });
 });

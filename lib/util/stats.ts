@@ -758,12 +758,34 @@ export class GitOperationStats {
     memCache.set('git-operations-stats', data);
   }
 
-  static getReport(): Record<string, TimingStatsReport> {
-    const report: Record<string, TimingStatsReport> = {};
+  static setCloned(): void {
+    memCache.set('git-operations-cloned', true);
+  }
+
+  static setUnshallowed(): void {
+    memCache.set('git-operations-unshallowed', true);
+  }
+
+  static setGitShallowCloneDepth(depth: number): void {
+    memCache.set('git-operations-shallow-depth', depth);
+  }
+
+  static getReport(): Record<string, unknown> {
+    const report: Record<string, unknown> = {};
     const data = memCache.get<LookupStatsData>('git-operations-stats') ?? {};
     for (const [operationType, durations] of Object.entries(data)) {
-      report[operationType] = makeTimingReport(durations);
-      report[operationType].totalMs = Math.ceil(report[operationType].totalMs);
+      const timingReport = makeTimingReport(durations);
+      timingReport.totalMs = Math.ceil(timingReport.totalMs);
+      report[operationType] = timingReport;
+    }
+
+    report.cloned = memCache.get<boolean>('git-operations-cloned') ?? false;
+    report.unshallowed =
+      memCache.get<boolean>('git-operations-unshallowed') ?? false;
+
+    const shallowDepth = memCache.get<number>('git-operations-shallow-depth');
+    if (shallowDepth !== undefined) {
+      report.gitShallowCloneDepth = shallowDepth;
     }
 
     return report;
