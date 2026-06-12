@@ -874,13 +874,15 @@ export async function isBranchModified(
   }
   const { gitAuthorEmail, ignoredAuthors } = config;
 
-  const includedAuthors = new Set(
-    [...committedAuthors].filter(
-      (committedAuthor) =>
-        committedAuthor !== gitAuthorEmail &&
-        !matchRegexOrGlobList(committedAuthor, ignoredAuthors),
-    ),
-  );
+  const includedAuthors = new Set<string>();
+  for (const committedAuthor of committedAuthors) {
+    if (
+      committedAuthor !== gitAuthorEmail &&
+      !matchRegexOrGlobList(committedAuthor, ignoredAuthors)
+    ) {
+      includedAuthors.add(committedAuthor);
+    }
+  }
 
   if (includedAuthors.size === 0) {
     // authors all match - branch has not been modified
