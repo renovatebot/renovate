@@ -159,7 +159,7 @@ export const allToolConfig: Record<ToolName, ToolConfig> = {
   paket: {
     datasource: 'nuget',
     packageName: 'paket',
-    versioning: semverVersioningId,
+    versioning: 'semver',
   },
   pdm: {
     datasource: 'github-releases',
