@@ -107,6 +107,33 @@ describe('modules/manager/tox/extract', () => {
       expect(res?.deps.map((d) => d.depName)).toEqual(['pytest', 'coverage']);
     });
 
+    it('skips invalid dependencies', () => {
+      const content = codeBlock`
+        [env_run_base]
+        deps = [
+          "pytest>=7.2",
+          "@not-valid@",
+        ]
+      `;
+      const res = extractPackageFile(content, 'tox.toml');
+      expect(res?.deps).toHaveLength(1);
+      expect(res?.deps.map((d) => d.depName)).toEqual(['pytest']);
+    });
+
+    it('skips invalid dependencies inside [env.<env-name>]', () => {
+      const content = codeBlock`
+        [env.docs]
+        deps = [
+          "sphinx>=7",
+          "@not-valid@",
+          "-r requirements-docs.txt",
+        ]
+      `;
+      const res = extractPackageFile(content, 'tox.toml');
+      expect(res?.deps).toHaveLength(1);
+      expect(res?.deps.map((d) => d.depName)).toEqual(['sphinx']);
+    });
+
     it('extracts all sections from tox.toml', () => {
       const content = codeBlock`
         requires = ["tox>=4.2", "tox-uv>=1.7"]
@@ -309,6 +336,11 @@ describe('modules/manager/tox/extract', () => {
         [project]
         name = "foo"
       `;
+      expect(extractToxConfig(content, 'pyproject.toml')).toBeNull();
+    });
+
+    it('returns null for invalid tox.toml', () => {
+      const content = codeBlock`{not valid}`;
       expect(extractToxConfig(content, 'pyproject.toml')).toBeNull();
     });
   });
