@@ -6,7 +6,7 @@ import { runPaketUpdate } from './tool.ts';
 export async function updateLockedDependency(
   config: UpdateLockedConfig,
 ): Promise<UpdateLockedResult> {
-  logger.debug(`paket.updateLockedDependency(${config.lockFile}})`);
+  logger.debug(`paket.updateLockedDependency(${config.lockFile})`);
 
   const existingLockFileContent = await readLocalFile(config.lockFile, 'utf8');
 

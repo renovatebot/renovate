@@ -83,7 +83,7 @@ describe('modules/manager/paket/artifacts', () => {
       expect(result).toBeNull();
     });
 
-    it('return artefact error if cmd failed', async () => {
+    it('return artifact error if cmd failed', async () => {
       const toolSpy = vi.spyOn(tool, 'runPaketUpdate');
       toolSpy.mockRejectedValue(new Error('Cmd error'));
       fs.readLocalFile.mockImplementation(

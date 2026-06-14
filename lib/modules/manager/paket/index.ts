@@ -12,7 +12,7 @@ export const supportsLockFileMaintenance = true;
 export const lockFileNames = ['paket.lock'];
 
 export const defaultConfig = {
-  managerFilePatterns: ['**paket.dependencies'],
+  managerFilePatterns: ['**/paket.dependencies'],
 };
 
 export const supportedDatasources = [NugetDatasource.id];
