@@ -61,6 +61,9 @@ ENV ARCH=${TARGETARCH/amd64/x64}
 # set `npm_config_platform_arch` for `install-artifact-from-github`
 ENV npm_config_arch=${ARCH} npm_config_platform_arch=${ARCH}
 
+# TODO: remove this once https://github.com/pnpm/pnpm/pull/12400 lands
+ENV pnpm_config_platform_arch=${ARCH}
+
 COPY --link patches ./patches
 COPY --link pnpm-lock.yaml ./
 COPY --link pnpm-workspace.yaml ./
