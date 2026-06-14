@@ -59,8 +59,10 @@ function parseLine(line: Line, state: ReduceState): ReduceState {
   }
 
   if (line.indent === 4) {
-    const packageMatch = /^(\S+)\s+\(([^)]+)\)/.exec(line.text);
-    if (packageMatch) {
+    const packageMatch = /^(?<packageName>\S+)\s+\((?<version>[^)]+)\)/.exec(
+      line.text,
+    );
+    if (packageMatch?.groups) {
       return {
         ...state,
         dependencies: [
@@ -69,8 +71,8 @@ function parseLine(line: Line, state: ReduceState): ReduceState {
             groupName: state.currentGroupName,
             source: state.currentSource,
             remote: state.currentRemote,
-            packageName: packageMatch[1],
-            version: packageMatch[2],
+            packageName: packageMatch.groups.packageName,
+            version: packageMatch.groups.version,
           },
         ],
       };
