@@ -1,6 +1,10 @@
 import { z } from 'zod/v4';
+import { regEx } from '../regex.ts';
 
-export const LongCommitSha = z.string().length(40).brand('LongCommitSha');
+export const LongCommitSha = z
+  .string()
+  .regex(regEx(/^(?:[a-f0-9]{40}|[a-f0-9]{64})$/))
+  .brand('LongCommitSha');
 export type LongCommitSha = z.infer<typeof LongCommitSha>;
 
 export function isLongCommitSha(value: unknown): value is LongCommitSha {
