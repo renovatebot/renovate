@@ -98,6 +98,7 @@ export abstract class HttpBase<
             this.calculateRetryDelay(retryObject),
           limit: retryLimit,
           maxRetryAfter: 0, // Don't rely on `got` retry-after handling, just let it fail and then we'll handle it
+          enforceRetryRules: false,
         },
       },
       { isMergeableObject: isPlainObject },
@@ -115,7 +116,7 @@ export abstract class HttpBase<
   private async request(
     requestUrl: string | URL,
     httpOptions: InternalHttpOptions & { responseType: 'buffer' },
-  ): Promise<HttpResponse<Buffer>>;
+  ): Promise<HttpResponse<Uint8Array>>;
   private async request<T = unknown>(
     requestUrl: string | URL,
     httpOptions: InternalHttpOptions & { responseType: 'json' },
@@ -256,11 +257,9 @@ export abstract class HttpBase<
         throw new ExternalHostError(err);
       }
 
-      const staleResponse = await cacheProvider?.bypassServer<string | Buffer>(
-        method,
-        url,
-        true,
-      );
+      const staleResponse = await cacheProvider?.bypassServer<
+        string | Uint8Array
+      >(method, url, true);
       if (staleResponse) {
         logger.debug(
           { err },
@@ -331,7 +330,7 @@ export abstract class HttpBase<
   get(
     url: string,
     options: HttpOptions = {},
-  ): Promise<HttpResponse<string | Buffer>> {
+  ): Promise<HttpResponse<string | Uint8Array>> {
     return this.request(url, options);
   }
 
@@ -354,7 +353,7 @@ export abstract class HttpBase<
   getBuffer(
     url: string | URL,
     options: HttpOptions = {},
-  ): Promise<HttpResponse<Buffer>> {
+  ): Promise<HttpResponse<Uint8Array>> {
     return this.request(url, { ...options, responseType: 'buffer' });
   }
 

@@ -120,7 +120,7 @@ export class GitlabHttp extends HttpBase<GitlabHttpOptions> {
       attemptCount <= retryOptions.limit &&
       error.options.method === 'POST' &&
       error.response?.statusCode === 409 &&
-      error.response.rawBody.toString().includes('Resource lock')
+      Buffer.from(error.response.rawBody).toString().includes('Resource lock')
     ) {
       const noise = Math.random() * 100;
       return 2 ** (attemptCount - 1) * 1000 + noise;

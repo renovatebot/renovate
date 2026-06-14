@@ -4,7 +4,7 @@ exports[`logger/err-serializer > got > sanitize http error 1`] = `
 {
   "code": "ERR_NON_2XX_3XX_RESPONSE",
   "input": undefined,
-  "message": "Request failed with status code 412 (Precondition Failed): POST https://**redacted**@github.com/api",
+  "message": "Request failed with status code 412 (Precondition Failed): POST https://github.com/api",
   "name": "HTTPError",
   "options": {
     "headers": {
