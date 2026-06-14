@@ -5,8 +5,8 @@ import {
   getCache,
   resetCache as repoCacheReset,
 } from '../../../util/cache/repository/index.ts';
-import type { LongCommitSha } from '../../../util/git/types.ts';
 import { GiteaHttp, setBaseUrl } from '../../../util/http/gitea.ts';
+import type { LongCommitSha } from '../../../util/schema-utils/git.ts';
 import { GiteaPrCache } from './pr-cache.ts';
 import type { PR, Repo } from './types.ts';
 import { toRenovatePR } from './utils.ts';
