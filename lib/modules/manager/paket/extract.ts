@@ -67,7 +67,7 @@ export async function extractPackageFile(
   const lockFileName = getSiblingFileName(packageFile, 'paket.lock');
   const lockFileContent = await readLocalFile(lockFileName, 'utf8');
   if (!lockFileContent) {
-    throw new Error(`Could not to paket lock file: ${lockFileName}`);
+    throw new Error(`Could not find paket lock file: ${lockFileName}`);
   }
 
   const parsedPackageFile = parseDependenciesFile(content);
