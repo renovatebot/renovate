@@ -36,7 +36,6 @@ import {
 import type {
   CommitFilesConfig,
   CommitResult,
-  LongCommitSha,
 } from '../../../util/git/types.ts';
 import * as hostRules from '../../../util/host-rules.ts';
 import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider.ts';
@@ -47,6 +46,8 @@ import type { HttpResponse } from '../../../util/http/types.ts';
 import { coerceObject } from '../../../util/object.ts';
 import { regEx } from '../../../util/regex.ts';
 import { sanitize } from '../../../util/sanitize.ts';
+import type { LongCommitSha } from '../../../util/schema-utils/git.ts';
+import { toLongCommitSha } from '../../../util/schema-utils/git.ts';
 import { fromBase64, looseEquals } from '../../../util/string.ts';
 import { ensureTrailingSlash, isHttpUrl, parseUrl } from '../../../util/url.ts';
 import { incLimitedValue } from '../../../workers/global/limits.ts';
@@ -2275,7 +2276,7 @@ async function pushFiles(
       { body: { message, tree: treeSha, parents: [parentCommitSha] } },
     );
     incLimitedValue('Commits');
-    const remoteCommitSha = commitRes.body.sha as LongCommitSha;
+    const remoteCommitSha = toLongCommitSha(commitRes.body.sha);
     await ensureBranchSha(branchName, remoteCommitSha);
     return remoteCommitSha;
   } catch (err) {
