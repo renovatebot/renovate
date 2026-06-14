@@ -4940,7 +4940,13 @@ You can set this option to `false` if you wish to disable updating for pinned (s
 ## `useBaseBranchConfig`
 
 By default, Renovate will read config file from the default branch only and will ignore any config files in base branches.
-You can configure `useBaseBranchConfig=merge` to instruct Renovate to merge the config from each base branch over the top of the config in the default branch.
+
+Set `useBaseBranchConfig=merge` to instruct Renovate to merge the config from each base branch over the top of the config in the default branch.
+Renovate will error if the config file is not found on the branch.
+
+Set `useBaseBranchConfig=fallback` to read branch-specific config with graceful fallback: if the config file does not exist on the branch, Renovate will silently use the default branch config instead.
+If the config file exists but is invalid or contains validation errors, Renovate will error.
+This is useful for repos with many branches where only some branches have branch-specific config.
 
 The config file name in the base branch must be the same as in the default branch and cannot be `package.json`.
 This scenario may be useful for testing the config changes in base branches instantly.

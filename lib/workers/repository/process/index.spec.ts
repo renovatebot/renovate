@@ -49,7 +49,6 @@ describe('workers/repository/process/index', () => {
 
     it('reads config from default branch if useBaseBranchConfig=none', async () => {
       scm.branchExists.mockResolvedValue(true);
-      platform.getJsonFile.mockResolvedValueOnce({});
       config.baseBranchPatterns = ['master', 'dev'];
       config.useBaseBranchConfig = 'none';
       getCache().configFileName = 'renovate.json';
@@ -68,11 +67,11 @@ describe('workers/repository/process/index', () => {
 
     it('applies branch-specific config for non-default branches when useBaseBranchConfig=fallback', async () => {
       scm.branchExists.mockResolvedValue(true);
-      platform.getRawFile.mockResolvedValue(
-        '{"extends": ["config:recommended"]}',
-      );
-      config.baseBranchPatterns = ['master', 'dev'];
-      config.defaultBranch = 'master';
+      platform.getJsonFile.mockResolvedValue({
+        extends: ['config:recommended'],
+      });
+      config.baseBranchPatterns = ['main', 'dev'];
+      config.defaultBranch = 'main';
       config.useBaseBranchConfig = 'fallback';
       getCache().configFileName = 'renovate.json';
       const res = await extractDependencies(config);
@@ -81,25 +80,25 @@ describe('workers/repository/process/index', () => {
         branches: [undefined, undefined],
         packageFiles: undefined,
       });
-      expect(platform.getRawFile).not.toHaveBeenCalledWith(
+      expect(platform.getJsonFile).not.toHaveBeenCalledWith(
         'renovate.json',
         config.repository,
-        'master',
+        'main',
       );
-      expect(platform.getRawFile).toHaveBeenCalledWith(
+      expect(platform.getJsonFile).toHaveBeenCalledWith(
         'renovate.json',
         config.repository,
         'dev',
       );
-      expect(addMeta).toHaveBeenNthCalledWith(1, { baseBranch: 'master' });
+      expect(addMeta).toHaveBeenNthCalledWith(1, { baseBranch: 'main' });
       expect(addMeta).toHaveBeenNthCalledWith(2, { baseBranch: 'dev' });
     });
 
     it('falls back gracefully when branch-specific config not found (useBaseBranchConfig=fallback)', async () => {
       scm.branchExists.mockResolvedValue(true);
-      platform.getRawFile.mockRejectedValue(new Error('not found'));
-      config.baseBranchPatterns = ['master', 'dev'];
-      config.defaultBranch = 'master';
+      platform.getJsonFile.mockResolvedValue(null);
+      config.baseBranchPatterns = ['main', 'dev'];
+      config.defaultBranch = 'main';
       config.useBaseBranchConfig = 'fallback';
       getCache().configFileName = 'renovate.json';
       const res = await extractDependencies(config);
@@ -108,27 +107,20 @@ describe('workers/repository/process/index', () => {
         branches: [undefined, undefined],
         packageFiles: undefined,
       });
-      expect(addMeta).toHaveBeenNthCalledWith(1, { baseBranch: 'master' });
+      expect(addMeta).toHaveBeenNthCalledWith(1, { baseBranch: 'main' });
       expect(addMeta).toHaveBeenNthCalledWith(2, { baseBranch: 'dev' });
     });
 
-    it('falls back gracefully when branch-specific config is invalid (useBaseBranchConfig=fallback)', async () => {
+    it('throws on invalid branch-specific config (useBaseBranchConfig=fallback)', async () => {
       scm.branchExists.mockResolvedValue(true);
-      platform.getRawFile.mockResolvedValue('{"labels": "not-an-array"}');
-      config.baseBranchPatterns = ['master', 'dev'];
-      config.defaultBranch = 'master';
+      platform.getJsonFile.mockResolvedValue({ labels: 'not-an-array' });
+      config.baseBranchPatterns = ['main', 'dev'];
+      config.defaultBranch = 'main';
       config.useBaseBranchConfig = 'fallback';
       getCache().configFileName = 'renovate.json';
-      const res = await extractDependencies(config);
-      expect(res).toEqual({
-        branchList: [undefined, undefined],
-        branches: [undefined, undefined],
-        packageFiles: undefined,
+      await expect(extractDependencies(config)).rejects.toMatchObject({
+        message: CONFIG_VALIDATION,
       });
-      expect(logger.logger.warn).toHaveBeenCalledWith(
-        expect.objectContaining({ baseBranch: 'dev' }),
-        'Branch-specific config has validation errors, using default branch config',
-      );
     });
 
     it('reads config from branches in baseBranchPatterns if useBaseBranchConfig specified', async () => {
@@ -348,12 +340,12 @@ describe('workers/repository/process/index', () => {
       });
 
       it('applies branch-specific config when present on branch', async () => {
-        platform.getRawFile.mockResolvedValueOnce(
-          '{"extends": ["config:recommended"]}',
-        );
+        platform.getJsonFile.mockResolvedValueOnce({
+          extends: ['config:recommended'],
+        });
         const res = await getBaseBranchConfig('postgresql/v18/dev', config);
         expect(res.baseBranch).toBe('postgresql/v18/dev');
-        expect(platform.getRawFile).toHaveBeenCalledWith(
+        expect(platform.getJsonFile).toHaveBeenCalledWith(
           'renovate.json',
           config.repository,
           'postgresql/v18/dev',
@@ -364,8 +356,8 @@ describe('workers/repository/process/index', () => {
         );
       });
 
-      it('falls back to default config when getRawFile returns null', async () => {
-        platform.getRawFile.mockResolvedValueOnce(null);
+      it('falls back to default config when getJsonFile returns null', async () => {
+        platform.getJsonFile.mockResolvedValueOnce(null);
         const res = await getBaseBranchConfig('postgresql/v18/dev', config);
         expect(res.baseBranch).toBe('postgresql/v18/dev');
         expect(logger.logger.debug).not.toHaveBeenCalledWith(
@@ -374,18 +366,15 @@ describe('workers/repository/process/index', () => {
         );
       });
 
-      it('falls back to default config when getRawFile throws', async () => {
-        platform.getRawFile.mockRejectedValueOnce(new Error('not found'));
-        const res = await getBaseBranchConfig('postgresql/v18/dev', config);
-        expect(res.baseBranch).toBe('postgresql/v18/dev');
-        expect(logger.logger.debug).toHaveBeenCalledWith(
-          { baseBranch: 'postgresql/v18/dev', configFileName: 'renovate.json' },
-          'No branch-specific config file found, using default branch config',
-        );
+      it('throws CONFIG_VALIDATION when getJsonFile throws', async () => {
+        platform.getJsonFile.mockRejectedValueOnce(new Error('fetch error'));
+        await expect(
+          getBaseBranchConfig('postgresql/v18/dev', config),
+        ).rejects.toMatchObject({ message: CONFIG_VALIDATION });
       });
 
       it('rethrows ExternalHostError', async () => {
-        platform.getRawFile.mockRejectedValueOnce(
+        platform.getJsonFile.mockRejectedValueOnce(
           new ExternalHostError(new Error('network error')),
         );
         await expect(
@@ -393,44 +382,31 @@ describe('workers/repository/process/index', () => {
         ).rejects.toThrow(ExternalHostError);
       });
 
-      it('warns and falls back when branch config fails to parse', async () => {
-        platform.getRawFile.mockResolvedValueOnce('invalid json {{{');
-        const res = await getBaseBranchConfig('postgresql/v18/dev', config);
-        expect(res.baseBranch).toBe('postgresql/v18/dev');
-        expect(logger.logger.warn).toHaveBeenCalledWith(
-          expect.objectContaining({ baseBranch: 'postgresql/v18/dev' }),
-          'Failed to parse branch-specific config, using default branch config',
-        );
-      });
-
-      it('warns and falls back when branch config has validation errors', async () => {
-        platform.getRawFile.mockResolvedValueOnce('{"labels": "not-an-array"}');
-        const res = await getBaseBranchConfig('postgresql/v18/dev', config);
-        expect(res.baseBranch).toBe('postgresql/v18/dev');
-        expect(logger.logger.warn).toHaveBeenCalledWith(
-          expect.objectContaining({ baseBranch: 'postgresql/v18/dev' }),
-          'Branch-specific config has validation errors, using default branch config',
-        );
+      it('throws when branch config has validation errors', async () => {
+        platform.getJsonFile.mockResolvedValueOnce({ labels: 'not-an-array' });
+        await expect(
+          getBaseBranchConfig('postgresql/v18/dev', config),
+        ).rejects.toMatchObject({ message: CONFIG_VALIDATION });
       });
 
       it('skips when baseBranch equals defaultBranch', async () => {
         const res = await getBaseBranchConfig('main', config);
         expect(res.baseBranch).toBe('main');
-        expect(platform.getRawFile).not.toHaveBeenCalled();
+        expect(platform.getJsonFile).not.toHaveBeenCalled();
       });
 
       it('skips when configFileName is package.json', async () => {
         getCache().configFileName = 'package.json';
         const res = await getBaseBranchConfig('postgresql/v18/dev', config);
         expect(res.baseBranch).toBe('postgresql/v18/dev');
-        expect(platform.getRawFile).not.toHaveBeenCalled();
+        expect(platform.getJsonFile).not.toHaveBeenCalled();
       });
 
       it('skips when configFileName is missing from cache', async () => {
         getCache().configFileName = undefined;
         const res = await getBaseBranchConfig('postgresql/v18/dev', config);
         expect(res.baseBranch).toBe('postgresql/v18/dev');
-        expect(platform.getRawFile).not.toHaveBeenCalled();
+        expect(platform.getJsonFile).not.toHaveBeenCalled();
       });
     });
   });

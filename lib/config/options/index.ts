@@ -1242,7 +1242,7 @@ const options: Readonly<RenovateOptions>[] = [
   {
     name: 'useBaseBranchConfig',
     description:
-      'Whether to read configuration from base branches instead of only the default branch. Use `fallback` to read branch-specific config with graceful fallback to the default branch config when not found or invalid. Use `merge` to require and merge branch config (error if not found).',
+      'Whether to read configuration from base branches instead of only the default branch.',
     type: 'string',
     allowedValues: ['fallback', 'merge', 'none'],
     default: 'none',

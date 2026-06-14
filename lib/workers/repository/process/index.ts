@@ -2,7 +2,6 @@
 import { GlobalConfig } from '../../../config/global.ts';
 import { mergeChildConfig } from '../../../config/index.ts';
 import { migrateAndValidate } from '../../../config/migrate-validate.ts';
-import { parseFileConfig } from '../../../config/parse.ts';
 import { resolveConfigPresets } from '../../../config/presets/index.ts';
 import type { RenovateConfig } from '../../../config/types.ts';
 import { CONFIG_VALIDATION } from '../../../constants/error-messages.ts';
@@ -23,6 +22,34 @@ import { readDashboardBody } from '../dependency-dashboard.ts';
 import type { ExtractResult } from './extract-update.ts';
 import { extract, lookup, update } from './extract-update.ts';
 import type { WriteUpdateResult } from './write.ts';
+
+async function resolveAndMerge(
+  config: RenovateConfig,
+  rawBranchConfig: RenovateConfig,
+  configFileName: string,
+  baseBranch: string,
+): Promise<RenovateConfig> {
+  const migratedConfig = await migrateAndValidate(config, rawBranchConfig);
+  if (migratedConfig.errors?.length) {
+    const error = new Error(CONFIG_VALIDATION);
+    error.validationSource = configFileName;
+    error.validationError = `The renovate configuration file of branch ${baseBranch} contains some invalid settings`;
+    error.validationMessage = migratedConfig.errors
+      .map((e) => e.message)
+      .join(', ');
+    throw error;
+  }
+  let result: RenovateConfig;
+  ({ config: result } = await resolveConfigPresets(migratedConfig, config));
+  result = mergeChildConfig(config, result);
+  result.baseBranchPatterns = config.baseBranchPatterns;
+  result.baseBranches = config.baseBranches;
+  /* v8 ignore next */
+  if (config.printConfig) {
+    logger.info({ config: result }, 'Base branch config after merge');
+  }
+  return result;
+}
 
 export async function getBaseBranchConfig(
   baseBranch: string,
@@ -66,34 +93,12 @@ export async function getBaseBranchConfig(
       throw error;
     }
 
-    baseBranchConfig = await migrateAndValidate(config, baseBranchConfig);
-    if (baseBranchConfig.errors?.length) {
-      const error = new Error(CONFIG_VALIDATION);
-      error.validationSource = configFileName;
-      error.validationError = `The renovate configuration file of branch ${baseBranch} contains some invalid settings`;
-      error.validationMessage = baseBranchConfig.errors
-        .map((e) => e.message)
-        .join(', ');
-      throw error;
-    }
-
-    ({ config: baseBranchConfig } = await resolveConfigPresets(
-      baseBranchConfig,
+    baseBranchConfig = await resolveAndMerge(
       config,
-    ));
-    baseBranchConfig = mergeChildConfig(config, baseBranchConfig);
-
-    // istanbul ignore if
-    if (config.printConfig) {
-      logger.info(
-        { config: baseBranchConfig },
-        'Base branch config after merge',
-      );
-    }
-
-    // baseBranches value should be based off the default branch
-    baseBranchConfig.baseBranchPatterns = config.baseBranchPatterns;
-    baseBranchConfig.baseBranches = config.baseBranches;
+      baseBranchConfig,
+      configFileName,
+      baseBranch,
+    );
   }
 
   if (
@@ -106,13 +111,12 @@ export async function getBaseBranchConfig(
     );
 
     const cache = getCache();
-    // TODO: types (#22198)
     const configFileName = cache.configFileName;
 
     if (configFileName && configFileName !== 'package.json') {
-      let branchConfigRaw: string | null = null;
+      let rawBranchConfig: RenovateConfig | null = null;
       try {
-        branchConfigRaw = await platform.getRawFile(
+        rawBranchConfig = await platform.getJsonFile(
           configFileName,
           config.repository,
           baseBranch,
@@ -121,51 +125,21 @@ export async function getBaseBranchConfig(
         if (err instanceof ExternalHostError) {
           throw err;
         }
-        logger.debug(
-          { baseBranch, configFileName },
-          'No branch-specific config file found, using default branch config',
-        );
+        const error = new Error(CONFIG_VALIDATION);
+        error.validationSource = configFileName;
+        error.validationError = 'Error fetching config file';
+        error.validationMessage = `Error fetching config file \`${configFileName}\` from branch \`${baseBranch}\``;
+        throw error;
       }
 
-      if (branchConfigRaw) {
-        const parseResult = parseFileConfig(configFileName, branchConfigRaw);
-        if (parseResult.success) {
-          // TODO: types (#22198)
-          const migratedConfig = await migrateAndValidate(
-            config,
-            parseResult.parsedContents as RenovateConfig,
-          );
-          if (migratedConfig.errors?.length) {
-            logger.warn(
-              { baseBranch, errors: migratedConfig.errors },
-              'Branch-specific config has validation errors, using default branch config',
-            );
-          } else {
-            ({ config: baseBranchConfig } = await resolveConfigPresets(
-              migratedConfig,
-              config,
-            ));
-            baseBranchConfig = mergeChildConfig(config, baseBranchConfig);
-            baseBranchConfig.baseBranchPatterns = config.baseBranchPatterns;
-            baseBranchConfig.baseBranches = config.baseBranches;
-            logger.debug(
-              { baseBranch },
-              'Applied branch-specific renovate config',
-            );
-            // istanbul ignore if
-            if (config.printConfig) {
-              logger.info(
-                { config: baseBranchConfig },
-                'Base branch config after merge',
-              );
-            }
-          }
-        } else {
-          logger.warn(
-            { baseBranch, validationError: parseResult.validationError },
-            'Failed to parse branch-specific config, using default branch config',
-          );
-        }
+      if (rawBranchConfig) {
+        baseBranchConfig = await resolveAndMerge(
+          config,
+          rawBranchConfig,
+          configFileName,
+          baseBranch,
+        );
+        logger.debug({ baseBranch }, 'Applied branch-specific renovate config');
       }
     }
   }
