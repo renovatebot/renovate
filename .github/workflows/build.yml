@@ -671,7 +671,7 @@ jobs:
           os: ${{ runner.os }}
 
       - name: Build docker
-        run: pnpm build:docker build --tries=3 --args '--load'
+        run: pnpm build:docker build --platform linux/amd64,linux/arm64 --tries=3 --args '--load'
         env:
           LOG_LEVEL: debug
 
