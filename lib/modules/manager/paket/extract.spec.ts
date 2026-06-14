@@ -163,5 +163,48 @@ describe('modules/manager/paket/extract', () => {
         lockFiles: [lockFileName],
       });
     });
+
+    it('resolves version when group name case differs (group names are case-insensitive)', async () => {
+      fs.readLocalFile.mockImplementation(
+        (filename: string, _encoding: 'utf8') => {
+          expect(filename).toEqual(lockFileName);
+          return Promise.resolve(codeBlock`
+            NUGET
+              remote: https://api.nuget.org/v3/index.json
+            GROUP groupA
+            NUGET
+              remote: https://api.nuget.org/v3/index.json
+                Fake (5.16)
+          `);
+        },
+      );
+      const packageFileContent = codeBlock`
+        source https://api.nuget.org/v3/index.json
+
+        group GroupA
+          source https://api.nuget.org/v3/index.json
+          nuget Fake
+      `;
+
+      const result = await extractPackageFile(
+        packageFileContent,
+        packageFileName,
+        config,
+      );
+
+      expect(result).toEqual({
+        deps: [
+          {
+            depType: 'dependencies',
+            depName: 'Fake',
+            currentVersion: '5.16',
+            datasource: NugetDatasource.id,
+            rangeStrategy: 'update-lockfile',
+            lockedVersion: '5.16',
+          },
+        ],
+        lockFiles: [lockFileName],
+      });
+    });
   });
 });

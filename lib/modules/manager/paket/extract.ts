@@ -22,7 +22,7 @@ function searchPackageVersion(
 ): LockFileDependency | undefined {
   return dependencies.find(
     (d) =>
-      d.groupName === group.groupName &&
+      d.groupName.toUpperCase() === group.groupName.toUpperCase() &&
       d.packageName.toUpperCase() === p.name.toUpperCase(),
   );
 }
