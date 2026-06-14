@@ -25,7 +25,7 @@ describe('modules/manager/paket/update-lock', () => {
       const newContentLockFile = 'New fake lock file content';
       fs.readLocalFile.mockImplementation(
         (filename: string, _encoding: 'utf8') => {
-          expect(filename).equals(lockFileName);
+          expect(filename).toEqual(lockFileName);
 
           if (toolSpy.mock.calls.length === 0) {
             return Promise.resolve('Old fake lock file content');
@@ -54,7 +54,7 @@ describe('modules/manager/paket/update-lock', () => {
       toolSpy.mockResolvedValue();
       fs.readLocalFile.mockImplementation(
         (filename: string, _encoding: 'utf8') => {
-          expect(filename).equals(lockFileName);
+          expect(filename).toEqual(lockFileName);
           return Promise.resolve('Old fake lock file content');
         },
       );

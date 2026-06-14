@@ -52,7 +52,7 @@ describe('modules/manager/paket/extract', () => {
     it('return all packages', async () => {
       fs.readLocalFile.mockImplementation(
         (filename: string, _encoding: 'utf8') => {
-          expect(filename).equals(lockFileName);
+          expect(filename).toEqual(lockFileName);
           return Promise.resolve(lockFileContent);
         },
       );
@@ -105,7 +105,7 @@ describe('modules/manager/paket/extract', () => {
     it('throw error if not found lock file', async () => {
       fs.readLocalFile.mockImplementation(
         (filename: string, _encoding: 'utf8') => {
-          expect(filename).equals(lockFileName);
+          expect(filename).toEqual(lockFileName);
           return Promise.resolve(null);
         },
       );
@@ -122,7 +122,7 @@ describe('modules/manager/paket/extract', () => {
     it('return package name of dependencies file if unknown in lock file', async () => {
       fs.readLocalFile.mockImplementation(
         (filename: string, _encoding: 'utf8') => {
-          expect(filename).equals(lockFileName);
+          expect(filename).toEqual(lockFileName);
           return Promise.resolve(codeBlock`
             NUGET
               remote: https://api.nuget.org/v3/index.json

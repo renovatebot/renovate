@@ -38,7 +38,7 @@ describe('modules/manager/paket/artifacts', () => {
       const newContentLockFile = 'New fake lock file content';
       fs.readLocalFile.mockImplementation(
         (filename: string, _encoding: 'utf8') => {
-          expect(filename).equals(lockFileName);
+          expect(filename).toEqual(lockFileName);
 
           if (toolSpy.mock.calls.length === 0) {
             return Promise.resolve('Old fake lock file content');
@@ -73,7 +73,7 @@ describe('modules/manager/paket/artifacts', () => {
       toolSpy.mockResolvedValue();
       fs.readLocalFile.mockImplementation(
         (filename: string, _encoding: 'utf8') => {
-          expect(filename).equals(lockFileName);
+          expect(filename).toEqual(lockFileName);
           return Promise.resolve('Old fake lock file content');
         },
       );
@@ -88,7 +88,7 @@ describe('modules/manager/paket/artifacts', () => {
       toolSpy.mockRejectedValue(new Error('Cmd error'));
       fs.readLocalFile.mockImplementation(
         (filename: string, _encoding: 'utf8') => {
-          expect(filename).equals(lockFileName);
+          expect(filename).toEqual(lockFileName);
           return Promise.resolve('Old fake lock file content');
         },
       );
