@@ -15,16 +15,17 @@ import type {
   LockFileDependency,
 } from './types.ts';
 
-const searchPackageVersion = (
+function searchPackageVersion(
   dependencies: LockFileDependency[],
   group: DependenciesFileGroup,
   p: DependenciesFilePackage,
-): LockFileDependency | undefined =>
-  dependencies.find(
+): LockFileDependency | undefined {
+  return dependencies.find(
     (d) =>
       d.groupName === group.groupName &&
       d.packageName.toUpperCase() === p.name.toUpperCase(),
   );
+}
 
 function convertToPackageDependency(
   dependencies: LockFileDependency[],
