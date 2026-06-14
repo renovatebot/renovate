@@ -21,10 +21,6 @@ export interface LockFileDependency {
   version: string;
 }
 
-export interface PaketPackage {
-  paketGroupName: string;
-}
-
 export interface UpdatePackage {
   filePath: string;
   packageName?: string;

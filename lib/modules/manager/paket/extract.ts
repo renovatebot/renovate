@@ -13,7 +13,6 @@ import type {
   DependenciesFileGroup,
   DependenciesFilePackage,
   LockFileDependency,
-  PaketPackage,
 } from './types.ts';
 
 const searchPackageVersion = (
@@ -31,7 +30,7 @@ function convertToPackageDependency(
   dependencies: LockFileDependency[],
   group: DependenciesFileGroup,
   p: DependenciesFilePackage,
-): PackageDependency<PaketPackage> {
+): PackageDependency {
   const lockVersion = searchPackageVersion(dependencies, group, p);
 
   const version = lockVersion?.version;
@@ -49,7 +48,7 @@ function convertToPackageDependency(
 function convertLockFileDependencyToPackageDependency(
   parsedPackageFile: DependenciesFile,
   parsedLockFile: LockFileDependency[],
-): PackageDependency<PaketPackage>[] {
+): PackageDependency[] {
   return parsedPackageFile.groups.flatMap((group) => {
     return group.nugetPackages.map((p) => {
       return convertToPackageDependency(parsedLockFile, group, p);
@@ -61,7 +60,7 @@ export async function extractPackageFile(
   content: string,
   packageFile: string,
   _config: ExtractConfig,
-): Promise<PackageFileContent<PaketPackage>> {
+): Promise<PackageFileContent> {
   logger.debug(`paket.extractPackageFile(${packageFile})`);
 
   const lockFileName = getSiblingFileName(packageFile, 'paket.lock');
@@ -73,7 +72,7 @@ export async function extractPackageFile(
   const parsedPackageFile = parseDependenciesFile(content);
   const parsedLockFile = parseLockFile(lockFileContent);
 
-  const deps: PackageDependency<PaketPackage>[] =
+  const deps: PackageDependency[] =
     convertLockFileDependencyToPackageDependency(
       parsedPackageFile,
       parsedLockFile,
