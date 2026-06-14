@@ -229,8 +229,9 @@ export class MavenDatasource extends Datasource {
       if (gitRef) {
         release.gitRef = gitRef;
       }
-    } catch {
+    } catch (err) {
       // Git ref extraction is best-effort metadata and should not fail release lookup.
+      logger.trace({ err }, 'Failed to extract git ref for Maven release');
     }
 
     return release;
