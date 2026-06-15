@@ -12,6 +12,23 @@ describe('config/parse', () => {
       });
     });
 
+    it('parses jsonc with trailing comma', () => {
+      const content =
+        '// comment\n{\n  "extends": ["config:best-practices"],\n}\n';
+      expect(parseFileConfig('config.jsonc', content)).toEqual({
+        success: true,
+        parsedContents: { extends: ['config:best-practices'] },
+      });
+    });
+
+    it('keeps commas inside strings', () => {
+      const content = '{\n  "foo": "a,]",\n  "bar": "b,}",\n}\n';
+      expect(parseFileConfig('config.jsonc', content)).toEqual({
+        success: true,
+        parsedContents: { foo: 'a,]', bar: 'b,}' },
+      });
+    });
+
     it('returns error', () => {
       // syntax validation
       expect(parseFileConfig('config.json', '{')).toEqual({
