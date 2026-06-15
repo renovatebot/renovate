@@ -1,7 +1,7 @@
 import * as httpMock from '~test/http-mock.ts';
 import type { Timestamp } from '../../../util/timestamp.ts';
 import * as versioning from '../../versioning/maven/index.ts';
-import { getPkgReleases } from '../index.ts';
+import { getPkgReleases, getRawPkgReleases } from '../index.ts';
 import { JenkinsPluginsDatasource } from './index.ts';
 import type {
   JenkinsPluginsInfoResponse,
@@ -64,6 +64,49 @@ describe('modules/datasource/jenkins-plugins/index', () => {
         .reply(200, jenkinsPluginsInfo);
 
       expect(await getPkgReleases(newparams)).toBeNull();
+    });
+
+    it('returns constraints when calling getRawPkgReleases', async () => {
+      httpMock
+        .scope('https://updates.jenkins.io')
+        .get('/current/update-center.actual.json')
+        .reply(200, jenkinsPluginsInfo);
+
+      httpMock
+        .scope('https://updates.jenkins.io')
+        .get('/current/plugin-versions.json')
+        .reply(200, jenkinsPluginsVersions);
+
+      const res = await getRawPkgReleases(params);
+
+      expect(res).toEqual({
+        res: {
+          ok: true,
+          val: {
+            registryUrl: 'https://updates.jenkins.io',
+            releases: [
+              {
+                downloadUrl: 'https://download.example.com',
+                version: '1.0.0',
+              },
+              {
+                downloadUrl: 'https://download.example.com',
+                releaseTimestamp: '2020-01-02T00:00:00.000Z' as Timestamp,
+                version: '2.0.0',
+              },
+              {
+                downloadUrl: 'https://download.example.com',
+                releaseTimestamp: '2020-05-13T00:11:40.000Z' as Timestamp,
+                version: '3.0.0',
+                constraints: {
+                  jenkins: ['>=2.164.3'],
+                },
+              },
+            ],
+            sourceUrl: 'https://source-url.example.com',
+          },
+        },
+      });
     });
 
     it('returns package releases for a hit for info and releases', async () => {
