@@ -336,6 +336,73 @@ requires-pixi = ">=0.40,<0.41"
       ]);
     });
 
+    it('uses requires-pixi version constraint from workspace table', async () => {
+      GlobalConfig.set({
+        ...adminConfig,
+        binarySource: 'docker',
+        dockerSidecarImage: 'ghcr.io/renovatebot/base-image',
+      });
+      const execSnapshots = mockExecAll();
+      fs.getSiblingFileName.mockReturnValueOnce('pixi.lock');
+      fs.readLocalFile.mockResolvedValueOnce('Old pixi.lock');
+      fs.ensureCacheDir.mockResolvedValueOnce(
+        '/tmp/renovate/cache/others/pixi',
+      );
+      fs.readLocalFile.mockResolvedValueOnce('New pixi.lock');
+      getPkgReleases.mockResolvedValueOnce({
+        releases: [
+          { version: '0.38.0' },
+          { version: '0.40.1' },
+          { version: '0.41.4' },
+        ],
+      });
+      const project = parsePyProject(`
+[tool.pixi.workspace]
+name = "test"
+channels = ["conda-forge"]
+platforms = ["linux-64"]
+requires-pixi = ">=0.40,<0.41"
+`);
+      const result = await processor.updateArtifacts(
+        {
+          packageFileName: 'pyproject.toml',
+          newPackageFileContent: '',
+          config: { constraints: {} },
+          updatedDeps: [{ depName: 'dep1' }],
+        },
+        project!,
+      );
+      expect(result).toEqual([
+        {
+          file: {
+            type: 'addition',
+            path: 'pixi.lock',
+            contents: 'New pixi.lock',
+          },
+        },
+      ]);
+      expect(execSnapshots).toMatchObject([
+        { cmd: 'docker pull ghcr.io/renovatebot/base-image' },
+        { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
+        {
+          cmd:
+            'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
+            '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
+            '-v "/tmp/cache":"/tmp/cache" ' +
+            '-e PIXI_CACHE_DIR ' +
+            '-e RATTLER_CACHE_DIR ' +
+            '-e CONTAINERBASE_CACHE_DIR ' +
+            '-w "/tmp/github/some/repo" ' +
+            'ghcr.io/renovatebot/base-image ' +
+            'bash -l -c "' +
+            'install-tool pixi 0.40.1 ' +
+            '&& ' +
+            'pixi lock --no-progress --color=never --quiet' +
+            '"',
+        },
+      ]);
+    });
+
     it('uses pixi version constraint from config.constraints', async () => {
       GlobalConfig.set({
         ...adminConfig,
