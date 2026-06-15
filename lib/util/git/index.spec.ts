@@ -90,6 +90,15 @@ describe('util/git/index', { timeout: 30000 }, () => {
     await repo.addConfig('user.email', 'custom@example.com');
     await repo.commit('custom message');
 
+    await repo.checkoutBranch('renovate/custom_author_brackets', defaultBranch);
+    await fs.writeFile(`${base.path}/custom_brackets_file`, 'custom');
+    await repo.add(['custom_brackets_file']);
+    await repo.addConfig(
+      'user.email',
+      '29139614+renovate[bot]@users.noreply.github.com',
+    );
+    await repo.commit('custom brackets message');
+
     await repo.checkoutBranch('renovate/nested_files', defaultBranch);
     await fs.mkdirp(`${base.path}/bin/`);
     await fs.writeFile(`${base.path}/bin/nested`, 'nested');
@@ -414,6 +423,27 @@ describe('util/git/index', { timeout: 30000 }, () => {
       expect(
         await git.isBranchModified('renovate/custom_author', defaultBranch),
       ).toBeFalse();
+    });
+
+    it('should return false when ignored author contains literal brackets', async () => {
+      git.setUserRepoConfig({
+        gitIgnoredAuthors: ['29139614+renovate[bot]@users.noreply.github.com'],
+      });
+      expect(
+        await git.isBranchModified(
+          'renovate/custom_author_brackets',
+          defaultBranch,
+        ),
+      ).toBeFalse();
+    });
+
+    it('should return true when author does not match ignored regex', async () => {
+      git.setUserRepoConfig({
+        gitIgnoredAuthors: ['/^other@example\\.com$/'],
+      });
+      expect(
+        await git.isBranchModified('renovate/custom_author', defaultBranch),
+      ).toBeTrue();
     });
 
     it('should return true when ignored regex is invalid', async () => {

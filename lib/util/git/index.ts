@@ -36,7 +36,7 @@ import { getEnv } from '../env.ts';
 import type { ExtraEnv } from '../exec/types.ts';
 import { getChildEnv } from '../exec/utils.ts';
 import { newlineRegex, regEx } from '../regex.ts';
-import { matchRegexOrGlobList } from '../string-match.ts';
+import { getRegexPredicate, matchRegexOrGlobList } from '../string-match.ts';
 import { logWarningIfUnicodeHiddenCharactersInPackageFile } from '../unicode.ts';
 import { getGitEnvironmentVariables } from './auth.ts';
 import { parseGitAuthor } from './author.ts';
@@ -874,11 +874,29 @@ export async function isBranchModified(
   }
   const { gitAuthorEmail, ignoredAuthors } = config;
 
+  const isIgnoredAuthor = (committedAuthor: string): boolean => {
+    for (const ignoredAuthor of ignoredAuthors) {
+      const ignoredAuthorRegex = getRegexPredicate(ignoredAuthor);
+      if (ignoredAuthorRegex) {
+        if (ignoredAuthorRegex(committedAuthor)) {
+          return true;
+        }
+        continue;
+      }
+
+      if (committedAuthor === ignoredAuthor) {
+        return true;
+      }
+    }
+
+    return false;
+  };
+
   const includedAuthors = new Set<string>();
   for (const committedAuthor of committedAuthors) {
     if (
       committedAuthor !== gitAuthorEmail &&
-      !matchRegexOrGlobList(committedAuthor, ignoredAuthors)
+      !isIgnoredAuthor(committedAuthor)
     ) {
       includedAuthors.add(committedAuthor);
     }
