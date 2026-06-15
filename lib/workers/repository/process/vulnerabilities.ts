@@ -18,6 +18,7 @@ import { getDefaultVersioning } from '../../../modules/datasource/common.ts';
 import type {
   PackageDependency,
   PackageFile,
+  SecurityAdvisory,
 } from '../../../modules/manager/types.ts';
 import type { VersioningApi } from '../../../modules/versioning/index.ts';
 import { get as getVersioning } from '../../../modules/versioning/index.ts';
@@ -269,6 +270,15 @@ export class Vulnerabilities {
             datasource: dep.datasource!,
             packageFileConfig,
           });
+
+          this.attachAdvisoryToUpdates(
+            ecosystem,
+            osvPackageName,
+            dep,
+            osvVulnerability,
+            affected,
+            versioningApi,
+          );
         }
       }
 
@@ -350,6 +360,68 @@ export class Vulnerabilities {
             dep.skipStage = 'lookup';
           }
         }
+      }
+    }
+  }
+
+  /**
+   * Attaches advisory metadata (id, severity, CVSS) to each update that resolves
+   * the given vulnerability, so it surfaces in the file-based report.
+   *
+   * Runs on the second `appendVulnerabilityPackageRules` pass (the first pass has
+   * no updates yet) and is idempotent: advisories are deduplicated by `id`.
+   */
+  private attachAdvisoryToUpdates(
+    ecosystem: Ecosystem,
+    osvPackageName: string,
+    dep: PackageDependency,
+    osvVulnerability: Osv.Vulnerability,
+    affected: Osv.Affected,
+    versioningApi: VersioningApi,
+  ): void {
+    if (!dep.updates?.length) {
+      return;
+    }
+
+    const details = this.extractSeverityDetails(osvVulnerability, affected);
+    const [baseScore] = Vulnerabilities.evaluateCvssVector(details.cvssVector);
+
+    const advisory: SecurityAdvisory = {
+      id: osvVulnerability.id,
+      severityLevel: details.severityLevel,
+    };
+    if (details.cvssVector) {
+      advisory.cvssVector = details.cvssVector;
+    }
+    if (isNonEmptyString(baseScore)) {
+      advisory.cvssScore = parseFloat(baseScore);
+    }
+
+    for (const update of dep.updates) {
+      const newVersion = update.newVersion ?? update.newValue;
+      if (
+        !isNonEmptyString(newVersion) ||
+        !versioningApi.isVersion(newVersion)
+      ) {
+        continue;
+      }
+
+      // Only attach to updates which are no longer vulnerable, i.e. which fix it
+      if (
+        this.isPackageVulnerable(
+          ecosystem,
+          osvPackageName,
+          newVersion,
+          affected,
+          versioningApi,
+        )
+      ) {
+        continue;
+      }
+
+      update.securityAdvisories ??= [];
+      if (!update.securityAdvisories.some((a) => a.id === advisory.id)) {
+        update.securityAdvisories.push(advisory);
       }
     }
   }

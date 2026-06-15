@@ -142,6 +142,33 @@ export interface LookupUpdate {
   hasAttestation?: boolean;
 
   prBodyNotes?: string[];
+
+  /**
+   * Security advisories fixed by this update.
+   *
+   * Only populated when `osvVulnerabilityAlerts` is enabled and the update
+   * resolves one or more vulnerabilities affecting the current version.
+   */
+  securityAdvisories?: SecurityAdvisory[];
+}
+
+export interface SecurityAdvisory {
+  /**
+   * The advisory identifier, e.g. `GHSA-...`, `CVE-...`, `GO-...`, `RUSTSEC-...` or `PYSEC-...`.
+   */
+  id: string;
+  /**
+   * The severity level, e.g. `HIGH`, `CRITICAL` or `UNKNOWN`. Always set.
+   */
+  severityLevel: string;
+  /**
+   * The CVSS base score, e.g. `7.5`. Omitted when no CVSS vector is available.
+   */
+  cvssScore?: number;
+  /**
+   * The raw CVSS vector string. Omitted when not provided by the advisory.
+   */
+  cvssVector?: string;
 }
 
 /**

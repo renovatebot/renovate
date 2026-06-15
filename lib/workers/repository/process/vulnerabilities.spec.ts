@@ -4,7 +4,10 @@ import { mockFn } from 'vitest-mock-extended';
 import type { RenovateConfig } from '~test/util.ts';
 import { logger } from '~test/util.ts';
 import { getConfig } from '../../../config/defaults.ts';
-import type { PackageFile } from '../../../modules/manager/types.ts';
+import type {
+  LookupUpdate,
+  PackageFile,
+} from '../../../modules/manager/types.ts';
 import { Vulnerabilities } from './vulnerabilities.ts';
 
 const getVulnerabilitiesMock =
@@ -2369,6 +2372,171 @@ describe('workers/repository/process/vulnerabilities', () => {
       ${'CVSS:3.1/AV:N'}                                                   | ${['0.0', 'NONE']}
     `('$input', ({ input, output }) => {
       expect(Vulnerabilities.evaluateCvssVector(input)).toMatchObject(output);
+    });
+  });
+
+  describe('securityAdvisories enrichment', () => {
+    let config: RenovateConfig;
+    let vulnerabilities: Vulnerabilities;
+
+    const cvssV3Vector = 'CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:L/A:N';
+    const cvssV4Vector =
+      'CVSS:4.0/AV:N/AC:L/AT:N/PR:L/UI:N/VC:N/VI:L/VA:N/SC:N/SI:L/SA:N';
+
+    function lodashPackageFiles(
+      updates: LookupUpdate[],
+    ): Record<string, PackageFile[]> {
+      return {
+        npm: [
+          {
+            deps: [
+              {
+                depName: 'lodash',
+                currentValue: '4.17.10',
+                datasource: 'npm',
+                updates,
+              },
+            ],
+            packageFile: 'package.json',
+          },
+        ],
+      };
+    }
+
+    function lodashVulnerability(
+      severity?: Osv.Severity[],
+      databaseSpecific?: Record<string, unknown>,
+    ): Osv.Vulnerability {
+      return {
+        id: 'GHSA-x5rq-j2xg-h7qm',
+        modified: '',
+        affected: [
+          {
+            ranges: [
+              {
+                type: 'SEMVER',
+                events: [{ introduced: '0.0.0' }, { fixed: '4.17.11' }],
+              },
+            ],
+            package: { name: 'lodash', ecosystem: 'npm' },
+          },
+        ],
+        severity,
+        database_specific: databaseSpecific,
+      };
+    }
+
+    beforeAll(async () => {
+      resetOsv();
+      createMock.mockResolvedValue({
+        getVulnerabilities: getVulnerabilitiesMock,
+      });
+      vulnerabilities = await Vulnerabilities.create();
+    });
+
+    beforeEach(() => {
+      config = getConfig();
+      config.packageRules = [];
+    });
+
+    it('attaches advisory with CVSS to updates that fix the vulnerability', async () => {
+      const packageFiles = lodashPackageFiles([
+        { newVersion: '4.17.21' },
+        { newVersion: '4.17.5' },
+      ]);
+      getVulnerabilitiesMock.mockResolvedValueOnce([
+        lodashVulnerability([{ type: 'CVSS_V3', score: cvssV3Vector }]),
+      ]);
+
+      await vulnerabilities.fetchVulnerabilities(config, packageFiles);
+
+      const updates = packageFiles.npm[0].deps[0].updates!;
+      expect(updates[0].securityAdvisories).toEqual([
+        {
+          id: 'GHSA-x5rq-j2xg-h7qm',
+          severityLevel: 'MEDIUM',
+          cvssScore: 6.5,
+          cvssVector: cvssV3Vector,
+        },
+      ]);
+      expect(updates[1].securityAdvisories).toBeUndefined();
+    });
+
+    it('prefers the CVSS v4 vector over v3', async () => {
+      const packageFiles = lodashPackageFiles([{ newVersion: '4.17.21' }]);
+      getVulnerabilitiesMock.mockResolvedValueOnce([
+        lodashVulnerability([
+          { type: 'CVSS_V4', score: cvssV4Vector },
+          { type: 'CVSS_V3', score: cvssV3Vector },
+        ]),
+      ]);
+
+      await vulnerabilities.fetchVulnerabilities(config, packageFiles);
+
+      expect(
+        packageFiles.npm[0].deps[0].updates![0].securityAdvisories,
+      ).toEqual([
+        {
+          id: 'GHSA-x5rq-j2xg-h7qm',
+          severityLevel: 'MEDIUM',
+          cvssScore: 5.3,
+          cvssVector: cvssV4Vector,
+        },
+      ]);
+    });
+
+    it('attaches severity level only when no CVSS vector is available', async () => {
+      const packageFiles = lodashPackageFiles([{ newVersion: '4.17.21' }]);
+      getVulnerabilitiesMock.mockResolvedValueOnce([
+        lodashVulnerability(undefined, { severity: 'high' }),
+      ]);
+
+      await vulnerabilities.fetchVulnerabilities(config, packageFiles);
+
+      expect(
+        packageFiles.npm[0].deps[0].updates![0].securityAdvisories,
+      ).toEqual([{ id: 'GHSA-x5rq-j2xg-h7qm', severityLevel: 'HIGH' }]);
+    });
+
+    it('does not attach advisories when there are no updates', async () => {
+      const packageFiles = lodashPackageFiles([]);
+      getVulnerabilitiesMock.mockResolvedValueOnce([
+        lodashVulnerability([{ type: 'CVSS_V3', score: cvssV3Vector }]),
+      ]);
+
+      await vulnerabilities.fetchVulnerabilities(config, packageFiles);
+
+      expect(packageFiles.npm[0].deps[0].updates).toEqual([]);
+    });
+
+    it('skips updates whose new value is not a single version', async () => {
+      const packageFiles = lodashPackageFiles([{ newValue: '^4.0.0' }, {}]);
+      getVulnerabilitiesMock.mockResolvedValueOnce([
+        lodashVulnerability([{ type: 'CVSS_V3', score: cvssV3Vector }]),
+      ]);
+
+      await vulnerabilities.fetchVulnerabilities(config, packageFiles);
+
+      const updates = packageFiles.npm[0].deps[0].updates!;
+      expect(updates[0].securityAdvisories).toBeUndefined();
+      expect(updates[1].securityAdvisories).toBeUndefined();
+    });
+
+    it('does not duplicate advisories when invoked multiple times', async () => {
+      const packageFiles = lodashPackageFiles([{ newVersion: '4.17.21' }]);
+      getVulnerabilitiesMock.mockResolvedValueOnce([
+        lodashVulnerability([{ type: 'CVSS_V3', score: cvssV3Vector }]),
+      ]);
+      getVulnerabilitiesMock.mockResolvedValueOnce([
+        lodashVulnerability([{ type: 'CVSS_V3', score: cvssV3Vector }]),
+      ]);
+
+      await vulnerabilities.fetchVulnerabilities(config, packageFiles);
+      await vulnerabilities.fetchVulnerabilities(config, packageFiles);
+
+      expect(
+        packageFiles.npm[0].deps[0].updates![0].securityAdvisories,
+      ).toHaveLength(1);
     });
   });
 });

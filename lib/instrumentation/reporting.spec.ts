@@ -102,6 +102,59 @@ describe('instrumentation/reporting', () => {
     expect(getReport()).toEqual(expectedReport);
   });
 
+  it('keeps securityAdvisories attached to an update in the report', () => {
+    const config: RenovateConfig = {
+      repository: 'myOrg/myRepo',
+      reportType: 'logging',
+    };
+    const packageFilesWithAdvisory: Record<string, PackageFile[]> = {
+      npm: [
+        {
+          packageFile: 'package.json',
+          deps: [
+            {
+              depName: 'lodash',
+              currentValue: '4.17.10',
+              updates: [
+                {
+                  newVersion: '4.17.21',
+                  securityAdvisories: [
+                    {
+                      id: 'GHSA-x5rq-j2xg-h7qm',
+                      severityLevel: 'HIGH',
+                      cvssScore: 7.5,
+                      cvssVector:
+                        'CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N',
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    };
+
+    addExtractionStats(config, {
+      branchList: [],
+      branches: [],
+      packageFiles: packageFilesWithAdvisory,
+    });
+
+    const report = getReport();
+    expect(
+      report.repositories['myOrg/myRepo'].packageFiles.npm[0].deps[0]
+        .updates![0].securityAdvisories,
+    ).toEqual([
+      {
+        id: 'GHSA-x5rq-j2xg-h7qm',
+        severityLevel: 'HIGH',
+        cvssScore: 7.5,
+        cvssVector: 'CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N',
+      },
+    ]);
+  });
+
   it('log report if reportType is set to logging', async () => {
     const config: RenovateConfig = {
       repository: 'myOrg/myRepo',
