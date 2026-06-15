@@ -39,7 +39,6 @@ import { newlineRegex, regEx } from '../regex.ts';
 import { getRegexPredicate, matchRegexOrGlobList } from '../string-match.ts';
 import type { LongCommitSha } from '../schema-utils/git.ts';
 import { toLongCommitSha } from '../schema-utils/git.ts';
-import { matchRegexOrGlobList } from '../string-match.ts';
 import { logWarningIfUnicodeHiddenCharactersInPackageFile } from '../unicode.ts';
 import { getGitEnvironmentVariables } from './auth.ts';
 import { parseGitAuthor } from './author.ts';
