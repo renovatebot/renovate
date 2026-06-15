@@ -298,6 +298,34 @@ describe('modules/manager/bun/extract', () => {
   });
 
   describe('catalogs', () => {
+    it('ignores invalid catalog values gracefully', async () => {
+      fs.getSiblingFileName.mockReturnValueOnce('package.json');
+      fs.readLocalFile.mockResolvedValueOnce(
+        JSON.stringify({
+          name: 'my-monorepo',
+          version: '1.0.0',
+          dependencies: { dep1: '1.0.0' },
+          catalog: 'not-an-object',
+        }),
+      );
+
+      const packageFiles = await extractAllPackageFiles({}, ['bun.lock']);
+      expect(packageFiles).toHaveLength(1);
+      // Should still extract normal deps but skip invalid catalog
+      expect(packageFiles[0].deps).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            depType: 'dependencies',
+            depName: 'dep1',
+            currentValue: '1.0.0',
+          }),
+        ]),
+      );
+      expect(
+        packageFiles[0].deps.some((d) => d.depType?.startsWith('bun.catalog')),
+      ).toBeFalse();
+    });
+
     it('extracts top-level catalog dependencies from root package.json', async () => {
       fs.getSiblingFileName.mockReturnValueOnce('package.json');
       fs.readLocalFile.mockResolvedValueOnce(
