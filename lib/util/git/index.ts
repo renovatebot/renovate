@@ -36,6 +36,8 @@ import { getEnv } from '../env.ts';
 import type { ExtraEnv } from '../exec/types.ts';
 import { getChildEnv } from '../exec/utils.ts';
 import { newlineRegex, regEx } from '../regex.ts';
+import type { LongCommitSha } from '../schema-utils/git.ts';
+import { toLongCommitSha } from '../schema-utils/git.ts';
 import { matchRegexOrGlobList } from '../string-match.ts';
 import { logWarningIfUnicodeHiddenCharactersInPackageFile } from '../unicode.ts';
 import { getGitEnvironmentVariables } from './auth.ts';
@@ -67,7 +69,6 @@ import type {
   DiffTreeItem,
   GitObjectType,
   LocalConfig,
-  LongCommitSha,
   PushFilesConfig,
   StatusResult,
   StorageConfig,
@@ -268,7 +269,7 @@ async function fetchBranchCommits(preferUpstream = true): Promise<void> {
       .map((line) => line.trim().split(regEx(/\s+/)))
       .forEach(([sha, ref]) => {
         config.branchCommits[ref.replace('refs/heads/', '')] =
-          sha as LongCommitSha;
+          toLongCommitSha(sha);
       });
     logger.trace({ branchCommits: config.branchCommits }, 'branch commits');
   } catch (err) /* v8 ignore next -- TODO: add test #40625 */ {
@@ -525,9 +526,9 @@ export const syncGit = withInstrumenting(
       });
     }
     try {
-      config.currentBranchSha = (
-        await git.raw(['rev-parse', 'HEAD'])
-      ).trim() as LongCommitSha;
+      config.currentBranchSha = toLongCommitSha(
+        (await git.raw(['rev-parse', 'HEAD'])).trim(),
+      );
     } catch (err) /* v8 ignore next -- TODO: add test #40625 */ {
       if (err.message?.includes('fatal: not a git repository')) {
         throw new Error(REPOSITORY_CHANGED);
@@ -578,9 +579,9 @@ export const syncGit = withInstrumenting(
       });
     }
 
-    config.currentBranchSha = (
-      await git.revparse('HEAD')
-    ).trim() as LongCommitSha;
+    config.currentBranchSha = toLongCommitSha(
+      (await git.revparse('HEAD')).trim(),
+    );
     logger.debug(`Current branch SHA: ${config.currentBranchSha}`);
   },
 );
@@ -669,9 +670,9 @@ export async function checkoutBranch(
       ),
     );
     config.currentBranch = branchName;
-    config.currentBranchSha = (
-      await git.raw(['rev-parse', 'HEAD'])
-    ).trim() as LongCommitSha;
+    config.currentBranchSha = toLongCommitSha(
+      (await git.raw(['rev-parse', 'HEAD'])).trim(),
+    );
     const latestCommitDate = await getCommitDate(config.currentBranchSha);
     // v8 ignore else -- TODO: add test #40625
     if (latestCommitDate) {
@@ -706,9 +707,9 @@ export async function checkoutBranchFromRemote(
       git.checkoutBranch(branchName, `${remoteName}/${branchName}`),
     );
     config.currentBranch = branchName;
-    config.currentBranchSha = (
-      await git.revparse('HEAD')
-    ).trim() as LongCommitSha;
+    config.currentBranchSha = toLongCommitSha(
+      (await git.revparse('HEAD')).trim(),
+    );
     logger.debug(`Checked out branch ${branchName} from remote ${remoteName}`);
     config.branchCommits[branchName] = config.currentBranchSha;
     return config.currentBranchSha;
@@ -1338,9 +1339,9 @@ export async function prepareCommit({
       return null;
     }
 
-    const commitSha = (
-      await git.revparse([branchName])
-    ).trim() as LongCommitSha;
+    const commitSha = toLongCommitSha(
+      (await git.revparse([branchName])).trim(),
+    );
     const result: CommitResult = {
       parentCommitSha,
       commitSha,
@@ -1401,7 +1402,7 @@ export async function fetchBranch(
   try {
     const ref = `refs/heads/${branchName}:refs/remotes/origin/${branchName}`;
     await gitRetry(() => git.pull(['origin', ref, '--force']));
-    const commit = (await git.revparse([branchName])).trim() as LongCommitSha;
+    const commit = toLongCommitSha((await git.revparse([branchName])).trim());
     config.branchCommits[branchName] = commit;
     config.branchIsModified[branchName] = false;
     return commit;
@@ -1576,7 +1577,7 @@ export async function getCommitTreeSha(
       `Could not extract tree SHA from commit ${commitSha}: ${snippet}`,
     );
   }
-  return treeSha as LongCommitSha;
+  return toLongCommitSha(treeSha);
 }
 
 function treeTypeFromMode(mode: string): GitObjectType {
@@ -1636,7 +1637,7 @@ export async function diffCommitTree(
             path: targetPath,
             mode: newMode,
             type: treeTypeFromMode(newMode),
-            sha: newSha as LongCommitSha,
+            sha: toLongCommitSha(newSha),
           });
           break;
         default:
@@ -1645,7 +1646,7 @@ export async function diffCommitTree(
             path: targetPath ?? sourcePath,
             mode: newMode,
             type: treeTypeFromMode(newMode),
-            sha: newSha as LongCommitSha,
+            sha: toLongCommitSha(newSha),
           });
           break;
       }
