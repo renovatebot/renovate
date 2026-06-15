@@ -12,7 +12,7 @@ export async function updateArtifacts(
     updateArtifact.packageFileName,
     'paket.lock',
   );
-  const existingLockFileContent = await readLocalFile(lockFileName);
+  const existingLockFileContent = await readLocalFile(lockFileName, 'utf8');
 
   try {
     await runPaketUpdate({
@@ -29,7 +29,7 @@ export async function updateArtifacts(
       ],
     });
 
-    const newLockFileContent = await readLocalFile(lockFileName);
+    const newLockFileContent = await readLocalFile(lockFileName, 'utf8');
 
     if (existingLockFileContent === newLockFileContent) {
       logger.debug(`Lock file ${lockFileName} is unchanged`);

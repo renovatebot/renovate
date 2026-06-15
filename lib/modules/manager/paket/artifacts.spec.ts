@@ -50,6 +50,7 @@ describe('modules/manager/paket/artifacts', () => {
 
       const result = await updateArtifacts(updateArtifact);
 
+      expect(fs.readLocalFile).toHaveBeenCalledWith(lockFileName, 'utf8');
       expect(toolSpy).toHaveBeenCalledWith({
         filePath: lockFileName,
         toolConstraints: [
@@ -80,6 +81,7 @@ describe('modules/manager/paket/artifacts', () => {
 
       const result = await updateArtifacts(updateArtifact);
 
+      expect(fs.readLocalFile).toHaveBeenCalledWith(lockFileName, 'utf8');
       expect(result).toBeNull();
     });
 
