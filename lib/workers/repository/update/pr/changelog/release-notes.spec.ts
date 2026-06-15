@@ -369,7 +369,6 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
         'changelog-github-notes@v2',
         'facebook/react-native:1.0.0',
       );
-      packageCacheGetSpy.mockRestore();
     });
 
     it('includes sourceDirectory and gitRef in cache key', async () => {
@@ -409,7 +408,6 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
         'changelog-github-notes@v2',
         'facebook/react-native:packages/core:1.0.0:custom-a/1.0.0',
       );
-      packageCacheGetSpy.mockRestore();
     });
 
     it('matches release notes using gitRef when the tag differs from the version', async () => {
