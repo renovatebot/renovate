@@ -124,9 +124,36 @@ describe('modules/datasource/common', () => {
       });
     });
 
-    it('should assemble version from major, minor, patch groups', () => {
+    it.each`
+      input                  | extractVersion                                                                                  | expected
+      ${'17.0.19_10-jdk'}    | ${'^(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)_(?<build>\\d+)-jdk$'}                      | ${'17.0.19+10'}
+      ${'v17'}               | ${'^v(?<major>\\d+)$'}                                                                          | ${'17.0.0'}
+      ${'v5.3'}              | ${'^v(?<major>\\d+)\\.(?<minor>\\d+)$'}                                                         | ${'5.3.0'}
+      ${'1.2.3-beta.1-sfx'}  | ${'^(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)-(?<prerelease>[^-]+)'}                     | ${'1.2.3-beta.1'}
+      ${'pkg-2.5.0-rc.1_42'} | ${'^pkg-(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)-(?<prerelease>[^_]+)_(?<build>\\d+)$'} | ${'2.5.0-rc.1+42'}
+      ${'v1.2.3'}            | ${'^v(?<version>\\d+\\.\\d+\\.\\d+)$'}                                                          | ${'1.2.3'}
+      ${'release-4.0.0'}     | ${'^release-(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)$'}                                 | ${'4.0.0'}
+      ${'21_35-jre'}         | ${'^(?<major>\\d+)_(?<build>\\d+)-jre$'}                                                        | ${'21.0.0+35'}
+    `(
+      'should extract "$expected" from "$input"',
+      ({ input, extractVersion, expected }) => {
+        const releaseResult: ReleaseResult = {
+          releases: [{ version: input }],
+        };
+        const result = applyExtractVersion(releaseResult, extractVersion);
+        expect(result).toEqual({
+          releases: [{ version: expected, versionOrig: input }],
+        });
+      },
+    );
+
+    it('should filter out non-matching releases when using named groups', () => {
       const releaseResult: ReleaseResult = {
-        releases: [{ version: '17.0.19_10-jdk' }],
+        releases: [
+          { version: '17.0.19_10-jdk' },
+          { version: 'latest' },
+          { version: '17-jdk' },
+        ],
       };
       const result = applyExtractVersion(
         releaseResult,
@@ -136,116 +163,29 @@ describe('modules/datasource/common', () => {
         releases: [{ version: '17.0.19+10', versionOrig: '17.0.19_10-jdk' }],
       });
     });
-
-    it('should default minor and patch to 0 when not captured', () => {
-      const releaseResult: ReleaseResult = {
-        releases: [{ version: 'v17' }],
-      };
-      const result = applyExtractVersion(releaseResult, '^v(?<major>\\d+)$');
-      expect(result).toEqual({
-        releases: [{ version: '17.0.0', versionOrig: 'v17' }],
-      });
-    });
-
-    it('should assemble version with prerelease group', () => {
-      const releaseResult: ReleaseResult = {
-        releases: [{ version: '1.2.3-beta.1-suffix' }],
-      };
-      const result = applyExtractVersion(
-        releaseResult,
-        '^(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)-(?<prerelease>[^-]+)',
-      );
-      expect(result).toEqual({
-        releases: [
-          { version: '1.2.3-beta.1', versionOrig: '1.2.3-beta.1-suffix' },
-        ],
-      });
-    });
-
-    it('should assemble version with both prerelease and build groups', () => {
-      const releaseResult: ReleaseResult = {
-        releases: [{ version: 'pkg-2.5.0-rc.1_42' }],
-      };
-      const result = applyExtractVersion(
-        releaseResult,
-        '^pkg-(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)-(?<prerelease>[^_]+)_(?<build>\\d+)$',
-      );
-      expect(result).toEqual({
-        releases: [
-          { version: '2.5.0-rc.1+42', versionOrig: 'pkg-2.5.0-rc.1_42' },
-        ],
-      });
-    });
-
-    it('should prefer version group over part groups', () => {
-      const releaseResult: ReleaseResult = {
-        releases: [{ version: 'v1.2.3' }],
-      };
-      const result = applyExtractVersion(
-        releaseResult,
-        '^v(?<version>\\d+\\.\\d+\\.\\d+)$',
-      );
-      expect(result).toEqual({
-        releases: [{ version: '1.2.3', versionOrig: 'v1.2.3' }],
-      });
-    });
   });
 
   describe('extractVersionFromGroups', () => {
-    it('returns undefined for undefined groups', () => {
-      expect(extractVersionFromGroups(undefined)).toBeUndefined();
-    });
-
-    it('returns version group when present', () => {
-      expect(extractVersionFromGroups({ version: '1.2.3' })).toBe('1.2.3');
-    });
-
-    it('returns undefined when no version or major group', () => {
-      expect(extractVersionFromGroups({ minor: '2' })).toBeUndefined();
-    });
-
-    it('assembles from major only', () => {
-      expect(extractVersionFromGroups({ major: '5' })).toBe('5.0.0');
-    });
-
-    it('assembles from major, minor, patch', () => {
-      expect(
-        extractVersionFromGroups({ major: '1', minor: '2', patch: '3' }),
-      ).toBe('1.2.3');
-    });
-
-    it('includes build metadata', () => {
-      expect(
-        extractVersionFromGroups({
-          major: '17',
-          minor: '0',
-          patch: '19',
-          build: '10',
-        }),
-      ).toBe('17.0.19+10');
-    });
-
-    it('includes prerelease', () => {
-      expect(
-        extractVersionFromGroups({
-          major: '1',
-          minor: '0',
-          patch: '0',
-          prerelease: 'alpha.1',
-        }),
-      ).toBe('1.0.0-alpha.1');
-    });
-
-    it('includes both prerelease and build', () => {
-      expect(
-        extractVersionFromGroups({
-          major: '2',
-          minor: '5',
-          patch: '0',
-          prerelease: 'rc.1',
-          build: '42',
-        }),
-      ).toBe('2.5.0-rc.1+42');
+    it.each`
+      groups                                                                     | expected
+      ${undefined}                                                               | ${undefined}
+      ${{ minor: '2' }}                                                          | ${undefined}
+      ${{ patch: '3', build: '10' }}                                             | ${undefined}
+      ${{}}                                                                      | ${undefined}
+      ${{ version: '1.2.3' }}                                                    | ${'1.2.3'}
+      ${{ version: '0.0.1-alpha', major: '0' }}                                  | ${'0.0.1-alpha'}
+      ${{ major: '5' }}                                                          | ${'5.0.0'}
+      ${{ major: '1', minor: '2', patch: '3' }}                                  | ${'1.2.3'}
+      ${{ major: '0', minor: '0', patch: '0' }}                                  | ${'0.0.0'}
+      ${{ major: '17', minor: '0', patch: '19', build: '10' }}                   | ${'17.0.19+10'}
+      ${{ major: '1', minor: '0', patch: '0', prerelease: 'alpha.1' }}           | ${'1.0.0-alpha.1'}
+      ${{ major: '2', minor: '5', patch: '0', prerelease: 'rc.1', build: '42' }} | ${'2.5.0-rc.1+42'}
+      ${{ major: '3', build: '99' }}                                             | ${'3.0.0+99'}
+      ${{ major: '10', minor: '3' }}                                             | ${'10.3.0'}
+      ${{ major: '1', patch: '7' }}                                              | ${'1.0.7'}
+      ${{ major: '1', prerelease: 'beta' }}                                      | ${'1.0.0-beta'}
+    `('returns $expected for groups $groups', ({ groups, expected }) => {
+      expect(extractVersionFromGroups(groups)).toBe(expected);
     });
   });
 
