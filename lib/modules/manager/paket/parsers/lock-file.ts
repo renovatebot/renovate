@@ -59,9 +59,9 @@ function parseLine(line: Line, state: ReduceState): ReduceState {
   }
 
   if (line.indent === 4) {
-    const packageMatch = /^(?<packageName>\S+)\s+\((?<version>[^)]+)\)/.exec(
-      line.text,
-    );
+    const packageMatch = regEx(
+      /^(?<packageName>\S+)\s+\((?<version>[^)]+)\)/,
+    ).exec(line.text);
     if (packageMatch?.groups) {
       return {
         ...state,
