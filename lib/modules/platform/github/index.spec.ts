@@ -5530,6 +5530,18 @@ describe('modules/platform/github/index', () => {
       git.fetchBranch.mockImplementation(() =>
         Promise.resolve('0abcdef' as LongCommitSha),
       );
+      git.pushCommitToRenovateRef.mockResolvedValue(undefined);
+      git.getCommitTreeSha.mockResolvedValue(
+        '0000000000000000000000000000000000000000' as LongCommitSha,
+      );
+      git.diffCommitTree.mockResolvedValue([
+        {
+          path: 'foo.bar',
+          mode: '100644',
+          type: 'blob',
+          sha: 'abc0000000000000000000000000000000000000' as LongCommitSha,
+        },
+      ]);
     });
 
     it('returns null if pre-commit phase has failed', async () => {
@@ -5567,10 +5579,22 @@ describe('modules/platform/github/index', () => {
       expect(res).toBeNull();
     });
 
-    it('commits and returns SHA string', async () => {
-      git.pushCommitToRenovateRef.mockResolvedValueOnce();
-      git.listCommitTree.mockResolvedValueOnce([]);
+    it('returns null when diff is empty', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      await github.initRepo({ repository: 'some/repo' });
+      git.diffCommitTree.mockResolvedValueOnce([]);
 
+      const res = await github.commitFiles({
+        branchName: 'foo/bar',
+        files: [{ type: 'addition', path: 'foo.bar', contents: 'foobar' }],
+        message: 'Foobar',
+      });
+
+      expect(res).toBeNull();
+    });
+
+    it('commits and returns SHA string', async () => {
       const scope = httpMock.scope(githubApiHost);
 
       initRepoMock(scope, 'some/repo');
@@ -5597,9 +5621,6 @@ describe('modules/platform/github/index', () => {
     });
 
     it('performs rebase', async () => {
-      git.pushCommitToRenovateRef.mockResolvedValueOnce();
-      git.listCommitTree.mockResolvedValueOnce([]);
-
       const scope = httpMock.scope(githubApiHost);
 
       initRepoMock(scope, 'some/repo');
@@ -5626,9 +5647,6 @@ describe('modules/platform/github/index', () => {
     });
 
     it('continues if rebase fails due to 422', async () => {
-      git.pushCommitToRenovateRef.mockResolvedValueOnce();
-      git.listCommitTree.mockResolvedValueOnce([]);
-
       const scope = httpMock.scope(githubApiHost);
 
       initRepoMock(scope, 'some/repo');
@@ -5657,9 +5675,6 @@ describe('modules/platform/github/index', () => {
     });
 
     it('aborts if rebase fails due to non-422', async () => {
-      git.pushCommitToRenovateRef.mockResolvedValueOnce();
-      git.listCommitTree.mockResolvedValueOnce([]);
-
       const scope = httpMock.scope(githubApiHost);
 
       initRepoMock(scope, 'some/repo');
@@ -5686,9 +5701,6 @@ describe('modules/platform/github/index', () => {
     });
 
     it("aborts if commit SHA doesn't exist", async () => {
-      git.pushCommitToRenovateRef.mockResolvedValueOnce();
-      git.listCommitTree.mockResolvedValueOnce([]);
-
       const scope = httpMock.scope(githubApiHost);
 
       initRepoMock(scope, 'some/repo');

@@ -7,10 +7,10 @@ import type {
   GerritAccountInfo,
   GerritChange,
   GerritChangeMessageInfo,
-  GerritChangeStatus,
   GerritLabelTypeInfo,
   GerritRevisionInfo,
-} from './types.ts';
+} from './schema.ts';
+import type { GerritChangeStatus } from './types.ts';
 import * as utils from './utils.ts';
 import { mapBranchStatusToLabel } from './utils.ts';
 

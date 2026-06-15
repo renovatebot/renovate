@@ -56,7 +56,7 @@
     "test-dirty": "git diff --exit-code",
     "test-e2e": "run-s 'test-e2e:*'",
     "test-e2e:pack": "pnpm pack",
-    "test-e2e:install": "cd test/e2e && pnpm --ignore-workspace install --no-lockfile --prod",
+    "test-e2e:install": "cd test/e2e && pnpm install --ignore-workspace --ignore-scripts --no-lockfile",
     "test-e2e:run": "cd test/e2e && pnpm test",
     "test-schema": "run-s create-json-schema && node tools/validate-schema.ts",
     "test:docs": "node --test tools/docs/test/**/*.mjs",
@@ -146,7 +146,7 @@
   "homepage": "https://renovatebot.com",
   "engines": {
     "node": "^24.11.0",
-    "pnpm": "^10.0.0"
+    "pnpm": "^11.0.0"
   },
   "dependencies": {
     "@aws-sdk/client-codecommit": "3.1053.0",
@@ -181,7 +181,7 @@
     "@renovatebot/good-enough-parser": "2.0.1",
     "@renovatebot/osv-offline": "3.0.3",
     "@renovatebot/pep440": "5.0.0",
-    "@renovatebot/pgp": "1.3.12",
+    "@renovatebot/pgp": "1.3.13",
     "@renovatebot/ruby-semver": "5.0.0",
     "@sindresorhus/is": "8.1.0",
     "@yarnpkg/core": "4.8.0",
@@ -280,7 +280,7 @@
     "@ls-lint/ls-lint": "2.3.1",
     "@openpgp/web-stream-tools": "0.3.1",
     "@semantic-release/exec": "7.1.0",
-    "@smithy/util-stream": "4.6.5",
+    "@smithy/util-stream": "4.6.6",
     "@types/adm-zip": "0.5.8",
     "@types/aws4": "1.11.6",
     "@types/breejs__later": "4.1.5",
@@ -306,7 +306,7 @@
     "@types/mdast": "4.0.4",
     "@types/moo": "0.5.10",
     "@types/ms": "2.1.0",
-    "@types/node": "24.12.4",
+    "@types/node": "24.13.0",
     "@types/parse-link-header": "2.0.3",
     "@types/punycode": "2.1.4",
     "@types/sax": "1.2.7",
@@ -325,13 +325,13 @@
     "emojibase-data": "17.0.0",
     "esbuild": "0.28.0",
     "expect-more-jest": "5.5.0",
-    "graphql": "16.14.0",
+    "graphql": "16.14.1",
     "husky": "9.1.7",
     "jest-extended": "7.0.0",
     "lint-staged": "17.0.7",
     "markdownlint-cli2": "0.22.1",
     "markdownlint-cli2-formatter-template": "0.0.4",
-    "memfs": "4.57.3",
+    "memfs": "4.57.6",
     "nock": "14.0.15",
     "npm-run-all2": "8.0.4",
     "nyc": "18.0.0",
@@ -341,7 +341,7 @@
     "semantic-release": "25.0.3",
     "tar": "7.5.16",
     "tmp-promise": "3.0.3",
-    "tsdown": "0.22.1",
+    "tsdown": "0.22.2",
     "type-fest": "5.7.0",
     "typescript": "6.0.3",
     "unified": "11.0.5",
@@ -349,7 +349,7 @@
     "vitest": "4.1.8",
     "vitest-mock-extended": "4.0.0"
   },
-  "packageManager": "pnpm@10.34.1",
+  "packageManager": "pnpm@11.5.2",
   "files": [
     "dist",
     "renovate-schema.json"
