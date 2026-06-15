@@ -454,6 +454,10 @@ describe('util/git/index', { timeout: 30000 }, () => {
       expect(
         await git.isBranchModified('renovate/custom_author', defaultBranch),
       ).toBeTrue();
+      expect(logger.logger.warn).toHaveBeenCalledWith(
+        { ignoredAuthor: '/(invalid/' },
+        'Invalid gitIgnoredAuthors regex pattern; treating as exact string match',
+      );
     });
 
     it('should return true when non-ignored authors commit followed by an ignored author', async () => {
