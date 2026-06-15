@@ -87,7 +87,7 @@ export function updateDependency({
 
   const catalogMatch = bunCatalogRe.exec(depType ?? '');
   if (!catalogMatch?.groups) {
-    // Not a bun catalog dependency — delegate to the npm manager's updateDependency
+    // Not a bun catalog dependency, delegate to the npm manager's updateDependency
     return npmUpdateDependency({
       fileContent,
       packageFile: packageFileName,

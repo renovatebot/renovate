@@ -8,6 +8,8 @@ If a `package.json` is found to be part of `bun` manager results then the same f
 Renovate supports [Bun catalogs](https://bun.sh/docs/install/catalogs), which let you share dependency versions across workspace packages.
 Catalog definitions are extracted from the root `package.json`, whether defined at the top level or nested under the `workspaces` object:
 
+<!-- schema-validation-disable-next-block -->
+
 ```json
 {
   "catalog": {
