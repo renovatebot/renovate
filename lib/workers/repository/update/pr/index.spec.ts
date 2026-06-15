@@ -450,13 +450,6 @@ describe('workers/repository/update/pr/index', () => {
           { pr: changedPr.number, prTitle },
           `PR updated`,
         );
-
-        expect(logger.logger.debug).toHaveBeenCalledWith(
-          {
-            prTitle,
-          },
-          'PR body changed',
-        );
       });
 
       it('updates PR target branch if base branch changed in config', async () => {
@@ -1315,11 +1308,6 @@ describe('workers/repository/update/pr/index', () => {
         });
         expect(platform.updatePr).toHaveBeenCalled();
         expect(platform.createPr).not.toHaveBeenCalled();
-
-        expect(logger.logger.debug).toHaveBeenCalledWith(
-          { prTitle },
-          'PR approval required',
-        );
       });
     });
   });

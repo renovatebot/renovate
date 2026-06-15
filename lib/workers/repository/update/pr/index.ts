@@ -403,11 +403,6 @@ export async function ensurePr(
       const newPrTitle = stripEmojis(prTitle);
       const newPrBodyHash = hashBody(prBody);
 
-      const targetBranchChanged =
-        existingPr?.targetBranch !== config.baseBranch;
-      const prTitleChanged = existingPrTitle !== newPrTitle;
-      const prBodyChanged = existingPrBodyHash !== newPrBodyHash;
-
       const prInitialLabels = existingPr.bodyStruct?.debugData?.labels;
       const prCurrentLabels = existingPr.labels;
       const configuredLabels = prepareLabels(config);
@@ -419,9 +414,9 @@ export async function ensurePr(
       );
 
       if (
-        !targetBranchChanged &&
-        !prTitleChanged &&
-        !prBodyChanged &&
+        existingPr?.targetBranch === config.baseBranch &&
+        existingPrTitle === newPrTitle &&
+        existingPrBodyHash === newPrBodyHash &&
         !labelsNeedUpdate &&
         !config.autoApprove
       ) {
@@ -440,7 +435,7 @@ export async function ensurePr(
         platformPrOptions: getPlatformPrOptions(config),
       };
       // PR must need updating
-      if (targetBranchChanged) {
+      if (existingPr?.targetBranch !== config.baseBranch) {
         logger.debug(
           {
             branchName,
@@ -481,7 +476,7 @@ export async function ensurePr(
         updatePrConfig.addLabels = addLabels;
         updatePrConfig.removeLabels = removeLabels;
       }
-      if (prTitleChanged) {
+      if (existingPrTitle !== newPrTitle) {
         logger.debug(
           {
             branchName,
@@ -490,19 +485,14 @@ export async function ensurePr(
           },
           'PR title changed',
         );
-      } else if (prBodyChanged) {
+      } else if (config.autoApprove) {
+        logger.debug({ prTitle }, 'PR approval required');
+      } else if (!config.committedFiles && !config.rebaseRequested) {
         logger.debug(
           {
             prTitle,
           },
           'PR body changed',
-        );
-      } else if (config.autoApprove) {
-        logger.debug(
-          {
-            prTitle,
-          },
-          'PR approval required',
         );
       }
 
