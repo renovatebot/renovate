@@ -31,6 +31,7 @@ import { getGoogleAuthToken } from '../util.ts';
 import { ecrRegex, getECRAuthToken } from './ecr.ts';
 import { googleRegex } from './google.ts';
 import type { OciHelmConfig } from './schema.ts';
+import { RegistryAuthToken } from './schema.ts';
 import type { RegistryRepository } from './types.ts';
 
 export const dockerDatasourceId = 'docker';
@@ -198,10 +199,7 @@ export async function getAuthHeaders(
     opts.noAuth = true;
     opts.cacheProvider = memCacheProvider;
     const authResponse = (
-      await http.getJsonUnchecked<{ token?: string; access_token?: string }>(
-        authUrl.href,
-        opts,
-      )
+      await http.getJson(authUrl.href, opts, RegistryAuthToken)
     ).body;
 
     const token = authResponse.token ?? authResponse.access_token;
