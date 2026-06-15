@@ -15,7 +15,7 @@ import {
 import type { BranchStatus } from '../../../types/index.ts';
 import * as memCache from '../../../util/cache/memory/index.ts';
 import * as repoCache from '../../../util/cache/repository/index.ts';
-import type { LongCommitSha } from '../../../util/git/types.ts';
+import type { LongCommitSha } from '../../../util/schema-utils/git.ts';
 import { toBase64 } from '../../../util/string.ts';
 import type { RepoParams } from '../index.ts';
 import * as prBodyModule from '../utils/pr-body.ts';
