@@ -225,9 +225,6 @@ describe('modules/manager/nix/extract', () => {
   });
 
   it('returns empty deps when all inputs are indirect follows (enables lockFileMaintenance for root flake)', async () => {
-    // Root flake uses follows to delegate all inputs to a sub-flake.
-    // No direct extractable inputs, but flake.lock still needs refreshing
-    // when sub-flake locks are updated — so lockFileMaintenance must run.
     const flakeLock = codeBlock`{
       "nodes": {
         "nixpkgs": {
