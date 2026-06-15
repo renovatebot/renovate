@@ -47,6 +47,3 @@ minimumReleaseAgeExclude:
   - '@containerbase/semantic-release-pnpm'
 
 provenance: true
-
-patchedDependencies:
-  install-artifact-from-github@1.6.0: patches/install-artifact-from-github@1.6.0.patch
