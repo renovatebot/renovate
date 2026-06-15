@@ -102,7 +102,7 @@ describe('modules/manager/paket/extract', () => {
       });
     });
 
-    it('throw error if not found lock file', async () => {
+    it('return null if lock file not found', async () => {
       fs.readLocalFile.mockImplementation(
         (filename: string, _encoding: 'utf8') => {
           expect(filename).toEqual(lockFileName);
@@ -110,13 +110,13 @@ describe('modules/manager/paket/extract', () => {
         },
       );
 
-      const result = extractPackageFile(
+      const result = await extractPackageFile(
         packageFileContent,
         packageFileName,
         config,
       );
 
-      await expect(result).rejects.toThrowError();
+      expect(result).toBeNull();
     });
 
     it('return package name of dependencies file if unknown in lock file', async () => {

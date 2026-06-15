@@ -61,13 +61,14 @@ export async function extractPackageFile(
   content: string,
   packageFile: string,
   _config: ExtractConfig,
-): Promise<PackageFileContent> {
+): Promise<PackageFileContent | null> {
   logger.debug(`paket.extractPackageFile(${packageFile})`);
 
   const lockFileName = getSiblingFileName(packageFile, 'paket.lock');
   const lockFileContent = await readLocalFile(lockFileName, 'utf8');
   if (!lockFileContent) {
-    throw new Error(`Could not find paket lock file: ${lockFileName}`);
+    logger.warn(`Could not find paket lock file: ${lockFileName}`);
+    return null;
   }
 
   const parsedPackageFile = parseDependenciesFile(content);
