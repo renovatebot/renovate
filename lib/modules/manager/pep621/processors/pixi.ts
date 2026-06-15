@@ -1,15 +1,9 @@
-import { isNonEmptyArray } from '@sindresorhus/is';
-import { TEMPORARY_ERROR } from '../../../../constants/error-messages.ts';
 import { logger } from '../../../../logger/index.ts';
-import { exec } from '../../../../util/exec/index.ts';
-import type { ExecOptions } from '../../../../util/exec/types.ts';
 import {
-  deleteLocalFile,
-  ensureCacheDir,
   getSiblingFileName,
   localPathExists,
-  readLocalFile,
 } from '../../../../util/fs/index.ts';
+import { updatePixiLockfile } from '../../pixi/lockfile.ts';
 import type {
   PackageDependency,
   UpdateArtifact,
@@ -17,8 +11,6 @@ import type {
 } from '../../types.ts';
 import type { PyProject } from '../schema.ts';
 import { BasePyProjectProcessor } from './abstract.ts';
-
-export const commandLock = 'pixi lock --no-progress --color=never --quiet';
 
 export class PixiProcessor extends BasePyProjectProcessor {
   process(_project: PyProject, deps: PackageDependency[]): PackageDependency[] {
@@ -45,74 +37,20 @@ export class PixiProcessor extends BasePyProjectProcessor {
     return [];
   }
 
-  async updateArtifacts(
+  updateArtifacts(
     { config, updatedDeps, packageFileName }: UpdateArtifact,
     project: PyProject,
   ): Promise<UpdateArtifactsResult[] | null> {
-    const { isLockFileMaintenance } = config;
-
-    if (!isNonEmptyArray(updatedDeps) && !isLockFileMaintenance) {
-      logger.debug('No updated pixi deps - returning null');
-      return null;
-    }
-
-    const lockFileName = getSiblingFileName(packageFileName, 'pixi.lock');
-    const existingLockFileContent = await readLocalFile(lockFileName, 'utf8');
-    if (!existingLockFileContent) {
-      logger.debug('No pixi.lock found');
-      return null;
-    }
-
     const constraint =
       config.constraints?.pixi ?? project.tool?.pixi?.['requires-pixi'];
 
-    try {
-      if (isLockFileMaintenance) {
-        await deleteLocalFile(lockFileName);
-      }
-
-      // https://pixi.sh/latest/features/environment/#caching-packages
-      const PIXI_CACHE_DIR = await ensureCacheDir('pixi');
-      const extraEnv = {
-        PIXI_CACHE_DIR,
-        RATTLER_CACHE_DIR: PIXI_CACHE_DIR,
-      };
-
-      const execOptions: ExecOptions = {
-        cwdFile: packageFileName,
-        extraEnv,
-        docker: {},
-        toolConstraints: [{ toolName: 'pixi', constraint }],
-      };
-      await exec([commandLock], execOptions);
-
-      const newPixiLockContent = await readLocalFile(lockFileName, 'utf8');
-      if (existingLockFileContent === newPixiLockContent) {
-        logger.debug(`${lockFileName} is unchanged`);
-        return null;
-      }
-      return [
-        {
-          file: {
-            type: 'addition',
-            path: lockFileName,
-            contents: newPixiLockContent,
-          },
-        },
-      ];
-    } catch (err) {
-      if (err.message === TEMPORARY_ERROR) {
-        throw err;
-      }
-      logger.debug({ err }, `Failed to update ${lockFileName} file`);
-      return [
-        {
-          artifactError: {
-            fileName: lockFileName,
-            stderr: `${err}`,
-          },
-        },
-      ];
-    }
+    // The `pep621` manager has already written the updated package file, so
+    // `newPackageFileContent` is intentionally left unset here.
+    return updatePixiLockfile({
+      packageFileName,
+      updatedDeps,
+      isLockFileMaintenance: config.isLockFileMaintenance,
+      constraint,
+    });
   }
 }
