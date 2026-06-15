@@ -144,6 +144,8 @@ describe('util/cache/package/impl/redis', () => {
         binaryClientMock.get.mockResolvedValueOnce(Buffer.from(payload));
 
         expect(await cache.get('_test-namespace', 'key')).toEqual(value);
+        // Redis cleanup uses native TTL, so it must not rewrite on read.
+        expect(clientMock.set).not.toHaveBeenCalled();
       });
 
       it('returns value from envelope payload', async () => {

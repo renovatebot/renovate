@@ -3,7 +3,7 @@ import { DateTime } from 'luxon';
 import { type DirectoryResult, dir } from 'tmp-promise';
 import upath from 'upath';
 import { logger as _logger } from '~test/util.ts';
-import { compressToBase64 } from '../../../compress.ts';
+import { compressToBase64, compressToBuffer } from '../../../compress.ts';
 import { decodeEntry, encodeEntry, isEnvelope } from '../codec.ts';
 import { PackageCacheFile } from './file.ts';
 
@@ -159,6 +159,60 @@ describe('util/cache/package/impl/file', () => {
       const res = await cache.get('_test-namespace', 'key');
 
       expect(res).toBe(1234);
+    });
+  });
+
+  // TODO: Delete this block once legacy.ts is removed.
+  describe('legacy upgrade-on-read', () => {
+    it('rewrites a valid legacy entry as an envelope with its expiry', async () => {
+      const value = await compressToBase64(JSON.stringify(1234));
+      const expiry = DateTime.local().plus({ minutes: 5 });
+      await cacache.put(
+        cacheFileName,
+        '_test-namespace-key',
+        JSON.stringify({ value, expiry }),
+      );
+
+      const res = await cache.get('_test-namespace', 'key');
+
+      expect(res).toBe(1234);
+      const entry = await cacache.get(cacheFileName, '_test-namespace-key');
+      expect(isEnvelope(entry.data)).toBeTrue();
+      expect((await decodeEntry(entry.data)).value).toBe(1234);
+      expect(entry.metadata.expiry).toBe(expiry.toMillis());
+    });
+
+    it('returns the value when the upgrade write fails', async () => {
+      const value = await compressToBase64(JSON.stringify(1234));
+      const expiry = DateTime.local().plus({ minutes: 5 });
+      await cacache.put(
+        cacheFileName,
+        '_test-namespace-key',
+        JSON.stringify({ value, expiry }),
+      );
+      const cacachePut = vi
+        .spyOn(cacache, 'put')
+        .mockRejectedValueOnce(new Error('write failed'));
+
+      const res = await cache.get('_test-namespace', 'key');
+
+      expect(res).toBe(1234);
+      expect(logger.once.debug).toHaveBeenCalledWith(
+        { err: expect.any(Error) },
+        'Error while upgrading legacy cache entry',
+      );
+      cacachePut.mockRestore();
+    });
+
+    it('does not upgrade a legacy entry without a derivable expiry', async () => {
+      const data = await compressToBuffer(JSON.stringify(1234));
+      await cacache.put(cacheFileName, '_test-namespace-key', data);
+
+      const res = await cache.get('_test-namespace', 'key');
+
+      expect(res).toBe(1234);
+      const entry = await cacache.get(cacheFileName, '_test-namespace-key');
+      expect(isEnvelope(entry.data)).toBeFalse();
     });
   });
 

@@ -4,7 +4,7 @@ import { DateTime } from 'luxon';
 import { withDir } from 'tmp-promise';
 import { logger as _logger } from '~test/util.ts';
 import { GlobalConfig } from '../../../../config/global.ts';
-import { decodeEntry, encodeEntry } from '../codec.ts';
+import { decodeEntry, encodeEntry, isEnvelope } from '../codec.ts';
 import { PackageCacheSqlite } from './sqlite.ts';
 
 const { logger } = _logger;
@@ -223,6 +223,27 @@ describe('util/cache/package/impl/sqlite', () => {
       });
 
       expect(res).toEqual({ foo: 'bar' });
+    });
+
+    // TODO: Delete this legacy raw-brotli read case once legacy.ts is removed.
+    it('returns value from legacy raw-brotli payload without rewriting it', async () => {
+      const res = await withSqlite(async (sqlite) => {
+        const compressed = await brotliCompress(JSON.stringify({ foo: 'bar' }));
+        insertRawCacheEntry(sqlite, 'bar', compressed);
+
+        const value = await sqlite.get('_test-namespace', 'bar');
+        const row = sqlite.client
+          .prepare(
+            'SELECT data FROM package_cache WHERE namespace = ? AND key = ?',
+          )
+          .get('_test-namespace', 'bar') as { data: Uint8Array };
+
+        return { value, data: Buffer.from(row.data) };
+      });
+
+      expect(res.value).toEqual({ foo: 'bar' });
+      // SQLite cleanup uses its expiry column, so it must not rewrite on read.
+      expect(isEnvelope(res.data)).toBeFalse();
     });
   });
 

@@ -1,6 +1,9 @@
 import cacache from 'cacache';
+import { DateTime } from 'luxon';
 import upath from 'upath';
 import { logger } from '../../../../logger/index.ts';
+import { encodeEntry } from '../codec.ts';
+import type { LegacyEntry } from '../legacy.ts';
 import type { PackageCacheNamespace } from '../types.ts';
 import { PackageCacheBase } from './base.ts';
 
@@ -86,9 +89,11 @@ export class PackageCacheFile extends PackageCacheBase {
     data: Buffer,
     ttlSeconds: number,
   ): Promise<void> {
-    await cacache.put(this.cacheFileName, this.getKey(namespace, key), data, {
-      metadata: { expiry: Date.now() + ttlSeconds * 1000 },
-    });
+    await this.putEntry(
+      this.getKey(namespace, key),
+      data,
+      Date.now() + ttlSeconds * 1000,
+    );
   }
 
   protected override async rm(
@@ -97,6 +102,39 @@ export class PackageCacheFile extends PackageCacheBase {
   ): Promise<void> {
     logger.trace({ namespace, key }, 'Removing cache entry');
     await cacache.rm.entry(this.cacheFileName, this.getKey(namespace, key));
+  }
+
+  // TODO: Delete together with the legacy decoder once pre-envelope entries
+  // have expired.
+  protected override async upgradeLegacyEntry(
+    namespace: PackageCacheNamespace,
+    key: string,
+    entry: LegacyEntry,
+  ): Promise<void> {
+    const { expiry } = entry;
+    if (!expiry?.isValid) {
+      return;
+    }
+
+    try {
+      await this.putEntry(
+        this.getKey(namespace, key),
+        await encodeEntry(entry.value, DateTime.local()),
+        expiry.toMillis(),
+      );
+    } catch (err) {
+      logger.once.debug({ err }, 'Error while upgrading legacy cache entry');
+    }
+  }
+
+  private async putEntry(
+    cacheKey: string,
+    data: Buffer,
+    expiry: number,
+  ): Promise<void> {
+    await cacache.put(this.cacheFileName, cacheKey, data, {
+      metadata: { expiry },
+    });
   }
 }
 
