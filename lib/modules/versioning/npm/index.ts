@@ -8,10 +8,10 @@ import { getNewValue } from './range.ts';
 export const id = 'npm';
 export const displayName = 'npm';
 export const urls = [
-  'https://semver.org/',
-  'https://www.npmjs.com/package/semver',
-  'https://docs.npmjs.com/about-semantic-versioning',
-  'https://semver.npmjs.com/',
+  '[Semantic Versioning](https://semver.org/)',
+  '[semver npm package](https://www.npmjs.com/package/semver)',
+  '[npm - About semantic versioning](https://docs.npmjs.com/about-semantic-versioning)',
+  '[npm semver calculator](https://semver.npmjs.com/)',
 ];
 export const supportsRanges = true;
 export const supportedRangeStrategies: RangeStrategy[] = [
