@@ -66,4 +66,4 @@ export const knownDepTypes = [
 ] as const satisfies readonly DepTypeMetadata[];
 
 export const supportsDynamicDepTypesNote =
-  'Additionally, catalog dependencies produce dynamic `depType` values: `pnpm.catalog.<name>` for [pnpm catalogs](https://pnpm.io/catalogs#defining-catalogs), `yarn.catalog.<name>` for [yarn catalogs](https://yarnpkg.com/features/catalogs), and `bun.catalog.<name>` for [bun catalogs](https://bun.sh/docs/install/catalogs).';
+  'Additionally, catalog dependencies produce dynamic `depType` values: `bun.catalog.<name>` for [bun catalogs](https://bun.sh/docs/install/catalogs), `pnpm.catalog.<name>` for [pnpm catalogs](https://pnpm.io/catalogs#defining-catalogs), and `yarn.catalog.<name>` for [yarn catalogs](https://yarnpkg.com/features/catalogs).';

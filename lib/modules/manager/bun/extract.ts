@@ -1,4 +1,4 @@
-import { isArray, isPlainObject, isString } from '@sindresorhus/is';
+import { isArray, isString } from '@sindresorhus/is';
 import { logger } from '../../../logger/index.ts';
 import {
   getParentDir,
@@ -10,6 +10,10 @@ import { extractCatalogDeps } from '../npm/extract/common/catalogs.ts';
 import { extractPackageJson } from '../npm/extract/common/package-file.ts';
 import type { Catalog, NpmPackage } from '../npm/extract/types.ts';
 import { resolveNpmrc } from '../npm/npmrc.ts';
+import {
+  type BunCatalogs,
+  BunCatalogs as BunCatalogsSchema,
+} from '../npm/schema.ts';
 import type { NpmManagerData } from '../npm/types.ts';
 import type { ExtractConfig, PackageFile } from '../types.ts';
 import { filesMatchingWorkspaces } from './utils.ts';
@@ -60,41 +64,27 @@ async function processPackageFile(
 }
 
 /**
- * Extract catalog definitions from a bun root package.json.
- * Bun supports catalogs both at the top level of package.json and nested
- * under the `workspaces` object.
+ * Convert parsed bun catalog fields into an array of Catalog entries,
+ * following the same pattern as pnpmCatalogsToArray / yarnCatalogsToArray.
  *
  * @see https://bun.sh/docs/install/catalogs
  */
-export function bunCatalogsToArray(
-  packageJson: Record<string, unknown>,
-): Catalog[] {
+function bunCatalogsToArray({
+  catalog: defaultCatalogDeps,
+  catalogs: namedCatalogs,
+}: BunCatalogs): Catalog[] {
   const result: Catalog[] = [];
 
-  // Bun supports catalog/catalogs at the top level or under workspaces
-  let catalog = packageJson.catalog as Record<string, string> | undefined;
-  let catalogs = packageJson.catalogs as
-    | Record<string, Record<string, string>>
-    | undefined;
-
-  const workspaces = packageJson.workspaces;
-  if (isPlainObject(workspaces)) {
-    catalog ??= workspaces.catalog as Record<string, string> | undefined;
-    catalogs ??= workspaces.catalogs as
-      | Record<string, Record<string, string>>
-      | undefined;
+  if (defaultCatalogDeps !== undefined) {
+    result.push({ name: 'default', dependencies: defaultCatalogDeps });
   }
 
-  if (isPlainObject(catalog)) {
-    result.push({ name: 'default', dependencies: catalog });
+  if (!namedCatalogs) {
+    return result;
   }
 
-  if (isPlainObject(catalogs)) {
-    for (const [name, deps] of Object.entries(catalogs)) {
-      if (isPlainObject(deps)) {
-        result.push({ name, dependencies: deps });
-      }
-    }
+  for (const [name, dependencies] of Object.entries(namedCatalogs)) {
+    result.push({ name, dependencies });
   }
 
   return result;
@@ -123,10 +113,13 @@ export async function extractAllPackageFiles(
       const { packageFileResult: res, packageJson } = processResult;
 
       // Extract bun catalog dependencies from the root package.json
-      const bunCatalogs = bunCatalogsToArray(packageJson);
-      if (bunCatalogs.length > 0) {
-        const catalogDeps = extractCatalogDeps(bunCatalogs, 'bun');
-        res.deps.push(...catalogDeps);
+      const parseResult = BunCatalogsSchema.safeParse(packageJson);
+      if (parseResult.success) {
+        const bunCatalogs = bunCatalogsToArray(parseResult.data);
+        if (bunCatalogs.length > 0) {
+          const catalogDeps = extractCatalogDeps(bunCatalogs, 'bun');
+          res.deps.push(...catalogDeps);
+        }
       }
 
       packageFiles.push({ ...res, lockFiles: [lockFile] });

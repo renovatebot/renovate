@@ -1,5 +1,5 @@
 import { fs } from '~test/util.ts';
-import { bunCatalogsToArray, extractAllPackageFiles } from './extract.ts';
+import { extractAllPackageFiles } from './extract.ts';
 
 vi.mock('../../../util/fs/index.ts');
 
@@ -295,90 +295,6 @@ describe('modules/manager/bun/extract', () => {
     expect(packageFiles[0].npmrc).toBe(
       'registry=https://custom.registry.com\n',
     );
-  });
-
-  describe('bunCatalogsToArray()', () => {
-    it('extracts top-level default catalog', () => {
-      const result = bunCatalogsToArray({
-        catalog: { react: '^19.0.0', 'react-dom': '^19.0.0' },
-      });
-      expect(result).toEqual([
-        {
-          name: 'default',
-          dependencies: { react: '^19.0.0', 'react-dom': '^19.0.0' },
-        },
-      ]);
-    });
-
-    it('extracts top-level named catalogs', () => {
-      const result = bunCatalogsToArray({
-        catalogs: {
-          testing: { jest: '30.0.0' },
-          build: { webpack: '5.88.2' },
-        },
-      });
-      expect(result).toEqual([
-        { name: 'testing', dependencies: { jest: '30.0.0' } },
-        { name: 'build', dependencies: { webpack: '5.88.2' } },
-      ]);
-    });
-
-    it('extracts catalogs under workspaces object', () => {
-      const result = bunCatalogsToArray({
-        workspaces: {
-          packages: ['packages/*'],
-          catalog: { react: '^19.0.0' },
-          catalogs: { testing: { jest: '30.0.0' } },
-        },
-      });
-      expect(result).toEqual([
-        { name: 'default', dependencies: { react: '^19.0.0' } },
-        { name: 'testing', dependencies: { jest: '30.0.0' } },
-      ]);
-    });
-
-    it('prefers top-level over workspaces-nested when both exist', () => {
-      const result = bunCatalogsToArray({
-        catalog: { react: '^19.0.0' },
-        workspaces: {
-          packages: ['packages/*'],
-          catalog: { react: '^18.0.0' },
-        },
-      });
-      // Top-level takes precedence (??= only fills if undefined)
-      expect(result).toEqual([
-        { name: 'default', dependencies: { react: '^19.0.0' } },
-      ]);
-    });
-
-    it('returns empty array when no catalogs present', () => {
-      const result = bunCatalogsToArray({
-        name: 'my-app',
-        dependencies: { dep1: '1.0.0' },
-      });
-      expect(result).toEqual([]);
-    });
-
-    it('returns both default and named catalogs', () => {
-      const result = bunCatalogsToArray({
-        catalog: { react: '^19.0.0' },
-        catalogs: { testing: { jest: '30.0.0' } },
-      });
-      expect(result).toEqual([
-        { name: 'default', dependencies: { react: '^19.0.0' } },
-        { name: 'testing', dependencies: { jest: '30.0.0' } },
-      ]);
-    });
-
-    it('ignores invalid catalog values', () => {
-      const result = bunCatalogsToArray({
-        catalog: 'not-an-object',
-        catalogs: { valid: { dep: '1.0.0' }, invalid: 'not-an-object' },
-      });
-      expect(result).toEqual([
-        { name: 'valid', dependencies: { dep: '1.0.0' } },
-      ]);
-    });
   });
 
   describe('catalogs', () => {

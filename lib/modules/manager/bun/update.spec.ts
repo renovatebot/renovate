@@ -1,3 +1,4 @@
+import { codeBlock } from 'common-tags';
 import { updateDependency } from './update.ts';
 
 vi.mock('jsonc-weaver', async (importOriginal) => {
@@ -135,14 +136,14 @@ describe('modules/manager/bun/update', () => {
 
     it('preserves formatting when updating', () => {
       // Use specific indentation to verify formatting preservation
-      const fileContent = [
-        '{',
-        '    "name": "my-monorepo",',
-        '    "catalog": {',
-        '        "react": "^18.0.0"',
-        '    }',
-        '}',
-      ].join('\n');
+      const fileContent = codeBlock`
+        {
+            "name": "my-monorepo",
+            "catalog": {
+                "react": "^18.0.0"
+            }
+        }
+      `;
 
       const result = updateDependency({
         fileContent,

@@ -1,6 +1,26 @@
 import { z } from 'zod/v4';
 import { Json, LooseRecord, Yaml } from '../../../util/schema-utils/index.ts';
 
+export const BunCatalogs = z
+  .object({
+    catalog: z.record(z.string(), z.string()).optional(),
+    catalogs: z.record(z.string(), z.record(z.string(), z.string())).optional(),
+    workspaces: z
+      .object({
+        catalog: z.record(z.string(), z.string()).optional(),
+        catalogs: z
+          .record(z.string(), z.record(z.string(), z.string()))
+          .optional(),
+      })
+      .optional()
+      .catch(undefined),
+  })
+  .transform((val) => ({
+    catalog: val.catalog ?? val.workspaces?.catalog,
+    catalogs: val.catalogs ?? val.workspaces?.catalogs,
+  }));
+export type BunCatalogs = z.infer<typeof BunCatalogs>;
+
 export const PnpmCatalogs = z.object({
   catalog: z.optional(z.record(z.string(), z.string())),
   catalogs: z.optional(z.record(z.string(), z.record(z.string(), z.string()))),

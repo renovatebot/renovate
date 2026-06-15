@@ -3,21 +3,21 @@ import { type NpmManagerData } from '../../types.ts';
 import { type Catalog } from '../types.ts';
 import { extractDependency, parseDepName } from './dependency.ts';
 
+export const BUN_CATALOG_DEPENDENCY = 'bun.catalog';
 export const PNPM_CATALOG_DEPENDENCY = 'pnpm.catalog';
 export const YARN_CATALOG_DEPENDENCY = 'yarn.catalog';
-export const BUN_CATALOG_DEPENDENCY = 'bun.catalog';
 
-type CatalogManager = 'pnpm' | 'yarn' | 'bun';
+type CatalogManager = 'bun' | 'pnpm' | 'yarn';
 
 const catalogPrefixes: Record<CatalogManager, string> = {
+  bun: BUN_CATALOG_DEPENDENCY,
   pnpm: PNPM_CATALOG_DEPENDENCY,
   yarn: YARN_CATALOG_DEPENDENCY,
-  bun: BUN_CATALOG_DEPENDENCY,
 };
 
 /**
  * In order to facilitate matching on specific catalogs, we structure the
- * depType as `[pnpm|yarn|bun].catalog.default`, `[pnpm|yarn|bun].catalog.react17`, and so on.
+ * depType as `[bun|pnpm|yarn].catalog.default`, `[bun|pnpm|yarn].catalog.react17`, and so on.
  */
 function getCatalogDepType(name: string, npmManager: CatalogManager): string {
   return `${catalogPrefixes[npmManager]}.${name}`;
