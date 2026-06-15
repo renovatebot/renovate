@@ -7,7 +7,7 @@ export const PuppetReleaseAbbreviated = z
   .object({
     version: z.string(),
     created_at: MaybeTimestamp,
-    deleted_at: z.string().optional().nullable(),
+    deleted_at: z.string().nullish(),
     file_uri: z.string().optional().nullable(),
   })
   .transform(
