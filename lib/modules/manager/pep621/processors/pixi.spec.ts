@@ -33,7 +33,9 @@ describe('modules/manager/pep621/processors/pixi', () => {
   describe('process()', () => {
     it('returns deps unchanged', () => {
       const deps = [{ depName: 'dep1' }, { depName: 'dep2' }];
+
       const result = processor.process(parsePyProject('')!, deps);
+
       expect(result).toEqual(deps);
     });
   });
@@ -41,11 +43,13 @@ describe('modules/manager/pep621/processors/pixi', () => {
   describe('extractLockedVersions()', () => {
     it('returns deps unchanged', async () => {
       const deps = [{ depName: 'dep1' }, { depName: 'dep2' }];
+
       const result = await processor.extractLockedVersions(
         parsePyProject('')!,
         deps,
         'pyproject.toml',
       );
+
       expect(result).toEqual(deps);
     });
   });
@@ -54,20 +58,24 @@ describe('modules/manager/pep621/processors/pixi', () => {
     it('returns pixi.lock when found', async () => {
       fs.getSiblingFileName.mockReturnValueOnce('pixi.lock');
       fs.localPathExists.mockResolvedValueOnce(true);
+
       const result = await processor.getLockfiles(
         parsePyProject('')!,
         'pyproject.toml',
       );
+
       expect(result).toEqual(['pixi.lock']);
     });
 
     it('returns empty array when pixi.lock not found', async () => {
       fs.getSiblingFileName.mockReturnValueOnce('pixi.lock');
       fs.localPathExists.mockResolvedValueOnce(false);
+
       const result = await processor.getLockfiles(
         parsePyProject('')!,
         'pyproject.toml',
       );
+
       expect(result).toEqual([]);
     });
   });
@@ -77,6 +85,7 @@ describe('modules/manager/pep621/processors/pixi', () => {
       fs.getSiblingFileName.mockReturnValueOnce('pixi.lock');
       fs.readLocalFile.mockResolvedValueOnce('Current pixi.lock');
       fs.ensureCacheDir.mockRejectedValueOnce(new Error(TEMPORARY_ERROR));
+
       const result = processor.updateArtifacts(
         {
           packageFileName: 'pyproject.toml',
@@ -86,11 +95,13 @@ describe('modules/manager/pep621/processors/pixi', () => {
         },
         parsePyProject('')!,
       );
+
       await expect(result).rejects.toThrow(TEMPORARY_ERROR);
     });
 
     it('returns null when no updated deps and not lock file maintenance', async () => {
       const execSnapshots = mockExecAll();
+
       const result = await processor.updateArtifacts(
         {
           packageFileName: 'pyproject.toml',
@@ -100,6 +111,7 @@ describe('modules/manager/pep621/processors/pixi', () => {
         },
         parsePyProject('')!,
       );
+
       expect(result).toBeNull();
       expect(execSnapshots).toEqual([]);
     });
@@ -107,6 +119,7 @@ describe('modules/manager/pep621/processors/pixi', () => {
     it('returns null when pixi.lock does not exist', async () => {
       const execSnapshots = mockExecAll();
       fs.getSiblingFileName.mockReturnValueOnce('pixi.lock');
+
       const result = await processor.updateArtifacts(
         {
           packageFileName: 'pyproject.toml',
@@ -116,6 +129,7 @@ describe('modules/manager/pep621/processors/pixi', () => {
         },
         parsePyProject('')!,
       );
+
       expect(result).toBeNull();
       expect(execSnapshots).toEqual([]);
     });
@@ -128,6 +142,7 @@ describe('modules/manager/pep621/processors/pixi', () => {
         '/tmp/renovate/cache/others/pixi',
       );
       fs.readLocalFile.mockResolvedValueOnce('Current pixi.lock');
+
       const result = await processor.updateArtifacts(
         {
           packageFileName: 'pyproject.toml',
@@ -137,6 +152,7 @@ describe('modules/manager/pep621/processors/pixi', () => {
         },
         parsePyProject('')!,
       );
+
       expect(result).toBeNull();
       expect(execSnapshots).toMatchObject([
         { cmd: 'pixi lock --no-progress --color=never --quiet' },
@@ -151,6 +167,7 @@ describe('modules/manager/pep621/processors/pixi', () => {
         '/tmp/renovate/cache/others/pixi',
       );
       fs.readLocalFile.mockResolvedValueOnce('New pixi.lock');
+
       const result = await processor.updateArtifacts(
         {
           packageFileName: 'pyproject.toml',
@@ -160,6 +177,7 @@ describe('modules/manager/pep621/processors/pixi', () => {
         },
         parsePyProject('')!,
       );
+
       expect(result).toEqual([
         {
           file: {
@@ -197,6 +215,7 @@ describe('modules/manager/pep621/processors/pixi', () => {
       getPkgReleases.mockResolvedValueOnce({
         releases: [{ version: '0.41.4' }, { version: '0.42.0' }],
       });
+
       const result = await processor.updateArtifacts(
         {
           packageFileName: 'pyproject.toml',
@@ -206,6 +225,7 @@ describe('modules/manager/pep621/processors/pixi', () => {
         },
         parsePyProject('')!,
       );
+
       expect(result).toEqual([
         {
           file: {
@@ -245,6 +265,7 @@ describe('modules/manager/pep621/processors/pixi', () => {
         '/tmp/renovate/cache/others/pixi',
       );
       fs.readLocalFile.mockResolvedValueOnce('New pixi.lock');
+
       const result = await processor.updateArtifacts(
         {
           packageFileName: 'pyproject.toml',
@@ -254,6 +275,7 @@ describe('modules/manager/pep621/processors/pixi', () => {
         },
         parsePyProject('')!,
       );
+
       expect(result).toEqual([
         {
           file: {
@@ -296,6 +318,7 @@ channels = ["conda-forge"]
 platforms = ["linux-64"]
 requires-pixi = ">=0.40,<0.41"
 `);
+
       const result = await processor.updateArtifacts(
         {
           packageFileName: 'pyproject.toml',
@@ -305,6 +328,7 @@ requires-pixi = ">=0.40,<0.41"
         },
         project!,
       );
+
       expect(result).toEqual([
         {
           file: {
@@ -363,6 +387,7 @@ channels = ["conda-forge"]
 platforms = ["linux-64"]
 requires-pixi = ">=0.40,<0.41"
 `);
+
       const result = await processor.updateArtifacts(
         {
           packageFileName: 'pyproject.toml',
@@ -372,6 +397,7 @@ requires-pixi = ">=0.40,<0.41"
         },
         project!,
       );
+
       expect(result).toEqual([
         {
           file: {
@@ -419,6 +445,7 @@ requires-pixi = ">=0.40,<0.41"
       getPkgReleases.mockResolvedValueOnce({
         releases: [{ version: '0.40.1' }, { version: '0.41.4' }],
       });
+
       const result = await processor.updateArtifacts(
         {
           packageFileName: 'pyproject.toml',
@@ -428,6 +455,7 @@ requires-pixi = ">=0.40,<0.41"
         },
         parsePyProject('')!,
       );
+
       expect(result).toEqual([
         {
           file: {
@@ -466,6 +494,7 @@ requires-pixi = ">=0.40,<0.41"
       fs.ensureCacheDir.mockImplementationOnce(() => {
         throw new Error('exec failed');
       });
+
       const result = await processor.updateArtifacts(
         {
           packageFileName: 'pyproject.toml',
@@ -475,6 +504,7 @@ requires-pixi = ">=0.40,<0.41"
         },
         parsePyProject('')!,
       );
+
       expect(result).toEqual([
         {
           artifactError: {
