@@ -9,7 +9,7 @@ import {
   REPOSITORY_NOT_FOUND,
 } from '../../../constants/error-messages.ts';
 import * as repoCache from '../../../util/cache/repository/index.ts';
-import type { LongCommitSha } from '../../../util/git/types.ts';
+import type { LongCommitSha } from '../../../util/schema-utils/git.ts';
 import { ensureTrailingSlash, parseUrl } from '../../../util/url.ts';
 import type { ReattemptPlatformAutomergeConfig } from '../types.ts';
 import * as bitbucket from './index.ts';

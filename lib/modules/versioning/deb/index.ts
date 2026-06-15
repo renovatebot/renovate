@@ -6,8 +6,8 @@ import type { VersioningApi } from '../types.ts';
 export const id = 'deb';
 export const displayName = 'Deb version';
 export const urls = [
-  'https://www.debian.org/doc/debian-policy/ch-controlfields.html#version',
-  'https://manpages.debian.org/unstable/dpkg-dev/deb-version.7.en.html',
+  '[Debian policy - Version](https://www.debian.org/doc/debian-policy/ch-controlfields.html#version)',
+  '[deb-version man page](https://manpages.debian.org/unstable/dpkg-dev/deb-version.7.en.html)',
 ];
 export const supportsRanges = false;
 
