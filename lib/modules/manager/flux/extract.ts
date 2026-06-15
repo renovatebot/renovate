@@ -1,5 +1,13 @@
 import { isString } from '@sindresorhus/is';
-import { isMap, isPair, isScalar, parseAllDocuments } from 'yaml';
+import {
+  type Document,
+  type Scalar,
+  type YAMLMap,
+  isMap,
+  isPair,
+  isScalar,
+  parseAllDocuments,
+} from 'yaml';
 import { logger } from '../../../logger/index.ts';
 import { coerceArray } from '../../../util/array.ts';
 import { readLocalFile } from '../../../util/fs/index.ts';
@@ -179,11 +187,15 @@ function resolveSystemManifest(
   ];
 }
 
-function extractOCIRefRange(
-  content: string,
+/**
+ * Returns all `spec.ref` map nodes for OCIRepository resources matching `resourceName`.
+ */
+function findOCIRefNodes(
+  docs: Document.Parsed[],
   resourceName: string,
-): { replaceString: string; tagFirst: boolean } | null {
-  for (const doc of parseAllDocuments(content, { strict: false })) {
+): YAMLMap[] {
+  const refNodes: YAMLMap[] = [];
+  for (const doc of docs) {
     const docContents = doc.contents;
     if (!isMap(docContents)) {
       continue;
@@ -204,42 +216,81 @@ function extractOCIRefRange(
       continue;
     }
     const refNode = specNode.get('ref');
-    if (!isMap(refNode)) {
-      continue;
+    if (isMap(refNode)) {
+      refNodes.push(refNode);
     }
+  }
 
-    let tagKeyRange: [number, number, number] | null = null;
-    let tagValueEnd: number | null = null;
-    let digestKeyRange: [number, number, number] | null = null;
-    let digestValueEnd: number | null = null;
+  return refNodes;
+}
+
+function extractOCIRefTagAndDigestRange(
+  docs: Document.Parsed[],
+  content: string,
+  resourceName: string,
+): { replaceString: string; tagFirst: boolean } | null {
+  for (const refNode of findOCIRefNodes(docs, resourceName)) {
+    let tagKey: Scalar | undefined;
+    let tagValue: Scalar | undefined;
+    let digestKey: Scalar | undefined;
+    let digestValue: Scalar | undefined;
 
     for (const item of refNode.items) {
       if (!isPair(item) || !isScalar(item.key)) {
         continue;
       }
       if (item.key.value === 'tag' && isScalar(item.value)) {
-        tagKeyRange = item.key.range;
-        tagValueEnd = item.value.range[1];
+        tagKey = item.key;
+        tagValue = item.value;
       } else if (item.key.value === 'digest' && isScalar(item.value)) {
-        digestKeyRange = item.key.range;
-        digestValueEnd = item.value.range[1];
+        digestKey = item.key;
+        digestValue = item.value;
       }
     }
 
     if (
-      !tagKeyRange ||
-      tagValueEnd === null ||
-      !digestKeyRange ||
-      digestValueEnd === null
+      !tagKey?.range ||
+      !tagValue?.range ||
+      !digestKey?.range ||
+      !digestValue?.range
     ) {
       continue;
     }
 
-    const tagFirst = tagKeyRange[0] < digestKeyRange[0];
-    const start = tagFirst ? tagKeyRange[0] : digestKeyRange[0];
-    const end = tagFirst ? digestValueEnd : tagValueEnd;
+    const tagFirst = tagKey.range[0] < digestKey.range[0];
+    const start = tagFirst ? tagKey.range[0] : digestKey.range[0];
+    const end = tagFirst ? digestValue.range[1] : tagValue.range[1];
 
     return { replaceString: content.slice(start, end), tagFirst };
+  }
+
+  return null;
+}
+
+function extractOCIRefTagRange(
+  docs: Document.Parsed[],
+  content: string,
+  resourceName: string,
+): { replaceString: string; indentation: string } | null {
+  for (const refNode of findOCIRefNodes(docs, resourceName)) {
+    for (const item of refNode.items) {
+      if (
+        isPair(item) &&
+        isScalar(item.key) &&
+        item.key.value === 'tag' &&
+        isScalar(item.value) &&
+        item.key.range &&
+        item.value.range
+      ) {
+        const keyStart = item.key.range[0];
+        const valueEnd = item.value.range[1];
+        const lineStart = content.lastIndexOf('\n', keyStart - 1) + 1;
+        return {
+          replaceString: content.slice(keyStart, valueEnd),
+          indentation: content.slice(lineStart, keyStart),
+        };
+      }
+    }
   }
 
   return null;
@@ -251,6 +302,7 @@ function resolveResourceManifest(
   registryAliases: Record<string, string> | undefined,
   content: string,
 ): PackageDependency[] {
+  let docs: Document.Parsed[] | undefined;
   const deps: PackageDependency[] = [];
   for (const resource of manifest.resources) {
     switch (resource.kind) {
@@ -371,7 +423,11 @@ function resolveResourceManifest(
           // Set currentValue to the tag so the docker datasource can look up the image's new digest
           combinedDep.currentValue = resource.spec.ref.tag;
 
-          const refRange = extractOCIRefRange(content, resource.metadata.name);
+          const refRange = extractOCIRefTagAndDigestRange(
+            (docs ??= parseAllDocuments(content, { strict: false })),
+            content,
+            resource.metadata.name,
+          );
           if (refRange) {
             combinedDep.replaceString = refRange.replaceString;
             if (refRange.tagFirst) {
@@ -405,9 +461,26 @@ function resolveResourceManifest(
             false,
             registryAliases,
           );
-          dep.autoReplaceStringTemplate =
-            '{{#if newValue}}{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}';
-          dep.replaceString = resource.spec.ref.tag;
+          const refTagRange = extractOCIRefTagRange(
+            (docs ??= parseAllDocuments(content, { strict: false })),
+            content,
+            resource.metadata.name,
+          );
+          if (refTagRange) {
+            dep.replaceString = refTagRange.replaceString;
+            const newline = content.includes('\r\n') ? '\r\n' : '\n';
+            dep.autoReplaceStringTemplate = `${refTagRange.replaceString.replace(
+              resource.spec.ref.tag,
+              '{{newValue}}',
+            )}{{#if newDigest}}${newline}${refTagRange.indentation}digest: {{newDigest}}{{/if}}`;
+          } else {
+            logger.debug(
+              { file: manifest.file, name: resource.metadata.name },
+              'Unable to locate tag node for replacement (may be YAML alias or alias reference), digest pinning will not be possible',
+            );
+            dep.replaceString = resource.spec.ref.tag;
+            dep.autoReplaceStringTemplate = '{{newValue}}';
+          }
           deps.push(dep);
         } else {
           const dep = getDep(container, false, registryAliases);

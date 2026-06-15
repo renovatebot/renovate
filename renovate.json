@@ -59,7 +59,7 @@
     },
     {
       "description": "set build scope for node updates",
-      "matchPackageNames": ["node"],
+      "matchDepNames": ["node"],
       "matchFileNames": [".nvmrc", "tools/docker/Dockerfile"],
       "semanticCommitType": "build"
     },

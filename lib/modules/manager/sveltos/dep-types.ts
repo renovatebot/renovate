@@ -13,4 +13,8 @@ export const knownDepTypes = [
     depType: 'EventTrigger',
     description: 'A Sveltos `EventTrigger` resource',
   },
+  {
+    depType: 'ClusterPromotion',
+    description: 'A Sveltos `ClusterPromotion` resource',
+  },
 ] as const satisfies readonly DepTypeMetadata[];

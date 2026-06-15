@@ -5,8 +5,8 @@ import {
   getCache,
   resetCache as repoCacheReset,
 } from '../../../util/cache/repository/index.ts';
-import type { LongCommitSha } from '../../../util/git/types.ts';
 import { ForgejoHttp, setBaseUrl } from '../../../util/http/forgejo.ts';
+import type { LongCommitSha } from '../../../util/schema-utils/git.ts';
 import { ForgejoPrCache } from './pr-cache.ts';
 import type { PR, Repo } from './types.ts';
 import { toRenovatePR } from './utils.ts';
@@ -33,7 +33,7 @@ const pr1: PR = {
     sha: 'other-head-sha' as LongCommitSha,
     repo: partial<Repo>({ full_name: 'SOME/repo' }),
   },
-  user: { username: 'some-author' },
+  user: { login: 'some-author' },
 };
 
 const pr2: PR = {
@@ -52,7 +52,7 @@ const pr2: PR = {
     sha: 'other-head-sha' as LongCommitSha,
     repo: partial<Repo>({ full_name: 'SOME/repo' }),
   },
-  user: { username: 'some-author' },
+  user: { login: 'some-author' },
 };
 
 describe('modules/platform/forgejo/pr-cache', () => {

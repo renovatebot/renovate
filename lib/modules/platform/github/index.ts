@@ -1,6 +1,6 @@
+import { setTimeout } from 'node:timers/promises';
 import { isArray, isNonEmptyObject, isNonEmptyString } from '@sindresorhus/is';
 import semver from 'semver';
-import { setTimeout } from 'timers/promises';
 import { GlobalConfig } from '../../../config/global.ts';
 import {
   PLATFORM_INTEGRATION_UNAUTHORIZED,
@@ -29,13 +29,13 @@ import { parseJson } from '../../../util/common.ts';
 import { getEnv } from '../../../util/env.ts';
 import * as git from '../../../util/git/index.ts';
 import {
-  listCommitTree,
+  diffCommitTree,
+  getCommitTreeSha,
   pushCommitToRenovateRef,
 } from '../../../util/git/index.ts';
 import type {
   CommitFilesConfig,
   CommitResult,
-  LongCommitSha,
 } from '../../../util/git/types.ts';
 import * as hostRules from '../../../util/host-rules.ts';
 import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider.ts';
@@ -46,8 +46,10 @@ import type { HttpResponse } from '../../../util/http/types.ts';
 import { coerceObject } from '../../../util/object.ts';
 import { regEx } from '../../../util/regex.ts';
 import { sanitize } from '../../../util/sanitize.ts';
+import type { LongCommitSha } from '../../../util/schema-utils/git.ts';
+import { toLongCommitSha } from '../../../util/schema-utils/git.ts';
 import { fromBase64, looseEquals } from '../../../util/string.ts';
-import { ensureTrailingSlash, parseUrl } from '../../../util/url.ts';
+import { ensureTrailingSlash, isHttpUrl, parseUrl } from '../../../util/url.ts';
 import { incLimitedValue } from '../../../workers/global/limits.ts';
 import { normalizePythonDepName } from '../../datasource/pypi/common.ts';
 import type {
@@ -100,7 +102,7 @@ import type {
   PlatformConfig,
 } from './types.ts';
 import { getAppDetails, getUserDetails, getUserEmail } from './user.ts';
-import { warnIfDefaultGitAuthorEmail } from './utils.ts';
+import { getRepoUrl, warnIfDefaultGitAuthorEmail } from './utils.ts';
 
 export const id = 'github';
 
@@ -130,6 +132,7 @@ export function isGHApp(): boolean {
 
 export async function detectGhe(token: string): Promise<void> {
   const parsedEndpoint = parseUrl(platformConfig.endpoint);
+  /* v8 ignore next -- endpoint is validated in initPlatform before detectGhe is called */
   if (!parsedEndpoint) {
     throw new Error(`Invalid GitHub endpoint: ${platformConfig.endpoint}`);
   }
@@ -165,6 +168,9 @@ export async function initPlatform({
   platformConfig.isGHApp = token.startsWith('x-access-token:');
 
   if (endpoint) {
+    if (!isHttpUrl(endpoint)) {
+      throw new Error(`Init: Invalid GitHub endpoint URL: ${endpoint}`);
+    }
     platformConfig.endpoint = ensureTrailingSlash(endpoint);
     githubHttp.setBaseUrl(platformConfig.endpoint);
   } else {
@@ -205,16 +211,12 @@ export async function initPlatform({
     if (platformConfig.isGHApp) {
       platformConfig.userDetails ??= await getAppDetails(token);
       let ghHostname: string;
+      /* v8 ignore next -- false negative due to V8/source-map artifact */
       if (platformConfig.isGheCloud) {
         ghHostname = 'ghe.com';
       } else if (platformConfig.isGhe) {
-        const parsedEndpoint = parseUrl(platformConfig.endpoint);
-        // v8 ignore if: endpoint is validated before initPlatform, this is here for defensive purposes
-        if (!parsedEndpoint) {
-          throw new Error(
-            `Invalid GitHub endpoint: ${platformConfig.endpoint}`,
-          );
-        }
+        // valid url ensured at the function start
+        const parsedEndpoint = parseUrl(platformConfig.endpoint)!;
         ghHostname = parsedEndpoint.hostname;
       } else {
         ghHostname = 'github.com';
@@ -504,6 +506,7 @@ export async function initRepo({
   forkCreation,
   forkOrg,
   forkToken,
+  gitUrl,
   renovateUsername,
   cloneSubmodules,
   cloneSubmodulesFilter,
@@ -524,6 +527,7 @@ export async function initRepo({
   config.renovateUsername = renovateUsername;
   [config.repositoryOwner, config.repositoryName] = repository.split('/');
   let repo: GhRepo | undefined;
+  let forkSshUrl: string | null = null;
   try {
     let infoQuery = repoInfoQuery;
 
@@ -679,6 +683,7 @@ export async function initRepo({
     let forkedRepo = await findFork(forkToken, repository, forkOrg);
     if (forkedRepo) {
       config.repository = forkedRepo.full_name;
+      forkSshUrl = forkedRepo.ssh_url;
       const forkDefaultBranch = forkedRepo.default_branch;
       if (forkDefaultBranch !== config.defaultBranch) {
         const body = {
@@ -731,17 +736,13 @@ export async function initRepo({
       logger.debug('Forked repo is not found - attempting to create it');
       forkedRepo = await createFork(forkToken, repository, forkOrg);
       config.repository = forkedRepo.full_name;
+      forkSshUrl = forkedRepo.ssh_url;
     } else {
       logger.debug('Forked repo is not found and forkCreation is disabled');
       throw new Error(REPOSITORY_FORK_MISSING);
     }
   }
 
-  const parsedEndpoint = parseUrl(platformConfig.endpoint);
-  // v8 ignore if: endpoint is validated during initPlatform
-  if (!parsedEndpoint) {
-    throw new Error(`Invalid GitHub endpoint: ${platformConfig.endpoint}`);
-  }
   let authToken: string | null;
   if (forkToken) {
     logger.debug('Using forkToken for git init');
@@ -753,21 +754,25 @@ export async function initRepo({
     logger.debug(`Using ${tokenType} token for git init`);
     authToken = opts.token ?? null;
   }
-  if (authToken) {
-    const [username, password] = authToken.split(':');
-    parsedEndpoint.username = username;
-    parsedEndpoint.password = password ?? '';
-  }
-  parsedEndpoint.host = parsedEndpoint.host.replace(
-    'api.github.com',
-    'github.com',
+  // endpoint is validated during initPlatform
+  const parsedEndpoint = parseUrl(platformConfig.endpoint)!;
+  const workingSshUrl = forkToken ? forkSshUrl : repo.sshUrl;
+  const url = getRepoUrl(
+    config.repository!,
+    gitUrl,
+    workingSshUrl,
+    parsedEndpoint,
+    authToken,
   );
-  parsedEndpoint.pathname = `${config.repository}.git`;
-  const url = parsedEndpoint.href;
-  let upstreamUrl = undefined;
+  let upstreamUrl: string | undefined;
   if (forkCreation && config.parentRepo) {
-    parsedEndpoint.pathname = `${config.parentRepo}.git`;
-    upstreamUrl = parsedEndpoint.href;
+    upstreamUrl = getRepoUrl(
+      config.parentRepo,
+      gitUrl,
+      repo.sshUrl,
+      parsedEndpoint,
+      authToken,
+    );
   }
   await git.initRepo({
     ...config,
@@ -2237,18 +2242,31 @@ async function pushFiles(
   { parentCommitSha, commitSha }: CommitResult,
 ): Promise<LongCommitSha | null> {
   try {
-    // Push the commit to GitHub using a custom ref
-    // The associated blobs will be pushed automatically
+    // Hybrid git/REST commit strategy (see #13824, #14271):
+    // 1. The git push below uploads blobs to GitHub via a custom ref
+    //    (refs/renovate/branches/*) which does NOT trigger CI/Actions.
+    // 2. We then recreate the tree+commit via REST API so that:
+    //    - The commit is signed by GitHub ("committed via GitHub" badge)
+    //    - Force-push and file mode bits are supported (GraphQL can't do this)
+    //    - We can use base_tree to send only changed files, avoiding org
+    //      ruleset file-path restrictions on unchanged files (#42554)
+    // Reusing the pushed commit/tree SHAs directly does not work because
+    // the branch ref must point to an API-created commit for signing.
     await pushCommitToRenovateRef(commitSha, branchName);
-    // Get all the blobs which the commit/tree points to
-    // The blob SHAs will be the same locally as on GitHub
-    const treeItems = await listCommitTree(commitSha);
+    const baseTreeSha = await getCommitTreeSha(parentCommitSha);
+    const treeItems = await diffCommitTree(parentCommitSha, commitSha);
 
-    // For reasons unknown, we need to recreate our tree+commit on GitHub
-    // Attempting to reuse the tree or commit SHA we pushed does not work
+    if (treeItems.length === 0) {
+      logger.debug(
+        { branchName },
+        'Platform-native commit: no changed files between commits',
+      );
+      return null;
+    }
+
     const treeRes = await githubApi.postJson<{ sha: string }>(
       `/repos/${config.repository}/git/trees`,
-      { body: { tree: treeItems } },
+      { body: { base_tree: baseTreeSha, tree: treeItems } },
     );
     const treeSha = treeRes.body.sha;
 
@@ -2258,7 +2276,7 @@ async function pushFiles(
       { body: { message, tree: treeSha, parents: [parentCommitSha] } },
     );
     incLimitedValue('Commits');
-    const remoteCommitSha = commitRes.body.sha as LongCommitSha;
+    const remoteCommitSha = toLongCommitSha(commitRes.body.sha);
     await ensureBranchSha(branchName, remoteCommitSha);
     return remoteCommitSha;
   } catch (err) {

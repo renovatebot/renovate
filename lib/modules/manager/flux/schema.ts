@@ -1,4 +1,4 @@
-import { z } from 'zod/v3';
+import { z } from 'zod/v4';
 import { KubernetesResource } from '../kubernetes/schema.ts';
 
 export const HelmRelease = KubernetesResource.extend({
@@ -27,7 +27,7 @@ export const HelmRelease = KubernetesResource.extend({
         namespace: z.string().optional(),
       })
       .optional(),
-    values: z.record(z.unknown()).optional(),
+    values: z.record(z.string(), z.unknown()).optional(),
   }),
 });
 export type HelmRelease = z.infer<typeof HelmRelease>;

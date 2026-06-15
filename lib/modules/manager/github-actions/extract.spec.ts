@@ -4,7 +4,23 @@ import { GlobalConfig } from '../../../config/global.ts';
 import * as yaml from '../../../util/yaml.ts';
 import { extractPackageFile } from './index.ts';
 
-const runnerTestWorkflow = codeBlock`
+const runnerTestWorkflowMacos = codeBlock`
+jobs:
+  test1:
+     runs-on: \${{ env.RUNNER }}
+  test2:
+      runs-on: abc-123
+  test3:
+    runs-on: "macos-12-large"
+  test4:
+    runs-on: 'macos-latest'
+  test5:
+      runs-on: macos-15-intel
+  test6:
+      runs-on: macos-26-intel
+`;
+
+const runnerTestWorkflowUbuntu = codeBlock`
 jobs:
   test1:
     runs-on: ubuntu-latest
@@ -12,25 +28,27 @@ jobs:
     runs-on:
       ubuntu-22.04
   test3:
-    runs-on: "macos-12-large"
-  test4:
-    runs-on: 'macos-latest'
-  test5:
-    runs-on: |
-      windows-2019
-  test6:
-    runs-on: >
-      windows-2022
-  test7:
-    runs-on: [windows-2022, selfhosted]
-  test8:
-     runs-on: \${{ env.RUNNER }}
-  test9:
      runs-on:
        group: ubuntu-runners
        labels: ubuntu-20.04-16core
-  test10:
-      runs-on: abc-123
+  test4:
+      runs-on: ubuntu-22.04-arm
+`;
+
+const runnerTestWorkflowWindows = codeBlock`
+jobs:
+  test1:
+    runs-on: |
+      windows-2019
+  test2:
+    runs-on: >
+      windows-2022
+  test3:
+    runs-on: [windows-2022, selfhosted]
+  test4:
+      runs-on: windows-11-arm
+  test5:
+      runs-on: windows-2025
 `;
 
 describe('modules/manager/github-actions/extract', () => {
@@ -682,8 +700,51 @@ describe('modules/manager/github-actions/extract', () => {
       expect(res!.deps[3]).not.toHaveProperty('registryUrls');
     });
 
-    it('extracts multiple action runners from yaml configuration file', () => {
-      const res = extractPackageFile(runnerTestWorkflow, 'workflow.yml');
+    it('extracts multiple macos action runners from yaml configuration file', () => {
+      const res = extractPackageFile(runnerTestWorkflowMacos, 'workflow.yml');
+
+      expect(res?.deps).toMatchObject([
+        {
+          depName: 'macos',
+          currentValue: '12-large',
+          replaceString: 'macos-12-large',
+          depType: 'github-runner',
+          datasource: 'github-runners',
+          autoReplaceStringTemplate: '{{depName}}-{{newValue}}',
+        },
+        {
+          depName: 'macos',
+          currentValue: 'latest',
+          replaceString: 'macos-latest',
+          depType: 'github-runner',
+          datasource: 'github-runners',
+          autoReplaceStringTemplate: '{{depName}}-{{newValue}}',
+          skipReason: 'invalid-version',
+        },
+        {
+          depName: 'macos',
+          currentValue: '15-intel',
+          replaceString: 'macos-15-intel',
+          depType: 'github-runner',
+          datasource: 'github-runners',
+          autoReplaceStringTemplate: '{{depName}}-{{newValue}}',
+        },
+        {
+          depName: 'macos',
+          currentValue: '26-intel',
+          replaceString: 'macos-26-intel',
+          depType: 'github-runner',
+          datasource: 'github-runners',
+          autoReplaceStringTemplate: '{{depName}}-{{newValue}}',
+        },
+      ]);
+      expect(
+        res?.deps.filter((d) => d.datasource === 'github-runners'),
+      ).toHaveLength(4);
+    });
+
+    it('extracts multiple ubuntu action runners from yaml configuration file', () => {
+      const res = extractPackageFile(runnerTestWorkflowUbuntu, 'workflow.yml');
 
       expect(res?.deps).toMatchObject([
         {
@@ -704,22 +765,23 @@ describe('modules/manager/github-actions/extract', () => {
           autoReplaceStringTemplate: '{{depName}}-{{newValue}}',
         },
         {
-          depName: 'macos',
-          currentValue: '12-large',
-          replaceString: 'macos-12-large',
+          depName: 'ubuntu',
+          currentValue: '22.04-arm',
+          replaceString: 'ubuntu-22.04-arm',
           depType: 'github-runner',
           datasource: 'github-runners',
           autoReplaceStringTemplate: '{{depName}}-{{newValue}}',
         },
-        {
-          depName: 'macos',
-          currentValue: 'latest',
-          replaceString: 'macos-latest',
-          depType: 'github-runner',
-          datasource: 'github-runners',
-          autoReplaceStringTemplate: '{{depName}}-{{newValue}}',
-          skipReason: 'invalid-version',
-        },
+      ]);
+      expect(
+        res?.deps.filter((d) => d.datasource === 'github-runners'),
+      ).toHaveLength(3);
+    });
+
+    it('extracts multiple windows action runners from yaml configuration file', () => {
+      const res = extractPackageFile(runnerTestWorkflowWindows, 'workflow.yml');
+
+      expect(res?.deps).toMatchObject([
         {
           depName: 'windows',
           currentValue: '2019',
@@ -744,10 +806,26 @@ describe('modules/manager/github-actions/extract', () => {
           datasource: 'github-runners',
           autoReplaceStringTemplate: '{{depName}}-{{newValue}}',
         },
+        {
+          depName: 'windows',
+          currentValue: '11-arm',
+          replaceString: 'windows-11-arm',
+          depType: 'github-runner',
+          datasource: 'github-runners',
+          autoReplaceStringTemplate: '{{depName}}-{{newValue}}',
+        },
+        {
+          depName: 'windows',
+          currentValue: '2025',
+          replaceString: 'windows-2025',
+          depType: 'github-runner',
+          datasource: 'github-runners',
+          autoReplaceStringTemplate: '{{depName}}-{{newValue}}',
+        },
       ]);
       expect(
         res?.deps.filter((d) => d.datasource === 'github-runners'),
-      ).toHaveLength(7);
+      ).toHaveLength(5);
     });
 
     it('extracts x-version from actions/setup-x', () => {
@@ -1600,10 +1678,71 @@ describe('modules/manager/github-actions/extract', () => {
         {
           currentValue: 'v27.1.0',
           datasource: 'github-releases',
-          depName: 'docker/setup-docker-action',
+          depName: 'docker',
           depType: 'uses-with',
           packageName: 'moby/moby',
           extractVersion: '^docker-(?<version>.+)$',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'dtolnay/rust-toolchain@master',
+        with: { toolchain: '1.89.0' },
+      },
+      expected: [
+        {
+          currentValue: '1.89.0',
+          datasource: 'rust-version',
+          depName: 'rust',
+          depType: 'uses-with',
+          packageName: 'rust',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'dtolnay/rust-toolchain@master',
+        with: { toolchain: 'nightly-2025-01-01' },
+      },
+      expected: [
+        {
+          currentValue: 'nightly-2025-01-01',
+          datasource: 'rust-version',
+          depName: 'rust',
+          depType: 'uses-with',
+          packageName: 'rust',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'dtolnay/rust-toolchain@stable',
+        with: { toolchain: 'stable' },
+      },
+      expected: [
+        {
+          currentValue: 'stable',
+          datasource: 'rust-version',
+          depName: 'rust',
+          depType: 'uses-with',
+          packageName: 'rust',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'dtolnay/rust-toolchain@master',
+        with: {},
+      },
+      expected: [
+        {
+          datasource: 'rust-version',
+          depName: 'rust',
+          depType: 'uses-with',
+          packageName: 'rust',
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
         },
       ],
     },

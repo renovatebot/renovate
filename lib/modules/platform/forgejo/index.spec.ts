@@ -14,7 +14,7 @@ import {
 } from '../../../constants/error-messages.ts';
 import * as memCache from '../../../util/cache/memory/index.ts';
 import * as repoCache from '../../../util/cache/repository/index.ts';
-import type { LongCommitSha } from '../../../util/git/types.ts';
+import type { LongCommitSha } from '../../../util/schema-utils/git.ts';
 import { parseUrl } from '../../../util/url.ts';
 import type { EnsureIssueConfig, RepoParams } from '../index.ts';
 import * as helper from './forgejo-helper.ts';
@@ -50,7 +50,7 @@ describe('modules/platform/forgejo/index', () => {
 
   const mockUser: User = {
     id: 1,
-    username: 'renovate',
+    login: 'renovate',
     full_name: 'Renovate Bot',
     email: 'renovate@example.com',
   };
@@ -63,7 +63,7 @@ describe('modules/platform/forgejo/index', () => {
     default_branch: 'master',
     full_name: 'some/repo',
     owner: partial<User>({
-      username: 'some',
+      login: 'some',
     }),
   });
 
@@ -269,7 +269,7 @@ describe('modules/platform/forgejo/index', () => {
     scope
       .get(`/repos/${repository}`)
       .reply(200, repoResult)
-      .get(`/orgs/${repoResult.owner.username}`)
+      .get(`/orgs/${repoResult.owner.login}`)
       .reply(orgCode, {});
     GlobalConfig.set({ ignorePrAuthor: true, ...config });
     await forgejo.initRepo({ repository });
@@ -1219,7 +1219,7 @@ describe('modules/platform/forgejo/index', () => {
           sha: 'other-head-sha' as LongCommitSha,
           repo: partial<Repo>({ full_name: mockRepo.full_name }),
         },
-        user: { username: 'not-renovate' },
+        user: { login: 'not-renovate' },
       });
 
       const scope = httpMock
@@ -1230,7 +1230,7 @@ describe('modules/platform/forgejo/index', () => {
           thirdPartyPr,
           ...mockPRs.map((pr) => ({
             ...pr,
-            user: { username: 'renovate' },
+            user: { login: 'renovate' },
           })),
         ]);
       await initFakePlatform(scope);
@@ -1254,7 +1254,7 @@ describe('modules/platform/forgejo/index', () => {
           state: 'all',
           sort: 'recentupdate',
           limit: 100,
-          poster: mockUser.username,
+          poster: mockUser.login,
         })
         .reply(200, mockPRs.slice(0, 2), {
           // test correct pagination handling, domain should be ignored

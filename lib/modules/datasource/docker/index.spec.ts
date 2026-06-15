@@ -218,6 +218,35 @@ describe('modules/datasource/docker/index', () => {
       expect(res).toBeNull();
     });
 
+    it('does not cache null digest results', async () => {
+      const registryUrl = 'https://registry.company.com/v2';
+      const packageName = 'registry.company.com/cache-poison';
+
+      httpMock
+        .scope(registryUrl)
+        .get('/', undefined, { badheaders: ['authorization'] })
+        .reply(401, '', {
+          'www-authenticate': 'Basic realm="My Private Docker Registry Server"',
+        })
+        .head('/cache-poison/manifests/some-tag')
+        .reply(403);
+      httpMock
+        .scope(registryUrl)
+        .get('/', undefined, { badheaders: ['authorization'] })
+        .reply(401, '', {
+          'www-authenticate': 'Basic realm="My Private Docker Registry Server"',
+        })
+        .head('/cache-poison/manifests/some-tag')
+        .reply(200, '', { 'docker-content-digest': 'sha256:some-digest' });
+
+      expect(
+        await getDigest({ datasource: 'docker', packageName }, 'some-tag'),
+      ).toBeNull();
+      expect(
+        await getDigest({ datasource: 'docker', packageName }, 'some-tag'),
+      ).toBe('sha256:some-digest');
+    });
+
     it.each(amazonHosts)(
       'passes credentials to ECR client for host $host',
       async ({ host }) => {
@@ -1519,6 +1548,64 @@ describe('modules/datasource/docker/index', () => {
       );
 
       expect(res).toBe(newDigest);
+    });
+  });
+
+  describe('getImageArchitecture', () => {
+    it('does not cache null architecture results', async () => {
+      const datasource = new DockerDatasource();
+      const registryHost = 'https://registry.company.com';
+      const dockerRepository = 'cache-arch';
+      const currentDigest =
+        'sha256:0101010101010101010101010101010101010101010101010101010101010101';
+
+      httpMock
+        .scope(`${registryHost}/v2`)
+        .get('/')
+        .reply(200)
+        .head(`/cache-arch/manifests/${currentDigest}`)
+        .reply(200, '', {
+          'content-type':
+            'application/vnd.docker.distribution.manifest.list.v2+json',
+        });
+      httpMock
+        .scope(`${registryHost}/v2`)
+        .get('/')
+        .times(3)
+        .reply(200)
+        .head(`/cache-arch/manifests/${currentDigest}`)
+        .reply(200, '', {
+          'content-type':
+            'application/vnd.docker.distribution.manifest.v2+json',
+        })
+        .get(`/cache-arch/manifests/${currentDigest}`)
+        .reply(200, {
+          schemaVersion: 2,
+          mediaType: 'application/vnd.docker.distribution.manifest.v2+json',
+          config: {
+            digest: 'sha256:config-digest',
+            mediaType: 'application/vnd.docker.container.image.v1+json',
+          },
+        })
+        .get('/cache-arch/blobs/sha256:config-digest')
+        .reply(200, {
+          architecture: 'amd64',
+        });
+
+      expect(
+        await datasource.getImageArchitecture(
+          registryHost,
+          dockerRepository,
+          currentDigest,
+        ),
+      ).toBeNull();
+      expect(
+        await datasource.getImageArchitecture(
+          registryHost,
+          dockerRepository,
+          currentDigest,
+        ),
+      ).toBe('amd64');
     });
   });
 
