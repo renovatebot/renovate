@@ -35,7 +35,7 @@ export const PuppetModule = z
   })
   .transform((module): ReleaseResult => {
     const releases = module.releases.filter(
-      (release): release is Release => release !== null,
+      isTruthy,
     );
     const result: ReleaseResult = { releases };
     if (module.homepage_url) {
