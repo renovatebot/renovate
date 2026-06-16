@@ -48,7 +48,7 @@ export class GlobalConfig {
     'onboardingNoDeps',
     'onboardingPrTitle',
     'platform',
-    'prCacheSyncMaxPages',
+    'repositoryCacheMaxPrPages',
     'presetCachePersistence',
     'repositoryCacheForceLocal',
     'repositoryCacheMaximumHttpDays',

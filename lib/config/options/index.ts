@@ -3464,7 +3464,7 @@ const options: Readonly<RenovateOptions>[] = [
     globalOnly: true,
   },
   {
-    name: 'prCacheSyncMaxPages',
+    name: 'repositoryCacheMaxPrPages',
     description:
       'Maximum number of pages to fetch when syncing the pull request cache.',
     type: 'integer',

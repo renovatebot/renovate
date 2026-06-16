@@ -260,7 +260,7 @@ export interface RepoGlobalConfig extends GlobalInheritableConfig {
   localDir?: string;
   migratePresets?: Record<string, string>;
   platform?: PlatformId;
-  prCacheSyncMaxPages?: number;
+  repositoryCacheMaxPrPages?: number;
   presetCachePersistence?: boolean;
   repositoryCacheMaximumHttpDays?: number;
   autodiscoverRepoSort?: RepoSortMethod;
