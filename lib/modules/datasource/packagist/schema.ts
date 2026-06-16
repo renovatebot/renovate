@@ -48,6 +48,7 @@ export const ComposerRelease = z.object({
   homepage: z.string().nullable().catch(null),
   source: z.object({ url: z.string() }).nullable().catch(null),
   time: MaybeTimestamp,
+  ['published-time']: MaybeTimestamp.optional(),
   require: z.object({ php: z.string() }).nullable().catch(null),
   abandoned: z.union([z.string(), z.boolean()]).optional().catch(undefined),
 });
@@ -105,8 +106,12 @@ export function extractReleaseResult(
 
       const dep: Release = { version, gitRef };
 
-      if (composerRelease.time) {
-        dep.releaseTimestamp = composerRelease.time;
+      // Packagist's `published-time` reflects when the version was actually published to the registry;
+      // prefer it over `time` (the git tag's `releasedAt`, which can be backdated), falling back when absent.
+      const releaseTimestamp =
+        composerRelease['published-time'] ?? composerRelease.time;
+      if (releaseTimestamp) {
+        dep.releaseTimestamp = releaseTimestamp;
       }
 
       if (composerRelease.require?.php) {
