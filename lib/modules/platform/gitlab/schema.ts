@@ -10,11 +10,11 @@ export const LastPipelineId = z
   })
   .transform(({ last_pipeline }) => last_pipeline.id);
 
-const GitlabUser = z.object({
+export const GitlabUser = z.object({
   id: z.number(),
   username: z.string(),
 });
-export type GitLabUser = z.infer<typeof GitlabUser>;
+export type GitlabUser = z.infer<typeof GitlabUser>;
 
 export const GitLabMergeRequest = z.object({
   iid: z.number(),
@@ -44,15 +44,18 @@ export const GitLabMergeRequests = z.array(GitLabMergeRequest);
 export type GitLabMergeRequest = z.infer<typeof GitLabMergeRequest>;
 
 // See https://gitlab.com/gitlab-org/gitlab/-/blob/master/app/graphql/types/user_status_type.rb
-export const GitlabUserStatusSchema = z.object({
+export const GitlabUserStatus = z.object({
   message: z.string().optional(),
   message_html: z.string().optional(),
   emoji: z.string().optional(),
   availability: z.enum(['not_set', 'busy']),
 });
-export type GitlabUserStatus = z.infer<typeof GitlabUserStatusSchema>;
+export type GitlabUserStatus = z.infer<typeof GitlabUserStatus>;
 
-export const RepoResponseSchema = z.object({
+export const MergeMethod = z.enum(['merge', 'rebase_merge', 'ff']);
+export type MergeMethod = z.infer<typeof MergeMethod>;
+
+export const RepoResponse = z.object({
   id: z.number().optional(),
   archived: z.boolean().optional(),
   mirror: z.boolean().optional(),
@@ -63,49 +66,49 @@ export const RepoResponseSchema = z.object({
   forked_from_project: z.boolean().optional(),
   repository_access_level: z.string().optional(),
   merge_requests_access_level: z.string().optional(),
-  merge_method: z.string().optional(),
+  merge_method: MergeMethod.catch('merge'),
   merge_trains_enabled: z.boolean().optional(),
   path_with_namespace: z.string().optional(),
   squash_option: z.string().optional(),
 });
-export type RepoResponse = z.infer<typeof RepoResponseSchema>;
+export type RepoResponse = z.infer<typeof RepoResponse>;
 
-export const GitlabCommentSchema = z.object({
+export const GitlabComment = z.object({
   body: z.string().optional().default(''),
   id: z.number(),
 });
-export type GitlabComment = z.infer<typeof GitlabCommentSchema>;
+export type GitlabComment = z.infer<typeof GitlabComment>;
 
-export const GitlabCommentsSchema = z.array(GitlabCommentSchema);
+export const GitlabComments = z.array(GitlabComment);
 
-export const GitlabIssueSchema = z.object({
+export const GitlabIssue = z.object({
   iid: z.number(),
   labels: z.array(z.string()).optional(),
   title: z.string().optional().default(''),
 });
-export type GitlabIssue = z.infer<typeof GitlabIssueSchema>;
+export type GitlabIssue = z.infer<typeof GitlabIssue>;
 
-export const GitlabIssuesSchema = z.array(GitlabIssueSchema);
+export const GitlabIssues = z.array(GitlabIssue);
 
-export const GitlabBranchStatusSchema = z.object({
+export const GitlabBranchStatus = z.object({
   status: z.string().optional().default(''),
   name: z.string().optional().default(''),
   allow_failure: z.boolean().optional(),
 });
-export type GitlabBranchStatus = z.infer<typeof GitlabBranchStatusSchema>;
+export type GitlabBranchStatus = z.infer<typeof GitlabBranchStatus>;
 
-export const GitlabBranchStatusesSchema = z.array(GitlabBranchStatusSchema);
+export const GitlabBranchStatuses = z.array(GitlabBranchStatus);
 
-export const GitlabApprovalRuleSchema = z.object({
+export const GitlabApprovalRule = z.object({
   name: z.string().optional().default(''),
   rule_type: z.string().optional().default(''),
   id: z.number(),
 });
-export type GitlabApprovalRule = z.infer<typeof GitlabApprovalRuleSchema>;
+export type GitlabApprovalRule = z.infer<typeof GitlabApprovalRule>;
 
-export const GitlabApprovalRulesSchema = z.array(GitlabApprovalRuleSchema);
+export const GitlabApprovalRules = z.array(GitlabApprovalRule);
 
-export const GitlabMergeRequestStatusSchema = z
+export const GitlabMergeRequestStatus = z
   .object({
     merge_status: z.string().optional(),
     detailed_merge_status: z.string().optional(),
@@ -118,39 +121,37 @@ export const GitlabMergeRequestStatusSchema = z
       .optional(),
   })
   .catch({});
-export type GitlabMergeRequestStatus = z.infer<
-  typeof GitlabMergeRequestStatusSchema
->;
+export type GitlabMergeRequestStatus = z.infer<typeof GitlabMergeRequestStatus>;
 
-export const GitlabUserInfoSchema = z.object({
+export const GitlabUserInfo = z.object({
   email: z.string().optional(),
   name: z.string().optional(),
   id: z.number().optional(),
   commit_email: z.string().optional(),
 });
-export type GitlabUserInfo = z.infer<typeof GitlabUserInfoSchema>;
+export type GitlabUserInfo = z.infer<typeof GitlabUserInfo>;
 
-export const GitlabVersionSchema = z.object({
+export const GitlabVersion = z.object({
   version: z.string(),
 });
-export type GitlabVersion = z.infer<typeof GitlabVersionSchema>;
+export type GitlabVersion = z.infer<typeof GitlabVersion>;
 
-export const GitlabRawFileSchema = z.object({
+export const GitlabRawFile = z.object({
   content: z.string(),
 });
-export type GitlabRawFile = z.infer<typeof GitlabRawFileSchema>;
+export type GitlabRawFile = z.infer<typeof GitlabRawFile>;
 
-export const GitlabIssueBodySchema = z.object({
+export const GitlabIssueBody = z.object({
   description: z.string(),
 });
-export type GitlabIssueBody = z.infer<typeof GitlabIssueBodySchema>;
+export type GitlabIssueBody = z.infer<typeof GitlabIssueBody>;
 
-export const GitlabTreeNodeSchema = z.object({
+export const GitlabTreeNode = z.object({
   id: z.string(),
   name: z.string(),
   type: z.string(),
   path: z.string(),
 });
-export type GitlabTreeNode = z.infer<typeof GitlabTreeNodeSchema>;
+export type GitlabTreeNode = z.infer<typeof GitlabTreeNode>;
 
-export const GitlabTreeSchema = z.array(GitlabTreeNodeSchema);
+export const GitlabTree = z.array(GitlabTreeNode);

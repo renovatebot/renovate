@@ -5,7 +5,7 @@ import { joinUrlParts } from '../../../util/url.ts';
 import { Datasource } from '../datasource.ts';
 import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
 import { datasource } from './common.ts';
-import { GitlabPackagesSchema } from './schema.ts';
+import { GitlabPackages } from './schema.ts';
 
 // Gitlab Packages API: https://docs.gitlab.com/ee/api/packages.html
 
@@ -68,11 +68,7 @@ export class GitlabPackagesDatasource extends Datasource {
 
     try {
       const response = (
-        await this.http.getJson(
-          apiUrl,
-          { paginate: true },
-          GitlabPackagesSchema,
-        )
+        await this.http.getJson(apiUrl, { paginate: true }, GitlabPackages)
       ).body;
 
       result.releases = response

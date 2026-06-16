@@ -10,7 +10,7 @@ import type {
   GetReleasesConfig,
   ReleaseResult,
 } from '../types.ts';
-import { GitlabCommitSchema, GitlabTagsSchema } from './schema.ts';
+import { GitlabCommit, GitlabTags } from './schema.ts';
 import { defaultRegistryUrl, getDepHost, getSourceUrl } from './util.ts';
 
 export class GitlabTagsDatasource extends Datasource {
@@ -49,7 +49,7 @@ export class GitlabTagsDatasource extends Datasource {
     );
 
     const gitlabTags = (
-      await this.http.getJson(url, { paginate: true }, GitlabTagsSchema)
+      await this.http.getJson(url, { paginate: true }, GitlabTags)
     ).body;
 
     const dependency: ReleaseResult = {
@@ -99,7 +99,7 @@ export class GitlabTagsDatasource extends Datasource {
           `repository/commits/`,
           newValue,
         );
-        const gitlabCommit = await this.http.getJson(url, GitlabCommitSchema);
+        const gitlabCommit = await this.http.getJson(url, GitlabCommit);
         digest = gitlabCommit.body.id;
       } else {
         const url = joinUrlParts(
@@ -110,7 +110,7 @@ export class GitlabTagsDatasource extends Datasource {
         );
         const gitlabCommits = await this.http.getJson(
           url,
-          z.array(GitlabCommitSchema),
+          z.array(GitlabCommit),
         );
         digest = gitlabCommits.body[0].id;
       }

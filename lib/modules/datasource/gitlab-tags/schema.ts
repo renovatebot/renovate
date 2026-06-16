@@ -1,12 +1,12 @@
 import { z } from 'zod/v4';
 
-export const GitlabCommitSchema = z.object({
+export const GitlabCommit = z.object({
   id: z.string(),
   created_at: z.string().optional(),
 });
-export type GitlabCommit = z.infer<typeof GitlabCommitSchema>;
+export type GitlabCommit = z.infer<typeof GitlabCommit>;
 
-export const GitlabTagSchema = z.object({
+export const GitlabTag = z.object({
   name: z.string(),
   commit: z
     .object({
@@ -14,6 +14,6 @@ export const GitlabTagSchema = z.object({
     })
     .optional(),
 });
-export type GitlabTag = z.infer<typeof GitlabTagSchema>;
+export type GitlabTag = z.infer<typeof GitlabTag>;
 
-export const GitlabTagsSchema = z.array(GitlabTagSchema);
+export const GitlabTags = z.array(GitlabTag);

@@ -8,8 +8,7 @@ import type { HttpResponse } from '../../../util/http/types.ts';
 import { parseUrl } from '../../../util/url.ts';
 import { getPrBodyStruct } from '../pr-body.ts';
 import type { GitUrlOption } from '../types.ts';
-import type { GitLabMergeRequest } from './schema.ts';
-import type { RepoResponse } from './schema.ts';
+import type { GitLabMergeRequest, RepoResponse } from './schema.ts';
 import type { GitlabPr } from './types.ts';
 
 export const DRAFT_PREFIX = 'Draft: ';

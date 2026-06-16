@@ -1,7 +1,7 @@
 import changelogFilenameRegex from 'changelog-filename-regex';
 import { logger } from '../../../../../../logger/index.ts';
-import { GitlabReleasesSchema } from '../../../../../../modules/datasource/gitlab-releases/schema.ts';
-import { GitlabTreeSchema } from '../../../../../../modules/platform/gitlab/schema.ts';
+import { GitlabReleases } from '../../../../../../modules/datasource/gitlab-releases/schema.ts';
+import { GitlabTree } from '../../../../../../modules/platform/gitlab/schema.ts';
 import { GitlabHttp } from '../../../../../../util/http/gitlab.ts';
 import { compareChangelogFilePath } from '../common.ts';
 import type {
@@ -32,7 +32,7 @@ export async function getReleaseNotesMd(
       {
         paginate: true,
       },
-      GitlabTreeSchema,
+      GitlabTree,
     )
   ).body;
   const allFiles = tree.filter((f) => f.type === 'blob');
@@ -75,7 +75,7 @@ export async function getReleaseList(
     {
       paginate: true,
     },
-    GitlabReleasesSchema,
+    GitlabReleases,
   );
   return res.body.map((release) => ({
     url: `${project.baseUrl}${repository}/-/releases/${release.tag_name}`,

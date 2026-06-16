@@ -6,7 +6,7 @@ import { GitlabHttp } from '../../../util/http/gitlab.ts';
 import type { HttpResponse } from '../../../util/http/types.ts';
 import type { Preset, PresetConfig } from '../types.ts';
 import { PRESET_DEP_NOT_FOUND, fetchPreset, parsePreset } from '../util.ts';
-import { GitlabProjectSchema } from './schema.ts';
+import { GitlabProject } from './schema.ts';
 
 const gitlabApi = new GitlabHttp();
 export const Endpoint = 'https://gitlab.com/api/v4/';
@@ -17,7 +17,7 @@ async function getDefaultBranchName(
 ): Promise<string> {
   const res = await gitlabApi.getJson(
     `${endpoint}projects/${urlEncodedPkgName}`,
-    GitlabProjectSchema,
+    GitlabProject,
   );
   return res.body.default_branch ?? 'master'; // should never happen, but we keep this to ensure the current behavior
 }

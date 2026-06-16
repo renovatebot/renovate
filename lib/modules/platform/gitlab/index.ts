@@ -63,27 +63,23 @@ import {
 } from './http.ts';
 import { getMR, updateMR } from './merge-request.ts';
 import { GitlabPrCache } from './pr-cache.ts';
-import type { GitLabMergeRequest } from './schema.ts';
+import type { GitlabComment, GitlabIssue, MergeMethod } from './schema.ts';
 import {
-  GitlabApprovalRulesSchema,
-  GitlabBranchStatusesSchema,
-  GitlabCommentsSchema,
-  GitlabIssueBodySchema,
-  GitlabIssuesSchema,
-  GitlabMergeRequestStatusSchema,
-  GitLabMergeRequestsSchema,
-  GitlabRawFileSchema,
-  GitlabUserInfoSchema,
-  GitlabVersionSchema,
+  GitLabMergeRequest,
+  GitLabMergeRequests,
+  GitlabApprovalRules,
+  GitlabBranchStatuses,
+  GitlabComments,
+  GitlabIssueBody,
+  GitlabIssues,
+  GitlabMergeRequestStatus,
+  GitlabRawFile,
+  GitlabUserInfo,
+  GitlabVersion,
   LastPipelineId,
-  RepoResponseSchema,
+  RepoResponse,
 } from './schema.ts';
-import type {
-  GitlabComment,
-  GitlabIssue,
-  GitlabPr,
-  MergeMethod,
-} from './types.ts';
+import type { GitlabPr } from './types.ts';
 import {
   DRAFT_PREFIX,
   DRAFT_PREFIX_DEPRECATED,
@@ -144,9 +140,8 @@ export async function initPlatform({
   let gitlabVersion: string;
   try {
     if (!gitAuthor) {
-      const user = (
-        await gitlabApi.getJson(`user`, { token }, GitlabUserInfoSchema)
-      ).body;
+      const user = (await gitlabApi.getJson(`user`, { token }, GitlabUserInfo))
+        .body;
       platformConfig.gitAuthor = `${user.name} <${
         user.commit_email ?? user.email
       }>`;
@@ -158,7 +153,7 @@ export async function initPlatform({
       gitlabVersion = env.RENOVATE_X_PLATFORM_VERSION;
     } else {
       const version = (
-        await gitlabApi.getJson('version', { token }, GitlabVersionSchema)
+        await gitlabApi.getJson('version', { token }, GitlabVersion)
       ).body;
       gitlabVersion = version.version;
     }
@@ -220,11 +215,7 @@ export async function getRepos(config?: AutodiscoverConfig): Promise<string[]> {
       await pMap(
         urls,
         (url) =>
-          gitlabApi.getJson(
-            url,
-            { paginate: true },
-            RepoResponseSchema.array(),
-          ),
+          gitlabApi.getJson(url, { paginate: true }, RepoResponse.array()),
         {
           concurrency: 2,
         },
@@ -259,7 +250,7 @@ export async function getRawFile(
   const res = await gitlabApi.getJson(
     url,
     { cacheProvider: memCacheProvider },
-    GitlabRawFileSchema,
+    GitlabRawFile,
   );
   const buf = res.body.content;
   const str = Buffer.from(buf, 'base64').toString();
@@ -288,11 +279,11 @@ export async function initRepo({
   config.cloneSubmodulesFilter = cloneSubmodulesFilter;
   config.ignorePrAuthor = GlobalConfig.get('ignorePrAuthor');
 
-  let res: HttpResponse<import('./schema.ts').RepoResponse>;
+  let res: HttpResponse<RepoResponse>;
   try {
     res = await gitlabApi.getJson(
       `projects/${config.repository}`,
-      RepoResponseSchema,
+      RepoResponse,
     );
     if (res.body.archived) {
       logger.debug(
@@ -328,8 +319,7 @@ export async function initRepo({
       logger.warn({ resBody: res.body }, 'Error fetching GitLab project');
       throw new Error(TEMPORARY_ERROR);
     }
-    config.mergeMethod = (res.body.merge_method ||
-      'merge') as import('./types.ts').MergeMethod;
+    config.mergeMethod = res.body.merge_method;
     config.mergeTrainsEnabled = res.body.merge_trains_enabled ?? false;
     if (res.body.squash_option) {
       config.squash =
@@ -418,7 +408,7 @@ async function getStatus(
       opts.memCache = false;
     }
 
-    return (await gitlabApi.getJson(url, opts, GitlabBranchStatusesSchema))
+    return (await gitlabApi.getJson(url, opts, GitlabBranchStatuses))
       .body as GitlabBranchStatus[];
   } catch (err) /* v8 ignore next */ {
     logger.debug({ err }, 'Error getting commit status');
@@ -531,10 +521,7 @@ export async function getPrList(): Promise<Pr[]> {
 async function ignoreApprovals(pr: number): Promise<void> {
   try {
     const url = `projects/${config.repository}/merge_requests/${pr}/approval_rules`;
-    const { body: rules } = await gitlabApi.getJson(
-      url,
-      GitlabApprovalRulesSchema,
-    );
+    const { body: rules } = await gitlabApi.getJson(url, GitlabApprovalRules);
 
     const ruleName = 'renovateIgnoreApprovals';
 
@@ -616,7 +603,7 @@ async function tryPrAutomerge(
         const { body } = await gitlabApi.getJson(
           `projects/${config.repository}/merge_requests/${pr}`,
           { memCache: false },
-          GitlabMergeRequestStatusSchema,
+          GitlabMergeRequestStatus,
         );
 
         // Exit early if merge_when_pipeline_succeeds is already set
@@ -638,7 +625,7 @@ async function tryPrAutomerge(
         // Only continue if the merge request can be merged and has a pipeline.
         if (
           (detailed_merge_status_check || deprecated_merge_status_check) &&
-          body.pipeline != null &&
+          body.pipeline &&
           desiredPipelineStatus.includes(body.pipeline.status)
         ) {
           break;
@@ -731,7 +718,7 @@ export async function createPr({
   }
   const description = sanitize(rawDescription);
   logger.debug(`Creating Merge Request: ${title}`);
-  const res = await gitlabApi.postJson<GitLabMergeRequest>(
+  const res = await gitlabApi.postJson(
     `projects/${config.repository}/merge_requests`,
     {
       body: {
@@ -744,6 +731,7 @@ export async function createPr({
         squash: config.squash,
       },
     },
+    GitLabMergeRequest,
   );
 
   const pr = prInfo(res.body);
@@ -810,9 +798,10 @@ export async function updatePr({
   }
 
   const updatedPrInfo = (
-    await gitlabApi.putJson<GitLabMergeRequest>(
+    await gitlabApi.putJson(
       `projects/${config.repository}/merge_requests/${iid}`,
       { body },
+      GitLabMergeRequest,
     )
   ).body;
 
@@ -920,7 +909,7 @@ export async function findPr({
     // PR might have been created by anyone, so don't use the cached Renovate MR list
     const response = await gitlabApi.getJson(
       `projects/${config.repository}/merge_requests?source_branch=${branchName}&state=opened`,
-      GitLabMergeRequestsSchema,
+      GitLabMergeRequests,
     );
 
     const { body: mrList } = response;
@@ -1079,7 +1068,7 @@ export async function getIssueList(): Promise<GitlabIssue[]> {
     const res = await gitlabApi.getJson(
       `projects/${config.repository}/issues?${query}`,
       { memCache: false, paginate: true },
-      GitlabIssuesSchema,
+      GitlabIssues,
     );
     /* v8 ignore next */
     if (!isArray(res.body)) {
@@ -1111,7 +1100,7 @@ export async function getIssue(
       await gitlabApi.getJson(
         `projects/${config.repository}/issues/${number}`,
         opts,
-        GitlabIssueBodySchema,
+        GitlabIssueBody,
       )
     ).body.description;
     return {
@@ -1156,7 +1145,7 @@ export async function ensureIssue({
       const existingDescription = (
         await gitlabApi.getJson(
           `projects/${config.repository}/issues/${issue.iid}`,
-          GitlabIssueBodySchema,
+          GitlabIssueBody,
         )
       ).body.description;
       if (issue.title !== title || existingDescription !== description) {
@@ -1330,7 +1319,7 @@ async function getComments(issueNo: number): Promise<GitlabComment[]> {
   logger.debug(`Getting comments for #${issueNo}`);
   const url = `projects/${config.repository}/merge_requests/${issueNo}/notes`;
   const comments = (
-    await gitlabApi.getJson(url, { paginate: true }, GitlabCommentsSchema)
+    await gitlabApi.getJson(url, { paginate: true }, GitlabComments)
   ).body;
   logger.debug(`Found ${comments.length} comments`);
   return comments;
