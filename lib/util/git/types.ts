@@ -1,5 +1,6 @@
 import type { PlatformCommitOptions } from '../../config/types.ts';
 import type { GitOptions } from '../../types/git.ts';
+import type { LongCommitSha } from '../schema-utils/git.ts';
 import type { EmailAddress } from '../schema-utils/index.ts';
 
 export type { DiffResult, StatusResult } from 'simple-git';
@@ -10,11 +11,6 @@ export interface GitAuthor {
 }
 
 export type GitNoVerifyOption = 'commit' | 'push';
-
-/**
- * We want to make sure this is a long sha of 40 characters and not just any string
- */
-export type LongCommitSha = string & { __longCommitSha: never };
 
 export interface StorageConfig {
   currentBranch?: string;

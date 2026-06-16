@@ -1,7 +1,7 @@
 import * as httpMock from '~test/http-mock.ts';
 import { logger, partial } from '~test/util.ts';
-import type { LongCommitSha } from '../../../util/git/types.ts';
 import { setBaseUrl } from '../../../util/http/gitea.ts';
+import type { LongCommitSha } from '../../../util/schema-utils/git.ts';
 import { toBase64 } from '../../../util/string.ts';
 import {
   closeIssue,

@@ -382,6 +382,20 @@ const options: Readonly<RenovateOptions>[] = [
     },
   },
   {
+    name: 'statusCheckWhen',
+    description:
+      'Control when each Renovate status check is set on branches. Keys match `statusCheckNames`.',
+    type: 'object',
+    mergeable: true,
+    advancedUse: true,
+    default: {
+      artifactError: 'failed',
+      configValidation: 'always',
+      mergeConfidence: 'always',
+      minimumReleaseAge: 'always',
+    },
+  },
+  {
     name: 'extends',
     description: 'Configuration presets to use or extend.',
     stage: 'package',
@@ -666,7 +680,7 @@ const options: Readonly<RenovateOptions>[] = [
     description:
       'Change this value to override the default Renovate sidecar image.',
     type: 'string',
-    default: 'ghcr.io/renovatebot/base-image:13.57.1',
+    default: 'ghcr.io/renovatebot/base-image:13.59.3',
     globalOnly: true,
     deprecationMsg:
       'The usage of `binarySource=docker` is deprecated, and will be removed in the future',
