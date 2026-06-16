@@ -1294,6 +1294,33 @@ describe('modules/manager/mise/extract', () => {
       });
     });
 
+    it('skips lockedVersion when lock file holds a non-pinned range', async () => {
+      const rangeLockFileContent = codeBlock`
+        [[tools."npm:typescript"]]
+        version = "^1.18.4"
+
+        [[tools."npm:prettier"]]
+        version = "3.0.0"
+      `;
+      fs.readLocalFile.mockResolvedValueOnce(rangeLockFileContent);
+      const content = codeBlock`
+        [tools]
+        "npm:typescript" = "^1.18.4"
+        "npm:prettier" = "3.0.0"
+      `;
+      const result = await extractPackageFile(content, 'mise.toml');
+      expect(result?.deps[0]).toMatchObject({
+        depName: 'npm:typescript',
+        currentValue: '^1.18.4',
+      });
+      expect(result?.deps[0]).not.toHaveProperty('lockedVersion');
+      expect(result?.deps[1]).toMatchObject({
+        depName: 'npm:prettier',
+        currentValue: '3.0.0',
+        lockedVersion: '3.0.0',
+      });
+    });
+
     it('skips kafka tool when version has no apache- prefix', async () => {
       const content = codeBlock`
         [tools]
