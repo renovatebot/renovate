@@ -4,7 +4,7 @@ import type { PackageFileContent } from '../types.ts';
 import type { ToxConfig } from './schema.ts';
 import { ToxFile, ToxPyProject } from './schema.ts';
 
-export function extractToxConfig(
+function extractToxConfig(
   content: string,
   packageFile: string,
 ): ToxConfig | null {

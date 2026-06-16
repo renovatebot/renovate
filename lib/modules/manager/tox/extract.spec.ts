@@ -1,6 +1,6 @@
 import { codeBlock } from 'common-tags';
 import { describe, expect, it } from 'vitest';
-import { extractPackageFile, extractToxConfig } from './extract.ts';
+import { extractPackageFile } from './extract.ts';
 
 describe('modules/manager/tox/extract', () => {
   describe('extractPackageFile()', () => {
@@ -326,21 +326,6 @@ describe('modules/manager/tox/extract', () => {
         currentVersion: '4.5.0',
         depType: 'requires',
       });
-    });
-  });
-
-  describe('extractToxConfig()', () => {
-    it('returns null for pyproject.toml without [tool.tox]', () => {
-      const content = codeBlock`
-        [project]
-        name = "foo"
-      `;
-      expect(extractToxConfig(content, 'pyproject.toml')).toBeNull();
-    });
-
-    it('returns null for invalid tox.toml', () => {
-      const content = codeBlock`{not valid}`;
-      expect(extractToxConfig(content, 'pyproject.toml')).toBeNull();
     });
   });
 });
