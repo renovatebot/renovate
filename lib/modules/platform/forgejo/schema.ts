@@ -1,4 +1,5 @@
 import { z } from 'zod/v4';
+import { LongCommitSha } from '../../../util/schema-utils/git.ts';
 import {
   DeepNullish,
   EmailAddress,
@@ -130,7 +131,7 @@ export const PR = DeepNullish(
     head: z
       .object({
         label: z.string(),
-        sha: z.string(),
+        sha: LongCommitSha,
         repo: PartialRepo.optional(),
       })
       .optional(),

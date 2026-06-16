@@ -1,7 +1,6 @@
 import * as httpMock from '~test/http-mock.ts';
-import { logger, partial } from '~test/util.ts';
+import { fakeSha, logger, partial } from '~test/util.ts';
 import { setBaseUrl } from '../../../util/http/forgejo.ts';
-import type { LongCommitSha } from '../../../util/schema-utils/git.ts';
 import { toBase64 } from '../../../util/string.ts';
 import {
   closeIssue,
@@ -53,8 +52,7 @@ describe('modules/platform/forgejo/forgejo-helper', () => {
   const forgejoApiHost = 'https://forgejo.renovatebot.com/';
   const baseUrl = `${forgejoApiHost}api/v1`;
 
-  const mockCommitHash =
-    '0d9c7726c3d628b7e28af234595cfd20febdbf8e' as LongCommitSha;
+  const mockCommitHash = fakeSha('forgejo-helper');
 
   const mockUser: User = {
     id: 1,

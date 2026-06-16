@@ -1,4 +1,4 @@
-import { partial } from '~test/util.ts';
+import { fakeSha, partial } from '~test/util.ts';
 import * as httpMock from '../../../../test/http-mock.ts';
 import { reset as memCacheReset } from '../../../util/cache/memory/index.ts';
 import {
@@ -6,7 +6,6 @@ import {
   resetCache as repoCacheReset,
 } from '../../../util/cache/repository/index.ts';
 import { ForgejoHttp, setBaseUrl } from '../../../util/http/forgejo.ts';
-import type { LongCommitSha } from '../../../util/schema-utils/git.ts';
 import { ForgejoPrCache } from './pr-cache.ts';
 import type { PR, Repo } from './schema.ts';
 import { toRenovatePR } from './utils.ts';
@@ -30,7 +29,7 @@ const pr1: PR = {
   base: { ref: 'third-party-base-branch' },
   head: {
     label: 'other-head-branch',
-    sha: 'other-head-sha' as LongCommitSha,
+    sha: fakeSha('other-head-sha'),
     repo: partial<Repo>({ full_name: 'SOME/repo' }),
   },
   user: { id: 1, login: 'some-author' },
@@ -49,7 +48,7 @@ const pr2: PR = {
   base: { ref: 'third-party-base-branch' },
   head: {
     label: 'other-head-branch',
-    sha: 'other-head-sha' as LongCommitSha,
+    sha: fakeSha('other-head-sha'),
     repo: partial<Repo>({ full_name: 'SOME/repo' }),
   },
   user: { id: 1, login: 'some-author' },

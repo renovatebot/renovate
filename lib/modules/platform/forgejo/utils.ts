@@ -3,7 +3,6 @@ import type { MergeStrategy } from '../../../config/types.ts';
 import { CONFIG_GIT_URL_UNAVAILABLE } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
 import { coerceArray } from '../../../util/array.ts';
-import type { LongCommitSha } from '../../../util/git/types.ts';
 import * as hostRules from '../../../util/host-rules.ts';
 import { regEx } from '../../../util/regex.ts';
 import { parseUrl } from '../../../util/url.ts';
@@ -128,7 +127,7 @@ export function toRenovatePR(data: PR, author: string | null): Pr | null {
     title,
     isDraft,
     bodyStruct: getPrBodyStruct(data.body),
-    sha: data.head.sha as LongCommitSha,
+    sha: data.head.sha,
     sourceBranch: data.head.label,
     targetBranch: data.base.ref,
     sourceRepo: data.head.repo.full_name,
