@@ -1,3 +1,4 @@
+import { isTruthy } from '@sindresorhus/is';
 import { z } from 'zod/v4';
 import { LooseArray } from '../../../util/schema-utils/index.ts';
 import { MaybeTimestamp } from '../../../util/timestamp.ts';
@@ -34,9 +35,7 @@ export const PuppetModule = z
     deprecated_for: z.string().optional().nullable(),
   })
   .transform((module): ReleaseResult => {
-    const releases = module.releases.filter(
-      isTruthy,
-    );
+    const releases = module.releases.filter(isTruthy);
     const result: ReleaseResult = { releases };
     if (module.homepage_url) {
       result.homepage = module.homepage_url;
