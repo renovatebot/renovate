@@ -49,7 +49,10 @@ describe('docs/documentation', () => {
           .map((match) =>
             match.substring(4, match.length - 1).replace(/^`|`$/g, ''),
           )
-          .filter((header) => header !== 'managerFilePatterns');
+          .filter((header) => header !== 'managerFilePatterns')
+          .filter(
+            (header) => header !== 'Locations for configuration filenames',
+          );
       }
 
       function getRequiredConfigOptions(): string[] {

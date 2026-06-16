@@ -5,6 +5,7 @@ import * as httpMock from '~test/http-mock.ts';
 import { logger } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import {
+  CONFIG_GIT_URL_UNAVAILABLE,
   PLATFORM_RATE_LIMIT_EXCEEDED,
   PLATFORM_UNKNOWN_ERROR,
   REPOSITORY_CANNOT_FORK,
@@ -16,9 +17,9 @@ import {
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
 import * as repository from '../../../util/cache/repository/index.ts';
 import * as _git from '../../../util/git/index.ts';
-import type { LongCommitSha } from '../../../util/git/types.ts';
 import * as _hostRules from '../../../util/host-rules.ts';
 import { setBaseUrl } from '../../../util/http/github.ts';
+import type { LongCommitSha } from '../../../util/schema-utils/git.ts';
 import { toBase64 } from '../../../util/string.ts';
 import { hashBody } from '../pr-body.ts';
 import type {
@@ -731,6 +732,7 @@ describe('modules/platform/github/index', () => {
       data: {
         repository: {
           isFork: false,
+          sshUrl: `git@github.com:${repository}.git`,
           isArchived: false,
           nameWithOwner: repository,
           autoMergeAllowed: true,
@@ -765,6 +767,7 @@ describe('modules/platform/github/index', () => {
         data: {
           repository: {
             isFork,
+            sshUrl: `git@github.com:${repository}.git`,
             isArchived: false,
             nameWithOwner: repository,
             hasIssuesEnabled: true,
@@ -854,6 +857,56 @@ describe('modules/platform/github/index', () => {
           forkCreation: false,
         }),
       ).rejects.toThrow(REPOSITORY_FORK_MISSING);
+    });
+
+    it('should use sshUrl if gitUrl is set to ssh', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      await github.initRepo({
+        repository: 'some/repo',
+        gitUrl: 'ssh',
+      });
+      expect(git.initRepo).toHaveBeenCalledWith(
+        expect.objectContaining({
+          url: 'git@github.com:some/repo.git',
+        }),
+      );
+    });
+
+    it('should throw if sshUrl is not present but gitUrl is set to ssh', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo', { sshUrl: null });
+      await expect(
+        github.initRepo({
+          repository: 'some/repo',
+          gitUrl: 'ssh',
+        }),
+      ).rejects.toThrow(CONFIG_GIT_URL_UNAVAILABLE);
+    });
+
+    it('should use fork sshUrl when gitUrl is ssh in fork mode', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      forkInitRepoMock(scope, 'some/repo', false);
+      scope.get('/user').reply(200, {
+        login: 'forked',
+      });
+      scope.post('/repos/some/repo/forks').reply(200, {
+        full_name: 'forked/repo',
+        default_branch: 'master',
+        ssh_url: 'git@github.com:forked/repo.git',
+      });
+      await github.initRepo({
+        repository: 'some/repo',
+        forkToken: 'token',
+        forkCreation: true,
+        gitUrl: 'ssh',
+      });
+      expect(git.initRepo).toHaveBeenCalledWith(
+        expect.objectContaining({
+          url: 'git@github.com:forked/repo.git',
+          upstreamUrl: 'git@github.com:some/repo.git',
+        }),
+      );
     });
 
     it('throws if the repo is a fork', async () => {
@@ -5477,6 +5530,18 @@ describe('modules/platform/github/index', () => {
       git.fetchBranch.mockImplementation(() =>
         Promise.resolve('0abcdef' as LongCommitSha),
       );
+      git.pushCommitToRenovateRef.mockResolvedValue(undefined);
+      git.getCommitTreeSha.mockResolvedValue(
+        '0000000000000000000000000000000000000000' as LongCommitSha,
+      );
+      git.diffCommitTree.mockResolvedValue([
+        {
+          path: 'foo.bar',
+          mode: '100644',
+          type: 'blob',
+          sha: 'abc0000000000000000000000000000000000000' as LongCommitSha,
+        },
+      ]);
     });
 
     it('returns null if pre-commit phase has failed', async () => {
@@ -5514,10 +5579,22 @@ describe('modules/platform/github/index', () => {
       expect(res).toBeNull();
     });
 
-    it('commits and returns SHA string', async () => {
-      git.pushCommitToRenovateRef.mockResolvedValueOnce();
-      git.listCommitTree.mockResolvedValueOnce([]);
+    it('returns null when diff is empty', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      await github.initRepo({ repository: 'some/repo' });
+      git.diffCommitTree.mockResolvedValueOnce([]);
 
+      const res = await github.commitFiles({
+        branchName: 'foo/bar',
+        files: [{ type: 'addition', path: 'foo.bar', contents: 'foobar' }],
+        message: 'Foobar',
+      });
+
+      expect(res).toBeNull();
+    });
+
+    it('commits and returns SHA string', async () => {
       const scope = httpMock.scope(githubApiHost);
 
       initRepoMock(scope, 'some/repo');
@@ -5527,8 +5604,10 @@ describe('modules/platform/github/index', () => {
         .post('/repos/some/repo/git/trees')
         .reply(200, { sha: '111' })
         .post('/repos/some/repo/git/commits')
-        .reply(200, { sha: '222' })
-        .head('/repos/some/repo/git/commits/222')
+        .reply(200, { sha: '0123456789abcdef0123456789abcdef01234567' })
+        .head(
+          '/repos/some/repo/git/commits/0123456789abcdef0123456789abcdef01234567',
+        )
         .reply(200)
         .post('/repos/some/repo/git/refs')
         .reply(200);
@@ -5544,9 +5623,6 @@ describe('modules/platform/github/index', () => {
     });
 
     it('performs rebase', async () => {
-      git.pushCommitToRenovateRef.mockResolvedValueOnce();
-      git.listCommitTree.mockResolvedValueOnce([]);
-
       const scope = httpMock.scope(githubApiHost);
 
       initRepoMock(scope, 'some/repo');
@@ -5556,8 +5632,10 @@ describe('modules/platform/github/index', () => {
         .post('/repos/some/repo/git/trees')
         .reply(200, { sha: '111' })
         .post('/repos/some/repo/git/commits')
-        .reply(200, { sha: '222' })
-        .head('/repos/some/repo/git/commits/222')
+        .reply(200, { sha: '0123456789abcdef0123456789abcdef01234567' })
+        .head(
+          '/repos/some/repo/git/commits/0123456789abcdef0123456789abcdef01234567',
+        )
         .reply(200)
         .patch('/repos/some/repo/git/refs/heads/foo/bar')
         .reply(200);
@@ -5573,9 +5651,6 @@ describe('modules/platform/github/index', () => {
     });
 
     it('continues if rebase fails due to 422', async () => {
-      git.pushCommitToRenovateRef.mockResolvedValueOnce();
-      git.listCommitTree.mockResolvedValueOnce([]);
-
       const scope = httpMock.scope(githubApiHost);
 
       initRepoMock(scope, 'some/repo');
@@ -5585,8 +5660,10 @@ describe('modules/platform/github/index', () => {
         .post('/repos/some/repo/git/trees')
         .reply(200, { sha: '111' })
         .post('/repos/some/repo/git/commits')
-        .reply(200, { sha: '222' })
-        .head('/repos/some/repo/git/commits/222')
+        .reply(200, { sha: '0123456789abcdef0123456789abcdef01234567' })
+        .head(
+          '/repos/some/repo/git/commits/0123456789abcdef0123456789abcdef01234567',
+        )
         .reply(200)
         .patch('/repos/some/repo/git/refs/heads/foo/bar')
         .reply(422)
@@ -5604,9 +5681,6 @@ describe('modules/platform/github/index', () => {
     });
 
     it('aborts if rebase fails due to non-422', async () => {
-      git.pushCommitToRenovateRef.mockResolvedValueOnce();
-      git.listCommitTree.mockResolvedValueOnce([]);
-
       const scope = httpMock.scope(githubApiHost);
 
       initRepoMock(scope, 'some/repo');
@@ -5616,8 +5690,10 @@ describe('modules/platform/github/index', () => {
         .post('/repos/some/repo/git/trees')
         .reply(200, { sha: '111' })
         .post('/repos/some/repo/git/commits')
-        .reply(200, { sha: '222' })
-        .head('/repos/some/repo/git/commits/222')
+        .reply(200, { sha: '0123456789abcdef0123456789abcdef01234567' })
+        .head(
+          '/repos/some/repo/git/commits/0123456789abcdef0123456789abcdef01234567',
+        )
         .reply(200)
         .patch('/repos/some/repo/git/refs/heads/foo/bar')
         .reply(404);
@@ -5633,9 +5709,6 @@ describe('modules/platform/github/index', () => {
     });
 
     it("aborts if commit SHA doesn't exist", async () => {
-      git.pushCommitToRenovateRef.mockResolvedValueOnce();
-      git.listCommitTree.mockResolvedValueOnce([]);
-
       const scope = httpMock.scope(githubApiHost);
 
       initRepoMock(scope, 'some/repo');
@@ -5645,8 +5718,10 @@ describe('modules/platform/github/index', () => {
         .post('/repos/some/repo/git/trees')
         .reply(200, { sha: '111' })
         .post('/repos/some/repo/git/commits')
-        .reply(200, { sha: '222' })
-        .head('/repos/some/repo/git/commits/222')
+        .reply(200, { sha: '0123456789abcdef0123456789abcdef01234567' })
+        .head(
+          '/repos/some/repo/git/commits/0123456789abcdef0123456789abcdef01234567',
+        )
         .reply(404);
 
       const res = await github.commitFiles({

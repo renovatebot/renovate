@@ -5,27 +5,27 @@ ARG BASE_IMAGE_TYPE=slim
 # --------------------------------------
 # slim image
 # --------------------------------------
-FROM ghcr.io/renovatebot/base-image:13.53.0@sha256:5bd190a8fb7ba8998c5f7fa4454d5ba5197cfafe92580b2a86fa4b6c2704180e AS slim-base
+FROM ghcr.io/renovatebot/base-image:13.59.4@sha256:06eafdd9169015d0dfcac79553987307be0a1c3cf928f615d8992e592306dd63 AS slim-base
 
 # --------------------------------------
 # full image
 # --------------------------------------
-FROM ghcr.io/renovatebot/base-image:13.53.0-full@sha256:d45717780df2c89c6a030ce227f5940af21c5a1c6aeea3cf0ff5a270704a0a66 AS full-base
+FROM ghcr.io/renovatebot/base-image:13.59.4-full@sha256:da2bda65c8da2e9ffa0fe919f9b6cf14e0b3e3621bb125aecddc7139410aaaeb AS full-base
 
 ENV RENOVATE_BINARY_SOURCE=global
 
 # --------------------------------------
 # build image
 # --------------------------------------
-FROM --platform=$BUILDPLATFORM ghcr.io/renovatebot/base-image:13.53.0@sha256:5bd190a8fb7ba8998c5f7fa4454d5ba5197cfafe92580b2a86fa4b6c2704180e AS build
+FROM --platform=$BUILDPLATFORM ghcr.io/renovatebot/base-image:13.59.4@sha256:06eafdd9169015d0dfcac79553987307be0a1c3cf928f615d8992e592306dd63 AS build
 
 # We want a specific node version here
 # renovate: datasource=github-releases packageName=containerbase/node-prebuild versioning=node
-RUN install-tool node 24.15.0
+RUN install-tool node 24.16.0
 
 # corepack is too buggy 😞
 # renovate: datasource=npm
-RUN install-tool pnpm 10.33.4
+RUN install-tool pnpm 11.5.2
 
 WORKDIR /usr/local/renovate
 
@@ -52,8 +52,8 @@ RUN set -ex; \
   true
 
 # prepare pnpm env
-ENV CI=1 npm_config_modules_cache_max_age=0 \
-  npm_config_loglevel=info
+ENV CI=1 pnpm_config_modules_cache_max_age=0 \
+  pnpm_config_loglevel=info
 
 # replace `amd64` with `x64` for `node`
 ENV ARCH=${TARGETARCH/amd64/x64}
@@ -61,7 +61,9 @@ ENV ARCH=${TARGETARCH/amd64/x64}
 # set `npm_config_platform_arch` for `install-artifact-from-github`
 ENV npm_config_arch=${ARCH} npm_config_platform_arch=${ARCH}
 
-COPY --link .npmrc ./
+# TODO: remove this once https://github.com/pnpm/pnpm/pull/12400 lands
+ENV pnpm_config_platform_arch=${ARCH}
+
 COPY --link patches ./patches
 COPY --link pnpm-lock.yaml ./
 COPY --link pnpm-workspace.yaml ./

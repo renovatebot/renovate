@@ -8,32 +8,6 @@ description: Configuration Options usable in renovate.json or package.json
 This document describes all the configuration options you may use in a Renovate configuration file.
 Any config you define applies to the whole repository (e.g. if you have a monorepo).
 
-You can store your Renovate configuration file in one of these locations:
-
-<!-- config-filenames-begin -->
-
-Or in a custom file present within the [`configFileNames`](./self-hosted-configuration.md#configfilenames).
-The bot first checks all the files in the `configFileNames` array before checking from the above file list.
-
-!!! warning
-  Storing the Renovate configuration in a `package.json` file is deprecated and support may be removed in the future.
-
-!!! note
-  Renovate supports `JSONC` for `.json` files and any config files without file extension (e.g. `.renovaterc`).
-  We also recommend you prefer using `JSONC` within a `.json` file to using a `.json5` file if you want to add comments.
-
-When Renovate runs on a repository, it tries to find the configuration files in the order listed above.
-Renovate stops the search after it finds the first match.
-
-Renovate always uses the config from the repository's default branch, even if that configuration specifies `baseBranchPatterns`.
-Renovate does not read/override the config from within each base branch if present.
-
-Also, be sure to check out Renovate's [shareable config presets](./config-presets.md) to save yourself from reinventing any wheels.
-Shareable config presets only work with the JSON format.
-
-If you have any questions about the config options, or want to get help/feedback about a config, go to the [discussions tab in the Renovate repository](https://github.com/renovatebot/renovate/discussions) and start a new "config help" discussion.
-We will do our best to answer your question(s).
-
 A `subtype` in the configuration table specifies what type you're allowed to use within the main element.
 
 If a config option has a `parent` defined, it means it's only allowed to configure it within an object with the parent name, such as `packageRules` or `hostRules`.
@@ -45,6 +19,35 @@ When an array or object configuration option is `mergeable`, it means that value
 
 !!! note
   Config options with `type=string` are always non-mergeable, so `mergeable=false`.
+
+## Locations for configuration filenames
+
+You can store your Renovate configuration file in one of these locations:
+
+<!-- config-filenames-begin -->
+
+Also, be sure to check out Renovate's [shareable config presets](./config-presets.md) to save yourself from reinventing any wheels.
+Shareable config presets work with JSON and JSON5 file formats.
+
+If you have any questions about the config options, or want to get help/feedback about a config, go to the [discussions tab in the Renovate repository](https://github.com/renovatebot/renovate/discussions) and start a [new "Request Help" discussion](https://github.com/renovatebot/renovate/discussions/new?category=request-help).
+We will do our best to answer your question(s).
+
+Or in a custom file present within the [`configFileNames`](./self-hosted-configuration.md#configfilenames).
+
+When Renovate runs on a repository, it tries to find the configuration files in the order listed above.
+Renovate first checks all the files in the `configFileNames` array before checking from the above file list.
+Renovate stops the search after it finds the first match.
+
+!!! warning
+  Storing the Renovate configuration in a `package.json` file is deprecated and support may be removed in the future.
+
+!!! note
+  Renovate supports `JSONC` for `.json` files and any config files without file extension (e.g. `.renovaterc`).
+  We also recommend you prefer using a `.jsonc` file if you want to add comments to your configuration, instead of a `.json5` file.
+  Using an explicit `.jsonc` file is preferred over using a `.json` file with comments, as it can cause issues with editors and syntax highlighting.
+
+Renovate always uses the config from the repository's default branch, even if that configuration specifies `baseBranchPatterns`.
+Renovate does not read/override the config from within each base branch if present.
 
 ---
 
@@ -349,9 +352,29 @@ By default, Renovate will detect and process only the repository's default branc
 For most projects, this is the expected approach.
 Renovate also allows users to explicitly configure `baseBranchPatterns`, e.g. for use cases such as:
 
-- You wish Renovate to process only a non-default branch, e.g. `dev`: `"baseBranchPatterns": ["dev"]`
-- You have multiple release streams you need Renovate to keep up to date, e.g. in branches `main` and `next`: `"baseBranchPatterns": ["main", "next"]`
-- You want to update your main branch and consistently named release branches, e.g. `main` and `release/<version>`: `"baseBranchPatterns": ["main", "/^release\\/.*/"]`
+- You wish Renovate to process only a non-default branch, e.g. `dev`:
+
+  ```json
+  {
+    "baseBranchPatterns": ["dev"]
+  }
+  ```
+
+- You have multiple release streams you need Renovate to keep up to date, e.g. in branches `main` and `next`:
+
+```json
+{
+  "baseBranchPatterns": ["main", "next"]
+}
+```
+
+- You want to update your main branch and consistently named release branches, e.g. `main` and `release/<version>`:
+
+```json
+{
+  "baseBranchPatterns": ["main", "/^release\\/.*/"]
+}
+```
 
 It's possible to add this setting into the `renovate.json` file as part of the "Configure Renovate" onboarding PR.
 If so then Renovate will reflect this setting in its description and use package file contents from the custom base branch(es) instead of default.
@@ -602,7 +625,7 @@ Supported values are:
 This field supports templates for conditional logic.
 For example:
 
-```json
+```json {configType=none}
 {
   "bumpType": "{{#if isPatch}}patch{{else}}minor{{/if}}"
 }
@@ -643,7 +666,7 @@ Templates can also be used for dynamic patterns. See [Templates](./templates.md)
 
 For example:
 
-```json
+```json {configType=none}
 {
   "filePatterns": ["**/version.txt", "{{packageFileDir}}/Chart.yaml"]
 }
@@ -663,7 +686,7 @@ The `name` field is an optional identifier for the bump version rule. It is used
 
 For example:
 
-```json
+```json {configType=none}
 {
   "name": "Update release version"
 }
@@ -865,16 +888,16 @@ For now this datasource constraint feature only supports `python`, other compati
 }
 ```
 
-If you need to _override_ constraints that Renovate detects from the repository, wrap it in the `force` object like so:
+If you need to _override_ constraints that Renovate detects from the repository, wrap it in the [global self-hosted configuration's `force` object](./self-hosted-configuration.md#force) like so:
 
-```json
-{
-  "force": {
-    "constraints": {
-      "node": "< 15.0.0"
-    }
-  }
-}
+```js
+module.exports = {
+  force: {
+    constraints: {
+      node: '< 15.0.0',
+    },
+  },
+};
 ```
 
 The following `constraints` are available to specify which package managers/language constraints/tools Renovate will install for your repository:
@@ -1119,7 +1142,8 @@ Example:
       "managerFilePatterns": ["/file.json/"],
       "matchStrings": [
         "packages.{ \"depName\": package, \"currentValue\": version }"
-      ]
+      ],
+      "datasourceTemplate": "github-tags"
     }
   ]
 }
@@ -1165,7 +1189,8 @@ Only the `json`, `toml` and `yaml` formats are supported.
       "managerFilePatterns": ["/.renovaterc/"],
       "matchStrings": [
         "packages.{ 'depName': package, 'currentValue': version }"
-      ]
+      ],
+      "datasourceTemplate": "github-tags"
     }
   ]
 }
@@ -1180,7 +1205,8 @@ Only the `json`, `toml` and `yaml` formats are supported.
       "managerFilePatterns": ["/file.yml/"],
       "matchStrings": [
         "packages.{ 'depName': package, 'currentValue': version }"
-      ]
+      ],
+      "datasourceTemplate": "github-tags"
     }
   ]
 }
@@ -1195,7 +1221,8 @@ Only the `json`, `toml` and `yaml` formats are supported.
       "managerFilePatterns": ["/file.toml/"],
       "matchStrings": [
         "packages.{ 'depName': package, 'currentValue': version }"
-      ]
+      ],
+      "datasourceTemplate": "github-tags"
     }
   ]
 }
@@ -1210,7 +1237,7 @@ Each `matchStrings` must be one of the following:
 
 Example:
 
-```json title="matchStrings with a valid regular expression"
+```json {title="matchStrings with a valid regular expression" configType=none}
 {
   "matchStrings": [
     "ENV .*?_VERSION=(?<currentValue>.*) # (?<datasource>.*?)/(?<depName>.*?)\\s"
@@ -1218,7 +1245,7 @@ Example:
 }
 ```
 
-```json title="matchStrings with a valid JSONata query"
+```json {title="matchStrings with a valid JSONata query" configType=none}
 {
   "matchStrings": [
     "packages.{ \"depName\": package, \"currentValue\": version }"
@@ -1314,7 +1341,7 @@ But the second custom manager will upgrade both definitions as its first `matchS
 }
 ```
 
-```json title="example.json"
+```json {title="example.json" configType=none}
 {
   "backup": {
     "test": {
@@ -1810,10 +1837,12 @@ The following re-enables fetching of changelogs when creating pull-requests for 
 ```json
 {
   "fetchChangeLogs": "off",
-  "packageRules": {
-    "matchSourceUrls": ["https://github.com/lodash/lodash"],
-    "fetchChangeLogs": "pr"
-  }
+  "packageRules": [
+    {
+      "matchSourceUrls": ["https://github.com/lodash/lodash"],
+      "fetchChangeLogs": "pr"
+    }
+  ]
 }
 ```
 
@@ -1822,10 +1851,12 @@ which can be time-consuming due to the repository's large number of tags:
 
 ```json
 {
-  "packageRules": {
-    "matchSourceUrls": ["https://github.com/aws/aws-sdk-go-v2{/**,}"],
-    "fetchChangeLogs": "off"
-  }
+  "packageRules": [
+    {
+      "matchSourceUrls": ["https://github.com/aws/aws-sdk-go-v2{/**,}"],
+      "fetchChangeLogs": "off"
+    }
+  ]
 }
 ```
 
@@ -1998,6 +2029,10 @@ For example, to group all non-major devDependencies updates together into a sing
   Replacement updates will never be grouped.
   <br>
   Lock file maintenance will never be grouped with other dependency updates.
+
+## `groupSingleUpdates`
+
+For example, you can set it to `false` if you prefer individual dependency names in PR titles when only one update is in the group.
 
 ## `groupSlug`
 
@@ -3203,6 +3238,7 @@ Use this field to restrict rules to a particular branch. e.g.
 
 ```json
 {
+  "baseBranchPatterns": ["main"],
   "packageRules": [
     {
       "matchBaseBranches": ["main"],
@@ -3217,6 +3253,7 @@ This field also supports Regular Expressions if they begin and end with `/`. e.g
 
 ```json
 {
+  "baseBranchPatterns": ["main", "/^release\\/.*/"],
   "packageRules": [
     {
       "matchBaseBranches": ["/^release/.*/"],
@@ -3970,6 +4007,11 @@ If enabled Renovate will pin Docker images or GitHub Actions by means of their S
   [GitHub docs, require status checks before merging](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/defining-the-mergeability-of-pull-requests/about-protected-branches#require-status-checks-before-merging)
   If you're using another platform, search their documentation for a similar feature.
 
+<!-- prettier-ignore -->
+!!! note
+  If you mark `renovate/artifacts` as a required status check in your branch protection rules, you must also set [`statusCheckWhen.artifactError`](#statuscheckwhen) to `"always"`.
+  The default `"failed"` only sets the check when artifact updates fail, so a required check rule would block every PR that has no artifact errors (the check would never appear). Setting it to `"always"` makes Renovate report green when there are no errors and red when there are, which is what branch protection requires.
+
 If you have enabled `automerge` and set `automergeType=pr` in the Renovate config, then leaving `platformAutomerge` as `true` speeds up merging via the platform's native automerge functionality.
 
 On Bitbucket Server, GitHub and GitLab, Renovate re-enables the PR for platform-native automerge whenever it's rebased.
@@ -4217,7 +4259,7 @@ This can include Markdown or any other syntax that the platform supports.
     "Package": "📦 Package",
     "Age": "[Age](https://docs.renovatebot.com/merge-confidence)"
   },
-  "prBodyColumn": ["Package", "Age"]
+  "prBodyColumns": ["Package", "Age"]
 }
 ```
 
@@ -4772,6 +4814,35 @@ This option is mergeable, which means you only have to specify the status checks
   "statusCheckNames": {
     "minimumReleaseAge": "custom/stability-days",
     "mergeConfidence": "custom/merge-confidence-level"
+  }
+}
+```
+
+## `statusCheckWhen`
+
+Control when each Renovate status check is set on branches.
+The keys match those available in [`statusCheckNames`](#statuschecknames).
+This option is mergeable, so you only need to specify the checks you want to change.
+
+Allowed values per key:
+
+- `always`: Renovate always sets the status check on every branch commit — green on success, red on failure.
+- `never`: Renovate never sets this status check. Use this to skip a check entirely.
+- `failed`: Renovate only sets the status check when there is a failure. Successes are silent (no green check).
+
+Default values:
+
+<!-- status-check-when-defaults-begin -->
+
+For example, to make `renovate/artifacts` a required check, set `artifactError` to `"always"` so it always reports green/red, allowing you to mark it as required in your branch protection rules.
+To skip a check entirely, set any key to `"never"` to suppress that status check.
+To only report failures for stability, set `minimumReleaseAge` to `"failed"` if you only care about the red/pending status.
+
+```json title="Example: always set artifacts check, skip merge confidence"
+{
+  "statusCheckWhen": {
+    "artifactError": "always",
+    "mergeConfidence": "never"
   }
 }
 ```

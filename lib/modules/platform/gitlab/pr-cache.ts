@@ -8,7 +8,7 @@ import type {
 } from '../../../util/http/gitlab.ts';
 import { regEx } from '../../../util/regex.ts';
 import { getQueryString } from '../../../util/url.ts';
-import { GitLabMergeRequestsSchema } from './schema.ts';
+import { GitLabMergeRequests } from './schema.ts';
 import type { GitlabPr, GitlabPrCacheData } from './types.ts';
 import { prInfo } from './utils.ts';
 
@@ -141,7 +141,7 @@ export class GitlabPrCache {
     const { body: items } = await http.getJson(
       `/projects/${this.repo}/merge_requests?${query}`,
       opts,
-      GitLabMergeRequestsSchema,
+      GitLabMergeRequests,
     );
 
     if (items.length) {

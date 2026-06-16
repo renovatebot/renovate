@@ -9,7 +9,7 @@ import type { NewValueConfig, VersioningApi } from '../types.ts';
 export const id = 'cargo';
 export const displayName = 'Cargo';
 export const urls = [
-  'https://doc.rust-lang.org/cargo/reference/specifying-dependencies.html',
+  '[Cargo - Specifying Dependencies](https://doc.rust-lang.org/cargo/reference/specifying-dependencies.html)',
 ];
 export const supportsRanges = true;
 export const supportedRangeStrategies: RangeStrategy[] = ['bump', 'replace'];

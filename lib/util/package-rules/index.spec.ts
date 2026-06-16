@@ -998,27 +998,21 @@ describe('util/package-rules/index', () => {
     };
     const res1 = await applyPackageRules({
       ...config,
-      ...{
-        packageName: 'test',
-        currentValue: '^1.0.0',
-        currentVersion: '1.0.3',
-      },
+      packageName: 'test',
+      currentValue: '^1.0.0',
+      currentVersion: '1.0.3',
     });
     expect(res1.x).toBeDefined();
     const res2 = await applyPackageRules({
       ...config,
-      ...{
-        packageName: 'test',
-        currentValue: '^1.0.0',
-      },
+      packageName: 'test',
+      currentValue: '^1.0.0',
     });
     expect(res2.x).toBeUndefined();
     const res3 = await applyPackageRules({
       ...config,
-      ...{
-        packageName: 'test',
-        lockedVersion: '^1.0.0',
-      },
+      packageName: 'test',
+      lockedVersion: '^1.0.0',
     });
     expect(res3.x).toBeUndefined();
   });
@@ -1037,11 +1031,9 @@ describe('util/package-rules/index', () => {
     };
     const res1 = await applyPackageRules({
       ...config,
-      ...{
-        packageName: 'test',
-        currentValue: '2.4.6',
-        currentVersion: '2.4.6',
-      },
+      packageName: 'test',
+      currentValue: '2.4.6',
+      currentVersion: '2.4.6',
     });
     expect(res1.x).toBeDefined();
   });
@@ -1060,18 +1052,14 @@ describe('util/package-rules/index', () => {
     };
     const res1 = await applyPackageRules({
       ...config,
-      ...{
-        packageName: 'test',
-        currentValue: '^2.0.0',
-      },
+      packageName: 'test',
+      currentValue: '^2.0.0',
     });
     expect(res1.x).toBeDefined();
     const res2 = await applyPackageRules({
       ...config,
-      ...{
-        packageName: 'test',
-        currentValue: '~2.0.0',
-      },
+      packageName: 'test',
+      currentValue: '~2.0.0',
     });
     expect(res2.x).toBeUndefined();
   });
@@ -1089,11 +1077,9 @@ describe('util/package-rules/index', () => {
     };
     const res1 = await applyPackageRules({
       ...config,
-      ...{
-        packageName: 'test',
-        currentValue: '4.6.0',
-        currentVersion: '4.6.0',
-      },
+      packageName: 'test',
+      currentValue: '4.6.0',
+      currentVersion: '4.6.0',
     });
     expect(res1.x).toBeDefined();
   });
@@ -1111,19 +1097,15 @@ describe('util/package-rules/index', () => {
     };
     const res1 = await applyPackageRules({
       ...config,
-      ...{
-        packageName: 'test',
-        currentValue: '4.6.0',
-        currentVersion: '4.6.0',
-      },
+      packageName: 'test',
+      currentValue: '4.6.0',
+      currentVersion: '4.6.0',
     });
     const res2 = await applyPackageRules({
       ...config,
-      ...{
-        packageName: 'test',
-        currentValue: '5.6.0',
-        currentVersion: '5.6.0',
-      },
+      packageName: 'test',
+      currentValue: '5.6.0',
+      currentVersion: '5.6.0',
     });
     expect(res1.x).toBeDefined();
     expect(res2.x).toBeUndefined();
@@ -1142,19 +1124,15 @@ describe('util/package-rules/index', () => {
     };
     const res1 = await applyPackageRules({
       ...config,
-      ...{
-        packageName: 'test',
-        currentValue: '4.6.0',
-        currentVersion: '4.6.0',
-      },
+      packageName: 'test',
+      currentValue: '4.6.0',
+      currentVersion: '4.6.0',
     });
     const res2 = await applyPackageRules({
       ...config,
-      ...{
-        packageName: 'test',
-        currentValue: '5.6.0',
-        currentVersion: '5.6.0',
-      },
+      packageName: 'test',
+      currentValue: '5.6.0',
+      currentVersion: '5.6.0',
     });
     expect(res1.x).toBeUndefined();
     expect(res2.x).toBeDefined();

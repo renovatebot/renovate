@@ -8,7 +8,7 @@ description: How to use OpenTelemetry with Renovate
 !!! warning "This feature is flagged as experimental"
   Experimental features might be changed at any time.
   <br /> <br />
-  Renovate's OpenTelemetry support is stable enough to use in production, but there may be changes that rename attributes or fix bugs in a breaking, even in non-major version updates.
+  Renovate's OpenTelemetry support is stable enough to use in production, but there may be changes that rename attributes or fix bugs in a way that could be breaking to users, even in non-major version updates.
 
 Renovate supports the [OpenTelemetry](https://opentelemetry.io/) monitoring and observability standard.
 

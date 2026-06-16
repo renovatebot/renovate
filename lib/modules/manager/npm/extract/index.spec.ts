@@ -129,7 +129,17 @@ describe('modules/manager/npm/extract/index', () => {
       expect(res).toMatchSnapshot({
         extractedConstraints: {},
         deps: [
-          ...[{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}],
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
           {
             depName: undefined,
             depType: 'resolutions',
@@ -522,7 +532,10 @@ describe('modules/manager/npm/extract/index', () => {
       );
       expect(res).toMatchSnapshot({
         deps: [
-          ...[{}, {}, {}, {}],
+          {},
+          {},
+          {},
+          {},
           {
             depType: 'volta',
             currentValue: '6.11.2',

@@ -28,7 +28,8 @@ beforeEach(() => {
 
 describe('workers/repository/updates/generate', () => {
   describe('generateBranchConfig()', () => {
-    it('does not group single upgrade', () => {
+    it('groups single upgrade by default', () => {
+      const { groupSingleUpdates } = getConfig();
       const branch = [
         {
           manager: 'some-manager',
@@ -37,6 +38,65 @@ describe('workers/repository/updates/generate', () => {
           groupName: 'some-group',
           prTitle: 'some-title',
           releaseTimestamp: '2017-02-07T20:01:41+00:00' as Timestamp,
+          groupSingleUpdates,
+          group: {
+            foo: 2,
+          },
+        },
+      ] satisfies BranchUpgradeConfig[];
+      const res = generateBranchConfig(branch);
+      expect(res.groupName).toBe('some-group');
+      expect(res.isGroup).toBeTrue();
+      expect(res.recreateClosed).toBeFalse();
+    });
+
+    it('groups single upgrade across multiple files', () => {
+      const groupSingleUpdates = true;
+      const branch = [
+        {
+          manager: 'some-manager',
+          branchName: 'some-branch',
+          depName: 'some-dep',
+          newVersion: '2.0.0',
+          groupName: 'some-group',
+          prTitle: 'some-title',
+          releaseTimestamp: '2017-02-07T20:01:41+00:00' as Timestamp,
+          groupSingleUpdates,
+          group: {
+            foo: 2,
+          },
+          packageFile: 'package.json',
+        },
+        {
+          manager: 'some-manager',
+          branchName: 'some-branch',
+          depName: 'some-dep',
+          newVersion: '2.0.0',
+          groupName: 'some-group',
+          prTitle: 'some-title',
+          releaseTimestamp: '2017-02-07T20:01:41+00:00' as Timestamp,
+          groupSingleUpdates,
+          group: {
+            foo: 2,
+          },
+          packageFile: 'packages/core/package.json',
+        },
+      ] satisfies BranchUpgradeConfig[];
+      const res = generateBranchConfig(branch);
+      expect(res.groupName).toBe('some-group');
+      expect(res.isGroup).toBeTrue();
+    });
+
+    it('does not group single upgrade when groupSingleUpdates is false', () => {
+      const branch = [
+        {
+          manager: 'some-manager',
+          branchName: 'some-branch',
+          depName: 'some-dep',
+          groupName: 'some-group',
+          prTitle: 'some-title',
+          releaseTimestamp: '2017-02-07T20:01:41+00:00' as Timestamp,
+          groupSingleUpdates: false,
           group: {
             foo: 2,
           },
@@ -44,9 +104,25 @@ describe('workers/repository/updates/generate', () => {
       ] satisfies BranchUpgradeConfig[];
       const res = generateBranchConfig(branch);
       expect(res.groupName).toBeUndefined();
-      expect(res.releaseTimestamp).toBeDefined();
-      expect(res.recreateClosed).toBe(false);
-      expect(res.minimumGroupSize).toBe(1);
+      expect(res.recreateClosed).toBeFalse();
+    });
+
+    it('does not group single upgrade without groupName even with groupSingleUpdates', () => {
+      const branch = [
+        {
+          manager: 'some-manager',
+          branchName: 'some-branch',
+          depName: 'some-dep',
+          prTitle: 'some-title',
+          releaseTimestamp: '2017-02-07T20:01:41+00:00' as Timestamp,
+          groupSingleUpdates: true,
+          group: {
+            foo: 2,
+          },
+        },
+      ] satisfies BranchUpgradeConfig[];
+      const res = generateBranchConfig(branch);
+      expect(res.groupName).toBeUndefined();
     });
 
     it('handles lockFileMaintenance', () => {
@@ -169,7 +245,7 @@ describe('workers/repository/updates/generate', () => {
       ] satisfies BranchUpgradeConfig[];
       const res = generateBranchConfig(branch);
       expect(res.groupName).toBeUndefined();
-      expect(res.recreateClosed).toBe(false);
+      expect(res.recreateClosed).toBeFalse();
     });
 
     it('groups multiple upgrades same version', () => {
