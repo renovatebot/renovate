@@ -5,19 +5,19 @@ ARG BASE_IMAGE_TYPE=slim
 # --------------------------------------
 # slim image
 # --------------------------------------
-FROM ghcr.io/renovatebot/base-image:13.59.1@sha256:240d6ff8c56a9e00d999599c5af865b2d7a3ce0edd3ff43c321e2f37f4365158 AS slim-base
+FROM ghcr.io/renovatebot/base-image:13.59.3@sha256:ca88338748b99829dafe94053ac10afd0e5c97f89a3f8618a409760c825fc77d AS slim-base
 
 # --------------------------------------
 # full image
 # --------------------------------------
-FROM ghcr.io/renovatebot/base-image:13.59.1-full@sha256:fede8f7889d853b53426ee07bf218767b48148ff54c704a7ad9d9713bb470369 AS full-base
+FROM ghcr.io/renovatebot/base-image:13.59.3-full@sha256:d3746d07c1bec7c072c9e43ffb66f42b5443771673162b636163bcb7bfc995fa AS full-base
 
 ENV RENOVATE_BINARY_SOURCE=global
 
 # --------------------------------------
 # build image
 # --------------------------------------
-FROM --platform=$BUILDPLATFORM ghcr.io/renovatebot/base-image:13.59.1@sha256:240d6ff8c56a9e00d999599c5af865b2d7a3ce0edd3ff43c321e2f37f4365158 AS build
+FROM --platform=$BUILDPLATFORM ghcr.io/renovatebot/base-image:13.59.3@sha256:ca88338748b99829dafe94053ac10afd0e5c97f89a3f8618a409760c825fc77d AS build
 
 # We want a specific node version here
 # renovate: datasource=github-releases packageName=containerbase/node-prebuild versioning=node
@@ -60,6 +60,9 @@ ENV ARCH=${TARGETARCH/amd64/x64}
 # set `npm_config_arch` for `prebuild-install`
 # set `npm_config_platform_arch` for `install-artifact-from-github`
 ENV npm_config_arch=${ARCH} npm_config_platform_arch=${ARCH}
+
+# TODO: remove this once https://github.com/pnpm/pnpm/pull/12400 lands
+ENV pnpm_config_platform_arch=${ARCH}
 
 COPY --link patches ./patches
 COPY --link pnpm-lock.yaml ./

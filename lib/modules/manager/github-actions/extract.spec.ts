@@ -1685,6 +1685,67 @@ describe('modules/manager/github-actions/extract', () => {
         },
       ],
     },
+    {
+      step: {
+        uses: 'dtolnay/rust-toolchain@master',
+        with: { toolchain: '1.89.0' },
+      },
+      expected: [
+        {
+          currentValue: '1.89.0',
+          datasource: 'rust-version',
+          depName: 'rust',
+          depType: 'uses-with',
+          packageName: 'rust',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'dtolnay/rust-toolchain@master',
+        with: { toolchain: 'nightly-2025-01-01' },
+      },
+      expected: [
+        {
+          currentValue: 'nightly-2025-01-01',
+          datasource: 'rust-version',
+          depName: 'rust',
+          depType: 'uses-with',
+          packageName: 'rust',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'dtolnay/rust-toolchain@stable',
+        with: { toolchain: 'stable' },
+      },
+      expected: [
+        {
+          currentValue: 'stable',
+          datasource: 'rust-version',
+          depName: 'rust',
+          depType: 'uses-with',
+          packageName: 'rust',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'dtolnay/rust-toolchain@master',
+        with: {},
+      },
+      expected: [
+        {
+          datasource: 'rust-version',
+          depName: 'rust',
+          depType: 'uses-with',
+          packageName: 'rust',
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+        },
+      ],
+    },
   ])('extract from $step.uses', ({ step, expected }) => {
     const yamlContent = yaml.dump({ jobs: { build: { steps: [step] } } });
 
