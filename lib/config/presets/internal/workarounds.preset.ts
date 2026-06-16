@@ -121,7 +121,7 @@ export const presets: Record<string, Preset> = {
     ],
   },
   grafanaDockerImageVersioning: {
-    description: 'Use custom regex versioning for Grafana images',
+    description: 'Support security releases on Grafana (product) images',
     packageRules: [
       {
         matchDatasources: ['docker'],
