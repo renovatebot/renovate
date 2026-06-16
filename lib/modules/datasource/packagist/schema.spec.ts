@@ -168,6 +168,41 @@ describe('modules/datasource/packagist/schema', () => {
         source: null,
         require: null,
       });
+
+      expect(
+        ComposerRelease.parse({ version: '1.2.3', abandoned: true }),
+      ).toEqual({
+        version: '1.2.3',
+        abandoned: true,
+        homepage: null,
+        source: null,
+        time: null,
+        require: null,
+      });
+
+      expect(
+        ComposerRelease.parse({
+          version: '1.2.3',
+          abandoned: 'foo/replacement',
+        }),
+      ).toEqual({
+        version: '1.2.3',
+        abandoned: 'foo/replacement',
+        homepage: null,
+        source: null,
+        time: null,
+        require: null,
+      });
+
+      expect(
+        ComposerRelease.parse({ version: '1.2.3', abandoned: 42 }),
+      ).toEqual({
+        version: '1.2.3',
+        homepage: null,
+        source: null,
+        time: null,
+        require: null,
+      });
     });
   });
 
@@ -385,6 +420,44 @@ describe('modules/datasource/packagist/schema', () => {
             constraints: { php: ['^7.0'] },
           },
         ],
+      } satisfies ReleaseResult);
+    });
+
+    it('marks abandoned packages as deprecated', () => {
+      expect(
+        parsePackagesResponses('foo/bar', [
+          {
+            packages: {
+              'foo/bar': [
+                { version: 'v2.2.2', abandoned: true },
+                { version: 'v1.1.1', abandoned: true },
+              ],
+            },
+          },
+        ] satisfies { packages: Record<string, ComposerRelease[]> }[]),
+      ).toEqual({
+        deprecationMessage:
+          'This package is abandoned and no longer maintained.',
+        releases: [
+          { version: '2.2.2', gitRef: 'v2.2.2', isDeprecated: true },
+          { version: '1.1.1', gitRef: 'v1.1.1', isDeprecated: true },
+        ],
+      } satisfies ReleaseResult);
+    });
+
+    it('suggests a replacement for abandoned packages', () => {
+      expect(
+        parsePackagesResponses('foo/bar', [
+          {
+            packages: {
+              'foo/bar': [{ version: 'v1.1.1', abandoned: 'foo/replacement' }],
+            },
+          },
+        ] satisfies { packages: Record<string, ComposerRelease[]> }[]),
+      ).toEqual({
+        deprecationMessage:
+          'This package is abandoned and no longer maintained. The author suggests using the `foo/replacement` package instead.',
+        releases: [{ version: '1.1.1', gitRef: 'v1.1.1', isDeprecated: true }],
       } satisfies ReleaseResult);
     });
   });
