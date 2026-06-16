@@ -13,7 +13,7 @@ function Pep508Dep(depType: string): ToxPackageDependency {
   return z.string().transform((x, ctx) => {
     if (x.trimStart().startsWith('-')) {
       ctx.addIssue({
-        code: z.ZodIssueCode.custom,
+        code: 'custom',
         message: `skipping tox flag entry: ${x}`,
         fatal: true,
       });
@@ -23,7 +23,7 @@ function Pep508Dep(depType: string): ToxPackageDependency {
     const res = pep508ToPackageDependency(depType, x);
     if (!res) {
       ctx.addIssue({
-        code: z.ZodIssueCode.custom,
+        code: 'custom',
         message: 'should be a valid PEP508 dependency',
         fatal: true,
       });
