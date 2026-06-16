@@ -1,7 +1,11 @@
 import { isUndefined } from '@sindresorhus/is';
 import { z } from 'zod/v4';
 import { logger } from '../../../logger/index.ts';
-import { LooseArray, LooseRecord } from '../../../util/schema-utils/index.ts';
+import {
+  LooseArray,
+  LooseRecord,
+  Nullish,
+} from '../../../util/schema-utils/index.ts';
 import { MaybeTimestamp } from '../../../util/timestamp.ts';
 import type { Release, ReleaseResult } from '../types.ts';
 
@@ -48,7 +52,7 @@ export const ComposerRelease = z.object({
   homepage: z.string().nullable().catch(null),
   source: z.object({ url: z.string() }).nullable().catch(null),
   time: MaybeTimestamp,
-  ['published-time']: MaybeTimestamp.optional(),
+  ['published-time']: Nullish(MaybeTimestamp),
   require: z.object({ php: z.string() }).nullable().catch(null),
   abandoned: z.union([z.string(), z.boolean()]).optional().catch(undefined),
 });
