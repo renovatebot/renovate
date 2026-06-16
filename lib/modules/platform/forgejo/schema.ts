@@ -148,14 +148,16 @@ export const NullablePR = PR.nullable();
 
 export const PRList = LooseArray(NullablePR);
 
-export const Issue = z.object({
-  number: z.number(),
-  state: IssueState.optional(),
-  title: z.string(),
-  body: z.string(),
-  assignees: z.array(User).optional(),
-  labels: z.array(Label).optional(),
-});
+export const Issue = DeepNullish(
+  z.object({
+    number: z.number(),
+    state: IssueState.optional(),
+    title: z.string(),
+    body: z.string(),
+    assignees: z.array(User).optional(),
+    labels: z.array(Label).optional(),
+  }),
+);
 export type Issue = z.infer<typeof Issue>;
 
 export const Comment = z.object({
