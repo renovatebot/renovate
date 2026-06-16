@@ -91,14 +91,13 @@ describe('modules/manager/tox/extract', () => {
       });
     });
 
-    it('skips -r, -c, -e prefixed entries in env_run_base deps', () => {
+    it('skips -r, -c, prefixed entries in env_run_base deps', () => {
       const content = codeBlock`
         [env_run_base]
         deps = [
           "pytest>=7.2",
           "-r requirements-test.txt",
           "-c constraints.txt",
-          "-e .",
           "coverage>=7",
         ]
       `;

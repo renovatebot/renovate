@@ -48,7 +48,10 @@ const ToxEnvRecord = LooseRecord(
   for (const [envName, envConfig] of Object.entries(envs)) {
     const depType = `env.${envName}`;
     for (const depStr of envConfig.deps) {
-      if (depStr.trimStart().startsWith('-')) {
+      if (
+        depStr.trimStart().startsWith('-r') ||
+        depStr.trimStart().startsWith('-c')
+      ) {
         continue;
       }
       const dep = pep508ToPackageDependency(depType, depStr);
