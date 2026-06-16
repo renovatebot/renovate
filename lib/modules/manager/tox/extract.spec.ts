@@ -4,7 +4,11 @@ import { extractPackageFile } from './extract.ts';
 
 describe('modules/manager/tox/extract', () => {
   describe('extractPackageFile()', () => {
-    it('returns null for invalid TOML', () => {
+    it('returns null for invalid pyproject.toml', () => {
+      expect(extractPackageFile('{not valid}', 'pyproject.toml')).toBeNull();
+    });
+
+    it('returns null for invalid tox.toml', () => {
       expect(extractPackageFile('not valid toml {{', 'tox.toml')).toBeNull();
     });
 
