@@ -27,6 +27,9 @@ For example:
     {
       "customType": "regex",
       "managerFilePatterns": ["path_to_manifest_json"],
+      "matchStrings": [
+        "\"(?<depName>[^\"]+)\":\\s*\"(?<currentValue>[^\"]+)\""
+      ],
       "registryUrlTemplate": "http://example.com/repo/repodata/#rpmMetadataSource=primary",
       "datasourceTemplate": "rpm"
     }
@@ -69,6 +72,9 @@ where the versioning format could be `<semantic version>-<revision or release>`,
       "customType": "regex",
       "managerFilePatterns": [
         "path_to_manifest_json"
+      ],
+      "matchStrings": [
+        "\"(?<depName>[^\"]+)\":\\s*\"(?<currentValue>[^\"]+)\""
       ],
       "registryUrlTemplate": "http://example.com/repo/repodata/",
       "datasourceTemplate": "rpm"
