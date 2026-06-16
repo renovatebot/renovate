@@ -31,7 +31,7 @@ function Pep508Dep(depType: string): ToxPackageDependency {
     }
 
     return res;
-  }) as ToxPackageDependency;
+  });
 }
 
 const ToxEnvConfig = z.object({
