@@ -20,6 +20,7 @@ const pr = {
   summary: { raw: 'summary' },
   state: 'OPEN',
   created_on: '2018-07-02T07:02:25.275030+00:00',
+  draft: false,
 };
 
 describe('modules/platform/bitbucket/index', () => {
@@ -1172,6 +1173,36 @@ describe('modules/platform/bitbucket/index', () => {
         platformPrOptions: {
           bbUseDefaultReviewers: true,
         },
+        draftPR: false,
+      });
+      expect(pr?.number).toBe(5);
+    });
+
+    it('posts draft PR', async () => {
+      const scope = await initRepoMock();
+      scope
+        .get(
+          '/2.0/repositories/some/repo/effective-default-reviewers?pagelen=100',
+        )
+        .reply(200, {
+          values: [],
+        })
+        .post('/2.0/repositories/some/repo/pullrequests')
+        .reply(200, { id: 5 })
+        .get(`/2.0/repositories/some/repo/pullrequests`)
+        .query(true)
+        .reply(200, {
+          values: [{ id: 5 }],
+        });
+      const pr = await bitbucket.createPr({
+        sourceBranch: 'branch',
+        targetBranch: 'master',
+        prTitle: 'title',
+        prBody: 'body',
+        platformPrOptions: {
+          bbUseDefaultReviewers: true,
+        },
+        draftPR: true,
       });
       expect(pr?.number).toBe(5);
     });
