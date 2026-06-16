@@ -1,6 +1,6 @@
 import { isTruthy } from '@sindresorhus/is';
 import { z } from 'zod/v4';
-import { LooseArray } from '../../../util/schema-utils/index.ts';
+import { LooseArray, Nullish } from '../../../util/schema-utils/index.ts';
 import { MaybeTimestamp } from '../../../util/timestamp.ts';
 import type { Release, ReleaseResult } from '../types.ts';
 
@@ -8,7 +8,7 @@ export const PuppetReleaseAbbreviated = z
   .object({
     version: z.string(),
     created_at: MaybeTimestamp,
-    deleted_at: z.string().nullish(),
+    deleted_at: Nullish(z.string()),
     file_uri: z.string().optional().nullable(),
   })
   .transform(
