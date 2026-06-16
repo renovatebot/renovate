@@ -434,7 +434,7 @@ describe('modules/datasource/packagist/schema', () => {
               ],
             },
           },
-        ] satisfies { packages: Record<string, ComposerRelease[]> }[]),
+        ]),
       ).toEqual({
         deprecationMessage:
           'This package is abandoned and no longer maintained.',
@@ -453,7 +453,7 @@ describe('modules/datasource/packagist/schema', () => {
               'foo/bar': [{ version: 'v1.1.1', abandoned: 'foo/replacement' }],
             },
           },
-        ] satisfies { packages: Record<string, ComposerRelease[]> }[]),
+        ]),
       ).toEqual({
         deprecationMessage:
           'This package is abandoned and no longer maintained. The author suggests using the `foo/replacement` package instead.',
