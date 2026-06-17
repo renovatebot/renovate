@@ -21,9 +21,6 @@ export function configureScm(repo: string): void {
   repository = repo;
 }
 
-/** Branches with a local commit but no Gerrit change yet (push deferred to createPr()). */
-export const pendingChangeBranches = new Set<string>();
-
 export async function pushForReview(options: {
   sourceRef: string;
   targetBranch: string;
@@ -48,7 +45,6 @@ export async function pushForReview(options: {
     pushOptions,
   });
   if (result) {
-    pendingChangeBranches.delete(options.sourceRef);
     await git.updateVirtualBranch(options.sourceRef);
   }
   return result;
@@ -107,28 +103,11 @@ export class GerritScm extends DefaultGitScm {
         }
       } else {
         logger.debug(`Commit prepared, push deferred to createPr()`);
-        pendingChangeBranches.add(commit.branchName);
+        await git.setVirtualBranch(commit.branchName, commitSha);
         return commitSha;
       }
     }
     return null; // empty commit, no changes in this Gerrit Change
-  }
-
-  // Delete virtual branch created from a Gerrit change
-  // Note: Gerrit changes themselves are abandoned through the API, not deleted as branches
-  override async deleteBranch(branchName: string): Promise<void> {
-    pendingChangeBranches.delete(branchName);
-    await git.deleteVirtualBranch(branchName);
-  }
-
-  override async mergeToLocal(branchName: string): Promise<void> {
-    // Pending branches only have a local ref (refs/heads/<branchName>).
-    // Non-pending virtual branches have a remote-tracking ref (refs/remotes/origin/<branchName>).
-    // Both are already local, so no fetch is needed.
-    const ref = pendingChangeBranches.has(branchName)
-      ? branchName
-      : git.remoteBranchRef(branchName);
-    return git.mergeToLocal(ref, { localBranch: true });
   }
 }
 

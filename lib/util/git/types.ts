@@ -13,15 +13,15 @@ export interface GitAuthor {
 export type GitNoVerifyOption = 'commit' | 'push';
 
 /**
- * Represents a virtual branch initialized from a non-standard ref.
+ * Represents a virtual branch tracked as `refs/remotes/origin/<name>`.
  * Used by platforms like Gerrit where changes are represented as refs
  * (e.g., refs/changes/34/1234/1) instead of regular branches.
  */
 export interface VirtualBranch {
   /** The virtual branch name (e.g., 'renovate/typescript-5.x') */
   name: string;
-  /** The ref this virtual branch is fetched from (e.g., 'refs/changes/34/1234/1') */
-  ref: string;
+  /** The ref this virtual branch can be fetched from (e.g., 'refs/changes/34/1234/1') */
+  ref?: string;
   /** The commit SHA this virtual branch points to */
   sha: LongCommitSha;
 }
@@ -46,6 +46,8 @@ export interface LocalConfig extends StorageConfig {
   currentBranch: string;
   currentBranchSha: LongCommitSha;
   branchCommits: Record<string, LongCommitSha>;
+  /** Single registry of virtual branches, always initialized in initRepo. */
+  virtualBranches: VirtualBranch[];
   branchIsModified: Record<string, boolean>;
   commitBranches: Record<string, string[]>;
   ignoredAuthors: string[];

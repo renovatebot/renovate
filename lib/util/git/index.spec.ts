@@ -613,15 +613,19 @@ describe('util/git/index', { timeout: 30000 }, () => {
       expect(pushSpy).toHaveBeenCalledTimes(0);
     });
 
-    it('should merge a local-only branch without fetching from origin', async () => {
+    it('should merge a local-only virtual branch without fetching from origin', async () => {
       // Create a local-only branch (never pushed to origin)
-      await git.prepareCommit({
+      const commit = await git.prepareCommit({
         branchName: 'renovate/local_only_branch',
         message: 'local only commit',
         files: [
           { type: 'addition', path: 'local_only_file', contents: 'local' },
         ],
       });
+      await git.setVirtualBranch(
+        'renovate/local_only_branch',
+        commit!.commitSha,
+      );
       // Reset working tree back to default branch so the file is not present yet
       const local = simpleGit(tmpDir.path);
       await local.checkout(defaultBranch);
@@ -630,9 +634,7 @@ describe('util/git/index', { timeout: 30000 }, () => {
       const fetchSpy = vi.spyOn(SimpleGit.prototype, 'fetch');
       const pushSpy = vi.spyOn(SimpleGit.prototype, 'push');
 
-      await git.mergeToLocal('renovate/local_only_branch', {
-        localBranch: true,
-      });
+      await git.mergeToLocal('renovate/local_only_branch');
 
       expect(fs.existsSync(`${tmpDir.path}/local_only_file`)).toBeTrue();
       expect(fetchSpy).not.toHaveBeenCalled();
@@ -675,12 +677,19 @@ describe('util/git/index', { timeout: 30000 }, () => {
       ]);
     });
 
-    it('should only delete local branch when localBranch option is set', async () => {
+    it('should only delete local branch for a virtual branch', async () => {
+      const sha = git.getBranchCommit('renovate/past_branch')!;
+      await git.setVirtualBranch('renovate/past_branch', sha);
       const rawSpy = vi.spyOn(SimpleGit.prototype, 'raw');
-      await git.deleteBranch('renovate/past_branch', { localBranch: true });
+      await git.deleteBranch('renovate/past_branch');
       expect(rawSpy).not.toHaveBeenCalledWith(
         expect.arrayContaining(['push', '--delete']),
       );
+      expect(rawSpy).toHaveBeenCalledWith([
+        'update-ref',
+        '-d',
+        'refs/remotes/origin/renovate/past_branch',
+      ]);
     });
   });
 
@@ -2011,7 +2020,7 @@ describe('util/git/index', { timeout: 30000 }, () => {
     });
   });
 
-  describe('deleteVirtualBranch()', () => {
+  describe('deleteBranch() for virtual branches', () => {
     it('deletes local branch and remote tracking ref', async () => {
       const originRepo = simpleGit(origin.path);
       const commit = (await originRepo.revparse(['HEAD'])) as LongCommitSha;
@@ -2029,15 +2038,53 @@ describe('util/git/index', { timeout: 30000 }, () => {
       });
       await git.syncGit();
 
-      await git.deleteVirtualBranch('renovate/npm-lodash-4.x');
+      const pushSpy = vi.spyOn(SimpleGit.prototype, 'push');
+      await git.deleteBranch('renovate/npm-lodash-4.x');
 
       expect(git.branchExists('renovate/npm-lodash-4.x')).toBeFalse();
+      expect(pushSpy).not.toHaveBeenCalled();
     });
 
-    it('handles non-existent branch', async () => {
-      await expect(
-        git.deleteVirtualBranch('nonexistent'),
-      ).resolves.not.toThrow();
+    it('handles a missing remote-tracking ref', async () => {
+      const originRepo = simpleGit(origin.path);
+      const commit = (await originRepo.revparse(['HEAD'])) as LongCommitSha;
+      await git.setVirtualBranch('nonexistent', commit);
+      // Simulate the remote-tracking ref already being gone
+      await simpleGit(tmpDir.path).raw([
+        'update-ref',
+        '-d',
+        'refs/remotes/origin/nonexistent',
+      ]);
+      await expect(git.deleteBranch('nonexistent')).resolves.not.toThrow();
+    });
+  });
+
+  describe('mergeToLocal() for virtual branches', () => {
+    it('merges the remote-tracking ref of an init virtual branch', async () => {
+      const originRepo = simpleGit(origin.path);
+      const commit = (await originRepo.revparse(['HEAD'])) as LongCommitSha;
+      await originRepo.raw(['update-ref', 'refs/changes/70/12370/1', commit]);
+
+      await git.initRepo({
+        url: origin.path,
+        virtualBranches: [
+          {
+            name: 'renovate/virtual-merge',
+            ref: 'refs/changes/70/12370/1',
+            sha: commit,
+          },
+        ],
+      });
+      await git.syncGit();
+
+      const fetchSpy = vi.spyOn(SimpleGit.prototype, 'fetch');
+      const mergeSpy = vi.spyOn(SimpleGit.prototype, 'merge');
+      await git.mergeToLocal('renovate/virtual-merge');
+
+      expect(fetchSpy).not.toHaveBeenCalled();
+      expect(mergeSpy).toHaveBeenCalledWith([
+        'refs/remotes/origin/renovate/virtual-merge',
+      ]);
     });
   });
 
