@@ -592,12 +592,15 @@ export const syncGit = withInstrumenting(
     }
 
     if (isNonEmptyArray(config.virtualBranches)) {
-      const refs = config.virtualBranches.map((branch) => branch.ref);
-      await fetchRevSpec(...refs);
-      for (const branch of config.virtualBranches) {
-        await setVirtualBranch(branch.name, branch.sha);
-      }
-      logger.debug(`Fetched ${config.virtualBranches.length} virtual branches`);
+      const virtualBranches = config.virtualBranches;
+      await instrument('fetch virtual branches', async () => {
+        const refs = virtualBranches.map((branch) => branch.ref);
+        await fetchRevSpec(...refs);
+        for (const branch of virtualBranches) {
+          await setVirtualBranch(branch.name, branch.sha);
+        }
+        logger.debug(`Fetched ${virtualBranches.length} virtual branches`);
+      });
     }
 
     config.currentBranchSha = toLongCommitSha(
