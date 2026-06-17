@@ -301,7 +301,7 @@ export async function initRepo(args: StorageConfig): Promise<void> {
   config.ignoredAuthors = [];
   config.additionalBranches = [];
   config.branchIsModified = {};
-  config.virtualBranches = {};
+  config.virtualBranches ??= {};
   git = instrumentGit(
     createSimpleGit({ config: { baseDir: GlobalConfig.get('localDir') } }),
   );
