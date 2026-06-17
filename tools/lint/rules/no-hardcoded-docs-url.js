@@ -1,4 +1,5 @@
-const DOCS_URL = 'https://docs.renovatebot.com';
+// Regex used instead of String#includes() to avoid CodeQL's js/incomplete-url-substring-sanitization false positive.
+const DOCS_URL_RE = /https:\/\/docs\.renovatebot\.com/;
 
 /** @type {import('eslint').Rule.RuleModule} */
 export default {
@@ -22,12 +23,14 @@ export default {
 
     return {
       Literal(node) {
-        if (typeof node.value === 'string' && node.value.includes(DOCS_URL)) {
+        // oxlint-disable-next-line typescript/prefer-includes -- regex avoids CodeQL js/incomplete-url-substring-sanitization
+        if (typeof node.value === 'string' && DOCS_URL_RE.test(node.value)) {
           context.report({ node, messageId: 'noHardcodedDocsUrl' });
         }
       },
       TemplateElement(node) {
-        if (node.value?.raw?.includes(DOCS_URL)) {
+        // oxlint-disable-next-line typescript/prefer-includes -- regex avoids CodeQL js/incomplete-url-substring-sanitization
+        if (node.value?.raw && DOCS_URL_RE.test(node.value.raw)) {
           context.report({ node, messageId: 'noHardcodedDocsUrl' });
         }
       },
