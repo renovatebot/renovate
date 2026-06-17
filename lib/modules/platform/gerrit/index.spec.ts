@@ -38,7 +38,7 @@ vi.mock('./client.ts');
 const clientMock = vi.mocked(_client);
 
 describe('modules/platform/gerrit/index', () => {
-  const currentRevision = fakeSha('gerrit');
+  const currentRevision = '0123456789abcdef0123456789abcdef01234567';
 
   beforeEach(async () => {
     hostRules.find.mockReturnValue({
