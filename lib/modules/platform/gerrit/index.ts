@@ -178,7 +178,7 @@ export async function initRepo({
     if (!branchName) {
       continue;
     }
-    const sha = toLongCommitSha(change.current_revision!);
+    const sha = toLongCommitSha(change.current_revision);
     const ref = change.revisions![sha].ref;
     virtualBranches.push({
       name: branchName,
