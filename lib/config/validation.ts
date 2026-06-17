@@ -948,6 +948,8 @@ export async function validateConfig(
         }
       }
     }
+
+    validateAllowedValues(key, val, currentPath, errors);
   }
 
   function sortAll(a: ValidationMessage, b: ValidationMessage): number {
@@ -1192,6 +1194,8 @@ async function validateGlobalConfig(
       }
     }
   }
+
+  validateAllowedValues(key, val, currentPath, errors);
 }
 
 function getPossibleConfigFileNames({
@@ -1207,4 +1211,45 @@ function getPossibleConfigFileNames({
   }
 
   return filenames;
+}
+
+function validateAllowedValues(
+  key: string,
+  val: any,
+  currentPath: string | undefined,
+  errors: ValidationMessage[],
+): void {
+  const option = options.find((o) => o.name === key);
+  if (!option) {
+    return;
+  }
+
+  const allowedValues = option?.allowedValues;
+  if (allowedValues?.length) {
+    if (val === null && option.default === null) {
+      // do nothing
+    } else if (isArray(val, isString)) {
+      const invalidOptions = val.filter((v) => !allowedValues.includes(v));
+      if (invalidOptions.length) {
+        errors.push({
+          topic: 'Configuration Error',
+          message: `Invalid ${currentPath}: ${option.name} had invalid values \`${JSON.stringify(invalidOptions)}\` which are not part of the allowedValues: ${JSON.stringify(option.allowedValues)}`,
+        });
+      }
+    } else if (isString(val)) {
+      if (key === 'versioning') {
+        if (!allowedValues.includes(val) && !val.startsWith('regex:')) {
+          errors.push({
+            topic: 'Configuration Error',
+            message: `Invalid ${currentPath}: ${option.name} had invalid value \`${JSON.stringify(val)}\`. ${option.name} can only be a known versioning scheme, or be a string starting with \`regex:\` for custom regular expression versioning`,
+          });
+        }
+      } else if (!allowedValues.includes(val) && !option.supportsTemplating) {
+        errors.push({
+          topic: 'Configuration Error',
+          message: `Invalid ${currentPath}: ${option.name} had a value \`${JSON.stringify(val)}\` which was not part of the allowedValues: ${JSON.stringify(option.allowedValues)}`,
+        });
+      }
+    }
+  }
 }
