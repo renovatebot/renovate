@@ -1,4 +1,4 @@
-const DOCS_URL = 'docs.renovatebot.com';
+const DOCS_URL = 'https://docs.renovatebot.com';
 
 /** @type {import('eslint').Rule.RuleModule} */
 export default {
