@@ -126,9 +126,9 @@ export const presets: Record<string, Preset> = {
       {
         matchDatasources: ['docker'],
         matchPackageNames: [
-          'grafana/grafana', 
+          'grafana/grafana',
           'docker.io/grafana/grafana',
-          'grafana/grafana-enterprise', 
+          'grafana/grafana-enterprise',
           'docker.io/grafana/grafana-enterprise',
         ],
         versioning:
