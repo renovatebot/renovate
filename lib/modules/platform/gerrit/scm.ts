@@ -56,6 +56,7 @@ export class GerritScm extends DefaultGitScm {
       branchName: commit.branchName,
       state: 'open',
       targetBranch: commit.baseBranch,
+      requestDetails: ['CURRENT_REVISION'],
     });
 
     const message = isString(commit.message)
@@ -95,7 +96,13 @@ export class GerritScm extends DefaultGitScm {
         });
         /* v8 ignore else -- should never happen */
         if (pushResult) {
-          await git.updateVirtualBranch(commit.branchName, commitSha);
+          const currentRef =
+            existingChange.revisions![existingChange.current_revision!].ref;
+          await git.setVirtualBranch(
+            commit.branchName,
+            nextPatchSetRef(currentRef),
+            commitSha,
+          );
           return commitSha;
         }
       } else {
@@ -105,6 +112,18 @@ export class GerritScm extends DefaultGitScm {
     }
     return null; // empty commit, no changes in this Gerrit Change
   }
+}
+
+/**
+ * Derive the next patch-set ref from a Gerrit change ref.
+ * Gerrit refs follow the pattern `refs/changes/<NN>/<change>/<patchset>`.
+ * After a push, Gerrit creates the next patch-set, so we increment the
+ * trailing number to keep the virtual branch in sync.
+ */
+export function nextPatchSetRef(currentRef: string): string {
+  const lastSlash = currentRef.lastIndexOf('/');
+  const patchSet = Number(currentRef.slice(lastSlash + 1));
+  return `${currentRef.slice(0, lastSlash + 1)}${patchSet + 1}`;
 }
 
 /**

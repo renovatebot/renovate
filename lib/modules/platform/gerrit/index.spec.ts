@@ -454,7 +454,7 @@ describe('modules/platform/gerrit/index', () => {
         files: [],
         pushOptions: ['notify=NONE', 'ready'],
       });
-      expect(git.registerVirtualBranch).toHaveBeenCalledExactlyOnceWith(
+      expect(git.setVirtualBranch).toHaveBeenCalledExactlyOnceWith(
         'source',
         'refs/changes/56/123456/1',
         currentRevision,
@@ -496,7 +496,7 @@ describe('modules/platform/gerrit/index', () => {
         files: [],
         pushOptions: ['notify=NONE', 'ready', 'label=Code-Review+2'],
       });
-      expect(git.registerVirtualBranch).toHaveBeenCalledExactlyOnceWith(
+      expect(git.setVirtualBranch).toHaveBeenCalledExactlyOnceWith(
         'source',
         'refs/changes/56/123456/1',
         currentRevision,
@@ -541,7 +541,7 @@ describe('modules/platform/gerrit/index', () => {
           'hashtag=label2',
         ],
       });
-      expect(git.registerVirtualBranch).toHaveBeenCalledExactlyOnceWith(
+      expect(git.setVirtualBranch).toHaveBeenCalledExactlyOnceWith(
         'source',
         'refs/changes/56/123456/1',
         currentRevision,
@@ -566,7 +566,7 @@ describe('modules/platform/gerrit/index', () => {
       ).rejects.toThrow(
         `Could not find the Gerrit change after pushing to refs/for/target`,
       );
-      expect(git.registerVirtualBranch).not.toHaveBeenCalled();
+      expect(git.setVirtualBranch).not.toHaveBeenCalled();
     });
 
     it('createPr() - push fails => rejects', async () => {
@@ -581,7 +581,7 @@ describe('modules/platform/gerrit/index', () => {
       ).rejects.toThrow(
         `Failed to push commit to refs/for/target to create Gerrit change`,
       );
-      expect(git.registerVirtualBranch).not.toHaveBeenCalled();
+      expect(git.setVirtualBranch).not.toHaveBeenCalled();
     });
   });
 

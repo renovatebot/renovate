@@ -622,7 +622,7 @@ describe('util/git/index', { timeout: 30000 }, () => {
           { type: 'addition', path: 'local_only_file', contents: 'local' },
         ],
       });
-      await git.registerVirtualBranch(
+      await git.setVirtualBranch(
         'renovate/local_only_branch',
         'refs/changes/99/99999/1',
         commit!.commitSha,
@@ -680,7 +680,7 @@ describe('util/git/index', { timeout: 30000 }, () => {
 
     it('should only delete local branch for a virtual branch', async () => {
       const sha = git.getBranchCommit('renovate/past_branch')!;
-      await git.registerVirtualBranch(
+      await git.setVirtualBranch(
         'renovate/past_branch',
         'refs/changes/99/99999/1',
         sha,
@@ -2048,7 +2048,7 @@ describe('util/git/index', { timeout: 30000 }, () => {
     it('handles a missing remote-tracking ref', async () => {
       const originRepo = simpleGit(origin.path);
       const commit = (await originRepo.revparse(['HEAD'])) as LongCommitSha;
-      await git.registerVirtualBranch(
+      await git.setVirtualBranch(
         'nonexistent',
         'refs/changes/99/99999/1',
         commit,
@@ -2091,30 +2091,8 @@ describe('util/git/index', { timeout: 30000 }, () => {
     });
   });
 
-  describe('updateVirtualBranch()', () => {
-    it('updates tracking to match current local branch', async () => {
-      const originRepo = simpleGit(origin.path);
-      const commit = (await originRepo.revparse(['HEAD'])) as LongCommitSha;
-      await originRepo.raw(['update-ref', 'refs/changes/60/12360/1', commit]);
-
-      await git.initRepo({
-        url: origin.path,
-        virtualBranches: {
-          'renovate/virtual-test': {
-            ref: 'refs/changes/60/12360/1',
-            sha: commit,
-          },
-        },
-      });
-      await git.syncGit();
-      await git.checkoutBranch('renovate/virtual-test');
-
-      await git.updateVirtualBranch('renovate/virtual-test');
-
-      expect(git.getBranchCommit('renovate/virtual-test')).toBe(commit);
-    });
-
-    it('marks branch as not modified after update', async () => {
+  describe('setVirtualBranch()', () => {
+    it('marks branch as not modified after registration', async () => {
       modifiedCache.getCachedModifiedResult.mockReturnValue(null);
       const originRepo = simpleGit(origin.path);
       const commit = (await originRepo.revparse(['HEAD'])) as LongCommitSha;
@@ -2132,7 +2110,11 @@ describe('util/git/index', { timeout: 30000 }, () => {
       await git.syncGit();
       await git.checkoutBranch('renovate/virtual-test');
 
-      await git.updateVirtualBranch('renovate/virtual-test');
+      await git.setVirtualBranch(
+        'renovate/virtual-test',
+        'refs/changes/60/12360/2',
+        commit,
+      );
 
       expect(
         await git.isBranchModified('renovate/virtual-test', defaultBranch),

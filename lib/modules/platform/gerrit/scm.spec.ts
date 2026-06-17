@@ -1,8 +1,13 @@
 import { git, partial } from '~test/util.ts';
 import type { LongCommitSha } from '../../../util/schema-utils/git.ts';
 import { client as _client } from './client.ts';
-import type { GerritChange } from './schema.ts';
-import { GerritScm, configureScm, pushForReview } from './scm.ts';
+import type { GerritChange, GerritRevisionInfo } from './schema.ts';
+import {
+  GerritScm,
+  configureScm,
+  nextPatchSetRef,
+  pushForReview,
+} from './scm.ts';
 
 vi.mock('./client.ts');
 const clientMock = vi.mocked(_client);
@@ -87,6 +92,7 @@ describe('modules/platform/gerrit/scm', () => {
           branchName: 'renovate/dependency-1.x',
           state: 'open',
           targetBranch: 'main',
+          requestDetails: ['CURRENT_REVISION'],
         },
       );
     });
@@ -125,9 +131,16 @@ describe('modules/platform/gerrit/scm', () => {
     });
 
     it('commitAndPush() - existing change keeps original target branch', async () => {
+      const currentRevision = 'abc123' as LongCommitSha;
       const existingChange = partial<GerritChange>({
         change_id: 'Ifcd936eef0ced620040a07a337c586d0a882725b',
         branch: 'main',
+        current_revision: currentRevision,
+        revisions: {
+          [currentRevision]: partial<GerritRevisionInfo>({
+            ref: 'refs/changes/56/123456/2',
+          }),
+        },
       });
       clientMock.getBranchChange.mockResolvedValueOnce(existingChange);
       git.prepareCommit.mockResolvedValueOnce({
@@ -162,8 +175,9 @@ describe('modules/platform/gerrit/scm', () => {
         targetRef: 'refs/for/main', // not new-main
         pushOptions: ['notify=NONE', 'ready'],
       });
-      expect(git.updateVirtualBranch).toHaveBeenCalledExactlyOnceWith(
+      expect(git.setVirtualBranch).toHaveBeenCalledExactlyOnceWith(
         'renovate/dependency-1.x',
+        'refs/changes/56/123456/3',
         'commitSha',
       );
     });
@@ -199,10 +213,17 @@ describe('modules/platform/gerrit/scm', () => {
     });
 
     it('commitAndPush() - existing change with new changes - auto-approve', async () => {
+      const currentRevision = 'abc123' as LongCommitSha;
       const existingChange = partial<GerritChange>({
         _number: 123456,
         change_id: 'I1bf983f8f6530c44826925b1308a45fe672408a6',
         branch: 'main',
+        current_revision: currentRevision,
+        revisions: {
+          [currentRevision]: partial<GerritRevisionInfo>({
+            ref: 'refs/changes/56/123456/2',
+          }),
+        },
       });
       clientMock.getBranchChange.mockResolvedValueOnce(existingChange);
       git.prepareCommit.mockResolvedValueOnce({
@@ -238,9 +259,30 @@ describe('modules/platform/gerrit/scm', () => {
         targetRef: 'refs/for/main',
         pushOptions: ['notify=NONE', 'ready', 'label=Code-Review+2'],
       });
-      expect(git.updateVirtualBranch).toHaveBeenCalledExactlyOnceWith(
+      expect(git.setVirtualBranch).toHaveBeenCalledExactlyOnceWith(
         'renovate/dependency-1.x',
+        'refs/changes/56/123456/3',
         'commitSha',
+      );
+    });
+  });
+
+  describe('nextPatchSetRef()', () => {
+    it('increments patchset 1', () => {
+      expect(nextPatchSetRef('refs/changes/45/12345/1')).toBe(
+        'refs/changes/45/12345/2',
+      );
+    });
+
+    it('increments patchset 9 to 10', () => {
+      expect(nextPatchSetRef('refs/changes/45/12345/9')).toBe(
+        'refs/changes/45/12345/10',
+      );
+    });
+
+    it('increments double-digit patchset', () => {
+      expect(nextPatchSetRef('refs/changes/00/100/42')).toBe(
+        'refs/changes/00/100/43',
       );
     });
   });

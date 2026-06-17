@@ -763,17 +763,17 @@ function isVirtualBranch(branchName: string): boolean {
 }
 
 /**
- * Register a virtual branch: create its remote-tracking ref and add it to
- * the virtual-branch registry (config.virtualBranches).
+ * Set a virtual branch's remote-tracking ref and add it to the
+ * virtual-branch registry (config.virtualBranches).
  *
  * Used after pushing (to keep tracking in sync with the remote) and in
  * createPr() when the Gerrit change ref becomes available.
  *
- * @param branchName Virtual branch name to register
+ * @param branchName Virtual branch name to set
  * @param ref The ref this virtual branch is fetched from (e.g., 'refs/changes/34/1234/1')
  * @param commitSha The commit SHA the virtual branch points to.
  */
-export async function registerVirtualBranch(
+export async function setVirtualBranch(
   branchName: string,
   ref: string,
   commitSha: LongCommitSha,
@@ -781,25 +781,6 @@ export async function registerVirtualBranch(
   await git.raw(['update-ref', remoteBranchRef(branchName), commitSha]);
   config.branchCommits[branchName] = commitSha;
   config.virtualBranches[branchName] = { ref, sha: commitSha };
-}
-
-/**
- * Update a virtual branch's remote-tracking ref after a push.
- *
- * @param branchName Virtual branch name to update (must already be registered)
- * @param commitSha If provided, used directly; otherwise resolved from the local branch ref.
- */
-export async function updateVirtualBranch(
-  branchName: string,
-  commitSha?: LongCommitSha,
-): Promise<void> {
-  const existing = config.virtualBranches[branchName];
-  if (!existing) {
-    throw new Error(`Virtual branch not found: ${branchName}`);
-  }
-  const sha =
-    commitSha ?? ((await git.revparse([branchName])).trim() as LongCommitSha);
-  await registerVirtualBranch(branchName, existing.ref, sha);
   config.branchIsModified[branchName] = false;
 }
 

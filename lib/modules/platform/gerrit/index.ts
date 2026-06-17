@@ -298,7 +298,7 @@ export async function createPr(prConfig: CreatePRConfig): Promise<Pr | null> {
   // Register the virtual branch now that the change exists and we have the ref.
   const sha = toLongCommitSha(change.current_revision);
   const ref = change.revisions![sha].ref;
-  await git.registerVirtualBranch(prConfig.sourceBranch, ref, sha);
+  await git.setVirtualBranch(prConfig.sourceBranch, ref, sha);
 
   await client.addMessage(
     change._number,
