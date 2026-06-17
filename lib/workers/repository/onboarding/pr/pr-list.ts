@@ -1,6 +1,7 @@
 import type { RenovateConfig } from '../../../../config/types.ts';
 import { logger } from '../../../../logger/index.ts';
 import { emojify } from '../../../../util/emoji.ts';
+import { coerceNumber } from '../../../../util/number.ts';
 import { regEx } from '../../../../util/regex.ts';
 import type { BranchConfig } from '../../../types.ts';
 
@@ -62,9 +63,8 @@ export function getExpectedPrList(
     prDesc += '\n\n';
     prDesc += '</details>\n\n';
   }
-  // TODO: type (#22198)
-  const prHourlyLimit = config.prHourlyLimit!;
-  const commitHourlyLimit = config.commitHourlyLimit!;
+  const prHourlyLimit = coerceNumber(config.prHourlyLimit);
+  const commitHourlyLimit = coerceNumber(config.commitHourlyLimit);
   if (
     commitHourlyLimit > 0 &&
     commitHourlyLimit < 5 &&
