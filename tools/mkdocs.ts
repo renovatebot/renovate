@@ -29,7 +29,7 @@ program
     if (opts.strict) {
       args.push('--strict');
     }
-    const res = await exec('pdm', args, {
+    const res = await exec('uv', args, {
       cwd: 'tools/mkdocs',
       stdio: 'inherit',
       env: {
@@ -53,7 +53,7 @@ program
       mkdocsArgs.push('--strict');
     }
     const spawnServe = (): ExecaChildProcess<string> =>
-      execa('pdm', mkdocsArgs, {
+      execa('uv', mkdocsArgs, {
         cwd: 'tools/mkdocs',
         stdio: 'inherit',
         reject: false,

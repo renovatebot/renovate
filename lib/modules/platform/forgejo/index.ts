@@ -45,14 +45,8 @@ import { smartTruncate } from '../utils/pr-body.ts';
 import * as helper from './forgejo-helper.ts';
 import { forgejoHttp } from './forgejo-helper.ts';
 import { ForgejoPrCache } from './pr-cache.ts';
-import type {
-  CombinedCommitStatus,
-  Comment,
-  Label,
-  PRMergeMethod,
-  PRUpdateParams,
-  Repo,
-} from './types.ts';
+import type { Comment, Label, PRMergeMethod, Repo } from './schema.ts';
+import type { CombinedCommitStatus, PRUpdateParams } from './types.ts';
 import {
   DRAFT_PREFIX,
   getMergeMethod,
@@ -228,9 +222,9 @@ const platform: Platform = {
     try {
       const user = await helper.getCurrentUser({ token });
       // oxlint-disable-next-line typescript/prefer-nullish-coalescing -- `full_name` can be emtpy string
-      gitAuthor = `${user.full_name || user.username} <${user.email}>`;
+      gitAuthor = `${user.full_name || user.login} <${user.email}>`;
       botUserID = user.id;
-      botUserName = user.username;
+      botUserName = user.login;
       const env = getEnv();
       /* v8 ignore if: experimental feature */
       if (semver.valid(env.RENOVATE_X_PLATFORM_VERSION)) {
@@ -261,6 +255,9 @@ const platform: Platform = {
   ): Promise<string | null> {
     const repo = repoName ?? config.repository;
     const contents = await helper.getRepoContents(repo, fileName, branchOrTag);
+    if (contents.type !== 'file') {
+      return null;
+    }
     return contents.contentString ?? null;
   },
 
@@ -305,7 +302,7 @@ const platform: Platform = {
       logger.debug('Repository is a mirror - aborting renovation');
       throw new Error(REPOSITORY_MIRRORED);
     }
-    if (repo.permissions.pull === false || repo.permissions.push === false) {
+    if (!repo.permissions.pull || !repo.permissions.push) {
       logger.debug(
         'Repository does not permit pull or push - aborting renovation',
       );
@@ -325,7 +322,7 @@ const platform: Platform = {
     // else fall back to predefined order. Order chosen to minimize commits - see
     // https://github.com/renovatebot/renovate/pull/37768 for discussion.
     const preferredOrder: PRMergeMethod[] = [
-      repo.default_merge_style,
+      ...(repo.default_merge_style ? [repo.default_merge_style] : []),
       'fast-forward-only',
       'squash',
       'merge',
@@ -345,7 +342,7 @@ const platform: Platform = {
     }
 
     try {
-      config.isOrgRepo = await helper.isOrg(repo.owner.username);
+      config.isOrgRepo = await helper.isOrg(repo.owner.login);
     } catch (err) {
       logger.debug({ err }, 'Forgejo initRepo() error');
       throw err;
@@ -367,7 +364,7 @@ const platform: Platform = {
     config.issueList = null;
     config.labelList = null;
     config.hasIssuesEnabled = !repo.external_tracker && repo.has_issues;
-    config.orgName = repo.owner.username;
+    config.orgName = repo.owner.login;
 
     return {
       defaultBranch: config.defaultBranch,
@@ -478,8 +475,7 @@ const platform: Platform = {
       return 'yellow';
     }
 
-    /* v8 ignore next */
-    return helper.forgejoToRenovateStatusMapping[ccs.worstStatus] ?? 'yellow';
+    return helper.forgejoToRenovateStatusMapping[ccs.worstStatus];
   },
 
   async getBranchStatusCheck(
@@ -494,15 +490,7 @@ const platform: Platform = {
     if (!cs) {
       return null;
     } // no status check exists
-    const status = helper.forgejoToRenovateStatusMapping[cs.status];
-    if (status) {
-      return status;
-    }
-    logger.warn(
-      { check: cs },
-      'Could not map Forgejo status value to Renovate status',
-    );
-    return 'yellow';
+    return helper.forgejoToRenovateStatusMapping[cs.status];
   },
 
   getPrList(): Promise<Pr[]> {

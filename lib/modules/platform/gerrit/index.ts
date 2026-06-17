@@ -8,6 +8,7 @@ import * as git from '../../../util/git/index.ts';
 import type { VirtualBranch } from '../../../util/git/types.ts';
 import { setBaseUrl } from '../../../util/http/gerrit.ts';
 import { regEx } from '../../../util/regex.ts';
+import { toLongCommitSha } from '../../../util/schema-utils/git.ts';
 import { ensureTrailingSlash } from '../../../util/url.ts';
 import type {
   BranchStatusConfig,
@@ -32,8 +33,8 @@ import { repoFingerprint } from '../util.ts';
 import { smartTruncate } from '../utils/pr-body.ts';
 import { readOnlyIssueBody } from '../utils/read-only-issue-body.ts';
 import { client } from './client.ts';
+import type { GerritLabelTypeInfo, GerritProjectInfo } from './schema.ts';
 import { configureScm, pushForReview } from './scm.ts';
-import type { GerritLabelTypeInfo, GerritProjectInfo } from './types.ts';
 import {
   MAX_GERRIT_COMMENT_SIZE,
   REQUEST_DETAILS_FOR_PRS,
@@ -177,7 +178,7 @@ export async function initRepo({
     if (!branchName) {
       continue;
     }
-    const sha = change.current_revision!;
+    const sha = toLongCommitSha(change.current_revision!);
     const ref = change.revisions![sha].ref;
     virtualBranches.push({
       name: branchName,

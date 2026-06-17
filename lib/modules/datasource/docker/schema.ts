@@ -188,3 +188,35 @@ export const DockerHubTagsPage = z.object({
     },
   }),
 });
+
+/**
+ * Docker registry auth token response.
+ * https://distribution.github.io/distribution/spec/auth/token/
+ */
+export const RegistryAuthToken = z.object({
+  token: z.string().optional(),
+  access_token: z.string().optional(),
+});
+export type RegistryAuthToken = z.infer<typeof RegistryAuthToken>;
+
+/**
+ * Docker registry tags list response.
+ * https://distribution.github.io/distribution/spec/api/#listing-image-tags
+ */
+export const RegistryTagsList = z.object({
+  tags: z.array(z.string()),
+});
+export type RegistryTagsList = z.infer<typeof RegistryTagsList>;
+
+/**
+ * Quay registry tags list response (Quay v1 API).
+ */
+export const QuayTagsResponse = z.object({
+  tags: LooseArray(
+    z.object({
+      name: z.string(),
+    }),
+  ),
+  has_additional: z.boolean().default(false),
+});
+export type QuayTagsResponse = z.infer<typeof QuayTagsResponse>;

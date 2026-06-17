@@ -1,13 +1,13 @@
 import { git, partial } from '~test/util.ts';
-import type { LongCommitSha } from '../../../util/git/types.ts';
+import type { LongCommitSha } from '../../../util/schema-utils/git.ts';
 import { client as _client } from './client.ts';
+import type { GerritChange } from './schema.ts';
 import {
   GerritScm,
   configureScm,
   pendingChangeBranches,
   pushForReview,
 } from './scm.ts';
-import type { GerritChange } from './types.ts';
 
 vi.mock('./client.ts');
 const clientMock = vi.mocked(_client);
