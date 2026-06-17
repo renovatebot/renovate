@@ -778,6 +778,7 @@ export async function setVirtualBranch(
   ref: string,
   commitSha: LongCommitSha,
 ): Promise<void> {
+  logger.debug({ branchName, ref, commitSha }, 'setVirtualBranch()');
   await git.raw(['update-ref', remoteBranchRef(branchName), commitSha]);
   config.branchCommits[branchName] = commitSha;
   config.virtualBranches[branchName] = { ref, sha: commitSha };
@@ -1061,9 +1062,9 @@ export async function deleteBranch(branchName: string): Promise<void> {
     // Delete the remote-tracking ref.
     // Note: git update-ref -d succeeds even if the ref doesn't exist.
     const ref = remoteBranchRef(branchName);
+    logger.debug({ branchName, ref }, 'Deleting virtual branch');
     await git.raw(['update-ref', '-d', ref]);
     delete config.virtualBranches[branchName];
-    logger.debug(`Deleted remote-tracking ref: ${ref}`);
   } else {
     try {
       const deleteCommand = ['push', '--delete', 'origin', branchName];
@@ -1115,7 +1116,12 @@ export async function mergeToLocal(branchName: string): Promise<void> {
     if (isVirtualBranch(branchName)) {
       // Virtual branches are already local and tracked as a remote-tracking ref,
       // so merge it directly without fetching from origin.
-      await git.merge([remoteBranchRef(branchName)]);
+      const ref = remoteBranchRef(branchName);
+      logger.debug(
+        { branchName, ref },
+        'mergeToLocal(): merging virtual branch',
+      );
+      await git.merge([ref]);
     } else {
       await fetchRevSpec(branchName);
       await gitRetry(() => git.merge(['FETCH_HEAD']));
