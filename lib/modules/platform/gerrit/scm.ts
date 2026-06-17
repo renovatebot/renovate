@@ -38,16 +38,12 @@ export async function pushForReview(options: {
     }
   }
 
-  const result = await git.pushCommit({
+  return git.pushCommit({
     sourceRef: options.sourceRef,
     targetRef: `refs/for/${options.targetBranch}`,
     files: options.files,
     pushOptions,
   });
-  if (result) {
-    await git.updateVirtualBranch(options.sourceRef);
-  }
-  return result;
 }
 
 export class GerritScm extends DefaultGitScm {
@@ -99,11 +95,11 @@ export class GerritScm extends DefaultGitScm {
         });
         /* v8 ignore else -- should never happen */
         if (pushResult) {
+          await git.updateVirtualBranch(commit.branchName, commitSha);
           return commitSha;
         }
       } else {
         logger.debug(`Commit prepared, push deferred to createPr()`);
-        await git.setVirtualBranch(commit.branchName, commitSha);
         return commitSha;
       }
     }

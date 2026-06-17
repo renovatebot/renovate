@@ -143,7 +143,7 @@ describe('modules/platform/gerrit/index', () => {
       });
       expect(git.initRepo).toHaveBeenCalledExactlyOnceWith({
         url: 'https://user:pass@dev.gerrit.com/renovate/a/test%2Frepo',
-        virtualBranches: [],
+        virtualBranches: {},
       });
     });
 
@@ -162,7 +162,7 @@ describe('modules/platform/gerrit/index', () => {
         url: 'https://user:pass@dev.gerrit.com/renovate/a/test%2Frepo',
         cloneSubmodules: true,
         cloneSubmodulesFilter: ['test'],
-        virtualBranches: [],
+        virtualBranches: {},
       });
     });
 
@@ -250,18 +250,16 @@ describe('modules/platform/gerrit/index', () => {
       ]);
       expect(git.initRepo).toHaveBeenCalledExactlyOnceWith({
         url: 'https://user:pass@dev.gerrit.com/renovate/a/test%2Frepo',
-        virtualBranches: [
-          {
-            name: 'renovate/dep-1',
+        virtualBranches: {
+          'renovate/dep-1': {
             ref: 'refs/changes/45/12345/1',
             sha: sha1,
           },
-          {
-            name: 'renovate/dep-2',
+          'renovate/dep-2': {
             ref: 'refs/changes/46/12346/1',
             sha: sha3,
           },
-        ],
+        },
       });
     });
   });
@@ -436,6 +434,7 @@ describe('modules/platform/gerrit/index', () => {
         current_revision: currentRevision,
         revisions: {
           [currentRevision]: partial<GerritRevisionInfo>({
+            ref: 'refs/changes/56/123456/1',
             commit_with_footers: 'Renovate-Branch: source',
           }),
         },
@@ -455,7 +454,11 @@ describe('modules/platform/gerrit/index', () => {
         files: [],
         pushOptions: ['notify=NONE', 'ready'],
       });
-      expect(git.updateVirtualBranch).toHaveBeenCalledExactlyOnceWith('source');
+      expect(git.registerVirtualBranch).toHaveBeenCalledExactlyOnceWith(
+        'source',
+        'refs/changes/56/123456/1',
+        currentRevision,
+      );
       expect(clientMock.addMessage).toHaveBeenCalledExactlyOnceWith(
         123456,
         'body',
@@ -470,6 +473,7 @@ describe('modules/platform/gerrit/index', () => {
         current_revision: currentRevision,
         revisions: {
           [currentRevision]: partial<GerritRevisionInfo>({
+            ref: 'refs/changes/56/123456/1',
             commit_with_footers: 'Renovate-Branch: source',
           }),
         },
@@ -492,7 +496,11 @@ describe('modules/platform/gerrit/index', () => {
         files: [],
         pushOptions: ['notify=NONE', 'ready', 'label=Code-Review+2'],
       });
-      expect(git.updateVirtualBranch).toHaveBeenCalledExactlyOnceWith('source');
+      expect(git.registerVirtualBranch).toHaveBeenCalledExactlyOnceWith(
+        'source',
+        'refs/changes/56/123456/1',
+        currentRevision,
+      );
       expect(clientMock.addMessage).toHaveBeenCalledExactlyOnceWith(
         123456,
         'body',
@@ -507,6 +515,7 @@ describe('modules/platform/gerrit/index', () => {
         current_revision: currentRevision,
         revisions: {
           [currentRevision]: partial<GerritRevisionInfo>({
+            ref: 'refs/changes/56/123456/1',
             commit_with_footers: 'Renovate-Branch: source',
           }),
         },
@@ -532,7 +541,11 @@ describe('modules/platform/gerrit/index', () => {
           'hashtag=label2',
         ],
       });
-      expect(git.updateVirtualBranch).toHaveBeenCalledExactlyOnceWith('source');
+      expect(git.registerVirtualBranch).toHaveBeenCalledExactlyOnceWith(
+        'source',
+        'refs/changes/56/123456/1',
+        currentRevision,
+      );
       expect(clientMock.addMessage).toHaveBeenCalledExactlyOnceWith(
         123456,
         'body',
@@ -553,7 +566,7 @@ describe('modules/platform/gerrit/index', () => {
       ).rejects.toThrow(
         `Could not find the Gerrit change after pushing to refs/for/target`,
       );
-      expect(git.updateVirtualBranch).toHaveBeenCalledExactlyOnceWith('source');
+      expect(git.registerVirtualBranch).not.toHaveBeenCalled();
     });
 
     it('createPr() - push fails => rejects', async () => {
@@ -568,7 +581,7 @@ describe('modules/platform/gerrit/index', () => {
       ).rejects.toThrow(
         `Failed to push commit to refs/for/target to create Gerrit change`,
       );
-      expect(git.updateVirtualBranch).not.toHaveBeenCalled();
+      expect(git.registerVirtualBranch).not.toHaveBeenCalled();
     });
   });
 

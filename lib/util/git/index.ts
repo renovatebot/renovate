@@ -1,11 +1,6 @@
 import { setTimeout } from 'node:timers/promises';
 import URL from 'node:url';
-import {
-  isBoolean,
-  isNonEmptyArray,
-  isNonEmptyObject,
-  isString,
-} from '@sindresorhus/is';
+import { isBoolean, isNonEmptyObject, isString } from '@sindresorhus/is';
 import fs from 'fs-extra';
 import { DateTime } from 'luxon';
 import semver from 'semver';
@@ -277,9 +272,9 @@ async function fetchBranchCommits(preferUpstream = true): Promise<void> {
           toLongCommitSha(sha);
       });
 
-    if (isNonEmptyArray(config.virtualBranches)) {
-      for (const branch of config.virtualBranches) {
-        config.branchCommits[branch.name] = branch.sha;
+    if (isNonEmptyObject(config.virtualBranches)) {
+      for (const [name, branch] of Object.entries(config.virtualBranches)) {
+        config.branchCommits[name] = branch.sha;
       }
     }
 
@@ -306,7 +301,7 @@ export async function initRepo(args: StorageConfig): Promise<void> {
   config.ignoredAuthors = [];
   config.additionalBranches = [];
   config.branchIsModified = {};
-  config.virtualBranches ??= [];
+  config.virtualBranches = {};
   git = instrumentGit(
     createSimpleGit({ config: { baseDir: GlobalConfig.get('localDir') } }),
   );
@@ -592,17 +587,16 @@ export const syncGit = withInstrumenting(
       });
     }
 
-    if (isNonEmptyArray(config.virtualBranches)) {
+    if (isNonEmptyObject(config.virtualBranches)) {
       const virtualBranches = config.virtualBranches;
       await instrument('fetch virtual branches', async () => {
-        const refs = virtualBranches
-          .map((branch) => branch.ref)
-          .filter(isString);
-        await fetchRevSpec(...refs);
-        for (const branch of virtualBranches) {
-          await setVirtualBranch(branch.name, branch.sha);
-        }
-        logger.debug(`Fetched ${virtualBranches.length} virtual branches`);
+        const refSpecs = Object.entries(virtualBranches).map(
+          ([name, branch]) => `${branch.ref}:${remoteBranchRef(name)}`,
+        );
+        await fetchRevSpec(...refSpecs);
+        logger.debug(
+          `Fetched ${Object.keys(virtualBranches).length} virtual branches`,
+        );
       });
     }
 
@@ -765,41 +759,47 @@ export function remoteBranchRef(branchName: string): string {
  * Returns whether the given branch is tracked as a virtual branch.
  */
 function isVirtualBranch(branchName: string): boolean {
-  return config.virtualBranches.some((b) => b.name === branchName);
+  return branchName in config.virtualBranches;
 }
 
 /**
- * Set a virtual branch's remote-tracking ref and register it in the single
- * virtual-branch registry (config.virtualBranches).
+ * Register a virtual branch: create its remote-tracking ref and add it to
+ * the virtual-branch registry (config.virtualBranches).
  *
- * Used during init (to create virtual branches from fetched refs), after
- * pushing (to keep tracking in sync with the remote) and when a push is
- * deferred (to track a commit that only exists locally so far).
+ * Used after pushing (to keep tracking in sync with the remote) and in
+ * createPr() when the Gerrit change ref becomes available.
  *
- * @param branchName Virtual branch name to set
+ * @param branchName Virtual branch name to register
+ * @param ref The ref this virtual branch is fetched from (e.g., 'refs/changes/34/1234/1')
  * @param commitSha The commit SHA the virtual branch points to.
  */
-export async function setVirtualBranch(
+export async function registerVirtualBranch(
   branchName: string,
+  ref: string,
   commitSha: LongCommitSha,
 ): Promise<void> {
   await git.raw(['update-ref', remoteBranchRef(branchName), commitSha]);
   config.branchCommits[branchName] = commitSha;
-  const existing = config.virtualBranches.find((b) => b.name === branchName);
-  if (existing) {
-    existing.sha = commitSha;
-  } else {
-    config.virtualBranches.push({ name: branchName, sha: commitSha });
-  }
+  config.virtualBranches[branchName] = { ref, sha: commitSha };
 }
 
 /**
- * Update a virtual branch's tracking to match the current local branch.
- * To be called after a commit is pushed.
+ * Update a virtual branch's remote-tracking ref after a push.
+ *
+ * @param branchName Virtual branch name to update (must already be registered)
+ * @param commitSha If provided, used directly; otherwise resolved from the local branch ref.
  */
-export async function updateVirtualBranch(branchName: string): Promise<void> {
-  const commitSha = (await git.revparse([branchName])).trim() as LongCommitSha;
-  await setVirtualBranch(branchName, commitSha);
+export async function updateVirtualBranch(
+  branchName: string,
+  commitSha?: LongCommitSha,
+): Promise<void> {
+  const existing = config.virtualBranches[branchName];
+  if (!existing) {
+    throw new Error(`Virtual branch not found: ${branchName}`);
+  }
+  const sha =
+    commitSha ?? ((await git.revparse([branchName])).trim() as LongCommitSha);
+  await registerVirtualBranch(branchName, existing.ref, sha);
   config.branchIsModified[branchName] = false;
 }
 
@@ -1081,9 +1081,7 @@ export async function deleteBranch(branchName: string): Promise<void> {
     // Note: git update-ref -d succeeds even if the ref doesn't exist.
     const ref = remoteBranchRef(branchName);
     await git.raw(['update-ref', '-d', ref]);
-    config.virtualBranches = config.virtualBranches.filter(
-      (b) => b.name !== branchName,
-    );
+    delete config.virtualBranches[branchName];
     logger.debug(`Deleted remote-tracking ref: ${ref}`);
   } else {
     try {

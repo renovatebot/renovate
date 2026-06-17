@@ -622,8 +622,9 @@ describe('util/git/index', { timeout: 30000 }, () => {
           { type: 'addition', path: 'local_only_file', contents: 'local' },
         ],
       });
-      await git.setVirtualBranch(
+      await git.registerVirtualBranch(
         'renovate/local_only_branch',
+        'refs/changes/99/99999/1',
         commit!.commitSha,
       );
       // Reset working tree back to default branch so the file is not present yet
@@ -679,7 +680,11 @@ describe('util/git/index', { timeout: 30000 }, () => {
 
     it('should only delete local branch for a virtual branch', async () => {
       const sha = git.getBranchCommit('renovate/past_branch')!;
-      await git.setVirtualBranch('renovate/past_branch', sha);
+      await git.registerVirtualBranch(
+        'renovate/past_branch',
+        'refs/changes/99/99999/1',
+        sha,
+      );
       const rawSpy = vi.spyOn(SimpleGit.prototype, 'raw');
       await git.deleteBranch('renovate/past_branch');
       expect(rawSpy).not.toHaveBeenCalledWith(
@@ -1943,13 +1948,12 @@ describe('util/git/index', { timeout: 30000 }, () => {
 
       await git.initRepo({
         url: origin.path,
-        virtualBranches: [
-          {
-            name: 'renovate/typescript-5.x',
+        virtualBranches: {
+          'renovate/typescript-5.x': {
             ref: 'refs/changes/45/12345/1',
             sha: commit,
           },
-        ],
+        },
       });
       await git.syncGit();
 
@@ -1963,13 +1967,12 @@ describe('util/git/index', { timeout: 30000 }, () => {
 
       await git.initRepo({
         url: origin.path,
-        virtualBranches: [
-          {
-            name: 'renovate/node-22.x',
+        virtualBranches: {
+          'renovate/node-22.x': {
             ref: 'refs/changes/99/99999/1',
             sha: commit,
           },
-        ],
+        },
       });
 
       await expect(git.syncGit()).rejects.toThrow();
@@ -1998,18 +2001,16 @@ describe('util/git/index', { timeout: 30000 }, () => {
 
       await git.initRepo({
         url: origin.path,
-        virtualBranches: [
-          {
-            name: 'renovate/dep1',
+        virtualBranches: {
+          'renovate/dep1': {
             ref: 'refs/changes/01/1001/1',
             sha: commit1,
           },
-          {
-            name: 'renovate/dep2',
+          'renovate/dep2': {
             ref: 'refs/changes/02/1002/1',
             sha: commit2,
           },
-        ],
+        },
       });
       await git.syncGit();
 
@@ -2028,13 +2029,12 @@ describe('util/git/index', { timeout: 30000 }, () => {
 
       await git.initRepo({
         url: origin.path,
-        virtualBranches: [
-          {
-            name: 'renovate/npm-lodash-4.x',
+        virtualBranches: {
+          'renovate/npm-lodash-4.x': {
             ref: 'refs/changes/50/12350/1',
             sha: commit,
           },
-        ],
+        },
       });
       await git.syncGit();
 
@@ -2048,7 +2048,11 @@ describe('util/git/index', { timeout: 30000 }, () => {
     it('handles a missing remote-tracking ref', async () => {
       const originRepo = simpleGit(origin.path);
       const commit = (await originRepo.revparse(['HEAD'])) as LongCommitSha;
-      await git.setVirtualBranch('nonexistent', commit);
+      await git.registerVirtualBranch(
+        'nonexistent',
+        'refs/changes/99/99999/1',
+        commit,
+      );
       // Simulate the remote-tracking ref already being gone
       await simpleGit(tmpDir.path).raw([
         'update-ref',
@@ -2067,13 +2071,12 @@ describe('util/git/index', { timeout: 30000 }, () => {
 
       await git.initRepo({
         url: origin.path,
-        virtualBranches: [
-          {
-            name: 'renovate/virtual-merge',
+        virtualBranches: {
+          'renovate/virtual-merge': {
             ref: 'refs/changes/70/12370/1',
             sha: commit,
           },
-        ],
+        },
       });
       await git.syncGit();
 
@@ -2096,13 +2099,12 @@ describe('util/git/index', { timeout: 30000 }, () => {
 
       await git.initRepo({
         url: origin.path,
-        virtualBranches: [
-          {
-            name: 'renovate/virtual-test',
+        virtualBranches: {
+          'renovate/virtual-test': {
             ref: 'refs/changes/60/12360/1',
             sha: commit,
           },
-        ],
+        },
       });
       await git.syncGit();
       await git.checkoutBranch('renovate/virtual-test');
@@ -2120,13 +2122,12 @@ describe('util/git/index', { timeout: 30000 }, () => {
 
       await git.initRepo({
         url: origin.path,
-        virtualBranches: [
-          {
-            name: 'renovate/virtual-test',
+        virtualBranches: {
+          'renovate/virtual-test': {
             ref: 'refs/changes/60/12360/1',
             sha: commit,
           },
-        ],
+        },
       });
       await git.syncGit();
       await git.checkoutBranch('renovate/virtual-test');

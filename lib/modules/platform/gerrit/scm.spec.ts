@@ -30,9 +30,6 @@ describe('modules/platform/gerrit/scm', () => {
         files: [],
         pushOptions: ['notify=NONE', 'ready'],
       });
-      expect(git.updateVirtualBranch).toHaveBeenCalledExactlyOnceWith(
-        'renovate/feat',
-      );
     });
 
     it('adds hashtag push options for each label', async () => {
@@ -56,12 +53,9 @@ describe('modules/platform/gerrit/scm', () => {
           'hashtag=priority:high',
         ],
       });
-      expect(git.updateVirtualBranch).toHaveBeenCalledExactlyOnceWith(
-        'renovate/feat',
-      );
     });
 
-    it('keeps no pending state when push fails', async () => {
+    it('returns false when push fails', async () => {
       git.pushCommit.mockResolvedValueOnce(false);
       await expect(
         pushForReview({
@@ -70,7 +64,6 @@ describe('modules/platform/gerrit/scm', () => {
           files: [],
         }),
       ).resolves.toBeFalse();
-      expect(git.updateVirtualBranch).not.toHaveBeenCalled();
     });
   });
 
@@ -129,13 +122,6 @@ describe('modules/platform/gerrit/scm', () => {
       });
       // For new changes, push should NOT be called - it will be done by createPr()
       expect(git.pushCommit).not.toHaveBeenCalled();
-      // Branch is registered as virtual so it can be merged/deleted locally
-      expect(git.setVirtualBranch).toHaveBeenCalledExactlyOnceWith(
-        'renovate/dependency-1.x',
-        'commitSha',
-      );
-      // Virtual branch is not updated until createPr() pushes the change
-      expect(git.updateVirtualBranch).not.toHaveBeenCalled();
     });
 
     it('commitAndPush() - existing change keeps original target branch', async () => {
@@ -178,6 +164,7 @@ describe('modules/platform/gerrit/scm', () => {
       });
       expect(git.updateVirtualBranch).toHaveBeenCalledExactlyOnceWith(
         'renovate/dependency-1.x',
+        'commitSha',
       );
     });
 
@@ -253,6 +240,7 @@ describe('modules/platform/gerrit/scm', () => {
       });
       expect(git.updateVirtualBranch).toHaveBeenCalledExactlyOnceWith(
         'renovate/dependency-1.x',
+        'commitSha',
       );
     });
   });

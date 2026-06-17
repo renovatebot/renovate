@@ -1,4 +1,4 @@
-import { isNonEmptyArray, isTruthy, isUndefined } from '@sindresorhus/is';
+import { isTruthy, isUndefined } from '@sindresorhus/is';
 import semver from 'semver';
 import { logger } from '../../../logger/index.ts';
 import type { BranchStatus } from '../../../types/index.ts';
@@ -172,7 +172,7 @@ export async function initRepo({
     state: 'open',
     requestDetails: ['CURRENT_REVISION', 'COMMIT_FOOTERS'],
   });
-  const virtualBranches: VirtualBranch[] = [];
+  const virtualBranches: Record<string, VirtualBranch> = {};
   for (const change of openChanges) {
     const branchName = extractSourceBranch(change);
     if (!branchName) {
@@ -180,16 +180,13 @@ export async function initRepo({
     }
     const sha = toLongCommitSha(change.current_revision);
     const ref = change.revisions![sha].ref;
-    virtualBranches.push({
-      name: branchName,
-      ref,
-      sha,
-    });
+    virtualBranches[branchName] = { ref, sha };
   }
 
-  if (isNonEmptyArray(virtualBranches)) {
+  const virtualBranchCount = Object.keys(virtualBranches).length;
+  if (virtualBranchCount > 0) {
     logger.debug(
-      `Will fetch ${virtualBranches.length} Gerrit changes as virtual branches`,
+      `Will fetch ${virtualBranchCount} Gerrit changes as virtual branches`,
     );
   }
 
@@ -297,6 +294,12 @@ export async function createPr(prConfig: CreatePRConfig): Promise<Pr | null> {
       `Could not find the Gerrit change after pushing to refs/for/${prConfig.targetBranch}`,
     );
   }
+
+  // Register the virtual branch now that the change exists and we have the ref.
+  const sha = toLongCommitSha(change.current_revision);
+  const ref = change.revisions![sha].ref;
+  await git.registerVirtualBranch(prConfig.sourceBranch, ref, sha);
+
   await client.addMessage(
     change._number,
     prConfig.prBody,

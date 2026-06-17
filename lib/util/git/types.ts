@@ -18,10 +18,8 @@ export type GitNoVerifyOption = 'commit' | 'push';
  * (e.g., refs/changes/34/1234/1) instead of regular branches.
  */
 export interface VirtualBranch {
-  /** The virtual branch name (e.g., 'renovate/typescript-5.x') */
-  name: string;
-  /** The ref this virtual branch can be fetched from (e.g., 'refs/changes/34/1234/1') */
-  ref?: string;
+  /** The ref this virtual branch is fetched from (e.g., 'refs/changes/34/1234/1') */
+  ref: string;
   /** The commit SHA this virtual branch points to */
   sha: LongCommitSha;
 }
@@ -37,8 +35,9 @@ export interface StorageConfig {
   /**
    * Virtual branches to initialize from non-standard refs (e.g., Gerrit change refs).
    * Each virtual branch is fetched and stored as refs/remotes/origin/<name>.
+   * Keyed by branch name.
    */
-  virtualBranches?: VirtualBranch[];
+  virtualBranches?: Record<string, VirtualBranch>;
 }
 
 export interface LocalConfig extends StorageConfig {
@@ -46,8 +45,8 @@ export interface LocalConfig extends StorageConfig {
   currentBranch: string;
   currentBranchSha: LongCommitSha;
   branchCommits: Record<string, LongCommitSha>;
-  /** Single registry of virtual branches, always initialized in initRepo. */
-  virtualBranches: VirtualBranch[];
+  /** Single registry of virtual branches, always initialized in initRepo. Keyed by branch name. */
+  virtualBranches: Record<string, VirtualBranch>;
   branchIsModified: Record<string, boolean>;
   commitBranches: Record<string, string[]>;
   ignoredAuthors: string[];
