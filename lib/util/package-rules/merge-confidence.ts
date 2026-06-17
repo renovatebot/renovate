@@ -29,6 +29,7 @@ export class MergeConfidenceMatcher extends Matcher {
       error.validationSource = 'MatchConfidence Authenticator';
       error.validationError = 'Missing credentials';
       error.validationMessage =
+        // oxlint-disable-next-line renovate/no-hardcoded-docs-url -- no config access in package rule utility
         'The `matchConfidence` matcher in `packageRules` requires authentication. Please refer to the [documentation](https://docs.renovatebot.com/configuration-options/#packagerulesmatchconfidence) and add the required host rule.';
       throw error;
     }
