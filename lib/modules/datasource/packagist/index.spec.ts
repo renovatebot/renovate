@@ -543,27 +543,27 @@ describe('modules/datasource/packagist/index', () => {
       });
     });
 
-    it('marks abandoned packages as deprecated', async () => {
+    it('marks abandoned packages as deprecated with a replacement', async () => {
       httpMock
         .scope('https://example.com')
         .get('/packages.json')
         .reply(200, {
           'metadata-url': 'https://example.com/p2/%package%.json',
         })
-        .get('/p2/drewm/mailchimp-api.json')
+        .get('/p2/scheb/two-factor-bundle.json')
         .reply(200, {
           minified: 'composer/2.0',
           packages: {
-            'drewm/mailchimp-api': [
+            'scheb/two-factor-bundle': [
               {
-                name: 'drewm/mailchimp-api',
-                version: 'v2.5.4',
-                abandoned: 'foo/replacement',
+                name: 'scheb/two-factor-bundle',
+                version: 'v4.18.4',
+                abandoned: 'scheb/2fa-bundle',
               },
             ],
           },
         })
-        .get('/p2/drewm/mailchimp-api~dev.json')
+        .get('/p2/scheb/two-factor-bundle~dev.json')
         .reply(404);
       config.registryUrls = ['https://example.com'];
 
@@ -571,14 +571,55 @@ describe('modules/datasource/packagist/index', () => {
         ...config,
         datasource,
         versioning,
-        packageName: 'drewm/mailchimp-api',
+        packageName: 'scheb/two-factor-bundle',
       });
 
       expect(res).toEqual({
         registryUrl: 'https://example.com',
         deprecationMessage:
-          'This package is abandoned and no longer maintained. The author suggests using the `foo/replacement` package instead.',
-        releases: [{ gitRef: 'v2.5.4', version: '2.5.4', isDeprecated: true }],
+          'This package is abandoned and no longer maintained. The author suggests using the `scheb/2fa-bundle` package instead.',
+        releases: [
+          { gitRef: 'v4.18.4', version: '4.18.4', isDeprecated: true },
+        ],
+      });
+    });
+
+    it('marks abandoned packages as deprecated without a replacement', async () => {
+      httpMock
+        .scope('https://example.com')
+        .get('/packages.json')
+        .reply(200, {
+          'metadata-url': 'https://example.com/p2/%package%.json',
+        })
+        .get('/p2/sonata-project/core-bundle.json')
+        .reply(200, {
+          minified: 'composer/2.0',
+          packages: {
+            'sonata-project/core-bundle': [
+              {
+                name: 'sonata-project/core-bundle',
+                version: '3.20.0',
+                abandoned: true,
+              },
+            ],
+          },
+        })
+        .get('/p2/sonata-project/core-bundle~dev.json')
+        .reply(404);
+      config.registryUrls = ['https://example.com'];
+
+      const res = await getPkgReleases({
+        ...config,
+        datasource,
+        versioning,
+        packageName: 'sonata-project/core-bundle',
+      });
+
+      expect(res).toEqual({
+        registryUrl: 'https://example.com',
+        deprecationMessage:
+          'This package is abandoned and no longer maintained.',
+        releases: [{ gitRef: '3.20.0', version: '3.20.0', isDeprecated: true }],
       });
     });
 

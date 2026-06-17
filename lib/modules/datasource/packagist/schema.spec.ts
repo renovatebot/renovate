@@ -183,11 +183,11 @@ describe('modules/datasource/packagist/schema', () => {
       expect(
         ComposerRelease.parse({
           version: '1.2.3',
-          abandoned: 'foo/replacement',
+          abandoned: 'scheb/2fa-bundle',
         }),
       ).toEqual({
         version: '1.2.3',
-        abandoned: 'foo/replacement',
+        abandoned: 'scheb/2fa-bundle',
         homepage: null,
         source: null,
         time: null,
@@ -425,12 +425,12 @@ describe('modules/datasource/packagist/schema', () => {
 
     it('marks abandoned packages as deprecated', () => {
       expect(
-        parsePackagesResponses('foo/bar', [
+        parsePackagesResponses('sonata-project/core-bundle', [
           {
             packages: {
-              'foo/bar': [
-                { version: 'v2.2.2', abandoned: true },
-                { version: 'v1.1.1', abandoned: true },
+              'sonata-project/core-bundle': [
+                { version: '3.20.0', abandoned: true },
+                { version: '3.19.0', abandoned: true },
               ],
             },
           },
@@ -439,25 +439,29 @@ describe('modules/datasource/packagist/schema', () => {
         deprecationMessage:
           'This package is abandoned and no longer maintained.',
         releases: [
-          { version: '2.2.2', gitRef: 'v2.2.2', isDeprecated: true },
-          { version: '1.1.1', gitRef: 'v1.1.1', isDeprecated: true },
+          { version: '3.20.0', gitRef: '3.20.0', isDeprecated: true },
+          { version: '3.19.0', gitRef: '3.19.0', isDeprecated: true },
         ],
       } satisfies ReleaseResult);
     });
 
     it('suggests a replacement for abandoned packages', () => {
       expect(
-        parsePackagesResponses('foo/bar', [
+        parsePackagesResponses('scheb/two-factor-bundle', [
           {
             packages: {
-              'foo/bar': [{ version: 'v1.1.1', abandoned: 'foo/replacement' }],
+              'scheb/two-factor-bundle': [
+                { version: 'v4.18.4', abandoned: 'scheb/2fa-bundle' },
+              ],
             },
           },
         ]),
       ).toEqual({
         deprecationMessage:
-          'This package is abandoned and no longer maintained. The author suggests using the `foo/replacement` package instead.',
-        releases: [{ version: '1.1.1', gitRef: 'v1.1.1', isDeprecated: true }],
+          'This package is abandoned and no longer maintained. The author suggests using the `scheb/2fa-bundle` package instead.',
+        releases: [
+          { version: '4.18.4', gitRef: 'v4.18.4', isDeprecated: true },
+        ],
       } satisfies ReleaseResult);
     });
   });
