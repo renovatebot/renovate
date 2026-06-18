@@ -175,6 +175,201 @@ describe('config/migrations/custom/package-rules-migration', () => {
     );
   });
 
+  it.each`
+    pattern
+    ${'*'}
+    ${'**'}
+    ${'!*'}
+    ${'!**'}
+  `(
+    'should migrate packagePatterns $pattern with excludePackagePatterns to negative matchPackageNames',
+    async ({ pattern }) => {
+      await expect(PackageRulesMigration).toMigrate(
+        {
+          packageRules: [
+            {
+              packagePatterns: [pattern],
+              excludePackagePatterns: ['some-package'],
+              automerge: true,
+            },
+          ],
+        },
+        {
+          packageRules: [
+            {
+              automerge: true,
+              matchPackageNames: ['!/some-package/'],
+            },
+          ],
+        },
+      );
+    },
+  );
+
+  it.each`
+    pattern
+    ${'*'}
+    ${'**'}
+    ${'!*'}
+    ${'!**'}
+  `(
+    'should migrate excludePackagePatterns $pattern to a negative match-all matcher',
+    async ({ pattern }) => {
+      await expect(PackageRulesMigration).toMigrate(
+        {
+          packageRules: [
+            {
+              packagePatterns: ['some-package'],
+              excludePackagePatterns: [pattern],
+              automerge: true,
+            },
+          ],
+        },
+        {
+          packageRules: [
+            {
+              automerge: true,
+              matchPackageNames: ['!**'],
+            },
+          ],
+        },
+      );
+    },
+  );
+
+  it('should normalize matchPackageNames containing match-all patterns', async () => {
+    await expect(PackageRulesMigration).toMigrate(
+      {
+        packageRules: [
+          {
+            matchPackageNames: ['*', '!/some-package/'],
+            automerge: true,
+          },
+          {
+            matchPackageNames: ['**', 'some-package'],
+            automerge: true,
+          },
+          {
+            matchPackageNames: ['!*', 'some-package'],
+            automerge: true,
+          },
+          {
+            matchPackageNames: ['!**', 'some-package'],
+            automerge: true,
+          },
+        ],
+      },
+      {
+        packageRules: [
+          {
+            matchPackageNames: ['!/some-package/'],
+            automerge: true,
+          },
+          {
+            matchPackageNames: ['**'],
+            automerge: true,
+          },
+          {
+            matchPackageNames: ['!*', 'some-package'],
+            automerge: true,
+          },
+          {
+            matchPackageNames: ['!**'],
+            automerge: true,
+          },
+        ],
+      },
+    );
+  });
+
+  it('should normalize regex-or-glob package rule matchers containing match-all patterns', async () => {
+    await expect(PackageRulesMigration).toMigrate(
+      {
+        packageRules: [
+          {
+            matchManagers: ['*', 'npm'],
+            matchDatasources: ['*', '!docker'],
+            matchRepositories: ['!**', 'renovatebot/renovate'],
+            matchSourceUrls: ['**', '!https://github.com/renovatebot/renovate'],
+            automerge: true,
+          },
+        ],
+      },
+      {
+        packageRules: [
+          {
+            matchManagers: ['*'],
+            matchDatasources: ['!docker'],
+            matchRepositories: ['!**'],
+            matchSourceUrls: ['!https://github.com/renovatebot/renovate'],
+            automerge: true,
+          },
+        ],
+      },
+    );
+  });
+
+  it('should migrate match-all dep patterns to matchDepNames', async () => {
+    await expect(PackageRulesMigration).toMigrate(
+      {
+        packageRules: [
+          {
+            matchDepPatterns: ['*'],
+            excludeDepPatterns: ['some-dep'],
+            automerge: true,
+          },
+          {
+            matchDepPatterns: ['some-dep'],
+            excludeDepPatterns: ['**'],
+            automerge: true,
+          },
+          {
+            matchDepPatterns: ['some-dep'],
+            excludeDepPatterns: ['!*'],
+            automerge: true,
+          },
+        ],
+      },
+      {
+        packageRules: [
+          {
+            matchDepNames: ['!/some-dep/'],
+            automerge: true,
+          },
+          {
+            matchDepNames: ['!**'],
+            automerge: true,
+          },
+          {
+            matchDepNames: ['!**'],
+            automerge: true,
+          },
+        ],
+      },
+    );
+  });
+
+  it('should migrate excludeRepositories to matchRepositories', async () => {
+    await expect(PackageRulesMigration).toMigrate(
+      {
+        packageRules: [
+          {
+            excludeRepositories: ['renovatebot/renovate'],
+            automerge: true,
+          },
+        ],
+      },
+      {
+        packageRules: [
+          {
+            automerge: true,
+            matchRepositories: ['!renovatebot/renovate'],
+          },
+        ],
+      },
+    );
+  });
+
   it('should migrate all match/exclude when value is of type string', async () => {
     await expect(PackageRulesMigration).toMigrate(
       {

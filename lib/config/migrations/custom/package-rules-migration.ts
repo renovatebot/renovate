@@ -19,6 +19,88 @@ export const renameMap = {
 };
 type RenameMapKey = keyof typeof renameMap;
 
+const positiveMatchAllMatchers = new Set(['*', '**']);
+const legacyMatchAllPatterns = new Set(['*', '**', '!*', '!**']);
+const negativeMatchAllMatchers = new Set(['!**']);
+const regexOrGlobPackageRuleMatchers = [
+  'matchBaseBranches',
+  'matchCategories',
+  'matchDatasources',
+  'matchDepNames',
+  'matchDepTypes',
+  'matchFileNames',
+  'matchManagers',
+  'matchPackageNames',
+  'matchRegistryUrls',
+  'matchRepositories',
+  'matchSourceUrls',
+  'matchUpdateTypes',
+] satisfies (keyof PackageRule)[];
+
+function isPositiveMatchAll(matcher: string): boolean {
+  return positiveMatchAllMatchers.has(matcher);
+}
+
+function isNegativeMatchAll(matcher: string): boolean {
+  return negativeMatchAllMatchers.has(matcher);
+}
+
+function migratePattern(pattern: string): string {
+  if (legacyMatchAllPatterns.has(pattern)) {
+    return '*';
+  }
+  return `/${pattern}/`;
+}
+
+function migrateExcludePattern(pattern: string): string {
+  if (legacyMatchAllPatterns.has(pattern)) {
+    return '!**';
+  }
+  return `!/${pattern}/`;
+}
+
+function migrateExcludePatterns(patterns: string[]): string[] {
+  const matchers: string[] = [];
+  for (const pattern of patterns) {
+    matchers.push(migrateExcludePattern(pattern));
+  }
+  return matchers;
+}
+
+function normalizeMatchers(matchers: string[]): string[] {
+  const negativeMatchAll = matchers.find(isNegativeMatchAll);
+  if (negativeMatchAll) {
+    return [negativeMatchAll];
+  }
+
+  const positiveMatchAll = matchers.find(isPositiveMatchAll);
+  if (!positiveMatchAll) {
+    return matchers;
+  }
+
+  const negativeMatchers = matchers.filter((matcher) =>
+    matcher.startsWith('!'),
+  );
+  if (negativeMatchers.length) {
+    return negativeMatchers;
+  }
+
+  return [positiveMatchAll];
+}
+
+function normalizeRegexOrGlobMatchers(packageRule: PackageRule): PackageRule {
+  const newPackageRule = { ...packageRule };
+
+  for (const key of regexOrGlobPackageRuleMatchers) {
+    const matchers = newPackageRule[key];
+    if (isArray(matchers, isString)) {
+      Object.assign(newPackageRule, { [key]: normalizeMatchers(matchers) });
+    }
+  }
+
+  return newPackageRule;
+}
+
 function renameKeys(packageRule: PackageRule): PackageRule {
   const newPackageRule: PackageRule = {};
   for (const [key, val] of Object.entries(packageRule)) {
@@ -47,7 +129,7 @@ function mergeMatchers(packageRule: PackageRule): PackageRule {
       // v8 ignore else -- TODO: add test #40625
       if (isArray(patterns, isString)) {
         newPackageRule.matchDepNames ??= [];
-        newPackageRule.matchDepNames.push(...patterns.map((v) => `/${v}/`));
+        newPackageRule.matchDepNames.push(...patterns.map(migratePattern));
       }
       // @ts-expect-error -- TODO: fix me
       delete newPackageRule.matchDepPatterns;
@@ -75,8 +157,11 @@ function mergeMatchers(packageRule: PackageRule): PackageRule {
     if (key === 'excludeDepPatterns') {
       // v8 ignore else -- TODO: add test #40625
       if (isArray(patterns, isString)) {
-        newPackageRule.matchDepNames ??= [];
-        newPackageRule.matchDepNames.push(...patterns.map((v) => `!/${v}/`));
+        const matchers = migrateExcludePatterns(patterns);
+        if (matchers.length) {
+          newPackageRule.matchDepNames ??= [];
+          newPackageRule.matchDepNames.push(...matchers);
+        }
       }
       // @ts-expect-error -- TODO: fix me
       delete newPackageRule.excludeDepPatterns;
@@ -97,14 +182,7 @@ function mergeMatchers(packageRule: PackageRule): PackageRule {
       // v8 ignore else -- TODO: add test #40625
       if (isArray(patterns, isString)) {
         newPackageRule.matchPackageNames ??= [];
-        newPackageRule.matchPackageNames.push(
-          ...patterns.map((v) => {
-            if (v === '*') {
-              return '*';
-            }
-            return `/${v}/`;
-          }),
-        );
+        newPackageRule.matchPackageNames.push(...patterns.map(migratePattern));
       }
       // @ts-expect-error -- TODO: fix me
       delete newPackageRule.matchPackagePatterns;
@@ -132,10 +210,11 @@ function mergeMatchers(packageRule: PackageRule): PackageRule {
     if (key === 'excludePackagePatterns') {
       // v8 ignore else -- TODO: add test #40625
       if (isArray(patterns, isString)) {
-        newPackageRule.matchPackageNames ??= [];
-        newPackageRule.matchPackageNames.push(
-          ...patterns.map((v) => `!/${v}/`),
-        );
+        const matchers = migrateExcludePatterns(patterns);
+        if (matchers.length) {
+          newPackageRule.matchPackageNames ??= [];
+          newPackageRule.matchPackageNames.push(...matchers);
+        }
       }
       // @ts-expect-error -- TODO: fix me
       delete newPackageRule.excludePackagePatterns;
@@ -163,7 +242,8 @@ function mergeMatchers(packageRule: PackageRule): PackageRule {
       delete newPackageRule.excludeRepositories;
     }
   }
-  return newPackageRule;
+
+  return normalizeRegexOrGlobMatchers(newPackageRule);
 }
 
 export class PackageRulesMigration extends AbstractMigration {
