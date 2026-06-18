@@ -2,8 +2,8 @@ import { DateTime } from 'luxon';
 import { git, logger, partial } from '~test/util.ts';
 import * as _repositoryCache from '../cache/repository/index.ts';
 import type { BranchCache, RepoCacheData } from '../cache/repository/types.ts';
+import type { LongCommitSha } from '../schema-utils/git.ts';
 import { setBranchNewCommit } from './set-branch-commit.ts';
-import type { LongCommitSha } from './types.ts';
 
 vi.mock('../cache/repository/index.ts');
 vi.mock('./index.ts');

@@ -171,6 +171,23 @@ describe('util/template/index', () => {
     });
   });
 
+  it.each`
+    input                      | expected
+    ${'foo'}                   | ${'foo'}
+    ${'>='}                    | ${'>='}
+    ${'<~'}                    | ${'<~'}
+    ${'<= {{ newVersion }}'}   | ${'<= 1.6.0'}
+    ${'<= {{{ newVersion }}}'} | ${'<= 1.6.0'}
+    ${'& {{ newValue}}'}       | ${'& >= 1.6.0'}
+  `(
+    'do not escape common range symbols: $input -> $output',
+    ({ input, expected }) => {
+      expect(
+        template.compile(input, { newVersion: '1.6.0', newValue: '>= 1.6.0' }),
+      ).toBe(expected);
+    },
+  );
+
   it('lowercase', () => {
     const userTemplate = "{{{ lowercase 'FOO'}}}";
     const output = template.compile(userTemplate, {});

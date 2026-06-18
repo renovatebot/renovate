@@ -1,5 +1,6 @@
 import { isArray, isNonEmptyArray, isObject, isString } from '@sindresorhus/is';
 import { clone } from '../util/clone.ts';
+import { toMs } from '../util/pretty-time.ts';
 import { getOptions } from './options/index.ts';
 import type { PackageRule, RenovateConfig, UpdateType } from './types.ts';
 
@@ -19,7 +20,9 @@ export function massageConfig(config: RenovateConfig): RenovateConfig {
   }
   const massagedConfig = clone(config);
   for (const [key, val] of Object.entries(config)) {
-    if (allowedStrings.includes(key) && isString(val)) {
+    if (key === 'minimumReleaseAge' && isString(val) && toMs(val) === 0) {
+      massagedConfig.minimumReleaseAge = null;
+    } else if (allowedStrings.includes(key) && isString(val)) {
       // @ts-expect-error -- TODO: fix me
       massagedConfig[key] = [val];
     } else if (isArray(val)) {

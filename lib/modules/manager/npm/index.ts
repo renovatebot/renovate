@@ -47,3 +47,5 @@ export const supportedDatasources = [
   NpmDatasource.id,
   NodeVersionDatasource.id,
 ];
+
+export { knownDepTypes, supportsDynamicDepTypesNote } from './dep-types.ts';

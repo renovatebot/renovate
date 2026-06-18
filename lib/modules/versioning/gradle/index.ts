@@ -16,7 +16,7 @@ import {
 export const id = 'gradle';
 export const displayName = 'Gradle';
 export const urls = [
-  'https://docs.gradle.org/current/userguide/single_versions.html#version_ordering',
+  '[Gradle version ordering](https://docs.gradle.org/current/userguide/single_versions.html#version_ordering)',
 ];
 export const supportsRanges = true;
 export const supportedRangeStrategies: RangeStrategy[] = ['bump'];
@@ -218,6 +218,35 @@ function getNewValue({
       // our version is already "+" which includes ever version
       return null;
     }
+  }
+
+  const mavenRange = parseMavenBasedRange(currentValue);
+  if (mavenRange?.preferredVal) {
+    const { leftVal, rightVal, preferredVal } = mavenRange;
+    const baseRange = currentValue.slice(
+      0,
+      currentValue.lastIndexOf(`!!${preferredVal}`),
+    );
+    const newBaseRange = mavenVersion.getNewValue({
+      currentValue: baseRange,
+      rangeStrategy,
+      newVersion,
+    });
+    // v8 ignore if: the implementation has a non-null return type
+    if (newBaseRange === null) {
+      return null;
+    }
+
+    const preferredIsBoundary =
+      preferredVal === leftVal || preferredVal === rightVal;
+    const newParsed = parseMavenBasedRange(newBaseRange);
+    const preferredStillPresent =
+      newParsed?.leftVal === preferredVal ||
+      newParsed?.rightVal === preferredVal;
+    const newPreferredVal =
+      preferredIsBoundary && !preferredStillPresent ? newVersion : preferredVal;
+
+    return `${newBaseRange}!!${newPreferredVal}`;
   }
 
   return mavenVersion.getNewValue({ currentValue, rangeStrategy, newVersion });

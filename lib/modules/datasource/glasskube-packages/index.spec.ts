@@ -1,23 +1,24 @@
 import { Fixtures } from '~test/fixtures.ts';
 import * as httpMock from '~test/http-mock.ts';
+import { parseUrl } from '../../../util/url.ts';
 import { getPkgReleases } from '../index.ts';
 import { GlasskubePackagesDatasource } from './index.ts';
 
 describe('modules/datasource/glasskube-packages/index', () => {
   const customRegistryUrl = 'https://packages.test.example/packages';
-  const customVersionsUrl = new URL(
+  const customVersionsUrl = parseUrl(
     `${customRegistryUrl}/cloudnative-pg/versions.yaml`,
-  );
-  const defaultVersionUrl = new URL(
+  )!;
+  const defaultVersionUrl = parseUrl(
     `${GlasskubePackagesDatasource.defaultRegistryUrl}/cloudnative-pg/versions.yaml`,
-  );
+  )!;
   const versionsYaml = Fixtures.get('versions.yaml');
-  const customPackageManifestUrl = new URL(
+  const customPackageManifestUrl = parseUrl(
     `${customRegistryUrl}/cloudnative-pg/v1.23.1+1/package.yaml`,
-  );
-  const defaultPackageManifestUrl = new URL(
+  )!;
+  const defaultPackageManifestUrl = parseUrl(
     `${GlasskubePackagesDatasource.defaultRegistryUrl}/cloudnative-pg/v1.23.1+1/package.yaml`,
-  );
+  )!;
   const packageManifestYaml = Fixtures.get('package.yaml');
   const packageManifestNoReferencesYaml = Fixtures.get(
     'package_no_references.yaml',

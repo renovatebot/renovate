@@ -4,9 +4,10 @@ import { GlobalConfig } from '../../../../config/global.ts';
 import { CONFIG_SECRETS_EXPOSED } from '../../../../constants/error-messages.ts';
 import { logger } from '../../../../logger/index.ts';
 import { scm } from '../../../../modules/platform/scm.ts';
-import type { LongCommitSha } from '../../../../util/git/types.ts';
+import type { CommitFilesConfig } from '../../../../util/git/types.ts';
 import { minimatch } from '../../../../util/minimatch.ts';
 import { sanitize } from '../../../../util/sanitize.ts';
+import type { LongCommitSha } from '../../../../util/schema-utils/git.ts';
 import type { BranchConfig } from '../../../types.ts';
 
 export function commitFilesToBranch(
@@ -33,12 +34,8 @@ export function commitFilesToBranch(
     logger.debug(`No files to commit`);
     return Promise.resolve(null);
   }
-  const fileLength = [...new Set(updatedFiles.map((file) => file.path))].length;
+  const fileLength = new Set(updatedFiles.map((file) => file.path)).size;
   logger.debug(`${fileLength} file(s) to commit`);
-  if (GlobalConfig.get('dryRun')) {
-    logger.info('DRY-RUN: Would commit files to branch ' + config.branchName);
-    return Promise.resolve(null);
-  }
   // istanbul ignore if
   if (
     config.branchName !== sanitize(config.branchName) ||
@@ -51,8 +48,7 @@ export function commitFilesToBranch(
     throw new Error(CONFIG_SECRETS_EXPOSED);
   }
 
-  // API will know whether to create new branch or not
-  return scm.commitAndPush({
+  const commitFilesConfig: CommitFilesConfig = {
     baseBranch: config.baseBranch,
     branchName: config.branchName,
     files: updatedFiles,
@@ -63,7 +59,31 @@ export function commitFilesToBranch(
     prTitle: config.prTitle,
     // Only needed by Gerrit platform
     autoApprove: config.autoApprove,
-    // Only needed by Gerrit platform
-    labels: config.labels,
-  });
+  };
+
+  // istanbul ignore if
+  if (GlobalConfig.get('dryRun')) {
+    const logExtra = {
+      ...commitFilesConfig,
+    };
+
+    for (const file of logExtra.files) {
+      if (file.type === 'addition') {
+        // NOTE that we're copying this field with a different name so we get the raw contents logged, otherwise it'll be logged as `[content]`
+        (file as any).rawContents = file.contents;
+      }
+    }
+
+    logger.info(
+      `DRY-RUN: Would commit files to branch ${config.branchName}. See debug logs for raw commit information`,
+    );
+    logger.debug(
+      { ...logExtra },
+      `DRY-RUN: Would commit files to branch ${config.branchName}`,
+    );
+    return Promise.resolve(null);
+  }
+
+  // API will know whether to create new branch or not
+  return scm.commitAndPush(commitFilesConfig);
 }

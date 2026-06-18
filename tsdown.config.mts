@@ -5,6 +5,7 @@ export default defineConfig({
     'lib/config-validator.ts',
     'lib/config/defaults.ts',
     'lib/config/global.ts',
+    'lib/config/options/env-options.ts',
     'lib/config/options/index.ts',
     'lib/config/types.ts',
     'lib/config/utils.ts',
@@ -59,5 +60,7 @@ export default defineConfig({
   sourcemap: true,
   platform: 'node',
   fixedExtension: false,
-  external: /^(?![./]|lib\/)/,
+  deps: {
+    neverBundle: /^(?![./]|lib\/)/,
+  },
 });

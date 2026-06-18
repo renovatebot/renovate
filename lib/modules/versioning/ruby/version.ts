@@ -141,11 +141,11 @@ const decrement = (version: string): string => {
 };
 
 export {
-  parse,
   adapt,
-  floor,
-  trimZeroes,
-  pgteUpperBound,
-  increment,
   decrement,
+  floor,
+  increment,
+  parse,
+  pgteUpperBound,
+  trimZeroes,
 };

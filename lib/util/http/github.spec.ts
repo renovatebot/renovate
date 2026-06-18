@@ -73,9 +73,9 @@ describe('util/http/github', () => {
       const [req] = httpMock.getTrace();
       expect(req).toBeDefined();
       expect(req.headers.accept).toBe(
-        'some-accept, application/vnd.github.machine-man-preview+json',
+        'some-accept, application/vnd.github.v3+json',
       );
-      expect(req.headers.authorization).toBe('token 123test');
+      expect(req.headers.authorization).toBe('Bearer 123test');
     });
 
     it('supports different datasources', async () => {
@@ -290,7 +290,7 @@ describe('util/http/github', () => {
       const apiUrl = 'some-url?per_page=2';
       httpMock
         .scope(baseUrl)
-        .get('/' + apiUrl)
+        .get(`/${apiUrl}`)
         .reply(200, ['a', 'b'], {
           link: `<${baseUrl}${apiUrl}&page=2>; rel="next", <${baseUrl}${apiUrl}&page=3>; rel="last"`,
         })
@@ -326,6 +326,8 @@ describe('util/http/github', () => {
           .get(url)
           .reply(
             code,
+            // nock's reply callback binds `this.req` to the request object, requires regular function
+            // eslint-disable-next-line prefer-arrow-callback
             function reply() {
               // https://github.com/nock/nock/issues/1979
               if (typeof body === 'object' && 'message' in body) {
@@ -419,6 +421,8 @@ describe('util/http/github', () => {
             .get(url)
             .reply(
               code,
+              // nock's reply callback binds `this.req` to the request object, requires regular function
+              // eslint-disable-next-line prefer-arrow-callback
               function reply() {
                 // https://github.com/nock/nock/issues/1979
                 if (typeof body === 'object' && 'message' in body) {
@@ -666,9 +670,7 @@ describe('util/http/github', () => {
       });
       const [req] = httpMock.getTrace();
       expect(req).toBeDefined();
-      expect(req.headers.accept).toBe(
-        'application/vnd.github.machine-man-preview+json',
-      );
+      expect(req.headers.accept).toBe('application/vnd.github.v3+json');
     });
 
     it('returns empty array for undefined data', async () => {

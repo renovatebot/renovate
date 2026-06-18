@@ -1,7 +1,7 @@
+import { setTimeout } from 'node:timers/promises';
 import { isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
 import ignore from 'ignore';
 import semver from 'semver';
-import { setTimeout } from 'timers/promises';
 import type { PartialDeep } from 'type-fest';
 import { GlobalConfig } from '../../../config/global.ts';
 import {
@@ -146,7 +146,7 @@ export async function initPlatform({
       );
       config.username = headers['x-ausername'];
     }
-    logger.debug('Bitbucket Server version is: ' + bitbucketServerVersion);
+    logger.debug(`Bitbucket Server version is: ${bitbucketServerVersion}`);
 
     // v8 ignore else -- TODO: add test #40625
     if (semver.valid(bitbucketServerVersion)) {
@@ -226,9 +226,7 @@ export async function getRawFile(
 ): Promise<string | null> {
   const repo = repoName ?? config.repository;
   const [project, slug] = repo.split('/');
-  const fileUrl =
-    `./rest/api/1.0/projects/${project}/repos/${slug}/browse/${fileName}?limit=20000` +
-    (branchOrTag ? '&at=' + branchOrTag : '');
+  const fileUrl = `./rest/api/1.0/projects/${project}/repos/${slug}/browse/${fileName}?limit=20000${branchOrTag ? `&at=${branchOrTag}` : ''}`;
   const res = await bitbucketServerHttp.getJsonUnchecked<FileData>(fileUrl);
   const { isLastPage, lines, size } = res.body;
   if (isLastPage) {
@@ -269,7 +267,7 @@ export async function initRepo({
     repository,
     prVersions: new Map<number, number>(),
     username: opts.username,
-    ignorePrAuthor: GlobalConfig.get('ignorePrAuthor', false),
+    ignorePrAuthor: GlobalConfig.get('ignorePrAuthor'),
   } as any;
 
   try {
@@ -459,7 +457,7 @@ export async function findPr({
   if (pr) {
     logger.debug(`Found PR #${pr.number}`);
   } else {
-    logger.debug(`Renovate did not find a PR for branch #${branchName}`);
+    logger.debug(`Renovate did not find a PR for branch ${branchName}`);
   }
   return pr ?? null;
 }

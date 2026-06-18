@@ -128,7 +128,7 @@ async function updateArtifactsImpl(
 
   try {
     await writeLocalFile(packageFileName, newPackageFileContent);
-    logger.debug('Updating ' + lockFileName);
+    logger.debug(`Updating ${lockFileName}`);
 
     if (isLockFileMaintenance) {
       await cargoUpdate(packageFileName, true, config.constraints?.rust);

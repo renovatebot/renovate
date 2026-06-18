@@ -27,7 +27,9 @@ const invalidNameContent = Fixtures.get('invalid-name.json', '..');
 describe('modules/manager/npm/extract/index', () => {
   describe('.extractPackageFile()', () => {
     beforeEach(async () => {
-      const realFs = await vi.importActual<typeof fs>('../../../../util/fs');
+      const realFs = await vi.importActual<typeof fs>(
+        '../../../../util/fs/index.ts',
+      );
       fs.readLocalFile.mockResolvedValue(null);
       fs.localPathExists.mockResolvedValue(false);
       fs.getSiblingFileName.mockImplementation(realFs.getSiblingFileName);
@@ -127,7 +129,17 @@ describe('modules/manager/npm/extract/index', () => {
       expect(res).toMatchSnapshot({
         extractedConstraints: {},
         deps: [
-          ...[{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}],
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
           {
             depName: undefined,
             depType: 'resolutions',
@@ -520,7 +532,10 @@ describe('modules/manager/npm/extract/index', () => {
       );
       expect(res).toMatchSnapshot({
         deps: [
-          ...[{}, {}, {}, {}],
+          {},
+          {},
+          {},
+          {},
           {
             depType: 'volta',
             currentValue: '6.11.2',
@@ -642,6 +657,8 @@ describe('modules/manager/npm/extract/index', () => {
           p: 'Owner/P.git#v2.0.0',
           q: 'github:owner/q#semver:1.1.0',
           r: 'github:owner/r#semver:^1.0.0',
+          s: 'github:owner/repo.with.dots#v1.0.0',
+          t: 'git@github.com:owner/repo.with.dots.git#v1.0.0',
         },
       };
       const pJsonStr = JSON.stringify(pJson);
@@ -750,6 +767,18 @@ describe('modules/manager/npm/extract/index', () => {
             currentValue: '^1.0.0',
             datasource: 'github-tags',
             sourceUrl: 'https://github.com/owner/r',
+          },
+          {
+            depName: 's',
+            currentValue: 'v1.0.0',
+            datasource: 'github-tags',
+            sourceUrl: 'https://github.com/owner/repo.with.dots',
+          },
+          {
+            depName: 't',
+            currentValue: 'v1.0.0',
+            datasource: 'github-tags',
+            sourceUrl: 'https://github.com/owner/repo.with.dots',
           },
         ],
       });
@@ -1243,6 +1272,32 @@ describe('modules/manager/npm/extract/index', () => {
           skipInstalls: true,
         },
       ]);
+    });
+
+    it('warns for invalid pnpm workspace yaml files', async () => {
+      fs.readLocalFile.mockResolvedValueOnce(codeBlock`
+        **:
+      `);
+      const res = await extractAllPackageFiles(defaultExtractConfig, [
+        'pnpm-workspace.yaml',
+      ]);
+      expect(res).toEqual([]);
+      expect(logger.warn).toHaveBeenCalledWith(
+        {
+          packageFile: 'pnpm-workspace.yaml',
+          err: expect.any(Error),
+        },
+        'Failed to parse pnpm-workspace.yaml file',
+      );
+    });
+
+    it('parses empty pnpm workspace yaml files', async () => {
+      fs.readLocalFile.mockResolvedValueOnce('');
+      const res = await extractAllPackageFiles(defaultExtractConfig, [
+        'pnpm-workspace.yaml',
+      ]);
+      expect(res).toEqual([]);
+      expect(logger.warn).not.toHaveBeenCalled();
     });
 
     it('extracts pnpm workspace yaml files', async () => {

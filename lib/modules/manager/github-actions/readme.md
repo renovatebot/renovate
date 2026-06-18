@@ -39,6 +39,9 @@ If you want to automatically pin action digests add the `helpers:pinGitHubAction
 }
 ```
 
+Actions pinned to a bare SHA without a version comment are disabled by default, because Renovate cannot determine which branch or tag the SHA belongs to.
+To enable updates, add a tag or branch name as a version comment, as shown above.
+
 ### Non-semver refs (branches and feature tags)
 
 Renovate supports GitHub Actions that reference non-semver refs like branch names (`main`, `master`) or feature-oriented tags (`cargo-llvm-cov`).
@@ -99,15 +102,24 @@ For example, normally the `^` syntax is not used in `go` or `python`, but it's s
 Depending on your use case, you may need to change `versioning` manually.
 If you find a use case which you think Renovate could/should automatically detect and support without manual configuration, please raise a Discussion to suggest it.
 
-### commonly used community actions
+### Updating `with:` values in commonly used Community-maintained GitHub Actions
 
-Renovate also supports some commonly used community actions:
+Third-party GitHub Actions will commonly specify a version of a given tool using a `with:` block, such as:
 
-- `astral-sh/setup-uv`
-- `pnpm/action-setup`
-- `pdm-project/setup-pdm`
-- `jaxxstorm/action-install-gh-release`
-- `sigoden/install-binary`
-- `prefix-dev/setup-pixi`
-- `pypa/hatch@install`
-- `golangci/golangci-lint-action`
+GitHub Actions maintained by the wider community have `with:` blocks such as:
+
+```yaml
+steps:
+- uses: astral-sh/setup-uv@v8.2.0
+  with:
+    version: '0.4.x'
+
+- uses: 'denoland/setup-deno@v2',
+  with:
+    deno-version: '2.4.0'
+```
+
+Renovate supports extracting some of these input(s) from the following Actions, and performing automagic dependency updates accordingly.
+The following third-party Actions have support for their `with:` blocks:
+
+<!-- Autogenerate in https://github.com/renovatebot/renovate -->

@@ -130,7 +130,7 @@ function unfoldBaseBranches(
   return [...new Set(unfoldedList)];
 }
 
-function isMultiBaseBranch(config: RenovateConfig): boolean {
+export function isMultiBaseBranch(config: RenovateConfig): boolean {
   if (!config.baseBranchPatterns?.length) {
     return false;
   }

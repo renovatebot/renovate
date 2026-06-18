@@ -91,6 +91,40 @@ describe('config/secrets', () => {
       });
     });
 
+    it('handles a mix of space characters around the curly braces', () => {
+      const config = {
+        secrets: { TOKEN: 'secret123' },
+        variables: { MANAGER: 'npm' },
+        hostRules: [
+          {
+            hostType: '{{variables.MANAGER   }}',
+            token: '{{secrets.TOKEN}}',
+          },
+        ],
+      };
+      const result = applySecretsAndVariablesToConfig({ config });
+      expect(result).toEqual({
+        hostRules: [{ hostType: 'npm', token: 'secret123' }],
+      });
+    });
+
+    it('does not handle non-space characters around the curly braces', () => {
+      const config = {
+        secrets: { TOKEN: 'secret123' },
+        variables: { MANAGER: 'npm' },
+        hostRules: [
+          {
+            hostType: '{{variables.MANAGER   }}',
+            token: '{{\tsecrets.token\t}}',
+          },
+        ],
+      };
+      const result = applySecretsAndVariablesToConfig({ config });
+      expect(result).toEqual({
+        hostRules: [{ hostType: 'npm', token: '{{\tsecrets.token\t}}' }],
+      });
+    });
+
     it('preserves secrets and variables if delete flags are false', () => {
       const config = {
         secrets: { TOKEN: 'secret123' },

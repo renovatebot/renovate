@@ -21,6 +21,7 @@ export const presets: Record<string, Preset> = {
       'workarounds:containerbase',
       'workarounds:bitnamiDockerImageVersioning',
       'workarounds:clamavDockerImageVersioning',
+      'workarounds:grafanaDockerImageVersioning',
       'workarounds:k3sKubernetesVersioning',
       'workarounds:rke2KubernetesVersioning',
       'workarounds:libericaJdkDockerVersioning',
@@ -119,6 +120,22 @@ export const presets: Record<string, Preset> = {
       },
     ],
   },
+  grafanaDockerImageVersioning: {
+    description: 'Support security releases on Grafana (product) images',
+    packageRules: [
+      {
+        matchDatasources: ['docker'],
+        matchPackageNames: [
+          'grafana/grafana',
+          'docker.io/grafana/grafana',
+          'grafana/grafana-enterprise',
+          'docker.io/grafana/grafana-enterprise',
+        ],
+        versioning:
+          'regex:^(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)(?:-security-(?<build>\\d+))?(?:-(?<compatibility>.*))?$',
+      },
+    ],
+  },
   ignoreHttp4sDigestMilestones: {
     description: 'Ignore `http4s` digest-based `1.x` milestones.',
     packageRules: [
@@ -165,6 +182,7 @@ export const presets: Record<string, Preset> = {
           'adoptopenjdk',
           'openjdk',
           'java',
+          'java-jdk',
           'java-jre',
           'sapmachine',
           '/^azul/zulu-openjdk/',
@@ -277,6 +295,7 @@ export const presets: Record<string, Preset> = {
           '!docker.io/calico/node',
           '!ghcr.io/devcontainers/features/node',
           '!kindest/node',
+          '!docker.io/kindest/node',
         ],
         versionCompatibility: '^(?<version>[^-]+)(?<compatibility>-.*)?$',
         versioning: 'node',

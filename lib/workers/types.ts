@@ -4,6 +4,7 @@ import type {
   LegacyAdminConfig,
   RenovateConfig,
   RenovateSharedConfig,
+  UpdateType,
   ValidationMessage,
 } from '../config/types.ts';
 import type { Release } from '../modules/datasource/types.ts';
@@ -17,6 +18,7 @@ import type {
 } from '../modules/manager/types.ts';
 import type { PlatformPrOptions } from '../modules/platform/types.ts';
 import type { BranchStatus } from '../types/index.ts';
+import type { ConstraintName } from '../util/exec/types.ts';
 import type { FileChange } from '../util/git/types.ts';
 import type { MergeConfidence } from '../util/merge-confidence/types.ts';
 import type { Timestamp } from '../util/timestamp.ts';
@@ -120,7 +122,7 @@ export interface BranchUpgradeConfig
   sourceRepoOrg?: string;
   sourceRepoName?: string;
 
-  constraints?: Record<string, string>;
+  constraints?: Partial<Record<ConstraintName, string>>;
 }
 
 export type PrBlockedBy =
@@ -219,6 +221,37 @@ export interface BranchSummary {
   inactiveBranches: string[];
 }
 
+export interface ManagerUpdateSummary {
+  /** Total number of upgrades processed for this manager. */
+  total: number;
+  /**
+   * Number of upgrades flagged as a fix for a vulnerability alert.
+   *
+   * Counted separately to regular updates, as a `minor` version could include a security update.
+   */
+  vulnerabilityAlert: number;
+  /** The number of updates a given `updateType` has for this manager */
+  updates: Partial<Record<UpdateType, number>>;
+}
+
+export interface BaseBranchUpdateSummary {
+  baseBranch: string;
+  /** Total number of upgrades processed for this base branch. */
+  total: number;
+  /**
+   * Number of upgrades flagged as a fix for a vulnerability alert.
+   *
+   * Counted separately to regular updates, as a `minor` version could include a security update.
+   */
+  vulnerabilityAlert: number;
+  /** The number of updates a given `updateType` has on this branch, across all package files and managers */
+  updates: Partial<Record<UpdateType, number>>;
+  /** Per-manager breakdown of updates on this base branch */
+  managers: Record<string, ManagerUpdateSummary>;
+}
+
+export type UpdateSummary = BaseBranchUpdateSummary[];
+
 export interface WorkerExtractConfig extends ExtractConfig {
   manager: string;
   fileList: string[];
@@ -251,7 +284,7 @@ export interface UpgradeFingerprintConfig {
   lockedVersion?: string;
   manager?: string | null;
   newName?: string;
-  newDigest?: string;
+  newDigest?: string | null;
   newValue?: string;
   newVersion?: string;
   packageFile?: string;

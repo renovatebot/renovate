@@ -40,6 +40,7 @@ export async function runChecksParallel(
         check.cmd,
         check.args,
         processManager,
+        check.env,
       );
       const duration = (Date.now() - start) / 1000;
 

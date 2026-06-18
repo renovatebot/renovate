@@ -16,9 +16,11 @@ Mend is ISO 27001 and SOC2 certified.
 
 ### Security / Disclosure
 
-If you find any bug with Renovate that may be a security problem, then e-mail us at: [renovate-disclosure@mend.io](mailto:renovate-disclosure@mend.io).
+If you find any bug with Renovate that may be a security problem, please report it through the [GitHub Security Advisories process](https://github.com/renovatebot/renovate/security/advisories).
 This way we can evaluate the bug and hopefully fix it before it gets abused.
 Please give us enough time to investigate the bug before you report it anywhere else.
+
+If you would like to discuss a potential finding before raising the Advisory, then e-mail us at: [renovate-disclosure@mend.io](mailto:renovate-disclosure@mend.io).
 
 Please do not create GitHub issues for security-related doubts or problems.
 
@@ -95,6 +97,7 @@ This is particularly true during, for example:
 
 - `postUpgradeTasks`, where scripts specified by the repository are run
 - when a wrapper within the repository is called, like `gradlew` (if setting [`allowedUnsafeExecutions=["gradleWrapper"]`](./self-hosted-configuration.md#allowedunsafeexecutions).
+- when `mise trust` / `mise lock` are run from the repository checkout (if setting [`allowedUnsafeExecutions=["mise"]`](./self-hosted-configuration.md#allowedunsafeexecutions).
 
 These scripts can contain arbitrary code.
 This may pose a significant security risk if the repository's integrity is compromised, or if the repository maintainers have malicious intentions.
@@ -109,9 +112,8 @@ As it is difficult to craft a regular expression that may deny usage of special 
 
 Separately, there are also opportunities for malicious external code to execute, as part of Renovate's update process.
 
-<!-- prettier-ignore -->
 !!! warning
-    Below are _some_ of the options, but note that this is **not exhaustive**.
+  Below are _some_ of the options, but note that this is **not exhaustive**.
 
 For instance:
 

@@ -191,6 +191,7 @@ describe('workers/repository/init/inherited', () => {
       },
       visitedPresets: {
         merged: [],
+        unmerged: [],
       },
     });
     const res = await mergeInheritedConfig(config);
@@ -229,6 +230,7 @@ describe('workers/repository/init/inherited', () => {
       },
       visitedPresets: {
         merged: [],
+        unmerged: [],
       },
     });
     const res = await mergeInheritedConfig(config);
@@ -272,6 +274,7 @@ describe('workers/repository/init/inherited', () => {
       },
       visitedPresets: {
         merged: [],
+        unmerged: [],
       },
     });
     await expect(mergeInheritedConfig(config)).rejects.toThrow(
@@ -307,6 +310,7 @@ describe('workers/repository/init/inherited', () => {
       },
       visitedPresets: {
         merged: [],
+        unmerged: [],
       },
     });
     const res = await mergeInheritedConfig(config);

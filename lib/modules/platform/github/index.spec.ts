@@ -5,6 +5,7 @@ import * as httpMock from '~test/http-mock.ts';
 import { logger } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import {
+  CONFIG_GIT_URL_UNAVAILABLE,
   PLATFORM_RATE_LIMIT_EXCEEDED,
   PLATFORM_UNKNOWN_ERROR,
   REPOSITORY_CANNOT_FORK,
@@ -16,9 +17,9 @@ import {
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
 import * as repository from '../../../util/cache/repository/index.ts';
 import * as _git from '../../../util/git/index.ts';
-import type { LongCommitSha } from '../../../util/git/types.ts';
 import * as _hostRules from '../../../util/host-rules.ts';
 import { setBaseUrl } from '../../../util/http/github.ts';
+import type { LongCommitSha } from '../../../util/schema-utils/git.ts';
 import { toBase64 } from '../../../util/string.ts';
 import { hashBody } from '../pr-body.ts';
 import type {
@@ -65,6 +66,15 @@ describe('modules/platform/github/index', () => {
       await expect(github.initPlatform({})).rejects.toThrow(
         'Init: You must configure a GitHub token',
       );
+    });
+
+    it('should throw if endpoint is invalid URL', async () => {
+      await expect(
+        github.initPlatform({
+          endpoint: 'https://[invalid',
+          token: 'abc',
+        }),
+      ).rejects.toThrow('Invalid GitHub endpoint URL: https://[invalid');
     });
 
     it('should throw if using fine-grained token with GHE <3.10', async () => {
@@ -349,12 +359,64 @@ describe('modules/platform/github/index', () => {
       expect(await github.initPlatform({ token: '123test' })).toMatchSnapshot();
     });
 
+    it('should use public email from user profile when available', async () => {
+      httpMock.scope(githubApiHost).get('/user').reply(200, {
+        login: 'renovate-bot',
+        name: 'Example User',
+        email: 'user@domain.com',
+      });
+      expect(await github.initPlatform({ token: '123test' })).toEqual({
+        endpoint: 'https://api.github.com/',
+        gitAuthor: 'Example User <user@domain.com>',
+        renovateUsername: 'renovate-bot',
+        token: '123test',
+      });
+    });
+
+    it('should fall back to user/emails when there is no public email', async () => {
+      httpMock
+        .scope(githubApiHost)
+        .get('/user')
+        .reply(200, {
+          login: 'renovate-bot',
+          name: 'Example User',
+          email: null,
+        })
+        .get('/user/emails')
+        .reply(200, [{ email: 'user@differentdomain.com' }]);
+      expect(await github.initPlatform({ token: '123test' })).toEqual({
+        endpoint: 'https://api.github.com/',
+        gitAuthor: 'Example User <user@differentdomain.com>',
+        renovateUsername: 'renovate-bot',
+        token: '123test',
+      });
+    });
+
+    it('should fall back gracefully when user/emails returns an error (no user:email scope)', async () => {
+      httpMock
+        .scope(githubApiHost)
+        .get('/user')
+        .reply(200, {
+          login: 'renovate-bot',
+          name: 'Example User',
+          email: null,
+        })
+        .get('/user/emails')
+        .reply(403);
+      expect(await github.initPlatform({ token: '123test' })).toEqual({
+        endpoint: 'https://api.github.com/',
+        gitAuthor: undefined,
+        renovateUsername: 'renovate-bot',
+        token: '123test',
+      });
+    });
+
     it('should autodetect email/user on default endpoint with GitHub App', async () => {
       process.env.RENOVATE_X_GITHUB_HOST_RULES = 'true';
       httpMock
         .scope(githubApiHost, {
           reqheaders: {
-            authorization: 'token ghs_123test',
+            authorization: 'Bearer ghs_123test',
           },
         })
         .post('/graphql')
@@ -450,7 +512,7 @@ describe('modules/platform/github/index', () => {
       httpMock
         .scope('https://ghe.renovatebot.com', {
           reqheaders: {
-            authorization: 'token ghs_123test',
+            authorization: 'Bearer ghs_123test',
           },
         })
         .head('/')
@@ -468,6 +530,32 @@ describe('modules/platform/github/index', () => {
         endpoint: 'https://ghe.renovatebot.com/',
         gitAuthor:
           'my-app[bot] <12345+my-app[bot]@users.noreply.ghe.renovatebot.com>',
+        renovateUsername: 'my-app[bot]',
+        token: 'x-access-token:ghs_123test',
+      });
+    });
+
+    it('should autodetect email/user on GHE Cloud endpoint with GitHub App', async () => {
+      httpMock
+        .scope('https://octocorp.ghe.com', {
+          reqheaders: {
+            authorization: 'Bearer ghs_123test',
+          },
+        })
+        .head('/')
+        .reply(200, '', { 'x-github-enterprise-version': '3.0.15' })
+        .post('/graphql')
+        .reply(200, {
+          data: { viewer: { login: 'my-app[bot]', databaseId: 12345 } },
+        });
+      expect(
+        await github.initPlatform({
+          endpoint: 'https://octocorp.ghe.com',
+          token: 'x-access-token:ghs_123test',
+        }),
+      ).toEqual({
+        endpoint: 'https://octocorp.ghe.com/',
+        gitAuthor: 'my-app[bot] <12345+my-app[bot]@users.noreply.ghe.com>',
         renovateUsername: 'my-app[bot]',
         token: 'x-access-token:ghs_123test',
       });
@@ -644,6 +732,7 @@ describe('modules/platform/github/index', () => {
       data: {
         repository: {
           isFork: false,
+          sshUrl: `git@github.com:${repository}.git`,
           isArchived: false,
           nameWithOwner: repository,
           autoMergeAllowed: true,
@@ -678,6 +767,7 @@ describe('modules/platform/github/index', () => {
         data: {
           repository: {
             isFork,
+            sshUrl: `git@github.com:${repository}.git`,
             isArchived: false,
             nameWithOwner: repository,
             hasIssuesEnabled: true,
@@ -767,6 +857,56 @@ describe('modules/platform/github/index', () => {
           forkCreation: false,
         }),
       ).rejects.toThrow(REPOSITORY_FORK_MISSING);
+    });
+
+    it('should use sshUrl if gitUrl is set to ssh', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      await github.initRepo({
+        repository: 'some/repo',
+        gitUrl: 'ssh',
+      });
+      expect(git.initRepo).toHaveBeenCalledWith(
+        expect.objectContaining({
+          url: 'git@github.com:some/repo.git',
+        }),
+      );
+    });
+
+    it('should throw if sshUrl is not present but gitUrl is set to ssh', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo', { sshUrl: null });
+      await expect(
+        github.initRepo({
+          repository: 'some/repo',
+          gitUrl: 'ssh',
+        }),
+      ).rejects.toThrow(CONFIG_GIT_URL_UNAVAILABLE);
+    });
+
+    it('should use fork sshUrl when gitUrl is ssh in fork mode', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      forkInitRepoMock(scope, 'some/repo', false);
+      scope.get('/user').reply(200, {
+        login: 'forked',
+      });
+      scope.post('/repos/some/repo/forks').reply(200, {
+        full_name: 'forked/repo',
+        default_branch: 'master',
+        ssh_url: 'git@github.com:forked/repo.git',
+      });
+      await github.initRepo({
+        repository: 'some/repo',
+        forkToken: 'token',
+        forkCreation: true,
+        gitUrl: 'ssh',
+      });
+      expect(git.initRepo).toHaveBeenCalledWith(
+        expect.objectContaining({
+          url: 'git@github.com:forked/repo.git',
+          upstreamUrl: 'git@github.com:some/repo.git',
+        }),
+      );
     });
 
     it('throws if the repo is a fork', async () => {
@@ -3132,6 +3272,99 @@ describe('modules/platform/github/index', () => {
         });
       await expect(github.ensureIssueClosing('title-2')).toResolve();
     });
+
+    it('swallows 410 Gone when the issue was deleted on the platform', async () => {
+      httpMock
+        .scope(githubApiHost)
+        .post('/graphql')
+        .reply(200, {
+          data: {
+            repository: {
+              issues: {
+                pageInfo: {
+                  startCursor: null,
+                  hasNextPage: false,
+                  endCursor: null,
+                },
+                nodes: [
+                  {
+                    number: 2,
+                    state: 'open',
+                    title: 'title-2',
+                    body: 'body-2',
+                    updatedAt: '2022-01-01T00:00:00Z',
+                  },
+                ],
+              },
+            },
+          },
+        })
+        .patch('/repos/undefined/issues/2')
+        .reply(410, { message: 'This issue was deleted' });
+      await expect(github.ensureIssueClosing('title-2')).toResolve();
+    });
+
+    it('swallows 404 Not Found when the issue was deleted on the platform', async () => {
+      httpMock
+        .scope(githubApiHost)
+        .post('/graphql')
+        .reply(200, {
+          data: {
+            repository: {
+              issues: {
+                pageInfo: {
+                  startCursor: null,
+                  hasNextPage: false,
+                  endCursor: null,
+                },
+                nodes: [
+                  {
+                    number: 3,
+                    state: 'open',
+                    title: 'title-3',
+                    body: 'body-3',
+                    updatedAt: '2022-01-01T00:00:00Z',
+                  },
+                ],
+              },
+            },
+          },
+        })
+        .patch('/repos/undefined/issues/3')
+        .reply(404, { message: 'Not Found' });
+      await expect(github.ensureIssueClosing('title-3')).toResolve();
+    });
+
+    it('rethrows non-deletion errors', async () => {
+      httpMock
+        .scope(githubApiHost)
+        .post('/graphql')
+        .reply(200, {
+          data: {
+            repository: {
+              issues: {
+                pageInfo: {
+                  startCursor: null,
+                  hasNextPage: false,
+                  endCursor: null,
+                },
+                nodes: [
+                  {
+                    number: 4,
+                    state: 'open',
+                    title: 'title-4',
+                    body: 'body-4',
+                    updatedAt: '2022-01-01T00:00:00Z',
+                  },
+                ],
+              },
+            },
+          },
+        })
+        .patch('/repos/undefined/issues/4')
+        .reply(500, { message: 'Internal Server Error' });
+      await expect(github.ensureIssueClosing('title-4')).toReject();
+    });
   });
 
   describe('deleteLabel(issueNo, label)', () => {
@@ -3159,6 +3392,46 @@ describe('modules/platform/github/index', () => {
       await expect(
         github.addAssignees(42, ['someuser', 'someotheruser']),
       ).toResolve();
+    });
+
+    it('should retry on 404 and succeed', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      scope
+        .post('/repos/some/repo/issues/42/assignees')
+        .reply(404)
+        .post('/repos/some/repo/issues/42/assignees')
+        .reply(200, {
+          number: 42,
+          state: 'open',
+          title: 'title-42',
+          body: 'body-42',
+          updated_at: '2023-01-01T00:00:00Z',
+        });
+      await github.initRepo({ repository: 'some/repo' });
+      await expect(
+        github.addAssignees(42, ['someuser', 'someotheruser']),
+      ).toResolve();
+    });
+
+    it('should throw after 3 consecutive 404 responses', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      scope.post('/repos/some/repo/issues/42/assignees').times(3).reply(404);
+      await github.initRepo({ repository: 'some/repo' });
+      await expect(
+        github.addAssignees(42, ['someuser', 'someotheruser']),
+      ).rejects.toThrow();
+    });
+
+    it('should throw immediately on non-404 errors', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      scope.post('/repos/some/repo/issues/42/assignees').reply(422);
+      await github.initRepo({ repository: 'some/repo' });
+      await expect(
+        github.addAssignees(42, ['someuser', 'someotheruser']),
+      ).rejects.toThrow();
     });
   });
 
@@ -3919,6 +4192,147 @@ describe('modules/platform/github/index', () => {
           restAddLabels,
           graphqlAutomerge,
         ]);
+      });
+
+      it('should pass commit message as commitHeadline and commitBody for squash merge', async () => {
+        const scope = await mockScope();
+        scope.post('/graphql').reply(200, graphqlAutomergeResp);
+
+        const pr = await github.createPr({
+          ...prConfig,
+          platformPrOptions: {
+            usePlatformAutomerge: true,
+            automergeCommitMessage: 'Update dependency foo to v1.2.3',
+          },
+        });
+
+        expect(pr).toMatchObject({ number: 123 });
+        expect(httpMock.getTrace()).toMatchObject([
+          graphqlGetRepo,
+          restCreatePr,
+          restAddLabels,
+          {
+            ...graphqlAutomerge,
+            graphql: {
+              ...graphqlAutomerge.graphql,
+              variables: {
+                pullRequestId: 'abcd',
+                mergeMethod: 'SQUASH',
+                commitHeadline: 'Update dependency foo to v1.2.3 (#123)',
+              },
+            },
+          },
+        ]);
+      });
+
+      it('should pass commit message as commitHeadline and commitBody for merge commit', async () => {
+        const scope = await mockScope({
+          squashMergeAllowed: false,
+          mergeCommitAllowed: true,
+        });
+        scope.post('/graphql').reply(200, graphqlAutomergeResp);
+
+        const pr = await github.createPr({
+          ...prConfig,
+          platformPrOptions: {
+            usePlatformAutomerge: true,
+            automergeCommitMessage: 'Update dependency foo to v1.2.3',
+          },
+        });
+
+        expect(pr).toMatchObject({ number: 123 });
+        expect(httpMock.getTrace()).toMatchObject([
+          graphqlGetRepo,
+          restCreatePr,
+          restAddLabels,
+          {
+            ...graphqlAutomerge,
+            graphql: {
+              ...graphqlAutomerge.graphql,
+              variables: {
+                pullRequestId: 'abcd',
+                mergeMethod: 'MERGE',
+                commitHeadline: 'Update dependency foo to v1.2.3 (#123)',
+              },
+            },
+          },
+        ]);
+      });
+
+      it('should pass multi-line commit message body for squash merge', async () => {
+        const scope = await mockScope();
+        scope.post('/graphql').reply(200, graphqlAutomergeResp);
+
+        const pr = await github.createPr({
+          ...prConfig,
+          platformPrOptions: {
+            usePlatformAutomerge: true,
+            automergeCommitMessage:
+              'Update dependency foo to v1.2.3\n\nSome commit body',
+          },
+        });
+
+        expect(pr).toMatchObject({ number: 123 });
+        expect(httpMock.getTrace()).toMatchObject([
+          graphqlGetRepo,
+          restCreatePr,
+          restAddLabels,
+          {
+            ...graphqlAutomerge,
+            graphql: {
+              ...graphqlAutomerge.graphql,
+              variables: {
+                pullRequestId: 'abcd',
+                mergeMethod: 'SQUASH',
+                commitHeadline: 'Update dependency foo to v1.2.3 (#123)',
+                commitBody: 'Some commit body',
+              },
+            },
+          },
+        ]);
+      });
+
+      it('should not pass commit message headline/body for rebase merge', async () => {
+        const scope = await mockScope({
+          squashMergeAllowed: false,
+          mergeCommitAllowed: false,
+          rebaseMergeAllowed: true,
+        });
+        scope.post('/graphql').reply(200, graphqlAutomergeResp);
+
+        const pr = await github.createPr({
+          ...prConfig,
+          platformPrOptions: {
+            usePlatformAutomerge: true,
+            automergeCommitMessage:
+              'Update dependency foo to v1.2.3\n\nSome commit body',
+          },
+        });
+
+        expect(pr).toMatchObject({ number: 123 });
+
+        const trace = httpMock.getTrace();
+        expect(trace).toMatchObject([
+          graphqlGetRepo,
+          restCreatePr,
+          restAddLabels,
+          {
+            ...graphqlAutomerge,
+            graphql: {
+              ...graphqlAutomerge.graphql,
+              variables: {
+                pullRequestId: 'abcd',
+                mergeMethod: 'REBASE',
+              },
+            },
+          },
+        ]);
+
+        const automergeTrace = trace.at(-1);
+        expect(
+          automergeTrace?.graphql?.variables?.commitHeadline,
+        ).toBeUndefined();
+        expect(automergeTrace?.graphql?.variables?.commitBody).toBeUndefined();
       });
     });
 
@@ -4759,15 +5173,19 @@ describe('modules/platform/github/index', () => {
         .reply(200, [
           {
             security_advisory: {
+              ghsa_id: 'GHSA-1234-5678-9012',
+              summary: 'summary',
               description: 'description',
               identifiers: [{ type: 'type', value: 'value' }],
               references: [],
+              severity: 'high',
             },
             security_vulnerability: {
               package: {
                 ecosystem: 'npm',
                 name: 'left-pad',
               },
+              severity: 'high',
               vulnerable_version_range: '0.0.2',
               first_patched_version: { identifier: '0.0.3' },
             },
@@ -4777,9 +5195,12 @@ describe('modules/platform/github/index', () => {
           },
           {
             security_advisory: {
+              ghsa_id: 'GHSA-1234-5678-9012',
+              summary: 'summary',
               description: 'description',
               identifiers: [{ type: 'type', value: 'value' }],
               references: [],
+              severity: 'high',
             },
             security_vulnerability: null,
             dependency: {
@@ -4830,15 +5251,19 @@ describe('modules/platform/github/index', () => {
         .reply(200, [
           {
             security_advisory: {
+              ghsa_id: 'GHSA-1234-5678-9012',
+              summary: 'summary',
               description: 'description',
               identifiers: [{ type: 'type', value: 'value' }],
               references: [],
+              severity: 'high',
             },
             security_vulnerability: {
               package: {
                 ecosystem: 'npm',
                 name: 'left-pad',
               },
+              severity: 'high',
               vulnerable_version_range: '0.0.2',
               first_patched_version: { identifier: '0.0.3' },
             },
@@ -4849,9 +5274,12 @@ describe('modules/platform/github/index', () => {
 
           {
             security_advisory: {
+              ghsa_id: 'GHSA-1234-5678-9012',
+              summary: 'summary',
               description: 'description',
               identifiers: [{ type: 'type', value: 'value' }],
               references: [],
+              severity: 'high',
             },
             security_vulnerability: null,
             dependency: {
@@ -4879,15 +5307,19 @@ describe('modules/platform/github/index', () => {
         .reply(200, [
           {
             security_advisory: {
+              ghsa_id: 'GHSA-1234-5678-9012',
+              summary: 'summary',
               description: 'description',
               identifiers: [{ type: 'type', value: 'value' }],
               references: [],
+              severity: 'medium',
             },
             security_vulnerability: {
               package: {
                 ecosystem: 'pip',
                 name: 'FrIeNdLy.-.BARD',
               },
+              severity: 'medium',
               vulnerable_version_range: '0.0.2',
               first_patched_version: { identifier: '0.0.3' },
             },
@@ -4914,15 +5346,19 @@ describe('modules/platform/github/index', () => {
           [
             {
               security_advisory: {
+                ghsa_id: 'GHSA-1234-5678-9012',
+                summary: 'summary',
                 description: 'description',
                 identifiers: [{ type: 'type', value: 'value' }],
                 references: [],
+                severity: 'high',
               },
               security_vulnerability: {
                 package: {
                   ecosystem: 'npm',
                   name: 'left-pad',
                 },
+                severity: 'high',
                 vulnerable_version_range: '0.0.2',
                 first_patched_version: { identifier: '0.0.3' },
               },
@@ -4932,15 +5368,19 @@ describe('modules/platform/github/index', () => {
             },
             {
               security_advisory: {
+                ghsa_id: 'GHSA-1234-5678-9012',
+                summary: 'summary',
                 description: 'description',
                 identifiers: [{ type: 'type', value: 'value' }],
                 references: [],
+                severity: 'critical',
               },
               security_vulnerability: {
                 package: {
                   ecosystem: 'npm',
                   name: 'right-pad',
                 },
+                severity: 'critical',
                 vulnerable_version_range: '0.0.1',
                 first_patched_version: { identifier: '0.0.2' },
               },
@@ -4959,15 +5399,19 @@ describe('modules/platform/github/index', () => {
         .reply(200, [
           {
             security_advisory: {
+              ghsa_id: 'GHSA-1234-5678-9012',
+              summary: 'summary',
               description: 'description',
               identifiers: [{ type: 'type', value: 'value' }],
               references: [],
+              severity: 'low',
             },
             security_vulnerability: {
               package: {
                 ecosystem: 'npm',
                 name: 'center-pad',
               },
+              severity: 'low',
               vulnerable_version_range: '0.0.3',
               first_patched_version: { identifier: '0.0.4' },
             },
@@ -5086,6 +5530,18 @@ describe('modules/platform/github/index', () => {
       git.fetchBranch.mockImplementation(() =>
         Promise.resolve('0abcdef' as LongCommitSha),
       );
+      git.pushCommitToRenovateRef.mockResolvedValue(undefined);
+      git.getCommitTreeSha.mockResolvedValue(
+        '0000000000000000000000000000000000000000' as LongCommitSha,
+      );
+      git.diffCommitTree.mockResolvedValue([
+        {
+          path: 'foo.bar',
+          mode: '100644',
+          type: 'blob',
+          sha: 'abc0000000000000000000000000000000000000' as LongCommitSha,
+        },
+      ]);
     });
 
     it('returns null if pre-commit phase has failed', async () => {
@@ -5123,10 +5579,22 @@ describe('modules/platform/github/index', () => {
       expect(res).toBeNull();
     });
 
-    it('commits and returns SHA string', async () => {
-      git.pushCommitToRenovateRef.mockResolvedValueOnce();
-      git.listCommitTree.mockResolvedValueOnce([]);
+    it('returns null when diff is empty', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      await github.initRepo({ repository: 'some/repo' });
+      git.diffCommitTree.mockResolvedValueOnce([]);
 
+      const res = await github.commitFiles({
+        branchName: 'foo/bar',
+        files: [{ type: 'addition', path: 'foo.bar', contents: 'foobar' }],
+        message: 'Foobar',
+      });
+
+      expect(res).toBeNull();
+    });
+
+    it('commits and returns SHA string', async () => {
       const scope = httpMock.scope(githubApiHost);
 
       initRepoMock(scope, 'some/repo');
@@ -5136,8 +5604,10 @@ describe('modules/platform/github/index', () => {
         .post('/repos/some/repo/git/trees')
         .reply(200, { sha: '111' })
         .post('/repos/some/repo/git/commits')
-        .reply(200, { sha: '222' })
-        .head('/repos/some/repo/git/commits/222')
+        .reply(200, { sha: '0123456789abcdef0123456789abcdef01234567' })
+        .head(
+          '/repos/some/repo/git/commits/0123456789abcdef0123456789abcdef01234567',
+        )
         .reply(200)
         .post('/repos/some/repo/git/refs')
         .reply(200);
@@ -5153,9 +5623,6 @@ describe('modules/platform/github/index', () => {
     });
 
     it('performs rebase', async () => {
-      git.pushCommitToRenovateRef.mockResolvedValueOnce();
-      git.listCommitTree.mockResolvedValueOnce([]);
-
       const scope = httpMock.scope(githubApiHost);
 
       initRepoMock(scope, 'some/repo');
@@ -5165,8 +5632,10 @@ describe('modules/platform/github/index', () => {
         .post('/repos/some/repo/git/trees')
         .reply(200, { sha: '111' })
         .post('/repos/some/repo/git/commits')
-        .reply(200, { sha: '222' })
-        .head('/repos/some/repo/git/commits/222')
+        .reply(200, { sha: '0123456789abcdef0123456789abcdef01234567' })
+        .head(
+          '/repos/some/repo/git/commits/0123456789abcdef0123456789abcdef01234567',
+        )
         .reply(200)
         .patch('/repos/some/repo/git/refs/heads/foo/bar')
         .reply(200);
@@ -5182,9 +5651,6 @@ describe('modules/platform/github/index', () => {
     });
 
     it('continues if rebase fails due to 422', async () => {
-      git.pushCommitToRenovateRef.mockResolvedValueOnce();
-      git.listCommitTree.mockResolvedValueOnce([]);
-
       const scope = httpMock.scope(githubApiHost);
 
       initRepoMock(scope, 'some/repo');
@@ -5194,8 +5660,10 @@ describe('modules/platform/github/index', () => {
         .post('/repos/some/repo/git/trees')
         .reply(200, { sha: '111' })
         .post('/repos/some/repo/git/commits')
-        .reply(200, { sha: '222' })
-        .head('/repos/some/repo/git/commits/222')
+        .reply(200, { sha: '0123456789abcdef0123456789abcdef01234567' })
+        .head(
+          '/repos/some/repo/git/commits/0123456789abcdef0123456789abcdef01234567',
+        )
         .reply(200)
         .patch('/repos/some/repo/git/refs/heads/foo/bar')
         .reply(422)
@@ -5213,9 +5681,6 @@ describe('modules/platform/github/index', () => {
     });
 
     it('aborts if rebase fails due to non-422', async () => {
-      git.pushCommitToRenovateRef.mockResolvedValueOnce();
-      git.listCommitTree.mockResolvedValueOnce([]);
-
       const scope = httpMock.scope(githubApiHost);
 
       initRepoMock(scope, 'some/repo');
@@ -5225,8 +5690,10 @@ describe('modules/platform/github/index', () => {
         .post('/repos/some/repo/git/trees')
         .reply(200, { sha: '111' })
         .post('/repos/some/repo/git/commits')
-        .reply(200, { sha: '222' })
-        .head('/repos/some/repo/git/commits/222')
+        .reply(200, { sha: '0123456789abcdef0123456789abcdef01234567' })
+        .head(
+          '/repos/some/repo/git/commits/0123456789abcdef0123456789abcdef01234567',
+        )
         .reply(200)
         .patch('/repos/some/repo/git/refs/heads/foo/bar')
         .reply(404);
@@ -5242,9 +5709,6 @@ describe('modules/platform/github/index', () => {
     });
 
     it("aborts if commit SHA doesn't exist", async () => {
-      git.pushCommitToRenovateRef.mockResolvedValueOnce();
-      git.listCommitTree.mockResolvedValueOnce([]);
-
       const scope = httpMock.scope(githubApiHost);
 
       initRepoMock(scope, 'some/repo');
@@ -5254,8 +5718,10 @@ describe('modules/platform/github/index', () => {
         .post('/repos/some/repo/git/trees')
         .reply(200, { sha: '111' })
         .post('/repos/some/repo/git/commits')
-        .reply(200, { sha: '222' })
-        .head('/repos/some/repo/git/commits/222')
+        .reply(200, { sha: '0123456789abcdef0123456789abcdef01234567' })
+        .head(
+          '/repos/some/repo/git/commits/0123456789abcdef0123456789abcdef01234567',
+        )
         .reply(404);
 
       const res = await github.commitFiles({

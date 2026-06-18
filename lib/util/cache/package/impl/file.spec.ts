@@ -2,7 +2,12 @@ import cacache from 'cacache';
 import { DateTime } from 'luxon';
 import { type DirectoryResult, dir } from 'tmp-promise';
 import upath from 'upath';
+import { logger as _logger } from '~test/util.ts';
+import { compressToBase64 } from '../../../compress.ts';
+import { encodeEntry } from '../codec.ts';
 import { PackageCacheFile } from './file.ts';
+
+const { logger } = _logger;
 
 describe('util/cache/package/impl/file', () => {
   let tmpDir: DirectoryResult;
@@ -28,6 +33,17 @@ describe('util/cache/package/impl/file', () => {
       const res = await cache.get('_test-namespace', 'key');
 
       expect(res).toBe(1234);
+    });
+
+    it('stores payload with value and expiry', async () => {
+      await cache.set('_test-namespace', 'key', 1234, 5);
+
+      const entry = await cacache.get(cacheFileName, '_test-namespace-key');
+      const payload = JSON.parse(entry.data.toString());
+
+      expect(Object.keys(payload).sort()).toEqual(['expiry', 'value']);
+      expect(payload.value).toBeString();
+      expect(payload.expiry).toBeString();
     });
   });
 
@@ -66,9 +82,23 @@ describe('util/cache/package/impl/file', () => {
       expect(res).toBeUndefined();
     });
 
-    it('returns undefined for corrupted compressed value', async () => {
+    it('removes invalid entries', async () => {
+      await cacache.put(cacheFileName, '_test-namespace-key', 'invalid-json');
+
+      const res = await cache.get('_test-namespace', 'key');
+
+      expect(res).toBeUndefined();
+      expect(logger.once.debug).toHaveBeenCalledWith(
+        { err: expect.any(Error) },
+        'Error while reading package cache value',
+      );
+      await expect(
+        cacache.get(cacheFileName, '_test-namespace-key'),
+      ).rejects.toThrow('No cache entry');
+    });
+
+    it('returns undefined for corrupted cache payload', async () => {
       const payload = JSON.stringify({
-        compress: true,
         value: 'not-base64-encoded-gzip',
         expiry: DateTime.local().plus({ minutes: 5 }),
       });
@@ -80,7 +110,7 @@ describe('util/cache/package/impl/file', () => {
     });
 
     it('returns undefined for missing expiry', async () => {
-      const payload = JSON.stringify({ compress: false, value: 1234 });
+      const payload = JSON.stringify({ value: 1234 });
       await cacache.put(cacheFileName, '_test-namespace-key', payload);
 
       const res = await cache.get('_test-namespace', 'key');
@@ -90,7 +120,6 @@ describe('util/cache/package/impl/file', () => {
 
     it('returns undefined for invalid expiry', async () => {
       const payload = JSON.stringify({
-        compress: false,
         value: 1234,
         expiry: 'not-a-date',
       });
@@ -101,13 +130,23 @@ describe('util/cache/package/impl/file', () => {
       expect(res).toBeUndefined();
     });
 
-    it('retrieves non-compressed value', async () => {
-      const payload = JSON.stringify({
-        compress: false,
-        value: 1234,
-        expiry: DateTime.local().plus({ minutes: 5 }),
-      });
+    it('retrieves value from cache payload', async () => {
+      const value = await compressToBase64(JSON.stringify(1234));
+      const expiry = DateTime.local().plus({ minutes: 5 });
+      const payload = JSON.stringify({ value, expiry });
       await cacache.put(cacheFileName, '_test-namespace-key', payload);
+
+      const res = await cache.get('_test-namespace', 'key');
+
+      expect(res).toBe(1234);
+    });
+
+    it('retrieves value from envelope payload', async () => {
+      await cacache.put(
+        cacheFileName,
+        '_test-namespace-key',
+        await encodeEntry(1234, DateTime.local()),
+      );
 
       const res = await cache.get('_test-namespace', 'key');
 
@@ -137,6 +176,17 @@ describe('util/cache/package/impl/file', () => {
       ).rejects.toThrow('ENOENT');
     });
 
+    it('keeps entries with valid non-expired expiry read from disk', async () => {
+      const futureExpiry = DateTime.local().plus({ days: 1 }).toISO();
+      const payload = JSON.stringify({ value: 'future', expiry: futureExpiry });
+      await cacache.put(cacheFileName, 'future-expiry-key', payload);
+
+      await cache.destroy();
+
+      const entries = await cacache.ls(cacheFileName);
+      expect(Object.keys(entries)).toContain('future-expiry-key');
+    });
+
     it('keeps entries without expiry field', async () => {
       const payload = JSON.stringify({ value: 'no-expiry' });
       await cacache.put(cacheFileName, 'no-expiry-key', payload);
@@ -162,6 +212,7 @@ describe('util/cache/package/impl/file', () => {
 
     it('continues on cleanup errors', async () => {
       await cache.set('_test-namespace', 'valid', 1234, 5);
+      await cacache.put(cacheFileName, 'cold-entry', 'some data');
       const cacacheGet = vi
         .spyOn(cacache, 'get')
         .mockRejectedValue(new Error('error'));
@@ -169,6 +220,36 @@ describe('util/cache/package/impl/file', () => {
       await cache.destroy();
 
       expect(cacacheGet).toHaveBeenCalled();
+    });
+
+    it('skips disk read for entry written this run', async () => {
+      await cache.set('_test-namespace', 'in-memory', 'value', 5);
+      const cacacheGet = vi.spyOn(cacache, 'get');
+
+      await cache.destroy();
+
+      const calledForKey = cacacheGet.mock.calls.some(
+        (args) => args[1] === '_test-namespace-in-memory',
+      );
+      expect(calledForKey).toBe(false);
+      const entries = await cacache.ls(cacheFileName);
+      expect(Object.keys(entries)).toContain('_test-namespace-in-memory');
+    });
+
+    it('skips disk read for expired entry written this run', async () => {
+      await cache.set('_test-namespace', 'expired-in-memory', 'value', -5);
+      const cacacheGet = vi.spyOn(cacache, 'get');
+
+      await cache.destroy();
+
+      const calledForKey = cacacheGet.mock.calls.some(
+        (args) => args[1] === '_test-namespace-expired-in-memory',
+      );
+      expect(calledForKey).toBe(false);
+      const entries = await cacache.ls(cacheFileName);
+      expect(Object.keys(entries)).not.toContain(
+        '_test-namespace-expired-in-memory',
+      );
     });
   });
 });

@@ -1,15 +1,13 @@
 # Self-Hosting Examples
 
-<!-- prettier-ignore -->
 !!! warning
-    All self-hosted Renovate instances must operate under a trust relationship with the developers of the monitored repositories. Because of this, there are [security implications](../security-and-permissions.md#security-awareness-for-self-hosted-renovate-instances) when running a self-hosted Renovate instance, which you must consider carefully.
+  All self-hosted Renovate instances must operate under a trust relationship with the developers of the monitored repositories. Because of this, there are [security implications](../security-and-permissions.md#security-awareness-for-self-hosted-renovate-instances) when running a self-hosted Renovate instance, which you must consider carefully.
 
-<!-- prettier-ignore -->
 !!! warning
-    Most Open Source packages are hosted on github.com, including a number of tools that Renovate may pull at run-time.
-    GitHub greatly rate limits unauthenticated API requests, so you need to configure credentials for `github.com` or the bot will get rate limited quickly.
-    &nbsp;
-    Read [Running Renovate, GitHub.com token for changelogs](../getting-started/running.md#githubcom-token-for-changelogs-and-tools) to learn more.
+  Most Open Source packages are hosted on github.com, including a number of tools that Renovate may pull at run-time.
+  GitHub greatly rate limits unauthenticated API requests, so you need to configure credentials for `github.com` or the bot will get rate limited quickly.
+  &nbsp;
+  Read [Running Renovate, GitHub.com token for changelogs](../getting-started/running.md#githubcom-token-for-changelogs-and-tools) to learn more.
 
 ## Installing Renovate OSS CLI
 
@@ -36,14 +34,13 @@ It builds `latest` based on the `main` branch and all SemVer tags are published 
 ```sh title="Example of valid tags"
 docker run --rm renovate/renovate
 docker run --rm renovate/renovate:43
-docker run --rm renovate/renovate:43.76
-docker run --rm renovate/renovate:43.76.2
+docker run --rm renovate/renovate:43.222
+docker run --rm renovate/renovate:43.222.1
 ```
 
-<!-- prettier-ignore -->
 !!! warning
-    Do not use the example tags listed above, as they will be out-of-date.
-    Go to [the `renovate/renovate` tags on DockerHub](https://hub.docker.com/r/renovate/renovate/tags) to grab the latest tagged release from Renovate.
+  Do not use the example tags listed above, as they will be out-of-date.
+  Go to [the `renovate/renovate` tags on DockerHub](https://hub.docker.com/r/renovate/renovate/tags) to grab the latest tagged release from Renovate.
 
 If you want to configure Renovate using a `config.js` file then map it to `/usr/src/app/config.js` using Docker volumes.
 For example:
@@ -73,7 +70,7 @@ spec:
             - name: renovate
               # Update this to the latest available and then enable Renovate on
               # the manifest
-              image: renovate/renovate:43.76.2
+              image: renovate/renovate:43.222.1
               args:
                 - user/repo
               # Environment Variables
@@ -132,7 +129,7 @@ spec:
       template:
         spec:
           containers:
-            - image: renovate/renovate:43.76.2
+            - image: renovate/renovate:43.222.1
               name: renovate-bot
               env: # For illustration purposes, please use secrets.
                 - name: RENOVATE_PLATFORM
@@ -163,11 +160,10 @@ spec:
 
 ### CircleCI
 
-<!-- prettier-ignore -->
 !!! warning
-    The CircleCI configuration examples are for version `2` of `daniel-shuy/renovate`, which is outdated.
-    Do you know how to get `daniel-shuy/renovate` version `3` working?
-    Then please open a pull request to update the docs and close [Renovate issue #13428](https://github.com/renovatebot/renovate/issues/13428).
+  The CircleCI configuration examples are for version `2` of `daniel-shuy/renovate`, which is outdated.
+  Do you know how to get `daniel-shuy/renovate` version `3` working?
+  Then please open a pull request to update the docs and close [Renovate issue #13428](https://github.com/renovatebot/renovate/issues/13428).
 
 If you are using CircleCI, you can use the third-party [daniel-shuy/renovate](https://circleci.com/developer/orbs/orb/daniel-shuy/renovate) orb to run a self-hosted instance of Renovate on CircleCI.
 
@@ -283,10 +279,9 @@ renovate
 Save the script file, and run the script manually.
 Only add the script to `cron` after you checked it works.
 
-<!-- prettier-ignore -->
 !!! note
-    The GitHub.com token as an environment variable is needed to fetch changelogs that are usually hosted on github.com.
-    You don't need to add it if you are already running the bot against github.com, but you do need to add it if you're using GitHub Enterprise Server, GitLab, Azure DevOps, or Bitbucket.
+  The GitHub.com token as an environment variable is needed to fetch changelogs that are usually hosted on github.com.
+  You don't need to add it if you are already running the bot against github.com, but you do need to add it if you're using GitHub Enterprise Server, GitLab, Azure DevOps, or Bitbucket.
 
 ## Kubernetes for GitLab, using Git over SSH
 
@@ -378,7 +373,7 @@ spec:
           containers:
             - name: renovate
               # Update this to the latest available and then enable Renovate on the manifest
-              image: renovate/renovate:43.76.2
+              image: renovate/renovate:43.222.1
               volumeMounts:
                 - name: ssh-key-volume
                   readOnly: true

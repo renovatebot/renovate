@@ -14,10 +14,8 @@ import type { Pr } from '../../../../modules/platform/index.ts';
 import * as memCache from '../../../../util/cache/memory/index.ts';
 import * as _cache from '../../../../util/cache/repository/index.ts';
 import type { RepoCacheData } from '../../../../util/cache/repository/types.ts';
-import type {
-  FileAddition,
-  LongCommitSha,
-} from '../../../../util/git/types.ts';
+import type { FileAddition } from '../../../../util/git/types.ts';
+import type { LongCommitSha } from '../../../../util/schema-utils/git.ts';
 import { OnboardingState } from '../common.ts';
 import * as _config from './config.ts';
 import { checkOnboardingBranch } from './index.ts';
@@ -47,6 +45,7 @@ describe('workers/repository/onboarding/branch/index', () => {
       GlobalConfig.set({
         onboarding: true,
         onboardingBranch: config.onboardingBranch,
+        requireConfig: config.requireConfig,
       });
       OnboardingState.prUpdateRequested = false;
       scm.getFileList.mockResolvedValue([]);
@@ -171,6 +170,7 @@ describe('workers/repository/onboarding/branch/index', () => {
       GlobalConfig.set({
         onboarding: false,
         onboardingBranch: config.onboardingBranch,
+        requireConfig: 'optional',
       });
       const res = await checkOnboardingBranch(config);
       expect(res.repoIsOnboarded).toBeTrue();
@@ -192,6 +192,7 @@ describe('workers/repository/onboarding/branch/index', () => {
       GlobalConfig.set({
         onboarding: false,
         onboardingBranch: config.onboardingBranch,
+        requireConfig: 'ignored',
       });
       const res = await checkOnboardingBranch(config);
       expect(res.repoIsOnboarded).toBeTrue();
@@ -202,6 +203,7 @@ describe('workers/repository/onboarding/branch/index', () => {
       GlobalConfig.set({
         onboarding: false,
         onboardingBranch: config.onboardingBranch,
+        requireConfig: 'required',
       });
       scm.getFileList.mockResolvedValueOnce(['package.json']);
       fs.readLocalFile.mockResolvedValueOnce('{}');
@@ -281,6 +283,10 @@ describe('workers/repository/onboarding/branch/index', () => {
 
     it('detects repo is onboarded via PR', async () => {
       config.requireConfig = 'optional';
+      GlobalConfig.set({
+        onboardingBranch: config.onboardingBranch,
+        requireConfig: 'optional',
+      });
       platform.findPr.mockResolvedValueOnce(mock<Pr>());
       const res = await checkOnboardingBranch(config);
       expect(res.repoIsOnboarded).toBeTrue();

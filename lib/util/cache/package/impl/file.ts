@@ -1,8 +1,9 @@
 import cacache from 'cacache';
+import { LRUCache } from 'lru-cache';
 import { DateTime } from 'luxon';
 import upath from 'upath';
 import { logger } from '../../../../logger/index.ts';
-import { compressToBase64, decompressFromBase64 } from '../../../compress.ts';
+import { compressToBase64 } from '../../../compress.ts';
 import type { PackageCacheNamespace } from '../types.ts';
 import { PackageCacheBase } from './base.ts';
 
@@ -15,6 +16,12 @@ export class PackageCacheFile extends PackageCacheBase {
 
   private readonly cacheFileName: string;
 
+  private readonly expiryMap = new LRUCache<string, DateTime>({
+    // Assuming 50 bytes per entry, this limits the memory footprint of this
+    // to around 5MB.
+    max: 100000,
+  });
+
   private constructor(cacheFileName: string) {
     super();
     this.cacheFileName = cacheFileName;
@@ -22,42 +29,6 @@ export class PackageCacheFile extends PackageCacheBase {
 
   private getKey(namespace: PackageCacheNamespace, key: string): string {
     return `${namespace}-${key}`;
-  }
-
-  override async get<T = unknown>(
-    namespace: PackageCacheNamespace,
-    key: string,
-  ): Promise<T | undefined> {
-    try {
-      const entry = await cacache.get(
-        this.cacheFileName,
-        this.getKey(namespace, key),
-      );
-      const raw = entry.data.toString();
-      const cached = JSON.parse(raw);
-
-      if (!cached) {
-        return undefined;
-      }
-
-      const expiry = DateTime.fromISO(cached.expiry);
-      if (!expiry.isValid || DateTime.local() >= expiry) {
-        await this.rm(namespace, key);
-        return undefined;
-      }
-
-      logger.trace({ namespace, key }, 'Returning cached value');
-
-      if (!cached.compress) {
-        return cached.value;
-      }
-
-      const json = await decompressFromBase64(cached.value);
-      return JSON.parse(json);
-    } catch {
-      logger.trace({ namespace, key }, 'Cache miss');
-    }
-    return undefined;
   }
 
   override async set(
@@ -71,11 +42,11 @@ export class PackageCacheFile extends PackageCacheBase {
     const compressedValue = await compressToBase64(serialized);
     const expiry = DateTime.local().plus({ minutes: hardTtlMinutes });
     const payload = JSON.stringify({
-      compress: true,
       value: compressedValue,
       expiry,
     });
     await cacache.put(this.cacheFileName, this.getKey(namespace, key), payload);
+    this.expiryMap.set(this.getKey(namespace, key), expiry);
   }
 
   override async destroy(): Promise<void> {
@@ -88,6 +59,17 @@ export class PackageCacheFile extends PackageCacheBase {
       try {
         totalCount += 1;
         const cacheEntry = item as unknown as cacache.CacheObject;
+        const cachedExpiry = this.expiryMap.get(cacheEntry.key);
+        if (cachedExpiry !== undefined) {
+          if (DateTime.local() <= cachedExpiry) {
+            continue;
+          }
+          await cacache.rm.entry(this.cacheFileName, cacheEntry.key);
+          await cacache.rm.content(this.cacheFileName, cacheEntry.integrity);
+          this.expiryMap.delete(cacheEntry.key);
+          deletedCount += 1;
+          continue;
+        }
         const entry = await cacache.get(this.cacheFileName, cacheEntry.key);
         let cached: { expiry?: string } | undefined;
         try {
@@ -124,11 +106,26 @@ export class PackageCacheFile extends PackageCacheBase {
     );
   }
 
-  private async rm(
+  protected override async readRaw(
+    namespace: PackageCacheNamespace,
+    key: string,
+  ): Promise<Buffer | undefined> {
+    const cacheKey = this.getKey(namespace, key);
+    try {
+      const entry = await cacache.get(this.cacheFileName, cacheKey);
+      return entry.data;
+    } catch {
+      return undefined;
+    }
+  }
+
+  protected override async rm(
     namespace: PackageCacheNamespace,
     key: string,
   ): Promise<void> {
     logger.trace({ namespace, key }, 'Removing cache entry');
-    await cacache.rm.entry(this.cacheFileName, this.getKey(namespace, key));
+    const cacheKey = this.getKey(namespace, key);
+    await cacache.rm.entry(this.cacheFileName, cacheKey);
+    this.expiryMap.delete(cacheKey);
   }
 }

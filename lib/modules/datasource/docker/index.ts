@@ -16,6 +16,7 @@ import {
   ensurePathPrefix,
   joinUrlParts,
   parseLinkHeader,
+  parseUrl,
 } from '../../../util/url.ts';
 import { id as dockerVersioningId } from '../../versioning/docker/index.ts';
 import { Datasource } from '../datasource.ts';
@@ -48,6 +49,8 @@ import {
   ManifestJson,
   OciHelmConfig,
   OciImageConfig,
+  QuayTagsResponse,
+  RegistryTagsList,
 } from './schema.ts';
 
 const defaultConfig = {
@@ -453,6 +456,7 @@ export class DockerDatasource extends Datasource {
         namespace: 'datasource-docker-architecture',
         key: `${registryHost}:${dockerRepository}@${currentDigest}`,
         ttlMinutes: 1440 * 28,
+        shouldCacheResult: isNonEmptyString,
       },
       () =>
         this._getImageArchitecture(
@@ -478,7 +482,7 @@ export class DockerDatasource extends Datasource {
     // Skip Docker Hub image if RENOVATE_X_DOCKER_HUB_DISABLE_LABEL_LOOKUP is set
     if (
       getEnv().RENOVATE_X_DOCKER_HUB_DISABLE_LABEL_LOOKUP &&
-      registryHost === 'https://index.docker.io'
+      registryHost === DOCKER_HUB
     ) {
       logger.debug(
         'Docker Hub image - skipping label lookup due to RENOVATE_X_DOCKER_HUB_DISABLE_LABEL_LOOKUP',
@@ -487,7 +491,7 @@ export class DockerDatasource extends Datasource {
     }
     // Docker Hub library images don't have labels we need
     if (
-      registryHost === 'https://index.docker.io' &&
+      registryHost === DOCKER_HUB &&
       dockerRepository.startsWith('library/')
     ) {
       logger.debug('Docker Hub library image - skipping label lookup');
@@ -655,18 +659,10 @@ export class DockerDatasource extends Datasource {
     let page = 1;
     let url: string | null = pageUrl(page);
     while (url && page <= 20) {
-      interface QuayRestDockerTags {
-        tags: {
-          name: string;
-        }[];
-        has_additional: boolean;
-      }
-
-      // typescript issue :-/
-      // oxlint-disable-next-line typescript/no-unnecessary-type-assertion
-      const res = (await this.http.getJsonUnchecked<QuayRestDockerTags>(
+      const res: HttpResponse<QuayTagsResponse> = await this.http.getJson(
         url,
-      )) as HttpResponse<QuayRestDockerTags>;
+        QuayTagsResponse,
+      );
       const pageTags = res.body.tags.map((tag) => tag.name);
       tags = tags.concat(pageTags);
       page += 1;
@@ -707,16 +703,17 @@ export class DockerDatasource extends Datasource {
     ];
     const pages = hostsNeedingAllPages.includes(registryHost)
       ? 1000
-      : GlobalConfig.get('dockerMaxPages', 20);
+      : GlobalConfig.get('dockerMaxPages');
     logger.trace({ registryHost, dockerRepository, pages }, 'docker.getTags');
     let foundMaxResultsError = false;
     do {
-      let res: HttpResponse<{ tags: string[] }>;
+      let res: HttpResponse<RegistryTagsList>;
       try {
-        res = await this.http.getJsonUnchecked<{ tags: string[] }>(url, {
-          headers,
-          noAuth: true,
-        });
+        res = await this.http.getJson(
+          url,
+          { headers, noAuth: true },
+          RegistryTagsList,
+        );
       } catch (err) {
         if (
           !foundMaxResultsError &&
@@ -737,7 +734,12 @@ export class DockerDatasource extends Datasource {
         // Artifactory bug: next link comes back without virtual-repo prefix (RTFACT-18971)
         if (linkHeader?.next?.last) {
           // parse the current URL, strip any old "last" param, then set the new one
-          const parsed: URL = new URL(url);
+          const parsed = parseUrl(url);
+          // v8 ignore if: url is always a valid HTTP URL as `ensurePathPrefix`
+          if (!parsed) {
+            url = null;
+            break;
+          }
           parsed.searchParams.delete('last');
           parsed.searchParams.set('last', linkHeader.next.last);
           url = parsed.href;
@@ -792,7 +794,7 @@ export class DockerDatasource extends Datasource {
         logger.debug(
           `Retrying Tags for ${registryHost}/${dockerRepository} using library/ prefix`,
         );
-        return this.getTags(registryHost, 'library/' + dockerRepository);
+        return this.getTags(registryHost, `library/${dockerRepository}`);
       }
       // JFrog Artifactory - Retry handling when resolving Docker Official Images
       // These follow the format of {{registryHost}}{{jFrogRepository}}/library/{{dockerRepository}}
@@ -811,7 +813,7 @@ export class DockerDatasource extends Datasource {
 
         return this.getTags(
           registryHost,
-          jfrogRepository + '/library/' + dockerImage,
+          `${jfrogRepository}/library/${dockerImage}`,
         );
       }
       if (err.statusCode === 429 && isDockerHost(registryHost)) {
@@ -900,6 +902,15 @@ export class DockerDatasource extends Datasource {
 
       let manifestResponse: HttpResponse | null = null;
       if (!architecture) {
+        // Reuse the digest cached from the Docker Hub tag API
+        if (registryHost === DOCKER_HUB) {
+          const cache = await DockerHubCache.init(dockerRepository);
+          const cachedDigest = cache.getDigestForTag(newTag);
+          if (cachedDigest) {
+            return cachedDigest;
+          }
+        }
+
         manifestResponse = await this.getManifestResponse(
           registryHost,
           dockerRepository,
@@ -922,6 +933,15 @@ export class DockerDatasource extends Datasource {
         (manifestResponse &&
           !hasKey('docker-content-digest', manifestResponse.headers))
       ) {
+        // Reuse the per-arch digest cached from the Docker Hub tag API
+        if (isNonEmptyString(architecture) && registryHost === DOCKER_HUB) {
+          const cache = await DockerHubCache.init(dockerRepository);
+          const cachedDigest = cache.getArchDigestForTag(newTag, architecture);
+          if (cachedDigest) {
+            return cachedDigest;
+          }
+        }
+
         logger.debug(
           { registryHost, dockerRepository },
           'Architecture-specific digest or missing docker-content-digest header - pulling full manifest',
@@ -995,7 +1015,7 @@ export class DockerDatasource extends Datasource {
         return this.getDigest(
           {
             registryUrl,
-            packageName: 'library/' + packageName,
+            packageName: `library/${packageName}`,
             currentDigest,
           },
           newValue,
@@ -1037,6 +1057,7 @@ export class DockerDatasource extends Datasource {
         namespace: 'datasource-docker-digest',
         key: `${registryHost}:${dockerRepository}:${newTag}${digest}`,
         fallback: true,
+        shouldCacheResult: isNonEmptyString,
       },
       () => this._getDigest(config, newValue),
     );
@@ -1048,7 +1069,7 @@ export class DockerDatasource extends Datasource {
     let url = `https://hub.docker.com/v2/repositories/${dockerRepository}/tags?page_size=1000&ordering=last_updated`;
 
     const cache = await DockerHubCache.init(dockerRepository);
-    const maxPages = GlobalConfig.get('dockerMaxPages', 20);
+    const maxPages = GlobalConfig.get('dockerMaxPages');
     let page = 0,
       needNextPage = true;
     while (needNextPage && page < maxPages) {
@@ -1075,29 +1096,20 @@ export class DockerDatasource extends Datasource {
     await cache.save();
 
     const items = cache.getItems();
-    return items.map(
-      ({ name: version, tag_last_pushed, digest: newDigest }) => {
-        const release: Release = { version };
+    return items.map(({ name: version, tag_last_pushed }) => {
+      const release: Release = { version };
 
-        const releaseTimestamp = asTimestamp(tag_last_pushed);
-        if (releaseTimestamp) {
-          release.releaseTimestamp = releaseTimestamp;
-        }
+      const releaseTimestamp = asTimestamp(tag_last_pushed);
+      if (releaseTimestamp) {
+        release.releaseTimestamp = releaseTimestamp;
+      }
 
-        if (newDigest) {
-          logger.once.debug(
-            {
-              documentationUrl:
-                'https://github.com/renovatebot/renovate/issues/38659',
-            },
-            'Using the `tag_last_pushed` to determine the age of a release from Docker Hub. If this is a digest update, it may lead to inconsistent behaviour, showing the digest as newer than it actually is',
-          );
-          release.newDigest = newDigest;
-        }
-
-        return release;
-      },
-    );
+      // Digest is intentionally not propagated — the Docker Hub tag API
+      // returns the manifest-list digest, which would bypass arch-aware
+      // resolution in `getDigest()`. `getDigest()` consults the same cache
+      // as a shortcut when no arch resolution is needed.
+      return release;
+    });
   }
 
   getDockerHubTags(dockerRepository: string): Promise<Release[] | null> {
@@ -1148,7 +1160,7 @@ export class DockerDatasource extends Datasource {
       ).catch(getTags);
 
     const tagsResult =
-      registryHost === 'https://index.docker.io' &&
+      registryHost === DOCKER_HUB &&
       !getEnv().RENOVATE_X_DOCKER_HUB_TAGS_DISABLE
         ? getDockerHubTags()
         : getTags();
@@ -1209,7 +1221,7 @@ export class DockerDatasource extends Datasource {
       {
         namespace: 'datasource-docker-releases-v2',
         key: `${registryHost}:${dockerRepository}`,
-        cacheable: registryHost === 'https://index.docker.io',
+        cacheable: registryHost === DOCKER_HUB,
         fallback: true,
       },
       () => this._getReleases(config),

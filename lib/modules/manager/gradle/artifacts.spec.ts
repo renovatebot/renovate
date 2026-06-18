@@ -28,6 +28,7 @@ const adminConfig: RepoGlobalConfig = {
 
   // although not enabled by default, let's assume it is
   allowedUnsafeExecutions: ['gradleWrapper'],
+  binarySource: 'global',
 };
 
 const osPlatformSpy = vi.spyOn(os, 'platform');

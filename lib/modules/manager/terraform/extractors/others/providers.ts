@@ -1,6 +1,6 @@
 import { isNullOrUndefined, isPlainObject } from '@sindresorhus/is';
 import { logger } from '../../../../../logger/index.ts';
-import type { PackageDependency } from '../../../types.ts';
+import type { ExtractConfig, PackageDependency } from '../../../types.ts';
 import { TerraformProviderExtractor } from '../../base.ts';
 import type { TerraformDefinitionFile } from '../../hcl/types.ts';
 import type { ProviderLock } from '../../lockfile/types.ts';
@@ -13,6 +13,7 @@ export class ProvidersExtractor extends TerraformProviderExtractor {
   extract(
     hclRoot: TerraformDefinitionFile,
     locks: ProviderLock[],
+    config: ExtractConfig,
   ): PackageDependency[] {
     const providerTypes = hclRoot?.provider;
     if (isNullOrUndefined(providerTypes)) {
@@ -40,6 +41,7 @@ export class ProvidersExtractor extends TerraformProviderExtractor {
           },
           locks,
           'provider',
+          config,
         );
         dependencies.push(dep);
       }

@@ -1,4 +1,5 @@
 export { updateArtifacts } from './artifacts.ts';
+export { knownDepTypes } from './dep-types.ts';
 export { extractPackageFile } from './extract.ts';
 
 import type { Category } from '../../../constants/index.ts';

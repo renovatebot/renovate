@@ -1,8 +1,7 @@
-import { asTimestamp } from '../../../util/timestamp.ts';
 import { Datasource } from '../datasource.ts';
-import type { GetReleasesConfig, Release, ReleaseResult } from '../types.ts';
+import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
 import { PUPPET_FORGE } from './common.ts';
-import type { PuppetModule } from './types.ts';
+import { PuppetModule } from './schema.ts';
 
 export class PuppetForgeDatasource extends Datasource {
   static id = 'puppet-forge';
@@ -23,44 +22,23 @@ export class PuppetForgeDatasource extends Datasource {
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     // https://forgeapi.puppet.com
     const moduleSlug = packageName.replace('/', '-');
-    // TODO: types (#22198)
     const url = `${registryUrl}/v3/modules/${moduleSlug}?exclude_fields=current_release`;
 
-    let module: PuppetModule;
+    let result: ReleaseResult;
 
     try {
-      const response = await this.http.getJsonUnchecked<PuppetModule>(url);
-      module = response.body;
+      const response = await this.http.getJson(url, PuppetModule);
+      result = response.body;
     } catch (err) {
       this.handleGenericErrors(err);
     }
 
-    const releases: Release[] = module?.releases?.map((release) => ({
-      version: release.version,
-      downloadUrl: release.file_uri,
-      releaseTimestamp: asTimestamp(release.created_at),
-      registryUrl,
-    }));
-
-    if (!releases?.length) {
+    if (!result.releases.length) {
       return null;
     }
 
-    return PuppetForgeDatasource.createReleaseResult(releases, module);
-  }
-
-  static createReleaseResult(
-    releases: Release[],
-    module: PuppetModule,
-  ): ReleaseResult {
-    const result: ReleaseResult = {
-      releases,
-      // the homepage url in the fixtures is a github repo, we can use this as sourceUrl
-      homepage: module.homepage_url,
-    };
-
-    if (module.deprecated_for) {
-      result.deprecationMessage = module.deprecated_for;
+    for (const release of result.releases) {
+      release.registryUrl = registryUrl;
     }
 
     return result;

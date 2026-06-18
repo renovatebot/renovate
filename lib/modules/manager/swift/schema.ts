@@ -1,4 +1,4 @@
-import { z } from 'zod/v3';
+import { z } from 'zod/v4';
 import { Json } from '../../../util/schema-utils/index.ts';
 
 const PackageResolvedPin = z.object({
@@ -7,7 +7,7 @@ const PackageResolvedPin = z.object({
   location: z.string(),
   state: z.object({
     revision: z.string(),
-    version: z.string().nullable(),
+    version: z.string().nullable().optional(),
     branch: z.string().nullable().optional(),
   }),
 });
