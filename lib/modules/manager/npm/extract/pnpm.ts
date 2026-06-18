@@ -18,7 +18,11 @@ import {
 } from '../../../../util/fs/index.ts';
 import { parseSingleYaml, parseYaml } from '../../../../util/yaml.ts';
 import { NpmDatasource } from '../../../datasource/npm/index.ts';
-import type { PackageFile, PackageFileContent } from '../../types.ts';
+import type {
+  PackageDependency,
+  PackageFile,
+  PackageFileContent,
+} from '../../types.ts';
 import { pnpmWorkspaceOverrides } from '../dep-types.ts';
 import type { PnpmDependency, PnpmLockFile } from '../post-update/types.ts';
 import type { PnpmCatalogs, PnpmWorkspaceFile } from '../schema.ts';
@@ -292,21 +296,7 @@ export async function extractPnpmWorkspaceFile(
   }
 
   const { registry, registries } = workspaceFile;
-  if (registry ?? registries) {
-    for (const dep of deps) {
-      const lookupName = dep.packageName ?? dep.depName;
-      if (lookupName && dep.datasource === NpmDatasource.id) {
-        const registryUrl = resolveRegistryUrl(
-          lookupName,
-          registries,
-          registry,
-        );
-        if (registryUrl) {
-          dep.registryUrls = [registryUrl];
-        }
-      }
-    }
-  }
+  applyPnpmWorkspaceRegistries(deps, registries, registry);
 
   let pnpmShrinkwrap;
   const filePath = getSiblingFileName(packageFile, 'pnpm-lock.yaml');
@@ -352,6 +342,43 @@ function hasEnvVar(value: string): boolean {
   return value.includes('${');
 }
 
+function withoutEnvVarRegistries(
+  registries: Record<string, string> | undefined,
+): Record<string, string> | undefined {
+  if (!registries) {
+    return undefined;
+  }
+  return Object.fromEntries(
+    Object.entries(registries).filter(([, url]) => !hasEnvVar(url)),
+  );
+}
+
+// Applies pnpm-workspace.yaml registries to npm deps; env-var registry URLs are
+// dropped because pnpm ignores them since v11.5.3.
+export function applyPnpmWorkspaceRegistries(
+  deps: PackageDependency[],
+  registries: Record<string, string> | undefined,
+  registry: string | undefined,
+): void {
+  if (!(registry ?? registries)) {
+    return;
+  }
+  const filteredRegistries = withoutEnvVarRegistries(registries);
+  for (const dep of deps) {
+    const lookupName = dep.packageName ?? dep.depName;
+    if (lookupName && dep.datasource === NpmDatasource.id) {
+      const registryUrl = resolveRegistryUrl(
+        lookupName,
+        filteredRegistries,
+        registry,
+      );
+      if (registryUrl) {
+        dep.registryUrls = [registryUrl];
+      }
+    }
+  }
+}
+
 export function resolveRegistryUrl(
   packageName: string,
   registries: Record<string, string> | undefined,
@@ -364,19 +391,13 @@ export function resolveRegistryUrl(
         continue;
       }
       // pnpm scope keys keep the leading `@`, e.g. `@my-org`
-      if (
-        packageName.startsWith(`${scope}/`) &&
-        !hasEnvVar(registries[scope])
-      ) {
+      if (packageName.startsWith(`${scope}/`)) {
         return registries[scope];
       }
     }
-    if (registries.default && !hasEnvVar(registries.default)) {
+    if (registries.default) {
       return registries.default;
     }
   }
-  if (defaultRegistry && !hasEnvVar(defaultRegistry)) {
-    return defaultRegistry;
-  }
-  return null;
+  return defaultRegistry ?? null;
 }

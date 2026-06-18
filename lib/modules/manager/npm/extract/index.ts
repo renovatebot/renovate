@@ -27,8 +27,8 @@ import {
   hasPackageManager,
 } from './common/package-file.ts';
 import {
+  applyPnpmWorkspaceRegistries,
   extractPnpmWorkspaceFile,
-  resolveRegistryUrl as resolvePnpmRegistryUrl,
 } from './pnpm.ts';
 import { postExtract } from './post/index.ts';
 import type { NpmPackage } from './types.ts';
@@ -204,20 +204,11 @@ export async function extractPackageFile(
   }
 
   // Applied after the yarnrc resolution so pnpm-workspace.yaml wins in pnpm repos
-  if (pnpmWorkspaceRegistry ?? pnpmWorkspaceRegistries) {
-    for (const dep of res.deps) {
-      if (dep.depName && dep.datasource === NpmDatasource.id) {
-        const registryUrl = resolvePnpmRegistryUrl(
-          dep.packageName ?? dep.depName,
-          pnpmWorkspaceRegistries,
-          pnpmWorkspaceRegistry,
-        );
-        if (registryUrl) {
-          dep.registryUrls = [registryUrl];
-        }
-      }
-    }
-  }
+  applyPnpmWorkspaceRegistries(
+    res.deps,
+    pnpmWorkspaceRegistries,
+    pnpmWorkspaceRegistry,
+  );
 
   return {
     ...res,

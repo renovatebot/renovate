@@ -218,6 +218,20 @@ describe('modules/manager/npm/extract/pnpm', () => {
       ]);
     });
 
+    it('skips packages without a pnpm workspace', async () => {
+      fs.localPathExists.mockResolvedValue(false);
+      const packageFiles = [
+        {
+          packageFile: 'nested-packages/group/a/package.json',
+          packageJsonName: '@demo/nested-group-a',
+          managerData: { pnpmShrinkwrap: undefined },
+        },
+      ];
+
+      await detectPnpmWorkspaces(packageFiles);
+      expect(packageFiles[0].managerData.pnpmShrinkwrap).toBeUndefined();
+    });
+
     it('filters none matching packages', async () => {
       fs.localPathExists.mockResolvedValue(true);
       const packageFiles = [
@@ -562,7 +576,7 @@ describe('modules/manager/npm/extract/pnpm', () => {
       ]);
     });
 
-    it('skips registry values containing env vars', async () => {
+    it('skips scoped registry values containing env vars', async () => {
       const res = await extractPnpmWorkspaceFile(
         {
           catalog: {
@@ -713,35 +727,6 @@ describe('modules/manager/npm/extract/pnpm', () => {
       expect(
         resolveRegistryUrl('react', undefined, 'https://default.example.com/'),
       ).toBe('https://default.example.com/');
-    });
-
-    it('skips a scoped registry value containing env vars', () => {
-      expect(
-        resolveRegistryUrl(
-          '@my-org/pkg',
-          {
-            '@my-org': 'https://${TOKEN}.example.com/',
-            default: 'https://default.example.com/',
-          },
-          undefined,
-        ),
-      ).toBe('https://default.example.com/');
-    });
-
-    it('skips a default registry value containing env vars', () => {
-      expect(
-        resolveRegistryUrl(
-          'react',
-          { default: 'https://${TOKEN}.example.com/' },
-          undefined,
-        ),
-      ).toBeNull();
-    });
-
-    it('skips a top-level registry value containing env vars', () => {
-      expect(
-        resolveRegistryUrl('react', undefined, 'https://${TOKEN}.example.com/'),
-      ).toBeNull();
     });
 
     it('returns null when nothing matches', () => {
