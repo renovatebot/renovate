@@ -67,8 +67,7 @@ export async function getRepositoryConfig(
   repoParts.pop();
   repoConfig.parentOrg = repoParts.join('/');
   repoConfig.topLevelOrg = repoParts.shift();
-  // TODO: types (#22198)
-  const platform = GlobalConfig.get('platform')!;
+  const platform = GlobalConfig.get('platform');
   repoConfig.localDir =
     platform === 'local'
       ? process.cwd()

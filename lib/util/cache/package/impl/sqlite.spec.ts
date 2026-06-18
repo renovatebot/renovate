@@ -219,14 +219,13 @@ describe('util/cache/package/impl/sqlite', () => {
     it('resolves when close throws', async () => {
       await withSqliteDir(async (cacheDir) => {
         const sqlite = await PackageCacheSqlite.create(cacheDir);
-        insertRawCacheEntry(sqlite, 'bar', Buffer.from('value'));
-        const iterator = sqlite.client
-          .prepare('SELECT * FROM package_cache')
-          .iterate();
+        const closeSpy = vi
+          .spyOn(sqlite.client, 'close')
+          .mockImplementationOnce(() => {
+            throw new Error('close failed');
+          });
 
         try {
-          iterator.next();
-
           await expect(sqlite.destroy()).resolves.toBeUndefined();
 
           expect(logger.warn).toHaveBeenCalledWith(
@@ -234,7 +233,8 @@ describe('util/cache/package/impl/sqlite', () => {
             'SQLite package cache close failed',
           );
         } finally {
-          iterator.return?.();
+          expect(sqlite.client.isOpen).toBe(true);
+          closeSpy.mockRestore();
           sqlite.client.close();
         }
       });

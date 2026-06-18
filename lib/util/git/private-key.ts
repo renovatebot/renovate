@@ -92,7 +92,7 @@ class GPGKey extends PrivateKey {
   }
 
   protected async importKey(): Promise<string | undefined> {
-    const keyFileName = upath.join(os.tmpdir() + '/git-private-gpg.key');
+    const keyFileName = upath.join(`${os.tmpdir()}/git-private-gpg.key`);
     await fs.outputFile(keyFileName, this.key);
     const { stdout, stderr } = await exec(
       // --batch --no-tty flags allow Renovate to skip warnings about unsupported algorithms in the key
@@ -113,7 +113,7 @@ class SSHKey extends PrivateKey {
   protected readonly gpgFormat = 'ssh';
 
   protected async importKey(): Promise<string | undefined> {
-    const keyFileName = upath.join(os.tmpdir() + '/git-private-ssh.key');
+    const keyFileName = upath.join(`${os.tmpdir()}/git-private-ssh.key`);
     await fs.outputFile(keyFileName, this.key.replace(/\n?$/, '\n'));
     /* v8 ignore next -- not easily testable */
     process.on('exit', () => fs.rmSync(keyFileName, { force: true }));

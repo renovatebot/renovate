@@ -16,6 +16,7 @@ import { acquireLock } from '../mutex.ts';
 import { type AsyncResult, Result } from '../result.ts';
 import { Toml } from '../schema-utils/index.ts';
 import { ObsoleteCacheHitLogger } from '../stats.ts';
+import { compile } from '../template/index.ts';
 import { isHttpUrl, parseUrl, resolveBaseUrl } from '../url.ts';
 import { parseSingleYaml } from '../yaml.ts';
 import { applyAuthorization } from './auth.ts';
@@ -63,12 +64,12 @@ export interface InternalHttpOptions extends HttpOptions {
 }
 
 export function applyDefaultHeaders(options: OptionsInit): void {
-  const renovateVersion = pkg.version;
+  const userAgentTemplate = GlobalConfig.get('userAgent');
   options.headers = {
     ...options.headers,
-    'user-agent':
-      GlobalConfig.get('userAgent') ??
-      `Renovate/${renovateVersion} (https://github.com/renovatebot/renovate)`,
+    'user-agent': compile(userAgentTemplate, {
+      renovateVersion: pkg.version,
+    }),
   };
 }
 

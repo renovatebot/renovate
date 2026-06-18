@@ -239,8 +239,7 @@ export async function extractAllPackageFiles(
     }
   }
   logger.debug(
-    'pip-compile: dependency graph:\n' +
-      generateMermaidGraph(depsBetweenFiles, lockFileArgs),
+    `pip-compile: dependency graph:\n${generateMermaidGraph(depsBetweenFiles, lockFileArgs)}`,
   );
   return result;
 }

@@ -109,7 +109,7 @@ export function extractDependency(
       dep.packageName = valSplit[0];
       dep.currentValue = valSplit[1];
     } else if (valSplit.length === 3) {
-      dep.packageName = valSplit[0] + '@' + valSplit[1];
+      dep.packageName = `${valSplit[0]}@${valSplit[1]}`;
       dep.currentValue = valSplit[2];
     } else {
       logger.debug(

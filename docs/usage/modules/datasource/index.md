@@ -25,4 +25,3 @@ But you may use datasources in a `packageRules` array to configure Renovate's be
 ## Supported Datasources
 
 <!-- Autogenerate in https://github.com/renovatebot/renovate -->
-<!-- Autogenerate end -->

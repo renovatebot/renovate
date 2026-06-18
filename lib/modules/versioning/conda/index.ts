@@ -76,7 +76,7 @@ function getNewValue({
 }: NewValueConfig): string | null {
   if (currentValue === '*') {
     if (rangeStrategy === 'bump') {
-      return '>=' + newVersion;
+      return `>=${newVersion}`;
     }
 
     // don't think you can widen or replace `*`
@@ -88,7 +88,7 @@ function getNewValue({
   // it's valid range spec in conda to write `3.12.*`, translate to pep440 `==3.12.*`
   if (/^(\d+\.)+\*$/.test(normalizedCurrentValue)) {
     const newValue = pep440.api.getNewValue({
-      currentValue: '==' + normalizedCurrentValue,
+      currentValue: `==${normalizedCurrentValue}`,
       rangeStrategy,
       currentVersion,
       newVersion,

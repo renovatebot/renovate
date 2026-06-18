@@ -673,7 +673,7 @@ export async function processBranch(
 
       if (config.artifactErrors?.length) {
         if (config.releaseTimestamp) {
-          logger.debug(`Branch timestamp: ` + config.releaseTimestamp);
+          logger.debug(`Branch timestamp: ${config.releaseTimestamp}`);
           const releaseTimestamp = DateTime.fromISO(config.releaseTimestamp);
           if (releaseTimestamp.plus({ hours: 2 }) < DateTime.local()) {
             logger.debug(
@@ -734,7 +734,7 @@ export async function processBranch(
           },
         )}`;
 
-        logger.trace(`commitMessage: ` + JSON.stringify(config.commitMessage));
+        logger.trace(`commitMessage: ${JSON.stringify(config.commitMessage)}`);
       }
 
       commitSha = await commitFilesToBranch(config);
@@ -804,7 +804,7 @@ export async function processBranch(
       logger.debug(`mergeStatus=${mergeStatus}`);
       if (mergeStatus === 'automerged') {
         if (GlobalConfig.get('dryRun')) {
-          logger.info('DRY-RUN: Would delete branch' + config.branchName);
+          logger.info(`DRY-RUN: Would delete branch${config.branchName}`);
         } else {
           await deleteBranchSilently(config.branchName);
         }

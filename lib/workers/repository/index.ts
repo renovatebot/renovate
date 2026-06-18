@@ -76,11 +76,11 @@ export async function renovateRepository(
       logger.trace({ config });
       queue.clear();
       throttle.clear();
-      const localDir = GlobalConfig.get('localDir')!;
+      const localDir = GlobalConfig.get('localDir');
 
       try {
         await fs.ensureDir(localDir);
-        logger.debug('Using localDir: ' + localDir);
+        logger.debug(`Using localDir: ${localDir}`);
         config = await initRepo(config);
         addSplit('init');
       } catch (err) /* istanbul ignore next */ {

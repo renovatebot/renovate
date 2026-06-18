@@ -285,5 +285,61 @@ describe('modules/manager/terraform/hcl/index', () => {
         },
       });
     });
+
+    it('should normalize nested arrays for kubernetes instances', async () => {
+      const nestedKube = codeBlock`
+      {
+        resource: {
+          kubernetes_deployment: {
+            foo: [[{ metadata: { name: 'nested' } }]]
+          }
+        }
+      }
+      `;
+      const res = await parseHCL(nestedKube, 'file.tf.json');
+      expect(res).toMatchObject({
+        resource: {
+          kubernetes_deployment: {
+            foo: [
+              {
+                metadata: [
+                  {
+                    name: 'nested',
+                  },
+                ],
+              },
+            ],
+          },
+        },
+      });
+    });
+
+    it('should wrap single kubernetes instance into array', async () => {
+      const singleKube = codeBlock`
+      {
+        resource: {
+          kubernetes_deployment: {
+            foo: { metadata: { name: 'single' } }
+          }
+        }
+      }
+      `;
+      const res = await parseHCL(singleKube, 'file.tf.json');
+      expect(res).toMatchObject({
+        resource: {
+          kubernetes_deployment: {
+            foo: [
+              {
+                metadata: [
+                  {
+                    name: 'single',
+                  },
+                ],
+              },
+            ],
+          },
+        },
+      });
+    });
   });
 });

@@ -90,14 +90,11 @@ export class ModuleExtractor extends DependencyExtractor {
         regEx(/\.git$/),
         '',
       );
-      dep.depName = 'github.com/' + dep.packageName;
+      dep.depName = `github.com/${dep.packageName}`;
       dep.currentValue = githubRefMatch.groups.tag;
       dep.datasource = GithubTagsDatasource.id;
     } else if (bitbucketRefMatch?.groups) {
-      dep.depName =
-        bitbucketRefMatch.groups.workspace +
-        '/' +
-        bitbucketRefMatch.groups.project;
+      dep.depName = `${bitbucketRefMatch.groups.workspace}/${bitbucketRefMatch.groups.project}`;
       dep.packageName = dep.depName;
       dep.currentValue = bitbucketRefMatch.groups.tag;
       dep.datasource = BitbucketTagsDatasource.id;

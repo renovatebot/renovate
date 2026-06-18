@@ -92,7 +92,7 @@ export async function initRepo({
   config = {} as any;
   config.repository = repository;
   config.defaultBranch = defaultBranch;
-  config.ignorePrAuthor = GlobalConfig.get('ignorePrAuthor', false);
+  config.ignorePrAuthor = GlobalConfig.get('ignorePrAuthor');
 
   await git.initRepo({
     ...config,

@@ -124,11 +124,10 @@ describe('workers/repository/dependency-dashboard', () => {
       platform.findIssue.mockResolvedValueOnce({
         title: '',
         number: 1,
-        body:
-          Fixtures.get('dependency-dashboard-with-10-PR.txt').replace(
-            '- [ ]',
-            '- [x]',
-          ) + '\n\n - [x] <!-- rebase-all-open-prs -->',
+        body: `${Fixtures.get('dependency-dashboard-with-10-PR.txt').replace(
+          '- [ ]',
+          '- [x]',
+        )}\n\n - [x] <!-- rebase-all-open-prs -->`,
       });
       await dependencyDashboard.readDashboardBody(conf);
       expect(conf).toEqual({

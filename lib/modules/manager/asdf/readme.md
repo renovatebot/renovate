@@ -4,7 +4,6 @@ Because `asdf` supports versioning for many different tools, specific tool suppo
 The following tools are currently supported:
 
 <!-- Autogenerate in https://github.com/renovatebot/renovate -->
-<!-- Autogenerate end -->
 
 <!-- prettier-ignore -->
 !!! note

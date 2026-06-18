@@ -40,5 +40,3 @@ test/datasource/nuget/_fixtures/obj
 /.agents
 /.claude
 /.opencode
-/AGENTS.md
-/CLAUDE.md

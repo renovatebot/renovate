@@ -735,12 +735,12 @@ describe('modules/datasource/docker/index', () => {
           'www-authenticate':
             'Bearer realm="https://auth.docker.io/token",service="registry.docker.io",scope="repository:library/some-dep:pull"',
         })
-        .head('/library/some-dep/manifests/' + currentDigest)
+        .head(`/library/some-dep/manifests/${currentDigest}`)
         .reply(200, '', {
           'content-type':
             'application/vnd.docker.distribution.manifest.v2+json',
         })
-        .get('/library/some-dep/manifests/' + currentDigest)
+        .get(`/library/some-dep/manifests/${currentDigest}`)
         .reply(200, {
           schemaVersion: 2,
           mediaType: 'application/vnd.docker.distribution.manifest.v2+json',
@@ -833,12 +833,12 @@ describe('modules/datasource/docker/index', () => {
           'www-authenticate':
             'Bearer realm="https://auth.docker.io/token",service="registry.docker.io",scope="repository:library/some-dep:pull"',
         })
-        .head('/library/some-dep/manifests/' + currentDigest)
+        .head(`/library/some-dep/manifests/${currentDigest}`)
         .reply(200, '', {
           'content-type':
             'application/vnd.docker.distribution.manifest.v2+json',
         })
-        .get('/library/some-dep/manifests/' + currentDigest)
+        .get(`/library/some-dep/manifests/${currentDigest}`)
         .reply(200, {
           schemaVersion: 2,
           mediaType: 'application/vnd.docker.distribution.manifest.v2+json',
@@ -910,12 +910,12 @@ describe('modules/datasource/docker/index', () => {
           'www-authenticate':
             'Bearer realm="https://auth.docker.io/token",service="registry.docker.io",scope="repository:library/some-dep:pull"',
         })
-        .head('/library/some-dep/manifests/' + currentDigest)
+        .head(`/library/some-dep/manifests/${currentDigest}`)
         .reply(200, '', {
           'content-type':
             'application/vnd.docker.distribution.manifest.v2+json',
         })
-        .get('/library/some-dep/manifests/' + currentDigest)
+        .get(`/library/some-dep/manifests/${currentDigest}`)
         .reply(200, {
           schemaVersion: 2,
           mediaType: 'application/vnd.docker.distribution.manifest.v2+json',
@@ -1009,12 +1009,12 @@ describe('modules/datasource/docker/index', () => {
           'www-authenticate':
             'Bearer realm="https://auth.docker.io/token",service="registry.docker.io",scope="repository:library/some-dep:pull"',
         })
-        .head('/library/some-dep/manifests/' + currentDigest)
+        .head(`/library/some-dep/manifests/${currentDigest}`)
         .reply(200, '', {
           'content-type':
             'application/vnd.docker.distribution.manifest.v2+json',
         })
-        .get('/library/some-dep/manifests/' + currentDigest)
+        .get(`/library/some-dep/manifests/${currentDigest}`)
         .reply(200, {
           schemaVersion: 2,
           mediaType: 'application/vnd.docker.distribution.manifest.v2+json',
@@ -1075,11 +1075,11 @@ describe('modules/datasource/docker/index', () => {
           'www-authenticate':
             'Bearer realm="https://auth.docker.io/token",service="registry.docker.io",scope="repository:library/some-dep:pull"',
         })
-        .head('/library/some-dep/manifests/' + currentDigest)
+        .head(`/library/some-dep/manifests/${currentDigest}`)
         .reply(200, '', {
           'content-type': 'application/vnd.oci.image.manifest.v1+json',
         })
-        .get('/library/some-dep/manifests/' + currentDigest)
+        .get(`/library/some-dep/manifests/${currentDigest}`)
         .reply(200, {
           schemaVersion: 2,
           mediaType: 'application/vnd.oci.image.manifest.v1+json',
@@ -1154,11 +1154,11 @@ describe('modules/datasource/docker/index', () => {
           'www-authenticate':
             'Bearer realm="https://auth.docker.io/token",service="registry.docker.io",scope="repository:library/some-dep:pull"',
         })
-        .head('/library/some-dep/manifests/' + currentDigest)
+        .head(`/library/some-dep/manifests/${currentDigest}`)
         .reply(200, '', {
           'content-type': 'application/vnd.oci.image.manifest.v1+json',
         })
-        .get('/library/some-dep/manifests/' + currentDigest)
+        .get(`/library/some-dep/manifests/${currentDigest}`)
         .reply(200, {
           schemaVersion: 2,
           config: {
@@ -1225,12 +1225,12 @@ describe('modules/datasource/docker/index', () => {
           'www-authenticate':
             'Bearer realm="https://auth.docker.io/token",service="registry.docker.io",scope="repository:library/some-dep:pull"',
         })
-        .head('/library/some-dep/manifests/' + currentDigest)
+        .head(`/library/some-dep/manifests/${currentDigest}`)
         .reply(200, '', {
           'content-type':
             'application/vnd.docker.distribution.manifest.v2+json',
         })
-        .get('/library/some-dep/manifests/' + currentDigest)
+        .get(`/library/some-dep/manifests/${currentDigest}`)
         .reply(404, {});
       httpMock
         .scope(baseUrl)
@@ -1309,11 +1309,11 @@ describe('modules/datasource/docker/index', () => {
           'www-authenticate':
             'Bearer realm="https://auth.docker.io/token",service="registry.docker.io",scope="repository:library/some-dep:pull"',
         })
-        .head('/library/some-dep/manifests/' + currentDigest)
+        .head(`/library/some-dep/manifests/${currentDigest}`)
         .reply(200, '', {
           'content-type': 'application/vnd.oci.image.manifest.v1+json',
         })
-        .get('/library/some-dep/manifests/' + currentDigest)
+        .get(`/library/some-dep/manifests/${currentDigest}`)
         .reply(200, {
           schemaVersion: 2,
           config: {
@@ -1454,11 +1454,11 @@ describe('modules/datasource/docker/index', () => {
           'www-authenticate':
             'Bearer realm="https://auth.docker.io/token",service="registry.docker.io",scope="repository:library/some-dep:pull"',
         })
-        .head('/library/some-dep/manifests/' + currentDigest)
+        .head(`/library/some-dep/manifests/${currentDigest}`)
         .reply(200, '', {
           'content-type': 'application/vnd.oci.image.manifest.v1+json',
         })
-        .get('/library/some-dep/manifests/' + currentDigest)
+        .get(`/library/some-dep/manifests/${currentDigest}`)
         .reply(200, {
           schemaVersion: 2,
           config: {

@@ -3,6 +3,7 @@ import { GlobalConfig } from '../../../config/global.ts';
 import { logger, withMeta } from '../../../logger/index.ts';
 import { detectPlatform } from '../../../util/common.ts';
 import { newlineRegex, regEx } from '../../../util/regex.ts';
+import { parseUrl } from '../../../util/url.ts';
 import { ForgejoTagsDatasource } from '../../datasource/forgejo-tags/index.ts';
 import { GiteaTagsDatasource } from '../../datasource/gitea-tags/index.ts';
 import { GithubDigestDatasource } from '../../datasource/github-digest/index.ts';
@@ -33,7 +34,11 @@ function detectCustomGitHubRegistryUrlsForActions(): PackageDependency {
   const endpoint = GlobalConfig.get('endpoint');
   const registryUrls = ['https://github.com'];
   if (endpoint && GlobalConfig.get('platform') === 'github') {
-    const parsedEndpoint = new URL(endpoint);
+    const parsedEndpoint = parseUrl(endpoint);
+    if (!parsedEndpoint) {
+      logger.warn({ endpoint }, 'Failed to parse endpoint url');
+      return {};
+    }
 
     if (
       parsedEndpoint.host !== 'github.com' &&
@@ -114,8 +119,7 @@ function extractRepositoryAction(
     const cleanComment = parsed.commentString.slice(1);
     const matchEndIndex = commentData.index + commentData.matchedString.length;
     const commentSuffix = cleanComment.slice(0, matchEndIndex);
-    dep.replaceString =
-      valueString + commentPrecedingWhitespace + '#' + commentSuffix;
+    dep.replaceString = `${valueString}${commentPrecedingWhitespace}#${commentSuffix}`;
   } else if (commentData.ratchetExclude) {
     dep.replaceString =
       valueString + commentPrecedingWhitespace + parsed.commentString;

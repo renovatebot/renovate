@@ -72,11 +72,15 @@ export const enableAutoMergeMutation = `
 mutation EnablePullRequestAutoMerge(
   $pullRequestId: ID!,
   $mergeMethod: PullRequestMergeMethod!,
+  $commitHeadline: String,
+  $commitBody: String,
 ) {
   enablePullRequestAutoMerge(
     input: {
       pullRequestId: $pullRequestId,
       mergeMethod: $mergeMethod,
+      commitHeadline: $commitHeadline,
+      commitBody: $commitBody,
     }
   ) {
     pullRequest {

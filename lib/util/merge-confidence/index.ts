@@ -13,7 +13,7 @@ import * as hostRules from '../host-rules.ts';
 import { memCacheProvider } from '../http/cache/memory-http-cache-provider.ts';
 import { Http } from '../http/index.ts';
 import { regEx } from '../regex.ts';
-import { ensureTrailingSlash, joinUrlParts } from '../url.ts';
+import { ensureTrailingSlash, joinUrlParts, parseUrl } from '../url.ts';
 import { MERGE_CONFIDENCE } from './common.ts';
 import type { MergeConfidence } from './types.ts';
 
@@ -246,20 +246,19 @@ function getApiBaseUrl(mergeConfidenceEndpoint: string | undefined): string {
   const defaultBaseUrl = 'https://developer.mend.io/';
   const baseFromEnv = mergeConfidenceEndpoint ?? defaultBaseUrl;
 
-  try {
-    const parsedBaseUrl = new URL(baseFromEnv).toString();
-    logger.trace(
-      { baseUrl: parsedBaseUrl },
-      'using merge confidence API base found in environment variables',
-    );
-    return ensureTrailingSlash(parsedBaseUrl);
-  } catch (err) {
+  const parsedBaseUrl = parseUrl(baseFromEnv)?.toString();
+  if (!parsedBaseUrl) {
     logger.warn(
-      { err, baseFromEnv },
+      { baseFromEnv },
       'invalid merge confidence API base URL found in environment variables - using default value instead',
     );
     return defaultBaseUrl;
   }
+  logger.trace(
+    { baseUrl: parsedBaseUrl },
+    'using merge confidence API base found in environment variables',
+  );
+  return ensureTrailingSlash(parsedBaseUrl);
 }
 
 export function getApiToken(): string | undefined {

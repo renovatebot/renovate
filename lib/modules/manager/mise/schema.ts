@@ -1,10 +1,12 @@
 import { z } from 'zod/v3';
 import { Toml } from '../../../util/schema-utils/index.ts';
 
-export const MiseRegistryJson = z.record(
-  z.string(),
-  z.record(z.string(), z.string()),
-);
+export const MiseRegistryJson = z.object({
+  meta: z.object({
+    version: z.string(),
+  }),
+  tools: z.record(z.string(), z.record(z.string(), z.string())),
+});
 
 const MiseToolOptions = z.object({
   // ubi backend only
@@ -25,7 +27,29 @@ export type MiseTool = z.infer<typeof MiseTool>;
 
 export const MiseFile = Toml.pipe(
   z.object({
-    tools: z.record(MiseTool),
+    tools: z.record(MiseTool).default({}),
   }),
 );
 export type MiseFile = z.infer<typeof MiseFile>;
+
+const MiseLockTool = z.object({
+  version: z.string(),
+  backend: z.string().optional(),
+  options: z.record(z.string()).optional(),
+  platforms: z
+    .record(
+      z.object({
+        checksum: z.string().optional(),
+        size: z.number().optional(),
+        url: z.string().optional(),
+      }),
+    )
+    .optional(),
+});
+
+export const MiseLockFile = Toml.pipe(
+  z.object({
+    tools: z.record(z.array(MiseLockTool)),
+  }),
+);
+export type MiseLockFile = z.infer<typeof MiseLockFile>;

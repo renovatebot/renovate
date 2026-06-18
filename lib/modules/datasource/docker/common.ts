@@ -171,7 +171,8 @@ export async function getAuthHeaders(
       return opts.headers ?? null;
     }
 
-    const authUrl = new URL(`${authenticateHeader.params.realm}`);
+    // already guarded by above clause
+    const authUrl = parseUrl(`${authenticateHeader.params.realm}`)!;
 
     // repo isn't known to server yet, so causing wrong scope `repository:user/image:pull`
     if (
@@ -280,9 +281,12 @@ export function getRegistryRepository(
       }
       let dockerRepository = packageName.replace(registryEndingWithSlash, '');
       const fullUrl = `${registryHost}/${dockerRepository}`;
-      const { origin, pathname } = parseUrl(fullUrl)!;
-      registryHost = origin;
-      dockerRepository = pathname.substring(1);
+      const parsedFullUrl = parseUrl(fullUrl);
+      if (!parsedFullUrl) {
+        return { registryHost, dockerRepository };
+      }
+      registryHost = parsedFullUrl.origin;
+      dockerRepository = parsedFullUrl.pathname.substring(1);
       return {
         registryHost,
         dockerRepository,
@@ -321,7 +325,7 @@ export function getRegistryRepository(
     registryHost = registryHost.replace('https', 'http');
   }
   if (registryHost.endsWith('.docker.io') && !dockerRepository.includes('/')) {
-    dockerRepository = 'library/' + dockerRepository;
+    dockerRepository = `library/${dockerRepository}`;
   }
   return {
     registryHost,
@@ -332,7 +336,7 @@ export function getRegistryRepository(
 export function extractDigestFromResponseBody(
   manifestResponse: HttpResponse,
 ): string {
-  return 'sha256:' + toSha256(manifestResponse.body);
+  return `sha256:${toSha256(manifestResponse.body)}`;
 }
 
 export function findLatestStable(tags: string[]): string | null {

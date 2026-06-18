@@ -113,6 +113,15 @@ describe('modules/datasource/docker/common', () => {
     ])('($name, $url)', ({ name, url, res }) => {
       expect(getRegistryRepository(name, url)).toStrictEqual(res);
     });
+
+    it('returns raw registryHost and dockerRepository when fullUrl is invalid', () => {
+      // 'https://[/prefix' is a syntactically invalid URL (unclosed bracket)
+      const res = getRegistryRepository('[/prefix/image', 'https://[/prefix');
+      expect(res).toStrictEqual({
+        registryHost: 'https://[/prefix',
+        dockerRepository: 'image',
+      });
+    });
   });
 
   describe('getAuthHeaders', () => {

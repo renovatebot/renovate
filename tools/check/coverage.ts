@@ -153,7 +153,7 @@ export function getCoverageForDir(
   coverage: Map<string, CoverageData[string]>,
   dir: string,
 ): CoverageInfo[] {
-  const absDir = upath.resolve(process.cwd(), dir) + '/';
+  const absDir = `${upath.resolve(process.cwd(), dir)}/`;
   const results: CoverageInfo[] = [];
   for (const absPath of coverage.keys()) {
     if (!absPath.startsWith(absDir)) {
