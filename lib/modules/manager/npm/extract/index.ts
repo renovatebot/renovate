@@ -26,7 +26,10 @@ import {
   extractPackageJson,
   hasPackageManager,
 } from './common/package-file.ts';
-import { extractPnpmWorkspaceFile } from './pnpm.ts';
+import {
+  extractPnpmWorkspaceFile,
+  resolveRegistryUrl as resolvePnpmRegistryUrl,
+} from './pnpm.ts';
 import { postExtract } from './post/index.ts';
 import type { NpmPackage } from './types.ts';
 import { extractYarnCatalogs, isZeroInstall } from './yarn.ts';
@@ -124,6 +127,28 @@ export async function extractPackageFile(
     yarnrcConfig = loadConfigFromLegacyYarnrc(repoLegacyYarnrc);
   }
 
+  let pnpmWorkspaceRegistry: string | undefined;
+  let pnpmWorkspaceRegistries: Record<string, string> | undefined;
+  const pnpmWorkspaceYamlFileName = await findLocalSiblingOrParent(
+    packageFile,
+    'pnpm-workspace.yaml',
+  );
+  const repoPnpmWorkspaceYaml = pnpmWorkspaceYamlFileName
+    ? await readLocalFile(pnpmWorkspaceYamlFileName, 'utf8')
+    : null;
+  if (
+    isString(repoPnpmWorkspaceYaml) &&
+    repoPnpmWorkspaceYaml.trim().length > 0
+  ) {
+    const parsed = await PnpmWorkspaceFile.safeParseAsync(
+      repoPnpmWorkspaceYaml,
+    );
+    if (parsed.success) {
+      pnpmWorkspaceRegistry = parsed.data.registry;
+      pnpmWorkspaceRegistries = parsed.data.registries;
+    }
+  }
+
   if (res.deps.length === 0) {
     logger.debug('Package file has no deps');
     if (
@@ -173,6 +198,22 @@ export async function extractPackageFile(
           dep.datasource === NpmDatasource.id
         ) {
           dep.registryUrls = [registryUrlFromYarnrcConfig];
+        }
+      }
+    }
+  }
+
+  // Applied after the yarnrc resolution so pnpm-workspace.yaml wins in pnpm repos
+  if (pnpmWorkspaceRegistry ?? pnpmWorkspaceRegistries) {
+    for (const dep of res.deps) {
+      if (dep.depName && dep.datasource === NpmDatasource.id) {
+        const registryUrl = resolvePnpmRegistryUrl(
+          dep.packageName ?? dep.depName,
+          pnpmWorkspaceRegistries,
+          pnpmWorkspaceRegistry,
+        );
+        if (registryUrl) {
+          dep.registryUrls = [registryUrl];
         }
       }
     }

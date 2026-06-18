@@ -39,6 +39,8 @@ export const PnpmWorkspaceFile = Yaml.pipe(
       minimumReleaseAge: z.number().nullish(),
       minimumReleaseAgeExclude: z.array(z.string()).optional(),
       overrides: z.record(z.string(), z.string()).optional(),
+      registry: z.string().optional(),
+      registries: z.record(z.string(), z.string()).optional(),
     })
     .and(PnpmCatalogs),
 );
