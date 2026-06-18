@@ -1,6 +1,7 @@
 import { codeBlock } from 'common-tags';
 import { Fixtures } from '~test/fixtures.ts';
 import { fs } from '~test/util.ts';
+import { GithubReleasesDatasource } from '../../datasource/github-releases/index.ts';
 import { GitRefsDatasource } from '../../datasource/git-refs/index.ts';
 import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
 import { extractPackageFile } from './index.ts';
@@ -405,6 +406,35 @@ describe('modules/manager/pep621/extract', () => {
           depName: 'dep-with_NORMALIZATION',
           depType: depTypes.uvSources,
           skipReason: 'inherited-dependency',
+        },
+      ]);
+    });
+
+    it('should extract uv required-version', async () => {
+      const result = await extractPackageFile(
+        codeBlock`
+          [project]
+          dependencies = ["attrs>=24.1.0"]
+
+          [tool.uv]
+          required-version = "0.10.12"
+        `,
+        'pyproject.toml',
+      );
+
+      expect(result?.deps).toMatchObject([
+        {
+          depName: 'attrs',
+        },
+        {
+          depName: 'uv',
+          packageName: 'astral-sh/uv',
+          datasource: GithubReleasesDatasource.id,
+          versioning: 'pep440',
+          depType: depTypes.uvRequiredVersion,
+          currentValue: '0.10.12',
+          replaceString: 'required-version = "0.10.12"',
+          autoReplaceStringTemplate: 'required-version = "{{newValue}}"',
         },
       ]);
     });

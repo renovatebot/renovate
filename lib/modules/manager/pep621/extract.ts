@@ -4,6 +4,7 @@ import {
   massage as massageToml,
   parse as parseToml,
 } from '../../../util/toml.ts';
+import { GithubReleasesDatasource } from '../../datasource/github-releases/index.ts';
 import { PythonVersionDatasource } from '../../datasource/python-version/index.ts';
 import * as pep440 from '../../versioning/pep440/index.ts';
 import type {
@@ -13,6 +14,7 @@ import type {
 } from '../types.ts';
 import { processors } from './processors/index.ts';
 import { PyProject } from './schema.ts';
+import { depTypes } from './utils.ts';
 
 export function parsePyProject(
   content: string,
@@ -28,6 +30,46 @@ export function parsePyProject(
     );
     return null;
   }
+}
+
+function getUvRequiredVersionReplacement(
+  content: string,
+  uvRequiredVersion: string,
+): Pick<PackageDependency, 'autoReplaceStringTemplate' | 'replaceString'> {
+  let isToolUvSection = false;
+
+  for (const line of content.split(/\r?\n/)) {
+    if (/^\s*\[tool\.uv]\s*(?:#.*)?$/.test(line)) {
+      isToolUvSection = true;
+      continue;
+    }
+
+    if (/^\s*\[/.test(line)) {
+      isToolUvSection = false;
+      continue;
+    }
+
+    if (!isToolUvSection) {
+      continue;
+    }
+
+    const match =
+      /^(?<prefix>\s*required-version\s*=\s*)(?<quote>["'])(?<currentValue>[^"']+)(?<closingQuote>["'])/.exec(
+        line,
+      );
+
+    if (
+      match?.groups?.currentValue === uvRequiredVersion &&
+      match.groups.quote === match.groups.closingQuote
+    ) {
+      return {
+        replaceString: `${match.groups.prefix}${match.groups.quote}${match.groups.currentValue}${match.groups.quote}`,
+        autoReplaceStringTemplate: `${match.groups.prefix}${match.groups.quote}{{newValue}}${match.groups.quote}`,
+      };
+    }
+  }
+
+  return {};
 }
 
 export async function extractPackageFile(
@@ -61,6 +103,23 @@ export async function extractPackageFile(
   const projectDependencies = def.project?.dependencies;
   if (projectDependencies) {
     deps.push(...projectDependencies);
+  }
+
+  const uvRequiredVersion = def.tool?.uv?.['required-version'];
+  if (uvRequiredVersion) {
+    const replacement = getUvRequiredVersionReplacement(
+      content,
+      uvRequiredVersion,
+    );
+    deps.push({
+      depName: 'uv',
+      packageName: 'astral-sh/uv',
+      datasource: GithubReleasesDatasource.id,
+      versioning: pep440.id,
+      depType: depTypes.uvRequiredVersion,
+      currentValue: uvRequiredVersion,
+      ...replacement,
+    });
   }
 
   const dependencyGroups = def['dependency-groups'];
