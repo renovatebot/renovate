@@ -116,7 +116,7 @@ export function extractReleaseResult(
       if (composerRelease.abandoned) {
         dep.isDeprecated = true;
         deprecationMessage ??= getAbandonedMessage(composerRelease.abandoned);
-        // TODO: when `abandoned` is a package name, emit replacementName/replacementVersion to open a replacement PR (follow-up)
+        // TODO #44060 when `abandoned` is a package name, emit replacementName/replacementVersion to open a replacement PR
       }
 
       releases.push(dep);
