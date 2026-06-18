@@ -443,6 +443,7 @@ describe('modules/manager/pep621/extract', () => {
       const result = await extractPackageFile(
         codeBlock`
           [tool.uv] # uv configuration
+          # keep the user's formatting around this scalar
             required-version = '0.10.12'
         `,
         'pyproject.toml',

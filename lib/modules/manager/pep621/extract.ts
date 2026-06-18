@@ -54,17 +54,17 @@ function getUvRequiredVersionReplacement(
     }
 
     const match =
-      /^(?<prefix>\s*required-version\s*=\s*)(?<quote>["'])(?<currentValue>[^"']+)(?<closingQuote>["'])/.exec(
+      /^(?<prefix>\s*required-version\s*=\s*)(?:"(?<doubleValue>[^"]+)"|'(?<singleValue>[^']+)')/.exec(
         line,
       );
 
-    if (
-      match?.groups?.currentValue === uvRequiredVersion &&
-      match.groups.quote === match.groups.closingQuote
-    ) {
+    if (match?.groups) {
+      const quote = match.groups.doubleValue ? '"' : "'";
+      const currentValue =
+        match.groups.doubleValue ?? match.groups.singleValue;
       return {
-        replaceString: `${match.groups.prefix}${match.groups.quote}${match.groups.currentValue}${match.groups.quote}`,
-        autoReplaceStringTemplate: `${match.groups.prefix}${match.groups.quote}{{newValue}}${match.groups.quote}`,
+        replaceString: `${match.groups.prefix}${quote}${currentValue}${quote}`,
+        autoReplaceStringTemplate: `${match.groups.prefix}${quote}{{newValue}}${quote}`,
       };
     }
   }
