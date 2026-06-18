@@ -510,7 +510,10 @@ export const syncGit = withInstrumenting(
             }
           } else if (gitShallowCloneDepth) {
             logger.debug({ gitShallowCloneDepth }, 'Performing shallow clone');
-            opts.push(`--depth=${gitShallowCloneDepth}`);
+            // `--no-single-branch` keeps the full refspec so that existing
+            // Renovate branches are fetched (a `--depth` clone is single-branch
+            // by default, which would hide them and break branch management).
+            opts.push(`--depth=${gitShallowCloneDepth}`, '--no-single-branch');
           } else {
             logger.debug('Performing blobless clone');
             opts.push('--filter=blob:none');

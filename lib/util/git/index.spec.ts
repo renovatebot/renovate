@@ -1636,6 +1636,24 @@ describe('util/git/index', { timeout: 30000 }, () => {
       expect(isShallow).toBe('true');
     });
 
+    it('should fetch all branches when using shallow clone', async () => {
+      // `--depth` is single-branch by default; ensure non-default branches are
+      // still fetched so existing Renovate branches remain manageable.
+      tmpDir = await tmp.dir({ unsafeCleanup: true });
+      GlobalConfig.set({
+        localDir: tmpDir.path,
+        gitShallowCloneDepth: 2,
+      });
+      await git.initRepo({
+        url: `file://${origin.path}`,
+      });
+      await git.syncGit();
+
+      const tmpGit = simpleGit(tmpDir.path);
+      const remoteBranches = await tmpGit.raw(['branch', '--remotes']);
+      expect(remoteBranches).toContain('origin/renovate/future_branch');
+    });
+
     it('should ignore gitShallowCloneDepth when fullClone is true', async () => {
       tmpDir = await tmp.dir({ unsafeCleanup: true });
       GlobalConfig.set({
