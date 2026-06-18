@@ -180,6 +180,7 @@ export async function decryptConfig<T extends RenovateConfig = AllConfig>(
           error.validationError = 'Encrypted config unsupported';
           error.validationMessage = `This config contains an encrypted object at location \`$.${key}\` but no privateKey is configured. To support encrypted config, the Renovate administrator must configure a \`privateKey\` in Global Configuration.`;
           if (env.MEND_HOSTED === 'true') {
+            // oxlint-disable-next-line renovate/no-hardcoded-docs-url -- no config access during decryption
             error.validationMessage = `Mend-hosted Renovate Apps no longer support the use of encrypted secrets in Renovate file config (e.g. renovate.json).
 Please migrate all secrets to the Developer Portal using the web UI available at https://developer.mend.io/
 

@@ -67,6 +67,7 @@ export async function updateArtifacts({
 
   if (isLockFileMaintenance && isUmbrella) {
     logger.debug(
+      // oxlint-disable-next-line renovate/no-hardcoded-docs-url -- no config access in manager artifact code
       'Cannot use lockFileMaintenance in an umbrella project, see https://docs.renovatebot.com/modules/manager/mix/#lockFileMaintenance',
     );
     return null;

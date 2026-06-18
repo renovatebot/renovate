@@ -130,6 +130,7 @@ function handleGotError(
         logger.once.warn(
           {
             documentationUrl:
+              // oxlint-disable-next-line renovate/no-hardcoded-docs-url -- no config access in HTTP utility
               'https://docs.renovatebot.com/getting-started/running/#githubcom-token-for-changelogs-and-tools',
           },
           `Rate limit exceeded for ${parsed.host}, as no hostRules set for this host. Please set a GITHUB_COM_TOKEN`,

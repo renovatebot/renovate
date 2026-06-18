@@ -2191,6 +2191,7 @@ export async function getVulnerabilityAlerts(): Promise<GithubVulnerabilityAlert
     logger.debug({ err }, 'Error retrieving vulnerability alerts');
     logger.warn(
       {
+        // oxlint-disable-next-line renovate/no-hardcoded-docs-url -- no config access in platform code
         url: 'https://docs.renovatebot.com/configuration-options/#vulnerabilityalerts',
       },
       'Cannot access vulnerability alerts. Please ensure permissions have been granted.',
