@@ -168,6 +168,41 @@ describe('modules/datasource/packagist/schema', () => {
         source: null,
         require: null,
       });
+
+      expect(
+        ComposerRelease.parse({ version: '1.2.3', abandoned: true }),
+      ).toEqual({
+        version: '1.2.3',
+        abandoned: true,
+        homepage: null,
+        source: null,
+        time: null,
+        require: null,
+      });
+
+      expect(
+        ComposerRelease.parse({
+          version: '1.2.3',
+          abandoned: 'scheb/2fa-bundle',
+        }),
+      ).toEqual({
+        version: '1.2.3',
+        abandoned: 'scheb/2fa-bundle',
+        homepage: null,
+        source: null,
+        time: null,
+        require: null,
+      });
+
+      expect(
+        ComposerRelease.parse({ version: '1.2.3', abandoned: 42 }),
+      ).toEqual({
+        version: '1.2.3',
+        homepage: null,
+        source: null,
+        time: null,
+        require: null,
+      });
     });
   });
 
@@ -384,6 +419,48 @@ describe('modules/datasource/packagist/schema', () => {
             releaseTimestamp: '2025-01-16T12:00:00.000Z' as Timestamp,
             constraints: { php: ['^7.0'] },
           },
+        ],
+      } satisfies ReleaseResult);
+    });
+
+    it('marks abandoned packages as deprecated', () => {
+      expect(
+        parsePackagesResponses('sonata-project/core-bundle', [
+          {
+            packages: {
+              'sonata-project/core-bundle': [
+                { version: '3.20.0', abandoned: true },
+                { version: '3.19.0', abandoned: true },
+              ],
+            },
+          },
+        ]),
+      ).toEqual({
+        deprecationMessage:
+          'This package is abandoned and no longer maintained.',
+        releases: [
+          { version: '3.20.0', gitRef: '3.20.0', isDeprecated: true },
+          { version: '3.19.0', gitRef: '3.19.0', isDeprecated: true },
+        ],
+      } satisfies ReleaseResult);
+    });
+
+    it('suggests a replacement for abandoned packages', () => {
+      expect(
+        parsePackagesResponses('scheb/two-factor-bundle', [
+          {
+            packages: {
+              'scheb/two-factor-bundle': [
+                { version: 'v4.18.4', abandoned: 'scheb/2fa-bundle' },
+              ],
+            },
+          },
+        ]),
+      ).toEqual({
+        deprecationMessage:
+          'This package is abandoned and no longer maintained. The author suggests using the `scheb/2fa-bundle` package instead.',
+        releases: [
+          { version: '4.18.4', gitRef: 'v4.18.4', isDeprecated: true },
         ],
       } satisfies ReleaseResult);
     });
