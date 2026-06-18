@@ -111,7 +111,7 @@ export function extractReleaseResult(
       const dep: Release = { version, gitRef };
 
       // Packagist's `published-time` reflects when the version was actually published to the registry;
-      // prefer it over `time` (the git tag's `releasedAt`, which can be backdated), falling back when absent.
+      // prefer it over `time` (the git tag's `releasedAt`, which could be when the commit that the tag points at was pushed, not the time the release itself was made public to the world), falling back when absent.
       const releaseTimestamp =
         composerRelease['published-time'] ?? composerRelease.time;
       if (releaseTimestamp) {
