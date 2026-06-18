@@ -102,6 +102,19 @@ describe('modules/manager/terraform/hcl/index', () => {
     });
   });
 
+  describe('parseHCL() for .hcl', () => {
+    it('should return flat modules for .hcl', async () => {
+      const res = await parseHCL(modulesTF, 'file.hcl');
+      expect(res?.module).toBeDefined();
+      expect(Object.keys(res!.module!)).toBeArrayOfSize(6);
+    });
+
+    it('should return null for lock.hcl file', async () => {
+      const res = await parseHCL(modulesTF, 'file.lock.hcl');
+      expect(res).toBeNil();
+    });
+  });
+
   describe('parseHCL() for .tf.json', () => {
     it('should return flat modules', async () => {
       const modulesTFJSON = codeBlock`
