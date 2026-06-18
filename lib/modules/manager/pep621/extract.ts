@@ -60,8 +60,7 @@ function getUvRequiredVersionReplacement(
 
     if (match?.groups) {
       const quote = match.groups.doubleValue ? '"' : "'";
-      const currentValue =
-        match.groups.doubleValue ?? match.groups.singleValue;
+      const currentValue = match.groups.doubleValue ?? match.groups.singleValue;
       return {
         replaceString: `${match.groups.prefix}${quote}${currentValue}${quote}`,
         autoReplaceStringTemplate: `${match.groups.prefix}${quote}{{newValue}}${quote}`,
