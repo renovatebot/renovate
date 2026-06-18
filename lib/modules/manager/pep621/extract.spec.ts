@@ -1,8 +1,8 @@
 import { codeBlock } from 'common-tags';
 import { Fixtures } from '~test/fixtures.ts';
 import { fs } from '~test/util.ts';
-import { GithubReleasesDatasource } from '../../datasource/github-releases/index.ts';
 import { GitRefsDatasource } from '../../datasource/git-refs/index.ts';
+import { GithubReleasesDatasource } from '../../datasource/github-releases/index.ts';
 import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
 import { extractPackageFile } from './index.ts';
 import { depTypes } from './utils.ts';
@@ -435,6 +435,50 @@ describe('modules/manager/pep621/extract', () => {
           currentValue: '0.10.12',
           replaceString: 'required-version = "0.10.12"',
           autoReplaceStringTemplate: 'required-version = "{{newValue}}"',
+        },
+      ]);
+    });
+
+    it('should preserve uv required-version single quotes and spacing', async () => {
+      const result = await extractPackageFile(
+        codeBlock`
+          [tool.uv] # uv configuration
+            required-version = '0.10.12'
+        `,
+        'pyproject.toml',
+      );
+
+      expect(result?.deps).toEqual([
+        {
+          depName: 'uv',
+          packageName: 'astral-sh/uv',
+          datasource: GithubReleasesDatasource.id,
+          versioning: 'pep440',
+          depType: depTypes.uvRequiredVersion,
+          currentValue: '0.10.12',
+          replaceString: "  required-version = '0.10.12'",
+          autoReplaceStringTemplate: "  required-version = '{{newValue}}'",
+        },
+      ]);
+    });
+
+    it('should extract inline uv required-version without replacement metadata', async () => {
+      const result = await extractPackageFile(
+        codeBlock`
+          [tool]
+          uv = { required-version = "0.10.12" }
+        `,
+        'pyproject.toml',
+      );
+
+      expect(result?.deps).toEqual([
+        {
+          depName: 'uv',
+          packageName: 'astral-sh/uv',
+          datasource: GithubReleasesDatasource.id,
+          versioning: 'pep440',
+          depType: depTypes.uvRequiredVersion,
+          currentValue: '0.10.12',
         },
       ]);
     });
