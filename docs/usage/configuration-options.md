@@ -4063,11 +4063,16 @@ Run `dotnet workload restore` before `dotnet restore` commands.
 
 ### `goGenerate`
 
-Run `go generate ./...` after vendoring (if vendoring was required).
+Run `go generate ./...`.
 This will then commit any files which were added or modified by running `go generate`.
+
 Note this will not install any other tools as part of the process.
 See [Go Tool](https://tip.golang.org/doc/go1.24#tools) usage for how to incorporate these as part of your build process.
-In order for this option to function, the global configuration option `allowedUnsafeExecutions` must include `goGenerate`.
+
+This runs after vendoring, if vendoring was required.
+
+!!! note
+  In order for this option to function, the global configuration option [`allowedUnsafeExecutions`](./self-hosted-configuration.md#allowedunsafeexecutions) must include `goGenerate`.
 
 ### `gomodMassage`
 
