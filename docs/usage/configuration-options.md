@@ -174,6 +174,17 @@ Read the docs for your platform for details on syntax and allowed file locations
 - [GitLab, Code Owners](https://docs.gitlab.com/ee/user/project/codeowners/)
 - [Bitbucket, Set up and use code owners](https://support.atlassian.com/bitbucket-cloud/docs/set-up-and-use-code-owners/)
 
+## assigneesOnChecks
+
+Controls when Renovate adds assignees to a PR, relative to CI status.
+
+If unset, Renovate preserves its prior default behavior: assignees are added immediately, unless `automerge` is enabled without `assignAutomerge`, in which case assignees are only added once status checks turn red.
+
+- `never`: never add assignees via this mechanism
+- `red`: only add assignees when status checks are red
+- `green`: only add assignees when status checks are green
+- `always`: always add assignees immediately, regardless of automerge settings
+
 ## `assigneesSampleSize`
 
 If configured, Renovate will take a random sample of given size from assignees and assign them only, instead of assigning the entire list of `assignees` you have configured.
@@ -4705,6 +4716,12 @@ Read the docs for your platform for details on syntax and allowed file locations
 - [Bitbucket, Set up and use code owners](https://support.atlassian.com/bitbucket-cloud/docs/set-up-and-use-code-owners/)
 
 Please note that Reviewers are only added during creation of a PR, but are not modified afterwards.
+
+## reviewersOnChecks
+
+Controls when Renovate adds reviewers to a PR, relative to CI status.
+
+Same semantics and default behavior as `assigneesOnChecks`, applied to reviewers instead.
 
 ## `reviewersSampleSize`
 

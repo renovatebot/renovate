@@ -42,12 +42,12 @@ function prepareParticipants(
   return filterUnavailableUsers(config, normalizedUsernames);
 }
 
-export async function addParticipants(
+export async function addAssignees(
   config: RenovateConfig,
   pr: Pr,
 ): Promise<void> {
   let assignees = config.assignees ?? [];
-  logger.debug(`addParticipants(pr=${pr?.number})`);
+  logger.debug(`addAssignees(pr=${pr?.number})`);
   if (config.assigneesFromCodeOwners) {
     assignees = await addCodeOwners(config, assignees, pr);
   }
@@ -72,7 +72,12 @@ export async function addParticipants(
       );
     }
   }
+}
 
+export async function addReviewers(
+  config: RenovateConfig,
+  pr: Pr,
+): Promise<void> {
   let reviewers = config.reviewers ?? [];
   if (config.reviewersFromCodeOwners) {
     reviewers = await addCodeOwners(config, reviewers, pr);
@@ -113,4 +118,12 @@ export async function addParticipants(
       );
     }
   }
+}
+
+export async function addParticipants(
+  config: RenovateConfig,
+  pr: Pr,
+): Promise<void> {
+  await addAssignees(config, pr);
+  await addReviewers(config, pr);
 }

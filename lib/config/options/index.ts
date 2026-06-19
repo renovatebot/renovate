@@ -64,6 +64,30 @@ const options: Readonly<RenovateOptions>[] = [
     mergeable: true,
   },
   {
+    name: 'assigneesOnChecks',
+    description:
+      'Controls when Renovate adds assignees to a PR, relative to CI status. ' +
+      'Unset (default): preserves prior behavior — assignees are added immediately, ' +
+      'unless `automerge` is enabled without `assignAutomerge`, in which case assignees ' +
+      'are only added once status checks turn red. ' +
+      '`never`: never add assignees via this mechanism. ' +
+      '`red`: only add assignees when status checks are red. ' +
+      '`green`: only add assignees when status checks are green. ' +
+      '`always`: always add assignees immediately, regardless of automerge settings.',
+    type: 'string',
+    allowedValues: ['never', 'red', 'green', 'always'],
+    default: null,
+  },
+  {
+    name: 'reviewersOnChecks',
+    description:
+      'Controls when Renovate adds reviewers to a PR, relative to CI status. ' +
+      'Same semantics and default behavior as `assigneesOnChecks`, applied to reviewers instead.',
+    type: 'string',
+    allowedValues: ['never', 'red', 'green', 'always'],
+    default: null,
+  },
+  {
     name: 'detectGlobalManagerConfig',
     description:
       'If `true`, Renovate tries to detect global manager configuration from the file system.',

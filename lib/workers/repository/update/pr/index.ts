@@ -22,6 +22,7 @@ import {
 } from '../../../../modules/platform/pr-body.ts';
 import { scm } from '../../../../modules/platform/scm.ts';
 import { ExternalHostError } from '../../../../types/errors/external-host-error.ts';
+import type { BranchStatus } from '../../../../types/index.ts';
 import { getElapsedHours } from '../../../../util/date.ts';
 import { stripEmojis } from '../../../../util/emoji.ts';
 import { fingerprint } from '../../../../util/fingerprint.ts';
@@ -31,6 +32,7 @@ import { incCountValue, isLimitReached } from '../../../global/limits.ts';
 import type {
   BranchConfig,
   BranchUpgradeConfig,
+  ChecksAssignTiming,
   PrBlockedBy,
 } from '../../../types.ts';
 import { embedChangelogs } from '../../changelog/index.ts';
@@ -41,7 +43,7 @@ import {
   prepareLabels,
   shouldUpdateLabels,
 } from './labels.ts';
-import { addParticipants } from './participants.ts';
+import { addAssignees, addReviewers } from './participants.ts';
 import { getPrCache, setPrCache } from './pr-cache.ts';
 import {
   generatePrBodyFingerprintConfig,
@@ -120,6 +122,57 @@ function hasNotIgnoredReviewers(pr: Pr, config: BranchConfig): boolean {
     );
   }
   return isNonEmptyArray(pr.reviewers);
+}
+
+function matchesTiming(
+  timing: ChecksAssignTiming,
+  status: BranchStatus,
+): boolean {
+  switch (timing) {
+    case 'never':
+      return false;
+    case 'red':
+      return status === 'red';
+    case 'green':
+      return status === 'green';
+    case 'always':
+      return true;
+  }
+}
+
+function defaultAssigneeTiming(config: BranchConfig): ChecksAssignTiming {
+  if (config.automerge && !config.assignAutomerge) {
+    return 'red';
+  }
+  return 'always';
+}
+
+async function maybeAddAssignees(
+  config: BranchConfig,
+  pr: Pr,
+  status: BranchStatus,
+): Promise<void> {
+  const timing = config.assigneesOnChecks ?? defaultAssigneeTiming(config);
+  if (matchesTiming(timing, status)) {
+    logger.debug(`Setting assignees (timing=${timing}, status=${status})`);
+    await addAssignees(config, pr);
+  } else {
+    logger.debug(`Skipping assignees (timing=${timing}, status=${status})`);
+  }
+}
+
+async function maybeAddReviewers(
+  config: BranchConfig,
+  pr: Pr,
+  status: BranchStatus,
+): Promise<void> {
+  const timing = config.reviewersOnChecks ?? defaultAssigneeTiming(config);
+  if (matchesTiming(timing, status)) {
+    logger.debug(`Setting reviewers (timing=${timing}, status=${status})`);
+    await addReviewers(config, pr);
+  } else {
+    logger.debug(`Skipping reviewers (timing=${timing}, status=${status})`);
+  }
 }
 
 function addPullRequestNoteIfAttestationHasBeenLost(
@@ -389,14 +442,12 @@ export async function ensurePr(
 
       if (
         !existingPr.hasAssignees &&
-        !hasNotIgnoredReviewers(existingPr, config) &&
-        config.automerge &&
-        !config.assignAutomerge &&
-        (await getBranchStatus()) === 'red'
+        !hasNotIgnoredReviewers(existingPr, config)
       ) {
-        logger.debug(`Setting assignees and reviewers as status checks failed`);
-        await addParticipants(config, existingPr);
+        await maybeAddAssignees(config, existingPr, await getBranchStatus());
+        await maybeAddReviewers(config, existingPr, await getBranchStatus());
       }
+
       // Check if existing PR needs updating
       const existingPrTitle = stripEmojis(existingPr.title);
       const existingPrBodyHash = existingPr.bodyStruct?.hash;
@@ -597,17 +648,9 @@ export async function ensurePr(
     }
     // Skip assign and review if automerging PR
     if (pr) {
-      if (
-        config.automerge &&
-        !config.assignAutomerge &&
-        (await getBranchStatus()) !== 'red'
-      ) {
-        logger.debug(
-          `Skipping assignees and reviewers as automerge=${config.automerge}`,
-        );
-      } else {
-        await addParticipants(config, pr);
-      }
+      const status = await getBranchStatus();
+      await maybeAddAssignees(config, pr, status);
+      await maybeAddReviewers(config, pr, status);
       setPrCache(branchName, prBodyFingerprint, true);
       logger.debug(`Created Pull Request #${pr.number}`);
       return { type: 'with-pr', pr };

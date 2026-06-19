@@ -609,7 +609,8 @@ describe('workers/repository/update/pr/index', () => {
         });
 
         expect(res).toEqual({ type: 'with-pr', pr: changedPr });
-        expect(participants.addParticipants).toHaveBeenCalled();
+        expect(participants.addAssignees).toHaveBeenCalled();
+        expect(participants.addReviewers).toHaveBeenCalled();
         expect(prCache.setPrCache).toHaveBeenCalled();
       });
 
@@ -631,7 +632,8 @@ describe('workers/repository/update/pr/index', () => {
         });
 
         expect(res).toEqual({ type: 'with-pr', pr: changedPr });
-        expect(participants.addParticipants).toHaveBeenCalled();
+        expect(participants.addAssignees).toHaveBeenCalled();
+        expect(participants.addReviewers).toHaveBeenCalled();
       });
 
       it('skips branch automerge and forces PR creation due to artifact errors', async () => {
@@ -646,7 +648,8 @@ describe('workers/repository/update/pr/index', () => {
 
         expect(res).toEqual({ type: 'with-pr', pr });
         expect(platform.createPr).toHaveBeenCalled();
-        expect(participants.addParticipants).not.toHaveBeenCalled();
+        expect(participants.addAssignees).not.toHaveBeenCalled();
+        expect(participants.addReviewers).not.toHaveBeenCalled();
         expect(prCache.setPrCache).toHaveBeenCalled();
       });
 
@@ -743,8 +746,7 @@ describe('workers/repository/update/pr/index', () => {
         checks.resolveBranchStatus.mockResolvedValueOnce('red');
 
         const err = new Error('unknown');
-        participants.addParticipants.mockRejectedValueOnce(err);
-
+        participants.addAssignees.mockRejectedValueOnce(err);
         await ensurePr({
           ...config,
           automerge: true,
@@ -767,7 +769,7 @@ describe('workers/repository/update/pr/index', () => {
         checks.resolveBranchStatus.mockResolvedValueOnce('red');
 
         const err = new ExternalHostError(new Error('unknown'));
-        participants.addParticipants.mockRejectedValueOnce(err);
+        participants.addAssignees.mockRejectedValueOnce(err);
 
         await expect(
           ensurePr({
@@ -795,7 +797,7 @@ describe('workers/repository/update/pr/index', () => {
           checks.resolveBranchStatus.mockResolvedValueOnce('red');
 
           const err = new Error(message);
-          participants.addParticipants.mockRejectedValueOnce(err);
+          participants.addAssignees.mockRejectedValueOnce(err);
 
           await expect(
             ensurePr({
@@ -807,6 +809,126 @@ describe('workers/repository/update/pr/index', () => {
           ).rejects.toThrow(err);
         },
       );
+    });
+
+    describe('assigneesOnChecks / reviewersOnChecks', () => {
+      it('preserves default behavior: assigns both immediately with no automerge', async () => {
+        checks.resolveBranchStatus.mockResolvedValueOnce('yellow');
+        platform.createPr.mockResolvedValueOnce(pr);
+
+        const res = await ensurePr({ ...config });
+
+        expect(res).toEqual({ type: 'with-pr', pr });
+        expect(participants.addAssignees).toHaveBeenCalled();
+        expect(participants.addReviewers).toHaveBeenCalled();
+      });
+
+      it('preserves default automerge-red behavior for both roles when neither flag is set', async () => {
+        checks.resolveBranchStatus.mockResolvedValueOnce('yellow');
+        platform.createPr.mockResolvedValueOnce(pr);
+
+        const res = await ensurePr({
+          ...config,
+          automerge: true,
+          automergeType: 'pr',
+          assignAutomerge: false,
+        });
+
+        expect(res).toEqual({ type: 'with-pr', pr });
+        expect(participants.addAssignees).not.toHaveBeenCalled();
+        expect(participants.addReviewers).not.toHaveBeenCalled();
+      });
+
+      it('assigns assignees on red even when reviewers are gated to green', async () => {
+        checks.resolveBranchStatus.mockResolvedValueOnce('red');
+        platform.createPr.mockResolvedValueOnce(pr);
+
+        const res = await ensurePr({
+          ...config,
+          assigneesOnChecks: 'red',
+          reviewersOnChecks: 'green',
+        });
+
+        expect(res).toEqual({ type: 'with-pr', pr });
+        expect(participants.addAssignees).toHaveBeenCalled();
+        expect(participants.addReviewers).not.toHaveBeenCalled();
+      });
+
+      it('assigns reviewers on green even when assignees are gated to red', async () => {
+        checks.resolveBranchStatus.mockResolvedValueOnce('green');
+        platform.createPr.mockResolvedValueOnce(pr);
+
+        const res = await ensurePr({
+          ...config,
+          assigneesOnChecks: 'red',
+          reviewersOnChecks: 'green',
+        });
+
+        expect(res).toEqual({ type: 'with-pr', pr });
+        expect(participants.addAssignees).not.toHaveBeenCalled();
+        expect(participants.addReviewers).toHaveBeenCalled();
+      });
+
+      it('skips both when status is yellow and both roles are gated to red/green', async () => {
+        checks.resolveBranchStatus.mockResolvedValueOnce('yellow');
+        platform.createPr.mockResolvedValueOnce(pr);
+
+        const res = await ensurePr({
+          ...config,
+          assigneesOnChecks: 'red',
+          reviewersOnChecks: 'green',
+        });
+
+        expect(res).toEqual({ type: 'with-pr', pr });
+        expect(participants.addAssignees).not.toHaveBeenCalled();
+        expect(participants.addReviewers).not.toHaveBeenCalled();
+      });
+
+      it('explicit "always" overrides automerge-red default', async () => {
+        checks.resolveBranchStatus.mockResolvedValueOnce('green');
+        platform.createPr.mockResolvedValueOnce(pr);
+
+        const res = await ensurePr({
+          ...config,
+          automerge: true,
+          automergeType: 'pr',
+          assignAutomerge: false,
+          assigneesOnChecks: 'always',
+        });
+
+        expect(res).toEqual({ type: 'with-pr', pr });
+        expect(participants.addAssignees).toHaveBeenCalled();
+      });
+
+      it('explicit "never" suppresses assignees even without automerge', async () => {
+        checks.resolveBranchStatus.mockResolvedValueOnce('green');
+        platform.createPr.mockResolvedValueOnce(pr);
+
+        const res = await ensurePr({
+          ...config,
+          assigneesOnChecks: 'never',
+        });
+
+        expect(res).toEqual({ type: 'with-pr', pr });
+        expect(participants.addAssignees).not.toHaveBeenCalled();
+        expect(participants.addReviewers).toHaveBeenCalled();
+      });
+
+      it('applies the same independent gating for an existing PR', async () => {
+        const changedPr: Pr = { ...pr, hasAssignees: false };
+        platform.getBranchPr.mockResolvedValueOnce(changedPr);
+        checks.resolveBranchStatus.mockResolvedValueOnce('red');
+
+        const res = await ensurePr({
+          ...config,
+          assigneesOnChecks: 'red',
+          reviewersOnChecks: 'green',
+        });
+
+        expect(res).toEqual({ type: 'with-pr', pr: changedPr });
+        expect(participants.addAssignees).toHaveBeenCalled();
+        expect(participants.addReviewers).not.toHaveBeenCalled();
+      });
     });
 
     describe('Changelog', () => {

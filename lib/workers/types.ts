@@ -157,6 +157,8 @@ export type CacheFingerprintMatchResult =
   | 'no-match'
   | 'no-fingerprint';
 
+export type ChecksAssignTiming = 'never' | 'red' | 'green' | 'always';
+
 export interface BranchConfig
   extends BranchUpgradeConfig, LegacyAdminConfig, PlatformPrOptions {
   automergeComment?: string;
@@ -196,6 +198,8 @@ export interface BranchConfig
   commitFingerprint?: string;
   cacheFingerprintMatch?: CacheFingerprintMatchResult;
   prNotPendingHours?: number;
+  assigneesOnChecks?: ChecksAssignTiming;
+  reviewersOnChecks?: ChecksAssignTiming;
 }
 
 export interface BranchMetadata {
