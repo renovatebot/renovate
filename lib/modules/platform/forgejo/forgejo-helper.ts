@@ -1,36 +1,38 @@
 import { isBoolean } from '@sindresorhus/is';
+import { z } from 'zod/v4';
 import { logger } from '../../../logger/index.ts';
 import type { BranchStatus } from '../../../types/index.ts';
 import { getCache } from '../../../util/cache/repository/index.ts';
 import type { ForgejoHttpOptions } from '../../../util/http/forgejo.ts';
 import { ForgejoHttp } from '../../../util/http/forgejo.ts';
-import { fromBase64 } from '../../../util/string.ts';
 import { getQueryString } from '../../../util/url.ts';
-import type {
+import {
   Branch,
-  CombinedCommitStatus,
   Comment,
-  CommentCreateParams,
-  CommentUpdateParams,
   CommitStatus,
-  CommitStatusCreateParams,
-  CommitStatusType,
+  type CommitStatusType,
   Issue,
+  Label,
+  PR,
+  Repo,
+  RepoContents,
+  RepoSearchResults,
+  User,
+  Version,
+} from './schema.ts';
+import type {
+  CombinedCommitStatus,
+  CommentCreateParams,
+  CommitStatusCreateParams,
   IssueCreateParams,
   IssueSearchParams,
   IssueUpdateLabelsParams,
   IssueUpdateParams,
-  Label,
-  PR,
   PRCreateParams,
   PRMergeParams,
   PRUpdateParams,
   PrReviewersParams,
-  Repo,
-  RepoContents,
   RepoSearchParams,
-  RepoSearchResults,
-  User,
 } from './types.ts';
 import { API_PATH } from './utils.ts';
 
@@ -47,21 +49,18 @@ const commitStatusStates: CommitStatusType[] = [
 ];
 
 export async function getCurrentUser(
-  options?: ForgejoHttpOptions,
+  options: ForgejoHttpOptions = {},
 ): Promise<User> {
   const url = `${API_PATH}/user`;
-  const res = await forgejoHttp.getJsonUnchecked<User>(url, options);
+  const res = await forgejoHttp.getJson(url, options, User);
   return res.body;
 }
 
 export async function getVersion(
-  options?: ForgejoHttpOptions,
+  options: ForgejoHttpOptions = {},
 ): Promise<string> {
   const url = `${API_PATH}/version`;
-  const res = await forgejoHttp.getJsonUnchecked<{ version: string }>(
-    url,
-    options,
-  );
+  const res = await forgejoHttp.getJson(url, options, Version);
   return res.body.version;
 }
 
@@ -94,10 +93,14 @@ export async function searchRepos(
 ): Promise<Repo[]> {
   const query = getQueryString(params);
   const url = `${API_PATH}/repos/search?${query}`;
-  const res = await forgejoHttp.getJsonUnchecked<RepoSearchResults>(url, {
-    ...options,
-    paginate: true,
-  });
+  const res = await forgejoHttp.getJson(
+    url,
+    {
+      ...options,
+      paginate: true,
+    },
+    RepoSearchResults,
+  );
 
   if (!res.body.ok) {
     throw new Error(
@@ -113,20 +116,24 @@ export async function orgListRepos(
   options?: ForgejoHttpOptions,
 ): Promise<Repo[]> {
   const url = `${API_PATH}/orgs/${organization}/repos`;
-  const res = await forgejoHttp.getJsonUnchecked<Repo[]>(url, {
-    ...options,
-    paginate: true,
-  });
+  const res = await forgejoHttp.getJson(
+    url,
+    {
+      ...options,
+      paginate: true,
+    },
+    z.array(Repo),
+  );
 
   return res.body;
 }
 
 export async function getRepo(
   repoPath: string,
-  options?: ForgejoHttpOptions,
+  options: ForgejoHttpOptions = {},
 ): Promise<Repo> {
   const url = `${API_PATH}/repos/${repoPath}`;
-  const res = await forgejoHttp.getJsonUnchecked<Repo>(url, options);
+  const res = await forgejoHttp.getJson(url, options, Repo);
   return res.body;
 }
 
@@ -134,17 +141,13 @@ export async function getRepoContents(
   repoPath: string,
   filePath: string,
   ref?: string | null,
-  options?: ForgejoHttpOptions,
+  options: ForgejoHttpOptions = {},
 ): Promise<RepoContents> {
   const query = getQueryString(ref ? { ref } : {});
   const url = `${API_PATH}/repos/${repoPath}/contents/${urlEscape(
     filePath,
   )}?${query}`;
-  const res = await forgejoHttp.getJsonUnchecked<RepoContents>(url, options);
-
-  if (res.body.content) {
-    res.body.contentString = fromBase64(res.body.content);
-  }
+  const res = await forgejoHttp.getJson(url, options, RepoContents);
 
   return res.body;
 }
@@ -155,10 +158,14 @@ export async function createPR(
   options?: ForgejoHttpOptions,
 ): Promise<PR> {
   const url = `${API_PATH}/repos/${repoPath}/pulls`;
-  const res = await forgejoHttp.postJson<PR>(url, {
-    ...options,
-    body: params,
-  });
+  const res = await forgejoHttp.postJson(
+    url,
+    {
+      ...options,
+      body: params,
+    },
+    PR,
+  );
 
   return res.body;
 }
@@ -170,10 +177,14 @@ export async function updatePR(
   options?: ForgejoHttpOptions,
 ): Promise<PR> {
   const url = `${API_PATH}/repos/${repoPath}/pulls/${idx}`;
-  const res = await forgejoHttp.patchJson<PR>(url, {
-    ...options,
-    body: params,
-  });
+  const res = await forgejoHttp.patchJson(
+    url,
+    {
+      ...options,
+      body: params,
+    },
+    PR,
+  );
 
   return res.body;
 }
@@ -205,10 +216,10 @@ export async function mergePR(
 export async function getPR(
   repoPath: string,
   idx: number,
-  options?: ForgejoHttpOptions,
+  options: ForgejoHttpOptions = {},
 ): Promise<PR> {
   const url = `${API_PATH}/repos/${repoPath}/pulls/${idx}`;
-  const res = await forgejoHttp.getJsonUnchecked<PR>(url, options);
+  const res = await forgejoHttp.getJson(url, options, PR);
   return res.body;
 }
 
@@ -216,11 +227,11 @@ export async function getPRByBranch(
   repoPath: string,
   base: string,
   head: string,
-  options?: ForgejoHttpOptions,
+  options: ForgejoHttpOptions = {},
 ): Promise<PR | null> {
   const url = `${API_PATH}/repos/${repoPath}/pulls/${base}/${head}`;
   try {
-    const res = await forgejoHttp.getJsonUnchecked<PR>(url, options);
+    const res = await forgejoHttp.getJson(url, options, PR);
     return res.body;
   } catch (err) {
     logger.trace({ err }, 'Error while fetching PR');
@@ -250,10 +261,14 @@ export async function createIssue(
   options?: ForgejoHttpOptions,
 ): Promise<Issue> {
   const url = `${API_PATH}/repos/${repoPath}/issues`;
-  const res = await forgejoHttp.postJson<Issue>(url, {
-    ...options,
-    body: params,
-  });
+  const res = await forgejoHttp.postJson(
+    url,
+    {
+      ...options,
+      body: params,
+    },
+    Issue,
+  );
 
   return res.body;
 }
@@ -265,10 +280,14 @@ export async function updateIssue(
   options?: ForgejoHttpOptions,
 ): Promise<Issue> {
   const url = `${API_PATH}/repos/${repoPath}/issues/${idx}`;
-  const res = await forgejoHttp.patchJson<Issue>(url, {
-    ...options,
-    body: params,
-  });
+  const res = await forgejoHttp.patchJson(
+    url,
+    {
+      ...options,
+      body: params,
+    },
+    Issue,
+  );
 
   return res.body;
 }
@@ -280,10 +299,14 @@ export async function updateIssueLabels(
   options?: ForgejoHttpOptions,
 ): Promise<Label[]> {
   const url = `${API_PATH}/repos/${repoPath}/issues/${idx}/labels`;
-  const res = await forgejoHttp.putJson<Label[]>(url, {
-    ...options,
-    body: params,
-  });
+  const res = await forgejoHttp.putJson(
+    url,
+    {
+      ...options,
+      body: params,
+    },
+    z.array(Label),
+  );
 
   return res.body;
 }
@@ -306,10 +329,14 @@ export async function searchIssues(
 ): Promise<Issue[]> {
   const query = getQueryString({ ...params, type: 'issues' });
   const url = `${API_PATH}/repos/${repoPath}/issues?${query}`;
-  const res = await forgejoHttp.getJsonUnchecked<Issue[]>(url, {
-    ...options,
-    paginate: true,
-  });
+  const res = await forgejoHttp.getJson(
+    url,
+    {
+      ...options,
+      paginate: true,
+    },
+    z.array(Issue),
+  );
 
   return res.body;
 }
@@ -317,29 +344,29 @@ export async function searchIssues(
 export async function getIssue(
   repoPath: string,
   idx: number,
-  options?: ForgejoHttpOptions,
+  options: ForgejoHttpOptions = {},
 ): Promise<Issue> {
   const url = `${API_PATH}/repos/${repoPath}/issues/${idx}`;
-  const res = await forgejoHttp.getJsonUnchecked<Issue>(url, options);
+  const res = await forgejoHttp.getJson(url, options, Issue);
   return res.body;
 }
 
 export async function getRepoLabels(
   repoPath: string,
-  options?: ForgejoHttpOptions,
+  options: ForgejoHttpOptions = {},
 ): Promise<Label[]> {
   const url = `${API_PATH}/repos/${repoPath}/labels`;
-  const res = await forgejoHttp.getJsonUnchecked<Label[]>(url, options);
+  const res = await forgejoHttp.getJson(url, options, z.array(Label));
 
   return res.body;
 }
 
 export async function getOrgLabels(
   orgName: string,
-  options?: ForgejoHttpOptions,
+  options: ForgejoHttpOptions = {},
 ): Promise<Label[]> {
   const url = `${API_PATH}/orgs/${orgName}/labels`;
-  const res = await forgejoHttp.getJsonUnchecked<Label[]>(url, options);
+  const res = await forgejoHttp.getJson(url, options, z.array(Label));
 
   return res.body;
 }
@@ -362,10 +389,14 @@ export async function createComment(
 ): Promise<Comment> {
   const params: CommentCreateParams = { body };
   const url = `${API_PATH}/repos/${repoPath}/issues/${issue}/comments`;
-  const res = await forgejoHttp.postJson<Comment>(url, {
-    ...options,
-    body: params,
-  });
+  const res = await forgejoHttp.postJson(
+    url,
+    {
+      ...options,
+      body: params,
+    },
+    Comment,
+  );
 
   return res.body;
 }
@@ -376,12 +407,16 @@ export async function updateComment(
   body: string,
   options?: ForgejoHttpOptions,
 ): Promise<Comment> {
-  const params: CommentUpdateParams = { body };
+  const params: CommentCreateParams = { body };
   const url = `${API_PATH}/repos/${repoPath}/issues/comments/${idx}`;
-  const res = await forgejoHttp.patchJson<Comment>(url, {
-    ...options,
-    body: params,
-  });
+  const res = await forgejoHttp.patchJson(
+    url,
+    {
+      ...options,
+      body: params,
+    },
+    Comment,
+  );
 
   return res.body;
 }
@@ -398,10 +433,10 @@ export async function deleteComment(
 export async function getComments(
   repoPath: string,
   issue: number,
-  options?: ForgejoHttpOptions,
+  options: ForgejoHttpOptions = {},
 ): Promise<Comment[]> {
   const url = `${API_PATH}/repos/${repoPath}/issues/${issue}/comments`;
-  const res = await forgejoHttp.getJsonUnchecked<Comment[]>(url, options);
+  const res = await forgejoHttp.getJson(url, options, z.array(Comment));
 
   return res.body;
 }
@@ -413,17 +448,21 @@ export async function createCommitStatus(
   options?: ForgejoHttpOptions,
 ): Promise<CommitStatus> {
   const url = `${API_PATH}/repos/${repoPath}/statuses/${branchCommit}`;
-  const res = await forgejoHttp.postJson<CommitStatus>(url, {
-    ...options,
-    body: params,
-  });
+  const res = await forgejoHttp.postJson(
+    url,
+    {
+      ...options,
+      body: params,
+    },
+    CommitStatus,
+  );
 
   return res.body;
 }
 
 export const forgejoToRenovateStatusMapping: Record<
   CommitStatusType,
-  BranchStatus | null
+  BranchStatus
 > = {
   unknown: 'yellow',
   success: 'green',
@@ -460,10 +499,14 @@ export async function getCombinedCommitStatus(
   const url = `${API_PATH}/repos/${repoPath}/commits/${urlEscape(
     branchName,
   )}/statuses`;
-  const res = await forgejoHttp.getJsonUnchecked<CommitStatus[]>(url, {
-    ...options,
-    paginate: true,
-  });
+  const res = await forgejoHttp.getJson(
+    url,
+    {
+      ...options,
+      paginate: true,
+    },
+    z.array(CommitStatus),
+  );
 
   let worstState = 0;
   const statuses = filterStatus(res.body);
@@ -480,10 +523,10 @@ export async function getCombinedCommitStatus(
 export async function getBranch(
   repoPath: string,
   branchName: string,
-  options?: ForgejoHttpOptions,
+  options: ForgejoHttpOptions = {},
 ): Promise<Branch> {
   const url = `${API_PATH}/repos/${repoPath}/branches/${urlEscape(branchName)}`;
-  const res = await forgejoHttp.getJsonUnchecked<Branch>(url, options);
+  const res = await forgejoHttp.getJson(url, options, Branch);
 
   return res.body;
 }
