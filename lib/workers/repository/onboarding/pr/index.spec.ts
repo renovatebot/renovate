@@ -30,7 +30,12 @@ describe('workers/repository/onboarding/pr/index', () => {
     // NOTE that if you're intentionally changing the onboarding PR's contents, these hashes will change - update them above
     describe('generates a consistent hash of the body', () => {
       it('when the rebase checkbox is present', async () => {
-        config.onboardingRebaseCheckbox = true;
+        GlobalConfig.set({
+          onboardingBranch: config.onboardingBranch,
+          onboardingPrTitle: 'Configure Renovate',
+          requireConfig: config.requireConfig,
+          onboardingRebaseCheckbox: true,
+        });
         OnboardingState.prUpdateRequested = true;
 
         await ensureOnboardingPr(config, packageFiles, branches);
@@ -40,7 +45,12 @@ describe('workers/repository/onboarding/pr/index', () => {
       });
 
       it('when the rebase checkbox is not present', async () => {
-        config.onboardingRebaseCheckbox = false;
+        GlobalConfig.set({
+          onboardingBranch: config.onboardingBranch,
+          onboardingPrTitle: 'Configure Renovate',
+          requireConfig: config.requireConfig,
+          onboardingRebaseCheckbox: false,
+        });
 
         await ensureOnboardingPr(config, packageFiles, branches);
         const prBody = platform.createPr.mock.calls[0][0].prBody;
@@ -102,7 +112,12 @@ describe('workers/repository/onboarding/pr/index', () => {
         '(onboardingRebaseCheckbox="$onboardingRebaseCheckbox", prUpdateRequeste="$prUpdateRequested" )',
       async ({ onboardingRebaseCheckbox, prUpdateRequested, expected }) => {
         config.repoIsOnboarded = false;
-        config.onboardingRebaseCheckbox = onboardingRebaseCheckbox;
+        GlobalConfig.set({
+          onboardingBranch: config.onboardingBranch,
+          onboardingPrTitle: 'Configure Renovate',
+          requireConfig: config.requireConfig,
+          onboardingRebaseCheckbox,
+        });
         OnboardingState.prUpdateRequested = prUpdateRequested;
         await expect(
           ensureOnboardingPr(config, packageFiles, branches),
@@ -159,7 +174,12 @@ describe('workers/repository/onboarding/pr/index', () => {
       'creates PR with empty footer and header' +
         '(onboardingRebaseCheckbox="$onboardingRebaseCheckbox")',
       async ({ onboardingRebaseCheckbox }) => {
-        config.onboardingRebaseCheckbox = onboardingRebaseCheckbox;
+        GlobalConfig.set({
+          onboardingBranch: config.onboardingBranch,
+          onboardingPrTitle: 'Configure Renovate',
+          requireConfig: config.requireConfig,
+          onboardingRebaseCheckbox,
+        });
         OnboardingState.prUpdateRequested = true; // case 'false' is tested in "breaks early when onboarding"
         await ensureOnboardingPr(
           {
@@ -183,7 +203,12 @@ describe('workers/repository/onboarding/pr/index', () => {
       'creates PR with footer and header with trailing and leading newlines' +
         '(onboardingRebaseCheckbox="$onboardingRebaseCheckbox")',
       async ({ onboardingRebaseCheckbox }) => {
-        config.onboardingRebaseCheckbox = onboardingRebaseCheckbox;
+        GlobalConfig.set({
+          onboardingBranch: config.onboardingBranch,
+          onboardingPrTitle: 'Configure Renovate',
+          requireConfig: config.requireConfig,
+          onboardingRebaseCheckbox,
+        });
         OnboardingState.prUpdateRequested = true; // case 'false' is tested in "breaks early when onboarding"
         await ensureOnboardingPr(
           {
@@ -210,7 +235,12 @@ describe('workers/repository/onboarding/pr/index', () => {
       async ({ onboardingRebaseCheckbox }) => {
         config.baseBranch = 'some-branch';
         config.repository = 'test';
-        config.onboardingRebaseCheckbox = onboardingRebaseCheckbox;
+        GlobalConfig.set({
+          onboardingBranch: config.onboardingBranch,
+          onboardingPrTitle: 'Configure Renovate',
+          requireConfig: config.requireConfig,
+          onboardingRebaseCheckbox,
+        });
         config.onboardingConfigFileName = undefined; // checks the case when fileName isn't available
         OnboardingState.prUpdateRequested = true; // case 'false' is tested in "breaks early when onboarding"
         await ensureOnboardingPr(
@@ -243,7 +273,12 @@ describe('workers/repository/onboarding/pr/index', () => {
         '(onboardingRebaseCheckbox="$onboardingRebaseCheckbox")',
       async ({ onboardingRebaseCheckbox }) => {
         const hash = ONBOARDING_PR_BODY_HASH_WITHOUT_REBASE;
-        config.onboardingRebaseCheckbox = onboardingRebaseCheckbox;
+        GlobalConfig.set({
+          onboardingBranch: config.onboardingBranch,
+          onboardingPrTitle: 'Configure Renovate',
+          requireConfig: config.requireConfig,
+          onboardingRebaseCheckbox,
+        });
         OnboardingState.prUpdateRequested = true; // case 'false' is tested in "breaks early when onboarding"
         platform.getBranchPr.mockResolvedValue(
           partial<Pr>({

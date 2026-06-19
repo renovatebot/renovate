@@ -226,7 +226,11 @@ describe('workers/repository/onboarding/branch/check', () => {
   });
 
   it('checks git file list for config file when in fork mode', async () => {
-    config.forkToken = 'token';
+    GlobalConfig.set({
+      onboarding: true,
+      requireConfig: 'required',
+      forkToken: 'token',
+    });
     cache.getCache.mockReturnValue({ configFileName: 'renovate.json' });
     scm.getFileList.mockResolvedValue([]);
     await isOnboarded(config);

@@ -2,12 +2,16 @@ import { isNonEmptyArray, isNullOrUndefined, isString } from '@sindresorhus/is';
 import { dequal } from 'dequal';
 import { setUserConfigFileNames } from '../../../config/app-strings.ts';
 import { decryptConfig } from '../../../config/decrypt.ts';
+import { GlobalConfig } from '../../../config/global.ts';
 import { mergeChildConfig, removeGlobalConfig } from '../../../config/index.ts';
 import { InheritConfig } from '../../../config/inherit.ts';
 import { parseFileConfig } from '../../../config/parse.ts';
 import { resolveConfigPresets } from '../../../config/presets/index.ts';
 import { applySecretsAndVariablesToConfig } from '../../../config/secrets.ts';
-import type { RenovateConfig } from '../../../config/types.ts';
+import type {
+  GlobalInheritableConfig,
+  RenovateConfig,
+} from '../../../config/types.ts';
 import { validateConfig } from '../../../config/validation.ts';
 import {
   CONFIG_INHERIT_NOT_FOUND,
@@ -22,20 +26,18 @@ import { applyHostRules } from './merge.ts';
 export async function mergeInheritedConfig(
   config: RenovateConfig,
 ): Promise<RenovateConfig> {
+  const inheritConfig = GlobalConfig.get('inheritConfig');
+  const inheritConfigFileName = GlobalConfig.get('inheritConfigFileName');
+  const inheritConfigRepoName = GlobalConfig.get('inheritConfigRepoName');
+  const inheritConfigStrict = GlobalConfig.get('inheritConfigStrict');
   // typescript doesn't know that repo is defined
-  if (!config.repository || !config.inheritConfig) {
+  if (!config.repository || !inheritConfig) {
     return config;
   }
-  if (
-    !isString(config.inheritConfigRepoName) ||
-    !isString(config.inheritConfigFileName)
-  ) {
+  if (!isString(inheritConfigRepoName) || !isString(inheritConfigFileName)) {
     // Config validation should prevent this error
     logger.error(
-      {
-        inheritConfigRepoName: config.inheritConfigRepoName,
-        inheritConfigFileName: config.inheritConfigFileName,
-      },
+      { inheritConfigRepoName, inheritConfigFileName },
       'Invalid inherited config.',
     );
     return config;
@@ -45,44 +47,44 @@ export async function mergeInheritedConfig(
     parentOrg: config.parentOrg,
     repository: config.repository,
   };
-  const inheritConfigRepoName = template.compile(
-    config.inheritConfigRepoName,
+  const compiledInheritConfigRepoName = template.compile(
+    inheritConfigRepoName,
     templateConfig,
     false,
   );
   logger.trace(
-    { templateConfig, inheritConfigRepoName },
+    { templateConfig, inheritConfigRepoName: compiledInheritConfigRepoName },
     'Compiled inheritConfigRepoName result.',
   );
   logger.debug(
-    `Checking for inherited config file ${config.inheritConfigFileName} in repo ${inheritConfigRepoName}.`,
+    `Checking for inherited config file ${inheritConfigFileName} in repo ${compiledInheritConfigRepoName}.`,
   );
   let configFileRaw: string | null = null;
   try {
     configFileRaw = await platform.getRawFile(
-      config.inheritConfigFileName,
-      inheritConfigRepoName,
+      inheritConfigFileName,
+      compiledInheritConfigRepoName,
     );
   } catch (err) {
-    if (config.inheritConfigStrict) {
+    if (inheritConfigStrict) {
       logger.debug({ err }, 'Error getting inherited config.');
       throw new Error(CONFIG_INHERIT_NOT_FOUND);
     }
     logger.trace({ err }, `Error getting inherited config.`);
   }
   if (!configFileRaw) {
-    logger.debug(`No inherited config found in ${inheritConfigRepoName}.`);
+    logger.debug(
+      `No inherited config found in ${compiledInheritConfigRepoName}.`,
+    );
     return config;
   }
-  const parseResult = parseFileConfig(
-    config.inheritConfigFileName,
-    configFileRaw,
-  );
+  const parseResult = parseFileConfig(inheritConfigFileName, configFileRaw);
   if (!parseResult.success) {
     logger.debug({ parseResult }, 'Error parsing inherited config.');
     throw new Error(CONFIG_INHERIT_PARSE_ERROR);
   }
-  const inheritedConfig = parseResult.parsedContents as RenovateConfig;
+  const inheritedConfig = parseResult.parsedContents as RenovateConfig &
+    GlobalInheritableConfig;
   logger.debug({ config: inheritedConfig }, `Inherited config`);
   const res = await validateConfig('inherit', inheritedConfig);
   if (res.errors.length) {
@@ -106,7 +108,6 @@ export async function mergeInheritedConfig(
       'Updated the config filenames list',
     );
     setUserConfigFileNames(inheritedConfig.configFileNames);
-    delete config.configFileNames;
   }
 
   let decryptedConfig = await decryptConfig(inheritedConfig, config.repository);

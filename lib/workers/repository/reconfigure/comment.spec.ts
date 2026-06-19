@@ -19,17 +19,19 @@ describe('workers/repository/reconfigure/comment', () => {
         errors: [],
         warnings: [],
         description: [],
-        productLinks: {
-          documentation: 'https://docs.renovatebot.com/',
-          help: 'https://github.com/renovatebot/renovate/discussions',
-          homepage: 'https://github.com/renovatebot/renovate',
-        },
       };
       packageFiles = { npm: [{ packageFile: 'package.json', deps: [] }] };
       branches = [];
       platform.massageMarkdown.mockImplementation((input) => input);
       platform.ensureComment.mockResolvedValueOnce(true);
       GlobalConfig.reset();
+      GlobalConfig.set({
+        productLinks: {
+          documentation: 'https://docs.renovatebot.com/',
+          help: 'https://github.com/renovatebot/renovate/discussions',
+          homepage: 'https://github.com/renovatebot/renovate',
+        },
+      });
     });
 
     it('ensures comment', async () => {

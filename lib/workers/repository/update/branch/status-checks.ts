@@ -102,7 +102,7 @@ export async function setStability(config: StabilityConfig): Promise<void> {
       : 'Updates have not met minimum release age requirement';
 
   const docsLink = joinUrlParts(
-    coerceString(config.productLinks?.documentation),
+    coerceString(GlobalConfig.get('productLinks')?.documentation),
     'key-concepts/minimum-release-age/',
   );
 
@@ -159,7 +159,7 @@ export async function setConfidence(config: ConfidenceConfig): Promise<void> {
       : 'Updates have not met Merge Confidence requirement';
 
   const docsLink = joinUrlParts(
-    coerceString(config.productLinks?.documentation),
+    coerceString(GlobalConfig.get('productLinks')?.documentation),
     'merge-confidence',
   );
 

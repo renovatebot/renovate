@@ -194,7 +194,7 @@ export async function renovateRepository(
     );
   }
 
-  if (localDir && !repoConfig.persistRepoData) {
+  if (localDir && !GlobalConfig.get('persistRepoData')) {
     try {
       await deleteLocalFile('.');
     } catch (err) /* istanbul ignore if */ {

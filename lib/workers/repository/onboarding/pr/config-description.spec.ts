@@ -58,8 +58,10 @@ describe('workers/repository/onboarding/pr/config-description', () => {
     it('include retry/refresh checkbox message only if onboardingRebaseCheckbox is true', () => {
       delete config.description;
       config.schedule = ['before 5am'];
-      GlobalConfig.set({ onboardingConfigFileName: '.github/renovate.json' });
-      config.onboardingRebaseCheckbox = true;
+      GlobalConfig.set({
+        onboardingConfigFileName: '.github/renovate.json',
+        onboardingRebaseCheckbox: true,
+      });
       const res = getConfigDesc(config);
       expect(res).toMatchSnapshot();
     });

@@ -90,7 +90,12 @@ describe('workers/repository/onboarding/branch/index', () => {
       'has default onboarding config' +
         '(config.onboardingRebaseCheckbox="$checkboxEnabled")',
       async ({ checkboxEnabled, expected }) => {
-        config.onboardingRebaseCheckbox = checkboxEnabled;
+        GlobalConfig.set({
+          onboarding: true,
+          onboardingBranch: config.onboardingBranch,
+          requireConfig: config.requireConfig,
+          onboardingRebaseCheckbox: checkboxEnabled,
+        });
         configModule.getOnboardingConfig.mockResolvedValue(
           config.onboardingConfig,
         );
@@ -368,7 +373,12 @@ describe('workers/repository/onboarding/branch/index', () => {
         .mockReturnValueOnce('default-sha' as LongCommitSha)
         .mockReturnValueOnce('default-sha' as LongCommitSha)
         .mockReturnValueOnce('onboarding-sha' as LongCommitSha);
-      config.onboardingRebaseCheckbox = true;
+      GlobalConfig.set({
+        platform: 'github',
+        onboarding: true,
+        onboardingBranch: config.onboardingBranch,
+        onboardingRebaseCheckbox: true,
+      });
       await checkOnboardingBranch(config);
       expect(scm.commitAndPush).not.toHaveBeenCalled();
       expect(scm.mergeToLocal).not.toHaveBeenCalled();
@@ -461,8 +471,8 @@ describe('workers/repository/onboarding/branch/index', () => {
           platform: 'github',
           onboarding: true,
           onboardingBranch: config.onboardingBranch,
+          onboardingRebaseCheckbox: true,
         });
-        config.onboardingRebaseCheckbox = true;
         OnboardingState.prUpdateRequested = false;
         scm.getFileList.mockResolvedValueOnce(['package.json']);
         onboardingCache.isOnboardingBranchModified.mockResolvedValueOnce(true);
@@ -475,6 +485,7 @@ describe('workers/repository/onboarding/branch/index', () => {
           platform: pl,
           onboarding: true,
           onboardingBranch: config.onboardingBranch,
+          onboardingRebaseCheckbox: true,
         });
         platform.getBranchPr.mockResolvedValueOnce(mock<Pr>({}));
 

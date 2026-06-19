@@ -23,7 +23,7 @@ export async function ensureConfigMigrationPr(
 ): Promise<Pr | null> {
   logger.debug('ensureConfigMigrationPr()');
   const docsLink = joinUrlParts(
-    coerceString(config.productLinks?.documentation),
+    coerceString(GlobalConfig.get('productLinks')?.documentation),
     'configuration-options/#configmigration',
   );
   const branchName = getMigrationBranchName(config);
@@ -52,7 +52,7 @@ ${
 :no_bell: **Ignore**: Close this PR and you won't be reminded about config migration again, but one day your current config may no longer be valid.
 
 :question: Got questions? Does something look wrong to you? Please don't hesitate to [request help here](${
-      config.productLinks?.help
+      GlobalConfig.get('productLinks')?.help
     }).\n\n`,
   );
 

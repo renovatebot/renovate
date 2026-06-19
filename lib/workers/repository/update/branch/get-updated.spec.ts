@@ -1,6 +1,7 @@
 import { isArray } from '@sindresorhus/is';
 import { mockDeep } from 'vitest-mock-extended';
 import { git, logger } from '~test/util.ts';
+import { GlobalConfig } from '../../../../config/global.ts';
 import { GitRefsDatasource } from '../../../../modules/datasource/git-refs/index.ts';
 import * as _batectWrapper from '../../../../modules/manager/batect-wrapper/index.ts';
 import * as _bundler from '../../../../modules/manager/bundler/index.ts';
@@ -1234,8 +1235,10 @@ describe('workers/repository/update/branch/get-updated', () => {
         branchName: 'renovate/pin',
         upgrades: [],
         minimumReleaseAgeBehaviour: 'timestamp-required',
-        productLinks: { documentation: 'https://docs.renovatebot.com/' },
       } satisfies BranchConfig;
+      GlobalConfig.set({
+        productLinks: { documentation: 'https://docs.renovatebot.com/' },
+      });
       git.getFile.mockResolvedValueOnce('existing content');
     });
 

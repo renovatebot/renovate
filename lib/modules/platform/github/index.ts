@@ -503,14 +503,14 @@ export async function createFork(
 // Initialize GitHub by getting base branch and SHA
 export async function initRepo({
   repository,
-  forkCreation,
-  forkOrg,
-  forkToken,
   gitUrl,
   renovateUsername,
   cloneSubmodules,
   cloneSubmodulesFilter,
 }: RepoParams): Promise<RepoResult> {
+  const forkToken = GlobalConfig.get('forkToken');
+  const forkCreation = GlobalConfig.get('forkCreation');
+  const forkOrg = GlobalConfig.get('forkOrg');
   logger.debug(`initRepo("${repository}")`);
   // config is used by the platform api itself, not necessary for the app layer to know
   config = {

@@ -1,5 +1,6 @@
 import type { RenovateConfig } from '~test/util.ts';
 import { partial } from '~test/util.ts';
+import { GlobalConfig } from '../../../../config/global.ts';
 import type { BranchConfig } from '../../../types.ts';
 import { getExpectedPrList } from './pr-list.ts';
 
@@ -10,8 +11,14 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
     beforeEach(() => {
       config = partial<RenovateConfig>({
         prHourlyLimit: 2, // default
+      });
+      GlobalConfig.set({
         productLinks: { documentation: 'https://docs.renovatebot.com/' },
       });
+    });
+
+    afterEach(() => {
+      GlobalConfig.reset();
     });
 
     it('handles empty', () => {

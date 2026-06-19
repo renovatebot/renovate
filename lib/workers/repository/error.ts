@@ -1,3 +1,4 @@
+import { GlobalConfig } from '../../config/global.ts';
 import type { RenovateConfig } from '../../config/types.ts';
 
 import {
@@ -131,7 +132,7 @@ export default async function handleError(
     }
     if (err.message === CONFIG_VALIDATION) {
       delete config.branchList;
-      if (config.configValidationError) {
+      if (GlobalConfig.get('configValidationError')) {
         logger.error({ error: err }, 'Repository has invalid config');
       } else {
         logger.warn({ error: err }, 'Repository has invalid config');

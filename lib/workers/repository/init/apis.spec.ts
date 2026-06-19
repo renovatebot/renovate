@@ -17,7 +17,6 @@ describe('workers/repository/init/apis', () => {
       config = { ...getConfig() };
       config.errors = [];
       config.warnings = [];
-      delete config.optimizeForDisabled;
       delete config.forkProcessing;
     });
 
@@ -38,12 +37,8 @@ describe('workers/repository/init/apis', () => {
         repoFingerprint: '123',
       });
       platform.getJsonFile.mockResolvedValueOnce({ enabled: false });
-      await expect(
-        initApis({
-          ...config,
-          optimizeForDisabled: true,
-        }),
-      ).rejects.toThrow(REPOSITORY_DISABLED);
+      GlobalConfig.set({ optimizeForDisabled: true });
+      await expect(initApis(config)).rejects.toThrow(REPOSITORY_DISABLED);
     });
 
     it('throws for forked', async () => {
@@ -96,10 +91,10 @@ describe('workers/repository/init/apis', () => {
         repoFingerprint: '123',
       });
       platform.getJsonFile.mockRejectedValue(new Error());
+      GlobalConfig.set({ optimizeForDisabled: true });
       await expect(
         initApis({
           ...config,
-          optimizeForDisabled: true,
           forkProcessing: 'disabled',
           isFork: true,
         }),
@@ -122,7 +117,10 @@ describe('workers/repository/init/apis', () => {
     });
 
     it('uses the onboardingConfigFileName if set', async () => {
-      GlobalConfig.set({ onboardingConfigFileName: '.github/renovate.json' });
+      GlobalConfig.set({
+        onboardingConfigFileName: '.github/renovate.json',
+        optimizeForDisabled: true,
+      });
       platform.initRepo.mockResolvedValueOnce({
         defaultBranch: 'master',
         isFork: false,
@@ -133,7 +131,6 @@ describe('workers/repository/init/apis', () => {
       });
       const workerPlatformConfig = await initApis({
         ...config,
-        optimizeForDisabled: true,
         onboardingConfigFileName: '.github/renovate.json',
       });
       expect(workerPlatformConfig).toBeTruthy();
@@ -157,9 +154,9 @@ describe('workers/repository/init/apis', () => {
       platform.getJsonFile.mockResolvedValueOnce({
         forkProcessing: 'disabled',
       });
+      GlobalConfig.set({ optimizeForDisabled: true });
       const workerPlatformConfig = await initApis({
         ...config,
-        optimizeForDisabled: true,
         onboardingConfigFileName: undefined,
       });
       expect(workerPlatformConfig).toBeTruthy();
@@ -176,9 +173,9 @@ describe('workers/repository/init/apis', () => {
         repoFingerprint: '123',
       });
       platform.getJsonFile.mockResolvedValueOnce({ forkProcessing: false });
+      GlobalConfig.set({ optimizeForDisabled: true });
       const workerPlatformConfig = await initApis({
         ...config,
-        optimizeForDisabled: true,
         onboardingConfigFileName: 'foo.bar',
       });
       expect(workerPlatformConfig).toBeTruthy();
@@ -197,9 +194,9 @@ describe('workers/repository/init/apis', () => {
       platform.getJsonFile.mockResolvedValueOnce({
         enabled: true,
       });
+      GlobalConfig.set({ optimizeForDisabled: true });
       const workerPlatformConfig = await initApis({
         ...config,
-        optimizeForDisabled: true,
         extends: [':disableRenovate'],
       });
       expect(workerPlatformConfig).toBeTruthy();
@@ -215,10 +212,10 @@ describe('workers/repository/init/apis', () => {
         repoFingerprint: '123',
       });
       platform.getJsonFile.mockResolvedValueOnce(null);
+      GlobalConfig.set({ optimizeForDisabled: true });
       await expect(
         initApis({
           ...config,
-          optimizeForDisabled: true,
           extends: [':disableRenovate'],
         }),
       ).rejects.toThrow(REPOSITORY_DISABLED);

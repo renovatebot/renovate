@@ -1,3 +1,4 @@
+import { GlobalConfig } from '../../../config/global.ts';
 import type { RenovateConfig } from '../../../config/types.ts';
 import {
   REPOSITORY_DISABLED_BY_CONFIG,
@@ -27,7 +28,7 @@ async function getJsonFile(file: string): Promise<RenovateConfig | null> {
 async function validateOptimizeForDisabled(
   config: RenovateConfig,
 ): Promise<void> {
-  if (config.optimizeForDisabled) {
+  if (GlobalConfig.get('optimizeForDisabled')) {
     const renovateConfig = await getJsonFile(getDefaultConfigFileName());
     if (renovateConfig?.enabled === false) {
       throw new Error(REPOSITORY_DISABLED_BY_CONFIG);

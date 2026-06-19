@@ -228,7 +228,7 @@ export async function start(): Promise<number> {
     }
 
     finalizeReport();
-    await exportStats(config);
+    await exportStats();
   } catch (err) /* istanbul ignore next */ {
     if (err.message.startsWith('Init: ')) {
       logger.fatal(

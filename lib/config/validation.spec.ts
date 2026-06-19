@@ -2816,7 +2816,7 @@ describe('config/validation', () => {
     });
 
     it('fails for missing reportPath if reportType is "s3"', async () => {
-      const config: RenovateConfig = {
+      const config: AllConfig = {
         reportType: 's3',
       };
       const { warnings, errors } = await configValidation.validateConfig(
@@ -2832,7 +2832,7 @@ describe('config/validation', () => {
     });
 
     it('validates reportPath if reportType is "s3"', async () => {
-      const config: RenovateConfig = {
+      const config: AllConfig = {
         reportType: 's3',
         reportPath: 's3://bucket-name/key-name',
       };
@@ -2845,7 +2845,7 @@ describe('config/validation', () => {
     });
 
     it('fails for missing reportPath if reportType is "file"', async () => {
-      const config: RenovateConfig = {
+      const config: AllConfig = {
         reportType: 'file',
       };
       const { warnings, errors } = await configValidation.validateConfig(
@@ -2861,7 +2861,7 @@ describe('config/validation', () => {
     });
 
     it('validates reportPath if reportType is "file"', async () => {
-      const config: RenovateConfig = {
+      const config: AllConfig = {
         reportType: 'file',
         reportPath: './report.json',
       };

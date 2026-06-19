@@ -1,6 +1,7 @@
 import type { PutObjectCommandInput } from '@aws-sdk/client-s3';
 import { PutObjectCommand } from '@aws-sdk/client-s3';
 import { isNullOrUndefined, isUndefined } from '@sindresorhus/is';
+import { GlobalConfig } from '../config/global.ts';
 import type { RenovateConfig } from '../config/types.ts';
 import { prettier } from '../expose.ts';
 import { getProblems, logger } from '../logger/index.ts';
@@ -28,7 +29,7 @@ export function addBranchStats(
   config: RenovateConfig,
   branchesInformation: Partial<BranchCache>[],
 ): void {
-  if (isNullOrUndefined(config.reportType)) {
+  if (isNullOrUndefined(GlobalConfig.get('reportType'))) {
     return;
   }
 
@@ -40,7 +41,7 @@ export function addExtractionStats(
   config: RenovateConfig,
   extractResult: ExtractResult,
 ): void {
-  if (isNullOrUndefined(config.reportType)) {
+  if (isNullOrUndefined(GlobalConfig.get('reportType'))) {
     return;
   }
 
@@ -53,7 +54,7 @@ export function addLibYears(
   config: RenovateConfig,
   libYearsWithDepCount: LibYearsWithStatus,
 ): void {
-  if (isNullOrUndefined(config.reportType)) {
+  if (isNullOrUndefined(GlobalConfig.get('reportType'))) {
     return;
   }
 
@@ -78,51 +79,53 @@ export function finalizeReport(): void {
   }
 }
 
-async function getReportBody(config: RenovateConfig): Promise<string> {
+async function getReportBody(): Promise<string> {
   const json = JSON.stringify(report);
-  if (!config.reportFormatting) {
+  if (!GlobalConfig.get('reportFormatting')) {
     return json;
   }
   return prettier().format(json, { parser: 'json' });
 }
 
-export async function exportStats(config: RenovateConfig): Promise<void> {
+export async function exportStats(): Promise<void> {
   try {
-    if (isNullOrUndefined(config.reportType)) {
+    const reportType = GlobalConfig.get('reportType');
+    if (isNullOrUndefined(reportType)) {
       return;
     }
 
-    if (config.reportType === 'logging') {
+    if (reportType === 'logging') {
       logger.info({ report }, 'Printing report');
       return;
     }
 
-    if (config.reportType === 'file') {
-      const path = config.reportPath!;
-      await writeSystemFile(path, await getReportBody(config));
+    if (reportType === 'file') {
+      const path = GlobalConfig.get('reportPath');
+      await writeSystemFile(path, await getReportBody());
       logger.debug({ path }, 'Writing report');
       return;
     }
 
     // v8 ignore else -- TODO: add test #40625
-    if (config.reportType === 's3') {
-      const s3Url = parseS3Url(config.reportPath!);
+    if (reportType === 's3') {
+      const reportPath = GlobalConfig.get('reportPath');
+      const s3Url = parseS3Url(reportPath);
       if (isNullOrUndefined(s3Url)) {
-        logger.warn(
-          { reportPath: config.reportPath },
-          'Failed to parse s3 URL',
-        );
+        logger.warn({ reportPath }, 'Failed to parse s3 URL');
         return;
       }
 
       const s3Params: PutObjectCommandInput = {
         Bucket: s3Url.Bucket,
         Key: s3Url.Key,
-        Body: await getReportBody(config),
+        Body: await getReportBody(),
         ContentType: 'application/json',
       };
 
-      const client = getS3Client(config.s3Endpoint, config.s3PathStyle);
+      const client = getS3Client(
+        GlobalConfig.get('s3Endpoint'),
+        GlobalConfig.get('s3PathStyle'),
+      );
       const command = new PutObjectCommand(s3Params);
       await client.send(command);
     }

@@ -1,8 +1,4 @@
-import type {
-  RepositoryCacheConfig,
-  RepositoryCacheType,
-  UpdateType,
-} from '../../../config/types.ts';
+import type { UpdateType } from '../../../config/types.ts';
 import type { PackageFile } from '../../../modules/manager/types.ts';
 import type { RepoInitConfig } from '../../../workers/repository/init/types.ts';
 import type { ExtractResult } from '../../../workers/repository/process/extract-update.ts';
@@ -181,7 +177,5 @@ export interface RepoCache {
 
 export interface RepoCacheConfig {
   repository?: string;
-  repositoryCache?: RepositoryCacheConfig;
-  repositoryCacheType?: RepositoryCacheType;
   repoFingerprint: string;
 }

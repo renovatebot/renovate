@@ -1,3 +1,4 @@
+import { GlobalConfig } from '../../../config/global.ts';
 import { instrument } from '../../../instrumentation/index.ts';
 import { CacheFactory } from './impl/cache-factory.ts';
 import { RepoCacheNull } from './impl/null.ts';
@@ -10,12 +11,9 @@ import type { RepoCacheConfig } from './types.ts';
 export async function initRepoCache(config: RepoCacheConfig): Promise<void> {
   resetCache();
 
-  const {
-    repository,
-    repositoryCache,
-    repositoryCacheType: type = 'local',
-    repoFingerprint,
-  } = config;
+  const { repository, repoFingerprint } = config;
+  const repositoryCache = GlobalConfig.get('repositoryCache');
+  const type = GlobalConfig.get('repositoryCacheType') ?? 'local';
 
   if (repositoryCache === 'disabled') {
     setCache(new RepoCacheNull());

@@ -92,7 +92,6 @@ export interface RenovateSharedConfig {
   commitMessagePrefix?: string;
   commitMessageTopic?: string;
   confidential?: boolean;
-  configValidationError?: boolean;
   changelogUrl?: string;
   dependencyDashboardApproval?: boolean;
   draftPR?: boolean;
@@ -140,7 +139,6 @@ export interface RenovateSharedConfig {
   prPriority?: number;
   prTitle?: string;
   prTitleStrict?: boolean;
-  productLinks?: Record<string, string>;
   pruneBranchAfterAutomerge?: boolean;
   rangeStrategy?: RangeStrategy;
   rebaseLabel?: string;
@@ -148,8 +146,6 @@ export interface RenovateSharedConfig {
   recreateClosed?: boolean;
   recreateWhen?: RecreateWhen;
   repository?: string;
-  repositoryCache?: RepositoryCacheConfig;
-  repositoryCacheType?: RepositoryCacheType;
   respectLatest?: boolean;
   rollbackPrs?: boolean;
   schedule?: string[];
@@ -164,7 +160,6 @@ export interface RenovateSharedConfig {
   stopUpdatingLabel?: string;
   suppressNotifications?: string[];
   timezone?: string;
-  unicodeEmoji?: boolean;
   updateNotScheduled?: boolean;
   versioning?: string;
   versionCompatibility?: string;
@@ -243,6 +238,8 @@ export interface RepoGlobalConfig extends GlobalInheritableConfig {
   cacheDir?: string;
   cacheHardTtlMinutes?: number;
   cacheTtlOverride?: Record<string, number>;
+  checkedBranches?: string[];
+  configValidationError?: boolean;
   containerbaseDir?: string;
   customEnvVariables?: Record<string, string>;
   dockerChildPrefix?: string;
@@ -254,28 +251,44 @@ export interface RepoGlobalConfig extends GlobalInheritableConfig {
   endpoint?: string;
   executionTimeout?: number;
   exposeAllEnv?: boolean;
+  forkCreation?: boolean;
+  forkOrg?: string;
+  forkToken?: string;
   gitTimeout?: number;
   githubTokenWarn?: boolean;
+  httpCacheTtlDays?: number;
+  ignorePrAuthor?: boolean;
   includeMirrors?: boolean;
+  inheritConfig?: boolean;
+  inheritConfigFileName?: string;
+  inheritConfigRepoName?: string;
+  inheritConfigStrict?: boolean;
   localDir?: string;
   migratePresets?: Record<string, string>;
+  onboardingAutoCloseAge?: number;
+  onboardingRebaseCheckbox?: boolean;
+  optimizeForDisabled?: boolean;
+  persistRepoData?: boolean;
   platform?: PlatformId;
   prCacheSyncMaxPages?: number;
   presetCachePersistence?: boolean;
-  httpCacheTtlDays?: number;
+  productLinks?: Record<string, string>;
   autodiscoverRepoSort?: RepoSortMethod;
   autodiscoverRepoOrder?: SortMethod;
-  userAgent?: string;
-  dockerMaxPages?: number;
+  reportFormatting?: boolean;
+  reportPath?: string;
+  reportType?: 'logging' | 'file' | 's3' | null;
+  repositoryCache?: RepositoryCacheConfig;
+  repositoryCacheForceLocal?: boolean;
+  repositoryCacheType?: RepositoryCacheType;
   s3Endpoint?: string;
   s3PathStyle?: boolean;
   cachePrivatePackages?: boolean;
-  repositoryCacheForceLocal?: boolean;
-  configFileNames?: string[];
-  ignorePrAuthor?: boolean;
-  allowedUnsafeExecutions?: AllowedUnsafeExecution[];
-  onboardingAutoCloseAge?: number;
   toolSettings?: ToolSettingsOptions;
+  unicodeEmoji?: boolean;
+  userAgent?: string;
+  dockerMaxPages?: number;
+  allowedUnsafeExecutions?: AllowedUnsafeExecution[];
 }
 
 /**
@@ -292,13 +305,8 @@ export interface LegacyAdminConfig {
   onboarding?: boolean;
   onboardingBranch?: string;
   onboardingNoDeps?: 'auto' | 'enabled' | 'disabled';
-  onboardingRebaseCheckbox?: boolean;
   onboardingConfig?: RenovateConfig;
   onboardingConfigFileName?: string;
-
-  optimizeForDisabled?: boolean;
-
-  persistRepoData?: boolean;
 
   prCommitsPerRunLimit?: number;
 
@@ -377,11 +385,6 @@ export interface RenovateConfig
     AssigneesAndReviewersConfig,
     ConfigMigration,
     RenovateInternalConfig {
-  s3Endpoint?: string;
-  s3PathStyle?: boolean;
-  reportFormatting?: boolean;
-  reportPath?: string;
-  reportType?: 'logging' | 'file' | 's3' | null;
   depName?: string;
   /** user configurable base branch patterns*/
   baseBranchPatterns?: string[];
@@ -396,16 +399,10 @@ export interface RenovateConfig
   errors?: ValidationMessage[];
   forkModeDisallowMaintainerEdits?: boolean;
   forkProcessing?: 'auto' | 'enabled' | 'disabled';
-  forkToken?: string;
 
   gitAuthor?: string;
 
   hostRules?: HostRule[];
-
-  inheritConfig?: boolean;
-  inheritConfigFileName?: string;
-  inheritConfigRepoName?: string;
-  inheritConfigStrict?: boolean;
 
   ignorePresets?: string[];
 
@@ -472,7 +469,6 @@ export interface RenovateConfig
 
   constraintsFiltering?: ConstraintsFilter;
 
-  checkedBranches?: string[];
   customizeDashboard?: Record<string, string>;
 
   statusCheckNames?: Record<StatusCheckKey, string | null>;
@@ -487,9 +483,7 @@ export interface RenovateConfig
   additionalBranchPrefix?: string;
   sharedVariableName?: string;
   minimumGroupSize?: number;
-  configFileNames?: string[];
   minimumReleaseAgeBehaviour?: MinimumReleaseAgeBehaviour;
-  toolSettings?: ToolSettingsOptions;
 }
 
 const CustomDatasourceFormats = [

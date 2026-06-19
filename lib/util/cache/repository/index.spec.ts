@@ -15,19 +15,28 @@ describe('util/cache/repository/index', () => {
 
   const config: RepoCacheConfig = {
     repository: 'some/repo',
-    repositoryCache: 'enabled',
     repoFingerprint: '0123456789abcdef',
   };
 
   it('returns if cache not enabled', async () => {
-    await initRepoCache({ ...config, repositoryCache: 'disabled' });
+    GlobalConfig.set({
+      cacheDir: '/tmp/cache',
+      platform: 'github',
+      repositoryCache: 'disabled',
+    });
+    await initRepoCache(config);
     expect(fs.readCacheFile).not.toHaveBeenCalled();
     expect(getCache()).toBeEmpty();
     expect(isCacheModified()).toBeUndefined();
   });
 
   it('saves cache', async () => {
-    await initRepoCache({ ...config, repositoryCache: 'enabled' });
+    GlobalConfig.set({
+      cacheDir: '/tmp/cache',
+      platform: 'github',
+      repositoryCache: 'enabled',
+    });
+    await initRepoCache(config);
     await saveCache();
     expect(fs.outputCacheFile).toHaveBeenCalled();
     expect(isCacheModified()).toBeUndefined();
@@ -38,15 +47,21 @@ describe('util/cache/repository/index', () => {
       cacheDir: '/tmp/cache',
       platform: 'github',
       dryRun: 'full',
+      repositoryCache: 'enabled',
     });
-    await initRepoCache({ ...config, repositoryCache: 'enabled' });
+    await initRepoCache(config);
     await saveCache();
     expect(fs.outputCacheFile).not.toHaveBeenCalled();
     expect(isCacheModified()).toBeUndefined();
   });
 
   it('resets cache', async () => {
-    await initRepoCache({ ...config, repositoryCache: 'reset' });
+    GlobalConfig.set({
+      cacheDir: '/tmp/cache',
+      platform: 'github',
+      repositoryCache: 'reset',
+    });
+    await initRepoCache(config);
     expect(fs.readCacheFile).not.toHaveBeenCalled();
     expect(fs.outputCacheFile).toHaveBeenCalled();
     expect(getCache()).toBeEmpty();

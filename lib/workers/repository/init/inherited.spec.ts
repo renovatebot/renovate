@@ -4,6 +4,7 @@ import {
   setUserConfigFileNames,
 } from '../../../config/app-strings.ts';
 import * as decrypt from '../../../config/decrypt.ts';
+import { GlobalConfig } from '../../../config/global.ts';
 import { InheritConfig } from '../../../config/inherit.ts';
 import * as presets_ from '../../../config/presets/index.ts';
 import type { RenovateConfig } from '../../../config/types.ts';
@@ -26,11 +27,13 @@ describe('workers/repository/init/inherited', () => {
   beforeEach(() => {
     config = {
       repository: 'test/repo',
+    };
+    GlobalConfig.set({
       inheritConfig: true,
       inheritConfigRepoName: 'inherit/repo',
       inheritConfigFileName: 'config.json',
       inheritConfigStrict: false,
-    };
+    });
     hostRules.clear();
     InheritConfig.reset();
   });
@@ -42,13 +45,23 @@ describe('workers/repository/init/inherited', () => {
   });
 
   it('should return the same config if inheritConfigRepoName or inheritConfigFileName is not a string', async () => {
-    config.inheritConfigRepoName = undefined;
+    GlobalConfig.set({
+      inheritConfig: true,
+      inheritConfigRepoName: undefined,
+      inheritConfigFileName: 'config.json',
+      inheritConfigStrict: false,
+    });
     const result = await mergeInheritedConfig(config);
     expect(result).toEqual(config);
   });
 
   it('should throw an error if getting the raw file fails and inheritConfigStrict is true', async () => {
-    config.inheritConfigStrict = true;
+    GlobalConfig.set({
+      inheritConfig: true,
+      inheritConfigRepoName: 'inherit/repo',
+      inheritConfigFileName: 'config.json',
+      inheritConfigStrict: true,
+    });
     platform.getRawFile.mockRejectedValue(new Error('File not found'));
     await expect(mergeInheritedConfig(config)).rejects.toThrow(
       CONFIG_INHERIT_NOT_FOUND,
@@ -334,7 +347,12 @@ describe('workers/repository/init/inherited', () => {
   });
 
   it('overwrites configFileNames set by admin config', async () => {
-    config.inheritConfigFileName = 'some-other-file.json';
+    GlobalConfig.set({
+      inheritConfig: true,
+      inheritConfigRepoName: 'inherit/repo',
+      inheritConfigFileName: 'some-other-file.json',
+      inheritConfigStrict: false,
+    });
     // imitate setting of configFileNames by admin config
     setUserConfigFileNames(['some-file.json']);
     platform.getRawFile.mockResolvedValue(
@@ -347,7 +365,12 @@ describe('workers/repository/init/inherited', () => {
   });
 
   it('does not modify configFileNames set by admin config if configFileNames is not present in inherited config', async () => {
-    config.inheritConfigFileName = 'some-other-file.json';
+    GlobalConfig.set({
+      inheritConfig: true,
+      inheritConfigRepoName: 'inherit/repo',
+      inheritConfigFileName: 'some-other-file.json',
+      inheritConfigStrict: false,
+    });
     // imitate setting of configFileNames by admin config
     setUserConfigFileNames(['some-file.json']);
     platform.getRawFile.mockResolvedValue(

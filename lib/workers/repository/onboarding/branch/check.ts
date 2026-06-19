@@ -1,5 +1,6 @@
 import { isNonEmptyObject } from '@sindresorhus/is';
 import { getConfigFileNames } from '../../../../config/app-strings.ts';
+import { GlobalConfig } from '../../../../config/global.ts';
 import type { RenovateConfig } from '../../../../config/types.ts';
 import {
   REPOSITORY_CLOSED_ONBOARDING,
@@ -109,7 +110,7 @@ export async function isOnboarded(config: RenovateConfig): Promise<boolean> {
 
   // when bot is ran is fork mode ... do not fetch file using api call instead use the git.fileList so we get sync first and get the latest config
   // prevents https://github.com/renovatebot/renovate/discussions/37328
-  if (cache.configFileName && !config.forkToken) {
+  if (cache.configFileName && !GlobalConfig.get('forkToken')) {
     logger.debug('Checking cached config file name');
     try {
       const configFileContent = await platform.getJsonFile(

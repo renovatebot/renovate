@@ -74,14 +74,17 @@ export async function checkOnboardingBranch(
         await platform.refreshPr(onboardingPr.number);
       }
     }
-    if (config.onboardingRebaseCheckbox) {
+    if (GlobalConfig.get('onboardingRebaseCheckbox')) {
       handleOnboardingManualRebase(onboardingPr);
     }
 
     if (
       isConfigHashPresent(onboardingPr) && // needed so that existing onboarding PRs are updated with config hash comment
       isOnboardingCacheValid(defaultBranch, onboardingBranch!) &&
-      !(config.onboardingRebaseCheckbox && OnboardingState.prUpdateRequested)
+      !(
+        GlobalConfig.get('onboardingRebaseCheckbox') &&
+        OnboardingState.prUpdateRequested
+      )
     ) {
       logger.debug(
         'Skip processing since the onboarding branch is up to date and default branch has not changed',
@@ -114,7 +117,7 @@ export async function checkOnboardingBranch(
       }
     }
     logger.debug('Need to create onboarding PR');
-    if (config.onboardingRebaseCheckbox) {
+    if (GlobalConfig.get('onboardingRebaseCheckbox')) {
       OnboardingState.prUpdateRequested = true;
     }
     const commit = await createOnboardingBranch(mergedConfig);

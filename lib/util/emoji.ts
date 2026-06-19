@@ -7,7 +7,7 @@ import {
 import emojibaseEmojiRegex from 'emojibase-regex/emoji.js';
 import SHORTCODE_REGEX from 'emojibase-regex/shortcode.js';
 import { z } from 'zod/v4';
-import type { RenovateConfig } from '../config/types.ts';
+import type { AllConfig } from '../config/types.ts';
 import dataFiles from '../data-files.generated.ts';
 import { logger } from '../logger/index.ts';
 import { regEx } from './regex.ts';
@@ -68,7 +68,7 @@ function lazyInitMappings(): void {
   }
 }
 
-export function setEmojiConfig(config: RenovateConfig): void {
+export function setEmojiConfig(config: AllConfig): void {
   unicodeEmoji = !!config.unicodeEmoji;
 }
 

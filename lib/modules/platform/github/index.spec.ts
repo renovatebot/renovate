@@ -836,10 +836,9 @@ describe('modules/platform/github/index', () => {
         full_name: 'forked/repo',
         default_branch: 'master',
       });
+      GlobalConfig.set({ forkToken: 'token', forkCreation: true });
       const config = await github.initRepo({
         repository: 'some/repo',
-        forkToken: 'token',
-        forkCreation: true,
       });
       expect(config).toMatchSnapshot();
     });
@@ -850,11 +849,10 @@ describe('modules/platform/github/index', () => {
       scope.get('/user').reply(200, {
         login: 'forked',
       });
+      GlobalConfig.set({ forkToken: 'true', forkCreation: false });
       await expect(
         github.initRepo({
           repository: 'some/repo',
-          forkToken: 'true',
-          forkCreation: false,
         }),
       ).rejects.toThrow(REPOSITORY_FORK_MISSING);
     });
@@ -895,10 +893,9 @@ describe('modules/platform/github/index', () => {
         default_branch: 'master',
         ssh_url: 'git@github.com:forked/repo.git',
       });
+      GlobalConfig.set({ forkToken: 'token', forkCreation: true });
       await github.initRepo({
         repository: 'some/repo',
-        forkToken: 'token',
-        forkCreation: true,
         gitUrl: 'ssh',
       });
       expect(git.initRepo).toHaveBeenCalledWith(
@@ -914,11 +911,10 @@ describe('modules/platform/github/index', () => {
       const branch = 'master';
       const scope = httpMock.scope(githubApiHost);
       forkInitRepoMock(scope, repo, false, 200, branch, true);
+      GlobalConfig.set({ forkToken: 'true', forkCreation: true });
       await expect(
         github.initRepo({
           repository: 'some/repo',
-          forkToken: 'true',
-          forkCreation: true,
         }),
       ).rejects.toThrow(REPOSITORY_FORKED);
     });
@@ -929,11 +925,10 @@ describe('modules/platform/github/index', () => {
       const scope = httpMock.scope(githubApiHost);
       forkInitRepoMock(scope, repo, false, 200, branch);
       scope.get('/user').reply(404);
+      GlobalConfig.set({ forkToken: 'true', forkCreation: true });
       await expect(
         github.initRepo({
           repository: 'some/repo',
-          forkToken: 'true',
-          forkCreation: true,
         }),
       ).rejects.toThrow(REPOSITORY_CANNOT_FORK);
     });
@@ -942,11 +937,10 @@ describe('modules/platform/github/index', () => {
       const repo = 'some/repo';
       const scope = httpMock.scope(githubApiHost);
       forkInitRepoMock(scope, repo, false, 404);
+      GlobalConfig.set({ forkToken: 'true', forkCreation: true });
       await expect(
         github.initRepo({
           repository: 'some/repo',
-          forkToken: 'true',
-          forkCreation: true,
         }),
       ).rejects.toThrow(REPOSITORY_CANNOT_FORK);
     });
@@ -955,11 +949,10 @@ describe('modules/platform/github/index', () => {
       const repo = 'some/repo';
       const scope = httpMock.scope(githubApiHost);
       forkInitRepoMock(scope, repo, false, 500);
+      GlobalConfig.set({ forkToken: 'true', forkCreation: true });
       await expect(
         github.initRepo({
           repository: 'some/repo',
-          forkToken: 'true',
-          forkCreation: true,
         }),
       ).rejects.toThrow(REPOSITORY_CANNOT_FORK);
     });
@@ -972,12 +965,14 @@ describe('modules/platform/github/index', () => {
         login: 'forked',
       });
       scope.post(`/repos/${repo}/forks`).reply(500);
+      GlobalConfig.set({
+        forkToken: 'true',
+        forkCreation: true,
+        forkOrg: 'forked',
+      });
       await expect(
         github.initRepo({
           repository: 'some/repo',
-          forkToken: 'true',
-          forkCreation: true,
-          forkOrg: 'forked',
         }),
       ).rejects.toThrow(REPOSITORY_CANNOT_FORK);
     });
@@ -985,11 +980,13 @@ describe('modules/platform/github/index', () => {
     it('should update fork when using forkToken and forkOrg', async () => {
       const scope = httpMock.scope(githubApiHost);
       forkInitRepoMock(scope, 'some/repo', true);
-      const config = await github.initRepo({
-        repository: 'some/repo',
+      GlobalConfig.set({
         forkToken: 'true',
         forkCreation: true,
         forkOrg: 'forked',
+      });
+      const config = await github.initRepo({
+        repository: 'some/repo',
       });
       expect(config).toMatchSnapshot();
     });
@@ -1002,10 +999,9 @@ describe('modules/platform/github/index', () => {
       });
       scope.post('/repos/forked/repo/git/refs').reply(200);
       scope.patch('/repos/forked/repo').reply(200);
+      GlobalConfig.set({ forkToken: 'true', forkCreation: true });
       const config = await github.initRepo({
         repository: 'some/repo',
-        forkToken: 'true',
-        forkCreation: true,
       });
       expect(config).toMatchSnapshot();
     });
@@ -1285,10 +1281,9 @@ describe('modules/platform/github/index', () => {
         full_name: 'forked/repo',
         default_branch: 'master',
       });
+      GlobalConfig.set({ forkToken: 'fork-token', forkCreation: true });
       await github.initRepo({
         repository: 'some/repo',
-        forkToken: 'fork-token',
-        forkCreation: true,
       });
 
       const res = await github.getBranchForceRebase('main');
@@ -1663,11 +1658,10 @@ describe('modules/platform/github/index', () => {
           default_branch: 'master',
         });
         scope.get(pagePath(1)).reply(200, [renovatePr, otherPr]);
+        GlobalConfig.set({ forkToken: 'some-token', forkCreation: true });
         await github.initRepo({
           repository: 'some/repo',
           renovateUsername: 'renovate-bot',
-          forkToken: 'some-token',
-          forkCreation: true,
         });
 
         const res = await github.getPrList();
@@ -3892,10 +3886,9 @@ describe('modules/platform/github/index', () => {
           default_branch: 'master',
         });
 
+        GlobalConfig.set({ forkToken: 'true', forkCreation: true });
         await github.initRepo({
           repository: 'some/repo',
-          forkToken: 'true',
-          forkCreation: true,
         });
       });
 

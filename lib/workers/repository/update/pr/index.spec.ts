@@ -1188,7 +1188,7 @@ describe('workers/repository/update/pr/index', () => {
       });
 
       it('skips fetching changelogs when cache is valid and pr was lastEdited before 24hrs', async () => {
-        config.repositoryCache = 'enabled';
+        GlobalConfig.set({ repositoryCache: 'enabled' });
         platform.getBranchPr.mockResolvedValue(existingPr);
         cachedPr = {
           bodyFingerprint: fingerprint(
@@ -1213,7 +1213,7 @@ describe('workers/repository/update/pr/index', () => {
       });
 
       it('updates PR when rebase requested by user regardless of pr-cache state', async () => {
-        config.repositoryCache = 'enabled';
+        GlobalConfig.set({ repositoryCache: 'enabled' });
         platform.getBranchPr.mockResolvedValue({
           number,
           sourceBranch,
@@ -1257,7 +1257,7 @@ describe('workers/repository/update/pr/index', () => {
       });
 
       it('logs when cache is enabled but pr-cache is absent', async () => {
-        config.repositoryCache = 'enabled';
+        GlobalConfig.set({ repositoryCache: 'enabled' });
         platform.getBranchPr.mockResolvedValue(existingPr);
         prCache.getPrCache.mockReturnValueOnce(null);
         await ensurePr(config);
@@ -1266,7 +1266,7 @@ describe('workers/repository/update/pr/index', () => {
       });
 
       it('does not log when cache is disabled and pr-cache is absent', async () => {
-        config.repositoryCache = 'disabled';
+        GlobalConfig.set({ repositoryCache: 'disabled' });
         platform.getBranchPr.mockResolvedValue(existingPr);
         prCache.getPrCache.mockReturnValueOnce(null);
         await ensurePr(config);

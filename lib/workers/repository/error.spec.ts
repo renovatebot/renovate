@@ -1,5 +1,6 @@
 import type { RenovateConfig } from '~test/util.ts';
 import { logger, partial } from '~test/util.ts';
+import { GlobalConfig } from '../../config/global.ts';
 import {
   CONFIG_SECRETS_EXPOSED,
   CONFIG_VALIDATION,
@@ -129,7 +130,8 @@ describe('workers/repository/error', () => {
 
     it('logs config validation errors as warnings when configValidationError is false', async () => {
       const error = new Error(CONFIG_VALIDATION);
-      await handleError({ ...config, configValidationError: false }, error);
+      GlobalConfig.set({ configValidationError: false });
+      await handleError(config, error);
       expect(logger.logger.warn).toHaveBeenCalledExactlyOnceWith(
         { error },
         'Repository has invalid config',
@@ -139,7 +141,8 @@ describe('workers/repository/error', () => {
 
     it('logs config validation errors as errors when configValidationError is true', async () => {
       const error = new Error(CONFIG_VALIDATION);
-      await handleError({ ...config, configValidationError: true }, error);
+      GlobalConfig.set({ configValidationError: true });
+      await handleError(config, error);
       expect(logger.logger.error).toHaveBeenCalledExactlyOnceWith(
         { error },
         'Repository has invalid config',

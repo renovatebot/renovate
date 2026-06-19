@@ -2,6 +2,7 @@ import type { S3Client } from '@aws-sdk/client-s3';
 import { mock, mockDeep } from 'vitest-mock-extended';
 import { s3 } from '~test/s3.ts';
 import { fs, logger } from '~test/util.ts';
+import { GlobalConfig } from '../config/global.ts';
 import type { RenovateConfig } from '../config/types.ts';
 import type { PackageFile } from '../modules/manager/types.ts';
 import type { BranchCache } from '../util/cache/repository/types.ts';
@@ -23,6 +24,7 @@ vi.mock('../logger/index.ts', () => mockDeep());
 describe('instrumentation/reporting', () => {
   beforeEach(() => {
     resetReport();
+    GlobalConfig.reset();
   });
 
   const branchInformation: Partial<BranchCache>[] = [
@@ -93,8 +95,8 @@ describe('instrumentation/reporting', () => {
   it('return report if reportType is set to logging', () => {
     const config: RenovateConfig = {
       repository: 'myOrg/myRepo',
-      reportType: 'logging',
     };
+    GlobalConfig.set({ reportType: 'logging' });
 
     addBranchStats(config, branchInformation);
     addExtractionStats(config, { branchList: [], branches: [], packageFiles });
@@ -105,13 +107,13 @@ describe('instrumentation/reporting', () => {
   it('log report if reportType is set to logging', async () => {
     const config: RenovateConfig = {
       repository: 'myOrg/myRepo',
-      reportType: 'logging',
     };
+    GlobalConfig.set({ reportType: 'logging' });
 
     addBranchStats(config, branchInformation);
     addExtractionStats(config, { branchList: [], branches: [], packageFiles });
 
-    await exportStats(config);
+    await exportStats();
 
     expect(logger.logger.info).toHaveBeenCalledWith(
       { report: expectedReport },
@@ -122,16 +124,15 @@ describe('instrumentation/reporting', () => {
   it('write report if reportType is set to file', async () => {
     const config: RenovateConfig = {
       repository: 'myOrg/myRepo',
-      reportType: 'file',
-      reportPath: './report.json',
     };
+    GlobalConfig.set({ reportType: 'file', reportPath: './report.json' });
 
     addBranchStats(config, branchInformation);
     addExtractionStats(config, { branchList: [], branches: [], packageFiles });
 
-    await exportStats(config);
+    await exportStats();
     expect(fs.writeSystemFile).toHaveBeenCalledExactlyOnceWith(
-      config.reportPath,
+      './report.json',
       JSON.stringify(expectedReport),
     );
   });
@@ -139,15 +140,17 @@ describe('instrumentation/reporting', () => {
   it('write formatted report if reportFormatting is enabled', async () => {
     const config: RenovateConfig = {
       repository: 'myOrg/myRepo',
+    };
+    GlobalConfig.set({
       reportType: 'file',
       reportPath: './report.json',
       reportFormatting: true,
-    };
+    });
 
     addBranchStats(config, branchInformation);
     addExtractionStats(config, { branchList: [], branches: [], packageFiles });
 
-    await exportStats(config);
+    await exportStats();
 
     const [[, writtenContent]] = fs.writeSystemFile.mock.calls;
     expect(JSON.parse(writtenContent as string)).toEqual(expectedReport);
@@ -161,14 +164,16 @@ describe('instrumentation/reporting', () => {
 
     const config: RenovateConfig = {
       repository: 'myOrg/myRepo',
+    };
+    GlobalConfig.set({
       reportType: 's3',
       reportPath: 's3://bucket-name/key-name',
-    };
+    });
 
     addBranchStats(config, branchInformation);
     addExtractionStats(config, { branchList: [], branches: [], packageFiles });
 
-    await exportStats(config);
+    await exportStats();
     expect(mockClient.send.mock.calls[0][0]).toMatchObject({
       input: {
         Body: JSON.stringify(expectedReport),
@@ -181,17 +186,16 @@ describe('instrumentation/reporting', () => {
 
     const config: RenovateConfig = {
       repository: 'myOrg/myRepo',
-      reportType: 's3',
-      reportPath: 'aPath',
     };
+    GlobalConfig.set({ reportType: 's3', reportPath: 'aPath' });
 
     addBranchStats(config, branchInformation);
     addExtractionStats(config, { branchList: [], branches: [], packageFiles });
 
-    await exportStats(config);
+    await exportStats();
 
     expect(logger.logger.warn).toHaveBeenCalledWith(
-      { reportPath: config.reportPath },
+      { reportPath: 'aPath' },
       'Failed to parse s3 URL',
     );
   });
@@ -199,24 +203,20 @@ describe('instrumentation/reporting', () => {
   it('catch exception', async () => {
     const config: RenovateConfig = {
       repository: 'myOrg/myRepo',
-      reportType: 'file',
-      reportPath: './report.json',
     };
+    GlobalConfig.set({ reportType: 'file', reportPath: './report.json' });
 
     addBranchStats(config, branchInformation);
     addExtractionStats(config, { branchList: [], branches: [], packageFiles });
 
     fs.writeSystemFile.mockRejectedValue(null);
-    await expect(exportStats(config)).toResolve();
+    await expect(exportStats()).toResolve();
   });
 
   it('reports nothing when reportType=null', async () => {
-    const config: RenovateConfig = {
-      repository: 'myOrg/myRepo',
-      reportType: null,
-    };
+    GlobalConfig.set({ reportType: null });
 
-    await exportStats(config);
+    await exportStats();
 
     expect(logger.logger.debug).not.toHaveBeenCalled();
     expect(logger.logger.info).not.toHaveBeenCalled();
@@ -226,8 +226,8 @@ describe('instrumentation/reporting', () => {
   it('should add problems to report', () => {
     const config: RenovateConfig = {
       repository: 'myOrg/myRepo',
-      reportType: 'logging',
     };
+    GlobalConfig.set({ reportType: 'logging' });
     const expectedReport = {
       problems: [
         {
@@ -271,8 +271,8 @@ describe('instrumentation/reporting', () => {
   it('should handle libyears addition', () => {
     const config: RenovateConfig = {
       repository: 'myOrg/myRepo',
-      reportType: 'logging',
     };
+    GlobalConfig.set({ reportType: 'logging' });
 
     addBranchStats(config, branchInformation);
     addExtractionStats(config, { branchList: [], branches: [], packageFiles });

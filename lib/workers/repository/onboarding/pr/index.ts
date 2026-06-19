@@ -88,7 +88,8 @@ export async function ensureOnboardingPr(
 ): Promise<void> {
   if (
     config.repoIsOnboarded === true ||
-    (config.onboardingRebaseCheckbox && !OnboardingState.prUpdateRequested)
+    (GlobalConfig.get('onboardingRebaseCheckbox') &&
+      !OnboardingState.prUpdateRequested)
   ) {
     return;
   }
@@ -135,10 +136,13 @@ export async function ensureOnboardingPr(
   }
 
   const onboardingConfigHashComment = await getOnboardingConfigHashComment();
-  const rebaseCheckBox = getRebaseCheckbox(config.onboardingRebaseCheckbox);
+  const rebaseCheckBox = getRebaseCheckbox(
+    GlobalConfig.get('onboardingRebaseCheckbox'),
+  );
+  const productLinks = GlobalConfig.get('productLinks');
   logger.debug('Filling in onboarding PR template');
   let prTemplate = `Welcome to [Renovate](${
-    config.productLinks!.homepage
+    productLinks.homepage
   })! This is an onboarding PR to help you understand and configure settings before regular Pull Requests begin.\n\n`;
   prTemplate +=
     getInheritedOrGlobal('requireConfig') === 'required'
@@ -150,7 +154,7 @@ export async function ensureOnboardingPr(
         );
 
   prTemplate += emojify(
-    `:books: See our [Reading List](${config.productLinks!.documentation}reading-list/) for relevant documentation you may be interested in reading.\n\n`,
+    `:books: See our [Reading List](${productLinks.documentation}reading-list/) for relevant documentation you may be interested in reading.\n\n`,
   );
 
   const configFile = getDefaultConfigFileName();
@@ -158,7 +162,7 @@ export async function ensureOnboardingPr(
     `:abcd: Do you want to change how Renovate upgrades your dependencies?`,
   );
   prTemplate += ` Add your custom config to \`${configFile}\` in this branch${
-    config.onboardingRebaseCheckbox
+    GlobalConfig.get('onboardingRebaseCheckbox')
       ? ' and select the Retry/Rebase checkbox below'
       : ''
   }. Renovate will update the Pull Request description the next time it runs.`;
@@ -178,10 +182,10 @@ export async function ensureOnboardingPr(
 ---
 
 :question: Got questions? Check out Renovate's [Docs](${
-      config.productLinks!.documentation
+      productLinks.documentation
     }), particularly the Getting Started section.
 If you need any further assistance then you can also [request help here](${
-      config.productLinks!.help
+      productLinks.help
     }).
 `,
   );
