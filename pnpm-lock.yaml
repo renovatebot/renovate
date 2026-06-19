@@ -5,22 +5,6 @@ settings:
   dedupePeers: true
   excludeLinksFromLockfile: false
 
-catalogs:
-  default:
-    protobufjs:
-      specifier: 8.6.3
-      version: 8.6.3
-    tar:
-      specifier: 7.5.16
-      version: 7.5.16
-
-overrides:
-  '@aws-sdk/xml-builder@3.972.4>fast-xml-parser': ^5.3.6
-  '@yarnpkg/core@4.5.0>tar': 7.5.16
-  esbuild: 0.28.0
-  protobufjs@8.0.1: 8.6.3
-  vite: 8.0.16
-
 importers:
 
   .:
@@ -308,7 +292,7 @@ importers:
         specifier: 3.8.1
         version: 3.8.1
       protobufjs:
-        specifier: 'catalog:'
+        specifier: 8.6.3
         version: 8.6.3
       punycode:
         specifier: 2.3.1
@@ -579,7 +563,7 @@ importers:
         specifier: 25.0.5
         version: 25.0.5(typescript@6.0.3)
       tar:
-        specifier: 'catalog:'
+        specifier: 7.5.16
         version: 7.5.16
       tmp-promise:
         specifier: 3.0.3
@@ -2369,7 +2353,7 @@ packages:
     resolution: {integrity: sha512-LEiN/xe4OSIbKe9HQIp5OC24agGD9J5CnmMgsLohVVoOPWL9a2sBoR6VBx43jQZb7Kr1l4RCuyCJzcAa0+dojw==}
     peerDependencies:
       msw: ^2.4.9
-      vite: 8.0.16
+      vite: ^6.0.0 || ^7.0.0 || ^8.0.0
     peerDependenciesMeta:
       msw:
         optional: true
@@ -5533,7 +5517,7 @@ packages:
     peerDependencies:
       '@types/node': ^20.19.0 || >=22.12.0
       '@vitejs/devtools': ^0.1.18
-      esbuild: 0.28.0
+      esbuild: ^0.27.0 || ^0.28.0
       jiti: '>=1.21.0'
       less: ^4.0.0
       sass: ^1.70.0
@@ -5591,7 +5575,7 @@ packages:
       '@vitest/ui': 4.1.8
       happy-dom: '*'
       jsdom: '*'
-      vite: 8.0.16
+      vite: ^6.0.0 || ^7.0.0 || ^8.0.0
     peerDependenciesMeta:
       '@edge-runtime/vm':
         optional: true
