@@ -225,6 +225,49 @@ export type DatasourceName = typeof AllDatasourcesListLiteral[number];
   await updateFile(`lib/datasource-list.generated.ts`, content);
 }
 
+async function generateConfigOptionNames() {
+  const { getOptions } = await import('../lib/config/options/index.ts');
+  const options = getOptions();
+
+  const globalOnly = []
+  const inherited = []
+  const repo = []
+  for (const option of options
+    .sort((a, b) => a.name.localeCompare(b.name))) {
+    if (option.globalOnly && option.inheritConfigSupport) {
+      inherited.push(option.name)
+    } else if (option.globalOnly) {
+      globalOnly.push(option.name)
+    } else {
+      repo.push(option.name)
+    }
+  }
+
+  const content = `
+export const globalConfigOptionNames = ${JSON.stringify(globalOnly, null, 2)};
+
+export type GlobalConfigOptionName = (typeof globalConfigOptionNames)[number];
+
+export const inheritedConfigOptionNames = ${JSON.stringify(inherited, null, 2)};
+
+export type InheritedConfigOptionName = (typeof inheritedConfigOptionNames)[number];
+
+export const repoConfigOptionNames = ${JSON.stringify(repo, null, 2)};
+
+export type RepoConfigOptionName = (typeof repoConfigOptionNames)[number];
+
+export const configOptionNames = [
+  ...globalConfigOptionNames,
+  ...inheritedConfigOptionNames,
+  ...repoConfigOptionNames,
+];
+
+export type ConfigOptionName = (typeof configOptionNames)[number];
+`;
+
+  await updateFile('lib/config-options.generated.ts', content);
+}
+
 async function generateGlobalConfigOptionDefaults() {
   const { getOptions } = await import('../lib/config/options/index.ts');
   const options = getOptions();
@@ -309,6 +352,7 @@ await (async () => {
     await generateManagerDefaultConfigs();
     await generateVersioningList();
     await generateDatasourceList();
+    await generateConfigOptionNames();
     await generateGlobalConfigOptionDefaults();
     await generateHash();
     await Promise.all(
