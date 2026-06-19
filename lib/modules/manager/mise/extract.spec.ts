@@ -1321,6 +1321,24 @@ describe('modules/manager/mise/extract', () => {
       });
     });
 
+    it('extracts lockedVersion when lock file holds an exact-pin single version', async () => {
+      const pinnedLockFileContent = codeBlock`
+        [[tools."npm:typescript"]]
+        version = "=1.18.4"
+      `;
+      fs.readLocalFile.mockResolvedValueOnce(pinnedLockFileContent);
+      const content = codeBlock`
+        [tools]
+        "npm:typescript" = "=1.18.4"
+      `;
+      const result = await extractPackageFile(content, 'mise.toml');
+      expect(result?.deps[0]).toMatchObject({
+        depName: 'npm:typescript',
+        currentValue: '=1.18.4',
+        lockedVersion: '=1.18.4',
+      });
+    });
+
     it('skips kafka tool when version has no apache- prefix', async () => {
       const content = codeBlock`
         [tools]
