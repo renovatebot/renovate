@@ -9,6 +9,8 @@ import { logger } from '../../logger/index.ts';
 import { logWarningIfUnicodeHiddenCharactersInPackageFile } from '../unicode.ts';
 import { ensureCachePath, ensureLocalPath, isValidPath } from './util.ts';
 
+export { getMatchingFiles, resolveRelativePathToRoot } from './util.ts';
+
 export const pipeline = util.promisify(stream.pipeline);
 
 export function getParentDir(fileName: string): string {
