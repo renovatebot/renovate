@@ -613,34 +613,33 @@ describe('util/git/index', { timeout: 30000 }, () => {
       expect(pushSpy).toHaveBeenCalledTimes(0);
     });
 
-    it('should merge a virtual branch by fetching its ref', async () => {
+    it('should merge a local-only virtual branch without fetching from origin', async () => {
+      // Create a local-only branch (never pushed to origin)
       const commit = await git.prepareCommit({
-        branchName: 'renovate/future_branch',
-        message: 'future commit',
-        files: [{ type: 'addition', path: 'future_file', contents: 'local' }],
-      });
-      await git.pushCommit({
-        sourceRef: 'renovate/future_branch',
-        targetRef: 'refs/changes/99/99999/1',
-        files: [{ type: 'addition', path: 'future_file', contents: 'local' }],
+        branchName: 'renovate/local_only_branch',
+        message: 'local only commit',
+        files: [
+          { type: 'addition', path: 'local_only_file', contents: 'local' },
+        ],
       });
       await git.setVirtualBranch(
-        'renovate/future_branch',
+        'renovate/local_only_branch',
         'refs/changes/99/99999/1',
         commit!.commitSha,
       );
-      await git.checkoutBranch(defaultBranch);
+      // Reset working tree back to default branch so the file is not present yet
+      const local = simpleGit(tmpDir.path);
+      await local.checkout(defaultBranch);
 
-      expect(fs.existsSync(`${tmpDir.path}/future_file`)).toBeFalse();
+      expect(fs.existsSync(`${tmpDir.path}/local_only_file`)).toBeFalse();
       const fetchSpy = vi.spyOn(SimpleGit.prototype, 'fetch');
+      const pushSpy = vi.spyOn(SimpleGit.prototype, 'push');
 
-      await git.mergeToLocal('renovate/future_branch');
+      await git.mergeToLocal('renovate/local_only_branch');
 
-      expect(fs.existsSync(`${tmpDir.path}/future_file`)).toBeTrue();
-      expect(fetchSpy).toHaveBeenCalledWith([
-        'origin',
-        'refs/changes/99/99999/1',
-      ]);
+      expect(fs.existsSync(`${tmpDir.path}/local_only_file`)).toBeTrue();
+      expect(fetchSpy).not.toHaveBeenCalled();
+      expect(pushSpy).not.toHaveBeenCalled();
     });
 
     it('should throw', async () => {
@@ -2065,7 +2064,7 @@ describe('util/git/index', { timeout: 30000 }, () => {
   });
 
   describe('mergeToLocal() for virtual branches', () => {
-    it('merges a virtual branch by fetching its ref', async () => {
+    it('merges the remote-tracking ref of an init virtual branch', async () => {
       const originRepo = simpleGit(origin.path);
       const commit = (await originRepo.revparse(['HEAD'])) as LongCommitSha;
       await originRepo.raw(['update-ref', 'refs/changes/70/12370/1', commit]);
@@ -2085,11 +2084,10 @@ describe('util/git/index', { timeout: 30000 }, () => {
       const mergeSpy = vi.spyOn(SimpleGit.prototype, 'merge');
       await git.mergeToLocal('renovate/virtual-merge');
 
-      expect(fetchSpy).toHaveBeenCalledWith([
-        'origin',
-        'refs/changes/70/12370/1',
+      expect(fetchSpy).not.toHaveBeenCalled();
+      expect(mergeSpy).toHaveBeenCalledWith([
+        'refs/remotes/origin/renovate/virtual-merge',
       ]);
-      expect(mergeSpy).toHaveBeenCalledWith(['FETCH_HEAD']);
     });
   });
 

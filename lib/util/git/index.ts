@@ -1113,11 +1113,19 @@ export async function mergeToLocal(branchName: string): Promise<void> {
       ]),
     );
     status = await git.status();
-    const ref = isVirtualBranch(branchName)
-      ? config.virtualBranches[branchName].ref
-      : branchName;
-    await fetchRevSpec(ref);
-    await gitRetry(() => git.merge(['FETCH_HEAD']));
+    if (isVirtualBranch(branchName)) {
+      // Virtual branches are already local and tracked as a remote-tracking ref,
+      // so merge it directly without fetching from origin.
+      const ref = remoteBranchRef(branchName);
+      logger.debug(
+        { branchName, ref },
+        'mergeToLocal(): merging virtual branch',
+      );
+      await git.merge([ref]);
+    } else {
+      await fetchRevSpec(branchName);
+      await gitRetry(() => git.merge(['FETCH_HEAD']));
+    }
   } catch (err) {
     logger.debug(
       {
