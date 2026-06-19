@@ -337,24 +337,6 @@ function pnpmCatalogsToArray({
   return result;
 }
 
-// pnpm ignores registry URLs containing `${...}` env-var interpolation since v11.5.3
-function hasEnvVar(value: string): boolean {
-  return value.includes('${');
-}
-
-function withoutEnvVarRegistries(
-  registries: Record<string, string> | undefined,
-): Record<string, string> | undefined {
-  if (!registries) {
-    return undefined;
-  }
-  return Object.fromEntries(
-    Object.entries(registries).filter(([, url]) => !hasEnvVar(url)),
-  );
-}
-
-// Applies pnpm-workspace.yaml registries to npm deps; env-var registry URLs are
-// dropped because pnpm ignores them since v11.5.3.
 export function applyPnpmWorkspaceRegistries(
   deps: PackageDependency[],
   registries: Record<string, string> | undefined,
@@ -363,15 +345,10 @@ export function applyPnpmWorkspaceRegistries(
   if (!(registry ?? registries)) {
     return;
   }
-  const filteredRegistries = withoutEnvVarRegistries(registries);
   for (const dep of deps) {
     const lookupName = dep.packageName ?? dep.depName;
     if (lookupName && dep.datasource === NpmDatasource.id) {
-      const registryUrl = resolveRegistryUrl(
-        lookupName,
-        filteredRegistries,
-        registry,
-      );
+      const registryUrl = resolveRegistryUrl(lookupName, registries, registry);
       if (registryUrl) {
         dep.registryUrls = [registryUrl];
       }

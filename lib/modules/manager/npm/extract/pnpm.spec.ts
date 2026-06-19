@@ -4,6 +4,7 @@ import { fs, getFixturePath, logger, partial } from '~test/util.ts';
 import { GlobalConfig } from '../../../../config/global.ts';
 import * as yaml from '../../../../util/yaml.ts';
 import type { PackageFile } from '../../types.ts';
+import { PnpmWorkspaceFile } from '../schema.ts';
 import type { NpmManagerData } from '../types.ts';
 import {
   detectPnpmWorkspaces,
@@ -576,19 +577,15 @@ describe('modules/manager/npm/extract/pnpm', () => {
       ]);
     });
 
-    it('skips scoped registry values containing env vars', async () => {
-      const res = await extractPnpmWorkspaceFile(
-        {
-          catalog: {
-            '@my-org/pkg': '1.0.0',
-          },
-          registries: {
-            '@my-org': 'https://${TOKEN}.example.com/',
-          },
-        },
-        'pnpm-workspace.yaml',
-      );
-      expect(res?.deps[0].registryUrls).toBeUndefined();
+    it('strips registries values containing env vars when parsing', async () => {
+      const parsed = await PnpmWorkspaceFile.safeParseAsync(codeBlock`
+        registries:
+          "@my-org": https://\${TOKEN}.example.com/
+          "@other-org": https://private.example.com/
+      `);
+      expect(parsed.data?.registries).toEqual({
+        '@other-org': 'https://private.example.com/',
+      });
     });
 
     it('does not apply registries to non-npm catalog deps', async () => {
