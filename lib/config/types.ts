@@ -275,6 +275,7 @@ export interface RepoGlobalConfig extends GlobalInheritableConfig {
   ignorePrAuthor?: boolean;
   allowedUnsafeExecutions?: AllowedUnsafeExecution[];
   onboardingAutoCloseAge?: number;
+  productLinks?: Record<string, string>;
   toolSettings?: ToolSettingsOptions;
 }
 
