@@ -21,10 +21,9 @@ function getAuthenticationHandler(config: HostRule): IRequestHandler {
   if (!config.token && config.username && config.password) {
     return getBasicHandler(config.username, config.password, true);
   }
-  // TODO: token can be undefined here (#22198)
-  if (isProbablyJwt(config.token!)) {
+  if (config.token && isProbablyJwt(config.token)) {
     logger.debug('Using Bearer authentication (JWT detected)');
-    return getBearerHandler(config.token!, true);
+    return getBearerHandler(config.token, true);
   }
   logger.debug('Using PAT authentication');
   return getPersonalAccessTokenHandler(config.token!, true);
