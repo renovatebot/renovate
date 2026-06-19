@@ -32,6 +32,7 @@ export const defaultConfig = {
     '**/.config/mise/conf.d/*.toml',
     '**/.rtx{,.*}.toml',
   ],
+  pinDigests: false,
 };
 
 const backendDatasources = {

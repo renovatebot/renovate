@@ -275,6 +275,7 @@ export interface RepoGlobalConfig extends GlobalInheritableConfig {
   ignorePrAuthor?: boolean;
   allowedUnsafeExecutions?: AllowedUnsafeExecution[];
   onboardingAutoCloseAge?: number;
+  productLinks?: Record<string, string>;
   toolSettings?: ToolSettingsOptions;
 }
 
@@ -324,11 +325,11 @@ export type UpdateConfig<
   T extends RenovateSharedConfig = RenovateSharedConfig,
 > = Partial<Record<UpdateType, T | null>>;
 
-export type RenovateRepository =
-  | string
-  | (AllConfig & {
-      repository: string;
-    });
+export type RenovateRepositoryEntry = AllConfig & {
+  repository: string;
+};
+
+export type RenovateRepository = string | RenovateRepositoryEntry;
 
 export type UseBaseBranchConfigType = 'merge' | 'none';
 export type ConstraintsFilter = 'strict' | 'none';

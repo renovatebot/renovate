@@ -1,5 +1,6 @@
 import { isEmptyArray, isString } from '@sindresorhus/is';
 import { quote } from 'shlex';
+import { GlobalConfig } from '../../../config/global.ts';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
 import { exec } from '../../../util/exec/index.ts';
@@ -67,7 +68,7 @@ export async function updateArtifacts({
 
   if (isLockFileMaintenance && isUmbrella) {
     logger.debug(
-      'Cannot use lockFileMaintenance in an umbrella project, see https://docs.renovatebot.com/modules/manager/mix/#lockFileMaintenance',
+      `Cannot use lockFileMaintenance in an umbrella project, see ${GlobalConfig.get('productLinks').documentation}modules/manager/mix/#lockFileMaintenance`,
     );
     return null;
   }

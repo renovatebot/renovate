@@ -1,16 +1,14 @@
 import { isNonEmptyArray } from '@sindresorhus/is';
 import type { MergeStrategy } from '../../../config/types.ts';
-import {
-  CONFIG_GIT_URL_UNAVAILABLE,
-  REPOSITORY_BLOCKED,
-} from '../../../constants/error-messages.ts';
+import { CONFIG_GIT_URL_UNAVAILABLE } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
+import { coerceArray } from '../../../util/array.ts';
 import * as hostRules from '../../../util/host-rules.ts';
 import { regEx } from '../../../util/regex.ts';
 import { parseUrl } from '../../../util/url.ts';
 import { getPrBodyStruct } from '../pr-body.ts';
 import type { GitUrlOption, Pr } from '../types.ts';
-import type { PR, PRMergeMethod, Repo } from './types.ts';
+import type { PR, PRMergeMethod, Repo } from './schema.ts';
 
 export function smartLinks(body: string): string {
   return body
@@ -92,10 +90,6 @@ export const DRAFT_PREFIX = 'WIP: ';
 const reconfigurePrRegex = regEx(/reconfigure$/g);
 
 export function toRenovatePR(data: PR, author: string | null): Pr | null {
-  if (!data) {
-    return null;
-  }
-
   if (
     !data.base?.ref ||
     !data.head?.label ||
@@ -124,7 +118,7 @@ export function toRenovatePR(data: PR, author: string | null): Pr | null {
     title = title.substring(DRAFT_PREFIX.length);
     isDraft = true;
   }
-  const labels = (data?.labels ?? []).map((l) => l.name);
+  const labels = coerceArray(data.labels).map((l) => l.name);
 
   return {
     labels,
@@ -188,6 +182,4 @@ export function isAllowed(style: PRMergeMethod, repo: Repo): boolean {
     case 'fast-forward-only':
       return repo.allow_fast_forward_only_merge;
   }
-  logger.debug('Repo has unknown merge style - aborting renovation');
-  throw new Error(REPOSITORY_BLOCKED);
 }

@@ -150,7 +150,7 @@ export async function ensureOnboardingPr(
         );
 
   prTemplate += emojify(
-    `:books: See our [Reading List](https://docs.renovatebot.com/reading-list/) for relevant documentation you may be interested in reading.\n\n`,
+    `:books: See our [Reading List](${config.productLinks!.documentation}reading-list/) for relevant documentation you may be interested in reading.\n\n`,
   );
 
   const configFile = getDefaultConfigFileName();
