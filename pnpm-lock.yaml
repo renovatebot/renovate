@@ -7,6 +7,9 @@ settings:
 
 catalogs:
   default:
+    protobufjs:
+      specifier: 8.6.3
+      version: 8.6.3
     tar:
       specifier: 7.5.16
       version: 7.5.16
@@ -305,7 +308,7 @@ importers:
         specifier: 3.8.1
         version: 3.8.1
       protobufjs:
-        specifier: 8.6.3
+        specifier: 'catalog:'
         version: 8.6.3
       punycode:
         specifier: 2.3.1
