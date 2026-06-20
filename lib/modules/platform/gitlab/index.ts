@@ -72,7 +72,6 @@ import {
   GitlabComments,
   GitlabIssueBody,
   GitlabIssues,
-  GitlabMergeRequestStatus,
   GitlabRawFile,
   GitlabUserInfo,
   GitlabVersion,
@@ -603,7 +602,7 @@ async function tryPrAutomerge(
         const { body } = await gitlabApi.getJson(
           `projects/${config.repository}/merge_requests/${pr}`,
           { memCache: false },
-          GitlabMergeRequestStatus,
+          GitLabMergeRequest,
         );
 
         // Exit early if merge_when_pipeline_succeeds is already set

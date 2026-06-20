@@ -20,6 +20,7 @@ import { toBase64 } from '../../../util/string.ts';
 import type { RepoParams } from '../index.ts';
 import * as prBodyModule from '../utils/pr-body.ts';
 import * as gitlab from './index.ts';
+import type { GitLabMergeRequest } from './schema.ts';
 
 vi.mock('../../../util/host-rules.ts', () => mockDeep());
 vi.mock('../../../util/git/index.ts', () => mockDeep());
@@ -54,6 +55,19 @@ describe('modules/platform/gitlab/index', () => {
     memCache.init();
     repoCache.resetCache();
   });
+
+  const mockMergeRequestResponse: GitLabMergeRequest = {
+    assignees: [],
+    labels: [],
+    reviewers: [],
+    iid: 12345,
+    title: 'some title',
+    state: 'opened',
+    source_branch: 'some-branch',
+    target_branch: 'master',
+    created_at: '2021-01-20T10:00:00.000Z',
+    updated_at: '2021-01-20T10:00:00.000Z',
+  };
 
   async function initFakePlatform(version: string) {
     httpMock
@@ -2495,9 +2509,9 @@ describe('modules/platform/gitlab/index', () => {
           updated_at: '2021-01-20T10:00:00.000Z',
         })
         .get('/api/v4/projects/undefined/merge_requests/12345')
-        .reply(200, {})
+        .reply(200, mockMergeRequestResponse)
         .get('/api/v4/projects/undefined/merge_requests/12345')
-        .reply(200, {})
+        .reply(200, mockMergeRequestResponse)
         .put('/api/v4/projects/undefined/merge_requests/12345/merge')
         .reply(200);
       expect(
@@ -2549,6 +2563,7 @@ describe('modules/platform/gitlab/index', () => {
         })
         .get('/api/v4/projects/some%2Frepo/merge_requests/12345')
         .reply(200, {
+          ...mockMergeRequestResponse,
           merge_status: 'can_be_merged',
           pipeline: { status: 'running' },
         })
@@ -2604,6 +2619,7 @@ describe('modules/platform/gitlab/index', () => {
         })
         .get('/api/v4/projects/some%2Frepo/merge_requests/12345')
         .reply(200, {
+          ...mockMergeRequestResponse,
           merge_status: 'can_be_merged',
           pipeline: { status: 'running' },
         })
@@ -2660,6 +2676,7 @@ describe('modules/platform/gitlab/index', () => {
         })
         .get('/api/v4/projects/some%2Frepo/merge_requests/12345')
         .reply(200, {
+          ...mockMergeRequestResponse,
           merge_status: 'can_be_merged',
           pipeline: { status: 'running' },
         })
@@ -2688,6 +2705,7 @@ describe('modules/platform/gitlab/index', () => {
     it('should parse merge_status attribute if detailed_merge_status is not set (on < 15.6)', async () => {
       await initPlatform('13.3.6-ee');
       const reply_body = {
+        ...mockMergeRequestResponse,
         merge_status: 'pending',
       };
       httpMock
@@ -2756,6 +2774,7 @@ describe('modules/platform/gitlab/index', () => {
     it('should parse detailed_merge_status attribute on >= 15.6', async () => {
       await initPlatform('15.6.0-ee');
       const reply_body = {
+        ...mockMergeRequestResponse,
         detailed_merge_status: 'pending',
       };
       httpMock
@@ -2817,6 +2836,7 @@ describe('modules/platform/gitlab/index', () => {
     it('should retry auto merge creation on 405 method not allowed', async () => {
       await initPlatform('15.6.0-ee');
       const reply_body = {
+        ...mockMergeRequestResponse,
         detailed_merge_status: 'pending',
       };
       httpMock
@@ -2898,6 +2918,7 @@ describe('modules/platform/gitlab/index', () => {
     it('should not retry if MR is mergeable and pipeline is running', async () => {
       await initPlatform('15.6.0-ee');
       const reply_body = {
+        ...mockMergeRequestResponse,
         detailed_merge_status: 'mergeable',
         pipeline: {
           status: 'running',
@@ -3055,9 +3076,10 @@ describe('modules/platform/gitlab/index', () => {
           updated_at: '2021-01-20T10:00:00.000Z',
         })
         .get('/api/v4/projects/undefined/merge_requests/12345')
-        .reply(200, {})
+        .reply(200, mockMergeRequestResponse)
         .get('/api/v4/projects/undefined/merge_requests/12345')
         .reply(200, {
+          ...mockMergeRequestResponse,
           merge_status: 'can_be_merged',
           pipeline: {
             id: 29626725,
@@ -3163,9 +3185,10 @@ describe('modules/platform/gitlab/index', () => {
           updated_at: '2021-01-20T10:00:00.000Z',
         })
         .get('/api/v4/projects/undefined/merge_requests/12345')
-        .reply(200, {})
+        .reply(200, mockMergeRequestResponse)
         .get('/api/v4/projects/undefined/merge_requests/12345')
         .reply(200, {
+          ...mockMergeRequestResponse,
           merge_status: 'can_be_merged',
           pipeline: {
             id: 29626725,
@@ -3228,9 +3251,10 @@ describe('modules/platform/gitlab/index', () => {
           updated_at: '2021-01-20T10:00:00.000Z',
         })
         .get('/api/v4/projects/undefined/merge_requests/12345')
-        .reply(200, {})
+        .reply(200, mockMergeRequestResponse)
         .get('/api/v4/projects/undefined/merge_requests/12345')
         .reply(200, {
+          ...mockMergeRequestResponse,
           merge_status: 'can_be_merged',
           pipeline: {
             id: 29626725,
@@ -3304,9 +3328,10 @@ describe('modules/platform/gitlab/index', () => {
           updated_at: '2021-01-20T10:00:00.000Z',
         })
         .get('/api/v4/projects/undefined/merge_requests/12345')
-        .reply(200, {})
+        .reply(200, mockMergeRequestResponse)
         .get('/api/v4/projects/undefined/merge_requests/12345')
         .reply(200, {
+          ...mockMergeRequestResponse,
           merge_status: 'can_be_merged',
           pipeline: {
             id: 29626725,
@@ -3390,9 +3415,10 @@ describe('modules/platform/gitlab/index', () => {
           updated_at: '2021-01-20T10:00:00.000Z',
         })
         .get('/api/v4/projects/undefined/merge_requests/12345')
-        .reply(200, {})
+        .reply(200, mockMergeRequestResponse)
         .get('/api/v4/projects/undefined/merge_requests/12345')
         .reply(200, {
+          ...mockMergeRequestResponse,
           merge_status: 'can_be_merged',
           pipeline: {
             id: 29626725,
@@ -3447,9 +3473,10 @@ describe('modules/platform/gitlab/index', () => {
           updated_at: '2021-01-20T10:00:00.000Z',
         })
         .get('/api/v4/projects/undefined/merge_requests/12345')
-        .reply(200, {})
+        .reply(200, mockMergeRequestResponse)
         .get('/api/v4/projects/undefined/merge_requests/12345')
         .reply(200, {
+          ...mockMergeRequestResponse,
           merge_status: 'can_be_merged',
           pipeline: {
             id: 29626725,
@@ -4063,9 +4090,10 @@ describe('modules/platform/gitlab/index', () => {
       httpMock
         .scope(gitlabApiHost)
         .get('/api/v4/projects/undefined/merge_requests/12345')
-        .reply(200, {})
+        .reply(200, mockMergeRequestResponse)
         .get('/api/v4/projects/undefined/merge_requests/12345')
         .reply(200, {
+          ...mockMergeRequestResponse,
           merge_status: 'can_be_merged',
           pipeline: {
             status: 'running',
@@ -4087,6 +4115,7 @@ describe('modules/platform/gitlab/index', () => {
         .scope(gitlabApiHost)
         .get('/api/v4/projects/undefined/merge_requests/12345')
         .reply(200, {
+          ...mockMergeRequestResponse,
           merge_status: 'ci_must_pass',
           merge_when_pipeline_succeeds: true,
           pipeline: {

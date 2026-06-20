@@ -28,11 +28,18 @@ export const GitLabMergeRequest = DeepNullish(
     updated_at: z.string(),
     diverged_commits_count: z.number().optional(),
     merge_status: z.string().optional(),
+    detailed_merge_status: z.string().optional(),
+    merge_when_pipeline_succeeds: z.boolean().optional(),
     assignee: GitlabUser.optional(),
     assignees: LooseArray(GitlabUser).default([]),
     reviewers: LooseArray(GitlabUser).default([]),
     labels: z.array(z.string()).default([]),
     sha: LongCommitSha.optional(),
+    pipeline: z
+      .object({
+        status: z.string(),
+      })
+      .optional(),
     head_pipeline: z
       .object({
         status: z.string(),
@@ -111,20 +118,6 @@ export const GitlabApprovalRule = z.object({
 export type GitlabApprovalRule = z.infer<typeof GitlabApprovalRule>;
 
 export const GitlabApprovalRules = z.array(GitlabApprovalRule);
-
-export const GitlabMergeRequestStatus = DeepNullish(
-  z.object({
-    merge_status: z.string().optional(),
-    detailed_merge_status: z.string().optional(),
-    merge_when_pipeline_succeeds: z.boolean().optional(),
-    pipeline: z
-      .object({
-        status: z.string(),
-      })
-      .optional(),
-  }),
-);
-export type GitlabMergeRequestStatus = z.infer<typeof GitlabMergeRequestStatus>;
 
 export const GitlabUserInfo = z.object({
   email: z.string().optional(),
