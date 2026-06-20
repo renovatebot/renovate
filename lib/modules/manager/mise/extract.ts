@@ -87,10 +87,12 @@ export async function extractPackageFile(
           lockFileParsed.data,
           dep.depName!,
         );
-        // mise records the requested specifier (e.g. "^1.18.4") for backends that
-        // don't pin, so only treat single versions as a lockedVersion — a range
-        // would otherwise crash the lookup's exact-version comparison.
-        if (lockedVersion && isSingleVersion(dep, lockedVersion)) {
+        /*
+         * mise records the requested specifier (e.g. "^1.18.4" or "=1.18.4") for
+         * backends that don't pin, so only treat concrete versions as a
+         * lockedVersion — anything else crashes the lookup's exact-version comparison.
+         */
+        if (lockedVersion && isConcreteVersion(dep, lockedVersion)) {
           dep.lockedVersion = lockedVersion;
         }
       }
@@ -105,11 +107,11 @@ export async function extractPackageFile(
   return result;
 }
 
-function isSingleVersion(dep: PackageDependency, version: string): boolean {
+function isConcreteVersion(dep: PackageDependency, version: string): boolean {
   const versioning = allVersioning.get(
     dep.versioning ?? getDefaultVersioning(dep.datasource),
   );
-  return versioning.isSingleVersion(version);
+  return versioning.isVersion(version);
 }
 
 function parseVersion(toolData: MiseTool): string | null {
