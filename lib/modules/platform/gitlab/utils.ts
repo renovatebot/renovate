@@ -28,7 +28,7 @@ export function prInfo(mr: GitLabMergeRequest): GitlabPr {
     number: mr.iid,
     title: mr.title,
     createdAt: mr.created_at,
-    hasAssignees: !!(mr.assignee?.id ?? mr.assignees?.[0]?.id),
+    hasAssignees: !!(mr.assignee?.id ?? mr.assignees[0]?.id),
     bodyStruct: getPrBodyStruct(mr.description),
 
     ...(mr.target_branch && { targetBranch: mr.target_branch }),
@@ -39,10 +39,10 @@ export function prInfo(mr: GitLabMergeRequest): GitlabPr {
     ...(mr.head_pipeline?.sha && { headPipelineSha: mr.head_pipeline?.sha }),
 
     ...(isNonEmptyArray(mr.reviewers) && {
-      reviewers: mr.reviewers?.map(({ username }) => username),
+      reviewers: mr.reviewers.map(({ username }) => username),
     }),
 
-    ...(mr.labels && { labels: mr.labels }),
+    labels: mr.labels,
     ...(mr.sha && { sha: mr.sha }),
   };
 

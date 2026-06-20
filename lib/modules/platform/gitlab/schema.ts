@@ -28,9 +28,9 @@ export const GitLabMergeRequest = z.object({
   diverged_commits_count: z.number().optional(),
   merge_status: z.string().optional(),
   assignee: GitlabUser.nullish(),
-  assignees: LooseArray(GitlabUser).catch([]),
-  reviewers: LooseArray(GitlabUser).catch([]),
-  labels: z.array(z.string()).optional(),
+  assignees: LooseArray(GitlabUser).default([]),
+  reviewers: LooseArray(GitlabUser).default([]),
+  labels: z.array(z.string()).default([]),
   sha: LongCommitSha.nullish(),
   head_pipeline: z
     .object({

@@ -3766,6 +3766,7 @@ describe('modules/platform/gitlab/index', () => {
         },
         createdAt: '2021-01-20T10:00:00.000Z',
         hasAssignees: false,
+        labels: [],
         number: 12345,
         reviewers: ['foo', 'bar'],
         sourceBranch: 'some-branch',

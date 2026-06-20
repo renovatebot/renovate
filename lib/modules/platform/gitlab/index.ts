@@ -1253,7 +1253,6 @@ export async function addReviewers(
     return;
   }
 
-  mr.reviewers = coerceArray(mr.reviewers);
   const existingReviewers = mr.reviewers.map((r) => r.username);
   const existingReviewerIDs = mr.reviewers.map((r) => r.id);
 
