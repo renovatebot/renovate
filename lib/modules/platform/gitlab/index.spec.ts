@@ -2495,9 +2495,9 @@ describe('modules/platform/gitlab/index', () => {
           updated_at: '2021-01-20T10:00:00.000Z',
         })
         .get('/api/v4/projects/undefined/merge_requests/12345')
-        .reply(200)
+        .reply(200, {})
         .get('/api/v4/projects/undefined/merge_requests/12345')
-        .reply(200)
+        .reply(200, {})
         .put('/api/v4/projects/undefined/merge_requests/12345/merge')
         .reply(200);
       expect(
@@ -3055,7 +3055,7 @@ describe('modules/platform/gitlab/index', () => {
           updated_at: '2021-01-20T10:00:00.000Z',
         })
         .get('/api/v4/projects/undefined/merge_requests/12345')
-        .reply(200)
+        .reply(200, {})
         .get('/api/v4/projects/undefined/merge_requests/12345')
         .reply(200, {
           merge_status: 'can_be_merged',
@@ -3163,7 +3163,7 @@ describe('modules/platform/gitlab/index', () => {
           updated_at: '2021-01-20T10:00:00.000Z',
         })
         .get('/api/v4/projects/undefined/merge_requests/12345')
-        .reply(200)
+        .reply(200, {})
         .get('/api/v4/projects/undefined/merge_requests/12345')
         .reply(200, {
           merge_status: 'can_be_merged',
@@ -3228,7 +3228,7 @@ describe('modules/platform/gitlab/index', () => {
           updated_at: '2021-01-20T10:00:00.000Z',
         })
         .get('/api/v4/projects/undefined/merge_requests/12345')
-        .reply(200)
+        .reply(200, {})
         .get('/api/v4/projects/undefined/merge_requests/12345')
         .reply(200, {
           merge_status: 'can_be_merged',
@@ -3304,7 +3304,7 @@ describe('modules/platform/gitlab/index', () => {
           updated_at: '2021-01-20T10:00:00.000Z',
         })
         .get('/api/v4/projects/undefined/merge_requests/12345')
-        .reply(200)
+        .reply(200, {})
         .get('/api/v4/projects/undefined/merge_requests/12345')
         .reply(200, {
           merge_status: 'can_be_merged',
@@ -3390,7 +3390,7 @@ describe('modules/platform/gitlab/index', () => {
           updated_at: '2021-01-20T10:00:00.000Z',
         })
         .get('/api/v4/projects/undefined/merge_requests/12345')
-        .reply(200)
+        .reply(200, {})
         .get('/api/v4/projects/undefined/merge_requests/12345')
         .reply(200, {
           merge_status: 'can_be_merged',
@@ -3447,7 +3447,7 @@ describe('modules/platform/gitlab/index', () => {
           updated_at: '2021-01-20T10:00:00.000Z',
         })
         .get('/api/v4/projects/undefined/merge_requests/12345')
-        .reply(200)
+        .reply(200, {})
         .get('/api/v4/projects/undefined/merge_requests/12345')
         .reply(200, {
           merge_status: 'can_be_merged',
@@ -4063,7 +4063,7 @@ describe('modules/platform/gitlab/index', () => {
       httpMock
         .scope(gitlabApiHost)
         .get('/api/v4/projects/undefined/merge_requests/12345')
-        .reply(200)
+        .reply(200, {})
         .get('/api/v4/projects/undefined/merge_requests/12345')
         .reply(200, {
           merge_status: 'can_be_merged',

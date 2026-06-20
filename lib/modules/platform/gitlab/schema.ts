@@ -123,7 +123,7 @@ export const GitlabMergeRequestStatus = DeepNullish(
       })
       .optional(),
   }),
-).catch({});
+);
 export type GitlabMergeRequestStatus = z.infer<typeof GitlabMergeRequestStatus>;
 
 export const GitlabUserInfo = z.object({
