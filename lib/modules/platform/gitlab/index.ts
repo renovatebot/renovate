@@ -310,10 +310,10 @@ export async function initRepo({
       );
       throw new Error(REPOSITORY_DISABLED);
     }
-    if (res.body.default_branch === null || res.body.empty_repo) {
+    if (!res.body.default_branch || res.body.empty_repo) {
       throw new Error(REPOSITORY_EMPTY);
     }
-    config.defaultBranch = res.body.default_branch ?? '';
+    config.defaultBranch = res.body.default_branch;
     /* v8 ignore next */
     if (!config.defaultBranch) {
       logger.warn({ resBody: res.body }, 'Error fetching GitLab project');

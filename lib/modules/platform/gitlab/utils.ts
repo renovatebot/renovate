@@ -79,9 +79,9 @@ export function getRepoUrl(
   if (
     gitUrl === 'endpoint' ||
     isNonEmptyString(env.GITLAB_IGNORE_REPO_URL) ||
-    res.body.http_url_to_repo === null
+    !res.body.http_url_to_repo
   ) {
-    if (res.body.http_url_to_repo === null) {
+    if (!res.body.http_url_to_repo) {
       logger.debug('no http_url_to_repo found. Falling back to old behavior.');
     }
     if (env.GITLAB_IGNORE_REPO_URL) {
@@ -110,11 +110,7 @@ export function getRepoUrl(
   }
 
   logger.debug(`Using http URL: ${res.body.http_url_to_repo}`);
-  const repoUrl = parseUrl(res.body.http_url_to_repo);
-  // should never happen, but bad tests are causing that
-  if (!repoUrl) {
-    return '';
-  }
+  const repoUrl = parseUrl(res.body.http_url_to_repo)!;
   repoUrl.username = 'oauth2';
   repoUrl.password = opts.token!;
   return repoUrl.toString();

@@ -1,6 +1,6 @@
 import { z } from 'zod/v4';
 import { LongCommitSha } from '../../../util/schema-utils/git.ts';
-import { LooseArray } from '../../../util/schema-utils/index.ts';
+import { DeepNullish, LooseArray } from '../../../util/schema-utils/index.ts';
 
 export const LastPipelineId = z
   .object({
@@ -16,29 +16,31 @@ export const GitlabUser = z.object({
 });
 export type GitlabUser = z.infer<typeof GitlabUser>;
 
-export const GitLabMergeRequest = z.object({
-  iid: z.number(),
-  title: z.string(),
-  description: z.string().nullable(),
-  state: z.string(),
-  source_branch: z.string(),
-  target_branch: z.string(),
-  created_at: z.string(),
-  updated_at: z.string(),
-  diverged_commits_count: z.number().optional(),
-  merge_status: z.string().optional(),
-  assignee: GitlabUser.nullish(),
-  assignees: LooseArray(GitlabUser).default([]),
-  reviewers: LooseArray(GitlabUser).default([]),
-  labels: z.array(z.string()).default([]),
-  sha: LongCommitSha.nullish(),
-  head_pipeline: z
-    .object({
-      status: z.string(),
-      sha: LongCommitSha,
-    })
-    .nullish(),
-});
+export const GitLabMergeRequest = DeepNullish(
+  z.object({
+    iid: z.number(),
+    title: z.string(),
+    description: z.string().optional(),
+    state: z.string(),
+    source_branch: z.string(),
+    target_branch: z.string(),
+    created_at: z.string(),
+    updated_at: z.string(),
+    diverged_commits_count: z.number().optional(),
+    merge_status: z.string().optional(),
+    assignee: GitlabUser.optional(),
+    assignees: LooseArray(GitlabUser).default([]),
+    reviewers: LooseArray(GitlabUser).default([]),
+    labels: z.array(z.string()).default([]),
+    sha: LongCommitSha.optional(),
+    head_pipeline: z
+      .object({
+        status: z.string(),
+        sha: LongCommitSha,
+      })
+      .optional(),
+  }),
+);
 
 export const GitLabMergeRequests = z.array(GitLabMergeRequest);
 export type GitLabMergeRequest = z.infer<typeof GitLabMergeRequest>;
@@ -55,22 +57,24 @@ export type GitlabUserStatus = z.infer<typeof GitlabUserStatus>;
 export const MergeMethod = z.enum(['merge', 'rebase_merge', 'ff']);
 export type MergeMethod = z.infer<typeof MergeMethod>;
 
-export const RepoResponse = z.object({
-  id: z.number().optional(),
-  archived: z.boolean().optional(),
-  mirror: z.boolean().optional(),
-  default_branch: z.string().nullable().optional(),
-  empty_repo: z.boolean().optional(),
-  ssh_url_to_repo: z.string().nullable().optional(),
-  http_url_to_repo: z.string().nullable().optional(),
-  forked_from_project: z.boolean().optional(),
-  repository_access_level: z.string().optional(),
-  merge_requests_access_level: z.string().optional(),
-  merge_method: MergeMethod.catch('merge'),
-  merge_trains_enabled: z.boolean().optional(),
-  path_with_namespace: z.string().optional(),
-  squash_option: z.string().optional(),
-});
+export const RepoResponse = DeepNullish(
+  z.object({
+    id: z.number().optional(),
+    archived: z.boolean().optional(),
+    mirror: z.boolean().optional(),
+    default_branch: z.string().optional(),
+    empty_repo: z.boolean().optional(),
+    ssh_url_to_repo: z.string().optional(),
+    http_url_to_repo: z.string().optional(),
+    forked_from_project: z.boolean().optional(),
+    repository_access_level: z.string().optional(),
+    merge_requests_access_level: z.string().optional(),
+    merge_method: MergeMethod.catch('merge'),
+    merge_trains_enabled: z.boolean().optional(),
+    path_with_namespace: z.string().optional(),
+    squash_option: z.string().optional(),
+  }),
+);
 export type RepoResponse = z.infer<typeof RepoResponse>;
 
 export const GitlabComment = z.object({
@@ -108,8 +112,8 @@ export type GitlabApprovalRule = z.infer<typeof GitlabApprovalRule>;
 
 export const GitlabApprovalRules = z.array(GitlabApprovalRule);
 
-export const GitlabMergeRequestStatus = z
-  .object({
+export const GitlabMergeRequestStatus = DeepNullish(
+  z.object({
     merge_status: z.string().optional(),
     detailed_merge_status: z.string().optional(),
     merge_when_pipeline_succeeds: z.boolean().optional(),
@@ -117,10 +121,9 @@ export const GitlabMergeRequestStatus = z
       .object({
         status: z.string(),
       })
-      .nullable()
       .optional(),
-  })
-  .catch({});
+  }),
+).catch({});
 export type GitlabMergeRequestStatus = z.infer<typeof GitlabMergeRequestStatus>;
 
 export const GitlabUserInfo = z.object({
