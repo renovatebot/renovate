@@ -2,6 +2,7 @@ import { z } from 'zod/v4';
 import {
   LooseArray,
   LooseRecord,
+  Nullish,
   Toml,
 } from '../../../util/schema-utils/index.ts';
 import { pep508ToPackageDependency } from '../pep621/utils.ts';
@@ -65,8 +66,8 @@ const ToxEnvRecord = LooseRecord(
 
 export const ToxConfig = z.object({
   requires: LooseArray(Pep508Dep('requires')).catch([]),
-  env_run_base: ToxEnvConfig.optional().catch(undefined),
-  env: ToxEnvRecord.optional().catch(undefined),
+  env_run_base: Nullish(ToxEnvConfig),
+  env: Nullish(ToxEnvRecord),
 });
 export type ToxConfig = z.infer<typeof ToxConfig>;
 
