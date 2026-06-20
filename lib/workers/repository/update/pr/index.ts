@@ -442,7 +442,9 @@ export async function ensurePr(
 
       if (
         !existingPr.hasAssignees &&
-        !hasNotIgnoredReviewers(existingPr, config)
+        !hasNotIgnoredReviewers(existingPr, config) &&
+        config.automerge &&
+        !config.assignAutomerge
       ) {
         await maybeAddAssignees(config, existingPr, await getBranchStatus());
         await maybeAddReviewers(config, existingPr, await getBranchStatus());

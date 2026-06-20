@@ -914,7 +914,7 @@ describe('workers/repository/update/pr/index', () => {
         expect(participants.addReviewers).toHaveBeenCalled();
       });
 
-      it('applies the same independent gating for an existing PR', async () => {
+      it('does nothing for an existing PR without automerge', async () => {
         const changedPr: Pr = { ...pr, hasAssignees: false };
         platform.getBranchPr.mockResolvedValueOnce(changedPr);
         checks.resolveBranchStatus.mockResolvedValueOnce('red');
@@ -923,6 +923,25 @@ describe('workers/repository/update/pr/index', () => {
           ...config,
           assigneesOnChecks: 'red',
           reviewersOnChecks: 'green',
+        });
+
+        expect(res).toEqual({ type: 'with-pr', pr: changedPr });
+        expect(participants.addAssignees).not.toHaveBeenCalled();
+        expect(participants.addReviewers).not.toHaveBeenCalled();
+      });
+
+      it('assigns participants accordingly to an existing PR with automerge', async () => {
+        const changedPr: Pr = { ...pr, hasAssignees: false };
+        platform.getBranchPr.mockResolvedValueOnce(changedPr);
+        checks.resolveBranchStatus.mockResolvedValueOnce('red');
+
+        const res = await ensurePr({
+          ...config,
+          assigneesOnChecks: 'red',
+          reviewersOnChecks: 'green',
+          automerge: true,
+          automergeType: 'pr',
+          assignAutomerge: false,
         });
 
         expect(res).toEqual({ type: 'with-pr', pr: changedPr });
