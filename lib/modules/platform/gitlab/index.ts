@@ -355,7 +355,7 @@ export async function initRepo({
   const repoConfig: RepoResult = {
     defaultBranch: config.defaultBranch,
     isFork: !!res.body.forked_from_project,
-    repoFingerprint: repoFingerprint(res.body.id ?? 0, defaults.endpoint),
+    repoFingerprint: repoFingerprint(res.body.id, defaults.endpoint),
   };
   return repoConfig;
 }

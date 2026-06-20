@@ -72,7 +72,7 @@ export type MergeMethod = z.infer<typeof MergeMethod>;
 
 export const RepoResponse = DeepNullish(
   z.object({
-    id: z.number().optional(),
+    id: z.number(),
     archived: z.boolean().optional(),
     mirror: z.boolean().optional(),
     default_branch: z.string().optional(),

@@ -188,12 +188,15 @@ describe('modules/platform/gitlab/index', () => {
         )
         .reply(200, [
           {
+            id: 1,
             path_with_namespace: 'a/b',
           },
           {
+            id: 1,
             path_with_namespace: 'c/d',
           },
           {
+            id: 1,
             path_with_namespace: 'c/f',
             mirror: true,
           },
@@ -210,12 +213,15 @@ describe('modules/platform/gitlab/index', () => {
         )
         .reply(200, [
           {
+            id: 1,
             path_with_namespace: 'a/b',
           },
           {
+            id: 1,
             path_with_namespace: 'c/d',
           },
           {
+            id: 1,
             path_with_namespace: 'c/f',
             mirror: true,
           },
@@ -232,9 +238,11 @@ describe('modules/platform/gitlab/index', () => {
         )
         .reply(200, [
           {
+            id: 1,
             path_with_namespace: 'a/b',
           },
           {
+            id: 1,
             path_with_namespace: 'c/d',
           },
         ]);
@@ -250,6 +258,7 @@ describe('modules/platform/gitlab/index', () => {
         )
         .reply(200, [
           {
+            id: 1,
             path_with_namespace: 'a/b',
           },
         ])
@@ -258,9 +267,11 @@ describe('modules/platform/gitlab/index', () => {
         )
         .reply(200, [
           {
+            id: 1,
             path_with_namespace: 'c/d/e',
           },
           {
+            id: 1,
             path_with_namespace: 'c/d/f',
           },
         ]);
@@ -276,9 +287,11 @@ describe('modules/platform/gitlab/index', () => {
         )
         .reply(200, [
           {
+            id: 1,
             path_with_namespace: 'a/b',
           },
           {
+            id: 1,
             path_with_namespace: 'a/c',
           },
         ]);
@@ -297,9 +310,11 @@ describe('modules/platform/gitlab/index', () => {
         )
         .reply(200, [
           {
+            id: 1,
             path_with_namespace: 'a/b',
           },
           {
+            id: 1,
             path_with_namespace: 'a/c',
           },
         ]);
@@ -323,6 +338,7 @@ describe('modules/platform/gitlab/index', () => {
     scope.get(`/api/v4/projects/${encodeURIComponent(repo)}`).reply(
       200,
       repoResp ?? {
+        id: 1,
         default_branch: 'master',
         http_url_to_repo: `https://gitlab.com/${justRepo}.git`,
       },
@@ -332,7 +348,11 @@ describe('modules/platform/gitlab/index', () => {
   }
 
   describe('initRepo', () => {
-    const okReturn = { default_branch: 'master', url: 'https://some-url' };
+    const okReturn = {
+      id: 1,
+      default_branch: 'master',
+      url: 'https://some-url',
+    };
 
     it(`should escape all forward slashes in project names`, async () => {
       httpMock
@@ -366,7 +386,7 @@ describe('modules/platform/gitlab/index', () => {
       httpMock
         .scope(gitlabApiHost)
         .get('/api/v4/projects/some%2Frepo')
-        .reply(200, { archived: true });
+        .reply(200, { id: 1, archived: true });
       await expect(
         gitlab.initRepo({
           repository: 'some/repo',
@@ -378,7 +398,7 @@ describe('modules/platform/gitlab/index', () => {
       httpMock
         .scope(gitlabApiHost)
         .get('/api/v4/projects/some%2Frepo')
-        .reply(200, { mirror: true });
+        .reply(200, { id: 1, mirror: true });
       await expect(
         gitlab.initRepo({
           repository: 'some/repo',
@@ -391,6 +411,7 @@ describe('modules/platform/gitlab/index', () => {
         .scope(gitlabApiHost)
         .get('/api/v4/projects/some%2Frepo')
         .reply(200, {
+          id: 1,
           default_branch: 'master',
           mirror: true,
         });
@@ -410,7 +431,7 @@ describe('modules/platform/gitlab/index', () => {
       httpMock
         .scope(gitlabApiHost)
         .get('/api/v4/projects/some%2Frepo')
-        .reply(200, { repository_access_level: 'disabled' });
+        .reply(200, { id: 1, repository_access_level: 'disabled' });
       await expect(
         gitlab.initRepo({
           repository: 'some/repo',
@@ -422,7 +443,7 @@ describe('modules/platform/gitlab/index', () => {
       httpMock
         .scope(gitlabApiHost)
         .get('/api/v4/projects/some%2Frepo')
-        .reply(200, { merge_requests_access_level: 'disabled' });
+        .reply(200, { id: 1, merge_requests_access_level: 'disabled' });
       await expect(
         gitlab.initRepo({
           repository: 'some/repo',
@@ -434,7 +455,7 @@ describe('modules/platform/gitlab/index', () => {
       httpMock
         .scope(gitlabApiHost)
         .get('/api/v4/projects/some%2Frepo')
-        .reply(200, { empty_repo: true });
+        .reply(200, { id: 1, empty_repo: true });
       await expect(
         gitlab.initRepo({
           repository: 'some/repo',
@@ -446,7 +467,7 @@ describe('modules/platform/gitlab/index', () => {
       httpMock
         .scope(gitlabApiHost)
         .get('/api/v4/projects/some%2Frepo')
-        .reply(200, { default_branch: null });
+        .reply(200, { id: 1, default_branch: null });
       await expect(
         gitlab.initRepo({
           repository: 'some/repo',
@@ -459,6 +480,7 @@ describe('modules/platform/gitlab/index', () => {
         .scope(gitlabApiHost)
         .get('/api/v4/projects/some%2Frepo%2Fproject')
         .reply(200, {
+          id: 1,
           default_branch: 'master',
           http_url_to_repo: null,
         });
@@ -478,6 +500,7 @@ describe('modules/platform/gitlab/index', () => {
         .scope(gitlabApiHost)
         .get('/api/v4/projects/some%2Frepo%2Fproject')
         .reply(200, {
+          id: 1,
           default_branch: 'master',
           http_url_to_repo: `https://gitlab.com/some%2Frepo%2Fproject.git`,
           ssh_url_to_repo: `ssh://git@gitlab.com/some%2Frepo%2Fproject.git`,
@@ -495,6 +518,7 @@ describe('modules/platform/gitlab/index', () => {
         .scope(gitlabApiHost)
         .get('/api/v4/projects/some%2Frepo%2Fproject')
         .reply(200, {
+          id: 1,
           default_branch: 'master',
           http_url_to_repo: `https://gitlab.com/some%2Frepo%2Fproject.git`,
         });
@@ -530,6 +554,7 @@ describe('modules/platform/gitlab/index', () => {
         .scope(selfHostedUrl)
         .get('/api/v4/projects/some%2Frepo%2Fproject')
         .reply(200, {
+          id: 1,
           default_branch: 'master',
           http_url_to_repo: `http://other.host.com/gitlab/some/repo/project.git`,
         });
@@ -547,6 +572,7 @@ describe('modules/platform/gitlab/index', () => {
           repository: 'some/repo/project',
         },
         {
+          id: 1,
           default_branch: 'master',
           http_url_to_repo: null,
           merge_method: 'merge',
@@ -561,6 +587,7 @@ describe('modules/platform/gitlab/index', () => {
           repository: 'some/repo/project',
         },
         {
+          id: 1,
           default_branch: 'master',
           http_url_to_repo: null,
           merge_method: 'ff',
@@ -575,6 +602,7 @@ describe('modules/platform/gitlab/index', () => {
           repository: 'some/repo/project',
         },
         {
+          id: 1,
           default_branch: 'master',
           http_url_to_repo: null,
           merge_method: 'ff',
@@ -2549,6 +2577,7 @@ describe('modules/platform/gitlab/index', () => {
       const scope = await initRepo(
         { repository: 'some/repo' },
         {
+          id: 1,
           default_branch: 'master',
           http_url_to_repo: `https://gitlab.com/some/repo.git`,
           merge_trains_enabled: true,
@@ -2605,6 +2634,7 @@ describe('modules/platform/gitlab/index', () => {
       const scope = await initRepo(
         { repository: 'some/repo' },
         {
+          id: 1,
           default_branch: 'master',
           http_url_to_repo: `https://gitlab.com/some/repo.git`,
           merge_trains_enabled: true,
@@ -2662,6 +2692,7 @@ describe('modules/platform/gitlab/index', () => {
       const scope = await initRepo(
         { repository: 'some/repo' },
         {
+          id: 1,
           default_branch: 'master',
           http_url_to_repo: `https://gitlab.com/some/repo.git`,
           merge_trains_enabled: true,
@@ -2984,6 +3015,7 @@ describe('modules/platform/gitlab/index', () => {
         .reply(200, [])
         .get('/api/v4/projects/some%2Frepo')
         .reply(200, {
+          id: 1,
           squash_option: 'default_on',
           default_branch: 'master',
           url: 'https://some-url',
@@ -3030,6 +3062,7 @@ describe('modules/platform/gitlab/index', () => {
         .reply(200, [])
         .get('/api/v4/projects/some%2Frepo')
         .reply(200, {
+          id: 1,
           squash_option: 'always',
           default_branch: 'master',
           url: 'https://some-url',
