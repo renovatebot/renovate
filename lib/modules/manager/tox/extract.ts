@@ -1,5 +1,4 @@
 import { logger } from '../../../logger/index.ts';
-import { Result } from '../../../util/result.ts';
 import type { PackageFileContent } from '../types.ts';
 import type { ToxConfig } from './schema.ts';
 import { ToxFile, ToxPyProject } from './schema.ts';
@@ -23,12 +22,15 @@ function extractToxConfig(
     return result.data.tool.tox;
   }
 
-  const { val, err } = Result.parse(content, ToxFile).unwrap();
-  if (err) {
-    logger.debug({ packageFile, err }, `error parsing ${packageFile}`);
+  const result = ToxFile.safeParse(content);
+  if (!result.success) {
+    logger.debug(
+      { packageFile, error: result.error },
+      `error parsing ${packageFile}`,
+    );
     return null;
   }
-  return val;
+  return result.data;
 }
 
 export function extractPackageFile(
