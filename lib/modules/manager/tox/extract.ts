@@ -12,12 +12,15 @@ function extractToxConfig(
     packageFile === 'pyproject.toml' ||
     packageFile.endsWith('/pyproject.toml')
   ) {
-    const { val, err } = Result.parse(content, ToxPyProject).unwrap();
-    if (err) {
-      logger.debug({ packageFile, err }, `error parsing ${packageFile}`);
+    const result = ToxPyProject.safeParse(content);
+    if (!result.success) {
+      logger.debug(
+        { packageFile, error: result.error },
+        `error parsing ${packageFile}`,
+      );
       return null;
     }
-    return val?.tool?.tox ?? null;
+    return result.data.tool.tox;
   }
 
   const { val, err } = Result.parse(content, ToxFile).unwrap();
