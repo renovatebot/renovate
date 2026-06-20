@@ -6,6 +6,9 @@ export const GitlabCommit = z.object({
 });
 export type GitlabCommit = z.infer<typeof GitlabCommit>;
 
+export const GitlabCommits = z.array(GitlabCommit);
+export type GitlabCommits = z.infer<typeof GitlabCommits>;
+
 export const GitlabTag = z.object({
   name: z.string(),
   commit: z
