@@ -26,6 +26,7 @@ function getAuthenticationHandler(config: HostRule): IRequestHandler {
     return getBearerHandler(config.token, true);
   }
   logger.debug('Using PAT authentication');
+  // TODO: token can be undefined here (#22198)
   return getPersonalAccessTokenHandler(config.token!, true);
 }
 
