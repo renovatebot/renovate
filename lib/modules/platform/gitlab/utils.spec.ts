@@ -14,8 +14,6 @@ function makeRes(
       mirror: false,
       default_branch: 'main',
       empty_repo: false,
-      ssh_url_to_repo: null,
-      http_url_to_repo: null,
       forked_from_project: false,
       repository_access_level: 'enabled',
       merge_requests_access_level: 'enabled',
@@ -50,7 +48,7 @@ describe('modules/platform/gitlab/utils', () => {
         getRepoUrl(
           'group/repo',
           undefined,
-          makeRes({ http_url_to_repo: null }),
+          makeRes({ http_url_to_repo: undefined }),
         ),
       ).toThrow('Invalid GitLab endpoint: not-a-valid-url');
     });
