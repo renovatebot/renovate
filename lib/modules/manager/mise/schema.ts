@@ -1,5 +1,5 @@
 import { z } from 'zod/v4';
-import { Nullish, Toml } from '../../../util/schema-utils/index.ts';
+import { Toml } from '../../../util/schema-utils/index.ts';
 
 export const MiseRegistryJson = z.object({
   meta: z.object({
@@ -10,9 +10,9 @@ export const MiseRegistryJson = z.object({
 
 const MiseToolOptions = z.object({
   // ubi backend only
-  tag_regex: Nullish(z.string()),
+  tag_regex: z.string().optional(),
   // github and gitlab backends
-  version_prefix: Nullish(z.string()),
+  version_prefix: z.string().optional(),
 });
 export type MiseToolOptions = z.infer<typeof MiseToolOptions>;
 
