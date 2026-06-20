@@ -136,11 +136,11 @@ describe('modules/manager/tox/extract', () => {
       `;
       const res = extractPackageFile(content, 'tox.toml');
       expect(res?.deps[0]).toMatchObject({
-          depName: 'pytest',
-          packageName: 'pytest',
-          currentValue: '>=7.2',
-          datasource: 'pypi',
-          depType: 'env_run_base',
+        depName: 'pytest',
+        packageName: 'pytest',
+        currentValue: '>=7.2',
+        datasource: 'pypi',
+        depType: 'env_run_base',
       });
     });
 
@@ -155,11 +155,11 @@ describe('modules/manager/tox/extract', () => {
       `;
       const res = extractPackageFile(content, 'tox.toml');
       expect(res?.deps[0]).toMatchObject({
-          depName: 'sphinx',
-          packageName: 'sphinx',
-          currentValue: '>=7',
-          datasource: 'pypi',
-          depType: 'env.docs',
+        depName: 'sphinx',
+        packageName: 'sphinx',
+        currentValue: '>=7',
+        datasource: 'pypi',
+        depType: 'env.docs',
       });
     });
 
