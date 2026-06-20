@@ -16,6 +16,9 @@ export const GitlabUser = z.object({
 });
 export type GitlabUser = z.infer<typeof GitlabUser>;
 
+export const GitlabUsers = z.array(GitlabUser);
+export type GitlabUsers = z.infer<typeof GitlabUsers>;
+
 export const GitLabMergeRequest = DeepNullish(
   z.object({
     iid: z.number(),

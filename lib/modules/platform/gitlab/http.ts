@@ -1,17 +1,13 @@
 import { isEmptyArray } from '@sindresorhus/is';
 import { logger } from '../../../logger/index.ts';
 import { GitlabHttp } from '../../../util/http/gitlab.ts';
-import { LooseArray } from '../../../util/schema-utils/index.ts';
-import { GitlabUser, GitlabUserStatus } from './schema.ts';
+import { GitlabUserStatus, GitlabUsers } from './schema.ts';
 
 export const gitlabApi = new GitlabHttp();
 
 export async function getUserID(username: string): Promise<number> {
   const userInfo = (
-    await gitlabApi.getJson(
-      `users?username=${username}`,
-      LooseArray(GitlabUser).catch([]),
-    )
+    await gitlabApi.getJson(`users?username=${username}`, GitlabUsers)
   ).body;
 
   if (isEmptyArray(userInfo)) {
@@ -23,15 +19,10 @@ export async function getUserID(username: string): Promise<number> {
   return userInfo[0].id;
 }
 
-async function getMembers(
-  group: string,
-): Promise<{ id: number; username: string }[]> {
+async function getMembers(group: string): Promise<GitlabUsers> {
   const groupEncoded = encodeURIComponent(group);
   return (
-    await gitlabApi.getJson(
-      `groups/${groupEncoded}/members`,
-      LooseArray(GitlabUser).catch([]),
-    )
+    await gitlabApi.getJson(`groups/${groupEncoded}/members`, GitlabUsers)
   ).body;
 }
 

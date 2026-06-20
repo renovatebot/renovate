@@ -6,7 +6,6 @@ import {
   resetCache as repoCacheReset,
 } from '../../../util/cache/repository/index.ts';
 import { ForgejoHttp, setBaseUrl } from '../../../util/http/forgejo.ts';
-import type { LongCommitSha } from '../../../util/schema-utils/git.ts';
 import { ForgejoPrCache } from './pr-cache.ts';
 import type { PR, Repo } from './schema.ts';
 import { toRenovatePR } from './utils.ts';
