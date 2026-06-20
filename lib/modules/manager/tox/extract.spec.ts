@@ -106,8 +106,24 @@ describe('modules/manager/tox/extract', () => {
         ]
       `;
       const res = extractPackageFile(content, 'tox.toml');
-      expect(res?.deps).toHaveLength(2);
-      expect(res?.deps.map((d) => d.depName)).toEqual(['pytest', 'coverage']);
+      expect(res).toMatchObject({
+        deps: [
+          {
+            depName: 'pytest',
+            packageName: 'pytest',
+            currentValue: '>=7.2',
+            datasource: 'pypi',
+            depType: 'env_run_base',
+          },
+          {
+            depName: 'coverage',
+            packageName: 'coverage',
+            currentValue: '>=7',
+            datasource: 'pypi',
+            depType: 'env_run_base',
+          },
+        ],
+      });
     });
 
     it('skips invalid dependencies', () => {
@@ -119,8 +135,13 @@ describe('modules/manager/tox/extract', () => {
         ]
       `;
       const res = extractPackageFile(content, 'tox.toml');
-      expect(res?.deps).toHaveLength(1);
-      expect(res?.deps.map((d) => d.depName)).toEqual(['pytest']);
+      expect(res?.deps[0]).toMatchObject({
+          depName: 'pytest',
+          packageName: 'pytest',
+          currentValue: '>=7.2',
+          datasource: 'pypi',
+          depType: 'env_run_base',
+      });
     });
 
     it('skips invalid dependencies inside [env.<env-name>]', () => {
@@ -133,8 +154,13 @@ describe('modules/manager/tox/extract', () => {
         ]
       `;
       const res = extractPackageFile(content, 'tox.toml');
-      expect(res?.deps).toHaveLength(1);
-      expect(res?.deps.map((d) => d.depName)).toEqual(['sphinx']);
+      expect(res?.deps[0]).toMatchObject({
+          depName: 'sphinx',
+          packageName: 'sphinx',
+          currentValue: '>=7',
+          datasource: 'pypi',
+          depType: 'env.docs',
+      });
     });
 
     it('extracts all sections from tox.toml', () => {
