@@ -74,7 +74,7 @@ export const RepoResponse = z.object({
 export type RepoResponse = z.infer<typeof RepoResponse>;
 
 export const GitlabComment = z.object({
-  body: z.string().optional().default(''),
+  body: z.string(),
   id: z.number(),
 });
 export type GitlabComment = z.infer<typeof GitlabComment>;
@@ -84,15 +84,15 @@ export const GitlabComments = z.array(GitlabComment);
 export const GitlabIssue = z.object({
   iid: z.number(),
   labels: z.array(z.string()).optional(),
-  title: z.string().optional().default(''),
+  title: z.string(),
 });
 export type GitlabIssue = z.infer<typeof GitlabIssue>;
 
 export const GitlabIssues = z.array(GitlabIssue);
 
 export const GitlabBranchStatus = z.object({
-  status: z.string().optional().default(''),
-  name: z.string().optional().default(''),
+  status: z.string(),
+  name: z.string(),
   allow_failure: z.boolean().optional(),
 });
 export type GitlabBranchStatus = z.infer<typeof GitlabBranchStatus>;
@@ -100,8 +100,8 @@ export type GitlabBranchStatus = z.infer<typeof GitlabBranchStatus>;
 export const GitlabBranchStatuses = z.array(GitlabBranchStatus);
 
 export const GitlabApprovalRule = z.object({
-  name: z.string().optional().default(''),
-  rule_type: z.string().optional().default(''),
+  name: z.string(),
+  rule_type: z.string(),
   id: z.number(),
 });
 export type GitlabApprovalRule = z.infer<typeof GitlabApprovalRule>;

@@ -773,8 +773,8 @@ describe('modules/platform/gitlab/index', () => {
           '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses',
         )
         .reply(200, [
-          { context: 'renovate/stability-days', status: 'success' },
-          { context: 'renovate/other', status: 'success' },
+          { name: 'renovate/stability-days', status: 'success' },
+          { name: 'renovate/other', status: 'success' },
         ])
         .get(
           '/api/v4/projects/some%2Frepo/merge_requests?per_page=100&order_by=updated_at&sort=desc&scope=created_by_me',
@@ -961,8 +961,8 @@ describe('modules/platform/gitlab/index', () => {
           '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses',
         )
         .reply(200, [
-          { status: 'success' },
-          { status: 'failed', allow_failure: true },
+          { name: 'check-1', status: 'success' },
+          { name: 'check-2', status: 'failed', allow_failure: true },
         ])
         .get(
           '/api/v4/projects/some%2Frepo/merge_requests?per_page=100&order_by=updated_at&sort=desc&scope=created_by_me',
@@ -978,7 +978,9 @@ describe('modules/platform/gitlab/index', () => {
         .get(
           '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses',
         )
-        .reply(200, [{ status: 'failed', allow_failure: true }])
+        .reply(200, [
+          { name: 'check-1', status: 'failed', allow_failure: true },
+        ])
         .get(
           '/api/v4/projects/some%2Frepo/merge_requests?per_page=100&order_by=updated_at&sort=desc&scope=created_by_me',
         )
@@ -993,7 +995,10 @@ describe('modules/platform/gitlab/index', () => {
         .get(
           '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses',
         )
-        .reply(200, [{ status: 'success' }, { status: 'skipped' }])
+        .reply(200, [
+          { name: 'check-1', status: 'success' },
+          { name: 'check-2', status: 'skipped' },
+        ])
         .get(
           '/api/v4/projects/some%2Frepo/merge_requests?per_page=100&order_by=updated_at&sort=desc&scope=created_by_me',
         )
@@ -1008,7 +1013,7 @@ describe('modules/platform/gitlab/index', () => {
         .get(
           '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses',
         )
-        .reply(200, [{ status: 'skipped' }])
+        .reply(200, [{ name: 'check-1', status: 'skipped' }])
         .get(
           '/api/v4/projects/some%2Frepo/merge_requests?per_page=100&order_by=updated_at&sort=desc&scope=created_by_me',
         )
@@ -1023,7 +1028,10 @@ describe('modules/platform/gitlab/index', () => {
         .get(
           '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses',
         )
-        .reply(200, [{ status: 'skipped' }, { status: 'failed' }])
+        .reply(200, [
+          { name: 'check-1', status: 'skipped' },
+          { name: 'check-2', status: 'failed' },
+        ])
         .get(
           '/api/v4/projects/some%2Frepo/merge_requests?per_page=100&order_by=updated_at&sort=desc&scope=created_by_me',
         )
@@ -1039,9 +1047,9 @@ describe('modules/platform/gitlab/index', () => {
           '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses',
         )
         .reply(200, [
-          { status: 'success' },
-          { status: 'failed', allow_failure: true },
-          { status: 'failed' },
+          { name: 'check-1', status: 'success' },
+          { name: 'check-2', status: 'failed', allow_failure: true },
+          { name: 'check-3', status: 'failed' },
         ])
         .get(
           '/api/v4/projects/some%2Frepo/merge_requests?per_page=100&order_by=updated_at&sort=desc&scope=created_by_me',
@@ -1057,7 +1065,10 @@ describe('modules/platform/gitlab/index', () => {
         .get(
           '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses',
         )
-        .reply(200, [{ status: 'success' }, { status: 'foo' }])
+        .reply(200, [
+          { name: 'check-1', status: 'success' },
+          { name: 'check-2', status: 'foo' },
+        ])
         .get(
           '/api/v4/projects/some%2Frepo/merge_requests?per_page=100&order_by=updated_at&sort=desc&scope=created_by_me',
         )
