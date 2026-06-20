@@ -136,16 +136,18 @@ export async function extractPackageFile(
   const repoPnpmWorkspaceYaml = pnpmWorkspaceYamlFileName
     ? await readLocalFile(pnpmWorkspaceYamlFileName, 'utf8')
     : null;
-  if (
-    isString(repoPnpmWorkspaceYaml) &&
-    repoPnpmWorkspaceYaml.trim().length > 0
-  ) {
+  if (isNonEmptyStringAndNotWhitespace(repoPnpmWorkspaceYaml)) {
     const parsed = await PnpmWorkspaceFile.safeParseAsync(
       repoPnpmWorkspaceYaml,
     );
     if (parsed.success) {
       pnpmWorkspaceRegistry = parsed.data.registry;
       pnpmWorkspaceRegistries = parsed.data.registries;
+    } else {
+      logger.debug(
+        { packageFile: pnpmWorkspaceYamlFileName, err: parsed.error },
+        'Failed to parse pnpm-workspace.yaml',
+      );
     }
   }
 
