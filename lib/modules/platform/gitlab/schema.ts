@@ -13,6 +13,9 @@ export const LastPipelineId = z
 export const GitlabUser = z.object({
   id: z.number(),
   username: z.string(),
+  name: z.string().optional(),
+  email: z.string().optional(),
+  commit_email: z.string().optional(),
 });
 export type GitlabUser = z.infer<typeof GitlabUser>;
 
@@ -121,14 +124,6 @@ export const GitlabApprovalRule = z.object({
 export type GitlabApprovalRule = z.infer<typeof GitlabApprovalRule>;
 
 export const GitlabApprovalRules = z.array(GitlabApprovalRule);
-
-export const GitlabUserInfo = z.object({
-  email: z.string().optional(),
-  name: z.string().optional(),
-  id: z.number().optional(),
-  commit_email: z.string().optional(),
-});
-export type GitlabUserInfo = z.infer<typeof GitlabUserInfo>;
 
 export const GitlabVersion = z.object({
   version: z.string(),

@@ -73,7 +73,7 @@ import {
   GitlabIssueBody,
   GitlabIssues,
   GitlabRawFile,
-  GitlabUserInfo,
+  GitlabUser,
   GitlabVersion,
   LastPipelineId,
   RepoResponse,
@@ -139,7 +139,7 @@ export async function initPlatform({
   let gitlabVersion: string;
   try {
     if (!gitAuthor) {
-      const user = (await gitlabApi.getJson(`user`, { token }, GitlabUserInfo))
+      const user = (await gitlabApi.getJson(`user`, { token }, GitlabUser))
         .body;
       platformConfig.gitAuthor = `${user.name} <${
         user.commit_email ?? user.email

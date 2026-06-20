@@ -74,6 +74,8 @@ describe('modules/platform/gitlab/index', () => {
       .scope(gitlabApiHost)
       .get('/api/v4/user')
       .reply(200, {
+        id: 1,
+        username: 'renovate-bot',
         email: 'a@b.com',
         name: 'Renovate Bot',
       })
@@ -114,6 +116,8 @@ describe('modules/platform/gitlab/index', () => {
 
     it('should default to gitlab.com', async () => {
       httpMock.scope(gitlabApiHost).get('/api/v4/user').reply(200, {
+        id: 1,
+        username: 'renovate-bot',
         email: 'a@b.com',
         name: 'Renovate Bot',
       });
@@ -134,6 +138,8 @@ describe('modules/platform/gitlab/index', () => {
         .scope(endpoint)
         .get('/user')
         .reply(200, {
+          id: 1,
+          username: 'renovate-bot',
           email: 'a@b.com',
           name: 'Renovate Bot',
         })
@@ -507,6 +513,8 @@ describe('modules/platform/gitlab/index', () => {
         .scope(selfHostedUrl)
         .get('/api/v4/user')
         .reply(200, {
+          id: 1,
+          username: 'renovate-bot',
           email: 'a@b.com',
           name: 'Renovate Bot',
         })
@@ -2329,6 +2337,8 @@ describe('modules/platform/gitlab/index', () => {
       .scope(gitlabApiHost)
       .get('/api/v4/user')
       .reply(200, {
+        id: 1,
+        username: 'renovate-bot',
         email: 'a@b.com',
         name: 'Renovate Bot',
       })
