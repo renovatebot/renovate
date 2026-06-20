@@ -1531,7 +1531,7 @@ describe('modules/platform/gitlab/index', () => {
           },
         ])
         .get('/api/v4/projects/undefined/issues/2')
-        .reply(200, { description: 'new-content' });
+        .reply(200, { iid: 2, title: 'title-2', description: 'new-content' });
       const res = await gitlab.findIssue('title-2');
       expect(res).not.toBeNull();
     });
@@ -1597,7 +1597,7 @@ describe('modules/platform/gitlab/index', () => {
           },
         ])
         .get('/api/v4/projects/undefined/issues/2')
-        .reply(200, { description: 'new-content' })
+        .reply(200, { iid: 2, title: 'title-2', description: 'new-content' })
         .put('/api/v4/projects/undefined/issues/2')
         .reply(200);
       const res = await gitlab.ensureIssue({
@@ -1624,7 +1624,7 @@ describe('modules/platform/gitlab/index', () => {
           },
         ])
         .get('/api/v4/projects/undefined/issues/2')
-        .reply(200, { description: 'new-content' })
+        .reply(200, { iid: 2, title: 'title-2', description: 'new-content' })
         .put('/api/v4/projects/undefined/issues/2')
         .reply(200);
       const res = await gitlab.ensureIssue({
@@ -1652,7 +1652,7 @@ describe('modules/platform/gitlab/index', () => {
           },
         ])
         .get('/api/v4/projects/undefined/issues/2')
-        .reply(200, { description: 'newer-content' });
+        .reply(200, { iid: 2, title: 'title-2', description: 'newer-content' });
       const res = await gitlab.ensureIssue({
         title: 'title-2',
         body: 'newer-content',
@@ -1703,7 +1703,7 @@ describe('modules/platform/gitlab/index', () => {
           },
         ])
         .get('/api/v4/projects/undefined/issues/2')
-        .reply(200, { description: 'new-content' })
+        .reply(200, { iid: 2, title: 'title-2', description: 'new-content' })
         .put('/api/v4/projects/undefined/issues/2')
         .reply(200);
       const res = await gitlab.ensureIssue({

@@ -63,14 +63,14 @@ import {
 } from './http.ts';
 import { getMR, updateMR } from './merge-request.ts';
 import { GitlabPrCache } from './pr-cache.ts';
-import type { GitlabComment, GitlabIssue, MergeMethod } from './schema.ts';
+import type { GitlabComment, MergeMethod } from './schema.ts';
 import {
   GitLabMergeRequest,
   GitLabMergeRequests,
   GitlabApprovalRules,
   GitlabBranchStatuses,
   GitlabComments,
-  GitlabIssueBody,
+  GitlabIssue,
   GitlabIssues,
   GitlabRawFile,
   GitlabUser,
@@ -1099,7 +1099,7 @@ export async function getIssue(
       await gitlabApi.getJson(
         `projects/${config.repository}/issues/${number}`,
         opts,
-        GitlabIssueBody,
+        GitlabIssue,
       )
     ).body.description;
     return {
@@ -1144,7 +1144,7 @@ export async function ensureIssue({
       const existingDescription = (
         await gitlabApi.getJson(
           `projects/${config.repository}/issues/${issue.iid}`,
-          GitlabIssueBody,
+          GitlabIssue,
         )
       ).body.description;
       if (issue.title !== title || existingDescription !== description) {

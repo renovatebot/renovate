@@ -102,6 +102,7 @@ export const GitlabIssue = z.object({
   iid: z.number(),
   labels: z.array(z.string()).optional(),
   title: z.string(),
+  description: z.string().optional(),
 });
 export type GitlabIssue = z.infer<typeof GitlabIssue>;
 
@@ -134,11 +135,6 @@ export const GitlabRawFile = z.object({
   content: z.string(),
 });
 export type GitlabRawFile = z.infer<typeof GitlabRawFile>;
-
-export const GitlabIssueBody = z.object({
-  description: z.string(),
-});
-export type GitlabIssueBody = z.infer<typeof GitlabIssueBody>;
 
 export const GitlabTreeNode = z.object({
   id: z.string(),
