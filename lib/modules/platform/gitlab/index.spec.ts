@@ -2439,7 +2439,7 @@ describe('modules/platform/gitlab/index', () => {
         })
         .get('/api/v4/projects/some%2Frepo/merge_requests/12345')
         .reply(200, {
-          merge_status: 'can_be_merged',
+          detailed_merge_status: 'can_be_merged',
           pipeline: { status: 'running' },
         })
         .post(
@@ -2491,7 +2491,7 @@ describe('modules/platform/gitlab/index', () => {
         })
         .get('/api/v4/projects/some%2Frepo/merge_requests/12345')
         .reply(200, {
-          merge_status: 'can_be_merged',
+          detailed_merge_status: 'can_be_merged',
           pipeline: { status: 'running' },
         })
         .put('/api/v4/projects/some%2Frepo/merge_requests/12345/merge')
@@ -2544,7 +2544,7 @@ describe('modules/platform/gitlab/index', () => {
         })
         .get('/api/v4/projects/some%2Frepo/merge_requests/12345')
         .reply(200, {
-          merge_status: 'can_be_merged',
+          detailed_merge_status: 'can_be_merged',
           pipeline: { status: 'running' },
         })
         .post('/api/v4/projects/some%2Frepo/merge_trains/merge_requests/12345')
@@ -2921,7 +2921,7 @@ describe('modules/platform/gitlab/index', () => {
         .reply(200)
         .get('/api/v4/projects/undefined/merge_requests/12345')
         .reply(200, {
-          merge_status: 'can_be_merged',
+          detailed_merge_status: 'can_be_merged',
           pipeline: {
             id: 29626725,
             sha: '2be7ddb704c7b6b83732fdd5b9f09d5a397b5f8f',
@@ -3023,7 +3023,7 @@ describe('modules/platform/gitlab/index', () => {
         .reply(200)
         .get('/api/v4/projects/undefined/merge_requests/12345')
         .reply(200, {
-          merge_status: 'can_be_merged',
+          detailed_merge_status: 'can_be_merged',
           pipeline: {
             id: 29626725,
             sha: '2be7ddb704c7b6b83732fdd5b9f09d5a397b5f8f',
@@ -3085,7 +3085,7 @@ describe('modules/platform/gitlab/index', () => {
         .reply(200)
         .get('/api/v4/projects/undefined/merge_requests/12345')
         .reply(200, {
-          merge_status: 'can_be_merged',
+          detailed_merge_status: 'can_be_merged',
           pipeline: {
             id: 29626725,
             sha: '2be7ddb704c7b6b83732fdd5b9f09d5a397b5f8f',
@@ -3158,7 +3158,7 @@ describe('modules/platform/gitlab/index', () => {
         .reply(200)
         .get('/api/v4/projects/undefined/merge_requests/12345')
         .reply(200, {
-          merge_status: 'can_be_merged',
+          detailed_merge_status: 'can_be_merged',
           pipeline: {
             id: 29626725,
             sha: '2be7ddb704c7b6b83732fdd5b9f09d5a397b5f8f',
@@ -3241,7 +3241,7 @@ describe('modules/platform/gitlab/index', () => {
         .reply(200)
         .get('/api/v4/projects/undefined/merge_requests/12345')
         .reply(200, {
-          merge_status: 'can_be_merged',
+          detailed_merge_status: 'can_be_merged',
           pipeline: {
             id: 29626725,
             sha: '2be7ddb704c7b6b83732fdd5b9f09d5a397b5f8f',
@@ -3295,7 +3295,7 @@ describe('modules/platform/gitlab/index', () => {
         .reply(200)
         .get('/api/v4/projects/undefined/merge_requests/12345')
         .reply(200, {
-          merge_status: 'can_be_merged',
+          detailed_merge_status: 'can_be_merged',
           pipeline: {
             id: 29626725,
             sha: '2be7ddb704c7b6b83732fdd5b9f09d5a397b5f8f',
@@ -3452,7 +3452,7 @@ describe('modules/platform/gitlab/index', () => {
           description: 'a merge request',
           state: 'merged',
           created_at: '2025-05-19T12:00:00.000Z',
-          merge_status: 'cannot_be_merged',
+          detailed_merge_status: 'cannot_be_merged',
           diverged_commits_count: 5,
           source_branch: 'some-branch',
           target_branch: 'master',
@@ -3476,7 +3476,7 @@ describe('modules/platform/gitlab/index', () => {
           description: 'a merge request',
           state: 'merged',
           created_at: '2025-05-19T12:00:00.000Z',
-          merge_status: 'cannot_be_merged',
+          detailed_merge_status: 'cannot_be_merged',
           diverged_commits_count: 5,
           source_branch: 'some-branch',
           target_branch: 'master',
@@ -3500,7 +3500,7 @@ describe('modules/platform/gitlab/index', () => {
           description: 'a merge request',
           state: 'merged',
           created_at: '2025-05-19T12:00:00.000Z',
-          merge_status: 'cannot_be_merged',
+          detailed_merge_status: 'cannot_be_merged',
           diverged_commits_count: 5,
           source_branch: 'some-branch',
           target_branch: 'master',
@@ -3549,7 +3549,7 @@ describe('modules/platform/gitlab/index', () => {
           description: 'a merge request',
           state: 'open',
           created_at: '2025-05-19T12:00:00.000Z',
-          merge_status: 'cannot_be_merged',
+          detailed_merge_status: 'cannot_be_merged',
           diverged_commits_count: 2,
           source_branch: 'some-branch',
           target_branch: 'master',
@@ -3576,7 +3576,7 @@ describe('modules/platform/gitlab/index', () => {
           title: 'do something',
           description: 'a merge request',
           state: 'merged',
-          merge_status: 'cannot_be_merged',
+          detailed_merge_status: 'cannot_be_merged',
           diverged_commits_count: 5,
           source_branch: 'some-branch',
           target_branch: 'master',
@@ -3885,7 +3885,7 @@ describe('modules/platform/gitlab/index', () => {
         .reply(200)
         .get('/api/v4/projects/undefined/merge_requests/12345')
         .reply(200, {
-          merge_status: 'can_be_merged',
+          detailed_merge_status: 'can_be_merged',
           pipeline: {
             status: 'running',
           },
@@ -3906,7 +3906,7 @@ describe('modules/platform/gitlab/index', () => {
         .scope(gitlabApiHost)
         .get('/api/v4/projects/undefined/merge_requests/12345')
         .reply(200, {
-          merge_status: 'ci_must_pass',
+          detailed_merge_status: 'ci_must_pass',
           merge_when_pipeline_succeeds: true,
           pipeline: {
             status: 'failed',
@@ -4033,7 +4033,7 @@ These updates have all been created already. To force a retry/rebase of any, cli
           title: 'some change',
           description: 'a merge request',
           state: 'merged',
-          merge_status: 'cannot_be_merged',
+          detailed_merge_status: 'cannot_be_merged',
           diverged_commits_count: 5,
           source_branch: 'some-branch',
           target_branch: 'master',
