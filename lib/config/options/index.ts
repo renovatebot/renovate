@@ -1459,8 +1459,7 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'closedState',
-    description:
-      'The work item state Renovate sets when it closes an issue.',
+    description: 'The work item state Renovate sets when it closes an issue.',
     type: 'string',
     parents: ['azureWorkItem'],
     supportedPlatforms: ['azure'],
