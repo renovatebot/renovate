@@ -14,7 +14,6 @@ function makeRes(
       mirror: false,
       default_branch: 'main',
       empty_repo: false,
-      forked_from_project: false,
       repository_access_level: 'enabled',
       merge_requests_access_level: 'enabled',
       merge_method: 'merge',

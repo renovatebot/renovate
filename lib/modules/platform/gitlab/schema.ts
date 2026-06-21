@@ -79,7 +79,11 @@ export const GitlabProject = DeepNullish(
     empty_repo: z.boolean().optional(),
     ssh_url_to_repo: z.string().optional(),
     http_url_to_repo: z.httpUrl().optional(),
-    forked_from_project: z.boolean().optional(),
+    forked_from_project: z
+      .object({
+        id: z.number(),
+      })
+      .optional(),
     repository_access_level: z.string().optional(),
     merge_requests_access_level: z.string().optional(),
     merge_method: MergeMethod.catch('merge'),
