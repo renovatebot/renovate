@@ -72,11 +72,11 @@ import {
   GitlabComments,
   GitlabIssue,
   GitlabIssues,
+  GitlabProject,
   GitlabRawFile,
   GitlabUser,
   GitlabVersion,
   LastPipelineId,
-  RepoResponse,
 } from './schema.ts';
 import type { GitlabPr } from './types.ts';
 import {
@@ -214,7 +214,7 @@ export async function getRepos(config?: AutodiscoverConfig): Promise<string[]> {
       await pMap(
         urls,
         (url) =>
-          gitlabApi.getJson(url, { paginate: true }, RepoResponse.array()),
+          gitlabApi.getJson(url, { paginate: true }, GitlabProject.array()),
         {
           concurrency: 2,
         },
@@ -278,11 +278,11 @@ export async function initRepo({
   config.cloneSubmodulesFilter = cloneSubmodulesFilter;
   config.ignorePrAuthor = GlobalConfig.get('ignorePrAuthor');
 
-  let res: HttpResponse<RepoResponse>;
+  let res: HttpResponse<GitlabProject>;
   try {
     res = await gitlabApi.getJson(
       `projects/${config.repository}`,
-      RepoResponse,
+      GitlabProject,
     );
     if (res.body.archived) {
       logger.debug(

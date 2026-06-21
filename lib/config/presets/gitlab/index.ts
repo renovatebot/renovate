@@ -1,6 +1,6 @@
 import { isNonEmptyString } from '@sindresorhus/is';
 import { logger } from '../../../logger/index.ts';
-import { RepoResponse } from '../../../modules/platform/gitlab/schema.ts';
+import { GitlabProject } from '../../../modules/platform/gitlab/schema.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
 import type { Nullish } from '../../../types/index.ts';
 import { GitlabHttp } from '../../../util/http/gitlab.ts';
@@ -17,7 +17,7 @@ async function getDefaultBranchName(
 ): Promise<string> {
   const res = await gitlabApi.getJson(
     `${endpoint}projects/${urlEncodedPkgName}`,
-    RepoResponse,
+    GitlabProject,
   );
   return res.body.default_branch ?? 'master'; // should never happen, but we keep this to ensure the current behavior
 }

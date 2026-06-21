@@ -70,7 +70,7 @@ export type GitlabUserStatus = z.infer<typeof GitlabUserStatus>;
 export const MergeMethod = z.enum(['merge', 'rebase_merge', 'ff']);
 export type MergeMethod = z.infer<typeof MergeMethod>;
 
-export const RepoResponse = DeepNullish(
+export const GitlabProject = DeepNullish(
   z.object({
     id: z.number(),
     archived: z.boolean().optional(),
@@ -88,7 +88,7 @@ export const RepoResponse = DeepNullish(
     squash_option: z.string().optional(),
   }),
 );
-export type RepoResponse = z.infer<typeof RepoResponse>;
+export type GitlabProject = z.infer<typeof GitlabProject>;
 
 export const GitlabComment = z.object({
   body: z.string(),

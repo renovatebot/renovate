@@ -8,7 +8,7 @@ import type { HttpResponse } from '../../../util/http/types.ts';
 import { parseUrl } from '../../../util/url.ts';
 import { getPrBodyStruct } from '../pr-body.ts';
 import type { GitUrlOption } from '../types.ts';
-import type { GitLabMergeRequest, RepoResponse } from './schema.ts';
+import type { GitLabMergeRequest, GitlabProject } from './schema.ts';
 import type { GitlabPr } from './types.ts';
 
 export const DRAFT_PREFIX = 'Draft: ';
@@ -60,7 +60,7 @@ export function prInfo(mr: GitLabMergeRequest): GitlabPr {
 export function getRepoUrl(
   repository: string,
   gitUrl: GitUrlOption | undefined,
-  res: HttpResponse<RepoResponse>,
+  res: HttpResponse<GitlabProject>,
 ): string {
   if (gitUrl === 'ssh') {
     if (!res.body.ssh_url_to_repo) {
