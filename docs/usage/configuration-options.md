@@ -342,14 +342,7 @@ If you're not already using `bors-ng` or similar, don't worry about this option.
 ## `azureWorkItem`
 
 Configures the Azure Boards work item that Renovate uses to represent issues, such as the Dependency Dashboard.
-
-| Subkey        | Default  | Description                                                       |
-| ------------- | -------- | ----------------------------------------------------------------- |
-| `type`        | `Issue`  | The work item type, e.g. `Issue`, `Task` or `User Story`.         |
-| `openState`   | `New`    | The state Renovate sets when it creates or reopens the work item. |
-| `closedState` | `Closed` | The state Renovate sets when it closes the work item.             |
-
-Set this if your Azure DevOps process does not use the default `Issue` type or `New`/`Closed` states.
+Set this if your Azure DevOps process does not use the default `Issue` work item type or the `New`/`Closed` states.
 For example, a Basic process uses `Issue` work items with `To Do`/`Done` states:
 
 ```json
@@ -364,6 +357,18 @@ For example, a Basic process uses `Issue` work items with `To Do`/`Done` states:
 
 This option is `mergeable`, so you can override just one subkey while keeping the defaults for the others.
 The user that Renovate runs as must have permission to create and edit work items of the configured type.
+
+### `azureWorkItem.closedState`
+
+The work item state Renovate sets when it closes an issue, for example `Closed` or `Done`.
+
+### `azureWorkItem.openState`
+
+The work item state Renovate sets when it opens or reopens an issue, for example `New` or `To Do`.
+
+### `azureWorkItem.type`
+
+The work item type Renovate creates for issues, for example `Issue`, `Task` or `User Story`.
 
 ## `azureWorkItemId`
 

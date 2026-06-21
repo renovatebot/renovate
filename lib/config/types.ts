@@ -637,6 +637,7 @@ export interface ValidationMessage {
 
 export type AllowedParents =
   | '.'
+  | 'azureWorkItem'
   | 'bumpVersions'
   | 'customDatasources'
   | 'customManagers'
