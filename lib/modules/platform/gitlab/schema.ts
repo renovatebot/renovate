@@ -78,7 +78,7 @@ export const GitlabProject = DeepNullish(
     default_branch: z.string().optional(),
     empty_repo: z.boolean().optional(),
     ssh_url_to_repo: z.string().optional(),
-    http_url_to_repo: z.httpUrl(),
+    http_url_to_repo: z.httpUrl().optional(),
     forked_from_project: z.boolean().optional(),
     repository_access_level: z.string().optional(),
     merge_requests_access_level: z.string().optional(),
@@ -108,8 +108,24 @@ export type GitlabIssue = z.infer<typeof GitlabIssue>;
 
 export const GitlabIssues = z.array(GitlabIssue);
 
+// GitLab CI/CD job statuses
+// https://docs.gitlab.com/ee/api/commits/#list-the-statuses-of-a-commit
+export const BranchState = z.enum([
+  'pending',
+  'created',
+  'running',
+  'waiting_for_resource',
+  'manual',
+  'success',
+  'failed',
+  'canceled',
+  'skipped',
+  'scheduled',
+]);
+export type BranchState = z.infer<typeof BranchState>;
+
 export const GitlabBranchStatus = z.object({
-  status: z.string(),
+  status: BranchState.catch('pending'), // unknown statuses normalize to pending (-> yellow)
   name: z.string(),
   allow_failure: z.boolean().optional(),
 });

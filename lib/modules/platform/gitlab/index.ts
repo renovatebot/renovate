@@ -63,11 +63,12 @@ import {
 } from './http.ts';
 import { getMR, updateMR } from './merge-request.ts';
 import { GitlabPrCache } from './pr-cache.ts';
-import type { GitlabComment, MergeMethod } from './schema.ts';
+import type { BranchState, GitlabComment, MergeMethod } from './schema.ts';
 import {
   GitLabMergeRequest,
   GitLabMergeRequests,
   GitlabApprovalRules,
+  GitlabBranchStatus,
   GitlabBranchStatuses,
   GitlabComments,
   GitlabIssue,
@@ -371,31 +372,12 @@ export function getBranchForceRebase(): Promise<boolean> {
   return Promise.resolve(forceRebase);
 }
 
-type BranchState =
-  | 'pending'
-  | 'created'
-  | 'running'
-  | 'waiting_for_resource'
-  | 'manual'
-  | 'success'
-  | 'failed'
-  | 'canceled'
-  | 'skipped'
-  | 'scheduled';
-
-interface GitlabBranchStatus {
-  status: BranchState;
-  name: string;
-  allow_failure?: boolean;
-}
-
 async function getStatus(
   branchName: string,
   useCache = true,
 ): Promise<GitlabBranchStatus[]> {
   const branchSha = git.getBranchCommit(branchName);
   try {
-    // TODO: types (#22198)
     const url = `projects/${
       config.repository
     }/repository/commits/${branchSha!}/statuses`;
@@ -407,8 +389,7 @@ async function getStatus(
       opts.memCache = false;
     }
 
-    return (await gitlabApi.getJson(url, opts, GitlabBranchStatuses))
-      .body as GitlabBranchStatus[];
+    return (await gitlabApi.getJson(url, opts, GitlabBranchStatuses)).body;
   } catch (err) /* v8 ignore next */ {
     logger.debug({ err }, 'Error getting commit status');
     if (err.response?.statusCode === 404) {
@@ -458,10 +439,12 @@ export async function getBranchStatus(
     logger.debug(
       'Merge request head pipeline has different sha to commit, assuming merged results pipeline',
     );
-    branchStatuses.push({
-      status: mr.headPipelineStatus as BranchState,
-      name: 'head_pipeline',
-    });
+    branchStatuses.push(
+      GitlabBranchStatus.parse({
+        status: mr.headPipelineStatus,
+        name: 'head_pipeline',
+      }),
+    );
   }
   // ignore all skipped jobs
   const res = branchStatuses.filter((check) => check.status !== 'skipped');
@@ -489,15 +472,7 @@ export async function getBranchStatus(
       // v8 ignore else -- TODO: add test #40625
       if (status !== 'red') {
         // if red, stay red
-        let mappedStatus: BranchStatus =
-          gitlabToRenovateStatusMapping[check.status];
-        if (!mappedStatus) {
-          logger.warn(
-            { check },
-            'Could not map GitLab check.status to Renovate status',
-          );
-          mappedStatus = 'yellow';
-        }
+        const mappedStatus = gitlabToRenovateStatusMapping[check.status];
         if (mappedStatus !== 'green') {
           logger.trace({ check }, 'Found non-green check');
           status = mappedStatus;
@@ -952,7 +927,7 @@ export async function getBranchStatusCheck(
   logger.debug(`Got res with ${res.length} results`);
   for (const check of res) {
     if (check.name === context) {
-      return gitlabToRenovateStatusMapping[check.status] || 'yellow';
+      return gitlabToRenovateStatusMapping[check.status];
     }
   }
   return null;
