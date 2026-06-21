@@ -78,7 +78,7 @@ export const GitlabProject = DeepNullish(
     default_branch: z.string().optional(),
     empty_repo: z.boolean().optional(),
     ssh_url_to_repo: z.string().optional(),
-    http_url_to_repo: z.string().optional(),
+    http_url_to_repo: z.httpUrl(),
     forked_from_project: z.boolean().optional(),
     repository_access_level: z.string().optional(),
     merge_requests_access_level: z.string().optional(),
@@ -145,3 +145,4 @@ export const GitlabTreeNode = z.object({
 export type GitlabTreeNode = z.infer<typeof GitlabTreeNode>;
 
 export const GitlabTree = z.array(GitlabTreeNode);
+export type GitlabTree = z.infer<typeof GitlabTree>;

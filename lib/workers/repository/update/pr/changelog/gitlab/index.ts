@@ -24,7 +24,7 @@ export async function getReleaseNotesMd(
   const apiPrefix = `${apiBaseUrl}projects/${urlEncodedRepo}/repository/`;
 
   // https://docs.gitlab.com/13.2/ee/api/repositories.html#list-repository-tree
-  const tree = (
+  const tree: GitlabTree = (
     await http.getJson(
       `${apiPrefix}tree?per_page=100${
         sourceDirectory ? `&path=${sourceDirectory}` : ''
@@ -36,7 +36,7 @@ export async function getReleaseNotesMd(
     )
   ).body;
   const allFiles = tree.filter((f) => f.type === 'blob');
-  let files: typeof allFiles = [];
+  let files: GitlabTree = [];
   if (!files.length) {
     files = allFiles.filter((f) => changelogFilenameRegex.test(f.name));
   }
@@ -81,7 +81,7 @@ export async function getReleaseList(
     url: `${project.baseUrl}${repository}/-/releases/${release.tag_name}`,
     notesSourceUrl: apiUrl,
     name: release.name,
-    body: release.description ?? undefined,
+    body: release.description,
     tag: release.tag_name,
   }));
 }

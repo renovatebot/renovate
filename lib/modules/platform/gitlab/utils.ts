@@ -110,6 +110,7 @@ export function getRepoUrl(
   }
 
   logger.debug(`Using http URL: ${res.body.http_url_to_repo}`);
+  // validated by schema
   const repoUrl = parseUrl(res.body.http_url_to_repo)!;
   repoUrl.username = 'oauth2';
   repoUrl.password = opts.token!;
