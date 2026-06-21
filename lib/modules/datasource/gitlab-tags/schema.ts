@@ -2,7 +2,7 @@ import { z } from 'zod/v4';
 
 export const GitlabCommit = z.object({
   id: z.string(),
-  created_at: z.string().optional(),
+  created_at: z.string(),
 });
 export type GitlabCommit = z.infer<typeof GitlabCommit>;
 
@@ -11,11 +11,7 @@ export type GitlabCommits = z.infer<typeof GitlabCommits>;
 
 export const GitlabTag = z.object({
   name: z.string(),
-  commit: z
-    .object({
-      created_at: z.string().optional(),
-    })
-    .optional(),
+  commit: GitlabCommit,
 });
 export type GitlabTag = z.infer<typeof GitlabTag>;
 

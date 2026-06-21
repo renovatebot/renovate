@@ -58,7 +58,7 @@ export class GitlabTagsDatasource extends Datasource {
     dependency.releases = gitlabTags.map(({ name, commit }) => ({
       version: name,
       gitRef: name,
-      releaseTimestamp: asTimestamp(commit?.created_at),
+      releaseTimestamp: asTimestamp(commit.created_at),
     }));
 
     return dependency;
