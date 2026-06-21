@@ -94,7 +94,7 @@ export function massageBody(
   input: string | undefined | null,
   baseUrl: string,
 ): string {
-  const baseUrlForRegex = baseUrl.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const baseUrlForRegex = RegExp.escape(baseUrl);
   let body = coerceString(input);
   // Convert line returns
   body = body.replace(regEx(/\r\n/g), '\n');
