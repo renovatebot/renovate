@@ -2199,6 +2199,47 @@ describe('modules/platform/azure/index', () => {
       'Issue',
     );
   });
+
+  it('ensureIssue creates a new issue with a configured work item', async () => {
+    await initRepo({
+      repository: 'some/repo',
+      azureWorkItem: { type: 'Task', openState: 'To Do', closedState: 'Done' },
+    });
+
+    const createWorkItemMock = vi.fn().mockResolvedValue({
+      id: 123,
+    });
+
+    azureApi.workItemTrackingApi.mockResolvedValueOnce(
+      partial<IWorkItemTrackingApi>({
+        queryByWiql: vi.fn().mockResolvedValue({ workItems: [] }),
+        createWorkItem: createWorkItemMock,
+      }),
+    );
+    const result = await azure.ensureIssue({
+      title: 'Test Issue',
+      body: 'Test body',
+    });
+    expect(result).toBe('created');
+    expect(createWorkItemMock).toHaveBeenCalledWith(
+      undefined, // no headers
+      expect.arrayContaining([
+        expect.objectContaining({
+          op: 'add',
+          path: '/fields/System.WorkItemType',
+          value: 'Task',
+        }),
+        expect.objectContaining({
+          op: 'add',
+          path: '/fields/System.State',
+          value: 'To Do',
+        }),
+      ]),
+      'some',
+      'Task',
+    );
+  });
+
   it('ensureIssue updates an existing issue', async () => {
     await initRepo({ repository: 'some/repo' });
 

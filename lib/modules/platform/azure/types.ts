@@ -1,4 +1,5 @@
 import type { GitPullRequestMergeStrategy } from 'azure-devops-node-api/interfaces/GitInterfaces.js';
+import type { AzureWorkItem } from '../../../config/types.ts';
 import type { Pr } from '../types.ts';
 
 export interface AzurePr extends Pr {
@@ -23,4 +24,5 @@ export interface Config {
   fileList: null;
   repository: string;
   defaultBranch: string;
+  workItem: AzureWorkItem;
 }

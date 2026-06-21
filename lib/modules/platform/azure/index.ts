@@ -199,6 +199,7 @@ export async function initRepo({
   repository,
   cloneSubmodules,
   cloneSubmodulesFilter,
+  azureWorkItem,
 }: RepoParams): Promise<RepoResult> {
   logger.debug(`initRepo("${repository}")`);
   config = { repository } as Config;
@@ -223,6 +224,11 @@ export async function initRepo({
   config.repoId = repo.id!;
 
   config.project = repo.project!.name!;
+  config.workItem = {
+    type: azureWorkItem?.type ?? 'Issue',
+    openState: azureWorkItem?.openState ?? 'New',
+    closedState: azureWorkItem?.closedState ?? 'Closed',
+  };
   issueService = new IssueService(config);
   config.owner = '?owner?';
   logger.debug(`${repository} owner = ${config.owner}`);

@@ -28,6 +28,7 @@ describe('modules/platform/azure/issue', () => {
       repository: 'test/repo',
       project: 'testProject',
       repoId: '123',
+      workItem: { type: 'Issue', openState: 'New', closedState: 'Closed' },
     } as Config;
 
     issueService = new IssueService(config);
@@ -121,6 +122,37 @@ describe('modules/platform/azure/issue', () => {
 
       expect(queryByWiqlMock.mock.calls[0][0].query).toContain(
         "AND [System.Title] = 'Test''s Filter'",
+      );
+    });
+
+    it('should query for the default work item type', async () => {
+      const queryByWiqlMock = vi.fn().mockResolvedValue({ workItems: [] });
+      azureApi.workItemTrackingApi.mockResolvedValue(
+        partial<IWorkItemTrackingApi>({
+          queryByWiql: queryByWiqlMock,
+        }),
+      );
+
+      await issueService.getIssueList();
+
+      expect(queryByWiqlMock.mock.calls[0][0].query).toContain(
+        "[System.WorkItemType] = 'Issue'",
+      );
+    });
+
+    it('should query for the configured work item type', async () => {
+      config.workItem.type = 'Task';
+      const queryByWiqlMock = vi.fn().mockResolvedValue({ workItems: [] });
+      azureApi.workItemTrackingApi.mockResolvedValue(
+        partial<IWorkItemTrackingApi>({
+          queryByWiql: queryByWiqlMock,
+        }),
+      );
+
+      await issueService.getIssueList();
+
+      expect(queryByWiqlMock.mock.calls[0][0].query).toContain(
+        "[System.WorkItemType] = 'Task'",
       );
     });
 
@@ -317,8 +349,71 @@ describe('modules/platform/azure/issue', () => {
         body: 'Test body content',
       });
 
-      expect(createWorkItemMock).toHaveBeenCalled();
+      expect(createWorkItemMock).toHaveBeenCalledWith(
+        undefined,
+        expect.arrayContaining([
+          { op: 'add', path: '/fields/System.WorkItemType', value: 'Issue' },
+        ]),
+        'testProject',
+        'Issue',
+      );
       expect(result).toEqual('created');
+    });
+
+    it('should create new issue with the configured work item type', async () => {
+      config.workItem = { type: 'Task', openState: 'To Do', closedState: 'Done' };
+      vi.spyOn(issueService, 'getIssueList').mockResolvedValue([]);
+
+      const createWorkItemMock = vi.fn().mockResolvedValue({ id: 123 });
+      azureApi.workItemTrackingApi.mockResolvedValue(
+        partial<IWorkItemTrackingApi>({
+          createWorkItem: createWorkItemMock,
+        }),
+      );
+
+      const result = await issueService.ensureIssue({
+        title: 'Test Issue',
+        body: 'Test body content',
+      });
+
+      expect(createWorkItemMock).toHaveBeenCalledWith(
+        undefined,
+        expect.arrayContaining([
+          { op: 'add', path: '/fields/System.WorkItemType', value: 'Task' },
+          { op: 'add', path: '/fields/System.State', value: 'To Do' },
+        ]),
+        'testProject',
+        'Task',
+      );
+      expect(result).toEqual('created');
+    });
+
+    it('should close an issue using the configured closed state', async () => {
+      config.workItem = { type: 'Task', openState: 'To Do', closedState: 'Done' };
+      const mockIssue = {
+        number: 1,
+        title: '[Renovate] Test Issue',
+        state: 'open',
+        body: 'Test description',
+      };
+
+      vi.spyOn(issueService, 'findIssue').mockResolvedValue(mockIssue);
+
+      const updateWorkItemMock = vi.fn();
+      azureApi.workItemTrackingApi.mockResolvedValue(
+        partial<IWorkItemTrackingApi>({
+          updateWorkItem: updateWorkItemMock,
+        }),
+      );
+
+      await issueService.ensureIssueClosing('Test Issue');
+
+      expect(updateWorkItemMock).toHaveBeenCalledWith(
+        undefined,
+        [{ op: 'replace', path: '/fields/System.State', value: 'Done' }],
+        1,
+        'testProject',
+      );
     });
 
     it('should reopen closed issue when shouldReOpen is true', async () => {

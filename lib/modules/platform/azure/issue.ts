@@ -30,10 +30,11 @@ export class IssueService {
     try {
       const azureApiWit = await azureApi.workItemTrackingApi();
 
+      const escapedWorkItemType = this.config.workItem.type.replace(/'/g, "''");
       let wiql = `
         SELECT [System.Id]
         FROM WorkItems
-        WHERE [System.WorkItemType] = 'Issue'
+        WHERE [System.WorkItemType] = '${escapedWorkItemType}'
           AND [System.TeamProject] = '${this.config.project}'
       `;
 
@@ -62,7 +63,10 @@ export class IssueService {
       return workItems.map((wi: WorkItem) => ({
         number: wi.id!,
         title: wi.fields!['System.Title'],
-        state: wi.fields!['System.State'] === 'Closed' ? 'closed' : 'open',
+        state:
+          wi.fields!['System.State'] === this.config.workItem.closedState
+            ? 'closed'
+            : 'open',
         body: wi.fields!['System.Description'],
         createdAt: wi.fields!['System.CreatedDate'],
         lastModified: wi.fields!['System.ChangedDate'],
@@ -81,7 +85,13 @@ export class IssueService {
         const azureApiWit = await azureApi.workItemTrackingApi();
         await azureApiWit.updateWorkItem(
           undefined,
-          [{ op: 'replace', path: '/fields/System.State', value: 'Closed' }],
+          [
+            {
+              op: 'replace',
+              path: '/fields/System.State',
+              value: this.config.workItem.closedState,
+            },
+          ],
           issue.number,
           this.config.project,
         );
@@ -117,7 +127,7 @@ export class IssueService {
                 {
                   op: 'replace',
                   path: '/fields/System.State',
-                  value: 'Closed',
+                  value: this.config.workItem.closedState,
                 },
               ],
               issueNumber,
@@ -144,7 +154,11 @@ export class IssueService {
           await azureApiWit.updateWorkItem(
             undefined,
             [
-              { op: 'replace', path: '/fields/System.State', value: 'New' },
+              {
+                op: 'replace',
+                path: '/fields/System.State',
+                value: this.config.workItem.openState,
+              },
               {
                 op: 'replace',
                 path: '/fields/System.Title',
@@ -210,7 +224,11 @@ export class IssueService {
       const newWorkItem = await azureApiWit.createWorkItem(
         undefined,
         [
-          { op: 'add', path: '/fields/System.WorkItemType', value: 'Issue' },
+          {
+            op: 'add',
+            path: '/fields/System.WorkItemType',
+            value: this.config.workItem.type,
+          },
           { op: 'add', path: '/fields/System.Title', value: finalTitle },
           {
             op: 'add',
@@ -222,10 +240,14 @@ export class IssueService {
             path: '/multilineFieldsFormat/System.Description',
             value: 'Markdown',
           },
-          { op: 'add', path: '/fields/System.State', value: 'New' },
+          {
+            op: 'add',
+            path: '/fields/System.State',
+            value: this.config.workItem.openState,
+          },
         ],
         this.config.project,
-        'Issue',
+        this.config.workItem.type,
       );
 
       logger.debug(`Created new issue #${newWorkItem.id}`);

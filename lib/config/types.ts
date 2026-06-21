@@ -32,6 +32,20 @@ export type RenovateConfigStage =
   | 'branch'
   | 'pr';
 
+/**
+ * Describes the Azure DevOps work item Renovate uses to represent issues
+ * (such as the Dependency Dashboard): its work item type and the state names
+ * used when Renovate opens/reopens and closes it.
+ */
+export interface AzureWorkItem {
+  /** Work item type, e.g. `Issue`, `Task` or `User Story`. */
+  type: string;
+  /** State applied when opening or reopening a work item, e.g. `New`. */
+  openState: string;
+  /** State applied when closing a work item, e.g. `Closed`. */
+  closedState: string;
+}
+
 export type RenovateSplit =
   | 'init'
   | 'onboarding'
@@ -78,6 +92,7 @@ export interface RenovateSharedConfig {
   automergeStrategy?: MergeStrategy;
   automergeType?: AutoMergeType;
   azureWorkItemId?: number;
+  azureWorkItem?: AzureWorkItem;
   branchName?: string;
   branchNameStrict?: boolean;
   branchPrefix?: string;

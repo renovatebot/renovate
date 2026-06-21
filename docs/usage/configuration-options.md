@@ -339,6 +339,32 @@ If you prefer that Renovate more silently automerge _without_ Pull Requests at a
 The final value for `automergeType` is `"pr-comment"`, intended only for users who already have a "merge bot" such as [bors-ng](https://github.com/bors-ng/bors-ng) and want Renovate to _not_ actually automerge by itself and instead tell `bors-ng` to merge for it, by using a comment in the PR.
 If you're not already using `bors-ng` or similar, don't worry about this option.
 
+## `azureWorkItem`
+
+Configures the Azure Boards work item that Renovate uses to represent issues, such as the Dependency Dashboard.
+
+| Subkey        | Default  | Description                                                        |
+| ------------- | -------- | ----------------------------------------------------------------- |
+| `type`        | `Issue`  | The work item type, e.g. `Issue`, `Task` or `User Story`.         |
+| `openState`   | `New`    | The state Renovate sets when it creates or reopens the work item. |
+| `closedState` | `Closed` | The state Renovate sets when it closes the work item.             |
+
+Set this if your Azure DevOps process does not use the default `Issue` type or `New`/`Closed` states.
+For example, a Basic process uses `Issue` work items with `To Do`/`Done` states:
+
+```json
+{
+  "azureWorkItem": {
+    "type": "Issue",
+    "openState": "To Do",
+    "closedState": "Done"
+  }
+}
+```
+
+This option is `mergeable`, so you can override just one subkey while keeping the defaults for the others.
+The user that Renovate runs as must have permission to create and edit work items of the configured type.
+
 ## `azureWorkItemId`
 
 When creating a PR in Azure DevOps, some branches can be protected with branch policies to [check for linked work items](https://learn.microsoft.com/azure/devops/repos/git/branch-policies#check-for-linked-work-items).

@@ -1,5 +1,5 @@
 import type { DateTime } from 'luxon';
-import type { MergeStrategy } from '../../config/types.ts';
+import type { AzureWorkItem, MergeStrategy } from '../../config/types.ts';
 import type { BranchStatus, HostRule } from '../../types/index.ts';
 import type { CommitFilesConfig } from '../../util/git/types.ts';
 import type { LongCommitSha } from '../../util/schema-utils/git.ts';
@@ -44,6 +44,7 @@ export interface RepoParams {
   renovateUsername?: string;
   cloneSubmodules?: boolean;
   cloneSubmodulesFilter?: string[];
+  azureWorkItem?: AzureWorkItem;
 }
 
 export interface PrDebugData {

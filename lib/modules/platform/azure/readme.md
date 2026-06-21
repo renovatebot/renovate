@@ -196,6 +196,24 @@ Make sure the user has the following permissions on the work item's _area path_:
 
 If the user does not have these permissions, Renovate still creates a PR but it won't have a link to the work item.
 
+### Configuring the work item used for issues
+
+When Renovate creates issues on Azure Boards (for example the Dependency Dashboard) it creates a work item of type `Issue` with the states `New` (open) and `Closed` (closed) by default.
+If your Azure DevOps process does not use those, configure the `azureWorkItem` option:
+
+```json
+{
+  "azureWorkItem": {
+    "type": "Task",
+    "openState": "To Do",
+    "closedState": "Done"
+  }
+}
+```
+
+The option is mergeable, so you can override just `type`, `openState` or `closedState` and keep the defaults for the rest.
+The user that Renovate runs as must have permission to create and edit work items of the configured type.
+
 ### Adding tags to Pull Requests
 
 Tags can be added to Pull Requests using the `labels` or `addLabels` configurations.

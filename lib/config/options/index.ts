@@ -1424,6 +1424,22 @@ const options: Readonly<RenovateOptions>[] = [
     env: false,
   },
   {
+    name: 'azureWorkItem',
+    description:
+      'Configures the Azure Boards work item Renovate uses to represent issues, such as the Dependency Dashboard: its `type` and the `openState`/`closedState` used when opening and closing it.',
+    type: 'object',
+    mergeable: true,
+    default: {
+      type: 'Issue',
+      openState: 'New',
+      closedState: 'Closed',
+    },
+    additionalProperties: {
+      type: 'string',
+    },
+    supportedPlatforms: ['azure'],
+  },
+  {
     name: 'azureWorkItemId',
     description:
       'The id of an existing work item on Azure Boards to link to each PR.',
