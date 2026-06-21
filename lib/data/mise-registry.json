@@ -1,6 +1,6 @@
 {
   "meta": {
-    "version": "2026.6.6 linux-x64 (2026-06-13)"
+    "version": "2026.6.11 linux-x64 (2026-06-16)"
   },
   "tools": {
     "1password": {
@@ -2490,6 +2490,9 @@
     "pinact": {
       "aqua": "suzuki-shunsuke/pinact"
     },
+    "pinniped": {
+      "github": "vmware/pinniped"
+    },
     "pint": {
       "aqua": "cloudflare/pint",
       "asdf": "sam-burrell/asdf-pint"
@@ -3025,6 +3028,9 @@
     "sqlc": {
       "aqua": "sqlc-dev/sqlc",
       "github": "sqlc-dev/sqlc"
+    },
+    "sqlcl": {
+      "aqua": "oracle.com/sqlcl"
     },
     "sqlite": {
       "asdf": "mise-plugins/mise-sqlite",
