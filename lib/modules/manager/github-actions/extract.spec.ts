@@ -1746,6 +1746,148 @@ describe('modules/manager/github-actions/extract', () => {
         },
       ],
     },
+    {
+      step: {
+        uses: 'azure/setup-helm@v4',
+        with: { version: 'v3.17.0' },
+      },
+      expected: [
+        {
+          currentValue: 'v3.17.0',
+          datasource: 'github-releases',
+          depName: 'helm',
+          depType: 'uses-with',
+          packageName: 'helm/helm',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'azure/setup-helm@v4',
+        with: {},
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'github-releases',
+          depName: 'helm',
+          depType: 'uses-with',
+          packageName: 'helm/helm',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'docker/setup-buildx-action@v3',
+        with: { version: 'v0.19.3' },
+      },
+      expected: [
+        {
+          currentValue: 'v0.19.3',
+          datasource: 'github-releases',
+          depName: 'buildx',
+          depType: 'uses-with',
+          packageName: 'docker/buildx',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'docker/setup-buildx-action@v3',
+        with: {},
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'github-releases',
+          depName: 'buildx',
+          depType: 'uses-with',
+          packageName: 'docker/buildx',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'docker/setup-compose-action@v1',
+        with: { version: 'v2.36.1' },
+      },
+      expected: [
+        {
+          currentValue: 'v2.36.1',
+          datasource: 'github-releases',
+          depName: 'docker/compose',
+          depType: 'uses-with',
+          packageName: 'docker/compose',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'docker/setup-compose-action@v1',
+        with: {},
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'github-releases',
+          depName: 'docker/compose',
+          depType: 'uses-with',
+          packageName: 'docker/compose',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'helm/chart-testing-action@v2',
+        with: { version: 'v3.12.0' },
+      },
+      expected: [
+        {
+          currentValue: 'v3.12.0',
+          datasource: 'github-releases',
+          depName: 'chart-testing',
+          depType: 'uses-with',
+          packageName: 'helm/chart-testing',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'helm/chart-testing-action@v2',
+        with: {},
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'github-releases',
+          depName: 'chart-testing',
+          depType: 'uses-with',
+          packageName: 'helm/chart-testing',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'sigoden/install-binary@v1',
+        with: {
+          repo: 'sigoden/argc',
+          tag: 'v1.22.0',
+        },
+      },
+      expected: [
+        {
+          currentValue: 'v1.22.0',
+          datasource: 'github-releases',
+          depName: 'sigoden/argc',
+          depType: 'uses-with',
+          packageName: 'sigoden/argc',
+        },
+      ],
+    },
   ])('extract from $step.uses', ({ step, expected }) => {
     const yamlContent = yaml.dump({ jobs: { build: { steps: [step] } } });
 

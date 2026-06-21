@@ -709,7 +709,7 @@ jobs:
       - name: Setup uv
         uses: astral-sh/setup-uv@fac544c07dec837d0ccb6301d7b5580bf5edae39 # v8.2.0
         with:
-          version: 0.11.21
+          version: 0.11.23
           enable-cache: true
           cache-python: true
 
@@ -865,7 +865,7 @@ jobs:
       - name: Setup uv
         uses: astral-sh/setup-uv@fac544c07dec837d0ccb6301d7b5580bf5edae39 # v8.2.0
         with:
-          version: 0.11.21
+          version: 0.11.23
           enable-cache: true
           cache-python: true
 
@@ -901,18 +901,17 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           LOG_LEVEL: debug
 
-      - name: Build mkdocs site for deployment (when no release)
+      - name: Build mkdocs site for deployment
         if: github.ref_name == 'main'
         run: |
-          # If there wasn't a release, we won't have executed `tools/prepare-release.ts`, and the mkdocs site won't be built, but we do want it built regardless, so we can update the docs site
-          if [[ ! -f tmp/mkdocs-site.tgz ]]; then
-            latest_tag=$(gh release view --json tagName -q .tagName)
-            pnpm mkdocs build --version "$latest_tag"
-            mkdir -p tmp
-            tar -czf tmp/mkdocs-site.tgz -C tools/mkdocs/site .
-          fi
+          # Always rebuild the docs site with the announcement bar for deployment to GitHub Pages, including the announcement bar (which isn't included when preparing a release's docs)
+          latest_tag=$(gh release view --json tagName -q .tagName)
+          pnpm mkdocs build --version "$latest_tag"
+          mkdir -p tmp
+          tar -czf tmp/mkdocs-site.tgz -C tools/mkdocs/site .
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          MKDOCS_INCLUDE_ANNOUNCEMENT: 'true'
 
       - name: Upload docs artifact for deployment
         if: github.ref_name == 'main'

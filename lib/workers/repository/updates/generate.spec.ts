@@ -35,6 +35,8 @@ describe('workers/repository/updates/generate', () => {
           manager: 'some-manager',
           branchName: 'some-branch',
           depName: 'some-dep',
+          newVersion: '1.2.3',
+          commitMessageExtra: 'to 1.2.3',
           groupName: 'some-group',
           prTitle: 'some-title',
           releaseTimestamp: '2017-02-07T20:01:41+00:00' as Timestamp,
@@ -47,7 +49,8 @@ describe('workers/repository/updates/generate', () => {
       const res = generateBranchConfig(branch);
       expect(res.groupName).toBe('some-group');
       expect(res.isGroup).toBeTrue();
-      expect(res.recreateClosed).toBeFalse();
+      expect(res.recreateClosed).toBeTrue();
+      expect(res.commitMessageExtra).toBeUndefined();
     });
 
     it('groups single upgrade across multiple files', () => {
@@ -58,6 +61,7 @@ describe('workers/repository/updates/generate', () => {
           branchName: 'some-branch',
           depName: 'some-dep',
           newVersion: '2.0.0',
+          commitMessageExtra: 'to v2',
           groupName: 'some-group',
           prTitle: 'some-title',
           releaseTimestamp: '2017-02-07T20:01:41+00:00' as Timestamp,
@@ -72,6 +76,7 @@ describe('workers/repository/updates/generate', () => {
           branchName: 'some-branch',
           depName: 'some-dep',
           newVersion: '2.0.0',
+          commitMessageExtra: 'to v2',
           groupName: 'some-group',
           prTitle: 'some-title',
           releaseTimestamp: '2017-02-07T20:01:41+00:00' as Timestamp,
@@ -85,6 +90,8 @@ describe('workers/repository/updates/generate', () => {
       const res = generateBranchConfig(branch);
       expect(res.groupName).toBe('some-group');
       expect(res.isGroup).toBeTrue();
+      expect(res.recreateClosed).toBeTrue();
+      expect(res.commitMessageExtra).toBeUndefined();
     });
 
     it('does not group single upgrade when groupSingleUpdates is false', () => {
