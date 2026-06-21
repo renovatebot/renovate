@@ -442,11 +442,17 @@ export async function ensurePr(
 
       if (
         !existingPr.hasAssignees &&
-        !hasNotIgnoredReviewers(existingPr, config) &&
-        config.automerge &&
-        !config.assignAutomerge
+        ((config.automerge && !config.assignAutomerge) ||
+          config.assigneesOnChecks !== undefined)
       ) {
         await maybeAddAssignees(config, existingPr, await getBranchStatus());
+      }
+
+      if (
+        !hasNotIgnoredReviewers(existingPr, config) &&
+        ((config.automerge && !config.assignAutomerge) ||
+          config.reviewersOnChecks !== undefined)
+      ) {
         await maybeAddReviewers(config, existingPr, await getBranchStatus());
       }
 

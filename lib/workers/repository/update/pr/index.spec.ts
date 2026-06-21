@@ -914,20 +914,20 @@ describe('workers/repository/update/pr/index', () => {
         expect(participants.addReviewers).toHaveBeenCalled();
       });
 
-      it('does nothing for an existing PR without automerge', async () => {
+      it('assigns participants accordingly to an existing PR without automerge with assigneesOnChecks', async () => {
         const changedPr: Pr = { ...pr, hasAssignees: false };
         platform.getBranchPr.mockResolvedValueOnce(changedPr);
         checks.resolveBranchStatus.mockResolvedValueOnce('red');
 
         const res = await ensurePr({
           ...config,
-          assigneesOnChecks: 'red',
-          reviewersOnChecks: 'green',
+          assigneesOnChecks: 'green',
+          reviewersOnChecks: 'red',
         });
 
         expect(res).toEqual({ type: 'with-pr', pr: changedPr });
         expect(participants.addAssignees).not.toHaveBeenCalled();
-        expect(participants.addReviewers).not.toHaveBeenCalled();
+        expect(participants.addReviewers).toHaveBeenCalled();
       });
 
       it('assigns participants accordingly to an existing PR with automerge', async () => {
