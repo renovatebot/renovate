@@ -84,6 +84,13 @@ export async function extractAllPackageFiles(
         type: 'constraint',
       });
     }
+    for (const override of coerceArray(compileArgs.overridesFiles)) {
+      depsBetweenFiles.push({
+        sourceFile: override,
+        outputFile: matchedFile,
+        type: 'override',
+      });
+    }
     const lockedDeps = extractRequirementsFile(fileContent)?.deps;
     if (!lockedDeps) {
       logger.debug(

@@ -24,7 +24,7 @@ import {
 
 export const id = 'rez';
 export const displayName = 'rez';
-export const urls = ['https://github.com/nerdvegas/rez'];
+export const urls = ['[Rez package manager](https://github.com/nerdvegas/rez)'];
 export const supportsRanges = true;
 export const supportedRangeStrategies: RangeStrategy[] = [
   'bump',

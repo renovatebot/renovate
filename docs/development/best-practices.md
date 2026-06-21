@@ -297,11 +297,22 @@ if (end) {
 - Avoid exporting functions purely for the purpose of testing unless you really need to
 - Avoid cast or prefer `x as T` instead of `<T>x` cast
   - Use `partial<T>()` from `test/util` if only a partial object is required
+  - Use `fakeSha(seed)` from `test/util` to generate deterministic, valid `LongCommitSha` values in tests
 
 ## Fixtures
 
 Where possible, reduce the test fixture to a size where an inline `codeBlock` is possible to use instead of a separate fixture file.
 Inline `codeBlock`s improve performance plus are more readable.
+
+```ts
+import { codeBlock } from 'common-tags';
+
+const input = codeBlock`
+  line one
+  line two
+`;
+// → 'line one\nline two'
+```
 
 Use the `Fixture` class if loading fixtures from files.
 For example:
@@ -333,7 +344,22 @@ Declare types and function prototypes with [JSDoc](https://jsdoc.app/index.html)
 
 ## regex
 
-Use [Named Capturing Groups](https://www.regular-expressions.info/named.html) when capturing multiple groups, for example: `(?<groupName>CapturedGroup)`.
+Use [Named Capturing Groups](https://www.regular-expressions.info/named.html) when capturing groups.
+Prefer named groups even for a single capture — positional references (`match[1]`) break silently when the pattern changes.
+Non-capturing groups (`(?:...)`) are always fine and encouraged when the captured value is not needed.
+
+Always use the `regEx()` utility from `lib/util/regex.ts` instead of the `RegExp` constructor or regex literals.
+It transparently uses the RE2 engine when available for safer, denial-of-service-resistant matching.
+
+```ts
+import { regEx } from '~/lib/util/regex';
+
+const pattern = regEx(/^(?<major>\d+)\.(?<minor>\d+)(?:\.(?<patch>\d+))?$/);
+const match = pattern.exec(version);
+if (match?.groups) {
+  const { major, minor, patch } = match.groups;
+}
+```
 
 ## Windows
 

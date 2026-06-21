@@ -58,23 +58,13 @@ export async function extractPackageFile(
   const deps: PackageDependency[] = [];
 
   for (const [name, toolData] of Object.entries(misefile.tools)) {
-    const version = parseVersion(toolData);
-    // Parse the tool options in the tool name
-    const { name: depName, options: optionsInName } =
-      optionInToolNameRegex.exec(name.trim())!.groups!;
-    const delimiterIndex = name.indexOf(':');
-    const backend = depName.substring(0, delimiterIndex);
-    const toolName = depName.substring(delimiterIndex + 1);
-    const options = parseOptions(
-      optionsInName,
-      isNonEmptyObject(toolData) ? toolData : {},
-    );
-    const toolConfig =
-      version === null
-        ? null
-        : getToolConfig(backend, toolName, version, options);
-    const dep = createDependency(depName, version, toolConfig);
-    deps.push(dep);
+    deps.push(extractToolEntry(name, toolData));
+  }
+
+  for (const taskData of Object.values(misefile.tasks)) {
+    for (const [name, toolData] of Object.entries(taskData.tools ?? {})) {
+      deps.push(extractToolEntry(name, toolData));
+    }
   }
 
   if (!deps.length) {
@@ -257,6 +247,25 @@ function getConfigFromTooling(
       ? toolDefinition.config(version)
       : toolDefinition.config) ?? null
   ); // Ensure null is returned instead of undefined
+}
+
+function extractToolEntry(name: string, toolData: MiseTool): PackageDependency {
+  const version = parseVersion(toolData);
+  const { name: depName, options: optionsInName } = optionInToolNameRegex.exec(
+    name.trim(),
+  )!.groups!;
+  const delimiterIndex = depName.indexOf(':');
+  const backend = depName.substring(0, delimiterIndex);
+  const toolName = depName.substring(delimiterIndex + 1);
+  const options = parseOptions(
+    optionsInName,
+    isNonEmptyObject(toolData) ? toolData : {},
+  );
+  const toolConfig =
+    version === null
+      ? null
+      : getToolConfig(backend, toolName, version, options);
+  return createDependency(depName, version, toolConfig);
 }
 
 function createDependency(
