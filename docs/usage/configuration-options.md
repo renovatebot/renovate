@@ -343,7 +343,7 @@ If you're not already using `bors-ng` or similar, don't worry about this option.
 
 Configures the Azure Boards work item that Renovate uses to represent issues, such as the Dependency Dashboard.
 
-| Subkey        | Default  | Description                                                        |
+| Subkey        | Default  | Description                                                       |
 | ------------- | -------- | ----------------------------------------------------------------- |
 | `type`        | `Issue`  | The work item type, e.g. `Issue`, `Task` or `User Story`.         |
 | `openState`   | `New`    | The state Renovate sets when it creates or reopens the work item. |

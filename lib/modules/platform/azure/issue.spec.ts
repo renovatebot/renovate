@@ -361,7 +361,11 @@ describe('modules/platform/azure/issue', () => {
     });
 
     it('should create new issue with the configured work item type', async () => {
-      config.workItem = { type: 'Task', openState: 'To Do', closedState: 'Done' };
+      config.workItem = {
+        type: 'Task',
+        openState: 'To Do',
+        closedState: 'Done',
+      };
       vi.spyOn(issueService, 'getIssueList').mockResolvedValue([]);
 
       const createWorkItemMock = vi.fn().mockResolvedValue({ id: 123 });
@@ -389,7 +393,11 @@ describe('modules/platform/azure/issue', () => {
     });
 
     it('should close an issue using the configured closed state', async () => {
-      config.workItem = { type: 'Task', openState: 'To Do', closedState: 'Done' };
+      config.workItem = {
+        type: 'Task',
+        openState: 'To Do',
+        closedState: 'Done',
+      };
       const mockIssue = {
         number: 1,
         title: '[Renovate] Test Issue',
