@@ -145,7 +145,7 @@ export async function initPlatform({
       platformConfig.gitAuthor = `${user.name} <${
         user.commit_email ?? user.email
       }>`;
-      botUserName = user.name ?? '';
+      botUserName = user.name;
     }
     const env = getEnv();
     /* v8 ignore next: experimental feature */

@@ -1772,7 +1772,7 @@ describe('modules/platform/gitlab/index', () => {
       httpMock
         .scope(gitlabApiHost)
         .get('/api/v4/users?username=someuser')
-        .reply(200, [{ id: 123, username: 'someuser' }])
+        .reply(200, [{ id: 123, username: 'someuser', name: 'someuser' }])
         .put('/api/v4/projects/undefined/merge_requests/42?assignee_ids[]=123')
         .reply(200);
       await expect(gitlab.addAssignees(42, ['someuser'])).toResolve();
@@ -1782,9 +1782,11 @@ describe('modules/platform/gitlab/index', () => {
       httpMock
         .scope(gitlabApiHost)
         .get('/api/v4/users?username=someuser')
-        .reply(200, [{ id: 123, username: 'someuser' }])
+        .reply(200, [{ id: 123, username: 'someuser', name: 'someuser' }])
         .get('/api/v4/users?username=someotheruser')
-        .reply(200, [{ id: 124, username: 'someotheruser' }])
+        .reply(200, [
+          { id: 124, username: 'someotheruser', name: 'someotheruser' },
+        ])
         .put(
           '/api/v4/projects/undefined/merge_requests/42?assignee_ids[]=123&assignee_ids[]=124',
         )
@@ -1800,7 +1802,9 @@ describe('modules/platform/gitlab/index', () => {
         .get('/api/v4/users?username=someuser')
         .replyWithError('some error')
         .get('/api/v4/users?username=someotheruser')
-        .reply(200, [{ id: 124, username: 'someotheruser' }])
+        .reply(200, [
+          { id: 124, username: 'someotheruser', name: 'someotheruser' },
+        ])
         .put('/api/v4/projects/undefined/merge_requests/42?assignee_ids[]=124')
         .replyWithError('some error');
       await expect(
@@ -1814,7 +1818,9 @@ describe('modules/platform/gitlab/index', () => {
         .get('/api/v4/users?username=someuser')
         .reply(200, [])
         .get('/api/v4/users?username=someotheruser')
-        .reply(200, [{ id: 124, username: 'someotheruser' }])
+        .reply(200, [
+          { id: 124, username: 'someotheruser', name: 'someotheruser' },
+        ])
         .put('/api/v4/projects/undefined/merge_requests/42?assignee_ids[]=124')
         .reply(200);
       await expect(
@@ -1859,8 +1865,8 @@ describe('modules/platform/gitlab/index', () => {
       });
 
       const existingReviewers = [
-        { id: 1, username: 'foo' },
-        { id: 2, username: 'bar' },
+        { id: 1, username: 'foo', name: 'foo' },
+        { id: 2, username: 'bar', name: 'bar' },
       ];
 
       it('should fail to get existing reviewers', async () => {
@@ -1893,7 +1899,7 @@ describe('modules/platform/gitlab/index', () => {
             reviewers: existingReviewers,
           })
           .get('/api/v4/users?username=someuser')
-          .reply(200, [{ id: 10, username: 'someuser' }])
+          .reply(200, [{ id: 10, username: 'someuser', name: 'someuser' }])
           .get('/api/v4/users?username=someotheruser')
           .reply(404)
           .get('/api/v4/groups/someotheruser/members')
@@ -1958,13 +1964,13 @@ describe('modules/platform/gitlab/index', () => {
             reviewers: existingReviewers,
           })
           .get('/api/v4/users?username=someuser')
-          .reply(200, [{ id: 10, username: 'someuser' }])
+          .reply(200, [{ id: 10, username: 'someuser', name: 'someuser' }])
           .get('/api/v4/users?username=somegroup')
           .reply(404)
           .get('/api/v4/groups/somegroup/members')
           .reply(200, [
-            { id: 11, username: 'member1' },
-            { id: 12, username: 'member2' },
+            { id: 11, username: 'member1', name: 'member1' },
+            { id: 12, username: 'member2', name: 'member2' },
           ])
           .put('/api/v4/projects/undefined/merge_requests/42', {
             reviewer_ids: [1, 2, 10, 11, 12],
@@ -1993,9 +1999,11 @@ describe('modules/platform/gitlab/index', () => {
             reviewers: existingReviewers,
           })
           .get('/api/v4/users?username=someuser')
-          .reply(200, [{ id: 10, username: 'someuser' }])
+          .reply(200, [{ id: 10, username: 'someuser', name: 'someuser' }])
           .get('/api/v4/users?username=someotheruser')
-          .reply(200, [{ id: 15, username: 'someotheruser' }])
+          .reply(200, [
+            { id: 15, username: 'someotheruser', name: 'someotheruser' },
+          ])
           .put('/api/v4/projects/undefined/merge_requests/42', {
             reviewer_ids: [1, 2, 10, 15],
           })
@@ -2023,9 +2031,11 @@ describe('modules/platform/gitlab/index', () => {
             reviewers: existingReviewers,
           })
           .get('/api/v4/users?username=someuser')
-          .reply(200, [{ id: 10, username: 'someuser' }])
+          .reply(200, [{ id: 10, username: 'someuser', name: 'someuser' }])
           .get('/api/v4/users?username=someotheruser')
-          .reply(200, [{ id: 15, username: 'someotheruser' }])
+          .reply(200, [
+            { id: 15, username: 'someotheruser', name: 'someotheruser' },
+          ])
           .put('/api/v4/projects/undefined/merge_requests/42', {
             reviewer_ids: [1, 2, 10, 15],
           })
@@ -2053,9 +2063,11 @@ describe('modules/platform/gitlab/index', () => {
             reviewers: existingReviewers,
           })
           .get('/api/v4/users?username=someuser')
-          .reply(200, [{ id: 1, username: 'someuser' }])
+          .reply(200, [{ id: 1, username: 'someuser', name: 'someuser' }])
           .get('/api/v4/users?username=someotheruser')
-          .reply(200, [{ id: 2, username: 'someotheruser' }])
+          .reply(200, [
+            { id: 2, username: 'someotheruser', name: 'someotheruser' },
+          ])
           .put('/api/v4/projects/undefined/merge_requests/42')
           .reply(200);
 
@@ -3768,6 +3780,7 @@ describe('modules/platform/gitlab/index', () => {
           assignee: {
             id: 1,
             username: 'user1',
+            name: 'user1',
           },
         });
       const pr = await gitlab.getPr(12345);
@@ -3797,6 +3810,7 @@ describe('modules/platform/gitlab/index', () => {
             {
               id: 1,
               username: 'user1',
+              name: 'user1',
             },
           ],
         });
@@ -3825,8 +3839,8 @@ describe('modules/platform/gitlab/index', () => {
           target_branch: 'master',
           assignees: [],
           reviewers: [
-            { id: 1, username: 'foo' },
-            { id: 2, username: 'bar' },
+            { id: 1, username: 'foo', name: 'foo' },
+            { id: 2, username: 'bar', name: 'bar' },
           ],
         });
       const pr = await gitlab.getPr(12345);
@@ -4446,11 +4460,11 @@ These updates have all been created already. To force a retry/rebase of any, cli
         .scope(gitlabApiHost)
         .get('/api/v4/groups/group-a/members')
         .reply(200, [
-          { id: 1, username: 'maria' },
-          { id: 2, username: 'jimmy' },
+          { id: 1, username: 'maria', name: 'maria' },
+          { id: 2, username: 'jimmy', name: 'jimmy' },
         ])
         .get('/api/v4/groups/group-b/members')
-        .reply(200, [{ id: 3, username: 'john' }]);
+        .reply(200, [{ id: 3, username: 'john', name: 'john' }]);
       const expandedGroupMembers = await gitlab.expandGroupMembers?.([
         'u@email.com',
         '@group-a',

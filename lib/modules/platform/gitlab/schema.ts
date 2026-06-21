@@ -13,7 +13,7 @@ export const LastPipelineId = z
 export const GitlabUser = z.object({
   id: z.number(),
   username: z.string(),
-  name: z.string().optional(),
+  name: z.string(),
   email: z.string().optional(),
   commit_email: z.string().optional(),
 });
