@@ -26,7 +26,7 @@ export const GitLabMergeRequest = z.object({
   updated_at: z.string(),
   diverged_commits_count: z.number().optional(),
   merge_status: z.string().optional(),
-  detailed_merge_request: z.enum([
+  detailed_merge_status: z.enum([
     'approvals_syncing',
     'checking',
     'ci_must_pass',
