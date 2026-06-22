@@ -1,38 +1,12 @@
 import { dir } from 'tmp-promise';
-import { Fixtures } from '~test/fixtures.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import { outputCacheFile } from '../../../util/fs/index.ts';
-import {
-  computeFileChecksum,
-  parseChecksumsFromInRelease,
-} from './checksum.ts';
-
-const fixtureInRelease = Fixtures.getBinary(`InRelease`).toString();
+import { computeFileChecksum } from './checksum.ts';
 
 describe('modules/datasource/deb/checksum', () => {
   beforeEach(async () => {
     const cacheDir = await dir({ unsafeCleanup: true });
     GlobalConfig.set({ cacheDir: cacheDir.path });
-  });
-
-  describe('parseChecksumsFromInRelease', () => {
-    it('parses the checksum for the specified package', () => {
-      const expectedHash =
-        'bf77b15e68c5bfd7267c76a34172021de8f10f861f41ebda7b39d1390dd4bf9a';
-      expect(
-        parseChecksumsFromInRelease(
-          fixtureInRelease,
-          'contrib/binary-amd64/Packages.gz',
-        ),
-      ).toBe(expectedHash);
-
-      expect(
-        parseChecksumsFromInRelease(
-          fixtureInRelease,
-          'non-existing/binary-amd64/Packages.gz',
-        ),
-      ).toBeNull();
-    });
   });
 
   describe('computeFileChecksum', () => {

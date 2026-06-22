@@ -1,4 +1,5 @@
 import { createReadStream } from 'node:fs';
+import { isNonEmptyString } from '@sindresorhus/is';
 import { copyFile } from 'fs-extra';
 import type { DirectoryResult } from 'tmp-promise';
 import { dir } from 'tmp-promise';
@@ -455,10 +456,9 @@ export function mockFetchInReleaseContent(
   compression = 'gz',
   releaseFile = 'InRelease',
 ) {
-  const packageIndexPath =
-    compression.length > 0
-      ? `${component}/binary-${arch}/Packages.${compression}`
-      : `${component}/binary-${arch}/Packages`;
+  const packageIndexPath = isNonEmptyString(compression)
+    ? `${component}/binary-${arch}/Packages.${compression}`
+    : `${component}/binary-${arch}/Packages`;
 
   const content = `SHA256:
  3957f28db16e3f28c7b34ae84f1c929c567de6970f3f1b95dac9b498dd80fe63   738242 contrib/Contents-all
@@ -486,10 +486,9 @@ export function mockModifiedPackageFile(
   compression = 'gz',
   modified = false,
 ) {
-  const packageIndexPath =
-    compression.length > 0
-      ? `${component}/binary-${arch}/Packages.${compression}`
-      : `${component}/binary-${arch}/Packages`;
+  const packageIndexPath = isNonEmptyString(compression)
+    ? `${component}/binary-${arch}/Packages.${compression}`
+    : `${component}/binary-${arch}/Packages`;
 
   const uri = joinUrlParts(
     getBaseSuiteUrl(getComponentUrl('', release, component, arch)),
@@ -553,7 +552,7 @@ export function getPackageUrl(
   arch: string,
   compression = 'gz',
 ) {
-  if (compression.length > 0) {
+  if (isNonEmptyString(compression)) {
     return `${getComponentUrl(baseUrl, release, component, arch)}/Packages.${compression}`;
   }
   return `${getComponentUrl(baseUrl, release, component, arch)}/Packages`;
