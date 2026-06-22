@@ -1,5 +1,5 @@
 import { z } from 'zod/v4';
-import type { LongCommitSha } from '../../../util/git/types.ts';
+import { LongCommitSha } from '../../../util/schema-utils/git.ts';
 import { LooseArray } from '../../../util/schema-utils/index.ts';
 
 export const LastPipelineId = z
@@ -14,8 +14,6 @@ const GitlabUser = z.object({
   id: z.number(),
   username: z.string(),
 });
-
-const LongCommitSha = z.string().transform((val) => val as LongCommitSha);
 
 export const GitLabMergeRequest = z.object({
   iid: z.number(),

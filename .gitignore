@@ -34,8 +34,12 @@ test/datasource/nuget/_fixtures/obj
 /docker-compose.yml
 /report*.json
 
-# pdm
+# uv
+/.venv
+
+# For old checkouts
 /.pdm-python
+/pdm.lock
 
 # local development directories
 /.agents

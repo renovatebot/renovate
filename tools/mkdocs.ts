@@ -22,19 +22,25 @@ program
   .option('--version <version>', 'the current version of the Renovate CLI')
   .option('--no-build', 'do not build docs from source')
   .option('--no-strict', 'do not build in strict mode')
+  .option('--no-announcement', 'do not include the announcement bar')
   .action(async (opts) => {
     await prepareDocs(opts);
-    logger.info('* running mkdocs build');
+    if (opts.announcement) {
+      logger.info('* running mkdocs build');
+    } else {
+      logger.info('* running mkdocs build (without announcement bar)');
+    }
     const args = ['run', 'mkdocs', 'build'];
     if (opts.strict) {
       args.push('--strict');
     }
-    const res = await exec('pdm', args, {
+    const res = await exec('uv', args, {
       cwd: 'tools/mkdocs',
       stdio: 'inherit',
       env: {
         ...process.env,
         RENOVATE_VERSION: opts.version ?? '',
+        MKDOCS_INCLUDE_ANNOUNCEMENT: opts.announcement ? 'true' : '',
       },
       reject: false,
     });
@@ -53,7 +59,7 @@ program
       mkdocsArgs.push('--strict');
     }
     const spawnServe = (): ExecaChildProcess<string> =>
-      execa('pdm', mkdocsArgs, {
+      execa('uv', mkdocsArgs, {
         cwd: 'tools/mkdocs',
         stdio: 'inherit',
         reject: false,
