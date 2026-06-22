@@ -6,11 +6,36 @@ import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
 import { findGithubToken } from '../../../util/check-token.ts';
 import { exec } from '../../../util/exec/index.ts';
-import type { ExecOptions, ExtraEnv } from '../../../util/exec/types.ts';
+import type {
+  ConstraintName,
+  ExecOptions,
+  ExtraEnv,
+  ToolConstraint,
+} from '../../../util/exec/types.ts';
 import { readLocalFile } from '../../../util/fs/index.ts';
 import * as hostRules from '../../../util/host-rules.ts';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
 import { getConfigType, getLockFileName } from './lockfile.ts';
+
+/**
+ * Resolver tools that mise may invoke while running `mise lock` (version listing),
+ * regardless of which tools are being locked.
+ *
+ * @see https://mise.jdx.dev/dev-tools/backends/npm.html
+ * @see https://mise.jdx.dev/dev-tools/backends/go.html
+ * @see https://mise.jdx.dev/dev-tools/backends/gem.html
+ */
+function getMiseLockToolConstraints(
+  constraints?: Partial<Record<ConstraintName, string>> | null,
+): ToolConstraint[] {
+  return [
+    { toolName: 'mise', constraint: constraints?.mise },
+    { toolName: 'node', constraint: constraints?.node },
+    { toolName: 'npm', constraint: constraints?.npm },
+    { toolName: 'golang', constraint: constraints?.golang },
+    { toolName: 'ruby', constraint: constraints?.ruby },
+  ];
+}
 
 /**
  * Updates mise lock files when dependencies are updated.
@@ -70,12 +95,7 @@ export async function updateArtifacts({
   const execOptions: ExecOptions = {
     cwdFile: packageFileName,
     extraEnv,
-    toolConstraints: [
-      {
-        toolName: 'mise',
-        constraint: config.constraints?.mise,
-      },
-    ],
+    toolConstraints: getMiseLockToolConstraints(config.constraints),
     docker: {},
   };
 
