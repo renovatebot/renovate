@@ -1811,6 +1811,7 @@ const options: Readonly<RenovateOptions>[] = [
     parents: ['packageRules'],
     cli: false,
     env: false,
+    supportsTemplating: true,
   },
   {
     name: 'pinDigests',
@@ -2350,6 +2351,7 @@ const options: Readonly<RenovateOptions>[] = [
     subType: 'string',
     parents: ['customDatasources'],
     default: [],
+    supportsTemplating: true,
   },
   {
     name: 'vulnerabilityAlerts',
@@ -3159,12 +3161,13 @@ const options: Readonly<RenovateOptions>[] = [
   {
     name: 'matchStrings',
     description:
-      'Queries to use. Valid only within `bumpVersions` or `customManagers` object.',
+      'Queries to use. Valid only within `bumpVersions` or `customManagers` object. Templating is supported within `bumpVersions` only.',
     type: 'array',
     subType: 'string',
     parents: ['bumpVersions', 'customManagers'],
     cli: false,
     env: false,
+    supportsTemplating: true,
   },
   {
     name: 'matchStringsStrategy',
