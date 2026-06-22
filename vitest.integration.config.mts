@@ -1,5 +1,12 @@
 import { defineConfig } from 'vitest/config';
 
+// unset any RENOVATE_* env vars to avoid tampering with the tests
+for (const key of Object.keys(process.env)) {
+  if (key.startsWith('RENOVATE_')) {
+    delete process.env[key];
+  }
+}
+
 export default defineConfig({
   test: {
     globals: true,
