@@ -2032,7 +2032,9 @@ For example, to group all non-major devDependencies updates together into a sing
 
 ## `groupSingleUpdates`
 
-For example, you can set it to `false` if you prefer individual dependency names in PR titles when only one update is in the group.
+<!-- prettier-ignore -->
+!!! note
+  This option was [recently made opt-in, instead of opt-out](https://github.com/renovatebot/renovate/pull/44168).
 
 ## `groupSlug`
 
