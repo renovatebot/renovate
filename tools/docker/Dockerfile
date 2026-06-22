@@ -1,27 +1,27 @@
-# syntax=docker/dockerfile:1.24.0@sha256:87999aa3d42bdc6bea60565083ee17e86d1f3339802f543c0d03998580f9cb89
+# syntax=docker/dockerfile:1.25.0@sha256:0adf442eae370b6087e08edc7c50b552d80ddf261576f4ebd6421006b2461f12
 
 ARG BASE_IMAGE_TYPE=slim
 
 # --------------------------------------
 # slim image
 # --------------------------------------
-FROM ghcr.io/renovatebot/base-image:13.58.0@sha256:320757f91a08a94847b6767db866f927553486226bd37f1f83e23f19429fa12e AS slim-base
+FROM ghcr.io/renovatebot/base-image:13.62.3@sha256:05115b61a932b3a31849b6aaf829d4376ff22961f190bc1cd0779aeaa0cc0cf6 AS slim-base
 
 # --------------------------------------
 # full image
 # --------------------------------------
-FROM ghcr.io/renovatebot/base-image:13.58.0-full@sha256:6fd9f36a1ab16b399c216cb0edf951b8a180da56337115a158a2e7f20070eea0 AS full-base
+FROM ghcr.io/renovatebot/base-image:13.62.3-full@sha256:d8d0abf523511f71e5c2a1437462202d03c1a7be6e2d5c0f3caeba6da82c247a AS full-base
 
 ENV RENOVATE_BINARY_SOURCE=global
 
 # --------------------------------------
 # build image
 # --------------------------------------
-FROM --platform=$BUILDPLATFORM ghcr.io/renovatebot/base-image:13.58.0@sha256:320757f91a08a94847b6767db866f927553486226bd37f1f83e23f19429fa12e AS build
+FROM --platform=$BUILDPLATFORM ghcr.io/renovatebot/base-image:13.62.3@sha256:05115b61a932b3a31849b6aaf829d4376ff22961f190bc1cd0779aeaa0cc0cf6 AS build
 
 # We want a specific node version here
 # renovate: datasource=github-releases packageName=containerbase/node-prebuild versioning=node
-RUN install-tool node 24.16.0
+RUN install-tool node 24.17.0
 
 # corepack is too buggy 😞
 # renovate: datasource=npm
@@ -60,6 +60,9 @@ ENV ARCH=${TARGETARCH/amd64/x64}
 # set `npm_config_arch` for `prebuild-install`
 # set `npm_config_platform_arch` for `install-artifact-from-github`
 ENV npm_config_arch=${ARCH} npm_config_platform_arch=${ARCH}
+
+# TODO: remove this once https://github.com/pnpm/pnpm/pull/12400 lands
+ENV pnpm_config_platform_arch=${ARCH}
 
 COPY --link patches ./patches
 COPY --link pnpm-lock.yaml ./

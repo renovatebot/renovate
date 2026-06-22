@@ -4,8 +4,8 @@ import {
   getCache,
   resetCache as repoCacheReset,
 } from '../../../util/cache/repository/index.ts';
-import type { LongCommitSha } from '../../../util/git/types.ts';
 import { GitlabHttp, setBaseUrl } from '../../../util/http/gitlab.ts';
+import type { LongCommitSha } from '../../../util/schema-utils/git.ts';
 import { GitlabPrCache } from './pr-cache.ts';
 import type { GitLabMergeRequest } from './schema.ts';
 import type { GitlabPrCacheData } from './types.ts';
@@ -26,7 +26,7 @@ const pr1: GitLabMergeRequest = {
   labels: [],
   merge_status: 'cannot_be_merged',
   description: 'a merge request',
-  sha: 'defg' as LongCommitSha,
+  sha: '0123456789abcdef0123456789abcdef01234567' as LongCommitSha,
   assignee: null,
   assignees: [],
 };
@@ -43,7 +43,7 @@ const pr2: GitLabMergeRequest = {
   labels: [],
   merge_status: 'cannot_be_merged',
   description: 'a merge request',
-  sha: 'defg' as LongCommitSha,
+  sha: '0123456789abcdef0123456789abcdef01234567' as LongCommitSha,
   assignee: null,
   assignees: [],
   reviewers: [],
@@ -61,7 +61,7 @@ const pr3: GitLabMergeRequest = {
   labels: [],
   merge_status: 'cannot_be_merged',
   description: 'a merge request',
-  sha: 'defg' as LongCommitSha,
+  sha: '0123456789abcdef0123456789abcdef01234567' as LongCommitSha,
   assignee: null,
   assignees: [],
   reviewers: [],

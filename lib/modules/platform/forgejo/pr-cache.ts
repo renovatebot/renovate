@@ -6,14 +6,15 @@ import { logger } from '../../../logger/index.ts';
 import * as memCache from '../../../util/cache/memory/index.ts';
 import { getCache } from '../../../util/cache/repository/index.ts';
 import type { ForgejoHttp } from '../../../util/http/forgejo.ts';
-import type { HttpResponse } from '../../../util/http/types.ts';
 import {
   getQueryString,
   parseLinkHeader,
   parseUrl,
 } from '../../../util/url.ts';
 import type { Pr } from '../types.ts';
-import type { ForgejoPrCacheData, PR } from './types.ts';
+import type { PR } from './schema.ts';
+import { PRList } from './schema.ts';
+import type { ForgejoPrCacheData } from './types.ts';
 import { API_PATH, toRenovatePR } from './utils.ts';
 
 export class ForgejoPrCache {
@@ -168,13 +169,13 @@ export class ForgejoPrCache {
     });
 
     while (query) {
-      // TODO: use zod, typescript can't infer the type of the response #22198
-      const res: HttpResponse<(PR | null)[]> = await http.getJsonUnchecked(
+      const res = await http.getJson(
         `${API_PATH}/repos/${this.repo}/pulls?${query}`,
         {
           memCache: false,
           paginate: false,
         },
+        PRList,
       );
 
       const needNextPage = this.reconcile(res.body);

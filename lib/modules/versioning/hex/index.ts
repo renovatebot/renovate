@@ -5,7 +5,9 @@ import type { NewValueConfig, VersioningApi } from '../types.ts';
 
 export const id = 'hex';
 export const displayName = 'Hex';
-export const urls = ['https://hexdocs.pm/elixir/Version.html'];
+export const urls = [
+  '[Elixir Version module](https://hexdocs.pm/elixir/Version.html)',
+];
 export const supportsRanges = true;
 export const supportedRangeStrategies: RangeStrategy[] = [
   'bump',

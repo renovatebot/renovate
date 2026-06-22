@@ -312,6 +312,13 @@ export function generateBranchConfig(
       // Now overwrite original config with group config
       upgrade = mergeChildConfig(upgrade, upgrade.group);
       upgrade.isGroup = true;
+      if (!groupEligible) {
+        // Group settings here are only applied because of groupSingleUpdates.
+        // In this case, the group name is used instead of the dependency name,
+        // so the single update's version must not be appended to it.
+        delete upgrade.commitMessageExtra;
+        upgrade.recreateClosed = upgrade.recreateWhen !== 'never';
+      }
     } else {
       delete upgrade.groupName;
     }

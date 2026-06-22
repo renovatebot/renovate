@@ -68,6 +68,7 @@
     "no-nested-ternary": "error",
 
     "renovate/enforce-ts-extension": "error",
+    "renovate/no-hardcoded-docs-url": "error",
     "renovate/no-new-url": "error",
     "renovate/no-tools-import": "error",
     "renovate/zod-schema-naming": "error",

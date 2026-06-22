@@ -7,7 +7,7 @@ import { REPOSITORY_CLOSED_ONBOARDING } from '../../../../constants/error-messag
 import { logger } from '../../../../logger/index.ts';
 import type { Pr } from '../../../../modules/platform/types.ts';
 import * as _cache from '../../../../util/cache/repository/index.ts';
-import type { LongCommitSha } from '../../../../util/git/types.ts';
+import type { LongCommitSha } from '../../../../util/schema-utils/git.ts';
 import { isOnboarded } from './check.ts';
 
 vi.mock('../../../../util/cache/repository/index.ts');

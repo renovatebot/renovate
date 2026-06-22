@@ -13,13 +13,14 @@ import {
 } from '../../constants/error-messages.ts';
 import { setCustomEnv } from '../env.ts';
 import { newlineRegex, regEx } from '../regex.ts';
+import { toLongCommitSha } from '../schema-utils/git.ts';
 import * as _auth from './auth.ts';
 import * as _behindBaseCache from './behind-base-branch-cache.ts';
 import * as _conflictsCache from './conflicts-cache.ts';
 import * as git from './index.ts';
 import { setNoVerify } from './index.ts';
 import * as _modifiedCache from './modified-cache.ts';
-import type { FileChange, LongCommitSha } from './types.ts';
+import type { FileChange } from './types.ts';
 import * as _updateDateCache from './update-date-cache.ts';
 
 vi.mock('./conflicts-cache.ts');
@@ -1459,7 +1460,7 @@ describe('util/git/index', { timeout: 30000 }, () => {
       await repo.raw(['mv', 'master_file', 'renamed_master_file']);
       await repo.commit('rename master file');
 
-      const commit = (await repo.revparse(['HEAD'])).trim() as LongCommitSha;
+      const commit = toLongCommitSha((await repo.revparse(['HEAD'])).trim());
       const diff = await git.diffCommitTree(parentCommit, commit);
 
       expect(diff).toHaveLength(2);
