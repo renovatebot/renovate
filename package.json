@@ -184,7 +184,7 @@
     "@renovatebot/pgp": "1.3.14",
     "@renovatebot/ruby-semver": "5.0.0",
     "@sindresorhus/is": "8.1.0",
-    "@yarnpkg/core": "4.8.0",
+    "@yarnpkg/core": "4.9.0",
     "@yarnpkg/parsers": "3.0.3",
     "adm-zip": "0.5.17",
     "ae-cvss-calculator": "1.0.12",
