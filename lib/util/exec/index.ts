@@ -177,7 +177,10 @@ export async function exec(
     if (useDocker) {
       await removeDockerContainer(sideCarImage, dockerChildPrefix);
     }
-    logger.debug({ command: rawCmd }, 'Executing command');
+    logger.debug(
+      { command: rawCmd, env: Object.keys(rawOptions.env ?? {}) },
+      'Executing command',
+    );
     logger.trace({ commandOptions: rawOptions }, 'Command options');
     try {
       res = await rawExec(rawCmd, rawOptions);
