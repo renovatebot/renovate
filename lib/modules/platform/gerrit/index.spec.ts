@@ -1,8 +1,7 @@
 import { codeBlock } from 'common-tags';
-import { git, hostRules, partial } from '~test/util.ts';
+import { fakeSha, git, hostRules, partial } from '~test/util.ts';
 import { REPOSITORY_ARCHIVED } from '../../../constants/error-messages.ts';
 import type { BranchStatus } from '../../../types/index.ts';
-import type { LongCommitSha } from '../../../util/git/types.ts';
 import { repoFingerprint } from '../util.ts';
 import { client as _client } from './client.ts';
 import * as gerrit from './index.ts';
@@ -15,7 +14,7 @@ import type {
   GerritLabelTypeInfo,
   GerritProjectInfo,
   GerritRevisionInfo,
-} from './types.ts';
+} from './schema.ts';
 import { TAG_PULL_REQUEST_BODY, mapGerritChangeToPr } from './utils.ts';
 
 const gerritEndpointUrl = 'https://dev.gerrit.com/renovate';
@@ -35,14 +34,17 @@ const codeReviewLabel: GerritLabelTypeInfo = {
  * Creates a standard GerritChange fixture with sensible defaults.
  * Override any field via the `overrides` parameter.
  */
+const defaultRevision = fakeSha('default-revision');
+
 function makeChange(overrides?: Partial<GerritChange>): GerritChange {
   return partial<GerritChange>({
     _number: 123456,
     created: '2025-04-14 16:33:37.000000000',
     updated: '2025-04-14 16:40:00.000000000',
-    current_revision: 'some-revision' as LongCommitSha,
+    current_revision: defaultRevision,
     revisions: {
-      'some-revision': partial<GerritRevisionInfo>({
+      [defaultRevision]: partial<GerritRevisionInfo>({
+        ref: 'refs/changes/56/123456/1',
         commit_with_footers: 'Renovate-Branch: branch',
       }),
     },
@@ -57,6 +59,8 @@ const clientMock = vi.mocked(_client);
 const prCacheMock = vi.mocked(_GerritPrCache);
 
 describe('modules/platform/gerrit/index', () => {
+  const currentRevision = '0123456789abcdef0123456789abcdef01234567';
+
   beforeEach(async () => {
     hostRules.find.mockReturnValue({
       username: 'user',
@@ -160,7 +164,7 @@ describe('modules/platform/gerrit/index', () => {
       });
       expect(git.initRepo).toHaveBeenCalledExactlyOnceWith({
         url: 'https://user:pass@dev.gerrit.com/renovate/a/test%2Frepo',
-        virtualBranches: [],
+        virtualBranches: {},
       });
     });
 
@@ -179,7 +183,7 @@ describe('modules/platform/gerrit/index', () => {
         url: 'https://user:pass@dev.gerrit.com/renovate/a/test%2Frepo',
         cloneSubmodules: true,
         cloneSubmodulesFilter: ['test'],
-        virtualBranches: [],
+        virtualBranches: {},
       });
     });
 
@@ -213,16 +217,18 @@ describe('modules/platform/gerrit/index', () => {
     });
 
     it('initRepo() - initialize branches from open changes', async () => {
+      const sha1 = fakeSha('dep-1');
+      const sha2 = fakeSha('dep-2-skip');
+      const sha3 = fakeSha('dep-3');
+
       clientMock.getProjectInfo.mockResolvedValueOnce(projectInfo);
       clientMock.findChanges.mockResolvedValueOnce([]); // rejected changes
       clientMock.findChanges.mockResolvedValueOnce([
         partial<GerritChange>({
           _number: 12345,
-          created: '2025-04-14 16:33:37.000000000',
-          updated: '2025-04-14 16:40:00.000000000',
-          current_revision: 'sha123' as LongCommitSha,
+          current_revision: sha1,
           revisions: {
-            sha123: partial<GerritRevisionInfo>({
+            [sha1]: partial<GerritRevisionInfo>({
               ref: 'refs/changes/45/12345/1',
               commit_with_footers:
                 'commit message\n\nRenovate-Branch: renovate/dep-1',
@@ -232,9 +238,9 @@ describe('modules/platform/gerrit/index', () => {
         // change without Renovate-Branch footer should be skipped
         partial<GerritChange>({
           _number: 99999,
-          current_revision: 'sha789' as LongCommitSha,
+          current_revision: sha2,
           revisions: {
-            sha789: partial<GerritRevisionInfo>({
+            [sha2]: partial<GerritRevisionInfo>({
               ref: 'refs/changes/99/99999/1',
               commit_with_footers: 'commit message without branch footer',
             }),
@@ -242,11 +248,9 @@ describe('modules/platform/gerrit/index', () => {
         }),
         partial<GerritChange>({
           _number: 12346,
-          created: '2025-04-14 16:33:37.000000000',
-          updated: '2025-04-14 16:40:00.000000000',
-          current_revision: 'sha456' as LongCommitSha,
+          current_revision: sha3,
           revisions: {
-            sha456: partial<GerritRevisionInfo>({
+            [sha3]: partial<GerritRevisionInfo>({
               ref: 'refs/changes/46/12346/1',
               commit_with_footers:
                 'commit message\n\nRenovate-Branch: renovate/dep-2',
@@ -267,18 +271,16 @@ describe('modules/platform/gerrit/index', () => {
       ]);
       expect(git.initRepo).toHaveBeenCalledExactlyOnceWith({
         url: 'https://user:pass@dev.gerrit.com/renovate/a/test%2Frepo',
-        virtualBranches: [
-          {
-            name: 'renovate/dep-1',
+        virtualBranches: {
+          'renovate/dep-1': {
             ref: 'refs/changes/45/12345/1',
-            sha: 'sha123',
+            sha: sha1,
           },
-          {
-            name: 'renovate/dep-2',
+          'renovate/dep-2': {
             ref: 'refs/changes/46/12346/1',
-            sha: 'sha456',
+            sha: sha3,
           },
-        ],
+        },
       });
     });
   });
@@ -553,7 +555,11 @@ describe('modules/platform/gerrit/index', () => {
         files: [],
         pushOptions: ['notify=NONE', 'ready'],
       });
-      expect(git.updateVirtualBranch).toHaveBeenCalledExactlyOnceWith('source');
+      expect(git.setVirtualBranch).toHaveBeenCalledExactlyOnceWith(
+        'source',
+        'refs/changes/56/123456/1',
+        defaultRevision,
+      );
       expect(clientMock.addMessage).toHaveBeenCalledExactlyOnceWith(
         123456,
         'body',
@@ -625,7 +631,7 @@ describe('modules/platform/gerrit/index', () => {
       ).rejects.toThrow(
         `Could not find the Gerrit change after pushing to refs/for/target`,
       );
-      expect(git.updateVirtualBranch).toHaveBeenCalledExactlyOnceWith('source');
+      expect(git.setVirtualBranch).not.toHaveBeenCalled();
     });
 
     it('createPr() - push fails => rejects', async () => {
@@ -640,7 +646,7 @@ describe('modules/platform/gerrit/index', () => {
       ).rejects.toThrow(
         `Failed to push commit to refs/for/target to create Gerrit change`,
       );
-      expect(git.updateVirtualBranch).not.toHaveBeenCalled();
+      expect(git.setVirtualBranch).not.toHaveBeenCalled();
     });
   });
 
@@ -804,9 +810,9 @@ describe('modules/platform/gerrit/index', () => {
       const change = partial<GerritChange>({
         submittable: true,
         problems: [{ message: 'error1' }, { message: 'error2' }],
-        current_revision: 'abc' as LongCommitSha,
+        current_revision: currentRevision,
         revisions: {
-          abc: partial<GerritRevisionInfo>({
+          [currentRevision]: partial<GerritRevisionInfo>({
             commit_with_footers: 'Renovate-Branch: renovate/dependency-1.x',
           }),
         },
@@ -821,9 +827,9 @@ describe('modules/platform/gerrit/index', () => {
       const change = partial<GerritChange>({
         submittable: false,
         problems: [{ message: 'error1' }, { message: 'error2' }],
-        current_revision: 'abc' as LongCommitSha,
+        current_revision: currentRevision,
         revisions: {
-          abc: partial<GerritRevisionInfo>({
+          [currentRevision]: partial<GerritRevisionInfo>({
             commit_with_footers: 'Renovate-Branch: renovate/dependency-1.x',
           }),
         },
@@ -841,9 +847,9 @@ describe('modules/platform/gerrit/index', () => {
         labels: {
           Verified: { blocking: true },
         },
-        current_revision: 'abc' as LongCommitSha,
+        current_revision: currentRevision,
         revisions: {
-          abc: partial<GerritRevisionInfo>({
+          [currentRevision]: partial<GerritRevisionInfo>({
             commit_with_footers: 'Renovate-Branch: renovate/dependency-1.x',
           }),
         },
@@ -994,11 +1000,9 @@ describe('modules/platform/gerrit/index', () => {
         async ({ ctx, branchState, expectedVote, expectedLabel }) => {
           const change = partial<GerritChange>({
             _number: 123456,
-            created: '2025-04-14 16:33:37.000000000',
-            updated: '2025-04-14 16:40:00.000000000',
-            current_revision: 'abc' as LongCommitSha,
+            current_revision: currentRevision,
             revisions: {
-              abc: partial<GerritRevisionInfo>({
+              [currentRevision]: partial<GerritRevisionInfo>({
                 commit_with_footers: 'Renovate-Branch: renovate/dependency-1.x',
               }),
             },
@@ -1040,11 +1044,9 @@ describe('modules/platform/gerrit/index', () => {
       it('does not call setLabel() if label does not exist in change', async () => {
         const change = partial<GerritChange>({
           _number: 123456,
-          created: '2025-04-14 16:33:37.000000000',
-          updated: '2025-04-14 16:40:00.000000000',
-          current_revision: 'abc' as LongCommitSha,
+          current_revision: currentRevision,
           revisions: {
-            abc: partial<GerritRevisionInfo>({
+            [currentRevision]: partial<GerritRevisionInfo>({
               commit_with_footers: 'Renovate-Branch: renovate/dependency-1.x',
             }),
           },

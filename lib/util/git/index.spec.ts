@@ -13,13 +13,14 @@ import {
 } from '../../constants/error-messages.ts';
 import { setCustomEnv } from '../env.ts';
 import { newlineRegex, regEx } from '../regex.ts';
+import { type LongCommitSha, toLongCommitSha } from '../schema-utils/git.ts';
 import * as _auth from './auth.ts';
 import * as _behindBaseCache from './behind-base-branch-cache.ts';
 import * as _conflictsCache from './conflicts-cache.ts';
 import * as git from './index.ts';
 import { setNoVerify } from './index.ts';
 import * as _modifiedCache from './modified-cache.ts';
-import type { FileChange, LongCommitSha } from './types.ts';
+import type { FileChange } from './types.ts';
 import * as _updateDateCache from './update-date-cache.ts';
 
 vi.mock('./conflicts-cache.ts');
@@ -612,15 +613,20 @@ describe('util/git/index', { timeout: 30000 }, () => {
       expect(pushSpy).toHaveBeenCalledTimes(0);
     });
 
-    it('should merge a local-only branch without fetching from origin', async () => {
+    it('should merge a local-only virtual branch without fetching from origin', async () => {
       // Create a local-only branch (never pushed to origin)
-      await git.prepareCommit({
+      const commit = await git.prepareCommit({
         branchName: 'renovate/local_only_branch',
         message: 'local only commit',
         files: [
           { type: 'addition', path: 'local_only_file', contents: 'local' },
         ],
       });
+      await git.setVirtualBranch(
+        'renovate/local_only_branch',
+        'refs/changes/99/99999/1',
+        commit!.commitSha,
+      );
       // Reset working tree back to default branch so the file is not present yet
       const local = simpleGit(tmpDir.path);
       await local.checkout(defaultBranch);
@@ -629,9 +635,7 @@ describe('util/git/index', { timeout: 30000 }, () => {
       const fetchSpy = vi.spyOn(SimpleGit.prototype, 'fetch');
       const pushSpy = vi.spyOn(SimpleGit.prototype, 'push');
 
-      await git.mergeToLocal('renovate/local_only_branch', {
-        localBranch: true,
-      });
+      await git.mergeToLocal('renovate/local_only_branch');
 
       expect(fs.existsSync(`${tmpDir.path}/local_only_file`)).toBeTrue();
       expect(fetchSpy).not.toHaveBeenCalled();
@@ -674,12 +678,23 @@ describe('util/git/index', { timeout: 30000 }, () => {
       ]);
     });
 
-    it('should only delete local branch when localBranch option is set', async () => {
+    it('should only delete local branch for a virtual branch', async () => {
+      const sha = git.getBranchCommit('renovate/past_branch')!;
+      await git.setVirtualBranch(
+        'renovate/past_branch',
+        'refs/changes/99/99999/1',
+        sha,
+      );
       const rawSpy = vi.spyOn(SimpleGit.prototype, 'raw');
-      await git.deleteBranch('renovate/past_branch', { localBranch: true });
+      await git.deleteBranch('renovate/past_branch');
       expect(rawSpy).not.toHaveBeenCalledWith(
         expect.arrayContaining(['push', '--delete']),
       );
+      expect(rawSpy).toHaveBeenCalledWith([
+        'update-ref',
+        '-d',
+        'refs/remotes/origin/renovate/past_branch',
+      ]);
     });
   });
 
@@ -1396,18 +1411,145 @@ describe('util/git/index', { timeout: 30000 }, () => {
     });
   });
 
-  describe('listCommitTree', () => {
-    it('creates non-branch ref', async () => {
+  describe('getCommitTreeSha', () => {
+    it('returns the tree SHA for a commit', async () => {
       const commit = git.getBranchCommit('develop')!;
-      const res = await git.listCommitTree(commit);
-      expect(res).toEqual([
-        {
+      const treeSha = await git.getCommitTreeSha(commit);
+      expect(treeSha).toBeString();
+      expect(treeSha).toHaveLength(40);
+      expect(treeSha).toMatch(regEx(/^[0-9a-f]{40}$/));
+    });
+
+    it('throws if commit output does not contain a tree SHA', async () => {
+      const commit = git.getBranchCommit('develop')!;
+      vi.spyOn(SimpleGit.prototype, 'catFile').mockResolvedValueOnce(
+        'parent deadbeef',
+      );
+
+      await expect(git.getCommitTreeSha(commit)).rejects.toThrow(
+        `Could not extract tree SHA from commit ${commit}: parent deadbeef`,
+      );
+    });
+  });
+
+  describe('diffCommitTree', () => {
+    it('returns changed files between two commits', async () => {
+      const parentCommit = git.getBranchCommit('develop')!;
+      const commit = git.getBranchCommit(defaultBranch)!;
+      const diff = await git.diffCommitTree(parentCommit, commit);
+      expect(diff.length).toBeGreaterThanOrEqual(2);
+      expect(diff).toContainEqual(
+        expect.objectContaining({
+          path: 'master_file',
           mode: '100644',
-          path: 'past_file',
-          sha: '913705ab2ca79368053a476efa48aa6912d052c5',
           type: 'blob',
-        },
-      ]);
+        }),
+      );
+      expect(diff).toContainEqual(
+        expect.objectContaining({ path: 'file_to_delete' }),
+      );
+      for (const item of diff) {
+        expect(item.sha).toMatch(regEx(/^[0-9a-f]{40}$/));
+      }
+    });
+
+    it('returns deletions with sha null', async () => {
+      const commit = git.getBranchCommit(defaultBranch)!;
+      const parentCommit = git.getBranchCommit('develop')!;
+      // Reverse: from default branch back to develop — master_file and file_to_delete are "deleted"
+      const diff = await git.diffCommitTree(commit, parentCommit);
+      expect(diff.length).toBeGreaterThanOrEqual(2);
+      const masterFile = diff.find((d) => d.path === 'master_file');
+      expect(masterFile?.sha).toBeNull();
+      const fileToDelete = diff.find((d) => d.path === 'file_to_delete');
+      expect(fileToDelete?.sha).toBeNull();
+    });
+
+    it('returns renames as deletion and addition entries', async () => {
+      const repo = simpleGit(tmpDir.path);
+      await repo.addConfig('user.email', 'Jest@example.com');
+      await repo.addConfig('user.name', 'Jest');
+      const parentCommit = git.getBranchCommit(defaultBranch)!;
+
+      await repo.raw(['mv', 'master_file', 'renamed_master_file']);
+      await repo.commit('rename master file');
+
+      const commit = toLongCommitSha((await repo.revparse(['HEAD'])).trim());
+      const diff = await git.diffCommitTree(parentCommit, commit);
+
+      expect(diff).toHaveLength(2);
+      expect(diff).toContainEqual({
+        path: 'master_file',
+        mode: '100644',
+        type: 'blob',
+        sha: null,
+      });
+      expect(diff).toContainEqual(
+        expect.objectContaining({
+          path: 'renamed_master_file',
+          mode: '100644',
+          type: 'blob',
+          sha: expect.stringMatching(/^[0-9a-f]{40}$/),
+        }),
+      );
+    });
+
+    it('parses R status lines from diff-tree output', async () => {
+      const parentCommit = git.getBranchCommit('develop')!;
+      const commit = git.getBranchCommit(defaultBranch)!;
+      vi.spyOn(SimpleGit.prototype, 'raw').mockResolvedValueOnce(
+        ':100644 100644 aaa0000000000000000000000000000000000000 bbb0000000000000000000000000000000000000 R100\told.txt\tnew.txt\n',
+      );
+
+      const diff = await git.diffCommitTree(parentCommit, commit);
+
+      expect(diff).toHaveLength(2);
+      expect(diff).toContainEqual({
+        path: 'old.txt',
+        mode: '100644',
+        type: 'blob',
+        sha: null,
+      });
+      expect(diff).toContainEqual({
+        path: 'new.txt',
+        mode: '100644',
+        type: 'blob',
+        sha: 'bbb0000000000000000000000000000000000000',
+      });
+    });
+
+    it('maps mode 160000 to type commit for submodules', async () => {
+      const parentCommit = git.getBranchCommit('develop')!;
+      const commit = git.getBranchCommit(defaultBranch)!;
+      vi.spyOn(SimpleGit.prototype, 'raw').mockResolvedValueOnce(
+        ':000000 160000 0000000000000000000000000000000000000000 abc0000000000000000000000000000000000000 A\tvendor/sub\n',
+      );
+
+      const diff = await git.diffCommitTree(parentCommit, commit);
+
+      expect(diff).toContainEqual({
+        path: 'vendor/sub',
+        mode: '160000',
+        type: 'commit',
+        sha: 'abc0000000000000000000000000000000000000',
+      });
+    });
+
+    it('maps mode 040000 to type tree', async () => {
+      const parentCommit = git.getBranchCommit('develop')!;
+      const commit = git.getBranchCommit(defaultBranch)!;
+      vi.spyOn(SimpleGit.prototype, 'raw').mockResolvedValueOnce(
+        ':000000 040000 0000000000000000000000000000000000000000 def0000000000000000000000000000000000000 A\tsome/dir\n',
+      );
+
+      const diff = await git.diffCommitTree(parentCommit, commit);
+
+      expect(diff).toContainEqual({
+        path: 'some/dir',
+        mode: '040000',
+        type: 'tree',
+        sha: 'def0000000000000000000000000000000000000',
+      });
     });
   });
 
@@ -1806,13 +1948,12 @@ describe('util/git/index', { timeout: 30000 }, () => {
 
       await git.initRepo({
         url: origin.path,
-        virtualBranches: [
-          {
-            name: 'renovate/typescript-5.x',
+        virtualBranches: {
+          'renovate/typescript-5.x': {
             ref: 'refs/changes/45/12345/1',
             sha: commit,
           },
-        ],
+        },
       });
       await git.syncGit();
 
@@ -1826,13 +1967,12 @@ describe('util/git/index', { timeout: 30000 }, () => {
 
       await git.initRepo({
         url: origin.path,
-        virtualBranches: [
-          {
-            name: 'renovate/node-22.x',
+        virtualBranches: {
+          'renovate/node-22.x': {
             ref: 'refs/changes/99/99999/1',
             sha: commit,
           },
-        ],
+        },
       });
 
       await expect(git.syncGit()).rejects.toThrow();
@@ -1861,18 +2001,16 @@ describe('util/git/index', { timeout: 30000 }, () => {
 
       await git.initRepo({
         url: origin.path,
-        virtualBranches: [
-          {
-            name: 'renovate/dep1',
+        virtualBranches: {
+          'renovate/dep1': {
             ref: 'refs/changes/01/1001/1',
             sha: commit1,
           },
-          {
-            name: 'renovate/dep2',
+          'renovate/dep2': {
             ref: 'refs/changes/02/1002/1',
             sha: commit2,
           },
-        ],
+        },
       });
       await git.syncGit();
 
@@ -1883,7 +2021,7 @@ describe('util/git/index', { timeout: 30000 }, () => {
     });
   });
 
-  describe('deleteVirtualBranch()', () => {
+  describe('deleteBranch() for virtual branches', () => {
     it('deletes local branch and remote tracking ref', async () => {
       const originRepo = simpleGit(origin.path);
       const commit = (await originRepo.revparse(['HEAD'])) as LongCommitSha;
@@ -1891,53 +2029,70 @@ describe('util/git/index', { timeout: 30000 }, () => {
 
       await git.initRepo({
         url: origin.path,
-        virtualBranches: [
-          {
-            name: 'renovate/npm-lodash-4.x',
+        virtualBranches: {
+          'renovate/npm-lodash-4.x': {
             ref: 'refs/changes/50/12350/1',
             sha: commit,
           },
-        ],
+        },
       });
       await git.syncGit();
 
-      await git.deleteVirtualBranch('renovate/npm-lodash-4.x');
+      const pushSpy = vi.spyOn(SimpleGit.prototype, 'push');
+      await git.deleteBranch('renovate/npm-lodash-4.x');
 
       expect(git.branchExists('renovate/npm-lodash-4.x')).toBeFalse();
+      expect(pushSpy).not.toHaveBeenCalled();
     });
 
-    it('handles non-existent branch', async () => {
-      await expect(
-        git.deleteVirtualBranch('nonexistent'),
-      ).resolves.not.toThrow();
+    it('handles a missing remote-tracking ref', async () => {
+      const originRepo = simpleGit(origin.path);
+      const commit = (await originRepo.revparse(['HEAD'])) as LongCommitSha;
+      await git.setVirtualBranch(
+        'nonexistent',
+        'refs/changes/99/99999/1',
+        commit,
+      );
+      // Simulate the remote-tracking ref already being gone
+      await simpleGit(tmpDir.path).raw([
+        'update-ref',
+        '-d',
+        'refs/remotes/origin/nonexistent',
+      ]);
+      await expect(git.deleteBranch('nonexistent')).resolves.not.toThrow();
     });
   });
 
-  describe('updateVirtualBranch()', () => {
-    it('updates tracking to match current local branch', async () => {
+  describe('mergeToLocal() for virtual branches', () => {
+    it('merges the remote-tracking ref of an init virtual branch', async () => {
       const originRepo = simpleGit(origin.path);
       const commit = (await originRepo.revparse(['HEAD'])) as LongCommitSha;
-      await originRepo.raw(['update-ref', 'refs/changes/60/12360/1', commit]);
+      await originRepo.raw(['update-ref', 'refs/changes/70/12370/1', commit]);
 
       await git.initRepo({
         url: origin.path,
-        virtualBranches: [
-          {
-            name: 'renovate/virtual-test',
-            ref: 'refs/changes/60/12360/1',
+        virtualBranches: {
+          'renovate/virtual-merge': {
+            ref: 'refs/changes/70/12370/1',
             sha: commit,
           },
-        ],
+        },
       });
       await git.syncGit();
-      await git.checkoutBranch('renovate/virtual-test');
 
-      await git.updateVirtualBranch('renovate/virtual-test');
+      const fetchSpy = vi.spyOn(SimpleGit.prototype, 'fetch');
+      const mergeSpy = vi.spyOn(SimpleGit.prototype, 'merge');
+      await git.mergeToLocal('renovate/virtual-merge');
 
-      expect(git.getBranchCommit('renovate/virtual-test')).toBe(commit);
+      expect(fetchSpy).not.toHaveBeenCalled();
+      expect(mergeSpy).toHaveBeenCalledWith([
+        'refs/remotes/origin/renovate/virtual-merge',
+      ]);
     });
+  });
 
-    it('marks branch as not modified after update', async () => {
+  describe('setVirtualBranch()', () => {
+    it('marks branch as not modified after registration', async () => {
       modifiedCache.getCachedModifiedResult.mockReturnValue(null);
       const originRepo = simpleGit(origin.path);
       const commit = (await originRepo.revparse(['HEAD'])) as LongCommitSha;
@@ -1945,18 +2100,21 @@ describe('util/git/index', { timeout: 30000 }, () => {
 
       await git.initRepo({
         url: origin.path,
-        virtualBranches: [
-          {
-            name: 'renovate/virtual-test',
+        virtualBranches: {
+          'renovate/virtual-test': {
             ref: 'refs/changes/60/12360/1',
             sha: commit,
           },
-        ],
+        },
       });
       await git.syncGit();
       await git.checkoutBranch('renovate/virtual-test');
 
-      await git.updateVirtualBranch('renovate/virtual-test');
+      await git.setVirtualBranch(
+        'renovate/virtual-test',
+        'refs/changes/60/12360/2',
+        commit,
+      );
 
       expect(
         await git.isBranchModified('renovate/virtual-test', defaultBranch),

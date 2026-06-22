@@ -2,12 +2,9 @@ import { randomUUID } from 'node:crypto';
 import { isNonEmptyArray, isString } from '@sindresorhus/is';
 import { logger } from '../../../logger/index.ts';
 import * as git from '../../../util/git/index.ts';
-import type {
-  CommitFilesConfig,
-  FileChange,
-  LongCommitSha,
-} from '../../../util/git/types.ts';
+import type { CommitFilesConfig, FileChange } from '../../../util/git/types.ts';
 import { hash } from '../../../util/hash.ts';
+import type { LongCommitSha } from '../../../util/schema-utils/git.ts';
 import { DefaultGitScm } from '../default-scm.ts';
 import { client } from './client.ts';
 
@@ -23,9 +20,6 @@ let repository: string;
 export function configureScm(repo: string): void {
   repository = repo;
 }
-
-/** Branches with a local commit but no Gerrit change yet (push deferred to createPr()). */
-export const pendingChangeBranches = new Set<string>();
 
 export async function pushForReview(options: {
   sourceRef: string;
@@ -44,17 +38,12 @@ export async function pushForReview(options: {
     }
   }
 
-  const result = await git.pushCommit({
+  return git.pushCommit({
     sourceRef: options.sourceRef,
     targetRef: `refs/for/${options.targetBranch}`,
     files: options.files,
     pushOptions,
   });
-  if (result) {
-    pendingChangeBranches.delete(options.sourceRef);
-    await git.updateVirtualBranch(options.sourceRef);
-  }
-  return result;
 }
 
 export class GerritScm extends DefaultGitScm {
@@ -67,6 +56,7 @@ export class GerritScm extends DefaultGitScm {
       branchName: commit.branchName,
       state: 'open',
       targetBranch: commit.baseBranch,
+      requestDetails: ['CURRENT_REVISION'],
     });
 
     const message = isString(commit.message)
@@ -106,33 +96,34 @@ export class GerritScm extends DefaultGitScm {
         });
         /* v8 ignore else -- should never happen */
         if (pushResult) {
+          const currentRef =
+            existingChange.revisions![existingChange.current_revision!].ref;
+          await git.setVirtualBranch(
+            commit.branchName,
+            nextPatchSetRef(currentRef),
+            commitSha,
+          );
           return commitSha;
         }
       } else {
         logger.debug(`Commit prepared, push deferred to createPr()`);
-        pendingChangeBranches.add(commit.branchName);
         return commitSha;
       }
     }
     return null; // empty commit, no changes in this Gerrit Change
   }
+}
 
-  // Delete virtual branch created from a Gerrit change
-  // Note: Gerrit changes themselves are abandoned through the API, not deleted as branches
-  override async deleteBranch(branchName: string): Promise<void> {
-    pendingChangeBranches.delete(branchName);
-    await git.deleteVirtualBranch(branchName);
-  }
-
-  override async mergeToLocal(branchName: string): Promise<void> {
-    // Pending branches only have a local ref (refs/heads/<branchName>).
-    // Non-pending virtual branches have a remote-tracking ref (refs/remotes/origin/<branchName>).
-    // Both are already local, so no fetch is needed.
-    const ref = pendingChangeBranches.has(branchName)
-      ? branchName
-      : git.remoteBranchRef(branchName);
-    return git.mergeToLocal(ref, { localBranch: true });
-  }
+/**
+ * Derive the next patch-set ref from a Gerrit change ref.
+ * Gerrit refs follow the pattern `refs/changes/<NN>/<change>/<patchset>`.
+ * After a push, Gerrit creates the next patch-set, so we increment the
+ * trailing number to keep the virtual branch in sync.
+ */
+export function nextPatchSetRef(currentRef: string): string {
+  const lastSlash = currentRef.lastIndexOf('/');
+  const patchSet = Number(currentRef.slice(lastSlash + 1));
+  return `${currentRef.slice(0, lastSlash + 1)}${patchSet + 1}`;
 }
 
 /**

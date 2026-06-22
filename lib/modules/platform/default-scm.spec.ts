@@ -1,6 +1,7 @@
 import { git, partial } from '~test/util.ts';
 import { RENOVATE_FORK_UPSTREAM } from '../../util/git/index.ts';
-import type { CommitFilesConfig, LongCommitSha } from '../../util/git/types.ts';
+import type { CommitFilesConfig } from '../../util/git/types.ts';
+import type { LongCommitSha } from '../../util/schema-utils/git.ts';
 import { DefaultGitScm } from './default-scm.ts';
 
 describe('modules/platform/default-scm', () => {

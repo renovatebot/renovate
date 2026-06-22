@@ -1,4 +1,4 @@
-import type { LongCommitSha } from '../../../util/git/types.ts';
+import type { LongCommitSha } from '../../../util/schema-utils/git.ts';
 import type { EmailAddress } from '../../../util/schema-utils/index.ts';
 import type { Pr, PrBodyStruct } from '../types.ts';
 

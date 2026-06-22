@@ -1,6 +1,6 @@
 {
   "meta": {
-    "version": "2026.6.1 linux-x64 (2026-06-06)"
+    "version": "2026.6.11 linux-x64 (2026-06-16)"
   },
   "tools": {
     "1password": {
@@ -51,6 +51,9 @@
     "agebox": {
       "aqua": "slok/agebox",
       "asdf": "slok/asdf-agebox"
+    },
+    "agy": {
+      "aqua": "google-antigravity/antigravity-cli"
     },
     "aichat": {
       "aqua": "sigoden/aichat"
@@ -106,6 +109,9 @@
     },
     "ant": {
       "vfox": "mise-plugins/vfox-ant"
+    },
+    "antigravity-cli": {
+      "aqua": "google-antigravity/antigravity-cli"
     },
     "apko": {
       "aqua": "chainguard-dev/apko",
@@ -182,9 +188,9 @@
       "cargo": "atuin"
     },
     "aube": {
-      "aqua": "endevco/aube",
+      "aqua": "jdx/aube",
       "cargo": "aube",
-      "github": "endevco/aube"
+      "github": "jdx/aube"
     },
     "auto-doc": {
       "asdf": "mise-plugins/mise-auto-doc",
@@ -445,6 +451,10 @@
       "aqua": "sagiegurari/cargo-make",
       "asdf": "mise-plugins/asdf-cargo-make",
       "cargo": "cargo-make"
+    },
+    "cargo-msrv": {
+      "aqua": "foresterre/cargo-msrv",
+      "cargo": "cargo-msrv"
     },
     "cargo-release": {
       "github": "crate-ci/cargo-release"
@@ -1194,6 +1204,10 @@
     "ghq": {
       "aqua": "x-motemen/ghq",
       "asdf": "kajisha/asdf-ghq"
+    },
+    "ghtkn": {
+      "aqua": "suzuki-shunsuke/ghtkn",
+      "github": "suzuki-shunsuke/ghtkn"
     },
     "ginkgo": {
       "asdf": "mise-plugins/mise-ginkgo",
@@ -2476,6 +2490,9 @@
     "pinact": {
       "aqua": "suzuki-shunsuke/pinact"
     },
+    "pinniped": {
+      "github": "vmware/pinniped"
+    },
     "pint": {
       "aqua": "cloudflare/pint",
       "asdf": "sam-burrell/asdf-pint"
@@ -2528,7 +2545,7 @@
     },
     "podman": {
       "asdf": "tvon/asdf-podman",
-      "github": "containers/podman"
+      "github": "podman-container-tools/podman"
     },
     "podman-tui": {
       "github": "containers/podman-tui"
@@ -3011,6 +3028,9 @@
     "sqlc": {
       "aqua": "sqlc-dev/sqlc",
       "github": "sqlc-dev/sqlc"
+    },
+    "sqlcl": {
+      "aqua": "oracle.com/sqlcl"
     },
     "sqlite": {
       "asdf": "mise-plugins/mise-sqlite",
@@ -3530,6 +3550,9 @@
     },
     "vp": {
       "npm": "vite-plus"
+    },
+    "vscode-cli": {
+      "aqua": "microsoft/vscode/code"
     },
     "vultr": {
       "asdf": "ikuradon/asdf-vultr-cli",

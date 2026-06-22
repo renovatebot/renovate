@@ -1,4 +1,4 @@
-import { isNonEmptyArray, isUndefined } from '@sindresorhus/is';
+import { isUndefined } from '@sindresorhus/is';
 import semver from 'semver';
 import { logger } from '../../../logger/index.ts';
 import type { BranchStatus } from '../../../types/index.ts';
@@ -9,6 +9,7 @@ import * as git from '../../../util/git/index.ts';
 import type { VirtualBranch } from '../../../util/git/types.ts';
 import { setBaseUrl } from '../../../util/http/gerrit.ts';
 import { regEx } from '../../../util/regex.ts';
+import { toLongCommitSha } from '../../../util/schema-utils/git.ts';
 import { ensureTrailingSlash } from '../../../util/url.ts';
 import { hashBody } from '../pr-body.ts';
 import type {
@@ -35,12 +36,12 @@ import { smartTruncate } from '../utils/pr-body.ts';
 import { readOnlyIssueBody } from '../utils/read-only-issue-body.ts';
 import { client } from './client.ts';
 import { GerritPrCache } from './pr-cache.ts';
-import { configureScm, pushForReview } from './scm.ts';
 import type {
   GerritChange,
   GerritLabelTypeInfo,
   GerritProjectInfo,
-} from './types.ts';
+} from './schema.ts';
+import { configureScm, pushForReview } from './scm.ts';
 import {
   MAX_GERRIT_COMMENT_SIZE,
   REQUEST_DETAILS_FOR_PRS,
@@ -180,24 +181,21 @@ export async function initRepo({
     state: 'open',
     requestDetails: ['CURRENT_REVISION', 'COMMIT_FOOTERS'],
   });
-  const virtualBranches: VirtualBranch[] = [];
+  const virtualBranches: Record<string, VirtualBranch> = {};
   for (const change of openChanges) {
     const branchName = extractSourceBranch(change);
     if (!branchName) {
       continue;
     }
-    const sha = change.current_revision!;
+    const sha = toLongCommitSha(change.current_revision);
     const ref = change.revisions![sha].ref;
-    virtualBranches.push({
-      name: branchName,
-      ref,
-      sha,
-    });
+    virtualBranches[branchName] = { ref, sha };
   }
 
-  if (isNonEmptyArray(virtualBranches)) {
+  const virtualBranchCount = Object.keys(virtualBranches).length;
+  if (virtualBranchCount > 0) {
     logger.debug(
-      `Will fetch ${virtualBranches.length} Gerrit changes as virtual branches`,
+      `Will fetch ${virtualBranchCount} Gerrit changes as virtual branches`,
     );
   }
 
@@ -352,6 +350,12 @@ export async function createPr(prConfig: CreatePRConfig): Promise<Pr | null> {
       `Could not find the Gerrit change after pushing to refs/for/${prConfig.targetBranch}`,
     );
   }
+
+  // Register the virtual branch now that the change exists and we have the ref.
+  const sha = toLongCommitSha(change.current_revision);
+  const ref = change.revisions![sha].ref;
+  await git.setVirtualBranch(prConfig.sourceBranch, ref, sha);
+
   await client.addMessage(
     change._number,
     prConfig.prBody,

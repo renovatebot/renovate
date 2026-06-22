@@ -7,9 +7,9 @@ import { client } from './client.ts';
 import type {
   GerritChange,
   GerritChangeMessageInfo,
-  GerritFindPRConfig,
   GerritMergeableInfo,
-} from './types.ts';
+} from './schema.ts';
+import type { GerritFindPRConfig } from './types.ts';
 import { MIN_GERRIT_VERSION } from './utils.ts';
 
 const gerritEndpointUrl = 'https://dev.gerrit.com/renovate/';
@@ -178,12 +178,15 @@ describe('modules/platform/gerrit/client', () => {
           .query((query) => query?.q?.includes(expectedQueryPart) ?? false)
           .reply(
             200,
-            gerritRestResponse([{ _number: 1 }, { _number: 2 }]),
+            gerritRestResponse([
+              gerritChange({ _number: 1 }),
+              gerritChange({ _number: 2 }),
+            ]),
             jsonResultHeader,
           );
         await expect(client.findChanges('repo', config)).resolves.toEqual([
-          { _number: 1 },
-          { _number: 2 },
+          gerritChange({ _number: 1 }),
+          gerritChange({ _number: 2 }),
         ]);
       },
     );
@@ -193,14 +196,18 @@ describe('modules/platform/gerrit/client', () => {
         .scope(gerritEndpointUrl)
         .get('/a/changes/')
         .query((query) => query.n === '1')
-        .reply(200, gerritRestResponse([{ _number: 1 }]), jsonResultHeader);
+        .reply(
+          200,
+          gerritRestResponse([gerritChange({ _number: 1 })]),
+          jsonResultHeader,
+        );
       await expect(
         client.findChanges('repo', {
           branchName: 'dependency-xyz',
           singleChange: true,
           pageLimit: 5, // should be ignored
         }),
-      ).resolves.toEqual([{ _number: 1 }]);
+      ).resolves.toEqual([gerritChange({ _number: 1 })]);
     });
 
     it('sets query.n as 50 if pageLimit is not provided', async () => {
@@ -208,12 +215,16 @@ describe('modules/platform/gerrit/client', () => {
         .scope(gerritEndpointUrl)
         .get('/a/changes/')
         .query((query) => query.n === '50')
-        .reply(200, gerritRestResponse([{ _number: 1 }]), jsonResultHeader);
+        .reply(
+          200,
+          gerritRestResponse([gerritChange({ _number: 1 })]),
+          jsonResultHeader,
+        );
       await expect(
         client.findChanges('repo', {
           branchName: 'dependency-xyz',
         }),
-      ).resolves.toEqual([{ _number: 1 }]);
+      ).resolves.toEqual([gerritChange({ _number: 1 })]);
     });
 
     it('sets query.n with pageLimit if provided', async () => {
@@ -221,13 +232,17 @@ describe('modules/platform/gerrit/client', () => {
         .scope(gerritEndpointUrl)
         .get('/a/changes/')
         .query((query) => query.n === '5')
-        .reply(200, gerritRestResponse([{ _number: 1 }]), jsonResultHeader);
+        .reply(
+          200,
+          gerritRestResponse([gerritChange({ _number: 1 })]),
+          jsonResultHeader,
+        );
       await expect(
         client.findChanges('repo', {
           branchName: 'dependency-xyz',
           pageLimit: 5,
         }),
-      ).resolves.toEqual([{ _number: 1 }]);
+      ).resolves.toEqual([gerritChange({ _number: 1 })]);
     });
 
     it('sets query.S as 0 if startOffset is not provided', async () => {
@@ -235,12 +250,16 @@ describe('modules/platform/gerrit/client', () => {
         .scope(gerritEndpointUrl)
         .get('/a/changes/')
         .query((query) => query.S === '0')
-        .reply(200, gerritRestResponse([{ _number: 1 }]), jsonResultHeader);
+        .reply(
+          200,
+          gerritRestResponse([gerritChange({ _number: 1 })]),
+          jsonResultHeader,
+        );
       await expect(
         client.findChanges('repo', {
           branchName: 'dependency-xyz',
         }),
-      ).resolves.toEqual([{ _number: 1 }]);
+      ).resolves.toEqual([gerritChange({ _number: 1 })]);
     });
 
     it('handles pagination automatically', async () => {
@@ -251,8 +270,8 @@ describe('modules/platform/gerrit/client', () => {
         .reply(
           200,
           gerritRestResponse([
-            { _number: 1 },
-            { _number: 2, _more_changes: true },
+            gerritChange({ _number: 1 }),
+            gerritChange({ _number: 2, _more_changes: true }),
           ]),
           jsonResultHeader,
         )
@@ -261,8 +280,8 @@ describe('modules/platform/gerrit/client', () => {
         .reply(
           200,
           gerritRestResponse([
-            { _number: 3 },
-            { _number: 4, _more_changes: true },
+            gerritChange({ _number: 3 }),
+            gerritChange({ _number: 4, _more_changes: true }),
           ]),
           jsonResultHeader,
         )
@@ -270,7 +289,10 @@ describe('modules/platform/gerrit/client', () => {
         .query((query) => query.n === '2' && query.S === '4')
         .reply(
           200,
-          gerritRestResponse([{ _number: 5 }, { _number: 6 }]),
+          gerritRestResponse([
+            gerritChange({ _number: 5 }),
+            gerritChange({ _number: 6 }),
+          ]),
           jsonResultHeader,
         );
       await expect(
@@ -279,12 +301,12 @@ describe('modules/platform/gerrit/client', () => {
           pageLimit: 2, // to keep the test short
         }),
       ).resolves.toEqual([
-        { _number: 1 },
-        { _number: 2 },
-        { _number: 3 },
-        { _number: 4 },
-        { _number: 5 },
-        { _number: 6 },
+        gerritChange({ _number: 1 }),
+        gerritChange({ _number: 2 }),
+        gerritChange({ _number: 3 }),
+        gerritChange({ _number: 4 }),
+        gerritChange({ _number: 5 }),
+        gerritChange({ _number: 6 }),
       ]);
     });
 
@@ -304,8 +326,8 @@ describe('modules/platform/gerrit/client', () => {
         .reply(
           200,
           gerritRestResponse([
-            { _number: 1 },
-            { _number: 2, _more_changes: true },
+            gerritChange({ _number: 1 }),
+            gerritChange({ _number: 2, _more_changes: true }),
           ]),
           jsonResultHeader,
         )
@@ -314,8 +336,8 @@ describe('modules/platform/gerrit/client', () => {
         .reply(
           200,
           gerritRestResponse([
-            { _number: 3 },
-            { _number: 4, _more_changes: true },
+            gerritChange({ _number: 3 }),
+            gerritChange({ _number: 4, _more_changes: true }),
           ]),
           jsonResultHeader,
         );
@@ -327,14 +349,20 @@ describe('modules/platform/gerrit/client', () => {
       });
 
       expect(result).toEqual([
-        { _number: 1 },
-        { _number: 2 },
-        { _number: 3 },
-        { _number: 4 },
+        gerritChange({ _number: 1 }),
+        gerritChange({ _number: 2 }),
+        gerritChange({ _number: 3 }),
+        gerritChange({ _number: 4 }),
       ]);
       expect(calls).toHaveLength(2);
-      expect(calls[0]).toEqual([{ _number: 1 }, { _number: 2 }]);
-      expect(calls[1]).toEqual([{ _number: 3 }, { _number: 4 }]);
+      expect(calls[0]).toEqual([
+        gerritChange({ _number: 1 }),
+        gerritChange({ _number: 2 }),
+      ]);
+      expect(calls[1]).toEqual([
+        gerritChange({ _number: 3 }),
+        gerritChange({ _number: 4 }),
+      ]);
     });
 
     it('stops pagination when shouldFetchNextPage returns false', async () => {
@@ -351,8 +379,8 @@ describe('modules/platform/gerrit/client', () => {
         .reply(
           200,
           gerritRestResponse([
-            { _number: 1 },
-            { _number: 2, _more_changes: true },
+            gerritChange({ _number: 1 }),
+            gerritChange({ _number: 2, _more_changes: true }),
           ]),
           jsonResultHeader,
         );
@@ -363,7 +391,10 @@ describe('modules/platform/gerrit/client', () => {
         shouldFetchNextPage,
       });
 
-      expect(result).toEqual([{ _number: 1 }, { _number: 2 }]);
+      expect(result).toEqual([
+        gerritChange({ _number: 1 }),
+        gerritChange({ _number: 2 }),
+      ]);
       expect(callCount).toBe(1);
     });
 
@@ -376,19 +407,23 @@ describe('modules/platform/gerrit/client', () => {
             Array.isArray(query.o) &&
             query.o.toString() === ['LABELS', 'MESSAGES'].toString(),
         )
-        .reply(200, gerritRestResponse([{ _number: 3 }]), jsonResultHeader);
+        .reply(
+          200,
+          gerritRestResponse([gerritChange({ _number: 3 })]),
+          jsonResultHeader,
+        );
       await expect(
         client.findChanges('repo', {
           branchName: 'dependency-xyz',
           requestDetails: ['LABELS', 'MESSAGES'],
         }),
-      ).resolves.toEqual([{ _number: 3 }]);
+      ).resolves.toEqual([gerritChange({ _number: 3 })]);
     });
   });
 
   describe('getChange()', () => {
     it('get', async () => {
-      const change = partial<GerritChange>({});
+      const change = gerritChange({ _number: 123456 });
       httpMock
         .scope(gerritEndpointUrl)
         .get('/a/changes/123456?o=CURRENT_REVISION&o=COMMIT_FOOTERS')
@@ -483,7 +518,7 @@ describe('modules/platform/gerrit/client', () => {
     });
 
     it('returns single change when only one found', async () => {
-      const change = partial<GerritChange>({
+      const change = gerritChange({
         _number: 123,
         branch: 'main',
       });
@@ -501,11 +536,11 @@ describe('modules/platform/gerrit/client', () => {
     });
 
     it('returns first change when multiple found without targetBranch', async () => {
-      const change1 = partial<GerritChange>({
+      const change1 = gerritChange({
         _number: 111,
         branch: 'main',
       });
-      const change2 = partial<GerritChange>({
+      const change2 = gerritChange({
         _number: 222,
         branch: 'develop',
       });
@@ -523,11 +558,11 @@ describe('modules/platform/gerrit/client', () => {
     });
 
     it('returns matching change when targetBranch specified and match found', async () => {
-      const change1 = partial<GerritChange>({
+      const change1 = gerritChange({
         _number: 111,
         branch: 'main',
       });
-      const change2 = partial<GerritChange>({
+      const change2 = gerritChange({
         _number: 222,
         branch: 'develop',
       });
@@ -546,11 +581,11 @@ describe('modules/platform/gerrit/client', () => {
     });
 
     it('returns first change when targetBranch specified but no match found', async () => {
-      const change1 = partial<GerritChange>({
+      const change1 = gerritChange({
         _number: 111,
         branch: 'main',
       });
-      const change2 = partial<GerritChange>({
+      const change2 = gerritChange({
         _number: 222,
         branch: 'develop',
       });
@@ -585,14 +620,14 @@ describe('modules/platform/gerrit/client', () => {
         .reply(
           200,
           gerritRestResponse([
-            partial<GerritChangeMessageInfo>({ message: 'msg1' }),
-            partial<GerritChangeMessageInfo>({ message: 'msg2' }),
+            partial<GerritChangeMessageInfo>({ id: '1', message: 'msg1' }),
+            partial<GerritChangeMessageInfo>({ id: '2', message: 'msg2' }),
           ]),
           jsonResultHeader,
         );
       await expect(client.getMessages(123456)).resolves.toEqual([
-        { message: 'msg1' },
-        { message: 'msg2' },
+        { id: '1', message: 'msg1' },
+        { id: '2', message: 'msg2' },
       ]);
     });
   });
@@ -658,8 +693,11 @@ describe('modules/platform/gerrit/client', () => {
         .reply(
           200,
           gerritRestResponse([
-            partial<GerritChangeMessageInfo>({ message: 'msg1' }),
-            partial<GerritChangeMessageInfo>({ message: 'the message' }),
+            partial<GerritChangeMessageInfo>({ id: '1', message: 'msg1' }),
+            partial<GerritChangeMessageInfo>({
+              id: '2',
+              message: 'the message',
+            }),
           ]),
           jsonResultHeader,
         );
@@ -700,7 +738,11 @@ describe('modules/platform/gerrit/client', () => {
         .reply(
           200,
           gerritRestResponse([
-            partial<GerritChangeMessageInfo>({ message: 'msg1', tag: 'TAG' }),
+            partial<GerritChangeMessageInfo>({
+              id: '1',
+              message: 'msg1',
+              tag: 'TAG',
+            }),
           ]),
           jsonResultHeader,
         );
@@ -816,6 +858,20 @@ describe('modules/platform/gerrit/client', () => {
     });
   });
 });
+
+function gerritChange(overrides: Partial<GerritChange> = {}): GerritChange {
+  return {
+    branch: 'main',
+    change_id: 'I0123456789abcdef',
+    subject: 'subject',
+    status: 'NEW',
+    created: '2024-01-01 00:00:00.000000000',
+    updated: '2024-01-01 00:00:00.000000000',
+    hashtags: [],
+    _number: 0,
+    ...overrides,
+  };
+}
 
 function gerritRestResponse(body: any): any {
   return `)]}'\n${JSON.stringify(body)}`;

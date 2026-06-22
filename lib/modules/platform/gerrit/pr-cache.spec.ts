@@ -1,17 +1,19 @@
-import { partial } from '~test/util.ts';
+import { fakeSha, partial } from '~test/util.ts';
 import { reset as memCacheReset } from '../../../util/cache/memory/index.ts';
 import {
   getCache,
   resetCache as repoCacheReset,
 } from '../../../util/cache/repository/index.ts';
-import type { LongCommitSha } from '../../../util/git/types.ts';
 import { client as _client } from './client.ts';
 import { GerritPrCache } from './pr-cache.ts';
-import type { GerritChange, GerritRevisionInfo } from './types.ts';
+import type { GerritChange, GerritRevisionInfo } from './schema.ts';
 import { REQUEST_DETAILS_FOR_PRS, mapGerritChangeToPr } from './utils.ts';
 
 vi.mock('./client.ts');
 const clientMock = vi.mocked(_client);
+
+const defaultSha = fakeSha('default');
+const otherSha = fakeSha('other');
 
 /**
  * Mock findChanges so it calls shouldFetchNextPage (the reconcile callback)
@@ -32,9 +34,9 @@ function makeChange(overrides?: Partial<GerritChange>): GerritChange {
     subject: 'test change',
     created: '2025-04-14 16:33:37.000000000',
     updated: '2025-04-14 16:40:00.000000000',
-    current_revision: 'abc123' as LongCommitSha,
+    current_revision: defaultSha,
     revisions: {
-      abc123: partial<GerritRevisionInfo>({
+      [defaultSha]: partial<GerritRevisionInfo>({
         commit_with_footers: 'msg\n\nRenovate-Branch: renovate/dep-1',
       }),
     },
@@ -204,9 +206,9 @@ describe('modules/platform/gerrit/pr-cache', () => {
       // A change without Renovate-Branch footer will return null from mapGerritChangeToPr
       const changeWithoutBranch = makeChange({
         _number: 300,
-        current_revision: 'def456' as LongCommitSha,
+        current_revision: otherSha,
         revisions: {
-          def456: partial<GerritRevisionInfo>({
+          [otherSha]: partial<GerritRevisionInfo>({
             commit_with_footers: 'no branch footer here',
           }),
         },

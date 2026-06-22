@@ -3,7 +3,7 @@ import * as memCache from '../../../util/cache/memory/index.ts';
 import { getCache } from '../../../util/cache/repository/index.ts';
 import type { Pr } from '../types.ts';
 import { client } from './client.ts';
-import type { GerritChange } from './types.ts';
+import type { GerritChange } from './schema.ts';
 import { REQUEST_DETAILS_FOR_PRS, mapGerritChangeToPr } from './utils.ts';
 
 /**
