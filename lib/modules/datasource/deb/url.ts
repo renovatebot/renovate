@@ -127,7 +127,7 @@ export async function checkIfModified(
  * will return 'main/binary-amd64'.
  *
  * @param basePackageUrl - The base URL of the package.
- * @returns
+ * @returns The relative package path (the last two segments of the URL path).
  */
 export function getPackagePath(basePackageUrl: string): string {
   const urlParts = basePackageUrl.split('/');
