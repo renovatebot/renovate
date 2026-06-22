@@ -687,6 +687,160 @@ describe('integration/gerrit/index', () => {
     });
   });
 
+  describe('grouped dependency updates create a single change', () => {
+    const REPO = 'test-gerrit-grouped-deps';
+
+    it('groups multiple deps into one change via groupName', async () => {
+      await createAndConfigureProject(REPO, {
+        'package.json': JSON.stringify(
+          {
+            name: 'test-grouped',
+            version: '1.0.0',
+            dependencies: {
+              semver: '7.0.0',
+              lodash: '4.0.0',
+            },
+          },
+          null,
+          2,
+        ),
+        'renovate.json': JSON.stringify(
+          {
+            $schema: 'https://docs.renovatebot.com/renovate-schema.json',
+            extends: ['config:recommended'],
+            packageRules: [
+              {
+                matchDepNames: ['semver', 'lodash'],
+                groupName: 'all-deps',
+              },
+            ],
+          },
+          null,
+          2,
+        ),
+      });
+
+      await renovate([REPO]);
+
+      const changes = await getOpenChanges(REPO);
+      // With grouping, both deps should be in a single change
+      expect(changes).toHaveLength(1);
+      expect(changes[0].subject.toLowerCase()).toContain('all-deps');
+    });
+  });
+
+  describe('config preset from a separate Gerrit repo (local>)', () => {
+    const PRESET_REPO = 'test-gerrit-preset-repo';
+    const CONSUMER_REPO = 'test-gerrit-preset-consumer';
+
+    it('reads renovate config from another Gerrit project via local> extends', async () => {
+      // Create a preset repo containing a shared Renovate config
+      await createAndConfigureProject(PRESET_REPO, {
+        'renovate.json': JSON.stringify(
+          {
+            $schema: 'https://docs.renovatebot.com/renovate-schema.json',
+            labels: ['from-preset'],
+          },
+          null,
+          2,
+        ),
+      });
+
+      // Create a consumer repo that extends the preset via local>
+      await createAndConfigureProject(CONSUMER_REPO, {
+        'package.json': JSON.stringify(
+          {
+            name: 'test-consumer',
+            version: '1.0.0',
+            dependencies: { semver: '7.0.0' },
+          },
+          null,
+          2,
+        ),
+        'renovate.json': JSON.stringify(
+          {
+            $schema: 'https://docs.renovatebot.com/renovate-schema.json',
+            extends: ['config:recommended', `local>${PRESET_REPO}`],
+          },
+          null,
+          2,
+        ),
+      });
+
+      await renovate([CONSUMER_REPO]);
+
+      const changes = await getOpenChanges(CONSUMER_REPO);
+      expect(changes.length).toBeGreaterThan(0);
+      // The hashtag "from-preset" should have been applied via the preset's labels config
+      expect(changes[0].hashtags).toContain('from-preset');
+    });
+  });
+
+  describe('conflict detection triggers force-rebase of the change', () => {
+    const REPO = 'test-gerrit-conflict-rebase';
+    let changeNum: number;
+    let originalRev: string;
+
+    it('sets up project and creates initial change', async () => {
+      await createAndConfigureProject(REPO, {
+        'package.json': JSON.stringify(
+          {
+            name: 'test-conflict',
+            version: '1.0.0',
+            dependencies: { semver: '7.0.0' },
+          },
+          null,
+          2,
+        ),
+        'renovate.json': JSON.stringify(
+          {
+            $schema: 'https://docs.renovatebot.com/renovate-schema.json',
+            extends: ['config:recommended'],
+          },
+          null,
+          2,
+        ),
+      });
+
+      await renovate([REPO]);
+
+      const changes = await getOpenChanges(REPO);
+      const ch = changes.find((c) => /semver/i.test(c.subject));
+      expect(ch).toBeTruthy();
+      changeNum = ch!._number;
+
+      const detailed = await getChange(changeNum, ['CURRENT_REVISION']);
+      originalRev = detailed.current_revision!;
+      expect(originalRev).toBeTruthy();
+    });
+
+    it('after a conflicting base branch update, renovate rebases the change', async () => {
+      // Push a conflicting commit to master (modify the same file the change touches)
+      await pushFilesToGerrit(REPO, {
+        'package.json': JSON.stringify(
+          {
+            name: 'test-conflict',
+            version: '1.0.0',
+            dependencies: { semver: '7.0.0' },
+            extra: 'conflict-trigger',
+          },
+          null,
+          2,
+        ),
+      });
+
+      // Run renovate again — should detect the conflict via isBranchConflicted
+      // and force-push a rebased version of the change
+      await renovate([REPO]);
+
+      const updated = await getChange(changeNum, ['CURRENT_REVISION']);
+      // The revision should have changed (new patch set from rebase)
+      expect(updated.current_revision).not.toBe(originalRev);
+      // The change should still be open
+      expect(updated.status).toBe('NEW');
+    });
+  });
+
   describe('initRepo abandons changes with Code-Review -2', () => {
     const REPO = 'test-gerrit-minus-two';
 
