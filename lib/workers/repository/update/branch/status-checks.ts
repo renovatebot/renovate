@@ -6,7 +6,6 @@ import type { BranchStatusConfig } from '../../../../modules/platform/types.ts';
 import type { BranchStatus } from '../../../../types/index.ts';
 import { isActiveConfidenceLevel } from '../../../../util/merge-confidence/index.ts';
 import type { MergeConfidence } from '../../../../util/merge-confidence/types.ts';
-import { coerceString } from '../../../../util/string.ts';
 import { joinUrlParts } from '../../../../util/url.ts';
 
 export async function resolveBranchStatus(
@@ -102,7 +101,7 @@ export async function setStability(config: StabilityConfig): Promise<void> {
       : 'Updates have not met minimum release age requirement';
 
   const docsLink = joinUrlParts(
-    coerceString(config.productLinks?.documentation),
+    GlobalConfig.get('productLinks').documentation,
     'key-concepts/minimum-release-age/',
   );
 
@@ -159,7 +158,7 @@ export async function setConfidence(config: ConfidenceConfig): Promise<void> {
       : 'Updates have not met Merge Confidence requirement';
 
   const docsLink = joinUrlParts(
-    coerceString(config.productLinks?.documentation),
+    GlobalConfig.get('productLinks').documentation,
     'merge-confidence',
   );
 

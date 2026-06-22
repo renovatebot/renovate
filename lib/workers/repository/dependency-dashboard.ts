@@ -700,7 +700,7 @@ export function getAbandonedPackagesMd(
   abandonedMd += `<summary>View abandoned dependencies (${abandonedCount})</summary>\n\n`;
 
   abandonedMd += emojify('> :information_source: **Note**\n> \n');
-  abandonedMd += `Packages are marked as abandoned when they exceed the [\`abandonmentThreshold\`](${config.productLinks?.documentation}configuration-options/#abandonmentthreshold) since their last release. `;
+  abandonedMd += `Packages are marked as abandoned when they exceed the [\`abandonmentThreshold\`](${GlobalConfig.get('productLinks').documentation}configuration-options/#abandonmentthreshold) since their last release. `;
   abandonedMd +=
     'Unlike deprecated packages with official notices, abandonment is detected by release inactivity.\n> \n';
 
@@ -771,7 +771,7 @@ export async function getDashboardMarkdownVulnerabilities(
   if (isTruthy(config.osvVulnerabilityAlerts)) {
     result += ' CVEs have Renovate fixes.\n\n';
   } else {
-    result += ` CVEs have possible Renovate fixes.\n> See [\`osvVulnerabilityAlerts\`](${config.productLinks?.documentation}configuration-options/#osvvulnerabilityalerts) to allow Renovate to supply fixes.\n\n`;
+    result += ` CVEs have possible Renovate fixes.\n> See [\`osvVulnerabilityAlerts\`](${GlobalConfig.get('productLinks').documentation}configuration-options/#osvvulnerabilityalerts) to allow Renovate to supply fixes.\n\n`;
   }
 
   let renderedVulnerabilities: Vulnerability[];
