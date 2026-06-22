@@ -15,7 +15,7 @@ const renovateEntrypoint = resolve(
 );
 
 export async function renovate(
-  repositories: string[],
+  repositories?: string[] | null,
   overrides: AllConfig = {},
 ): Promise<void> {
   const config: AllConfig = {
@@ -24,7 +24,7 @@ export async function renovate(
     username: GERRIT_ADMIN_USERNAME,
     password: GERRIT_ADMIN_PASSWORD,
     gitAuthor: 'Renovate Bot <renovate@renovateapp.com>',
-    repositories,
+    ...(repositories && repositories.length > 0 ? { repositories } : {}),
     ...overrides,
   };
 
