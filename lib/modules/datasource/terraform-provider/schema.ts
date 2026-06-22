@@ -154,10 +154,10 @@ export const OpenTofuProviderPackagesResponse = z
     packages: z.record(z.string(), OpenTofuProviderPackage).optional(),
   })
   .transform(({ packages }): string[] | null => {
-    if (!packages) {
-      return null;
-    }
-    return Object.values(packages).flatMap(({ hashes }) => hashes);
+    const allHashes = Object.values(packages ?? {}).flatMap(
+      ({ hashes }) => hashes,
+    );
+    return allHashes.length ? allHashes : null;
   });
 
 export type OpenTofuProviderPackagesResponse = z.infer<

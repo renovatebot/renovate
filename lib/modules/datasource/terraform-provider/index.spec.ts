@@ -485,21 +485,9 @@ describe('modules/datasource/terraform-provider/index', () => {
   });
 
   describe('getProviderPackages', () => {
-    it('returns flat hash list from packages map', async () => {
+    it('returns flat hash list from the linux/amd64 packages map', async () => {
       httpMock
         .scope(openTofuRegistryUrl)
-        .get('/v1/providers/hashicorp/local/versions')
-        .reply(200, {
-          versions: [
-            {
-              version: '2.5.1',
-              platforms: [
-                { os: 'linux', arch: 'amd64' },
-                { os: 'darwin', arch: 'arm64' },
-              ],
-            },
-          ],
-        })
         .get('/v1/providers/hashicorp/local/2.5.1/download/linux/amd64')
         .reply(200, {
           packages: {
@@ -531,9 +519,45 @@ describe('modules/datasource/terraform-provider/index', () => {
       ]);
     });
 
+    it('falls back to platform discovery when linux/amd64 is unavailable', async () => {
+      httpMock
+        .scope(openTofuRegistryUrl)
+        .get('/v1/providers/hashicorp/local/2.5.1/download/linux/amd64')
+        .reply(404)
+        .get('/v1/providers/hashicorp/local/versions')
+        .reply(200, {
+          versions: [
+            { version: '2.5.1', platforms: [{ os: 'darwin', arch: 'arm64' }] },
+          ],
+        })
+        .get('/v1/providers/hashicorp/local/2.5.1/download/darwin/arm64')
+        .reply(200, {
+          packages: {
+            darwin_arm64: {
+              hashes: [
+                'zh:c66529133599a419123ad2e42874afbd9aba82bd1de2b15cc68d2a1e665d4c8e',
+                'h1:87L+rpGao062xifb1VuG9YVFwp9vbDP6G2fgfYxUkQs=',
+              ],
+            },
+          },
+        });
+
+      const res = await terraformProviderDatasource.getProviderPackages(
+        'hashicorp/local',
+        '2.5.1',
+      );
+
+      expect(res).toIncludeAllMembers([
+        'zh:c66529133599a419123ad2e42874afbd9aba82bd1de2b15cc68d2a1e665d4c8e',
+        'h1:87L+rpGao062xifb1VuG9YVFwp9vbDP6G2fgfYxUkQs=',
+      ]);
+    });
+
     it('returns null when the requested version is missing from /versions', async () => {
       httpMock
         .scope(openTofuRegistryUrl)
+        .get('/v1/providers/hashicorp/local/2.5.1/download/linux/amd64')
+        .reply(404)
         .get('/v1/providers/hashicorp/local/versions')
         .reply(200, { versions: [] });
 
@@ -548,6 +572,8 @@ describe('modules/datasource/terraform-provider/index', () => {
     it('returns null when /versions has no platforms for the version', async () => {
       httpMock
         .scope(openTofuRegistryUrl)
+        .get('/v1/providers/hashicorp/local/2.5.1/download/linux/amd64')
+        .reply(404)
         .get('/v1/providers/hashicorp/local/versions')
         .reply(200, {
           versions: [{ version: '2.5.1', platforms: [] }],
@@ -564,12 +590,6 @@ describe('modules/datasource/terraform-provider/index', () => {
     it('returns null when the download response has no packages field', async () => {
       httpMock
         .scope(openTofuRegistryUrl)
-        .get('/v1/providers/hashicorp/local/versions')
-        .reply(200, {
-          versions: [
-            { version: '2.5.1', platforms: [{ os: 'linux', arch: 'amd64' }] },
-          ],
-        })
         .get('/v1/providers/hashicorp/local/2.5.1/download/linux/amd64')
         .reply(200, {
           os: 'linux',
@@ -589,12 +609,6 @@ describe('modules/datasource/terraform-provider/index', () => {
     it('returns null when packages map is empty', async () => {
       httpMock
         .scope(openTofuRegistryUrl)
-        .get('/v1/providers/hashicorp/local/versions')
-        .reply(200, {
-          versions: [
-            { version: '2.5.1', platforms: [{ os: 'linux', arch: 'amd64' }] },
-          ],
-        })
         .get('/v1/providers/hashicorp/local/2.5.1/download/linux/amd64')
         .reply(200, { packages: {} });
 
@@ -606,10 +620,10 @@ describe('modules/datasource/terraform-provider/index', () => {
       expect(res).toBeNull();
     });
 
-    it('throws when /versions errors', async () => {
+    it('throws when the download request errors', async () => {
       httpMock
         .scope(openTofuRegistryUrl)
-        .get('/v1/providers/hashicorp/local/versions')
+        .get('/v1/providers/hashicorp/local/2.5.1/download/linux/amd64')
         .reply(500);
 
       const res = terraformProviderDatasource.getProviderPackages(

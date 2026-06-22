@@ -1,6 +1,7 @@
 import { logger } from '../../../logger/index.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
+import { HttpError } from '../../../util/http/index.ts';
 import * as p from '../../../util/promises.ts';
 import { regEx } from '../../../util/regex.ts';
 import { getQueryString, joinUrlParts } from '../../../util/url.ts';
@@ -334,9 +335,10 @@ export class TerraformProviderDatasource extends TerraformDatasource {
   }
 
   /**
-   * OpenTofu Registry exposes a `packages` field on the per-platform download
-   * endpoint that contains both `zh:` and `h1:` hashes for every platform of
-   * a version, removing the need to download and re-hash each zip locally.
+   * The OpenTofu download endpoint exposes a `packages` map with the `zh:`/`h1:`
+   * hashes for every platform, avoiding a local download-and-rehash of each zip.
+   * The map is platform-independent, so we request `linux/amd64` directly and
+   * fall back to `/versions` discovery only when that platform is missing (404).
    * See https://github.com/opentofu/opentofu/pull/3434
    */
   private async _getProviderPackages(
@@ -348,14 +350,41 @@ export class TerraformProviderDatasource extends TerraformDatasource {
       'v1/providers',
       repository,
     );
+
+    let hashes = null;
+    try {
+      ({ body: hashes } = await this.http.getJson(
+        `${baseUrl}/${version}/download/linux/amd64`,
+        OpenTofuProviderPackagesResponse,
+      ));
+    } catch (err) {
+      if (!(err instanceof HttpError) || err.response?.statusCode !== 404) {
+        throw err;
+      }
+      hashes = await this._getProviderPackagesForAvailablePlatform(
+        baseUrl,
+        version,
+      );
+    }
+
+    return hashes;
+  }
+
+  /**
+   * Some providers do not publish a `linux/amd64` build, so discover an
+   * available platform via `/versions` and fetch its download endpoint.
+   */
+  private async _getProviderPackagesForAvailablePlatform(
+    baseUrl: string,
+    version: string,
+  ): Promise<string[] | null> {
     const { body: versionsResponse } = await this.http.getJson(
       `${baseUrl}/versions`,
       TerraformRegistryVersions,
     );
-    const versionEntry = versionsResponse.versions?.find(
+    const platform = versionsResponse.versions?.find(
       (entry) => entry.version === version,
-    );
-    const platform = versionEntry?.platforms?.[0];
+    )?.platforms?.[0];
     if (!platform) {
       return null;
     }
@@ -363,9 +392,6 @@ export class TerraformProviderDatasource extends TerraformDatasource {
       `${baseUrl}/${version}/download/${platform.os}/${platform.arch}`,
       OpenTofuProviderPackagesResponse,
     );
-    if (!hashes?.length) {
-      return null;
-    }
     return hashes;
   }
 

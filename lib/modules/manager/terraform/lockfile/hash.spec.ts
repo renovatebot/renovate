@@ -450,18 +450,6 @@ describe('modules/manager/terraform/lockfile/hash', () => {
     it('uses packages API without downloading zips', async () => {
       httpMock
         .scope(openTofuRegistryUrl)
-        .get('/v1/providers/hashicorp/local/versions')
-        .reply(200, {
-          versions: [
-            {
-              version: '2.5.1',
-              platforms: [
-                { os: 'linux', arch: 'amd64' },
-                { os: 'darwin', arch: 'arm64' },
-              ],
-            },
-          ],
-        })
         .get('/v1/providers/hashicorp/local/2.5.1/download/linux/amd64')
         .reply(200, {
           packages: {
@@ -506,18 +494,6 @@ describe('modules/manager/terraform/lockfile/hash', () => {
       httpMock
         .scope(openTofuRegistryUrl)
         // Fast-path attempt: response without `packages`
-        .get('/v1/providers/hashicorp/local/versions')
-        .reply(200, {
-          versions: [
-            {
-              version: '2.5.1',
-              platforms: [
-                { os: 'linux', arch: 'amd64' },
-                { os: 'darwin', arch: 'arm64' },
-              ],
-            },
-          ],
-        })
         .get('/v1/providers/hashicorp/local/2.5.1/download/linux/amd64')
         .reply(200, {
           os: 'linux',
