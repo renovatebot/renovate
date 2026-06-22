@@ -39,7 +39,8 @@ export const ContentsListResponse = z.array(RepoContents);
 export const User = DeepNullish(
   z.object({
     id: z.number(),
-    email: EmailAddress.optional(),
+    // catch empty strings which are returned if an organization has no email
+    email: EmailAddress.optional().catch(undefined),
     full_name: z.string().optional(),
     login: z.string(),
   }),
@@ -148,14 +149,16 @@ export const NullablePR = PR.nullable();
 
 export const PRList = LooseArray(NullablePR);
 
-export const Issue = z.object({
-  number: z.number(),
-  state: IssueState.optional(),
-  title: z.string(),
-  body: z.string(),
-  assignees: z.array(User).optional(),
-  labels: z.array(Label).optional(),
-});
+export const Issue = DeepNullish(
+  z.object({
+    number: z.number(),
+    state: IssueState.optional(),
+    title: z.string(),
+    body: z.string(),
+    assignees: z.array(User).optional(),
+    labels: z.array(Label).optional(),
+  }),
+);
 export type Issue = z.infer<typeof Issue>;
 
 export const Comment = z.object({

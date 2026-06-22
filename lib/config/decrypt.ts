@@ -183,7 +183,7 @@ export async function decryptConfig<T extends RenovateConfig = AllConfig>(
             error.validationMessage = `Mend-hosted Renovate Apps no longer support the use of encrypted secrets in Renovate file config (e.g. renovate.json).
 Please migrate all secrets to the Developer Portal using the web UI available at https://developer.mend.io/
 
-Refer to migration documents here: https://docs.renovatebot.com/mend-hosted/migrating-secrets/`;
+Refer to migration documents here: ${GlobalConfig.get('productLinks').documentation}mend-hosted/migrating-secrets/`;
           }
           throw error;
         } else {
