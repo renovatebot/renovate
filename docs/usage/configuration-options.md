@@ -934,6 +934,7 @@ This feature is limited to the following datasources:
 - `jenkins-plugins`
 - `npm`
 - `packagist`
+- `pub`
 - `pypi`
 - `rubygems`
 
