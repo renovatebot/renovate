@@ -5,6 +5,7 @@ import type { ToolSettingsOptions } from '../../config/types.ts';
 import { TEMPORARY_ERROR } from '../../constants/error-messages.ts';
 import { logger } from '../../logger/index.ts';
 import { getCustomEnv, getUserEnv } from '../env.ts';
+import { coerceObject } from '../object.ts';
 import { rawExec } from './common.ts';
 import { generateInstallCommands, isDynamicInstall } from './containerbase.ts';
 import {
@@ -178,7 +179,7 @@ export async function exec(
       await removeDockerContainer(sideCarImage, dockerChildPrefix);
     }
     logger.debug(
-      { command: rawCmd, env: Object.keys(rawOptions.env ?? {}) },
+      { command: rawCmd, env: Object.keys(coerceObject(rawOptions.env)) },
       'Executing command',
     );
     logger.trace({ commandOptions: rawOptions }, 'Command options');
