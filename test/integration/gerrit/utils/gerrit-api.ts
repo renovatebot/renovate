@@ -268,6 +268,95 @@ export async function createBranch(
   );
 }
 
+export async function createGerritUser(
+  username: string,
+  password: string,
+  displayName = username,
+): Promise<void> {
+  // Create the account as admin
+  await gerritFetch(`/a/accounts/${encodeURIComponent(username)}`, {
+    method: 'PUT',
+    body: JSON.stringify({
+      username,
+      name: displayName,
+      email: `${username}@example.com`,
+    }),
+  });
+
+  // Set the HTTP password for the new user
+  await gerritFetch(
+    `/a/accounts/${encodeURIComponent(username)}/password.http`,
+    {
+      method: 'PUT',
+      body: JSON.stringify({ http_password: password }),
+    },
+  );
+}
+
+export async function amendChangeAsOtherUser(
+  changeNumber: number,
+  username: string,
+  password: string,
+  filePath: string,
+  content: string,
+): Promise<void> {
+  const auth = `Basic ${Buffer.from(`${username}:${password}`).toString('base64')}`;
+  const base = getBaseUrl().replace(/\/$/, '');
+
+  // Upload file via the change edit API as the other user (this will create a new revision)
+  const editUrl = `${base}/a/changes/${changeNumber}/edit/${encodeURIComponent(filePath)}`;
+  let res = await fetch(editUrl, {
+    method: 'PUT',
+    headers: {
+      Authorization: auth,
+      'Content-Type': 'application/octet-stream',
+    },
+    body: content,
+  });
+  if (!res.ok) {
+    const body = await res.text();
+    throw new Error(
+      `amendChangeAsOtherUser edit failed: ${res.status} ${body}`,
+    );
+  }
+
+  // Publish the edit → creates new patch set with uploader = the authenticated user
+  const publishUrl = `${base}/a/changes/${changeNumber}/edit:publish`;
+  res = await fetch(publishUrl, {
+    method: 'POST',
+    headers: {
+      Authorization: auth,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ notify: 'NONE' }),
+  });
+  if (!res.ok) {
+    const body = await res.text();
+    throw new Error(
+      `amendChangeAsOtherUser publish failed: ${res.status} ${body}`,
+    );
+  }
+}
+
+export async function grantRegisteredUsersModifyChangePermission(): Promise<void> {
+  await gerritFetch('/a/projects/All-Projects/access', {
+    method: 'POST',
+    body: JSON.stringify({
+      add: {
+        'refs/*': {
+          permissions: {
+            modifyChange: {
+              rules: {
+                'Registered Users': { action: 'ALLOW' },
+              },
+            },
+          },
+        },
+      },
+    }),
+  });
+}
+
 /**
  * Creates an *open* (unsubmitted) Gerrit change that looks like one created by Renovate:
  * - commit message contains `Renovate-Branch: <branchName>`
