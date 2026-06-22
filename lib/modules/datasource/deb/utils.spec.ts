@@ -7,10 +7,6 @@ import { fs } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import { extract } from './utils.ts';
 
-const fixturePackagesArchiveGzPath = Fixtures.getPath(`Packages.gz`);
-const fixturePackagesArchiveBz2Path = Fixtures.getPath(`Packages.bz2`);
-const fixturePackagesArchiveXzPath = Fixtures.getPath(`Packages.xz`);
-
 describe('modules/datasource/deb/utils', () => {
   let cacheDir: DirectoryResult | null;
   let extractedPackageFile: string;
@@ -33,6 +29,10 @@ describe('modules/datasource/deb/utils', () => {
   });
 
   describe('extract', () => {
+    const fixturePackagesArchiveGzPath = Fixtures.getPath(`Packages.gz`);
+    const fixturePackagesArchiveBz2Path = Fixtures.getPath(`Packages.bz2`);
+    const fixturePackagesArchiveXzPath = Fixtures.getPath(`Packages.xz`);
+
     it('should support xz compression', async () => {
       await copyFile(fixturePackagesArchiveXzPath, packageArchiveCache);
       await extract(packageArchiveCache, 'xz', extractedPackageFile);
