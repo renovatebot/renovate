@@ -162,9 +162,6 @@ export async function createAndConfigureProject(
   files?: Record<string, string>,
 ): Promise<void> {
   await createProject(project);
-  // configureAdminSelfApproval only needs to run once per container (it affects All-Projects),
-  // but it is idempotent and cheap, so callers may invoke it safely.
-  await configureAdminSelfApproval();
   if (files && Object.keys(files).length > 0) {
     await pushFilesToGerrit(project, files);
   }

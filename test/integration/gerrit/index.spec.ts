@@ -35,14 +35,12 @@ describe('integration/gerrit/index', () => {
   describe('setup', () => {
     it('starts the Gerrit container', async () => {
       await startGerritContainer();
+      // configureAdminSelfApproval only needs to be done once (affects All-Projects)
+      await configureAdminSelfApproval();
     }, 60_000);
 
     it('creates the test project', async () => {
       await createProject(REPO_NAME);
-    });
-
-    it('configures admin self-approval', async () => {
-      await configureAdminSelfApproval();
     });
 
     it('pushes initial files', async () => {
@@ -77,34 +75,23 @@ describe('integration/gerrit/index', () => {
     expect(changes[0].subject).toMatch(/update dependency semver/i);
   });
 
-  it('is idempotent on a second run', async () => {
+  it('is idempotent on subsequent runs and preserves the change number', async () => {
     const before = await getOpenChanges(REPO_NAME);
-    const prBodiesBefore = getPrBodies(before);
-
-    await renovate([REPO_NAME]);
-
-    const after = await getOpenChanges(REPO_NAME);
-    const prBodiesAfter = getPrBodies(after);
-
-    expect(after).toHaveLength(before.length);
-    expect(prBodiesAfter).toStrictEqual(prBodiesBefore);
-  });
-
-  it('preserves the same change number on repeated runs (idempotency)', async () => {
-    const before = await getOpenChanges(REPO_NAME);
-    expect(before.length).toBeGreaterThan(0);
+    const bodiesBefore = getPrBodies(before);
     const changeNum = before[0]._number;
 
     await renovate([REPO_NAME]);
 
     const after = await getOpenChanges(REPO_NAME);
+    expect(after).toHaveLength(before.length);
+    expect(getPrBodies(after)).toStrictEqual(bodiesBefore);
     expect(after[0]._number).toBe(changeNum);
   });
 
   describe('packageRules labels become hashtags', () => {
     const REPO = 'test-gerrit-hashtags';
 
-    it('creates project with packageRules that add labels', async () => {
+    it('applies hashtags from packageRules', async () => {
       await createAndConfigureProject(REPO, {
         'package.json': JSON.stringify(
           {
@@ -130,9 +117,7 @@ describe('integration/gerrit/index', () => {
           2,
         ),
       });
-    });
 
-    it('applies hashtags when creating the change', async () => {
       await renovate([REPO]);
 
       const changes = await getOpenChanges(REPO);
@@ -146,7 +131,7 @@ describe('integration/gerrit/index', () => {
   describe('automerge with autoApprove', () => {
     const REPO = 'test-gerrit-automerge';
 
-    it('creates project', async () => {
+    it('creates project and runs with automerge+autoApprove', async () => {
       await createAndConfigureProject(REPO, {
         'package.json': JSON.stringify(
           {
@@ -166,11 +151,11 @@ describe('integration/gerrit/index', () => {
           2,
         ),
       });
+
+      await renovate([REPO], { automerge: true, autoApprove: true });
     });
 
     it('automerge submits the change and updates master', async () => {
-      await renovate([REPO], { automerge: true, autoApprove: true });
-
       // The push with autoApprove should have set Code-Review +2.
       // In the test Gerrit image there is usually also a "Verified" label that blocks submit.
       // Unblock it so we can finish the merge and verify the end-to-end file update on master.
@@ -201,7 +186,7 @@ describe('integration/gerrit/index', () => {
   describe('Gerrit-specific massageMarkdown in PR body', () => {
     const REPO = 'test-gerrit-massage';
 
-    it('creates project', async () => {
+    it('stores a body using Gerrit terminology', async () => {
       await createAndConfigureProject(REPO, {
         'package.json': JSON.stringify(
           {
@@ -221,9 +206,7 @@ describe('integration/gerrit/index', () => {
           2,
         ),
       });
-    });
 
-    it('stores a body using Gerrit terminology', async () => {
       await renovate([REPO]);
 
       const changes = await getOpenChanges(REPO);
@@ -242,7 +225,7 @@ describe('integration/gerrit/index', () => {
   describe('reviewers and assignees', () => {
     const REPO = 'test-gerrit-participants';
 
-    it('creates project', async () => {
+    it('adds reviewers and assignees from config', async () => {
       await createAndConfigureProject(REPO, {
         'package.json': JSON.stringify(
           {
@@ -262,9 +245,7 @@ describe('integration/gerrit/index', () => {
           2,
         ),
       });
-    });
 
-    it('adds reviewers and assignees from config', async () => {
       await renovate([REPO], {
         reviewers: ['admin'],
         assignees: ['admin'],
@@ -287,7 +268,7 @@ describe('integration/gerrit/index', () => {
   describe('autodiscover', () => {
     const REPO = 'test-gerrit-autodiscover';
 
-    it('creates project', async () => {
+    it('discovers the repository via getRepos and creates a change', async () => {
       await createAndConfigureProject(REPO, {
         'package.json': JSON.stringify(
           {
@@ -307,9 +288,7 @@ describe('integration/gerrit/index', () => {
           2,
         ),
       });
-    });
 
-    it('discovers the repository via getRepos and creates a change', async () => {
       // Do not pass explicit repositories; enable autodiscover
       await renovate(undefined, { autodiscover: true });
 
@@ -322,7 +301,7 @@ describe('integration/gerrit/index', () => {
   describe('multiple dependencies create multiple changes', () => {
     const REPO = 'test-gerrit-multi-deps';
 
-    it('creates project with two outdated deps', async () => {
+    it('creates separate changes for each dep', async () => {
       await createAndConfigureProject(REPO, {
         'package.json': JSON.stringify(
           {
@@ -345,9 +324,7 @@ describe('integration/gerrit/index', () => {
           2,
         ),
       });
-    });
 
-    it('creates separate changes for each dep', async () => {
       await renovate([REPO]);
 
       const changes = await getOpenChanges(REPO);
@@ -463,7 +440,7 @@ describe('integration/gerrit/index', () => {
   describe('PR body message added only once unless content changes', () => {
     const REPO = 'test-gerrit-pr-body-once';
 
-    it('sets up', async () => {
+    it('adds the pull-request body message only once on identical runs', async () => {
       await createAndConfigureProject(REPO, {
         'package.json': JSON.stringify(
           {
@@ -483,9 +460,7 @@ describe('integration/gerrit/index', () => {
           2,
         ),
       });
-    });
 
-    it('adds the pull-request body message only once on identical runs', async () => {
       await renovate([REPO]);
       const ch1 = (await getOpenChanges(REPO)).find((c) =>
         /semver/i.test(c.subject),
@@ -671,7 +646,7 @@ describe('integration/gerrit/index', () => {
   describe('initRepo abandons changes with Code-Review -2', () => {
     const REPO = 'test-gerrit-minus-two';
 
-    it('sets up project', async () => {
+    it('a renovate-like change with Code-Review -2 is abandoned on next run (via initRepo)', async () => {
       await createAndConfigureProject(REPO, {
         'package.json': JSON.stringify(
           {
@@ -691,9 +666,7 @@ describe('integration/gerrit/index', () => {
           2,
         ),
       });
-    });
 
-    it('a renovate-like change with Code-Review -2 is abandoned on next run (via initRepo)', async () => {
       // Create a synthetic open change that has the footer so initRepo will consider it
       const synth = await createOpenRenovateChange(REPO, {
         branchName: 'renovate/minus-two-demo',
