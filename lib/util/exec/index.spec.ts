@@ -1084,6 +1084,19 @@ describe('util/exec/index', () => {
     await expect(promise).rejects.toThrow('No tool releases found.');
   });
 
+  it('logs "Executing command" with the command', async () => {
+    process.env = processEnv;
+    cpExec.mockResolvedValue({ stdout: '', stderr: '' });
+    GlobalConfig.set({ ...globalConfig, localDir: cwd });
+
+    await exec(inCmd);
+
+    expect(logger.logger.debug).toHaveBeenCalledWith(
+      { command: inCmd },
+      'Executing command',
+    );
+  });
+
   it('logs ignored tool constraints for binarySource=global', async () => {
     process.env = processEnv;
     cpExec.mockResolvedValue({ stdout: '', stderr: '' });
