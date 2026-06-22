@@ -28,7 +28,7 @@ import {
 } from '../../../util/url.ts';
 import { api as dockerVersioning } from '../../versioning/docker/index.ts';
 import { getGoogleAuthToken } from '../util.ts';
-import { ecrRegex, getECRAuthToken } from './ecr.ts';
+import { ecrRegex, getECRAuthToken, isECRMaxResultsResponse } from './ecr.ts';
 import { googleRegex } from './google.ts';
 import type { OciHelmConfig } from './schema.ts';
 import { RegistryAuthToken } from './schema.ts';
@@ -76,6 +76,17 @@ export async function getAuthHeaders(
       logger.debug(`Page Not Found ${apiCheckUrl}`);
       // throw error up to be caught and potentially retried with library/ prefix
       throw new Error(PAGE_NOT_FOUND_ERROR);
+    }
+    // Some ECR-compatible private registries (e.g. corporate Docker proxies) reject
+    // n>1000 with 405 even on the auth-probe request.  Fall back to probing the base
+    // /v2/ endpoint so getAuthHeaders can still obtain a valid token; the main fetch
+    // loop already retries with n=1000 when it encounters this same error.
+    if (isECRMaxResultsResponse(apiCheckResponse)) {
+      logger.debug(
+        { apiCheckUrl },
+        'Registry rejected n>1000 on auth probe; retrying auth check via base /v2/ endpoint',
+      );
+      return getAuthHeaders(http, registryHost, dockerRepository);
     }
     if (
       apiCheckResponse.statusCode !== 401 ||
