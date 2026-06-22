@@ -28,14 +28,7 @@ const debBaseUrl = 'http://deb.debian.org';
 describe('modules/datasource/deb/packages', () => {
   let downloadedPackageFile: string;
 
-  const fixtureInRelease = Fixtures.get('InRelease');
-  const fixtureInReleaseBookworm = Fixtures.get('InReleaseBookworm');
-  const fixtureInReleaseInvalid = Fixtures.get('InReleaseInvalid');
-
   const fixturePackagesArchiveXzPath = Fixtures.getPath('Packages.xz');
-  const fixturePackagesArchivePath = Fixtures.getPath('Packages.gz');
-  const fixturePackagesArchivePath2 = Fixtures.getPath(`Packages2.gz`);
-  const fixturePackagesArchiveNoCompr = Fixtures.getPath(`Packages`);
 
   const packageArgs: [release: string, component: string, arch: string] = [
     'stable',
@@ -44,8 +37,11 @@ describe('modules/datasource/deb/packages', () => {
   ];
 
   describe('getPackageFromReleaseFile', () => {
+    const fixtureInReleaseBookworm = Fixtures.get('InReleaseBookworm');
+
     it('retrieves Packages.xz file from the release file', () => {
       const packageBaseUrl = 'main/binary-arm64/';
+      const fixtureInRelease = Fixtures.get('InRelease');
 
       const { hash, packagesFile } = getPackageFromReleaseFile(
         fixtureInRelease,
@@ -95,6 +91,7 @@ describe('modules/datasource/deb/packages', () => {
     });
 
     it('do not match invalid release file lines', () => {
+      const fixtureInReleaseInvalid = Fixtures.get('InReleaseInvalid');
       expect(() => {
         getPackageFromReleaseFile(
           fixtureInReleaseInvalid,
@@ -323,6 +320,7 @@ describe('modules/datasource/deb/packages', () => {
   });
 
   describe('downloadAndExtractPackage', () => {
+    const fixturePackagesArchivePath2 = Fixtures.getPath(`Packages2.gz`);
     let cacheDir: DirectoryResult | null;
     let extractionFolder: string;
 
@@ -380,6 +378,7 @@ describe('modules/datasource/deb/packages', () => {
     });
 
     it('should fall back to no compression if release file only contains no compressed Package file', async () => {
+      const fixturePackagesArchiveNoCompr = Fixtures.getPath(`Packages`);
       const fixturePackageHash = await computeFileChecksum(
         fixturePackagesArchiveNoCompr,
       );
@@ -472,6 +471,8 @@ describe('modules/datasource/deb/packages', () => {
     });
 
     it('should default to downloading Package.gz when release file is fetched but package cannot be found', async () => {
+      const fixturePackagesArchivePath = Fixtures.getPath('Packages.gz');
+
       // return InRelease content with bogus hash and no package info to trigger fallback to download of Package.gz file
       // based on old module behavior
       mockFetchInReleaseContent(
@@ -530,6 +531,7 @@ describe('modules/datasource/deb/packages', () => {
     });
 
     it('should not download if package file already exists', async () => {
+      const fixturePackagesArchiveNoCompr = Fixtures.getPath(`Packages`);
       downloadedPackageFile = upath.join(
         extractionFolder,
         `${toSha256(getComponentUrl(debBaseUrl, ...packageArgs))}.xz`,

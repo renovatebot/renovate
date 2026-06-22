@@ -1,3 +1,4 @@
+import { isNonEmptyString } from '@sindresorhus/is';
 import upath from 'upath';
 import { logger } from '../../../logger/index.ts';
 import * as fs from '../../../util/fs/index.ts';
@@ -42,7 +43,7 @@ export async function downloadAndExtractPackage(
     );
   } catch (err) {
     releaseContent = null;
-    logger.debug({ baseSuiteUrl }, err.message);
+    logger.debug({ baseSuiteUrl, err }, 'Failed to fetch release file content');
   }
 
   let packageReleaseInfo;
@@ -56,7 +57,10 @@ export async function downloadAndExtractPackage(
         packagePath,
       );
     } catch (err) {
-      logger.debug({ baseSuiteUrl, packagePath }, err.message);
+      logger.debug(
+        { baseSuiteUrl, packagePath, err },
+        'Failed to fetch package file',
+      );
     }
   }
 
@@ -77,20 +81,24 @@ export async function downloadAndExtractPackage(
     );
   }
 
-  // the path to the package file to download
-  const downloadedPackageFile =
-    packageReleaseInfo.compression.length > 0
-      ? upath.join(
-          fullCacheDir,
-          `${packageUrlHash}.${packageReleaseInfo.compression}`,
-        )
-      : extractedFile;
+  const hasCompression = isNonEmptyString(packageReleaseInfo.compression);
 
-  // the URL to download the package file from
-  const packageDownloadUrl =
-    packageReleaseInfo.compression.length > 0
-      ? joinUrlParts(componentUrl, `Packages.${packageReleaseInfo.compression}`)
-      : joinUrlParts(componentUrl, 'Packages');
+  let downloadedPackageFile: string;
+  let packageDownloadUrl: string;
+
+  if (hasCompression) {
+    downloadedPackageFile = upath.join(
+      fullCacheDir,
+      `${packageUrlHash}.${packageReleaseInfo.compression}`,
+    );
+    packageDownloadUrl = joinUrlParts(
+      componentUrl,
+      `Packages.${packageReleaseInfo.compression}`,
+    );
+  } else {
+    downloadedPackageFile = extractedFile;
+    packageDownloadUrl = joinUrlParts(componentUrl, 'Packages');
+  }
 
   const packageFileChanged = await downloadPackageFile(
     packageDownloadUrl,
@@ -101,7 +109,7 @@ export async function downloadAndExtractPackage(
 
   // lastTimestamp undefined if extracted file does not exist
   if (packageFileChanged || !lastTimestamp) {
-    if (packageReleaseInfo.compression.length > 0) {
+    if (hasCompression) {
       // let's extract if we have a compressed file
       try {
         await extract(
@@ -156,7 +164,7 @@ export function getPackageFromReleaseFile(
 
   for (const compressionMethod of compressionMethods) {
     let packagesFile = '';
-    if (compressionMethod.length > 0) {
+    if (isNonEmptyString(compressionMethod)) {
       packagesFile = joinUrlParts(
         basePackageUrl,
         `Packages.${compressionMethod}`,
@@ -200,7 +208,7 @@ export async function downloadPackageFile(
   http: Http,
 ): Promise<boolean> {
   const lastDownloadTime = await getFileCreationTime(packageFile);
-  const hashProvided = packageHash.length > 0;
+  const hashProvided = isNonEmptyString(packageHash);
 
   if (lastDownloadTime && hashProvided) {
     // check whether the file is modified locally
@@ -248,7 +256,7 @@ export async function downloadPackageFile(
   // if we got a hash value, we have to compare the checksums
   // the checksum should be retrieved from InRelease or Release file but
   // may not be available in every case
-  if (packageHash?.length > 0) {
+  if (isNonEmptyString(packageHash)) {
     const actualChecksum = await computeFileChecksum(packageFile);
 
     if (actualChecksum !== packageHash) {
