@@ -1,3 +1,4 @@
+import { setTimeout } from 'node:timers/promises';
 import { isNumber, isString } from '@sindresorhus/is';
 import { GlobalConfig } from '../../../../config/global.ts';
 import type { RenovateConfig } from '../../../../config/types.ts';
@@ -276,6 +277,8 @@ If you need any further assistance then you can also [request help here](${
         { pr: `Pull Request #${pr!.number}` },
         'Onboarding PR created',
       );
+      // prevent a possibly race condition by giving the platform a moment to create the PR
+      await setTimeout(1000);
       await addParticipants(config, pr!);
     }
   } catch (err) {
