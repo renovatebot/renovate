@@ -135,12 +135,16 @@ describe('modules/manager/tox/extract', () => {
         ]
       `;
       const res = extractPackageFile(content, 'tox.toml');
-      expect(res?.deps[0]).toMatchObject({
-        depName: 'pytest',
-        packageName: 'pytest',
-        currentValue: '>=7.2',
-        datasource: 'pypi',
-        depType: 'env_run_base',
+      expect(res).toMatchObject({
+        deps: [
+          {
+            depName: 'pytest',
+            packageName: 'pytest',
+            currentValue: '>=7.2',
+            datasource: 'pypi',
+            depType: 'env_run_base',
+          },
+        ],
       });
     });
 
@@ -154,12 +158,16 @@ describe('modules/manager/tox/extract', () => {
         ]
       `;
       const res = extractPackageFile(content, 'tox.toml');
-      expect(res?.deps[0]).toMatchObject({
-        depName: 'sphinx',
-        packageName: 'sphinx',
-        currentValue: '>=7',
-        datasource: 'pypi',
-        depType: 'env.docs',
+      expect(res).toMatchObject({
+        deps: [
+          {
+            depName: 'sphinx',
+            packageName: 'sphinx',
+            currentValue: '>=7',
+            datasource: 'pypi',
+            depType: 'env.docs',
+          },
+        ],
       });
     });
 
@@ -326,8 +334,17 @@ describe('modules/manager/tox/extract', () => {
         requires = ["tox>=4"]
       `;
       const res = extractPackageFile(content, 'packages/foo/pyproject.toml');
-      expect(res?.deps).toHaveLength(1);
-      expect(res?.deps[0].depName).toBe('tox');
+      expect(res).toMatchObject({
+        deps: [
+          {
+            depName: 'tox',
+            packageName: 'tox',
+            currentValue: '>=4',
+            datasource: 'pypi',
+            depType: 'requires',
+          },
+        ],
+      });
     });
 
     it('extracts deps with extras from env_run_base', () => {
@@ -336,12 +353,16 @@ describe('modules/manager/tox/extract', () => {
         deps = ["coverage[toml]>=7"]
       `;
       const res = extractPackageFile(content, 'tox.toml');
-      expect(res?.deps[0]).toMatchObject({
-        depName: 'coverage',
-        packageName: 'coverage',
-        currentValue: '>=7',
-        datasource: 'pypi',
-        depType: 'env_run_base',
+      expect(res).toMatchObject({
+        deps: [
+          {
+            depName: 'coverage',
+            packageName: 'coverage',
+            currentValue: '>=7',
+            datasource: 'pypi',
+            depType: 'env_run_base',
+          },
+        ],
       });
     });
 
@@ -350,11 +371,15 @@ describe('modules/manager/tox/extract', () => {
         requires = ["tox==4.5.0"]
       `;
       const res = extractPackageFile(content, 'tox.toml');
-      expect(res?.deps[0]).toMatchObject({
-        depName: 'tox',
-        currentValue: '==4.5.0',
-        currentVersion: '4.5.0',
-        depType: 'requires',
+      expect(res).toMatchObject({
+        deps: [
+          {
+            depName: 'tox',
+            currentValue: '==4.5.0',
+            currentVersion: '4.5.0',
+            depType: 'requires',
+          },
+        ],
       });
     });
   });
