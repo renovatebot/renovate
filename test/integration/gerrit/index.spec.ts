@@ -563,102 +563,6 @@ describe('integration/gerrit/index', () => {
       });
       staleChangeNum = synth.number;
 
-      describe('does not override a change that was modified by another user', () => {
-        const REPO = 'test-gerrit-modified-by-other';
-
-        it('sets up project and lets renovate create a change', async () => {
-          await createAndConfigureProject(REPO, {
-            'package.json': JSON.stringify(
-              {
-                name: 'test-modified',
-                version: '1.0.0',
-                dependencies: { semver: '7.0.0' },
-              },
-              null,
-              2,
-            ),
-            'renovate.json': JSON.stringify(
-              {
-                $schema: 'https://docs.renovatebot.com/renovate-schema.json',
-                extends: ['config:recommended'],
-              },
-              null,
-              2,
-            ),
-          });
-
-          await renovate([REPO]);
-        });
-
-        it('after another user uploads a new patch set, renovate does not override it', async () => {
-          const changes = await getOpenChanges(REPO);
-          const ch = changes.find((c) => /semver/i.test(c.subject));
-          expect(ch).toBeTruthy();
-          const changeNum = ch!._number;
-
-          // Capture the revision uploaded by renovate (admin)
-          const before = await getChange(changeNum, [
-            'CURRENT_REVISION',
-            'DETAILED_ACCOUNTS',
-          ]);
-          const beforeRev = before.current_revision!;
-          const beforeUploader =
-            before.revisions?.[beforeRev]?.uploader?.username;
-          expect(beforeUploader).toBe(GERRIT_ADMIN_USERNAME);
-
-          // Create a second user
-          const OTHER = 'otherdev';
-          const OTHER_PASS = 's3cr3t-other';
-          await createGerritUser(OTHER, OTHER_PASS, 'Other Developer');
-
-          // As the other user, amend the change (upload a new revision)
-          // We touch the package.json with a marker so it's a real new patch set
-          await amendChangeAsOtherUser(
-            changeNum,
-            OTHER,
-            OTHER_PASS,
-            'package.json',
-            JSON.stringify(
-              {
-                name: 'test-modified',
-                version: '1.0.0',
-                dependencies: { semver: '7.0.0' },
-                'modified-by-other': true,
-              },
-              null,
-              2,
-            ),
-          );
-
-          // Verify the current revision is now uploaded by the other user
-          const afterEdit = await getChange(changeNum, [
-            'CURRENT_REVISION',
-            'DETAILED_ACCOUNTS',
-          ]);
-          const afterRev = afterEdit.current_revision!;
-          const afterUploader =
-            afterEdit.revisions?.[afterRev]?.uploader?.username;
-          expect(afterUploader).toBe(OTHER);
-          expect(afterRev).not.toBe(beforeRev);
-
-          // Run renovate again (as admin)
-          await renovate([REPO]);
-
-          // Renovate must NOT have overridden the change
-          const final = await getChange(changeNum, [
-            'CURRENT_REVISION',
-            'DETAILED_ACCOUNTS',
-          ]);
-          const finalRev = final.current_revision!;
-          const finalUploader = final.revisions?.[finalRev]?.uploader?.username;
-
-          // The uploader should still be the other developer
-          expect(finalUploader).toBe(OTHER);
-          // The revision should be the one created by "other", not a new one from admin
-          expect(finalRev).toBe(afterRev);
-        });
-      });
-
       // Make a refs/heads/ entry so getBranchList() during the run will see the branchName
       await createBranch(REPO, staleBranch, synth.revision);
     });
@@ -667,9 +571,100 @@ describe('integration/gerrit/index', () => {
       // The current package.json only has "semver", so "renovate/stale-prune-demo" will be a remaining branch
       await renovate([REPO]);
 
-      // The stale change should have been abandoned by prune
+      // The stale change should have been abandoned by prune (exercises the updatePr({ state: 'closed' }) path)
       const stale = await getChange(staleChangeNum);
       expect(stale.status).toBe('ABANDONED');
+    });
+  });
+
+  describe('does not override a change that was modified by another user', () => {
+    const REPO = 'test-gerrit-modified-by-other';
+
+    it('sets up project and lets renovate create a change', async () => {
+      await createAndConfigureProject(REPO, {
+        'package.json': JSON.stringify(
+          {
+            name: 'test-modified',
+            version: '1.0.0',
+            dependencies: { semver: '7.0.0' },
+          },
+          null,
+          2,
+        ),
+        'renovate.json': JSON.stringify(
+          {
+            $schema: 'https://docs.renovatebot.com/renovate-schema.json',
+            extends: ['config:recommended'],
+          },
+          null,
+          2,
+        ),
+      });
+
+      await renovate([REPO]);
+    });
+
+    it('after another user uploads a new patch set, renovate does not override it', async () => {
+      const changes = await getOpenChanges(REPO);
+      const ch = changes.find((c) => /semver/i.test(c.subject));
+      expect(ch).toBeTruthy();
+      const changeNum = ch!._number;
+
+      // Capture the revision uploaded by renovate (admin)
+      const before = await getChange(changeNum, [
+        'CURRENT_REVISION',
+        'DETAILED_ACCOUNTS',
+      ]);
+      const beforeRev = before.current_revision!;
+      const beforeUploader = before.revisions?.[beforeRev]?.uploader?.username;
+      expect(beforeUploader).toBe(GERRIT_ADMIN_USERNAME);
+
+      // Create a second user
+      const OTHER = 'otherdev';
+      const OTHER_PASS = 's3cr3t-other';
+      await createGerritUser(OTHER, OTHER_PASS, 'Other Developer');
+
+      // As the other user, amend the change (upload a new revision)
+      await amendChangeAsOtherUser(
+        changeNum,
+        OTHER,
+        OTHER_PASS,
+        'package.json',
+        JSON.stringify(
+          {
+            name: 'test-modified',
+            version: '1.0.0',
+            dependencies: { semver: '7.0.0' },
+            'modified-by-other': true,
+          },
+          null,
+          2,
+        ),
+      );
+
+      // Verify the current revision is now uploaded by the other user
+      const afterEdit = await getChange(changeNum, [
+        'CURRENT_REVISION',
+        'DETAILED_ACCOUNTS',
+      ]);
+      const afterRev = afterEdit.current_revision!;
+      const afterUploader = afterEdit.revisions?.[afterRev]?.uploader?.username;
+      expect(afterUploader).toBe(OTHER);
+      expect(afterRev).not.toBe(beforeRev);
+
+      // Run renovate again (as admin)
+      await renovate([REPO]);
+
+      // Renovate must NOT have overridden the change
+      const final = await getChange(changeNum, [
+        'CURRENT_REVISION',
+        'DETAILED_ACCOUNTS',
+      ]);
+      const finalRev = final.current_revision!;
+      const finalUploader = final.revisions?.[finalRev]?.uploader?.username;
+
+      expect(finalUploader).toBe(OTHER);
+      expect(finalRev).toBe(afterRev);
     });
   });
 
