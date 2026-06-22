@@ -11,6 +11,7 @@ import {
   getFileContent,
   getOpenChanges,
   getPrBodies,
+  getReviewers,
   pushFilesToGerrit,
   setHashtags,
   setLabel,
@@ -246,21 +247,42 @@ describe('integration/gerrit/index', () => {
         ),
       });
 
+      // Create a distinct user so we can assert they actually appear as reviewer/assignee
+      const REVIEWER_USER = 'test-reviewer';
+      await createGerritUser(REVIEWER_USER, 'secret-reviewer', 'Test Reviewer');
+
       await renovate([REPO], {
-        reviewers: ['admin'],
-        assignees: ['admin'],
+        reviewers: [REVIEWER_USER],
+        assignees: [REVIEWER_USER],
       });
 
       const changes = await getOpenChanges(REPO);
       expect(changes.length).toBeGreaterThan(0);
 
-      // Retrieving with DETAILED_ACCOUNTS exercises the participants path without throwing.
-      // Note: Gerrit often does not list the owner as an explicit REVIEWER entry.
-      const ch = await getChange(changes[0]._number);
-      expect(ch).toBeTruthy();
-      // reviewers object (if present) should be an object (may be empty for self)
-      if (ch.reviewers) {
-        expect(typeof ch.reviewers).toBe('object');
+      const ch = await getChange(changes[0]._number, ['DETAILED_ACCOUNTS']);
+
+      // Use the dedicated /reviewers endpoint for a reliable check
+      const reviewersList = await getReviewers(changes[0]._number);
+      const reviewerUsernames = reviewersList
+        .map((r: any) => r.username)
+        .filter(Boolean);
+      expect(reviewerUsernames).toContain(REVIEWER_USER);
+
+      // Also sanity-check via the change object (populated with DETAILED_ACCOUNTS)
+      const reviewerFromChange =
+        ch.reviewers?.REVIEWER?.map((r) => r.username).filter(Boolean) ?? [];
+      if (reviewerFromChange.length > 0) {
+        expect(reviewerFromChange).toContain(REVIEWER_USER);
+      }
+
+      // Assignees (or CCs on Gerrit 3.8+) — best-effort
+      const anyCh = ch as any;
+      const assigneeUser =
+        anyCh.assignee?.username ??
+        anyCh.reviewers?.CC?.find((r: any) => r.username === REVIEWER_USER)
+          ?.username;
+      if (assigneeUser) {
+        expect(assigneeUser).toBe(REVIEWER_USER);
       }
     });
   });
@@ -328,9 +350,14 @@ describe('integration/gerrit/index', () => {
       await renovate([REPO]);
 
       const changes = await getOpenChanges(REPO);
+      expect(changes.length).toBeGreaterThanOrEqual(2);
       const subjects = changes.map((c) => c.subject.toLowerCase());
-      expect(subjects.some((s) => s.includes('semver'))).toBe(true);
-      expect(subjects.some((s) => s.includes('lodash'))).toBe(true);
+      expect(subjects).toEqual(
+        expect.arrayContaining([
+          expect.stringContaining('semver'),
+          expect.stringContaining('lodash'),
+        ]),
+      );
     });
   });
 
@@ -358,6 +385,10 @@ describe('integration/gerrit/index', () => {
         ),
       });
       await renovate([REPO]);
+
+      // Basic verification that the first run produced a change for the dep
+      const initial = await getOpenChanges(REPO);
+      expect(initial.some((c) => /semver/i.test(c.subject))).toBe(true);
     });
 
     it('after abandoning the change, next run treats it as already-existed and adds ignore notification', async () => {
@@ -382,7 +413,7 @@ describe('integration/gerrit/index', () => {
       const abandoned = await getChange(ch!._number, ['MESSAGES']);
       const hasIgnore = (abandoned.messages ?? []).some(
         (m) =>
-          m.tag?.includes('Ignore') ??
+          m.tag?.includes('Ignore') === true ||
           /will ignore this update/i.test(m.message),
       );
       expect(hasIgnore).toBe(true);
@@ -464,8 +495,9 @@ describe('integration/gerrit/index', () => {
       await renovate([REPO]);
       const ch1 = (await getOpenChanges(REPO)).find((c) =>
         /semver/i.test(c.subject),
-      )!;
-      const tagged1 = (ch1.messages ?? []).filter(
+      );
+      expect(ch1).toBeDefined();
+      const tagged1 = (ch1!.messages ?? []).filter(
         (m) => m.tag === 'pull-request',
       );
       expect(tagged1.length).toBe(1);
@@ -473,8 +505,9 @@ describe('integration/gerrit/index', () => {
       await renovate([REPO]);
       const ch2 = (await getOpenChanges(REPO)).find((c) =>
         /semver/i.test(c.subject),
-      )!;
-      const tagged2 = (ch2.messages ?? []).filter(
+      );
+      expect(ch2).toBeDefined();
+      const tagged2 = (ch2!.messages ?? []).filter(
         (m) => m.tag === 'pull-request',
       );
       expect(tagged2.length).toBe(1);
@@ -486,8 +519,9 @@ describe('integration/gerrit/index', () => {
 
       const ch = (await getOpenChanges(REPO)).find((c) =>
         /semver/i.test(c.subject),
-      )!;
-      const tagged = (ch.messages ?? []).filter(
+      );
+      expect(ch).toBeDefined();
+      const tagged = (ch!.messages ?? []).filter(
         (m) => m.tag === 'pull-request',
       );
       const hasMarker = tagged.some((m) =>
@@ -577,6 +611,10 @@ describe('integration/gerrit/index', () => {
       });
 
       await renovate([REPO]);
+
+      // Basic verification that the initial run produced the expected change
+      const changes = await getOpenChanges(REPO);
+      expect(changes.some((c) => /semver/i.test(c.subject))).toBe(true);
     });
 
     it('after another user uploads a new patch set, renovate does not override it', async () => {

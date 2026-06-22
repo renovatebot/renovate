@@ -1,9 +1,10 @@
 import { createHash, randomUUID } from 'node:crypto';
-import { mkdtemp, writeFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { dirname, join } from 'node:path';
 import { execa } from 'execa';
-import type { GerritChange } from '../../../../lib/modules/platform/gerrit/types.ts';
+import type { GerritChange } from '../../../../lib/modules/platform/gerrit/schema.ts';
+import type { GerritRequestDetail } from '../../../../lib/modules/platform/gerrit/types.ts';
 import {
   GERRIT_ADMIN_PASSWORD,
   GERRIT_ADMIN_USERNAME,
@@ -88,13 +89,23 @@ export async function getChanges(
 
 export async function getChange(
   changeNumber: number,
-  requestDetails: string[] = ['LABELS', 'MESSAGES', 'DETAILED_ACCOUNTS'],
+  requestDetails: GerritRequestDetail[] = [
+    'LABELS',
+    'MESSAGES',
+    'DETAILED_ACCOUNTS',
+  ],
 ): Promise<GerritChange> {
   const o = requestDetails.map((d) => `o=${d}`).join('&');
   const qs = o ? `?${o}` : '';
   const res = await gerritFetch(`/a/changes/${changeNumber}${qs}`);
   const text = await res.text();
   return parseGerritJson(text) as GerritChange;
+}
+
+export async function getReviewers(changeNumber: number): Promise<any[]> {
+  const res = await gerritFetch(`/a/changes/${changeNumber}/reviewers/`);
+  const text = await res.text();
+  return parseGerritJson(text) as any[];
 }
 
 const TAG_PULL_REQUEST_BODY = 'pull-request';
@@ -302,7 +313,7 @@ export async function amendChangeAsOtherUser(
 
   // Upload file via the change edit API as the other user (this will create a new revision)
   const editUrl = `${base}/a/changes/${changeNumber}/edit/${encodeURIComponent(filePath)}`;
-  let res = await fetch(editUrl, {
+  const editRes = await fetch(editUrl, {
     method: 'PUT',
     headers: {
       Authorization: auth,
@@ -310,16 +321,16 @@ export async function amendChangeAsOtherUser(
     },
     body: content,
   });
-  if (!res.ok) {
-    const body = await res.text();
+  if (!editRes.ok) {
+    const body = await editRes.text();
     throw new Error(
-      `amendChangeAsOtherUser edit failed: ${res.status} ${body}`,
+      `amendChangeAsOtherUser edit failed: ${editRes.status} ${body}`,
     );
   }
 
   // Publish the edit → creates new patch set with uploader = the authenticated user
   const publishUrl = `${base}/a/changes/${changeNumber}/edit:publish`;
-  res = await fetch(publishUrl, {
+  const publishRes = await fetch(publishUrl, {
     method: 'POST',
     headers: {
       Authorization: auth,
@@ -327,31 +338,12 @@ export async function amendChangeAsOtherUser(
     },
     body: JSON.stringify({ notify: 'NONE' }),
   });
-  if (!res.ok) {
-    const body = await res.text();
+  if (!publishRes.ok) {
+    const body = await publishRes.text();
     throw new Error(
-      `amendChangeAsOtherUser publish failed: ${res.status} ${body}`,
+      `amendChangeAsOtherUser publish failed: ${publishRes.status} ${body}`,
     );
   }
-}
-
-export async function grantRegisteredUsersModifyChangePermission(): Promise<void> {
-  await gerritFetch('/a/projects/All-Projects/access', {
-    method: 'POST',
-    body: JSON.stringify({
-      add: {
-        'refs/*': {
-          permissions: {
-            modifyChange: {
-              rules: {
-                'Registered Users': { action: 'ALLOW' },
-              },
-            },
-          },
-        },
-      },
-    }),
-  });
 }
 
 /**
@@ -391,11 +383,7 @@ export async function createOpenRenovateChange(
 
   for (const [filePath, content] of Object.entries(opts.files)) {
     const full = join(tmp, filePath);
-    await execa('mkdir', ['-p', join(tmp, filePath, '..')], { cwd: tmp }).catch(
-      () => {
-        /* directory may already exist */
-      },
-    );
+    await mkdir(dirname(full), { recursive: true });
     await writeFile(full, content);
     await execa('git', ['add', filePath], { cwd: tmp });
   }
