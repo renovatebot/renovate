@@ -16,7 +16,7 @@ import * as git from '../../../util/git/index.ts';
 import type { Timestamp } from '../../../util/timestamp.ts';
 import { getPkgReleases } from '../index.ts';
 import { CrateDatasource } from './index.ts';
-import type { RegistryConfigSchema } from './schema.ts';
+import type { RegistryConfig } from './schema.ts';
 
 vi.unmock('../../../util/mutex.ts');
 const createSimpleGit = vi.mocked(git.createSimpleGit);
@@ -28,7 +28,7 @@ const CRATES_IO_REGISTRY_URL_PARSED = 'https://index.crates.io/';
 
 const datasource = CrateDatasource.id;
 
-const cratesIoConfig: RegistryConfigSchema = {
+const cratesIoConfig: RegistryConfig = {
   dl: DL_BASE_URL,
   api: API_BASE_URL,
 };

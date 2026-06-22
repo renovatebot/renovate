@@ -1,7 +1,7 @@
 import { z } from 'zod/v4';
 import { Json } from '../../schema-utils/index.ts';
 
-export const RepoCacheV13 = Json.pipe(
+export const RepoCacheRecord = Json.pipe(
   z
     .object({
       repository: z.string().min(1),
@@ -13,4 +13,4 @@ export const RepoCacheV13 = Json.pipe(
     .strict(),
 );
 
-export type RepoCacheRecord = z.infer<typeof RepoCacheV13>;
+export type RepoCacheRecord = z.infer<typeof RepoCacheRecord>;

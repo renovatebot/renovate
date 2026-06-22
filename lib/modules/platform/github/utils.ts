@@ -1,5 +1,8 @@
+import { CONFIG_GIT_URL_UNAVAILABLE } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
 import { parseGitAuthor } from '../../../util/git/author.ts';
+import { parseUrl } from '../../../util/url.ts';
+import type { GitUrlOption } from '../types.ts';
 
 export function warnIfDefaultGitAuthorEmail(
   gitAuthor: string | undefined,
@@ -20,4 +23,31 @@ export function warnIfDefaultGitAuthorEmail(
       'Using the default gitAuthor email address, renovate@whitesourcesoftware.com, is not recommended on GitHub.com, as this corresponds to a user owned by Mend and used by users of the forking-renovate[bot] GitHub App. For security and authenticity reasons, Mend enables "Vigilant Mode" on this account to visibly flag unsigned commits. As an account you do not control, you will not be able to sign commits. If you are comfortable with the `Unverified` signatures on each commit, no work is needed. Otherwise, it is recommended to migrate to a user account you own',
     );
   }
+}
+
+export function getRepoUrl(
+  repository: string,
+  gitUrl: GitUrlOption | undefined,
+  sshUrl: string | null,
+  endpoint: URL,
+  authToken: string | null,
+): string {
+  if (gitUrl === 'ssh') {
+    if (!sshUrl) {
+      throw new Error(CONFIG_GIT_URL_UNAVAILABLE);
+    }
+    logger.debug(`Using ssh URL: ${sshUrl}`);
+    return sshUrl;
+  }
+
+  // clone to avoid mutating the caller's URL; href is known-valid
+  const url = parseUrl(endpoint.href)!;
+  if (authToken) {
+    const [username, password] = authToken.split(':');
+    url.username = username;
+    url.password = password ?? '';
+  }
+  url.host = url.host.replace('api.github.com', 'github.com');
+  url.pathname = `${repository}.git`;
+  return url.href;
 }

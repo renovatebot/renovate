@@ -12,8 +12,7 @@ import { asTimestamp } from '../../../util/timestamp.ts';
 import { joinUrlParts } from '../../../util/url.ts';
 import type { Release, ReleaseResult } from '../types.ts';
 import { defaultRegistryUrl } from './common.ts';
-import { CachedPackument } from './schema.ts';
-import type { NpmResponse } from './types.ts';
+import { CachedPackument, NpmResponse } from './schema.ts';
 
 const SHORT_REPO_REGEX = regEx(
   /^((?<platform>bitbucket|github|gitlab):)?(?<shortRepo>[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+)$/,
@@ -101,7 +100,7 @@ export async function getDependency(
       });
     }
 
-    const resp = await http.getJsonUnchecked<NpmResponse>(packageUrl, options);
+    const resp = await http.getJson(packageUrl, options, NpmResponse);
     const { body: res } = resp;
     if (!res.versions || !Object.keys(res.versions).length) {
       // Registry returned a 200 OK but with no versions

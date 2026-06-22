@@ -610,14 +610,14 @@ export class Vulnerabilities {
   }
 
   static evaluateCvssVector(vector: string): [string, string] {
-    const CvssJsonSchema = z.object({
+    const CvssJson = z.object({
       baseScore: z.number().default(0.0),
       baseSeverity: z.string().toUpperCase().default('UNKNOWN'),
     });
 
     try {
       const parsedCvssScore: CvssVector<any> | null = fromVector(vector);
-      const res = CvssJsonSchema.parse(parsedCvssScore?.createJsonSchema());
+      const res = CvssJson.parse(parsedCvssScore?.createJsonSchema());
 
       return [res.baseScore.toFixed(1), res.baseSeverity];
     } catch {

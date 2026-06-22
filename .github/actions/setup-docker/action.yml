@@ -1,0 +1,28 @@
+name: 'Setup Docker'
+description: ''
+
+runs:
+  using: 'composite'
+
+  steps:
+    - name: Set Up contained image store
+      shell: bash
+      run: |
+        if [ ! -f /etc/docker/daemon.json ]; then
+            echo "{}" | sudo tee /etc/docker/daemon.json
+        fi
+        cat /etc/docker/daemon.json | jq '. | .+{"features": {"containerd-snapshotter": true},"data-root": "/mnt/docker"}' | sudo tee /etc/docker/daemon.json
+        sudo systemctl restart docker
+
+    - name: Check docker service
+      shell: bash
+      run: |
+        systemctl status docker
+
+    - name: Check docker info
+      shell: bash
+      run: |
+        docker info
+
+    # allow build cross arch images
+    - uses: docker/setup-qemu-action@06116385d9baf250c9f4dcb4858b16962ea869c3 # v4.1.0
