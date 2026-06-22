@@ -23,7 +23,7 @@ export async function renovate(
     endpoint: `${getBaseUrl()}/`,
     username: GERRIT_ADMIN_USERNAME,
     password: GERRIT_ADMIN_PASSWORD,
-    gitAuthor: 'Renovate Bot <renovate@renovateapp.com>',
+    gitAuthor: 'Renovate Gerrit <renovate-gerrit@example.com>',
     ...(repositories && repositories.length > 0 ? { repositories } : {}),
     ...overrides,
   };

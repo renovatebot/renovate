@@ -353,8 +353,8 @@ export async function createOpenRenovateChange(
 
   // Prepare a git repo with the desired commit (with footer), based on current master
   await execa('git', ['init', '-b', 'main'], { cwd: tmp });
-  await execa('git', ['config', 'user.name', 'Synth'], { cwd: tmp });
-  await execa('git', ['config', 'user.email', 'synth@example.com'], {
+  await execa('git', ['config', 'user.name', 'Renovate Gerrit'], { cwd: tmp });
+  await execa('git', ['config', 'user.email', 'renovate-gerrit@example.com'], {
     cwd: tmp,
   });
   await execa('git', ['remote', 'add', 'origin', remote], { cwd: tmp });
