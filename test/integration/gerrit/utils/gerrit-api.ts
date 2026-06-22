@@ -75,18 +75,6 @@ export async function getOpenChanges(project: string): Promise<GerritChange[]> {
   return parseGerritJson(text) as GerritChange[];
 }
 
-export async function getChanges(
-  project: string,
-  extraQuery = 'status:open owner:self',
-): Promise<GerritChange[]> {
-  const query = encodeURIComponent(`project:${project} ${extraQuery}`);
-  const res = await gerritFetch(
-    `/a/changes/?q=${query}&o=LABELS&o=SUBMITTABLE&o=CURRENT_REVISION&o=CURRENT_COMMIT&o=MESSAGES`,
-  );
-  const text = await res.text();
-  return parseGerritJson(text) as GerritChange[];
-}
-
 export async function getChange(
   changeNumber: number,
   requestDetails: GerritRequestDetail[] = [
@@ -217,20 +205,6 @@ export async function abandonChange(
   });
 }
 
-export async function createLabel(
-  project: string,
-  labelName: string,
-  input: Record<string, unknown>,
-): Promise<void> {
-  await gerritFetch(
-    `/a/projects/${encodeURIComponent(project)}/labels/${encodeURIComponent(labelName)}`,
-    {
-      method: 'PUT',
-      body: JSON.stringify(input),
-    },
-  );
-}
-
 export async function setLabel(
   changeNumber: number,
   label: string,
@@ -346,6 +320,14 @@ export async function amendChangeAsOtherUser(
   }
 }
 
+/** Gerrit Change-Id must be `I` + 40 hex chars (SHA-1 format). */
+function makeChangeId(): string {
+  const h = createHash('sha1')
+    .update(randomUUID() + Date.now().toString(16))
+    .digest('hex');
+  return `I${h}`;
+}
+
 /**
  * Creates an *open* (unsubmitted) Gerrit change that looks like one created by Renovate:
  * - commit message contains `Renovate-Branch: <branchName>`
@@ -388,13 +370,6 @@ export async function createOpenRenovateChange(
     await execa('git', ['add', filePath], { cwd: tmp });
   }
 
-  function makeChangeId(): string {
-    // Gerrit Change-Id must be I + 40 hex chars
-    const h = createHash('sha1')
-      .update(randomUUID() + Date.now().toString(16))
-      .digest('hex');
-    return `I${h}`;
-  }
   const fullMessage = `${opts.subject}\n\nRenovate-Branch: ${opts.branchName}\nChange-Id: ${makeChangeId()}`;
   await execa('git', ['commit', '-m', fullMessage], { cwd: tmp });
 

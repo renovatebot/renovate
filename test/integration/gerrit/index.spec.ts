@@ -1,3 +1,4 @@
+import { isString } from '@sindresorhus/is';
 import {
   abandonChange,
   amendChangeAsOtherUser,
@@ -85,7 +86,7 @@ describe('integration/gerrit/index', () => {
 
     const after = await getOpenChanges(REPO_NAME);
     expect(after).toHaveLength(before.length);
-    expect(getPrBodies(after)).toStrictEqual(bodiesBefore);
+    expect(getPrBodies(after)).toEqual(bodiesBefore);
     expect(after[0]._number).toBe(changeNum);
   });
 
@@ -265,12 +266,12 @@ describe('integration/gerrit/index', () => {
       const reviewersList = await getReviewers(changes[0]._number);
       const reviewerUsernames = reviewersList
         .map((r: any) => r.username)
-        .filter(Boolean);
+        .filter(isString);
       expect(reviewerUsernames).toContain(REVIEWER_USER);
 
       // Also sanity-check via the change object (populated with DETAILED_ACCOUNTS)
       const reviewerFromChange =
-        ch.reviewers?.REVIEWER?.map((r) => r.username).filter(Boolean) ?? [];
+        ch.reviewers?.REVIEWER?.map((r) => r.username).filter(isString) ?? [];
       if (reviewerFromChange.length > 0) {
         expect(reviewerFromChange).toContain(REVIEWER_USER);
       }
@@ -384,6 +385,7 @@ describe('integration/gerrit/index', () => {
           2,
         ),
       });
+
       await renovate([REPO]);
 
       // Basic verification that the first run produced a change for the dep
@@ -444,7 +446,9 @@ describe('integration/gerrit/index', () => {
           2,
         ),
       });
+
       await renovate([REPO]);
+
       const changes = await getOpenChanges(REPO);
       const ch = changes.find((c) => /semver/i.test(c.subject));
       expect(ch).toBeTruthy();
@@ -493,6 +497,7 @@ describe('integration/gerrit/index', () => {
       });
 
       await renovate([REPO]);
+
       const ch1 = (await getOpenChanges(REPO)).find((c) =>
         /semver/i.test(c.subject),
       );
@@ -503,6 +508,7 @@ describe('integration/gerrit/index', () => {
       expect(tagged1.length).toBe(1);
 
       await renovate([REPO]);
+
       const ch2 = (await getOpenChanges(REPO)).find((c) =>
         /semver/i.test(c.subject),
       );
