@@ -32,7 +32,7 @@ function getMiseLockToolConstraints(
     { toolName: 'mise', constraint: constraints?.mise },
     { toolName: 'node', constraint: constraints?.node },
     { toolName: 'npm', constraint: constraints?.npm },
-    { toolName: 'golang', constraint: constraints?.golang },
+    { toolName: 'golang', constraint: constraints?.go },
     { toolName: 'ruby', constraint: constraints?.ruby },
   ];
 }
