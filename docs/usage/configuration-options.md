@@ -2032,7 +2032,6 @@ For example, to group all non-major devDependencies updates together into a sing
 
 ## `groupSingleUpdates`
 
-<!-- prettier-ignore -->
 !!! note
   This option was [recently made opt-in, instead of opt-out](https://github.com/renovatebot/renovate/pull/44168).
 
