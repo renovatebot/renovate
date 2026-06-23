@@ -208,7 +208,41 @@ describe('modules/manager/mise/artifacts', () => {
     ]);
   });
 
-  it('installs resolver tools before running mise lock with dynamic installs', async () => {
+  it('looks up latest versions for tool versions before `mise lock`, if not set', async () => {
+    GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
+
+    for (const version of ['1.2.3', '2.3.4', '3.4.5', '4.5.6', '5.6.7']) {
+      datasource.getPkgReleases.mockResolvedValueOnce({
+        releases: [{ version: version }],
+      });
+    }
+
+    fs.readLocalFile
+      .mockResolvedValueOnce('existing content')
+      .mockResolvedValueOnce('existing content');
+    const execSnapshots = mockExecAll();
+
+    await updateArtifacts({
+      packageFileName: 'mise.toml',
+      updatedDeps: [{ depName: 'node' }],
+      newPackageFileContent: '',
+      config: {
+        // no constraints
+      },
+    });
+
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'install-tool mise 1.2.3' },
+      { cmd: 'install-tool node 2.3.4' },
+      { cmd: 'install-tool npm 3.4.5' },
+      { cmd: 'install-tool golang 4.5.6' },
+      { cmd: 'install-tool ruby 5.6.7' },
+      { cmd: trustCmd },
+      { cmd: updateToolCmd },
+    ]);
+  });
+
+  it('uses constraints to specify tool versions before `mise lock`, if set', async () => {
     GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
     fs.readLocalFile
       .mockResolvedValueOnce('existing content')
