@@ -18,9 +18,9 @@ import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
 import { getConfigType, getLockFileName } from './lockfile.ts';
 
 /**
- * Resolver tools that mise may invoke while running `mise lock` (version listing),
- * regardless of which tools are being locked.
- *
+ * Resolver tools that mise may invoke while running `mise lock` (version listing).
+ * 
+ * NOTE: this will install all relevant tools, regardless of what the given mise configuration uses.
  * @see https://mise.jdx.dev/dev-tools/backends/npm.html
  * @see https://mise.jdx.dev/dev-tools/backends/go.html
  * @see https://mise.jdx.dev/dev-tools/backends/gem.html
