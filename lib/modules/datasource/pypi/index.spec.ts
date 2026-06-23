@@ -12,6 +12,7 @@ const googleAuth = vi.mocked(_googleAuth);
 
 const res1 = Fixtures.get('azure-cli-monitor.json');
 const htmlResponse = Fixtures.get('versions-html.html');
+const jsonSimpleResponse = Fixtures.get('versions-simple.json');
 const mixedCaseResponse = Fixtures.get('versions-html-mixed-case.html');
 const withPeriodsResponse = Fixtures.get('versions-html-with-periods.html');
 
@@ -463,6 +464,54 @@ describe('modules/datasource/pypi/index', () => {
           packageName: 'dj-database-url',
         }),
       ).toMatchSnapshot();
+    });
+
+    it('process data from JSON simple endpoint (PEP 691)', async () => {
+      httpMock
+        .scope('https://some.registry.org/simple/')
+        .get('/dj-database-url/')
+        .reply(200, jsonSimpleResponse, {
+          'content-type': 'application/vnd.pypi.simple.v1+json',
+        });
+      const config = {
+        registryUrls: ['https://some.registry.org/simple/'],
+      };
+      const res = await getPkgReleases({
+        datasource,
+        ...config,
+        packageName: 'dj-database-url',
+      });
+      expect(res?.releases).toMatchObject([
+        { version: '0.1.2', releaseTimestamp: '2014-09-09T14:13:32.281Z' },
+        { version: '0.1.3' },
+        { version: '0.1.4' },
+        { version: '0.2.0' },
+        { version: '0.2.1' },
+        { version: '0.2.2' },
+        { version: '0.3.0' },
+        { version: '0.4.0' },
+        { version: '0.4.1' },
+        { version: '0.4.2' },
+        { isDeprecated: true, version: '0.5.0' },
+      ]);
+    });
+
+    it('returns empty releases for malformed JSON simple endpoint response', async () => {
+      httpMock
+        .scope('https://some.registry.org/simple/')
+        .get('/dj-database-url/')
+        .reply(200, 'not json', {
+          'content-type': 'application/vnd.pypi.simple.v1+json',
+        });
+      const config = {
+        registryUrls: ['https://some.registry.org/simple/'],
+      };
+      const res = await getPkgReleases({
+        datasource,
+        ...config,
+        packageName: 'dj-database-url',
+      });
+      expect(res).toBeNull();
     });
 
     it('sets private simple if authorization provided', async () => {
