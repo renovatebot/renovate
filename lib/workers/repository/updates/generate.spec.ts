@@ -35,6 +35,8 @@ describe('workers/repository/updates/generate', () => {
           manager: 'some-manager',
           branchName: 'some-branch',
           depName: 'some-dep',
+          newVersion: '1.2.3',
+          commitMessageExtra: 'to 1.2.3',
           groupName: 'some-group',
           prTitle: 'some-title',
           releaseTimestamp: '2017-02-07T20:01:41+00:00' as Timestamp,
@@ -47,107 +49,8 @@ describe('workers/repository/updates/generate', () => {
       const res = generateBranchConfig(branch);
       expect(res.groupName).toBe('some-group');
       expect(res.isGroup).toBeTrue();
-      expect(res.recreateClosed).toBeFalse();
-    });
-
-    it('does not include version in commit message for group single updates', () => {
-      const { group, groupSingleUpdates } = getConfig();
-      const branch = [
-        {
-          ...requiredDefaultOptions,
-          manager: 'some-manager',
-          branchName: 'some-branch',
-          depName: 'some-dep',
-          groupName: 'all docker dependencies',
-          newVersion: '3.24.0',
-          newValue: '3.24.0',
-          newMajor: 3,
-          isSingleVersion: true,
-          prettyNewVersion: 'v3.24.0',
-          prettyNewMajor: 'v3',
-          releaseTimestamp: '2017-02-07T20:01:41+00:00' as Timestamp,
-          groupSingleUpdates,
-          group,
-        },
-      ] satisfies BranchUpgradeConfig[];
-
-      const res = generateBranchConfig(branch);
-
-      expect(res.isGroup).toBeTrue();
-      expect(res.prTitle).toBe('Update all docker dependencies');
-      expect(res.commitMessage).toBe('Update all docker dependencies');
-    });
-
-    it('retains version in commit message for group with multiple updates to same version', () => {
-      const { group } = getConfig();
-      const branch = [
-        {
-          ...requiredDefaultOptions,
-          manager: 'some-manager',
-          branchName: 'some-branch',
-          depName: 'core',
-          groupName: 'docusaurus monorepo',
-          newVersion: '2.4.3',
-          newValue: '2.4.3',
-          isSingleVersion: true,
-          prettyNewVersion: 'v2.4.3',
-          releaseTimestamp: '2017-02-07T20:01:41+00:00' as Timestamp,
-          group,
-        },
-        {
-          ...requiredDefaultOptions,
-          manager: 'some-manager',
-          branchName: 'some-branch',
-          depName: 'theme-classic',
-          groupName: 'docusaurus monorepo',
-          newVersion: '2.4.3',
-          newValue: '2.4.3',
-          isSingleVersion: true,
-          prettyNewVersion: 'v2.4.3',
-          releaseTimestamp: '2017-02-07T20:01:41+00:00' as Timestamp,
-          group,
-        },
-      ] satisfies BranchUpgradeConfig[];
-
-      const res = generateBranchConfig(branch);
-
-      expect(res.isGroup).toBeTrue();
-      expect(res.prTitle).toBe('Update docusaurus monorepo to v2.4.3');
-      expect(res.commitMessage).toBe('Update docusaurus monorepo to v2.4.3');
-    });
-
-    it('preserves user-set commitMessageExtra for group single updates', () => {
-      const { group, groupSingleUpdates } = getConfig();
-      const branch = [
-        {
-          ...requiredDefaultOptions,
-          manager: 'some-manager',
-          branchName: 'some-branch',
-          depName: 'commander',
-          groupName: 'commander group',
-          commitMessageExtra: '(new commander)',
-          newVersion: '2.0.0',
-          newValue: '2.0.0',
-          newMajor: 2,
-          isMajor: true,
-          isSingleVersion: true,
-          prettyNewVersion: 'v2.0.0',
-          prettyNewMajor: 'v2',
-          separateMajorMinor: true,
-          updateType: 'major' as UpdateType,
-          releaseTimestamp: '2017-02-07T20:01:41+00:00' as Timestamp,
-          groupSingleUpdates,
-          group: { ...group, commitMessageExtra: '(new commander)' },
-        },
-      ] satisfies BranchUpgradeConfig[];
-
-      const res = generateBranchConfig(branch);
-
-      expect(res.isGroup).toBeTrue();
-      expect(res.prTitle).toBe(
-        'Update commander group (new commander) (major)',
-      );
-      expect(res.commitMessage).toBe('Update commander group (new commander)');
+      expect(res.recreateClosed).toBeTrue();
+      expect(res.commitMessageExtra).toBeUndefined();
     });
 
     it('groups single upgrade across multiple files', () => {
@@ -158,6 +61,7 @@ describe('workers/repository/updates/generate', () => {
           branchName: 'some-branch',
           depName: 'some-dep',
           newVersion: '2.0.0',
+          commitMessageExtra: 'to v2',
           groupName: 'some-group',
           prTitle: 'some-title',
           releaseTimestamp: '2017-02-07T20:01:41+00:00' as Timestamp,
@@ -172,6 +76,7 @@ describe('workers/repository/updates/generate', () => {
           branchName: 'some-branch',
           depName: 'some-dep',
           newVersion: '2.0.0',
+          commitMessageExtra: 'to v2',
           groupName: 'some-group',
           prTitle: 'some-title',
           releaseTimestamp: '2017-02-07T20:01:41+00:00' as Timestamp,
@@ -185,6 +90,8 @@ describe('workers/repository/updates/generate', () => {
       const res = generateBranchConfig(branch);
       expect(res.groupName).toBe('some-group');
       expect(res.isGroup).toBeTrue();
+      expect(res.recreateClosed).toBeTrue();
+      expect(res.commitMessageExtra).toBeUndefined();
     });
 
     it('does not group single upgrade when groupSingleUpdates is false', () => {

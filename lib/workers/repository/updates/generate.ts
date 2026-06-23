@@ -309,18 +309,16 @@ export function generateBranchConfig(
     upgrade.prettyDepType =
       upgrade.prettyDepType ?? upgrade.depType ?? 'dependency';
     if (useGroupSettings) {
-      // For group-single updates, the default commitMessageExtra renders a
-      // version (e.g. "to v3.24") which doesn't make sense when there is
-      // only one dep and the commit message topic is a group name. Clear it
-      // before merging unless the user explicitly set commitMessageExtra
-      // (via packageRules or inside the group sub-config), in which case
-      // flatten.ts will have propagated it into group.commitMessageExtra.
-      if (!groupEligible && !upgrade.group?.commitMessageExtra) {
-        delete upgrade.commitMessageExtra;
-      }
       // Now overwrite original config with group config
       upgrade = mergeChildConfig(upgrade, upgrade.group);
       upgrade.isGroup = true;
+      if (!groupEligible) {
+        // Group settings here are only applied because of groupSingleUpdates.
+        // In this case, the group name is used instead of the dependency name,
+        // so the single update's version must not be appended to it.
+        delete upgrade.commitMessageExtra;
+        upgrade.recreateClosed = upgrade.recreateWhen !== 'never';
+      }
     } else {
       delete upgrade.groupName;
     }

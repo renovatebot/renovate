@@ -129,9 +129,6 @@ export async function flattenUpdates(
               depConfig.datasource!,
             );
             updateConfig = mergeChildConfig(updateConfig, datasourceConfig);
-            // Snapshot commitMessageExtra before packageRules so we can
-            // detect if the user overrode it via a packageRule.
-            const defaultMessageExtra = updateConfig.commitMessageExtra;
             updateConfig = await applyPackageRules(
               updateConfig,
               'datasource-merge',
@@ -151,19 +148,6 @@ export async function flattenUpdates(
               updateConfig,
               'update-type-merge',
             );
-            // If the user's packageRules changed commitMessageExtra (from
-            // the datasource/manager default), propagate the user's value
-            // into the group sub-config so generate.ts knows to preserve it.
-
-            if (
-              updateConfig.groupName &&
-              updateConfig.commitMessageExtra !== defaultMessageExtra
-            ) {
-              updateConfig.group = {
-                ...updateConfig.group,
-                commitMessageExtra: updateConfig.commitMessageExtra,
-              };
-            }
             updateConfig = applyUpdateConfig(updateConfig);
             updateConfig.baseDeps = packageFile.deps;
             update.branchName = updateConfig.branchName;
