@@ -312,10 +312,14 @@ export function generateBranchConfig(
       // For group-single updates, the default commitMessageExtra renders a
       // version (e.g. "to v3.24") which doesn't make sense when there is
       // only one dep and the commit message topic is a group name. Clear it
-      // before merging unless the user explicitly set commitMessageExtra
-      // (via packageRules or inside the group sub-config), in which case
-      // flatten.ts will have propagated it into group.commitMessageExtra.
-      if (!groupEligible && !upgrade.group?.commitMessageExtra) {
+      // unless the user explicitly set commitMessageExtra (signaled via
+      // group.commitMessageExtra from flatten.ts), or the group was
+      // auto-created from a sharedVariableName (e.g. Maven properties).
+      if (
+        !groupEligible &&
+        !upgrade.group?.commitMessageExtra &&
+        !upgrade.sharedVariableName
+      ) {
         delete upgrade.commitMessageExtra;
       }
       // Now overwrite original config with group config
