@@ -1,8 +1,10 @@
+import { isEmptyObject, isNonEmptyString } from '@sindresorhus/is';
+import type { ConstraintName } from '../../../util/exec/types.ts';
 import { asTimestamp } from '../../../util/timestamp.ts';
 import { ensureTrailingSlash } from '../../../util/url.ts';
 import { id as npmId } from '../../versioning/npm/index.ts';
 import { Datasource } from '../datasource.ts';
-import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
+import type { GetReleasesConfig, Release, ReleaseResult } from '../types.ts';
 import { DartResult } from './schema.ts';
 
 export class DartDatasource extends Datasource {
@@ -49,10 +51,25 @@ export class DartDatasource extends Datasource {
       const { versions, latest } = body;
       const releases = versions
         ?.filter(({ retracted }) => !retracted)
-        ?.map(({ version, published }) => ({
-          version,
-          releaseTimestamp: asTimestamp(published),
-        }));
+        ?.map(({ version, published, pubspec }) => {
+          const release: Release = {
+            version,
+            releaseTimestamp: asTimestamp(published),
+          };
+
+          const constraints: Partial<Record<ConstraintName, string[]>> = {};
+          if (isNonEmptyString(pubspec?.environment?.sdk)) {
+            constraints.dart = [pubspec.environment.sdk];
+          }
+          if (isNonEmptyString(pubspec?.environment?.flutter)) {
+            constraints.flutter = [pubspec.environment.flutter];
+          }
+          if (!isEmptyObject(constraints)) {
+            release.constraints = constraints;
+          }
+
+          return release;
+        });
       if (releases && latest) {
         result = { releases };
 
