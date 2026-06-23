@@ -1,5 +1,7 @@
 import { isTruthy } from '@sindresorhus/is';
+import upath from 'upath';
 import { logger } from '../../../../logger/index.ts';
+import { localPathExists, readLocalFile } from '../../../../util/fs/index.ts';
 import { regEx } from '../../../../util/regex.ts';
 import { Result } from '../../../../util/result.ts';
 import { YarnConfig } from '../schema.ts';
@@ -35,6 +37,89 @@ export function loadConfigFromYarnrcYml(yarnrcYml: string): YarnConfig | null {
       logger.warn({ yarnrcYml, err }, `Failed to load yarnrc file`);
     })
     .unwrapOrNull();
+}
+
+export function mergeYarnConfigs(
+  parentConfig: YarnConfig | null,
+  childConfig: YarnConfig | null,
+): YarnConfig | null {
+  if (!parentConfig) {
+    return childConfig;
+  }
+  if (!childConfig) {
+    return parentConfig;
+  }
+
+  const mergedConfig: YarnConfig = {
+    ...parentConfig,
+    ...childConfig,
+  };
+
+  for (const [key, parentValue] of Object.entries(parentConfig)) {
+    const childValue = childConfig[key as keyof YarnConfig];
+    if (
+      parentValue &&
+      childValue &&
+      typeof parentValue === 'object' &&
+      typeof childValue === 'object' &&
+      !Array.isArray(parentValue) &&
+      !Array.isArray(childValue)
+    ) {
+      mergedConfig[key as keyof YarnConfig] = {
+        ...parentValue,
+        ...childValue,
+      } as never;
+    }
+  }
+
+  return mergedConfig;
+}
+
+async function findLocalSiblingAndParentFiles(
+  existingFileNameWithPath: string,
+  otherFileName: string,
+): Promise<string[]> {
+  if (upath.isAbsolute(existingFileNameWithPath)) {
+    return [];
+  }
+  if (upath.isAbsolute(otherFileName)) {
+    return [];
+  }
+
+  const fileNames: string[] = [];
+  let current = existingFileNameWithPath;
+
+  while (current !== '') {
+    current = upath.parse(current).dir;
+    const candidate = upath.join(current, otherFileName);
+    if (await localPathExists(candidate)) {
+      fileNames.push(candidate);
+    }
+  }
+
+  return fileNames;
+}
+
+export async function loadConfigFromInheritedYarnrcYml(
+  packageFile: string,
+): Promise<YarnConfig | null> {
+  const yarnrcFileNames = await findLocalSiblingAndParentFiles(
+    packageFile,
+    '.yarnrc.yml',
+  );
+
+  let yarnrcConfig: YarnConfig | null = null;
+  for (const yarnrcFileName of yarnrcFileNames.reverse()) {
+    const repoYarnrcYml = await readLocalFile(yarnrcFileName, 'utf8');
+    if (repoYarnrcYml?.trim().length) {
+      yarnrcConfig = mergeYarnConfigs(
+        yarnrcConfig,
+        loadConfigFromYarnrcYml(repoYarnrcYml),
+      );
+    }
+  }
+
+  return yarnrcConfig;
 }
 
 export function resolveRegistryUrl(

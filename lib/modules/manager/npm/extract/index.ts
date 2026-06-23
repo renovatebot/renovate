@@ -31,6 +31,7 @@ import { postExtract } from './post/index.ts';
 import type { NpmPackage } from './types.ts';
 import { extractYarnCatalogs, isZeroInstall } from './yarn.ts';
 import {
+  loadConfigFromInheritedYarnrcYml,
   loadConfigFromLegacyYarnrc,
   loadConfigFromYarnrcYml,
   resolveRegistryUrl,
@@ -105,13 +106,8 @@ export async function extractPackageFile(
     ? await isZeroInstall(yarnrcYmlFileName)
     : false;
 
-  let yarnrcConfig: YarnConfig | null = null;
-  const repoYarnrcYml = yarnrcYmlFileName
-    ? await readLocalFile(yarnrcYmlFileName, 'utf8')
-    : null;
-  if (isString(repoYarnrcYml) && repoYarnrcYml.trim().length > 0) {
-    yarnrcConfig = loadConfigFromYarnrcYml(repoYarnrcYml);
-  }
+  let yarnrcConfig: YarnConfig | null =
+    await loadConfigFromInheritedYarnrcYml(packageFile);
 
   const legacyYarnrcFileName = await findLocalSiblingOrParent(
     packageFile,

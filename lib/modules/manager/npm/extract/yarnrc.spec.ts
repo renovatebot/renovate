@@ -2,6 +2,7 @@ import { codeBlock } from 'common-tags';
 import {
   loadConfigFromLegacyYarnrc,
   loadConfigFromYarnrcYml,
+  mergeYarnConfigs,
   resolveRegistryUrl,
 } from './yarnrc.ts';
 
@@ -157,6 +158,86 @@ describe('modules/manager/npm/extract/yarnrc', () => {
       const config = loadConfigFromLegacyYarnrc(legacyYarnrc);
 
       expect(config).toEqual(expectedConfig);
+    });
+  });
+
+  describe('mergeYarnConfigs()', () => {
+    it('merges child config on top of parent config', () => {
+      const mergedConfig = mergeYarnConfigs(
+        {
+          npmRegistryServer: 'https://default.example.com',
+          npmScopes: {
+            root: {
+              npmRegistryServer: 'https://root.example.com',
+            },
+            shared: {
+              npmRegistryServer: 'https://shared-root.example.com',
+            },
+          },
+          catalog: {
+            typescript: '^5.0.0',
+            eslint: '^8.0.0',
+          },
+          catalogs: {
+            ci: {
+              vitest: '^2.0.0',
+              eslint: '^8.0.0',
+            },
+          },
+        },
+        {
+          npmScopes: {
+            leaf: {
+              npmRegistryServer: 'https://leaf.example.com',
+            },
+            shared: {
+              npmRegistryServer: 'https://shared-leaf.example.com',
+            },
+          },
+          catalog: {
+            eslint: '^9.0.0',
+            prettier: '^3.0.0',
+          },
+          catalogs: {
+            ci: {
+              eslint: '^9.0.0',
+              '@types/node': '^22.0.0',
+            },
+            test: {
+              vitest: '^3.0.0',
+            },
+          },
+        },
+      );
+
+      expect(mergedConfig).toEqual({
+        npmRegistryServer: 'https://default.example.com',
+        npmScopes: {
+          root: {
+            npmRegistryServer: 'https://root.example.com',
+          },
+          leaf: {
+            npmRegistryServer: 'https://leaf.example.com',
+          },
+          shared: {
+            npmRegistryServer: 'https://shared-leaf.example.com',
+          },
+        },
+        catalog: {
+          typescript: '^5.0.0',
+          eslint: '^9.0.0',
+          prettier: '^3.0.0',
+        },
+        catalogs: {
+          ci: {
+            eslint: '^9.0.0',
+            '@types/node': '^22.0.0',
+          },
+          test: {
+            vitest: '^3.0.0',
+          },
+        },
+      });
     });
   });
 });
