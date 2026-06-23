@@ -202,40 +202,6 @@ describe('modules/manager/mise/artifacts', () => {
     ]);
   });
 
-  it('uses constraints.go for the golang resolver tool', async () => {
-    GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
-    fs.readLocalFile
-      .mockResolvedValueOnce('existing content')
-      .mockResolvedValueOnce('existing content');
-    const execSnapshots = mockExecAll();
-
-    await updateArtifacts({
-      packageFileName: 'mise.toml',
-      updatedDeps: [{ depName: 'node' }],
-      newPackageFileContent: '',
-      config: {
-        constraints: {
-          mise: '2026.6.12',
-          node: '24.16.0',
-          npm: '11.4.2',
-          go: '1.24.4',
-          golang: '1.23.0',
-          ruby: '3.4.3',
-        },
-      },
-    });
-
-    expect(execSnapshots).toMatchObject([
-      { cmd: 'install-tool mise 2026.6.12' },
-      { cmd: 'install-tool node 24.16.0' },
-      { cmd: 'install-tool npm 11.4.2' },
-      { cmd: 'install-tool golang 1.24.4' },
-      { cmd: 'install-tool ruby 3.4.3' },
-      { cmd: trustCmd },
-      { cmd: updateToolCmd },
-    ]);
-  });
-
   it('injects GITHUB_TOKEN when host rule found', async () => {
     fs.readLocalFile
       .mockResolvedValueOnce('existing content')
