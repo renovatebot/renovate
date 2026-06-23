@@ -18,9 +18,10 @@ import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
 import { getConfigType, getLockFileName } from './lockfile.ts';
 
 /**
- * Resolver tools that mise may invoke while running `mise lock` (version listing).
+ * Resolver tools that mise may invoke while running `mise lock`, for instance to convert an inexact version like `1` against the npm registry.
  *
  * NOTE: this will install all relevant tools, regardless of what the given mise configuration uses.
+ *
  * @see https://mise.jdx.dev/dev-tools/backends/npm.html
  * @see https://mise.jdx.dev/dev-tools/backends/go.html
  * @see https://mise.jdx.dev/dev-tools/backends/gem.html
