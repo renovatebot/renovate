@@ -149,6 +149,36 @@ export function isValidLocalPath(path: string): boolean {
 }
 
 /**
+ * Finds `otherFileName` in the directory where `existingFileNameWithPath` is,
+ * then in its parent directory, then in the grandparent,
+ * until we reach the top-level directory and found all files.
+ * All paths must be relative to `localDir`.
+ */
+export async function findLocalSiblingAndParents(
+  existingFileNameWithPath: string,
+  otherFileName: string,
+): Promise<string[]> {
+  if (upath.isAbsolute(existingFileNameWithPath)) {
+    return [];
+  }
+  if (upath.isAbsolute(otherFileName)) {
+    return [];
+  }
+
+  const fileNames: string[] = [];
+  let current = existingFileNameWithPath;
+  while (current !== '') {
+    current = getParentDir(current);
+    const candidate = upath.join(current, otherFileName);
+    if (await localPathExists(candidate)) {
+      fileNames.push(candidate);
+    }
+  }
+
+  return fileNames;
+}
+
+/**
  * Tries to find `otherFileName` in the directory where
  * `existingFileNameWithPath` is, then in its parent directory, then in the
  * grandparent, until we reach the top-level directory. All paths
@@ -158,23 +188,11 @@ export async function findLocalSiblingOrParent(
   existingFileNameWithPath: string,
   otherFileName: string,
 ): Promise<string | null> {
-  if (upath.isAbsolute(existingFileNameWithPath)) {
-    return null;
-  }
-  if (upath.isAbsolute(otherFileName)) {
-    return null;
-  }
-
-  let current = existingFileNameWithPath;
-  while (current !== '') {
-    current = getParentDir(current);
-    const candidate = upath.join(current, otherFileName);
-    if (await localPathExists(candidate)) {
-      return candidate;
-    }
-  }
-
-  return null;
+  return (
+    (
+      await findLocalSiblingAndParents(existingFileNameWithPath, otherFileName)
+    )[0] ?? null
+  );
 }
 
 /**
