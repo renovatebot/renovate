@@ -543,7 +543,7 @@
     "marten": "https://github.com/JasperFx/marten",
     "masstransit": [
       "https://github.com/MassTransit/MassTransit",
-      "https://github.com/Massient/MassTransit",
+      "https://github.com/Massient/MassTransit"
     ]
     "material-components-web": "https://github.com/material-components/material-components-web",
     "material-ui": [
