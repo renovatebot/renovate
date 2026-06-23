@@ -1,15 +1,20 @@
 import upath from 'upath';
+import { mockDeep } from 'vitest-mock-extended';
 import { envMock, mockExecAll, mockExecSequence } from '~test/exec-util.ts';
 import { env, fs, hostRules } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import type { RepoGlobalConfig } from '../../../config/types.ts';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
 import * as docker from '../../../util/exec/docker/index.ts';
+import * as _datasource from '../../datasource/index.ts';
 import type { UpdateArtifactsConfig } from '../types.ts';
 import { updateArtifacts } from './artifacts.ts';
 import * as lockfile from './lockfile.ts';
 import { updateLockedDependency } from './update-locked.ts';
 
+const datasource = vi.mocked(_datasource);
+
+vi.mock('../../datasource/index.ts', () => mockDeep());
 vi.mock('../../../util/exec/env.ts');
 vi.mock('../../../util/fs/index.ts');
 
@@ -45,6 +50,7 @@ describe('modules/manager/mise/artifacts', () => {
     GlobalConfig.set(adminConfig);
     docker.resetPrefetchedImages();
     hostRules.clear();
+    datasource.getPkgReleases.mockReset();
   });
 
   it('returns null if lock file does not exist', async () => {
@@ -234,6 +240,53 @@ describe('modules/manager/mise/artifacts', () => {
       { cmd: updateToolCmd },
     ]);
   });
+
+  it.each`
+    depName                              | oldVersion    | newVersion    | newPackageFileContent
+    ${'npm:renovate'}                    | ${'43.220.0'} | ${'43.233.3'} | ${`[tools]\n"npm:renovate" = "43.233.3"\n`}
+    ${'go:github.com/DarthSim/hivemind'} | ${'1.0.0'}    | ${'1.1.0'}    | ${`[tools]\n"go:github.com/DarthSim/hivemind" = { version = "1.1.0", install_env = { GOPROXY = "direct" } }\n`}
+    ${'gem:rubocop'}                     | ${'1.75.0'}   | ${'1.76.0'}   | ${`[tools]\n"gem:rubocop" = "1.76.0"\n`}
+  `(
+    'updates mise.lock for $depName with dynamic installs and no constraints',
+    async ({ depName, oldVersion, newVersion, newPackageFileContent }) => {
+      GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
+      datasource.getPkgReleases.mockResolvedValue({
+        releases: [{ version: '1.0.0' }],
+      });
+      const oldLockFileContent = `[[tools."${depName}"]]\nversion = "${oldVersion}"\nbackend = "${depName}"\n`;
+      const newLockFileContent = `[[tools."${depName}"]]\nversion = "${newVersion}"\nbackend = "${depName}"\n`;
+      fs.readLocalFile
+        .mockResolvedValueOnce(oldLockFileContent)
+        .mockResolvedValueOnce(newLockFileContent);
+      const execSnapshots = mockExecAll();
+
+      const res = await updateArtifacts({
+        packageFileName: 'mise.toml',
+        updatedDeps: [{ depName }],
+        newPackageFileContent,
+        config,
+      });
+
+      expect(res).toEqual([
+        {
+          file: {
+            type: 'addition',
+            path: 'mise.lock',
+            contents: newLockFileContent,
+          },
+        },
+      ]);
+      expect(execSnapshots).toMatchObject([
+        { cmd: 'install-tool mise 1.0.0' },
+        { cmd: 'install-tool node 1.0.0' },
+        { cmd: 'install-tool npm 1.0.0' },
+        { cmd: 'install-tool golang 1.0.0' },
+        { cmd: 'install-tool ruby 1.0.0' },
+        { cmd: trustCmd },
+        { cmd: `mise lock ${depName}` },
+      ]);
+    },
+  );
 
   it('injects GITHUB_TOKEN when host rule found', async () => {
     fs.readLocalFile
