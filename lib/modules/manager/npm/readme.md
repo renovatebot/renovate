@@ -15,6 +15,13 @@ Please post feedback to the Renovate repository "Discussions" if you're needing 
 
 If Renovate detects a `packageManager` setting for Yarn in `package.json` then it will use Corepack to install Yarn.
 
+#### Yarn RC Discovery
+
+For Yarn 2+ projects, Renovate reads inherited `.yarnrc.yml` files from the current package directory up through parent directories, with nearer files taking precedence.
+This means you do not need to duplicate `.yarnrc.yml` next to every `yarn.lock` or `package.json` just for registry-related settings.
+
+For legacy `.yarnrc`, Renovate still reads the nearest matching file.
+
 #### HTTP Proxy Support
 
 Yarn itself does not natively recognize/support the `HTTP_PROXY` and `HTTPS_PROXY` environment variables.
