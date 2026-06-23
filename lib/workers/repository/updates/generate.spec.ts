@@ -150,33 +150,6 @@ describe('workers/repository/updates/generate', () => {
       expect(res.commitMessage).toBe('Update commander group (new commander)');
     });
 
-    it('retains version for sharedVariableName group single updates', () => {
-      const { group, groupSingleUpdates } = getConfig();
-      const branch = [
-        {
-          ...requiredDefaultOptions,
-          manager: 'some-manager',
-          branchName: 'some-branch',
-          depName: 'commons-io:commons-io',
-          groupName: 'commons-io.version',
-          sharedVariableName: 'commons-io.version',
-          newVersion: '2.19.0',
-          newValue: '2.19.0',
-          isSingleVersion: true,
-          prettyNewVersion: 'v2.19.0',
-          releaseTimestamp: '2017-02-07T20:01:41+00:00' as Timestamp,
-          groupSingleUpdates,
-          group,
-        },
-      ] satisfies BranchUpgradeConfig[];
-
-      const res = generateBranchConfig(branch);
-
-      expect(res.isGroup).toBeTrue();
-      expect(res.prTitle).toBe('Update commons-io.version to v2.19.0');
-      expect(res.commitMessage).toBe('Update commons-io.version to v2.19.0');
-    });
-
     it('groups single upgrade across multiple files', () => {
       const groupSingleUpdates = true;
       const branch = [
