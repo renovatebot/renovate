@@ -544,7 +544,7 @@
     "masstransit": [
       "https://github.com/MassTransit/MassTransit",
       "https://github.com/Massient/MassTransit"
-    ]
+    ],
     "material-components-web": "https://github.com/material-components/material-components-web",
     "material-ui": [
       "https://github.com/mui-org/material-ui",
