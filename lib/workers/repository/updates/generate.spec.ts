@@ -28,7 +28,7 @@ beforeEach(() => {
 
 describe('workers/repository/updates/generate', () => {
   describe('generateBranchConfig()', () => {
-    it('groups single upgrade by default', () => {
+    it('does not group single upgrade by default', () => {
       const { groupSingleUpdates } = getConfig();
       const branch = [
         {
@@ -47,10 +47,10 @@ describe('workers/repository/updates/generate', () => {
         },
       ] satisfies BranchUpgradeConfig[];
       const res = generateBranchConfig(branch);
-      expect(res.groupName).toBe('some-group');
-      expect(res.isGroup).toBeTrue();
-      expect(res.recreateClosed).toBeTrue();
-      expect(res.commitMessageExtra).toBeUndefined();
+      expect(res.groupName).toBeUndefined();
+      expect(res.isGroup).toBeUndefined();
+      expect(res.recreateClosed).toBeFalse();
+      expect(res.commitMessageExtra).toEqual('to 1.2.3');
     });
 
     it('groups single upgrade across multiple files', () => {
