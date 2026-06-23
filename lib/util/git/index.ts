@@ -1057,8 +1057,7 @@ export async function isBranchConflicted(
 
 export async function deleteBranch(branchName: string): Promise<void> {
   await syncGit();
-  const isVirtual = isVirtualBranch(branchName);
-  if (isVirtual) {
+  if (isVirtualBranch(branchName)) {
     // Delete the remote-tracking ref.
     // Note: git update-ref -d succeeds even if the ref doesn't exist.
     const ref = remoteBranchRef(branchName);

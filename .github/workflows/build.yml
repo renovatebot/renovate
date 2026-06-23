@@ -546,6 +546,7 @@ jobs:
       - coverage-threshold
       - lint-actions
       - build-docker
+      - build-docs
     runs-on: ubuntu-latest
     timeout-minutes: 1
     if: always()
@@ -600,6 +601,19 @@ jobs:
           github.event_name == 'pull_request' &&
           github.event.pull_request.draft != true &&
           needs.lint-actions.result == 'skipped'
+        run: exit 1
+
+      - name: Fail for failed or cancelled docs build
+        if: |
+          needs.build-docs.result == 'failure' ||
+          needs.build-docs.result == 'cancelled'
+        run: exit 1
+
+      - name: Fail for skipped docs build when PR is ready for review
+        if: |
+          github.event_name == 'pull_request' &&
+          github.event.pull_request.draft != true &&
+          needs.build-docs.result == 'skipped'
         run: exit 1
 
       - name: Fail for skipped or failed docker build when needed

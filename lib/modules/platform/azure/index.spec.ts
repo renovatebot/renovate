@@ -1636,6 +1636,19 @@ describe('modules/platform/azure/index', () => {
         'You can manually request rebase by renaming the PR to start with "rebase!".\n\nplus also [a link](https://github.com/foo/bar/issues/5)',
       );
     });
+
+    it('converts standalone PR references to Azure format', () => {
+      expect(azure.massageMarkdown('see #123 and (#456)')).toBe(
+        'see !123 and (!456)',
+      );
+    });
+
+    it('does not corrupt HTML entities or URL anchors', () => {
+      const input =
+        '[#&#8203;32124](https://github.com/org/repo/issues/32124) ' +
+        '[`v4.78.0`](https://github.com/org/repo/blob/HEAD/CHANGELOG.md#4780-june-18-2026)';
+      expect(azure.massageMarkdown(input)).toBe(input);
+    });
   });
 
   describe('setBranchStatus', () => {
