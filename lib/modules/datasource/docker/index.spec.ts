@@ -218,6 +218,35 @@ describe('modules/datasource/docker/index', () => {
       expect(res).toBeNull();
     });
 
+    it('does not cache null digest results', async () => {
+      const registryUrl = 'https://registry.company.com/v2';
+      const packageName = 'registry.company.com/cache-poison';
+
+      httpMock
+        .scope(registryUrl)
+        .get('/', undefined, { badheaders: ['authorization'] })
+        .reply(401, '', {
+          'www-authenticate': 'Basic realm="My Private Docker Registry Server"',
+        })
+        .head('/cache-poison/manifests/some-tag')
+        .reply(403);
+      httpMock
+        .scope(registryUrl)
+        .get('/', undefined, { badheaders: ['authorization'] })
+        .reply(401, '', {
+          'www-authenticate': 'Basic realm="My Private Docker Registry Server"',
+        })
+        .head('/cache-poison/manifests/some-tag')
+        .reply(200, '', { 'docker-content-digest': 'sha256:some-digest' });
+
+      expect(
+        await getDigest({ datasource: 'docker', packageName }, 'some-tag'),
+      ).toBeNull();
+      expect(
+        await getDigest({ datasource: 'docker', packageName }, 'some-tag'),
+      ).toBe('sha256:some-digest');
+    });
+
     it.each(amazonHosts)(
       'passes credentials to ECR client for host $host',
       async ({ host }) => {
@@ -1522,6 +1551,64 @@ describe('modules/datasource/docker/index', () => {
     });
   });
 
+  describe('getImageArchitecture', () => {
+    it('does not cache null architecture results', async () => {
+      const datasource = new DockerDatasource();
+      const registryHost = 'https://registry.company.com';
+      const dockerRepository = 'cache-arch';
+      const currentDigest =
+        'sha256:0101010101010101010101010101010101010101010101010101010101010101';
+
+      httpMock
+        .scope(`${registryHost}/v2`)
+        .get('/')
+        .reply(200)
+        .head(`/cache-arch/manifests/${currentDigest}`)
+        .reply(200, '', {
+          'content-type':
+            'application/vnd.docker.distribution.manifest.list.v2+json',
+        });
+      httpMock
+        .scope(`${registryHost}/v2`)
+        .get('/')
+        .times(3)
+        .reply(200)
+        .head(`/cache-arch/manifests/${currentDigest}`)
+        .reply(200, '', {
+          'content-type':
+            'application/vnd.docker.distribution.manifest.v2+json',
+        })
+        .get(`/cache-arch/manifests/${currentDigest}`)
+        .reply(200, {
+          schemaVersion: 2,
+          mediaType: 'application/vnd.docker.distribution.manifest.v2+json',
+          config: {
+            digest: 'sha256:config-digest',
+            mediaType: 'application/vnd.docker.container.image.v1+json',
+          },
+        })
+        .get('/cache-arch/blobs/sha256:config-digest')
+        .reply(200, {
+          architecture: 'amd64',
+        });
+
+      expect(
+        await datasource.getImageArchitecture(
+          registryHost,
+          dockerRepository,
+          currentDigest,
+        ),
+      ).toBeNull();
+      expect(
+        await datasource.getImageArchitecture(
+          registryHost,
+          dockerRepository,
+          currentDigest,
+        ),
+      ).toBe('amd64');
+    });
+  });
+
   describe('getReleases', () => {
     it('returns null if no token', async () => {
       process.env.RENOVATE_X_DOCKER_HUB_TAGS_DISABLE = 'true';
@@ -1890,6 +1977,72 @@ describe('modules/datasource/docker/index', () => {
               mediaType: 'application/vnd.docker.container.image.v1+json',
             },
           })
+          .get('/')
+          .reply(200)
+          .get('/node/blobs/some-config-digest')
+          .reply(200, {
+            architecture: 'amd64',
+            config: {
+              Labels: {
+                'org.opencontainers.image.source':
+                  'https://github.com/renovatebot/renovate',
+              },
+            },
+          });
+        expect(
+          await getPkgReleases({
+            datasource: DockerDatasource.id,
+            packageName: 'ecr-proxy.company.com/node',
+          }),
+        ).toEqual({
+          lookupName: 'node',
+          registryUrl: 'https://ecr-proxy.company.com',
+          releases: [],
+          sourceUrl: 'https://github.com/renovatebot/renovate',
+        });
+      });
+
+      it('resolves requests to ECR proxy when auth probe itself returns 405 maxResults error', async () => {
+        const maxResultsErrorBody = {
+          errors: [
+            {
+              code: 'UNSUPPORTED',
+              message:
+                "Invalid parameter at 'maxResults' failed to satisfy constraint: 'Member must have value less than or equal to 1000'",
+            },
+          ],
+        };
+
+        httpMock
+          .scope('https://ecr-proxy.company.com/v2')
+          // auth probe for tags URL → 405 (triggers fallback to /v2/ base)
+          .get('/node/tags/list?n=10000')
+          .reply(405, maxResultsErrorBody, {
+            'Docker-Distribution-Api-Version': 'registry/2.0',
+          })
+          // fallback auth probe via base /v2/ → 200 (no auth needed)
+          .get('/')
+          .reply(200)
+          // actual tag fetch → 405 (triggers isECRMaxResultsError retry with n=1000)
+          .get('/node/tags/list?n=10000')
+          .reply(405, maxResultsErrorBody, {
+            'Docker-Distribution-Api-Version': 'registry/2.0',
+          })
+          .get('/node/tags/list?n=1000')
+          .reply(200, { tags: ['some'] }, {})
+          // auth probe for manifest fetch
+          .get('/')
+          .reply(200)
+          .get('/node/manifests/some')
+          .reply(200, {
+            schemaVersion: 2,
+            mediaType: 'application/vnd.docker.distribution.manifest.v2+json',
+            config: {
+              digest: 'some-config-digest',
+              mediaType: 'application/vnd.docker.container.image.v1+json',
+            },
+          })
+          // auth probe for blob fetch
           .get('/')
           .reply(200)
           .get('/node/blobs/some-config-digest')

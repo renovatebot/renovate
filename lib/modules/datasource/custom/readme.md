@@ -48,7 +48,7 @@ After all transformations, the resulting JSON must match one of these formats:
 
 Minimal-supported object:
 
-```json
+```json {configType=none}
 {
   "releases": [
     {
@@ -63,7 +63,7 @@ Minimal-supported object:
 
 All available options:
 
-```json
+```json {configType=none}
 {
   "releases": [
     {
@@ -133,7 +133,7 @@ Suppose the body of the HTTP response is as follows:
 
 When Renovate receives this response with the `plain` format, it will convert it into the following:
 
-```json
+```json {configType=none}
 {
   "releases": [
     {
@@ -166,7 +166,7 @@ releases:
 
 When Renovate receives this response with the `yaml` format, it will convert it into the following:
 
-```json
+```json {configType=none}
 {
   "releases": [
     {
@@ -201,7 +201,7 @@ version = "3.0.0"
 
 Will convert applying any `jsonata` rules defined in the `transformTemplates` section will be applied.
 
-```json
+```json {configType=none}
 {
   "releases": [
     {
@@ -235,7 +235,7 @@ For the following HTML document:
 
 The following JSON will be generated:
 
-```json
+```json {configType=none}
 {
   "releases": [
     {

@@ -130,8 +130,8 @@ export class ConanDatasource extends Datasource {
       );
 
       try {
-        const rep = await this.http.getJsonUnchecked(lookupUrl);
-        const conanJson = ConanJSON.parse(rep.body);
+        const rep = await this.http.getJson(lookupUrl, ConanJSON);
+        const conanJson = rep.body;
         if (conanJson) {
           logger.trace({ lookupUrl }, 'Got conan api result');
           const dep: ReleaseResult = { releases: [] };

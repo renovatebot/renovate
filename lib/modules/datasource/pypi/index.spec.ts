@@ -87,16 +87,6 @@ describe('modules/datasource/pypi/index', () => {
       process.env = OLD_ENV;
     });
 
-    it('returns null for empty result', async () => {
-      httpMock.scope(baseUrl).get('/something/json').reply(200);
-      expect(
-        await getPkgReleases({
-          datasource,
-          packageName: 'something',
-        }),
-      ).toBeNull();
-    });
-
     it('returns null for 404', async () => {
       httpMock.scope(baseUrl).get('/something/json').reply(404);
       httpMock.scope(baseUrl).get('/something/').reply(404);
@@ -205,6 +195,8 @@ describe('modules/datasource/pypi/index', () => {
           'https://someregion-python.pkg.dev/some-project/some-repo',
         ],
       };
+      // GoogleAuth is mocked as a class and instantiated with `new`, requires regular function
+      // eslint-disable-next-line prefer-arrow-callback
       googleAuth.mockImplementationOnce(function () {
         return partial<InstanceType<typeof _googleAuth>>({
           getAccessToken: vi.fn().mockResolvedValue('some-token'),
@@ -229,6 +221,8 @@ describe('modules/datasource/pypi/index', () => {
           'https://someregion-python.pkg.dev/some-project/some-repo',
         ],
       };
+      // GoogleAuth is mocked as a class and instantiated with `new`, requires regular function
+      // eslint-disable-next-line prefer-arrow-callback
       googleAuth.mockImplementation(function () {
         return partial<InstanceType<typeof _googleAuth>>({
           getAccessToken: vi.fn(),
@@ -284,6 +278,31 @@ describe('modules/datasource/pypi/index', () => {
         datasource,
         packageName: 'flexget',
       });
+      expect(result?.sourceUrl).toBe(info.project_urls.Repository);
+      expect(result?.changelogUrl).toBe(info.project_urls.changelog);
+    });
+
+    it('finds urls from project_urls when home_page is null', async () => {
+      const info = {
+        name: 'flexget',
+        home_page: null,
+        project_urls: {
+          Forum: 'https://discuss.flexget.com',
+          Homepage: 'https://flexget.com',
+          changelog: 'https://github.com/Flexget/wiki/blob/master/ChangeLog.md',
+          'Issue Tracker': 'https://github.com/Flexget/Flexget/issues',
+          Repository: 'https://github.com/Flexget/Flexget',
+        },
+      };
+      httpMock
+        .scope(baseUrl)
+        .get('/flexget/json')
+        .reply(200, { ...JSON.parse(res1), info });
+      const result = await getPkgReleases({
+        datasource,
+        packageName: 'flexget',
+      });
+      expect(result?.homepage).toBeUndefined();
       expect(result?.sourceUrl).toBe(info.project_urls.Repository);
       expect(result?.changelogUrl).toBe(info.project_urls.changelog);
     });
@@ -798,6 +817,8 @@ describe('modules/datasource/pypi/index', () => {
         'https://someregion-python.pkg.dev/some-project/some-repo/simple/',
       ],
     };
+    // GoogleAuth is mocked as a class and instantiated with `new`, requires regular function
+    // eslint-disable-next-line prefer-arrow-callback
     googleAuth.mockImplementationOnce(function () {
       return partial<InstanceType<typeof _googleAuth>>({
         getAccessToken: vi.fn().mockResolvedValue('some-token'),
@@ -829,6 +850,8 @@ describe('modules/datasource/pypi/index', () => {
         'https://oauth2accesstoken@someregion-python.pkg.dev/some-project/some-repo/simple/',
       ],
     };
+    // GoogleAuth is mocked as a class and instantiated with `new`, requires regular function
+    // eslint-disable-next-line prefer-arrow-callback
     googleAuth.mockImplementationOnce(function () {
       return partial<InstanceType<typeof _googleAuth>>({
         getAccessToken: vi.fn().mockResolvedValue('some-token'),

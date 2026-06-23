@@ -1242,6 +1242,7 @@ describe('config/presets/index', () => {
           'helpers:gitlabDigestChangelogs',
           'helpers:goXPackagesChangelogLink',
           'helpers:goXPackagesNameLink',
+          'helpers:renovateChangelog',
         ],
       });
     });

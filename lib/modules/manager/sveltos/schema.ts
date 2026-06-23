@@ -1,4 +1,4 @@
-import { z } from 'zod/v3';
+import { z } from 'zod/v4';
 import { LooseArray } from '../../../util/schema-utils/index.ts';
 import { KubernetesResource } from '../kubernetes/schema.ts';
 

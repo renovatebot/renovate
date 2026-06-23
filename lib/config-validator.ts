@@ -129,10 +129,12 @@ interface PackageJson {
     .summary('Validate Renovate configuration files')
     .description(
       `Validate your Renovate configuration (repo config, shared presets or global configuration) files\n` +
+        // oxlint-disable-next-line renovate/no-hardcoded-docs-url -- CLI help text, no config available
         'If no [config-files...] are given, renovate-config-validator will look at the default config file locations (https://docs.renovatebot.com/configuration-options/)',
     )
     .addHelpText(
       'after',
+      // oxlint-disable-next-line renovate/no-hardcoded-docs-url -- CLI help text, no config available
       `
 When specifying [config-files...], Renovate will treat them as global self-hosted configuration files. You can disable this behaviour with --no-global
 
@@ -278,7 +280,7 @@ If you have specified global self-hosted configuration (https://docs.renovatebot
       logger.info(
         `Config validated successfully against ${filesValidated} file(s)`,
       );
-    } else {
+    } else if (!filesValidated) {
       logger.warn(`No files to perform configuration validation against`);
     }
     // Use exitCode (not process.exit) so async log streams can flush

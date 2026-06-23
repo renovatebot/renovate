@@ -16,6 +16,7 @@ import {
   toolDefinitions,
   toolNames,
 } from '../../lib/util/exec/types.ts';
+import { coerceObject } from '../../lib/util/object.ts';
 import { getCliName } from '../../lib/workers/global/config/parse/cli.ts';
 import { convertedExperimentalEnvVars } from '../../lib/workers/global/config/parse/env.ts';
 import { readFile, updateFile } from '../utils/index.ts';
@@ -309,6 +310,28 @@ function generateCacheNamespacesList(): string {
   return list;
 }
 
+function generateStatusCheckWhenTable(): string {
+  const option = options.find((o) => o.name === 'statusCheckWhen');
+  const defaults = coerceObject<Record<string, string>>(option?.default);
+
+  const reasoning: Record<string, string> = {
+    artifactError: 'Legacy behavior — only reports artifact failures',
+    configValidation: 'Always reports validation pass/fail',
+    mergeConfidence: 'Always reports confidence level',
+    minimumReleaseAge: 'Always reports stability status',
+  };
+
+  const keys = Object.keys(defaults).sort();
+
+  let table = '\n| Key | Default | Reasoning |\n';
+  table += '| :-- | :-- | :-- |\n';
+  for (const key of keys) {
+    table += `| \`${key}\` | \`${defaults[key]}\` | ${reasoning[key] ?? ''} |\n`;
+  }
+
+  return table;
+}
+
 function generateConfigFileNames(): string {
   // TODO #10682 #10651 make sure that we include `getConfigFileNames(platformId)`
   const filenames = getConfigFileNames();
@@ -324,7 +347,7 @@ function generateConfigFileNames(): string {
 
   output += '1. `package.json` _(within a `"renovate"` section)_\n';
 
-  return output.trimEnd();
+  return output;
 }
 
 function generateToolsForConstraints(): string {
@@ -361,7 +384,7 @@ function generateAdditionalConstraints(): string {
 
 function generateToolsForInstallTools(): string {
   let output = '';
-  for (const tool of [...toolNames]) {
+  for (const tool of toolNames) {
     output += `- \`${tool}\`\n`;
   }
 
@@ -486,6 +509,14 @@ export async function generateConfig(dist: string, bot = false): Promise<void> {
       content,
       generateToolsForInstallTools(),
       '<!-- installTools-tools-begin -->',
+    );
+  }
+
+  if (!bot) {
+    content = replaceContent(
+      content,
+      generateStatusCheckWhenTable(),
+      '<!-- status-check-when-defaults-begin -->',
     );
   }
 

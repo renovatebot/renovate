@@ -4,7 +4,7 @@ There is a [online decoder for cached data](https://docs.renovatebot.com/cache-d
 
 Suppose you have data:
 
-```json
+```json {configType=none}
 {
   "fingerprint": "0123456789abcdef",
   "hash": "756a22cbd28854a64687fa5e458eb1da5b51958d7b329094f4a152dc4dc533dd26213f97fdc10f2480784aa667382ef671d820c1625bb694542a99f8a709be45",

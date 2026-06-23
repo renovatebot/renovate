@@ -42,6 +42,29 @@ describe('workers/repository/update/branch/status-checks', () => {
       expect(platform.setBranchStatus).toHaveBeenCalledTimes(1);
     });
 
+    it('uses the productLinks documentation from GlobalConfig for the status url', async () => {
+      config.stabilityStatus = 'green';
+      await setStability(config);
+      expect(platform.setBranchStatus).toHaveBeenCalledWith(
+        expect.objectContaining({
+          url: 'https://docs.renovatebot.com/key-concepts/minimum-release-age/',
+        }),
+      );
+    });
+
+    it('honours a custom productLinks documentation url', async () => {
+      config.stabilityStatus = 'green';
+      GlobalConfig.set({
+        productLinks: { documentation: 'https://example.com/docs/' },
+      });
+      await setStability(config);
+      expect(platform.setBranchStatus).toHaveBeenCalledWith(
+        expect.objectContaining({
+          url: 'https://example.com/docs/key-concepts/minimum-release-age/',
+        }),
+      );
+    });
+
     it('skips status if already set', async () => {
       config.stabilityStatus = 'green';
       platform.getBranchStatusCheck.mockResolvedValueOnce('green');
@@ -103,6 +126,53 @@ describe('workers/repository/update/branch/status-checks', () => {
       );
       expect(platform.setBranchStatus).not.toHaveBeenCalled();
     });
+
+    describe('statusCheckWhen.minimumReleaseAge', () => {
+      it('skips status entirely when mode is "never"', async () => {
+        config.stabilityStatus = 'green';
+        config.statusCheckWhen = { minimumReleaseAge: 'never' };
+        await setStability(config);
+        expect(logger.debug).toHaveBeenCalledWith(
+          'statusCheckWhen.minimumReleaseAge is set to "never", skipping stability status check.',
+        );
+        expect(platform.getBranchStatusCheck).not.toHaveBeenCalled();
+        expect(platform.setBranchStatus).not.toHaveBeenCalled();
+      });
+
+      it('does not log when mode is "never" and no stability status is set', async () => {
+        config.statusCheckWhen = { minimumReleaseAge: 'never' };
+        await setStability(config);
+        expect(logger.debug).not.toHaveBeenCalledWith(
+          'statusCheckWhen.minimumReleaseAge is set to "never", skipping stability status check.',
+        );
+        expect(platform.getBranchStatusCheck).not.toHaveBeenCalled();
+        expect(platform.setBranchStatus).not.toHaveBeenCalled();
+      });
+
+      it('skips green status when mode is "failed"', async () => {
+        config.stabilityStatus = 'green';
+        config.statusCheckWhen = { minimumReleaseAge: 'failed' };
+        await setStability(config);
+        expect(platform.getBranchStatusCheck).not.toHaveBeenCalled();
+        expect(platform.setBranchStatus).not.toHaveBeenCalled();
+      });
+
+      it('sets yellow status when mode is "failed"', async () => {
+        config.stabilityStatus = 'yellow';
+        config.statusCheckWhen = { minimumReleaseAge: 'failed' };
+        await setStability(config);
+        expect(platform.getBranchStatusCheck).toHaveBeenCalledTimes(1);
+        expect(platform.setBranchStatus).toHaveBeenCalledTimes(1);
+      });
+
+      it('sets green status when mode is "always" (default)', async () => {
+        config.stabilityStatus = 'green';
+        config.statusCheckWhen = { minimumReleaseAge: 'always' };
+        await setStability(config);
+        expect(platform.getBranchStatusCheck).toHaveBeenCalledTimes(1);
+        expect(platform.setBranchStatus).toHaveBeenCalledTimes(1);
+      });
+    });
   });
 
   describe('setConfidence', () => {
@@ -137,6 +207,17 @@ describe('workers/repository/update/branch/status-checks', () => {
       await setConfidence(config);
       expect(platform.getBranchStatusCheck).toHaveBeenCalledTimes(1);
       expect(platform.setBranchStatus).toHaveBeenCalledTimes(1);
+    });
+
+    it('uses the productLinks documentation from GlobalConfig for the status url', async () => {
+      config.minimumConfidence = 'high';
+      config.confidenceStatus = 'green';
+      await setConfidence(config);
+      expect(platform.setBranchStatus).toHaveBeenCalledWith(
+        expect.objectContaining({
+          url: 'https://docs.renovatebot.com/merge-confidence',
+        }),
+      );
     });
 
     it('skips status if already set', async () => {
@@ -204,6 +285,58 @@ describe('workers/repository/update/branch/status-checks', () => {
         'DRY-RUN: Would update renovate/merge-confidence status check state to yellow',
       );
       expect(platform.setBranchStatus).not.toHaveBeenCalled();
+    });
+
+    describe('statusCheckWhen.mergeConfidence', () => {
+      it('skips status entirely when mode is "never"', async () => {
+        config.minimumConfidence = 'high';
+        config.confidenceStatus = 'yellow';
+        config.statusCheckWhen = { mergeConfidence: 'never' };
+        await setConfidence(config);
+        expect(logger.debug).toHaveBeenCalledWith(
+          'statusCheckWhen.mergeConfidence is set to "never", skipping merge confidence status check.',
+        );
+        expect(platform.getBranchStatusCheck).not.toHaveBeenCalled();
+        expect(platform.setBranchStatus).not.toHaveBeenCalled();
+      });
+
+      it('does not log when mode is "never" and no confidence status is set', async () => {
+        config.minimumConfidence = 'high';
+        config.statusCheckWhen = { mergeConfidence: 'never' };
+        await setConfidence(config);
+        expect(logger.debug).not.toHaveBeenCalledWith(
+          'statusCheckWhen.mergeConfidence is set to "never", skipping merge confidence status check.',
+        );
+        expect(platform.getBranchStatusCheck).not.toHaveBeenCalled();
+        expect(platform.setBranchStatus).not.toHaveBeenCalled();
+      });
+
+      it('skips green status when mode is "failed"', async () => {
+        config.minimumConfidence = 'high';
+        config.confidenceStatus = 'green';
+        config.statusCheckWhen = { mergeConfidence: 'failed' };
+        await setConfidence(config);
+        expect(platform.getBranchStatusCheck).not.toHaveBeenCalled();
+        expect(platform.setBranchStatus).not.toHaveBeenCalled();
+      });
+
+      it('sets yellow status when mode is "failed"', async () => {
+        config.minimumConfidence = 'high';
+        config.confidenceStatus = 'yellow';
+        config.statusCheckWhen = { mergeConfidence: 'failed' };
+        await setConfidence(config);
+        expect(platform.getBranchStatusCheck).toHaveBeenCalledTimes(1);
+        expect(platform.setBranchStatus).toHaveBeenCalledTimes(1);
+      });
+
+      it('sets green status when mode is "always" (default)', async () => {
+        config.minimumConfidence = 'high';
+        config.confidenceStatus = 'green';
+        config.statusCheckWhen = { mergeConfidence: 'always' };
+        await setConfidence(config);
+        expect(platform.getBranchStatusCheck).toHaveBeenCalledTimes(1);
+        expect(platform.setBranchStatus).toHaveBeenCalledTimes(1);
+      });
     });
   });
 
