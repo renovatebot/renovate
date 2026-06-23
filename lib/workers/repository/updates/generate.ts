@@ -275,9 +275,13 @@ export function generateBranchConfig(
   const typesGroup =
     depNames.length > 1 && !hasGroupName && isTypesGroup(branchUpgrades);
   logger.trace(`groupEligible: ${groupEligible}`);
+  const singleUpdateGroup =
+    hasGroupName && !groupEligible && !branchUpgrades[0].sharedVariableName;
+  logger.trace(`singleUpdateGroup: ${singleUpdateGroup}`);
   const useGroupSettings =
     hasGroupName &&
-    (groupEligible || branchUpgrades[0].groupSingleUpdates === true);
+    (groupEligible ||
+      (singleUpdateGroup && branchUpgrades[0].groupSingleUpdates === true));
   logger.trace(`useGroupSettings: ${useGroupSettings}`);
   let releaseTimestamp: Timestamp;
 
@@ -312,11 +316,9 @@ export function generateBranchConfig(
       // Now overwrite original config with group config
       upgrade = mergeChildConfig(upgrade, upgrade.group);
       upgrade.isGroup = true;
-      if (!groupEligible && !upgrade.sharedVariableName) {
+      if (singleUpdateGroup) {
         // Single update using group name instead of dependency name,
         // so remove version from commit message.
-        // sharedVariableName groups (e.g. Maven properties) are excluded
-        // because the shared variable identifies the update.
         delete upgrade.commitMessageExtra;
         upgrade.recreateClosed = upgrade.recreateWhen !== 'never';
       }

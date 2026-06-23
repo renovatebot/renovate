@@ -132,8 +132,7 @@ describe('workers/repository/updates/generate', () => {
       expect(res.groupName).toBeUndefined();
     });
 
-    it('retains version in group single upgrade with sharedVariableName', () => {
-      const groupSingleUpdates = true;
+    it('does not group single upgrade with sharedVariableName', () => {
       const branch = [
         {
           manager: 'some-manager',
@@ -145,15 +144,15 @@ describe('workers/repository/updates/generate', () => {
           sharedVariableName: 'spring-boot.version',
           prTitle: 'some-title',
           releaseTimestamp: '2017-02-07T20:01:41+00:00' as Timestamp,
-          groupSingleUpdates,
+          groupSingleUpdates: true,
           group: {
             foo: 2,
           },
         },
       ] satisfies BranchUpgradeConfig[];
       const res = generateBranchConfig(branch);
-      expect(res.groupName).toBe('spring-boot.version');
-      expect(res.isGroup).toBeTrue();
+      expect(res.groupName).toBeUndefined();
+      expect(res.isGroup).toBeUndefined();
       expect(res.commitMessageExtra).toBe('to v3.2.1');
       expect(res.recreateClosed).toBeFalse();
     });
