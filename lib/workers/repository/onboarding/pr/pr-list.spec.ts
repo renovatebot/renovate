@@ -10,7 +10,6 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
     beforeEach(() => {
       config = partial<RenovateConfig>({
         prHourlyLimit: 2, // default
-        productLinks: { documentation: 'https://docs.renovatebot.com/' },
       });
     });
 
