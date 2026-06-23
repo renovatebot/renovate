@@ -124,9 +124,12 @@ function extractConstraints(
   const extractedConstraints: Partial<Record<ConstraintName, string>> = {};
   if (pubspec.environment.sdk) {
     extractedConstraints.dart = pubspec.environment.sdk;
-  }
-  if (pubspec.environment.flutter) {
-    extractedConstraints.flutter = pubspec.environment.flutter;
+
+    // it's impossible to have a [flutter] entry without a [sdk] entry.
+    // only parse environment.flutter if sdk exists
+    if (pubspec.environment.flutter) {
+      extractedConstraints.flutter = pubspec.environment.flutter;
+    }
   }
 
   return extractedConstraints;
