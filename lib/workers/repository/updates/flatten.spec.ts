@@ -358,6 +358,71 @@ describe('workers/repository/updates/flatten', () => {
       expect(lockFileUpdate!.branchName).not.toBe(regularUpdate!.branchName);
     });
 
+    it('propagates user-set commitMessageExtra into group config', async () => {
+      config.packageRules = [
+        {
+          matchPackageNames: ['commander'],
+          groupName: 'commander group',
+          commitMessageExtra: '(new commander)',
+        },
+      ];
+      const packageFiles: Record<string, PackageFile[]> = {
+        npm: [
+          {
+            packageFile: 'package.json',
+            deps: [
+              {
+                depName: 'commander',
+                packageName: 'commander',
+                currentValue: '14.0.3',
+                updates: [
+                  {
+                    newValue: '15.0.0',
+                    updateType: 'major',
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      };
+
+      const res = await flattenUpdates(config, packageFiles);
+
+      expect(res).toHaveLength(1);
+      expect(res[0].commitMessageExtra).toBe('(new commander)');
+      expect(res[0].group).toMatchObject({
+        commitMessageExtra: '(new commander)',
+      });
+    });
+
+    it('does not propagate default commitMessageExtra into group config', async () => {
+      config.packageRules = [
+        {
+          matchCategories: ['docker'],
+          groupName: 'all docker dependencies',
+        },
+      ];
+      const packageFiles: Record<string, PackageFile[]> = {
+        dockerfile: [
+          {
+            packageFile: 'Dockerfile',
+            deps: [
+              {
+                depName: 'ubuntu',
+                updates: [{ newValue: '24.04' }],
+              },
+            ],
+          },
+        ],
+      };
+
+      const res = await flattenUpdates(config, packageFiles);
+
+      expect(res).toHaveLength(1);
+      expect(res[0].group).not.toHaveProperty('commitMessageExtra');
+    });
+
     describe('hasAttestation is taken from the current value', () => {
       it.each([[true], [false], [undefined]])(
         'current attestation %s, new attestation %s',
