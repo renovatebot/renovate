@@ -19,7 +19,7 @@ overrides:
   '@aws-sdk/xml-builder@3.972.4>fast-xml-parser': '^5.3.6'
   '@yarnpkg/core@4.5.0>tar': $tar
   esbuild: $esbuild
-  protobufjs@8.0.1: 8.5.0
+  protobufjs@8.0.1: 8.6.4
   vite: $vite
 
 ignoredOptionalDependencies:
@@ -45,5 +45,8 @@ minimumReleaseAgeExclude:
   - '@containerbase/eslint-plugin'
   - '@containerbase/istanbul-reports-html'
   - '@containerbase/semantic-release-pnpm'
-  # Renovate security update: simple-git@3.36.0
-  - simple-git@3.36.0
+
+provenance: true
+
+patchedDependencies:
+  install-artifact-from-github@1.6.0: patches/install-artifact-from-github@1.6.0.patch

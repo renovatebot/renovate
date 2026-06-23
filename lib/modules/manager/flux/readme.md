@@ -49,6 +49,7 @@ In this example, a `HelmRelease` whose `spec.chart.spec.sourceRef.name` is `podi
 Renovate can update `git` references from `GitRepository` resources.
 
 The `flux` manager only updates `GitRepository` fields that have a `tag` or `commit` key.
+When `commit` is being updated, if a `branch` key is also present, only commits from that branch will be considered.
 
 ### Kustomization support
 
