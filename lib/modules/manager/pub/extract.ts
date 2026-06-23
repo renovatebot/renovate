@@ -121,15 +121,13 @@ function extractFlutter(pubspec: Pubspec): PackageDependency[] {
 function extractConstraints(
   pubspec: Pubspec,
 ): Partial<Record<ConstraintName, string>> {
-  const extractedConstraints: Partial<Record<ConstraintName, string>> = {};
-  if (pubspec.environment.sdk) {
-    extractedConstraints.dart = pubspec.environment.sdk;
+  const extractedConstraints: Partial<Record<ConstraintName, string>> = {
+    // environment.sdk is a required field in a pubspec
+    dart: pubspec.environment.sdk,
+  };
 
-    // it's impossible to have a [flutter] entry without a [sdk] entry.
-    // only parse environment.flutter if sdk exists
-    if (pubspec.environment.flutter) {
-      extractedConstraints.flutter = pubspec.environment.flutter;
-    }
+  if (pubspec.environment.flutter) {
+    extractedConstraints.flutter = pubspec.environment.flutter;
   }
 
   return extractedConstraints;
