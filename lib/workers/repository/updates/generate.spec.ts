@@ -76,7 +76,6 @@ describe('workers/repository/updates/generate', () => {
       expect(res.isGroup).toBeTrue();
       expect(res.prTitle).toBe('Update all docker dependencies');
       expect(res.commitMessage).toBe('Update all docker dependencies');
-      expect(res.recreateClosed).toBeTrue();
     });
 
     it('retains version in commit message for group with multiple updates to same version', () => {

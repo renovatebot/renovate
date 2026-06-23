@@ -320,9 +320,6 @@ export function generateBranchConfig(
         !upgrade.group?.commitMessageExtra &&
         !upgrade.sharedVariableName
       ) {
-        if (upgrade.commitMessageExtra) {
-          upgrade.recreateClosed = upgrade.recreateWhen !== 'never';
-        }
         delete upgrade.commitMessageExtra;
       }
       // Now overwrite original config with group config
