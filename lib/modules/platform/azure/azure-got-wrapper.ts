@@ -12,7 +12,7 @@ import type { IWorkItemTrackingApi } from 'azure-devops-node-api/WorkItemTrackin
 import { logger } from '../../../logger/index.ts';
 import type { HostRule } from '../../../types/index.ts';
 import * as hostRules from '../../../util/host-rules.ts';
-import { isProbablyJwt } from './util.ts';
+import { isProbablyJwt } from '../../../util/http/jwt.ts';
 
 const hostType = 'azure';
 let endpoint: string;
