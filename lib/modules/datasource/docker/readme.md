@@ -22,4 +22,4 @@ See the [Docker package manager docs](../../../docker.md#registry-authentication
 - [Docker Hub](../../../docker.md#docker-hub)
 - [Self-hosted registries](../../../docker.md#self-hosted-docker-registry)
 - [AWS ECR](../../../docker.md#aws-ecr-amazon-web-services-elastic-container-registry) (including ambient AWS credentials via OIDC, IRSA, or Pod Identity)
-- [Google Container Registry / Google Artifact Registry](../../../docker.md#google-container-registry--google-artifact-registry)
+- [Google Container Registry / Google Artifact Registry](../../../docker.md#google-container-registry-google-artifact-registry)

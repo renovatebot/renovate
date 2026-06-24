@@ -574,8 +574,8 @@ You must refresh the token at least once every 12 hours, so most users obtain it
 
 <!-- prettier-ignore -->
 !!! tip "Use the AWS SDK credential chain"
-    The AWS CLI command above will pick up credentials from the standard AWS credential provider chain.
-    This means you can authenticate to AWS via [GitHub Actions OIDC](https://docs.github.com/en/actions/deployment/security-hardening-your-deployments/configuring-openid-connect-in-amazon-web-services), [EKS IRSA](https://docs.aws.amazon.com/eks/latest/userguide/iam-roles-for-service-accounts.html), [EKS Pod Identity](https://docs.aws.amazon.com/eks/latest/userguide/pod-identities.html), or instance/task roles — no long-lived access keys required.
+  The AWS CLI command above will pick up credentials from the standard AWS credential provider chain.
+  This means you can authenticate to AWS via [GitHub Actions OIDC](https://docs.github.com/en/actions/deployment/security-hardening-your-deployments/configuring-openid-connect-in-amazon-web-services), [EKS IRSA](https://docs.aws.amazon.com/eks/latest/userguide/iam-roles-for-service-accounts.html), [EKS Pod Identity](https://docs.aws.amazon.com/eks/latest/userguide/pod-identities.html), or instance/task roles — no long-lived access keys required.
 
 ### CodeArtifact hostRules per ecosystem
 
