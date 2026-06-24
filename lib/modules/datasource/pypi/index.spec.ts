@@ -1,3 +1,4 @@
+import { codeBlock } from 'common-tags';
 import { GoogleAuth as _googleAuth } from 'google-auth-library';
 import { Fixtures } from '~test/fixtures.ts';
 import * as httpMock from '~test/http-mock.ts';
@@ -804,6 +805,263 @@ describe('modules/datasource/pypi/index', () => {
           constraintsFiltering: 'strict',
         }),
       ).toMatchSnapshot();
+    });
+
+    it('parses PEP 691 JSON response from simple endpoint', async () => {
+      const simpleJson = codeBlock`
+        {
+          "files": [
+            {
+              "filename": "dj-database-url-0.4.1.tar.gz",
+              "requires-python": null,
+              "yanked": false,
+              "upload-time": "2016-04-18T07:30:00.000Z"
+            },
+            {
+              "filename": "dj-database-url-0.4.2.tar.gz",
+              "requires-python": ">=3.6",
+              "yanked": false,
+              "upload-time": "2016-11-01T15:20:33.000Z"
+            },
+            {
+              "filename": "dj_database_url-0.5.0-py2.py3-none-any.whl",
+              "requires-python": null,
+              "yanked": "security vulnerability",
+              "upload-time": "2018-04-10T11:05:00.000Z"
+            }
+          ]
+        }
+      `;
+      httpMock
+        .scope('https://some.registry.org/simple/')
+        .get('/dj-database-url/')
+        .reply(200, simpleJson, {
+          'content-type': 'application/vnd.pypi.simple.v1+json',
+        });
+      const config = {
+        registryUrls: ['https://some.registry.org/simple/'],
+      };
+
+      const res = await getPkgReleases({
+        datasource,
+        ...config,
+        packageName: 'dj-database-url',
+      });
+
+      expect(res?.releases).toMatchObject([
+        {
+          version: '0.4.1',
+          releaseTimestamp: '2016-04-18T07:30:00.000Z',
+        },
+        {
+          version: '0.4.2',
+          releaseTimestamp: '2016-11-01T15:20:33.000Z',
+        },
+        {
+          version: '0.5.0',
+          releaseTimestamp: '2018-04-10T11:05:00.000Z',
+          isDeprecated: true,
+        },
+      ]);
+    });
+
+    it('falls back to HTML when simple endpoint returns HTML despite Accept header', async () => {
+      httpMock
+        .scope('https://some.registry.org/simple/')
+        .get('/dj-database-url/')
+        .reply(200, htmlResponse, {
+          'content-type': 'text/html',
+        });
+      const config = {
+        registryUrls: ['https://some.registry.org/simple/'],
+      };
+
+      const res = await getPkgReleases({
+        datasource,
+        ...config,
+        packageName: 'dj-database-url',
+      });
+
+      expect(res?.releases).toMatchObject([
+        { version: '0.1.2' },
+        { version: '0.1.3' },
+        { version: '0.1.4' },
+        { version: '0.2.0' },
+        { version: '0.2.1' },
+        { version: '0.2.2' },
+        { version: '0.3.0' },
+        { version: '0.4.0' },
+        { version: '0.4.1' },
+        { version: '0.4.2' },
+        { isDeprecated: true, version: '0.5.0' },
+      ]);
+    });
+
+    it('falls back to HTML when PEP 691 JSON parsing fails', async () => {
+      httpMock
+        .scope('https://some.registry.org/simple/')
+        .get('/dj-database-url/')
+        .reply(200, htmlResponse, {
+          'content-type': 'application/vnd.pypi.simple.v1+json',
+        });
+      const config = {
+        registryUrls: ['https://some.registry.org/simple/'],
+      };
+
+      const res = await getPkgReleases({
+        datasource,
+        ...config,
+        packageName: 'dj-database-url',
+      });
+
+      expect(res?.releases).toMatchObject([
+        { version: '0.1.2' },
+        { version: '0.1.3' },
+        { version: '0.1.4' },
+        { version: '0.2.0' },
+        { version: '0.2.1' },
+        { version: '0.2.2' },
+        { version: '0.3.0' },
+        { version: '0.4.0' },
+        { version: '0.4.1' },
+        { version: '0.4.2' },
+        { isDeprecated: true, version: '0.5.0' },
+      ]);
+    });
+
+    it('falls back to HTML when PEP 691 JSON schema validation fails', async () => {
+      const invalidSchemaJson = JSON.stringify({ name: 'dj-database-url' });
+      httpMock
+        .scope('https://some.registry.org/simple/')
+        .get('/dj-database-url/')
+        .reply(200, invalidSchemaJson, {
+          'content-type': 'application/vnd.pypi.simple.v1+json',
+        });
+      const config = {
+        registryUrls: ['https://some.registry.org/simple/'],
+      };
+
+      const res = await getPkgReleases({
+        datasource,
+        ...config,
+        packageName: 'dj-database-url',
+      });
+
+      // Schema validation fails, falls back to HTML parsing which also finds no releases
+      expect(res).toBeNull();
+    });
+
+    it('parses PEP 691 JSON response with requires-python constraints', async () => {
+      const jsonBody = {
+        meta: { 'api-version': '1.0' },
+        name: 'doit',
+        files: [
+          {
+            filename: 'doit-0.31.0.tar.gz',
+            'requires-python': '>=3.4',
+            yanked: false,
+            'upload-time': '2023-01-01T00:00:00.000Z',
+          },
+          {
+            filename: 'doit-0.31.0-py3-none-any.whl',
+            'requires-python': '>=2.7',
+            yanked: false,
+            'upload-time': '2023-01-01T01:00:00.000Z',
+          },
+        ],
+      };
+      httpMock
+        .scope('https://some.registry.org/simple/')
+        .get('/doit/')
+        .reply(200, JSON.stringify(jsonBody), {
+          'content-type': 'application/vnd.pypi.simple.v1+json',
+        });
+      const config = {
+        registryUrls: ['https://some.registry.org/simple/'],
+      };
+
+      const res = await getPkgReleases({
+        datasource,
+        ...config,
+        packageName: 'doit',
+      });
+
+      expect(res?.releases).toMatchObject([
+        {
+          version: '0.31.0',
+          releaseTimestamp: '2023-01-01T00:00:00.000Z',
+        },
+      ]);
+    });
+
+    it('parses PEP 691 JSON response with yanked string reason', async () => {
+      const jsonBody = {
+        meta: { 'api-version': '1.0' },
+        name: 'some-package',
+        files: [
+          {
+            filename: 'some-package-1.0.0.tar.gz',
+            yanked: 'security vulnerability',
+            'upload-time': '2023-01-01T00:00:00.000Z',
+          },
+          {
+            filename: 'some-package-2.0.0.tar.gz',
+            yanked: false,
+            'upload-time': '2023-06-01T00:00:00.000Z',
+          },
+        ],
+      };
+      httpMock
+        .scope('https://some.registry.org/simple/')
+        .get('/some-package/')
+        .reply(200, JSON.stringify(jsonBody), {
+          'content-type': 'application/vnd.pypi.simple.v1+json',
+        });
+      const config = {
+        registryUrls: ['https://some.registry.org/simple/'],
+      };
+
+      const res = await getPkgReleases({
+        datasource,
+        ...config,
+        packageName: 'some-package',
+      });
+
+      expect(res?.releases).toMatchObject([
+        { version: '1.0.0', isDeprecated: true },
+        { version: '2.0.0' },
+      ]);
+    });
+
+    it('parses PEP 691 JSON response without upload-time', async () => {
+      const jsonBody = {
+        meta: { 'api-version': '1.0' },
+        name: 'some-package',
+        files: [
+          {
+            filename: 'some-package-1.0.0.tar.gz',
+            yanked: false,
+          },
+        ],
+      };
+      httpMock
+        .scope('https://some.registry.org/simple/')
+        .get('/some-package/')
+        .reply(200, JSON.stringify(jsonBody), {
+          'content-type': 'application/vnd.pypi.simple.v1+json',
+        });
+      const config = {
+        registryUrls: ['https://some.registry.org/simple/'],
+      };
+
+      const res = await getPkgReleases({
+        datasource,
+        ...config,
+        packageName: 'some-package',
+      });
+
+      expect(res?.releases).toMatchObject([{ version: '1.0.0' }]);
+      expect(res?.releases?.[0].releaseTimestamp).toBeUndefined();
     });
   });
 

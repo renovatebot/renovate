@@ -13,8 +13,8 @@ import { Datasource } from '../datasource.ts';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types.ts';
 import { getGoogleAuthToken } from '../util.ts';
 import { isGitHubRepo, normalizePythonDepName } from './common.ts';
-import type { PypiRelease } from './schema.ts';
-import { PypiResponse } from './schema.ts';
+import type { PypiRelease, PypiSimpleFile } from './schema.ts';
+import { PypiResponse, PypiSimpleResponse } from './schema.ts';
 import type { Releases } from './types.ts';
 
 export class PypiDatasource extends Datasource {
@@ -38,7 +38,7 @@ export class PypiDatasource extends Datasource {
 
   override readonly releaseTimestampSupport = true;
   override readonly releaseTimestampNote =
-    'The relase timestamp is determined from the `upload_time` field in the results. This field is not available when using the simple API.';
+    'The release timestamp is determined from the `upload_time` field in the results. When using the simple API, timestamps are available if the server supports PEP 691 (JSON Simple API).';
   override readonly sourceUrlSupport = 'release';
   override readonly sourceUrlNote =
     'The source URL is determined from the `homepage` field if it is a github repository, else we use the `project_urls` field.';
@@ -267,6 +267,54 @@ export class PypiDatasource extends Datasource {
     );
   }
 
+  private parseSimpleJson(body: string, packageName: string): Release[] | null {
+    const parsed = PypiSimpleResponse.safeParse(JSON.parse(body));
+    if (!parsed.success) {
+      logger.trace(
+        { packageName, error: parsed.error },
+        'Failed to parse PEP 691 JSON response',
+      );
+      return null;
+    }
+
+    const filesByVersion: Record<string, PypiSimpleFile[]> = {};
+    for (const file of parsed.data.files) {
+      const version = PypiDatasource.extractVersionFromLinkText(
+        file.filename,
+        packageName,
+      );
+      if (version) {
+        if (!filesByVersion[version]) {
+          filesByVersion[version] = [];
+        }
+        filesByVersion[version].push(file);
+      }
+    }
+
+    return Object.entries(filesByVersion).map(([version, files]) => {
+      const isDeprecated = files.some(
+        (file) => file.yanked === true || typeof file.yanked === 'string',
+      );
+      const firstUploadTime = files.find((file) => file['upload-time'])?.[
+        'upload-time'
+      ];
+      const result: Release = {
+        version,
+        releaseTimestamp: asTimestamp(firstUploadTime),
+      };
+      if (isDeprecated) {
+        result.isDeprecated = isDeprecated;
+      }
+      const pythonConstraints = files
+        .map((file) => file['requires-python'])
+        .filter(isString);
+      result.constraints = {
+        python: Array.from(new Set(pythonConstraints)),
+      };
+      return result;
+    });
+  }
+
   private async getSimpleDependency(
     packageName: string,
     hostUrl: string,
@@ -276,8 +324,12 @@ export class PypiDatasource extends Datasource {
       hostUrl,
     ).href;
     const dependency: ReleaseResult = { releases: [] };
-    const { headers, lookupUrl: sanitizedUrl } =
+    const { headers: authHeaders, lookupUrl: sanitizedUrl } =
       await this.getAuthHeaders(lookupUrl);
+    const headers: OutgoingHttpHeaders = {
+      ...authHeaders,
+      accept: 'application/vnd.pypi.simple.v1+json, text/html;q=0.9',
+    };
     const response = await this.http.getText(sanitizedUrl, { headers });
     const dep = response?.body;
     if (!dep) {
@@ -287,6 +339,24 @@ export class PypiDatasource extends Datasource {
     if (response.authorization) {
       dependency.isPrivate = true;
     }
+
+    const contentType = response.headers['content-type'];
+    if (contentType?.includes('application/vnd.pypi.simple')) {
+      logger.trace({ packageName }, 'Parsing PEP 691 JSON simple response');
+      try {
+        const releases = this.parseSimpleJson(dep, packageName);
+        if (releases) {
+          dependency.releases = releases;
+          return dependency;
+        }
+      } catch {
+        logger.trace(
+          { packageName },
+          'Failed to parse PEP 691 response, falling back to HTML',
+        );
+      }
+    }
+
     const root = parse(PypiDatasource.cleanSimpleHtml(dep));
     const links = root.querySelectorAll('a');
     const releases: Releases = {};
