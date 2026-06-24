@@ -125,7 +125,12 @@ export const presets: Record<string, Preset> = {
     packageRules: [
       {
         matchDatasources: ['docker'],
-        matchPackageNames: ['grafana/grafana', 'docker.io/grafana/grafana'],
+        matchPackageNames: [
+          'grafana/grafana',
+          'docker.io/grafana/grafana',
+          'grafana/grafana-enterprise',
+          'docker.io/grafana/grafana-enterprise',
+        ],
         versioning:
           'regex:^(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)(?:-security-(?<build>\\d+))?(?:-(?<compatibility>.*))?$',
       },
