@@ -1,5 +1,5 @@
 import { isPlainObject } from '@sindresorhus/is';
-import { parseJsonc } from '../common.ts';
+import { Json } from '../schema-utils/index.ts';
 
 /**
  * Detects whether a token string is likely a JWT (JSON Web Token).
@@ -17,12 +17,12 @@ export function isProbablyJwt(token: string): boolean {
     return false;
   }
 
-  try {
-    const header = parseJsonc(
-      Buffer.from(parts[0], 'base64url').toString('utf8'),
-    );
-    return isPlainObject(header) && ('typ' in header || 'alg' in header);
-  } catch {
-    return false;
-  }
+  const result = Json.safeParse(
+    Buffer.from(parts[0], 'base64url').toString('utf8'),
+  );
+  return (
+    result.success &&
+    isPlainObject(result.data) &&
+    ('typ' in result.data || 'alg' in result.data)
+  );
 }
