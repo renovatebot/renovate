@@ -1,12 +1,22 @@
 import { codeBlock } from 'common-tags';
+import { fs } from '~test/util.ts';
+import type { YarnConfig } from '../schema.ts';
 import {
+  loadConfigFromInheritedYarnrcYml,
   loadConfigFromLegacyYarnrc,
   loadConfigFromYarnrcYml,
   mergeYarnConfigs,
   resolveRegistryUrl,
 } from './yarnrc.ts';
 
+vi.mock('../../../../util/fs/index.ts');
+
 describe('modules/manager/npm/extract/yarnrc', () => {
+  beforeEach(() => {
+    fs.localPathExists.mockResolvedValue(false);
+    fs.readLocalFile.mockResolvedValue(null);
+  });
+
   describe('resolveRegistryUrl()', () => {
     it('considers default registry', () => {
       const registryUrl = resolveRegistryUrl('a-package', {
@@ -162,6 +172,29 @@ describe('modules/manager/npm/extract/yarnrc', () => {
   });
 
   describe('mergeYarnConfigs()', () => {
+    it('returns child when parent config is null', () => {
+      const mergedConfig = mergeYarnConfigs(null, {
+        npmRegistryServer: 'https://child.example.com',
+      });
+
+      expect(mergedConfig).toEqual({
+        npmRegistryServer: 'https://child.example.com',
+      });
+    });
+
+    it('returns parent when child config is null', () => {
+      const mergedConfig = mergeYarnConfigs(
+        {
+          npmRegistryServer: 'https://parent.example.com',
+        },
+        null,
+      );
+
+      expect(mergedConfig).toEqual({
+        npmRegistryServer: 'https://parent.example.com',
+      });
+    });
+
     it('merges child config on top of parent config', () => {
       const mergedConfig = mergeYarnConfigs(
         {
@@ -237,6 +270,113 @@ describe('modules/manager/npm/extract/yarnrc', () => {
             vitest: '^3.0.0',
           },
         },
+      });
+    });
+
+    it('does not merge array values and prefers child value', () => {
+      const mergedConfig = mergeYarnConfigs(
+        {
+          customArraySetting: ['parent-entry'],
+        } as unknown as YarnConfig,
+        {
+          customArraySetting: ['child-entry'],
+        } as unknown as YarnConfig,
+      );
+
+      expect(mergedConfig).toEqual({
+        customArraySetting: ['child-entry'],
+      });
+    });
+  });
+
+  describe('loadConfigFromInheritedYarnrcYml()', () => {
+    it('returns null when no inherited .yarnrc.yml files are found', async () => {
+      const config = await loadConfigFromInheritedYarnrcYml(
+        'packages/foo/package.json',
+      );
+
+      expect(config).toBeNull();
+    });
+
+    it('returns null for absolute package file path', async () => {
+      const config = await loadConfigFromInheritedYarnrcYml(
+        '/absolute/package.json',
+      );
+
+      expect(config).toBeNull();
+      expect(fs.localPathExists).not.toHaveBeenCalled();
+    });
+
+    it('loads and merges inherited files from parent to child', async () => {
+      fs.localPathExists.mockImplementation((path): Promise<boolean> => {
+        if (path === '.yarnrc.yml' || path === 'packages/.yarnrc.yml') {
+          return Promise.resolve(true);
+        }
+        return Promise.resolve(false);
+      });
+
+      fs.readLocalFile.mockImplementation((path): Promise<any> => {
+        if (path === '.yarnrc.yml') {
+          return Promise.resolve(codeBlock`
+            npmRegistryServer: https://parent.example.com
+            npmScopes:
+              parent:
+                npmRegistryServer: https://scope-parent.example.com
+          `);
+        }
+        if (path === 'packages/.yarnrc.yml') {
+          return Promise.resolve(codeBlock`
+            npmScopes:
+              leaf:
+                npmRegistryServer: https://scope-leaf.example.com
+          `);
+        }
+        return Promise.resolve(null);
+      });
+
+      const config = await loadConfigFromInheritedYarnrcYml(
+        'packages/foo/package.json',
+      );
+
+      expect(config).toEqual({
+        npmRegistryServer: 'https://parent.example.com',
+        npmScopes: {
+          parent: {
+            npmRegistryServer: 'https://scope-parent.example.com',
+          },
+          leaf: {
+            npmRegistryServer: 'https://scope-leaf.example.com',
+          },
+        },
+      });
+    });
+
+    it('skips empty inherited files', async () => {
+      fs.localPathExists.mockImplementation((path): Promise<boolean> => {
+        if (path === '.yarnrc.yml' || path === 'packages/.yarnrc.yml') {
+          return Promise.resolve(true);
+        }
+        return Promise.resolve(false);
+      });
+
+      fs.readLocalFile.mockImplementation((path): Promise<any> => {
+        if (path === '.yarnrc.yml') {
+          return Promise.resolve('   \n');
+        }
+        if (path === 'packages/.yarnrc.yml') {
+          return Promise.resolve(
+            'npmRegistryServer: https://child.example.com',
+          );
+        }
+        return Promise.resolve(null);
+      });
+
+      const config = await loadConfigFromInheritedYarnrcYml(
+        'packages/foo/package.json',
+      );
+
+      expect(config).toEqual({
+        npmRegistryServer: 'https://child.example.com',
       });
     });
   });
