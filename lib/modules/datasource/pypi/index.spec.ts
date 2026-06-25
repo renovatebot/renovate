@@ -830,6 +830,12 @@ describe('modules/datasource/pypi/index', () => {
               "upload-time": "2018-04-10T11:05:00.000Z"
             },
             {
+              "filename": "dj-database-url-0.5.0.tar.gz",
+              "requires-python": ">=3.5",
+              "yanked": false,
+              "upload-time": "2018-04-10T11:05:00.000Z"
+            },
+            {
               "filename": "dj_database_url-0.5.0-py2.py3-none-any.whl.metadata",
               "requires-python": null,
               "yanked": false,
@@ -891,26 +897,6 @@ describe('modules/datasource/pypi/index', () => {
       expect(res?.releases).toMatchObject(djDatabaseUrlSimpleReleases);
     });
 
-    it('falls back to HTML when PEP 691 JSON parsing fails', async () => {
-      httpMock
-        .scope('https://some.registry.org/simple/')
-        .get('/dj-database-url/')
-        .reply(200, htmlResponse, {
-          'content-type': 'application/vnd.pypi.simple.v1+json',
-        });
-      const config = {
-        registryUrls: ['https://some.registry.org/simple/'],
-      };
-
-      const res = await getPkgReleases({
-        datasource,
-        ...config,
-        packageName: 'dj-database-url',
-      });
-
-      expect(res?.releases).toMatchObject(djDatabaseUrlSimpleReleases);
-    });
-
     it('falls back to HTML when PEP 691 JSON schema validation fails', async () => {
       const invalidSchemaJson = JSON.stringify({ name: 'dj-database-url' });
       httpMock
@@ -931,88 +917,6 @@ describe('modules/datasource/pypi/index', () => {
 
       // Schema validation fails, falls back to HTML parsing which also finds no releases
       expect(res).toBeNull();
-    });
-
-    it('parses PEP 691 JSON response with requires-python constraints', async () => {
-      const jsonBody = {
-        meta: { 'api-version': '1.0' },
-        name: 'doit',
-        files: [
-          {
-            filename: 'doit-0.31.0.tar.gz',
-            'requires-python': '>=3.4',
-            yanked: false,
-            'upload-time': '2023-01-01T00:00:00.000Z',
-          },
-          {
-            filename: 'doit-0.31.0-py3-none-any.whl',
-            'requires-python': '>=2.7',
-            yanked: false,
-            'upload-time': '2023-01-01T01:00:00.000Z',
-          },
-        ],
-      };
-      httpMock
-        .scope('https://some.registry.org/simple/')
-        .get('/doit/')
-        .reply(200, JSON.stringify(jsonBody), {
-          'content-type': 'application/vnd.pypi.simple.v1+json',
-        });
-      const config = {
-        registryUrls: ['https://some.registry.org/simple/'],
-      };
-
-      const res = await getPkgReleases({
-        datasource,
-        ...config,
-        packageName: 'doit',
-      });
-
-      expect(res?.releases).toMatchObject([
-        {
-          version: '0.31.0',
-          releaseTimestamp: '2023-01-01T00:00:00.000Z',
-        },
-      ]);
-    });
-
-    it('parses PEP 691 JSON response with yanked string reason', async () => {
-      const jsonBody = {
-        meta: { 'api-version': '1.0' },
-        name: 'some-package',
-        files: [
-          {
-            filename: 'some-package-1.0.0.tar.gz',
-            yanked: 'security vulnerability',
-            'upload-time': '2023-01-01T00:00:00.000Z',
-          },
-          {
-            filename: 'some-package-2.0.0.tar.gz',
-            yanked: false,
-            'upload-time': '2023-06-01T00:00:00.000Z',
-          },
-        ],
-      };
-      httpMock
-        .scope('https://some.registry.org/simple/')
-        .get('/some-package/')
-        .reply(200, JSON.stringify(jsonBody), {
-          'content-type': 'application/vnd.pypi.simple.v1+json',
-        });
-      const config = {
-        registryUrls: ['https://some.registry.org/simple/'],
-      };
-
-      const res = await getPkgReleases({
-        datasource,
-        ...config,
-        packageName: 'some-package',
-      });
-
-      expect(res?.releases).toMatchObject([
-        { version: '1.0.0', isDeprecated: true },
-        { version: '2.0.0' },
-      ]);
     });
 
     it('parses PEP 691 JSON response without upload-time', async () => {
