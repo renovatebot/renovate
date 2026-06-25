@@ -11,7 +11,11 @@ import { Json } from '../schema-utils/index.ts';
  * This is used to automatically distinguish Microsoft Entra ID (AAD)
  * Bearer tokens from Azure DevOps Personal Access Tokens (PATs).
  */
-export function isProbablyJwt(token: string): boolean {
+export function isProbablyJwt(token: string | undefined): boolean {
+  if (!token) {
+    return false;
+  }
+
   const parts = token.split('.');
   if (parts.length !== 3) {
     return false;

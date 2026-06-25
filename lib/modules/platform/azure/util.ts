@@ -123,9 +123,9 @@ export function getStorageExtraCloneOpts(config: HostRule): GitOptions {
   if (!config.token && config.username && config.password) {
     authType = 'basic';
     authValue = toBase64(`${config.username}:${config.password}`);
-  } else if (isProbablyJwt(config.token!)) {
+  } else if (config.token && isProbablyJwt(config.token)) {
     authType = 'bearer';
-    authValue = config.token!;
+    authValue = config.token;
   } else {
     authType = 'basic';
     authValue = toBase64(`:${config.token}`);
