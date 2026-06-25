@@ -268,7 +268,14 @@ export class PypiDatasource extends Datasource {
   }
 
   private parseSimpleJson(body: string, packageName: string): Release[] | null {
-    const parsed = PypiSimpleResponse.safeParse(JSON.parse(body));
+    let json: unknown;
+    try {
+      json = JSON.parse(body);
+    } catch {
+      logger.trace({ packageName }, 'Failed to parse PEP 691 response as JSON');
+      return null;
+    }
+    const parsed = PypiSimpleResponse.safeParse(json);
     if (!parsed.success) {
       logger.trace(
         { packageName, error: parsed.error },
@@ -298,10 +305,13 @@ export class PypiDatasource extends Datasource {
       const firstUploadTime = files.find((file) => file['upload-time'])?.[
         'upload-time'
       ];
+      const releaseTimestamp = asTimestamp(firstUploadTime);
       const result: Release = {
         version,
-        releaseTimestamp: asTimestamp(firstUploadTime),
       };
+      if (releaseTimestamp) {
+        result.releaseTimestamp = releaseTimestamp;
+      }
       if (isDeprecated) {
         result.isDeprecated = isDeprecated;
       }
@@ -328,7 +338,8 @@ export class PypiDatasource extends Datasource {
       await this.getAuthHeaders(lookupUrl);
     const headers: OutgoingHttpHeaders = {
       ...authHeaders,
-      accept: 'application/vnd.pypi.simple.v1+json, text/html;q=0.9',
+      accept:
+        'application/vnd.pypi.simple.v1+json, application/vnd.pypi.simple.v1+html;q=0.9, text/html;q=0.8',
     };
     const response = await this.http.getText(sanitizedUrl, { headers });
     const dep = response?.body;
@@ -341,19 +352,12 @@ export class PypiDatasource extends Datasource {
     }
 
     const contentType = response.headers['content-type'];
-    if (contentType?.includes('application/vnd.pypi.simple')) {
+    if (contentType?.includes('application/vnd.pypi.simple.v1+json')) {
       logger.trace({ packageName }, 'Parsing PEP 691 JSON simple response');
-      try {
-        const releases = this.parseSimpleJson(dep, packageName);
-        if (releases) {
-          dependency.releases = releases;
-          return dependency;
-        }
-      } catch {
-        logger.trace(
-          { packageName },
-          'Failed to parse PEP 691 response, falling back to HTML',
-        );
+      const releases = this.parseSimpleJson(dep, packageName);
+      if (releases) {
+        dependency.releases = releases;
+        return dependency;
       }
     }
 
