@@ -1,4 +1,5 @@
 import { z } from 'zod/v4';
+import { Nullish } from '../../../util/schema-utils/index.ts';
 import { MaybeTimestamp } from '../../../util/timestamp.ts';
 
 export const RegistryConfig = z.object({
@@ -18,10 +19,10 @@ export const ReleaseTimestamp = z
   .catch(null);
 
 export const CrateMetadata = z.object({
-  description: z.string().nullish(),
-  documentation: z.string().nullish(),
-  homepage: z.string().nullish(),
-  repository: z.string().nullish(),
+  description: Nullish(z.string()),
+  documentation: Nullish(z.string()),
+  homepage: Nullish(z.string()),
+  repository: Nullish(z.string()),
 });
 export type CrateMetadata = z.infer<typeof CrateMetadata>;
 
