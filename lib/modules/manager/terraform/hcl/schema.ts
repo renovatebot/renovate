@@ -1,9 +1,9 @@
 import { z } from 'zod/v4';
 
 const tfPrimitive = z.union([z.string(), z.number(), z.boolean(), z.null()]);
-type TfPrimitive = z.infer<typeof tfPrimitive>;
+type tfPrimitive = z.infer<typeof tfPrimitive>;
 
-type TfLiteral = TfPrimitive | { [k: string]: TfLiteral } | TfLiteral[];
+type TfLiteral = tfPrimitive | { [k: string]: TfLiteral } | TfLiteral[];
 
 const tfLiteral: z.ZodType<TfLiteral> = z.lazy(() =>
   z.union([tfPrimitive, z.record(z.string(), tfLiteral), z.array(tfLiteral)]),
@@ -130,7 +130,7 @@ const DockerServiceInstance = z
   .catchall(tfLiteral);
 
 const GenericResourceInstance = z.record(z.string(), tfLiteral);
-const GenericResourceSchema = z.record(
+const GenericResource = z.record(
   z.string(),
   oneOrMany(GenericResourceInstance),
 );
@@ -198,7 +198,7 @@ const TerraformResources = z
       .optional(),
     tfe_workspace: z.record(z.string(), TerraformWorkspaceArray).optional(),
   })
-  .catchall(GenericResourceSchema);
+  .catchall(GenericResource);
 
 export type TerraformResources = z.infer<typeof TerraformResources>;
 
@@ -214,6 +214,6 @@ export const TerraformDefinitionFileJSON = z.object({
   provider: z.record(z.string(), oneOrMany(TerraformProvider)).optional(),
 });
 
-export type TerraformDefinitionFile = z.infer<
+export type TerraformDefinitionFileJSON = z.infer<
   typeof TerraformDefinitionFileJSON
 >;

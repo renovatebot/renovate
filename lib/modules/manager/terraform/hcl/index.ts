@@ -1,13 +1,12 @@
 import { parse } from '@cdktf/hcl2json';
 import { logger } from '../../../../logger/index.ts';
 import { parseJson } from '../../../../util/common.ts';
-import type { TerraformDefinitionFile } from './schema.ts';
 import { TerraformDefinitionFileJSON } from './schema.ts';
 
 export async function parseHCL(
   content: string,
   fileName: string,
-): Promise<TerraformDefinitionFile | null> {
+): Promise<TerraformDefinitionFileJSON | null> {
   try {
     if (
       (fileName.endsWith('.hcl') && !fileName.endsWith('.lock.hcl')) ||

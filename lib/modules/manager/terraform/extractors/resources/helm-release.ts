@@ -10,7 +10,7 @@ import { getDep } from '../../../dockerfile/extract.ts';
 import { isOCIRegistry, removeOCIPrefix } from '../../../helmv3/oci.ts';
 import type { ExtractConfig, PackageDependency } from '../../../types.ts';
 import { DependencyExtractor } from '../../base.ts';
-import type { TerraformDefinitionFile } from '../../hcl/schema.ts';
+import type { TerraformDefinitionFileJSON } from '../../hcl/schema.ts';
 import type { ProviderLock } from '../../lockfile/types.ts';
 import { checkIfStringIsPath } from '../../util.ts';
 
@@ -20,7 +20,7 @@ export class HelmReleaseExtractor extends DependencyExtractor {
   }
 
   override extract(
-    hclMap: TerraformDefinitionFile,
+    hclMap: TerraformDefinitionFileJSON,
     _locks: ProviderLock[],
     config: ExtractConfig,
   ): PackageDependency[] {
