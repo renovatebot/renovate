@@ -307,7 +307,7 @@ To make use of this authentication mechanism, specify the username as `AWS`:
 }
 ```
 
-##### Using ambient AWS credentials
+##### Using the AWS SDK credential chain
 
 If you omit `username` and `password`, Renovate fetches the ECR authorization token itself using the [AWS SDK default credential provider chain](https://docs.aws.amazon.com/sdkref/latest/guide/standardized-credentials.html).
 Renovate detects ECR registries from the host URL, so it picks up credentials automatically from any of the following sources, in order:
@@ -317,7 +317,9 @@ Renovate detects ECR registries from the host URL, so it picks up credentials au
 - Container or EC2 instance roles
 
 In this mode no `hostRules` entry is required for authentication — Renovate finds the token from the credential chain.
-Add a `hostRules` entry only if you want to fetch the token yourself (for example to reuse a short-lived token across jobs) and inject it via `username: "AWS"`:
+This needs Renovate to run with access to AWS credentials, so it does not work on the Mend-hosted apps.
+
+There may be cases where you wish to specify the exact token - for example to reuse a short-lived token across jobs, or in the Mend-hosted apps - which you can do with a `hostRules` entry that sets `username: "AWS"`:
 
 ```json
 {
@@ -332,7 +334,7 @@ Add a `hostRules` entry only if you want to fetch the token yourself (for exampl
 }
 ```
 
-Populate `AWS_ECR_TOKEN` from `aws ecr get-login-password` in your CI job; the CLI uses the same ambient credentials listed above.
+Populate `AWS_ECR_TOKEN` from `aws ecr get-login-password` in your CI job (or store it as a secret for the Mend-hosted apps); the CLI uses the same credentials listed above.
 The identity used must have at least `ecr:GetAuthorizationToken`, plus the standard ECR read actions (`ecr:BatchCheckLayerAvailability`, `ecr:BatchGetImage`, `ecr:DescribeImages`, `ecr:GetDownloadUrlForLayer`, `ecr:ListImages`) on the repositories you want Renovate to scan.
 
 #### Google Container Registry / Google Artifact Registry

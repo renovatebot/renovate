@@ -572,10 +572,8 @@ aws codeartifact get-authorization-token \
 Inject the token into Renovate via an environment variable, then reference it from `hostRules`.
 You must refresh the token at least once every 12 hours, so most users obtain it as a step in their CI job, in an init container, or via a scheduled secret update for the Mend Renovate App.
 
-<!-- prettier-ignore -->
-!!! tip "Use the AWS SDK credential chain"
-  The AWS CLI command above will pick up credentials from the standard AWS credential provider chain.
-  This means you can authenticate to AWS via [GitHub Actions OIDC](https://docs.github.com/en/actions/deployment/security-hardening-your-deployments/configuring-openid-connect-in-amazon-web-services), [EKS IRSA](https://docs.aws.amazon.com/eks/latest/userguide/iam-roles-for-service-accounts.html), [EKS Pod Identity](https://docs.aws.amazon.com/eks/latest/userguide/pod-identities.html), or instance/task roles — no long-lived access keys required.
+The AWS CLI command above picks up credentials from the standard AWS credential provider chain.
+This means you can authenticate to AWS via [GitHub Actions OIDC](https://docs.github.com/en/actions/deployment/security-hardening-your-deployments/configuring-openid-connect-in-amazon-web-services), [EKS IRSA](https://docs.aws.amazon.com/eks/latest/userguide/iam-roles-for-service-accounts.html), [EKS Pod Identity](https://docs.aws.amazon.com/eks/latest/userguide/pod-identities.html), or instance/task roles — no long-lived access keys required.
 
 ### CodeArtifact hostRules per ecosystem
 
@@ -626,7 +624,7 @@ To direct lookups for a particular ecosystem at CodeArtifact, configure `package
 
 ### Mend Renovate App
 
-The hosted app cannot fetch CodeArtifact tokens for you because [it does not run user scripts](https://github.com/renovatebot/renovate/discussions/19651#discussioncomment-4602340).
+The hosted app cannot fetch CodeArtifact tokens for you, as it does not run user scripts.
 Store the token as a secret in your Mend organisation or repository settings and reference it via `{{ secrets.CODEARTIFACT_AUTH_TOKEN }}`, then refresh the secret on a schedule that runs at least every 12 hours.
 See [Using Secrets with Mend Cloud Apps](../mend-hosted/credentials.md) and [Automating secrets via APIs](../mend-hosted/credentials.md#automating-secrets-via-apis-github-only).
 
