@@ -1,4 +1,4 @@
-import { z } from 'zod/v3';
+import { z } from 'zod/v4';
 
 const tfPrimitive = z.union([z.string(), z.number(), z.boolean(), z.null()]);
 type TfPrimitive = z.infer<typeof tfPrimitive>;
@@ -6,7 +6,7 @@ type TfPrimitive = z.infer<typeof tfPrimitive>;
 type TfLiteral = TfPrimitive | { [k: string]: TfLiteral } | TfLiteral[];
 
 const tfLiteral: z.ZodType<TfLiteral> = z.lazy(() =>
-  z.union([tfPrimitive, z.record(tfLiteral), z.array(tfLiteral)]),
+  z.union([tfPrimitive, z.record(z.string(), tfLiteral), z.array(tfLiteral)]),
 );
 
 const NORMALIZE_KEYS = new Set([
@@ -45,16 +45,12 @@ function normalize(node: TfLiteral): TfLiteral {
   return node;
 }
 
-function oneOrMany<T extends z.ZodTypeAny>(
+function oneOrMany<T extends z.ZodType>(
   schema: T,
-): z.ZodEffects<
-  z.ZodUnion<[T, z.ZodArray<T>]>,
-  z.infer<T>[],
-  z.infer<T> | z.infer<T>[]
-> {
+): z.ZodType<z.infer<T>[], z.input<T> | z.input<T>[]> {
   return z
     .union([schema, z.array(schema)])
-    .transform((v) => (Array.isArray(v) ? v : [v]));
+    .transform((v): z.infer<T>[] => (Array.isArray(v) ? v : [v]));
 }
 
 const TerraformRequiredProvider = z.object({
@@ -67,6 +63,7 @@ export type TerraformRequiredProvider = z.infer<
 >;
 
 const TerraformRequiredProviderBlock = z.record(
+  z.string(),
   z.union([TerraformRequiredProvider, z.string()]),
 );
 
@@ -111,13 +108,13 @@ export type TerraformWorkspace = z.infer<typeof TerraformWorkspace>;
 
 const TerraformWorkspaceArray = oneOrMany(TerraformWorkspace);
 
-const DockerSimpleInstance = z.record(tfLiteral);
+const DockerSimpleInstance = z.record(z.string(), tfLiteral);
 const DockerTaskSpec = z
   .object({
     container_spec: oneOrMany(DockerSimpleInstance).optional(),
   })
   .catchall(tfLiteral);
-const DockerPortsSpec = z.record(tfLiteral);
+const DockerPortsSpec = z.record(z.string(), tfLiteral);
 const DockerEndpointSpec = z
   .object({
     ports: oneOrMany(DockerPortsSpec).optional(),
@@ -132,8 +129,11 @@ const DockerServiceInstance = z
   })
   .catchall(tfLiteral);
 
-const GenericResourceInstance = z.record(tfLiteral);
-const GenericResourceSchema = z.record(oneOrMany(GenericResourceInstance));
+const GenericResourceInstance = z.record(z.string(), tfLiteral);
+const GenericResourceSchema = z.record(
+  z.string(),
+  oneOrMany(GenericResourceInstance),
+);
 
 const KubernetesInstance = tfLiteral.transform((orig) => {
   const n = normalize(orig);
@@ -142,37 +142,61 @@ const KubernetesInstance = tfLiteral.transform((orig) => {
 
 const TerraformResources = z
   .object({
-    helm_release: z.record(TerraformHelmRelease).optional(),
-    docker_container: z.record(oneOrMany(DockerSimpleInstance)).optional(),
+    helm_release: z.record(z.string(), TerraformHelmRelease).optional(),
+    docker_container: z
+      .record(z.string(), oneOrMany(DockerSimpleInstance))
+      .optional(),
 
-    docker_image: z.record(oneOrMany(DockerSimpleInstance)).optional(),
+    docker_image: z
+      .record(z.string(), oneOrMany(DockerSimpleInstance))
+      .optional(),
 
-    docker_service: z.record(oneOrMany(DockerServiceInstance)).optional(),
-    kubernetes_cron_job_v1: z.record(oneOrMany(KubernetesInstance)).optional(),
-    kubernetes_cron_job: z.record(oneOrMany(KubernetesInstance)).optional(),
+    docker_service: z
+      .record(z.string(), oneOrMany(DockerServiceInstance))
+      .optional(),
+    kubernetes_cron_job_v1: z
+      .record(z.string(), oneOrMany(KubernetesInstance))
+      .optional(),
+    kubernetes_cron_job: z
+      .record(z.string(), oneOrMany(KubernetesInstance))
+      .optional(),
     kubernetes_daemon_set_v1: z
-      .record(oneOrMany(KubernetesInstance))
+      .record(z.string(), oneOrMany(KubernetesInstance))
       .optional(),
-    kubernetes_daemonset: z.record(oneOrMany(KubernetesInstance)).optional(),
-    kubernetes_deployment: z.record(oneOrMany(KubernetesInstance)).optional(),
+    kubernetes_daemonset: z
+      .record(z.string(), oneOrMany(KubernetesInstance))
+      .optional(),
+    kubernetes_deployment: z
+      .record(z.string(), oneOrMany(KubernetesInstance))
+      .optional(),
     kubernetes_deployment_v1: z
-      .record(oneOrMany(KubernetesInstance))
+      .record(z.string(), oneOrMany(KubernetesInstance))
       .optional(),
-    kubernetes_job: z.record(oneOrMany(KubernetesInstance)).optional(),
-    kubernetes_job_v1: z.record(oneOrMany(KubernetesInstance)).optional(),
-    kubernetes_pod: z.record(oneOrMany(KubernetesInstance)).optional(),
-    kubernetes_pod_v1: z.record(oneOrMany(KubernetesInstance)).optional(),
+    kubernetes_job: z
+      .record(z.string(), oneOrMany(KubernetesInstance))
+      .optional(),
+    kubernetes_job_v1: z
+      .record(z.string(), oneOrMany(KubernetesInstance))
+      .optional(),
+    kubernetes_pod: z
+      .record(z.string(), oneOrMany(KubernetesInstance))
+      .optional(),
+    kubernetes_pod_v1: z
+      .record(z.string(), oneOrMany(KubernetesInstance))
+      .optional(),
     kubernetes_replication_controller: z
-      .record(oneOrMany(KubernetesInstance))
+      .record(z.string(), oneOrMany(KubernetesInstance))
       .optional(),
     kubernetes_replication_controller_v1: z
-      .record(oneOrMany(KubernetesInstance))
+      .record(z.string(), oneOrMany(KubernetesInstance))
       .optional(),
-    kubernetes_stateful_set: z.record(oneOrMany(KubernetesInstance)).optional(),
+    kubernetes_stateful_set: z
+      .record(z.string(), oneOrMany(KubernetesInstance))
+      .optional(),
     kubernetes_stateful_set_v1: z
-      .record(oneOrMany(KubernetesInstance))
+      .record(z.string(), oneOrMany(KubernetesInstance))
       .optional(),
-    tfe_workspace: z.record(TerraformWorkspaceArray).optional(),
+    tfe_workspace: z.record(z.string(), TerraformWorkspaceArray).optional(),
   })
   .catchall(GenericResourceSchema);
 
@@ -181,13 +205,13 @@ export type TerraformResources = z.infer<typeof TerraformResources>;
 export const TerraformDefinitionFileJSON = z.object({
   terraform: oneOrMany(TerraformBlock).optional(),
 
-  module: z.record(oneOrMany(TerraformModule)).optional(),
+  module: z.record(z.string(), oneOrMany(TerraformModule)).optional(),
 
   resource: TerraformResources.optional(),
 
-  data: z.record(tfLiteral).optional(),
+  data: z.record(z.string(), tfLiteral).optional(),
 
-  provider: z.record(oneOrMany(TerraformProvider)).optional(),
+  provider: z.record(z.string(), oneOrMany(TerraformProvider)).optional(),
 });
 
 export type TerraformDefinitionFile = z.infer<
