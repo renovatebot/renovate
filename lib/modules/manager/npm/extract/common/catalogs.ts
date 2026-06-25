@@ -28,6 +28,7 @@ export function extractCatalogDeps(
         depName,
         ...extractDependency(depType, depName, val!),
         prettyDepType: depType,
+        sharedVariableName: depType,
       };
       deps.push(dep);
     }
