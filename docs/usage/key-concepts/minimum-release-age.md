@@ -239,7 +239,6 @@ The below is a non-exhaustive list of public registries which support release ti
 | `npm`                | `https://registry.npmjs.org`                       | ✅        |                                                                  |
 | `nuget`              | `https://api.nuget.org/v3/index.json`              | ✅        |                                                                  |
 | `pypi`               | `https://pypi.org/pypi/`                           | ✅        |                                                                  |
-| `pypi`               | `https://pypi.org/simple/`                         | ✅        | Via [PEP 691](https://peps.python.org/pep-0691/) JSON response   |
 | `ruby-version`       | `https://www.ruby-lang.org`                        | ✅        |                                                                  |
 | `jsr`                | `https://jsr.io`                                   | ✅        | For packages without explicit timestamps, defaults to 2025-09-18 |
 
@@ -541,10 +540,6 @@ If your custom Maven source registry is **pull-through** and does _not_ support 
 ```
 
 #### Pypi datasource
-
-When using the PyPI JSON API (`/pypi/` URLs), release timestamps are always available.
-When using the Simple API (`/simple/` URLs), release timestamps are available if the registry supports [PEP 691](https://peps.python.org/pep-0691/).
-Renovate automatically negotiates the response format, so no extra configuration is needed.
 
 ```json
 {

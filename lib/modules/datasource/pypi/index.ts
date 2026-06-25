@@ -299,9 +299,7 @@ export class PypiDatasource extends Datasource {
     }
 
     return Object.entries(filesByVersion).map(([version, files]) => {
-      const isDeprecated = files.some(
-        (file) => file.yanked === true || typeof file.yanked === 'string',
-      );
+      const isDeprecated = files.some((file) => file.yanked);
       const firstUploadTime = files.find((file) => file['upload-time'])?.[
         'upload-time'
       ];
