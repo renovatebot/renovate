@@ -2,6 +2,7 @@ import os from 'node:os';
 import { isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
 import fs from 'fs-extra';
 import upath from 'upath';
+import { GlobalConfig } from '../../config/global.ts';
 import { PLATFORM_GPG_FAILED } from '../../constants/error-messages.ts';
 import { logger } from '../../logger/index.ts';
 import { exec } from '../exec/index.ts';
@@ -74,6 +75,9 @@ abstract class PrivateKey {
     await exec(`git config user.signingkey ${this.keyId!}`, { cwd });
     await exec(`git config commit.gpgsign true`, { cwd });
     await exec(`git config gpg.format ${this.gpgFormat}`, { cwd });
+    if (GlobalConfig.get('platform') === 'gerrit') {
+      await exec(`git config push.gpgSign if-asked`, { cwd });
+    }
   }
 
   protected abstract importKey(): Promise<string | undefined>;

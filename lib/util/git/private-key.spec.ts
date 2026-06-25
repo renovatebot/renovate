@@ -5,6 +5,7 @@ import upath from 'upath';
 import { any, mockFn } from 'vitest-mock-extended';
 import { Fixtures } from '~test/fixtures.ts';
 import { logger, mockedExtended } from '~test/util.ts';
+import { GlobalConfig } from '../../config/global.ts';
 import * as exec_ from '../exec/index.ts';
 import * as sanitize_ from '../sanitize.ts';
 import { toBase64 } from '../string.ts';
@@ -490,5 +491,53 @@ some-private-key
         'global',
       );
     });
+  });
+
+  describe('push signing', () => {
+    beforeEach(() => {
+      Fixtures.reset();
+      exec.exec.mockReset();
+      GlobalConfig.reset();
+    });
+
+    it.each`
+      platform    | expected
+      ${'gerrit'} | ${true}
+      ${'github'} | ${false}
+    `(
+      'sets push.gpgSign if-asked=$expected for $platform',
+      async ({ platform, expected }) => {
+        const repoDir = '/tmp/some-repo';
+        GlobalConfig.set({ platform });
+
+        exec.exec
+          .calledWith(any())
+          .mockResolvedValue({ stdout: '', stderr: '' });
+        exec.exec
+          .calledWith(
+            `gpg --batch --no-tty --import ${upath.join(`${os.tmpdir()}/git-private-gpg.key`)}`,
+          )
+          .mockResolvedValueOnce({
+            stderr: 'gpg: key BADC0FFEE: secret key imported\nfoo\n',
+            stdout: '',
+          });
+
+        setPrivateKey('some-key', undefined);
+        await writePrivateKey();
+        await configSigningKey(repoDir);
+
+        if (expected) {
+          expect(exec.exec).toHaveBeenCalledWith(
+            'git config push.gpgSign if-asked',
+            { cwd: repoDir },
+          );
+        } else {
+          expect(exec.exec).not.toHaveBeenCalledWith(
+            'git config push.gpgSign if-asked',
+            { cwd: repoDir },
+          );
+        }
+      },
+    );
   });
 });
