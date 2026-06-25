@@ -6,6 +6,7 @@ import { getEnv } from '../../../util/env.ts';
 import { parse } from '../../../util/html.ts';
 import type { OutgoingHttpHeaders } from '../../../util/http/types.ts';
 import { regEx } from '../../../util/regex.ts';
+import { Json } from '../../../util/schema-utils/index.ts';
 import { asTimestamp } from '../../../util/timestamp.ts';
 import { ensureTrailingSlash, parseUrl } from '../../../util/url.ts';
 import * as pep440 from '../../versioning/pep440/index.ts';
@@ -268,14 +269,7 @@ export class PypiDatasource extends Datasource {
   }
 
   private parseSimpleJson(body: string, packageName: string): Release[] | null {
-    let json: unknown;
-    try {
-      json = JSON.parse(body);
-    } catch {
-      logger.trace({ packageName }, 'Failed to parse PEP 691 response as JSON');
-      return null;
-    }
-    const parsed = PypiSimpleResponse.safeParse(json);
+    const parsed = Json.pipe(PypiSimpleResponse).safeParse(body);
     if (!parsed.success) {
       logger.trace(
         { packageName, error: parsed.error },
