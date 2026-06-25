@@ -25,7 +25,7 @@ describe('modules/manager/npm/extract/common/catalogs', () => {
         currentValue: '17.0.2',
         datasource: 'npm',
         prettyDepType: 'pnpm.catalog.default',
-        sharedVariableName: 'pnpm.catalog.default',
+        sharedVariableName: 'pnpm.catalog.default.react',
       },
       {
         depType: 'pnpm.catalog.custom',
@@ -61,7 +61,7 @@ describe('modules/manager/npm/extract/common/catalogs', () => {
         currentValue: '17.0.2',
         datasource: 'npm',
         prettyDepType: 'yarn.catalog.default',
-        sharedVariableName: 'yarn.catalog.default',
+        sharedVariableName: 'yarn.catalog.default.react',
       },
       {
         depType: 'yarn.catalog.custom',

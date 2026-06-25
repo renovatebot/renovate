@@ -28,7 +28,8 @@ export function extractCatalogDeps(
         depName,
         ...extractDependency(depType, depName, val!),
         prettyDepType: depType,
-        sharedVariableName: depType,
+        sharedVariableName:
+          catalog.name === 'default' ? `${depType}.${depName}` : depType,
       };
       deps.push(dep);
     }
