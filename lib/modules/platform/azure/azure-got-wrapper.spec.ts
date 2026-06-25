@@ -1,15 +1,5 @@
 import type * as _hostRules from '../../../util/host-rules.ts';
-
-function buildJwt(): string {
-  const header = Buffer.from(
-    JSON.stringify({ typ: 'JWT', alg: 'RS256' }),
-  ).toString('base64url');
-  const payload = Buffer.from(
-    JSON.stringify({ aud: '499b84ac', sub: 'test', exp: 9999999999 }),
-  ).toString('base64url');
-  const sig = Buffer.from('fake-sig').toString('base64url');
-  return `${header}.${payload}.${sig}`;
-}
+import { buildTestJwt } from '../../../util/http/jwt.spec.ts';
 
 describe('modules/platform/azure/azure-got-wrapper', () => {
   let azure: typeof import('./azure-got-wrapper.ts');
@@ -52,7 +42,11 @@ describe('modules/platform/azure/azure-got-wrapper', () => {
     });
 
     it('should set bearer token and endpoint', () => {
-      const token = buildJwt();
+      const token = buildTestJwt(
+        { typ: 'JWT', alg: 'RS256' },
+        { aud: '499b84ac', sub: 'test', exp: 9999999999 },
+        'fake-sig',
+      );
       hostRules.add({
         hostType: 'azure',
         token,
@@ -97,7 +91,11 @@ describe('modules/platform/azure/azure-got-wrapper', () => {
     });
 
     it('should use BearerCredentialHandler for JWT tokens', () => {
-      const jwt = buildJwt();
+      const jwt = buildTestJwt(
+        { typ: 'JWT', alg: 'RS256' },
+        { aud: '499b84ac', sub: 'test', exp: 9999999999 },
+        'fake-sig',
+      );
       hostRules.add({
         hostType: 'azure',
         token: jwt,

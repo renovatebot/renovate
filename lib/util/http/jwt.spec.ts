@@ -1,27 +1,31 @@
 import { isProbablyJwt } from './jwt.ts';
 
+type StrObjNull = string | object | null;
+export function buildTestJwt(
+  header: StrObjNull,
+  payload: StrObjNull,
+  sig: StrObjNull,
+): string {
+  const encode = (segment: StrObjNull): string => {
+    return Buffer.from(JSON.stringify(segment)).toString('base64url');
+  };
+  return `${encode(header)}.${encode(payload)}.${encode(sig)}`;
+}
+
 describe('util/http/jwt', () => {
   describe('isProbablyJwt', () => {
     it('returns true for a valid JWT with typ and alg', () => {
-      const header = Buffer.from(
-        JSON.stringify({ typ: 'JWT', alg: 'RS256' }),
-      ).toString('base64url');
-      const payload = Buffer.from(
-        JSON.stringify({ aud: '499b84ac', sub: 'test' }),
-      ).toString('base64url');
-      const sig = Buffer.from('fake-sig').toString('base64url');
-      expect(isProbablyJwt(`${header}.${payload}.${sig}`)).toBeTrue();
+      const token = buildTestJwt(
+        { typ: 'JWT', alg: 'RS256' },
+        { aud: '499b84ac', sub: 'test' },
+        'fake-sig',
+      );
+      expect(isProbablyJwt(token)).toBeTrue();
     });
 
     it('returns true for a JWT with only alg in header', () => {
-      const header = Buffer.from(JSON.stringify({ alg: 'HS256' })).toString(
-        'base64url',
-      );
-      const payload = Buffer.from(JSON.stringify({ sub: 'x' })).toString(
-        'base64url',
-      );
-      const sig = Buffer.from('sig').toString('base64url');
-      expect(isProbablyJwt(`${header}.${payload}.${sig}`)).toBeTrue();
+      const token = buildTestJwt({ alg: 'HS256' }, { sub: 'x' }, 'sig');
+      expect(isProbablyJwt(token)).toBeTrue();
     });
 
     it('returns false for a 52-char PAT', () => {
@@ -37,14 +41,8 @@ describe('util/http/jwt', () => {
     });
 
     it('returns false when header JSON has no typ or alg', () => {
-      const header = Buffer.from(JSON.stringify({ foo: 'bar' })).toString(
-        'base64url',
-      );
-      const payload = Buffer.from(JSON.stringify({ sub: 'x' })).toString(
-        'base64url',
-      );
-      const sig = Buffer.from('sig').toString('base64url');
-      expect(isProbablyJwt(`${header}.${payload}.${sig}`)).toBeFalse();
+      const token = buildTestJwt({ foo: 'bar' }, { sub: 'x' }, 'sig');
+      expect(isProbablyJwt(token)).toBeFalse();
     });
 
     it('returns false for two segments', () => {
@@ -62,21 +60,13 @@ describe('util/http/jwt', () => {
     });
 
     it('returns false when header decodes to a non-object', () => {
-      const header = Buffer.from('"just a string"').toString('base64url');
-      const payload = Buffer.from(JSON.stringify({ sub: 'x' })).toString(
-        'base64url',
-      );
-      const sig = Buffer.from('sig').toString('base64url');
-      expect(isProbablyJwt(`${header}.${payload}.${sig}`)).toBeFalse();
+      const token = buildTestJwt('just a string', { sub: 'x' }, 'sig');
+      expect(isProbablyJwt(token)).toBeFalse();
     });
 
     it('returns false when header decodes to null', () => {
-      const header = Buffer.from('null').toString('base64url');
-      const payload = Buffer.from(JSON.stringify({ sub: 'x' })).toString(
-        'base64url',
-      );
-      const sig = Buffer.from('sig').toString('base64url');
-      expect(isProbablyJwt(`${header}.${payload}.${sig}`)).toBeFalse();
+      const token = buildTestJwt(null, { sub: 'x' }, 'sig');
+      expect(isProbablyJwt(token)).toBeFalse();
     });
   });
 });

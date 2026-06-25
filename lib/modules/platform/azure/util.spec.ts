@@ -1,4 +1,5 @@
 import { Readable } from 'node:stream';
+import { buildTestJwt } from '../../../util/http/jwt.spec.ts';
 import { streamToString } from '../../../util/streams.ts';
 import {
   getBranchNameWithoutRefsheadsPrefix,
@@ -141,17 +142,14 @@ describe('modules/platform/azure/util', () => {
     });
 
     it('should use bearer when token is a JWT', () => {
-      const header = Buffer.from(
-        JSON.stringify({ typ: 'JWT', alg: 'RS256' }),
-      ).toString('base64url');
-      const payload = Buffer.from(
-        JSON.stringify({ aud: '499b84ac', sub: 'test', exp: 9999999999 }),
-      ).toString('base64url');
-      const sig = Buffer.from('fake-sig').toString('base64url');
-      const jwt = `${header}.${payload}.${sig}`;
-      const res = getStorageExtraCloneOpts({ token: jwt });
+      const token = buildTestJwt(
+        { typ: 'JWT', alg: 'RS256' },
+        { aud: '499b84ac', sub: 'test', exp: 9999999999 },
+        'fake-sig',
+      );
+      const res = getStorageExtraCloneOpts({ token });
       expect(res['-c']).toContain('AUTHORIZATION: bearer');
-      expect(res['-c']).toContain(jwt);
+      expect(res['-c']).toContain(token);
     });
 
     it('should use basic for a 52-char PAT', () => {
