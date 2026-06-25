@@ -4,6 +4,7 @@ import { NpmDatasource } from '../../datasource/npm/index.ts';
 
 export { getRangeStrategy } from '../npm/index.ts';
 export { updateArtifacts } from './artifacts.ts';
+export { supportsDynamicDepTypesNote } from './dep-types.ts';
 export { extractAllPackageFiles } from './extract.ts';
 export { updateDependency } from './update.ts';
 

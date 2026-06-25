@@ -10,12 +10,12 @@ import { extractCatalogDeps } from '../npm/extract/common/catalogs.ts';
 import { extractPackageJson } from '../npm/extract/common/package-file.ts';
 import type { Catalog, NpmPackage } from '../npm/extract/types.ts';
 import { resolveNpmrc } from '../npm/npmrc.ts';
+import type { NpmManagerData } from '../npm/types.ts';
+import type { ExtractConfig, PackageFile } from '../types.ts';
 import {
   type BunCatalogs,
   BunCatalogs as BunCatalogsSchema,
-} from '../npm/schema.ts';
-import type { NpmManagerData } from '../npm/types.ts';
-import type { ExtractConfig, PackageFile } from '../types.ts';
+} from './schema.ts';
 import { filesMatchingWorkspaces } from './utils.ts';
 
 function matchesFileName(fileNameWithPath: string, fileName: string): boolean {

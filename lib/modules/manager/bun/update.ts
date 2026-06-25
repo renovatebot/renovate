@@ -1,6 +1,7 @@
 import { isPlainObject } from '@sindresorhus/is';
 import { weave } from 'jsonc-weaver';
 import { logger } from '../../../logger/index.ts';
+import { regEx } from '../../../util/regex.ts';
 import { BUN_CATALOG_DEPENDENCY } from '../npm/extract/common/catalogs.ts';
 import {
   getNewGitValue,
@@ -9,9 +10,7 @@ import {
 import { updateDependency as npmUpdateDependency } from '../npm/update/index.ts';
 import type { UpdateDependencyConfig } from '../types.ts';
 
-const bunCatalogRe = new RegExp(
-  `^${BUN_CATALOG_DEPENDENCY}\\.(?<catalogName>.+)$`,
-);
+const bunCatalogRe = regEx(`^${BUN_CATALOG_DEPENDENCY}\\.(?<catalogName>.+)$`);
 
 /**
  * Locate and update a catalog entry in the parsed package.json object.
