@@ -828,6 +828,12 @@ describe('modules/datasource/pypi/index', () => {
               "requires-python": null,
               "yanked": "security vulnerability",
               "upload-time": "2018-04-10T11:05:00.000Z"
+            },
+            {
+              "filename": "dj_database_url-0.5.0-py2.py3-none-any.whl.metadata",
+              "requires-python": null,
+              "yanked": false,
+              "upload-time": "2018-04-10T11:05:00.000Z"
             }
           ]
         }
