@@ -243,7 +243,7 @@
     "p-throttle": "8.1.0",
     "parse-link-header": "2.0.0",
     "prettier": "3.8.1",
-    "protobufjs": "8.6.3",
+    "protobufjs": "8.6.4",
     "punycode": "2.3.1",
     "remark": "15.0.1",
     "remark-gfm": "4.0.1",
@@ -269,7 +269,7 @@
   },
   "optionalDependencies": {
     "openpgp": "6.3.1",
-    "re2": "1.24.1"
+    "re2": "1.25.0"
   },
   "devDependencies": {
     "@biomejs/biome": "2.5.0",
@@ -280,7 +280,7 @@
     "@ls-lint/ls-lint": "2.3.1",
     "@openpgp/web-stream-tools": "0.3.1",
     "@semantic-release/exec": "7.1.0",
-    "@smithy/util-stream": "4.7.0",
+    "@smithy/util-stream": "4.7.1",
     "@types/adm-zip": "0.5.8",
     "@types/aws4": "1.11.6",
     "@types/breejs__later": "4.1.5",
@@ -341,7 +341,7 @@
     "semantic-release": "25.0.5",
     "tar": "7.5.16",
     "tmp-promise": "3.0.3",
-    "tsdown": "0.22.2",
+    "tsdown": "0.22.3",
     "type-fest": "5.7.0",
     "typescript": "6.0.3",
     "unified": "11.0.5",
@@ -349,7 +349,7 @@
     "vitest": "4.1.9",
     "vitest-mock-extended": "4.0.0"
   },
-  "packageManager": "pnpm@11.7.0",
+  "packageManager": "pnpm@11.8.0",
   "files": [
     "dist",
     "renovate-schema.json"
