@@ -45,8 +45,6 @@ minimumReleaseAgeExclude:
   - '@containerbase/eslint-plugin'
   - '@containerbase/istanbul-reports-html'
   - '@containerbase/semantic-release-pnpm'
-  # Renovate security update: esbuild@0.28.1
-  - esbuild@0.28.1
 
 provenance: true
 
