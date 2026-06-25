@@ -26,7 +26,7 @@ Renovate also supports authenticating to Azure DevOps Services using Microsoft E
 This works with service principals, managed identities, and user-delegated tokens.
 
 Renovate **automatically detects** whether a token is a JWT (Bearer token) or a PAT based on its format.
-No additional configuration is needed — just set the `token` field to your Entra ID access token:
+No additional configuration is needed. Just set the `token` field to your Entra ID access token:
 
 ```js
 // config.js
