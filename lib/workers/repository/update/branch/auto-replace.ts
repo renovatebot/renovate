@@ -101,7 +101,7 @@ export async function confirmIfDepUpdated(
         );
         templateMatchesExtractedValue =
           compiledValue === newUpgrade.currentValue;
-      } catch (err) /* istanbul ignore next */ {
+      } catch (err) {
         logger.debug(
           { err, manager, packageFile },
           'Failed to compile autoReplaceStringTemplate in confirmIfDepUpdated',
