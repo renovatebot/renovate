@@ -1,7 +1,6 @@
 import { GlobalConfig } from '../../config/global.ts';
 
 export const basicEnvVars = [
-  'CI',
   'HTTP_PROXY',
   'HTTPS_PROXY',
   'NO_PROXY',
@@ -48,6 +47,10 @@ export const basicEnvVars = [
   'PNPM_MAX_WORKERS',
 ] as const;
 
+export const hardcodedProcessEnv: Readonly<NodeJS.ProcessEnv> = {
+  CI: 'true',
+} as const;
+
 export function getChildProcessEnv(
   customEnvVars: string[] = [],
 ): NodeJS.ProcessEnv {
@@ -68,5 +71,10 @@ export function getChildProcessEnv(
       env[key] = process.env[key];
     }
   }
+
+  for (const [key, value] of Object.entries(hardcodedProcessEnv)) {
+    env[key] = value;
+  }
+
   return env;
 }
