@@ -75,9 +75,6 @@ abstract class PrivateKey {
     await exec(`git config user.signingkey ${this.keyId!}`, { cwd });
     await exec(`git config commit.gpgsign true`, { cwd });
     await exec(`git config gpg.format ${this.gpgFormat}`, { cwd });
-    if (GlobalConfig.get('platform') === 'gerrit') {
-      await exec(`git config push.gpgSign if-asked`, { cwd });
-    }
   }
 
   protected abstract importKey(): Promise<string | undefined>;
@@ -92,6 +89,13 @@ class GPGKey extends PrivateKey {
       logger.warn(
         'Passphrase is not yet supported for GPG keys, it will be ignored',
       );
+    }
+  }
+
+  override async configSigningKey(cwd: string): Promise<void> {
+    await super.configSigningKey(cwd);
+    if (GlobalConfig.get('platform') === 'gerrit') {
+      await exec(`git config push.gpgSign if-asked`, { cwd });
     }
   }
 

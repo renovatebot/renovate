@@ -539,5 +539,31 @@ some-private-key
         }
       },
     );
+
+    it('does not set push.gpgSign for SSH key on gerrit', async () => {
+      const sshKey = `\
+-----BEGIN OPENSSH PRIVATE KEY-----
+some-private-key
+some-private-key
+-----END OPENSSH PRIVATE KEY-----
+`;
+      const privateKeyFile = upath.join(`${os.tmpdir()}/git-private-ssh.key`);
+      const repoDir = '/tmp/some-repo';
+      GlobalConfig.set({ platform: 'gerrit' });
+
+      exec.exec.calledWith(any()).mockResolvedValue({ stdout: '', stderr: '' });
+      exec.exec
+        .calledWith(`ssh-keygen -y -f ${privateKeyFile}`)
+        .mockResolvedValue({ stderr: '', stdout: 'some-public-key' });
+
+      setPrivateKey(sshKey, undefined);
+      await writePrivateKey();
+      await configSigningKey(repoDir);
+
+      expect(exec.exec).not.toHaveBeenCalledWith(
+        'git config push.gpgSign if-asked',
+        { cwd: repoDir },
+      );
+    });
   });
 });
