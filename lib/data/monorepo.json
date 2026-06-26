@@ -74,6 +74,7 @@
     "arcus.security": "https://github.com/arcus-azure/arcus.security",
     "arcus.webapi": "https://github.com/arcus-azure/arcus.webapi",
     "arrow-kt": "https://github.com/arrow-kt/arrow",
+    "arrow-rs": "https://github.com/apache/arrow-rs",
     "aspire": [
       "https://github.com/dotnet/aspire",
       "https://github.com/microsoft/aspire"

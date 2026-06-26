@@ -934,6 +934,7 @@ This feature is limited to the following datasources:
 - `jenkins-plugins`
 - `npm`
 - `packagist`
+- `pub`
 - `pypi`
 - `rubygems`
 
@@ -2032,7 +2033,8 @@ For example, to group all non-major devDependencies updates together into a sing
 
 ## `groupSingleUpdates`
 
-For example, you can set it to `false` if you prefer individual dependency names in PR titles when only one update is in the group.
+!!! note
+  This option was [recently made opt-in, instead of opt-out](https://github.com/renovatebot/renovate/pull/44168).
 
 ## `groupSlug`
 
@@ -4044,29 +4046,92 @@ This way Renovate can use GitHub's [Commit signing support for bots and other Gi
 
 ## `postUpdateOptions`
 
-Table with options:
+### `bundlerConservative`
 
-| Name                         | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `bundlerConservative`        | Enable conservative mode for `bundler` (Ruby dependencies). This will only update the immediate dependency in the lockfile instead of all subdependencies.                                                                                                                                                                                                                                                                                                                         |
-| `composerNoMinimalChanges`   | Run `composer update` with no `--minimal-changes` flag (does not affect lock file maintenance, which will never use `--minimal-changes`).                                                                                                                                                                                                                                                                                                                                          |
-| `composerWithAll`            | Run `composer update` with `--with-all-dependencies` flag instead of the default `--with-dependencies`.                                                                                                                                                                                                                                                                                                                                                                            |
-| `dotnetWorkloadRestore`      | Run `dotnet workload restore` before `dotnet restore` commands.                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| `gomodMassage`               | Enable massaging `replace` directives before calling `go` commands.                                                                                                                                                                                                                                                                                                                                                                                                                |
-| `gomodTidy`                  | Run `go mod tidy` after Go module updates. This is implicitly enabled for major module updates when `gomodUpdateImportPaths` is enabled.                                                                                                                                                                                                                                                                                                                                           |
-| `gomodTidy1.17`              | Run `go mod tidy -compat=1.17` after Go module updates.                                                                                                                                                                                                                                                                                                                                                                                                                            |
-| `gomodTidyE`                 | Run `go mod tidy -e` after Go module updates.                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| `gomodUpdateImportPaths`     | Update source import paths on major module updates, using [mod](https://github.com/marwan-at-work/mod).                                                                                                                                                                                                                                                                                                                                                                            |
-| `gomodSkipVendor`            | Never run `go mod vendor` after Go module updates.                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| `gomodVendor`                | Always run `go mod vendor` after Go module updates even if vendor files aren't detected.                                                                                                                                                                                                                                                                                                                                                                                           |
-| `goGenerate`                 | Run `go generate ./...` after vendoring (if vendoring was required). This will then commit any files which were added or modified by running `go generate`. Note this will not install any other tools as part of the process. See [Go Tool](https://tip.golang.org/doc/go1.24#tools) usage for how to incorporate these as part of your build process. In order for this option to function, the global configuration option `allowedUnsafeExecutions` must include `goGenerate`. |
-| `helmUpdateSubChartArchives` | Update subchart archives in the `/charts` folder.                                                                                                                                                                                                                                                                                                                                                                                                                                  |
-| `kustomizeInflateHelmCharts` | Inflate updated helm charts referenced in the kustomization.                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| `npmDedupe`                  | Run `npm install` with `--prefer-dedupe` for npm >= 7 or `npm dedupe` after `package-lock.json` update for npm <= 6.                                                                                                                                                                                                                                                                                                                                                               |
-| `npmInstallTwice`            | Run `npm install` commands _twice_ to work around bugs where `npm` generates invalid lock files if run only once                                                                                                                                                                                                                                                                                                                                                                   |
-| `pnpmDedupe`                 | Run `pnpm dedupe --ignore-scripts` after `pnpm-lock.yaml` updates.                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| `yarnDedupeFewer`            | Run `yarn-deduplicate --strategy fewer` after `yarn.lock` updates.                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| `yarnDedupeHighest`          | Run `yarn-deduplicate --strategy highest` (`yarn dedupe --strategy highest` for Yarn >=2.2.0) after `yarn.lock` updates.                                                                                                                                                                                                                                                                                                                                                           |
+Enable conservative mode for `bundler` (Ruby dependencies).
+This will only update the immediate dependency in the lockfile instead of all subdependencies.
+
+### `composerNoMinimalChanges`
+
+Run `composer update` with no `--minimal-changes` flag (does not affect lock file maintenance, which will never use `--minimal-changes`).
+
+### `composerWithAll`
+
+Run `composer update` with `--with-all-dependencies` flag instead of the default `--with-dependencies`.
+
+### `dotnetWorkloadRestore`
+
+Run `dotnet workload restore` before `dotnet restore` commands.
+
+### `goGenerate`
+
+Run `go generate ./...`.
+This will then commit any files which were added or modified by running `go generate`.
+
+Note this will not install any other tools as part of the process.
+See [Go Tool](https://tip.golang.org/doc/go1.24#tools) usage for how to incorporate these as part of your build process.
+
+This runs after vendoring, if vendoring was required.
+
+!!! note
+  In order for this option to function, the global configuration option [`allowedUnsafeExecutions`](./self-hosted-configuration.md#allowedunsafeexecutions) must include `goGenerate`.
+
+### `gomodMassage`
+
+Enable massaging `replace` directives before calling `go` commands.
+
+### `gomodSkipVendor`
+
+Never run `go mod vendor` after Go module updates.
+
+### `gomodTidy`
+
+Run `go mod tidy` after Go module updates.
+This is implicitly enabled for major module updates when `gomodUpdateImportPaths` is enabled.
+
+### `gomodTidy1.17`
+
+Run `go mod tidy -compat=1.17` after Go module updates.
+
+### `gomodTidyE`
+
+Run `go mod tidy -e` after Go module updates.
+
+### `gomodUpdateImportPaths`
+
+Update source import paths on major module updates, using [mod](https://github.com/marwan-at-work/mod).
+
+### `gomodVendor`
+
+Always run `go mod vendor` after Go module updates even if vendor files aren't detected.
+
+### `helmUpdateSubChartArchives`
+
+Update subchart archives in the `/charts` folder.
+
+### `kustomizeInflateHelmCharts`
+
+Inflate updated helm charts referenced in the kustomization.
+
+### `npmDedupe`
+
+Run `npm install` with `--prefer-dedupe` for npm >= 7 or `npm dedupe` after `package-lock.json` update for npm <= 6.
+
+### `npmInstallTwice`
+
+Run `npm install` commands _twice_ to work around bugs where `npm` generates invalid lock files if run only once.
+
+### `pnpmDedupe`
+
+Run `pnpm dedupe --ignore-scripts` after `pnpm-lock.yaml` updates.
+
+### `yarnDedupeFewer`
+
+Run `yarn-deduplicate --strategy fewer` after `yarn.lock` updates.
+
+### `yarnDedupeHighest`
+
+Run `yarn-deduplicate --strategy highest` (`yarn dedupe --strategy highest` for Yarn >=2.2.0) after `yarn.lock` updates.
 
 ## `postUpgradeTasks`
 

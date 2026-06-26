@@ -403,6 +403,9 @@ function resolveResourceManifest(
           if (isHttpUrl(gitUrl)) {
             dep.sourceUrl = gitUrl.replace(/\.git$/, '');
           }
+          if (resource.spec.ref?.branch) {
+            dep.currentValue = resource.spec.ref.branch;
+          }
         } else if (resource.spec.ref?.tag) {
           dep.currentValue = resource.spec.ref.tag;
           resolveGitRepositoryPerSourceTag(dep, resource.spec.url);

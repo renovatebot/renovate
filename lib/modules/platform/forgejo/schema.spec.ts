@@ -1,4 +1,4 @@
-import { ContentsListResponse, Issue, Repo } from './schema.ts';
+import { ContentsListResponse, Issue, Repo, User } from './schema.ts';
 
 describe('modules/platform/forgejo/schema', () => {
   it('ContentsListResponse', () => {
@@ -32,6 +32,33 @@ describe('modules/platform/forgejo/schema', () => {
     });
     expect(issue.assignees).toBeUndefined();
     expect(issue.labels).toBeUndefined();
+  });
+
+  it('User degrades empty email string to undefined', () => {
+    const user = User.parse({
+      id: 1,
+      email: '',
+      login: 'user',
+    });
+    expect(user.email).toBeUndefined();
+  });
+
+  it('User forwards GitHub app style email addresses', () => {
+    const user = User.parse({
+      id: 1,
+      email: '211370388+foo[bot]@users.noreply.github.com',
+      login: 'user',
+    });
+    expect(user.email).toBe('211370388+foo[bot]@users.noreply.github.com');
+  });
+
+  it('User keeps a valid email address', () => {
+    const user = User.parse({
+      id: 1,
+      email: 'user@example.com',
+      login: 'user',
+    });
+    expect(user.email).toBe('user@example.com');
   });
 
   it('Repo degrades unrecognized default_merge_style to undefined', () => {

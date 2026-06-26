@@ -2191,7 +2191,7 @@ export async function getVulnerabilityAlerts(): Promise<GithubVulnerabilityAlert
     logger.debug({ err }, 'Error retrieving vulnerability alerts');
     logger.warn(
       {
-        url: 'https://docs.renovatebot.com/configuration-options/#vulnerabilityalerts',
+        url: `${GlobalConfig.get('productLinks').documentation}configuration-options/#vulnerabilityalerts`,
       },
       'Cannot access vulnerability alerts. Please ensure permissions have been granted.',
     );

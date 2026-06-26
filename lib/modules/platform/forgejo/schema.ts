@@ -39,7 +39,8 @@ export const ContentsListResponse = z.array(RepoContents);
 export const User = DeepNullish(
   z.object({
     id: z.number(),
-    email: EmailAddress.optional(),
+    // catch empty strings which are returned if an organization has no email
+    email: EmailAddress.optional().catch(undefined),
     full_name: z.string().optional(),
     login: z.string(),
   }),
