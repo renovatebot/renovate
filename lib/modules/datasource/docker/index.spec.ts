@@ -1942,107 +1942,64 @@ describe('modules/datasource/docker/index', () => {
       },
     );
 
-    it.each(amazonHosts)(
-      'returns ECR release timestamps from image config blobs for host $host',
-      async ({ host }) => {
-        httpMock
-          .scope(`https://${host}/v2`)
-          .get('/node/tags/list?n=1000')
-          .reply(200, '', {})
-          .get('/node/tags/list?n=1000')
-          .reply(200, { tags: ['1.0.0', '2.0.0'] }, {})
-          // getCreatedTimestamp('1.0.0') auth + manifest + blob
-          .get('/')
-          .reply(200, '', {})
-          .get('/node/manifests/1.0.0')
-          .reply(200, {
-            schemaVersion: 2,
-            mediaType: 'application/vnd.docker.distribution.manifest.v2+json',
-            config: {
-              digest: 'sha256:abc100',
-              mediaType: 'application/vnd.docker.container.image.v1+json',
-            },
-          })
-          .get('/')
-          .reply(200, '', {})
-          .get('/node/blobs/sha256:abc100')
-          .reply(200, {
-            created: '2021-01-01T00:00:00.000Z',
-            architecture: 'amd64',
-            config: { Labels: {} },
-          })
-          // getCreatedTimestamp('2.0.0') auth + manifest + blob
-          .get('/')
-          .reply(200, '', {})
-          .get('/node/manifests/2.0.0')
-          .reply(200, {
-            schemaVersion: 2,
-            mediaType: 'application/vnd.docker.distribution.manifest.v2+json',
-            config: {
-              digest: 'sha256:abc200',
-              mediaType: 'application/vnd.docker.container.image.v1+json',
-            },
-          })
-          .get('/')
-          .reply(200, '', {})
-          .get('/node/blobs/sha256:abc200')
-          .reply(200, {
-            created: '2022-01-01T00:00:00.000Z',
-            architecture: 'amd64',
-            config: {
-              Labels: {
-                'org.opencontainers.image.source':
-                  'https://github.com/renovatebot/renovate',
+    describe('postprocessRelease', () => {
+      it.each(amazonHosts)(
+        'fetches ECR release timestamp from image config blob for host $host',
+        async ({ host }) => {
+          httpMock
+            .scope(`https://${host}/v2`)
+            .get('/')
+            .reply(200, '', {})
+            .get('/node/manifests/1.0.0')
+            .reply(200, {
+              schemaVersion: 2,
+              mediaType: 'application/vnd.docker.distribution.manifest.v2+json',
+              config: {
+                digest: 'sha256:abc100',
+                mediaType: 'application/vnd.docker.container.image.v1+json',
               },
-            },
-          })
-          // _getLabels('2.0.0') auth + manifest (blob already fetched above)
-          .get('/')
-          .reply(200, '', {})
-          .get('/node/manifests/2.0.0')
-          .reply(200, {
-            schemaVersion: 2,
-            mediaType: 'application/vnd.docker.distribution.manifest.v2+json',
-            config: {
-              digest: 'sha256:abc200',
-              mediaType: 'application/vnd.docker.container.image.v1+json',
-            },
-          })
-          .get('/')
-          .reply(200, '', {})
-          .get('/node/blobs/sha256:abc200')
-          .reply(200, {
-            created: '2022-01-01T00:00:00.000Z',
-            architecture: 'amd64',
-            config: {
-              Labels: {
-                'org.opencontainers.image.source':
-                  'https://github.com/renovatebot/renovate',
-              },
-            },
+            })
+            .get('/')
+            .reply(200, '', {})
+            .get('/node/blobs/sha256:abc100')
+            .reply(200, {
+              created: '2021-01-01T00:00:00.000Z',
+              architecture: 'amd64',
+              config: { Labels: {} },
+            });
+          const ds = new DockerDatasource();
+          const result = await ds.postprocessRelease(
+            { packageName: `${host}/node`, registryUrl: null },
+            { version: '1.0.0' },
+          );
+          expect(result).toEqual({
+            version: '1.0.0',
+            releaseTimestamp: '2021-01-01T00:00:00.000Z',
           });
-        expect(
-          await getPkgReleases({
-            datasource: DockerDatasource.id,
-            packageName: `${host}/node`,
-          }),
-        ).toEqual({
-          lookupName: 'node',
-          registryUrl: `https://${host}`,
-          sourceUrl: 'https://github.com/renovatebot/renovate',
-          releases: [
-            {
-              version: '1.0.0',
-              releaseTimestamp: '2021-01-01T00:00:00.000Z',
-            },
-            {
-              version: '2.0.0',
-              releaseTimestamp: '2022-01-01T00:00:00.000Z',
-            },
-          ],
-        });
-      },
-    );
+        },
+      );
+
+      it('skips non-ECR registries', async () => {
+        const ds = new DockerDatasource();
+        const release = { version: '1.0.0' };
+        const result = await ds.postprocessRelease(
+          { packageName: 'library/node', registryUrl: null },
+          release,
+        );
+        expect(result).toBe(release);
+      });
+
+      it('skips non-version tags', async () => {
+        const ds = new DockerDatasource();
+        const release = { version: 'latest' };
+        const [{ host }] = amazonHosts;
+        const result = await ds.postprocessRelease(
+          { packageName: `${host}/node`, registryUrl: null },
+          release,
+        );
+        expect(result).toBe(release);
+      });
+    });
 
     describe('when making requests that interact with an ECR proxy', () => {
       it('resolves requests to ECR proxy', async () => {

@@ -26,6 +26,8 @@ import { Datasource } from '../datasource.ts';
 import type {
   DigestConfig,
   GetReleasesConfig,
+  PostprocessReleaseConfig,
+  PostprocessReleaseResult,
   Release,
   ReleaseResult,
 } from '../types.ts';
@@ -346,6 +348,30 @@ export class DockerDatasource extends Datasource {
       `ECR image config blob created timestamp for ${dockerRepository}:${tag} -> ${created ?? 'null'}`,
     );
     return created;
+  }
+
+  override async postprocessRelease(
+    config: PostprocessReleaseConfig,
+    release: Release,
+  ): Promise<PostprocessReleaseResult> {
+    const { packageName, registryUrl } = config;
+    const { registryHost, dockerRepository } = getRegistryRepository(
+      packageName,
+      registryUrl ?? '',
+    );
+    if (
+      !dockerVersioning.isVersion(release.version) ||
+      (!ecrRegex.test(registryHost) && !ecrPublicRegex.test(registryHost))
+    ) {
+      return release;
+    }
+    const created = await this.getCreatedTimestamp(
+      registryHost,
+      dockerRepository,
+      release.version,
+    );
+    const releaseTimestamp = asTimestamp(created);
+    return releaseTimestamp ? { ...release, releaseTimestamp } : release;
   }
 
   private async getManifest(
@@ -1241,26 +1267,6 @@ export class DockerDatasource extends Datasource {
     if (dockerRepository !== packageName) {
       // This will be reused later if a getDigest() call is made
       ret.lookupName = dockerRepository;
-    }
-
-    if (ecrRegex.test(registryHost) || ecrPublicRegex.test(registryHost)) {
-      const validReleases = releases.filter(({ version }) =>
-        dockerVersioning.isVersion(version),
-      );
-      const createdDates = await Promise.all(
-        validReleases.map(({ version }) =>
-          this.getCreatedTimestamp(registryHost, dockerRepository, version),
-        ),
-      );
-      for (let i = 0; i < validReleases.length; i++) {
-        const ts = asTimestamp(createdDates[i]);
-        /* v8 ignore next 3 -- all valid ECR image versions have a created timestamp */
-        if (!ts) {
-          continue;
-        }
-        const idx = releases.indexOf(validReleases[i]);
-        releases[idx] = { ...releases[idx], releaseTimestamp: ts };
-      }
     }
 
     const tags = releases.map((release) => release.version);
