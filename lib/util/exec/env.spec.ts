@@ -66,6 +66,16 @@ describe('util/exec/env', () => {
     });
   });
 
+  it('static environment variables override the process environment variables', () => {
+    process.env.CI = 'false';
+
+    expect(getChildProcessEnv()).toMatchObject({
+      CI: 'true',
+    });
+
+    delete process.env.CI;
+  });
+
   it('returns environment variable only if defined', () => {
     delete process.env.PATH;
     expect(getChildProcessEnv()).not.toHaveProperty('PATH');
