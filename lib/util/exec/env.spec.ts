@@ -3,6 +3,7 @@ import { getChildProcessEnv } from './env.ts';
 
 describe('util/exec/env', () => {
   const envVars = [
+    'CI',
     'HTTP_PROXY',
     'HTTPS_PROXY',
     'NO_PROXY',
@@ -33,7 +34,8 @@ describe('util/exec/env', () => {
   });
 
   it('returns default environment variables', () => {
-    expect(getChildProcessEnv()).toMatchObject({
+    expect(getChildProcessEnv()).toEqual({
+      CI: 'CI',
       DOCKER_HOST: 'DOCKER_HOST',
       GIT_SSL_CAPATH: 'GIT_SSL_CAPATH',
       GIT_SSL_CAINFO: 'GIT_SSL_CAINFO',
