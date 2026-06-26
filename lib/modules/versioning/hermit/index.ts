@@ -1,4 +1,3 @@
-import { isUndefined } from '@sindresorhus/is';
 import { satisfies } from 'semver';
 import type { RegExpVersion } from '../regex/index.ts';
 import { RegExpVersioningApi } from '../regex/index.ts';
@@ -42,9 +41,9 @@ export class HermitVersioning extends RegExpVersioningApi {
     } = groups;
     const release = [
       Number.parseInt(major, 10),
-      isUndefined(minor) ? 0 : Number.parseInt(minor, 10),
-      isUndefined(patch) ? 0 : Number.parseInt(patch, 10),
-      isUndefined(supplement) ? 0 : Number.parseInt(supplement, 10),
+      Number.parseInt(minor, 10),
+      Number.parseInt(patch, 10),
+      Number.parseInt(supplement, 10),
     ];
 
     if (build) {
