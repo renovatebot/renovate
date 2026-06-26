@@ -180,13 +180,24 @@ function handleGotError(
       message.includes('Review cannot be requested from pull request author')
     ) {
       return err;
-    } else if (err.body?.errors?.find((e: any) => e.field === 'milestone')) {
+    }
+
+    // GitHub usually returns `errors` as an array, but not always - normalize
+    const rawErrors = err.body?.errors;
+    let errors: unknown[] = [];
+    if (isArray(rawErrors)) {
+      errors = rawErrors;
+    } else if (!isNullOrUndefined(rawErrors)) {
+      errors = [rawErrors];
+    }
+
+    if (errors.find((e: any) => e.field === 'milestone')) {
       return err;
-    } else if (err.body?.errors?.find((e: any) => e.code === 'invalid')) {
+    } else if (errors.find((e: any) => e.code === 'invalid')) {
       logger.debug({ err }, 'Received invalid response - aborting');
       return new Error(REPOSITORY_CHANGED);
     } else if (
-      err.body?.errors?.find((e: any) =>
+      errors.find((e: any) =>
         e.message?.startsWith('A pull request already exists'),
       )
     ) {
