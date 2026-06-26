@@ -410,6 +410,45 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
       `);
     });
 
+    it('does not show schedule information', () => {
+      const branches: BranchConfig[] = [
+        {
+          prTitle: 'Lock file maintenance',
+          schedule: ['before 5am on Monday'],
+          branchName: 'renovate/lock-file-maintenance',
+          baseBranch: '',
+          manager: 'some-manager',
+          upgrades: [
+            {
+              manager: 'some-manager',
+              updateType: 'lockFileMaintenance',
+              branchName: 'ignored',
+            },
+          ],
+        },
+        {
+          prTitle: 'Update a to v2',
+          schedule: ['every weekend'],
+          branchName: 'renovate/a-2.x',
+          baseBranch: '',
+          manager: 'some-manager',
+          upgrades: [
+            {
+              manager: 'some-manager',
+              updateType: 'minor',
+              depName: 'a',
+              newValue: '2.0.0',
+              branchName: 'ignored',
+            },
+          ],
+        },
+      ];
+      const res = getExpectedPrListSummary(config, branches);
+      expect(res).not.toContain('before 5am');
+      expect(res).not.toContain('every weekend');
+      expect(res).not.toContain('Schedule');
+    });
+
     it('includes the base branch if there are multiple being tracked', () => {
       const branches: BranchConfig[] = [
         {

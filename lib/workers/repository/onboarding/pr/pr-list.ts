@@ -9,9 +9,13 @@ import { coerceNumber } from '../../../../util/number.ts';
 import { regEx } from '../../../../util/regex.ts';
 import type { BranchConfig } from '../../../types.ts';
 
-/** The different categories of dependency updates to output, when providing the summary view.
+/**
+ * The different categories of dependency updates to output, when providing the summary view.
  *
- * Upgrades without an `updateType` (such as `isRemediation`), which are used less frequently, are classed as `other`.
+ * - `security`: if the upgrade is driven by a vulnerability alert
+ * - `${updateType}`: if it's set. I.e. `major`
+ * - `lockfileUpdate` when `isLockfileUpdate` is true, without an `updateType`
+ * - `other`: otherwise
  */
 type SummaryCategory = UpdateType | 'security' | 'other';
 
@@ -125,6 +129,10 @@ function getBranchUpgradeTypes(branch: BranchConfig): Set<SummaryCategory> {
 // Sort: default branch (empty string) first, then named branches alphabetically.
 function sortBaseBranches(bases: Iterable<string>): string[] {
   return [...bases].sort((a, b) => {
+    if (a === b) {
+      /* v8 ignore next -- base branches are unique Record keys; equal comparison cannot occur */
+      return 0;
+    }
     if (a === '') {
       return -1;
     }
@@ -266,6 +274,10 @@ function getCategoryColumns(
 }
 
 function categoriesToColumnHeaders(cols: readonly string[]): string {
+  /* v8 ignore next -- branches always have at least one upgrade, so cols is never empty in practice */
+  if (cols.length === 0) {
+    return '';
+  }
   return ` | ${cols.join(' | ')}`;
 }
 
@@ -364,7 +376,7 @@ export function getExpectedPrListSummary(
   if (
     commitHourlyLimit > 0 &&
     commitHourlyLimit < 5 &&
-    commitHourlyLimit < branches.length
+    commitHourlyLimit < stats.prCount
   ) {
     prDesc += emojify(
       `\n\n:children_crossing: Branch creation and rebasing will be limited to maximum ${commitHourlyLimit} per hour, so it doesn't swamp any CI resources or overwhelm the project. See [docs for \`commitHourlyLimit\`](https://docs.renovatebot.com/configuration-options/#commithourlylimit) for details.\n\n`,
@@ -372,7 +384,7 @@ export function getExpectedPrListSummary(
   } else if (
     prHourlyLimit > 0 &&
     prHourlyLimit < 5 &&
-    prHourlyLimit < branches.length
+    prHourlyLimit < stats.prCount
   ) {
     prDesc += emojify(
       `\n\n:children_crossing: PR creation will be limited to maximum ${prHourlyLimit} per hour, so it doesn't swamp any CI resources or overwhelm the project. See [docs for \`prHourlyLimit\`](https://docs.renovatebot.com/configuration-options/#prhourlylimit) for details.\n\n`,
