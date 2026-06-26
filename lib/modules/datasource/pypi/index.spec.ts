@@ -807,7 +807,7 @@ describe('modules/datasource/pypi/index', () => {
       ).toMatchSnapshot();
     });
 
-    it('parses PEP 691 JSON response from simple endpoint', async () => {
+    it('parses JSON-based Simple API response', async () => {
       const simpleJson = codeBlock`
         {
           "files": [
@@ -897,7 +897,7 @@ describe('modules/datasource/pypi/index', () => {
       expect(res?.releases).toMatchObject(djDatabaseUrlSimpleReleases);
     });
 
-    it('falls back to HTML when PEP 691 JSON schema validation fails', async () => {
+    it('falls back to HTML when JSON-based Simple API schema validation fails', async () => {
       const invalidSchemaJson = JSON.stringify({ name: 'dj-database-url' });
       httpMock
         .scope('https://some.registry.org/simple/')
@@ -919,7 +919,7 @@ describe('modules/datasource/pypi/index', () => {
       expect(res).toBeNull();
     });
 
-    it('parses PEP 691 JSON response without upload-time', async () => {
+    it('parses JSON-based Simple API response without upload-time', async () => {
       const jsonBody = {
         meta: { 'api-version': '1.0' },
         name: 'some-package',

@@ -26,7 +26,7 @@ export const PypiResponse = DeepNullish(
 
 export type PypiResponse = z.infer<typeof PypiResponse>;
 
-// PEP 691 Simple Repository API JSON response schemas
+// JSON-based Simple API (PEP 691) schemas
 // https://peps.python.org/pep-0691/
 export const PypiSimpleFile = DeepNullish(
   z.object({

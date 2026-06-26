@@ -39,7 +39,7 @@ export class PypiDatasource extends Datasource {
 
   override readonly releaseTimestampSupport = true;
   override readonly releaseTimestampNote =
-    'The release timestamp is determined from the `upload_time` field in the results. When using the simple API, timestamps are available if the server supports PEP 691 (JSON Simple API).';
+    'The release timestamp is determined from the `upload_time` field in the results. When using the Simple API, timestamps are available if the server supports the JSON-based Simple API (PEP 691).';
   override readonly sourceUrlSupport = 'release';
   override readonly sourceUrlNote =
     'The source URL is determined from the `homepage` field if it is a github repository, else we use the `project_urls` field.';
@@ -273,7 +273,7 @@ export class PypiDatasource extends Datasource {
     if (!parsed.success) {
       logger.trace(
         { packageName, error: parsed.error },
-        'Failed to parse PEP 691 JSON response',
+        'Failed to parse JSON-based Simple API response',
       );
       return null;
     }
@@ -345,7 +345,7 @@ export class PypiDatasource extends Datasource {
 
     const contentType = response.headers['content-type'];
     if (contentType?.includes('application/vnd.pypi.simple.v1+json')) {
-      logger.trace({ packageName }, 'Parsing PEP 691 JSON simple response');
+      logger.trace({ packageName }, 'Parsing JSON-based Simple API response');
       const releases = this.parseSimpleJson(dep, packageName);
       if (releases) {
         dependency.releases = releases;
