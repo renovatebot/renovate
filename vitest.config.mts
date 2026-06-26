@@ -132,6 +132,8 @@ export default defineConfig(() =>
           'dist/**/*',
           'tools/docs/test/**/*.test.mjs',
           '.worktrees/**/*',
+          // run via: pnpm test-integration
+          'test/integration/**',
         ],
       },
     }),
