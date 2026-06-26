@@ -32,7 +32,10 @@ import {
 } from '../common.ts';
 import { getBaseBranchDesc } from './base-branch.ts';
 import { getConfigDesc } from './config-description.ts';
-import { getPackageFilesDesc } from './package-files.ts';
+import {
+  getPackageFilesDesc,
+  getPackageFilesSummary,
+} from './package-files.ts';
 import { getExpectedPrList, getExpectedPrListSummary } from './pr-list.ts';
 
 /**
@@ -221,9 +224,15 @@ If you need any further assistance then you can also [request help here](${
 
   if (prBody.length > platform.maxBodyLength()) {
     logger.debug(
-      'Onboarding PR body exceeds platform limit, switching to summary PR list',
+      'Onboarding PR body exceeds platform limit, switching to summary PR list and package files',
     );
     prBody = prBody.replace(prList, getExpectedPrListSummary(config, branches));
+    if (packageFilesDesc) {
+      prBody = prBody.replace(
+        packageFilesDesc,
+        `### Detected Package Files\n\n${getPackageFilesSummary(packageFiles)}`,
+      );
+    }
   }
 
   logger.trace(`prBody:\n${prBody}`);
