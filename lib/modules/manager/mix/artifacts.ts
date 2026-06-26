@@ -145,6 +145,9 @@ export async function updateArtifacts({
     return acc;
   }, [] as string[]);
 
+  // renovate: will update this
+  const erlangVersion = '26';
+
   const execOptions: ExecOptions = {
     extraEnv: {
       // https://hexdocs.pm/mix/1.15.0/Mix.Tasks.Archive.html
@@ -157,7 +160,7 @@ export async function updateArtifacts({
       {
         toolName: 'erlang',
         // https://hexdocs.pm/elixir/1.14.5/compatibility-and-deprecations.html#compatibility-between-elixir-and-erlang-otp
-        constraint: config.constraints?.erlang ?? '^26',
+        constraint: config.constraints?.erlang ?? `^${erlangVersion}`,
       },
       {
         toolName: 'elixir',
