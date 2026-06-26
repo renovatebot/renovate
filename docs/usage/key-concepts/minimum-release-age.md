@@ -223,6 +223,7 @@ The below is a non-exhaustive list of public registries which support release ti
 | `crate`              | `https://crates.io`                                | ✅        |                                                                  |
 | `rubygems`           | `https://rubygems.org`                             | ✅        |                                                                  |
 | `docker`             | `https://index.docker.io`                          | ✅        |                                                                  |
+| `docker`             | `*.dkr.ecr.*.amazonaws.com` / `public.ecr.aws`     | ✅        | Reads `created` from image config blob                           |
 | `docker`             | (not Docker Hub)                                   | ❌        | [Issue](https://github.com/renovatebot/renovate/issues/38656)    |
 | `docker`             | `https://ghcr.io`                                  | ❌        | [Issue](https://github.com/renovatebot/renovate/issues/39064)    |
 | `docker`             | `https://quay.io`                                  | ❌        | [Issue](https://github.com/renovatebot/renovate/issues/38572)    |
