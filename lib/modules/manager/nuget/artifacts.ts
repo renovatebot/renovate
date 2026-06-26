@@ -34,6 +34,7 @@ import {
   findGlobalJson,
   getConfiguredRegistries,
   getDefaultRegistries,
+  isRegistryDisabled,
 } from './util.ts';
 
 async function createCachedNuGetConfigFile(
@@ -41,19 +42,23 @@ async function createCachedNuGetConfigFile(
   packageFileName: string,
   updatedDeps: Upgrade[],
 ): Promise<string> {
-  const registries =
-    (await getConfiguredRegistries(packageFileName)) ?? getDefaultRegistries();
+  const registries = await getConfiguredRegistries(packageFileName);
+  let combinedRegistries: Registry[];
 
-  const updatedDepsRegistries: Registry[] = Array.from(
-    new Set(
-      updatedDeps
-        .flatMap((dep) => dep.registryUrls ?? [])
-        .filter(isNonEmptyString),
-    ),
-    (url) => ({ url }),
-  );
-
-  const combinedRegistries = [...registries, ...updatedDepsRegistries];
+  if (registries) {
+    combinedRegistries = registries.filter((r) => !isRegistryDisabled(r.url));
+  } else {
+    const updatedDepsRegistries: Registry[] = Array.from(
+      new Set(
+        updatedDeps
+          .flatMap((dep) => dep.registryUrls ?? [])
+          .filter(isNonEmptyString)
+          .filter((url) => !isRegistryDisabled(url)),
+      ),
+      (url) => ({ url }),
+    );
+    combinedRegistries = [...getDefaultRegistries(), ...updatedDepsRegistries];
+  }
 
   const contents = createNuGetConfigXml(combinedRegistries);
 
