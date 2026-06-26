@@ -33,7 +33,7 @@ describe('util/exec/env', () => {
   });
 
   it('returns default environment variables', () => {
-    expect(getChildProcessEnv()).toMatchObject({
+    expect(getChildProcessEnv()).toEqual({
       DOCKER_HOST: 'DOCKER_HOST',
       GIT_SSL_CAPATH: 'GIT_SSL_CAPATH',
       GIT_SSL_CAINFO: 'GIT_SSL_CAINFO',
