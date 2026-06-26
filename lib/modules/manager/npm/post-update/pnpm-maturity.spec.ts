@@ -62,6 +62,14 @@ describe('modules/manager/npm/post-update/pnpm-maturity', () => {
         version: '9.9.9',
       });
     });
+
+    it('returns null when error code is present but version line is missing', () => {
+      expect(
+        parsePnpmNoMatureMatchingVersion(
+          'ERR_PNPM_NO_MATURE_MATCHING_VERSION something went wrong',
+        ),
+      ).toBeNull();
+    });
   });
 
   describe('lockfileContainsPackageVersion', () => {
@@ -110,6 +118,17 @@ describe('modules/manager/npm/post-update/pnpm-maturity', () => {
       expect(
         lockfileContainsPackageVersion(lockfileV9, 'react', '19.0.0'),
       ).toBeFalse();
+    });
+
+    it('detects double-quoted package keys', () => {
+      const lockfile = codeBlock`
+        packages:
+          "@scope/pkg@1.2.3":
+            resolution: {integrity: sha512-abc}
+      `;
+      expect(
+        lockfileContainsPackageVersion(lockfile, '@scope/pkg', '1.2.3'),
+      ).toBeTrue();
     });
 
     it('detects path-style lockfile package keys', () => {
@@ -207,6 +226,45 @@ describe('modules/manager/npm/post-update/pnpm-maturity', () => {
         }),
       ).toBeFalse();
     });
+
+    it('matches security remediation via depName and newValue', () => {
+      expect(
+        shouldExcludeImmatureVersionForLockfileRetry({
+          packageName: 'ua-parser-js',
+          version: '2.0.10',
+          preUpdateLockfileContent: null,
+          upgrades: [
+            partial<Upgrade>({
+              depName: 'ua-parser-js',
+              newValue: '2.0.10',
+              isVulnerabilityAlert: true,
+            }),
+          ],
+        }),
+      ).toBeTrue();
+    });
+
+    it('skips non-matching vulnerability upgrades', () => {
+      expect(
+        shouldExcludeImmatureVersionForLockfileRetry({
+          packageName: 'ua-parser-js',
+          version: '2.0.10',
+          preUpdateLockfileContent: null,
+          upgrades: [
+            partial<Upgrade>({
+              packageName: 'other-pkg',
+              newVersion: '2.0.10',
+              isVulnerabilityAlert: true,
+            }),
+            partial<Upgrade>({
+              packageName: 'ua-parser-js',
+              newVersion: '2.0.10',
+              isVulnerabilityAlert: false,
+            }),
+          ],
+        }),
+      ).toBeFalse();
+    });
   });
 
   describe('CLI flag helpers', () => {
@@ -227,6 +285,12 @@ describe('modules/manager/npm/post-update/pnpm-maturity', () => {
       );
       expect(cmd).toContain(
         '--config.minimumReleaseAgeExclude[]=lodash@4.17.21',
+      );
+    });
+
+    it('appendPnpmMinimumReleaseAgeExcludeFlags is no-op for empty excludes', () => {
+      expect(appendPnpmMinimumReleaseAgeExcludeFlags('pnpm install', [])).toBe(
+        'pnpm install',
       );
     });
 

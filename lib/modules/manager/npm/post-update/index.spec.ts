@@ -490,6 +490,48 @@ describe('modules/manager/npm/post-update/index', () => {
       );
     });
 
+    it('adds artifact notice on pnpm maturityFallback', async () => {
+      spyPnpm.mockResolvedValueOnce({
+        error: false,
+        lockFile: 'lockfileVersion: "9.0"\n',
+        maturityFallback: true,
+      });
+      fs.readLocalFile.mockImplementation((f): Promise<string> => {
+        if (f === '.npmrc') {
+          return Promise.resolve('# dummy');
+        }
+        return Promise.resolve('');
+      });
+      const res = await getAdditionalFiles(
+        {
+          ...updateConfig,
+          reuseExistingBranch: true,
+          upgrades: [
+            {
+              ...updateConfig.upgrades[0],
+              managerData: { pnpmShrinkwrap: 'pnpm-lock.yaml' },
+            },
+          ],
+        },
+        {
+          npm: [
+            {
+              packageFile: 'package.json',
+              managerData: { pnpmShrinkwrap: 'pnpm-lock.yaml' },
+              deps: [],
+            },
+          ],
+        },
+      );
+
+      expect(
+        res.artifactNotices?.some((n) => n.file === 'pnpm-lock.yaml'),
+      ).toBe(true);
+      expect(
+        res.artifactNotices?.find((n) => n.file === 'pnpm-lock.yaml')?.message,
+      ).toContain('minimumReleaseAge');
+    });
+
     it('detects if lock file contents are unchanged(reuseExistingBranch=true)', async () => {
       spyNpm.mockResolvedValueOnce({ error: false, lockFile: '{}' });
       fs.readLocalFile.mockImplementation((f): Promise<any> => {

@@ -780,6 +780,71 @@ describe('modules/manager/npm/post-update/pnpm', () => {
       expect(res.error).toBeTrue();
       expect(execSnapshots).toHaveLength(1);
     });
+
+    it('does not loop when the same maturity error repeats after exclude', async () => {
+      const err = maturityError('@ai-sdk/xai', '3.0.97');
+      const execSnapshots = mockExecSequence([err, err]);
+      fs.getSiblingFileName.mockReturnValue('some-folder/pnpm-workspace.yaml');
+      fs.localPathExists.mockResolvedValue(false);
+      fs.readLocalFile.mockResolvedValue(lockfileWithAiSdk);
+
+      const res = await pnpmHelper.generateLockFile(
+        'some-folder',
+        {},
+        config,
+        upgrades,
+      );
+
+      expect(res.error).toBeTrue();
+      expect(res.maturityFallback).toBeTrue();
+      expect(execSnapshots).toHaveLength(2);
+    });
+
+    it('returns maturityFallback true when retry still errors after exclude', async () => {
+      const matureErr = maturityError('@ai-sdk/xai', '3.0.97');
+      const other = new ExecError('pnpm failed', {
+        cmd: 'pnpm install',
+        stdout: 'out',
+        stderr: 'ERR_PNPM_OUTDATED_LOCKFILE later',
+        options: {},
+        exitCode: 1,
+      });
+      mockExecSequence([matureErr, other]);
+      fs.getSiblingFileName.mockReturnValue('some-folder/pnpm-workspace.yaml');
+      fs.localPathExists.mockResolvedValue(false);
+      fs.readLocalFile.mockResolvedValue(lockfileWithAiSdk);
+
+      const res = await pnpmHelper.generateLockFile(
+        'some-folder',
+        {},
+        config,
+        upgrades,
+      );
+
+      expect(res.error).toBeTrue();
+      expect(res.maturityFallback).toBeTrue();
+      expect(res.stderr).toContain('ERR_PNPM_OUTDATED_LOCKFILE');
+    });
+
+    it('rethrows temporary errors during maturity retry loop', async () => {
+      const { TEMPORARY_ERROR } =
+        await import('../../../../constants/error-messages.ts');
+      const temp = new ExecError(TEMPORARY_ERROR, {
+        cmd: 'pnpm install',
+        stdout: '',
+        stderr: '',
+        options: {},
+        exitCode: 1,
+      });
+      mockExecSequence([temp]);
+      fs.getSiblingFileName.mockReturnValue('some-folder/pnpm-workspace.yaml');
+      fs.localPathExists.mockResolvedValue(false);
+      fs.readLocalFile.mockResolvedValue(lockfileWithAiSdk);
+
+      await expect(
+        pnpmHelper.generateLockFile('some-folder', {}, config, upgrades),
+      ).rejects.toThrow(TEMPORARY_ERROR);
+    });
   });
 
   describe('getConstraintsFromLockFile()', () => {
