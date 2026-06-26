@@ -1,6 +1,8 @@
 import { isNonEmptyString, isString } from '@sindresorhus/is';
 import { quote } from 'shlex';
+import { newlineRegex, regEx } from '../../../../util/regex.ts';
 import type { Upgrade } from '../../types.ts';
+import type { PnpmWorkspaceFile } from '../extract/types.ts';
 
 /**
  * Package/version that failed pnpm's minimumReleaseAge during resolution.
@@ -20,37 +22,75 @@ export const PNPM_MATURITY_MAX_RETRIES = 15;
  * Example stderr fragment:
  *   ERR_PNPM_NO_MATURE_MATCHING_VERSION  Version 3.0.97 (released 2 days ago) of @ai-sdk/xai does not meet the minimumReleaseAge constraint
  */
+export function parsePnpmNoMatureMatchingVersions(
+  stderr: string | null | undefined,
+): PnpmImmaturePackageVersion[] {
+  if (!isNonEmptyString(stderr)) {
+    return [];
+  }
+  if (!stderr.includes('ERR_PNPM_NO_MATURE_MATCHING_VERSION')) {
+    return [];
+  }
+
+  const results: PnpmImmaturePackageVersion[] = [];
+
+  // pnpm 10: `Version 1.2.3 (...) of package does not meet ...`
+  const versionOfPackage = regEx(
+    /Version\s+(\S+)\s+\([^)]*\)\s+of\s+(\S+)\s+does not meet the minimumReleaseAge/i,
+  );
+  const packageVersionLine = regEx(/^\s+(\S+)\s+was published at\s+/i);
+  for (const line of stderr.split(newlineRegex)) {
+    const versionOfPackageMatch = versionOfPackage.exec(line);
+    if (versionOfPackageMatch) {
+      results.push({
+        version: versionOfPackageMatch[1],
+        packageName: versionOfPackageMatch[2],
+      });
+      continue;
+    }
+
+    // pnpm 11: aggregated list entries, e.g.
+    // `  @scope/pkg@1.2.3 was published at 2026-06-26T...`
+    const packageVersionLineMatch = packageVersionLine.exec(line);
+    if (packageVersionLineMatch) {
+      const parsed = splitPackageVersion(packageVersionLineMatch[1]);
+      if (parsed) {
+        results.push(parsed);
+      }
+    }
+  }
+
+  return dedupePackageVersions(results);
+}
+
 export function parsePnpmNoMatureMatchingVersion(
   stderr: string | null | undefined,
 ): PnpmImmaturePackageVersion | null {
-  if (!isNonEmptyString(stderr)) {
+  return parsePnpmNoMatureMatchingVersions(stderr)[0] ?? null;
+}
+
+function splitPackageVersion(spec: string): PnpmImmaturePackageVersion | null {
+  const at = spec.lastIndexOf('@');
+  if (at <= 0 || at === spec.length - 1) {
     return null;
   }
-  if (!stderr.includes('ERR_PNPM_NO_MATURE_MATCHING_VERSION')) {
-    return null;
-  }
+  return { packageName: spec.slice(0, at), version: spec.slice(at + 1) };
+}
 
-  // Prefer the dedicated error code line; fall back to the prose sentence.
-  const versionOfPackage =
-    /ERR_PNPM_NO_MATURE_MATCHING_VERSION[^\n]*Version\s+(\S+)\s+\([^)]*\)\s+of\s+(\S+)\s+does not meet/i.exec(
-      stderr,
-    );
-  if (versionOfPackage) {
-    return {
-      version: versionOfPackage[1],
-      packageName: versionOfPackage[2],
-    };
+function dedupePackageVersions(
+  versions: PnpmImmaturePackageVersion[],
+): PnpmImmaturePackageVersion[] {
+  const seen = new Set<string>();
+  const deduped: PnpmImmaturePackageVersion[] = [];
+  for (const version of versions) {
+    const key = `${version.packageName}@${version.version}`;
+    if (seen.has(key)) {
+      continue;
+    }
+    seen.add(key);
+    deduped.push(version);
   }
-
-  const prose =
-    /Version\s+(\S+)\s+\([^)]*\)\s+of\s+(\S+)\s+does not meet the minimumReleaseAge/i.exec(
-      stderr,
-    );
-  if (prose) {
-    return { version: prose[1], packageName: prose[2] };
-  }
-
-  return null;
+  return deduped;
 }
 
 /**
@@ -183,14 +223,26 @@ export function appendPnpmMinimumReleaseAgeExcludeFlags(
 /**
  * Map commands through appendPnpmMinimumReleaseAgeExcludeFlags.
  */
+export function getPnpmWorkspaceMaturityExcludes(
+  pnpmWorkspace: PnpmWorkspaceFile | null | undefined,
+): string[] {
+  return (
+    pnpmWorkspace?.minimumReleaseAgeExclude?.filter(isNonEmptyString) ?? []
+  );
+}
+
 export function withPnpmMaturityExcludes(
   commands: string[],
   excludes: readonly string[],
+  existingExcludes: readonly string[] = [],
 ): string[] {
   if (!excludes.length) {
     return commands;
   }
   return commands.map((cmd) =>
-    appendPnpmMinimumReleaseAgeExcludeFlags(cmd, excludes),
+    appendPnpmMinimumReleaseAgeExcludeFlags(cmd, [
+      ...existingExcludes,
+      ...excludes,
+    ]),
   );
 }

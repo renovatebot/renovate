@@ -49,6 +49,19 @@ function maturityError(packageName: string, version: string): ExecError {
   });
 }
 
+function maturityListError(entries: string[]): ExecError {
+  return new ExecError('pnpm failed', {
+    cmd: 'pnpm install',
+    stdout: '',
+    stderr: codeBlock`
+      ERR_PNPM_NO_MATURE_MATCHING_VERSION  ${entries.length} versions do not meet the minimumReleaseAge constraint:
+      ${entries.map((entry) => `  ${entry} was published at 2026-06-25T12:00:00.000Z, within the minimumReleaseAge cutoff (2026-06-20T12:00:00.000Z)`).join('\n')}
+    `,
+    options: {},
+    exitCode: 1,
+  });
+}
+
 describe('modules/manager/npm/post-update/pnpm', () => {
   let config: PostUpdateConfig;
   const upgrades: Upgrade[] = [{}];
@@ -755,6 +768,78 @@ describe('modules/manager/npm/post-update/pnpm', () => {
       expect(execSnapshots.length).toBeGreaterThanOrEqual(2);
       const lastCmd = execSnapshots[execSnapshots.length - 1].cmd;
       expect(lastCmd).toContain('@ai-sdk/xai@3.0.97');
+    });
+
+    it('adds all allowed excludes from pnpm list-style maturity errors', async () => {
+      const execSnapshots = mockExecSequence([
+        maturityListError(['@ai-sdk/xai@3.0.97', 'lodash@4.17.21']),
+        { stdout: '', stderr: '' },
+      ]);
+      const lockfile = codeBlock`
+        lockfileVersion: '9.0'
+        packages:
+          '@ai-sdk/xai@3.0.97':
+            resolution: {integrity: a}
+          lodash@4.17.21:
+            resolution: {integrity: b}
+      `;
+      fs.getSiblingFileName.mockReturnValue('some-folder/pnpm-workspace.yaml');
+      fs.localPathExists.mockResolvedValue(false);
+      fs.readLocalFile.mockResolvedValue(lockfile);
+
+      const res = await pnpmHelper.generateLockFile(
+        'some-folder',
+        {},
+        config,
+        upgrades,
+      );
+
+      expect(res.maturityFallback).toBeTrue();
+      expect(execSnapshots).toHaveLength(2);
+      expect(execSnapshots[1].cmd).toContain(
+        '--config.minimumReleaseAgeExclude[]=@ai-sdk/xai@3.0.97',
+      );
+      expect(execSnapshots[1].cmd).toContain(
+        '--config.minimumReleaseAgeExclude[]=lodash@4.17.21',
+      );
+    });
+
+    it('preserves existing pnpm workspace maturity excludes on retry', async () => {
+      const execSnapshots = mockExecSequence([
+        maturityError('@ai-sdk/xai', '3.0.97'),
+        { stdout: '', stderr: '' },
+      ]);
+      fs.getSiblingFileName.mockReturnValue('some-folder/pnpm-workspace.yaml');
+      fs.localPathExists.mockResolvedValue(true);
+      fs.readLocalFile.mockImplementation((fileName: string) => {
+        if (fileName.endsWith('pnpm-lock.yaml')) {
+          return Promise.resolve(lockfileWithAiSdk);
+        }
+        if (fileName.endsWith('pnpm-workspace.yaml')) {
+          return Promise.resolve(codeBlock`
+            packages:
+              - "apps/*"
+            minimumReleaseAgeExclude:
+              - existing@2.0.0
+          `);
+        }
+        return Promise.resolve('');
+      });
+
+      const res = await pnpmHelper.generateLockFile(
+        'some-folder',
+        {},
+        config,
+        upgrades,
+      );
+
+      expect(res.maturityFallback).toBeTrue();
+      expect(execSnapshots[1].cmd).toContain(
+        '--config.minimumReleaseAgeExclude[]=existing@2.0.0',
+      );
+      expect(execSnapshots[1].cmd).toContain(
+        '--config.minimumReleaseAgeExclude[]=@ai-sdk/xai@3.0.97',
+      );
     });
 
     it('does not retry on non-maturity pnpm errors', async () => {

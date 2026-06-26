@@ -25,7 +25,8 @@ import type { PnpmWorkspaceFile } from '../extract/types.ts';
 import { getNodeToolConstraint } from './node-version.ts';
 import {
   PNPM_MATURITY_MAX_RETRIES,
-  parsePnpmNoMatureMatchingVersion,
+  getPnpmWorkspaceMaturityExcludes,
+  parsePnpmNoMatureMatchingVersions,
   shouldExcludeImmatureVersionForLockfileRetry,
   toMinimumReleaseAgeExcludeEntry,
   withPnpmMaturityExcludes,
@@ -112,10 +113,13 @@ export async function generateLockFile(
     // If it's not a workspaces project/monorepo, but single project with unrelated other npm project in source tree (for example, a git submodule),
     // `--recursive` will install un-wanted project.
     // we should avoid this.
+    let existingMaturityExcludes: string[] = [];
     if (await localPathExists(pnpmWorkspaceFilePath)) {
       const pnpmWorkspace = parseSingleYaml<PnpmWorkspaceFile>(
         (await readLocalFile(pnpmWorkspaceFilePath, 'utf8'))!,
       );
+      existingMaturityExcludes =
+        getPnpmWorkspaceMaturityExcludes(pnpmWorkspace);
       if (pnpmWorkspace?.packages?.length) {
         logger.debug(
           `Found pnpm workspace with ${pnpmWorkspace.packages.length} package definitions`,
@@ -195,38 +199,50 @@ export async function generateLockFile(
           throw err;
         }
 
-        const immature = parsePnpmNoMatureMatchingVersion(err.stderr);
-        if (!immature) {
+        const immatureVersions = parsePnpmNoMatureMatchingVersions(err.stderr);
+        if (!immatureVersions.length) {
           throw err;
         }
 
-        const excludeEntry = toMinimumReleaseAgeExcludeEntry(
-          immature.packageName,
-          immature.version,
-        );
-
-        if (maturityExcludes.includes(excludeEntry)) {
-          logger.debug(
-            { excludeEntry },
-            'pnpm maturity exclude already applied; not retrying',
+        const newExcludeEntries: string[] = [];
+        for (const immature of immatureVersions) {
+          const excludeEntry = toMinimumReleaseAgeExcludeEntry(
+            immature.packageName,
+            immature.version,
           );
-          throw err;
-        }
 
-        if (
-          !shouldExcludeImmatureVersionForLockfileRetry({
-            packageName: immature.packageName,
-            version: immature.version,
-            preUpdateLockfileContent,
-            upgrades,
-          })
-        ) {
-          logger.debug(
-            {
+          if (
+            maturityExcludes.includes(excludeEntry) ||
+            existingMaturityExcludes.includes(excludeEntry)
+          ) {
+            continue;
+          }
+
+          if (
+            !shouldExcludeImmatureVersionForLockfileRetry({
               packageName: immature.packageName,
               version: immature.version,
-            },
-            'pnpm minimumReleaseAge blocked a version not present in the pre-update lockfile (and not a security remediation target); not overriding maturity',
+              preUpdateLockfileContent,
+              upgrades,
+            })
+          ) {
+            logger.debug(
+              {
+                packageName: immature.packageName,
+                version: immature.version,
+              },
+              'pnpm minimumReleaseAge blocked a version not present in the pre-update lockfile (and not a security remediation target); not overriding maturity',
+            );
+            throw err;
+          }
+
+          newExcludeEntries.push(excludeEntry);
+        }
+
+        if (!newExcludeEntries.length) {
+          logger.debug(
+            { maturityExcludes, existingMaturityExcludes },
+            'pnpm maturity excludes already applied; not retrying',
           );
           throw err;
         }
@@ -239,18 +255,20 @@ export async function generateLockFile(
           throw err;
         }
 
-        maturityExcludes.push(excludeEntry);
+        maturityExcludes.push(...newExcludeEntries);
         maturityFallback = true;
-        attemptCommands = withPnpmMaturityExcludes(commands, maturityExcludes);
+        attemptCommands = withPnpmMaturityExcludes(
+          commands,
+          maturityExcludes,
+          existingMaturityExcludes,
+        );
 
         logger.debug(
           {
-            packageName: immature.packageName,
-            version: immature.version,
             maturityExcludes,
             attempt: attempt + 1,
           },
-          'pnpm minimumReleaseAge blocked a version already on the base branch (or security target); retrying lockfile generation with CLI maturity exclude',
+          'pnpm minimumReleaseAge blocked version(s) already on the base branch (or security targets); retrying lockfile generation with CLI maturity excludes',
         );
       }
     }

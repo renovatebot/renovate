@@ -3,8 +3,10 @@ import { partial } from '~test/util.ts';
 import type { Upgrade } from '../../types.ts';
 import {
   appendPnpmMinimumReleaseAgeExcludeFlags,
+  getPnpmWorkspaceMaturityExcludes,
   lockfileContainsPackageVersion,
   parsePnpmNoMatureMatchingVersion,
+  parsePnpmNoMatureMatchingVersions,
   shouldExcludeImmatureVersionForLockfileRetry,
   toMinimumReleaseAgeExcludeEntry,
   withPnpmMaturityExcludes,
@@ -69,6 +71,28 @@ describe('modules/manager/npm/post-update/pnpm-maturity', () => {
           'ERR_PNPM_NO_MATURE_MATCHING_VERSION something went wrong',
         ),
       ).toBeNull();
+    });
+
+    it('parses all versions from pnpm list-style maturity errors', () => {
+      const stderr = codeBlock`
+        ERR_PNPM_NO_MATURE_MATCHING_VERSION  2 versions do not meet the minimumReleaseAge constraint:
+          @ai-sdk/xai@3.0.97 was published at 2026-06-25T12:00:00.000Z, within the minimumReleaseAge cutoff (2026-06-20T12:00:00.000Z)
+          lodash@4.17.21 was published at 2026-06-25T12:00:00.000Z, within the minimumReleaseAge cutoff (2026-06-20T12:00:00.000Z)
+      `;
+      expect(parsePnpmNoMatureMatchingVersions(stderr)).toEqual([
+        { packageName: '@ai-sdk/xai', version: '3.0.97' },
+        { packageName: 'lodash', version: '4.17.21' },
+      ]);
+    });
+
+    it('deduplicates versions parsed from multiple maturity formats', () => {
+      const stderr = codeBlock`
+        ERR_PNPM_NO_MATURE_MATCHING_VERSION  Version 3.0.97 (released 2 days ago) of @ai-sdk/xai does not meet the minimumReleaseAge constraint
+          @ai-sdk/xai@3.0.97 was published at 2026-06-25T12:00:00.000Z, within the minimumReleaseAge cutoff (2026-06-20T12:00:00.000Z)
+      `;
+      expect(parsePnpmNoMatureMatchingVersions(stderr)).toEqual([
+        { packageName: '@ai-sdk/xai', version: '3.0.97' },
+      ]);
     });
   });
 
@@ -294,6 +318,16 @@ describe('modules/manager/npm/post-update/pnpm-maturity', () => {
       );
     });
 
+    it('reads existing pnpm workspace maturity excludes', () => {
+      expect(
+        getPnpmWorkspaceMaturityExcludes({
+          packages: ['apps/*'],
+          minimumReleaseAgeExclude: ['existing@1.0.0', ''],
+        }),
+      ).toEqual(['existing@1.0.0']);
+      expect(getPnpmWorkspaceMaturityExcludes(undefined)).toEqual([]);
+    });
+
     it('withPnpmMaturityExcludes is no-op for empty excludes', () => {
       const commands = ['pnpm install --lockfile-only'];
       expect(withPnpmMaturityExcludes(commands, [])).toBe(commands);
@@ -307,6 +341,18 @@ describe('modules/manager/npm/post-update/pnpm-maturity', () => {
       expect(out).toHaveLength(2);
       expect(out[0]).toContain('minimumReleaseAgeExclude');
       expect(out[1]).toContain('minimumReleaseAgeExclude');
+    });
+
+    it('keeps existing workspace excludes when adding retry excludes', () => {
+      const out = withPnpmMaturityExcludes(
+        ['pnpm install --lockfile-only'],
+        ['pkg@1.0.0'],
+        ['existing@2.0.0'],
+      );
+      expect(out[0]).toContain(
+        '--config.minimumReleaseAgeExclude[]=existing@2.0.0',
+      );
+      expect(out[0]).toContain('--config.minimumReleaseAgeExclude[]=pkg@1.0.0');
     });
   });
 });
