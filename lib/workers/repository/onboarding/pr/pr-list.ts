@@ -274,6 +274,10 @@ function getCategoryColumns(
 }
 
 function categoriesToColumnHeaders(cols: readonly string[]): string {
+  /* v8 ignore next -- branches always have at least one upgrade, so cols is never empty in practice */
+  if (cols.length === 0) {
+    return '';
+  }
   return ` | ${cols.join(' | ')}`;
 }
 
