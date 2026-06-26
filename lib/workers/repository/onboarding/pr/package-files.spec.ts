@@ -88,6 +88,52 @@ describe('workers/repository/onboarding/pr/package-files', () => {
       expect(res).toBe('#### npm\n\n * `package.json`');
     });
 
+    it('groups files under a nested list when a directory has 3 or more files', () => {
+      const res = getPackageFilesSummary({
+        'github-actions': [
+          partial<PackageFile>({
+            packageFile: '.github/workflows/ci.yml',
+          }),
+          partial<PackageFile>({
+            packageFile: '.github/workflows/release.yml',
+          }),
+          partial<PackageFile>({
+            packageFile: '.github/workflows/lint.yml',
+          }),
+        ],
+      });
+      expect(res).toBe(
+        '#### github-actions\n\n' +
+          ' * `.github/workflows/`\n' +
+          '   * `ci.yml`\n' +
+          '   * `release.yml`\n' +
+          '   * `lint.yml`',
+      );
+    });
+
+    it('lists files individually when a directory has fewer than 3 files, and groups when it meets the threshold', () => {
+      const res = getPackageFilesSummary({
+        'github-actions': [
+          partial<PackageFile>({ packageFile: '.github/workflows/ci.yml' }),
+          partial<PackageFile>({
+            packageFile: '.github/workflows/release.yml',
+          }),
+          partial<PackageFile>({
+            packageFile: '.github/workflows/lint.yml',
+          }),
+          partial<PackageFile>({ packageFile: '.github/dependabot.yml' }),
+        ],
+      });
+      expect(res).toBe(
+        '#### github-actions\n\n' +
+          ' * `.github/workflows/`\n' +
+          '   * `ci.yml`\n' +
+          '   * `release.yml`\n' +
+          '   * `lint.yml`\n' +
+          ' * `.github/dependabot.yml`',
+      );
+    });
+
     it('returns grouped markdown for many files across managers, including a file handled by multiple managers', () => {
       const res = getPackageFilesSummary({
         npm: [
