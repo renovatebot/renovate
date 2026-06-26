@@ -1,3 +1,4 @@
+import { isUndefined } from '@sindresorhus/is';
 import { CONFIG_VALIDATION } from '../../../constants/error-messages.ts';
 import { regEx } from '../../../util/regex.ts';
 import type { GenericVersion } from '../generic.ts';
@@ -64,9 +65,9 @@ export class RegExpVersioningApi extends GenericVersioningApi<RegExpVersion> {
     const { major, minor, patch, build, revision, prerelease, compatibility } =
       groups;
     const release = [
-      typeof major === 'undefined' ? 0 : Number.parseInt(major, 10),
-      typeof minor === 'undefined' ? 0 : Number.parseInt(minor, 10),
-      typeof patch === 'undefined' ? 0 : Number.parseInt(patch, 10),
+      isUndefined(major) ? 0 : Number.parseInt(major, 10),
+      isUndefined(minor) ? 0 : Number.parseInt(minor, 10),
+      isUndefined(patch) ? 0 : Number.parseInt(patch, 10),
     ];
 
     if (build) {
