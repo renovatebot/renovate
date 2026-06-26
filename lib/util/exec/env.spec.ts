@@ -134,4 +134,22 @@ describe('util/exec/env', () => {
       }
     });
   });
+
+  describe('basicEnvVars and hardcodedProcessEnv should not have any overlap', () => {
+    describe('basicEnvVars does not include any environment variables in hardcodedProcessEnv', () => {
+      for (const env of Object.keys(hardcodedProcessEnv)) {
+        it(`${env} is not in basicEnvVars`, () => {
+          expect(basicEnvVars).not.toContain(env);
+        });
+      }
+    });
+
+    describe('hardcodedProcessEnv does not include any environment variables in basicEnvVars', () => {
+      for (const env of basicEnvVars) {
+        it(`${env} is not in hardcodedProcessEnv`, () => {
+          expect(hardcodedProcessEnv).not.toContainKey(env);
+        });
+      }
+    });
+  });
 });
