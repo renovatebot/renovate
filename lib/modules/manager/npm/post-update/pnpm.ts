@@ -23,6 +23,13 @@ import type { PostUpdateConfig, Upgrade } from '../../types.ts';
 import { PNPM_CACHE_DIR, PNPM_STORE_DIR } from '../constants.ts';
 import type { PnpmWorkspaceFile } from '../extract/types.ts';
 import { getNodeToolConstraint } from './node-version.ts';
+import {
+  PNPM_MATURITY_MAX_RETRIES,
+  parsePnpmNoMatureMatchingVersion,
+  shouldExcludeImmatureVersionForLockfileRetry,
+  toMinimumReleaseAgeExcludeEntry,
+  withPnpmMaturityExcludes,
+} from './pnpm-maturity.ts';
 import type { GenerateLockFileResult, PnpmLockFile } from './types.ts';
 import {
   getNodeOptions,
@@ -48,6 +55,7 @@ export async function generateLockFile(
   const lockFileName = upath.join(lockFileDir, 'pnpm-lock.yaml');
   logger.debug(`Spawning pnpm install to create ${lockFileName}`);
   let lockFile: string | null = null;
+  let maturityFallback = false;
   const commands: string[] = [];
   try {
     const lazyPgkJson = lazyLoadPackageJson(lockFileDir);
@@ -152,6 +160,10 @@ export async function generateLockFile(
       commands.push('pnpm dedupe --ignore-scripts');
     }
 
+    // Capture lockfile *before* lockFileMaintenance deletes it, and before install,
+    // so we can detect versions already accepted on the base branch.
+    const preUpdateLockfileContent = await readLocalFile(lockFileName, 'utf8');
+
     if (upgrades.find((upgrade) => upgrade.isLockFileMaintenance)) {
       logger.debug(
         `Removing ${lockFileName} first due to lock file maintenance upgrade`,
@@ -166,7 +178,83 @@ export async function generateLockFile(
       }
     }
 
-    await exec(commands, execOptions);
+    // Retry lockfile generation when pnpm minimumReleaseAge blocks a version that
+    // was already on the base branch (in the pre-update lockfile) or is a security
+    // remediation target. Mirrors npm's retry-without-`--before` for ETARGET when
+    // the lockfile already contains packages newer than Renovate's cooldown.
+    // See: https://github.com/renovatebot/renovate/discussions/39999
+    const maturityExcludes: string[] = [];
+    let attemptCommands = commands;
+
+    for (let attempt = 0; attempt <= PNPM_MATURITY_MAX_RETRIES; attempt++) {
+      try {
+        await exec(attemptCommands, execOptions);
+        break;
+      } catch (err) {
+        if (err.message === TEMPORARY_ERROR) {
+          throw err;
+        }
+
+        const immature = parsePnpmNoMatureMatchingVersion(err.stderr);
+        if (!immature) {
+          throw err;
+        }
+
+        const excludeEntry = toMinimumReleaseAgeExcludeEntry(
+          immature.packageName,
+          immature.version,
+        );
+
+        if (maturityExcludes.includes(excludeEntry)) {
+          logger.debug(
+            { excludeEntry },
+            'pnpm maturity exclude already applied; not retrying',
+          );
+          throw err;
+        }
+
+        if (
+          !shouldExcludeImmatureVersionForLockfileRetry({
+            packageName: immature.packageName,
+            version: immature.version,
+            preUpdateLockfileContent,
+            upgrades,
+          })
+        ) {
+          logger.debug(
+            {
+              packageName: immature.packageName,
+              version: immature.version,
+            },
+            'pnpm minimumReleaseAge blocked a version not present in the pre-update lockfile (and not a security remediation target); not overriding maturity',
+          );
+          throw err;
+        }
+
+        if (attempt >= PNPM_MATURITY_MAX_RETRIES) {
+          logger.debug(
+            { maturityExcludes, attempt },
+            'pnpm maturity retry limit reached',
+          );
+          throw err;
+        }
+
+        maturityExcludes.push(excludeEntry);
+        maturityFallback = true;
+        attemptCommands = withPnpmMaturityExcludes(commands, maturityExcludes);
+
+        logger.debug(
+          {
+            packageName: immature.packageName,
+            version: immature.version,
+            maturityExcludes,
+            attempt: attempt + 1,
+          },
+          'pnpm minimumReleaseAge blocked a version already on the base branch (or security target); retrying lockfile generation with CLI maturity exclude',
+        );
+      }
+    }
+
     lockFile = await readLocalFile(lockFileName, 'utf8');
   } catch (err) {
     // v8 ignore if -- TODO: add test #40625
@@ -183,9 +271,14 @@ export async function generateLockFile(
       },
       'lock file error',
     );
-    return { error: true, stderr: err.stderr, stdout: err.stdout };
+    return {
+      error: true,
+      stderr: err.stderr,
+      stdout: err.stdout,
+      maturityFallback,
+    };
   }
-  return { lockFile };
+  return { lockFile, maturityFallback };
 }
 
 export async function getConstraintFromLockFile(

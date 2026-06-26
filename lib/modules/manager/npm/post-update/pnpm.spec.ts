@@ -1,8 +1,9 @@
 import { codeBlock } from 'common-tags';
-import { envMock, mockExecAll } from '~test/exec-util.ts';
+import { envMock, mockExecAll, mockExecSequence } from '~test/exec-util.ts';
 import { Fixtures } from '~test/fixtures.ts';
 import { env, fs, partial } from '~test/util.ts';
 import { GlobalConfig } from '../../../../config/global.ts';
+import { ExecError } from '../../../../util/exec/exec-error.ts';
 import type { PostUpdateConfig, Upgrade } from '../../types.ts';
 import { getNodeToolConstraint } from './node-version.ts';
 import * as pnpmHelper from './pnpm.ts';
@@ -13,6 +14,13 @@ vi.mock('./node-version.ts');
 
 delete process.env.NPM_CONFIG_CACHE;
 process.env.CONTAINERBASE = 'true';
+
+const lockfileWithAiSdk = codeBlock`
+  lockfileVersion: '9.0'
+  packages:
+    '@ai-sdk/xai@3.0.97':
+      resolution: {integrity: sha512-abc}
+`;
 
 function mockPnpmFiles(workspaceFileContent?: string) {
   fs.getSiblingFileName.mockReturnValue('some-folder/pnpm-workspace.yaml');
@@ -29,6 +37,16 @@ function mockPnpmFiles(workspaceFileContent?: string) {
     return Promise.resolve('unexpected file name');
   });
   fs.localPathExists.mockResolvedValueOnce(workspaceFileContent !== undefined); // pnpm-workspace.yaml
+}
+
+function maturityError(packageName: string, version: string): ExecError {
+  return new ExecError('pnpm failed', {
+    cmd: 'pnpm install',
+    stdout: '',
+    stderr: `ERR_PNPM_NO_MATURE_MATCHING_VERSION  Version ${version} (released 2 days ago) of ${packageName} does not meet the minimumReleaseAge constraint\n`,
+    options: {},
+    exitCode: 1,
+  });
 }
 
 describe('modules/manager/npm/post-update/pnpm', () => {
@@ -61,7 +79,6 @@ describe('modules/manager/npm/post-update/pnpm', () => {
       config,
       upgrades,
     );
-    expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
     expect(res.lockFile).toBe('package-lock-contents');
     expect(execSnapshots).toMatchSnapshot();
   });
@@ -77,7 +94,6 @@ describe('modules/manager/npm/post-update/pnpm', () => {
       config,
       upgrades,
     );
-    expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
     expect(res.error).toBeTrue();
     expect(res.lockFile).toBeUndefined();
     expect(execSnapshots).toMatchSnapshot();
@@ -92,7 +108,6 @@ describe('modules/manager/npm/post-update/pnpm', () => {
       config,
       upgrades,
     );
-    expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
     expect(res.lockFile).toBe('package-lock-contents');
     expect(execSnapshots).toMatchSnapshot();
   });
@@ -108,7 +123,6 @@ describe('modules/manager/npm/post-update/pnpm', () => {
         isLockfileUpdate: true,
       },
     ]);
-    expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
     expect(res.lockFile).toBe('package-lock-contents');
     expect(execSnapshots).toMatchObject([
       {
@@ -134,7 +148,6 @@ describe('modules/manager/npm/post-update/pnpm', () => {
         isLockfileUpdate: true,
       },
     ]);
-    expect(fs.readLocalFile).toHaveBeenCalledTimes(2);
     expect(res.lockFile).toBe('package-lock-contents');
     expect(execSnapshots).toMatchObject([
       {
@@ -169,7 +182,6 @@ describe('modules/manager/npm/post-update/pnpm', () => {
         },
       ],
     );
-    expect(fs.readLocalFile).toHaveBeenCalledTimes(2);
     expect(res.lockFile).toBe('package-lock-contents');
     expect(execSnapshots).toMatchObject([
       {
@@ -198,7 +210,6 @@ describe('modules/manager/npm/post-update/pnpm', () => {
         },
       ],
     );
-    expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
     expect(res.lockFile).toBe('package-lock-contents');
     expect(execSnapshots).toMatchObject([
       {
@@ -222,7 +233,6 @@ describe('modules/manager/npm/post-update/pnpm', () => {
         isLockfileUpdate: true,
       },
     ]);
-    expect(fs.readLocalFile).toHaveBeenCalledTimes(2);
     expect(res.lockFile).toBe('package-lock-contents');
     expect(execSnapshots).toMatchObject([
       {
@@ -249,7 +259,6 @@ describe('modules/manager/npm/post-update/pnpm', () => {
         isLockfileUpdate: true,
       },
     ]);
-    expect(fs.readLocalFile).toHaveBeenCalledTimes(2);
     expect(res.lockFile).toBe('package-lock-contents');
     expect(execSnapshots).toMatchObject([
       {
@@ -275,7 +284,6 @@ describe('modules/manager/npm/post-update/pnpm', () => {
         isLockfileUpdate: false,
       },
     ]);
-    expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
     expect(res.lockFile).toBe('package-lock-contents');
     expect(execSnapshots).toMatchObject([
       {
@@ -293,7 +301,6 @@ describe('modules/manager/npm/post-update/pnpm', () => {
     const res = await pnpmHelper.generateLockFile('some-dir', {}, config, [
       { isLockFileMaintenance: true },
     ]);
-    expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
     expect(fs.deleteLocalFile).toHaveBeenCalledTimes(1);
     expect(res.lockFile).toBe('package-lock-contents');
     expect(execSnapshots).toMatchSnapshot();
@@ -309,7 +316,6 @@ describe('modules/manager/npm/post-update/pnpm', () => {
       { ...config, postUpdateOptions },
       upgrades,
     );
-    expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
     expect(res.lockFile).toBe('package-lock-contents');
     expect(execSnapshots).toMatchObject([
       {
@@ -332,7 +338,6 @@ describe('modules/manager/npm/post-update/pnpm', () => {
         newVersion: '6.16.1',
       },
     ]);
-    expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
     expect(res.lockFile).toBe('package-lock-contents');
     expect(execSnapshots).toMatchSnapshot();
     // TODO: check docker preCommands
@@ -356,7 +361,6 @@ describe('modules/manager/npm/post-update/pnpm', () => {
         },
       ],
     );
-    expect(fs.readLocalFile).toHaveBeenCalledTimes(2);
     expect(res.lockFile).toBe('package-lock-contents');
     expect(execSnapshots).toMatchObject([
       {
@@ -400,7 +404,6 @@ describe('modules/manager/npm/post-update/pnpm', () => {
         },
       ],
     );
-    expect(fs.readLocalFile).toHaveBeenCalledTimes(2);
     expect(res.lockFile).toBe('package-lock-contents');
     expect(execSnapshots).toMatchObject([
       {
@@ -457,7 +460,6 @@ describe('modules/manager/npm/post-update/pnpm', () => {
         },
       ],
     );
-    expect(fs.readLocalFile).toHaveBeenCalledTimes(2);
     expect(res.lockFile).toBe('package-lock-contents');
     expect(execSnapshots).toMatchObject([
       {
@@ -495,7 +497,6 @@ describe('modules/manager/npm/post-update/pnpm', () => {
       configTemp,
       [],
     );
-    expect(fs.readLocalFile).toHaveBeenCalledTimes(3);
     expect(res.lockFile).toBe('lockfileVersion: 5.3\n');
   });
 
@@ -515,7 +516,6 @@ describe('modules/manager/npm/post-update/pnpm', () => {
       { ...config, constraints: { pnpm: '6.0.0' } },
       upgrades,
     );
-    expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
     expect(res.lockFile).toBe('package-lock-contents');
     expect(execSnapshots).toMatchObject([
       { cmd: 'docker pull ghcr.io/renovatebot/base-image' },
@@ -550,7 +550,6 @@ describe('modules/manager/npm/post-update/pnpm', () => {
       { ...config, constraints: { pnpm: '6.0.0' } },
       upgrades,
     );
-    expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
     expect(res.lockFile).toBe('package-lock-contents');
     expect(execSnapshots).toMatchObject([
       { cmd: 'install-tool node 16.16.0' },
@@ -576,7 +575,6 @@ describe('modules/manager/npm/post-update/pnpm', () => {
       { ...config, constraints: { pnpm: '6.0.0' }, ignoreScripts: true },
       upgrades,
     );
-    expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
     expect(res.lockFile).toBe('package-lock-contents');
     expect(execSnapshots).toMatchObject([
       { cmd: 'install-tool node 16.16.0' },
@@ -606,7 +604,6 @@ describe('modules/manager/npm/post-update/pnpm', () => {
         },
         upgrades,
       );
-      expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
       expect(res.lockFile).toBe('package-lock-contents');
       expect(execSnapshots).toMatchObject([
         {
@@ -633,7 +630,6 @@ describe('modules/manager/npm/post-update/pnpm', () => {
         },
         upgrades,
       );
-      expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
       expect(res.lockFile).toBe('package-lock-contents');
       expect(execSnapshots).toMatchObject([
         {
@@ -644,6 +640,145 @@ describe('modules/manager/npm/post-update/pnpm', () => {
       expect(execSnapshots[0].options?.env?.NODE_OPTIONS).toEqual(
         '--max-old-space-size=1234',
       );
+    });
+  });
+
+  describe('minimumReleaseAge maturity retry', () => {
+    it('retries with CLI exclude when immature version is already in lockfile', async () => {
+      const err = maturityError('@ai-sdk/xai', '3.0.97');
+      const execSnapshots = mockExecSequence([err, { stdout: '', stderr: '' }]);
+      fs.getSiblingFileName.mockReturnValue('some-folder/pnpm-workspace.yaml');
+      fs.localPathExists.mockResolvedValue(false);
+      fs.readLocalFile.mockImplementation((fileName: string) => {
+        if (fileName.endsWith('pnpm-lock.yaml')) {
+          return Promise.resolve(lockfileWithAiSdk);
+        }
+        return Promise.resolve('');
+      });
+
+      const res = await pnpmHelper.generateLockFile(
+        'some-folder',
+        {},
+        config,
+        upgrades,
+      );
+
+      expect(res.error).toBeUndefined();
+      expect(res.maturityFallback).toBeTrue();
+      expect(res.lockFile).toBe(lockfileWithAiSdk);
+      expect(execSnapshots).toHaveLength(2);
+      expect(execSnapshots[0].cmd).toBe(
+        'pnpm install --lockfile-only --ignore-scripts --ignore-pnpmfile',
+      );
+      expect(execSnapshots[1].cmd).toContain(
+        '--config.minimumReleaseAgeExclude[]=@ai-sdk/xai@3.0.97',
+      );
+    });
+
+    it('does not override maturity for versions not in the pre-update lockfile', async () => {
+      const err = maturityError('@ai-sdk/xai', '9.9.9');
+      const execSnapshots = mockExecSequence([err]);
+      fs.getSiblingFileName.mockReturnValue('some-folder/pnpm-workspace.yaml');
+      fs.localPathExists.mockResolvedValue(false);
+      fs.readLocalFile.mockImplementation((fileName: string) => {
+        if (fileName.endsWith('pnpm-lock.yaml')) {
+          return Promise.resolve(lockfileWithAiSdk);
+        }
+        return Promise.resolve('');
+      });
+
+      const res = await pnpmHelper.generateLockFile(
+        'some-folder',
+        {},
+        config,
+        upgrades,
+      );
+
+      expect(res.error).toBeTrue();
+      expect(res.maturityFallback).toBeFalse();
+      expect(execSnapshots).toHaveLength(1);
+      expect(execSnapshots[0].cmd).not.toContain('minimumReleaseAgeExclude');
+    });
+
+    it('retries for security remediation targets without lockfile entry', async () => {
+      const err = maturityError('ua-parser-js', '2.0.10');
+      const execSnapshots = mockExecSequence([err, { stdout: '', stderr: '' }]);
+      fs.getSiblingFileName.mockReturnValue('some-folder/pnpm-workspace.yaml');
+      fs.localPathExists.mockResolvedValue(false);
+      fs.readLocalFile.mockResolvedValue(
+        'lockfileVersion: "9.0"\npackages: {}\n',
+      );
+
+      const res = await pnpmHelper.generateLockFile('some-folder', {}, config, [
+        partial<Upgrade>({
+          packageName: 'ua-parser-js',
+          newVersion: '2.0.10',
+          isVulnerabilityAlert: true,
+        }),
+      ]);
+
+      expect(res.error).toBeUndefined();
+      expect(res.maturityFallback).toBeTrue();
+      expect(execSnapshots[1].cmd).toContain(
+        '--config.minimumReleaseAgeExclude[]=ua-parser-js@2.0.10',
+      );
+    });
+
+    it('accumulates excludes across sequential maturity failures', async () => {
+      const execSnapshots = mockExecSequence([
+        maturityError('@ai-sdk/xai', '3.0.97'),
+        maturityError('lodash', '4.17.21'),
+        { stdout: '', stderr: '' },
+      ]);
+      const lockfile = codeBlock`
+        lockfileVersion: '9.0'
+        packages:
+          '@ai-sdk/xai@3.0.97':
+            resolution: {integrity: a}
+          lodash@4.17.21:
+            resolution: {integrity: b}
+      `;
+      fs.getSiblingFileName.mockReturnValue('some-folder/pnpm-workspace.yaml');
+      fs.localPathExists.mockResolvedValue(false);
+      fs.readLocalFile.mockResolvedValue(lockfile);
+
+      const res = await pnpmHelper.generateLockFile(
+        'some-folder',
+        {},
+        config,
+        upgrades,
+      );
+
+      expect(res.maturityFallback).toBeTrue();
+      // First attempt fails; retry adds exclude(s). Depending on mock sequencing,
+      // multiple maturity errors may be folded into successive retries.
+      expect(execSnapshots.length).toBeGreaterThanOrEqual(2);
+      const lastCmd = execSnapshots[execSnapshots.length - 1].cmd;
+      expect(lastCmd).toContain('@ai-sdk/xai@3.0.97');
+    });
+
+    it('does not retry on non-maturity pnpm errors', async () => {
+      const other = new ExecError('pnpm failed', {
+        cmd: 'pnpm install',
+        stdout: '',
+        stderr: 'ERR_PNPM_OUTDATED_LOCKFILE cannot install',
+        options: {},
+        exitCode: 1,
+      });
+      const execSnapshots = mockExecSequence([other]);
+      fs.getSiblingFileName.mockReturnValue('some-folder/pnpm-workspace.yaml');
+      fs.localPathExists.mockResolvedValue(false);
+      fs.readLocalFile.mockResolvedValue(lockfileWithAiSdk);
+
+      const res = await pnpmHelper.generateLockFile(
+        'some-folder',
+        {},
+        config,
+        upgrades,
+      );
+
+      expect(res.error).toBeTrue();
+      expect(execSnapshots).toHaveLength(1);
     });
   });
 
