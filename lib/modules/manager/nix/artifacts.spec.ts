@@ -18,6 +18,7 @@ const adminConfig: RepoGlobalConfig = {
   localDir: upath.join('/tmp/github/some/repo'),
   cacheDir: upath.join('/tmp/renovate/cache'),
   containerbaseDir: upath.join('/tmp/renovate/cache/containerbase'),
+  binarySource: 'global',
 };
 const dockerAdminConfig = {
   ...adminConfig,
@@ -203,18 +204,7 @@ describe('modules/manager/nix/artifacts', () => {
       { cmd: 'docker pull ghcr.io/renovatebot/base-image' },
       { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
       {
-        cmd:
-          'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
-          '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
-          '-v "/tmp/renovate/cache":"/tmp/renovate/cache" ' +
-          '-e CONTAINERBASE_CACHE_DIR ' +
-          '-w "/tmp/github/some/repo" ' +
-          'ghcr.io/renovatebot/base-image ' +
-          'bash -l -c "' +
-          'install-tool nix 2.10.0 ' +
-          '&& ' +
-          updateInputCmd +
-          '"',
+        cmd: `docker run --rm --name=renovate_sidecar --label=renovate_child -v "/tmp/github/some/repo":"/tmp/github/some/repo" -v "/tmp/renovate/cache":"/tmp/renovate/cache" -e CONTAINERBASE_CACHE_DIR -w "/tmp/github/some/repo" ghcr.io/renovatebot/base-image bash -l -c "install-tool nix 2.10.0 && ${updateInputCmd}"`,
       },
     ]);
   });
@@ -333,18 +323,7 @@ describe('modules/manager/nix/artifacts', () => {
       { cmd: 'docker pull ghcr.io/renovatebot/base-image' },
       { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
       {
-        cmd:
-          'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
-          '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
-          '-v "/tmp/renovate/cache":"/tmp/renovate/cache" ' +
-          '-e CONTAINERBASE_CACHE_DIR ' +
-          '-w "/tmp/github/some/repo" ' +
-          'ghcr.io/renovatebot/base-image ' +
-          'bash -l -c "' +
-          'install-tool nix 2.10.0 ' +
-          '&& ' +
-          updateInputCmd +
-          '"',
+        cmd: `docker run --rm --name=renovate_sidecar --label=renovate_child -v "/tmp/github/some/repo":"/tmp/github/some/repo" -v "/tmp/renovate/cache":"/tmp/renovate/cache" -e CONTAINERBASE_CACHE_DIR -w "/tmp/github/some/repo" ghcr.io/renovatebot/base-image bash -l -c "install-tool nix 2.10.0 && ${updateInputCmd}"`,
       },
     ]);
   });

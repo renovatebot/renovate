@@ -40,7 +40,7 @@ export function validateNumber(
   subKey?: string,
 ): ValidationMessage[] {
   const errors: ValidationMessage[] = [];
-  const path = `${currentPath}${subKey ? '.' + subKey : ''}`;
+  const path = `${currentPath}${subKey ? `.${subKey}` : ''}`;
   if (isNumber(val)) {
     if (val < 0 && !allowsNegative) {
       errors.push({

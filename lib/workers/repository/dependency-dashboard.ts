@@ -227,9 +227,9 @@ function getListItem(branch: BranchConfig, type: string): string {
     ...new Set(branch.upgrades.map((upgrade) => `\`${upgrade.depName!}\``)),
   ];
   if (uniquePackages.length < 2) {
-    return item + '\n';
+    return `${item}\n`;
   }
-  return item + ' (' + uniquePackages.join(', ') + ')\n';
+  return `${item} (${uniquePackages.join(', ')})\n`;
 }
 
 function splitBranchesByCategory(filteredBranches: BranchConfig[]): {
@@ -287,27 +287,27 @@ function getBranchesListMd(
       ([keyA], [keyB]) =>
         keyA.localeCompare(keyB, undefined, { numeric: true }),
     )) {
-      result = result.trimEnd() + '\n\n';
+      result = `${result.trimEnd()}\n\n`;
       result += `### ${category}\n\n`;
       result += getBranchList(branches, listItemType);
     }
     if (hasUncategorized) {
-      result = result.trimEnd() + '\n\n';
+      result = `${result.trimEnd()}\n\n`;
       result += `### Others`;
     }
   }
-  result = result.trimEnd() + '\n\n';
+  result = `${result.trimEnd()}\n\n`;
   result += getBranchList(uncategorized, listItemType);
 
   if (bulkComment && bulkMessage && filteredBranches.length > 1) {
     if (hasCategorized) {
-      result = result.trimEnd() + '\n\n';
+      result = `${result.trimEnd()}\n\n`;
       result += '### All\n\n';
     }
     result += getCheckbox(bulkComment);
-    result += `${bulkIcon ? bulkIcon + ' ' : ''}**${bulkMessage}**${bulkIcon ? ' ' + bulkIcon : ''}`;
+    result += `${bulkIcon ? `${bulkIcon} ` : ''}**${bulkMessage}**${bulkIcon ? ` ${bulkIcon}` : ''}`;
   }
-  return result.trimEnd() + '\n\n';
+  return `${result.trimEnd()}\n\n`;
 }
 
 function appendRepoProblems(config: RenovateConfig, issueBody: string): string {
@@ -318,7 +318,7 @@ function appendRepoProblems(config: RenovateConfig, issueBody: string): string {
     const repoProblemsHeader =
       config.customizeDashboard?.repoProblemsHeader ??
       'Renovate tried to run on this repository, but found these problems.';
-    newIssueBody += template.compile(repoProblemsHeader, config) + '\n\n';
+    newIssueBody += `${template.compile(repoProblemsHeader, config)}\n\n`;
 
     for (const repoProblem of repoProblems) {
       newIssueBody += ` - ${repoProblem}\n`;
@@ -427,26 +427,15 @@ export async function ensureDependencyDashboard(
   let issueBody = '';
 
   if (config.dependencyDashboardHeader?.length) {
-    issueBody +=
-      template.compile(config.dependencyDashboardHeader, config) + '\n\n';
+    issueBody += `${template.compile(config.dependencyDashboardHeader, config)}\n\n`;
   }
 
   if (configMigrationRes.result === 'pr-exists') {
-    issueBody +=
-      '## Config Migration Needed\n\n' +
-      getMarkdownComment(configMigrationPrInfo) +
-      ` See Config Migration PR: #${configMigrationRes.prNumber}.\n\n`;
+    issueBody += `## Config Migration Needed\n\n${getMarkdownComment(configMigrationPrInfo)} See Config Migration PR: #${configMigrationRes.prNumber}.\n\n`;
   } else if (configMigrationRes?.result === 'pr-modified') {
-    issueBody +=
-      '## Config Migration Needed (Blocked)\n\n' +
-      getMarkdownComment(configMigrationPrInfo) +
-      ` The Config Migration branch exists but has been modified by another user. Renovate will not push to this branch unless it is first deleted. \n\n See Config Migration PR: #${configMigrationRes.prNumber}.\n\n`;
+    issueBody += `## Config Migration Needed (Blocked)\n\n${getMarkdownComment(configMigrationPrInfo)} The Config Migration branch exists but has been modified by another user. Renovate will not push to this branch unless it is first deleted. \n\n See Config Migration PR: #${configMigrationRes.prNumber}.\n\n`;
   } else if (configMigrationRes?.result === 'add-checkbox') {
-    issueBody +=
-      '## Config Migration Needed\n\n' +
-      getCheckbox(createConfigMigrationPr) +
-      ' Select this checkbox to let Renovate create an automated Config Migration PR.' +
-      '\n\n';
+    issueBody += `## Config Migration Needed\n\n${getCheckbox(createConfigMigrationPr)} Select this checkbox to let Renovate create an automated Config Migration PR.\n\n`;
   }
 
   issueBody = appendRepoProblems(config, issueBody);
@@ -475,7 +464,7 @@ export async function ensureDependencyDashboard(
   }
 
   if (config.dependencyDashboardReportAbandonment) {
-    issueBody += getAbandonedPackagesMd(packageFiles);
+    issueBody += getAbandonedPackagesMd(config, packageFiles);
   }
 
   issueBody += getBranchesListMd(
@@ -672,6 +661,7 @@ export async function ensureDependencyDashboard(
 }
 
 export function getAbandonedPackagesMd(
+  config: RenovateConfig,
   packageFiles: Record<string, PackageFile[]>,
 ): string {
   const abandonedPackages: Record<
@@ -710,8 +700,7 @@ export function getAbandonedPackagesMd(
   abandonedMd += `<summary>View abandoned dependencies (${abandonedCount})</summary>\n\n`;
 
   abandonedMd += emojify('> :information_source: **Note**\n> \n');
-  abandonedMd +=
-    'Packages are marked as abandoned when they exceed the [`abandonmentThreshold`](https://docs.renovatebot.com/configuration-options/#abandonmentthreshold) since their last release. ';
+  abandonedMd += `Packages are marked as abandoned when they exceed the [\`abandonmentThreshold\`](${GlobalConfig.get('productLinks').documentation}configuration-options/#abandonmentthreshold) since their last release. `;
   abandonedMd +=
     'Unlike deprecated packages with official notices, abandonment is detected by release inactivity.\n> \n';
 
@@ -738,10 +727,7 @@ export function getAbandonedPackagesMd(
 function getFooter(config: RenovateConfig): string {
   let footer = '';
   if (config.dependencyDashboardFooter?.length) {
-    footer +=
-      '---\n' +
-      template.compile(config.dependencyDashboardFooter, config) +
-      '\n';
+    footer += `---\n${template.compile(config.dependencyDashboardFooter, config)}\n`;
   }
 
   return footer;
@@ -785,8 +771,7 @@ export async function getDashboardMarkdownVulnerabilities(
   if (isTruthy(config.osvVulnerabilityAlerts)) {
     result += ' CVEs have Renovate fixes.\n\n';
   } else {
-    result +=
-      ' CVEs have possible Renovate fixes.\n> See [`osvVulnerabilityAlerts`](https://docs.renovatebot.com/configuration-options/#osvvulnerabilityalerts) to allow Renovate to supply fixes.\n\n';
+    result += ` CVEs have possible Renovate fixes.\n> See [\`osvVulnerabilityAlerts\`](${GlobalConfig.get('productLinks').documentation}configuration-options/#osvvulnerabilityalerts) to allow Renovate to supply fixes.\n\n`;
   }
 
   let renderedVulnerabilities: Vulnerability[];

@@ -1,4 +1,4 @@
-import { isArray, isNonEmptyString } from '@sindresorhus/is';
+import { isArray } from '@sindresorhus/is';
 import JSON5 from 'json5';
 import { getEnvName } from '../../../../config/options/env.ts';
 import { getOptions } from '../../../../config/options/index.ts';
@@ -77,18 +77,44 @@ function massageEnvKeyValues(env: NodeJS.ProcessEnv): NodeJS.ProcessEnv {
   return result;
 }
 
-// these experimental env vars have been converted into self-hosted config options
-const convertedExperimentalEnvVars = [
-  'RENOVATE_X_AUTODISCOVER_REPO_SORT',
-  'RENOVATE_X_AUTODISCOVER_REPO_ORDER',
-  'RENOVATE_X_DOCKER_MAX_PAGES',
-  'RENOVATE_X_DELETE_CONFIG_FILE',
-  'RENOVATE_X_S3_ENDPOINT',
-  'RENOVATE_X_S3_PATH_STYLE',
-  'RENOVATE_X_MERGE_CONFIDENCE_API_BASE_URL',
-  'RENOVATE_X_MERGE_CONFIDENCE_SUPPORTED_DATASOURCES',
-  'RENOVATE_X_REPO_CACHE_FORCE_LOCAL',
-];
+interface ConvertedExperimentalEnvVar {
+  optionName: string;
+  // Normalize the raw env var value before passing it through, if needed.
+  normalizeValue?: (value: string) => string;
+}
+
+// Maps RENOVATE_X_ env vars that have been promoted to regular config options
+// to the option name they now correspond to.
+export const convertedExperimentalEnvVars: ReadonlyMap<
+  string,
+  ConvertedExperimentalEnvVar
+> = new Map([
+  ['RENOVATE_X_AUTODISCOVER_REPO_SORT', { optionName: 'autodiscoverRepoSort' }],
+  [
+    'RENOVATE_X_AUTODISCOVER_REPO_ORDER',
+    { optionName: 'autodiscoverRepoOrder' },
+  ],
+  ['RENOVATE_X_DOCKER_MAX_PAGES', { optionName: 'dockerMaxPages' }],
+  ['RENOVATE_X_DELETE_CONFIG_FILE', { optionName: 'deleteConfigFile' }],
+  ['RENOVATE_X_S3_ENDPOINT', { optionName: 's3Endpoint' }],
+  ['RENOVATE_X_S3_PATH_STYLE', { optionName: 's3PathStyle' }],
+  [
+    'RENOVATE_X_MERGE_CONFIDENCE_API_BASE_URL',
+    { optionName: 'mergeConfidenceEndpoint' },
+  ],
+  [
+    'RENOVATE_X_MERGE_CONFIDENCE_SUPPORTED_DATASOURCES',
+    { optionName: 'mergeConfidenceDatasources' },
+  ],
+  [
+    'RENOVATE_X_REPO_CACHE_FORCE_LOCAL',
+    {
+      optionName: 'repositoryCacheForceLocal',
+      // The old env var was treated as a flag: any non-empty value meant true.
+      normalizeValue: (v: string) => (v ? 'true' : v),
+    },
+  ],
+]);
 
 /**
  * Massages the experimental env vars which have been converted to config options
@@ -99,20 +125,16 @@ function massageConvertedExperimentalVars(
   env: NodeJS.ProcessEnv,
 ): NodeJS.ProcessEnv {
   const result = { ...env };
-  for (const key of convertedExperimentalEnvVars) {
-    if (env[key] !== undefined) {
-      let newKey = key.replace('RENOVATE_X_', 'RENOVATE_');
-
-      // special case to use a more consistent prefix with other `repositoryCache` options
-      if (key === 'RENOVATE_X_REPO_CACHE_FORCE_LOCAL') {
-        newKey = 'RENOVATE_REPOSITORY_CACHE_FORCE_LOCAL';
-        if (isNonEmptyString(env[key])) {
-          env[key] = 'true';
-        }
-      }
-
-      result[newKey] = env[key];
-      delete result[key];
+  for (const [
+    oldKey,
+    { optionName, normalizeValue },
+  ] of convertedExperimentalEnvVars) {
+    if (env[oldKey] !== undefined) {
+      const newKey = getEnvName({ name: optionName });
+      result[newKey] = normalizeValue
+        ? normalizeValue(env[oldKey])
+        : env[oldKey];
+      delete result[oldKey];
     }
   }
   return result;

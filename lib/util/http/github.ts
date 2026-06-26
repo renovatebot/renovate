@@ -5,6 +5,7 @@ import {
   isPlainObject,
 } from '@sindresorhus/is';
 import { DateTime } from 'luxon';
+import { GlobalConfig } from '../../config/global.ts';
 import {
   PLATFORM_BAD_CREDENTIALS,
   PLATFORM_INTEGRATION_UNAUTHORIZED,
@@ -129,8 +130,7 @@ function handleGotError(
       if (parsed?.hostname === 'api.github.com') {
         logger.once.warn(
           {
-            documentationUrl:
-              'https://docs.renovatebot.com/getting-started/running/#githubcom-token-for-changelogs-and-tools',
+            documentationUrl: `${GlobalConfig.get('productLinks').documentation}getting-started/running/#githubcom-token-for-changelogs-and-tools`,
           },
           `Rate limit exceeded for ${parsed.host}, as no hostRules set for this host. Please set a GITHUB_COM_TOKEN`,
         );
@@ -338,7 +338,8 @@ export class GithubHttp extends HttpBase<GithubHttpOptions> {
     opts: InternalHttpOptions & GithubBaseHttpOptions,
   ): void {
     if (!opts.token) {
-      const authUrl = new URL(url);
+      // create a mutable copy of `url`
+      const authUrl = parseUrl(url.toString())!;
 
       if (opts.repository) {
         // set authUrl to https://api.github.com/repos/org/repo or https://gihub.domain.com/api/v3/repos/org/repo
@@ -421,7 +422,7 @@ export class GithubHttp extends HttpBase<GithubHttpOptions> {
         const queue = [...range(2, lastPage)].map(
           (pageNumber) => (): Promise<HttpResponse<T>> => {
             // copy before modifying searchParams
-            const nextUrl = new URL(firstPageUrl);
+            const nextUrl = parseUrl(firstPageUrl.toString())!;
             nextUrl.searchParams.set('page', String(pageNumber));
             return super.requestJsonUnsafe<T>(method, {
               ...opts,

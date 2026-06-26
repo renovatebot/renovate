@@ -1,5 +1,6 @@
 import type { PlatformCommitOptions } from '../../config/types.ts';
 import type { GitOptions } from '../../types/git.ts';
+import type { LongCommitSha } from '../schema-utils/git.ts';
 import type { EmailAddress } from '../schema-utils/index.ts';
 
 export type { DiffResult, StatusResult } from 'simple-git';
@@ -10,11 +11,6 @@ export interface GitAuthor {
 }
 
 export type GitNoVerifyOption = 'commit' | 'push';
-
-/**
- * We want to make sure this is a long sha of 40 characters and not just any string
- */
-export type LongCommitSha = string & { __longCommitSha: never };
 
 export interface StorageConfig {
   currentBranch?: string;
@@ -90,8 +86,6 @@ export interface CommitFilesConfig {
   prTitle?: string;
   /** Only needed by Gerrit platform */
   autoApprove?: boolean;
-  /** Only needed by Gerrit platform */
-  labels?: string[];
 }
 
 export interface PushFilesConfig {
@@ -109,11 +103,30 @@ export interface CommitResult {
   files: FileChange[];
 }
 
-export interface TreeItem {
+export type GitObjectType = 'blob' | 'tree' | 'commit';
+
+/**
+ * Git tree entry modes (octal file-type representations).
+ * @see https://git-scm.com/docs/gitdatamodel
+ */
+export const GitTreeMode = {
+  /** Regular non-executable file */
+  RegularFile: '100644',
+  /** Regular executable file */
+  ExecutableFile: '100755',
+  /** Symbolic link */
+  SymbolicLink: '120000',
+  /** Directory / subtree */
+  Directory: '040000',
+  /** Gitlink (submodule) */
+  Gitlink: '160000',
+} as const;
+
+export interface DiffTreeItem {
   path: string;
   mode: string;
-  type: string;
-  sha: LongCommitSha;
+  type: GitObjectType;
+  sha: LongCommitSha | null;
 }
 
 /**

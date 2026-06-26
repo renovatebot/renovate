@@ -31,6 +31,19 @@ The following configuration options can be used to enable and tune the functiona
 
 ## FAQs
 
+### Where does the release timestamp need to be set?
+
+To prevent supply-chain attacks, Renovate requires that the registry/datasource provides the timestamp.
+
+This ensures that a package maintainer cannot specify (maliciously or accidentally) a different timestamp to when the package was actually published.
+
+!!! warning
+  For instance, a suggestion for the Docker ecosystem is to use the `org.opencontainers.image.created` image annotation.
+  <br>
+  Unfortunately, the publisher controls this annotation, so could allow a maintainer to say that their image was published earlier than it had been to bypass Minimum Release Age restrictions.
+
+As long as the registry/datasource provides the release timestamp, Renovate will add support for it.
+
 ### My package manager has support for minimum release age, how does Renovate work with that? Do I need to set it in both?
 
 We recommend specifying minimum release age in **both** your Renovate and package manager configuration.
@@ -46,24 +59,35 @@ To protect against this, it's recommended to ensure that your package manager co
 There is ongoing work to [integrate more closely with package manager checks](https://github.com/renovatebot/renovate/issues/41652) to make sure that Renovate's minimum release age configuration is specified when calling package managers that support it.
 If you have a package manager you'd like supported, please raise a [Suggest an Idea Discussion](https://github.com/renovatebot/renovate/discussions/new?category=suggest-an-idea).
 
+#### npm
+
+When `minimumReleaseAge` is configured, Renovate passes `--before=<date>` to npm commands during lock file generation.
+This ensures that npm only resolves package versions that were available before the cooldown threshold, protecting against newly published (and potentially malicious) transitive dependencies.
+
+The `--before` date is calculated as `now - minimumReleaseAge`.
+If a `before=<date>` or `min-release-age=<days>` setting already exists in the project's `.npmrc`, Renovate uses the stricter (older) of the two dates.
+
+If the existing lock file contains packages published after the `--before` cutoff (for example, from dependencies merged before `minimumReleaseAge` was configured), npm will fail with an `ETARGET` error.
+In this case, Renovate automatically retries without `--before` and logs a warning.
+This ensures existing lock files are never broken by the `--before` flag.
+
+After the next lock file maintenance run (which regenerates the lock file from scratch with `--before`), subsequent updates will fully enforce the `minimumReleaseAge` constraint.
+
 ### What happens if the datasource and/or registry does not provide a release timestamp, when using `minimumReleaseAge`?
 
-<!-- prettier-ignore -->
 !!! warning
-    Renovate 42 changed the behaviour detailed below.
-    In Renovate 42, the absence of a release timestamp will be treated as if the release is not yet past the timestamp, which provides a safer default.
-    Prior to Renovate 42, we would treat the dependency without a release timestamp **as if it has passed** the `minimumReleaseAge`, and will **immediately suggest that dependency update**.
-    If using Renovate prior you can opt into the more secure behaviour (which is default in Renovate 42) by using [`minimumReleaseAgeBehaviour=timestamp-required`](../configuration-options.md#minimumreleaseagebehaviour) (added in 41.150.0)
+  Renovate 42 changed the behaviour detailed below.
+  In Renovate 42, the absence of a release timestamp will be treated as if the release is not yet past the timestamp, which provides a safer default.
+  Prior to Renovate 42, we would treat the dependency without a release timestamp **as if it has passed** the `minimumReleaseAge`, and will **immediately suggest that dependency update**.
+  If using Renovate prior you can opt into the more secure behaviour (which is default in Renovate 42) by using [`minimumReleaseAgeBehaviour=timestamp-required`](../configuration-options.md#minimumreleaseagebehaviour) (added in 41.150.0)
 
 Consider that:
 
-<!-- markdownlint-disable MD007 -->
-<!-- prettier-ignore -->
 - we have set `minimumReleaseAge` to apply to a given dependency
 - that dependency has 4 updates available
-    - 1 of which has a release timestamp that has passed
-    - 2 of which have a release timestamp that has _not_ yet passed
-    - 1 of which does not have a release timestamp
+  - 1 of which has a release timestamp that has passed
+  - 2 of which have a release timestamp that has _not_ yet passed
+  - 1 of which does not have a release timestamp
 
 Renovate will create a PR for the 1 dependency update that has passed the release timestamp, and the others will be marked as "Pending Status Checks" on the Dependency Dashboard.
 As time goes on, if the 2 updates with a release timestamp are now passed the minimum release age, Renovate will add them to the PR (or create a new one).
@@ -94,9 +118,8 @@ If you have a Dependency Dashboard enabled, it will be found in the Dependency D
 
 You can force the dependency update by requesting it via the Dependency Dashboard, or if you are self-hosting, you can use the [`checkedBranches`](../self-hosted-configuration.md#checkedbranches) to force the branch creation.
 
-<!-- prettier-ignore -->
 !!! note
-    A previous version of the documentation (up until Renovate 42.19.9) recommended configuring [`prCreation`](../configuration-options.md#prcreation). This is no longer the case.
+  A previous version of the documentation (up until Renovate 42.19.9) recommended configuring [`prCreation`](../configuration-options.md#prcreation). This is no longer the case.
 
 If no branch is created, Renovate will not raise a PR, regardless of [`prCreation`](../configuration-options.md#prcreation)'s settings.
 
@@ -132,9 +155,8 @@ Security updates bypass any `minimumReleaseAge` checks, and so will be raised as
 
 ### What happens if a package has multiple updates available?
 
-<!-- prettier-ignore -->
 !!! note
-    This is based on the [recommended settings above](#recommended-settings)
+  This is based on the [recommended settings above](#recommended-settings)
 
 Renovate waits for the set duration to pass for each **separate** version.
 
@@ -176,15 +198,13 @@ To opt out a dependency from minimum release age checks, create a package rule w
 }
 ```
 
-<!-- prettier-ignore -->
 !!! note
-    As of Renovate 42.19.5, using `minimumReleaseAge=0 days` is treated the same as `minimumReleaseAge=null`.
+  As of Renovate 42.19.5, using `minimumReleaseAge=0 days` is treated the same as `minimumReleaseAge=null`.
 
 ### Which datasources support release timestamps?
 
-<!-- prettier-ignore -->
 !!! tip
-    You can confirm if your datasource supports the release timestamp by viewing [the documentation for the given datasource](../modules/datasource/index.md).
+  You can confirm if your datasource supports the release timestamp by viewing [the documentation for the given datasource](../modules/datasource/index.md).
 
 The datasource that Renovate uses must have a release timestamp for the `minimumReleaseAge` config option to work.
 Some datasources may have a release timestamp, but in a format Renovate does not support.
@@ -207,7 +227,10 @@ The below is a non-exhaustive list of public registries which support release ti
 | `docker`             | `https://ghcr.io`                                  | ❌        | [Issue](https://github.com/renovatebot/renovate/issues/39064)    |
 | `docker`             | `https://quay.io`                                  | ❌        | [Issue](https://github.com/renovatebot/renovate/issues/38572)    |
 | `github-releases`    | `https://github.com`                               | ✅        |                                                                  |
+| `terraform-module`   | `https://registry.terraform.io`                    | ✅        |                                                                  |
+| `terraform-module`   | `https://registry.opentofu.org`                    | ✅        | Queries `api.opentofu.org` for release timestamps                |
 | `terraform-provider` | `https://registry.terraform.io`                    | ✅        |                                                                  |
+| `terraform-provider` | `https://registry.opentofu.org`                    | ✅        | Queries `api.opentofu.org` for release timestamps                |
 | `github-tags`        | `https://github.com`                               | ✅        |                                                                  |
 | `go`                 | `https://proxy.golang.org,`                        | ✅        |                                                                  |
 | `golang-version`     | `https://raw.githubusercontent.com/golang/website` | ✅        |                                                                  |
@@ -378,7 +401,7 @@ Will then output:
 
 <summary><code>jq</code> query output</summary>
 
-```json
+```json {configType=none}
 {
   "missingCurrentVersionTimestamps": [
     {
@@ -389,7 +412,7 @@ Will then output:
       "registryUrls": ["https://ghcr.io"]
     },
     {
-      "manager": "renovate-config-presets",
+      "manager": "renovate-config",
       "datasource": null,
       "depName": "renovatebot/.github",
       "packageFile": "renovate.json",
@@ -486,7 +509,7 @@ Notice that this indicates that:
 
 ### How do I add timestamp data to custom registries?
 
-Renovate requires release timestamp to be provided by the registry.
+Renovate [requires release timestamp to be provided by the registry](#where-does-the-release-timestamp-need-to-be-set).
 
 A common solution is to point Renovate to a registry that _does_ have the release timestamp in the form that Renovate is expecting.
 You can achieve this by using `packageRules` to **prepend** the public registry's URL to the `registryUrls`.

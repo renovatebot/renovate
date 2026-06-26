@@ -25,22 +25,11 @@ export function matchPrState(pr: Pr, state: PrFilterByState): boolean {
     return true;
   }
 
-  if (state === 'open' && (pr.state === 'OPEN' || pr.state === 'DRAFT')) {
+  if (state === '!open' && (pr.state === 'closed' || pr.state === 'merged')) {
     return true;
   }
 
-  if (state === '!open' && (pr.state === 'MERGED' || pr.state === 'REJECTED')) {
-    return true;
-  }
-
-  if (
-    state === 'closed' &&
-    (pr.state === 'MERGED' || pr.state === 'REJECTED')
-  ) {
-    return true;
-  }
-
-  return false;
+  return state === pr.state;
 }
 
 export function smartLinks(body: string): string {

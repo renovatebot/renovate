@@ -12,6 +12,8 @@ export abstract class TerraformDatasource extends Datasource {
   static id = terraformId;
 
   static readonly terraformRegistryUrl = 'https://registry.terraform.io';
+  static readonly openTofuApiUrl = 'https://api.opentofu.org';
+  static readonly openTofuRegistryUrl = 'https://registry.opentofu.org';
 
   private async _getTerraformServiceDiscoveryResult(
     registryUrl: string,

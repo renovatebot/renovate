@@ -1,3 +1,4 @@
+import { globalConfigOptionDefaults } from '../global-config-option-defaults.generated.ts';
 import type { RenovateConfig, RepoGlobalConfig } from './types.ts';
 
 export class GlobalConfig {
@@ -50,6 +51,7 @@ export class GlobalConfig {
     'platform',
     'prCacheSyncMaxPages',
     'presetCachePersistence',
+    'productLinks',
     'repositoryCacheForceLocal',
     'requireConfig',
     's3Endpoint',
@@ -63,17 +65,20 @@ export class GlobalConfig {
   static get(): RepoGlobalConfig;
   static get<Key extends keyof RepoGlobalConfig>(
     key: Key,
-  ): RepoGlobalConfig[Key];
+  ): Required<RepoGlobalConfig>[Key];
   static get<Key extends keyof RepoGlobalConfig>(
     key: Key,
-    defaultValue: Required<RepoGlobalConfig>[Key],
   ): Required<RepoGlobalConfig>[Key];
   static get<Key extends keyof RepoGlobalConfig>(
     key?: Key,
-    defaultValue?: RepoGlobalConfig[Key],
-  ): RepoGlobalConfig | RepoGlobalConfig[Key] {
+  ): RepoGlobalConfig | Required<RepoGlobalConfig>[Key] {
+    const defaultValue = key
+      ? (globalConfigOptionDefaults[key] as Required<RepoGlobalConfig>[Key])
+      : undefined;
+
     return key
-      ? (GlobalConfig.config[key] ?? defaultValue)
+      ? ((GlobalConfig.config[key] ??
+          defaultValue) as Required<RepoGlobalConfig>[Key])
       : GlobalConfig.config;
   }
 

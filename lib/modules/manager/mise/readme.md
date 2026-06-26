@@ -11,6 +11,41 @@ Renovate supports all standard mise configuration file patterns:
 - Environment-specific variants (e.g., `mise.production.toml`, `.mise.dev.toml`)
 - Local variants (e.g., `mise.local.toml`, `.mise.local.toml`)
 
+### Supported tool locations
+
+Renovate supports top level [`tools`](https://mise.jdx.dev/configuration.html#tools-dev-tools) and [`tasks.*.tools`](https://mise.jdx.dev/tasks/task-configuration.html#tools) keys.
+
+### Lock file support
+
+Renovate supports mise lock files (`mise.lock`).
+When a lock file is present:
+
+- Dependencies will have their `lockedVersion` extracted from the lock file
+- Renovate can update lock files when dependencies change
+- Lock file maintenance is supported via the `lockFileMaintenance` option
+
+Renovate recognizes environment-specific lock files:
+
+- `mise.lock` - default lock file
+- `mise.local.lock` - local configuration lock file, typically ignored alongside `mise.local.toml`
+- `mise.{env}.lock` - environment-specific lock files (e.g., `mise.production.lock`)
+- `mise.{env}.local.lock` - environment-specific local lock files, typically ignored alongside `mise.{env}.local.toml`
+
+For more information about mise lock files, see the [mise lock file documentation](https://mise.jdx.dev/dev-tools/mise-lock.html).
+
+### Trust model for lock file updates
+
+Running `mise lock` can execute repository-defined behavior, so Renovate treats mise lockfile refreshes as an unsafe execution.
+
+Self-hosted administrators must explicitly allow this path by including `mise` in the global [`allowedUnsafeExecutions`](../../../self-hosted-configuration.md#allowedunsafeexecutions) setting.
+
+When `mise` is allowed and an existing `mise.lock` is present, Renovate explicitly runs `mise trust` before `mise lock` from the repository checkout. This makes the trust step visible in logs and lets mise own any future trust behavior changes.
+
+In particular:
+
+- an existing `mise.lock` is required
+- self-hosted administrators decide whether this unsafe execution is acceptable for their environment
+
 ### Renovate only updates primary versions
 
 Renovate's `mise` manager is designed to automatically update the _first_ (primary) version listed for each tool in the `mise.toml` file.
@@ -38,21 +73,23 @@ This follows the same workflow that Renovate's `asdf` manager uses.
 
 ### Short names support
 
-Renovate uses [mise registry](https://mise.jdx.dev/registry.html) to understand tools short names.
+Renovate uses the [mise registry](https://mise.jdx.dev/registry.html) to resolve tool short names to their appropriate datasource.
 
-Support for new tool short names needs to be _manually_ added to Renovate's logic.
+Where possible, Renovate will automagically support tools from the mise registry (via `mise registry --json`).
+
+This means that any tool in the mise registry that has a supported backend (e.g. `aqua`, `github`, `cargo`) should be automatically supported by Renovate.
 
 #### Adding new tool support
 
-There are 2 ways to integrate versioning for a new tool:
+If a tool you need is not yet in the mise registry, add it upstream to [mise](https://mise.jdx.dev/registry.html).
+Once Renovate syncs its registry data, the tool will be supported automatically, as long as it is in a backend that Renovate supports.
 
-- Renovate's `mise` manager: ensure upstream `mise` supports the tool, then add support to the `mise` manager in Renovate
-- Renovate's `asdf` manager: improve the `asdf` manager in Renovate, which automatically extends support to `mise`
-
-If `mise` adds support for more tools via its own [core tools](https://mise.jdx.dev/core-tools.html), you can create a PR to extend Renovate's `mise` manager to add support for the new core tools.
+For tools that need a custom datasource mapping (e.g. core tools like `node`, `python`), you can create a PR to extend Renovate's `mise` manager directly.
 
 If you want to add support for other tools' short names to `mise`, you can create a PR to extend Renovate's `asdf` manager, which indirectly helps Renovate's `mise` manager as well.
 Even if the tool does not use the `asdf` backend in the registry, the short names added to the `asdf` manager will still be used in the `mise` manager.
+
+This may no longer be necessary now we automagically add support via the tools that the mise registry advertises.
 
 ### Backends support
 
@@ -106,9 +143,8 @@ Renovate's `mise` manager does not support the following tool syntax:
   The `version_prefix` option is converted to `extractVersion` by escaping special regex characters.
   If the version is not updated or updated incorrectly, override `extractVersion` manually in the Renovate config.
 
+- Renovate will prefer the `github:` backend over other backends, if using the tool definition from the mise registry
+
 ### Supported default registry tool short names
 
-Renovate's `mise` manager can only version these tool short names:
-
 <!-- Autogenerate in https://github.com/renovatebot/renovate -->
-<!-- Autogenerate end -->

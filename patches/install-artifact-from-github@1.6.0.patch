@@ -1,0 +1,24 @@
+diff --git a/bin/install-from-cache.js b/bin/install-from-cache.js
+index 29c682ff236ff59d678bd26f6a9d93ad710cfad8..7cda10259cfb429a47eb0626a0cb9871ac599ccb 100755
+--- a/bin/install-from-cache.js
++++ b/bin/install-from-cache.js
+@@ -27,7 +27,8 @@ const getPlatform = () => {
+ };
+ 
+ const platform = getPlatform(),
+-  platformArch = process.env.npm_config_platform_arch || process.arch,
++  // TODO: remove this patch once https://github.com/pnpm/pnpm/pull/12400 lands
++  platformArch = process.env.npm_config_platform_arch || process.env.pnpm_config_platform_arch || process.arch,
+   platformABI = process.env.npm_config_platform_abi || process.versions.modules;
+ 
+ const isParamPresent = name => process.argv.indexOf('--' + name) > 0;
+@@ -117,7 +118,8 @@ const run = (cmd, suppressOutput) =>
+   });
+ 
+ const isVerified = async () => {
+-  if (process.env.npm_config_platform || process.env.npm_config_platform_arch || process.env.npm_config_platform_abi) {
++  // TODO: remove this patch once https://github.com/pnpm/pnpm/pull/12400 lands
++  if (process.env.npm_config_platform || process.env.npm_config_platform_arch || process.env.pnpm_config_platform_arch || process.env.npm_config_platform_abi) {
+     console.log(`Fetched for the custom platform "${platform}-${platformArch}-${platformABI}" -- skipping the verification.`);
+     return true;
+   }

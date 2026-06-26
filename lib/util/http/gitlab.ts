@@ -55,7 +55,7 @@ export class GitlabHttp extends HttpBase<GitlabHttpOptions> {
           : null;
         if (nextUrl) {
           if (getEnv().GITLAB_IGNORE_REPO_URL) {
-            const defaultEndpoint = new URL(baseUrl);
+            const defaultEndpoint = parseUrl(baseUrl)!;
             nextUrl.protocol = defaultEndpoint.protocol;
             nextUrl.host = defaultEndpoint.host;
           }

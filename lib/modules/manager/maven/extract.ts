@@ -85,7 +85,10 @@ function parseExtensions(raw: string, packageFile: string): XmlDocument | null {
 }
 
 function containsPlaceholder(str: string | null | undefined): boolean {
-  return !!str && regEx(/\${[^}]*?}/).test(str);
+  return (
+    !!str &&
+    (regEx(/\${[^}]*?}/).test(str) || regEx(/\{\{[^}]*?\}\}/).test(str))
+  );
 }
 
 function getCNBDependencies(

@@ -2,8 +2,12 @@ import cacache from 'cacache';
 import { DateTime } from 'luxon';
 import { type DirectoryResult, dir } from 'tmp-promise';
 import upath from 'upath';
+import { logger as _logger } from '~test/util.ts';
 import { compressToBase64 } from '../../../compress.ts';
+import { encodeEntry } from '../codec.ts';
 import { PackageCacheFile } from './file.ts';
+
+const { logger } = _logger;
 
 describe('util/cache/package/impl/file', () => {
   let tmpDir: DirectoryResult;
@@ -78,6 +82,21 @@ describe('util/cache/package/impl/file', () => {
       expect(res).toBeUndefined();
     });
 
+    it('removes invalid entries', async () => {
+      await cacache.put(cacheFileName, '_test-namespace-key', 'invalid-json');
+
+      const res = await cache.get('_test-namespace', 'key');
+
+      expect(res).toBeUndefined();
+      expect(logger.once.debug).toHaveBeenCalledWith(
+        { err: expect.any(Error) },
+        'Error while reading package cache value',
+      );
+      await expect(
+        cacache.get(cacheFileName, '_test-namespace-key'),
+      ).rejects.toThrow('No cache entry');
+    });
+
     it('returns undefined for corrupted cache payload', async () => {
       const payload = JSON.stringify({
         value: 'not-base64-encoded-gzip',
@@ -121,6 +140,18 @@ describe('util/cache/package/impl/file', () => {
 
       expect(res).toBe(1234);
     });
+
+    it('retrieves value from envelope payload', async () => {
+      await cacache.put(
+        cacheFileName,
+        '_test-namespace-key',
+        await encodeEntry(1234, DateTime.local()),
+      );
+
+      const res = await cache.get('_test-namespace', 'key');
+
+      expect(res).toBe(1234);
+    });
   });
 
   describe('destroy', () => {
@@ -143,6 +174,17 @@ describe('util/cache/package/impl/file', () => {
       await expect(
         cacache.get.byDigest(cacheFileName, expiredDigest),
       ).rejects.toThrow('ENOENT');
+    });
+
+    it('keeps entries with valid non-expired expiry read from disk', async () => {
+      const futureExpiry = DateTime.local().plus({ days: 1 }).toISO();
+      const payload = JSON.stringify({ value: 'future', expiry: futureExpiry });
+      await cacache.put(cacheFileName, 'future-expiry-key', payload);
+
+      await cache.destroy();
+
+      const entries = await cacache.ls(cacheFileName);
+      expect(Object.keys(entries)).toContain('future-expiry-key');
     });
 
     it('keeps entries without expiry field', async () => {

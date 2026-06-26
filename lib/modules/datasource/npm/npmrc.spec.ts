@@ -1,6 +1,7 @@
 import ini from 'ini';
 import { GlobalConfig } from '../../../config/global.ts';
 import * as _sanitize from '../../../util/sanitize.ts';
+import { defaultRegistryUrl } from './common.ts';
 import {
   convertNpmrcToRules,
   getMatchHostFromNpmrcHost,
@@ -31,8 +32,8 @@ describe('modules/datasource/npm/npmrc', () => {
     });
 
     it('parses https://host', () => {
-      expect(getMatchHostFromNpmrcHost('https://registry.npmjs.org')).toBe(
-        'https://registry.npmjs.org',
+      expect(getMatchHostFromNpmrcHost(defaultRegistryUrl)).toBe(
+        defaultRegistryUrl,
       );
     });
   });

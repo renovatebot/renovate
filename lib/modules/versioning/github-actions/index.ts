@@ -8,17 +8,26 @@ import type { NewValueConfig, VersioningApi } from '../types.ts';
 export const id = 'github-actions';
 export const displayName = 'GitHub Actions';
 export const urls = [
-  'https://docs.github.com/en/actions/how-tos/write-workflows/choose-what-workflows-do/find-and-customize-actions#using-release-management-for-your-custom-actions',
+  '[GitHub Actions - Using release management for custom actions](https://docs.github.com/en/actions/how-tos/write-workflows/choose-what-workflows-do/find-and-customize-actions#using-release-management-for-your-custom-actions)',
 ];
 export const supportsRanges = true;
 export const supportedRangeStrategies = ['pin', 'replace'];
+
+const floatingMinorTagRegex = regEx(/^\d+(\.\d+)?$/);
+const majorOnlyRegex = regEx(/^\d+$/);
 
 function massageValue(input: string): string {
   return input.trim().replace(regEx(/^v/i), '');
 }
 
 function parseVersion(input: string): SemVer | null {
-  return semver.parse(massageValue(input));
+  const stripped = massageValue(input);
+  const v = semver.parse(stripped);
+  if (v) {
+    return v;
+  }
+  // Handle major.minor-prerelease format (e.g. v2.2-rc.1) by normalizing to major.minor.0-prerelease
+  return semver.parse(stripped.replace(regEx(/^(\d+\.\d+)(-.+)$/), '$1.0$2'));
 }
 
 interface Range {
@@ -28,13 +37,17 @@ interface Range {
 
 function parseRange(input: string): Range | null {
   const stripped = massageValue(input);
+  if (!floatingMinorTagRegex.test(stripped)) {
+    return null;
+  }
   const coerced = semver.coerce(stripped);
+  /* v8 ignore if -- unreachable: floatingMinorTagRegex should guarantee coerce() succeeds */
   if (!coerced) {
     return null;
   }
   const { major, minor } = coerced;
 
-  if (regEx(/^\d+$/).test(stripped)) {
+  if (majorOnlyRegex.test(stripped)) {
     return { major };
   }
 
@@ -109,7 +122,11 @@ function sortVersions(x: string, y: string): number {
   if (!a || !b) {
     return 0;
   }
-  return semver.compare(a, b);
+  const cmp = semver.compare(a, b);
+  if (cmp === 0) {
+    return x.localeCompare(y, undefined, { numeric: true });
+  }
+  return cmp;
 }
 
 function equals(x: string, y: string): boolean {
@@ -131,6 +148,14 @@ function isGreaterThan(x: string, y: string): boolean {
 }
 
 function matches(version: string, range: string): boolean {
+  // if we have a valid floating tag provided, and it's the same as the range, treat it as the same
+  if (
+    parseVersionCoerced(version) &&
+    massageValue(version) === massageValue(range)
+  ) {
+    return true;
+  }
+
   const v = parseVersion(version);
   if (!v) {
     return false;
@@ -250,6 +275,7 @@ function getNewValue({
 
   // Check if currentValue is a full version (has patch component)
   const currentParsed = parseVersion(currentValue);
+  // v8 ignore if -- currentValue can't fail both parseRange and parseVersion
   if (currentParsed) {
     // currentValue is a full version, return full newVersion
     return newVersion;

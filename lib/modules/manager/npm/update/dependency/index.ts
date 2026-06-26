@@ -272,7 +272,7 @@ export function updateDependency({
     }
     if (parsedContents?.dependenciesMeta) {
       for (const [depKey] of Object.entries(parsedContents.dependenciesMeta)) {
-        if (depKey.startsWith(depName + '@')) {
+        if (depKey.startsWith(`${depName}@`)) {
           newFileContent = replaceAsString(
             parsedContents,
             newFileContent,

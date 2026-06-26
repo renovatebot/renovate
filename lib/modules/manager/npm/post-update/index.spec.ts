@@ -421,6 +421,7 @@ describe('modules/manager/npm/post-update/index', () => {
         await getAdditionalFiles({ ...updateConfig }, additionalFiles),
       ).toStrictEqual({
         artifactErrors: [],
+        artifactNotices: [],
         updatedArtifacts: [],
       });
     });
@@ -440,6 +441,7 @@ describe('modules/manager/npm/post-update/index', () => {
         ),
       ).toStrictEqual({
         artifactErrors: [],
+        artifactNotices: [],
         updatedArtifacts: [
           {
             type: 'addition',
@@ -456,6 +458,36 @@ describe('modules/manager/npm/post-update/index', () => {
         ['randomFolder/.npmrc'],
         ['packages/pnpm/.npmrc'],
       ]);
+    });
+
+    it('adds artifact notice on beforeFallback', async () => {
+      spyNpm.mockResolvedValueOnce({
+        error: false,
+        lockFile: '{}',
+        beforeFallback: true,
+      });
+      fs.readLocalFile.mockImplementation((f): Promise<string> => {
+        if (f === '.npmrc') {
+          return Promise.resolve('# dummy');
+        }
+        return Promise.resolve('');
+      });
+      const res = await getAdditionalFiles(
+        { ...updateConfig, reuseExistingBranch: true },
+        additionalFiles,
+      );
+
+      expect(res.artifactNotices).toEqual([
+        {
+          file: 'package-lock.json',
+          message:
+            'npm `--before` could not be enforced because existing locked packages were published after the `minimumReleaseAge` cutoff. This will resolve after the next lock file maintenance run.',
+        },
+      ]);
+      expect(logger.logger.warn).toHaveBeenCalledWith(
+        { npmLock: 'package-lock.json' },
+        'npm `--before` could not be enforced because existing locked packages were published after the `minimumReleaseAge` cutoff. This will resolve after the next lock file maintenance run.',
+      );
     });
 
     it('detects if lock file contents are unchanged(reuseExistingBranch=true)', async () => {
@@ -523,6 +555,7 @@ describe('modules/manager/npm/post-update/index', () => {
         ),
       ).toStrictEqual({
         artifactErrors: [],
+        artifactNotices: [],
         updatedArtifacts: [
           {
             type: 'addition',
@@ -555,6 +588,7 @@ describe('modules/manager/npm/post-update/index', () => {
         ),
       ).toStrictEqual({
         artifactErrors: [],
+        artifactNotices: [],
         updatedArtifacts: [
           {
             type: 'addition',
@@ -569,6 +603,7 @@ describe('modules/manager/npm/post-update/index', () => {
     it('no npm files', async () => {
       expect(await getAdditionalFiles(baseConfig, {})).toStrictEqual({
         artifactErrors: [],
+        artifactNotices: [],
         updatedArtifacts: [],
       });
     });
@@ -578,6 +613,7 @@ describe('modules/manager/npm/post-update/index', () => {
         await getAdditionalFiles(baseConfig, additionalFiles),
       ).toStrictEqual({
         artifactErrors: [],
+        artifactNotices: [],
         updatedArtifacts: [],
       });
     });
@@ -604,6 +640,7 @@ describe('modules/manager/npm/post-update/index', () => {
         ),
       ).toStrictEqual({
         artifactErrors: [],
+        artifactNotices: [],
         updatedArtifacts: [],
       });
       expect(spyNpm).not.toHaveBeenCalled();
@@ -625,6 +662,7 @@ describe('modules/manager/npm/post-update/index', () => {
         ),
       ).toStrictEqual({
         artifactErrors: [],
+        artifactNotices: [],
         updatedArtifacts: [],
       });
     });
@@ -644,6 +682,7 @@ describe('modules/manager/npm/post-update/index', () => {
         ),
       ).toStrictEqual({
         artifactErrors: [],
+        artifactNotices: [],
         updatedArtifacts: [],
       });
     });
@@ -656,6 +695,7 @@ describe('modules/manager/npm/post-update/index', () => {
         artifactErrors: [
           { fileName: 'package-lock.json', stderr: 'some-error' },
         ],
+        artifactNotices: [],
         updatedArtifacts: [],
       });
     });
@@ -669,6 +709,7 @@ describe('modules/manager/npm/post-update/index', () => {
         ),
       ).toStrictEqual({
         artifactErrors: [{ fileName: 'yarn.lock', stderr: 'some-error' }],
+        artifactNotices: [],
         updatedArtifacts: [],
       });
     });
@@ -692,6 +733,7 @@ describe('modules/manager/npm/post-update/index', () => {
         artifactErrors: [
           { fileName: 'packages/pnpm/pnpm-lock.yaml', stderr: 'some-error' },
         ],
+        artifactNotices: [],
         updatedArtifacts: [],
       });
     });
