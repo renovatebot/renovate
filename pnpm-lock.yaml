@@ -378,8 +378,8 @@ importers:
         specifier: 14.0.0
         version: 14.0.0(commander@14.0.3)
       '@containerbase/istanbul-reports-html':
-        specifier: 2.0.7
-        version: 2.0.7
+        specifier: 2.0.8
+        version: 2.0.8
       '@containerbase/semantic-release-pnpm':
         specifier: 1.4.2
         version: 1.4.2(semantic-release@25.0.5)
@@ -955,8 +955,8 @@ packages:
     peerDependencies:
       commander: ~14.0.0
 
-  '@containerbase/istanbul-reports-html@2.0.7':
-    resolution: {integrity: sha512-m+0J9DL5eLl/oGxmdYUSHIa2hahIDrAtm0kJwvfY3ZtG/W8/2bqCxVmGP+RismfgGdGVevIkMCJM9jp2VCFJhg==}
+  '@containerbase/istanbul-reports-html@2.0.8':
+    resolution: {integrity: sha512-J79N/rvY7z35ZXUG3d5+b7SoRdtwrLmV9GWtiStq3XLJQHOpE1D4xMRcrAnF9AX77dIz8j7jp3amlFaRmERb4A==}
     engines: {node: ^22.11.0 || >=24.0.0, pnpm: '>=10.0.0'}
 
   '@containerbase/semantic-release-pnpm@1.4.2':
@@ -6351,7 +6351,7 @@ snapshots:
     dependencies:
       commander: 14.0.3
 
-  '@containerbase/istanbul-reports-html@2.0.7':
+  '@containerbase/istanbul-reports-html@2.0.8':
     dependencies:
       istanbul-reports: 3.2.0
 
