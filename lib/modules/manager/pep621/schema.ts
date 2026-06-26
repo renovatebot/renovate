@@ -219,17 +219,29 @@ export const PdmLockfile = Toml.pipe(
   )
   .transform((lock) => ({ lock }));
 
+export interface UvLockedPackage {
+  version: string;
+  // The index a package was resolved from, if any. Absent for the workspace
+  // root and for virtual/editable/path/git packages, which cannot be
+  // remediated by `uv lock --upgrade-package`.
+  registryUrl?: string;
+}
+
 export const UvLockfile = Toml.pipe(
   z.object({
     package: LooseArray(
       z.object({
         name: z.string(),
         version: z.string(),
+        source: z.object({ registry: z.string() }).partial().optional(),
       }),
     ),
   }),
 ).transform(({ package: pkg }) =>
   Object.fromEntries(
-    pkg.map(({ name, version }): [string, string] => [name, version]),
+    pkg.map(({ name, version, source }): [string, UvLockedPackage] => [
+      name,
+      { version, registryUrl: source?.registry },
+    ]),
   ),
 );

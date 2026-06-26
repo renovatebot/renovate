@@ -1127,6 +1127,9 @@ describe('workers/repository/process/vulnerabilities', () => {
           matchPackageNames: ['stdlib'],
           matchCurrentVersion: '1.7.5',
           allowedVersions: '>= 1.7.6',
+          // remediation must override a disabled dependency, e.g. a transitive
+          // dep surfaced from a lockfile
+          enabled: true,
           isVulnerabilityAlert: true,
         },
       ]);
