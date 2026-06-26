@@ -13,6 +13,7 @@ import {
   generateDockerCommand,
   removeDockerContainer,
 } from './docker/index.ts';
+import { hardcodedProcessEnv } from './env.ts';
 import { getHermitEnvs, isHermit } from './hermit.ts';
 import type {
   CommandWithOptions,
@@ -98,6 +99,7 @@ async function prepareRawExec(
   if (isDocker(docker)) {
     logger.debug({ image: sideCarImage }, 'Using docker to execute');
     const extraEnv = {
+      ...hardcodedProcessEnv,
       ...opts.extraEnv,
       ...customEnvVariables,
       ...userConfiguredEnv,
