@@ -287,7 +287,7 @@ function renderRowCounts(
   typeCounts: Partial<Record<SummaryCategory, number>>,
 ): string {
   return categoriesToColumnHeaders(
-    typeColumns.map((t) => String(typeCounts[t] ?? 0)),
+    typeColumns.map((t) => `${typeCounts[t] ?? 0}`),
   );
 }
 
