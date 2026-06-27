@@ -25,35 +25,6 @@ function isReleaseStable(
   return true;
 }
 
-function filterByMaxMajorIncrement(
-  releases: Release[],
-  currentVersion: string,
-  maxMajorIncrement: number,
-  versioningApi: VersioningApi,
-  depName: string,
-): Release[] {
-  const currentMajor = versioningApi.getMajor(currentVersion);
-  /* v8 ignore next 3 -- shouldn't happen */
-  if (currentMajor === null) {
-    return releases;
-  }
-  return releases.filter((r) => {
-    const releaseMajor = versioningApi.getMajor(r.version);
-    /* v8 ignore next 3 -- shouldn't happen */
-    if (releaseMajor === null) {
-      return true;
-    }
-    const majorIncrement = releaseMajor - currentMajor;
-    if (majorIncrement > maxMajorIncrement) {
-      logger.once.debug(
-        `Skipping ${depName}@${r.version} because major increment ${majorIncrement} exceeds maxMajorIncrement ${maxMajorIncrement}`,
-      );
-      return false;
-    }
-    return true;
-  });
-}
-
 export function filterVersions(
   config: FilterConfig,
   currentVersion: string,
@@ -61,8 +32,7 @@ export function filterVersions(
   releases: Release[],
   versioningApi: VersioningApi,
 ): Release[] {
-  const { ignoreUnstable, ignoreDeprecated, respectLatest, maxMajorIncrement } =
-    config;
+  const { ignoreUnstable, ignoreDeprecated, respectLatest } = config;
 
   /* v8 ignore next 3 -- shouldn't happen */
   if (!currentVersion) {
@@ -94,16 +64,6 @@ export function filterVersions(
       }
       return true;
     });
-  }
-
-  if (maxMajorIncrement && maxMajorIncrement > 0) {
-    filteredReleases = filterByMaxMajorIncrement(
-      filteredReleases,
-      currentVersion,
-      maxMajorIncrement,
-      versioningApi,
-      config.depName!,
-    );
   }
 
   const currentMajor = versioningApi.getMajor(currentVersion);
