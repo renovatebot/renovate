@@ -3,7 +3,9 @@ This manager supports updating dependencies inside `pyproject.toml` files.
 In addition to standard dependencies, these toolsets are also supported:
 
 - `pdm` (including `pdm.lock` files)
-- `uv` (including `uv.lock` files and `uv` workspaces)
+- `uv` (including `uv.lock` files and `uv` workspaces; workspace members
+  inherit `[tool.uv.sources]` and `[[tool.uv.index]]` declared at the
+  workspace root, matching uv's own resolution rules)
 - `hatch`
 
 ### Private Modules Authentication

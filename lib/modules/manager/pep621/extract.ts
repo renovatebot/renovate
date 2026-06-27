@@ -83,6 +83,11 @@ export async function extractPackageFile(
   const lockFiles: string[] = [];
   for (const processor of processors) {
     processedDeps = processor.process(def, processedDeps);
+    processedDeps = await processor.extractWorkspaceContext(
+      def,
+      processedDeps,
+      packageFile,
+    );
     processedDeps = await processor.extractLockedVersions(
       def,
       processedDeps,
