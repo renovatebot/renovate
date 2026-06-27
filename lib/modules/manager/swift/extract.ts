@@ -1,11 +1,19 @@
 import { detectPlatform } from '../../../util/common.ts';
+import { readLocalFile } from '../../../util/fs/index.ts';
 import { getHttpUrl } from '../../../util/git/url.ts';
 import { regEx } from '../../../util/regex.ts';
 import { parseUrl } from '../../../util/url.ts';
 import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
 import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
 import { GitlabTagsDatasource } from '../../datasource/gitlab-tags/index.ts';
-import type { PackageDependency, PackageFileContent } from '../types.ts';
+import { SwiftPackageRegistryDatasource } from '../../datasource/swift-package-registry/index.ts';
+import type {
+  ExtractConfig,
+  PackageDependency,
+  PackageFile,
+  PackageFileContent,
+} from '../types.ts';
+import { discoverRegistryUrls } from './registries-json.ts';
 import type { MatchResult } from './types.ts';
 
 const regExps = {
@@ -17,6 +25,7 @@ const regExps = {
   endSection: regEx(/],?/),
   package: regEx(/\s*.\s*package\s*\(\s*/),
   urlKey: regEx(/url/),
+  idKey: regEx(/id/),
   stringLiteral: regEx(/"[^"]+"/),
   comma: regEx(/,/),
   from: regEx(/from/),
@@ -37,6 +46,7 @@ const BEGIN_SECTION = 'beginSection';
 const END_SECTION = 'endSection';
 const PACKAGE = 'package';
 const URL_KEY = 'urlKey';
+const ID_KEY = 'idKey';
 const STRING_LITERAL = 'stringLiteral';
 const COMMA = 'comma';
 const FROM = 'from';
@@ -55,6 +65,7 @@ const searchLabels = {
   endSection: END_SECTION,
   package: PACKAGE,
   urlKey: URL_KEY,
+  idKey: ID_KEY,
   stringLiteral: STRING_LITERAL,
   comma: COMMA,
   from: FROM,
@@ -74,10 +85,14 @@ function searchKeysForState(state: string | null): (keyof typeof regExps)[] {
     case 'dependencies: [':
       return [SPACE, PACKAGE, COMMA, TRAITS_LABEL, END_SECTION];
     case '.package(':
-      return [SPACE, URL_KEY, PACKAGE, END_SECTION];
+      return [SPACE, URL_KEY, ID_KEY, PACKAGE, END_SECTION];
     case '.package(url':
       return [SPACE, COLON, PACKAGE, END_SECTION];
+    case '.package(id':
+      return [SPACE, COLON, PACKAGE, END_SECTION];
     case '.package(url:':
+      return [SPACE, STRING_LITERAL, PACKAGE, END_SECTION];
+    case '.package(id:':
       return [SPACE, STRING_LITERAL, PACKAGE, END_SECTION];
     case '.package(url: [depName]':
       return [SPACE, COMMA, PACKAGE, END_SECTION];
@@ -191,27 +206,46 @@ export function extractPackageFile(content: string): PackageFileContent | null {
 
   let packageName: string | null = null;
   let currentValue: string | null = null;
+  let currentForm: 'url' | 'id' = 'url';
 
   function yieldDep(): void {
     // istanbul ignore if
     if (!packageName) {
       return;
     }
-    const parsedUrl = parseDependencyUrl(packageName);
-    if (parsedUrl && currentValue) {
-      const { depName, datasource, registryUrls } = parsedUrl;
+    if (currentForm === 'id') {
+      /* v8 ignore next: currentValue is always set before id-form yieldDep is reached on valid input */
+      if (currentValue) {
+        const dep: PackageDependency = {
+          datasource: SwiftPackageRegistryDatasource.id,
+          depName: packageName,
+          packageName,
+          currentValue,
+        };
+        deps.push(dep);
+      }
+    } else {
+      const parsedUrl = parseDependencyUrl(packageName);
+      if (parsedUrl && currentValue) {
+        const {
+          depName,
+          datasource,
+          registryUrls: depRegistryUrls,
+        } = parsedUrl;
 
-      const dep: PackageDependency = {
-        datasource,
-        depName,
-        currentValue,
-        ...(registryUrls?.length && { registryUrls }),
-      };
+        const dep: PackageDependency = {
+          datasource,
+          depName,
+          currentValue,
+          ...(depRegistryUrls?.length && { registryUrls: depRegistryUrls }),
+        };
 
-      deps.push(dep);
+        deps.push(dep);
+      }
     }
     packageName = null;
     currentValue = null;
+    currentForm = 'url';
   }
 
   while (match) {
@@ -256,7 +290,11 @@ export function extractPackageFile(content: string): PackageFileContent | null {
           yieldDep();
           state = null;
         } else if (label === URL_KEY) {
+          currentForm = 'url';
           state = '.package(url';
+        } else if (label === ID_KEY) {
+          currentForm = 'id';
+          state = '.package(id';
         } else if (label === PACKAGE) {
           yieldDep();
         }
@@ -272,6 +310,20 @@ export function extractPackageFile(content: string): PackageFileContent | null {
           state = '.package(';
         }
         break;
+      case '.package(id':
+        if (label === END_SECTION) {
+          yieldDep();
+          state = null;
+        } else if (label === COLON) {
+          state = '.package(id:';
+        } else if (
+          /* v8 ignore next: defensive, mirrors the url-form's nested-`.package(` recovery path */
+          label === PACKAGE
+        ) {
+          yieldDep();
+          state = '.package(';
+        }
+        break;
       case '.package(url:':
         if (label === END_SECTION) {
           yieldDep();
@@ -280,6 +332,22 @@ export function extractPackageFile(content: string): PackageFileContent | null {
           packageName = substr
             .replace(regEx(/^"/), '')
             .replace(regEx(/"$/), '');
+          state = '.package(url: [depName]';
+        } else if (label === PACKAGE) {
+          yieldDep();
+          state = '.package(';
+        }
+        break;
+      case '.package(id:':
+        if (label === END_SECTION) {
+          yieldDep();
+          state = null;
+        } else if (label === STRING_LITERAL) {
+          packageName = substr
+            .replace(regEx(/^"/), '')
+            .replace(regEx(/"$/), '');
+          // From here the version-clause grammar is identical to the
+          // url-form, so reuse the existing post-name state.
           state = '.package(url: [depName]';
         } else if (label === PACKAGE) {
           yieldDep();
@@ -412,4 +480,41 @@ export function extractPackageFile(content: string): PackageFileContent | null {
     match = getMatch(restStr, state);
   }
   return deps.length ? result : null;
+}
+
+export async function extractAllPackageFiles(
+  _config: ExtractConfig,
+  packageFiles: string[],
+): Promise<PackageFile[] | null> {
+  const results: PackageFile[] = [];
+
+  for (const packageFile of packageFiles) {
+    const content = await readLocalFile(packageFile, 'utf8');
+    if (!content) {
+      continue;
+    }
+    const parsed = extractPackageFile(content);
+    if (!parsed) {
+      continue;
+    }
+
+    // Attach discovered registry URLs to id-form deps so the
+    // swift-package-registry datasource knows where to look. URL-form deps
+    // already carry their own registryUrls (set by parseDependencyUrl).
+    // If discoverRegistryUrls returns an empty list, the loop is a no-op.
+    const registryUrls = await discoverRegistryUrls(packageFile);
+    for (const dep of parsed.deps) {
+      if (
+        registryUrls.length &&
+        dep.datasource === SwiftPackageRegistryDatasource.id &&
+        !dep.registryUrls?.length
+      ) {
+        dep.registryUrls = registryUrls;
+      }
+    }
+
+    results.push({ ...parsed, packageFile });
+  }
+
+  return results.length ? results : null;
 }
