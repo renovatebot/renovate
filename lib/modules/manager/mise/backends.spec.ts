@@ -4,6 +4,7 @@ import {
   createDotnetToolConfig,
   createGemToolConfig,
   createGithubToolConfig,
+  createGitlabToolConfig,
   createGoToolConfig,
   createNpmToolConfig,
   createPipxToolConfig,
@@ -193,6 +194,54 @@ describe('modules/manager/mise/backends', () => {
         datasource: 'github-releases',
         currentValue: '1.0.0',
         extractVersion: '^prefix\\[test\\]\\(v\\)(?<version>.+)',
+      });
+    });
+  });
+
+  describe('createGitlabToolConfig()', () => {
+    it('should create a tooling config with empty options', () => {
+      expect(
+        createGitlabToolConfig('gitlab-org/cli', '1.54.0', {}),
+      ).toStrictEqual({
+        packageName: 'gitlab-org/cli',
+        datasource: 'gitlab-releases',
+        currentValue: '1.54.0',
+      });
+    });
+
+    it('should not set extractVersion if the version has leading v', () => {
+      expect(
+        createGitlabToolConfig('gitlab-org/cli', 'v1.54.0', {}),
+      ).toStrictEqual({
+        packageName: 'gitlab-org/cli',
+        datasource: 'gitlab-releases',
+        currentValue: 'v1.54.0',
+      });
+    });
+
+    it('should set extractVersion with custom version_prefix', () => {
+      expect(
+        createGitlabToolConfig('some/repo', '1.0.0', {
+          version_prefix: 'release-',
+        }),
+      ).toStrictEqual({
+        packageName: 'some/repo',
+        datasource: 'gitlab-releases',
+        currentValue: '1.0.0',
+        extractVersion: '^release\\-(?<version>.+)',
+      });
+    });
+
+    it('should escape special regex characters in version_prefix', () => {
+      expect(
+        createGitlabToolConfig('some/repo', '1.0.0', {
+          version_prefix: 'v1.0+',
+        }),
+      ).toStrictEqual({
+        packageName: 'some/repo',
+        datasource: 'gitlab-releases',
+        currentValue: '1.0.0',
+        extractVersion: '^v1\\.0\\+(?<version>.+)',
       });
     });
   });
