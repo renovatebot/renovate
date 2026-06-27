@@ -238,6 +238,35 @@ describe('modules/manager/custom/regex/index', () => {
     expect(res?.deps).toHaveLength(1);
   });
 
+  it('applies registryAliases to depName', async () => {
+    const config = {
+      matchStrings: [
+        'image:\\s+(?<depName>my\\.old\\.registry\\/aRepository\\/andImage):(?<currentValue>[^\\s]+)',
+      ],
+      datasourceTemplate: 'docker',
+      registryAliases: {
+        'my.old.registry': 'my.new.registry',
+      },
+    };
+
+    const res = await extractPackageFile(
+      'image: my.old.registry/aRepository/andImage:1.18-alpine',
+      'values.yaml',
+      config,
+    );
+
+    expect(res?.deps).toEqual([
+      {
+        datasource: 'docker',
+        depName: 'my.old.registry/aRepository/andImage',
+        packageName: 'my.new.registry/aRepository/andImage',
+        currentValue: '1.18-alpine',
+        replaceString:
+          'image: my.old.registry/aRepository/andImage:1.18-alpine',
+      },
+    ]);
+  });
+
   it('extracts indentation: maintains indentation value if whitespace or empty', async () => {
     const config = {
       matchStrings: [

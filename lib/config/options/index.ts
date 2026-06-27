@@ -1362,6 +1362,8 @@ const options: Readonly<RenovateOptions>[] = [
       'terraform',
       'vendir',
       'woodpecker',
+      'regex',
+      'jsonata',
     ],
   },
   {
