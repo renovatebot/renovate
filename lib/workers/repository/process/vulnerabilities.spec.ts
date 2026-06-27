@@ -1128,6 +1128,8 @@ describe('workers/repository/process/vulnerabilities', () => {
           matchCurrentVersion: '1.7.5',
           allowedVersions: '>= 1.7.6',
           isVulnerabilityAlert: true,
+          // security updates inherit `vulnerabilityAlerts`, which disables `minimumReleaseAge`
+          force: { minimumReleaseAge: null },
         },
       ]);
     });

@@ -2817,6 +2817,55 @@ describe('workers/repository/process/lookup/index', () => {
       ]);
     });
 
+    it('does not apply minimumReleaseAge to security updates', async () => {
+      config.currentValue = '1.4.4';
+      config.packageName = 'some/action';
+      config.datasource = GithubReleasesDatasource.id;
+      config.minimumReleaseAge = '14 days';
+      config.internalChecksFilter = 'strict';
+      config.isVulnerabilityAlert = true;
+      // security updates force `minimumReleaseAge: null` via the `vulnerabilityAlerts` config
+      config.packageRules = [
+        {
+          matchPackageNames: ['some/action'],
+          force: { minimumReleaseAge: null },
+        },
+      ];
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+      getGithubReleases.mockResolvedValueOnce({
+        releases: [
+          { version: '1.4.4' },
+          {
+            version: '1.4.5',
+            releaseTimestamp: yesterday.toISOString() as Timestamp,
+          },
+        ],
+      });
+
+      const { updates } = await Result.wrap(
+        lookup.lookupUpdates(config),
+      ).unwrapOrThrow();
+
+      // 1.4.5 released yesterday is well within the 14-day window, yet it is
+      // proposed immediately with no pending status checks
+      expect(updates).toEqual([
+        {
+          bucket: 'non-major',
+          isBreaking: false,
+          newMajor: 1,
+          newMinor: 4,
+          newPatch: 5,
+          newValue: '1.4.5',
+          newVersion: '1.4.5',
+          newVersionAgeInDays: expect.any(Number),
+          releaseTimestamp: expect.any(String),
+          updateType: 'patch',
+          hasAttestation: undefined,
+        },
+      ]);
+    });
+
     it('should allow unstable versions if the ignoreUnstable=false', async () => {
       config.currentValue = '2.5.16';
       config.ignoreUnstable = false;
