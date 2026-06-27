@@ -600,9 +600,11 @@ export class Vulnerabilities {
       matchCurrentVersion: depVersion,
       versioning,
       allowedVersions: fixedVersion,
-      // Remediate even when updates are otherwise disabled for the dependency,
-      // e.g. transitive deps surfaced from a lockfile. Consistent with how
-      // vulnerability alerts already override schedule and minimumReleaseAge.
+      /**
+       * Remediate even when updates are otherwise disabled for the dependency,
+       * e.g. transitive deps surfaced from a lockfile. Consistent with how
+       * vulnerability alerts already override schedule and minimumReleaseAge.
+       */
       enabled: true,
       isVulnerabilityAlert: true,
       vulnerabilitySeverity: severityDetails.severityLevel,

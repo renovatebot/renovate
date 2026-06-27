@@ -221,9 +221,11 @@ export const PdmLockfile = Toml.pipe(
 
 export interface UvLockedPackage {
   version: string;
-  // The index a package was resolved from, if any. Absent for the workspace
-  // root and for virtual/editable/path/git packages, which cannot be
-  // remediated by `uv lock --upgrade-package`.
+  /**
+   * The index a package was resolved from, if any. Absent for the workspace
+   * root and for virtual/editable/path/git packages, which cannot be
+   * remediated by `uv lock --upgrade-package`.
+   */
   registryUrl?: string;
 }
 
