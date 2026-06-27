@@ -186,6 +186,16 @@ describe('modules/datasource/aws-machine-image/index', () => {
       expect(res).toStrictEqual(image3.Name);
     });
 
+    it('without newValue, with newest image missing a name to be null', async () => {
+      const { Name, ...imageWithoutName } = image3;
+      mockDescribeImagesCommand({ Images: [imageWithoutName] });
+      const res = await getDigest({
+        datasource,
+        packageName: '[{"Name":"owner-id","Values":["602401143452"]}]',
+      });
+      expect(res).toBeNull();
+    });
+
     it('without newValue, with 3 matching image to return the newest image', async () => {
       mockDescribeImagesCommand(mock3Images);
       const res = await getDigest({
@@ -272,15 +282,27 @@ describe('modules/datasource/aws-machine-image/index', () => {
       });
     });
 
-    it('with 3 matching image to return the newest image', async () => {
+    it('with 3 matching images returns all images as releases, not just the newest', async () => {
       mockDescribeImagesCommand(mock3Images);
       const res = await getPkgReleases({
         datasource,
         packageName:
-          '[{"Name":"owner-id","Values":["602401143452"]},{"Name":"name","Values":["with 3 matching image to return the newest image"]}]',
+          '[{"Name":"owner-id","Values":["602401143452"]},{"Name":"name","Values":["with 3 matching images returns all"]}]',
       });
       expect(res).toEqual({
         releases: [
+          {
+            isDeprecated: false,
+            newDigest: image1.Name,
+            releaseTimestamp: image1.CreationDate,
+            version: image1.ImageId,
+          },
+          {
+            isDeprecated: true,
+            newDigest: image2.Name,
+            releaseTimestamp: image2.CreationDate,
+            version: image2.ImageId,
+          },
           {
             isDeprecated: false,
             newDigest: image3.Name,

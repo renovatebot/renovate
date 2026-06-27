@@ -129,8 +129,7 @@ export class AwsMachineImageDatasource extends Datasource {
       return null;
     }
 
-    const res = await this.getReleases({ packageName: serializedAmiFilter });
-    return res?.releases?.[0]?.newDigest ?? /* v8 ignore next */ null; // TODO: needs test
+    return images.at(-1)!.Name ?? null;
   }
 
   override getDigest(
@@ -151,21 +150,17 @@ export class AwsMachineImageDatasource extends Datasource {
     packageName: serializedAmiFilter,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     const images = await this.getSortedAwsMachineImages(serializedAmiFilter);
-    const latestImage = images[images.length - 1];
-    if (!latestImage?.ImageId) {
+    if (!images.length || !images.at(-1)!.ImageId) {
       return null;
     }
     return {
-      releases: [
-        {
-          version: latestImage.ImageId,
-          releaseTimestamp: asTimestamp(latestImage.CreationDate),
-          isDeprecated:
-            Date.parse(latestImage.DeprecationTime ?? this.now.toString()) <
-            this.now,
-          newDigest: latestImage.Name,
-        },
-      ],
+      releases: images.map((image) => ({
+        version: image.ImageId!,
+        releaseTimestamp: asTimestamp(image.CreationDate),
+        isDeprecated:
+          Date.parse(image.DeprecationTime ?? this.now.toString()) < this.now,
+        newDigest: image.Name,
+      })),
     };
   }
 
