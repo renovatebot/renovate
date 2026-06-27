@@ -330,7 +330,7 @@ export type RenovateRepositoryEntry = AllConfig & {
 
 export type RenovateRepository = string | RenovateRepositoryEntry;
 
-export type UseBaseBranchConfigType = 'merge' | 'none';
+export type UseBaseBranchConfigType = 'fallback' | 'merge' | 'none';
 export type ConstraintsFilter = 'strict' | 'none';
 export type MinimumReleaseAgeBehaviour =
   | 'timestamp-required'
