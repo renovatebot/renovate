@@ -4035,14 +4035,34 @@ To learn how to use GitHub's Merge Queue feature with Renovate, read our [GitHub
 
 ## `platformCommit`
 
-Only use this option if you run Renovate as a [GitHub App](https://docs.github.com/en/developers/apps/getting-started-with-apps/about-apps).
-It does not apply when you use a Personal Access Token as credential.
+`platformCommit` tells Renovate to create commits through the platform API instead of creating local git commits and pushing them.
 
-When `platformCommit` is enabled, Renovate will create commits with GitHub's API instead of using `git` directly.
-This way Renovate can use GitHub's [Commit signing support for bots and other GitHub Apps](https://github.blog/2019-08-15-commit-signing-support-for-bots-and-other-github-apps/) feature.
+**GitHub**
+
+Use this option only when running Renovate as a [GitHub App](https://docs.github.com/en/developers/apps/getting-started-with-apps/about-apps). It does not apply when using a Personal Access Token.
+
+When `platformCommit=enabled`, Renovate creates commits via GitHub's API.
+This allows GitHub's [commit signing support for bots and GitHub Apps](https://github.blog/2019-08-15-commit-signing-support-for-bots-and-other-github-apps/).
+
+**GitLab**
+
+When `platformCommit=enabled`, Renovate creates commits using GitLab's [Commits API](https://docs.gitlab.com/api/commits/#create-a-commit-with-multiple-files-and-actions) instead of pushing with `git`.
+This lets Renovate commit without requiring configured `gitAuthor` or `gitPrivateKey`, because GitLab signs and attributes commits server-side.
+
+Renovate recreates the branch from the base branch on each update so the branch remains a single fresh commit instead of accumulating prior Renovate commits.
+
+To verify behavior in logs, set `LOG_LEVEL=debug` and look for:
+
+- `GitLab platformCommit enabled: using platform API commit path`
+- `GitLab platformCommit: preparing commit via GitLab API`
+- `GitLab platformCommit: created commit via GitLab API`
+
+If you see this message instead, Renovate used the regular `git` commit/push path:
+
+- `GitLab platformCommit disabled or auto: using git push commit path`
 
 !!! note
-  When using platform commits, GitHub determines the git author string to use and Renovate's own gitAuthor is ignored.
+  For GitHub platform commits, GitHub determines the git author string and Renovate's own `gitAuthor` is ignored.
 
 ## `postUpdateOptions`
 

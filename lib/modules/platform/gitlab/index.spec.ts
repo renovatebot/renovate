@@ -518,6 +518,270 @@ describe('modules/platform/gitlab/index', () => {
     });
   });
 
+  describe('commitFiles', () => {
+    beforeEach(async () => {
+      await initRepo();
+    });
+
+    it('returns null when no actions are generated', async () => {
+      const res = await gitlab.commitFiles({
+        branchName: 'some-branch',
+        files: [],
+        message: 'msg',
+      });
+
+      expect(res).toBeNull();
+      expect(git.prepareCommit).not.toHaveBeenCalled();
+    });
+
+    it('creates a commit via the GitLab API for create, update and delete actions', async () => {
+      // First file exists on the branch (update), second does not (create).
+      git.getFile.mockResolvedValueOnce('existing').mockResolvedValueOnce(null);
+
+      const scope = httpMock
+        .scope(gitlabApiHost)
+        .post('/api/v4/projects/some%2Frepo/repository/commits', {
+          branch: 'some-branch',
+          start_branch: 'master',
+          commit_message: 'title\n\nbody',
+          actions: [
+            {
+              action: 'update',
+              file_path: 'existing.txt',
+              content: 'updated',
+            },
+            {
+              action: 'create',
+              file_path: 'new.txt',
+              content: 'created',
+            },
+            {
+              action: 'delete',
+              file_path: 'old.txt',
+            },
+          ],
+          force: true,
+        })
+        .reply(201, {
+          id: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+        });
+
+      const res = await gitlab.commitFiles({
+        branchName: 'some-branch',
+        files: [
+          {
+            type: 'addition',
+            path: 'existing.txt',
+            contents: 'updated',
+          },
+          {
+            type: 'addition',
+            path: 'new.txt',
+            contents: 'created',
+          },
+          {
+            type: 'deletion',
+            path: 'old.txt',
+          },
+        ],
+        message: ['title', 'body'],
+      });
+
+      expect(scope.isDone()).toBeTrue();
+      // The platform commit path must not touch the local git author/signing flow.
+      expect(git.prepareCommit).not.toHaveBeenCalled();
+      expect(git.resetToCommit).not.toHaveBeenCalled();
+      expect(git.fetchBranch).not.toHaveBeenCalled();
+      expect(git.getFile).toHaveBeenNthCalledWith(1, 'existing.txt', 'master');
+      expect(git.getFile).toHaveBeenNthCalledWith(2, 'new.txt', 'master');
+      expect(res).toBe('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa');
+    });
+
+    it('returns the API sha for a single create action', async () => {
+      git.getFile.mockResolvedValueOnce(null);
+
+      const scope = httpMock
+        .scope(gitlabApiHost)
+        .post('/api/v4/projects/some%2Frepo/repository/commits', {
+          branch: 'some-branch',
+          start_branch: 'master',
+          commit_message: 'msg',
+          actions: [
+            {
+              action: 'create',
+              file_path: 'new.txt',
+              content: 'created',
+            },
+          ],
+          force: true,
+        })
+        .reply(201, {
+          id: 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
+        });
+
+      const res = await gitlab.commitFiles({
+        branchName: 'some-branch',
+        files: [
+          {
+            type: 'addition',
+            path: 'new.txt',
+            contents: 'created',
+          },
+        ],
+        message: 'msg',
+      });
+
+      expect(scope.isDone()).toBeTrue();
+      expect(res).toBe('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb');
+    });
+
+    it('base64 encodes binary file contents', async () => {
+      git.getFile.mockResolvedValueOnce(null);
+      const contents = Buffer.from([0x00, 0x01, 0x02, 0x03]);
+
+      const scope = httpMock
+        .scope(gitlabApiHost)
+        .post('/api/v4/projects/some%2Frepo/repository/commits', {
+          branch: 'some-branch',
+          start_branch: 'master',
+          commit_message: 'msg',
+          actions: [
+            {
+              action: 'create',
+              file_path: 'binary.bin',
+              content: contents.toString('base64'),
+              encoding: 'base64',
+            },
+          ],
+          force: true,
+        })
+        .reply(201, {
+          id: 'cccccccccccccccccccccccccccccccccccccccc',
+        });
+
+      const res = await gitlab.commitFiles({
+        branchName: 'some-branch',
+        files: [
+          {
+            type: 'addition',
+            path: 'binary.bin',
+            contents,
+          },
+        ],
+        message: 'msg',
+      });
+
+      expect(scope.isDone()).toBeTrue();
+      expect(res).toBe('cccccccccccccccccccccccccccccccccccccccc');
+    });
+
+    it('sets execute_filemode for executable files and recreates the branch from the base branch', async () => {
+      git.getFile.mockResolvedValueOnce(null);
+
+      const scope = httpMock
+        .scope(gitlabApiHost)
+        .post('/api/v4/projects/some%2Frepo/repository/commits', {
+          branch: 'some-branch',
+          start_branch: 'develop',
+          commit_message: 'msg',
+          actions: [
+            {
+              action: 'create',
+              file_path: 'script.sh',
+              content: 'echo hi',
+              execute_filemode: true,
+            },
+          ],
+          force: true,
+        })
+        .reply(201, {
+          id: 'dddddddddddddddddddddddddddddddddddddddd',
+        });
+
+      const res = await gitlab.commitFiles({
+        branchName: 'some-branch',
+        files: [
+          {
+            type: 'addition',
+            path: 'script.sh',
+            contents: 'echo hi',
+            isExecutable: true,
+          },
+        ],
+        message: 'msg',
+        baseBranch: 'develop',
+      });
+
+      expect(scope.isDone()).toBeTrue();
+      expect(git.getFile).toHaveBeenCalledWith('script.sh', 'develop');
+      expect(res).toBe('dddddddddddddddddddddddddddddddddddddddd');
+    });
+
+    it('handles null contents as an empty file', async () => {
+      git.getFile.mockResolvedValueOnce(null);
+
+      const scope = httpMock
+        .scope(gitlabApiHost)
+        .post('/api/v4/projects/some%2Frepo/repository/commits', {
+          branch: 'some-branch',
+          start_branch: 'master',
+          commit_message: 'msg',
+          actions: [
+            {
+              action: 'create',
+              file_path: 'empty.txt',
+              content: '',
+            },
+          ],
+          force: true,
+        })
+        .reply(201, {
+          id: 'eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
+        });
+
+      const res = await gitlab.commitFiles({
+        branchName: 'some-branch',
+        files: [
+          {
+            type: 'addition',
+            path: 'empty.txt',
+            contents: null,
+          },
+        ],
+        message: 'msg',
+      });
+
+      expect(scope.isDone()).toBeTrue();
+      expect(res).toBe('eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee');
+    });
+
+    it('returns null and logs a warning when the API call fails', async () => {
+      git.getFile.mockResolvedValueOnce(null);
+
+      const scope = httpMock
+        .scope(gitlabApiHost)
+        .post('/api/v4/projects/some%2Frepo/repository/commits')
+        .reply(400, {
+          message: 'bad request',
+        });
+
+      const res = await gitlab.commitFiles({
+        branchName: 'some-branch',
+        files: [
+          {
+            type: 'addition',
+            path: 'new.txt',
+            contents: 'created',
+          },
+        ],
+        message: 'msg',
+      });
+
+      expect(scope.isDone()).toBeTrue();
+      expect(res).toBeNull();
+    });
+  });
+
   describe('getBranchForceRebase', () => {
     it('should return false for merge_method=merge', async () => {
       await initRepo(

@@ -19,6 +19,10 @@ import { coerceArray } from '../../../util/array.ts';
 import { noLeadingAtSymbol, parseJson } from '../../../util/common.ts';
 import { getEnv } from '../../../util/env.ts';
 import * as git from '../../../util/git/index.ts';
+import type {
+  CommitFilesConfig,
+  FileAddition,
+} from '../../../util/git/types.ts';
 import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider.ts';
 import type { GitlabHttpOptions } from '../../../util/http/gitlab.ts';
 import { setBaseUrl } from '../../../util/http/gitlab.ts';
@@ -27,6 +31,8 @@ import { parseInteger } from '../../../util/number.ts';
 import * as p from '../../../util/promises.ts';
 import { regEx } from '../../../util/regex.ts';
 import { sanitize } from '../../../util/sanitize.ts';
+import type { LongCommitSha } from '../../../util/schema-utils/git.ts';
+import { toLongCommitSha } from '../../../util/schema-utils/git.ts';
 import type { EmailAddress } from '../../../util/schema-utils/index.ts';
 import {
   ensureTrailingSlash,
@@ -263,6 +269,117 @@ export async function getJsonFile(
 ): Promise<any> {
   const raw = await getRawFile(fileName, repoName, branchOrTag);
   return parseJson(raw, fileName);
+}
+
+// Commit actions accepted by the GitLab "create a commit" API.
+// https://docs.gitlab.com/api/commits/#create-a-commit-with-multiple-files-and-actions
+
+interface GitlabCommitAction {
+  action: 'create' | 'update' | 'delete';
+  file_path: string;
+  content?: string;
+  encoding?: 'base64';
+  execute_filemode?: boolean;
+}
+
+interface GitlabCommitResponse {
+  id: string;
+}
+
+function toCommitMessage(message: string | string[]): string {
+  return isArray(message) ? message.join('\n\n') : message;
+}
+
+async function toAdditionAction(
+  file: FileAddition,
+  startBranch: string,
+): Promise<GitlabCommitAction> {
+  // The GitLab API requires the caller to declare whether a file is being
+  // created or updated, so we check whether it already exists on the parent
+  // branch reference used by start_branch.
+  const fileExists = (await git.getFile(file.path, startBranch)) !== null;
+
+  const action: GitlabCommitAction = {
+    action: fileExists ? 'update' : 'create',
+    file_path: file.path,
+    content: Buffer.isBuffer(file.contents)
+      ? file.contents.toString('base64')
+      : (file.contents ?? ''),
+  };
+
+  // Binary content must be base64 encoded so it survives the JSON round-trip.
+  if (Buffer.isBuffer(file.contents)) {
+    action.encoding = 'base64';
+  }
+
+  if (file.isExecutable) {
+    action.execute_filemode = true;
+  }
+
+  return action;
+}
+
+function toDeletionAction(filePath: string): GitlabCommitAction {
+  return {
+    action: 'delete',
+    file_path: filePath,
+  };
+}
+
+export async function commitFiles(
+  commitConfig: CommitFilesConfig,
+): Promise<LongCommitSha | null> {
+  const { baseBranch, branchName, files, message } = commitConfig;
+  const startBranch = baseBranch ?? config.defaultBranch;
+  logger.debug(
+    { branchName, fileCount: files.length },
+    'GitLab platformCommit: preparing commit via GitLab API',
+  );
+
+  const actions: GitlabCommitAction[] = [];
+  for (const file of files) {
+    if (file.type === 'deletion') {
+      actions.push(toDeletionAction(file.path));
+    } else {
+      actions.push(await toAdditionAction(file, startBranch));
+    }
+  }
+
+  if (isEmptyArray(actions)) {
+    logger.debug(
+      { branchName },
+      'GitLab platformCommit: no file changes to commit',
+    );
+    return null;
+  }
+
+  try {
+    const res = await gitlabApi.postJson<GitlabCommitResponse>(
+      `projects/${config.repository}/repository/commits`,
+      {
+        body: {
+          branch: branchName,
+          start_branch: startBranch,
+          commit_message: toCommitMessage(message),
+          actions,
+          force: true,
+        },
+      },
+    );
+
+    const commitSha = toLongCommitSha(res.body.id);
+    logger.debug(
+      { branchName, commitSha, startBranch },
+      'GitLab platformCommit: created commit via GitLab API',
+    );
+    return commitSha;
+  } catch (err) {
+    logger.warn(
+      { err, branchName, startBranch },
+      'GitLab platformCommit: failed to create commit via GitLab API',
+    );
+    return null;
+  }
 }
 
 // Initialize GitLab by getting base branch
