@@ -48,6 +48,11 @@ const pinnedPrecommitConfig = codeBlock`
 `;
 
 describe('modules/manager/pre-commit/extract', () => {
+  beforeEach(() => {
+    hostRules.find.mockReset();
+    hostRules.hostType.mockReset();
+  });
+
   describe('extractPackageFile()', () => {
     it('returns null for invalid yaml file content', () => {
       const result = extractPackageFile('nothing here: [', filename);
@@ -174,7 +179,25 @@ describe('modules/manager/pre-commit/extract', () => {
             depName: 'pre-commit/pre-commit-hooks',
             depType: 'repository',
             packageName: 'pre-commit/pre-commit-hooks',
-            registryUrls: ['enterprise.com'],
+            registryUrls: ['https://enterprise.com'],
+          },
+        ],
+      });
+    });
+
+    it('preserves registryUrls for custom github hosts detected via hostRules', () => {
+      hostRules.hostType.mockReturnValueOnce('github');
+
+      const result = extractPackageFile(enterpriseGitPrecommitConfig, filename);
+      expect(result).toEqual({
+        deps: [
+          {
+            currentValue: 'v1.0.0',
+            datasource: 'github-tags',
+            depName: 'pre-commit/pre-commit-hooks',
+            depType: 'repository',
+            packageName: 'pre-commit/pre-commit-hooks',
+            registryUrls: ['https://enterprise.com'],
           },
         ],
       });
@@ -190,7 +213,7 @@ describe('modules/manager/pre-commit/extract', () => {
             depName: 'pre-commit/pre-commit-hooks',
             depType: 'repository',
             packageName: 'pre-commit/pre-commit-hooks',
-            registryUrls: ['enterprise.com'],
+            registryUrls: ['https://enterprise.com'],
             skipReason: 'unknown-registry',
           },
         ],
@@ -210,8 +233,117 @@ describe('modules/manager/pre-commit/extract', () => {
             depName: 'pre-commit/pre-commit-hooks',
             depType: 'repository',
             packageName: 'pre-commit/pre-commit-hooks',
-            registryUrls: ['enterprise.com'],
+            registryUrls: ['https://enterprise.com'],
             skipReason: 'unknown-registry',
+          },
+        ],
+      });
+    });
+
+    it('normalizes depName for repository URLs with query and fragment', () => {
+      const config = codeBlock`
+        repos:
+          - repo: https://github.com/pre-commit/pre-commit-hooks.git?ref=main#frag
+            rev: v1.0.0
+      `;
+
+      const result = extractPackageFile(config, filename);
+      expect(result).toEqual({
+        deps: [
+          {
+            currentValue: 'v1.0.0',
+            datasource: 'github-tags',
+            depName: 'pre-commit/pre-commit-hooks',
+            depType: 'repository',
+            packageName: 'pre-commit/pre-commit-hooks',
+          },
+        ],
+      });
+    });
+
+    it('normalizes depName for trailing slash repository URLs', () => {
+      const config = codeBlock`
+        repos:
+          - repo: https://github.com/pre-commit/pre-commit-hooks/
+            rev: v1.0.0
+      `;
+
+      const result = extractPackageFile(config, filename);
+      expect(result).toEqual({
+        deps: [
+          {
+            currentValue: 'v1.0.0',
+            datasource: 'github-tags',
+            depName: 'pre-commit/pre-commit-hooks',
+            depType: 'repository',
+            packageName: 'pre-commit/pre-commit-hooks',
+          },
+        ],
+      });
+    });
+
+    it('marks host-only repository URLs as invalid', () => {
+      const config = codeBlock`
+        repos:
+          - repo: https://github.com/
+            rev: v1.0.0
+      `;
+
+      const result = extractPackageFile(config, filename);
+      expect(result).toEqual({
+        deps: [
+          {
+            currentValue: 'v1.0.0',
+            datasource: undefined,
+            depName: undefined,
+            depType: 'repository',
+            packageName: undefined,
+            skipReason: 'invalid-url',
+          },
+        ],
+      });
+    });
+
+    it('strips credentials from registryUrls for custom hosts', () => {
+      hostRules.find.mockReturnValue({});
+      const config = codeBlock`
+        repos:
+          - repo: https://user:pass@enterprise.com/pre-commit/pre-commit-hooks
+            rev: v1.0.0
+      `;
+
+      const result = extractPackageFile(config, filename);
+      expect(result).toEqual({
+        deps: [
+          {
+            currentValue: 'v1.0.0',
+            depName: 'pre-commit/pre-commit-hooks',
+            depType: 'repository',
+            packageName: 'pre-commit/pre-commit-hooks',
+            registryUrls: ['https://enterprise.com'],
+            skipReason: 'unknown-registry',
+          },
+        ],
+      });
+    });
+
+    it('detects gitlab datasource for custom gitlab hosts with explicit ports', () => {
+      const config = codeBlock`
+        repos:
+          - repo: https://gitlab.enterprise.com:8443/pre-commit/pre-commit-hooks
+            rev: v1.0.0
+      `;
+
+      const result = extractPackageFile(config, filename);
+      expect(result).toEqual({
+        deps: [
+          {
+            currentValue: 'v1.0.0',
+            datasource: 'gitlab-tags',
+            depName: 'pre-commit/pre-commit-hooks',
+            depType: 'repository',
+            packageName: 'pre-commit/pre-commit-hooks',
+            registryUrls: ['https://gitlab.enterprise.com:8443'],
           },
         ],
       });
