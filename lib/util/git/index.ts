@@ -38,7 +38,11 @@ import { getChildEnv } from '../exec/utils.ts';
 import { newlineRegex, regEx } from '../regex.ts';
 import type { LongCommitSha } from '../schema-utils/git.ts';
 import { toLongCommitSha } from '../schema-utils/git.ts';
-import { matchRegexOrGlobList } from '../string-match.ts';
+import {
+  getRegexPredicate,
+  isRegexMatch,
+  matchRegexOrGlobList,
+} from '../string-match.ts';
 import { logWarningIfUnicodeHiddenCharactersInPackageFile } from '../unicode.ts';
 import { getGitEnvironmentVariables } from './auth.ts';
 import { parseGitAuthor } from './author.ts';
@@ -874,16 +878,45 @@ export async function isBranchModified(
     logger.warn({ err }, 'Error checking last author for isBranchModified');
   }
   const { gitAuthorEmail, ignoredAuthors } = config;
+  const invalidIgnoredAuthors = new Set<string>();
 
-  const includedAuthors = new Set(committedAuthors);
+  function isIgnoredAuthor(committedAuthor: string): boolean {
+    for (const ignoredAuthor of ignoredAuthors) {
+      const ignoredAuthorRegex = getRegexPredicate(ignoredAuthor);
+      if (ignoredAuthorRegex) {
+        if (ignoredAuthorRegex(committedAuthor)) {
+          return true;
+        }
+        continue;
+      }
 
-  // v8 ignore else -- TODO: add test #40625
-  if (gitAuthorEmail) {
-    includedAuthors.delete(gitAuthorEmail);
+      if (
+        isRegexMatch(ignoredAuthor) &&
+        !invalidIgnoredAuthors.has(ignoredAuthor)
+      ) {
+        invalidIgnoredAuthors.add(ignoredAuthor);
+        logger.warn(
+          { ignoredAuthor },
+          'Invalid gitIgnoredAuthors regex pattern; treating as exact string match',
+        );
+      }
+
+      if (committedAuthor === ignoredAuthor) {
+        return true;
+      }
+    }
+
+    return false;
   }
 
-  for (const ignoredAuthor of ignoredAuthors) {
-    includedAuthors.delete(ignoredAuthor);
+  const includedAuthors = new Set<string>();
+  for (const committedAuthor of committedAuthors) {
+    if (
+      committedAuthor !== gitAuthorEmail &&
+      !isIgnoredAuthor(committedAuthor)
+    ) {
+      includedAuthors.add(committedAuthor);
+    }
   }
 
   if (includedAuthors.size === 0) {
