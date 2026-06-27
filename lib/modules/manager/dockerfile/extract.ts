@@ -1,6 +1,7 @@
 import { isNonEmptyStringAndNotWhitespace, isString } from '@sindresorhus/is';
 import { logger } from '../../../logger/index.ts';
 import { newlineRegex, regEx } from '../../../util/regex.ts';
+import { ensureTrailingSlash } from '../../../util/url.ts';
 import { DockerDatasource } from '../../datasource/docker/index.ts';
 import * as debianVersioning from '../../versioning/debian/index.ts';
 import * as ubuntuVersioning from '../../versioning/ubuntu/index.ts';
@@ -179,20 +180,35 @@ export function getDep(
 
   // Resolve registry aliases first so that we don't need special casing later on:
   for (const [name, value] of Object.entries(registryAliases ?? {})) {
-    if (currentFrom.startsWith(`${name}/`)) {
-      const depName = currentFrom.substring(name.length + 1);
-      const dep = getDep(`${value}/${depName}`, false);
-      // retain depName, not sure if condition is necessary
-      if (dep.depName?.startsWith(value)) {
-        dep.packageName = dep.depName;
-        dep.depName = `${name}/${dep.depName.substring(value.length + 1)}`;
-      }
-      if (specifyReplaceString) {
-        dep.replaceString = currentFrom;
-        dep.autoReplaceStringTemplate = getAutoReplaceTemplate(dep);
-      }
-      return dep;
+    // Allow `${VAR}`/`${VAR:-...}` keys to match without a trailing slash
+    // (`}` is an unambiguous boundary). Bare identifier keys like
+    // `$CI_REGISTRY` still require `/` so they can't eat `$CI_REGISTRY_IMAGE/`.
+    const matchedWithSlash = currentFrom.startsWith(`${name}/`);
+    const matchedAtBoundary =
+      !matchedWithSlash && name.endsWith('}') && currentFrom.startsWith(name);
+    if (!matchedWithSlash && !matchedAtBoundary) {
+      continue;
     }
+    const depName = currentFrom.slice(
+      matchedWithSlash ? name.length + 1 : name.length,
+    );
+    const valueWithSlash = ensureTrailingSlash(value);
+    const dep = getDep(`${valueWithSlash}${depName}`, false);
+    // TODO: when the inner getDep strips a `library/` prefix (or similar)
+    // the depName no longer starts with `valueWithSlash` and the alias-rooted
+    // depName is not restored.
+    if (dep.depName?.startsWith(valueWithSlash)) {
+      dep.packageName = dep.depName;
+      const [imageAndTag] = currentFrom.split('@');
+      dep.depName = dep.currentValue
+        ? imageAndTag.substring(0, imageAndTag.lastIndexOf(':'))
+        : imageAndTag;
+    }
+    if (specifyReplaceString) {
+      dep.replaceString = currentFrom;
+      dep.autoReplaceStringTemplate = getAutoReplaceTemplate(dep);
+    }
+    return dep;
   }
 
   const dep = splitImageParts(currentFrom);
