@@ -11,7 +11,8 @@ export function copyResponse<T>(
 
   if (deep) {
     res.headers = clone(headers);
-    res.body = body instanceof Buffer ? (body.subarray() as T) : clone<T>(body);
+    res.body =
+      body instanceof Uint8Array ? (body.subarray() as T) : clone<T>(body);
   }
 
   if (cached) {
