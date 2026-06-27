@@ -32,6 +32,13 @@ import { BasePyProjectProcessor } from './abstract.ts';
 
 const uvUpdateCMD = 'uv lock';
 
+// The public PyPI index, as recorded in `uv.lock` package sources. Transitive
+// deps resolved from it use the datasource default, so no `registryUrls` needed.
+const defaultPypiRegistries = new Set([
+  'https://pypi.org/simple',
+  'https://pypi.org/simple/',
+]);
+
 export class UvProcessor extends BasePyProjectProcessor {
   override lockfileName = 'uv.lock';
 
@@ -150,8 +157,38 @@ export class UvProcessor extends BasePyProjectProcessor {
           for (const dep of deps) {
             const packageName = dep.packageName;
             if (packageName && packageName in lockFileMapping) {
-              dep.lockedVersion = lockFileMapping[packageName];
+              dep.lockedVersion = lockFileMapping[packageName].version;
             }
+          }
+          const knownPackageNames = new Set(
+            deps.map((dep) => dep.packageName).filter(isString),
+          );
+
+          // Surface transitive (lockfile-only) packages as disabled
+          // dependencies. They produce no routine updates, but
+          // `osvVulnerabilityAlerts` can still match them and re-enable a
+          // targeted `uv lock --upgrade-package` when a fixed version exists.
+          for (const [packageName, locked] of Object.entries(lockFileMapping)) {
+            if (knownPackageNames.has(packageName)) {
+              continue;
+            }
+            // Only registry-sourced packages can be remediated by name. Skip
+            // the workspace root and any virtual/editable/path/git packages.
+            if (!locked.registryUrl) {
+              continue;
+            }
+            const indirectDep: PackageDependency = {
+              packageName,
+              depName: packageName,
+              depType: depTypes.uvIndirectDependencies,
+              datasource: PypiDatasource.id,
+              lockedVersion: locked.version,
+              enabled: false,
+            };
+            if (!defaultPypiRegistries.has(locked.registryUrl)) {
+              indirectDep.registryUrls = [locked.registryUrl];
+            }
+            deps.push(indirectDep);
           }
         }
       }
