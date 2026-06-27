@@ -1,3 +1,4 @@
+import { test } from 'vitest'
 import { CONFIG_VALIDATION } from '../../../constants/error-messages.ts';
 import { regEx } from '../../../util/regex.ts';
 import { massageConfig } from '../../massage.ts';
@@ -25,6 +26,33 @@ describe('config/presets/internal/index', () => {
       CONFIG_VALIDATION,
     );
   });
+
+
+  for (const [groupName, groupPresets] of Object.entries(internal.groups)) {
+    for (const [presetName, presetConfig] of Object.entries(
+      groupPresets,
+    )) {
+      // these presets don't always have the description as they're a mix of human-generated and auto-generated
+      if (groupName === 'monorepo' || groupName === 'group') {
+        if (presetConfig.description) {
+          it(`${`${groupName}:${presetName}`} has a description`, () => {
+            expect(presetConfig.description).toBeDefined()
+            expect(presetConfig.description).not.toBeEmptyString()
+          })
+        } else {
+          test.todo(`${`${groupName}:${presetName}`} has a description`, () => {
+            expect(presetConfig.description).toBeDefined()
+            expect(presetConfig.description).not.toBeEmptyString()
+          })
+        }
+      } else {
+        it(`${`${groupName}:${presetName}`} has a description`, () => {
+          expect(presetConfig.description).toBeDefined()
+          expect(presetConfig.description).not.toBeEmptyString()
+        })
+      }
+    }
+  }
 
   for (const [groupName, groupPresets] of Object.entries(internal.groups)) {
     for (const [presetName, presetConfig] of Object.entries(
