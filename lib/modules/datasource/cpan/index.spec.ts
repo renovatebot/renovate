@@ -86,5 +86,22 @@ describe('modules/datasource/cpan/index', () => {
       });
       expect(res?.tags?.latest).toBe('1.0048');
     });
+
+    it('strips a leading v from v-prefixed versions', async () => {
+      httpMock
+        .scope(baseUrl)
+        .post(
+          '/v1/file/_search',
+          (body) =>
+            body.query.bool.filter[0].term['module.name'] === 'Foo::Bar',
+        )
+        .reply(200, Fixtures.get('Foo-Bar.json'));
+      const res = await getPkgReleases({
+        datasource: CpanDatasource.id,
+        packageName: 'Foo::Bar',
+      });
+      expect(res?.releases.map((r) => r.version)).toEqual(['1.1.0', '1.1.1']);
+      expect(res?.tags?.latest).toBe('1.1.1');
+    });
   });
 });
