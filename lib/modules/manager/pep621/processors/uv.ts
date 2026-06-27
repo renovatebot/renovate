@@ -39,10 +39,6 @@ const defaultPypiRegistries = new Set([
   'https://pypi.org/simple/',
 ]);
 
-function isDefaultPypiRegistry(registryUrl: string): boolean {
-  return defaultPypiRegistries.has(registryUrl);
-}
-
 export class UvProcessor extends BasePyProjectProcessor {
   override lockfileName = 'uv.lock';
 
@@ -189,7 +185,7 @@ export class UvProcessor extends BasePyProjectProcessor {
               lockedVersion: locked.version,
               enabled: false,
             };
-            if (!isDefaultPypiRegistry(locked.registryUrl)) {
+            if (!defaultPypiRegistries.has(locked.registryUrl)) {
               indirectDep.registryUrls = [locked.registryUrl];
             }
             deps.push(indirectDep);
