@@ -83,6 +83,9 @@ export const toolDefinitions = [
     name: 'jb',
   },
   {
+    name: 'kas',
+  },
+  {
     name: 'kustomize',
   },
   {
