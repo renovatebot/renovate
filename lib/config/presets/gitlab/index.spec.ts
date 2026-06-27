@@ -34,7 +34,7 @@ describe('config/presets/gitlab/index', () => {
         .scope(gitlabApiHost)
         .get(projectPath)
         .twice()
-        .reply(200, {})
+        .reply(200, { id: 1 })
         .get(`${basePath}/files/default.json/raw?ref=master`)
         .reply(404)
         .get(`${basePath}/files/renovate.json/raw?ref=master`)
@@ -49,6 +49,7 @@ describe('config/presets/gitlab/index', () => {
         .scope(gitlabApiHost)
         .get(projectPath)
         .reply(200, {
+          id: 1,
           default_branch: 'main',
         })
         .get(`${basePath}/files/default.json/raw?ref=main`)
@@ -76,6 +77,7 @@ describe('config/presets/gitlab/index', () => {
         .scope(gitlabApiHost)
         .get(projectPath)
         .reply(200, {
+          id: 1,
           default_branch: 'master',
         })
         .get(`${basePath}/files/path%2Fcustom.json/raw?ref=master`)
@@ -94,6 +96,7 @@ describe('config/presets/gitlab/index', () => {
         .scope(gitlabApiHost)
         .get(projectPath)
         .reply(200, {
+          id: 1,
           default_branch: 'master',
         })
         .get(`${basePath}/files/path%2Fcustom.json/raw?ref=master`)
@@ -112,6 +115,7 @@ describe('config/presets/gitlab/index', () => {
         .scope(gitlabApiHost)
         .get(projectPath)
         .reply(200, {
+          id: 1,
           default_branch: 'master',
         })
         .get(`${basePath}/files/path%2Fcustom.json5/raw?ref=master`)
@@ -132,6 +136,7 @@ describe('config/presets/gitlab/index', () => {
         .scope(gitlabApiHost)
         .get(projectPath)
         .reply(200, {
+          id: 1,
           default_branch: 'devel',
         })
         .get(`${basePath}/files/some.json/raw?ref=devel`)
@@ -150,6 +155,7 @@ describe('config/presets/gitlab/index', () => {
         .scope('https://gitlab.example.org')
         .get(projectPath)
         .reply(200, {
+          id: 1,
           default_branch: 'devel',
         })
         .get(`${basePath}/files/some.json/raw?ref=devel`)
