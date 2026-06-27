@@ -1294,6 +1294,82 @@ describe('modules/manager/mise/extract', () => {
       });
     });
 
+    it('skips lockedVersion when lock file holds a non-pinned range', async () => {
+      const rangeLockFileContent = codeBlock`
+        [[tools."npm:typescript"]]
+        version = "^1.18.4"
+
+        [[tools."npm:prettier"]]
+        version = "3.0.0"
+      `;
+      fs.readLocalFile.mockResolvedValueOnce(rangeLockFileContent);
+      const content = codeBlock`
+        [tools]
+        "npm:typescript" = "^1.18.4"
+        "npm:prettier" = "3.0.0"
+      `;
+      const result = await extractPackageFile(content, 'mise.toml');
+      expect(result?.deps[0]).toMatchObject({
+        depName: 'npm:typescript',
+        currentValue: '^1.18.4',
+      });
+      expect(result?.deps[0]).not.toHaveProperty('lockedVersion');
+      expect(result?.deps[1]).toMatchObject({
+        depName: 'npm:prettier',
+        currentValue: '3.0.0',
+        lockedVersion: '3.0.0',
+      });
+    });
+
+    /*
+     * Each backend must resolve its own datasource versioning, not the default semver-coerced one.
+     *
+     * semver-coerced accepts `=1.18.4`/`=1.2.3` as versions while npm/cargo reject them, so these
+     * specifiers must be skipped — otherwise they reach the lookup's exact-version comparison and crash it.
+     */
+    describe.each([
+      { backend: 'npm', tool: 'npm:typescript', concrete: '1.18.4' },
+      { backend: 'cargo', tool: 'cargo:ripgrep', concrete: '1.2.3' },
+    ])(
+      'lockedVersion resolution for the $backend backend',
+      ({ tool, concrete }) => {
+        it('extracts lockedVersion when lock file holds a concrete version', async () => {
+          fs.readLocalFile.mockResolvedValueOnce(codeBlock`
+          [[tools."${tool}"]]
+          version = "${concrete}"
+        `);
+          const content = codeBlock`
+          [tools]
+          "${tool}" = "${concrete}"
+        `;
+          const result = await extractPackageFile(content, 'mise.toml');
+          expect(result?.deps[0]).toMatchObject({
+            depName: tool,
+            currentValue: concrete,
+            lockedVersion: concrete,
+          });
+        });
+
+        it('skips lockedVersion when lock file holds an equals-prefixed single version', async () => {
+          const specifier = `=${concrete}`;
+          fs.readLocalFile.mockResolvedValueOnce(codeBlock`
+          [[tools."${tool}"]]
+          version = "${specifier}"
+        `);
+          const content = codeBlock`
+          [tools]
+          "${tool}" = "${specifier}"
+        `;
+          const result = await extractPackageFile(content, 'mise.toml');
+          expect(result?.deps[0]).toMatchObject({
+            depName: tool,
+            currentValue: specifier,
+          });
+          expect(result?.deps[0]).not.toHaveProperty('lockedVersion');
+        });
+      },
+    );
+
     it('skips kafka tool when version has no apache- prefix', async () => {
       const content = codeBlock`
         [tools]
