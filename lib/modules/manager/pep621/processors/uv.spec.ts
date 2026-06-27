@@ -340,6 +340,106 @@ describe('modules/manager/pep621/processors/uv', () => {
         },
       ]);
     });
+
+    it('uses flat index-url as default registry', () => {
+      const pyproject = parsePyProject(codeBlock`
+        [tool.uv]
+        index-url = "https://custom.example.com/pypi/simple"
+      `)!;
+
+      const dependencies = [
+        { depName: 'dep1', packageName: 'dep1' },
+        { depName: 'dep2', packageName: 'dep2' },
+      ];
+
+      const result = processor.process(pyproject, dependencies);
+
+      expect(result).toEqual([
+        {
+          depName: 'dep1',
+          registryUrls: ['https://custom.example.com/pypi/simple'],
+          packageName: 'dep1',
+        },
+        {
+          depName: 'dep2',
+          registryUrls: ['https://custom.example.com/pypi/simple'],
+          packageName: 'dep2',
+        },
+      ]);
+    });
+
+    it('uses flat extra-index-url as implicit indexes', () => {
+      const pyproject = parsePyProject(codeBlock`
+        [tool.uv]
+        extra-index-url = [
+          "https://private.example.com/pypi/simple",
+        ]
+      `)!;
+
+      const dependencies = [{ depName: 'dep1', packageName: 'dep1' }];
+
+      const result = processor.process(pyproject, dependencies);
+
+      expect(result).toEqual([
+        {
+          depName: 'dep1',
+          registryUrls: [
+            'https://private.example.com/pypi/simple',
+            'https://pypi.org/pypi/',
+          ],
+          packageName: 'dep1',
+        },
+      ]);
+    });
+
+    it('uses flat index-url and extra-index-url together', () => {
+      const pyproject = parsePyProject(codeBlock`
+        [tool.uv]
+        index-url = "https://cdproxy.example.com/pypi/simple"
+        extra-index-url = [
+          "https://private.example.com/pypi/simple",
+        ]
+      `)!;
+
+      const dependencies = [{ depName: 'dep1', packageName: 'dep1' }];
+
+      const result = processor.process(pyproject, dependencies);
+
+      expect(result).toEqual([
+        {
+          depName: 'dep1',
+          registryUrls: [
+            'https://private.example.com/pypi/simple',
+            'https://cdproxy.example.com/pypi/simple',
+          ],
+          packageName: 'dep1',
+        },
+      ]);
+    });
+
+    it('flat index-url is ignored when [[tool.uv.index]] has a default', () => {
+      const pyproject = parsePyProject(codeBlock`
+        [tool.uv]
+        index-url = "https://flat-default.example.com/pypi/simple"
+
+        [[tool.uv.index]]
+        name = "structured"
+        url = "https://structured.example.com/pypi/simple"
+        default = true
+      `)!;
+
+      const dependencies = [{ depName: 'dep1', packageName: 'dep1' }];
+
+      const result = processor.process(pyproject, dependencies);
+
+      expect(result).toEqual([
+        {
+          depName: 'dep1',
+          registryUrls: ['https://structured.example.com/pypi/simple'],
+          packageName: 'dep1',
+        },
+      ]);
+    });
   });
 
   describe('extractLockedVersions()', () => {
@@ -888,6 +988,506 @@ describe('modules/manager/pep621/processors/uv', () => {
           cmd: 'uv lock --upgrade',
           options: {
             cwd: '/tmp/github/some/repo/folder',
+          },
+        },
+      ]);
+    });
+
+    it('injects credentials for flat extra-index-url', async () => {
+      const execSnapshots = mockExecAll();
+      GlobalConfig.set(adminConfig);
+      hostRules.add({
+        matchHost: 'https://private.example.com',
+        hostType: 'pypi',
+        username: 'user',
+        password: 'pass',
+      });
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce('uv.lock');
+      fs.readLocalFile.mockResolvedValueOnce('test content');
+      fs.readLocalFile.mockResolvedValueOnce('changed test content');
+      getPkgReleases.mockResolvedValueOnce({
+        releases: [{ version: '3.11.1' }],
+      });
+      getPkgReleases.mockResolvedValueOnce({
+        releases: [{ version: '0.2.35' }],
+      });
+
+      const updatedDeps = [
+        {
+          packageName: 'dep1',
+          depType: depTypes.dependencies,
+          datasource: PypiDatasource.id,
+          registryUrls: [
+            'https://private.example.com/pypi/simple',
+            'https://pypi.org/pypi/',
+          ],
+        },
+      ];
+      const pyproject = parsePyProject(codeBlock`
+        [tool.uv]
+        extra-index-url = [
+          "https://private.example.com/pypi/simple",
+        ]
+      `)!;
+
+      const result = await processor.updateArtifacts(
+        {
+          packageFileName: 'pyproject.toml',
+          newPackageFileContent: '',
+          config: {},
+          updatedDeps,
+        },
+        pyproject,
+      );
+      expect(result).toEqual([
+        {
+          file: {
+            contents: 'changed test content',
+            path: 'uv.lock',
+            type: 'addition',
+          },
+        },
+      ]);
+      expect(execSnapshots).toMatchObject([
+        {
+          cmd: 'uv lock --upgrade-package dep1',
+          options: {
+            env: {
+              UV_EXTRA_INDEX_URL:
+                'https://user:pass@private.example.com/pypi/simple',
+            },
+          },
+        },
+      ]);
+    });
+
+    it('injects credentials for flat extra-index-url on lockFileMaintenance', async () => {
+      const execSnapshots = mockExecAll();
+      GlobalConfig.set(adminConfig);
+      hostRules.add({
+        matchHost: 'https://private.example.com',
+        hostType: 'pypi',
+        username: 'user',
+        password: 'pass',
+      });
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce('uv.lock');
+      fs.readLocalFile.mockResolvedValueOnce('test content');
+      fs.readLocalFile.mockResolvedValueOnce('changed test content');
+      getPkgReleases.mockResolvedValueOnce({
+        releases: [{ version: '3.11.1' }],
+      });
+      getPkgReleases.mockResolvedValueOnce({
+        releases: [{ version: '0.2.35' }],
+      });
+
+      const pyproject = parsePyProject(codeBlock`
+        [tool.uv]
+        extra-index-url = [
+          "https://private.example.com/pypi/simple",
+        ]
+      `)!;
+
+      const result = await processor.updateArtifacts(
+        {
+          packageFileName: 'pyproject.toml',
+          newPackageFileContent: '',
+          config: { isLockFileMaintenance: true },
+          updatedDeps: [],
+        },
+        pyproject,
+      );
+      expect(result).toEqual([
+        {
+          file: {
+            contents: 'changed test content',
+            path: 'uv.lock',
+            type: 'addition',
+          },
+        },
+      ]);
+      expect(execSnapshots).toMatchObject([
+        {
+          cmd: 'uv lock --upgrade',
+          options: {
+            env: {
+              UV_EXTRA_INDEX_URL:
+                'https://user:pass@private.example.com/pypi/simple',
+            },
+          },
+        },
+      ]);
+    });
+
+    it('injects credentials for flat index-url as UV_INDEX_URL', async () => {
+      const execSnapshots = mockExecAll();
+      GlobalConfig.set(adminConfig);
+      hostRules.add({
+        matchHost: 'https://cdproxy.example.com',
+        hostType: 'pypi',
+        username: 'user',
+        password: 'pass',
+      });
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce('uv.lock');
+      fs.readLocalFile.mockResolvedValueOnce('test content');
+      fs.readLocalFile.mockResolvedValueOnce('changed test content');
+      getPkgReleases.mockResolvedValueOnce({
+        releases: [{ version: '3.11.1' }],
+      });
+      getPkgReleases.mockResolvedValueOnce({
+        releases: [{ version: '0.2.35' }],
+      });
+
+      const updatedDeps = [
+        {
+          packageName: 'dep1',
+          depType: depTypes.dependencies,
+          datasource: PypiDatasource.id,
+          registryUrls: ['https://cdproxy.example.com/pypi/simple'],
+        },
+      ];
+      const pyproject = parsePyProject(codeBlock`
+        [tool.uv]
+        index-url = "https://cdproxy.example.com/pypi/simple"
+      `)!;
+
+      const result = await processor.updateArtifacts(
+        {
+          packageFileName: 'pyproject.toml',
+          newPackageFileContent: '',
+          config: {},
+          updatedDeps,
+        },
+        pyproject,
+      );
+      expect(result).toEqual([
+        {
+          file: {
+            contents: 'changed test content',
+            path: 'uv.lock',
+            type: 'addition',
+          },
+        },
+      ]);
+      expect(execSnapshots).toMatchObject([
+        {
+          cmd: 'uv lock --upgrade-package dep1',
+          options: {
+            env: {
+              UV_INDEX_URL: 'https://user:pass@cdproxy.example.com/pypi/simple',
+              UV_EXTRA_INDEX_URL: '',
+            },
+          },
+        },
+      ]);
+    });
+
+    it('does not set UV_INDEX_URL when [[tool.uv.index]] overrides the default', async () => {
+      const execSnapshots = mockExecAll();
+      GlobalConfig.set(adminConfig);
+      hostRules.add({
+        matchHost: 'https://structured.example.com',
+        hostType: 'pypi',
+        username: 'user',
+        password: 'pass',
+      });
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce('uv.lock');
+      fs.readLocalFile.mockResolvedValueOnce('test content');
+      fs.readLocalFile.mockResolvedValueOnce('changed test content');
+      getPkgReleases.mockResolvedValueOnce({
+        releases: [{ version: '3.11.1' }],
+      });
+      getPkgReleases.mockResolvedValueOnce({
+        releases: [{ version: '0.2.35' }],
+      });
+
+      const updatedDeps = [
+        {
+          packageName: 'dep1',
+          depType: depTypes.dependencies,
+          datasource: PypiDatasource.id,
+          registryUrls: ['https://structured.example.com/pypi/simple'],
+        },
+      ];
+      const pyproject = parsePyProject(codeBlock`
+        [tool.uv]
+        index-url = "https://flat.example.com/pypi/simple"
+
+        [[tool.uv.index]]
+        name = "structured"
+        url = "https://structured.example.com/pypi/simple"
+        default = true
+      `)!;
+
+      const result = await processor.updateArtifacts(
+        {
+          packageFileName: 'pyproject.toml',
+          newPackageFileContent: '',
+          config: {},
+          updatedDeps,
+        },
+        pyproject,
+      );
+      expect(result).toEqual([
+        {
+          file: {
+            contents: 'changed test content',
+            path: 'uv.lock',
+            type: 'addition',
+          },
+        },
+      ]);
+      expect(execSnapshots).toMatchObject([
+        {
+          cmd: 'uv lock --upgrade-package dep1',
+          options: {
+            env: expect.not.objectContaining({
+              UV_INDEX_URL: expect.anything(),
+            }),
+          },
+        },
+      ]);
+    });
+
+    it('injects only username into UV_INDEX_URL when password is absent', async () => {
+      const execSnapshots = mockExecAll();
+      GlobalConfig.set(adminConfig);
+      hostRules.clear();
+      hostRules.add({
+        matchHost: 'https://username-only.example.com',
+        hostType: 'pypi',
+        username: 'user',
+      });
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce('uv.lock');
+      fs.readLocalFile.mockResolvedValueOnce('test content');
+      fs.readLocalFile.mockResolvedValueOnce('changed test content');
+      getPkgReleases.mockResolvedValueOnce({
+        releases: [{ version: '3.11.1' }],
+      });
+      getPkgReleases.mockResolvedValueOnce({
+        releases: [{ version: '0.2.35' }],
+      });
+
+      const updatedDeps = [
+        {
+          packageName: 'dep1',
+          depType: depTypes.dependencies,
+        },
+      ];
+      const pyproject = parsePyProject(codeBlock`
+        [tool.uv]
+        index-url = "https://username-only.example.com/pypi/simple"
+      `)!;
+
+      const result = await processor.updateArtifacts(
+        {
+          packageFileName: 'pyproject.toml',
+          newPackageFileContent: '',
+          config: {},
+          updatedDeps,
+        },
+        pyproject,
+      );
+      expect(result).toEqual([
+        {
+          file: {
+            contents: 'changed test content',
+            path: 'uv.lock',
+            type: 'addition',
+          },
+        },
+      ]);
+      expect(execSnapshots).toMatchObject([
+        {
+          cmd: 'uv lock --upgrade-package dep1',
+          options: {
+            env: {
+              UV_INDEX_URL:
+                'https://user@username-only.example.com/pypi/simple',
+            },
+          },
+        },
+      ]);
+    });
+
+    it('injects only password into UV_INDEX_URL when username is absent', async () => {
+      const execSnapshots = mockExecAll();
+      GlobalConfig.set(adminConfig);
+      hostRules.clear();
+      hostRules.add({
+        matchHost: 'https://password-only.example.com',
+        hostType: 'pypi',
+        password: 'pass',
+      });
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce('uv.lock');
+      fs.readLocalFile.mockResolvedValueOnce('test content');
+      fs.readLocalFile.mockResolvedValueOnce('changed test content');
+      getPkgReleases.mockResolvedValueOnce({
+        releases: [{ version: '3.11.1' }],
+      });
+      getPkgReleases.mockResolvedValueOnce({
+        releases: [{ version: '0.2.35' }],
+      });
+
+      const updatedDeps = [
+        {
+          packageName: 'dep1',
+          depType: depTypes.dependencies,
+        },
+      ];
+      const pyproject = parsePyProject(codeBlock`
+        [tool.uv]
+        index-url = "https://password-only.example.com/pypi/simple"
+      `)!;
+
+      const result = await processor.updateArtifacts(
+        {
+          packageFileName: 'pyproject.toml',
+          newPackageFileContent: '',
+          config: {},
+          updatedDeps,
+        },
+        pyproject,
+      );
+      expect(result).toEqual([
+        {
+          file: {
+            contents: 'changed test content',
+            path: 'uv.lock',
+            type: 'addition',
+          },
+        },
+      ]);
+      expect(execSnapshots).toMatchObject([
+        {
+          cmd: 'uv lock --upgrade-package dep1',
+          options: {
+            env: {
+              UV_INDEX_URL:
+                'https://:pass@password-only.example.com/pypi/simple',
+            },
+          },
+        },
+      ]);
+    });
+
+    it('does not add flat extra-index-url to UV_EXTRA_INDEX_URL when already in [[tool.uv.index]]', async () => {
+      const execSnapshots = mockExecAll();
+      GlobalConfig.set(adminConfig);
+      hostRules.clear();
+      hostRules.add({
+        matchHost: 'https://dedup.example.com',
+        hostType: 'pypi',
+        username: 'user',
+        password: 'pass',
+      });
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce('uv.lock');
+      fs.readLocalFile.mockResolvedValueOnce('test content');
+      fs.readLocalFile.mockResolvedValueOnce('changed test content');
+      getPkgReleases.mockResolvedValueOnce({
+        releases: [{ version: '3.11.1' }],
+      });
+      getPkgReleases.mockResolvedValueOnce({
+        releases: [{ version: '0.2.35' }],
+      });
+
+      const updatedDeps = [
+        {
+          packageName: 'dep1',
+          depType: depTypes.dependencies,
+        },
+      ];
+      const pyproject = parsePyProject(codeBlock`
+        [tool.uv]
+        extra-index-url = ["https://dedup.example.com/pypi/simple"]
+
+        [[tool.uv.index]]
+        name = "dedup"
+        url = "https://dedup.example.com/pypi/simple"
+      `)!;
+
+      const result = await processor.updateArtifacts(
+        {
+          packageFileName: 'pyproject.toml',
+          newPackageFileContent: '',
+          config: {},
+          updatedDeps,
+        },
+        pyproject,
+      );
+      expect(result).toEqual([
+        {
+          file: {
+            contents: 'changed test content',
+            path: 'uv.lock',
+            type: 'addition',
+          },
+        },
+      ]);
+      // The URL is already covered by [[tool.uv.index]], so the flat extra-index-url
+      // entry is deduplicated and UV_EXTRA_INDEX_URL is empty.
+      expect(execSnapshots).toMatchObject([
+        {
+          cmd: 'uv lock --upgrade-package dep1',
+          options: {
+            env: {
+              UV_EXTRA_INDEX_URL: '',
+              UV_INDEX_DEDUP_USERNAME: 'user',
+              UV_INDEX_DEDUP_PASSWORD: 'pass',
+            },
+          },
+        },
+      ]);
+    });
+
+    it('does not set UV_INDEX_URL when index-url has no matching credentials', async () => {
+      const execSnapshots = mockExecAll();
+      GlobalConfig.set(adminConfig);
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce('uv.lock');
+      fs.readLocalFile.mockResolvedValueOnce('test content');
+      fs.readLocalFile.mockResolvedValueOnce('changed test content');
+      getPkgReleases.mockResolvedValueOnce({
+        releases: [{ version: '3.11.1' }],
+      });
+      getPkgReleases.mockResolvedValueOnce({
+        releases: [{ version: '0.2.35' }],
+      });
+
+      const updatedDeps = [
+        {
+          packageName: 'dep1',
+          depType: depTypes.dependencies,
+        },
+      ];
+      const pyproject = parsePyProject(codeBlock`
+        [tool.uv]
+        index-url = "https://no-creds.example.com/simple"
+      `)!;
+
+      const result = await processor.updateArtifacts(
+        {
+          packageFileName: 'pyproject.toml',
+          newPackageFileContent: '',
+          config: {},
+          updatedDeps,
+        },
+        pyproject,
+      );
+      expect(result).toEqual([
+        {
+          file: {
+            contents: 'changed test content',
+            path: 'uv.lock',
+            type: 'addition',
+          },
+        },
+      ]);
+      expect(execSnapshots).toMatchObject([
+        {
+          cmd: 'uv lock --upgrade-package dep1',
+          options: {
+            env: expect.not.objectContaining({
+              UV_INDEX_URL: expect.anything(),
+            }),
           },
         },
       ]);
