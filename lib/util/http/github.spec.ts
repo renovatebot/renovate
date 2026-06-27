@@ -557,6 +557,24 @@ describe('util/http/github', () => {
         ).rejects.toThrow(EXTERNAL_HOST_ERROR);
       });
 
+      it('should throw on repository change with a non-array error with code `invalid`', async () => {
+        await expect(
+          fail(422, {
+            message: 'foobar',
+            errors: { code: 'invalid' },
+          }),
+        ).rejects.toThrow(REPOSITORY_CHANGED);
+      });
+
+      it('should throw platform failure on 422 response with an unrecognized non-array errors', async () => {
+        await expect(
+          fail(422, {
+            message: 'foobar',
+            errors: 'Validation Failed',
+          }),
+        ).rejects.toThrow(EXTERNAL_HOST_ERROR);
+      });
+
       it('should throw original error when failed to add reviewers', async () => {
         await expect(
           fail(422, {

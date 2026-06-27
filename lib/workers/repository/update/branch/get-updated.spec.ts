@@ -1234,7 +1234,6 @@ describe('workers/repository/update/branch/get-updated', () => {
         branchName: 'renovate/pin',
         upgrades: [],
         minimumReleaseAgeBehaviour: 'timestamp-required',
-        productLinks: { documentation: 'https://docs.renovatebot.com/' },
       } satisfies BranchConfig;
       git.getFile.mockResolvedValueOnce('existing content');
     });

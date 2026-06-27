@@ -370,9 +370,9 @@ jobs:
           args: -color -ignore "invalid activity type \"destroyed\" for \"merge_group\" Webhook event. available types are \"checks_requested\""
 
       - name: Run zizmor
-        uses: zizmorcore/zizmor-action@5f14fd08f7cf1cb1609c1e344975f152c7ee938d # v0.5.6
+        uses: zizmorcore/zizmor-action@192e21d79ab29983730a13d1382995c2307fbcaa # v0.5.7
         with:
-          version: 1.25.2
+          version: 1.26.1
 
   test:
     needs: [setup, prefetch]
@@ -546,6 +546,7 @@ jobs:
       - coverage-threshold
       - lint-actions
       - build-docker
+      - build-docs
     runs-on: ubuntu-latest
     timeout-minutes: 1
     if: always()
@@ -600,6 +601,19 @@ jobs:
           github.event_name == 'pull_request' &&
           github.event.pull_request.draft != true &&
           needs.lint-actions.result == 'skipped'
+        run: exit 1
+
+      - name: Fail for failed or cancelled docs build
+        if: |
+          needs.build-docs.result == 'failure' ||
+          needs.build-docs.result == 'cancelled'
+        run: exit 1
+
+      - name: Fail for skipped docs build when PR is ready for review
+        if: |
+          github.event_name == 'pull_request' &&
+          github.event.pull_request.draft != true &&
+          needs.build-docs.result == 'skipped'
         run: exit 1
 
       - name: Fail for skipped or failed docker build when needed
@@ -709,7 +723,7 @@ jobs:
       - name: Setup uv
         uses: astral-sh/setup-uv@fac544c07dec837d0ccb6301d7b5580bf5edae39 # v8.2.0
         with:
-          version: 0.11.23
+          version: 0.11.25
           enable-cache: true
           cache-python: true
 
@@ -865,7 +879,7 @@ jobs:
       - name: Setup uv
         uses: astral-sh/setup-uv@fac544c07dec837d0ccb6301d7b5580bf5edae39 # v8.2.0
         with:
-          version: 0.11.23
+          version: 0.11.25
           enable-cache: true
           cache-python: true
 
