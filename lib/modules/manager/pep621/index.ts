@@ -1,4 +1,5 @@
 import type { Category } from '../../../constants/index.ts';
+import { GithubReleasesDatasource } from '../../datasource/github-releases/index.ts';
 import { PypiDatasource } from '../../datasource/pypi/index.ts';
 
 export { updateArtifacts } from './artifacts.ts';
@@ -16,6 +17,9 @@ export const defaultConfig = {
   managerFilePatterns: ['/(^|/)pyproject\\.toml$/'],
 };
 
-export const supportedDatasources = [PypiDatasource.id];
+export const supportedDatasources = [
+  GithubReleasesDatasource.id,
+  PypiDatasource.id,
+];
 
 export { knownDepTypes, supportsDynamicDepTypesNote } from './dep-types.ts';
