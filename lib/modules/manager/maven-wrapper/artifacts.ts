@@ -17,8 +17,10 @@ import {
 import { getRepoStatus } from '../../../util/git/index.ts';
 import type { StatusResult } from '../../../util/git/types.ts';
 import { hashStream } from '../../../util/hash.ts';
+import * as hostRules from '../../../util/host-rules.ts';
 import { Http } from '../../../util/http/index.ts';
 import { regEx } from '../../../util/regex.ts';
+import { MavenDatasource } from '../../datasource/maven/index.ts';
 import mavenVersioning from '../../versioning/maven/index.ts';
 import type {
   PackageDependency,
@@ -421,11 +423,28 @@ async function executeWrapperCommand(
 }
 
 function getExtraEnvOptions(deps: PackageDependency[]): ExtraEnv {
+  const extraEnv: ExtraEnv = {};
+
   const customMavenWrapperUrl = getCustomMavenWrapperRepoUrl(deps);
   if (customMavenWrapperUrl) {
-    return { MVNW_REPOURL: customMavenWrapperUrl };
+    extraEnv.MVNW_REPOURL = customMavenWrapperUrl;
+
+    const { username, password } = hostRules.find({
+      hostType: MavenDatasource.id,
+      url: customMavenWrapperUrl,
+    });
+
+    if (username && password) {
+      extraEnv.MVNW_USERNAME = username;
+      extraEnv.MVNW_PASSWORD = password;
+      logger.debug(
+        { customMavenWrapperUrl },
+        'Using MVNW_USERNAME and MVNW_PASSWORD for private repository',
+      );
+    }
   }
-  return {};
+
+  return extraEnv;
 }
 
 function getCustomMavenWrapperRepoUrl(
