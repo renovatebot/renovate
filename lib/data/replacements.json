@@ -184,6 +184,17 @@
       }
     ]
   },
+  "capgo-inappbrowser-to-capgo-capacitor-inappbrowser": {
+    "description": "`@capgo/inappbrowser` was renamed to `@capgo/capacitor-inappbrowser`.",
+    "packageRules": [
+      {
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["@capgo/inappbrowser"],
+        "matchCurrentVersion": ">=8.6.15",
+        "replacementName": "@capgo/capacitor-inappbrowser"
+      }
+    ]
+  },
   "clang-format-to-maintenance-fork": {
     "description": "Maintenance fork of `clang-format`",
     "packageRules": [
