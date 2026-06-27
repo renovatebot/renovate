@@ -4,6 +4,20 @@ import { quickStringify } from '../util/stringify.ts';
 import type { BunyanNodeStream, BunyanRecord, BunyanStream } from './types.ts';
 import { sanitizeValue } from './utils.ts';
 
+function truncateLargeFields(record: BunyanRecord): BunyanRecord {
+  const result: BunyanRecord = { ...record };
+  for (const key of Object.keys(result)) {
+    try {
+      quickStringify(result[key]);
+    } catch (err) {
+      if (err instanceof RangeError) {
+        result[key] = '[omitted: value too large to serialize]';
+      }
+    }
+  }
+  return result;
+}
+
 export function withSanitizer(streamConfig: BunyanStream): BunyanStream {
   if (streamConfig.type === 'rotating-file') {
     throw new Error("Rotating files aren't supported");
@@ -17,10 +31,21 @@ export function withSanitizer(streamConfig: BunyanStream): BunyanStream {
       cb: (err?: Error | null) => void,
     ): void => {
       const raw = sanitizeValue(chunk);
-      const result =
-        streamConfig.type === 'raw'
-          ? raw
-          : quickStringify(raw)?.replace(regEx(/\n?$/), '\n');
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      let result = raw;
+      if (streamConfig.type !== 'raw') {
+        let serialized: string | undefined;
+        try {
+          serialized = quickStringify(raw);
+        } catch (err) {
+          if (err instanceof RangeError) {
+            serialized = quickStringify(truncateLargeFields(raw));
+          } else {
+            throw err;
+          }
+        }
+        result = serialized?.replace(regEx(/\n?$/), '\n');
+      }
       stream.write(result, enc, cb);
     };
 
