@@ -5,7 +5,9 @@ import { getNewValue, getPinnedValue, isLessThanRange } from './range.ts';
 
 export const id = 'pep440';
 export const displayName = 'PEP440';
-export const urls = ['https://www.python.org/dev/peps/pep-0440/'];
+export const urls = [
+  '[PEP 440 - Version Identification](https://www.python.org/dev/peps/pep-0440/)',
+];
 export const supportsRanges = true;
 export const supportedRangeStrategies: RangeStrategy[] = [
   'bump',

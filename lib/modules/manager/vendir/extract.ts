@@ -12,16 +12,15 @@ import type {
   PackageFileContent,
 } from '../types.ts';
 import type {
-  GitRefDefinition,
-  GithubReleaseDefinition,
-  HelmChartDefinition,
-  HttpReleaseDefinition,
-  VendirDefinition,
+  GitRef,
+  GithubRelease,
+  HelmChart,
+  HttpRelease,
 } from './schema.ts';
 import { Vendir } from './schema.ts';
 
 export function extractHelmChart(
-  helmChart: HelmChartDefinition,
+  helmChart: HelmChart,
   aliases?: Record<string, string>,
 ): PackageDependency {
   if (isOCIRegistry(helmChart.repository.url)) {
@@ -48,9 +47,7 @@ export function extractHelmChart(
   };
 }
 
-export function extractGitSource(
-  gitSource: GitRefDefinition,
-): PackageDependency {
+export function extractGitSource(gitSource: GitRef): PackageDependency {
   const httpUrl = getHttpUrl(gitSource.url);
   return {
     depName: httpUrl,
@@ -61,7 +58,7 @@ export function extractGitSource(
 }
 
 export function extractGithubReleaseSource(
-  githubRelease: GithubReleaseDefinition,
+  githubRelease: GithubRelease,
 ): PackageDependency {
   return {
     depName: githubRelease.slug,
@@ -73,7 +70,7 @@ export function extractGithubReleaseSource(
 }
 
 export function extractHttpReleaseSource(
-  httpRelease: HttpReleaseDefinition,
+  httpRelease: HttpRelease,
 ): PackageDependency {
   return {
     packageName: httpRelease.url,
@@ -86,7 +83,7 @@ export function extractHttpReleaseSource(
 export function parseVendir(
   content: string,
   packageFile?: string,
-): VendirDefinition | null {
+): Vendir | null {
   try {
     return parseSingleYaml(content, {
       customSchema: Vendir,

@@ -30,6 +30,8 @@ function execSnapshot(
 
   const cwd = upath.toUnix(process.cwd());
 
+  // traverse binds `this.update()` to the callback, requires regular function
+  // eslint-disable-next-line prefer-arrow-callback
   return traverse(snapshot).map(function fixup(v) {
     if (is.string(v)) {
       const val = v

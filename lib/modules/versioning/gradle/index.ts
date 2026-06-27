@@ -16,7 +16,7 @@ import {
 export const id = 'gradle';
 export const displayName = 'Gradle';
 export const urls = [
-  'https://docs.gradle.org/current/userguide/single_versions.html#version_ordering',
+  '[Gradle version ordering](https://docs.gradle.org/current/userguide/single_versions.html#version_ordering)',
 ];
 export const supportsRanges = true;
 export const supportedRangeStrategies: RangeStrategy[] = ['bump'];

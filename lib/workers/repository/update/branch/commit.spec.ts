@@ -1,6 +1,6 @@
 import { logger, scm } from '~test/util.ts';
 import { GlobalConfig } from '../../../../config/global.ts';
-import type { LongCommitSha } from '../../../../util/git/types.ts';
+import type { LongCommitSha } from '../../../../util/schema-utils/git.ts';
 import type { BranchConfig } from '../../../types.ts';
 import { commitFilesToBranch } from './commit.ts';
 

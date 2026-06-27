@@ -1,6 +1,6 @@
 import { isString } from '@sindresorhus/is';
 import { DateTime } from 'luxon';
-import type { ZodType } from 'zod/v3';
+import type { ZodType } from 'zod/v4';
 import { GlobalConfig } from '../../../config/global.ts';
 import { logger } from '../../../logger/index.ts';
 import * as packageCache from '../../cache/package/index.ts';

@@ -12,7 +12,7 @@ import type {
   RepoCacheData,
 } from '../../../util/cache/repository/types.ts';
 import { fingerprint } from '../../../util/fingerprint.ts';
-import type { LongCommitSha } from '../../../util/git/types.ts';
+import type { LongCommitSha } from '../../../util/schema-utils/git.ts';
 import { counts } from '../../global/limits.ts';
 import type { BranchConfig, BranchUpgradeConfig } from '../../types.ts';
 import * as _branchWorker from '../update/branch/index.ts';

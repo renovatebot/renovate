@@ -52,14 +52,19 @@ export async function getECRAuthToken(
   return null;
 }
 
-export function isECRMaxResultsError(err: HttpError): boolean {
-  const resp = err.response as HttpResponse<any> | undefined;
+// https://docs.aws.amazon.com/AmazonECR/latest/APIReference/API_DescribeRepositories.html#ECR-DescribeRepositories-request-maxResults
+export function isECRMaxResultsResponse(resp: HttpResponse<unknown>): boolean {
+  const body = resp.body as { errors?: { message?: string }[] } | undefined;
   return !!(
-    resp?.statusCode === 405 &&
+    resp.statusCode === 405 &&
     resp.headers?.['docker-distribution-api-version'] &&
-    // https://docs.aws.amazon.com/AmazonECR/latest/APIReference/API_DescribeRepositories.html#ECR-DescribeRepositories-request-maxResults
-    resp.body?.errors?.[0]?.message?.includes(
+    body?.errors?.[0]?.message?.includes(
       'Member must have value less than or equal to 1000',
     )
   );
+}
+
+export function isECRMaxResultsError(err: HttpError): boolean {
+  const resp = err.response as HttpResponse<unknown> | undefined;
+  return !!resp && isECRMaxResultsResponse(resp);
 }

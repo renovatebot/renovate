@@ -149,6 +149,73 @@ describe('modules/datasource/docker/common', () => {
       ).rejects.toThrow(PAGE_NOT_FOUND_ERROR);
     });
 
+    it('falls back to base /v2/ auth probe when tags URL returns 405 ECR maxResults error', async () => {
+      httpMock
+        .scope('https://my.local.registry')
+        .get('/v2/repo/tags/list?n=10000')
+        .reply(
+          405,
+          {
+            errors: [
+              {
+                code: 'UNSUPPORTED',
+                message:
+                  "Invalid parameter at 'maxResults' failed to satisfy constraint: 'Member must have value less than or equal to 1000'",
+              },
+            ],
+          },
+          { 'docker-distribution-api-version': 'registry/2.0' },
+        )
+        .get('/v2/')
+        .reply(200, '');
+
+      const headers = await getAuthHeaders(
+        http,
+        'https://my.local.registry',
+        'repo',
+        'https://my.local.registry/v2/repo/tags/list?n=10000',
+      );
+
+      expect(headers).toEqual({});
+    });
+
+    it('falls back to base /v2/ auth probe and negotiates token when 405 ECR maxResults error is received', async () => {
+      httpMock
+        .scope('https://my.local.registry')
+        .get('/v2/repo/tags/list?n=10000')
+        .reply(
+          405,
+          {
+            errors: [
+              {
+                code: 'UNSUPPORTED',
+                message:
+                  "Invalid parameter at 'maxResults' failed to satisfy constraint: 'Member must have value less than or equal to 1000'",
+              },
+            ],
+          },
+          { 'docker-distribution-api-version': 'registry/2.0' },
+        )
+        .get('/v2/', undefined, { badheaders: ['authorization'] })
+        .reply(401, '', {
+          'www-authenticate':
+            'Bearer realm="https://my.local.registry/oauth2/token",service="my.local.registry"',
+        })
+        .get(
+          '/oauth2/token?service=my.local.registry&scope=repository:repo:pull',
+        )
+        .reply(200, { token: 'abc' });
+
+      const headers = await getAuthHeaders(
+        http,
+        'https://my.local.registry',
+        'repo',
+        'https://my.local.registry/v2/repo/tags/list?n=10000',
+      );
+
+      expect(headers).toEqual({ authorization: 'Bearer abc' });
+    });
+
     it('returns "authType token" if both provided', async () => {
       httpMock
         .scope('https://my.local.registry')

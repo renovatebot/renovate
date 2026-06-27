@@ -16,7 +16,7 @@ import {
   localPathExists,
   readLocalFile,
 } from '../../../../util/fs/index.ts';
-import { parseSingleYaml } from '../../../../util/yaml.ts';
+import { parseSingleYaml, parseYaml } from '../../../../util/yaml.ts';
 import type { PackageFile, PackageFileContent } from '../../types.ts';
 import { pnpmWorkspaceOverrides } from '../dep-types.ts';
 import type { PnpmDependency, PnpmLockFile } from '../post-update/types.ts';
@@ -160,7 +160,13 @@ export async function getPnpmLock(filePath: string): Promise<LockFile> {
       throw new Error('Unable to read pnpm-lock.yaml');
     }
 
-    const lockParsed = parseSingleYaml(pnpmLockRaw);
+    // pnpm writes a multi-document YAML lockfile when `pnpm-workspace.yaml`
+    // declares `configDependencies`; the env document (config-deps + integrity
+    // metadata) is unconditionally prepended before the main lockfile, so the
+    // main lockfile is always the last document.
+    // https://pnpm.io/config-dependencies.
+    const parsedDocs = parseYaml(pnpmLockRaw);
+    const lockParsed = parsedDocs.at(-1);
     if (!isPnpmLockfile(lockParsed)) {
       throw new Error('Invalid or empty lockfile');
     }

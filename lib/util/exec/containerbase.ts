@@ -203,9 +203,9 @@ export const allToolConfig: Record<ToolName, ToolConfig> = {
     versioning: 'ruby',
   },
   rust: {
-    datasource: 'docker',
+    datasource: 'rust-version',
     packageName: 'rust',
-    versioning: 'semver',
+    versioning: 'rust-release-channel',
   },
   uv: {
     datasource: 'pypi',

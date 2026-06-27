@@ -3,7 +3,7 @@ import semver from 'semver';
 import semverUtils from 'semver-utils';
 import { logger } from '../../../logger/index.ts';
 import { regEx } from '../../../util/regex.ts';
-import { isSemVerXRange } from '../semver/common.ts';
+import { isSemVerXRange, normalizeLegacyXRanges } from '../semver/common.ts';
 import type { NewValueConfig } from '../types.ts';
 
 const {
@@ -61,6 +61,10 @@ function stripV(value: string): string {
   return value.replace(/^v/, '');
 }
 
+function satisfiesRange(version: string, range: string): boolean {
+  return satisfies(version, normalizeLegacyXRanges(range));
+}
+
 // TODO: #22198
 export function getNewValue({
   currentValue,
@@ -75,7 +79,7 @@ export function getNewValue({
     return newVersion;
   }
   if (rangeStrategy === 'update-lockfile') {
-    if (satisfies(newVersion, currentValue)) {
+    if (satisfiesRange(newVersion, currentValue)) {
       return currentValue;
     }
     return getNewValue({
@@ -88,7 +92,7 @@ export function getNewValue({
   const parsedRange = semverUtils.parseRange(currentValue);
   const element = parsedRange[parsedRange.length - 1];
   if (rangeStrategy === 'widen') {
-    if (satisfies(newVersion, currentValue)) {
+    if (satisfiesRange(newVersion, currentValue)) {
       return currentValue;
     }
     const newValue = getNewValue({
@@ -160,7 +164,7 @@ export function getNewValue({
             currentVersion,
             newVersion,
           });
-          if (bumpedSubRange && satisfies(newVersion, bumpedSubRange)) {
+          if (bumpedSubRange && satisfiesRange(newVersion, bumpedSubRange)) {
             return bumpedSubRange;
           }
 

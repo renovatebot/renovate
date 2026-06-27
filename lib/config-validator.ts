@@ -77,17 +77,22 @@ async function validate(
     const added = styleText('green', '+ ');
     const removed = styleText('red', '- ');
     const msg = changedObjects
-      .flatMap((part) =>
-        part.value
+      .flatMap((part) => {
+        let linePrefix: string;
+        if (part.added) {
+          linePrefix = added;
+        } else if (part.removed) {
+          linePrefix = removed;
+        } else {
+          linePrefix = '  ';
+        }
+        return part.value
           .split('\n')
           .filter(isNonEmptyStringAndNotWhitespace)
           .map((line) =>
-            line.replace(
-              regEx(/^(?<ws> *)/),
-              `${part.added ? added : part.removed ? removed : '  '}$<ws>`,
-            ),
-          ),
-      )
+            line.replace(regEx(/^(?<ws> *)/), `${linePrefix}$<ws>`),
+          );
+      })
       .join('\n');
     logger.warn(`Config migration diff:\n${msg}`);
     if (strict) {
@@ -124,10 +129,12 @@ interface PackageJson {
     .summary('Validate Renovate configuration files')
     .description(
       `Validate your Renovate configuration (repo config, shared presets or global configuration) files\n` +
+        // oxlint-disable-next-line renovate/no-hardcoded-docs-url -- CLI help text, no config available
         'If no [config-files...] are given, renovate-config-validator will look at the default config file locations (https://docs.renovatebot.com/configuration-options/)',
     )
     .addHelpText(
       'after',
+      // oxlint-disable-next-line renovate/no-hardcoded-docs-url -- CLI help text, no config available
       `
 When specifying [config-files...], Renovate will treat them as global self-hosted configuration files. You can disable this behaviour with --no-global
 
@@ -273,7 +280,7 @@ If you have specified global self-hosted configuration (https://docs.renovatebot
       logger.info(
         `Config validated successfully against ${filesValidated} file(s)`,
       );
-    } else {
+    } else if (!filesValidated) {
       logger.warn(`No files to perform configuration validation against`);
     }
     // Use exitCode (not process.exit) so async log streams can flush

@@ -491,7 +491,8 @@ export async function addReleaseNotes(
 
   for (const v of input.versions) {
     let releaseNotes: ChangeLogNotes | null | undefined;
-    const cacheKey = `${cacheKeyPrefix}:${v.version}`;
+    const gitRefCachePart = v.gitRef ? `:${v.gitRef}` : '';
+    const cacheKey = `${cacheKeyPrefix}:${v.version}${gitRefCachePart}`;
     releaseNotes = await packageCache.get(cacheNamespace, cacheKey);
     releaseNotes ??= await getReleaseNotesMd(input.project, v);
     releaseNotes ??= await getReleaseNotes(input.project, v, config);

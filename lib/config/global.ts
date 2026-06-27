@@ -51,6 +51,7 @@ export class GlobalConfig {
     'platform',
     'prCacheSyncMaxPages',
     'presetCachePersistence',
+    'productLinks',
     'repositoryCacheForceLocal',
     'requireConfig',
     's3Endpoint',

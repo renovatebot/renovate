@@ -2,7 +2,7 @@ import { isString } from '@sindresorhus/is';
 import { regEx } from '../../../util/regex.ts';
 import { Datasource } from '../datasource.ts';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types.ts';
-import type { DartResponse } from './types.ts';
+import { DartResponse } from './schema.ts';
 
 export const stableVersionRegex = regEx(/^\d+\.\d+\.\d+$/);
 /**
@@ -47,8 +47,9 @@ export class DartVersionDatasource extends Datasource {
     try {
       for (const channel of this.channels) {
         const resp = (
-          await this.http.getJsonUnchecked<DartResponse>(
+          await this.http.getJson(
             `${registryUrl}/storage/v1/b/dart-archive/o?delimiter=%2F&prefix=channels%2F${channel}%2Frelease%2F&alt=json`,
+            DartResponse,
           )
         ).body;
         const releases = this.getReleasesFromResponse(channel, resp.prefixes);

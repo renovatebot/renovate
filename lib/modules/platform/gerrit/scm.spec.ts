@@ -1,18 +1,18 @@
 import { DateTime } from 'luxon';
 import { git, partial } from '~test/util.ts';
-import type { LongCommitSha } from '../../../util/git/types.ts';
+import type { LongCommitSha } from '../../../util/schema-utils/git.ts';
 import { client as _client } from './client.ts';
+import type {
+  GerritAccountInfo,
+  GerritChange,
+  GerritRevisionInfo,
+} from './schema.ts';
 import {
   GerritScm,
   configureScm,
   pendingChangeBranches,
   pushForReview,
 } from './scm.ts';
-import type {
-  GerritAccountInfo,
-  GerritChange,
-  GerritRevisionInfo,
-} from './types.ts';
 
 vi.mock('./client.ts');
 const clientMock = vi.mocked(_client);
@@ -222,10 +222,11 @@ describe('modules/platform/gerrit/scm', () => {
     });
 
     it('open change found for branchname -> return true', async () => {
-      const change = partial<GerritChange>({ current_revision: 'curSha' });
+      const sha40 = '0123456789abcdef0123456789abcdef01234567';
+      const change = partial<GerritChange>({ current_revision: sha40 });
       clientMock.findChanges.mockResolvedValueOnce([change]);
       await expect(gerritScm.getBranchCommit('myBranchName')).resolves.toBe(
-        'curSha',
+        sha40,
       );
     });
   });

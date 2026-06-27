@@ -9,7 +9,7 @@ import { Datasource } from '../datasource.ts';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types.ts';
 import { datasource, defaultRegistryUrl } from './common.ts';
 import * as prefixDev from './prefix-dev.ts';
-import type { CondaPackage } from './types.ts';
+import { CondaPackage } from './schema.ts';
 
 export class CondaDatasource extends Datasource {
   static readonly id = datasource;
@@ -59,10 +59,8 @@ export class CondaDatasource extends Datasource {
       releases: [],
     };
 
-    let response: { body: CondaPackage };
-
     try {
-      response = await this.http.getJsonUnchecked(url);
+      const response = await this.http.getJson(url, CondaPackage);
 
       result.homepage = response.body.html_url;
       result.sourceUrl = response.body.dev_url;
@@ -73,7 +71,7 @@ export class CondaDatasource extends Datasource {
         releaseDate[file.version] ??= Timestamp.parse(file.upload_time);
       }
 
-      response.body.versions.forEach((version: string) => {
+      coerceArray(response.body.versions).forEach((version: string) => {
         const thisRelease: Release = {
           version,
           releaseTimestamp: releaseDate[version],

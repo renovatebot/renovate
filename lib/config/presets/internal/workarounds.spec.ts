@@ -67,6 +67,56 @@ describe('config/presets/internal/workarounds', () => {
     });
   });
 
+  describe('grafanaDockerImageVersioning', () => {
+    const preset = presets.grafanaDockerImageVersioning;
+    const packageRule = preset.packageRules![0];
+    const versioning = versionings.get(packageRule.versioning);
+    const matchPackageNames = packageRule.matchPackageNames!;
+
+    it.each`
+      input                          | expected
+      ${'latest'}                    | ${false}
+      ${'main'}                      | ${false}
+      ${'13'}                        | ${false}
+      ${'13.0'}                      | ${false}
+      ${'13.0.1'}                    | ${true}
+      ${'13.0.1-security-01'}        | ${true}
+      ${'13.0.1-security-01-fips'}   | ${true}
+      ${'13.0.1-security-01-ubi'}    | ${true}
+      ${'13.0.1-security-01-ubuntu'} | ${true}
+      ${'13.0.2'}                    | ${true}
+      ${'13.0.2-ubuntu'}             | ${true}
+    `('versioning("$input") == "$expected"', ({ input, expected }) => {
+      expect(versioning.isValid(input)).toEqual(expected);
+    });
+
+    it.each`
+      input                          | expected
+      ${'grafana/grafana'}           | ${true}
+      ${'docker.io/grafana/grafana'} | ${true}
+      ${'grafana/loki'}              | ${false}
+      ${'ghcr.io/grafana/grafana'}   | ${false}
+    `('matchPackageNames("$input") == "$expected"', ({ input, expected }) => {
+      expect(
+        matchPackageNames.some((pattern) => matchRegexOrGlob(input, pattern)),
+      ).toEqual(expected);
+    });
+
+    it.each`
+      version                        | current                        | expected
+      ${'13.0.1-security-01'}        | ${'13.0.1'}                    | ${true}
+      ${'13.0.2'}                    | ${'13.0.1-security-01'}        | ${true}
+      ${'13.0.1-security-01-ubuntu'} | ${'13.0.1-ubuntu'}             | ${true}
+      ${'13.0.2-ubuntu'}             | ${'13.0.1-security-01-ubuntu'} | ${true}
+      ${'13.0.1-security-01-ubuntu'} | ${'13.0.1-security-01'}        | ${false}
+    `(
+      'isGreaterThan("$version", "$current") == "$expected"',
+      ({ version, current, expected }) => {
+        expect(versioning.isGreaterThan(version, current)).toEqual(expected);
+      },
+    );
+  });
+
   describe('libericaJdkDockerVersioning', () => {
     const preset = presets.libericaJdkDockerVersioning;
 

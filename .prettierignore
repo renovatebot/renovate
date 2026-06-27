@@ -24,8 +24,11 @@ lib/modules/datasource/hex/v2/signed.ts
 **/tmp/
 /.venv/
 
-pdm.lock
+uv.lock
 pnpm-lock.yaml
+
+# For old checkouts
+pdm.lock
 
 # Ignore the mkdocs.yml file, as Prettier moves some comments around
 /tools/mkdocs/mkdocs.yml

@@ -158,6 +158,23 @@ describe('modules/manager/pip-compile/extract', () => {
       });
     });
 
+    it('no override files in returned package files', async () => {
+      fs.readLocalFile.mockResolvedValueOnce(
+        getSimpleRequirementsFile(
+          'uv pip compile --output-file=requirements.txt --overrides=overrides.txt requirements.in',
+          ['foo==1.0.1'],
+        ),
+      );
+      fs.readLocalFile.mockResolvedValueOnce('foo>=1.0.0');
+
+      const lockFiles = ['requirements.txt'];
+      const packageFiles = await extractAllPackageFiles({}, lockFiles);
+      expect(packageFiles).not.toBeNull();
+      packageFiles!.forEach((packageFile) => {
+        expect(packageFile).not.toHaveProperty('packageFile', 'overrides.txt');
+      });
+    });
+
     // TODO(not7cd): update when constraints are supported
     it('no constraint files in returned package files', async () => {
       fs.readLocalFile.mockResolvedValueOnce(

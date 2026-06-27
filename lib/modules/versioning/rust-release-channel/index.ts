@@ -6,7 +6,7 @@ import { sortParsed } from './util.ts';
 export const id = 'rust-release-channel';
 export const displayName = 'Rust Release Channel';
 export const urls = [
-  'https://rust-lang.github.io/rustup/concepts/toolchains.html',
+  '[Rustup - Toolchains](https://rust-lang.github.io/rustup/concepts/toolchains.html)',
 ];
 export const supportsRanges = true;
 export const supportedRangeStrategies = ['pin', 'replace'];

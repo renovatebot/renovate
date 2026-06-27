@@ -9,7 +9,7 @@ import {
 } from '@sindresorhus/is';
 import type { CvssVector } from 'ae-cvss-calculator';
 import * as _aeCvss from 'ae-cvss-calculator';
-import { z } from 'zod/v3';
+import { z } from 'zod/v4';
 import { getManagerConfig, mergeChildConfig } from '../../../config/index.ts';
 import type { PackageRule, RenovateConfig } from '../../../config/types.ts';
 import { instrument } from '../../../instrumentation/index.ts';
@@ -610,14 +610,14 @@ export class Vulnerabilities {
   }
 
   static evaluateCvssVector(vector: string): [string, string] {
-    const CvssJsonSchema = z.object({
+    const CvssJson = z.object({
       baseScore: z.number().default(0.0),
       baseSeverity: z.string().toUpperCase().default('UNKNOWN'),
     });
 
     try {
       const parsedCvssScore: CvssVector<any> | null = fromVector(vector);
-      const res = CvssJsonSchema.parse(parsedCvssScore?.createJsonSchema());
+      const res = CvssJson.parse(parsedCvssScore?.createJsonSchema());
 
       return [res.baseScore.toFixed(1), res.baseSeverity];
     } catch {

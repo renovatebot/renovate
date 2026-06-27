@@ -1,6 +1,7 @@
 import { readdirSync } from 'node:fs';
 import { readFile } from 'fs-extra';
 import { z } from 'zod/v4';
+import { markdownLinkRegex } from './common.ts';
 
 describe('modules/versioning/versioning-metadata', () => {
   const allVersioning = readdirSync('lib/modules/versioning', {
@@ -41,7 +42,9 @@ describe('modules/versioning/versioning-metadata', () => {
       const Base = z.object({
         id: z.string(),
         displayName: z.string(),
-        urls: z.array(z.unknown()),
+        urls: z.array(
+          z.string().regex(markdownLinkRegex, 'url must be a markdown link'),
+        ),
       });
       const VersioningMetadata = z.discriminatedUnion('supportsRanges', [
         Base.extend({

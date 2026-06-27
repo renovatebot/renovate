@@ -57,9 +57,8 @@ We recommend this default image for most users.
 Renovate supports a persistent cache for downloaded tools, so that it only needs to unpack the tools on later runs.
 Use the [`containerbaseDir` config option](../self-hosted-configuration.md#containerbasedir) to control where Renovate stores its containerbase cache.
 
-<!-- prettier-ignore -->
 !!! warning
-    The usage of `binarySource=docker` is deprecated, and [will be removed in the future](https://github.com/renovatebot/renovate/issues/40747).
+  The usage of `binarySource=docker` is deprecated, and [will be removed in the future](https://github.com/renovatebot/renovate/issues/40747).
 
 If you want, you can map the Docker socket into the container so that Renovate can dynamically invoke "sidecar" images when needed.
 You'll need to set `binarySource=docker` for this to work.
@@ -87,23 +86,25 @@ The Renovate team provide a ["Renovate Runner"](https://gitlab.com/renovate-bot/
 This supports both `gitlab.com` and self-hosted GitLab.
 Details for how it works can be found in the project.
 
-#### Mend Renovate Community Edition / Enterprise Edition
+#### Mend Renovate Self-Hosted (Community Edition / Enterprise Edition)
 
-Mend Renovate Community Edition (Renovate CE) and Enterprise Edition (Renovate EE) are closed-source offerings of Renovate for self-hosted users.
-Renovate CE and Renovate EE have support for GitHub (both `github.com` and GitHub Enterprise Server) as well as GitLab self-hosted.
+Mend Renovate Self-Hosted Community Edition (sometimes "Renovate CE"/"CE") and Enterprise Edition (sometimes "Renovate EE"/"EE") are closed-source offerings of Renovate for self-hosted users.
+
 It is built similarly to the default "full" Renovate image described above, but with these differences:
 
 - It is a stateful app and does not exit after processing all repositories
 - It is installed as an App on GitHub, and behaves similarly on GitLab - for example responding to webhooks
 - It includes a priority job queue which prioritizes events like merged PRs over scheduled jobs
-- It is released every 1-2 months in a slower, more stable cadence than Renovate OSS, which releases on every commit
-- It's licensed using an end-user license agreement (EULA) and not the Affero General Public License (AGPL)
+- It is released every 2 weeks in a slightly slower and more stable cadence than Renovate OSS, which releases on every commit
+- It's licensed using an end-user license agreement (EULA) and not the Affero General Public License (AGPL-3.0-only)
 
 Plus, the Enterprise Edition has:
 
 - Horizontal scaling to run multiple 'worker' containers
 - Dedicated support from Mend.io
 - Premium features, including Smart Merge Control
+
+Mend Renovate Self-Hosted CE and EE have support for GitHub.com, GitHub Enterprise Server, GitLab.com, GitLab Self-Managed, and Bitbucket Data Center.
 
 Go to the Mend.io website to learn more about [Renovate Enterprise Edition](https://www.mend.io/renovate-enterprise/).
 
@@ -176,10 +177,9 @@ If you are configuring Renovate using environment variables, there are two possi
 
 If you combine both of the above then any single config option in the environment variable will override what's in `RENOVATE_CONFIG`.
 
-<!-- prettier-ignore -->
 !!! note
-    It's also possible to change the default prefix from `RENOVATE_` using `ENV_PREFIX`.
-    For example: `ENV_PREFIX=RNV_ RNV_TOKEN=abc123 renovate`.
+  It's also possible to change the default prefix from `RENOVATE_` using `ENV_PREFIX`.
+  For example: `ENV_PREFIX=RNV_ RNV_TOKEN=abc123 renovate`.
 
 #### Using `config.js`
 
@@ -228,10 +228,9 @@ Regardless of platform, you need to select a user account for `renovate` to assu
 We recommend you use `@renovate-bot` as username if you're on a self-hosted server where you can set all usernames.
 We also recommend you configure `config.gitAuthor` with the same identity as your Renovate user, for example: `"gitAuthor": "Renovate Bot <renovate@some.domain.test>"`.
 
-<!-- prettier-ignore -->
 !!! warning
-    We recommend you use a single, dedicated username for your Renovate bot.
-    Never share the Renovate username with your other bots, as this can cause flip-flopping.
+  We recommend you use a single, dedicated username for your Renovate bot.
+  Never share the Renovate username with your other bots, as this can cause flip-flopping.
 
 #### Docs
 
@@ -253,10 +252,9 @@ This account can be _any_ account on GitHub, and needs only `read-only` access.
 It's used when fetching changelogs for repositories, as well as some Renovate-specific tools at runtime, in order to increase the hourly API limit.
 It's also OK to configure the same as a host rule instead, if you prefer that.
 
-<!-- prettier-ignore -->
 !!! note
-    If you're using Renovate in a project where dependencies are loaded from github.com (such as Go modules hosted on GitHub), we highly recommend that you add a `github.com` PAT (classic).
-    Otherwise you will exceed the rate limit for the github.com API, which will lead to Renovate closing and reopening PRs because it could not get reliable info on updated dependencies.
+  If you're using Renovate in a project where dependencies are loaded from github.com (such as Go modules hosted on GitHub), we highly recommend that you add a `github.com` PAT (classic).
+  Otherwise you will exceed the rate limit for the github.com API, which will lead to Renovate closing and reopening PRs because it could not get reliable info on updated dependencies.
 
 ### Self-hosting examples
 

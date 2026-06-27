@@ -1,6 +1,6 @@
+import { setTimeout } from 'node:timers/promises';
 import fs from 'fs-extra';
 import type { SimpleGit } from 'simple-git';
-import { setTimeout } from 'timers/promises';
 import type { DirectoryResult } from 'tmp-promise';
 import { dir } from 'tmp-promise';
 import upath from 'upath';
@@ -16,7 +16,7 @@ import * as git from '../../../util/git/index.ts';
 import type { Timestamp } from '../../../util/timestamp.ts';
 import { getPkgReleases } from '../index.ts';
 import { CrateDatasource } from './index.ts';
-import type { RegistryConfigSchema } from './schema.ts';
+import type { RegistryConfig } from './schema.ts';
 
 vi.unmock('../../../util/mutex.ts');
 const createSimpleGit = vi.mocked(git.createSimpleGit);
@@ -28,7 +28,7 @@ const CRATES_IO_REGISTRY_URL_PARSED = 'https://index.crates.io/';
 
 const datasource = CrateDatasource.id;
 
-const cratesIoConfig: RegistryConfigSchema = {
+const cratesIoConfig: RegistryConfig = {
   dl: DL_BASE_URL,
   api: API_BASE_URL,
 };
@@ -289,6 +289,24 @@ describe('modules/datasource/crate/index', () => {
       const res = await getPkgReleases({
         datasource,
         packageName: 'amethyst',
+        registryUrls: [CRATES_IO_REGISTRY_URL],
+      });
+      expect(res).toMatchSnapshot();
+      expect(res).not.toBeNull();
+      expect(res).toBeDefined();
+    });
+
+    it('processes real data: sentry', async () => {
+      mockCratesIoConfig();
+      mockCratesApiCallFor('sentry', Fixtures.get('sentry.json'));
+
+      httpMock
+        .scope(CRATES_IO_REGISTRY_URL_PARSED)
+        .get('/se/nt/sentry')
+        .reply(200, Fixtures.get('sentry'));
+      const res = await getPkgReleases({
+        datasource,
+        packageName: 'sentry',
         registryUrls: [CRATES_IO_REGISTRY_URL],
       });
       expect(res).toMatchSnapshot();

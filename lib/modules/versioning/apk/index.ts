@@ -6,8 +6,8 @@ import type { VersioningApi } from '../types.ts';
 export const id = 'apk';
 export const displayName = 'Alpine Package Keeper (APK)';
 export const urls = [
-  'https://wiki.alpinelinux.org/wiki/Package_policies',
-  'https://wiki.alpinelinux.org/wiki/Alpine_Package_Keeper#Package_pinning',
+  '[Alpine Linux package policies](https://wiki.alpinelinux.org/wiki/Package_policies)',
+  '[Alpine Package Keeper - Package pinning](https://wiki.alpinelinux.org/wiki/Alpine_Package_Keeper#Package_pinning)',
 ];
 export const supportsRanges = false;
 

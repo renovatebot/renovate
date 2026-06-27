@@ -703,6 +703,51 @@ describe('modules/datasource/npm/get', () => {
       );
     });
 
+    it('returns releases when `time` contains non-string entries', async () => {
+      // JFrog Artifactory emits `"unpublished": null` under `time`, which
+      // previously caused the whole packument to fail schema validation.
+      httpMock
+        .scope('https://example.com')
+        .get('/some-package')
+        .reply(200, {
+          name: 'some-package',
+          'dist-tags': { latest: '1.1.0' },
+          versions: { '1.0.0': {}, '1.1.0': {} },
+          time: {
+            unpublished: null,
+            created: '2026-01-22T23:58:45.285Z',
+            modified: '2026-06-02T00:59:50.138Z',
+            '1.0.0': '2026-01-23T01:23:37.982Z',
+            '1.1.0': '2026-04-15T18:50:36.431Z',
+          },
+        });
+
+      const dep = await getDependency(
+        http,
+        'https://example.com',
+        'some-package',
+      );
+
+      expect(dep?.releases).toEqual([
+        {
+          version: '1.0.0',
+          releaseTimestamp: '2026-01-23T01:23:37.982Z',
+          attestation: false,
+          dependencies: undefined,
+          devDependencies: undefined,
+          gitRef: undefined,
+        },
+        {
+          version: '1.1.0',
+          releaseTimestamp: '2026-04-15T18:50:36.431Z',
+          attestation: false,
+          dependencies: undefined,
+          devDependencies: undefined,
+          gitRef: undefined,
+        },
+      ]);
+    });
+
     it('returns unexpired cache', async () => {
       vi.setSystemTime('2024-06-15T00:14:59.999Z');
       packageCache.get.mockResolvedValue({

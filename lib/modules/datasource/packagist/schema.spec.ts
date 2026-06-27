@@ -159,6 +159,21 @@ describe('modules/datasource/packagist/schema', () => {
 
       expect(
         ComposerRelease.parse({
+          version: '1.2.3',
+          time: '2025-01-16T12:00:00.000Z',
+          'published-time': '2025-02-20T08:30:00.000Z',
+        }),
+      ).toEqual({
+        version: '1.2.3',
+        time: '2025-01-16T12:00:00.000Z',
+        'published-time': '2025-02-20T08:30:00.000Z',
+        homepage: null,
+        source: null,
+        require: null,
+      });
+
+      expect(
+        ComposerRelease.parse({
           version: 123,
         }),
       ).toEqual({
@@ -166,6 +181,41 @@ describe('modules/datasource/packagist/schema', () => {
         time: null,
         homepage: null,
         source: null,
+        require: null,
+      });
+
+      expect(
+        ComposerRelease.parse({ version: '1.2.3', abandoned: true }),
+      ).toEqual({
+        version: '1.2.3',
+        abandoned: true,
+        homepage: null,
+        source: null,
+        time: null,
+        require: null,
+      });
+
+      expect(
+        ComposerRelease.parse({
+          version: '1.2.3',
+          abandoned: 'scheb/2fa-bundle',
+        }),
+      ).toEqual({
+        version: '1.2.3',
+        abandoned: 'scheb/2fa-bundle',
+        homepage: null,
+        source: null,
+        time: null,
+        require: null,
+      });
+
+      expect(
+        ComposerRelease.parse({ version: '1.2.3', abandoned: 42 }),
+      ).toEqual({
+        version: '1.2.3',
+        homepage: null,
+        source: null,
+        time: null,
         require: null,
       });
     });
@@ -383,6 +433,83 @@ describe('modules/datasource/packagist/schema', () => {
             gitRef: 'v3.3.3',
             releaseTimestamp: '2025-01-16T12:00:00.000Z' as Timestamp,
             constraints: { php: ['^7.0'] },
+          },
+        ],
+      } satisfies ReleaseResult);
+    });
+
+    it('marks abandoned packages as deprecated', () => {
+      expect(
+        parsePackagesResponses('sonata-project/core-bundle', [
+          {
+            packages: {
+              'sonata-project/core-bundle': [
+                { version: '3.20.0', abandoned: true },
+                { version: '3.19.0', abandoned: true },
+              ],
+            },
+          },
+        ]),
+      ).toEqual({
+        deprecationMessage:
+          'This package is abandoned and no longer maintained.',
+        releases: [
+          { version: '3.20.0', gitRef: '3.20.0', isDeprecated: true },
+          { version: '3.19.0', gitRef: '3.19.0', isDeprecated: true },
+        ],
+      } satisfies ReleaseResult);
+    });
+
+    it('suggests a replacement for abandoned packages', () => {
+      expect(
+        parsePackagesResponses('scheb/two-factor-bundle', [
+          {
+            packages: {
+              'scheb/two-factor-bundle': [
+                { version: 'v4.18.4', abandoned: 'scheb/2fa-bundle' },
+              ],
+            },
+          },
+        ]),
+      ).toEqual({
+        deprecationMessage:
+          'This package is abandoned and no longer maintained. The author suggests using the `scheb/2fa-bundle` package instead.',
+        releases: [
+          { version: '4.18.4', gitRef: 'v4.18.4', isDeprecated: true },
+        ],
+      } satisfies ReleaseResult);
+    });
+
+    it('prefers published-time over time, falling back to time', () => {
+      expect(
+        parsePackagesResponses('foo/bar', [
+          {
+            packages: {
+              'foo/bar': {
+                '1.1.1': {
+                  version: 'v1.1.1',
+                  time: '2025-01-16T12:00:00+00:00',
+                  'published-time': '2025-02-20T08:30:00+00:00',
+                },
+                '2.2.2': {
+                  version: 'v2.2.2',
+                  time: '2025-03-10T09:00:00+00:00',
+                },
+              },
+            },
+          },
+        ]),
+      ).toEqual({
+        releases: [
+          {
+            version: '1.1.1',
+            gitRef: 'v1.1.1',
+            releaseTimestamp: '2025-02-20T08:30:00.000Z' as Timestamp,
+          },
+          {
+            version: '2.2.2',
+            gitRef: 'v2.2.2',
+            releaseTimestamp: '2025-03-10T09:00:00.000Z' as Timestamp,
           },
         ],
       } satisfies ReleaseResult);

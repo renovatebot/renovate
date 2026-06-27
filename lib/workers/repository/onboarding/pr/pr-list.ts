@@ -1,3 +1,4 @@
+import { GlobalConfig } from '../../../../config/global.ts';
 import type { RenovateConfig } from '../../../../config/types.ts';
 import { logger } from '../../../../logger/index.ts';
 import { emojify } from '../../../../util/emoji.ts';
@@ -79,7 +80,7 @@ export function getExpectedPrList(
     prHourlyLimit < branches.length
   ) {
     prDesc += emojify(
-      `\n\n:children_crossing: PR creation will be limited to maximum ${prHourlyLimit} per hour, so it doesn't swamp any CI resources or overwhelm the project. See [docs for \`prHourlyLimit\`](https://docs.renovatebot.com/configuration-options/#prhourlylimit) for details.\n\n`,
+      `\n\n:children_crossing: PR creation will be limited to maximum ${prHourlyLimit} per hour, so it doesn't swamp any CI resources or overwhelm the project. See [docs for \`prHourlyLimit\`](${GlobalConfig.get('productLinks').documentation}configuration-options/#prhourlylimit) for details.\n\n`,
     );
   }
   return prDesc;

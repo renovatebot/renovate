@@ -12,6 +12,14 @@ import {
 } from './tools/test/utils.ts';
 
 const ci = !!process.env.CI;
+const agentHook = !!process.env.RENOVATE_AGENT_HOOK;
+
+let reporters: string[] = ['default'];
+if (ci) {
+  reporters = ['default', 'github-actions', 'junit'];
+} else if (agentHook) {
+  reporters = ['minimal'];
+}
 
 /**
  * Generates Vitest config for sharded test run.
@@ -74,6 +82,7 @@ export default defineConfig(() =>
   mergeConfig(
     {
       resolve: { tsconfigPaths: true },
+      oxc: { include: /\.([cm]?ts|[jt]sx)$/ }, // Fixes .cts fixtures not being transformed
       cacheDir: ci ? '.cache/vitest' : undefined,
       test: {
         globals: true,
@@ -83,7 +92,7 @@ export default defineConfig(() =>
           './test/setup.ts',
           'test/to-migrate.ts',
         ],
-        reporters: ci ? ['default', 'github-actions', 'junit'] : ['default'],
+        reporters,
         mockReset: true,
         coverage: {
           provider: 'v8',

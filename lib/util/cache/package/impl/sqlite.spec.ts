@@ -1,8 +1,10 @@
 import { promisify } from 'node:util';
 import zlib from 'node:zlib';
+import { DateTime } from 'luxon';
 import { withDir } from 'tmp-promise';
 import { logger as _logger } from '~test/util.ts';
 import { GlobalConfig } from '../../../../config/global.ts';
+import { encodeEntry } from '../codec.ts';
 import { PackageCacheSqlite } from './sqlite.ts';
 
 const { logger } = _logger;
@@ -59,17 +61,25 @@ describe('util/cache/package/impl/sqlite', () => {
       expect(logger.warn).not.toHaveBeenCalled();
     });
 
-    it('returns undefined for invalid compressed payload', async () => {
+    it('removes invalid compressed payloads', async () => {
       const res = await withSqlite(async (sqlite) => {
         insertRawCacheEntry(sqlite, 'bar', Buffer.from('not-brotli'));
 
-        return sqlite.get('_test-namespace', 'bar');
+        const value = await sqlite.get('_test-namespace', 'bar');
+        const row = sqlite.client
+          .prepare(
+            'SELECT data FROM package_cache WHERE namespace = ? AND key = ?',
+          )
+          .get('_test-namespace', 'bar');
+
+        return { value, row };
       });
 
-      expect(res).toBeUndefined();
-      expect(logger.once.warn).toHaveBeenCalledWith(
+      expect(res.value).toBeUndefined();
+      expect(res.row).toBeUndefined();
+      expect(logger.once.debug).toHaveBeenCalledWith(
         { err: expect.any(Error) },
-        'Error while reading SQLite cache value',
+        'Error while reading package cache value',
       );
       expect(logger.warn).not.toHaveBeenCalled();
     });
@@ -83,9 +93,9 @@ describe('util/cache/package/impl/sqlite', () => {
       });
 
       expect(res).toBeUndefined();
-      expect(logger.once.warn).toHaveBeenCalledWith(
+      expect(logger.once.debug).toHaveBeenCalledWith(
         { err: expect.any(Error) },
-        'Error while reading SQLite cache value',
+        'Error while reading package cache value',
       );
       expect(logger.warn).not.toHaveBeenCalled();
     });
@@ -100,9 +110,9 @@ describe('util/cache/package/impl/sqlite', () => {
           const res = await sqlite.get('_test-namespace', 'bar');
 
           expect(res).toBeUndefined();
-          expect(logger.once.warn).toHaveBeenCalledWith(
+          expect(logger.once.debug).toHaveBeenCalledWith(
             { err: expect.any(Error) },
-            'Error while reading SQLite cache value',
+            'Error while reading package cache value',
           );
           expect(logger.trace).not.toHaveBeenCalledWith(
             { namespace: '_test-namespace', key: 'bar' },
@@ -167,6 +177,20 @@ describe('util/cache/package/impl/sqlite', () => {
       });
 
       expect(res).toEqual({ baz: 'baz' });
+    });
+
+    it('returns value from envelope payload', async () => {
+      const res = await withSqlite(async (sqlite) => {
+        insertRawCacheEntry(
+          sqlite,
+          'bar',
+          await encodeEntry({ foo: 'bar' }, DateTime.local()),
+        );
+
+        return sqlite.get('_test-namespace', 'bar');
+      });
+
+      expect(res).toEqual({ foo: 'bar' });
     });
   });
 

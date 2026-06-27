@@ -138,7 +138,7 @@ export async function ensureOnboardingPr(
   const rebaseCheckBox = getRebaseCheckbox(config.onboardingRebaseCheckbox);
   logger.debug('Filling in onboarding PR template');
   let prTemplate = `Welcome to [Renovate](${
-    config.productLinks!.homepage
+    GlobalConfig.get('productLinks').homepage
   })! This is an onboarding PR to help you understand and configure settings before regular Pull Requests begin.\n\n`;
   prTemplate +=
     getInheritedOrGlobal('requireConfig') === 'required'
@@ -150,7 +150,7 @@ export async function ensureOnboardingPr(
         );
 
   prTemplate += emojify(
-    `:books: See our [Reading List](https://docs.renovatebot.com/reading-list/) for relevant documentation you may be interested in reading.\n\n`,
+    `:books: See our [Reading List](${GlobalConfig.get('productLinks').documentation}reading-list/) for relevant documentation you may be interested in reading.\n\n`,
   );
 
   const configFile = getDefaultConfigFileName();
@@ -178,10 +178,10 @@ export async function ensureOnboardingPr(
 ---
 
 :question: Got questions? Check out Renovate's [Docs](${
-      config.productLinks!.documentation
+      GlobalConfig.get('productLinks').documentation
     }), particularly the Getting Started section.
 If you need any further assistance then you can also [request help here](${
-      config.productLinks!.help
+      GlobalConfig.get('productLinks').help
     }).
 `,
   );

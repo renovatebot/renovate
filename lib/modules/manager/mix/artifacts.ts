@@ -1,5 +1,6 @@
 import { isEmptyArray, isString } from '@sindresorhus/is';
 import { quote } from 'shlex';
+import { GlobalConfig } from '../../../config/global.ts';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
 import { exec } from '../../../util/exec/index.ts';
@@ -67,7 +68,7 @@ export async function updateArtifacts({
 
   if (isLockFileMaintenance && isUmbrella) {
     logger.debug(
-      'Cannot use lockFileMaintenance in an umbrella project, see https://docs.renovatebot.com/modules/manager/mix/#lockFileMaintenance',
+      `Cannot use lockFileMaintenance in an umbrella project, see ${GlobalConfig.get('productLinks').documentation}modules/manager/mix/#lockFileMaintenance`,
     );
     return null;
   }
@@ -144,6 +145,9 @@ export async function updateArtifacts({
     return acc;
   }, [] as string[]);
 
+  // renovate: will update this
+  const erlangVersion = '26';
+
   const execOptions: ExecOptions = {
     extraEnv: {
       // https://hexdocs.pm/mix/1.15.0/Mix.Tasks.Archive.html
@@ -156,7 +160,7 @@ export async function updateArtifacts({
       {
         toolName: 'erlang',
         // https://hexdocs.pm/elixir/1.14.5/compatibility-and-deprecations.html#compatibility-between-elixir-and-erlang-otp
-        constraint: config.constraints?.erlang ?? '^26',
+        constraint: config.constraints?.erlang ?? `^${erlangVersion}`,
       },
       {
         toolName: 'elixir',

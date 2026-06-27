@@ -34,6 +34,8 @@ nav:
       - 'Noise Reduction': 'noise-reduction.md'
       - 'Upgrade best practices': 'upgrade-best-practices.md'
       - "How does Renovate's Docker image get built?": 'docker-build-process.md'
+  - Tool Calling:
+      - 'Environment variable handling': 'environment-variable-handling.md'
   - Included Presets:
       - 'Abandonment Presets': 'presets-abandonments.md'
       - 'Custom Manager Presets': 'presets-customManagers.md'

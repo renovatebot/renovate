@@ -14,10 +14,8 @@ import type { Pr } from '../../../../modules/platform/index.ts';
 import * as memCache from '../../../../util/cache/memory/index.ts';
 import * as _cache from '../../../../util/cache/repository/index.ts';
 import type { RepoCacheData } from '../../../../util/cache/repository/types.ts';
-import type {
-  FileAddition,
-  LongCommitSha,
-} from '../../../../util/git/types.ts';
+import type { FileAddition } from '../../../../util/git/types.ts';
+import type { LongCommitSha } from '../../../../util/schema-utils/git.ts';
 import { OnboardingState } from '../common.ts';
 import * as _config from './config.ts';
 import { checkOnboardingBranch } from './index.ts';

@@ -8,7 +8,7 @@ import type { NewValueConfig, VersioningApi } from '../types.ts';
 
 export const id = 'semver-coerced';
 export const displayName = 'Coerced Semantic Versioning';
-export const urls = ['https://semver.org/'];
+export const urls = ['[Semantic Versioning](https://semver.org/)'];
 export const supportsRanges = false;
 
 function isStable(version: string): boolean {

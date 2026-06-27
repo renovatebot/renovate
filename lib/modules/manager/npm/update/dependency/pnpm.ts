@@ -56,11 +56,16 @@ export function updatePnpmWorkspaceDependency({
   const usesImplicitDefaultCatalog = parsedContents.catalog !== undefined;
   const isCatalogUpdate = catalogName && depType !== pnpmWorkspaceOverrides;
 
-  const oldVersion = isCatalogUpdate
-    ? catalogName === 'default' && usesImplicitDefaultCatalog
-      ? parsedContents.catalog?.[depName!]
-      : parsedContents.catalogs?.[catalogName]?.[depName!]
-    : parsedContents.overrides?.[depName!];
+  let oldVersion: string | undefined;
+  if (isCatalogUpdate) {
+    if (catalogName === 'default' && usesImplicitDefaultCatalog) {
+      oldVersion = parsedContents.catalog?.[depName!];
+    } else {
+      oldVersion = parsedContents.catalogs?.[catalogName]?.[depName!];
+    }
+  } else {
+    oldVersion = parsedContents.overrides?.[depName!];
+  }
 
   if (oldVersion === newValue) {
     logger.trace('Version is already updated');

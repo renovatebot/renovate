@@ -5,6 +5,7 @@ import {
   isPlainObject,
 } from '@sindresorhus/is';
 import { DateTime } from 'luxon';
+import { GlobalConfig } from '../../config/global.ts';
 import {
   PLATFORM_BAD_CREDENTIALS,
   PLATFORM_INTEGRATION_UNAUTHORIZED,
@@ -129,8 +130,7 @@ function handleGotError(
       if (parsed?.hostname === 'api.github.com') {
         logger.once.warn(
           {
-            documentationUrl:
-              'https://docs.renovatebot.com/getting-started/running/#githubcom-token-for-changelogs-and-tools',
+            documentationUrl: `${GlobalConfig.get('productLinks').documentation}getting-started/running/#githubcom-token-for-changelogs-and-tools`,
           },
           `Rate limit exceeded for ${parsed.host}, as no hostRules set for this host. Please set a GITHUB_COM_TOKEN`,
         );
@@ -180,13 +180,24 @@ function handleGotError(
       message.includes('Review cannot be requested from pull request author')
     ) {
       return err;
-    } else if (err.body?.errors?.find((e: any) => e.field === 'milestone')) {
+    }
+
+    // GitHub usually returns `errors` as an array, but not always - normalize
+    const rawErrors = err.body?.errors;
+    let errors: unknown[] = [];
+    if (isArray(rawErrors)) {
+      errors = rawErrors;
+    } else if (!isNullOrUndefined(rawErrors)) {
+      errors = [rawErrors];
+    }
+
+    if (errors.find((e: any) => e.field === 'milestone')) {
       return err;
-    } else if (err.body?.errors?.find((e: any) => e.code === 'invalid')) {
+    } else if (errors.find((e: any) => e.code === 'invalid')) {
       logger.debug({ err }, 'Received invalid response - aborting');
       return new Error(REPOSITORY_CHANGED);
     } else if (
-      err.body?.errors?.find((e: any) =>
+      errors.find((e: any) =>
         e.message?.startsWith('A pull request already exists'),
       )
     ) {
