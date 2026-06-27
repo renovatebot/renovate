@@ -1,15 +1,25 @@
 import type { Osv, OsvOffline } from '@renovatebot/osv-offline';
 import { codeBlock } from 'common-tags';
+import { DateTime } from 'luxon';
 import { mockFn } from 'vitest-mock-extended';
-import type { RenovateConfig } from '~test/util.ts';
-import { logger } from '~test/util.ts';
+import { type RenovateConfig, logger, partial } from '~test/util.ts';
 import { getConfig } from '../../../config/defaults.ts';
+import { MavenDatasource } from '../../../modules/datasource/maven/index.ts';
 import type { PackageFile } from '../../../modules/manager/types.ts';
+import { Result } from '../../../util/result.ts';
+import { asTimestamp } from '../../../util/timestamp.ts';
+import * as lookup from './lookup/index.ts';
+import type { LookupUpdateConfig } from './lookup/types.ts';
 import { Vulnerabilities } from './vulnerabilities.ts';
 
 const getVulnerabilitiesMock =
   mockFn<typeof OsvOffline.prototype.getVulnerabilities>();
 const createMock = vi.fn();
+const getMavenReleases = vi.spyOn(MavenDatasource.prototype, 'getReleases');
+const postprocessMavenRelease = vi.spyOn(
+  MavenDatasource.prototype,
+  'postprocessRelease',
+);
 
 vi.mock('@renovatebot/osv-offline', () => {
   return {
@@ -1289,6 +1299,90 @@ describe('workers/repository/process/vulnerabilities', () => {
           isVulnerabilityAlert: true,
         },
       ]);
+    });
+
+    it('proposes a fresh security fix immediately despite minimumReleaseAge', async () => {
+      const packageFiles: Record<string, PackageFile[]> = {
+        maven: [
+          {
+            deps: [
+              {
+                depName: 'org.example:lib',
+                currentValue: '1.0.0',
+                datasource: 'maven',
+              },
+            ],
+            packageFile: 'pom.xml',
+          },
+        ],
+      };
+      getVulnerabilitiesMock.mockResolvedValueOnce([
+        {
+          id: 'GHSA-1111-2222-3333',
+          modified: '',
+          affected: [
+            {
+              package: {
+                ecosystem: 'Maven',
+                name: 'org.example:lib',
+                purl: 'pkg:maven/org.example/lib',
+              },
+              ranges: [
+                {
+                  type: 'ECOSYSTEM',
+                  events: [{ introduced: '0' }, { fixed: '1.0.1' }],
+                },
+              ],
+            },
+          ],
+        },
+      ]);
+
+      // The user enforces a long release-age delay with strict filtering.
+      config.minimumReleaseAge = '14 days';
+      config.internalChecksFilter = 'strict';
+
+      // The real vulnerability flow appends the security packageRule to config.
+      await vulnerabilities.appendVulnerabilityPackageRules(
+        config,
+        packageFiles,
+      );
+
+      // The fix was released yesterday: far inside the 14-day window, so a normal
+      // update would be held as a pending status check.
+      getMavenReleases.mockResolvedValueOnce({
+        releases: [
+          { version: '1.0.0' },
+          {
+            version: '1.0.1',
+            releaseTimestamp: asTimestamp(
+              DateTime.now().minus({ days: 1 }).toISO(),
+            ),
+          },
+        ],
+      });
+      postprocessMavenRelease.mockImplementation((_, release) =>
+        Promise.resolve(release),
+      );
+
+      // Feed the config that the vulnerability flow just mutated into the real lookup.
+      const dep = packageFiles.maven[0].deps[0];
+      const lookupConfig = partial<LookupUpdateConfig>({
+        ...config,
+        manager: 'maven',
+        packageName: dep.depName,
+        currentValue: dep.currentValue,
+        datasource: dep.datasource,
+        versioning: 'maven',
+      });
+      const { updates } = await Result.wrap(
+        lookup.lookupUpdates(lookupConfig),
+      ).unwrapOrThrow();
+
+      // The fix is proposed right away, with no pending status check.
+      expect(updates).toHaveLength(1);
+      expect(updates[0]).toMatchObject({ newVersion: '1.0.1' });
+      expect(updates[0]).not.toHaveProperty('pendingChecks');
     });
 
     it('vulnerability with multiple affected entries and version ranges', async () => {

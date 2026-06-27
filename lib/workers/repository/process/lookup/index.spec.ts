@@ -1,4 +1,5 @@
 import { codeBlock } from 'common-tags';
+import { DateTime } from 'luxon';
 import { Fixtures } from '~test/fixtures.ts';
 import * as httpMock from '~test/http-mock.ts';
 import { partial } from '~test/util.ts';
@@ -36,7 +37,7 @@ import {
   resetConfig,
 } from '../../../../util/merge-confidence/index.ts';
 import { Result } from '../../../../util/result.ts';
-import type { Timestamp } from '../../../../util/timestamp.ts';
+import { type Timestamp, asTimestamp } from '../../../../util/timestamp.ts';
 import * as lookup from './index.ts';
 import type { LookupUpdateConfig } from './types.ts';
 
@@ -2824,21 +2825,24 @@ describe('workers/repository/process/lookup/index', () => {
       config.minimumReleaseAge = '14 days';
       config.internalChecksFilter = 'strict';
       config.isVulnerabilityAlert = true;
-      // security updates force `minimumReleaseAge: null` via the `vulnerabilityAlerts` config
+      // A security update's packageRule carries a `force` block (taken from the
+      // `vulnerabilityAlerts` config). Settings inside `force` override the user's
+      // own config, so `minimumReleaseAge: null` here disables the age check for
+      // this package. Simulated inline; the end-to-end path is covered in
+      // `vulnerabilities.spec.ts`.
       config.packageRules = [
         {
           matchPackageNames: ['some/action'],
           force: { minimumReleaseAge: null },
         },
       ];
-      const yesterday = new Date();
-      yesterday.setDate(yesterday.getDate() - 1);
+      const yesterday = asTimestamp(DateTime.now().minus({ days: 1 }).toISO());
       getGithubReleases.mockResolvedValueOnce({
         releases: [
           { version: '1.4.4' },
           {
             version: '1.4.5',
-            releaseTimestamp: yesterday.toISOString() as Timestamp,
+            releaseTimestamp: yesterday,
           },
         ],
       });
