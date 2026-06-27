@@ -5,9 +5,11 @@ import {
   getPkgReleases,
   isGetPkgReleasesConfig,
 } from '../../../../../modules/datasource/index.ts';
+import { postprocessRelease } from '../../../../../modules/datasource/postprocess-release.ts';
 import type { VersioningApi } from '../../../../../modules/versioning/index.ts';
 import { get } from '../../../../../modules/versioning/index.ts';
 import { coerceArray } from '../../../../../util/array.ts';
+import * as p from '../../../../../util/promises.ts';
 import type { BranchUpgradeConfig } from '../../../../types.ts';
 
 function matchesMMP(
@@ -87,12 +89,25 @@ export async function getInRangeReleases(
       }
     }
 
+    const hydratedReleases = await p.map(releases, async (release) => {
+      const hydratedRelease = await postprocessRelease(
+        {
+          datasource,
+          packageName: config.packageName,
+          registryUrl: release.registryUrl ?? config.registryUrl,
+          registryUrls: config.registryUrls,
+        },
+        release,
+      );
+      return hydratedRelease ?? release;
+    });
+
     if (version.valueToVersion) {
-      for (const release of coerceArray(releases)) {
+      for (const release of coerceArray(hydratedReleases)) {
         release.version = version.valueToVersion(release.version);
       }
     }
-    return releases;
+    return hydratedReleases;
   } catch (err) /* istanbul ignore next */ {
     logger.debug({ err }, 'getInRangeReleases err');
     logger.debug(`Error getting releases for ${depName} from ${datasource}`);
