@@ -111,6 +111,7 @@ export function mapGerritChangeToPr(
     targetBranch: change.branch,
     title: change.subject,
     createdAt: convertGerritDateToISO(change.created),
+    updatedAt: convertGerritDateToISO(change.updated),
     labels: change.hashtags,
     reviewers:
       change.reviewers?.REVIEWER?.map((reviewer) => reviewer.username!) ?? [],
