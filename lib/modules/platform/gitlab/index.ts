@@ -589,7 +589,6 @@ async function tryPrAutomerge(
         'failed', // don't lose time if pipeline failed
         'running', // pipeline is running, no need to wait for it
       ];
-      const desiredStatus = 'can_be_merged';
       const env = getEnv();
       // The default value of 5 attempts results in max. 13.75 seconds timeout if no pipeline created.
       const retryTimes = parseInteger(
@@ -605,7 +604,6 @@ async function tryPrAutomerge(
       // Check for correct merge request status before setting `merge_when_pipeline_succeeds` to  `true`.
       for (let attempt = 1; attempt <= retryTimes; attempt += 1) {
         const { body } = await gitlabApi.getJsonUnchecked<{
-          merge_status: string;
           detailed_merge_status?: string;
           merge_when_pipeline_succeeds?: boolean;
           pipeline: {
@@ -622,18 +620,13 @@ async function tryPrAutomerge(
           );
           return;
         }
-        // detailed_merge_status is available with Gitlab >=15.6.0
-        const use_detailed_merge_status = !!body.detailed_merge_status;
         const detailed_merge_status_check =
-          use_detailed_merge_status &&
-          desiredDetailedMergeStatus.includes(body.detailed_merge_status!);
-        // merge_status is deprecated with Gitlab >= 15.6
-        const deprecated_merge_status_check =
-          !use_detailed_merge_status && body.merge_status === desiredStatus;
+          !!body.detailed_merge_status &&
+          desiredDetailedMergeStatus.includes(body.detailed_merge_status);
 
         // Only continue if the merge request can be merged and has a pipeline.
         if (
-          (detailed_merge_status_check || deprecated_merge_status_check) &&
+          detailed_merge_status_check &&
           body.pipeline !== null &&
           desiredPipelineStatus.includes(body.pipeline.status)
         ) {

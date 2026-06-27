@@ -25,7 +25,7 @@ export const GitLabMergeRequest = z.object({
   created_at: z.string(),
   updated_at: z.string(),
   diverged_commits_count: z.number().optional(),
-  merge_status: z.string().optional(),
+  detailed_merge_status: z.string().optional(),
   assignee: GitlabUser.nullish(),
   assignees: LooseArray(GitlabUser).catch([]),
   reviewers: LooseArray(GitlabUser).catch([]),
