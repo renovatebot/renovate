@@ -1,6 +1,7 @@
 import { GlobalConfig } from '../../../config/global.ts';
 import { logger } from '../../../logger/index.ts';
 import { coerceArray } from '../../../util/array.ts';
+import { AzurePipelines } from '../../../util/azure.ts';
 import { regEx } from '../../../util/regex.ts';
 import { joinUrlParts } from '../../../util/url.ts';
 import { AzurePipelinesTasksDatasource } from '../../datasource/azure-pipelines-tasks/index.ts';
@@ -12,7 +13,7 @@ import type {
   PackageFileContent,
 } from '../types.ts';
 import type {
-  AzurePipelines,
+  AzurePipelines as AzurePipelinesContent,
   Container,
   Deploy,
   Deployment,
@@ -37,14 +38,30 @@ export function extractRepository(
     repositoryUrl = `https://github.com/${repository.name}.git`;
   } else if (repository.type === 'git') {
     const platform = GlobalConfig.get('platform');
-    const endpoint = GlobalConfig.get('endpoint');
 
-    if (platform === 'azure' && endpoint) {
+    let azureEndpoint: string | undefined = undefined;
+
+    if (platform === 'azure') {
+      azureEndpoint = GlobalConfig.get('endpoint');
+    } else if (platform === 'github') {
+      const azurePipelinesSystemCollectionUri =
+        process.env[
+          AzurePipelines.PredefinedVariables.systemCollectionUri
+        ]?.toString();
+      if (azurePipelinesSystemCollectionUri) {
+        logger.info(
+          `Platform is ${platform} but found to be running under Azure Pipelines due to presence of ${AzurePipelines.PredefinedVariables.systemCollectionUri} environment variable. Using it as the Azure DevOps endpoint for repository URL resolution.`,
+        );
+        azureEndpoint = azurePipelinesSystemCollectionUri;
+      }
+    }
+
+    if (azureEndpoint) {
       // extract the project name if the repository from which the pipline is referencing templates contains the Azure DevOps project name
       if (repository.name.includes('/')) {
         const [projectName, repoName] = repository.name.split('/');
         repositoryUrl = joinUrlParts(
-          endpoint,
+          azureEndpoint,
           encodeURIComponent(projectName),
           '_git',
           encodeURIComponent(repoName),
@@ -55,7 +72,7 @@ export function extractRepository(
         const projectName = currentRepository.split('/')[0];
         depName = `${projectName}/${repository.name}`;
         repositoryUrl = joinUrlParts(
-          endpoint,
+          azureEndpoint,
           encodeURIComponent(projectName),
           '_git',
           encodeURIComponent(repository.name),
@@ -121,7 +138,7 @@ export function extractAzurePipelinesTasks(
 export function parseAzurePipelines(
   content: string,
   packageFile: string,
-): AzurePipelines | null {
+): AzurePipelinesContent | null {
   const res = AzurePipelinesYaml.safeParse(content);
   if (res.success) {
     return res.data;
