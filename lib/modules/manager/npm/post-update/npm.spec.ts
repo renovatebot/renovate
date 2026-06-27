@@ -27,6 +27,7 @@ describe('modules/manager/npm/post-update/npm', () => {
     const execSnapshots = mockExecAll();
     // package.json
     fs.readLocalFile.mockResolvedValueOnce('{}');
+    fs.readLocalFile.mockResolvedValueOnce('{}'); // ancestor package.json (walk-up)
     const packageLockContents = JSON.stringify({
       packages: {},
       lockfileVersion: 3,
@@ -45,7 +46,7 @@ describe('modules/manager/npm/post-update/npm', () => {
       { skipInstalls, postUpdateOptions },
       updates,
     );
-    expect(fs.readLocalFile).toHaveBeenCalledTimes(3);
+    expect(fs.readLocalFile).toHaveBeenCalledTimes(4);
     expect(res.error).toBeFalse();
     expect(res.lockFile).toBe(packageLockContents);
     expect(execSnapshots).toMatchSnapshot();
@@ -55,6 +56,7 @@ describe('modules/manager/npm/post-update/npm', () => {
     const execSnapshots = mockExecAll();
     // package.json
     fs.readLocalFile.mockResolvedValueOnce('{}');
+    fs.readLocalFile.mockResolvedValueOnce('{}'); // ancestor package.json (walk-up)
     const packageLockContents = JSON.stringify({
       packages: {},
       lockfileVersion: 3,
@@ -205,6 +207,7 @@ describe('modules/manager/npm/post-update/npm', () => {
     const execSnapshots = mockExecAll();
     // package.json
     fs.readLocalFile.mockResolvedValueOnce('{}');
+    fs.readLocalFile.mockResolvedValueOnce('{}'); // ancestor package.json (walk-up)
     const packageLockContents = JSON.stringify({
       dependencies: {},
       lockfileVersion: 2,
@@ -222,7 +225,7 @@ describe('modules/manager/npm/post-update/npm', () => {
       { postUpdateOptions },
       updates,
     );
-    expect(fs.readLocalFile).toHaveBeenCalledTimes(3);
+    expect(fs.readLocalFile).toHaveBeenCalledTimes(4);
     expect(res.error).toBeFalse();
     expect(res.lockFile).toBe(packageLockContents);
     expect(execSnapshots).toHaveLength(1);
@@ -237,6 +240,7 @@ describe('modules/manager/npm/post-update/npm', () => {
     const execSnapshots = mockExecAll();
     // package.json
     fs.readLocalFile.mockResolvedValueOnce('{}');
+    fs.readLocalFile.mockResolvedValueOnce('{}'); // ancestor package.json (walk-up)
     const packageLockContents = JSON.stringify({
       dependencies: {},
       lockfileVersion: 1,
@@ -254,7 +258,7 @@ describe('modules/manager/npm/post-update/npm', () => {
       { postUpdateOptions },
       updates,
     );
-    expect(fs.readLocalFile).toHaveBeenCalledTimes(3);
+    expect(fs.readLocalFile).toHaveBeenCalledTimes(4);
     expect(res.error).toBeFalse();
     expect(res.lockFile).toBe(packageLockContents);
     expect(execSnapshots).toHaveLength(2);
@@ -272,6 +276,7 @@ describe('modules/manager/npm/post-update/npm', () => {
     const execSnapshots = mockExecAll();
     // package.json
     fs.readLocalFile.mockResolvedValueOnce('{}');
+    fs.readLocalFile.mockResolvedValueOnce('{}'); // ancestor package.json (walk-up)
     const packageLockContents = JSON.stringify({
       dependencies: {},
       lockfileVersion: 1,
@@ -289,7 +294,7 @@ describe('modules/manager/npm/post-update/npm', () => {
       { postUpdateOptions },
       updates,
     );
-    expect(fs.readLocalFile).toHaveBeenCalledTimes(3);
+    expect(fs.readLocalFile).toHaveBeenCalledTimes(4);
 
     expect(fs.readLocalFile).toHaveBeenCalledWith(
       'some-dir/npm-shrinkwrap.json',
@@ -356,7 +361,8 @@ describe('modules/manager/npm/post-update/npm', () => {
       {},
       updates,
     );
-    expect(fs.readLocalFile).toHaveBeenCalledTimes(3);
+    // +1 read for the ancestor package.json walk-up
+    expect(fs.readLocalFile).toHaveBeenCalledTimes(4);
     expect(res.lockFile).toBe('package-lock-contents');
     // since there are no install npm commands, it means we are using the global npm
     expect(execSnapshots).toMatchObject([
@@ -393,7 +399,8 @@ describe('modules/manager/npm/post-update/npm', () => {
       {},
       [{ isLockFileMaintenance: true }],
     );
-    expect(fs.readLocalFile).toHaveBeenCalledTimes(3);
+    // +1 read for the ancestor package.json walk-up
+    expect(fs.readLocalFile).toHaveBeenCalledTimes(4);
     expect(fs.deleteLocalFile).toHaveBeenCalledTimes(1);
     expect(res.lockFile).toBe('package-lock-contents');
     expect(execSnapshots).toMatchSnapshot();
@@ -480,7 +487,8 @@ describe('modules/manager/npm/post-update/npm', () => {
       { constraints: {} },
       [{ isLockFileMaintenance: true }],
     );
-    expect(fs.readLocalFile).toHaveBeenCalledTimes(3);
+    // +1 read for the ancestor package.json walk-up
+    expect(fs.readLocalFile).toHaveBeenCalledTimes(4);
     expect(res.lockFile).toBe('package-lock-contents');
     expect(execSnapshots).toMatchObject([
       { cmd: 'install-tool node 16.16.0' },
@@ -706,7 +714,8 @@ describe('modules/manager/npm/post-update/npm', () => {
         { skipInstalls },
         updates,
       );
-      expect(fs.readLocalFile).toHaveBeenCalledTimes(3);
+      // +1 read for the ancestor package.json walk-up
+      expect(fs.readLocalFile).toHaveBeenCalledTimes(4);
       expect(res.error).toBeFalse();
       expect(execSnapshots).toMatchObject([
         {
@@ -886,6 +895,7 @@ describe('modules/manager/npm/post-update/npm', () => {
       // package.json
       fs.readLocalFile.mockResolvedValue('{}');
       fs.readLocalFile.mockResolvedValueOnce('package-lock content');
+      fs.readLocalFile.mockResolvedValueOnce('{}'); // ancestor package.json (walk-up)
       const skipInstalls = true;
       const res = await npmHelper.generateLockFile(
         'some-dir',
@@ -917,7 +927,8 @@ describe('modules/manager/npm/post-update/npm', () => {
           },
         ],
       );
-      expect(fs.readLocalFile).toHaveBeenCalledTimes(3);
+      // +1 read for the ancestor package.json walk-up
+      expect(fs.readLocalFile).toHaveBeenCalledTimes(4);
       expect(res.error).toBeFalse();
       expect(execSnapshots).toMatchObject([
         {
@@ -964,7 +975,8 @@ describe('modules/manager/npm/post-update/npm', () => {
       vi.useFakeTimers();
       vi.setSystemTime(new Date('2026-06-15T12:00:00.000Z'));
       execSnapshots = mockExecAll();
-      fs.readLocalFile.mockResolvedValueOnce('{}');
+      fs.readLocalFile.mockResolvedValueOnce('{}'); // sibling package.json
+      fs.readLocalFile.mockResolvedValueOnce('{}'); // ancestor package.json (walk-up)
       const packageLockContents = JSON.stringify({
         packages: {},
         lockfileVersion: 3,
