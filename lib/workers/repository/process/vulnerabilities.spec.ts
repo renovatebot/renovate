@@ -1374,7 +1374,7 @@ describe('workers/repository/process/vulnerabilities', () => {
         currentValue: dep.currentValue,
         datasource: dep.datasource,
         versioning: 'maven',
-      });
+      } as never);
       const { updates } = await Result.wrap(
         lookup.lookupUpdates(lookupConfig),
       ).unwrapOrThrow();
