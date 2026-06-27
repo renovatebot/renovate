@@ -1,3 +1,4 @@
+import { isUndefined } from '@sindresorhus/is';
 import type { ZodError, output as ZodOutput, ZodType } from 'zod/v4';
 import { NEVER } from 'zod/v4';
 import { logger } from '../logger/index.ts';
@@ -42,11 +43,7 @@ function isZodResult<Output extends Val>(
   }
 
   if (input.success) {
-    return (
-      'data' in input &&
-      typeof input.data !== 'undefined' &&
-      input.data !== null
-    );
+    return 'data' in input && !isUndefined(input.data) && input.data !== null;
   } else {
     return 'error' in input;
   }

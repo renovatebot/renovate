@@ -22,14 +22,10 @@ class RedhatVersioningApi extends GenericVersioningApi {
     const { major, minor, patch, releaseMajor, releaseMinor } = matches;
     const release = [
       Number.parseInt(major, 10),
-      typeof minor === 'undefined' ? 0 : Number.parseInt(minor, 10),
-      typeof patch === 'undefined' ? 0 : Number.parseInt(patch, 10),
-      typeof releaseMajor === 'undefined'
-        ? 0
-        : Number.parseInt(releaseMajor, 10),
-      typeof releaseMinor === 'undefined'
-        ? 0
-        : Number.parseInt(releaseMinor, 10),
+      Number.parseInt(minor, 10) || 0,
+      Number.parseInt(patch, 10) || 0,
+      Number.parseInt(releaseMajor, 10) || 0,
+      Number.parseInt(releaseMinor, 10) || 0,
     ];
 
     return { release, prerelease: '' };
