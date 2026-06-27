@@ -4364,8 +4364,8 @@ This setting - if enabled - limits Renovate to a maximum of `x` concurrent PRs o
 This limit is enforced on a per-repository basis.
 
 !!! note
-  Renovate always creates security PRs, even if the concurrent PR limit is already reached.
-  Security PRs have `[SECURITY]` in their PR title.
+  Renovate always creates security PRs in Github, even if the concurrent PR limit is already reached.
+  Security PRs have `[SECURITY]` in their PR title. This feature is limited to Github currently.
 
 ## `prCreation`
 
