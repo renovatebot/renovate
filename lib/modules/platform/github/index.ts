@@ -1637,6 +1637,33 @@ export async function addReviewers(
   }
 }
 
+export async function getPrDismissedReviewers(prNo: number): Promise<string[]> {
+  logger.debug(`Getting reviewers with dismissed approvals for PR #${prNo}`);
+  try {
+    const res = await githubApi.getJsonUnchecked<
+      { user: { login: string } | null; state: string }[]
+    >(`repos/${config.parentRepo ?? config.repository}/pulls/${prNo}/reviews`, {
+      paginate: true,
+    });
+    const latestReviewByUser = new Map<string, string>();
+    for (const review of res.body) {
+      if (review.user?.login) {
+        latestReviewByUser.set(review.user.login, review.state);
+      }
+    }
+    const dismissedLogins: string[] = [];
+    for (const [login, state] of latestReviewByUser) {
+      if (state === 'DISMISSED') {
+        dismissedLogins.push(login);
+      }
+    }
+    return dismissedLogins;
+  } catch (err) /* v8 ignore next */ {
+    logger.warn({ err }, 'Failed to get PR reviews');
+    return [];
+  }
+}
+
 export async function addLabels(
   issueNo: number,
   labels: string[] | null | undefined,
