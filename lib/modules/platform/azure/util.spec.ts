@@ -1,4 +1,5 @@
 import { Readable } from 'node:stream';
+import { buildTestJwt } from '../../../util/http/jwt.spec.ts';
 import { streamToString } from '../../../util/streams.ts';
 import {
   getBranchNameWithoutRefsheadsPrefix,
@@ -135,9 +136,39 @@ describe('modules/platform/azure/util', () => {
       expect(res).toMatchSnapshot();
     });
 
-    it('should configure bearer token', () => {
+    it('should configure non-JWT token as PAT', () => {
       const res = getStorageExtraCloneOpts({ token: 'token' });
-      expect(res).toMatchSnapshot();
+      expect(res['-c']).toContain('AUTHORIZATION: basic');
+    });
+
+    it('should use bearer when token is a JWT', () => {
+      const token = buildTestJwt(
+        { typ: 'JWT', alg: 'RS256' },
+        { aud: '499b84ac', sub: 'test', exp: 9999999999 },
+        'fake-sig',
+      );
+      const res = getStorageExtraCloneOpts({ token });
+      expect(res['-c']).toContain('AUTHORIZATION: bearer');
+      expect(res['-c']).toContain(token);
+    });
+
+    it('should use basic for a 52-char PAT', () => {
+      const token = '1234567890123456789012345678901234567890123456789012';
+      const res = getStorageExtraCloneOpts({ token });
+      expect(res['-c']).toContain('AUTHORIZATION: basic');
+      expect(res['-c']).not.toContain('bearer');
+    });
+
+    it('should use basic for a short opaque token', () => {
+      const res = getStorageExtraCloneOpts({ token: 'short-token' });
+      expect(res['-c']).toContain('AUTHORIZATION: basic');
+      expect(res['-c']).not.toContain('bearer');
+    });
+
+    it('should use basic for an invalid JWT-like token', () => {
+      const res = getStorageExtraCloneOpts({ token: 'not.valid.jwt' });
+      expect(res['-c']).toContain('AUTHORIZATION: basic');
+      expect(res['-c']).not.toContain('bearer');
     });
   });
 
