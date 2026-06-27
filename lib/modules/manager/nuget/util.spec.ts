@@ -1,6 +1,7 @@
 import { codeBlock } from 'common-tags';
 import { XmlDocument } from 'xmldoc';
 import { fs } from '~test/util.ts';
+import * as hostRules from '../../../util/host-rules.ts';
 import type { Registry } from './types.ts';
 import { bumpPackageVersion } from './update.ts';
 import {
@@ -8,6 +9,8 @@ import {
   findGlobalJson,
   findVersion,
   getConfiguredRegistries,
+  getDefaultRegistries,
+  isRegistryDisabled,
 } from './util.ts';
 
 vi.mock('../../../util/fs/index.ts');
@@ -409,6 +412,53 @@ describe('modules/manager/nuget/util', () => {
       );
       const globalJson = await findGlobalJson('project.csproj');
       expect(globalJson).toEqual({ sdk: { version: '5.0.100' } });
+    });
+  });
+
+  describe('isRegistryDisabled', () => {
+    beforeEach(() => {
+      hostRules.clear();
+    });
+
+    it('returns false if not configured in hostRules', () => {
+      expect(isRegistryDisabled('https://api.nuget.org/v3/index.json')).toBe(
+        false,
+      );
+    });
+
+    it('returns true if host is disabled in hostRules', () => {
+      hostRules.add({
+        matchHost: 'api.nuget.org',
+        enabled: false,
+      });
+      expect(isRegistryDisabled('https://api.nuget.org/v3/index.json')).toBe(
+        true,
+      );
+    });
+  });
+
+  describe('getDefaultRegistries', () => {
+    beforeEach(() => {
+      hostRules.clear();
+    });
+
+    it('returns default nuget.org registry by default', () => {
+      const registries = getDefaultRegistries();
+      expect(registries).toEqual([
+        {
+          name: 'nuget.org',
+          url: 'https://api.nuget.org/v3/index.json',
+        },
+      ]);
+    });
+
+    it('returns empty array if nugetOrg is disabled in hostRules', () => {
+      hostRules.add({
+        matchHost: 'api.nuget.org',
+        enabled: false,
+      });
+      const registries = getDefaultRegistries();
+      expect(registries).toEqual([]);
     });
   });
 });

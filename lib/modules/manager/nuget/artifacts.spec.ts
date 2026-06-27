@@ -16,7 +16,12 @@ vi.mock('../../../util/fs/index.ts');
 vi.mock('../../../util/host-rules.ts');
 vi.mock('./util.ts');
 
-const { getDefaultRegistries, findGlobalJson } = vi.mocked(util);
+const {
+  getDefaultRegistries,
+  findGlobalJson,
+  getConfiguredRegistries,
+  isRegistryDisabled,
+} = vi.mocked(util);
 const hostRules = vi.mocked(_hostRules);
 
 process.env.CONTAINERBASE = 'true';
@@ -40,6 +45,7 @@ describe('modules/manager/nuget/artifacts', () => {
     getDefaultRegistries.mockReturnValue([
       { url: nugetOrg, name: 'nuget.org' },
     ]);
+    isRegistryDisabled.mockReturnValue(false);
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
     fs.privateCacheDir.mockImplementation(realFs.privateCacheDir);
     scm.getFileList.mockResolvedValueOnce([]);
@@ -515,5 +521,68 @@ describe('modules/manager/nuget/artifacts', () => {
       },
     ]);
     expect(execSnapshots).toBeEmptyArray();
+  });
+
+  it('uses only NuGet.config registries if present, and filters out disabled registries', async () => {
+    const execSnapshots = mockExecAll();
+    fs.getSiblingFileName.mockReturnValueOnce('packages.lock.json');
+    git.getFiles.mockResolvedValueOnce({
+      'packages.lock.json': 'Current packages.lock.json',
+    });
+    fs.getLocalFiles.mockResolvedValueOnce({
+      'packages.lock.json': 'New packages.lock.json',
+    });
+
+    getConfiguredRegistries.mockResolvedValueOnce([
+      {
+        name: 'my-custom-feed',
+        url: 'https://my-custom-feed.com/v3/index.json',
+      },
+      { name: 'disabled-feed', url: 'https://disabled-feed.com/v3/index.json' },
+    ]);
+    isRegistryDisabled.mockImplementation(
+      (url) => url === 'https://disabled-feed.com/v3/index.json',
+    );
+
+    expect(
+      await nuget.updateArtifacts({
+        packageFileName: 'project.csproj',
+        updatedDeps: [
+          {
+            depName: 'dep',
+            registryUrls: ['https://another-feed.com/v3/index.json'],
+          },
+        ],
+        newPackageFileContent: '{}',
+        config,
+      }),
+    ).toEqual([
+      {
+        file: {
+          contents: 'New packages.lock.json',
+          path: 'packages.lock.json',
+          type: 'addition',
+        },
+      },
+    ]);
+
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'dotnet restore project.csproj --force-evaluate --configfile /tmp/renovate/cache/__renovate-private-cache/nuget/nuget.config',
+      },
+    ]);
+
+    expect(fs.outputCacheFile).toHaveBeenCalledWith(
+      expect.stringContaining('nuget.config'),
+      expect.stringContaining('https://my-custom-feed.com/v3/index.json'),
+    );
+    expect(fs.outputCacheFile).not.toHaveBeenCalledWith(
+      expect.stringContaining('nuget.config'),
+      expect.stringContaining('https://disabled-feed.com/v3/index.json'),
+    );
+    expect(fs.outputCacheFile).not.toHaveBeenCalledWith(
+      expect.stringContaining('nuget.config'),
+      expect.stringContaining('https://another-feed.com/v3/index.json'),
+    );
   });
 });
