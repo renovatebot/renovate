@@ -101,6 +101,9 @@ export const toolDefinitions = [
     name: 'npm',
   },
   {
+    name: 'paket',
+  },
+  {
     name: 'pdm',
   },
   {
