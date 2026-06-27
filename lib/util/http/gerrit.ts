@@ -20,8 +20,8 @@ export class GerritHttp extends HttpBase {
     return baseUrl;
   }
 
-  constructor(options?: HttpOptions) {
-    super('gerrit', options);
+  constructor(hostType?: string, options?: HttpOptions) {
+    super(hostType ?? 'gerrit', options);
   }
 
   override resolveUrl(
