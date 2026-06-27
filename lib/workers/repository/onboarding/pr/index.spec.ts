@@ -117,6 +117,15 @@ describe('workers/repository/onboarding/pr/index', () => {
       expect(platform.createPr).toHaveBeenCalledTimes(1);
     });
 
+    it('uses summary PR list and package files when body exceeds platform limit', async () => {
+      platform.maxBodyLength.mockReturnValueOnce(1);
+      await ensureOnboardingPr(config, packageFiles, branches);
+      expect(platform.createPr).toHaveBeenCalledTimes(1);
+      expect(logger.debug).toHaveBeenCalledWith(
+        'Onboarding PR body exceeds platform limit, switching to summary PR list and package files',
+      );
+    });
+
     it('creates semantic PR', async () => {
       await ensureOnboardingPr(
         {
