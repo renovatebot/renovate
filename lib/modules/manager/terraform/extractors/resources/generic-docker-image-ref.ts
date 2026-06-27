@@ -7,7 +7,7 @@ import {
 import { getDep } from '../../../dockerfile/extract.ts';
 import type { ExtractConfig, PackageDependency } from '../../../types.ts';
 import { DependencyExtractor } from '../../base.ts';
-import type { TerraformDefinitionFile } from '../../hcl/types.ts';
+import type { TerraformDefinitionFileJSON } from '../../hcl/schema.ts';
 import type { ProviderLock } from '../../lockfile/types.ts';
 import type { GenericImageResourceDef } from '../../types.ts';
 import { generic_image_datasource, generic_image_resource } from './utils.ts';
@@ -20,7 +20,7 @@ export class GenericDockerImageRefExtractor extends DependencyExtractor {
   }
 
   extract(
-    hclMap: TerraformDefinitionFile,
+    hclMap: TerraformDefinitionFileJSON,
     _locks: ProviderLock[],
     config: ExtractConfig,
   ): PackageDependency[] {
