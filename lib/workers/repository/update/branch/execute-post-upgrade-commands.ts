@@ -343,17 +343,37 @@ export default async function executePostUpgradeCommands(
     return null;
   }
 
-  const branchUpgradeCommands: BranchUpgradeConfig[] = [
-    {
+  const uniqueBranchTasks = new Map<string, BranchUpgradeConfig>();
+  for (const upgrade of config.upgrades) {
+    if (upgrade.postUpgradeTasks?.executionMode === 'branch') {
+      const key = JSON.stringify(upgrade.postUpgradeTasks);
+      if (!uniqueBranchTasks.has(key)) {
+        uniqueBranchTasks.set(key, {
+          manager: upgrade.manager,
+          depName: upgrade.depName,
+          branchName: config.branchName,
+          postUpgradeTasks: upgrade.postUpgradeTasks,
+        });
+      }
+    }
+  }
+
+  // Fall back to branch-level config when no individual upgrade defines
+  // executionMode: 'branch', e.g. when postUpgradeTasks is only set at the
+  // top level of the BranchConfig.
+  if (
+    uniqueBranchTasks.size === 0 &&
+    config.postUpgradeTasks?.executionMode === 'branch'
+  ) {
+    uniqueBranchTasks.set(JSON.stringify(config.postUpgradeTasks), {
       manager: config.manager,
       depName: config.upgrades.map(({ depName }) => depName).join(' '),
       branchName: config.branchName,
-      postUpgradeTasks:
-        config.postUpgradeTasks!.executionMode === 'branch'
-          ? config.postUpgradeTasks
-          : undefined,
-    },
-  ];
+      postUpgradeTasks: config.postUpgradeTasks,
+    });
+  }
+
+  const branchUpgradeCommands = [...uniqueBranchTasks.values()];
 
   const updateUpgradeCommands: BranchUpgradeConfig[] = config.upgrades.filter(
     ({ postUpgradeTasks }) =>
