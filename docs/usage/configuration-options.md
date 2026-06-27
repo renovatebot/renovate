@@ -1810,6 +1810,31 @@ A similar one could strip leading `v` prefixes:
 }
 ```
 
+Alternatively of a single `version` capture group, you can use individual named groups to assemble a [SemVer](https://semver.org/) version string from parts.
+The supported group names are `major`, `minor`, `patch`, `prerelease`, and `build`.
+
+- `major` is required
+- `minor` and `patch` default to `0` if not captured
+- `prerelease` adds a `-{prerelease}` suffix
+- `build` adds a `+{build}` suffix
+
+If a `version` group is also present, it takes priority and the part groups are ignored.
+
+For example, Docker Hub tags for `eclipse-temurin` use `17.0.19_10` where `_` separates the patch from the build metadata.
+To extract this as `17.0.19+10`:
+
+```json
+{
+  "packageRules": [
+    {
+      "matchDatasources": ["docker"],
+      "matchPackageNames": ["eclipse-temurin"],
+      "extractVersion": "^(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)_(?<build>\\d+)"
+    }
+  ]
+}
+```
+
 ## `fetchChangeLogs`
 
 Use this config option to configure changelogs/release notes fetching.
