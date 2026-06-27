@@ -41,6 +41,7 @@ import { getCache } from '../cache/repository/index.ts';
 import { getEnv } from '../env.ts';
 import type { ExtraEnv } from '../exec/types.ts';
 import { getChildEnv } from '../exec/utils.ts';
+import { readLocalFile } from '../fs/index.ts';
 import { newlineRegex, regEx } from '../regex.ts';
 import type { LongCommitSha } from '../schema-utils/git.ts';
 import { toLongCommitSha } from '../schema-utils/git.ts';
@@ -1310,6 +1311,11 @@ export async function getFile(
   filePath: string,
   branchName?: string,
 ): Promise<string | null> {
+  // The local platform has no git branches to read from, so read the file
+  // straight from the working directory instead of syncing git.
+  if (GlobalConfig.get('platform') === 'local') {
+    return readLocalFile(filePath, 'utf8');
+  }
   await syncGit();
   try {
     const content = await git.show([

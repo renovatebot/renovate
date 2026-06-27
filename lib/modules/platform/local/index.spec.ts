@@ -1,6 +1,17 @@
+import { partial } from '~test/util.ts';
+import { GlobalConfig } from '../../../config/global.ts';
+import { rawExec as _rawExec } from '../../../util/exec/common.ts';
+import type { ExecResult } from '../../../util/exec/types.ts';
 import * as platform from './index.ts';
 
+vi.mock('../../../util/exec/common.ts');
+const rawExec = vi.mocked(_rawExec);
+
 describe('modules/platform/local/index', () => {
+  afterEach(() => {
+    GlobalConfig.reset();
+  });
+
   describe('initPlatform', () => {
     it('returns input', async () => {
       expect(await platform.initPlatform({})).toMatchInlineSnapshot(`
@@ -26,17 +37,25 @@ describe('modules/platform/local/index', () => {
       });
     });
 
-    it('falls back to lookup when dryRun=full is requested', async () => {
+    it('preserves an explicit dryRun=full override', async () => {
       await expect(
         platform.initPlatform({
           dryRun: 'full',
         }),
       ).resolves.toEqual({
-        dryRun: 'lookup',
+        dryRun: 'full',
         endpoint: 'local',
         persistRepoData: true,
         requireConfig: 'optional',
       });
+    });
+
+    it('falls back to lookup for unsupported dryRun values', async () => {
+      await expect(
+        platform.initPlatform({
+          dryRun: 'silent',
+        }),
+      ).resolves.toMatchObject({ dryRun: 'lookup' });
     });
   });
 
@@ -55,6 +74,37 @@ describe('modules/platform/local/index', () => {
           "repoFingerprint": "",
         }
       `);
+      expect(rawExec).not.toHaveBeenCalled();
+    });
+
+    it('allows dryRun=full on a clean work tree', async () => {
+      GlobalConfig.set({ dryRun: 'full', localDir: '/tmp/foo' });
+      rawExec.mockResolvedValueOnce(partial<ExecResult>({ stdout: '\n' }));
+      await expect(platform.initRepo()).resolves.toMatchObject({
+        defaultBranch: '',
+      });
+      expect(rawExec).toHaveBeenCalledExactlyOnceWith(
+        'git status --porcelain',
+        {
+          cwd: '/tmp/foo',
+        },
+      );
+    });
+
+    it('throws on dryRun=full with a dirty work tree', async () => {
+      GlobalConfig.set({ dryRun: 'full', localDir: '/tmp/foo' });
+      rawExec.mockResolvedValueOnce(
+        partial<ExecResult>({ stdout: ' M Dockerfile\n' }),
+      );
+      await expect(platform.initRepo()).rejects.toThrow('uncommitted changes');
+    });
+
+    it('warns on dryRun=full outside a git repository', async () => {
+      GlobalConfig.set({ dryRun: 'full', localDir: '/tmp/foo' });
+      rawExec.mockRejectedValueOnce(new Error('not a git repository'));
+      await expect(platform.initRepo()).resolves.toMatchObject({
+        defaultBranch: '',
+      });
     });
   });
 

@@ -961,6 +961,19 @@ describe('util/git/index', { timeout: 30000 }, () => {
       expect(await git.getFile('some-path', 'some-branch')).toBeNull();
     });
 
+    it('reads from the working directory when platform=local', async () => {
+      GlobalConfig.set({ platform: 'local', localDir: tmpDir.path });
+      await fs.outputFile(`${tmpDir.path}/local_file`, 'local contents');
+
+      expect(await git.getFile('local_file')).toBe('local contents');
+    });
+
+    it('returns null for a missing file when platform=local', async () => {
+      GlobalConfig.set({ platform: 'local', localDir: tmpDir.path });
+
+      expect(await git.getFile('missing_file')).toBeNull();
+    });
+
     it('logs a warning if hidden Unciode characters are found', async () => {
       await git.getFile('Dockerfile', 'renovate/hidden-unicode');
 
