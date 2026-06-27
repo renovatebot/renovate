@@ -68,7 +68,7 @@ describe('modules/manager/nix/extract', () => {
     expect(await extractPackageFile('', 'flake.nix')).toBeNull();
   });
 
-  it('returns null when inputs are missing locked', async () => {
+  it('returns empty deps when inputs are missing locked', async () => {
     const flakeLock = codeBlock`{
       "nodes": {
         "nixpkgs": {
@@ -89,10 +89,12 @@ describe('modules/manager/nix/extract', () => {
       "version": 7
     }`;
     fs.readLocalFile.mockResolvedValueOnce(flakeLock);
-    expect(await extractPackageFile('', 'flake.nix')).toBeNull();
+    expect(await extractPackageFile('', 'flake.nix')).toMatchObject({
+      deps: [],
+    });
   });
 
-  it('returns null when inputs are missing original', async () => {
+  it('returns empty deps when inputs are missing original', async () => {
     const flakeLock = codeBlock`{
       "nodes": {
         "nixpkgs": {
@@ -115,10 +117,12 @@ describe('modules/manager/nix/extract', () => {
       "version": 7
     }`;
     fs.readLocalFile.mockResolvedValueOnce(flakeLock);
-    expect(await extractPackageFile('', 'flake.nix')).toBeNull();
+    expect(await extractPackageFile('', 'flake.nix')).toMatchObject({
+      deps: [],
+    });
   });
 
-  it('returns null when original inputs are from local path', async () => {
+  it('returns empty deps when original inputs are from local path', async () => {
     const flakeLock = codeBlock`{
       "nodes": {
         "nixpkgs": {
@@ -147,10 +151,12 @@ describe('modules/manager/nix/extract', () => {
       "version": 7
     }`;
     fs.readLocalFile.mockResolvedValueOnce(flakeLock);
-    expect(await extractPackageFile('', 'flake.nix')).toBeNull();
+    expect(await extractPackageFile('', 'flake.nix')).toMatchObject({
+      deps: [],
+    });
   });
 
-  it('returns null when locked inputs are indirect', async () => {
+  it('returns empty deps when locked inputs are indirect', async () => {
     const flakeLock = codeBlock`{
       "nodes": {
         "nixpkgs": {
@@ -179,10 +185,12 @@ describe('modules/manager/nix/extract', () => {
       "version": 7
     }`;
     fs.readLocalFile.mockResolvedValueOnce(flakeLock);
-    expect(await extractPackageFile('', 'flake.nix')).toBeNull();
+    expect(await extractPackageFile('', 'flake.nix')).toMatchObject({
+      deps: [],
+    });
   });
 
-  it('returns null when locked inputs are from local path', async () => {
+  it('returns empty deps when locked inputs are from local path', async () => {
     const flakeLock = codeBlock`{
       "nodes": {
         "nixpkgs": {
@@ -211,7 +219,56 @@ describe('modules/manager/nix/extract', () => {
       "version": 7
     }`;
     fs.readLocalFile.mockResolvedValueOnce(flakeLock);
-    expect(await extractPackageFile('', 'flake.nix')).toBeNull();
+    expect(await extractPackageFile('', 'flake.nix')).toMatchObject({
+      deps: [],
+    });
+  });
+
+  it('returns empty deps when all inputs are indirect follows (enables lockFileMaintenance for root flake)', async () => {
+    const flakeLock = codeBlock`{
+      "nodes": {
+        "nixpkgs": {
+          "locked": {
+            "lastModified": 1720031269,
+            "narHash": "sha256-rwz8NJZV+387rnWpTYcXaRNvzUSnnF9aHONoJIYmiUQ=",
+            "owner": "NixOS",
+            "repo": "nixpkgs",
+            "rev": "9f4128e00b0ae8ec65918efeba59db998750ead6",
+            "type": "github"
+          },
+          "original": {
+            "id": "nixpkgs",
+            "type": "indirect"
+          }
+        },
+        "home-manager": {
+          "locked": {
+            "lastModified": 1720031269,
+            "narHash": "sha256-rwz8NJZV+387rnWpTYcXaRNvzUSnnF9aHONoJIYmiUQ=",
+            "owner": "nix-community",
+            "repo": "home-manager",
+            "rev": "abc123def456abc123def456abc123def456abc1",
+            "type": "github"
+          },
+          "original": {
+            "id": "home-manager",
+            "type": "indirect"
+          }
+        },
+        "root": {
+          "inputs": {
+            "nixpkgs": "nixpkgs",
+            "home-manager": "home-manager"
+          }
+        }
+      },
+      "root": "root",
+      "version": 7
+    }`;
+    fs.readLocalFile.mockResolvedValueOnce(flakeLock);
+    expect(await extractPackageFile('', 'flake.nix')).toMatchObject({
+      deps: [],
+    });
   });
 
   it('returns nixpkgs input', async () => {
@@ -518,7 +575,9 @@ describe('modules/manager/nix/extract', () => {
       "version": 7
     }`;
     fs.readLocalFile.mockResolvedValueOnce(flakeLock);
-    expect(await extractPackageFile('', 'flake.nix')).toBeNull();
+    expect(await extractPackageFile('', 'flake.nix')).toMatchObject({
+      deps: [],
+    });
   });
 
   it('includes nixpkgs but using indirect type and path locked type that cannot be updated', async () => {
@@ -547,7 +606,9 @@ describe('modules/manager/nix/extract', () => {
       "version": 7
     }`;
     fs.readLocalFile.mockResolvedValueOnce(flakeLock);
-    expect(await extractPackageFile('', 'flake.nix')).toBeNull();
+    expect(await extractPackageFile('', 'flake.nix')).toMatchObject({
+      deps: [],
+    });
   });
 
   it('includes flake from GitHub Enterprise', async () => {
@@ -812,7 +873,9 @@ describe('modules/manager/nix/extract', () => {
     "version": 7
   }`;
     fs.readLocalFile.mockResolvedValueOnce(flakeLock);
-    expect(await extractPackageFile('', 'flake.nix')).toBeNull();
+    expect(await extractPackageFile('', 'flake.nix')).toMatchObject({
+      deps: [],
+    });
   });
 
   it('includes flake with nixpkgs-lib as tarball type', async () => {
