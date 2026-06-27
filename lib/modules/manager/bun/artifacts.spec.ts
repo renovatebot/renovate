@@ -232,6 +232,29 @@ describe('modules/manager/bun/artifacts', () => {
         ]);
       });
 
+      it('writes the resolved npmrc so scoped registries resolve', async () => {
+        updateArtifact.updatedDeps = [
+          { manager: 'bun', lockFiles: ['bun.lock'] },
+        ];
+        updateArtifact.config.npmrc =
+          '@scope:registry=https://example.com/api/v4/packages/npm/\n';
+        const oldLock = Buffer.from('old');
+        fs.readFile.mockResolvedValueOnce(oldLock as never);
+        // no repo .npmrc
+        fs.readFile.mockResolvedValueOnce(null as never);
+        const newLock = Buffer.from('new');
+        fs.readFile.mockResolvedValueOnce(newLock as never);
+
+        await updateArtifacts(updateArtifact);
+
+        expect(fs.outputFile).toHaveBeenCalledWith(
+          expect.stringMatching(/\.npmrc$/),
+          expect.stringContaining(
+            '@scope:registry=https://example.com/api/v4/packages/npm/',
+          ),
+        );
+      });
+
       it('supports lockFileMaintenance', async () => {
         updateArtifact.updatedDeps = [
           { manager: 'bun', lockFiles: ['bun.lock'] },
