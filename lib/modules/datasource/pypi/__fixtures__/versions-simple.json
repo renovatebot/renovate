@@ -1,0 +1,85 @@
+{
+  "meta": { "api-version": "1.0" },
+  "name": "dj-database-url",
+  "files": [
+    {
+      "filename": "dj-database-url-0.1.2.tar.gz",
+      "url": "https://files.pythonhosted.org/packages/04/89/dj-database-url-0.1.2.tar.gz",
+      "hashes": { "sha256": "6169f2c272326e3cced6999effb19013365ea73f6ed6c731efa4e346711d8969" },
+      "upload-time": "2014-09-09T14:13:32.281Z"
+    },
+    {
+      "filename": "dj-database-url-0.1.3.tar.gz",
+      "url": "https://files.pythonhosted.org/packages/bd/80/dj-database-url-0.1.3.tar.gz",
+      "hashes": { "sha256": "222744896dcbe939aa940217c940a8a95981be13beb9af639a1da024be4f9411" }
+    },
+    {
+      "filename": "dj-database-url-0.1.4.tar.gz",
+      "url": "https://files.pythonhosted.org/packages/3e/78/dj-database-url-0.1.4.tar.gz",
+      "hashes": { "sha256": "14faa143247e267aefd807490e1e89e3ad9fac0a06c4aee3f9fe328849bd15cf" }
+    },
+    {
+      "filename": "dj-database-url-0.2.0.tar.gz",
+      "url": "https://files.pythonhosted.org/packages/d6/cb/dj-database-url-0.2.0.tar.gz",
+      "hashes": { "sha256": "5edd253ccb407a0bd19e91c4c9bbe164632639767086b4a38f2d20e00010488b" }
+    },
+    {
+      "filename": "dj-database-url-0.2.1.tar.gz",
+      "url": "https://files.pythonhosted.org/packages/a6/94/dj-database-url-0.2.1.tar.gz",
+      "hashes": { "sha256": "f95c0b2e9e70cc246bd101720e1be492524ecf0dd5ea39241b51ef142faefecc" }
+    },
+    {
+      "filename": "dj-database-url-0.2.2.tar.gz",
+      "url": "https://files.pythonhosted.org/packages/19/11/dj-database-url-0.2.2.tar.gz",
+      "hashes": { "sha256": "492a7294b85ad8ac1b13be0b7337f381d2d44c4da185f289ab7c26dd765ef6cb" }
+    },
+    {
+      "filename": "dj-database-url-0.3.0.tar.gz",
+      "url": "https://files.pythonhosted.org/packages/e1/0e/dj-database-url-0.3.0.tar.gz",
+      "hashes": { "sha256": "f2e273ed34acbb560962d5cf12917936d8df02297df09bd3089b8546d4584138" }
+    },
+    {
+      "filename": "dj_database_url-0.3.0-py2.py3-none-any.whl",
+      "url": "https://files.pythonhosted.org/packages/ef/b6/dj_database_url-0.3.0-py2.py3-none-any.whl",
+      "hashes": { "sha256": "ca01768fdecde134301f3170743226f60edff5c3935f12437378ebd911506353" }
+    },
+    {
+      "filename": "dj-database-url-0.4.0.tar.gz",
+      "url": "https://files.pythonhosted.org/packages/64/d9/dj-database-url-0.4.0.tar.gz",
+      "hashes": { "sha256": "858312abb7b330ea875733a65806a36ad04d7b8451c6ce8835118a2fa10d6870" }
+    },
+    {
+      "filename": "dj-database-url-0.4.1.tar.gz",
+      "url": "https://files.pythonhosted.org/packages/39/9f/dj-database-url-0.4.1.tar.gz",
+      "hashes": { "sha256": "7f4c78d2a090df8dfaf56d5d3ff7bbee17360436e4879558317e2314424864cd" }
+    },
+    {
+      "filename": "dj-database-url-0.4.2.tar.gz",
+      "url": "https://files.pythonhosted.org/packages/c8/4b/dj-database-url-0.4.2.tar.gz",
+      "hashes": { "sha256": "a6832d8445ee9d788c5baa48aef8130bf61fdc442f7d9a548424d25cd85c9f08" }
+    },
+    {
+      "filename": "dj_database_url-0.4.2-py2.py3-none-any.whl",
+      "url": "https://files.pythonhosted.org/packages/91/84/dj_database_url-0.4.2-py2.py3-none-any.whl",
+      "hashes": { "sha256": "e16d94c382ea0564c48038fa7fe8d9c890ef1ab1a8ec4cb48e732c124b9482fd" },
+      "yanked": false
+    },
+    {
+      "filename": "dj-database-url-0.5.0.tar.gz",
+      "url": "https://files.pythonhosted.org/packages/01/c4/dj-database-url-0.5.0.tar.gz",
+      "hashes": { "sha256": "4aeaeb1f573c74835b0686a2b46b85990571159ffc21aa57ecd4d1e1cb334163" },
+      "requires-python": ">=3.5"
+    },
+    {
+      "filename": "dj_database_url-0.5.0-py2.py3-none-any.whl",
+      "url": "https://files.pythonhosted.org/packages/d4/a6/dj_database_url-0.5.0-py2.py3-none-any.whl",
+      "hashes": { "sha256": "851785365761ebe4994a921b433062309eb882fedd318e1b0fcecc607ed02da9" },
+      "yanked": "security issue"
+    },
+    {
+      "filename": "unrelated-file.txt",
+      "url": "https://files.pythonhosted.org/packages/zz/zz/unrelated-file.txt",
+      "hashes": { "sha256": "0000000000000000000000000000000000000000000000000000000000000000" }
+    }
+  ]
+}
