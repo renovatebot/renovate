@@ -1,6 +1,7 @@
 import { logger } from '../../../logger/index.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
+import { HttpError } from '../../../util/http/index.ts';
 import * as p from '../../../util/promises.ts';
 import { regEx } from '../../../util/regex.ts';
 import { getQueryString, joinUrlParts } from '../../../util/url.ts';
@@ -10,6 +11,7 @@ import { createSDBackendURL } from '../terraform-module/utils.ts';
 import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
 import {
   OpenTofuProviderDocsResponse,
+  OpenTofuProviderPackagesResponse,
   type TerraformBuild,
   TerraformProviderReleaseBackend,
   TerraformProviderV2Response,
@@ -329,6 +331,80 @@ export class TerraformProviderDatasource extends TerraformDatasource {
         key: `getBuilds:${registryURL}/${repository}/${version}`,
       },
       () => this._getBuilds(registryURL, repository, version),
+    );
+  }
+
+  /**
+   * The OpenTofu download endpoint exposes a `packages` map with the `zh:`/`h1:`
+   * hashes for every platform, avoiding a local download-and-rehash of each zip.
+   * The map is platform-independent, so we request `linux/amd64` directly and
+   * fall back to `/versions` discovery only when that platform is missing (404).
+   * See https://github.com/opentofu/opentofu/pull/3434
+   */
+  private async _getProviderPackages(
+    repository: string,
+    version: string,
+  ): Promise<string[] | null> {
+    const baseUrl = joinUrlParts(
+      TerraformProviderDatasource.openTofuRegistryUrl,
+      'v1/providers',
+      repository,
+    );
+
+    let hashes = null;
+    try {
+      ({ body: hashes } = await this.http.getJson(
+        `${baseUrl}/${version}/download/linux/amd64`,
+        OpenTofuProviderPackagesResponse,
+      ));
+    } catch (err) {
+      if (!(err instanceof HttpError) || err.response?.statusCode !== 404) {
+        throw err;
+      }
+      hashes = await this._getProviderPackagesForAvailablePlatform(
+        baseUrl,
+        version,
+      );
+    }
+
+    return hashes;
+  }
+
+  /**
+   * Some providers do not publish a `linux/amd64` build, so discover an
+   * available platform via `/versions` and fetch its download endpoint.
+   */
+  private async _getProviderPackagesForAvailablePlatform(
+    baseUrl: string,
+    version: string,
+  ): Promise<string[] | null> {
+    const { body: versionsResponse } = await this.http.getJson(
+      `${baseUrl}/versions`,
+      TerraformRegistryVersions,
+    );
+    const platform = versionsResponse.versions?.find(
+      (entry) => entry.version === version,
+    )?.platforms?.[0];
+    if (!platform) {
+      return null;
+    }
+    const { body: hashes } = await this.http.getJson(
+      `${baseUrl}/${version}/download/${platform.os}/${platform.arch}`,
+      OpenTofuProviderPackagesResponse,
+    );
+    return hashes;
+  }
+
+  getProviderPackages(
+    repository: string,
+    version: string,
+  ): Promise<string[] | null> {
+    return withCache(
+      {
+        namespace: `datasource-${TerraformProviderDatasource.id}`,
+        key: `getProviderPackages:${repository}/${version}`,
+      },
+      () => this._getProviderPackages(repository, version),
     );
   }
 
