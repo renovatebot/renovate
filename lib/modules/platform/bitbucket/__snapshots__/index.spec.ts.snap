@@ -6,13 +6,6 @@ exports[`modules/platform/bitbucket/index > ensureComment() > does not throw 1`]
 
 exports[`modules/platform/bitbucket/index > ensureCommentRemoval() > does not throw 1`] = `undefined`;
 
-exports[`modules/platform/bitbucket/index > findIssue() > does not throw 1`] = `
-{
-  "body": "content",
-  "number": 25,
-}
-`;
-
 exports[`modules/platform/bitbucket/index > findPr() > finds pr 1`] = `
 {
   "bodyStruct": {
@@ -39,27 +32,6 @@ exports[`modules/platform/bitbucket/index > getBranchPr() > bitbucket finds PR f
   "targetBranch": "master",
   "title": "title",
 }
-`;
-
-exports[`modules/platform/bitbucket/index > getIssueList() > get issues 1`] = `
-[
-  {
-    "content": {
-      "raw": "content",
-    },
-    "id": 25,
-    "kind": "task",
-    "title": "title",
-  },
-  {
-    "content": {
-      "raw": "content",
-    },
-    "id": 26,
-    "kind": "task",
-    "title": "title",
-  },
-]
 `;
 
 exports[`modules/platform/bitbucket/index > getPr() > canRebase 1`] = `
