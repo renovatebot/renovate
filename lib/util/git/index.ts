@@ -36,7 +36,7 @@ import { getEnv } from '../env.ts';
 import type { ExtraEnv } from '../exec/types.ts';
 import { getChildEnv } from '../exec/utils.ts';
 import { newlineRegex, regEx } from '../regex.ts';
-import type { LongCommitSha } from '../schema-utils/git.ts';
+import { GitOperationStats } from '../stats.ts';
 import { toLongCommitSha } from '../schema-utils/git.ts';
 import { matchRegexOrGlobList } from '../string-match.ts';
 import { logWarningIfUnicodeHiddenCharactersInPackageFile } from '../unicode.ts';
@@ -474,6 +474,16 @@ export const syncGit = withInstrumenting(
           const durationMs = Math.round(Date.now() - fetchStart);
           logger.info({ durationMs }, 'git fetch completed');
           clone = false;
+          // Check if repo is shallow and unshallow if needed
+          const isShallow = (
+            await git.raw(['rev-parse', '--is-shallow-repository'])
+          ).trim();
+          if (isShallow === 'true') {
+            logger.debug('Repository is shallow, performing unshallow fetch');
+            await gitRetry(() => git.fetch(['--unshallow', 'origin']));
+            GitOperationStats.setUnshallowed();
+            logger.debug('Unshallow fetch completed');
+          }
         } catch (err) /* v8 ignore next -- TODO: add test #40625 */ {
           if (err.message === REPOSITORY_EMPTY) {
             throw err;
@@ -490,8 +500,20 @@ export const syncGit = withInstrumenting(
           if (config.defaultBranch) {
             opts.push('-b', config.defaultBranch);
           }
+          const { gitShallowCloneDepth } = GlobalConfig.get();
           if (config.fullClone) {
             logger.debug('Performing full clone');
+            if (gitShallowCloneDepth) {
+              logger.warn(
+                'gitShallowCloneDepth is ignored when fullClone is required by the platform',
+              );
+            }
+          } else if (gitShallowCloneDepth) {
+            logger.debug({ gitShallowCloneDepth }, 'Performing shallow clone');
+            // `--no-single-branch` keeps the full refspec so that existing
+            // Renovate branches are fetched (a `--depth` clone is single-branch
+            // by default, which would hide them and break branch management).
+            opts.push(`--depth=${gitShallowCloneDepth}`, '--no-single-branch');
           } else {
             logger.debug('Performing blobless clone');
             opts.push('--filter=blob:none');
@@ -520,6 +542,11 @@ export const syncGit = withInstrumenting(
             throw err;
           }
           throw new ExternalHostError(err, 'git');
+        }
+        GitOperationStats.setCloned();
+        const { gitShallowCloneDepth: shallowDepth } = GlobalConfig.get();
+        if (shallowDepth) {
+          GitOperationStats.setGitShallowCloneDepth(shallowDepth);
         }
         const durationMs = Math.round(Date.now() - cloneStart);
         logger.debug({ durationMs }, 'git clone completed');
