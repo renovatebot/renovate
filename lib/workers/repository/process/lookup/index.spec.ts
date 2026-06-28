@@ -1,5 +1,4 @@
 import { codeBlock } from 'common-tags';
-import { DateTime } from 'luxon';
 import { Fixtures } from '~test/fixtures.ts';
 import * as httpMock from '~test/http-mock.ts';
 import { partial } from '~test/util.ts';
@@ -37,7 +36,7 @@ import {
   resetConfig,
 } from '../../../../util/merge-confidence/index.ts';
 import { Result } from '../../../../util/result.ts';
-import { type Timestamp, asTimestamp } from '../../../../util/timestamp.ts';
+import type { Timestamp } from '../../../../util/timestamp.ts';
 import * as lookup from './index.ts';
 import type { LookupUpdateConfig } from './types.ts';
 
@@ -2810,58 +2809,6 @@ describe('workers/repository/process/lookup/index', () => {
           newValue: '1.4.5',
           newVersion: '1.4.5',
           pendingVersions: ['1.4.6'],
-          newVersionAgeInDays: expect.any(Number),
-          releaseTimestamp: expect.any(String),
-          updateType: 'patch',
-          hasAttestation: undefined,
-        },
-      ]);
-    });
-
-    it('does not apply minimumReleaseAge to security updates', async () => {
-      config.currentValue = '1.4.4';
-      config.packageName = 'some/action';
-      config.datasource = GithubReleasesDatasource.id;
-      config.minimumReleaseAge = '14 days';
-      config.internalChecksFilter = 'strict';
-      config.isVulnerabilityAlert = true;
-      // A security update's packageRule carries a `force` block (taken from the
-      // `vulnerabilityAlerts` config). Settings inside `force` override the user's
-      // own config, so `minimumReleaseAge: null` here disables the age check for
-      // this package. Simulated inline; the end-to-end path is covered in
-      // `vulnerabilities.spec.ts`.
-      config.packageRules = [
-        {
-          matchPackageNames: ['some/action'],
-          force: { minimumReleaseAge: null },
-        },
-      ];
-      const yesterday = asTimestamp(DateTime.now().minus({ days: 1 }).toISO());
-      getGithubReleases.mockResolvedValueOnce({
-        releases: [
-          { version: '1.4.4' },
-          {
-            version: '1.4.5',
-            releaseTimestamp: yesterday,
-          },
-        ],
-      });
-
-      const { updates } = await Result.wrap(
-        lookup.lookupUpdates(config),
-      ).unwrapOrThrow();
-
-      // 1.4.5 released yesterday is well within the 14-day window, yet it is
-      // proposed immediately with no pending status checks
-      expect(updates).toEqual([
-        {
-          bucket: 'non-major',
-          isBreaking: false,
-          newMajor: 1,
-          newMinor: 4,
-          newPatch: 5,
-          newValue: '1.4.5',
-          newVersion: '1.4.5',
           newVersionAgeInDays: expect.any(Number),
           releaseTimestamp: expect.any(String),
           updateType: 'patch',
