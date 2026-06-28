@@ -5186,3 +5186,4 @@ If `vulnerabilityFixStrategy=highest` is configured then Renovate will use its n
   }
 }
 ```
+
