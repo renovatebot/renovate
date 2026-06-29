@@ -33,6 +33,7 @@ export const PypiSimpleFile = DeepNullish(
     filename: z.string(),
     'requires-python': z.string().optional(),
     yanked: z.union([z.boolean(), z.string()]).optional().default(false),
+    // `upload-time` is specified by PEP 700
     'upload-time': z.string().optional(),
   }),
 );

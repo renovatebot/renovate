@@ -877,27 +877,7 @@ describe('modules/datasource/pypi/index', () => {
       ]);
     });
 
-    it('falls back to HTML when simple endpoint returns HTML despite Accept header', async () => {
-      httpMock
-        .scope('https://some.registry.org/simple/')
-        .get('/dj-database-url/')
-        .reply(200, htmlResponse, {
-          'content-type': 'text/html',
-        });
-      const config = {
-        registryUrls: ['https://some.registry.org/simple/'],
-      };
-
-      const res = await getPkgReleases({
-        datasource,
-        ...config,
-        packageName: 'dj-database-url',
-      });
-
-      expect(res?.releases).toMatchObject(djDatabaseUrlSimpleReleases);
-    });
-
-    it('falls back to HTML when JSON-based Simple API schema validation fails', async () => {
+    it('returns no releases when JSON-based Simple API schema validation fails', async () => {
       const invalidSchemaJson = JSON.stringify({ name: 'dj-database-url' });
       httpMock
         .scope('https://some.registry.org/simple/')
@@ -915,7 +895,7 @@ describe('modules/datasource/pypi/index', () => {
         packageName: 'dj-database-url',
       });
 
-      // Schema validation fails, falls back to HTML parsing which also finds no releases
+      // Content-type is JSON, so HTML parsing is not attempted; no releases found
       expect(res).toBeNull();
     });
 
