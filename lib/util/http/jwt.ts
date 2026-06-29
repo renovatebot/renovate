@@ -7,9 +7,6 @@ import { Json } from '../schema-utils/index.ts';
  * JWTs consist of three base64url-encoded segments separated by dots.
  * The first segment (header) must decode to valid JSON containing
  * at least a `typ` or `alg` field.
- *
- * This is used to automatically distinguish Microsoft Entra ID (AAD)
- * Bearer tokens from Azure DevOps Personal Access Tokens (PATs).
  */
 export function isProbablyJwt(token: string | undefined): boolean {
   if (!token) {
