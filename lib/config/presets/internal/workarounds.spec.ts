@@ -41,6 +41,21 @@ describe('config/presets/internal/workarounds', () => {
     });
   });
 
+  describe('byteBuddyMavenArtifactVersioning', () => {
+    const preset = presets.byteBuddyMavenArtifactVersioning;
+    const packageRule = preset.packageRules![0];
+    const versioning = versionings.get(packageRule.versioning);
+
+    it.each`
+      input                | expected
+      ${'1.0.0'}           | ${true}
+      ${'1.0.0-jdk5'}      | ${true}
+      ${'1.0.0-jdk6-jdk5'} | ${true}
+    `('versioning("$input") == "$expected"', ({ input, expected }) => {
+      expect(versioning.isValid(input)).toEqual(expected);
+    });
+  });
+
   describe('clamavDockerImageVersioning', () => {
     const preset = presets.clamavDockerImageVersioning;
     const packageRule = preset.packageRules![0];
