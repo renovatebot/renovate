@@ -41,7 +41,9 @@ import { calculateMostRecentTimestamp } from './timestamps.ts';
 import type { LookupUpdateConfig, UpdateResult } from './types.ts';
 import {
   addReplacementUpdateIfValid,
-  isReplacementRulesConfigured,
+  addReplacementUpdateIfValidWithVersion,
+  isReplacementRulesConfiguredWithVersionFixed,
+  isReplacementRulesConfiguredWithVersionLatest,
 } from './utils.ts';
 
 async function getTimestamp(
@@ -606,7 +608,83 @@ export async function lookupUpdates(
       res.skipReason = 'invalid-value';
     }
 
-    if (isReplacementRulesConfigured(config)) {
+    if (isReplacementRulesConfiguredWithVersionLatest(config)) {
+      const replacementConfig = { ...config };
+      replacementConfig.packageName = config.replacementName!;
+
+      const { val: releaseResult, err: lookupError } = await getRawPkgReleases(
+        replacementConfig,
+      )
+        .transform((res) => calculateMostRecentTimestamp(versioningApi, res))
+        .transform((res) => calculateAbandonment(res, replacementConfig))
+        .transform((res) => applyDatasourceFilters(res, replacementConfig))
+        .unwrap();
+
+      if (lookupError instanceof Error) {
+        throw lookupError;
+      }
+
+      if (lookupError) {
+        // If dependency lookup fails then warn and return
+        const warning: ValidationMessage = {
+          topic: replacementConfig.packageName,
+          message: `Failed to look up ${replacementConfig.datasource} package ${replacementConfig.packageName}`,
+        };
+        logger.debug(
+          {
+            dependency: replacementConfig.packageName,
+            packageFile: replacementConfig.packageFile,
+          },
+          warning.message,
+        );
+        // TODO: return warnings in own field
+        res.warnings.push(warning);
+        return Result.ok(res);
+      }
+
+      dependency = releaseResult;
+
+      const latestVersion = dependency.tags?.latest;
+
+      const allVersions = dependency.releases.filter((release) =>
+        versioningApi.isVersion(release.version),
+      );
+
+      const inRangeOnlyStrategy = config.rangeStrategy === 'in-range-only';
+      const allSatisfyingVersions =
+        (inRangeOnlyStrategy || config.rollbackPrs) && !unconstrainedValue
+          ? allVersions.filter((v) =>
+              // TODO #22198
+              versioningApi.matches(v.version, compareValue!),
+            )
+          : allVersions;
+      if (!allSatisfyingVersions.length) {
+        logger.debug(
+          `Found no satisfying versions with '${config.versioning}' versioning`,
+        );
+      }
+
+      // versioning schemes between replacements are usually different.
+      // therefore we do not "start" from the previous/current version
+      const currentVersion = '0';
+
+      const filteredReleases = filterVersions(
+        replacementConfig,
+        currentVersion,
+        latestVersion!,
+        inRangeOnlyStrategy ? allSatisfyingVersions : allVersions,
+        versioningApi,
+      );
+
+      const sortedReleases = filteredReleases.sort((r1, r2) =>
+        versioningApi.sortVersions(r2.version, r1.version),
+      );
+      addReplacementUpdateIfValidWithVersion(
+        res.updates,
+        config,
+        sortedReleases[0].version,
+      );
+    } else if (isReplacementRulesConfiguredWithVersionFixed(config)) {
       addReplacementUpdateIfValid(res.updates, config);
     } else if (dependency?.replacementName && dependency.replacementVersion) {
       res.updates.push({

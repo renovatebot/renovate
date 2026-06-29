@@ -1717,6 +1717,16 @@ const options: Readonly<RenovateOptions>[] = [
     supportsTemplating: true,
   },
   {
+    name: 'replacementVersionLatest',
+    description:
+      'Use the latest version of the new dependency that replaces the old deprecated dependency.',
+    type: 'boolean',
+    stage: 'package',
+    parents: ['packageRules'],
+    cli: false,
+    env: false,
+  },
+  {
     name: 'replacementApproach',
     description:
       'Select whether to perform a direct replacement or alias replacement.',

@@ -25,14 +25,44 @@ export function addReplacementUpdateIfValid(
   }
 }
 
-export function isReplacementRulesConfigured(
+export function addReplacementUpdateIfValidWithVersion(
+  updates: LookupUpdate[],
+  config: LookupUpdateConfig,
+  replacementNewValue: string,
+): void {
+  const replacementNewName = determineNewReplacementName(config);
+
+  if (
+    config.packageName !== replacementNewName ||
+    config.currentValue !== replacementNewValue
+  ) {
+    updates.push({
+      updateType: 'replacement',
+      newName: replacementNewName,
+      newValue: replacementNewValue,
+    });
+  }
+}
+
+export function isReplacementRulesConfiguredWithVersionLatest(
   config: LookupUpdateConfig,
 ): boolean {
   return (
-    isNonEmptyString(config.replacementName) ||
-    isNonEmptyString(config.replacementNameTemplate) ||
-    isNonEmptyString(config.replacementVersion) ||
-    isNonEmptyString(config.replacementVersionTemplate)
+    (isNonEmptyString(config.replacementName) ||
+      isNonEmptyString(config.replacementNameTemplate)) &&
+    config.replacementVersionLatest === true
+  );
+}
+
+export function isReplacementRulesConfiguredWithVersionFixed(
+  config: LookupUpdateConfig,
+): boolean {
+  return (
+    (isNonEmptyString(config.replacementName) ||
+      isNonEmptyString(config.replacementNameTemplate) ||
+      isNonEmptyString(config.replacementVersion) ||
+      isNonEmptyString(config.replacementVersionTemplate)) &&
+    config.replacementVersionLatest !== true
   );
 }
 
