@@ -13,13 +13,16 @@ describe('modules/versioning/node/index', () => {
   });
 
   it.each`
-    currentValue | rangeStrategy | currentVersion | newVersion   | expected
-    ${'1.0.0'}   | ${'replace'}  | ${'1.0.0'}     | ${'v1.1.0'}  | ${'1.1.0'}
-    ${'~8.0.0'}  | ${'replace'}  | ${'8.0.2'}     | ${'v8.2.0'}  | ${'~8.2.0'}
-    ${'erbium'}  | ${'replace'}  | ${'12.0.0'}    | ${'v14.1.4'} | ${'fermium'}
-    ${'Fermium'} | ${'replace'}  | ${'14.0.0'}    | ${'v16.1.6'} | ${'gallium'}
-    ${'gallium'} | ${'bump'}     | ${'16.0.0'}    | ${'v16.1.6'} | ${'gallium'}
-    ${'gallium'} | ${'auto'}     | ${'16.1.6'}    | ${'v16.1.6'} | ${'gallium'}
+    currentValue        | rangeStrategy | currentVersion      | newVersion           | expected
+    ${'1.0.0'}          | ${'replace'}  | ${'1.0.0'}          | ${'v1.1.0'}          | ${'1.1.0'}
+    ${'~8.0.0'}         | ${'replace'}  | ${'8.0.2'}          | ${'v8.2.0'}          | ${'~8.2.0'}
+    ${'erbium'}         | ${'replace'}  | ${'12.0.0'}         | ${'v14.1.4'}         | ${'fermium'}
+    ${'Fermium'}        | ${'replace'}  | ${'14.0.0'}         | ${'v16.1.6'}         | ${'gallium'}
+    ${'gallium'}        | ${'bump'}     | ${'16.0.0'}         | ${'v16.1.6'}         | ${'gallium'}
+    ${'gallium'}        | ${'auto'}     | ${'16.1.6'}         | ${'v16.1.6'}         | ${'gallium'}
+    ${'27.0.0-alpha.1'} | ${'replace'}  | ${'27.0.0-alpha.1'} | ${'v27.0.0-alpha.2'} | ${'27.0.0-alpha.2'}
+    ${'27.0.0-alpha.1'} | ${'replace'}  | ${'27.0.0-alpha.1'} | ${'v27.0.0'}         | ${'27.0.0'}
+    ${'gallium'}        | ${'replace'}  | ${'16.0.0'}         | ${'v27.0.0'}         | ${'^27.0.0'}
   `(
     'getNewValue($currentValue, $rangeStrategy, $currentVersion, $newVersion, $expected) === $expected',
     ({ currentValue, rangeStrategy, currentVersion, newVersion, expected }) => {
@@ -35,22 +38,31 @@ describe('modules/versioning/node/index', () => {
 
   const t1 = DateTime.fromISO('2020-09-01');
   const t2 = DateTime.fromISO('2021-06-01');
+  // Node 27 schedule (new shape): alpha 2026-10-28, Current from 2027-04-22,
+  // LTS (maintenance) from 2027-10-20.
+  const t3 = DateTime.fromISO('2027-06-01'); // Current phase, not yet LTS
+  const t4 = DateTime.fromISO('2027-11-01'); // LTS phase
 
   it.each`
-    version       | time  | expected
-    ${'16.0.0'}   | ${t1} | ${false}
-    ${'15.0.0'}   | ${t1} | ${false}
-    ${'14.9.0'}   | ${t1} | ${false}
-    ${'14.0.0'}   | ${t2} | ${true}
-    ${'12.0.3'}   | ${t1} | ${true}
-    ${'v12.0.3'}  | ${t1} | ${true}
-    ${'12.0.3a'}  | ${t1} | ${false}
-    ${'11.0.0'}   | ${t1} | ${false}
-    ${'10.0.0'}   | ${t1} | ${true}
-    ${'10.0.999'} | ${t1} | ${true}
-    ${'10.1.0'}   | ${t1} | ${true}
-    ${'10.0.0a'}  | ${t1} | ${false}
-    ${'9.0.0'}    | ${t1} | ${false}
+    version             | time  | expected
+    ${'16.0.0'}         | ${t1} | ${false}
+    ${'15.0.0'}         | ${t1} | ${false}
+    ${'14.9.0'}         | ${t1} | ${false}
+    ${'14.0.0'}         | ${t2} | ${true}
+    ${'12.0.3'}         | ${t1} | ${true}
+    ${'v12.0.3'}        | ${t1} | ${true}
+    ${'12.0.3a'}        | ${t1} | ${false}
+    ${'11.0.0'}         | ${t1} | ${false}
+    ${'10.0.0'}         | ${t1} | ${true}
+    ${'10.0.999'}       | ${t1} | ${true}
+    ${'10.1.0'}         | ${t1} | ${true}
+    ${'10.0.0a'}        | ${t1} | ${false}
+    ${'9.0.0'}          | ${t1} | ${false}
+    ${'1.0.0'}          | ${t1} | ${false}
+    ${'27.0.0'}         | ${t3} | ${false}
+    ${'27.0.0'}         | ${t4} | ${true}
+    ${'v27.0.0'}        | ${t4} | ${true}
+    ${'27.0.0-alpha.1'} | ${t4} | ${false}
   `('isStable("$version") === $expected', ({ version, time, expected }) => {
     DateTime.local = (...args: any[]) =>
       args.length ? dtLocal.apply(DateTime, args) : time;
@@ -58,15 +70,25 @@ describe('modules/versioning/node/index', () => {
   });
 
   it.each`
-    version       | expected
-    ${'16.0.0'}   | ${true}
-    ${'erbium'}   | ${true}
-    ${'bogus'}    | ${false}
-    ${'^10.0.0'}  | ${true}
-    ${'10.x'}     | ${true}
-    ${'10.9.8.7'} | ${false}
+    version             | expected
+    ${'16.0.0'}         | ${true}
+    ${'erbium'}         | ${true}
+    ${'bogus'}          | ${false}
+    ${'^10.0.0'}        | ${true}
+    ${'10.x'}           | ${true}
+    ${'10.9.8.7'}       | ${false}
+    ${'27.0.0-alpha.1'} | ${true}
   `('isValid("$version") === $expected', ({ version, expected }) => {
     expect(nodever.isValid(version as string)).toBe(expected);
+  });
+
+  it('treats Semver pre-release versions as valid but unstable', () => {
+    expect(nodever.isVersion('27.0.0-alpha.1')).toBe(true);
+    expect(nodever.isStable('27.0.0-alpha.1')).toBe(false);
+    expect(nodever.isGreaterThan('27.0.0', '27.0.0-alpha.1')).toBe(true);
+    expect(nodever.isGreaterThan('27.0.0-alpha.2', '27.0.0-alpha.1')).toBe(
+      true,
+    );
   });
 
   it.each`
