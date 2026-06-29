@@ -49,14 +49,31 @@ export function isValid(version: string): boolean {
 }
 
 export function isStable(version: string): boolean {
-  if (npm.isStable(version)) {
-    const schedule = findScheduleForVersion(version);
-    if (schedule?.lts) {
-      // TODO: use the exact release that started LTS (#9716)
-      return DateTime.local() > DateTime.fromISO(schedule.lts);
-    }
+  if (!npm.isStable(version)) {
+    return false;
   }
-  return false;
+
+  const schedule = findScheduleForVersion(version);
+  if (!schedule) {
+    return false;
+  }
+
+  // Node 27+ reworked the release schedule: the dedicated LTS date was dropped
+  // (every line now eventually becomes LTS), so the LTS-promotion point is read
+  // from a different milestone for those newer entries.
+  let ltsStart = schedule.lts;
+  if (schedule.alpha) {
+    ltsStart = schedule.maintenance;
+  }
+  if (!ltsStart) {
+    return false;
+  }
+
+  // We only track when a major line as a whole reached LTS, not which specific
+  // release started it — so every release of that major counts as stable once
+  // that date passes, even an early one like 18.0.0 that shipped before Node
+  // 18's first LTS release (18.12.0). This coarse granularity is intentional.
+  return DateTime.local() > DateTime.fromISO(ltsStart);
 }
 
 export function matches(version: string, range: string): boolean {
