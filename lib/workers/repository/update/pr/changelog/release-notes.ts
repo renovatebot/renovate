@@ -90,6 +90,7 @@ export function getCachedReleaseList(
 export function massageBody(
   input: string | undefined | null,
   baseUrl: string,
+  repository: string,
   type?: string,
 ): string {
   let body = coerceString(input);
@@ -131,8 +132,14 @@ export function massageBody(
         part.startsWith('```')
           ? part
           : part
-              .replace(regEx(/(^|\s)(![0-9]+)/gm), '$1`$2`')
-              .replace(regEx(/(^|\s)(#[0-9]+)/gm), '$1`$2`'),
+              .replace(
+                regEx(/(^|\s)!([0-9]+)/gm),
+                `$1[!$2](${baseUrl}${repository}/-/merge_requests/$2)`,
+              )
+              .replace(
+                regEx(/(^|\s)#([0-9]+)/gm),
+                `$1[#$2](${baseUrl}${repository}/-/work_items/$2)`,
+              ),
       )
       .join('');
   }
@@ -236,7 +243,7 @@ async function releaseNotesResult(
         `${baseUrl}${repository}/releases/${releaseMatch.tag!}`;
   }
   // set body for release notes
-  releaseNotes.body = massageBody(releaseNotes.body, baseUrl, type);
+  releaseNotes.body = massageBody(releaseNotes.body, baseUrl, repository, type);
   releaseNotes.name = massageName(releaseNotes.name, releaseNotes.tag);
   if (releaseNotes.body.length || releaseNotes.name?.length) {
     try {
@@ -577,7 +584,7 @@ async function linkifyBody(
   { baseUrl, repository, type }: ChangeLogProject,
   bodyStr: string,
 ): Promise<string> {
-  const body = massageBody(bodyStr, baseUrl, type);
+  const body = massageBody(bodyStr, baseUrl, repository, type);
   if (body?.length) {
     try {
       return await linkify(body, {

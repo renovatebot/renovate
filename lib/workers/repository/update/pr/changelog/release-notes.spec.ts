@@ -1211,7 +1211,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
         partial<BranchUpgradeConfig>(),
       );
       expect(res).toEqual({
-        body: 'some body `#123`, [#124](https://gitlab.com/some/yet-other-repository/issues/124)',
+        body: 'some body [#123](https://gitlab.com/some/other-repository/-/work_items/123), [#124](https://gitlab.com/some/yet-other-repository/issues/124)',
         name: undefined,
         notesSourceUrl:
           'https://api.gitlab.com/projects/some%2Fother-repository/releases',
@@ -1248,7 +1248,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
         partial<BranchUpgradeConfig>(),
       );
       expect(res).toEqual({
-        body: 'some body `#123`, [#124](https://gitlab.com/some/yet-other-repository/issues/124)',
+        body: 'some body [#123](https://gitlab.com/some/other-repository/-/work_items/123), [#124](https://gitlab.com/some/yet-other-repository/issues/124)',
         name: undefined,
         notesSourceUrl:
           'https://api.gitlab.com/projects/some%2Fother-repository/releases',
@@ -1285,7 +1285,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
         partial<BranchUpgradeConfig>(),
       );
       expect(res).toEqual({
-        body: 'some body `#123`, [#124](https://gitlab.com/some/yet-other-repository/issues/124)',
+        body: 'some body [#123](https://gitlab.com/some/other-repository/-/work_items/123), [#124](https://gitlab.com/some/yet-other-repository/issues/124)',
         name: undefined,
         notesSourceUrl:
           'https://api.gitlab.com/projects/some%2Fother-repository/releases',
@@ -1995,33 +1995,54 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
         '\n' +
         'dependency.analysis.scans.publish=true' +
         '```';
-      expect(massageBody(str, 'https://github.com/foo/bar/')).toBe(
+      expect(massageBody(str, 'https://github.com/foo/bar/', 'repo')).toBe(
         str.replace('  # Version 3.2.0', '### Version 3.2.0'),
       );
     });
 
     it('escapes gitlab MR references in release notes for gitlab projects', () => {
       expect(
-        massageBody('Fixed in !123 and !456', 'https://gitlab.com/', 'gitlab'),
-      ).toBe('Fixed in `!123` and `!456`');
+        massageBody(
+          'Fixed in !123 and !456',
+          'https://gitlab.com/',
+          'repository',
+          'gitlab',
+        ),
+      ).toBe(
+        'Fixed in [!123](https://gitlab.com/repository/-/merge_requests/123) and [!456](https://gitlab.com/repository/-/merge_requests/456)',
+      );
     });
 
     it('escapes gitlab issue references in release notes for gitlab projects', () => {
       expect(
-        massageBody('Fixes #123 and #456', 'https://gitlab.com/', 'gitlab'),
-      ).toBe('Fixes `#123` and `#456`');
+        massageBody(
+          'Fixes #123 and #456',
+          'https://gitlab.com/',
+          'repository',
+          'gitlab',
+        ),
+      ).toBe(
+        'Fixes [#123](https://gitlab.com/repository/-/work_items/123) and [#456](https://gitlab.com/repository/-/work_items/456)',
+      );
     });
 
     it('does not escape MR or issue references for non-gitlab projects', () => {
       expect(
-        massageBody('Fixed in !123, see #456', 'https://github.com/', 'github'),
+        massageBody(
+          'Fixed in !123, see #456',
+          'https://github.com/',
+          'repository',
+          'github',
+        ),
       ).toBe('Fixed in !123, see #456');
     });
 
     it('does not escape gitlab references inside code fences', () => {
       const str = 'See !123\n```\n!456 and #789\n```';
-      expect(massageBody(str, 'https://gitlab.com/', 'gitlab')).toBe(
-        'See `!123`\n```\n!456 and #789\n```',
+      expect(
+        massageBody(str, 'https://gitlab.com/', 'repository', 'gitlab'),
+      ).toBe(
+        'See [!123](https://gitlab.com/repository/-/merge_requests/123)\n```\n!456 and #789\n```',
       );
     });
 
@@ -2030,10 +2051,11 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
         massageBody(
           'some body #123, [#124](https://gitlab.com/some/repo/issues/124)',
           'https://gitlab.com/',
+          'repository',
           'gitlab',
         ),
       ).toBe(
-        'some body `#123`, [#124](https://gitlab.com/some/repo/issues/124)',
+        'some body [#123](https://gitlab.com/repository/-/work_items/123), [#124](https://gitlab.com/some/repo/issues/124)',
       );
     });
   });
