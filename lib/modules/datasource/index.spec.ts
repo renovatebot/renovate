@@ -1018,6 +1018,57 @@ describe('modules/datasource/index', () => {
           });
         });
       });
+
+      describe('config registryStrategy overrides datasource default', () => {
+        class MergeDatasource extends DummyDatasource {
+          override readonly registryStrategy = 'merge';
+        }
+
+        beforeEach(() => {
+          datasources.set(
+            datasource,
+            new MergeDatasource({
+              'https://reg1.com': { releases: [{ version: '1.0.0' }] },
+              'https://reg2.com': { releases: [{ version: '2.0.0' }] },
+            }),
+          );
+        });
+
+        it('config first overrides datasource merge', async () => {
+          const res = await getPkgReleases({
+            datasource,
+            packageName,
+            registryStrategy: 'first',
+            defaultRegistryUrls: ['https://reg1.com', 'https://reg2.com'],
+          });
+          expect(res).toMatchObject({
+            releases: [{ version: '1.0.0' }],
+          });
+        });
+
+        it('config hunt overrides datasource merge', async () => {
+          const res = await getPkgReleases({
+            datasource,
+            packageName,
+            registryStrategy: 'hunt',
+            defaultRegistryUrls: ['https://reg1.com', 'https://reg2.com'],
+          });
+          expect(res).toMatchObject({
+            releases: [{ version: '1.0.0' }],
+          });
+        });
+
+        it('uses datasource merge when config does not override', async () => {
+          const res = await getPkgReleases({
+            datasource,
+            packageName,
+            defaultRegistryUrls: ['https://reg1.com', 'https://reg2.com'],
+          });
+          expect(res).toMatchObject({
+            releases: [{ version: '1.0.0' }, { version: '2.0.0' }],
+          });
+        });
+      });
     });
   });
 });
