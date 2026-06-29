@@ -27,6 +27,9 @@ export abstract class RepoCacheBase implements RepoCache {
 
   private static parseData(input: string): RepoCacheData {
     const data: RepoCacheData = JSON.parse(input);
+    // Comment assurance hashes describe mutable platform-side state. Do not
+    // restore them from repository cache across runs.
+    delete data.prComments;
     // istanbul ignore next
     if (data.branches) {
       for (const branch of data.branches) {
@@ -37,6 +40,18 @@ export abstract class RepoCacheBase implements RepoCache {
       }
     }
     return data;
+  }
+
+  private static prepareDataForPersistence(
+    data: RepoCacheData,
+    cleanHttpCache = false,
+  ): RepoCacheData {
+    const persistedData = { ...data };
+    delete persistedData.prComments;
+    if (cleanHttpCache) {
+      cleanupHttpCache(persistedData);
+    }
+    return persistedData;
   }
 
   private async restore(oldCache: RepoCacheRecord): Promise<void> {
@@ -78,8 +93,11 @@ export abstract class RepoCacheBase implements RepoCache {
   }
 
   async save(): Promise<void> {
-    cleanupHttpCache(this.data);
-    const jsonStr = safeStringify(this.data);
+    const persistedData = RepoCacheBase.prepareDataForPersistence(
+      this.data,
+      true,
+    );
+    const jsonStr = safeStringify(persistedData);
     const hashedJsonStr = hash(jsonStr);
     if (hashedJsonStr === this.oldHash) {
       return;
@@ -108,7 +126,8 @@ export abstract class RepoCacheBase implements RepoCache {
     if (!this.oldHash) {
       return undefined;
     }
-    const jsonStr = safeStringify(this.data);
+    const persistedData = RepoCacheBase.prepareDataForPersistence(this.data);
+    const jsonStr = safeStringify(persistedData);
     return hash(jsonStr) !== this.oldHash;
   }
 }

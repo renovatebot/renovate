@@ -104,6 +104,28 @@ describe('util/cache/repository/impl/local', () => {
     expect(localRepoCache.isModified()).toBeFalse();
   });
 
+  it('drops persisted PR comment cache entries when loading', async () => {
+    const cacheRecord = await createCacheRecord({
+      semanticCommits: 'enabled',
+      prComments: {
+        1: {
+          warning: 'cached-content-hash',
+        },
+      },
+    });
+    fs.readCacheFile.mockResolvedValue(JSON.stringify(cacheRecord));
+    const localRepoCache = CacheFactory.get(
+      'some/repo',
+      '0123456789abcdef',
+      'local',
+    );
+
+    await localRepoCache.load();
+
+    expect(localRepoCache.getData()).toEqual({ semanticCommits: 'enabled' });
+    expect(localRepoCache.isModified()).toBeTrue();
+  });
+
   it('resets if fingerprint does not match', async () => {
     const data: RepoCacheData = { semanticCommits: 'enabled' };
     const cacheRecord: RepoCacheRecord = {
@@ -224,6 +246,31 @@ describe('util/cache/repository/impl/local', () => {
 
     await localRepoCache.load();
     expect(localRepoCache.getData()).toEqual({ semanticCommits: 'enabled' });
+    expect(localRepoCache.isModified()).toBeFalse();
+
+    await localRepoCache.save();
+
+    expect(fs.outputCacheFile).not.toHaveBeenCalledExactlyOnceWith();
+  });
+
+  it('does not persist runtime PR comment cache entries', async () => {
+    const oldCacheRecord = await createCacheRecord({
+      semanticCommits: 'enabled',
+    });
+    fs.readCacheFile.mockResolvedValueOnce(JSON.stringify(oldCacheRecord));
+    const localRepoCache = CacheFactory.get(
+      'some/repo',
+      '0123456789abcdef',
+      'local',
+    );
+
+    await localRepoCache.load();
+    localRepoCache.getData().prComments = {
+      1: {
+        warning: 'cached-content-hash',
+      },
+    };
+
     expect(localRepoCache.isModified()).toBeFalse();
 
     await localRepoCache.save();
