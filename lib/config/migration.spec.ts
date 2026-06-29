@@ -1,4 +1,4 @@
-import { logger } from '~test/util.ts';
+import { logger, partial } from '~test/util.ts';
 import { GlobalConfig } from './global.ts';
 import * as configMigration from './migration.ts';
 import { MigrationsService } from './migrations/index.ts';
@@ -10,6 +10,7 @@ import type {
 
 interface TestRenovateConfig extends RenovateConfig {
   node?: RenovateSharedConfig;
+  autoReplaceStringTemplate?: string;
 }
 
 describe('config/migration', () => {
@@ -691,6 +692,31 @@ describe('config/migration', () => {
       configMigration.migrateConfig(config);
     expect(isMigrated).toBeTrue();
     expect(migratedConfig).toMatchSnapshot();
+  });
+
+  it('does not migrate legacy template identifiers within larger identifiers', () => {
+    const config = partial<TestRenovateConfig>({
+      autoReplaceStringTemplate:
+        'val correttoVersion = "{{{newValue}}}"\n    val imageSha256 = "{{{newDigest}}}"\n    val toVersionSuffix = "{{{newValue}}}"\n    val _toVersion = "{{{newValue}}}"\n    val toVersion_ = "{{{newValue}}}"\n    val foo_toVersion_bar = "{{{newValue}}}"',
+    });
+    const { isMigrated, migratedConfig } =
+      configMigration.migrateConfig(config);
+    expect(isMigrated).toBeFalse();
+    expect(migratedConfig).toEqual(config);
+  });
+
+  it('migrates standalone legacy template identifiers in template expressions', () => {
+    const config: RenovateConfig = {
+      commitMessage:
+        '{{#if toVersion}}{{fromVersion}} -> {{{toVersion}}} {{newValueMajor}}/{{newValueMinor}} {{newVersionMajor}}/{{newVersionMinor}}{{/if}}',
+    };
+    const { isMigrated, migratedConfig } =
+      configMigration.migrateConfig(config);
+    expect(isMigrated).toBeTrue();
+    expect(migratedConfig).toEqual({
+      commitMessage:
+        '{{#if newVersion}}{{currentVersion}} -> {{{newVersion}}} {{newMajor}}/{{newMinor}} {{newMajor}}/{{newMinor}}{{/if}}',
+    });
   });
 
   it('migrates pip-compile', () => {
