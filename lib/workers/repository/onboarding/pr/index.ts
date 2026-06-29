@@ -32,6 +32,7 @@ import {
 } from '../common.ts';
 import { getBaseBranchDesc } from './base-branch.ts';
 import { getConfigDesc } from './config-description.ts';
+import { getPackageFilesDesc } from './package-files.ts';
 import { getExpectedPrList } from './pr-list.ts';
 
 /**
@@ -187,17 +188,9 @@ If you need any further assistance then you can also [request help here](${
   );
   prTemplate += rebaseCheckBox;
   let prBody = prTemplate;
-  if (packageFiles && Object.entries(packageFiles).length) {
-    let files: string[] = [];
-    for (const [manager, managerFiles] of Object.entries(packageFiles)) {
-      files = files.concat(
-        managerFiles.map((file) => ` * \`${file.packageFile}\` (${manager})`),
-      );
-    }
-    prBody = `${prBody.replace(
-      '{{PACKAGE FILES}}',
-      `### Detected Package Files\n\n${files.join('\n')}`,
-    )}\n`;
+  const packageFilesDesc = getPackageFilesDesc(packageFiles);
+  if (packageFilesDesc) {
+    prBody = `${prBody.replace('{{PACKAGE FILES}}', packageFilesDesc)}\n`;
   } else {
     prBody = prBody.replace('{{PACKAGE FILES}}\n', '');
   }
