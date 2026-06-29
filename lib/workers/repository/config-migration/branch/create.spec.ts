@@ -150,6 +150,63 @@ describe('workers/repository/config-migration/branch/create', () => {
       });
     });
 
+    describe('appends the commitBody value', () => {
+      it('to the default commit message', async () => {
+        config.gitAuthor = 'renovate@renovatebot.com';
+        config.commitBody = 'Signed-off-by: {{{gitAuthor}}}';
+        config.commitMessage = '';
+
+        const message = `Migrate config renovate.json\n\nSigned-off-by: renovate@renovatebot.com`;
+        await createConfigMigrationBranch(config, migratedConfigData);
+
+        expect(scm.checkoutBranch).toHaveBeenCalledExactlyOnceWith(
+          config.defaultBranch,
+        );
+        expect(scm.commitAndPush).toHaveBeenCalledExactlyOnceWith({
+          branchName: 'renovate/migrate-config',
+          baseBranch: 'dev',
+          files: [
+            {
+              type: 'addition',
+              path: 'renovate.json',
+              contents: renovateConfig,
+            },
+          ],
+          message,
+          platformCommit: 'auto',
+          force: true,
+          labels: [],
+        });
+      });
+      it('to the supplied commit message', async () => {
+        config.gitAuthor = 'renovate@renovatebot.com';
+        config.commitBody = 'Signed-off-by: {{{gitAuthor}}}';
+        config.commitMessage = 'Supplied Commit Message';
+
+        const message = `Supplied Commit Message\n\nSigned-off-by: renovate@renovatebot.com`;
+        await createConfigMigrationBranch(config, migratedConfigData);
+
+        expect(scm.checkoutBranch).toHaveBeenCalledExactlyOnceWith(
+          config.defaultBranch,
+        );
+        expect(scm.commitAndPush).toHaveBeenCalledExactlyOnceWith({
+          branchName: 'renovate/migrate-config',
+          baseBranch: 'dev',
+          files: [
+            {
+              type: 'addition',
+              path: 'renovate.json',
+              contents: renovateConfig,
+            },
+          ],
+          message,
+          platformCommit: 'auto',
+          force: true,
+          labels: [],
+        });
+      });
+    });
+
     describe('applies semanticCommit prefix', () => {
       it('to the default commit message', async () => {
         const prefix = 'chore(config)';
