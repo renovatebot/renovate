@@ -3,7 +3,11 @@ import upath from 'upath';
 import { mockDeep } from 'vitest-mock-extended';
 import { fs } from '~test/util.ts';
 import { GlobalConfig } from '../../../../config/global.ts';
+import * as _dateUtil from '../../../../util/date.ts';
+import { toMs } from '../../../../util/pretty-time.ts';
+import { asTimestamp } from '../../../../util/timestamp.ts';
 import { getPkgReleases } from '../../../datasource/index.ts';
+import * as versioningApi from '../../../versioning/index.ts';
 import type { UpdateArtifactsConfig } from '../../types.ts';
 import { updateArtifacts } from '../index.ts';
 import { TerraformProviderHash } from './hash.ts';
@@ -11,6 +15,7 @@ import { getNewConstraint } from './index.ts';
 
 // auto-mock fs
 vi.mock('../../../../util/fs/index.ts');
+vi.mock('../../../../util/date.ts');
 vi.mock('./hash.ts');
 vi.mock('../../../datasource/index.ts', () => mockDeep());
 
@@ -27,10 +32,12 @@ const adminConfig = {
 
 const mockHash = vi.mocked(TerraformProviderHash.createHashes);
 const mockGetPkgReleases = vi.mocked(getPkgReleases);
+const dateUtil = vi.mocked(_dateUtil);
 
 describe('modules/manager/terraform/lockfile/index', () => {
   beforeEach(() => {
     GlobalConfig.set(adminConfig);
+    dateUtil.getElapsedMs.mockReset();
   });
 
   it('returns artifact error', async () => {
@@ -92,67 +99,117 @@ describe('modules/manager/terraform/lockfile/index', () => {
     ).toBeNull();
   });
 
-  it('update single dependency with exact constraint and depType provider', async () => {
-    fs.readLocalFile.mockResolvedValueOnce(codeBlock`
-      provider "registry.opentofu.org/hashicorp/aws" {
-        version     = "3.0.0"
-        constraints = "3.0.0"
-        hashes = [
-          "aaa",
-          "bbb",
-          "ccc",
-        ]
-      }
-    `);
-    fs.findLocalSiblingOrParent.mockResolvedValueOnce('.terraform.lock.hcl');
-    mockHash.mockResolvedValueOnce([
-      'h1:lDsKRxDRXPEzA4AxkK4t+lJd3IQIP2UoaplJGjQSp2s=',
-      'h1:6zB2hX7YIOW26OrKsLJn0uLMnjqbPNxcz9RhlWEuuSY=',
-    ]);
+  it.each`
+    depType                | registryHost               | registryUrl
+    ${'provider'}          | ${'registry.opentofu.org'} | ${'https://registry.opentofu.org'}
+    ${'required_provider'} | ${'registry.terraform.io'} | ${'https://registry.terraform.io'}
+  `(
+    'updates a single exact-constraint dependency for depType=$depType',
+    async ({ depType, registryHost, registryUrl }) => {
+      fs.readLocalFile.mockResolvedValueOnce(codeBlock`
+        provider "${registryHost}/hashicorp/aws" {
+          version     = "3.0.0"
+          constraints = "3.0.0"
+          hashes = [
+            "aaa",
+            "bbb",
+            "ccc",
+          ]
+        }
+      `);
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce('.terraform.lock.hcl');
+      mockHash.mockResolvedValueOnce([
+        'h1:lDsKRxDRXPEzA4AxkK4t+lJd3IQIP2UoaplJGjQSp2s=',
+        'h1:6zB2hX7YIOW26OrKsLJn0uLMnjqbPNxcz9RhlWEuuSY=',
+      ]);
 
-    const result = await updateArtifacts({
-      packageFileName: 'main.tf',
-      updatedDeps: [
+      const result = await updateArtifacts({
+        packageFileName: 'main.tf',
+        updatedDeps: [
+          {
+            depName: 'hashicorp/aws',
+            packageName: 'hashicorp/aws',
+            depType,
+            newVersion: '3.36.0',
+            newValue: '3.36.0',
+          },
+        ],
+        newPackageFileContent: '',
+        config,
+      });
+
+      expect(result).toEqual([
         {
-          depName: 'hashicorp/aws',
-          packageName: 'hashicorp/aws',
-          depType: 'provider',
-          newVersion: '3.36.0',
-          newValue: '3.36.0',
+          file: {
+            contents: codeBlock`
+              provider "${registryHost}/hashicorp/aws" {
+                version     = "3.36.0"
+                constraints = "3.36.0"
+                hashes = [
+                  "h1:lDsKRxDRXPEzA4AxkK4t+lJd3IQIP2UoaplJGjQSp2s=",
+                  "h1:6zB2hX7YIOW26OrKsLJn0uLMnjqbPNxcz9RhlWEuuSY=",
+                ]
+              }
+            `,
+            path: '.terraform.lock.hcl',
+            type: 'addition',
+          },
         },
-      ],
-      newPackageFileContent: '',
-      config,
-    });
+      ]);
+      expect(mockHash.mock.calls).toEqual([
+        [registryUrl, 'hashicorp/aws', '3.36.0'],
+      ]);
+    },
+  );
 
-    expect(result).toEqual([
-      {
-        file: {
-          contents: codeBlock`
-            provider "registry.opentofu.org/hashicorp/aws" {
-              version     = "3.36.0"
-              constraints = "3.36.0"
-              hashes = [
-                "h1:lDsKRxDRXPEzA4AxkK4t+lJd3IQIP2UoaplJGjQSp2s=",
-                "h1:6zB2hX7YIOW26OrKsLJn0uLMnjqbPNxcz9RhlWEuuSY=",
-              ]
-            }
-          `,
-          path: '.terraform.lock.hcl',
-          type: 'addition',
-        },
-      },
-    ]);
-    expect(mockHash.mock.calls).toEqual([
-      ['https://registry.opentofu.org', 'hashicorp/aws', '3.36.0'],
-    ]);
-  });
+  it.each(['3.0.0', '~> 3.0, 3.0.0'])(
+    'does not update dependency with exact constraint during lockfile update: %s',
+    async (constraints) => {
+      fs.readLocalFile.mockResolvedValueOnce(codeBlock`
+        provider "registry.terraform.io/hashicorp/aws" {
+          version     = "3.0.0"
+          constraints = "${constraints}"
+          hashes = [
+            "aaa",
+            "bbb",
+            "ccc",
+          ]
+        }
+      `);
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce('.terraform.lock.hcl');
 
-  it('update single dependency with exact constraint and and depType required_provider', async () => {
+      mockHash.mockResolvedValueOnce([
+        'h1:lDsKRxDRXPEzA4AxkK4t+lJd3IQIP2UoaplJGjQSp2s=',
+        'h1:6zB2hX7YIOW26OrKsLJn0uLMnjqbPNxcz9RhlWEuuSY=',
+      ]);
+
+      const result = await updateArtifacts({
+        packageFileName: 'main.tf',
+        updatedDeps: [
+          {
+            depName: 'hashicorp/aws',
+            packageName: 'hashicorp/aws',
+            depType: 'required_provider',
+            currentVersion: '3.0.0',
+            currentValue: '3.0.0',
+            newVersion: '3.36.0',
+            newValue: '3.36.0',
+            isLockfileUpdate: true,
+          },
+        ],
+        newPackageFileContent: '',
+        config,
+      });
+
+      expect(result).toBeNull();
+    },
+  );
+
+  it('updates dependency when lockfile update version satisfies constraints', async () => {
     fs.readLocalFile.mockResolvedValueOnce(codeBlock`
       provider "registry.terraform.io/hashicorp/aws" {
         version     = "3.0.0"
-        constraints = "3.0.0"
+        constraints = "~> 3.0.0"
         hashes = [
           "aaa",
           "bbb",
@@ -174,8 +231,12 @@ describe('modules/manager/terraform/lockfile/index', () => {
           depName: 'hashicorp/aws',
           packageName: 'hashicorp/aws',
           depType: 'required_provider',
-          newVersion: '3.36.0',
-          newValue: '3.36.0',
+          versioning: 'hashicorp',
+          currentVersion: '3.0.0',
+          currentValue: '~> 3.0.0',
+          newVersion: '3.0.1',
+          newValue: '~> 3.0.1',
+          isLockfileUpdate: true,
         },
       ],
       newPackageFileContent: '',
@@ -187,8 +248,8 @@ describe('modules/manager/terraform/lockfile/index', () => {
         file: {
           contents: codeBlock`
             provider "registry.terraform.io/hashicorp/aws" {
-              version     = "3.36.0"
-              constraints = "3.36.0"
+              version     = "3.0.1"
+              constraints = "~> 3.0.1"
               hashes = [
                 "h1:lDsKRxDRXPEzA4AxkK4t+lJd3IQIP2UoaplJGjQSp2s=",
                 "h1:6zB2hX7YIOW26OrKsLJn0uLMnjqbPNxcz9RhlWEuuSY=",
@@ -200,93 +261,9 @@ describe('modules/manager/terraform/lockfile/index', () => {
         },
       },
     ]);
-
-    expect(mockHash.mock.calls).toEqual([
-      ['https://registry.terraform.io', 'hashicorp/aws', '3.36.0'],
-    ]);
   });
 
-  it('does not update dependency with exact constraint during lockfile update', async () => {
-    fs.readLocalFile.mockResolvedValueOnce(codeBlock`
-      provider "registry.terraform.io/hashicorp/aws" {
-        version     = "3.0.0"
-        constraints = "3.0.0"
-        hashes = [
-          "aaa",
-          "bbb",
-          "ccc",
-        ]
-      }
-    `);
-    fs.findLocalSiblingOrParent.mockResolvedValueOnce('.terraform.lock.hcl');
-
-    mockHash.mockResolvedValueOnce([
-      'h1:lDsKRxDRXPEzA4AxkK4t+lJd3IQIP2UoaplJGjQSp2s=',
-      'h1:6zB2hX7YIOW26OrKsLJn0uLMnjqbPNxcz9RhlWEuuSY=',
-    ]);
-
-    const result = await updateArtifacts({
-      packageFileName: 'main.tf',
-      updatedDeps: [
-        {
-          depName: 'hashicorp/aws',
-          packageName: 'hashicorp/aws',
-          depType: 'required_provider',
-          currentVersion: '3.0.0',
-          currentValue: '3.0.0',
-          newVersion: '3.36.0',
-          newValue: '3.36.0',
-          isLockfileUpdate: true,
-        },
-      ],
-      newPackageFileContent: '',
-      config,
-    });
-
-    expect(result).toBeNull();
-  });
-
-  it('does not update dependency with exact constraint within multiple during lockfile update', async () => {
-    fs.readLocalFile.mockResolvedValueOnce(codeBlock`
-      provider "registry.terraform.io/hashicorp/aws" {
-        version     = "3.0.0"
-        constraints = "~> 3.0, 3.0.0"
-        hashes = [
-          "aaa",
-          "bbb",
-          "ccc",
-        ]
-      }
-    `);
-    fs.findLocalSiblingOrParent.mockResolvedValueOnce('.terraform.lock.hcl');
-
-    mockHash.mockResolvedValueOnce([
-      'h1:lDsKRxDRXPEzA4AxkK4t+lJd3IQIP2UoaplJGjQSp2s=',
-      'h1:6zB2hX7YIOW26OrKsLJn0uLMnjqbPNxcz9RhlWEuuSY=',
-    ]);
-
-    const result = await updateArtifacts({
-      packageFileName: 'main.tf',
-      updatedDeps: [
-        {
-          depName: 'hashicorp/aws',
-          packageName: 'hashicorp/aws',
-          depType: 'required_provider',
-          currentVersion: '3.0.0',
-          currentValue: '3.0.0',
-          newVersion: '3.36.0',
-          newValue: '3.36.0',
-          isLockfileUpdate: true,
-        },
-      ],
-      newPackageFileContent: '',
-      config,
-    });
-
-    expect(result).toBeNull();
-  });
-
-  it('do not update dependency with depType module', async () => {
+  it('does not update dependencies with depType=module', async () => {
     const result = await updateArtifacts({
       packageFileName: 'main.tf',
       updatedDeps: [
@@ -304,7 +281,7 @@ describe('modules/manager/terraform/lockfile/index', () => {
     expect(result).toBeNull();
   });
 
-  it('update single dependency with range constraint and minor update from private registry', async () => {
+  it('updates a single dependency with a range constraint from a private registry', async () => {
     fs.readLocalFile.mockResolvedValueOnce(codeBlock`
       provider "registry.terraform.io/hashicorp/azurerm" {
         version     = "2.50.0"
@@ -363,7 +340,7 @@ describe('modules/manager/terraform/lockfile/index', () => {
     ]);
   });
 
-  it('update single dependency with range constraint and major update', async () => {
+  it('updates a single dependency with a range constraint across a major version', async () => {
     fs.readLocalFile.mockResolvedValueOnce(codeBlock`
       provider "registry.terraform.io/hashicorp/random" {
         version     = "2.2.1"
@@ -421,7 +398,7 @@ describe('modules/manager/terraform/lockfile/index', () => {
     ]);
   });
 
-  it('update single dependency in subfolder', async () => {
+  it('updates a single dependency in a subfolder lockfile', async () => {
     fs.readLocalFile.mockResolvedValueOnce(codeBlock`
       provider "registry.terraform.io/hashicorp/random" {
         version     = "2.2.1"
@@ -481,7 +458,7 @@ describe('modules/manager/terraform/lockfile/index', () => {
     ]);
   });
 
-  it('update multiple dependencies which are not ordered', async () => {
+  it('updates multiple dependencies regardless of updatedDeps order', async () => {
     fs.readLocalFile.mockResolvedValue(codeBlock`
       provider "registry.terraform.io/hashicorp/aws" {
         version     = "3.0.0"
@@ -618,7 +595,7 @@ describe('modules/manager/terraform/lockfile/index', () => {
     ]);
   });
 
-  it('do full lock file maintenance', async () => {
+  it('updates all lockfile entries during lock file maintenance', async () => {
     fs.readLocalFile.mockResolvedValueOnce(codeBlock`
       provider "registry.terraform.io/hashicorp/aws" {
         version     = "3.0.0"
@@ -754,7 +731,7 @@ describe('modules/manager/terraform/lockfile/index', () => {
     ]);
   });
 
-  it('do full lock file maintenance with lockfile in subfolder', async () => {
+  it('updates all lockfile entries during lock file maintenance in a subfolder', async () => {
     fs.readLocalFile.mockResolvedValueOnce(codeBlock`
       provider "registry.terraform.io/hashicorp/aws" {
         version     = "3.0.0"
@@ -870,7 +847,303 @@ describe('modules/manager/terraform/lockfile/index', () => {
     );
   });
 
-  it('do full lock file maintenance without necessary changes', async () => {
+  it('filters lock file maintenance releases using minimumReleaseAge', async () => {
+    dateUtil.getElapsedMs
+      .mockReturnValueOnce(toMs('12 hours') ?? 0)
+      .mockReturnValueOnce(toMs('12 days') ?? 0)
+      .mockReturnValueOnce(toMs('12 hours') ?? 0)
+      .mockReturnValueOnce(toMs('4 days') ?? 0);
+
+    fs.readLocalFile.mockResolvedValueOnce(codeBlock`
+      provider "registry.terraform.io/hashicorp/azurerm" {
+        version     = "2.50.0"
+        constraints = "~> 2.50"
+        hashes = [
+          "bar",
+        ]
+      }
+
+      provider "registry.opentofu.org/hashicorp/random" {
+        version     = "2.2.1"
+        constraints = "~> 2.2"
+        hashes = [
+          "baz",
+        ]
+      }
+    `);
+    fs.findLocalSiblingOrParent.mockResolvedValueOnce('.terraform.lock.hcl');
+
+    mockGetPkgReleases
+      .mockResolvedValueOnce({
+        releases: [
+          {
+            version: '2.50.0',
+            releaseTimestamp: asTimestamp('2026-03-01T00:00:00.000Z'),
+          },
+          {
+            version: '2.55.0',
+            releaseTimestamp: asTimestamp('2026-03-20T00:00:00.000Z'),
+          },
+          {
+            version: '2.56.0',
+            releaseTimestamp: asTimestamp('2026-03-31T12:00:00.000Z'),
+          },
+        ],
+      })
+      .mockResolvedValueOnce({
+        releases: [
+          {
+            version: '2.2.1',
+            releaseTimestamp: asTimestamp('2026-03-01T00:00:00.000Z'),
+          },
+          {
+            version: '2.2.2',
+            releaseTimestamp: asTimestamp('2026-03-28T00:00:00.000Z'),
+          },
+          {
+            version: '2.2.3',
+            releaseTimestamp: asTimestamp('2026-03-31T12:00:00.000Z'),
+          },
+        ],
+      });
+    mockHash.mockResolvedValue([
+      'h1:lDsKRxDRXPEzA4AxkK4t+lJd3IQIP2UoaplJGjQSp2s=',
+      'h1:6zB2hX7YIOW26OrKsLJn0uLMnjqbPNxcz9RhlWEuuSY=',
+    ]);
+
+    const result = await updateArtifacts({
+      packageFileName: '',
+      updatedDeps: [],
+      newPackageFileContent: '',
+      config: {
+        ...config,
+        isLockFileMaintenance: true,
+        minimumReleaseAge: '3 days',
+      },
+    });
+
+    expect(result).toEqual([
+      {
+        file: {
+          contents: codeBlock`
+            provider "registry.terraform.io/hashicorp/azurerm" {
+              version     = "2.55.0"
+              constraints = "~> 2.50"
+              hashes = [
+                "h1:lDsKRxDRXPEzA4AxkK4t+lJd3IQIP2UoaplJGjQSp2s=",
+                "h1:6zB2hX7YIOW26OrKsLJn0uLMnjqbPNxcz9RhlWEuuSY=",
+              ]
+            }
+
+            provider "registry.opentofu.org/hashicorp/random" {
+              version     = "2.2.2"
+              constraints = "~> 2.2"
+              hashes = [
+                "h1:lDsKRxDRXPEzA4AxkK4t+lJd3IQIP2UoaplJGjQSp2s=",
+                "h1:6zB2hX7YIOW26OrKsLJn0uLMnjqbPNxcz9RhlWEuuSY=",
+              ]
+            }
+          `,
+          path: '.terraform.lock.hcl',
+          type: 'addition',
+        },
+      },
+    ]);
+
+    expect(mockHash.mock.calls).toEqual([
+      ['https://registry.terraform.io', 'hashicorp/azurerm', '2.55.0'],
+      ['https://registry.opentofu.org', 'hashicorp/random', '2.2.2'],
+    ]);
+  });
+
+  it('updates lock file maintenance when release timestamp is missing and minimumReleaseAgeBehaviour=timestamp-optional', async () => {
+    fs.readLocalFile.mockResolvedValueOnce(codeBlock`
+      provider "registry.terraform.io/hashicorp/azurerm" {
+        version     = "2.50.0"
+        constraints = "~> 2.50"
+        hashes = [
+          "bar",
+        ]
+      }
+    `);
+    fs.findLocalSiblingOrParent.mockResolvedValueOnce('.terraform.lock.hcl');
+
+    mockGetPkgReleases.mockResolvedValueOnce({
+      releases: [
+        {
+          version: '2.50.0',
+          releaseTimestamp: asTimestamp('2026-03-01T00:00:00.000Z'),
+        },
+        {
+          version: '2.56.0',
+        },
+      ],
+    });
+    mockHash.mockResolvedValue([
+      'h1:lDsKRxDRXPEzA4AxkK4t+lJd3IQIP2UoaplJGjQSp2s=',
+      'h1:6zB2hX7YIOW26OrKsLJn0uLMnjqbPNxcz9RhlWEuuSY=',
+    ]);
+
+    const result = await updateArtifacts({
+      packageFileName: '',
+      updatedDeps: [],
+      newPackageFileContent: '',
+      config: {
+        ...config,
+        isLockFileMaintenance: true,
+        minimumReleaseAge: '3 days',
+        minimumReleaseAgeBehaviour: 'timestamp-optional',
+      },
+    });
+
+    expect(result).toEqual([
+      {
+        file: {
+          contents: codeBlock`
+            provider "registry.terraform.io/hashicorp/azurerm" {
+              version     = "2.56.0"
+              constraints = "~> 2.50"
+              hashes = [
+                "h1:lDsKRxDRXPEzA4AxkK4t+lJd3IQIP2UoaplJGjQSp2s=",
+                "h1:6zB2hX7YIOW26OrKsLJn0uLMnjqbPNxcz9RhlWEuuSY=",
+              ]
+            }
+          `,
+          path: '.terraform.lock.hcl',
+          type: 'addition',
+        },
+      },
+    ]);
+
+    expect(mockHash.mock.calls).toEqual([
+      ['https://registry.terraform.io', 'hashicorp/azurerm', '2.56.0'],
+    ]);
+  });
+
+  it('does not update lock file maintenance when the latest satisfying release has no version and no minimumReleaseAge is set', async () => {
+    fs.readLocalFile.mockResolvedValueOnce(codeBlock`
+      provider "registry.terraform.io/hashicorp/azurerm" {
+        version     = "2.50.0"
+        constraints = "~> 2.50"
+        hashes = [
+          "bar",
+        ]
+      }
+    `);
+    fs.findLocalSiblingOrParent.mockResolvedValueOnce('.terraform.lock.hcl');
+
+    const getVersioningSpy = vi.spyOn(versioningApi, 'get').mockReturnValue({
+      matches: () => true,
+    } as never);
+
+    mockGetPkgReleases.mockResolvedValueOnce({
+      releases: [{} as never],
+    });
+
+    const result = await updateArtifacts({
+      packageFileName: '',
+      updatedDeps: [],
+      newPackageFileContent: '',
+      config: {
+        ...config,
+        isLockFileMaintenance: true,
+      },
+    });
+
+    expect(result).toBeNull();
+    expect(mockHash).not.toHaveBeenCalled();
+
+    getVersioningSpy.mockRestore();
+  });
+
+  it.each([
+    {
+      description: 'all satisfying releases are pending',
+      elapsedMs: [toMs('12 hours') ?? 0, toMs('2 days') ?? 0],
+      releases: [
+        {
+          version: '2.50.0',
+          releaseTimestamp: asTimestamp('2026-03-30T00:00:00.000Z'),
+        },
+        {
+          version: '2.55.0',
+          releaseTimestamp: asTimestamp('2026-03-31T12:00:00.000Z'),
+        },
+      ],
+      localConfig: {
+        ...config,
+        isLockFileMaintenance: true,
+        minimumReleaseAge: '3 days',
+      },
+    },
+    {
+      description: 'no releases satisfy the constraints',
+      elapsedMs: [],
+      releases: [
+        {
+          version: '3.0.0',
+          releaseTimestamp: asTimestamp('2026-03-01T00:00:00.000Z'),
+        },
+      ],
+      localConfig: {
+        ...config,
+        isLockFileMaintenance: true,
+        minimumReleaseAge: '3 days',
+      },
+    },
+    {
+      description:
+        'release timestamp is missing and minimumReleaseAgeBehaviour=timestamp-required',
+      elapsedMs: [],
+      releases: [
+        {
+          version: '2.50.0',
+          releaseTimestamp: asTimestamp('2026-03-01T00:00:00.000Z'),
+        },
+        {
+          version: '2.56.0',
+        },
+      ],
+      localConfig: {
+        ...config,
+        isLockFileMaintenance: true,
+        minimumReleaseAge: '3 days',
+        minimumReleaseAgeBehaviour: 'timestamp-required' as const,
+      },
+    },
+  ])(
+    'does not update lock file maintenance when $description',
+    async ({ elapsedMs, releases, localConfig }) => {
+      for (const elapsed of elapsedMs) {
+        dateUtil.getElapsedMs.mockReturnValueOnce(elapsed);
+      }
+
+      fs.readLocalFile.mockResolvedValueOnce(codeBlock`
+        provider "registry.terraform.io/hashicorp/azurerm" {
+          version     = "2.50.0"
+          constraints = "~> 2.50"
+          hashes = [
+            "bar",
+          ]
+        }
+      `);
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce('.terraform.lock.hcl');
+
+      mockGetPkgReleases.mockResolvedValueOnce({ releases });
+
+      const result = await updateArtifacts({
+        packageFileName: '',
+        updatedDeps: [],
+        newPackageFileContent: '',
+        config: localConfig,
+      });
+
+      expect(result).toBeNull();
+      expect(mockHash).not.toHaveBeenCalled();
+    },
+  );
+
+  it('does not rewrite the lockfile when maintenance finds no changes', async () => {
     fs.readLocalFile.mockResolvedValueOnce(codeBlock`
       provider "registry.terraform.io/hashicorp/aws" {
         version     = "3.0.0"
@@ -930,7 +1203,7 @@ describe('modules/manager/terraform/lockfile/index', () => {
     expect(mockHash.mock.calls).toBeEmptyArray();
   });
 
-  it('return null if hashing fails', async () => {
+  it('returns null if hashing fails during lock file maintenance', async () => {
     fs.readLocalFile.mockResolvedValueOnce(codeBlock`
       provider "registry.terraform.io/hashicorp/aws" {
         version     = "3.0.0"
@@ -1020,17 +1293,35 @@ describe('modules/manager/terraform/lockfile/index', () => {
     );
   });
 
-  it('return null if experimental flag is not set', async () => {
-    const localConfig: UpdateArtifactsConfig = {
-      isLockFileMaintenance: true,
-      ...config,
-    };
+  it('returns null if hashing fails for a normal provider update', async () => {
+    fs.readLocalFile.mockResolvedValueOnce(codeBlock`
+      provider "registry.terraform.io/hashicorp/aws" {
+        version     = "3.0.0"
+        constraints = "3.0.0"
+        hashes = [
+          "foo",
+        ]
+      }
+    `);
+    fs.findLocalSiblingOrParent.mockResolvedValueOnce('.terraform.lock.hcl');
+
+    mockHash.mockResolvedValueOnce(null);
+
     const result = await updateArtifacts({
-      packageFileName: '',
-      updatedDeps: [],
+      packageFileName: 'main.tf',
+      updatedDeps: [
+        {
+          depName: 'hashicorp/aws',
+          packageName: 'hashicorp/aws',
+          depType: 'required_provider',
+          newVersion: '3.36.0',
+          newValue: '3.36.0',
+        },
+      ],
       newPackageFileContent: '',
-      config: localConfig,
+      config,
     });
+
     expect(result).toBeNull();
   });
 
@@ -1094,7 +1385,7 @@ describe('modules/manager/terraform/lockfile/index', () => {
     ]);
   });
 
-  it('replaces current value to new version within a constraint', async () => {
+  it('replaces the current value with the new version inside the constraint', async () => {
     fs.readLocalFile.mockResolvedValueOnce(codeBlock`
       provider "registry.terraform.io/hashicorp/aws" {
         version     = "3.0.0"
@@ -1154,7 +1445,7 @@ describe('modules/manager/terraform/lockfile/index', () => {
     ]);
   });
 
-  it('replaces current version to new version within a constraint', async () => {
+  it('replaces the current version with the new version inside the constraint', async () => {
     fs.readLocalFile.mockResolvedValueOnce(codeBlock`
       provider "registry.terraform.io/hashicorp/aws" {
         version     = "3.0.0"
@@ -1214,69 +1505,61 @@ describe('modules/manager/terraform/lockfile/index', () => {
   });
 
   describe('getNewConstraint', () => {
-    it('correctly calculate new constraint on pinning', () => {
-      expect(
-        getNewConstraint(
-          {
-            currentValue: '>= 4.3',
-            newValue: '5.26.0',
-            newVersion: '5.26.0',
-          },
-          '>= 4.3.0',
-        ),
-      ).toBe('5.26.0');
-    });
-
-    it('update constraint with multiple elements', () => {
-      expect(
-        getNewConstraint(
-          {
-            currentValue: '2.41.0',
-            newValue: '2.46.0',
-            newVersion: '2.46.0',
-          },
-          '>= 2.36.0, 2.41.0',
-        ),
-      ).toBe('>= 2.36.0, 2.46.0');
-    });
-
-    it('update constraint when current version is matched multiple times', () => {
-      expect(
-        getNewConstraint(
-          {
-            currentValue: '2.41.0',
-            newValue: '2.46.0',
-            newVersion: '2.46.0',
-          },
-          '>= 2.41.0, 2.41.0',
-        ),
-      ).toBe('>= 2.41.0, 2.46.0');
-    });
-
-    it('update constraint when current version is in a complicated constraint', () => {
-      expect(
-        getNewConstraint(
-          {
-            currentValue: '<= 2.41.0',
-            newValue: '<= 2.46.0',
-            newVersion: '2.46.0',
-          },
-          '>= 2.41.0, <= 2.41.0, >= 2.0.0',
-        ),
-      ).toBe('>= 2.41.0, <= 2.46.0, >= 2.0.0');
-    });
-
-    it('create constraint with full version', () => {
-      expect(
-        getNewConstraint(
-          {
-            currentValue: '>= 4.0, <4.12',
-            newValue: '< 4.21',
-            newVersion: '4.20.0',
-          },
-          '>= 4.0.0, < 4.12.0',
-        ),
-      ).toBe('< 4.21.0');
+    it.each([
+      {
+        description: 'correctly calculate new constraint on pinning',
+        dep: {
+          currentValue: '>= 4.3',
+          newValue: '5.26.0',
+          newVersion: '5.26.0',
+        },
+        oldConstraint: '>= 4.3.0',
+        expected: '5.26.0',
+      },
+      {
+        description: 'update constraint with multiple elements',
+        dep: {
+          currentValue: '2.41.0',
+          newValue: '2.46.0',
+          newVersion: '2.46.0',
+        },
+        oldConstraint: '>= 2.36.0, 2.41.0',
+        expected: '>= 2.36.0, 2.46.0',
+      },
+      {
+        description:
+          'update constraint when current version is matched multiple times',
+        dep: {
+          currentValue: '2.41.0',
+          newValue: '2.46.0',
+          newVersion: '2.46.0',
+        },
+        oldConstraint: '>= 2.41.0, 2.41.0',
+        expected: '>= 2.41.0, 2.46.0',
+      },
+      {
+        description:
+          'update constraint when current version is in a complicated constraint',
+        dep: {
+          currentValue: '<= 2.41.0',
+          newValue: '<= 2.46.0',
+          newVersion: '2.46.0',
+        },
+        oldConstraint: '>= 2.41.0, <= 2.41.0, >= 2.0.0',
+        expected: '>= 2.41.0, <= 2.46.0, >= 2.0.0',
+      },
+      {
+        description: 'create constraint with full version',
+        dep: {
+          currentValue: '>= 4.0, <4.12',
+          newValue: '< 4.21',
+          newVersion: '4.20.0',
+        },
+        oldConstraint: '>= 4.0.0, < 4.12.0',
+        expected: '< 4.21.0',
+      },
+    ])('$description', ({ dep, oldConstraint, expected }) => {
+      expect(getNewConstraint(dep, oldConstraint)).toBe(expected);
     });
   });
 });
