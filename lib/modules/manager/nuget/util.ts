@@ -46,9 +46,6 @@ export function isRegistryDisabled(url: string): boolean {
  * @returns the default registry for NuGet
  */
 export function getDefaultRegistries(): Registry[] {
-  if (isRegistryDisabled(nugetOrg)) {
-    return [];
-  }
   return [{ url: nugetOrg, name: 'nuget.org' }];
 }
 

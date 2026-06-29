@@ -451,14 +451,5 @@ describe('modules/manager/nuget/util', () => {
         },
       ]);
     });
-
-    it('returns empty array if nugetOrg is disabled in hostRules', () => {
-      hostRules.add({
-        matchHost: 'api.nuget.org',
-        enabled: false,
-      });
-      const registries = getDefaultRegistries();
-      expect(registries).toEqual([]);
-    });
   });
 });
