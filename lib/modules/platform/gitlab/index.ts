@@ -331,6 +331,16 @@ export async function commitFiles(
 ): Promise<LongCommitSha | null> {
   const { baseBranch, branchName, files, message } = commitConfig;
   const startBranch = baseBranch ?? config.defaultBranch;
+
+  const commitResult = await git.prepareCommit(commitConfig);
+  if (!commitResult) {
+    logger.debug(
+      { branchName, files: files.map(({ path }) => path) },
+      'GitLab platformCommit: unable to prepare for commit',
+    );
+    return null;
+  }
+
   logger.debug(
     { branchName, fileCount: files.length },
     'GitLab platformCommit: preparing commit via GitLab API',
@@ -372,7 +382,10 @@ export async function commitFiles(
       { branchName, commitSha, startBranch },
       'GitLab platformCommit: created commit via GitLab API',
     );
-    return commitSha;
+    // Keep local branch state in sync with the platform-created commit,
+    // matching the GitHub platform-commit flow.
+    await git.resetToCommit(commitResult.parentCommitSha);
+    return await git.fetchBranch(branchName);
   } catch (err) {
     logger.warn(
       { err, branchName, startBranch },

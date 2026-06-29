@@ -519,8 +519,42 @@ describe('modules/platform/gitlab/index', () => {
   });
 
   describe('commitFiles', () => {
+    const preparedParentSha =
+      '1111111111111111111111111111111111111111' as LongCommitSha;
+    const preparedCommitSha =
+      '2222222222222222222222222222222222222222' as LongCommitSha;
+    const fetchedSha =
+      '3333333333333333333333333333333333333333' as LongCommitSha;
+
     beforeEach(async () => {
       await initRepo();
+      git.prepareCommit.mockResolvedValue({
+        parentCommitSha: preparedParentSha,
+        commitSha: preparedCommitSha,
+        files: [],
+      });
+      git.fetchBranch.mockResolvedValue(fetchedSha);
+    });
+
+    it('returns null when prepareCommit returns null', async () => {
+      git.prepareCommit.mockResolvedValueOnce(null);
+
+      const res = await gitlab.commitFiles({
+        branchName: 'some-branch',
+        files: [
+          {
+            type: 'addition',
+            path: 'new.txt',
+            contents: 'created',
+          },
+        ],
+        message: 'msg',
+      });
+
+      expect(res).toBeNull();
+      expect(git.getFile).not.toHaveBeenCalled();
+      expect(git.resetToCommit).not.toHaveBeenCalled();
+      expect(git.fetchBranch).not.toHaveBeenCalled();
     });
 
     it('returns null when no actions are generated', async () => {
@@ -531,7 +565,9 @@ describe('modules/platform/gitlab/index', () => {
       });
 
       expect(res).toBeNull();
-      expect(git.prepareCommit).not.toHaveBeenCalled();
+      expect(git.prepareCommit).toHaveBeenCalled();
+      expect(git.resetToCommit).not.toHaveBeenCalled();
+      expect(git.fetchBranch).not.toHaveBeenCalled();
     });
 
     it('creates a commit via the GitLab API for create, update and delete actions', async () => {
@@ -588,13 +624,12 @@ describe('modules/platform/gitlab/index', () => {
       });
 
       expect(scope.isDone()).toBeTrue();
-      // The platform commit path must not touch the local git author/signing flow.
-      expect(git.prepareCommit).not.toHaveBeenCalled();
-      expect(git.resetToCommit).not.toHaveBeenCalled();
-      expect(git.fetchBranch).not.toHaveBeenCalled();
+      expect(git.prepareCommit).toHaveBeenCalled();
+      expect(git.resetToCommit).toHaveBeenCalledWith(preparedParentSha);
+      expect(git.fetchBranch).toHaveBeenCalledWith('some-branch');
       expect(git.getFile).toHaveBeenNthCalledWith(1, 'existing.txt', 'master');
       expect(git.getFile).toHaveBeenNthCalledWith(2, 'new.txt', 'master');
-      expect(res).toBe('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa');
+      expect(res).toBe(fetchedSha);
     });
 
     it('returns the API sha for a single create action', async () => {
@@ -632,7 +667,9 @@ describe('modules/platform/gitlab/index', () => {
       });
 
       expect(scope.isDone()).toBeTrue();
-      expect(res).toBe('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb');
+      expect(git.resetToCommit).toHaveBeenCalledWith(preparedParentSha);
+      expect(git.fetchBranch).toHaveBeenCalledWith('some-branch');
+      expect(res).toBe(fetchedSha);
     });
 
     it('base64 encodes binary file contents', async () => {
@@ -672,7 +709,9 @@ describe('modules/platform/gitlab/index', () => {
       });
 
       expect(scope.isDone()).toBeTrue();
-      expect(res).toBe('cccccccccccccccccccccccccccccccccccccccc');
+      expect(git.resetToCommit).toHaveBeenCalledWith(preparedParentSha);
+      expect(git.fetchBranch).toHaveBeenCalledWith('some-branch');
+      expect(res).toBe(fetchedSha);
     });
 
     it('sets execute_filemode for executable files and recreates the branch from the base branch', async () => {
@@ -714,7 +753,9 @@ describe('modules/platform/gitlab/index', () => {
 
       expect(scope.isDone()).toBeTrue();
       expect(git.getFile).toHaveBeenCalledWith('script.sh', 'develop');
-      expect(res).toBe('dddddddddddddddddddddddddddddddddddddddd');
+      expect(git.resetToCommit).toHaveBeenCalledWith(preparedParentSha);
+      expect(git.fetchBranch).toHaveBeenCalledWith('some-branch');
+      expect(res).toBe(fetchedSha);
     });
 
     it('handles null contents as an empty file', async () => {
@@ -752,7 +793,9 @@ describe('modules/platform/gitlab/index', () => {
       });
 
       expect(scope.isDone()).toBeTrue();
-      expect(res).toBe('eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee');
+      expect(git.resetToCommit).toHaveBeenCalledWith(preparedParentSha);
+      expect(git.fetchBranch).toHaveBeenCalledWith('some-branch');
+      expect(res).toBe(fetchedSha);
     });
 
     it('returns null and logs a warning when the API call fails', async () => {
@@ -779,6 +822,8 @@ describe('modules/platform/gitlab/index', () => {
 
       expect(scope.isDone()).toBeTrue();
       expect(res).toBeNull();
+      expect(git.resetToCommit).not.toHaveBeenCalled();
+      expect(git.fetchBranch).not.toHaveBeenCalled();
     });
   });
 
