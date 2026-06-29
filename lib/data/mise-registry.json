@@ -1,6 +1,6 @@
 {
   "meta": {
-    "version": "2026.6.11 linux-x64 (2026-06-16)"
+    "version": "2026.6.14 linux-x64 (2026-06-25)"
   },
   "tools": {
     "1password": {
@@ -159,6 +159,9 @@
     "asciidoctorj": {
       "asdf": "mise-plugins/mise-asciidoctorj",
       "vfox": "mise-plugins/vfox-asciidoctorj"
+    },
+    "aspire": {
+      "github": "microsoft/aspire"
     },
     "assh": {
       "asdf": "mise-plugins/mise-assh",
@@ -1971,6 +1974,9 @@
     "lazyssh": {
       "aqua": "Adembc/lazyssh"
     },
+    "ldc": {
+      "github": "ldc-developers/ldc"
+    },
     "lefthook": {
       "aqua": "evilmartians/lefthook",
       "asdf": "jtzero/asdf-lefthook",
@@ -2028,6 +2034,9 @@
     "longbridge-terminal": {
       "cargo": "longbridge-terminal",
       "github": "longbridge/longbridge-terminal"
+    },
+    "lore": {
+      "aqua": "EpicGames/lore"
     },
     "ls-lint": {
       "aqua": "loeffel-io/ls-lint",
@@ -2302,6 +2311,9 @@
     "nsc": {
       "asdf": "dex4er/asdf-nsc",
       "github": "nats-io/nsc"
+    },
+    "nub": {
+      "npm": "@nubjs/nub"
     },
     "numbat": {
       "aqua": "sharkdp/numbat",
