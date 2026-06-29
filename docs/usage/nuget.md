@@ -68,7 +68,8 @@ All feeds are checked for dependency updates, and duplicate updates are merged i
 
 ### Disabling the default nuget.org feed
 
-By default, Renovate falls back to `https://api.nuget.org/v3/index.json` if no specific feeds are found, and includes it when regenerating lock files. If you use strict `PackageSourceMapping` and want to avoid mapping errors, you can disable `nuget.org` using one of the following methods:
+By default, Renovate falls back to `https://api.nuget.org/v3/index.json` if no specific feeds are found, and includes it when regenerating lock files.
+If you use strict `PackageSourceMapping` and want to avoid mapping errors, you can disable `nuget.org` using one of the following methods:
 
 - **Via `NuGet.config`**: If you define alternate feeds in your repository's `NuGet.config` file, Renovate will automatically respect your settings and will **not** inject the default `nuget.org` source (unless you explicitly included it).
 - **Via `hostRules`**: You can explicitly disable the default `nuget.org` feed in your Renovate configuration (e.g. `renovate.json`) by setting its `enabled` property to `false`:

@@ -523,7 +523,7 @@ describe('modules/manager/nuget/artifacts', () => {
     expect(execSnapshots).toBeEmptyArray();
   });
 
-  it('uses only NuGet.config registries if present, and filters out disabled registries', async () => {
+  it('uses NuGet.config registries, appends unique updatedDepsRegistries, and filters out disabled registries', async () => {
     const execSnapshots = mockExecAll();
     fs.getSiblingFileName.mockReturnValueOnce('packages.lock.json');
     git.getFiles.mockResolvedValueOnce({
@@ -550,7 +550,10 @@ describe('modules/manager/nuget/artifacts', () => {
         updatedDeps: [
           {
             depName: 'dep',
-            registryUrls: ['https://another-feed.com/v3/index.json'],
+            registryUrls: [
+              'https://another-feed.com/v3/index.json',
+              'https://my-custom-feed.com/v3/index.json', // duplicate feed URL
+            ],
           },
         ],
         newPackageFileContent: '{}',
@@ -576,13 +579,18 @@ describe('modules/manager/nuget/artifacts', () => {
       expect.stringContaining('nuget.config'),
       expect.stringContaining('https://my-custom-feed.com/v3/index.json'),
     );
+    expect(fs.outputCacheFile).toHaveBeenCalledWith(
+      expect.stringContaining('nuget.config'),
+      expect.stringContaining('https://another-feed.com/v3/index.json'),
+    );
     expect(fs.outputCacheFile).not.toHaveBeenCalledWith(
       expect.stringContaining('nuget.config'),
       expect.stringContaining('https://disabled-feed.com/v3/index.json'),
     );
+    // Should not have created a duplicate "Package source" for the duplicate feed URL
     expect(fs.outputCacheFile).not.toHaveBeenCalledWith(
       expect.stringContaining('nuget.config'),
-      expect.stringContaining('https://another-feed.com/v3/index.json'),
+      expect.stringContaining('Package source 2'),
     );
   });
 });

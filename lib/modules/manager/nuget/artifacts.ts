@@ -42,23 +42,21 @@ async function createCachedNuGetConfigFile(
   packageFileName: string,
   updatedDeps: Upgrade[],
 ): Promise<string> {
-  const registries = await getConfiguredRegistries(packageFileName);
-  let combinedRegistries: Registry[];
+  const registries =
+    (await getConfiguredRegistries(packageFileName)) ?? getDefaultRegistries();
 
-  if (registries) {
-    combinedRegistries = registries.filter((r) => !isRegistryDisabled(r.url));
-  } else {
-    const updatedDepsRegistries: Registry[] = Array.from(
-      new Set(
-        updatedDeps
-          .flatMap((dep) => dep.registryUrls ?? [])
-          .filter(isNonEmptyString)
-          .filter((url) => !isRegistryDisabled(url)),
-      ),
-      (url) => ({ url }),
-    );
-    combinedRegistries = [...getDefaultRegistries(), ...updatedDepsRegistries];
-  }
+  const updatedDepsRegistries: Registry[] = Array.from(
+    new Set(
+      updatedDeps
+        .flatMap((dep) => dep.registryUrls ?? [])
+        .filter(isNonEmptyString),
+    ),
+    (url) => ({ url }),
+  );
+
+  const combinedRegistries = [...registries, ...updatedDepsRegistries].filter(
+    (reg) => !isRegistryDisabled(reg.url),
+  );
 
   const contents = createNuGetConfigXml(combinedRegistries);
 
