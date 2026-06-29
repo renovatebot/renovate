@@ -878,6 +878,26 @@ describe('config/validation', () => {
       ]);
     });
 
+    it('warns for unwrapped regex-like managerFilePatterns', async () => {
+      const config = {
+        npm: {
+          managerFilePatterns: ['package.json', '\\.html?$'],
+        },
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'repo',
+        // @ts-expect-error -- TODO: managers, datasources and versionings are not defined on RenovateConfig
+        config,
+      );
+      expect(errors).toBeEmptyArray();
+      expect(warnings).toMatchObject([
+        {
+          message:
+            'npm.managerFilePatterns: the pattern `\\.html?$` looks like a regex but is not wrapped in `/.../`, so it is treated as a glob. Wrap it in slashes if you intended a regex.',
+        },
+      ]);
+    });
+
     it('validates regEx for each managerFilePatterns of format regex', async () => {
       const config: RenovateConfig = {
         customManagers: [
