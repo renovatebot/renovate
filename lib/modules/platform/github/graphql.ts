@@ -15,6 +15,7 @@ query($owner: String!, $name: String!, $user: String) {
     mergeCommitAllowed
     rebaseMergeAllowed
     squashMergeAllowed
+    deleteBranchOnMerge
     defaultBranchRef {
       name
       target {
