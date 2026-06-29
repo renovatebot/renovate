@@ -1,5 +1,5 @@
 import { Readable } from 'node:stream';
-import { buildTestJwt } from '../../../util/http/jwt.spec.ts';
+import { buildTestJwt } from '~test/jwt-util.ts';
 import { streamToString } from '../../../util/streams.ts';
 import {
   getBranchNameWithoutRefsheadsPrefix,

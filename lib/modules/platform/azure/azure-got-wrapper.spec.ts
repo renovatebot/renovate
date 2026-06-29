@@ -1,5 +1,5 @@
+import { buildTestJwt } from '~test/jwt-util.ts';
 import type * as _hostRules from '../../../util/host-rules.ts';
-import { buildTestJwt } from '../../../util/http/jwt.spec.ts';
 
 describe('modules/platform/azure/azure-got-wrapper', () => {
   let azure: typeof import('./azure-got-wrapper.ts');
