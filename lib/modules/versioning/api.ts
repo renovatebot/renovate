@@ -52,6 +52,7 @@ import type { VersioningApi, VersioningApiConstructor } from './types.ts';
 import * as ubuntu from './ubuntu/index.ts';
 import * as unity3d from './unity3d/index.ts';
 import * as unity3dPackages from './unity3d-packages/index.ts';
+import * as vcpkg from './vcpkg/index.ts';
 
 const api = new Map<string, VersioningApi | VersioningApiConstructor>();
 export default api;
@@ -109,3 +110,4 @@ api.set(swift.id, swift.api);
 api.set(ubuntu.id, ubuntu.api);
 api.set(unity3d.id, unity3d.api);
 api.set(unity3dPackages.id, unity3dPackages.api);
+api.set(vcpkg.id, vcpkg.api);
