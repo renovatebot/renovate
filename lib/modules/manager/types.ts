@@ -208,6 +208,7 @@ export interface PackageDependency<
 
   mostRecentTimestamp?: Timestamp;
   isAbandoned?: boolean;
+  extractedConstraints?: Partial<Record<ConstraintName, string>>;
   /**
    * Whether the package registry has attestation information for the given update.
    *
