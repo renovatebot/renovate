@@ -1,10 +1,10 @@
 import { codeBlock } from 'common-tags';
+import { Fixtures } from '~test/fixtures.ts';
+import { fs, logger, partial } from '~test/util.ts';
 import type { ExtractConfig, PackageDependency } from '../types.ts';
 import { matchesContentDescriptor } from './extract.ts';
 import { extractAllPackageFiles } from './index.ts';
 import * as parser from './parser.ts';
-import { Fixtures } from '~test/fixtures.ts';
-import { fs, logger, partial } from '~test/util.ts';
 
 vi.mock('../../../util/fs/index.ts');
 
@@ -999,6 +999,173 @@ describe('modules/manager/gradle/extract', () => {
               skipReason: 'unspecified-version',
             },
           ],
+        },
+      ]);
+    });
+
+    it('provides versions from external version catalogs to gradle files', async () => {
+      const fsMock = {
+        'gradle/libs.versions.toml': codeBlock`
+          [versions]
+          detekt = "1.18.1"
+          kotlin = "2.2.20"
+          springBoot = "3.5.4"
+        `,
+        'build.gradle.kts': codeBlock`
+          plugins {
+            id "org.springframework.boot" version libs.versions.springBoot
+          }
+          detekt {
+            toolVersion = libs.versions.detekt.get()
+          }
+          dependencies {
+            classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:\${libs.versions.kotlin.get()}")
+          }
+        `,
+      };
+      mockFs(fsMock);
+
+      const res = await extractAllPackageFiles(
+        partial<ExtractConfig>(),
+        Object.keys(fsMock),
+      );
+      expect(res).toMatchObject([
+        {
+          packageFile: 'gradle/libs.versions.toml',
+          deps: [
+            {
+              packageName:
+                'org.springframework.boot:org.springframework.boot.gradle.plugin',
+              currentValue: '3.5.4',
+              sharedVariableName: 'libs.versions.springBoot',
+            },
+            {
+              packageName: 'io.gitlab.arturbosch.detekt:detekt-core',
+              currentValue: '1.18.1',
+              sharedVariableName: 'libs.versions.detekt',
+            },
+            {
+              depName: 'org.jetbrains.kotlin:kotlin-gradle-plugin',
+              currentValue: '2.2.20',
+              sharedVariableName: 'libs.versions.kotlin',
+            },
+          ],
+        },
+        {
+          packageFile: 'build.gradle.kts',
+          deps: [],
+        },
+      ]);
+    });
+
+    it('provides versions to gradle files with changed default catalog name', async () => {
+      const fsMock = {
+        'gradle/libs.versions.toml': codeBlock`
+          [versions]
+          kotlin = "2.2.20"
+        `,
+        'settings.gradle.kts': codeBlock`
+          dependencyResolutionManagement {
+            defaultLibrariesExtensionName = "projectLibs"
+          }
+        `,
+        'build.gradle.kts': codeBlock`
+          dependencies {
+            classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:\${projectLibs.versions.kotlin.get()}")
+          }
+        `,
+      };
+      mockFs(fsMock);
+
+      const res = await extractAllPackageFiles(
+        partial<ExtractConfig>(),
+        Object.keys(fsMock),
+      );
+      expect(res).toMatchObject([
+        {
+          packageFile: 'settings.gradle.kts',
+          deps: [],
+        },
+        {
+          packageFile: 'gradle/libs.versions.toml',
+          deps: [
+            {
+              depName: 'org.jetbrains.kotlin:kotlin-gradle-plugin',
+              currentValue: '2.2.20',
+              sharedVariableName: 'projectLibs.versions.kotlin',
+            },
+          ],
+        },
+        {
+          packageFile: 'build.gradle.kts',
+          deps: [],
+        },
+      ]);
+    });
+
+    it('ignores version catalog accessor with non-get provider method', async () => {
+      const fsMock = {
+        'gradle/libs.versions.toml': codeBlock`
+          [versions]
+          detekt = "1.18.1"
+        `,
+        'build.gradle.kts': codeBlock`
+          detekt {
+            toolVersion = libs.versions.detekt.getOrNull()
+          }
+        `,
+      };
+      mockFs(fsMock);
+
+      const res = await extractAllPackageFiles(
+        partial<ExtractConfig>(),
+        Object.keys(fsMock),
+      );
+      expect(res).toBeNull();
+    });
+
+    it('aligns sharedVariableName if version reference has multiple aliases', async () => {
+      const fsMock = {
+        'gradle/libs.versions.toml': codeBlock`
+          [versions]
+          android-test = "1.0.2"
+
+          [libraries]
+          android-test-runner = { group = "com.android.support.test", name = "runner", version.ref = "android-test" }
+        `,
+        'build.gradle.kts': codeBlock`
+          dependencies {
+            classpath("com.android.support.test:rules:\${libs.versions.android.test.get()}")
+          }
+        `,
+      };
+      mockFs(fsMock);
+
+      const res = await extractAllPackageFiles(
+        partial<ExtractConfig>(),
+        Object.keys(fsMock),
+      );
+      expect(res).toMatchObject([
+        {
+          packageFile: 'gradle/libs.versions.toml',
+          deps: [
+            {
+              depName: 'com.android.support.test:runner',
+              currentValue: '1.0.2',
+              fileReplacePosition: 27,
+              sharedVariableName: 'android.test',
+            },
+            {
+              depName: 'com.android.support.test:rules',
+              currentValue: '1.0.2',
+              fileReplacePosition: 27,
+              sharedVariableName: 'android.test',
+            },
+          ],
+        },
+        {
+          packageFile: 'build.gradle.kts',
+          deps: [],
         },
       ]);
     });

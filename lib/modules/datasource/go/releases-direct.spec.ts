@@ -1,10 +1,10 @@
 import { mockDeep } from 'vitest-mock-extended';
+import * as httpMock from '~test/http-mock.ts';
 import * as _hostRules from '../../../util/host-rules.ts';
 import { GitTagsDatasource } from '../git-tags/index.ts';
 import { GithubTagsDatasource } from '../github-tags/index.ts';
 import { BaseGoDatasource } from './base.ts';
 import { GoDirectDatasource } from './releases-direct.ts';
-import * as httpMock from '~test/http-mock.ts';
 
 vi.mock('../../../util/host-rules.ts', () => mockDeep());
 vi.mock('./base.ts');

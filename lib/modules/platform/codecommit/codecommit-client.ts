@@ -1,21 +1,3 @@
-import {
-  CodeCommitClient,
-  CreatePullRequestApprovalRuleCommand,
-  CreatePullRequestCommand,
-  DeleteCommentContentCommand,
-  GetCommentsForPullRequestCommand,
-  GetFileCommand,
-  GetPullRequestCommand,
-  GetRepositoryCommand,
-  ListPullRequestsCommand,
-  ListRepositoriesCommand,
-  PostCommentForPullRequestCommand,
-  PullRequestStatusEnum,
-  UpdateCommentCommand,
-  UpdatePullRequestDescriptionCommand,
-  UpdatePullRequestStatusCommand,
-  UpdatePullRequestTitleCommand,
-} from '@aws-sdk/client-codecommit';
 import type {
   CreatePullRequestApprovalRuleInput,
   CreatePullRequestApprovalRuleOutput,
@@ -46,6 +28,24 @@ import type {
   UpdatePullRequestStatusOutput,
   UpdatePullRequestTitleInput,
   UpdatePullRequestTitleOutput,
+} from '@aws-sdk/client-codecommit';
+import {
+  CodeCommitClient,
+  CreatePullRequestApprovalRuleCommand,
+  CreatePullRequestCommand,
+  DeleteCommentContentCommand,
+  GetCommentsForPullRequestCommand,
+  GetFileCommand,
+  GetPullRequestCommand,
+  GetRepositoryCommand,
+  ListPullRequestsCommand,
+  ListRepositoriesCommand,
+  PostCommentForPullRequestCommand,
+  PullRequestStatusEnum,
+  UpdateCommentCommand,
+  UpdatePullRequestDescriptionCommand,
+  UpdatePullRequestStatusCommand,
+  UpdatePullRequestTitleCommand,
 } from '@aws-sdk/client-codecommit';
 import { isString } from '@sindresorhus/is';
 import * as aws4 from 'aws4';

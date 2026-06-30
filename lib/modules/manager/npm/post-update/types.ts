@@ -1,5 +1,9 @@
 import type { FileChange } from '../../../../util/git/types.ts';
-import type { PackageFile } from '../../types.ts';
+import type {
+  ArtifactError,
+  ArtifactNotice,
+  PackageFile,
+} from '../../types.ts';
 import type { NpmManagerData } from '../types.ts';
 
 export interface DetermineLockFileDirsResult {
@@ -12,13 +16,9 @@ export interface AdditionalPackageFiles {
   npm?: Partial<PackageFile<NpmManagerData>>[];
 }
 
-export interface ArtifactError {
-  lockFile: string;
-  stderr?: string;
-}
-
 export interface WriteExistingFilesResult {
   artifactErrors: ArtifactError[];
+  artifactNotices?: ArtifactNotice[];
   updatedArtifacts: FileChange[];
 }
 
@@ -27,6 +27,7 @@ export interface GenerateLockFileResult {
   lockFile?: string | null;
   stderr?: string;
   stdout?: string;
+  beforeFallback?: boolean;
 }
 
 // the dependencies schema is different for v6 and other lockfile versions

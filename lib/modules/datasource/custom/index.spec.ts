@@ -1,10 +1,10 @@
 import { codeBlock, html } from 'common-tags';
-import { logger } from '../../../logger/index.ts';
-import { getPkgReleases } from '../index.ts';
-import { CustomDatasource } from './index.ts';
 import { Fixtures } from '~test/fixtures.ts';
 import * as httpMock from '~test/http-mock.ts';
 import { fs } from '~test/util.ts';
+import { logger } from '../../../logger/index.ts';
+import { getPkgReleases } from '../index.ts';
+import { CustomDatasource } from './index.ts';
 
 vi.mock('../../../util/fs/index.ts');
 

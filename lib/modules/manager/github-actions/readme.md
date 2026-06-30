@@ -39,6 +39,32 @@ If you want to automatically pin action digests add the `helpers:pinGitHubAction
 }
 ```
 
+Actions pinned to a bare SHA without a version comment are disabled by default, because Renovate cannot determine which branch or tag the SHA belongs to.
+To enable updates, add a tag or branch name as a version comment, as shown above.
+
+### Non-semver refs (branches and feature tags)
+
+Renovate supports GitHub Actions that reference non-semver refs like branch names (`main`, `master`) or feature-oriented tags (`cargo-llvm-cov`).
+
+When the action reference doesn't look like a version number (i.e., doesn't match `/^v?\d+/`), Renovate routes to the `github-digest` datasource which fetches both tags and branches.
+Since these refs have no version ordering, only digest pinning updates are supported.
+
+**Routing logic:**
+
+- `actions/checkout@v4.2.0` → `github-tags` datasource (version updates)
+- `actions/checkout@v4` → `github-tags` datasource (version updates)
+- `taiki-e/install-action@cargo-llvm-cov` → `github-digest` datasource (digest pinning only)
+- `actions/checkout@main` → `github-digest` datasource (digest pinning only)
+
+When pinning, Renovate adds a comment to preserve the original ref:
+
+```yaml
+- uses: taiki-e/install-action@d8c10dae823f48238abff23fee4146b448aed2f1 # cargo-llvm-cov
+```
+
+Non-semver ref support is currently limited to GitHub-hosted actions.
+Gitea and Forgejo support the same ref types, but Renovate does not yet handle them for these platforms.
+
 ### Non-support of Variables
 
 Renovate ignores any GitHub runners which are configured in variables.
@@ -76,14 +102,24 @@ For example, normally the `^` syntax is not used in `go` or `python`, but it's s
 Depending on your use case, you may need to change `versioning` manually.
 If you find a use case which you think Renovate could/should automatically detect and support without manual configuration, please raise a Discussion to suggest it.
 
-### commonly used community actions
+### Updating `with:` values in commonly used Community-maintained GitHub Actions
 
-Renovate also supports some commonly used community actions:
+Third-party GitHub Actions will commonly specify a version of a given tool using a `with:` block, such as:
 
-- `astral-sh/setup-uv`
-- `pnpm/action-setup`
-- `pdm-project/setup-pdm`
-- `jaxxstorm/action-install-gh-release`
-- `sigoden/install-binary`
-- `prefix-dev/setup-pixi`
-- `pypa/hatch@install`
+GitHub Actions maintained by the wider community have `with:` blocks such as:
+
+```yaml
+steps:
+- uses: astral-sh/setup-uv@v8.2.0
+  with:
+    version: '0.4.x'
+
+- uses: 'denoland/setup-deno@v2',
+  with:
+    deno-version: '2.4.0'
+```
+
+Renovate supports extracting some of these input(s) from the following Actions, and performing automagic dependency updates accordingly.
+The following third-party Actions have support for their `with:` blocks:
+
+<!-- Autogenerate in https://github.com/renovatebot/renovate -->

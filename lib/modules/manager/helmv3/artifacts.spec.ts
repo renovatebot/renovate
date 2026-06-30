@@ -4,6 +4,9 @@ import { mockClient } from 'aws-sdk-client-mock';
 import { codeBlock } from 'common-tags';
 import upath from 'upath';
 import { mockDeep } from 'vitest-mock-extended';
+import { envMock, mockExecAll } from '~test/exec-util.ts';
+import { Fixtures } from '~test/fixtures.ts';
+import { env, fs, git, partial } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import type { RepoGlobalConfig } from '../../../config/types.ts';
 import * as docker from '../../../util/exec/docker/index.ts';
@@ -13,9 +16,6 @@ import { toBase64 } from '../../../util/string.ts';
 import * as _datasource from '../../datasource/index.ts';
 import type { UpdateArtifactsConfig } from '../types.ts';
 import * as helmv3 from './index.ts';
-import { envMock, mockExecAll } from '~test/exec-util.ts';
-import { Fixtures } from '~test/fixtures.ts';
-import { env, fs, git, partial } from '~test/util.ts';
 
 vi.mock('../../datasource/index.ts', () => mockDeep());
 vi.mock('../../../util/exec/env.ts');
@@ -28,6 +28,7 @@ const adminConfig: RepoGlobalConfig = {
   localDir: upath.join('/tmp/github/some/repo'), // `join` fixes Windows CI
   cacheDir: upath.join('/tmp/renovate/cache'),
   containerbaseDir: upath.join('/tmp/renovate/cache/containerbase'),
+  binarySource: 'global',
 };
 
 const config: UpdateArtifactsConfig = {};
@@ -268,7 +269,7 @@ describe('modules/manager/helmv3/artifacts', () => {
     ).toMatchObject([
       {
         artifactError: {
-          lockFile: 'Chart.lock',
+          fileName: 'Chart.lock',
           stderr: 'not found',
         },
       },
@@ -1143,7 +1144,7 @@ describe('modules/manager/helmv3/artifacts', () => {
     const password = 'pass>word';
     mockEcrAuthResolve({
       authorizationData: [
-        { authorizationToken: toBase64(username + ':' + password) },
+        { authorizationToken: toBase64(`${username}:${password}`) },
       ],
     });
 

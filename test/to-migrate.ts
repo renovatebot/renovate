@@ -6,7 +6,7 @@ import type {
 import type { RenovateConfig } from '../lib/config/types.ts';
 
 declare global {
-  // eslint-disable-next-line @typescript-eslint/no-namespace
+  // oxlint-disable-next-line typescript/no-namespace
   namespace jest {
     interface Matchers<R> {
       toMigrate(
@@ -26,9 +26,8 @@ expect.extend({
     isMigrated = true,
   ) {
     // async load to avoid circular dependency
-    const { MigrationsService } = await import(
-      './../lib/config/migrations/migrations-service.js'
-    );
+    const { MigrationsService } =
+      await import('./../lib/config/migrations/migrations-service.ts');
     class CustomMigrationsService extends MigrationsService {
       public static override getMigrations(
         original: RenovateConfig,

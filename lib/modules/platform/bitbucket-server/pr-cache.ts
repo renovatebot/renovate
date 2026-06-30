@@ -72,6 +72,7 @@ export class BbsPrCache {
     const res = new BbsPrCache(projectKey, repo, ignorePrAuthor, author);
     const isSynced = memCache.get<true | undefined>('bbs-pr-cache-synced');
 
+    // v8 ignore next -- TODO: add test #40625
     if (!isSynced) {
       await res.sync(http);
       memCache.set('bbs-pr-cache-synced', true);

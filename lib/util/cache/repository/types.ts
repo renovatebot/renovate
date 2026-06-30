@@ -23,16 +23,18 @@ export interface BranchUpgradeCache {
   depName?: string;
   depType?: string;
   displayPending?: unknown;
+  manager?: string;
   fixedVersion?: string;
   currentVersion?: string;
   packageName?: string;
-  newDigest?: string;
+  newDigest?: string | null;
   newValue?: string;
   newVersion?: string;
   sourceUrl?: string;
   packageFile?: string;
   remediationNotPossible?: unknown;
   updateType?: UpdateType;
+  isVulnerabilityAlert?: boolean;
 }
 
 export interface OnboardingBranchCache {
@@ -80,6 +82,11 @@ export interface BranchCache {
    */
   branchFingerprint?: string; // Defunct
   commitFingerprint?: string; // Actively used
+  /**
+   * The branch's most recent commit timestamp (ISO string)
+   * Used for commitHourlyLimit tracking
+   */
+  commitTimestamp?: string;
   /**
    * Branch name
    */

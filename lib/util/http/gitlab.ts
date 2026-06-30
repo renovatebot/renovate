@@ -25,6 +25,12 @@ export class GitlabHttp extends HttpBase<GitlabHttpOptions> {
     super(type, options);
   }
 
+  protected override extraOptions(): readonly string[] {
+    return super
+      .extraOptions()
+      .concat(['paginate'] as (keyof GitlabHttpOptions)[]);
+  }
+
   protected override async requestJsonUnsafe<T = unknown>(
     method: HttpMethod,
     options: InternalJsonUnsafeOptions<GitlabHttpOptions>,
@@ -49,7 +55,7 @@ export class GitlabHttp extends HttpBase<GitlabHttpOptions> {
           : null;
         if (nextUrl) {
           if (getEnv().GITLAB_IGNORE_REPO_URL) {
-            const defaultEndpoint = new URL(baseUrl);
+            const defaultEndpoint = parseUrl(baseUrl)!;
             nextUrl.protocol = defaultEndpoint.protocol;
             nextUrl.host = defaultEndpoint.host;
           }

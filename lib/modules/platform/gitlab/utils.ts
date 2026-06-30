@@ -90,13 +90,16 @@ export function getRepoUrl(
       );
     }
 
-    // TODO: null check (#22198)
-    const { protocol, host, pathname } = parseUrl(defaults.endpoint)!;
+    const parsedEndpoint = parseUrl(defaults.endpoint);
+    if (!parsedEndpoint) {
+      throw new Error(`Invalid GitLab endpoint: ${defaults.endpoint}`);
+    }
+    const { protocol, host, pathname } = parsedEndpoint;
     const newPathname = pathname.slice(0, pathname.indexOf('/api'));
     const uri = url.format({
-      protocol:
-        /* v8 ignore next: should never happen */
-        protocol.slice(0, -1) || 'https',
+      /* v8 ignore start: should never happen (#40625) */
+      protocol: protocol.slice(0, -1) || 'https',
+      /* v8 ignore stop */
       // TODO: types (#22198)
       auth: `oauth2:${opts.token!}`,
       host,

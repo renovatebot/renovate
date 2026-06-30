@@ -5,16 +5,16 @@ import { mockClient } from 'aws-sdk-client-mock';
 import { codeBlock } from 'common-tags';
 import { GoogleAuth as _googleAuth } from 'google-auth-library';
 import { DateTime } from 'luxon';
+import { Fixtures } from '~test/fixtures.ts';
+import * as httpMock from '~test/http-mock.ts';
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages.ts';
 import * as hostRules from '../../../util/host-rules.ts';
 import { id as versioning } from '../../versioning/maven/index.ts';
-import { getPkgReleases } from '../index.ts';
 import type { Release, ReleaseResult } from '../index.ts';
+import { getPkgReleases } from '../index.ts';
 import { postprocessRelease } from '../postprocess-release.ts';
-import { MAVEN_REPO } from './common.ts';
+import { MAVEN_CENTRAL_MIRROR, MAVEN_REPO } from './common.ts';
 import { MavenDatasource } from './index.ts';
-import { Fixtures } from '~test/fixtures.ts';
-import * as httpMock from '~test/http-mock.ts';
 
 const googleAuth = vi.mocked(_googleAuth);
 vi.mock('google-auth-library');
@@ -67,14 +67,14 @@ function mockGenericPackage(opts: MockOpts = {}) {
       const [major, minor, patch] = latest
         .replace('-SNAPSHOT', '')
         .split('.')
-        .map((x) => parseInt(x))
+        .map((x) => parseInt(x, 10))
         .map((x) => (x < 10 ? `0${x}` : `${x}`));
       scope
         .get(
           `/${packagePath}/${latest}/${artifact}-${latest.replace(
             '-SNAPSHOT',
             '',
-          )}-20200101.${major}${minor}${patch}-${parseInt(patch)}.pom`,
+          )}-20200101.${major}${minor}${patch}-${parseInt(patch, 10)}.pom`,
         )
         .reply(200, pom);
     } else {
@@ -129,6 +129,62 @@ describe('modules/datasource/maven/index', () => {
     const res = await get();
 
     expect(res).toBeNull();
+  });
+
+  describe('skips Maven Central for suspected Gradle plugins', () => {
+    describe('when in groupId', () => {
+      it('when using primary registry URL', async () => {
+        const res = await get(
+          'io.github.ramanji025.gradle.plugin:typescript-gradle-plugin',
+          MAVEN_REPO,
+        );
+
+        expect(res).toBeNull();
+      });
+
+      it('when using mirror URL', async () => {
+        const res = await get(
+          'io.github.ramanji025.gradle.plugin:typescript-gradle-plugin',
+          MAVEN_CENTRAL_MIRROR,
+        );
+
+        expect(res).toBeNull();
+      });
+    });
+
+    describe('when in artifactId', () => {
+      it('when using primary registry URL', async () => {
+        const res = await get(
+          'org.example:org.example.gradle.plugin',
+          MAVEN_REPO,
+        );
+
+        expect(res).toBeNull();
+      });
+
+      it('when using mirror URL', async () => {
+        const res = await get(
+          'org.example:org.example.gradle.plugin',
+          MAVEN_CENTRAL_MIRROR,
+        );
+
+        expect(res).toBeNull();
+      });
+    });
+  });
+
+  it('fetches Gradle plugins from non-Maven-Central registries', async () => {
+    mockGenericPackage({
+      dep: 'org.example:org.example.gradle.plugin',
+      base: baseUrlCustom,
+    });
+
+    const res = await get(
+      'org.example:org.example.gradle.plugin',
+      baseUrlCustom,
+    );
+
+    expect(res).not.toBeNull();
   });
 
   it('returns releases', async () => {
@@ -243,6 +299,27 @@ describe('modules/datasource/maven/index', () => {
     );
 
     expect(res).toMatchSnapshot();
+  });
+
+  it('merges releases from multiple registries', async () => {
+    mockGenericPackage();
+    mockGenericPackage({
+      base: baseUrlCustom,
+      meta: Fixtures.get('metadata-extra.xml'),
+      latest: '3.0.0',
+    });
+
+    const res = await get('org.example:package', baseUrl, baseUrlCustom);
+
+    expect(res).toMatchObject({
+      releases: expect.arrayContaining([
+        expect.objectContaining({ version: '2.0.0', registryUrl: baseUrl }),
+        expect.objectContaining({
+          version: '3.0.0',
+          registryUrl: baseUrlCustom,
+        }),
+      ]),
+    });
   });
 
   it('throws EXTERNAL_HOST_ERROR for 50x', async () => {

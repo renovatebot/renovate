@@ -209,5 +209,10 @@ export function parsePropsFile(
   logger.trace(
     `Found ${depVerExactMap.size} dependencies and ${depVerRegexMap.size} wildcard dependencies in ${VERSIONS_PROPS}.`,
   );
-  return [depVerExactMap, new Map([...depVerRegexMap].sort().reverse())];
+  return [
+    depVerExactMap,
+    new Map(
+      [...depVerRegexMap].sort(([ka], [kb]) => ka.localeCompare(kb)).reverse(),
+    ),
+  ];
 }

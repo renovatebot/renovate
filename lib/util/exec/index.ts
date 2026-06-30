@@ -1,9 +1,11 @@
 import { isNonEmptyString } from '@sindresorhus/is';
 import upath from 'upath';
 import { GlobalConfig } from '../../config/global.ts';
+import type { ToolSettingsOptions } from '../../config/types.ts';
 import { TEMPORARY_ERROR } from '../../constants/error-messages.ts';
 import { logger } from '../../logger/index.ts';
 import { getCustomEnv, getUserEnv } from '../env.ts';
+import { coerceObject } from '../object.ts';
 import { rawExec } from './common.ts';
 import { generateInstallCommands, isDynamicInstall } from './containerbase.ts';
 import {
@@ -28,6 +30,7 @@ function dockerEnvVars(extraEnv: ExtraEnv, childEnv: ExtraEnv): string[] {
 }
 
 function getCwd({ cwd, cwdFile }: ExecOptions): string | undefined {
+  // TODO: types (#22198)
   const defaultCwd = GlobalConfig.get('localDir');
   const paramCwd = cwdFile
     ? upath.join(defaultCwd, upath.dirname(cwdFile))
@@ -40,14 +43,7 @@ function getRawExecOptions(opts: ExecOptions): RawExecOptions {
   const childEnv = getChildEnv(opts);
   const cwd = getCwd(opts);
   let timeout = opts.timeout;
-  // Set default timeout config.executionTimeout if specified; othrwise to 15 minutes
-  if (!timeout) {
-    if (defaultExecutionTimeout) {
-      timeout = defaultExecutionTimeout * 60 * 1000;
-    } else {
-      timeout = 15 * 60 * 1000;
-    }
-  }
+  timeout ??= defaultExecutionTimeout * 60 * 1000;
 
   // Set default max buffer size to 10MB
   const maxBuffer = opts.maxBuffer ?? 10 * 1024 * 1024;
@@ -166,8 +162,8 @@ export async function exec(
   opts: ExecOptions = {},
 ): Promise<ExecResult> {
   const { docker } = opts;
-  const dockerChildPrefix = GlobalConfig.get('dockerChildPrefix', 'renovate_');
-  const sideCarImage = GlobalConfig.get('dockerSidecarImage')!;
+  const dockerChildPrefix = GlobalConfig.get('dockerChildPrefix');
+  const sideCarImage = GlobalConfig.get('dockerSidecarImage');
 
   const { rawCommands, rawOptions } = await prepareRawExec(
     cmd,
@@ -182,7 +178,10 @@ export async function exec(
     if (useDocker) {
       await removeDockerContainer(sideCarImage, dockerChildPrefix);
     }
-    logger.debug({ command: rawCmd }, 'Executing command');
+    logger.debug(
+      { command: rawCmd, env: Object.keys(coerceObject(rawOptions.env)) },
+      'Executing command',
+    );
     logger.trace({ commandOptions: rawOptions }, 'Command options');
     try {
       res = await rawExec(rawCmd, rawOptions);
@@ -220,4 +219,76 @@ export async function exec(
   }
 
   return res;
+}
+
+export function getToolSettingsOptions(
+  repoConfig?: ToolSettingsOptions,
+): ToolSettingsOptions {
+  let defaults = GlobalConfig.get('toolSettings');
+  defaults ??= {
+    jvmMaxMemory: 512,
+    jvmMemory: 512,
+  };
+
+  const options: ToolSettingsOptions = {};
+
+  options.jvmMaxMemory = defaults?.jvmMaxMemory ?? 512;
+  options.jvmMemory = defaults?.jvmMemory ?? options.jvmMaxMemory;
+  options.nodeMaxMemory ??= defaults?.nodeMaxMemory;
+
+  if (repoConfig !== undefined) {
+    if (repoConfig.jvmMaxMemory) {
+      if (repoConfig.jvmMaxMemory > options.jvmMaxMemory) {
+        logger.once.debug(
+          `A higher jvmMaxMemory (${repoConfig.jvmMaxMemory}) than the global configuration (${options.jvmMaxMemory}) is not permitted for Java VM invocations. Using global configuration instead`,
+        );
+      }
+
+      options.jvmMaxMemory = Math.min(
+        options.jvmMaxMemory,
+        repoConfig.jvmMaxMemory,
+      );
+    }
+
+    if (repoConfig.jvmMemory) {
+      options.jvmMemory = repoConfig.jvmMemory;
+    }
+
+    if (repoConfig.nodeMaxMemory) {
+      if (
+        options.nodeMaxMemory &&
+        repoConfig.nodeMaxMemory > options.nodeMaxMemory
+      ) {
+        logger.once.debug(
+          `A higher nodeMaxMemory (${repoConfig.nodeMaxMemory}) than the global configuration (${options.nodeMaxMemory}) is not permitted for Node invocations. Using global configuration instead`,
+        );
+      } else {
+        options.nodeMaxMemory = repoConfig.nodeMaxMemory;
+      }
+    }
+  }
+
+  options.jvmMaxMemory = Math.floor(options.jvmMaxMemory);
+  options.jvmMemory = Math.floor(options.jvmMemory);
+  if (options.nodeMaxMemory) {
+    options.nodeMaxMemory = Math.floor(options.nodeMaxMemory);
+  }
+
+  // make sure that the starting memory can't be more than the max memory
+  options.jvmMemory = Math.min(options.jvmMemory, options.jvmMaxMemory);
+
+  if (options.jvmMaxMemory < 512 || options.jvmMemory < 512) {
+    options.jvmMaxMemory = Math.max(options.jvmMaxMemory, 512);
+
+    logger.once.debug(
+      'Overriding low memory settings for Java VM invocations to a minimum of 512M',
+    );
+    options.jvmMemory = Math.max(options.jvmMemory, 512);
+  }
+
+  return options;
+}
+
+export function gradleJvmArg(config: ToolSettingsOptions): string {
+  return ` -Dorg.gradle.jvmargs="-Xms${config.jvmMemory}m -Xmx${config.jvmMaxMemory}m"`;
 }

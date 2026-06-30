@@ -1,7 +1,7 @@
+import { Fixtures } from '~test/fixtures.ts';
 import type { UpdateLockedConfig } from '../types.ts';
 import { updateLockedDependency } from './index.ts';
 import * as lockedVersion from './locked-version.ts';
-import { Fixtures } from '~test/fixtures.ts';
 
 const lockFileContent = Fixtures.get('lockfile-parsing/Cargo.v1.lock');
 

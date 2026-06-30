@@ -1,44 +1,50 @@
 import { isUndefined } from '@sindresorhus/is';
-import { z } from 'zod';
+import { z } from 'zod/v4';
 import { logger } from '../../../logger/index.ts';
-import { LooseArray, LooseRecord } from '../../../util/schema-utils/index.ts';
+import {
+  LooseArray,
+  LooseRecord,
+  Nullish,
+} from '../../../util/schema-utils/index.ts';
 import { MaybeTimestamp } from '../../../util/timestamp.ts';
 import type { Release, ReleaseResult } from '../types.ts';
 
-export const MinifiedArray = z.array(z.record(z.unknown())).transform((xs) => {
-  // Ported from: https://github.com/composer/metadata-minifier/blob/main/src/MetadataMinifier.php#L17
-  if (xs.length === 0) {
+export const MinifiedArray = z
+  .array(z.record(z.string(), z.unknown()))
+  .transform((xs) => {
+    // Ported from: https://github.com/composer/metadata-minifier/blob/main/src/MetadataMinifier.php#L17
+    if (xs.length === 0) {
+      return xs;
+    }
+
+    const prevVals: Record<string, unknown> = {};
+    for (const x of xs) {
+      for (const key of Object.keys(x)) {
+        prevVals[key] ??= undefined;
+      }
+
+      for (const key of Object.keys(prevVals)) {
+        const val = x[key];
+        if (val === '__unset') {
+          delete x[key];
+          prevVals[key] = undefined;
+          continue;
+        }
+
+        if (!isUndefined(val)) {
+          prevVals[key] = val;
+          continue;
+        }
+
+        if (!isUndefined(prevVals[key])) {
+          x[key] = prevVals[key];
+          continue;
+        }
+      }
+    }
+
     return xs;
-  }
-
-  const prevVals: Record<string, unknown> = {};
-  for (const x of xs) {
-    for (const key of Object.keys(x)) {
-      prevVals[key] ??= undefined;
-    }
-
-    for (const key of Object.keys(prevVals)) {
-      const val = x[key];
-      if (val === '__unset') {
-        delete x[key];
-        prevVals[key] = undefined;
-        continue;
-      }
-
-      if (!isUndefined(val)) {
-        prevVals[key] = val;
-        continue;
-      }
-
-      if (!isUndefined(prevVals[key])) {
-        x[key] = prevVals[key];
-        continue;
-      }
-    }
-  }
-
-  return xs;
-});
+  });
 export type MinifiedArray = z.infer<typeof MinifiedArray>;
 
 export const ComposerRelease = z.object({
@@ -46,7 +52,9 @@ export const ComposerRelease = z.object({
   homepage: z.string().nullable().catch(null),
   source: z.object({ url: z.string() }).nullable().catch(null),
   time: MaybeTimestamp,
+  ['published-time']: Nullish(MaybeTimestamp),
   require: z.object({ php: z.string() }).nullable().catch(null),
+  abandoned: z.union([z.string(), z.boolean()]).optional().catch(undefined),
 });
 export type ComposerRelease = z.infer<typeof ComposerRelease>;
 
@@ -62,7 +70,7 @@ export const ComposerPackagesResponse = z
   .object({
     packageName: z.string(),
     packagesResponse: z.object({
-      packages: z.record(z.unknown()),
+      packages: z.record(z.string(), z.unknown()),
     }),
   })
   .transform(
@@ -93,6 +101,7 @@ export function extractReleaseResult(
   const releases: Release[] = [];
   let homepage: string | null | undefined;
   let sourceUrl: string | null | undefined;
+  let deprecationMessage: string | undefined;
 
   for (const composerReleasesArray of composerReleasesArrays) {
     for (const composerRelease of composerReleasesArray) {
@@ -101,12 +110,22 @@ export function extractReleaseResult(
 
       const dep: Release = { version, gitRef };
 
-      if (composerRelease.time) {
-        dep.releaseTimestamp = composerRelease.time;
+      // Packagist's `published-time` reflects when the version was actually published to the registry;
+      // prefer it over `time` (the git tag's `releasedAt`, which could be when the commit that the tag points at was pushed, not the time the release itself was made public to the world), falling back when absent.
+      const releaseTimestamp =
+        composerRelease['published-time'] ?? composerRelease.time;
+      if (releaseTimestamp) {
+        dep.releaseTimestamp = releaseTimestamp;
       }
 
       if (composerRelease.require?.php) {
         dep.constraints = { php: [composerRelease.require.php] };
+      }
+
+      if (composerRelease.abandoned) {
+        dep.isDeprecated = true;
+        deprecationMessage ??= getAbandonedMessage(composerRelease.abandoned);
+        // TODO #44060 when `abandoned` is a package name, emit replacementName/replacementVersion to open a replacement PR
       }
 
       releases.push(dep);
@@ -135,7 +154,19 @@ export function extractReleaseResult(
     result.sourceUrl = sourceUrl;
   }
 
+  if (deprecationMessage) {
+    result.deprecationMessage = deprecationMessage;
+  }
+
   return result;
+}
+
+function getAbandonedMessage(abandoned: string | boolean): string {
+  const message = 'This package is abandoned and no longer maintained.';
+  if (typeof abandoned === 'string') {
+    return `${message} The author suggests using the \`${abandoned}\` package instead.`;
+  }
+  return message;
 }
 
 export function extractDepReleases(
@@ -190,7 +221,7 @@ export const PackagistFile = PackagesResponse.merge(
 export type PackagistFile = z.infer<typeof PackagistFile>;
 
 export const RegistryMeta = z
-  .record(z.unknown())
+  .record(z.string(), z.unknown())
   .catch({})
   .pipe(
     PackagistFile.merge(

@@ -1,8 +1,8 @@
+import { Fixtures } from '~test/fixtures.ts';
+import * as httpMock from '~test/http-mock.ts';
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages.ts';
 import { getPkgReleases } from '../index.ts';
 import { DotnetVersionDatasource } from './index.ts';
-import { Fixtures } from '~test/fixtures.ts';
-import * as httpMock from '~test/http-mock.ts';
 
 const releasesIndex = Fixtures.getJson('releases-index.json');
 const releases7_0 = Fixtures.getJson('releases-7.0.json');

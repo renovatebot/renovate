@@ -1,5 +1,5 @@
-import { GerritHttp, setBaseUrl } from './gerrit.ts';
 import * as httpMock from '~test/http-mock.ts';
+import { GerritHttp, setBaseUrl } from './gerrit.ts';
 
 const baseUrl = 'https://gerrit.example.com/';
 
@@ -11,7 +11,7 @@ describe('util/http/gerrit', () => {
     setBaseUrl(baseUrl);
   });
 
-  it.each(['some-url/', baseUrl + 'some-url/'])('get %p', async (pathOrUrl) => {
+  it.each(['some-url/', `${baseUrl}some-url/`])('get %p', async (pathOrUrl) => {
     const body = 'body result';
     httpMock
       .scope(baseUrl)

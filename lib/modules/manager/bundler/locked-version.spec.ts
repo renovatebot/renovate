@@ -1,7 +1,7 @@
 import { codeBlock } from 'common-tags';
-import { extractLockFileEntries } from './locked-version.ts';
 import { Fixtures } from '~test/fixtures.ts';
 import { logger } from '~test/util.ts';
+import { extractLockFileEntries } from './locked-version.ts';
 
 const railsGemfileLock = Fixtures.get('Gemfile.rails.lock');
 const webPackerGemfileLock = Fixtures.get('Gemfile.webpacker.lock');

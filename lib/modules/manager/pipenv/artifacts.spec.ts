@@ -1,6 +1,9 @@
 import * as _fsExtra from 'fs-extra';
 import upath from 'upath';
 import { mockDeep } from 'vitest-mock-extended';
+import { envMock, mockExecAll } from '~test/exec-util.ts';
+import { Fixtures } from '~test/fixtures.ts';
+import { env, git, partial } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import type { RepoGlobalConfig } from '../../../config/types.ts';
 import { logger } from '../../../logger/index.ts';
@@ -17,9 +20,6 @@ import {
 } from './artifacts.ts';
 import { updateArtifacts } from './index.ts';
 import type { PipfileLock } from './types.ts';
-import { envMock, mockExecAll } from '~test/exec-util.ts';
-import { Fixtures } from '~test/fixtures.ts';
-import { env, git, partial } from '~test/util.ts';
 
 // mock for cjs require for `@renovatebot/detect-tools`
 // https://github.com/vitest-dev/vitest/discussions/3134
@@ -46,6 +46,7 @@ const adminConfig: RepoGlobalConfig = {
   localDir: upath.join(upath.join('/tmp/github/some/repo')),
   cacheDir: upath.join(upath.join('/tmp/renovate/cache')),
   containerbaseDir: upath.join(upath.join('/tmp/renovate/cache/containerbase')),
+  binarySource: 'global',
 };
 const dockerAdminConfig = {
   ...adminConfig,
@@ -774,7 +775,7 @@ describe('modules/manager/pipenv/artifacts', () => {
         config,
       }),
     ).toEqual([
-      { artifactError: { lockFile: 'Pipfile.lock', stderr: 'not found' } },
+      { artifactError: { fileName: 'Pipfile.lock', stderr: 'not found' } },
     ]);
 
     expect(fsExtra.ensureDir.mock.calls).toEqual([]);

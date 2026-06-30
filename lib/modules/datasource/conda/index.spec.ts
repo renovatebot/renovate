@@ -1,10 +1,10 @@
 import { DateTime } from 'luxon';
+import { Fixtures } from '~test/fixtures.ts';
+import * as httpMock from '~test/http-mock.ts';
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages.ts';
 import { getPkgReleases } from '../index.ts';
 import { datasource, defaultRegistryUrl } from './common.ts';
 import { CondaDatasource } from './index.ts';
-import { Fixtures } from '~test/fixtures.ts';
-import * as httpMock from '~test/http-mock.ts';
 
 const packageName = 'main/pytest';
 const depUrl = `/${packageName}`;
@@ -74,6 +74,27 @@ describe('modules/datasource/conda/index', () => {
         packageName,
       });
       expect(res).toBeNull();
+    });
+
+    it('handles null html_url and dev_url without throwing', async () => {
+      const packageName = 'pytest';
+      httpMock
+        .scope('https://api.anaconda.org/package/conda-forge')
+        .get(`/${packageName}`)
+        .reply(200, {
+          html_url: null,
+          dev_url: null,
+          versions: ['1.0.0'],
+          files: [],
+        });
+      const res = await getPkgReleases({
+        registryUrls: ['https://api.anaconda.org/package/conda-forge'],
+        datasource,
+        packageName,
+      });
+      expect(res).toMatchObject({ releases: [{ version: '1.0.0' }] });
+      expect(res?.homepage).toBeUndefined();
+      expect(res?.sourceUrl).toBeUndefined();
     });
 
     it('supports multiple custom datasource urls', async () => {

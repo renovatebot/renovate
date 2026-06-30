@@ -49,7 +49,10 @@ export function extractPackageFile(
   config?: ExtractConfig,
 ): PackageFileContent | null {
   const { val: parsed, err } = Result.wrap(() =>
-    CircleCiFile.parse(parseSingleYaml(content)),
+    // Parse as YAML 1.1 so anchor merge keys (`<<`) work, matching CircleCI's
+    // own behavior. Under YAML 1.2 a mapping with multiple `<<` keys is
+    // rejected as a duplicate key, which causes the whole file to be skipped.
+    CircleCiFile.parse(parseSingleYaml(content, { version: '1.1' })),
   ).unwrap();
 
   if (err) {

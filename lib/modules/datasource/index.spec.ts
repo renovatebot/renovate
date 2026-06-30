@@ -1,4 +1,5 @@
 import fs from 'fs-extra';
+import { logger } from '~test/util.ts';
 import { GlobalConfig } from '../../config/global.ts';
 import {
   EXTERNAL_HOST_ERROR,
@@ -23,7 +24,6 @@ import type {
   GetReleasesConfig,
   ReleaseResult,
 } from './types.ts';
-import { logger } from '~test/util.ts';
 
 const datasource = 'dummy';
 const packageName = 'package';
@@ -614,6 +614,22 @@ describe('modules/datasource/index', () => {
             override caching = true;
           }
 
+          it('returns cached result on cache hit', async () => {
+            const cachedResult: ReleaseResult = {
+              releases: [{ version: '0.0.1' }],
+            };
+            packageCache.get.mockResolvedValue(cachedResult);
+            datasources.set(datasource, new CachingDatasource());
+
+            const res = await getPkgReleases({
+              datasource,
+              packageName,
+              registryUrls: ['https://reg1.com'],
+            });
+            expect(res).toMatchObject({ releases: [{ version: '0.0.1' }] });
+            expect(packageCache.set).not.toHaveBeenCalled();
+          });
+
           it('caches by default', async () => {
             const registries = {
               'https://reg1.com': {
@@ -939,7 +955,11 @@ describe('modules/datasource/index', () => {
             constraintsFiltering: 'strict',
           });
           expect(res).toMatchObject({
-            releases: [{ version: '0.0.3' }, { version: '0.0.4' }],
+            releases: [
+              { version: '0.0.2' },
+              { version: '0.0.3' },
+              { version: '0.0.4' },
+            ],
           });
         });
       });

@@ -47,12 +47,15 @@ export function updateYarnrcCatalogDependency({
     return null;
   }
 
-  const oldVersion =
-    catalogName === 'default'
-      ? parsedContents.catalog?.[depName!]
-      : isObject(parsedContents.catalogs?.[catalogName]) && isString(depName)
-        ? parsedContents.catalogs?.[catalogName][depName]
-        : undefined;
+  let oldVersion: string | undefined;
+  if (catalogName === 'default') {
+    oldVersion = parsedContents.catalog?.[depName!];
+  } else if (
+    isObject(parsedContents.catalogs?.[catalogName]) &&
+    isString(depName)
+  ) {
+    oldVersion = parsedContents.catalogs?.[catalogName][depName];
+  }
 
   if (oldVersion === newValue) {
     logger.trace('Version is already updated');
@@ -111,6 +114,7 @@ function changeDependencyIn(
     CST.setScalarValue(relevantNode.srcToken!.key!, newName);
   }
 
+  // v8 ignore else -- TODO: add test #40625
   if (newValue) {
     // We only support scalar values when substituting. This explicitly avoids
     // substituting aliases, since those can be resolved from a shared location,

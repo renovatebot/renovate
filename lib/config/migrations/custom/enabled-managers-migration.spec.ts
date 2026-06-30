@@ -4,7 +4,14 @@ describe('config/migrations/custom/enabled-managers-migration', () => {
   it('migrates', async () => {
     await expect(EnabledManagersMigration).toMigrate(
       {
-        enabledManagers: ['test1', 'yarn', 'test2', 'regex', 'custom.regex'],
+        enabledManagers: [
+          'test1',
+          'yarn',
+          'test2',
+          'regex',
+          'custom.regex',
+          'renovate-config-presets',
+        ],
       },
       {
         enabledManagers: [
@@ -13,6 +20,7 @@ describe('config/migrations/custom/enabled-managers-migration', () => {
           'test2',
           'custom.regex',
           'custom.regex',
+          'renovate-config',
         ],
       },
     );

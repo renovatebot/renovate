@@ -21,3 +21,6 @@ declare module '*.json' {
   const value: Record<string, any>;
   export = value;
 }
+
+// make typescript happy
+declare module 'source-map-support/register.js';

@@ -1,5 +1,5 @@
-import { extractPackageFile } from './index.ts';
 import { Fixtures } from '~test/fixtures.ts';
+import { extractPackageFile } from './index.ts';
 
 describe('modules/manager/tekton/extract', () => {
   describe('extractPackageFile()', () => {
@@ -9,7 +9,7 @@ describe('modules/manager/tekton/extract', () => {
         'test-file.yaml',
       );
       expect(result).toMatchSnapshot();
-      expect(result?.deps).toHaveLength(39);
+      expect(result?.deps).toHaveLength(40);
     });
 
     it('extracts deps from a file in annotations', () => {

@@ -5,7 +5,9 @@ import type { NewValueConfig, VersioningApi } from '../types.ts';
 
 export const id = 'hex';
 export const displayName = 'Hex';
-export const urls = ['https://hexdocs.pm/elixir/Version.html'];
+export const urls = [
+  '[Elixir Version module](https://hexdocs.pm/elixir/Version.html)',
+];
 export const supportsRanges = true;
 export const supportedRangeStrategies: RangeStrategy[] = [
   'bump',
@@ -37,12 +39,12 @@ function npm2hex(input: string): string {
       break;
     }
     if (i < res.length - 1 && res[i + 1].includes('||')) {
-      output += res[i] + ' or ';
+      output += `${res[i]} or `;
       i += 1;
     } else if (operators.includes(res[i])) {
-      output += res[i] + ' ';
+      output += `${res[i]} `;
     } else {
-      output += res[i] + ' and ';
+      output += `${res[i]} and `;
     }
   }
   return output;
@@ -53,6 +55,18 @@ function isLessThanRange(version: string, range: string): boolean {
 }
 
 const isValid = (input: string): boolean => !!npm.isValid(hex2npm(input));
+
+function isSingleVersion(constraint: string): boolean {
+  return (
+    npm.isVersion(constraint) ||
+    (constraint?.startsWith('==') &&
+      npm.isVersion(constraint.substring(2).trim()))
+  );
+}
+
+function getPinnedValue(newVersion: string): string {
+  return `== ${newVersion}`;
+}
 
 const matches = (version: string, range: string): boolean =>
   npm.matches(hex2npm(version), hex2npm(range));
@@ -111,11 +125,13 @@ export { isValid };
 export const api: VersioningApi = {
   ...npm,
   isLessThanRange,
+  isSingleVersion,
   isValid,
   matches,
   getSatisfyingVersion,
   minSatisfyingVersion,
   getNewValue,
+  getPinnedValue,
 };
 
 export default api;

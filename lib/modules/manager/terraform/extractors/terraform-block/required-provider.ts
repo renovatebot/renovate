@@ -1,5 +1,5 @@
 import { isNullOrUndefined, isString } from '@sindresorhus/is';
-import type { PackageDependency } from '../../../types.ts';
+import type { ExtractConfig, PackageDependency } from '../../../types.ts';
 import { TerraformProviderExtractor } from '../../base.ts';
 import type {
   TerraformDefinitionFile,
@@ -15,6 +15,7 @@ export class RequiredProviderExtractor extends TerraformProviderExtractor {
   extract(
     hclRoot: TerraformDefinitionFile,
     locks: ProviderLock[],
+    config: ExtractConfig,
   ): PackageDependency[] {
     const terraformBlocks = hclRoot?.terraform;
     if (isNullOrUndefined(terraformBlocks)) {
@@ -51,7 +52,12 @@ export class RequiredProviderExtractor extends TerraformProviderExtractor {
           };
         }
         dependencies.push(
-          this.analyzeTerraformProvider(dep, locks, 'required_provider'),
+          this.analyzeTerraformProvider(
+            dep,
+            locks,
+            'required_provider',
+            config,
+          ),
         );
       }
     }

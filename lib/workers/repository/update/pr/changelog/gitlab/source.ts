@@ -7,7 +7,7 @@ export class GitLabChangeLogSource extends ChangeLogSource {
   }
 
   getAPIBaseUrl(config: BranchUpgradeConfig): string {
-    return this.getBaseUrl(config) + 'api/v4/';
+    return `${this.getBaseUrl(config)}api/v4/`;
   }
 
   getCompareURL(

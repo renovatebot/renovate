@@ -14,3 +14,5 @@ export const defaultConfig = {
 };
 
 export const supportedDatasources = [GoDatasource.id];
+
+export { knownDepTypes } from './dep-types.ts';

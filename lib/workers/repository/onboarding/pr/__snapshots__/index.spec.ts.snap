@@ -7,6 +7,10 @@ Welcome to [Renovate](https://github.com/renovatebot/renovate)! This is an onboa
 
 🚦 To activate Renovate, merge this Pull Request. To disable Renovate, simply close this Pull Request unmerged.
 
+📚 See our [Reading List](https://docs.renovatebot.com/reading-list/) for relevant documentation you may be interested in reading.
+
+🔡 Do you want to change how Renovate upgrades your dependencies? Add your custom config to \`renovate.json\` in this branch. Renovate will update the Pull Request description the next time it runs.
+
 
 
 ---
@@ -38,6 +42,10 @@ exports[`workers/repository/onboarding/pr/index > ensureOnboardingPr() > creates
 Welcome to [Renovate](https://github.com/renovatebot/renovate)! This is an onboarding PR to help you understand and configure settings before regular Pull Requests begin.
 
 🚦 To activate Renovate, merge this Pull Request. To disable Renovate, simply close this Pull Request unmerged.
+
+📚 See our [Reading List](https://docs.renovatebot.com/reading-list/) for relevant documentation you may be interested in reading.
+
+🔡 Do you want to change how Renovate upgrades your dependencies? Add your custom config to \`renovate.json\` in this branch and select the Retry/Rebase checkbox below. Renovate will update the Pull Request description the next time it runs.
 
 
 
@@ -76,6 +84,10 @@ Welcome to [Renovate](https://github.com/renovatebot/renovate)! This is an onboa
 
 🚦 To activate Renovate, merge this Pull Request. To disable Renovate, simply close this Pull Request unmerged.
 
+📚 See our [Reading List](https://docs.renovatebot.com/reading-list/) for relevant documentation you may be interested in reading.
+
+🔡 Do you want to change how Renovate upgrades your dependencies? Add your custom config to \`renovate.json\` in this branch. Renovate will update the Pull Request description the next time it runs.
+
 
 
 ---
@@ -107,6 +119,10 @@ exports[`workers/repository/onboarding/pr/index > ensureOnboardingPr() > creates
 Welcome to [Renovate](https://github.com/renovatebot/renovate)! This is an onboarding PR to help you understand and configure settings before regular Pull Requests begin.
 
 🚦 To activate Renovate, merge this Pull Request. To disable Renovate, simply close this Pull Request unmerged.
+
+📚 See our [Reading List](https://docs.renovatebot.com/reading-list/) for relevant documentation you may be interested in reading.
+
+🔡 Do you want to change how Renovate upgrades your dependencies? Add your custom config to \`renovate.json\` in this branch and select the Retry/Rebase checkbox below. Renovate will update the Pull Request description the next time it runs.
 
 
 
@@ -147,6 +163,10 @@ Welcome to [Renovate](https://github.com/renovatebot/renovate)! This is an onboa
 
 🚦 To activate Renovate, merge this Pull Request. To disable Renovate, simply close this Pull Request unmerged.
 
+📚 See our [Reading List](https://docs.renovatebot.com/reading-list/) for relevant documentation you may be interested in reading.
+
+🔡 Do you want to change how Renovate upgrades your dependencies? Add your custom config to \`renovate.json\` in this branch. Renovate will update the Pull Request description the next time it runs.
+
 
 
 ---
@@ -183,6 +203,10 @@ This should not be the first line of the PR
 Welcome to [Renovate](https://github.com/renovatebot/renovate)! This is an onboarding PR to help you understand and configure settings before regular Pull Requests begin.
 
 🚦 To activate Renovate, merge this Pull Request. To disable Renovate, simply close this Pull Request unmerged.
+
+📚 See our [Reading List](https://docs.renovatebot.com/reading-list/) for relevant documentation you may be interested in reading.
+
+🔡 Do you want to change how Renovate upgrades your dependencies? Add your custom config to \`renovate.json\` in this branch and select the Retry/Rebase checkbox below. Renovate will update the Pull Request description the next time it runs.
 
 
 

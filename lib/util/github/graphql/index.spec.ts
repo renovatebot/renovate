@@ -1,6 +1,6 @@
+import * as httpMock from '~test/http-mock.ts';
 import { GithubHttp } from '../../http/github.ts';
 import { queryBranches, queryReleases, queryTags } from './index.ts';
-import * as httpMock from '~test/http-mock.ts';
 
 const http = new GithubHttp();
 

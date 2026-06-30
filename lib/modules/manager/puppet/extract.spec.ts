@@ -1,9 +1,9 @@
 import { EOL } from 'node:os';
+import { Fixtures } from '~test/fixtures.ts';
 import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
 import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
 import { PuppetForgeDatasource } from '../../datasource/puppet-forge/index.ts';
 import { extractPackageFile } from './index.ts';
-import { Fixtures } from '~test/fixtures.ts';
 
 describe('modules/manager/puppet/extract', () => {
   describe('extractPackageFile()', () => {

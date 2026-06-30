@@ -1,3 +1,5 @@
+import type { RenovateConfig } from '~test/util.ts';
+import { partial } from '~test/util.ts';
 import type { PackageFile } from '../../modules/manager/types.ts';
 import {
   getDepWarningsDashboard,
@@ -6,8 +8,6 @@ import {
   getErrors,
   getWarnings,
 } from './errors-warnings.ts';
-import type { RenovateConfig } from '~test/util.ts';
-import { partial } from '~test/util.ts';
 
 describe('workers/repository/errors-warnings', () => {
   describe('getWarnings()', () => {
@@ -92,6 +92,29 @@ describe('workers/repository/errors-warnings', () => {
 
         "
       `);
+    });
+
+    it('returns 2 pr warnings text dependencyDashboard true with issue link', () => {
+      const config: RenovateConfig = { dependencyDashboardIssue: 123 };
+      const dependencyDashboard = true;
+      const packageFiles: Record<string, PackageFile[]> = {
+        npm: [
+          {
+            packageFile: 'package.json',
+            deps: [
+              {
+                warnings: [{ message: 'Warning 1', topic: '' }],
+              },
+              {},
+            ],
+          },
+        ],
+      };
+
+      const res = getDepWarningsPR(packageFiles, config, dependencyDashboard);
+      expect(res).toContain(
+        'Check the [Dependency Dashboard](../issues/123) for more information.',
+      );
     });
 
     it('returns 2 pr warnings text dependencyDashboard false', () => {

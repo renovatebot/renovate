@@ -1,5 +1,5 @@
-import { extractPackageFile } from './index.ts';
 import { Fixtures } from '~test/fixtures.ts';
+import { extractPackageFile } from './index.ts';
 
 const conanfile1 = Fixtures.get('conanfile.txt');
 const conanfile2 = Fixtures.get('conanfile2.txt');

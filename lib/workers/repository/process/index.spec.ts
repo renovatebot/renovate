@@ -1,3 +1,5 @@
+import type { RenovateConfig } from '~test/util.ts';
+import { git, logger, platform, scm } from '~test/util.ts';
 import { getConfig } from '../../../config/defaults.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import { CONFIG_VALIDATION } from '../../../constants/error-messages.ts';
@@ -10,8 +12,6 @@ import {
   getBaseBranchConfig,
   updateRepo,
 } from './index.ts';
-import { git, logger, platform, scm } from '~test/util.ts';
-import type { RenovateConfig } from '~test/util.ts';
 
 vi.mock('./extract-update.ts');
 

@@ -1,4 +1,4 @@
-import { setTimeout } from 'timers/promises';
+import { setTimeout } from 'node:timers/promises';
 import { isArray, isEmptyArray, isNonEmptyArray } from '@sindresorhus/is';
 import pMap from 'p-map';
 import semver from 'semver';
@@ -28,7 +28,11 @@ import * as p from '../../../util/promises.ts';
 import { regEx } from '../../../util/regex.ts';
 import { sanitize } from '../../../util/sanitize.ts';
 import type { EmailAddress } from '../../../util/schema-utils/index.ts';
-import { ensureTrailingSlash, getQueryString } from '../../../util/url.ts';
+import {
+  ensureTrailingSlash,
+  getQueryString,
+  parseUrl,
+} from '../../../util/url.ts';
 import type {
   AutodiscoverConfig,
   BranchStatusConfig,
@@ -75,6 +79,7 @@ import {
   getRepoUrl,
   prInfo,
 } from './utils.ts';
+
 export { extractRulesFromCodeOwnersLines } from './code-owners.ts';
 
 let config: {
@@ -113,11 +118,13 @@ export async function initPlatform({
   if (!token) {
     throw new Error('Init: You must configure a GitLab personal access token');
   }
-  if (endpoint) {
+  if (!endpoint) {
+    logger.debug(`Using default GitLab endpoint: ${defaults.endpoint}`);
+  } else if (parseUrl(endpoint) === null) {
+    throw new Error(`Invalid GitLab endpoint URL: ${endpoint}`);
+  } else {
     defaults.endpoint = ensureTrailingSlash(endpoint);
     setBaseUrl(defaults.endpoint);
-  } else {
-    logger.debug('Using default GitLab endpoint: ' + defaults.endpoint);
   }
   const platformConfig: PlatformResult = {
     endpoint: defaults.endpoint,
@@ -150,7 +157,7 @@ export async function initPlatform({
       ).body;
       gitlabVersion = version.version;
     }
-    logger.debug('GitLab version is: ' + gitlabVersion);
+    logger.debug(`GitLab version is: ${gitlabVersion}`);
     // version is 'x.y.z-edition', so not strictly semver; need to strip edition
     [gitlabVersion] = gitlabVersion.split('-');
     defaults.version = gitlabVersion;
@@ -200,7 +207,7 @@ export async function getRepos(config?: AutodiscoverConfig): Promise<string[]> {
       ),
     );
   } else {
-    urls.push('projects?' + getQueryString(queryParams));
+    urls.push(`projects?${getQueryString(queryParams)}`);
   }
 
   try {
@@ -240,9 +247,7 @@ export async function getRawFile(
 ): Promise<string | null> {
   const escapedFileName = urlEscape(fileName);
   const repo = urlEscape(repoName) ?? config.repository;
-  const url =
-    `projects/${repo}/repository/files/${escapedFileName}?ref=` +
-    (branchOrTag ?? `HEAD`);
+  const url = `projects/${repo}/repository/files/${escapedFileName}?ref=${branchOrTag ?? `HEAD`}`;
   const res = await gitlabApi.getJsonUnchecked<{ content: string }>(url, {
     cacheProvider: memCacheProvider,
   });
@@ -480,6 +485,7 @@ export async function getBranchStatus(
   res
     .filter((check) => !check.allow_failure)
     .forEach((check) => {
+      // v8 ignore else -- TODO: add test #40625
       if (status !== 'red') {
         // if red, stay red
         let mappedStatus: BranchStatus =
@@ -601,12 +607,21 @@ async function tryPrAutomerge(
         const { body } = await gitlabApi.getJsonUnchecked<{
           merge_status: string;
           detailed_merge_status?: string;
+          merge_when_pipeline_succeeds?: boolean;
           pipeline: {
             status: string;
           };
         }>(`projects/${config.repository}/merge_requests/${pr}`, {
           memCache: false,
         });
+
+        // Exit early if merge_when_pipeline_succeeds is already set
+        if (body.merge_when_pipeline_succeeds === true) {
+          logger.debug(
+            'Skipping automerge retry - merge_when_pipeline_succeeds already enabled',
+          );
+          return;
+        }
         // detailed_merge_status is available with Gitlab >=15.6.0
         const use_detailed_merge_status = !!body.detailed_merge_status;
         const detailed_merge_status_check =
@@ -628,19 +643,43 @@ async function tryPrAutomerge(
         await setTimeout(mergeDelay * attempt ** 2); // exponential backoff
       }
 
+      // The merge_trains endpoint's auto_merge parameter requires GitLab
+      // 17.11+. On older versions we fall back to the /merge endpoint so the
+      // MR still automerges, just not on the train.
+      // https://docs.gitlab.com/api/merge_trains/#add-a-merge-request-to-a-merge-train
+      const useMergeTrain =
+        config.mergeTrainsEnabled && !semver.lt(defaults.version, '17.11.0');
+      if (config.mergeTrainsEnabled && !useMergeTrain) {
+        logger.once.warn(
+          { version: defaults.version },
+          'Merge trains require GitLab 17.11.0 or later, falling back to /merge endpoint',
+        );
+      }
+
       // Even if Gitlab returns a "merge-able" merge request status, enabling auto-merge sometimes
       // returns a 405 Method Not Allowed. It seems to be a timing issue within Gitlab.
       for (let attempt = 1; attempt <= retryTimes; attempt += 1) {
         try {
-          await gitlabApi.putJson(
-            `projects/${config.repository}/merge_requests/${pr}/merge`,
-            {
-              body: {
-                should_remove_source_branch: true,
-                merge_when_pipeline_succeeds: true,
+          if (useMergeTrain) {
+            await gitlabApi.postJson(
+              `projects/${config.repository}/merge_trains/merge_requests/${pr}`,
+              {
+                body: {
+                  auto_merge: true,
+                },
               },
-            },
-          );
+            );
+          } else {
+            await gitlabApi.putJson(
+              `projects/${config.repository}/merge_requests/${pr}/merge`,
+              {
+                body: {
+                  should_remove_source_branch: true,
+                  merge_when_pipeline_succeeds: true,
+                },
+              },
+            );
+          }
           break;
         } catch (err) {
           logger.debug(
@@ -829,8 +868,10 @@ export function massageMarkdown(input: string): string {
     .replace(regEx(/\bPR\b/g), 'MR')
     .replace(regEx(/\bPRs\b/g), 'MRs')
     .replace(regEx(/\]\(\.\.\/pull\//g), '](!')
+    .replace(regEx(/\]\(\.\.\/issues\//g), '](#')
     // Strip unicode null characters as GitLab markdown does not permit them
-    .replace(regEx(/\u0000/g), ''); // eslint-disable-line no-control-regex
+    // oxlint-disable-next-line no-control-regex
+    .replace(regEx(/\u0000/g), '');
   return smartTruncate(desc, maxBodyLength());
 }
 
@@ -951,6 +992,7 @@ export async function setBranchStatus({
     context,
   };
 
+  // v8 ignore else -- TODO: add test #40625
   if (targetUrl) {
     options.target_url = targetUrl;
   }
@@ -987,6 +1029,14 @@ export async function setBranchStatus({
     logger.warn('Failed to retrieve commit pipeline');
   }
 
+  if (
+    options.pipeline_id === undefined &&
+    env.RENOVATE_X_GITLAB_SKIP_STATUS_WITHOUT_PIPELINE === 'true'
+  ) {
+    logger.debug('Skipping branch status update because no pipeline was found');
+    return;
+  }
+
   try {
     await gitlabApi.postJson(url, { body: options });
 
@@ -1010,11 +1060,13 @@ export async function setBranchStatus({
 // Issue
 
 export async function getIssueList(): Promise<GitlabIssue[]> {
+  // v8 ignore else -- TODO: add test #40625
   if (!config.issueList) {
     const searchParams: Record<string, string> = {
       per_page: '100',
       state: 'opened',
     };
+    // v8 ignore else -- TODO: add test #40625
     if (!config.ignorePrAuthor) {
       searchParams.scope = 'created_by_me';
     }
@@ -1338,6 +1390,7 @@ export async function ensureComment({
       maxBodyLength(),
     );
     comments.forEach((comment: { body: string; id: number }) => {
+      // v8 ignore else -- TODO: add test #40625
       if (comment.body.startsWith(`### ${massagedTopic!}\n\n`)) {
         commentId = comment.id;
         commentNeedsUpdating = comment.body !== body;
@@ -1347,6 +1400,7 @@ export async function ensureComment({
     logger.debug(`Ensuring content-only comment in #${number}`);
     body = smartTruncate(`${sanitizedContent}`, maxBodyLength());
     comments.forEach((comment: { body: string; id: number }) => {
+      // v8 ignore else -- TODO: add test #40625
       if (comment.body === body) {
         commentId = comment.id;
         commentNeedsUpdating = false;
@@ -1366,7 +1420,7 @@ export async function ensureComment({
       'Updated comment',
     );
   } else {
-    logger.debug('Comment is already update-to-date');
+    logger.debug('Comment is already up-to-date');
   }
   return true;
 }
@@ -1384,6 +1438,7 @@ export async function ensureCommentRemoval(
   const comments = await getComments(issueNo);
   let commentId: number | null | undefined = null;
 
+  // v8 ignore else -- TODO: add test #40625
   if (deleteConfig.type === 'by-topic') {
     const byTopic = (comment: GitlabComment): boolean =>
       comment.body.startsWith(`### ${deleteConfig.topic}\n\n`);
@@ -1394,6 +1449,7 @@ export async function ensureCommentRemoval(
     commentId = comments.find(byContent)?.id;
   }
 
+  // v8 ignore else -- TODO: add test #40625
   if (commentId) {
     await deleteComment(issueNo, commentId);
   }

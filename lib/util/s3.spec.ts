@@ -1,4 +1,5 @@
 import { getS3Client, parseS3Url } from './s3.ts';
+import { parseUrl } from './url.ts';
 
 describe('util/s3', () => {
   afterEach(() => {
@@ -13,7 +14,7 @@ describe('util/s3', () => {
   });
 
   it('returns null for non-S3 URLs', () => {
-    expect(parseS3Url(new URL('http://example.com/key/path'))).toBeNull();
+    expect(parseS3Url(parseUrl('http://example.com/key/path')!)).toBeNull();
   });
 
   it('returns null for invalid URLs', () => {

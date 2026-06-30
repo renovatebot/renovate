@@ -1,10 +1,10 @@
+import { Fixtures } from '~test/fixtures.ts';
+import * as httpMock from '~test/http-mock.ts';
 import * as conan from '../../versioning/conan/index.ts';
 import { getDigest, getPkgReleases } from '../index.ts';
 import type { GetDigestInputConfig, GetPkgReleasesConfig } from '../types.ts';
 import { defaultRegistryUrl } from './common.ts';
 import { ConanDatasource } from './index.ts';
-import { Fixtures } from '~test/fixtures.ts';
-import * as httpMock from '~test/http-mock.ts';
 
 const mixedCaseJson = Fixtures.get('mixed_case.json');
 const pocoJson = Fixtures.get('poco.json');

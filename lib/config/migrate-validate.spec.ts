@@ -1,7 +1,7 @@
+import { type RenovateConfig, logger } from '~test/util.ts';
 import { getConfig } from './defaults.ts';
 import { migrateAndValidate } from './migrate-validate.ts';
 import * as configMigration from './migration.ts';
-import { type RenovateConfig, logger } from '~test/util.ts';
 
 let config: RenovateConfig;
 

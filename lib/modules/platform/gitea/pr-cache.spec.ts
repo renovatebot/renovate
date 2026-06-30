@@ -1,15 +1,15 @@
+import { partial } from '~test/util.ts';
 import * as httpMock from '../../../../test/http-mock.ts';
 import { reset as memCacheReset } from '../../../util/cache/memory/index.ts';
 import {
   getCache,
   resetCache as repoCacheReset,
 } from '../../../util/cache/repository/index.ts';
-import type { LongCommitSha } from '../../../util/git/types.ts';
 import { GiteaHttp, setBaseUrl } from '../../../util/http/gitea.ts';
+import type { LongCommitSha } from '../../../util/schema-utils/git.ts';
 import { GiteaPrCache } from './pr-cache.ts';
 import type { PR, Repo } from './types.ts';
 import { toRenovatePR } from './utils.ts';
-import { partial } from '~test/util.ts';
 
 const http = new GiteaHttp();
 const ignorePrAuthor = false;

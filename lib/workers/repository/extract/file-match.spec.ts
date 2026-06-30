@@ -1,5 +1,5 @@
-import * as fileMatch from './file-match.ts';
 import type { RenovateConfig } from '~test/util.ts';
+import * as fileMatch from './file-match.ts';
 
 describe('workers/repository/extract/file-match', () => {
   const fileList = ['package.json', 'frontend/package.json'];

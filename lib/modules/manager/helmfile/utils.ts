@@ -18,8 +18,7 @@ export function kustomizationsKeysUsed(release: HelmRelease): boolean {
 }
 
 /** Returns true if a helmfile release uses a local chart with a kustomization.yaml file **/
-// eslint-disable-next-line require-await
-export async function localChartHasKustomizationsYaml(
+export function localChartHasKustomizationsYaml(
   release: HelmRelease,
   helmFileYamlFileName: string,
 ): Promise<boolean> {

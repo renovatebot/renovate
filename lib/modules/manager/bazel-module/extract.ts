@@ -9,16 +9,17 @@ import type {
   PackageFileContent,
 } from '../types.ts';
 import * as bazelrc from './bazelrc.ts';
+import { RuleToCratePackageDep } from './parser/crate.ts';
 import type { ResultFragment } from './parser/fragments.ts';
 import { parse } from './parser/index.ts';
 import { RuleToMavenPackageDep, fillRegistryUrls } from './parser/maven.ts';
 import { RuleToDockerPackageDep } from './parser/oci.ts';
-import { transformRulesImgCalls } from './rules-img.ts';
+import * as rules from './rules.ts';
 import {
   GitRepositoryToPackageDep,
   RuleToBazelModulePackageDep,
 } from './rules.ts';
-import * as rules from './rules.ts';
+import { transformRulesImgCalls } from './rules-img.ts';
 
 export async function extractPackageFile(
   content: string,
@@ -47,6 +48,7 @@ export async function extractPackageFile(
       )
       .parse(records);
     const rulesImgDeps = transformRulesImgCalls(records);
+    const crateDeps = LooseArray(RuleToCratePackageDep).parse(records);
 
     if (gitRepositoryDeps.length) {
       pfc.deps.push(...gitRepositoryDeps);
@@ -62,6 +64,10 @@ export async function extractPackageFile(
 
     if (rulesImgDeps.length) {
       pfc.deps.push(...rulesImgDeps);
+    }
+
+    if (crateDeps.length) {
+      pfc.deps.push(...crateDeps);
     }
 
     return pfc.deps.length ? pfc : null;
@@ -84,6 +90,7 @@ async function extractBazelPfc(
     // Ignore any entries for custom configurations
     .filter((ce) => ce.config === undefined)
     .map((ce) => ce.getOption('registry')?.value)
+    .map((url) => url?.replace(/^["']|["']$/g, ''))
     .filter(isNotNullOrUndefined);
   if (registryUrls.length) {
     pfc.registryUrls = registryUrls;

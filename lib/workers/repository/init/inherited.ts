@@ -16,10 +16,8 @@ import {
 } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
 import { platform } from '../../../modules/platform/index.ts';
-import * as hostRules from '../../../util/host-rules.ts';
-import * as queue from '../../../util/http/queue.ts';
-import * as throttle from '../../../util/http/throttle.ts';
 import * as template from '../../../util/template/index.ts';
+import { applyHostRules } from './merge.ts';
 
 export async function mergeInheritedConfig(
   config: RenovateConfig,
@@ -127,7 +125,7 @@ export async function mergeInheritedConfig(
       secrets: config.secrets ?? {},
       variables: config.variables ?? {},
     });
-    setInheritedHostRules(filteredConfig);
+    applyHostRules(filteredConfig);
     filteredConfig = InheritConfig.set(filteredConfig);
     return mergeChildConfig(config, filteredConfig);
   }
@@ -172,28 +170,7 @@ export async function mergeInheritedConfig(
     secrets: config.secrets ?? {},
     variables: config.variables ?? {},
   });
-  setInheritedHostRules(filteredConfig);
+  applyHostRules(filteredConfig);
   filteredConfig = InheritConfig.set(filteredConfig);
   return mergeChildConfig(config, filteredConfig);
-}
-
-function setInheritedHostRules(config: RenovateConfig): void {
-  if (config.hostRules) {
-    logger.debug('Setting hostRules from config');
-    for (const rule of config.hostRules) {
-      try {
-        hostRules.add(rule);
-      } catch (err) {
-        // istanbul ignore next
-        logger.warn(
-          { err, config: rule },
-          'Error setting hostRule from config',
-        );
-      }
-    }
-    // host rules can change concurrency
-    queue.clear();
-    throttle.clear();
-    delete config.hostRules;
-  }
 }

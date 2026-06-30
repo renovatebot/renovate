@@ -1,19 +1,27 @@
 {
+  /*
+   * A sample Renovate configuration file with various comments
+   * to test preservation of comments during migration.
+   *
+   * This explanation itself is part of the test.
+   */
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
     ":separateMajorReleases",
     ":prImmediately",
     ":renovatePrefix",
     ":semanticPrefixFixDepsChoreOthers",
-    ":updateNotScheduled",
+    ":updateNotScheduled",  // this comment should be kept
     ":automergeDisabled",
     ":maintainLockFilesDisabled",
+    // this one too
     "group:monorepos",
-    "helpers:oddIsUnstablePackages"
+    "helpers:oddIsUnstablePackages" // but this one should not
   ],
   "onboarding": false,
-  "pinVersions": false,
-  "semanticCommits": true,
+  "pinVersions": false,  // this comment will be lost too
+  "semanticCommits": true, // but this one stays
   "timezone": "US/Central",
+  // this should be preserved too
   "baseBranch": "main"
 }

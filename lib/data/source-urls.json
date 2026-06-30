@@ -1,39 +1,35 @@
 {
   "$schema": "../../tools/schemas/source-urls-schema.json",
-  "orb": {
-    "cypress-io/cypress": "https://github.com/cypress-io/circleci-orb",
-    "hutson/library-release-workflows": "https://github.com/hyper-expanse/library-release-workflows"
-  },
   "docker": {
     "adminer": "https://github.com/vrana/adminer",
     "amd64/registry": "https://github.com/distribution/distribution",
     "amd64/traefik": "https://github.com/containous/traefik",
     "confluentinc/ksqldb-cli": "https://github.com/confluentinc/ksql",
     "confluentinc/ksqldb-server": "https://github.com/confluentinc/ksql",
+    "coredns/coredns": "https://github.com/coredns/coredns",
     "crossplanecontrib/provider-helm": "https://github.com/crossplane-contrib/provider-helm",
     "crossplanecontrib/provider-kubernetes": "https://github.com/crossplane-contrib/provider-kubernetes",
-    "coredns/coredns": "https://github.com/coredns/coredns",
     "docker/compose": "https://github.com/docker/compose",
     "drone/drone": "https://github.com/drone/drone",
     "drone/drone-runner-docker": "https://github.com/drone-runners/drone-runner-docker",
     "drone/drone-runner-kube": "https://github.com/drone-runners/drone-runner-kube",
     "drone/drone-runner-ssh": "https://github.com/drone-runners/drone-runner-ssh",
     "gcr.io/kaniko-project/executor": "https://github.com/GoogleContainerTools/kaniko",
+    "gitea/gitea": "https://github.com/go-gitea/gitea",
     "gitlab/gitlab-ce": "https://gitlab.com/gitlab-org/gitlab-foss",
     "gitlab/gitlab-runner": "https://gitlab.com/gitlab-org/gitlab-runner",
-    "gitea/gitea": "https://github.com/go-gitea/gitea",
     "hashicorp/terraform": "https://github.com/hashicorp/terraform",
+    "kudobuilder/kuttl": "https://github.com/kudobuilder/kuttl",
     "mcr.microsoft.com/dotnet/aspnet": "https://github.com/dotnet/aspnetcore",
     "mcr.microsoft.com/dotnet/monitor": "https://github.com/dotnet/dotnet-monitor",
     "mcr.microsoft.com/dotnet/runtime": "https://github.com/dotnet/runtime",
     "mcr.microsoft.com/dotnet/runtime-deps": "https://github.com/dotnet/runtime",
     "mcr.microsoft.com/dotnet/sdk": "https://github.com/dotnet/sdk",
     "node": "https://github.com/nodejs/node",
+    "prom/blackbox-exporter": "https://github.com/prometheus/blackbox_exporter",
     "registry": "https://github.com/distribution/distribution",
     "timberio/vector": "https://github.com/vectordotdev/vector",
     "traefik": "https://github.com/containous/traefik",
-    "kudobuilder/kuttl": "https://github.com/kudobuilder/kuttl",
-    "prom/blackbox-exporter": "https://github.com/prometheus/blackbox_exporter",
     "xpkg.upbound.io/upbound/provider-gcp": "https://github.com/upbound/provider-gcp"
   },
   "helm": {
@@ -53,10 +49,9 @@
   "nvm": {
     "node": "https://github.com/nodejs/node"
   },
-  "pypi": {
-    "mkdocs": "https://github.com/mkdocs/mkdocs",
-    "mkdocs-material": "https://github.com/squidfunk/mkdocs-material",
-    "mypy": "https://github.com/python/mypy"
+  "orb": {
+    "cypress-io/cypress": "https://github.com/cypress-io/circleci-orb",
+    "hutson/library-release-workflows": "https://github.com/hyper-expanse/library-release-workflows"
   },
   "packagist": {
     "api-platform/doctrine-common": "https://github.com/api-platform/core",
@@ -79,5 +74,10 @@
     "api-platform/state": "https://github.com/api-platform/core",
     "api-platform/symfony": "https://github.com/api-platform/core",
     "api-platform/validator": "https://github.com/api-platform/core"
+  },
+  "pypi": {
+    "mkdocs": "https://github.com/mkdocs/mkdocs",
+    "mkdocs-material": "https://github.com/squidfunk/mkdocs-material",
+    "mypy": "https://github.com/python/mypy"
   }
 }

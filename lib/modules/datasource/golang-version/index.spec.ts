@@ -1,8 +1,8 @@
+import { Fixtures } from '~test/fixtures.ts';
+import * as httpMock from '~test/http-mock.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
 import { getPkgReleases } from '../index.ts';
 import { GolangVersionDatasource } from './index.ts';
-import { Fixtures } from '~test/fixtures.ts';
-import * as httpMock from '~test/http-mock.ts';
 
 const golangReleasesContent = Fixtures.get('releases.go');
 const golangReleasesInvalidContent = Fixtures.get('releases-invalid.go');

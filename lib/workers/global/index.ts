@@ -4,6 +4,7 @@ import {
   ATTR_VCS_REPOSITORY_NAME,
 } from '@opentelemetry/semantic-conventions/incubating';
 import {
+  isNonEmptyObject,
   isNonEmptyString,
   isNonEmptyStringAndNotWhitespace,
   isString,
@@ -20,6 +21,7 @@ import type {
   AllConfig,
   RenovateConfig,
   RenovateRepository,
+  RepoGlobalConfig,
 } from '../../config/types.ts';
 import { CONFIG_PRESETS_INVALID } from '../../constants/error-messages.ts';
 import { pkg } from '../../expose.ts';
@@ -36,33 +38,64 @@ import * as queue from '../../util/http/queue.ts';
 import * as throttle from '../../util/http/throttle.ts';
 import { regexEngineStatus } from '../../util/regex.ts';
 import { addSecretForSanitizing } from '../../util/sanitize.ts';
+import { coerceString } from '../../util/string.ts';
 import * as repositoryWorker from '../repository/index.ts';
+import type { RepositoryWorkerConfig } from '../repository/init/types.ts';
 import { autodiscoverRepositories } from './autodiscover.ts';
 import { parseConfigs } from './config/parse/index.ts';
 import { globalFinalize, globalInitialize } from './initialize.ts';
 import { isLimitReached } from './limits.ts';
 
+function applyGlobalOption<K extends keyof RepoGlobalConfig>(
+  target: RepoGlobalConfig,
+  source: RepoGlobalConfig,
+  key: K,
+): void {
+  target[key] = source[key];
+  delete source[key];
+}
+
 export async function getRepositoryConfig(
   globalConfig: RenovateConfig,
   repository: RenovateRepository,
-): Promise<RenovateConfig> {
-  const repoConfig = configParser.mergeChildConfig(
-    globalConfig,
-    isString(repository) ? { repository } : repository,
-  );
-  const repoParts = repoConfig.repository.split('/');
+): Promise<RepositoryWorkerConfig> {
+  const repoIsString = isString(repository);
+  const repoName = repoIsString ? repository : repository.repository;
+
+  const repoConfig: RepositoryWorkerConfig = {
+    ...globalConfig,
+    repository: repoName,
+  };
+
+  if (!repoIsString) {
+    const { repository: _repository, ...repositoryEntryConfig } = repository;
+
+    // Promote GlobalConfig.OPTIONS keys into repoConfig directly so that
+    // GlobalConfig.set(repoConfig) in the repository worker picks them up
+    // with per-repo overrides before onboarding checks run.
+    for (const option of GlobalConfig.OPTIONS) {
+      if (option in repositoryEntryConfig) {
+        applyGlobalOption(repoConfig, repositoryEntryConfig, option);
+      }
+    }
+
+    if (isNonEmptyObject(repositoryEntryConfig)) {
+      // mergeRenovateConfig later resolves this repositories[] object-entry
+      // config in the correct order
+      repoConfig.repositoryEntryConfig = repositoryEntryConfig;
+    }
+  }
+
+  const repoParts = repoName.split('/');
   repoParts.pop();
   repoConfig.parentOrg = repoParts.join('/');
   repoConfig.topLevelOrg = repoParts.shift();
-  // TODO: types (#22198)
-  const platform = GlobalConfig.get('platform')!;
+  const platform = GlobalConfig.get('platform');
   repoConfig.localDir =
     platform === 'local'
       ? process.cwd()
-      : upath.join(
-          repoConfig.baseDir,
-          `./repos/${platform}/${repoConfig.repository}`,
-        );
+      : // TODO: types (#22198)
+        upath.join(repoConfig.baseDir!, `./repos/${platform}/${repoName}`);
   await fs.ensureDir(repoConfig.localDir);
   delete repoConfig.baseDir;
   return configParser.filterConfig(repoConfig, 'repository');
@@ -107,6 +140,7 @@ export async function validatePresets(config: AllConfig): Promise<void> {
 }
 
 export async function start(): Promise<number> {
+  logger.info({ renovateVersion: pkg.version }, 'Renovate started');
   // istanbul ignore next
   if (regexEngineStatus.type === 'available') {
     logger.debug('Using RE2 regex engine');
@@ -256,7 +290,7 @@ function repositoryToOwnerAndRepo(fullName: string): {
   repo: string;
 } {
   const parts = fullName.split('/');
-  const repo = parts.pop() ?? '';
+  const repo = coerceString(parts.pop());
   const owner = parts.join('/');
   return { owner, repo };
 }

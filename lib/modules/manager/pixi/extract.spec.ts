@@ -1,8 +1,7 @@
 import { codeBlock } from 'common-tags';
 import { describe, expect, it, vi } from 'vitest';
-
-import { extractPackageFile } from './index.ts';
 import { fs } from '~test/util.ts';
+import { extractPackageFile } from './index.ts';
 
 vi.mock('../../../util/fs/index.ts');
 
@@ -96,6 +95,7 @@ numpy = { version = "*", build = "py312*" }
 [pypi-dependencies]
 requests = '*'
 requests2 = {version = '*'}
+mako = "==1.3.9"
 
 [target.win-64.pypi-dependencies]
 urllib3 = {version = '*'}
@@ -410,6 +410,13 @@ describe('modules/manager/pixi/extract', () => {
             currentValue: '*',
             datasource: 'pypi',
             depName: 'requests2',
+            versioning: 'pep440',
+          },
+          {
+            currentValue: '==1.3.9',
+            currentVersion: '1.3.9',
+            datasource: 'pypi',
+            depName: 'mako',
             versioning: 'pep440',
           },
           {

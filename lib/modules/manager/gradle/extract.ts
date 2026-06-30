@@ -10,7 +10,10 @@ import type {
   PackageDependency,
   PackageFile,
 } from '../types.ts';
-import { parseCatalog } from './extract/catalog.ts';
+import {
+  parseCatalog,
+  unifyCatalogSharedVariableNames,
+} from './extract/catalog.ts';
 import {
   isGcvPropsFile,
   parseGcv,
@@ -33,6 +36,7 @@ import {
   reorderFiles,
   toAbsolutePath,
   updateVars,
+  updateVarsFromDefaultCatalog,
 } from './utils.ts';
 
 const mavenDatasource = MavenDatasource.id;
@@ -191,7 +195,13 @@ async function parsePackageFiles(
         updateVars(varRegistry, packageFileDir, vars);
         extractedDeps.push(...deps);
       } else if (isTOMLFile(packageFile)) {
-        const deps = parseCatalog(packageFile, content);
+        const { vars, deps } = parseCatalog(packageFile, content);
+        updateVarsFromDefaultCatalog(
+          varRegistry,
+          packageFileDir,
+          packageFile,
+          vars,
+        );
         extractedDeps.push(...deps);
       } else if (
         isGcvPropsFile(packageFile) &&
@@ -253,6 +263,8 @@ export async function extractAllPackageFiles(
   if (!extractedDeps.length) {
     return null;
   }
+
+  unifyCatalogSharedVariableNames(extractedDeps);
 
   for (const dep of extractedDeps) {
     dep.fileReplacePosition = dep?.managerData?.fileReplacePosition; // #8224

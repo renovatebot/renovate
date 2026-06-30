@@ -1,20 +1,13 @@
+import type { DateTime } from 'luxon';
 import type { MergeStrategy } from '../../config/types.ts';
-import type {
-  BranchStatus,
-  HostRule,
-  VulnerabilityAlert,
-} from '../../types/index.ts';
-import type { CommitFilesConfig, LongCommitSha } from '../../util/git/types.ts';
-
-type VulnerabilityKey = string;
-type VulnerabilityRangeKey = string;
-type VulnerabilityPatch = string;
-export type AggregatedVulnerabilities = Record<
-  VulnerabilityKey,
-  Record<VulnerabilityRangeKey, VulnerabilityPatch | null>
->;
+import type { BranchStatus, HostRule } from '../../types/index.ts';
+import type { CommitFilesConfig } from '../../util/git/types.ts';
+import type { LongCommitSha } from '../../util/schema-utils/git.ts';
+import type { GithubVulnerabilityAlert } from './github/schema.ts';
+export type VulnerabilityAlert = GithubVulnerabilityAlert;
 
 export interface PlatformParams {
+  dryRun?: string;
   endpoint?: string;
   token?: string;
   username?: string;
@@ -51,7 +44,6 @@ export interface RepoParams {
   renovateUsername?: string;
   cloneSubmodules?: boolean;
   cloneSubmodulesFilter?: string[];
-  bbUseDevelopmentBranch?: boolean;
 }
 
 export interface PrDebugData {
@@ -97,9 +89,12 @@ export interface Issue {
   number?: number;
   state?: string;
   title?: string;
+  createdAt?: string;
+  lastModified?: string;
 }
 export interface PlatformPrOptions {
   autoApprove?: boolean;
+  automergeCommitMessage?: string;
   automergeStrategy?: MergeStrategy;
   azureWorkItemId?: number;
   bbUseDefaultReviewers?: boolean;
@@ -162,12 +157,14 @@ export interface EnsureIssueConfig {
   shouldReOpen?: boolean;
   confidential?: boolean;
 }
-export interface BranchStatusConfig {
-  branchName: string;
+export interface StatusCheckConfig {
   context: string;
   description: string;
   state: BranchStatus;
   url?: string;
+}
+export interface BranchStatusConfig extends StatusCheckConfig {
+  branchName: string;
 }
 export interface FindPRConfig {
   branchName: string;
@@ -232,6 +229,12 @@ export interface FileOwnerRule {
 }
 
 export interface Platform {
+  /**
+   * Whether this is an experimental Platform.
+   *
+   * Experimental features might be changed or even removed at any time.
+   */
+  experimental?: true;
   findIssue(title: string): Promise<Issue | null>;
   getIssueList(): Promise<Issue[]>;
   getIssue?(number: number, memCache?: boolean): Promise<Issue | null>;
@@ -324,10 +327,11 @@ export interface PlatformScm {
   isBranchConflicted(baseBranch: string, branch: string): Promise<boolean>;
   branchExists(branchName: string): Promise<boolean>;
   getBranchCommit(branchName: string): Promise<LongCommitSha | null>;
+  getBranchUpdateDate(branchName: string): Promise<DateTime | null>;
   deleteBranch(branchName: string): Promise<void>;
   commitAndPush(commitConfig: CommitFilesConfig): Promise<LongCommitSha | null>;
   getFileList(): Promise<string[]>;
-  checkoutBranch(branchName: string): Promise<LongCommitSha>;
+  checkoutBranch(branchName: string): Promise<LongCommitSha | null>;
   mergeToLocal(branchName: string): Promise<void>;
   mergeAndPush(branchName: string, allowBehindBase: boolean): Promise<void>;
   syncForkWithUpstream?(baseBranch: string): Promise<void>;

@@ -1,7 +1,6 @@
-import { ZodError } from 'zod';
-import { DenoDatasource } from './index.ts';
 import * as httpMock from '~test/http-mock.ts';
 import { logger } from '~test/util.ts';
+import { DenoDatasource } from './index.ts';
 
 describe('modules/datasource/deno/index', () => {
   const deno = new DenoDatasource();
@@ -65,7 +64,7 @@ describe('modules/datasource/deno/index', () => {
 
       expect(logger.logger.warn).toHaveBeenCalledWith(
         expect.objectContaining({
-          err: expect.any(ZodError),
+          err: expect.objectContaining({ issues: expect.any(Array) }),
           version: '0.161.0',
         }),
         'Deno: failed to get version details',

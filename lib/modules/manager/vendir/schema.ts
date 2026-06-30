@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from 'zod/v4';
 import { regEx } from '../../../util/regex.ts';
 import { LooseArray } from '../../../util/schema-utils/index.ts';
 
@@ -41,10 +41,20 @@ export const GithubReleaseContent = z.object({
   githubRelease: GithubRelease,
 });
 
+export const HttpRelease = z.object({
+  url: z.string(),
+});
+
+export const HttpContent = z.object({
+  path: z.string(),
+  http: HttpRelease,
+});
+
 export const Contents = z.union([
   HelmChartContent,
   GitRefContent,
   GithubReleaseContent,
+  HttpContent,
 ]);
 
 export const Vendir = VendirResource.extend({
@@ -56,7 +66,8 @@ export const Vendir = VendirResource.extend({
   ),
 });
 
-export type VendirDefinition = z.infer<typeof Vendir>;
-export type HelmChartDefinition = z.infer<typeof HelmChart>;
-export type GitRefDefinition = z.infer<typeof GitRef>;
-export type GithubReleaseDefinition = z.infer<typeof GithubRelease>;
+export type Vendir = z.infer<typeof Vendir>;
+export type HelmChart = z.infer<typeof HelmChart>;
+export type GitRef = z.infer<typeof GitRef>;
+export type GithubRelease = z.infer<typeof GithubRelease>;
+export type HttpRelease = z.infer<typeof HttpRelease>;

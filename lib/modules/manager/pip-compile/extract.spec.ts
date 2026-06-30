@@ -1,11 +1,11 @@
 import { codeBlock } from 'common-tags';
 import upath from 'upath';
+import { Fixtures } from '~test/fixtures.ts';
+import { fs } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import type { RepoGlobalConfig } from '../../../config/types.ts';
 import { logger } from '../../../logger/index.ts';
 import { extractAllPackageFiles, extractPackageFile } from './index.ts';
-import { Fixtures } from '~test/fixtures.ts';
-import { fs } from '~test/util.ts';
 
 vi.mock('../../../util/fs/index.ts');
 
@@ -155,6 +155,23 @@ describe('modules/manager/pip-compile/extract', () => {
       expect(packageFiles).not.toBeNull();
       packageFiles!.forEach((packageFile) => {
         expect(packageFile).not.toHaveProperty('packageFile', 'foo.txt');
+      });
+    });
+
+    it('no override files in returned package files', async () => {
+      fs.readLocalFile.mockResolvedValueOnce(
+        getSimpleRequirementsFile(
+          'uv pip compile --output-file=requirements.txt --overrides=overrides.txt requirements.in',
+          ['foo==1.0.1'],
+        ),
+      );
+      fs.readLocalFile.mockResolvedValueOnce('foo>=1.0.0');
+
+      const lockFiles = ['requirements.txt'];
+      const packageFiles = await extractAllPackageFiles({}, lockFiles);
+      expect(packageFiles).not.toBeNull();
+      packageFiles!.forEach((packageFile) => {
+        expect(packageFile).not.toHaveProperty('packageFile', 'overrides.txt');
       });
     });
 

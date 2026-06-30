@@ -2,13 +2,13 @@ import { createReadStream } from 'node:fs';
 import type { DirectoryResult } from 'tmp-promise';
 import { dir } from 'tmp-promise';
 import upath from 'upath';
+import { Fixtures } from '~test/fixtures.ts';
+import * as httpMock from '~test/http-mock.ts';
+import { getFixturePath, logger } from '~test/util.ts';
 import { GlobalConfig } from '../../../../config/global.ts';
 import { ExternalHostError } from '../../../../types/errors/external-host-error.ts';
 import { TerraformProviderDatasource } from '../../../datasource/terraform-provider/index.ts';
 import { TerraformProviderHash } from './hash.ts';
-import { Fixtures } from '~test/fixtures.ts';
-import * as httpMock from '~test/http-mock.ts';
-import { getFixturePath, logger } from '~test/util.ts';
 
 const releaseBackendUrl = TerraformProviderDatasource.defaultRegistryUrls[1];
 const terraformCloudReleaseBackendUrl =
@@ -44,7 +44,9 @@ describe('modules/manager/terraform/lockfile/hash', () => {
     httpMock
       .scope('https://example.com')
       .get('/.well-known/terraform.json')
-      .reply(200, '');
+      .reply(200, {})
+      .get('/test/gitlab/versions')
+      .reply(200, { versions: [] });
     const result = TerraformProviderHash.createHashes(
       'https://example.com',
       'test/gitlab',

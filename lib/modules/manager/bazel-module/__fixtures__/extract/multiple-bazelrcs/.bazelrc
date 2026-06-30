@@ -2,6 +2,8 @@
 
 build --registry=https://example.com/custom_registry.git
 build --registry=https://github.com/bazelbuild/bazel-central-registry
+build --registry='http://example.com/registry-with-single-quotes.git'
+build --registry="http://example.com/registry-with-double-quotes.git"
 
 import %workspace%/shared.bazelrc
 

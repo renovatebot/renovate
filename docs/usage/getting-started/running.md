@@ -57,9 +57,8 @@ We recommend this default image for most users.
 Renovate supports a persistent cache for downloaded tools, so that it only needs to unpack the tools on later runs.
 Use the [`containerbaseDir` config option](../self-hosted-configuration.md#containerbasedir) to control where Renovate stores its containerbase cache.
 
-<!-- prettier-ignore -->
 !!! warning
-    The usage of `binarySource=docker` is deprecated, and [will be removed in the future](https://github.com/renovatebot/renovate/issues/40747).
+  The usage of `binarySource=docker` is deprecated, and [will be removed in the future](https://github.com/renovatebot/renovate/issues/40747).
 
 If you want, you can map the Docker socket into the container so that Renovate can dynamically invoke "sidecar" images when needed.
 You'll need to set `binarySource=docker` for this to work.
@@ -87,17 +86,17 @@ The Renovate team provide a ["Renovate Runner"](https://gitlab.com/renovate-bot/
 This supports both `gitlab.com` and self-hosted GitLab.
 Details for how it works can be found in the project.
 
-#### Mend Renovate Community Edition / Enterprise Edition
+#### Mend Renovate Self-Hosted (Community Edition / Enterprise Edition)
 
-Mend Renovate Community Edition (Renovate CE) and Enterprise Edition (Renovate EE) are closed-source offerings of Renovate for self-hosted users.
-Renovate CE and Renovate EE have support for GitHub (both `github.com` and GitHub Enterprise Server) as well as GitLab self-hosted.
+Mend Renovate Self-Hosted Community Edition (sometimes "Renovate CE"/"CE") and Enterprise Edition (sometimes "Renovate EE"/"EE") are closed-source offerings of Renovate for self-hosted users.
+
 It is built similarly to the default "full" Renovate image described above, but with these differences:
 
 - It is a stateful app and does not exit after processing all repositories
 - It is installed as an App on GitHub, and behaves similarly on GitLab - for example responding to webhooks
 - It includes a priority job queue which prioritizes events like merged PRs over scheduled jobs
-- It is released every 1-2 months in a slower, more stable cadence than Renovate OSS, which releases on every commit
-- It's licensed using an end-user license agreement (EULA) and not the Affero General Public License (AGPL)
+- It is released every 2 weeks in a slightly slower and more stable cadence than Renovate OSS, which releases on every commit
+- It's licensed using an end-user license agreement (EULA) and not the Affero General Public License (AGPL-3.0-only)
 
 Plus, the Enterprise Edition has:
 
@@ -105,13 +104,16 @@ Plus, the Enterprise Edition has:
 - Dedicated support from Mend.io
 - Premium features, including Smart Merge Control
 
+Mend Renovate Self-Hosted CE and EE have support for GitHub.com, GitHub Enterprise Server, GitLab.com, GitLab Self-Managed, and Bitbucket Data Center.
+
 Go to the Mend.io website to learn more about [Renovate Enterprise Edition](https://www.mend.io/renovate-enterprise/).
 
 To learn how to configure Renovate CE or Renovate EE, read the documentation on the public GitHub repository [`mend/renovate-ce-ee`](https://github.com/mend/renovate-ce-ee).
 
 #### Mend Remediate
 
-[Mend Remediate](https://www.whitesourcesoftware.com/wp-content/media/2021/04/whitesource-remediation-solution.pdf) is an extension of WSOP available for Mend commercial customers, with full enterprise support.
+[Mend Remediate](https://docs.mend.io/integrations/latest/mend-remediate-and-renovate) is part of Mend's [Classic Repository Integrations](https://docs.mend.io/integrations/latest/mend-classic-repository-integrations) product which is for Mend commercial customers, with full enterprise support.
+
 It is integrated with Mend's vulnerability detection capabilities and additionally supports the capability of "horizontal" scalability - the ability to configure many Renovate "worker" containers which share a common job queue in order to not conflict with each other.
 
 Mend Remediate supports GitHub Enterprise Server, GitLab self-hosted, and Bitbucket Server.
@@ -157,7 +159,7 @@ Renovate's server-side/admin config is referred to as its "global" config, and c
 - CLI parameters
 
 By default Renovate checks if a file named `config.js` is present.
-Any other (`*.js`, `*.json`, `*.json5`, `*.yaml` or `*.yml`) file is supported, when you reference it with the `RENOVATE_CONFIG_FILE` environment variable (for example: `RENOVATE_CONFIG_FILE=config.yaml`).
+Any other (`*.js`, `*.ts`, `*.json`, `*.json5`, `*.yaml` or `*.yml`) file is supported, when you reference it with the `RENOVATE_CONFIG_FILE` environment variable (for example: `RENOVATE_CONFIG_FILE=config.yaml`).
 
 Renovate checks for the additional config file only if the `RENOVATE_ADDITIONAL_CONFIG_FILE` is set.
 Behaviour wise this config is similar to the file config, except that it has higher priority than the default config file.
@@ -175,10 +177,9 @@ If you are configuring Renovate using environment variables, there are two possi
 
 If you combine both of the above then any single config option in the environment variable will override what's in `RENOVATE_CONFIG`.
 
-<!-- prettier-ignore -->
 !!! note
-    It's also possible to change the default prefix from `RENOVATE_` using `ENV_PREFIX`.
-    For example: `ENV_PREFIX=RNV_ RNV_TOKEN=abc123 renovate`.
+  It's also possible to change the default prefix from `RENOVATE_` using `ENV_PREFIX`.
+  For example: `ENV_PREFIX=RNV_ RNV_TOKEN=abc123 renovate`.
 
 #### Using `config.js`
 
@@ -195,16 +196,41 @@ module.exports = {
 This allows one to include the results of asynchronous operations in the exported value.
 An example of a `config.js` that exports an `async` function (which is a function that returns a `Promise`) can be seen in a comment for [#10011: Allow autodiscover filtering for repo topic](https://github.com/renovatebot/renovate/issues/10011#issuecomment-992568583) and more examples can be seen in [`file.spec.ts`](https://github.com/renovatebot/renovate/blob/main/lib/workers/global/config/parse/file.spec.ts).
 
+#### Using TypeScript config files
+
+Renovate supports TypeScript config files (`.ts`, `.mts`, `.cts`) via Node.js's built-in type stripping.
+Set the `RENOVATE_CONFIG_FILE` environment variable to point to your TypeScript config file:
+
+```bash
+RENOVATE_CONFIG_FILE=config.ts renovate
+```
+
+An example `config.ts`:
+
+```typescript
+import type { AllConfig } from 'renovate/dist/config/types';
+
+const config: AllConfig = {
+  platform: 'github',
+  token: process.env.RENOVATE_TOKEN,
+  repositories: ['my-org/my-repo'],
+};
+
+export default config;
+```
+
+TypeScript config files follow the same rules as JavaScript config files: they can export a plain object, a `Promise`, or a function.
+The `.mts` extension is always treated as an ES module, and `.cts` is always treated as CommonJS.
+
 ### Authentication
 
 Regardless of platform, you need to select a user account for `renovate` to assume the identity of, and generate a Personal Access Token.
 We recommend you use `@renovate-bot` as username if you're on a self-hosted server where you can set all usernames.
 We also recommend you configure `config.gitAuthor` with the same identity as your Renovate user, for example: `"gitAuthor": "Renovate Bot <renovate@some.domain.test>"`.
 
-<!-- prettier-ignore -->
 !!! warning
-    We recommend you use a single, dedicated username for your Renovate bot.
-    Never share the Renovate username with your other bots, as this can cause flip-flopping.
+  We recommend you use a single, dedicated username for your Renovate bot.
+  Never share the Renovate username with your other bots, as this can cause flip-flopping.
 
 #### Docs
 
@@ -217,6 +243,7 @@ Read the platform-specific docs to learn how to setup authentication on your pla
 - [Gitea](../modules/platform/gitea/index.md)
 - [github.com and GitHub Enterprise Server](../modules/platform/github/index.md)
 - [GitLab](../modules/platform/gitlab/index.md)
+- [SCM-Manager](../modules/platform/scm-manager/index.md)
 
 ### GitHub.com token for changelogs (and tools)
 
@@ -225,11 +252,14 @@ This account can be _any_ account on GitHub, and needs only `read-only` access.
 It's used when fetching changelogs for repositories, as well as some Renovate-specific tools at runtime, in order to increase the hourly API limit.
 It's also OK to configure the same as a host rule instead, if you prefer that.
 
-<!-- prettier-ignore -->
 !!! note
-    If you're using Renovate in a project where dependencies are loaded from github.com (such as Go modules hosted on GitHub), we highly recommend that you add a `github.com` PAT (classic).
-    Otherwise you will exceed the rate limit for the github.com API, which will lead to Renovate closing and reopening PRs because it could not get reliable info on updated dependencies.
+  If you're using Renovate in a project where dependencies are loaded from github.com (such as Go modules hosted on GitHub), we highly recommend that you add a `github.com` PAT (classic).
+  Otherwise you will exceed the rate limit for the github.com API, which will lead to Renovate closing and reopening PRs because it could not get reliable info on updated dependencies.
 
 ### Self-hosting examples
 
 For more examples on running Renovate self-hosted, read our [Self-hosted examples](../examples/self-hosting.md) page.
+
+### Community tools
+
+There are also some [community-maintained tools](../community-tools.md) which may help running Renovate.

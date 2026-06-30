@@ -8,7 +8,7 @@ import { hashicorp2npm, npm2hashicorp } from './convertor.ts';
 export const id = 'hashicorp';
 export const displayName = 'Hashicorp';
 export const urls = [
-  'https://www.terraform.io/docs/configuration/terraform.html#specifying-a-required-terraform-version',
+  '[Terraform - Specifying a required version](https://www.terraform.io/docs/configuration/terraform.html#specifying-a-required-terraform-version)',
 ];
 export const supportsRanges = true;
 export const supportedRangeStrategies: RangeStrategy[] = [
@@ -107,7 +107,7 @@ export const api: VersioningApi = {
   getNewValue,
 };
 
-// eslint-disable-next-line @typescript-eslint/unbound-method
+// oxlint-disable-next-line typescript/unbound-method
 export const { isVersion } = api;
 
 export default api;

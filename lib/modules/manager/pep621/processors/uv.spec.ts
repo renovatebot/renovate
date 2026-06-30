@@ -1,6 +1,8 @@
 import { codeBlock } from 'common-tags';
 import { GoogleAuth as _googleAuth } from 'google-auth-library';
 import upath from 'upath';
+import { mockExecAll } from '~test/exec-util.ts';
+import { fs, hostRules, logger, partial } from '~test/util.ts';
 import { GlobalConfig } from '../../../../config/global.ts';
 import type { RepoGlobalConfig } from '../../../../config/types.ts';
 import { TEMPORARY_ERROR } from '../../../../constants/error-messages.ts';
@@ -14,8 +16,6 @@ import type { UpdateArtifact, UpdateArtifactsConfig } from '../../types.ts';
 import { parsePyProject } from '../extract.ts';
 import { depTypes } from '../utils.ts';
 import { UvProcessor } from './uv.ts';
-import { mockExecAll } from '~test/exec-util.ts';
-import { fs, hostRules, logger, partial } from '~test/util.ts';
 
 vi.mock('google-auth-library');
 vi.mock('../../../../util/fs/index.ts');
@@ -29,6 +29,7 @@ const adminConfig: RepoGlobalConfig = {
   localDir: upath.join('/tmp/github/some/repo'),
   cacheDir: upath.join('/tmp/cache'),
   containerbaseDir: upath.join('/tmp/cache/containerbase'),
+  binarySource: 'global',
 };
 
 const processor = new UvProcessor();
@@ -480,7 +481,7 @@ describe('modules/manager/pep621/processors/uv', () => {
         parsePyProject('')!,
       );
       expect(result).toEqual([
-        { artifactError: { lockFile: 'uv.lock', stderr: 'test error' } },
+        { artifactError: { fileName: 'uv.lock', stderr: 'test error' } },
       ]);
       expect(execSnapshots).toEqual([]);
     });

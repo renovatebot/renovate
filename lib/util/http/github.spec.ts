@@ -1,5 +1,8 @@
 import { codeBlock } from 'common-tags';
 import { DateTime } from 'luxon';
+import * as httpMock from '~test/http-mock.ts';
+import { logger } from '~test/util.ts';
+import { GlobalConfig } from '../../config/global.ts';
 import {
   EXTERNAL_HOST_ERROR,
   PLATFORM_BAD_CREDENTIALS,
@@ -11,10 +14,8 @@ import { GithubReleasesDatasource } from '../../modules/datasource/github-releas
 import * as _repositoryCache from '../cache/repository/index.ts';
 import type { RepoCacheData } from '../cache/repository/types.ts';
 import * as hostRules from '../host-rules.ts';
-import { GithubHttp, setBaseUrl } from './github.ts';
 import type { GraphqlPageCache } from './github.ts';
-import * as httpMock from '~test/http-mock.ts';
-import { logger } from '~test/util.ts';
+import { GithubHttp, setBaseUrl } from './github.ts';
 
 vi.mock('../cache/repository/index.ts');
 const repositoryCache = vi.mocked(_repositoryCache);
@@ -61,6 +62,7 @@ describe('util/http/github', () => {
 
   afterEach(() => {
     hostRules.clear();
+    GlobalConfig.reset();
   });
 
   describe('HTTP', () => {
@@ -73,9 +75,9 @@ describe('util/http/github', () => {
       const [req] = httpMock.getTrace();
       expect(req).toBeDefined();
       expect(req.headers.accept).toBe(
-        'some-accept, application/vnd.github.machine-man-preview+json',
+        'some-accept, application/vnd.github.v3+json',
       );
-      expect(req.headers.authorization).toBe('token 123test');
+      expect(req.headers.authorization).toBe('Bearer 123test');
     });
 
     it('supports different datasources', async () => {
@@ -290,7 +292,7 @@ describe('util/http/github', () => {
       const apiUrl = 'some-url?per_page=2';
       httpMock
         .scope(baseUrl)
-        .get('/' + apiUrl)
+        .get(`/${apiUrl}`)
         .reply(200, ['a', 'b'], {
           link: `<${baseUrl}${apiUrl}&page=2>; rel="next", <${baseUrl}${apiUrl}&page=3>; rel="last"`,
         })
@@ -310,7 +312,9 @@ describe('util/http/github', () => {
       it('should log a once warning for github.com 401', async () => {
         await expect(
           fail(401, { message: 'Some unauthorized' }),
-        ).rejects.toThrow('Response code 401 (Some unauthorized)');
+        ).rejects.toThrow(
+          'Request failed with status code 401 (Some unauthorized): GET https://api.github.com/some-url',
+        );
         expect(logger.logger.once.warn).toHaveBeenCalled();
       });
       async function fail(
@@ -324,6 +328,8 @@ describe('util/http/github', () => {
           .get(url)
           .reply(
             code,
+            // nock's reply callback binds `this.req` to the request object, requires regular function
+            // eslint-disable-next-line prefer-arrow-callback
             function reply() {
               // https://github.com/nock/nock/issues/1979
               if (typeof body === 'object' && 'message' in body) {
@@ -347,7 +353,7 @@ describe('util/http/github', () => {
 
       it('should throw Not found', async () => {
         await expect(fail(404)).rejects.toThrow(
-          'Response code 404 (Not Found)',
+          'Request failed with status code 404 (Not Found): GET https://api.github.com/some-url',
         );
       });
 
@@ -355,7 +361,7 @@ describe('util/http/github', () => {
         await expect(
           fail(410, { message: 'Issues are disabled for this repo' }),
         ).rejects.toThrow(
-          'Response code 410 (Issues are disabled for this repo)',
+          'Request failed with status code 410 (Issues are disabled for this repo): GET https://api.github.com/some-url',
         );
       });
 
@@ -405,6 +411,28 @@ describe('util/http/github', () => {
         );
       });
 
+      it('uses productLinks.documentation in rate limit warn URL', async () => {
+        GlobalConfig.set({
+          productLinks: { documentation: 'https://custom.example.com/' },
+        });
+        hostRules.clear();
+
+        await expect(
+          fail(403, {
+            message:
+              "API rate limit exceeded for xxx.xxx.xxx.xxx. (But here's the good news: Authenticated requests get a higher rate limit. Check out the documentation for more details.)",
+          }),
+        ).rejects.toThrow(PLATFORM_RATE_LIMIT_EXCEEDED);
+
+        expect(logger.logger.once.warn).toHaveBeenCalledWith(
+          {
+            documentationUrl:
+              'https://custom.example.com/getting-started/running/#githubcom-token-for-changelogs-and-tools',
+          },
+          'Rate limit exceeded for api.github.com, as no hostRules set for this host. Please set a GITHUB_COM_TOKEN',
+        );
+      });
+
       it('when the rate limit is exceeded to GitHub Enterprise, but no host rules are set, a warn is logged', async () => {
         async function fail(
           code: number,
@@ -417,6 +445,8 @@ describe('util/http/github', () => {
             .get(url)
             .reply(
               code,
+              // nock's reply callback binds `this.req` to the request object, requires regular function
+              // eslint-disable-next-line prefer-arrow-callback
               function reply() {
                 // https://github.com/nock/nock/issues/1979
                 if (typeof body === 'object' && 'message' in body) {
@@ -523,6 +553,24 @@ describe('util/http/github', () => {
         await expect(
           fail(422, {
             message: 'foobar',
+          }),
+        ).rejects.toThrow(EXTERNAL_HOST_ERROR);
+      });
+
+      it('should throw on repository change with a non-array error with code `invalid`', async () => {
+        await expect(
+          fail(422, {
+            message: 'foobar',
+            errors: { code: 'invalid' },
+          }),
+        ).rejects.toThrow(REPOSITORY_CHANGED);
+      });
+
+      it('should throw platform failure on 422 response with an unrecognized non-array errors', async () => {
+        await expect(
+          fail(422, {
+            message: 'foobar',
+            errors: 'Validation Failed',
           }),
         ).rejects.toThrow(EXTERNAL_HOST_ERROR);
       });
@@ -664,9 +712,7 @@ describe('util/http/github', () => {
       });
       const [req] = httpMock.getTrace();
       expect(req).toBeDefined();
-      expect(req.headers.accept).toBe(
-        'application/vnd.github.machine-man-preview+json',
-      );
+      expect(req.headers.accept).toBe('application/vnd.github.v3+json');
     });
 
     it('returns empty array for undefined data', async () => {
@@ -705,7 +751,9 @@ describe('util/http/github', () => {
         githubApi.queryRepoField(graphqlQuery, 'someItem', {
           paginate: false,
         }),
-      ).rejects.toThrow("Response code 418 (I'm a Teapot)");
+      ).rejects.toThrow(
+        "Request failed with status code 418 (I'm a Teapot): POST https://api.github.com/graphql",
+      );
     });
 
     it('halves node count and retries request', async () => {

@@ -1,7 +1,8 @@
 import { Mutex, type MutexInterface, withTimeout } from 'async-mutex';
 
 const DEFAULT_NAMESPACE = 'default';
-let mutexes: Record<string, Record<string, MutexInterface>> = {};
+const DEFAULT_TIMEOUT_MS = 2 * 60 * 1000;
+let mutexes: Record<string, Record<string, Mutex>> = {};
 
 export function initMutexes(): void {
   mutexes = {};
@@ -10,16 +11,16 @@ export function initMutexes(): void {
 export function getMutex(
   key: string,
   namespace: string = DEFAULT_NAMESPACE,
-): MutexInterface {
+): Mutex {
   mutexes[namespace] ??= {};
-  // create a new mutex if it doesn't exist with a timeout of 2 minutes
-  mutexes[namespace][key] ??= withTimeout(new Mutex(), 1000 * 60 * 2);
+  mutexes[namespace][key] ??= new Mutex();
   return mutexes[namespace][key];
 }
 
 export function acquireLock(
   key: string,
   namespace: string = DEFAULT_NAMESPACE,
+  timeoutMs: number = DEFAULT_TIMEOUT_MS,
 ): Promise<MutexInterface.Releaser> {
-  return getMutex(key, namespace).acquire();
+  return withTimeout(getMutex(key, namespace), timeoutMs).acquire();
 }

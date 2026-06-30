@@ -10,10 +10,10 @@ import type { NewValueConfig, VersioningApi } from '../types.ts';
 export const id = 'composer';
 export const displayName = 'Composer';
 export const urls = [
-  'https://getcomposer.org/doc/articles/versions.md',
-  'https://packagist.org/packages/composer/semver',
-  'https://madewithlove.be/tilde-and-caret-constraints/',
-  'https://semver.mwl.be',
+  '[Composer versions](https://getcomposer.org/doc/articles/versions.md)',
+  '[composer/semver package](https://packagist.org/packages/composer/semver)',
+  '[Tilde and caret constraints](https://madewithlove.be/tilde-and-caret-constraints/)',
+  '[Composer semver checker](https://semver.mwl.be)',
 ];
 export const supportsRanges = true;
 export const supportedRangeStrategies: RangeStrategy[] = [
@@ -29,7 +29,7 @@ function getVersionParts(input: string): [string, string] {
     return [input, ''];
   }
 
-  return [versionParts[0], '-' + versionParts[1]];
+  return [versionParts[0], `-${versionParts[1]}`];
 }
 
 function padZeroes(input: string): string {
@@ -39,7 +39,7 @@ function padZeroes(input: string): string {
   while (sections.length < 3) {
     sections.push('0');
   }
-  return sections.join('.') + stability;
+  return `${sections.join('.')}${stability}`;
 }
 
 function convertStabilityModifier(input: string): string {
@@ -57,11 +57,13 @@ function convertStabilityModifier(input: string): string {
 
   // If there is a stability part, npm semver expects the version
   // to be full
-  return padZeroes(versionParts[0]) + '-' + stability;
+  return `${padZeroes(versionParts[0])}-${stability}`;
 }
 
 function normalizeVersion(input: string): string {
   let output = input;
+  // Strip leading + prefix (not a valid composer constraint operator)
+  output = output.replace(regEx(/^\+/), '');
   output = output.replace(regEx(/(^|>|>=|\^|~)v/i), '$1');
   return convertStabilityModifier(output);
 }
@@ -328,9 +330,9 @@ function getNewValue({
         if (element.operator?.startsWith('<')) {
           const splitCurrent = currentValue.split(element.operator);
           splitCurrent.pop();
-          newValue = splitCurrent.join(element.operator) + replacementValue;
+          newValue = `${splitCurrent.join(element.operator)}${replacementValue}`;
         } else {
-          newValue = currentValue + ' || ' + replacementValue;
+          newValue = `${currentValue} || ${replacementValue}`;
         }
       }
     }
@@ -349,7 +351,7 @@ function getNewValue({
 
   // Preserve original min-stability specifier
   if (currentValue.includes('@')) {
-    newValue += '@' + currentValue.split('@')[1];
+    newValue += `@${currentValue.split('@')[1]}`;
   }
 
   return newValue;

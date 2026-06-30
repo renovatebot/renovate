@@ -1,4 +1,5 @@
 import { DateTime } from 'luxon';
+import { git, logger, partial, platform, scm } from '~test/util.ts';
 import { GlobalConfig } from '../../../../config/global.ts';
 import {
   PLATFORM_INTEGRATION_UNAUTHORIZED,
@@ -22,7 +23,6 @@ import { ensurePr } from './index.ts';
 import * as _participants from './participants.ts';
 import * as _prCache from './pr-cache.ts';
 import { generatePrBodyFingerprintConfig } from './pr-fingerprint.ts';
-import { git, logger, partial, platform, scm } from '~test/util.ts';
 
 vi.mock('../../changelog/index.ts');
 
@@ -93,6 +93,17 @@ describe('workers/repository/update/pr/index', () => {
           'PR created',
         );
         expect(prCache.setPrCache).toHaveBeenCalled();
+      });
+
+      it('fetches changelogs for the "pr" stage', async () => {
+        platform.createPr.mockResolvedValueOnce(pr);
+
+        await ensurePr(config);
+
+        expect(embedChangelogs).toHaveBeenCalledExactlyOnceWith({
+          upgrades: config.upgrades,
+          stage: 'pr',
+        });
       });
 
       it('aborts PR creation once limit is exceeded', async () => {
@@ -511,6 +522,7 @@ describe('workers/repository/update/pr/index', () => {
         expect(platform.createPr).not.toHaveBeenCalled();
 
         expect(logger.logger.info).toHaveBeenCalledWith(
+          { labels: ['new_label'] },
           `DRY-RUN: Would create PR: ${prTitle}`,
         );
       });
@@ -629,7 +641,7 @@ describe('workers/repository/update/pr/index', () => {
           ...config,
           automerge: true,
           automergeType: 'branch',
-          artifactErrors: [{ lockFile: 'foo', stderr: 'bar' }],
+          artifactErrors: [{ fileName: 'foo', stderr: 'bar' }],
         });
 
         expect(res).toEqual({ type: 'with-pr', pr });
@@ -997,6 +1009,7 @@ describe('workers/repository/update/pr/index', () => {
             [true, true],
             [false, true],
             [false, false],
+            [undefined, undefined],
           ])(
             'current attestation %s, new attestation %s',
             (currentAttestation, newAttestation) => {
@@ -1007,10 +1020,7 @@ describe('workers/repository/update/pr/index', () => {
                 manager: 'npm',
                 currentVersion: '1.2.3',
                 newVersion: '2.3.4',
-                releases: [
-                  { version: '1.2.3', attestation: currentAttestation },
-                  { version: '2.3.4', attestation: newAttestation },
-                ],
+                releases: [{ version: '2.3.4', attestation: newAttestation }],
               });
 
               it('does not warn the user', async () => {
@@ -1018,6 +1028,7 @@ describe('workers/repository/update/pr/index', () => {
 
                 const res = await ensurePr({
                   ...config,
+                  hasAttestation: currentAttestation,
                   upgrades: [dummyUpgrade],
                 });
 
@@ -1037,7 +1048,7 @@ describe('workers/repository/update/pr/index', () => {
             currentVersion: '1.2.3',
             newVersion: '2.3.4',
             releases: [
-              { version: '1.2.3', attestation: true },
+              // but the update we're updating to does not
               { version: '2.3.4', attestation: false },
             ],
           });
@@ -1047,6 +1058,8 @@ describe('workers/repository/update/pr/index', () => {
 
             const res = await ensurePr({
               ...config,
+              // the current release has an attestation
+              hasAttestation: true,
               upgrades: [dummyUpgrade],
             });
 
@@ -1066,6 +1079,41 @@ describe('workers/repository/update/pr/index', () => {
                 },
               ],
             });
+          });
+        });
+        // TODO #42312
+        describe('when attestation is removed in an intermediate version', () => {
+          const dummyUpgrade = partial<BranchUpgradeConfig>({
+            branchName: sourceBranch,
+            depType: 'foo',
+            depName: 'bar',
+            manager: 'npm',
+            currentVersion: '1.2.3',
+            newVersion: '2.3.4',
+            releases: [
+              // previous versions between our currentVersion and newVersion have gaps in attestations
+              { version: '1.2.4', attestation: false },
+              { version: '1.3.0', attestation: false },
+              { version: '2.0.0', attestation: false },
+
+              // but the update we're updating to has attestation information
+              { version: '2.3.4', attestation: true },
+            ],
+          });
+
+          it('does not warn the user', async () => {
+            platform.createPr.mockResolvedValueOnce(pr);
+
+            const res = await ensurePr({
+              ...config,
+              // the current release has an attestation
+              hasAttestation: true,
+              upgrades: [dummyUpgrade],
+            });
+
+            expect(res).toEqual({ type: 'with-pr', pr });
+            const [[bodyConfig]] = prBody.getPrBody.mock.calls;
+            expect(bodyConfig.upgrades[0].prBodyNotes).toBeUndefined();
           });
         });
       });
@@ -1225,6 +1273,41 @@ describe('workers/repository/update/pr/index', () => {
         expect(logger.logger.debug).not.toHaveBeenCalledExactlyOnceWith(
           'PR cache not found',
         );
+      });
+
+      it('skips cache early return when autoApprove is set', async () => {
+        platform.getBranchPr.mockResolvedValue(existingPr);
+        cachedPr = {
+          bodyFingerprint: fingerprint(generatePrBodyFingerprintConfig(config)),
+          lastEdited: '2020-01-20T00:00:00Z',
+        };
+        prCache.getPrCache.mockReturnValueOnce(cachedPr);
+        const res = await ensurePr({ ...config, autoApprove: true });
+        expect(res).toEqual({
+          type: 'with-pr',
+          pr: existingPr,
+        });
+
+        expect(logger.logger.debug).toHaveBeenCalledWith(
+          'PR cache matches and no PR changes in last 24hrs, so skipping PR body check',
+        );
+        // updatePr should be called to re-trigger approval
+        expect(platform.updatePr).toHaveBeenCalled();
+      });
+    });
+
+    describe('autoApprove', () => {
+      it('updates PR when autoApprove is set even if PR does not need updating', async () => {
+        platform.getBranchPr.mockResolvedValueOnce(pr);
+
+        const res = await ensurePr({ ...config, autoApprove: true });
+
+        expect(res).toEqual({
+          type: 'with-pr',
+          pr: { ...pr, bodyStruct },
+        });
+        expect(platform.updatePr).toHaveBeenCalled();
+        expect(platform.createPr).not.toHaveBeenCalled();
       });
     });
   });

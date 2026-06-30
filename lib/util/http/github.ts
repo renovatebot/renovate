@@ -5,6 +5,7 @@ import {
   isPlainObject,
 } from '@sindresorhus/is';
 import { DateTime } from 'luxon';
+import { GlobalConfig } from '../../config/global.ts';
 import {
   PLATFORM_BAD_CREDENTIALS,
   PLATFORM_INTEGRATION_UNAUTHORIZED,
@@ -129,8 +130,7 @@ function handleGotError(
       if (parsed?.hostname === 'api.github.com') {
         logger.once.warn(
           {
-            documentationUrl:
-              'https://docs.renovatebot.com/getting-started/running/#githubcom-token-for-changelogs-and-tools',
+            documentationUrl: `${GlobalConfig.get('productLinks').documentation}getting-started/running/#githubcom-token-for-changelogs-and-tools`,
           },
           `Rate limit exceeded for ${parsed.host}, as no hostRules set for this host. Please set a GITHUB_COM_TOKEN`,
         );
@@ -180,13 +180,24 @@ function handleGotError(
       message.includes('Review cannot be requested from pull request author')
     ) {
       return err;
-    } else if (err.body?.errors?.find((e: any) => e.field === 'milestone')) {
+    }
+
+    // GitHub usually returns `errors` as an array, but not always - normalize
+    const rawErrors = err.body?.errors;
+    let errors: unknown[] = [];
+    if (isArray(rawErrors)) {
+      errors = rawErrors;
+    } else if (!isNullOrUndefined(rawErrors)) {
+      errors = [rawErrors];
+    }
+
+    if (errors.find((e: any) => e.field === 'milestone')) {
       return err;
-    } else if (err.body?.errors?.find((e: any) => e.code === 'invalid')) {
+    } else if (errors.find((e: any) => e.code === 'invalid')) {
       logger.debug({ err }, 'Received invalid response - aborting');
       return new Error(REPOSITORY_CHANGED);
     } else if (
-      err.body?.errors?.find((e: any) =>
+      errors.find((e: any) =>
         e.message?.startsWith('A pull request already exists'),
       )
     ) {
@@ -322,12 +333,24 @@ export class GithubHttp extends HttpBase<GithubHttpOptions> {
     super(hostType, options);
   }
 
+  protected override extraOptions(): readonly string[] {
+    return super
+      .extraOptions()
+      .concat([
+        'pageLimit',
+        'paginate',
+        'paginationField',
+        'repository',
+      ] as (keyof GithubHttpOptions)[]);
+  }
+
   protected override processOptions(
     url: URL,
     opts: InternalHttpOptions & GithubBaseHttpOptions,
   ): void {
     if (!opts.token) {
-      const authUrl = new URL(url);
+      // create a mutable copy of `url`
+      const authUrl = parseUrl(url.toString())!;
 
       if (opts.repository) {
         // set authUrl to https://api.github.com/repos/org/repo or https://gihub.domain.com/api/v3/repos/org/repo
@@ -392,7 +415,7 @@ export class GithubHttp extends HttpBase<GithubHttpOptions> {
       const next = linkHeader?.next;
       const env = getEnv();
       if (next?.url && linkHeader?.last?.page) {
-        let lastPage = parseInt(linkHeader.last.page);
+        let lastPage = parseInt(linkHeader.last.page, 10);
         // v8 ignore else -- TODO: add test #40625
         if (!env.RENOVATE_PAGINATE_ALL && httpOptions.paginate !== 'all') {
           lastPage = Math.min(pageLimit, lastPage);
@@ -410,7 +433,7 @@ export class GithubHttp extends HttpBase<GithubHttpOptions> {
         const queue = [...range(2, lastPage)].map(
           (pageNumber) => (): Promise<HttpResponse<T>> => {
             // copy before modifying searchParams
-            const nextUrl = new URL(firstPageUrl);
+            const nextUrl = parseUrl(firstPageUrl.toString())!;
             nextUrl.searchParams.set('page', String(pageNumber));
             return super.requestJsonUnsafe<T>(method, {
               ...opts,

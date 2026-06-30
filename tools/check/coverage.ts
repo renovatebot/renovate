@@ -1,6 +1,6 @@
 import fs from 'fs-extra';
 import upath from 'upath';
-import { z } from 'zod';
+import { z } from 'zod/v4';
 import type { CoverageInfo } from './types.ts';
 
 const StatementLocation = z.object({
@@ -15,7 +15,7 @@ const CoverageEntry = z.object({
 
 const CoverageJson = z.record(z.string(), CoverageEntry);
 
-type CoverageData = z.infer<typeof CoverageJson>;
+type CoverageJson = z.infer<typeof CoverageJson>;
 
 function groupConsecutiveNumbers(numbers: number[]): string[] {
   if (numbers.length === 0) {
@@ -41,14 +41,18 @@ function groupConsecutiveNumbers(numbers: number[]): string[] {
   return ranges;
 }
 
-function loadCoverageFile(coverageDir: string): CoverageData | null {
+async function loadCoverageFile(
+  coverageDir: string,
+): Promise<CoverageJson | null> {
   const coverageFile = upath.resolve(coverageDir, 'coverage-final.json');
-  if (!fs.existsSync(coverageFile)) {
+  if (!(await fs.pathExists(coverageFile))) {
     return null;
   }
 
   try {
-    const rawJson: unknown = JSON.parse(fs.readFileSync(coverageFile, 'utf8'));
+    const rawJson: unknown = JSON.parse(
+      await fs.readFile(coverageFile, 'utf8'),
+    );
     const parseResult = CoverageJson.safeParse(rawJson);
     return parseResult.success ? parseResult.data : null;
   } catch {
@@ -57,9 +61,9 @@ function loadCoverageFile(coverageDir: string): CoverageData | null {
 }
 
 function normalizeCoveragePaths(
-  data: CoverageData,
-): Map<string, CoverageData[string]> {
-  const normalized = new Map<string, CoverageData[string]>();
+  data: CoverageJson,
+): Map<string, CoverageJson[string]> {
+  const normalized = new Map<string, CoverageJson[string]>();
   for (const [key, value] of Object.entries(data)) {
     normalized.set(upath.normalize(key), value);
   }
@@ -72,7 +76,7 @@ function isSourceFile(path: string): boolean {
 
 function extractFileCoverage(
   file: string,
-  coverage: Map<string, CoverageData[string]>,
+  coverage: Map<string, CoverageJson[string]>,
 ): CoverageInfo | null {
   const absPath = upath.resolve(process.cwd(), file);
   const entry = coverage.get(absPath);
@@ -118,27 +122,51 @@ function extractFileCoverage(
   };
 }
 
-export function parseCoverageJson(
+export async function loadCoverage(
   coverageDir: string,
-  changedFiles: string[],
-): CoverageInfo[] {
-  const data = loadCoverageFile(coverageDir);
+): Promise<Map<string, CoverageJson[string]> | null> {
+  const data = await loadCoverageFile(coverageDir);
   if (!data) {
-    return [];
+    return null;
   }
+  return normalizeCoveragePaths(data);
+}
 
-  const normalized = normalizeCoveragePaths(data);
+export function getCoverageForFiles(
+  coverage: Map<string, CoverageJson[string]>,
+  files: string[],
+): CoverageInfo[] {
   const results: CoverageInfo[] = [];
-
-  for (const file of changedFiles) {
+  for (const file of files) {
     if (!isSourceFile(file)) {
       continue;
     }
-    const info = extractFileCoverage(file, normalized);
+    const info = extractFileCoverage(file, coverage);
     if (info) {
       results.push(info);
     }
   }
+  return results;
+}
 
+export function getCoverageForDir(
+  coverage: Map<string, CoverageJson[string]>,
+  dir: string,
+): CoverageInfo[] {
+  const absDir = `${upath.resolve(process.cwd(), dir)}/`;
+  const results: CoverageInfo[] = [];
+  for (const absPath of coverage.keys()) {
+    if (!absPath.startsWith(absDir)) {
+      continue;
+    }
+    const relPath = upath.relative(process.cwd(), absPath);
+    if (!isSourceFile(relPath)) {
+      continue;
+    }
+    const info = extractFileCoverage(relPath, coverage);
+    if (info) {
+      results.push(info);
+    }
+  }
   return results;
 }

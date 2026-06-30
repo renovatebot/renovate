@@ -18,8 +18,7 @@ export interface JSONataManagerConfig extends JSONataManagerTemplates {
 }
 
 export interface JsonataExtractConfig
-  extends ExtractConfig,
-    JSONataManagerTemplates {
+  extends ExtractConfig, JSONataManagerTemplates {
   fileFormat: string;
   matchStrings: string[];
 }

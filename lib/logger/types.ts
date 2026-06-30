@@ -1,6 +1,12 @@
 import type { Stream } from 'node:stream';
 import type { LogLevel, LogLevelString } from 'bunyan';
 
+export type {
+  LogLevelString as BunyanLogLevel,
+  Serializers as BunyanSerializers,
+  Stream as BunyanStream,
+} from 'bunyan';
+
 export interface LogError {
   level: LogLevel;
   meta: any;
@@ -32,7 +38,7 @@ export interface BunyanRecord extends Record<string, any> {
   module?: string;
 }
 
-export type BunyanStream = (NodeJS.WritableStream | Stream) & {
+export type BunyanNodeStream = (NodeJS.WritableStream | Stream) & {
   writable?: boolean;
   write: (
     chunk: BunyanRecord,
@@ -40,6 +46,8 @@ export type BunyanStream = (NodeJS.WritableStream | Stream) & {
     cb: (err?: Error | null) => void,
   ) => void;
 };
+
+export type BunyanLogger = ReturnType<typeof import('bunyan').createLogger>;
 
 export interface LogLevelRemap {
   matchMessage: string;

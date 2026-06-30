@@ -7,8 +7,8 @@ import { getFile } from '../../../../util/git/index.ts';
 import { quickStringify } from '../../../../util/stringify.ts';
 import { getMigrationBranchName } from '../common.ts';
 import { ConfigMigrationCommitMessageFactory } from './commit-message.ts';
-import { MigratedDataFactory } from './migrated-data.ts';
 import type { MigratedData } from './migrated-data.ts';
+import { MigratedDataFactory } from './migrated-data.ts';
 
 export async function rebaseMigrationBranch(
   config: RenovateConfig,
@@ -54,7 +54,8 @@ export async function rebaseMigrationBranch(
     ],
     message: commitMessage.toString(),
     platformCommit: config.platformCommit,
-    labels: config.labels,
+    // Only needed by Gerrit platform
+    prTitle: commitMessageFactory.getPrTitle(),
   });
 }
 

@@ -79,10 +79,7 @@ export function getDepWarningsOnboardingPR(
   for (const w of warnings) {
     warningText += `> -   \`${w}\`\n`;
   }
-  warningText +=
-    '> \n> Files affected: ' +
-    warningFiles.map((f) => '`' + f + '`').join(', ') +
-    '\n\n';
+  warningText += `> \n> Files affected: ${warningFiles.map((f) => `\`${f}\``).join(', ')}\n\n`;
   return warningText;
 }
 
@@ -102,7 +99,10 @@ export function getDepWarningsPR(
   warningText = emojify(`\n---\n\n> :warning: **Warning**\n> \n`);
   warningText += '> Some dependencies could not be looked up. ';
   if (dependencyDashboard) {
-    warningText += `Check the Dependency Dashboard for more information.\n\n`;
+    const depDashboardMd = config.dependencyDashboardIssue
+      ? `[Dependency Dashboard](../issues/${config.dependencyDashboardIssue})`
+      : 'Dependency Dashboard';
+    warningText += `Check the ${depDashboardMd} for more information.\n\n`;
   } else {
     warningText += `Check the warning logs for more information.\n\n`;
   }
@@ -125,7 +125,7 @@ export function getDepWarningsDashboard(
     .map((w) =>
       w.replace(regEx(/^Failed to look up(?: [-\w]+)? dependency /), ''),
     )
-    .map((dep) => '`' + dep + '`')
+    .map((dep) => `\`${dep}\``)
     .join(', ');
 
   let warningText = emojify(
@@ -133,7 +133,7 @@ export function getDepWarningsDashboard(
   );
   warningText += depWarnings;
   warningText += '.\n> \n> Files affected: ';
-  warningText += warningFiles.map((f) => '`' + f + '`').join(', ');
+  warningText += warningFiles.map((f) => `\`${f}\``).join(', ');
   warningText += '\n\n---\n\n';
   return warningText;
 }

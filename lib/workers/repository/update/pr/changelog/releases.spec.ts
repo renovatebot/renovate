@@ -1,9 +1,9 @@
+import { partial } from '~test/util.ts';
 import * as datasource from '../../../../../modules/datasource/index.ts';
 import * as dockerVersioning from '../../../../../modules/versioning/docker/index.ts';
 import * as npmVersioning from '../../../../../modules/versioning/npm/index.ts';
 import type { BranchUpgradeConfig } from '../../../../types.ts';
 import * as releases from './releases.ts';
-import { partial } from '~test/util.ts';
 
 describe('workers/repository/update/pr/changelog/releases', () => {
   describe('getReleaseNotes()', () => {

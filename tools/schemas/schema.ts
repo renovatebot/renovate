@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from 'zod/v4';
 
 const Url = z.record(z.string(), z.union([z.string(), z.array(z.string())]));
 

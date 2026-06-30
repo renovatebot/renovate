@@ -16,7 +16,7 @@ import {
 
 export const id = 'ivy';
 export const displayName = 'Ivy';
-export const urls = ['https://ant.apache.org/ivy/'];
+export const urls = ['[Apache Ivy](https://ant.apache.org/ivy/)'];
 export const supportsRanges = true;
 export const supportedRangeStrategies: RangeStrategy[] = [
   'bump',
@@ -24,7 +24,7 @@ export const supportedRangeStrategies: RangeStrategy[] = [
   'replace',
 ];
 
-/* eslint-disable @typescript-eslint/unbound-method */
+/* oxlint-disable typescript/unbound-method */
 const {
   equals,
   getMajor,
@@ -35,7 +35,7 @@ const {
   matches: mavenMatches,
   sortVersions,
 } = maven;
-/* eslint-enable @typescript-eslint/unbound-method */
+/* oxlint-enable typescript/unbound-method */
 
 function isValid(str: string): boolean {
   if (!str) {

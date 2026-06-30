@@ -82,6 +82,11 @@ If set, Renovate will use this as a delay to proceed with an automerge.
 
 Default value: `250` (milliseconds).
 
+## `RENOVATE_X_GITLAB_SKIP_STATUS_WITHOUT_PIPELINE`
+
+If set to `true` value, Renovate will skip setting a branch status check on GitLab when no pipeline is found for the commit.
+This is useful for GitLab configurations where pipelines are only created for merge requests, not for branches.
+
 ## `RENOVATE_X_HARD_EXIT`
 
 If set to any value, Renovate will use a "hard" `process.exit()` once all work is done, even if a sub-process is otherwise delaying Node.js from exiting.
@@ -100,10 +105,9 @@ If set to any value, Renovate will download `nupkg` files for determining packag
 Specify which PGP runtime to use for decrypting Renovate config.
 Allowed values are `js-java`, `wasm-java` and `wasm-dotnet`.
 
-<!-- prettier-ignore -->
 !!! note
-    `js-java` and `wasm-dotnet` are not recommended due to performance reasons.
-    Incompatible with `RENOVATE_X_USE_OPENPGP`.
+  `js-java` and `wasm-dotnet` are not recommended due to performance reasons.
+  Incompatible with `RENOVATE_X_USE_OPENPGP`.
 
 Default: `wasm-java`.
 
@@ -118,13 +122,14 @@ Read [platform details](modules/platform/gitlab/index.md) to learn why we need t
 
 If set, Renovate will rewrite GitHub Enterprise Server's pagination responses to use the `endpoint` URL from the Renovate config.
 
-<!-- prettier-ignore -->
 !!! note
-    For the GitHub Enterprise Server platform only.
+  For the GitHub Enterprise Server platform only.
 
-## `RENOVATE_X_REPO_CACHE_FORCE_LOCAL`
+## `RENOVATE_X_SQLITE_BUSY_TIMEOUT`
 
-If set, Renovate will persist repository cache locally after uploading to S3.
+Set the SQLite busy timeout in milliseconds. Defaults to `5000`.
+
+Only applies when `RENOVATE_X_SQLITE_PACKAGE_CACHE` is set.
 
 ## `RENOVATE_X_SQLITE_PACKAGE_CACHE`
 
@@ -135,13 +140,11 @@ Don't combine with `redisUrl`, Redis would be preferred over SQlite.
 
 If set to a valid path pointing to a file containing a _valid_ Renovate configuration in `JSON` format, it will be applied to the repository config before resolving the actual configuration file within the repository.
 
-<!-- prettier-ignore -->
 !!! warning
-    If the file is missing or contains invalid configuration, the scan will be aborted.
+  If the file is missing or contains invalid configuration, the scan will be aborted.
 
-<!-- prettier-ignore -->
 !!! note
-    You probably **shouldn’t use this** unless you have a very specific reason to override the repository’s normal configuration resolution process.
+  You probably **shouldn’t use this** unless you have a very specific reason to override the repository’s normal configuration resolution process.
 
 ## `RENOVATE_X_SUPPRESS_PRE_COMMIT_WARNING`
 
@@ -149,9 +152,8 @@ Suppress the pre-commit support warning in PR bodies.
 
 ## `RENOVATE_X_USE_OPENPGP`
 
-<!-- prettier-ignore -->
 !!! note
-    Incompatible with `RENOVATE_X_PGP_RUNTIME`.
+  Incompatible with `RENOVATE_X_PGP_RUNTIME`.
 
 Use `openpgp` instead of [Bouncy Castle](https://www.bouncycastle.org/) for `PGP` decryption.
 

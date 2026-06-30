@@ -2,26 +2,27 @@ import redhat from './index.ts';
 
 describe('modules/versioning/redhat/index', () => {
   it.each`
-    input                     | expected
-    ${'1'}                    | ${true}
-    ${'17.04'}                | ${true}
-    ${'9.0.0'}                | ${true}
-    ${'1-632'}                | ${true}
-    ${'1.2-62'}               | ${true}
-    ${'1.2.3-62'}             | ${true}
-    ${'8.5-239.1651231664'}   | ${true}
-    ${'8.5.0-239.1651231664'} | ${true}
-    ${'9.0.0-62'}             | ${true}
-    ${'v0.4.0-383'}           | ${true}
-    ${'1.2.3.4-62'}           | ${false}
-    ${'1.2.3 -62'}            | ${false}
-    ${'8.5-'}                 | ${false}
-    ${'3.0.0-beta'}           | ${false}
-    ${'2.0.2-pre2019100318'}  | ${false}
-    ${'1.0.0+c30d7625'}       | ${false}
-    ${'2.3.4-beta+1990ef74'}  | ${false}
-    ${'5.1.2-+'}              | ${false}
-    ${'5.1.2+1'}              | ${false}
+    input                       | expected
+    ${'1'}                      | ${true}
+    ${'17.04'}                  | ${true}
+    ${'9.0.0'}                  | ${true}
+    ${'1-632'}                  | ${true}
+    ${'1.2-62'}                 | ${true}
+    ${'1.2.3-62'}               | ${true}
+    ${'8.5-239.1651231664'}     | ${true}
+    ${'8.5.0-239.1651231664'}   | ${true}
+    ${'9.0.0-62'}               | ${true}
+    ${'1.0.0.GA-20.1770236070'} | ${true}
+    ${'v0.4.0-383'}             | ${true}
+    ${'1.2.3.4-62'}             | ${false}
+    ${'1.2.3 -62'}              | ${false}
+    ${'8.5-'}                   | ${false}
+    ${'3.0.0-beta'}             | ${false}
+    ${'2.0.2-pre2019100318'}    | ${false}
+    ${'1.0.0+c30d7625'}         | ${false}
+    ${'2.3.4-beta+1990ef74'}    | ${false}
+    ${'5.1.2-+'}                | ${false}
+    ${'5.1.2+1'}                | ${false}
   `('isValid("$input") === $expected', ({ input, expected }) => {
     expect(redhat.isValid(input)).toBe(expected);
   });

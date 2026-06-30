@@ -1,4 +1,7 @@
 import { mock } from 'vitest-mock-extended';
+import { Fixtures } from '~test/fixtures.ts';
+import type { RenovateConfig } from '~test/util.ts';
+import { git, partial, platform, scm } from '~test/util.ts';
 import { getConfig } from '../../../../config/defaults.ts';
 import { GlobalConfig } from '../../../../config/global.ts';
 import { logger } from '../../../../logger/index.ts';
@@ -7,9 +10,6 @@ import { createConfigMigrationBranch } from './create.ts';
 import { checkConfigMigrationBranch } from './index.ts';
 import type { MigratedData } from './migrated-data.ts';
 import { rebaseMigrationBranch } from './rebase.ts';
-import { Fixtures } from '~test/fixtures.ts';
-import { git, partial, platform, scm } from '~test/util.ts';
-import type { RenovateConfig } from '~test/util.ts';
 
 vi.mock('./migrated-data.ts');
 vi.mock('./rebase.ts');

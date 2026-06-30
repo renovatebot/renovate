@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from 'zod/v4';
 import { logger } from '../../../logger/index.ts';
 import { readLocalFile } from '../../../util/fs/index.ts';
 import { regEx } from '../../../util/regex.ts';
@@ -53,7 +53,7 @@ export const Repo = z.discriminatedUnion('type', [
   PathRepo,
   PackageRepo,
 ]);
-export type Repo = z.infer<typeof ComposerRepo>;
+export type Repo = z.infer<typeof Repo>;
 
 export const NamedRepo = z.discriminatedUnion('type', [
   ComposerRepo,

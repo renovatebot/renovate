@@ -46,6 +46,9 @@ function getDeps(doc: TektonResource): PackageDependency[] {
     return deps;
   }
 
+  // Handle StepAction resource
+  addStepActionImage(doc.spec, deps);
+
   // Handle TaskRun resource
   addDep(doc.spec?.taskRef, deps);
   addStepImageSpec(doc.spec?.taskSpec, deps);
@@ -221,6 +224,32 @@ function addStepImageSpec(
     );
     deps.push(dep);
   }
+}
+
+function addStepActionImage(
+  spec: TektonResourceSpec | undefined,
+  deps: PackageDependency[],
+): void {
+  if (isNullOrUndefined(spec)) {
+    return;
+  }
+  if (isFalsy(spec.image)) {
+    return;
+  }
+
+  const image = spec.image;
+  const dep = getDep(image);
+
+  dep.depType = 'tekton-step-image';
+  logger.trace(
+    {
+      depName: dep.depName,
+      currentValue: dep.currentValue,
+      currentDigest: dep.currentDigest,
+    },
+    'Tekton step image dependency found',
+  );
+  deps.push(dep);
 }
 
 function getBundleValue(

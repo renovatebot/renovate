@@ -4,10 +4,13 @@ import * as tar from 'tar';
 import { getProblems, logger } from '../../lib/logger/index.ts';
 import { generateConfig } from './config.ts';
 import { generateDatasources } from './datasources.ts';
+import { generateEnvOptions } from './env-options.ts';
+import { generateEnvVars } from './env-vars.ts';
 import { getOpenGitHubItems } from './github-query-items.ts';
+import { generateManagerGithubActionsCommunity } from './manager/github-actions/community.ts';
+import { generateManagers } from './manager.ts';
 import { generateManagerAsdfSupportedPlugins } from './manager-asdf-supported-plugins.ts';
 import { generateManagerMiseSupportedPlugins } from './manager-mise-supported-plugins.ts';
-import { generateManagers } from './manager.ts';
 import { generatePlatforms } from './platforms.ts';
 import { generatePresets } from './presets.ts';
 import { generateSchema } from './schema.ts';
@@ -50,6 +53,10 @@ export async function generateDocs(
     logger.info('* managers/asdf/supported-plugins');
     await generateManagerAsdfSupportedPlugins(dist);
 
+    // managers/github-actions community actions
+    logger.info('* managers/github-actions/community');
+    await generateManagerGithubActionsCommunity(dist);
+
     // managers/mise supported plugins
     logger.info('* managers/mise/supported-plugins');
     await generateManagerMiseSupportedPlugins(dist);
@@ -69,6 +76,14 @@ export async function generateDocs(
     // self-hosted-configuration
     logger.info('* self-hosted-configuration');
     await generateConfig(dist, true);
+
+    // env-options
+    logger.info('* env-options');
+    await generateEnvOptions(dist);
+
+    // environment-variable-handling
+    logger.info('* environment-variable-handling');
+    await generateEnvVars(dist);
 
     // json-schema
     logger.info('* json-schema');

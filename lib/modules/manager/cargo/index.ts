@@ -6,11 +6,13 @@ import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
 import { GitlabTagsDatasource } from '../../datasource/gitlab-tags/index.ts';
 import { updateArtifacts } from './artifacts.ts';
 import { extractPackageFile } from './extract.ts';
-export { bumpPackageVersion } from './update.ts';
+
 export { getRangeStrategy } from './range.ts';
+export { bumpPackageVersion } from './update.ts';
 export { updateLockedDependency } from './update-locked.ts';
 
 export const supportsLockFileMaintenance = true;
+export const lockFileNames = ['Cargo.lock'];
 
 export { extractPackageFile, updateArtifacts };
 

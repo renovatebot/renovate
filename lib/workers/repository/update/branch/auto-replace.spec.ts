@@ -1,11 +1,11 @@
 import { codeBlock } from 'common-tags';
+import { Fixtures } from '~test/fixtures.ts';
 import { getConfig } from '../../../../config/defaults.ts';
 import { GlobalConfig } from '../../../../config/global.ts';
 import { WORKER_FILE_UPDATE_FAILED } from '../../../../constants/error-messages.ts';
 import { extractPackageFile } from '../../../../modules/manager/html/index.ts';
 import type { BranchUpgradeConfig } from '../../../types.ts';
 import { doAutoReplace } from './auto-replace.ts';
-import { Fixtures } from '~test/fixtures.ts';
 
 const sampleHtml = Fixtures.get(
   'sample.html',
@@ -263,7 +263,7 @@ describe('workers/repository/update/branch/auto-replace', () => {
       await expect(res).rejects.toThrow(WORKER_FILE_UPDATE_FAILED);
     });
 
-    it('fails with digest mismatch', async () => {
+    it('updates digest when only digest changes and no replaceString is set', async () => {
       const dockerfile = codeBlock`
         FROM java:11@sha256-1234 as build
       `;
@@ -277,8 +277,8 @@ describe('workers/repository/update/branch/auto-replace', () => {
       upgrade.newValue = '11';
       upgrade.newDigest = 'sha256-5678';
       upgrade.packageFile = 'Dockerfile';
-      const res = doAutoReplace(upgrade, dockerfile, reuseExistingBranch);
-      await expect(res).rejects.toThrow(WORKER_FILE_UPDATE_FAILED);
+      const res = await doAutoReplace(upgrade, dockerfile, reuseExistingBranch);
+      expect(res).toBe('FROM java:11@sha256-5678 as build');
     });
 
     it('updates with docker replacement', async () => {
@@ -1355,6 +1355,102 @@ describe('workers/repository/update/branch/auto-replace', () => {
       const res = await doAutoReplace(upgrade, yml, reuseExistingBranch);
       expect(res).toBe(
         'image: "some.other.url.com/some-new-repo:3.16@sha256:p0o9i8u7z6t5r4e3w2q1"',
+      );
+    });
+
+    it('jsonata: update currentValue', async () => {
+      const source =
+        '[ { "version": "1.2.3", "digest": "abcdef", "package": "foo" } ]';
+      upgrade.manager = 'jsonata';
+      upgrade.depName = 'foo';
+      upgrade.currentValue = '1.2.3';
+      upgrade.newValue = '1.2.4';
+      upgrade.depIndex = 0;
+      upgrade.packageFile = 'deps.json';
+      // @ts-expect-error -- TODO: improve typing
+      upgrade.fileFormat = 'json';
+      // @ts-expect-error -- TODO: improve typing
+      upgrade.datasourceTemplate = 'github-releases';
+      // @ts-expect-error -- TODO: improve typing
+      upgrade.matchStrings = [
+        '*.{"depName": package, "currentDigest": digest, "currentValue": version }',
+      ];
+
+      const res = await doAutoReplace(upgrade, source, reuseExistingBranch);
+      expect(res).toBe(
+        '[ { "version": "1.2.4", "digest": "abcdef", "package": "foo" } ]',
+      );
+    });
+
+    it('jsonata: update currentDigest', async () => {
+      const source =
+        '[ { "version": "1.2.3", "digest": "abcdef", "package": "foo" } ]';
+      upgrade.manager = 'jsonata';
+      upgrade.depName = 'foo';
+      upgrade.currentDigest = 'abcdef';
+      upgrade.newDigest = 'badbeef';
+      upgrade.depIndex = 0;
+      upgrade.packageFile = 'deps.json';
+      // @ts-expect-error -- TODO: improve typing
+      upgrade.fileFormat = 'json';
+      // @ts-expect-error -- TODO: improve typing
+      upgrade.datasourceTemplate = 'github-releases';
+      // @ts-expect-error -- TODO: improve typing
+      upgrade.matchStrings = [
+        '*.{"depName": package, "currentDigest": digest, "currentValue": version }',
+      ];
+      const res = await doAutoReplace(upgrade, source, reuseExistingBranch);
+      expect(res).toBe(
+        '[ { "version": "1.2.3", "digest": "badbeef", "package": "foo" } ]',
+      );
+    });
+
+    it('jsonata: update currentValue and currentDigest', async () => {
+      const source =
+        '[ { "version": "1.2.3", "digest": "abcdef", "package": "foo" } ]';
+      upgrade.manager = 'jsonata';
+      upgrade.depName = 'foo';
+      upgrade.currentValue = '1.2.3';
+      upgrade.newValue = '1.2.4';
+      upgrade.currentDigest = 'abcdef';
+      upgrade.newDigest = 'badbeef';
+      upgrade.depIndex = 0;
+      upgrade.packageFile = 'deps.json';
+      // @ts-expect-error -- TODO: improve typing
+      upgrade.fileFormat = 'json';
+      // @ts-expect-error -- TODO: improve typing
+      upgrade.datasourceTemplate = 'github-releases';
+      // @ts-expect-error -- TODO: improve typing
+      upgrade.matchStrings = [
+        '*.{"depName": package, "currentDigest": digest, "currentValue": version }',
+      ];
+      const res = await doAutoReplace(upgrade, source, reuseExistingBranch);
+      expect(res).toBe(
+        '[ { "version": "1.2.4", "digest": "badbeef", "package": "foo" } ]',
+      );
+    });
+
+    it('jsonata: update currentDigest with currentValue captured', async () => {
+      const source =
+        '[ { "version": "1.2.3", "digest": "abcdef", "package": "foo" } ]';
+      upgrade.manager = 'jsonata';
+      upgrade.depName = 'foo';
+      upgrade.currentValue = '1.2.3';
+      upgrade.currentDigest = 'abcdef';
+      upgrade.newDigest = 'badbeef';
+      upgrade.depIndex = 0;
+      upgrade.packageFile = 'deps.json';
+      // @ts-expect-error -- TODO: improve typing
+      upgrade.fileFormat = 'json';
+      // @ts-expect-error -- TODO: improve typing
+      upgrade.datasourceTemplate = 'github-releases';
+      // @ts-expect-error -- TODO: improve typing
+      upgrade.matchStrings = [
+        '*.{"depName": package, "currentDigest": digest, "currentValue": version }',
+      ];
+      const res = await doAutoReplace(upgrade, source, reuseExistingBranch);
+      expect(res).toBe(
+        '[ { "version": "1.2.3", "digest": "badbeef", "package": "foo" } ]',
       );
     });
 

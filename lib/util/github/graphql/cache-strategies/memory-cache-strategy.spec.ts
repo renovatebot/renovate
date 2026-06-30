@@ -17,13 +17,13 @@ const hourMinSecMillisRe = /T\d{2}:\d{2}:\d{2}\.\d\d\d$/;
 const isoTs = (t: string) => {
   let iso = t.replace(' ', 'T');
   if (hourMinSecMillisRe.test(iso)) {
-    iso = iso + 'Z';
+    iso = `${iso}Z`;
   } else if (hourMinSecRe.test(iso)) {
-    iso = iso + '.000Z';
+    iso = `${iso}.000Z`;
   } else if (hourMinRe.test(iso)) {
-    iso = iso + ':00.000Z';
+    iso = `${iso}:00.000Z`;
   } else {
-    throw new Error('Unrecognized date-time string. ' + t);
+    throw new Error(`Unrecognized date-time string. ${t}`);
   }
   return iso as Timestamp;
 };

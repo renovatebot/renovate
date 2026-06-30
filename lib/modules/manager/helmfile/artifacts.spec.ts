@@ -1,6 +1,8 @@
 import { codeBlock } from 'common-tags';
 import upath from 'upath';
 import { mockDeep } from 'vitest-mock-extended';
+import { envMock, mockExecAll } from '~test/exec-util.ts';
+import { env, fs, git } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import type { RepoGlobalConfig } from '../../../config/types.ts';
 import * as docker from '../../../util/exec/docker/index.ts';
@@ -8,8 +10,6 @@ import * as hostRules from '../../../util/host-rules.ts';
 import * as _datasource from '../../datasource/index.ts';
 import type { UpdateArtifactsConfig } from '../types.ts';
 import * as helmfile from './index.ts';
-import { envMock, mockExecAll } from '~test/exec-util.ts';
-import { env, fs, git } from '~test/util.ts';
 
 vi.mock('../../datasource/index.ts', () => mockDeep());
 vi.mock('../../../util/exec/env.ts');
@@ -25,6 +25,7 @@ const adminConfig: RepoGlobalConfig = {
   cacheDir: upath.join('/tmp/renovate/cache'),
   containerbaseDir: upath.join('/tmp/renovate/cache/containerbase'),
   dockerSidecarImage: 'ghcr.io/renovatebot/base-image',
+  binarySource: 'global',
 };
 
 const config: UpdateArtifactsConfig = {};
@@ -411,7 +412,7 @@ describe('modules/manager/helmfile/artifacts', () => {
     ).toEqual([
       {
         artifactError: {
-          lockFile: 'helmfile.lock',
+          fileName: 'helmfile.lock',
           stderr: errorMessage,
         },
       },

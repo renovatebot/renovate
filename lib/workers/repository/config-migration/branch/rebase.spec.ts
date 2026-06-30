@@ -1,13 +1,13 @@
 import type { Indent } from 'detect-indent';
 import JSON5 from 'json5';
+import { Fixtures } from '~test/fixtures.ts';
+import type { RenovateConfig } from '~test/util.ts';
+import { git, partial, scm } from '~test/util.ts';
 import { getConfig } from '../../../../config/defaults.ts';
 import { GlobalConfig } from '../../../../config/global.ts';
-import { MigratedDataFactory } from './migrated-data.ts';
 import type { MigratedData } from './migrated-data.ts';
+import { MigratedDataFactory } from './migrated-data.ts';
 import { jsonStripWhitespaces, rebaseMigrationBranch } from './rebase.ts';
-import { Fixtures } from '~test/fixtures.ts';
-import { git, partial, scm } from '~test/util.ts';
-import type { RenovateConfig } from '~test/util.ts';
 
 const formattedMigratedData = Fixtures.getJson(
   './migrated-data-formatted.json',
@@ -23,12 +23,10 @@ describe('workers/repository/config-migration/branch/rebase', () => {
   });
 
   describe('rebaseMigrationBranch()', () => {
-    const repoConfig = Fixtures.getJson('./renovate.json');
+    const repoConfig = Fixtures.getJsonc('./renovate.json');
     const indent = '  ';
-    const renovateConfigJson =
-      JSON.stringify(repoConfig, undefined, indent) + '\n';
-    const renovateConfigJson5 =
-      JSON5.stringify(repoConfig, undefined, indent) + '\n';
+    const renovateConfigJson = `${JSON.stringify(repoConfig, undefined, indent)}\n`;
+    const renovateConfigJson5 = `${JSON5.stringify(repoConfig, undefined, indent)}\n`;
     let config: RenovateConfig;
     const migratedConfigData: MigratedData = {
       content: '',
@@ -110,7 +108,7 @@ describe('workers/repository/config-migration/branch/rebase', () => {
           message: `Migrate config ${filename}`,
           platformCommit: 'auto',
           baseBranch: 'dev',
-          labels: [],
+          prTitle: 'Migrate Renovate config',
         });
       },
     );

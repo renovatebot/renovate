@@ -3,12 +3,14 @@
 exports[`logger/err-serializer > got > sanitize http error 1`] = `
 {
   "code": "ERR_NON_2XX_3XX_RESPONSE",
-  "message": "Response code 412 (Precondition Failed)",
+  "input": undefined,
+  "message": "Request failed with status code 412 (Precondition Failed): POST https://**redacted**@github.com/api",
   "name": "HTTPError",
   "options": {
     "headers": {
       "accept": "application/json",
-      "accept-encoding": "gzip, deflate, br",
+      "accept-encoding": "gzip, deflate, br, zstd",
+      "authorization": "***********",
       "user-agent": "Renovate/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
     },
     "hostType": "any",

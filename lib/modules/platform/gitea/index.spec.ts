@@ -1,3 +1,5 @@
+import * as httpMock from '~test/http-mock.ts';
+import { git, hostRules, logger, partial } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import type { RepoGlobalConfig } from '../../../config/types.ts';
 import {
@@ -12,7 +14,8 @@ import {
 } from '../../../constants/error-messages.ts';
 import * as memCache from '../../../util/cache/memory/index.ts';
 import * as repoCache from '../../../util/cache/repository/index.ts';
-import type { LongCommitSha } from '../../../util/git/types.ts';
+import type { LongCommitSha } from '../../../util/schema-utils/git.ts';
+import { parseUrl } from '../../../util/url.ts';
 import type { EnsureIssueConfig, RepoParams } from '../index.ts';
 import * as helper from './gitea-helper.ts';
 import * as gitea from './index.ts';
@@ -27,8 +30,6 @@ import type {
   RepoPermission,
   User,
 } from './types.ts';
-import * as httpMock from '~test/http-mock.ts';
-import { git, hostRules, logger, partial } from '~test/util.ts';
 
 /**
  * latest tested gitea version.
@@ -49,7 +50,7 @@ describe('modules/platform/gitea/index', () => {
 
   const mockUser: User = {
     id: 1,
-    username: 'renovate',
+    login: 'renovate',
     full_name: 'Renovate Bot',
     email: 'renovate@example.com',
   };
@@ -284,13 +285,13 @@ describe('modules/platform/gitea/index', () => {
       const scope = httpMock.scope('https://gitea.com/api/v1');
       scope
         .get('/user')
-        .reply(200, mockUser)
+        .reply(200, { ...mockUser, full_name: '' })
         .get('/version')
         .reply(200, { version: GITEA_VERSION });
 
       expect(await gitea.initPlatform({ token: 'some-token' })).toEqual({
         endpoint: 'https://gitea.com/',
-        gitAuthor: 'Renovate Bot <renovate@example.com>',
+        gitAuthor: 'renovate <renovate@example.com>',
       });
     });
 
@@ -747,7 +748,7 @@ describe('modules/platform/gitea/index', () => {
       };
       await gitea.initRepo(repoCfg);
 
-      const url = new URL(`${mockRepo.clone_url}`);
+      const url = parseUrl(`${mockRepo.clone_url}`)!;
       url.username = token;
       expect(git.initRepo).toHaveBeenCalledExactlyOnceWith(
         expect.objectContaining({
@@ -775,7 +776,7 @@ describe('modules/platform/gitea/index', () => {
       };
       await gitea.initRepo(repoCfg);
 
-      const url = new URL(`${mockRepo.clone_url}`);
+      const url = parseUrl(`${mockRepo.clone_url}`)!;
       url.username = token;
       expect(git.initRepo).toHaveBeenCalledExactlyOnceWith(
         expect.objectContaining({ url: url.toString() }),
@@ -1176,7 +1177,7 @@ describe('modules/platform/gitea/index', () => {
           sha: 'other-head-sha' as LongCommitSha,
           repo: partial<Repo>({ full_name: mockRepo.full_name }),
         },
-        user: { username: 'not-renovate' },
+        user: { login: 'not-renovate' },
       });
 
       const scope = httpMock
@@ -1187,7 +1188,7 @@ describe('modules/platform/gitea/index', () => {
           thirdPartyPr,
           ...mockPRs.map((pr) => ({
             ...pr,
-            user: { username: 'renovate' },
+            user: { login: 'renovate' },
           })),
         ]);
       await initFakePlatform(scope);
@@ -1211,7 +1212,7 @@ describe('modules/platform/gitea/index', () => {
           state: 'all',
           sort: 'recentupdate',
           limit: 100,
-          poster: mockUser.username,
+          poster: mockUser.login,
         })
         .reply(200, mockPRs.slice(0, 2), {
           // test correct pagination handling, domain should be ignored
@@ -2923,6 +2924,15 @@ describe('modules/platform/gitea/index', () => {
 
       expect(gitea.massageMarkdown(body)).toBe(
         '[#123](pulls/123) [#124](pulls/124) [#125](pulls/125)',
+      );
+    });
+
+    it('replaces issue links', () => {
+      const body =
+        '[#123](../issues/123) [#124](../issues/124) [#125](../issues/125)';
+
+      expect(gitea.massageMarkdown(body)).toBe(
+        '[#123](issues/123) [#124](issues/124) [#125](issues/125)',
       );
     });
   });

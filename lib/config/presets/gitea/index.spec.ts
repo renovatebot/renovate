@@ -1,10 +1,10 @@
+import { hostRules } from '~test/host-rules.ts';
+import * as httpMock from '~test/http-mock.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
 import { setBaseUrl } from '../../../util/http/gitea.ts';
 import { toBase64 } from '../../../util/string.ts';
 import { PRESET_INVALID_JSON, PRESET_NOT_FOUND } from '../util.ts';
 import * as gitea from './index.ts';
-import { hostRules } from '~test/host-rules.ts';
-import * as httpMock from '~test/http-mock.ts';
 
 const giteaApiHost = gitea.Endpoint;
 const basePath = '/api/v1/repos/some/repo/contents';
@@ -44,6 +44,23 @@ describe('config/presets/gitea/index', () => {
       const res = await gitea.fetchJSONFile(
         'some/repo',
         'some-filename.json5',
+        giteaApiHost,
+        null,
+      );
+      expect(res).toEqual({ from: 'api' });
+    });
+
+    it('returns JSONC', async () => {
+      httpMock
+        .scope(giteaApiHost)
+        .get(`${basePath}/some-filename.jsonc`)
+        .reply(200, {
+          content: toBase64('{"from": /* secret! */ "api"}'),
+        });
+
+      const res = await gitea.fetchJSONFile(
+        'some/repo',
+        'some-filename.jsonc',
         giteaApiHost,
         null,
       );

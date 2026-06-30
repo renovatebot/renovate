@@ -1,8 +1,10 @@
+import type { RenovateConfig } from '~test/util.ts';
+import { git, logger, partial, platform, scm } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import { type AllConfig } from '../../../config/types.ts';
 import type { Pr } from '../../../modules/platform/index.ts';
 import * as _cache from '../../../util/cache/repository/index.ts';
-import type { LongCommitSha } from '../../../util/git/types.ts';
+import type { LongCommitSha } from '../../../util/schema-utils/git.ts';
 import type { BranchConfig } from '../../types.ts';
 import * as _inherited from '../init/inherited.ts';
 import * as _merge from '../init/merge.ts';
@@ -11,8 +13,6 @@ import * as _prComment from './comment.ts';
 import { checkReconfigureBranch } from './index.ts';
 import * as _utils from './utils.ts';
 import * as _validate from './validate.ts';
-import { git, logger, partial, platform, scm } from '~test/util.ts';
-import type { RenovateConfig } from '~test/util.ts';
 
 vi.mock('./validate.ts');
 vi.mock('./utils.ts');

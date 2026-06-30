@@ -1,4 +1,6 @@
 import { codeBlock } from 'common-tags';
+import { Fixtures } from '~test/fixtures.ts';
+import { fs, getFixturePath, logger, partial } from '~test/util.ts';
 import { GlobalConfig } from '../../../../config/global.ts';
 import * as yaml from '../../../../util/yaml.ts';
 import type { PackageFile } from '../../types.ts';
@@ -10,8 +12,6 @@ import {
   findPnpmWorkspace,
   getPnpmLock,
 } from './pnpm.ts';
-import { Fixtures } from '~test/fixtures.ts';
-import { fs, getFixturePath, logger, partial } from '~test/util.ts';
 
 vi.mock('../../../../util/fs/index.ts');
 
@@ -95,7 +95,9 @@ describe('modules/manager/npm/extract/pnpm', () => {
 
   describe('.detectPnpmWorkspaces()', () => {
     beforeEach(async () => {
-      const realFs = await vi.importActual<typeof fs>('../../../../util/fs');
+      const realFs = await vi.importActual<typeof fs>(
+        '../../../../util/fs/index.ts',
+      );
 
       // The real implementations of these functions are used for this block;
       // they do static path manipulation.
@@ -341,6 +343,60 @@ describe('modules/manager/npm/extract/pnpm', () => {
       const res = await getPnpmLock('package.json');
       expect(res.lockedVersionsWithPath).toBeUndefined();
     });
+
+    it('extracts version from multi-document lockfile (configDependencies)', async () => {
+      const lockfileContent = codeBlock`
+        ---
+        lockfileVersion: '9.0'
+
+        importers:
+
+          .:
+            configDependencies:
+              '@scope/pnpm-plugin-defaults':
+                specifier: 0.1.0
+                version: 0.1.0
+
+        packages:
+
+          '@scope/pnpm-plugin-defaults@0.1.0':
+            resolution: {integrity: sha512-aaa==}
+
+        snapshots:
+
+          '@scope/pnpm-plugin-defaults@0.1.0': {}
+
+        ---
+        lockfileVersion: '9.0'
+
+        settings:
+          autoInstallPeers: true
+          excludeLinksFromLockfile: false
+
+        importers:
+
+          .:
+            dependencies:
+              lodash:
+                specifier: ^4.17.20
+                version: 4.18.1
+
+        packages:
+
+          lodash@4.18.1:
+            resolution: {integrity: sha512-bbb==}
+
+        snapshots:
+
+          lodash@4.18.1: {}
+      `;
+      fs.readLocalFile.mockResolvedValueOnce(lockfileContent);
+      const res = await getPnpmLock('package.json');
+      expect(Object.keys(res.lockedVersionsWithPath!)).toHaveLength(1);
+      expect(res.lockedVersionsWithPath!['.'].dependencies.lodash).toBe(
+        '4.18.1',
+      );
+    });
   });
 
   describe('.extractPnpmWorkspaceFile()', () => {
@@ -385,6 +441,77 @@ describe('modules/manager/npm/extract/pnpm', () => {
             depName: 'react',
             depType: 'pnpm.catalog.react17',
             prettyDepType: 'pnpm.catalog.react17',
+          },
+        ],
+      });
+    });
+
+    it('parses overrides in pnpm-workspace.yaml file', async () => {
+      expect(
+        await extractPnpmWorkspaceFile(
+          {
+            overrides: {
+              'foo>bar': '2.0.0',
+              'foo@1.0.0': '2.0.0',
+              'foo@>1.0.0': '2.0.0',
+              'foo@>=1.0.0': '2.0.0',
+              'foo@1.0.0>bar': '2.0.0',
+              'foo@>1.0.0>bar': '2.0.0',
+              'foo@>=1.0.0 <2.0.0': '>=2.0.0',
+            },
+          },
+          'pnpm-workspace.yaml',
+        ),
+      ).toMatchObject({
+        deps: [
+          {
+            currentValue: '2.0.0',
+            datasource: 'npm',
+            depName: 'foo>bar',
+            depType: 'pnpm-workspace.overrides',
+            packageName: 'bar',
+          },
+          {
+            currentValue: '2.0.0',
+            datasource: 'npm',
+            depName: 'foo@1.0.0',
+            depType: 'pnpm-workspace.overrides',
+            packageName: 'foo',
+          },
+          {
+            currentValue: '2.0.0',
+            datasource: 'npm',
+            depName: 'foo@>1.0.0',
+            depType: 'pnpm-workspace.overrides',
+            packageName: 'foo',
+          },
+          {
+            currentValue: '2.0.0',
+            datasource: 'npm',
+            depName: 'foo@>=1.0.0',
+            depType: 'pnpm-workspace.overrides',
+            packageName: 'foo',
+          },
+          {
+            currentValue: '2.0.0',
+            datasource: 'npm',
+            depName: 'foo@1.0.0>bar',
+            depType: 'pnpm-workspace.overrides',
+            packageName: 'bar',
+          },
+          {
+            currentValue: '2.0.0',
+            datasource: 'npm',
+            depName: 'foo@>1.0.0>bar',
+            depType: 'pnpm-workspace.overrides',
+            packageName: 'bar',
+          },
+          {
+            currentValue: '>=2.0.0',
+            datasource: 'npm',
+            depName: 'foo@>=1.0.0 <2.0.0',
+            depType: 'pnpm-workspace.overrides',
+            packageName: 'foo',
           },
         ],
       });

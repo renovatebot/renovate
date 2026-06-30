@@ -1,10 +1,9 @@
 import { glob } from 'glob';
+import type { DateTime } from 'luxon';
 import { logger } from '../../../logger/index.ts';
 import { rawExec } from '../../../util/exec/common.ts';
-import type {
-  CommitFilesConfig,
-  LongCommitSha,
-} from '../../../util/git/types.ts';
+import type { CommitFilesConfig } from '../../../util/git/types.ts';
+import type { LongCommitSha } from '../../../util/schema-utils/git.ts';
 import type { PlatformScm } from '../types.ts';
 
 let fileList: string[] | undefined;
@@ -25,6 +24,9 @@ export class LocalFs implements PlatformScm {
     return Promise.resolve(true);
   }
   getBranchCommit(_branchName: string): Promise<LongCommitSha | null> {
+    return Promise.resolve(null);
+  }
+  getBranchUpdateDate(_branchName: string): Promise<DateTime | null> {
     return Promise.resolve(null);
   }
   deleteBranch(_branchName: string): Promise<void> {
@@ -54,9 +56,8 @@ export class LocalFs implements PlatformScm {
     return fileList;
   }
 
-  checkoutBranch(_branchName: string): Promise<LongCommitSha> {
-    // We don't care about the commit sha in local mode
-    return Promise.resolve('' as LongCommitSha);
+  checkoutBranch(_branchName: string): Promise<LongCommitSha | null> {
+    return Promise.resolve(null);
   }
 
   mergeAndPush(_branchName: string, _allowBehindBase: boolean): Promise<void> {

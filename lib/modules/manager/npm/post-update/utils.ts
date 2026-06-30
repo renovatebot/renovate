@@ -28,6 +28,7 @@ export function getPackageManagerVersion(
       : [pkg.devEngines.packageManager];
     const packageMgr = packageManagers.find((pm) => pm.name === name);
     const version = packageMgr?.version;
+    // v8 ignore else -- TODO: add test #40625
     if (version) {
       logger.debug(
         `Found ${name} constraint in package.json devEngines: ${version}`,
@@ -53,4 +54,8 @@ export function getPackageManagerVersion(
     return version;
   }
   return null;
+}
+
+export function getNodeOptions(nodeMaxMemory: number): string {
+  return `--max-old-space-size=${nodeMaxMemory}`;
 }

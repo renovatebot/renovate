@@ -1,13 +1,13 @@
 import type { StatusResult } from 'simple-git';
 import upath from 'upath';
 import { mockDeep } from 'vitest-mock-extended';
+import { envMock, mockExecAll, mockExecSequence } from '~test/exec-util.ts';
+import { env, fs, git, hostRules, partial } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import type { RepoGlobalConfig } from '../../../config/types.ts';
 import * as docker from '../../../util/exec/docker/index.ts';
 import type { UpdateArtifactsConfig } from '../types.ts';
 import { updateArtifacts } from './index.ts';
-import { envMock, mockExecAll, mockExecSequence } from '~test/exec-util.ts';
-import { env, fs, git, hostRules, partial } from '~test/util.ts';
 
 vi.mock('../../../util/exec/env.ts');
 vi.mock('../../../util/fs/index.ts');
@@ -18,6 +18,7 @@ const adminConfig: RepoGlobalConfig = {
   localDir: upath.join('/tmp/github/some/repo'),
   cacheDir: upath.join('/tmp/renovate/cache'),
   containerbaseDir: upath.join('/tmp/renovate/cache/containerbase'),
+  binarySource: 'global',
 };
 const dockerAdminConfig = {
   ...adminConfig,
@@ -203,18 +204,7 @@ describe('modules/manager/nix/artifacts', () => {
       { cmd: 'docker pull ghcr.io/renovatebot/base-image' },
       { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
       {
-        cmd:
-          'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
-          '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
-          '-v "/tmp/renovate/cache":"/tmp/renovate/cache" ' +
-          '-e CONTAINERBASE_CACHE_DIR ' +
-          '-w "/tmp/github/some/repo" ' +
-          'ghcr.io/renovatebot/base-image ' +
-          'bash -l -c "' +
-          'install-tool nix 2.10.0 ' +
-          '&& ' +
-          updateInputCmd +
-          '"',
+        cmd: `docker run --rm --name=renovate_sidecar --label=renovate_child -v "/tmp/github/some/repo":"/tmp/github/some/repo" -v "/tmp/renovate/cache":"/tmp/renovate/cache" -e CONTAINERBASE_CACHE_DIR -w "/tmp/github/some/repo" ghcr.io/renovatebot/base-image bash -l -c "install-tool nix 2.10.0 && ${updateInputCmd}"`,
       },
     ]);
   });
@@ -266,7 +256,7 @@ describe('modules/manager/nix/artifacts', () => {
 
     expect(res).toEqual([
       {
-        artifactError: { lockFile: 'flake.lock', stderr: 'exec error' },
+        artifactError: { fileName: 'flake.lock', stderr: 'exec error' },
       },
     ]);
     expect(execSnapshots).toMatchObject([{ cmd: updateInputCmd }]);
@@ -333,18 +323,7 @@ describe('modules/manager/nix/artifacts', () => {
       { cmd: 'docker pull ghcr.io/renovatebot/base-image' },
       { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
       {
-        cmd:
-          'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
-          '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
-          '-v "/tmp/renovate/cache":"/tmp/renovate/cache" ' +
-          '-e CONTAINERBASE_CACHE_DIR ' +
-          '-w "/tmp/github/some/repo" ' +
-          'ghcr.io/renovatebot/base-image ' +
-          'bash -l -c "' +
-          'install-tool nix 2.10.0 ' +
-          '&& ' +
-          updateInputCmd +
-          '"',
+        cmd: `docker run --rm --name=renovate_sidecar --label=renovate_child -v "/tmp/github/some/repo":"/tmp/github/some/repo" -v "/tmp/renovate/cache":"/tmp/renovate/cache" -e CONTAINERBASE_CACHE_DIR -w "/tmp/github/some/repo" ghcr.io/renovatebot/base-image bash -l -c "install-tool nix 2.10.0 && ${updateInputCmd}"`,
       },
     ]);
   });

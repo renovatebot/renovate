@@ -1,6 +1,8 @@
 import { ERROR } from 'bunyan';
-import { getProblems, logger } from '../lib/logger/index.ts';
+import { getProblems, init, logger } from '../lib/logger/index.ts';
 import { generateSchema } from './docs/schema.ts';
+
+await init();
 
 process.on('unhandledRejection', (err) => {
   // Will print "unhandledRejection err is not defined"
@@ -8,8 +10,7 @@ process.on('unhandledRejection', (err) => {
   process.exit(-1);
 });
 
-// eslint-disable-next-line @typescript-eslint/no-floating-promises
-(async () => {
+void (async () => {
   try {
     const dist = '.';
 

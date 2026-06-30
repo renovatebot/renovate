@@ -1,11 +1,11 @@
 import { codeBlock } from 'common-tags';
+import { envMock, mockExecAll } from '~test/exec-util.ts';
+import { Fixtures } from '~test/fixtures.ts';
+import { env, fs, partial } from '~test/util.ts';
 import { GlobalConfig } from '../../../../config/global.ts';
 import type { PostUpdateConfig, Upgrade } from '../../types.ts';
 import { getNodeToolConstraint } from './node-version.ts';
 import * as pnpmHelper from './pnpm.ts';
-import { envMock, mockExecAll } from '~test/exec-util.ts';
-import { Fixtures } from '~test/fixtures.ts';
-import { env, fs, partial } from '~test/util.ts';
 
 vi.mock('../../../../util/exec/env.ts');
 vi.mock('../../../../util/fs/index.ts');
@@ -38,7 +38,7 @@ describe('modules/manager/npm/post-update/pnpm', () => {
   beforeEach(() => {
     config = partial<PostUpdateConfig>({ constraints: { pnpm: '^2.0.0' } });
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
-    GlobalConfig.set({ localDir: '' });
+    GlobalConfig.set({ localDir: '', binarySource: 'global' });
     vi.mocked(getNodeToolConstraint).mockResolvedValueOnce({
       toolName: 'node',
       constraint: '16.16.0',
@@ -585,6 +585,66 @@ describe('modules/manager/npm/post-update/pnpm', () => {
         cmd: 'pnpm install --lockfile-only --ignore-scripts',
       },
     ]);
+  });
+
+  describe('passes NODE_OPTIONS', () => {
+    it('if nodeMaxMemory set on global config', async () => {
+      GlobalConfig.set({
+        localDir: '',
+        toolSettings: {
+          nodeMaxMemory: 1234,
+        },
+        binarySource: 'global',
+      });
+      const execSnapshots = mockExecAll();
+      fs.readLocalFile.mockResolvedValue('package-lock-contents');
+      const res = await pnpmHelper.generateLockFile(
+        'some-dir',
+        {},
+        {
+          ...config,
+        },
+        upgrades,
+      );
+      expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
+      expect(res.lockFile).toBe('package-lock-contents');
+      expect(execSnapshots).toMatchObject([
+        {
+          cmd: 'pnpm install --lockfile-only --ignore-scripts --ignore-pnpmfile',
+        },
+      ]);
+
+      expect(execSnapshots[0].options?.env?.NODE_OPTIONS).toEqual(
+        '--max-old-space-size=1234',
+      );
+    });
+
+    it('if nodeMaxMemory set on repo config', async () => {
+      const execSnapshots = mockExecAll();
+      fs.readLocalFile.mockResolvedValue('package-lock-contents');
+      const res = await pnpmHelper.generateLockFile(
+        'some-dir',
+        {},
+        {
+          ...config,
+          toolSettings: {
+            nodeMaxMemory: 1234,
+          },
+        },
+        upgrades,
+      );
+      expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
+      expect(res.lockFile).toBe('package-lock-contents');
+      expect(execSnapshots).toMatchObject([
+        {
+          cmd: 'pnpm install --lockfile-only --ignore-scripts --ignore-pnpmfile',
+        },
+      ]);
+
+      expect(execSnapshots[0].options?.env?.NODE_OPTIONS).toEqual(
+        '--max-old-space-size=1234',
+      );
+    });
   });
 
   describe('getConstraintsFromLockFile()', () => {

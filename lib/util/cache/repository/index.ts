@@ -1,4 +1,5 @@
 import { GlobalConfig } from '../../../config/global.ts';
+import { instrument } from '../../../instrumentation/index.ts';
 import { logger } from '../../../logger/index.ts';
 import { RepoCacheNull } from './impl/null.ts';
 import type { RepoCache, RepoCacheData } from './types.ts';
@@ -23,7 +24,7 @@ export async function saveCache(): Promise<void> {
   if (GlobalConfig.get('dryRun')) {
     logger.info(`DRY-RUN: Would save repository cache.`);
   } else {
-    await repoCache.save();
+    await instrument('save RepoCache', () => repoCache.save());
   }
 }
 

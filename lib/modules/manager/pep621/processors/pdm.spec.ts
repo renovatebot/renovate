@@ -1,4 +1,6 @@
 import upath from 'upath';
+import { mockExecAll } from '~test/exec-util.ts';
+import { fs, partial } from '~test/util.ts';
 import { GlobalConfig } from '../../../../config/global.ts';
 import type { RepoGlobalConfig } from '../../../../config/types.ts';
 import { TEMPORARY_ERROR } from '../../../../constants/error-messages.ts';
@@ -9,8 +11,6 @@ import type { UpdateArtifact, UpdateArtifactsConfig } from '../../types.ts';
 import { parsePyProject } from '../extract.ts';
 import { depTypes } from '../utils.ts';
 import { PdmProcessor } from './pdm.ts';
-import { mockExecAll } from '~test/exec-util.ts';
-import { fs, partial } from '~test/util.ts';
 
 vi.mock('../../../../util/fs/index.ts');
 vi.mock('../../../datasource/index.ts');
@@ -22,6 +22,7 @@ const adminConfig: RepoGlobalConfig = {
   localDir: upath.join('/tmp/github/some/repo'),
   cacheDir: upath.join('/tmp/cache'),
   containerbaseDir: upath.join('/tmp/cache/containerbase'),
+  binarySource: 'global',
 };
 
 const processor = new PdmProcessor();
@@ -127,7 +128,7 @@ describe('modules/manager/pep621/processors/pdm', () => {
         parsePyProject('')!,
       );
       expect(result).toEqual([
-        { artifactError: { lockFile: 'pdm.lock', stderr: 'test error' } },
+        { artifactError: { fileName: 'pdm.lock', stderr: 'test error' } },
       ]);
       expect(execSnapshots).toEqual([]);
     });

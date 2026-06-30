@@ -1,12 +1,13 @@
 import upath from 'upath';
 import { mockDeep } from 'vitest-mock-extended';
+import { envMock, mockExecAll } from '~test/exec-util.ts';
+import { env, fs, hostRules, logger } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import type { RepoGlobalConfig } from '../../../config/types.ts';
+import type { ConstraintName } from '../../../util/exec/types.ts';
 import { getPkgReleases as _getPkgReleases } from '../../datasource/index.ts';
 import type { UpdateArtifactsConfig } from '../types.ts';
 import { updateArtifacts } from './index.ts';
-import { envMock, mockExecAll } from '~test/exec-util.ts';
-import { env, fs, hostRules } from '~test/util.ts';
 
 vi.mock('../../../util/exec/env.ts');
 vi.mock('../../../util/fs/index.ts');
@@ -20,13 +21,14 @@ const adminConfig: RepoGlobalConfig = {
   localDir: upath.join('/tmp/github/some/repo'),
   cacheDir: upath.join('/tmp/cache'),
   containerbaseDir: upath.join('/tmp/cache/containerbase'),
+  binarySource: 'global',
 };
 
 // support install mode
 process.env.CONTAINERBASE = 'true';
 
 const config: UpdateArtifactsConfig = {};
-const constraints: Record<string, string> = {
+const constraints: Partial<Record<ConstraintName, string>> = {
   erlang: '25.0.0.0',
   elixir: 'v1.13.4',
 };
@@ -137,6 +139,32 @@ describe('modules/manager/mix/artifacts', () => {
         config: { ...config, isLockFileMaintenance: true },
       }),
     ).toBeNull();
+    expect(logger.logger.debug).toHaveBeenCalledWith(
+      'Cannot use lockFileMaintenance in an umbrella project, see https://docs.renovatebot.com/modules/manager/mix/#lockFileMaintenance',
+    );
+  });
+
+  it('uses productLinks.documentation in lockFileMaintenance umbrella log URL', async () => {
+    GlobalConfig.set({
+      ...adminConfig,
+      productLinks: { documentation: 'https://custom.example.com/' },
+    });
+    fs.getSiblingFileName.mockReturnValueOnce('apps/foo/mix.lock');
+    fs.findLocalSiblingOrParent.mockResolvedValueOnce('mix.lock');
+    fs.readLocalFile.mockResolvedValueOnce(null);
+    fs.readLocalFile.mockResolvedValueOnce('Old mix.lock');
+    fs.readLocalFile.mockResolvedValueOnce('New mix.lock');
+    expect(
+      await updateArtifacts({
+        packageFileName: 'apps/foo/mix.exs',
+        updatedDeps: [],
+        newPackageFileContent: '{}',
+        config: { ...config, isLockFileMaintenance: true },
+      }),
+    ).toBeNull();
+    expect(logger.logger.debug).toHaveBeenCalledWith(
+      'Cannot use lockFileMaintenance in an umbrella project, see https://custom.example.com/modules/manager/mix/#lockFileMaintenance',
+    );
   });
 
   it('returns updated mix.lock', async () => {
@@ -478,7 +506,7 @@ describe('modules/manager/mix/artifacts', () => {
         config,
       }),
     ).toEqual([
-      { artifactError: { lockFile: 'mix.lock', stderr: 'not found' } },
+      { artifactError: { fileName: 'mix.lock', stderr: 'not found' } },
     ]);
   });
 
@@ -494,7 +522,7 @@ describe('modules/manager/mix/artifacts', () => {
         config,
       }),
     ).toEqual([
-      { artifactError: { lockFile: 'mix.lock', stderr: 'exec-error' } },
+      { artifactError: { fileName: 'mix.lock', stderr: 'exec-error' } },
     ]);
   });
 
@@ -512,7 +540,7 @@ describe('modules/manager/mix/artifacts', () => {
     ).toEqual([
       {
         artifactError: {
-          lockFile: 'mix.lock',
+          fileName: 'mix.lock',
           stderr: 'Error reading mix.lock',
         },
       },
@@ -536,7 +564,7 @@ describe('modules/manager/mix/artifacts', () => {
     ).toEqual([
       {
         artifactError: {
-          lockFile: 'mix.lock',
+          fileName: 'mix.lock',
           stderr: 'Error reading mix.lock',
         },
       },

@@ -1,6 +1,6 @@
+import { fs, logger } from '~test/util.ts';
 import * as _merge from '../init/merge.ts';
 import { getReconfigureBranchName, getReconfigureConfig } from './utils.ts';
-import { fs, logger } from '~test/util.ts';
 
 vi.mock('../../../util/fs/index.ts');
 vi.mock('../init/merge.ts');

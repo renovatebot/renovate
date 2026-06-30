@@ -2,8 +2,9 @@ import * as azure from 'azure-devops-node-api';
 import { getBasicHandler, getHandlerFromToken } from 'azure-devops-node-api';
 import type { ICoreApi } from 'azure-devops-node-api/CoreApi.js';
 import type { IGitApi } from 'azure-devops-node-api/GitApi.js';
-import type { IPolicyApi } from 'azure-devops-node-api/PolicyApi.js';
 import type { IRequestHandler } from 'azure-devops-node-api/interfaces/common/VsoBaseInterfaces.js';
+import type { IPolicyApi } from 'azure-devops-node-api/PolicyApi.js';
+import type { IWorkItemTrackingApi } from 'azure-devops-node-api/WorkItemTrackingApi.js';
 import type { HostRule } from '../../../types/index.ts';
 import * as hostRules from '../../../util/host-rules.ts';
 
@@ -40,6 +41,10 @@ export function coreApi(): Promise<ICoreApi> {
 
 export function policyApi(): Promise<IPolicyApi> {
   return azureObj().getPolicyApi();
+}
+
+export function workItemTrackingApi(): Promise<IWorkItemTrackingApi> {
+  return azureObj().getWorkItemTrackingApi();
 }
 
 export function setEndpoint(e: string): void {
