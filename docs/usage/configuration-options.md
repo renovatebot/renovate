@@ -4039,7 +4039,8 @@ To learn how to use GitHub's Merge Queue feature with Renovate, read our [GitHub
 
 **GitHub**
 
-Use this option only when running Renovate as a [GitHub App](https://docs.github.com/en/developers/apps/getting-started-with-apps/about-apps). It does not apply when using a Personal Access Token.
+Use this option only when running Renovate as a [GitHub App](https://docs.github.com/en/developers/apps/getting-started-with-apps/about-apps).
+It does not apply when using a Personal Access Token.
 
 When `platformCommit=enabled`, Renovate creates commits via GitHub's API.
 This allows GitHub's [commit signing support for bots and GitHub Apps](https://github.blog/2019-08-15-commit-signing-support-for-bots-and-other-github-apps/).

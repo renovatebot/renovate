@@ -528,11 +528,13 @@ describe('modules/platform/gitlab/index', () => {
 
     beforeEach(async () => {
       await initRepo();
-      git.prepareCommit.mockResolvedValue({
-        parentCommitSha: preparedParentSha,
-        commitSha: preparedCommitSha,
-        files: [],
-      });
+      git.prepareCommit.mockImplementation((commitConfig) =>
+        Promise.resolve({
+          parentCommitSha: preparedParentSha,
+          commitSha: preparedCommitSha,
+          files: commitConfig.files,
+        }),
+      );
       git.fetchBranch.mockResolvedValue(fetchedSha);
     });
 
@@ -566,6 +568,32 @@ describe('modules/platform/gitlab/index', () => {
 
       expect(res).toBeNull();
       expect(git.prepareCommit).toHaveBeenCalled();
+      expect(git.resetToCommit).not.toHaveBeenCalled();
+      expect(git.fetchBranch).not.toHaveBeenCalled();
+    });
+
+    it('returns null when prepareCommit filters all changes out', async () => {
+      git.prepareCommit.mockResolvedValueOnce({
+        parentCommitSha: preparedParentSha,
+        commitSha: preparedCommitSha,
+        files: [],
+      });
+
+      const res = await gitlab.commitFiles({
+        branchName: 'some-branch',
+        files: [
+          {
+            type: 'addition',
+            path: 'new.txt',
+            contents: 'created',
+          },
+        ],
+        message: 'msg',
+      });
+
+      expect(res).toBeNull();
+      expect(git.prepareCommit).toHaveBeenCalled();
+      expect(git.getFile).not.toHaveBeenCalled();
       expect(git.resetToCommit).not.toHaveBeenCalled();
       expect(git.fetchBranch).not.toHaveBeenCalled();
     });

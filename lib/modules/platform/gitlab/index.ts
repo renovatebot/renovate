@@ -19,10 +19,7 @@ import { coerceArray } from '../../../util/array.ts';
 import { noLeadingAtSymbol, parseJson } from '../../../util/common.ts';
 import { getEnv } from '../../../util/env.ts';
 import * as git from '../../../util/git/index.ts';
-import type {
-  CommitFilesConfig,
-  FileAddition,
-} from '../../../util/git/types.ts';
+import type { CommitFilesConfig } from '../../../util/git/types.ts';
 import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider.ts';
 import type { GitlabHttpOptions } from '../../../util/http/gitlab.ts';
 import { setBaseUrl } from '../../../util/http/gitlab.ts';
@@ -73,6 +70,8 @@ import type { GitLabMergeRequest } from './schema.ts';
 import { LastPipelineId } from './schema.ts';
 import type {
   GitlabComment,
+  GitlabCommitAction,
+  GitlabCommitResponse,
   GitlabIssue,
   GitlabPr,
   MergeMethod,
@@ -84,6 +83,9 @@ import {
   defaults,
   getRepoUrl,
   prInfo,
+  toAdditionAction,
+  toCommitMessage,
+  toDeletionAction,
 } from './utils.ts';
 
 export { extractRulesFromCodeOwnersLines } from './code-owners.ts';
@@ -271,61 +273,6 @@ export async function getJsonFile(
   return parseJson(raw, fileName);
 }
 
-// Commit actions accepted by the GitLab "create a commit" API.
-// https://docs.gitlab.com/api/commits/#create-a-commit-with-multiple-files-and-actions
-
-interface GitlabCommitAction {
-  action: 'create' | 'update' | 'delete';
-  file_path: string;
-  content?: string;
-  encoding?: 'base64';
-  execute_filemode?: boolean;
-}
-
-interface GitlabCommitResponse {
-  id: string;
-}
-
-function toCommitMessage(message: string | string[]): string {
-  return isArray(message) ? message.join('\n\n') : message;
-}
-
-async function toAdditionAction(
-  file: FileAddition,
-  startBranch: string,
-): Promise<GitlabCommitAction> {
-  // The GitLab API requires the caller to declare whether a file is being
-  // created or updated, so we check whether it already exists on the parent
-  // branch reference used by start_branch.
-  const fileExists = (await git.getFile(file.path, startBranch)) !== null;
-
-  const action: GitlabCommitAction = {
-    action: fileExists ? 'update' : 'create',
-    file_path: file.path,
-    content: Buffer.isBuffer(file.contents)
-      ? file.contents.toString('base64')
-      : (file.contents ?? ''),
-  };
-
-  // Binary content must be base64 encoded so it survives the JSON round-trip.
-  if (Buffer.isBuffer(file.contents)) {
-    action.encoding = 'base64';
-  }
-
-  if (file.isExecutable) {
-    action.execute_filemode = true;
-  }
-
-  return action;
-}
-
-function toDeletionAction(filePath: string): GitlabCommitAction {
-  return {
-    action: 'delete',
-    file_path: filePath,
-  };
-}
-
 export async function commitFiles(
   commitConfig: CommitFilesConfig,
 ): Promise<LongCommitSha | null> {
@@ -347,7 +294,7 @@ export async function commitFiles(
   );
 
   const actions: GitlabCommitAction[] = [];
-  for (const file of files) {
+  for (const file of commitResult.files) {
     if (file.type === 'deletion') {
       actions.push(toDeletionAction(file.path));
     } else {
