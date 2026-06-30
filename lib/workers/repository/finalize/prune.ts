@@ -187,7 +187,7 @@ export async function pruneStaleBranches(
     },
     'Branch lists',
   );
-  // TODO: types (#22198)
+
   const lockFileBranch = `${config.branchPrefix}lock-file-maintenance`;
   renovateBranches = renovateBranches.filter(
     (branch) => branch !== lockFileBranch,
