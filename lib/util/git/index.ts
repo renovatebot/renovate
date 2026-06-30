@@ -69,7 +69,6 @@ import type {
   DiffTreeItem,
   GitObjectType,
   LocalConfig,
-  LongCommitSha,
   MergeFlag,
   PushFilesConfig,
   StatusResult,
