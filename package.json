@@ -345,7 +345,7 @@
     "type-fest": "5.7.0",
     "typescript": "6.0.3",
     "unified": "11.0.5",
-    "vite": "8.0.16",
+    "vite": "8.1.0",
     "vitest": "4.1.9",
     "vitest-mock-extended": "4.0.0"
   },
