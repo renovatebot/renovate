@@ -6,11 +6,16 @@ import {
   readLocalFile,
 } from '../../../util/fs/index.ts';
 
+import { extractCatalogDeps } from '../npm/extract/common/catalogs.ts';
 import { extractPackageJson } from '../npm/extract/common/package-file.ts';
-import type { NpmPackage } from '../npm/extract/types.ts';
+import type { Catalog, NpmPackage } from '../npm/extract/types.ts';
 import { resolveNpmrc } from '../npm/npmrc.ts';
 import type { NpmManagerData } from '../npm/types.ts';
 import type { ExtractConfig, PackageFile } from '../types.ts';
+import {
+  type BunCatalogs,
+  BunCatalogs as BunCatalogsSchema,
+} from './schema.ts';
 import { filesMatchingWorkspaces } from './utils.ts';
 
 function matchesFileName(fileNameWithPath: string, fileName: string): boolean {
@@ -19,10 +24,15 @@ function matchesFileName(fileNameWithPath: string, fileName: string): boolean {
   );
 }
 
-export async function processPackageFile(
+interface ProcessResult {
+  packageFileResult: PackageFile;
+  packageJson: NpmPackage;
+}
+
+async function processPackageFile(
   packageFile: string,
   config: ExtractConfig,
-): Promise<PackageFile | null> {
+): Promise<ProcessResult | null> {
   const fileContent = await readLocalFile(packageFile, 'utf8');
   if (!fileContent) {
     logger.warn({ fileName: packageFile }, 'Could not read file content');
@@ -44,11 +54,42 @@ export async function processPackageFile(
   const { npmrc } = await resolveNpmrc(packageFile, config);
 
   return {
-    ...result,
-    packageFile,
-    npmrc,
+    packageFileResult: {
+      ...result,
+      packageFile,
+      npmrc,
+    },
+    packageJson,
   };
 }
+
+/**
+ * Convert parsed bun catalog fields into an array of Catalog entries,
+ * following the same pattern as pnpmCatalogsToArray / yarnCatalogsToArray.
+ *
+ * @see https://bun.sh/docs/install/catalogs
+ */
+function bunCatalogsToArray({
+  catalog: defaultCatalogDeps,
+  catalogs: namedCatalogs,
+}: BunCatalogs): Catalog[] {
+  const result: Catalog[] = [];
+
+  if (defaultCatalogDeps !== undefined) {
+    result.push({ name: 'default', dependencies: defaultCatalogDeps });
+  }
+
+  if (!namedCatalogs) {
+    return result;
+  }
+
+  for (const [name, dependencies] of Object.entries(namedCatalogs)) {
+    result.push({ name, dependencies });
+  }
+
+  return result;
+}
+
 export async function extractAllPackageFiles(
   config: ExtractConfig,
   matchedFiles: string[],
@@ -67,12 +108,24 @@ export async function extractAllPackageFiles(
   );
   for (const lockFile of allLockFiles) {
     const packageFile = getSiblingFileName(lockFile, 'package.json');
-    const res = await processPackageFile(packageFile, config);
-    if (res) {
+    const processResult = await processPackageFile(packageFile, config);
+    if (processResult) {
+      const { packageFileResult: res, packageJson } = processResult;
+
+      // Extract bun catalog dependencies from the root package.json
+      const parseResult = BunCatalogsSchema.safeParse(packageJson);
+      if (parseResult.success) {
+        const bunCatalogs = bunCatalogsToArray(parseResult.data);
+        if (bunCatalogs.length > 0) {
+          const catalogDeps = extractCatalogDeps(bunCatalogs, 'bun');
+          res.deps.push(...catalogDeps);
+        }
+      }
+
       packageFiles.push({ ...res, lockFiles: [lockFile] });
     }
     // Check if package.json contains workspaces
-    let workspaces = res?.managerData?.workspaces;
+    let workspaces = processResult?.packageFileResult?.managerData?.workspaces;
 
     // Check for nested packages property https://bun.com/docs/pm/catalogs#1-define-catalogs-in-root-package-json
     if (typeof workspaces === 'object' && 'packages' in workspaces) {
@@ -93,9 +146,12 @@ export async function extractAllPackageFiles(
     if (workspacePackageFiles.length) {
       logger.debug({ workspacePackageFiles }, 'Found bun workspace files');
       for (const workspaceFile of workspacePackageFiles) {
-        const res = await processPackageFile(workspaceFile, config);
-        if (res) {
-          packageFiles.push({ ...res, lockFiles: [lockFile] });
+        const workspaceResult = await processPackageFile(workspaceFile, config);
+        if (workspaceResult) {
+          packageFiles.push({
+            ...workspaceResult.packageFileResult,
+            lockFiles: [lockFile],
+          });
         }
       }
     }
