@@ -69,8 +69,8 @@ az account get-access-token --resource 499b84ac-1321-427f-aa17-267ca6975798 --qu
 #### Requirements for service principals / managed identities
 
 1. The identity must be added to the Azure DevOps organization (Organization Settings → Users).
-2. The identity must have at least a **Basic** license.
-3. Grant permissions: Code (Read & Write) at the project level.
+1. The identity must have at least a **Basic** license.
+1. Grant permissions: Code (Read & Write) at the project level.
 
 #### Limitations
 
