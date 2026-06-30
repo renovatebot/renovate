@@ -41,9 +41,9 @@ export class HermitVersioning extends RegExpVersioningApi {
     } = groups;
     const release = [
       Number.parseInt(major, 10),
-      typeof minor === 'undefined' ? 0 : Number.parseInt(minor, 10),
-      typeof patch === 'undefined' ? 0 : Number.parseInt(patch, 10),
-      typeof supplement === 'undefined' ? 0 : Number.parseInt(supplement, 10),
+      Number.parseInt(minor, 10) || 0,
+      Number.parseInt(patch, 10) || 0,
+      Number.parseInt(supplement, 10) || 0,
     ];
 
     if (build) {
