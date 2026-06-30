@@ -1,4 +1,4 @@
-import { isString, isTruthy } from '@sindresorhus/is';
+import { isNonEmptyString, isTruthy } from '@sindresorhus/is';
 import changelogFilenameRegex from 'changelog-filename-regex';
 import { logger } from '../../../logger/index.ts';
 import { coerceArray, deduplicateArray } from '../../../util/array.ts';
@@ -205,7 +205,7 @@ export class PypiDatasource extends Datasource {
           python: deduplicateArray(
             releases
               .map(({ requires_python }) => requires_python)
-              .filter(isString),
+              .filter(isNonEmptyString),
           ),
         };
         return result;
@@ -392,7 +392,7 @@ export class PypiDatasource extends Datasource {
         python: deduplicateArray(
           versionReleases
             .map(({ requires_python }) => requires_python)
-            .filter(isString),
+            .filter(isNonEmptyString),
         ),
       };
       return result;
