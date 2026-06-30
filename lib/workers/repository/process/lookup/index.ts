@@ -650,20 +650,6 @@ export async function lookupUpdates(
         versioningApi.isVersion(release.version),
       );
 
-      const inRangeOnlyStrategy = config.rangeStrategy === 'in-range-only';
-      const allSatisfyingVersions =
-        (inRangeOnlyStrategy || config.rollbackPrs) && !unconstrainedValue
-          ? allVersions.filter((v) =>
-              // TODO #22198
-              versioningApi.matches(v.version, compareValue!),
-            )
-          : allVersions;
-      if (!allSatisfyingVersions.length) {
-        logger.debug(
-          `Found no satisfying versions with '${config.versioning}' versioning`,
-        );
-      }
-
       // versioning schemes between replacements are usually different.
       // therefore we do not "start" from the previous/current version
       const currentVersion = '0';
@@ -672,7 +658,7 @@ export async function lookupUpdates(
         replacementConfig,
         currentVersion,
         latestVersion!,
-        inRangeOnlyStrategy ? allSatisfyingVersions : allVersions,
+        allVersions,
         versioningApi,
       );
 
