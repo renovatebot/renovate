@@ -159,6 +159,21 @@ describe('modules/datasource/packagist/schema', () => {
 
       expect(
         ComposerRelease.parse({
+          version: '1.2.3',
+          time: '2025-01-16T12:00:00.000Z',
+          'published-time': '2025-02-20T08:30:00.000Z',
+        }),
+      ).toEqual({
+        version: '1.2.3',
+        time: '2025-01-16T12:00:00.000Z',
+        'published-time': '2025-02-20T08:30:00.000Z',
+        homepage: null,
+        source: null,
+        require: null,
+      });
+
+      expect(
+        ComposerRelease.parse({
           version: 123,
         }),
       ).toEqual({
@@ -461,6 +476,41 @@ describe('modules/datasource/packagist/schema', () => {
           'This package is abandoned and no longer maintained. The author suggests using the `scheb/2fa-bundle` package instead.',
         releases: [
           { version: '4.18.4', gitRef: 'v4.18.4', isDeprecated: true },
+        ],
+      } satisfies ReleaseResult);
+    });
+
+    it('prefers published-time over time, falling back to time', () => {
+      expect(
+        parsePackagesResponses('foo/bar', [
+          {
+            packages: {
+              'foo/bar': {
+                '1.1.1': {
+                  version: 'v1.1.1',
+                  time: '2025-01-16T12:00:00+00:00',
+                  'published-time': '2025-02-20T08:30:00+00:00',
+                },
+                '2.2.2': {
+                  version: 'v2.2.2',
+                  time: '2025-03-10T09:00:00+00:00',
+                },
+              },
+            },
+          },
+        ]),
+      ).toEqual({
+        releases: [
+          {
+            version: '1.1.1',
+            gitRef: 'v1.1.1',
+            releaseTimestamp: '2025-02-20T08:30:00.000Z' as Timestamp,
+          },
+          {
+            version: '2.2.2',
+            gitRef: 'v2.2.2',
+            releaseTimestamp: '2025-03-10T09:00:00.000Z' as Timestamp,
+          },
         ],
       } satisfies ReleaseResult);
     });

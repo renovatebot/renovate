@@ -755,6 +755,37 @@ describe('modules/manager/flux/extract', () => {
       });
     });
 
+    it('extracts GitRepository with both commit and branch', () => {
+      const result = extractPackageFile(
+        codeBlock`
+          apiVersion: source.toolkit.fluxcd.io/v1beta1
+          kind: GitRepository
+          metadata:
+            name: renovate-repo
+            namespace: renovate-system
+          spec:
+            ref:
+              commit: adf1fce
+              branch: hotfix/39.264.1
+            url: https://github.com/renovatebot/renovate
+        `,
+        'test.yaml',
+      );
+      expect(result).toEqual({
+        deps: [
+          {
+            currentDigest: 'adf1fce',
+            currentValue: 'hotfix/39.264.1',
+            datasource: GitRefsDatasource.id,
+            depName: 'renovate-repo',
+            packageName: 'https://github.com/renovatebot/renovate',
+            replaceString: 'adf1fce',
+            sourceUrl: 'https://github.com/renovatebot/renovate',
+          },
+        ],
+      });
+    });
+
     it('extracts GitRepository with a tag from github with ssh', () => {
       const result = extractPackageFile(
         codeBlock`

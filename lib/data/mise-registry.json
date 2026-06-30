@@ -1,6 +1,6 @@
 {
   "meta": {
-    "version": "2026.6.6 linux-x64 (2026-06-13)"
+    "version": "2026.6.14 linux-x64 (2026-06-25)"
   },
   "tools": {
     "1password": {
@@ -159,6 +159,9 @@
     "asciidoctorj": {
       "asdf": "mise-plugins/mise-asciidoctorj",
       "vfox": "mise-plugins/vfox-asciidoctorj"
+    },
+    "aspire": {
+      "github": "microsoft/aspire"
     },
     "assh": {
       "asdf": "mise-plugins/mise-assh",
@@ -1971,6 +1974,9 @@
     "lazyssh": {
       "aqua": "Adembc/lazyssh"
     },
+    "ldc": {
+      "github": "ldc-developers/ldc"
+    },
     "lefthook": {
       "aqua": "evilmartians/lefthook",
       "asdf": "jtzero/asdf-lefthook",
@@ -2028,6 +2034,9 @@
     "longbridge-terminal": {
       "cargo": "longbridge-terminal",
       "github": "longbridge/longbridge-terminal"
+    },
+    "lore": {
+      "aqua": "EpicGames/lore"
     },
     "ls-lint": {
       "aqua": "loeffel-io/ls-lint",
@@ -2303,6 +2312,9 @@
       "asdf": "dex4er/asdf-nsc",
       "github": "nats-io/nsc"
     },
+    "nub": {
+      "npm": "@nubjs/nub"
+    },
     "numbat": {
       "aqua": "sharkdp/numbat",
       "cargo": "numbat-cli"
@@ -2489,6 +2501,9 @@
     },
     "pinact": {
       "aqua": "suzuki-shunsuke/pinact"
+    },
+    "pinniped": {
+      "github": "vmware/pinniped"
     },
     "pint": {
       "aqua": "cloudflare/pint",
@@ -3025,6 +3040,9 @@
     "sqlc": {
       "aqua": "sqlc-dev/sqlc",
       "github": "sqlc-dev/sqlc"
+    },
+    "sqlcl": {
+      "aqua": "oracle.com/sqlcl"
     },
     "sqlite": {
       "asdf": "mise-plugins/mise-sqlite",

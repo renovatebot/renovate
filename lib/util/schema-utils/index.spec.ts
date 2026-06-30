@@ -664,6 +664,12 @@ describe('util/schema-utils/index', () => {
     it('returns false for invalid email', () => {
       expect(isEmailAdress('not-an-email')).toBe(false);
     });
+
+    it('returns true for GitHub app style email', () => {
+      expect(isEmailAdress('211370388+foo[bot]@users.noreply.github.com')).toBe(
+        true,
+      );
+    });
   });
 
   describe('Toml', () => {
