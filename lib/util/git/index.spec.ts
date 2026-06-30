@@ -623,7 +623,7 @@ describe('util/git/index', { timeout: 30000 }, () => {
 
       await workingRepo.checkout(['-b', 'renovate/test_conflict']);
       await fs.writeFile(
-        tmpDir.path + '/conflict_file.txt',
+        `${tmpDir.path}/conflict_file.txt`,
         'content from test branch',
       );
       await workingRepo.add(['conflict_file.txt']);
@@ -632,7 +632,7 @@ describe('util/git/index', { timeout: 30000 }, () => {
 
       await workingRepo.checkout(defaultBranch);
       await fs.writeFile(
-        tmpDir.path + '/conflict_file.txt',
+        `${tmpDir.path}/conflict_file.txt`,
         'content from main branch',
       );
       await workingRepo.add(['conflict_file.txt']);
@@ -822,7 +822,7 @@ describe('util/git/index', { timeout: 30000 }, () => {
         isSymlink: true,
       };
       const commit = await git.commitFiles({
-        branchName: 'renovate/future_branch',
+        branchName: 'renovate/symlink_branch',
         files: [file],
         message: 'Create a link',
       });
