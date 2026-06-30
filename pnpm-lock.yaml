@@ -5,16 +5,6 @@ settings:
   dedupePeers: true
   excludeLinksFromLockfile: false
 
-overrides:
-  '@aws-sdk/xml-builder@3.972.4>fast-xml-parser': ^5.3.6
-  '@yarnpkg/core@4.5.0>tar': 7.5.16
-  esbuild: 0.28.0
-  protobufjs@8.0.1: 8.6.4
-  vite: 8.0.16
-
-patchedDependencies:
-  install-artifact-from-github@1.6.0: 0ceb8fd926db68d46ee8734f3c5924f9c67d8749303a18a09c8bb8d6fe2ddeb8
-
 importers:
 
   .:
@@ -2372,7 +2362,7 @@ packages:
     resolution: {integrity: sha512-EVkXzBjrPGM+cK8/ANWgBrkUCfJfb38/EfTSO8h7pWvKkyPkpWxvR7BkD2MyItMF62C97zAEoqdpUixwR/e+Rw==}
     peerDependencies:
       msw: ^2.4.9
-      vite: 8.0.16
+      vite: ^6.0.0 || ^7.0.0 || ^8.0.0
     peerDependenciesMeta:
       msw:
         optional: true
@@ -5543,7 +5533,7 @@ packages:
     peerDependencies:
       '@types/node': ^20.19.0 || >=22.12.0
       '@vitejs/devtools': ^0.1.18
-      esbuild: 0.28.0
+      esbuild: ^0.27.0 || ^0.28.0
       jiti: '>=1.21.0'
       less: ^4.0.0
       sass: ^1.70.0
@@ -5601,7 +5591,7 @@ packages:
       '@vitest/ui': 4.1.9
       happy-dom: '*'
       jsdom: '*'
-      vite: 8.0.16
+      vite: ^6.0.0 || ^7.0.0 || ^8.0.0
     peerDependenciesMeta:
       '@edge-runtime/vm':
         optional: true
@@ -8910,7 +8900,7 @@ snapshots:
 
   ini@6.0.0: {}
 
-  install-artifact-from-github@1.6.0(patch_hash=0ceb8fd926db68d46ee8734f3c5924f9c67d8749303a18a09c8bb8d6fe2ddeb8):
+  install-artifact-from-github@1.6.0:
     optional: true
 
   is-alphabetical@2.0.1: {}
@@ -10252,7 +10242,7 @@ snapshots:
 
   re2@1.25.0:
     dependencies:
-      install-artifact-from-github: 1.6.0(patch_hash=0ceb8fd926db68d46ee8734f3c5924f9c67d8749303a18a09c8bb8d6fe2ddeb8)
+      install-artifact-from-github: 1.6.0
       nan: 2.27.0
       node-gyp: 13.0.0
     optional: true
