@@ -1,4 +1,4 @@
-import { z } from 'zod/v3';
+import { z } from 'zod/v4';
 
 export const ReleasesConfig = z.object({
   packageName: z.string(),

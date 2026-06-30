@@ -2,6 +2,7 @@ export const repoInfoQuery = `
 query($owner: String!, $name: String!, $user: String) {
   repository(owner: $owner, name: $name) {
     id
+    sshUrl
     isFork
     parent {
       nameWithOwner

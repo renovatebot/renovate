@@ -131,6 +131,7 @@ const pipOptionsWithArguments = [
 ];
 const uvOptionsWithArguments = [
   '--constraints',
+  '--constraint', // singular alias accepted by uv
   '--python-version',
   '--no-emit-package',
   '--prerelease',
@@ -140,6 +141,8 @@ const uvOptionsWithArguments = [
   '--exclude-newer',
   '--exclude-newer-package',
   '--group',
+  '--override',
+  '--overrides',
   ...commonOptionsWithArguments,
 ];
 export const optionsWithArguments = [
@@ -235,6 +238,9 @@ export function extractHeaderCommand(
       } else if (['--constraint', '--constraints'].includes(option)) {
         result.constraintsFiles = result.constraintsFiles ?? [];
         result.constraintsFiles.push(value);
+      } else if (['--override', '--overrides'].includes(option)) {
+        result.overridesFiles = result.overridesFiles ?? [];
+        result.overridesFiles.push(value);
       } else if (option === '--output-file') {
         if (result.outputFile) {
           throw new Error('Cannot use multiple --output-file options');

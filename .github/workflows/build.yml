@@ -34,7 +34,6 @@ env:
   # are we on a release branch?
   DO_RELEASE: ${{ github.ref_name == github.event.repository.default_branch || github.ref_name == 'next' || startsWith(github.ref_name, 'maint/')}}
   NODE_VERSION: 24
-  PDM_VERSION: 2.27.0 # renovate: datasource=pypi depName=pdm
   DRY_RUN: true
   TEST_LEGACY_DECRYPTION: true
   SPARSE_CHECKOUT: |-
@@ -99,8 +98,9 @@ jobs:
         run: gh api ${{ env.PR_URL }} | jq -rc '${{ env.JQ_FILTER }}' >> "$GITHUB_OUTPUT"
 
       - name: Checkout code
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
+          persist-credentials: false
           filter: blob:none # we don't need all blobs
           sparse-checkout: ${{ env.SPARSE_CHECKOUT }}
           show-progress: false
@@ -138,8 +138,9 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
+          persist-credentials: false
           filter: blob:none # we don't need all blobs
           sparse-checkout: ${{ env.SPARSE_CHECKOUT }}
           show-progress: false
@@ -182,8 +183,9 @@ jobs:
     steps:
       - name: Checkout code
         if: needs.setup.outputs.os-matrix-is-full && runner.os != 'Linux'
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
+          persist-credentials: false
           filter: blob:none # we don't need all blobs
           sparse-checkout: ${{ env.SPARSE_CHECKOUT }}
           show-progress: false
@@ -204,8 +206,9 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
+          persist-credentials: false
           show-progress: false
 
       - name: Setup Node.js
@@ -228,8 +231,9 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
+          persist-credentials: false
           show-progress: false
 
       - name: Setup Node.js
@@ -270,8 +274,9 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
+          persist-credentials: false
           show-progress: false
 
       - name: Setup Node.js
@@ -303,8 +308,9 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
+          persist-credentials: false
           show-progress: false
 
       - name: Setup Node.js
@@ -352,8 +358,9 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
+          persist-credentials: false
           show-progress: false
           sparse-checkout: .github/workflows
 
@@ -363,9 +370,9 @@ jobs:
           args: -color -ignore "invalid activity type \"destroyed\" for \"merge_group\" Webhook event. available types are \"checks_requested\""
 
       - name: Run zizmor
-        uses: zizmorcore/zizmor-action@5f14fd08f7cf1cb1609c1e344975f152c7ee938d # v0.5.6
+        uses: zizmorcore/zizmor-action@192e21d79ab29983730a13d1382995c2307fbcaa # v0.5.7
         with:
-          version: 1.25.2
+          version: 1.26.1
 
   test:
     needs: [setup, prefetch]
@@ -388,8 +395,9 @@ jobs:
         include: ${{ fromJSON(needs.setup.outputs.test-shard-matrix) }}
 
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
+          persist-credentials: false
           show-progress: false
 
       - name: Setup Node.js
@@ -425,7 +433,7 @@ jobs:
 
       - name: Codecov Test
         if: github.event_name != 'merge_group' && !cancelled()
-        uses: codecov/codecov-action@e79a6962e0d4c0c17b229090214935d2e33f8354 # v6.0.1
+        uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v6.0.2
         with:
           use_oidc: true
           report_type: test_results
@@ -464,8 +472,9 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
+          persist-credentials: false
           filter: blob:none # we don't need all blobs
           show-progress: false
 
@@ -478,7 +487,7 @@ jobs:
 
       - name: Codecov Coverage
         if: github.event_name != 'merge_group'
-        uses: codecov/codecov-action@e79a6962e0d4c0c17b229090214935d2e33f8354 # v6.0.1
+        uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v6.0.2
         with:
           use_oidc: true
           directory: coverage/lcov
@@ -494,8 +503,9 @@ jobs:
     if: success() && github.event.pull_request.draft != true
     steps:
       - name: Checkout code
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
+          persist-credentials: false
           filter: blob:none # we don't need all blobs
           sparse-checkout: ${{ env.SPARSE_CHECKOUT }}
           show-progress: false
@@ -536,6 +546,7 @@ jobs:
       - coverage-threshold
       - lint-actions
       - build-docker
+      - build-docs
     runs-on: ubuntu-latest
     timeout-minutes: 1
     if: always()
@@ -592,6 +603,19 @@ jobs:
           needs.lint-actions.result == 'skipped'
         run: exit 1
 
+      - name: Fail for failed or cancelled docs build
+        if: |
+          needs.build-docs.result == 'failure' ||
+          needs.build-docs.result == 'cancelled'
+        run: exit 1
+
+      - name: Fail for skipped docs build when PR is ready for review
+        if: |
+          github.event_name == 'pull_request' &&
+          github.event.pull_request.draft != true &&
+          needs.build-docs.result == 'skipped'
+        run: exit 1
+
       - name: Fail for skipped or failed docker build when needed
         if: |
           (
@@ -609,8 +633,9 @@ jobs:
     if: github.event.pull_request.draft != true
     steps:
       - name: Checkout code
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
+          persist-credentials: false
           show-progress: false
 
       - name: Setup Node.js
@@ -638,17 +663,14 @@ jobs:
     steps:
       - run: df -h
 
-      # Ensure docker is using /mnt/docker for data storage on x86_64 runners to avoid disk space issues
-      - name: Prepare docker
-        run: |
-          echo '{"data-root": "/mnt/docker"}' | sudo tee /etc/docker/daemon.json
-          sudo systemctl restart docker
-          docker info
-
       - name: Checkout code
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
+          persist-credentials: false
           show-progress: false
+
+      - name: Setup Docker
+        uses: ./.github/actions/setup-docker
 
       - name: Download dist
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
@@ -663,7 +685,7 @@ jobs:
           os: ${{ runner.os }}
 
       - name: Build docker
-        run: pnpm build:docker build --tries=3 --args '--load'
+        run: pnpm build:docker build --platform linux/amd64,linux/arm64 --tries=3 --args '--load'
         env:
           LOG_LEVEL: debug
 
@@ -687,8 +709,9 @@ jobs:
     if: github.event.pull_request.draft != true
     steps:
       - name: Checkout code
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
+          persist-credentials: false
           show-progress: false
 
       - name: Setup Node.js
@@ -697,15 +720,15 @@ jobs:
           node-version: ${{ needs.setup-build.outputs.node-version }}
           os: ${{ runner.os }}
 
-      - name: Setup PDM
-        uses: pdm-project/setup-pdm@973541a5febeafcfdadf8a51211435be6ecfd90f # v4.5
+      - name: Setup uv
+        uses: astral-sh/setup-uv@fac544c07dec837d0ccb6301d7b5580bf5edae39 # v8.2.0
         with:
-          python-version-file: .python-version
-          version: ${{ env.PDM_VERSION }}
-          cache: true
+          version: 0.11.25
+          enable-cache: true
+          cache-python: true
 
-      - name: Install pdm dependencies
-        run: pdm install
+      - name: Install uv dependencies
+        run: uv sync --locked
 
       - name: Build
         run: pnpm build:docs
@@ -736,8 +759,9 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
+          persist-credentials: false
           show-progress: false
 
       - name: Setup Node.js
@@ -756,11 +780,7 @@ jobs:
         run: pnpm test-e2e:pack
 
       - name: Install dependencies
-        run: |
-          # as `--ignore-workspace` doesn't seem to apply to `minimumReleaseAge`, forcibly delete our workspace
-          rm pnpm-workspace.yaml
-
-          pnpm test-e2e:install
+        run: pnpm test-e2e:install
 
       - name: E2E Test
         run: pnpm test-e2e:run
@@ -810,42 +830,35 @@ jobs:
             gh run cancel "$RUN_ID"
           fi
 
-      - run: df -h
-
-      # Ensure docker is using /mnt/docker for data storage on x86_64 runners to avoid disk space issues
-      - name: Prepare docker
-        run: |
-          echo '{"data-root": "/mnt/docker"}' | sudo tee /etc/docker/daemon.json
-          sudo systemctl restart docker
-          docker info
-
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
+          persist-credentials: false
           fetch-depth: 0 # zero stands for full checkout, which is required for semantic-release
           filter: blob:none # we don't need all blobs, only the full tree
           show-progress: false
 
-      # To avoid disk space issues when performing a release, we can clear up some disk space ahead of time
-      - name: Free Disk Space
-        uses: jlumbroso/free-disk-space@54081f138730dfa15788a46383842cd2f914a1be # v1.3.1
-        with:
-          # we're likely already using some of the globally installed tools
-          tool-cache: false
-          # there are no images by default
-          docker-images: false
-          # but we're definitely not using these
-          android: true
-          dotnet: true
-          haskell: true
-          # and shouldn't be using swap storage
-          swap-storage: true
+      - name: Setup Docker
+        uses: ./.github/actions/setup-docker
 
       - run: df -h
 
-      - name: docker-config
-        uses: containerbase/internal-tools@f8723091cfbf2dafad5686273c2772a981f29c66 # v4.6.31
-        with:
-          command: docker-config
+      # We currently don't neexd it, the runner changed and has now 89G available
+      # To avoid disk space issues when performing a release, we can clear up some disk space ahead of time
+      # - name: Free Disk Space
+      #   uses: jlumbroso/free-disk-space@54081f138730dfa15788a46383842cd2f914a1be # v1.3.1
+      #   with:
+      #     # we're likely already using some of the globally installed tools
+      #     tool-cache: false
+      #     # there are no images by default
+      #     docker-images: false
+      #     # but we're definitely not using these
+      #     android: true
+      #     dotnet: true
+      #     haskell: true
+      #     # and shouldn't be using swap storage
+      #     swap-storage: true
+
+      # - run: df -h
 
       - name: Setup Node.js
         uses: ./.github/actions/setup-node
@@ -863,15 +876,15 @@ jobs:
           echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
           echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.repository_owner }} --password-stdin
 
-      - name: Setup PDM
-        uses: pdm-project/setup-pdm@973541a5febeafcfdadf8a51211435be6ecfd90f # v4.5
+      - name: Setup uv
+        uses: astral-sh/setup-uv@fac544c07dec837d0ccb6301d7b5580bf5edae39 # v8.2.0
         with:
-          python-version-file: .python-version
-          version: ${{ env.PDM_VERSION }}
-          cache: true
+          version: 0.11.25
+          enable-cache: true
+          cache-python: true
 
-      - name: Install pdm dependencies
-        run: pdm install
+      - name: Install uv dependencies
+        run: uv sync --locked
 
       - name: Check dry run
         run: |
@@ -902,18 +915,17 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           LOG_LEVEL: debug
 
-      - name: Build mkdocs site for deployment (when no release)
+      - name: Build mkdocs site for deployment
         if: github.ref_name == 'main'
         run: |
-          # If there wasn't a release, we won't have executed `tools/prepare-release.ts`, and the mkdocs site won't be built, but we do want it built regardless, so we can update the docs site
-          if [[ ! -f tmp/mkdocs-site.tgz ]]; then
-            latest_tag=$(gh release view --json tagName -q .tagName)
-            pnpm mkdocs build --version "$latest_tag"
-            mkdir -p tmp
-            tar -czf tmp/mkdocs-site.tgz -C tools/mkdocs/site .
-          fi
+          # Always rebuild the docs site with the announcement bar for deployment to GitHub Pages, including the announcement bar (which isn't included when preparing a release's docs)
+          latest_tag=$(gh release view --json tagName -q .tagName)
+          pnpm mkdocs build --version "$latest_tag"
+          mkdir -p tmp
+          tar -czf tmp/mkdocs-site.tgz -C tools/mkdocs/site .
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          MKDOCS_INCLUDE_ANNOUNCEMENT: 'true'
 
       - name: Upload docs artifact for deployment
         if: github.ref_name == 'main'

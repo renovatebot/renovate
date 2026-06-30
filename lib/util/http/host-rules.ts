@@ -253,21 +253,21 @@ export function applyHostRule<GotOptions extends HostRulesGotOptions>(
 
   if (isNonEmptyString(hostRule.httpsCertificateAuthority)) {
     options.https = {
-      ...(options.https ?? {}),
+      ...options.https,
       certificateAuthority: hostRule.httpsCertificateAuthority,
     };
   }
 
   if (isNonEmptyString(hostRule.httpsPrivateKey)) {
     options.https = {
-      ...(options.https ?? {}),
+      ...options.https,
       key: hostRule.httpsPrivateKey,
     };
   }
 
   if (isNonEmptyString(hostRule.httpsCertificate)) {
     options.https = {
-      ...(options.https ?? {}),
+      ...options.https,
       certificate: hostRule.httpsCertificate,
     };
   }

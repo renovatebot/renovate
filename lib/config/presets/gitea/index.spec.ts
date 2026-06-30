@@ -50,6 +50,23 @@ describe('config/presets/gitea/index', () => {
       expect(res).toEqual({ from: 'api' });
     });
 
+    it('returns JSONC', async () => {
+      httpMock
+        .scope(giteaApiHost)
+        .get(`${basePath}/some-filename.jsonc`)
+        .reply(200, {
+          content: toBase64('{"from": /* secret! */ "api"}'),
+        });
+
+      const res = await gitea.fetchJSONFile(
+        'some/repo',
+        'some-filename.jsonc',
+        giteaApiHost,
+        null,
+      );
+      expect(res).toEqual({ from: 'api' });
+    });
+
     it('throws external host error', async () => {
       httpMock
         .scope(giteaApiHost)
