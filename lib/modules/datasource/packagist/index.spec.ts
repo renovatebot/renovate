@@ -1,6 +1,7 @@
 import { mockDeep } from 'vitest-mock-extended';
 import { Fixtures } from '~test/fixtures.ts';
 import * as httpMock from '~test/http-mock.ts';
+import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
 import type { HostRule } from '../../../types/index.ts';
 import * as _hostRules from '../../../util/host-rules.ts';
 import * as composerVersioning from '../../versioning/composer/index.ts';
@@ -96,6 +97,100 @@ describe('modules/datasource/packagist/index', () => {
         versioning,
         packageName: 'vendor/package-name2',
       });
+      expect(res).toBeNull();
+    });
+
+    it('throws for default registry timeouts', async () => {
+      httpMock
+        .scope(baseUrl)
+        .get('/packages.json')
+        .replyWithError(httpMock.error({ code: 'ETIMEDOUT' }));
+      config.registryUrls = [baseUrl];
+
+      await expect(
+        getPkgReleases({
+          ...config,
+          datasource,
+          versioning,
+          packageName: 'vendor/default-timeout',
+        }),
+      ).rejects.toThrow(ExternalHostError);
+    });
+
+    it('throws for legacy default registry host timeouts', async () => {
+      const legacyBaseUrl = 'https://packagist.org';
+      httpMock
+        .scope(legacyBaseUrl)
+        .get('/packages.json')
+        .replyWithError(httpMock.error({ code: 'ETIMEDOUT' }));
+      config.registryUrls = [legacyBaseUrl];
+
+      await expect(
+        getPkgReleases({
+          ...config,
+          datasource,
+          versioning,
+          packageName: 'vendor/legacy-default-timeout',
+        }),
+      ).rejects.toThrow(ExternalHostError);
+    });
+
+    it('throws for default registry rate limiting', async () => {
+      httpMock.scope(baseUrl).get('/packages.json').reply(429);
+      config.registryUrls = [baseUrl];
+
+      await expect(
+        getPkgReleases({
+          ...config,
+          datasource,
+          versioning,
+          packageName: 'vendor/default-rate-limit',
+        }),
+      ).rejects.toThrow(ExternalHostError);
+    });
+
+    it('throws for default registry server errors', async () => {
+      httpMock.scope(baseUrl).get('/packages.json').reply(500);
+      config.registryUrls = [baseUrl];
+
+      await expect(
+        getPkgReleases({
+          ...config,
+          datasource,
+          versioning,
+          packageName: 'vendor/default-server-error',
+        }),
+      ).rejects.toThrow(ExternalHostError);
+    });
+
+    it('returns null for default registry not found responses', async () => {
+      httpMock.scope(baseUrl).get('/packages.json').reply(404);
+      config.registryUrls = [baseUrl];
+
+      const res = await getPkgReleases({
+        ...config,
+        datasource,
+        versioning,
+        packageName: 'vendor/default-not-found',
+      });
+
+      expect(res).toBeNull();
+    });
+
+    it('returns null for default registry unknown errors', async () => {
+      httpMock
+        .scope(baseUrl)
+        .get('/packages.json')
+        .replyWithError('unknown error');
+      config.registryUrls = [baseUrl];
+
+      const res = await getPkgReleases({
+        ...config,
+        datasource,
+        versioning,
+        packageName: 'vendor/default-unknown-error',
+      });
+
       expect(res).toBeNull();
     });
 
