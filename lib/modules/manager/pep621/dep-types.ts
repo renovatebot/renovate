@@ -33,6 +33,11 @@ export const knownDepTypes = [
     depType: 'tool.uv.sources',
     description: 'Listed under `[tool.uv.sources]`',
   },
+  {
+    depType: 'uv.lock',
+    description:
+      'Transitive dependency resolved in `uv.lock`. Only surfaced for `osvVulnerabilityAlerts`; never updated routinely.',
+  },
 ] as const satisfies readonly DepTypeMetadata[];
 
 export const supportsDynamicDepTypesNote =
