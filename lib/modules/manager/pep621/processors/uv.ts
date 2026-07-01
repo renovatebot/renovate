@@ -219,14 +219,16 @@ export class UvProcessor extends BasePyProjectProcessor {
       }
       let excludeNewerFlag = '';
       if (config.minimumReleaseAge) {
-        const ms = toMs(config.minimumReleaseAge);
-        if (ms === null) {
+        const minimumReleaseAgeMs = toMs(config.minimumReleaseAge);
+        if (minimumReleaseAgeMs === null) {
           logger.debug(
             { minimumReleaseAge: config.minimumReleaseAge },
             'Invalid minimumReleaseAge, skipping --exclude-newer for uv lock',
           );
         } else {
-          let excludeNewerDate = DateTime.now().minus(ms).toUTC();
+          let excludeNewerDate = DateTime.now()
+            .minus(minimumReleaseAgeMs)
+            .toUTC();
           const uvExcludeNewerDate = project.tool?.uv?.['exclude-newer'];
           if (uvExcludeNewerDate === null) {
             logger.debug(
