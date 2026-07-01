@@ -26,6 +26,8 @@ interface PackagistLookupError {
 
 function isDefaultPackagistHost(registryUrl: string): boolean {
   const url = parseUrl(registryUrl);
+
+  /* v8 ignore if -- typescript strict null check */
   if (!url) {
     return false;
   }
