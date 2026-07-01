@@ -66,6 +66,25 @@ All feeds are checked for dependency updates, and duplicate updates are merged i
 !!! note
   Some alternative feeds (e.g. Artifactory) do not implement the full set of [required NuGet resources](https://learn.microsoft.com/en-us/nuget/api/overview#resources-and-schema) for the V3 API. If the `PackageBaseAddress` resource does not exist, Renovate falls back to using the `projectUrl` from the dependency's catalog entry as the `sourceUrl` for the dependency, affecting [changelog detection](key-concepts/changelogs.md#how-renovate-detects-changelogs).
 
+### Disabling the default nuget.org feed
+
+By default, Renovate falls back to `https://api.nuget.org/v3/index.json` if no specific feeds are found, and includes it when regenerating lock files.
+If you use strict `PackageSourceMapping` and want to avoid mapping errors, you can disable `nuget.org` using one of the following methods:
+
+- **Via `NuGet.config`**: If you define alternate feeds in your repository's `NuGet.config` file, Renovate will automatically respect your settings and will **not** inject the default `nuget.org` source (unless you explicitly included it).
+- **Via `hostRules`**: You can explicitly disable the default `nuget.org` feed in your Renovate configuration (e.g. `renovate.json`) by setting its `enabled` property to `false`:
+
+  ```json
+  {
+    "hostRules": [
+      {
+        "matchHost": "api.nuget.org",
+        "enabled": false
+      }
+    ]
+  }
+  ```
+
 ### Protocol versions
 
 NuGet supports two protocol versions, `v2` and `v3`.

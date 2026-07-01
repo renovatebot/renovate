@@ -34,6 +34,7 @@ import {
   findGlobalJson,
   getConfiguredRegistries,
   getDefaultRegistries,
+  isRegistryDisabled,
 } from './util.ts';
 
 async function createCachedNuGetConfigFile(
@@ -53,7 +54,9 @@ async function createCachedNuGetConfigFile(
     (url) => ({ url }),
   );
 
-  const combinedRegistries = [...registries, ...updatedDepsRegistries];
+  const combinedRegistries = [...registries, ...updatedDepsRegistries].filter(
+    (reg) => !isRegistryDisabled(reg.url),
+  );
 
   const contents = createNuGetConfigXml(combinedRegistries);
 

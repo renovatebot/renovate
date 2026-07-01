@@ -7,6 +7,7 @@ import {
   findUpLocal,
   readLocalFile,
 } from '../../../util/fs/index.ts';
+import * as hostRules from '../../../util/host-rules.ts';
 import { minimatch } from '../../../util/minimatch.ts';
 import { regEx } from '../../../util/regex.ts';
 import { nugetOrg } from '../../datasource/nuget/index.ts';
@@ -25,6 +26,19 @@ export async function readFileAsXmlDocument(
     logger.debug({ err, file }, `failed to parse file as XML document`);
     return undefined;
   }
+}
+
+/**
+ * Checks if a registry URL is disabled by hostRules.
+ * @param url the registry URL
+ * @returns true if the registry is disabled
+ */
+export function isRegistryDisabled(url: string): boolean {
+  const rule = hostRules.find({
+    hostType: 'nuget',
+    url,
+  });
+  return rule.enabled === false;
 }
 
 /**
