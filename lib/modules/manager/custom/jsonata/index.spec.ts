@@ -337,6 +337,65 @@ describe('modules/manager/custom/jsonata/index', () => {
     });
   });
 
+  it('replace depName with registryAliases', async () => {
+    const config = {
+      fileFormat: 'json',
+      matchStrings: [`{"depName": "old/bar"}`],
+      currentValueTemplate: '1.0.0',
+      datasourceTemplate: 'npm',
+      registryAliases: {
+        old: 'new',
+      },
+    };
+    const res = await extractPackageFile('{}', 'unused', config);
+    expect({
+      registryAliases: {
+        old: 'new',
+      },
+      ...res,
+    }).toMatchObject({
+      ...config,
+      deps: [
+        {
+          depName: 'old/bar',
+          packageName: 'new/bar',
+          currentValue: '1.0.0',
+          datasource: 'npm',
+        },
+      ],
+    });
+  });
+
+  it('replace registryUrl with registryAliases', async () => {
+    const config = {
+      fileFormat: 'json',
+      matchStrings: [`{"depName": "foo"}`],
+      currentValueTemplate: '1.0.0',
+      datasourceTemplate: 'npm',
+      registryUrlTemplate: 'https://old.registry',
+      registryAliases: {
+        'https://old.registry': 'https://new.registry',
+      },
+    };
+    const res = await extractPackageFile('{}', 'unused', config);
+    expect({
+      registryAliases: {
+        'https://old.registry': 'https://new.registry',
+      },
+      ...res,
+    }).toMatchObject({
+      ...config,
+      deps: [
+        {
+          depName: 'foo',
+          registryUrls: ['https://new.registry/'],
+          currentValue: '1.0.0',
+          datasource: 'npm',
+        },
+      ],
+    });
+  });
+
   it('extracts other matchStrings if one finds no match', async () => {
     const config = {
       fileFormat: 'json',
