@@ -76,7 +76,7 @@ const getMajor = (version: string): number | null => {
   if (isVersion(version)) {
     const tokens = tokenize(version);
     const majorToken = tokens[0];
-    return +majorToken.val;
+    return Number(majorToken.val);
   }
   return null;
 };
@@ -86,7 +86,7 @@ const getMinor = (version: string): number | null => {
     const tokens = tokenize(version);
     const minorToken = tokens[1];
     if (minorToken?.type === TYPE_NUMBER) {
-      return +minorToken.val;
+      return Number(minorToken.val);
     }
     return 0;
   }
@@ -103,7 +103,7 @@ const getPatch = (version: string): number | null => {
       minorToken.type === TYPE_NUMBER &&
       patchToken.type === TYPE_NUMBER
     ) {
-      return +patchToken.val;
+      return Number(patchToken.val);
     }
     return 0;
   }

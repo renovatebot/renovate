@@ -10,13 +10,13 @@ const TYPE_QUALIFIER = 'TYPE_QUALIFIER';
 export interface BaseToken {
   prefix: string;
   type: typeof TYPE_NUMBER | typeof TYPE_QUALIFIER;
-  val: number | string;
+  val: bigint | string;
   isTransition?: boolean;
 }
 
 export interface NumberToken extends BaseToken {
   type: typeof TYPE_NUMBER;
-  val: number;
+  val: bigint;
 }
 
 export interface QualifierToken extends BaseToken {
@@ -65,7 +65,7 @@ function iterateTokens(versionStr: string, cb: (token: Token) => void): void {
       cb({
         prefix: currentPrefix,
         type: TYPE_NUMBER,
-        val: parseInt(val, 10),
+        val: BigInt(val),
         isTransition: transition,
       });
     } else {
@@ -113,7 +113,7 @@ function iterateTokens(versionStr: string, cb: (token: Token) => void): void {
 function isNull(token: Token): boolean {
   const val = token.val;
   return (
-    val === 0 ||
+    val === 0n ||
     val === '' ||
     val === 'final' ||
     val === 'ga' ||
@@ -149,7 +149,7 @@ function nullFor(token: Token): Token {
     ? {
         prefix: token.prefix,
         type: TYPE_NUMBER,
-        val: 0,
+        val: 0n,
       }
     : {
         prefix: token.prefix,
@@ -490,8 +490,8 @@ function coerceRangeValue(prev: string, next: string): string {
 function incrementRangeValue(value: string): string {
   const tokens = tokenize(value);
   const lastToken = tokens[tokens.length - 1];
-  if (typeof lastToken.val === 'number') {
-    lastToken.val += 1;
+  if (typeof lastToken.val === 'bigint') {
+    lastToken.val += 1n;
     return coerceRangeValue(value, tokensToStr(tokens));
   }
   return value;
@@ -569,7 +569,7 @@ function autoExtendMavenRange(
     if (interval.rightType === INCLUDING_POINT) {
       const tokens = tokenize(rightValue);
       const lastToken = tokens[tokens.length - 1];
-      if (typeof lastToken.val === 'number') {
+      if (typeof lastToken.val === 'bigint') {
         interval.rightValue = coerceRangeValue(rightValue, newValue);
       } else {
         interval.rightValue = newValue;
