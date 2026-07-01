@@ -28,6 +28,7 @@ export abstract class ChangeLogSource {
   private readonly cacheNamespace: PackageCacheNamespace;
   private readonly platform: ChangeLogPlatform;
   private readonly datasource:
+    | 'azure-tags'
     | 'bitbucket-tags'
     | 'bitbucket-server-tags'
     | 'forgejo-tags'
@@ -38,6 +39,7 @@ export abstract class ChangeLogSource {
   constructor(
     platform: ChangeLogPlatform,
     datasource:
+      | 'azure-tags'
       | 'bitbucket-tags'
       | 'bitbucket-server-tags'
       | 'forgejo-tags'
@@ -284,6 +286,9 @@ export abstract class ChangeLogSource {
       return '';
     }
     const pathname = parsedUrl.pathname;
+    if (this.platform === 'azure') {
+      return trimSlashes(pathname).replace(regEx(/.*\//), '');
+    }
     return trimSlashes(pathname).replace(regEx(/\.git$/), '');
   }
 
@@ -299,6 +304,11 @@ export abstract class ChangeLogSource {
   }
 
   hasValidRepository(repository: string): boolean {
-    return repository.split('/').length === 2;
+    const repositoryLength = repository.split('/').length;
+    if (this.platform === 'azure') {
+      return repositoryLength === 1;
+    } else {
+      return repositoryLength === 2;
+    }
   }
 }

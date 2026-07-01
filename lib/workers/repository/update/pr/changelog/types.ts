@@ -24,6 +24,7 @@ export interface ChangeLogRelease {
 }
 
 export type ChangeLogPlatform =
+  | 'azure'
   | 'bitbucket'
   | 'bitbucket-server'
   | 'forgejo'
@@ -43,6 +44,7 @@ export interface ChangeLogProject {
 }
 
 export type ChangeLogError =
+  | 'MissingAzureToken'
   | 'MissingBitbucketToken'
   | 'MissingGithubToken'
   | 'MissingGitlabToken';
