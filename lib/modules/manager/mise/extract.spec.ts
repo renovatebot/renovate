@@ -779,6 +779,40 @@ describe('modules/manager/mise/extract', () => {
       });
     });
 
+    it('extracts gitlab backend tools', async () => {
+      const content = codeBlock`
+      [tools]
+      "gitlab:gitlab-org/cli" = "v1.54.0"
+      "gitlab:some/repo" = { version_prefix = "release-", version = "1.0.0" }
+      "gitlab:other/repo[version_prefix=v]" = "2.0.0"
+    `;
+      const result = await extractPackageFile(content, miseFilename);
+      expect(result).toMatchObject({
+        deps: [
+          {
+            depName: 'gitlab:gitlab-org/cli',
+            currentValue: 'v1.54.0',
+            packageName: 'gitlab-org/cli',
+            datasource: 'gitlab-releases',
+          },
+          {
+            depName: 'gitlab:some/repo',
+            currentValue: '1.0.0',
+            packageName: 'some/repo',
+            datasource: 'gitlab-releases',
+            extractVersion: '^release\\-(?<version>.+)',
+          },
+          {
+            depName: 'gitlab:other/repo',
+            currentValue: '2.0.0',
+            packageName: 'other/repo',
+            datasource: 'gitlab-releases',
+            extractVersion: '^v(?<version>.+)',
+          },
+        ],
+      });
+    });
+
     it('provides skipReason for lines with unsupported tooling', async () => {
       const content = codeBlock`
       [tools]

@@ -101,6 +101,7 @@ Renovate's `mise` manager supports the following [backends](https://mise.jdx.dev
 - [`cargo`](https://mise.jdx.dev/dev-tools/backends/cargo.html)
 - [`gem`](https://mise.jdx.dev/dev-tools/backends/gem.html)
 - [`github`](https://mise.jdx.dev/dev-tools/backends/github.html)
+- [`gitlab`](https://mise.jdx.dev/dev-tools/backends/gitlab.html)
 - [`go`](https://mise.jdx.dev/dev-tools/backends/go.html)
 - [`npm`](https://mise.jdx.dev/dev-tools/backends/npm.html)
 - [`pipx`](https://mise.jdx.dev/dev-tools/backends/pipx.html)

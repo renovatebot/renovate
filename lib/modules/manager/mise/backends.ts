@@ -10,6 +10,7 @@ import { GitRefsDatasource } from '../../datasource/git-refs/index.ts';
 import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
 import { GithubReleasesDatasource } from '../../datasource/github-releases/index.ts';
 import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
+import { GitlabReleasesDatasource } from '../../datasource/gitlab-releases/index.ts';
 import { GoDatasource } from '../../datasource/go/index.ts';
 import { NpmDatasource } from '../../datasource/npm/index.ts';
 import { NugetDatasource } from '../../datasource/nuget/index.ts';
@@ -134,6 +135,30 @@ export function createGithubToolConfig(
   return {
     packageName: name,
     datasource: GithubReleasesDatasource.id,
+    currentValue: version,
+    ...(extractVersion && { extractVersion }),
+  };
+}
+
+/**
+ * Create a tooling config for gitlab backend
+ * @link https://mise.jdx.dev/dev-tools/backends/gitlab.html
+ */
+export function createGitlabToolConfig(
+  name: string,
+  version: string,
+  toolOptions: MiseToolOptions,
+): BackendToolingConfig {
+  let extractVersion: string | undefined = undefined;
+  const prefix = toolOptions.version_prefix;
+
+  if (isNonEmptyString(prefix)) {
+    extractVersion = `^${escapeRegExp(prefix)}(?<version>.+)`;
+  }
+
+  return {
+    packageName: name,
+    datasource: GitlabReleasesDatasource.id,
     currentValue: version,
     ...(extractVersion && { extractVersion }),
   };
