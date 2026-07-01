@@ -47,6 +47,10 @@ If set to `"true"`, a config error Issue will be raised in case repository confi
 
 If set, Renovate will terminate the whole process group of a terminated child process spawned by Renovate.
 
+## `RENOVATE_X_GIT_UNSAFE_ASK_PASS`
+
+Allow passing unsafe `GIT_ASKPASS` to git via `simple-git`.
+
 ## `RENOVATE_X_GITLAB_AUTO_APPROVE_TOKEN`
 
 If set, when `autoApprove` is enabled, the provided token is used to authenticate GitLab approve requests instead of the default one.

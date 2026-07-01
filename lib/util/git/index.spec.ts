@@ -1626,6 +1626,7 @@ describe('util/git/index', { timeout: 30000 }, () => {
       process.env.GIT_CONFIG_GLOBAL = '/tmp/global-gitconfig';
       process.env.GIT_CONFIG_SYSTEM = '/tmp/system-gitconfig';
       process.env.PAGER = 'less';
+      process.env.GIT_ASKPASS = '/tmp/.git-askpass';
 
       const envSpy = vi.spyOn(SimpleGit.prototype, 'env');
       await git.initRepo({ url: origin.path });
@@ -1637,6 +1638,7 @@ describe('util/git/index', { timeout: 30000 }, () => {
           LANG: 'C.UTF-8',
           LC_ALL: 'C.UTF-8',
           GIT_SSH_COMMAND: 'ssh -o BatchMode=yes',
+          GIT_ASKPASS: '/tmp/.git-askpass',
         }),
       );
       expect(gitEnv).not.toHaveProperty('GIT_CONFIG_COUNT');

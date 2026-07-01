@@ -25,6 +25,10 @@ export function simpleGitConfig(): Partial<SimpleGitOptions> {
   if (getEnv().RENOVATE_X_CLEAR_HOOKS) {
     unsafe.allowUnsafeHooksPath = true;
   }
+  // For custom `GIT_ASKPASS`
+  if (getEnv().RENOVATE_X_GIT_UNSAFE_ASK_PASS) {
+    unsafe.allowUnsafeAskPass = true;
+  }
   const config: Partial<SimpleGitOptions> = {
     completion: {
       onClose: true,
