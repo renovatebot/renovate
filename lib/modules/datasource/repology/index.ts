@@ -237,7 +237,7 @@ export class RepologyDatasource extends Datasource {
         );
       }
 
-      throw new ExternalHostError(err);
+      this.handleGenericErrors(err);
     }
   }
 }
