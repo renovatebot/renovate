@@ -1,7 +1,7 @@
 import changelogFilenameRegex from 'changelog-filename-regex';
 import { logger } from '../../../../../../logger/index.ts';
-import type { GitlabRelease } from '../../../../../../modules/datasource/gitlab-releases/types.ts';
-import type { GitlabTreeNode } from '../../../../../../types/platform/gitlab/index.ts';
+import { GitlabReleases } from '../../../../../../modules/datasource/gitlab-releases/schema.ts';
+import { GitlabTree } from '../../../../../../modules/platform/gitlab/schema.ts';
 import { GitlabHttp } from '../../../../../../util/http/gitlab.ts';
 import { compareChangelogFilePath } from '../common.ts';
 import type {
@@ -24,18 +24,19 @@ export async function getReleaseNotesMd(
   const apiPrefix = `${apiBaseUrl}projects/${urlEncodedRepo}/repository/`;
 
   // https://docs.gitlab.com/13.2/ee/api/repositories.html#list-repository-tree
-  const tree = (
-    await http.getJsonUnchecked<GitlabTreeNode[]>(
+  const tree: GitlabTree = (
+    await http.getJson(
       `${apiPrefix}tree?per_page=100${
         sourceDirectory ? `&path=${sourceDirectory}` : ''
       }`,
       {
         paginate: true,
       },
+      GitlabTree,
     )
   ).body;
   const allFiles = tree.filter((f) => f.type === 'blob');
-  let files: GitlabTreeNode[] = [];
+  let files: GitlabTree = [];
   if (!files.length) {
     files = allFiles.filter((f) => changelogFilenameRegex.test(f.name));
   }
@@ -69,11 +70,12 @@ export async function getReleaseList(
   const urlEncodedRepo = encodeURIComponent(repository);
   const apiUrl = `${apiBaseUrl}projects/${urlEncodedRepo}/releases`;
 
-  const res = await http.getJsonUnchecked<GitlabRelease[]>(
+  const res = await http.getJson(
     `${apiUrl}?per_page=100`,
     {
       paginate: true,
     },
+    GitlabReleases,
   );
   return res.body.map((release) => ({
     url: `${project.baseUrl}${repository}/-/releases/${release.tag_name}`,

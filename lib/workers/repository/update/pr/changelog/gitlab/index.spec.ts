@@ -110,12 +110,12 @@ describe('workers/repository/update/pr/changelog/gitlab/index', () => {
         .scope(matchHost)
         .get('/api/v4/projects/meno%2Fdropzone/repository/tags?per_page=100')
         .reply(200, [
-          { name: 'v5.2.0' },
-          { name: 'v5.4.0' },
-          { name: 'v5.5.0' },
-          { name: 'v5.6.0' },
-          { name: 'v5.6.1' },
-          { name: 'v5.7.0' },
+          { name: 'v5.2.0', commit: { id: 'aaa520', created_at: '' } },
+          { name: 'v5.4.0', commit: { id: 'aaa540', created_at: '' } },
+          { name: 'v5.5.0', commit: { id: 'aaa550', created_at: '' } },
+          { name: 'v5.6.0', commit: { id: 'aaa560', created_at: '' } },
+          { name: 'v5.6.1', commit: { id: 'aaa561', created_at: '' } },
+          { name: 'v5.7.0', commit: { id: 'aaa570', created_at: '' } },
         ])
         .persist()
         .get('/api/v4/projects/meno%2Fdropzone/repository/tree?per_page=100')
@@ -339,9 +339,9 @@ describe('workers/repository/update/pr/changelog/gitlab/index', () => {
         .scope('https://git.test.com/')
         .get('/api/v4/projects/some%2Frepo/repository/tags?per_page=100')
         .reply(200, [
-          { name: 'v5.2.0' },
-          { name: 'v5.4.0' },
-          { name: 'v5.5.0' },
+          { name: 'v5.2.0', commit: { id: 'aaa520', created_at: '' } },
+          { name: 'v5.4.0', commit: { id: 'aaa540', created_at: '' } },
+          { name: 'v5.5.0', commit: { id: 'aaa550', created_at: '' } },
         ]);
       expect(
         await changelogSource.getAllTags('https://git.test.com/', 'some/repo'),

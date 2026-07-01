@@ -153,11 +153,11 @@ const githubTreeResponse = {
 };
 
 const gitlabTreeResponse = [
-  { path: 'lib', name: 'lib', type: 'tree' },
+  { path: 'lib', name: 'lib', type: 'tree', id: 'lib-id' },
   { path: 'CHANGELOG', name: 'CHANGELOG', type: 'blob', id: 'cdef' },
   { path: 'CHANGELOG.json', name: 'CHANGELOG.json', type: 'blob', id: 'bcde' },
   { path: 'CHANGELOG.md', name: 'CHANGELOG.md', type: 'blob', id: 'abcd' },
-  { path: 'README.md', name: 'README.md', type: 'blob' },
+  { path: 'README.md', name: 'README.md', type: 'blob', id: 'readme-id' },
 ];
 
 const bitbucketProject = partial<ChangeLogProject>({
@@ -560,9 +560,10 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
           '/api/v4/projects/some%2Fyet-other-repository/releases?per_page=100',
         )
         .reply(200, [
-          { tag_name: `v1.0.0` },
+          { tag_name: `v1.0.0`, released_at: '2021-01-01T00:00:00.000Z' },
           {
             tag_name: `v1.0.1`,
+            released_at: '2021-01-02T00:00:00.000Z',
             body: 'some body #123, [#124](https://gitlab.com/some/yet-other-repository/issues/124)',
           },
         ]);
@@ -597,9 +598,10 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
           '/api/v4/projects/some%2Fyet-other-repository/releases?per_page=100',
         )
         .reply(200, [
-          { tag_name: `v1.0.0` },
+          { tag_name: `v1.0.0`, released_at: '2021-01-01T00:00:00.000Z' },
           {
             tag_name: `v1.0.1`,
+            released_at: '2021-01-02T00:00:00.000Z',
             body: 'some body #123, [#124](https://my.custom.domain/some/yet-other-repository/issues/124)',
           },
         ]);
@@ -1189,9 +1191,13 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
         .scope('https://api.gitlab.com/')
         .get('/projects/some%2Fother-repository/releases?per_page=100')
         .reply(200, [
-          { tag_name: `${prefix}1.0.0` },
+          {
+            tag_name: `${prefix}1.0.0`,
+            released_at: '2021-01-01T00:00:00.000Z',
+          },
           {
             tag_name: `${prefix}1.0.1`,
+            released_at: '2021-01-02T00:00:00.000Z',
             description:
               'some body #123, [#124](https://gitlab.com/some/yet-other-repository/issues/124)',
           },
@@ -1226,9 +1232,13 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
         .scope('https://api.gitlab.com/')
         .get('/projects/some%2Fother-repository/releases?per_page=100')
         .reply(200, [
-          { tag_name: `${prefix}1.0.0` },
+          {
+            tag_name: `${prefix}1.0.0`,
+            released_at: '2021-01-01T00:00:00.000Z',
+          },
           {
             tag_name: `${prefix}1.0.1`,
+            released_at: '2021-01-02T00:00:00.000Z',
             description:
               'some body #123, [#124](https://gitlab.com/some/yet-other-repository/issues/124)',
           },
@@ -1263,9 +1273,13 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
         .scope('https://api.gitlab.com/')
         .get('/projects/some%2Fother-repository/releases?per_page=100')
         .reply(200, [
-          { tag_name: `${prefix}1.0.0` },
+          {
+            tag_name: `${prefix}1.0.0`,
+            released_at: '2021-01-01T00:00:00.000Z',
+          },
           {
             tag_name: `${prefix}1.0.1`,
+            released_at: '2021-01-02T00:00:00.000Z',
             description:
               'some body #123, [#124](https://gitlab.com/some/yet-other-repository/issues/124)',
           },
