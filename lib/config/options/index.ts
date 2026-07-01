@@ -2731,6 +2731,14 @@ const options: Readonly<RenovateOptions>[] = [
     mergeable: true,
   },
   {
+    name: 'reRequestApprovedReviews',
+    description:
+      'Re-request review from users whose approvals were dismissed on existing PRs.',
+    type: 'boolean',
+    default: false,
+    supportedPlatforms: ['github'],
+  },
+  {
     name: 'managerFilePatterns',
     description: 'RegEx (`re2`) and glob patterns for matching manager files.',
     type: 'array',
