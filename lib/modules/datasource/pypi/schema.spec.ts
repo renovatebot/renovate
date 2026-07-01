@@ -1,4 +1,4 @@
-import { PypiResponse } from './schema.ts';
+import { PypiResponse, PypiSimpleFile, PypiSimpleResponse } from './schema.ts';
 
 describe('modules/datasource/pypi/schema', () => {
   describe('PypiResponseSchema', () => {
@@ -89,6 +89,121 @@ describe('modules/datasource/pypi/schema', () => {
       };
       const result = PypiResponse.parse(input);
       expect(result?.info?.name).toBe('mypackage');
+    });
+  });
+
+  describe('PypiSimpleFile', () => {
+    it('parses a valid file entry', () => {
+      const input = {
+        filename: 'package-1.0.0.tar.gz',
+        'requires-python': '>=3.7',
+        yanked: false,
+        'upload-time': '2023-01-01T00:00:00.000Z',
+      };
+
+      const result = PypiSimpleFile.parse(input);
+
+      expect(result.filename).toBe('package-1.0.0.tar.gz');
+      expect(result['requires-python']).toBe('>=3.7');
+      expect(result.yanked).toBe(false);
+      expect(result['upload-time']).toBe('2023-01-01T00:00:00.000Z');
+    });
+
+    it('handles missing optional fields', () => {
+      const input = {
+        filename: 'package-1.0.0.tar.gz',
+      };
+
+      const result = PypiSimpleFile.parse(input);
+
+      expect(result.filename).toBe('package-1.0.0.tar.gz');
+      expect(result['requires-python']).toBeUndefined();
+      expect(result.yanked).toBe(false);
+      expect(result['upload-time']).toBeUndefined();
+    });
+
+    it('normalizes null optional fields to undefined', () => {
+      const input = {
+        filename: 'package-1.0.0.tar.gz',
+        'requires-python': null,
+        'upload-time': null,
+      };
+
+      const result = PypiSimpleFile.parse(input);
+
+      expect(result['requires-python']).toBeUndefined();
+      expect(result['upload-time']).toBeUndefined();
+    });
+
+    it('handles yanked as a string reason', () => {
+      const input = {
+        filename: 'package-1.0.0.tar.gz',
+        yanked: 'security vulnerability',
+      };
+
+      const result = PypiSimpleFile.parse(input);
+
+      expect(result.yanked).toBe('security vulnerability');
+    });
+
+    it('handles yanked as true', () => {
+      const input = {
+        filename: 'package-1.0.0.tar.gz',
+        yanked: true,
+      };
+
+      const result = PypiSimpleFile.parse(input);
+
+      expect(result.yanked).toBe(true);
+    });
+  });
+
+  describe('PypiSimpleResponse', () => {
+    it('parses a valid response with files', () => {
+      const input = {
+        files: [
+          {
+            filename: 'package-1.0.0.tar.gz',
+            'requires-python': '>=3.7',
+            yanked: false,
+            'upload-time': '2023-01-01T00:00:00.000Z',
+          },
+          {
+            filename: 'package-2.0.0.tar.gz',
+            yanked: true,
+          },
+        ],
+      };
+
+      const result = PypiSimpleResponse.parse(input);
+
+      expect(result.files).toHaveLength(2);
+      expect(result.files[0].filename).toBe('package-1.0.0.tar.gz');
+      expect(result.files[1].yanked).toBe(true);
+    });
+
+    it('filters out invalid file entries via LooseArray', () => {
+      const input = {
+        files: [
+          { filename: 'package-1.0.0.tar.gz' },
+          { notAFilename: 'invalid' },
+          { filename: 'package-2.0.0.tar.gz' },
+        ],
+      };
+
+      const result = PypiSimpleResponse.parse(input);
+
+      expect(result.files).toHaveLength(2);
+      expect(result.files[0].filename).toBe('package-1.0.0.tar.gz');
+      expect(result.files[1].filename).toBe('package-2.0.0.tar.gz');
+    });
+
+    it('parses an empty files array', () => {
+      const input = { files: [] };
+
+      const result = PypiSimpleResponse.parse(input);
+
+      expect(result.files).toHaveLength(0);
     });
   });
 });

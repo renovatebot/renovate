@@ -1,11 +1,12 @@
-import { isString } from '@sindresorhus/is';
+import { isNonEmptyString, isTruthy } from '@sindresorhus/is';
 import changelogFilenameRegex from 'changelog-filename-regex';
 import { logger } from '../../../logger/index.ts';
-import { coerceArray } from '../../../util/array.ts';
+import { coerceArray, deduplicateArray } from '../../../util/array.ts';
 import { getEnv } from '../../../util/env.ts';
 import { parse } from '../../../util/html.ts';
 import type { OutgoingHttpHeaders } from '../../../util/http/types.ts';
 import { regEx } from '../../../util/regex.ts';
+import { Json } from '../../../util/schema-utils/index.ts';
 import { asTimestamp } from '../../../util/timestamp.ts';
 import { ensureTrailingSlash, parseUrl } from '../../../util/url.ts';
 import * as pep440 from '../../versioning/pep440/index.ts';
@@ -14,7 +15,7 @@ import type { GetReleasesConfig, Release, ReleaseResult } from '../types.ts';
 import { getGoogleAuthToken } from '../util.ts';
 import { isGitHubRepo, normalizePythonDepName } from './common.ts';
 import type { PypiRelease } from './schema.ts';
-import { PypiResponse } from './schema.ts';
+import { PypiResponse, PypiSimpleResponse } from './schema.ts';
 import type { Releases } from './types.ts';
 
 export class PypiDatasource extends Datasource {
@@ -38,7 +39,7 @@ export class PypiDatasource extends Datasource {
 
   override readonly releaseTimestampSupport = true;
   override readonly releaseTimestampNote =
-    'The relase timestamp is determined from the `upload_time` field in the results. This field is not available when using the simple API.';
+    'The release timestamp is determined from the `upload_time` field in the results. When using the Simple API, timestamps are available if the server supports the JSON-based Simple API (PEP 691).';
   override readonly sourceUrlSupport = 'release';
   override readonly sourceUrlNote =
     'The source URL is determined from the `homepage` field if it is a github repository, else we use the `project_urls` field.';
@@ -188,7 +189,9 @@ export class PypiDatasource extends Datasource {
       const versions = Object.keys(dep.releases);
       dependency.releases = versions.map((version) => {
         const releases = coerceArray(dep.releases?.[version]);
-        const { upload_time: releaseTimestamp } = releases[0] || {};
+        const releaseTimestamp = releases.find(
+          ({ upload_time }) => upload_time,
+        )?.upload_time;
         const isDeprecated = releases.some(({ yanked }) => yanked);
         const result: Release = {
           version,
@@ -198,11 +201,12 @@ export class PypiDatasource extends Datasource {
           result.isDeprecated = isDeprecated;
         }
         // There may be multiple releases with different requires_python, so we return all in an array
-        const pythonConstraints = releases
-          .map(({ requires_python }) => requires_python)
-          .filter(isString);
         result.constraints = {
-          python: Array.from(new Set(pythonConstraints)),
+          python: deduplicateArray(
+            releases
+              .map(({ requires_python }) => requires_python)
+              .filter(isNonEmptyString),
+          ),
         };
         return result;
       });
@@ -267,27 +271,11 @@ export class PypiDatasource extends Datasource {
     );
   }
 
-  private async getSimpleDependency(
+  private static getSimpleReleasesFromHtml(
+    html: string,
     packageName: string,
-    hostUrl: string,
-  ): Promise<ReleaseResult | null> {
-    const lookupUrl = new URL(
-      ensureTrailingSlash(normalizePythonDepName(packageName)),
-      hostUrl,
-    ).href;
-    const dependency: ReleaseResult = { releases: [] };
-    const { headers, lookupUrl: sanitizedUrl } =
-      await this.getAuthHeaders(lookupUrl);
-    const response = await this.http.getText(sanitizedUrl, { headers });
-    const dep = response?.body;
-    if (!dep) {
-      logger.trace({ dependency: packageName }, 'pip package not found');
-      return null;
-    }
-    if (response.authorization) {
-      dependency.isPrivate = true;
-    }
-    const root = parse(PypiDatasource.cleanSimpleHtml(dep));
+  ): Releases {
+    const root = parse(PypiDatasource.cleanSimpleHtml(html));
     const links = root.querySelectorAll('a');
     const releases: Releases = {};
     for (const link of Array.from(links)) {
@@ -303,26 +291,109 @@ export class PypiDatasource extends Datasource {
         if (requiresPython) {
           release.requires_python = requiresPython;
         }
-        if (!releases[version]) {
-          releases[version] = [];
-        }
-        releases[version].push(release);
+        (releases[version] ??= []).push(release);
       }
     }
+    return releases;
+  }
+
+  private static getSimpleReleasesFromJson(
+    json: string,
+    packageName: string,
+  ): Releases {
+    const releases: Releases = {};
+    const parsed = Json.pipe(PypiSimpleResponse).safeParse(json);
+    if (!parsed.success) {
+      logger.trace(
+        { packageName, err: parsed.error },
+        'Failed to parse JSON-based Simple API response',
+      );
+      return releases;
+    }
+    for (const file of parsed.data.files) {
+      const version = PypiDatasource.extractVersionFromLinkText(
+        file.filename,
+        packageName,
+      );
+      if (version) {
+        const release: PypiRelease = {
+          // Per the Simple API spec, `yanked` is yanked when truthy
+          // https://packaging.python.org/en/latest/specifications/simple-repository-api/#json-based-simple-api-for-python-package-indexes
+          yanked: isTruthy(file.yanked),
+        };
+        const requiresPython = file['requires-python'];
+        if (requiresPython) {
+          release.requires_python = requiresPython;
+        }
+        const uploadTime = file['upload-time'];
+        if (uploadTime) {
+          release.upload_time = uploadTime;
+        }
+        (releases[version] ??= []).push(release);
+      }
+    }
+    return releases;
+  }
+
+  private async getSimpleDependency(
+    packageName: string,
+    hostUrl: string,
+  ): Promise<ReleaseResult | null> {
+    const lookupUrl = new URL(
+      ensureTrailingSlash(normalizePythonDepName(packageName)),
+      hostUrl,
+    ).href;
+    const dependency: ReleaseResult = { releases: [] };
+    const { headers: authHeaders, lookupUrl: sanitizedUrl } =
+      await this.getAuthHeaders(lookupUrl);
+    const headers: OutgoingHttpHeaders = {
+      ...authHeaders,
+      // Request the JSON serialization (PEP 691), falling back to the legacy
+      // HTML serialization (PEP 503) via content negotiation.
+      // https://github.com/pypa/pip/blob/6b0011b49a068c62f65389bf4cea7af5d28cb002/src/pip/_internal/index/collector.py#L128-L134
+      accept:
+        'application/vnd.pypi.simple.v1+json, application/vnd.pypi.simple.v1+html; q=0.1, text/html; q=0.01',
+    };
+    const response = await this.http.getText(sanitizedUrl, { headers });
+    const dep = response?.body;
+    if (!dep) {
+      logger.trace({ dependency: packageName }, 'pip package not found');
+      return null;
+    }
+    if (response.authorization) {
+      dependency.isPrivate = true;
+    }
+
+    // Dispatch deterministically on the negotiated content-type: JSON
+    // serialization (PEP 691) or the legacy HTML serialization (PEP 503).
+    const contentType = response.headers['content-type'];
+    const releases = contentType?.includes(
+      'application/vnd.pypi.simple.v1+json',
+    )
+      ? PypiDatasource.getSimpleReleasesFromJson(dep, packageName)
+      : PypiDatasource.getSimpleReleasesFromHtml(dep, packageName);
+
     const versions = Object.keys(releases);
     dependency.releases = versions.map((version) => {
       const versionReleases = coerceArray(releases[version]);
       const isDeprecated = versionReleases.some(({ yanked }) => yanked);
       const result: Release = { version };
+      const releaseTimestamp = asTimestamp(
+        versionReleases.find(({ upload_time }) => upload_time)?.upload_time,
+      );
+      if (releaseTimestamp) {
+        result.releaseTimestamp = releaseTimestamp;
+      }
       if (isDeprecated) {
         result.isDeprecated = isDeprecated;
       }
       // There may be multiple releases with different requires_python, so we return all in an array
       result.constraints = {
-        // TODO: string[] isn't allowed here
-        python: versionReleases.map(
-          ({ requires_python }) => requires_python,
-        ) as any,
+        python: deduplicateArray(
+          versionReleases
+            .map(({ requires_python }) => requires_python)
+            .filter(isNonEmptyString),
+        ),
       };
       return result;
     });

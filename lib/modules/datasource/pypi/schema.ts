@@ -1,5 +1,5 @@
 import { z } from 'zod/v4';
-import { DeepNullish } from '../../../util/schema-utils/index.ts';
+import { DeepNullish, LooseArray } from '../../../util/schema-utils/index.ts';
 
 export const PypiRelease = DeepNullish(
   z.object({
@@ -25,3 +25,21 @@ export const PypiResponse = DeepNullish(
 );
 
 export type PypiResponse = z.infer<typeof PypiResponse>;
+
+// JSON-based Simple API (PEP 691) schemas
+// https://peps.python.org/pep-0691/
+export const PypiSimpleFile = DeepNullish(
+  z.object({
+    filename: z.string(),
+    'requires-python': z.string().optional(),
+    yanked: z.union([z.boolean(), z.string()]).optional().default(false),
+    // `upload-time` is specified by PEP 700
+    'upload-time': z.string().optional(),
+  }),
+);
+export type PypiSimpleFile = z.infer<typeof PypiSimpleFile>;
+
+export const PypiSimpleResponse = z.object({
+  files: LooseArray(PypiSimpleFile),
+});
+export type PypiSimpleResponse = z.infer<typeof PypiSimpleResponse>;
