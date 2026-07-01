@@ -101,6 +101,7 @@ function buildTargetedChecks(targets: string[], fix: boolean): ParallelCheck[] {
         'exec',
         'oxlint',
         ...(fix ? ['--fix'] : []),
+        '--no-error-on-unmatched-pattern',
         '-c',
         '.oxlintrc.json',
         ...targets,
@@ -109,7 +110,14 @@ function buildTargetedChecks(targets: string[], fix: boolean): ParallelCheck[] {
     {
       name: `biome${suffix}`,
       cmd: 'pnpm',
-      args: ['exec', 'biome', 'check', ...(fix ? ['--write'] : []), ...targets],
+      args: [
+        'exec',
+        'biome',
+        'check',
+        ...(fix ? ['--write'] : []),
+        '--no-errors-on-unmatched',
+        ...targets,
+      ],
     },
     {
       name: `prettier${suffix}`,
@@ -118,6 +126,7 @@ function buildTargetedChecks(targets: string[], fix: boolean): ParallelCheck[] {
         'exec',
         'prettier',
         fix ? '--write' : '--check',
+        '--no-error-on-unmatched-pattern',
         '--cache',
         ...targets,
       ],
@@ -222,7 +231,9 @@ function buildTestChecks(args: CliArgs): ParallelCheck[] {
     return [];
   }
   const name = `test (${fileCount} ${fileCount === 1 ? 'file' : 'files'})`;
-  return [{ name, cmd: 'pnpm', args: ['vitest', ...patterns] }];
+  return [
+    { name, cmd: 'pnpm', args: ['vitest', '--passWithNoTests', ...patterns] },
+  ];
 }
 
 async function main(): Promise<void> {
