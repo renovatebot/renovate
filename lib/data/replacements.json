@@ -61,6 +61,7 @@
       "replacements:vso-task-lib-to-azure-pipelines-task-lib",
       "replacements:vsts-task-lib-to-azure-pipelines-task-lib",
       "replacements:wuchale-vite-plugin-to-wuchale",
+      "replacements:xlsx-to-scoped",
       "replacements:xmldom-to-scoped",
       "replacements:zap"
     ],
@@ -1268,6 +1269,18 @@
         "matchPackageNames": ["@wuchale/vite-plugin"],
         "replacementName": "wuchale",
         "replacementVersion": "0.22.0"
+      }
+    ]
+  },
+  "xlsx-to-scoped": {
+    "description": "The `xlsx` package is now published as `@e965/xlsx`.",
+    "packageRules": [
+      {
+        "matchCurrentVersion": "0.18.5",
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["xlsx"],
+        "replacementName": "@e965/xlsx",
+        "replacementVersion": "0.20.3"
       }
     ]
   },
