@@ -38,7 +38,10 @@ function handleDepInMintfile(line: string): PackageDependency {
   let depName = depDefinition;
   let packageName = `https://github.com/${depName}.git`;
 
-  if (depDefinition.startsWith('http')) {
+  if (
+    depDefinition.startsWith('http://') ||
+    depDefinition.startsWith('https://')
+  ) {
     packageName = depDefinition.endsWith('.git')
       ? depDefinition
       : `${depDefinition}.git`;

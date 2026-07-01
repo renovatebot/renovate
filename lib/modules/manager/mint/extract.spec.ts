@@ -118,7 +118,8 @@ describe('modules/manager/mint/extract', () => {
     it('Mintfile Includes Full Urls', () => {
       const res = extractPackageFile(codeBlock`
         https://bitbucket.org/atlassian/swift-http-server@0.7.4
-
+        http://internal.server.local/org/secret-lib@2.0.0
+        httpfoundation/swift-http-server@1.0.0
         yonaskolb/xcodegen
         #yonaskolb/xcodegen
         realm/SwiftLint@0.48.0 #commented out
@@ -131,6 +132,19 @@ describe('modules/manager/mint/extract', () => {
             datasource: 'git-tags',
             packageName:
               'https://bitbucket.org/atlassian/swift-http-server.git',
+          },
+          {
+            depName: 'org/secret-lib',
+            currentValue: '2.0.0',
+            datasource: 'git-tags',
+            packageName: 'http://internal.server.local/org/secret-lib.git',
+          },
+          {
+            depName: 'httpfoundation/swift-http-server',
+            currentValue: '1.0.0',
+            datasource: 'git-tags',
+            packageName:
+              'https://github.com/httpfoundation/swift-http-server.git',
           },
           {
             depName: 'yonaskolb/xcodegen',
