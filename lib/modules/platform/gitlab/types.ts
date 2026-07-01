@@ -67,3 +67,15 @@ export interface GitlabPrCacheData {
   updated_at: string | null;
   author: string | null;
 }
+
+export interface GitlabCommitAction {
+  action: 'create' | 'update' | 'delete';
+  file_path: string;
+  content?: string;
+  encoding?: 'base64';
+  execute_filemode?: boolean;
+}
+
+export interface GitlabCommitResponse {
+  id: string;
+}
