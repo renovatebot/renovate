@@ -49,6 +49,7 @@ export const GerritChange = z.object({
   subject: z.string(),
   status: z.enum(['NEW', 'MERGED', 'ABANDONED']),
   created: z.string(),
+  updated: z.string(),
   hashtags: z.array(z.string()),
   submittable: z.boolean().optional(),
   _number: z.number(),
