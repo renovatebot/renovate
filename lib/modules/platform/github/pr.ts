@@ -81,7 +81,7 @@ export async function getPrCache(
   const cutoffTime = lastModifiedRaw ? DateTime.fromISO(lastModifiedRaw) : null;
 
   try {
-    const maxSyncPages = GlobalConfig.get('prCacheSyncMaxPages');
+    const maxSyncPages = GlobalConfig.get('repositoryCacheMaxPrPages');
     const startTime = Date.now();
     let requestsTotal = 0;
     let apiQuotaAffected = false;
