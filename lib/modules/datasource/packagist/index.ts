@@ -46,11 +46,7 @@ function isTransientPackagistError(err: PackagistLookupError): boolean {
     return false;
   }
 
-  if (statusCode === 429) {
-    return true;
-  }
-
-  if (statusCode >= 500 && statusCode < 600) {
+  if (statusCode === 429 || (statusCode >= 500 && statusCode < 600)) {
     return true;
   }
 
