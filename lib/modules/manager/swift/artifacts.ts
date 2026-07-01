@@ -6,6 +6,7 @@ import { trimTrailingSlash } from '../../../util/url.ts';
 import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
 import { getDigest } from '../../datasource/index.ts';
 import { scm } from '../../platform/scm.ts';
+import { api as swiftVersioning } from '../../versioning/swift/index.ts';
 import type {
   PackageDependency,
   UpdateArtifact,
@@ -221,6 +222,34 @@ export async function updateArtifacts({
           'swift: no matching pin found in Package.resolved',
         );
         continue;
+      }
+
+      // Only rewrite a pin we can confidently attribute to the dependency being
+      // upgraded. For exact (single-version) specs the pin to update is the one
+      // currently at the from-version; a pin at any other version belongs to a
+      // different constraint — e.g. a transitive dependency in an unrelated
+      // package — and must be left untouched, otherwise we may write a version
+      // that package does not allow.
+      // https://github.com/renovatebot/renovate/issues/44312
+      if (
+        dep.currentValue &&
+        swiftVersioning.isSingleVersion(dep.currentValue)
+      ) {
+        const fromVersion = (dep.currentVersion ?? dep.currentValue).replace(
+          regEx(/^v/),
+          '',
+        );
+        if (pin.state.version !== fromVersion) {
+          logger.debug(
+            {
+              depName: dep.depName,
+              pinVersion: pin.state.version,
+              currentValue: dep.currentValue,
+            },
+            'swift: pin does not match the upgraded-from version; skipping to avoid touching an unrelated pin',
+          );
+          continue;
+        }
       }
 
       const resolvedVersion = dep.newVersion.replace(regEx(/^v/), '');
