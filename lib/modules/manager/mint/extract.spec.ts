@@ -118,7 +118,7 @@ describe('modules/manager/mint/extract', () => {
     it('Mintfile Includes Full Urls', () => {
       const res = extractPackageFile(codeBlock`
         https://bitbucket.org/atlassian/swift-http-server@0.7.4
-        http://internal.server.local/org/secret-lib@2.0.0
+        http://internal.server.local/org/secret-lib.git@2.0.0
         httpfoundation/swift-http-server@1.0.0
         yonaskolb/xcodegen
         #yonaskolb/xcodegen

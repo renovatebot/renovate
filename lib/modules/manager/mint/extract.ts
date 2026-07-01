@@ -45,7 +45,7 @@ function handleDepInMintfile(line: string): PackageDependency {
     packageName = depDefinition.endsWith('.git')
       ? depDefinition
       : `${depDefinition}.git`;
-    depName = depDefinition.split('/').slice(-2).join('/');
+    depName = packageName.replace('.git', '').split('/').slice(-2).join('/');
   }
 
   return {
