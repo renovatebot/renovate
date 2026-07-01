@@ -1,0 +1,30 @@
+minimum_prek_version = "0.1.0"
+
+[[repos]]
+repo = "https://github.com/pre-commit/pre-commit-hooks"
+rev = "v5.0.0"
+
+[[repos]]
+repo = "https://gitlab.com/psf/black"
+rev = "24.1.0"
+
+[[repos]]
+repo = "git@github.com:prettier/pre-commit"
+rev = "v2.1.2"
+
+[[repos]]
+repo = "git://github.com/pre-commit/pre-commit-hooks"
+rev = "v2.4.0"
+
+[[repos]]
+repo = "ssh://git@github.com/pre-commit/pre-commit-hooks"
+rev = "v3.0.0"
+
+[[repos]]
+repo = "local"
+
+[[repos]]
+repo = "meta"
+
+[[repos]]
+repo = "builtin"
