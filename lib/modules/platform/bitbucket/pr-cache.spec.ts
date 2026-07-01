@@ -6,7 +6,7 @@ import {
 } from '../../../util/cache/repository/index.ts';
 import { BitbucketHttp } from '../../../util/http/bitbucket.ts';
 import { BitbucketPrCache } from './pr-cache.ts';
-import type { PrResponse } from './types.ts';
+import type { PrResponse } from './schema.ts';
 import { prInfo } from './utils.ts';
 
 const http = new BitbucketHttp();

@@ -1,5 +1,4 @@
 import { isNonEmptyObject, isNullOrUndefined } from '@sindresorhus/is';
-import type { PagedResult } from '../../modules/platform/bitbucket/types.ts';
 import { HttpBase, type InternalJsonUnsafeOptions } from './http.ts';
 import type { HttpMethod, HttpOptions, HttpResponse } from './types.ts';
 
@@ -10,6 +9,14 @@ let baseUrl = 'https://api.bitbucket.org/';
 
 export function setBaseUrl(url: string): void {
   baseUrl = url;
+}
+
+interface PagedResult<T = unknown> {
+  page?: number;
+  pagelen?: number;
+  size?: number;
+  next?: string;
+  values: T[];
 }
 
 export interface BitbucketHttpOptions extends HttpOptions {
