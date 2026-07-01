@@ -633,6 +633,15 @@ const options: Readonly<RenovateOptions>[] = [
     type: 'string',
   },
   {
+    name: 'containerbasePackageRules',
+    description:
+      'Package rules to override datasource, packageName, or versioning for containerbase tool installations.',
+    globalOnly: true,
+    type: 'array',
+    subType: 'object',
+    default: [],
+  },
+  {
     name: 'customEnvVariables',
     description:
       'Custom environment variables for child processes and sidecar Docker containers.',

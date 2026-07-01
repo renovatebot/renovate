@@ -276,6 +276,7 @@ export interface RepoGlobalConfig extends GlobalInheritableConfig {
   onboardingAutoCloseAge?: number;
   productLinks?: Record<string, string>;
   toolSettings?: ToolSettingsOptions;
+  containerbasePackageRules?: PackageRule[];
 }
 
 /**

@@ -3,6 +3,7 @@ import { quote } from 'shlex';
 import { GlobalConfig } from '../../config/global.ts';
 import { logger } from '../../logger/index.ts';
 import type { ReleaseResult } from '../../modules/datasource/index.ts';
+import type { GetPkgReleasesConfig } from '../../modules/datasource/types.ts';
 import type { VersioningApi } from '../../modules/versioning/types.ts';
 import { getEnv } from '../env.ts';
 import type { Opt, ToolConfig, ToolConstraint, ToolName } from './types.ts';
@@ -244,11 +245,11 @@ let _getPkgReleases: Promise<
 > | null = null;
 
 async function getPkgReleases(
-  toolConfig: ToolConfig,
+  config: GetPkgReleasesConfig,
 ): Promise<ReleaseResult | null> {
   _getPkgReleases ??= import('../../modules/datasource/index.ts');
   const { getPkgReleases } = await _getPkgReleases;
-  return getPkgReleases(toolConfig);
+  return getPkgReleases(config);
 }
 
 export function getToolConfig(toolName: ToolName): ToolConfig {
@@ -297,18 +298,40 @@ function isStable(
   return true;
 }
 
+async function applyToolPackageRules(
+  toolName: ToolName,
+  toolConfig: ToolConfig,
+): Promise<GetPkgReleasesConfig> {
+  const { datasource, packageName, extractVersion, versioning } = toolConfig;
+  const packageRules = GlobalConfig.get('containerbasePackageRules');
+  if (!packageRules?.length) {
+    return { datasource, packageName, extractVersion, versioning };
+  }
+
+  const { applyPackageRules } = await import('../package-rules/index.ts');
+  return applyPackageRules({
+    depName: toolName,
+    datasource,
+    packageName,
+    versioning,
+    extractVersion,
+    depType: 'tool-constraint',
+    packageRules,
+  });
+}
+
 export async function resolveConstraint(
   toolConstraint: ToolConstraint,
 ): Promise<string> {
   const { toolName } = toolConstraint;
-  const toolConfig = allToolConfig[toolName];
-  if (!toolConfig) {
+  const baseToolConfig = allToolConfig[toolName];
+  if (!baseToolConfig) {
     throw new Error(`Invalid tool to install: ${toolName}`);
   }
 
   const { get: getVersioning } =
     await import('../../modules/versioning/index.ts');
-  const versioning = getVersioning(toolConfig.versioning);
+  const versioning = getVersioning(baseToolConfig.versioning);
   let constraint = toolConstraint.constraint;
   if (constraint) {
     if (versioning.isValid(constraint)) {
@@ -317,18 +340,19 @@ export async function resolveConstraint(
       }
     } else {
       logger.warn(
-        { toolName, constraint, versioning: toolConfig.versioning },
+        { toolName, constraint, versioning: baseToolConfig.versioning },
         'Invalid tool constraint',
       );
       constraint = undefined;
     }
   }
 
-  const pkgReleases = await getPkgReleases(toolConfig);
+  const releaseConfig = await applyToolPackageRules(toolName, baseToolConfig);
+  const pkgReleases = await getPkgReleases(releaseConfig);
   const releases = pkgReleases?.releases ?? [];
 
   if (!releases?.length) {
-    logger.warn({ toolConfig }, 'No tool releases found.');
+    logger.warn({ releaseConfig }, 'No tool releases found.');
     throw new Error('No tool releases found.');
   }
 
