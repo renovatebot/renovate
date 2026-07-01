@@ -1619,6 +1619,110 @@ describe('util/git/index', { timeout: 30000 }, () => {
       delete process.env.RENOVATE_X_CLEAR_HOOKS;
     });
 
+    it('should use shallow clone when gitShallowCloneDepth is set', async () => {
+      tmpDir = await tmp.dir({ unsafeCleanup: true });
+      GlobalConfig.set({
+        localDir: tmpDir.path,
+        gitShallowCloneDepth: 2,
+      });
+      await git.initRepo({
+        url: `file://${origin.path}`,
+      });
+      await git.syncGit();
+
+      const tmpGit = simpleGit(tmpDir.path);
+      const isShallow = (
+        await tmpGit.raw(['rev-parse', '--is-shallow-repository'])
+      ).trim();
+      expect(isShallow).toBe('true');
+    });
+
+    it('should fetch all branches when using shallow clone', async () => {
+      // `--depth` is single-branch by default; ensure non-default branches are
+      // still fetched so existing Renovate branches remain manageable.
+      tmpDir = await tmp.dir({ unsafeCleanup: true });
+      GlobalConfig.set({
+        localDir: tmpDir.path,
+        gitShallowCloneDepth: 2,
+      });
+      await git.initRepo({
+        url: `file://${origin.path}`,
+      });
+      await git.syncGit();
+
+      const tmpGit = simpleGit(tmpDir.path);
+      const remoteBranches = await tmpGit.raw(['branch', '--remotes']);
+      expect(remoteBranches).toContain('origin/renovate/future_branch');
+    });
+
+    it('should ignore gitShallowCloneDepth when fullClone is true', async () => {
+      tmpDir = await tmp.dir({ unsafeCleanup: true });
+      GlobalConfig.set({
+        localDir: tmpDir.path,
+        gitShallowCloneDepth: 2,
+      });
+      await git.initRepo({
+        url: `file://${origin.path}`,
+        fullClone: true,
+      });
+      await git.syncGit();
+
+      const tmpGit = simpleGit(tmpDir.path);
+      const isShallow = (
+        await tmpGit.raw(['rev-parse', '--is-shallow-repository'])
+      ).trim();
+      expect(isShallow).toBe('false');
+    });
+
+    it('should unshallow repo on subsequent fetch', async () => {
+      // First run: shallow clone
+      tmpDir = await tmp.dir({ unsafeCleanup: true });
+      GlobalConfig.set({
+        localDir: tmpDir.path,
+        gitShallowCloneDepth: 1,
+      });
+      await git.initRepo({ url: `file://${origin.path}` });
+      await git.syncGit();
+
+      const tmpGit = simpleGit(tmpDir.path);
+      let isShallow = (
+        await tmpGit.raw(['rev-parse', '--is-shallow-repository'])
+      ).trim();
+      expect(isShallow).toBe('true');
+
+      // Second run: should fetch and unshallow
+      await git.initRepo({ url: `file://${origin.path}` });
+      await git.syncGit();
+
+      isShallow = (
+        await tmpGit.raw(['rev-parse', '--is-shallow-repository'])
+      ).trim();
+      expect(isShallow).toBe('false');
+    });
+
+    it('should not unshallow when repo is not shallow', async () => {
+      // First run: normal blobless clone (no shallow)
+      tmpDir = await tmp.dir({ unsafeCleanup: true });
+      GlobalConfig.set({
+        localDir: tmpDir.path,
+      });
+      await git.initRepo({ url: origin.path });
+      await git.syncGit();
+
+      const rawSpy = vi.spyOn(SimpleGit.prototype, 'raw');
+
+      // Second run: fetch existing repo
+      await git.initRepo({ url: origin.path });
+      await git.syncGit();
+
+      const unshallowCalls = rawSpy.mock.calls.filter(
+        (call) =>
+          Array.isArray(call[0]) &&
+          (call[0] as string[]).includes('--unshallow'),
+      );
+      expect(unshallowCalls).toHaveLength(0);
+    });
+
     it('should not inherit unsafe git environment variables from process.env', async () => {
       process.env.GIT_CONFIG_COUNT = '1';
       process.env.GIT_CONFIG_KEY_0 = 'core.hooksPath';
