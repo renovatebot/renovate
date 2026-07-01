@@ -5,6 +5,7 @@ In addition to standard dependencies, these toolsets are also supported:
 - `pdm` (including `pdm.lock` files)
 - `uv` (including `uv.lock` files and `uv` workspaces)
 - `hatch`
+- `pixi` (including `pixi.lock` files)
 
 ### Private Modules Authentication
 
