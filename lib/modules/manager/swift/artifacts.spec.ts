@@ -3,6 +3,7 @@ import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
 import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
 import { GitlabTagsDatasource } from '../../datasource/gitlab-tags/index.ts';
 import * as datasource from '../../datasource/index.ts';
+import { SwiftPackageRegistryDatasource } from '../../datasource/swift-package-registry/index.ts';
 import { updateArtifacts } from './artifacts.ts';
 
 vi.mock('../../../util/fs/index.ts');
@@ -872,5 +873,170 @@ describe('modules/manager/swift/artifacts', () => {
       expect.objectContaining({ datasource: GithubTagsDatasource.id }),
       'v5.10.0',
     );
+  });
+
+  describe('SE-0292 registry pins', () => {
+    const registryFixture = JSON.stringify(
+      {
+        pins: [
+          {
+            identity: 'acme.somelib',
+            kind: 'registry',
+            location: '',
+            state: { version: '1.0.0' },
+          },
+          {
+            identity: 'acme.other',
+            kind: 'registry',
+            location: '',
+            state: { version: '2.0.0' },
+          },
+        ],
+        version: 3,
+      },
+      null,
+      2,
+    );
+
+    const bridgedFixture = JSON.stringify(
+      {
+        pins: [
+          {
+            identity: 'acme.somelib',
+            kind: 'remoteSourceControl',
+            location: 'https://github.com/acme/somelib.git',
+            state: {
+              revision: 'oldrev',
+              version: '1.0.0',
+            },
+          },
+        ],
+        version: 2,
+      },
+      null,
+      2,
+    );
+
+    it('updates a kind: "registry" pin by identity, leaving revision absent', async () => {
+      scm.getFileList.mockResolvedValue(['Package.resolved']);
+      fs.readLocalFile.mockResolvedValue(registryFixture);
+      vi.mocked(datasource.getDigest).mockResolvedValue(null);
+
+      const result = await updateArtifacts({
+        packageFileName: 'Package.swift',
+        updatedDeps: [
+          {
+            depName: 'acme.somelib',
+            packageName: 'acme.somelib',
+            datasource: SwiftPackageRegistryDatasource.id,
+            newVersion: '1.5.0',
+            newValue: 'from: "1.5.0"',
+          },
+        ],
+        newPackageFileContent: '',
+        config: {},
+      });
+
+      expect(result).toHaveLength(1);
+      const { contents } = result![0].file as { contents: string };
+      expect(contents).toContain('"version": "1.5.0"');
+      expect(contents).not.toContain('"revision"');
+      // Unrelated pin untouched
+      expect(contents).toContain('"version": "2.0.0"');
+    });
+
+    it('updates a bridged "remoteSourceControl" pin when the dep is registry-form', async () => {
+      scm.getFileList.mockResolvedValue(['Package.resolved']);
+      fs.readLocalFile.mockResolvedValue(bridgedFixture);
+      // No digest available from the SPR datasource — revision stays unchanged.
+      vi.mocked(datasource.getDigest).mockResolvedValue(null);
+
+      const result = await updateArtifacts({
+        packageFileName: 'Package.swift',
+        updatedDeps: [
+          {
+            depName: 'acme.somelib',
+            packageName: 'acme.somelib',
+            datasource: SwiftPackageRegistryDatasource.id,
+            newVersion: '1.5.0',
+            newValue: 'from: "1.5.0"',
+          },
+        ],
+        newPackageFileContent: '',
+        config: {},
+      });
+
+      expect(result).toHaveLength(1);
+      const { contents } = result![0].file as { contents: string };
+      expect(contents).toContain('"version": "1.5.0"');
+      // Revision preserved when no digest is resolvable.
+      expect(contents).toContain('"revision": "oldrev"');
+    });
+
+    it('returns null when no pin matches the registry-form dep identity', async () => {
+      scm.getFileList.mockResolvedValue(['Package.resolved']);
+      fs.readLocalFile.mockResolvedValue(registryFixture);
+
+      const result = await updateArtifacts({
+        packageFileName: 'Package.swift',
+        updatedDeps: [
+          {
+            depName: 'acme.notpinned',
+            packageName: 'acme.notpinned',
+            datasource: SwiftPackageRegistryDatasource.id,
+            newVersion: '1.5.0',
+            newValue: 'from: "1.5.0"',
+          },
+        ],
+        newPackageFileContent: '',
+        config: {},
+      });
+
+      expect(result).toBeNull();
+    });
+
+    it('returns null when a registry-form dep has neither packageName nor depName', async () => {
+      scm.getFileList.mockResolvedValue(['Package.resolved']);
+      fs.readLocalFile.mockResolvedValue(registryFixture);
+
+      const result = await updateArtifacts({
+        packageFileName: 'Package.swift',
+        updatedDeps: [
+          {
+            datasource: SwiftPackageRegistryDatasource.id,
+            newVersion: '1.5.0',
+            newValue: 'from: "1.5.0"',
+          },
+        ],
+        newPackageFileContent: '',
+        config: {},
+      });
+
+      expect(result).toBeNull();
+    });
+
+    it('falls back to depName when packageName is absent on the dep', async () => {
+      scm.getFileList.mockResolvedValue(['Package.resolved']);
+      fs.readLocalFile.mockResolvedValue(registryFixture);
+      vi.mocked(datasource.getDigest).mockResolvedValue(null);
+
+      const result = await updateArtifacts({
+        packageFileName: 'Package.swift',
+        updatedDeps: [
+          {
+            depName: 'acme.somelib',
+            datasource: SwiftPackageRegistryDatasource.id,
+            newVersion: '1.5.0',
+            newValue: 'from: "1.5.0"',
+          },
+        ],
+        newPackageFileContent: '',
+        config: {},
+      });
+
+      expect(result).toHaveLength(1);
+      const { contents } = result![0].file as { contents: string };
+      expect(contents).toContain('"version": "1.5.0"');
+    });
   });
 });
