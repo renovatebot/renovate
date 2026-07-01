@@ -1,4 +1,4 @@
-import { isNumber } from '@sindresorhus/is';
+import { isNumber, isObject } from '@sindresorhus/is';
 import { z } from 'zod/v4';
 import { logger } from '../../../logger/index.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
