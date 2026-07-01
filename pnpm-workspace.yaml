@@ -15,12 +15,17 @@ allowBuilds:
 
 dedupePeers: true
 
+catalog:
+  esbuild: 0.28.0
+  tar: 7.5.16
+  vite: 8.1.0
+
 overrides:
   '@aws-sdk/xml-builder@3.972.4>fast-xml-parser': '^5.3.6'
-  '@yarnpkg/core@4.5.0>tar': $tar
-  esbuild: $esbuild
+  '@yarnpkg/core@4.5.0>tar': 'catalog:'
+  esbuild: 'catalog:'
   protobufjs@8.0.1: 8.6.5
-  vite: $vite
+  vite: 'catalog:'
 
 ignoredOptionalDependencies:
   - dtrace-provider
