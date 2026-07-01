@@ -445,6 +445,28 @@ describe('workers/repository/update/branch/index', () => {
       });
     });
 
+    it('does not skip edited PR when caller pinned rebaseRequested', async () => {
+      schedule.isScheduledNow.mockReturnValueOnce(false);
+      scm.branchExists.mockResolvedValue(true);
+      platform.getBranchPr.mockResolvedValueOnce(
+        partial<Pr>({
+          state: 'open',
+          // no rebase-triggering title or label — rebaseCheck() would return false
+        }),
+      );
+      scm.isBranchModified.mockResolvedValueOnce(true);
+      const res = await branchWorker.processBranch({
+        ...config,
+        rebaseRequested: true,
+      });
+      expect(res).toEqual({
+        branchExists: true,
+        prNo: undefined,
+        commitSha: null,
+        result: 'error',
+      });
+    });
+
     it('skips branch if edited PR found', async () => {
       const pr = partial<Pr>({
         state: 'open',

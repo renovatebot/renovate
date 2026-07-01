@@ -175,7 +175,9 @@ export async function processBranch(
   logger.debug(`branchExists=${branchExists}`);
   logger.debug(`dependencyDashboardCheck=${dependencyDashboardCheck!}`);
   if (branchPr) {
-    config.rebaseRequested = await rebaseCheck(config, branchPr);
+    if (config.rebaseRequested !== true) {
+      config.rebaseRequested = await rebaseCheck(config, branchPr);
+    }
     logger.debug(`PR rebase requested=${config.rebaseRequested}`);
   }
   const keepUpdatedLabel = config.keepUpdatedLabel;
