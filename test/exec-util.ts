@@ -75,6 +75,7 @@ export function mockExecSequence(execResults: ExecResult[]): ExecSnapshots {
 }
 
 const basicEnvMock = {
+  CI: 'true',
   HTTP_PROXY: 'http://example.com',
   HTTPS_PROXY: 'https://example.com',
   NO_PROXY: 'localhost',
