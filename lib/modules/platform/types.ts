@@ -333,6 +333,6 @@ export interface PlatformScm {
   getFileList(): Promise<string[]>;
   checkoutBranch(branchName: string): Promise<LongCommitSha | null>;
   mergeToLocal(branchName: string): Promise<void>;
-  mergeAndPush(branchName: string): Promise<void>;
+  mergeAndPush(branchName: string, allowBehindBase: boolean): Promise<void>;
   syncForkWithUpstream?(baseBranch: string): Promise<void>;
 }
