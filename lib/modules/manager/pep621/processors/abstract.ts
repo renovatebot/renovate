@@ -30,6 +30,14 @@ export abstract class BasePyProjectProcessor implements PyProjectProcessor {
     packageFile: string,
   ): Promise<PackageDependency[]>;
 
+  extractWorkspaceContext(
+    _project: PyProject,
+    deps: PackageDependency[],
+    _packageFile: string,
+  ): Promise<PackageDependency[]> {
+    return Promise.resolve(deps);
+  }
+
   async getLockfiles(
     _project: PyProject,
     packageFile: string,

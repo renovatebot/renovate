@@ -691,6 +691,93 @@ describe('modules/manager/pep621/extract', () => {
       });
     });
 
+    it('inherits uv workspace-root sources and indexes in a member pyproject', async () => {
+      const root = codeBlock`
+        [tool.uv.workspace]
+        members = ["packages/*"]
+
+        [tool.uv.sources]
+        private-pkg = { index = "PrivateIndex" }
+        some-internal-pkg = { workspace = true }
+
+        [[tool.uv.index]]
+        name = "PrivateIndex"
+        url = "https://my-private-registry/simple/"
+        explicit = true
+      `;
+      fs.localPathExists.mockImplementation((p: string) =>
+        Promise.resolve(p === 'pyproject.toml'),
+      );
+      fs.readLocalFile.mockImplementation((p: string) =>
+        Promise.resolve(p === 'pyproject.toml' ? root : null),
+      );
+      fs.findLocalSiblingOrParent.mockResolvedValue(null);
+
+      const res = await extractPackageFile(
+        codeBlock`
+          [project]
+          name = "foo"
+          dependencies = ["private-pkg==1.0.0", "some-internal-pkg==1.0.0"]
+        `,
+        'packages/foo/pyproject.toml',
+      );
+      expect(res?.deps).toMatchObject([
+        {
+          packageName: 'private-pkg',
+          depType: depTypes.uvSources,
+          registryUrls: ['https://my-private-registry/simple/'],
+        },
+        {
+          packageName: 'some-internal-pkg',
+          depType: depTypes.uvSources,
+          skipReason: 'inherited-dependency',
+        },
+      ]);
+    });
+
+    it('lets a workspace member override a root source on the same key', async () => {
+      const root = codeBlock`
+        [tool.uv.workspace]
+        members = ["packages/*"]
+
+        [tool.uv.sources]
+        pkg = { index = "RootIndex" }
+
+        [[tool.uv.index]]
+        name = "RootIndex"
+        url = "https://root/simple/"
+        explicit = true
+      `;
+      fs.localPathExists.mockImplementation((p: string) =>
+        Promise.resolve(p === 'pyproject.toml'),
+      );
+      fs.readLocalFile.mockImplementation((p: string) =>
+        Promise.resolve(p === 'pyproject.toml' ? root : null),
+      );
+      fs.findLocalSiblingOrParent.mockResolvedValue(null);
+
+      const res = await extractPackageFile(
+        codeBlock`
+          [project]
+          name = "foo"
+          dependencies = ["pkg==1.0.0"]
+
+          [tool.uv.sources]
+          pkg = { index = "MemberIndex" }
+
+          [[tool.uv.index]]
+          name = "MemberIndex"
+          url = "https://member/simple/"
+          explicit = true
+        `,
+        'packages/foo/pyproject.toml',
+      );
+      expect(res?.deps[0]).toMatchObject({
+        packageName: 'pkg',
+        registryUrls: ['https://member/simple/'],
+      });
+    });
+
     it('should resolve dependencies with template', async () => {
       const content = codeBlock`
             [project]
