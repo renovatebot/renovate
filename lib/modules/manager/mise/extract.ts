@@ -9,6 +9,8 @@ import {
 import { logger } from '../../../logger/index.ts';
 import { readLocalFile } from '../../../util/fs/index.ts';
 import { regEx } from '../../../util/regex.ts';
+import { getDefaultVersioning } from '../../datasource/common.ts';
+import * as allVersioning from '../../versioning/index.ts';
 import type { StaticTooling } from '../asdf/upgradeable-tooling.ts';
 import type { PackageDependency, PackageFileContent } from '../types.ts';
 import type { BackendToolingConfig } from './backends.ts';
@@ -85,7 +87,12 @@ export async function extractPackageFile(
           lockFileParsed.data,
           dep.depName!,
         );
-        if (lockedVersion) {
+        /*
+         * mise records the requested specifier (e.g. "^1.18.4" or "=1.18.4") for
+         * backends that don't pin, so only treat concrete versions as a
+         * lockedVersion — anything else crashes the lookup's exact-version comparison.
+         */
+        if (lockedVersion && isConcreteVersion(dep, lockedVersion)) {
           dep.lockedVersion = lockedVersion;
         }
       }
@@ -98,6 +105,13 @@ export async function extractPackageFile(
   }
 
   return result;
+}
+
+function isConcreteVersion(dep: PackageDependency, version: string): boolean {
+  const versioning = allVersioning.get(
+    dep.versioning ?? getDefaultVersioning(dep.datasource),
+  );
+  return versioning.isVersion(version);
 }
 
 function parseVersion(toolData: MiseTool): string | null {
