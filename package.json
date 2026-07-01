@@ -149,13 +149,13 @@
     "pnpm": "^11.0.0"
   },
   "dependencies": {
-    "@aws-sdk/client-codecommit": "3.1053.0",
-    "@aws-sdk/client-ec2": "3.1053.0",
-    "@aws-sdk/client-ecr": "3.1053.0",
-    "@aws-sdk/client-eks": "3.1053.0",
-    "@aws-sdk/client-rds": "3.1053.0",
-    "@aws-sdk/client-s3": "3.1053.0",
-    "@aws-sdk/credential-providers": "3.1053.0",
+    "@aws-sdk/client-codecommit": "3.1075.0",
+    "@aws-sdk/client-ec2": "3.1075.0",
+    "@aws-sdk/client-ecr": "3.1075.0",
+    "@aws-sdk/client-eks": "3.1075.0",
+    "@aws-sdk/client-rds": "3.1075.0",
+    "@aws-sdk/client-s3": "3.1075.0",
+    "@aws-sdk/credential-providers": "3.1075.0",
     "@baszalmstra/rattler": "0.2.1",
     "@breejs/later": "4.2.0",
     "@cdktf/hcl2json": "0.21.0",
@@ -243,7 +243,7 @@
     "p-throttle": "8.1.0",
     "parse-link-header": "2.0.0",
     "prettier": "3.8.1",
-    "protobufjs": "8.6.4",
+    "protobufjs": "8.6.5",
     "punycode": "2.3.1",
     "remark": "15.0.1",
     "remark-gfm": "4.0.1",
@@ -272,7 +272,7 @@
     "re2": "1.25.0"
   },
   "devDependencies": {
-    "@biomejs/biome": "2.5.0",
+    "@biomejs/biome": "2.5.1",
     "@commander-js/extra-typings": "14.0.0",
     "@containerbase/istanbul-reports-html": "2.0.8",
     "@containerbase/semantic-release-pnpm": "1.4.2",
@@ -345,11 +345,11 @@
     "type-fest": "5.7.0",
     "typescript": "6.0.3",
     "unified": "11.0.5",
-    "vite": "8.0.16",
+    "vite": "8.1.0",
     "vitest": "4.1.9",
     "vitest-mock-extended": "4.0.0"
   },
-  "packageManager": "pnpm@11.8.0",
+  "packageManager": "pnpm@11.9.0",
   "files": [
     "dist",
     "renovate-schema.json"
