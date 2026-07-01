@@ -63,7 +63,7 @@ export class DebianVersioningApi extends GenericVersioningApi {
 
     if (this._distroInfo.isCodename(currentValue)) {
       const di = this._rollingReleases.schedule(newVersion);
-      let ver = newVersion;
+      let ver = this._getBaseVersion(newVersion);
       if (di) {
         ver = di.version;
       }
@@ -75,6 +75,12 @@ export class DebianVersioningApi extends GenericVersioningApi {
     if (this._rollingReleases.has(newVersion)) {
       // should never `undefined` if it exists
       return this._rollingReleases.schedule(newVersion)!.version;
+    }
+
+    // current value is numeric, so keep a dated codename (e.g. trixie-20260406)
+    // as its numeric version rather than switching format
+    if (isDatedCodeName(newVersion, this._distroInfo)) {
+      return this._getBaseVersion(newVersion);
     }
 
     return this._distroInfo.getVersionByCodename(newVersion);
