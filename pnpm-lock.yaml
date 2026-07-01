@@ -5,6 +5,12 @@ settings:
   dedupePeers: true
   excludeLinksFromLockfile: false
 
+catalogs:
+  default:
+    tar:
+      specifier: 7.5.16
+      version: 7.5.16
+
 overrides:
   '@aws-sdk/xml-builder@3.972.4>fast-xml-parser': ^5.3.6
   '@yarnpkg/core@4.5.0>tar': 7.5.16
@@ -573,7 +579,7 @@ importers:
         specifier: 25.0.5
         version: 25.0.5(typescript@6.0.3)
       tar:
-        specifier: 7.5.16
+        specifier: 'catalog:'
         version: 7.5.16
       tmp-promise:
         specifier: 3.0.3
