@@ -47,9 +47,23 @@ export class UvProcessor extends BasePyProjectProcessor {
     const defaultIndex = uv.index?.find(
       (index) => index.default && !index.explicit,
     );
-    const implicitIndexUrls = uv.index
-      ?.filter((index) => !index.explicit && index.name !== defaultIndex?.name)
-      ?.map(({ url }) => url);
+
+    // flat 'index-url' is equivalent to a non-explicit default [[tool.uv.index]] entry
+    const flatDefaultUrl =
+      !defaultIndex && !hasExplicitDefault ? uv['index-url'] : undefined;
+
+    const indexImplicitUrls =
+      uv.index
+        ?.filter(
+          (index) => !index.explicit && index.name !== defaultIndex?.name,
+        )
+        ?.map(({ url }) => url) ?? [];
+
+    // flat 'extra-index-url' entries are equivalent to non-explicit, non-default [[tool.uv.index]] entries
+    const implicitIndexUrls = [
+      ...indexImplicitUrls,
+      ...(uv['extra-index-url'] ?? []),
+    ];
 
     const devDependencies = uv['dev-dependencies'];
     if (devDependencies) {
@@ -58,7 +72,12 @@ export class UvProcessor extends BasePyProjectProcessor {
 
     // https://docs.astral.sh/uv/concepts/dependencies/#dependency-sources
     // Skip sources that do not make sense to handle (e.g. path).
-    if (uv.sources || defaultIndex || implicitIndexUrls) {
+    if (
+      uv.sources ||
+      defaultIndex ||
+      flatDefaultUrl ||
+      implicitIndexUrls.length > 0
+    ) {
       for (const dep of deps) {
         /* v8 ignore next 3 -- needs test */
         if (!dep.packageName) {
@@ -109,9 +128,12 @@ export class UvProcessor extends BasePyProjectProcessor {
           } else if (defaultIndex) {
             // There is a default index configured, so use it.
             dep.registryUrls = [defaultIndex.url];
+          } else if (flatDefaultUrl) {
+            // flat index-url acts as the default
+            dep.registryUrls = [flatDefaultUrl];
           }
 
-          if (implicitIndexUrls?.length) {
+          if (implicitIndexUrls.length > 0) {
             // If there are implicit indexes, check them first and fall back
             // to the default.
             dep.registryUrls = implicitIndexUrls.concat(
@@ -199,6 +221,7 @@ export class UvProcessor extends BasePyProjectProcessor {
         ...getGitEnvironmentVariables(['pep621']),
         ...(await getUvExtraIndexUrl(project, updateArtifact.updatedDeps)),
         ...(await getUvIndexCredentials(project)),
+        ...(await getUvIndexUrl(project)),
       };
       const execOptions: ExecOptions = {
         cwdFile: packageFileName,
@@ -319,13 +342,28 @@ async function getUvExtraIndexUrl(
       // Check if the registry URL is not the default one and not already configured
       const configuredIndexUrls =
         project.tool?.uv?.index?.map(({ url }) => url) ?? [];
+      const flatDefaultUrl = project.tool?.uv?.['index-url'];
       return (
         registryUrl !== PypiDatasource.defaultURL &&
-        !configuredIndexUrls.includes(registryUrl)
+        !configuredIndexUrls.includes(registryUrl) &&
+        registryUrl !== flatDefaultUrl
       );
     });
 
   const registryUrls = new Set(pyPiRegistryUrls);
+
+  // Also include URLs from flat 'extra-index-url' directly.
+  // This covers lockFileMaintenance (empty updatedDeps) and cases where
+  // extra-index-url is not yet reflected in dep.registryUrls.
+  const configuredIndexUrls = new Set(
+    project.tool?.uv?.index?.map(({ url }) => url) ?? [],
+  );
+  for (const url of project.tool?.uv?.['extra-index-url'] ?? []) {
+    if (!configuredIndexUrls.has(url)) {
+      registryUrls.add(url);
+    }
+  }
+
   const extraIndexUrls: string[] = [];
 
   for (const registryUrl of registryUrls) {
@@ -350,6 +388,37 @@ async function getUvExtraIndexUrl(
   return {
     UV_EXTRA_INDEX_URL: extraIndexUrls.join(' '),
   };
+}
+
+async function getUvIndexUrl(project: PyProject): Promise<NodeJS.ProcessEnv> {
+  const indexUrl = project.tool?.uv?.['index-url'];
+  // Only handle flat index-url if no [[tool.uv.index]] entry overrides the default
+  const hasIndexDefault = project.tool?.uv?.index?.some(
+    (index) => index.default,
+  );
+  if (!indexUrl || hasIndexDefault) {
+    return {};
+  }
+
+  const parsedUrl = parseUrl(indexUrl);
+  /* v8 ignore if -- needs test */
+  if (!parsedUrl) {
+    return {};
+  }
+
+  const { username, password } = await getUsernamePassword(parsedUrl);
+  if (!username && !password) {
+    return {};
+  }
+
+  if (username) {
+    parsedUrl.username = username;
+  }
+  if (password) {
+    parsedUrl.password = password;
+  }
+
+  return { UV_INDEX_URL: parsedUrl.toString() };
 }
 
 async function getUvIndexCredentials(
