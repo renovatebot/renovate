@@ -865,6 +865,7 @@ jobs:
           large-packages: true # breaks docker cross platform support
 
       - run: df -h
+        if: ${{ steps.check.outputs.do-cleanup == 'true' }}
 
       - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
@@ -883,8 +884,7 @@ jobs:
           os: ${{ runner.os }}
 
       - name: Install newer npm if needed
-        run: |
-          dpkg --compare-versions $(npm -v) lt 11.5.1 && (npm update -g npm; echo "updated npm to: $(npm -v)") || echo "npm is new enough: $(npm -v)"
+        run: 'dpkg --compare-versions "$(npm -v)" lt 11.5.1 && (npm update -g npm; echo "updated npm to: $(npm -v)") || echo "npm is new enough: $(npm -v)"'
 
       - uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6 # v4.1.2
 
