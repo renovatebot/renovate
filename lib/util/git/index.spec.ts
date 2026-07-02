@@ -334,6 +334,12 @@ describe('util/git/index', { timeout: 30000 }, () => {
     });
   });
 
+  describe('getCurrentBranch()', () => {
+    it('should return the current branch', () => {
+      expect(git.getCurrentBranch()).toBe(defaultBranch);
+    });
+  });
+
   describe('getBranchList()', () => {
     it('should return all branches', () => {
       const res = git.getBranchList();

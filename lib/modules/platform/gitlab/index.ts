@@ -277,7 +277,7 @@ export async function commitFiles(
   commitConfig: CommitFilesConfig,
 ): Promise<LongCommitSha | null> {
   const { baseBranch, branchName, files, message } = commitConfig;
-  const startBranch = baseBranch ?? config.defaultBranch;
+  const startBranch = baseBranch ?? git.getCurrentBranch();
 
   const commitResult = await git.prepareCommit(commitConfig);
   if (!commitResult) {
@@ -289,7 +289,7 @@ export async function commitFiles(
   }
 
   logger.debug(
-    { branchName, fileCount: files.length },
+    { branchName, fileCount: commitResult.files.length },
     'GitLab platformCommit: preparing commit via GitLab API',
   );
 

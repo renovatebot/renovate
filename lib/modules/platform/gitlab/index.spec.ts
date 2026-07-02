@@ -528,6 +528,7 @@ describe('modules/platform/gitlab/index', () => {
 
     beforeEach(async () => {
       await initRepo();
+      git.getCurrentBranch.mockReturnValue('master');
       git.prepareCommit.mockImplementation((commitConfig) =>
         Promise.resolve({
           parentCommitSha: preparedParentSha,
@@ -695,6 +696,48 @@ describe('modules/platform/gitlab/index', () => {
       });
 
       expect(scope.isDone()).toBeTrue();
+      expect(git.resetToCommit).toHaveBeenCalledWith(preparedParentSha);
+      expect(git.fetchBranch).toHaveBeenCalledWith('some-branch');
+      expect(res).toBe(fetchedSha);
+    });
+
+    it('falls back to current branch when baseBranch is undefined', async () => {
+      git.getCurrentBranch.mockReturnValue('release/1.x');
+      git.getFile.mockResolvedValueOnce(null);
+
+      const scope = httpMock
+        .scope(gitlabApiHost)
+        .post('/api/v4/projects/some%2Frepo/repository/commits', {
+          branch: 'some-branch',
+          start_branch: 'release/1.x',
+          commit_message: 'msg',
+          actions: [
+            {
+              action: 'create',
+              file_path: 'new.txt',
+              content: 'created',
+            },
+          ],
+          force: true,
+        })
+        .reply(201, {
+          id: 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
+        });
+
+      const res = await gitlab.commitFiles({
+        branchName: 'some-branch',
+        files: [
+          {
+            type: 'addition',
+            path: 'new.txt',
+            contents: 'created',
+          },
+        ],
+        message: 'msg',
+      });
+
+      expect(scope.isDone()).toBeTrue();
+      expect(git.getFile).toHaveBeenCalledWith('new.txt', 'release/1.x');
       expect(git.resetToCommit).toHaveBeenCalledWith(preparedParentSha);
       expect(git.fetchBranch).toHaveBeenCalledWith('some-branch');
       expect(res).toBe(fetchedSha);
