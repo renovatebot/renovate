@@ -446,4 +446,48 @@ describe('modules/manager/custom/jsonata/index', () => {
       ],
     });
   });
+
+  it('catches jsonata evaluation errors', async () => {
+    const yaml = codeBlock`
+      public.ecr.aws:
+        images-by-semver:
+          bitnamicharts/cert-manager: '>=1.5.14'
+      `;
+    const config = {
+      fileFormat: 'yaml',
+      matchStrings: [
+        '$each(`docker.io`.`images-by-semver`, function($v, $n) { { "depName": $n, "currentValue": $replace($v, ">=", "") } })',
+        '$reduce($each(*, function($images, $host){ $each($images.`images-by-semver`, function($v, $n){ { "packageName": $host & "/" & $n, "depName": $n, "currentValue": $replace($v, ">=", "") } })}), $append)',
+      ],
+      datasourceTemplate: 'docker',
+    };
+    const res = await extractPackageFile(yaml, 'some.yaml', config);
+
+    expect(res).toEqual({
+      datasourceTemplate: 'docker',
+      deps: [
+        {
+          currentValue: '1.5.14',
+          datasource: 'docker',
+          depName: 'bitnamicharts/cert-manager',
+          packageName: 'public.ecr.aws/bitnamicharts/cert-manager',
+        },
+      ],
+      fileFormat: 'yaml',
+      matchStrings: [
+        '$each(`docker.io`.`images-by-semver`, function($v, $n) { { "depName": $n, "currentValue": $replace($v, ">=", "") } })',
+        '$reduce($each(*, function($images, $host){ $each($images.`images-by-semver`, function($v, $n){ { "packageName": $host & "/" & $n, "depName": $n, "currentValue": $replace($v, ">=", "") } })}), $append)',
+      ],
+    });
+
+    expect(logger.logger.warn).toHaveBeenCalledWith(
+      {
+        err: expect.any(TypeError),
+        packageFile: 'some.yaml',
+        jsonataQuery:
+          '$each(`docker.io`.`images-by-semver`, function($v, $n) { { "depName": $n, "currentValue": $replace($v, ">=", "") } })',
+      },
+      'Error executing jsonata query. Please check your query.',
+    );
+  });
 });
