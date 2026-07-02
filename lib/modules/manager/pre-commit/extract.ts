@@ -83,22 +83,25 @@ function determineDatasource(
 }
 
 const gitUrlRegex = regEx(/\.git$/i);
+const fullGitShaRegex = regEx(/^[a-f0-9]{40}$/i);
+const shortGitShaRegex = regEx(/^[a-f0-9]{6,7}$/i);
 
-// Matches: rev: <digest><whitespace># frozen: <version>
+// Matches: rev: <digest> with optional quotes and frozen version comment
 const revLineWithFrozenCommentRegex = regEx(
-  /^\s*rev:\s*(?<replaceString>(?<currentDigest>[a-f0-9]{40})(?<commentWhiteSpaces>\s+)#\s*frozen:\s*(?<currentValue>\S+))/,
+  /^\s*rev:\s*(?<replaceString>(?:"(?<doubleQuotedDigest>(?:[a-f0-9]{40}|[a-f0-9]{6,7}))"|'(?<singleQuotedDigest>(?:[a-f0-9]{40}|[a-f0-9]{6,7}))'|(?<bareDigest>(?:[a-f0-9]{40}|[a-f0-9]{6,7})))(?:(?<commentWhiteSpaces>\s+)#\s*frozen:\s*(?<currentValue>\S+))?)(?:\s+#.*|\s*)$/,
 );
 
 interface RegexDep {
-  currentDigest: string;
-  currentValue: string;
+  currentDigest?: string;
+  currentDigestShort?: string;
+  currentValue?: string;
   replaceString: string;
-  autoReplaceStringTemplate: string;
+  autoReplaceStringTemplate?: string;
 }
 
-function extractWithRegex(content: string): Map<string, RegexDep> {
+function extractWithRegex(content: string): Map<string, RegexDep[]> {
   logger.trace('pre-commit.extractWithRegex()');
-  const regexDeps = new Map<string, RegexDep>();
+  const regexDeps = new Map<string, RegexDep[]>();
 
   for (const line of content.split(newlineRegex)) {
     if (line.trim().startsWith('#')) {
@@ -107,16 +110,39 @@ function extractWithRegex(content: string): Map<string, RegexDep> {
 
     const match = revLineWithFrozenCommentRegex.exec(line);
     if (match?.groups) {
-      const { currentDigest, currentValue, replaceString, commentWhiteSpaces } =
-        match.groups;
+      const {
+        bareDigest,
+        currentValue,
+        doubleQuotedDigest,
+        replaceString,
+        singleQuotedDigest,
+        commentWhiteSpaces,
+      } = match.groups;
+      const currentDigest =
+        doubleQuotedDigest ?? singleQuotedDigest ?? bareDigest;
+      let quote = '';
+      if (doubleQuotedDigest) {
+        quote = '"';
+      } else if (singleQuotedDigest) {
+        quote = "'";
+      }
+      const key = currentDigest;
 
-      // Store by digest to correlate with YAML-extracted deps later
-      regexDeps.set(currentDigest, {
-        currentDigest,
+      const regexDep: RegexDep = {
         currentValue,
         replaceString,
-        autoReplaceStringTemplate: `{{newDigest}}${commentWhiteSpaces}# frozen: {{newValue}}`,
-      });
+      };
+      if (fullGitShaRegex.test(currentDigest)) {
+        regexDep.currentDigest = currentDigest;
+      } else {
+        regexDep.currentDigestShort = currentDigest;
+      }
+      if (currentValue) {
+        regexDep.autoReplaceStringTemplate = `${quote}{{newDigest}}${quote}${commentWhiteSpaces}# frozen: {{newValue}}`;
+      }
+
+      // Store by digest and occurrence to correlate with YAML-extracted deps later
+      regexDeps.set(key, [...(regexDeps.get(key) ?? []), regexDep]);
     }
   }
 
@@ -173,7 +199,7 @@ function extractDependency(tag: string, repository: string): PackageDependency {
  */
 function findDependencies(
   precommitFile: PreCommitConfig,
-  regexDeps: Map<string, RegexDep>,
+  regexDeps: Map<string, RegexDep[]>,
 ): PackageDependency[] {
   if (!precommitFile.repos) {
     logger.debug(`No repos section found, skipping file`);
@@ -239,13 +265,28 @@ function findDependencies(
       const dep = extractDependency(tag, repository);
 
       // Check if this rev has regex-extracted formatting info
-      const regexDep = regexDeps.get(tag);
-      if (regexDep) {
+      const regexDep = regexDeps.get(tag)?.shift();
+      if (regexDep?.currentValue) {
         // Enrich with formatting info from regex extraction
-        dep.currentDigest = regexDep.currentDigest;
+        if (regexDep.currentDigest) {
+          dep.currentDigest = regexDep.currentDigest;
+        }
+        if (regexDep.currentDigestShort) {
+          dep.currentDigestShort = regexDep.currentDigestShort;
+        }
         dep.currentValue = regexDep.currentValue;
         dep.replaceString = regexDep.replaceString;
         dep.autoReplaceStringTemplate = regexDep.autoReplaceStringTemplate;
+      } else if (fullGitShaRegex.test(tag)) {
+        dep.currentDigest = tag;
+        dep.currentValue = undefined;
+        dep.enabled = false;
+        dep.skipReason = 'unversioned-reference';
+      } else if (shortGitShaRegex.test(tag)) {
+        dep.currentDigestShort = tag;
+        dep.currentValue = undefined;
+        dep.enabled = false;
+        dep.skipReason = 'unversioned-reference';
       }
 
       packageDependencies.push(dep);

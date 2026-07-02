@@ -27,6 +27,19 @@ To enable the `pre-commit` manager, add the following config:
 
 Alternatively, add `:enablePreCommit` to your `extends` array.
 
+Repository `rev` values pinned to a bare full SHA or 6-7 character short SHA without a frozen version comment are disabled by default, because Renovate cannot determine which tag or version the SHA belongs to.
+Prefer using a tag or version directly.
+If you need SHA pinning, add the version with `# frozen: ...`:
+
+<!-- prettier-ignore -->
+```yaml
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: cef0300fd0fc4d2a87a85fa2093c6b283ea36f4b  # frozen: v5.0.0
+    hooks:
+      - id: check-yaml
+```
+
 ### Additional Dependencies
 
 Renovate has partial support for `additional_dependencies`, currently Go, Node.js and Python only.
