@@ -853,7 +853,7 @@ jobs:
       # https://github.com/orgs/community/discussions/199328
       # To avoid disk space issues when performing a release, we can clear up some disk space ahead of time
       - name: Free Disk Space
-        if: ${{ check.outputs.do-cleanup }}
+        if: ${{ steps.check.outputs.do-cleanup }}
         uses: jlumbroso/free-disk-space@54081f138730dfa15788a46383842cd2f914a1be # v1.3.1
         with:
           # we're likely already using some of the globally installed tools
