@@ -226,6 +226,38 @@ describe('modules/manager/poetry/artifacts', () => {
       ]);
     });
 
+    it('skips disabled registry credentials', async () => {
+      fs.getSiblingFileName.mockReturnValueOnce('poetry.lock');
+      fs.readLocalFile.mockResolvedValueOnce(null);
+      fs.getSiblingFileName.mockReturnValueOnce('pyproject.lock');
+      fs.readLocalFile.mockResolvedValueOnce('[metadata]\n');
+      const execSnapshots = mockExecAll();
+      fs.readLocalFile.mockResolvedValueOnce('New poetry.lock');
+      hostRules.find.mockReturnValueOnce({
+        enabled: false,
+      });
+      const updatedDeps = [{ depName: 'dep1' }];
+      expect(
+        await updateArtifacts({
+          packageFileName: 'pyproject.toml',
+          updatedDeps,
+          newPackageFileContent: pyproject10toml,
+          config,
+        }),
+      ).toEqual([
+        {
+          file: {
+            type: 'addition',
+            path: 'pyproject.lock',
+            contents: 'New poetry.lock',
+          },
+        },
+      ]);
+      expect(execSnapshots[0].options?.env).not.toHaveProperty(
+        'POETRY_HTTP_BASIC_ONE_USERNAME',
+      );
+    });
+
     it('passes Google Artifact Registry credentials environment vars', async () => {
       // poetry.lock
       fs.getSiblingFileName.mockReturnValueOnce('poetry.lock');

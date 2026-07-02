@@ -218,3 +218,17 @@ export function clear(): void {
   hostRules = [];
   sanitize.clearRepoSanitizedSecretsList();
 }
+
+/**
+ * Checks if a registry is disabled
+ * @param url The URL of the registry
+ * @param hostType The type of host
+ * @returns True if the registry is disabled, false otherwise
+ */
+export function isRegistryDisabled(url: string, hostType?: string): boolean {
+  const rule = find({
+    hostType,
+    url,
+  });
+  return rule.enabled === false;
+}

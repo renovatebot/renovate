@@ -7,6 +7,7 @@ import {
   getAll,
   hostType,
   hosts,
+  isRegistryDisabled,
 } from './host-rules.ts';
 
 describe('util/host-rules', () => {
@@ -481,6 +482,38 @@ describe('util/host-rules', () => {
           url: 'https://gitlab.example.com/chalk/chalk',
         }),
       ).toBeNull();
+    });
+  });
+
+  describe('isRegistryDisabled()', () => {
+    it('returns true if registry is disabled', () => {
+      add({
+        hostType: 'nuget',
+        matchHost: 'https://api.nuget.org',
+        enabled: false,
+      });
+      expect(isRegistryDisabled('https://api.nuget.org', 'nuget')).toBe(true);
+    });
+
+    it('returns false if registry is enabled', () => {
+      add({
+        hostType: 'nuget',
+        matchHost: 'https://api.nuget.org',
+        enabled: true,
+      });
+      expect(isRegistryDisabled('https://api.nuget.org', 'nuget')).toBe(false);
+    });
+
+    it('returns false if registry has no rule', () => {
+      expect(isRegistryDisabled('https://api.nuget.org', 'nuget')).toBe(false);
+    });
+
+    it('works with optional hostType', () => {
+      add({
+        matchHost: 'https://api.nuget.org',
+        enabled: false,
+      });
+      expect(isRegistryDisabled('https://api.nuget.org')).toBe(true);
     });
   });
 });

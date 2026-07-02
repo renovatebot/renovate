@@ -349,6 +349,9 @@ function getRegistryCredEnvVars(
   index: number,
 ): Record<string, string> {
   const hostRule = hostRules.find({ url: url.href });
+  if (hostRule.enabled === false) {
+    return {};
+  }
   logger.debug(hostRule, `Found host rule for url ${url.href}`);
   const ret: Record<string, string> = {};
   if (!!hostRule.username || !!hostRule.password) {
@@ -382,7 +385,10 @@ export function getRegistryCredVarsFromPackageFiles(
   logger.debug(urls, 'Extracted registry URLs from package files');
 
   const uniqueHosts = new Set<URL>(
-    urls.map(cleanUrl).filter(isNotNullOrUndefined),
+    urls
+      .map(cleanUrl)
+      .filter(isNotNullOrUndefined)
+      .filter((url) => !hostRules.isRegistryDisabled(url.href)),
   );
 
   let allCreds: ExtraEnv<string> = {};

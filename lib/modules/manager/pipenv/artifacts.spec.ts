@@ -1142,6 +1142,11 @@ describe('modules/manager/pipenv/artifacts', () => {
     expect(getMatchingHostRule('')).toBeNull();
   });
 
+  it('returns null if matching rule is disabled', () => {
+    find.mockReturnValueOnce({ enabled: false });
+    expect(getMatchingHostRule('https://pypi.org/simple')).toBeNull();
+  });
+
   it.each`
     credential                      | result
     ${'$USERNAME'}                  | ${'USERNAME'}

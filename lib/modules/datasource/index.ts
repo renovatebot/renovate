@@ -17,6 +17,7 @@ import * as packageCache from '../../util/cache/package/index.ts';
 import type { PackageCacheNamespace } from '../../util/cache/package/types.ts';
 import { clone } from '../../util/clone.ts';
 import { filterMap } from '../../util/filter-map.ts';
+import { isRegistryDisabled } from '../../util/host-rules.ts';
 import { AsyncResult, Result } from '../../util/result.ts';
 import { DatasourceCacheStats } from '../../util/stats.ts';
 import { trimTrailingSlash } from '../../util/url.ts';
@@ -297,7 +298,23 @@ function resolveRegistryUrls(
   registryUrls: string[] | undefined | null,
   additionalRegistryUrls: string[] | undefined,
 ): string[] {
-  if (!datasource.customRegistrySupport) {
+  let resolvedUrls: string[] = [];
+  if (datasource.customRegistrySupport) {
+    const customUrls = registryUrls?.filter(Boolean);
+    if (isNonEmptyArray(customUrls)) {
+      resolvedUrls = [...customUrls];
+    } else if (isNonEmptyArray(defaultRegistryUrls)) {
+      resolvedUrls = [...defaultRegistryUrls];
+      resolvedUrls = resolvedUrls.concat(additionalRegistryUrls ?? []);
+    } else if (isFunction(datasource.defaultRegistryUrls)) {
+      resolvedUrls = [...datasource.defaultRegistryUrls()];
+      resolvedUrls = resolvedUrls.concat(additionalRegistryUrls ?? []);
+    } else if (isNonEmptyArray(datasource.defaultRegistryUrls)) {
+      resolvedUrls = [...datasource.defaultRegistryUrls];
+      resolvedUrls = resolvedUrls.concat(additionalRegistryUrls ?? []);
+    }
+    resolvedUrls = massageRegistryUrls(resolvedUrls);
+  } else {
     if (
       isNonEmptyArray(registryUrls) ||
       isNonEmptyArray(defaultRegistryUrls) ||
@@ -313,25 +330,11 @@ function resolveRegistryUrls(
         'Custom registries are not allowed for this datasource and will be ignored',
       );
     }
-    return isFunction(datasource.defaultRegistryUrls)
+    resolvedUrls = isFunction(datasource.defaultRegistryUrls)
       ? datasource.defaultRegistryUrls()
       : (datasource.defaultRegistryUrls ?? []);
   }
-  const customUrls = registryUrls?.filter(Boolean);
-  let resolvedUrls: string[] = [];
-  if (isNonEmptyArray(customUrls)) {
-    resolvedUrls = [...customUrls];
-  } else if (isNonEmptyArray(defaultRegistryUrls)) {
-    resolvedUrls = [...defaultRegistryUrls];
-    resolvedUrls = resolvedUrls.concat(additionalRegistryUrls ?? []);
-  } else if (isFunction(datasource.defaultRegistryUrls)) {
-    resolvedUrls = [...datasource.defaultRegistryUrls()];
-    resolvedUrls = resolvedUrls.concat(additionalRegistryUrls ?? []);
-  } else if (isNonEmptyArray(datasource.defaultRegistryUrls)) {
-    resolvedUrls = [...datasource.defaultRegistryUrls];
-    resolvedUrls = resolvedUrls.concat(additionalRegistryUrls ?? []);
-  }
-  return massageRegistryUrls(resolvedUrls);
+  return resolvedUrls.filter((url) => !isRegistryDisabled(url, datasource.id));
 }
 
 function applyReplacements(

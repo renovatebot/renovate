@@ -259,6 +259,18 @@ describe('modules/manager/pip-compile/common', () => {
       });
     });
 
+    it('skips disabled registry credentials', () => {
+      hostRules.isRegistryDisabled.mockReturnValueOnce(true);
+      expect(
+        getRegistryCredVarsFromPackageFiles([
+          {
+            deps: [],
+            registryUrls: ['https://example.com/pypi/simple'],
+          },
+        ]),
+      ).toEqual({});
+    });
+
     it('handles multiple additionalRegistryUrls', () => {
       hostRules.find.mockReturnValueOnce({
         username: 'user1',

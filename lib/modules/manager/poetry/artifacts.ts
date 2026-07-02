@@ -123,6 +123,9 @@ function getPoetrySources(content: string, fileName: string): PoetrySource[] {
 async function getMatchingHostRule(url: string | undefined): Promise<HostRule> {
   const scopedMatch = find({ hostType: PypiDatasource.id, url });
   const hostRule = isNonEmptyObject(scopedMatch) ? scopedMatch : find({ url });
+  if (hostRule?.enabled === false) {
+    return {};
+  }
   if (hostRule && Object.keys(hostRule).length !== 0) {
     return hostRule;
   }

@@ -41,6 +41,11 @@ export function processHostRules(): HostRulesResult {
     `Found ${effectiveHostRules.length} effective npm host rule(s) after deduplication`,
   );
   for (const hostRule of effectiveHostRules) {
+    if (hostRule.enabled === false) {
+      logger.debug('Skipping disabled host rule');
+      continue;
+    }
+
     if (!hostRule.resolvedHost) {
       logger.debug('Skipping host rule without resolved host');
       continue;

@@ -32,7 +32,14 @@ export function getMatchingHostRule(url: string): HostRule | null {
     parsedUrl.password = '';
     const urlWithoutCredentials = parsedUrl.toString();
 
-    return find({ hostType: PypiDatasource.id, url: urlWithoutCredentials });
+    const rule = find({
+      hostType: PypiDatasource.id,
+      url: urlWithoutCredentials,
+    });
+    if (rule?.enabled === false) {
+      return null;
+    }
+    return rule;
   }
   return null;
 }

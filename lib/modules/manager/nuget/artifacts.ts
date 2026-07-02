@@ -14,6 +14,7 @@ import {
   writeLocalFile,
 } from '../../../util/fs/index.ts';
 import { getFiles } from '../../../util/git/index.ts';
+import { isRegistryDisabled } from '../../../util/host-rules.ts';
 import { regEx } from '../../../util/regex.ts';
 import type {
   UpdateArtifact,
@@ -53,7 +54,9 @@ async function createCachedNuGetConfigFile(
     (url) => ({ url }),
   );
 
-  const combinedRegistries = [...registries, ...updatedDepsRegistries];
+  const combinedRegistries = [...registries, ...updatedDepsRegistries].filter(
+    (reg) => !isRegistryDisabled(reg.url),
+  );
 
   const contents = createNuGetConfigXml(combinedRegistries);
 

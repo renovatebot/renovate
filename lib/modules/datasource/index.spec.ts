@@ -7,6 +7,7 @@ import {
 } from '../../constants/error-messages.ts';
 import { ExternalHostError } from '../../types/errors/external-host-error.ts';
 import * as _packageCache from '../../util/cache/package/index.ts';
+import * as hostRules from '../../util/host-rules.ts';
 import { loadModules } from '../../util/modules.ts';
 import datasources from './api.ts';
 import { getDefaultVersioning } from './common.ts';
@@ -143,6 +144,10 @@ vi.mock('../../util/cache/package/index.ts');
 const packageCache = vi.mocked(_packageCache);
 
 describe('modules/datasource/index', () => {
+  beforeEach(() => {
+    hostRules.clear();
+  });
+
   afterEach(() => {
     datasources.delete(datasource);
   });
@@ -249,6 +254,22 @@ describe('modules/datasource/index', () => {
         'Custom registries are not allowed for this datasource and will be ignored',
       );
       expect(res).toMatchObject({ releases: [{ version: '1.2.3' }] });
+    });
+
+    it('filters out disabled registry URLs', async () => {
+      datasources.set(datasource, new DummyDatasource());
+      hostRules.add({
+        hostType: 'dummy',
+        matchHost: 'https://reg1.com',
+        enabled: false,
+      });
+
+      const res = await getPkgReleases({
+        datasource,
+        packageName,
+      });
+
+      expect(res).toBeNull();
     });
   });
 

@@ -187,5 +187,32 @@ describe('modules/manager/npm/post-update/rules', () => {
         },
       });
     });
+
+    it('skips disabled host rules', () => {
+      hostRules.add({
+        hostType: 'npm',
+        matchHost: 'registry.company.com',
+        token: 'sometoken',
+      });
+      hostRules.add({
+        hostType: 'npm',
+        matchHost: 'registry.other.org',
+        enabled: false,
+      });
+      const res = processHostRules();
+      expect(res).toEqual({
+        additionalNpmrcContent: [
+          '//registry.company.com/:_authToken=sometoken',
+        ],
+
+        additionalYarnRcYml: {
+          npmRegistries: {
+            '//registry.company.com/': {
+              npmAuthToken: 'sometoken',
+            },
+          },
+        },
+      });
+    });
   });
 });
