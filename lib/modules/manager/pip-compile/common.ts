@@ -349,9 +349,6 @@ function getRegistryCredEnvVars(
   index: number,
 ): Record<string, string> {
   const hostRule = hostRules.find({ url: url.href });
-  if (hostRule.enabled === false) {
-    return {};
-  }
   logger.debug(hostRule, `Found host rule for url ${url.href}`);
   const ret: Record<string, string> = {};
   if (!!hostRule.username || !!hostRule.password) {
