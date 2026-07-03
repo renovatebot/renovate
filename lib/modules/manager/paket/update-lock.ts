@@ -1,30 +1,31 @@
 import { logger } from '../../../logger/index.ts';
-import { readLocalFile } from '../../../util/fs/index.ts';
 import type { UpdateLockedConfig, UpdateLockedResult } from '../types.ts';
-import { runPaketUpdate } from './tool.ts';
+import { parse as parseLockFile } from './parsers/lock-file.ts';
 
-export async function updateLockedDependency(
-  config: UpdateLockedConfig,
-): Promise<UpdateLockedResult> {
-  logger.debug(`paket.updateLockedDependency(${config.lockFile})`);
+export function updateLockedDependency({
+  depName,
+  currentVersion,
+  newVersion,
+  lockFile,
+  lockFileContent,
+}: UpdateLockedConfig): UpdateLockedResult {
+  logger.debug(
+    `paket.updateLockedDependency: ${depName}@${currentVersion} -> ${newVersion} [${lockFile}]`,
+  );
 
-  const existingLockFileContent = await readLocalFile(config.lockFile, 'utf8');
-
-  await runPaketUpdate({
-    filePath: config.lockFile,
-    packageName: config.depName,
-    version: config.newVersion,
-    toolConstraints: [{ toolName: 'dotnet' }, { toolName: 'paket' }],
-  });
-
-  const newLockFileContent = await readLocalFile(config.lockFile, 'utf8');
-  if (existingLockFileContent === newLockFileContent || !newLockFileContent) {
-    logger.debug(`Lock file ${config.lockFile} is unchanged`);
-    return { status: 'already-updated' };
+  try {
+    const lockedEntries = parseLockFile(lockFileContent!).filter(
+      (dep) => dep.packageName.toUpperCase() === depName.toUpperCase(),
+    );
+    if (
+      lockedEntries.length &&
+      lockedEntries.every((dep) => dep.version === newVersion)
+    ) {
+      return { status: 'already-updated' };
+    }
+    return { status: 'unsupported' };
+  } catch (err) {
+    logger.debug({ err }, 'paket.updateLockedDependency() error');
+    return { status: 'update-failed' };
   }
-
-  return {
-    status: 'updated',
-    files: { [config.lockFile]: newLockFileContent },
-  };
 }

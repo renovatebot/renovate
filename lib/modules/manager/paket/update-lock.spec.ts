@@ -1,67 +1,73 @@
-import { fs } from '~test/util.ts';
+import { codeBlock } from 'common-tags';
 import type { UpdateLockedConfig } from '../types.ts';
-import * as tool from './tool.ts';
 import { updateLockedDependency } from './update-lock.ts';
 
-vi.mock('../../../util/fs/index.ts');
-
 describe('modules/manager/paket/update-lock', () => {
-  const packageFileName = '/app/test/paket.dependencies';
-
   describe('updateLockedDependency()', () => {
-    const lockFileName = '/app/test/paket.lock';
+    const lockFileContent = codeBlock`
+      NUGET
+        remote: https://api.nuget.org/v3/index.json
+          FSharp.Core (9.0.300)
+          xunit (2.9.3)
+      GROUP GroupA
+      NUGET
+        remote: https://api.nuget.org/v3/index.json
+          xunit (2.9.2)
+    `;
     const config: UpdateLockedConfig = {
-      packageFile: packageFileName,
-      lockFile: lockFileName,
+      packageFile: '/app/test/paket.dependencies',
+      lockFile: '/app/test/paket.lock',
       depName: 'FSharp.Core',
-      currentVersion: '1.2.3',
-      newVersion: '1.2.4',
+      currentVersion: '9.0.300',
+      newVersion: '9.0.301',
+      lockFileContent,
     };
 
-    it('update all packages', async () => {
-      const toolSpy = vi.spyOn(tool, 'runPaketUpdate');
-      toolSpy.mockResolvedValue();
-
-      const newContentLockFile = 'New fake lock file content';
-      fs.readLocalFile.mockImplementation(
-        (filename: string, _encoding: 'utf8') => {
-          expect(filename).toEqual(lockFileName);
-
-          if (toolSpy.mock.calls.length === 0) {
-            return Promise.resolve('Old fake lock file content');
-          } else {
-            return Promise.resolve(newContentLockFile);
-          }
-        },
-      );
-
-      const result = await updateLockedDependency(config);
-
-      expect(toolSpy).toHaveBeenCalledWith({
-        filePath: lockFileName,
-        packageName: config.depName,
-        version: config.newVersion,
-        toolConstraints: [{ toolName: 'dotnet' }, { toolName: 'paket' }],
+    it('returns already-updated if the lock file contains the new version', () => {
+      const result = updateLockedDependency({
+        ...config,
+        currentVersion: '9.0.299',
+        newVersion: '9.0.300',
       });
-      expect(result).toEqual({
-        files: { [lockFileName]: newContentLockFile },
-        status: 'updated',
-      });
-    });
-
-    it('return null if no changes', async () => {
-      const toolSpy = vi.spyOn(tool, 'runPaketUpdate');
-      toolSpy.mockResolvedValue();
-      fs.readLocalFile.mockImplementation(
-        (filename: string, _encoding: 'utf8') => {
-          expect(filename).toEqual(lockFileName);
-          return Promise.resolve('Old fake lock file content');
-        },
-      );
-
-      const result = await updateLockedDependency(config);
 
       expect(result).toEqual({ status: 'already-updated' });
+    });
+
+    it('returns unsupported if the lock file contains the old version', () => {
+      const result = updateLockedDependency(config);
+
+      expect(result).toEqual({ status: 'unsupported' });
+    });
+
+    it('returns unsupported if only one group is at the new version', () => {
+      const result = updateLockedDependency({
+        ...config,
+        depName: 'xunit',
+        currentVersion: '2.9.2',
+        newVersion: '2.9.3',
+      });
+
+      expect(result).toEqual({ status: 'unsupported' });
+    });
+
+    it('returns unsupported if the dependency is missing from the lock file', () => {
+      const result = updateLockedDependency({
+        ...config,
+        depName: 'Newtonsoft.Json',
+        currentVersion: '13.0.2',
+        newVersion: '13.0.3',
+      });
+
+      expect(result).toEqual({ status: 'unsupported' });
+    });
+
+    it('returns update-failed if the lock file content is missing', () => {
+      const result = updateLockedDependency({
+        ...config,
+        lockFileContent: undefined,
+      });
+
+      expect(result).toEqual({ status: 'update-failed' });
     });
   });
 });
