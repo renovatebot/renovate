@@ -71,12 +71,12 @@ export async function extractPackageFile(
   packageFile: string,
   _config: ExtractConfig,
 ): Promise<PackageFileContent | null> {
-  logger.debug(`paket.extractPackageFile(${packageFile})`);
+  logger.trace(`paket.extractPackageFile(${packageFile})`);
 
   const lockFileName = getSiblingFileName(packageFile, 'paket.lock');
   const lockFileContent = await readLocalFile(lockFileName, 'utf8');
   if (!lockFileContent) {
-    logger.warn(`Could not find paket lock file: ${lockFileName}`);
+    logger.debug({ lockFileName }, 'Could not find paket lock file');
     return null;
   }
 
