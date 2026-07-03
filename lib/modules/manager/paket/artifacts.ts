@@ -1,3 +1,4 @@
+import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
 import type { ToolConstraint } from '../../../util/exec/types.ts';
 import { getSiblingFileName, readLocalFile } from '../../../util/fs/index.ts';
@@ -90,6 +91,9 @@ export async function updateArtifacts(
       },
     ];
   } catch (err) {
+    if (err.message === TEMPORARY_ERROR) {
+      throw err;
+    }
     logger.debug({ err }, 'Failed to generate lock file');
     return [
       {

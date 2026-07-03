@@ -1,4 +1,5 @@
 import { fs } from '~test/util.ts';
+import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
 import type { UpdateArtifact } from '../types.ts';
 import { updateArtifacts } from './artifacts.ts';
 import * as tool from './tool.ts';
@@ -222,6 +223,21 @@ describe('modules/manager/paket/artifacts', () => {
           },
         },
       ]);
+    });
+
+    it('rethrow temporary error', async () => {
+      const toolSpy = vi.spyOn(tool, 'runPaketUpdate');
+      toolSpy.mockRejectedValue(new Error(TEMPORARY_ERROR));
+      fs.readLocalFile.mockImplementation(
+        (filename: string, _encoding: 'utf8') => {
+          expect(filename).toEqual(lockFileName);
+          return Promise.resolve('Old fake lock file content');
+        },
+      );
+
+      await expect(updateArtifacts(updateArtifact)).rejects.toThrow(
+        TEMPORARY_ERROR,
+      );
     });
   });
 });
