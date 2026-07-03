@@ -6,6 +6,7 @@
       "replacements:actions-attest-build-provenance-to-actions-attest",
       "replacements:airbnb-prop-types-to-prop-types-tools",
       "replacements:apollo-server-to-scoped",
+      "replacements:aws-sdk-smithy-client-to-smithy",
       "replacements:babel-eslint-to-eslint-parser",
       "replacements:base-ui-components-to-base-ui",
       "replacements:containerbase",
@@ -146,6 +147,17 @@
         "matchPackageNames": ["apollo-reporting-protobuf"],
         "replacementName": "@apollo/usage-reporting-protobuf",
         "replacementVersion": "4.0.0"
+      }
+    ]
+  },
+  "aws-sdk-smithy-client-to-smithy": {
+    "description": "`@aws-sdk/smithy-client` was moved to `@smithy/smithy-client`.",
+    "packageRules": [
+      {
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["@aws-sdk/smithy-client"],
+        "replacementName": "@smithy/smithy-client",
+        "replacementVersion": "1.0.5"
       }
     ]
   },

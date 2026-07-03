@@ -13,13 +13,14 @@ import {
 } from '../../constants/error-messages.ts';
 import { setCustomEnv } from '../env.ts';
 import { newlineRegex, regEx } from '../regex.ts';
+import { toLongCommitSha } from '../schema-utils/git.ts';
 import * as _auth from './auth.ts';
 import * as _behindBaseCache from './behind-base-branch-cache.ts';
 import * as _conflictsCache from './conflicts-cache.ts';
 import * as git from './index.ts';
 import { setNoVerify } from './index.ts';
 import * as _modifiedCache from './modified-cache.ts';
-import type { FileChange, LongCommitSha } from './types.ts';
+import type { FileChange } from './types.ts';
 import * as _updateDateCache from './update-date-cache.ts';
 
 vi.mock('./conflicts-cache.ts');
@@ -1459,7 +1460,7 @@ describe('util/git/index', { timeout: 30000 }, () => {
       await repo.raw(['mv', 'master_file', 'renamed_master_file']);
       await repo.commit('rename master file');
 
-      const commit = (await repo.revparse(['HEAD'])).trim() as LongCommitSha;
+      const commit = toLongCommitSha((await repo.revparse(['HEAD'])).trim());
       const diff = await git.diffCommitTree(parentCommit, commit);
 
       expect(diff).toHaveLength(2);
@@ -1625,6 +1626,7 @@ describe('util/git/index', { timeout: 30000 }, () => {
       process.env.GIT_CONFIG_GLOBAL = '/tmp/global-gitconfig';
       process.env.GIT_CONFIG_SYSTEM = '/tmp/system-gitconfig';
       process.env.PAGER = 'less';
+      process.env.GIT_ASKPASS = '/tmp/.git-askpass';
 
       const envSpy = vi.spyOn(SimpleGit.prototype, 'env');
       await git.initRepo({ url: origin.path });
@@ -1644,6 +1646,7 @@ describe('util/git/index', { timeout: 30000 }, () => {
       expect(gitEnv).not.toHaveProperty('GIT_CONFIG_GLOBAL');
       expect(gitEnv).not.toHaveProperty('GIT_CONFIG_SYSTEM');
       expect(gitEnv).not.toHaveProperty('PAGER');
+      expect(gitEnv).not.toHaveProperty('GIT_ASKPASS');
     });
 
     it('should work when GIT_CONFIG_COUNT authentication environment variables are configured', async () => {
@@ -1733,6 +1736,24 @@ describe('util/git/index', { timeout: 30000 }, () => {
       expect(envSpy).toHaveBeenCalledWith(
         expect.objectContaining({
           GIT_SSH_COMMAND: 'ssh -o SomeHostOption=yes',
+        }),
+      );
+    });
+
+    it('should allow customEnvVariables to override GIT_ASKPASS', async () => {
+      // Self-hosted users may inject a custom GIT_ASKPASS via
+      // customEnvVariables to configure git authentication.
+      const customAskPassCommand = '/tmp/.git-askpass';
+      setCustomEnv({ GIT_ASKPASS: customAskPassCommand });
+
+      const envSpy = vi.spyOn(SimpleGit.prototype, 'env');
+      await git.initRepo({ url: origin.path });
+      await expect(git.syncGit()).resolves.toBeUndefined();
+      expect(envSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          LANG: 'C.UTF-8',
+          LC_ALL: 'C.UTF-8',
+          GIT_ASKPASS: customAskPassCommand,
         }),
       );
     });

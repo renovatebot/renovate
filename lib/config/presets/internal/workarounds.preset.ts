@@ -21,6 +21,7 @@ export const presets: Record<string, Preset> = {
       'workarounds:containerbase',
       'workarounds:bitnamiDockerImageVersioning',
       'workarounds:clamavDockerImageVersioning',
+      'workarounds:grafanaDockerImageVersioning',
       'workarounds:k3sKubernetesVersioning',
       'workarounds:rke2KubernetesVersioning',
       'workarounds:libericaJdkDockerVersioning',
@@ -116,6 +117,22 @@ export const presets: Record<string, Preset> = {
         matchCurrentVersion: '!/^\\d{8}$/',
         matchDatasources: ['docker'],
         matchPackageNames: ['alpine'],
+      },
+    ],
+  },
+  grafanaDockerImageVersioning: {
+    description: 'Support security releases on Grafana (product) images',
+    packageRules: [
+      {
+        matchDatasources: ['docker'],
+        matchPackageNames: [
+          'grafana/grafana',
+          'docker.io/grafana/grafana',
+          'grafana/grafana-enterprise',
+          'docker.io/grafana/grafana-enterprise',
+        ],
+        versioning:
+          'regex:^(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)(?:-security-(?<build>\\d+))?(?:-(?<compatibility>.*))?$',
       },
     ],
   },

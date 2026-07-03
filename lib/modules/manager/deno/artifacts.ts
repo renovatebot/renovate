@@ -1,4 +1,5 @@
 import { isEmptyArray } from '@sindresorhus/is';
+import upath from 'upath';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
 import { exec } from '../../../util/exec/index.ts';
@@ -8,6 +9,13 @@ import {
   readLocalFile,
   writeLocalFile,
 } from '../../../util/fs/index.ts';
+import * as hostRules from '../../../util/host-rules.ts';
+import { processHostRules } from '../npm/post-update/rules.ts';
+import {
+  getNpmrcContent,
+  resetNpmrcContent,
+  updateNpmrcContent,
+} from '../npm/utils.ts';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
 import type { DenoManagerData } from './types.ts';
 
@@ -64,6 +72,11 @@ export async function updateArtifacts(
     }
   }
 
+  const pkgFileDir = upath.dirname(packageFileName);
+  const { additionalNpmrcContent } = processHostRules();
+  const npmrcContent = await getNpmrcContent(pkgFileDir);
+  await updateNpmrcContent(pkgFileDir, npmrcContent, additionalNpmrcContent);
+
   try {
     await writeLocalFile(packageFileName, newPackageFileContent);
 
@@ -93,6 +106,29 @@ export async function updateArtifacts(
       ],
     };
 
+    // defaults as per https://docs.deno.com/runtime/fundamentals/security/#importing-from-the-web
+    const defaultImportHosts = [
+      'deno.land:443',
+      'esm.sh:443',
+      'jsr.io:443',
+      'cdn.jsdelivr.net:443',
+      'raw.githubusercontent.com:443',
+      'gist.githubusercontent.com:443',
+    ];
+    const additionalImportHosts = hostRules
+      .findAll({ hostType: 'npm' })
+      .filter((rule) => rule.resolvedHost)
+      .map((rule) => rule.resolvedHost);
+
+    if (additionalImportHosts.length > 0) {
+      // combine default and additional import hosts, removing duplicates
+      const importHosts = [
+        ...new Set([...defaultImportHosts, ...additionalImportHosts]),
+      ].join(',');
+
+      args += ` --allow-import=${importHosts}`;
+    }
+
     // "deno install" don't execute lifecycle scripts of package.json by default
     // https://docs.deno.com/runtime/reference/cli/install/#native-node.js-addons
     // TODO: appending `--lockfile-only` is better to reduce disk usage
@@ -102,6 +138,7 @@ export async function updateArtifacts(
       command += args;
     }
     await exec(command, execOptions);
+    await resetNpmrcContent(pkgFileDir, npmrcContent);
 
     const newLockFileContent = await readLocalFile(lockFileName);
     if (

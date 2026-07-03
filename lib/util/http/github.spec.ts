@@ -2,6 +2,7 @@ import { codeBlock } from 'common-tags';
 import { DateTime } from 'luxon';
 import * as httpMock from '~test/http-mock.ts';
 import { logger } from '~test/util.ts';
+import { GlobalConfig } from '../../config/global.ts';
 import {
   EXTERNAL_HOST_ERROR,
   PLATFORM_BAD_CREDENTIALS,
@@ -61,6 +62,7 @@ describe('util/http/github', () => {
 
   afterEach(() => {
     hostRules.clear();
+    GlobalConfig.reset();
   });
 
   describe('HTTP', () => {
@@ -409,6 +411,28 @@ describe('util/http/github', () => {
         );
       });
 
+      it('uses productLinks.documentation in rate limit warn URL', async () => {
+        GlobalConfig.set({
+          productLinks: { documentation: 'https://custom.example.com/' },
+        });
+        hostRules.clear();
+
+        await expect(
+          fail(403, {
+            message:
+              "API rate limit exceeded for xxx.xxx.xxx.xxx. (But here's the good news: Authenticated requests get a higher rate limit. Check out the documentation for more details.)",
+          }),
+        ).rejects.toThrow(PLATFORM_RATE_LIMIT_EXCEEDED);
+
+        expect(logger.logger.once.warn).toHaveBeenCalledWith(
+          {
+            documentationUrl:
+              'https://custom.example.com/getting-started/running/#githubcom-token-for-changelogs-and-tools',
+          },
+          'Rate limit exceeded for api.github.com, as no hostRules set for this host. Please set a GITHUB_COM_TOKEN',
+        );
+      });
+
       it('when the rate limit is exceeded to GitHub Enterprise, but no host rules are set, a warn is logged', async () => {
         async function fail(
           code: number,
@@ -529,6 +553,24 @@ describe('util/http/github', () => {
         await expect(
           fail(422, {
             message: 'foobar',
+          }),
+        ).rejects.toThrow(EXTERNAL_HOST_ERROR);
+      });
+
+      it('should throw on repository change with a non-array error with code `invalid`', async () => {
+        await expect(
+          fail(422, {
+            message: 'foobar',
+            errors: { code: 'invalid' },
+          }),
+        ).rejects.toThrow(REPOSITORY_CHANGED);
+      });
+
+      it('should throw platform failure on 422 response with an unrecognized non-array errors', async () => {
+        await expect(
+          fail(422, {
+            message: 'foobar',
+            errors: 'Validation Failed',
           }),
         ).rejects.toThrow(EXTERNAL_HOST_ERROR);
       });
