@@ -1,9 +1,9 @@
 import { codeBlock } from 'common-tags';
 import type { ManagerData, UpdateLockedConfig } from '../types.ts';
 import type { PaketManagerData } from './types.ts';
-import { updateLockedDependency } from './update-lock.ts';
+import { updateLockedDependency } from './update-locked.ts';
 
-describe('modules/manager/paket/update-lock', () => {
+describe('modules/manager/paket/update-locked', () => {
   describe('updateLockedDependency()', () => {
     const lockFileContent = codeBlock`
       NUGET
