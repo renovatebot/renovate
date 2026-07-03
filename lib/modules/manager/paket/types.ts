@@ -9,6 +9,7 @@ export interface DependenciesFileGroup {
 }
 export interface DependenciesFilePackage {
   name: string;
+  versionConstraint?: string;
   options: string[];
 }
 

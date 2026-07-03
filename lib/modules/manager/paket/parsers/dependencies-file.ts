@@ -7,8 +7,27 @@ interface ReduceState {
   currentGroup: DependenciesFileGroup;
 }
 
+// https://fsprojects.github.io/Paket/nuget-dependencies.html
+const versionConstraintTokenRegex = regEx(/^(?:[!@]?(?:>=|<=|==|~>|[><=])|\d)/);
+const commentRegex = regEx(/(?:^|\s)\/\/.*$/);
+
+function splitVersionConstraint(tokens: string[]): {
+  versionConstraint?: string;
+  options: string[];
+} {
+  const constraintLength = tokens.findIndex(
+    (t) => !versionConstraintTokenRegex.test(t),
+  );
+  const splitAt = constraintLength === -1 ? tokens.length : constraintLength;
+  return {
+    versionConstraint: tokens.slice(0, splitAt).join(' ') || undefined,
+    options: tokens.slice(splitAt),
+  };
+}
+
 function analyzeLine(state: ReduceState, line: string): ReduceState {
   const lineParts = line
+    .replace(commentRegex, '')
     .split(regEx(/\s+/))
     .filter(isNonEmptyStringAndNotWhitespace);
   if (lineParts.length < 2) {
@@ -19,7 +38,7 @@ function analyzeLine(state: ReduceState, line: string): ReduceState {
     case 'nuget':
       state.currentGroup.nugetPackages.push({
         name: lineParts[1],
-        options: lineParts.slice(2),
+        ...splitVersionConstraint(lineParts.slice(2)),
       });
       break;
     case 'group':
