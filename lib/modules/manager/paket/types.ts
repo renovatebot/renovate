@@ -1,5 +1,3 @@
-import type { ToolConstraint } from '../../../util/exec/types.ts';
-
 export interface DependenciesFile {
   groups: DependenciesFileGroup[];
 }
@@ -27,9 +25,7 @@ export interface LockFileDependency {
 }
 
 export interface UpdatePackage {
-  filePath: string;
   packageName?: string;
   group?: string;
   version?: string;
-  toolConstraints?: ToolConstraint[];
 }

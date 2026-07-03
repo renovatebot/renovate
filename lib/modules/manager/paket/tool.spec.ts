@@ -58,43 +58,24 @@ describe('modules/manager/paket/tool', () => {
           '  Total time taken: 6 seconds\n',
       });
 
-      await runPaketUpdate({ filePath: packageFilePath });
+      await runPaketUpdate(packageFilePath, [{}]);
 
       expect(execSnapshots.map((s) => s.cmd)).toEqual(['paket update']);
     });
 
     it.each([
+      [{ packageName: 'FSharp.Core' }, 'paket update FSharp.Core '],
+      [{ group: 'GroupA' }, 'paket update --group GroupA '],
       [
-        { filePath: packageFilePath, packageName: 'FSharp.Core' },
-        'paket update FSharp.Core ',
-      ],
-      [
-        { filePath: packageFilePath, group: 'GroupA' },
-        'paket update --group GroupA ',
-      ],
-      [
-        {
-          filePath: packageFilePath,
-          group: 'GroupA',
-          packageName: 'FSharp.Core',
-        },
+        { group: 'GroupA', packageName: 'FSharp.Core' },
         'paket update --group GroupA  FSharp.Core ',
       ],
       [
-        {
-          filePath: packageFilePath,
-          packageName: 'FSharp.Core',
-          version: '1.2.3',
-        },
+        { packageName: 'FSharp.Core', version: '1.2.3' },
         'paket update --version 1.2.3  FSharp.Core ',
       ],
       [
-        {
-          filePath: packageFilePath,
-          group: 'GroupA',
-          packageName: 'FSharp.Core',
-          version: '1.2.3',
-        },
+        { group: 'GroupA', packageName: 'FSharp.Core', version: '1.2.3' },
         'paket update --group GroupA  --version 1.2.3  FSharp.Core ',
       ],
     ])(
@@ -102,21 +83,32 @@ describe('modules/manager/paket/tool', () => {
       async (command: UpdatePackage, expected) => {
         const execSnapshots = mockExecAll();
 
-        await runPaketUpdate(command);
+        await runPaketUpdate(packageFilePath, [command]);
 
         expect(execSnapshots.map((s) => s.cmd)).toEqual([expected]);
       },
     );
 
+    it('run all update commands in a single exec call', async () => {
+      const execSnapshots = mockExecAll();
+
+      await runPaketUpdate(packageFilePath, [
+        { packageName: 'xunit', version: '2.9.3', group: 'Main' },
+        { packageName: 'FAKE', version: '5.16', group: 'GroupA' },
+      ]);
+
+      expect(execSnapshots.map((s) => s.cmd)).toEqual([
+        'paket update --group Main  --version 2.9.3  xunit ',
+        'paket update --group GroupA  --version 5.16  FAKE ',
+      ]);
+    });
+
     it('secure parameters (impossible case normally)', async () => {
       const execSnapshots = mockExecAll();
 
-      await runPaketUpdate({
-        filePath: packageFilePath,
-        packageName: 'FSharp Core',
-        group: 'Group A',
-        version: '1 2 3',
-      });
+      await runPaketUpdate(packageFilePath, [
+        { packageName: 'FSharp Core', group: 'Group A', version: '1 2 3' },
+      ]);
 
       expect(execSnapshots.map((s) => s.cmd)).toEqual([
         `paket update --group 'Group A'  --version '1 2 3'  'FSharp Core' `,

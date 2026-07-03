@@ -8,33 +8,31 @@ import type {
   Upgrade,
 } from '../types.ts';
 import { runPaketUpdate } from './tool.ts';
-import type { PaketManagerData } from './types.ts';
+import type { PaketManagerData, UpdatePackage } from './types.ts';
 
-async function updateDependencies(
-  lockFileName: string,
+const updateAllPackages: UpdatePackage[] = [{}];
+
+function buildUpdateCommands(
   updatedDeps: Upgrade<PaketManagerData>[],
-  toolConstraints: ToolConstraint[],
-): Promise<void> {
+): UpdatePackage[] {
+  const commands: UpdatePackage[] = [];
   for (const dep of updatedDeps) {
     if (!dep.depName || !dep.newVersion) {
       logger.debug(
         { depName: dep.depName, newVersion: dep.newVersion },
         'Missing depName or newVersion, updating all paket dependencies',
       );
-      await runPaketUpdate({ filePath: lockFileName, toolConstraints });
-      return;
+      return updateAllPackages;
     }
-  }
 
-  for (const dep of updatedDeps) {
-    await runPaketUpdate({
-      filePath: lockFileName,
+    commands.push({
       packageName: dep.depName,
       version: dep.newVersion,
       group: dep.managerData?.group,
-      toolConstraints,
     });
   }
+
+  return commands;
 }
 
 export async function updateArtifacts(
@@ -48,6 +46,14 @@ export async function updateArtifacts(
   );
   const existingLockFileContent = await readLocalFile(lockFileName, 'utf8');
 
+  if (
+    !updateArtifact.config.isLockFileMaintenance &&
+    !updateArtifact.updatedDeps.length
+  ) {
+    logger.debug('No updated paket deps - returning null');
+    return null;
+  }
+
   const toolConstraints: ToolConstraint[] = [
     {
       toolName: 'dotnet',
@@ -58,21 +64,12 @@ export async function updateArtifacts(
       constraint: updateArtifact.config.constraints?.paket,
     },
   ];
+  const commands = updateArtifact.config.isLockFileMaintenance
+    ? updateAllPackages
+    : buildUpdateCommands(updateArtifact.updatedDeps);
 
   try {
-    if (updateArtifact.config.isLockFileMaintenance) {
-      await runPaketUpdate({ filePath: lockFileName, toolConstraints });
-    } else {
-      if (!updateArtifact.updatedDeps.length) {
-        logger.debug('No updated paket deps - returning null');
-        return null;
-      }
-      await updateDependencies(
-        lockFileName,
-        updateArtifact.updatedDeps,
-        toolConstraints,
-      );
-    }
+    await runPaketUpdate(lockFileName, commands, toolConstraints);
 
     const newLockFileContent = await readLocalFile(lockFileName, 'utf8');
 
