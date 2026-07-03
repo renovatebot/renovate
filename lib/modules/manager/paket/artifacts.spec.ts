@@ -2,6 +2,7 @@ import { fs } from '~test/util.ts';
 import type { UpdateArtifact } from '../types.ts';
 import { updateArtifacts } from './artifacts.ts';
 import * as tool from './tool.ts';
+import type { PaketManagerData } from './types.ts';
 
 vi.mock('../../../util/fs/index.ts');
 
@@ -23,19 +24,28 @@ describe('modules/manager/paket/artifacts', () => {
   });
 
   describe('updateArtifacts()', () => {
-    const updateArtifact: UpdateArtifact = {
+    const updateArtifact: UpdateArtifact<PaketManagerData> = {
       config: {},
       packageFileName,
       newPackageFileContent: 'Fake package content',
-      updatedDeps: [],
+      updatedDeps: [
+        {
+          depName: 'xunit',
+          newVersion: '2.9.3',
+          managerData: { group: 'Main' },
+        },
+      ],
     };
     const lockFileName = '/app/test/paket.lock';
+    const toolConstraints = [
+      { toolName: 'dotnet', constraint: undefined },
+      { toolName: 'paket', constraint: undefined },
+    ];
 
-    it('update all packages', async () => {
-      const toolSpy = vi.spyOn(tool, 'runPaketUpdate');
-      toolSpy.mockResolvedValue();
-
-      const newContentLockFile = 'New fake lock file content';
+    function mockLockFileChangedByTool(
+      toolSpy: ReturnType<typeof vi.spyOn>,
+      newContentLockFile: string,
+    ): void {
       fs.readLocalFile.mockImplementation(
         (filename: string, _encoding: 'utf8') => {
           expect(filename).toEqual(lockFileName);
@@ -47,16 +57,23 @@ describe('modules/manager/paket/artifacts', () => {
           }
         },
       );
+    }
+
+    it('updates the given package only', async () => {
+      const toolSpy = vi.spyOn(tool, 'runPaketUpdate');
+      toolSpy.mockResolvedValue();
+      const newContentLockFile = 'New fake lock file content';
+      mockLockFileChangedByTool(toolSpy, newContentLockFile);
 
       const result = await updateArtifacts(updateArtifact);
 
       expect(fs.readLocalFile).toHaveBeenCalledWith(lockFileName, 'utf8');
-      expect(toolSpy).toHaveBeenCalledWith({
+      expect(toolSpy).toHaveBeenCalledExactlyOnceWith({
         filePath: lockFileName,
-        toolConstraints: [
-          { toolName: 'dotnet', constraint: undefined },
-          { toolName: 'paket', constraint: undefined },
-        ],
+        packageName: 'xunit',
+        version: '2.9.3',
+        group: 'Main',
+        toolConstraints,
       });
       expect(result).toEqual([
         {
@@ -67,6 +84,106 @@ describe('modules/manager/paket/artifacts', () => {
           },
         },
       ]);
+    });
+
+    it('updates each updated package', async () => {
+      const toolSpy = vi.spyOn(tool, 'runPaketUpdate');
+      toolSpy.mockResolvedValue();
+      mockLockFileChangedByTool(toolSpy, 'New fake lock file content');
+
+      const result = await updateArtifacts({
+        ...updateArtifact,
+        updatedDeps: [
+          {
+            depName: 'xunit',
+            newVersion: '2.9.3',
+            managerData: { group: 'Main' },
+          },
+          {
+            depName: 'Fake',
+            newVersion: '5.16',
+            managerData: { group: 'GroupA' },
+          },
+        ],
+      });
+
+      expect(toolSpy).toHaveBeenCalledTimes(2);
+      expect(toolSpy).toHaveBeenCalledWith({
+        filePath: lockFileName,
+        packageName: 'xunit',
+        version: '2.9.3',
+        group: 'Main',
+        toolConstraints,
+      });
+      expect(toolSpy).toHaveBeenCalledWith({
+        filePath: lockFileName,
+        packageName: 'Fake',
+        version: '5.16',
+        group: 'GroupA',
+        toolConstraints,
+      });
+      expect(result).toBeArrayOfSize(1);
+    });
+
+    it('updates all packages if a dep is missing depName or newVersion', async () => {
+      const toolSpy = vi.spyOn(tool, 'runPaketUpdate');
+      toolSpy.mockResolvedValue();
+      mockLockFileChangedByTool(toolSpy, 'New fake lock file content');
+
+      const result = await updateArtifacts({
+        ...updateArtifact,
+        updatedDeps: [
+          {
+            depName: 'xunit',
+            newVersion: '2.9.3',
+            managerData: { group: 'Main' },
+          },
+          { depName: 'Fake' },
+        ],
+      });
+
+      expect(toolSpy).toHaveBeenCalledExactlyOnceWith({
+        filePath: lockFileName,
+        toolConstraints,
+      });
+      expect(result).toBeArrayOfSize(1);
+    });
+
+    it('updates all packages during lock file maintenance', async () => {
+      const toolSpy = vi.spyOn(tool, 'runPaketUpdate');
+      toolSpy.mockResolvedValue();
+      mockLockFileChangedByTool(toolSpy, 'New fake lock file content');
+
+      const result = await updateArtifacts({
+        ...updateArtifact,
+        config: { isLockFileMaintenance: true },
+        updatedDeps: [],
+      });
+
+      expect(toolSpy).toHaveBeenCalledExactlyOnceWith({
+        filePath: lockFileName,
+        toolConstraints,
+      });
+      expect(result).toBeArrayOfSize(1);
+    });
+
+    it('return null if no updated deps', async () => {
+      const toolSpy = vi.spyOn(tool, 'runPaketUpdate');
+      toolSpy.mockResolvedValue();
+      fs.readLocalFile.mockImplementation(
+        (filename: string, _encoding: 'utf8') => {
+          expect(filename).toEqual(lockFileName);
+          return Promise.resolve('Old fake lock file content');
+        },
+      );
+
+      const result = await updateArtifacts({
+        ...updateArtifact,
+        updatedDeps: [],
+      });
+
+      expect(toolSpy).not.toHaveBeenCalled();
+      expect(result).toBeNull();
     });
 
     it('return null if no changes', async () => {

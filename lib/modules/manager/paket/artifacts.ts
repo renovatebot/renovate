@@ -1,10 +1,43 @@
 import { logger } from '../../../logger/index.ts';
+import type { ToolConstraint } from '../../../util/exec/types.ts';
 import { getSiblingFileName, readLocalFile } from '../../../util/fs/index.ts';
-import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
+import type {
+  UpdateArtifact,
+  UpdateArtifactsResult,
+  Upgrade,
+} from '../types.ts';
 import { runPaketUpdate } from './tool.ts';
+import type { PaketManagerData } from './types.ts';
+
+async function updateDependencies(
+  lockFileName: string,
+  updatedDeps: Upgrade<PaketManagerData>[],
+  toolConstraints: ToolConstraint[],
+): Promise<void> {
+  for (const dep of updatedDeps) {
+    if (!dep.depName || !dep.newVersion) {
+      logger.debug(
+        { depName: dep.depName, newVersion: dep.newVersion },
+        'Missing depName or newVersion, updating all paket dependencies',
+      );
+      await runPaketUpdate({ filePath: lockFileName, toolConstraints });
+      return;
+    }
+  }
+
+  for (const dep of updatedDeps) {
+    await runPaketUpdate({
+      filePath: lockFileName,
+      packageName: dep.depName,
+      version: dep.newVersion,
+      group: dep.managerData?.group,
+      toolConstraints,
+    });
+  }
+}
 
 export async function updateArtifacts(
-  updateArtifact: UpdateArtifact,
+  updateArtifact: UpdateArtifact<PaketManagerData>,
 ): Promise<UpdateArtifactsResult[] | null> {
   logger.debug(`paket.updateArtifacts(${updateArtifact.packageFileName})`);
 
@@ -14,20 +47,31 @@ export async function updateArtifacts(
   );
   const existingLockFileContent = await readLocalFile(lockFileName, 'utf8');
 
+  const toolConstraints: ToolConstraint[] = [
+    {
+      toolName: 'dotnet',
+      constraint: updateArtifact.config.constraints?.dotnet,
+    },
+    {
+      toolName: 'paket',
+      constraint: updateArtifact.config.constraints?.paket,
+    },
+  ];
+
   try {
-    await runPaketUpdate({
-      filePath: lockFileName,
-      toolConstraints: [
-        {
-          toolName: 'dotnet',
-          constraint: updateArtifact.config.constraints?.dotnet,
-        },
-        {
-          toolName: 'paket',
-          constraint: updateArtifact.config.constraints?.paket,
-        },
-      ],
-    });
+    if (updateArtifact.config.isLockFileMaintenance) {
+      await runPaketUpdate({ filePath: lockFileName, toolConstraints });
+    } else {
+      if (!updateArtifact.updatedDeps.length) {
+        logger.debug('No updated paket deps - returning null');
+        return null;
+      }
+      await updateDependencies(
+        lockFileName,
+        updateArtifact.updatedDeps,
+        toolConstraints,
+      );
+    }
 
     const newLockFileContent = await readLocalFile(lockFileName, 'utf8');
 
