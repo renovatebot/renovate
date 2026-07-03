@@ -13,6 +13,7 @@ import type {
   DependenciesFileGroup,
   DependenciesFilePackage,
   LockFileDependency,
+  PaketManagerData,
 } from './types.ts';
 
 function searchPackageVersion(
@@ -31,19 +32,27 @@ function convertToPackageDependency(
   dependencies: LockFileDependency[],
   group: DependenciesFileGroup,
   p: DependenciesFilePackage,
-): PackageDependency {
+): PackageDependency<PaketManagerData> {
   const lockVersion = searchPackageVersion(dependencies, group, p);
 
   const version = lockVersion?.version;
   const name = lockVersion?.packageName ?? p.name;
-  return {
+  const dep: PackageDependency<PaketManagerData> = {
     depType: 'dependencies',
     depName: name,
     currentVersion: version,
     datasource: NugetDatasource.id,
-    rangeStrategy: 'update-lockfile',
     lockedVersion: version,
+    managerData: { group: group.groupName },
   };
+
+  if (p.versionConstraint) {
+    // Version constraints from paket.dependencies can't be evaluated without a paket versioning module, so such dependencies are skipped for now.
+    dep.currentValue = p.versionConstraint;
+    dep.skipReason = 'unsupported-version';
+  }
+
+  return dep;
 }
 
 function convertLockFileDependencyToPackageDependency(

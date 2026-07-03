@@ -13,6 +13,10 @@ export interface DependenciesFilePackage {
   options: string[];
 }
 
+export interface PaketManagerData extends Record<string, any> {
+  group: string;
+}
+
 export type LockFileSourceType = 'nuget';
 export interface LockFileDependency {
   source: LockFileSourceType;

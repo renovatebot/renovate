@@ -70,32 +70,32 @@ describe('modules/manager/paket/extract', () => {
             depName: 'FSharp.Core',
             currentVersion: '9.0.300',
             datasource: NugetDatasource.id,
-            rangeStrategy: 'update-lockfile',
             lockedVersion: '9.0.300',
+            managerData: { group: 'Main' },
           },
           {
             depType: 'dependencies',
             depName: 'xunit',
             currentVersion: '2.9.3',
             datasource: NugetDatasource.id,
-            rangeStrategy: 'update-lockfile',
             lockedVersion: '2.9.3',
+            managerData: { group: 'Main' },
           },
           {
             depType: 'dependencies',
             depName: 'FAKE',
             currentVersion: '5.16',
             datasource: NugetDatasource.id,
-            rangeStrategy: 'update-lockfile',
             lockedVersion: '5.16',
+            managerData: { group: 'GroupA' },
           },
           {
             depType: 'dependencies',
             depName: 'xunit',
             currentVersion: '2.9.2',
             datasource: NugetDatasource.id,
-            rangeStrategy: 'update-lockfile',
             lockedVersion: '2.9.2',
+            managerData: { group: 'GroupA' },
           },
         ],
         lockFiles: [lockFileName],
@@ -150,14 +150,14 @@ describe('modules/manager/paket/extract', () => {
             depName: 'FSharp.Core',
             currentVersion: '9.0.300',
             datasource: NugetDatasource.id,
-            rangeStrategy: 'update-lockfile',
             lockedVersion: '9.0.300',
+            managerData: { group: 'Main' },
           },
           {
             depType: 'dependencies',
             depName: 'xunit',
             datasource: NugetDatasource.id,
-            rangeStrategy: 'update-lockfile',
+            managerData: { group: 'Main' },
           },
         ],
         lockFiles: [lockFileName],
@@ -199,8 +199,70 @@ describe('modules/manager/paket/extract', () => {
             depName: 'Fake',
             currentVersion: '5.16',
             datasource: NugetDatasource.id,
-            rangeStrategy: 'update-lockfile',
             lockedVersion: '5.16',
+            managerData: { group: 'GroupA' },
+          },
+        ],
+        lockFiles: [lockFileName],
+      });
+    });
+
+    it('skips dependencies with a version constraint', async () => {
+      fs.readLocalFile.mockImplementation(
+        (filename: string, _encoding: 'utf8') => {
+          expect(filename).toEqual(lockFileName);
+          return Promise.resolve(codeBlock`
+            NUGET
+              remote: https://api.nuget.org/v3/index.json
+                FSharp.Core (9.0.300)
+                Newtonsoft.Json (13.0.3)
+                xunit (2.9.3)
+          `);
+        },
+      );
+      const packageFileContent = codeBlock`
+        source https://api.nuget.org/v3/index.json
+
+        nuget Fsharp.Core
+        nuget Newtonsoft.Json 13.0.3
+        nuget xunit ~> 2.9
+      `;
+
+      const result = await extractPackageFile(
+        packageFileContent,
+        packageFileName,
+        config,
+      );
+
+      expect(result).toEqual({
+        deps: [
+          {
+            depType: 'dependencies',
+            depName: 'FSharp.Core',
+            currentVersion: '9.0.300',
+            datasource: NugetDatasource.id,
+            lockedVersion: '9.0.300',
+            managerData: { group: 'Main' },
+          },
+          {
+            depType: 'dependencies',
+            depName: 'Newtonsoft.Json',
+            currentValue: '13.0.3',
+            currentVersion: '13.0.3',
+            datasource: NugetDatasource.id,
+            lockedVersion: '13.0.3',
+            managerData: { group: 'Main' },
+            skipReason: 'unsupported-version',
+          },
+          {
+            depType: 'dependencies',
+            depName: 'xunit',
+            currentValue: '~> 2.9',
+            currentVersion: '2.9.3',
+            datasource: NugetDatasource.id,
+            lockedVersion: '2.9.3',
+            managerData: { group: 'Main' },
+            skipReason: 'unsupported-version',
           },
         ],
         lockFiles: [lockFileName],
