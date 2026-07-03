@@ -4,12 +4,13 @@ import { DateTime } from 'luxon';
 import { withDir } from 'tmp-promise';
 import { logger as _logger } from '~test/util.ts';
 import { GlobalConfig } from '../../../../config/global.ts';
-import { encodeEntry } from '../codec.ts';
+import { decodeEntry, encodeEntry, isEnvelope } from '../codec.ts';
 import { PackageCacheSqlite } from './sqlite.ts';
 
 const { logger } = _logger;
 
-export const brotliCompress = promisify(zlib.brotliCompress);
+// TODO: Delete this legacy raw-brotli fixture helper once legacy.ts is removed.
+const brotliCompress = promisify(zlib.brotliCompress);
 
 function withSqliteDir<T>(fn: (cacheDir: string) => Promise<T>): Promise<T> {
   return withDir(
@@ -39,15 +40,16 @@ function insertRawCacheEntry(
   sqlite: PackageCacheSqlite,
   key: string,
   value: Buffer,
+  ttlSeconds = 300,
 ): void {
   sqlite.client
     .prepare(
       `
         INSERT INTO package_cache (namespace, key, expiry, data)
-        VALUES (?, ?, unixepoch() + 300, ?)
+        VALUES (?, ?, unixepoch() + ?, ?)
       `,
     )
-    .run('_test-namespace', key, value);
+    .run('_test-namespace', key, ttlSeconds, value);
 }
 
 describe('util/cache/package/impl/sqlite', () => {
@@ -61,6 +63,8 @@ describe('util/cache/package/impl/sqlite', () => {
       expect(logger.warn).not.toHaveBeenCalled();
     });
 
+    // TODO: Replace this legacy raw-brotli malformed-entry case with an
+    // unsupported non-envelope fixture once legacy.ts is removed.
     it('removes invalid compressed payloads', async () => {
       const res = await withSqlite(async (sqlite) => {
         insertRawCacheEntry(sqlite, 'bar', Buffer.from('not-brotli'));
@@ -84,6 +88,8 @@ describe('util/cache/package/impl/sqlite', () => {
       expect(logger.warn).not.toHaveBeenCalled();
     });
 
+    // TODO: Delete this legacy raw-brotli malformed-entry case once legacy.ts is
+    // removed.
     it('returns undefined for invalid JSON payload', async () => {
       const res = await withSqlite(async (sqlite) => {
         const compressed = await brotliCompress('not-json');
@@ -127,6 +133,32 @@ describe('util/cache/package/impl/sqlite', () => {
   });
 
   describe('set', () => {
+    it('stores envelope payload with backend-native expiry', async () => {
+      const res = await withSqlite(async (sqlite) => {
+        await sqlite.set('_test-namespace', 'bar', { foo: 'bar' }, 5);
+        const row = sqlite.client
+          .prepare(
+            `
+              SELECT data, expiry > unixepoch() AS hasFutureExpiry
+              FROM package_cache
+              WHERE namespace = ? AND key = ?
+            `,
+          )
+          .get('_test-namespace', 'bar') as {
+          data: Uint8Array;
+          hasFutureExpiry: number;
+        };
+
+        return {
+          decoded: await decodeEntry(Buffer.from(row.data)),
+          hasFutureExpiry: row.hasFutureExpiry,
+        };
+      });
+
+      expect(res.decoded.value).toEqual({ foo: 'bar' });
+      expect(res.hasFutureExpiry).toBe(1);
+    });
+
     it('logs a warning and continues when serialization fails', async () => {
       const circular: { self?: unknown } = {};
       circular.self = circular;
@@ -139,7 +171,7 @@ describe('util/cache/package/impl/sqlite', () => {
 
       expect(logger.once.warn).toHaveBeenCalledWith(
         { err: expect.any(TypeError) },
-        'Error while setting SQLite cache value',
+        'Error while setting package cache value',
       );
       expect(logger.warn).not.toHaveBeenCalled();
     });
@@ -157,7 +189,7 @@ describe('util/cache/package/impl/sqlite', () => {
 
           expect(logger.once.warn).toHaveBeenCalledWith(
             { err: expect.any(Error) },
-            'Error while setting SQLite cache value',
+            'Error while setting package cache value',
           );
           expect(logger.warn).not.toHaveBeenCalled();
         } finally {
@@ -192,36 +224,79 @@ describe('util/cache/package/impl/sqlite', () => {
 
       expect(res).toEqual({ foo: 'bar' });
     });
+
+    // TODO: Delete this legacy raw-brotli read case once legacy.ts is removed.
+    it('returns value from legacy raw-brotli payload without rewriting it', async () => {
+      const res = await withSqlite(async (sqlite) => {
+        const compressed = await brotliCompress(JSON.stringify({ foo: 'bar' }));
+        insertRawCacheEntry(sqlite, 'bar', compressed);
+
+        const value = await sqlite.get('_test-namespace', 'bar');
+        const row = sqlite.client
+          .prepare(
+            'SELECT data FROM package_cache WHERE namespace = ? AND key = ?',
+          )
+          .get('_test-namespace', 'bar') as { data: Uint8Array };
+
+        return { value, data: Buffer.from(row.data) };
+      });
+
+      expect(res.value).toEqual({ foo: 'bar' });
+      // SQLite cleanup uses its expiry column, so it must not rewrite on read.
+      expect(isEnvelope(res.data)).toBeFalse();
+    });
   });
 
   describe('expiry', () => {
-    it('returns undefined for immediately expired entry', async () => {
+    it('deletes existing row for non-positive TTL', async () => {
       const res = await withSqlite(async (sqlite) => {
+        await sqlite.set('_test-namespace', 'bar', 'value', 5);
         await sqlite.set('_test-namespace', 'bar', 'value', -1);
-        return sqlite.get('_test-namespace', 'bar');
+        const row = sqlite.client
+          .prepare(
+            'SELECT data FROM package_cache WHERE namespace = ? AND key = ?',
+          )
+          .get('_test-namespace', 'bar');
+
+        return {
+          value: await sqlite.get('_test-namespace', 'bar'),
+          row,
+        };
       });
 
-      expect(res).toBeUndefined();
+      expect(res.value).toBeUndefined();
+      expect(res.row).toBeUndefined();
     });
   });
 
   describe('destroy', () => {
-    it('deletes expired entries and closes database', async () => {
+    it('deletes expired rows and closes database', async () => {
       const res = await withSqliteDir(async (cacheDir) => {
         const client1 = await PackageCacheSqlite.create(cacheDir);
-        await client1.set('_test-namespace', 'expired', 'old', -1);
+        insertRawCacheEntry(
+          client1,
+          'expired',
+          await encodeEntry('old', DateTime.local()),
+          -1,
+        );
         await client1.set('_test-namespace', 'valid', 'fresh', 5);
         await client1.destroy();
 
         const client2 = await PackageCacheSqlite.create(cacheDir);
         const expired = await client2.get('_test-namespace', 'expired');
         const valid = await client2.get('_test-namespace', 'valid');
+        const expiredRow = client2.client
+          .prepare(
+            'SELECT data FROM package_cache WHERE namespace = ? AND key = ?',
+          )
+          .get('_test-namespace', 'expired');
         await client2.destroy();
 
-        return { expired, valid };
+        return { expired, expiredRow, valid };
       });
 
       expect(res.expired).toBeUndefined();
+      expect(res.expiredRow).toBeUndefined();
       expect(res.valid).toBe('fresh');
     });
 

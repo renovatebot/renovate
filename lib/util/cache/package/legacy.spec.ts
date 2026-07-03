@@ -15,6 +15,7 @@ async function legacyJsonWrapper(
   return Buffer.from(payload);
 }
 
+// TODO: Delete this spec with legacy.ts once pre-envelope entries have expired.
 describe('util/cache/package/legacy', () => {
   it('decodes legacy JSON-wrapper entries', async () => {
     const expiry = DateTime.local().plus({ minutes: 5 });

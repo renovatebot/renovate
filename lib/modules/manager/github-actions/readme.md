@@ -65,6 +65,26 @@ When pinning, Renovate adds a comment to preserve the original ref:
 Non-semver ref support is currently limited to GitHub-hosted actions.
 Gitea and Forgejo support the same ref types, but Renovate does not yet handle them for these platforms.
 
+### Steps nested in `parallel:` blocks
+
+Renovate extracts dependencies from steps nested inside a [`parallel:`](https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax#example-running-steps-in-parallel) block, just as it does for regular sequential steps.
+This includes both the action reference itself and any supported `with:` version inputs.
+
+```yaml
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - parallel:
+          - uses: actions/setup-node@v5
+            with:
+              node-version: '20.0.0'
+          - uses: actions/setup-go@v5
+            with:
+              go-version: '1.23'
+```
+
 ### Non-support of Variables
 
 Renovate ignores any GitHub runners which are configured in variables.

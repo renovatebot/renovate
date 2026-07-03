@@ -5,6 +5,7 @@ import {
   isPlainObject,
 } from '@sindresorhus/is';
 import { DateTime } from 'luxon';
+import { z } from 'zod/v4';
 import { GlobalConfig } from '../../config/global.ts';
 import {
   PLATFORM_BAD_CREDENTIALS,
@@ -21,6 +22,7 @@ import { maskToken } from '../mask.ts';
 import * as p from '../promises.ts';
 import { range } from '../range.ts';
 import { regEx } from '../regex.ts';
+import { LooseArray } from '../schema-utils/index.ts';
 import { joinUrlParts, parseLinkHeader, parseUrl } from '../url.ts';
 import { findMatchingRule } from './host-rules.ts';
 import {
@@ -68,6 +70,20 @@ export type GithubGraphqlResponse<T = unknown> =
         message: string;
       }[];
     };
+
+const GithubError = z.object({
+  field: z.string().optional(),
+  code: z.string().optional(),
+  message: z.string().optional(),
+});
+
+/**
+ * GitHub usually returns `errors` as an array, but not always - normalize it
+ * into an array of error objects, dropping anything that doesn't fit.
+ */
+const GithubErrors = z
+  .union([LooseArray(GithubError), GithubError.transform((error) => [error])])
+  .catch([]);
 
 function handleGotError(
   err: GotLegacyError,
@@ -182,24 +198,14 @@ function handleGotError(
       return err;
     }
 
-    // GitHub usually returns `errors` as an array, but not always - normalize
-    const rawErrors = err.body?.errors;
-    let errors: unknown[] = [];
-    if (isArray(rawErrors)) {
-      errors = rawErrors;
-    } else if (!isNullOrUndefined(rawErrors)) {
-      errors = [rawErrors];
-    }
-
-    if (errors.find((e: any) => e.field === 'milestone')) {
+    const errors = GithubErrors.parse(err.body?.errors);
+    if (errors.some((e) => e.field === 'milestone')) {
       return err;
-    } else if (errors.find((e: any) => e.code === 'invalid')) {
+    } else if (errors.some((e) => e.code === 'invalid')) {
       logger.debug({ err }, 'Received invalid response - aborting');
       return new Error(REPOSITORY_CHANGED);
     } else if (
-      errors.find((e: any) =>
-        e.message?.startsWith('A pull request already exists'),
-      )
+      errors.some((e) => e.message?.startsWith('A pull request already exists'))
     ) {
       return err;
     }
@@ -221,7 +227,7 @@ interface GraphqlPaginatedContent<T = unknown> {
   pageInfo: { hasNextPage: boolean; endCursor: string };
 }
 
-function constructAcceptString(input?: any): string {
+function constructAcceptString(input?: unknown): string {
   const defaultAccept = 'application/vnd.github.v3+json';
   const acceptStrings =
     typeof input === 'string' ? input.split(regEx(/\s*,\s*/)) : [];
