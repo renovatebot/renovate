@@ -17,14 +17,41 @@ describe('modules/manager/paket/parsers/dependencies-file', () => {
         groups: [
           {
             groupName: 'Main',
+            sources: ['https://api.nuget.org/v3/index.json'],
             nugetPackages: [
-              { name: 'Fsharp.Core', options: [] },
-              {
-                name: 'xunit',
-                versionConstraint: '> 3',
-                options: ['prerelease'],
-              },
+              { name: 'Fsharp.Core' },
+              { name: 'xunit', versionConstraint: '> 3' },
             ],
+          },
+        ],
+      });
+    });
+
+    it('should extract sources per group', () => {
+      const result = parse(codeBlock`
+        source https://api.nuget.org/v3/index.json
+        source https://example.com/feed/v3/index.json username: "user" password: "pass"
+
+        nuget Fsharp.Core
+
+        group GroupA
+          nuget Fake
+      `);
+
+      expect(result).toEqual({
+        groups: [
+          {
+            groupName: 'Main',
+            sources: [
+              'https://api.nuget.org/v3/index.json',
+              'https://example.com/feed/v3/index.json',
+            ],
+            nugetPackages: [{ name: 'Fsharp.Core' }],
+          },
+          {
+            groupName: 'GroupA',
+            sources: [],
+            nugetPackages: [{ name: 'Fake' }],
           },
         ],
       });
@@ -54,76 +81,28 @@ describe('modules/manager/paket/parsers/dependencies-file', () => {
         groups: [
           {
             groupName: 'Main',
+            sources: ['https://api.nuget.org/v3/index.json'],
             nugetPackages: [
-              {
-                name: 'PinnedPackage',
-                versionConstraint: '1.2.3',
-                options: [],
-              },
-              {
-                name: 'PinnedWithEqual',
-                versionConstraint: '= 1.2.3',
-                options: [],
-              },
+              { name: 'PinnedPackage', versionConstraint: '1.2.3' },
+              { name: 'PinnedWithEqual', versionConstraint: '= 1.2.3' },
               {
                 name: 'PinnedPrerelease',
                 versionConstraint: '1.2.3-alpha001',
-                options: [],
               },
-              {
-                name: 'ExactPackage',
-                versionConstraint: '== 1.2.3',
-                options: [],
-              },
-              {
-                name: 'AtLeastPackage',
-                versionConstraint: '>= 1.2.3',
-                options: [],
-              },
-              {
-                name: 'RangePackage',
-                versionConstraint: '>= 1.2.3 < 1.5',
-                options: [],
-              },
-              {
-                name: 'PessimisticPackage',
-                versionConstraint: '~> 1.2.3',
-                options: [],
-              },
+              { name: 'ExactPackage', versionConstraint: '== 1.2.3' },
+              { name: 'AtLeastPackage', versionConstraint: '>= 1.2.3' },
+              { name: 'RangePackage', versionConstraint: '>= 1.2.3 < 1.5' },
+              { name: 'PessimisticPackage', versionConstraint: '~> 1.2.3' },
               {
                 name: 'CompoundPackage',
                 versionConstraint: '~> 1.2 >= 1.2.3',
-                options: [],
               },
-              {
-                name: 'MinStrategyPackage',
-                versionConstraint: '!~> 1.2',
-                options: [],
-              },
-              {
-                name: 'MaxStrategyPackage',
-                versionConstraint: '@~> 1.2',
-                options: [],
-              },
-              {
-                name: 'MaxGreaterPackage',
-                versionConstraint: '@> 0',
-                options: [],
-              },
-              {
-                name: 'MinEqualPackage',
-                versionConstraint: '!= 1.2',
-                options: [],
-              },
-              {
-                name: 'ConstraintWithOptions',
-                versionConstraint: '>= 1.2.3',
-                options: ['prerelease', 'strategy:', 'min'],
-              },
-              {
-                name: 'OptionsOnlyPackage',
-                options: ['redirects:', 'on'],
-              },
+              { name: 'MinStrategyPackage', versionConstraint: '!~> 1.2' },
+              { name: 'MaxStrategyPackage', versionConstraint: '@~> 1.2' },
+              { name: 'MaxGreaterPackage', versionConstraint: '@> 0' },
+              { name: 'MinEqualPackage', versionConstraint: '!= 1.2' },
+              { name: 'ConstraintWithOptions', versionConstraint: '>= 1.2.3' },
+              { name: 'OptionsOnlyPackage' },
             ],
           },
         ],
@@ -153,18 +132,18 @@ describe('modules/manager/paket/parsers/dependencies-file', () => {
         groups: [
           {
             groupName: 'Main',
-            nugetPackages: [{ name: 'Fsharp.Core', options: [] }],
+            sources: ['https://api.nuget.org/v3/index.json'],
+            nugetPackages: [{ name: 'Fsharp.Core' }],
           },
           {
             groupName: 'GroupA',
-            nugetPackages: [{ name: 'Fake', options: [] }],
+            sources: ['https://api.nuget.org/v3/index.json'],
+            nugetPackages: [{ name: 'Fake' }],
           },
           {
             groupName: 'GroupB',
-            nugetPackages: [
-              { name: 'Fsharp.Core', options: [] },
-              { name: 'xunit', options: [] },
-            ],
+            sources: ['https://api.nuget.org/v3/index.json'],
+            nugetPackages: [{ name: 'Fsharp.Core' }, { name: 'xunit' }],
           },
         ],
       });

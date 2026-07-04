@@ -4,7 +4,7 @@ import { parse } from './lock-file.ts';
 
 describe('modules/manager/paket/parsers/lock-file', () => {
   describe('parse()', () => {
-    it('should return all nuget package version on main group', () => {
+    it('should return all nuget package versions on main group', () => {
       const result = parse(codeBlock`
         RESTRICTION: == net8.0
         NUGET
@@ -19,22 +19,18 @@ describe('modules/manager/paket/parsers/lock-file', () => {
       expect(result).toEqual<LockFileDependency[]>([
         {
           groupName: 'Main',
-          source: 'nuget',
-          remote: 'https://api.nuget.org/v3/index.json',
           packageName: 'dotnet-fable',
           version: '2.0.11',
         },
         {
           groupName: 'Main',
-          source: 'nuget',
-          remote: 'https://api.nuget.org/v3/index.json',
           packageName: 'Dotnet.ProjInfo',
           version: '0.44',
         },
       ]);
     });
 
-    it('should return all nuget sources on main group', () => {
+    it('should return packages from all remotes on main group', () => {
       const result = parse(codeBlock`
         RESTRICTION: == net8.0
         NUGET
@@ -49,22 +45,18 @@ describe('modules/manager/paket/parsers/lock-file', () => {
       expect(result).toEqual<LockFileDependency[]>([
         {
           groupName: 'Main',
-          source: 'nuget',
-          remote: 'https://api.nuget.org/v3/index.json',
           packageName: 'dotnet-fable',
           version: '2.0.11',
         },
         {
           groupName: 'Main',
-          source: 'nuget',
-          remote: 'https://example.com/v3/index.json',
           packageName: 'FSharp.Core',
           version: '9.0.300',
         },
       ]);
     });
 
-    it('should ignore other package line', () => {
+    it('should ignore other package lines', () => {
       const result = parse(codeBlock`
         RESTRICTION: == net8.0
         NUGET
@@ -80,7 +72,7 @@ describe('modules/manager/paket/parsers/lock-file', () => {
       expect(result.length).toEqual<number>(2);
     });
 
-    it('should return all nuget sources of all groups', () => {
+    it('should return packages of all groups', () => {
       const result = parse(codeBlock`
         RESTRICTION: == net8.0
         NUGET
@@ -106,29 +98,21 @@ describe('modules/manager/paket/parsers/lock-file', () => {
       expect(result).toEqual<LockFileDependency[]>([
         {
           groupName: 'Main',
-          source: 'nuget',
-          remote: 'https://api.nuget.org/v3/index.json',
           packageName: 'FSharp.Core',
           version: '9.0.300',
         },
         {
           groupName: 'GroupA',
-          source: 'nuget',
-          remote: 'https://api.nuget.org/v3/index.json',
           packageName: 'FAKE',
           version: '5.16',
         },
         {
           groupName: 'GroupB',
-          source: 'nuget',
-          remote: 'https://api.nuget.org/v3/index.json',
           packageName: 'dotnet-fable',
           version: '2.0.11',
         },
         {
           groupName: 'GroupB',
-          source: 'nuget',
-          remote: 'https://example.com/v3/index.json',
           packageName: 'FSharp.Core',
           version: '9.0.300',
         },

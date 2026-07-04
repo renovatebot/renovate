@@ -1,8 +1,12 @@
 import { isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
 import { newlineRegex, regEx } from '../../../../util/regex.ts';
-import type { DependenciesFile, DependenciesFileGroup } from '../types.ts';
+import type {
+  DependenciesFile,
+  DependenciesFileGroup,
+  DependenciesFilePackage,
+} from '../types.ts';
 
-interface ReduceState {
+interface ParseState {
   groups: DependenciesFileGroup[];
   currentGroup: DependenciesFileGroup;
 }
@@ -11,60 +15,59 @@ interface ReduceState {
 const versionConstraintTokenRegex = regEx(/^(?:[!@]?(?:>=|<=|==|~>|[><=])|\d)/);
 const commentRegex = regEx(/(?:^|\s)\/\/.*$/);
 
-function splitVersionConstraint(tokens: string[]): {
-  versionConstraint?: string;
-  options: string[];
-} {
+function extractVersionConstraint(tokens: string[]): string | undefined {
   const constraintLength = tokens.findIndex(
     (t) => !versionConstraintTokenRegex.test(t),
   );
   const splitAt = constraintLength === -1 ? tokens.length : constraintLength;
-  return {
-    versionConstraint: tokens.slice(0, splitAt).join(' ') || undefined,
-    options: tokens.slice(splitAt),
-  };
+  return tokens.slice(0, splitAt).join(' ') || undefined;
 }
 
-function analyzeLine(state: ReduceState, line: string): ReduceState {
+function analyzeLine(state: ParseState, line: string): void {
   const lineParts = line
     .replace(commentRegex, '')
     .split(regEx(/\s+/))
     .filter(isNonEmptyStringAndNotWhitespace);
   if (lineParts.length < 2) {
-    return state;
+    return;
   }
 
   switch (lineParts[0]) {
-    case 'nuget':
-      state.currentGroup.nugetPackages.push({
-        name: lineParts[1],
-        ...splitVersionConstraint(lineParts.slice(2)),
-      });
+    case 'nuget': {
+      const pkg: DependenciesFilePackage = { name: lineParts[1] };
+      const versionConstraint = extractVersionConstraint(lineParts.slice(2));
+      if (versionConstraint) {
+        pkg.versionConstraint = versionConstraint;
+      }
+      state.currentGroup.nugetPackages.push(pkg);
+      break;
+    }
+    case 'source':
+      state.currentGroup.sources.push(lineParts[1]);
       break;
     case 'group':
       state.groups.push(state.currentGroup);
       state.currentGroup = {
         groupName: lineParts[1],
+        sources: [],
         nugetPackages: [],
       };
   }
-
-  return state;
 }
 
 export function parse(content: string): DependenciesFile {
-  let result: ReduceState = {
+  const state: ParseState = {
     groups: [],
-    currentGroup: { groupName: 'Main', nugetPackages: [] },
+    currentGroup: { groupName: 'Main', sources: [], nugetPackages: [] },
   };
 
-  for (const item of content.split(newlineRegex)) {
-    result = analyzeLine(result, item);
+  for (const line of content.split(newlineRegex)) {
+    analyzeLine(state, line);
   }
 
-  result.groups.push(result.currentGroup);
+  state.groups.push(state.currentGroup);
 
   return {
-    groups: result.groups,
+    groups: state.groups,
   };
 }

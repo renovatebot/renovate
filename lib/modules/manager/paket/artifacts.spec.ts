@@ -69,6 +69,10 @@ describe('modules/manager/paket/artifacts', () => {
       const result = await updateArtifacts(updateArtifact);
 
       expect(fs.readLocalFile).toHaveBeenCalledWith(lockFileName, 'utf8');
+      expect(fs.writeLocalFile).toHaveBeenCalledExactlyOnceWith(
+        packageFileName,
+        'Fake package content',
+      );
       expect(toolSpy).toHaveBeenCalledExactlyOnceWith(
         lockFileName,
         [{ packageName: 'xunit', version: '2.9.3', group: 'Main' }],
@@ -117,7 +121,7 @@ describe('modules/manager/paket/artifacts', () => {
       expect(result).toBeArrayOfSize(1);
     });
 
-    it('updates all packages if a dep is missing newVersion', async () => {
+    it('skips deps missing newVersion', async () => {
       const toolSpy = vi.spyOn(tool, 'runPaketUpdate');
       toolSpy.mockResolvedValue();
       mockLockFileChangedByTool(toolSpy, 'New fake lock file content');
@@ -136,28 +140,29 @@ describe('modules/manager/paket/artifacts', () => {
 
       expect(toolSpy).toHaveBeenCalledExactlyOnceWith(
         lockFileName,
-        [{}],
+        [{ packageName: 'xunit', version: '2.9.3', group: 'Main' }],
         toolConstraints,
       );
       expect(result).toBeArrayOfSize(1);
     });
 
-    it('updates all packages if a dep is missing depName', async () => {
+    it('return null if all deps are missing depName', async () => {
       const toolSpy = vi.spyOn(tool, 'runPaketUpdate');
       toolSpy.mockResolvedValue();
-      mockLockFileChangedByTool(toolSpy, 'New fake lock file content');
+      fs.readLocalFile.mockImplementation(
+        (filename: string, _encoding: 'utf8') => {
+          expect(filename).toEqual(lockFileName);
+          return Promise.resolve('Old fake lock file content');
+        },
+      );
 
       const result = await updateArtifacts({
         ...updateArtifact,
         updatedDeps: [{ newVersion: '5.16', managerData: { group: 'Main' } }],
       });
 
-      expect(toolSpy).toHaveBeenCalledExactlyOnceWith(
-        lockFileName,
-        [{}],
-        toolConstraints,
-      );
-      expect(result).toBeArrayOfSize(1);
+      expect(toolSpy).not.toHaveBeenCalled();
+      expect(result).toBeNull();
     });
 
     it('updates all packages during lock file maintenance', async () => {
@@ -177,6 +182,22 @@ describe('modules/manager/paket/artifacts', () => {
         toolConstraints,
       );
       expect(result).toBeArrayOfSize(1);
+    });
+
+    it('return null if lock file not found', async () => {
+      const toolSpy = vi.spyOn(tool, 'runPaketUpdate');
+      toolSpy.mockResolvedValue();
+      fs.readLocalFile.mockImplementation(
+        (filename: string, _encoding: 'utf8') => {
+          expect(filename).toEqual(lockFileName);
+          return Promise.resolve(null);
+        },
+      );
+
+      const result = await updateArtifacts(updateArtifact);
+
+      expect(toolSpy).not.toHaveBeenCalled();
+      expect(result).toBeNull();
     });
 
     it('return null if no updated deps', async () => {

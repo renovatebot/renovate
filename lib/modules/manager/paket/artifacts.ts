@@ -1,7 +1,11 @@
 import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
 import type { ToolConstraint } from '../../../util/exec/types.ts';
-import { getSiblingFileName, readLocalFile } from '../../../util/fs/index.ts';
+import {
+  getSiblingFileName,
+  readLocalFile,
+  writeLocalFile,
+} from '../../../util/fs/index.ts';
 import type {
   UpdateArtifact,
   UpdateArtifactsResult,
@@ -20,9 +24,9 @@ function buildUpdateCommands(
     if (!dep.depName || !dep.newVersion) {
       logger.debug(
         { depName: dep.depName, newVersion: dep.newVersion },
-        'Missing depName or newVersion, updating all paket dependencies',
+        'Missing depName or newVersion, skipping paket update for this dependency',
       );
-      return updateAllPackages;
+      continue;
     }
 
     commands.push({
@@ -45,12 +49,24 @@ export async function updateArtifacts(
     'paket.lock',
   );
   const existingLockFileContent = await readLocalFile(lockFileName, 'utf8');
+  if (!existingLockFileContent) {
+    logger.debug(`No ${lockFileName} found - returning null`);
+    return null;
+  }
 
   if (
     !updateArtifact.config.isLockFileMaintenance &&
     !updateArtifact.updatedDeps.length
   ) {
     logger.debug('No updated paket deps - returning null');
+    return null;
+  }
+
+  const commands = updateArtifact.config.isLockFileMaintenance
+    ? updateAllPackages
+    : buildUpdateCommands(updateArtifact.updatedDeps);
+  if (!commands.length) {
+    logger.debug('No paket update commands to run - returning null');
     return null;
   }
 
@@ -64,11 +80,13 @@ export async function updateArtifacts(
       constraint: updateArtifact.config.constraints?.paket,
     },
   ];
-  const commands = updateArtifact.config.isLockFileMaintenance
-    ? updateAllPackages
-    : buildUpdateCommands(updateArtifact.updatedDeps);
 
   try {
+    await writeLocalFile(
+      updateArtifact.packageFileName,
+      updateArtifact.newPackageFileContent,
+    );
+
     await runPaketUpdate(lockFileName, commands, toolConstraints);
 
     const newLockFileContent = await readLocalFile(lockFileName, 'utf8');
@@ -96,6 +114,7 @@ export async function updateArtifacts(
       {
         artifactError: {
           fileName: lockFileName,
+          // error is written to stdout
           stderr: err.stdout ?? err.message,
         },
       },

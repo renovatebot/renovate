@@ -3,12 +3,12 @@ export interface DependenciesFile {
 }
 export interface DependenciesFileGroup {
   groupName: string;
+  sources: string[];
   nugetPackages: DependenciesFilePackage[];
 }
 export interface DependenciesFilePackage {
   name: string;
   versionConstraint?: string;
-  options: string[];
 }
 
 export interface PaketManagerData extends Record<string, any> {
@@ -17,9 +17,7 @@ export interface PaketManagerData extends Record<string, any> {
 
 export type LockFileSourceType = 'nuget';
 export interface LockFileDependency {
-  source: LockFileSourceType;
   groupName: string;
-  remote: string;
   packageName: string;
   version: string;
 }

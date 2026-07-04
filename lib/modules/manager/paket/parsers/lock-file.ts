@@ -12,88 +12,54 @@ function extractLines(content: string): Line[] {
     .split(newlineRegex)
     .map((line) => ({
       text: line.trim(),
-      indent: regEx(/^(\s*)/).exec(line)![1].length,
+      indent: line.length - line.trimStart().length,
     }))
     .filter((line) => isNonEmptyStringAndNotWhitespace(line.text));
 }
 
-interface ReduceState {
+const packageRegex = regEx(/^(?<packageName>\S+)\s+\((?<version>[^)]+)\)/);
+
+interface ParseState {
   dependencies: LockFileDependency[];
   currentSource: LockFileSourceType | null;
   currentGroupName: string;
-  currentRemote: string;
 }
 
-function parseLine(line: Line, state: ReduceState): ReduceState {
+function parseLine(line: Line, state: ParseState): void {
   if (line.indent === 0) {
     if (line.text.startsWith('GROUP ')) {
-      return {
-        ...state,
-        currentGroupName: line.text.replace('GROUP ', ''),
-        currentSource: null,
-      };
+      state.currentGroupName = line.text.replace('GROUP ', '');
+      state.currentSource = null;
+      return;
     }
 
-    if (line.text.startsWith('NUGET')) {
-      return {
-        ...state,
-        currentSource: 'nuget',
-      };
-    }
-
-    return {
-      ...state,
-      currentSource: null,
-    };
+    state.currentSource = line.text.startsWith('NUGET') ? 'nuget' : null;
+    return;
   }
 
-  if (state.currentSource !== 'nuget') {
-    return state;
+  if (state.currentSource !== 'nuget' || line.indent !== 4) {
+    return;
   }
 
-  if (line.indent === 2 && line.text.startsWith('remote:')) {
-    return {
-      ...state,
-      currentRemote: line.text.replace('remote: ', ''),
-    };
+  const packageMatch = packageRegex.exec(line.text);
+  if (packageMatch?.groups) {
+    state.dependencies.push({
+      groupName: state.currentGroupName,
+      packageName: packageMatch.groups.packageName,
+      version: packageMatch.groups.version,
+    });
   }
-
-  if (line.indent === 4) {
-    const packageMatch = regEx(
-      /^(?<packageName>\S+)\s+\((?<version>[^)]+)\)/,
-    ).exec(line.text);
-    if (packageMatch?.groups) {
-      return {
-        ...state,
-        dependencies: [
-          ...state.dependencies,
-          {
-            groupName: state.currentGroupName,
-            source: state.currentSource,
-            remote: state.currentRemote,
-            packageName: packageMatch.groups.packageName,
-            version: packageMatch.groups.version,
-          },
-        ],
-      };
-    }
-  }
-
-  return state;
 }
 
 export function parse(content: string): LockFileDependency[] {
-  const lines = extractLines(content);
-
-  let result: ReduceState = {
+  const state: ParseState = {
     dependencies: [],
     currentSource: null,
     currentGroupName: 'Main',
-    currentRemote: '',
   };
-  for (const line of lines) {
-    result = parseLine(line, result);
+  for (const line of extractLines(content)) {
+    parseLine(line, state);
   }
 
-  return result.dependencies;
+  return state.dependencies;
 }
