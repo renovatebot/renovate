@@ -91,6 +91,7 @@ export const packageCacheNamespaces = [
   'datasource-orb',
   'datasource-packagist',
   'datasource-pod',
+  'datasource-proto-plugin',
   'datasource-python-version',
   'datasource-repology',
   'datasource-rpm',

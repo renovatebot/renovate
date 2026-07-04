@@ -1,5 +1,7 @@
 import { codeBlock } from 'common-tags';
+import { fs } from '~test/util.ts';
 import { extractPackageFile } from './index.ts';
+import { protoTooling } from './upgradeable-tooling.ts';
 
 vi.mock('../../../util/fs/index.ts');
 
@@ -275,31 +277,132 @@ describe('modules/manager/proto/extract', () => {
       ]);
     });
 
-    it('extracts all supported built-in tools', () => {
-      const content = codeBlock`
-        bun = "1.2.2"
-        deno = "2.0.0"
-        go = "1.22.0"
-        moon = "1.30.0"
-        node = "22.14.0"
-        npm = "11.6.2"
-        pnpm = "9.0.0"
-        yarn = "4.0.0"
-        python = "3.12.0"
-        ruby = "3.3.0"
-        rust = "1.80.0"
-        proto = "0.56.0"
-        gh = "2.60.0"
-        poetry = "1.8.0"
-        uv = "0.6.0"
-      `;
+    it('maps every built-in tool to its datasource', () => {
+      const content = Object.keys(protoTooling)
+        .map((tool) => `${tool} = "1.0.0"`)
+        .join('\n');
       const result = extractPackageFile(content, protoFilename);
-      expect(result).not.toBeNull();
-      expect(result!.deps).toHaveLength(15);
-      // Verify no deps have skipReason
-      for (const dep of result!.deps) {
-        expect(dep.skipReason).toBeUndefined();
-      }
+
+      const mapped = Object.fromEntries(
+        result!.deps.map((dep) => [dep.depName, dep.datasource]),
+      );
+      const expected = Object.fromEntries(
+        Object.entries(protoTooling).map(([tool, def]) => [
+          tool,
+          def.config.datasource,
+        ]),
+      );
+      expect(mapped).toEqual(expected);
+      expect(result!.deps.every((dep) => !dep.skipReason)).toBe(true);
+    });
+  });
+
+  describe('custom plugin tools', () => {
+    it('points a remote plugin tool at the proto-plugin datasource', () => {
+      const content = codeBlock`
+        buf = "1.71.0"
+        moon = "1.30.0"
+
+        [plugins.tools]
+        buf = "https://raw.githubusercontent.com/acme/proto-plugins/main/buf/plugin.toml"
+      `;
+
+      const result = extractPackageFile(content, protoFilename);
+      expect(result!.deps).toEqual([
+        {
+          depName: 'buf',
+          currentValue: '1.71.0',
+          datasource: 'proto-plugin',
+          packageName:
+            'https://raw.githubusercontent.com/acme/proto-plugins/main/buf/plugin.toml',
+          extractVersion: '^v?(?<version>.+)',
+        },
+        {
+          depName: 'moon',
+          currentValue: '1.30.0',
+          datasource: 'github-releases',
+          packageName: 'moonrepo/moon',
+          extractVersion: '^v(?<version>\\S+)',
+        },
+      ]);
+    });
+
+    it('resolves a file plugin locator to a repository-relative path', () => {
+      fs.getSiblingFileName.mockReturnValue('sub/.proto/plugins/direnv.toml');
+      const content = codeBlock`
+        direnv = "2.37.1"
+
+        [plugins]
+        direnv = "file://./.proto/plugins/direnv.toml"
+      `;
+
+      const result = extractPackageFile(content, 'sub/.prototools');
+      expect(fs.getSiblingFileName).toHaveBeenCalledWith(
+        'sub/.prototools',
+        './.proto/plugins/direnv.toml',
+      );
+      expect(result!.deps).toEqual([
+        {
+          depName: 'direnv',
+          currentValue: '2.37.1',
+          datasource: 'proto-plugin',
+          packageName: 'sub/.proto/plugins/direnv.toml',
+          extractVersion: '^v?(?<version>.+)',
+        },
+      ]);
+    });
+
+    it('prefers the built-in datasource over a plugin locator', () => {
+      const content = codeBlock`
+        moon = "1.30.0"
+
+        [plugins.tools]
+        moon = "https://example.com/moon.toml"
+      `;
+
+      const result = extractPackageFile(content, protoFilename);
+      expect(result!.deps).toMatchObject([
+        { depName: 'moon', datasource: 'github-releases' },
+      ]);
+    });
+
+    it('skips a wasm plugin locator', () => {
+      const content = codeBlock`
+        my-tool = "1.0.0"
+
+        [plugins.tools]
+        my-tool = "https://example.com/plugin.wasm"
+      `;
+
+      const result = extractPackageFile(content, protoFilename);
+      expect(result!.deps).toMatchObject([
+        { depName: 'my-tool', skipReason: 'unsupported-datasource' },
+      ]);
+    });
+
+    it('skips an unsupported (github://) plugin locator', () => {
+      const content = codeBlock`
+        my-tool = "1.0.0"
+
+        [plugins.tools]
+        my-tool = "github://moonrepo/tools"
+      `;
+
+      const result = extractPackageFile(content, protoFilename);
+      expect(result!.deps).toMatchObject([
+        { depName: 'my-tool', skipReason: 'unsupported-datasource' },
+      ]);
+    });
+
+    it('skips a non-built-in tool with no plugin locator', () => {
+      const content = codeBlock`
+        unknown-tool = "1.0.0"
+      `;
+
+      const result = extractPackageFile(content, protoFilename);
+      expect(result!.deps).toMatchObject([
+        { depName: 'unknown-tool', skipReason: 'unsupported-datasource' },
+      ]);
     });
   });
 });

@@ -14,7 +14,22 @@ proto = "0.56.0"
 
 Renovate extracts these version pins and updates them using the appropriate datasource for each tool.
 
-Non-version sections (`[settings]`, `[plugins]`, `[tools]`, `[env]`, `[shell]`, `[backends]`) are ignored.
+Non-version configuration sections (`[settings]`, `[tools]`, `[env]`, `[shell]`, `[backends]`) are ignored.
+
+### Custom plugin tools
+
+Tools that aren't built in are installed via a [TOML plugin](https://moonrepo.dev/docs/proto/non-wasm-plugin) declared under `[plugins]` or `[plugins.tools]`.
+Renovate resolves these from the plugin's `[resolve] git-url` (falling back to `[install] download-url`), which points at the upstream repository proto reads git tags from:
+
+```toml
+buf = "1.71.0"
+
+[plugins.tools]
+buf = "https://raw.githubusercontent.com/example/proto-plugins/main/buf/plugin.toml"
+```
+
+Both `file://` and `http(s)://` plugins are resolved lazily by the `proto-plugin` datasource, which reads the plugin definition when looking up versions and maps it to the `github-tags` or `gitlab-tags` datasource for its repository.
+Since proto pins are bare versions while git tags are commonly `v`-prefixed, an optional leading `v` is stripped when matching.
 
 ### Supported tools
 
@@ -40,8 +55,10 @@ Renovate's `proto` manager supports the following built-in proto tools:
 
 ### Limitations
 
-- **Third-party plugins**: Tools installed via `[plugins]` URLs (custom WASM plugins) are reported as `unsupported-datasource` and skipped.
+- **WASM plugins**: Tools installed via a compiled WASM plugin (a `.wasm` locator, or a `github://` release-asset locator) carry no introspectable version source, so they are reported as `unsupported-datasource` and skipped.
   You can use Renovate's `customManagers` with regex to handle these if needed.
+
+- **Non-GitHub/GitLab repositories**: A custom plugin whose repository is not hosted on `github.com` or `gitlab.com` is reported as `unsupported-url` and skipped.
 
 - **Version aliases**: Values like `latest`, `stable`, `canary`, or `nightly` are skipped as they cannot be updated via semver.
 
