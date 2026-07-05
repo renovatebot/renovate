@@ -170,9 +170,11 @@ function replaceConstraint(
   }
 }
 
-// Rewrite `~> band` optionally followed by a `>=`/`>` floor: the band follows
-// the new version at its old precision, and the floor sticks to the exact new
-// version unless it becomes redundant.
+/**
+ * Rewrite `~> band` optionally followed by a `>=`/`>` floor: the band follows
+ * the new version at its old precision, and the floor sticks to the exact new
+ * version unless it becomes redundant.
+ */
 function pessimisticWithFloor(range: PaketRange, v: NugetVersion): PaketRange {
   const [pessimistic] = range.constraints;
   const band = adaptToPrecision(v, releaseParts(pessimistic.version).length);

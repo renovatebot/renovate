@@ -30,8 +30,9 @@ const constraintOperators: readonly string[] = [
 
 const prereleaseTagRegex = regEx(/^[a-zA-Z][a-zA-Z0-9-]*$/);
 
-// Paket only accepts these operator combinations for two-part constraints,
-// see `parseVersionRequirement` in `src/Paket.Core/Dependencies/DependenciesFileParser.fs`.
+/**
+ * Paket only accepts these operator combinations for two-part constraints.
+ */
 function isValidPair(first: PaketOperator, second: PaketOperator): boolean {
   if (first === '~>') {
     return (
@@ -156,9 +157,11 @@ export function bumpAtPrecision(
   return versionFromParts(parts);
 }
 
-// Upper bound of the pessimistic operator: chop off the last release part and
-// increment the remaining last number, so `~> 1.2.3` allows `< 1.3` and
-// `~> 1.2` allows `< 2`. Ports `twiddle` from Paket's `DependenciesFileParser.fs`.
+/**
+ * Upper bound of the pessimistic operator: chop off the last release part and
+ * increment the remaining last number, so `~> 1.2.3` allows `< 1.3` and
+ * `~> 1.2` allows `< 2`.
+ */
 export function twiddle(version: NugetVersion): NugetVersion {
   const precision = Math.max(releaseParts(version).length - 1, 1);
   return bumpAtPrecision(version, precision);
@@ -261,8 +264,10 @@ function channelFromSegments(segments: string[]): string {
   return '';
 }
 
-// The channel name of a prerelease suffix, e.g. `alpha` for `alpha001` or
-// `beta` for `beta.2`. Ports `PreRelease.TryParse` from Paket's `SemVer.fs`.
+/**
+ * The channel name of a prerelease suffix, e.g. `alpha` for `alpha001` or
+ * `beta` for `beta.2`.
+ */
 export function prereleaseChannel(prerelease: string): string {
   const segments = prerelease.split('.');
   if (segments.length > 1) {
@@ -331,8 +336,10 @@ function isPrereleaseAllowed(
   return status.includes(prereleaseChannel(version.prerelease));
 }
 
-// Paket rule: a prerelease of a stable bound version counts as being in range
-// when its channel is allowed, e.g. `1.2.3-alpha1` satisfies `= 1.2.3 alpha`.
+/**
+ * Paket rule: a prerelease of a stable bound version counts as being in range
+ * when its channel is allowed, e.g. `1.2.3-alpha1` satisfies `= 1.2.3 alpha`.
+ */
 function isPrereleaseOfBound(
   version: NugetVersion,
   bound: NugetVersion,
@@ -346,7 +353,6 @@ function isPrereleaseOfBound(
   );
 }
 
-// Ports `VersionRequirement.IsInRange` from Paket's `VersionRange.fs`.
 export function matches(version: NugetVersion, range: PaketRange): boolean {
   const interval = intervalOf(range.constraints);
   const status = prereleaseStatusOf(range, interval);
@@ -420,8 +426,10 @@ export function isLessThanLowerBound(
   }
 }
 
-// A rewritten range admits the new version numerically, but its prerelease
-// channel may still be blocked, so allow the channel with an explicit tag.
+/**
+ * A rewritten range admits the new version numerically, but its prerelease
+ * channel may still be blocked, so allow the channel with an explicit tag.
+ */
 export function ensurePrereleaseMatches(
   range: PaketRange,
   version: NugetVersion,

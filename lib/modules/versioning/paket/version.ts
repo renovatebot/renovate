@@ -10,10 +10,11 @@ export function sameReleaseParts(x: NugetVersion, y: NugetVersion): boolean {
   );
 }
 
-// NuGet ordering, plus the Paket rule that the literal `prerelease` suffix
-// sorts below any other prerelease of the same release version, so that
-// `1.2.3-prerelease` acts as an "any prerelease of 1.2.3" floor.
-// Ports the sentinel from `SemVerInfo.CompareTo` in Paket's `SemVer.fs`.
+/**
+ * NuGet ordering, plus the Paket rule that the literal `prerelease` suffix
+ * sorts below any other prerelease of the same release version, so that
+ * `1.2.3-prerelease` acts as an "any prerelease of 1.2.3" floor.
+ */
 export function compare(x: NugetVersion, y: NugetVersion): number {
   if (x.prerelease && y.prerelease && sameReleaseParts(x, y)) {
     const xSentinel = x.prerelease === 'prerelease';
