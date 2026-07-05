@@ -97,3 +97,33 @@ module.exports = {
   ],
 };
 ```
+
+### Private Go modules hosted on GitLab
+
+For private GitLab projects, Renovate must authenticate the `?go-get=1` requests it uses to resolve the source repository of a module.
+Add a host rule with `hostType` set to `go` that uses `username` and `password`:
+
+```js
+module.exports = {
+  hostRules: [
+    {
+      matchHost: 'gitlab.company.com',
+      hostType: 'go',
+      username: 'renovate-bot',
+      password: process.env.GITLAB_PAT,
+    },
+  ],
+};
+```
+
+The `password` must be a personal access token with the `read_api` scope.
+The `username` can be any non-empty string when the password is a personal access token.
+
+!!! warning
+  Use `username` and `password` in the `go` host rule, not `token`.
+  [GitLab only supports Basic authentication for `?go-get=1` requests](https://docs.gitlab.com/development/go_guide/dependencies/#authenticating), and a `token` results in a `Bearer` authorization header.
+
+If you do not run Renovate with GitLab as its platform, you also need a host rule with `hostType` set to `gitlab` to authenticate the GitLab tags API.
+
+Without the `go` host rule, GitLab responds to the unauthenticated `?go-get=1` request with a truncated `go-import` path, so Renovate resolves the wrong repository.
+Lookups then fail with a 404 response for a tags URL with a truncated project path, for example: `https://gitlab.company.com/api/v4/projects/group%2Fsubgroup/repository/tags?per_page=100`.
