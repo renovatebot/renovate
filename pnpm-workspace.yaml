@@ -17,7 +17,7 @@ dedupePeers: true
 
 catalog:
   esbuild: 0.28.0
-  tar: 7.5.17
+  tar: 7.5.19
   vite: 8.1.0
 
 overrides:
