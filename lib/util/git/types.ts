@@ -138,6 +138,8 @@ export interface AuthenticationRule {
   insteadOf: string;
 }
 
+export type MergeFlag = '--ff-only' | '--ff';
+
 export type GitOperationType =
   /**
    * The `git clone` sub-command.

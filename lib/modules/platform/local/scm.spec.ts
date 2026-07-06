@@ -80,7 +80,9 @@ describe('modules/platform/local/scm', () => {
   });
 
   it('mergeAndPush', async () => {
-    await expect(localFs.mergeAndPush('branchName')).resolves.toBeUndefined();
+    await expect(
+      localFs.mergeAndPush('branchName', false),
+    ).resolves.toBeUndefined();
   });
 
   it('mergeBranch', async () => {
