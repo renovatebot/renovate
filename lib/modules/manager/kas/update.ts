@@ -1,8 +1,10 @@
+import is from '@sindresorhus/is';
 import { parse, weave } from 'jsonc-weaver';
 import { logger } from '../../../logger/index.ts';
 import { writeLocalFile } from '../../../util/fs/index.ts';
-import { escapeRegExp, regEx } from '../../../util/regex.ts';
+import { regEx } from '../../../util/regex.ts';
 import { replaceAt } from '../../../util/string.ts';
+import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
 import type { UpdateDependencyConfig } from '../types.ts';
 import { isLockFilePath, isYamlFilePath } from './extract.ts';
 import type { KasRepo } from './schema.ts';
@@ -21,7 +23,7 @@ export async function updateDependency({
     newDigest,
   } = upgrade;
   logger.debug({ packageFile }, 'kas.updateDependency');
-  if (datasource === 'git-tags' && currentValue === newValue) {
+  if (datasource === GitTagsDatasource.id && currentValue === newValue) {
     logger.debug(
       { packageFile, depName, currentValue, newDigest },
       'git tag version did not change. Skipping digest update.',
@@ -30,7 +32,15 @@ export async function updateDependency({
   }
   if (isYamlFilePath(packageFile)) {
     const replaceString = upgrade.replaceString;
-    const searchIndex: number = fileContent.indexOf(replaceString!);
+    /* istanbul ignore if */
+    if (!is.string(replaceString)) {
+      logger.warn(
+        { packageFile, depName, replaceString },
+        'replaceString is not a string. This should not happen, skipping update.',
+      );
+      return fileContent;
+    }
+    const searchIndex: number = fileContent.indexOf(replaceString);
     if (searchIndex === -1) {
       logger.warn(
         { packageFile, depName, fileContent, replaceString },
@@ -39,7 +49,7 @@ export async function updateDependency({
       return fileContent;
     }
     try {
-      let newString = replaceString!;
+      let newString = replaceString;
       if (currentValue && newValue && currentValue !== newValue) {
         if (!newString.includes(currentValue)) {
           logger.trace(
@@ -48,7 +58,7 @@ export async function updateDependency({
           );
         }
         newString = newString.replace(
-          regEx(escapeRegExp(currentValue)),
+          regEx(RegExp.escape(currentValue)),
           newValue,
         );
       }
@@ -60,7 +70,7 @@ export async function updateDependency({
           );
         }
         newString = newString.replace(
-          regEx(escapeRegExp(currentDigest)),
+          regEx(RegExp.escape(currentDigest)),
           newDigest,
         );
       }
@@ -69,12 +79,7 @@ export async function updateDependency({
         `Starting search at index ${searchIndex}`,
       );
       let newContent = fileContent;
-      newContent = replaceAt(
-        newContent,
-        searchIndex,
-        replaceString!,
-        newString,
-      );
+      newContent = replaceAt(newContent, searchIndex, replaceString, newString);
       if (newContent === fileContent) {
         logger.warn(
           { packageFile, depName },

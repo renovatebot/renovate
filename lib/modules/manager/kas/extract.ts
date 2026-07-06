@@ -32,7 +32,10 @@ export function getLockFilePath(filePath: string): string | null {
     );
     return null;
   }
-  const lockFilePath = filePath.replace(/\.(yml|yaml|json)$/i, '.lock.$1');
+  const lockFilePath = filePath.replace(
+    regEx(/\.(yml|yaml|json)$/i),
+    '.lock.$1',
+  );
   if (lockFilePath === filePath) {
     logger.debug(
       { filePath },
@@ -211,7 +214,7 @@ export function _extractPackageFile(
     const packageDependency: PackageDependency = {
       depName: repoName,
       packageName: git,
-      versioning: repo.branch ? looseVersioning : undefined,
+      versioning: dumpRepo.branch ? looseVersioning : undefined,
       replaceString: replaceString,
       currentDigest: commit,
     };
@@ -357,10 +360,7 @@ export async function extractAllPackageFiles(
       }
     }
 
-    logger.debug(
-      { packageFiles, files: filesToExamine.entries() },
-      'Extracted all KAS files',
-    );
+    logger.debug({ files: seen }, 'Extracted all KAS files');
   }
   return results;
 }
