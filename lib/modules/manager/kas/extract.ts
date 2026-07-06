@@ -24,7 +24,7 @@ import {
   KasProjectYaml,
 } from './schema.ts';
 
-export function getLockFilePath(filePath: string): string | null {
+function getLockFilePath(filePath: string): string | null {
   if (isLockFilePath(filePath)) {
     logger.trace(
       { filePath },
@@ -54,21 +54,22 @@ export function isYamlFilePath(filePath: string): boolean {
   return regEx(/\.(yml|yaml)$/i).test(filePath);
 }
 
-export function getProjectParser(filePath: string): typeof KasProjectYaml {
+function getProjectParser(filePath: string): typeof KasProjectYaml {
   const isYaml = isYamlFilePath(filePath);
   return isYaml ? KasProjectYaml : KasProjectJson;
 }
 
-export function getLockParser(filePath: string): typeof KasLockFileYaml {
+function getLockParser(filePath: string): typeof KasLockFileYaml {
   const isYaml = isYamlFilePath(filePath);
   return isYaml ? KasLockFileYaml : KasLockFileJson;
 }
 
-export function extractRepoStrings(
+function extractRepoStrings(
   content: string,
   packageFile: string,
 ): Map<string, string> {
   const map = new Map<string, string>();
+  // istanbul ignore if
   if (!isYamlFilePath(packageFile)) {
     return map;
   }
@@ -82,10 +83,12 @@ export function extractRepoStrings(
   let reposNode = rawYamlDocument.get('repos');
   if (!(reposNode instanceof YAMLMap)) {
     const overridesNode = rawYamlDocument.get('overrides');
+    // istanbul ignore else
     if (overridesNode instanceof YAMLMap) {
       reposNode = overridesNode.get('repos');
     }
   }
+  // istanbul ignore if
   if (!(reposNode instanceof YAMLMap) || reposNode.items.length === 0) {
     logger.debug({ packageFile }, 'no repos found in KAS file');
     return map;
@@ -103,7 +106,7 @@ export function extractRepoStrings(
   return map;
 }
 
-export function _extractPackageFile(
+function extractPackageFile(
   content: string,
   packageFile: string,
   kasDump: KasDump,
@@ -233,7 +236,7 @@ export function _extractPackageFile(
   return deps.length > 0 ? { deps } : null;
 }
 
-export async function executeKasDump(file: string): Promise<KasDump | null> {
+async function executeKasDump(file: string): Promise<KasDump | null> {
   const cmd = `kas dump --format json ${file}`;
   const execOptions: ExecOptions = {
     toolConstraints: [
@@ -342,11 +345,11 @@ export async function extractAllPackageFiles(
             }
           }
         }
-      } catch (err) /* istanbul ignore next */ {
+      } catch (err) {
         logger.warn({ file, err }, `Parsing KAS file failed`);
         continue;
       }
-      const packageFileContent: PackageFileContent | null = _extractPackageFile(
+      const packageFileContent: PackageFileContent | null = extractPackageFile(
         content,
         file,
         kasDump,

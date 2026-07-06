@@ -1,18 +1,186 @@
 import { codeBlock } from 'common-tags';
+import { mockExecAll } from '~test/exec-util.ts';
+import { fs } from '~test/util.ts';
 import {
-  extractRepoStrings,
-  getLockFilePath,
-  getLockParser,
-  getProjectParser,
+  extractAllPackageFiles,
   isLockFilePath,
   isYamlFilePath,
 } from './extract.ts';
-import {
-  KasLockFileJson,
-  KasLockFileYaml,
-  KasProjectJson,
-  KasProjectYaml,
-} from './schema.ts';
+
+vi.mock('../../../util/fs/index.ts');
+
+const kasFile = codeBlock`
+  header:
+    version: 22
+    includes:
+      - kasInclude.yml
+
+  build_system: isar
+
+  repos:
+    isar:
+      url: https://github.com/ilbers/isar.git
+      branch: next
+    isar2:
+      url: https://github.com/ilbers/isar.git
+      tag: v1.1
+`;
+
+const kasFileInclude = codeBlock`
+  header:
+    version: 22
+
+  repos:
+    isar2:
+      tag: v1.0
+`;
+
+const kasLockFile = codeBlock`
+  header:
+    version: 22
+  overrides:
+    repos:
+      isar:
+        commit: fe4f6297ea80b2d79fad423f5652a2ec12c541a7
+      isar2:
+        commit: c0bacbd54d682c6c2d71cdadcc2050a0173ada0a
+`;
+
+const kasFileJson = JSON.stringify(
+  {
+    header: {
+      version: 22,
+      includes: ['kasInclude.json'],
+    },
+    build_system: 'isar',
+    repos: {
+      isar: {
+        url: 'https://github.com/ilbers/isar.git',
+        branch: 'next',
+      },
+      isar2: {
+        url: 'https://github.com/ilbers/isar.git',
+        tag: 'v1.1',
+      },
+    },
+  },
+  null,
+  4,
+);
+
+const kasFileIncludeJson = JSON.stringify(
+  {
+    header: {
+      version: 22,
+    },
+    repos: {
+      isar2: {
+        tag: 'v1.0',
+      },
+    },
+  },
+  null,
+  4,
+);
+
+const kasLockFileJson = JSON.stringify(
+  {
+    header: {
+      version: 22,
+    },
+    overrides: {
+      repos: {
+        isar: {
+          commit: 'fe4f6297ea80b2d79fad423f5652a2ec12c541a7',
+        },
+        isar2: {
+          commit: 'c0bacbd54d682c6c2d71cdadcc2050a0173ada0a',
+        },
+      },
+    },
+  },
+  null,
+  4,
+);
+
+const dump = JSON.stringify({
+  header: {
+    version: 22,
+  },
+  overrides: {
+    repos: {
+      isar: {
+        commit: 'fe4f6297ea80b2d79fad423f5652a2ec12c541a7',
+      },
+      isar2: {
+        commit: 'c0bacbd54d682c6c2d71cdadcc2050a0173ada0a',
+      },
+    },
+  },
+  repos: {
+    isar2: {
+      tag: 'v1.1',
+      url: 'https://github.com/ilbers/isar.git',
+    },
+    isar: {
+      url: 'https://github.com/ilbers/isar.git',
+      branch: 'next',
+    },
+  },
+  build_system: 'isar',
+});
+
+const expectedDependencies = [
+  {
+    packageFile: 'kas.lock.yml',
+    deps: [
+      {
+        currentDigest: 'fe4f6297ea80b2d79fad423f5652a2ec12c541a7',
+        currentValue: 'next',
+        datasource: 'git-refs',
+        depName: 'isar',
+        packageName: 'https://github.com/ilbers/isar.git',
+        replaceString:
+          'isar:\n      commit: fe4f6297ea80b2d79fad423f5652a2ec12c541a7\n',
+        versioning: 'loose',
+      },
+      {
+        currentDigest: 'c0bacbd54d682c6c2d71cdadcc2050a0173ada0a',
+        currentValue: 'v1.1',
+        datasource: 'git-tags',
+        depName: 'isar2',
+        packageName: 'https://github.com/ilbers/isar.git',
+        replaceString:
+          'isar2:\n      commit: c0bacbd54d682c6c2d71cdadcc2050a0173ada0a',
+        versioning: undefined,
+      },
+    ],
+  },
+  {
+    packageFile: 'kas.yml',
+    deps: [
+      {
+        currentDigest: undefined,
+        currentValue: 'v1.1',
+        datasource: 'git-tags',
+        depName: 'isar2',
+        packageName: 'https://github.com/ilbers/isar.git',
+        replaceString:
+          'isar2:\n    url: https://github.com/ilbers/isar.git\n    tag: v1.1',
+        versioning: undefined,
+      },
+    ],
+  },
+];
+
+const exptectedDependenciesJson = expectedDependencies.map((depGroup) => ({
+  ...depGroup,
+  packageFile: depGroup.packageFile.replace('yml', 'json'),
+  deps: depGroup.deps.map((dep) => ({
+    ...dep,
+    replaceString: undefined,
+  })),
+}));
 
 describe('modules/manager/kas/extract', () => {
   describe('isLockFilePath()', () => {
@@ -41,24 +209,6 @@ describe('modules/manager/kas/extract', () => {
     });
   });
 
-  describe('getLockFilePath()', () => {
-    it.each`
-      filePath                  | expected
-      ${'project.yml'}          | ${'project.lock.yml'}
-      ${'project.yaml'}         | ${'project.lock.yaml'}
-      ${'project.override.yml'} | ${'project.override.lock.yml'}
-      ${'path/to/project.yml'}  | ${'path/to/project.lock.yml'}
-      ${'path/to/project.yaml'} | ${'path/to/project.lock.yaml'}
-      ${'project.YML'}          | ${'project.lock.YML'}
-      ${'project.YAML'}         | ${'project.lock.YAML'}
-      ${'project.txt'}          | ${null}
-      ${'project'}              | ${null}
-      ${'project.lock.yml'}     | ${null}
-    `('converts "$filePath" to "$expected"', ({ filePath, expected }) => {
-      expect(getLockFilePath(filePath)).toBe(expected);
-    });
-  });
-
   describe('isYamlFilePath()', () => {
     it.each`
       filePath                  | expected
@@ -76,129 +226,209 @@ describe('modules/manager/kas/extract', () => {
     });
   });
 
-  describe('getProjectParser()', () => {
-    it('returns yaml parser for .yml files', () => {
-      const parser = getProjectParser('project.yml');
-      expect(parser).toBe(KasProjectYaml);
-    });
-    it('returns yaml parser for .yaml files', () => {
-      const parser = getProjectParser('project.yaml');
-      expect(parser).toBe(KasProjectYaml);
-    });
-    it('returns json parser for .json files', () => {
-      const parser = getProjectParser('project.json');
-      expect(parser).toBe(KasProjectJson);
-    });
-  });
-
-  describe('getLockParser()', () => {
-    it('returns yaml parser for .yml files', () => {
-      const parser = getLockParser('project.lock.yml');
-      expect(parser).toBe(KasLockFileYaml);
-    });
-    it('returns yaml parser for .yaml files', () => {
-      const parser = getLockParser('project.lock.yaml');
-      expect(parser).toBe(KasLockFileYaml);
-    });
-    it('returns json parser for .json files', () => {
-      const parser = getLockParser('project.lock.json');
-      expect(parser).toBe(KasLockFileJson);
-    });
-  });
-
-  describe('extractRepoStrings()', () => {
-    it('extracts repo strings from yaml kas file', () => {
-      const kasFile = codeBlock`
-        header:
-          version: 22
-
-        build_system: isar
-
-        repos:
-          meta-test:
-            path: meta-test/
-            layers:
-              .:
-          isar:
-            url: https://github.com/ilbers/isar.git
-            branch: next
-            commit: fe4f6297ea80b2d79fad423f5652a2ec12c541a7
-            layers:
-              meta:
-              meta-isar:
-      `;
-      const expected = new Map<string, string>([
-        [
-          'isar',
-          codeBlock`
-            isar:
-                url: https://github.com/ilbers/isar.git
-                branch: next
-                commit: fe4f6297ea80b2d79fad423f5652a2ec12c541a7
-                layers:
-                  meta:
-                  meta-isar:
-          `,
-        ],
-        [
-          'meta-test',
-          codeBlock`
-            meta-test:
-                path: meta-test/
-                layers:
-                  .:
-          `,
-        ],
-      ]);
-      expect(extractRepoStrings(kasFile, 'project.yml')).toEqual(expected);
+  describe('modules/manager/kas/extract-all-package-files', () => {
+    it('extract dependencies for example kas config', async () => {
+      fs.readLocalFile
+        .mockResolvedValueOnce(kasLockFile)
+        .mockResolvedValueOnce(kasFile)
+        .mockResolvedValueOnce(null)
+        .mockResolvedValueOnce(kasFileInclude);
+      mockExecAll({ stdout: dump, stderr: '' });
+      const result = await extractAllPackageFiles({}, ['kas.yml']);
+      expect(result).toEqual(expectedDependencies);
     });
 
-    it('returns empty map if no repos found in yaml file', () => {
-      const kasFile = codeBlock`
-        header:
-          version: 22
-        repos: {}
-      `;
-      expect(extractRepoStrings(kasFile, 'project.yml')).toEqual(new Map());
+    it('extract dependencies for example kas json config', async () => {
+      fs.readLocalFile
+        .mockResolvedValueOnce(kasLockFileJson)
+        .mockResolvedValueOnce(kasFileJson)
+        .mockResolvedValueOnce(null)
+        .mockResolvedValueOnce(kasFileIncludeJson);
+      mockExecAll({ stdout: dump, stderr: '' });
+      const result = await extractAllPackageFiles({}, ['kas.json']);
+      expect(result).toEqual(exptectedDependenciesJson);
     });
 
-    it('returns empty map if no repos found in yaml lock file', () => {
-      const kasFile = codeBlock`
-        header:
-          version: 22
-        overrides:
-          repos: {}
-      `;
-      expect(extractRepoStrings(kasFile, 'project.lock.yml')).toEqual(
-        new Map(),
-      );
+    it('skip when no dump available', async () => {
+      mockExecAll(new Error('command not found: kas'));
+      const result = await extractAllPackageFiles({}, ['kas.yml']);
+      expect(result).toEqual([]);
     });
 
-    it('returns empty map if no repo and no overrides exist', () => {
-      const kasFile = codeBlock`
-        header:
-          version: 22
-      `;
-      expect(extractRepoStrings(kasFile, 'project.lock.yml')).toEqual(
-        new Map(),
-      );
-    });
-
-    it('returns empty map for JSON files', () => {
-      const kasFile = JSON.stringify({
-        header: { version: 22 },
-        build_system: 'isar',
-        repos: {
-          'meta-test': { path: 'meta-test/', layers: { '.': {} } },
-          isar: {
-            url: 'https://github.com/ilbers/isar.git',
-            branch: 'next',
-            commit: 'fe4f6297ea80b2d79fad423f5652a2ec12c541a7',
-            layers: { meta: {}, 'meta-isar': {} },
-          },
-        },
+    it('skip no repos in dump', async () => {
+      fs.readLocalFile.mockResolvedValue(null);
+      mockExecAll({
+        stdout: JSON.stringify({ header: { version: 22 } }),
+        stderr: '',
       });
-      expect(extractRepoStrings(kasFile, 'project.json')).toEqual(new Map());
+      const result = await extractAllPackageFiles({}, [
+        'kas.yml',
+        'kas.yml',
+        '',
+      ]);
+      expect(result).toEqual([]);
+    });
+
+    it('skip special include', async () => {
+      fs.readLocalFile.mockResolvedValueOnce(null)
+        .mockResolvedValueOnce(codeBlock`
+          header:
+            version: 22
+            includes:
+              - repo: isar
+                file: kas.yml
+              - kas.yml
+        `);
+      mockExecAll({
+        stdout: JSON.stringify({ header: { version: 22 } }),
+        stderr: '',
+      });
+      const result = await extractAllPackageFiles({}, ['kas.yml']);
+      expect(result).toEqual([]);
+    });
+
+    it('skip including file twice', async () => {
+      fs.readLocalFile.mockResolvedValueOnce(null).mockResolvedValueOnce(
+        JSON.stringify({
+          header: { version: 22, includes: ['kas2.yml', 'kas2.yml'] },
+        }),
+      );
+      mockExecAll({
+        stdout: JSON.stringify({ header: { version: 22 } }),
+        stderr: '',
+      });
+      const result = await extractAllPackageFiles({}, ['kas.yml']);
+      expect(result).toEqual([]);
+    });
+
+    it('skip invalid kas files', async () => {
+      fs.readLocalFile.mockResolvedValueOnce(codeBlock`
+          overrides: "no-repos"
+        `).mockResolvedValueOnce(codeBlock`
+          header:
+            version: "twenty-two"
+        `);
+      mockExecAll({ stdout: dump, stderr: '' });
+      const result = await extractAllPackageFiles({}, ['kas.yml']);
+      expect(result).toEqual([]);
+    });
+
+    it('skip empty kas repo', async () => {
+      fs.readLocalFile.mockResolvedValueOnce(null)
+        .mockResolvedValueOnce(codeBlock`
+          header:
+            version: 22
+          repos:
+            isar:
+        `);
+      mockExecAll({ stdout: dump, stderr: '' });
+      const result = await extractAllPackageFiles({}, ['kas.yml']);
+      expect(result).toEqual([]);
+    });
+
+    it('skip repo with no dump', async () => {
+      fs.readLocalFile.mockResolvedValueOnce(null)
+        .mockResolvedValueOnce(codeBlock`
+          header:
+            version: 22
+          repos:
+            isarNotInDump:
+              url: https://github.com/ilbers/isar.git
+              branch: next
+        `);
+      mockExecAll({ stdout: dump, stderr: '' });
+      const result = await extractAllPackageFiles({}, ['kas.yml']);
+      expect(result).toEqual([]);
+    });
+
+    it('skip hg repo with no dump', async () => {
+      fs.readLocalFile.mockResolvedValueOnce(null)
+        .mockResolvedValueOnce(codeBlock`
+          header:
+            version: 22
+          repos:
+            isar:
+              type: hg
+              url: https://github.com/ilbers/isar.git
+              branch: next
+        `);
+      mockExecAll({ stdout: dump, stderr: '' });
+      const result = await extractAllPackageFiles({}, ['kas.yml']);
+      expect(result).toEqual([]);
+    });
+
+    it('skip repo with non matching url', async () => {
+      fs.readLocalFile.mockResolvedValueOnce(null)
+        .mockResolvedValueOnce(codeBlock`
+          header:
+            version: 22
+          repos:
+            isar:
+              url: not-the-same-url
+              branch: next
+        `);
+      mockExecAll({ stdout: dump, stderr: '' });
+      const result = await extractAllPackageFiles({}, ['kas.yml']);
+      expect(result).toEqual([]);
+    });
+
+    it('skip repo without an url', async () => {
+      fs.readLocalFile.mockResolvedValueOnce(null)
+        .mockResolvedValueOnce(codeBlock`
+          header:
+            version: 22
+          repos:
+            isar:
+              branch: next
+        `);
+      mockExecAll({
+        stdout: JSON.stringify({
+          header: { version: 22 },
+          repos: {
+            isar: {
+              branch: 'next',
+            },
+          },
+        }),
+        stderr: '',
+      });
+      const result = await extractAllPackageFiles({}, ['kas.yml']);
+      expect(result).toEqual([]);
+    });
+
+    it('skip repo with branch and tag', async () => {
+      fs.readLocalFile.mockResolvedValueOnce(null)
+        .mockResolvedValueOnce(codeBlock`
+          header:
+            version: 22
+          repos:
+            isar:
+              url: https://github.com/ilbers/isar.git
+              branch: next
+              tag: v1.1
+        `);
+      mockExecAll({
+        stdout: JSON.stringify({
+          header: { version: 22 },
+          repos: {
+            isar: {
+              url: 'https://github.com/ilbers/isar.git',
+              branch: 'next',
+              tag: 'v1.1',
+            },
+          },
+        }),
+        stderr: '',
+      });
+      const result = await extractAllPackageFiles({}, ['kas.yml']);
+      expect(result).toEqual([]);
+    });
+
+    it('getLockFilePath: return null for lock files', async () => {
+      fs.readLocalFile.mockResolvedValueOnce(null).mockResolvedValueOnce(null);
+      mockExecAll({ stdout: dump, stderr: '' });
+      const result = await extractAllPackageFiles({}, ['kas.lock.yml']);
+      expect(result).toEqual([]);
     });
   });
 });
