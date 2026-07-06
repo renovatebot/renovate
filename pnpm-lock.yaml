@@ -137,8 +137,8 @@ importers:
         specifier: 3.0.3
         version: 3.0.3
       adm-zip:
-        specifier: 0.5.17
-        version: 0.5.17
+        specifier: 0.5.18
+        version: 0.5.18
       ae-cvss-calculator:
         specifier: 1.0.13
         version: 1.0.13
@@ -2311,8 +2311,8 @@ packages:
     engines: {node: '>=0.4.0'}
     hasBin: true
 
-  adm-zip@0.5.17:
-    resolution: {integrity: sha512-+Ut8d9LLqwEvHHJl1+PIHqoyDxFgVN847JTVM3Izi3xHDWPE4UtzzXysMZQs64DMcrJfBeS/uoEP4AD3HQHnQQ==}
+  adm-zip@0.5.18:
+    resolution: {integrity: sha512-ufJnssQGbxzLNS1Ho9bCtX4rQKCCvoVuDLHoJyc3F9dOGDB4BkWs2Ci0kv53lqocAEQ/Cbi+I2XCsNYGqVYqng==}
     engines: {node: '>=12.0'}
 
   ae-cvss-calculator@1.0.13:
@@ -6935,7 +6935,7 @@ snapshots:
   '@renovatebot/osv-offline@3.0.5':
     dependencies:
       '@renovatebot/osv-offline-db': 3.0.5
-      adm-zip: 0.5.17
+      adm-zip: 0.5.18
       debug: 4.4.3
       fs-extra: 11.3.5
       got: 15.0.7
@@ -7504,7 +7504,7 @@ snapshots:
 
   acorn@8.17.0: {}
 
-  adm-zip@0.5.17: {}
+  adm-zip@0.5.18: {}
 
   ae-cvss-calculator@1.0.13: {}
 
