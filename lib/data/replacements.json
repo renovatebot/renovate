@@ -257,7 +257,7 @@
     "description": "`corentinmusard/otel-cicd-action` was transferred to `dash0hq/otel-cicd-action`.",
     "packageRules": [
       {
-        "matchDatasources": ["github-tags"],
+        "matchDatasources": ["github-releases", "github-tags"],
         "matchPackageNames": ["corentinmusard/otel-cicd-action"],
         "replacementName": "dash0hq/otel-cicd-action",
         "replacementVersion": "4.0.1"
