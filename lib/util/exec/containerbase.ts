@@ -8,6 +8,11 @@ import { getEnv } from '../env.ts';
 import type { Opt, ToolConfig, ToolConstraint, ToolName } from './types.ts';
 
 export const allToolConfig: Record<ToolName, ToolConfig> = {
+  apm: {
+    datasource: 'pypi',
+    packageName: 'apm-cli',
+    versioning: 'pep440',
+  },
   bazelisk: {
     datasource: 'github-releases',
     packageName: 'bazelbuild/bazelisk',
