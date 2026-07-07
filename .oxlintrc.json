@@ -165,7 +165,7 @@
     "typescript/no-unsafe-function-type": "error",
     "unicorn/prefer-node-protocol": "error",
 
-    "typescript/no-useless-default-assignment": "off",
+    "typescript/no-useless-default-assignment": "error",
     "vitest/require-mock-type-parameters": "off",
     "vitest/expect-expect": "off",
     "vitest/no-conditional-expect": "off",
