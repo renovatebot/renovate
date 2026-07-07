@@ -1,4 +1,7 @@
-import type { WorkItem } from 'azure-devops-node-api/interfaces/WorkItemTrackingInterfaces.js';
+import type {
+  WorkItem,
+  WorkItemStateColor,
+} from 'azure-devops-node-api/interfaces/WorkItemTrackingInterfaces.js';
 import { logger } from '../../../logger/index.ts';
 import { sanitize } from '../../../util/sanitize.ts';
 import type { EnsureIssueConfig, EnsureIssueResult, Issue } from '../types.ts';
@@ -6,11 +9,91 @@ import * as azureApi from './azure-got-wrapper.ts';
 import type { Config } from './types.ts';
 import { getWorkItemTitle } from './util.ts';
 
+const workItemType = 'Issue';
+
+// Historical fallbacks, used when the work item type's states cannot be
+// resolved from the API (e.g. Azure DevOps Server versions without the
+// endpoint). These match the values Renovate hardcoded previously.
+const defaultOpenState = 'New';
+const defaultClosedState = 'Closed';
+
+// Azure Boards groups every work item state into one of these meta-state
+// categories. Which concrete state name maps to a category depends on the
+// project's process (Basic: To Do/Doing/Done, Agile: New/Active/.../Closed,
+// custom inherited processes: anything). Categories are stable, so we resolve
+// the concrete names from them instead of hardcoding process-specific values.
+const openCategories = ['Proposed', 'InProgress'];
+const closedCategories = ['Completed', 'Resolved', 'Removed'];
+
+interface WorkItemStates {
+  /** State to move a work item to when (re)opening it. */
+  open: string;
+  /** State to move a work item to when closing it. */
+  closed: string;
+  /** All state names that represent a closed/completed work item. */
+  closedNames: Set<string>;
+}
+
 export class IssueService {
   private config: Config;
+  private workItemStates: WorkItemStates | null = null;
 
   constructor(config: Config) {
     this.config = config;
+  }
+
+  /**
+   * Resolve the concrete open/closed state names for the `Issue` work item type
+   * from its process, so Renovate does not depend on hardcoded state names that
+   * only exist in some Azure DevOps processes. Falls back to the historical
+   * `New`/`Closed` values if the states cannot be fetched. Cached per instance.
+   */
+  private async getWorkItemStates(): Promise<WorkItemStates> {
+    if (this.workItemStates) {
+      return this.workItemStates;
+    }
+
+    const states: WorkItemStates = {
+      open: defaultOpenState,
+      closed: defaultClosedState,
+      closedNames: new Set([defaultClosedState]),
+    };
+
+    try {
+      const azureApiWit = await azureApi.workItemTrackingApi();
+      const stateColors = await azureApiWit.getWorkItemTypeStates(
+        this.config.project,
+        workItemType,
+      );
+
+      if (stateColors?.length) {
+        const namesByCategory = (categories: string[]): string[] =>
+          stateColors
+            .filter(
+              (s: WorkItemStateColor) =>
+                s.category && categories.includes(s.category) && s.name,
+            )
+            .map((s: WorkItemStateColor) => s.name!);
+
+        const openNames = namesByCategory(openCategories);
+        const closedNames = namesByCategory(closedCategories);
+
+        // First open-category state, else the type's first state overall.
+        states.open = openNames[0] ?? stateColors[0].name ?? states.open;
+        if (closedNames.length) {
+          states.closed = closedNames[0];
+          states.closedNames = new Set(closedNames);
+        }
+      }
+    } catch (err) {
+      logger.debug(
+        { err },
+        'Azure: could not resolve work item states, using default state names',
+      );
+    }
+
+    this.workItemStates = states;
+    return states;
   }
 
   async findIssue(title: string): Promise<Issue | null> {
@@ -59,10 +142,12 @@ export class IssueService {
         'System.ChangedDate',
       ]);
 
+      const { closedNames } = await this.getWorkItemStates();
+
       return workItems.map((wi: WorkItem) => ({
         number: wi.id!,
         title: wi.fields!['System.Title'],
-        state: wi.fields!['System.State'] === 'Closed' ? 'closed' : 'open',
+        state: closedNames.has(wi.fields!['System.State']) ? 'closed' : 'open',
         body: wi.fields!['System.Description'],
         createdAt: wi.fields!['System.CreatedDate'],
         lastModified: wi.fields!['System.ChangedDate'],
@@ -79,9 +164,10 @@ export class IssueService {
       const issue = await this.findIssue(title);
       if (issue?.state === 'open' && issue.number) {
         const azureApiWit = await azureApi.workItemTrackingApi();
+        const { closed } = await this.getWorkItemStates();
         await azureApiWit.updateWorkItem(
           undefined,
-          [{ op: 'replace', path: '/fields/System.State', value: 'Closed' }],
+          [{ op: 'replace', path: '/fields/System.State', value: closed }],
           issue.number,
           this.config.project,
         );
@@ -104,6 +190,7 @@ export class IssueService {
       const azureApiWit = await azureApi.workItemTrackingApi();
       const finalTitle = getWorkItemTitle(title, this.config.repository);
       const issues = await this.getIssueList(finalTitle);
+      const { open, closed } = await this.getWorkItemStates();
 
       // Close duplicate open issues if any
       const openIssues = issues.filter((issue) => issue.state === 'open');
@@ -117,7 +204,7 @@ export class IssueService {
                 {
                   op: 'replace',
                   path: '/fields/System.State',
-                  value: 'Closed',
+                  value: closed,
                 },
               ],
               issueNumber,
@@ -144,7 +231,7 @@ export class IssueService {
           await azureApiWit.updateWorkItem(
             undefined,
             [
-              { op: 'replace', path: '/fields/System.State', value: 'New' },
+              { op: 'replace', path: '/fields/System.State', value: open },
               {
                 op: 'replace',
                 path: '/fields/System.Title',
@@ -206,7 +293,10 @@ export class IssueService {
         }
       }
 
-      // Create new work item if none found
+      // Create new work item if none found. System.State is intentionally
+      // omitted so Azure DevOps applies the work item type's default initial
+      // state for the project's process (e.g. `To Do` on Basic, `New`/`Active`
+      // on Agile). Passing a hardcoded state fails on processes that lack it.
       const newWorkItem = await azureApiWit.createWorkItem(
         undefined,
         [
@@ -222,7 +312,6 @@ export class IssueService {
             path: '/multilineFieldsFormat/System.Description',
             value: 'Markdown',
           },
-          { op: 'add', path: '/fields/System.State', value: 'New' },
         ],
         this.config.project,
         'Issue',
