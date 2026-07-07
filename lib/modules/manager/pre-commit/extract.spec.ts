@@ -293,6 +293,11 @@ describe('modules/manager/pre-commit/extract', () => {
               rev: '20b36ca07fa1bfe124912287ac8502cf12f140e6'  # frozen: v1.14.12
               hooks:
                 - id: typos
+
+            - repo: https://github.com/astral-sh/ruff-pre-commit
+              rev: "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef" # frozen: v0.14.8
+              hooks:
+                - id: ruff-check
         `,
         filename,
       );
@@ -322,6 +327,18 @@ describe('modules/manager/pre-commit/extract', () => {
             replaceString:
               "'20b36ca07fa1bfe124912287ac8502cf12f140e6'  # frozen: v1.14.12",
           },
+          {
+            autoReplaceStringTemplate: '"{{newDigest}}" # frozen: {{newValue}}',
+            currentDigest:
+              '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef',
+            currentValue: 'v0.14.8',
+            datasource: 'github-tags',
+            depName: 'astral-sh/ruff-pre-commit',
+            depType: 'repository',
+            packageName: 'astral-sh/ruff-pre-commit',
+            replaceString:
+              '"0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef" # frozen: v0.14.8',
+          },
         ],
       });
     });
@@ -339,6 +356,11 @@ describe('modules/manager/pre-commit/extract', () => {
               rev: 6fd1ced
               hooks:
                 - id: ruff-check
+
+            - repo: https://github.com/crate-ci/typos
+              rev: 0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
+              hooks:
+                - id: typos
         `,
         filename,
       );
@@ -363,6 +385,17 @@ describe('modules/manager/pre-commit/extract', () => {
             depType: 'repository',
             enabled: false,
             packageName: 'astral-sh/ruff-pre-commit',
+            skipReason: 'unversioned-reference',
+          },
+          {
+            currentDigest:
+              '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef',
+            currentValue: undefined,
+            datasource: 'github-tags',
+            depName: 'crate-ci/typos',
+            depType: 'repository',
+            enabled: false,
+            packageName: 'crate-ci/typos',
             skipReason: 'unversioned-reference',
           },
         ],

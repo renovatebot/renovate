@@ -8,6 +8,10 @@ import type { SkipReason } from '../../../types/index.ts';
 import { detectPlatform } from '../../../util/common.ts';
 import { find } from '../../../util/host-rules.ts';
 import { newlineRegex, regEx } from '../../../util/regex.ts';
+import {
+  isLongCommitSha,
+  isShortCommitSha,
+} from '../../../util/schema-utils/git.ts';
 import { parseSingleYaml } from '../../../util/yaml.ts';
 import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
 import { GitlabTagsDatasource } from '../../datasource/gitlab-tags/index.ts';
@@ -83,12 +87,10 @@ function determineDatasource(
 }
 
 const gitUrlRegex = regEx(/\.git$/i);
-const fullGitShaRegex = regEx(/^[a-f0-9]{40}$/i);
-const shortGitShaRegex = regEx(/^[a-f0-9]{6,7}$/i);
 
 // Matches: rev: <digest> with optional quotes and frozen version comment
 const revLineWithFrozenCommentRegex = regEx(
-  /^\s*rev:\s*(?<replaceString>(?:"(?<doubleQuotedDigest>(?:[a-f0-9]{40}|[a-f0-9]{6,7}))"|'(?<singleQuotedDigest>(?:[a-f0-9]{40}|[a-f0-9]{6,7}))'|(?<bareDigest>(?:[a-f0-9]{40}|[a-f0-9]{6,7})))(?:(?<commentWhiteSpaces>\s+)#\s*frozen:\s*(?<currentValue>\S+))?)(?:\s+#.*|\s*)$/,
+  /^\s*rev:\s*(?<replaceString>(?:"(?<doubleQuotedDigest>(?:[a-f0-9]{40}|[a-f0-9]{64}|[a-f0-9]{6,7}))"|'(?<singleQuotedDigest>(?:[a-f0-9]{40}|[a-f0-9]{64}|[a-f0-9]{6,7}))'|(?<bareDigest>(?:[a-f0-9]{40}|[a-f0-9]{64}|[a-f0-9]{6,7})))(?:(?<commentWhiteSpaces>\s+)#\s*frozen:\s*(?<currentValue>\S+))?)(?:\s+#.*|\s*)$/,
 );
 
 interface RegexDep {
@@ -132,7 +134,7 @@ function extractWithRegex(content: string): Map<string, RegexDep[]> {
         currentValue,
         replaceString,
       };
-      if (fullGitShaRegex.test(currentDigest)) {
+      if (isLongCommitSha(currentDigest)) {
         regexDep.currentDigest = currentDigest;
       } else {
         regexDep.currentDigestShort = currentDigest;
@@ -277,12 +279,12 @@ function findDependencies(
         dep.currentValue = regexDep.currentValue;
         dep.replaceString = regexDep.replaceString;
         dep.autoReplaceStringTemplate = regexDep.autoReplaceStringTemplate;
-      } else if (fullGitShaRegex.test(tag)) {
+      } else if (isLongCommitSha(tag)) {
         dep.currentDigest = tag;
         dep.currentValue = undefined;
         dep.enabled = false;
         dep.skipReason = 'unversioned-reference';
-      } else if (shortGitShaRegex.test(tag)) {
+      } else if (isShortCommitSha(tag)) {
         dep.currentDigestShort = tag;
         dep.currentValue = undefined;
         dep.enabled = false;
