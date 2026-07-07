@@ -6,7 +6,7 @@ export { updateArtifacts } from './artifacts.ts';
 export { extractPackageFile } from './extract.ts';
 
 export const displayName = 'APM';
-export const url = 'https://github.com/danielmeppiel/apm';
+export const url = 'https://github.com/microsoft/apm';
 
 export const supportsLockFileMaintenance = true;
 export const lockFileNames = ['apm.lock.yaml'];
