@@ -167,15 +167,14 @@
 
     "typescript/no-useless-default-assignment": "error",
     "vitest/require-mock-type-parameters": "off",
-    "vitest/expect-expect": "off",
-    "vitest/no-conditional-expect": "off",
-    "vitest/no-standalone-expect": "error",
-    "vitest/prefer-snapshot-hint": "off",
+    "vitest/expect-expect": [
+      "error",
+      { "assertFunctionNames": ["expect", "expectTypeOf", "checkKeysSorted"] }
+    ],
     "vitest/no-conditional-expect": "error",
     "vitest/no-standalone-expect": "error",
     "vitest/prefer-snapshot-hint": "error",
-
-    "vitest/require-to-throw-message": "off"
+    "vitest/require-to-throw-message": "error"
   },
   "overrides": [
     {

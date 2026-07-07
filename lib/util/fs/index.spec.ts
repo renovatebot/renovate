@@ -213,7 +213,9 @@ describe('util/fs/index', () => {
   describe('deleteLocalFile', () => {
     it('throws if platform is local', async () => {
       GlobalConfig.set({ platform: 'local' });
-      await expect(deleteLocalFile('foo/bar/file.txt')).rejects.toThrow();
+      await expect(deleteLocalFile('foo/bar/file.txt')).rejects.toThrow(
+        'Cannot delete file when platform=local',
+      );
     });
 
     it('deletes file', async () => {
@@ -394,7 +396,9 @@ describe('util/fs/index', () => {
     });
 
     it('return empty array for non existing directory', async () => {
-      await expect(readLocalDirectory('somedir')).rejects.toThrow();
+      await expect(readLocalDirectory('somedir')).rejects.toThrow(
+        'ENOENT: no such file or directory',
+      );
     });
 
     it('return empty array for a existing but empty directory', async () => {
