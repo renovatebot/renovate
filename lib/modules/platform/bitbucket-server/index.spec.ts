@@ -2128,11 +2128,11 @@ describe('modules/platform/bitbucket-server/index', () => {
           .twice()
           .reply(200, prMock(url, 'SOME', 'repo'));
 
-        expect(await bitbucket.getPr(3)).toMatchSnapshot();
+        expect(await bitbucket.getPr(3)).toMatchSnapshot('getPr(3)');
 
-        expect(await bitbucket.getPr(5)).toMatchSnapshot();
+        expect(await bitbucket.getPr(5)).toMatchSnapshot('getPr(5)');
 
-        expect(await bitbucket.getPr(5)).toMatchSnapshot();
+        expect(await bitbucket.getPr(5)).toMatchSnapshot('getPr(5) repeated');
       });
 
       it('gets a closed PR', async () => {

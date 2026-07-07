@@ -63,7 +63,7 @@ const adapter: GithubGraphqlDatasourceAdapter<
 function resp(
   isRepoPrivate: boolean | undefined,
   nodes: TestAdapterInput[],
-  cursor: string | undefined = undefined,
+  cursor?: string,
 ): GithubGraphqlResponse<GithubGraphqlRepoResponse<TestAdapterInput>> {
   const data: GithubGraphqlRepoResponse<TestAdapterInput> = {
     repository: {

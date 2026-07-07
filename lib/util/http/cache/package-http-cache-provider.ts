@@ -32,8 +32,8 @@ export class PackageHttpCacheProvider extends AbstractHttpCacheProvider {
   constructor({
     namespace,
     softTtlMinutes = 15,
-    checkCacheControlHeader = false,
-    checkAuthorizationHeader = false,
+    checkCacheControlHeader,
+    checkAuthorizationHeader,
     writeSchema,
   }: PackageHttpCacheProviderOptions) {
     super();

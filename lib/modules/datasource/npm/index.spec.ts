@@ -137,8 +137,8 @@ describe('modules/datasource/npm/index', () => {
       .get('/foobar')
       .reply(200, deprecatedPackage);
     const res = await getPkgReleases({ datasource, packageName: 'foobar' });
-    expect(res).toMatchSnapshot();
-    expect(res?.deprecationMessage).toMatchSnapshot();
+    expect(res).toMatchSnapshot('releases');
+    expect(res?.deprecationMessage).toMatchSnapshot('deprecationMessage');
   });
 
   it('should return attestation', async () => {

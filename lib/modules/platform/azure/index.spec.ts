@@ -150,8 +150,8 @@ describe('modules/platform/azure/index', () => {
         'sometoken',
         'https://dev.azure.com/renovate12345',
       );
-      expect(azureApi.gitApi.mock.calls).toMatchSnapshot();
-      expect(repos).toMatchSnapshot();
+      expect(azureApi.gitApi.mock.calls).toMatchSnapshot('gitApi calls');
+      expect(repos).toMatchSnapshot('repos');
     });
   });
 
@@ -203,8 +203,8 @@ describe('modules/platform/azure/index', () => {
       const config = await initRepo({
         repository: 'some/repo',
       });
-      expect(azureApi.gitApi.mock.calls).toMatchSnapshot();
-      expect(config).toMatchSnapshot();
+      expect(azureApi.gitApi.mock.calls).toMatchSnapshot('gitApi calls');
+      expect(config).toMatchSnapshot('config');
     });
 
     it(`throws if repo is disabled`, async () => {
@@ -1362,8 +1362,12 @@ describe('modules/platform/azure/index', () => {
         topic: 'some-subject',
         content: 'some\ncontent',
       });
-      expect(gitApiMock.createThread.mock.calls).toMatchSnapshot();
-      expect(gitApiMock.updateComment.mock.calls).toMatchSnapshot();
+      expect(gitApiMock.createThread.mock.calls).toMatchSnapshot(
+        'createThread calls',
+      );
+      expect(gitApiMock.updateComment.mock.calls).toMatchSnapshot(
+        'updateComment calls',
+      );
     });
 
     it('updates comment if missing', async () => {
@@ -1388,8 +1392,12 @@ describe('modules/platform/azure/index', () => {
         topic: 'some-subject',
         content: 'some\nnew\ncontent',
       });
-      expect(gitApiMock.createThread.mock.calls).toMatchSnapshot();
-      expect(gitApiMock.updateComment.mock.calls).toMatchSnapshot();
+      expect(gitApiMock.createThread.mock.calls).toMatchSnapshot(
+        'createThread calls',
+      );
+      expect(gitApiMock.updateComment.mock.calls).toMatchSnapshot(
+        'updateComment calls',
+      );
     });
 
     it('does nothing if comment exists and is the same', async () => {
@@ -1414,8 +1422,12 @@ describe('modules/platform/azure/index', () => {
         topic: 'some-subject',
         content: 'some\ncontent',
       });
-      expect(gitApiMock.createThread.mock.calls).toMatchSnapshot();
-      expect(gitApiMock.updateComment.mock.calls).toMatchSnapshot();
+      expect(gitApiMock.createThread.mock.calls).toMatchSnapshot(
+        'createThread calls',
+      );
+      expect(gitApiMock.updateComment.mock.calls).toMatchSnapshot(
+        'updateComment calls',
+      );
     });
 
     it('does nothing if comment exists and is the same when there is no topic', async () => {
@@ -1436,8 +1448,12 @@ describe('modules/platform/azure/index', () => {
         topic: null,
         content: 'some\ncontent',
       });
-      expect(gitApiMock.createThread.mock.calls).toMatchSnapshot();
-      expect(gitApiMock.updateComment.mock.calls).toMatchSnapshot();
+      expect(gitApiMock.createThread.mock.calls).toMatchSnapshot(
+        'createThread calls',
+      );
+      expect(gitApiMock.updateComment.mock.calls).toMatchSnapshot(
+        'updateComment calls',
+      );
     });
 
     it('passes comment through massageMarkdown', async () => {
