@@ -297,10 +297,7 @@ export abstract class HttpBase<
     throw err;
   }
 
-  resolveUrl(
-    requestUrl: string | URL,
-    options: HttpOptions | undefined = undefined,
-  ): URL {
+  resolveUrl(requestUrl: string | URL, options?: HttpOptions): URL {
     let url = requestUrl;
 
     if (url instanceof URL) {

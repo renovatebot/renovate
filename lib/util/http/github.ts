@@ -222,8 +222,8 @@ function handleGotError(
 }
 
 interface GraphqlPaginatedContent<T = unknown> {
-  nodes: T[];
-  edges: T[];
+  nodes?: T[];
+  edges?: T[];
   pageInfo: { hasNextPage: boolean; endCursor: string };
 }
 
