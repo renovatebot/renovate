@@ -1682,11 +1682,11 @@ describe('modules/platform/bitbucket/index', () => {
         })
         .get('/2.0/repositories/some/repo/pullrequests/5')
         .reply(200, pr);
-      expect(await bitbucket.getPr(3)).toMatchSnapshot();
+      expect(await bitbucket.getPr(3)).toMatchSnapshot('getPr(3)');
 
-      expect(await bitbucket.getPr(5)).toMatchSnapshot();
+      expect(await bitbucket.getPr(5)).toMatchSnapshot('getPr(5)');
 
-      expect(await bitbucket.getPr(5)).toMatchSnapshot();
+      expect(await bitbucket.getPr(5)).toMatchSnapshot('getPr(5) repeated');
     });
 
     it('reviewers', async () => {

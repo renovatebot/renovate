@@ -382,7 +382,7 @@ describe('util/fs/index', () => {
       const result = await readLocalDirectory('test');
       expect(result).not.toBeNull();
       expect(result).toBeArrayOfSize(2);
-      expect(result).toMatchSnapshot();
+      expect(result).toMatchSnapshot('two files');
 
       await writeLocalFile('Cargo.lock', '');
       await writeLocalFile('test/subdir/Cargo.lock', '');
@@ -390,7 +390,7 @@ describe('util/fs/index', () => {
       const resultWithAdditionalFiles = await readLocalDirectory('test');
       expect(resultWithAdditionalFiles).not.toBeNull();
       expect(resultWithAdditionalFiles).toBeArrayOfSize(3);
-      expect(resultWithAdditionalFiles).toMatchSnapshot();
+      expect(resultWithAdditionalFiles).toMatchSnapshot('three files');
     });
 
     it('return empty array for non existing directory', async () => {
