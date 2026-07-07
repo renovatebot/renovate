@@ -28,7 +28,7 @@ describe('logger/bunyan', () => {
     });
     expect(() => {
       validateLogLevel(input, 'info');
-    }).toThrow();
+    }).toThrow('process.exit: 1');
     expect(mockExit).toHaveBeenCalledExactlyOnceWith(1);
   });
 });

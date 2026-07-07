@@ -17,7 +17,7 @@ describe('config/migrations/base/abstract-migration', () => {
       {},
     );
 
-    expect(() => customMigration.run()).toThrow();
+    expect(() => customMigration.run()).toThrow(Error);
   });
 
   it('should not allow to use method delete', () => {
@@ -36,6 +36,6 @@ describe('config/migrations/base/abstract-migration', () => {
       {},
     );
 
-    expect(() => customMigration.run()).toThrow();
+    expect(() => customMigration.run()).toThrow(Error);
   });
 });

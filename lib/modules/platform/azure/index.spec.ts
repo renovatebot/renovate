@@ -102,7 +102,9 @@ describe('modules/platform/azure/index', () => {
   describe('initPlatform()', () => {
     it('should throw if no endpoint', () => {
       expect.assertions(1);
-      expect(() => azure.initPlatform({})).toThrow();
+      expect(() => azure.initPlatform({})).toThrow(
+        'Init: You must configure an Azure DevOps endpoint',
+      );
     });
 
     it('should throw if no token nor a username and password', () => {
@@ -111,7 +113,9 @@ describe('modules/platform/azure/index', () => {
         azure.initPlatform({
           endpoint: 'https://dev.azure.com/renovate12345',
         }),
-      ).toThrow();
+      ).toThrow(
+        'Init: You must configure an Azure DevOps token, or a username and',
+      );
     });
 
     it('should throw if a username but no password', () => {
@@ -121,7 +125,9 @@ describe('modules/platform/azure/index', () => {
           endpoint: 'https://dev.azure.com/renovate12345',
           username: 'user',
         }),
-      ).toThrow();
+      ).toThrow(
+        'Init: You must configure an Azure DevOps token, or a username and',
+      );
     });
 
     it('should throw if a password but no username', () => {
@@ -131,7 +137,9 @@ describe('modules/platform/azure/index', () => {
           endpoint: 'https://dev.azure.com/renovate12345',
           password: 'pass',
         }),
-      ).toThrow();
+      ).toThrow(
+        'Init: You must configure an Azure DevOps token, or a username and',
+      );
     });
 
     it('should init', async () => {
@@ -2041,7 +2049,9 @@ describe('modules/platform/azure/index', () => {
           getItemContent: vi.fn(() => Promise.resolve(Readable.from('!@#'))),
         }),
       );
-      await expect(azure.getJsonFile('file.json')).rejects.toThrow();
+      await expect(azure.getJsonFile('file.json')).rejects.toThrow(
+        'azureApiGit.getItem is not a function',
+      );
     });
 
     it('throws on errors', async () => {
@@ -2052,7 +2062,9 @@ describe('modules/platform/azure/index', () => {
           }),
         }),
       );
-      await expect(azure.getJsonFile('file.json')).rejects.toThrow();
+      await expect(azure.getJsonFile('file.json')).rejects.toThrow(
+        'azureApiGit.getItem is not a function',
+      );
     });
 
     it('supports fetch from another repo', async () => {
