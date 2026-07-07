@@ -239,7 +239,9 @@ describe('modules/manager/poetry/artifacts', () => {
         // TODO: fix typing
         vi.fn<any>(
           class {
-            getAccessToken = vi.fn().mockResolvedValue('some-token');
+            getAccessToken = vi
+              .fn<(...args: any[]) => any>()
+              .mockResolvedValue('some-token');
           },
         ),
       );
@@ -288,7 +290,7 @@ describe('modules/manager/poetry/artifacts', () => {
         // TODO: fix typing
         vi.fn<any>(
           class {
-            getAccessToken = vi.fn();
+            getAccessToken = vi.fn<(...args: any[]) => any>();
           },
         ),
       );

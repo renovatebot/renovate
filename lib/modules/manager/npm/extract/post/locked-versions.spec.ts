@@ -13,7 +13,7 @@ const yarn = vi.mocked(_yarn);
 vi.mock('../npm.ts');
 vi.mock('../yarn.ts', async () => ({
   ...(await vi.importActual<typeof import('../yarn.ts')>('../yarn.ts')),
-  getYarnLock: vi.fn(),
+  getYarnLock: vi.fn<(...args: any[]) => any>(),
 }));
 vi.mock('../pnpm.ts');
 

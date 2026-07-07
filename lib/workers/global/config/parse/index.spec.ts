@@ -12,7 +12,7 @@ import * as _hostRulesFromEnv from './host-rules-from-env.ts';
 
 vi.mock('../../../../modules/datasource/npm.ts');
 vi.mock('../../../../modules/manager/index.ts', () => ({
-  detectAllGlobalConfig: vi.fn().mockResolvedValue({}),
+  detectAllGlobalConfig: vi.fn<(...args: any[]) => any>().mockResolvedValue({}),
 }));
 vi.mock('../../../../util/fs/index.ts');
 vi.mock('../../../../config/decrypt.ts');

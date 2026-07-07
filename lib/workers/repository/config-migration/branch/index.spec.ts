@@ -105,7 +105,9 @@ describe('workers/repository/config-migration/branch/index', () => {
           number: 1,
         }),
       );
-      platform.refreshPr = vi.fn().mockResolvedValueOnce(null);
+      platform.refreshPr = vi
+        .fn<(...args: any[]) => any>()
+        .mockResolvedValueOnce(null);
       vi.mocked(rebaseMigrationBranch).mockResolvedValueOnce('committed');
       const res = await checkConfigMigrationBranch(
         {
@@ -156,7 +158,9 @@ describe('workers/repository/config-migration/branch/index', () => {
 
     it('updates migration branch & refresh PR when migration enabled and open pr exists', async () => {
       platform.getBranchPr.mockResolvedValue(mock<Pr>());
-      platform.refreshPr = vi.fn().mockResolvedValueOnce(null);
+      platform.refreshPr = vi
+        .fn<(...args: any[]) => any>()
+        .mockResolvedValueOnce(null);
       vi.mocked(rebaseMigrationBranch).mockResolvedValueOnce('committed');
       const res = await checkConfigMigrationBranch(
         {

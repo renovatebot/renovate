@@ -21,7 +21,7 @@ vi.mock('jsonc-weaver', async (importOriginal) => {
   const actual = await importOriginal<typeof import('jsonc-weaver')>();
   return {
     ...actual,
-    weave: vi.fn(actual.weave),
+    weave: vi.fn<(...args: any[]) => any>(actual.weave),
   };
 });
 

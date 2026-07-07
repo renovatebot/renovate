@@ -28,7 +28,7 @@ const logContext = 'initial_context';
 
 vi.unmock('./index.ts');
 vi.mock('node:crypto', () => ({
-  randomUUID: vi.fn(() => 'initial_context'),
+  randomUUID: vi.fn<() => string>(() => 'initial_context'),
 }));
 
 const bunyanDebugSpy = vi.spyOn(bunyan.prototype, 'debug');

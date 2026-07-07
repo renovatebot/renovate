@@ -451,7 +451,9 @@ describe('modules/datasource/docker/index', () => {
         // TODO: fix typing
         vi.fn<any>(
           class {
-            getAccessToken = vi.fn().mockResolvedValue('some-token');
+            getAccessToken = vi
+              .fn<(...args: any[]) => any>()
+              .mockResolvedValue('some-token');
           },
         ),
       );
@@ -486,7 +488,9 @@ describe('modules/datasource/docker/index', () => {
         // TODO: fix typing
         vi.fn<any>(
           class GoogleAuth {
-            getAccessToken = vi.fn().mockResolvedValue('some-token');
+            getAccessToken = vi
+              .fn<(...args: any[]) => any>()
+              .mockResolvedValue('some-token');
           },
         ),
       );
@@ -522,7 +526,9 @@ describe('modules/datasource/docker/index', () => {
         // TODO: fix typing
         vi.fn<any>(
           class GoogleAuth {
-            getAccessToken = vi.fn().mockResolvedValue('some-token');
+            getAccessToken = vi
+              .fn<(...args: any[]) => any>()
+              .mockResolvedValue('some-token');
           },
         ),
       );
@@ -556,7 +562,9 @@ describe('modules/datasource/docker/index', () => {
         // TODO: fix typing
         vi.fn<any>(
           class GoogleAuth {
-            getAccessToken = vi.fn().mockResolvedValue('some-token');
+            getAccessToken = vi
+              .fn<(...args: any[]) => any>()
+              .mockResolvedValue('some-token');
           },
         ),
       );
@@ -625,7 +633,7 @@ describe('modules/datasource/docker/index', () => {
         // TODO: fix typing
         vi.fn<any>(
           class GoogleAuth {
-            getAccessToken = vi.fn();
+            getAccessToken = vi.fn<(...args: any[]) => any>();
           },
         ),
       );
@@ -649,7 +657,9 @@ describe('modules/datasource/docker/index', () => {
         // TODO: fix typing
         vi.fn<any>(
           class GoogleAuth {
-            getAccessToken = vi.fn().mockRejectedValue('some-error');
+            getAccessToken = vi
+              .fn<(...args: any[]) => any>()
+              .mockRejectedValue('some-error');
           },
         ),
       );
@@ -1451,8 +1461,12 @@ describe('modules/datasource/docker/index', () => {
     it('uses Docker Hub tag cache digest without HEAD request', async () => {
       vi.spyOn(DockerHubCache, 'init').mockResolvedValueOnce(
         partial<DockerHubCache>({
-          getDigestForTag: vi.fn().mockReturnValue('sha256:cached-digest'),
-          getArchDigestForTag: vi.fn().mockReturnValue(null),
+          getDigestForTag: vi
+            .fn<(...args: any[]) => any>()
+            .mockReturnValue('sha256:cached-digest'),
+          getArchDigestForTag: vi
+            .fn<(...args: any[]) => any>()
+            .mockReturnValue(null),
         }),
       );
 
@@ -1502,8 +1516,12 @@ describe('modules/datasource/docker/index', () => {
 
       vi.spyOn(DockerHubCache, 'init').mockResolvedValueOnce(
         partial<DockerHubCache>({
-          getDigestForTag: vi.fn().mockReturnValue(null),
-          getArchDigestForTag: vi.fn().mockReturnValue('sha256:cached-amd64'),
+          getDigestForTag: vi
+            .fn<(...args: any[]) => any>()
+            .mockReturnValue(null),
+          getArchDigestForTag: vi
+            .fn<(...args: any[]) => any>()
+            .mockReturnValue('sha256:cached-amd64'),
         }),
       );
 

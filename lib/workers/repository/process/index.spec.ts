@@ -68,7 +68,7 @@ describe('workers/repository/process/index', () => {
     it('reads config from branches in baseBranchPatterns if useBaseBranchConfig specified', async () => {
       scm.branchExists.mockResolvedValue(true);
       platform.getJsonFile = vi
-        .fn()
+        .fn<(...args: any[]) => any>()
         .mockResolvedValue({ extends: [':approveMajorUpdates'] });
       config.baseBranchPatterns = ['master', 'dev'];
       config.useBaseBranchConfig = 'merge';
@@ -91,11 +91,13 @@ describe('workers/repository/process/index', () => {
 
     it('throws if base branch config is invalid', async () => {
       scm.branchExists.mockResolvedValue(true);
-      platform.getJsonFile = vi.fn().mockResolvedValue({
-        extends: [':approveMajorUpdates'],
-        labels: '123',
-        invalidKey: 'invalidValue',
-      });
+      platform.getJsonFile = vi
+        .fn<(...args: any[]) => any>()
+        .mockResolvedValue({
+          extends: [':approveMajorUpdates'],
+          labels: '123',
+          invalidKey: 'invalidValue',
+        });
       config.baseBranchPatterns = ['master', 'dev'];
       config.useBaseBranchConfig = 'merge';
       getCache().configFileName = 'renovate.json';
@@ -107,7 +109,7 @@ describe('workers/repository/process/index', () => {
     it('handles config name mismatch between baseBranches if useBaseBranchConfig specified', async () => {
       scm.branchExists.mockResolvedValue(true);
       platform.getJsonFile = vi
-        .fn()
+        .fn<(...args: any[]) => any>()
         .mockImplementation((fileName, repoName, branchName) => {
           if (branchName === 'dev') {
             throw new Error();

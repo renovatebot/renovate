@@ -15,7 +15,7 @@ import {
 } from './extract-update.ts';
 import * as _fetch from './fetch.ts';
 
-const createVulnerabilitiesMock = vi.fn();
+const createVulnerabilitiesMock = vi.fn<(...args: any[]) => any>();
 
 vi.mock('./write.ts');
 vi.mock('./sort.ts');
@@ -124,7 +124,8 @@ describe('workers/repository/process/extract-update', () => {
         repoIsOnboarded: true,
         osvVulnerabilityAlerts: true,
       };
-      const appendVulnerabilityPackageRulesMock = vi.fn();
+      const appendVulnerabilityPackageRulesMock =
+        vi.fn<(...args: any[]) => any>();
       createVulnerabilitiesMock.mockResolvedValue({
         appendVulnerabilityPackageRules: appendVulnerabilityPackageRulesMock,
       });
@@ -196,7 +197,8 @@ describe('workers/repository/process/extract-update', () => {
             baseBranch: 'main',
             osvVulnerabilityAlerts: true,
           };
-          const appendVulnerabilityPackageRulesMock = vi.fn();
+          const appendVulnerabilityPackageRulesMock =
+            vi.fn<(...args: any[]) => any>();
           createVulnerabilitiesMock.mockResolvedValue({
             appendVulnerabilityPackageRules:
               appendVulnerabilityPackageRulesMock,

@@ -11,10 +11,10 @@ describe('logger/renovate-logger', () => {
 
   it('should queue logs until initialized', () => {
     const fakeLogger = {
-      info: vi.fn(),
-      warn: vi.fn(),
-      error: vi.fn(),
-      fatal: vi.fn(),
+      info: vi.fn<(...args: unknown[]) => void>(),
+      warn: vi.fn<(...args: unknown[]) => void>(),
+      error: vi.fn<(...args: unknown[]) => void>(),
+      fatal: vi.fn<(...args: unknown[]) => void>(),
     };
     const logger = new RenovateLogger('test', {});
     logger.info('test');

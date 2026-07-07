@@ -5,7 +5,7 @@ afterAll(disableInstrumentations);
 
 describe('instrumentation/with-instrumenting', () => {
   it('wraps async function', async () => {
-    const spy = vi.fn(() => Promise.resolve(42));
+    const spy = vi.fn<() => Promise<number>>(() => Promise.resolve(42));
     const wrapped = withInstrumenting({ name: 'test-span' }, spy);
 
     const result = await wrapped();
@@ -15,7 +15,7 @@ describe('instrumentation/with-instrumenting', () => {
   });
 
   it('instruments multiple calls', async () => {
-    const spy = vi.fn(() => Promise.resolve('ok'));
+    const spy = vi.fn<() => Promise<string>>(() => Promise.resolve('ok'));
     const wrapped = withInstrumenting({ name: 'test-span' }, spy);
 
     await wrapped();
@@ -27,7 +27,9 @@ describe('instrumentation/with-instrumenting', () => {
   });
 
   it('propagates errors', async () => {
-    const spy = vi.fn(() => Promise.reject(new Error('test error')));
+    const spy = vi.fn<() => Promise<never>>(() =>
+      Promise.reject(new Error('test error')),
+    );
     const wrapped = withInstrumenting({ name: 'test-span' }, spy);
 
     await expect(wrapped()).rejects.toThrow('test error');
@@ -35,7 +37,7 @@ describe('instrumentation/with-instrumenting', () => {
   });
 
   it('accepts options', async () => {
-    const spy = vi.fn(() => Promise.resolve('result'));
+    const spy = vi.fn<() => Promise<string>>(() => Promise.resolve('result'));
     const wrapped = withInstrumenting(
       {
         name: 'test-span',
@@ -52,7 +54,9 @@ describe('instrumentation/with-instrumenting', () => {
   });
 
   it('passes arguments to wrapped function', async () => {
-    const spy = vi.fn((a: number, b: string) => Promise.resolve(`${a}-${b}`));
+    const spy = vi.fn<(a: number, b: string) => Promise<string>>(
+      (a: number, b: string) => Promise.resolve(`${a}-${b}`),
+    );
     const wrapped = withInstrumenting({ name: 'test-span' }, spy);
 
     const result = await wrapped(42, 'hello');

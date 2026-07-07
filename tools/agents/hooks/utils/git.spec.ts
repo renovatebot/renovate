@@ -2,17 +2,17 @@ import { getChangedFiles, getRepoRoot } from './git.ts';
 
 const mockGit = vi.hoisted(() => {
   const obj = {
-    raw: vi.fn(),
-    revparse: vi.fn(),
-    diff: vi.fn(),
-    env: vi.fn(),
+    raw: vi.fn<(...args: any[]) => any>(),
+    revparse: vi.fn<(...args: any[]) => any>(),
+    diff: vi.fn<(...args: any[]) => any>(),
+    env: vi.fn<(...args: any[]) => any>(),
   };
   obj.env.mockReturnValue(obj);
   return obj;
 });
 
 vi.mock('simple-git', () => ({
-  simpleGit: vi.fn(() => mockGit),
+  simpleGit: vi.fn<(...args: any[]) => any>(() => mockGit),
 }));
 
 beforeEach(() => {

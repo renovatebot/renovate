@@ -14,7 +14,9 @@ vi.mock('../../../util/sanitize.ts', () =>
   mockDeep({ sanitize: (s: string) => s }),
 );
 vi.mock('./util.ts', () => ({
-  getWorkItemTitle: vi.fn((title: string) => `[Renovate] ${title}`),
+  getWorkItemTitle: vi.fn<(...args: any[]) => any>(
+    (title: string) => `[Renovate] ${title}`,
+  ),
 }));
 
 const azureApi = vi.mocked(_azureApi, true);
@@ -37,7 +39,7 @@ describe('modules/platform/azure/issue', () => {
     it('should return empty array when no work items found', async () => {
       azureApi.workItemTrackingApi.mockResolvedValue(
         partial<IWorkItemTrackingApi>({
-          queryByWiql: vi.fn().mockResolvedValue({
+          queryByWiql: vi.fn<(...args: any[]) => any>().mockResolvedValue({
             workItems: [],
           }),
         }),
@@ -69,10 +71,12 @@ describe('modules/platform/azure/issue', () => {
 
       azureApi.workItemTrackingApi.mockResolvedValue(
         partial<IWorkItemTrackingApi>({
-          queryByWiql: vi.fn().mockResolvedValue({
+          queryByWiql: vi.fn<(...args: any[]) => any>().mockResolvedValue({
             workItems: [{ id: 1 }, { id: 2 }],
           }),
-          getWorkItems: vi.fn().mockResolvedValue(mockWorkItems),
+          getWorkItems: vi
+            .fn<(...args: any[]) => any>()
+            .mockResolvedValue(mockWorkItems),
         }),
       );
 
@@ -95,7 +99,9 @@ describe('modules/platform/azure/issue', () => {
     });
 
     it('should filter by title when titleFilter provided', async () => {
-      const queryByWiqlMock = vi.fn().mockResolvedValue({ workItems: [] });
+      const queryByWiqlMock = vi
+        .fn<(...args: any[]) => any>()
+        .mockResolvedValue({ workItems: [] });
       azureApi.workItemTrackingApi.mockResolvedValue(
         partial<IWorkItemTrackingApi>({
           queryByWiql: queryByWiqlMock,
@@ -110,7 +116,9 @@ describe('modules/platform/azure/issue', () => {
     });
 
     it('should escape single quotes in title filter', async () => {
-      const queryByWiqlMock = vi.fn().mockResolvedValue({ workItems: [] });
+      const queryByWiqlMock = vi
+        .fn<(...args: any[]) => any>()
+        .mockResolvedValue({ workItems: [] });
       azureApi.workItemTrackingApi.mockResolvedValue(
         partial<IWorkItemTrackingApi>({
           queryByWiql: queryByWiqlMock,
@@ -127,7 +135,9 @@ describe('modules/platform/azure/issue', () => {
     it('should handle errors gracefully', async () => {
       azureApi.workItemTrackingApi.mockResolvedValue(
         partial<IWorkItemTrackingApi>({
-          queryByWiql: vi.fn().mockRejectedValue(new Error('API Error')),
+          queryByWiql: vi
+            .fn<(...args: any[]) => any>()
+            .mockRejectedValue(new Error('API Error')),
         }),
       );
 
@@ -166,10 +176,12 @@ describe('modules/platform/azure/issue', () => {
 
       azureApi.workItemTrackingApi.mockResolvedValue(
         partial<IWorkItemTrackingApi>({
-          queryByWiql: vi.fn().mockResolvedValue({
+          queryByWiql: vi.fn<(...args: any[]) => any>().mockResolvedValue({
             workItems: [{ id: 1 }, { id: 2 }, { id: 3 }],
           }),
-          getWorkItems: vi.fn().mockResolvedValue(mockWorkItems),
+          getWorkItems: vi
+            .fn<(...args: any[]) => any>()
+            .mockResolvedValue(mockWorkItems),
         }),
       );
 
@@ -228,7 +240,7 @@ describe('modules/platform/azure/issue', () => {
 
       vi.spyOn(issueService, 'findIssue').mockResolvedValue(mockIssue);
 
-      const updateWorkItemMock = vi.fn();
+      const updateWorkItemMock = vi.fn<(...args: any[]) => any>();
       azureApi.workItemTrackingApi.mockResolvedValue(
         partial<IWorkItemTrackingApi>({
           updateWorkItem: updateWorkItemMock,
@@ -255,7 +267,7 @@ describe('modules/platform/azure/issue', () => {
 
       vi.spyOn(issueService, 'findIssue').mockResolvedValue(mockIssue);
 
-      const updateWorkItemMock = vi.fn();
+      const updateWorkItemMock = vi.fn<(...args: any[]) => any>();
       azureApi.workItemTrackingApi.mockResolvedValue(
         partial<IWorkItemTrackingApi>({
           updateWorkItem: updateWorkItemMock,
@@ -277,7 +289,7 @@ describe('modules/platform/azure/issue', () => {
 
       vi.spyOn(issueService, 'findIssue').mockResolvedValue(mockIssue);
 
-      const updateWorkItemMock = vi.fn();
+      const updateWorkItemMock = vi.fn<(...args: any[]) => any>();
       azureApi.workItemTrackingApi.mockResolvedValue(
         partial<IWorkItemTrackingApi>({
           updateWorkItem: updateWorkItemMock,
@@ -305,7 +317,9 @@ describe('modules/platform/azure/issue', () => {
     it('should create new issue when none exists', async () => {
       vi.spyOn(issueService, 'getIssueList').mockResolvedValue([]);
 
-      const createWorkItemMock = vi.fn().mockResolvedValue({ id: 123 });
+      const createWorkItemMock = vi
+        .fn<(...args: any[]) => any>()
+        .mockResolvedValue({ id: 123 });
       azureApi.workItemTrackingApi.mockResolvedValue(
         partial<IWorkItemTrackingApi>({
           createWorkItem: createWorkItemMock,
@@ -333,7 +347,7 @@ describe('modules/platform/azure/issue', () => {
         mockClosedIssue,
       ]);
 
-      const updateWorkItemMock = vi.fn();
+      const updateWorkItemMock = vi.fn<(...args: any[]) => any>();
       azureApi.workItemTrackingApi.mockResolvedValue(
         partial<IWorkItemTrackingApi>({
           updateWorkItem: updateWorkItemMock,
@@ -398,7 +412,7 @@ describe('modules/platform/azure/issue', () => {
 
       vi.spyOn(issueService, 'getIssueList').mockResolvedValue([mockOpenIssue]);
 
-      const updateWorkItemMock = vi.fn();
+      const updateWorkItemMock = vi.fn<(...args: any[]) => any>();
       azureApi.workItemTrackingApi.mockResolvedValue(
         partial<IWorkItemTrackingApi>({
           updateWorkItem: updateWorkItemMock,
@@ -454,7 +468,7 @@ describe('modules/platform/azure/issue', () => {
 
       vi.spyOn(issueService, 'getIssueList').mockResolvedValue(mockOpenIssues);
 
-      const updateWorkItemMock = vi.fn();
+      const updateWorkItemMock = vi.fn<(...args: any[]) => any>();
       azureApi.workItemTrackingApi.mockResolvedValue(
         partial<IWorkItemTrackingApi>({
           updateWorkItem: updateWorkItemMock,
@@ -499,7 +513,7 @@ describe('modules/platform/azure/issue', () => {
 
       vi.spyOn(issueService, 'getIssueList').mockResolvedValue(mockOpenIssues);
 
-      const updateWorkItemMock = vi.fn();
+      const updateWorkItemMock = vi.fn<(...args: any[]) => any>();
       azureApi.workItemTrackingApi.mockResolvedValue(
         partial<IWorkItemTrackingApi>({
           updateWorkItem: updateWorkItemMock,
@@ -546,7 +560,7 @@ describe('modules/platform/azure/issue', () => {
 
       vi.spyOn(issueService, 'getIssueList').mockResolvedValue([mockOpenIssue]);
 
-      const updateWorkItemMock = vi.fn();
+      const updateWorkItemMock = vi.fn<(...args: any[]) => any>();
       azureApi.workItemTrackingApi.mockResolvedValue(
         partial<IWorkItemTrackingApi>({
           updateWorkItem: updateWorkItemMock,
@@ -624,7 +638,9 @@ describe('modules/platform/azure/issue', () => {
         mockClosedIssue,
       ]);
 
-      const createWorkItemMock = vi.fn().mockResolvedValue({ id: 123 });
+      const createWorkItemMock = vi
+        .fn<(...args: any[]) => any>()
+        .mockResolvedValue({ id: 123 });
       azureApi.workItemTrackingApi.mockResolvedValue(
         partial<IWorkItemTrackingApi>({
           createWorkItem: createWorkItemMock,

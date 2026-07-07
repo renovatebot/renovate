@@ -30,7 +30,9 @@ describe('modules/datasource/utils', () => {
       // TODO: fix typing
       vi.fn<any>(
         class {
-          getAccessToken = vi.fn().mockResolvedValue('some-token');
+          getAccessToken = vi
+            .fn<() => Promise<string>>()
+            .mockResolvedValue('some-token');
         },
       ),
     );
@@ -44,7 +46,7 @@ describe('modules/datasource/utils', () => {
       // TODO: fix typing
       vi.fn<any>(
         class {
-          getAccessToken = vi.fn().mockResolvedValue('');
+          getAccessToken = vi.fn<() => Promise<string>>().mockResolvedValue('');
         },
       ),
     );
@@ -59,7 +61,9 @@ describe('modules/datasource/utils', () => {
       // TODO: fix typing
       vi.fn<any>(
         class {
-          getAccessToken = vi.fn().mockRejectedValue(new Error(err));
+          getAccessToken = vi
+            .fn<() => Promise<string>>()
+            .mockRejectedValue(new Error(err));
         },
       ),
     );
@@ -72,7 +76,7 @@ describe('modules/datasource/utils', () => {
       // TODO: fix typing
       vi.fn<any>(
         class {
-          getAccessToken = vi.fn().mockRejectedValue({
+          getAccessToken = vi.fn<() => Promise<string>>().mockRejectedValue({
             message: 'Could not load the default credentials',
           });
         },

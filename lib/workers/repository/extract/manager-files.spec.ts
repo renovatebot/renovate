@@ -51,7 +51,7 @@ describe('workers/repository/extract/manager-files', () => {
       };
       fileMatch.getMatchingFiles.mockReturnValue(['Dockerfile']);
       fs.readLocalFile.mockResolvedValueOnce('some content');
-      html.extractPackageFile = vi.fn(() => ({
+      html.extractPackageFile = vi.fn<(...args: any[]) => any>(() => ({
         deps: [{}, { replaceString: 'abc', packageName: 'p' }],
       })) as never;
       const res = await getManagerPackageFiles(managerConfig);

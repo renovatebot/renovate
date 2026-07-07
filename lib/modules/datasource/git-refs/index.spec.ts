@@ -27,8 +27,8 @@ describe('modules/datasource/git-refs/index', () => {
 
     // reset git mock
     gitMock = mock<SimpleGit>({
-      env: vi.fn(),
-      listRemote: vi.fn(),
+      env: vi.fn<(...args: any[]) => any>(),
+      listRemote: vi.fn<(...args: any[]) => any>(),
     });
 
     createSimpleGit.mockReturnValue(gitMock);

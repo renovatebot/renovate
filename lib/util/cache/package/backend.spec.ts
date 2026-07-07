@@ -13,9 +13,9 @@ function mockBackend(): {
   destroy: ReturnType<typeof vi.fn>;
 } {
   return {
-    get: vi.fn().mockResolvedValue(undefined),
-    set: vi.fn().mockResolvedValue(undefined),
-    destroy: vi.fn().mockResolvedValue(undefined),
+    get: vi.fn<(...args: any[]) => any>().mockResolvedValue(undefined),
+    set: vi.fn<(...args: any[]) => any>().mockResolvedValue(undefined),
+    destroy: vi.fn<(...args: any[]) => any>().mockResolvedValue(undefined),
   };
 }
 

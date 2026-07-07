@@ -23,7 +23,7 @@ import * as dependencyDashboard from './dependency-dashboard.ts';
 import { getDashboardMarkdownVulnerabilities } from './dependency-dashboard.ts';
 import { PackageFiles } from './package-files.ts';
 
-const createVulnerabilitiesMock = vi.fn();
+const createVulnerabilitiesMock = vi.fn<(...args: any[]) => any>();
 vi.mock('./process/vulnerabilities.ts', () => {
   return {
     __esModule: true,
@@ -1777,7 +1777,7 @@ None detected
     });
 
     it('return no data section if summary is set to all and no vulnerabilities', async () => {
-      const fetchVulnerabilitiesMock = vi.fn();
+      const fetchVulnerabilitiesMock = vi.fn<(...args: any[]) => any>();
       createVulnerabilitiesMock.mockResolvedValueOnce({
         fetchVulnerabilities: fetchVulnerabilitiesMock,
       });
@@ -1796,7 +1796,7 @@ None detected
     });
 
     it('return all vulnerabilities if set to all and disabled osvVulnerabilities', async () => {
-      const fetchVulnerabilitiesMock = vi.fn();
+      const fetchVulnerabilitiesMock = vi.fn<(...args: any[]) => any>();
       createVulnerabilitiesMock.mockResolvedValueOnce({
         fetchVulnerabilities: fetchVulnerabilitiesMock,
       });
@@ -1868,7 +1868,7 @@ None detected
     });
 
     it('return unresolved vulnerabilities if set to "unresolved"', async () => {
-      const fetchVulnerabilitiesMock = vi.fn();
+      const fetchVulnerabilitiesMock = vi.fn<(...args: any[]) => any>();
       createVulnerabilitiesMock.mockResolvedValueOnce({
         fetchVulnerabilities: fetchVulnerabilitiesMock,
       });

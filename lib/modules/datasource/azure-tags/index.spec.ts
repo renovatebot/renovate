@@ -11,7 +11,7 @@ describe('modules/datasource/azure-tags/index', () => {
     vi.resetAllMocks();
     azureTags = new AzureTagsDatasource();
     mockGitApi = {
-      getRefs: vi.fn(),
+      getRefs: vi.fn<(...args: any[]) => any>(),
     };
     vi.mocked(azureApi.gitApi).mockResolvedValue(mockGitApi);
   });

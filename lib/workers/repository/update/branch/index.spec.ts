@@ -108,9 +108,9 @@ describe('workers/repository/update/branch/index', () => {
       reuse.shouldReuseExistingBranch.mockImplementation((config) =>
         Promise.resolve(config),
       );
-      prWorker.ensurePr = vi.fn();
-      prWorker.getPlatformPrOptions = vi.fn();
-      prAutomerge.checkAutoMerge = vi.fn();
+      prWorker.ensurePr = vi.fn<(...args: any[]) => any>();
+      prWorker.getPlatformPrOptions = vi.fn<(...args: any[]) => any>();
+      prAutomerge.checkAutoMerge = vi.fn<(...args: any[]) => any>();
       // TODO: incompatible types (#22198)
       config = {
         ...getConfig(),

@@ -12,7 +12,7 @@ vi.mock('../../datasource/index.ts', async () => {
   );
   return {
     ...actual,
-    getDigest: vi.fn(),
+    getDigest: vi.fn<(...args: any[]) => any>(),
   };
 });
 

@@ -1,7 +1,7 @@
 // https://code.claude.com/docs/en/hooks#stop
 import { BlockOutput } from './utils/schemas.ts';
 
-const { exec } = vi.hoisted(() => ({ exec: vi.fn() }));
+const { exec } = vi.hoisted(() => ({ exec: vi.fn<(...args: any[]) => any>() }));
 vi.mock('./utils/exec.ts', () => ({ exec }));
 
 const { getChangedFiles } = vi.hoisted(() => ({

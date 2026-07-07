@@ -24,14 +24,14 @@ describe('util/cache/package/impl/redis', () => {
 
   describe('PackageCacheRedis', () => {
     const clientMock = {
-      connect: vi.fn(),
-      set: vi.fn(),
-      del: vi.fn(),
-      destroy: vi.fn(),
-      withTypeMapping: vi.fn(),
+      connect: vi.fn<(...args: any[]) => any>(),
+      set: vi.fn<(...args: any[]) => any>(),
+      del: vi.fn<(...args: any[]) => any>(),
+      destroy: vi.fn<(...args: any[]) => any>(),
+      withTypeMapping: vi.fn<(...args: any[]) => any>(),
     };
     const binaryClientMock = {
-      get: vi.fn(),
+      get: vi.fn<(...args: any[]) => any>(),
     };
 
     beforeEach(() => {

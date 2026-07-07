@@ -18,16 +18,16 @@ vi.mock('fs-extra', async () => {
   const realFs = await vi.importActual<typeof fs>('fs-extra');
   return {
     default: {
-      ensureDir: vi.fn(),
-      remove: vi.fn(),
-      readFile: vi.fn((file: string, options: any) => {
+      ensureDir: vi.fn<(...args: any[]) => any>(),
+      remove: vi.fn<(...args: any[]) => any>(),
+      readFile: vi.fn<(...args: any[]) => any>((file: string, options: any) => {
         if (file.endsWith('.wasm.gz')) {
           return realFs.readFile(file, options);
         }
         return undefined;
       }),
-      writeFile: vi.fn(),
-      outputFile: vi.fn(),
+      writeFile: vi.fn<(...args: any[]) => any>(),
+      outputFile: vi.fn<(...args: any[]) => any>(),
     },
   };
 });

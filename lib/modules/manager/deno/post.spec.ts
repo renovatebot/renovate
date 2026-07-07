@@ -15,7 +15,7 @@ import type { DenoManagerData } from './types.ts';
 vi.mock('../../../util/fs/index.ts');
 // used in detectNodeCompatWorkspaces()
 vi.mock('find-packages', () => ({
-  findPackages: vi.fn(),
+  findPackages: vi.fn<(...args: any[]) => any>(),
 }));
 
 describe('modules/manager/deno/post', () => {

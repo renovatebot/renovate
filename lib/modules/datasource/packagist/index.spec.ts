@@ -25,8 +25,10 @@ describe('modules/datasource/packagist/index', () => {
     let config: any;
 
     beforeEach(() => {
-      hostRules.find = vi.fn((input: HostRule) => input);
-      hostRules.hosts = vi.fn(() => []);
+      hostRules.find = vi.fn<(...args: any[]) => any>(
+        (input: HostRule) => input,
+      );
+      hostRules.hosts = vi.fn<(...args: any[]) => any>(() => []);
       config = {
         versioning: composerVersioning.id,
         registryUrls: [
@@ -144,7 +146,7 @@ describe('modules/datasource/packagist/index', () => {
     });
 
     it('supports includes packages', async () => {
-      hostRules.find = vi.fn(() => ({
+      hostRules.find = vi.fn<(...args: any[]) => any>(() => ({
         username: 'some-username',
         password: 'some-password',
       }));
@@ -177,7 +179,7 @@ describe('modules/datasource/packagist/index', () => {
     });
 
     it('supports older sha1 hashes', async () => {
-      hostRules.find = vi.fn(() => ({
+      hostRules.find = vi.fn<(...args: any[]) => any>(() => ({
         username: 'some-username',
         password: 'some-password',
       }));

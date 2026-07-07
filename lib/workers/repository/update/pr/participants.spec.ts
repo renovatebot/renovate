@@ -44,7 +44,7 @@ describe('workers/repository/update/pr/participants', () => {
 
     it('filters assignees', async () => {
       platform.filterUnavailableUsers = vi
-        .fn()
+        .fn<(...args: any[]) => any>()
         .mockResolvedValueOnce(['a', 'b']);
       await addParticipants({ ...config, filterUnavailableUsers: true }, pr);
       expect(platform.addAssignees).toHaveBeenCalledExactlyOnceWith(123, [
@@ -60,7 +60,7 @@ describe('workers/repository/update/pr/participants', () => {
         'u@email.com',
       ]);
       platform.expandGroupMembers = vi
-        .fn()
+        .fn<(...args: any[]) => any>()
         .mockResolvedValueOnce(['u@email.com', 'user', 'group.user']);
       await addParticipants(
         {
@@ -91,7 +91,7 @@ describe('workers/repository/update/pr/participants', () => {
     it('does not expand group code owners assignees when assigneesFromCodeOwners disabled', async () => {
       codeOwners.codeOwnersForPr.mockResolvedValueOnce(['user', '@group']);
       platform.expandGroupMembers = vi
-        .fn()
+        .fn<(...args: any[]) => any>()
         .mockResolvedValueOnce(['user', 'group.user']);
       await addParticipants(config, pr);
       expect(codeOwners.codeOwnersForPr).not.toHaveBeenCalled();
@@ -106,7 +106,7 @@ describe('workers/repository/update/pr/participants', () => {
     it('does not expand group code owners assignees when expandCodeOwnersGroups disabled', async () => {
       codeOwners.codeOwnersForPr.mockResolvedValueOnce(['user', '@group']);
       platform.expandGroupMembers = vi
-        .fn()
+        .fn<(...args: any[]) => any>()
         .mockResolvedValueOnce(['user', 'group.user']);
       await addParticipants({ ...config, assigneesFromCodeOwners: true }, pr);
       expect(codeOwners.codeOwnersForPr).toHaveBeenCalledExactlyOnceWith({

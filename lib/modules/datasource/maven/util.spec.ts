@@ -343,7 +343,7 @@ describe('modules/datasource/maven/util', () => {
 
       it('returns cached not-found without making HTTP request', async () => {
         vi.spyOn(packageCache, 'get').mockResolvedValue(true);
-        const getText = vi.fn();
+        const getText = vi.fn<Http['getText']>();
         const http = partial<Http>({ getText });
 
         const res = await downloadHttpProtocol(http, metadataUrl);

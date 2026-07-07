@@ -14,7 +14,7 @@ vi.mock('../../../util/fs/index.ts');
 vi.mock('./compat.ts');
 // used in detectNodeCompatWorkspaces()
 vi.mock('find-packages', () => ({
-  findPackages: vi.fn(),
+  findPackages: vi.fn<(...args: any[]) => any>(),
 }));
 
 describe('modules/manager/deno/extract', () => {

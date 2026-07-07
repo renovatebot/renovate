@@ -28,7 +28,7 @@ describe('modules/datasource/git-tags/index', () => {
 
     // reset git mock
     gitMock = mock<SimpleGit>({
-      listRemote: vi.fn(),
+      listRemote: vi.fn<(...args: any[]) => any>(),
     });
 
     createSimpleGit.mockReturnValue(gitMock);

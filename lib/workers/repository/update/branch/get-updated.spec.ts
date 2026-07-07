@@ -57,7 +57,7 @@ describe('workers/repository/update/branch/get-updated', () => {
         branchName: 'renovate/pin',
         upgrades: [],
       } satisfies BranchConfig;
-      npm.updateDependency = vi.fn();
+      npm.updateDependency = vi.fn<(...args: any[]) => any>();
       git.getFile.mockResolvedValueOnce('existing content');
     });
 

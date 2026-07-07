@@ -1,6 +1,8 @@
 import { validateLogLevel } from './bunyan.ts';
 
-vi.mock('bunyan', () => ({ createLogger: () => ({ fatal: vi.fn() }) }));
+vi.mock('bunyan', () => ({
+  createLogger: () => ({ fatal: vi.fn<(...args: unknown[]) => void>() }),
+}));
 
 describe('logger/bunyan', () => {
   it('checks for valid log levels', () => {

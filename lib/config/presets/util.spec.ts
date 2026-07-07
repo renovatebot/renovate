@@ -8,7 +8,9 @@ const config: FetchPresetConfig = {
   fetch: undefined as never,
 };
 
-const fetch = vi.fn(() => Promise.resolve<Preset | null>({}));
+const fetch = vi.fn<() => Promise<Preset | null>>(() =>
+  Promise.resolve<Preset | null>({}),
+);
 
 describe('config/presets/util', () => {
   beforeEach(() => {

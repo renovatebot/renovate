@@ -210,7 +210,7 @@ describe('util/result', () => {
 
       it('skips transform for error Result', () => {
         const res: Result<number, string> = Result.err('oops');
-        const fn = vi.fn((x: number) => x + 1);
+        const fn = vi.fn<(x: number) => number>((x: number) => x + 1);
         expect(res.transform(fn)).toEqual(Result.err('oops'));
         expect(fn).not.toHaveBeenCalled();
       });
@@ -327,13 +327,13 @@ describe('util/result', () => {
 
     describe('Handlers', () => {
       it('supports value handlers', () => {
-        const cb = vi.fn();
+        const cb = vi.fn<(value: number) => void>();
         Result.ok(42).onValue(cb);
         expect(cb).toHaveBeenCalledExactlyOnceWith(42);
       });
 
       it('supports error handlers', () => {
-        const cb = vi.fn();
+        const cb = vi.fn<(err: string) => void>();
         Result.err('oops').onError(cb);
         expect(cb).toHaveBeenCalledExactlyOnceWith('oops');
       });
@@ -490,7 +490,7 @@ describe('util/result', () => {
 
       it('skips transform for failed promises', async () => {
         const res = AsyncResult.err('oops');
-        const fn = vi.fn((x: number) => x + 1);
+        const fn = vi.fn<(x: number) => number>((x: number) => x + 1);
         await expect(res.transform(fn)).resolves.toEqual(Result.err('oops'));
         expect(fn).not.toHaveBeenCalled();
       });
@@ -525,7 +525,9 @@ describe('util/result', () => {
 
       it('skips async transform for error Result', async () => {
         const input: Result<number, string> = Result.err('oops');
-        const fn = vi.fn((x: number) => Promise.resolve(x + 1));
+        const fn = vi.fn<(x: number) => Promise<number>>((x: number) =>
+          Promise.resolve(x + 1),
+        );
         const res = await input.transform(fn);
         expect(res).toEqual(Result.err('oops'));
         expect(fn).not.toHaveBeenCalled();
@@ -533,7 +535,9 @@ describe('util/result', () => {
 
       it('skips async transform for rejected promise', async () => {
         const res: AsyncResult<number, string> = AsyncResult.err('oops');
-        const fn = vi.fn((x: number) => Promise.resolve(x + 1));
+        const fn = vi.fn<(x: number) => Promise<number>>((x: number) =>
+          Promise.resolve(x + 1),
+        );
         await expect(res.transform(fn)).resolves.toEqual(Result.err('oops'));
         expect(fn).not.toHaveBeenCalled();
       });
@@ -686,13 +690,13 @@ describe('util/result', () => {
 
   describe('Handlers', () => {
     it('supports value handlers', async () => {
-      const cb = vi.fn();
+      const cb = vi.fn<(value: number) => void>();
       await AsyncResult.ok(42).onValue(cb);
       expect(cb).toHaveBeenCalledExactlyOnceWith(42);
     });
 
     it('supports error handlers', async () => {
-      const cb = vi.fn();
+      const cb = vi.fn<(err: string) => void>();
       await AsyncResult.err('oops').onError(cb);
       expect(cb).toHaveBeenCalledExactlyOnceWith('oops');
     });

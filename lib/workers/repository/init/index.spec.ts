@@ -16,8 +16,8 @@ vi.mock('../init/merge.ts');
 vi.mock('../../../config/secrets.ts');
 vi.mock('../../../config/variables.ts');
 vi.mock('../../../modules/platform/index.ts', () => ({
-  platform: { initRepo: vi.fn() },
-  getPlatformList: vi.fn(),
+  platform: { initRepo: vi.fn<(...args: any[]) => any>() },
+  getPlatformList: vi.fn<(...args: any[]) => any>(),
 }));
 vi.unmock('../../../util/mutex.ts');
 

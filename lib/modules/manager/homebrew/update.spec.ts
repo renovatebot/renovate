@@ -500,15 +500,15 @@ describe('modules/manager/homebrew/update', () => {
   it('returns unchanged content if handler buildArchiveUrls returns null', async () => {
     const mockHandler = {
       type: 'github',
-      parseUrl: vi.fn().mockReturnValue({
+      parseUrl: vi.fn<(...args: any[]) => any>().mockReturnValue({
         type: 'github',
         currentValue: 'v0.8.2',
         ownerName: 'bazelbuild',
         repoName: 'bazel-watcher',
         urlType: 'archive',
       }),
-      buildArchiveUrls: vi.fn().mockReturnValue(null),
-      createDependency: vi.fn(),
+      buildArchiveUrls: vi.fn<(...args: any[]) => any>().mockReturnValue(null),
+      createDependency: vi.fn<(...args: any[]) => any>(),
     };
 
     vi.spyOn(handlers, 'findHandlerByType').mockReturnValue(

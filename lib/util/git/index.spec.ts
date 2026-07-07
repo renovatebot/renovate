@@ -169,13 +169,15 @@ describe('util/git/index', { timeout: 30000 }, () => {
 
   describe('gitRetry', () => {
     it('returns result if git returns successfully', async () => {
-      const gitFunc = vi.fn().mockImplementation((args) => {
-        if (args === undefined) {
-          return 'some result';
-        } else {
-          return 'different result';
-        }
-      });
+      const gitFunc = vi
+        .fn<(...args: any[]) => any>()
+        .mockImplementation((args) => {
+          if (args === undefined) {
+            return 'some result';
+          } else {
+            return 'different result';
+          }
+        });
       expect(await git.gitRetry(() => gitFunc())).toBe('some result');
       expect(await git.gitRetry(() => gitFunc('arg'))).toBe('different result');
       expect(gitFunc).toHaveBeenCalledTimes(2);
@@ -184,7 +186,7 @@ describe('util/git/index', { timeout: 30000 }, () => {
     it('retries the func call if ExternalHostError thrown', async () => {
       process.env.NODE_ENV = '';
       const gitFunc = vi
-        .fn()
+        .fn<(...args: any[]) => any>()
         .mockImplementationOnce(() => {
           throw new Error('The remote end hung up unexpectedly');
         })
@@ -198,9 +200,11 @@ describe('util/git/index', { timeout: 30000 }, () => {
 
     it('retries the func call up to retry count if ExternalHostError thrown', async () => {
       process.env.NODE_ENV = '';
-      const gitFunc = vi.fn().mockImplementation(() => {
-        throw new Error('The remote end hung up unexpectedly');
-      });
+      const gitFunc = vi
+        .fn<(...args: any[]) => any>()
+        .mockImplementation(() => {
+          throw new Error('The remote end hung up unexpectedly');
+        });
       await expect(git.gitRetry(() => gitFunc())).rejects.toThrow(
         'The remote end hung up unexpectedly',
       );
@@ -208,9 +212,11 @@ describe('util/git/index', { timeout: 30000 }, () => {
     });
 
     it("doesn't retry and throws an Error if non-ExternalHostError thrown by git", async () => {
-      const gitFunc = vi.fn().mockImplementationOnce(() => {
-        throw new Error('some error');
-      });
+      const gitFunc = vi
+        .fn<(...args: any[]) => any>()
+        .mockImplementationOnce(() => {
+          throw new Error('some error');
+        });
       await expect(git.gitRetry(() => gitFunc())).rejects.toThrow('some error');
       expect(gitFunc).toHaveBeenCalledTimes(1);
     });

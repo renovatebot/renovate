@@ -13,7 +13,7 @@ import {
 } from './index.ts';
 
 vi.mock('../../../modules/datasource/index.ts', () => ({
-  getPkgReleases: vi.fn(),
+  getPkgReleases: vi.fn<(...args: any[]) => any>(),
 }));
 
 describe('util/exec/docker/index', () => {

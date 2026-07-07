@@ -1,6 +1,6 @@
 import { provision } from './provision.ts';
 
-const { exec } = vi.hoisted(() => ({ exec: vi.fn() }));
+const { exec } = vi.hoisted(() => ({ exec: vi.fn<(...args: any[]) => any>() }));
 vi.mock('./exec.ts', () => ({ exec }));
 const errorSpy = vi.spyOn(console, 'error');
 

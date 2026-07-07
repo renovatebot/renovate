@@ -554,7 +554,9 @@ describe('modules/manager/pep621/processors/uv', () => {
         // TODO: fix typing
         vi.fn<any>(
           class {
-            getAccessToken = vi.fn().mockResolvedValue('some-token');
+            getAccessToken = vi
+              .fn<(...args: any[]) => any>()
+              .mockResolvedValue('some-token');
           },
         ),
       );
@@ -694,7 +696,7 @@ describe('modules/manager/pep621/processors/uv', () => {
         // TODO: fix typing
         vi.fn<any>(
           class {
-            getAccessToken = vi.fn();
+            getAccessToken = vi.fn<(...args: any[]) => any>();
           },
         ),
       );
@@ -791,7 +793,7 @@ describe('modules/manager/pep621/processors/uv', () => {
         // TODO: fix typing
         vi.fn<any>(
           class {
-            getAccessToken = vi.fn();
+            getAccessToken = vi.fn<(...args: any[]) => any>();
           },
         ),
       );

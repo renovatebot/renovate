@@ -9,7 +9,7 @@ import { Vulnerabilities } from './vulnerabilities.ts';
 
 const getVulnerabilitiesMock =
   mockFn<typeof OsvOffline.prototype.getVulnerabilities>();
-const createMock = vi.fn();
+const createMock = vi.fn<(...args: any[]) => any>();
 
 vi.mock('@renovatebot/osv-offline', () => {
   return {

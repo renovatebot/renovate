@@ -8,7 +8,7 @@ import { withCache } from './with-cache.ts';
 describe('util/cache/package/with-cache', () => {
   let setCache: MockInstance<typeof packageCache.setWithRawTtl>;
   let dirResult: Awaited<ReturnType<typeof tmpDir>>;
-  const getValue = vi.fn();
+  const getValue = vi.fn<(...args: any[]) => any>();
   let count = 1;
 
   beforeEach(async () => {

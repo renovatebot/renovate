@@ -199,7 +199,9 @@ describe('modules/datasource/pypi/index', () => {
       // eslint-disable-next-line prefer-arrow-callback
       googleAuth.mockImplementationOnce(function () {
         return partial<InstanceType<typeof _googleAuth>>({
-          getAccessToken: vi.fn().mockResolvedValue('some-token'),
+          getAccessToken: vi
+            .fn<(...args: any[]) => any>()
+            .mockResolvedValue('some-token'),
         });
       });
       const res = await getPkgReleases({
@@ -225,7 +227,7 @@ describe('modules/datasource/pypi/index', () => {
       // eslint-disable-next-line prefer-arrow-callback
       googleAuth.mockImplementation(function () {
         return partial<InstanceType<typeof _googleAuth>>({
-          getAccessToken: vi.fn(),
+          getAccessToken: vi.fn<(...args: any[]) => any>(),
         });
       });
       const res = await getPkgReleases({
@@ -821,7 +823,9 @@ describe('modules/datasource/pypi/index', () => {
     // eslint-disable-next-line prefer-arrow-callback
     googleAuth.mockImplementationOnce(function () {
       return partial<InstanceType<typeof _googleAuth>>({
-        getAccessToken: vi.fn().mockResolvedValue('some-token'),
+        getAccessToken: vi
+          .fn<(...args: any[]) => any>()
+          .mockResolvedValue('some-token'),
       });
     });
     expect(
@@ -854,7 +858,9 @@ describe('modules/datasource/pypi/index', () => {
     // eslint-disable-next-line prefer-arrow-callback
     googleAuth.mockImplementationOnce(function () {
       return partial<InstanceType<typeof _googleAuth>>({
-        getAccessToken: vi.fn().mockResolvedValue('some-token'),
+        getAccessToken: vi
+          .fn<(...args: any[]) => any>()
+          .mockResolvedValue('some-token'),
       });
     });
     expect(

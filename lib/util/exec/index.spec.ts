@@ -22,7 +22,7 @@ const getHermitEnvsMock = vi.mocked(getHermitEnvs);
 
 vi.mock('./hermit.ts', async () => ({
   ...(await vi.importActual<typeof import('./hermit.ts')>('./hermit.ts')),
-  getHermitEnvs: vi.fn(),
+  getHermitEnvs: vi.fn<(...args: any[]) => any>(),
 }));
 vi.mock('../../modules/datasource/index.ts', () => mockDeep());
 

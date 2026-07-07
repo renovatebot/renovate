@@ -44,7 +44,7 @@ function setupGitMocks(delayMs?: number): {
   mockClone: MockedFunction<SimpleGit['clone']>;
 } {
   const mockClone = vi
-    .fn()
+    .fn<(...args: any[]) => any>()
     .mockName('clone')
     .mockImplementation(
       async (_registryUrl: string, clonePath: string, _opts) => {
@@ -72,7 +72,7 @@ function setupErrorGitMock(): {
   mockClone: MockedFunction<SimpleGit['clone']>;
 } {
   const mockClone = vi
-    .fn()
+    .fn<(...args: any[]) => any>()
     .mockName('clone')
     .mockImplementation((_registryUrl: string, _clonePath: string, _opts) =>
       Promise.reject(new Error('mocked error')),
@@ -501,7 +501,7 @@ describe('modules/datasource/crate/index', () => {
 
     it('retries if shallow fails because of dumb http git repo', async () => {
       const mockClone = vi
-        .fn()
+        .fn<(...args: any[]) => any>()
         .mockName('clone')
         .mockImplementation((_registryUrl: string, clonePath: string, opts) => {
           if (typeof opts !== 'undefined' && Object.hasOwn(opts, '--depth')) {
@@ -547,7 +547,7 @@ describe('modules/datasource/crate/index', () => {
 
     it('retries if shallow fails but retry can also fail', async () => {
       const mockClone = vi
-        .fn()
+        .fn<(...args: any[]) => any>()
         .mockName('clone')
         .mockImplementation((_registryUrl: string, clonePath: string, opts) => {
           if (typeof opts !== 'undefined' && Object.hasOwn(opts, '--depth')) {

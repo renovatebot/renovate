@@ -25,14 +25,16 @@ describe('util/http/retry-after', () => {
 
   describe('wrapWithRetry', () => {
     it('works', async () => {
-      const task = vi.fn(() => Promise.resolve(42));
+      const task = vi.fn<() => Promise<number>>(() => Promise.resolve(42));
       const res = await wrapWithRetry(task, 'foobar', () => null, 60);
       expect(res).toBe(42);
       expect(task).toHaveBeenCalledTimes(1);
     });
 
     it('throws', async () => {
-      const task = vi.fn(() => Promise.reject(new Error('error')));
+      const task = vi.fn<() => Promise<number>>(() =>
+        Promise.reject(new Error('error')),
+      );
 
       await expect(
         wrapWithRetry(task, 'http://example.com', () => null, 60),
@@ -43,7 +45,7 @@ describe('util/http/retry-after', () => {
 
     it('retries', async () => {
       const task = vi
-        .fn()
+        .fn<() => Promise<number>>()
         .mockRejectedValueOnce(new Error('error-1'))
         .mockRejectedValueOnce(new Error('error-2'))
         .mockResolvedValueOnce(42);
@@ -58,7 +60,7 @@ describe('util/http/retry-after', () => {
 
     it('gives up after max retries', async () => {
       const task = vi
-        .fn()
+        .fn<() => Promise<number>>()
         .mockRejectedValueOnce('error-1')
         .mockRejectedValueOnce('error-2')
         .mockRejectedValueOnce('error-3')
@@ -74,7 +76,7 @@ describe('util/http/retry-after', () => {
     });
 
     it('gives up when delay exceeds maxRetryAfter', async () => {
-      const task = vi.fn().mockRejectedValue('error');
+      const task = vi.fn<() => Promise<number>>().mockRejectedValue('error');
 
       const p = wrapWithRetry(task, 'http://example.com', () => 61, 60).catch(
         (err) => err,

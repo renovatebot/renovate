@@ -166,7 +166,7 @@
     "unicorn/prefer-node-protocol": "error",
 
     "typescript/no-useless-default-assignment": "error",
-    "vitest/require-mock-type-parameters": "off",
+    "vitest/require-mock-type-parameters": "error",
     "vitest/expect-expect": [
       "error",
       { "assertFunctionNames": ["expect", "expectTypeOf", "checkKeysSorted"] }

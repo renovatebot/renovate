@@ -13,7 +13,7 @@ describe('logger/once', () => {
 
   describe('core', () => {
     it('should call a function only once', () => {
-      const innerFn = vi.fn();
+      const innerFn = vi.fn<() => void>();
 
       function outerFn() {
         once(innerFn, undefined, '');
@@ -26,8 +26,8 @@ describe('logger/once', () => {
     });
 
     it('supports support distinct calls', () => {
-      const innerFn1 = vi.fn();
-      const innerFn2 = vi.fn();
+      const innerFn1 = vi.fn<() => void>();
+      const innerFn2 = vi.fn<() => void>();
 
       function outerFn() {
         once(innerFn1, undefined, '');
@@ -42,7 +42,7 @@ describe('logger/once', () => {
     });
 
     it('resets keys', () => {
-      const innerFn = vi.fn();
+      const innerFn = vi.fn<() => void>();
 
       function outerFn() {
         once(innerFn, undefined, '');

@@ -28,7 +28,9 @@ async function collectTsFiles(dir: string): Promise<string[]> {
 describe('config/options/index', () => {
   it('test manager should have no defaultConfig', () => {
     vi.doMock('../../modules/manager/index.ts', () => ({
-      getManagers: vi.fn(() => new Map().set('testManager', {})),
+      getManagers: vi.fn<(...args: any[]) => any>(() =>
+        new Map().set('testManager', {}),
+      ),
     }));
 
     const opts = getOptions();

@@ -1,9 +1,11 @@
 // https://code.claude.com/docs/en/hooks#pretooluse
 
-const { deny } = vi.hoisted(() => ({ deny: vi.fn() }));
+const { deny } = vi.hoisted(() => ({ deny: vi.fn<(...args: any[]) => any>() }));
 vi.mock('./utils/output.ts', () => ({ deny }));
 
-const { readStdin } = vi.hoisted(() => ({ readStdin: vi.fn() }));
+const { readStdin } = vi.hoisted(() => ({
+  readStdin: vi.fn<(...args: any[]) => any>(),
+}));
 vi.mock('./utils/stdin.ts', () => ({ readStdin }));
 
 function makeInput(

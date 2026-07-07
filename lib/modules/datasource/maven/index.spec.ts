@@ -536,7 +536,9 @@ describe('modules/datasource/maven/index', () => {
       // TODO: fix typing
       vi.fn<any>(
         class {
-          getAccessToken = vi.fn().mockResolvedValue('some-token');
+          getAccessToken = vi
+            .fn<(...args: any[]) => any>()
+            .mockResolvedValue('some-token');
         },
       ),
     );
@@ -589,7 +591,7 @@ describe('modules/datasource/maven/index', () => {
       // TODO: fix typing
       vi.fn<any>(
         class GoogleAuth {
-          getAccessToken = vi.fn();
+          getAccessToken = vi.fn<(...args: any[]) => any>();
         },
       ),
     );

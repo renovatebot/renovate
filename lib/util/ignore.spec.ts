@@ -3,7 +3,7 @@ import { isSkipComment } from './ignore.ts';
 
 vi.mock('../logger/index.ts', () => ({
   logger: {
-    debug: vi.fn(),
+    debug: vi.fn<(...args: unknown[]) => void>(),
   },
 }));
 

@@ -9,17 +9,17 @@ import { GoDatasource } from './index.ts';
 vi.mock('../../../util/host-rules.ts', () => mockDeep());
 const hostRules = vi.mocked(_hostRules);
 
-const getReleasesDirectMock = vi.fn();
+const getReleasesDirectMock = vi.fn<(...args: any[]) => any>();
 
-const getDigestForgejoMock = vi.fn();
-const getDigestGiteaMock = vi.fn();
-const getDigestGithubMock = vi.fn();
-const getDigestGitlabMock = vi.fn();
-const getDigestGitMock = vi.fn();
-const getDigestBitbucketMock = vi.fn();
+const getDigestForgejoMock = vi.fn<(...args: any[]) => any>();
+const getDigestGiteaMock = vi.fn<(...args: any[]) => any>();
+const getDigestGithubMock = vi.fn<(...args: any[]) => any>();
+const getDigestGitlabMock = vi.fn<(...args: any[]) => any>();
+const getDigestGitMock = vi.fn<(...args: any[]) => any>();
+const getDigestBitbucketMock = vi.fn<(...args: any[]) => any>();
 vi.mock('./releases-direct.ts', () => {
   return {
-    GoDirectDatasource: vi.fn(
+    GoDirectDatasource: vi.fn<new (...args: any[]) => any>(
       class {
         forgejo = {
           getDigest: (...args: any[]) => getDigestForgejoMock(...args),
@@ -41,10 +41,10 @@ vi.mock('./releases-direct.ts', () => {
   };
 });
 
-const getReleasesProxyMock = vi.fn();
+const getReleasesProxyMock = vi.fn<(...args: any[]) => any>();
 vi.mock('./releases-goproxy.ts', () => {
   return {
-    GoProxyDatasource: vi.fn(
+    GoProxyDatasource: vi.fn<new (...args: any[]) => any>(
       class {
         getReleases = () => getReleasesProxyMock();
       },
