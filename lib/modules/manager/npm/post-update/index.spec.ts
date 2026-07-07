@@ -815,7 +815,7 @@ describe('modules/manager/npm/post-update/index', () => {
             },
             additionalFiles,
           ),
-        ).rejects.toThrow();
+        ).rejects.toThrow(Error);
 
         expect(logger.logger.warn).toHaveBeenCalledWith(
           expect.anything(),

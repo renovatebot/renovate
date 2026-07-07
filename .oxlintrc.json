@@ -174,7 +174,7 @@
     "vitest/no-conditional-expect": "error",
     "vitest/no-standalone-expect": "off",
     "vitest/prefer-snapshot-hint": "error",
-    "vitest/require-to-throw-message": "off"
+    "vitest/require-to-throw-message": "error"
   },
   "overrides": [
     {
