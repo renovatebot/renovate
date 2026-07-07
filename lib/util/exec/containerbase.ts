@@ -9,9 +9,10 @@ import type { Opt, ToolConfig, ToolConstraint, ToolName } from './types.ts';
 
 export const allToolConfig: Record<ToolName, ToolConfig> = {
   apm: {
-    datasource: 'pypi',
-    packageName: 'apm-cli',
-    versioning: 'pep440',
+    datasource: 'github-releases',
+    packageName: 'microsoft/apm',
+    versioning: 'semver',
+    extractVersion: '^v(?<version>.*)$',
   },
   bazelisk: {
     datasource: 'github-releases',
