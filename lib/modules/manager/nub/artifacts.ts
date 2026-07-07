@@ -60,9 +60,11 @@ export async function updateArtifacts(
     }
 
     // `--lockfile-only` refreshes nub.lock without linking node_modules, the
-    // cheapest correct update for a lockfile-only bump. nub.lock is pnpm-lock
-    // v9 under nub's own basename, so the write round-trips as nub reads it.
-    let cmd = 'nub install --lockfile-only';
+    // cheapest correct update for a lockfile-only bump. `--no-frozen-lockfile`
+    // forces a re-resolve of the bumped manifest: nub defaults to a frozen
+    // lockfile under CI (where Renovate runs), which would otherwise reject the
+    // drift between the updated package.json and the pre-update lockfile.
+    let cmd = 'nub install --lockfile-only --no-frozen-lockfile';
 
     if (!GlobalConfig.get('allowScripts') || config.ignoreScripts) {
       cmd += ' --ignore-scripts';

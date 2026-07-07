@@ -103,7 +103,7 @@ describe('modules/manager/nub/artifacts', () => {
       ]);
 
       expect(exec).toHaveBeenCalledWith(
-        'nub install --lockfile-only --ignore-scripts',
+        'nub install --lockfile-only --no-frozen-lockfile --ignore-scripts',
         {
           cwdFile: 'nub.lock',
           docker: {},
@@ -201,27 +201,30 @@ describe('modules/manager/nub/artifacts', () => {
         {
           allowScripts: undefined,
           ignoreScripts: undefined,
-          expectedCmd: 'nub install --lockfile-only --ignore-scripts',
+          expectedCmd:
+            'nub install --lockfile-only --no-frozen-lockfile --ignore-scripts',
         },
         {
           allowScripts: false,
           ignoreScripts: undefined,
-          expectedCmd: 'nub install --lockfile-only --ignore-scripts',
+          expectedCmd:
+            'nub install --lockfile-only --no-frozen-lockfile --ignore-scripts',
         },
         {
           allowScripts: true,
           ignoreScripts: undefined,
-          expectedCmd: 'nub install --lockfile-only',
+          expectedCmd: 'nub install --lockfile-only --no-frozen-lockfile',
         },
         {
           allowScripts: true,
           ignoreScripts: true,
-          expectedCmd: 'nub install --lockfile-only --ignore-scripts',
+          expectedCmd:
+            'nub install --lockfile-only --no-frozen-lockfile --ignore-scripts',
         },
         {
           allowScripts: true,
           ignoreScripts: false,
-          expectedCmd: 'nub install --lockfile-only',
+          expectedCmd: 'nub install --lockfile-only --no-frozen-lockfile',
         },
       ];
 
@@ -257,6 +260,26 @@ describe('modules/manager/nub/artifacts', () => {
         exec.mockClear();
         GlobalConfig.reset();
       }
+    });
+
+    it('passes --no-frozen-lockfile so nub re-resolves the bumped manifest under a CI-frozen default', async () => {
+      GlobalConfig.set(globalConfig);
+      const updateArtifact: UpdateArtifact = {
+        config: {},
+        newPackageFileContent: '',
+        packageFileName: '',
+        updatedDeps: [{ manager: 'nub', lockFiles: ['nub.lock'] }],
+      };
+      fs.readFile.mockResolvedValueOnce(Buffer.from('old') as never);
+      fs.readFile.mockResolvedValueOnce(Buffer.from('new') as never);
+
+      await updateArtifacts(updateArtifact);
+
+      expect(exec).toHaveBeenCalledExactlyOnceWith(
+        expect.stringContaining('--no-frozen-lockfile'),
+        expect.anything(),
+      );
+      GlobalConfig.reset();
     });
   });
 });

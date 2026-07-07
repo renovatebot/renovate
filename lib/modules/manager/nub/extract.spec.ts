@@ -107,6 +107,46 @@ describe('modules/manager/nub/extract', () => {
       ]);
     });
 
+    it('processes workspace package files declared as an object', async () => {
+      fs.getSiblingFileName.mockReturnValue('package.json');
+      fs.readLocalFile
+        .mockResolvedValueOnce(
+          JSON.stringify({
+            name: 'my-monorepo',
+            version: '0.0.1',
+            dependencies: { dep1: '1.0.0' },
+            workspaces: { packages: ['packages/*'] },
+          }),
+        )
+        .mockResolvedValueOnce(
+          JSON.stringify({
+            name: 'pkg1',
+            version: '1.0.0',
+            dependencies: { dep2: '2.0.0' },
+          }),
+        );
+      fs.getParentDir.mockReturnValueOnce('');
+
+      const packageFiles = await extractAllPackageFiles({}, [
+        'nub.lock',
+        'package.json',
+        'packages/pkg1/package.json',
+      ]);
+
+      expect(packageFiles).toMatchObject([
+        {
+          packageFile: 'package.json',
+          packageFileVersion: '0.0.1',
+          lockFiles: ['nub.lock'],
+        },
+        {
+          packageFile: 'packages/pkg1/package.json',
+          packageFileVersion: '1.0.0',
+          lockFiles: ['nub.lock'],
+        },
+      ]);
+    });
+
     it('handles workspaces with no matching package files', async () => {
       fs.getSiblingFileName.mockReturnValue('package.json');
       fs.readLocalFile.mockResolvedValueOnce(

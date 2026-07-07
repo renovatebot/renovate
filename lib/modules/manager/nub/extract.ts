@@ -71,7 +71,12 @@ export async function extractAllPackageFiles(
       packageFiles.push({ ...res, lockFiles: [lockFile] });
     }
     // Check if package.json contains workspaces
-    const workspaces = res?.managerData?.workspaces;
+    let workspaces = res?.managerData?.workspaces;
+
+    // nub also accepts the object form `workspaces: { packages: [...] }`.
+    if (typeof workspaces === 'object' && 'packages' in workspaces) {
+      workspaces = workspaces.packages;
+    }
 
     if (!isArray(workspaces, isString)) {
       continue;
