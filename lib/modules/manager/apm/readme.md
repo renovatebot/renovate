@@ -1,4 +1,4 @@
-The `apm` manager keeps [APM (Agent Package Manager)](https://github.com/danielmeppiel/apm) dependencies up to date.
+The `apm` manager keeps [APM (Agent Package Manager)](https://github.com/microsoft/apm) dependencies up to date.
 
 Renovate reads the `apm.yml` manifest and updates the git-pinned entries under `dependencies.apm` and `devDependencies.apm`.
 Each entry uses the form `[host/]owner/repo[/subpath]#<ref>`, for example:
