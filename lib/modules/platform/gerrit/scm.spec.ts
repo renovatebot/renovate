@@ -5,6 +5,7 @@ import { client as _client } from './client.ts';
 import type {
   GerritAccountInfo,
   GerritChange,
+  GerritLabelTypeInfo,
   GerritRevisionInfo,
 } from './schema.ts';
 import {
@@ -315,6 +316,49 @@ describe('modules/platform/gerrit/scm', () => {
           'hashtag=team:backend',
           'hashtag=priority:high',
         ],
+      });
+    });
+
+    it('adds Code-Review+2 push option when autoApprove is set and the project has no known Code-Review label definition', async () => {
+      configureScm('test/repo', 'user');
+      git.pushCommit.mockResolvedValueOnce(true);
+      await expect(
+        pushForReview({
+          sourceRef: 'renovate/feat',
+          targetBranch: 'main',
+          files: [],
+          autoApprove: true,
+        }),
+      ).resolves.toBeTrue();
+      expect(git.pushCommit).toHaveBeenCalledExactlyOnceWith({
+        sourceRef: 'renovate/feat',
+        targetRef: 'refs/for/main',
+        files: [],
+        pushOptions: ['notify=NONE', 'ready', 'label=Code-Review+2'],
+      });
+    });
+
+    it('uses the maximum value configured for the Code-Review label when autoApprove is set', async () => {
+      configureScm('test/repo', 'user', {
+        'Code-Review': {
+          values: { '-1': 'disliked', '0': 'default', '1': 'looksOkay' },
+          default_value: 0,
+        } satisfies GerritLabelTypeInfo,
+      });
+      git.pushCommit.mockResolvedValueOnce(true);
+      await expect(
+        pushForReview({
+          sourceRef: 'renovate/feat',
+          targetBranch: 'main',
+          files: [],
+          autoApprove: true,
+        }),
+      ).resolves.toBeTrue();
+      expect(git.pushCommit).toHaveBeenCalledExactlyOnceWith({
+        sourceRef: 'renovate/feat',
+        targetRef: 'refs/for/main',
+        files: [],
+        pushOptions: ['notify=NONE', 'ready', 'label=Code-Review+1'],
       });
     });
 
