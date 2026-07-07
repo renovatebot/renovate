@@ -9,14 +9,39 @@ import type { LongCommitSha } from '../../../util/schema-utils/git.ts';
 import { isLongCommitSha } from '../../../util/schema-utils/git.ts';
 import { DefaultGitScm } from '../default-scm.ts';
 import { client } from './client.ts';
+import type { GerritLabelTypeInfo } from './schema.ts';
 import type { GerritFindPRConfig } from './types.ts';
-import { convertGerritDateToISO } from './utils.ts';
+import { convertGerritDateToISO, mapBranchStatusToLabel } from './utils.ts';
+
+/** Fallback used when the project's Code-Review label definition is unknown
+ * or does not expose a "+2" value (kept for backwards compatibility). */
+const DEFAULT_CODE_REVIEW_APPROVAL_VALUE = 2;
 
 let repository: string;
 let username: string;
-export function configureScm(repo: string, login: string): void {
+let projectLabels: Record<string, GerritLabelTypeInfo> = {};
+export function configureScm(
+  repo: string,
+  login: string,
+  labels: Record<string, GerritLabelTypeInfo> = {},
+): void {
   repository = repo;
   username = login;
+  projectLabels = labels;
+}
+
+/**
+ * Determines the numeric vote to apply on the "Code-Review" label when
+ * `autoApprove` is requested, based on the project's actual label
+ * configuration instead of assuming "+2" is always available (some Gerrit
+ * projects only define values up to "+1").
+ */
+function getAutoApproveLabelValue(): number {
+  const codeReviewLabel = projectLabels['Code-Review'];
+  if (!codeReviewLabel) {
+    return DEFAULT_CODE_REVIEW_APPROVAL_VALUE;
+  }
+  return mapBranchStatusToLabel('green', codeReviewLabel);
 }
 
 /** Branches with a local commit but no Gerrit change yet (push deferred to createPr()). */
@@ -31,7 +56,7 @@ export async function pushForReview(options: {
 }): Promise<boolean> {
   const pushOptions = ['notify=NONE', 'ready'];
   if (options.autoApprove) {
-    pushOptions.push('label=Code-Review+2');
+    pushOptions.push(`label=Code-Review+${getAutoApproveLabelValue()}`);
   }
   if (isNonEmptyArray(options.labels)) {
     for (const label of options.labels) {
