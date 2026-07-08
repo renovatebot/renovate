@@ -19,22 +19,21 @@ export function updateLockedDependency({
     `paket.updateLockedDependency: ${depName}@${currentVersion} -> ${newVersion} [${lockFile}]`,
   );
 
-  try {
-    const group = managerData?.group;
-    const lockedEntries = parseLockFile(lockFileContent!).filter(
-      (dep) =>
-        dep.packageName.toUpperCase() === depName.toUpperCase() &&
-        (!group || dep.groupName.toUpperCase() === group.toUpperCase()),
-    );
-    if (
-      lockedEntries.length &&
-      lockedEntries.every((dep) => dep.version === newVersion)
-    ) {
-      return { status: 'already-updated' };
-    }
-    return { status: 'unsupported' };
-  } catch (err) {
-    logger.debug({ err }, 'paket.updateLockedDependency() error');
+  if (!lockFileContent) {
     return { status: 'update-failed' };
   }
+
+  const group = managerData?.group;
+  const lockedEntries = parseLockFile(lockFileContent).filter(
+    (dep) =>
+      dep.packageName.toUpperCase() === depName.toUpperCase() &&
+      (!group || dep.groupName.toUpperCase() === group.toUpperCase()),
+  );
+  if (
+    lockedEntries.length &&
+    lockedEntries.every((dep) => dep.version === newVersion)
+  ) {
+    return { status: 'already-updated' };
+  }
+  return { status: 'unsupported' };
 }

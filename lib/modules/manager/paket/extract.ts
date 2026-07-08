@@ -9,61 +9,59 @@ import type {
 import { parse as parseDependenciesFile } from './parsers/dependencies-file.ts';
 import { parse as parseLockFile } from './parsers/lock-file.ts';
 import type {
-  DependenciesFile,
   DependenciesFileGroup,
   DependenciesFilePackage,
   LockFileDependency,
   PaketManagerData,
 } from './types.ts';
 
-function searchPackageVersion(
+function findLockedDependency(
   dependencies: LockFileDependency[],
   group: DependenciesFileGroup,
-  p: DependenciesFilePackage,
+  pkg: DependenciesFilePackage,
 ): LockFileDependency | undefined {
   return dependencies.find(
     (d) =>
       d.groupName.toUpperCase() === group.groupName.toUpperCase() &&
-      d.packageName.toUpperCase() === p.name.toUpperCase(),
+      d.packageName.toUpperCase() === pkg.name.toUpperCase(),
   );
 }
 
 function convertToPackageDependency(
   dependencies: LockFileDependency[],
   group: DependenciesFileGroup,
-  p: DependenciesFilePackage,
+  pkg: DependenciesFilePackage,
 ): PackageDependency<PaketManagerData> {
-  const lockVersion = searchPackageVersion(dependencies, group, p);
+  const lockedDependency = findLockedDependency(dependencies, group, pkg);
 
-  const version = lockVersion?.version;
-  const name = lockVersion?.packageName ?? p.name;
   const dep: PackageDependency<PaketManagerData> = {
     depType: 'dependencies',
-    depName: name,
-    currentVersion: version,
+    depName: lockedDependency?.packageName ?? pkg.name,
     datasource: NugetDatasource.id,
-    lockedVersion: version,
     managerData: { group: group.groupName },
   };
 
-  if (p.versionConstraint) {
-    // Version constraints from paket.dependencies can't be evaluated without a paket versioning module, so such dependencies are skipped for now.
-    dep.currentValue = p.versionConstraint;
+  if (group.sources.length) {
+    dep.registryUrls = [...new Set(group.sources)];
+  }
+
+  if (lockedDependency) {
+    dep.lockedVersion = lockedDependency.version;
+  }
+
+  if (pkg.versionConstraint) {
+    // Paket constraint syntax cannot be evaluated without a dedicated versioning
+    // module: bare `1.2.3` means an exact pin in Paket, while nuget versioning
+    // treats it as a floor (>= 1.2.3). Once a paket versioning module exists,
+    // set it in `defaultConfig.versioning` and drop this skipReason - lookup and
+    // autoReplace then handle constrained updates without further manager changes.
+    dep.currentValue = pkg.versionConstraint;
     dep.skipReason = 'unsupported-version';
+  } else if (!lockedDependency) {
+    dep.skipReason = 'unspecified-version';
   }
 
   return dep;
-}
-
-function convertLockFileDependencyToPackageDependency(
-  parsedPackageFile: DependenciesFile,
-  parsedLockFile: LockFileDependency[],
-): PackageDependency[] {
-  return parsedPackageFile.groups.flatMap((group) => {
-    return group.nugetPackages.map((p) => {
-      return convertToPackageDependency(parsedLockFile, group, p);
-    });
-  });
 }
 
 export async function extractPackageFile(
@@ -76,21 +74,24 @@ export async function extractPackageFile(
   const lockFileName = getSiblingFileName(packageFile, 'paket.lock');
   const lockFileContent = await readLocalFile(lockFileName, 'utf8');
   if (!lockFileContent) {
-    logger.debug({ lockFileName }, 'Could not find paket lock file');
-    return null;
+    logger.debug(`Could not find paket lock file ${lockFileName}`);
   }
 
   const parsedPackageFile = parseDependenciesFile(content);
-  const parsedLockFile = parseLockFile(lockFileContent);
+  const parsedLockFile = lockFileContent ? parseLockFile(lockFileContent) : [];
 
-  const deps: PackageDependency[] =
-    convertLockFileDependencyToPackageDependency(
-      parsedPackageFile,
-      parsedLockFile,
-    );
+  const deps: PackageDependency[] = parsedPackageFile.groups.flatMap((group) =>
+    group.nugetPackages.map((pkg) =>
+      convertToPackageDependency(parsedLockFile, group, pkg),
+    ),
+  );
+  if (!deps.length && !lockFileContent) {
+    return null;
+  }
 
-  return {
-    deps,
-    lockFiles: [lockFileName],
-  };
+  const res: PackageFileContent = { deps };
+  if (lockFileContent) {
+    res.lockFiles = [lockFileName];
+  }
+  return res;
 }

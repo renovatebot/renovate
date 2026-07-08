@@ -68,41 +68,41 @@ describe('modules/manager/paket/extract', () => {
           {
             depType: 'dependencies',
             depName: 'FSharp.Core',
-            currentVersion: '9.0.300',
             datasource: NugetDatasource.id,
             lockedVersion: '9.0.300',
             managerData: { group: 'Main' },
+            registryUrls: ['https://api.nuget.org/v3/index.json'],
           },
           {
             depType: 'dependencies',
             depName: 'xunit',
-            currentVersion: '2.9.3',
             datasource: NugetDatasource.id,
             lockedVersion: '2.9.3',
             managerData: { group: 'Main' },
+            registryUrls: ['https://api.nuget.org/v3/index.json'],
           },
           {
             depType: 'dependencies',
             depName: 'FAKE',
-            currentVersion: '5.16',
             datasource: NugetDatasource.id,
             lockedVersion: '5.16',
             managerData: { group: 'GroupA' },
+            registryUrls: ['https://api.nuget.org/v3/index.json'],
           },
           {
             depType: 'dependencies',
             depName: 'xunit',
-            currentVersion: '2.9.2',
             datasource: NugetDatasource.id,
             lockedVersion: '2.9.2',
             managerData: { group: 'GroupA' },
+            registryUrls: ['https://api.nuget.org/v3/index.json'],
           },
         ],
         lockFiles: [lockFileName],
       });
     });
 
-    it('return null if lock file not found', async () => {
+    it('skips dependencies if lock file not found', async () => {
       fs.readLocalFile.mockImplementation(
         (filename: string, _encoding: 'utf8') => {
           expect(filename).toEqual(lockFileName);
@@ -116,7 +116,87 @@ describe('modules/manager/paket/extract', () => {
         config,
       );
 
+      expect(result).toEqual({
+        deps: [
+          {
+            depType: 'dependencies',
+            depName: 'Fsharp.Core',
+            datasource: NugetDatasource.id,
+            managerData: { group: 'Main' },
+            registryUrls: ['https://api.nuget.org/v3/index.json'],
+            skipReason: 'unspecified-version',
+          },
+          {
+            depType: 'dependencies',
+            depName: 'xunit',
+            datasource: NugetDatasource.id,
+            managerData: { group: 'Main' },
+            registryUrls: ['https://api.nuget.org/v3/index.json'],
+            skipReason: 'unspecified-version',
+          },
+          {
+            depType: 'dependencies',
+            depName: 'Fake',
+            datasource: NugetDatasource.id,
+            managerData: { group: 'GroupA' },
+            registryUrls: ['https://api.nuget.org/v3/index.json'],
+            skipReason: 'unspecified-version',
+          },
+          {
+            depType: 'dependencies',
+            depName: 'xunit',
+            datasource: NugetDatasource.id,
+            managerData: { group: 'GroupA' },
+            registryUrls: ['https://api.nuget.org/v3/index.json'],
+            skipReason: 'unspecified-version',
+          },
+        ],
+      });
+    });
+
+    it('return null if no nuget dependencies and no lock file found', async () => {
+      fs.readLocalFile.mockImplementation(
+        (filename: string, _encoding: 'utf8') => {
+          expect(filename).toEqual(lockFileName);
+          return Promise.resolve(null);
+        },
+      );
+
+      const result = await extractPackageFile(
+        codeBlock`
+          source https://api.nuget.org/v3/index.json
+
+          github forki/FsUnit FsUnit.fs
+        `,
+        packageFileName,
+        config,
+      );
+
       expect(result).toBeNull();
+    });
+
+    it('return empty deps if no nuget dependencies but the lock file exists', async () => {
+      fs.readLocalFile.mockImplementation(
+        (filename: string, _encoding: 'utf8') => {
+          expect(filename).toEqual(lockFileName);
+          return Promise.resolve(lockFileContent);
+        },
+      );
+
+      const result = await extractPackageFile(
+        codeBlock`
+          source https://api.nuget.org/v3/index.json
+
+          github forki/FsUnit FsUnit.fs
+        `,
+        packageFileName,
+        config,
+      );
+
+      expect(result).toEqual({
+        deps: [],
+        lockFiles: [lockFileName],
+      });
     });
 
     it('return package name of dependencies file if unknown in lock file', async () => {
@@ -148,16 +228,18 @@ describe('modules/manager/paket/extract', () => {
           {
             depType: 'dependencies',
             depName: 'FSharp.Core',
-            currentVersion: '9.0.300',
             datasource: NugetDatasource.id,
             lockedVersion: '9.0.300',
             managerData: { group: 'Main' },
+            registryUrls: ['https://api.nuget.org/v3/index.json'],
           },
           {
             depType: 'dependencies',
             depName: 'xunit',
             datasource: NugetDatasource.id,
             managerData: { group: 'Main' },
+            registryUrls: ['https://api.nuget.org/v3/index.json'],
+            skipReason: 'unspecified-version',
           },
         ],
         lockFiles: [lockFileName],
@@ -197,10 +279,10 @@ describe('modules/manager/paket/extract', () => {
           {
             depType: 'dependencies',
             depName: 'Fake',
-            currentVersion: '5.16',
             datasource: NugetDatasource.id,
             lockedVersion: '5.16',
             managerData: { group: 'GroupA' },
+            registryUrls: ['https://api.nuget.org/v3/index.json'],
           },
         ],
         lockFiles: [lockFileName],
@@ -221,8 +303,6 @@ describe('modules/manager/paket/extract', () => {
         },
       );
       const packageFileContent = codeBlock`
-        source https://api.nuget.org/v3/index.json
-
         nuget Fsharp.Core
         nuget Newtonsoft.Json 13.0.3
         nuget xunit ~> 2.9
@@ -239,7 +319,6 @@ describe('modules/manager/paket/extract', () => {
           {
             depType: 'dependencies',
             depName: 'FSharp.Core',
-            currentVersion: '9.0.300',
             datasource: NugetDatasource.id,
             lockedVersion: '9.0.300',
             managerData: { group: 'Main' },
@@ -248,7 +327,6 @@ describe('modules/manager/paket/extract', () => {
             depType: 'dependencies',
             depName: 'Newtonsoft.Json',
             currentValue: '13.0.3',
-            currentVersion: '13.0.3',
             datasource: NugetDatasource.id,
             lockedVersion: '13.0.3',
             managerData: { group: 'Main' },
@@ -258,7 +336,6 @@ describe('modules/manager/paket/extract', () => {
             depType: 'dependencies',
             depName: 'xunit',
             currentValue: '~> 2.9',
-            currentVersion: '2.9.3',
             datasource: NugetDatasource.id,
             lockedVersion: '2.9.3',
             managerData: { group: 'Main' },
