@@ -76,7 +76,11 @@ export async function extractAllPackageFiles(
     let workspaces = res?.managerData?.workspaces;
 
     // Support the nested packages property shape
-    if (typeof workspaces === 'object' && 'packages' in workspaces) {
+    if (
+      workspaces !== null &&
+      typeof workspaces === 'object' &&
+      'packages' in workspaces
+    ) {
       workspaces = workspaces.packages;
     }
 
