@@ -598,7 +598,9 @@ describe('util/git/index', { timeout: 30000 }, () => {
     });
 
     it('should throw if branch merge throws', async () => {
-      await expect(git.mergeBranch('not_found')).rejects.toThrow();
+      await expect(git.mergeBranch('not_found')).rejects.toThrow(
+        "fatal: 'origin/not_found' is not a commit and a branch 'not_found'",
+      );
     });
   });
 
@@ -640,7 +642,9 @@ describe('util/git/index', { timeout: 30000 }, () => {
     });
 
     it('should throw', async () => {
-      await expect(git.mergeToLocal('not_found')).rejects.toThrow();
+      await expect(git.mergeToLocal('not_found')).rejects.toThrow(
+        "fatal: couldn't find remote ref not_found",
+      );
     });
   });
 
