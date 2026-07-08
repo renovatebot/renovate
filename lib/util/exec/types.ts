@@ -14,6 +14,9 @@ export interface ConstraintDefinition {
  */
 export const toolDefinitions = [
   {
+    name: 'aube',
+  },
+  {
     name: 'bazelisk',
   },
   {
