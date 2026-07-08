@@ -96,6 +96,7 @@ export async function updateArtifacts(
       },
     ];
   } catch (err) {
+    await resetNpmrcContent(pkgFileDir, npmrcContent);
     if (err.message === TEMPORARY_ERROR) {
       throw err;
     }
