@@ -11,7 +11,7 @@ import type { NpmPackage } from '../npm/extract/types.ts';
 import { resolveNpmrc } from '../npm/npmrc.ts';
 import type { NpmManagerData } from '../npm/types.ts';
 import type { ExtractConfig, PackageFile } from '../types.ts';
-import { filesMatchingWorkspaces } from './utils.ts';
+import { filesMatchingWorkspaces } from '../npm/workspaces.ts';
 
 function matchesFileName(fileNameWithPath: string, fileName: string): boolean {
   return (
