@@ -91,4 +91,21 @@ describe('modules/manager/gemspec/extract', () => {
       },
     ]);
   });
+
+  it('ignores commented-out dependency declarations', () => {
+    const content = codeBlock`
+      Gem::Specification.new do |spec|
+        # spec.add_dependency "foo", "~> 1.0"
+        spec.add_dependency "bar", "~> 2.0"
+      end
+    `;
+    expect(extractPackageFile(content)?.deps).toEqual([
+      {
+        depName: 'bar',
+        depType: 'runtime',
+        datasource: 'rubygems',
+        currentValue: '"~> 2.0"',
+      },
+    ]);
+  });
 });

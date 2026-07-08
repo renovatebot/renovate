@@ -3,7 +3,7 @@ import { RubygemsDatasource } from '../../datasource/rubygems/index.ts';
 import type { PackageDependency, PackageFileContent } from '../types.ts';
 
 const methodRegex = regEx(
-  `\\.add_(?<type>runtime_|development_)?dependency\\s*\\(?\\s*` +
+  `^\\s*[\\w:.]+\\.add_(?<type>runtime_|development_)?dependency\\s*\\(?\\s*` +
     `(['"])(?<depName>[^'"]+)['"]` +
     `(?<rest>.*)$`,
 );
