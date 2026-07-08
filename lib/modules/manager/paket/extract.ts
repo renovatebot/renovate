@@ -50,13 +50,7 @@ function convertToPackageDependency(
   }
 
   if (pkg.versionConstraint) {
-    // Paket constraint syntax cannot be evaluated without a dedicated versioning
-    // module: bare `1.2.3` means an exact pin in Paket, while nuget versioning
-    // treats it as a floor (>= 1.2.3). Once a paket versioning module exists,
-    // set it in `defaultConfig.versioning` and drop this skipReason - lookup and
-    // autoReplace then handle constrained updates without further manager changes.
     dep.currentValue = pkg.versionConstraint;
-    dep.skipReason = 'unsupported-version';
   } else if (!lockedDependency) {
     dep.skipReason = 'unspecified-version';
   }

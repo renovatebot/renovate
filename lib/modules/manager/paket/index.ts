@@ -1,5 +1,6 @@
 import type { Category } from '../../../constants/index.ts';
 import { NugetDatasource } from '../../datasource/nuget/index.ts';
+import * as paketVersioning from '../../versioning/paket/index.ts';
 
 export { updateArtifacts } from './artifacts.ts';
 export { extractPackageFile } from './extract.ts';
@@ -14,9 +15,10 @@ export const categories: Category[] = ['dotnet'];
 
 export const defaultConfig = {
   managerFilePatterns: ['/(^|/)paket\\.dependencies$/'],
-  // `versioning` is intentionally unset: locked versions compare fine with the
-  // nuget datasource default, while Paket constraint syntax needs a dedicated
-  // versioning module (see the `unsupported-version` skip in extract.ts)
+  // Releases come from the nuget datasource, but constraints use the paket
+  // versioning module: Paket reads a bare `1.2.3` as an exact pin, whereas
+  // nuget versioning reads it as a floor (>= 1.2.3).
+  versioning: paketVersioning.id,
 };
 
 export const supportedDatasources = [NugetDatasource.id];
