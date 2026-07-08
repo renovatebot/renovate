@@ -289,7 +289,7 @@ describe('modules/manager/paket/extract', () => {
       });
     });
 
-    it('skips dependencies with a version constraint', async () => {
+    it('extracts dependencies with a version constraint', async () => {
       fs.readLocalFile.mockImplementation(
         (filename: string, _encoding: 'utf8') => {
           expect(filename).toEqual(lockFileName);
@@ -330,7 +330,6 @@ describe('modules/manager/paket/extract', () => {
             datasource: NugetDatasource.id,
             lockedVersion: '13.0.3',
             managerData: { group: 'Main' },
-            skipReason: 'unsupported-version',
           },
           {
             depType: 'dependencies',
@@ -339,7 +338,6 @@ describe('modules/manager/paket/extract', () => {
             datasource: NugetDatasource.id,
             lockedVersion: '2.9.3',
             managerData: { group: 'Main' },
-            skipReason: 'unsupported-version',
           },
         ],
         lockFiles: [lockFileName],
