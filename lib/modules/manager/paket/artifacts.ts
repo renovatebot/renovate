@@ -23,8 +23,7 @@ function buildUpdateCommands(
   for (const dep of updatedDeps) {
     if (!dep.depName || !dep.newVersion) {
       logger.debug(
-        { depName: dep.depName, newVersion: dep.newVersion },
-        'Missing depName or newVersion, skipping paket update for this dependency',
+        `Missing depName (${dep.depName}) or newVersion (${dep.newVersion}), skipping paket update for this dependency`,
       );
       continue;
     }
