@@ -92,6 +92,27 @@ describe('modules/manager/gemspec/extract', () => {
     ]);
   });
 
+  it('skips interpolated version strings', () => {
+    const content = codeBlock`
+      spec.add_dependency "foo", "~> #{Foo::VERSION}"
+      spec.add_runtime_dependency 'bar', "= #{version}"
+    `;
+    expect(extractPackageFile(content)?.deps).toEqual([
+      {
+        depName: 'foo',
+        depType: 'runtime',
+        datasource: 'rubygems',
+        skipReason: 'unspecified-version',
+      },
+      {
+        depName: 'bar',
+        depType: 'runtime',
+        datasource: 'rubygems',
+        skipReason: 'unspecified-version',
+      },
+    ]);
+  });
+
   it('ignores commented-out dependency declarations', () => {
     const content = codeBlock`
       Gem::Specification.new do |spec|
