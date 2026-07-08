@@ -270,6 +270,21 @@ describe('modules/manager/npm/update/dependency/index', () => {
       expect(JSON.parse(testContent!).dependencies.abc).toBe('2.0.0');
     });
 
+    it('replaces a package version only', () => {
+      const upgrade = {
+        depType: 'dependencies',
+        depName: 'browserify',
+        newName: 'browserify',
+        newValue: '12.2.3', // downgrade via replacement.
+      };
+      const testContent = npmUpdater.updateDependency({
+        fileContent: input01Content,
+        packageFile: 'package.json',
+        upgrade,
+      });
+      expect(JSON.parse(testContent!).dependencies.browserify).toBe('12.2.3');
+    });
+
     it('supports alias-based replacement', () => {
       const upgrade: Upgrade = {
         depType: 'dependencies',
@@ -302,6 +317,21 @@ describe('modules/manager/npm/update/dependency/index', () => {
       });
       expect(JSON.parse(testContent!).resolutions.config).toBeUndefined();
       expect(JSON.parse(testContent!).resolutions['**/abc']).toBe('2.0.0');
+    });
+
+    it('version-only replaces glob package resolutions', () => {
+      const upgrade = {
+        depType: 'dependencies',
+        depName: 'config',
+        newName: 'config',
+        newValue: '1.10.0',
+      };
+      const testContent = npmUpdater.updateDependency({
+        fileContent: input01GlobContent,
+        packageFile: 'package.json',
+        upgrade,
+      });
+      expect(JSON.parse(testContent!).resolutions['**/config']).toBe('1.10.0');
     });
 
     it('pins also the version in patch with npm protocol in resolutions', () => {

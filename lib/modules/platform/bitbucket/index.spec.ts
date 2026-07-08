@@ -67,7 +67,9 @@ describe('modules/platform/bitbucket/index', () => {
   describe('initPlatform()', () => {
     it('should throw if no token or username/password', async () => {
       expect.assertions(1);
-      await expect(bitbucket.initPlatform({})).rejects.toThrow();
+      await expect(bitbucket.initPlatform({})).rejects.toThrow(
+        'Init: You must configure either a Bitbucket token or username and',
+      );
     });
 
     it('should show warning message if custom endpoint', async () => {
@@ -1682,11 +1684,11 @@ describe('modules/platform/bitbucket/index', () => {
         })
         .get('/2.0/repositories/some/repo/pullrequests/5')
         .reply(200, pr);
-      expect(await bitbucket.getPr(3)).toMatchSnapshot();
+      expect(await bitbucket.getPr(3)).toMatchSnapshot('getPr(3)');
 
-      expect(await bitbucket.getPr(5)).toMatchSnapshot();
+      expect(await bitbucket.getPr(5)).toMatchSnapshot('getPr(5)');
 
-      expect(await bitbucket.getPr(5)).toMatchSnapshot();
+      expect(await bitbucket.getPr(5)).toMatchSnapshot('getPr(5) repeated');
     });
 
     it('reviewers', async () => {
@@ -2380,7 +2382,9 @@ describe('modules/platform/bitbucket/index', () => {
       scope
         .get('/2.0/repositories/some/repo/src/HEAD/file.json')
         .reply(200, '!@#');
-      await expect(bitbucket.getJsonFile('file.json')).rejects.toThrow();
+      await expect(bitbucket.getJsonFile('file.json')).rejects.toThrow(
+        "JSON5: invalid character '!' at 1:1",
+      );
     });
 
     it('throws on errors', async () => {
@@ -2388,7 +2392,9 @@ describe('modules/platform/bitbucket/index', () => {
       scope
         .get('/2.0/repositories/some/repo/src/HEAD/file.json')
         .replyWithError('some error');
-      await expect(bitbucket.getJsonFile('file.json')).rejects.toThrow();
+      await expect(bitbucket.getJsonFile('file.json')).rejects.toThrow(
+        'some error',
+      );
     });
   });
 });

@@ -76,7 +76,9 @@ describe('modules/platform/gitlab/index', () => {
 
   describe('initPlatform()', () => {
     it('should throw if no token', async () => {
-      await expect(gitlab.initPlatform({} as any)).rejects.toThrow();
+      await expect(gitlab.initPlatform({} as any)).rejects.toThrow(
+        'Init: You must configure a GitLab personal access token',
+      );
     });
 
     it('should throw if endpoint is not a valid URL', async () => {
@@ -4161,7 +4163,9 @@ These updates have all been created already. To force a retry/rebase of any, cli
         .reply(200, {
           content: toBase64('!@#'),
         });
-      await expect(gitlab.getJsonFile('dir/file.json')).rejects.toThrow();
+      await expect(gitlab.getJsonFile('dir/file.json')).rejects.toThrow(
+        "JSON5: invalid character '!' at 1:1",
+      );
     });
 
     it('throws on errors', async () => {
@@ -4171,7 +4175,9 @@ These updates have all been created already. To force a retry/rebase of any, cli
           '/api/v4/projects/some%2Frepo/repository/files/dir%2Ffile.json?ref=HEAD',
         )
         .replyWithError('some error');
-      await expect(gitlab.getJsonFile('dir/file.json')).rejects.toThrow();
+      await expect(gitlab.getJsonFile('dir/file.json')).rejects.toThrow(
+        'some error',
+      );
     });
   });
 

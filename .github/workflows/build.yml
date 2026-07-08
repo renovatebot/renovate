@@ -243,7 +243,7 @@ jobs:
           os: ${{ runner.os }}
 
       - name: Restore prettier cache
-        uses: actions/cache/restore@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        uses: actions/cache/restore@caa296126883cff596d87d8935842f9db880ef25 # v5.1.0
         with:
           path: .cache/prettier
           # we need to add the hash because prettier cache doesn't detect plugin changes
@@ -261,7 +261,7 @@ jobs:
 
       - name: Save prettier cache
         if: github.event_name == 'push'
-        uses: actions/cache/save@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        uses: actions/cache/save@caa296126883cff596d87d8935842f9db880ef25 # v5.1.0
         with:
           path: .cache/prettier
           key: prettier-cache-${{ hashFiles('pnpm-lock.yaml', 'package.json') }}-${{ github.run_id }}-${{ github.run_attempt }}
@@ -320,7 +320,7 @@ jobs:
           os: ${{ runner.os }}
 
       - name: Restore tsbuildinfo cache
-        uses: actions/cache/restore@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        uses: actions/cache/restore@caa296126883cff596d87d8935842f9db880ef25 # v5.1.0
         with:
           path: .cache/tsbuildinfo
           key: tsbuildinfo-${{ hashFiles('pnpm-lock.yaml') }}
@@ -331,7 +331,7 @@ jobs:
 
       - name: Save tsbuildinfo cache
         if: github.event_name == 'push'
-        uses: actions/cache/save@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        uses: actions/cache/save@caa296126883cff596d87d8935842f9db880ef25 # v5.1.0
         with:
           path: .cache/tsbuildinfo
           key: tsbuildinfo-${{ hashFiles('pnpm-lock.yaml') }}-${{ github.run_id }}-${{ github.run_attempt }}
@@ -370,9 +370,9 @@ jobs:
           args: -color -ignore "invalid activity type \"destroyed\" for \"merge_group\" Webhook event. available types are \"checks_requested\""
 
       - name: Run zizmor
-        uses: zizmorcore/zizmor-action@5f14fd08f7cf1cb1609c1e344975f152c7ee938d # v0.5.6
+        uses: zizmorcore/zizmor-action@192e21d79ab29983730a13d1382995c2307fbcaa # v0.5.7
         with:
-          version: 1.25.2
+          version: 1.26.1
 
   test:
     needs: [setup, prefetch]
@@ -407,7 +407,7 @@ jobs:
           os: ${{ runner.os }}
 
       - name: Cache vitest
-        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5.1.0
         with:
           path: .cache/vitest
           key: |
@@ -546,6 +546,7 @@ jobs:
       - coverage-threshold
       - lint-actions
       - build-docker
+      - build-docs
     runs-on: ubuntu-latest
     timeout-minutes: 1
     if: always()
@@ -600,6 +601,19 @@ jobs:
           github.event_name == 'pull_request' &&
           github.event.pull_request.draft != true &&
           needs.lint-actions.result == 'skipped'
+        run: exit 1
+
+      - name: Fail for failed or cancelled docs build
+        if: |
+          needs.build-docs.result == 'failure' ||
+          needs.build-docs.result == 'cancelled'
+        run: exit 1
+
+      - name: Fail for skipped docs build when PR is ready for review
+        if: |
+          github.event_name == 'pull_request' &&
+          github.event.pull_request.draft != true &&
+          needs.build-docs.result == 'skipped'
         run: exit 1
 
       - name: Fail for skipped or failed docker build when needed
@@ -707,9 +721,9 @@ jobs:
           os: ${{ runner.os }}
 
       - name: Setup uv
-        uses: astral-sh/setup-uv@fac544c07dec837d0ccb6301d7b5580bf5edae39 # v8.2.0
+        uses: astral-sh/setup-uv@f98e06938123ccabd21905ea5d0069192241f9f1 # v8.3.1
         with:
-          version: 0.11.23
+          version: 0.11.27
           enable-cache: true
           cache-python: true
 
@@ -814,7 +828,44 @@ jobs:
           if [[ "$latest_sha" != "$EXPECTED_SHA" ]]; then
             echo "Newer commit detected on $REF_NAME ($latest_sha), cancelling release run"
             gh run cancel "$RUN_ID"
+            sleep 5
           fi
+
+      - run: df -h
+
+      - name: check for old vm with low disk space
+        id: check
+        run: |
+          if [[ -e /dev/sdb1 ]]; then
+            echo "::warning::We're on old vm, running cleanup"
+            echo "do-cleanup=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::notice::We're on new vm, no cleanup required"
+            echo "do-cleanup=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      # Some runner vm's are smaller than others for unknown reasons
+      # https://github.com/orgs/community/discussions/199328
+      # To avoid disk space issues when performing a release, we can clear up some disk space ahead of time
+      - name: Free Disk Space
+        if: ${{ steps.check.outputs.do-cleanup == 'true' }}
+        uses: jlumbroso/free-disk-space@54081f138730dfa15788a46383842cd2f914a1be # v1.3.1
+        with:
+          # we're likely already using some of the globally installed tools
+          tool-cache: false
+          # there are no images by default
+          docker-images: false
+          # but we're definitely not using these
+          android: true
+          dotnet: true
+          haskell: true
+          # there is no swap storage anymore
+          swap-storage: false
+
+          large-packages: true # breaks docker cross platform support
+
+      - run: df -h
+        if: ${{ steps.check.outputs.do-cleanup == 'true' }}
 
       - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
@@ -826,34 +877,14 @@ jobs:
       - name: Setup Docker
         uses: ./.github/actions/setup-docker
 
-      - run: df -h
-
-      # We currently don't neexd it, the runner changed and has now 89G available
-      # To avoid disk space issues when performing a release, we can clear up some disk space ahead of time
-      # - name: Free Disk Space
-      #   uses: jlumbroso/free-disk-space@54081f138730dfa15788a46383842cd2f914a1be # v1.3.1
-      #   with:
-      #     # we're likely already using some of the globally installed tools
-      #     tool-cache: false
-      #     # there are no images by default
-      #     docker-images: false
-      #     # but we're definitely not using these
-      #     android: true
-      #     dotnet: true
-      #     haskell: true
-      #     # and shouldn't be using swap storage
-      #     swap-storage: true
-
-      # - run: df -h
-
       - name: Setup Node.js
         uses: ./.github/actions/setup-node
         with:
           node-version: ${{ needs.setup-build.outputs.node-version }}
           os: ${{ runner.os }}
 
-      - name: Install newer npm
-        run: npm install -g npm
+      - name: Install newer npm if needed
+        run: 'dpkg --compare-versions "$(npm -v)" lt 11.5.1 && (npm update -g npm; echo "updated npm to: $(npm -v)") || echo "npm is new enough: $(npm -v)"'
 
       - uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6 # v4.1.2
 
@@ -863,9 +894,9 @@ jobs:
           echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.repository_owner }} --password-stdin
 
       - name: Setup uv
-        uses: astral-sh/setup-uv@fac544c07dec837d0ccb6301d7b5580bf5edae39 # v8.2.0
+        uses: astral-sh/setup-uv@f98e06938123ccabd21905ea5d0069192241f9f1 # v8.3.1
         with:
-          version: 0.11.23
+          version: 0.11.27
           enable-cache: true
           cache-python: true
 
@@ -892,6 +923,7 @@ jobs:
           if [[ "$latest_sha" != "$EXPECTED_SHA" ]]; then
             echo "Newer commit detected on $REF_NAME ($latest_sha), cancelling release run"
             gh run cancel "$RUN_ID"
+            sleep 5
           fi
 
       - name: semantic-release
@@ -922,6 +954,7 @@ jobs:
           retention-days: 1
 
       - run: df -h
+        if: ${{ !cancelled() }}
 
   deploy-docs-site:
     if: ${{ github.repository == 'renovatebot/renovate' && github.ref_name == 'main' && github.event_name == 'push' }}

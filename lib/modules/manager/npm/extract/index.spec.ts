@@ -71,7 +71,7 @@ describe('modules/manager/npm/extract/index', () => {
           'backend/package.json',
           defaultExtractConfig,
         ),
-      ).rejects.toThrow();
+      ).rejects.toThrow('config-validation');
     });
 
     it('returns null if no deps', async () => {
