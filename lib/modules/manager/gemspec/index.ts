@@ -18,3 +18,4 @@ export const defaultConfig = {
 export const supportedDatasources = [RubygemsDatasource.id];
 
 export const supportsLockFileMaintenance = true;
+export const lockFileNames = ['Gemfile.lock'];
