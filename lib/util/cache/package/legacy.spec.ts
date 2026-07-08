@@ -40,7 +40,9 @@ describe('util/cache/package/legacy', () => {
   });
 
   it('throws for garbage entries', async () => {
-    await expect(decodeLegacyEntry(Buffer.from('garbage'))).rejects.toThrow();
+    await expect(decodeLegacyEntry(Buffer.from('garbage'))).rejects.toThrow(
+      'Decompression failed',
+    );
   });
 
   it('does not classify legacy brotli payloads as envelopes', async () => {

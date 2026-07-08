@@ -100,7 +100,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
       expect(fs.readFile).toHaveBeenCalledTimes(expectedFsCalls);
       expect(fs.remove).toHaveBeenCalledTimes(0);
       expect(res.lockFile).toBe('package-lock-contents');
-      expect(fixSnapshots(execSnapshots)).toMatchSnapshot();
+      expect(fixSnapshots(execSnapshots)).toMatchSnapshot('exec commands');
     },
   );
 
@@ -343,7 +343,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
         },
       ]);
       expect(res.lockFile).toBe('package-lock-contents');
-      expect(fixSnapshots(execSnapshots)).toMatchSnapshot();
+      expect(fixSnapshots(execSnapshots)).toMatchSnapshot('exec commands');
     },
   );
 
@@ -367,7 +367,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
         },
       ]);
       expect(res.lockFile).toBe('package-lock-contents');
-      expect(fixSnapshots(execSnapshots)).toMatchSnapshot();
+      expect(fixSnapshots(execSnapshots)).toMatchSnapshot('exec commands');
     },
   );
 
@@ -403,7 +403,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
 
       // expected the lock file not to be deleted.
       expect(res.lockFile).toBe('');
-      expect(fixSnapshots(execSnapshots)).toMatchSnapshot();
+      expect(fixSnapshots(execSnapshots)).toMatchSnapshot('exec commands');
     },
   );
 
@@ -454,7 +454,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
       expect(vi.mocked(fs.outputFile).mock.calls[0][0]).toEndWith(
         'some-dir/sub_workspace/yarn.lock',
       );
-      expect(fixSnapshots(execSnapshots)).toMatchSnapshot();
+      expect(fixSnapshots(execSnapshots)).toMatchSnapshot('exec commands');
     },
   );
 
@@ -487,7 +487,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
         },
       ]);
       expect(res.lockFile).toBe('package-lock-contents');
-      expect(fixSnapshots(execSnapshots)).toMatchSnapshot();
+      expect(fixSnapshots(execSnapshots)).toMatchSnapshot('exec commands');
     },
   );
 

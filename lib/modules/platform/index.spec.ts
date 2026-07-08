@@ -49,7 +49,9 @@ describe('modules/platform/index', () => {
       username: 'abc',
       password: '123',
     };
-    await expect(platform.initPlatform(config)).rejects.toThrow();
+    await expect(platform.initPlatform(config)).rejects.toThrow(
+      'Init: Platform "wrong" not found. Must be one of: azure, bitbucket,',
+    );
   });
 
   it('initializes', async () => {
