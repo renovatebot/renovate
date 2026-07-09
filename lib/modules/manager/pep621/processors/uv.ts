@@ -309,7 +309,7 @@ export class UvProcessor extends BasePyProjectProcessor {
 
 function resolveUvExcludeNewerDate(
   value: string,
-  now: DateTime,
+  now: DateTime<true>,
 ): DateTime<true> | null {
   const dur = Duration.fromISO(value);
   if (dur.isValid) {
