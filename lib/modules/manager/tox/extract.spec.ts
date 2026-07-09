@@ -95,13 +95,15 @@ describe('modules/manager/tox/extract', () => {
       });
     });
 
-    it('skips -r, -c, prefixed entries in env_run_base deps', () => {
+    it('skips any - prefixed entries in env_run_base deps', () => {
       const content = codeBlock`
         [env_run_base]
         deps = [
           "pytest>=7.2",
           "-r requirements-test.txt",
           "-c constraints.txt",
+          "-e .",
+          "--pre",
           "coverage>=7",
         ]
       `;
@@ -121,6 +123,40 @@ describe('modules/manager/tox/extract', () => {
             currentValue: '>=7',
             datasource: 'pypi',
             depType: 'env_run_base',
+          },
+        ],
+      });
+    });
+
+    it('skips any - prefixed entries in an env', () => {
+      const content = codeBlock`
+        [env_run_base]
+        [env.lint]
+        deps = [
+          "ruff>=0.1",
+          "mypy",
+          "-r requirements-test.txt",
+          "-c constraints.txt",
+          "-e .",
+          "--pre",
+        ]
+      `;
+      const res = extractPackageFile(content, 'tox.toml');
+      expect(res).toMatchObject({
+        deps: [
+          {
+            currentValue: '>=0.1',
+            datasource: 'pypi',
+            depName: 'ruff',
+            depType: 'env.lint',
+            packageName: 'ruff',
+          },
+          {
+            datasource: 'pypi',
+            depName: 'mypy',
+            depType: 'env.lint',
+            packageName: 'mypy',
+            skipReason: 'unspecified-version',
           },
         ],
       });
