@@ -8,29 +8,29 @@ import {
 import { pep508ToPackageDependency } from '../pep621/utils.ts';
 import type { PackageDependency } from '../types.ts';
 
+function parsePep508Dep(
+  depType: string,
+  depStr: string,
+): PackageDependency | null {
+  if (depStr.trimStart().startsWith('-')) {
+    return null;
+  }
+  return pep508ToPackageDependency(depType, depStr);
+}
+
 type ToxPackageDependency = z.ZodType<PackageDependency>;
 
 function Pep508Dep(depType: string): ToxPackageDependency {
   return z.string().transform((x, ctx) => {
-    if (x.trimStart().startsWith('-')) {
-      ctx.addIssue({
-        code: 'custom',
-        message: `skipping tox flag entry: ${x}`,
-        fatal: true,
-      });
-      return z.NEVER;
-    }
-
-    const res = pep508ToPackageDependency(depType, x);
+    const res = parsePep508Dep(depType, x);
     if (!res) {
       ctx.addIssue({
         code: 'custom',
-        message: 'should be a valid PEP508 dependency',
+        message: 'not a valid PEP 508 dep',
         fatal: true,
       });
       return z.NEVER;
     }
-
     return res;
   });
 }
@@ -49,10 +49,7 @@ const ToxEnvRecord = LooseRecord(
   for (const [envName, envConfig] of Object.entries(envs)) {
     const depType = `env.${envName}`;
     for (const depStr of envConfig.deps) {
-      if (depStr.trimStart().startsWith('-')) {
-        continue;
-      }
-      const dep = pep508ToPackageDependency(depType, depStr);
+      const dep = parsePep508Dep(depType, depStr);
       if (dep) {
         deps.push(dep);
       }
