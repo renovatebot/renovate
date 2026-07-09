@@ -325,7 +325,7 @@ describe('config/migrations/custom/package-rules-migration', () => {
           },
           {
             matchDepPatterns: ['some-dep'],
-            excludeDepPatterns: ['!*'],
+            excludeDepPatterns: ['.*'],
             automerge: true,
           },
         ],
@@ -341,7 +341,7 @@ describe('config/migrations/custom/package-rules-migration', () => {
             automerge: true,
           },
           {
-            matchDepNames: ['!**'],
+            matchDepNames: ['/some-dep/', '!/.*/'],
             automerge: true,
           },
         ],
