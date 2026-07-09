@@ -1,5 +1,5 @@
 import { isString } from '@sindresorhus/is';
-import { DateTime } from 'luxon';
+import { DateTime, Duration } from 'luxon';
 import { quote } from 'shlex';
 import { TEMPORARY_ERROR } from '../../../../constants/error-messages.ts';
 import { logger } from '../../../../logger/index.ts';
@@ -226,11 +226,13 @@ export class UvProcessor extends BasePyProjectProcessor {
             'Invalid minimumReleaseAge, skipping --exclude-newer for uv lock',
           );
         } else {
-          let excludeNewerDate = DateTime.now()
-            .minus(minimumReleaseAgeMs)
-            .toUTC();
-          const uvExcludeNewerDate = project.tool?.uv?.['exclude-newer'];
-          if (uvExcludeNewerDate === null) {
+          const now = DateTime.now();
+          let excludeNewerDate = now.minus(minimumReleaseAgeMs).toUTC();
+          const rawUvExcludeNewer = project.tool?.uv?.['exclude-newer'];
+          const uvExcludeNewerDate = rawUvExcludeNewer
+            ? resolveUvExcludeNewerDate(rawUvExcludeNewer, now)
+            : undefined;
+          if (rawUvExcludeNewer && uvExcludeNewerDate === null) {
             logger.debug(
               'Could not parse [tool.uv].exclude-newer in pyproject.toml, falling back to minimumReleaseAge',
             );
@@ -303,6 +305,25 @@ export class UvProcessor extends BasePyProjectProcessor {
       ];
     }
   }
+}
+
+function resolveUvExcludeNewerDate(
+  value: string,
+  now: DateTime,
+): DateTime<true> | null {
+  const dur = Duration.fromISO(value);
+  if (dur.isValid) {
+    return now.minus(dur).toUTC();
+  }
+  const ts = DateTime.fromISO(value, { zone: 'utc' });
+  if (ts.isValid) {
+    return ts;
+  }
+  const millis = toMs(value);
+  if (millis === null) {
+    return null;
+  }
+  return now.minus(millis).toUTC();
 }
 
 function generateCMD(updatedDeps: Upgrade[]): string {

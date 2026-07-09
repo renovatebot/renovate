@@ -1,6 +1,4 @@
-import { DateTime, Duration } from 'luxon';
 import { z } from 'zod/v4';
-import { toMs } from '../../../util/pretty-time.ts';
 import {
   LooseArray,
   LooseRecord,
@@ -155,25 +153,7 @@ const UvConfig = z.object({
     Pep508Dependency(depTypes.uvDevDependencies),
   ).catch([]),
   'required-version': z.string().optional(),
-  'exclude-newer': z
-    .string()
-    .transform((value): DateTime<true> | null => {
-      const dur = Duration.fromISO(value);
-      if (dur.isValid) {
-        return DateTime.now().minus(dur).toUTC();
-      }
-      const ts = DateTime.fromISO(value, { zone: 'utc' });
-      if (ts.isValid) {
-        return ts;
-      }
-      const millis = toMs(value);
-      if (millis === null) {
-        return null;
-      }
-      return DateTime.now().minus(millis).toUTC();
-    })
-    .optional()
-    .catch(undefined),
+  'exclude-newer': z.string().optional().catch(undefined),
   sources: LooseRecord(
     // uv applies the same normalization as for Python dependencies on sources
     z.string().transform((source) => normalizePythonDepName(source)),
