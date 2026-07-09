@@ -1,4 +1,4 @@
-import { isString } from '@sindresorhus/is';
+import { isNullOrUndefined, isString } from '@sindresorhus/is';
 import { DateTime, Duration } from 'luxon';
 import { quote } from 'shlex';
 import { TEMPORARY_ERROR } from '../../../../constants/error-messages.ts';
@@ -237,7 +237,7 @@ export class UvProcessor extends BasePyProjectProcessor {
               'Could not parse [tool.uv].exclude-newer in pyproject.toml, falling back to minimumReleaseAge',
             );
           } else if (
-            uvExcludeNewerDate &&
+            !isNullOrUndefined(uvExcludeNewerDate) &&
             uvExcludeNewerDate < excludeNewerDate
           ) {
             logger.debug(
