@@ -406,7 +406,7 @@ export async function getReleaseNotesMd(
                   parenthesizedHeading
                     .replace(regEx(/^\s*#*\s*/), '')
                     .toLowerCase()
-                    .replace(regEx(/\s+/), '-'),
+                    .replace(regEx(/\s+/g), '-'),
                 )
               : title
                   .filter((word) => !isHttpUrl(word))

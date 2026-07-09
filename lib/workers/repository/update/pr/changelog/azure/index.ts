@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import { GitObjectType } from 'azure-devops-node-api/interfaces/GitInterfaces.js';
 import changelogFilenameRegex from 'changelog-filename-regex';
 import upath from 'upath';
@@ -19,7 +20,7 @@ export function getReleaseList(
   _release: ChangeLogRelease,
 ): ChangeLogNotes[] {
   logger.trace('azure.getReleaseList()');
-  logger.debug('Unsupported Azure DevOps feature.  Skipping release fetching.');
+  logger.debug('Unsupported Azure DevOps feature. Skipping release fetching.');
   return [];
 }
 
@@ -42,9 +43,14 @@ export async function getReleaseNotesMd(
     project,
   );
 
+  if (!is.string(sourceDirectoryId.objectId)) {
+    logger.debug('no objectId found for source directory');
+    return null;
+  }
+
   const tree = await azureHelper.getTrees(
     urlEncodedRepo,
-    sourceDirectoryId.objectId!,
+    sourceDirectoryId.objectId,
     project,
   );
 
@@ -70,7 +76,6 @@ export async function getReleaseNotesMd(
     .sort((a, b) => compareChangelogFilePath(a.relativePath!, b.relativePath!))
     .shift()?.relativePath;
 
-  /* v8 ignore next -- not testable */
   changelogFile = `${sourceDirectory ? ensureTrailingSlash(sourceDirectory) : ''}${changelogFile}`;
 
   const fileRes = await azureHelper.getItem(

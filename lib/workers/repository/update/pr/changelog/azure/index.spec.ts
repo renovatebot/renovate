@@ -54,7 +54,7 @@ describe('workers/repository/update/pr/changelog/azure/index', () => {
     it('handles release notes', async () => {
       const changelogMd = Fixtures.get('jest.md', '..');
 
-      vi.spyOn(azureHelper, 'getItem').mockRejectedValue({
+      vi.spyOn(azureHelper, 'getItem').mockResolvedValueOnce({
         objectId: 'some-object-id',
       });
 
@@ -84,7 +84,7 @@ describe('workers/repository/update/pr/changelog/azure/index', () => {
     it('handles release notes with sourceDirectory', async () => {
       const changelogMd = Fixtures.get('jest.md', '..');
 
-      vi.spyOn(azureHelper, 'getItem').mockRejectedValue({
+      vi.spyOn(azureHelper, 'getItem').mockResolvedValueOnce({
         objectId: 'some-object-id',
         path: '/src/docs',
       });
@@ -119,7 +119,7 @@ describe('workers/repository/update/pr/changelog/azure/index', () => {
     it('handles release notes with sourceDirectory that has trailing slash', async () => {
       const changelogMd = Fixtures.get('jest.md', '..');
 
-      vi.spyOn(azureHelper, 'getItem').mockRejectedValue({
+      vi.spyOn(azureHelper, 'getItem').mockResolvedValueOnce({
         objectId: 'some-object-id',
         path: '/src/docs/',
       });
@@ -147,6 +147,40 @@ describe('workers/repository/update/pr/changelog/azure/index', () => {
       const res = await getReleaseNotesMdFile(project);
       expect(res).toStrictEqual({
         changelogFile: '/src/docs/CHANGELOG.md',
+        changelogMd: `${changelogMd}\n#\n##`,
+      });
+    });
+
+    it('handles empty sourceDirectory', async () => {
+      const changelogMd = Fixtures.get('jest.md', '..');
+
+      vi.spyOn(azureHelper, 'getItem').mockResolvedValueOnce({
+        objectId: 'some-object-id',
+      });
+
+      vi.spyOn(azureHelper, 'getTrees').mockResolvedValue({
+        objectId: 'some-object-id',
+        treeEntries: [
+          {
+            objectId: 'some-other-object-id',
+            gitObjectType: GitObjectType.Blob,
+            relativePath: 'CHANGELOG.md',
+          },
+        ],
+      });
+
+      vi.spyOn(azureHelper, 'getItem').mockResolvedValue({
+        objectId: 'some-other-object-id',
+        content: changelogMd,
+      });
+
+      const project = {
+        ...azureProject,
+        sourceDirectory: '',
+      };
+      const res = await getReleaseNotesMdFile(project);
+      expect(res).toStrictEqual({
+        changelogFile: 'CHANGELOG.md',
         changelogMd: `${changelogMd}\n#\n##`,
       });
     });
@@ -215,7 +249,7 @@ describe('workers/repository/update/pr/changelog/azure/index', () => {
     });
 
     it('handles no changelog content', async () => {
-      vi.spyOn(azureHelper, 'getItem').mockRejectedValue({
+      vi.spyOn(azureHelper, 'getItem').mockResolvedValueOnce({
         objectId: 'some-object-id',
       });
       vi.spyOn(azureHelper, 'getTrees').mockResolvedValue({
@@ -240,7 +274,7 @@ describe('workers/repository/update/pr/changelog/azure/index', () => {
     it('handles alternate changelog file names', async () => {
       const changelogMd = Fixtures.get('jest.md', '..');
 
-      vi.spyOn(azureHelper, 'getItem').mockRejectedValue({
+      vi.spyOn(azureHelper, 'getItem').mockResolvedValueOnce({
         objectId: 'some-object-id',
       });
 

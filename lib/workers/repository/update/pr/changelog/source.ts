@@ -305,10 +305,8 @@ export abstract class ChangeLogSource {
 
   hasValidRepository(repository: string): boolean {
     const repositoryLength = repository.split('/').length;
-    if (this.platform === 'azure') {
-      return repositoryLength === 1;
-    } else {
-      return repositoryLength === 2;
-    }
+    return this.platform === 'azure'
+      ? repositoryLength === 1
+      : repositoryLength === 2;
   }
 }

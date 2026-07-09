@@ -1762,7 +1762,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
     it('handles azure sourceDirectory', async () => {
       const sourceDirectory = '/packages/foo';
 
-      vi.spyOn(azureHelper, 'getItem').mockResolvedValue(
+      vi.spyOn(azureHelper, 'getItem').mockResolvedValueOnce(
         azureItemsResponseWithSourceDirectory,
       );
 

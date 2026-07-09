@@ -44,7 +44,6 @@ export interface ChangeLogProject {
 }
 
 export type ChangeLogError =
-  | 'MissingAzureToken'
   | 'MissingBitbucketToken'
   | 'MissingGithubToken'
   | 'MissingGitlabToken';
