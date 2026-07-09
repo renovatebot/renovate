@@ -2,7 +2,7 @@
 import _timers from 'node:timers/promises';
 import { mockDeep } from 'vitest-mock-extended';
 import * as httpMock from '~test/http-mock.ts';
-import { git, hostRules, logger } from '~test/util.ts';
+import { fakeSha, git, hostRules, logger } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import {
   CONFIG_GIT_URL_UNAVAILABLE,
@@ -519,12 +519,9 @@ describe('modules/platform/gitlab/index', () => {
   });
 
   describe('commitFiles', () => {
-    const preparedParentSha =
-      '1111111111111111111111111111111111111111' as LongCommitSha;
-    const preparedCommitSha =
-      '2222222222222222222222222222222222222222' as LongCommitSha;
-    const fetchedSha =
-      '3333333333333333333333333333333333333333' as LongCommitSha;
+    const preparedParentSha = fakeSha('gitlab-prepared-parent');
+    const preparedCommitSha = fakeSha('gitlab-prepared-commit');
+    const fetchedSha = fakeSha('gitlab-fetched-sha');
 
     beforeEach(async () => {
       await initRepo();
