@@ -4,7 +4,7 @@ import type { PackageDependency, PackageFileContent } from '../types.ts';
 
 const methodRegex = regEx(
   `^\\s*[\\w:.]+\\.add_(?<type>runtime_|development_)?dependency\\s*\\(?\\s*` +
-    `(['"])(?<depName>[^'"]+)['"]` +
+    `['"](?<depName>[^'"]+)['"]` +
     `(?<rest>.*)$`,
 );
 
