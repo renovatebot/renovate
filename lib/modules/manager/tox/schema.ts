@@ -8,7 +8,7 @@ import {
 import { pep508ToPackageDependency } from '../pep621/utils.ts';
 import type { PackageDependency } from '../types.ts';
 
-type ToxPackageDependency = z.ZodType<PackageDependency<Record<string, any>>>;
+type ToxPackageDependency = z.ZodType<PackageDependency>;
 
 function Pep508Dep(depType: string): ToxPackageDependency {
   return z.string().transform((x, ctx) => {
