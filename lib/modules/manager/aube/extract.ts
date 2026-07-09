@@ -1,4 +1,4 @@
-import { isArray, isString } from '@sindresorhus/is';
+import { isArray, isPlainObject, isString } from '@sindresorhus/is';
 import { logger } from '../../../logger/index.ts';
 import {
   getParentDir,
@@ -76,11 +76,7 @@ export async function extractAllPackageFiles(
     let workspaces = res?.managerData?.workspaces;
 
     // Support the nested packages property shape
-    if (
-      workspaces !== null &&
-      typeof workspaces === 'object' &&
-      'packages' in workspaces
-    ) {
+    if (isPlainObject(workspaces) && 'packages' in workspaces) {
       workspaces = workspaces.packages;
     }
 
