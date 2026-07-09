@@ -8,7 +8,10 @@ export const url = 'https://tox.wiki/';
 export const categories: Category[] = ['python'];
 
 export const defaultConfig = {
-  managerFilePatterns: ['tox.toml', 'pyproject.toml'],
+  managerFilePatterns: [
+    '**/tox.toml', // root object
+    '**/pyproject.toml', // `[tool.tox]` section
+  ],
 };
 
 export const supportedDatasources = [PypiDatasource.id];
