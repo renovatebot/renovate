@@ -4,7 +4,17 @@
 
 import { z } from 'zod/v4';
 import { logger } from '~test/util.ts';
-import { AsyncResult, Result } from './result.ts';
+import { AsyncResult, Result, type SafeParser } from './result.ts';
+
+function assertTypes(): void {
+  // @ts-expect-error - schemas with nullable output are rejected
+  Result.parse('foo', z.string().nullable());
+  // @ts-expect-error - raw safeParse results must go through .parse()
+  Result.ok('foo').transform((x) => z.string().safeParse(x));
+  // @ts-expect-error - unwrapOrThrow requires an Error-typed channel
+  Result.err('oops' as const).unwrapOrThrow();
+}
+void assertTypes;
 
 describe('util/result', () => {
   describe('Result', () => {
@@ -72,15 +82,6 @@ describe('util/result', () => {
         expect(res).toEqual(Result.err('oops'));
       });
 
-      it('distincts between null and undefined callback results', () => {
-        expect(Result.wrapNullable(() => null, 'null', 'undefined')).toEqual(
-          Result.err('null'),
-        );
-        expect(
-          Result.wrapNullable(() => undefined, 'null', 'undefined'),
-        ).toEqual(Result.err('undefined'));
-      });
-
       it('handles nullable callback error', () => {
         const res = Result.wrapNullable(() => {
           throw 'oops';
@@ -101,16 +102,6 @@ describe('util/result', () => {
       it('wraps nullable value undefined', () => {
         const res = Result.wrapNullable(undefined, 'oops');
         expect(res).toEqual(Result.err('oops'));
-      });
-
-      it('wraps zod parse result', () => {
-        const schema = z.string().transform((x) => x.toUpperCase());
-        expect(Result.wrap(schema.safeParse('foo'))).toEqual(Result.ok('FOO'));
-        expect(Result.wrap(schema.safeParse(42))).toMatchObject(
-          Result.err({
-            issues: [{ code: 'invalid_type', expected: 'string' }],
-          }),
-        );
       });
     });
 
@@ -169,8 +160,9 @@ describe('util/result', () => {
       });
 
       it('throws error for unwrapOrThrow on error result', () => {
-        const res = Result.err('oops');
-        expect(() => res.unwrapOrThrow()).toThrow('oops');
+        const error = new Error('oops');
+        const res = Result.err(error);
+        expect(() => res.unwrapOrThrow()).toThrow(error);
       });
 
       it('unwrapOrNull returns value for ok-result', () => {
@@ -227,9 +219,9 @@ describe('util/result', () => {
         );
       });
 
-      it('automatically converts zod values', () => {
+      it('parses values explicitly in transform chains', () => {
         const schema = z.string().transform((x) => x.toUpperCase());
-        const res = Result.ok('foo').transform((x) => schema.safeParse(x));
+        const res = Result.ok('foo').parse(schema);
         expect(res).toEqual(Result.ok('FOO'));
       });
     });
@@ -238,7 +230,6 @@ describe('util/result', () => {
       it('bypasses ok result', () => {
         const res = Result.ok(42);
         expect(res.catch(() => Result.ok(0))).toEqual(Result.ok(42));
-        expect(res.catch(() => Result.ok(0))).toBe(res);
       });
 
       it('bypasses uncaught transform errors', () => {
@@ -246,7 +237,6 @@ describe('util/result', () => {
           throw 'oops';
         });
         expect(res.catch(() => Result.ok(0))).toEqual(Result._uncaught('oops'));
-        expect(res.catch(() => Result.ok(0))).toBe(res);
       });
 
       it('converts error to Result', () => {
@@ -264,12 +254,9 @@ describe('util/result', () => {
     });
 
     describe('Parsing', () => {
-      it('parses Zod schema', () => {
-        const schema = z
-          .string()
-          .transform((x) => x.toUpperCase())
-          .nullish();
+      const schema = z.string().transform((x) => x.toUpperCase());
 
+      it('parses a schema', () => {
         expect(Result.parse('foo', schema)).toEqual(Result.ok('FOO'));
 
         expect(Result.parse(42, schema).unwrap()).toMatchObject({
@@ -281,34 +268,37 @@ describe('util/result', () => {
             ]),
           }),
         });
-
-        expect(Result.parse(undefined, schema).unwrap()).toMatchObject({
-          err: {
-            issues: [
-              {
-                message: `Result can't accept nullish values, but input was parsed by Zod schema to undefined`,
-              },
-            ],
-          },
-        });
-
-        expect(Result.parse(null, schema).unwrap()).toMatchObject({
-          err: {
-            issues: [
-              {
-                message: `Result can't accept nullish values, but input was parsed by Zod schema to null`,
-              },
-            ],
-          },
-        });
       });
 
-      it('parses Zod schema by piping from Result', () => {
-        const schema = z
-          .string()
-          .transform((x) => x.toUpperCase())
-          .nullish();
+      it('supports non-Zod parsers', () => {
+        const evenParser: SafeParser<number, 'odd'> = {
+          safeParse: (input) =>
+            typeof input === 'number' && input % 2 === 0
+              ? { success: true, data: input }
+              : { success: false, error: 'odd' },
+        };
 
+        expect(Result.parse(2, evenParser)).toEqual(Result.ok(2));
+        expect(Result.parse(3, evenParser)).toEqual(Result.err('odd'));
+      });
+
+      it('routes nullish output from a lying parser to the uncaught channel', () => {
+        const lyingParser: SafeParser<string, Error> = {
+          safeParse: () => ({ success: true, data: null as never }),
+        };
+
+        const result = Result.parse('foo', lyingParser);
+
+        expect(() => result.unwrap()).toThrow(
+          new TypeError('Result.parse: schema output must not be nullish'),
+        );
+        expect(logger.logger.warn).toHaveBeenCalledWith(
+          { err: expect.any(TypeError) },
+          'Result: nullish schema output',
+        );
+      });
+
+      it('parses a schema by piping from Result', () => {
         expect(Result.ok('foo').parse(schema)).toEqual(Result.ok('FOO'));
 
         expect(Result.ok(42).parse(schema).unwrap()).toMatchObject({
@@ -338,18 +328,40 @@ describe('util/result', () => {
         expect(cb).toHaveBeenCalledExactlyOnceWith('oops');
       });
 
+      it('skips value handlers for errors', () => {
+        const cb = vi.fn();
+        Result.err('oops').onValue(cb);
+        expect(cb).not.toHaveBeenCalled();
+      });
+
+      it('skips error handlers for values', () => {
+        const cb = vi.fn();
+        Result.ok(42).onError(cb);
+        expect(cb).not.toHaveBeenCalled();
+      });
+
       it('handles error thrown in value handler', () => {
         const res = Result.ok(42).onValue(() => {
           throw 'oops';
         });
+
         expect(res).toEqual(Result._uncaught('oops'));
+        expect(logger.logger.warn).toHaveBeenCalledWith(
+          { err: 'oops' },
+          'Result: unexpected error in onValue callback',
+        );
       });
 
       it('handles error thrown in error handler', () => {
         const res = Result.err('oops').onError(() => {
           throw 'oops';
         });
+
         expect(res).toEqual(Result._uncaught('oops'));
+        expect(logger.logger.warn).toHaveBeenCalledWith(
+          { err: 'oops' },
+          'Result: unexpected error in onError callback',
+        );
       });
     });
   });
@@ -393,16 +405,6 @@ describe('util/result', () => {
       it('wraps promise returning undefined', async () => {
         const res = Result.wrapNullable(Promise.resolve(undefined), 'oops');
         await expect(res).resolves.toEqual(Result.err('oops'));
-      });
-
-      it('distincts between null and undefined promise results', async () => {
-        await expect(
-          Result.wrapNullable(Promise.resolve(null), 'null', 'undefined'),
-        ).resolves.toEqual(Result.err('null'));
-
-        await expect(
-          Result.wrapNullable(Promise.resolve(undefined), 'null', 'undefined'),
-        ).resolves.toEqual(Result.err('undefined'));
       });
 
       it('handles rejected nullable promise', async () => {
@@ -605,19 +607,17 @@ describe('util/result', () => {
         expect(res).toEqual(Result.ok('F-O-O'));
       });
 
-      it('asynchronously transforms Result to zod values', async () => {
+      it('asynchronously transforms Result before parsing', async () => {
         const schema = z.string().transform((x) => x.toUpperCase());
-        const res = await Result.ok('foo').transform((x) =>
-          Promise.resolve(schema.safeParse(x)),
-        );
+        const res = await Result.ok('foo')
+          .transform((x) => Promise.resolve(x))
+          .parse(schema);
         expect(res).toEqual(Result.ok('FOO'));
       });
 
-      it('transforms AsyncResult to zod values', async () => {
+      it('transforms AsyncResult before parsing', async () => {
         const schema = z.string().transform((x) => x.toUpperCase());
-        const res = await AsyncResult.ok('foo').transform((x) =>
-          schema.safeParse(x),
-        );
+        const res = await AsyncResult.ok('foo').parse(schema);
         expect(res).toEqual(Result.ok('FOO'));
       });
     });
@@ -648,15 +648,25 @@ describe('util/result', () => {
         const result = await error.catch(() => AsyncResult.ok<number>(42));
         expect(result).toEqual(Result.ok(42));
       });
+
+      it('bypasses uncaught AsyncResult errors', async () => {
+        const error = new Error('oops');
+        const handler = vi.fn(() => AsyncResult.ok(0));
+        const result = AsyncResult.ok(42)
+          .transform(() => {
+            throw error;
+          })
+          .catch(handler);
+
+        await expect(result.unwrap()).rejects.toBe(error);
+        expect(handler).not.toHaveBeenCalled();
+      });
     });
   });
 
   describe('Parsing', () => {
-    it('parses Zod schema by piping from AsyncResult', async () => {
-      const schema = z
-        .string()
-        .transform((x) => x.toUpperCase())
-        .nullish();
+    it('parses a schema by piping from AsyncResult', async () => {
+      const schema = z.string().transform((x) => x.toUpperCase());
 
       expect(await AsyncResult.ok('foo').parse(schema)).toEqual(
         Result.ok('FOO'),
@@ -671,6 +681,16 @@ describe('util/result', () => {
           ]),
         }),
       });
+    });
+
+    it('rejects when an async lying parser produces nullish output', async () => {
+      const lyingParser: SafeParser<string, Error> = {
+        safeParse: () => ({ success: true, data: undefined as never }),
+      };
+
+      await expect(
+        AsyncResult.ok('foo').parse(lyingParser).unwrap(),
+      ).rejects.toThrow('Result.parse: schema output must not be nullish');
     });
 
     it('handles uncaught error thrown in the steps before parsing', async () => {
@@ -701,14 +721,24 @@ describe('util/result', () => {
       const res = await AsyncResult.ok(42).onValue(() => {
         throw 'oops';
       });
+
       expect(res).toEqual(Result._uncaught('oops'));
+      expect(logger.logger.warn).toHaveBeenCalledWith(
+        { err: 'oops' },
+        'Result: unexpected error in onValue callback',
+      );
     });
 
     it('handles error thrown in error handler', async () => {
       const res = await AsyncResult.err('oops').onError(() => {
         throw 'oops';
       });
+
       expect(res).toEqual(Result._uncaught('oops'));
+      expect(logger.logger.warn).toHaveBeenCalledWith(
+        { err: 'oops' },
+        'Result: unexpected error in onError callback',
+      );
     });
   });
 });

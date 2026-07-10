@@ -5,6 +5,7 @@ import { logger } from '../../../logger/index.ts';
 import { coerceArray } from '../../../util/array.ts';
 import { getSiblingFileName, localPathExists } from '../../../util/fs/index.ts';
 import { Result } from '../../../util/result.ts';
+import { nonNullish } from '../../../util/schema-utils/index.ts';
 import {
   ensureTrailingSlash,
   isHttpUrl,
@@ -50,7 +51,10 @@ export function getUserPixiConfig(
 
   const { val, err } = Result.parse(
     content,
-    z.union([PixiFile, PixiPyProject.transform((p) => p.tool?.pixi)]),
+    z.union([
+      PixiFile,
+      PixiPyProject.transform((p) => p.tool?.pixi).transform(nonNullish),
+    ]),
   ).unwrap();
 
   if (err) {

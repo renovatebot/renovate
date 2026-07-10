@@ -136,7 +136,7 @@ export class RubygemsDatasource extends Datasource {
     const url = `${path}?${query}`;
     const bufPromise = this.http.getBuffer(url);
     return Result.wrap(bufPromise).transform(({ body }) =>
-      MarshalledVersionInfo.safeParse(Marshal.parse(body)),
+      Result.parse(Marshal.parse(body), MarshalledVersionInfo),
     );
   }
 }

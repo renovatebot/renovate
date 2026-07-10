@@ -16,6 +16,7 @@ import { getGitEnvironmentVariables } from '../../../util/git/auth.ts';
 import { find } from '../../../util/host-rules.ts';
 import { regEx } from '../../../util/regex.ts';
 import { Result } from '../../../util/result.ts';
+import { nonNullish } from '../../../util/schema-utils/index.ts';
 import {
   massage as massageToml,
   parse as parseToml,
@@ -38,7 +39,7 @@ export function getPythonConstraint(
       ({ packageFileContent }) =>
         packageFileContent.deps.find((dep) => dep.depName === 'python')
           ?.currentValue,
-    ),
+    ).transform(nonNullish),
   ).unwrapOrNull();
   if (pyprojectPythonConstraint) {
     logger.debug('Using python version from pyproject.toml');
@@ -47,7 +48,9 @@ export function getPythonConstraint(
 
   const lockfilePythonConstraint = Result.parse(
     existingLockFileContent,
-    Lockfile.transform(({ pythonVersions }) => pythonVersions),
+    Lockfile.transform(({ pythonVersions }) => pythonVersions).transform(
+      nonNullish,
+    ),
   ).unwrapOrNull();
   if (lockfilePythonConstraint) {
     logger.debug('Using python version from poetry.lock');
@@ -74,7 +77,9 @@ export function getPoetryRequirement(
 
   const { val: lockfilePoetryConstraint } = Result.parse(
     existingLockFileContent,
-    Lockfile.transform(({ poetryConstraint }) => poetryConstraint),
+    Lockfile.transform(({ poetryConstraint }) => poetryConstraint).transform(
+      nonNullish,
+    ),
   ).unwrap();
   if (lockfilePoetryConstraint) {
     logger.debug(
@@ -85,7 +90,9 @@ export function getPoetryRequirement(
 
   const { val: pyprojectPoetryConstraint } = Result.parse(
     massageToml(pyProjectContent),
-    PoetryPyProject.transform(({ poetryRequirement }) => poetryRequirement),
+    PoetryPyProject.transform(
+      ({ poetryRequirement }) => poetryRequirement,
+    ).transform(nonNullish),
   ).unwrap();
   if (pyprojectPoetryConstraint) {
     logger.debug(
