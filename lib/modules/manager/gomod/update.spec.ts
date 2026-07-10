@@ -400,6 +400,33 @@ describe('modules/manager/gomod/update', () => {
       expect(res).not.toContain('knative.dev/pkg 4a022ed9999a');
     });
 
+    it('falls back to bare hash when newValue equals currentValue', () => {
+      const fileContent = codeBlock`
+        module example.com/test
+        require (
+          example.private.com/org/module v0.0.0-20250312035536-b7bbf4be5dbd
+        )
+      `;
+      const upgrade = {
+        depName: 'example.private.com/org/module',
+        managerData: { lineNumber: 2, multiLine: true },
+        updateType: 'digest' as const,
+        currentValue: 'v0.0.0-20250312035536-b7bbf4be5dbd',
+        currentDigest: 'b7bbf4be5dbd',
+        newValue: 'v0.0.0-20250312035536-b7bbf4be5dbd',
+        newDigest: '4a022ed9999a',
+        depType: 'require',
+      };
+      const res = updateDependency({
+        fileContent,
+        packageFile: 'go.mod',
+        upgrade,
+      });
+      // Should fall back to bare hash since newValue === currentValue
+      expect(res).toContain('example.private.com/org/module 4a022ed9999a');
+      expect(res).not.toContain('b7bbf4be5dbd');
+    });
+
     it('handles multiline mismatch', () => {
       const upgrade = {
         depName: 'github.com/fatih/color',
