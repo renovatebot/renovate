@@ -24,6 +24,10 @@ const defaultClosedState = 'Closed';
 // the concrete names from them instead of hardcoding process-specific values.
 const openCategories = ['Proposed', 'InProgress'];
 const closedCategories = ['Completed', 'Resolved', 'Removed'];
+// Preferred category for the close target. A `Completed` state (e.g. Agile's
+// `Closed`) is the true "done" state; `Resolved`/`Removed` states also count as
+// closed but must not be picked over `Completed` when moving an item to closed.
+const completedCategories = ['Completed'];
 
 interface WorkItemStates {
   /** State to move a work item to when (re)opening it. */
@@ -76,12 +80,18 @@ export class IssueService {
             .map((s: WorkItemStateColor) => s.name!);
 
         const openNames = namesByCategory(openCategories);
+        const completedNames = namesByCategory(completedCategories);
         const closedNames = namesByCategory(closedCategories);
 
         // First open-category state, else the type's first state overall.
         states.open = openNames[0] ?? stateColors[0].name ?? states.open;
         if (closedNames.length) {
-          states.closed = closedNames[0];
+          // Prefer a `Completed` state as the close target so processes that
+          // order `Resolved` before `Closed` (e.g. some custom Agile
+          // inheritances) still close to `Closed`; fall back to the wider set
+          // only when no `Completed` state exists. Keep the full set for
+          // recognising already-closed items.
+          states.closed = completedNames[0] ?? closedNames[0];
           states.closedNames = new Set(closedNames);
         }
       }
