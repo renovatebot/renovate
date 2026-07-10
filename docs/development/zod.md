@@ -349,16 +349,14 @@ Release.parse('{"version":"1.0.0","releaseTimestamp":null}');
 
 The `Result` (and `AsyncResult`) class represents the result of an operation, like `Result.ok(200)` or `Result.err(404)`.
 
-It supports the `.transform()` method, which is similar to `zod`'s.
+It supports the `.transform()` method, which is similar to Zod's, and `.onValue()` and `.onError()` methods for side-effectful result inspection.
 
-It also supports `.onResult()` and `.onError()` methods for side-effectful result inspection.
+After all result manipulations are done, call `.unwrap()`, `.unwrapOr()` or `.unwrapOrThrow()` to get the underlying result value.
 
-After all result manipulations are done, you may call `.unwrap()`, `.unwrapOrElse()` or `.unwrapOrThrow()` methods to get the underlying result value.
-
-You can wrap the schema parsing result into the `Result` class:
+`Result` is validator-agnostic through its structural `SafeParser` interface. Every Zod schema implements this interface, so use `Result.parse(input, schema)` or `.parse(schema)` as the explicit bridge between schema validation and a result chain:
 
 ```ts
-const { val, err } = Result.parse(url, z.string().url())
+const { val, err } = Result.parse(url, z.url())
   .transform((url) => http.get(url))
   .onError((err) => {
     logger.warn({ err }, 'Failed to fetch something important');
@@ -366,15 +364,20 @@ const { val, err } = Result.parse(url, z.string().url())
   .transform((res) => res.body);
 ```
 
-You can use schema parsing in the middle of the `Result` transform chain:
+Schemas passed to `Result.parse()` must produce non-nullish output. Chain `.transform(nonNullish)` after optional-field extractors to convert absent output into a parse error.
+
+You can also parse in the middle of an asynchronous result chain:
 
 ```ts
 const UserConfig = z.object({
   /* ... */
 });
 
-const config = await Result.wrap(readLocalFile('config.json'))
-  .transform((content) => Json.pipe(UserConfig).safeParse(content))
+const config = await Result.wrapNullable(
+  readLocalFile('config.json'),
+  new Error('config file not found'),
+)
+  .parse(Json.pipe(UserConfig))
   .unwrapOrThrow();
 ```
 
@@ -408,5 +411,5 @@ const users = await http
   .onError((err) => {
     logger.warn({ err }, 'Failed to fetch users');
   })
-  .unwrapOrElse([]);
+  .unwrapOr([]);
 ```
