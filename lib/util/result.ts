@@ -31,6 +31,8 @@ type Res<T extends Val, E extends Val> = Ok<T> | Err<E>;
  * Note: `T extends Val` means schemas with nullable or optional output are
  * rejected at compile time. Apply the `nonNullish` transform from
  * `lib/util/schema-utils` to turn nullish output into a parse error.
+ * Implementations must return a safe-parse result instead of throwing;
+ * thrown errors propagate to the caller.
  */
 export interface SafeParser<T extends Val, E extends Val> {
   safeParse(
@@ -409,7 +411,9 @@ export class Result<T extends Val, E extends Val = Error> {
       | RawValue<U>,
   ): Result<U, E | EE> | AsyncResult<U, E | EE> {
     if (!this.res.ok) {
-      return Result.err(this.res.err);
+      return this.res._uncaught
+        ? Result._uncaught(this.res.err)
+        : Result.err(this.res.err);
     }
 
     try {

@@ -353,15 +353,16 @@ It supports the `.transform()` method, which is similar to Zod's, and `.onValue(
 
 After all result manipulations are done, call `.unwrap()`, `.unwrapOr()` or `.unwrapOrThrow()` to get the underlying result value.
 
-`Result` is validator-agnostic through its structural `SafeParser` interface. Every Zod schema implements this interface, so use `Result.parse(input, schema)` or `.parse(schema)` as the explicit bridge between schema validation and a result chain:
+`Result` is validator-agnostic through its structural `SafeParser` interface. Every Zod schema with non-nullish output implements this interface, so use `Result.parse(input, schema)` or `.parse(schema)` as the explicit bridge between schema validation and a result chain:
 
 ```ts
-const { val, err } = Result.parse(url, z.url())
+const { val, err } = await Result.parse(url, z.url())
   .transform((url) => http.get(url))
   .onError((err) => {
     logger.warn({ err }, 'Failed to fetch something important');
   })
-  .transform((res) => res.body);
+  .transform((res) => res.body)
+  .unwrap();
 ```
 
 Schemas passed to `Result.parse()` must produce non-nullish output. Chain `.transform(nonNullish)` after optional-field extractors to convert absent output into a parse error.

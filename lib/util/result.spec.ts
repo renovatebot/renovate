@@ -219,6 +219,27 @@ describe('util/result', () => {
         );
       });
 
+      it('preserves uncaught errors through chained transforms', () => {
+        const error = new Error('oops');
+        const handler = vi.fn(() => Result.ok(0));
+        const result = Result.ok(42)
+          .transform((): number => {
+            throw error;
+          })
+          .transform((value) => value + 1)
+          .catch(handler);
+
+        let thrown: unknown;
+        try {
+          result.unwrap();
+        } catch (err) {
+          thrown = err;
+        }
+
+        expect(thrown).toBe(error);
+        expect(handler).not.toHaveBeenCalled();
+      });
+
       it('parses values explicitly in transform chains', () => {
         const schema = z.string().transform((x) => x.toUpperCase());
         const res = Result.ok('foo').parse(schema);
