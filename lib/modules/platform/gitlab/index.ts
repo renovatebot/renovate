@@ -1,5 +1,10 @@
 import { setTimeout } from 'node:timers/promises';
-import { isArray, isEmptyArray, isNonEmptyArray } from '@sindresorhus/is';
+import {
+  isArray,
+  isEmptyArray,
+  isNonEmptyArray,
+  isString,
+} from '@sindresorhus/is';
 import pMap from 'p-map';
 import semver from 'semver';
 import { GlobalConfig } from '../../../config/global.ts';
@@ -1044,7 +1049,8 @@ export async function setBranchStatus({
     await getStatus(branchName, false);
   } catch (err) /* v8 ignore next */ {
     if (
-      err.body?.message?.startsWith(
+      isString(err.body?.message) &&
+      err.body.message.startsWith(
         'Cannot transition status via :enqueue from :pending',
       )
     ) {

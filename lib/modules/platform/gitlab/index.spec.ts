@@ -1176,6 +1176,33 @@ describe('modules/platform/gitlab/index', () => {
       );
     });
 
+    it('logs and resolves when GitLab returns an object error message', async () => {
+      const scope = await initRepo();
+      scope
+        .post(
+          '/api/v4/projects/some%2Frepo/statuses/0d9c7726c3d628b7e28af234595cfd20febdbf8e',
+        )
+        .reply(400, { message: { status: ['is invalid'] } })
+        .get(
+          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e',
+        )
+        .reply(200, { last_pipeline: { id: 123 } });
+
+      await expect(
+        gitlab.setBranchStatus({
+          branchName: 'some-branch',
+          context: 'some-context',
+          description: 'some-description',
+          state: 'green',
+          url: 'some-url',
+        }),
+      ).toResolve();
+
+      expect(logger.logger.warn).toHaveBeenCalledWith(
+        'Failed to set branch status',
+      );
+    });
+
     it.each(states)('sets branch status %s', async (state) => {
       const scope = await initRepo();
       scope
