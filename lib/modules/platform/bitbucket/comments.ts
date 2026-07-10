@@ -4,17 +4,12 @@ import type {
   EnsureCommentConfig,
   EnsureCommentRemovalConfig,
 } from '../types.ts';
-import type { Account, Config, PagedResult } from './types.ts';
+import { Comment, PagedResult } from './schema.ts';
+import type { Config } from './types.ts';
 
 export const REOPEN_PR_COMMENT_KEYWORD = 'reopen!';
 
 const bitbucketHttp = new BitbucketHttp();
-
-interface Comment {
-  content: { raw: string };
-  id: number;
-  user: Account;
-}
 
 export type CommentsConfig = Pick<Config, 'repository'>;
 
@@ -27,11 +22,12 @@ async function getComments(
   prNo: number,
 ): Promise<Comment[]> {
   const comments = (
-    await bitbucketHttp.getJsonUnchecked<PagedResult<Comment>>(
+    await bitbucketHttp.getJson(
       `/2.0/repositories/${config.repository}/pullrequests/${prNo}/comments`,
       {
         paginate: true,
       },
+      PagedResult(Comment),
     )
   ).body.values;
 

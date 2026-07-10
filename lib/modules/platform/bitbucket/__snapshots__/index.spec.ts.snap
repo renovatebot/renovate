@@ -124,12 +124,12 @@ exports[`modules/platform/bitbucket/index > getPrList() > filters PR list by aut
     "bodyStruct": {
       "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     },
-    "createdAt": undefined,
+    "createdAt": "2018-07-02T07:02:25.275030+00:00",
     "number": 1,
     "sourceBranch": "branch-a",
     "state": "open",
     "targetBranch": "branch-b",
-    "title": undefined,
+    "title": "title",
   },
 ]
 `;
