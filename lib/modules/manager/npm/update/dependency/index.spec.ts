@@ -211,6 +211,56 @@ describe('modules/manager/npm/update/dependency/index', () => {
       expect(testContent).toEqual(input01Content);
     });
 
+    it('replaces when version is not changing', () => {
+      const upgrade = {
+        depType: 'peerDependencies',
+        depName: 'request',
+        newValue: '>=2.0.0',
+        newName: 'got',
+      };
+      const packageContent = `{
+        "peerDependencies": {
+          "request": ">=2.0.0"
+        }
+      }`;
+      const expected = `{
+        "peerDependencies": {
+          "got": ">=2.0.0"
+        }
+      }`;
+      const testContent = npmUpdater.updateDependency({
+        fileContent: packageContent,
+        packageFile: 'package.json',
+        upgrade,
+      });
+      expect(testContent).toEqual(expected);
+    });
+
+    it('handles the case when version and name are not changing', () => {
+      const upgrade = {
+        depType: 'peerDependencies',
+        depName: 'got',
+        newValue: '>=2.0.0',
+        newName: 'got',
+      };
+      const packageContent = `{
+        "peerDependencies": {
+          "got": ">=2.0.0"
+        }
+      }`;
+      const expected = `{
+        "peerDependencies": {
+          "got": ">=2.0.0"
+        }
+      }`;
+      const testContent = npmUpdater.updateDependency({
+        fileContent: packageContent,
+        packageFile: 'package.json',
+        upgrade,
+      });
+      expect(testContent).toEqual(expected);
+    });
+
     it('returns null if throws error', () => {
       const upgrade = {
         depType: 'blah',
