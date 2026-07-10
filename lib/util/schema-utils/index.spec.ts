@@ -17,6 +17,7 @@ import {
   Yaml,
   isEmailAdress,
   multidocYaml,
+  nonNullish,
   withDebugMessage,
   withDepType,
   withTraceMessage,
@@ -141,6 +142,30 @@ describe('util/schema-utils/index', () => {
             path: ['bbb', 'foo', 'bar'],
           },
         ],
+      });
+    });
+  });
+
+  describe('nonNullish', () => {
+    it('passes through non-nullish values and preserves their type', () => {
+      const schema = z.string().nullable().transform(nonNullish);
+
+      expect(schema.parse('value')).toBe('value');
+      expectTypeOf<z.output<typeof schema>>().toEqualTypeOf<string>();
+    });
+
+    it.each([null, undefined])('rejects %s output', (value) => {
+      const result = z
+        .string()
+        .nullish()
+        .transform(nonNullish)
+        .safeParse(value);
+
+      expect(result).toMatchObject({
+        success: false,
+        error: {
+          issues: [{ code: 'custom', message: 'Expected non-nullish value' }],
+        },
       });
     });
   });
