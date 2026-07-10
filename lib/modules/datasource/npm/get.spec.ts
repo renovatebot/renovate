@@ -41,7 +41,7 @@ describe('modules/datasource/npm/get', () => {
     ];
 
     it.each(configs)('%p', async (npmrc) => {
-      expect.assertions(2);
+      expect.assertions(1);
       httpMock
         .scope('https://test.org', {
           reqheaders: {
@@ -54,9 +54,6 @@ describe('modules/datasource/npm/get', () => {
       setNpmrc(npmrc);
       const registryUrl = resolveRegistryUrl('@myco/test');
       expect(await getDependency(http, registryUrl, '@myco/test')).toBeNull();
-
-      const trace = httpMock.getTrace();
-      expect(trace[0].headers.authorization).toBe('Bearer XXX');
     });
   });
 
@@ -74,7 +71,7 @@ describe('modules/datasource/npm/get', () => {
     ];
 
     it.each(configs)('%p', async (npmrc) => {
-      expect.assertions(2);
+      expect.assertions(1);
       httpMock
         .scope('https://test.org', {
           reqheaders: {
@@ -86,9 +83,6 @@ describe('modules/datasource/npm/get', () => {
       setNpmrc(npmrc);
       const registryUrl = resolveRegistryUrl('@myco/test');
       expect(await getDependency(http, registryUrl, '@myco/test')).toBeNull();
-
-      const trace = httpMock.getTrace();
-      expect(trace[0].headers.authorization).toBe('Basic dGVzdDp0ZXN0');
     });
   });
 
@@ -101,7 +95,7 @@ describe('modules/datasource/npm/get', () => {
     ];
 
     it.each(configs)('%p', async (npmrc) => {
-      expect.assertions(2);
+      expect.assertions(1);
       httpMock
         .scope('https://test.org', { badheaders: ['authorization'] })
         .get(getPath(npmrc))
@@ -109,9 +103,6 @@ describe('modules/datasource/npm/get', () => {
       setNpmrc(npmrc);
       const registryUrl = resolveRegistryUrl('@myco/test');
       expect(await getDependency(http, registryUrl, '@myco/test')).toBeNull();
-
-      const trace = httpMock.getTrace();
-      expect(trace[0].headers.authorization).toBeUndefined();
     });
   });
 
@@ -356,24 +347,6 @@ describe('modules/datasource/npm/get', () => {
       'https://github.com/neutrinojs/neutrino/tree/master/packages/react',
     );
     expect(dep?.sourceDirectory).toBeUndefined();
-
-    expect(httpMock.getTrace()).toMatchInlineSnapshot(`
-      [
-        {
-          "headers": {
-            "accept": "application/json",
-            "accept-encoding": "gzip, deflate, br, zstd",
-            "authorization": "Bearer XXX",
-            "connection": "close",
-            "host": "test.org",
-            "user-agent": "Renovate/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-          },
-          "method": "GET",
-          "status": 200,
-          "url": "https://test.org/@neutrinojs%2Freact",
-        },
-      ]
-    `);
   });
 
   it('handles missing dist-tags latest', async () => {
@@ -504,24 +477,6 @@ describe('modules/datasource/npm/get', () => {
       'https://github.com/neutrinojs/neutrino/tree/master/packages/react',
     );
     expect(dep?.sourceDirectory).toBe('packages/foo');
-
-    expect(httpMock.getTrace()).toMatchInlineSnapshot(`
-      [
-        {
-          "headers": {
-            "accept": "application/json",
-            "accept-encoding": "gzip, deflate, br, zstd",
-            "authorization": "Bearer XXX",
-            "connection": "close",
-            "host": "test.org",
-            "user-agent": "Renovate/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-          },
-          "method": "GET",
-          "status": 200,
-          "url": "https://test.org/@neutrinojs%2Freact",
-        },
-      ]
-    `);
   });
 
   it('handles full repository urls with release source directories', async () => {
@@ -572,24 +527,6 @@ describe('modules/datasource/npm/get', () => {
       'https://bitbucket.org/neutrinojs/neutrino/tree/master/packages/react',
     );
     expect(dep?.sourceDirectory).toBeUndefined();
-
-    expect(httpMock.getTrace()).toMatchInlineSnapshot(`
-      [
-        {
-          "headers": {
-            "accept": "application/json",
-            "accept-encoding": "gzip, deflate, br, zstd",
-            "authorization": "Bearer XXX",
-            "connection": "close",
-            "host": "test.org",
-            "user-agent": "Renovate/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
-          },
-          "method": "GET",
-          "status": 200,
-          "url": "https://test.org/@neutrinojs%2Freact",
-        },
-      ]
-    `);
   });
 
   describe('cache', () => {
