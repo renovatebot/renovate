@@ -1,8 +1,3 @@
-import { createHash, randomUUID } from 'node:crypto';
-import { mkdir, mkdtemp, writeFile } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
-import { dirname, join } from 'node:path';
-import { execa } from 'execa';
 import type { GerritChange } from '../../../../lib/modules/platform/gerrit/schema.ts';
 import type { GerritRequestDetail } from '../../../../lib/modules/platform/gerrit/types.ts';
 import {
@@ -15,15 +10,23 @@ function parseGerritJson(text: string): unknown {
   return JSON.parse(text.replace(/^\)]}'\n/, ''));
 }
 
+function basicAuth(
+  username = GERRIT_ADMIN_USERNAME,
+  password = GERRIT_ADMIN_PASSWORD,
+): string {
+  return `Basic ${Buffer.from(`${username}:${password}`).toString('base64')}`;
+}
+
 async function gerritFetch(
   path: string,
   options: RequestInit = {},
+  auth = basicAuth(),
 ): Promise<Response> {
   const url = `${getBaseUrl()}${path}`;
   const res = await fetch(url, {
     ...options,
     headers: {
-      Authorization: `Basic ${Buffer.from(`${GERRIT_ADMIN_USERNAME}:${GERRIT_ADMIN_PASSWORD}`).toString('base64')}`,
+      Authorization: auth,
       'Content-Type': 'application/json',
       ...(options.headers as Record<string, string>),
     },
@@ -35,6 +38,68 @@ async function gerritFetch(
     );
   }
   return res;
+}
+
+async function gerritJson<T>(path: string, options?: RequestInit): Promise<T> {
+  return parseGerritJson(await (await gerritFetch(path, options)).text()) as T;
+}
+
+/** Create change, edit files, optionally set message / submit. */
+async function writeChange(
+  project: string,
+  files: Record<string, string>,
+  opts: {
+    subject: string;
+    message?: string;
+    submit?: boolean;
+  },
+): Promise<{ number: number; change_id: string }> {
+  const change = await gerritJson<{ _number: number; change_id: string }>(
+    '/a/changes/',
+    {
+      method: 'POST',
+      body: JSON.stringify({
+        project,
+        branch: 'master',
+        subject: opts.subject,
+        status: 'NEW',
+      }),
+    },
+  );
+  const id = String(change._number);
+
+  for (const [path, content] of Object.entries(files)) {
+    await gerritFetch(`/a/changes/${id}/edit/${encodeURIComponent(path)}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/octet-stream' },
+      body: content,
+    });
+  }
+
+  if (opts.message) {
+    const message = opts.message.includes('Change-Id:')
+      ? opts.message
+      : `${opts.message.trimEnd()}\nChange-Id: ${change.change_id}\n`;
+    await gerritFetch(`/a/changes/${id}/edit:message`, {
+      method: 'PUT',
+      body: JSON.stringify({ message }),
+    });
+  }
+
+  await gerritFetch(`/a/changes/${id}/edit:publish`, {
+    method: 'POST',
+    body: JSON.stringify({ notify: 'NONE' }),
+  });
+
+  if (opts.submit) {
+    await setLabel(change._number, 'Code-Review', 2);
+    await gerritFetch(`/a/changes/${id}/submit`, {
+      method: 'POST',
+      body: JSON.stringify({}),
+    });
+  }
+
+  return { number: change._number, change_id: change.change_id };
 }
 
 export async function createProject(project: string): Promise<void> {
@@ -68,11 +133,9 @@ export async function configureAdminSelfApproval(): Promise<void> {
 
 export async function getOpenChanges(project: string): Promise<GerritChange[]> {
   const query = encodeURIComponent(`project:${project} status:open owner:self`);
-  const res = await gerritFetch(
+  return gerritJson(
     `/a/changes/?q=${query}&o=LABELS&o=SUBMITTABLE&o=CURRENT_REVISION&o=CURRENT_COMMIT&o=MESSAGES`,
   );
-  const text = await res.text();
-  return parseGerritJson(text) as GerritChange[];
 }
 
 export async function getChange(
@@ -84,25 +147,20 @@ export async function getChange(
   ],
 ): Promise<GerritChange> {
   const o = requestDetails.map((d) => `o=${d}`).join('&');
-  const qs = o ? `?${o}` : '';
-  const res = await gerritFetch(`/a/changes/${changeNumber}${qs}`);
-  const text = await res.text();
-  return parseGerritJson(text) as GerritChange;
+  return gerritJson(`/a/changes/${changeNumber}${o ? `?${o}` : ''}`);
 }
 
-export async function getReviewers(changeNumber: number): Promise<any[]> {
-  const res = await gerritFetch(`/a/changes/${changeNumber}/reviewers/`);
-  const text = await res.text();
-  return parseGerritJson(text) as any[];
+export async function getReviewers(
+  changeNumber: number,
+): Promise<{ username?: string }[]> {
+  return gerritJson(`/a/changes/${changeNumber}/reviewers/`);
 }
-
-const TAG_PULL_REQUEST_BODY = 'pull-request';
 
 export function getPrBodies(changes: GerritChange[]): string[] {
   return changes.flatMap(
     (change) =>
       change.messages
-        ?.filter((m) => m.tag === TAG_PULL_REQUEST_BODY)
+        ?.filter((m) => m.tag === 'pull-request')
         .map((m) => m.message) ?? [],
   );
 }
@@ -111,48 +169,9 @@ export async function pushFilesToGerrit(
   project: string,
   files: Record<string, string>,
 ): Promise<void> {
-  // 1. Create a change
-  const createRes = await gerritFetch('/a/changes/', {
-    method: 'POST',
-    body: JSON.stringify({
-      project,
-      branch: 'master',
-      subject: 'chore: push files',
-      status: 'NEW',
-    }),
-  });
-  const createText = await createRes.text();
-  const change = parseGerritJson(createText) as { _number: number };
-  const changeId = String(change._number);
-
-  // 2. Add each file via Change Edit
-  for (const [path, content] of Object.entries(files)) {
-    await gerritFetch(
-      `/a/changes/${changeId}/edit/${encodeURIComponent(path)}`,
-      {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/octet-stream' },
-        body: content,
-      },
-    );
-  }
-
-  // 3. Publish the edit
-  await gerritFetch(`/a/changes/${changeId}/edit:publish`, {
-    method: 'POST',
-    body: JSON.stringify({ notify: 'NONE' }),
-  });
-
-  // 4. Approve the change (Code-Review +2)
-  await gerritFetch(`/a/changes/${changeId}/revisions/current/review`, {
-    method: 'POST',
-    body: JSON.stringify({ labels: { 'Code-Review': 2 } }),
-  });
-
-  // 5. Submit the change
-  await gerritFetch(`/a/changes/${changeId}/submit`, {
-    method: 'POST',
-    body: JSON.stringify({}),
+  await writeChange(project, files, {
+    subject: 'chore: push files',
+    submit: true,
   });
 }
 
@@ -176,32 +195,23 @@ export async function getFileContent(
   )}/files/${encodeURIComponent(filePath)}/content`;
   const url = `${getBaseUrl()}${path}`;
   const res = await fetch(url, {
-    headers: {
-      Authorization: `Basic ${Buffer.from(
-        `${GERRIT_ADMIN_USERNAME}:${GERRIT_ADMIN_PASSWORD}`,
-      ).toString('base64')}`,
-    },
+    headers: { Authorization: basicAuth() },
   });
   if (res.status === 404) {
     return null;
   }
   if (!res.ok) {
-    const body = await res.text();
     throw new Error(
-      `Gerrit request failed: GET ${url} → ${res.status} ${res.statusText}\n${body}`,
+      `Gerrit request failed: GET ${url} → ${res.status} ${res.statusText}\n${await res.text()}`,
     );
   }
-  const b64 = await res.text();
-  return Buffer.from(b64, 'base64').toString();
+  return Buffer.from(await res.text(), 'base64').toString();
 }
 
-export async function abandonChange(
-  changeNumber: number,
-  message?: string,
-): Promise<void> {
+export async function abandonChange(changeNumber: number): Promise<void> {
   await gerritFetch(`/a/changes/${changeNumber}/abandon`, {
     method: 'POST',
-    body: JSON.stringify({ message, notify: 'OWNER_REVIEWERS' }),
+    body: JSON.stringify({ notify: 'OWNER_REVIEWERS' }),
   });
 }
 
@@ -216,23 +226,13 @@ export async function setLabel(
   });
 }
 
-export async function submitChange(changeNumber: number): Promise<void> {
-  await gerritFetch(`/a/changes/${changeNumber}/submit`, {
-    method: 'POST',
-    body: JSON.stringify({}),
-  });
-}
-
 export async function setHashtags(
   changeNumber: number,
-  { add = [], remove = [] }: { add?: string[]; remove?: string[] },
+  add: string[],
 ): Promise<void> {
-  if (add.length === 0 && remove.length === 0) {
-    return;
-  }
   await gerritFetch(`/a/changes/${changeNumber}/hashtags`, {
     method: 'POST',
-    body: JSON.stringify({ add, remove }),
+    body: JSON.stringify({ add }),
   });
 }
 
@@ -255,7 +255,6 @@ export async function createGerritUser(
   password: string,
   displayName = username,
 ): Promise<void> {
-  // Create the account as admin
   await gerritFetch(`/a/accounts/${encodeURIComponent(username)}`, {
     method: 'PUT',
     body: JSON.stringify({
@@ -264,8 +263,6 @@ export async function createGerritUser(
       email: `${username}@example.com`,
     }),
   });
-
-  // Set the HTTP password for the new user
   await gerritFetch(
     `/a/accounts/${encodeURIComponent(username)}/password.http`,
     {
@@ -282,58 +279,28 @@ export async function amendChangeAsOtherUser(
   filePath: string,
   content: string,
 ): Promise<void> {
-  const auth = `Basic ${Buffer.from(`${username}:${password}`).toString('base64')}`;
-  const base = getBaseUrl().replace(/\/$/, '');
-
-  // Upload file via the change edit API as the other user (this will create a new revision)
-  const editUrl = `${base}/a/changes/${changeNumber}/edit/${encodeURIComponent(filePath)}`;
-  const editRes = await fetch(editUrl, {
-    method: 'PUT',
-    headers: {
-      Authorization: auth,
-      'Content-Type': 'application/octet-stream',
+  const auth = basicAuth(username, password);
+  await gerritFetch(
+    `/a/changes/${changeNumber}/edit/${encodeURIComponent(filePath)}`,
+    {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/octet-stream' },
+      body: content,
     },
-    body: content,
-  });
-  if (!editRes.ok) {
-    const body = await editRes.text();
-    throw new Error(
-      `amendChangeAsOtherUser edit failed: ${editRes.status} ${body}`,
-    );
-  }
-
-  // Publish the edit → creates new patch set with uploader = the authenticated user
-  const publishUrl = `${base}/a/changes/${changeNumber}/edit:publish`;
-  const publishRes = await fetch(publishUrl, {
-    method: 'POST',
-    headers: {
-      Authorization: auth,
-      'Content-Type': 'application/json',
+    auth,
+  );
+  await gerritFetch(
+    `/a/changes/${changeNumber}/edit:publish`,
+    {
+      method: 'POST',
+      body: JSON.stringify({ notify: 'NONE' }),
     },
-    body: JSON.stringify({ notify: 'NONE' }),
-  });
-  if (!publishRes.ok) {
-    const body = await publishRes.text();
-    throw new Error(
-      `amendChangeAsOtherUser publish failed: ${publishRes.status} ${body}`,
-    );
-  }
-}
-
-/** Gerrit Change-Id must be `I` + 40 hex chars (SHA-1 format). */
-function makeChangeId(): string {
-  const h = createHash('sha1')
-    .update(randomUUID() + Date.now().toString(16))
-    .digest('hex');
-  return `I${h}`;
+    auth,
+  );
 }
 
 /**
- * Creates an *open* (unsubmitted) Gerrit change that looks like one created by Renovate:
- * - commit message contains `Renovate-Branch: <branchName>`
- * - has a tagged 'pull-request' message with the given body
- *
- * Returns the change number and current revision sha.
+ * Open change that looks like Renovate's: Renovate-Branch footer + pull-request tag.
  */
 export async function createOpenRenovateChange(
   project: string,
@@ -344,67 +311,12 @@ export async function createOpenRenovateChange(
     files: Record<string, string>;
   },
 ): Promise<{ number: number; revision: string }> {
-  const tmp = await mkdtemp(join(tmpdir(), 'gerrit-synth-'));
-  const base = getBaseUrl().replace(/\/$/, '');
-  const remote = `${base.replace(
-    'http://',
-    `http://${GERRIT_ADMIN_USERNAME}:${GERRIT_ADMIN_PASSWORD}@`,
-  )}/a/${encodeURIComponent(project)}`;
-
-  // Prepare a git repo with the desired commit (with footer), based on current master
-  await execa('git', ['init', '-b', 'main'], { cwd: tmp });
-  await execa('git', ['config', 'user.name', 'Renovate Gerrit'], { cwd: tmp });
-  await execa('git', ['config', 'user.email', 'renovate-gerrit@example.com'], {
-    cwd: tmp,
-  });
-  await execa('git', ['remote', 'add', 'origin', remote], { cwd: tmp });
-
-  // Fetch current master so our commit has common ancestry
-  await execa('git', ['fetch', 'origin', 'master', '--depth=1'], { cwd: tmp });
-  await execa('git', ['reset', '--hard', 'FETCH_HEAD'], { cwd: tmp });
-
-  for (const [filePath, content] of Object.entries(opts.files)) {
-    const full = join(tmp, filePath);
-    await mkdir(dirname(full), { recursive: true });
-    await writeFile(full, content);
-    await execa('git', ['add', filePath], { cwd: tmp });
-  }
-
-  const fullMessage = `${opts.subject}\n\nRenovate-Branch: ${opts.branchName}\nChange-Id: ${makeChangeId()}`;
-  await execa('git', ['commit', '-m', fullMessage], { cwd: tmp });
-
-  // Push for review (creates open change)
-  const push = await execa('git', ['push', 'origin', 'HEAD:refs/for/master'], {
-    cwd: tmp,
-    all: true,
+  const created = await writeChange(project, opts.files, {
+    subject: opts.subject,
+    message: `${opts.subject}\n\nRenovate-Branch: ${opts.branchName}\n`,
   });
 
-  // Parse change number from output, e.g. ".../c/NNN ..." or "New Changes:"
-  const out = push.all ?? push.stdout ?? '';
-  const match = /\/\+(\d+)|\/c\/(\d+)|#(\d+)/.exec(out);
-  let changeNum = match
-    ? parseInt(match[1] || match[2] || match[3] || '0', 10) || undefined
-    : undefined;
-
-  if (!changeNum) {
-    // Fallback: query the most recent open change by us with matching subject fragment
-    const recent = await getOpenChanges(project);
-    const found = recent.find((c) =>
-      c.subject.includes(opts.subject.slice(0, 20)),
-    );
-    if (found) {
-      changeNum = found._number;
-    }
-  }
-
-  if (!changeNum) {
-    throw new Error(
-      `Could not determine change number after synthetic push. Output:\n${out}`,
-    );
-  }
-
-  // Add the PR body as tagged message (like Renovate does)
-  await gerritFetch(`/a/changes/${changeNum}/revisions/current/review`, {
+  await gerritFetch(`/a/changes/${created.number}/revisions/current/review`, {
     method: 'POST',
     body: JSON.stringify({
       message: opts.prBody,
@@ -413,12 +325,9 @@ export async function createOpenRenovateChange(
     }),
   });
 
-  // Fetch current revision
-  const ch = await getChange(changeNum, ['CURRENT_REVISION']);
-  const revision = ch.current_revision!;
-  if (!revision) {
+  const ch = await getChange(created.number, ['CURRENT_REVISION']);
+  if (!ch.current_revision) {
     throw new Error('Synthetic change has no current_revision');
   }
-
-  return { number: changeNum, revision };
+  return { number: created.number, revision: ch.current_revision };
 }
