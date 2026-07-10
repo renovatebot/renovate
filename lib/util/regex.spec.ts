@@ -1,10 +1,16 @@
-import RE2 from 're2';
 import { CONFIG_VALIDATION } from '../constants/error-messages.ts';
-import { regEx } from './regex.ts';
+import { regEx, regexEngineStatus } from './regex.ts';
 
 describe('util/regex', () => {
-  it('uses RE2', () => {
-    expect(regEx('foo')).toBeInstanceOf(RE2);
+  it('uses the available regex engine', async () => {
+    const regex = regEx('foo');
+    // Import RE2 only after Renovate confirms its native addon can be loaded.
+    const ExpectedRegExp =
+      regexEngineStatus.type === 'available'
+        ? (await import('re2')).default
+        : RegExp;
+
+    expect(regex).toBeInstanceOf(ExpectedRegExp);
   });
 
   it('throws unsafe 2', () => {
@@ -12,7 +18,8 @@ describe('util/regex', () => {
   });
 
   it('reuses flags from regex', () => {
-    expect(regEx(/foo/i).flags).toBe('iu');
+    const expectedFlags = regexEngineStatus.type === 'available' ? 'iu' : 'i';
+    expect(regEx(/foo/i).flags).toBe(expectedFlags);
   });
 
   it('caches non-stateful regex', () => {
@@ -25,8 +32,10 @@ describe('util/regex', () => {
     expect(regEx(/bar/g)).not.toBe(/bar/g);
   });
 
-  it('Falls back to RegExp', async () => {
+  it('falls back to RegExp', async () => {
     vi.resetModules();
+    // Exercise a load failure even if RENOVATE_X_IGNORE_RE2 is set externally.
+    vi.doMock('./env.ts', () => ({ getEnv: () => ({}) }));
     vi.doMock('../expose.ts', () => ({
       re2: () => {
         throw new Error();
@@ -34,6 +43,7 @@ describe('util/regex', () => {
     }));
 
     const regex = await import('./regex.ts');
+    expect(regex.regexEngineStatus.type).toBe('unavailable');
     expect(regex.regEx('foo')).toBeInstanceOf(RegExp);
   });
 });
