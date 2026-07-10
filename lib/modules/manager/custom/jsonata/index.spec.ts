@@ -371,8 +371,6 @@ describe('modules/manager/custom/jsonata/index', () => {
       matchStrings: [`{"depName": "foo"}`, `{"depName": "bar"}`],
       currentValueTemplate: '1.0.0',
       datasourceTemplate: 'npm',
-      // should be included present extract result as it is not valid jsonata manager template
-      // adding here for testing
       autoReplaceStringTemplate: `{{{depName}}}:{{{newValue}}}`,
     };
     const res = await extractPackageFile('{}', 'unused', config);
@@ -393,6 +391,7 @@ describe('modules/manager/custom/jsonata/index', () => {
       matchStrings: [`{"depName": "foo"}`, `{"depName": "bar"}`],
       currentValueTemplate: '1.0.0',
       datasourceTemplate: 'npm',
+      autoReplaceStringTemplate: `{{{depName}}}:{{{newValue}}}`,
     });
   });
 
