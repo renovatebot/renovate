@@ -1294,8 +1294,9 @@ export async function prepareCommit({
           const addParams =
             fileName === getConfigFileNames()[0] ? ['-f', fileName] : fileName;
           await git.add(addParams);
-          if (file.isExecutable) {
-            await git.raw(['update-index', '--chmod=+x', fileName]);
+          if (file.isExecutable !== undefined) {
+            const mode = file.isExecutable ? '+x' : '-x';
+            await git.raw(['update-index', `--chmod=${mode}`, fileName]);
           }
           addedModifiedFiles.push(fileName);
         } catch (err) /* v8 ignore next -- TODO: add test #40625 */ {

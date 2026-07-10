@@ -999,6 +999,31 @@ describe('util/git/index', { timeout: 30000 }, () => {
       const result = await repo.raw(['ls-tree', 'HEAD', 'some-executable']);
       expect(result).toStartWith('100755');
     });
+
+    it('removes the executable bit', async () => {
+      const repo = simpleGit(tmpDir.path);
+      await fs.writeFile(`${tmpDir.path}/executable`, 'executable');
+      await repo.add('executable');
+      await repo.raw(['update-index', '--chmod=+x', 'executable']);
+      await repo.commit('Add executable');
+      await repo.push('origin', defaultBranch);
+
+      const file: FileChange = {
+        type: 'addition',
+        path: 'executable',
+        contents: 'updated contents',
+        isExecutable: false,
+      };
+      const commit = await git.commitFiles({
+        branchName: 'renovate/past_branch',
+        files: [file],
+        message: 'Update something',
+      });
+      expect(commit).not.toBeNull();
+
+      const result = await repo.raw(['ls-tree', 'HEAD', 'executable']);
+      expect(result).toStartWith('100644');
+    });
   });
 
   describe('getCommitMessages()', () => {

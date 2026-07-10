@@ -1,6 +1,7 @@
 // TODO #22198
 
 import crypto from 'node:crypto';
+import os from 'node:os';
 import { isArray, isNonEmptyArray } from '@sindresorhus/is';
 import upath from 'upath';
 import { GlobalConfig } from '../../../../config/global.ts';
@@ -20,6 +21,7 @@ import {
   outputCacheFile,
   privateCacheDir,
   readLocalFile,
+  statLocalFile,
   writeLocalFile,
 } from '../../../../util/fs/index.ts';
 import { getGitEnvironmentVariables } from '../../../../util/git/auth.ts';
@@ -274,16 +276,25 @@ export async function postUpgradeCommandsExecutor(
               'Post-upgrade file saved',
             );
             const existingContent = await readLocalFile(relativePath);
+            const fileStats = await statLocalFile(relativePath);
+            const isExecutable =
+              os.platform() === 'win32' || !fileStats
+                ? undefined
+                : (fileStats.mode & 0o100) !== 0;
             const existingUpdatedArtifacts = updatedArtifacts.find(
               (ua) => ua.path === relativePath,
             );
             if (existingUpdatedArtifacts?.type === 'addition') {
               existingUpdatedArtifacts.contents = existingContent;
+              if (isExecutable !== undefined) {
+                existingUpdatedArtifacts.isExecutable = isExecutable;
+              }
             } else {
               updatedArtifacts.push({
                 type: 'addition',
                 path: relativePath,
                 contents: existingContent,
+                ...(isExecutable === undefined ? {} : { isExecutable }),
               });
             }
             // If the file is deleted by a previous post-update command, remove the deletion from updatedArtifacts

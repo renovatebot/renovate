@@ -1,3 +1,5 @@
+import type { Stats } from 'node:fs';
+import os from 'node:os';
 import type { DirectoryResult } from 'tmp-promise';
 import { dir } from 'tmp-promise';
 import upath from 'upath';
@@ -16,6 +18,7 @@ vi.mock('../../../../util/git/auth.ts');
 
 const exec = vi.mocked(_exec);
 const gitAuth = vi.mocked(_gitAuth);
+const platform = vi.spyOn(os, 'platform');
 
 describe('workers/repository/update/branch/execute-post-upgrade-commands', () => {
   describe('postUpgradeCommandsExecutor', () => {
@@ -23,6 +26,7 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
 
     beforeEach(async () => {
       GlobalConfig.reset();
+      platform.mockReturnValue('linux');
 
       tmpDir = await dir({ unsafeCleanup: true });
     });
@@ -523,6 +527,162 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
       expect(res.updatedArtifacts).toHaveLength(1);
       expect(res.updatedArtifacts[0].path).toBe('other-file.txt');
       expect(res.updatedArtifacts[0].type).toBe('addition');
+    });
+
+    it('preserves executable modes from post-upgrade commands', async () => {
+      const commands = partial<BranchUpgradeConfig>([
+        {
+          manager: 'some-manager',
+          branchName: 'main',
+          postUpgradeTasks: {
+            executionMode: 'branch',
+            commands: ['command'],
+            fileFilters: ['*.txt'],
+          },
+        },
+      ]);
+      const config: BranchConfig = {
+        manager: 'some-manager',
+        updatedPackageFiles: [],
+        updatedArtifacts: [
+          {
+            type: 'addition',
+            path: 'existing.txt',
+            contents: 'old content',
+            isExecutable: true,
+          },
+          {
+            type: 'addition',
+            path: 'unknown-mode.txt',
+            contents: 'old content',
+            isExecutable: true,
+          },
+        ],
+        upgrades: [],
+        branchName: 'main',
+        baseBranch: 'base',
+      };
+      git.getRepoStatus.mockResolvedValueOnce(
+        partial<StatusResult>({
+          modified: ['existing.txt', 'unknown-mode.txt'],
+          not_added: ['created.txt', 'group-only-executable.txt'],
+          deleted: [],
+        }),
+      );
+      GlobalConfig.set({
+        localDir: import.meta.dirname,
+        allowedCommands: ['some-command'],
+      });
+      fs.localPathIsFile.mockResolvedValueOnce(true);
+      fs.localPathExists.mockResolvedValueOnce(true);
+      fs.readLocalFile
+        .mockResolvedValueOnce('created content')
+        .mockResolvedValueOnce('group-only executable content')
+        .mockResolvedValueOnce('existing content')
+        .mockResolvedValueOnce('unknown mode content');
+      fs.statLocalFile
+        .mockResolvedValueOnce(partial<Stats>({ mode: 0o755 }))
+        .mockResolvedValueOnce(partial<Stats>({ mode: 0o011 }))
+        .mockResolvedValueOnce(partial<Stats>({ mode: 0o644 }))
+        .mockResolvedValueOnce(null);
+
+      const res = await postUpgradeCommands.postUpgradeCommandsExecutor(
+        commands,
+        config,
+      );
+
+      expect(res.updatedArtifacts).toEqual([
+        {
+          type: 'addition',
+          path: 'existing.txt',
+          contents: 'existing content',
+          isExecutable: false,
+        },
+        {
+          type: 'addition',
+          path: 'unknown-mode.txt',
+          contents: 'unknown mode content',
+          isExecutable: true,
+        },
+        {
+          type: 'addition',
+          path: 'created.txt',
+          contents: 'created content',
+          isExecutable: true,
+        },
+        {
+          type: 'addition',
+          path: 'group-only-executable.txt',
+          contents: 'group-only executable content',
+          isExecutable: false,
+        },
+      ]);
+    });
+
+    it('preserves known executable modes on Windows', async () => {
+      platform.mockReturnValue('win32');
+      const commands = partial<BranchUpgradeConfig>([
+        {
+          manager: 'some-manager',
+          branchName: 'main',
+          postUpgradeTasks: {
+            executionMode: 'branch',
+            commands: ['command'],
+            fileFilters: ['*.txt'],
+          },
+        },
+      ]);
+      const config: BranchConfig = {
+        manager: 'some-manager',
+        updatedPackageFiles: [],
+        updatedArtifacts: [
+          {
+            type: 'addition',
+            path: 'existing.txt',
+            contents: 'old content',
+            isExecutable: true,
+          },
+        ],
+        upgrades: [],
+        branchName: 'main',
+        baseBranch: 'base',
+      };
+      git.getRepoStatus.mockResolvedValueOnce(
+        partial<StatusResult>({
+          modified: ['existing.txt'],
+          not_added: ['created.txt'],
+          deleted: [],
+        }),
+      );
+      GlobalConfig.set({
+        localDir: import.meta.dirname,
+        allowedCommands: ['some-command'],
+      });
+      fs.localPathIsFile.mockResolvedValueOnce(true);
+      fs.localPathExists.mockResolvedValueOnce(true);
+      fs.readLocalFile
+        .mockResolvedValueOnce('created content')
+        .mockResolvedValueOnce('existing content');
+      fs.statLocalFile.mockResolvedValue(partial<Stats>({ mode: 0o644 }));
+
+      const res = await postUpgradeCommands.postUpgradeCommandsExecutor(
+        commands,
+        config,
+      );
+
+      expect(res.updatedArtifacts).toEqual([
+        {
+          type: 'addition',
+          path: 'existing.txt',
+          contents: 'existing content',
+          isExecutable: true,
+        },
+        {
+          type: 'addition',
+          path: 'created.txt',
+          contents: 'created content',
+        },
+      ]);
     });
 
     it('handles previously-deleted files which are re-added', async () => {
