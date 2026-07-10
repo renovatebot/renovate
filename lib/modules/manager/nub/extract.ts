@@ -1,4 +1,4 @@
-import { isArray, isString } from '@sindresorhus/is';
+import { isArray, isPlainObject, isString } from '@sindresorhus/is';
 import { logger } from '../../../logger/index.ts';
 import {
   getParentDir,
@@ -24,7 +24,7 @@ export async function processPackageFile(
 ): Promise<PackageFile | null> {
   const fileContent = await readLocalFile(packageFile, 'utf8');
   if (!fileContent) {
-    logger.warn({ fileName: packageFile }, 'Could not read file content');
+    logger.debug({ fileName: packageFile }, 'Could not read file content');
     return null;
   }
   let packageJson: NpmPackage;
@@ -74,7 +74,9 @@ export async function extractAllPackageFiles(
     let workspaces = res?.managerData?.workspaces;
 
     // nub also accepts the object form `workspaces: { packages: [...] }`.
-    if (typeof workspaces === 'object' && 'packages' in workspaces) {
+    // isPlainObject (not `typeof === 'object'`) also rejects null, which would
+    // otherwise throw on the `'packages' in workspaces` check.
+    if (isPlainObject(workspaces) && 'packages' in workspaces) {
       workspaces = workspaces.packages;
     }
 

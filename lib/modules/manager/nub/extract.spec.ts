@@ -230,6 +230,34 @@ describe('modules/manager/nub/extract', () => {
       ]);
     });
 
+    it('skips workspace processing when workspaces is null', async () => {
+      fs.getSiblingFileName.mockReturnValue('package.json');
+      // `typeof null === 'object'`, so a raw object check would throw on the
+      // `'packages' in workspaces` guard; isPlainObject rejects null.
+      fs.readLocalFile.mockResolvedValueOnce(
+        JSON.stringify({
+          name: 'test',
+          version: '0.0.1',
+          dependencies: { dep1: '1.0.0' },
+          workspaces: null,
+        }),
+      );
+
+      const packageFiles = await extractAllPackageFiles({}, [
+        'nub.lock',
+        'package.json',
+        'packages/pkg1/package.json',
+      ]);
+
+      expect(packageFiles).toMatchObject([
+        {
+          packageFile: 'package.json',
+          packageFileVersion: '0.0.1',
+          lockFiles: ['nub.lock'],
+        },
+      ]);
+    });
+
     it('extracts .npmrc from sibling or parent directory', async () => {
       fs.getSiblingFileName.mockReturnValueOnce('package.json');
       fs.findLocalSiblingOrParent.mockImplementation(

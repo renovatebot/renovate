@@ -1,4 +1,5 @@
-import _fs from 'fs-extra';
+import type { MockedFunction } from 'vitest';
+import { fs } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import type { RepoGlobalConfig } from '../../../config/types.ts';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
@@ -8,10 +9,16 @@ import type { UpdateArtifact } from '../types.ts';
 import { updateArtifacts } from './artifacts.ts';
 
 vi.mock('../../../util/exec/index.ts');
-vi.mock('fs-extra');
+vi.mock('../../../util/fs/index.ts');
 
 const exec = vi.mocked(_exec);
-const fs = vi.mocked(_fs);
+
+// `readLocalFile` is overloaded; `vi.mocked` resolves it to the string (utf8)
+// overload, so lockfile reads — which resolve to a Buffer — are set through this
+// typed handle rather than an `as never` cast.
+const readLockFile = fs.readLocalFile as MockedFunction<
+  (fileName: string) => Promise<Buffer | null>
+>;
 
 const globalConfig: RepoGlobalConfig = {
   localDir: '',
@@ -53,8 +60,8 @@ describe('modules/manager/nub/artifacts', () => {
         { manager: 'nub', lockFiles: ['nub.lock'] },
       ];
       const oldLock = Buffer.from('old');
-      fs.readFile.mockResolvedValueOnce(oldLock as never);
-      fs.readFile.mockResolvedValueOnce(oldLock as never);
+      readLockFile.mockResolvedValueOnce(oldLock);
+      readLockFile.mockResolvedValueOnce(oldLock);
       expect(await updateArtifacts(updateArtifact)).toBeNull();
     });
 
@@ -63,11 +70,10 @@ describe('modules/manager/nub/artifacts', () => {
         { manager: 'nub', lockFiles: ['nub.lock'] },
       ];
       const oldLock = Buffer.from('old');
-      fs.readFile.mockResolvedValueOnce(oldLock as never);
-      // npmrc
-      fs.readFile.mockResolvedValueOnce('# dummy' as never);
+      readLockFile.mockResolvedValueOnce(oldLock);
+      fs.readLocalFile.mockResolvedValueOnce('# dummy'); // npmrc
       const newLock = Buffer.from('new');
-      fs.readFile.mockResolvedValueOnce(newLock as never);
+      readLockFile.mockResolvedValueOnce(newLock);
       expect(await updateArtifacts(updateArtifact)).toEqual([
         {
           file: {
@@ -85,10 +91,10 @@ describe('modules/manager/nub/artifacts', () => {
         { manager: 'nub', lockFiles: ['nub.lock'] },
       ];
       const oldLock = Buffer.from('old');
-      fs.readFile.mockResolvedValueOnce(oldLock as never);
-      fs.readFile.mockResolvedValueOnce('# dummy' as never);
+      readLockFile.mockResolvedValueOnce(oldLock);
+      fs.readLocalFile.mockResolvedValueOnce('# dummy'); // npmrc
       const newLock = Buffer.from('new');
-      fs.readFile.mockResolvedValueOnce(newLock as never);
+      readLockFile.mockResolvedValueOnce(newLock);
 
       const result = await updateArtifacts(updateArtifact);
 
@@ -122,11 +128,10 @@ describe('modules/manager/nub/artifacts', () => {
       ];
       updateArtifact.config.isLockFileMaintenance = true;
       const oldLock = Buffer.from('old');
-      fs.readFile.mockResolvedValueOnce(oldLock as never);
-      // npmrc
-      fs.readFile.mockResolvedValueOnce('# dummy' as never);
+      readLockFile.mockResolvedValueOnce(oldLock);
+      fs.readLocalFile.mockResolvedValueOnce('# dummy'); // npmrc
       const newLock = Buffer.from('new');
-      fs.readFile.mockResolvedValueOnce(newLock as never);
+      readLockFile.mockResolvedValueOnce(newLock);
       expect(await updateArtifacts(updateArtifact)).toEqual([
         {
           file: {
@@ -142,11 +147,10 @@ describe('modules/manager/nub/artifacts', () => {
       updateArtifact.config.lockFiles = ['nub.lock'];
       updateArtifact.config.isLockFileMaintenance = true;
       const oldLock = Buffer.from('old');
-      fs.readFile.mockResolvedValueOnce(oldLock as never);
-      // npmrc
-      fs.readFile.mockResolvedValueOnce('# dummy' as never);
+      readLockFile.mockResolvedValueOnce(oldLock);
+      fs.readLocalFile.mockResolvedValueOnce('# dummy'); // npmrc
       const newLock = Buffer.from('new');
-      fs.readFile.mockResolvedValueOnce(newLock as never);
+      readLockFile.mockResolvedValueOnce(newLock);
       expect(await updateArtifacts(updateArtifact)).toEqual([
         {
           file: {
@@ -168,8 +172,7 @@ describe('modules/manager/nub/artifacts', () => {
       updateArtifact.updatedDeps = [
         { manager: 'nub', lockFiles: ['nub.lock'] },
       ];
-      const oldLock = Buffer.from('old');
-      fs.readFile.mockResolvedValueOnce(oldLock as never);
+      readLockFile.mockResolvedValueOnce(Buffer.from('old'));
       exec.mockRejectedValueOnce(execError);
       await expect(updateArtifacts(updateArtifact)).rejects.toThrow(
         TEMPORARY_ERROR,
@@ -186,8 +189,7 @@ describe('modules/manager/nub/artifacts', () => {
       updateArtifact.updatedDeps = [
         { manager: 'nub', lockFiles: ['nub.lock'] },
       ];
-      const oldLock = Buffer.from('old');
-      fs.readFile.mockResolvedValueOnce(oldLock as never);
+      readLockFile.mockResolvedValueOnce(Buffer.from('old'));
       exec.mockRejectedValueOnce(execError);
       expect(await updateArtifacts(updateArtifact)).toEqual([
         { artifactError: { fileName: 'nub.lock', stderr: 'nope' } },
@@ -196,58 +198,52 @@ describe('modules/manager/nub/artifacts', () => {
   });
 
   describe('nub command execution', () => {
-    it('omits --ignore-scripts only when scripts are explicitly allowed', async () => {
-      const testCases = [
-        {
-          allowScripts: undefined,
-          ignoreScripts: undefined,
-          expectedCmd:
-            'nub install --lockfile-only --no-frozen-lockfile --ignore-scripts',
-        },
-        {
-          allowScripts: false,
-          ignoreScripts: undefined,
-          expectedCmd:
-            'nub install --lockfile-only --no-frozen-lockfile --ignore-scripts',
-        },
-        {
-          allowScripts: true,
-          ignoreScripts: undefined,
-          expectedCmd: 'nub install --lockfile-only --no-frozen-lockfile',
-        },
-        {
-          allowScripts: true,
-          ignoreScripts: true,
-          expectedCmd:
-            'nub install --lockfile-only --no-frozen-lockfile --ignore-scripts',
-        },
-        {
-          allowScripts: true,
-          ignoreScripts: false,
-          expectedCmd: 'nub install --lockfile-only --no-frozen-lockfile',
-        },
-      ];
-
-      for (const testCase of testCases) {
-        GlobalConfig.set({
-          ...globalConfig,
-          allowScripts: testCase.allowScripts,
-        });
+    it.each([
+      {
+        allowScripts: undefined,
+        ignoreScripts: undefined,
+        expectedCmd:
+          'nub install --lockfile-only --no-frozen-lockfile --ignore-scripts',
+      },
+      {
+        allowScripts: false,
+        ignoreScripts: undefined,
+        expectedCmd:
+          'nub install --lockfile-only --no-frozen-lockfile --ignore-scripts',
+      },
+      {
+        allowScripts: true,
+        ignoreScripts: undefined,
+        expectedCmd: 'nub install --lockfile-only --no-frozen-lockfile',
+      },
+      {
+        allowScripts: true,
+        ignoreScripts: true,
+        expectedCmd:
+          'nub install --lockfile-only --no-frozen-lockfile --ignore-scripts',
+      },
+      {
+        allowScripts: true,
+        ignoreScripts: false,
+        expectedCmd: 'nub install --lockfile-only --no-frozen-lockfile',
+      },
+    ])(
+      'omits --ignore-scripts only when scripts are explicitly allowed (allowScripts=$allowScripts, ignoreScripts=$ignoreScripts)',
+      async ({ allowScripts, ignoreScripts, expectedCmd }) => {
+        GlobalConfig.set({ ...globalConfig, allowScripts });
         const updateArtifact: UpdateArtifact = {
-          config: { ignoreScripts: testCase.ignoreScripts },
+          config: { ignoreScripts },
           newPackageFileContent: '',
           packageFileName: '',
           updatedDeps: [{ manager: 'nub', lockFiles: ['nub.lock'] }],
         };
 
-        const oldLock = Buffer.from('old');
-        fs.readFile.mockResolvedValueOnce(oldLock as never);
-        const newLock = Buffer.from('new');
-        fs.readFile.mockResolvedValueOnce(newLock as never);
+        readLockFile.mockResolvedValueOnce(Buffer.from('old'));
+        readLockFile.mockResolvedValueOnce(Buffer.from('new'));
 
         await updateArtifacts(updateArtifact);
 
-        expect(exec).toHaveBeenCalledExactlyOnceWith(testCase.expectedCmd, {
+        expect(exec).toHaveBeenCalledExactlyOnceWith(expectedCmd, {
           cwdFile: 'nub.lock',
           docker: {},
           toolConstraints: [
@@ -256,11 +252,8 @@ describe('modules/manager/nub/artifacts', () => {
             },
           ],
         });
-
-        exec.mockClear();
-        GlobalConfig.reset();
-      }
-    });
+      },
+    );
 
     it('passes --no-frozen-lockfile so nub re-resolves the bumped manifest under a CI-frozen default', async () => {
       GlobalConfig.set(globalConfig);
@@ -270,8 +263,8 @@ describe('modules/manager/nub/artifacts', () => {
         packageFileName: '',
         updatedDeps: [{ manager: 'nub', lockFiles: ['nub.lock'] }],
       };
-      fs.readFile.mockResolvedValueOnce(Buffer.from('old') as never);
-      fs.readFile.mockResolvedValueOnce(Buffer.from('new') as never);
+      readLockFile.mockResolvedValueOnce(Buffer.from('old'));
+      readLockFile.mockResolvedValueOnce(Buffer.from('new'));
 
       await updateArtifacts(updateArtifact);
 
@@ -279,7 +272,6 @@ describe('modules/manager/nub/artifacts', () => {
         expect.stringContaining('--no-frozen-lockfile'),
         expect.anything(),
       );
-      GlobalConfig.reset();
     });
   });
 });

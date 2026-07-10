@@ -76,7 +76,7 @@ export async function updateArtifacts(
       toolConstraints: [
         {
           toolName: 'nub',
-          constraint: updateArtifact?.config?.constraints?.nub,
+          constraint: config.constraints?.nub,
         },
       ],
     };
