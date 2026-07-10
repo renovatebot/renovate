@@ -20,6 +20,7 @@ import {
 } from './utils/gerrit-api.ts';
 import {
   GERRIT_ADMIN_USERNAME,
+  getBaseUrl,
   startGerritContainer,
   stopGerritContainer,
 } from './utils/gerrit-container.ts';
@@ -39,10 +40,14 @@ describe('integration/gerrit/index', () => {
       await startGerritContainer();
       // configureAdminSelfApproval only needs to be done once (affects All-Projects)
       await configureAdminSelfApproval();
+      expect(getBaseUrl()).toMatch(/^http:\/\/localhost:\d+$/);
     }, 60_000);
 
     it('creates the test project', async () => {
       await createProject(REPO_NAME);
+      // Project/branch is reachable; no package.json yet (empty initial commit)
+      const pkg = await getFileContent(REPO_NAME, 'master', 'package.json');
+      expect(pkg).toBeNull();
     });
 
     it('pushes initial files', async () => {
@@ -65,6 +70,8 @@ describe('integration/gerrit/index', () => {
           2,
         ),
       });
+      const pkg = await getFileContent(REPO_NAME, 'master', 'package.json');
+      expect(pkg).toContain('"semver": "7.0.0"');
     });
   });
 
@@ -155,6 +162,11 @@ describe('integration/gerrit/index', () => {
       });
 
       await renovate([REPO], { automerge: true, autoApprove: true });
+
+      // Renovate ran successfully; repo remains reachable. The following test
+      // asserts automerge/autoApprove end-state (open +2 and/or master update).
+      const pkg = await getFileContent(REPO, 'master', 'package.json');
+      expect(pkg).toContain('semver');
     });
 
     it('automerge submits the change and updates master', async () => {
@@ -260,31 +272,14 @@ describe('integration/gerrit/index', () => {
       const changes = await getOpenChanges(REPO);
       expect(changes.length).toBeGreaterThan(0);
 
-      const ch = await getChange(changes[0]._number, ['DETAILED_ACCOUNTS']);
-
-      // Use the dedicated /reviewers endpoint for a reliable check
+      // Use the dedicated /reviewers endpoint for a reliable check.
+      // (Assignee/CC fields vary across Gerrit versions, so we assert via
+      // the reviewers API which is what Renovate uses for `reviewers` config.)
       const reviewersList = await getReviewers(changes[0]._number);
       const reviewerUsernames = reviewersList
         .map((r: any) => r.username)
         .filter(isString);
       expect(reviewerUsernames).toContain(REVIEWER_USER);
-
-      // Also sanity-check via the change object (populated with DETAILED_ACCOUNTS)
-      const reviewerFromChange =
-        ch.reviewers?.REVIEWER?.map((r) => r.username).filter(isString) ?? [];
-      if (reviewerFromChange.length > 0) {
-        expect(reviewerFromChange).toContain(REVIEWER_USER);
-      }
-
-      // Assignees (or CCs on Gerrit 3.8+) — best-effort
-      const anyCh = ch as any;
-      const assigneeUser =
-        anyCh.assignee?.username ??
-        anyCh.reviewers?.CC?.find((r: any) => r.username === REVIEWER_USER)
-          ?.username;
-      if (assigneeUser) {
-        expect(assigneeUser).toBe(REVIEWER_USER);
-      }
     });
   });
 
@@ -577,9 +572,13 @@ describe('integration/gerrit/index', () => {
         },
       });
       staleChangeNum = synth.number;
+      expect(staleChangeNum).toBeGreaterThan(0);
 
       // Make a refs/heads/ entry so getBranchList() during the run will see the branchName
       await createBranch(REPO, staleBranch, synth.revision);
+
+      const open = await getChange(staleChangeNum);
+      expect(open.status).toBe('NEW');
     });
 
     it('run causes prune to autoclose (updatePr state closed) the stale change', async () => {
