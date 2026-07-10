@@ -80,12 +80,11 @@ export async function updateArtifacts(
   try {
     await writeLocalFile(packageFileName, newPackageFileContent);
 
-    let args = '';
+    // ensure lockfile gets updated when projects specify `lock.frozen=true` config.
+    let args = ' --frozen=false';
     if (isLockFileMaintenance) {
+      // recreate the lock file from scratch during lock file maintenance.
       await deleteLocalFile(lockFileName);
-      // force update lockfile when deleting it
-      // https://github.com/denoland/deno/blob/7eda90e61d107a2f48ef6eab954cda143707e01c/tests/specs/lockfile/frozen_lockfile/no_lockfile_run.out
-      args += ' --frozen=false';
     }
 
     // run from its referred deno.json/deno.jsonc location if import map is used

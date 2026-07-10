@@ -14,6 +14,7 @@ The following `depTypes` of `deno.json` or `deno.jsonc` are currently supported 
 Additionally, an [import map](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/script/type/importmap) JSON file containing `imports` and `scopes.<mapping>.<specifier>` like the examples above is supported.
 
 The deno manager also supports some `depTypes` that supported by [npm manager](../npm/index.md).
+For artifact updates, Renovate runs `deno install --frozen=false` to update `deno.lock` when `lock.frozen=true` is configured.
 
 !!! note
   Deno cli supports [private npm compatible registries](https://docs.deno.com/runtime/fundamentals/node/#private-registries) itself, however the deno managaer is not yet ready to support [Private npm module](../../../getting-started/private-packages.md#npm).
