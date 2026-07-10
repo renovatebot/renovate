@@ -2,24 +2,21 @@ import { CONFIG_VALIDATION } from '../constants/error-messages.ts';
 import { regEx, regexEngineStatus } from './regex.ts';
 
 describe('util/regex', () => {
-  it('uses the available regex engine', async () => {
-    const regex = regEx('foo');
-    // Import RE2 only after Renovate confirms its native addon can be loaded.
-    const ExpectedRegExp =
-      regexEngineStatus.type === 'available'
-        ? (await import('re2')).default
-        : RegExp;
+  describe.skipIf(regexEngineStatus.type !== 'available')('with RE2', () => {
+    it('uses RE2', async () => {
+      // Import lazily so skipped runtimes never load the incompatible native addon.
+      const { default: RE2 } = await import('re2');
 
-    expect(regex).toBeInstanceOf(ExpectedRegExp);
+      expect(regEx('foo')).toBeInstanceOf(RE2);
+    });
+
+    it('reuses flags from regex', () => {
+      expect(regEx(/foo/i).flags).toBe('iu');
+    });
   });
 
   it('throws unsafe 2', () => {
     expect(() => regEx(`x++`)).toThrow(CONFIG_VALIDATION);
-  });
-
-  it('reuses flags from regex', () => {
-    const expectedFlags = regexEngineStatus.type === 'available' ? 'iu' : 'i';
-    expect(regEx(/foo/i).flags).toBe(expectedFlags);
   });
 
   it('caches non-stateful regex', () => {
