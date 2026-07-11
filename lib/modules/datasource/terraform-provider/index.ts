@@ -351,23 +351,18 @@ export class TerraformProviderDatasource extends TerraformDatasource {
       repository,
     );
 
-    let hashes = null;
-    try {
-      ({ body: hashes } = await this.http.getJson(
-        `${baseUrl}/${version}/download/linux/amd64`,
-        OpenTofuProviderPackagesResponse,
-      ));
-    } catch (err) {
-      if (!(err instanceof HttpError) || err.response?.statusCode !== 404) {
-        throw err;
-      }
-      hashes = await this._getProviderPackagesForAvailablePlatform(
-        baseUrl,
-        version,
-      );
-    }
-
-    return hashes;
+   try {
+  const { body } = await this.http.getJson(
+    `${baseUrl}/${version}/download/linux/amd64`,
+    OpenTofuProviderPackagesResponse,
+  );
+  return body;
+} catch (err) {
+  if (!(err instanceof HttpError) || err.response?.statusCode !== 404) {
+    throw err;
+  }
+  return await this._getProviderPackagesForAvailablePlatform(baseUrl, version);
+}
   }
 
   /**
