@@ -1,6 +1,4 @@
-import { isPlainObject, isString } from '@sindresorhus/is';
 import { logger } from '../../../logger/index.ts';
-import type { SkipReason } from '../../../types/index.ts';
 import { detectPlatform } from '../../../util/common.ts';
 import { regEx } from '../../../util/regex.ts';
 import { parseSingleYaml } from '../../../util/yaml.ts';
@@ -8,7 +6,7 @@ import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
 import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
 import { GitlabTagsDatasource } from '../../datasource/gitlab-tags/index.ts';
 import type { PackageDependency, PackageFileContent } from '../types.ts';
-import type { ApmDependencies, ApmManifest } from './types.ts';
+import { ApmManifest } from './schema.ts';
 
 interface DatasourceResult {
   datasource: string;
@@ -70,7 +68,7 @@ export function parseApmDependency(
 
   if (!currentValue) {
     // Unpinned dependency (no `#ref`) - nothing for Renovate to update.
-    return { ...base, skipReason: 'unspecified-version' as SkipReason };
+    return { ...base, skipReason: 'unspecified-version' };
   }
 
   const segments = pathPart.split('/').filter(Boolean);
@@ -83,7 +81,7 @@ export function parseApmDependency(
     return {
       ...base,
       currentValue,
-      skipReason: 'invalid-dependency-specification' as SkipReason,
+      skipReason: 'invalid-dependency-specification',
     };
   }
 
@@ -105,44 +103,27 @@ export function parseApmDependency(
 }
 
 function extractSection(
-  deps: ApmDependencies | undefined,
+  entries: string[] | undefined,
   depType: string,
 ): PackageDependency[] {
-  const result: PackageDependency[] = [];
-  if (!deps || !Array.isArray(deps.apm)) {
-    return result;
-  }
-  for (const entry of deps.apm) {
-    // MCP entries are objects without a version and are not managed - skip.
-    if (!isString(entry)) {
-      continue;
-    }
-    result.push(parseApmDependency(entry, depType));
-  }
-  return result;
+  return (entries ?? []).map((entry) => parseApmDependency(entry, depType));
 }
 
 export function extractPackageFile(
   content: string,
   packageFile: string,
 ): PackageFileContent | null {
-  let parsed: unknown;
+  let manifest: ApmManifest;
   try {
-    parsed = parseSingleYaml(content);
+    manifest = parseSingleYaml(content, { customSchema: ApmManifest });
   } catch (err) {
-    logger.debug({ packageFile, err }, 'apm: failed to parse YAML');
+    logger.debug({ packageFile, err }, 'apm: failed to parse manifest');
     return null;
   }
 
-  if (!isPlainObject(parsed)) {
-    logger.debug({ packageFile }, 'apm: parsed content is not an object');
-    return null;
-  }
-
-  const manifest = parsed as ApmManifest;
   const deps = [
-    ...extractSection(manifest.dependencies, 'apm'),
-    ...extractSection(manifest.devDependencies, 'apm-dev'),
+    ...extractSection(manifest.dependencies?.apm, 'apm'),
+    ...extractSection(manifest.devDependencies?.apm, 'apm-dev'),
   ];
 
   if (!deps.length) {
