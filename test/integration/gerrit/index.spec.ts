@@ -21,6 +21,7 @@ import {
   getPrBodies,
   getReviewers,
   pushFilesToGerrit,
+  registerGpgKey,
   setHashtags,
   setLabel,
   setProjectLabel,
@@ -30,6 +31,7 @@ import {
   startGerritContainer,
   stopGerritContainer,
 } from './utils/gerrit-container.ts';
+import { generateGpgKeyPair } from './utils/gpg.ts';
 import { renovate } from './utils/renovate.ts';
 
 const REPO_NAME = 'test-renovate-integration';
@@ -64,12 +66,17 @@ async function seed(
   opts: {
     deps?: Record<string, string>;
     renovate?: Record<string, unknown>;
+    requireSignedPush?: boolean;
   } = {},
 ): Promise<void> {
-  await createAndConfigureProject(repo, {
-    'package.json': pkgJson(name, opts.deps),
-    'renovate.json': renovateJson(opts.renovate),
-  });
+  await createAndConfigureProject(
+    repo,
+    {
+      'package.json': pkgJson(name, opts.deps),
+      'renovate.json': renovateJson(opts.renovate),
+    },
+    { requireSignedPush: opts.requireSignedPush },
+  );
 }
 
 function findSemverChange(changes: Awaited<ReturnType<typeof getOpenChanges>>) {
@@ -89,7 +96,7 @@ describe('integration/gerrit/index', () => {
       'package.json': pkgJson('test-project'),
       'renovate.json': renovateJson(),
     });
-  }, 60_000);
+  }, 120_000);
 
   it('discovers the repository via autodiscover', async () => {
     // Arrange
@@ -535,6 +542,37 @@ describe('integration/gerrit/index', () => {
 
     expect(updated.current_revision).not.toEqual(originalRev);
     expect(updated.status).toEqual('NEW');
+  });
+
+  // Covers #44228: GPG gitPrivateKey enables push.gpgSign if-asked on Gerrit.
+  // Repro inspired by eclipse-jgit/jgit#222 (signed push + push-options).
+  // Renovate always sends push-options (notify=NONE, ready, labels, …).
+  it('creates a change with signed push when gitPrivateKey is set', async () => {
+    // Arrange
+    const REPO = 'test-gerrit-signed-push';
+    // Gerrit only accepts GPG keys whose UID matches a preferred account email
+    // (admin@example.com for the test image admin). Commit author can still
+    // be Renovate's gitAuthor; signingkey is set by id after import.
+    const key = await generateGpgKeyPair('Administrator', 'admin@example.com');
+    try {
+      await registerGpgKey(key.publicKey);
+      await seed(REPO, 'test-signed-push', { requireSignedPush: true });
+
+      // Act — autoApprove forces push-options (label=Code-Review+2) together
+      // with a signed push certificate (the jgit#222 failure mode)
+      await renovate([REPO], {
+        automerge: true,
+        autoApprove: true,
+        gitPrivateKey: key.secretKey,
+      });
+
+      // Assert
+      const ch = findSemverChange(await getOpenChanges(REPO));
+      expect(ch).toBeDefined();
+      expect(isTruthy(ch!.labels?.['Code-Review']?.approved)).toBe(true);
+    } finally {
+      await key.dispose();
+    }
   });
 
   it('initRepo abandons changes with Code-Review -2', async () => {

@@ -107,13 +107,32 @@ async function writeChange(
   return { number: change._number, change_id: change.change_id };
 }
 
-export async function createProject(project: string): Promise<void> {
+export async function createProject(
+  project: string,
+  opts: {
+    requireSignedPush?: boolean;
+  } = {},
+): Promise<void> {
   await gerritFetch(`/a/projects/${encodeURIComponent(project)}`, {
     method: 'PUT',
     body: JSON.stringify({
       create_empty_commit: true,
       branches: ['master'],
+      ...(opts.requireSignedPush
+        ? {
+            enable_signed_push: 'TRUE',
+            require_signed_push: 'TRUE',
+          }
+        : {}),
     }),
+  });
+}
+
+/** Register an OpenPGP public key on the admin account (for signed push). */
+export async function registerGpgKey(publicKeyArmored: string): Promise<void> {
+  await gerritFetch('/a/accounts/self/gpgkeys', {
+    method: 'POST',
+    body: JSON.stringify({ add: [publicKeyArmored] }),
   });
 }
 
@@ -183,8 +202,11 @@ export async function pushFilesToGerrit(
 export async function createAndConfigureProject(
   project: string,
   files?: Record<string, string>,
+  opts: {
+    requireSignedPush?: boolean;
+  } = {},
 ): Promise<void> {
-  await createProject(project);
+  await createProject(project, opts);
   if (isNonEmptyObject(files)) {
     await pushFilesToGerrit(project, files);
   }

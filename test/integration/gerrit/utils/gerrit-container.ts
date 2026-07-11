@@ -5,7 +5,9 @@ import {
   Wait,
 } from 'testcontainers';
 
-const GERRIT_IMAGE = 'gerritcodereview/gerrit:3.8.9';
+// 3.14+ includes a jgit that accepts signed push + push-options together
+// (see eclipse-jgit/jgit#222). 3.8.x rejects that combination.
+const GERRIT_IMAGE = 'gerritcodereview/gerrit:3.14.1-ubuntu24';
 const GERRIT_CONTAINER_NAME = 'gerrit-renovate-integration-test';
 
 export const GERRIT_ADMIN_USERNAME = 'admin';
@@ -26,10 +28,16 @@ export async function startGerritContainer(): Promise<void> {
       GERRIT_ADMIN_PASSWORD,
     })
     .withName(GERRIT_CONTAINER_NAME)
+    // Enable server-side signed-push support before the stock entrypoint runs
+    .withEntrypoint([
+      'bash',
+      '-c',
+      'git config -f /var/gerrit/etc/gerrit.config receive.enableSignedPush true && exec /entrypoint.sh',
+    ])
     .withWaitStrategy(
       Wait.forHttp('/a/config/server/version', 8080)
         .withBasicCredentials(GERRIT_ADMIN_USERNAME, GERRIT_ADMIN_PASSWORD)
-        .withStartupTimeout(45_000),
+        .withStartupTimeout(90_000),
     )
     .start();
 
