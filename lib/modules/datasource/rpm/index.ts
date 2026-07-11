@@ -185,10 +185,12 @@ export class RpmDatasource extends Datasource {
       return await this.getProviderReleases('primary', metadata, packageName);
     }
 
+    /* v8 ignore if -- fetchRepositoryMetadata guarantees at least one source */
     if (sqliteError) {
       throw sqliteError;
     }
 
+    /* v8 ignore next -- fetchRepositoryMetadata guarantees at least one source */
     return null;
   }
 
