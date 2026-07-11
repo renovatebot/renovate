@@ -81,14 +81,18 @@ describe('modules/platform/gerrit/index', () => {
   describe('initPlatform()', () => {
     it('should throw if no endpoint', async () => {
       expect.assertions(1);
-      await expect(() => gerrit.initPlatform({})).rejects.toThrow();
+      await expect(() => gerrit.initPlatform({})).rejects.toThrow(
+        'Init: You must configure a Gerrit Server endpoint',
+      );
     });
 
     it('should throw if no username/password', async () => {
       expect.assertions(1);
       await expect(() =>
         gerrit.initPlatform({ endpoint: 'endpoint' }),
-      ).rejects.toThrow();
+      ).rejects.toThrow(
+        'Init: You must configure a Gerrit Server username/password',
+      );
     });
 
     it('should init', async () => {

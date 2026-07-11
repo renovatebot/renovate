@@ -598,7 +598,9 @@ describe('util/git/index', { timeout: 30000 }, () => {
     });
 
     it('should throw if branch merge throws', async () => {
-      await expect(git.mergeBranch('not_found')).rejects.toThrow();
+      await expect(git.mergeBranch('not_found')).rejects.toThrow(
+        "fatal: 'origin/not_found' is not a commit and a branch 'not_found'",
+      );
     });
   });
 
@@ -643,7 +645,9 @@ describe('util/git/index', { timeout: 30000 }, () => {
     });
 
     it('should throw', async () => {
-      await expect(git.mergeToLocal('not_found')).rejects.toThrow();
+      await expect(git.mergeToLocal('not_found')).rejects.toThrow(
+        "fatal: couldn't find remote ref not_found",
+      );
     });
   });
 
@@ -1640,6 +1644,7 @@ describe('util/git/index', { timeout: 30000 }, () => {
       process.env.GIT_CONFIG_GLOBAL = '/tmp/global-gitconfig';
       process.env.GIT_CONFIG_SYSTEM = '/tmp/system-gitconfig';
       process.env.PAGER = 'less';
+      process.env.GIT_ASKPASS = '/tmp/.git-askpass';
 
       const envSpy = vi.spyOn(SimpleGit.prototype, 'env');
       await git.initRepo({ url: origin.path });
@@ -1659,6 +1664,7 @@ describe('util/git/index', { timeout: 30000 }, () => {
       expect(gitEnv).not.toHaveProperty('GIT_CONFIG_GLOBAL');
       expect(gitEnv).not.toHaveProperty('GIT_CONFIG_SYSTEM');
       expect(gitEnv).not.toHaveProperty('PAGER');
+      expect(gitEnv).not.toHaveProperty('GIT_ASKPASS');
     });
 
     it('should work when GIT_CONFIG_COUNT authentication environment variables are configured', async () => {
@@ -1748,6 +1754,24 @@ describe('util/git/index', { timeout: 30000 }, () => {
       expect(envSpy).toHaveBeenCalledWith(
         expect.objectContaining({
           GIT_SSH_COMMAND: 'ssh -o SomeHostOption=yes',
+        }),
+      );
+    });
+
+    it('should allow customEnvVariables to override GIT_ASKPASS', async () => {
+      // Self-hosted users may inject a custom GIT_ASKPASS via
+      // customEnvVariables to configure git authentication.
+      const customAskPassCommand = '/tmp/.git-askpass';
+      setCustomEnv({ GIT_ASKPASS: customAskPassCommand });
+
+      const envSpy = vi.spyOn(SimpleGit.prototype, 'env');
+      await git.initRepo({ url: origin.path });
+      await expect(git.syncGit()).resolves.toBeUndefined();
+      expect(envSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          LANG: 'C.UTF-8',
+          LC_ALL: 'C.UTF-8',
+          GIT_ASKPASS: customAskPassCommand,
         }),
       );
     });
@@ -1975,7 +1999,9 @@ describe('util/git/index', { timeout: 30000 }, () => {
         },
       });
 
-      await expect(git.syncGit()).rejects.toThrow();
+      await expect(git.syncGit()).rejects.toThrow(
+        /couldn't find remote ref|not found|fatal/i,
+      );
     });
 
     it('handles multiple refspecs', async () => {

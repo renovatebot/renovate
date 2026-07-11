@@ -291,7 +291,7 @@ describe('workers/repository/init/merge', () => {
         checkForRepoConfigError({
           configFileParseError: { validationError: '', validationMessage: '' },
         }),
-      ).toThrow();
+      ).toThrow('config-validation');
     });
   });
 
