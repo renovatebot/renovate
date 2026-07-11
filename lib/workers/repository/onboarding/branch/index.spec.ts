@@ -302,7 +302,9 @@ describe('workers/repository/onboarding/branch/index', () => {
           state: 'open',
         },
       ]);
-      await expect(checkOnboardingBranch(config)).rejects.toThrow();
+      await expect(checkOnboardingBranch(config)).rejects.toThrow(
+        'disabled-closed-onboarding',
+      );
     });
 
     it('rebases onboarding branch', async () => {
