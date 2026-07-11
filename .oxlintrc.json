@@ -172,7 +172,7 @@
       { "assertFunctionNames": ["expect", "expectTypeOf", "checkKeysSorted"] }
     ],
     "vitest/no-conditional-expect": "error",
-    "vitest/no-standalone-expect": "off",
+    "vitest/no-standalone-expect": "error",
     "vitest/prefer-snapshot-hint": "error",
     "vitest/require-to-throw-message": "error"
   },
