@@ -1,4 +1,9 @@
-import { isNonEmptyString, isString, isTruthy } from '@sindresorhus/is';
+import {
+  isNonEmptyString,
+  isNumber,
+  isString,
+  isTruthy,
+} from '@sindresorhus/is';
 import { TAG_PULL_REQUEST_BODY } from '../../../lib/modules/platform/gerrit/utils.ts';
 import { regEx } from '../../../lib/util/regex.ts';
 import {
@@ -18,6 +23,7 @@ import {
   pushFilesToGerrit,
   setHashtags,
   setLabel,
+  setProjectLabel,
 } from './utils/gerrit-api.ts';
 import {
   GERRIT_ADMIN_USERNAME,
@@ -177,6 +183,46 @@ describe('integration/gerrit/index', () => {
     // +2 on open change, or already merged to master
     expect(approved || merged).toBe(true);
   });
+
+  // Expected to fail until #44425 lands (autoApprove uses max Code-Review value).
+  // it.fails: suite stays green now; flips red when the fix merges so we drop .fails.
+  it.fails(
+    'autoApprove uses max Code-Review value when project only allows +1',
+    async () => {
+      // Arrange
+      const REPO = 'test-gerrit-automerge-plus-one';
+      await seed(REPO, 'test-automerge-plus-one');
+      // Override inherited Code-Review so the highest vote is +1 (not +2)
+      await setProjectLabel(REPO, 'Code-Review', {
+        values: {
+          '-1': 'I would prefer this is not merged as is',
+          ' 0': 'No score',
+          '+1': 'Looks good to me, but someone else must approve',
+        },
+        default_value: 0,
+      });
+
+      // Act
+      await renovate([REPO], { automerge: true, autoApprove: true });
+
+      // Assert — push with label=Code-Review+1 must succeed and mark approved
+      const ch = findSemverChange(await getOpenChanges(REPO));
+      expect(ch).toBeDefined();
+      expect(isTruthy(ch!.labels?.['Code-Review']?.approved)).toBe(true);
+
+      // DETAILED_LABELS exposes the numeric vote (should be +1, not +2)
+      const detailed = await getChange(ch!._number, [
+        'LABELS',
+        'DETAILED_LABELS',
+      ]);
+      const cr = detailed.labels?.['Code-Review'] as
+        | { all?: { value?: number }[] }
+        | undefined;
+      const voteValues = (cr?.all ?? []).map((v) => v.value).filter(isNumber);
+      expect(voteValues).toContain(1);
+      expect(voteValues.every((v) => v <= 1)).toBe(true);
+    },
+  );
 
   it('stores a PR body using Gerrit terminology', async () => {
     // Arrange

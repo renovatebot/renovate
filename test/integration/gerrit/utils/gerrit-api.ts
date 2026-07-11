@@ -231,6 +231,31 @@ export async function setLabel(
   });
 }
 
+/**
+ * Create or override a project label definition (e.g. Code-Review with max +1).
+ * Requires admin write access to refs/meta/config.
+ */
+export async function setProjectLabel(
+  project: string,
+  labelName: string,
+  definition: {
+    values: Record<string, string>;
+    default_value: number;
+  },
+): Promise<void> {
+  await gerritFetch(
+    `/a/projects/${encodeURIComponent(project)}/labels/${encodeURIComponent(labelName)}`,
+    {
+      method: 'PUT',
+      body: JSON.stringify({
+        commit_message: `Set ${labelName} label definition`,
+        values: definition.values,
+        default_value: definition.default_value,
+      }),
+    },
+  );
+}
+
 export async function setHashtags(
   changeNumber: number,
   add: string[],
