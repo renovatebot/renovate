@@ -33,6 +33,7 @@ export interface LocalConfig extends StorageConfig {
   ignoredAuthors: string[];
   gitAuthorName?: string | null;
   gitAuthorEmail?: EmailAddress;
+  fileModeEnabled?: boolean;
 
   writeGitDone?: boolean;
 }

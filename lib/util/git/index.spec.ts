@@ -1021,6 +1021,15 @@ describe('util/git/index', { timeout: 30000 }, () => {
         await expect(git.isFileModeEnabled()).resolves.toBe(expected);
       },
     );
+
+    it('caches a disabled setting for the repository run', async () => {
+      const repo = simpleGit(tmpDir.path);
+      await repo.addConfig('core.fileMode', 'false');
+      await expect(git.isFileModeEnabled()).resolves.toBeFalse();
+
+      await repo.addConfig('core.fileMode', 'true');
+      await expect(git.isFileModeEnabled()).resolves.toBeFalse();
+    });
   });
 
   describe('getCommitMessages()', () => {

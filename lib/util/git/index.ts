@@ -440,14 +440,18 @@ export function isCloned(): boolean {
 }
 
 export async function isFileModeEnabled(): Promise<boolean> {
-  const value = await git.raw([
-    'config',
-    '--type=bool',
-    '--default=true',
-    '--get',
-    'core.fileMode',
-  ]);
-  return value.trim() === 'true';
+  if (config.fileModeEnabled === undefined) {
+    const value = await git.raw([
+      'config',
+      '--type=bool',
+      '--default=true',
+      '--get',
+      'core.fileMode',
+    ]);
+    config.fileModeEnabled = value.trim() === 'true';
+  }
+
+  return config.fileModeEnabled;
 }
 
 export const syncGit = withInstrumenting(
