@@ -18,5 +18,5 @@ Additionally, the `elm-version` field is extracted as `depType: elm-version` usi
 
 ### Version formats
 
-Applications use exact versions (e.g., `1.0.0`), while packages use Elm's range constraint format (e.g., `1.0.0 <= v < 2.0.0`).
+Applications use exact versions (e.g., `1.0.0`), while packages use the Elm range constraint format (e.g., `1.0.0 <= v < 2.0.0`).
 Both formats are supported by the `elm` versioning module.
