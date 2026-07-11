@@ -335,10 +335,9 @@ export class TerraformProviderDatasource extends TerraformDatasource {
   }
 
   /**
-   * The OpenTofu download endpoint exposes a `packages` map with the `zh:`/`h1:`
-   * hashes for every platform, avoiding a local download-and-rehash of each zip.
-   * The map is platform-independent, so we request `linux/amd64` directly and
-   * fall back to `/versions` discovery only when that platform is missing (404).
+   * A single platform's download endpoint returns the hashes for all platforms,
+   * so we query `linux/amd64` and fall back to `/versions` discovery only when a
+   * provider lacks that platform (404).
    * See https://github.com/opentofu/opentofu/pull/3434
    */
   private async _getProviderPackages(
@@ -351,18 +350,21 @@ export class TerraformProviderDatasource extends TerraformDatasource {
       repository,
     );
 
-   try {
-  const { body } = await this.http.getJson(
-    `${baseUrl}/${version}/download/linux/amd64`,
-    OpenTofuProviderPackagesResponse,
-  );
-  return body;
-} catch (err) {
-  if (!(err instanceof HttpError) || err.response?.statusCode !== 404) {
-    throw err;
-  }
-  return await this._getProviderPackagesForAvailablePlatform(baseUrl, version);
-}
+    try {
+      const { body } = await this.http.getJson(
+        `${baseUrl}/${version}/download/linux/amd64`,
+        OpenTofuProviderPackagesResponse,
+      );
+      return body;
+    } catch (err) {
+      if (!(err instanceof HttpError) || err.response?.statusCode !== 404) {
+        throw err;
+      }
+      return await this._getProviderPackagesForAvailablePlatform(
+        baseUrl,
+        version,
+      );
+    }
   }
 
   /**
