@@ -201,4 +201,68 @@ describe('util/http/gitlab', () => {
       );
     });
   });
+
+  describe('handles 400 source_branch errors', () => {
+    let NODE_ENV: string | undefined;
+
+    beforeAll(() => {
+      // Unset NODE_ENV so that we can test the retry logic
+      NODE_ENV = process.env.NODE_ENV;
+      delete process.env.NODE_ENV;
+    });
+
+    afterAll(() => {
+      process.env.NODE_ENV = NODE_ENV;
+    });
+
+    it('retries the request when source branch does not yet exist', async () => {
+      const body = { message: { source_branch: ['does not exist'] } };
+      httpMock.scope(gitlabApiHost).post('/api/v4/some-url').reply(400, body);
+      httpMock.scope(gitlabApiHost).post('/api/v4/some-url').reply(200, {});
+      const res = await gitlabApi.postJson('some-url', {});
+      expect(res.statusCode).toBe(200);
+    });
+
+    it('does not retry more than twice when source branch does not exist', async () => {
+      const body = { message: { source_branch: ['does not exist'] } };
+      httpMock.scope(gitlabApiHost).post('/api/v4/some-url').reply(400, body);
+      httpMock.scope(gitlabApiHost).post('/api/v4/some-url').reply(400, body);
+      httpMock.scope(gitlabApiHost).post('/api/v4/some-url').reply(400, body);
+      await expect(gitlabApi.postJson('some-url', {})).rejects.toThrow(
+        HTTPError,
+      );
+    });
+
+    it('does not retry for unrelated 400 errors', async () => {
+      const body = { message: { base: ['Another error'] } };
+      httpMock.scope(gitlabApiHost).post('/api/v4/some-url').reply(400, body);
+      await expect(gitlabApi.postJson('some-url', {})).rejects.toThrow(
+        HTTPError,
+      );
+    });
+
+    it('does not retry for other source_branch 400 errors', async () => {
+      const body = { message: { source_branch: ['is invalid'] } };
+      httpMock.scope(gitlabApiHost).post('/api/v4/some-url').reply(400, body);
+      await expect(gitlabApi.postJson('some-url', {})).rejects.toThrow(
+        HTTPError,
+      );
+    });
+
+    it('does not retry other POST error codes', async () => {
+      const body = { message: 'Forbidden' };
+      httpMock.scope(gitlabApiHost).post('/api/v4/some-url').reply(403, body);
+      await expect(gitlabApi.postJson('some-url', {})).rejects.toThrow(
+        HTTPError,
+      );
+    });
+
+    it('does not retry non-POST requests', async () => {
+      const body = { message: { source_branch: ['does not exist'] } };
+      httpMock.scope(gitlabApiHost).get('/api/v4/some-url').reply(400, body);
+      await expect(gitlabApi.getJsonUnchecked('some-url')).rejects.toThrow(
+        HTTPError,
+      );
+    });
+  });
 });
