@@ -41,6 +41,7 @@ export interface PostUpgradeCommandsExecutionResult {
 async function getExecutableState(
   relativePath: string,
 ): Promise<boolean | undefined> {
+  /* v8 ignore if -- tested on Windows CI */
   if (os.platform() === 'win32') {
     return undefined;
   }
