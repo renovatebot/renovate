@@ -11,6 +11,7 @@ import * as packageCache from '../../../util/cache/package/index.ts';
 import * as cacheFs from '../../../util/fs/index.ts';
 import { toSha256 } from '../../../util/hash.ts';
 import { RpmDatasource } from './index.ts';
+import { RpmSqliteMetadataProvider } from './providers/sqlite.ts';
 
 const registryUrl = 'https://example.com/repo/repodata/';
 const primaryXmlUrl =
@@ -62,7 +63,11 @@ function buildPrimaryXml(packageEntries: string): string {
 }
 
 async function createPrimaryDbGzip(
-  rows: { name: string; release?: string | null; version: string | null }[],
+  rows: {
+    name: string;
+    release?: string | null | Buffer;
+    version: string | null | Buffer;
+  }[],
 ): Promise<Buffer> {
   const dirResult = await tmpDir({ unsafeCleanup: true });
   const dbFile = `${dirResult.path}/primary.sqlite`;
@@ -135,51 +140,9 @@ function mockPrimaryDbResponse(primaryDbGzip: Buffer): void {
     });
 }
 
-function parseRegistryUrlForTest(
-  datasource: RpmDatasource,
-  url: string,
-): { metadataSource: string; registryUrl: string } {
-  return (
-    datasource as unknown as {
-      parseRegistryUrl: (url: string) => {
-        metadataSource: string;
-        registryUrl: string;
-      };
-    }
-  ).parseRegistryUrl(url);
-}
-
-function getAutoReleasesForTest(
-  datasource: RpmDatasource,
-  metadata: { repomdUrl: string },
-  packageName: string,
-  url: string,
-): Promise<unknown> {
-  return (
-    datasource as unknown as {
-      getAutoReleases: (
-        metadata: { repomdUrl: string },
-        packageName: string,
-        url: string,
-      ) => Promise<unknown>;
-    }
-  ).getAutoReleases(metadata, packageName, url);
-}
-
-function mockPrimaryDbProviderFailure(
-  datasource: RpmDatasource,
-  err: unknown,
-): void {
+function mockPrimaryDbProviderFailure(err: unknown): void {
   vi.spyOn(
-    (
-      datasource as unknown as {
-        providers: {
-          primary_db: {
-            getReleases: () => Promise<unknown>;
-          };
-        };
-      }
-    ).providers.primary_db,
+    RpmSqliteMetadataProvider.prototype,
     'getReleases',
   ).mockRejectedValue(err);
 }
@@ -1018,7 +981,7 @@ describe('modules/datasource/rpm/index', () => {
           registryUrl: `${registryUrl}#rpmMetadataSource=primary_db`,
           packageName: 'example-package',
         }),
-      ).rejects.toThrow();
+      ).rejects.toThrow(/database/);
     });
 
     it('throws sqlite errors when only primary_db metadata is present in auto mode', async () => {
@@ -1033,7 +996,7 @@ describe('modules/datasource/rpm/index', () => {
           registryUrl,
           packageName: 'example-package',
         }),
-      ).rejects.toThrow();
+      ).rejects.toThrow(/database/);
     });
 
     it('uses primary_db when primary metadata is malformed', async () => {
@@ -1135,11 +1098,13 @@ describe('modules/datasource/rpm/index', () => {
       });
     });
 
-    it('keeps invalid registryUrl unchanged when parsing metadata source', () => {
-      expect(parseRegistryUrlForTest(rpmDatasource, 'not a url')).toEqual({
-        metadataSource: 'auto',
-        registryUrl: 'not a url',
-      });
+    it('throws for invalid registry URLs', async () => {
+      await expect(
+        rpmDatasource.getReleases({
+          registryUrl: 'not a url',
+          packageName: 'example-package',
+        }),
+      ).rejects.toThrow('Invalid URL');
     });
 
     it('falls back to primary.xml.gz when primary_db is absent', async () => {
@@ -1198,7 +1163,7 @@ describe('modules/datasource/rpm/index', () => {
       mockRepomdResponse({
         primaryDbHref: 'repodata/somesha256-primary.sqlite.gz',
       });
-      mockPrimaryDbProviderFailure(rpmDatasource, 'not-a-sqlite-error');
+      mockPrimaryDbProviderFailure('not-a-sqlite-error');
       mockPrimaryXmlResponse(
         buildPrimaryXml(codeBlock`
           <package type="rpm">
@@ -1364,6 +1329,29 @@ describe('modules/datasource/rpm/index', () => {
       expect(releases).toBeNull();
     });
 
+    it('throws when primary_db rows contain an invalid version value', async () => {
+      mockRepomdResponse({
+        primaryDbHref: 'repodata/somesha256-primary.sqlite.gz',
+        primaryHref: '',
+      });
+      mockPrimaryDbResponse(
+        await createPrimaryDbGzip([
+          {
+            name: 'example-package',
+            release: '1.azl3',
+            version: Buffer.from('1.0'),
+          },
+        ]),
+      );
+
+      await expect(
+        rpmDatasource.getReleases({
+          registryUrl,
+          packageName: 'example-package',
+        }),
+      ).rejects.toThrow('Invalid version value in RPM metadata');
+    });
+
     it('throws an error if neither primary nor primary_db metadata is present', async () => {
       mockRepomdResponse({
         primaryDbHref: '',
@@ -1376,17 +1364,6 @@ describe('modules/datasource/rpm/index', () => {
           packageName: 'example-package',
         }),
       ).rejects.toThrow(`No primary data found in ${registryUrl}repomd.xml`);
-    });
-
-    it('returns null when repository metadata has no usable source', async () => {
-      await expect(
-        getAutoReleasesForTest(
-          rpmDatasource,
-          { repomdUrl: `${registryUrl}repomd.xml` },
-          'example-package',
-          registryUrl,
-        ),
-      ).resolves.toBeNull();
     });
   });
 });

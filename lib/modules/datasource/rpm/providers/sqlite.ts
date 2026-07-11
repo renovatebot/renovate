@@ -7,9 +7,16 @@ import {
   getCachedGunzippedFile,
 } from './common.ts';
 
-interface RpmSqlitePackageRow {
-  release: string | null;
-  version: string | null;
+function getRpmSqliteValue(
+  row: Record<string, unknown>,
+  column: 'version' | 'release',
+): string | null {
+  const value = row[column];
+  if (value === null || typeof value === 'string') {
+    return value;
+  }
+
+  throw new Error(`Invalid ${column} value in RPM metadata`);
 }
 
 export class RpmSqliteMetadataProvider {
@@ -38,11 +45,14 @@ export class RpmSqliteMetadataProvider {
     try {
       const rows = db
         .prepare('select version, release from packages where name = ?')
-        .iterate(packageName) as Iterable<RpmSqlitePackageRow>;
+        .iterate(packageName);
 
       const versions = new Set<string>();
       for (const row of rows) {
-        const version = formatRpmVersion(row.version, row.release);
+        const version = formatRpmVersion(
+          getRpmSqliteValue(row, 'version'),
+          getRpmSqliteValue(row, 'release'),
+        );
         if (version) {
           versions.add(version);
         }
