@@ -8,8 +8,8 @@ import type { HttpResponse } from '../../../util/http/types.ts';
 import { parseUrl } from '../../../util/url.ts';
 import { getPrBodyStruct } from '../pr-body.ts';
 import type { GitUrlOption } from '../types.ts';
-import type { GitLabMergeRequest } from './schema.ts';
-import type { GitlabPr, RepoResponse } from './types.ts';
+import type { GitLabMergeRequest, GitlabProject } from './schema.ts';
+import type { GitlabPr } from './types.ts';
 
 export const DRAFT_PREFIX = 'Draft: ';
 export const DRAFT_PREFIX_DEPRECATED = 'WIP: ';
@@ -28,7 +28,7 @@ export function prInfo(mr: GitLabMergeRequest): GitlabPr {
     number: mr.iid,
     title: mr.title,
     createdAt: mr.created_at,
-    hasAssignees: !!(mr.assignee?.id ?? mr.assignees?.[0]?.id),
+    hasAssignees: !!(mr.assignee?.id ?? mr.assignees[0]?.id),
     bodyStruct: getPrBodyStruct(mr.description),
 
     ...(mr.target_branch && { targetBranch: mr.target_branch }),
@@ -39,10 +39,10 @@ export function prInfo(mr: GitLabMergeRequest): GitlabPr {
     ...(mr.head_pipeline?.sha && { headPipelineSha: mr.head_pipeline?.sha }),
 
     ...(isNonEmptyArray(mr.reviewers) && {
-      reviewers: mr.reviewers?.map(({ username }) => username),
+      reviewers: mr.reviewers.map(({ username }) => username),
     }),
 
-    ...(mr.labels && { labels: mr.labels }),
+    labels: mr.labels,
     ...(mr.sha && { sha: mr.sha }),
   };
 
@@ -60,7 +60,7 @@ export function prInfo(mr: GitLabMergeRequest): GitlabPr {
 export function getRepoUrl(
   repository: string,
   gitUrl: GitUrlOption | undefined,
-  res: HttpResponse<RepoResponse>,
+  res: HttpResponse<GitlabProject>,
 ): string {
   if (gitUrl === 'ssh') {
     if (!res.body.ssh_url_to_repo) {
@@ -79,9 +79,9 @@ export function getRepoUrl(
   if (
     gitUrl === 'endpoint' ||
     isNonEmptyString(env.GITLAB_IGNORE_REPO_URL) ||
-    res.body.http_url_to_repo === null
+    !res.body.http_url_to_repo
   ) {
-    if (res.body.http_url_to_repo === null) {
+    if (!res.body.http_url_to_repo) {
       logger.debug('no http_url_to_repo found. Falling back to old behavior.');
     }
     if (env.GITLAB_IGNORE_REPO_URL) {
@@ -110,11 +110,8 @@ export function getRepoUrl(
   }
 
   logger.debug(`Using http URL: ${res.body.http_url_to_repo}`);
-  const repoUrl = parseUrl(res.body.http_url_to_repo);
-  // should never happen, but bad tests are causing that
-  if (!repoUrl) {
-    return '';
-  }
+  // validated by schema
+  const repoUrl = parseUrl(res.body.http_url_to_repo)!;
   repoUrl.username = 'oauth2';
   repoUrl.password = opts.token!;
   return repoUrl.toString();

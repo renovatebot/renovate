@@ -127,5 +127,12 @@ describe('modules/platform/gitlab/code-owners', () => {
         },
       ]);
     });
+
+    it('returns a match function that tests paths against the pattern', () => {
+      const [rule] = extractRulesFromCodeOwnersLines(['*.js username1']);
+
+      expect(rule.match('index.js')).toBeTrue();
+      expect(rule.match('index.ts')).toBeFalse();
+    });
   });
 });

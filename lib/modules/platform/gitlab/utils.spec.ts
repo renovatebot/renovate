@@ -1,10 +1,10 @@
 import type { HttpResponse } from '../../../util/http/types.ts';
-import type { RepoResponse } from './types.ts';
+import type { GitlabProject } from './schema.ts';
 import { defaults, getRepoUrl } from './utils.ts';
 
 function makeRes(
-  overrides: Partial<RepoResponse> = {},
-): HttpResponse<RepoResponse> {
+  overrides: Partial<GitlabProject> = {},
+): HttpResponse<GitlabProject> {
   return {
     statusCode: 200,
     headers: {},
@@ -14,9 +14,6 @@ function makeRes(
       mirror: false,
       default_branch: 'main',
       empty_repo: false,
-      ssh_url_to_repo: null,
-      http_url_to_repo: null,
-      forked_from_project: false,
       repository_access_level: 'enabled',
       merge_requests_access_level: 'enabled',
       merge_method: 'merge',
@@ -50,7 +47,7 @@ describe('modules/platform/gitlab/utils', () => {
         getRepoUrl(
           'group/repo',
           undefined,
-          makeRes({ http_url_to_repo: null }),
+          makeRes({ http_url_to_repo: undefined }),
         ),
       ).toThrow('Invalid GitLab endpoint: not-a-valid-url');
     });

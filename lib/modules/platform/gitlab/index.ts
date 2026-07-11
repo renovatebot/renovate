@@ -68,15 +68,23 @@ import {
 } from './http.ts';
 import { getMR, updateMR } from './merge-request.ts';
 import { GitlabPrCache } from './pr-cache.ts';
-import type { GitLabMergeRequest } from './schema.ts';
-import { LastPipelineId } from './schema.ts';
-import type {
-  GitlabComment,
+import type { BranchState, GitlabComment, MergeMethod } from './schema.ts';
+import {
+  GitLabMergeRequest,
+  GitLabMergeRequests,
+  GitlabApprovalRules,
+  GitlabBranchStatus,
+  GitlabBranchStatuses,
+  GitlabComments,
   GitlabIssue,
-  GitlabPr,
-  MergeMethod,
-  RepoResponse,
-} from './types.ts';
+  GitlabIssues,
+  GitlabProject,
+  GitlabRawFile,
+  GitlabUser,
+  GitlabVersion,
+  LastPipelineId,
+} from './schema.ts';
+import type { GitlabPr } from './types.ts';
 import {
   DRAFT_PREFIX,
   DRAFT_PREFIX_DEPRECATED,
@@ -137,14 +145,8 @@ export async function initPlatform({
   let gitlabVersion: string;
   try {
     if (!gitAuthor) {
-      const user = (
-        await gitlabApi.getJsonUnchecked<{
-          email: EmailAddress;
-          name: string;
-          id: number;
-          commit_email?: EmailAddress;
-        }>(`user`, { token })
-      ).body;
+      const user = (await gitlabApi.getJson(`user`, { token }, GitlabUser))
+        .body;
       platformConfig.gitAuthor = `${user.name} <${
         user.commit_email ?? user.email
       }>`;
@@ -156,9 +158,7 @@ export async function initPlatform({
       gitlabVersion = env.RENOVATE_X_PLATFORM_VERSION;
     } else {
       const version = (
-        await gitlabApi.getJsonUnchecked<{ version: string }>('version', {
-          token,
-        })
+        await gitlabApi.getJson('version', { token }, GitlabVersion)
       ).body;
       gitlabVersion = version.version;
     }
@@ -220,9 +220,7 @@ export async function getRepos(config?: AutodiscoverConfig): Promise<string[]> {
       await pMap(
         urls,
         (url) =>
-          gitlabApi.getJsonUnchecked<RepoResponse[]>(url, {
-            paginate: true,
-          }),
+          gitlabApi.getJson(url, { paginate: true }, GitlabProject.array()),
         {
           concurrency: 2,
         },
@@ -232,7 +230,8 @@ export async function getRepos(config?: AutodiscoverConfig): Promise<string[]> {
     logger.debug(`Discovered ${repos.length} project(s)`);
     return repos
       .filter((repo) => !repo.mirror || config?.includeMirrors)
-      .map((repo) => repo.path_with_namespace);
+      .filter((repo) => repo.path_with_namespace !== undefined)
+      .map((repo) => repo.path_with_namespace!);
   } catch (err) {
     logger.error({ err }, `GitLab getRepos error`);
     throw err;
@@ -253,9 +252,11 @@ export async function getRawFile(
   const escapedFileName = urlEscape(fileName);
   const repo = urlEscape(repoName) ?? config.repository;
   const url = `projects/${repo}/repository/files/${escapedFileName}?ref=${branchOrTag ?? `HEAD`}`;
-  const res = await gitlabApi.getJsonUnchecked<{ content: string }>(url, {
-    cacheProvider: memCacheProvider,
-  });
+  const res = await gitlabApi.getJson(
+    url,
+    { cacheProvider: memCacheProvider },
+    GitlabRawFile,
+  );
   const buf = res.body.content;
   const str = Buffer.from(buf, 'base64').toString();
   return str;
@@ -283,10 +284,11 @@ export async function initRepo({
   config.cloneSubmodulesFilter = cloneSubmodulesFilter;
   config.ignorePrAuthor = GlobalConfig.get('ignorePrAuthor');
 
-  let res: HttpResponse<RepoResponse>;
+  let res: HttpResponse<GitlabProject>;
   try {
-    res = await gitlabApi.getJsonUnchecked<RepoResponse>(
+    res = await gitlabApi.getJson(
       `projects/${config.repository}`,
+      GitlabProject,
     );
     if (res.body.archived) {
       logger.debug(
@@ -313,7 +315,7 @@ export async function initRepo({
       );
       throw new Error(REPOSITORY_DISABLED);
     }
-    if (res.body.default_branch === null || res.body.empty_repo) {
+    if (!res.body.default_branch || res.body.empty_repo) {
       throw new Error(REPOSITORY_EMPTY);
     }
     config.defaultBranch = res.body.default_branch;
@@ -322,7 +324,7 @@ export async function initRepo({
       logger.warn({ resBody: res.body }, 'Error fetching GitLab project');
       throw new Error(TEMPORARY_ERROR);
     }
-    config.mergeMethod = res.body.merge_method || 'merge';
+    config.mergeMethod = res.body.merge_method;
     config.mergeTrainsEnabled = res.body.merge_trains_enabled ?? false;
     if (res.body.squash_option) {
       config.squash =
@@ -375,31 +377,12 @@ export function getBranchForceRebase(): Promise<boolean> {
   return Promise.resolve(forceRebase);
 }
 
-type BranchState =
-  | 'pending'
-  | 'created'
-  | 'running'
-  | 'waiting_for_resource'
-  | 'manual'
-  | 'success'
-  | 'failed'
-  | 'canceled'
-  | 'skipped'
-  | 'scheduled';
-
-interface GitlabBranchStatus {
-  status: BranchState;
-  name: string;
-  allow_failure?: boolean;
-}
-
 async function getStatus(
   branchName: string,
   useCache = true,
 ): Promise<GitlabBranchStatus[]> {
   const branchSha = git.getBranchCommit(branchName);
   try {
-    // TODO: types (#22198)
     const url = `projects/${
       config.repository
     }/repository/commits/${branchSha!}/statuses`;
@@ -411,8 +394,7 @@ async function getStatus(
       opts.memCache = false;
     }
 
-    return (await gitlabApi.getJsonUnchecked<GitlabBranchStatus[]>(url, opts))
-      .body;
+    return (await gitlabApi.getJson(url, opts, GitlabBranchStatuses)).body;
   } catch (err) /* v8 ignore next */ {
     logger.debug({ err }, 'Error getting commit status');
     if (err.response?.statusCode === 404) {
@@ -462,10 +444,12 @@ export async function getBranchStatus(
     logger.debug(
       'Merge request head pipeline has different sha to commit, assuming merged results pipeline',
     );
-    branchStatuses.push({
-      status: mr.headPipelineStatus as BranchState,
-      name: 'head_pipeline',
-    });
+    branchStatuses.push(
+      GitlabBranchStatus.parse({
+        status: mr.headPipelineStatus,
+        name: 'head_pipeline',
+      }),
+    );
   }
   // ignore all skipped jobs
   const res = branchStatuses.filter((check) => check.status !== 'skipped');
@@ -493,15 +477,7 @@ export async function getBranchStatus(
       // v8 ignore else -- TODO: add test #40625
       if (status !== 'red') {
         // if red, stay red
-        let mappedStatus: BranchStatus =
-          gitlabToRenovateStatusMapping[check.status];
-        if (!mappedStatus) {
-          logger.warn(
-            { check },
-            'Could not map GitLab check.status to Renovate status',
-          );
-          mappedStatus = 'yellow';
-        }
+        const mappedStatus = gitlabToRenovateStatusMapping[check.status];
         if (mappedStatus !== 'green') {
           logger.trace({ check }, 'Found non-green check');
           status = mappedStatus;
@@ -524,13 +500,7 @@ export async function getPrList(): Promise<Pr[]> {
 async function ignoreApprovals(pr: number): Promise<void> {
   try {
     const url = `projects/${config.repository}/merge_requests/${pr}/approval_rules`;
-    const { body: rules } = await gitlabApi.getJsonUnchecked<
-      {
-        name: string;
-        rule_type: string;
-        id: number;
-      }[]
-    >(url);
+    const { body: rules } = await gitlabApi.getJson(url, GitlabApprovalRules);
 
     const ruleName = 'renovateIgnoreApprovals';
 
@@ -609,16 +579,11 @@ async function tryPrAutomerge(
 
       // Check for correct merge request status before setting `merge_when_pipeline_succeeds` to  `true`.
       for (let attempt = 1; attempt <= retryTimes; attempt += 1) {
-        const { body } = await gitlabApi.getJsonUnchecked<{
-          merge_status: string;
-          detailed_merge_status?: string;
-          merge_when_pipeline_succeeds?: boolean;
-          pipeline: {
-            status: string;
-          };
-        }>(`projects/${config.repository}/merge_requests/${pr}`, {
-          memCache: false,
-        });
+        const { body } = await gitlabApi.getJson(
+          `projects/${config.repository}/merge_requests/${pr}`,
+          { memCache: false },
+          GitLabMergeRequest,
+        );
 
         // Exit early if merge_when_pipeline_succeeds is already set
         if (body.merge_when_pipeline_succeeds === true) {
@@ -639,7 +604,7 @@ async function tryPrAutomerge(
         // Only continue if the merge request can be merged and has a pipeline.
         if (
           (detailed_merge_status_check || deprecated_merge_status_check) &&
-          body.pipeline !== null &&
+          body.pipeline &&
           desiredPipelineStatus.includes(body.pipeline.status)
         ) {
           break;
@@ -732,7 +697,7 @@ export async function createPr({
   }
   const description = sanitize(rawDescription);
   logger.debug(`Creating Merge Request: ${title}`);
-  const res = await gitlabApi.postJson<GitLabMergeRequest>(
+  const res = await gitlabApi.postJson(
     `projects/${config.repository}/merge_requests`,
     {
       body: {
@@ -745,6 +710,7 @@ export async function createPr({
         squash: config.squash,
       },
     },
+    GitLabMergeRequest,
   );
 
   const pr = prInfo(res.body);
@@ -811,9 +777,10 @@ export async function updatePr({
   }
 
   const updatedPrInfo = (
-    await gitlabApi.putJson<GitLabMergeRequest>(
+    await gitlabApi.putJson(
       `projects/${config.repository}/merge_requests/${iid}`,
       { body },
+      GitLabMergeRequest,
     )
   ).body;
 
@@ -919,8 +886,9 @@ export async function findPr({
 
   if (includeOtherAuthors) {
     // PR might have been created by anyone, so don't use the cached Renovate MR list
-    const response = await gitlabApi.getJsonUnchecked<GitLabMergeRequest[]>(
+    const response = await gitlabApi.getJson(
       `projects/${config.repository}/merge_requests?source_branch=${branchName}&state=opened`,
+      GitLabMergeRequests,
     );
 
     const { body: mrList } = response;
@@ -964,7 +932,7 @@ export async function getBranchStatusCheck(
   logger.debug(`Got res with ${res.length} results`);
   for (const check of res) {
     if (check.name === context) {
-      return gitlabToRenovateStatusMapping[check.status] || 'yellow';
+      return gitlabToRenovateStatusMapping[check.status];
     }
   }
   return null;
@@ -1076,12 +1044,11 @@ export async function getIssueList(): Promise<GitlabIssue[]> {
       searchParams.scope = 'created_by_me';
     }
     const query = getQueryString(searchParams);
-    const res = await gitlabApi.getJsonUnchecked<
-      { iid: number; title: string; labels: string[] }[]
-    >(`projects/${config.repository}/issues?${query}`, {
-      memCache: false,
-      paginate: true,
-    });
+    const res = await gitlabApi.getJson(
+      `projects/${config.repository}/issues?${query}`,
+      { memCache: false, paginate: true },
+      GitlabIssues,
+    );
     /* v8 ignore next */
     if (!isArray(res.body)) {
       logger.warn({ responseBody: res.body }, 'Could not retrieve issue list');
@@ -1109,9 +1076,10 @@ export async function getIssue(
       opts.memCache = false;
     }
     const issueBody = (
-      await gitlabApi.getJsonUnchecked<{ description: string }>(
+      await gitlabApi.getJson(
         `projects/${config.repository}/issues/${number}`,
         opts,
+        GitlabIssue,
       )
     ).body.description;
     return {
@@ -1154,8 +1122,9 @@ export async function ensureIssue({
     issue ??= issueList.find((i) => i.title === reuseTitle);
     if (issue) {
       const existingDescription = (
-        await gitlabApi.getJsonUnchecked<{ description: string }>(
+        await gitlabApi.getJson(
           `projects/${config.repository}/issues/${issue.iid}`,
+          GitlabIssue,
         )
       ).body.description;
       if (issue.title !== title || existingDescription !== description) {
@@ -1263,7 +1232,6 @@ export async function addReviewers(
     return;
   }
 
-  mr.reviewers = coerceArray(mr.reviewers);
   const existingReviewers = mr.reviewers.map((r) => r.username);
   const existingReviewerIDs = mr.reviewers.map((r) => r.id);
 
@@ -1329,7 +1297,7 @@ async function getComments(issueNo: number): Promise<GitlabComment[]> {
   logger.debug(`Getting comments for #${issueNo}`);
   const url = `projects/${config.repository}/merge_requests/${issueNo}/notes`;
   const comments = (
-    await gitlabApi.getJsonUnchecked<GitlabComment[]>(url, { paginate: true })
+    await gitlabApi.getJson(url, { paginate: true }, GitlabComments)
   ).body;
   logger.debug(`Found ${comments.length} comments`);
   return comments;
