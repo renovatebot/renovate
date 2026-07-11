@@ -563,6 +563,7 @@ const options: Readonly<RenovateOptions>[] = [
     default: false,
     supportedPlatforms: [
       'azure',
+      'bitbucket',
       'forgejo',
       'gitea',
       'github',
