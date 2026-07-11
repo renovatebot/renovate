@@ -342,7 +342,7 @@
     "tar": "catalog:",
     "tmp-promise": "3.0.3",
     "tsdown": "0.22.3",
-    "type-fest": "5.7.0",
+    "type-fest": "5.8.0",
     "typescript": "6.0.3",
     "unified": "11.0.5",
     "vite": "catalog:",
