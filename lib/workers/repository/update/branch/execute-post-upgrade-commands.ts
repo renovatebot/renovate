@@ -38,8 +38,6 @@ export interface PostUpgradeCommandsExecutionResult {
   artifactErrors: ArtifactError[];
 }
 
-const gitExecutableFileMode = 0o100;
-
 async function getExecutableState(
   relativePath: string,
 ): Promise<boolean | undefined> {
@@ -52,7 +50,8 @@ async function getExecutableState(
     return undefined;
   }
 
-  return (fileStats.mode & gitExecutableFileMode) !== 0;
+  // Git derives its executable flag from the owner's execute permission.
+  return (fileStats.mode & 0o100) !== 0;
 }
 
 export async function postUpgradeCommandsExecutor(
