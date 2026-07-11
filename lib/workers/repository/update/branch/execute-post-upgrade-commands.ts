@@ -1,6 +1,7 @@
 // TODO #22198
 
 import crypto from 'node:crypto';
+import { constants as fsConstants } from 'node:fs';
 import os from 'node:os';
 import { isArray, isNonEmptyArray } from '@sindresorhus/is';
 import upath from 'upath';
@@ -36,6 +37,21 @@ import type { BranchConfig, BranchUpgradeConfig } from '../../../types.ts';
 export interface PostUpgradeCommandsExecutionResult {
   updatedArtifacts: FileChange[];
   artifactErrors: ArtifactError[];
+}
+
+async function getExecutableState(
+  relativePath: string,
+): Promise<boolean | undefined> {
+  if (os.platform() === 'win32') {
+    return undefined;
+  }
+
+  const fileStats = await statLocalFile(relativePath);
+  if (!fileStats) {
+    return undefined;
+  }
+
+  return (fileStats.mode & fsConstants.S_IXUSR) !== 0;
 }
 
 export async function postUpgradeCommandsExecutor(
@@ -276,11 +292,7 @@ export async function postUpgradeCommandsExecutor(
               'Post-upgrade file saved',
             );
             const existingContent = await readLocalFile(relativePath);
-            const fileStats = await statLocalFile(relativePath);
-            const isExecutable =
-              os.platform() === 'win32' || !fileStats
-                ? undefined
-                : (fileStats.mode & 0o100) !== 0;
+            const isExecutable = await getExecutableState(relativePath);
             const existingUpdatedArtifacts = updatedArtifacts.find(
               (ua) => ua.path === relativePath,
             );
@@ -290,12 +302,15 @@ export async function postUpgradeCommandsExecutor(
                 existingUpdatedArtifacts.isExecutable = isExecutable;
               }
             } else {
-              updatedArtifacts.push({
+              const updatedArtifact: FileChange = {
                 type: 'addition',
                 path: relativePath,
                 contents: existingContent,
-                ...(isExecutable === undefined ? {} : { isExecutable }),
-              });
+              };
+              if (isExecutable !== undefined) {
+                updatedArtifact.isExecutable = isExecutable;
+              }
+              updatedArtifacts.push(updatedArtifact);
             }
             // If the file is deleted by a previous post-update command, remove the deletion from updatedArtifacts
             updatedArtifacts = updatedArtifacts.filter(
