@@ -1,4 +1,4 @@
-import { z } from 'zod/v3';
+import { z } from 'zod/v4';
 import { Json } from '../../../util/schema-utils/index.ts';
 
 /**
@@ -47,6 +47,6 @@ export const ElmJson = Json.pipe(
   z.discriminatedUnion('type', [ElmApplicationJson, ElmPackageJson]),
 );
 
-export type ElmApplicationJsonType = z.infer<typeof ElmApplicationJson>;
-export type ElmPackageJsonType = z.infer<typeof ElmPackageJson>;
-export type ElmJsonType = z.infer<typeof ElmJson>;
+export type ElmApplicationJson = z.infer<typeof ElmApplicationJson>;
+export type ElmPackageJson = z.infer<typeof ElmPackageJson>;
+export type ElmJson = z.infer<typeof ElmJson>;

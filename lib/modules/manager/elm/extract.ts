@@ -3,12 +3,11 @@ import { ElmPackageDatasource } from '../../datasource/elm-package/index.ts';
 import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
 import * as elmVersioning from '../../versioning/elm/index.ts';
 import type { PackageDependency, PackageFileContent } from '../types.ts';
-import type {
-  ElmApplicationJsonType,
-  ElmJsonType,
-  ElmPackageJsonType,
+import {
+  type ElmApplicationJson,
+  ElmJson,
+  type ElmPackageJson,
 } from './schema.ts';
-import { ElmJson } from './schema.ts';
 
 type DepType =
   | 'dependencies:direct'
@@ -19,7 +18,7 @@ type DepType =
   | 'test-dependencies';
 
 function extractApplicationDeps(
-  elmJson: ElmApplicationJsonType,
+  elmJson: ElmApplicationJson,
 ): PackageDependency[] {
   const deps: PackageDependency[] = [];
 
@@ -54,7 +53,7 @@ function extractApplicationDeps(
   return deps;
 }
 
-function extractPackageDeps(elmJson: ElmPackageJsonType): PackageDependency[] {
+function extractPackageDeps(elmJson: ElmPackageJson): PackageDependency[] {
   const deps: PackageDependency[] = [];
 
   const sections: {
@@ -80,7 +79,7 @@ function extractPackageDeps(elmJson: ElmPackageJsonType): PackageDependency[] {
   return deps;
 }
 
-function extractElmVersion(elmJson: ElmJsonType): PackageDependency {
+function extractElmVersion(elmJson: ElmJson): PackageDependency {
   return {
     depName: 'elm',
     packageName: 'elm/compiler',
