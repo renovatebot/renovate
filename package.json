@@ -243,7 +243,7 @@
     "p-throttle": "8.1.0",
     "parse-link-header": "2.0.0",
     "prettier": "3.8.1",
-    "protobufjs": "8.6.5",
+    "protobufjs": "8.6.6",
     "punycode": "2.3.1",
     "remark": "15.0.1",
     "remark-gfm": "4.0.1",
@@ -349,7 +349,7 @@
     "vitest": "4.1.9",
     "vitest-mock-extended": "4.0.0"
   },
-  "packageManager": "pnpm@11.9.0",
+  "packageManager": "pnpm@11.10.0",
   "files": [
     "dist",
     "renovate-schema.json"
