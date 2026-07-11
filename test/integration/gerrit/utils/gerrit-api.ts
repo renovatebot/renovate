@@ -1,13 +1,18 @@
+import { isNonEmptyObject, isNonEmptyString } from '@sindresorhus/is';
 import type { GerritChange } from '../../../../lib/modules/platform/gerrit/schema.ts';
 import type { GerritRequestDetail } from '../../../../lib/modules/platform/gerrit/types.ts';
+import { TAG_PULL_REQUEST_BODY } from '../../../../lib/modules/platform/gerrit/utils.ts';
+import { regEx } from '../../../../lib/util/regex.ts';
 import {
   GERRIT_ADMIN_PASSWORD,
   GERRIT_ADMIN_USERNAME,
   getBaseUrl,
 } from './gerrit-container.ts';
 
+const gerritMagicPrefixRe = regEx(/^\)\]\}'\n/);
+
 function parseGerritJson(text: string): unknown {
-  return JSON.parse(text.replace(/^\)]}'\n/, ''));
+  return JSON.parse(text.replace(gerritMagicPrefixRe, ''));
 }
 
 function basicAuth(
@@ -76,7 +81,7 @@ async function writeChange(
     });
   }
 
-  if (opts.message) {
+  if (isNonEmptyString(opts.message)) {
     const message = opts.message.includes('Change-Id:')
       ? opts.message
       : `${opts.message.trimEnd()}\nChange-Id: ${change.change_id}\n`;
@@ -160,7 +165,7 @@ export function getPrBodies(changes: GerritChange[]): string[] {
   return changes.flatMap(
     (change) =>
       change.messages
-        ?.filter((m) => m.tag === 'pull-request')
+        ?.filter((m) => m.tag === TAG_PULL_REQUEST_BODY)
         .map((m) => m.message) ?? [],
   );
 }
@@ -180,7 +185,7 @@ export async function createAndConfigureProject(
   files?: Record<string, string>,
 ): Promise<void> {
   await createProject(project);
-  if (files && Object.keys(files).length > 0) {
+  if (isNonEmptyObject(files)) {
     await pushFilesToGerrit(project, files);
   }
 }
@@ -320,13 +325,13 @@ export async function createOpenRenovateChange(
     method: 'POST',
     body: JSON.stringify({
       message: opts.prBody,
-      tag: 'pull-request',
+      tag: TAG_PULL_REQUEST_BODY,
       notify: 'NONE',
     }),
   });
 
   const ch = await getChange(created.number, ['CURRENT_REVISION']);
-  if (!ch.current_revision) {
+  if (!isNonEmptyString(ch.current_revision)) {
     throw new Error('Synthetic change has no current_revision');
   }
   return { number: created.number, revision: ch.current_revision };

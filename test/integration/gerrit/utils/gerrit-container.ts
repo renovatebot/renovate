@@ -1,3 +1,4 @@
+import { codeBlock } from 'common-tags';
 import {
   GenericContainer,
   type StartedTestContainer,
@@ -42,13 +43,15 @@ export async function stopGerritContainer(): Promise<void> {
 
   if (['true', '1'].includes(process.env.KEEP_GERRIT ?? '')) {
     // oxlint-disable-next-line no-console -- intentional: display container info for debugging
-    console.log(
-      `Gerrit kept running at ${baseUrl}\n` +
-        `RENOVATE_PLATFORM=gerrit RENOVATE_ENDPOINT=${baseUrl}/ ` +
-        `RENOVATE_USERNAME=${GERRIT_ADMIN_USERNAME} RENOVATE_PASSWORD=${GERRIT_ADMIN_PASSWORD} ` +
-        `RENOVATE_AUTODISCOVER=true pnpm start\n` +
-        `docker rm -f ${GERRIT_CONTAINER_NAME}`,
-    );
+    console.log(codeBlock`
+      Gerrit container kept running. Access it at: ${baseUrl}
+
+      Run renovate against it with:
+        RENOVATE_PLATFORM=gerrit RENOVATE_ENDPOINT=${baseUrl}/ RENOVATE_USERNAME=${GERRIT_ADMIN_USERNAME} RENOVATE_PASSWORD=${GERRIT_ADMIN_PASSWORD} RENOVATE_AUTODISCOVER=true pnpm start
+
+      Remove the container when done:
+        docker rm -f ${GERRIT_CONTAINER_NAME}
+    `);
     return;
   }
 

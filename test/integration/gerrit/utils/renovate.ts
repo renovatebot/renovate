@@ -1,6 +1,7 @@
 import { mkdtemp } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { resolve } from 'node:path';
+import { isNonEmptyArray } from '@sindresorhus/is';
 import { execaNode } from 'execa';
 import type { AllConfig } from '../../../../lib/config/types.ts';
 import {
@@ -24,7 +25,7 @@ export async function renovate(
     username: GERRIT_ADMIN_USERNAME,
     password: GERRIT_ADMIN_PASSWORD,
     gitAuthor: 'Renovate Gerrit <renovate-gerrit@example.com>',
-    ...(repositories && repositories.length > 0 ? { repositories } : {}),
+    ...(isNonEmptyArray(repositories) ? { repositories } : {}),
     ...overrides,
   };
 
