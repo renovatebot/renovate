@@ -1,5 +1,10 @@
 import { setTimeout } from 'node:timers/promises';
-import { isArray, isEmptyArray, isNonEmptyArray } from '@sindresorhus/is';
+import {
+  isArray,
+  isEmptyArray,
+  isNonEmptyArray,
+  isString,
+} from '@sindresorhus/is';
 import pMap from 'p-map';
 import semver from 'semver';
 import { GlobalConfig } from '../../../config/global.ts';
@@ -1042,11 +1047,11 @@ export async function setBranchStatus({
 
     // update status cache
     await getStatus(branchName, false);
-  } catch (err) /* v8 ignore next */ {
+  } catch (err) {
+    const message = err.body?.message;
     if (
-      err.body?.message?.startsWith(
-        'Cannot transition status via :enqueue from :pending',
-      )
+      isString(message) &&
+      message.startsWith('Cannot transition status via :enqueue from :pending')
     ) {
       // https://gitlab.com/gitlab-org/gitlab-foss/issues/25807
       logger.debug('Ignoring status transition error');
