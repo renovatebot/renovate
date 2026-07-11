@@ -54,7 +54,7 @@ describe('util/git/private-key', () => {
           stderr: `something wrong`,
           stdout: '',
         });
-      await expect(writePrivateKey()).rejects.toThrow();
+      await expect(writePrivateKey()).rejects.toThrow('gpg-failed');
     });
 
     it('imports the private GPG key', async () => {
@@ -113,7 +113,7 @@ some-private-key with-passphrase
 `,
         passphrase,
       );
-      await expect(writePrivateKey()).rejects.toThrow();
+      await expect(writePrivateKey()).rejects.toThrow('gpg-failed');
     });
 
     it('imports SSH key with passphrase successfully', async () => {

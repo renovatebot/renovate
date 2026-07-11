@@ -213,7 +213,9 @@ describe('util/fs/index', () => {
   describe('deleteLocalFile', () => {
     it('throws if platform is local', async () => {
       GlobalConfig.set({ platform: 'local' });
-      await expect(deleteLocalFile('foo/bar/file.txt')).rejects.toThrow();
+      await expect(deleteLocalFile('foo/bar/file.txt')).rejects.toThrow(
+        'Cannot delete file when platform=local',
+      );
     });
 
     it('deletes file', async () => {
@@ -382,7 +384,7 @@ describe('util/fs/index', () => {
       const result = await readLocalDirectory('test');
       expect(result).not.toBeNull();
       expect(result).toBeArrayOfSize(2);
-      expect(result).toMatchSnapshot();
+      expect(result).toMatchSnapshot('two files');
 
       await writeLocalFile('Cargo.lock', '');
       await writeLocalFile('test/subdir/Cargo.lock', '');
@@ -390,11 +392,13 @@ describe('util/fs/index', () => {
       const resultWithAdditionalFiles = await readLocalDirectory('test');
       expect(resultWithAdditionalFiles).not.toBeNull();
       expect(resultWithAdditionalFiles).toBeArrayOfSize(3);
-      expect(resultWithAdditionalFiles).toMatchSnapshot();
+      expect(resultWithAdditionalFiles).toMatchSnapshot('three files');
     });
 
     it('return empty array for non existing directory', async () => {
-      await expect(readLocalDirectory('somedir')).rejects.toThrow();
+      await expect(readLocalDirectory('somedir')).rejects.toThrow(
+        'ENOENT: no such file or directory',
+      );
     });
 
     it('return empty array for a existing but empty directory', async () => {
