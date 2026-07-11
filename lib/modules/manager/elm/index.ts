@@ -6,7 +6,7 @@ export { extractPackageFile } from './extract.ts';
 
 export const displayName = 'Elm';
 export const url = 'https://elm-lang.org';
-export const categories: Category[] = ['js'];
+export const categories: Category[] = ['elm'];
 
 export const defaultConfig = {
   managerFilePatterns: ['/(^|/)elm\\.json$/'],

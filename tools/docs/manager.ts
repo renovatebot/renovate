@@ -46,6 +46,7 @@ export const CategoryNames: Record<Category, string> = {
   dart: 'Dart',
   docker: 'Docker',
   dotnet: '.NET',
+  elm: 'Elm',
   elixir: 'Elixir',
   golang: 'Go',
   haskell: 'Haskell',

@@ -9,6 +9,7 @@ export const Categories = [
   'dart',
   'docker',
   'dotnet',
+  'elm',
   'elixir',
   'golang',
   'haskell',
