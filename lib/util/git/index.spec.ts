@@ -1999,7 +1999,9 @@ describe('util/git/index', { timeout: 30000 }, () => {
         },
       });
 
-      await expect(git.syncGit()).rejects.toThrow();
+      await expect(git.syncGit()).rejects.toThrow(
+        "fatal: couldn't find remote ref refs/changes/99/99999/1",
+      );
     });
 
     it('handles multiple refspecs', async () => {
