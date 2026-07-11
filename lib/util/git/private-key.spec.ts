@@ -500,45 +500,46 @@ some-private-key
       GlobalConfig.reset();
     });
 
-    it.each`
-      platform    | expected
-      ${'gerrit'} | ${true}
-      ${'github'} | ${false}
-    `(
-      'sets push.gpgSign if-asked=$expected for $platform',
-      async ({ platform, expected }) => {
-        const repoDir = '/tmp/some-repo';
-        GlobalConfig.set({ platform });
+    async function setupGpgKeyAndConfigSigning(
+      platform: string,
+      repoDir: string,
+    ): Promise<void> {
+      GlobalConfig.set({ platform });
 
-        exec.exec
-          .calledWith(any())
-          .mockResolvedValue({ stdout: '', stderr: '' });
-        exec.exec
-          .calledWith(
-            `gpg --batch --no-tty --import ${upath.join(`${os.tmpdir()}/git-private-gpg.key`)}`,
-          )
-          .mockResolvedValueOnce({
-            stderr: 'gpg: key BADC0FFEE: secret key imported\nfoo\n',
-            stdout: '',
-          });
+      exec.exec.calledWith(any()).mockResolvedValue({ stdout: '', stderr: '' });
+      exec.exec
+        .calledWith(
+          `gpg --batch --no-tty --import ${upath.join(`${os.tmpdir()}/git-private-gpg.key`)}`,
+        )
+        .mockResolvedValueOnce({
+          stderr: 'gpg: key BADC0FFEE: secret key imported\nfoo\n',
+          stdout: '',
+        });
 
-        setPrivateKey('some-key', undefined);
-        await writePrivateKey();
-        await configSigningKey(repoDir);
+      setPrivateKey('some-key', undefined);
+      await writePrivateKey();
+      await configSigningKey(repoDir);
+    }
 
-        if (expected) {
-          expect(exec.exec).toHaveBeenCalledWith(
-            'git config push.gpgSign if-asked',
-            { cwd: repoDir },
-          );
-        } else {
-          expect(exec.exec).not.toHaveBeenCalledWith(
-            'git config push.gpgSign if-asked',
-            { cwd: repoDir },
-          );
-        }
-      },
-    );
+    it('sets push.gpgSign if-asked for gerrit', async () => {
+      const repoDir = '/tmp/some-repo';
+      await setupGpgKeyAndConfigSigning('gerrit', repoDir);
+
+      expect(exec.exec).toHaveBeenCalledWith(
+        'git config push.gpgSign if-asked',
+        { cwd: repoDir },
+      );
+    });
+
+    it('does not set push.gpgSign for github', async () => {
+      const repoDir = '/tmp/some-repo';
+      await setupGpgKeyAndConfigSigning('github', repoDir);
+
+      expect(exec.exec).not.toHaveBeenCalledWith(
+        'git config push.gpgSign if-asked',
+        { cwd: repoDir },
+      );
+    });
 
     it('does not set push.gpgSign for SSH key on gerrit', async () => {
       const sshKey = `\
