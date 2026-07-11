@@ -610,6 +610,31 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
         ]);
       });
 
+      it('marks an existing artifact executable when the owner execute bit is set', async () => {
+        git.isFileModeEnabled.mockResolvedValue(true);
+        mockRepositoryChanges({ modified: ['script.txt'] });
+        fs.statLocalFile.mockResolvedValue(
+          partial<Stats>({ mode: ownerExecutableMode }),
+        );
+
+        const result = await runPostUpgradeTask([
+          {
+            type: 'addition',
+            path: 'script.txt',
+            contents: 'old contents',
+          },
+        ]);
+
+        expect(result.updatedArtifacts).toEqual([
+          {
+            type: 'addition',
+            path: 'script.txt',
+            contents: updatedContents,
+            isExecutable: true,
+          },
+        ]);
+      });
+
       it('does not infer executability from group or other execute bits', async () => {
         git.isFileModeEnabled.mockResolvedValue(true);
         mockRepositoryChanges({ created: ['script.txt'] });
