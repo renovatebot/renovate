@@ -422,7 +422,6 @@ describe('modules/manager/gomod/update', () => {
         packageFile: 'go.mod',
         upgrade,
       });
-      // Should fall back to bare hash since newValue === currentValue
       expect(res).toContain('example.private.com/org/module 4a022ed9999a');
       expect(res).not.toContain('b7bbf4be5dbd');
     });
