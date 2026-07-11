@@ -69,4 +69,8 @@ export type StageName =
   | 'pre-lookup'
   | 'source-url'
   | 'update-type'
-  | 'update-type-merge';
+  | 'update-type-merge'
+  /**
+   * The update was skipped during one of the Enrichment modules.
+   */
+  | 'enrichment';

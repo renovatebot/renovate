@@ -10,9 +10,7 @@ export const coersions: Record<string, (arg: string) => unknown> = {
       return false;
     }
     throw new Error(
-      "Invalid boolean value: expected 'true' or 'false', but got '" +
-        val +
-        "'",
+      `Invalid boolean value: expected 'true' or 'false', but got '${val}'`,
     );
   },
   array: (val: string): string[] => {
@@ -35,7 +33,7 @@ export const coersions: Record<string, (arg: string) => unknown> = {
     try {
       return JSON5.parse(val);
     } catch {
-      throw new Error("Invalid JSON value: '" + val + "'");
+      throw new Error(`Invalid JSON value: '${val}'`);
     }
   },
   string: (val: string): string => val.replace(/\\n/g, '\n'),

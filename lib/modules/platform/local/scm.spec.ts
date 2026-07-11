@@ -50,7 +50,7 @@ describe('modules/platform/local/scm', () => {
     });
 
     it('checkoutBranch', async () => {
-      expect(await localFs.checkoutBranch('')).toBe('');
+      expect(await localFs.checkoutBranch('')).toBeNull();
     });
   });
 

@@ -124,11 +124,10 @@ describe('workers/repository/dependency-dashboard', () => {
       platform.findIssue.mockResolvedValueOnce({
         title: '',
         number: 1,
-        body:
-          Fixtures.get('dependency-dashboard-with-10-PR.txt').replace(
-            '- [ ]',
-            '- [x]',
-          ) + '\n\n - [x] <!-- rebase-all-open-prs -->',
+        body: `${Fixtures.get('dependency-dashboard-with-10-PR.txt').replace(
+          '- [ ]',
+          '- [x]',
+        )}\n\n - [x] <!-- rebase-all-open-prs -->`,
       });
       await dependencyDashboard.readDashboardBody(conf);
       expect(conf).toEqual({
@@ -1486,7 +1485,7 @@ None detected
           );
           expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
           expect(platform.ensureIssue.mock.calls[0][0].body).toInclude(
-            'These dependencies are either deprecated or have replacements available',
+            'The following dependencies are either deprecated or have replacements available.',
           );
           expect(platform.ensureIssue.mock.calls[0][0].body).toInclude(
             '| npm | [cookie-parser](https://redirect.github.com/expressjs/cookie-parser) | ![Unavailable]',
@@ -1948,7 +1947,10 @@ None detected
         ],
       };
 
-      const result = dependencyDashboard.getAbandonedPackagesMd(packageFiles);
+      const result = dependencyDashboard.getAbandonedPackagesMd(
+        config,
+        packageFiles,
+      );
       expect(result).toEqual('');
     });
 
@@ -1968,8 +1970,18 @@ None detected
         ],
       };
 
-      const result = dependencyDashboard.getAbandonedPackagesMd(packageFiles);
+      const result = dependencyDashboard.getAbandonedPackagesMd(
+        config,
+        packageFiles,
+      );
 
+      expect(result).toContain('## Abandoned Dependencies');
+      expect(result).toContain(
+        'The following dependencies have not received updates for an extended period and may be unmaintained.',
+      );
+      expect(result).toContain(
+        '<summary>View abandoned dependencies (1)</summary>',
+      );
       expect(result).toContain('> ℹ️ **Note**');
       expect(result).toContain('| Datasource | Package | Last Updated |');
       expect(result).toContain('| npm | `abandoned-pkg` | `2020-05-15` |');
@@ -2010,8 +2022,20 @@ None detected
         ],
       };
 
-      const result = dependencyDashboard.getAbandonedPackagesMd(packageFiles);
+      const result = dependencyDashboard.getAbandonedPackagesMd(
+        config,
+        packageFiles,
+      );
 
+      expect(result).toContain('## Abandoned Dependencies');
+      expect(result).toContain(
+        'The following dependencies have not received updates for an extended period and may be unmaintained.',
+      );
+      expect(result).toContain(
+        '<summary>View abandoned dependencies (3)</summary>',
+      );
+      expect(result).toContain('> ℹ️ **Note**');
+      expect(result).toContain('| Datasource | Package | Last Updated |');
       expect(result).toContain('| gradle | `org.example:lib` | `2019-07-22` |');
       expect(result).toContain('| npm | `pkg1` | `2021-01-10` |');
       expect(result).toContain('| npm | `pkg3` | `2020-11-05` |');
@@ -2035,8 +2059,20 @@ None detected
         ],
       };
 
-      const result = dependencyDashboard.getAbandonedPackagesMd(packageFiles);
+      const result = dependencyDashboard.getAbandonedPackagesMd(
+        config,
+        packageFiles,
+      );
 
+      expect(result).toContain('## Abandoned Dependencies');
+      expect(result).toContain(
+        'The following dependencies have not received updates for an extended period and may be unmaintained.',
+      );
+      expect(result).toContain(
+        '<summary>View abandoned dependencies (2)</summary>',
+      );
+      expect(result).toContain('> ℹ️ **Note**');
+      expect(result).toContain('| Datasource | Package | Last Updated |');
       expect(result).toContain('| npm | `pkg-with-date` | `2021-03-17` |');
       expect(result).toContain('| npm | `pkg-no-date` | `unknown` |');
     });
@@ -2051,7 +2087,10 @@ None detected
         ],
       };
 
-      const result = dependencyDashboard.getAbandonedPackagesMd(packageFiles);
+      const result = dependencyDashboard.getAbandonedPackagesMd(
+        config,
+        packageFiles,
+      );
       expect(result).toEqual('');
     });
   });

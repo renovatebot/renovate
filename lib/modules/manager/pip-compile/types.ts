@@ -12,6 +12,7 @@ export interface PipCompileArgs {
   command: string;
   commandType: CommandType;
   constraintsFiles?: string[];
+  overridesFiles?: string[];
   pythonVersion?: string;
   extra?: string[];
   allExtras?: boolean;
@@ -26,5 +27,5 @@ export interface PipCompileArgs {
 export interface DependencyBetweenFiles {
   sourceFile: string;
   outputFile: string;
-  type: 'requirement' | 'constraint';
+  type: 'requirement' | 'constraint' | 'override';
 }

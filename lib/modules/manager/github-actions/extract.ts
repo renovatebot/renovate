@@ -3,6 +3,7 @@ import { GlobalConfig } from '../../../config/global.ts';
 import { logger, withMeta } from '../../../logger/index.ts';
 import { detectPlatform } from '../../../util/common.ts';
 import { newlineRegex, regEx } from '../../../util/regex.ts';
+import { parseUrl } from '../../../util/url.ts';
 import { ForgejoTagsDatasource } from '../../datasource/forgejo-tags/index.ts';
 import { GiteaTagsDatasource } from '../../datasource/gitea-tags/index.ts';
 import { GithubDigestDatasource } from '../../datasource/github-digest/index.ts';
@@ -11,6 +12,7 @@ import { GithubRunnersDatasource } from '../../datasource/github-runners/index.t
 import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
 import * as dockerVersioning from '../../versioning/docker/index.ts';
 import * as exactVersioning from '../../versioning/exact/index.ts';
+import * as githubActionsVersioning from '../../versioning/github-actions/index.ts';
 import * as nodeVersioning from '../../versioning/node/index.ts';
 import * as npmVersioning from '../../versioning/npm/index.ts';
 import { getDep } from '../dockerfile/extract.ts';
@@ -22,7 +24,7 @@ import type {
 import { CommunityActions } from './community.ts';
 import type { DockerReference, RepositoryReference } from './parse.ts';
 import { isSha, isShortSha, parseUsesLine, versionLikeRe } from './parse.ts';
-import type { Steps } from './schema.ts';
+import type { UsesStep } from './schema.ts';
 import { Workflow } from './schema.ts';
 
 // detects if we run against a Github Enterprise Server and adds the URL to the beginning of the registryURLs for looking up Actions
@@ -32,7 +34,11 @@ function detectCustomGitHubRegistryUrlsForActions(): PackageDependency {
   const endpoint = GlobalConfig.get('endpoint');
   const registryUrls = ['https://github.com'];
   if (endpoint && GlobalConfig.get('platform') === 'github') {
-    const parsedEndpoint = new URL(endpoint);
+    const parsedEndpoint = parseUrl(endpoint);
+    if (!parsedEndpoint) {
+      logger.warn({ endpoint }, 'Failed to parse endpoint url');
+      return {};
+    }
 
     if (
       parsedEndpoint.host !== 'github.com' &&
@@ -86,7 +92,7 @@ function extractRepositoryAction(
   const dep: PackageDependency = {
     depName,
     commitMessageTopic: '{{{depName}}} action',
-    versioning: dockerVersioning.id,
+    versioning: githubActionsVersioning.id,
     depType: 'action',
     replaceString: valueString,
     autoReplaceStringTemplate: `${quote}{{depName}}${pathSuffix}@{{#if newDigest}}{{newDigest}}${quote}{{#if newValue}}${commentWs}# {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}${quote}{{/unless}}`,
@@ -113,8 +119,7 @@ function extractRepositoryAction(
     const cleanComment = parsed.commentString.slice(1);
     const matchEndIndex = commentData.index + commentData.matchedString.length;
     const commentSuffix = cleanComment.slice(0, matchEndIndex);
-    dep.replaceString =
-      valueString + commentPrecedingWhitespace + '#' + commentSuffix;
+    dep.replaceString = `${valueString}${commentPrecedingWhitespace}#${commentSuffix}`;
   } else if (commentData.ratchetExclude) {
     dep.replaceString =
       valueString + commentPrecedingWhitespace + parsed.commentString;
@@ -253,7 +258,7 @@ const versionedActions: Record<string, string> = {
   // - java
 };
 
-function extractVersionedAction(step: Steps): PackageDependency | null {
+function extractVersionedAction(step: UsesStep): PackageDependency | null {
   for (const [action, versioning] of Object.entries(versionedActions)) {
     const actionName = `actions/setup-${action}`;
     if (step.uses !== actionName && !step.uses?.startsWith(`${actionName}@`)) {
@@ -279,7 +284,7 @@ function extractVersionedAction(step: Steps): PackageDependency | null {
   return null;
 }
 
-function extractSteps(steps: Steps[]): PackageDependency[] {
+function extractSteps(steps: UsesStep[]): PackageDependency[] {
   const deps: PackageDependency[] = [];
 
   for (const step of steps) {

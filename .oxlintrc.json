@@ -1,6 +1,6 @@
 {
   "$schema": "https://raw.githubusercontent.com/oxc-project/oxc/main/npm/oxlint/configuration_schema.json",
-  "plugins": ["import", "promise", "typescript", "vitest"],
+  "plugins": ["import", "promise", "unicorn", "typescript", "vitest"],
   "jsPlugins": ["./tools/lint/rules.js"],
   "options": {
     "typeAware": true
@@ -34,7 +34,24 @@
     "no-restricted-imports": [
       "error",
       {
-        "paths": ["nock", "parse-link-header", "path"]
+        "paths": [
+          "nock",
+          "parse-link-header",
+          "path",
+          {
+            "name": "simple-git",
+            "importNames": ["simpleGit"],
+            "message": "Use createSimpleGit instead of simpleGit."
+          },
+          {
+            "name": "zod",
+            "message": "Use zod/v4 instead of the bare zod package."
+          },
+          {
+            "name": "zod/v3",
+            "message": "Use zod/v4 instead of the zod/v3 compatibility shim."
+          }
+        ]
       }
     ],
     "no-unused-vars": [
@@ -46,9 +63,15 @@
       }
     ],
     "no-unassigned-vars": "error",
+    "prefer-template": "error",
+    "prefer-arrow-callback": ["error", { "allowUnboundThis": false }],
+    "no-nested-ternary": "error",
 
     "renovate/enforce-ts-extension": "error",
+    "renovate/no-hardcoded-docs-url": "error",
+    "renovate/no-new-url": "error",
     "renovate/no-tools-import": "error",
+    "renovate/zod-schema-naming": "error",
 
     "typescript/await-thenable": "error",
     "typescript/no-floating-promises": "error",
@@ -139,7 +162,19 @@
     "typescript/no-namespace": "error",
     "typescript/no-require-imports": "error",
     "typescript/no-unnecessary-type-constraint": "error",
-    "typescript/no-unsafe-function-type": "error"
+    "typescript/no-unsafe-function-type": "error",
+    "unicorn/prefer-node-protocol": "error",
+
+    "typescript/no-useless-default-assignment": "error",
+    "vitest/require-mock-type-parameters": "off",
+    "vitest/expect-expect": [
+      "error",
+      { "assertFunctionNames": ["expect", "expectTypeOf", "checkKeysSorted"] }
+    ],
+    "vitest/no-conditional-expect": "error",
+    "vitest/no-standalone-expect": "error",
+    "vitest/prefer-snapshot-hint": "error",
+    "vitest/require-to-throw-message": "error"
   },
   "overrides": [
     {
@@ -196,6 +231,22 @@
         "typescript/restrict-template-expressions": "off",
         "typescript/explicit-function-return-type": "off",
         "renovate/enforce-ts-extension": "off"
+      }
+    },
+    {
+      "files": [
+        "lib/util/git/index.ts",
+        "tools/**/*.mjs",
+        "tools/**/*.ts",
+        "lib/**/*.spec.ts"
+      ],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "paths": ["nock", "parse-link-header", "path"]
+          }
+        ]
       }
     }
   ],

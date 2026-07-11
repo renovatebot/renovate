@@ -9,8 +9,8 @@ import {
   REPOSITORY_NOT_FOUND,
 } from '../../../constants/error-messages.ts';
 import * as repoCache from '../../../util/cache/repository/index.ts';
-import type { LongCommitSha } from '../../../util/git/types.ts';
-import { ensureTrailingSlash } from '../../../util/url.ts';
+import type { LongCommitSha } from '../../../util/schema-utils/git.ts';
+import { ensureTrailingSlash, parseUrl } from '../../../util/url.ts';
 import type { ReattemptPlatformAutomergeConfig } from '../types.ts';
 import * as bitbucket from './index.ts';
 
@@ -171,8 +171,8 @@ function prMock(
   };
 }
 
-const endpointWithNoPath = new URL('https://stash.renovatebot.com');
-const endpointWithPath = new URL('https://stash.renovatebot.com/vcs');
+const endpointWithNoPath = parseUrl('https://stash.renovatebot.com')!;
+const endpointWithPath = parseUrl('https://stash.renovatebot.com/vcs')!;
 
 describe('modules/platform/bitbucket-server/index', () => {
   describe('endpoint with path', () => {
@@ -239,14 +239,18 @@ describe('modules/platform/bitbucket-server/index', () => {
     describe('initPlatform()', () => {
       it('should throw if no endpoint', async () => {
         expect.assertions(1);
-        await expect(bitbucket.initPlatform({})).rejects.toThrow();
+        await expect(bitbucket.initPlatform({})).rejects.toThrow(
+          'Init: You must configure a Bitbucket Server endpoint',
+        );
       });
 
       it('should throw if no username/password/token', async () => {
         expect.assertions(1);
         await expect(
           bitbucket.initPlatform({ endpoint: 'endpoint' }),
-        ).rejects.toThrow();
+        ).rejects.toThrow(
+          'Init: You must either configure a Bitbucket Server username/password',
+        );
       });
 
       it('should throw if password and token is set', async () => {
@@ -258,7 +262,9 @@ describe('modules/platform/bitbucket-server/index', () => {
             password: '123',
             token: 'abc',
           }),
-        ).rejects.toThrow();
+        ).rejects.toThrow(
+          'Init: You must configure either a Bitbucket Server password or a HTTP',
+        );
       });
 
       it('should not throw if username/password', async () => {
@@ -1012,7 +1018,7 @@ describe('modules/platform/bitbucket-server/index', () => {
 
         await expect(
           bitbucket.addReviewers(5, ['user1', 'user2', '']),
-        ).rejects.toThrow();
+        ).rejects.toThrow('Request failed with status code 409 (Conflict)');
 
         expect(logger.logger.warn).toHaveBeenCalledWith(
           expect.anything(),
@@ -2128,11 +2134,11 @@ describe('modules/platform/bitbucket-server/index', () => {
           .twice()
           .reply(200, prMock(url, 'SOME', 'repo'));
 
-        expect(await bitbucket.getPr(3)).toMatchSnapshot();
+        expect(await bitbucket.getPr(3)).toMatchSnapshot('getPr(3)');
 
-        expect(await bitbucket.getPr(5)).toMatchSnapshot();
+        expect(await bitbucket.getPr(5)).toMatchSnapshot('getPr(5)');
 
-        expect(await bitbucket.getPr(5)).toMatchSnapshot();
+        expect(await bitbucket.getPr(5)).toMatchSnapshot('getPr(5) repeated');
       });
 
       it('gets a closed PR', async () => {
@@ -2952,7 +2958,9 @@ Followed by some information.
             isLastPage: true,
             lines: [{ text: '!@#' }],
           });
-        await expect(bitbucket.getJsonFile('file.json')).rejects.toThrow();
+        await expect(bitbucket.getJsonFile('file.json')).rejects.toThrow(
+          "JSON5: invalid character '!' at 1:1",
+        );
       });
 
       it('throws on long content', async () => {
@@ -2965,7 +2973,9 @@ Followed by some information.
             isLastPage: false,
             lines: [{ text: '{' }],
           });
-        await expect(bitbucket.getJsonFile('file.json')).rejects.toThrow();
+        await expect(bitbucket.getJsonFile('file.json')).rejects.toThrow(
+          'The file is too big (undefinedB)',
+        );
       });
 
       it('throws on errors', async () => {
@@ -2975,7 +2985,9 @@ Followed by some information.
             `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/browse/file.json?limit=20000`,
           )
           .replyWithError('some error');
-        await expect(bitbucket.getJsonFile('file.json')).rejects.toThrow();
+        await expect(bitbucket.getJsonFile('file.json')).rejects.toThrow(
+          'some error',
+        );
       });
     });
     describe('modules/platform/bitbucket-server/code-owners', () => {

@@ -11,7 +11,9 @@ import {
   TEMPORARY_ERROR,
   UNKNOWN_ERROR,
 } from '../../constants/error-messages.ts';
+import { setCustomEnv } from '../env.ts';
 import { newlineRegex, regEx } from '../regex.ts';
+import { toLongCommitSha } from '../schema-utils/git.ts';
 import * as _auth from './auth.ts';
 import * as _behindBaseCache from './behind-base-branch-cache.ts';
 import * as _conflictsCache from './conflicts-cache.ts';
@@ -19,10 +21,12 @@ import * as git from './index.ts';
 import { setNoVerify } from './index.ts';
 import * as _modifiedCache from './modified-cache.ts';
 import type { FileChange } from './types.ts';
+import * as _updateDateCache from './update-date-cache.ts';
 
 vi.mock('./conflicts-cache.ts');
 vi.mock('./behind-base-branch-cache.ts');
 vi.mock('./modified-cache.ts');
+vi.mock('./update-date-cache.ts');
 vi.mock('timers/promises');
 vi.mock('../cache/repository/index.ts');
 vi.mock('./auth.ts');
@@ -31,13 +35,14 @@ vi.unmock('./index.ts');
 const behindBaseCache = vi.mocked(_behindBaseCache);
 const conflictsCache = vi.mocked(_conflictsCache);
 const modifiedCache = vi.mocked(_modifiedCache);
+const updateDateCache = vi.mocked(_updateDateCache);
 const auth = vi.mocked(_auth);
 // Class is no longer exported
 const SimpleGit = simpleGit().constructor as {
   prototype: ReturnType<typeof simpleGit>;
 };
 
-describe('util/git/index', { timeout: 10000 }, () => {
+describe('util/git/index', { timeout: 30000 }, () => {
   const masterCommitDate = new Date();
   masterCommitDate.setMilliseconds(0);
   let base: tmp.DirectoryResult;
@@ -51,7 +56,7 @@ describe('util/git/index', { timeout: 10000 }, () => {
     defaultBranch = (await repo.raw('branch', '--show-current')).trim();
     await repo.addConfig('user.email', 'Jest@example.com');
     await repo.addConfig('user.name', 'Jest');
-    await fs.writeFile(base.path + '/past_file', 'past');
+    await fs.writeFile(`${base.path}/past_file`, 'past');
     await repo.addConfig('commit.gpgsign', 'false');
     await repo.add(['past_file']);
     await repo.commit('past message');
@@ -60,42 +65,42 @@ describe('util/git/index', { timeout: 10000 }, () => {
     await repo.checkout(['-b', 'develop', defaultBranch]);
 
     await repo.checkout(defaultBranch);
-    await fs.writeFile(base.path + '/master_file', defaultBranch);
-    await fs.writeFile(base.path + '/file_to_delete', 'bye');
+    await fs.writeFile(`${base.path}/master_file`, defaultBranch);
+    await fs.writeFile(`${base.path}/file_to_delete`, 'bye');
     await repo.add(['master_file', 'file_to_delete']);
     process.env.GIT_COMMITTER_DATE = masterCommitDate.toISOString();
     await repo.commit('master message');
     delete process.env.GIT_COMMITTER_DATE;
 
     await repo.checkout(['-b', 'renovate/future_branch', defaultBranch]);
-    await fs.writeFile(base.path + '/future_file', 'future');
+    await fs.writeFile(`${base.path}/future_file`, 'future');
     await repo.add(['future_file']);
     await repo.commit('future message');
 
     await repo.checkoutBranch('renovate/modified_branch', defaultBranch);
-    await fs.writeFile(base.path + '/base_file', 'base');
+    await fs.writeFile(`${base.path}/base_file`, 'base');
     await repo.add(['base_file']);
     await repo.commit('base message');
-    await fs.writeFile(base.path + '/modified_file', 'modified');
+    await fs.writeFile(`${base.path}/modified_file`, 'modified');
     await repo.add(['modified_file']);
     await repo.commit('modification');
 
     await repo.checkoutBranch('renovate/custom_author', defaultBranch);
-    await fs.writeFile(base.path + '/custom_file', 'custom');
+    await fs.writeFile(`${base.path}/custom_file`, 'custom');
     await repo.add(['custom_file']);
     await repo.addConfig('user.email', 'custom@example.com');
     await repo.commit('custom message');
 
     await repo.checkoutBranch('renovate/nested_files', defaultBranch);
-    await fs.mkdirp(base.path + '/bin/');
-    await fs.writeFile(base.path + '/bin/nested', 'nested');
-    await fs.writeFile(base.path + '/root', 'root');
+    await fs.mkdirp(`${base.path}/bin/`);
+    await fs.writeFile(`${base.path}/bin/nested`, 'nested');
+    await fs.writeFile(`${base.path}/root`, 'root');
     await repo.add(['root', 'bin/nested']);
     await repo.addConfig('user.email', 'custom@example.com');
     await repo.commit('nested message');
 
     await repo.checkout(['-b', 'renovate/hidden-unicode', defaultBranch]);
-    await fs.writeFile(base.path + '/Dockerfile', 'FROM scratch\u00A0');
+    await fs.writeFile(`${base.path}/Dockerfile`, 'FROM scratch\u00A0');
     await repo.add(['Dockerfile']);
     await repo.commit('hidden Unicode');
 
@@ -103,7 +108,7 @@ describe('util/git/index', { timeout: 10000 }, () => {
     const binaryContent = Buffer.from([
       0x50, 0x4b, 0x03, 0x04, 0x00, 0x00, 0xe2, 0x80, 0x8b, 0x00,
     ]); // 0xe2 0x80 0x8b is UTF-8 encoding of U+200B (zero-width space)
-    await fs.writeFile(base.path + '/binary.dat', binaryContent);
+    await fs.writeFile(`${base.path}/binary.dat`, binaryContent);
     await repo.add(['binary.dat']);
     await repo.commit('add binary file');
 
@@ -127,6 +132,7 @@ describe('util/git/index', { timeout: 10000 }, () => {
 
   beforeEach(async () => {
     process.env = { ...OLD_ENV };
+    setCustomEnv({});
     origin = await tmp.dir({ unsafeCleanup: true });
     const repo = simpleGit(origin.path);
     await repo.clone(base.path, '.', ['--bare']);
@@ -143,7 +149,10 @@ describe('util/git/index', { timeout: 10000 }, () => {
     // override some local git settings for better testing
     const local = simpleGit(tmpDir.path);
     await local.addConfig('commit.gpgsign', 'false');
+    await local.addConfig('user.name', 'Jest');
+    await local.addConfig('user.email', 'Jest@example.com');
     behindBaseCache.getCachedBehindBaseResult.mockReturnValue(null);
+    updateDateCache.getCachedUpdateDateResult.mockReturnValue(null);
   });
 
   afterEach(async () => {
@@ -153,6 +162,7 @@ describe('util/git/index', { timeout: 10000 }, () => {
   });
 
   afterAll(async () => {
+    setCustomEnv({});
     process.env = OLD_ENV;
     await base?.cleanup();
   });
@@ -230,7 +240,7 @@ describe('util/git/index', { timeout: 10000 }, () => {
           GIT_ALLOW_PROTOCOL: 'file',
         });
 
-        const submoduleBasePath = base.path + '/submodule';
+        const submoduleBasePath = `${base.path}/submodule`;
         await fs.mkdir(submoduleBasePath);
         const submodule = simpleGit(submoduleBasePath);
         await submodule.init();
@@ -238,7 +248,7 @@ describe('util/git/index', { timeout: 10000 }, () => {
         await submodule.addConfig('user.name', 'Jest');
         await submodule.addConfig('commit.gpgsign', 'false');
 
-        await fs.writeFile(submoduleBasePath + '/init_file', 'init');
+        await fs.writeFile(`${submoduleBasePath}/init_file`, 'init');
         await submodule.add('init_file');
         await submodule.commit('init submodule');
 
@@ -246,7 +256,7 @@ describe('util/git/index', { timeout: 10000 }, () => {
         await repo.commit('add submodule');
         await repo.branch(['stable']);
 
-        await fs.writeFile(submoduleBasePath + '/current_file', 'current');
+        await fs.writeFile(`${submoduleBasePath}/current_file`, 'current');
         await submodule.add('current_file');
         await submodule.commit('update');
         await repo.add('submodule');
@@ -277,7 +287,7 @@ describe('util/git/index', { timeout: 10000 }, () => {
         await repo.checkout(defaultBranch);
         await repo.reset(['--hard', 'HEAD~2']);
         await repo.branch(['-D', 'stable']);
-        await fs.rm(base.path + '/submodule', { recursive: true });
+        await fs.rm(`${base.path}/submodule`, { recursive: true });
       });
     });
   });
@@ -303,7 +313,7 @@ describe('util/git/index', { timeout: 10000 }, () => {
       });
       expect(git.isCloned()).toBeFalse();
       await git.syncGit();
-      expect(await fs.pathExists(tmpDir.path + '/.gitmodules')).toBeTruthy();
+      expect(await fs.pathExists(`${tmpDir.path}/.gitmodules`)).toBeTruthy();
       expect(await git.getFileList()).toEqual([
         '.gitmodules',
         'file_to_delete',
@@ -447,6 +457,10 @@ describe('util/git/index', { timeout: 10000 }, () => {
       const defaultDate = await git.getBranchUpdateDate(defaultBranch);
       expect(date!.toISO()).toBe(defaultDate!.toISO());
       expect(date).toBeInstanceOf(DateTime);
+      expect(updateDateCache.setCachedUpdateDateResult).toHaveBeenCalledWith(
+        'renovate/equal_branch',
+        expect.any(DateTime),
+      );
     });
 
     it('should return null when branch does not exist', async () => {
@@ -482,6 +496,51 @@ describe('util/git/index', { timeout: 10000 }, () => {
 
       // Restore original implementation
       fromISOSpy.mockRestore();
+    });
+
+    it('returns cached result without syncing git when cache is populated', async () => {
+      const branchName = 'renovate/equal_branch';
+      const cachedDate = DateTime.fromISO('2023-05-20T14:25:30.123Z');
+      updateDateCache.getCachedUpdateDateResult.mockReturnValueOnce(cachedDate);
+      await git.checkoutBranchFromRemote(branchName, 'origin');
+      const result = await git.getBranchUpdateDate(branchName);
+      expect(result).toBe(cachedDate);
+      expect(updateDateCache.setCachedUpdateDateResult).not.toHaveBeenCalled();
+    });
+
+    it('works if running with a Repo Cache', async () => {
+      // Create a branch with a commit so it exists in the remote
+      const branchName = 'renovate/cache-test-branch';
+      await git.commitFiles({
+        branchName,
+        files: [
+          {
+            type: 'addition',
+            path: 'cache-test-file',
+            contents: 'test content',
+          },
+        ],
+        message: 'Test commit',
+      });
+
+      // Simulate a new run of Renovate, when running from a fresh localDir, where we've not already cloned anything, as happens when using RENOVATE_REPOSITORY_CACHE=enabled
+      const freshDir = await tmp.dir({ unsafeCleanup: true });
+      try {
+        GlobalConfig.set({ localDir: freshDir.path });
+        await git.initRepo({ url: origin.path });
+        git.setUserRepoConfig({ branchPrefix: 'renovate/' });
+        git.setGitAuthor('Jest <Jest@example.com>');
+        setNoVerify([]);
+
+        // will sync Git
+        const result = await git.getBranchUpdateDate(branchName);
+
+        expect(result).toBeInstanceOf(DateTime);
+        expect(result).not.toBeNull();
+      } finally {
+        await freshDir.cleanup();
+        GlobalConfig.set({ localDir: tmpDir.path });
+      }
     });
   });
 
@@ -539,7 +598,9 @@ describe('util/git/index', { timeout: 10000 }, () => {
     });
 
     it('should throw if branch merge throws', async () => {
-      await expect(git.mergeBranch('not_found')).rejects.toThrow();
+      await expect(git.mergeBranch('not_found')).rejects.toThrow(
+        "fatal: 'origin/not_found' is not a commit and a branch 'not_found'",
+      );
     });
   });
 
@@ -554,8 +615,36 @@ describe('util/git/index', { timeout: 10000 }, () => {
       expect(pushSpy).toHaveBeenCalledTimes(0);
     });
 
+    it('should merge a local-only branch without fetching from origin', async () => {
+      // Create a local-only branch (never pushed to origin)
+      await git.prepareCommit({
+        branchName: 'renovate/local_only_branch',
+        message: 'local only commit',
+        files: [
+          { type: 'addition', path: 'local_only_file', contents: 'local' },
+        ],
+      });
+      // Reset working tree back to default branch so the file is not present yet
+      const local = simpleGit(tmpDir.path);
+      await local.checkout(defaultBranch);
+
+      expect(fs.existsSync(`${tmpDir.path}/local_only_file`)).toBeFalse();
+      const fetchSpy = vi.spyOn(SimpleGit.prototype, 'fetch');
+      const pushSpy = vi.spyOn(SimpleGit.prototype, 'push');
+
+      await git.mergeToLocal('renovate/local_only_branch', {
+        localBranch: true,
+      });
+
+      expect(fs.existsSync(`${tmpDir.path}/local_only_file`)).toBeTrue();
+      expect(fetchSpy).not.toHaveBeenCalled();
+      expect(pushSpy).not.toHaveBeenCalled();
+    });
+
     it('should throw', async () => {
-      await expect(git.mergeToLocal('not_found')).rejects.toThrow();
+      await expect(git.mergeToLocal('not_found')).rejects.toThrow(
+        "fatal: couldn't find remote ref not_found",
+      );
     });
   });
 
@@ -588,6 +677,14 @@ describe('util/git/index', { timeout: 10000 }, () => {
         'renovate/something',
         '--no-verify',
       ]);
+    });
+
+    it('should only delete local branch when localBranch option is set', async () => {
+      const rawSpy = vi.spyOn(SimpleGit.prototype, 'raw');
+      await git.deleteBranch('renovate/past_branch', { localBranch: true });
+      expect(rawSpy).not.toHaveBeenCalledWith(
+        expect.arrayContaining(['push', '--delete']),
+      );
     });
   });
 
@@ -953,7 +1050,7 @@ describe('util/git/index', { timeout: 10000 }, () => {
     it('should fetch latest', async () => {
       const repo = simpleGit(base.path);
       await repo.checkout(['-b', 'test', defaultBranch]);
-      await fs.writeFile(base.path + '/test', 'lorem ipsum');
+      await fs.writeFile(`${base.path}/test`, 'lorem ipsum');
       await repo.add(['test']);
       await repo.commit('past message2');
       await repo.checkout(defaultBranch);
@@ -983,7 +1080,7 @@ describe('util/git/index', { timeout: 10000 }, () => {
     it('should set branch prefix', async () => {
       const repo = simpleGit(base.path);
       await repo.checkout(['-b', 'renovate/test', defaultBranch]);
-      await fs.writeFile(base.path + '/test', 'lorem ipsum');
+      await fs.writeFile(`${base.path}/test`, 'lorem ipsum');
       await repo.add(['test']);
       await repo.commit('past message2');
       await repo.checkout(defaultBranch);
@@ -1009,7 +1106,7 @@ describe('util/git/index', { timeout: 10000 }, () => {
     it('should fail clone ssh submodule', async () => {
       const repo = simpleGit(base.path);
       await fs.writeFile(
-        base.path + '/.gitmodules',
+        `${base.path}/.gitmodules`,
         '[submodule "test"]\npath=test\nurl=ssh://0.0.0.0',
       );
       await repo.add('.gitmodules');
@@ -1027,7 +1124,7 @@ describe('util/git/index', { timeout: 10000 }, () => {
         url: base.path,
       });
       await git.syncGit();
-      expect(await fs.pathExists(tmpDir.path + '/.gitmodules')).toBeTruthy();
+      expect(await fs.pathExists(`${tmpDir.path}/.gitmodules`)).toBeTruthy();
       await repo.reset(['--hard', 'HEAD^']);
     });
 
@@ -1045,6 +1142,26 @@ describe('util/git/index', { timeout: 10000 }, () => {
       const repo = simpleGit(tmpDir.path);
       const res = (await repo.raw(['config', 'extra.clone.config'])).trim();
       expect(res).toBe('test-extra-config-value');
+    });
+
+    it('should not pass extraCloneOpts to ls-remote when local repo exists', async () => {
+      const extraCloneOpts = {
+        '-c': 'extra.clone.config=test-extra-config-value',
+      };
+
+      await fs.emptyDir(tmpDir.path);
+      await git.initRepo({ url: origin.path, extraCloneOpts, fullClone: true });
+      await git.syncGit();
+
+      const rawSpy = vi.spyOn(SimpleGit.prototype, 'raw');
+
+      await git.initRepo({ url: origin.path, extraCloneOpts, fullClone: true });
+
+      expect(rawSpy).toHaveBeenCalledWith([
+        'ls-remote',
+        '--heads',
+        origin.path,
+      ]);
     });
   });
 
@@ -1067,17 +1184,17 @@ describe('util/git/index', { timeout: 10000 }, () => {
       ]);
 
       await repo.checkout(defaultBranch);
-      await fs.writeFile(base.path + '/one_file', 'past (updated)');
+      await fs.writeFile(`${base.path}/one_file`, 'past (updated)');
       await repo.add(['one_file']);
       await repo.commit('past (updated) message');
 
       await repo.checkout('renovate/conflicted_branch');
-      await fs.writeFile(base.path + '/one_file', 'past (updated branch)');
+      await fs.writeFile(`${base.path}/one_file`, 'past (updated branch)');
       await repo.add(['one_file']);
       await repo.commit('past (updated branch) message');
 
       await repo.checkout('renovate/non_conflicted_branch');
-      await fs.writeFile(base.path + '/another_file', 'other');
+      await fs.writeFile(`${base.path}/another_file`, 'other');
       await repo.add(['another_file']);
       await repo.commit('other (updated branch) message');
 
@@ -1284,18 +1401,145 @@ describe('util/git/index', { timeout: 10000 }, () => {
     });
   });
 
-  describe('listCommitTree', () => {
-    it('creates non-branch ref', async () => {
+  describe('getCommitTreeSha', () => {
+    it('returns the tree SHA for a commit', async () => {
       const commit = git.getBranchCommit('develop')!;
-      const res = await git.listCommitTree(commit);
-      expect(res).toEqual([
-        {
+      const treeSha = await git.getCommitTreeSha(commit);
+      expect(treeSha).toBeString();
+      expect(treeSha).toHaveLength(40);
+      expect(treeSha).toMatch(regEx(/^[0-9a-f]{40}$/));
+    });
+
+    it('throws if commit output does not contain a tree SHA', async () => {
+      const commit = git.getBranchCommit('develop')!;
+      vi.spyOn(SimpleGit.prototype, 'catFile').mockResolvedValueOnce(
+        'parent deadbeef',
+      );
+
+      await expect(git.getCommitTreeSha(commit)).rejects.toThrow(
+        `Could not extract tree SHA from commit ${commit}: parent deadbeef`,
+      );
+    });
+  });
+
+  describe('diffCommitTree', () => {
+    it('returns changed files between two commits', async () => {
+      const parentCommit = git.getBranchCommit('develop')!;
+      const commit = git.getBranchCommit(defaultBranch)!;
+      const diff = await git.diffCommitTree(parentCommit, commit);
+      expect(diff.length).toBeGreaterThanOrEqual(2);
+      expect(diff).toContainEqual(
+        expect.objectContaining({
+          path: 'master_file',
           mode: '100644',
-          path: 'past_file',
-          sha: '913705ab2ca79368053a476efa48aa6912d052c5',
           type: 'blob',
-        },
-      ]);
+        }),
+      );
+      expect(diff).toContainEqual(
+        expect.objectContaining({ path: 'file_to_delete' }),
+      );
+      for (const item of diff) {
+        expect(item.sha).toMatch(regEx(/^[0-9a-f]{40}$/));
+      }
+    });
+
+    it('returns deletions with sha null', async () => {
+      const commit = git.getBranchCommit(defaultBranch)!;
+      const parentCommit = git.getBranchCommit('develop')!;
+      // Reverse: from default branch back to develop — master_file and file_to_delete are "deleted"
+      const diff = await git.diffCommitTree(commit, parentCommit);
+      expect(diff.length).toBeGreaterThanOrEqual(2);
+      const masterFile = diff.find((d) => d.path === 'master_file');
+      expect(masterFile?.sha).toBeNull();
+      const fileToDelete = diff.find((d) => d.path === 'file_to_delete');
+      expect(fileToDelete?.sha).toBeNull();
+    });
+
+    it('returns renames as deletion and addition entries', async () => {
+      const repo = simpleGit(tmpDir.path);
+      await repo.addConfig('user.email', 'Jest@example.com');
+      await repo.addConfig('user.name', 'Jest');
+      const parentCommit = git.getBranchCommit(defaultBranch)!;
+
+      await repo.raw(['mv', 'master_file', 'renamed_master_file']);
+      await repo.commit('rename master file');
+
+      const commit = toLongCommitSha((await repo.revparse(['HEAD'])).trim());
+      const diff = await git.diffCommitTree(parentCommit, commit);
+
+      expect(diff).toHaveLength(2);
+      expect(diff).toContainEqual({
+        path: 'master_file',
+        mode: '100644',
+        type: 'blob',
+        sha: null,
+      });
+      expect(diff).toContainEqual(
+        expect.objectContaining({
+          path: 'renamed_master_file',
+          mode: '100644',
+          type: 'blob',
+          sha: expect.stringMatching(/^[0-9a-f]{40}$/),
+        }),
+      );
+    });
+
+    it('parses R status lines from diff-tree output', async () => {
+      const parentCommit = git.getBranchCommit('develop')!;
+      const commit = git.getBranchCommit(defaultBranch)!;
+      vi.spyOn(SimpleGit.prototype, 'raw').mockResolvedValueOnce(
+        ':100644 100644 aaa0000000000000000000000000000000000000 bbb0000000000000000000000000000000000000 R100\told.txt\tnew.txt\n',
+      );
+
+      const diff = await git.diffCommitTree(parentCommit, commit);
+
+      expect(diff).toHaveLength(2);
+      expect(diff).toContainEqual({
+        path: 'old.txt',
+        mode: '100644',
+        type: 'blob',
+        sha: null,
+      });
+      expect(diff).toContainEqual({
+        path: 'new.txt',
+        mode: '100644',
+        type: 'blob',
+        sha: 'bbb0000000000000000000000000000000000000',
+      });
+    });
+
+    it('maps mode 160000 to type commit for submodules', async () => {
+      const parentCommit = git.getBranchCommit('develop')!;
+      const commit = git.getBranchCommit(defaultBranch)!;
+      vi.spyOn(SimpleGit.prototype, 'raw').mockResolvedValueOnce(
+        ':000000 160000 0000000000000000000000000000000000000000 abc0000000000000000000000000000000000000 A\tvendor/sub\n',
+      );
+
+      const diff = await git.diffCommitTree(parentCommit, commit);
+
+      expect(diff).toContainEqual({
+        path: 'vendor/sub',
+        mode: '160000',
+        type: 'commit',
+        sha: 'abc0000000000000000000000000000000000000',
+      });
+    });
+
+    it('maps mode 040000 to type tree', async () => {
+      const parentCommit = git.getBranchCommit('develop')!;
+      const commit = git.getBranchCommit(defaultBranch)!;
+      vi.spyOn(SimpleGit.prototype, 'raw').mockResolvedValueOnce(
+        ':000000 040000 0000000000000000000000000000000000000000 def0000000000000000000000000000000000000 A\tsome/dir\n',
+      );
+
+      const diff = await git.diffCommitTree(parentCommit, commit);
+
+      expect(diff).toContainEqual({
+        path: 'some/dir',
+        mode: '040000',
+        type: 'tree',
+        sha: 'def0000000000000000000000000000000000000',
+      });
     });
   });
 
@@ -1303,8 +1547,8 @@ describe('util/git/index', { timeout: 10000 }, () => {
     it('should pass options into git status', async () => {
       await git.checkoutBranch('renovate/nested_files');
 
-      await fs.writeFile(tmpDir.path + '/bin/nested', 'new nested');
-      await fs.writeFile(tmpDir.path + '/root', 'new root');
+      await fs.writeFile(`${tmpDir.path}/bin/nested`, 'new nested');
+      await fs.writeFile(`${tmpDir.path}/root`, 'new root');
       const resp = await git.getRepoStatus('bin');
 
       expect(resp.modified).toStrictEqual(['bin/nested']);
@@ -1314,8 +1558,8 @@ describe('util/git/index', { timeout: 10000 }, () => {
       GlobalConfig.set({ localDir: tmpDir.path });
       await git.checkoutBranch('renovate/nested_files');
 
-      await fs.writeFile(tmpDir.path + '/bin/nested', 'new nested');
-      await fs.writeFile(tmpDir.path + '/root', 'new root');
+      await fs.writeFile(`${tmpDir.path}/bin/nested`, 'new nested');
+      await fs.writeFile(`${tmpDir.path}/root`, 'new root');
 
       await expect(git.getRepoStatus('../../bin')).rejects.toThrow(
         INVALID_PATH,
@@ -1358,6 +1602,165 @@ describe('util/git/index', { timeout: 10000 }, () => {
       ).trim();
       expect(branch).toBe('develop');
     });
+
+    it('should set core.hooksPath when RENOVATE_X_CLEAR_HOOKS is set', async () => {
+      // set up our repo again, so we can initialise it with `RENOVATE_X_CLEAR_HOOKS`
+      tmpDir = await tmp.dir({ unsafeCleanup: true });
+      GlobalConfig.set({ localDir: tmpDir.path });
+      process.env.RENOVATE_X_CLEAR_HOOKS = 'true';
+      await git.initRepo({
+        url: origin.path,
+      });
+
+      // initialise the repo
+      await git.syncGit();
+      // then hit the RENOVATE_X_CLEAR_HOOKS code path
+      await git.syncGit();
+
+      const tmpGit = simpleGit(tmpDir.path);
+      const hooksPath = (await tmpGit.raw(['config', 'core.hooksPath'])).trim();
+      expect(hooksPath).toBe('/dev/null');
+      delete process.env.RENOVATE_X_CLEAR_HOOKS;
+    });
+
+    it('should not inherit unsafe git environment variables from process.env', async () => {
+      process.env.GIT_CONFIG_COUNT = '1';
+      process.env.GIT_CONFIG_KEY_0 = 'core.hooksPath';
+      process.env.GIT_CONFIG_VALUE_0 = '/tmp/hooks';
+      process.env.GIT_CONFIG_GLOBAL = '/tmp/global-gitconfig';
+      process.env.GIT_CONFIG_SYSTEM = '/tmp/system-gitconfig';
+      process.env.PAGER = 'less';
+      process.env.GIT_ASKPASS = '/tmp/.git-askpass';
+
+      const envSpy = vi.spyOn(SimpleGit.prototype, 'env');
+      await git.initRepo({ url: origin.path });
+      await expect(git.syncGit()).resolves.toBeUndefined();
+      expect(envSpy).toHaveBeenCalledTimes(1);
+      const [gitEnv] = envSpy.mock.calls[0];
+      expect(gitEnv).toEqual(
+        expect.objectContaining({
+          LANG: 'C.UTF-8',
+          LC_ALL: 'C.UTF-8',
+          GIT_SSH_COMMAND: 'ssh -o BatchMode=yes',
+        }),
+      );
+      expect(gitEnv).not.toHaveProperty('GIT_CONFIG_COUNT');
+      expect(gitEnv).not.toHaveProperty('GIT_CONFIG_KEY_0');
+      expect(gitEnv).not.toHaveProperty('GIT_CONFIG_VALUE_0');
+      expect(gitEnv).not.toHaveProperty('GIT_CONFIG_GLOBAL');
+      expect(gitEnv).not.toHaveProperty('GIT_CONFIG_SYSTEM');
+      expect(gitEnv).not.toHaveProperty('PAGER');
+      expect(gitEnv).not.toHaveProperty('GIT_ASKPASS');
+    });
+
+    it('should work when GIT_CONFIG_COUNT authentication environment variables are configured', async () => {
+      // Self-hosted users can opt into passing GIT_CONFIG_COUNT + GIT_CONFIG_KEY_n
+      // + GIT_CONFIG_VALUE_n via customEnvVariables.
+      // simple-git >=3.36.0 blocks git operations when these vars are present unless
+      // allowUnsafeConfigEnvCount is enabled in the simple-git config.
+      setCustomEnv({
+        GIT_CONFIG_COUNT: '3',
+        GIT_CONFIG_KEY_0: 'url.https://ssh:token@example.com/.insteadOf',
+        GIT_CONFIG_VALUE_0: 'ssh://git@example.com/',
+        GIT_CONFIG_KEY_1: 'url.https://git:token@example.com/.insteadOf',
+        GIT_CONFIG_VALUE_1: 'git@example.com:',
+        GIT_CONFIG_KEY_2: 'url.https://token@example.com/.insteadOf',
+        GIT_CONFIG_VALUE_2: 'https://example.com/',
+      });
+
+      const envSpy = vi.spyOn(SimpleGit.prototype, 'env');
+      await git.initRepo({ url: origin.path });
+      await expect(git.syncGit()).resolves.toBeUndefined();
+      expect(envSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          GIT_CONFIG_COUNT: '3',
+          GIT_CONFIG_KEY_0: 'url.https://ssh:token@example.com/.insteadOf',
+          GIT_CONFIG_VALUE_0: 'ssh://git@example.com/',
+          GIT_CONFIG_KEY_1: 'url.https://git:token@example.com/.insteadOf',
+          GIT_CONFIG_VALUE_1: 'git@example.com:',
+          GIT_CONFIG_KEY_2: 'url.https://token@example.com/.insteadOf',
+          GIT_CONFIG_VALUE_2: 'https://example.com/',
+          LANG: 'C.UTF-8',
+          LC_ALL: 'C.UTF-8',
+          GIT_SSH_COMMAND: 'ssh -o BatchMode=yes',
+        }),
+      );
+    });
+
+    it('should allow customEnvVariables to override GIT_SSH_COMMAND', async () => {
+      // Self-hosted users may inject a custom GIT_SSH_COMMAND via
+      // customEnvVariables to configure SSH authentication (e.g. a
+      // specific identity file). The default 'ssh -o BatchMode=yes'
+      // should be used as a fallback, not as a forced override.
+      const customSshCommand =
+        'ssh -i /path/to/deploy-key -o StrictHostKeyChecking=no';
+      setCustomEnv({ GIT_SSH_COMMAND: customSshCommand });
+
+      const envSpy = vi.spyOn(SimpleGit.prototype, 'env');
+      await git.initRepo({ url: origin.path });
+      await expect(git.syncGit()).resolves.toBeUndefined();
+      expect(envSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          LANG: 'C.UTF-8',
+          LC_ALL: 'C.UTF-8',
+          GIT_SSH_COMMAND: customSshCommand,
+        }),
+      );
+    });
+
+    it('should allow customEnvVariables to override GIT_SSH_COMMAND alongside other custom vars', async () => {
+      const customSshCommand =
+        'ssh -i /path/to/deploy-key -o StrictHostKeyChecking=no';
+      setCustomEnv({
+        GIT_SSH_COMMAND: customSshCommand,
+        CUSTOM_TOKEN: 'abc123',
+      });
+
+      const envSpy = vi.spyOn(SimpleGit.prototype, 'env');
+      await git.initRepo({ url: origin.path });
+      await expect(git.syncGit()).resolves.toBeUndefined();
+      expect(envSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          LANG: 'C.UTF-8',
+          LC_ALL: 'C.UTF-8',
+          GIT_SSH_COMMAND: customSshCommand,
+          CUSTOM_TOKEN: 'abc123',
+        }),
+      );
+    });
+
+    it('should allow process.env GIT_SSH_COMMAND to override the default', async () => {
+      // GIT_SSH_COMMAND is declared in extraEnv, so the key is inherited
+      // from process.env via parentEnv (higher priority than extraEnv).
+      process.env.GIT_SSH_COMMAND = 'ssh -o SomeHostOption=yes';
+
+      const envSpy = vi.spyOn(SimpleGit.prototype, 'env');
+      await git.initRepo({ url: origin.path });
+      await expect(git.syncGit()).resolves.toBeUndefined();
+      expect(envSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          GIT_SSH_COMMAND: 'ssh -o SomeHostOption=yes',
+        }),
+      );
+    });
+
+    it('should allow customEnvVariables to override GIT_ASKPASS', async () => {
+      // Self-hosted users may inject a custom GIT_ASKPASS via
+      // customEnvVariables to configure git authentication.
+      const customAskPassCommand = '/tmp/.git-askpass';
+      setCustomEnv({ GIT_ASKPASS: customAskPassCommand });
+
+      const envSpy = vi.spyOn(SimpleGit.prototype, 'env');
+      await git.initRepo({ url: origin.path });
+      await expect(git.syncGit()).resolves.toBeUndefined();
+      expect(envSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          LANG: 'C.UTF-8',
+          LC_ALL: 'C.UTF-8',
+          GIT_ASKPASS: customAskPassCommand,
+        }),
+      );
+    });
   });
 
   describe('pushCommit', () => {
@@ -1398,7 +1801,7 @@ describe('util/git/index', { timeout: 10000 }, () => {
       ).trim();
       await upstream.addConfig('user.email', 'other@example.com');
       await upstream.addConfig('user.name', 'Other');
-      await fs.writeFile(upstreamBase.path + '/past_file', 'past');
+      await fs.writeFile(`${upstreamBase.path}/past_file`, 'past');
       await upstream.addConfig('commit.gpgsign', 'false');
       await upstream.add(['past_file']);
       await upstream.commit('past message');

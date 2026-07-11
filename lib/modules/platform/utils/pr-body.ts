@@ -18,11 +18,20 @@ export function smartTruncate(input: string, len: number): string {
   const note = emojify(
     `> :information_source: **Note**\n> \n> This PR body was truncated due to platform limits.\n\n`,
   );
+  const truncationNotice = emojify(
+    `\n\n> :scissors: **Note**\n> \n> PR body was truncated to here.\n`,
+  );
   const truncatedInput = note + input;
 
   const reMatch = re.exec(truncatedInput);
   if (!reMatch?.groups) {
-    return truncatedInput.substring(0, len);
+    if (truncationNotice.length >= len) {
+      return truncatedInput.substring(0, len);
+    }
+    return (
+      truncatedInput.substring(0, len - truncationNotice.length) +
+      truncationNotice
+    );
   }
 
   const divider = `\n\n</details>\n\n---\n\n### Configuration`;
@@ -31,13 +40,27 @@ export function smartTruncate(input: string, len: number): string {
   const postNotes = reMatch.groups.postNotes;
 
   const availableLength =
-    len - (preNotes.length + postNotes.length + divider.length);
+    len -
+    (preNotes.length +
+      postNotes.length +
+      divider.length +
+      truncationNotice.length);
 
   if (availableLength <= 0) {
-    return truncatedInput.substring(0, len);
+    if (truncationNotice.length >= len) {
+      return truncatedInput.substring(0, len);
+    }
+    return (
+      truncatedInput.substring(0, len - truncationNotice.length) +
+      truncationNotice
+    );
   } else {
     return (
-      preNotes + releaseNotes.slice(0, availableLength) + divider + postNotes
+      preNotes +
+      releaseNotes.slice(0, availableLength) +
+      truncationNotice +
+      divider +
+      postNotes
     );
   }
 }

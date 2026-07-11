@@ -4,7 +4,7 @@ import type { NewValueConfig, VersioningApi } from '../types.ts';
 
 export const id = 'semver';
 export const displayName = 'Semantic';
-export const urls = ['https://semver.org/'];
+export const urls = ['[Semantic Versioning](https://semver.org/)'];
 export const supportsRanges = false;
 
 const { is: isStable } = stable;
@@ -26,7 +26,7 @@ const {
 // If this is left as an alias, inputs like "17.04.0" throw errors
 export const isVersion = (input: string): boolean => !!valid(input);
 
-export { isVersion as isValid, getSatisfyingVersion };
+export { getSatisfyingVersion, isVersion as isValid };
 
 function getNewValue({
   currentValue,

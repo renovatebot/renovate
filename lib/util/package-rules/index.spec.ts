@@ -1,4 +1,5 @@
 import { hostRules } from '~test/util.ts';
+import { GlobalConfig } from '../../config/global.ts';
 import type { PackageRuleInputConfig, UpdateType } from '../../config/types.ts';
 import { MISSING_API_CREDENTIALS } from '../../constants/error-messages.ts';
 import { DockerDatasource } from '../../modules/datasource/docker/index.ts';
@@ -197,6 +198,116 @@ describe('util/package-rules/index', () => {
     expect(res.enabled).toBeTrue();
     expect(res.skipReason).toBeUndefined();
     expect(res.skipStage).toBeUndefined();
+  });
+
+  it('does not set skipReason=package-rules if the last packageRule has force.enabled=true', async () => {
+    const dep: any = {
+      depName: 'foo',
+      packageRules: [
+        {
+          enabled: false,
+        },
+        {
+          // this is a vulnerability alert
+          force: {
+            enabled: true,
+          },
+        },
+      ],
+    };
+    const res = await applyPackageRules(dep, 'datasource-merge');
+    expect(res.enabled).toBeTrue();
+    expect(res.skipReason).toBeUndefined();
+    expect(res.skipStage).toBeUndefined();
+  });
+
+  it('does not set skipReason=package-rules if the last packageRule has force.enabled=true (if config.enabled=false)', async () => {
+    const dep: any = {
+      depName: 'foo',
+      enabled: false,
+      packageRules: [
+        {
+          enabled: false,
+        },
+        {
+          // this is a vulnerability alert
+          force: {
+            enabled: true,
+          },
+        },
+      ],
+    };
+    const res = await applyPackageRules(dep, 'datasource-merge');
+    expect(res.enabled).toBeTrue();
+    expect(res.skipReason).toBeUndefined();
+    expect(res.skipStage).toBeUndefined();
+  });
+
+  it('does not set skipReason=package-rules if the last packageRule has enabled=true (if config.force.enabled=false)', async () => {
+    const dep: any = {
+      depName: 'foo',
+      enabled: false,
+      // for instance, if we've already merged a vulnrability alert
+      force: {
+        enabled: true,
+      },
+      packageRules: [
+        {
+          enabled: false,
+        },
+      ],
+    };
+    const res = await applyPackageRules(dep, 'datasource-merge');
+    expect(res.enabled).toBeTrue();
+    expect(res.skipReason).toBeUndefined();
+    expect(res.skipStage).toBeUndefined();
+  });
+
+  // TODO naming
+
+  it('sets skipReason=package-rules if the last packageRule has force.enabled=false (if config.force.enabled=false)', async () => {
+    const dep: any = {
+      depName: 'foo',
+      enabled: false,
+      // for instance, if we've already merged a vulnerability alert
+      force: {
+        enabled: true,
+      },
+      packageRules: [
+        {
+          enabled: false,
+        },
+        {
+          force: {
+            enabled: false,
+          },
+        },
+      ],
+    };
+    const res = await applyPackageRules(dep, 'datasource-merge');
+    expect(res.enabled).toBeFalse();
+    expect(res.skipReason).toBe('package-rules');
+    expect(res.skipStage).toBe('datasource-merge');
+  });
+
+  it('sets skipReason=package-rules if the last packageRule has force.enabled=false', async () => {
+    const dep: any = {
+      depName: 'foo',
+      packageRules: [
+        {
+          enabled: true,
+        },
+        {
+          force: {
+            enabled: false,
+          },
+        },
+      ],
+    };
+    const res = await applyPackageRules(dep, 'datasource-merge');
+    expect(res.enabled).toBeFalse();
+    expect(res.skipReason).toBe('package-rules');
+    expect(res.skipStage).toBe('datasource-merge');
   });
 
   it('skips skipReason=package-rules if enabled=true', async () => {
@@ -752,6 +863,10 @@ describe('util/package-rules/index', () => {
       hostRules.add(hostRule);
     });
 
+    afterEach(() => {
+      GlobalConfig.reset();
+    });
+
     it('matches matchConfidence', async () => {
       const config: TestConfig = {
         packageRules: [
@@ -835,6 +950,28 @@ describe('util/package-rules/index', () => {
         'The `matchConfidence` matcher in `packageRules` requires authentication. Please refer to the [documentation](https://docs.renovatebot.com/configuration-options/#packagerulesmatchconfidence) and add the required host rule.',
       );
     });
+
+    it('uses productLinks.documentation in error message URL', async () => {
+      GlobalConfig.set({
+        productLinks: { documentation: 'https://custom.example.com/' },
+      });
+      hostRules.clear();
+      const config: TestConfig = {
+        packageRules: [
+          {
+            matchUpdateTypes: ['major'],
+            matchConfidence: ['high'],
+            // @ts-expect-error -- testing
+            x: 1,
+          },
+        ],
+      };
+
+      await expect(applyPackageRules(config)).rejects.toMatchObject({
+        validationMessage:
+          'The `matchConfidence` matcher in `packageRules` requires authentication. Please refer to the [documentation](https://custom.example.com/configuration-options/#packagerulesmatchconfidence) and add the required host rule.',
+      });
+    });
   });
 
   it('filters naked depType', async () => {
@@ -888,27 +1025,21 @@ describe('util/package-rules/index', () => {
     };
     const res1 = await applyPackageRules({
       ...config,
-      ...{
-        packageName: 'test',
-        currentValue: '^1.0.0',
-        currentVersion: '1.0.3',
-      },
+      packageName: 'test',
+      currentValue: '^1.0.0',
+      currentVersion: '1.0.3',
     });
     expect(res1.x).toBeDefined();
     const res2 = await applyPackageRules({
       ...config,
-      ...{
-        packageName: 'test',
-        currentValue: '^1.0.0',
-      },
+      packageName: 'test',
+      currentValue: '^1.0.0',
     });
     expect(res2.x).toBeUndefined();
     const res3 = await applyPackageRules({
       ...config,
-      ...{
-        packageName: 'test',
-        lockedVersion: '^1.0.0',
-      },
+      packageName: 'test',
+      lockedVersion: '^1.0.0',
     });
     expect(res3.x).toBeUndefined();
   });
@@ -927,11 +1058,9 @@ describe('util/package-rules/index', () => {
     };
     const res1 = await applyPackageRules({
       ...config,
-      ...{
-        packageName: 'test',
-        currentValue: '2.4.6',
-        currentVersion: '2.4.6',
-      },
+      packageName: 'test',
+      currentValue: '2.4.6',
+      currentVersion: '2.4.6',
     });
     expect(res1.x).toBeDefined();
   });
@@ -950,18 +1079,14 @@ describe('util/package-rules/index', () => {
     };
     const res1 = await applyPackageRules({
       ...config,
-      ...{
-        packageName: 'test',
-        currentValue: '^2.0.0',
-      },
+      packageName: 'test',
+      currentValue: '^2.0.0',
     });
     expect(res1.x).toBeDefined();
     const res2 = await applyPackageRules({
       ...config,
-      ...{
-        packageName: 'test',
-        currentValue: '~2.0.0',
-      },
+      packageName: 'test',
+      currentValue: '~2.0.0',
     });
     expect(res2.x).toBeUndefined();
   });
@@ -979,11 +1104,9 @@ describe('util/package-rules/index', () => {
     };
     const res1 = await applyPackageRules({
       ...config,
-      ...{
-        packageName: 'test',
-        currentValue: '4.6.0',
-        currentVersion: '4.6.0',
-      },
+      packageName: 'test',
+      currentValue: '4.6.0',
+      currentVersion: '4.6.0',
     });
     expect(res1.x).toBeDefined();
   });
@@ -1001,19 +1124,15 @@ describe('util/package-rules/index', () => {
     };
     const res1 = await applyPackageRules({
       ...config,
-      ...{
-        packageName: 'test',
-        currentValue: '4.6.0',
-        currentVersion: '4.6.0',
-      },
+      packageName: 'test',
+      currentValue: '4.6.0',
+      currentVersion: '4.6.0',
     });
     const res2 = await applyPackageRules({
       ...config,
-      ...{
-        packageName: 'test',
-        currentValue: '5.6.0',
-        currentVersion: '5.6.0',
-      },
+      packageName: 'test',
+      currentValue: '5.6.0',
+      currentVersion: '5.6.0',
     });
     expect(res1.x).toBeDefined();
     expect(res2.x).toBeUndefined();
@@ -1032,19 +1151,15 @@ describe('util/package-rules/index', () => {
     };
     const res1 = await applyPackageRules({
       ...config,
-      ...{
-        packageName: 'test',
-        currentValue: '4.6.0',
-        currentVersion: '4.6.0',
-      },
+      packageName: 'test',
+      currentValue: '4.6.0',
+      currentVersion: '4.6.0',
     });
     const res2 = await applyPackageRules({
       ...config,
-      ...{
-        packageName: 'test',
-        currentValue: '5.6.0',
-        currentVersion: '5.6.0',
-      },
+      packageName: 'test',
+      currentValue: '5.6.0',
+      currentVersion: '5.6.0',
     });
     expect(res1.x).toBeUndefined();
     expect(res2.x).toBeDefined();
@@ -1349,6 +1464,36 @@ describe('util/package-rules/index', () => {
     const res = await applyPackageRules(config);
     expect(res.depName).toBe('node');
     expect(res.packageName).toBe('docker.io/library/node');
+  });
+
+  it('propagates fetchChangeLogs from matching packageRule', async () => {
+    const config: TestConfig = {
+      datasource: 'npm',
+      depName: 'some-dep',
+      packageRules: [
+        {
+          matchDatasources: ['npm'],
+          fetchChangeLogs: 'off',
+        },
+      ],
+    };
+    const res = await applyPackageRules(config);
+    expect(res.fetchChangeLogs).toBe('off');
+  });
+
+  it('does not set fetchChangeLogs when packageRule does not match', async () => {
+    const config: TestConfig = {
+      datasource: 'npm',
+      depName: 'some-dep',
+      packageRules: [
+        {
+          matchDatasources: ['pypi'],
+          fetchChangeLogs: 'off',
+        },
+      ],
+    };
+    const res = await applyPackageRules(config);
+    expect(res).not.toHaveProperty('fetchChangeLogs');
   });
 
   it('compiles sourceUrl with template helper functions', async () => {

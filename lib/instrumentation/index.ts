@@ -26,6 +26,7 @@ import {
 } from '@opentelemetry/semantic-conventions';
 import { isPromise } from '@sindresorhus/is';
 import { pkg } from '../expose.ts';
+import { GetDatasourceReleasesSpanProcessor } from '../modules/datasource/span-processor.ts';
 import { GitOperationSpanProcessor } from '../util/git/span-processor.ts';
 import { getResourceDetectors } from './detectors.ts';
 import type { RenovateSpanOptions } from './types.ts';
@@ -39,7 +40,10 @@ import {
 let instrumentations: Instrumentation[] = [];
 
 export function init(): void {
-  const spanProcessors: SpanProcessor[] = [new GitOperationSpanProcessor()];
+  const spanProcessors: SpanProcessor[] = [
+    new GitOperationSpanProcessor(),
+    new GetDatasourceReleasesSpanProcessor(),
+  ];
 
   if (!isTracingEnabled()) {
     const traceProvider = new NodeTracerProvider({ spanProcessors });

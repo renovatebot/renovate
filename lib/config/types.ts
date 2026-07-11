@@ -2,7 +2,11 @@ import type { Category, PlatformId } from '../constants/index.ts';
 import type { LogLevelRemap } from '../logger/types.ts';
 import type { ManagerName } from '../manager-list.generated.ts';
 import type { CustomManager } from '../modules/manager/custom/types.ts';
-import type { RepoSortMethod, SortMethod } from '../modules/platform/types.ts';
+import type {
+  GitUrlOption,
+  RepoSortMethod,
+  SortMethod,
+} from '../modules/platform/types.ts';
 import type {
   AutoMergeType,
   HostRule,
@@ -11,6 +15,11 @@ import type {
   SkipReason,
 } from '../types/index.ts';
 import type { StageName } from '../types/skip-reason.ts';
+import type {
+  AdditionalConstraintName,
+  ConstraintName,
+  ToolName,
+} from '../util/exec/types.ts';
 import type { GitNoVerifyOption } from '../util/git/types.ts';
 import type { MergeConfidence } from '../util/merge-confidence/types.ts';
 import type { Timestamp } from '../util/timestamp.ts';
@@ -41,6 +50,7 @@ export interface GroupConfig extends Record<string, unknown> {
 }
 
 export type RecreateWhen = 'auto' | 'never' | 'always';
+export type StatusCheckWhen = 'always' | 'never' | 'failed';
 export type PlatformCommitOptions = 'auto' | 'disabled' | 'enabled';
 
 export type BinarySource = 'docker' | 'global' | 'install' | 'hermit';
@@ -97,6 +107,7 @@ export interface RenovateSharedConfig {
   gitIgnoredAuthors?: string[];
   group?: GroupConfig;
   groupName?: string;
+  groupSingleUpdates?: boolean;
   groupSlug?: string;
   hashedBranchLength?: number;
   ignoreDeps?: string[];
@@ -129,7 +140,6 @@ export interface RenovateSharedConfig {
   prPriority?: number;
   prTitle?: string;
   prTitleStrict?: boolean;
-  productLinks?: Record<string, string>;
   pruneBranchAfterAutomerge?: boolean;
   rangeStrategy?: RangeStrategy;
   rebaseLabel?: string;
@@ -173,6 +183,7 @@ export interface GlobalInheritableConfig {
   onboardingConfigFileName?: string;
   onboardingNoDeps?: 'auto' | 'enabled' | 'disabled';
   onboardingPrTitle?: string;
+  requireConfig?: RequiredConfig;
 }
 
 // Config options used only within the global worker
@@ -263,6 +274,7 @@ export interface RepoGlobalConfig extends GlobalInheritableConfig {
   ignorePrAuthor?: boolean;
   allowedUnsafeExecutions?: AllowedUnsafeExecution[];
   onboardingAutoCloseAge?: number;
+  productLinks?: Record<string, string>;
   toolSettings?: ToolSettingsOptions;
 }
 
@@ -305,18 +317,18 @@ export interface PostUpgradeTasks {
   dataFileTemplate?: string;
   fileFilters?: string[];
   executionMode: ExecutionMode;
-  installTools?: Record<string, Record<never, never>>;
+  installTools?: Partial<Record<ToolName, Record<never, never>>>;
 }
 
 export type UpdateConfig<
   T extends RenovateSharedConfig = RenovateSharedConfig,
 > = Partial<Record<UpdateType, T | null>>;
 
-export type RenovateRepository =
-  | string
-  | (RenovateConfig & {
-      repository: string;
-    });
+export type RenovateRepositoryEntry = AllConfig & {
+  repository: string;
+};
+
+export type RenovateRepository = string | RenovateRepositoryEntry;
 
 export type UseBaseBranchConfigType = 'merge' | 'none';
 export type ConstraintsFilter = 'strict' | 'none';
@@ -451,7 +463,11 @@ export interface RenovateConfig
   secrets?: Record<string, string>;
   variables?: Record<string, string>;
 
-  constraints?: Record<string, string>;
+  constraints?: Partial<Record<ConstraintName, string>>;
+  /**
+   * Any specific overrides for the versioning for the `AdditionalConstraintName`s.
+   */
+  constraintsVersioning?: Partial<Record<AdditionalConstraintName, string>>;
   skipInstalls?: boolean | null;
 
   constraintsFiltering?: ConstraintsFilter;
@@ -460,6 +476,7 @@ export interface RenovateConfig
   customizeDashboard?: Record<string, string>;
 
   statusCheckNames?: Record<StatusCheckKey, string | null>;
+  statusCheckWhen?: Partial<Record<StatusCheckKey, StatusCheckWhen>>;
   /**
    * User configured environment variables that Renovate uses when executing package manager commands
    */
@@ -496,6 +513,7 @@ export interface CustomDatasourceConfig {
  */
 export interface AllConfig
   extends RenovateConfig, GlobalOnlyConfigLegacy, RepoGlobalConfig {
+  gitUrl?: GitUrlOption;
   password?: string;
   token?: string;
   username?: string;
@@ -558,7 +576,8 @@ export type MergeStrategy =
 export type AllowedUnsafeExecution =
   | 'bazelModDeps'
   | 'goGenerate'
-  | 'gradleWrapper';
+  | 'gradleWrapper'
+  | 'mise';
 
 // TODO: Proper typings
 export interface PackageRule
@@ -684,6 +703,12 @@ export interface RenovateOptionBase {
    * Conditions that must be met for this option to be required.
    */
   requiredIf?: RenovateRequiredOption[];
+
+  /**
+   * If true, the option's value supports Renovate templating.
+   * @see https://docs.renovatebot.com/templates/
+   */
+  supportsTemplating?: boolean;
 }
 
 export interface RenovateRequiredOption {

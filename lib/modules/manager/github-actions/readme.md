@@ -65,6 +65,26 @@ When pinning, Renovate adds a comment to preserve the original ref:
 Non-semver ref support is currently limited to GitHub-hosted actions.
 Gitea and Forgejo support the same ref types, but Renovate does not yet handle them for these platforms.
 
+### Steps nested in `parallel:` blocks
+
+Renovate extracts dependencies from steps nested inside a [`parallel:`](https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax#example-running-steps-in-parallel) block, just as it does for regular sequential steps.
+This includes both the action reference itself and any supported `with:` version inputs.
+
+```yaml
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - parallel:
+          - uses: actions/setup-node@v5
+            with:
+              node-version: '20.0.0'
+          - uses: actions/setup-go@v5
+            with:
+              go-version: '1.23'
+```
+
 ### Non-support of Variables
 
 Renovate ignores any GitHub runners which are configured in variables.
@@ -102,15 +122,24 @@ For example, normally the `^` syntax is not used in `go` or `python`, but it's s
 Depending on your use case, you may need to change `versioning` manually.
 If you find a use case which you think Renovate could/should automatically detect and support without manual configuration, please raise a Discussion to suggest it.
 
-### commonly used community actions
+### Updating `with:` values in commonly used Community-maintained GitHub Actions
 
-Renovate also supports some commonly used community actions:
+Third-party GitHub Actions will commonly specify a version of a given tool using a `with:` block, such as:
 
-- `astral-sh/setup-uv`
-- `pnpm/action-setup`
-- `pdm-project/setup-pdm`
-- `jaxxstorm/action-install-gh-release`
-- `sigoden/install-binary`
-- `prefix-dev/setup-pixi`
-- `pypa/hatch@install`
-- `golangci/golangci-lint-action`
+GitHub Actions maintained by the wider community have `with:` blocks such as:
+
+```yaml
+steps:
+- uses: astral-sh/setup-uv@v8.3.0
+  with:
+    version: '0.4.x'
+
+- uses: 'denoland/setup-deno@v2',
+  with:
+    deno-version: '2.4.0'
+```
+
+Renovate supports extracting some of these input(s) from the following Actions, and performing automagic dependency updates accordingly.
+The following third-party Actions have support for their `with:` blocks:
+
+<!-- Autogenerate in https://github.com/renovatebot/renovate -->

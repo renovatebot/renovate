@@ -87,8 +87,10 @@ describe('modules/manager/haskell-cabal/extract', () => {
       },
     );
 
-    // The first hyphen makes the package name invalid
-    expect(splitSingleDependency('-invalid-package-name')).toBeNull();
+    it('returns null for an invalid package name', () => {
+      // The first hyphen makes the package name invalid
+      expect(splitSingleDependency('-invalid-package-name')).toBeNull();
+    });
   });
 
   describe('extractNamesAndRanges()', () => {
@@ -103,7 +105,7 @@ describe('modules/manager/haskell-cabal/extract', () => {
 
   describe('findDepends()', () => {
     it('strips comments', () => {
-      const res = findDepends(commentCabalFile + '\na: b');
+      const res = findDepends(`${commentCabalFile}\na: b`);
       expect(res).toEqual({
         buildDependsContent: '\n base,\n other,\n other2',
         lengthProcessed: commentCabalFile.length,

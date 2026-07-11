@@ -19,7 +19,6 @@
         ]
       }
     ],
-    "@containerbase/semantic-release-pnpm",
     [
       "@semantic-release/exec",
       {
@@ -32,7 +31,8 @@
       {
         "successCmd": "echo '::notice::Released Renovate ${nextRelease.version}' && echo '## Released Renovate ${nextRelease.version}' >> \"$GITHUB_STEP_SUMMARY\""
       }
-    ]
+    ],
+    "@containerbase/semantic-release-pnpm"
   ],
   "analyzeCommits": {
     "releaseRules": [

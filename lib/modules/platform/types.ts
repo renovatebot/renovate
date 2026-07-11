@@ -1,11 +1,13 @@
 import type { DateTime } from 'luxon';
 import type { MergeStrategy } from '../../config/types.ts';
 import type { BranchStatus, HostRule } from '../../types/index.ts';
-import type { CommitFilesConfig, LongCommitSha } from '../../util/git/types.ts';
+import type { CommitFilesConfig } from '../../util/git/types.ts';
+import type { LongCommitSha } from '../../util/schema-utils/git.ts';
 import type { GithubVulnerabilityAlert } from './github/schema.ts';
 export type VulnerabilityAlert = GithubVulnerabilityAlert;
 
 export interface PlatformParams {
+  dryRun?: string;
   endpoint?: string;
   token?: string;
   username?: string;
@@ -87,9 +89,12 @@ export interface Issue {
   number?: number;
   state?: string;
   title?: string;
+  createdAt?: string;
+  lastModified?: string;
 }
 export interface PlatformPrOptions {
   autoApprove?: boolean;
+  automergeCommitMessage?: string;
   automergeStrategy?: MergeStrategy;
   azureWorkItemId?: number;
   bbUseDefaultReviewers?: boolean;
@@ -326,7 +331,7 @@ export interface PlatformScm {
   deleteBranch(branchName: string): Promise<void>;
   commitAndPush(commitConfig: CommitFilesConfig): Promise<LongCommitSha | null>;
   getFileList(): Promise<string[]>;
-  checkoutBranch(branchName: string): Promise<LongCommitSha>;
+  checkoutBranch(branchName: string): Promise<LongCommitSha | null>;
   mergeToLocal(branchName: string): Promise<void>;
   mergeAndPush(branchName: string): Promise<void>;
   syncForkWithUpstream?(baseBranch: string): Promise<void>;

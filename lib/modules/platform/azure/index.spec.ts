@@ -11,6 +11,7 @@ import {
   GitVersionType,
   PullRequestStatus,
 } from 'azure-devops-node-api/interfaces/GitInterfaces.js';
+import type { IWorkItemTrackingApi } from 'azure-devops-node-api/WorkItemTrackingApi.js';
 import type { Mocked, MockedObject } from 'vitest';
 import { vi } from 'vitest';
 import { mockDeep } from 'vitest-mock-extended';
@@ -101,7 +102,9 @@ describe('modules/platform/azure/index', () => {
   describe('initPlatform()', () => {
     it('should throw if no endpoint', () => {
       expect.assertions(1);
-      expect(() => azure.initPlatform({})).toThrow();
+      expect(() => azure.initPlatform({})).toThrow(
+        'Init: You must configure an Azure DevOps endpoint',
+      );
     });
 
     it('should throw if no token nor a username and password', () => {
@@ -110,7 +113,9 @@ describe('modules/platform/azure/index', () => {
         azure.initPlatform({
           endpoint: 'https://dev.azure.com/renovate12345',
         }),
-      ).toThrow();
+      ).toThrow(
+        'Init: You must configure an Azure DevOps token, or a username and',
+      );
     });
 
     it('should throw if a username but no password', () => {
@@ -120,7 +125,9 @@ describe('modules/platform/azure/index', () => {
           endpoint: 'https://dev.azure.com/renovate12345',
           username: 'user',
         }),
-      ).toThrow();
+      ).toThrow(
+        'Init: You must configure an Azure DevOps token, or a username and',
+      );
     });
 
     it('should throw if a password but no username', () => {
@@ -130,7 +137,9 @@ describe('modules/platform/azure/index', () => {
           endpoint: 'https://dev.azure.com/renovate12345',
           password: 'pass',
         }),
-      ).toThrow();
+      ).toThrow(
+        'Init: You must configure an Azure DevOps token, or a username and',
+      );
     });
 
     it('should init', async () => {
@@ -149,8 +158,8 @@ describe('modules/platform/azure/index', () => {
         'sometoken',
         'https://dev.azure.com/renovate12345',
       );
-      expect(azureApi.gitApi.mock.calls).toMatchSnapshot();
-      expect(repos).toMatchSnapshot();
+      expect(azureApi.gitApi.mock.calls).toMatchSnapshot('gitApi calls');
+      expect(repos).toMatchSnapshot('repos');
     });
   });
 
@@ -202,8 +211,8 @@ describe('modules/platform/azure/index', () => {
       const config = await initRepo({
         repository: 'some/repo',
       });
-      expect(azureApi.gitApi.mock.calls).toMatchSnapshot();
-      expect(config).toMatchSnapshot();
+      expect(azureApi.gitApi.mock.calls).toMatchSnapshot('gitApi calls');
+      expect(config).toMatchSnapshot('config');
     });
 
     it(`throws if repo is disabled`, async () => {
@@ -1361,8 +1370,12 @@ describe('modules/platform/azure/index', () => {
         topic: 'some-subject',
         content: 'some\ncontent',
       });
-      expect(gitApiMock.createThread.mock.calls).toMatchSnapshot();
-      expect(gitApiMock.updateComment.mock.calls).toMatchSnapshot();
+      expect(gitApiMock.createThread.mock.calls).toMatchSnapshot(
+        'createThread calls',
+      );
+      expect(gitApiMock.updateComment.mock.calls).toMatchSnapshot(
+        'updateComment calls',
+      );
     });
 
     it('updates comment if missing', async () => {
@@ -1387,8 +1400,12 @@ describe('modules/platform/azure/index', () => {
         topic: 'some-subject',
         content: 'some\nnew\ncontent',
       });
-      expect(gitApiMock.createThread.mock.calls).toMatchSnapshot();
-      expect(gitApiMock.updateComment.mock.calls).toMatchSnapshot();
+      expect(gitApiMock.createThread.mock.calls).toMatchSnapshot(
+        'createThread calls',
+      );
+      expect(gitApiMock.updateComment.mock.calls).toMatchSnapshot(
+        'updateComment calls',
+      );
     });
 
     it('does nothing if comment exists and is the same', async () => {
@@ -1413,8 +1430,12 @@ describe('modules/platform/azure/index', () => {
         topic: 'some-subject',
         content: 'some\ncontent',
       });
-      expect(gitApiMock.createThread.mock.calls).toMatchSnapshot();
-      expect(gitApiMock.updateComment.mock.calls).toMatchSnapshot();
+      expect(gitApiMock.createThread.mock.calls).toMatchSnapshot(
+        'createThread calls',
+      );
+      expect(gitApiMock.updateComment.mock.calls).toMatchSnapshot(
+        'updateComment calls',
+      );
     });
 
     it('does nothing if comment exists and is the same when there is no topic', async () => {
@@ -1435,8 +1456,12 @@ describe('modules/platform/azure/index', () => {
         topic: null,
         content: 'some\ncontent',
       });
-      expect(gitApiMock.createThread.mock.calls).toMatchSnapshot();
-      expect(gitApiMock.updateComment.mock.calls).toMatchSnapshot();
+      expect(gitApiMock.createThread.mock.calls).toMatchSnapshot(
+        'createThread calls',
+      );
+      expect(gitApiMock.updateComment.mock.calls).toMatchSnapshot(
+        'updateComment calls',
+      );
     });
 
     it('passes comment through massageMarkdown', async () => {
@@ -1634,6 +1659,19 @@ describe('modules/platform/azure/index', () => {
       expect(azure.massageMarkdown(commentContent)).toBe(
         'You can manually request rebase by renaming the PR to start with "rebase!".\n\nplus also [a link](https://github.com/foo/bar/issues/5)',
       );
+    });
+
+    it('converts standalone PR references to Azure format', () => {
+      expect(azure.massageMarkdown('see #123 and (#456)')).toBe(
+        'see !123 and (!456)',
+      );
+    });
+
+    it('does not corrupt HTML entities or URL anchors', () => {
+      const input =
+        '[#&#8203;32124](https://github.com/org/repo/issues/32124) ' +
+        '[`v4.78.0`](https://github.com/org/repo/blob/HEAD/CHANGELOG.md#4780-june-18-2026)';
+      expect(azure.massageMarkdown(input)).toBe(input);
     });
   });
 
@@ -2011,7 +2049,9 @@ describe('modules/platform/azure/index', () => {
           getItemContent: vi.fn(() => Promise.resolve(Readable.from('!@#'))),
         }),
       );
-      await expect(azure.getJsonFile('file.json')).rejects.toThrow();
+      await expect(azure.getJsonFile('file.json')).rejects.toThrow(
+        'azureApiGit.getItem is not a function',
+      );
     });
 
     it('throws on errors', async () => {
@@ -2022,7 +2062,9 @@ describe('modules/platform/azure/index', () => {
           }),
         }),
       );
-      await expect(azure.getJsonFile('file.json')).rejects.toThrow();
+      await expect(azure.getJsonFile('file.json')).rejects.toThrow(
+        'azureApiGit.getItem is not a function',
+      );
     });
 
     it('supports fetch from another repo', async () => {
@@ -2105,5 +2147,481 @@ describe('modules/platform/azure/index', () => {
     expect(result).toEqual({ test: 'branch content' });
     expect(callArgs[0]).toBe(GitVersionType.Tag);
     expect(callArgs[1]).toBe(GitVersionType.Branch);
+  });
+
+  it('findIssue returns null if not found', async () => {
+    await initRepo({ repository: 'some/repo' });
+    azureApi.workItemTrackingApi.mockResolvedValueOnce(
+      partial<IWorkItemTrackingApi>({
+        queryByWiql: vi.fn().mockResolvedValue({ workItems: [] }),
+      }),
+    );
+    const res = await azure.findIssue('Nonexistent');
+    expect(res).toBeNull();
+  });
+
+  it('findIssue return first issue if multiple found', async () => {
+    await initRepo({ repository: 'some/repo' });
+
+    azureApi.workItemTrackingApi.mockResolvedValueOnce(
+      partial<IWorkItemTrackingApi>({
+        queryByWiql: vi.fn().mockResolvedValue({
+          workItems: [{ id: 123 }, { id: 456 }],
+        }),
+        getWorkItems: vi.fn().mockResolvedValue([
+          {
+            id: 123,
+            fields: {
+              'System.Title': 'The title',
+              'System.WorkItemType': 'Issue',
+              'System.State': 'Active',
+              'System.Description': 'fake',
+            },
+          },
+          {
+            id: 456,
+            fields: {
+              'System.Title': 'The title',
+              'System.WorkItemType': 'Issue',
+              'System.State': 'New',
+              'System.Description': 'another fake description',
+            },
+          },
+        ]),
+      }),
+    );
+    const res = await azure.findIssue('The title');
+    expect(res).toMatchObject({
+      number: 123,
+      title: 'The title',
+      state: 'open',
+      body: 'fake',
+    });
+  });
+
+  it('ensureIssue creates a new issue if none existing found', async () => {
+    await initRepo({ repository: 'some/repo' });
+
+    const createWorkItemMock = vi.fn().mockResolvedValue({
+      id: 123,
+    });
+
+    azureApi.workItemTrackingApi.mockResolvedValueOnce(
+      partial<IWorkItemTrackingApi>({
+        queryByWiql: vi.fn().mockResolvedValue({ workItems: [] }),
+        createWorkItem: createWorkItemMock,
+      }),
+    );
+    const result = await azure.ensureIssue({
+      title: 'Test Issue',
+      body: 'Test body',
+    });
+    expect(result).toBe('created');
+    expect(createWorkItemMock).toHaveBeenCalledWith(
+      undefined, // no headers
+      expect.arrayContaining([
+        expect.objectContaining({
+          op: 'add',
+          path: '/fields/System.Title',
+          value: 'Test Issue',
+        }),
+        expect.objectContaining({
+          op: 'add',
+          path: '/fields/System.Description',
+          value: 'Test body',
+        }),
+        expect.objectContaining({
+          op: 'add',
+          path: '/multilineFieldsFormat/System.Description',
+          value: 'Markdown',
+        }),
+      ]),
+      'some',
+      'Issue',
+    );
+  });
+  it('ensureIssue updates an existing issue', async () => {
+    await initRepo({ repository: 'some/repo' });
+
+    const updateWorkItemMock = vi.fn();
+    const createWorkItemMock = vi.fn();
+
+    azureApi.workItemTrackingApi.mockResolvedValue(
+      partial<IWorkItemTrackingApi>({
+        queryByWiql: vi.fn().mockResolvedValue({
+          workItems: [{ id: 123 }],
+        }),
+        getWorkItems: vi.fn().mockResolvedValue([
+          {
+            id: 123,
+            fields: {
+              'System.Title': 'Test Issue',
+              'System.WorkItemType': 'Issue',
+              'System.State': 'Active',
+              'System.Description': 'fake',
+            },
+          },
+        ]),
+        updateWorkItem: updateWorkItemMock,
+        createWorkItem: createWorkItemMock,
+      }),
+    );
+
+    const result = await azure.ensureIssue({
+      title: 'Test Issue',
+      body: 'Updated body',
+    });
+    expect(result).toBe('updated');
+    expect(createWorkItemMock).not.toHaveBeenCalled();
+    expect(updateWorkItemMock).toHaveBeenCalledWith(
+      undefined, // no headers
+      expect.arrayContaining([
+        expect.objectContaining({
+          op: 'replace',
+          path: '/fields/System.Title',
+          value: 'Test Issue',
+        }),
+        expect.objectContaining({
+          op: 'replace',
+          path: '/fields/System.Description',
+          value: 'Updated body',
+        }),
+        expect.objectContaining({
+          op: 'replace',
+          path: '/multilineFieldsFormat/System.Description',
+          value: 'Markdown',
+        }),
+      ]),
+      123,
+      'some',
+    );
+  });
+  it('ensureIssue do not touch issues when not needed', async () => {
+    await initRepo({ repository: 'some/repo' });
+
+    const updateWorkItemMock = vi.fn();
+    const createWorkItemMock = vi.fn();
+
+    azureApi.workItemTrackingApi.mockResolvedValue(
+      partial<IWorkItemTrackingApi>({
+        queryByWiql: vi.fn().mockResolvedValue({
+          workItems: [{ id: 123 }],
+        }),
+        getWorkItems: vi.fn().mockResolvedValue([
+          {
+            id: 123,
+            fields: {
+              'System.Title': 'Test Issue',
+              'System.WorkItemType': 'Issue',
+              'System.State': 'Active',
+              'System.Description': 'fake body',
+            },
+          },
+        ]),
+        updateWorkItem: updateWorkItemMock,
+        createWorkItem: createWorkItemMock,
+      }),
+    );
+
+    const result = await azure.ensureIssue({
+      title: 'Test Issue',
+      body: 'fake body',
+    });
+    expect(result).toBe('updated');
+    expect(createWorkItemMock).not.toHaveBeenCalled();
+    expect(updateWorkItemMock).not.toHaveBeenCalled();
+  });
+
+  it('ensureIssue do not recreate issue when once == true', async () => {
+    await initRepo({ repository: 'some/repo' });
+
+    const updateWorkItemMock = vi.fn();
+    const createWorkItemMock = vi.fn();
+
+    azureApi.workItemTrackingApi.mockResolvedValue(
+      partial<IWorkItemTrackingApi>({
+        queryByWiql: vi.fn().mockResolvedValue({
+          workItems: [{ id: 123 }],
+        }),
+        getWorkItems: vi.fn().mockResolvedValue([
+          {
+            id: 123,
+            fields: {
+              'System.Title': 'Test Issue',
+              'System.WorkItemType': 'Issue',
+              'System.State': 'Closed',
+              'System.Description': 'fake body',
+            },
+          },
+        ]),
+        updateWorkItem: updateWorkItemMock,
+        createWorkItem: createWorkItemMock,
+      }),
+    );
+
+    const result = await azure.ensureIssue({
+      title: 'Test Issue',
+      body: 'Updated body',
+      once: true,
+    });
+    expect(result).toBeNull();
+  });
+
+  it('ensureIssue handles Azure API error', async () => {
+    await initRepo({ repository: 'some/repo' });
+
+    const updateWorkItemMock = vi
+      .fn()
+      .mockRejectedValue(new Error('Test error'));
+    const createWorkItemMock = vi.fn();
+
+    azureApi.workItemTrackingApi.mockResolvedValue(
+      partial<IWorkItemTrackingApi>({
+        queryByWiql: vi.fn().mockResolvedValue({
+          workItems: [{ id: 123 }],
+        }),
+        getWorkItems: vi.fn().mockResolvedValue([
+          {
+            id: 123,
+            fields: {
+              'System.Title': 'Test Issue',
+              'System.WorkItemType': 'Issue',
+              'System.State': 'Closed',
+              'System.Description': 'fake body',
+            },
+          },
+        ]),
+        updateWorkItem: updateWorkItemMock,
+        createWorkItem: createWorkItemMock,
+      }),
+    );
+
+    const result = await azure.ensureIssue({
+      title: 'Test Issue',
+      body: 'Updated body',
+    });
+    expect(result).toBeNull();
+  });
+
+  it('ensureIssue updates an existing issue and reopens it if needed', async () => {
+    await initRepo({ repository: 'some/repo' });
+
+    const updateWorkItemMock = vi.fn();
+    const createWorkItemMock = vi.fn();
+
+    azureApi.workItemTrackingApi.mockResolvedValue(
+      partial<IWorkItemTrackingApi>({
+        queryByWiql: vi.fn().mockResolvedValue({
+          workItems: [{ id: 123 }],
+        }),
+        getWorkItems: vi.fn().mockResolvedValue([
+          {
+            id: 123,
+            fields: {
+              'System.Title': 'Test Issue',
+              'System.WorkItemType': 'Issue',
+              'System.State': 'Closed',
+              'System.Description': 'fake',
+            },
+          },
+        ]),
+        updateWorkItem: updateWorkItemMock,
+        createWorkItem: createWorkItemMock,
+      }),
+    );
+
+    await azure.ensureIssue({
+      title: 'Test Issue',
+      body: 'Updated body',
+    });
+    expect(createWorkItemMock).not.toHaveBeenCalled();
+    expect(updateWorkItemMock).toHaveBeenCalledWith(
+      undefined, // no headers
+      expect.arrayContaining([
+        expect.objectContaining({
+          op: 'replace',
+          path: '/fields/System.Title',
+          value: 'Test Issue',
+        }),
+        expect.objectContaining({
+          op: 'replace',
+          path: '/fields/System.Description',
+          value: 'Updated body',
+        }),
+        expect.objectContaining({
+          op: 'replace',
+          path: '/fields/System.State',
+          value: 'New',
+        }),
+        expect.objectContaining({
+          op: 'replace',
+          path: '/multilineFieldsFormat/System.Description',
+          value: 'Markdown',
+        }),
+      ]),
+      123,
+      'some',
+    );
+  });
+
+  it('ensureIssue close duplicates and updates an existing issue', async () => {
+    await initRepo({ repository: 'some/repo' });
+
+    const updateWorkItemMock = vi.fn();
+    const createWorkItemMock = vi.fn();
+
+    azureApi.workItemTrackingApi.mockResolvedValue(
+      partial<IWorkItemTrackingApi>({
+        queryByWiql: vi.fn().mockResolvedValue({
+          workItems: [{ id: 123 }, { id: 456 }],
+        }),
+        getWorkItems: vi.fn().mockResolvedValue([
+          {
+            id: 123,
+            fields: {
+              'System.Title': 'Test Issue',
+              'System.WorkItemType': 'Issue',
+              'System.State': 'Active',
+              'System.Description': 'fake',
+            },
+          },
+          {
+            id: 456,
+            fields: {
+              'System.Title': 'Test Issue',
+              'System.WorkItemType': 'Issue',
+              'System.State': 'New',
+              'System.Description': 'another fake',
+            },
+          },
+        ]),
+        updateWorkItem: updateWorkItemMock,
+        createWorkItem: createWorkItemMock,
+      }),
+    );
+
+    await azure.ensureIssue({
+      title: 'Test Issue',
+      body: 'Updated body',
+    });
+    expect(createWorkItemMock).not.toHaveBeenCalled();
+    expect(updateWorkItemMock).toHaveBeenCalledWith(
+      undefined, // no headers
+      expect.arrayContaining([
+        expect.objectContaining({
+          op: 'replace',
+          path: '/fields/System.Title',
+          value: 'Test Issue',
+        }),
+        expect.objectContaining({
+          op: 'replace',
+          path: '/fields/System.Description',
+          value: 'Updated body',
+        }),
+        expect.objectContaining({
+          op: 'replace',
+          path: '/multilineFieldsFormat/System.Description',
+          value: 'Markdown',
+        }),
+      ]),
+      123,
+      'some',
+    );
+  });
+
+  it('ensureIssueClosing closes an existing issue', async () => {
+    await initRepo({ repository: 'some/repo' });
+
+    const updateWorkItemMock = vi.fn();
+
+    azureApi.workItemTrackingApi.mockResolvedValue(
+      partial<IWorkItemTrackingApi>({
+        queryByWiql: vi.fn().mockResolvedValue({
+          workItems: [{ id: 123 }],
+        }),
+        getWorkItems: vi.fn().mockResolvedValue([
+          {
+            id: 123,
+            fields: {
+              'System.Title': 'Test Issue',
+              'System.WorkItemType': 'Issue',
+              'System.State': 'Active',
+              'System.Description': 'fake',
+            },
+          },
+        ]),
+        updateWorkItem: updateWorkItemMock,
+      }),
+    );
+
+    await azure.ensureIssueClosing('Test Issue');
+    expect(updateWorkItemMock).toHaveBeenCalledWith(
+      undefined, // no headers
+      expect.arrayContaining([
+        expect.objectContaining({
+          op: 'replace',
+          path: '/fields/System.State',
+          value: 'Closed',
+        }),
+      ]),
+      123,
+      'some',
+    );
+  });
+
+  it('ensureIssueClosing handles Azure API error', async () => {
+    await initRepo({ repository: 'some/repo' });
+
+    const updateWorkItemMock = vi
+      .fn()
+      .mockRejectedValue(new Error('Test error'));
+
+    azureApi.workItemTrackingApi.mockResolvedValue(
+      partial<IWorkItemTrackingApi>({
+        queryByWiql: vi.fn().mockResolvedValue({
+          workItems: [{ id: 123 }],
+        }),
+        getWorkItems: vi.fn().mockResolvedValue([
+          {
+            id: 123,
+            fields: {
+              'System.Title': 'Test Issue',
+              'System.WorkItemType': 'Issue',
+              'System.State': 'Active',
+              'System.Description': 'fake',
+            },
+          },
+        ]),
+        updateWorkItem: updateWorkItemMock,
+      }),
+    );
+
+    await azure.ensureIssueClosing('Test Issue');
+    expect(updateWorkItemMock).toHaveBeenCalledWith(
+      undefined, // no headers
+      expect.arrayContaining([
+        expect.objectContaining({
+          op: 'replace',
+          path: '/fields/System.State',
+          value: 'Closed',
+        }),
+      ]),
+      123,
+      'some',
+    );
+  });
+
+  it('getIssueList handles empty wiql result', async () => {
+    await initRepo({ repository: 'some/repo' });
+    azureApi.workItemTrackingApi.mockResolvedValue(
+      partial<IWorkItemTrackingApi>({
+        queryByWiql: vi.fn().mockResolvedValue({
+          workItems: [],
+        }),
+      }),
+    );
+
+    const result = await azure.getIssueList();
+    expect(result).toBeEmptyArray();
   });
 });

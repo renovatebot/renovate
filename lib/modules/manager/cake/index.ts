@@ -1,9 +1,11 @@
 import moo from 'moo';
 import type { Category } from '../../../constants/index.ts';
 import { regEx } from '../../../util/regex.ts';
-import { isHttpUrl } from '../../../util/url.ts';
+import { isHttpUrl, parseUrl } from '../../../util/url.ts';
 import { NugetDatasource } from '../../datasource/nuget/index.ts';
-import type { PackageDependency, PackageFileContent } from '../types.ts';
+import type { NugetPackageDependency, Registry } from '../nuget/types.ts';
+import { applyRegistries, getConfiguredRegistries } from '../nuget/util.ts';
+import type { ExtractConfig, PackageFileContent } from '../types.ts';
 
 export const url = 'https://cakebuild.net/docs';
 export const categories: Category[] = ['dotnet'];
@@ -33,59 +35,70 @@ const lexer = moo.states({
   },
 });
 
-function parseDependencyLine(line: string): PackageDependency | null {
-  try {
-    let url = line.replace(regEx(/^[^:]*:/), '');
-    const isEmptyHost = url.startsWith('?');
-    url = isEmptyHost ? `http://localhost/${url}` : url;
+function parseDependencyLine(line: string): NugetPackageDependency | null {
+  let url = line.replace(regEx(/^[^:]*:/), '');
+  const isEmptyHost = url.startsWith('?');
+  url = isEmptyHost ? `http://localhost/${url}` : url;
 
-    const parsedUrl = new URL(url);
-    const { origin, pathname, searchParams } = parsedUrl;
-
-    const registryUrl = `${origin}${pathname}`;
-
-    const depName = searchParams.get('package')!;
-    const currentValue = searchParams.get('version') ?? undefined;
-
-    const result: PackageDependency = {
-      datasource: NugetDatasource.id,
-      depName,
-      currentValue,
-    };
-
-    if (!isEmptyHost) {
-      if (isHttpUrl(parsedUrl)) {
-        result.registryUrls = [registryUrl];
-      } else {
-        result.skipReason = 'unsupported-url';
-      }
-    }
-
-    return result;
-  } catch {
+  const parsedUrl = parseUrl(url);
+  if (!parsedUrl) {
     return null;
+  }
+  const { origin, pathname, searchParams } = parsedUrl;
+
+  const registryUrl = `${origin}${pathname}`;
+
+  const depName = searchParams.get('package')!;
+  const currentValue = searchParams.get('version') ?? undefined;
+
+  const result: NugetPackageDependency = {
+    datasource: NugetDatasource.id,
+    depName,
+    currentValue,
+  };
+
+  if (!isEmptyHost) {
+    if (isHttpUrl(parsedUrl)) {
+      result.registryUrls = [registryUrl];
+    } else {
+      result.skipReason = 'unsupported-url';
+    }
+  }
+
+  return result;
+}
+
+function parseAndPushDependencyLine(
+  registries: Registry[] | undefined,
+  deps: NugetPackageDependency[],
+  value: string,
+): void {
+  const dep = parseDependencyLine(value);
+  if (dep) {
+    applyRegistries(dep, registries);
+    deps.push(dep);
   }
 }
 
-export function extractPackageFile(content: string): PackageFileContent {
-  const deps: PackageDependency[] = [];
+export async function extractPackageFile(
+  content: string,
+  packageFile: string,
+  _config: ExtractConfig,
+): Promise<PackageFileContent> {
+  const deps: NugetPackageDependency[] = [];
+  const registries = await getConfiguredRegistries(packageFile);
+
   lexer.reset(content);
   let token = lexer.next();
   while (token) {
     const { type, value } = token;
     if (type === 'dependency' || type === 'dependencyQuoted') {
-      const dep = parseDependencyLine(value);
-      if (dep) {
-        deps.push(dep);
-      }
+      parseAndPushDependencyLine(registries, deps, value);
     } else if (type === 'dependencyFromInstallTools') {
       const matches = value.matchAll(regEx(/"dotnet:[^"]+"/g));
       for (const match of matches) {
         const withoutQuote = match.toString().slice(1, -1);
-        const dep = parseDependencyLine(withoutQuote);
-        if (dep) {
-          deps.push(dep);
-        }
+        parseAndPushDependencyLine(registries, deps, withoutQuote);
       }
     }
     token = lexer.next();

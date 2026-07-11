@@ -4,7 +4,23 @@ import { GlobalConfig } from '../../../config/global.ts';
 import * as yaml from '../../../util/yaml.ts';
 import { extractPackageFile } from './index.ts';
 
-const runnerTestWorkflow = codeBlock`
+const runnerTestWorkflowMacos = codeBlock`
+jobs:
+  test1:
+     runs-on: \${{ env.RUNNER }}
+  test2:
+      runs-on: abc-123
+  test3:
+    runs-on: "macos-12-large"
+  test4:
+    runs-on: 'macos-latest'
+  test5:
+      runs-on: macos-15-intel
+  test6:
+      runs-on: macos-26-intel
+`;
+
+const runnerTestWorkflowUbuntu = codeBlock`
 jobs:
   test1:
     runs-on: ubuntu-latest
@@ -12,25 +28,27 @@ jobs:
     runs-on:
       ubuntu-22.04
   test3:
-    runs-on: "macos-12-large"
-  test4:
-    runs-on: 'macos-latest'
-  test5:
-    runs-on: |
-      windows-2019
-  test6:
-    runs-on: >
-      windows-2022
-  test7:
-    runs-on: [windows-2022, selfhosted]
-  test8:
-     runs-on: \${{ env.RUNNER }}
-  test9:
      runs-on:
        group: ubuntu-runners
        labels: ubuntu-20.04-16core
-  test10:
-      runs-on: abc-123
+  test4:
+      runs-on: ubuntu-22.04-arm
+`;
+
+const runnerTestWorkflowWindows = codeBlock`
+jobs:
+  test1:
+    runs-on: |
+      windows-2019
+  test2:
+    runs-on: >
+      windows-2022
+  test3:
+    runs-on: [windows-2022, selfhosted]
+  test4:
+      runs-on: windows-11-arm
+  test5:
+      runs-on: windows-2025
 `;
 
 describe('modules/manager/github-actions/extract', () => {
@@ -150,6 +168,18 @@ describe('modules/manager/github-actions/extract', () => {
       expect(res?.deps[0].registryUrls).toBeUndefined();
     });
 
+    it('returns undefined registryUrls when endpoint is invalid URL', () => {
+      GlobalConfig.set({
+        platform: 'github',
+        endpoint: 'not-a-valid-url',
+      });
+      const res = extractPackageFile(
+        Fixtures.get('workflow_2.yml'),
+        'workflow_2.yml',
+      );
+      expect(res?.deps[0].registryUrls).toBeUndefined();
+    });
+
     it('extracts multiple action tag lines with double quotes and comments', () => {
       const res = extractPackageFile(
         Fixtures.get('workflow_3.yml'),
@@ -163,7 +193,7 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'pascalgn/automerge-action',
           depType: 'action',
           replaceString: '"pascalgn/automerge-action@v0.13.1"',
-          versioning: 'docker',
+          versioning: 'github-actions',
         },
         {
           currentValue: 'v2.3.5',
@@ -172,7 +202,7 @@ describe('modules/manager/github-actions/extract', () => {
           depType: 'action',
           replaceString:
             'actions/checkout@1e204e9a9253d643386038d443f96446fa156a97 # renovate: tag=v2.3.5',
-          versioning: 'docker',
+          versioning: 'github-actions',
         },
         {
           currentValue: 'v1',
@@ -180,7 +210,7 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'actions/checkout',
           depType: 'action',
           replaceString: 'actions/checkout@v1',
-          versioning: 'docker',
+          versioning: 'github-actions',
         },
         {
           currentValue: 'v1.1.2',
@@ -188,7 +218,7 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'actions/checkout',
           depType: 'action',
           replaceString: '"actions/checkout@v1.1.2"',
-          versioning: 'docker',
+          versioning: 'github-actions',
         },
         {
           currentValue: '1.37.0-glibc',
@@ -236,7 +266,7 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'actions/setup-node',
           commitMessageTopic: '{{{depName}}} action',
           datasource: 'github-tags',
-          versioning: 'docker',
+          versioning: 'github-actions',
           depType: 'action',
           replaceString:
             'actions/setup-node@56337c425554a6be30cdef71bf441f15be286854 # tag=v3.1.1',
@@ -249,7 +279,7 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'actions/setup-node',
           commitMessageTopic: '{{{depName}}} action',
           datasource: 'github-tags',
-          versioning: 'docker',
+          versioning: 'github-actions',
           depType: 'action',
           replaceString:
             "'actions/setup-node@1f8c6b94b26d0feae1e387ca63ccbdc44d27b561' # tag=v3.1.1",
@@ -262,7 +292,7 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'actions/setup-node',
           commitMessageTopic: '{{{depName}}} action',
           datasource: 'github-tags',
-          versioning: 'docker',
+          versioning: 'github-actions',
           depType: 'action',
           replaceString:
             '"actions/setup-node@1f8c6b94b26d0feae1e387ca63ccbdc44d27b561" # tag=v2.5.1',
@@ -275,7 +305,7 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'actions/checkout',
           commitMessageTopic: '{{{depName}}} action',
           datasource: 'github-tags',
-          versioning: 'docker',
+          versioning: 'github-actions',
           depType: 'action',
           replaceString: '"actions/checkout@v2"',
           autoReplaceStringTemplate:
@@ -286,7 +316,7 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'actions/setup-java',
           commitMessageTopic: '{{{depName}}} action',
           datasource: 'github-tags',
-          versioning: 'docker',
+          versioning: 'github-actions',
           depType: 'action',
           replaceString: '"actions/setup-java@v2"',
           autoReplaceStringTemplate:
@@ -575,7 +605,7 @@ describe('modules/manager/github-actions/extract', () => {
       expect(res?.deps[0]).toEqual({
         depName: 'actions/checkout',
         commitMessageTopic: '{{{depName}}} action',
-        versioning: 'docker',
+        versioning: 'github-actions',
         depType: 'action',
         replaceString:
           'actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v4',
@@ -600,7 +630,7 @@ describe('modules/manager/github-actions/extract', () => {
       expect(res?.deps[0]).toEqual({
         depName: 'actions/checkout',
         commitMessageTopic: '{{{depName}}} action',
-        versioning: 'docker',
+        versioning: 'github-actions',
         depType: 'action',
         replaceString: 'actions/checkout@c85c95e # v4',
         autoReplaceStringTemplate:
@@ -670,8 +700,51 @@ describe('modules/manager/github-actions/extract', () => {
       expect(res!.deps[3]).not.toHaveProperty('registryUrls');
     });
 
-    it('extracts multiple action runners from yaml configuration file', () => {
-      const res = extractPackageFile(runnerTestWorkflow, 'workflow.yml');
+    it('extracts multiple macos action runners from yaml configuration file', () => {
+      const res = extractPackageFile(runnerTestWorkflowMacos, 'workflow.yml');
+
+      expect(res?.deps).toMatchObject([
+        {
+          depName: 'macos',
+          currentValue: '12-large',
+          replaceString: 'macos-12-large',
+          depType: 'github-runner',
+          datasource: 'github-runners',
+          autoReplaceStringTemplate: '{{depName}}-{{newValue}}',
+        },
+        {
+          depName: 'macos',
+          currentValue: 'latest',
+          replaceString: 'macos-latest',
+          depType: 'github-runner',
+          datasource: 'github-runners',
+          autoReplaceStringTemplate: '{{depName}}-{{newValue}}',
+          skipReason: 'invalid-version',
+        },
+        {
+          depName: 'macos',
+          currentValue: '15-intel',
+          replaceString: 'macos-15-intel',
+          depType: 'github-runner',
+          datasource: 'github-runners',
+          autoReplaceStringTemplate: '{{depName}}-{{newValue}}',
+        },
+        {
+          depName: 'macos',
+          currentValue: '26-intel',
+          replaceString: 'macos-26-intel',
+          depType: 'github-runner',
+          datasource: 'github-runners',
+          autoReplaceStringTemplate: '{{depName}}-{{newValue}}',
+        },
+      ]);
+      expect(
+        res?.deps.filter((d) => d.datasource === 'github-runners'),
+      ).toHaveLength(4);
+    });
+
+    it('extracts multiple ubuntu action runners from yaml configuration file', () => {
+      const res = extractPackageFile(runnerTestWorkflowUbuntu, 'workflow.yml');
 
       expect(res?.deps).toMatchObject([
         {
@@ -692,22 +765,23 @@ describe('modules/manager/github-actions/extract', () => {
           autoReplaceStringTemplate: '{{depName}}-{{newValue}}',
         },
         {
-          depName: 'macos',
-          currentValue: '12-large',
-          replaceString: 'macos-12-large',
+          depName: 'ubuntu',
+          currentValue: '22.04-arm',
+          replaceString: 'ubuntu-22.04-arm',
           depType: 'github-runner',
           datasource: 'github-runners',
           autoReplaceStringTemplate: '{{depName}}-{{newValue}}',
         },
-        {
-          depName: 'macos',
-          currentValue: 'latest',
-          replaceString: 'macos-latest',
-          depType: 'github-runner',
-          datasource: 'github-runners',
-          autoReplaceStringTemplate: '{{depName}}-{{newValue}}',
-          skipReason: 'invalid-version',
-        },
+      ]);
+      expect(
+        res?.deps.filter((d) => d.datasource === 'github-runners'),
+      ).toHaveLength(3);
+    });
+
+    it('extracts multiple windows action runners from yaml configuration file', () => {
+      const res = extractPackageFile(runnerTestWorkflowWindows, 'workflow.yml');
+
+      expect(res?.deps).toMatchObject([
         {
           depName: 'windows',
           currentValue: '2019',
@@ -732,10 +806,26 @@ describe('modules/manager/github-actions/extract', () => {
           datasource: 'github-runners',
           autoReplaceStringTemplate: '{{depName}}-{{newValue}}',
         },
+        {
+          depName: 'windows',
+          currentValue: '11-arm',
+          replaceString: 'windows-11-arm',
+          depType: 'github-runner',
+          datasource: 'github-runners',
+          autoReplaceStringTemplate: '{{depName}}-{{newValue}}',
+        },
+        {
+          depName: 'windows',
+          currentValue: '2025',
+          replaceString: 'windows-2025',
+          depType: 'github-runner',
+          datasource: 'github-runners',
+          autoReplaceStringTemplate: '{{depName}}-{{newValue}}',
+        },
       ]);
       expect(
         res?.deps.filter((d) => d.datasource === 'github-runners'),
-      ).toHaveLength(7);
+      ).toHaveLength(5);
     });
 
     it('extracts x-version from actions/setup-x', () => {
@@ -776,7 +866,7 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'actions/setup-node',
           depType: 'action',
           replaceString: 'actions/setup-node@v3',
-          versioning: 'docker',
+          versioning: 'github-actions',
         },
         {
           autoReplaceStringTemplate:
@@ -787,7 +877,7 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'actions/setup-node',
           depType: 'action',
           replaceString: 'actions/setup-node@v3',
-          versioning: 'docker',
+          versioning: 'github-actions',
         },
         {
           autoReplaceStringTemplate:
@@ -798,7 +888,7 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'actions/setup-go',
           depType: 'action',
           replaceString: 'actions/setup-go@v5',
-          versioning: 'docker',
+          versioning: 'github-actions',
         },
         {
           autoReplaceStringTemplate:
@@ -809,7 +899,7 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'actions/setup-python',
           depType: 'action',
           replaceString: 'actions/setup-python@v3',
-          versioning: 'docker',
+          versioning: 'github-actions',
         },
         {
           autoReplaceStringTemplate:
@@ -820,7 +910,7 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'actions/setup-node',
           depType: 'action',
           replaceString: 'actions/setup-node@v3',
-          versioning: 'docker',
+          versioning: 'github-actions',
         },
         {
           depName: 'node',
@@ -926,7 +1016,7 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'actions/setup-node',
           depType: 'action',
           replaceString: 'actions/setup-node@v3',
-          versioning: 'docker',
+          versioning: 'github-actions',
         },
         {
           autoReplaceStringTemplate:
@@ -937,7 +1027,7 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'actions/setup-node',
           depType: 'action',
           replaceString: 'actions/setup-node@v3',
-          versioning: 'docker',
+          versioning: 'github-actions',
         },
         {
           autoReplaceStringTemplate:
@@ -948,7 +1038,7 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'actions/setup-go',
           depType: 'action',
           replaceString: 'actions/setup-go@v5',
-          versioning: 'docker',
+          versioning: 'github-actions',
         },
         {
           autoReplaceStringTemplate:
@@ -959,7 +1049,7 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'actions/setup-python',
           depType: 'action',
           replaceString: 'actions/setup-python@v3',
-          versioning: 'docker',
+          versioning: 'github-actions',
         },
         {
           autoReplaceStringTemplate:
@@ -970,7 +1060,7 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'actions/setup-node',
           depType: 'action',
           replaceString: 'actions/setup-node@v3',
-          versioning: 'docker',
+          versioning: 'github-actions',
         },
         {
           depName: 'node',
@@ -1028,11 +1118,172 @@ describe('modules/manager/github-actions/extract', () => {
         `;
       expect(extractPackageFile(yamlContent, 'action.yml')).toBeNull();
     });
+
+    it('extracts actions and with-version inputs nested in a parallel block', () => {
+      const yamlContent = codeBlock`
+        jobs:
+          build:
+            steps:
+              - uses: actions/checkout@v4
+              - parallel:
+                  - name: Setup Node.js
+                    uses: actions/setup-node@v5
+                    with:
+                      node-version: '20.0.0'
+                  - name: Setup Go
+                    uses: actions/setup-go@v5
+                    with:
+                      go-version: '1.23'
+              - run: npm test
+        `;
+
+      const res = extractPackageFile(yamlContent, 'workflow.yml');
+      expect(res?.deps).toMatchObject([
+        { depName: 'actions/checkout', depType: 'action' },
+        { depName: 'actions/setup-node', depType: 'action' },
+        { depName: 'actions/setup-go', depType: 'action' },
+        { depName: 'node', depType: 'uses-with', currentValue: '20.0.0' },
+        { depName: 'go', depType: 'uses-with', currentValue: '1.23' },
+      ]);
+    });
+
+    it('extracts community action with-inputs nested in a parallel block', () => {
+      const yamlContent = codeBlock`
+        jobs:
+          build:
+            steps:
+              - parallel:
+                  - uses: astral-sh/setup-uv@v8.2.0
+                    with:
+                      version: '0.4.x'
+        `;
+
+      const res = extractPackageFile(yamlContent, 'workflow.yml');
+      expect(res?.deps).toMatchObject([
+        { depName: 'astral-sh/setup-uv', depType: 'action' },
+        {
+          depName: 'astral-sh/uv',
+          depType: 'uses-with',
+          currentValue: '0.4.x',
+          datasource: 'github-releases',
+        },
+      ]);
+    });
+
+    it('extracts steps nested in nested parallel blocks', () => {
+      const yamlContent = codeBlock`
+        jobs:
+          build:
+            steps:
+              - parallel:
+                  - name: Setup Node.js
+                    uses: actions/setup-node@v5
+                    with:
+                      node-version: '18.0.0'
+                  - parallel:
+                      - name: Setup Go
+                        uses: actions/setup-go@v5
+                        with:
+                          go-version: '1.22'
+        `;
+
+      const res = extractPackageFile(yamlContent, 'workflow.yml');
+      expect(res?.deps).toMatchObject([
+        { depName: 'actions/setup-node', depType: 'action' },
+        { depName: 'actions/setup-go', depType: 'action' },
+        { depName: 'node', depType: 'uses-with', currentValue: '18.0.0' },
+        { depName: 'go', depType: 'uses-with', currentValue: '1.22' },
+      ]);
+    });
   });
 
   it.each([
     {
       step: {
+        uses: 'aquasecurity/setup-trivy@v0.2.6',
+        with: {},
+      },
+      expected: [
+        {
+          datasource: 'github-releases',
+          depName: 'aquasecurity/trivy',
+          depType: 'uses-with',
+          packageName: 'aquasecurity/trivy',
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'aquasecurity/setup-trivy@v0.2.6',
+        with: {
+          version: 'latest',
+        },
+      },
+      expected: [
+        {
+          currentValue: 'latest',
+          datasource: 'github-releases',
+          depName: 'aquasecurity/trivy',
+          depType: 'uses-with',
+          packageName: 'aquasecurity/trivy',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'aquasecurity/setup-trivy@v0.2.6',
+        with: {
+          version: 'v0.70.0',
+        },
+      },
+      expected: [
+        {
+          currentValue: 'v0.70.0',
+          datasource: 'github-releases',
+          depName: 'aquasecurity/trivy',
+          depType: 'uses-with',
+          packageName: 'aquasecurity/trivy',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'aquasecurity/trivy-action@v0.35.0',
+        with: {
+          version: 'latest',
+        },
+      },
+      expected: [
+        {
+          currentValue: 'latest',
+          datasource: 'github-releases',
+          depName: 'aquasecurity/trivy',
+          depType: 'uses-with',
+          packageName: 'aquasecurity/trivy',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'aquasecurity/trivy-action@v0.35.0',
+        with: {
+          version: 'v0.70.0',
+        },
+      },
+      expected: [
+        {
+          currentValue: 'v0.70.0',
+          datasource: 'github-releases',
+          depName: 'aquasecurity/trivy',
+          depType: 'uses-with',
+          packageName: 'aquasecurity/trivy',
+        },
+      ],
+    },
+    {
+      step: {
         uses: 'astral-sh/setup-uv@v5',
         with: {
           version: 'latest',
@@ -1045,7 +1296,6 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'astral-sh/uv',
           depType: 'uses-with',
           packageName: 'astral-sh/uv',
-          versioning: 'npm',
         },
       ],
     },
@@ -1064,7 +1314,6 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'astral-sh/uv',
           depType: 'uses-with',
           packageName: 'astral-sh/uv',
-          versioning: 'npm',
         },
       ],
     },
@@ -1118,7 +1367,6 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'pnpm',
           depType: 'uses-with',
           packageName: 'pnpm',
-          versioning: 'npm',
         },
       ],
     },
@@ -1135,7 +1383,6 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'pnpm',
           depType: 'uses-with',
           packageName: 'pnpm',
-          versioning: 'npm',
         },
       ],
     },
@@ -1175,7 +1422,6 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'pnpm',
           depType: 'uses-with',
           packageName: 'pnpm',
-          versioning: 'npm',
         },
       ],
     },
@@ -1193,7 +1439,6 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'pnpm',
           depType: 'uses-with',
           packageName: 'pnpm',
-          versioning: 'npm',
         },
       ],
     },
@@ -1211,7 +1456,6 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'pdm',
           depType: 'uses-with',
           packageName: 'pdm',
-          versioning: 'pep440',
         },
       ],
     },
@@ -1228,7 +1472,6 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'pdm',
           depType: 'uses-with',
           packageName: 'pdm',
-          versioning: 'pep440',
         },
       ],
     },
@@ -1263,7 +1506,6 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'bun',
           depType: 'uses-with',
           packageName: 'bun',
-          versioning: 'npm',
         },
       ],
     },
@@ -1279,7 +1521,6 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'bun',
           depType: 'uses-with',
           packageName: 'bun',
-          versioning: 'npm',
         },
       ],
     },
@@ -1296,7 +1537,6 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'deno',
           depType: 'uses-with',
           packageName: 'deno',
-          versioning: 'npm',
         },
       ],
     },
@@ -1312,7 +1552,6 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'deno',
           depType: 'uses-with',
           packageName: 'deno',
-          versioning: 'npm',
         },
       ],
     },
@@ -1329,7 +1568,6 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'ruby',
           depType: 'uses-with',
           packageName: 'ruby',
-          versioning: 'ruby',
         },
       ],
     },
@@ -1345,7 +1583,6 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'ruby',
           depType: 'uses-with',
           packageName: 'ruby',
-          versioning: 'ruby',
         },
       ],
     },
@@ -1377,6 +1614,54 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'pypa/hatch',
           depType: 'uses-with',
           packageName: 'pypa/hatch',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'jakebailey/pyright-action@v2',
+        with: { version: '1.1.100' },
+      },
+      expected: [
+        {
+          currentValue: '1.1.100',
+          datasource: 'npm',
+          depName: 'pyright',
+          depType: 'uses-with',
+          packageName: 'pyright',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'jakebailey/pyright-action@v2',
+        with: {},
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'npm',
+          depName: 'pyright',
+          depType: 'uses-with',
+          packageName: 'pyright',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'jakebailey/pyright-action@v2',
+        with: { version: 'PATH' },
+      },
+      expected: [
+        {
+          currentValue: 'PATH',
+          skipStage: 'extract',
+          skipReason: 'invalid-version',
+          datasource: 'npm',
+          depName: 'pyright',
+          depType: 'uses-with',
+          packageName: 'pyright',
         },
       ],
     },
@@ -1420,10 +1705,10 @@ describe('modules/manager/github-actions/extract', () => {
         {
           skipStage: 'extract',
           skipReason: 'unspecified-version',
-          datasource: 'pypi',
-          depName: 'zizmor',
+          datasource: 'docker',
+          depName: 'ghcr.io/zizmorcore/zizmor',
           depType: 'uses-with',
-          packageName: 'zizmor',
+          packageName: 'ghcr.io/zizmorcore/zizmor',
         },
       ],
     },
@@ -1437,10 +1722,10 @@ describe('modules/manager/github-actions/extract', () => {
       expected: [
         {
           currentValue: 'v1.23.1',
-          datasource: 'pypi',
-          depName: 'zizmor',
+          datasource: 'docker',
+          depName: 'ghcr.io/zizmorcore/zizmor',
           depType: 'uses-with',
-          packageName: 'zizmor',
+          packageName: 'ghcr.io/zizmorcore/zizmor',
         },
       ],
     },
@@ -1454,10 +1739,229 @@ describe('modules/manager/github-actions/extract', () => {
       expected: [
         {
           currentValue: '1.23.1',
-          datasource: 'pypi',
-          depName: 'zizmor',
+          datasource: 'docker',
+          depName: 'ghcr.io/zizmorcore/zizmor',
           depType: 'uses-with',
-          packageName: 'zizmor',
+          packageName: 'ghcr.io/zizmorcore/zizmor',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'docker/setup-docker-action@v4',
+        with: { version: 'v27.1.0' },
+      },
+      expected: [
+        {
+          currentValue: 'v27.1.0',
+          datasource: 'github-releases',
+          depName: 'docker',
+          depType: 'uses-with',
+          packageName: 'moby/moby',
+          extractVersion: '^docker-(?<version>.+)$',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'dtolnay/rust-toolchain@master',
+        with: { toolchain: '1.89.0' },
+      },
+      expected: [
+        {
+          currentValue: '1.89.0',
+          datasource: 'rust-version',
+          depName: 'rust',
+          depType: 'uses-with',
+          packageName: 'rust',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'dtolnay/rust-toolchain@master',
+        with: { toolchain: 'nightly-2025-01-01' },
+      },
+      expected: [
+        {
+          currentValue: 'nightly-2025-01-01',
+          datasource: 'rust-version',
+          depName: 'rust',
+          depType: 'uses-with',
+          packageName: 'rust',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'dtolnay/rust-toolchain@stable',
+        with: { toolchain: 'stable' },
+      },
+      expected: [
+        {
+          currentValue: 'stable',
+          datasource: 'rust-version',
+          depName: 'rust',
+          depType: 'uses-with',
+          packageName: 'rust',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'dtolnay/rust-toolchain@master',
+        with: {},
+      },
+      expected: [
+        {
+          datasource: 'rust-version',
+          depName: 'rust',
+          depType: 'uses-with',
+          packageName: 'rust',
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'azure/setup-helm@v4',
+        with: { version: 'v3.17.0' },
+      },
+      expected: [
+        {
+          currentValue: 'v3.17.0',
+          datasource: 'github-releases',
+          depName: 'helm',
+          depType: 'uses-with',
+          packageName: 'helm/helm',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'azure/setup-helm@v4',
+        with: {},
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'github-releases',
+          depName: 'helm',
+          depType: 'uses-with',
+          packageName: 'helm/helm',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'docker/setup-buildx-action@v3',
+        with: { version: 'v0.19.3' },
+      },
+      expected: [
+        {
+          currentValue: 'v0.19.3',
+          datasource: 'github-releases',
+          depName: 'buildx',
+          depType: 'uses-with',
+          packageName: 'docker/buildx',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'docker/setup-buildx-action@v3',
+        with: {},
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'github-releases',
+          depName: 'buildx',
+          depType: 'uses-with',
+          packageName: 'docker/buildx',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'docker/setup-compose-action@v1',
+        with: { version: 'v2.36.1' },
+      },
+      expected: [
+        {
+          currentValue: 'v2.36.1',
+          datasource: 'github-releases',
+          depName: 'docker/compose',
+          depType: 'uses-with',
+          packageName: 'docker/compose',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'docker/setup-compose-action@v1',
+        with: {},
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'github-releases',
+          depName: 'docker/compose',
+          depType: 'uses-with',
+          packageName: 'docker/compose',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'helm/chart-testing-action@v2',
+        with: { version: 'v3.12.0' },
+      },
+      expected: [
+        {
+          currentValue: 'v3.12.0',
+          datasource: 'github-releases',
+          depName: 'chart-testing',
+          depType: 'uses-with',
+          packageName: 'helm/chart-testing',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'helm/chart-testing-action@v2',
+        with: {},
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'github-releases',
+          depName: 'chart-testing',
+          depType: 'uses-with',
+          packageName: 'helm/chart-testing',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'sigoden/install-binary@v1',
+        with: {
+          repo: 'sigoden/argc',
+          tag: 'v1.22.0',
+        },
+      },
+      expected: [
+        {
+          currentValue: 'v1.22.0',
+          datasource: 'github-releases',
+          depName: 'sigoden/argc',
+          depType: 'uses-with',
+          packageName: 'sigoden/argc',
         },
       ],
     },

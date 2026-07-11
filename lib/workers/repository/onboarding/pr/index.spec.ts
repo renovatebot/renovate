@@ -9,6 +9,7 @@ import { REPOSITORY_CLOSED_ONBOARDING } from '../../../../constants/error-messag
 import { logger } from '../../../../logger/index.ts';
 import type { PackageFile } from '../../../../modules/manager/types.ts';
 import type { Pr } from '../../../../modules/platform/index.ts';
+import { hashBody } from '../../../../modules/platform/pr-body.ts';
 import * as memCache from '../../../../util/cache/memory/index.ts';
 import type { BranchConfig } from '../../../types.ts';
 import { OnboardingState } from '../common.ts';
@@ -20,8 +21,36 @@ describe('workers/repository/onboarding/pr/index', () => {
     let packageFiles: Record<string, PackageFile[]>;
     let branches: BranchConfig[];
 
+    // NOTE that when the test below fails, these will need to be updated
+    const ONBOARDING_PR_BODY_HASH_WITH_REBASE =
+      '3864212140a13f6ddfaf19c2c812187369a6b00e680a0ac443b4d23539317c41';
+    const ONBOARDING_PR_BODY_HASH_WITHOUT_REBASE =
+      '1280e47eeebf596351163aef6d1367d083276b37bcc97fb3b05c4b4312ef357a';
+
+    // NOTE that if you're intentionally changing the onboarding PR's contents, these hashes will change - update them above
+    describe('generates a consistent hash of the body', () => {
+      it('when the rebase checkbox is present', async () => {
+        config.onboardingRebaseCheckbox = true;
+        OnboardingState.prUpdateRequested = true;
+
+        await ensureOnboardingPr(config, packageFiles, branches);
+        const prBody = platform.createPr.mock.calls[0][0].prBody;
+
+        expect(hashBody(prBody)).toBe(ONBOARDING_PR_BODY_HASH_WITH_REBASE);
+      });
+
+      it('when the rebase checkbox is not present', async () => {
+        config.onboardingRebaseCheckbox = false;
+
+        await ensureOnboardingPr(config, packageFiles, branches);
+        const prBody = platform.createPr.mock.calls[0][0].prBody;
+
+        expect(hashBody(prBody)).toBe(ONBOARDING_PR_BODY_HASH_WITHOUT_REBASE);
+      });
+    });
+
     const bodyStruct = {
-      hash: 'ca7d8b2b5477b8db83231a2584c4e0a1748e4c19e26089507ee1447b8eeb6894',
+      hash: ONBOARDING_PR_BODY_HASH_WITH_REBASE,
     };
 
     beforeEach(() => {
@@ -39,6 +68,7 @@ describe('workers/repository/onboarding/pr/index', () => {
       GlobalConfig.set({
         onboardingBranch: config.onboardingBranch,
         onboardingPrTitle: 'Configure Renovate', // default value
+        requireConfig: config.requireConfig,
       });
       InheritConfig.reset();
     });
@@ -141,7 +171,9 @@ describe('workers/repository/onboarding/pr/index', () => {
           branches,
         );
         expect(platform.createPr).toHaveBeenCalledTimes(1);
-        expect(platform.createPr.mock.calls[0][0].prBody).toMatchSnapshot();
+        expect(platform.createPr.mock.calls[0][0].prBody).toMatchSnapshot(
+          'PR body',
+        );
       },
     );
 
@@ -166,7 +198,9 @@ describe('workers/repository/onboarding/pr/index', () => {
           branches,
         );
         expect(platform.createPr).toHaveBeenCalledTimes(1);
-        expect(platform.createPr.mock.calls[0][0].prBody).toMatchSnapshot();
+        expect(platform.createPr.mock.calls[0][0].prBody).toMatchSnapshot(
+          'PR body',
+        );
       },
     );
 
@@ -200,7 +234,9 @@ describe('workers/repository/onboarding/pr/index', () => {
         expect(platform.createPr.mock.calls[0][0].prBody).toMatch(
           /repository:test/,
         );
-        expect(platform.createPr.mock.calls[0][0].prBody).toMatchSnapshot();
+        expect(platform.createPr.mock.calls[0][0].prBody).toMatchSnapshot(
+          'PR body',
+        );
       },
     );
 
@@ -212,8 +248,7 @@ describe('workers/repository/onboarding/pr/index', () => {
       'returns if PR does not need updating' +
         '(onboardingRebaseCheckbox="$onboardingRebaseCheckbox")',
       async ({ onboardingRebaseCheckbox }) => {
-        const hash =
-          '16d923d407af84b1d00c4336c5dd88fc3cd0e6695b7e4e13debd02c7b8c4b60d'; // no rebase checkbox PR hash
+        const hash = ONBOARDING_PR_BODY_HASH_WITHOUT_REBASE;
         config.onboardingRebaseCheckbox = onboardingRebaseCheckbox;
         OnboardingState.prUpdateRequested = true; // case 'false' is tested in "breaks early when onboarding"
         platform.getBranchPr.mockResolvedValue(
@@ -465,6 +500,11 @@ describe('workers/repository/onboarding/pr/index', () => {
 
     it('creates PR (no require config)', async () => {
       config.requireConfig = 'optional';
+      GlobalConfig.set({
+        onboardingBranch: config.onboardingBranch,
+        onboardingPrTitle: 'Configure Renovate',
+        requireConfig: 'optional',
+      });
       await ensureOnboardingPr(config, packageFiles, branches);
       expect(platform.createPr).toHaveBeenCalledTimes(1);
     });
