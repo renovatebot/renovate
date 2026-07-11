@@ -1,7 +1,6 @@
 // TODO #22198
 
 import crypto from 'node:crypto';
-import os from 'node:os';
 import { isArray, isNonEmptyArray } from '@sindresorhus/is';
 import upath from 'upath';
 import { GlobalConfig } from '../../../../config/global.ts';
@@ -25,7 +24,10 @@ import {
   writeLocalFile,
 } from '../../../../util/fs/index.ts';
 import { getGitEnvironmentVariables } from '../../../../util/git/auth.ts';
-import { getRepoStatus } from '../../../../util/git/index.ts';
+import {
+  getRepoStatus,
+  isFileModeEnabled,
+} from '../../../../util/git/index.ts';
 import type { FileChange } from '../../../../util/git/types.ts';
 import { minimatch } from '../../../../util/minimatch.ts';
 import { regEx } from '../../../../util/regex.ts';
@@ -38,21 +40,23 @@ export interface PostUpgradeCommandsExecutionResult {
   artifactErrors: ArtifactError[];
 }
 
-async function getExecutableState(
+const ownerExecutePermission = 0o100;
+
+async function detectExecutable(
   relativePath: string,
-): Promise<boolean | undefined> {
-  /* v8 ignore if -- tested on Windows CI */
-  if (os.platform() === 'win32') {
+  canReadFileMode: boolean,
+): Promise<true | undefined> {
+  if (!canReadFileMode) {
     return undefined;
   }
 
   const fileStats = await statLocalFile(relativePath);
-  if (!fileStats) {
+  if (!fileStats || (fileStats.mode & ownerExecutePermission) === 0) {
     return undefined;
   }
 
   // Git derives its executable flag from the owner's execute permission.
-  return (fileStats.mode & 0o100) !== 0;
+  return true;
 }
 
 export async function postUpgradeCommandsExecutor(
@@ -274,6 +278,7 @@ export async function postUpgradeCommandsExecutor(
       if (config.npmrc) {
         fileExcludes.push('.npmrc');
       }
+      const canReadFileMode = await isFileModeEnabled();
 
       for (const relativePath of addedOrModifiedFiles) {
         if (
@@ -293,7 +298,10 @@ export async function postUpgradeCommandsExecutor(
               'Post-upgrade file saved',
             );
             const existingContent = await readLocalFile(relativePath);
-            const isExecutable = await getExecutableState(relativePath);
+            const isExecutable = await detectExecutable(
+              relativePath,
+              canReadFileMode,
+            );
             const existingUpdatedArtifacts = updatedArtifacts.find(
               (ua) => ua.path === relativePath,
             );

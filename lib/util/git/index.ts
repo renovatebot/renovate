@@ -439,6 +439,17 @@ export function isCloned(): boolean {
   return gitInitialized;
 }
 
+export async function isFileModeEnabled(): Promise<boolean> {
+  const value = await git.raw([
+    'config',
+    '--type=bool',
+    '--default=true',
+    '--get',
+    'core.fileMode',
+  ]);
+  return value.trim() === 'true';
+}
+
 export const syncGit = withInstrumenting(
   { name: 'syncGit' },
   async (): Promise<void> => {
@@ -1294,9 +1305,8 @@ export async function prepareCommit({
           const addParams =
             fileName === getConfigFileNames()[0] ? ['-f', fileName] : fileName;
           await git.add(addParams);
-          if (file.isExecutable !== undefined) {
-            const mode = file.isExecutable ? '+x' : '-x';
-            await git.raw(['update-index', `--chmod=${mode}`, fileName]);
+          if (file.isExecutable) {
+            await git.raw(['update-index', '--chmod=+x', fileName]);
           }
           addedModifiedFiles.push(fileName);
         } catch (err) /* v8 ignore next -- TODO: add test #40625 */ {

@@ -999,31 +999,28 @@ describe('util/git/index', { timeout: 30000 }, () => {
       const result = await repo.raw(['ls-tree', 'HEAD', 'some-executable']);
       expect(result).toStartWith('100755');
     });
+  });
 
-    it('removes the executable bit', async () => {
+  describe('isFileModeEnabled()', () => {
+    it('defaults to enabled when core.fileMode is unset', async () => {
       const repo = simpleGit(tmpDir.path);
-      await fs.writeFile(`${tmpDir.path}/executable`, 'executable');
-      await repo.add('executable');
-      await repo.raw(['update-index', '--chmod=+x', 'executable']);
-      await repo.commit('Add executable');
-      await repo.push('origin', defaultBranch);
+      await repo.raw(['config', '--unset', 'core.fileMode']);
 
-      const file: FileChange = {
-        type: 'addition',
-        path: 'executable',
-        contents: 'updated contents',
-        isExecutable: false,
-      };
-      const commit = await git.commitFiles({
-        branchName: 'renovate/past_branch',
-        files: [file],
-        message: 'Update something',
-      });
-      expect(commit).not.toBeNull();
-
-      const result = await repo.raw(['ls-tree', 'HEAD', 'executable']);
-      expect(result).toStartWith('100644');
+      await expect(git.isFileModeEnabled()).resolves.toBeTrue();
     });
+
+    it.each([
+      { setting: 'true', expected: true },
+      { setting: 'false', expected: false },
+    ])(
+      'returns $expected when core.fileMode is $setting',
+      async ({ setting, expected }) => {
+        const repo = simpleGit(tmpDir.path);
+        await repo.addConfig('core.fileMode', setting);
+
+        await expect(git.isFileModeEnabled()).resolves.toBe(expected);
+      },
+    );
   });
 
   describe('getCommitMessages()', () => {
