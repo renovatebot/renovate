@@ -85,6 +85,23 @@ describe('integration/gerrit/index', () => {
     });
   }, 60_000);
 
+  it('discovers the repository via autodiscover', async () => {
+    // Arrange
+    const REPO = 'test-gerrit-autodiscover';
+    await seed(REPO, 'test-autodiscover');
+
+    // Act
+    await renovate(undefined, {
+      autodiscover: true,
+      autodiscoverFilter: [REPO],
+    });
+
+    // Assert
+    const ch = findSemverChange(await getOpenChanges(REPO));
+
+    expect(ch).toBeDefined();
+  });
+
   it('creates a change for an outdated dependency', async () => {
     // Arrange — shared REPO_NAME seeded in beforeAll
 
@@ -200,20 +217,6 @@ describe('integration/gerrit/index', () => {
       .filter(isString);
 
     expect(usernames).toContain(REVIEWER_USER);
-  });
-
-  it('discovers the repository via autodiscover', async () => {
-    // Arrange
-    const REPO = 'test-gerrit-autodiscover';
-    await seed(REPO, 'test-autodiscover');
-
-    // Act
-    await renovate(undefined, { autodiscover: true });
-
-    // Assert
-    const ch = findSemverChange(await getOpenChanges(REPO));
-
-    expect(ch).toBeDefined();
   });
 
   it('creates separate changes for multiple deps', async () => {
