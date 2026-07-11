@@ -341,8 +341,8 @@ describe('modules/manager/npm/post-update/index', () => {
         oldYarnrcYml,
       );
       expect(git.getFile).not.toHaveBeenCalled();
-      expect(existingYarnrcYmlContent).toMatchSnapshot();
-      expect(updatedArtifacts).toMatchSnapshot();
+      expect(existingYarnrcYmlContent).toMatchSnapshot('existing yarnrc.yml');
+      expect(updatedArtifacts).toMatchSnapshot('updatedArtifacts');
     });
 
     it("should not update the Yarn binary if the old .yarnrc.yml doesn't exist", async () => {
@@ -815,7 +815,7 @@ describe('modules/manager/npm/post-update/index', () => {
             },
             additionalFiles,
           ),
-        ).rejects.toThrow();
+        ).rejects.toThrow(Error);
 
         expect(logger.logger.warn).toHaveBeenCalledWith(
           expect.anything(),

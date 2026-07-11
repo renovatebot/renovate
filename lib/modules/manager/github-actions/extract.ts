@@ -24,7 +24,7 @@ import type {
 import { CommunityActions } from './community.ts';
 import type { DockerReference, RepositoryReference } from './parse.ts';
 import { isSha, isShortSha, parseUsesLine, versionLikeRe } from './parse.ts';
-import type { Steps } from './schema.ts';
+import type { UsesStep } from './schema.ts';
 import { Workflow } from './schema.ts';
 
 // detects if we run against a Github Enterprise Server and adds the URL to the beginning of the registryURLs for looking up Actions
@@ -258,7 +258,7 @@ const versionedActions: Record<string, string> = {
   // - java
 };
 
-function extractVersionedAction(step: Steps): PackageDependency | null {
+function extractVersionedAction(step: UsesStep): PackageDependency | null {
   for (const [action, versioning] of Object.entries(versionedActions)) {
     const actionName = `actions/setup-${action}`;
     if (step.uses !== actionName && !step.uses?.startsWith(`${actionName}@`)) {
@@ -284,7 +284,7 @@ function extractVersionedAction(step: Steps): PackageDependency | null {
   return null;
 }
 
-function extractSteps(steps: Steps[]): PackageDependency[] {
+function extractSteps(steps: UsesStep[]): PackageDependency[] {
   const deps: PackageDependency[] = [];
 
   for (const step of steps) {

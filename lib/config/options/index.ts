@@ -563,6 +563,7 @@ const options: Readonly<RenovateOptions>[] = [
     default: false,
     supportedPlatforms: [
       'azure',
+      'bitbucket',
       'forgejo',
       'gitea',
       'github',
@@ -680,7 +681,7 @@ const options: Readonly<RenovateOptions>[] = [
     description:
       'Change this value to override the default Renovate sidecar image.',
     type: 'string',
-    default: 'ghcr.io/renovatebot/base-image:13.65.0',
+    default: 'ghcr.io/renovatebot/base-image:13.72.6',
     globalOnly: true,
     deprecationMsg:
       'The usage of `binarySource=docker` is deprecated, and will be removed in the future',
