@@ -1,6 +1,4 @@
 import type { DatabaseSync, StatementSync } from 'node:sqlite';
-import { promisify } from 'node:util';
-import zlib, { constants } from 'node:zlib';
 import fs from 'fs-extra';
 import upath from 'upath';
 import { logger } from '../../../../logger/index.ts';
@@ -11,17 +9,6 @@ import type { PackageCacheNamespace } from '../types.ts';
 import { PackageCacheBase } from './base.ts';
 
 const { exists } = fs;
-const brotliCompress = promisify(zlib.brotliCompress);
-
-function compress(input: unknown): Promise<Buffer> {
-  const jsonStr = JSON.stringify(input);
-  return brotliCompress(jsonStr, {
-    params: {
-      [constants.BROTLI_PARAM_MODE]: constants.BROTLI_MODE_TEXT,
-      [constants.BROTLI_PARAM_QUALITY]: 3,
-    },
-  });
-}
 
 export class PackageCacheSqlite extends PackageCacheBase {
   static async create(cacheDir: string): Promise<PackageCacheSqlite> {
@@ -101,24 +88,18 @@ export class PackageCacheSqlite extends PackageCacheBase {
     );
   }
 
-  override async set(
+  protected override writeRaw(
     namespace: PackageCacheNamespace,
     key: string,
-    value: unknown,
-    hardTtlMinutes: number,
-  ): Promise<void> {
-    try {
-      const compressedData = await compress(value);
-      const ttlSeconds = hardTtlMinutes * 60;
-      this.upsertStatement.run({
-        namespace,
-        key,
-        data: compressedData,
-        ttlSeconds,
-      });
-    } catch (err) {
-      logger.once.warn({ err }, 'Error while setting SQLite cache value');
-    }
+    data: Buffer,
+    ttlSeconds: number,
+  ): void {
+    this.upsertStatement.run({
+      namespace,
+      key,
+      data,
+      ttlSeconds,
+    });
   }
 
   protected override readRaw(

@@ -82,7 +82,7 @@ describe('modules/datasource/deno/index', () => {
           packageName: 'https://deno.land/std',
           registryUrl: deno.defaultRegistryUrls[0],
         }),
-      ).rejects.toThrow();
+      ).rejects.toThrow('Request failed with status code 404 (Not Found)');
     });
 
     it('throws error if version endpoint fails', async () => {
@@ -110,7 +110,9 @@ describe('modules/datasource/deno/index', () => {
           packageName: 'https://deno.land/std',
           registryUrl: deno.defaultRegistryUrls[0],
         }),
-      ).rejects.toThrow();
+      ).rejects.toThrow(
+        'Request failed with status code 503 (Service Unavailable)',
+      );
     });
 
     it('returns null if we could not match a deno land dependency', async () => {
