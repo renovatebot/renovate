@@ -1,7 +1,6 @@
 // TODO #22198
 
 import crypto from 'node:crypto';
-import { constants as fsConstants } from 'node:fs';
 import os from 'node:os';
 import { isArray, isNonEmptyArray } from '@sindresorhus/is';
 import upath from 'upath';
@@ -39,6 +38,8 @@ export interface PostUpgradeCommandsExecutionResult {
   artifactErrors: ArtifactError[];
 }
 
+const gitExecutableFileMode = 0o100;
+
 async function getExecutableState(
   relativePath: string,
 ): Promise<boolean | undefined> {
@@ -51,7 +52,7 @@ async function getExecutableState(
     return undefined;
   }
 
-  return (fileStats.mode & fsConstants.S_IXUSR) !== 0;
+  return (fileStats.mode & gitExecutableFileMode) !== 0;
 }
 
 export async function postUpgradeCommandsExecutor(
