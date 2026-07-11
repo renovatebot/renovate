@@ -1,6 +1,7 @@
 import { Fixtures } from '~test/fixtures.ts';
 import * as httpMock from '~test/http-mock.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
+import { HttpError } from '../../../util/http/index.ts';
 import { getPkgReleases } from '../index.ts';
 import { TerraformProviderDatasource } from './index.ts';
 
@@ -631,7 +632,7 @@ describe('modules/datasource/terraform-provider/index', () => {
         '2.5.1',
       );
 
-      await expect(res).rejects.toThrow();
+      await expect(res).rejects.toThrow(HttpError);
     });
   });
 
