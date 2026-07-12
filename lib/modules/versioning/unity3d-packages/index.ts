@@ -6,8 +6,8 @@ import type { VersioningApi } from '../types.ts';
 export const id = 'unity3d-packages';
 export const displayName = 'Unity3D Packages';
 export const urls = [
-  'https://docs.unity3d.com/Manual/upm-semver.html',
-  'https://docs.unity3d.com/Manual/upm-lifecycle.html',
+  '[Unity Package Manager - Versioning](https://docs.unity3d.com/Manual/upm-semver.html)',
+  '[Unity Package Manager - Lifecycle](https://docs.unity3d.com/Manual/upm-lifecycle.html)',
 ];
 export const supportsRanges = false;
 

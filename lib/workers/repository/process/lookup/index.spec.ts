@@ -129,7 +129,7 @@ describe('workers/repository/process/lookup/index', () => {
 
       const res = await lookup.lookupUpdates(config);
 
-      expect(() => res.unwrapOrThrow()).toThrow();
+      expect(() => res.unwrapOrThrow()).toThrow('external-host-error');
     });
 
     it('returns rollback for pinned version', async () => {

@@ -58,7 +58,7 @@ describe('modules/manager/deno/update', () => {
 
         expect(() =>
           updateDependency({ fileContent, packageFile: 'deno.json', upgrade }),
-        ).toThrow();
+        ).toThrow(Error);
       });
 
       it('updates dependency in scopes', () => {

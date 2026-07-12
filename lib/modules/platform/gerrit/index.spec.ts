@@ -1,5 +1,5 @@
 import { codeBlock } from 'common-tags';
-import { git, hostRules, partial } from '~test/util.ts';
+import { fakeSha, git, hostRules, partial } from '~test/util.ts';
 import { REPOSITORY_ARCHIVED } from '../../../constants/error-messages.ts';
 import type { BranchStatus } from '../../../types/index.ts';
 import { repoFingerprint } from '../util.ts';
@@ -38,6 +38,8 @@ vi.mock('./client.ts');
 const clientMock = vi.mocked(_client);
 
 describe('modules/platform/gerrit/index', () => {
+  const currentRevision = fakeSha('gerrit');
+
   beforeEach(async () => {
     hostRules.find.mockReturnValue({
       username: 'user',
@@ -58,14 +60,18 @@ describe('modules/platform/gerrit/index', () => {
   describe('initPlatform()', () => {
     it('should throw if no endpoint', async () => {
       expect.assertions(1);
-      await expect(() => gerrit.initPlatform({})).rejects.toThrow();
+      await expect(() => gerrit.initPlatform({})).rejects.toThrow(
+        'Init: You must configure a Gerrit Server endpoint',
+      );
     });
 
     it('should throw if no username/password', async () => {
       expect.assertions(1);
       await expect(() =>
         gerrit.initPlatform({ endpoint: 'endpoint' }),
-      ).rejects.toThrow();
+      ).rejects.toThrow(
+        'Init: You must configure a Gerrit Server username/password',
+      );
     });
 
     it('should init', async () => {
@@ -214,9 +220,9 @@ describe('modules/platform/gerrit/index', () => {
     it('findPr() - found', async () => {
       const change = partial<GerritChange>({
         _number: 123456,
-        current_revision: 'some-revision',
+        current_revision: currentRevision,
         revisions: {
-          'some-revision': partial<GerritRevisionInfo>({
+          [currentRevision]: partial<GerritRevisionInfo>({
             commit_with_footers: 'Renovate-Branch: source',
           }),
         },
@@ -255,7 +261,7 @@ describe('modules/platform/gerrit/index', () => {
 
     it('getPr() - other error', async () => {
       clientMock.getChange.mockRejectedValueOnce(new Error('other error'));
-      await expect(gerrit.getPr(123456)).rejects.toThrow();
+      await expect(gerrit.getPr(123456)).rejects.toThrow('other error');
     });
   });
 
@@ -356,9 +362,9 @@ describe('modules/platform/gerrit/index', () => {
       git.pushCommit.mockResolvedValueOnce(true);
       const change = partial<GerritChange>({
         _number: 123456,
-        current_revision: 'some-revision',
+        current_revision: currentRevision,
         revisions: {
-          'some-revision': partial<GerritRevisionInfo>({
+          [currentRevision]: partial<GerritRevisionInfo>({
             commit_with_footers: 'Renovate-Branch: source',
           }),
         },
@@ -389,9 +395,9 @@ describe('modules/platform/gerrit/index', () => {
       git.pushCommit.mockResolvedValueOnce(true);
       const change = partial<GerritChange>({
         _number: 123456,
-        current_revision: 'some-revision',
+        current_revision: currentRevision,
         revisions: {
-          'some-revision': partial<GerritRevisionInfo>({
+          [currentRevision]: partial<GerritRevisionInfo>({
             commit_with_footers: 'Renovate-Branch: source',
           }),
         },
@@ -425,9 +431,9 @@ describe('modules/platform/gerrit/index', () => {
       git.pushCommit.mockResolvedValueOnce(true);
       const change = partial<GerritChange>({
         _number: 123456,
-        current_revision: 'some-revision',
+        current_revision: currentRevision,
         revisions: {
-          'some-revision': partial<GerritRevisionInfo>({
+          [currentRevision]: partial<GerritRevisionInfo>({
             commit_with_footers: 'Renovate-Branch: source',
           }),
         },
@@ -509,9 +515,9 @@ describe('modules/platform/gerrit/index', () => {
     it('getBranchPr() - found', async () => {
       const change = partial<GerritChange>({
         _number: 123456,
-        current_revision: 'some-revision',
+        current_revision: currentRevision,
         revisions: {
-          'some-revision': partial<GerritRevisionInfo>({
+          [currentRevision]: partial<GerritRevisionInfo>({
             commit_with_footers: 'Renovate-Branch: renovate/dependency-1.x',
           }),
         },
@@ -535,9 +541,9 @@ describe('modules/platform/gerrit/index', () => {
     it('getBranchPr() - found even without targetBranch', async () => {
       const change = partial<GerritChange>({
         _number: 123456,
-        current_revision: 'some-revision',
+        current_revision: currentRevision,
         revisions: {
-          'some-revision': partial<GerritRevisionInfo>({
+          [currentRevision]: partial<GerritRevisionInfo>({
             commit_with_footers: 'Renovate-Branch: renovate/dependency-1.x',
           }),
         },
@@ -574,9 +580,9 @@ describe('modules/platform/gerrit/index', () => {
 
     it('getPrList() - multiple results', async () => {
       const change = partial<GerritChange>({
-        current_revision: 'abc',
+        current_revision: currentRevision,
         revisions: {
-          abc: partial<GerritRevisionInfo>({
+          [currentRevision]: partial<GerritRevisionInfo>({
             commit_with_footers: 'Renovate-Branch: renovate/dependency-1.x',
           }),
         },
@@ -608,7 +614,9 @@ describe('modules/platform/gerrit/index', () => {
       clientMock.submitChange.mockRejectedValueOnce(
         new Error('any other error'),
       );
-      await expect(gerrit.mergePr({ id: 123456 })).rejects.toThrow();
+      await expect(gerrit.mergePr({ id: 123456 })).rejects.toThrow(
+        'any other error',
+      );
     });
   });
 
@@ -634,9 +642,9 @@ describe('modules/platform/gerrit/index', () => {
       const change = partial<GerritChange>({
         submittable: true,
         problems: [{ message: 'error1' }, { message: 'error2' }],
-        current_revision: 'abc',
+        current_revision: currentRevision,
         revisions: {
-          abc: partial<GerritRevisionInfo>({
+          [currentRevision]: partial<GerritRevisionInfo>({
             commit_with_footers: 'Renovate-Branch: renovate/dependency-1.x',
           }),
         },
@@ -651,9 +659,9 @@ describe('modules/platform/gerrit/index', () => {
       const change = partial<GerritChange>({
         submittable: false,
         problems: [{ message: 'error1' }, { message: 'error2' }],
-        current_revision: 'abc',
+        current_revision: currentRevision,
         revisions: {
-          abc: partial<GerritRevisionInfo>({
+          [currentRevision]: partial<GerritRevisionInfo>({
             commit_with_footers: 'Renovate-Branch: renovate/dependency-1.x',
           }),
         },
@@ -671,9 +679,9 @@ describe('modules/platform/gerrit/index', () => {
         labels: {
           Verified: { blocking: true },
         },
-        current_revision: 'abc',
+        current_revision: currentRevision,
         revisions: {
-          abc: partial<GerritRevisionInfo>({
+          [currentRevision]: partial<GerritRevisionInfo>({
             commit_with_footers: 'Renovate-Branch: renovate/dependency-1.x',
           }),
         },
@@ -824,9 +832,9 @@ describe('modules/platform/gerrit/index', () => {
         async ({ ctx, branchState, expectedVote, expectedLabel }) => {
           const change = partial<GerritChange>({
             _number: 123456,
-            current_revision: 'abc',
+            current_revision: currentRevision,
             revisions: {
-              abc: partial<GerritRevisionInfo>({
+              [currentRevision]: partial<GerritRevisionInfo>({
                 commit_with_footers: 'Renovate-Branch: renovate/dependency-1.x',
               }),
             },
@@ -868,9 +876,9 @@ describe('modules/platform/gerrit/index', () => {
       it('does not call setLabel() if label does not exist in change', async () => {
         const change = partial<GerritChange>({
           _number: 123456,
-          current_revision: 'abc',
+          current_revision: currentRevision,
           revisions: {
-            abc: partial<GerritRevisionInfo>({
+            [currentRevision]: partial<GerritRevisionInfo>({
               commit_with_footers: 'Renovate-Branch: renovate/dependency-1.x',
             }),
           },

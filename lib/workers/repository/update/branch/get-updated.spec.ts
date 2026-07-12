@@ -96,7 +96,9 @@ describe('workers/repository/update/branch/get-updated', () => {
     it('handles autoreplace failure', async () => {
       config.upgrades.push({ manager: 'html', branchName: '' });
       autoReplace.doAutoReplace.mockResolvedValueOnce(null);
-      await expect(getUpdatedPackageFiles(config)).rejects.toThrow();
+      await expect(getUpdatedPackageFiles(config)).rejects.toThrow(
+        'update-failure',
+      );
     });
 
     it('handles autoreplace branch needs update', async () => {
@@ -133,7 +135,9 @@ describe('workers/repository/update/branch/get-updated', () => {
         manager: 'npm',
         branchName: 'some-branch',
       } satisfies BranchUpgradeConfig);
-      await expect(getUpdatedPackageFiles(config)).rejects.toThrow();
+      await expect(getUpdatedPackageFiles(config)).rejects.toThrow(
+        'update-failure',
+      );
     });
 
     it('handles content change', async () => {

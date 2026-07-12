@@ -1,6 +1,7 @@
 import semver from 'semver';
 import stable from 'semver-stable';
 import type { RangeStrategy } from '../../../types/versioning.ts';
+import { normalizeLegacyXRanges } from '../semver/common.ts';
 import { isBreaking } from '../semver/index.ts';
 import type { VersioningApi } from '../types.ts';
 import { getNewValue } from './range.ts';
@@ -8,10 +9,10 @@ import { getNewValue } from './range.ts';
 export const id = 'npm';
 export const displayName = 'npm';
 export const urls = [
-  'https://semver.org/',
-  'https://www.npmjs.com/package/semver',
-  'https://docs.npmjs.com/about-semantic-versioning',
-  'https://semver.npmjs.com/',
+  '[Semantic Versioning](https://semver.org/)',
+  '[semver npm package](https://www.npmjs.com/package/semver)',
+  '[npm - About semantic versioning](https://docs.npmjs.com/about-semantic-versioning)',
+  '[npm semver calculator](https://semver.npmjs.com/)',
 ];
 export const supportsRanges = true;
 export const supportedRangeStrategies: RangeStrategy[] = [
@@ -22,24 +23,62 @@ export const supportedRangeStrategies: RangeStrategy[] = [
 
 const {
   compare: sortVersions,
-  maxSatisfying: getSatisfyingVersion,
-  minSatisfying: minSatisfyingVersion,
+  maxSatisfying,
+  minSatisfying,
   major: getMajor,
   minor: getMinor,
   patch: getPatch,
-  satisfies: matches,
+  satisfies,
   valid,
   validRange,
-  ltr: isLessThanRange,
+  ltr,
   gt: isGreaterThan,
   eq: equals,
-  subset,
-  intersects,
+  subset: semverSubset,
+  intersects: semverIntersects,
 } = semver;
 
+function normalizeNpmRange(range: string): string {
+  return normalizeLegacyXRanges(range);
+}
+
 // If this is left as an alias, inputs like "17.04.0" throw errors
-export const isValid = (input: string): boolean => !!validRange(input);
+export const isValid = (input: string): boolean =>
+  !!validRange(normalizeNpmRange(input));
 export const isVersion = (input: string): boolean => !!valid(input);
+
+function matches(version: string, range: string): boolean {
+  return satisfies(version, normalizeNpmRange(range));
+}
+
+function getSatisfyingVersion(
+  versions: string[],
+  range: string,
+): string | null {
+  return maxSatisfying(versions, normalizeNpmRange(range));
+}
+
+function minSatisfyingVersion(
+  versions: string[],
+  range: string,
+): string | null {
+  return minSatisfying(versions, normalizeNpmRange(range));
+}
+
+function isLessThanRange(version: string, range: string): boolean {
+  return ltr(version, normalizeNpmRange(range));
+}
+
+function subset(subRange: string, superRange: string): boolean | undefined {
+  return semverSubset(
+    normalizeNpmRange(subRange),
+    normalizeNpmRange(superRange),
+  );
+}
+
+function intersects(range1: string, range2: string): boolean {
+  return semverIntersects(normalizeNpmRange(range1), normalizeNpmRange(range2));
+}
 
 function isSingleVersion(constraint: string): boolean {
   return (
