@@ -1,8 +1,0 @@
-{
-  "name": "renovate-integration-tests",
-  "private": true,
-  "version": "0.0.0",
-  "dependencies": {
-    "testcontainers": "12.0.1"
-  }
-}
