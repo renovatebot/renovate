@@ -110,8 +110,8 @@ importers:
         specifier: 5.12.1
         version: 5.12.1(@opentelemetry/api@1.9.1)
       '@renovatebot/detect-tools':
-        specifier: 4.0.8
-        version: 4.0.8
+        specifier: 4.0.10
+        version: 4.0.10
       '@renovatebot/good-enough-parser':
         specifier: 2.0.1
         version: 2.0.1
@@ -1785,8 +1785,8 @@ packages:
       '@opentelemetry/api':
         optional: true
 
-  '@renovatebot/detect-tools@4.0.8':
-    resolution: {integrity: sha512-beysRwqyNh/6ETeeF6Qr1q9fVMc+j+oXT5vh2PaeX+ESm8j9Sw5ngtTxy5dHNZV+4rqywdz0qwEos623bB6Gew==}
+  '@renovatebot/detect-tools@4.0.10':
+    resolution: {integrity: sha512-hGIZahyyO3zahpr3a2kRkNvDVXwW1gZBN6YYbql6OXlN1gFRQz7/jgn+/ImtYvP84P4tQxc9U4jS5/Qurvl0Nw==}
     engines: {node: '>=22.12.0', pnpm: '>=10.0.0'}
 
   '@renovatebot/good-enough-parser@2.0.1':
@@ -6899,7 +6899,7 @@ snapshots:
     optionalDependencies:
       '@opentelemetry/api': 1.9.1
 
-  '@renovatebot/detect-tools@4.0.8':
+  '@renovatebot/detect-tools@4.0.10':
     dependencies:
       fs-extra: 11.3.6
       toml-eslint-parser: 1.0.3
