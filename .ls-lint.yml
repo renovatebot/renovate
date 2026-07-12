@@ -19,6 +19,7 @@ ignore:
   - .pnpm-store
   - SECURITY.md
   - test/e2e/node_modules
+  - test/integration/node_modules
   - tmp
   - tools/mkdocs/docs
   - tools/mkdocs/site
