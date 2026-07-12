@@ -6,6 +6,7 @@ import { any, mockFn } from 'vitest-mock-extended';
 import { Fixtures } from '~test/fixtures.ts';
 import { logger, mockedExtended } from '~test/util.ts';
 import { GlobalConfig } from '../../config/global.ts';
+import type { PlatformId } from '../../constants/index.ts';
 import * as exec_ from '../exec/index.ts';
 import * as sanitize_ from '../sanitize.ts';
 import { toBase64 } from '../string.ts';
@@ -501,7 +502,7 @@ some-private-key
     });
 
     async function setupGpgKeyAndConfigSigning(
-      platform: string,
+      platform: PlatformId,
       repoDir: string,
     ): Promise<void> {
       GlobalConfig.set({ platform });
