@@ -26,7 +26,7 @@ overrides:
   '@aws-sdk/xml-builder@3.972.4>fast-xml-parser': '^5.3.6'
   '@yarnpkg/core@4.5.0>tar': 'catalog:'
   esbuild: 'catalog:'
-  protobufjs@8.0.1: 8.6.5
+  protobufjs@8.0.1: 8.6.6
   vite: 'catalog:'
 
 ignoredOptionalDependencies:
