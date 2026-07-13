@@ -106,6 +106,13 @@
         "zizmorcore/zizmor-action"
       ],
       "minimumGroupSize": 2
+    },
+    {
+      "description": "Only update the major version constraint for Erlang",
+      "matchFileNames": ["lib/modules/manager/mix/artifacts.ts"],
+      "matchPackageNames": ["containerbase/erlang-prebuild"],
+      "extractVersion": "^(?<version>\\d+)",
+      "separateMultipleMajor": true
     }
   ],
   "customManagers": [
@@ -116,6 +123,14 @@
         "default: '(?<depName>ghcr.io/renovatebot/base-image):(?<currentValue>.*)'"
       ],
       "datasourceTemplate": "docker"
+    },
+    {
+      "customType": "regex",
+      "managerFilePatterns": ["lib/modules/manager/mix/artifacts.ts"],
+      "matchStrings": ["const erlangVersion = '(?<currentValue>[\\^0-9]*)'"],
+      "datasourceTemplate": "github-releases",
+      "packageNameTemplate": "containerbase/erlang-prebuild",
+      "versioningTemplate": "loose"
     }
   ]
 }

@@ -1,11 +1,15 @@
 import cacache from 'cacache';
-import { LRUCache } from 'lru-cache';
 import { DateTime } from 'luxon';
 import upath from 'upath';
 import { logger } from '../../../../logger/index.ts';
-import { compressToBase64 } from '../../../compress.ts';
+import { encodeEntry } from '../codec.ts';
+import type { LegacyEntry } from '../legacy.ts';
 import type { PackageCacheNamespace } from '../types.ts';
 import { PackageCacheBase } from './base.ts';
+
+interface FileCacheMetadata {
+  expiry?: unknown;
+}
 
 export class PackageCacheFile extends PackageCacheBase {
   static create(cacheDir: string): PackageCacheFile {
@@ -16,12 +20,6 @@ export class PackageCacheFile extends PackageCacheBase {
 
   private readonly cacheFileName: string;
 
-  private readonly expiryMap = new LRUCache<string, DateTime>({
-    // Assuming 50 bytes per entry, this limits the memory footprint of this
-    // to around 5MB.
-    max: 100000,
-  });
-
   private constructor(cacheFileName: string) {
     super();
     this.cacheFileName = cacheFileName;
@@ -29,24 +27,6 @@ export class PackageCacheFile extends PackageCacheBase {
 
   private getKey(namespace: PackageCacheNamespace, key: string): string {
     return `${namespace}-${key}`;
-  }
-
-  override async set(
-    namespace: PackageCacheNamespace,
-    key: string,
-    value: unknown,
-    hardTtlMinutes: number,
-  ): Promise<void> {
-    logger.trace({ namespace, key, hardTtlMinutes }, 'Saving cached value');
-    const serialized = JSON.stringify(value);
-    const compressedValue = await compressToBase64(serialized);
-    const expiry = DateTime.local().plus({ minutes: hardTtlMinutes });
-    const payload = JSON.stringify({
-      value: compressedValue,
-      expiry,
-    });
-    await cacache.put(this.cacheFileName, this.getKey(namespace, key), payload);
-    this.expiryMap.set(this.getKey(namespace, key), expiry);
   }
 
   override async destroy(): Promise<void> {
@@ -59,36 +39,12 @@ export class PackageCacheFile extends PackageCacheBase {
       try {
         totalCount += 1;
         const cacheEntry = item as unknown as cacache.CacheObject;
-        const cachedExpiry = this.expiryMap.get(cacheEntry.key);
-        if (cachedExpiry !== undefined) {
-          if (DateTime.local() <= cachedExpiry) {
-            continue;
-          }
-          await cacache.rm.entry(this.cacheFileName, cacheEntry.key);
-          await cacache.rm.content(this.cacheFileName, cacheEntry.integrity);
-          this.expiryMap.delete(cacheEntry.key);
-          deletedCount += 1;
+        if (hasFutureExpiry(cacheEntry.metadata)) {
           continue;
         }
-        const entry = await cacache.get(this.cacheFileName, cacheEntry.key);
-        let cached: { expiry?: string } | undefined;
-        try {
-          const raw = entry.data.toString();
-          cached = JSON.parse(raw);
-        } catch {
-          logger.debug('Error parsing cached value - deleting');
-        }
 
-        if (cached) {
-          if (!cached.expiry) {
-            continue;
-          }
-          const expiry = DateTime.fromISO(cached.expiry);
-          if (expiry.isValid && DateTime.local() <= expiry) {
-            continue;
-          }
-        }
-
+        // Entries without native expiry metadata include legacy and foreign
+        // entries. The sweep evicts them so future reads converge on envelopes.
         await cacache.rm.entry(this.cacheFileName, cacheEntry.key);
         await cacache.rm.content(this.cacheFileName, cacheEntry.integrity);
         deletedCount += 1;
@@ -112,11 +68,32 @@ export class PackageCacheFile extends PackageCacheBase {
   ): Promise<Buffer | undefined> {
     const cacheKey = this.getKey(namespace, key);
     try {
+      // TODO: Once legacy file entries are unsupported, use get.info first and
+      // require valid future expiry metadata before reading content.
       const entry = await cacache.get(this.cacheFileName, cacheKey);
+      if (hasExpiredMetadata(entry.metadata)) {
+        // Do not call rm here: rm.entry only tombstones the index entry, which
+        // would hide this item from the sweep and orphan its content file.
+        return undefined;
+      }
+
       return entry.data;
     } catch {
       return undefined;
     }
+  }
+
+  protected override async writeRaw(
+    namespace: PackageCacheNamespace,
+    key: string,
+    data: Buffer,
+    ttlSeconds: number,
+  ): Promise<void> {
+    await this.putEntry(
+      this.getKey(namespace, key),
+      data,
+      Date.now() + ttlSeconds * 1000,
+    );
   }
 
   protected override async rm(
@@ -124,8 +101,60 @@ export class PackageCacheFile extends PackageCacheBase {
     key: string,
   ): Promise<void> {
     logger.trace({ namespace, key }, 'Removing cache entry');
-    const cacheKey = this.getKey(namespace, key);
-    await cacache.rm.entry(this.cacheFileName, cacheKey);
-    this.expiryMap.delete(cacheKey);
+    await cacache.rm.entry(this.cacheFileName, this.getKey(namespace, key));
   }
+
+  // TODO: Delete together with the legacy decoder once pre-envelope entries
+  // have expired.
+  protected override async upgradeLegacyEntry(
+    namespace: PackageCacheNamespace,
+    key: string,
+    entry: LegacyEntry,
+  ): Promise<void> {
+    const { expiry } = entry;
+    if (!expiry?.isValid) {
+      return;
+    }
+
+    try {
+      await this.putEntry(
+        this.getKey(namespace, key),
+        await encodeEntry(entry.value, DateTime.local()),
+        expiry.toMillis(),
+      );
+    } catch (err) {
+      logger.once.debug({ err }, 'Error while upgrading legacy cache entry');
+    }
+  }
+
+  private async putEntry(
+    cacheKey: string,
+    data: Buffer,
+    expiry: number,
+  ): Promise<void> {
+    await cacache.put(this.cacheFileName, cacheKey, data, {
+      metadata: { expiry },
+    });
+  }
+}
+
+function getMetadataExpiry(metadata: unknown): number | undefined {
+  if (!metadata || typeof metadata !== 'object') {
+    return undefined;
+  }
+
+  const { expiry } = metadata as FileCacheMetadata;
+  return typeof expiry === 'number' ? expiry : undefined;
+}
+
+// TODO: Treat missing or invalid expiry metadata as expired in readRaw once
+// legacy file entries are unsupported.
+function hasExpiredMetadata(metadata: unknown): boolean {
+  const expiry = getMetadataExpiry(metadata);
+  return expiry !== undefined && Date.now() >= expiry;
+}
+
+function hasFutureExpiry(metadata: unknown): boolean {
+  const expiry = getMetadataExpiry(metadata);
+  return expiry !== undefined && Date.now() < expiry;
 }

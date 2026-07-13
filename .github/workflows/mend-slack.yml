@@ -10,8 +10,8 @@ permissions:
 jobs:
   slack:
     if: >
-      contains(github.event.label.name, 'mend-app') ||
-      contains(github.event.discussion.labels.*.name, 'mend-app')
+      (github.event.action == 'created' && contains(github.event.discussion.labels.*.name, 'mend-app')) ||
+      (github.event.action == 'labeled' && github.event.label.name == 'mend-app')
     runs-on: ubuntu-latest
     steps:
       - name: Calculate time ago
@@ -32,7 +32,7 @@ jobs:
 
       - name: Post to Slack
         id: slack
-        uses: slackapi/slack-github-action@45a88b9581bfab2566dc881e2cd66d334e621e2c # v3.0.3
+        uses: slackapi/slack-github-action@0d95c9a7becc1e6e297d76df9bc735c44f4cbcbc # v3.0.5
         with:
           method: chat.postMessage
           payload: |

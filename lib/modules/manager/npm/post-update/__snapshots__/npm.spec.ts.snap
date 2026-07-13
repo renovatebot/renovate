@@ -75,7 +75,32 @@ exports[`modules/manager/npm/post-update/npm > performs lock file updates 1`] = 
 ]
 `;
 
-exports[`modules/manager/npm/post-update/npm > performs lock file updates retaining the package.json counterparts 1`] = `
+exports[`modules/manager/npm/post-update/npm > performs lock file updates retaining the package.json counterparts > execSnapshots 1`] = `
+[
+  {
+    "cmd": "npm install --package-lock-only --no-audit --ignore-scripts postcss@8.4.8",
+    "options": {
+      "cwd": "some-dir",
+      "env": {
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+      "maxBuffer": 10485760,
+      "stderr": "pipe",
+      "stdin": "pipe",
+      "stdout": "pipe",
+      "timeout": 900000,
+    },
+  },
+]
+`;
+
+exports[`modules/manager/npm/post-update/npm > performs lock file updates retaining the package.json counterparts > lockFile 1`] = `
 "{
   "name": "update-lockfile-massage-1",
   "version": "1.0.0",
@@ -160,29 +185,4 @@ exports[`modules/manager/npm/post-update/npm > performs lock file updates retain
   }
 }
 "
-`;
-
-exports[`modules/manager/npm/post-update/npm > performs lock file updates retaining the package.json counterparts 2`] = `
-[
-  {
-    "cmd": "npm install --package-lock-only --no-audit --ignore-scripts postcss@8.4.8",
-    "options": {
-      "cwd": "some-dir",
-      "env": {
-        "HOME": "/home/user",
-        "HTTPS_PROXY": "https://example.com",
-        "HTTP_PROXY": "http://example.com",
-        "LANG": "en_US.UTF-8",
-        "LC_ALL": "en_US",
-        "NO_PROXY": "localhost",
-        "PATH": "/tmp/path",
-      },
-      "maxBuffer": 10485760,
-      "stderr": "pipe",
-      "stdin": "pipe",
-      "stdout": "pipe",
-      "timeout": 900000,
-    },
-  },
-]
 `;

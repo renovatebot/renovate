@@ -1118,6 +1118,83 @@ describe('modules/manager/github-actions/extract', () => {
         `;
       expect(extractPackageFile(yamlContent, 'action.yml')).toBeNull();
     });
+
+    it('extracts actions and with-version inputs nested in a parallel block', () => {
+      const yamlContent = codeBlock`
+        jobs:
+          build:
+            steps:
+              - uses: actions/checkout@v4
+              - parallel:
+                  - name: Setup Node.js
+                    uses: actions/setup-node@v5
+                    with:
+                      node-version: '20.0.0'
+                  - name: Setup Go
+                    uses: actions/setup-go@v5
+                    with:
+                      go-version: '1.23'
+              - run: npm test
+        `;
+
+      const res = extractPackageFile(yamlContent, 'workflow.yml');
+      expect(res?.deps).toMatchObject([
+        { depName: 'actions/checkout', depType: 'action' },
+        { depName: 'actions/setup-node', depType: 'action' },
+        { depName: 'actions/setup-go', depType: 'action' },
+        { depName: 'node', depType: 'uses-with', currentValue: '20.0.0' },
+        { depName: 'go', depType: 'uses-with', currentValue: '1.23' },
+      ]);
+    });
+
+    it('extracts community action with-inputs nested in a parallel block', () => {
+      const yamlContent = codeBlock`
+        jobs:
+          build:
+            steps:
+              - parallel:
+                  - uses: astral-sh/setup-uv@v8.2.0
+                    with:
+                      version: '0.4.x'
+        `;
+
+      const res = extractPackageFile(yamlContent, 'workflow.yml');
+      expect(res?.deps).toMatchObject([
+        { depName: 'astral-sh/setup-uv', depType: 'action' },
+        {
+          depName: 'astral-sh/uv',
+          depType: 'uses-with',
+          currentValue: '0.4.x',
+          datasource: 'github-releases',
+        },
+      ]);
+    });
+
+    it('extracts steps nested in nested parallel blocks', () => {
+      const yamlContent = codeBlock`
+        jobs:
+          build:
+            steps:
+              - parallel:
+                  - name: Setup Node.js
+                    uses: actions/setup-node@v5
+                    with:
+                      node-version: '18.0.0'
+                  - parallel:
+                      - name: Setup Go
+                        uses: actions/setup-go@v5
+                        with:
+                          go-version: '1.22'
+        `;
+
+      const res = extractPackageFile(yamlContent, 'workflow.yml');
+      expect(res?.deps).toMatchObject([
+        { depName: 'actions/setup-node', depType: 'action' },
+        { depName: 'actions/setup-go', depType: 'action' },
+        { depName: 'node', depType: 'uses-with', currentValue: '18.0.0' },
+        { depName: 'go', depType: 'uses-with', currentValue: '1.22' },
+      ]);
+    });
   });
 
   it.each([
@@ -1743,6 +1820,148 @@ describe('modules/manager/github-actions/extract', () => {
           packageName: 'rust',
           skipStage: 'extract',
           skipReason: 'unspecified-version',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'azure/setup-helm@v4',
+        with: { version: 'v3.17.0' },
+      },
+      expected: [
+        {
+          currentValue: 'v3.17.0',
+          datasource: 'github-releases',
+          depName: 'helm',
+          depType: 'uses-with',
+          packageName: 'helm/helm',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'azure/setup-helm@v4',
+        with: {},
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'github-releases',
+          depName: 'helm',
+          depType: 'uses-with',
+          packageName: 'helm/helm',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'docker/setup-buildx-action@v3',
+        with: { version: 'v0.19.3' },
+      },
+      expected: [
+        {
+          currentValue: 'v0.19.3',
+          datasource: 'github-releases',
+          depName: 'buildx',
+          depType: 'uses-with',
+          packageName: 'docker/buildx',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'docker/setup-buildx-action@v3',
+        with: {},
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'github-releases',
+          depName: 'buildx',
+          depType: 'uses-with',
+          packageName: 'docker/buildx',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'docker/setup-compose-action@v1',
+        with: { version: 'v2.36.1' },
+      },
+      expected: [
+        {
+          currentValue: 'v2.36.1',
+          datasource: 'github-releases',
+          depName: 'docker/compose',
+          depType: 'uses-with',
+          packageName: 'docker/compose',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'docker/setup-compose-action@v1',
+        with: {},
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'github-releases',
+          depName: 'docker/compose',
+          depType: 'uses-with',
+          packageName: 'docker/compose',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'helm/chart-testing-action@v2',
+        with: { version: 'v3.12.0' },
+      },
+      expected: [
+        {
+          currentValue: 'v3.12.0',
+          datasource: 'github-releases',
+          depName: 'chart-testing',
+          depType: 'uses-with',
+          packageName: 'helm/chart-testing',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'helm/chart-testing-action@v2',
+        with: {},
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'github-releases',
+          depName: 'chart-testing',
+          depType: 'uses-with',
+          packageName: 'helm/chart-testing',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'sigoden/install-binary@v1',
+        with: {
+          repo: 'sigoden/argc',
+          tag: 'v1.22.0',
+        },
+      },
+      expected: [
+        {
+          currentValue: 'v1.22.0',
+          datasource: 'github-releases',
+          depName: 'sigoden/argc',
+          depType: 'uses-with',
+          packageName: 'sigoden/argc',
         },
       ],
     },
