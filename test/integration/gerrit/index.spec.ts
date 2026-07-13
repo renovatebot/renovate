@@ -15,10 +15,12 @@ import {
   createGerritUser,
   createOpenRenovateChange,
   createProject,
+  deleteProjectLabel,
   getChange,
   getFileContent,
   getOpenChanges,
   getPrBodies,
+  getProjectLabel,
   getReviewers,
   pushFilesToGerrit,
   registerGpgKey,
@@ -191,45 +193,68 @@ describe('integration/gerrit/index', () => {
     expect(approved || merged).toBe(true);
   });
 
-  // Expected to fail until #44425 lands (autoApprove uses max Code-Review value).
-  // it.fails: suite stays green now; flips red when the fix merges so we drop .fails.
-  it.fails(
-    'autoApprove uses max Code-Review value when project only allows +1',
-    async () => {
-      // Arrange
-      const REPO = 'test-gerrit-automerge-plus-one';
-      await seed(REPO, 'test-automerge-plus-one');
-      // Override inherited Code-Review so the highest vote is +1 (not +2)
-      await setProjectLabel(REPO, 'Code-Review', {
-        values: {
-          '-1': 'I would prefer this is not merged as is',
-          ' 0': 'No score',
-          '+1': 'Looks good to me, but someone else must approve',
-        },
-        default_value: 0,
-      });
+  it('autoApprove uses max Code-Review value when project only allows +1', async () => {
+    // Arrange
+    const REPO = 'test-gerrit-automerge-plus-one';
+    await seed(REPO, 'test-automerge-plus-one');
+    // Override inherited Code-Review so the highest vote is +1 (not +2)
+    await setProjectLabel(REPO, 'Code-Review', {
+      values: {
+        '-1': 'I would prefer this is not merged as is',
+        ' 0': 'No score',
+        '+1': 'Looks good to me, but someone else must approve',
+      },
+      default_value: 0,
+    });
 
-      // Act
+    // Act
+    await renovate([REPO], { automerge: true, autoApprove: true });
+
+    // Assert — push with label=Code-Review+1 must succeed and mark approved
+    const ch = findSemverChange(await getOpenChanges(REPO));
+    expect(ch).toBeDefined();
+    expect(isTruthy(ch!.labels?.['Code-Review']?.approved)).toBe(true);
+
+    // DETAILED_LABELS exposes the numeric vote (should be +1, not +2)
+    const detailed = await getChange(ch!._number, [
+      'LABELS',
+      'DETAILED_LABELS',
+    ]);
+    const cr = detailed.labels?.['Code-Review'] as
+      | { all?: { value?: number }[] }
+      | undefined;
+    const voteValues = (cr?.all ?? []).map((v) => v.value).filter(isNumber);
+    expect(voteValues).toContain(1);
+    expect(voteValues.every((v) => v <= 1)).toBe(true);
+  });
+
+  it('autoApprove does not fail when project has no Code-Review label', async () => {
+    // Arrange — seed while Code-Review still exists (submit needs +2), then
+    // remove it from All-Projects so the project inherits no Code-Review label.
+    // Inherited labels cannot be deleted on the child project alone.
+    const REPO = 'test-gerrit-automerge-no-code-review';
+    await seed(REPO, 'test-automerge-no-code-review');
+    const savedLabel = await getProjectLabel('All-Projects', 'Code-Review');
+    await deleteProjectLabel('All-Projects', 'Code-Review');
+
+    try {
+      // Act — must not reject the push with an unknown label=Code-Review vote
       await renovate([REPO], { automerge: true, autoApprove: true });
 
-      // Assert — push with label=Code-Review+1 must succeed and mark approved
+      // Assert — change is created; no Code-Review approval (label is gone)
       const ch = findSemverChange(await getOpenChanges(REPO));
       expect(ch).toBeDefined();
-      expect(isTruthy(ch!.labels?.['Code-Review']?.approved)).toBe(true);
-
-      // DETAILED_LABELS exposes the numeric vote (should be +1, not +2)
-      const detailed = await getChange(ch!._number, [
-        'LABELS',
-        'DETAILED_LABELS',
-      ]);
-      const cr = detailed.labels?.['Code-Review'] as
-        | { all?: { value?: number }[] }
-        | undefined;
-      const voteValues = (cr?.all ?? []).map((v) => v.value).filter(isNumber);
-      expect(voteValues).toContain(1);
-      expect(voteValues.every((v) => v <= 1)).toBe(true);
-    },
-  );
+      expect(ch!.labels?.['Code-Review']).toBeUndefined();
+    } finally {
+      await setProjectLabel('All-Projects', 'Code-Review', {
+        values: savedLabel.values,
+        default_value: savedLabel.default_value,
+        function: savedLabel.function,
+        copy_condition: savedLabel.copy_condition,
+        allow_post_submit: savedLabel.allow_post_submit,
+      });
+    }
+  });
 
   it('stores a PR body using Gerrit terminology', async () => {
     // Arrange

@@ -263,6 +263,9 @@ export async function setProjectLabel(
   definition: {
     values: Record<string, string>;
     default_value: number;
+    function?: string;
+    copy_condition?: string;
+    allow_post_submit?: boolean;
   },
 ): Promise<void> {
   await gerritFetch(
@@ -273,6 +276,51 @@ export async function setProjectLabel(
         commit_message: `Set ${labelName} label definition`,
         values: definition.values,
         default_value: definition.default_value,
+        ...(isNonEmptyString(definition.function)
+          ? { function: definition.function }
+          : {}),
+        ...(isNonEmptyString(definition.copy_condition)
+          ? { copy_condition: definition.copy_condition }
+          : {}),
+        ...(definition.allow_post_submit === undefined
+          ? {}
+          : { allow_post_submit: definition.allow_post_submit }),
+      }),
+    },
+  );
+}
+
+/** Fetch a single project label definition (not including inherited-only labels). */
+export async function getProjectLabel(
+  project: string,
+  labelName: string,
+): Promise<{
+  values: Record<string, string>;
+  default_value: number;
+  function?: string;
+  copy_condition?: string;
+  allow_post_submit?: boolean;
+}> {
+  return gerritJson(
+    `/a/projects/${encodeURIComponent(project)}/labels/${encodeURIComponent(labelName)}`,
+  );
+}
+
+/**
+ * Delete a label defined on the given project.
+ * Inherited labels must be deleted from the project that defines them (often All-Projects).
+ * Gerrit requires a JSON body when Content-Type is application/json.
+ */
+export async function deleteProjectLabel(
+  project: string,
+  labelName: string,
+): Promise<void> {
+  await gerritFetch(
+    `/a/projects/${encodeURIComponent(project)}/labels/${encodeURIComponent(labelName)}`,
+    {
+      method: 'DELETE',
+      body: JSON.stringify({
+        commit_message: `Delete ${labelName} label definition`,
       }),
     },
   );
