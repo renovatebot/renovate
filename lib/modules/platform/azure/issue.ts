@@ -38,6 +38,19 @@ interface WorkItemStates {
   closedNames: Set<string>;
 }
 
+/**
+ * Return the names of the states whose category is one of `categories`,
+ * preserving the order Azure DevOps returns them in (workflow order).
+ */
+function namesByCategory(
+  stateColors: WorkItemStateColor[],
+  categories: string[],
+): string[] {
+  return stateColors
+    .filter((s) => s.category && categories.includes(s.category) && s.name)
+    .map((s) => s.name!);
+}
+
 export class IssueService {
   private config: Config;
   private workItemStates: WorkItemStates | null = null;
@@ -71,17 +84,12 @@ export class IssueService {
       );
 
       if (stateColors?.length) {
-        const namesByCategory = (categories: string[]): string[] =>
-          stateColors
-            .filter(
-              (s: WorkItemStateColor) =>
-                s.category && categories.includes(s.category) && s.name,
-            )
-            .map((s: WorkItemStateColor) => s.name!);
-
-        const openNames = namesByCategory(openCategories);
-        const completedNames = namesByCategory(completedCategories);
-        const closedNames = namesByCategory(closedCategories);
+        const openNames = namesByCategory(stateColors, openCategories);
+        const completedNames = namesByCategory(
+          stateColors,
+          completedCategories,
+        );
+        const closedNames = namesByCategory(stateColors, closedCategories);
 
         // First open-category state, else the type's first state overall.
         states.open = openNames[0] ?? stateColors[0].name ?? states.open;

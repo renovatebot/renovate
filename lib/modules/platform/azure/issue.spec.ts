@@ -768,6 +768,42 @@ describe('modules/platform/azure/issue', () => {
       );
     });
 
+    it('closes to the first closed-category state when no Completed state exists', async () => {
+      // Process that exposes a Resolved-category state but no Completed one, so
+      // the close target falls back to the first closed-category state.
+      const resolvedWithoutCompletedStates = [
+        { name: 'New', category: 'Proposed' },
+        { name: 'Active', category: 'InProgress' },
+        { name: 'Resolved', category: 'Resolved' },
+      ];
+
+      vi.spyOn(issueService, 'findIssue').mockResolvedValue({
+        number: 1,
+        title: '[Renovate] Test Issue',
+        state: 'open',
+        body: 'body',
+      });
+
+      const updateWorkItemMock = vi.fn();
+      azureApi.workItemTrackingApi.mockResolvedValue(
+        partial<IWorkItemTrackingApi>({
+          updateWorkItem: updateWorkItemMock,
+          getWorkItemTypeStates: vi
+            .fn()
+            .mockResolvedValue(resolvedWithoutCompletedStates),
+        }),
+      );
+
+      await issueService.ensureIssueClosing('Test Issue');
+
+      expect(updateWorkItemMock).toHaveBeenCalledWith(
+        undefined,
+        [{ op: 'replace', path: '/fields/System.State', value: 'Resolved' }],
+        1,
+        'testProject',
+      );
+    });
+
     it('classifies all closed-category states as closed', async () => {
       azureApi.workItemTrackingApi.mockResolvedValue(
         partial<IWorkItemTrackingApi>({
