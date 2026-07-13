@@ -1442,6 +1442,64 @@ describe('modules/platform/gitlab/index', () => {
       expect(timers.setTimeout.mock.calls).toHaveLength(retry + 1);
       expect(timers.setTimeout.mock.calls[0][0]).toBe(delay);
     });
+
+    it('ignores status transition error', async () => {
+      const scope = await initRepo();
+      scope
+        .get(
+          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e',
+        )
+        .times(3)
+        .reply(200, {})
+        .post(
+          '/api/v4/projects/some%2Frepo/statuses/0d9c7726c3d628b7e28af234595cfd20febdbf8e',
+        )
+        .reply(400, {
+          message: 'Cannot transition status via :enqueue from :pending',
+        });
+
+      await expect(
+        gitlab.setBranchStatus({
+          branchName: 'some-branch',
+          context: 'some-context',
+          description: 'some-description',
+          state: 'green',
+          url: 'some-url',
+        }),
+      ).toResolve();
+
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        'Ignoring status transition error',
+      );
+    });
+
+    it('handles non-string error message', async () => {
+      const scope = await initRepo();
+      scope
+        .get(
+          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e',
+        )
+        .times(3)
+        .reply(200, {})
+        .post(
+          '/api/v4/projects/some%2Frepo/statuses/0d9c7726c3d628b7e28af234595cfd20febdbf8e',
+        )
+        .reply(400, { message: { base: ['Some validation error'] } });
+
+      await expect(
+        gitlab.setBranchStatus({
+          branchName: 'some-branch',
+          context: 'some-context',
+          description: 'some-description',
+          state: 'green',
+          url: 'some-url',
+        }),
+      ).toResolve();
+
+      expect(logger.logger.warn).toHaveBeenCalledWith(
+        'Failed to set branch status',
+      );
+    });
   });
 
   describe('findIssue()', () => {

@@ -176,7 +176,10 @@ export function updateDependency({
     } else {
       oldVersion = parsedContents[depType as NpmDepType]![depName] as string;
     }
-    if (oldVersion === newValue) {
+    if (
+      oldVersion === newValue &&
+      (!upgrade.newName || upgrade.newName === depName)
+    ) {
       logger.trace('Version is already updated');
       return fileContent;
     }

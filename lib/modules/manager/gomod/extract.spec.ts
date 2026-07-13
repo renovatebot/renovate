@@ -570,17 +570,18 @@ describe('modules/manager/gomod/extract', () => {
     const datasourceVersioningName = getDefaultVersioning(
       res!.deps[0].datasource,
     );
-    // NOTE that this is not the `go-mod-directive` versioning, as that comes from `constraintsVersioning`
-    expect(datasourceVersioningName).toEqual('semver');
-
-    expect(res!.constraintsVersioning).toBeDefined();
     const versioningName = res!.constraintsVersioning!['%goMod'];
-    expect(versioningName).toBeDefined();
-
     const versioning = allVersioning.get(versioningName);
-    expect(versioning).toBeDefined();
-
     const constraint = res!.extractedConstraints!['%goMod']!;
+
+    it('extracts the expected versioning and constraints', () => {
+      // NOTE that this is not the `go-mod-directive` versioning, as that comes from `constraintsVersioning`
+      expect(datasourceVersioningName).toEqual('semver');
+      expect(res!.constraintsVersioning).toBeDefined();
+      expect(versioningName).toBeDefined();
+      expect(versioning).toBeDefined();
+    });
+
     it(`${constraint} is a valid constraint`, () => {
       expect(versioning.isValid(constraint)).toBeTrue();
     });
