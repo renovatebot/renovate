@@ -126,7 +126,7 @@ static.rust-lang.org/dist/2024-10-17/channel-rust-1.82.0.toml`;
           datasource,
           packageName: 'rust',
         }),
-      ).rejects.toThrow();
+      ).rejects.toThrow('external-host-error');
     });
   });
 });

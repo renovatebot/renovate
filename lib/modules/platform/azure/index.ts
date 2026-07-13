@@ -893,8 +893,10 @@ export function massageMarkdown(input: string): string {
       .replace(regEx(/<!--renovate-(?:debug|config-hash):.*?-->/g), '')
       // Replace GitHub-style PR links with Azure DevOps format
       .replace(regEx(/\]\(\.\.\/pull\//g), '](!')
-      // Replace GitHub-style PR references (#123) with Azure DevOps format, needed for text linking config migration PR
-      .replace(regEx(/#(\d+)/g), '!$1')
+      // Replace GitHub-style PR references (#123) with Azure DevOps format, needed for text linking config migration PR.
+      // Only match a standalone reference (preceded by start, whitespace or `(`) so we don't corrupt
+      // HTML entities like `&#8203;` or URL anchors like `CHANGELOG.md#4780`.
+      .replace(regEx(/(^|[\s(])#(\d+)/g), '$1!$2')
   );
 }
 
