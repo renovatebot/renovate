@@ -84,9 +84,7 @@ function infoMock(
 }
 
 describe('modules/platform/bitbucket-server/utils', () => {
-  function createError(
-    body: Partial<BitbucketErrorResponse> | undefined = undefined,
-  ) {
+  function createError(body?: Partial<BitbucketErrorResponse>) {
     return partial<BitbucketError>({
       response: partial<Response<BitbucketErrorResponse>>({ body }),
     });

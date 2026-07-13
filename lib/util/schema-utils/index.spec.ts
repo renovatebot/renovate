@@ -163,7 +163,9 @@ describe('util/schema-utils/index', () => {
 
     it('rejects wrong types', () => {
       const s = Nullish(z.string());
-      expect(() => s.parse(42)).toThrow();
+      expect(() => s.parse(42)).toThrow(
+        'Invalid input: expected string, received number',
+      );
     });
   });
 
@@ -181,7 +183,9 @@ describe('util/schema-utils/index', () => {
       });
 
       it('rejects wrong types', () => {
-        expect(() => s.parse({ a: 42 })).toThrow();
+        expect(() => s.parse({ a: 42 })).toThrow(
+          'Invalid input: expected string, received number',
+        );
       });
     });
 
@@ -290,7 +294,9 @@ describe('util/schema-utils/index', () => {
     });
 
     it('rejects wrong types on leaf', () => {
-      expect(() => DeepNullish(z.string()).parse(42)).toThrow();
+      expect(() => DeepNullish(z.string()).parse(42)).toThrow(
+        'Invalid input: expected string, received number',
+      );
     });
 
     it.each`
@@ -503,7 +509,7 @@ describe('util/schema-utils/index', () => {
     });
 
     it('rejects invalid date', () => {
-      expect(() => UtcDate.parse('foobar')).toThrow();
+      expect(() => UtcDate.parse('foobar')).toThrow('Invalid date');
     });
   });
 

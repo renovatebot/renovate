@@ -60,14 +60,18 @@ describe('modules/platform/gerrit/index', () => {
   describe('initPlatform()', () => {
     it('should throw if no endpoint', async () => {
       expect.assertions(1);
-      await expect(() => gerrit.initPlatform({})).rejects.toThrow();
+      await expect(() => gerrit.initPlatform({})).rejects.toThrow(
+        'Init: You must configure a Gerrit Server endpoint',
+      );
     });
 
     it('should throw if no username/password', async () => {
       expect.assertions(1);
       await expect(() =>
         gerrit.initPlatform({ endpoint: 'endpoint' }),
-      ).rejects.toThrow();
+      ).rejects.toThrow(
+        'Init: You must configure a Gerrit Server username/password',
+      );
     });
 
     it('should init', async () => {
@@ -257,7 +261,7 @@ describe('modules/platform/gerrit/index', () => {
 
     it('getPr() - other error', async () => {
       clientMock.getChange.mockRejectedValueOnce(new Error('other error'));
-      await expect(gerrit.getPr(123456)).rejects.toThrow();
+      await expect(gerrit.getPr(123456)).rejects.toThrow('other error');
     });
   });
 
@@ -610,7 +614,9 @@ describe('modules/platform/gerrit/index', () => {
       clientMock.submitChange.mockRejectedValueOnce(
         new Error('any other error'),
       );
-      await expect(gerrit.mergePr({ id: 123456 })).rejects.toThrow();
+      await expect(gerrit.mergePr({ id: 123456 })).rejects.toThrow(
+        'any other error',
+      );
     });
   });
 
