@@ -76,8 +76,7 @@ function processDepForAutoReplace(
   });
 
   const minLine = lineNumberRangesToReplace[0]?.[0];
-  const maxLine =
-    lineNumberRangesToReplace[lineNumberRangesToReplace.length - 1]?.[1];
+  const maxLine = lineNumberRangesToReplace.at(-1)?.[1];
   if (
     lineNumberRanges.length === 1 ||
     minLine === undefined ||
@@ -129,10 +128,7 @@ export function splitImageParts(currentFrom: string): PackageDependency {
   const depTagSplit = currentDepTag.split(':');
   let depName: string;
   let currentValue: string | undefined;
-  if (
-    depTagSplit.length === 1 ||
-    depTagSplit[depTagSplit.length - 1].includes('/')
-  ) {
+  if (depTagSplit.length === 1 || depTagSplit.at(-1)!.includes('/')) {
     depName = currentDepTag;
   } else {
     currentValue = depTagSplit.pop();
@@ -455,6 +451,6 @@ export function extractPackageFile(
   for (const d of deps) {
     d.depType ??= 'stage';
   }
-  deps[deps.length - 1].depType = 'final';
+  deps.at(-1)!.depType = 'final';
   return { deps };
 }

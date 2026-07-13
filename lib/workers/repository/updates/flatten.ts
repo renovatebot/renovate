@@ -98,7 +98,7 @@ export async function flattenUpdates(
         packagePath.splice(-1, 1);
       }
       if (packagePath.length > 0) {
-        packageFileConfig.parentDir = packagePath[packagePath.length - 1];
+        packageFileConfig.parentDir = packagePath.at(-1);
         packageFileConfig.packageFileDir = packagePath.join('/');
       } else {
         packageFileConfig.parentDir = '';

@@ -1459,7 +1459,7 @@ export async function ensureIssue({
         if (shouldReOpen) {
           logger.debug('Reopening previously closed issue');
         }
-        issue = issues[issues.length - 1];
+        issue = issues.at(-1)!;
       }
       for (const i of issues) {
         if (i.state === 'open' && i.number !== issue.number) {

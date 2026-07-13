@@ -163,6 +163,7 @@
     "typescript/no-require-imports": "error",
     "typescript/no-unnecessary-type-constraint": "error",
     "typescript/no-unsafe-function-type": "error",
+    "unicorn/prefer-at": "error",
     "unicorn/prefer-node-protocol": "error",
 
     "typescript/no-useless-default-assignment": "error",

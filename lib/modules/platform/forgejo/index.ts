@@ -852,7 +852,7 @@ const platform: Platform = {
           }
 
           // Pick the last issue in the list as the active one
-          activeIssue = issues[issues.length - 1];
+          activeIssue = issues.at(-1)!;
         }
 
         // Close any duplicate issues
