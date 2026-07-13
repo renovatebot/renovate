@@ -13,6 +13,7 @@ import type { GerritLabelTypeInfo } from './schema.ts';
 import type { GerritFindPRConfig } from './types.ts';
 import { convertGerritDateToISO, mapBranchStatusToLabel } from './utils.ts';
 
+const CODE_REVIEW_LABEL = 'Code-Review';
 /** Fallback used when the project's Code-Review label definition is unknown
  * or does not expose a "+2" value (kept for backwards compatibility). */
 const DEFAULT_CODE_REVIEW_APPROVAL_VALUE = 2;
@@ -37,7 +38,7 @@ export function configureScm(
  * projects only define values up to "+1").
  */
 function getAutoApproveLabelValue(): number {
-  const codeReviewLabel = projectLabels['Code-Review'];
+  const codeReviewLabel = projectLabels[CODE_REVIEW_LABEL];
   if (!codeReviewLabel) {
     return DEFAULT_CODE_REVIEW_APPROVAL_VALUE;
   }
@@ -57,8 +58,8 @@ export async function pushForReview(options: {
   const pushOptions = ['notify=NONE', 'ready'];
   if (options.autoApprove) {
     const value = getAutoApproveLabelValue();
-    pushOptions.push(`label=Code-Review+${value}`);
-}
+    pushOptions.push(`label=${CODE_REVIEW_LABEL}+${value}`);
+  }
   if (isNonEmptyArray(options.labels)) {
     for (const label of options.labels) {
       pushOptions.push(`hashtag=${label}`);
