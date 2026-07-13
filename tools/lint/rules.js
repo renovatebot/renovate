@@ -1,3 +1,4 @@
+import codeblockInSpecFixtures from './rules/codeblock-in-spec-fixtures.js';
 import enforceTsExtension from './rules/enforce-ts-extension.js';
 import noHardcodedDocsUrl from './rules/no-hardcoded-docs-url.js';
 import noNewUrl from './rules/no-new-url.js';
@@ -10,6 +11,7 @@ export default {
     name: 'renovate',
   },
   rules: {
+    'codeblock-in-spec-fixtures': codeblockInSpecFixtures,
     'enforce-ts-extension': enforceTsExtension,
     'no-hardcoded-docs-url': noHardcodedDocsUrl,
     'no-new-url': noNewUrl,
