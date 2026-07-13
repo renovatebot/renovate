@@ -363,7 +363,7 @@ export async function extractAllPackageFiles(
       }
     }
 
-    logger.debug({ files: seen }, 'Extracted all KAS files');
+    logger.debug({ files: Array.from(seen) }, 'Extracted all KAS files');
   }
   return results;
 }
