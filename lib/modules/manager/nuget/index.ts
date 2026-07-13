@@ -16,7 +16,7 @@ export const categories: Category[] = ['dotnet'];
 
 export const defaultConfig = {
   managerFilePatterns: [
-    '/\\.(?:cs|fs|vb)proj$/',
+    '/\\.(?:cs|fs|vb|sql)proj$/',
     '/\\.(?:props|targets)$/',
     '/(^|/)dotnet-tools\\.json$/',
     '/(^|/)global\\.json$/',
@@ -24,6 +24,12 @@ export const defaultConfig = {
   // after Renovate 43.208.2, this is required to make sure that NuGet's treatment of "bare versions" as a range does not lead to a lack of dependency updates
   // NOTE that in the next major version, this will be removed, and users will need to decide whether to re-enable this
   rangeStrategy: 'bump',
+  packageRules: [
+    {
+      matchDepTypes: ['msbuild-sdk'],
+      rangeStrategy: 'bump',
+    },
+  ],
 };
 
 export const supportedDatasources = [

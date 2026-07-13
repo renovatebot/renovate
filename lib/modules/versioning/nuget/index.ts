@@ -17,8 +17,8 @@ import { compare, versionToString } from './version.ts';
 export const id = 'nuget';
 export const displayName = 'NuGet';
 export const urls = [
-  'https://learn.microsoft.com/nuget/concepts/package-versioning',
-  'https://nugettools.azurewebsites.net/',
+  '[NuGet package versioning](https://learn.microsoft.com/nuget/concepts/package-versioning)',
+  '[NuGet version range tool](https://nugettools.azurewebsites.net/)',
 ];
 export const supportsRanges = true;
 export const supportedRangeStrategies = ['bump'];

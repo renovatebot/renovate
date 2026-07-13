@@ -4,7 +4,7 @@ import { git, partial, platform } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import { logger } from '../../../logger/index.ts';
 import type { Pr } from '../../../modules/platform/types.ts';
-import type { LongCommitSha } from '../../../util/git/types.ts';
+import type { LongCommitSha } from '../../../util/schema-utils/git.ts';
 import { validateReconfigureBranch } from './validate.ts';
 
 vi.mock('../../../util/git/index.ts');

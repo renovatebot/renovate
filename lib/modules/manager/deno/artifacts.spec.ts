@@ -1,10 +1,11 @@
 import type { DirectoryResult } from 'tmp-promise';
 import tmp from 'tmp-promise';
+import { mockExecAll } from '~test/exec-util.ts';
 import { fs } from '~test/util.ts';
-import { mockExecAll } from '../../../../test/exec-util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
 import { ExecError } from '../../../util/exec/exec-error.ts';
+import * as hostRules from '../../../util/host-rules.ts';
 import type { UpdateArtifact } from '../types.ts';
 import { updateArtifacts } from './artifacts.ts';
 
@@ -20,6 +21,10 @@ const updateArtifact: UpdateArtifact = {
 };
 
 describe('modules/manager/deno/artifacts', () => {
+  beforeEach(() => {
+    hostRules.clear();
+  });
+
   describe('updateArtifacts()', () => {
     let localDirResult: DirectoryResult;
     let localDir: string;
@@ -60,6 +65,8 @@ describe('modules/manager/deno/artifacts', () => {
       updateArtifact.updatedDeps = [{ lockFiles: ['deno.lock'] }];
       const oldLock = Buffer.from('old');
       fs.readLocalFile.mockResolvedValueOnce(oldLock as never);
+      // Second read is .npmrc
+      fs.readLocalFile.mockResolvedValueOnce(null);
       fs.readLocalFile.mockResolvedValueOnce(oldLock as never);
       mockExecAll();
       expect(await updateArtifacts(updateArtifact)).toBeNull();
@@ -69,6 +76,8 @@ describe('modules/manager/deno/artifacts', () => {
       updateArtifact.updatedDeps = [{ lockFiles: ['deno.lock'] }];
       const oldLock = Buffer.from('old');
       fs.readLocalFile.mockResolvedValueOnce(oldLock as never);
+      // Second read is .npmrc
+      fs.readLocalFile.mockResolvedValueOnce(null);
       const newLock = Buffer.from('new');
       fs.readLocalFile.mockResolvedValueOnce(newLock as never);
       mockExecAll();
@@ -94,6 +103,8 @@ describe('modules/manager/deno/artifacts', () => {
       ];
       const oldLock = Buffer.from('old');
       fs.readLocalFile.mockResolvedValueOnce(oldLock as never);
+      // Second read is .npmrc
+      fs.readLocalFile.mockResolvedValueOnce(null);
       const newLock = Buffer.from('new');
       fs.readLocalFile.mockResolvedValueOnce(newLock as never);
       mockExecAll();
@@ -113,6 +124,8 @@ describe('modules/manager/deno/artifacts', () => {
       updateArtifact.config.updateType = 'lockFileMaintenance';
       const oldLock = Buffer.from('old');
       fs.readLocalFile.mockResolvedValueOnce(oldLock as never);
+      // Second read is .npmrc
+      fs.readLocalFile.mockResolvedValueOnce(null);
       const newLock = Buffer.from('new');
       fs.readLocalFile.mockResolvedValueOnce(newLock as never);
       mockExecAll();
@@ -171,6 +184,8 @@ describe('modules/manager/deno/artifacts', () => {
     };
     const oldLock = Buffer.from('old');
     fs.readLocalFile.mockResolvedValueOnce(oldLock as never);
+    // Second read is .npmrc
+    fs.readLocalFile.mockResolvedValueOnce(null);
     const newLock = Buffer.from('new');
     fs.readLocalFile.mockResolvedValueOnce(newLock as never);
 
@@ -195,6 +210,8 @@ describe('modules/manager/deno/artifacts', () => {
     };
     const oldLock = Buffer.from('old');
     fs.readLocalFile.mockResolvedValueOnce(oldLock as never);
+    // Second read is .npmrc
+    fs.readLocalFile.mockResolvedValueOnce(null);
     const newLock = Buffer.from('new');
     fs.readLocalFile.mockResolvedValueOnce(newLock as never);
 
@@ -214,6 +231,8 @@ describe('modules/manager/deno/artifacts', () => {
     updateArtifact.config.isLockFileMaintenance = true;
     const oldLock = Buffer.from('old');
     fs.readLocalFile.mockResolvedValueOnce(oldLock as never);
+    // Second read is .npmrc
+    fs.readLocalFile.mockResolvedValueOnce(null);
     const newLock = Buffer.from('new');
     fs.readLocalFile.mockResolvedValueOnce(newLock as never);
     const execSnapshots = mockExecAll();
@@ -243,6 +262,8 @@ describe('modules/manager/deno/artifacts', () => {
 
     const oldLock = Buffer.from('old');
     fs.readLocalFile.mockResolvedValueOnce(oldLock as never);
+    // Second read is .npmrc
+    fs.readLocalFile.mockResolvedValueOnce(null);
     const newLock = Buffer.from('new');
     fs.readLocalFile.mockResolvedValueOnce(newLock as never);
     const execSnapshots = mockExecAll();
@@ -253,5 +274,45 @@ describe('modules/manager/deno/artifacts', () => {
         cmd: 'deno install',
       },
     ]);
+  });
+
+  describe('private registries', () => {
+    it('should add private registries to deno install command allow-import option', async () => {
+      const updateArtifact: UpdateArtifact = {
+        config: {
+          updateType: 'lockFileMaintenance',
+          lockFiles: ['deno.lock'],
+        },
+        newPackageFileContent: '',
+        packageFileName: '',
+        updatedDeps: [],
+      };
+      const oldLock = Buffer.from('old');
+      fs.readLocalFile.mockResolvedValueOnce(oldLock as never);
+      // Second read is .npmrc
+      fs.readLocalFile.mockResolvedValueOnce(null);
+      const newLock = Buffer.from('new');
+      fs.readLocalFile.mockResolvedValueOnce(newLock as never);
+      hostRules.add({
+        token: 'some-token',
+        hostType: 'npm',
+        matchHost: 'https://private-registry.example',
+      });
+      const execSnapshots = mockExecAll();
+      expect(await updateArtifacts(updateArtifact)).toEqual([
+        {
+          file: {
+            path: 'deno.lock',
+            type: 'addition',
+            contents: newLock,
+          },
+        },
+      ]);
+      expect(execSnapshots).toMatchObject([
+        {
+          cmd: 'deno install --frozen=false --allow-import=deno.land:443,esm.sh:443,jsr.io:443,cdn.jsdelivr.net:443,raw.githubusercontent.com:443,gist.githubusercontent.com:443,private-registry.example',
+        },
+      ]);
+    });
   });
 });

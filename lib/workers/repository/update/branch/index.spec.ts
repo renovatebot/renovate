@@ -22,13 +22,10 @@ import type {
 import { hashBody } from '../../../../modules/platform/pr-body.ts';
 import * as _repoCache from '../../../../util/cache/repository/index.ts';
 import * as _exec from '../../../../util/exec/index.ts';
-import type {
-  FileChange,
-  LongCommitSha,
-  StatusResult,
-} from '../../../../util/git/types.ts';
+import type { FileChange, StatusResult } from '../../../../util/git/types.ts';
 import * as _mergeConfidence from '../../../../util/merge-confidence/index.ts';
 import * as _sanitize from '../../../../util/sanitize.ts';
+import type { LongCommitSha } from '../../../../util/schema-utils/git.ts';
 import type { Timestamp } from '../../../../util/timestamp.ts';
 import * as _limits from '../../../global/limits.ts';
 import type {

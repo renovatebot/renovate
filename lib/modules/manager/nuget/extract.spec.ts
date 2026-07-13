@@ -153,6 +153,24 @@ describe('modules/manager/nuget/extract', () => {
       expect(res?.deps).toHaveLength(1);
     });
 
+    it('extracts msbuild sdk from sqlproj Sdk element', async () => {
+      const packageFile = 'sample.sqlproj';
+      const sample = codeBlock`
+        <Project>
+          <Sdk Name="Microsoft.Build.Sql" Version="0.1.19-preview" />
+        </Project>
+      `;
+      const res = await extractPackageFile(sample, packageFile, config);
+      expect(res?.deps).toEqual([
+        {
+          depName: 'Microsoft.Build.Sql',
+          depType: 'msbuild-sdk',
+          currentValue: '0.1.19-preview',
+          datasource: 'nuget',
+        },
+      ]);
+    });
+
     it('does not extract msbuild sdk from the Sdk element if version is missing', async () => {
       const packageFile = 'sample.csproj';
       const sample = `
@@ -191,6 +209,26 @@ describe('modules/manager/nuget/extract', () => {
         },
       ]);
       expect(res?.deps).toHaveLength(1);
+    });
+
+    it('does not set versioning on PackageReference dependencies', async () => {
+      const packageFile = 'sample.csproj';
+      const sample = codeBlock`
+        <Project>
+          <ItemGroup>
+            <PackageReference Include="Autofac" Version="4.5.0" />
+          </ItemGroup>
+        </Project>
+      `;
+      const res = await extractPackageFile(sample, packageFile, config);
+      expect(res?.deps).toEqual([
+        {
+          currentValue: '4.5.0',
+          datasource: 'nuget',
+          depName: 'Autofac',
+          depType: 'nuget',
+        },
+      ]);
     });
 
     it('does not extract msbuild sdk from the Import element if version is missing', async () => {

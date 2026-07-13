@@ -14,7 +14,7 @@ import {
 } from '../../../constants/error-messages.ts';
 import * as memCache from '../../../util/cache/memory/index.ts';
 import * as repoCache from '../../../util/cache/repository/index.ts';
-import type { LongCommitSha } from '../../../util/git/types.ts';
+import type { LongCommitSha } from '../../../util/schema-utils/git.ts';
 import { parseUrl } from '../../../util/url.ts';
 import type { EnsureIssueConfig, RepoParams } from '../index.ts';
 import * as helper from './gitea-helper.ts';
@@ -50,7 +50,7 @@ describe('modules/platform/gitea/index', () => {
 
   const mockUser: User = {
     id: 1,
-    username: 'renovate',
+    login: 'renovate',
     full_name: 'Renovate Bot',
     email: 'renovate@example.com',
   };
@@ -269,16 +269,18 @@ describe('modules/platform/gitea/index', () => {
 
   describe('initPlatform()', () => {
     it('should throw if no token', async () => {
-      await expect(gitea.initPlatform({})).rejects.toThrow();
+      await expect(gitea.initPlatform({})).rejects.toThrow(
+        'Init: You must configure a Gitea personal access token',
+      );
     });
 
     it('should throw if auth fails', async () => {
       const scope = httpMock.scope('https://gitea.com/api/v1');
       scope.get('/user').reply(500);
 
-      await expect(
-        gitea.initPlatform({ token: 'some-token' }),
-      ).rejects.toThrow();
+      await expect(gitea.initPlatform({ token: 'some-token' })).rejects.toThrow(
+        'Init: Authentication failure',
+      );
     });
 
     it('should support default endpoint', async () => {
@@ -1177,7 +1179,7 @@ describe('modules/platform/gitea/index', () => {
           sha: 'other-head-sha' as LongCommitSha,
           repo: partial<Repo>({ full_name: mockRepo.full_name }),
         },
-        user: { username: 'not-renovate' },
+        user: { login: 'not-renovate' },
       });
 
       const scope = httpMock
@@ -1188,7 +1190,7 @@ describe('modules/platform/gitea/index', () => {
           thirdPartyPr,
           ...mockPRs.map((pr) => ({
             ...pr,
-            user: { username: 'renovate' },
+            user: { login: 'renovate' },
           })),
         ]);
       await initFakePlatform(scope);
@@ -1212,7 +1214,7 @@ describe('modules/platform/gitea/index', () => {
           state: 'all',
           sort: 'recentupdate',
           limit: 100,
-          poster: mockUser.username,
+          poster: mockUser.login,
         })
         .reply(200, mockPRs.slice(0, 2), {
           // test correct pagination handling, domain should be ignored
@@ -1715,7 +1717,7 @@ describe('modules/platform/gitea/index', () => {
           prTitle: mockNewPR.title,
           prBody: mockNewPR.body,
         }),
-      ).rejects.toThrow();
+      ).rejects.toThrow('Can not parse newly created Pull Request');
     });
 
     it('should use platform automerge', async () => {
@@ -3020,7 +3022,9 @@ describe('modules/platform/gitea/index', () => {
         });
       await initFakePlatform(scope);
       await initFakeRepo(scope);
-      await expect(gitea.getJsonFile('file.json')).rejects.toThrow();
+      await expect(gitea.getJsonFile('file.json')).rejects.toThrow(
+        "JSON5: invalid character '!' at 1:1",
+      );
     });
 
     it('returns null on missing content', async () => {
@@ -3040,7 +3044,7 @@ describe('modules/platform/gitea/index', () => {
         .replyWithError('unknown');
       await initFakePlatform(scope);
       await initFakeRepo(scope);
-      await expect(gitea.getJsonFile('file.json')).rejects.toThrow();
+      await expect(gitea.getJsonFile('file.json')).rejects.toThrow('unknown');
     });
   });
 });

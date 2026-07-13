@@ -220,7 +220,15 @@ exports[`modules/datasource/npm/index > should replace any environment variable 
 }
 `;
 
-exports[`modules/datasource/npm/index > should return deprecated 1`] = `
+exports[`modules/datasource/npm/index > should return deprecated > deprecationMessage 1`] = `
+"On registry \`https://registry.npmjs.org\`, the "latest" version of dependency \`foobar\` has the following deprecation notice:
+
+\`This is deprecated\`
+
+Marking the latest version of an npm package as deprecated results in the entire package being considered deprecated, so contact the package author you think this is a mistake."
+`;
+
+exports[`modules/datasource/npm/index > should return deprecated > releases 1`] = `
 {
   "deprecationMessage": "On registry \`https://registry.npmjs.org\`, the "latest" version of dependency \`foobar\` has the following deprecation notice:
 
@@ -254,14 +262,6 @@ Marking the latest version of an npm package as deprecated results in the entire
     "latest": "0.0.2",
   },
 }
-`;
-
-exports[`modules/datasource/npm/index > should return deprecated 2`] = `
-"On registry \`https://registry.npmjs.org\`, the "latest" version of dependency \`foobar\` has the following deprecation notice:
-
-\`This is deprecated\`
-
-Marking the latest version of an npm package as deprecated results in the entire package being considered deprecated, so contact the package author you think this is a mistake."
 `;
 
 exports[`modules/datasource/npm/index > should send an authorization header if provided 1`] = `

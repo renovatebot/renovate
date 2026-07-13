@@ -17,9 +17,9 @@ import {
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
 import * as repository from '../../../util/cache/repository/index.ts';
 import * as _git from '../../../util/git/index.ts';
-import type { LongCommitSha } from '../../../util/git/types.ts';
 import * as _hostRules from '../../../util/host-rules.ts';
 import { setBaseUrl } from '../../../util/http/github.ts';
+import type { LongCommitSha } from '../../../util/schema-utils/git.ts';
 import { toBase64 } from '../../../util/string.ts';
 import { hashBody } from '../pr-body.ts';
 import type {
@@ -128,7 +128,9 @@ describe('modules/platform/github/index', () => {
 
     it('should throw if user failure', async () => {
       httpMock.scope(githubApiHost).get('/user').reply(404);
-      await expect(github.initPlatform({ token: '123test' })).rejects.toThrow();
+      await expect(github.initPlatform({ token: '123test' })).rejects.toThrow(
+        'Init: Authentication failure',
+      );
     });
 
     it('should support default endpoint no email access', async () => {
@@ -1107,7 +1109,7 @@ describe('modules/platform/github/index', () => {
         });
       await expect(
         github.initRepo({ repository: 'some/repo' }),
-      ).rejects.toThrow();
+      ).rejects.toThrow('archived');
     });
 
     it('throws not-found', async () => {
@@ -3421,7 +3423,7 @@ describe('modules/platform/github/index', () => {
       await github.initRepo({ repository: 'some/repo' });
       await expect(
         github.addAssignees(42, ['someuser', 'someotheruser']),
-      ).rejects.toThrow();
+      ).rejects.toThrow('Request failed with status code 404 (Not Found)');
     });
 
     it('should throw immediately on non-404 errors', async () => {
@@ -3431,7 +3433,7 @@ describe('modules/platform/github/index', () => {
       await github.initRepo({ repository: 'some/repo' });
       await expect(
         github.addAssignees(42, ['someuser', 'someotheruser']),
-      ).rejects.toThrow();
+      ).rejects.toThrow('external-host-error');
     });
   });
 
@@ -5503,7 +5505,9 @@ describe('modules/platform/github/index', () => {
       scope.get('/repos/some/repo/contents/file.json').reply(200, {
         content: toBase64('!@#'),
       });
-      await expect(github.getJsonFile('file.json')).rejects.toThrow();
+      await expect(github.getJsonFile('file.json')).rejects.toThrow(
+        "JSON5: invalid character '!' at 1:1",
+      );
     });
 
     it('throws on errors', async () => {
@@ -5514,7 +5518,9 @@ describe('modules/platform/github/index', () => {
         .get('/repos/some/repo/contents/file.json')
         .replyWithError('some error');
 
-      await expect(github.getJsonFile('file.json')).rejects.toThrow();
+      await expect(github.getJsonFile('file.json')).rejects.toThrow(
+        'some error',
+      );
     });
   });
 
@@ -5530,6 +5536,18 @@ describe('modules/platform/github/index', () => {
       git.fetchBranch.mockImplementation(() =>
         Promise.resolve('0abcdef' as LongCommitSha),
       );
+      git.pushCommitToRenovateRef.mockResolvedValue(undefined);
+      git.getCommitTreeSha.mockResolvedValue(
+        '0000000000000000000000000000000000000000' as LongCommitSha,
+      );
+      git.diffCommitTree.mockResolvedValue([
+        {
+          path: 'foo.bar',
+          mode: '100644',
+          type: 'blob',
+          sha: 'abc0000000000000000000000000000000000000' as LongCommitSha,
+        },
+      ]);
     });
 
     it('returns null if pre-commit phase has failed', async () => {
@@ -5567,10 +5585,22 @@ describe('modules/platform/github/index', () => {
       expect(res).toBeNull();
     });
 
-    it('commits and returns SHA string', async () => {
-      git.pushCommitToRenovateRef.mockResolvedValueOnce();
-      git.listCommitTree.mockResolvedValueOnce([]);
+    it('returns null when diff is empty', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      await github.initRepo({ repository: 'some/repo' });
+      git.diffCommitTree.mockResolvedValueOnce([]);
 
+      const res = await github.commitFiles({
+        branchName: 'foo/bar',
+        files: [{ type: 'addition', path: 'foo.bar', contents: 'foobar' }],
+        message: 'Foobar',
+      });
+
+      expect(res).toBeNull();
+    });
+
+    it('commits and returns SHA string', async () => {
       const scope = httpMock.scope(githubApiHost);
 
       initRepoMock(scope, 'some/repo');
@@ -5580,8 +5610,10 @@ describe('modules/platform/github/index', () => {
         .post('/repos/some/repo/git/trees')
         .reply(200, { sha: '111' })
         .post('/repos/some/repo/git/commits')
-        .reply(200, { sha: '222' })
-        .head('/repos/some/repo/git/commits/222')
+        .reply(200, { sha: '0123456789abcdef0123456789abcdef01234567' })
+        .head(
+          '/repos/some/repo/git/commits/0123456789abcdef0123456789abcdef01234567',
+        )
         .reply(200)
         .post('/repos/some/repo/git/refs')
         .reply(200);
@@ -5597,9 +5629,6 @@ describe('modules/platform/github/index', () => {
     });
 
     it('performs rebase', async () => {
-      git.pushCommitToRenovateRef.mockResolvedValueOnce();
-      git.listCommitTree.mockResolvedValueOnce([]);
-
       const scope = httpMock.scope(githubApiHost);
 
       initRepoMock(scope, 'some/repo');
@@ -5609,8 +5638,10 @@ describe('modules/platform/github/index', () => {
         .post('/repos/some/repo/git/trees')
         .reply(200, { sha: '111' })
         .post('/repos/some/repo/git/commits')
-        .reply(200, { sha: '222' })
-        .head('/repos/some/repo/git/commits/222')
+        .reply(200, { sha: '0123456789abcdef0123456789abcdef01234567' })
+        .head(
+          '/repos/some/repo/git/commits/0123456789abcdef0123456789abcdef01234567',
+        )
         .reply(200)
         .patch('/repos/some/repo/git/refs/heads/foo/bar')
         .reply(200);
@@ -5626,9 +5657,6 @@ describe('modules/platform/github/index', () => {
     });
 
     it('continues if rebase fails due to 422', async () => {
-      git.pushCommitToRenovateRef.mockResolvedValueOnce();
-      git.listCommitTree.mockResolvedValueOnce([]);
-
       const scope = httpMock.scope(githubApiHost);
 
       initRepoMock(scope, 'some/repo');
@@ -5638,8 +5666,10 @@ describe('modules/platform/github/index', () => {
         .post('/repos/some/repo/git/trees')
         .reply(200, { sha: '111' })
         .post('/repos/some/repo/git/commits')
-        .reply(200, { sha: '222' })
-        .head('/repos/some/repo/git/commits/222')
+        .reply(200, { sha: '0123456789abcdef0123456789abcdef01234567' })
+        .head(
+          '/repos/some/repo/git/commits/0123456789abcdef0123456789abcdef01234567',
+        )
         .reply(200)
         .patch('/repos/some/repo/git/refs/heads/foo/bar')
         .reply(422)
@@ -5657,9 +5687,6 @@ describe('modules/platform/github/index', () => {
     });
 
     it('aborts if rebase fails due to non-422', async () => {
-      git.pushCommitToRenovateRef.mockResolvedValueOnce();
-      git.listCommitTree.mockResolvedValueOnce([]);
-
       const scope = httpMock.scope(githubApiHost);
 
       initRepoMock(scope, 'some/repo');
@@ -5669,8 +5696,10 @@ describe('modules/platform/github/index', () => {
         .post('/repos/some/repo/git/trees')
         .reply(200, { sha: '111' })
         .post('/repos/some/repo/git/commits')
-        .reply(200, { sha: '222' })
-        .head('/repos/some/repo/git/commits/222')
+        .reply(200, { sha: '0123456789abcdef0123456789abcdef01234567' })
+        .head(
+          '/repos/some/repo/git/commits/0123456789abcdef0123456789abcdef01234567',
+        )
         .reply(200)
         .patch('/repos/some/repo/git/refs/heads/foo/bar')
         .reply(404);
@@ -5686,9 +5715,6 @@ describe('modules/platform/github/index', () => {
     });
 
     it("aborts if commit SHA doesn't exist", async () => {
-      git.pushCommitToRenovateRef.mockResolvedValueOnce();
-      git.listCommitTree.mockResolvedValueOnce([]);
-
       const scope = httpMock.scope(githubApiHost);
 
       initRepoMock(scope, 'some/repo');
@@ -5698,8 +5724,10 @@ describe('modules/platform/github/index', () => {
         .post('/repos/some/repo/git/trees')
         .reply(200, { sha: '111' })
         .post('/repos/some/repo/git/commits')
-        .reply(200, { sha: '222' })
-        .head('/repos/some/repo/git/commits/222')
+        .reply(200, { sha: '0123456789abcdef0123456789abcdef01234567' })
+        .head(
+          '/repos/some/repo/git/commits/0123456789abcdef0123456789abcdef01234567',
+        )
         .reply(404);
 
       const res = await github.commitFiles({
