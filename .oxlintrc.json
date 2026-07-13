@@ -119,6 +119,7 @@
     "typescript/prefer-regexp-exec": "error",
     "typescript/prefer-string-starts-ends-with": "error",
 
+    "typescript/no-explicit-any": "warn",
     "typescript/no-unsafe-argument": "off",
     "typescript/no-unsafe-assignment": "off",
     "typescript/no-unsafe-call": "off",
@@ -182,6 +183,7 @@
       "rules": {
         "no-template-curly-in-string": "off",
         "jest/valid-title": "error",
+        "typescript/no-explicit-any": "off",
         "typescript/unbound-method": "off",
         "renovate/test-root-describe": "error",
         "typescript/explicit-function-return-type": "off"
