@@ -71,6 +71,7 @@
     "renovate/no-hardcoded-docs-url": "error",
     "renovate/no-new-url": "error",
     "renovate/no-tools-import": "error",
+    "renovate/require-regex-util": "warn",
     "renovate/zod-schema-naming": "error",
 
     "typescript/await-thenable": "error",
@@ -177,6 +178,12 @@
     "vitest/require-to-throw-message": "error"
   },
   "overrides": [
+    {
+      "files": ["**/*.spec.ts", "test/**", "tools/**"],
+      "rules": {
+        "renovate/require-regex-util": "off"
+      }
+    },
     {
       "files": ["**/*.spec.ts", "test/**"],
       "rules": {
