@@ -37,7 +37,7 @@ describe('config/migrate-validate', () => {
             automerge: true,
           },
         ],
-      } as RenovateConfig;
+      } as unknown as RenovateConfig;
 
       const res = await migrateAndValidate(config, input);
 
@@ -62,7 +62,7 @@ describe('config/migrate-validate', () => {
             automerge: true,
           },
         ],
-      } as RenovateConfig;
+      } as unknown as RenovateConfig;
 
       const res = await migrateAndValidate(config, input);
 
