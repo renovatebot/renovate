@@ -7,8 +7,8 @@ const PackageResolvedPin = z.object({
   location: z.string(),
   state: z.object({
     revision: z.string(),
-    version: z.string().nullable().optional(),
-    branch: z.string().nullable().optional(),
+    version: z.string().nullish(),
+    branch: z.string().nullish(),
   }),
 });
 

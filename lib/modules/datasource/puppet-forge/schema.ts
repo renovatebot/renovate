@@ -9,7 +9,7 @@ export const PuppetReleaseAbbreviated = z
     version: z.string(),
     created_at: MaybeTimestamp,
     deleted_at: Nullish(z.string()),
-    file_uri: z.string().optional().nullable(),
+    file_uri: z.string().nullish(),
   })
   .transform(
     ({ version, created_at, deleted_at, file_uri }): Release | null => {
@@ -31,8 +31,8 @@ export const PuppetReleaseAbbreviated = z
 export const PuppetModule = z
   .object({
     releases: LooseArray(PuppetReleaseAbbreviated).default([]),
-    homepage_url: z.string().optional().nullable(),
-    deprecated_for: z.string().optional().nullable(),
+    homepage_url: z.string().nullish(),
+    deprecated_for: z.string().nullish(),
   })
   .transform((module): ReleaseResult => {
     const releases = module.releases.filter(isTruthy);

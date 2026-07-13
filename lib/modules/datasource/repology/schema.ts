@@ -5,9 +5,9 @@ export const RepologyPackage = z.object({
   repo: z.string(),
   visiblename: z.string(),
   version: z.string(),
-  srcname: z.string().nullable().optional(),
-  binname: z.string().nullable().optional(),
-  origversion: z.string().nullable().optional(),
+  srcname: z.string().nullish(),
+  binname: z.string().nullish(),
+  origversion: z.string().nullish(),
 });
 
 export type RepologyPackage = z.infer<typeof RepologyPackage>;

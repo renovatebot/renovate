@@ -14,8 +14,8 @@ export const DefaultBranch = z.object({
 
 export const Link = z.object({
   href: z.string(),
-  name: z.string().optional().nullable(),
-  templated: z.boolean().optional().nullable(),
+  name: z.string().nullish(),
+  templated: z.boolean().nullish(),
 });
 export type Link = z.infer<typeof Link>;
 
@@ -38,38 +38,35 @@ export const PullRequest = z.object({
   id: z.string(),
   author: z
     .object({
-      mail: z.string().optional().nullable(),
+      mail: z.string().nullish(),
       displayName: z.string(),
       id: z.string(),
     })
-    .optional()
-    .nullable(),
+    .nullish(),
   reviser: z
     .object({
-      id: z.string().optional().nullable(),
-      displayName: z.string().optional().nullable(),
+      id: z.string().nullish(),
+      displayName: z.string().nullish(),
     })
-    .optional()
-    .nullable(),
-  closeDate: z.string().optional().nullable(),
+    .nullish(),
+  closeDate: z.string().nullish(),
   source: z.string(),
   target: z.string(),
   title: z.string(),
-  description: z.string().optional().nullable(),
+  description: z.string().nullish(),
   creationDate: z.string(),
-  lastModified: z.string().optional().nullable(),
+  lastModified: z.string().nullish(),
   status: PrState,
   reviewer: z
     .array(
       z.object({
         id: z.string(),
         displayName: z.string(),
-        mail: z.string().optional().nullable(),
+        mail: z.string().nullish(),
         approved: z.boolean(),
       }),
     )
-    .optional()
-    .nullable(),
+    .nullish(),
   labels: z.string().array(),
   tasks: z.object({
     todo: z.number(),
@@ -88,10 +85,10 @@ export type PullRequest = z.infer<typeof PullRequest>;
 const RepoType = z.enum(['git', 'svn', 'hg']);
 
 export const Repo = z.object({
-  contact: z.string().optional().nullable(),
-  creationDate: z.string().optional().nullable(),
-  description: z.string().optional().nullable(),
-  lastModified: z.string().optional().nullable(),
+  contact: z.string().nullish(),
+  creationDate: z.string().nullish(),
+  description: z.string().nullish(),
+  lastModified: z.string().nullish(),
   namespace: z.string(),
   name: z.string(),
   type: RepoType,
