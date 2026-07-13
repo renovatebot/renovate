@@ -24,10 +24,6 @@ const defaultClosedState = 'Closed';
 // the concrete names from them instead of hardcoding process-specific values.
 const openCategories = ['Proposed', 'InProgress'];
 const closedCategories = ['Completed', 'Resolved', 'Removed'];
-// Preferred category for the close target. A `Completed` state (e.g. Agile's
-// `Closed`) is the true "done" state; `Resolved`/`Removed` states also count as
-// closed but must not be picked over `Completed` when moving an item to closed.
-const completedCategories = ['Completed'];
 
 interface WorkItemStates {
   /** State to move a work item to when (re)opening it. */
@@ -85,13 +81,18 @@ export class IssueService {
 
       if (stateColors?.length) {
         const openNames = namesByCategory(stateColors, openCategories);
-        const completedNames = namesByCategory(
-          stateColors,
-          completedCategories,
+        // A `Completed` state (e.g. Agile's `Closed`) is the true "done" state.
+        // `Resolved`/`Removed` states also count as closed but must not be
+        // picked over `Completed` when moving an item to closed.
+        const completed = stateColors.find(
+          (s) => s.category === 'Completed' && s.name,
         );
         const closedNames = namesByCategory(stateColors, closedCategories);
 
-        // First open-category state, else the type's first state overall.
+        // First open-category state, else the type's first state overall. If a
+        // process somehow exposes only closed states, this falls back to a
+        // closed state name; that is intentional (there is no better reopen
+        // target) rather than a bug.
         states.open = openNames[0] ?? stateColors[0].name ?? states.open;
         if (closedNames.length) {
           // Prefer a `Completed` state as the close target so processes that
@@ -99,7 +100,7 @@ export class IssueService {
           // inheritances) still close to `Closed`; fall back to the wider set
           // only when no `Completed` state exists. Keep the full set for
           // recognising already-closed items.
-          states.closed = completedNames[0] ?? closedNames[0];
+          states.closed = completed?.name ?? closedNames[0];
           states.closedNames = new Set(closedNames);
         }
       }
@@ -134,7 +135,7 @@ export class IssueService {
       let wiql = `
         SELECT [System.Id]
         FROM WorkItems
-        WHERE [System.WorkItemType] = 'Issue'
+        WHERE [System.WorkItemType] = '${workItemType}'
           AND [System.TeamProject] = '${this.config.project}'
       `;
 
@@ -318,7 +319,11 @@ export class IssueService {
       const newWorkItem = await azureApiWit.createWorkItem(
         undefined,
         [
-          { op: 'add', path: '/fields/System.WorkItemType', value: 'Issue' },
+          {
+            op: 'add',
+            path: '/fields/System.WorkItemType',
+            value: workItemType,
+          },
           { op: 'add', path: '/fields/System.Title', value: finalTitle },
           {
             op: 'add',
@@ -332,7 +337,7 @@ export class IssueService {
           },
         ],
         this.config.project,
-        'Issue',
+        workItemType,
       );
 
       logger.debug(`Created new issue #${newWorkItem.id}`);
