@@ -156,6 +156,7 @@ export class PypiDatasource extends Datasource {
         const lower = name.toLowerCase();
 
         if (
+          projectUrl &&
           !dependency.sourceUrl &&
           (lower.startsWith('repo') ||
             lower === 'code' ||

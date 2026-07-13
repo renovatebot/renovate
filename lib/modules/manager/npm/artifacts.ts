@@ -188,6 +188,10 @@ async function updatePnpmWorkspace(
     let excludeNode = doc.getIn(['minimumReleaseAgeExclude']) as YAMLSeq | null;
     // v8 ignore next -- TODO: add test #40625
     const newVersion = upgrade.newVersion ?? upgrade.newValue;
+    // For pnpm overrides with range selectors (e.g. "pkg@<=1.0.0"), depName contains
+    // the full key including the selector. Use packageName (bare package name) for
+    // minimumReleaseAgeExclude entries which require exact versions only.
+    const excludeDepName = upgrade.packageName ?? upgrade.depName;
 
     /* v8 ignore if -- should not happen, adding for type narrowing*/
     if (excludeNode && !isSeq(excludeNode)) {
@@ -197,31 +201,38 @@ async function updatePnpmWorkspace(
     if (!excludeNode) {
       logger.debug('Adding new exclude block');
       excludeNode = doc.createNode([]) as YAMLSeq;
-      const newItem = doc.createNode(`${upgrade.depName}@${newVersion}`);
-      newItem.commentBefore = ` Renovate security update: ${upgrade.depName}@${newVersion}`;
+      const newItem = doc.createNode(`${excludeDepName}@${newVersion}`);
+      newItem.commentBefore = ` Renovate security update: ${excludeDepName}@${newVersion}`;
       excludeNode.items.push(newItem);
       doc.set('minimumReleaseAgeExclude', excludeNode);
       updated = true;
       continue;
     }
 
-    const { item: matchedItem, allExcluded } = getMatchedItem(
-      upgrade.depName!,
-      excludeNode.items,
-    );
+    const {
+      item: matchedItem,
+      allExcluded,
+      malformed,
+    } = getMatchedItem(excludeDepName!, excludeNode.items);
 
     if (allExcluded) {
-      continue;
-    }
-
-    if (isScalar<string>(matchedItem)) {
+      // still clean up any malformed entries even when a wildcard covers the package
+    } else if (malformed && isScalar<string>(matchedItem)) {
+      logger.debug(
+        { entry: matchedItem.value, excludeDepName, newVersion },
+        'Replacing malformed minimumReleaseAgeExclude entry',
+      );
+      matchedItem.value = `${excludeDepName}@${newVersion}`;
+      matchedItem.commentBefore = ` Renovate security update: ${excludeDepName}@${newVersion}`;
+      updated = true;
+    } else if (isScalar<string>(matchedItem)) {
       // if we have a comment before the list, which includes the dependency
-      if (excludeNode?.commentBefore?.includes(`${upgrade.depName}@`)) {
+      if (excludeNode?.commentBefore?.includes(`${excludeDepName}@`)) {
         // and it doesn't already have the version included in it
         if (
           !minimumReleaseAgeExcludeIncludesDepNameAndVersion(
             excludeNode.commentBefore,
-            upgrade.depName,
+            excludeDepName,
             newVersion,
           )
         ) {
@@ -238,7 +249,7 @@ async function updatePnpmWorkspace(
         if (
           !minimumReleaseAgeExcludeIncludesDepNameAndVersion(
             matchedItem.commentBefore,
-            upgrade.depName,
+            excludeDepName,
             newVersion,
           )
         ) {
@@ -247,14 +258,14 @@ async function updatePnpmWorkspace(
           updated = true;
         }
       } else {
-        matchedItem.commentBefore = ` Renovate security update: ${upgrade.depName}@${newVersion}`;
+        matchedItem.commentBefore = ` Renovate security update: ${excludeDepName}@${newVersion}`;
         updated = true;
       }
 
       if (
         !minimumReleaseAgeExcludeIncludesDepNameAndVersion(
           matchedItem.value,
-          upgrade.depName,
+          excludeDepName,
           newVersion,
         )
       ) {
@@ -263,11 +274,26 @@ async function updatePnpmWorkspace(
       }
     } else {
       // add new entry
-      const newItem = doc.createNode(`${upgrade.depName}@${newVersion}`);
-      newItem.commentBefore = ` Renovate security update: ${upgrade.depName}@${newVersion}`;
+      const newItem = doc.createNode(`${excludeDepName}@${newVersion}`);
+      newItem.commentBefore = ` Renovate security update: ${excludeDepName}@${newVersion}`;
 
       excludeNode.items.push(newItem);
       updated = true;
+    }
+
+    // Remove any malformed entries for the same package left over from the prior bug
+    for (let i = excludeNode.items.length - 1; i >= 0; i--) {
+      const item = excludeNode.items[i];
+      if (
+        item !== matchedItem &&
+        isScalar(item) &&
+        isString(item.value) &&
+        item.value.startsWith(`${excludeDepName}@`) &&
+        !isValidMinimumReleaseAgeExcludeEntry(item.value, excludeDepName!)
+      ) {
+        excludeNode.items.splice(i, 1);
+        updated = true;
+      }
     }
   }
 
@@ -293,7 +319,10 @@ function getMatchedItem(
 ): {
   item: Scalar | null;
   allExcluded: boolean;
+  malformed?: boolean;
 } {
+  let malformedItem: Scalar | null = null;
+
   for (const item of items) {
     /* v8 ignore if -- should not happen */
     if (!isScalar(item) || !isString(item.value)) {
@@ -301,10 +330,14 @@ function getMatchedItem(
     }
 
     if (item.value.startsWith(`${depName}@`)) {
-      return {
-        allExcluded: false,
-        item,
-      };
+      if (isValidMinimumReleaseAgeExcludeEntry(item.value, depName)) {
+        return {
+          allExcluded: false,
+          item,
+        };
+      }
+      malformedItem ??= item;
+      continue;
     }
 
     if (item.value === depName || matchRegexOrGlob(depName, item.value)) {
@@ -315,10 +348,26 @@ function getMatchedItem(
     }
   }
 
+  if (malformedItem) {
+    return {
+      allExcluded: false,
+      item: malformedItem,
+      malformed: true,
+    };
+  }
+
   return {
     item: null,
     allExcluded: false,
   };
+}
+
+/** pnpm requires package@version entries without range selectors or extra @ in the version part */
+function isValidMinimumReleaseAgeExcludeEntry(
+  value: string,
+  packageName: string,
+): boolean {
+  return !value.slice(`${packageName}@`.length).includes('@');
 }
 
 /** determine whether a comment or a list item contains the depName at a given newVersion */

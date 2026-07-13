@@ -50,6 +50,7 @@ export interface GroupConfig extends Record<string, unknown> {
 }
 
 export type RecreateWhen = 'auto' | 'never' | 'always';
+export type StatusCheckWhen = 'always' | 'never' | 'failed';
 export type PlatformCommitOptions = 'auto' | 'disabled' | 'enabled';
 
 export type BinarySource = 'docker' | 'global' | 'install' | 'hermit';
@@ -139,7 +140,6 @@ export interface RenovateSharedConfig {
   prPriority?: number;
   prTitle?: string;
   prTitleStrict?: boolean;
-  productLinks?: Record<string, string>;
   pruneBranchAfterAutomerge?: boolean;
   rangeStrategy?: RangeStrategy;
   rebaseLabel?: string;
@@ -274,6 +274,7 @@ export interface RepoGlobalConfig extends GlobalInheritableConfig {
   ignorePrAuthor?: boolean;
   allowedUnsafeExecutions?: AllowedUnsafeExecution[];
   onboardingAutoCloseAge?: number;
+  productLinks?: Record<string, string>;
   toolSettings?: ToolSettingsOptions;
 }
 
@@ -323,11 +324,11 @@ export type UpdateConfig<
   T extends RenovateSharedConfig = RenovateSharedConfig,
 > = Partial<Record<UpdateType, T | null>>;
 
-export type RenovateRepository =
-  | string
-  | (RenovateConfig & {
-      repository: string;
-    });
+export type RenovateRepositoryEntry = AllConfig & {
+  repository: string;
+};
+
+export type RenovateRepository = string | RenovateRepositoryEntry;
 
 export type UseBaseBranchConfigType = 'merge' | 'none';
 export type ConstraintsFilter = 'strict' | 'none';
@@ -475,6 +476,7 @@ export interface RenovateConfig
   customizeDashboard?: Record<string, string>;
 
   statusCheckNames?: Record<StatusCheckKey, string | null>;
+  statusCheckWhen?: Partial<Record<StatusCheckKey, StatusCheckWhen>>;
   /**
    * User configured environment variables that Renovate uses when executing package manager commands
    */

@@ -7,6 +7,7 @@
  *   targets           Files or directories to scope checks to
  *
  * Options:
+ *   --all             Run fixers first, then all lint checks and tests
  *   --fix             Run fixers only (oxlint-fix, biome-fix, prettier-fix)
  *   --no-test         Skip tests
  */
@@ -100,6 +101,7 @@ function buildTargetedChecks(targets: string[], fix: boolean): ParallelCheck[] {
         'exec',
         'oxlint',
         ...(fix ? ['--fix'] : []),
+        '--no-error-on-unmatched-pattern',
         '-c',
         '.oxlintrc.json',
         ...targets,
@@ -108,7 +110,14 @@ function buildTargetedChecks(targets: string[], fix: boolean): ParallelCheck[] {
     {
       name: `biome${suffix}`,
       cmd: 'pnpm',
-      args: ['exec', 'biome', 'check', ...(fix ? ['--write'] : []), ...targets],
+      args: [
+        'exec',
+        'biome',
+        'check',
+        ...(fix ? ['--write'] : []),
+        '--no-errors-on-unmatched',
+        ...targets,
+      ],
     },
     {
       name: `prettier${suffix}`,
@@ -117,6 +126,7 @@ function buildTargetedChecks(targets: string[], fix: boolean): ParallelCheck[] {
         'exec',
         'prettier',
         fix ? '--write' : '--check',
+        '--no-error-on-unmatched-pattern',
         '--cache',
         ...targets,
       ],
@@ -179,6 +189,7 @@ async function collectCoverage(args: CliArgs): Promise<CoverageInfo[]> {
 function parseCliArgs(): CliArgs {
   const { values, positionals } = parseArgs({
     options: {
+      all: { type: 'boolean', default: false },
       fix: { type: 'boolean', default: false },
       'no-test': { type: 'boolean', default: false },
     },
@@ -186,6 +197,7 @@ function parseCliArgs(): CliArgs {
   });
 
   return {
+    all: values.all ?? false,
     fix: values.fix ?? false,
     noTest: values['no-test'] ?? false,
     targets: positionals,
@@ -193,7 +205,7 @@ function parseCliArgs(): CliArgs {
 }
 
 function buildTestChecks(args: CliArgs): ParallelCheck[] {
-  if (args.noTest || args.fix) {
+  if (args.noTest || (args.fix && !args.all)) {
     return [];
   }
 
@@ -219,7 +231,9 @@ function buildTestChecks(args: CliArgs): ParallelCheck[] {
     return [];
   }
   const name = `test (${fileCount} ${fileCount === 1 ? 'file' : 'files'})`;
-  return [{ name, cmd: 'pnpm', args: ['vitest', ...patterns] }];
+  return [
+    { name, cmd: 'pnpm', args: ['vitest', '--passWithNoTests', ...patterns] },
+  ];
 }
 
 async function main(): Promise<void> {
@@ -230,7 +244,16 @@ async function main(): Promise<void> {
   let fixChecks: ParallelCheck[];
   let lintChecks: ParallelCheck[];
 
-  if (args.fix) {
+  if (args.all) {
+    fixChecks =
+      args.targets.length > 0
+        ? buildTargetedChecks(args.targets, true)
+        : [...FIX_CHECKS];
+    lintChecks =
+      args.targets.length > 0
+        ? buildTargetedChecks(args.targets, false)
+        : [...FIXABLE_CHECKS, ...OTHER_CHECKS];
+  } else if (args.fix) {
     fixChecks =
       args.targets.length > 0
         ? buildTargetedChecks(args.targets, true)

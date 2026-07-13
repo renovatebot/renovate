@@ -2002,6 +2002,72 @@ describe('modules/datasource/docker/index', () => {
         });
       });
 
+      it('resolves requests to ECR proxy when auth probe itself returns 405 maxResults error', async () => {
+        const maxResultsErrorBody = {
+          errors: [
+            {
+              code: 'UNSUPPORTED',
+              message:
+                "Invalid parameter at 'maxResults' failed to satisfy constraint: 'Member must have value less than or equal to 1000'",
+            },
+          ],
+        };
+
+        httpMock
+          .scope('https://ecr-proxy.company.com/v2')
+          // auth probe for tags URL → 405 (triggers fallback to /v2/ base)
+          .get('/node/tags/list?n=10000')
+          .reply(405, maxResultsErrorBody, {
+            'Docker-Distribution-Api-Version': 'registry/2.0',
+          })
+          // fallback auth probe via base /v2/ → 200 (no auth needed)
+          .get('/')
+          .reply(200)
+          // actual tag fetch → 405 (triggers isECRMaxResultsError retry with n=1000)
+          .get('/node/tags/list?n=10000')
+          .reply(405, maxResultsErrorBody, {
+            'Docker-Distribution-Api-Version': 'registry/2.0',
+          })
+          .get('/node/tags/list?n=1000')
+          .reply(200, { tags: ['some'] }, {})
+          // auth probe for manifest fetch
+          .get('/')
+          .reply(200)
+          .get('/node/manifests/some')
+          .reply(200, {
+            schemaVersion: 2,
+            mediaType: 'application/vnd.docker.distribution.manifest.v2+json',
+            config: {
+              digest: 'some-config-digest',
+              mediaType: 'application/vnd.docker.container.image.v1+json',
+            },
+          })
+          // auth probe for blob fetch
+          .get('/')
+          .reply(200)
+          .get('/node/blobs/some-config-digest')
+          .reply(200, {
+            architecture: 'amd64',
+            config: {
+              Labels: {
+                'org.opencontainers.image.source':
+                  'https://github.com/renovatebot/renovate',
+              },
+            },
+          });
+        expect(
+          await getPkgReleases({
+            datasource: DockerDatasource.id,
+            packageName: 'ecr-proxy.company.com/node',
+          }),
+        ).toEqual({
+          lookupName: 'node',
+          registryUrl: 'https://ecr-proxy.company.com',
+          releases: [],
+          sourceUrl: 'https://github.com/renovatebot/renovate',
+        });
+      });
+
       it('returns null when it receives ECR max results error more than once', async () => {
         const maxResultsErrorBody = {
           errors: [

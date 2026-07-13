@@ -2020,7 +2020,10 @@ None detected
         ],
       };
 
-      const result = dependencyDashboard.getAbandonedPackagesMd(packageFiles);
+      const result = dependencyDashboard.getAbandonedPackagesMd(
+        config,
+        packageFiles,
+      );
       expect(result).toEqual('');
     });
 
@@ -2040,7 +2043,10 @@ None detected
         ],
       };
 
-      const result = dependencyDashboard.getAbandonedPackagesMd(packageFiles);
+      const result = dependencyDashboard.getAbandonedPackagesMd(
+        config,
+        packageFiles,
+      );
 
       expect(result).toContain('## Abandoned Dependencies');
       expect(result).toContain(
@@ -2089,7 +2095,10 @@ None detected
         ],
       };
 
-      const result = dependencyDashboard.getAbandonedPackagesMd(packageFiles);
+      const result = dependencyDashboard.getAbandonedPackagesMd(
+        config,
+        packageFiles,
+      );
 
       expect(result).toContain('## Abandoned Dependencies');
       expect(result).toContain(
@@ -2123,7 +2132,10 @@ None detected
         ],
       };
 
-      const result = dependencyDashboard.getAbandonedPackagesMd(packageFiles);
+      const result = dependencyDashboard.getAbandonedPackagesMd(
+        config,
+        packageFiles,
+      );
 
       expect(result).toContain('## Abandoned Dependencies');
       expect(result).toContain(
@@ -2148,7 +2160,10 @@ None detected
         ],
       };
 
-      const result = dependencyDashboard.getAbandonedPackagesMd(packageFiles);
+      const result = dependencyDashboard.getAbandonedPackagesMd(
+        config,
+        packageFiles,
+      );
       expect(result).toEqual('');
     });
   });

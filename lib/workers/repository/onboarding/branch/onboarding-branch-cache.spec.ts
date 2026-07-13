@@ -4,7 +4,7 @@ import type {
   OnboardingBranchCache,
   RepoCacheData,
 } from '../../../../util/cache/repository/types.ts';
-import type { LongCommitSha } from '../../../../util/git/types.ts';
+import type { LongCommitSha } from '../../../../util/schema-utils/git.ts';
 import {
   deleteOnboardingCache,
   getOnboardingConfigFromCache,

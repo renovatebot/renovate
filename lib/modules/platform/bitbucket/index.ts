@@ -1044,6 +1044,7 @@ export async function createPr({
   targetBranch,
   prTitle: title,
   prBody: description,
+  draftPR = false,
   platformPrOptions,
 }: CreatePRConfig): Promise<Pr> {
   // labels is not supported in Bitbucket: https://bitbucket.org/site/master/issues/11976/ability-to-add-labels-to-pull-requests-bb
@@ -1085,6 +1086,7 @@ export async function createPr({
     },
     close_source_branch: true,
     reviewers,
+    draft: draftPR,
   };
 
   try {

@@ -34,7 +34,6 @@ env:
   # are we on a release branch?
   DO_RELEASE: ${{ github.ref_name == github.event.repository.default_branch || github.ref_name == 'next' || startsWith(github.ref_name, 'maint/')}}
   NODE_VERSION: 24
-  PDM_VERSION: 2.27.0 # renovate: datasource=pypi depName=pdm
   DRY_RUN: true
   TEST_LEGACY_DECRYPTION: true
   SPARSE_CHECKOUT: |-
@@ -244,7 +243,7 @@ jobs:
           os: ${{ runner.os }}
 
       - name: Restore prettier cache
-        uses: actions/cache/restore@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        uses: actions/cache/restore@caa296126883cff596d87d8935842f9db880ef25 # v5.1.0
         with:
           path: .cache/prettier
           # we need to add the hash because prettier cache doesn't detect plugin changes
@@ -262,7 +261,7 @@ jobs:
 
       - name: Save prettier cache
         if: github.event_name == 'push'
-        uses: actions/cache/save@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        uses: actions/cache/save@caa296126883cff596d87d8935842f9db880ef25 # v5.1.0
         with:
           path: .cache/prettier
           key: prettier-cache-${{ hashFiles('pnpm-lock.yaml', 'package.json') }}-${{ github.run_id }}-${{ github.run_attempt }}
@@ -321,7 +320,7 @@ jobs:
           os: ${{ runner.os }}
 
       - name: Restore tsbuildinfo cache
-        uses: actions/cache/restore@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        uses: actions/cache/restore@caa296126883cff596d87d8935842f9db880ef25 # v5.1.0
         with:
           path: .cache/tsbuildinfo
           key: tsbuildinfo-${{ hashFiles('pnpm-lock.yaml') }}
@@ -332,7 +331,7 @@ jobs:
 
       - name: Save tsbuildinfo cache
         if: github.event_name == 'push'
-        uses: actions/cache/save@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        uses: actions/cache/save@caa296126883cff596d87d8935842f9db880ef25 # v5.1.0
         with:
           path: .cache/tsbuildinfo
           key: tsbuildinfo-${{ hashFiles('pnpm-lock.yaml') }}-${{ github.run_id }}-${{ github.run_attempt }}
@@ -371,9 +370,9 @@ jobs:
           args: -color -ignore "invalid activity type \"destroyed\" for \"merge_group\" Webhook event. available types are \"checks_requested\""
 
       - name: Run zizmor
-        uses: zizmorcore/zizmor-action@5f14fd08f7cf1cb1609c1e344975f152c7ee938d # v0.5.6
+        uses: zizmorcore/zizmor-action@192e21d79ab29983730a13d1382995c2307fbcaa # v0.5.7
         with:
-          version: 1.25.2
+          version: 1.26.1
 
   test:
     needs: [setup, prefetch]
@@ -408,7 +407,7 @@ jobs:
           os: ${{ runner.os }}
 
       - name: Cache vitest
-        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5.1.0
         with:
           path: .cache/vitest
           key: |
@@ -434,7 +433,7 @@ jobs:
 
       - name: Codecov Test
         if: github.event_name != 'merge_group' && !cancelled()
-        uses: codecov/codecov-action@e79a6962e0d4c0c17b229090214935d2e33f8354 # v6.0.1
+        uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v6.0.2
         with:
           use_oidc: true
           report_type: test_results
@@ -488,7 +487,7 @@ jobs:
 
       - name: Codecov Coverage
         if: github.event_name != 'merge_group'
-        uses: codecov/codecov-action@e79a6962e0d4c0c17b229090214935d2e33f8354 # v6.0.1
+        uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v6.0.2
         with:
           use_oidc: true
           directory: coverage/lcov
@@ -547,6 +546,7 @@ jobs:
       - coverage-threshold
       - lint-actions
       - build-docker
+      - build-docs
     runs-on: ubuntu-latest
     timeout-minutes: 1
     if: always()
@@ -603,6 +603,19 @@ jobs:
           needs.lint-actions.result == 'skipped'
         run: exit 1
 
+      - name: Fail for failed or cancelled docs build
+        if: |
+          needs.build-docs.result == 'failure' ||
+          needs.build-docs.result == 'cancelled'
+        run: exit 1
+
+      - name: Fail for skipped docs build when PR is ready for review
+        if: |
+          github.event_name == 'pull_request' &&
+          github.event.pull_request.draft != true &&
+          needs.build-docs.result == 'skipped'
+        run: exit 1
+
       - name: Fail for skipped or failed docker build when needed
         if: |
           (
@@ -650,18 +663,14 @@ jobs:
     steps:
       - run: df -h
 
-      # Ensure docker is using /mnt/docker for data storage on x86_64 runners to avoid disk space issues
-      - name: Prepare docker
-        run: |
-          echo '{"data-root": "/mnt/docker"}' | sudo tee /etc/docker/daemon.json
-          sudo systemctl restart docker
-          docker info
-
       - name: Checkout code
         uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
           persist-credentials: false
           show-progress: false
+
+      - name: Setup Docker
+        uses: ./.github/actions/setup-docker
 
       - name: Download dist
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
@@ -676,7 +685,7 @@ jobs:
           os: ${{ runner.os }}
 
       - name: Build docker
-        run: pnpm build:docker build --tries=3 --args '--load'
+        run: pnpm build:docker build --platform linux/amd64,linux/arm64 --tries=3 --args '--load'
         env:
           LOG_LEVEL: debug
 
@@ -711,15 +720,15 @@ jobs:
           node-version: ${{ needs.setup-build.outputs.node-version }}
           os: ${{ runner.os }}
 
-      - name: Setup PDM
-        uses: pdm-project/setup-pdm@973541a5febeafcfdadf8a51211435be6ecfd90f # v4.5
+      - name: Setup uv
+        uses: astral-sh/setup-uv@11f9893b081a58869d3b5fccaea48c9e9e46f990 # v8.3.2
         with:
-          python-version-file: .python-version
-          version: ${{ env.PDM_VERSION }}
-          cache: true
+          version: 0.11.28
+          enable-cache: true
+          cache-python: true
 
-      - name: Install pdm dependencies
-        run: pdm install
+      - name: Install uv dependencies
+        run: uv sync --locked
 
       - name: Build
         run: pnpm build:docs
@@ -771,11 +780,7 @@ jobs:
         run: pnpm test-e2e:pack
 
       - name: Install dependencies
-        run: |
-          # as `--ignore-workspace` doesn't seem to apply to `minimumReleaseAge`, forcibly delete our workspace
-          rm pnpm-workspace.yaml
-
-          pnpm test-e2e:install
+        run: pnpm test-e2e:install
 
       - name: E2E Test
         run: pnpm test-e2e:run
@@ -823,26 +828,27 @@ jobs:
           if [[ "$latest_sha" != "$EXPECTED_SHA" ]]; then
             echo "Newer commit detected on $REF_NAME ($latest_sha), cancelling release run"
             gh run cancel "$RUN_ID"
+            sleep 5
           fi
 
       - run: df -h
 
-      # Ensure docker is using /mnt/docker for data storage on x86_64 runners to avoid disk space issues
-      - name: Prepare docker
+      - name: check for old vm with low disk space
+        id: check
         run: |
-          echo '{"data-root": "/mnt/docker"}' | sudo tee /etc/docker/daemon.json
-          sudo systemctl restart docker
-          docker info
+          if [[ -e /dev/sdb1 ]]; then
+            echo "::warning::We're on old vm, running cleanup"
+            echo "do-cleanup=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::notice::We're on new vm, no cleanup required"
+            echo "do-cleanup=false" >> "$GITHUB_OUTPUT"
+          fi
 
-      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
-        with:
-          persist-credentials: false
-          fetch-depth: 0 # zero stands for full checkout, which is required for semantic-release
-          filter: blob:none # we don't need all blobs, only the full tree
-          show-progress: false
-
+      # Some runner vm's are smaller than others for unknown reasons
+      # https://github.com/orgs/community/discussions/199328
       # To avoid disk space issues when performing a release, we can clear up some disk space ahead of time
       - name: Free Disk Space
+        if: ${{ steps.check.outputs.do-cleanup == 'true' }}
         uses: jlumbroso/free-disk-space@54081f138730dfa15788a46383842cd2f914a1be # v1.3.1
         with:
           # we're likely already using some of the globally installed tools
@@ -853,15 +859,23 @@ jobs:
           android: true
           dotnet: true
           haskell: true
-          # and shouldn't be using swap storage
-          swap-storage: true
+          # there is no swap storage anymore
+          swap-storage: false
+
+          large-packages: true # breaks docker cross platform support
 
       - run: df -h
+        if: ${{ steps.check.outputs.do-cleanup == 'true' }}
 
-      - name: docker-config
-        uses: containerbase/internal-tools@1dd7882986cbda6e6ac247b70a67305bc68745bb # v4.6.37
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
-          command: docker-config
+          persist-credentials: false
+          fetch-depth: 0 # zero stands for full checkout, which is required for semantic-release
+          filter: blob:none # we don't need all blobs, only the full tree
+          show-progress: false
+
+      - name: Setup Docker
+        uses: ./.github/actions/setup-docker
 
       - name: Setup Node.js
         uses: ./.github/actions/setup-node
@@ -869,8 +883,8 @@ jobs:
           node-version: ${{ needs.setup-build.outputs.node-version }}
           os: ${{ runner.os }}
 
-      - name: Install newer npm
-        run: npm install -g npm
+      - name: Install newer npm if needed
+        run: 'dpkg --compare-versions "$(npm -v)" lt 11.5.1 && (npm update -g npm; echo "updated npm to: $(npm -v)") || echo "npm is new enough: $(npm -v)"'
 
       - uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6 # v4.1.2
 
@@ -879,15 +893,15 @@ jobs:
           echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
           echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.repository_owner }} --password-stdin
 
-      - name: Setup PDM
-        uses: pdm-project/setup-pdm@973541a5febeafcfdadf8a51211435be6ecfd90f # v4.5
+      - name: Setup uv
+        uses: astral-sh/setup-uv@11f9893b081a58869d3b5fccaea48c9e9e46f990 # v8.3.2
         with:
-          python-version-file: .python-version
-          version: ${{ env.PDM_VERSION }}
-          cache: true
+          version: 0.11.28
+          enable-cache: true
+          cache-python: true
 
-      - name: Install pdm dependencies
-        run: pdm install
+      - name: Install uv dependencies
+        run: uv sync --locked
 
       - name: Check dry run
         run: |
@@ -909,6 +923,7 @@ jobs:
           if [[ "$latest_sha" != "$EXPECTED_SHA" ]]; then
             echo "Newer commit detected on $REF_NAME ($latest_sha), cancelling release run"
             gh run cancel "$RUN_ID"
+            sleep 5
           fi
 
       - name: semantic-release
@@ -918,18 +933,17 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           LOG_LEVEL: debug
 
-      - name: Build mkdocs site for deployment (when no release)
+      - name: Build mkdocs site for deployment
         if: github.ref_name == 'main'
         run: |
-          # If there wasn't a release, we won't have executed `tools/prepare-release.ts`, and the mkdocs site won't be built, but we do want it built regardless, so we can update the docs site
-          if [[ ! -f tmp/mkdocs-site.tgz ]]; then
-            latest_tag=$(gh release view --json tagName -q .tagName)
-            pnpm mkdocs build --version "$latest_tag"
-            mkdir -p tmp
-            tar -czf tmp/mkdocs-site.tgz -C tools/mkdocs/site .
-          fi
+          # Always rebuild the docs site with the announcement bar for deployment to GitHub Pages, including the announcement bar (which isn't included when preparing a release's docs)
+          latest_tag=$(gh release view --json tagName -q .tagName)
+          pnpm mkdocs build --version "$latest_tag"
+          mkdir -p tmp
+          tar -czf tmp/mkdocs-site.tgz -C tools/mkdocs/site .
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          MKDOCS_INCLUDE_ANNOUNCEMENT: 'true'
 
       - name: Upload docs artifact for deployment
         if: github.ref_name == 'main'
@@ -940,6 +954,7 @@ jobs:
           retention-days: 1
 
       - run: df -h
+        if: ${{ !cancelled() }}
 
   deploy-docs-site:
     if: ${{ github.repository == 'renovatebot/renovate' && github.ref_name == 'main' && github.event_name == 'push' }}
@@ -991,7 +1006,7 @@ jobs:
     steps:
       - name: Post to Slack
         id: slack
-        uses: slackapi/slack-github-action@45a88b9581bfab2566dc881e2cd66d334e621e2c # v3.0.3
+        uses: slackapi/slack-github-action@0d95c9a7becc1e6e297d76df9bc735c44f4cbcbc # v3.0.5
         with:
           webhook: ${{ secrets.RENOVATEBOT_SLACK_WEBHOOK_MAIN_FAILURES }}
           webhook-type: incoming-webhook
@@ -1011,7 +1026,7 @@ jobs:
     steps:
       - name: Post to Slack
         id: slack
-        uses: slackapi/slack-github-action@45a88b9581bfab2566dc881e2cd66d334e621e2c # v3.0.3
+        uses: slackapi/slack-github-action@0d95c9a7becc1e6e297d76df9bc735c44f4cbcbc # v3.0.5
         with:
           webhook: ${{ secrets.RENOVATEBOT_SLACK_WEBHOOK_MAIN_FAILURES }}
           webhook-type: incoming-webhook

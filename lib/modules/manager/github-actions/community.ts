@@ -6,6 +6,7 @@ import { GithubReleasesDatasource } from '../../datasource/github-releases/index
 import { NpmDatasource } from '../../datasource/npm/index.ts';
 import { PypiDatasource } from '../../datasource/pypi/index.ts';
 import { RubyVersionDatasource } from '../../datasource/ruby-version/index.ts';
+import { RustVersionDatasource } from '../../datasource/rust-version/index.ts';
 import * as condaVersioning from '../../versioning/conda/index.ts';
 import * as npmVersioning from '../../versioning/npm/index.ts';
 import type { PackageDependency } from '../types.ts';
@@ -111,21 +112,50 @@ export const communityActions: Record<string, CommunityActionConfig> = {
     versioning: npmVersioning.id,
     packageName: 'astral-sh/uv',
   },
+  'azure/setup-helm': {
+    datasource: GithubReleasesDatasource.id,
+    depName: 'helm',
+    packageName: 'helm/helm',
+  },
+  // https://github.com/azure/setup-helm
   'denoland/setup-deno': {
     datasource: NpmDatasource.id,
     packageName: 'deno',
     withSchema: valSchema('deno-version'),
   },
+  // https://github.com/docker/setup-buildx-action
+  'docker/setup-buildx-action': {
+    datasource: GithubReleasesDatasource.id,
+    depName: 'buildx',
+    packageName: 'docker/buildx',
+  },
+  // https://github.com/docker/setup-compose-action
+  'docker/setup-compose-action': {
+    datasource: GithubReleasesDatasource.id,
+    packageName: 'docker/compose',
+  },
   // https://github.com/docker/setup-docker-action
   'docker/setup-docker-action': {
     datasource: GithubReleasesDatasource.id,
-    depName: 'docker/setup-docker-action',
+    depName: 'docker',
     packageName: 'moby/moby',
     extractVersion: '^docker-(?<version>.+)$',
+  },
+  // https://github.com/dtolnay/rust-toolchain
+  'dtolnay/rust-toolchain': {
+    datasource: RustVersionDatasource.id,
+    packageName: 'rust',
+    withSchema: valSchema('toolchain'),
   },
   'golangci/golangci-lint-action': {
     datasource: GithubReleasesDatasource.id,
     packageName: 'golangci/golangci-lint',
+  },
+  // https://github.com/helm/chart-testing-action
+  'helm/chart-testing-action': {
+    datasource: GithubReleasesDatasource.id,
+    depName: 'chart-testing',
+    packageName: 'helm/chart-testing',
   },
   'jakebailey/pyright-action': {
     datasource: NpmDatasource.id,
