@@ -391,12 +391,12 @@ export async function validateConfig(
                   }
                 }
                 if (isRegexOrGlobOption(key)) {
-                  errors.push(
-                    ...regexOrGlobValidator.check({
-                      val,
-                      currentPath,
-                    }),
-                  );
+                  const regexOrGlobResult = regexOrGlobValidator.check({
+                    val,
+                    currentPath,
+                  });
+                  errors.push(...regexOrGlobResult.errors);
+                  warnings.push(...regexOrGlobResult.warnings);
                 }
                 if (key === 'extends') {
                   for (const subval of val) {
@@ -1122,11 +1122,13 @@ async function validateGlobalConfig(
         }
 
         if (isRegexOrGlobOption(key)) {
+          const regexOrGlobResult = regexOrGlobValidator.check({
+            val,
+            currentPath: currentPath!,
+          });
           warnings.push(
-            ...regexOrGlobValidator.check({
-              val,
-              currentPath: currentPath!,
-            }),
+            ...regexOrGlobResult.errors,
+            ...regexOrGlobResult.warnings,
           );
         }
         if (key === 'gitNoVerify') {
