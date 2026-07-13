@@ -14,9 +14,6 @@ import type { GerritFindPRConfig } from './types.ts';
 import { convertGerritDateToISO, mapBranchStatusToLabel } from './utils.ts';
 
 const CODE_REVIEW_LABEL = 'Code-Review';
-/** Fallback used when the project's Code-Review label definition is unknown
- * or does not expose a "+2" value (kept for backwards compatibility). */
-const DEFAULT_CODE_REVIEW_APPROVAL_VALUE = 2;
 
 let repository: string;
 let username: string;
@@ -36,11 +33,18 @@ export function configureScm(
  * `autoApprove` is requested, based on the project's actual label
  * configuration instead of assuming "+2" is always available (some Gerrit
  * projects only define values up to "+1").
+ *
+ * Returns `null` if the project doesn't define a "Code-Review" label at all
+ * (e.g. it was removed from the project config), so that callers can skip
+ * voting instead of risking the whole push being rejected by Gerrit.
  */
-function getAutoApproveLabelValue(): number {
+function getAutoApproveLabelValue(): number | null {
   const codeReviewLabel = projectLabels[CODE_REVIEW_LABEL];
   if (!codeReviewLabel) {
-    return DEFAULT_CODE_REVIEW_APPROVAL_VALUE;
+    logger.warn(
+      `Cannot auto-approve: project "${repository}" does not define a "${CODE_REVIEW_LABEL}" label`,
+    );
+    return null;
   }
   return mapBranchStatusToLabel('green', codeReviewLabel);
 }
@@ -58,7 +62,9 @@ export async function pushForReview(options: {
   const pushOptions = ['notify=NONE', 'ready'];
   if (options.autoApprove) {
     const value = getAutoApproveLabelValue();
-    pushOptions.push(`label=${CODE_REVIEW_LABEL}+${value}`);
+    if (value !== null) {
+      pushOptions.push(`label=${CODE_REVIEW_LABEL}+${value}`);
+    }
   }
   if (isNonEmptyArray(options.labels)) {
     for (const label of options.labels) {

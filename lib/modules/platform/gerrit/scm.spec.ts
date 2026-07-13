@@ -1,5 +1,5 @@
 import { DateTime } from 'luxon';
-import { git, partial } from '~test/util.ts';
+import { git, logger, partial } from '~test/util.ts';
 import type { LongCommitSha } from '../../../util/schema-utils/git.ts';
 import { client as _client } from './client.ts';
 import type {
@@ -319,7 +319,7 @@ describe('modules/platform/gerrit/scm', () => {
       });
     });
 
-    it('adds Code-Review+2 push option when autoApprove is set and the project has no known Code-Review label definition', async () => {
+    it('skips voting and logs a warning when autoApprove is set but the project has no known Code-Review label definition', async () => {
       configureScm('test/repo', 'user');
       git.pushCommit.mockResolvedValueOnce(true);
       await expect(
@@ -334,8 +334,11 @@ describe('modules/platform/gerrit/scm', () => {
         sourceRef: 'renovate/feat',
         targetRef: 'refs/for/main',
         files: [],
-        pushOptions: ['notify=NONE', 'ready', 'label=Code-Review+2'],
+        pushOptions: ['notify=NONE', 'ready'],
       });
+      expect(logger.logger.warn).toHaveBeenCalledWith(
+        'Cannot auto-approve: project "test/repo" does not define a "Code-Review" label',
+      );
     });
 
     it('uses the maximum value configured for the Code-Review label when autoApprove is set', async () => {
@@ -617,7 +620,7 @@ describe('modules/platform/gerrit/scm', () => {
       expect(git.pushCommit).not.toHaveBeenCalled();
     });
 
-    it('commitAndPush() - existing change with new changes - auto-approve', async () => {
+    it('commitAndPush() - existing change with new changes - auto-approve without known Code-Review label skips vote', async () => {
       const existingChange = partial<GerritChange>({
         _number: 123456,
         change_id: 'I1bf983f8f6530c44826925b1308a45fe672408a6',
@@ -665,7 +668,7 @@ describe('modules/platform/gerrit/scm', () => {
         files: [],
         sourceRef: 'renovate/dependency-1.x',
         targetRef: 'refs/for/main',
-        pushOptions: ['notify=NONE', 'ready', 'label=Code-Review+2'],
+        pushOptions: ['notify=NONE', 'ready'],
       });
     });
   });
