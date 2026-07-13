@@ -7,8 +7,11 @@ import fs from 'fs-extra';
 import { glob } from 'glob';
 import MarkdownIt from 'markdown-it';
 import type Token from 'markdown-it/lib/token.mjs';
+import { GlobalConfig } from '../lib/config/global.ts';
+import { massageConfig } from '../lib/config/massage.ts';
 import { migrateConfig } from '../lib/config/migration.ts';
 import type { RenovateConfig } from '../lib/config/types.ts';
+import { validateConfig } from '../lib/config/validation.ts';
 import { init } from '../lib/logger/index.ts';
 
 await init();
@@ -22,10 +25,20 @@ const errorLogFormat = process.env.CI
   ? `::error file=%s,line=%d,endLine=%d,title=${errorTitle}::%s. ${errorBody}`
   : `${errorTitle} (%s lines %d-%d): %s`;
 
+const warningLogFormat = process.env.CI
+  ? `::warning file=%s,line=%d,endLine=%d,title=${errorTitle}::%s. ${errorBody}`
+  : `${errorTitle}\n(%s lines %d-%d):\n%s`;
+
 function reportIssue(file: string, token: Token, message: string): void {
   const [start, end] = token.map ?? [-1, -1];
   issues += 1;
   console.error(format(errorLogFormat, file, start + 1, end + 1, message));
+}
+
+function reportWarning(file: string, token: Token, message: string): void {
+  const [start, end] = token.map ?? [-1, -1];
+  issues += 1;
+  console.warn(format(warningLogFormat, file, start + 1, end + 1, message));
 }
 
 const markdownGlob = '{docs,lib}/**/*.md';
@@ -97,6 +110,34 @@ async function processFile(file: string): Promise<void> {
     const configuration = checkSchemaCompliantJson(file, token, validJson);
     if (configuration !== undefined) {
       checkMigrationStatus(file, token, configuration);
+
+      const massagedConfig = massageConfig(configuration);
+
+      if (!token.info.includes('configType=none')) {
+        const { errors, warnings } = await validateConfig(
+          token.info.includes('configType=global') ? 'global' : 'repo',
+          massagedConfig,
+        );
+
+        if (errors.length) {
+          reportIssue(
+            file,
+            token,
+            `The JSON contains Renovate configuration validation errors: ${JSON.stringify(errors, null, 2)}`,
+          );
+        }
+
+        if (
+          warnings.length &&
+          !token.info.includes('ignoreConfigWarnings=true')
+        ) {
+          reportWarning(
+            file,
+            token,
+            `The JSON contains Renovate configuration validation warnings: ${JSON.stringify(warnings, null, 2)}`,
+          );
+        }
+      }
     }
   }
 }
@@ -107,6 +148,16 @@ void (async () => {
   );
   addFormats(validator);
   validate = validator.compile(draft7MetaSchema);
+
+  GlobalConfig.set({
+    // any environment vars that any repository configuration in the documentation references
+    allowedEnv: [
+      'SOME_ENV_VARIABLE',
+      'GONOSUMDB',
+      'SOME_ENV_*',
+      'EXTRA_ENV_NAME',
+    ],
+  });
 
   const files = await glob(markdownGlob);
 

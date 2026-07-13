@@ -23,7 +23,6 @@
     "embroider": "/^@embroider//",
     "forge": "/^@forge//",
     "fullcalendar": "/^@fullcalendar//",
-    "hotchocolate": "/^HotChocolate\\./",
     "oracle-database": [
       "/^com.oracle.database.jdbc:/",
       "/^com.oracle.database.nls:/"
@@ -31,6 +30,11 @@
     "oxlint": ["oxlint", "eslint-plugin-oxlint"],
     "prometheus-simpleclient": "/^io.prometheus:simpleclient/",
     "russh": ["/^russh$/", "/^russh-keys$/"],
+    "solid": [
+      "@solid-design-system/tokens",
+      "@solid-design-system/styles",
+      "@solid-design-system/components"
+    ],
     "spfx": ["/^@microsoft/sp-/", "/^@microsoft/eslint-.+-spfx$/"],
     "spock": "/^org\\.spockframework:spock-/",
     "syncfusion-dotnet": "/^Syncfusion\\./",
@@ -69,6 +73,7 @@
     "arcus.security": "https://github.com/arcus-azure/arcus.security",
     "arcus.webapi": "https://github.com/arcus-azure/arcus.webapi",
     "arrow-kt": "https://github.com/arrow-kt/arrow",
+    "arrow-rs": "https://github.com/apache/arrow-rs",
     "aspire": [
       "https://github.com/dotnet/aspire",
       "https://github.com/microsoft/aspire"
@@ -130,6 +135,7 @@
     "babel": "https://github.com/babel/babel",
     "backstage": "https://github.com/backstage/backstage",
     "baset": "https://github.com/igmat/baset",
+    "better-auth": "https://github.com/better-auth/better-auth",
     "brave": "https://github.com/openzipkin/brave",
     "bugsnag-js": "https://github.com/bugsnag/bugsnag-js",
     "bull-board": "https://github.com/felixmosh/bull-board",
@@ -404,6 +410,7 @@
     "graphql-hive-gateway": "https://github.com/graphql-hive/gateway",
     "graphql-mesh": "https://github.com/Urigo/graphql-mesh",
     "graphql-modules": "https://github.com/Urigo/graphql-modules",
+    "graphql-platform": "https://github.com/ChilliCream/graphql-platform",
     "graphql-tools": "https://github.com/ardatan/graphql-tools",
     "graphql-yoga": "https://github.com/dotansimha/graphql-yoga",
     "graphqlcodegenerator": [
@@ -468,6 +475,7 @@
     "jna": "https://github.com/java-native-access/jna",
     "json-smart-v2": "https://github.com/netplex/json-smart-v2",
     "jsplumb": "https://github.com/jsplumb/jsplumb",
+    "junior": "https://github.com/getsentry/junior",
     "junit-framework": [
       "https://github.com/junit-team/junit5",
       "https://github.com/junit-team/junit-framework"
@@ -730,6 +738,7 @@
     "tiptap": "https://github.com/ueberdosis/tiptap",
     "tokio-prost": "https://github.com/tokio-rs/prost",
     "tokio-tracing": "https://github.com/tokio-rs/tracing",
+    "tomcat": "https://github.com/apache/tomcat",
     "tonic": "https://github.com/hyperium/tonic",
     "treat": "https://github.com/seek-oss/treat",
     "trpc": "https://github.com/trpc/trpc",
@@ -763,6 +772,7 @@
     "vstest": "https://github.com/microsoft/vstest",
     "vue": ["https://github.com/vuejs/vue", "https://github.com/vuejs/core"],
     "vue-cli": "https://github.com/vuejs/vue-cli",
+    "vue-language-tools": "https://github.com/vuejs/language-tools",
     "vuepress": "https://github.com/vuejs/vuepress",
     "vueuse": "https://github.com/vueuse/vueuse",
     "weasel": "https://github.com/JasperFx/weasel",

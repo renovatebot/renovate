@@ -34,6 +34,7 @@ import {
   TEMPORARY_ERROR,
   UNKNOWN_ERROR,
 } from '../../constants/error-messages.ts';
+import { instrument } from '../../instrumentation/index.ts';
 import { logger } from '../../logger/index.ts';
 import { ExternalHostError } from '../../types/errors/external-host-error.ts';
 import {
@@ -46,187 +47,189 @@ export default async function handleError(
   config: RenovateConfig,
   err: Error,
 ): Promise<RepositoryResult> {
-  if (err.message === REPOSITORY_UNINITIATED) {
-    logger.info('Repository is uninitiated - skipping');
-    delete config.branchList;
-    return err.message;
-  }
-  if (err.message === REPOSITORY_EMPTY) {
-    logger.info('Repository is empty - skipping');
-    delete config.branchList;
-    return err.message;
-  }
-  switch (err.message) {
-    case REPOSITORY_CLOSED_ONBOARDING:
-    case REPOSITORY_DISABLED:
-    case REPOSITORY_DISABLED_BY_CONFIG:
-    case REPOSITORY_NO_CONFIG:
-      logger.info('Repository is disabled - skipping');
+  return instrument('handleError', async () => {
+    if (err.message === REPOSITORY_UNINITIATED) {
+      logger.info('Repository is uninitiated - skipping');
+      delete config.branchList;
       return err.message;
-  }
-  if (err.message === REPOSITORY_ARCHIVED) {
-    logger.info('Repository is archived - skipping');
-    delete config.branchList;
-    return err.message;
-  }
-  if (err.message === REPOSITORY_MIRRORED) {
-    logger.info('Repository is a mirror - skipping');
-    delete config.branchList;
-    return err.message;
-  }
-  if (err.message === REPOSITORY_RENAMED) {
-    logger.info('Repository has been renamed - skipping');
-    delete config.branchList;
-    return err.message;
-  }
-  if (err.message === REPOSITORY_BLOCKED) {
-    delete config.branchList;
-    logger.info('Repository is blocked - skipping');
-    return err.message;
-  }
-  if (err.message === REPOSITORY_ACCESS_FORBIDDEN) {
-    delete config.branchList;
-    logger.info('Repository is forbidden');
-    return err.message;
-  }
-  if (err.message === REPOSITORY_NOT_FOUND) {
-    delete config.branchList;
-    logger.error('Repository is not found');
-    return err.message;
-  }
-  if (err.message === REPOSITORY_FORK_MODE_FORKED) {
-    logger.info(
-      'Repository is a fork and cannot be processed when Renovate is running in fork mode itself',
-    );
-    return err.message;
-  }
-  if (err.message === REPOSITORY_FORKED) {
-    logger.info(
-      'Repository is a fork and not manually configured - skipping - did you want to run with --fork-processing=enabled?',
-    );
-    return err.message;
-  }
-  if (err.message === REPOSITORY_CANNOT_FORK) {
-    logger.info('Cannot fork repository - skipping');
-    return err.message;
-  }
-  if (err.message === REPOSITORY_FORK_MISSING) {
-    logger.info('Cannot find fork required for fork mode - skipping');
-    return err.message;
-  }
-  if (err.message === REPOSITORY_NO_PACKAGE_FILES) {
-    logger.info('Repository has no package files - skipping');
-    return err.message;
-  }
-  if (err.message === NO_VULNERABILITY_ALERTS) {
-    logger.info('Repository has no vulnerability alerts - skipping');
-    return err.message;
-  }
-  if (err.message === REPOSITORY_CHANGED) {
-    logger.info('Repository has changed during renovation - aborting');
-    delete config.branchList;
-    return err.message;
-  }
-  if (err.message === CONFIG_VALIDATION) {
-    delete config.branchList;
-    if (config.configValidationError) {
-      logger.error({ error: err }, 'Repository has invalid config');
-    } else {
-      logger.warn({ error: err }, 'Repository has invalid config');
     }
-    await raiseConfigWarningIssue(config, err);
-    return err.message;
-  }
-  if (err.message === MISSING_API_CREDENTIALS) {
+    if (err.message === REPOSITORY_EMPTY) {
+      logger.info('Repository is empty - skipping');
+      delete config.branchList;
+      return err.message;
+    }
+    switch (err.message) {
+      case REPOSITORY_CLOSED_ONBOARDING:
+      case REPOSITORY_DISABLED:
+      case REPOSITORY_DISABLED_BY_CONFIG:
+      case REPOSITORY_NO_CONFIG:
+        logger.info('Repository is disabled - skipping');
+        return err.message;
+    }
+    if (err.message === REPOSITORY_ARCHIVED) {
+      logger.info('Repository is archived - skipping');
+      delete config.branchList;
+      return err.message;
+    }
+    if (err.message === REPOSITORY_MIRRORED) {
+      logger.info('Repository is a mirror - skipping');
+      delete config.branchList;
+      return err.message;
+    }
+    if (err.message === REPOSITORY_RENAMED) {
+      logger.info('Repository has been renamed - skipping');
+      delete config.branchList;
+      return err.message;
+    }
+    if (err.message === REPOSITORY_BLOCKED) {
+      delete config.branchList;
+      logger.info('Repository is blocked - skipping');
+      return err.message;
+    }
+    if (err.message === REPOSITORY_ACCESS_FORBIDDEN) {
+      delete config.branchList;
+      logger.info('Repository is forbidden');
+      return err.message;
+    }
+    if (err.message === REPOSITORY_NOT_FOUND) {
+      delete config.branchList;
+      logger.error('Repository is not found');
+      return err.message;
+    }
+    if (err.message === REPOSITORY_FORK_MODE_FORKED) {
+      logger.info(
+        'Repository is a fork and cannot be processed when Renovate is running in fork mode itself',
+      );
+      return err.message;
+    }
+    if (err.message === REPOSITORY_FORKED) {
+      logger.info(
+        'Repository is a fork and not manually configured - skipping - did you want to run with --fork-processing=enabled?',
+      );
+      return err.message;
+    }
+    if (err.message === REPOSITORY_CANNOT_FORK) {
+      logger.info('Cannot fork repository - skipping');
+      return err.message;
+    }
+    if (err.message === REPOSITORY_FORK_MISSING) {
+      logger.info('Cannot find fork required for fork mode - skipping');
+      return err.message;
+    }
+    if (err.message === REPOSITORY_NO_PACKAGE_FILES) {
+      logger.info('Repository has no package files - skipping');
+      return err.message;
+    }
+    if (err.message === NO_VULNERABILITY_ALERTS) {
+      logger.info('Repository has no vulnerability alerts - skipping');
+      return err.message;
+    }
+    if (err.message === REPOSITORY_CHANGED) {
+      logger.info('Repository has changed during renovation - aborting');
+      delete config.branchList;
+      return err.message;
+    }
+    if (err.message === CONFIG_VALIDATION) {
+      delete config.branchList;
+      if (config.configValidationError) {
+        logger.error({ error: err }, 'Repository has invalid config');
+      } else {
+        logger.warn({ error: err }, 'Repository has invalid config');
+      }
+      await raiseConfigWarningIssue(config, err);
+      return err.message;
+    }
+    if (err.message === MISSING_API_CREDENTIALS) {
+      delete config.branchList;
+      logger.info({ error: err }, MISSING_API_CREDENTIALS);
+      await raiseCredentialsWarningIssue(config, err);
+      return err.message;
+    }
+    if (err.message === CONFIG_SECRETS_EXPOSED) {
+      delete config.branchList;
+      logger.warn(
+        { error: err },
+        'Repository aborted due to potential secrets exposure',
+      );
+      return err.message;
+    }
+    if (err instanceof ExternalHostError) {
+      logger.warn(
+        { hostType: err.hostType, packageName: err.packageName, err: err.err },
+        'Host error',
+      );
+      logger.info('External host error causing abort - skipping');
+      delete config.branchList;
+      return EXTERNAL_HOST_ERROR;
+    }
+    if (
+      err.message.includes('No space left on device') ||
+      err.message === SYSTEM_INSUFFICIENT_DISK_SPACE
+    ) {
+      logger.error('Disk space error - skipping');
+      delete config.branchList;
+      return SYSTEM_INSUFFICIENT_DISK_SPACE;
+    }
+    if (err.message === PLATFORM_RATE_LIMIT_EXCEEDED) {
+      logger.warn('Rate limit exceeded - aborting');
+      delete config.branchList;
+      return err.message;
+    }
+    if (err.message === SYSTEM_INSUFFICIENT_MEMORY) {
+      logger.warn('Insufficient memory - aborting');
+      delete config.branchList;
+      return err.message;
+    }
+    if (err.message === PLATFORM_BAD_CREDENTIALS) {
+      logger.warn('Bad credentials - aborting');
+      delete config.branchList;
+      return err.message;
+    }
+    if (err.message === PLATFORM_INTEGRATION_UNAUTHORIZED) {
+      logger.warn('Integration unauthorized - aborting');
+      delete config.branchList;
+      return err.message;
+    }
+    if (err.message === PLATFORM_AUTHENTICATION_ERROR) {
+      logger.warn('Authentication error - aborting');
+      delete config.branchList;
+      return err.message;
+    }
+    if (err.message === TEMPORARY_ERROR) {
+      logger.info('Temporary error - aborting');
+      delete config.branchList;
+      return err.message;
+    }
+    if (err.message === MANAGER_LOCKFILE_ERROR) {
+      delete config.branchList;
+      logger.info('Lock file error - aborting');
+      delete config.branchList;
+      return err.message;
+    }
+    if (err.message.includes('The requested URL returned error: 5')) {
+      logger.warn({ err }, 'Git error - aborting');
+      delete config.branchList;
+      // rewrite this error
+      return EXTERNAL_HOST_ERROR;
+    }
+    if (
+      err.message.includes('remote end hung up unexpectedly') ||
+      err.message.includes('access denied or repository not exported')
+    ) {
+      logger.warn({ err }, 'Git error - aborting');
+      delete config.branchList;
+      // rewrite this error
+      return EXTERNAL_HOST_ERROR;
+    }
+    if (err.message.includes('fatal: not a git repository')) {
+      delete config.branchList;
+      return TEMPORARY_ERROR;
+    }
+    // Swallow this error so that other repositories can be processed
+    logger.error({ err }, `Repository has unknown error`);
+    // delete branchList to avoid cleaning up branches
     delete config.branchList;
-    logger.info({ error: err }, MISSING_API_CREDENTIALS);
-    await raiseCredentialsWarningIssue(config, err);
-    return err.message;
-  }
-  if (err.message === CONFIG_SECRETS_EXPOSED) {
-    delete config.branchList;
-    logger.warn(
-      { error: err },
-      'Repository aborted due to potential secrets exposure',
-    );
-    return err.message;
-  }
-  if (err instanceof ExternalHostError) {
-    logger.warn(
-      { hostType: err.hostType, packageName: err.packageName, err: err.err },
-      'Host error',
-    );
-    logger.info('External host error causing abort - skipping');
-    delete config.branchList;
-    return EXTERNAL_HOST_ERROR;
-  }
-  if (
-    err.message.includes('No space left on device') ||
-    err.message === SYSTEM_INSUFFICIENT_DISK_SPACE
-  ) {
-    logger.error('Disk space error - skipping');
-    delete config.branchList;
-    return SYSTEM_INSUFFICIENT_DISK_SPACE;
-  }
-  if (err.message === PLATFORM_RATE_LIMIT_EXCEEDED) {
-    logger.warn('Rate limit exceeded - aborting');
-    delete config.branchList;
-    return err.message;
-  }
-  if (err.message === SYSTEM_INSUFFICIENT_MEMORY) {
-    logger.warn('Insufficient memory - aborting');
-    delete config.branchList;
-    return err.message;
-  }
-  if (err.message === PLATFORM_BAD_CREDENTIALS) {
-    logger.warn('Bad credentials - aborting');
-    delete config.branchList;
-    return err.message;
-  }
-  if (err.message === PLATFORM_INTEGRATION_UNAUTHORIZED) {
-    logger.warn('Integration unauthorized - aborting');
-    delete config.branchList;
-    return err.message;
-  }
-  if (err.message === PLATFORM_AUTHENTICATION_ERROR) {
-    logger.warn('Authentication error - aborting');
-    delete config.branchList;
-    return err.message;
-  }
-  if (err.message === TEMPORARY_ERROR) {
-    logger.info('Temporary error - aborting');
-    delete config.branchList;
-    return err.message;
-  }
-  if (err.message === MANAGER_LOCKFILE_ERROR) {
-    delete config.branchList;
-    logger.info('Lock file error - aborting');
-    delete config.branchList;
-    return err.message;
-  }
-  if (err.message.includes('The requested URL returned error: 5')) {
-    logger.warn({ err }, 'Git error - aborting');
-    delete config.branchList;
-    // rewrite this error
-    return EXTERNAL_HOST_ERROR;
-  }
-  if (
-    err.message.includes('remote end hung up unexpectedly') ||
-    err.message.includes('access denied or repository not exported')
-  ) {
-    logger.warn({ err }, 'Git error - aborting');
-    delete config.branchList;
-    // rewrite this error
-    return EXTERNAL_HOST_ERROR;
-  }
-  if (err.message.includes('fatal: not a git repository')) {
-    delete config.branchList;
-    return TEMPORARY_ERROR;
-  }
-  // Swallow this error so that other repositories can be processed
-  logger.error({ err }, `Repository has unknown error`);
-  // delete branchList to avoid cleaning up branches
-  delete config.branchList;
 
-  return UNKNOWN_ERROR;
+    return UNKNOWN_ERROR;
+  });
 }

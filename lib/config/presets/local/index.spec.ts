@@ -41,19 +41,9 @@ describe('config/presets/local/index', () => {
           repo: 'some/repo',
           presetName: 'default',
         }),
-      ).rejects.toThrow();
-    });
-
-    it('throws for missing platform', async () => {
-      GlobalConfig.set({
-        platform: undefined,
-      });
-      await expect(
-        local.getPreset({
-          repo: 'some/repo',
-          presetName: 'default',
-        }),
-      ).rejects.toThrow();
+      ).rejects.toThrow(
+        "The platform you're using (unsupported-platform) does not support",
+      );
     });
 
     it('forwards to azure', async () => {

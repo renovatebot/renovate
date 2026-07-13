@@ -88,6 +88,52 @@ describe('workers/global/index', () => {
       expect(repoConfig.repository).toBe('test/repo');
     });
 
+    it('extracts admin-level options from object entry to top level', async () => {
+      const repoConfig = await globalWorker.getRepositoryConfig(
+        { ...globalConfig, onboarding: true },
+        {
+          repository: 'test/repo',
+          onboarding: false,
+          requireConfig: 'optional',
+          allowedCommands: ['^hack/vendor$'],
+          dryRun: 'full',
+          extends: [':automergeAll'],
+          packageRules: [{ matchPackageNames: ['lodash'], enabled: false }],
+        },
+      );
+      // Admin options promoted to top level and override global config
+      expect(repoConfig.onboarding).toBe(false);
+      expect(repoConfig.requireConfig).toBe('optional');
+      expect(repoConfig.allowedCommands).toEqual(['^hack/vendor$']);
+      expect(repoConfig.dryRun).toBe('full');
+      // Repo-level options remain in repositoryEntryConfig
+      expect(repoConfig.repositoryEntryConfig).toEqual({
+        extends: [':automergeAll'],
+        packageRules: [{ matchPackageNames: ['lodash'], enabled: false }],
+      });
+    });
+
+    it('does not set repositoryEntryConfig when only admin-level options are present', async () => {
+      const repoConfig = await globalWorker.getRepositoryConfig(globalConfig, {
+        repository: 'test/repo',
+        onboarding: false,
+      });
+      expect(repoConfig.onboarding).toBe(false);
+      expect(repoConfig.repositoryEntryConfig).toBeUndefined();
+    });
+
+    it('GlobalConfig.set picks up per-repo onboarding override', async () => {
+      const repoConfig = await globalWorker.getRepositoryConfig(
+        { ...globalConfig, onboarding: true },
+        {
+          repository: 'test/repo',
+          onboarding: false,
+        },
+      );
+      GlobalConfig.set(repoConfig);
+      expect(GlobalConfig.get('onboarding')).toBe(false);
+    });
+
     it('does not store repositoryEntryConfig for repositories[] string entries', async () => {
       const repoConfig = await globalWorker.getRepositoryConfig(
         globalConfig,

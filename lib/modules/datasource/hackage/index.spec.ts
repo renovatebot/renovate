@@ -47,12 +47,12 @@ describe('modules/datasource/hackage/index', () => {
         registryUrl: baseUrl,
         releases: [
           {
-            changelogUrl: baseUrl + 'package/base-4.19.0.1/changelog',
+            changelogUrl: `${baseUrl}package/base-4.19.0.1/changelog`,
             version: '4.19.0.1',
             isDeprecated: true,
           },
           {
-            changelogUrl: baseUrl + 'package/base-4.20.0.1/changelog',
+            changelogUrl: `${baseUrl}package/base-4.20.0.1/changelog`,
             version: '4.20.0.1',
             isDeprecated: false,
           },

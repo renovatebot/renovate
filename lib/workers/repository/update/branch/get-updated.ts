@@ -1,4 +1,5 @@
 import { isNonEmptyArray } from '@sindresorhus/is';
+import { GlobalConfig } from '../../../../config/global.ts';
 import { WORKER_FILE_UPDATE_FAILED } from '../../../../constants/error-messages.ts';
 import { logger } from '../../../../logger/index.ts';
 import { extractPackageFile, get } from '../../../../modules/manager/index.ts';
@@ -602,17 +603,16 @@ async function checkForPendingVersions(
       dep.currentVersion ??
       dep.currentValue;
     if (!resolvedVersion) {
-      logger.error(
+      logger.warn(
         {
           packageFile: packageFileName,
           manager,
           branchName: config.branchName,
           depName,
-          newVersion: resolvedVersion,
         },
-        `No new version found for '${depName}' after updating '${packageFileName}'`,
+        `Could not determine resolved version for '${depName}' after updating '${packageFileName}'; skipping pending-version check`,
       );
-      throw new Error(WORKER_FILE_UPDATE_FAILED);
+      continue;
     }
 
     if (resolvedVersion && upgradeInfo.pendingVersions.has(resolvedVersion)) {
@@ -657,7 +657,7 @@ async function checkForPendingVersions(
       );
       let stderr = `Artifact update for ${depName} resolved to version ${resolvedVersion}, which is a pending version that has not yet passed the Minimum Release Age threshold.`;
       stderr += `\nRenovate was attempting to update to ${expectedVersion}`;
-      stderr += `\nThis is (likely) not a bug in Renovate, but due to the way your project pins dependencies, _and_ how Renovate calls your package manager to update them.\nUntil Renovate supports specifying an exact update to your package manager (https://github.com/renovatebot/renovate/issues/41624), it is recommended to directly pin your dependencies (with \`rangeStrategy=pin\` for apps, or \`rangeStrategy=widen\` for libraries)\nSee also: https://docs.renovatebot.com/dependency-pinning/`;
+      stderr += `\nThis is (likely) not a bug in Renovate, but due to the way your project pins dependencies, _and_ how Renovate calls your package manager to update them.\nUntil Renovate supports specifying an exact update to your package manager (https://github.com/renovatebot/renovate/issues/41624), it is recommended to directly pin your dependencies (with \`rangeStrategy=pin\` for apps, or \`rangeStrategy=widen\` for libraries)\nSee also: ${GlobalConfig.get('productLinks').documentation}dependency-pinning/`;
 
       artifactErrors.push({
         fileName: packageFileName,

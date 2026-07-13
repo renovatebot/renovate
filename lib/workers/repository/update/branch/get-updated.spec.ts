@@ -96,7 +96,9 @@ describe('workers/repository/update/branch/get-updated', () => {
     it('handles autoreplace failure', async () => {
       config.upgrades.push({ manager: 'html', branchName: '' });
       autoReplace.doAutoReplace.mockResolvedValueOnce(null);
-      await expect(getUpdatedPackageFiles(config)).rejects.toThrow();
+      await expect(getUpdatedPackageFiles(config)).rejects.toThrow(
+        'update-failure',
+      );
     });
 
     it('handles autoreplace branch needs update', async () => {
@@ -133,7 +135,9 @@ describe('workers/repository/update/branch/get-updated', () => {
         manager: 'npm',
         branchName: 'some-branch',
       } satisfies BranchUpgradeConfig);
-      await expect(getUpdatedPackageFiles(config)).rejects.toThrow();
+      await expect(getUpdatedPackageFiles(config)).rejects.toThrow(
+        'update-failure',
+      );
     });
 
     it('handles content change', async () => {
@@ -1667,8 +1671,7 @@ describe('workers/repository/update/branch/get-updated', () => {
       });
     });
 
-    // should never happen, but our types allow this
-    it('rejects when an updated dependency has no new version', async () => {
+    it('skips the pending-version check when re-extracted dep has no resolvable version', async () => {
       config.upgrades.push({
         packageFile: 'composer.json',
         manager: 'composer',
@@ -1699,19 +1702,16 @@ describe('workers/repository/update/branch/get-updated', () => {
         ],
       });
 
-      await expect(getUpdatedPackageFiles(config)).rejects.toThrowError(
-        'update-failure',
-      );
-
-      expect(logger.logger.error).toHaveBeenCalledWith(
+      const res = await getUpdatedPackageFiles(config);
+      expect(res.artifactErrors).toHaveLength(0);
+      expect(logger.logger.warn).toHaveBeenCalledWith(
         {
           packageFile: 'composer.json',
           manager: 'composer',
           branchName: 'renovate/pin',
           depName: 'some-dep',
-          newVersion: undefined,
         },
-        "No new version found for 'some-dep' after updating 'composer.json'",
+        "Could not determine resolved version for 'some-dep' after updating 'composer.json'; skipping pending-version check",
       );
     });
 

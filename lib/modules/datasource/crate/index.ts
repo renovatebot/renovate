@@ -1,12 +1,10 @@
-import { simpleGit } from 'simple-git';
 import upath from 'upath';
 import { GlobalConfig } from '../../../config/global.ts';
 import { logger } from '../../../logger/index.ts';
 import * as memCache from '../../../util/cache/memory/index.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
-import { getChildEnv } from '../../../util/exec/utils.ts';
 import { privateCacheDir, readCacheFile } from '../../../util/fs/index.ts';
-import { simpleGitConfig } from '../../../util/git/config.ts';
+import { createSimpleGit } from '../../../util/git/index.ts';
 import { toSha256 } from '../../../util/hash.ts';
 import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider.ts';
 import { acquireLock } from '../../../util/mutex.ts';
@@ -23,13 +21,13 @@ import type {
   Release,
   ReleaseResult,
 } from '../types.ts';
-import { RegistryConfigSchema, ReleaseTimestamp } from './schema.ts';
-import type {
-  CrateMetadata,
-  CrateRecord,
-  RegistryFlavor,
-  RegistryInfo,
-} from './types.ts';
+import type { CrateMetadata } from './schema.ts';
+import {
+  CrateMetadataResponse,
+  RegistryConfig,
+  ReleaseTimestamp,
+} from './schema.ts';
+import type { CrateRecord, RegistryFlavor, RegistryInfo } from './types.ts';
 
 type CloneResult =
   | {
@@ -163,9 +161,9 @@ export class CrateDatasource extends Datasource {
    */
   private async fetchRegistryConfig(
     info: RegistryInfo,
-  ): Promise<RegistryConfigSchema | null> {
+  ): Promise<RegistryConfig | null> {
     const cacheKey = `crate-datasource/registry-config/${info.rawUrl}`;
-    const cached = memCache.get<RegistryConfigSchema>(cacheKey);
+    const cached = memCache.get<RegistryConfig>(cacheKey);
     if (cached) {
       return cached;
     }
@@ -174,7 +172,7 @@ export class CrateDatasource extends Datasource {
       try {
         const configPath = upath.join(info.clonePath, 'config.json');
         const content = await readCacheFile(configPath, 'utf8');
-        const parsed = Json.pipe(RegistryConfigSchema).parse(content);
+        const parsed = Json.pipe(RegistryConfig).parse(content);
         memCache.set(cacheKey, parsed);
         return parsed;
       } catch {
@@ -186,10 +184,7 @@ export class CrateDatasource extends Datasource {
     } else {
       try {
         const configUrl = joinUrlParts(info.rawUrl, 'config.json');
-        const { body } = await this.http.getJson(
-          configUrl,
-          RegistryConfigSchema,
-        );
+        const { body } = await this.http.getJson(configUrl, RegistryConfig);
         memCache.set(cacheKey, body);
         return body;
       } catch {
@@ -225,11 +220,8 @@ export class CrateDatasource extends Datasource {
     );
 
     try {
-      interface Response {
-        crate: CrateMetadata;
-      }
-      const response = await this.http.getJsonUnchecked<Response>(crateUrl);
-      return response.body.crate;
+      const { body } = await this.http.getJson(crateUrl, CrateMetadataResponse);
+      return body.crate;
     } catch (err) {
       logger.debug(
         { err, packageName, registryUrl: info.rawUrl },
@@ -380,9 +372,8 @@ export class CrateDatasource extends Datasource {
       const cacheKey = `crate-datasource/registry-clone-path/${registryFetchUrl}`;
       const lockKey = registryFetchUrl;
 
-      const executionTimeout =
-        GlobalConfig.get('executionTimeout', 15) * 60 * 1000;
-      const gitTimeout = GlobalConfig.get('gitTimeout', executionTimeout);
+      const executionTimeout = GlobalConfig.get('executionTimeout') * 60 * 1000;
+      const gitTimeout = GlobalConfig.get('gitTimeout') || executionTimeout;
       const releaseLock = await acquireLock(
         lockKey,
         'crate-registry',
@@ -444,10 +435,9 @@ export class CrateDatasource extends Datasource {
       `Cloning private cargo registry`,
     );
 
-    const git = simpleGit({
-      ...simpleGitConfig(),
-      maxConcurrentProcesses: 1,
-    }).env(getChildEnv());
+    const git = createSimpleGit({
+      config: { maxConcurrentProcesses: 1 },
+    });
 
     try {
       await git.clone(registryFetchUrl, clonePath, {

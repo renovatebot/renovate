@@ -17,7 +17,7 @@ export function parseGitAuthor(input: string): GitAuthor | null {
     let massagedBotEmail = false;
     if (input.includes('<') && input.includes('>')) {
       // try wrapping the name part in quotations
-      massagedInput = '"' + input.replace(regEx(/(\s?<)/), '"$1');
+      massagedInput = `"${input.replace(regEx(/(\s?<)/), '"$1')}`;
     }
     if (input.includes('[bot]@')) {
       // invalid github app/bot addresses

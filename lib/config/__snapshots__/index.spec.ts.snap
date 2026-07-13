@@ -11,7 +11,6 @@ exports[`config/index > mergeChildConfig(parentConfig, childConfig) > merges 1`]
   "prBodyDefinitions": {
     "Change": "All locks refreshed",
   },
-  "rebaseStalePrs": true,
   "recreateWhen": "always",
   "schedule": [
     "on monday",

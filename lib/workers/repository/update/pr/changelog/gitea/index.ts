@@ -65,7 +65,7 @@ export async function getReleaseNotesMd(
     logger.debug(`Missing content for changelog file, using ${changelogFile}`);
     return null;
   }
-  const changelogMd = fromBase64(fileRes.body.content) + '\n#\n##';
+  const changelogMd = `${fromBase64(fileRes.body.content)}\n#\n##`;
 
   return { changelogFile, changelogMd };
 }

@@ -94,14 +94,14 @@ describe('logger/pretty-stdout', () => {
         },
       });
       expect(prettyStdout.getDetails(rec)).toBe(
-        prettyStdout.indent(
+        `${prettyStdout.indent(
           codeBlock`
             "err": {"message": "something broke"}
             Error: something broke
                 at foo (file.js:1:1)
           `,
           true,
-        ) + '\n',
+        )}\n`,
       );
     });
 
@@ -113,13 +113,13 @@ describe('logger/pretty-stdout', () => {
         },
       });
       expect(prettyStdout.getDetails(rec)).toBe(
-        prettyStdout.indent(
+        `${prettyStdout.indent(
           codeBlock`
             Error: oops
                 at bar (file.js:2:2)
           `,
           true,
-        ) + '\n',
+        )}\n`,
       );
     });
   });
@@ -163,10 +163,10 @@ describe('logger/pretty-stdout', () => {
         },
       });
       expect(prettyStdout.formatRecord(rec, false)).toEqual(
-        codeBlock`
+        `${codeBlock`
           TRACE: test message
                  "config": {"a": "b", "d": ["e", "f"]}
-        ` + '\n',
+        `}\n`,
       );
     });
   });

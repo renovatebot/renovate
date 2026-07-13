@@ -1,6 +1,6 @@
 import { isString } from '@sindresorhus/is';
 import { DateTime } from 'luxon';
-import type { ZodType } from 'zod/v3';
+import type { ZodType } from 'zod/v4';
 import { GlobalConfig } from '../../../config/global.ts';
 import { logger } from '../../../logger/index.ts';
 import * as packageCache from '../../cache/package/index.ts';
@@ -32,8 +32,8 @@ export class PackageHttpCacheProvider extends AbstractHttpCacheProvider {
   constructor({
     namespace,
     softTtlMinutes = 15,
-    checkCacheControlHeader = false,
-    checkAuthorizationHeader = false,
+    checkCacheControlHeader,
+    checkAuthorizationHeader,
     writeSchema,
   }: PackageHttpCacheProviderOptions) {
     super();
@@ -140,22 +140,19 @@ export class PackageHttpCacheProvider extends AbstractHttpCacheProvider {
   }
 
   cacheAllowed<T>(resp: HttpResponse<T>): boolean {
-    const allowedViaGlobalConfig = GlobalConfig.get(
-      'cachePrivatePackages',
-      false,
-    );
+    const allowedViaGlobalConfig = GlobalConfig.get('cachePrivatePackages');
     if (allowedViaGlobalConfig) {
       return true;
     }
 
-    if (
-      this.checkCacheControlHeader &&
-      isString(resp.headers['cache-control'])
-    ) {
-      const isPublic = resp.headers['cache-control']
-        .toLocaleLowerCase()
-        .split(regEx(/\s*,\s*/))
-        .includes('public');
+    if (this.checkCacheControlHeader) {
+      const cacheControl = resp.headers['cache-control'];
+      const isPublic =
+        isString(cacheControl) &&
+        cacheControl
+          .toLocaleLowerCase()
+          .split(regEx(/\s*,\s*/))
+          .includes('public');
 
       if (!isPublic) {
         return false;

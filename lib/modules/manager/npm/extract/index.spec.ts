@@ -71,7 +71,7 @@ describe('modules/manager/npm/extract/index', () => {
           'backend/package.json',
           defaultExtractConfig,
         ),
-      ).rejects.toThrow();
+      ).rejects.toThrow('config-validation');
     });
 
     it('returns null if no deps', async () => {
@@ -129,7 +129,17 @@ describe('modules/manager/npm/extract/index', () => {
       expect(res).toMatchSnapshot({
         extractedConstraints: {},
         deps: [
-          ...[{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}],
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
           {
             depName: undefined,
             depType: 'resolutions',
@@ -522,7 +532,10 @@ describe('modules/manager/npm/extract/index', () => {
       );
       expect(res).toMatchSnapshot({
         deps: [
-          ...[{}, {}, {}, {}],
+          {},
+          {},
+          {},
+          {},
           {
             depType: 'volta',
             currentValue: '6.11.2',
@@ -644,6 +657,8 @@ describe('modules/manager/npm/extract/index', () => {
           p: 'Owner/P.git#v2.0.0',
           q: 'github:owner/q#semver:1.1.0',
           r: 'github:owner/r#semver:^1.0.0',
+          s: 'github:owner/repo.with.dots#v1.0.0',
+          t: 'git@github.com:owner/repo.with.dots.git#v1.0.0',
         },
       };
       const pJsonStr = JSON.stringify(pJson);
@@ -752,6 +767,18 @@ describe('modules/manager/npm/extract/index', () => {
             currentValue: '^1.0.0',
             datasource: 'github-tags',
             sourceUrl: 'https://github.com/owner/r',
+          },
+          {
+            depName: 's',
+            currentValue: 'v1.0.0',
+            datasource: 'github-tags',
+            sourceUrl: 'https://github.com/owner/repo.with.dots',
+          },
+          {
+            depName: 't',
+            currentValue: 'v1.0.0',
+            datasource: 'github-tags',
+            sourceUrl: 'https://github.com/owner/repo.with.dots',
           },
         ],
       });

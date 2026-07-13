@@ -124,11 +124,10 @@ describe('workers/repository/dependency-dashboard', () => {
       platform.findIssue.mockResolvedValueOnce({
         title: '',
         number: 1,
-        body:
-          Fixtures.get('dependency-dashboard-with-10-PR.txt').replace(
-            '- [ ]',
-            '- [x]',
-          ) + '\n\n - [x] <!-- rebase-all-open-prs -->',
+        body: `${Fixtures.get('dependency-dashboard-with-10-PR.txt').replace(
+          '- [ ]',
+          '- [x]',
+        )}\n\n - [x] <!-- rebase-all-open-prs -->`,
       });
       await dependencyDashboard.readDashboardBody(conf);
       expect(conf).toEqual({
@@ -1948,7 +1947,10 @@ None detected
         ],
       };
 
-      const result = dependencyDashboard.getAbandonedPackagesMd(packageFiles);
+      const result = dependencyDashboard.getAbandonedPackagesMd(
+        config,
+        packageFiles,
+      );
       expect(result).toEqual('');
     });
 
@@ -1968,7 +1970,10 @@ None detected
         ],
       };
 
-      const result = dependencyDashboard.getAbandonedPackagesMd(packageFiles);
+      const result = dependencyDashboard.getAbandonedPackagesMd(
+        config,
+        packageFiles,
+      );
 
       expect(result).toContain('## Abandoned Dependencies');
       expect(result).toContain(
@@ -2017,7 +2022,10 @@ None detected
         ],
       };
 
-      const result = dependencyDashboard.getAbandonedPackagesMd(packageFiles);
+      const result = dependencyDashboard.getAbandonedPackagesMd(
+        config,
+        packageFiles,
+      );
 
       expect(result).toContain('## Abandoned Dependencies');
       expect(result).toContain(
@@ -2051,7 +2059,10 @@ None detected
         ],
       };
 
-      const result = dependencyDashboard.getAbandonedPackagesMd(packageFiles);
+      const result = dependencyDashboard.getAbandonedPackagesMd(
+        config,
+        packageFiles,
+      );
 
       expect(result).toContain('## Abandoned Dependencies');
       expect(result).toContain(
@@ -2076,7 +2087,10 @@ None detected
         ],
       };
 
-      const result = dependencyDashboard.getAbandonedPackagesMd(packageFiles);
+      const result = dependencyDashboard.getAbandonedPackagesMd(
+        config,
+        packageFiles,
+      );
       expect(result).toEqual('');
     });
   });

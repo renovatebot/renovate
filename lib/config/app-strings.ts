@@ -4,11 +4,11 @@ import type { PlatformId } from '../constants/index.ts';
 import { regEx } from '../util/regex.ts';
 
 const configFilePatterns = [
-  'renovate.json{,5}',
-  '.github/renovate.json{,5}',
-  '.gitlab/renovate.json{,5}',
+  'renovate.json{,c,5}',
+  '.github/renovate.json{,c,5}',
+  '.gitlab/renovate.json{,c,5}',
   '.renovaterc',
-  '.renovaterc.json{,5}',
+  '.renovaterc.json{,c,5}',
   'package.json',
 ];
 
@@ -24,7 +24,7 @@ export function getConfigFileNames(platform?: PlatformId): string[] {
   let filteredConfigFileNames = [...configFileNames];
 
   if (isNonEmptyString(platform)) {
-    const platfromRe = regEx('\\.(?<platform>.*)\\/renovate\\.json[5]?$');
+    const platfromRe = regEx('\\.(?<platform>.*)\\/renovate\\.json[c5]?$');
     filteredConfigFileNames = configFileNames.filter((filename) => {
       const matchResult = platfromRe.exec(filename);
       if (!matchResult) {
@@ -38,6 +38,7 @@ export function getConfigFileNames(platform?: PlatformId): string[] {
 
     if (!['github', 'gitlab'].includes(platform) && platform !== 'local') {
       filteredConfigFileNames.push(`.${platform}/renovate.json`);
+      filteredConfigFileNames.push(`.${platform}/renovate.jsonc`);
       filteredConfigFileNames.push(`.${platform}/renovate.json5`);
     }
   }

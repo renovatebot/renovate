@@ -1,4 +1,4 @@
-import { z } from 'zod/v3';
+import { z } from 'zod/v4';
 
 import { escapeRegExp, regEx } from '../../../util/regex.ts';
 import { DockerDatasource } from '../../datasource/docker/index.ts';
@@ -6,6 +6,7 @@ import { GithubReleasesDatasource } from '../../datasource/github-releases/index
 import { NpmDatasource } from '../../datasource/npm/index.ts';
 import { PypiDatasource } from '../../datasource/pypi/index.ts';
 import { RubyVersionDatasource } from '../../datasource/ruby-version/index.ts';
+import { RustVersionDatasource } from '../../datasource/rust-version/index.ts';
 import * as condaVersioning from '../../versioning/conda/index.ts';
 import * as npmVersioning from '../../versioning/npm/index.ts';
 import type { PackageDependency } from '../types.ts';
@@ -22,13 +23,10 @@ export interface CommunityActionConfig {
    */
   isInvalid?: (value: string) => boolean;
 
-  withSchema?: z.ZodEffects<
-    z.ZodTypeAny,
-    { val: string | undefined } & Record<string, unknown>
-  >;
+  withSchema?: z.ZodType<{ val: string | undefined } & Record<string, unknown>>;
 }
 
-type ActionSchema = z.ZodEffects<z.ZodTypeAny, PackageDependency>;
+type ActionSchema = z.ZodType<PackageDependency>;
 
 function actionSchema(
   name: string,
@@ -37,7 +35,7 @@ function actionSchema(
   return z
     .object({
       uses: matchAction(name),
-      with: withSchema ?? VersionValSchema,
+      with: withSchema ?? VersionVal,
     })
     .transform(
       ({ with: { val, ...meta } }): PackageDependency => ({
@@ -80,19 +78,17 @@ function parseValue(
   return { currentValue, depType: 'uses-with' };
 }
 
-function valSchema(
-  key: string,
-): z.ZodEffects<z.ZodTypeAny, { val: string | undefined }> {
+function valSchema(key: string): z.ZodType<{ val: string | undefined }> {
   return z
     .object({ [key]: z.string().optional() })
     .transform((val) => ({ val: val[key] }));
 }
 
-const VersionValSchema = z
+const VersionVal = z
   .object({ version: z.string().optional() })
   .transform((val) => ({ val: val.version }));
 
-const InstallBinaryWithSchema = z
+const InstallBinaryWith = z
   .object({ repo: z.string(), tag: z.string() })
   .transform(({ repo, tag }) => ({ packageName: repo, val: tag }));
 
@@ -116,21 +112,50 @@ export const communityActions: Record<string, CommunityActionConfig> = {
     versioning: npmVersioning.id,
     packageName: 'astral-sh/uv',
   },
+  'azure/setup-helm': {
+    datasource: GithubReleasesDatasource.id,
+    depName: 'helm',
+    packageName: 'helm/helm',
+  },
+  // https://github.com/azure/setup-helm
   'denoland/setup-deno': {
     datasource: NpmDatasource.id,
     packageName: 'deno',
     withSchema: valSchema('deno-version'),
   },
+  // https://github.com/docker/setup-buildx-action
+  'docker/setup-buildx-action': {
+    datasource: GithubReleasesDatasource.id,
+    depName: 'buildx',
+    packageName: 'docker/buildx',
+  },
+  // https://github.com/docker/setup-compose-action
+  'docker/setup-compose-action': {
+    datasource: GithubReleasesDatasource.id,
+    packageName: 'docker/compose',
+  },
   // https://github.com/docker/setup-docker-action
   'docker/setup-docker-action': {
     datasource: GithubReleasesDatasource.id,
-    depName: 'docker/setup-docker-action',
+    depName: 'docker',
     packageName: 'moby/moby',
     extractVersion: '^docker-(?<version>.+)$',
+  },
+  // https://github.com/dtolnay/rust-toolchain
+  'dtolnay/rust-toolchain': {
+    datasource: RustVersionDatasource.id,
+    packageName: 'rust',
+    withSchema: valSchema('toolchain'),
   },
   'golangci/golangci-lint-action': {
     datasource: GithubReleasesDatasource.id,
     packageName: 'golangci/golangci-lint',
+  },
+  // https://github.com/helm/chart-testing-action
+  'helm/chart-testing-action': {
+    datasource: GithubReleasesDatasource.id,
+    depName: 'chart-testing',
+    packageName: 'helm/chart-testing',
   },
   'jakebailey/pyright-action': {
     datasource: NpmDatasource.id,
@@ -140,7 +165,7 @@ export const communityActions: Record<string, CommunityActionConfig> = {
   'jaxxstorm/action-install-gh-release': {
     datasource: GithubReleasesDatasource.id,
     packageName: '', // determined from `repo` input
-    withSchema: InstallBinaryWithSchema,
+    withSchema: InstallBinaryWith,
   },
   'oven-sh/setup-bun': {
     datasource: NpmDatasource.id,
@@ -176,7 +201,7 @@ export const communityActions: Record<string, CommunityActionConfig> = {
   'sigoden/install-binary': {
     datasource: GithubReleasesDatasource.id,
     packageName: '', // determined from `repo` input
-    withSchema: InstallBinaryWithSchema,
+    withSchema: InstallBinaryWith,
   },
   'zizmorcore/zizmor-action': {
     datasource: DockerDatasource.id,

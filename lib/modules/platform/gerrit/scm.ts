@@ -1,14 +1,12 @@
+import { randomUUID } from 'node:crypto';
 import { isNonEmptyArray } from '@sindresorhus/is';
-import { randomUUID } from 'crypto';
 import { DateTime } from 'luxon';
 import { logger } from '../../../logger/index.ts';
 import * as git from '../../../util/git/index.ts';
-import type {
-  CommitFilesConfig,
-  FileChange,
-  LongCommitSha,
-} from '../../../util/git/types.ts';
+import type { CommitFilesConfig, FileChange } from '../../../util/git/types.ts';
 import { hash } from '../../../util/hash.ts';
+import type { LongCommitSha } from '../../../util/schema-utils/git.ts';
+import { isLongCommitSha } from '../../../util/schema-utils/git.ts';
 import { DefaultGitScm } from '../default-scm.ts';
 import { client } from './client.ts';
 import type { GerritFindPRConfig } from './types.ts';
@@ -77,8 +75,8 @@ export class GerritScm extends DefaultGitScm {
       requestDetails: ['CURRENT_REVISION'],
     };
     const change = (await client.findChanges(repository, searchConfig)).pop();
-    if (change) {
-      return change.current_revision as LongCommitSha;
+    if (isLongCommitSha(change?.current_revision)) {
+      return change.current_revision;
     }
     return git.getBranchCommit(branchName);
   }
@@ -259,5 +257,5 @@ export class GerritScm extends DefaultGitScm {
  * TODO: Gerrit don't accept longer Change-IDs (sha256), but what happens with this https://git-scm.com/docs/hash-function-transition/ ?
  */
 function generateChangeId(): string {
-  return 'I' + hash(randomUUID(), 'sha1');
+  return `I${hash(randomUUID(), 'sha1')}`;
 }

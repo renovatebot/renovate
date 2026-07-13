@@ -176,7 +176,10 @@ export function updateDependency({
     } else {
       oldVersion = parsedContents[depType as NpmDepType]![depName] as string;
     }
-    if (oldVersion === newValue) {
+    if (
+      oldVersion === newValue &&
+      (!upgrade.newName || upgrade.newName === depName)
+    ) {
       logger.trace('Version is already updated');
       return fileContent;
     }
@@ -203,7 +206,7 @@ export function updateDependency({
         newValue!,
         overrideDepParents,
       );
-      if (upgrade.newName) {
+      if (upgrade.newName && upgrade.newName !== depName) {
         newFileContent = replaceAsString(
           parsedContents,
           newFileContent,
@@ -254,7 +257,7 @@ export function updateDependency({
           // TODO #22198
           newValue!,
         );
-        if (upgrade.newName) {
+        if (upgrade.newName && upgrade.newName !== depName) {
           if (depKey === `**/${depName}`) {
             // handles the case where a replacement is in a resolution
             upgrade.newName = `**/${upgrade.newName}`;
@@ -272,7 +275,7 @@ export function updateDependency({
     }
     if (parsedContents?.dependenciesMeta) {
       for (const [depKey] of Object.entries(parsedContents.dependenciesMeta)) {
-        if (depKey.startsWith(depName + '@')) {
+        if (depKey.startsWith(`${depName}@`)) {
           newFileContent = replaceAsString(
             parsedContents,
             newFileContent,

@@ -16,6 +16,7 @@ import {
   ensurePathPrefix,
   joinUrlParts,
   parseLinkHeader,
+  parseUrl,
 } from '../../../util/url.ts';
 import { id as dockerVersioningId } from '../../versioning/docker/index.ts';
 import { Datasource } from '../datasource.ts';
@@ -48,6 +49,8 @@ import {
   ManifestJson,
   OciHelmConfig,
   OciImageConfig,
+  QuayTagsResponse,
+  RegistryTagsList,
 } from './schema.ts';
 
 const defaultConfig = {
@@ -453,6 +456,7 @@ export class DockerDatasource extends Datasource {
         namespace: 'datasource-docker-architecture',
         key: `${registryHost}:${dockerRepository}@${currentDigest}`,
         ttlMinutes: 1440 * 28,
+        shouldCacheResult: isNonEmptyString,
       },
       () =>
         this._getImageArchitecture(
@@ -655,19 +659,10 @@ export class DockerDatasource extends Datasource {
     let page = 1;
     let url: string | null = pageUrl(page);
     while (url && page <= 20) {
-      interface QuayRestDockerTags {
-        tags: {
-          name: string;
-        }[];
-        has_additional: boolean;
-      }
-
-      // typescript issue :-/
-      // oxlint-disable typescript/no-unnecessary-type-assertion
-      const res = (await this.http.getJsonUnchecked<QuayRestDockerTags>(
+      const res: HttpResponse<QuayTagsResponse> = await this.http.getJson(
         url,
-      )) as HttpResponse<QuayRestDockerTags>;
-      // oxlint-enable typescript/no-unnecessary-type-assertion
+        QuayTagsResponse,
+      );
       const pageTags = res.body.tags.map((tag) => tag.name);
       tags = tags.concat(pageTags);
       page += 1;
@@ -708,16 +703,17 @@ export class DockerDatasource extends Datasource {
     ];
     const pages = hostsNeedingAllPages.includes(registryHost)
       ? 1000
-      : GlobalConfig.get('dockerMaxPages', 20);
+      : GlobalConfig.get('dockerMaxPages');
     logger.trace({ registryHost, dockerRepository, pages }, 'docker.getTags');
     let foundMaxResultsError = false;
     do {
-      let res: HttpResponse<{ tags: string[] }>;
+      let res: HttpResponse<RegistryTagsList>;
       try {
-        res = await this.http.getJsonUnchecked<{ tags: string[] }>(url, {
-          headers,
-          noAuth: true,
-        });
+        res = await this.http.getJson(
+          url,
+          { headers, noAuth: true },
+          RegistryTagsList,
+        );
       } catch (err) {
         if (
           !foundMaxResultsError &&
@@ -738,7 +734,12 @@ export class DockerDatasource extends Datasource {
         // Artifactory bug: next link comes back without virtual-repo prefix (RTFACT-18971)
         if (linkHeader?.next?.last) {
           // parse the current URL, strip any old "last" param, then set the new one
-          const parsed: URL = new URL(url);
+          const parsed = parseUrl(url);
+          // v8 ignore if: url is always a valid HTTP URL as `ensurePathPrefix`
+          if (!parsed) {
+            url = null;
+            break;
+          }
           parsed.searchParams.delete('last');
           parsed.searchParams.set('last', linkHeader.next.last);
           url = parsed.href;
@@ -793,7 +794,7 @@ export class DockerDatasource extends Datasource {
         logger.debug(
           `Retrying Tags for ${registryHost}/${dockerRepository} using library/ prefix`,
         );
-        return this.getTags(registryHost, 'library/' + dockerRepository);
+        return this.getTags(registryHost, `library/${dockerRepository}`);
       }
       // JFrog Artifactory - Retry handling when resolving Docker Official Images
       // These follow the format of {{registryHost}}{{jFrogRepository}}/library/{{dockerRepository}}
@@ -812,7 +813,7 @@ export class DockerDatasource extends Datasource {
 
         return this.getTags(
           registryHost,
-          jfrogRepository + '/library/' + dockerImage,
+          `${jfrogRepository}/library/${dockerImage}`,
         );
       }
       if (err.statusCode === 429 && isDockerHost(registryHost)) {
@@ -1014,7 +1015,7 @@ export class DockerDatasource extends Datasource {
         return this.getDigest(
           {
             registryUrl,
-            packageName: 'library/' + packageName,
+            packageName: `library/${packageName}`,
             currentDigest,
           },
           newValue,
@@ -1056,6 +1057,7 @@ export class DockerDatasource extends Datasource {
         namespace: 'datasource-docker-digest',
         key: `${registryHost}:${dockerRepository}:${newTag}${digest}`,
         fallback: true,
+        shouldCacheResult: isNonEmptyString,
       },
       () => this._getDigest(config, newValue),
     );
@@ -1067,7 +1069,7 @@ export class DockerDatasource extends Datasource {
     let url = `https://hub.docker.com/v2/repositories/${dockerRepository}/tags?page_size=1000&ordering=last_updated`;
 
     const cache = await DockerHubCache.init(dockerRepository);
-    const maxPages = GlobalConfig.get('dockerMaxPages', 20);
+    const maxPages = GlobalConfig.get('dockerMaxPages');
     let page = 0,
       needNextPage = true;
     while (needNextPage && page < maxPages) {

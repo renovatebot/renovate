@@ -3,6 +3,7 @@ import { logger } from '../../logger/index.ts';
 import { detectPlatform } from '../common.ts';
 import * as hostRules from '../host-rules.ts';
 import { regEx } from '../regex.ts';
+import { parseUrl } from '../url.ts';
 
 export function parseGitUrl(url: string): gitUrlParse.GitUrl {
   return gitUrlParse(url);
@@ -50,7 +51,12 @@ export function getHttpUrl(url: string, token?: string): string {
       break;
   }
 
-  return new URL(parsedUrl.toString(protocol)).href;
+  const httpUrl = parseUrl(parsedUrl.toString(protocol));
+  // v8 ignore if: git-url-parse always produces a parseable URL string
+  if (!httpUrl) {
+    throw new Error(`Failed to parse git URL: ${parsedUrl.toString(protocol)}`);
+  }
+  return httpUrl.href;
 }
 
 export function getRemoteUrlWithToken(url: string, hostType?: string): string {
