@@ -311,22 +311,6 @@ describe('workers/repository/update/pr/changelog/azure/index', () => {
       });
     });
 
-    it('handles empty tree entries', async () => {
-      vi.spyOn(azureHelper, 'getItem').mockResolvedValueOnce({
-        objectId: 'some-object-id',
-        path: '/',
-      });
-
-      // Mock getTrees to return an empty tree or a tree with no entries
-      vi.spyOn(azureHelper, 'getTrees').mockResolvedValueOnce({
-        objectId: 'some-object-id',
-        treeEntries: [], // Empty array of files
-      });
-
-      const res = await getReleaseNotesMdFile(azureProject);
-      expect(res).toBeNull();
-    });
-
     it('handles null tree entries', async () => {
       vi.spyOn(azureHelper, 'getItem').mockResolvedValueOnce({
         objectId: 'some-object-id',
@@ -463,35 +447,6 @@ describe('workers/repository/update/pr/changelog/azure/index', () => {
 
       // Check that the extracted project was passed to getItem
       expect(azureHelper.getItem).toHaveBeenCalledTimes(2);
-      expect(azureHelper.getItem).toHaveBeenNthCalledWith(
-        1,
-        'some-repo',
-        '/',
-        'project-name',
-      );
-    });
-
-    it('extracts project name with special characters', async () => {
-      vi.spyOn(azureHelper, 'getItem').mockResolvedValue({
-        objectId: 'test-id',
-      });
-
-      vi.spyOn(azureHelper, 'getTrees').mockResolvedValue({
-        treeEntries: [
-          {
-            gitObjectType: GitObjectType.Blob,
-            relativePath: 'CHANGELOG.md',
-          },
-        ],
-      });
-
-      const apiUrl =
-        'https://dev.azure.com/organization/project-name/_apis/git/repositories';
-      await getReleaseNotesMdFile({
-        ...azureProject,
-        apiBaseUrl: apiUrl,
-      });
-
       expect(azureHelper.getItem).toHaveBeenNthCalledWith(
         1,
         'some-repo',

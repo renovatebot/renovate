@@ -4,6 +4,7 @@ import changelogFilenameRegex from 'changelog-filename-regex';
 import upath from 'upath';
 import { logger } from '../../../../../../logger/index.ts';
 import * as azureHelper from '../../../../../../modules/platform/azure/azure-helper.ts';
+import { regEx } from '../../../../../../util/regex.ts';
 import { ensureTrailingSlash } from '../../../../../../util/url.ts';
 import { compareChangelogFilePath } from '../common.ts';
 import type {
@@ -34,8 +35,8 @@ export async function getReleaseNotesMd(
   const urlEncodedRepo = encodeURIComponent(repository);
 
   // Extract project name from API base URL (last path segment before "_apis/")
-  const projectMatch = /\/([^/]+)\/_apis\//.exec(apiBaseUrl);
-  const project = projectMatch?.[1] ?? '';
+  const projectMatch = regEx('/(?<project>[^/]+)/_apis/').exec(apiBaseUrl);
+  const project = projectMatch?.groups?.project ?? '';
 
   const sourceDirectoryId = await azureHelper.getItem(
     urlEncodedRepo,
@@ -63,8 +64,10 @@ export async function getReleaseNotesMd(
     return null;
   }
 
-  const files = allFiles.filter((f) =>
-    changelogFilenameRegex.test(upath.basename(f.relativePath ?? '')),
+  const files = allFiles.filter(
+    (f): f is typeof f & { relativePath: string } =>
+      is.string(f.relativePath) &&
+      changelogFilenameRegex.test(upath.basename(f.relativePath)),
   );
 
   if (!files.length) {
@@ -73,7 +76,7 @@ export async function getReleaseNotesMd(
   }
 
   let changelogFile = files
-    .sort((a, b) => compareChangelogFilePath(a.relativePath!, b.relativePath!))
+    .sort((a, b) => compareChangelogFilePath(a.relativePath, b.relativePath))
     .shift()?.relativePath;
 
   changelogFile = `${sourceDirectory ? ensureTrailingSlash(sourceDirectory) : ''}${changelogFile}`;

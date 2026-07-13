@@ -1,9 +1,6 @@
 import { Readable } from 'node:stream';
 import type { IGitApi } from 'azure-devops-node-api/GitApi.js';
-import {
-  GitPullRequestMergeStrategy,
-  type GitRef,
-} from 'azure-devops-node-api/interfaces/GitInterfaces.js';
+import { GitPullRequestMergeStrategy } from 'azure-devops-node-api/interfaces/GitInterfaces.js';
 import type { PolicyConfiguration } from 'azure-devops-node-api/interfaces/PolicyInterfaces.js';
 import type { IPolicyApi } from 'azure-devops-node-api/PolicyApi.js';
 import type { MockedObject } from 'vitest';
@@ -513,24 +510,6 @@ describe('modules/platform/azure/azure-helper', () => {
       );
       const res = await azureHelper.getAllProjectTeams('projectId');
       expect(res).toEqual(allTeams);
-    });
-  });
-
-  describe('getTags', () => {
-    it('should get tags', async () => {
-      azureApi.gitApi.mockResolvedValueOnce(
-        partial<IGitApi>({
-          getRefs: vi.fn(() =>
-            Promise.resolve([
-              partial<GitRef>({
-                name: 'refs/tags/1.0.0',
-              }),
-            ]),
-          ),
-        }),
-      );
-      const res = await azureHelper.getTags('123');
-      expect(res).toEqual([{ name: 'refs/tags/1.0.0' }]);
     });
   });
 
