@@ -178,6 +178,12 @@
   },
   "overrides": [
     {
+      "files": ["tools/**", "**/*.spec.ts"],
+      "rules": {
+        "renovate/no-sync-io": "warn"
+      }
+    },
+    {
       "files": ["**/*.spec.ts", "test/**"],
       "rules": {
         "no-template-curly-in-string": "off",
