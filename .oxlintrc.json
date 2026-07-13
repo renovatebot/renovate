@@ -71,6 +71,7 @@
     "renovate/no-hardcoded-docs-url": "error",
     "renovate/no-new-url": "error",
     "renovate/no-tools-import": "error",
+    "renovate/v8-ignore-reason": "warn",
     "renovate/zod-schema-naming": "error",
 
     "typescript/await-thenable": "error",
