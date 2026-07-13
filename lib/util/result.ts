@@ -54,7 +54,7 @@ function isZodResult<Output extends Val>(
 
 function fromZodResult<ZodOutput extends Val>(
   input: ZodSafeParseResult<ZodOutput>,
-): Result<ZodOutput, ZodError<unknown>> {
+): Result<ZodOutput, ZodError> {
   return input.success ? Result.ok(input.data) : Result.err(input.error);
 }
 
@@ -145,7 +145,7 @@ export class Result<T extends Val, E extends Val = Error> {
    */
   static wrap<T extends Val>(
     zodResult: ZodSafeParseResult<T>,
-  ): Result<T, ZodError<unknown>>;
+  ): Result<T, ZodError>;
   static wrap<T extends Val, E extends Val = Error>(
     callback: () => RawValue<T>,
   ): Result<T, E>;
@@ -165,7 +165,7 @@ export class Result<T extends Val, E extends Val = Error> {
       | (() => Promise<RawValue<T>>)
       | Promise<Result<T, EE>>
       | Promise<RawValue<T>>,
-  ): Result<T, ZodError<unknown>> | Result<T, E | EE> | AsyncResult<T, E | EE> {
+  ): Result<T, ZodError> | Result<T, E | EE> | AsyncResult<T, E | EE> {
     if (isZodResult<T>(input)) {
       return fromZodResult<T>(input);
     }
@@ -432,10 +432,10 @@ export class Result<T extends Val, E extends Val = Error> {
   ): AsyncResult<U, E | EE>;
   transform<U extends Val>(
     fn: (value: T) => ZodSafeParseResult<NonNullable<U>>,
-  ): Result<U, E | ZodError<unknown>>;
+  ): Result<U, E | ZodError>;
   transform<U extends Val>(
     fn: (value: T) => Promise<ZodSafeParseResult<NonNullable<U>>>,
-  ): AsyncResult<U, E | ZodError<unknown>>;
+  ): AsyncResult<U, E | ZodError>;
   transform<U extends Val, EE extends Val>(
     fn: (value: T) => Promise<Result<U, E | EE>>,
   ): AsyncResult<U, E | EE>;
@@ -454,9 +454,7 @@ export class Result<T extends Val, E extends Val = Error> {
       | Promise<Result<U, E | EE>>
       | Promise<RawValue<U>>
       | RawValue<U>,
-  ):
-    | Result<U, E | EE | ZodError<unknown>>
-    | AsyncResult<U, E | EE | ZodError<unknown>> {
+  ): Result<U, E | EE | ZodError> | AsyncResult<U, E | EE | ZodError> {
     if (!this.res.ok) {
       return Result.err(this.res.err);
     }
@@ -537,7 +535,7 @@ export class Result<T extends Val, E extends Val = Error> {
   static parse<Schema extends ZodType<any, any, any>>(
     input: unknown,
     schema: Schema,
-  ): Result<NonNullable<ZodOutput<Schema>>, ZodError<unknown>> {
+  ): Result<NonNullable<ZodOutput<Schema>>, ZodError> {
     const parseResult = schema
       .transform((result, ctx): NonNullable<ZodOutput<Schema>> => {
         if (result === undefined) {
@@ -569,7 +567,7 @@ export class Result<T extends Val, E extends Val = Error> {
    */
   parse<Schema extends ZodType<any, any, any>>(
     schema: Schema,
-  ): Result<NonNullable<ZodOutput<Schema>>, E | ZodError<unknown>> {
+  ): Result<NonNullable<ZodOutput<Schema>>, E | ZodError> {
     if (this.res.ok) {
       return Result.parse(this.res.val, schema);
     }
@@ -764,10 +762,10 @@ export class AsyncResult<T extends Val, E extends Val> implements PromiseLike<
   ): AsyncResult<U, E | EE>;
   transform<U extends Val>(
     fn: (value: T) => ZodSafeParseResult<NonNullable<U>>,
-  ): AsyncResult<U, E | ZodError<unknown>>;
+  ): AsyncResult<U, E | ZodError>;
   transform<U extends Val>(
     fn: (value: T) => Promise<ZodSafeParseResult<NonNullable<U>>>,
-  ): AsyncResult<U, E | ZodError<unknown>>;
+  ): AsyncResult<U, E | ZodError>;
   transform<U extends Val, EE extends Val>(
     fn: (value: T) => Promise<Result<U, E | EE>>,
   ): AsyncResult<U, E | EE>;
@@ -786,7 +784,7 @@ export class AsyncResult<T extends Val, E extends Val> implements PromiseLike<
       | Promise<Result<U, E | EE>>
       | Promise<RawValue<U>>
       | RawValue<U>,
-  ): AsyncResult<U, E | EE | ZodError<unknown>> {
+  ): AsyncResult<U, E | EE | ZodError> {
     return new AsyncResult(
       this.asyncResult
         .then((oldResult) => {
@@ -859,7 +857,7 @@ export class AsyncResult<T extends Val, E extends Val> implements PromiseLike<
    */
   parse<Schema extends ZodType<any, any, any>>(
     schema: Schema,
-  ): AsyncResult<NonNullable<ZodOutput<Schema>>, E | ZodError<unknown>> {
+  ): AsyncResult<NonNullable<ZodOutput<Schema>>, E | ZodError> {
     return new AsyncResult(
       this.asyncResult
         .then((oldResult) => oldResult.parse(schema))

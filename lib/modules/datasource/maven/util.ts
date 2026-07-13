@@ -122,7 +122,7 @@ export async function downloadHttpProtocol(
     }
   }
 
-  const fetchResult = await Result.wrap<HttpResponse, Error>(
+  const fetchResult = await Result.wrap<HttpResponse>(
     http.getText(url, { ...opts, cacheProvider: selectCacheProvider(url) }),
   )
     .transform((res): MavenFetchSuccess => {
