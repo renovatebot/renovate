@@ -53,6 +53,31 @@ describe('config/migrate-validate', () => {
       });
     });
 
+    it('validates a legacy package match-all combined with an exclusion', async () => {
+      const input = {
+        packageRules: [
+          {
+            packagePatterns: ['*'],
+            excludePackageNames: ['some-package'],
+            automerge: true,
+          },
+        ],
+      } as RenovateConfig;
+
+      const res = await migrateAndValidate(config, input);
+
+      expect(res).toEqual({
+        packageRules: [
+          {
+            automerge: true,
+            matchPackageNames: ['!some-package'],
+          },
+        ],
+        errors: [],
+        warnings: [],
+      });
+    });
+
     it('handles invalid', async () => {
       // @ts-expect-error -- invalid option
       const input: RenovateConfig = { foo: 'none' };
