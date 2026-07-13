@@ -1,11 +1,10 @@
 import { DateTime } from 'luxon';
-import { git, logger, partial } from '~test/util.ts';
+import { git, partial } from '~test/util.ts';
 import type { LongCommitSha } from '../../../util/schema-utils/git.ts';
 import { client as _client } from './client.ts';
 import type {
   GerritAccountInfo,
   GerritChange,
-  GerritLabelTypeInfo,
   GerritRevisionInfo,
 } from './schema.ts';
 import {
@@ -319,52 +318,6 @@ describe('modules/platform/gerrit/scm', () => {
       });
     });
 
-    it('skips voting and logs a warning when autoApprove is set but the project has no known Code-Review label definition', async () => {
-      configureScm('test/repo', 'user');
-      git.pushCommit.mockResolvedValueOnce(true);
-      await expect(
-        pushForReview({
-          sourceRef: 'renovate/feat',
-          targetBranch: 'main',
-          files: [],
-          autoApprove: true,
-        }),
-      ).resolves.toBeTrue();
-      expect(git.pushCommit).toHaveBeenCalledExactlyOnceWith({
-        sourceRef: 'renovate/feat',
-        targetRef: 'refs/for/main',
-        files: [],
-        pushOptions: ['notify=NONE', 'ready'],
-      });
-      expect(logger.logger.warn).toHaveBeenCalledWith(
-        'Cannot auto-approve: project "test/repo" does not define a "Code-Review" label',
-      );
-    });
-
-    it('uses the maximum value configured for the Code-Review label when autoApprove is set', async () => {
-      configureScm('test/repo', 'user', {
-        'Code-Review': {
-          values: { '-1': 'disliked', '0': 'default', '1': 'looksOkay' },
-          default_value: 0,
-        } satisfies GerritLabelTypeInfo,
-      });
-      git.pushCommit.mockResolvedValueOnce(true);
-      await expect(
-        pushForReview({
-          sourceRef: 'renovate/feat',
-          targetBranch: 'main',
-          files: [],
-          autoApprove: true,
-        }),
-      ).resolves.toBeTrue();
-      expect(git.pushCommit).toHaveBeenCalledExactlyOnceWith({
-        sourceRef: 'renovate/feat',
-        targetRef: 'refs/for/main',
-        files: [],
-        pushOptions: ['notify=NONE', 'ready', 'label=Code-Review+1'],
-      });
-    });
-
     it('clears pending change branch on success', async () => {
       pendingChangeBranches.add('renovate/feat');
       git.pushCommit.mockResolvedValueOnce(true);
@@ -620,7 +573,7 @@ describe('modules/platform/gerrit/scm', () => {
       expect(git.pushCommit).not.toHaveBeenCalled();
     });
 
-    it('commitAndPush() - existing change with new changes - auto-approve without known Code-Review label skips vote', async () => {
+    it('commitAndPush() - existing change with new changes - auto-approve', async () => {
       const existingChange = partial<GerritChange>({
         _number: 123456,
         change_id: 'I1bf983f8f6530c44826925b1308a45fe672408a6',
@@ -668,7 +621,7 @@ describe('modules/platform/gerrit/scm', () => {
         files: [],
         sourceRef: 'renovate/dependency-1.x',
         targetRef: 'refs/for/main',
-        pushOptions: ['notify=NONE', 'ready'],
+        pushOptions: ['notify=NONE', 'ready', 'label=Code-Review+2'],
       });
     });
   });

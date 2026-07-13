@@ -9,44 +9,14 @@ import type { LongCommitSha } from '../../../util/schema-utils/git.ts';
 import { isLongCommitSha } from '../../../util/schema-utils/git.ts';
 import { DefaultGitScm } from '../default-scm.ts';
 import { client } from './client.ts';
-import type { GerritLabelTypeInfo } from './schema.ts';
 import type { GerritFindPRConfig } from './types.ts';
-import { convertGerritDateToISO, mapBranchStatusToLabel } from './utils.ts';
-
-const CODE_REVIEW_LABEL = 'Code-Review';
+import { convertGerritDateToISO } from './utils.ts';
 
 let repository: string;
 let username: string;
-let projectLabels: Record<string, GerritLabelTypeInfo> = {};
-export function configureScm(
-  repo: string,
-  login: string,
-  labels: Record<string, GerritLabelTypeInfo> = {},
-): void {
+export function configureScm(repo: string, login: string): void {
   repository = repo;
   username = login;
-  projectLabels = labels;
-}
-
-/**
- * Determines the numeric vote to apply on the "Code-Review" label when
- * `autoApprove` is requested, based on the project's actual label
- * configuration instead of assuming "+2" is always available (some Gerrit
- * projects only define values up to "+1").
- *
- * Returns `null` if the project doesn't define a "Code-Review" label at all
- * (e.g. it was removed from the project config), so that callers can skip
- * voting instead of risking the whole push being rejected by Gerrit.
- */
-function getAutoApproveLabelValue(): number | null {
-  const codeReviewLabel = projectLabels[CODE_REVIEW_LABEL];
-  if (!codeReviewLabel) {
-    logger.warn(
-      `Cannot auto-approve: project "${repository}" does not define a "${CODE_REVIEW_LABEL}" label`,
-    );
-    return null;
-  }
-  return mapBranchStatusToLabel('green', codeReviewLabel);
 }
 
 /** Branches with a local commit but no Gerrit change yet (push deferred to createPr()). */
@@ -61,10 +31,7 @@ export async function pushForReview(options: {
 }): Promise<boolean> {
   const pushOptions = ['notify=NONE', 'ready'];
   if (options.autoApprove) {
-    const value = getAutoApproveLabelValue();
-    if (value !== null) {
-      pushOptions.push(`label=${CODE_REVIEW_LABEL}+${value}`);
-    }
+    pushOptions.push('label=Code-Review+2');
   }
   if (isNonEmptyArray(options.labels)) {
     for (const label of options.labels) {
