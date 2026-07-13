@@ -183,6 +183,7 @@
         "no-template-curly-in-string": "off",
         "jest/valid-title": "error",
         "typescript/unbound-method": "off",
+        "renovate/no-redundant-mock-reset": "error",
         "renovate/test-root-describe": "error",
         "typescript/explicit-function-return-type": "off"
       }

@@ -32,10 +32,6 @@ describe('modules/manager/pip-compile/extract', () => {
     GlobalConfig.set(adminConfig);
   });
 
-  afterEach(() => {
-    fs.readLocalFile.mockClear();
-  });
-
   describe('extractPackageFile()', () => {
     it('returns object for requirements.in', async () => {
       const packageFile = await extractPackageFile(
