@@ -56,8 +56,9 @@ export async function pushForReview(options: {
 }): Promise<boolean> {
   const pushOptions = ['notify=NONE', 'ready'];
   if (options.autoApprove) {
-    pushOptions.push(`label=Code-Review+${getAutoApproveLabelValue()}`);
-  }
+    const value = getAutoApproveLabelValue();
+    pushOptions.push(`label=Code-Review+${value}`);
+}
   if (isNonEmptyArray(options.labels)) {
     for (const label of options.labels) {
       pushOptions.push(`hashtag=${label}`);
