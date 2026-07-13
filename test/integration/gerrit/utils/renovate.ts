@@ -38,6 +38,7 @@ export async function renovate(
     username: GERRIT_ADMIN_USERNAME,
     password: GERRIT_ADMIN_PASSWORD,
     gitAuthor: 'Renovate Gerrit <renovate-gerrit@example.com>',
+    githubTokenWarn: false,
     baseDir,
     ...(isNonEmptyArray(repositories) ? { repositories } : {}),
     ...overrides,

@@ -85,11 +85,7 @@ function findSemverChange(changes: Awaited<ReturnType<typeof getOpenChanges>>) {
   return changes.find((c) => semverSubjectRe.test(c.subject));
 }
 
-afterAll(async () => {
-  await stopGerritContainer();
-});
-
-describe('integration/gerrit/index', () => {
+describe('integration/gerrit/index', { timeout: 120_000 }, () => {
   beforeAll(async () => {
     await startGerritContainer();
     await configureAdminSelfApproval();
@@ -98,7 +94,11 @@ describe('integration/gerrit/index', () => {
       'package.json': pkgJson('test-project'),
       'renovate.json': renovateJson(),
     });
-  }, 120_000);
+  }, 180_000);
+
+  afterAll(async () => {
+    await stopGerritContainer();
+  }, 60_000);
 
   it('discovers the repository via autodiscover', async () => {
     // Arrange
@@ -518,7 +518,7 @@ describe('integration/gerrit/index', () => {
     const CONSUMER_REPO = 'test-gerrit-preset-consumer';
 
     await createAndConfigureProject(PRESET_REPO, {
-      'renovate.json': JSON.stringify(
+      'default.json': JSON.stringify(
         { $schema: SCHEMA, labels: ['from-preset'] },
         null,
         2,
