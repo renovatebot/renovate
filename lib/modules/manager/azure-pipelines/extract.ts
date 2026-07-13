@@ -125,12 +125,12 @@ export function parseAzurePipelines(
   const res = AzurePipelinesYaml.safeParse(content);
   if (res.success) {
     return res.data;
-  } else {
-    logger.debug(
-      { err: res.error, packageFile },
-      'Error parsing pubspec lockfile.',
-    );
   }
+  logger.debug(
+    { err: res.error, packageFile },
+    'Error parsing pubspec lockfile.',
+  );
+
   return null;
 }
 

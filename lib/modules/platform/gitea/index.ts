@@ -387,7 +387,8 @@ const platform: Platform = {
         );
         const repos = await map(fetchRepoArgs, fetchRepositories);
         return deduplicateArray(repos.flat());
-      } else if (config?.namespaces) {
+      }
+      if (config?.namespaces) {
         logger.debug(
           { namespaces: config.namespaces },
           'Auto-discovering by organization',
@@ -402,12 +403,11 @@ const platform: Platform = {
           },
         );
         return deduplicateArray(repos.flat());
-      } else {
-        return await fetchRepositories({
-          sort: config?.sort,
-          order: config?.order,
-        });
       }
+      return await fetchRepositories({
+        sort: config?.sort,
+        order: config?.order,
+      });
     } catch (err) {
       logger.error({ err }, 'Gitea getRepos() error');
       throw err;

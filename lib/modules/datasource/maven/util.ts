@@ -195,9 +195,8 @@ export async function downloadHttpProtocol(
             }
           }
           return Result.err({ type: 'maven-central-temporary-error', err });
-        } else {
-          return Result.err({ type: 'temporary-error' });
         }
+        return Result.err({ type: 'temporary-error' });
       }
 
       if (isConnectionError(err)) {

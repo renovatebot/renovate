@@ -135,7 +135,8 @@ export class IssueService {
         if (existingIssue.state === 'closed' && once) {
           logger.debug('Issue already closed - skipping update');
           return null;
-        } else if (existingIssue.state === 'closed' && shouldReOpen) {
+        }
+        if (existingIssue.state === 'closed' && shouldReOpen) {
           // Reopen and update work item
           if (!existingIssue.number) {
             logger.warn('Cannot reopen issue without number');
@@ -166,7 +167,8 @@ export class IssueService {
           );
           logger.debug(`Reopened issue #${existingIssue.number}`);
           return 'updated';
-        } else if (existingIssue.state === 'open') {
+        }
+        if (existingIssue.state === 'open') {
           // Update work item if needed
           if (
             existingIssue.title !== finalTitle ||
