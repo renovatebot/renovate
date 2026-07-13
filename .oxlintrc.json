@@ -182,6 +182,7 @@
       "rules": {
         "no-template-curly-in-string": "off",
         "jest/valid-title": "error",
+        "vitest/consistent-test-it": ["error", { "fn": "it" }],
         "typescript/unbound-method": "off",
         "renovate/test-root-describe": "error",
         "typescript/explicit-function-return-type": "off"
