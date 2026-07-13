@@ -285,7 +285,10 @@ export async function parseAndValidateOrExit(
 
     return await migrateAndValidateConfig(config, `${configEnvKey}`);
   } catch (err) {
-    logger.fatal({ err }, `Could not parse ${configEnvKey}`);
+    logger.fatal(
+      { err, configEnvKey },
+      'Could not parse config environment variable',
+    );
     process.exit(1);
   }
 }

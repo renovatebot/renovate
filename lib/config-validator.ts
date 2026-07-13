@@ -94,7 +94,7 @@ async function validate(
           );
       })
       .join('\n');
-    logger.warn(`Config migration diff:\n${msg}`);
+    logger.warn({ diff: msg }, 'Config migration diff');
     if (strict) {
       returnVal = 1;
     }

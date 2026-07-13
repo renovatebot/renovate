@@ -129,7 +129,7 @@ export async function updateArtifacts({
       .filter(isString)
       .join('\n');
 
-    logger.warn({ err }, `Error updating ${lockFileName}`);
+    logger.warn({ err, lockFileName }, 'Error updating mise lock file');
     return [
       {
         artifactError: {

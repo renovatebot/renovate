@@ -68,6 +68,7 @@
     "no-nested-ternary": "error",
 
     "renovate/enforce-ts-extension": "error",
+    "renovate/logger-static-message": "error",
     "renovate/no-hardcoded-docs-url": "error",
     "renovate/no-new-url": "error",
     "renovate/no-tools-import": "error",
@@ -183,6 +184,7 @@
         "no-template-curly-in-string": "off",
         "jest/valid-title": "error",
         "typescript/unbound-method": "off",
+        "renovate/logger-static-message": "off",
         "renovate/test-root-describe": "error",
         "typescript/explicit-function-return-type": "off"
       }

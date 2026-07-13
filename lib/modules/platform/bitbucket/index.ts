@@ -93,7 +93,8 @@ export async function initPlatform({
   }
   if (endpoint && endpoint !== BITBUCKET_PROD_ENDPOINT) {
     logger.warn(
-      `Init: Bitbucket Cloud endpoint should generally be ${BITBUCKET_PROD_ENDPOINT} but is being configured to a different value. Did you mean to use Bitbucket Server?`,
+      { endpoint, defaultEndpoint: BITBUCKET_PROD_ENDPOINT },
+      'Init: Bitbucket Cloud endpoint should generally be the default but is being configured to a different value. Did you mean to use Bitbucket Server?',
     );
     defaults.endpoint = endpoint;
   }

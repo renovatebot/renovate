@@ -1,4 +1,5 @@
 import enforceTsExtension from './rules/enforce-ts-extension.js';
+import loggerStaticMessage from './rules/logger-static-message.js';
 import noHardcodedDocsUrl from './rules/no-hardcoded-docs-url.js';
 import noNewUrl from './rules/no-new-url.js';
 import noToolsImport from './rules/no-tools-import.js';
@@ -11,6 +12,7 @@ export default {
   },
   rules: {
     'enforce-ts-extension': enforceTsExtension,
+    'logger-static-message': loggerStaticMessage,
     'no-hardcoded-docs-url': noHardcodedDocsUrl,
     'no-new-url': noNewUrl,
     'no-tools-import': noToolsImport,

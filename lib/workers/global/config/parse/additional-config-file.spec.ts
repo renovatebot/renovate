@@ -138,7 +138,12 @@ describe('workers/global/config/parse/additional-config-file', () => {
       await file.getConfig({ RENOVATE_ADDITIONAL_CONFIG_FILE: tmpConfigFile });
 
       expect(logger.fatal).toHaveBeenCalledWith(
-        'Error parsing additional config file due to unresolved variable(s): CI_API_V4_URL is not defined',
+        {
+          err: expect.objectContaining({
+            message: 'CI_API_V4_URL is not defined',
+          }),
+        },
+        'Error parsing additional config file due to unresolved variable(s)',
       );
       expect(processExitSpy).toHaveBeenCalledExactlyOnceWith(1);
     });
