@@ -2,6 +2,14 @@ import type { RenovateConfig } from '../../types.ts';
 import { MigrationsService } from '../migrations-service.ts';
 import { PackageRulesMigration, renameMap } from './package-rules-migration.ts';
 
+function configWithPackageRule(
+  packageRule: Record<string, unknown>,
+): Record<string, unknown> {
+  return {
+    packageRules: [{ ...packageRule, automerge: true }],
+  };
+}
+
 describe('config/migrations/custom/package-rules-migration', () => {
   it('should preserve config order', () => {
     const originalConfig: RenovateConfig = {
@@ -173,6 +181,44 @@ describe('config/migrations/custom/package-rules-migration', () => {
         ],
       },
     );
+  });
+
+  describe('legacy pattern match-all conversion', () => {
+    it.each`
+      legacyField                 | migratedField          | legacyPattern | migratedMatcher
+      ${'matchDepPatterns'}       | ${'matchDepNames'}     | ${'*'}        | ${'*'}
+      ${'matchDepPatterns'}       | ${'matchDepNames'}     | ${'^*$'}      | ${'*'}
+      ${'matchPackagePatterns'}   | ${'matchPackageNames'} | ${'^*$'}      | ${'*'}
+      ${'excludeDepPatterns'}     | ${'matchDepNames'}     | ${'*'}        | ${'!**'}
+      ${'excludeDepPatterns'}     | ${'matchDepNames'}     | ${'^*$'}      | ${'!**'}
+      ${'excludePackagePatterns'} | ${'matchPackageNames'} | ${'*'}        | ${'!**'}
+      ${'excludePackagePatterns'} | ${'matchPackageNames'} | ${'^*$'}      | ${'!**'}
+    `(
+      'migrates $legacyField pattern $legacyPattern to $migratedField matcher $migratedMatcher',
+      async ({
+        legacyField,
+        migratedField,
+        legacyPattern,
+        migratedMatcher,
+      }) => {
+        await expect(PackageRulesMigration).toMigrate(
+          configWithPackageRule({ [legacyField]: [legacyPattern] }),
+          configWithPackageRule({ [migratedField]: [migratedMatcher] }),
+        );
+      },
+    );
+
+    it('preserves an ordinary raw regex that matches every dependency', async () => {
+      await expect(PackageRulesMigration).toMigrate(
+        configWithPackageRule({
+          matchDepPatterns: ['some-dep'],
+          excludeDepPatterns: ['.*'],
+        }),
+        configWithPackageRule({
+          matchDepNames: ['/some-dep/', '!/.*/'],
+        }),
+      );
+    });
   });
 
   it('should migrate all match/exclude when value is of type string', async () => {

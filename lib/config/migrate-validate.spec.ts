@@ -29,6 +29,30 @@ describe('config/migrate-validate', () => {
       });
     });
 
+    it('migrates a legacy dependency match-all without creating an invalid regex', async () => {
+      const input = {
+        packageRules: [
+          {
+            matchDepPatterns: ['*'],
+            automerge: true,
+          },
+        ],
+      } as RenovateConfig;
+
+      const res = await migrateAndValidate(config, input);
+
+      expect(res).toEqual({
+        packageRules: [
+          {
+            automerge: true,
+            matchDepNames: ['*'],
+          },
+        ],
+        errors: [],
+        warnings: [],
+      });
+    });
+
     it('handles invalid', async () => {
       // @ts-expect-error -- invalid option
       const input: RenovateConfig = { foo: 'none' };
