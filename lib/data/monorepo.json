@@ -23,7 +23,6 @@
     "embroider": "/^@embroider//",
     "forge": "/^@forge//",
     "fullcalendar": "/^@fullcalendar//",
-    "hotchocolate": "/^HotChocolate\\./",
     "oracle-database": [
       "/^com.oracle.database.jdbc:/",
       "/^com.oracle.database.nls:/"
@@ -411,6 +410,7 @@
     "graphql-hive-gateway": "https://github.com/graphql-hive/gateway",
     "graphql-mesh": "https://github.com/Urigo/graphql-mesh",
     "graphql-modules": "https://github.com/Urigo/graphql-modules",
+    "graphql-platform": "https://github.com/ChilliCream/graphql-platform",
     "graphql-tools": "https://github.com/ardatan/graphql-tools",
     "graphql-yoga": "https://github.com/dotansimha/graphql-yoga",
     "graphqlcodegenerator": [

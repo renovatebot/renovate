@@ -296,6 +296,24 @@ describe('modules/datasource/crate/index', () => {
       expect(res).toBeDefined();
     });
 
+    it('processes real data: sentry', async () => {
+      mockCratesIoConfig();
+      mockCratesApiCallFor('sentry', Fixtures.get('sentry.json'));
+
+      httpMock
+        .scope(CRATES_IO_REGISTRY_URL_PARSED)
+        .get('/se/nt/sentry')
+        .reply(200, Fixtures.get('sentry'));
+      const res = await getPkgReleases({
+        datasource,
+        packageName: 'sentry',
+        registryUrls: [CRATES_IO_REGISTRY_URL],
+      });
+      expect(res).toMatchSnapshot();
+      expect(res).not.toBeNull();
+      expect(res).toBeDefined();
+    });
+
     it('uses cached registry config for subsequent packages', async () => {
       mockCratesIoConfig();
       mockCratesApiCallFor('libc', Fixtures.get('libc.json'));
