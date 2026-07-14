@@ -340,7 +340,7 @@ export async function processBranch(
             };
           }
         }
-      } else if (branchIsModified) {
+      } else if (branchIsModified && !dependencyDashboardCheck) {
         const oldPr = await platform.findPr({
           branchName: config.branchName,
           state: '!open',

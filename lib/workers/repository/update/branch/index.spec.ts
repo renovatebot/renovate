@@ -598,6 +598,52 @@ describe('workers/repository/update/branch/index', () => {
       });
     });
 
+    it('does not skip branch if branch edited and no PR found but rebase requested', async () => {
+      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
+        ...updatedPackageFiles,
+      });
+      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+        artifactErrors: [],
+        updatedArtifacts: [],
+      });
+      scm.branchExists.mockResolvedValue(true);
+      scm.isBranchModified.mockResolvedValueOnce(true);
+      platform.findPr.mockResolvedValueOnce(null);
+      config.dependencyDashboardChecks = { 'renovate/some-branch': 'rebase' };
+      expect(await branchWorker.processBranch(config)).toEqual({
+        branchExists: true,
+        updatesVerified: true,
+        prNo: 5,
+        result: 'done',
+        commitSha: '123test',
+      });
+
+      expect(logger.debug).toHaveBeenCalledWith('User has requested rebase');
+    });
+
+    it('does not skip branch if branch edited and PR found with sha mismatch but rebase requested', async () => {
+      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
+        ...updatedPackageFiles,
+      });
+      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+        artifactErrors: [],
+        updatedArtifacts: [],
+      });
+      scm.branchExists.mockResolvedValue(true);
+      scm.isBranchModified.mockResolvedValueOnce(true);
+      platform.findPr.mockResolvedValueOnce({ sha: 'def456' } as any);
+      config.dependencyDashboardChecks = { 'renovate/some-branch': 'rebase' };
+      expect(await branchWorker.processBranch(config)).toEqual({
+        branchExists: true,
+        updatesVerified: true,
+        prNo: 5,
+        result: 'done',
+        commitSha: '123test',
+      });
+
+      expect(logger.debug).toHaveBeenCalledWith('User has requested rebase');
+    });
+
     it('returns if branch creation limit exceeded', async () => {
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
         ...updatedPackageFiles,
