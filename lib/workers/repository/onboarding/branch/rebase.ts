@@ -67,7 +67,7 @@ export async function rebaseOnboardingBranch(
       },
     ],
     message: commitMessage.toString(),
-    platformCommit: config.platformCommit,
+    platformCommit: GlobalConfig.get('platformCommit'),
     // Only needed by Gerrit platform
     prTitle,
   });

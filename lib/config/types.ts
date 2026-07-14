@@ -128,7 +128,6 @@ export interface RenovateSharedConfig {
 
   pinDigests?: boolean;
   platformAutomerge?: boolean;
-  platformCommit?: PlatformCommitOptions;
   postUpgradeTasks?: PostUpgradeTasks;
   prBodyColumns?: string[];
   prBodyDefinitions?: Record<string, string>;
@@ -259,6 +258,7 @@ export interface RepoGlobalConfig extends GlobalInheritableConfig {
   localDir?: string;
   migratePresets?: Record<string, string>;
   platform?: PlatformId;
+  platformCommit?: PlatformCommitOptions;
   prCacheSyncMaxPages?: number;
   presetCachePersistence?: boolean;
   httpCacheTtlDays?: number;

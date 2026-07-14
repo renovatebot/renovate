@@ -1045,6 +1045,17 @@ It also may mean that ignored directories like `node_modules` can be preserved a
 
 ## `platform`
 
+## `platformCommit`
+
+Only use this option if you run Renovate as a [GitHub App](https://docs.github.com/en/developers/apps/getting-started-with-apps/about-apps).
+It does not apply when you use a Personal Access Token as credential.
+
+When `platformCommit` is enabled, Renovate will create commits with GitHub's API instead of using `git` directly.
+This way Renovate can use GitHub's [Commit signing support for bots and other GitHub Apps](https://github.blog/2019-08-15-commit-signing-support-for-bots-and-other-github-apps/) feature.
+
+!!! note
+  When using platform commits, GitHub determines the git author string to use and Renovate's own gitAuthor is ignored.
+
 ## `prCacheSyncMaxPages`
 
 Maximum number of pages to fetch when syncing the pull request cache.
