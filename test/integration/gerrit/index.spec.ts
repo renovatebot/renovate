@@ -24,6 +24,7 @@ import {
   getReviewers,
   pushFilesToGerrit,
   registerGpgKey,
+  registerSshKey,
   setHashtags,
   setLabel,
   setProjectLabel,
@@ -35,6 +36,7 @@ import {
 } from './utils/gerrit-container.ts';
 import { generateGpgKeyPair } from './utils/gpg.ts';
 import { renovate } from './utils/renovate.ts';
+import { generateSshKeyPair, gitSshCommand } from './utils/ssh.ts';
 
 const REPO_NAME = 'test-renovate-integration';
 const SCHEMA = 'https://docs.renovatebot.com/renovate-schema.json';
@@ -575,6 +577,32 @@ describe('integration/gerrit/index', { timeout: 120_000 }, () => {
 
     expect(updated.current_revision).not.toEqual(originalRev);
     expect(updated.status).toEqual('NEW');
+  });
+
+  // Covers #43651: SSH clone/push URLs must include the Gerrit username.
+  // Without it, git uses the local OS username and Gerrit rejects the key.
+  it('creates a change over SSH when gitUrl is ssh', async () => {
+    // Arrange
+    const REPO = 'test-gerrit-ssh-git-url';
+    const key = await generateSshKeyPair();
+    try {
+      await registerSshKey(key.publicKey);
+      await seed(REPO, 'test-ssh-git-url');
+
+      // Act
+      await renovate([REPO], {
+        gitUrl: 'ssh',
+        customEnvVariables: {
+          GIT_SSH_COMMAND: gitSshCommand(key.privateKeyPath),
+        },
+      });
+
+      // Assert — full clone + push via ssh://admin@host:29418/... succeeded
+      const ch = findSemverChange(await getOpenChanges(REPO));
+      expect(ch).toBeDefined();
+    } finally {
+      await key.dispose();
+    }
   });
 
   // Covers #44228: GPG gitPrivateKey enables push.gpgSign if-asked on Gerrit.

@@ -10,6 +10,9 @@ import {
 const GERRIT_IMAGE = 'gerritcodereview/gerrit:3.14.1-ubuntu24';
 const GERRIT_CONTAINER_NAME = 'gerrit-renovate-integration-test';
 
+/** Gerrit sshd port — Renovate hardcodes this in createSshUrl. */
+export const GERRIT_SSH_PORT = 29418;
+
 export const GERRIT_ADMIN_USERNAME = 'admin';
 export const GERRIT_ADMIN_PASSWORD = 'secret';
 
@@ -22,7 +25,12 @@ export function getBaseUrl(): string {
 
 export async function startGerritContainer(): Promise<void> {
   container = await new GenericContainer(GERRIT_IMAGE)
-    .withExposedPorts(8080)
+    // Bind SSH to the host's well-known 29418 so gitUrl=ssh URLs work
+    // (Renovate always uses port 29418; HTTP can stay on a random port).
+    .withExposedPorts(8080, {
+      container: GERRIT_SSH_PORT,
+      host: GERRIT_SSH_PORT,
+    })
     .withEnvironment({
       GERRIT_ADMIN_USERNAME,
       GERRIT_ADMIN_PASSWORD,
@@ -35,9 +43,12 @@ export async function startGerritContainer(): Promise<void> {
       'git config -f /var/gerrit/etc/gerrit.config receive.enableSignedPush true && exec /entrypoint.sh',
     ])
     .withWaitStrategy(
-      Wait.forHttp('/a/config/server/version', 8080)
-        .withBasicCredentials(GERRIT_ADMIN_USERNAME, GERRIT_ADMIN_PASSWORD)
-        .withStartupTimeout(90_000),
+      Wait.forAll([
+        Wait.forHttp('/a/config/server/version', 8080)
+          .withBasicCredentials(GERRIT_ADMIN_USERNAME, GERRIT_ADMIN_PASSWORD)
+          .withStartupTimeout(90_000),
+        Wait.forListeningPorts(),
+      ]).withStartupTimeout(90_000),
     )
     .start();
 

@@ -136,6 +136,15 @@ export async function registerGpgKey(publicKeyArmored: string): Promise<void> {
   });
 }
 
+/** Register an OpenSSH public key on the admin account (for gitUrl=ssh). */
+export async function registerSshKey(publicKey: string): Promise<void> {
+  await gerritFetch('/a/accounts/self/sshkeys', {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain' },
+    body: publicKey,
+  });
+}
+
 export async function configureAdminSelfApproval(): Promise<void> {
   await gerritFetch('/a/projects/All-Projects/access', {
     method: 'POST',
