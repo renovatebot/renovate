@@ -390,5 +390,80 @@ describe('workers/repository/updates/flatten', () => {
         },
       );
     });
+
+    it('skips replacement update when replacement already exists as sibling dep', async () => {
+      const packageFiles: Record<string, PackageFile[]> = {
+        npm: [
+          {
+            packageFile: 'package.json',
+            deps: [
+              {
+                depName: '@material-ui/core',
+                updates: [
+                  {
+                    newName: '@mui/material',
+                    newValue: '^5.0.0',
+                    updateType: 'replacement',
+                  },
+                ],
+              },
+              {
+                depName: '@mui/material',
+                updates: [
+                  {
+                    newValue: '^6.2.0',
+                    updateType: 'minor',
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      };
+      const res = await flattenUpdates(config, packageFiles);
+      expect(
+        res.find((update) => update.depName === '@material-ui/core'),
+      ).toBeUndefined();
+      expect(
+        res.find((update) => update.depName === '@mui/material'),
+      ).toBeDefined();
+    });
+
+    it('skips replacement update when sibling packageName matches newName', async () => {
+      const packageFiles: Record<string, PackageFile[]> = {
+        npm: [
+          {
+            packageFile: 'package.json',
+            deps: [
+              {
+                depName: 'old-pkg',
+                updates: [
+                  {
+                    newName: '@scope/new-pkg',
+                    newValue: '^2.0.0',
+                    updateType: 'replacement',
+                  },
+                ],
+              },
+              {
+                depName: 'alias',
+                packageName: '@scope/new-pkg',
+                updates: [
+                  {
+                    newValue: '^3.0.0',
+                    updateType: 'minor',
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      };
+      const res = await flattenUpdates(config, packageFiles);
+      expect(
+        res.find((update) => update.depName === 'old-pkg'),
+      ).toBeUndefined();
+      expect(res.find((update) => update.depName === 'alias')).toBeDefined();
+    });
   });
 });
