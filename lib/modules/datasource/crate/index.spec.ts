@@ -135,7 +135,6 @@ describe('modules/datasource/crate/index', () => {
       };
       GlobalConfig.set(adminConfig);
 
-      createSimpleGit.mockReset();
       memCache.init();
     });
 

@@ -1501,6 +1501,79 @@ None detected
           await dryRun(branches, platform, 0, 1);
         });
 
+        it('shows replacement as unavailable when target already exists as sibling', async () => {
+          const branches: BranchConfig[] = [];
+          const packageFilesWithExistingReplacement: Record<
+            string,
+            PackageFile[]
+          > = {
+            npm: [
+              {
+                packageFile: 'package.json',
+                deps: [
+                  {
+                    depName: '@material-ui/core',
+                    deprecationMessage: 'This package is deprecated',
+                    updates: [
+                      {
+                        updateType: 'replacement',
+                        newName: '@mui/material',
+                        newValue: '^5.0.0',
+                      },
+                    ],
+                  },
+                  {
+                    depName: '@material-ui/icons',
+                    updates: [
+                      {
+                        updateType: 'replacement',
+                        newName: '@mui/icons-material',
+                        newValue: '^5.0.0',
+                      },
+                    ],
+                  },
+                  {
+                    depName: '@mui/material',
+                    updates: [
+                      {
+                        newValue: '^6.2.0',
+                        updateType: 'minor',
+                      },
+                    ],
+                  },
+                  {
+                    depName: '@mui/icons-material',
+                    updates: [
+                      {
+                        newValue: '^6.2.0',
+                        updateType: 'minor',
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          };
+          PackageFiles.add('main', packageFilesWithExistingReplacement);
+          await dependencyDashboard.ensureDependencyDashboard(
+            config,
+            branches,
+            packageFilesWithExistingReplacement,
+            { result: 'no-migration' },
+          );
+          expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
+          const body = platform.ensureIssue.mock.calls[0][0].body;
+          expect(body).toInclude('Deprecations / Replacements');
+          expect(body).toInclude('@material-ui/core');
+          expect(body).toInclude('@material-ui/icons');
+          expect(body).not.toInclude(
+            '![Available](https://img.shields.io/badge/available-green?style=flat-square)',
+          );
+          expect(body).toInclude(
+            '![Unavailable](https://img.shields.io/badge/unavailable-orange?style=flat-square)',
+          );
+        });
+
         it('handles missing version/digest values correctly', async () => {
           const branches: BranchConfig[] = [];
           const packageFilesWithMissingVersions = {
