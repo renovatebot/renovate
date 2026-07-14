@@ -61,6 +61,64 @@ describe('modules/platform/github/index', () => {
     delete process.env.RENOVATE_X_GITHUB_HOST_RULES;
   });
 
+  describe('isPlatformCommitEnabled()', () => {
+    it('returns false before initPlatform', () => {
+      expect(github.isPlatformCommitEnabled()).toBeFalse();
+    });
+
+    it('returns true after init with platformCommit enabled', async () => {
+      GlobalConfig.set({ platformCommit: 'enabled' });
+      httpMock.scope(githubApiHost).get('/user').reply(200, {
+        login: 'renovate-bot',
+        name: 'Example User',
+        email: 'user@domain.com',
+      });
+      await github.initPlatform({ token: '123test' });
+      expect(github.isPlatformCommitEnabled()).toBeTrue();
+    });
+
+    it('returns false after init with platformCommit disabled', async () => {
+      GlobalConfig.set({ platformCommit: 'disabled' });
+      httpMock
+        .scope(githubApiHost, {
+          reqheaders: {
+            authorization: 'Bearer ghs_123test',
+          },
+        })
+        .post('/graphql')
+        .reply(200, {
+          data: { viewer: { login: 'my-app[bot]', databaseId: 12345 } },
+        });
+      await github.initPlatform({ token: 'x-access-token:ghs_123test' });
+      expect(github.isPlatformCommitEnabled()).toBeFalse();
+    });
+
+    it('returns true after init for auto when a GitHub App', async () => {
+      httpMock
+        .scope(githubApiHost, {
+          reqheaders: {
+            authorization: 'Bearer ghs_123test',
+          },
+        })
+        .post('/graphql')
+        .reply(200, {
+          data: { viewer: { login: 'my-app[bot]', databaseId: 12345 } },
+        });
+      await github.initPlatform({ token: 'x-access-token:ghs_123test' });
+      expect(github.isPlatformCommitEnabled()).toBeTrue();
+    });
+
+    it('returns false after init for auto when not a GitHub App', async () => {
+      httpMock.scope(githubApiHost).get('/user').reply(200, {
+        login: 'renovate-bot',
+        name: 'Example User',
+        email: 'user@domain.com',
+      });
+      await github.initPlatform({ token: '123test' });
+      expect(github.isPlatformCommitEnabled()).toBeFalse();
+    });
+  });
+
   describe('initPlatform()', () => {
     it('should throw if no token', async () => {
       await expect(github.initPlatform({})).rejects.toThrow(
@@ -373,6 +431,8 @@ describe('modules/platform/github/index', () => {
         renovateUsername: 'renovate-bot',
         token: '123test',
       });
+      // PAT + platformCommit=auto does not use platform commits
+      expect(git.setPlatformIgnoredAuthors).toHaveBeenCalledWith([]);
     });
 
     it('should fall back to user/emails when there is no public email', async () => {
@@ -464,6 +524,10 @@ describe('modules/platform/github/index', () => {
         renovateUsername: 'my-app[bot]',
         token: 'x-access-token:ghs_123test',
       });
+      // GitHub App + platformCommit=auto uses platform commits
+      expect(git.setPlatformIgnoredAuthors).toHaveBeenCalledWith([
+        'noreply@github.com',
+      ]);
       expect(await github.initPlatform({ token: 'ghs_123test' })).toEqual({
         endpoint: 'https://api.github.com/',
         gitAuthor: 'my-app[bot] <12345+my-app[bot]@users.noreply.github.com>',
@@ -503,6 +567,35 @@ describe('modules/platform/github/index', () => {
       });
     });
 
+    it('should not register platform committer when platformCommit is disabled', async () => {
+      GlobalConfig.set({ platformCommit: 'disabled' });
+      httpMock
+        .scope(githubApiHost, {
+          reqheaders: {
+            authorization: 'Bearer ghs_123test',
+          },
+        })
+        .post('/graphql')
+        .reply(200, {
+          data: { viewer: { login: 'my-app[bot]', databaseId: 12345 } },
+        });
+      await github.initPlatform({ token: 'x-access-token:ghs_123test' });
+      expect(git.setPlatformIgnoredAuthors).toHaveBeenCalledWith([]);
+    });
+
+    it('should register platform committer when platformCommit is enabled for a PAT', async () => {
+      GlobalConfig.set({ platformCommit: 'enabled' });
+      httpMock.scope(githubApiHost).get('/user').reply(200, {
+        login: 'renovate-bot',
+        name: 'Example User',
+        email: 'user@domain.com',
+      });
+      await github.initPlatform({ token: '123test' });
+      expect(git.setPlatformIgnoredAuthors).toHaveBeenCalledWith([
+        'noreply@github.com',
+      ]);
+    });
+
     it('should throw error when cant request App information on default endpoint with GitHub App', async () => {
       httpMock.scope(githubApiHost).post('/graphql').reply(200, {});
       await expect(
@@ -535,6 +628,9 @@ describe('modules/platform/github/index', () => {
         renovateUsername: 'my-app[bot]',
         token: 'x-access-token:ghs_123test',
       });
+      expect(git.setPlatformIgnoredAuthors).toHaveBeenCalledWith([
+        'noreply@ghe.renovatebot.com',
+      ]);
     });
 
     it('should autodetect email/user on GHE Cloud endpoint with GitHub App', async () => {
@@ -561,6 +657,9 @@ describe('modules/platform/github/index', () => {
         renovateUsername: 'my-app[bot]',
         token: 'x-access-token:ghs_123test',
       });
+      expect(git.setPlatformIgnoredAuthors).toHaveBeenCalledWith([
+        'noreply@ghe.com',
+      ]);
     });
 
     it('should support custom endpoint', async () => {

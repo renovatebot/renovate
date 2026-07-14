@@ -22,6 +22,8 @@ describe('modules/platform/github/scm', () => {
   } satisfies CommitFilesConfig;
 
   it('platformCommit = disabled => delegate to git', async () => {
+    github.isPlatformCommitEnabled.mockReturnValueOnce(false);
+
     await githubScm.commitAndPush({
       ...commitObj,
       platformCommit: 'disabled',
@@ -35,6 +37,8 @@ describe('modules/platform/github/scm', () => {
   });
 
   it('platformCommit = enabled => delegate to github', async () => {
+    github.isPlatformCommitEnabled.mockReturnValueOnce(true);
+
     await githubScm.commitAndPush({
       ...commitObj,
       platformCommit: 'enabled',
@@ -48,6 +52,8 @@ describe('modules/platform/github/scm', () => {
   });
 
   it('platformCommit = auto => delegate to git', async () => {
+    github.isPlatformCommitEnabled.mockReturnValueOnce(false);
+
     await githubScm.commitAndPush({
       ...commitObj,
       platformCommit: 'auto',
@@ -61,7 +67,7 @@ describe('modules/platform/github/scm', () => {
   });
 
   it('platformCommit = auto and is a github app => delegate to github', async () => {
-    github.isGHApp.mockReturnValueOnce(true);
+    github.isPlatformCommitEnabled.mockReturnValueOnce(true);
 
     await githubScm.commitAndPush({
       ...commitObj,

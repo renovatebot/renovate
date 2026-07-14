@@ -133,6 +133,15 @@ describe('util/git/index', { timeout: 30000 }, () => {
     await repo.commit('committed by someone else');
     delete process.env.GIT_COMMITTER_EMAIL;
 
+    // platformCommit: author is bot, committer is noreply@github.com
+    await repo.checkoutBranch('renovate/platform_commit', defaultBranch);
+    await repo.addConfig('user.email', 'Jest@example.com');
+    process.env.GIT_COMMITTER_EMAIL = 'noreply@github.com';
+    await fs.writeFile(`${base.path}/platform_commit_file`, 'test');
+    await repo.add(['platform_commit_file']);
+    await repo.commit('platform api commit');
+    delete process.env.GIT_COMMITTER_EMAIL;
+
     await repo.checkout(defaultBranch);
   });
 
@@ -154,6 +163,7 @@ describe('util/git/index', { timeout: 30000 }, () => {
     });
     git.setUserRepoConfig({ branchPrefix: 'renovate/' });
     git.setGitAuthor('Jest <Jest@example.com>');
+    git.setPlatformIgnoredAuthors([]);
     setNoVerify([]);
     await git.syncGit();
     // override some local git settings for better testing
@@ -445,6 +455,19 @@ describe('util/git/index', { timeout: 30000 }, () => {
           defaultBranch,
         ),
       ).toBeTrue();
+    });
+
+    it('should return true for platformCommit committer when not registered', async () => {
+      expect(
+        await git.isBranchModified('renovate/platform_commit', defaultBranch),
+      ).toBeTrue();
+    });
+
+    it('should return false for platformCommit committer when registered', async () => {
+      git.setPlatformIgnoredAuthors(['noreply@github.com']);
+      expect(
+        await git.isBranchModified('renovate/platform_commit', defaultBranch),
+      ).toBeFalse();
     });
 
     it('should return value stored in modifiedCacheResult', async () => {

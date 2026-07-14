@@ -130,6 +130,11 @@ export function isGHApp(): boolean {
   return !!platformConfig.isGHApp;
 }
 
+/** Resolved in initPlatform; true when commits go through the GitHub API. */
+export function isPlatformCommitEnabled(): boolean {
+  return !!platformConfig.platformCommitEnabled;
+}
+
 export async function detectGhe(token: string): Promise<void> {
   const parsedEndpoint = parseUrl(platformConfig.endpoint);
   /* v8 ignore next -- endpoint is validated in initPlatform before detectGhe is called */
@@ -206,21 +211,22 @@ export async function initPlatform({
     );
     renovateUsername = platformConfig.userDetails.username;
   }
+  let ghHostname: string;
+  /* v8 ignore next -- false negative due to V8/source-map artifact */
+  if (platformConfig.isGheCloud) {
+    ghHostname = 'ghe.com';
+  } else if (platformConfig.isGhe) {
+    // valid url ensured at the function start
+    const parsedEndpoint = parseUrl(platformConfig.endpoint)!;
+    ghHostname = parsedEndpoint.hostname;
+  } else {
+    ghHostname = 'github.com';
+  }
+
   let discoveredGitAuthor: string | undefined;
   if (!gitAuthor) {
     if (platformConfig.isGHApp) {
       platformConfig.userDetails ??= await getAppDetails(token);
-      let ghHostname: string;
-      /* v8 ignore next -- false negative due to V8/source-map artifact */
-      if (platformConfig.isGheCloud) {
-        ghHostname = 'ghe.com';
-      } else if (platformConfig.isGhe) {
-        // valid url ensured at the function start
-        const parsedEndpoint = parseUrl(platformConfig.endpoint)!;
-        ghHostname = parsedEndpoint.hostname;
-      } else {
-        ghHostname = 'github.com';
-      }
       discoveredGitAuthor = `${platformConfig.userDetails.name} <${platformConfig.userDetails.id}+${platformConfig.userDetails.username}@users.noreply.${ghHostname}>`;
     } else {
       platformConfig.userDetails ??= await getUserDetails(
@@ -236,6 +242,17 @@ export async function initPlatform({
       }
     }
   }
+
+  // Resolve once: scm and isBranchModified both use this (#43164).
+  // Option default is 'auto' when unset in GlobalConfig.
+  const platformCommit = GlobalConfig.get('platformCommit') ?? 'auto';
+  platformConfig.platformCommitEnabled =
+    platformCommit === 'enabled' ||
+    (platformCommit === 'auto' && platformConfig.isGHApp);
+  git.setPlatformIgnoredAuthors(
+    platformConfig.platformCommitEnabled ? [`noreply@${ghHostname}`] : [],
+  );
+
   logger.debug({ platformConfig, renovateUsername }, 'Platform config');
   const platformResult: PlatformResult = {
     endpoint: platformConfig.endpoint,

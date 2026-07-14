@@ -94,6 +94,8 @@ export interface PlatformConfig {
   isGheCloud?: boolean;
   gheVersion?: string | null;
   isGHApp?: boolean;
+  /** Resolved once in initPlatform from platformCommit + isGHApp. */
+  platformCommitEnabled?: boolean;
   existingRepos?: string[];
   userDetails?: UserDetails;
   userEmail?: EmailAddress | null;

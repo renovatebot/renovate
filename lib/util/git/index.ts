@@ -217,6 +217,10 @@ let submodulesInitizialized: boolean;
 
 let privateKeySet = false;
 
+// Platform-owned emails (e.g. GitHub platformCommit committer), set at init.
+// Kept separate from config.ignoredAuthors so setUserRepoConfig does not wipe them.
+let platformIgnoredAuthors: string[] = [];
+
 export const GIT_MINIMUM_VERSION = '2.33.0'; // git show-current
 
 export async function validateGitVersion(): Promise<boolean> {
@@ -383,6 +387,10 @@ export function setUserRepoConfig({
 }: RenovateConfig): void {
   config.ignoredAuthors = gitIgnoredAuthors ?? [];
   setGitAuthor(gitAuthor);
+}
+
+export function setPlatformIgnoredAuthors(emails: string[] = []): void {
+  platformIgnoredAuthors = emails;
 }
 
 export async function getSubmodules(): Promise<string[]> {
@@ -893,6 +901,10 @@ export async function isBranchModified(
     includedAuthors.delete(ignoredAuthor);
   }
 
+  for (const ignoredAuthor of platformIgnoredAuthors) {
+    includedAuthors.delete(ignoredAuthor);
+  }
+
   if (includedAuthors.size === 0) {
     // authors all match - branch has not been modified
     logger.trace(
@@ -903,6 +915,7 @@ export async function isBranchModified(
         includedAuthors: [...includedAuthors],
         gitAuthorEmail,
         ignoredAuthors,
+        platformIgnoredAuthors,
       },
       'branch.isModified() = false',
     );
@@ -919,6 +932,7 @@ export async function isBranchModified(
       includedAuthors: [...includedAuthors],
       gitAuthorEmail,
       ignoredAuthors,
+      platformIgnoredAuthors,
     },
     'branch.isModified() = true',
   );
