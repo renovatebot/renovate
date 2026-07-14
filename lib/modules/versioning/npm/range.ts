@@ -88,7 +88,7 @@ export function getNewValue({
     });
   }
   const parsedRange = semverUtils.parseRange(currentValue);
-  const element = parsedRange[parsedRange.length - 1];
+  const element = parsedRange.at(-1)!;
   if (rangeStrategy === 'widen') {
     if (satisfiesRange(newVersion, currentValue)) {
       return currentValue;
@@ -107,7 +107,7 @@ export function getNewValue({
       return `${splitCurrent.join(element.operator)}${newValue!}`;
     }
     if (parsedRange.length > 1) {
-      const previousElement = parsedRange[parsedRange.length - 2];
+      const previousElement = parsedRange.at(-2)!;
       if (previousElement.operator === '-') {
         const splitCurrent = currentValue.split('-');
         splitCurrent.pop();

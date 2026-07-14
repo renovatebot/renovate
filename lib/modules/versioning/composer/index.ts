@@ -315,7 +315,7 @@ function getNewValue({
     const hasOr = currentValue.includes(' || ');
     if (hasOr || rangeStrategy === 'widen') {
       const splitValues = currentValue.split('||');
-      const lastValue = splitValues[splitValues.length - 1];
+      const lastValue = splitValues.at(-1)!;
       const replacementValue = getNewValue({
         currentValue: lastValue.trim(),
         rangeStrategy: 'replace',
@@ -326,7 +326,7 @@ function getNewValue({
         newValue = replacementValue;
       } else if (replacementValue) {
         const parsedRange = parseRange(replacementValue);
-        const element = parsedRange[parsedRange.length - 1];
+        const element = parsedRange.at(-1)!;
         if (element.operator?.startsWith('<')) {
           const splitCurrent = currentValue.split(element.operator);
           splitCurrent.pop();
