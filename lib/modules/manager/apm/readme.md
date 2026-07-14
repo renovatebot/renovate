@@ -15,12 +15,6 @@ devDependencies:
     - owner/repo#v1.2.3
 ```
 
-The datasource is selected dynamically from the git host:
-
-- `github.com` (the default when no host is given) uses the `github-tags` datasource
-- `gitlab.com` and hosts matching a `gitlab` `hostRules` entry use the `gitlab-tags` datasource
-- any other host uses the generic `git-tags` datasource
-
 Only entries that pin an exact `#<ref>` are updated.
 Entries without a `#<ref>` are skipped because there is no version to bump.
 
