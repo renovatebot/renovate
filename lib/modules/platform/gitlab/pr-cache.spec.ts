@@ -27,7 +27,7 @@ const pr1: GitLabMergeRequest = {
   detailed_merge_status: 'not_approved',
   description: 'a merge request',
   sha: '0123456789abcdef0123456789abcdef01234567' as LongCommitSha,
-  assignee: null,
+  assignee: undefined,
   assignees: [],
 };
 
@@ -44,7 +44,7 @@ const pr2: GitLabMergeRequest = {
   detailed_merge_status: 'not_approved',
   description: 'a merge request',
   sha: '0123456789abcdef0123456789abcdef01234567' as LongCommitSha,
-  assignee: null,
+  assignee: undefined,
   assignees: [],
   reviewers: [],
 };
@@ -62,7 +62,7 @@ const pr3: GitLabMergeRequest = {
   detailed_merge_status: 'not_approved',
   description: 'a merge request',
   sha: '0123456789abcdef0123456789abcdef01234567' as LongCommitSha,
-  assignee: null,
+  assignee: undefined,
   assignees: [],
   reviewers: [],
 };
