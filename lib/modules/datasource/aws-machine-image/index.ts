@@ -151,7 +151,7 @@ export class AwsMachineImageDatasource extends Datasource {
     packageName: serializedAmiFilter,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     const images = await this.getSortedAwsMachineImages(serializedAmiFilter);
-    const latestImage = images[images.length - 1];
+    const latestImage = images.at(-1);
     if (!latestImage?.ImageId) {
       return null;
     }

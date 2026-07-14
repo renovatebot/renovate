@@ -1,6 +1,6 @@
 {
   "meta": {
-    "version": "2026.7.0 linux-x64 (2026-07-02)"
+    "version": "2026.7.5 linux-x64 (2026-07-09)"
   },
   "tools": {
     "1password": {
@@ -116,6 +116,9 @@
     "apko": {
       "aqua": "chainguard-dev/apko",
       "asdf": "omissis/asdf-apko"
+    },
+    "apm": {
+      "github": "microsoft/apm"
     },
     "apollo-ios": {
       "github": "apollographql/apollo-ios"
@@ -593,7 +596,8 @@
       "github": "greglook/cljstyle"
     },
     "clojure": {
-      "asdf": "mise-plugins/mise-clojure"
+      "asdf": "mise-plugins/mise-clojure",
+      "vfox": "jdx/vfox-clojure"
     },
     "cloud-sql-proxy": {
       "aqua": "GoogleCloudPlatform/cloud-sql-proxy",
@@ -1005,7 +1009,8 @@
       "asdf": "elementalvoid/asdf-eksctl"
     },
     "elasticsearch": {
-      "asdf": "mise-plugins/mise-elasticsearch"
+      "asdf": "mise-plugins/mise-elasticsearch",
+      "vfox": "jdx/vfox-elasticsearch"
     },
     "elixir": {
       "core": "elixir"
@@ -1019,7 +1024,8 @@
       "github": "elm/compiler"
     },
     "emsdk": {
-      "asdf": "mise-plugins/mise-emsdk"
+      "asdf": "mise-plugins/mise-emsdk",
+      "vfox": "jdx/vfox-emsdk"
     },
     "entire": {
       "aqua": "entireio/cli",
@@ -1162,7 +1168,8 @@
       "asdf": "MxNxPx/asdf-gator"
     },
     "gcc-arm-none-eabi": {
-      "asdf": "mise-plugins/mise-gcc-arm-none-eabi"
+      "asdf": "mise-plugins/mise-gcc-arm-none-eabi",
+      "vfox": "jdx/vfox-gcc-arm-none-eabi"
     },
     "gcloud": {
       "asdf": "mise-plugins/mise-gcloud",
@@ -1372,7 +1379,8 @@
       "github": "orf/gping"
     },
     "graalvm": {
-      "asdf": "mise-plugins/mise-graalvm"
+      "asdf": "mise-plugins/mise-graalvm",
+      "vfox": "jdx/vfox-graalvm"
     },
     "gradle": {
       "aqua": "gradle/gradle",
@@ -1399,7 +1407,7 @@
     },
     "groovy": {
       "asdf": "mise-plugins/mise-groovy",
-      "vfox": "mise-plugins/vfox-groovy"
+      "vfox": "jdx/vfox-groovy"
     },
     "grpc-health-probe": {
       "aqua": "grpc-ecosystem/grpc-health-probe",
@@ -1498,6 +1506,7 @@
       "aqua": "helmwave/helmwave"
     },
     "herdr": {
+      "aqua": "ogulcancelik/herdr",
       "github": "ogulcancelik/herdr"
     },
     "heroku": {
@@ -1642,7 +1651,8 @@
       "conda": "jfrog-cli"
     },
     "jib": {
-      "asdf": "mise-plugins/mise-jib"
+      "asdf": "mise-plugins/mise-jib",
+      "vfox": "jdx/vfox-jib"
     },
     "jiq": {
       "aqua": "fiatjaf/jiq",
@@ -2172,6 +2182,9 @@
       "asdf": "mise-plugins/mise-minio",
       "conda": "minio-server"
     },
+    "miniserve": {
+      "aqua": "svenstaro/miniserve"
+    },
     "minishift": {
       "aqua": "minishift/minishift",
       "asdf": "sqtran/asdf-minishift"
@@ -2208,7 +2221,7 @@
     },
     "mongodb": {
       "asdf": "mise-plugins/mise-mongodb",
-      "vfox": "echocat/vfox-mongod"
+      "vfox": "jdx/vfox-mongod"
     },
     "mongosh": {
       "asdf": "itspngu/asdf-mongosh",
@@ -2229,7 +2242,8 @@
       "asdf": "joschi/asdf-mvnd"
     },
     "mysql": {
-      "asdf": "mise-plugins/mise-mysql"
+      "asdf": "mise-plugins/mise-mysql",
+      "vfox": "jdx/vfox-mysql"
     },
     "mysql-client": {
       "conda": "mysql-client"
@@ -2296,6 +2310,9 @@
       "asdf": "mise-plugins/mise-hashicorp",
       "http": "nomad-pack"
     },
+    "nono": {
+      "github": "nolabs-ai/nono"
+    },
     "notation": {
       "aqua": "notaryproject/notation",
       "asdf": "bodgit/asdf-notation"
@@ -2332,7 +2349,8 @@
       "http": "oc"
     },
     "oci": {
-      "asdf": "mise-plugins/mise-oci"
+      "asdf": "mise-plugins/mise-oci",
+      "vfox": "jdx/vfox-oci"
     },
     "octosql": {
       "github": "cube2222/octosql"
@@ -2492,7 +2510,7 @@
     },
     "php": {
       "asdf": "mise-plugins/asdf-php",
-      "vfox": "mise-plugins/vfox-php"
+      "vfox": "jdx/vfox-php"
     },
     "pi": {
       "aqua": "earendil-works/pi",
@@ -3031,7 +3049,8 @@
       "asdf": "pavloos/asdf-spin"
     },
     "spring-boot": {
-      "asdf": "mise-plugins/mise-spring-boot"
+      "asdf": "mise-plugins/mise-spring-boot",
+      "vfox": "jdx/vfox-spring-boot"
     },
     "spruce": {
       "aqua": "geofffranks/spruce",
@@ -3204,10 +3223,12 @@
       "asdf": "johnhamelink/asdf-tekton-cli"
     },
     "teleport-community": {
-      "asdf": "mise-plugins/mise-teleport-community"
+      "asdf": "mise-plugins/mise-teleport-community",
+      "vfox": "jdx/vfox-teleport-community"
     },
     "teleport-ent": {
-      "asdf": "mise-plugins/mise-teleport-ent"
+      "asdf": "mise-plugins/mise-teleport-ent",
+      "vfox": "jdx/vfox-teleport-ent"
     },
     "telepresence": {
       "aqua": "telepresenceio/telepresence",
@@ -3317,7 +3338,8 @@
       "asdf": "Smana/asdf-timoni"
     },
     "tiny": {
-      "asdf": "mise-plugins/mise-tiny"
+      "asdf": "mise-plugins/mise-tiny",
+      "vfox": "jdx/vfox-tiny"
     },
     "tinygo": {
       "aqua": "tinygo-org/tinygo"
@@ -3327,7 +3349,8 @@
       "cargo": "tinymist"
     },
     "tinytex": {
-      "asdf": "mise-plugins/mise-tinytex"
+      "asdf": "mise-plugins/mise-tinytex",
+      "vfox": "jdx/vfox-tinytex"
     },
     "tirith": {
       "cargo": "tirith",
@@ -3427,6 +3450,9 @@
     "tusd": {
       "github": "tus/tusd"
     },
+    "twg": {
+      "http": "twg"
+    },
     "ty": {
       "aqua": "astral-sh/ty",
       "github": "astral-sh/ty"
@@ -3486,7 +3512,8 @@
       "pipx": "uv"
     },
     "v": {
-      "asdf": "mise-plugins/mise-v"
+      "asdf": "mise-plugins/mise-v",
+      "vfox": "jdx/vfox-v"
     },
     "vacuum": {
       "aqua": "daveshanley/vacuum"

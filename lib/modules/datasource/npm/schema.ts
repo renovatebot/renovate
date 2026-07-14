@@ -1,12 +1,14 @@
 import { z } from 'zod/v4';
-import { LooseRecord } from '../../../util/schema-utils/index.ts';
+import { DeepNullish, LooseRecord } from '../../../util/schema-utils/index.ts';
 
 const Repository = z.union([
   z.string(),
-  z.object({
-    url: z.string().nullish(),
-    directory: z.string().nullish(),
-  }),
+  DeepNullish(
+    z.object({
+      url: z.string().optional(),
+      directory: z.string().optional(),
+    }),
+  ),
 ]);
 
 const RepositoryNpmResponse = z
