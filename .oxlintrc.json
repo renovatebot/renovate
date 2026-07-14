@@ -71,7 +71,7 @@
     "renovate/no-hardcoded-docs-url": "error",
     "renovate/no-new-url": "error",
     "renovate/no-tools-import": "error",
-    "renovate/prefer-zod-nullish": "error",
+    "renovate/prefer-nullish-util": "error",
     "renovate/zod-schema-naming": "error",
 
     "typescript/await-thenable": "error",
@@ -184,6 +184,7 @@
         "no-template-curly-in-string": "off",
         "jest/valid-title": "error",
         "typescript/unbound-method": "off",
+        "renovate/prefer-nullish-util": "off",
         "renovate/test-root-describe": "error",
         "typescript/explicit-function-return-type": "off"
       }
