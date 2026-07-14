@@ -638,6 +638,35 @@ export async function getBranchUpdateDate(
   }
 }
 
+// Return the commit date of every remote branch tip.
+// Uses a a single `git for-each-ref` call, instead of spawning a `git show` per branch
+export async function getAllBranchUpdateDates(): Promise<
+  Map<string, DateTime>
+> {
+  logger.debug('getAllBranchUpdateDates');
+  await syncGit();
+
+  const raw = await git.raw([
+    'for-each-ref',
+    '--format=%(refname:short) %(committerdate:iso-strict)',
+    // NOTE that using `origin/` (instead of i.e. `origin/*`) allows us to capture nested branch names
+    'refs/remotes/origin/',
+  ]);
+  const result = new Map<string, DateTime>();
+  const lines = raw.trim().split(newlineRegex).filter(Boolean);
+  for (const line of lines) {
+    const [refShort, isoDate] = line.split(' ');
+    // refs/remotes/origin/HEAD, the default branch for the repo, is shortened to `origin`
+    if (refShort === 'origin') {
+      continue;
+    }
+
+    const branchName = refShort.replace(/^origin\//, '');
+    result.set(branchName, DateTime.fromISO(isoDate).toUTC());
+  }
+  return result;
+}
+
 export async function getCommitMessages(): Promise<string[]> {
   logger.debug('getCommitMessages');
   // v8 ignore else -- TODO: add test #40625

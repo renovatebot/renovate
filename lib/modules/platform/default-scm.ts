@@ -27,6 +27,10 @@ export class DefaultGitScm implements PlatformScm {
     return git.getBranchUpdateDate(branchName);
   }
 
+  getAllBranchUpdateDates(): Promise<Map<string, DateTime>> {
+    return git.getAllBranchUpdateDates();
+  }
+
   isBranchBehindBase(branchName: string, baseBranch: string): Promise<boolean> {
     return git.isBranchBehindBase(branchName, baseBranch);
   }

@@ -29,6 +29,9 @@ export class LocalFs implements PlatformScm {
   getBranchUpdateDate(_branchName: string): Promise<DateTime | null> {
     return Promise.resolve(null);
   }
+  getAllBranchUpdateDates(): Promise<Map<string, DateTime>> {
+    return Promise.resolve(new Map());
+  }
   deleteBranch(_branchName: string): Promise<void> {
     return Promise.resolve();
   }

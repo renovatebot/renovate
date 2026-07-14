@@ -123,6 +123,8 @@ describe('util/git/index', { timeout: 30000 }, () => {
     await repo.addConfig('user.email', 'author2@example.com');
     await repo.commit('second commit', undefined, { '--allow-empty': null });
 
+    await repo.checkoutBranch('renovate/deeply/nested', defaultBranch);
+
     await repo.checkout(defaultBranch);
   });
 
@@ -540,6 +542,47 @@ describe('util/git/index', { timeout: 30000 }, () => {
         await freshDir.cleanup();
         GlobalConfig.set({ localDir: tmpDir.path });
       }
+    });
+  });
+
+  describe('getAllBranchUpdateDates()', () => {
+    it('returns update dates for every remote branch', async () => {
+      const dates = await git.getAllBranchUpdateDates();
+
+      expect(dates.get('renovate/past_branch')).toBeInstanceOf(DateTime);
+
+      expect(dates.get(defaultBranch)).toBeInstanceOf(DateTime);
+      expect(dates.get(defaultBranch)?.toISO()).toEqual(
+        masterCommitDate.toISOString(),
+      );
+    });
+
+    it('returns the same date as getBranchUpdateDate for a given branch', async () => {
+      const dates = await git.getAllBranchUpdateDates();
+
+      const batchDate = dates.get('renovate/equal_branch');
+      const singleDate = await git.getBranchUpdateDate('renovate/equal_branch');
+
+      expect(batchDate!.toISO()).toBe(singleDate!.toISO());
+    });
+
+    it('excludes the origin/HEAD symbolic ref', async () => {
+      const dates = await git.getAllBranchUpdateDates();
+
+      expect(Array.from(dates.keys()).sort()).toEqual([
+        'develop',
+        'master',
+        'renovate/binary-file',
+        'renovate/branch_with_multiple_authors',
+        'renovate/custom_author',
+        'renovate/deeply/nested',
+        'renovate/equal_branch',
+        'renovate/future_branch',
+        'renovate/hidden-unicode',
+        'renovate/modified_branch',
+        'renovate/nested_files',
+        'renovate/past_branch',
+      ]);
     });
   });
 
