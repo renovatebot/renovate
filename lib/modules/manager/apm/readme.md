@@ -21,5 +21,3 @@ Entries without a `#<ref>` are skipped because there is no version to bump.
 When an `apm.lock.yaml` lockfile is present, Renovate refreshes it by running `apm install` after updating the manifest.
 This requires the `apm` CLI to be available (for example, with `binarySource=global`).
 
-Model Context Protocol (MCP) server entries under `dependencies.mcp` are not managed.
-They are identified by an MCP registry name (for example `io.github.github/github-mcp-server`) and carry no version to pin, so there is nothing for Renovate to update.
