@@ -3,6 +3,7 @@ import type {
   WorkItemStateColor,
 } from 'azure-devops-node-api/interfaces/WorkItemTrackingInterfaces.js';
 import { logger } from '../../../logger/index.ts';
+import { Lazy } from '../../../util/lazy.ts';
 import { sanitize } from '../../../util/sanitize.ts';
 import type { EnsureIssueConfig, EnsureIssueResult, Issue } from '../types.ts';
 import * as azureApi from './azure-got-wrapper.ts';
@@ -49,23 +50,22 @@ function namesByCategory(
 
 export class IssueService {
   private config: Config;
-  private workItemStates: WorkItemStates | null = null;
+  private readonly workItemStates: Lazy<Promise<WorkItemStates>>;
 
   constructor(config: Config) {
     this.config = config;
+    // Wrapped in `Lazy` so concurrent callers share a single resolution
+    // instead of each firing a duplicate `getWorkItemTypeStates` request.
+    this.workItemStates = new Lazy(() => this.resolveWorkItemStates());
   }
 
   /**
    * Resolve the concrete open/closed state names for the `Issue` work item type
    * from its process, so Renovate does not depend on hardcoded state names that
    * only exist in some Azure DevOps processes. Falls back to the historical
-   * `New`/`Closed` values if the states cannot be fetched. Cached per instance.
+   * `New`/`Closed` values if the states cannot be fetched.
    */
-  private async getWorkItemStates(): Promise<WorkItemStates> {
-    if (this.workItemStates) {
-      return this.workItemStates;
-    }
-
+  private async resolveWorkItemStates(): Promise<WorkItemStates> {
     const states: WorkItemStates = {
       open: defaultOpenState,
       closed: defaultClosedState,
@@ -111,7 +111,6 @@ export class IssueService {
       );
     }
 
-    this.workItemStates = states;
     return states;
   }
 
@@ -161,7 +160,7 @@ export class IssueService {
         'System.ChangedDate',
       ]);
 
-      const { closedNames } = await this.getWorkItemStates();
+      const { closedNames } = await this.workItemStates.getValue();
 
       return workItems.map((wi: WorkItem) => ({
         number: wi.id!,
@@ -183,7 +182,7 @@ export class IssueService {
       const issue = await this.findIssue(title);
       if (issue?.state === 'open' && issue.number) {
         const azureApiWit = await azureApi.workItemTrackingApi();
-        const { closed } = await this.getWorkItemStates();
+        const { closed } = await this.workItemStates.getValue();
         await azureApiWit.updateWorkItem(
           undefined,
           [{ op: 'replace', path: '/fields/System.State', value: closed }],
@@ -209,7 +208,7 @@ export class IssueService {
       const azureApiWit = await azureApi.workItemTrackingApi();
       const finalTitle = getWorkItemTitle(title, this.config.repository);
       const issues = await this.getIssueList(finalTitle);
-      const { open, closed } = await this.getWorkItemStates();
+      const { open, closed } = await this.workItemStates.getValue();
 
       // Close duplicate open issues if any
       const openIssues = issues.filter((issue) => issue.state === 'open');
