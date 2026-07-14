@@ -168,7 +168,6 @@ describe('modules/platform/github/index', () => {
           gitAuthor: 'renovate@whitesourcesoftware.com',
         }),
       ).toMatchSnapshot();
-      // always register, even when gitAuthor is provided
       expect(git.setPlatformIgnoredAuthors).toHaveBeenCalledWith([
         'noreply@github.com',
       ]);

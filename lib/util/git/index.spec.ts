@@ -123,8 +123,7 @@ describe('util/git/index', { timeout: 30000 }, () => {
     await repo.addConfig('user.email', 'author2@example.com');
     await repo.commit('second commit', undefined, { '--allow-empty': null });
 
-    // Branch where author matches Renovate but committer is different
-    // (simulates rebase or amend and force push by a different user)
+    // Renovate author, foreign committer (e.g. rebase/amend by someone else)
     await repo.checkoutBranch('renovate/different_committer', defaultBranch);
     await repo.addConfig('user.email', 'Jest@example.com');
     await fs.writeFile(`${base.path}/committer_file`, 'test');
@@ -133,7 +132,7 @@ describe('util/git/index', { timeout: 30000 }, () => {
       .env({ GIT_COMMITTER_EMAIL: 'someone-else@example.com' })
       .commit('committed by someone else');
 
-    // platformCommit: author is bot, committer is noreply@github.com
+    // Renovate author, GitHub platformCommit committer
     await repo.checkoutBranch('renovate/platform_commit', defaultBranch);
     await repo.addConfig('user.email', 'Jest@example.com');
     await fs.writeFile(`${base.path}/platform_commit_file`, 'test');
