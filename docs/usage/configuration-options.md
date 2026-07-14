@@ -303,6 +303,8 @@ If possible, Renovate follows the merge strategy set on the platform itself for 
 If you've set `automerge=true` and `automergeType=pr` for any of your dependencies, then you may choose what automerge strategy Renovate uses by setting the `automergeStrategy` config option.
 If you're happy with the default behavior, you don't need to do anything.
 
+On GitHub, Renovate applies `automergeStrategy` both when Renovate merges the PR directly and when `platformAutomerge=true` enables GitHub-native automerge.
+
 You may choose from these values:
 
 - `auto`, Renovate decides how to merge
