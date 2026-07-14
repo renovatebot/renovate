@@ -20,4 +20,3 @@ Entries without a `#<ref>` are skipped because there is no version to bump.
 
 When an `apm.lock.yaml` lockfile is present, Renovate refreshes it by running `apm install` after updating the manifest.
 This requires the `apm` CLI to be available (for example, with `binarySource=global`).
-
