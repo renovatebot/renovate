@@ -170,6 +170,22 @@ describe('modules/platform/gerrit/index', () => {
       });
     });
 
+    it('initRepo() - uses username in ssh clone url', async () => {
+      clientMock.getProjectInfo.mockResolvedValueOnce(projectInfo);
+      clientMock.findChanges.mockResolvedValueOnce([]); // rejected changes
+      clientMock.findChanges.mockResolvedValueOnce([]); // open changes for branch initialization
+
+      await gerrit.initRepo({
+        repository: 'test/repo',
+        gitUrl: 'ssh',
+      });
+
+      expect(git.initRepo).toHaveBeenCalledExactlyOnceWith({
+        url: 'ssh://user@dev.gerrit.com:29418/test/repo',
+        virtualBranches: {},
+      });
+    });
+
     it('initRepo() - abandon rejected changes', async () => {
       clientMock.getProjectInfo.mockResolvedValueOnce({
         ...projectInfo,

@@ -3,7 +3,7 @@ import { compare } from './version.ts';
 
 describe('modules/versioning/nuget/version', () => {
   describe('compare', () => {
-    test.each`
+    it.each`
       x                               | y                             | expected
       ${'17.4'}                       | ${'17.04'}                    | ${0}
       ${'1.4'}                        | ${'1.4.0'}                    | ${0}

@@ -54,11 +54,6 @@ describe('modules/manager/copier/artifacts', () => {
     );
   });
 
-  afterEach(() => {
-    fs.readLocalFile.mockClear();
-    git.getRepoStatus.mockClear();
-  });
-
   describe('updateArtifacts()', () => {
     it('returns null if newVersion is not provided', async () => {
       const execSnapshots = mockExecAll();

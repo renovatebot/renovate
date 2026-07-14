@@ -20,7 +20,7 @@ import { PackageFiles } from '../package-files.ts';
 import { lookupUpdates } from './lookup/index.ts';
 import type { LookupUpdateConfig, UpdateResult } from './lookup/types.ts';
 
-type LookupResult = Result<PackageDependency, Error>;
+type LookupResult = Result<PackageDependency>;
 
 async function lookup(
   packageFileConfig: RenovateConfig & PackageFile,
@@ -91,7 +91,7 @@ async function lookup(
           'Dependency lookup error',
         );
       })
-      .catch((err): Result<UpdateResult, Error> => {
+      .catch((err): Result<UpdateResult> => {
         if (
           packageFileConfig.repoIsOnboarded === true ||
           !(err instanceof ExternalHostError)
