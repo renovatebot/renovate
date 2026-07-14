@@ -61,64 +61,6 @@ describe('modules/platform/github/index', () => {
     delete process.env.RENOVATE_X_GITHUB_HOST_RULES;
   });
 
-  describe('isPlatformCommitEnabled()', () => {
-    it('returns false before initPlatform', () => {
-      expect(github.isPlatformCommitEnabled()).toBeFalse();
-    });
-
-    it('returns true after init with platformCommit enabled', async () => {
-      GlobalConfig.set({ platformCommit: 'enabled' });
-      httpMock.scope(githubApiHost).get('/user').reply(200, {
-        login: 'renovate-bot',
-        name: 'Example User',
-        email: 'user@domain.com',
-      });
-      await github.initPlatform({ token: '123test' });
-      expect(github.isPlatformCommitEnabled()).toBeTrue();
-    });
-
-    it('returns false after init with platformCommit disabled', async () => {
-      GlobalConfig.set({ platformCommit: 'disabled' });
-      httpMock
-        .scope(githubApiHost, {
-          reqheaders: {
-            authorization: 'Bearer ghs_123test',
-          },
-        })
-        .post('/graphql')
-        .reply(200, {
-          data: { viewer: { login: 'my-app[bot]', databaseId: 12345 } },
-        });
-      await github.initPlatform({ token: 'x-access-token:ghs_123test' });
-      expect(github.isPlatformCommitEnabled()).toBeFalse();
-    });
-
-    it('returns true after init for auto when a GitHub App', async () => {
-      httpMock
-        .scope(githubApiHost, {
-          reqheaders: {
-            authorization: 'Bearer ghs_123test',
-          },
-        })
-        .post('/graphql')
-        .reply(200, {
-          data: { viewer: { login: 'my-app[bot]', databaseId: 12345 } },
-        });
-      await github.initPlatform({ token: 'x-access-token:ghs_123test' });
-      expect(github.isPlatformCommitEnabled()).toBeTrue();
-    });
-
-    it('returns false after init for auto when not a GitHub App', async () => {
-      httpMock.scope(githubApiHost).get('/user').reply(200, {
-        login: 'renovate-bot',
-        name: 'Example User',
-        email: 'user@domain.com',
-      });
-      await github.initPlatform({ token: '123test' });
-      expect(github.isPlatformCommitEnabled()).toBeFalse();
-    });
-  });
-
   describe('initPlatform()', () => {
     it('should throw if no token', async () => {
       await expect(github.initPlatform({})).rejects.toThrow(
@@ -431,7 +373,6 @@ describe('modules/platform/github/index', () => {
         renovateUsername: 'renovate-bot',
         token: '123test',
       });
-      // PAT + platformCommit=auto does not use platform commits
       expect(git.setPlatformIgnoredAuthors).toHaveBeenCalledWith([]);
     });
 
@@ -524,7 +465,6 @@ describe('modules/platform/github/index', () => {
         renovateUsername: 'my-app[bot]',
         token: 'x-access-token:ghs_123test',
       });
-      // GitHub App + platformCommit=auto uses platform commits
       expect(git.setPlatformIgnoredAuthors).toHaveBeenCalledWith([
         'noreply@github.com',
       ]);

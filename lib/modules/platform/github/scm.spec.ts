@@ -21,7 +21,7 @@ describe('modules/platform/github/scm', () => {
     message: 'msg',
   } satisfies CommitFilesConfig;
 
-  it('delegates to git when platformCommit is disabled', async () => {
+  it('platformCommit = disabled => delegate to git', async () => {
     github.isPlatformCommitEnabled.mockReturnValueOnce(false);
 
     await githubScm.commitAndPush(commitObj);
@@ -30,7 +30,7 @@ describe('modules/platform/github/scm', () => {
     expect(github.commitFiles).not.toHaveBeenCalled();
   });
 
-  it('delegates to github when platformCommit is enabled', async () => {
+  it('platformCommit = enabled => delegate to github', async () => {
     github.isPlatformCommitEnabled.mockReturnValueOnce(true);
 
     await githubScm.commitAndPush(commitObj);

@@ -130,9 +130,12 @@ export function isGHApp(): boolean {
   return !!platformConfig.isGHApp;
 }
 
-/** Resolved in initPlatform; true when commits go through the GitHub API. */
+/** Whether commits go through the GitHub API (`platformCommit`). */
 export function isPlatformCommitEnabled(): boolean {
-  return !!platformConfig.platformCommitEnabled;
+  const platformCommit = GlobalConfig.get('platformCommit') ?? 'auto';
+  return (
+    platformCommit === 'enabled' || (platformCommit === 'auto' && isGHApp())
+  );
 }
 
 export async function detectGhe(token: string): Promise<void> {
@@ -211,6 +214,7 @@ export async function initPlatform({
     );
     renovateUsername = platformConfig.userDetails.username;
   }
+
   let ghHostname: string;
   /* v8 ignore next -- false negative due to V8/source-map artifact */
   if (platformConfig.isGheCloud) {
@@ -243,14 +247,9 @@ export async function initPlatform({
     }
   }
 
-  // Resolve once: scm and isBranchModified both use this (#43164).
-  // Option default is 'auto' when unset in GlobalConfig.
-  const platformCommit = GlobalConfig.get('platformCommit') ?? 'auto';
-  platformConfig.platformCommitEnabled =
-    platformCommit === 'enabled' ||
-    (platformCommit === 'auto' && platformConfig.isGHApp);
+  // platformCommit uses GitHub <noreply@host> as committer (#43164)
   git.setPlatformIgnoredAuthors(
-    platformConfig.platformCommitEnabled ? [`noreply@${ghHostname}`] : [],
+    isPlatformCommitEnabled() ? [`noreply@${ghHostname}`] : [],
   );
 
   logger.debug({ platformConfig, renovateUsername }, 'Platform config');
