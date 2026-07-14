@@ -1,4 +1,5 @@
 import { logger } from '../../../logger/index.ts';
+import { coerceArray } from '../../../util/array.ts';
 import { detectPlatform } from '../../../util/common.ts';
 import { regEx } from '../../../util/regex.ts';
 import { parseSingleYaml } from '../../../util/yaml.ts';
@@ -25,7 +26,7 @@ function determineDatasource(host: string, repoPath: string): DatasourceResult {
   const repoUrl = `https://${host}/${repoPath}`;
   const platform = detectPlatform(repoUrl);
 
-  if (host === 'github.com' || platform === 'github') {
+  if (platform === 'github') {
     logger.debug({ repoUrl }, 'apm: found github dependency');
     return {
       datasource: GithubTagsDatasource.id,
@@ -34,7 +35,7 @@ function determineDatasource(host: string, repoPath: string): DatasourceResult {
     };
   }
 
-  if (host === 'gitlab.com' || platform === 'gitlab') {
+  if (platform === 'gitlab') {
     logger.debug({ repoUrl }, 'apm: found gitlab dependency');
     return {
       datasource: GitlabTagsDatasource.id,
@@ -52,6 +53,12 @@ const hostnameRegex = regEx(/\./);
 /**
  * Parse a single APM dependency string of the form
  * `[host/]owner/repo[/subpath...][#ref]`.
+ *
+ * APM only supports remote git references (no local paths). The optional host
+ * prefix is always a hostname, which contains a dot, whereas git host owner
+ * names do not - so a dotted first segment denotes the host. Dots in later
+ * segments (repo names, subpaths, e.g. `owner/repo.js` or
+ * `github/awesome-copilot/agents/api-architect.agent.md`) are left untouched.
  */
 export function parseApmDependency(
   entry: string,
@@ -106,7 +113,9 @@ function extractSection(
   entries: string[] | undefined,
   depType: string,
 ): PackageDependency[] {
-  return (entries ?? []).map((entry) => parseApmDependency(entry, depType));
+  return coerceArray(entries).map((entry) =>
+    parseApmDependency(entry, depType),
+  );
 }
 
 export function extractPackageFile(
