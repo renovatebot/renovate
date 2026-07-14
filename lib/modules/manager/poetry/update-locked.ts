@@ -1,5 +1,6 @@
 import { logger } from '../../../logger/index.ts';
 import { Result } from '../../../util/result.ts';
+import { nonNullish } from '../../../util/schema-utils/index.ts';
 import type { UpdateLockedConfig, UpdateLockedResult } from '../types.ts';
 import { Lockfile } from './schema.ts';
 
@@ -12,7 +13,9 @@ export function updateLockedDependency(
     `poetry.updateLockedDependency: ${depName}@${currentVersion} -> ${newVersion} [${lockFile}]`,
   );
 
-  const LockedVersion = Lockfile.transform(({ lock }) => lock[depName]);
+  const LockedVersion = Lockfile.transform(
+    ({ lock }) => lock[depName],
+  ).transform(nonNullish);
   return Result.parse(lockFileContent, LockedVersion)
     .transform(
       (lockedVersion): UpdateLockedResult =>

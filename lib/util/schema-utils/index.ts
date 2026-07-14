@@ -201,6 +201,23 @@ export function Nullish<Schema extends z.ZodTypeAny>(
     .optional();
 }
 
+/**
+ * Zod transform callback that turns nullish output into a parse error. Useful
+ * after a transform that extracts an optional field, e.g. together with
+ * `Result.parse()`, which requires non-nullable output.
+ */
+export function nonNullish<T>(value: T, ctx: z.RefinementCtx): NonNullable<T> {
+  if (value === null || value === undefined) {
+    ctx.addIssue({
+      code: 'custom',
+      message: 'Expected non-nullish value',
+    });
+    return z.NEVER;
+  }
+
+  return value;
+}
+
 function deepNullishRewrite(node: z.ZodTypeAny): z.ZodTypeAny {
   if (node instanceof z.ZodOptional) {
     return Nullish(deepNullishRewrite(node.unwrap() as z.ZodTypeAny));

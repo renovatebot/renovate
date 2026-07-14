@@ -32,7 +32,19 @@ describe('modules/manager/poetry/update-locked', () => {
     expect(updateLockedDependency(config).status).toBe('unsupported');
   });
 
-  it('returns unsupported for mising locked content', () => {
+  it('returns unsupported for missing dependency', () => {
+    const config: UpdateLockedConfig = {
+      packageFile,
+      lockFile,
+      lockFileContent,
+      depName: 'missing',
+      newVersion: '1.0.0',
+      currentVersion: '0.9.0',
+    };
+    expect(updateLockedDependency(config).status).toBe('unsupported');
+  });
+
+  it('returns unsupported for missing locked content', () => {
     const config: UpdateLockedConfig = {
       packageFile,
       lockFile,
