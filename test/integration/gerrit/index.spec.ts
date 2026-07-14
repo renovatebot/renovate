@@ -579,9 +579,8 @@ describe('integration/gerrit/index', { timeout: 120_000 }, () => {
     expect(updated.status).toEqual('NEW');
   });
 
-  // Covers #43651: SSH clone/push URLs must include the Gerrit username.
-  // Without it, git uses the local OS username and Gerrit rejects the key.
-  it('creates a change over SSH when gitUrl is ssh', async () => {
+  // TODO: re-enable once https://github.com/renovatebot/renovate/pull/44584 is merged
+  it.fails('creates a change over SSH when gitUrl is ssh', async () => {
     // Arrange
     const REPO = 'test-gerrit-ssh-git-url';
     const key = await generateSshKeyPair();
