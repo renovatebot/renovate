@@ -66,6 +66,8 @@
     "prefer-template": "error",
     "prefer-arrow-callback": ["error", { "allowUnboundThis": false }],
     "no-nested-ternary": "error",
+    "no-else-return": ["error", { "allowElseIf": false }],
+    "unicorn/no-lonely-if": "error",
 
     "renovate/enforce-ts-extension": "error",
     "renovate/no-hardcoded-docs-url": "error",

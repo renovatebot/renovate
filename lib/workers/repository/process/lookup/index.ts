@@ -652,17 +652,18 @@ export async function lookupUpdates(
             newValue: config.currentValue,
           });
         }
-      } else if (config.pinDigests) {
+      } else if (
+        config.pinDigests &&
         // Create a pin only if one doesn't already exists
         // v8 ignore else -- TODO: add test #40625
-        if (!res.updates.some((update) => update.updateType === 'pin')) {
-          // pin digest
-          res.updates.push({
-            isPinDigest: true,
-            updateType: 'pinDigest',
-            newValue: config.currentValue,
-          });
-        }
+        !res.updates.some((update) => update.updateType === 'pin')
+      ) {
+        // pin digest
+        res.updates.push({
+          isPinDigest: true,
+          updateType: 'pinDigest',
+          newValue: config.currentValue,
+        });
       }
       if (versioningApi.valueToVersion) {
         // TODO #22198

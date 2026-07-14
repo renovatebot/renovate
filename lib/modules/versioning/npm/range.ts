@@ -36,11 +36,9 @@ function replaceCaretValue(oldValue: string, newValue: string): string {
     const newVal = newTuple[idx];
 
     let leadingDigit = false;
-    if (oldVal !== 0 || newVal !== 0) {
-      if (leadingZero) {
-        leadingZero = false;
-        leadingDigit = true;
-      }
+    if ((oldVal !== 0 || newVal !== 0) && leadingZero) {
+      leadingZero = false;
+      leadingDigit = true;
     }
 
     if (leadingDigit && newVal > oldVal) {

@@ -509,11 +509,10 @@ describe('modules/datasource/crate/index', () => {
                 'fatal: dumb http transport does not support shallow capabilities',
               ),
             );
-          } else {
-            const path = `${clonePath}/my/pk/mypkg`;
-            fs.mkdirSync(upath.dirname(path), { recursive: true });
-            fs.writeFileSync(path, Fixtures.get('mypkg'), { encoding: 'utf8' });
           }
+          const path = `${clonePath}/my/pk/mypkg`;
+          fs.mkdirSync(upath.dirname(path), { recursive: true });
+          fs.writeFileSync(path, Fixtures.get('mypkg'), { encoding: 'utf8' });
         });
 
       const gitMock = partial<SimpleGit>({
@@ -555,9 +554,8 @@ describe('modules/datasource/crate/index', () => {
                 'fatal: dumb http transport does not support shallow capabilities',
               ),
             );
-          } else {
-            return Promise.reject(new Error('mocked error'));
           }
+          return Promise.reject(new Error('mocked error'));
         });
 
       const gitMock = partial<SimpleGit>({
