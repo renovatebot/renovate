@@ -130,14 +130,6 @@ export function isGHApp(): boolean {
   return !!platformConfig.isGHApp;
 }
 
-/** Whether commits go through the GitHub API (`platformCommit`). */
-export function isPlatformCommitEnabled(): boolean {
-  const platformCommit = GlobalConfig.get('platformCommit') ?? 'auto';
-  return (
-    platformCommit === 'enabled' || (platformCommit === 'auto' && isGHApp())
-  );
-}
-
 export async function detectGhe(token: string): Promise<void> {
   const parsedEndpoint = parseUrl(platformConfig.endpoint);
   /* v8 ignore next -- endpoint is validated in initPlatform before detectGhe is called */
@@ -247,10 +239,9 @@ export async function initPlatform({
     }
   }
 
-  // platformCommit uses GitHub <noreply@host> as committer (#43164)
-  git.setPlatformIgnoredAuthors(
-    isPlatformCommitEnabled() ? [`noreply@${ghHostname}`] : [],
-  );
+  // platformCommit committer is GitHub <noreply@host> (#43164); always ignore on GitHub
+  // so packageRules can toggle platformCommit per branch without re-init.
+  git.setPlatformIgnoredAuthors([`noreply@${ghHostname}`]);
 
   logger.debug({ platformConfig, renovateUsername }, 'Platform config');
   const platformResult: PlatformResult = {
