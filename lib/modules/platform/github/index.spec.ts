@@ -124,6 +124,9 @@ describe('modules/platform/github/index', () => {
         renovateUsername: 'renovate-bot',
         token: 'github_pat_XXXXXX',
       });
+      expect(git.setPlatformIgnoredAuthors).toHaveBeenCalledWith([
+        'noreply@ghe.renovatebot.com',
+      ]);
     });
 
     it('should throw if user failure', async () => {
@@ -165,6 +168,10 @@ describe('modules/platform/github/index', () => {
           gitAuthor: 'renovate@whitesourcesoftware.com',
         }),
       ).toMatchSnapshot();
+      // always register, even when gitAuthor is provided
+      expect(git.setPlatformIgnoredAuthors).toHaveBeenCalledWith([
+        'noreply@github.com',
+      ]);
     });
 
     describe('when using the default gitAuthor', () => {
