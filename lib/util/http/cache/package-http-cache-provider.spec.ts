@@ -456,7 +456,7 @@ describe('util/http/cache/package-http-cache-provider', () => {
     // 3. cache-control header (public, private, null, undefined, malformed)
     // 4. checkAuthorizationHeader (true, false)
     // 5. authorization header (true, false, undefined)
-    test.each`
+    it.each`
       cachePrivatePackages | checkCacheControlHeader | cacheControl              | checkAuthorizationHeader | authorization | expected
       ${true}              | ${true}                 | ${'max-age=180, public'}  | ${true}                  | ${true}       | ${true}
       ${true}              | ${true}                 | ${'max-age=180, private'} | ${true}                  | ${true}       | ${true}
@@ -530,7 +530,7 @@ describe('util/http/cache/package-http-cache-provider', () => {
       },
     );
 
-    test('handles case-insensitive cache-control values', () => {
+    it('handles case-insensitive cache-control values', () => {
       GlobalConfig.set({ cachePrivatePackages: false });
 
       const cacheProvider = createCacheProvider({

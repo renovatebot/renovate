@@ -186,6 +186,7 @@
       "rules": {
         "no-template-curly-in-string": "off",
         "jest/valid-title": "error",
+        "vitest/consistent-test-it": ["error", { "fn": "it" }],
         "typescript/unbound-method": "off",
         "renovate/no-redundant-mock-reset": "error",
         "renovate/prefer-nullish-util": "off",
