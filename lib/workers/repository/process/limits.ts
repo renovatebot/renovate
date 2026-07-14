@@ -72,7 +72,7 @@ export async function getCommitsHourlyCount(
   try {
     const currentHourStart = DateTime.utc().startOf('hour');
     logger.debug(
-      `Calculating commits so far in this hour currentHourStart=${String(currentHourStart)}`,
+      `Calculating commits so far in this hour currentHourStart=${String(currentHourStart)}, for ${branches.length} branches`,
     );
 
     const cache = getCache();
