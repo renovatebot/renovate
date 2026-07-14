@@ -1,4 +1,3 @@
-import type { PlatformCommitOptions } from '../../config/types.ts';
 import type { GitOptions } from '../../types/git.ts';
 import type { LongCommitSha } from '../schema-utils/git.ts';
 import type { EmailAddress } from '../schema-utils/index.ts';
@@ -81,7 +80,6 @@ export interface CommitFilesConfig {
   files: FileChange[];
   message: string | string[];
   force?: boolean;
-  platformCommit?: PlatformCommitOptions;
   /** Only needed by Gerrit platform */
   prTitle?: string;
   /** Only needed by Gerrit platform */

@@ -52,7 +52,6 @@ describe('workers/repository/update/branch/commit', () => {
             ],
             force: false,
             message: 'some commit message',
-            platformCommit: 'auto',
           },
         ],
       ]);

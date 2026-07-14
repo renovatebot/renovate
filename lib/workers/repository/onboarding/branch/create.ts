@@ -59,7 +59,6 @@ export async function createOnboardingBranch(
       },
     ],
     message: commitMessage,
-    platformCommit: GlobalConfig.get('platformCommit'),
     force: true,
     // Only needed by Gerrit platform
     prTitle,

@@ -21,63 +21,21 @@ describe('modules/platform/github/scm', () => {
     message: 'msg',
   } satisfies CommitFilesConfig;
 
-  it('platformCommit = disabled => delegate to git', async () => {
+  it('delegates to git when platformCommit is disabled', async () => {
     github.isPlatformCommitEnabled.mockReturnValueOnce(false);
 
-    await githubScm.commitAndPush({
-      ...commitObj,
-      platformCommit: 'disabled',
-    });
+    await githubScm.commitAndPush(commitObj);
 
-    expect(git.commitFiles).toHaveBeenCalledExactlyOnceWith({
-      ...commitObj,
-      platformCommit: 'disabled',
-    });
+    expect(git.commitFiles).toHaveBeenCalledExactlyOnceWith(commitObj);
     expect(github.commitFiles).not.toHaveBeenCalled();
   });
 
-  it('platformCommit = enabled => delegate to github', async () => {
+  it('delegates to github when platformCommit is enabled', async () => {
     github.isPlatformCommitEnabled.mockReturnValueOnce(true);
 
-    await githubScm.commitAndPush({
-      ...commitObj,
-      platformCommit: 'enabled',
-    });
+    await githubScm.commitAndPush(commitObj);
 
     expect(git.commitFiles).not.toHaveBeenCalled();
-    expect(github.commitFiles).toHaveBeenCalledExactlyOnceWith({
-      ...commitObj,
-      platformCommit: 'enabled',
-    });
-  });
-
-  it('platformCommit = auto => delegate to git', async () => {
-    github.isPlatformCommitEnabled.mockReturnValueOnce(false);
-
-    await githubScm.commitAndPush({
-      ...commitObj,
-      platformCommit: 'auto',
-    });
-
-    expect(git.commitFiles).toHaveBeenCalledExactlyOnceWith({
-      ...commitObj,
-      platformCommit: 'auto',
-    });
-    expect(github.commitFiles).not.toHaveBeenCalled();
-  });
-
-  it('platformCommit = auto and is a github app => delegate to github', async () => {
-    github.isPlatformCommitEnabled.mockReturnValueOnce(true);
-
-    await githubScm.commitAndPush({
-      ...commitObj,
-      platformCommit: 'auto',
-    });
-
-    expect(git.commitFiles).not.toHaveBeenCalled();
-    expect(github.commitFiles).toHaveBeenCalledExactlyOnceWith({
-      ...commitObj,
-      platformCommit: 'auto',
-    });
+    expect(github.commitFiles).toHaveBeenCalledExactlyOnceWith(commitObj);
   });
 });

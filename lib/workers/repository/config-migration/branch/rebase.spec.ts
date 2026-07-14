@@ -106,7 +106,6 @@ describe('workers/repository/config-migration/branch/rebase', () => {
             },
           ],
           message: `Migrate config ${filename}`,
-          platformCommit: 'auto',
           baseBranch: 'dev',
           prTitle: 'Migrate Renovate config',
         });
