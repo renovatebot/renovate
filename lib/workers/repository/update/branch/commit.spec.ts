@@ -20,6 +20,7 @@ describe('workers/repository/update/branch/commit', () => {
         updatedPackageFiles: [],
         updatedArtifacts: [],
         upgrades: [],
+        platformCommit: 'auto',
       } satisfies BranchConfig;
       scm.commitAndPush.mockResolvedValueOnce('123test' as LongCommitSha);
       GlobalConfig.reset();
@@ -52,6 +53,7 @@ describe('workers/repository/update/branch/commit', () => {
             ],
             force: false,
             message: 'some commit message',
+            platformCommit: 'auto',
           },
         ],
       ]);

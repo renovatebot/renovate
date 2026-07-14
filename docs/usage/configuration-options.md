@@ -4033,6 +4033,17 @@ Please check platform specific docs for version requirements.
 
 To learn how to use GitHub's Merge Queue feature with Renovate, read our [GitHub Merge Queue](./key-concepts/automerge.md#github-merge-queue) docs.
 
+## `platformCommit`
+
+Only use this option if you run Renovate as a [GitHub App](https://docs.github.com/en/developers/apps/getting-started-with-apps/about-apps).
+It does not apply when you use a Personal Access Token as credential.
+
+When `platformCommit` is enabled, Renovate will create commits with GitHub's API instead of using `git` directly.
+This way Renovate can use GitHub's [Commit signing support for bots and other GitHub Apps](https://github.blog/2019-08-15-commit-signing-support-for-bots-and-other-github-apps/) feature.
+
+!!! note
+  When using platform commits, GitHub determines the git author string to use and Renovate's own gitAuthor is ignored.
+
 ## `postUpdateOptions`
 
 ### `bundlerConservative`

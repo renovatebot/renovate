@@ -3395,7 +3395,6 @@ const options: Readonly<RenovateOptions>[] = [
       'Use platform API to perform commits instead of using Git directly.',
     type: 'string',
     default: 'auto',
-    globalOnly: true,
     allowedValues: ['auto', 'disabled', 'enabled'],
     supportedPlatforms: ['github'],
   },

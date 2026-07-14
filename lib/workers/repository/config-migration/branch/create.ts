@@ -75,6 +75,7 @@ export async function createConfigMigrationBranch(
     branchName: getMigrationBranchName(config),
     files,
     message: commitMessage.toString(),
+    platformCommit: config.platformCommit,
     force: true,
     // Only needed by Gerrit platform
     prTitle: commitMessageFactory.getPrTitle(),

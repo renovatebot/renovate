@@ -49,7 +49,6 @@ export class GlobalConfig {
     'onboardingNoDeps',
     'onboardingPrTitle',
     'platform',
-    'platformCommit',
     'prCacheSyncMaxPages',
     'presetCachePersistence',
     'productLinks',

@@ -49,6 +49,7 @@ describe('workers/repository/config-migration/branch/create', () => {
           },
         ],
         message: 'Migrate config renovate.json',
+        platformCommit: 'auto',
         force: true,
         prTitle: 'Migrate Renovate config',
       });
@@ -75,6 +76,7 @@ describe('workers/repository/config-migration/branch/create', () => {
           },
         ],
         message,
+        platformCommit: 'auto',
         force: true,
         prTitle: message,
       });
@@ -113,6 +115,7 @@ describe('workers/repository/config-migration/branch/create', () => {
           },
         ],
         message: 'Migrate config renovate.json',
+        platformCommit: 'auto',
         force: true,
         prTitle: 'Migrate Renovate config',
       });
@@ -140,6 +143,7 @@ describe('workers/repository/config-migration/branch/create', () => {
             },
           ],
           message,
+          platformCommit: 'auto',
           force: true,
           prTitle: 'PREFIX: migrate Renovate config',
         });
@@ -169,6 +173,7 @@ describe('workers/repository/config-migration/branch/create', () => {
             },
           ],
           message,
+          platformCommit: 'auto',
           force: true,
           prTitle: `${prefix}: migrate Renovate config`,
         });
@@ -197,6 +202,7 @@ describe('workers/repository/config-migration/branch/create', () => {
             },
           ],
           message,
+          platformCommit: 'auto',
           force: true,
           prTitle: `${prefix}: migrate Renovate config`,
         });
