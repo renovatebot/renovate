@@ -235,6 +235,30 @@ export async function getFileContent(
   return Buffer.from(await res.text(), 'base64').toString();
 }
 
+/** File content from an open change's current revision (base64-decoded). */
+export async function getChangeFileContent(
+  changeNumber: number,
+  filePath: string,
+  revision = 'current',
+): Promise<string | null> {
+  const path = `/a/changes/${changeNumber}/revisions/${encodeURIComponent(
+    revision,
+  )}/files/${encodeURIComponent(filePath)}/content`;
+  const url = `${getBaseUrl()}${path}`;
+  const res = await fetch(url, {
+    headers: { Authorization: basicAuth() },
+  });
+  if (res.status === 404) {
+    return null;
+  }
+  if (!res.ok) {
+    throw new Error(
+      `Gerrit request failed: GET ${url} → ${res.status} ${res.statusText}\n${await res.text()}`,
+    );
+  }
+  return Buffer.from(await res.text(), 'base64').toString();
+}
+
 export async function abandonChange(changeNumber: number): Promise<void> {
   await gerritFetch(`/a/changes/${changeNumber}/abandon`, {
     method: 'POST',
