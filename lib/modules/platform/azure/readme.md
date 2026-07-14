@@ -196,6 +196,14 @@ Make sure the user has the following permissions on the work item's _area path_:
 
 If the user does not have these permissions, Renovate still creates a PR but it won't have a link to the work item.
 
+### Dependency Dashboard work item state
+
+On Azure DevOps, Renovate stores the Dependency Dashboard (and any other issues) as a work item of type `Issue`.
+Renovate resolves the correct open and closed state names from the process for the project automatically, so it works across the different processes (for example `To Do`/`Done` on _Basic_, `New`/`Active`/`Closed` on _Agile_, and custom inherited processes).
+
+When creating the work item, Renovate does not set a state, so Azure DevOps applies the default initial state of the work item type.
+If the states cannot be read (for example on older Azure DevOps Server versions), Renovate falls back to the `New` and `Closed` state names.
+
 ### Adding tags to Pull Requests
 
 Tags can be added to Pull Requests using the `labels` or `addLabels` configurations.
