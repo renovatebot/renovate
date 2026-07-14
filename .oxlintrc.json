@@ -190,6 +190,7 @@
         "jest/valid-title": "error",
         "vitest/consistent-test-it": ["error", { "fn": "it" }],
         "typescript/unbound-method": "off",
+        "renovate/codeblock-in-spec-fixtures": "error",
         "renovate/no-redundant-mock-reset": "error",
         "renovate/prefer-nullish-util": "off",
         "renovate/test-root-describe": "error",
