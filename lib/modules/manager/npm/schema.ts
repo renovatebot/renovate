@@ -1,5 +1,10 @@
 import { z } from 'zod/v4';
-import { Json, LooseRecord, Yaml } from '../../../util/schema-utils/index.ts';
+import {
+  Json,
+  LooseRecord,
+  Nullish,
+  Yaml,
+} from '../../../util/schema-utils/index.ts';
 
 export const PnpmCatalogs = z.object({
   catalog: z.optional(z.record(z.string(), z.string())),
@@ -36,7 +41,7 @@ export const PnpmWorkspaceFile = Yaml.pipe(
   z
     .object({
       packages: z.array(z.string()).optional(),
-      minimumReleaseAge: z.number().nullish(),
+      minimumReleaseAge: Nullish(z.number()),
       minimumReleaseAgeExclude: z.array(z.string()).optional(),
       overrides: z.record(z.string(), z.string()).optional(),
     })
