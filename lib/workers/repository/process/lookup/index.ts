@@ -70,7 +70,7 @@ async function getTimestamp(
 
 export async function lookupUpdates(
   inconfig: LookupUpdateConfig,
-): Promise<Result<UpdateResult, Error>> {
+): Promise<Result<UpdateResult>> {
   let config: LookupUpdateConfig = { ...inconfig };
   config.versioning ??= getDefaultVersioning(config.datasource);
 

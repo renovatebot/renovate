@@ -134,9 +134,7 @@ export function parseAzurePipelines(
   return null;
 }
 
-function extractSteps(
-  steps: Step[] | undefined,
-): PackageDependency<Record<string, any>>[] {
+function extractSteps(steps: Step[] | undefined): PackageDependency[] {
   const deps = [];
   for (const step of coerceArray(steps)) {
     const task = extractAzurePipelinesTasks(step.task);
