@@ -73,6 +73,29 @@ describe('modules/manager/apm/extract', () => {
       ]);
     });
 
+    it('handles dots in repo names and subpaths', () => {
+      const content = codeBlock`
+        dependencies:
+          apm:
+            - owner/repo.js#v1.0.0
+            - github/awesome-copilot/agents/api-architect.agent.md#v2.0.0
+      `;
+      expect(extractPackageFile(content, packageFile)?.deps).toMatchObject([
+        {
+          depName: 'owner/repo.js',
+          packageName: 'owner/repo.js',
+          datasource: GithubTagsDatasource.id,
+          currentValue: 'v1.0.0',
+        },
+        {
+          depName: 'github/awesome-copilot/agents/api-architect.agent.md',
+          packageName: 'github/awesome-copilot',
+          datasource: GithubTagsDatasource.id,
+          currentValue: 'v2.0.0',
+        },
+      ]);
+    });
+
     it('extracts gitlab.com dependencies', () => {
       const content = codeBlock`
         dependencies:

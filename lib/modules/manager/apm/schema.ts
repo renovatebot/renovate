@@ -6,7 +6,7 @@ import { LooseArray } from '../../../util/schema-utils/index.ts';
  * as an array of `[host/]owner/repo[/subpath]#<ref>` strings.
  */
 const ApmDependencySection = z.object({
-  apm: LooseArray(z.string()).optional().catch(undefined),
+  apm: LooseArray(z.string()).catch([]),
 });
 
 export const ApmManifest = z.object({
