@@ -127,20 +127,20 @@ describe('util/git/index', { timeout: 30000 }, () => {
     // (simulates rebase or amend and force push by a different user)
     await repo.checkoutBranch('renovate/different_committer', defaultBranch);
     await repo.addConfig('user.email', 'Jest@example.com');
-    process.env.GIT_COMMITTER_EMAIL = 'someone-else@example.com';
     await fs.writeFile(`${base.path}/committer_file`, 'test');
     await repo.add(['committer_file']);
-    await repo.commit('committed by someone else');
-    delete process.env.GIT_COMMITTER_EMAIL;
+    await repo
+      .env({ GIT_COMMITTER_EMAIL: 'someone-else@example.com' })
+      .commit('committed by someone else');
 
     // platformCommit: author is bot, committer is noreply@github.com
     await repo.checkoutBranch('renovate/platform_commit', defaultBranch);
     await repo.addConfig('user.email', 'Jest@example.com');
-    process.env.GIT_COMMITTER_EMAIL = 'noreply@github.com';
     await fs.writeFile(`${base.path}/platform_commit_file`, 'test');
     await repo.add(['platform_commit_file']);
-    await repo.commit('platform api commit');
-    delete process.env.GIT_COMMITTER_EMAIL;
+    await repo
+      .env({ GIT_COMMITTER_EMAIL: 'noreply@github.com' })
+      .commit('platform api commit');
 
     await repo.checkout(defaultBranch);
   });
