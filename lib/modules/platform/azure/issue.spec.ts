@@ -642,4 +642,453 @@ describe('modules/platform/azure/issue', () => {
       expect(result).toBe('created');
     });
   });
+
+  describe('work item state resolution', () => {
+    // Basic process: To Do (Proposed) / Doing (InProgress) / Done (Completed).
+    const basicStates = [
+      { name: 'To Do', category: 'Proposed' },
+      { name: 'Doing', category: 'InProgress' },
+      { name: 'Done', category: 'Completed' },
+    ];
+    // Custom Agile-derived process with no Proposed state (e.g. Nuvei "Digital
+    // Agile"): Active (InProgress) / Closed (Completed).
+    const noProposedStates = [
+      { name: 'Active', category: 'InProgress' },
+      { name: 'Closed', category: 'Completed' },
+    ];
+    // Custom process that orders a Resolved-category state *before* the
+    // Completed-category state (mirrors a real Nuvei "DBA" process). The close
+    // target must still be the Completed state, not the first closed-category
+    // state in workflow order.
+    const resolvedBeforeClosedStates = [
+      { name: 'New', category: 'Proposed' },
+      { name: 'Active', category: 'InProgress' },
+      { name: 'Resolved', category: 'Resolved' },
+      { name: 'Closed', category: 'Completed' },
+      { name: 'Duplicate', category: 'Removed' },
+      { name: 'Rejected', category: 'Removed' },
+    ];
+
+    it('does not set System.State when creating an issue', async () => {
+      vi.spyOn(issueService, 'getIssueList').mockResolvedValue([]);
+
+      const createWorkItemMock = vi.fn().mockResolvedValue({ id: 123 });
+      azureApi.workItemTrackingApi.mockResolvedValue(
+        partial<IWorkItemTrackingApi>({
+          createWorkItem: createWorkItemMock,
+          getWorkItemTypeStates: vi.fn().mockResolvedValue(noProposedStates),
+        }),
+      );
+
+      await issueService.ensureIssue({ title: 'Test Issue', body: 'body' });
+
+      const patchDocument = createWorkItemMock.mock.calls[0][1];
+      expect(patchDocument).not.toContainEqual(
+        expect.objectContaining({ path: '/fields/System.State' }),
+      );
+    });
+
+    it('classifies work items as closed by state category', async () => {
+      azureApi.workItemTrackingApi.mockResolvedValue(
+        partial<IWorkItemTrackingApi>({
+          queryByWiql: vi.fn().mockResolvedValue({
+            workItems: [{ id: 1 }, { id: 2 }],
+          }),
+          getWorkItems: vi.fn().mockResolvedValue([
+            {
+              id: 1,
+              fields: { 'System.Title': 'a', 'System.State': 'To Do' },
+            },
+            {
+              id: 2,
+              fields: { 'System.Title': 'b', 'System.State': 'Done' },
+            },
+          ]),
+          getWorkItemTypeStates: vi.fn().mockResolvedValue(basicStates),
+        }),
+      );
+
+      const result = await issueService.getIssueList();
+
+      expect(result[0].state).toBe('open'); // To Do
+      expect(result[1].state).toBe('closed'); // Done (Completed category)
+    });
+
+    it('closes an issue using the process closed state', async () => {
+      vi.spyOn(issueService, 'findIssue').mockResolvedValue({
+        number: 1,
+        title: '[Renovate] Test Issue',
+        state: 'open',
+        body: 'body',
+      });
+
+      const updateWorkItemMock = vi.fn();
+      azureApi.workItemTrackingApi.mockResolvedValue(
+        partial<IWorkItemTrackingApi>({
+          updateWorkItem: updateWorkItemMock,
+          getWorkItemTypeStates: vi.fn().mockResolvedValue(basicStates),
+        }),
+      );
+
+      await issueService.ensureIssueClosing('Test Issue');
+
+      expect(updateWorkItemMock).toHaveBeenCalledWith(
+        undefined,
+        [{ op: 'replace', path: '/fields/System.State', value: 'Done' }],
+        1,
+        'testProject',
+      );
+    });
+
+    it('closes to a Completed state even when Resolved is ordered first', async () => {
+      vi.spyOn(issueService, 'findIssue').mockResolvedValue({
+        number: 1,
+        title: '[Renovate] Test Issue',
+        state: 'open',
+        body: 'body',
+      });
+
+      const updateWorkItemMock = vi.fn();
+      azureApi.workItemTrackingApi.mockResolvedValue(
+        partial<IWorkItemTrackingApi>({
+          updateWorkItem: updateWorkItemMock,
+          getWorkItemTypeStates: vi
+            .fn()
+            .mockResolvedValue(resolvedBeforeClosedStates),
+        }),
+      );
+
+      await issueService.ensureIssueClosing('Test Issue');
+
+      expect(updateWorkItemMock).toHaveBeenCalledWith(
+        undefined,
+        [{ op: 'replace', path: '/fields/System.State', value: 'Closed' }],
+        1,
+        'testProject',
+      );
+    });
+
+    it('closes to the first closed-category state when no Completed state exists', async () => {
+      // Process that exposes a Resolved-category state but no Completed one, so
+      // the close target falls back to the first closed-category state.
+      const resolvedWithoutCompletedStates = [
+        { name: 'New', category: 'Proposed' },
+        { name: 'Active', category: 'InProgress' },
+        { name: 'Resolved', category: 'Resolved' },
+      ];
+
+      vi.spyOn(issueService, 'findIssue').mockResolvedValue({
+        number: 1,
+        title: '[Renovate] Test Issue',
+        state: 'open',
+        body: 'body',
+      });
+
+      const updateWorkItemMock = vi.fn();
+      azureApi.workItemTrackingApi.mockResolvedValue(
+        partial<IWorkItemTrackingApi>({
+          updateWorkItem: updateWorkItemMock,
+          getWorkItemTypeStates: vi
+            .fn()
+            .mockResolvedValue(resolvedWithoutCompletedStates),
+        }),
+      );
+
+      await issueService.ensureIssueClosing('Test Issue');
+
+      expect(updateWorkItemMock).toHaveBeenCalledWith(
+        undefined,
+        [{ op: 'replace', path: '/fields/System.State', value: 'Resolved' }],
+        1,
+        'testProject',
+      );
+    });
+
+    it('classifies all closed-category states as closed', async () => {
+      azureApi.workItemTrackingApi.mockResolvedValue(
+        partial<IWorkItemTrackingApi>({
+          queryByWiql: vi.fn().mockResolvedValue({
+            workItems: [{ id: 1 }, { id: 2 }, { id: 3 }, { id: 4 }],
+          }),
+          getWorkItems: vi.fn().mockResolvedValue([
+            {
+              id: 1,
+              fields: { 'System.Title': 'a', 'System.State': 'Active' },
+            },
+            {
+              id: 2,
+              fields: { 'System.Title': 'b', 'System.State': 'Resolved' },
+            },
+            {
+              id: 3,
+              fields: { 'System.Title': 'c', 'System.State': 'Closed' },
+            },
+            {
+              id: 4,
+              fields: { 'System.Title': 'd', 'System.State': 'Rejected' },
+            },
+          ]),
+          getWorkItemTypeStates: vi
+            .fn()
+            .mockResolvedValue(resolvedBeforeClosedStates),
+        }),
+      );
+
+      const result = await issueService.getIssueList();
+
+      expect(result[0].state).toBe('open'); // Active
+      expect(result[1].state).toBe('closed'); // Resolved (Resolved category)
+      expect(result[2].state).toBe('closed'); // Closed (Completed category)
+      expect(result[3].state).toBe('closed'); // Rejected (Removed category)
+    });
+
+    it('reopens an issue using the process open state', async () => {
+      vi.spyOn(issueService, 'getIssueList').mockResolvedValue([
+        {
+          number: 1,
+          title: '[Renovate] Test Issue',
+          state: 'closed',
+          body: 'Old description',
+        },
+      ]);
+
+      const updateWorkItemMock = vi.fn();
+      azureApi.workItemTrackingApi.mockResolvedValue(
+        partial<IWorkItemTrackingApi>({
+          updateWorkItem: updateWorkItemMock,
+          getWorkItemTypeStates: vi.fn().mockResolvedValue(basicStates),
+        }),
+      );
+
+      await issueService.ensureIssue({
+        title: 'Test Issue',
+        body: 'New body content',
+        shouldReOpen: true,
+      });
+
+      expect(updateWorkItemMock).toHaveBeenCalledWith(
+        undefined,
+        expect.arrayContaining([
+          { op: 'replace', path: '/fields/System.State', value: 'To Do' },
+        ]),
+        1,
+        'testProject',
+      );
+    });
+
+    it('reopens using the first InProgress state when no Proposed state exists', async () => {
+      vi.spyOn(issueService, 'getIssueList').mockResolvedValue([
+        {
+          number: 1,
+          title: '[Renovate] Test Issue',
+          state: 'closed',
+          body: 'Old description',
+        },
+      ]);
+
+      const updateWorkItemMock = vi.fn();
+      azureApi.workItemTrackingApi.mockResolvedValue(
+        partial<IWorkItemTrackingApi>({
+          updateWorkItem: updateWorkItemMock,
+          getWorkItemTypeStates: vi.fn().mockResolvedValue(noProposedStates),
+        }),
+      );
+
+      await issueService.ensureIssue({
+        title: 'Test Issue',
+        body: 'New body content',
+        shouldReOpen: true,
+      });
+
+      expect(updateWorkItemMock).toHaveBeenCalledWith(
+        undefined,
+        expect.arrayContaining([
+          { op: 'replace', path: '/fields/System.State', value: 'Active' },
+        ]),
+        1,
+        'testProject',
+      );
+    });
+
+    it('falls back to default state names when states cannot be resolved', async () => {
+      vi.spyOn(issueService, 'findIssue').mockResolvedValue({
+        number: 1,
+        title: '[Renovate] Test Issue',
+        state: 'open',
+        body: 'body',
+      });
+
+      const updateWorkItemMock = vi.fn();
+      azureApi.workItemTrackingApi.mockResolvedValue(
+        partial<IWorkItemTrackingApi>({
+          updateWorkItem: updateWorkItemMock,
+          getWorkItemTypeStates: vi
+            .fn()
+            .mockRejectedValue(new Error('not supported')),
+        }),
+      );
+
+      await issueService.ensureIssueClosing('Test Issue');
+
+      expect(updateWorkItemMock).toHaveBeenCalledWith(
+        undefined,
+        [{ op: 'replace', path: '/fields/System.State', value: 'Closed' }],
+        1,
+        'testProject',
+      );
+    });
+
+    it('keeps the default closed state when no closed-category state exists', async () => {
+      vi.spyOn(issueService, 'findIssue').mockResolvedValue({
+        number: 1,
+        title: '[Renovate] Test Issue',
+        state: 'open',
+        body: 'body',
+      });
+
+      const updateWorkItemMock = vi.fn();
+      azureApi.workItemTrackingApi.mockResolvedValue(
+        partial<IWorkItemTrackingApi>({
+          updateWorkItem: updateWorkItemMock,
+          getWorkItemTypeStates: vi
+            .fn()
+            .mockResolvedValue([{ name: 'To Do', category: 'Proposed' }]),
+        }),
+      );
+
+      await issueService.ensureIssueClosing('Test Issue');
+
+      expect(updateWorkItemMock).toHaveBeenCalledWith(
+        undefined,
+        [{ op: 'replace', path: '/fields/System.State', value: 'Closed' }],
+        1,
+        'testProject',
+      );
+    });
+
+    it('falls back to default states when the type has no states', async () => {
+      azureApi.workItemTrackingApi.mockResolvedValue(
+        partial<IWorkItemTrackingApi>({
+          queryByWiql: vi.fn().mockResolvedValue({ workItems: [{ id: 1 }] }),
+          getWorkItems: vi.fn().mockResolvedValue([
+            {
+              id: 1,
+              fields: { 'System.Title': 'a', 'System.State': 'Closed' },
+            },
+          ]),
+          getWorkItemTypeStates: vi.fn().mockResolvedValue([]),
+        }),
+      );
+
+      const result = await issueService.getIssueList();
+
+      expect(result[0].state).toBe('closed');
+    });
+
+    it('reopens using the first available state when only closed-category states exist', async () => {
+      vi.spyOn(issueService, 'getIssueList').mockResolvedValue([
+        {
+          number: 1,
+          title: '[Renovate] Test Issue',
+          state: 'closed',
+          body: 'Old description',
+        },
+      ]);
+
+      const updateWorkItemMock = vi.fn();
+      azureApi.workItemTrackingApi.mockResolvedValue(
+        partial<IWorkItemTrackingApi>({
+          updateWorkItem: updateWorkItemMock,
+          getWorkItemTypeStates: vi
+            .fn()
+            .mockResolvedValue([{ name: 'OnlyClosed', category: 'Completed' }]),
+        }),
+      );
+
+      await issueService.ensureIssue({
+        title: 'Test Issue',
+        body: 'New body content',
+        shouldReOpen: true,
+      });
+
+      expect(updateWorkItemMock).toHaveBeenCalledWith(
+        undefined,
+        expect.arrayContaining([
+          { op: 'replace', path: '/fields/System.State', value: 'OnlyClosed' },
+        ]),
+        1,
+        'testProject',
+      );
+    });
+
+    it('reopens using the default state when no state has a name', async () => {
+      vi.spyOn(issueService, 'getIssueList').mockResolvedValue([
+        {
+          number: 1,
+          title: '[Renovate] Test Issue',
+          state: 'closed',
+          body: 'Old description',
+        },
+      ]);
+
+      const updateWorkItemMock = vi.fn();
+      azureApi.workItemTrackingApi.mockResolvedValue(
+        partial<IWorkItemTrackingApi>({
+          updateWorkItem: updateWorkItemMock,
+          getWorkItemTypeStates: vi
+            .fn()
+            .mockResolvedValue([{ category: 'InProgress' }]),
+        }),
+      );
+
+      await issueService.ensureIssue({
+        title: 'Test Issue',
+        body: 'New body content',
+        shouldReOpen: true,
+      });
+
+      expect(updateWorkItemMock).toHaveBeenCalledWith(
+        undefined,
+        expect.arrayContaining([
+          { op: 'replace', path: '/fields/System.State', value: 'New' },
+        ]),
+        1,
+        'testProject',
+      );
+    });
+
+    it('resolves work item states only once (cached per instance)', async () => {
+      const getWorkItemTypeStatesMock = vi.fn().mockResolvedValue([
+        { name: 'Doing', category: 'InProgress' },
+        { name: 'Done', category: 'Completed' },
+      ]);
+      const updateWorkItemMock = vi.fn();
+      azureApi.workItemTrackingApi.mockResolvedValue(
+        partial<IWorkItemTrackingApi>({
+          queryByWiql: vi.fn().mockResolvedValue({ workItems: [{ id: 1 }] }),
+          getWorkItems: vi.fn().mockResolvedValue([
+            {
+              id: 1,
+              fields: {
+                'System.Title': '[Renovate] Test Issue',
+                'System.State': 'Doing',
+                'System.Description': 'Old description',
+              },
+            },
+          ]),
+          getWorkItemTypeStates: getWorkItemTypeStatesMock,
+          updateWorkItem: updateWorkItemMock,
+        }),
+      );
+
+      // getIssueList (inside ensureIssue) resolves states once, then ensureIssue
+      // resolves again and must hit the cache rather than re-querying.
+      await issueService.ensureIssue({
+        title: 'Test Issue',
+        body: 'New body content',
+      });
+
+      expect(getWorkItemTypeStatesMock).toHaveBeenCalledTimes(1);
+    });
+  });
 });
