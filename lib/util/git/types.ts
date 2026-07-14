@@ -23,6 +23,7 @@ export interface VirtualBranch {
   /** The commit SHA this virtual branch points to */
   sha: LongCommitSha;
 }
+
 export interface StorageConfig {
   currentBranch?: string;
   defaultBranch?: string;
