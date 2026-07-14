@@ -239,8 +239,6 @@ export async function initPlatform({
     }
   }
 
-  // platformCommit committer is GitHub <noreply@host> (#43164); always ignore on GitHub
-  // so packageRules can toggle platformCommit per branch without re-init.
   git.setPlatformIgnoredAuthors([`noreply@${ghHostname}`]);
 
   logger.debug({ platformConfig, renovateUsername }, 'Platform config');

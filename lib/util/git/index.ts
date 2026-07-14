@@ -217,7 +217,6 @@ let submodulesInitizialized: boolean;
 
 let privateKeySet = false;
 
-// Platform-owned emails (e.g. platformCommit committer); not wiped by setUserRepoConfig.
 let platformIgnoredAuthors: string[] = [];
 
 export const GIT_MINIMUM_VERSION = '2.33.0'; // git show-current
@@ -896,7 +895,11 @@ export async function isBranchModified(
     includedAuthors.delete(gitAuthorEmail);
   }
 
-  for (const ignoredAuthor of [...ignoredAuthors, ...platformIgnoredAuthors]) {
+  for (const ignoredAuthor of ignoredAuthors) {
+    includedAuthors.delete(ignoredAuthor);
+  }
+
+  for (const ignoredAuthor of platformIgnoredAuthors) {
     includedAuthors.delete(ignoredAuthor);
   }
 

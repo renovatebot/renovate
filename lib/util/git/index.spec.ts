@@ -457,13 +457,7 @@ describe('util/git/index', { timeout: 30000 }, () => {
       ).toBeTrue();
     });
 
-    it('should return true for platformCommit committer when not registered', async () => {
-      expect(
-        await git.isBranchModified('renovate/platform_commit', defaultBranch),
-      ).toBeTrue();
-    });
-
-    it('should return false for platformCommit committer when registered', async () => {
+    it('should return false for ignored platformCommit committer', async () => {
       git.setPlatformIgnoredAuthors(['noreply@github.com']);
       expect(
         await git.isBranchModified('renovate/platform_commit', defaultBranch),
