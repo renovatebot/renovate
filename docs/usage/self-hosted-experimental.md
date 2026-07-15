@@ -57,6 +57,15 @@ If set to `"true"`, a config error Issue will be raised in case repository confi
 
 If set, Renovate will terminate the whole process group of a terminated child process spawned by Renovate.
 
+## `RENOVATE_X_GITHUB_MERGE_QUEUE`
+
+If set to any value, Renovate will detect if a GitHub merge queue is required for the base branch, whether configured via classic branch protection or repository rulesets.
+If a merge queue is detected, then:
+
+- Renovate-native PR automerge (`platformAutomerge=false`) adds the PR to the merge queue instead of merging it directly, even if Renovate is on the merge queue's bypass list
+- branch automerge (`automergeType=branch`) is skipped with a warning, and a PR is created instead
+- `rebaseWhen=auto` resolves to `conflicted` instead of `behind-base-branch`, because the merge queue already tests PRs against the head of the base branch
+
 ## `RENOVATE_X_GITLAB_AUTO_APPROVE_TOKEN`
 
 If set, when `autoApprove` is enabled, the provided token is used to authenticate GitLab approve requests instead of the default one.

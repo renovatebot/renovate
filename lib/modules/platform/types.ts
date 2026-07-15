@@ -180,6 +180,7 @@ export interface MergePRConfig {
   branchName?: string;
   id: number;
   strategy?: MergeStrategy;
+  targetBranch?: string;
 }
 export interface EnsureCommentConfig {
   number: number;
@@ -272,6 +273,11 @@ export interface Platform {
   createPr(prConfig: CreatePRConfig): Promise<Pr | null>;
   getRepos(config?: AutodiscoverConfig): Promise<string[]>;
   getBranchForceRebase?(branchName: string): Promise<boolean>;
+  /**
+   * Returns true if the given branch is protected by a merge queue,
+   * so PRs targeting it must be merged through the queue.
+   */
+  isBranchMergeQueueEnabled?(branchName: string): Promise<boolean>;
   deleteLabel(number: number, label: string): Promise<void>;
   addLabel?(number: number, label: string): Promise<void>;
   setBranchStatus(branchStatusConfig: BranchStatusConfig): Promise<void>;

@@ -80,6 +80,22 @@ describe('workers/repository/update/pr/automerge', () => {
       expect(platform.ensureComment).toHaveBeenCalledTimes(1);
     });
 
+    it('should skip branch deletion if the PR was added to a merge queue', async () => {
+      config.automerge = true;
+      config.pruneBranchAfterAutomerge = true;
+      platform.getBranchStatus.mockResolvedValueOnce('green');
+      platform.mergePr.mockResolvedValueOnce(true);
+      platform.isBranchMergeQueueEnabled.mockResolvedValueOnce(true);
+
+      const res = await prAutomerge.checkAutoMerge(pr, config);
+
+      expect(res).toEqual({ automerged: true, branchRemoved: false });
+      expect(platform.mergePr).toHaveBeenCalledWith(
+        expect.objectContaining({ targetBranch: 'base-branch' }),
+      );
+      expect(scm.deleteBranch).toHaveBeenCalledTimes(0);
+    });
+
     it('should skip branch deletion after automerge if prune is disabled', async () => {
       config.automerge = true;
       config.pruneBranchAfterAutomerge = false;

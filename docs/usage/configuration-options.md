@@ -338,6 +338,8 @@ If you prefer that Renovate more silently automerge _without_ Pull Requests at a
 - Automerge the branch commit if it's: (a) up-to-date with the base branch, and (b) passing all tests
 - As a backup, raise a PR only if either: (a) tests fail, or (b) tests remain pending for too long (default: 25 hours, see [`prNotPendingHours`](#prnotpendinghours))
 
+Note that `"automergeType": "branch"` is not compatible with GitHub merge queues, because the merge queue does not allow pushing directly to the base branch.
+
 The final value for `automergeType` is `"pr-comment"`, intended only for users who already have a "merge bot" such as [bors-ng](https://github.com/bors-ng/bors-ng) and want Renovate to _not_ actually automerge by itself and instead tell `bors-ng` to merge for it, by using a comment in the PR.
 If you're not already using `bors-ng` or similar, don't worry about this option.
 
@@ -4603,7 +4605,7 @@ By default this label is `"rebase"` but you can configure it to anything you wan
 
 Possible values and meanings:
 
-- `auto`: Renovate will autodetect the best setting. It will use `behind-base-branch` if configured to automerge or repository has been set to require PRs to be up to date. Otherwise, `conflicted` will be used instead
+- `auto`: Renovate will autodetect the best setting. It will use `behind-base-branch` if configured to automerge or repository has been set to require PRs to be up to date. Otherwise, `conflicted` will be used instead. On GitHub, if the experimental environment variable `RENOVATE_X_GITHUB_MERGE_QUEUE` is set and the base branch has a merge queue, `conflicted` is used because the merge queue already tests PRs against the head of the base branch
 - `automerging`: Renovate will use `behind-base-branch` if configured to automerge, Otherwise, `never` will be used instead
 - `never`: Renovate will never rebase the branch or update it unless manually requested
 - `conflicted`: Renovate will rebase only if the branch is conflicted

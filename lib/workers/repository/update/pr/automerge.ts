@@ -137,8 +137,18 @@ export async function checkAutoMerge(
     branchName,
     id: pr.number,
     strategy: automergeStrategy,
+    targetBranch: baseBranch,
   });
   if (res) {
+    if (await platform.isBranchMergeQueueEnabled?.(baseBranch)) {
+      logger.info(
+        { pr: pr.number, prTitle: pr.title },
+        'PR added to the merge queue',
+      );
+      // The PR is not merged yet - deleting the branch would close the PR
+      // and drop the merge queue entry
+      return { automerged: true, branchRemoved: false };
+    }
     logger.info({ pr: pr.number, prTitle: pr.title }, 'PR automerged');
     if (!pruneBranchAfterAutomerge) {
       logger.info('Skipping pruning of merged branch');

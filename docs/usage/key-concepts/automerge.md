@@ -133,6 +133,19 @@ Read the [GitHub Docs, managing a merge queue](https://docs.github.com/en/reposi
 
 The steps to enable GitHub's Merge Queue differ based on whether you use GitHub Actions or another CI provider.
 
+By default, merge queues need `platformAutomerge` enabled (which is the default), because GitHub's auto-merge takes care of adding the PR to the merge queue.
+This requires the "Allow auto-merge" checkbox in the repository settings to be enabled, as described in the steps below.
+
+If you self-host Renovate and set the experimental environment variable [`RENOVATE_X_GITHUB_MERGE_QUEUE`](../self-hosted-experimental.md#renovate_x_github_merge_queue), merge queues also work with `platformAutomerge=false`: Renovate then adds the PR to the merge queue itself once all checks have passed.
+In that case the "Allow auto-merge" checkbox is not needed.
+We recommend enabling the "Automatically delete head branches" repository setting, so branches get cleaned up after the merge queue merges the PR.
+
+<!-- prettier-ignore -->
+!!! warning
+  Branch automerge (`automergeType=branch`) cannot work if the base branch has a merge queue, because pushing directly to the base branch is not possible.
+  With `RENOVATE_X_GITHUB_MERGE_QUEUE` set, Renovate detects this misconfiguration, logs a warning, and creates a PR instead.
+  Configure `automergeType=pr` in such repositories.
+
 !!! tip "GitHub Merge Queue overview page"
   GitHub has a page that shows all the PRs in the Merge Queue.
   The page link follows this pattern: `https://github.com/organization-name/repository-name/queue/base-branch-name`.

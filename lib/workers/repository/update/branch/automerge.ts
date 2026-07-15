@@ -8,6 +8,7 @@ import { resolveBranchStatus } from './status-checks.ts';
 
 export type AutomergeResult =
   | 'automerged'
+  | 'automerge aborted - merge queue'
   | 'automerge aborted - PR exists'
   | 'branch status error'
   | 'failed'
@@ -32,6 +33,13 @@ export async function tryBranchAutomerge(
   );
   if (existingPr) {
     return 'automerge aborted - PR exists';
+  }
+  if (await platform.isBranchMergeQueueEnabled?.(config.baseBranch!)) {
+    logger.warn(
+      { baseBranch: config.baseBranch },
+      'automergeType=branch is not possible because the base branch has a merge queue - falling back to creating a PR. Set automergeType=pr instead.',
+    );
+    return 'automerge aborted - merge queue';
   }
   const branchStatus = await resolveBranchStatus(
     config.branchName!,

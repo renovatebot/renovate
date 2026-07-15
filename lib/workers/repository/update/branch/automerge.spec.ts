@@ -1,4 +1,4 @@
-import { partial, platform, scm } from '~test/util.ts';
+import { logger, partial, platform, scm } from '~test/util.ts';
 import { GlobalConfig } from '../../../../config/global.ts';
 import type { RenovateConfig } from '../../../../config/types.ts';
 import type { Pr } from '../../../../modules/platform/types.ts';
@@ -58,6 +58,22 @@ describe('workers/repository/update/branch/automerge', () => {
       await expect(tryBranchAutomerge(config)).resolves.toBe(
         'automerge aborted - PR exists',
       );
+    });
+
+    it('aborts if the base branch has a merge queue', async () => {
+      config.automerge = true;
+      config.automergeType = 'branch';
+      config.baseBranch = 'test-branch';
+      platform.isBranchMergeQueueEnabled.mockResolvedValueOnce(true);
+
+      const res = await tryBranchAutomerge(config);
+
+      expect(res).toBe('automerge aborted - merge queue');
+      expect(logger.logger.warn).toHaveBeenCalledWith(
+        { baseBranch: 'test-branch' },
+        'automergeType=branch is not possible because the base branch has a merge queue - falling back to creating a PR. Set automergeType=pr instead.',
+      );
+      expect(scm.mergeAndPush).toHaveBeenCalledTimes(0);
     });
 
     it('returns false if automerge fails', async () => {
