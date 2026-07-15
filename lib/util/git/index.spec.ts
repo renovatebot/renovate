@@ -172,9 +172,8 @@ describe('util/git/index', { timeout: 30000 }, () => {
       const gitFunc = vi.fn().mockImplementation((args) => {
         if (args === undefined) {
           return 'some result';
-        } else {
-          return 'different result';
         }
+        return 'different result';
       });
       expect(await git.gitRetry(() => gitFunc())).toBe('some result');
       expect(await git.gitRetry(() => gitFunc('arg'))).toBe('different result');

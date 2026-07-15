@@ -19,7 +19,8 @@ export function sortParsed(
 
   if (isANightly && !isBNightly) {
     return 1;
-  } else if (!isANightly && isBNightly) {
+  }
+  if (!isANightly && isBNightly) {
     return -1;
   }
 
@@ -30,9 +31,11 @@ export function sortParsed(
 
     if (dateA.year !== dateB.year) {
       return dateA.year - dateB.year;
-    } else if (dateA.month !== dateB.month) {
+    }
+    if (dateA.month !== dateB.month) {
       return dateA.month - dateB.month;
-    } else if (dateA.day !== dateB.day) {
+    }
+    if (dateA.day !== dateB.day) {
       return dateA.day - dateB.day;
     }
 
@@ -61,7 +64,8 @@ export function sortParsed(
     // Version with prerelease is less than version without
     if (hasPreA && !hasPreB) {
       return -1;
-    } else if (!hasPreA && hasPreB) {
+    }
+    if (!hasPreA && hasPreB) {
       return 1;
     }
 
