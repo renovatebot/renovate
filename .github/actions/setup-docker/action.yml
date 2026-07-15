@@ -44,7 +44,7 @@ runs:
       if: ${{ steps.check.outputs.do-cleanup == 'true' }}
       shell: bash
 
-    - name: Set Up contained image store
+    - name: Set up containerd image store
       shell: bash
       run: |
         if [ ! -f /etc/docker/daemon.json ]; then
