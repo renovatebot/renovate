@@ -3410,6 +3410,7 @@ const options: Readonly<RenovateOptions>[] = [
       'A list of branch names to mark for creation or rebasing as if it was selected in the Dependency Dashboard issue.',
     type: 'array',
     subType: 'string',
+    cli: true,
     experimental: true,
     globalOnly: true,
     default: [],
