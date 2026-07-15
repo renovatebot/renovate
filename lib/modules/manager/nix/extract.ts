@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import { logger } from '../../../logger/index.ts';
 import { getSiblingFileName, readLocalFile } from '../../../util/fs/index.ts';
 import { regEx } from '../../../util/regex.ts';
@@ -47,7 +48,8 @@ export async function extractPackageFile(
 
   const flakeLock = flakeLockParsed.data;
   const rootName = flakeLock.root;
-  const rootInputs = flakeLock.nodes[rootName].inputs;
+  const rootInputs = flakeLock.nodes[rootName]?.inputs;
+  const versioning = new NixPkgsVersioning();
 
   if (!rootInputs) {
     logger.debug(
@@ -58,21 +60,20 @@ export async function extractPackageFile(
   }
 
   const mappedRoots: Record<string, string> = {};
-  for (const a in rootInputs) {
-    mappedRoots[rootInputs[a] as string] = a;
-  }
+  Object.entries(rootInputs).flatMap((entry) => {
+    if (is.string(entry[1])) {
+      mappedRoots[entry[1]] = entry[0];
+    } else {
+      logger.debug(
+        { flakeLockFile, error: flakeLockParsed.error },
+        `input ${entry[0]} has a malformed mapping.`,
+      );
+    }
+  });
 
   for (const [tmpName, flakeInput] of Object.entries(flakeLock.nodes)) {
-    let depName: string;
-    // the root input is a magic string for the entrypoint and only references other flake inputs
-    if (tmpName === 'root') {
-      continue;
-    }
-
-    // skip all locked and transitivie nodes as they cannot be updated by regular means
-    if (tmpName in mappedRoots) {
-      depName = mappedRoots[tmpName];
-    } else {
+    const depName = mappedRoots[tmpName];
+    if (!depName) {
       continue;
     }
 
@@ -157,15 +158,20 @@ export async function extractPackageFile(
       dep.lockedVersion = flakeLocked.rev;
     }
 
-    const versioning = new NixPkgsVersioning();
     switch (flakeLocked.type) {
       case 'github':
         // set to nixpkgs if it is a nixpkgs reference
-        dep.packageName = `https://${flakeOriginal.host ?? 'github.com'}/${flakeOriginal.owner}/${flakeOriginal.repo}`;
+        if (
+          flakeOriginal.owner?.toLowerCase() === 'nixos' &&
+          flakeOriginal.repo?.toLowerCase() === 'nixpkgs'
+        ) {
+          dep.packageName = 'https://github.com/NixOS/nixpkgs';
+        } else {
+          dep.packageName = `https://${flakeOriginal.host ?? 'github.com'}/${flakeOriginal.owner}/${flakeOriginal.repo}`;
+        }
         if (versioning.isValid(flakeOriginal.ref ?? '')) {
           dep.currentValue = flakeOriginal.ref;
           dep.versioning = nixpkgsVersioning;
-          break;
         }
 
         break;
