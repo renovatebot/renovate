@@ -667,9 +667,6 @@ jobs:
           persist-credentials: false
           show-progress: false
 
-      - name: Free disk space
-        uses: ./.github/actions/free-disk-space
-
       - name: Setup Docker
         uses: ./.github/actions/setup-docker
 
@@ -838,9 +835,6 @@ jobs:
           fetch-depth: 0 # zero stands for full checkout, which is required for semantic-release
           filter: blob:none # we don't need all blobs, only the full tree
           show-progress: false
-
-      - name: Free disk space
-        uses: ./.github/actions/free-disk-space
 
       - name: Setup Docker
         uses: ./.github/actions/setup-docker
