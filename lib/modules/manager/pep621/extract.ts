@@ -1,5 +1,6 @@
 import { logger } from '../../../logger/index.ts';
 import type { ConstraintName } from '../../../util/exec/types.ts';
+import { regEx } from '../../../util/regex.ts';
 import {
   massage as massageToml,
   parse as parseToml,
@@ -32,19 +33,26 @@ export function parsePyProject(
   }
 }
 
+const lineSplitRegex = regEx(/\r?\n/);
+const toolUvSectionHeaderRegex = regEx(/^\s*\[tool\.uv]\s*(?:#.*)?$/);
+const tomlSectionHeaderRegex = regEx(/^\s*\[/);
+const uvRequiredVersionLineRegex = regEx(
+  /^(?<prefix>\s*required-version\s*=\s*)(?:"(?<doubleValue>[^"]+)"|'(?<singleValue>[^']+)')/,
+);
+
 function getUvRequiredVersionReplacement(
   content: string,
   uvRequiredVersion: string,
 ): Pick<PackageDependency, 'autoReplaceStringTemplate' | 'replaceString'> {
   let isToolUvSection = false;
 
-  for (const line of content.split(/\r?\n/)) {
-    if (/^\s*\[tool\.uv]\s*(?:#.*)?$/.test(line)) {
+  for (const line of content.split(lineSplitRegex)) {
+    if (toolUvSectionHeaderRegex.test(line)) {
       isToolUvSection = true;
       continue;
     }
 
-    if (/^\s*\[/.test(line)) {
+    if (tomlSectionHeaderRegex.test(line)) {
       isToolUvSection = false;
       continue;
     }
@@ -53,10 +61,7 @@ function getUvRequiredVersionReplacement(
       continue;
     }
 
-    const match =
-      /^(?<prefix>\s*required-version\s*=\s*)(?:"(?<doubleValue>[^"]+)"|'(?<singleValue>[^']+)')/.exec(
-        line,
-      );
+    const match = uvRequiredVersionLineRegex.exec(line);
 
     if (match?.groups) {
       const quote = match.groups.doubleValue ? '"' : "'";

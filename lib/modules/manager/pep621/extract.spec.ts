@@ -413,19 +413,13 @@ describe('modules/manager/pep621/extract', () => {
     it('should extract uv required-version', async () => {
       const result = await extractPackageFile(
         codeBlock`
-          [project]
-          dependencies = ["attrs>=24.1.0"]
-
           [tool.uv]
           required-version = "0.10.12"
         `,
         'pyproject.toml',
       );
 
-      expect(result?.deps).toMatchObject([
-        {
-          depName: 'attrs',
-        },
+      expect(result?.deps).toEqual([
         {
           depName: 'uv',
           packageName: 'astral-sh/uv',
@@ -434,6 +428,29 @@ describe('modules/manager/pep621/extract', () => {
           depType: depTypes.uvRequiredVersion,
           currentValue: '0.10.12',
           replaceString: 'required-version = "0.10.12"',
+          autoReplaceStringTemplate: 'required-version = "{{newValue}}"',
+        },
+      ]);
+    });
+
+    it('should extract a PEP 440 version range for uv required-version', async () => {
+      const result = await extractPackageFile(
+        codeBlock`
+          [tool.uv]
+          required-version = ">=0.4.28,<0.5"
+        `,
+        'pyproject.toml',
+      );
+
+      expect(result?.deps).toEqual([
+        {
+          depName: 'uv',
+          packageName: 'astral-sh/uv',
+          datasource: GithubReleasesDatasource.id,
+          versioning: 'pep440',
+          depType: depTypes.uvRequiredVersion,
+          currentValue: '>=0.4.28,<0.5',
+          replaceString: 'required-version = ">=0.4.28,<0.5"',
           autoReplaceStringTemplate: 'required-version = "{{newValue}}"',
         },
       ]);
