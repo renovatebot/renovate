@@ -256,7 +256,6 @@ export interface RepoGlobalConfig extends GlobalInheritableConfig {
   gitTimeout?: number;
   githubTokenWarn?: boolean;
   includeMirrors?: boolean;
-  localDir?: string;
   migratePresets?: Record<string, string>;
   platform?: PlatformId;
   prCacheSyncMaxPages?: number;
@@ -276,6 +275,13 @@ export interface RepoGlobalConfig extends GlobalInheritableConfig {
   onboardingAutoCloseAge?: number;
   productLinks?: Record<string, string>;
   toolSettings?: ToolSettingsOptions;
+}
+
+/**
+ * Internal variables which are referenced from `GlobalConfig`, but are *not* user-configurable options.
+ */
+export interface InternalGlobalConfigOptions {
+  localDir?: string;
 }
 
 /**
