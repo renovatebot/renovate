@@ -52,38 +52,31 @@ export function mergeYarnConfigs(
     return parentConfig;
   }
 
-  const mergedConfig: YarnConfig = {
-    ...parentConfig,
-    ...childConfig,
+  return {
+    npmRegistryServer:
+      childConfig.npmRegistryServer ?? parentConfig.npmRegistryServer,
+    npmScopes: {
+      ...parentConfig.npmScopes,
+      ...childConfig.npmScopes,
+    },
+    catalog: {
+      ...parentConfig.catalog,
+      ...childConfig.catalog,
+    },
+    // Intentionally do not deep-merge overlapping catalogs: child entries
+    // replace parent entries for the same catalog name.
+    catalogs: {
+      ...parentConfig.catalogs,
+      ...childConfig.catalogs,
+    },
   };
-
-  for (const [key, parentValue] of Object.entries(parentConfig)) {
-    const childValue = childConfig[key as keyof YarnConfig];
-    if (
-      parentValue &&
-      childValue &&
-      typeof parentValue === 'object' &&
-      typeof childValue === 'object' &&
-      !Array.isArray(parentValue) &&
-      !Array.isArray(childValue)
-    ) {
-      mergedConfig[key as keyof YarnConfig] = {
-        ...parentValue,
-        ...childValue,
-      } as never;
-    }
-  }
-
-  return mergedConfig;
 }
 
 export async function loadConfigFromInheritedYarnrcYml(
   packageFile: string,
 ): Promise<YarnConfig | null> {
-  const yarnrcFileNames = await findLocalSiblingAndParents(
-    packageFile,
-    '.yarnrc.yml',
-  );
+  const yarnrcFileNames =
+    (await findLocalSiblingAndParents(packageFile, '.yarnrc.yml')) ?? [];
 
   let yarnrcConfig: YarnConfig | null = null;
   for (const yarnrcFileName of yarnrcFileNames.reverse()) {

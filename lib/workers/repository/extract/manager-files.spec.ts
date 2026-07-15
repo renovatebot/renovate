@@ -17,6 +17,7 @@ describe('workers/repository/extract/manager-files', () => {
 
     beforeEach(() => {
       config = partial<RenovateConfig>();
+      fs.findLocalSiblingAndParents.mockResolvedValue([]);
     });
 
     it('returns empty of manager is disabled', async () => {

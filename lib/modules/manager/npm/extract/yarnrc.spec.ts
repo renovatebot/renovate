@@ -1,6 +1,5 @@
 import { codeBlock } from 'common-tags';
 import { fs } from '~test/util.ts';
-import type { YarnConfig } from '../schema.ts';
 import {
   loadConfigFromInheritedYarnrcYml,
   loadConfigFromLegacyYarnrc,
@@ -13,7 +12,7 @@ vi.mock('../../../../util/fs/index.ts');
 
 describe('modules/manager/npm/extract/yarnrc', () => {
   beforeEach(() => {
-    fs.localPathExists.mockResolvedValue(false);
+    fs.findLocalSiblingAndParents.mockResolvedValue([]);
     fs.readLocalFile.mockResolvedValue(null);
   });
 
@@ -273,24 +272,42 @@ describe('modules/manager/npm/extract/yarnrc', () => {
       });
     });
 
-    it('does not merge array values and prefers child value', () => {
+    it('replaces overlapping catalog entries with child config', () => {
       const mergedConfig = mergeYarnConfigs(
         {
-          customArraySetting: ['parent-entry'],
-        } as unknown as YarnConfig,
+          catalogs: {
+            ci: {
+              vitest: '^2.0.0',
+              eslint: '^8.0.0',
+            },
+          },
+        },
         {
-          customArraySetting: ['child-entry'],
-        } as unknown as YarnConfig,
+          catalogs: {
+            ci: {
+              eslint: '^9.0.0',
+            },
+          },
+        },
       );
 
       expect(mergedConfig).toEqual({
-        customArraySetting: ['child-entry'],
+        npmRegistryServer: undefined,
+        npmScopes: {},
+        catalog: {},
+        catalogs: {
+          ci: {
+            eslint: '^9.0.0',
+          },
+        },
       });
     });
   });
 
   describe('loadConfigFromInheritedYarnrcYml()', () => {
     it('returns null when no inherited .yarnrc.yml files are found', async () => {
+      fs.findLocalSiblingAndParents.mockResolvedValue([]);
+
       const config = await loadConfigFromInheritedYarnrcYml(
         'packages/foo/package.json',
       );
@@ -299,21 +316,20 @@ describe('modules/manager/npm/extract/yarnrc', () => {
     });
 
     it('returns null for absolute package file path', async () => {
+      fs.findLocalSiblingAndParents.mockResolvedValue([]);
+
       const config = await loadConfigFromInheritedYarnrcYml(
         '/absolute/package.json',
       );
 
       expect(config).toBeNull();
-      expect(fs.localPathExists).not.toHaveBeenCalled();
     });
 
     it('loads and merges inherited files from parent to child', async () => {
-      fs.localPathExists.mockImplementation((path): Promise<boolean> => {
-        if (path === '.yarnrc.yml' || path === 'packages/.yarnrc.yml') {
-          return Promise.resolve(true);
-        }
-        return Promise.resolve(false);
-      });
+      fs.findLocalSiblingAndParents.mockResolvedValue([
+        'packages/.yarnrc.yml',
+        '.yarnrc.yml',
+      ]);
 
       fs.readLocalFile.mockImplementation((path): Promise<any> => {
         if (path === '.yarnrc.yml') {
@@ -348,16 +364,16 @@ describe('modules/manager/npm/extract/yarnrc', () => {
             npmRegistryServer: 'https://scope-leaf.example.com',
           },
         },
+        catalog: {},
+        catalogs: {},
       });
     });
 
     it('skips empty inherited files', async () => {
-      fs.localPathExists.mockImplementation((path): Promise<boolean> => {
-        if (path === '.yarnrc.yml' || path === 'packages/.yarnrc.yml') {
-          return Promise.resolve(true);
-        }
-        return Promise.resolve(false);
-      });
+      fs.findLocalSiblingAndParents.mockResolvedValue([
+        'packages/.yarnrc.yml',
+        '.yarnrc.yml',
+      ]);
 
       fs.readLocalFile.mockImplementation((path): Promise<any> => {
         if (path === '.yarnrc.yml') {
