@@ -3419,6 +3419,7 @@ const options: Readonly<RenovateOptions>[] = [
     description:
       'Rebase all open branches at once, as if the rebase-all-open-PRs checkbox was selected in the Dependency Dashboard issue.',
     type: 'boolean',
+    cli: true,
     experimental: true,
     globalOnly: true,
     default: false,
