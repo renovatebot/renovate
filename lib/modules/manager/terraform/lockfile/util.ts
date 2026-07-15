@@ -230,8 +230,13 @@ export function writeLockUpdates(
   };
 }
 
+const hashicorpVersioning = getVersioning('hashicorp');
+
 // Operators Terraform allows in a version constraint, matched longest-first so
-// ">=" wins over ">" and "<=" over "<".
+// ">=" wins over ">" and "<=" over "<". The normalization implemented below
+// (operator set, boundary-version sort, priority tie-break) mirrors Terraform's
+// getproviders.VersionConstraintsString and versionSelectionsBoundaryPriority:
+// https://github.com/hashicorp/terraform/blob/main/internal/getproviders/providerreqs/version.go
 const constraintOperators = ['>=', '<=', '!=', '~>', '=', '>', '<'];
 
 interface ParsedConstraint {
@@ -270,12 +275,14 @@ function operatorPriority(operator: string, rawVersion: string): number {
 // Pad the numeric core to three components, matching Terraform's
 // VersionSpec.ConstrainToZero so "5.0" and "5.0.0" compare (and dedupe) equal.
 function constrainToZero(version: string): string {
-  const [core, ...extra] = version.split(/(?=[-+])/);
+  const sep = version.search(regEx(/[-+]/)); // start of prerelease/build metadata, -1 if none
+  const core = sep === -1 ? version : version.slice(0, sep);
+  const extra = sep === -1 ? '' : version.slice(sep);
   const segments = core.split('.');
   while (segments.length < 3) {
     segments.push('0');
   }
-  return segments.join('.') + extra.join('');
+  return segments.join('.') + extra;
 }
 
 function parseConstraint(token: string): ParsedConstraint {
@@ -315,20 +322,21 @@ export function sortConstraints(
   if (!constraint?.includes(',')) {
     return constraint;
   }
-  const versioning = getVersioning('hashicorp');
   const parsed: ParsedConstraint[] = [];
   for (const token of constraint.split(',')) {
     const entry = parseConstraint(token);
     // Leave the constraint untouched if any token is unrecognizable, rather
     // than risk corrupting it.
-    if (!versioning.isValid(entry.cmpVersion)) {
+    if (!hashicorpVersioning.isValid(entry.cmpVersion)) {
       return constraint;
     }
     parsed.push(entry);
   }
   parsed.sort((a, b) => {
-    if (!versioning.equals(a.cmpVersion, b.cmpVersion)) {
-      return versioning.isGreaterThan(a.cmpVersion, b.cmpVersion) ? 1 : -1;
+    if (!hashicorpVersioning.equals(a.cmpVersion, b.cmpVersion)) {
+      return hashicorpVersioning.isGreaterThan(a.cmpVersion, b.cmpVersion)
+        ? 1
+        : -1;
     }
     return (
       operatorPriority(a.operator, a.rawVersion) -

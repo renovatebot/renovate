@@ -21,6 +21,7 @@ describe('modules/manager/terraform/lockfile/util', () => {
       ${'>= 1.0.0, > 1.0.0'}              | ${'> 1.0.0, >= 1.0.0'}
       ${'< 1.0.0, <= 1.0.0'}              | ${'<= 1.0.0, < 1.0.0'}
       ${'!= 1.0.0, 1.0.0'}                | ${'1.0.0, != 1.0.0'}
+      ${'1.0.0-rc1, ~> 1.0'}              | ${'1.0.0-rc1, ~> 1.0'}
     `('normalizes "$input" to "$expected"', ({ input, expected }) => {
       expect(sortConstraints(input)).toBe(expected);
     });
