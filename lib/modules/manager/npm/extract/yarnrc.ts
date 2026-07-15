@@ -1,7 +1,9 @@
 import { isTruthy } from '@sindresorhus/is';
-import upath from 'upath';
 import { logger } from '../../../../logger/index.ts';
-import { localPathExists, readLocalFile } from '../../../../util/fs/index.ts';
+import {
+  findLocalSiblingAndParents,
+  readLocalFile,
+} from '../../../../util/fs/index.ts';
 import { regEx } from '../../../../util/regex.ts';
 import { Result } from '../../../../util/result.ts';
 import { YarnConfig } from '../schema.ts';
@@ -75,35 +77,10 @@ export function mergeYarnConfigs(
   return mergedConfig;
 }
 
-async function findLocalSiblingAndParentFiles(
-  existingFileNameWithPath: string,
-  otherFileName: string,
-): Promise<string[]> {
-  if (upath.isAbsolute(existingFileNameWithPath)) {
-    return [];
-  }
-  if (upath.isAbsolute(otherFileName)) {
-    return [];
-  }
-
-  const fileNames: string[] = [];
-  let current = existingFileNameWithPath;
-
-  while (current !== '') {
-    current = upath.parse(current).dir;
-    const candidate = upath.join(current, otherFileName);
-    if (await localPathExists(candidate)) {
-      fileNames.push(candidate);
-    }
-  }
-
-  return fileNames;
-}
-
 export async function loadConfigFromInheritedYarnrcYml(
   packageFile: string,
 ): Promise<YarnConfig | null> {
-  const yarnrcFileNames = await findLocalSiblingAndParentFiles(
+  const yarnrcFileNames = await findLocalSiblingAndParents(
     packageFile,
     '.yarnrc.yml',
   );
