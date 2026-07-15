@@ -8,7 +8,7 @@ import { TAG_PULL_REQUEST_BODY } from '../../../lib/modules/platform/gerrit/util
 import { regEx } from '../../../lib/util/regex.ts';
 import {
   abandonChange,
-  amendChangeAsOtherUser,
+  amendChangeAsAdmin,
   configureAdminSelfApproval,
   createAndConfigureProject,
   createBranch,
@@ -16,6 +16,7 @@ import {
   createOpenRenovateChange,
   createProject,
   deleteProjectLabel,
+  ensureRenovateBotAccount,
   getChange,
   getFileContent,
   getOpenChanges,
@@ -31,6 +32,9 @@ import {
 } from './utils/gerrit-api.ts';
 import {
   GERRIT_ADMIN_USERNAME,
+  GERRIT_RENOVATE_DISPLAY_NAME,
+  GERRIT_RENOVATE_EMAIL,
+  GERRIT_RENOVATE_USERNAME,
   startGerritContainer,
   stopGerritContainer,
 } from './utils/gerrit-container.ts';
@@ -91,6 +95,7 @@ describe('integration/gerrit/index', { timeout: 120_000 }, () => {
   beforeAll(async () => {
     await startGerritContainer();
     await configureAdminSelfApproval();
+    await ensureRenovateBotAccount();
     await createProject(REPO_NAME);
     await pushFilesToGerrit(REPO_NAME, {
       'package.json': pkgJson('test-project'),
@@ -469,8 +474,6 @@ describe('integration/gerrit/index', { timeout: 120_000 }, () => {
   it('does not override a change modified by another user', async () => {
     // Arrange
     const REPO = 'test-gerrit-modified-by-other';
-    const OTHER = 'otherdev';
-    const OTHER_PASS = 's3cr3t-other';
     await seed(REPO, 'test-modified');
     await renovate([REPO]);
 
@@ -484,14 +487,11 @@ describe('integration/gerrit/index', { timeout: 120_000 }, () => {
     ]);
     const beforeRev = before.current_revision!;
     expect(before.revisions?.[beforeRev]?.uploader?.username).toEqual(
-      GERRIT_ADMIN_USERNAME,
+      GERRIT_RENOVATE_USERNAME,
     );
 
-    await createGerritUser(OTHER, OTHER_PASS, 'Other Developer');
-    await amendChangeAsOtherUser(
+    await amendChangeAsAdmin(
       changeNum,
-      OTHER,
-      OTHER_PASS,
       'package.json',
       pkgJson(
         'test-modified',
@@ -505,7 +505,9 @@ describe('integration/gerrit/index', { timeout: 120_000 }, () => {
       'DETAILED_ACCOUNTS',
     ]);
     const afterRev = afterEdit.current_revision!;
-    expect(afterEdit.revisions?.[afterRev]?.uploader?.username).toEqual(OTHER);
+    expect(afterEdit.revisions?.[afterRev]?.uploader?.username).toEqual(
+      GERRIT_ADMIN_USERNAME,
+    );
     expect(afterRev).not.toEqual(beforeRev);
 
     // Act
@@ -518,7 +520,7 @@ describe('integration/gerrit/index', { timeout: 120_000 }, () => {
     ]);
     expect(
       final.revisions?.[final.current_revision!]?.uploader?.username,
-    ).toEqual(OTHER);
+    ).toEqual(GERRIT_ADMIN_USERNAME);
     expect(final.current_revision).toEqual(afterRev);
   });
 
@@ -596,7 +598,7 @@ describe('integration/gerrit/index', { timeout: 120_000 }, () => {
         },
       });
 
-      // Assert — full clone + push via ssh://admin@host:29418/... succeeded
+      // Assert — full clone + push via ssh://renovate@host:29418/... succeeded
       const ch = findSemverChange(await getOpenChanges(REPO));
       expect(ch).toBeDefined();
     } finally {
@@ -611,9 +613,12 @@ describe('integration/gerrit/index', { timeout: 120_000 }, () => {
     // Arrange
     const REPO = 'test-gerrit-signed-push';
     // Gerrit only accepts GPG keys whose UID matches a preferred account email
-    // (admin@example.com for the test image admin). Commit author can still
-    // be Renovate's gitAuthor; signingkey is set by id after import.
-    const key = await generateGpgKeyPair('Administrator', 'admin@example.com');
+    // (renovate@example.com for the bot account). Commit author can still be
+    // Renovate's gitAuthor; signingkey is set by id after import.
+    const key = await generateGpgKeyPair(
+      GERRIT_RENOVATE_DISPLAY_NAME,
+      GERRIT_RENOVATE_EMAIL,
+    );
     try {
       await registerGpgKey(key.publicKey);
       await seed(REPO, 'test-signed-push', { requireSignedPush: true });

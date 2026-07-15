@@ -13,8 +13,19 @@ const GERRIT_CONTAINER_NAME = 'gerrit-renovate-integration-test';
 /** Gerrit sshd port — Renovate hardcodes this in createSshUrl. */
 export const GERRIT_SSH_PORT = 29418;
 
+/** Admin: harness setup (projects, seeds, access config) and "human user" ops. */
 export const GERRIT_ADMIN_USERNAME = 'admin';
 export const GERRIT_ADMIN_PASSWORD = 'secret';
+
+/**
+ * Dedicated Renovate bot account. Used as Renovate platform credentials and
+ * for synthetic "looks like Renovate" changes so git author/committer match.
+ */
+export const GERRIT_RENOVATE_USERNAME = 'renovate';
+export const GERRIT_RENOVATE_PASSWORD = 'renovate-secret';
+export const GERRIT_RENOVATE_DISPLAY_NAME = 'Renovate Bot';
+export const GERRIT_RENOVATE_EMAIL = `${GERRIT_RENOVATE_USERNAME}@example.com`;
+export const GERRIT_RENOVATE_GIT_AUTHOR = `${GERRIT_RENOVATE_DISPLAY_NAME} <${GERRIT_RENOVATE_EMAIL}>`;
 
 let container: StartedTestContainer;
 let baseUrl: string;
@@ -66,7 +77,7 @@ export async function stopGerritContainer(): Promise<void> {
       Gerrit container kept running. Access it at: ${baseUrl}
 
       Run renovate against it with:
-        RENOVATE_PLATFORM=gerrit RENOVATE_ENDPOINT=${baseUrl}/ RENOVATE_USERNAME=${GERRIT_ADMIN_USERNAME} RENOVATE_PASSWORD=${GERRIT_ADMIN_PASSWORD} RENOVATE_AUTODISCOVER=true pnpm start
+        RENOVATE_PLATFORM=gerrit RENOVATE_ENDPOINT=${baseUrl}/ RENOVATE_USERNAME=${GERRIT_RENOVATE_USERNAME} RENOVATE_PASSWORD=${GERRIT_RENOVATE_PASSWORD} RENOVATE_GIT_AUTHOR='${GERRIT_RENOVATE_GIT_AUTHOR}' RENOVATE_AUTODISCOVER=true pnpm start
 
       Remove the container when done:
         docker rm -f ${GERRIT_CONTAINER_NAME}

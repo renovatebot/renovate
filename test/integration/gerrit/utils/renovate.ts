@@ -11,8 +11,9 @@ import * as hostRules from '../../../../lib/util/host-rules.ts';
 import { start } from '../../../../lib/workers/global/index.ts';
 import { resetAllLimits } from '../../../../lib/workers/global/limits.ts';
 import {
-  GERRIT_ADMIN_PASSWORD,
-  GERRIT_ADMIN_USERNAME,
+  GERRIT_RENOVATE_GIT_AUTHOR,
+  GERRIT_RENOVATE_PASSWORD,
+  GERRIT_RENOVATE_USERNAME,
   getBaseUrl,
 } from './gerrit-container.ts';
 
@@ -35,9 +36,9 @@ export async function renovate(
   const config: AllConfig = {
     platform: 'gerrit',
     endpoint: `${getBaseUrl()}/`,
-    username: GERRIT_ADMIN_USERNAME,
-    password: GERRIT_ADMIN_PASSWORD,
-    gitAuthor: 'Renovate Gerrit <renovate-gerrit@example.com>',
+    username: GERRIT_RENOVATE_USERNAME,
+    password: GERRIT_RENOVATE_PASSWORD,
+    gitAuthor: GERRIT_RENOVATE_GIT_AUTHOR,
     githubTokenWarn: false,
     baseDir,
     ...(isNonEmptyArray(repositories) ? { repositories } : {}),

@@ -6,6 +6,9 @@ import { regEx } from '../../../../lib/util/regex.ts';
 import {
   GERRIT_ADMIN_PASSWORD,
   GERRIT_ADMIN_USERNAME,
+  GERRIT_RENOVATE_DISPLAY_NAME,
+  GERRIT_RENOVATE_PASSWORD,
+  GERRIT_RENOVATE_USERNAME,
   getBaseUrl,
 } from './gerrit-container.ts';
 
@@ -20,6 +23,10 @@ function basicAuth(
   password = GERRIT_ADMIN_PASSWORD,
 ): string {
   return `Basic ${Buffer.from(`${username}:${password}`).toString('base64')}`;
+}
+
+function renovateAuth(): string {
+  return basicAuth(GERRIT_RENOVATE_USERNAME, GERRIT_RENOVATE_PASSWORD);
 }
 
 async function gerritFetch(
@@ -45,8 +52,14 @@ async function gerritFetch(
   return res;
 }
 
-async function gerritJson<T>(path: string, options?: RequestInit): Promise<T> {
-  return parseGerritJson(await (await gerritFetch(path, options)).text()) as T;
+async function gerritJson<T>(
+  path: string,
+  options?: RequestInit,
+  auth = basicAuth(),
+): Promise<T> {
+  return parseGerritJson(
+    await (await gerritFetch(path, options, auth)).text(),
+  ) as T;
 }
 
 /** Create change, edit files, optionally set message / submit. */
@@ -58,6 +71,7 @@ async function writeChange(
     message?: string;
     submit?: boolean;
   },
+  auth = basicAuth(),
 ): Promise<{ number: number; change_id: string }> {
   const change = await gerritJson<{ _number: number; change_id: string }>(
     '/a/changes/',
@@ -70,38 +84,55 @@ async function writeChange(
         status: 'NEW',
       }),
     },
+    auth,
   );
   const id = String(change._number);
 
   for (const [path, content] of Object.entries(files)) {
-    await gerritFetch(`/a/changes/${id}/edit/${encodeURIComponent(path)}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/octet-stream' },
-      body: content,
-    });
+    await gerritFetch(
+      `/a/changes/${id}/edit/${encodeURIComponent(path)}`,
+      {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/octet-stream' },
+        body: content,
+      },
+      auth,
+    );
   }
 
   if (isNonEmptyString(opts.message)) {
     const message = opts.message.includes('Change-Id:')
       ? opts.message
       : `${opts.message.trimEnd()}\nChange-Id: ${change.change_id}\n`;
-    await gerritFetch(`/a/changes/${id}/edit:message`, {
-      method: 'PUT',
-      body: JSON.stringify({ message }),
-    });
+    await gerritFetch(
+      `/a/changes/${id}/edit:message`,
+      {
+        method: 'PUT',
+        body: JSON.stringify({ message }),
+      },
+      auth,
+    );
   }
 
-  await gerritFetch(`/a/changes/${id}/edit:publish`, {
-    method: 'POST',
-    body: JSON.stringify({ notify: 'NONE' }),
-  });
+  await gerritFetch(
+    `/a/changes/${id}/edit:publish`,
+    {
+      method: 'POST',
+      body: JSON.stringify({ notify: 'NONE' }),
+    },
+    auth,
+  );
 
   if (opts.submit) {
-    await setLabel(change._number, 'Code-Review', 2);
-    await gerritFetch(`/a/changes/${id}/submit`, {
-      method: 'POST',
-      body: JSON.stringify({}),
-    });
+    await setLabel(change._number, 'Code-Review', 2, auth);
+    await gerritFetch(
+      `/a/changes/${id}/submit`,
+      {
+        method: 'POST',
+        body: JSON.stringify({}),
+      },
+      auth,
+    );
   }
 
   return { number: change._number, change_id: change.change_id };
@@ -128,21 +159,35 @@ export async function createProject(
   });
 }
 
-/** Register an OpenPGP public key on the admin account (for signed push). */
-export async function registerGpgKey(publicKeyArmored: string): Promise<void> {
-  await gerritFetch('/a/accounts/self/gpgkeys', {
-    method: 'POST',
-    body: JSON.stringify({ add: [publicKeyArmored] }),
-  });
+/** Register an OpenPGP public key on the given account (default: Renovate bot). */
+export async function registerGpgKey(
+  publicKeyArmored: string,
+  auth = renovateAuth(),
+): Promise<void> {
+  await gerritFetch(
+    '/a/accounts/self/gpgkeys',
+    {
+      method: 'POST',
+      body: JSON.stringify({ add: [publicKeyArmored] }),
+    },
+    auth,
+  );
 }
 
-/** Register an OpenSSH public key on the admin account (for gitUrl=ssh). */
-export async function registerSshKey(publicKey: string): Promise<void> {
-  await gerritFetch('/a/accounts/self/sshkeys', {
-    method: 'POST',
-    headers: { 'Content-Type': 'text/plain' },
-    body: publicKey,
-  });
+/** Register an OpenSSH public key on the given account (default: Renovate bot). */
+export async function registerSshKey(
+  publicKey: string,
+  auth = renovateAuth(),
+): Promise<void> {
+  await gerritFetch(
+    '/a/accounts/self/sshkeys',
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain' },
+      body: publicKey,
+    },
+    auth,
+  );
 }
 
 export async function configureAdminSelfApproval(): Promise<void> {
@@ -164,8 +209,11 @@ export async function configureAdminSelfApproval(): Promise<void> {
   });
 }
 
+/** Open changes owned by the Renovate bot (not admin). */
 export async function getOpenChanges(project: string): Promise<GerritChange[]> {
-  const query = encodeURIComponent(`project:${project} status:open owner:self`);
+  const query = encodeURIComponent(
+    `project:${project} status:open owner:${GERRIT_RENOVATE_USERNAME}`,
+  );
   return gerritJson(
     `/a/changes/?q=${query}&o=LABELS&o=SUBMITTABLE&o=CURRENT_REVISION&o=CURRENT_COMMIT&o=MESSAGES`,
   );
@@ -255,11 +303,16 @@ export async function setLabel(
   changeNumber: number,
   label: string,
   value: number,
+  auth = basicAuth(),
 ): Promise<void> {
-  await gerritFetch(`/a/changes/${changeNumber}/revisions/current/review`, {
-    method: 'POST',
-    body: JSON.stringify({ labels: { [label]: value }, notify: 'NONE' }),
-  });
+  await gerritFetch(
+    `/a/changes/${changeNumber}/revisions/current/review`,
+    {
+      method: 'POST',
+      body: JSON.stringify({ labels: { [label]: value }, notify: 'NONE' }),
+    },
+    auth,
+  );
 }
 
 /**
@@ -381,14 +434,36 @@ export async function createGerritUser(
   );
 }
 
-export async function amendChangeAsOtherUser(
-  changeNumber: number,
+export async function addGroupMember(
+  groupName: string,
   username: string,
-  password: string,
+): Promise<void> {
+  await gerritFetch(
+    `/a/groups/${encodeURIComponent(groupName)}/members/${encodeURIComponent(username)}`,
+    { method: 'PUT', body: '{}' },
+  );
+}
+
+/**
+ * Create the Renovate bot account and grant it Administrators so it can
+ * Code-Review +2 / submit like a typical privileged service account.
+ * Harness setup (projects, seeds) still uses admin.
+ */
+export async function ensureRenovateBotAccount(): Promise<void> {
+  await createGerritUser(
+    GERRIT_RENOVATE_USERNAME,
+    GERRIT_RENOVATE_PASSWORD,
+    GERRIT_RENOVATE_DISPLAY_NAME,
+  );
+  await addGroupMember('Administrators', GERRIT_RENOVATE_USERNAME);
+}
+
+/** Amend a change as admin (human user), not the Renovate bot. */
+export async function amendChangeAsAdmin(
+  changeNumber: number,
   filePath: string,
   content: string,
 ): Promise<void> {
-  const auth = basicAuth(username, password);
   await gerritFetch(
     `/a/changes/${changeNumber}/edit/${encodeURIComponent(filePath)}`,
     {
@@ -396,20 +471,16 @@ export async function amendChangeAsOtherUser(
       headers: { 'Content-Type': 'application/octet-stream' },
       body: content,
     },
-    auth,
   );
-  await gerritFetch(
-    `/a/changes/${changeNumber}/edit:publish`,
-    {
-      method: 'POST',
-      body: JSON.stringify({ notify: 'NONE' }),
-    },
-    auth,
-  );
+  await gerritFetch(`/a/changes/${changeNumber}/edit:publish`, {
+    method: 'POST',
+    body: JSON.stringify({ notify: 'NONE' }),
+  });
 }
 
 /**
- * Open change that looks like Renovate's: Renovate-Branch footer + pull-request tag.
+ * Open change that looks like Renovate's: owned by the bot account, with
+ * Renovate-Branch footer + pull-request tag (author/committer = bot email).
  */
 export async function createOpenRenovateChange(
   project: string,
@@ -420,19 +491,29 @@ export async function createOpenRenovateChange(
     files: Record<string, string>;
   },
 ): Promise<{ number: number; revision: string }> {
-  const created = await writeChange(project, opts.files, {
-    subject: opts.subject,
-    message: `${opts.subject}\n\nRenovate-Branch: ${opts.branchName}\n`,
-  });
+  const auth = renovateAuth();
+  const created = await writeChange(
+    project,
+    opts.files,
+    {
+      subject: opts.subject,
+      message: `${opts.subject}\n\nRenovate-Branch: ${opts.branchName}\n`,
+    },
+    auth,
+  );
 
-  await gerritFetch(`/a/changes/${created.number}/revisions/current/review`, {
-    method: 'POST',
-    body: JSON.stringify({
-      message: opts.prBody,
-      tag: TAG_PULL_REQUEST_BODY,
-      notify: 'NONE',
-    }),
-  });
+  await gerritFetch(
+    `/a/changes/${created.number}/revisions/current/review`,
+    {
+      method: 'POST',
+      body: JSON.stringify({
+        message: opts.prBody,
+        tag: TAG_PULL_REQUEST_BODY,
+        notify: 'NONE',
+      }),
+    },
+    auth,
+  );
 
   const ch = await getChange(created.number, ['CURRENT_REVISION']);
   if (!isNonEmptyString(ch.current_revision)) {
