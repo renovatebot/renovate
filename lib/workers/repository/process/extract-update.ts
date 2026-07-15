@@ -250,7 +250,7 @@ export async function lookup(
 }
 
 export function reportMaliciousSkippedDependencies(
-  allPackageFiles: Record<string, PackageFile<Record<string, any>>[]>,
+  allPackageFiles: Record<string, PackageFile[]>,
 ): void {
   if (allPackageFiles === undefined) {
     return;

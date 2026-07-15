@@ -289,8 +289,8 @@ describe('modules/manager/mix/artifacts', () => {
       config,
     });
 
-    expect(result).toMatchSnapshot();
-    expect(execSnapshots).toMatchSnapshot();
+    expect(result).toMatchSnapshot('result');
+    expect(execSnapshots).toMatchSnapshot('execSnapshots');
 
     // TODO #22198
     const [updateResult] = result!;

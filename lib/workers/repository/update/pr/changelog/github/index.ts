@@ -32,7 +32,7 @@ export async function getReleaseNotesMd(
   logger.trace('github.getReleaseNotesMd()');
   const apiPrefix = `${ensureTrailingSlash(apiBaseUrl)}repos/${repository}`;
   const { default_branch: defaultBranch = 'HEAD' } = (
-    await http.getJsonUnchecked<{ default_branch: string }>(apiPrefix, {
+    await http.getJsonUnchecked<{ default_branch?: string }>(apiPrefix, {
       cacheProvider: memCacheProvider,
     })
   ).body;

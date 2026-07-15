@@ -1,3 +1,4 @@
+import { codeBlock } from 'common-tags';
 import upath from 'upath';
 import { mockDeep } from 'vitest-mock-extended';
 import { mockExecAll } from '~test/exec-util.ts';
@@ -33,7 +34,7 @@ const config: UpdateArtifactsConfig = {
  * "extras" specifications as well as line continuations and additional
  * (valid) whitespace.
  */
-const newPackageFileContent = `atomicwrites==1.4.0 \\\n\
+const newPackageFileContent = codeBlock`atomicwrites==1.4.0 \\\n\
   --hash=sha256:03472c30eb2c5d1ba9227e4c2ca66ab8287fbfbbda3888aa93dc2e28fc6811b4 \\\n\
   --hash=sha256:75a9445bac02d8d058d5e1fe689654ba5a6556a1dfd8ce6ec55a0ed79866cfa6\n\
  boto3-stubs[iam] == 1.24.36.post1 \

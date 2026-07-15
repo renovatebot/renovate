@@ -1,3 +1,4 @@
+import { codeBlock } from 'common-tags';
 import type { SimpleGit } from 'simple-git';
 import type { DirectoryResult } from 'tmp-promise';
 import { dir } from 'tmp-promise';
@@ -107,10 +108,12 @@ describe('modules/manager/git-submodules/update', () => {
     it('update gitmodule branch value if value changed', async () => {
       gitMock.submoduleUpdate.mockResolvedValue('');
       gitMock.checkout.mockResolvedValue('');
-      const updatedGitModules = `[submodule "renovate"]
-      path = deps/renovate
-      url = https://github.com/renovatebot/renovate.git
-      branch = v0.0.2`;
+      const updatedGitModules = codeBlock`
+        [submodule "renovate"]
+              path = deps/renovate
+              url = https://github.com/renovatebot/renovate.git
+              branch = v0.0.2
+      `;
       fs.readLocalFile.mockResolvedValueOnce(updatedGitModules);
 
       upgrade = {

@@ -224,9 +224,15 @@ describe('modules/platform/azure/util', () => {
 
     it('throws when repo name is invalid', () => {
       // TODO: better error handling #22198
-      expect(() => getRepoByName(undefined as never, [])).toThrow();
-      expect(() => getRepoByName(null as never, [])).toThrow();
-      expect(() => getRepoByName('foo/bar/baz', [])).toThrow();
+      expect(() => getRepoByName(undefined as never, [])).toThrow(
+        "Cannot read properties of undefined (reading 'split')",
+      );
+      expect(() => getRepoByName(null as never, [])).toThrow(
+        "Cannot read properties of null (reading 'split')",
+      );
+      expect(() => getRepoByName('foo/bar/baz', [])).toThrow(
+        'Azure repository can be only structured this way',
+      );
     });
   });
   it('returns the raw title if not a dependency dashboard', () => {

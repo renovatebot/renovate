@@ -47,9 +47,8 @@ export function satisfiesRange(ver: string, range: Range): boolean {
       satisfies(ver, `${range.operator}${range.version}`) &&
       satisfiesRange(ver, range.companion)
     );
-  } else {
-    return satisfies(ver, `${range.operator}${range.version}`);
   }
+  return satisfies(ver, `${range.operator}${range.version}`);
 }
 
 /**
@@ -87,9 +86,8 @@ export function stringifyRanges(ranges: Range[]): string {
     .map((r) => {
       if (r.companion) {
         return `${r.operator}${r.delimiter}${r.version}, ${r.companion.operator}${r.companion.delimiter}${r.companion.version}`;
-      } else {
-        return `${r.operator}${r.delimiter}${r.version}`;
       }
+      return `${r.operator}${r.delimiter}${r.version}`;
     })
     .join(', ');
 }

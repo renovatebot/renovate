@@ -76,7 +76,9 @@ describe('modules/platform/gitlab/index', () => {
 
   describe('initPlatform()', () => {
     it('should throw if no token', async () => {
-      await expect(gitlab.initPlatform({} as any)).rejects.toThrow();
+      await expect(gitlab.initPlatform({} as any)).rejects.toThrow(
+        'Init: You must configure a GitLab personal access token',
+      );
     });
 
     it('should throw if endpoint is not a valid URL', async () => {
@@ -590,6 +592,7 @@ describe('modules/platform/gitlab/index', () => {
             target_branch: 'master',
             state: 'opened',
             description: 'a merge request',
+            detailed_merge_status: 'mergeable',
             created_at: '2025-05-19T12:00:00.000Z',
             updated_at: '2025-05-19T12:00:00.000Z',
           },
@@ -629,6 +632,7 @@ describe('modules/platform/gitlab/index', () => {
             target_branch: 'master',
             state: 'opened',
             description: 'a merge request',
+            detailed_merge_status: 'mergeable',
             created_at: '2025-05-19T12:00:00.000Z',
             updated_at: '2025-05-19T12:00:00.000Z',
           },
@@ -668,6 +672,7 @@ describe('modules/platform/gitlab/index', () => {
             target_branch: 'master',
             state: 'opened',
             description: 'a merge request',
+            detailed_merge_status: 'mergeable',
             created_at: '2025-05-19T12:00:00.000Z',
             updated_at: '2025-05-19T12:00:00.000Z',
           },
@@ -728,6 +733,7 @@ describe('modules/platform/gitlab/index', () => {
             target_branch: 'master',
             state: 'opened',
             description: 'a merge request',
+            detailed_merge_status: 'mergeable',
             created_at: '2025-05-19T12:00:00.000Z',
             updated_at: '2025-05-19T12:00:00.000Z',
           },
@@ -811,6 +817,7 @@ describe('modules/platform/gitlab/index', () => {
             target_branch: 'master',
             state: 'opened',
             description: 'a merge request',
+            detailed_merge_status: 'mergeable',
             created_at: '2025-05-19T12:00:00.000Z',
             updated_at: '2025-05-19T12:00:00.000Z',
           },
@@ -857,6 +864,7 @@ describe('modules/platform/gitlab/index', () => {
             target_branch: 'master',
             state: 'opened',
             description: 'a merge request',
+            detailed_merge_status: 'mergeable',
             created_at: '2025-05-19T12:00:00.000Z',
             updated_at: '2025-05-19T12:00:00.000Z',
           },
@@ -907,6 +915,7 @@ describe('modules/platform/gitlab/index', () => {
             target_branch: 'master',
             state: 'opened',
             description: 'a merge request',
+            detailed_merge_status: 'mergeable',
             created_at: '2025-05-19T12:00:00.000Z',
             updated_at: '2025-05-19T12:00:00.000Z',
           },
@@ -1439,6 +1448,64 @@ describe('modules/platform/gitlab/index', () => {
 
       expect(timers.setTimeout.mock.calls).toHaveLength(retry + 1);
       expect(timers.setTimeout.mock.calls[0][0]).toBe(delay);
+    });
+
+    it('ignores status transition error', async () => {
+      const scope = await initRepo();
+      scope
+        .get(
+          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e',
+        )
+        .times(3)
+        .reply(200, {})
+        .post(
+          '/api/v4/projects/some%2Frepo/statuses/0d9c7726c3d628b7e28af234595cfd20febdbf8e',
+        )
+        .reply(400, {
+          message: 'Cannot transition status via :enqueue from :pending',
+        });
+
+      await expect(
+        gitlab.setBranchStatus({
+          branchName: 'some-branch',
+          context: 'some-context',
+          description: 'some-description',
+          state: 'green',
+          url: 'some-url',
+        }),
+      ).toResolve();
+
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        'Ignoring status transition error',
+      );
+    });
+
+    it('handles non-string error message', async () => {
+      const scope = await initRepo();
+      scope
+        .get(
+          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e',
+        )
+        .times(3)
+        .reply(200, {})
+        .post(
+          '/api/v4/projects/some%2Frepo/statuses/0d9c7726c3d628b7e28af234595cfd20febdbf8e',
+        )
+        .reply(400, { message: { base: ['Some validation error'] } });
+
+      await expect(
+        gitlab.setBranchStatus({
+          branchName: 'some-branch',
+          context: 'some-context',
+          description: 'some-description',
+          state: 'green',
+          url: 'some-url',
+        }),
+      ).toResolve();
+
+      expect(logger.logger.warn).toHaveBeenCalledWith(
+        'Failed to set branch status',
+      );
     });
   });
 
@@ -2034,6 +2101,7 @@ describe('modules/platform/gitlab/index', () => {
             title: 'branch a pr',
             state: 'opened',
             description: 'a merge request',
+            detailed_merge_status: 'mergeable',
             created_at: '2025-05-19T12:00:00.000Z',
             updated_at: '2025-05-19T12:00:00.000Z',
           },
@@ -2058,6 +2126,7 @@ describe('modules/platform/gitlab/index', () => {
             title: 'branch a pr',
             state: 'merged',
             description: 'a merge request',
+            detailed_merge_status: 'mergeable',
             created_at: '2025-05-19T12:00:00.000Z',
             updated_at: '2025-05-19T12:00:00.000Z',
           },
@@ -2083,6 +2152,7 @@ describe('modules/platform/gitlab/index', () => {
             title: 'branch a pr',
             state: 'opened',
             description: 'a merge request',
+            detailed_merge_status: 'mergeable',
             created_at: '2025-05-19T12:00:00.000Z',
             updated_at: '2025-05-19T12:00:00.000Z',
           },
@@ -2109,6 +2179,7 @@ describe('modules/platform/gitlab/index', () => {
             title: 'branch a pr',
             state: 'opened',
             description: 'a merge request',
+            detailed_merge_status: 'mergeable',
             created_at: '2025-05-19T12:00:00.000Z',
             updated_at: '2025-05-19T12:00:00.000Z',
           },
@@ -2134,6 +2205,7 @@ describe('modules/platform/gitlab/index', () => {
             title: 'Draft: branch a pr',
             state: 'opened',
             description: 'a merge request',
+            detailed_merge_status: 'mergeable',
             created_at: '2025-05-19T12:00:00.000Z',
             updated_at: '2025-05-19T12:00:00.000Z',
           },
@@ -2159,6 +2231,7 @@ describe('modules/platform/gitlab/index', () => {
             title: 'WIP: branch a pr',
             state: 'opened',
             description: 'a merge request',
+            detailed_merge_status: 'mergeable',
             created_at: '2025-05-19T12:00:00.000Z',
             updated_at: '2025-05-19T12:00:00.000Z',
           },
@@ -3342,6 +3415,7 @@ describe('modules/platform/gitlab/index', () => {
           iid: 12345,
           title: 'some title',
           source_branch: 'some-branch',
+          detailed_merge_status: 'mergeable',
           target_branch: 'master',
           description: 'the-body',
         })
@@ -3621,6 +3695,7 @@ describe('modules/platform/gitlab/index', () => {
             target_branch: 'master',
             title: 'branch a pr',
             description: 'a merge request',
+            detailed_merge_status: 'mergeable',
             state: 'opened',
             created_at: '2025-05-19T12:00:00.000Z',
             updated_at: '2025-05-19T12:00:00.000Z',
@@ -3632,6 +3707,7 @@ describe('modules/platform/gitlab/index', () => {
           source_branch: 'branch-a',
           target_branch: 'master',
           title: 'title',
+          detailed_merge_status: 'mergeable',
           description: 'body',
           state: 'opened',
         });
@@ -3654,6 +3730,7 @@ describe('modules/platform/gitlab/index', () => {
             target_branch: 'master',
             title: 'Draft: foo',
             description: 'a merge request',
+            detailed_merge_status: 'mergeable',
             state: 'opened',
             created_at: '2025-05-19T12:00:00.000Z',
             updated_at: '2025-05-19T12:00:00.000Z',
@@ -3665,6 +3742,7 @@ describe('modules/platform/gitlab/index', () => {
           source_branch: 'branch-a',
           target_branch: 'master',
           title: 'Draft: title',
+          detailed_merge_status: 'mergeable',
           description: 'body',
           state: 'opened',
         });
@@ -3688,6 +3766,7 @@ describe('modules/platform/gitlab/index', () => {
             title: 'WIP: foo',
             description: 'a merge request',
             state: 'opened',
+            detailed_merge_status: 'mergeable',
             created_at: '2025-05-19T12:00:00.000Z',
             updated_at: '2025-05-19T12:00:00.000Z',
           },
@@ -3698,6 +3777,7 @@ describe('modules/platform/gitlab/index', () => {
           source_branch: 'branch-a',
           target_branch: 'master',
           title: 'WIP: title',
+          detailed_merge_status: 'mergeable',
           description: 'body',
           state: 'opened',
         });
@@ -3721,6 +3801,7 @@ describe('modules/platform/gitlab/index', () => {
             title: 'branch a pr',
             description: 'a merge request',
             state: 'opened',
+            detailed_merge_status: 'mergeable',
             created_at: '2025-05-19T12:00:00.000Z',
             updated_at: '2025-05-19T12:00:00.000Z',
           },
@@ -3732,6 +3813,7 @@ describe('modules/platform/gitlab/index', () => {
           title: 'branch a pr',
           description: 'body',
           state: 'opened',
+          detailed_merge_status: 'mergeable',
           target_branch: 'branch-new',
           created_at: '2025-05-19T12:00:00.000Z',
         });
@@ -3760,6 +3842,7 @@ describe('modules/platform/gitlab/index', () => {
             title: 'branch a pr',
             description: 'a merge request',
             state: 'opened',
+            detailed_merge_status: 'mergeable',
             created_at: '2025-05-19T12:00:00.000Z',
             updated_at: '2025-05-19T12:00:00.000Z',
           },
@@ -3771,6 +3854,7 @@ describe('modules/platform/gitlab/index', () => {
           target_branch: 'branch-b',
           title: 'title',
           description: 'body',
+          detailed_merge_status: 'mergeable',
           state: 'opened',
           created_at: '2025-05-19T12:00:00.000Z',
         })
@@ -3803,6 +3887,7 @@ describe('modules/platform/gitlab/index', () => {
             title: 'branch a pr',
             description: 'a merge request',
             state: 'opened',
+            detailed_merge_status: 'mergeable',
             created_at: '2025-05-19T12:00:00.000Z',
             updated_at: '2025-05-19T12:00:00.000Z',
           },
@@ -3814,6 +3899,7 @@ describe('modules/platform/gitlab/index', () => {
           target_branch: 'branch-b',
           title: 'title',
           description: 'a merge requbody',
+          detailed_merge_status: 'mergeable',
           state: 'closed',
           created_at: '2025-05-19T12:00:00.000Z',
         });
@@ -3842,6 +3928,7 @@ describe('modules/platform/gitlab/index', () => {
             title: 'branch a pr',
             description: 'a merge request',
             state: 'opened',
+            detailed_merge_status: 'mergeable',
             created_at: '2025-05-19T12:00:00.000Z',
             updated_at: '2025-05-19T12:00:00.000Z',
           },
@@ -3853,6 +3940,7 @@ describe('modules/platform/gitlab/index', () => {
           target_branch: 'branch-b',
           title: 'title',
           description: 'body',
+          detailed_merge_status: 'mergeable',
           state: 'opened',
           created_at: '2025-05-19T12:00:00.000Z',
         });
@@ -4133,7 +4221,9 @@ These updates have all been created already. To force a retry/rebase of any, cli
         .reply(200, {
           content: toBase64('!@#'),
         });
-      await expect(gitlab.getJsonFile('dir/file.json')).rejects.toThrow();
+      await expect(gitlab.getJsonFile('dir/file.json')).rejects.toThrow(
+        "JSON5: invalid character '!' at 1:1",
+      );
     });
 
     it('throws on errors', async () => {
@@ -4143,7 +4233,9 @@ These updates have all been created already. To force a retry/rebase of any, cli
           '/api/v4/projects/some%2Frepo/repository/files/dir%2Ffile.json?ref=HEAD',
         )
         .replyWithError('some error');
-      await expect(gitlab.getJsonFile('dir/file.json')).rejects.toThrow();
+      await expect(gitlab.getJsonFile('dir/file.json')).rejects.toThrow(
+        'some error',
+      );
     });
   });
 

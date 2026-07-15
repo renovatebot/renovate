@@ -40,7 +40,7 @@ const adapt = (left: string, right: string): string =>
 
 const trimZeroes = (version: string): string => {
   const segments = version.split('.');
-  while (segments.length > 0 && segments[segments.length - 1] === '0') {
+  while (segments.length > 0 && segments.at(-1) === '0') {
     segments.pop();
   }
   return segments.join('.');

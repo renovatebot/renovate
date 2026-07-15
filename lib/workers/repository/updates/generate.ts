@@ -301,9 +301,7 @@ export function generateBranchConfig(
 
     const pendingVersionsLength = upgrade.pendingVersions?.length;
     if (pendingVersionsLength) {
-      upgrade.displayPending = `\`${upgrade
-        .pendingVersions!.slice(-1)
-        .pop()!}\``;
+      upgrade.displayPending = `\`${upgrade.pendingVersions!.at(-1)!}\``;
       if (pendingVersionsLength > 1) {
         upgrade.displayPending += ` (+${pendingVersionsLength - 1})`;
       }

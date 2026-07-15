@@ -15,6 +15,7 @@ import { regEx } from '../../../util/regex.ts';
 import * as template from '../../../util/template/index.ts';
 import { parseUrl } from '../../../util/url.ts';
 import type { BranchUpgradeConfig } from '../../types.ts';
+import { replacementAlreadyExists } from '../common.ts';
 import { generateBranchName } from './branch-name.ts';
 
 const upper = (str: string): string =>
@@ -98,7 +99,7 @@ export async function flattenUpdates(
         packagePath.splice(-1, 1);
       }
       if (packagePath.length > 0) {
-        packageFileConfig.parentDir = packagePath[packagePath.length - 1];
+        packageFileConfig.parentDir = packagePath.at(-1);
         packageFileConfig.packageFileDir = packagePath.join('/');
       } else {
         packageFileConfig.parentDir = '';
@@ -112,6 +113,17 @@ export async function flattenUpdates(
           delete depConfig.deps;
           depConfig.depIndex = depIndex; // used for autoreplace
           for (const update of dep.updates!) {
+            if (
+              update.updateType === 'replacement' &&
+              update.newName &&
+              replacementAlreadyExists(packageFile.deps, dep, update.newName)
+            ) {
+              logger.debug(
+                { fileName: packageFile.packageFile },
+                `Skipping replacement of ${dep.depName} with ${update.newName}: replacement already exists in ${packageFile.packageFile}`,
+              );
+              continue;
+            }
             let updateConfig = mergeChildConfig(depConfig, update);
             delete updateConfig.updates;
             if (updateConfig.updateType) {

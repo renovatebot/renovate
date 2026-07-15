@@ -253,6 +253,17 @@
       }
     ]
   },
+  "corentinmusard-otel-cicd-action-to-dash0hq": {
+    "description": "`corentinmusard/otel-cicd-action` was transferred to `dash0hq/otel-cicd-action`.",
+    "packageRules": [
+      {
+        "matchDatasources": ["github-releases", "github-tags"],
+        "matchPackageNames": ["corentinmusard/otel-cicd-action"],
+        "replacementName": "dash0hq/otel-cicd-action",
+        "replacementVersion": "4.0.1"
+      }
+    ]
+  },
   "cpx-to-maintenance-fork": {
     "description": "Maintenance fork of `cpx`",
     "packageRules": [

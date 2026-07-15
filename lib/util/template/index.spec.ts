@@ -149,7 +149,7 @@ describe('util/template/index', () => {
   it('to Object passing illegal number of elements', () => {
     const userTemplate = "{{{ toJSON (toObject 'foo') }}}";
     const outputFunc = () => template.compile(userTemplate, {});
-    expect(outputFunc).toThrow();
+    expect(outputFunc).toThrow('Must contain an even number of elements');
   });
 
   it('build complex json', () => {
@@ -239,7 +239,9 @@ describe('util/template/index', () => {
 
   it('add - throws if inputs are invalid', () => {
     const userTemplate = '{{add undefined null}}';
-    expect(() => template.compile(userTemplate, {})).toThrow();
+    expect(() => template.compile(userTemplate, {})).toThrow(
+      'add: inputs are not valid',
+    );
   });
 
   describe('proxyCompileInput', () => {

@@ -248,10 +248,10 @@ function deepExtract(
 }
 
 function applyProps(
-  dep: PackageDependency<Record<string, any>>,
+  dep: PackageDependency,
   depPackageFile: string,
   props: MavenProp,
-): PackageDependency<Record<string, any>> {
+): PackageDependency {
   let result = dep;
   let anyChange = false;
   const alreadySeenProps = new Set<string>();
@@ -281,11 +281,11 @@ function applyProps(
 }
 
 function applyPropsInternal(
-  dep: PackageDependency<Record<string, any>>,
+  dep: PackageDependency,
   depPackageFile: string,
   props: MavenProp,
   previouslySeenProps: Set<string>,
-): [PackageDependency<Record<string, any>>, boolean, boolean] {
+): [PackageDependency, boolean, boolean] {
   let anyChange = false;
   let fatal = false;
 

@@ -50,7 +50,6 @@ describe('modules/manager/mise/artifacts', () => {
     GlobalConfig.set(adminConfig);
     docker.resetPrefetchedImages();
     hostRules.clear();
-    datasource.getPkgReleases.mockReset();
   });
 
   it('returns null if lock file does not exist', async () => {

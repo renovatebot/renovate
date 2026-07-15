@@ -37,7 +37,7 @@ describe('modules/datasource/go/releases-direct', () => {
         datasource.getReleases({
           packageName: 'golang.org/foo/something',
         }),
-      ).rejects.toThrow();
+      ).rejects.toThrow('unknown');
     });
 
     it('processes real data', async () => {

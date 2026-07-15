@@ -221,15 +221,14 @@ function kill(cp: ChildProcess, signal: NodeJS.Signals): boolean {
        * and for which the process has permission to send a signal.
        */
       return process.kill(-cp.pid, signal);
-    } else {
-      // destroying stdio is needed for unref to work
-      // https://nodejs.org/api/child_process.html#subprocessunref
-      // https://github.com/nodejs/node/blob/4d5ff25a813fd18939c9f76b17e36291e3ea15c3/lib/child_process.js#L412-L426
-      cp.stderr?.destroy();
-      cp.stdout?.destroy();
-      cp.unref();
-      return cp.kill(signal);
     }
+    // destroying stdio is needed for unref to work
+    // https://nodejs.org/api/child_process.html#subprocessunref
+    // https://github.com/nodejs/node/blob/4d5ff25a813fd18939c9f76b17e36291e3ea15c3/lib/child_process.js#L412-L426
+    cp.stderr?.destroy();
+    cp.stdout?.destroy();
+    cp.unref();
+    return cp.kill(signal);
   } catch {
     // cp is a single node tree, therefore -pid is invalid as there is no such pgid,
     return false;

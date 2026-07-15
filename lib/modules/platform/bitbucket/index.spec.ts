@@ -20,6 +20,7 @@ const pr = {
   summary: { raw: 'summary' },
   state: 'OPEN',
   created_on: '2018-07-02T07:02:25.275030+00:00',
+  draft: false,
 };
 
 describe('modules/platform/bitbucket/index', () => {
@@ -67,7 +68,9 @@ describe('modules/platform/bitbucket/index', () => {
   describe('initPlatform()', () => {
     it('should throw if no token or username/password', async () => {
       expect.assertions(1);
-      await expect(bitbucket.initPlatform({})).rejects.toThrow();
+      await expect(bitbucket.initPlatform({})).rejects.toThrow(
+        'Init: You must configure either a Bitbucket token or username and',
+      );
     });
 
     it('should show warning message if custom endpoint', async () => {
@@ -1172,6 +1175,36 @@ describe('modules/platform/bitbucket/index', () => {
         platformPrOptions: {
           bbUseDefaultReviewers: true,
         },
+        draftPR: false,
+      });
+      expect(pr?.number).toBe(5);
+    });
+
+    it('posts draft PR', async () => {
+      const scope = await initRepoMock();
+      scope
+        .get(
+          '/2.0/repositories/some/repo/effective-default-reviewers?pagelen=100',
+        )
+        .reply(200, {
+          values: [],
+        })
+        .post('/2.0/repositories/some/repo/pullrequests')
+        .reply(200, { id: 5 })
+        .get(`/2.0/repositories/some/repo/pullrequests`)
+        .query(true)
+        .reply(200, {
+          values: [{ id: 5 }],
+        });
+      const pr = await bitbucket.createPr({
+        sourceBranch: 'branch',
+        targetBranch: 'master',
+        prTitle: 'title',
+        prBody: 'body',
+        platformPrOptions: {
+          bbUseDefaultReviewers: true,
+        },
+        draftPR: true,
       });
       expect(pr?.number).toBe(5);
     });
@@ -1682,11 +1715,11 @@ describe('modules/platform/bitbucket/index', () => {
         })
         .get('/2.0/repositories/some/repo/pullrequests/5')
         .reply(200, pr);
-      expect(await bitbucket.getPr(3)).toMatchSnapshot();
+      expect(await bitbucket.getPr(3)).toMatchSnapshot('getPr(3)');
 
-      expect(await bitbucket.getPr(5)).toMatchSnapshot();
+      expect(await bitbucket.getPr(5)).toMatchSnapshot('getPr(5)');
 
-      expect(await bitbucket.getPr(5)).toMatchSnapshot();
+      expect(await bitbucket.getPr(5)).toMatchSnapshot('getPr(5) repeated');
     });
 
     it('reviewers', async () => {
@@ -2380,7 +2413,9 @@ describe('modules/platform/bitbucket/index', () => {
       scope
         .get('/2.0/repositories/some/repo/src/HEAD/file.json')
         .reply(200, '!@#');
-      await expect(bitbucket.getJsonFile('file.json')).rejects.toThrow();
+      await expect(bitbucket.getJsonFile('file.json')).rejects.toThrow(
+        "JSON5: invalid character '!' at 1:1",
+      );
     });
 
     it('throws on errors', async () => {
@@ -2388,7 +2423,9 @@ describe('modules/platform/bitbucket/index', () => {
       scope
         .get('/2.0/repositories/some/repo/src/HEAD/file.json')
         .replyWithError('some error');
-      await expect(bitbucket.getJsonFile('file.json')).rejects.toThrow();
+      await expect(bitbucket.getJsonFile('file.json')).rejects.toThrow(
+        'some error',
+      );
     });
   });
 });

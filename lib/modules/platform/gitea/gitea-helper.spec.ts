@@ -251,7 +251,9 @@ describe('modules/platform/gitea/gitea-helper', () => {
         data: [],
       });
 
-      await expect(searchRepos({})).rejects.toThrow();
+      await expect(searchRepos({})).rejects.toThrow(
+        'Unable to search for repositories, ok flag has not been set',
+      );
     });
   });
 

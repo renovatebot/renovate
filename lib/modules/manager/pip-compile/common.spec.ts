@@ -148,7 +148,7 @@ describe('modules/manager/pip-compile/common', () => {
           ),
           'reqs.txt',
         ),
-      ).toThrow();
+      ).toThrow('Cannot use both --no-emit-index-url and --emit-index-url');
     });
 
     it('returned sourceFiles returns all source files', () => {

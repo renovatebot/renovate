@@ -210,14 +210,12 @@ function getNewValue({
           .join('.');
 
         return `${newPrefixed}.+`;
-      } else {
-        // our new version is shorter than our prefix range so drop our prefix range
-        return newVersion;
       }
-    } else {
-      // our version is already "+" which includes ever version
-      return null;
+      // our new version is shorter than our prefix range so drop our prefix range
+      return newVersion;
     }
+    // our version is already "+" which includes ever version
+    return null;
   }
 
   const mavenRange = parseMavenBasedRange(currentValue);

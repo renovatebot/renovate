@@ -319,7 +319,7 @@ describe('util/http/github', () => {
       });
       async function fail(
         code: number,
-        body: any = undefined,
+        body?: any,
         headers: httpMock.ReplyHeaders = {},
       ) {
         const url = '/some-url';
@@ -436,7 +436,7 @@ describe('util/http/github', () => {
       it('when the rate limit is exceeded to GitHub Enterprise, but no host rules are set, a warn is logged', async () => {
         async function fail(
           code: number,
-          body: any = undefined,
+          body?: any,
           headers: httpMock.ReplyHeaders = {},
         ) {
           const url = '/some-url';

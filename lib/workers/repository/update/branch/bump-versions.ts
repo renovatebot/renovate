@@ -341,7 +341,7 @@ function parseFileChanges(
     return { state: 'unmodified' };
   }
 
-  const lastChange = changes[changes.length - 1];
+  const lastChange = changes.at(-1)!;
   if (lastChange.type === 'deletion') {
     return { state: 'deleted' };
   }

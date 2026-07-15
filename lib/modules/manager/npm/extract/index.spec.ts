@@ -71,7 +71,7 @@ describe('modules/manager/npm/extract/index', () => {
           'backend/package.json',
           defaultExtractConfig,
         ),
-      ).rejects.toThrow();
+      ).rejects.toThrow('config-validation');
     });
 
     it('returns null if no deps', async () => {
@@ -982,26 +982,28 @@ describe('modules/manager/npm/extract/index', () => {
     });
 
     it('extracts dependencies from overrides', async () => {
-      const content = `{
-        "devDependencies": {
-          "@types/react": "18.0.5"
-        },
-        "overrides": {
-          "node": "8.9.2",
-          "@types/react": "18.0.5",
-          "baz": {
-            "node": "8.9.2",
-            "bar": {
-              "foo": "1.0.0"
-            }
-          },
-          "foo2": {
-            ".": "1.0.0",
-            "bar2": "1.0.0"
-          },
-          "emptyObject":{}
-        }
-      }`;
+      const content = codeBlock`
+        {
+                "devDependencies": {
+                  "@types/react": "18.0.5"
+                },
+                "overrides": {
+                  "node": "8.9.2",
+                  "@types/react": "18.0.5",
+                  "baz": {
+                    "node": "8.9.2",
+                    "bar": {
+                      "foo": "1.0.0"
+                    }
+                  },
+                  "foo2": {
+                    ".": "1.0.0",
+                    "bar2": "1.0.0"
+                  },
+                  "emptyObject":{}
+                }
+              }
+      `;
       const res = await npmExtract.extractPackageFile(
         content,
         'package.json',
@@ -1061,28 +1063,30 @@ describe('modules/manager/npm/extract/index', () => {
     });
 
     it('extracts dependencies from pnpm.overrides', async () => {
-      const content = `{
-        "devDependencies": {
-          "@types/react": "18.0.5"
-        },
-        "pnpm": {
-          "overrides": {
-            "node": "8.9.2",
-            "@types/react": "18.0.5",
-            "baz": {
-              "node": "8.9.2",
-              "bar": {
-                "foo": "1.0.0"
+      const content = codeBlock`
+        {
+                "devDependencies": {
+                  "@types/react": "18.0.5"
+                },
+                "pnpm": {
+                  "overrides": {
+                    "node": "8.9.2",
+                    "@types/react": "18.0.5",
+                    "baz": {
+                      "node": "8.9.2",
+                      "bar": {
+                        "foo": "1.0.0"
+                      }
+                    },
+                    "foo2": {
+                      ".": "1.0.0",
+                      "bar2": "1.0.0"
+                    },
+                    "emptyObject":{}
+                  }
+                }
               }
-            },
-            "foo2": {
-              ".": "1.0.0",
-              "bar2": "1.0.0"
-            },
-            "emptyObject":{}
-          }
-        }
-      }`;
+      `;
       const res = await npmExtract.extractPackageFile(
         content,
         'package.json',

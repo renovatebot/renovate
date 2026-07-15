@@ -24,10 +24,10 @@ const pr1: GitLabMergeRequest = {
   created_at: '2020-01-01T00:00:00.000Z',
   diverged_commits_count: 5,
   labels: [],
-  merge_status: 'cannot_be_merged',
+  detailed_merge_status: 'not_approved',
   description: 'a merge request',
   sha: '0123456789abcdef0123456789abcdef01234567' as LongCommitSha,
-  assignee: null,
+  assignee: undefined,
   assignees: [],
 };
 
@@ -41,10 +41,10 @@ const pr2: GitLabMergeRequest = {
   created_at: '2023-01-01T00:00:00.000Z',
   diverged_commits_count: 5,
   labels: [],
-  merge_status: 'cannot_be_merged',
+  detailed_merge_status: 'not_approved',
   description: 'a merge request',
   sha: '0123456789abcdef0123456789abcdef01234567' as LongCommitSha,
-  assignee: null,
+  assignee: undefined,
   assignees: [],
   reviewers: [],
 };
@@ -59,10 +59,10 @@ const pr3: GitLabMergeRequest = {
   created_at: '2023-01-01T00:00:00.000Z',
   diverged_commits_count: 5,
   labels: [],
-  merge_status: 'cannot_be_merged',
+  detailed_merge_status: 'not_approved',
   description: 'a merge request',
   sha: '0123456789abcdef0123456789abcdef01234567' as LongCommitSha,
-  assignee: null,
+  assignee: undefined,
   assignees: [],
   reviewers: [],
 };

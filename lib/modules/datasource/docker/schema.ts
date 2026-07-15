@@ -1,6 +1,11 @@
 import { z } from 'zod/v4';
 import { logger } from '../../../logger/index.ts';
-import { Json, LooseArray } from '../../../util/schema-utils/index.ts';
+import {
+  DeepNullish,
+  Json,
+  LooseArray,
+  Nullish,
+} from '../../../util/schema-utils/index.ts';
 
 // OCI manifests
 
@@ -9,7 +14,7 @@ import { Json, LooseArray } from '../../../util/schema-utils/index.ts';
  */
 export const ManifestObject = z.object({
   schemaVersion: z.literal(2),
-  mediaType: z.string().nullish(),
+  mediaType: Nullish(z.string()),
 });
 
 /**
@@ -19,17 +24,19 @@ export const ManifestObject = z.object({
 export const Descriptor = z.object({
   mediaType: z.string(),
   digest: z.string(),
-  size: z.number().int().gte(0).nullish(),
+  size: Nullish(z.number().int().gte(0)),
 });
 /**
  * OCI platform properties
  * https://github.com/opencontainers/image-spec/blob/main/image-index.md
  */
-const OciPlatform = z
-  .object({
-    architecture: z.string().nullish(),
-  })
-  .nullish();
+const OciPlatform = Nullish(
+  DeepNullish(
+    z.object({
+      architecture: z.string().optional(),
+    }),
+  ),
+);
 
 /**
  * OCI Image Configuration.
@@ -37,25 +44,29 @@ const OciPlatform = z
  * Compatible with old docker configiguration.
  * https://github.com/opencontainers/image-spec/blob/main/config.md
  */
-export const OciImageConfig = z.object({
-  // This is required by the spec, but probably not present in the wild.
-  architecture: z.string().nullish(),
-  config: z
-    .object({ Labels: z.record(z.string(), z.string()).nullish() })
-    .nullish(),
-});
+export const OciImageConfig = DeepNullish(
+  z.object({
+    // This is required by the spec, but probably not present in the wild.
+    architecture: z.string().optional(),
+    config: z
+      .object({ Labels: z.record(z.string(), z.string()).optional() })
+      .optional(),
+  }),
+);
 export type OciImageConfig = z.infer<typeof OciImageConfig>;
 
 /**
  * OCI Helm Configuration
  * https://helm.sh/docs/topics/charts/#the-chartyaml-file
  */
-export const OciHelmConfig = z.object({
-  name: z.string(),
-  version: z.string(),
-  home: z.string().nullish(),
-  sources: z.array(z.string()).nullish(),
-});
+export const OciHelmConfig = DeepNullish(
+  z.object({
+    name: z.string(),
+    version: z.string(),
+    home: z.string().optional(),
+    sources: z.array(z.string()).optional(),
+  }),
+);
 export type OciHelmConfig = z.infer<typeof OciHelmConfig>;
 
 /**
@@ -74,7 +85,7 @@ export const OciImageManifest = ManifestObject.extend({
       'application/vnd.cncf.flux.config.v1+json',
     ]),
   }),
-  annotations: z.record(z.string(), z.string()).nullish(),
+  annotations: Nullish(z.record(z.string(), z.string())),
 });
 export type OciImageManifest = z.infer<typeof OciImageManifest>;
 
@@ -94,7 +105,7 @@ export const OciImageIndexManifest = ManifestObject.extend({
       platform: OciPlatform,
     }),
   ),
-  annotations: z.record(z.string(), z.string()).nullish(),
+  annotations: Nullish(z.record(z.string(), z.string())),
 });
 
 // Old Docker manifests

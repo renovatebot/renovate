@@ -153,7 +153,7 @@ describe('modules/datasource/repology/index', () => {
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
     });
 
-    it('throws error on API request timeout', async () => {
+    it('skips package instead of aborting the run on API request timeout', async () => {
       mockResolverCall('debian_stable', 'nginx', 'binname', {
         status: 200,
         body: '[]',
@@ -169,10 +169,28 @@ describe('modules/datasource/repology/index', () => {
           versioning,
           packageName: 'debian_stable/nginx',
         }),
-      ).rejects.toThrow(EXTERNAL_HOST_ERROR);
+      ).resolves.toBeNull();
     });
 
-    it('throws error on Resolver request timeout', async () => {
+    it('skips package instead of aborting the run on Resolver request timeout', async () => {
+      mockResolverCall('debian_stable', 'nginx', 'binname', {
+        code: 'ETIMEDOUT',
+      });
+
+      await expect(
+        getPkgReleases({
+          datasource,
+          versioning,
+          packageName: 'debian_stable/nginx',
+        }),
+      ).resolves.toBeNull();
+    });
+
+    it('aborts the run on timeout when abortOnError is enabled for the host', async () => {
+      // With hostRules abortOnError: true, the HTTP layer wraps the timeout as
+      // an ExternalHostError, which handleGenericErrors re-throws, so the run
+      // still aborts. This preserves the documented opt-in behavior.
+      hostRules.add({ matchHost: 'repology.org', abortOnError: true });
       mockResolverCall('debian_stable', 'nginx', 'binname', {
         code: 'ETIMEDOUT',
       });

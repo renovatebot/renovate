@@ -19,16 +19,30 @@ describe('modules/datasource/puppet-forge/schema', () => {
       const result = PuppetReleaseAbbreviated.parse({
         version: '1.0.0',
         created_at: null,
+        deleted_at: null,
         file_uri: null,
       });
       expect(result).toEqual({ version: '1.0.0' });
+    });
+
+    it('returns null for deleted releases', () => {
+      const result = PuppetReleaseAbbreviated.parse({
+        version: '1.0.0',
+        created_at: '2021-10-11 07:47:24 -0700',
+        deleted_at: '2021-10-12 07:47:24 -0700',
+        file_uri: '/v3/files/puppetlabs-apache-1.0.0.tar.gz',
+      });
+      expect(result).toBeNull();
     });
   });
 
   describe('PuppetModuleSchema', () => {
     it('maps homepage and deprecation message when present', () => {
       const result = PuppetModule.parse({
-        releases: [{ version: '1.0.0' }],
+        releases: [
+          { version: '2.0.0', deleted_at: '2021-10-12 07:47:24 -0700' },
+          { version: '1.0.0', deleted_at: null },
+        ],
         homepage_url: 'https://github.com/puppetlabs/puppetlabs-apache',
         deprecated_for: 'use another module ...',
       });

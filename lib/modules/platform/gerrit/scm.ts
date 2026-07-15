@@ -134,13 +134,12 @@ export class GerritScm extends DefaultGitScm {
     if (change) {
       const mergeInfo = await client.getMergeableInfo(change);
       return !mergeInfo.mergeable;
-    } else {
-      logger.warn(
-        { branch, baseBranch },
-        'There is no open change with this branch',
-      );
-      return true;
     }
+    logger.warn(
+      { branch, baseBranch },
+      'There is no open change with this branch',
+    );
+    return true;
   }
 
   override async isBranchModified(

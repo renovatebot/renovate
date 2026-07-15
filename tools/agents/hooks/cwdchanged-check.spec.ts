@@ -24,11 +24,6 @@ const exitSpy = vi.spyOn(process, 'exit').mockImplementation(() => {
 
 beforeEach(() => {
   vi.resetModules();
-  readStdin.mockReset();
-  getRepoRoot.mockReset();
-  provision.mockReset();
-  existsSync.mockReset();
-  exitSpy.mockClear();
 });
 
 it('exits with code 1 when stdin is not valid JSON', async () => {

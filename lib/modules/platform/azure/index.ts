@@ -954,19 +954,18 @@ async function getUserIds(users: string[]): Promise<User[]> {
           isRequired = true;
         }
         if (
-          reviewer.toLowerCase() === m.identity?.displayName?.toLowerCase() ||
-          reviewer.toLowerCase() === m.identity?.uniqueName?.toLowerCase()
+          (reviewer.toLowerCase() === m.identity?.displayName?.toLowerCase() ||
+            reviewer.toLowerCase() === m.identity?.uniqueName?.toLowerCase()) &&
+          ids.filter((c) => c.id === m.identity?.id).length === 0
         ) {
-          if (ids.filter((c) => c.id === m.identity?.id).length === 0) {
-            // TODO #22198
-            ids.push({
-              id: m.identity.id!,
-              name: reviewer,
-              isRequired,
-            });
+          // TODO #22198
+          ids.push({
+            id: m.identity.id!,
+            name: reviewer,
+            isRequired,
+          });
 
-            validReviewers.add(reviewer);
-          }
+          validReviewers.add(reviewer);
         }
       });
     });
@@ -980,14 +979,15 @@ async function getUserIds(users: string[]): Promise<User[]> {
         reviewer = reviewer.replace(requiredReviewerPrefix, '');
         isRequired = true;
       }
-      if (reviewer.toLowerCase() === t.name?.toLowerCase()) {
-        // v8 ignore else -- TODO: add test #40625
-        if (ids.filter((c) => c.id === t.id).length === 0) {
-          // TODO #22198
-          ids.push({ id: t.id!, name: reviewer, isRequired });
+      // v8 ignore else -- TODO: add test #40625
+      if (
+        reviewer.toLowerCase() === t.name?.toLowerCase() &&
+        ids.filter((c) => c.id === t.id).length === 0
+      ) {
+        // TODO #22198
+        ids.push({ id: t.id!, name: reviewer, isRequired });
 
-          validReviewers.add(reviewer);
-        }
+        validReviewers.add(reviewer);
       }
     });
   });

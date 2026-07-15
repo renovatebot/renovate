@@ -128,7 +128,9 @@ describe('config/presets/forgejo/index', () => {
         .get(`${basePath}/renovate.json`)
         .reply(200, {});
 
-      await expect(forgejo.getPreset({ repo: 'some/repo' })).rejects.toThrow();
+      await expect(forgejo.getPreset({ repo: 'some/repo' })).rejects.toThrow(
+        'dep not found',
+      );
     });
 
     it('throws if invalid content', async () => {

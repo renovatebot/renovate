@@ -33,7 +33,6 @@ describe('util/git/private-key', () => {
   describe('writePrivateKey()', () => {
     beforeEach(() => {
       Fixtures.reset();
-      exec.exec.mockReset();
     });
 
     it('returns if no private key', async () => {
@@ -53,7 +52,7 @@ describe('util/git/private-key', () => {
           stderr: `something wrong`,
           stdout: '',
         });
-      await expect(writePrivateKey()).rejects.toThrow();
+      await expect(writePrivateKey()).rejects.toThrow('gpg-failed');
     });
 
     it('imports the private GPG key', async () => {
@@ -112,7 +111,7 @@ some-private-key with-passphrase
 `,
         passphrase,
       );
-      await expect(writePrivateKey()).rejects.toThrow();
+      await expect(writePrivateKey()).rejects.toThrow('gpg-failed');
     });
 
     it('imports SSH key with passphrase successfully', async () => {
@@ -251,9 +250,6 @@ some-private-key
   describe('base64 key encoding', () => {
     beforeEach(() => {
       Fixtures.reset();
-      exec.exec.mockReset();
-      logger.logger.warn.mockReset();
-      sanitize.addSecretForSanitizing.mockReset();
     });
 
     it('decodes base64-encoded GPG key', async () => {

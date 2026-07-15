@@ -247,11 +247,11 @@ export class GoProxyDatasource extends Datasource {
     const parts = goDirective.split('.');
     if (parts.length === 1) {
       return `${parts[0]}.0.0`;
-    } else if (parts.length === 2) {
-      return `${parts[0]}.${parts[1]}.0`;
-    } else {
-      return `${parts[0]}.${parts[1]}.${parts[2]}`;
     }
+    if (parts.length === 2) {
+      return `${parts[0]}.${parts[1]}.0`;
+    }
+    return `${parts[0]}.${parts[1]}.${parts[2]}`;
   }
 
   async getLatestVersion(

@@ -83,7 +83,7 @@ export function extractPackageFile(
       continue;
     }
     // parsing should use the last entry for the version
-    const currentValue = parts[parts.length - 1];
+    const currentValue = parts.at(-1)!;
     const result: PackageDependency = {
       datasource: MavenDatasource.id,
       depName: `${parts[0]}:${parts[1]}`,

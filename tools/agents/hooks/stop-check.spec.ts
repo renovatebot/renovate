@@ -13,9 +13,6 @@ const consoleSpy = vi.spyOn(console, 'log');
 
 beforeEach(() => {
   vi.resetModules();
-  exec.mockReset();
-  getChangedFiles.mockReset();
-  consoleSpy.mockReset();
 });
 
 it('runs pnpm check --all with changed files', async () => {

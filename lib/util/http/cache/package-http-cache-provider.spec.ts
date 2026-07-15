@@ -40,7 +40,6 @@ describe('util/http/cache/package-http-cache-provider', () => {
   let cache: Record<string, HttpCache> = {};
 
   beforeEach(() => {
-    vi.resetAllMocks();
     cache = {};
 
     packageCache.get.mockImplementation((_ns, k) => {
@@ -200,6 +199,21 @@ describe('util/http/cache/package-http-cache-provider', () => {
     const res = await http.get(url, { cacheProvider });
 
     expect(res.body).toBe('private response');
+    expect(packageCache.setWithRawTtl).not.toHaveBeenCalled();
+  });
+
+  it('prevents caching when cache-control header is missing', async () => {
+    mockTime('2024-06-15T00:00:00.000Z');
+
+    const cacheProvider = createCacheProvider({
+      checkCacheControlHeader: true,
+    });
+
+    httpMock.scope(url).get('').reply(200, 'unmarked response');
+
+    const res = await http.get(url, { cacheProvider });
+
+    expect(res.body).toBe('unmarked response');
     expect(packageCache.setWithRawTtl).not.toHaveBeenCalled();
   });
 
@@ -442,7 +456,7 @@ describe('util/http/cache/package-http-cache-provider', () => {
     // 3. cache-control header (public, private, null, undefined, malformed)
     // 4. checkAuthorizationHeader (true, false)
     // 5. authorization header (true, false, undefined)
-    test.each`
+    it.each`
       cachePrivatePackages | checkCacheControlHeader | cacheControl              | checkAuthorizationHeader | authorization | expected
       ${true}              | ${true}                 | ${'max-age=180, public'}  | ${true}                  | ${true}       | ${true}
       ${true}              | ${true}                 | ${'max-age=180, private'} | ${true}                  | ${true}       | ${true}
@@ -468,9 +482,9 @@ describe('util/http/cache/package-http-cache-provider', () => {
       ${false}             | ${true}                 | ${'max-age=180, private'} | ${true}                  | ${undefined}  | ${false}
       ${false}             | ${true}                 | ${'max-age=180, private'} | ${false}                 | ${true}       | ${false}
       ${false}             | ${true}                 | ${undefined}              | ${true}                  | ${true}       | ${false}
-      ${false}             | ${true}                 | ${undefined}              | ${true}                  | ${false}      | ${true}
-      ${false}             | ${true}                 | ${undefined}              | ${true}                  | ${undefined}  | ${true}
-      ${false}             | ${true}                 | ${undefined}              | ${false}                 | ${true}       | ${true}
+      ${false}             | ${true}                 | ${undefined}              | ${true}                  | ${false}      | ${false}
+      ${false}             | ${true}                 | ${undefined}              | ${true}                  | ${undefined}  | ${false}
+      ${false}             | ${true}                 | ${undefined}              | ${false}                 | ${true}       | ${false}
       ${false}             | ${false}                | ${'max-age=180, public'}  | ${true}                  | ${true}       | ${false}
       ${false}             | ${false}                | ${'max-age=180, public'}  | ${true}                  | ${false}      | ${true}
       ${false}             | ${false}                | ${'max-age=180, public'}  | ${true}                  | ${undefined}  | ${true}
@@ -516,7 +530,7 @@ describe('util/http/cache/package-http-cache-provider', () => {
       },
     );
 
-    test('handles case-insensitive cache-control values', () => {
+    it('handles case-insensitive cache-control values', () => {
       GlobalConfig.set({ cachePrivatePackages: false });
 
       const cacheProvider = createCacheProvider({
