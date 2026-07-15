@@ -43,6 +43,7 @@ const getIssueSpy = platform.getIssue;
 let config: BranchConfig;
 
 beforeEach(() => {
+  GlobalConfig.reset();
   massageMdSpy.mockImplementation(massageMarkdown);
   platform.maxBodyLength.mockReturnValue(60000); // Github Limit
   config = getConfig() as BranchConfig;
@@ -146,9 +147,9 @@ describe('workers/repository/dependency-dashboard', () => {
     });
 
     it('reads dashboard body and apply checkedBranches', async () => {
+      GlobalConfig.set({ checkedBranches: ['branch1', 'branch2'] });
       const conf: RenovateConfig = {};
       conf.prCreation = 'approval';
-      conf.checkedBranches = ['branch1', 'branch2'];
       platform.findIssue.mockResolvedValueOnce({
         title: '',
         number: 1,
@@ -156,7 +157,6 @@ describe('workers/repository/dependency-dashboard', () => {
       });
       await dependencyDashboard.readDashboardBody(conf);
       expect(conf).toEqual({
-        checkedBranches: ['branch1', 'branch2'],
         dependencyDashboardAllAwaitingSchedule: false,
         dependencyDashboardAllPending: false,
         dependencyDashboardAllRateLimited: false,
@@ -299,12 +299,11 @@ describe('workers/repository/dependency-dashboard', () => {
     });
 
     it('does not read dashboard body but applies checkedBranches regardless', async () => {
+      GlobalConfig.set({ checkedBranches: ['branch1', 'branch2'] });
       const conf: RenovateConfig = {};
       conf.dependencyDashboard = false;
-      conf.checkedBranches = ['branch1', 'branch2'];
       await dependencyDashboard.readDashboardBody(conf);
       expect(conf).toEqual({
-        checkedBranches: ['branch1', 'branch2'],
         dependencyDashboard: false,
         dependencyDashboardAllAwaitingSchedule: false,
         dependencyDashboardAllPending: false,
@@ -318,9 +317,9 @@ describe('workers/repository/dependency-dashboard', () => {
     });
 
     it('applies rebaseAllOpenBranches without dashboard', async () => {
+      GlobalConfig.set({ rebaseAllOpenBranches: true });
       const conf: RenovateConfig = {};
       conf.dependencyDashboard = false;
-      conf.rebaseAllOpenBranches = true;
       await dependencyDashboard.readDashboardBody(conf);
       expect(conf).toEqual({
         dependencyDashboard: false,
@@ -329,7 +328,6 @@ describe('workers/repository/dependency-dashboard', () => {
         dependencyDashboardAllRateLimited: false,
         dependencyDashboardChecks: {},
         dependencyDashboardRebaseAllOpen: true,
-        rebaseAllOpenBranches: true,
       });
     });
 
