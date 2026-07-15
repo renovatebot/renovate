@@ -12,7 +12,7 @@ runs:
       id: check
       shell: bash
       run: |
-        if [[ -e /dev/sdb1 ]] || true; then
+        if [[ -e /dev/sdb1 ]]; then
           echo "::warning::We're on old vm, running cleanup"
           echo "do-cleanup=true" >> "$GITHUB_OUTPUT"
         else
