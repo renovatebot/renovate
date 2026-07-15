@@ -2,6 +2,7 @@ import type {
   WorkItem,
   WorkItemStateColor,
 } from 'azure-devops-node-api/interfaces/WorkItemTrackingInterfaces.js';
+import type { IWorkItemTrackingApi } from 'azure-devops-node-api/WorkItemTrackingApi.js';
 import { logger } from '../../../logger/index.ts';
 import { Lazy } from '../../../util/lazy.ts';
 import { sanitize } from '../../../util/sanitize.ts';
@@ -124,6 +125,18 @@ export class IssueService {
       logger.error({ err }, 'Error finding issue');
       return null;
     }
+  }
+
+  /**
+   * Whether the project's process defines the `Issue` work item type. Some
+   * processes (e.g. Scrum) do not, in which case creating one fails; checking
+   * up front lets us log an actionable message instead of a cryptic error.
+   */
+  private async hasWorkItemType(
+    azureApiWit: IWorkItemTrackingApi,
+  ): Promise<boolean> {
+    const types = await azureApiWit.getWorkItemTypes(this.config.project);
+    return types.some((t) => t.name === workItemType);
   }
 
   async getIssueList(titleFilter?: string): Promise<Issue[]> {
@@ -317,6 +330,18 @@ export class IssueService {
       // omitted so Azure DevOps applies the work item type's default initial
       // state for the project's process (e.g. `To Do` on Basic, `New`/`Active`
       // on Agile). Passing a hardcoded state fails on processes that lack it.
+
+      // The `Issue` work item type only exists in some processes (Basic, Agile,
+      // CMMI) but not others (e.g. Scrum). Creating one on a process without it
+      // returns a 404 that the REST client surfaces as `null`, so check first
+      // and log an actionable message instead of failing cryptically.
+      if (!(await this.hasWorkItemType(azureApiWit))) {
+        logger.warn(
+          `Azure: work item type '${workItemType}' does not exist in project '${this.config.project}' (or the token lacks permission to it); skipping issue. The Dependency Dashboard needs a process that defines the '${workItemType}' work item type.`,
+        );
+        return null;
+      }
+
       const newWorkItem = await azureApiWit.createWorkItem(
         undefined,
         [
