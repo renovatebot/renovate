@@ -34,6 +34,7 @@ export interface RollbackConfig {
 export interface LookupUpdateConfig
   extends RollbackConfig, FilterConfig, RangeConfig, RenovateConfig {
   currentVersion?: string;
+  isLockfileOnly?: boolean;
 
   digestOneAndOnly?: boolean;
   rollbackPrs?: boolean;

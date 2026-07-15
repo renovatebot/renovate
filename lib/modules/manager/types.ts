@@ -171,6 +171,16 @@ export interface PackageDependency<
   sourceUrl?: string | null;
   pinDigests?: boolean;
   currentRawValue?: string;
+  /**
+   * Restrict extracted dependencies to a version range.
+   *
+   * Managers can use this for native selectors which are not Renovate
+   * version ranges but still describe a set of compatible versions.
+   */
+  allowedVersions?: string;
+  ignoreUnstable?: boolean;
+  /** True when the dependency selector must remain unchanged in the source file. */
+  isLockfileOnly?: boolean;
   major?: { enabled?: boolean };
   prettyDepType?: string;
   newValue?: string;
