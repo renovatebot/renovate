@@ -309,6 +309,7 @@ describe('modules/platform/azure/issue', () => {
       azureApi.workItemTrackingApi.mockResolvedValue(
         partial<IWorkItemTrackingApi>({
           createWorkItem: createWorkItemMock,
+          getWorkItemTypes: vi.fn().mockResolvedValue([{ name: 'Issue' }]),
         }),
       );
 
@@ -319,6 +320,52 @@ describe('modules/platform/azure/issue', () => {
 
       expect(createWorkItemMock).toHaveBeenCalled();
       expect(result).toEqual('created');
+    });
+
+    it('should return null when work item creation returns no result', async () => {
+      vi.spyOn(issueService, 'getIssueList').mockResolvedValue([]);
+
+      const createWorkItemMock = vi.fn().mockResolvedValue(null);
+      azureApi.workItemTrackingApi.mockResolvedValue(
+        partial<IWorkItemTrackingApi>({
+          createWorkItem: createWorkItemMock,
+          getWorkItemTypes: vi.fn().mockResolvedValue([{ name: 'Issue' }]),
+        }),
+      );
+
+      const result = await issueService.ensureIssue({
+        title: 'Test Issue',
+        body: 'Test body content',
+      });
+
+      expect(createWorkItemMock).toHaveBeenCalled();
+      expect(result).toBeNull();
+      expect(logger.warn).toHaveBeenCalledWith(
+        'Azure: work item creation returned no result; skipping issue',
+      );
+    });
+
+    it('should skip issue when the Issue work item type does not exist', async () => {
+      vi.spyOn(issueService, 'getIssueList').mockResolvedValue([]);
+
+      const createWorkItemMock = vi.fn();
+      azureApi.workItemTrackingApi.mockResolvedValue(
+        partial<IWorkItemTrackingApi>({
+          createWorkItem: createWorkItemMock,
+          getWorkItemTypes: vi.fn().mockResolvedValue([{ name: 'Bug' }]),
+        }),
+      );
+
+      const result = await issueService.ensureIssue({
+        title: 'Test Issue',
+        body: 'Test body content',
+      });
+
+      expect(createWorkItemMock).not.toHaveBeenCalled();
+      expect(result).toBeNull();
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining("work item type 'Issue' does not exist"),
+      );
     });
 
     it('should reopen closed issue when shouldReOpen is true', async () => {
@@ -628,6 +675,7 @@ describe('modules/platform/azure/issue', () => {
       azureApi.workItemTrackingApi.mockResolvedValue(
         partial<IWorkItemTrackingApi>({
           createWorkItem: createWorkItemMock,
+          getWorkItemTypes: vi.fn().mockResolvedValue([{ name: 'Issue' }]),
         }),
       );
 
@@ -677,6 +725,7 @@ describe('modules/platform/azure/issue', () => {
         partial<IWorkItemTrackingApi>({
           createWorkItem: createWorkItemMock,
           getWorkItemTypeStates: vi.fn().mockResolvedValue(noProposedStates),
+          getWorkItemTypes: vi.fn().mockResolvedValue([{ name: 'Issue' }]),
         }),
       );
 
