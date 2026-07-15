@@ -8,7 +8,7 @@ runs:
     - run: df -h
       shell: bash
 
-    - name: check for old vm with low disk space
+    - name: Check for old vm with low disk space
       id: check
       shell: bash
       run: |
