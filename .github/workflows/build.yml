@@ -697,6 +697,7 @@ jobs:
           RENOVATE_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - run: df -h
+        if: ${{ !cancelled() }}
 
   build-docs:
     needs:
