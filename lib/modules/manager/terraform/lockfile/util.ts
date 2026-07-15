@@ -212,7 +212,7 @@ export function writeLockUpdates(
   });
 
   const trailingNotUpdatedLines = lines.slice(
-    updates[updates.length - 1].lineNumbers.block?.end,
+    updates.at(-1)!.lineNumbers.block?.end,
   );
   sections.push(trailingNotUpdatedLines);
 
