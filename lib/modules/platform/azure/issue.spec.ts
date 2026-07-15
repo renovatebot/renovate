@@ -321,6 +321,28 @@ describe('modules/platform/azure/issue', () => {
       expect(result).toEqual('created');
     });
 
+    it('should return null when work item creation returns no result', async () => {
+      vi.spyOn(issueService, 'getIssueList').mockResolvedValue([]);
+
+      const createWorkItemMock = vi.fn().mockResolvedValue(null);
+      azureApi.workItemTrackingApi.mockResolvedValue(
+        partial<IWorkItemTrackingApi>({
+          createWorkItem: createWorkItemMock,
+        }),
+      );
+
+      const result = await issueService.ensureIssue({
+        title: 'Test Issue',
+        body: 'Test body content',
+      });
+
+      expect(createWorkItemMock).toHaveBeenCalled();
+      expect(result).toBeNull();
+      expect(logger.warn).toHaveBeenCalledWith(
+        'Azure: work item creation returned no result; skipping issue',
+      );
+    });
+
     it('should reopen closed issue when shouldReOpen is true', async () => {
       const mockClosedIssue = {
         number: 1,

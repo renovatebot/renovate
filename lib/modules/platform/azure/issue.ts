@@ -341,6 +341,19 @@ export class IssueService {
         workItemType,
       );
 
+      // Azure DevOps normally returns the created work item, but the
+      // underlying REST client resolves to `null` instead of throwing for
+      // some responses: a 404, or any 2xx with an empty/non-JSON body (e.g. a
+      // 203 sign-in page from an expired token or an SSO/proxy in front of the
+      // instance). Guard the result so such a response does not crash the whole
+      // run with `Cannot read properties of null (reading 'id')`.
+      if (!newWorkItem?.id) {
+        logger.warn(
+          'Azure: work item creation returned no result; skipping issue',
+        );
+        return null;
+      }
+
       logger.debug(`Created new issue #${newWorkItem.id}`);
       return 'created';
     } catch (err) {
