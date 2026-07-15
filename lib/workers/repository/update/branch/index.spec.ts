@@ -1066,7 +1066,6 @@ describe('workers/repository/update/branch/index', () => {
       });
       // Called twice: once before ensurePr, once after PR creation
       expect(platform.setBranchStatus).toHaveBeenCalledTimes(2);
-
       expect(setArtifactErrorStatus).not.toHaveBeenCalled();
     });
 
@@ -1139,7 +1138,7 @@ describe('workers/repository/update/branch/index', () => {
     });
 
     it('updates branch when no fingerprint match', async () => {
-      expect.assertions(3);
+      expect.assertions(4);
       const setArtifactErrorStatus = vi.spyOn(
         artifacts,
         'setArtifactErrorStatus',
