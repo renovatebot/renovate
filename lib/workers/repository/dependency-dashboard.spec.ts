@@ -43,6 +43,7 @@ const getIssueSpy = platform.getIssue;
 let config: BranchConfig;
 
 beforeEach(() => {
+  GlobalConfig.reset();
   massageMdSpy.mockImplementation(massageMarkdown);
   platform.maxBodyLength.mockReturnValue(60000); // Github Limit
   config = getConfig() as BranchConfig;
@@ -155,7 +156,6 @@ describe('workers/repository/dependency-dashboard', () => {
         body: Fixtures.get('dependency-dashboard-with-10-PR.txt'),
       });
       await dependencyDashboard.readDashboardBody(conf);
-      GlobalConfig.reset();
       expect(conf).toEqual({
         dependencyDashboardAllAwaitingSchedule: false,
         dependencyDashboardAllPending: false,
@@ -303,7 +303,6 @@ describe('workers/repository/dependency-dashboard', () => {
       const conf: RenovateConfig = {};
       conf.dependencyDashboard = false;
       await dependencyDashboard.readDashboardBody(conf);
-      GlobalConfig.reset();
       expect(conf).toEqual({
         dependencyDashboard: false,
         dependencyDashboardAllAwaitingSchedule: false,
@@ -322,7 +321,6 @@ describe('workers/repository/dependency-dashboard', () => {
       const conf: RenovateConfig = {};
       conf.dependencyDashboard = false;
       await dependencyDashboard.readDashboardBody(conf);
-      GlobalConfig.reset();
       expect(conf).toEqual({
         dependencyDashboard: false,
         dependencyDashboardAllAwaitingSchedule: false,
