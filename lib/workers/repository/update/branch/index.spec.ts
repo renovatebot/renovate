@@ -145,9 +145,6 @@ describe('workers/repository/update/branch/index', () => {
     });
 
     afterEach(() => {
-      platform.ensureComment.mockClear();
-      platform.ensureCommentRemoval.mockClear();
-      commit.commitFilesToBranch.mockClear();
       GlobalConfig.reset();
     });
 
