@@ -1111,19 +1111,17 @@ async function validateGlobalConfig(
         });
       }
     } else if (type === 'array') {
-      if (isArray(val)) {
-        if (key !== 'repositories') {
-          for (const [subIndex, subval] of val.entries()) {
-            if (isObject(subval)) {
-              const subValidation = await validateConfig(
-                'global',
-                subval as AllConfig,
-                false,
-                `${currentPath}[${subIndex}]`,
-              );
-              warnings.push(...subValidation.warnings);
-              errors.push(...subValidation.errors);
-            }
+      if (isArray(val) && key !== 'repositories') {
+        for (const [subIndex, subval] of val.entries()) {
+          if (isObject(subval)) {
+            const subValidation = await validateConfig(
+              'global',
+              subval as AllConfig,
+              false,
+              `${currentPath}[${subIndex}]`,
+            );
+            warnings.push(...subValidation.warnings);
+            errors.push(...subValidation.errors);
           }
         }
 
@@ -1159,25 +1157,24 @@ async function validateGlobalConfig(
             }
           }
         }
-        if (key === 'repositories') {
-          for (const [subIndex, subval] of val.entries()) {
-            if (isPlainObject(subval)) {
-              if (!isNonEmptyString(subval.repository)) {
-                errors.push({
-                  topic: 'Configuration Error',
-                  message: `${currentPath}[${subIndex}]: each repository object entry must have a \`repository\` string property`,
-                });
-              }
-              const { repository: _, ...repoEntryConfig } = subval;
-              const subValidation = await validateConfig(
-                'global',
-                repoEntryConfig,
-                false,
-                `${currentPath}[${subIndex}]`,
-              );
-              warnings.push(...subValidation.warnings);
-              errors.push(...subValidation.errors);
+      } else if (isArray(val)) {
+        for (const [subIndex, subval] of val.entries()) {
+          if (isPlainObject(subval)) {
+            if (!isNonEmptyString(subval.repository)) {
+              errors.push({
+                topic: 'Configuration Error',
+                message: `${currentPath}[${subIndex}]: each repository object entry must have a \`repository\` string property`,
+              });
             }
+            const { repository: _, ...repoEntryConfig } = subval;
+            const subValidation = await validateConfig(
+              'global',
+              repoEntryConfig,
+              false,
+              `${currentPath}[${subIndex}]`,
+            );
+            warnings.push(...subValidation.warnings);
+            errors.push(...subValidation.errors);
           }
         }
       } else {
