@@ -107,11 +107,11 @@ export abstract class HttpBase<
   private async request(
     requestUrl: string | URL,
     httpOptions: InternalHttpOptions,
-  ): Promise<HttpResponse<string>>;
+  ): Promise<HttpResponse>;
   private async request(
     requestUrl: string | URL,
     httpOptions: InternalHttpOptions & { responseType: 'text' },
-  ): Promise<HttpResponse<string>>;
+  ): Promise<HttpResponse>;
   private async request(
     requestUrl: string | URL,
     httpOptions: InternalHttpOptions & { responseType: 'buffer' },
@@ -341,10 +341,7 @@ export abstract class HttpBase<
     }) as Promise<HttpResponse<never>>;
   }
 
-  getText(
-    url: string | URL,
-    options: HttpOptions = {},
-  ): Promise<HttpResponse<string>> {
+  getText(url: string | URL, options: HttpOptions = {}): Promise<HttpResponse> {
     return this.request(url, { ...options, responseType: 'text' });
   }
 

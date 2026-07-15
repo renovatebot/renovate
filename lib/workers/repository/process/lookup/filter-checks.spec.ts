@@ -208,6 +208,7 @@ describe('workers/repository/process/lookup/filter-checks', () => {
     describe('if internalChecksFilter=strict, minimumReleaseAge is specified, and the latest release does not have a releaseTimestamp', () => {
       beforeEach(() => {
         // NOTE that we need to reset the existing test set up to make sure that we call `getElapsedMs` in the right order
+        // oxlint-disable-next-line renovate/no-redundant-mock-reset -- discards the once-values queued by the outer beforeEach
         dateUtil.getElapsedMs.mockReset();
         // NOTE that we do NOT want to return 3 days, as we want the first release that has a timestamp (1.0.3) to be within the `minimumReleaseAge=4 days`
         dateUtil.getElapsedMs.mockReturnValueOnce(toMs('5 days') ?? 0);

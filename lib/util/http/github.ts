@@ -202,10 +202,12 @@ function handleGotError(
     const errors = GithubErrors.parse(err.body?.errors);
     if (errors.some((e) => e.field === 'milestone')) {
       return err;
-    } else if (errors.some((e) => e.code === 'invalid')) {
+    }
+    if (errors.some((e) => e.code === 'invalid')) {
       logger.debug({ err }, 'Received invalid response - aborting');
       return new Error(REPOSITORY_CHANGED);
-    } else if (
+    }
+    if (
       errors.some((e) => e.message?.startsWith('A pull request already exists'))
     ) {
       return err;

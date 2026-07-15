@@ -25,7 +25,6 @@ describe('modules/datasource/maven/cache', () => {
   let cache: Record<string, HttpCache>;
 
   beforeEach(() => {
-    vi.resetAllMocks();
     cache = {};
 
     packageCache.get.mockImplementation((namespace, key) => {

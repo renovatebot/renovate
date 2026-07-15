@@ -126,9 +126,7 @@ export async function getPrCache(
           // even if no Renovate PRs are found.
           prApiCache.updateLastModified(page[0].updated_at);
 
-          const oldestOnPage = DateTime.fromISO(
-            page[page.length - 1].updated_at,
-          );
+          const oldestOnPage = DateTime.fromISO(page.at(-1)!.updated_at);
           if (oldestOnPage < cutoffTime) {
             needNextPageSync = false;
           }
