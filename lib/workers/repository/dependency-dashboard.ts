@@ -207,6 +207,10 @@ export async function readDashboardBody(
     };
   }
 
+  if (config.rebaseAllOpenBranches) {
+    dashboardChecks.dependencyDashboardRebaseAllOpen = true;
+  }
+
   Object.assign(config, dashboardChecks);
 }
 

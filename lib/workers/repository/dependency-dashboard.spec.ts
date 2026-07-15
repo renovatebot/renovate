@@ -317,6 +317,22 @@ describe('workers/repository/dependency-dashboard', () => {
       });
     });
 
+    it('applies rebaseAllOpenBranches without dashboard', async () => {
+      const conf: RenovateConfig = {};
+      conf.dependencyDashboard = false;
+      conf.rebaseAllOpenBranches = true;
+      await dependencyDashboard.readDashboardBody(conf);
+      expect(conf).toEqual({
+        dependencyDashboard: false,
+        dependencyDashboardAllAwaitingSchedule: false,
+        dependencyDashboardAllPending: false,
+        dependencyDashboardAllRateLimited: false,
+        dependencyDashboardChecks: {},
+        dependencyDashboardRebaseAllOpen: true,
+        rebaseAllOpenBranches: true,
+      });
+    });
+
     it('reads dashboard body and group size not met branches', async () => {
       const conf: RenovateConfig = {};
       conf.prCreation = 'approval';

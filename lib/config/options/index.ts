@@ -3415,6 +3415,15 @@ const options: Readonly<RenovateOptions>[] = [
     default: [],
   },
   {
+    name: 'rebaseAllOpenBranches',
+    description:
+      'Rebase all open branches at once, as if the rebase-all-open-PRs checkbox was selected in the Dependency Dashboard issue.',
+    type: 'boolean',
+    experimental: true,
+    globalOnly: true,
+    default: false,
+  },
+  {
     name: 'maxRetryAfter',
     description:
       'Maximum retry-after header value to wait for before retrying a failed request.',
