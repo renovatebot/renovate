@@ -57,12 +57,14 @@ import { smartTruncate } from '../utils/pr-body.ts';
 import {
   getMemberUserIDs,
   getMemberUsernames,
+  getRoleMemberUsernames,
   getUserID,
   gitlabApi,
   isUserBusy,
 } from './http.ts';
 import { getMR, updateMR } from './merge-request.ts';
 import { GitlabPrCache } from './pr-cache.ts';
+import { getRoleAccessLevel } from './roles.ts';
 import type { GitLabMergeRequest } from './schema.ts';
 import { LastPipelineId } from './schema.ts';
 import type {
@@ -1475,6 +1477,25 @@ export async function expandGroupMembers(
 
   // Skip passing user emails to Gitlab API, but include them in the final result
   for (const reviewerOrAssignee of reviewersOrAssignees) {
+    // Resolve GitLab CODEOWNERS role handles (@@developer, @@maintainer,
+    // @@owner) to project members instead of treating them as groups
+    const roleAccessLevel = getRoleAccessLevel(reviewerOrAssignee);
+    if (roleAccessLevel !== null) {
+      try {
+        const members = await getRoleMemberUsernames(
+          config.repository,
+          roleAccessLevel,
+        );
+        expandedReviewersOrAssignees.push(...members);
+      } catch (err) {
+        logger.debug(
+          { err, reviewerOrAssignee },
+          'Unable to fetch role members',
+        );
+      }
+      continue;
+    }
+
     if (reviewerOrAssignee.indexOf('@') > 0) {
       expandedReviewersOrAssignees.push(reviewerOrAssignee);
       continue;

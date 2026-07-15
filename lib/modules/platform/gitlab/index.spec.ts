@@ -4254,5 +4254,63 @@ These updates have all been created already. To force a retry/rebase of any, cli
       ]);
       expect(expandedGroupMembers).toEqual(['u@email.com']);
     });
+
+    it('expands a role handle into members holding exactly that role', async () => {
+      httpMock
+        .scope(gitlabApiHost)
+        .get('/api/v4/projects/undefined/members')
+        .reply(200, [
+          { username: 'dev-one', access_level: 30 },
+          { username: 'maintainer', access_level: 40 },
+          { username: 'dev-two', access_level: 30 },
+          { username: 'owner', access_level: 50 },
+        ]);
+      const expandedGroupMembers = await gitlab.expandGroupMembers?.([
+        '@@developer',
+      ]);
+      expect(expandedGroupMembers).toEqual(['dev-one', 'dev-two']);
+    });
+
+    it('resolves roles, groups, emails and users together', async () => {
+      httpMock
+        .scope(gitlabApiHost)
+        .get('/api/v4/projects/undefined/members')
+        .reply(200, [
+          { username: 'alice', access_level: 40 },
+          { username: 'bob', access_level: 30 },
+        ])
+        .get('/api/v4/groups/group-a/members')
+        .reply(200, [{ username: 'maria' }])
+        .get('/api/v4/groups/john/members')
+        .reply(404, { message: '404 Group Not Found' });
+      const expandedGroupMembers = await gitlab.expandGroupMembers?.([
+        '@@maintainer',
+        '@group-a',
+        'u@email.com',
+        'john',
+      ]);
+      expect(expandedGroupMembers).toEqual([
+        'alice',
+        'u@email.com',
+        'maria',
+        'john',
+      ]);
+    });
+
+    it('swallows role member fetch errors', async () => {
+      httpMock
+        .scope(gitlabApiHost)
+        .get('/api/v4/projects/undefined/members')
+        .reply(403, { message: '403 Authorization' });
+      const expandedGroupMembers = await gitlab.expandGroupMembers?.([
+        '@@developer',
+      ]);
+      expect(expandedGroupMembers).toEqual([]);
+
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        expect.any(Object),
+        'Unable to fetch role members',
+      );
+    });
   });
 });
