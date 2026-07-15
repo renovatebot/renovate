@@ -52,7 +52,7 @@ function getSatisfyingVersion(
   range: string,
 ): string | null {
   const found = pep440.filter(versions, range).sort(sortVersions);
-  return found.length === 0 ? null : found[found.length - 1];
+  return found.length === 0 ? null : found.at(-1)!;
 }
 
 function minSatisfyingVersion(

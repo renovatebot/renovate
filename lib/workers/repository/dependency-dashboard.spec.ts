@@ -1165,15 +1165,17 @@ None detected
       config.dependencyDashboardIssue = 1;
       getIssueSpy.mockResolvedValueOnce({
         title: 'Dependency Dashboard',
-        body: `This issue contains a list of Renovate updates and their statuses.
+        body: codeBlock`
+          This issue contains a list of Renovate updates and their statuses.
 
-        ## Pending Approval
+                  ## Pending Approval
 
-        These branches will be created by Renovate only once you click their checkbox below.
+                  These branches will be created by Renovate only once you click their checkbox below.
 
-         - [ ] <!-- approve-branch=branchName1 -->pr1
-         - [ ] <!-- approve-branch=branchName2 -->pr2
-         - [x] <!-- approve-all-pending-prs -->🔐 **Create all pending approval PRs at once** 🔐`,
+                   - [ ] <!-- approve-branch=branchName1 -->pr1
+                   - [ ] <!-- approve-branch=branchName2 -->pr2
+                   - [x] <!-- approve-all-pending-prs -->🔐 **Create all pending approval PRs at once** 🔐
+        `,
       });
       await dependencyDashboard.ensureDependencyDashboard(
         config,
@@ -1232,12 +1234,14 @@ None detected
       config.dependencyDashboardIssue = 1;
       getIssueSpy.mockResolvedValueOnce({
         title: 'Dependency Dashboard',
-        body: `This issue contains a list of Renovate updates and their statuses.
-        ## Rate-limited
-        These updates are currently rate-limited. Click on a checkbox below to force their creation now.
-         - [x] <!-- create-all-rate-limited-prs -->**Open all rate-limited PRs**
-         - [ ] <!-- unlimit-branch=branchName1 -->pr1
-         - [ ] <!-- unlimit-branch=branchName2 -->pr2`,
+        body: codeBlock`
+          This issue contains a list of Renovate updates and their statuses.
+                  ## Rate-limited
+                  These updates are currently rate-limited. Click on a checkbox below to force their creation now.
+                   - [x] <!-- create-all-rate-limited-prs -->**Open all rate-limited PRs**
+                   - [ ] <!-- unlimit-branch=branchName1 -->pr1
+                   - [ ] <!-- unlimit-branch=branchName2 -->pr2
+        `,
       });
       await dependencyDashboard.ensureDependencyDashboard(
         config,

@@ -489,7 +489,7 @@ function coerceRangeValue(prev: string, next: string): string {
 
 function incrementRangeValue(value: string): string {
   const tokens = tokenize(value);
-  const lastToken = tokens[tokens.length - 1];
+  const lastToken = tokens.at(-1)!;
   if (typeof lastToken.val === 'number') {
     lastToken.val += 1;
     return coerceRangeValue(value, tokensToStr(tokens));
@@ -568,7 +568,7 @@ function autoExtendMavenRange(
   } else if (rightValue !== null) {
     if (interval.rightType === INCLUDING_POINT) {
       const tokens = tokenize(rightValue);
-      const lastToken = tokens[tokens.length - 1];
+      const lastToken = tokens.at(-1)!;
       if (typeof lastToken.val === 'number') {
         interval.rightValue = coerceRangeValue(rightValue, newValue);
       } else {

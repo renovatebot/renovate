@@ -1,3 +1,4 @@
+import { codeBlock } from 'common-tags';
 import fs from 'fs-extra';
 import { mockDeep } from 'vitest-mock-extended';
 import type { ExecSnapshots } from '~test/exec-util.ts';
@@ -554,9 +555,11 @@ describe('modules/manager/npm/post-update/yarn', () => {
       binarySource: 'install',
       cacheDir: '/tmp/cache',
     });
-    const yarnLockContents = `__metadata:
-    version: 6
-    cacheKey: 8`;
+    const yarnLockContents = codeBlock`
+      __metadata:
+          version: 6
+          cacheKey: 8
+    `;
     Fixtures.mock(
       {
         'package.json':

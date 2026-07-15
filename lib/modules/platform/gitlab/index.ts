@@ -887,9 +887,8 @@ export function maxBodyLength(): number {
       'GitLab versions earlier than 13.4 have issues with long descriptions, truncating to 25K characters',
     );
     return 25000;
-  } else {
-    return 1000000;
   }
+  return 1000000;
 }
 
 /* v8 ignore next: no need to test */

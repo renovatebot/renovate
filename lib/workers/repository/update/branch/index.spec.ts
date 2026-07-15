@@ -37,6 +37,7 @@ import * as _changelog from '../../changelog/index.ts';
 import * as _prAutomerge from '../pr/automerge.ts';
 import type { ResultWithPr } from '../pr/index.ts';
 import * as _prWorker from '../pr/index.ts';
+import * as artifacts from './artifacts.ts';
 import * as _automerge from './automerge.ts';
 import * as _checkExisting from './check-existing.ts';
 import * as _commit from './commit.ts';
@@ -145,9 +146,6 @@ describe('workers/repository/update/branch/index', () => {
     });
 
     afterEach(() => {
-      platform.ensureComment.mockClear();
-      platform.ensureCommentRemoval.mockClear();
-      commit.commitFilesToBranch.mockClear();
       GlobalConfig.reset();
     });
 
@@ -952,7 +950,11 @@ describe('workers/repository/update/branch/index', () => {
     });
 
     it('returns if branch automerge is pending', async () => {
-      expect.assertions(1);
+      expect.assertions(2);
+      const setArtifactErrorStatus = vi.spyOn(
+        artifacts,
+        'setArtifactErrorStatus',
+      );
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce(
         partial<PackageFilesResult>({
           updatedPackageFiles: [partial<FileChange>()],
@@ -975,6 +977,7 @@ describe('workers/repository/update/branch/index', () => {
         result: 'done',
         commitSha: null,
       });
+      expect(setArtifactErrorStatus).not.toHaveBeenCalled();
     });
 
     it('returns if PR creation failed', async () => {
@@ -1030,6 +1033,10 @@ describe('workers/repository/update/branch/index', () => {
     });
 
     it('retries setting branch status checks after PR creation', async () => {
+      const setArtifactErrorStatus = vi.spyOn(
+        artifacts,
+        'setArtifactErrorStatus',
+      );
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce(
         partial<PackageFilesResult>({
           updatedPackageFiles: [partial<FileChange>()],
@@ -1059,6 +1066,7 @@ describe('workers/repository/update/branch/index', () => {
       });
       // Called twice: once before ensurePr, once after PR creation
       expect(platform.setBranchStatus).toHaveBeenCalledTimes(2);
+      expect(setArtifactErrorStatus).not.toHaveBeenCalled();
     });
 
     it('does not retry setting branch status checks when PR is not created', async () => {
@@ -1094,7 +1102,11 @@ describe('workers/repository/update/branch/index', () => {
     });
 
     it('returns if branch exists but updated', async () => {
-      expect.assertions(3);
+      expect.assertions(4);
+      const setArtifactErrorStatus = vi.spyOn(
+        artifacts,
+        'setArtifactErrorStatus',
+      );
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce(
         partial<PackageFilesResult>({
           updatedPackageFiles: [partial<FileChange>()],
@@ -1122,10 +1134,15 @@ describe('workers/repository/update/branch/index', () => {
 
       expect(automerge.tryBranchAutomerge).toHaveBeenCalledTimes(0);
       expect(prWorker.ensurePr).toHaveBeenCalledTimes(0);
+      expect(setArtifactErrorStatus).toHaveBeenCalledTimes(1);
     });
 
     it('updates branch when no fingerprint match', async () => {
-      expect.assertions(3);
+      expect.assertions(4);
+      const setArtifactErrorStatus = vi.spyOn(
+        artifacts,
+        'setArtifactErrorStatus',
+      );
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce(
         partial<PackageFilesResult>({
           updatedPackageFiles: [partial<FileChange>()],
@@ -1154,6 +1171,7 @@ describe('workers/repository/update/branch/index', () => {
 
       expect(automerge.tryBranchAutomerge).toHaveBeenCalledTimes(0);
       expect(prWorker.ensurePr).toHaveBeenCalledTimes(0);
+      expect(setArtifactErrorStatus).toHaveBeenCalledTimes(1);
     });
 
     it('updates branch when forceRebase=true', async () => {
