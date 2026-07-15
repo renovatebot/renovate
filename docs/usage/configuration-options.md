@@ -1810,7 +1810,7 @@ A similar one could strip leading `v` prefixes:
 }
 ```
 
-Alternatively of a single `version` capture group, you can use individual named groups to assemble a [SemVer](https://semver.org/) version string from parts.
+Instead of a single `version` capture group, you can use individual named groups to assemble a [SemVer](https://semver.org/) version string from parts.
 The supported group names are `major`, `minor`, `patch`, `prerelease`, and `build`.
 
 - `major` is required
