@@ -2210,6 +2210,7 @@ describe('modules/platform/azure/index', () => {
       partial<IWorkItemTrackingApi>({
         queryByWiql: vi.fn().mockResolvedValue({ workItems: [] }),
         createWorkItem: createWorkItemMock,
+        getWorkItemTypes: vi.fn().mockResolvedValue([{ name: 'Issue' }]),
       }),
     );
     const result = await azure.ensureIssue({

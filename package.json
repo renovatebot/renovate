@@ -272,7 +272,7 @@
     "re2": "1.25.2"
   },
   "devDependencies": {
-    "@biomejs/biome": "2.5.2",
+    "@biomejs/biome": "2.5.3",
     "@commander-js/extra-typings": "14.0.0",
     "@containerbase/istanbul-reports-html": "2.0.12",
     "@containerbase/semantic-release-pnpm": "1.4.2",
@@ -306,7 +306,7 @@
     "@types/mdast": "4.0.4",
     "@types/moo": "0.5.10",
     "@types/ms": "2.1.0",
-    "@types/node": "24.13.2",
+    "@types/node": "24.13.3",
     "@types/parse-link-header": "2.0.3",
     "@types/punycode": "2.1.4",
     "@types/sax": "1.2.7",
@@ -341,7 +341,7 @@
     "semantic-release": "25.0.5",
     "tar": "catalog:",
     "tmp-promise": "3.0.3",
-    "tsdown": "0.22.3",
+    "tsdown": "0.22.4",
     "type-fest": "5.8.0",
     "typescript": "6.0.3",
     "unified": "11.0.5",
