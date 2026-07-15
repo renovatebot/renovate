@@ -198,7 +198,7 @@ export async function readDashboardBody(
   }
 
   const checkedBranches = GlobalConfig.get('checkedBranches');
-  if (checkedBranches.length) {
+  if (isNonEmptyArray(checkedBranches)) {
     const checkedBranchesRec: Record<string, string> = Object.fromEntries(
       checkedBranches.map((branchName) => [branchName, 'global-config']),
     );
