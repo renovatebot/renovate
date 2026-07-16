@@ -5,7 +5,6 @@ import { logger } from '../../logger/index.ts';
 import type { ReleaseResult } from '../../modules/datasource/index.ts';
 import type { VersioningApi } from '../../modules/versioning/types.ts';
 import { getEnv } from '../env.ts';
-import { applyPackageRules } from '../package-rules/index.ts';
 import type { Opt, ToolConfig, ToolConstraint, ToolName } from './types.ts';
 
 export const allToolConfig: Record<ToolName, ToolConfig> = {
@@ -304,6 +303,10 @@ async function getEffectiveToolConfig(
   if (!packageRules.length) {
     return toolConfig;
   }
+  // Dynamic import avoids a cycle with generate:imports (manager/api →
+  // renovate-config → containerbase → package-rules → config/options →
+  // manager-default-configs.generated.ts).
+  const { applyPackageRules } = await import('../package-rules/index.ts');
   const resolved = await applyPackageRules({
     depName: toolName,
     ...toolConfig,
