@@ -74,23 +74,32 @@ export class GlobalConfig {
   static get<Key extends keyof RepoGlobalConfig>(
     key: Key,
   ): Required<RepoGlobalConfig>[Key];
-  static get<Key extends keyof RepoGlobalConfig>(
+  static get<Key extends keyof InternalGlobalConfigOptions>(
     key: Key,
-  ): Required<RepoGlobalConfig>[Key];
-  static get<Key extends keyof RepoGlobalConfig>(
+  ): Required<InternalGlobalConfigOptions>[Key];
+  static get<
+    Key extends keyof RepoGlobalConfig | keyof InternalGlobalConfigOptions,
+  >(
     key?: Key,
-  ): RepoGlobalConfig | Required<RepoGlobalConfig>[Key] {
+  ):
+    | RepoGlobalConfig
+    | Required<RepoGlobalConfig & InternalGlobalConfigOptions>[Key] {
     const defaultValue = key
-      ? (globalConfigOptionDefaults[key] as Required<RepoGlobalConfig>[Key])
+      ? (globalConfigOptionDefaults[key] as Required<
+          RepoGlobalConfig & InternalGlobalConfigOptions
+        >[Key])
       : undefined;
 
     return key
-      ? ((GlobalConfig.config[key] ??
-          defaultValue) as Required<RepoGlobalConfig>[Key])
+      ? ((GlobalConfig.config[key] ?? defaultValue) as Required<
+          RepoGlobalConfig & InternalGlobalConfigOptions
+        >[Key])
       : GlobalConfig.config;
   }
 
-  static set(config: RenovateConfig & RepoGlobalConfig): RenovateConfig {
+  static set(
+    config: RenovateConfig & RepoGlobalConfig & InternalGlobalConfigOptions,
+  ): RenovateConfig {
     GlobalConfig.reset();
 
     const result = { ...config };
