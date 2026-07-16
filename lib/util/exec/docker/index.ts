@@ -151,13 +151,13 @@ export async function generateDockerCommand(
   const { envVars, cwd } = options;
   const volumes = options.volumes ?? [];
   const {
-    localDir,
     cacheDir,
     containerbaseDir,
     dockerUser,
     dockerChildPrefix,
     dockerCliOptions,
   } = GlobalConfig.get();
+  const localDir = GlobalConfig.get('localDir');
   const result = ['docker run --rm'];
   const containerName = getContainerName(sideCarName, dockerChildPrefix);
   const containerLabel = getContainerLabel(dockerChildPrefix);

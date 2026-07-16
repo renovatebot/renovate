@@ -4,7 +4,10 @@ import upath from 'upath';
 import { fs, git, partial, platform, scm } from '~test/util.ts';
 import { getConfig } from '../../../../config/defaults.ts';
 import { GlobalConfig } from '../../../../config/global.ts';
-import type { RepoGlobalConfig } from '../../../../config/types.ts';
+import type {
+  InternalGlobalConfigOptions,
+  RepoGlobalConfig,
+} from '../../../../config/types.ts';
 import {
   MANAGER_LOCKFILE_ERROR,
   REPOSITORY_CHANGED,
@@ -80,7 +83,10 @@ const limits = vi.mocked(_limits);
 const repoCache = vi.mocked(_repoCache);
 const changelog = vi.mocked(_changelog);
 
-const adminConfig: RepoGlobalConfig = { localDir: '', cacheDir: '' };
+const adminConfig: RepoGlobalConfig & InternalGlobalConfigOptions = {
+  localDir: '',
+  cacheDir: '',
+};
 
 function findFileContent(
   files: FileChange[] | undefined,

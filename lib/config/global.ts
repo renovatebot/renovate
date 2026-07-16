@@ -71,12 +71,9 @@ export class GlobalConfig {
   private static config: RepoGlobalConfig & InternalGlobalConfigOptions = {};
 
   static get(): RepoGlobalConfig;
-  static get<Key extends keyof RepoGlobalConfig>(
-    key: Key,
-  ): Required<RepoGlobalConfig>[Key];
-  static get<Key extends keyof InternalGlobalConfigOptions>(
-    key: Key,
-  ): Required<InternalGlobalConfigOptions>[Key];
+  static get<
+    Key extends keyof RepoGlobalConfig | keyof InternalGlobalConfigOptions,
+  >(key: Key): Required<RepoGlobalConfig & InternalGlobalConfigOptions>[Key];
   static get<
     Key extends keyof RepoGlobalConfig | keyof InternalGlobalConfigOptions,
   >(
