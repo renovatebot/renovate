@@ -8,10 +8,36 @@ export function isDockerDigest(input: string): boolean {
   return /^sha256:[a-f0-9]{64}$/i.test(input);
 }
 
+/**
+ * Check if a string is an intentional glob pattern.
+ * We treat patterns containing `*`, `?`, or `{` (brace expansion) as globs.
+ * Square brackets `[...]` are deliberately excluded because email addresses
+ * (like GitHub bot emails `foo+renovate[bot]@example.com`) contain literal
+ * brackets that must not be interpreted as glob character classes.
+ */
+function isGlobPattern(pattern: string): boolean {
+  // Remove the '!' prefix if present (used for negation)
+  const cleanPattern = pattern.startsWith('!') ? pattern.slice(1) : pattern;
+  // Treat `*`, `?` (wildcards) and `{` (brace expansion) as glob indicators.
+  // `[` is intentionally omitted so literal brackets in emails match exactly.
+  return /[*?{]/.test(cleanPattern);
+}
+
 export function getRegexOrGlobPredicate(pattern: string): StringMatchPredicate {
   const regExPredicate = getRegexPredicate(pattern);
   if (regExPredicate) {
     return regExPredicate;
+  }
+
+  // If the pattern doesn't contain glob wildcards, do exact string matching.
+  // This prevents emails with `[bot]` from being interpreted as glob character classes.
+  if (!isGlobPattern(pattern)) {
+    const isPositive = !pattern.startsWith('!');
+    const exactPattern = isPositive ? pattern : pattern.slice(1);
+    return (x: string): boolean => {
+      const matches = x.toLowerCase() === exactPattern.toLowerCase();
+      return isPositive ? matches : !matches;
+    };
   }
 
   const mm = minimatch(pattern, { dot: true, nocase: true });

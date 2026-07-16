@@ -58,6 +58,27 @@ describe('util/string-match', () => {
     it('returns false if not matching every negative pattern (glob)', () => {
       expect(matchRegexOrGlobList('test', ['!test3', '!te*'])).toBeFalse();
     });
+
+    it('matches emails with literal brackets exactly', () => {
+      const email = '29139614+renovate[bot]@users.noreply.github.com';
+      expect(matchRegexOrGlobList(email, [email])).toBeTrue();
+    });
+
+    it('does not treat literal brackets as glob character classes', () => {
+      // `[bot]` must not match a single character b, o, or t
+      expect(
+        matchRegexOrGlobList('a+renovate[bot]@x.com', ['a+renovateb@x.com']),
+      ).toBeFalse();
+    });
+
+    it('still supports brace expansion globs', () => {
+      expect(
+        matchRegexOrGlobList('datasource-crate', ['datasource-{crate,go}']),
+      ).toBeTrue();
+      expect(
+        matchRegexOrGlobList('datasource-npm', ['datasource-{crate,go}']),
+      ).toBeFalse();
+    });
   });
 
   describe('anyMatchRegexOrGlobList()', () => {

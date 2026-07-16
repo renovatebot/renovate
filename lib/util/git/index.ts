@@ -38,11 +38,7 @@ import { getChildEnv } from '../exec/utils.ts';
 import { newlineRegex, regEx } from '../regex.ts';
 import type { LongCommitSha } from '../schema-utils/git.ts';
 import { toLongCommitSha } from '../schema-utils/git.ts';
-import {
-  getRegexPredicate,
-  isRegexMatch,
-  matchRegexOrGlobList,
-} from '../string-match.ts';
+import { matchRegexOrGlobList } from '../string-match.ts';
 import { logWarningIfUnicodeHiddenCharactersInPackageFile } from '../unicode.ts';
 import { getGitEnvironmentVariables } from './auth.ts';
 import { parseGitAuthor } from './author.ts';
@@ -878,35 +874,9 @@ export async function isBranchModified(
     logger.warn({ err }, 'Error checking last author for isBranchModified');
   }
   const { gitAuthorEmail, ignoredAuthors } = config;
-  const invalidIgnoredAuthors = new Set<string>();
 
   function isIgnoredAuthor(committedAuthor: string): boolean {
-    for (const ignoredAuthor of ignoredAuthors) {
-      const ignoredAuthorRegex = getRegexPredicate(ignoredAuthor);
-      if (ignoredAuthorRegex) {
-        if (ignoredAuthorRegex(committedAuthor)) {
-          return true;
-        }
-        continue;
-      }
-
-      if (
-        isRegexMatch(ignoredAuthor) &&
-        !invalidIgnoredAuthors.has(ignoredAuthor)
-      ) {
-        invalidIgnoredAuthors.add(ignoredAuthor);
-        logger.warn(
-          { ignoredAuthor },
-          'Invalid gitIgnoredAuthors regex pattern; treating as exact string match',
-        );
-      }
-
-      if (committedAuthor === ignoredAuthor) {
-        return true;
-      }
-    }
-
-    return false;
+    return matchRegexOrGlobList(committedAuthor, ignoredAuthors);
   }
 
   const includedAuthors = new Set<string>();

@@ -447,17 +447,37 @@ describe('util/git/index', { timeout: 30000 }, () => {
       ).toBeTrue();
     });
 
-    it('should return true when ignored regex is invalid', async () => {
+    it('should return false when author matches ignored glob pattern', async () => {
       git.setUserRepoConfig({
-        gitIgnoredAuthors: ['/(invalid/'],
+        gitIgnoredAuthors: ['custom@*'],
       });
       expect(
         await git.isBranchModified('renovate/custom_author', defaultBranch),
+      ).toBeFalse();
+    });
+
+    it('should return false when author matches exact email with brackets', async () => {
+      git.setUserRepoConfig({
+        gitIgnoredAuthors: ['29139614+renovate[bot]@users.noreply.github.com'],
+      });
+      expect(
+        await git.isBranchModified(
+          'renovate/custom_author_brackets',
+          defaultBranch,
+        ),
+      ).toBeFalse();
+    });
+
+    it('should return true when author does not match bracketed email pattern', async () => {
+      git.setUserRepoConfig({
+        gitIgnoredAuthors: ['29139614+renovate[bxy]@users.noreply.github.com'],
+      });
+      expect(
+        await git.isBranchModified(
+          'renovate/custom_author_brackets',
+          defaultBranch,
+        ),
       ).toBeTrue();
-      expect(logger.logger.warn).toHaveBeenCalledWith(
-        { ignoredAuthor: '/(invalid/' },
-        'Invalid gitIgnoredAuthors regex pattern; treating as exact string match',
-      );
     });
 
     it('should return true when non-ignored authors commit followed by an ignored author', async () => {
