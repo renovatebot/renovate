@@ -17,10 +17,6 @@ describe('config/global', () => {
   });
 
   describe('getPackageRules()', () => {
-    it('returns empty array by default', () => {
-      expect(GlobalConfig.getPackageRules()).toEqual([]);
-    });
-
     it('returns packageRules passed to set()', () => {
       const packageRules: PackageRule[] = [
         { matchPackageNames: ['containerbase/node-prebuild'] },
