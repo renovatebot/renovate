@@ -327,7 +327,7 @@ If you are using this mode, and cannot migrate to `binarySource=install`, [pleas
 
 To decide which version to install, each tool is looked up via its own datasource, listed in [`util/exec/containerbase.ts`](https://github.com/renovatebot/renovate/blob/main/lib/util/exec/containerbase.ts).
 
-You can override any tool's lookup with `packageRules` in your global config via [`matchDatasources`](configuration-options.md#packagerulesmatchdatasources)/[`matchPackageNames`](configuration-options.md#packagerulesmatchpackagenames)/[`matchDepNames`](configuration-options.md#packagerulesmatchdepnames), and setting whichever of [`overrideDatasource`](configuration-options.md#packagerulesoverridedatasource), [`overridePackageName`](configuration-options.md#packagerulesoverridepackagename), `registryUrls`, `versioning` or `extractVersion` the target datasource needs:
+You can override any tool's lookup with `packageRules` in your global config: match it with [`matchDatasources`](configuration-options.md#packagerulesmatchdatasources), [`matchPackageNames`](configuration-options.md#packagerulesmatchpackagenames) or [`matchDepNames`](configuration-options.md#packagerulesmatchdepnames), then set whichever of [`overrideDatasource`](configuration-options.md#packagerulesoverridedatasource), [`overridePackageName`](configuration-options.md#packagerulesoverridepackagename), `registryUrls`, `versioning` or `extractVersion` the target datasource needs:
 
 ```json
 {
@@ -345,7 +345,7 @@ You can override any tool's lookup with `packageRules` in your global config via
 ```
 
 !!! note
-  This only changes where Renovate looks up the tool versions, not where containerbase later downloads the tool from. For that, refer to [this documentation](https://github.com/containerbase/base/blob/main/docs/custom-registries.md).
+  This only changes where Renovate looks up the tool versions, not where Containerbase later downloads the tool from. For that, refer to [this documentation](https://github.com/containerbase/base/blob/main/docs/custom-registries.md).
 
 !!! note
   Only `packageRules` from the global config apply here. `packageRules` in repositories cannot override tool version lookups.

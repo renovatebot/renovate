@@ -64,11 +64,7 @@ export class GlobalConfig {
 
   private static config: RepoGlobalConfig = {};
 
-  // Mirrors global-level `packageRules` for `resolveConstraint()` in
-  // `util/exec/containerbase.ts`, which has no access to the resolved repo config.
-  // `set()` always runs before repo config is merged in (see `initRepo()`,
-  // `reconfigure/index.ts`) -- keep it that way, so repo config can't redirect Renovate's
-  // own tool installs.
+  // For util/exec/containerbase.ts
   private static toolPackageRules: PackageRule[] = [];
 
   static get(): RepoGlobalConfig;
