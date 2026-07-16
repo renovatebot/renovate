@@ -1,4 +1,5 @@
 import { isNullOrUndefined } from '@sindresorhus/is';
+import { codeBlock } from 'common-tags';
 import type { MockInstance } from 'vitest';
 import type { RenovateConfig } from '~test/util.ts';
 import { fs, logger, partial, platform, scm } from '~test/util.ts';
@@ -213,9 +214,11 @@ describe('workers/repository/init/merge', () => {
     });
 
     it('finds and parse renovate.json5', async () => {
-      const configFileRaw = `{
-        // this is json5 format
-      }`;
+      const configFileRaw = codeBlock`
+        {
+                // this is json5 format
+              }
+      `;
       scm.getFileList.mockResolvedValue(['package.json', 'renovate.json5']);
       fs.readLocalFile.mockResolvedValue(configFileRaw);
       expect(await detectRepoFileConfig()).toEqual({

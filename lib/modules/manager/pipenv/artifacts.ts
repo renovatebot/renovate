@@ -63,7 +63,7 @@ export function extractEnvironmentVariableName(
 }
 
 export function addExtraEnvVariable(
-  extraEnv: ExtraEnv<unknown>,
+  extraEnv: ExtraEnv,
   environmentVariableName: string,
   environmentValue: string,
 ): void {
@@ -91,7 +91,7 @@ export function addExtraEnvVariable(
 async function addCredentialsForSourceUrls(
   newPipfileContent: string,
   pipfileName: string,
-  extraEnv: ExtraEnv<unknown>,
+  extraEnv: ExtraEnv,
 ): Promise<void> {
   const sourceUrls = await findPipfileSourceUrlsWithCredentials(
     newPipfileContent,

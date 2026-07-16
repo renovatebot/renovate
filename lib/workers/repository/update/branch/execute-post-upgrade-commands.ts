@@ -184,7 +184,7 @@ export async function postUpgradeCommandsExecutor(
                       validTool,
                       validConstraint,
                     },
-                    `Skipping ${validConstraint ? 'valid' : 'invalid'} constraint that is not a tool that Containerbase knows`,
+                    'Skipping constraint that is not a tool that Containerbase knows',
                   );
                   continue;
                 }

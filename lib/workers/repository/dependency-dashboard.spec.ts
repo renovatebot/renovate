@@ -43,6 +43,7 @@ const getIssueSpy = platform.getIssue;
 let config: BranchConfig;
 
 beforeEach(() => {
+  GlobalConfig.reset();
   massageMdSpy.mockImplementation(massageMarkdown);
   platform.maxBodyLength.mockReturnValue(60000); // Github Limit
   config = getConfig() as BranchConfig;
@@ -146,9 +147,9 @@ describe('workers/repository/dependency-dashboard', () => {
     });
 
     it('reads dashboard body and apply checkedBranches', async () => {
+      GlobalConfig.set({ checkedBranches: ['branch1', 'branch2'] });
       const conf: RenovateConfig = {};
       conf.prCreation = 'approval';
-      conf.checkedBranches = ['branch1', 'branch2'];
       platform.findIssue.mockResolvedValueOnce({
         title: '',
         number: 1,
@@ -156,7 +157,6 @@ describe('workers/repository/dependency-dashboard', () => {
       });
       await dependencyDashboard.readDashboardBody(conf);
       expect(conf).toEqual({
-        checkedBranches: ['branch1', 'branch2'],
         dependencyDashboardAllAwaitingSchedule: false,
         dependencyDashboardAllPending: false,
         dependencyDashboardAllRateLimited: false,
@@ -299,12 +299,11 @@ describe('workers/repository/dependency-dashboard', () => {
     });
 
     it('does not read dashboard body but applies checkedBranches regardless', async () => {
+      GlobalConfig.set({ checkedBranches: ['branch1', 'branch2'] });
       const conf: RenovateConfig = {};
       conf.dependencyDashboard = false;
-      conf.checkedBranches = ['branch1', 'branch2'];
       await dependencyDashboard.readDashboardBody(conf);
       expect(conf).toEqual({
-        checkedBranches: ['branch1', 'branch2'],
         dependencyDashboard: false,
         dependencyDashboardAllAwaitingSchedule: false,
         dependencyDashboardAllPending: false,
@@ -314,6 +313,21 @@ describe('workers/repository/dependency-dashboard', () => {
           branch2: 'global-config',
         },
         dependencyDashboardRebaseAllOpen: false,
+      });
+    });
+
+    it('applies rebaseAllOpenBranches without dashboard', async () => {
+      GlobalConfig.set({ rebaseAllOpenBranches: true });
+      const conf: RenovateConfig = {};
+      conf.dependencyDashboard = false;
+      await dependencyDashboard.readDashboardBody(conf);
+      expect(conf).toEqual({
+        dependencyDashboard: false,
+        dependencyDashboardAllAwaitingSchedule: false,
+        dependencyDashboardAllPending: false,
+        dependencyDashboardAllRateLimited: false,
+        dependencyDashboardChecks: {},
+        dependencyDashboardRebaseAllOpen: true,
       });
     });
 
@@ -1165,15 +1179,17 @@ None detected
       config.dependencyDashboardIssue = 1;
       getIssueSpy.mockResolvedValueOnce({
         title: 'Dependency Dashboard',
-        body: `This issue contains a list of Renovate updates and their statuses.
+        body: codeBlock`
+          This issue contains a list of Renovate updates and their statuses.
 
-        ## Pending Approval
+                  ## Pending Approval
 
-        These branches will be created by Renovate only once you click their checkbox below.
+                  These branches will be created by Renovate only once you click their checkbox below.
 
-         - [ ] <!-- approve-branch=branchName1 -->pr1
-         - [ ] <!-- approve-branch=branchName2 -->pr2
-         - [x] <!-- approve-all-pending-prs -->🔐 **Create all pending approval PRs at once** 🔐`,
+                   - [ ] <!-- approve-branch=branchName1 -->pr1
+                   - [ ] <!-- approve-branch=branchName2 -->pr2
+                   - [x] <!-- approve-all-pending-prs -->🔐 **Create all pending approval PRs at once** 🔐
+        `,
       });
       await dependencyDashboard.ensureDependencyDashboard(
         config,
@@ -1232,12 +1248,14 @@ None detected
       config.dependencyDashboardIssue = 1;
       getIssueSpy.mockResolvedValueOnce({
         title: 'Dependency Dashboard',
-        body: `This issue contains a list of Renovate updates and their statuses.
-        ## Rate-limited
-        These updates are currently rate-limited. Click on a checkbox below to force their creation now.
-         - [x] <!-- create-all-rate-limited-prs -->**Open all rate-limited PRs**
-         - [ ] <!-- unlimit-branch=branchName1 -->pr1
-         - [ ] <!-- unlimit-branch=branchName2 -->pr2`,
+        body: codeBlock`
+          This issue contains a list of Renovate updates and their statuses.
+                  ## Rate-limited
+                  These updates are currently rate-limited. Click on a checkbox below to force their creation now.
+                   - [x] <!-- create-all-rate-limited-prs -->**Open all rate-limited PRs**
+                   - [ ] <!-- unlimit-branch=branchName1 -->pr1
+                   - [ ] <!-- unlimit-branch=branchName2 -->pr2
+        `,
       });
       await dependencyDashboard.ensureDependencyDashboard(
         config,
@@ -1495,6 +1513,79 @@ None detected
           );
           // same with dry run
           await dryRun(branches, platform, 0, 1);
+        });
+
+        it('shows replacement as unavailable when target already exists as sibling', async () => {
+          const branches: BranchConfig[] = [];
+          const packageFilesWithExistingReplacement: Record<
+            string,
+            PackageFile[]
+          > = {
+            npm: [
+              {
+                packageFile: 'package.json',
+                deps: [
+                  {
+                    depName: '@material-ui/core',
+                    deprecationMessage: 'This package is deprecated',
+                    updates: [
+                      {
+                        updateType: 'replacement',
+                        newName: '@mui/material',
+                        newValue: '^5.0.0',
+                      },
+                    ],
+                  },
+                  {
+                    depName: '@material-ui/icons',
+                    updates: [
+                      {
+                        updateType: 'replacement',
+                        newName: '@mui/icons-material',
+                        newValue: '^5.0.0',
+                      },
+                    ],
+                  },
+                  {
+                    depName: '@mui/material',
+                    updates: [
+                      {
+                        newValue: '^6.2.0',
+                        updateType: 'minor',
+                      },
+                    ],
+                  },
+                  {
+                    depName: '@mui/icons-material',
+                    updates: [
+                      {
+                        newValue: '^6.2.0',
+                        updateType: 'minor',
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          };
+          PackageFiles.add('main', packageFilesWithExistingReplacement);
+          await dependencyDashboard.ensureDependencyDashboard(
+            config,
+            branches,
+            packageFilesWithExistingReplacement,
+            { result: 'no-migration' },
+          );
+          expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
+          const body = platform.ensureIssue.mock.calls[0][0].body;
+          expect(body).toInclude('Deprecations / Replacements');
+          expect(body).toInclude('@material-ui/core');
+          expect(body).toInclude('@material-ui/icons');
+          expect(body).not.toInclude(
+            '![Available](https://img.shields.io/badge/available-green?style=flat-square)',
+          );
+          expect(body).toInclude(
+            '![Unavailable](https://img.shields.io/badge/unavailable-orange?style=flat-square)',
+          );
         });
 
         it('handles missing version/digest values correctly', async () => {

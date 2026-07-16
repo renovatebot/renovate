@@ -498,8 +498,12 @@ describe('workers/repository/update/branch/bump-versions', () => {
       await bumpVersions(config);
 
       expect(logger.logger.warn).toHaveBeenCalledWith(
-        { file: 'foo-bar' },
-        'bumpVersions(foo): Could not read file: an error',
+        {
+          file: 'foo-bar',
+          bumpVersionsDescr: 'bumpVersions(foo)',
+          err: new Error('an error'),
+        },
+        'bumpVersions: Could not read file',
       );
       expect(config).toMatchObject({
         updatedPackageFiles: [

@@ -1313,7 +1313,7 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
             validTool: false,
             validConstraint: true,
           },
-          'Skipping valid constraint that is not a tool that Containerbase knows',
+          'Skipping constraint that is not a tool that Containerbase knows',
         );
       });
 
@@ -1386,7 +1386,7 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
             validTool: false,
             validConstraint: false,
           },
-          'Skipping invalid constraint that is not a tool that Containerbase knows',
+          'Skipping constraint that is not a tool that Containerbase knows',
         );
       });
     });

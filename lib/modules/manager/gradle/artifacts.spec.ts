@@ -130,7 +130,8 @@ describe('modules/manager/gradle/artifacts', () => {
       isGradleExecutionAllowed('some_gradle-wrapper.command');
 
       expect(logger.logger.once.warn).toHaveBeenCalledWith(
-        'Gradle wrapper command, `some_gradle-wrapper.command`, was requested to run, but `gradleWrapper` is not permitted in the allowedUnsafeExecutions',
+        { command: 'some_gradle-wrapper.command' },
+        'Gradle wrapper command was requested to run, but `gradleWrapper` is not permitted in the allowedUnsafeExecutions',
       );
     });
   });
