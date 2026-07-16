@@ -1,12 +1,13 @@
+import { isArray, isPlainObject } from '@sindresorhus/is';
 import { z } from 'zod/v4';
 
-const tfPrimitive = z.union([z.string(), z.number(), z.boolean(), z.null()]);
-type tfPrimitive = z.infer<typeof tfPrimitive>;
+const TfPrimitive = z.union([z.string(), z.number(), z.boolean(), z.null()]);
+type TfPrimitive = z.infer<typeof TfPrimitive>;
 
-type TfLiteral = tfPrimitive | { [k: string]: TfLiteral } | TfLiteral[];
+type TfLiteral = TfPrimitive | { [k: string]: TfLiteral } | TfLiteral[];
 
 const tfLiteral: z.ZodType<TfLiteral> = z.lazy(() =>
-  z.union([tfPrimitive, z.record(z.string(), tfLiteral), z.array(tfLiteral)]),
+  z.union([TfPrimitive, z.record(z.string(), tfLiteral), z.array(tfLiteral)]),
 );
 
 const NORMALIZE_KEYS = new Set([
@@ -20,22 +21,22 @@ const NORMALIZE_KEYS = new Set([
 ]);
 
 function normalize(node: TfLiteral): TfLiteral {
-  if (Array.isArray(node)) {
+  if (isArray(node)) {
     // Recursively flatten nested arrays
     function flatten(arr: TfLiteral[]): TfLiteral[] {
       return arr.flatMap((item) =>
-        Array.isArray(item) ? flatten(item) : [normalize(item)],
+        isArray(item) ? flatten(item) : [normalize(item)],
       );
     }
     return flatten(node);
   }
 
-  if (node && typeof node === 'object') {
+  if (isPlainObject(node)) {
     const out: Record<string, TfLiteral> = {};
     for (const [k, v] of Object.entries(node)) {
       let val = normalize(v);
       if (NORMALIZE_KEYS.has(k)) {
-        val = Array.isArray(val) ? val : [val];
+        val = isArray(val) ? val : [val];
       }
       out[k] = val;
     }
@@ -50,7 +51,7 @@ function oneOrMany<T extends z.ZodType>(
 ): z.ZodType<z.infer<T>[], z.input<T> | z.input<T>[]> {
   return z
     .union([schema, z.array(schema)])
-    .transform((v): z.infer<T>[] => (Array.isArray(v) ? v : [v]));
+    .transform((v): z.infer<T>[] => (isArray(v) ? v : [v]));
 }
 
 const TerraformRequiredProvider = z.object({
@@ -137,7 +138,7 @@ const GenericResource = z.record(
 
 const KubernetesInstance = tfLiteral.transform((orig) => {
   const n = normalize(orig);
-  return Array.isArray(n) ? n : [n];
+  return isArray(n) ? n : [n];
 });
 
 const TerraformResources = z
