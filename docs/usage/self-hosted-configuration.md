@@ -325,30 +325,30 @@ If you are using this mode, and cannot migrate to `binarySource=install`, [pleas
 
 ### Overriding tool version lookups
 
-Renovate looks up some tool versions via the `github-releases` or `github-tags` datasource against `github.com` ([source](https://github.com/renovatebot/renovate/blob/main/lib/util/exec/containerbase.ts)).
-If your environment can't reach `github.com`, or you want a registry you control, override the lookup with `packageRules` in your bot/global config:
+To decide which version to install, each tool is looked up via its own datasource, listed in [`util/exec/containerbase.ts`](https://github.com/renovatebot/renovate/blob/main/lib/util/exec/containerbase.ts).
+
+You can override any tool's lookup with `packageRules` in your global config via [`matchDatasources`](configuration-options.md#packagerulesmatchdatasources)/[`matchPackageNames`](configuration-options.md#packagerulesmatchpackagenames)/[`matchDepNames`](configuration-options.md#packagerulesmatchdepnames), and setting whichever of [`overrideDatasource`](configuration-options.md#packagerulesoverridedatasource), [`overridePackageName`](configuration-options.md#packagerulesoverridepackagename), `registryUrls`, `versioning` or `extractVersion` the target datasource needs:
 
 ```json
 {
   "packageRules": [
     {
       "matchDatasources": ["github-releases"],
-      "matchPackageNames": ["containerbase/composer-prebuild"],
+      "matchPackageNames": ["containerbase/node-prebuild"],
       "overrideDatasource": "docker",
-      "overridePackageName": "my-registry.company.com/mirror/composer"
+      "overridePackageName": "my-registry.company.com/dockerhub-remote/library/node",
+      "versioning": "node",
+      "extractVersion": "^(?<version>\\d+\\.\\d+\\.\\d+)$"
     }
   ]
 }
 ```
 
-You can override [`overrideDatasource`](configuration-options.md#packagerulesoverridedatasource), [`overridePackageName`](configuration-options.md#packagerulesoverridepackagename), `registryUrls`, `versioning` and `extractVersion`.
-For example, set only `registryUrls` to keep the `github-releases` datasource but point it at a GitHub Enterprise Server mirror.
-
-Match on the tool's package name with `matchPackageNames`, or on the tool name (e.g. `composer`) with `matchDepNames`.
+!!! note
+  This only changes where Renovate looks up the tool versions, not where containerbase later downloads the tool from. For that, refer to [this documentation](https://github.com/containerbase/base/blob/main/docs/custom-registries.md).
 
 !!! note
-  Only `packageRules` from the bot/global config apply here.
-  `packageRules` in repository config files like `renovate.json` do not apply, so repository users cannot redirect tool lookups.
+  Only `packageRules` from the global config apply here. `packageRules` in repositories cannot override tool version lookups.
 
 ## `cacheDir`
 
