@@ -20,6 +20,7 @@ const adminConfig: RepoGlobalConfig = {
   localDir: upath.join('/tmp/github/some/repo'),
   cacheDir: upath.join('/tmp/cache'),
   containerbaseDir: upath.join('/tmp/cache/containerbase'),
+  allowedUnsafeExecutions: ['pixi'],
 };
 
 const processor = new PixiProcessor();
@@ -119,6 +120,26 @@ describe('modules/manager/pep621/processors/pixi', () => {
     it('returns null when pixi.lock does not exist', async () => {
       const execSnapshots = mockExecAll();
       fs.getSiblingFileName.mockReturnValueOnce('pixi.lock');
+
+      const result = await processor.updateArtifacts(
+        {
+          packageFileName: 'pyproject.toml',
+          newPackageFileContent: '',
+          config,
+          updatedDeps: [{ depName: 'dep1' }],
+        },
+        parsePyProject('')!,
+      );
+
+      expect(result).toBeNull();
+      expect(execSnapshots).toEqual([]);
+    });
+
+    it('returns null when pixi is not in allowedUnsafeExecutions', async () => {
+      GlobalConfig.set({ ...adminConfig, allowedUnsafeExecutions: [] });
+      const execSnapshots = mockExecAll();
+      fs.getSiblingFileName.mockReturnValueOnce('pixi.lock');
+      fs.readLocalFile.mockResolvedValueOnce('Current pixi.lock');
 
       const result = await processor.updateArtifacts(
         {

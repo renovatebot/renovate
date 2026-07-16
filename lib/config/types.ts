@@ -577,7 +577,8 @@ export type AllowedUnsafeExecution =
   | 'bazelModDeps'
   | 'goGenerate'
   | 'gradleWrapper'
-  | 'mise';
+  | 'mise'
+  | 'pixi';
 
 // TODO: Proper typings
 export interface PackageRule

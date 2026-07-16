@@ -1,4 +1,5 @@
 import { isNonEmptyArray } from '@sindresorhus/is';
+import { GlobalConfig } from '../../../../config/global.ts';
 import { TEMPORARY_ERROR } from '../../../../constants/error-messages.ts';
 import { logger } from '../../../../logger/index.ts';
 import { exec } from '../../../../util/exec/index.ts';
@@ -60,6 +61,16 @@ export class PixiProcessor extends BasePyProjectProcessor {
     const existingLockFileContent = await readLocalFile(lockFileName, 'utf8');
     if (!existingLockFileContent) {
       logger.debug('No pixi.lock found');
+      return null;
+    }
+
+    // `pixi lock` can execute arbitrary code from conda package hooks, so it is
+    // gated behind `allowedUnsafeExecutions`.
+    // https://pixi.prefix.dev/latest/security/#4-treat-package-hooks-as-code-execution
+    if (!GlobalConfig.get('allowedUnsafeExecutions').includes('pixi')) {
+      logger.once.warn(
+        '`pixi lock` was requested to run, but `pixi` is not permitted in the allowedUnsafeExecutions',
+      );
       return null;
     }
 
