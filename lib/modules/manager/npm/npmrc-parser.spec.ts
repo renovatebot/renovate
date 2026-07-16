@@ -26,10 +26,11 @@ describe('modules/manager/npm/npmrc-parser', () => {
           {
             type: 'setting',
             section: null,
+            npmSection: null,
             key,
-            array: false,
+            isArray: false,
             value,
-            environmentVariables: [],
+            environmentVariableReferences: [],
             raw: line,
             lineEnding: '',
           },
@@ -41,10 +42,11 @@ describe('modules/manager/npm/npmrc-parser', () => {
           {
             type: 'setting',
             section: null,
+            npmSection: null,
             key: 'key',
-            array: false,
+            isArray: false,
             value: 'value',
-            environmentVariables: [],
+            environmentVariableReferences: [],
             raw: 'key=value',
             lineEnding: '\r\n',
           },
@@ -114,15 +116,15 @@ describe('modules/manager/npm/npmrc-parser', () => {
         });
 
         it.each`
-          line                    | key        | array
+          line                    | key        | isArray
           ${'key[]=value'}        | ${'key'}   | ${true}
           ${'"key[]"=value'}      | ${'key'}   | ${true}
           ${'key[] # note=value'} | ${'key'}   | ${true}
           ${'key[][]=value'}      | ${'key[]'} | ${true}
           ${'key=value'}          | ${'key'}   | ${false}
           ${'[]=value'}           | ${'[]'}    | ${false}
-        `('parses bracketed array key in $line', ({ line, key, array }) => {
-          expect(parseSetting(line)).toMatchObject({ key, array });
+        `('parses bracketed array key in $line', ({ line, key, isArray }) => {
+          expect(parseSetting(line)).toMatchObject({ key, isArray });
         });
 
         it('accepts a whitespace-only key', () => {
@@ -145,7 +147,7 @@ describe('modules/manager/npm/npmrc-parser', () => {
         });
       });
 
-      describe('environment variables', () => {
+      describe('environment variable references', () => {
         it.each`
           line                       | name            | optional
           ${'auth=${TOKEN}'}         | ${'TOKEN'}      | ${false}
@@ -155,17 +157,18 @@ describe('modules/manager/npm/npmrc-parser', () => {
           ${'auth=$${TOKEN}'}        | ${'TOKEN'}      | ${false}
           ${'auth="${TOKEN NAME}"'}  | ${'TOKEN NAME'} | ${false}
         `(
-          'parses an environment variable in $line',
+          'finds an environment variable reference in $line',
           ({ line, name, optional }) => {
-            expect(parseSetting(line).environmentVariables).toEqual([
+            expect(parseSetting(line).environmentVariableReferences).toEqual([
               { name, optional, source: 'value' },
             ]);
           },
         );
 
-        it('parses environment variables in both the key and value', () => {
+        it('finds environment variable references in both the key and value', () => {
           expect(
-            parseSetting('${SCOPE}:registry=${REGISTRY?}').environmentVariables,
+            parseSetting('${SCOPE}:registry=${REGISTRY?}')
+              .environmentVariableReferences,
           ).toEqual([
             {
               name: 'SCOPE',
@@ -180,9 +183,10 @@ describe('modules/manager/npm/npmrc-parser', () => {
           ]);
         });
 
-        it('parses multiple environment variables in a value', () => {
+        it('finds multiple environment variable references in a value', () => {
           expect(
-            parseSetting('auth=${FIRST}-${SECOND?}').environmentVariables,
+            parseSetting('auth=${FIRST}-${SECOND?}')
+              .environmentVariableReferences,
           ).toEqual([
             {
               name: 'FIRST',
@@ -202,7 +206,7 @@ describe('modules/manager/npm/npmrc-parser', () => {
           ${'auth=value \\# ${TOKEN}'}
           ${'auth=value \\; ${TOKEN}'}
         `('parses an expression after escaped comment in $line', ({ line }) => {
-          expect(parseSetting(line).environmentVariables).toEqual([
+          expect(parseSetting(line).environmentVariableReferences).toEqual([
             {
               name: 'TOKEN',
               optional: false,
@@ -226,9 +230,9 @@ describe('modules/manager/npm/npmrc-parser', () => {
               const escapes = '\\'.repeat(rawEscapeCount);
               const line = `auth=${escapes}${'${TOKEN}'}`;
 
-              expect(parseSetting(line).environmentVariables.length > 0).toBe(
-                detected,
-              );
+              expect(
+                parseSetting(line).environmentVariableReferences.length > 0,
+              ).toBe(detected);
             },
           );
 
@@ -242,9 +246,9 @@ describe('modules/manager/npm/npmrc-parser', () => {
               const value = `${'\\'.repeat(decodedEscapeCount)}${'${TOKEN}'}`;
               const line = `auth=${JSON.stringify(value)}`;
 
-              expect(parseSetting(line).environmentVariables.length > 0).toBe(
-                detected,
-              );
+              expect(
+                parseSetting(line).environmentVariableReferences.length > 0,
+              ).toBe(detected);
             },
           );
         });
@@ -257,12 +261,12 @@ describe('modules/manager/npm/npmrc-parser', () => {
           ${'auth=${TO$KEN}'}
           ${'auth=${TO{KEN}'}
         `('ignores malformed expression in $line', ({ line }) => {
-          expect(parseSetting(line).environmentVariables).toEqual([]);
+          expect(parseSetting(line).environmentVariableReferences).toEqual([]);
         });
 
         it('continues parsing after a malformed expression', () => {
           expect(
-            parseSetting('auth=${BAD${GOOD}}').environmentVariables,
+            parseSetting('auth=${BAD${GOOD}}').environmentVariableReferences,
           ).toEqual([
             {
               name: 'GOOD',
@@ -278,39 +282,42 @@ describe('modules/manager/npm/npmrc-parser', () => {
           ${'auth=value ; ${TOKEN}'}
           ${'enabled=true'}
         `('ignores inactive expression in $line', ({ line }) => {
-          expect(parseSetting(line).environmentVariables).toEqual([]);
+          expect(parseSetting(line).environmentVariableReferences).toEqual([]);
         });
       });
     });
 
     describe('section lines', () => {
       it.each`
-        line                     | name
-        ${'[section]'}           | ${'section'}
-        ${' [section] '}         | ${'section'}
-        ${'[section=value]'}     | ${'section=value'}
-        ${'[]'}                  | ${''}
-        ${'["quoted section"]'}  | ${'quoted section'}
-        ${'[section # comment]'} | ${'section'}
-        ${'[section\\#literal]'} | ${'section#literal'}
-      `('parses $line', ({ line, name }) => {
+        line                     | name                 | npmSection
+        ${'[section]'}           | ${'section'}         | ${'section'}
+        ${' [section] '}         | ${'section'}         | ${null}
+        ${'\uFEFF[section]'}     | ${'section'}         | ${null}
+        ${'[section=value]'}     | ${'section=value'}   | ${'section=value'}
+        ${'[]'}                  | ${''}                | ${''}
+        ${'["quoted section"]'}  | ${'quoted section'}  | ${'quoted section'}
+        ${'[section # comment]'} | ${'section'}         | ${'section'}
+        ${'[section\\#literal]'} | ${'section#literal'} | ${'section#literal'}
+      `('parses $line', ({ line, name, npmSection }) => {
         expect(parseNpmrc(line).lines).toEqual([
           {
             type: 'section',
             name,
-            environmentVariables: [],
+            npmSection,
+            environmentVariableReferences: [],
             raw: line,
             lineEnding: '',
           },
         ]);
       });
 
-      it('parses environment variables in a section name', () => {
+      it('finds environment variable references in a section name', () => {
         expect(parseNpmrc('[${SCOPE?}]').lines).toEqual([
           {
             type: 'section',
             name: '${SCOPE?}',
-            environmentVariables: [
+            npmSection: '${SCOPE?}',
+            environmentVariableReferences: [
               {
                 name: 'SCOPE',
                 optional: true,
@@ -331,10 +338,56 @@ describe('modules/manager/npm/npmrc-parser', () => {
           (line): line is NpmrcSettingLine => line.type === 'setting',
         );
 
-        expect(settings.map(({ key, section }) => ({ key, section }))).toEqual([
-          { key: 'one', section: 'first' },
-          { key: 'two', section: 'first' },
-          { key: 'last', section: 'second' },
+        expect(
+          settings.map(({ key, section, npmSection }) => ({
+            key,
+            section,
+            npmSection,
+          })),
+        ).toEqual([
+          {
+            key: 'one',
+            section: 'first',
+            npmSection: 'first',
+          },
+          {
+            key: 'two',
+            section: 'first',
+            npmSection: 'first',
+          },
+          {
+            key: 'last',
+            section: 'second',
+            npmSection: 'second',
+          },
+        ]);
+      });
+
+      it('tracks permissive and npm section contexts independently', () => {
+        const document = parseNpmrc(
+          ' [parser-only]\ntop-level=${TOKEN}\n[recognized]\n [parser-only]\nnested=${TOKEN}',
+        );
+        const settings = document.lines.filter(
+          (line): line is NpmrcSettingLine => line.type === 'setting',
+        );
+
+        expect(
+          settings.map(({ key, section, npmSection }) => ({
+            key,
+            section,
+            npmSection,
+          })),
+        ).toEqual([
+          {
+            key: 'top-level',
+            section: 'parser-only',
+            npmSection: null,
+          },
+          {
+            key: 'nested',
+            section: 'parser-only',
+            npmSection: 'recognized',
+          },
         ]);
       });
     });

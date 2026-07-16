@@ -6,7 +6,7 @@ interface NpmrcBaseLine {
   lineEnding: NpmrcLineEnding;
 }
 
-export interface NpmrcEnvironmentVariable {
+export interface NpmrcEnvironmentVariableReference {
   name: string;
   optional: boolean;
   source: 'section' | 'key' | 'value';
@@ -15,16 +15,18 @@ export interface NpmrcEnvironmentVariable {
 export interface NpmrcSettingLine extends NpmrcBaseLine {
   type: 'setting';
   section: string | null;
+  npmSection: string | null;
   key: string;
-  array: boolean;
+  isArray: boolean;
   value: unknown;
-  environmentVariables: NpmrcEnvironmentVariable[];
+  environmentVariableReferences: NpmrcEnvironmentVariableReference[];
 }
 
 export interface NpmrcSectionLine extends NpmrcBaseLine {
   type: 'section';
   name: string;
-  environmentVariables: NpmrcEnvironmentVariable[];
+  npmSection: string | null;
+  environmentVariableReferences: NpmrcEnvironmentVariableReference[];
 }
 
 export interface NpmrcOtherLine extends NpmrcBaseLine {
@@ -103,15 +105,15 @@ function decodeNpmrcValue(raw: string): unknown {
   return value;
 }
 
-function parseEnvironmentVariables(
+function findEnvironmentVariableReferences(
   value: unknown,
-  source: NpmrcEnvironmentVariable['source'],
-): NpmrcEnvironmentVariable[] {
+  source: NpmrcEnvironmentVariableReference['source'],
+): NpmrcEnvironmentVariableReference[] {
   if (typeof value !== 'string') {
     return [];
   }
 
-  const variables: NpmrcEnvironmentVariable[] = [];
+  const references: NpmrcEnvironmentVariableReference[] = [];
   for (let index = 0; index < value.length; index += 1) {
     if (value[index] !== '$' || value[index + 1] !== '{') {
       continue;
@@ -152,7 +154,7 @@ function parseEnvironmentVariables(
       continue;
     }
 
-    variables.push({
+    references.push({
       name: value.slice(nameStart, nameEnd),
       optional,
       source,
@@ -160,7 +162,7 @@ function parseEnvironmentVariables(
     index = closingBraceIndex;
   }
 
-  return variables;
+  return references;
 }
 
 function findAssignmentSeparator(line: string): number {
@@ -177,10 +179,23 @@ function isSectionLine(line: string): boolean {
   return line.startsWith('[') && line.indexOf(']') === line.length - 1;
 }
 
+// npm's ini parser only recognizes a section when `[` is the first character.
+function isSectionLineForNpm(line: string): boolean {
+  if (!line.startsWith('[')) {
+    return false;
+  }
+
+  const closingBracketIndex = line.indexOf(']');
+  return (
+    closingBracketIndex >= 1 && !line.slice(closingBracketIndex + 1).trim()
+  );
+}
+
 function parseNpmrcLine(
   raw: string,
   lineEnding: NpmrcLineEnding,
   section: string | null,
+  npmSection: string | null,
 ): NpmrcLine {
   const trimmed = raw.trim();
   if (!trimmed || trimmed.startsWith('#') || trimmed.startsWith(';')) {
@@ -189,11 +204,16 @@ function parseNpmrcLine(
 
   if (isSectionLine(trimmed)) {
     const name = String(decodeNpmrcText(trimmed.slice(1, -1)));
+    const nextNpmSection = isSectionLineForNpm(raw) ? name : npmSection;
 
     return {
       type: 'section',
       name,
-      environmentVariables: parseEnvironmentVariables(name, 'section'),
+      npmSection: nextNpmSection,
+      environmentVariableReferences: findEnvironmentVariableReferences(
+        name,
+        'section',
+      ),
       raw,
       lineEnding,
     };
@@ -206,22 +226,23 @@ function parseNpmrcLine(
 
   const rawKey = raw.slice(0, separatorIndex < 0 ? undefined : separatorIndex);
   const decodedKey = String(decodeNpmrcText(rawKey));
-  const array = decodedKey.length > 2 && decodedKey.endsWith('[]');
-  const key = array ? decodedKey.slice(0, -2) : decodedKey;
+  const isArray = decodedKey.length > 2 && decodedKey.endsWith('[]');
+  const key = isArray ? decodedKey.slice(0, -2) : decodedKey;
   const value =
     separatorIndex < 0 ? true : decodeNpmrcValue(raw.slice(separatorIndex + 1));
-  const environmentVariables = [
-    ...parseEnvironmentVariables(key, 'key'),
-    ...parseEnvironmentVariables(value, 'value'),
+  const environmentVariableReferences = [
+    ...findEnvironmentVariableReferences(key, 'key'),
+    ...findEnvironmentVariableReferences(value, 'value'),
   ];
 
   return {
     type: 'setting',
     section,
+    npmSection,
     key,
-    array,
+    isArray,
     value,
-    environmentVariables,
+    environmentVariableReferences,
     raw,
     lineEnding,
   };
@@ -231,6 +252,7 @@ export function parseNpmrc(content: string): NpmrcDocument {
   const lines: NpmrcLine[] = [];
   let detectedLineEnding: DetectedNpmrcLineEnding | null = null;
   let section: string | null = null;
+  let npmSection: string | null = null;
   let lineStart = 0;
   let index = 0;
 
@@ -252,11 +274,13 @@ export function parseNpmrc(content: string): NpmrcDocument {
       content.slice(lineStart, index),
       lineEnding,
       section,
+      npmSection,
     );
     lines.push(line);
 
     if (line.type === 'section') {
       section = line.name;
+      npmSection = line.npmSection;
     }
 
     index += lineEnding.length;
@@ -264,7 +288,12 @@ export function parseNpmrc(content: string): NpmrcDocument {
   }
 
   if (lineStart < content.length) {
-    const line = parseNpmrcLine(content.slice(lineStart), '', section);
+    const line = parseNpmrcLine(
+      content.slice(lineStart),
+      '',
+      section,
+      npmSection,
+    );
     lines.push(line);
   }
 

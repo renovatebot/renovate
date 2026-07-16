@@ -17,7 +17,7 @@ export interface NpmrcResult {
   npmrcFileName: string | null;
 }
 
-interface SanitizedNpmrc {
+interface SanitizedRepoNpmrc {
   content: string;
   detectedLineEnding: NpmrcDocument['detectedLineEnding'];
 }
@@ -25,41 +25,46 @@ interface SanitizedNpmrc {
 function sanitizeRepoNpmrc(
   repoNpmrc: string,
   npmrcFileName: string,
-): SanitizedNpmrc {
+): SanitizedRepoNpmrc {
   const document = parseNpmrc(repoNpmrc);
-  const lines: NpmrcLine[] = [];
-  const allowEnvironmentVariables = GlobalConfig.get('exposeAllEnv');
-  let removedEnvironmentAssignments = false;
-  let removedPackageLock = false;
+  const retainedLines: NpmrcLine[] = [];
+  const allowEnvironmentVariableReferences = GlobalConfig.get('exposeAllEnv');
+  let removedEnvironmentVariableReferenceLine = false;
+  let removedPackageLockSetting = false;
 
   for (const line of document.lines) {
+    if (line.type === 'other') {
+      retainedLines.push(line);
+      continue;
+    }
+
+    const isTopLevelSettingForNpm = line.npmSection === null;
     if (
       line.type === 'setting' &&
-      line.section === null &&
+      isTopLevelSettingForNpm &&
       line.key === 'package-lock'
     ) {
-      removedPackageLock = true;
+      removedPackageLockSetting = true;
       continue;
     }
 
     if (
-      line.type === 'setting' &&
-      line.section === null &&
-      !allowEnvironmentVariables &&
-      line.environmentVariables.length > 0
+      isTopLevelSettingForNpm &&
+      !allowEnvironmentVariableReferences &&
+      line.environmentVariableReferences.length > 0
     ) {
-      removedEnvironmentAssignments = true;
+      removedEnvironmentVariableReferenceLine = true;
       continue;
     }
 
-    lines.push(line);
+    retainedLines.push(line);
   }
 
-  if (removedPackageLock) {
+  if (removedPackageLockSetting) {
     logger.debug('Stripping package-lock setting from .npmrc');
   }
 
-  if (removedEnvironmentAssignments) {
+  if (removedEnvironmentVariableReferenceLine) {
     logger.debug(
       { npmrcFileName },
       'Stripping .npmrc file of lines with variables',
@@ -67,28 +72,30 @@ function sanitizeRepoNpmrc(
   }
 
   return {
-    content: renderNpmrc(lines),
+    content: renderNpmrc(retainedLines),
     detectedLineEnding: document.detectedLineEnding,
   };
 }
 
 function mergeNpmrcDocuments(
   configNpmrc: string | undefined,
-  repoNpmrc: SanitizedNpmrc,
+  sanitizedRepoNpmrc: SanitizedRepoNpmrc,
 ): string {
   if (!configNpmrc) {
-    return repoNpmrc.content;
+    return sanitizedRepoNpmrc.content;
   }
 
   const configDocument = parseNpmrc(configNpmrc);
   if (configDocument.trailingLineEnding) {
-    return `${configNpmrc}${repoNpmrc.content}`;
+    return `${configNpmrc}${sanitizedRepoNpmrc.content}`;
   }
 
   const separator: Exclude<NpmrcLineEnding, ''> =
-    configDocument.detectedLineEnding ?? repoNpmrc.detectedLineEnding ?? '\n';
+    configDocument.detectedLineEnding ??
+    sanitizedRepoNpmrc.detectedLineEnding ??
+    '\n';
 
-  return `${configNpmrc}${separator}${repoNpmrc.content}`;
+  return `${configNpmrc}${separator}${sanitizedRepoNpmrc.content}`;
 }
 
 export async function resolveNpmrc(

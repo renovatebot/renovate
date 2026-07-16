@@ -285,7 +285,7 @@ describe('modules/manager/npm/npmrc', () => {
       );
     });
 
-    describe('environment variable sanitization', () => {
+    describe('environment variable reference sanitization', () => {
       it.each`
         source
         ${'auth=${TOKEN}'}
@@ -318,7 +318,7 @@ describe('modules/manager/npm/npmrc', () => {
         ${'auth=\\\\\\${TOKEN}'}
         ${'auth=\\\\\\\\${TOKEN}'}
         ${'${SCOPE}:registry=https://registry.test'}
-      `('removes active expression $source', async ({ source }) => {
+      `('removes active environment expression $source', async ({ source }) => {
         const npmrc = await resolveRepoNpmrc(source);
 
         expect(npmrc).toBe('');
@@ -331,7 +331,7 @@ describe('modules/manager/npm/npmrc', () => {
         ${'auth=${}'}
         ${'auth=${TOKEN??}'}
         ${'auth=${TOKEN'}
-      `('keeps inactive expression $source', async ({ source }) => {
+      `('keeps inactive environment expression $source', async ({ source }) => {
         const npmrc = await resolveRepoNpmrc(source);
 
         expect(npmrc).toBe(source);
@@ -353,15 +353,42 @@ describe('modules/manager/npm/npmrc', () => {
         },
       );
 
-      it('removes an environment variable from a bare key', async () => {
+      it('removes a bare key containing an environment variable reference', async () => {
         const npmrc = await resolveRepoNpmrc('not-an-assignment ${TOKEN}');
 
         expect(npmrc).toBe('');
       });
 
-      it('keeps environment variables inside a section', async () => {
+      it('keeps environment variable references inside an npm section', async () => {
         const source =
           '[scope]\r\nauth=${TOKEN}\r\n${KEY}=value\r\n[${SECTION}]\r\n';
+
+        const npmrc = await resolveRepoNpmrc(source);
+
+        expect(npmrc).toBe(source);
+      });
+
+      it.each([' ', '\t', '\uFEFF'])(
+        'removes top-level settings after a section-like line prefixed with %j',
+        async (prefix) => {
+          const sectionLine = `${prefix}[scope]\n`;
+          const npmrc = await resolveRepoNpmrc(
+            `${sectionLine}auth = \${TOKEN}\npackage-lock=false\n`,
+          );
+
+          expect(npmrc).toBe(sectionLine);
+        },
+      );
+
+      it('removes an environment variable reference from a section-like setting', async () => {
+        const npmrc = await resolveRepoNpmrc(' [${SECTION}]\n');
+
+        expect(npmrc).toBe('');
+      });
+
+      it("keeps npm's current section after a section-like setting", async () => {
+        const source =
+          '[recognized]\n [parser-only]\nauth=${TOKEN}\npackage-lock=false\n';
 
         const npmrc = await resolveRepoNpmrc(source);
 
