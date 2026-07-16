@@ -263,6 +263,14 @@ export interface Platform {
      */
     rebaseLabel?: string,
   ): string;
+  massageIssueMarkdown?(
+    issueBody: string,
+    /**
+     * Useful for suggesting the use of rebase label when there is no better
+     * way, e.g. for Gerrit.
+     */
+    rebaseLabel?: string,
+  ): string;
   updatePr(prConfig: UpdatePrConfig): Promise<void>;
   mergePr(config: MergePRConfig): Promise<boolean>;
   addReviewers(number: number, reviewers: string[]): Promise<void>;
@@ -318,6 +326,7 @@ export interface Platform {
   extractRulesFromCodeOwnersLines?(cleanedLines: string[]): FileOwnerRule[];
 
   maxBodyLength(): number;
+  maxIssueBodyLength?(): number;
   labelCharLimit?(): number;
 }
 

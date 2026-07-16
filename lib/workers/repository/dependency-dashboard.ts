@@ -616,8 +616,10 @@ export async function ensureDependencyDashboard(
 
   // fit the detected dependencies section
   const footer = getFooter(config);
+  const issueBodyLimit =
+    platform.maxIssueBodyLength?.() ?? platform.maxBodyLength();
   issueBody += PackageFiles.getDashboardMarkdown(
-    platform.maxBodyLength() - issueBody.length - footer.length,
+    issueBodyLimit - issueBody.length - footer.length,
   );
 
   issueBody += footer;
@@ -667,7 +669,9 @@ export async function ensureDependencyDashboard(
     await platform.ensureIssue({
       title: config.dependencyDashboardTitle!,
       reuseTitle,
-      body: platform.massageMarkdown(issueBody, config.rebaseLabel),
+      body:
+        platform.massageIssueMarkdown?.(issueBody, config.rebaseLabel) ??
+        platform.massageMarkdown(issueBody, config.rebaseLabel),
       labels: config.dependencyDashboardLabels,
       confidential: config.confidential,
     });
