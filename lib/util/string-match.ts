@@ -10,7 +10,8 @@ export function isDockerDigest(input: string): boolean {
 
 /**
  * Check if a string is an intentional glob pattern.
- * We treat patterns containing `*`, `?`, or `{` (brace expansion) as globs.
+ * We treat patterns containing `*`, `?` (wildcards), `{` (brace expansion) or
+ * `\` (escape character) as globs.
  * Square brackets `[...]` are deliberately excluded because email addresses
  * (like GitHub bot emails `foo+renovate[bot]@example.com`) contain literal
  * brackets that must not be interpreted as glob character classes.
@@ -18,9 +19,10 @@ export function isDockerDigest(input: string): boolean {
 function isGlobPattern(pattern: string): boolean {
   // Remove the '!' prefix if present (used for negation)
   const cleanPattern = pattern.startsWith('!') ? pattern.slice(1) : pattern;
-  // Treat `*`, `?` (wildcards) and `{` (brace expansion) as glob indicators.
-  // `[` is intentionally omitted so literal brackets in emails match exactly.
-  return /[*?{]/.test(cleanPattern);
+  // Treat `*`, `?` (wildcards), `{` (brace expansion) and `\` (escape) as glob
+  // indicators. `[` is intentionally omitted so literal brackets in emails match
+  // exactly.
+  return /[*?{\\]/.test(cleanPattern);
 }
 
 export function getRegexOrGlobPredicate(pattern: string): StringMatchPredicate {

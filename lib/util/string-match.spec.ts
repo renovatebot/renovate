@@ -79,6 +79,15 @@ describe('util/string-match', () => {
         matchRegexOrGlobList('datasource-npm', ['datasource-{crate,go}']),
       ).toBeFalse();
     });
+
+    it('still supports escaped glob patterns', () => {
+      expect(
+        matchRegexOrGlobList('.release-version', ['\\.release-version']),
+      ).toBeTrue();
+      expect(
+        matchRegexOrGlobList('xrelease-version', ['\\.release-version']),
+      ).toBeFalse();
+    });
   });
 
   describe('anyMatchRegexOrGlobList()', () => {
