@@ -323,6 +323,47 @@ For this to work, `docker` needs to be installed and the Docker socket available
 
 If you are using this mode, and cannot migrate to `binarySource=install`, [please provide feedback in this Discussion](https://github.com/renovatebot/renovate/discussions/40742).
 
+### Overriding tool version lookups
+
+When Renovate needs to install a tool, it first looks up the available tool versions, usually from `github.com` via the `github-releases` or `github-tags` datasource.
+If your environment cannot reach `github.com`, or you want the lookups to use a registry you control, you can override the lookup with `packageRules` in your bot/global config.
+Any of [`overrideDatasource`](configuration-options.md#packagerulesoverridedatasource), [`overridePackageName`](configuration-options.md#packagerulesoverridepackagename), `registryUrls`, `versioning` and `extractVersion` can be overridden this way.
+
+For example, to look up Composer versions from a Docker registry mirror instead of GitHub releases:
+
+```json
+{
+  "packageRules": [
+    {
+      "matchDatasources": ["github-releases"],
+      "matchPackageNames": ["containerbase/composer-prebuild"],
+      "overrideDatasource": "docker",
+      "overridePackageName": "my-registry.company.com/mirror/composer"
+    }
+  ]
+}
+```
+
+Or, if you host your own GitHub Enterprise Server instance and mirror the `containerbase` releases there, you can keep the `github-releases` datasource and only override `registryUrls`:
+
+```json
+{
+  "packageRules": [
+    {
+      "matchDatasources": ["github-releases"],
+      "matchPackageNames": ["containerbase/composer-prebuild"],
+      "registryUrls": ["https://ghe.company.com"]
+    }
+  ]
+}
+```
+
+Rules can match on the tool's package name (e.g. `containerbase/composer-prebuild`) with `matchPackageNames`, or on the tool name itself (e.g. `composer`) with `matchDepNames`.
+
+!!! note
+  Only `packageRules` from the bot/global config apply to tool version lookups.
+  `packageRules` in repository config files like `renovate.json` do not apply, so that repository users cannot redirect tool lookups.
+
 ## `cacheDir`
 
 By default Renovate stores cache data in a temporary directory like `/tmp/renovate/cache`.

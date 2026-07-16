@@ -257,6 +257,86 @@ describe('util/exec/containerbase', () => {
         );
       },
     );
+
+    describe('with packageRules', () => {
+      beforeEach(() => {
+        GlobalConfig.reset();
+      });
+
+      it('overrides datasource, packageName, versioning and extractVersion', async () => {
+        GlobalConfig.set({
+          packageRules: [
+            {
+              matchDatasources: ['github-releases'],
+              matchPackageNames: ['containerbase/composer-prebuild'],
+              overrideDatasource: 'docker',
+              overridePackageName: 'my-mirror/composer',
+              versioning: 'composer',
+              extractVersion: '^v(?<version>.*)$',
+            },
+          ],
+        });
+        datasource.getPkgReleases.mockResolvedValueOnce({
+          releases: [{ version: '1.1.0' }, { version: '2.1.0' }],
+        });
+
+        expect(await resolveConstraint({ toolName: 'composer' })).toBe('2.1.0');
+        expect(datasource.getPkgReleases).toHaveBeenCalledWith(
+          expect.objectContaining({
+            datasource: 'docker',
+            packageName: 'my-mirror/composer',
+            extractVersion: '^v(?<version>.*)$',
+          }),
+        );
+      });
+
+      it('overrides registryUrls, e.g. to point at a GitHub Enterprise Server instance', async () => {
+        GlobalConfig.set({
+          packageRules: [
+            {
+              matchDatasources: ['github-releases'],
+              matchPackageNames: ['containerbase/composer-prebuild'],
+              registryUrls: ['https://ghe.company.com'],
+            },
+          ],
+        });
+        datasource.getPkgReleases.mockResolvedValueOnce({
+          releases: [{ version: '1.1.0' }, { version: '2.1.0' }],
+        });
+
+        expect(await resolveConstraint({ toolName: 'composer' })).toBe('2.1.0');
+        expect(datasource.getPkgReleases).toHaveBeenCalledWith(
+          expect.objectContaining({
+            datasource: 'github-releases',
+            packageName: 'containerbase/composer-prebuild',
+            registryUrls: ['https://ghe.company.com'],
+          }),
+        );
+      });
+
+      it('leaves config unchanged when no rule matches', async () => {
+        GlobalConfig.set({
+          packageRules: [
+            {
+              matchPackageNames: ['some-other-package'],
+              overrideDatasource: 'docker',
+              overridePackageName: 'my-mirror/composer',
+            },
+          ],
+        });
+        datasource.getPkgReleases.mockResolvedValueOnce({
+          releases: [{ version: '1.1.0' }, { version: '2.1.0' }],
+        });
+
+        expect(await resolveConstraint({ toolName: 'composer' })).toBe('2.1.0');
+        expect(datasource.getPkgReleases).toHaveBeenCalledWith(
+          expect.objectContaining({
+            datasource: 'github-releases',
+            packageName: 'containerbase/composer-prebuild',
+          }),
+        );
+      });
+    });
   });
 
   describe('generateInstallCommands()', () => {

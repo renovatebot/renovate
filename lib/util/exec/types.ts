@@ -272,6 +272,7 @@ export interface ToolConfig {
   datasource: string;
   extractVersion?: string;
   packageName: string;
+  registryUrls?: string[] | null;
   versioning: VersioningName;
 }
 

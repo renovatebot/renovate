@@ -5,6 +5,7 @@ import { logger } from '../../logger/index.ts';
 import type { ReleaseResult } from '../../modules/datasource/index.ts';
 import type { VersioningApi } from '../../modules/versioning/types.ts';
 import { getEnv } from '../env.ts';
+import { applyPackageRules } from '../package-rules/index.ts';
 import type { Opt, ToolConfig, ToolConstraint, ToolName } from './types.ts';
 
 export const allToolConfig: Record<ToolName, ToolConfig> = {
@@ -295,14 +296,37 @@ function isStable(
   return true;
 }
 
+async function getEffectiveToolConfig(
+  toolName: ToolName,
+  toolConfig: ToolConfig,
+): Promise<ToolConfig> {
+  const packageRules = GlobalConfig.getPackageRules();
+  if (!packageRules.length) {
+    return toolConfig;
+  }
+  const resolved = await applyPackageRules({
+    depName: toolName,
+    ...toolConfig,
+    packageRules,
+  });
+  return {
+    datasource: resolved.datasource,
+    packageName: resolved.packageName,
+    versioning: resolved.versioning,
+    extractVersion: resolved.extractVersion,
+    registryUrls: resolved.registryUrls,
+  };
+}
+
 export async function resolveConstraint(
   toolConstraint: ToolConstraint,
 ): Promise<string> {
   const { toolName } = toolConstraint;
-  const toolConfig = allToolConfig[toolName];
-  if (!toolConfig) {
+  const rawToolConfig = allToolConfig[toolName];
+  if (!rawToolConfig) {
     throw new Error(`Invalid tool to install: ${toolName}`);
   }
+  const toolConfig = await getEffectiveToolConfig(toolName, rawToolConfig);
 
   const { get: getVersioning } =
     await import('../../modules/versioning/index.ts');
