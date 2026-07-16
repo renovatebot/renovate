@@ -37,7 +37,8 @@ function getAutoApproveLabelValue(): number | null {
   const codeReviewLabel = projectLabels[CODE_REVIEW_LABEL];
   if (!codeReviewLabel) {
     logger.warn(
-      `Cannot auto-approve: project "${repository}" does not define a "${CODE_REVIEW_LABEL}" label`,
+      { repository, label: CODE_REVIEW_LABEL },
+      'Cannot auto-approve: label is not defined on the project',
     );
     return null;
   }

@@ -337,7 +337,8 @@ describe('modules/platform/gerrit/scm', () => {
         pushOptions: ['notify=NONE', 'ready'],
       });
       expect(logger.logger.warn).toHaveBeenCalledWith(
-        'Cannot auto-approve: project "test/repo" does not define a "Code-Review" label',
+        { repository: 'test/repo', label: 'Code-Review' },
+        'Cannot auto-approve: label is not defined on the project',
       );
     });
 
