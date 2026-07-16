@@ -43,6 +43,7 @@ import {
 } from './common.ts';
 import { DockerHubCache } from './dockerhub-cache.ts';
 import { ecrPublicRegex, ecrRegex, isECRMaxResultsError } from './ecr.ts';
+import { googleRegex } from './google.ts';
 import type { DistributionManifest, OciImageManifest } from './schema.ts';
 import {
   DockerHubTagsPage,
@@ -176,6 +177,69 @@ export class DockerDatasource extends Datasource {
           tag,
         },
         'Unknown Error looking up docker manifest',
+      );
+      return null;
+    }
+  }
+
+  /**
+   * Checks the OCI Distribution Spec Referrers API
+   * (`GET /v2/<name>/referrers/<digest>`) for any artifacts (attestations,
+   * signatures, SBOMs, etc.) attached to the given digest.
+   *
+   * This is intentionally presence-based (any referrer counts) rather than
+   * filtering by a specific `artifactType`, since attestation conventions
+   * vary widely between registries/tools (cosign, in-toto, custom CI
+   * pipelines producing their own attestation artifacts, etc.).
+   *
+   * The caller currently only invokes this for registries matched by
+   * `googleRegex` (Google Container/Artifact Registry), as a starting
+   * point, since referrers support elsewhere in the ecosystem is less
+   * consistent — see the linked discussion for context on widening this.
+   */
+  private async hasReferrers(
+    registryHost: string,
+    dockerRepository: string,
+    digest: string,
+  ): Promise<boolean | null> {
+    logger.debug(
+      `hasReferrers(${registryHost}, ${dockerRepository}, ${digest})`,
+    );
+    try {
+      const headers = await getAuthHeaders(
+        this.http,
+        registryHost,
+        dockerRepository,
+      );
+      if (!headers) {
+        return null;
+      }
+      headers.accept = 'application/vnd.oci.image.index.v1+json';
+      const url = `${registryHost}/v2/${dockerRepository}/referrers/${digest}`;
+      const referrersResponse = await this.http.getText(url, {
+        headers,
+        noAuth: true,
+        cacheProvider: memCacheProvider,
+      });
+      const parsed = ManifestJson.safeParse(referrersResponse.body);
+      if (!parsed.success) {
+        return null;
+      }
+      const referrersIndex = parsed.data;
+      return (
+        'manifests' in referrersIndex && referrersIndex.manifests.length > 0
+      );
+    } catch (err) /* istanbul ignore next */ {
+      if (err instanceof ExternalHostError) {
+        throw err;
+      }
+      if (err.statusCode === 404) {
+        // No referrers, or registry doesn't support the Referrers API
+        return false;
+      }
+      logger.debug(
+        { err, registryHost, dockerRepository, digest },
+        'Unknown error checking OCI referrers',
       );
       return null;
     }
@@ -1209,6 +1273,44 @@ export class DockerDatasource extends Datasource {
         ret.homepage = labels[imageUrlLabel];
       }
     }
+
+    // Experimental / opt-in: checking OCI referrers adds an extra request
+    // per lookup, so this is gated behind an explicit flag rather than
+    // enabled unconditionally for every Google-hosted registry. See the
+    // linked discussion for the plan to graduate this out of RENOVATE_X_.
+    if (
+      getEnv().RENOVATE_X_DOCKER_CHECK_REFERRERS &&
+      googleRegex.test(registryHost)
+    ) {
+      const manifestResponse = await this.getManifestResponse(
+        registryHost,
+        dockerRepository,
+        latestTag,
+        'head',
+      );
+      const latestDigest =
+        manifestResponse &&
+        hasKey('docker-content-digest', manifestResponse.headers)
+          ? (manifestResponse.headers['docker-content-digest'] as string)
+          : null;
+      if (latestDigest) {
+        const attested = await this.hasReferrers(
+          registryHost,
+          dockerRepository,
+          latestDigest,
+        );
+        if (attested !== null) {
+          const latestRelease = releases.find(
+            (release) => release.version === latestTag,
+          );
+          /* v8 ignore next 3 -- latestTag is always derived from releases, so this is always found */
+          if (latestRelease) {
+            latestRelease.attestation = attested;
+          }
+        }
+      }
+    }
+
     return ret;
   }
 

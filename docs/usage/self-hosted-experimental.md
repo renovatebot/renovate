@@ -23,6 +23,12 @@ For more information see [the OpenTelemetry docs](opentelemetry.md).
 
 If set to any value, Renovate will always paginate requests to GitHub fully, instead of stopping after 10 pages.
 
+## `RENOVATE_X_DOCKER_CHECK_REFERRERS`
+
+If set to any value, Renovate will check the [OCI Distribution Spec Referrers API](https://github.com/opencontainers/distribution-spec/blob/main/spec.md#listing-referrers) for the latest tag of Google Container/Artifact Registry (`*gcr.io`, `*-docker.pkg.dev`) images, and populate `attestation: true` on the corresponding release if any referrers (attestations, signatures, SBOMs, etc.) are found.
+
+This is presence-based only (any referrer counts, regardless of `artifactType`), and only checks the latest tag rather than every tag, to keep the added request overhead bounded. See [this discussion](https://github.com/renovatebot/renovate/discussions) for context and to give feedback on wider registry support.
+
 ## `RENOVATE_X_DOCKER_HUB_DISABLE_LABEL_LOOKUP`
 
 If set to any value, Renovate will skip attempting to get release labels (e.g. gitRef, sourceUrl) from manifest annotations for `https://index.docker.io`.
