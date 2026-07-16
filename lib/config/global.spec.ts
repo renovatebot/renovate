@@ -17,30 +17,15 @@ describe('config/global', () => {
   });
 
   describe('getPackageRules()', () => {
-    it('returns packageRules passed to set()', () => {
-      const packageRules: PackageRule[] = [
-        { matchPackageNames: ['containerbase/node-prebuild'] },
-      ];
-
-      GlobalConfig.set({ packageRules });
-
-      expect(GlobalConfig.getPackageRules()).toBe(packageRules);
-    });
-
-    it('does not strip packageRules from set() result', () => {
+    it('mirrors packageRules from set()', () => {
       const packageRules: PackageRule[] = [
         { matchPackageNames: ['containerbase/node-prebuild'] },
       ];
 
       const result = GlobalConfig.set({ packageRules });
 
+      expect(GlobalConfig.getPackageRules()).toBe(packageRules);
       expect(result.packageRules).toBe(packageRules);
-    });
-
-    it('is cleared by reset()', () => {
-      GlobalConfig.set({
-        packageRules: [{ matchPackageNames: ['containerbase/node-prebuild'] }],
-      });
 
       GlobalConfig.reset();
 
