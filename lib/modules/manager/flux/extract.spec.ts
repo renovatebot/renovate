@@ -300,6 +300,48 @@ describe('modules/manager/flux/extract', () => {
       });
     });
 
+    // These patterns are exercised by Flux's own OCI chart repository tests,
+    // see https://github.com/fluxcd/source-controller/blob/5376a7ead3e636f6bef21dc7d06e9c2fe90808c6/internal/helm/repository/oci_chart_repository_test.go#L95-L184
+    it.each(['*', '0.9.x', '0.*'])(
+      'uses helm versioning for OCI HelmRelease range %p resolved through registryAliases',
+      (version) => {
+        const result = extractPackageFile(
+          codeBlock`
+            apiVersion: helm.toolkit.fluxcd.io/v2beta1
+            kind: HelmRelease
+            metadata:
+              name: sealed-secrets
+              namespace: kube-system
+            spec:
+              chart:
+                spec:
+                  chart: sealed-secrets
+                  sourceRef:
+                    kind: HelmRepository
+                    name: sealed-secrets
+                  version: "${version}"
+          `,
+          'helmRelease.yaml',
+          {
+            registryAliases: {
+              'sealed-secrets': 'oci://ghcr.io/charts',
+            },
+          },
+        );
+        expect(result).toEqual({
+          deps: [
+            {
+              currentValue: version,
+              datasource: DockerDatasource.id,
+              depName: 'sealed-secrets',
+              packageName: 'ghcr.io/charts/sealed-secrets',
+              versioning: 'helm',
+            },
+          ],
+        });
+      },
+    );
+
     it('ignores HelmRelease resources without an apiVersion', () => {
       const result = extractPackageFile('kind: HelmRelease', 'test.yaml');
       expect(result).toBeNull();
@@ -1819,6 +1861,54 @@ describe('modules/manager/flux/extract', () => {
         },
       ]);
     });
+
+    // These patterns are exercised by Flux's own OCI chart repository tests,
+    // see https://github.com/fluxcd/source-controller/blob/5376a7ead3e636f6bef21dc7d06e9c2fe90808c6/internal/helm/repository/oci_chart_repository_test.go#L95-L184
+    it.each(['*', '0.9.x', '0.*'])(
+      'uses helm versioning for OCI HelmRepository range %p',
+      (version) => {
+        const result = extractPackageFile(
+          codeBlock`
+            apiVersion: source.toolkit.fluxcd.io/v1beta2
+            kind: HelmRepository
+            metadata:
+              name: actions-runner-controller
+              namespace: flux-system
+            spec:
+              type: oci
+              url: oci://ghcr.io/actions
+            ---
+            apiVersion: helm.toolkit.fluxcd.io/v2beta1
+            kind: HelmRelease
+            metadata:
+              name: arc-assets
+              namespace: flux-system
+            spec:
+              chart:
+                spec:
+                  chart: actions-runner-controller-charts/gha-runner-scale-set
+                  version: "${version}"
+                  sourceRef:
+                    kind: HelmRepository
+                    name: actions-runner-controller
+                    namespace: flux-system
+          `,
+          'helmRelease.yaml',
+        );
+        expect(result).toEqual({
+          deps: [
+            {
+              currentValue: version,
+              datasource: DockerDatasource.id,
+              depName: 'actions-runner-controller-charts/gha-runner-scale-set',
+              packageName:
+                'ghcr.io/actions/actions-runner-controller-charts/gha-runner-scale-set',
+              versioning: 'helm',
+            },
+          ],
+        });
+      },
+    );
 
     it('should handle HelmRepository w/o type oci and url starts with oci', async () => {
       const result = await extractAllPackageFiles(config, [

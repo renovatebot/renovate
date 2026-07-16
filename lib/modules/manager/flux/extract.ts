@@ -124,6 +124,31 @@ function resolveGitRepositoryPerSourceTag(
   }
 }
 
+/**
+ * Flux always treats `spec.chart.spec.version` as a Helm chart semver
+ * expression, including ranges, regardless of whether the chart is served
+ * from a classic Helm repository or an OCI registry:
+ * - https://github.com/fluxcd/source-controller/blob/main/internal/helm/repository/oci_chart_repository.go#L142-L144
+ * - https://github.com/fluxcd/source-controller/blob/main/internal/helm/repository/oci_chart_repository.go#L170-L171
+ * - https://github.com/fluxcd/source-controller/blob/main/internal/helm/repository/oci_chart_repository.go#L257-L277
+ *
+ * Renovate's Docker datasource defaults to `docker` versioning, which does
+ * not understand Helm/semver ranges such as `*`, `0.9.x` or `0.*` (all
+ * exercised in Flux's own test suite, see
+ * https://github.com/fluxcd/source-controller/blob/5376a7ead3e636f6bef21dc7d06e9c2fe90808c6/internal/helm/repository/oci_chart_repository_test.go#L95-L184).
+ * When the current value is a range rather than a concrete version, switch
+ * to `helm` versioning so Renovate resolves/bumps it the same way Flux does.
+ */
+function applyOCIHelmVersioning(dep: PackageDependency): void {
+  if (
+    dep.currentValue &&
+    !dockerVersioningApi.isVersion(dep.currentValue) &&
+    helmVersioningApi.isValid(dep.currentValue)
+  ) {
+    dep.versioning = helmVersioningId;
+  }
+}
+
 function resolveHelmRepository(
   dep: PackageDependency,
   matchingRepositories: HelmRepository[],
@@ -136,13 +161,7 @@ function resolveHelmRepository(
         if (repo.spec.type === 'oci' || isOCIRegistry(repo.spec.url)) {
           // Change datasource to Docker
           dep.datasource = DockerDatasource.id;
-          if (
-            dep.currentValue &&
-            !dockerVersioningApi.isVersion(dep.currentValue) &&
-            helmVersioningApi.isValid(dep.currentValue)
-          ) {
-            dep.versioning = helmVersioningId;
-          }
+          applyOCIHelmVersioning(dep);
           // Ensure the URL is a valid OCI path
           dep.packageName = getDep(
             `${removeOCIPrefix(repo.spec.url)}/${dep.depName}`,
@@ -169,13 +188,7 @@ function resolveHelmRepository(
       if (isOCIRegistry(aliasUrl)) {
         // Treat alias value as an OCI registry URL
         dep.datasource = DockerDatasource.id;
-        if (
-          dep.currentValue &&
-          !dockerVersioningApi.isVersion(dep.currentValue) &&
-          helmVersioningApi.isValid(dep.currentValue)
-        ) {
-          dep.versioning = helmVersioningId;
-        }
+        applyOCIHelmVersioning(dep);
         dep.packageName = getDep(
           `${removeOCIPrefix(aliasUrl)}/${dep.depName}`,
           false,
