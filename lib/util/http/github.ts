@@ -148,11 +148,12 @@ function handleGotError(
           {
             documentationUrl: `${GlobalConfig.get('productLinks').documentation}getting-started/running/#githubcom-token-for-changelogs-and-tools`,
           },
-          `Rate limit exceeded for ${parsed.host}, as no hostRules set for this host. Please set a GITHUB_COM_TOKEN`,
+          'Rate limit exceeded for api.github.com, as no hostRules set for this host. Please set a GITHUB_COM_TOKEN',
         );
       } else {
         logger.once.warn(
-          `Rate limit exceeded for ${parsed!.host}, as no hostRules set for this host`,
+          { host: parsed!.host },
+          'Rate limit exceeded, as no hostRules set for this host',
         );
       }
     }
@@ -201,10 +202,12 @@ function handleGotError(
     const errors = GithubErrors.parse(err.body?.errors);
     if (errors.some((e) => e.field === 'milestone')) {
       return err;
-    } else if (errors.some((e) => e.code === 'invalid')) {
+    }
+    if (errors.some((e) => e.code === 'invalid')) {
       logger.debug({ err }, 'Received invalid response - aborting');
       return new Error(REPOSITORY_CHANGED);
-    } else if (
+    }
+    if (
       errors.some((e) => e.message?.startsWith('A pull request already exists'))
     ) {
       return err;
@@ -222,8 +225,8 @@ function handleGotError(
 }
 
 interface GraphqlPaginatedContent<T = unknown> {
-  nodes: T[];
-  edges: T[];
+  nodes?: T[];
+  edges?: T[];
   pageInfo: { hasNextPage: boolean; endCursor: string };
 }
 

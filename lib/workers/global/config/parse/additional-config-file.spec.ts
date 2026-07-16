@@ -1,4 +1,5 @@
 import fs from 'node:fs';
+import { codeBlock } from 'common-tags';
 import fsExtra from 'fs-extra';
 import type { DirectoryResult } from 'tmp-promise';
 import { dir } from 'tmp-promise';
@@ -67,10 +68,12 @@ describe('workers/global/config/parse/additional-config-file', () => {
 
     it('warns if config is invalid', async () => {
       const configFile = upath.resolve(tmp.path, 'config.js');
-      const fileContent = `module.exports = {
-        "enabled": "invalid-value",
-        "prTitle":"something",
-      };`;
+      const fileContent = codeBlock`
+        module.exports = {
+                "enabled": "invalid-value",
+                "prTitle":"something",
+              };
+      `;
       fs.writeFileSync(configFile, fileContent, { encoding: 'utf8' });
       await file.getConfig({ RENOVATE_ADDITIONAL_CONFIG_FILE: configFile });
       expect(logger.warn).toHaveBeenCalledTimes(2);
@@ -84,16 +87,18 @@ describe('workers/global/config/parse/additional-config-file', () => {
     it.each([
       [
         'config.invalid.js',
-        `module.exports = {
-        "platform": "github",
-        "token":"abcdef",
-        "onboarding": false,
-        "gitAuthor": "Renovate Bot <renovate@whitesourcesoftware.com>"
-        "onboardingConfig": {
-          "extends": ["config:recommended"],
-        },
-        "repositories": [ "test/test" ],
-      };`,
+        codeBlock`
+          module.exports = {
+                  "platform": "github",
+                  "token":"abcdef",
+                  "onboarding": false,
+                  "gitAuthor": "Renovate Bot <renovate@whitesourcesoftware.com>"
+                  "onboardingConfig": {
+                    "extends": ["config:recommended"],
+                  },
+                  "repositories": [ "test/test" ],
+                };
+        `,
       ],
       ['config.invalid.json5', `"invalid":`],
       ['config.invalid.yaml', `clearly: "invalid" "yaml"`],
@@ -138,7 +143,12 @@ describe('workers/global/config/parse/additional-config-file', () => {
       await file.getConfig({ RENOVATE_ADDITIONAL_CONFIG_FILE: tmpConfigFile });
 
       expect(logger.fatal).toHaveBeenCalledWith(
-        'Error parsing additional config file due to unresolved variable(s): CI_API_V4_URL is not defined',
+        {
+          err: expect.objectContaining({
+            message: 'CI_API_V4_URL is not defined',
+          }),
+        },
+        'Error parsing additional config file due to unresolved variable(s)',
       );
       expect(processExitSpy).toHaveBeenCalledExactlyOnceWith(1);
     });
@@ -159,12 +169,14 @@ describe('workers/global/config/parse/additional-config-file', () => {
 
     it('exports env variables to environment from processEnv object', async () => {
       const configFile = upath.resolve(tmp.path, 'config2.js');
-      const fileContent1 = `module.exports = {
-        "processEnv": {
-        "SOME_KEY": "SOME_VALUE"
-        },
-        "labels": ["renovate"]
-      }`;
+      const fileContent1 = codeBlock`
+        module.exports = {
+                "processEnv": {
+                "SOME_KEY": "SOME_VALUE"
+                },
+                "labels": ["renovate"]
+              }
+      `;
       fs.writeFileSync(configFile, fileContent1, {
         encoding: 'utf8',
       });
@@ -182,14 +194,16 @@ describe('workers/global/config/parse/additional-config-file', () => {
 
     it('does not export env variables to environment from processEnv object if key/value is invalid', async () => {
       const configFile = upath.resolve(tmp.path, 'config3.js');
-      const fileContent1 = `module.exports = {
-        "processEnv": {
-        "SOME_KEY": "SOME_VALUE",
-        "SOME_OTHER_KEY": true,
-        "valid_Key": "true",
-        },
-        "labels": ["renovate"]
-      }`;
+      const fileContent1 = codeBlock`
+        module.exports = {
+                "processEnv": {
+                "SOME_KEY": "SOME_VALUE",
+                "SOME_OTHER_KEY": true,
+                "valid_Key": "true",
+                },
+                "labels": ["renovate"]
+              }
+      `;
       fs.writeFileSync(configFile, fileContent1, {
         encoding: 'utf8',
       });

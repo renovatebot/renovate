@@ -323,8 +323,8 @@ async function getFileContent(
     return await readLocalFile(filePath, 'utf8');
   } catch (e) {
     logger.warn(
-      { file: filePath },
-      `${bumpVersionsDescr}: Could not read file: ${e.message}`,
+      { file: filePath, bumpVersionsDescr, err: e },
+      'bumpVersions: Could not read file',
     );
     return null;
   }
@@ -341,7 +341,7 @@ function parseFileChanges(
     return { state: 'unmodified' };
   }
 
-  const lastChange = changes[changes.length - 1];
+  const lastChange = changes.at(-1)!;
   if (lastChange.type === 'deletion') {
     return { state: 'deleted' };
   }
