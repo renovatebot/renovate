@@ -620,7 +620,19 @@ describe('modules/platform/gerrit/scm', () => {
       expect(git.pushCommit).not.toHaveBeenCalled();
     });
 
-    it('commitAndPush() - existing change with new changes - auto-approve without known Code-Review label skips vote', async () => {
+    it('commitAndPush() - existing change with new changes - auto-approve', async () => {
+      configureScm('test/repo', 'user', {
+        'Code-Review': {
+          values: {
+            '-2': 'rejected',
+            '-1': 'disliked',
+            '0': 'default',
+            '1': 'looksOkay',
+            '2': 'approved',
+          },
+          default_value: 0,
+        } satisfies GerritLabelTypeInfo,
+      });
       const existingChange = partial<GerritChange>({
         _number: 123456,
         change_id: 'I1bf983f8f6530c44826925b1308a45fe672408a6',
@@ -668,7 +680,7 @@ describe('modules/platform/gerrit/scm', () => {
         files: [],
         sourceRef: 'renovate/dependency-1.x',
         targetRef: 'refs/for/main',
-        pushOptions: ['notify=NONE', 'ready'],
+        pushOptions: ['notify=NONE', 'ready', 'label=Code-Review+2'],
       });
     });
   });
