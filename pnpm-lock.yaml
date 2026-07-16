@@ -18,9 +18,6 @@ overrides:
   protobufjs@8.0.1: 8.7.0
   vite: 8.1.3
 
-patchedDependencies:
-  install-artifact-from-github@1.6.0: 0ceb8fd926db68d46ee8734f3c5924f9c67d8749303a18a09c8bb8d6fe2ddeb8
-
 importers:
 
   .:
@@ -8762,7 +8759,7 @@ snapshots:
 
   ini@6.0.0: {}
 
-  install-artifact-from-github@1.6.0(patch_hash=0ceb8fd926db68d46ee8734f3c5924f9c67d8749303a18a09c8bb8d6fe2ddeb8):
+  install-artifact-from-github@1.6.0:
     optional: true
 
   is-alphabetical@2.0.1: {}
@@ -10103,7 +10100,7 @@ snapshots:
 
   re2@1.25.2:
     dependencies:
-      install-artifact-from-github: 1.6.0(patch_hash=0ceb8fd926db68d46ee8734f3c5924f9c67d8749303a18a09c8bb8d6fe2ddeb8)
+      install-artifact-from-github: 1.6.0
       nan: 2.28.0
       node-gyp: 13.0.1
     optional: true
