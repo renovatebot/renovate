@@ -106,9 +106,9 @@ describe('modules/datasource/pypi/schema', () => {
       const result = PypiSimpleFile.parse(input);
 
       expect(result.filename).toBe('package-1.0.0.tar.gz');
-      expect(result['requires-python']).toBe('>=3.7');
+      expect(result.requires_python).toBe('>=3.7');
       expect(result.yanked).toBe(false);
-      expect(result['upload-time']).toBe('2023-01-01T00:00:00.000Z');
+      expect(result.upload_time).toBe('2023-01-01T00:00:00.000Z');
     });
 
     it('handles missing optional fields', () => {
@@ -119,9 +119,9 @@ describe('modules/datasource/pypi/schema', () => {
       const result = PypiSimpleFile.parse(input);
 
       expect(result.filename).toBe('package-1.0.0.tar.gz');
-      expect(result['requires-python']).toBeUndefined();
+      expect(result.requires_python).toBeUndefined();
       expect(result.yanked).toBe(false);
-      expect(result['upload-time']).toBeUndefined();
+      expect(result.upload_time).toBeUndefined();
     });
 
     it('normalizes null optional fields to undefined', () => {
@@ -133,11 +133,11 @@ describe('modules/datasource/pypi/schema', () => {
 
       const result = PypiSimpleFile.parse(input);
 
-      expect(result['requires-python']).toBeUndefined();
-      expect(result['upload-time']).toBeUndefined();
+      expect(result.requires_python).toBeUndefined();
+      expect(result.upload_time).toBeUndefined();
     });
 
-    it('handles yanked as a string reason', () => {
+    it('treats yanked string reason as truthy', () => {
       const input = {
         filename: 'package-1.0.0.tar.gz',
         yanked: 'security vulnerability',
@@ -145,7 +145,7 @@ describe('modules/datasource/pypi/schema', () => {
 
       const result = PypiSimpleFile.parse(input);
 
-      expect(result.yanked).toBe('security vulnerability');
+      expect(result.yanked).toBe(true);
     });
 
     it('handles yanked as true', () => {

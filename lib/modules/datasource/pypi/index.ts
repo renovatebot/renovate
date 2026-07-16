@@ -1,4 +1,4 @@
-import { isNonEmptyString, isTruthy } from '@sindresorhus/is';
+import { isNonEmptyString } from '@sindresorhus/is';
 import changelogFilenameRegex from 'changelog-filename-regex';
 import { logger } from '../../../logger/index.ts';
 import { coerceArray, deduplicateArray } from '../../../util/array.ts';
@@ -304,7 +304,7 @@ export class PypiDatasource extends Datasource {
     const releases: Releases = {};
     const parsed = Json.pipe(PypiSimpleResponse).safeParse(json);
     if (!parsed.success) {
-      logger.trace(
+      logger.debug(
         { packageName, err: parsed.error },
         'Failed to parse JSON-based Simple API response',
       );
@@ -316,20 +316,7 @@ export class PypiDatasource extends Datasource {
         packageName,
       );
       if (version) {
-        const release: PypiRelease = {
-          // Per the Simple API spec, `yanked` is yanked when truthy
-          // https://packaging.python.org/en/latest/specifications/simple-repository-api/#json-based-simple-api-for-python-package-indexes
-          yanked: isTruthy(file.yanked),
-        };
-        const requiresPython = file['requires-python'];
-        if (requiresPython) {
-          release.requires_python = requiresPython;
-        }
-        const uploadTime = file['upload-time'];
-        if (uploadTime) {
-          release.upload_time = uploadTime;
-        }
-        (releases[version] ??= []).push(release);
+        (releases[version] ??= []).push(file);
       }
     }
     return releases;
