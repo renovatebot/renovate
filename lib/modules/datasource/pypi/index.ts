@@ -304,7 +304,7 @@ export class PypiDatasource extends Datasource {
     const releases: Releases = {};
     const parsed = Json.pipe(PypiSimpleResponse).safeParse(json);
     if (!parsed.success) {
-      logger.debug(
+      logger.once.warn(
         { packageName, err: parsed.error },
         'Failed to parse JSON-based Simple API response',
       );
