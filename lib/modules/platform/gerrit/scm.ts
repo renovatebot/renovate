@@ -29,14 +29,9 @@ export function configureScm(
 }
 
 /**
- * Determines the numeric vote to apply on the "Code-Review" label when
- * `autoApprove` is requested, based on the project's actual label
- * configuration instead of assuming "+2" is always available (some Gerrit
- * projects only define values up to "+1").
- *
- * Returns `null` if the project doesn't define a "Code-Review" label at all
- * (e.g. it was removed from the project config), so that callers can skip
- * voting instead of risking the whole push being rejected by Gerrit.
+ * Returns the max vote value for the "Code-Review" label (some Gerrit
+ * projects only allow up to +1), or `null` if the label isn't defined on
+ * the project, so the caller can skip voting instead of failing the push.
  */
 function getAutoApproveLabelValue(): number | null {
   const codeReviewLabel = projectLabels[CODE_REVIEW_LABEL];
