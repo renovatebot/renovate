@@ -266,7 +266,7 @@ function operatorPriority(operator: string, rawVersion: string): number {
       return 7;
     case '!=':
       return 8;
-    /* v8 ignore next 2 -- unreachable for constraints that parsed successfully */
+    /* v8 ignore next -- unreachable for constraints that parsed successfully */
     default:
       return 0;
   }
