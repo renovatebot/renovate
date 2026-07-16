@@ -94,6 +94,7 @@ async function validate(
           );
       })
       .join('\n');
+    // oxlint-disable-next-line renovate/logger-static-message -- the multi-line, colorized diff must be interpolated to stay readable; as a metadata field it is JSON-escaped onto one line
     logger.warn(`Config migration diff:\n${msg}`);
     if (strict) {
       returnVal = 1;

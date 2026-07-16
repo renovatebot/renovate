@@ -1,5 +1,6 @@
 import codeblockInSpecFixtures from './rules/codeblock-in-spec-fixtures.js';
 import enforceTsExtension from './rules/enforce-ts-extension.js';
+import loggerStaticMessage from './rules/logger-static-message.js';
 import noHardcodedDocsUrl from './rules/no-hardcoded-docs-url.js';
 import noNewUrl from './rules/no-new-url.js';
 import noRedundantMockReset from './rules/no-redundant-mock-reset.js';
@@ -16,6 +17,7 @@ export default {
   rules: {
     'codeblock-in-spec-fixtures': codeblockInSpecFixtures,
     'enforce-ts-extension': enforceTsExtension,
+    'logger-static-message': loggerStaticMessage,
     'no-hardcoded-docs-url': noHardcodedDocsUrl,
     'no-new-url': noNewUrl,
     'no-redundant-mock-reset': noRedundantMockReset,

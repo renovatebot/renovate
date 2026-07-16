@@ -70,6 +70,7 @@
     "unicorn/no-lonely-if": "error",
 
     "renovate/enforce-ts-extension": "error",
+    "renovate/logger-static-message": "error",
     "renovate/no-hardcoded-docs-url": "error",
     "renovate/no-new-url": "error",
     "renovate/no-stateful-global-regex": "error",
@@ -190,6 +191,7 @@
         "jest/valid-title": "error",
         "vitest/consistent-test-it": ["error", { "fn": "it" }],
         "typescript/unbound-method": "off",
+        "renovate/logger-static-message": "off",
         "renovate/codeblock-in-spec-fixtures": "error",
         "renovate/no-redundant-mock-reset": "error",
         "renovate/prefer-nullish-util": "off",
