@@ -70,7 +70,7 @@ export class GlobalConfig {
 
   private static config: RepoGlobalConfig & InternalGlobalConfigOptions = {};
 
-  static get(): RepoGlobalConfig;
+  static get(): RepoGlobalConfig & InternalGlobalConfigOptions;
   static get<
     Key extends keyof RepoGlobalConfig | keyof InternalGlobalConfigOptions,
   >(key: Key): Required<RepoGlobalConfig & InternalGlobalConfigOptions>[Key];
@@ -79,7 +79,7 @@ export class GlobalConfig {
   >(
     key?: Key,
   ):
-    | RepoGlobalConfig
+    | (RepoGlobalConfig & InternalGlobalConfigOptions)
     | Required<RepoGlobalConfig & InternalGlobalConfigOptions>[Key] {
     const defaultValue = key
       ? (globalConfigOptionDefaults[key] as Required<
