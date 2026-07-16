@@ -4,7 +4,10 @@ import type {
   GitRef,
 } from 'azure-devops-node-api/interfaces/GitInterfaces.js';
 import { GitPullRequestMergeStrategy } from 'azure-devops-node-api/interfaces/GitInterfaces.js';
-import type { PolicyConfiguration } from 'azure-devops-node-api/interfaces/PolicyInterfaces.js';
+import type {
+  PolicyConfiguration,
+  PolicyEvaluationRecord,
+} from 'azure-devops-node-api/interfaces/PolicyInterfaces.js';
 import { logger } from '../../../logger/index.ts';
 import { streamToString } from '../../../util/streams.ts';
 import { getNewBranchName } from '../util.ts';
@@ -200,6 +203,17 @@ export async function getMergeMethod(
     `getMergeMethod(branchRef=${branchRef!})=${GitPullRequestMergeStrategy[GitPullRequestMergeStrategy.NoFastForward]}`,
   );
   return GitPullRequestMergeStrategy.NoFastForward;
+}
+
+export async function getPolicyEvaluations(
+  project: string,
+  artifactId: string,
+): Promise<PolicyEvaluationRecord[]> {
+  logger.debug(`getPolicyEvaluations(${project}, ${artifactId})`);
+  const policyEvaluations = await (
+    await azureApi.policyApi()
+  ).getPolicyEvaluations(project, artifactId);
+  return policyEvaluations;
 }
 
 export async function getAllProjectTeams(
