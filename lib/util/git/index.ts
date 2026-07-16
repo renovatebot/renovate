@@ -1,6 +1,11 @@
 import { setTimeout } from 'node:timers/promises';
 import URL from 'node:url';
-import { isBoolean, isNonEmptyObject, isString } from '@sindresorhus/is';
+import {
+  isBoolean,
+  isNonEmptyArray,
+  isNonEmptyObject,
+  isString,
+} from '@sindresorhus/is';
 import fs from 'fs-extra';
 import { DateTime } from 'luxon';
 import semver from 'semver';
@@ -33,6 +38,7 @@ import type { GitProtocol } from '../../types/git.ts';
 import { incCountValue, incLimitedValue } from '../../workers/global/limits.ts';
 import { getCache } from '../cache/repository/index.ts';
 import { getEnv } from '../env.ts';
+import { rawExec } from '../exec/common.ts';
 import type { ExtraEnv } from '../exec/types.ts';
 import { getChildEnv } from '../exec/utils.ts';
 import { newlineRegex, regEx } from '../regex.ts';
@@ -1235,6 +1241,7 @@ export async function prepareCommit({
   branchName,
   files,
   message,
+  trailers,
   force = false,
 }: CommitFilesConfig): Promise<CommitResult | null> {
   const localDir = GlobalConfig.get('localDir');
@@ -1317,7 +1324,18 @@ export async function prepareCommit({
       commitOptions['--no-verify'] = null;
     }
 
-    const commitRes = await git.commit(message, [], commitOptions);
+    let commitMessage = message;
+    if (isNonEmptyArray(trailers)) {
+      // simple-git joins message array elements with blank lines, so the
+      // trailers become the final block of the commit message
+      const messageParts =
+        typeof message === 'string' ? [message] : [...message];
+      messageParts.push(trailers.join('\n'));
+      commitMessage = messageParts;
+      await verifyCommitTrailers(messageParts.join('\n\n'), trailers);
+    }
+
+    const commitRes = await git.commit(commitMessage, [], commitOptions);
     if (
       isNonEmptyObject(commitRes.summary) &&
       commitRes.summary.changes === 0 &&
@@ -1356,6 +1374,32 @@ export async function prepareCommit({
     return result;
   } catch (err) /* v8 ignore next -- TODO: add test #40625 */ {
     return handleCommitError(err, branchName, files);
+  }
+}
+
+/**
+ * Warn if any of the configured trailers are not interpreted as git trailers
+ * in the given commit message, e.g. because another message block broke the
+ * trailer block. Uses git's own trailer parsing (`git-interpret-trailers`).
+ */
+async function verifyCommitTrailers(
+  message: string,
+  trailers: string[],
+): Promise<void> {
+  // simple-git does not support stdin, so use rawExec instead
+  const { stdout } = await rawExec('git interpret-trailers --parse', {
+    cwd: GlobalConfig.get('localDir'),
+    input: message,
+  });
+  const parsedTrailers = stdout.split(newlineRegex).map((line) => line.trim());
+  const missing = trailers.filter(
+    (trailer) => !parsedTrailers.includes(trailer),
+  );
+  if (isNonEmptyArray(missing)) {
+    logger.warn(
+      { missing },
+      'Some commit trailers were not parsed as git trailers',
+    );
   }
 }
 

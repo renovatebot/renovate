@@ -80,6 +80,8 @@ export interface CommitFilesConfig {
   branchName: string;
   files: FileChange[];
   message: string | string[];
+  /** Git trailers (`Key: value` lines) appended as the final block of the commit message */
+  trailers?: string[];
   force?: boolean;
   platformCommit?: PlatformCommitOptions;
   /** Only needed by Gerrit platform */

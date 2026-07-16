@@ -738,6 +738,15 @@ export async function processBranch(
         logger.trace(`commitMessage: ${JSON.stringify(config.commitMessage)}`);
       }
 
+      if (config.commitTrailers) {
+        config.commitTrailers = config.commitTrailers.map((trailer) =>
+          template.compile(trailer, config),
+        );
+        logger.trace(
+          `commitTrailers: ${JSON.stringify(config.commitTrailers)}`,
+        );
+      }
+
       commitSha = await commitFilesToBranch(config);
       // Checkout to base branch to ensure that the next branch processing always starts with git being on the baseBranch
       // baseBranch is not checked out at the start of processBranch() due to pull/16246

@@ -5,12 +5,16 @@ import { logger } from '../../../logger/index.ts';
 import * as git from '../../../util/git/index.ts';
 import type { CommitFilesConfig, FileChange } from '../../../util/git/types.ts';
 import { hash } from '../../../util/hash.ts';
+import { regEx } from '../../../util/regex.ts';
 import type { LongCommitSha } from '../../../util/schema-utils/git.ts';
 import { isLongCommitSha } from '../../../util/schema-utils/git.ts';
 import { DefaultGitScm } from '../default-scm.ts';
 import { client } from './client.ts';
 import type { GerritFindPRConfig } from './types.ts';
 import { convertGerritDateToISO } from './utils.ts';
+
+/** Trailer keys managed by Renovate on Gerrit, user-configured values are ignored */
+const reservedTrailerRe = regEx(/^(?:Renovate-Branch|Change-Id):/);
 
 let repository: string;
 let username: string;
@@ -185,9 +189,13 @@ export class GerritScm extends DefaultGitScm {
     }
 
     const changeId = existingChange?.change_id ?? generateChangeId();
-    commit.message = [
-      ...message,
-      `Renovate-Branch: ${commit.branchName}\nChange-Id: ${changeId}`,
+    commit.message = message;
+    commit.trailers = [
+      ...(commit.trailers ?? []).filter(
+        (trailer) => !reservedTrailerRe.test(trailer),
+      ),
+      `Renovate-Branch: ${commit.branchName}`,
+      `Change-Id: ${changeId}`,
     ];
     const commitResult = await git.prepareCommit({ ...commit, force: true });
     if (commitResult) {

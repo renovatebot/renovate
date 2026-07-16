@@ -467,17 +467,53 @@ describe('modules/platform/gerrit/scm', () => {
         baseBranch: 'main',
         branchName: 'renovate/dependency-1.x',
         files: [],
-        message: [
-          'pr title',
-          expect.stringMatching(
-            /^Renovate-Branch: renovate\/dependency-1\.x\nChange-Id: I[a-z0-9]{40}$/,
-          ),
+        message: ['pr title'],
+        trailers: [
+          'Renovate-Branch: renovate/dependency-1.x',
+          expect.stringMatching(/^Change-Id: I[a-z0-9]{40}$/),
         ],
         prTitle: 'pr title',
         force: true,
       });
       // For new changes, push should NOT be called - it will be done by createPr()
       expect(git.pushCommit).not.toHaveBeenCalled();
+    });
+
+    it('commitAndPush() - merges user trailers and overrides reserved keys', async () => {
+      clientMock.getBranchChange.mockResolvedValueOnce(null);
+      git.prepareCommit.mockResolvedValueOnce({
+        commitSha: 'commitSha' as LongCommitSha,
+        parentCommitSha: 'parentSha' as LongCommitSha,
+        files: [],
+      });
+
+      expect(
+        await gerritScm.commitAndPush({
+          branchName: 'renovate/dependency-1.x',
+          baseBranch: 'main',
+          message: 'commit msg',
+          files: [],
+          prTitle: 'pr title',
+          trailers: [
+            'Signed-off-by: Renovate Bot <bot@renovateapp.com>',
+            'Change-Id: Iuserprovided',
+            'Renovate-Branch: user-provided',
+          ],
+        }),
+      ).toBe('commitSha');
+      expect(git.prepareCommit).toHaveBeenCalledExactlyOnceWith({
+        baseBranch: 'main',
+        branchName: 'renovate/dependency-1.x',
+        files: [],
+        message: ['pr title'],
+        trailers: [
+          'Signed-off-by: Renovate Bot <bot@renovateapp.com>',
+          'Renovate-Branch: renovate/dependency-1.x',
+          expect.stringMatching(/^Change-Id: I[a-z0-9]{40}$/),
+        ],
+        prTitle: 'pr title',
+        force: true,
+      });
     });
 
     it('commitAndPush() - existing change keeps original target branch', async () => {
@@ -511,9 +547,10 @@ describe('modules/platform/gerrit/scm', () => {
         baseBranch: 'new-main',
         branchName: 'renovate/dependency-1.x',
         files: [],
-        message: [
-          'pr title',
-          'Renovate-Branch: renovate/dependency-1.x\nChange-Id: Ifcd936eef0ced620040a07a337c586d0a882725b',
+        message: ['pr title'],
+        trailers: [
+          'Renovate-Branch: renovate/dependency-1.x',
+          'Change-Id: Ifcd936eef0ced620040a07a337c586d0a882725b',
         ],
         prTitle: 'pr title',
         force: true,
@@ -560,9 +597,10 @@ describe('modules/platform/gerrit/scm', () => {
         baseBranch: 'main',
         branchName: 'renovate/dependency-1.x',
         files: [],
-        message: [
-          'pr title',
-          'Renovate-Branch: renovate/dependency-1.x\nChange-Id: I1bf983f8f6530c44826925b1308a45fe672408a6',
+        message: ['pr title'],
+        trailers: [
+          'Renovate-Branch: renovate/dependency-1.x',
+          'Change-Id: I1bf983f8f6530c44826925b1308a45fe672408a6',
         ],
         prTitle: 'pr title',
         force: true,
@@ -606,9 +644,10 @@ describe('modules/platform/gerrit/scm', () => {
         baseBranch: 'main',
         branchName: 'renovate/dependency-1.x',
         files: [],
-        message: [
-          'pr title',
-          'Renovate-Branch: renovate/dependency-1.x\nChange-Id: I1bf983f8f6530c44826925b1308a45fe672408a6',
+        message: ['pr title'],
+        trailers: [
+          'Renovate-Branch: renovate/dependency-1.x',
+          'Change-Id: I1bf983f8f6530c44826925b1308a45fe672408a6',
         ],
         prTitle: 'pr title',
         autoApprove: true,

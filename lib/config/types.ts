@@ -91,6 +91,7 @@ export interface RenovateSharedConfig {
   commitMessageLowerCase?: 'auto' | 'never';
   commitMessagePrefix?: string;
   commitMessageTopic?: string;
+  commitTrailers?: string[];
   confidential?: boolean;
   configValidationError?: boolean;
   changelogUrl?: string;

@@ -6,7 +6,8 @@ Renovate supports all Gerrit 3.x versions.
 
 Support for Gerrit is currently _experimental_, meaning that it _might_ still have some undiscovered bugs or design limitations, and that we _might_ need to change functionality in a non-backwards compatible manner in a non-major release.
 
-Renovate stores its metadata in the _commit message footer_.
+Renovate stores its metadata in the _commit message footer_, as the `Renovate-Branch` and `Change-Id` git trailers.
+These two trailer keys are reserved on Gerrit: Renovate ignores user-configured [`commitTrailers`](../../../configuration-options.md#committrailers) values for them.
 
 ## Authentication
 

@@ -124,6 +124,32 @@ describe('workers/repository/onboarding/branch/create', () => {
       });
     });
 
+    describe('applies the commitTrailers value', () => {
+      it('compiles gitAuthor and passes trailers', async () => {
+        await createOnboardingBranch({
+          ...config,
+          commitTrailers: ['Signed-off-by: {{{gitAuthor}}}'],
+          gitAuthor: 'Bot <bot@botland.com>',
+        });
+
+        expect(scm.commitAndPush).toHaveBeenCalledExactlyOnceWith({
+          branchName: 'renovate/configure',
+          files: [
+            {
+              type: 'addition',
+              path: 'renovate.json',
+              contents: '{"foo":"bar"}',
+            },
+          ],
+          force: true,
+          message: 'Add renovate.json',
+          trailers: ['Signed-off-by: Bot <bot@botland.com>'],
+          platformCommit: 'auto',
+          prTitle: 'Configure Renovate',
+        });
+      });
+    });
+
     describe('applies the commitMessagePrefix value', () => {
       it('to the default commit message', async () => {
         const prefix = 'RENOV-123';

@@ -59,6 +59,25 @@ describe('workers/repository/update/branch/commit', () => {
       ]);
     });
 
+    it('passes commit trailers', async () => {
+      config.updatedPackageFiles?.push({
+        type: 'addition',
+        path: 'package.json',
+        contents: 'some contents',
+      });
+      config.commitTrailers = [
+        'Signed-off-by: Renovate Bot <bot@renovateapp.com>',
+      ];
+
+      await commitFilesToBranch(config);
+
+      expect(scm.commitAndPush).toHaveBeenCalledExactlyOnceWith(
+        expect.objectContaining({
+          trailers: ['Signed-off-by: Renovate Bot <bot@renovateapp.com>'],
+        }),
+      );
+    });
+
     it('dry runs', async () => {
       GlobalConfig.set({ dryRun: 'full' });
       config.updatedPackageFiles?.push({
