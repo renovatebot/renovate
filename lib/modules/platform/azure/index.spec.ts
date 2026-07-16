@@ -1676,7 +1676,7 @@ describe('modules/platform/azure/index', () => {
 
     it('uses a higher limit for issue markdown than PR markdown', () => {
       const input = 'a'.repeat(4100);
-      expect(azure.massageIssueMarkdown(input)).toBe(input);
+      expect(azure.massageIssueMarkdown?.(input)).toBe(input);
       expect(azure.massageMarkdown(input).length).toBeLessThan(input.length);
     });
   });
