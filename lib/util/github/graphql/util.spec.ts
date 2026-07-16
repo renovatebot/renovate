@@ -27,8 +27,12 @@ describe('util/github/graphql/util', () => {
 
     it('returns invalid query for invalid payload query', () => {
       const payloadQuery = '!@#';
-      expect(() => graphqlParse(`query { ${payloadQuery} }`)).toThrow();
-      expect(() => graphqlParse(prepareQuery(payloadQuery))).toThrow();
+      expect(() => graphqlParse(`query { ${payloadQuery} }`)).toThrow(
+        'Syntax Error: Expected Name, found "!".',
+      );
+      expect(() => graphqlParse(prepareQuery(payloadQuery))).toThrow(
+        'Syntax Error: Expected Name, found "!".',
+      );
     });
   });
 

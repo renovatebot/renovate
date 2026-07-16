@@ -970,7 +970,7 @@ describe('modules/manager/composer/artifacts', () => {
         newPackageFileContent: '{}',
         config,
       }),
-    ).rejects.toThrow();
+    ).rejects.toThrow('disk-space');
     expect(execSnapshots).toBeEmptyArray();
   });
 

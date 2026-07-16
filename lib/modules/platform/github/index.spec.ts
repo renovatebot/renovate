@@ -128,7 +128,9 @@ describe('modules/platform/github/index', () => {
 
     it('should throw if user failure', async () => {
       httpMock.scope(githubApiHost).get('/user').reply(404);
-      await expect(github.initPlatform({ token: '123test' })).rejects.toThrow();
+      await expect(github.initPlatform({ token: '123test' })).rejects.toThrow(
+        'Init: Authentication failure',
+      );
     });
 
     it('should support default endpoint no email access', async () => {
@@ -1107,7 +1109,7 @@ describe('modules/platform/github/index', () => {
         });
       await expect(
         github.initRepo({ repository: 'some/repo' }),
-      ).rejects.toThrow();
+      ).rejects.toThrow('archived');
     });
 
     it('throws not-found', async () => {
@@ -3421,7 +3423,7 @@ describe('modules/platform/github/index', () => {
       await github.initRepo({ repository: 'some/repo' });
       await expect(
         github.addAssignees(42, ['someuser', 'someotheruser']),
-      ).rejects.toThrow();
+      ).rejects.toThrow('Request failed with status code 404 (Not Found)');
     });
 
     it('should throw immediately on non-404 errors', async () => {
@@ -3431,7 +3433,7 @@ describe('modules/platform/github/index', () => {
       await github.initRepo({ repository: 'some/repo' });
       await expect(
         github.addAssignees(42, ['someuser', 'someotheruser']),
-      ).rejects.toThrow();
+      ).rejects.toThrow('external-host-error');
     });
   });
 
@@ -5503,7 +5505,9 @@ describe('modules/platform/github/index', () => {
       scope.get('/repos/some/repo/contents/file.json').reply(200, {
         content: toBase64('!@#'),
       });
-      await expect(github.getJsonFile('file.json')).rejects.toThrow();
+      await expect(github.getJsonFile('file.json')).rejects.toThrow(
+        "JSON5: invalid character '!' at 1:1",
+      );
     });
 
     it('throws on errors', async () => {
@@ -5514,7 +5518,9 @@ describe('modules/platform/github/index', () => {
         .get('/repos/some/repo/contents/file.json')
         .replyWithError('some error');
 
-      await expect(github.getJsonFile('file.json')).rejects.toThrow();
+      await expect(github.getJsonFile('file.json')).rejects.toThrow(
+        'some error',
+      );
     });
   });
 

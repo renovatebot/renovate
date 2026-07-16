@@ -129,7 +129,7 @@ export function findVariableInKotlinImport(
 ): VariableData | undefined {
   if (ctx.tmpKotlinImportStore.length && name.includes('.')) {
     for (const tokens of ctx.tmpKotlinImportStore) {
-      const lastToken = tokens[tokens.length - 1];
+      const lastToken = tokens.at(-1);
       if (lastToken && name.startsWith(`${lastToken.value}.`)) {
         const prefix = tokens
           .slice(0, -1)

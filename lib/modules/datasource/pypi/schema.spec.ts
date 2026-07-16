@@ -74,7 +74,9 @@ describe('modules/datasource/pypi/schema', () => {
     });
 
     it('throws for genuinely invalid input (no error swallowing)', () => {
-      expect(() => PypiResponse.parse('not-an-object')).toThrow();
+      expect(() => PypiResponse.parse('not-an-object')).toThrow(
+        'Invalid input: expected object, received string',
+      );
     });
 
     it('ignores extra fields in info', () => {

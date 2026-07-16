@@ -28,7 +28,9 @@ describe('workers/global/autodiscover', () => {
   it('throws if local and repositories defined', async () => {
     config.platform = 'local';
     config.repositories = ['a'];
-    await expect(autodiscoverRepositories(config)).rejects.toThrow();
+    await expect(autodiscoverRepositories(config)).rejects.toThrow(
+      'Invalid configuration: repositories list not supported when',
+    );
   });
 
   it('returns local', async () => {

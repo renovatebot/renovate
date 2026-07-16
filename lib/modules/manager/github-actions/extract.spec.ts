@@ -1118,6 +1118,83 @@ describe('modules/manager/github-actions/extract', () => {
         `;
       expect(extractPackageFile(yamlContent, 'action.yml')).toBeNull();
     });
+
+    it('extracts actions and with-version inputs nested in a parallel block', () => {
+      const yamlContent = codeBlock`
+        jobs:
+          build:
+            steps:
+              - uses: actions/checkout@v4
+              - parallel:
+                  - name: Setup Node.js
+                    uses: actions/setup-node@v5
+                    with:
+                      node-version: '20.0.0'
+                  - name: Setup Go
+                    uses: actions/setup-go@v5
+                    with:
+                      go-version: '1.23'
+              - run: npm test
+        `;
+
+      const res = extractPackageFile(yamlContent, 'workflow.yml');
+      expect(res?.deps).toMatchObject([
+        { depName: 'actions/checkout', depType: 'action' },
+        { depName: 'actions/setup-node', depType: 'action' },
+        { depName: 'actions/setup-go', depType: 'action' },
+        { depName: 'node', depType: 'uses-with', currentValue: '20.0.0' },
+        { depName: 'go', depType: 'uses-with', currentValue: '1.23' },
+      ]);
+    });
+
+    it('extracts community action with-inputs nested in a parallel block', () => {
+      const yamlContent = codeBlock`
+        jobs:
+          build:
+            steps:
+              - parallel:
+                  - uses: astral-sh/setup-uv@v8.2.0
+                    with:
+                      version: '0.4.x'
+        `;
+
+      const res = extractPackageFile(yamlContent, 'workflow.yml');
+      expect(res?.deps).toMatchObject([
+        { depName: 'astral-sh/setup-uv', depType: 'action' },
+        {
+          depName: 'astral-sh/uv',
+          depType: 'uses-with',
+          currentValue: '0.4.x',
+          datasource: 'github-releases',
+        },
+      ]);
+    });
+
+    it('extracts steps nested in nested parallel blocks', () => {
+      const yamlContent = codeBlock`
+        jobs:
+          build:
+            steps:
+              - parallel:
+                  - name: Setup Node.js
+                    uses: actions/setup-node@v5
+                    with:
+                      node-version: '18.0.0'
+                  - parallel:
+                      - name: Setup Go
+                        uses: actions/setup-go@v5
+                        with:
+                          go-version: '1.22'
+        `;
+
+      const res = extractPackageFile(yamlContent, 'workflow.yml');
+      expect(res?.deps).toMatchObject([
+        { depName: 'actions/setup-node', depType: 'action' },
+        { depName: 'actions/setup-go', depType: 'action' },
+        { depName: 'node', depType: 'uses-with', currentValue: '18.0.0' },
+        { depName: 'go', depType: 'uses-with', currentValue: '1.22' },
+      ]);
+    });
   });
 
   it.each([
