@@ -2327,6 +2327,29 @@ For example:
 You usually don't need to configure it in a host rule if you have already configured `matchHost` and only one host type is in use for those, as is usually the case.
 `hostType` can help for cases like an enterprise registry that serves multiple package types and has different authentication for each, although it's often the case that multiple `matchHost` rules could achieve the same thing.
 
+`hostType` is mutually exclusive with [`hostTypes`](#hostruleshosttypes): a host rule can use one or the other, but not both.
+
+### `hostRules.hostTypes`
+
+`hostTypes` works like [`hostType`](#hostruleshosttype), but accepts a list of host types, so a single host rule can match more than one host type.
+This helps when an enterprise registry, like Nexus, serves multiple package formats on the same host with the same credentials.
+For example, to authenticate both `npm` and `maven` requests against the same Nexus host:
+
+```json
+{
+  "hostRules": [
+    {
+      "matchHost": "nexus.example.com",
+      "hostTypes": ["npm", "maven"],
+      "username": "user",
+      "password": "pass"
+    }
+  ]
+}
+```
+
+`hostTypes` is mutually exclusive with `hostType`: a host rule can use one or the other, but not both.
+
 ### `hostRules.httpsCertificate`
 
 Specifies the [Certificate chains](https://en.wikipedia.org/wiki/X.509#Certificate_chains_and_cross-certification) in [PEM format](https://en.wikipedia.org/wiki/Privacy-Enhanced_Mail) for mTLS authentication.

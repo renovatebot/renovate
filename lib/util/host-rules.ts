@@ -35,6 +35,12 @@ export function migrateRule(rule: LegacyHostRule & HostRule): HostRule {
     );
   }
 
+  if (result.hostType && result.hostTypes) {
+    throw new Error(
+      `hostRules cannot contain both "hostType" and "hostTypes" - use one or the other.`,
+    );
+  }
+
   return result;
 }
 
@@ -110,8 +116,13 @@ function fromShorterToLongerMatchHost(a: HostRule, b: HostRule): number {
   return a.matchHost.length - b.matchHost.length;
 }
 
-function hostRuleRank({ hostType, matchHost, readOnly }: HostRule): number {
-  if ((hostType || readOnly) && matchHost) {
+function hostRuleRank({
+  hostType,
+  hostTypes,
+  matchHost,
+  readOnly,
+}: HostRule): number {
+  if ((hostType || hostTypes || readOnly) && matchHost) {
     return 3;
   }
 
@@ -119,7 +130,7 @@ function hostRuleRank({ hostType, matchHost, readOnly }: HostRule): number {
     return 2;
   }
 
-  if (hostType) {
+  if (hostType || hostTypes) {
     return 1;
   }
 
@@ -155,6 +166,13 @@ export function find(search: HostRuleSearch): CombinedHostRule {
       }
     }
 
+    if (rule.hostTypes) {
+      hostTypeMatch = false;
+      if (search.hostType && rule.hostTypes.includes(search.hostType)) {
+        hostTypeMatch = true;
+      }
+    }
+
     if (rule.matchHost && rule.resolvedHost) {
       hostMatch = false;
       if (search.url) {
@@ -178,15 +196,20 @@ export function find(search: HostRuleSearch): CombinedHostRule {
 
   const res: HostRule = Object.assign({}, ...matchedRules);
   delete res.hostType;
+  delete res.hostTypes;
   delete res.resolvedHost;
   delete res.matchHost;
   delete res.readOnly;
   return res;
 }
 
+function matchesHostType(rule: HostRule, hostType: string): boolean {
+  return rule.hostType === hostType || !!rule.hostTypes?.includes(hostType);
+}
+
 export function hosts({ hostType }: { hostType: string }): string[] {
   return hostRules
-    .filter((rule) => rule.hostType === hostType)
+    .filter((rule) => matchesHostType(rule, hostType))
     .map((rule) => rule.resolvedHost)
     .filter(isTruthy);
 }
@@ -203,7 +226,7 @@ export function hostType({ url }: { url: string }): string | null {
 }
 
 export function findAll({ hostType }: { hostType: string }): HostRule[] {
-  return hostRules.filter((rule) => rule.hostType === hostType);
+  return hostRules.filter((rule) => matchesHostType(rule, hostType));
 }
 
 /**

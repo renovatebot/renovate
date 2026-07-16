@@ -51,6 +51,19 @@ describe('util/host-rules', () => {
       );
     });
 
+    it('throws if both hostType and hostTypes', () => {
+      expect(() =>
+        add({
+          hostType: 'npm',
+          hostTypes: ['npm', 'maven'],
+          matchHost: 'nexus.example.com',
+          token: 'abc',
+        }),
+      ).toThrow(
+        'hostRules cannot contain both "hostType" and "hostTypes" - use one or the other.',
+      );
+    });
+
     it('supports baseUrl-only', () => {
       add({
         matchHost: 'https://some.endpoint',
@@ -155,6 +168,76 @@ describe('util/host-rules', () => {
       expect(
         find({ hostType: NugetDatasource.id, url: 'https://nuget.local/api' }),
       ).toEqual({ token: 'abc' });
+    });
+
+    it('matches on hostTypes', () => {
+      add({
+        hostTypes: ['npm', 'maven'],
+        matchHost: 'nexus.example.com',
+        token: 'abc',
+      });
+      expect(
+        find({
+          hostType: 'npm',
+          url: 'https://nexus.example.com/repository/npm/',
+        }),
+      ).toEqual({ token: 'abc' });
+      expect(
+        find({
+          hostType: 'maven',
+          url: 'https://nexus.example.com/repository/maven/',
+        }),
+      ).toEqual({ token: 'abc' });
+      expect(
+        find({
+          hostType: 'pypi',
+          url: 'https://nexus.example.com/repository/pypi/',
+        }),
+      ).toEqual({});
+    });
+
+    it('matches on hostTypes without matchHost', () => {
+      add({
+        hostTypes: ['npm', 'maven'],
+        token: 'abc',
+      });
+      expect(
+        find({ hostType: 'maven', url: 'https://nexus.example.com' }),
+      ).toEqual({ token: 'abc' });
+      expect(
+        find({ hostType: 'pypi', url: 'https://nexus.example.com' }),
+      ).toEqual({});
+    });
+
+    it('ranks hostTypes rules like hostType rules', () => {
+      add({
+        token: 'defaultToken',
+      });
+      add({
+        hostTypes: ['npm', 'maven'],
+        token: 'hostTypesToken',
+      });
+      add({
+        matchHost: 'https://nexus.example.com',
+        token: 'hostToken',
+      });
+      add({
+        hostTypes: ['npm', 'maven'],
+        matchHost: 'https://nexus.example.com',
+        token: 'specificToken',
+      });
+      expect(
+        find({ hostType: 'npm', url: 'https://nexus.example.com' }).token,
+      ).toBe('specificToken');
+    });
+
+    it('does not match hostTypes rule when search has no hostType', () => {
+      add({
+        hostTypes: ['npm'],
+        matchHost: 'nexus.example.com',
+        token: 'abc',
+      });
+      expect(find({ url: 'https://nexus.example.com' })).toEqual({});
     });
 
     it('matches on domainName', () => {
@@ -393,6 +476,25 @@ describe('util/host-rules', () => {
         'yet.another.local.registry',
       ]);
     });
+
+    it('returns hosts matched via hostTypes', () => {
+      add({
+        hostTypes: [NugetDatasource.id, 'maven'],
+        matchHost: 'https://nexus.local/repository',
+        token: 'abc',
+      });
+      add({
+        hostType: NugetDatasource.id,
+        matchHost: 'nuget.local',
+        token: 'def',
+      });
+      expect(hosts({ hostType: NugetDatasource.id })).toEqual([
+        'nexus.local',
+        'nuget.local',
+      ]);
+      expect(hosts({ hostType: 'maven' })).toEqual(['nexus.local']);
+      expect(hosts({ hostType: 'pypi' })).toEqual([]);
+    });
   });
 
   describe('findAll()', () => {
@@ -417,6 +519,24 @@ describe('util/host-rules', () => {
           matchHost: 'nuget.org',
         },
       ]);
+    });
+
+    it('returns rules matched via hostTypes', () => {
+      add({
+        hostTypes: ['npm', 'maven'],
+        matchHost: 'nexus.example.com',
+        token: 'abc',
+      });
+      expect(findAll({ hostType: 'npm' })).toEqual([
+        {
+          hostTypes: ['npm', 'maven'],
+          matchHost: 'nexus.example.com',
+          resolvedHost: 'nexus.example.com',
+          token: 'abc',
+        },
+      ]);
+      expect(findAll({ hostType: 'maven' })).toHaveLength(1);
+      expect(findAll({ hostType: 'pypi' })).toBeEmptyArray();
     });
   });
 
