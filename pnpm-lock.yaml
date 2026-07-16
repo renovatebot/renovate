@@ -607,8 +607,8 @@ importers:
         specifier: 6.3.1
         version: 6.3.1(@openpgp/web-stream-tools@0.3.1)
       re2:
-        specifier: 1.25.2
-        version: 1.25.2
+        specifier: 1.26.0
+        version: 1.26.0
 
 packages:
 
@@ -3523,8 +3523,8 @@ packages:
     resolution: {integrity: sha512-IBTdIkzZNOpqm7q3dRqJvMaldXjDHWkEDfrwGEQTs5eaQMWV+djAhR+wahyNNMAa+qpbDUhBMVt4ZKNwpPm7xQ==}
     engines: {node: ^20.17.0 || >=22.9.0}
 
-  install-artifact-from-github@1.6.0:
-    resolution: {integrity: sha512-wKsuzN8fy8QK7iEUqyWTQmvZ1QFGPn1xyl3/1iIIDthDjS7Hn9HoPwHlNakZirWbCsbad0lZMkr6Xfbpe1pUzw==}
+  install-artifact-from-github@1.7.0:
+    resolution: {integrity: sha512-qAb91yAKVF9rFY4rVP21ZtYUyCScxAFt9udwzVWNLBE1pQcdQeB2gd1HlNPcQNYCzCDvJ/QJQPuWQ6aTmSlU8g==}
     engines: {node: '>=18'}
     hasBin: true
 
@@ -4768,8 +4768,8 @@ packages:
     resolution: {integrity: sha512-y3bGgqKj3QBdxLbLkomlohkvsA8gdAiUQlSBJnBhfn+BPxg4bc62d8TcBW15wavDfgexCgccckhcZvywyQYPOw==}
     hasBin: true
 
-  re2@1.25.2:
-    resolution: {integrity: sha512-t75KS05wrPM0S7IRbM0l/WUYlHftJj3WAzQJAcSH8CrDP/jFYicZbMYTKohJ8w/3kFGwkY/G8/dGtC6CdShDlw==}
+  re2@1.26.0:
+    resolution: {integrity: sha512-QTEfFp0nu1eT/HKKZC+2BKM9Lb8uqprGkcHhro9r3giiKS+1SnNZBZ1m7C7Axi/VR1YGXiu3mp35UA53yHAuNw==}
     engines: {node: ^22.22.2 || ^24.15.0 || >=26.0.0}
 
   react-is@18.3.1:
@@ -8759,7 +8759,7 @@ snapshots:
 
   ini@6.0.0: {}
 
-  install-artifact-from-github@1.6.0:
+  install-artifact-from-github@1.7.0:
     optional: true
 
   is-alphabetical@2.0.1: {}
@@ -10098,9 +10098,9 @@ snapshots:
       minimist: 1.2.8
       strip-json-comments: 2.0.1
 
-  re2@1.25.2:
+  re2@1.26.0:
     dependencies:
-      install-artifact-from-github: 1.6.0
+      install-artifact-from-github: 1.7.0
       nan: 2.28.0
       node-gyp: 13.0.1
     optional: true
