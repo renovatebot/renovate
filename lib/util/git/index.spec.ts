@@ -1003,9 +1003,16 @@ describe('util/git/index', { timeout: 30000 }, () => {
       expect(result).toStartWith('100755');
     });
 
-    it('preserves a post-upgrade chmod in the committed tree', async () => {
+    it('preserves a post-upgrade chmod in the committed tree', async ({
+      skip,
+    }) => {
       const local = simpleGit(tmpDir.path);
-      await local.addConfig('core.fileMode', 'true');
+      const fileMode = await local.getConfig('core.fileMode');
+      skip(
+        fileMode.value !== 'true',
+        'Git does not track executable bits in this working tree',
+      );
+
       await fs.chmod(`${tmpDir.path}/master_file`, 0o644);
       auth.getGitEnvironmentVariables.mockReturnValue({});
       execCommon.rawExec.mockImplementationOnce(async (command, options) => {
