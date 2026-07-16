@@ -68,7 +68,7 @@ export class GlobalConfig {
     'userAgent',
   ];
 
-  private static config: RepoGlobalConfig = {};
+  private static config: RepoGlobalConfig & InternalGlobalConfigOptions = {};
 
   static get(): RepoGlobalConfig;
   static get<Key extends keyof RepoGlobalConfig>(

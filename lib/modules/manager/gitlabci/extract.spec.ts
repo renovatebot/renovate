@@ -1,13 +1,18 @@
 import { codeBlock } from 'common-tags';
 import { logger } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
-import type { RepoGlobalConfig } from '../../../config/types.ts';
+import type {
+  InternalGlobalConfigOptions,
+  RepoGlobalConfig,
+} from '../../../config/types.ts';
 import type { ExtractConfig, PackageDependency } from '../types.ts';
 import { extractAllPackageFiles, extractPackageFile } from './index.ts';
 
 const config: ExtractConfig = {};
 
-const adminConfig: RepoGlobalConfig = { localDir: '' };
+const adminConfig: RepoGlobalConfig & InternalGlobalConfigOptions = {
+  localDir: '',
+};
 
 describe('modules/manager/gitlabci/extract', () => {
   beforeEach(() => {
