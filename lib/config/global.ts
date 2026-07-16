@@ -64,18 +64,11 @@ export class GlobalConfig {
 
   private static config: RepoGlobalConfig = {};
 
-  // `packageRules` is not a globalOnly option, so it's not part of `OPTIONS`/`config` above,
-  // and it isn't stripped out of the repo config that `set()` returns. It's mirrored here so
-  // low-level util code without access to the resolved repo config, e.g.
-  // `resolveConstraint()` in `util/exec/containerbase.ts`, can still look up tool version
-  // overrides.
-  //
-  // `set()` is always called with the config as it exists *before* the repository's own config
-  // file (e.g. `renovate.json`) is merged in -- see `initRepo()` and `reconfigure/index.ts`,
-  // both of which call `set()` first and only merge in repo config afterwards. Keep it that
-  // way: only bot/global-level `packageRules` may redirect tool version lookups, so a
-  // repository can't point Renovate's own tool installs at an arbitrary registry via its own
-  // config file.
+  // Mirrors global-level `packageRules` for `resolveConstraint()` in
+  // `util/exec/containerbase.ts`, which has no access to the resolved repo config.
+  // `set()` always runs before repo config is merged in (see `initRepo()`,
+  // `reconfigure/index.ts`) -- keep it that way, so repo config can't redirect Renovate's
+  // own tool installs.
   private static toolPackageRules: PackageRule[] = [];
 
   static get(): RepoGlobalConfig;

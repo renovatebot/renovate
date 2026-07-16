@@ -303,9 +303,8 @@ async function getEffectiveToolConfig(
   if (!packageRules.length) {
     return toolConfig;
   }
-  // Dynamic import avoids a cycle with generate:imports (manager/api →
-  // renovate-config → containerbase → package-rules → config/options →
-  // manager-default-configs.generated.ts).
+  // Dynamic import: a static one breaks generate:imports (manager/api → containerbase →
+  // package-rules → config/options → manager-default-configs.generated.ts).
   const { applyPackageRules } = await import('../package-rules/index.ts');
   const resolved = await applyPackageRules({
     depName: toolName,
