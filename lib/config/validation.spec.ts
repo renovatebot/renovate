@@ -1,3 +1,4 @@
+import { partial } from '~test/util.ts';
 import type { HostRule } from '../types/index.ts';
 import { getConfigFileNames } from './app-strings.ts';
 import { GlobalConfig } from './global.ts';
@@ -1792,14 +1793,14 @@ describe('config/validation', () => {
     });
 
     it('errors if invalid combinations in packageRules', async () => {
-      const config = {
+      const config = partial<AllConfig>({
         packageRules: [
           {
             matchUpdateTypes: ['major'],
             registryUrls: ['https://registry.npmjs.org'],
           },
         ],
-      } as any;
+      });
       const { warnings, errors } = await configValidation.validateConfig(
         'repo',
         config,
