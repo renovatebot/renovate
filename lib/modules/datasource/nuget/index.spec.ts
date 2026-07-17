@@ -29,9 +29,6 @@ const pkgListV2NoGitHubProjectUrl = Fixtures.get(
   'nunit/v2_noGitHubProjectUrl.xml',
 );
 const pkgListV2NoRelease = Fixtures.get('nunit/v2_no_release.xml');
-const pkgListV2WithoutProjectUrl = Fixtures.get(
-  'nunit/v2_withoutProjectUrl.xml',
-);
 
 const pkgListV2Page1of2 = Fixtures.get('nunit/v2_paginated_1.xml');
 const pkgListV2Page2of2 = Fixtures.get('nunit/v2_paginated_2.xml');
@@ -821,6 +818,9 @@ describe('modules/datasource/nuget/index', () => {
     });
 
     it('processes real data without project url (v2)', async () => {
+      const pkgListV2WithoutProjectUrl = Fixtures.get(
+        'nunit/v2_withoutProjectUrl.xml',
+      );
       httpMock
         .scope('https://www.nuget.org')
         .get(

@@ -1,15 +1,6 @@
 import { codeBlock } from 'common-tags';
 import { extractPackageFile, getRangeStrategy } from './index.ts';
 
-const minimalCabalFile = codeBlock`
-cabal-version: 3.4
-name: minimal
-version: 0.1.0.0
-
-executable my-cli-entry-point
-  main-is: Main.hs
-  build-depends: base>=4.20`;
-
 describe('modules/manager/haskell-cabal/index', () => {
   describe('extractPackageFile()', () => {
     it.each`
@@ -30,6 +21,14 @@ describe('modules/manager/haskell-cabal/index', () => {
     );
 
     it('extracts deps from a minimal cabal file', () => {
+      const minimalCabalFile = codeBlock`
+      cabal-version: 3.4
+      name: minimal
+      version: 0.1.0.0
+
+      executable my-cli-entry-point
+        main-is: Main.hs
+        build-depends: base>=4.20`;
       expect(extractPackageFile(minimalCabalFile).deps).toStrictEqual([
         {
           autoReplaceStringTemplate: '{{{depName}}} {{{newValue}}}',

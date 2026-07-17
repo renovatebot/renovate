@@ -3,14 +3,6 @@ import { partial } from '~test/util.ts';
 import type { ExtractConfig } from '../types.ts';
 import { extractPackageFile } from './index.ts';
 
-const helmDefaultChartInitValues = Fixtures.get(
-  'default_chart_init_values.yaml',
-);
-
-const helmMultiAndNestedImageValues = Fixtures.get(
-  'multi_and_nested_image_values.yaml',
-);
-
 const config = partial<ExtractConfig>({});
 
 const configAliases = partial<ExtractConfig>({
@@ -34,6 +26,9 @@ describe('modules/manager/helm-values/extract', () => {
     });
 
     it('extracts from values.yaml correctly with same structure as "helm create"', () => {
+      const helmDefaultChartInitValues = Fixtures.get(
+        'default_chart_init_values.yaml',
+      );
       const result = extractPackageFile(
         helmDefaultChartInitValues,
         packageFile,
@@ -50,6 +45,9 @@ describe('modules/manager/helm-values/extract', () => {
     });
 
     it('extracts from complex values file correctly"', () => {
+      const helmMultiAndNestedImageValues = Fixtures.get(
+        'multi_and_nested_image_values.yaml',
+      );
       const result = extractPackageFile(
         helmMultiAndNestedImageValues,
         packageFile,

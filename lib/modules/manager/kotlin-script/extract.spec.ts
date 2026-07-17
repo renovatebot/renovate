@@ -2,9 +2,6 @@ import { Fixtures } from '~test/fixtures.ts';
 import { extractPackageFile } from './index.ts';
 
 const genericCaseFileContent = Fixtures.get('generic-case.main.kts');
-const customRepositoriesFileContent = Fixtures.get(
-  'custom-repositories.main.kts',
-);
 const missingPartsFileContent = Fixtures.get('missing-parts.main.kts');
 
 describe('modules/manager/kotlin-script/extract', () => {
@@ -42,6 +39,9 @@ describe('modules/manager/kotlin-script/extract', () => {
 
     it('detects custom repository definitions', () => {
       // when
+      const customRepositoriesFileContent = Fixtures.get(
+        'custom-repositories.main.kts',
+      );
       const packageFile = extractPackageFile(customRepositoriesFileContent);
 
       // then

@@ -5,9 +5,6 @@ import { getPkgReleases } from '../index.ts';
 import { TerraformProviderDatasource } from './index.ts';
 
 const azurermVersionsData = Fixtures.get('azurerm-provider-versions.json');
-const hashicorpGoogleBetaReleases = Fixtures.get(
-  'releaseBackendIndexGoogleBeta.json',
-);
 const serviceDiscoveryResult = Fixtures.get('service-discovery.json');
 const telmateProxmoxVersions = Fixtures.get(
   'telmate-proxmox-versions-response.json',
@@ -182,6 +179,9 @@ describe('modules/datasource/terraform-provider/index', () => {
     });
 
     it('processes data with alternative backend', async () => {
+      const hashicorpGoogleBetaReleases = Fixtures.get(
+        'releaseBackendIndexGoogleBeta.json',
+      );
       httpMock
         .scope(primaryUrl)
         .get('/v2/providers/hashicorp/google-beta')

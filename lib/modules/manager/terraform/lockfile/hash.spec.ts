@@ -14,18 +14,12 @@ const releaseBackendUrl = TerraformProviderDatasource.defaultRegistryUrls[1];
 const terraformCloudReleaseBackendUrl =
   TerraformProviderDatasource.defaultRegistryUrls[0];
 const releaseBackendAzurerm = Fixtures.get('releaseBackendAzurerm_2_56_0.json');
-const releaseBackendGoogleSha256 = Fixtures.get(
-  'releaseBackendGoogle_4_84_0_SHA256SUMS',
-);
 const terraformCloudSDCJson = Fixtures.get(
   'service-discovery.json',
   '../../../../modules/datasource/terraform-provider/',
 );
 const terraformCloudBackendAzurermVersions = Fixtures.get(
   'terraformCloudBackendAzurermVersions.json',
-);
-const terraformCloudBackendGoogleVersions = Fixtures.get(
-  'terraformCloudBackendGoogleVersions.json',
 );
 
 const log = logger.logger;
@@ -162,6 +156,12 @@ describe('modules/manager/terraform/lockfile/hash', () => {
   });
 
   it('full walkthrough on terraform cloud', async () => {
+    const releaseBackendGoogleSha256 = Fixtures.get(
+      'releaseBackendGoogle_4_84_0_SHA256SUMS',
+    );
+    const terraformCloudBackendGoogleVersions = Fixtures.get(
+      'terraformCloudBackendGoogleVersions.json',
+    );
     const readStreamLinux = createReadStream(
       'lib/modules/manager/terraform/lockfile/__fixtures__/test.zip',
     );

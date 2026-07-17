@@ -5,9 +5,6 @@ import type { ExtractConfig } from '../types.ts';
 import { extractPackageFile } from './index.ts';
 
 const validFleetYaml = Fixtures.get('valid_fleet.yaml');
-const validFleetYamlWithCustom = Fixtures.get(
-  'valid_fleet_helm_target_customization.yaml',
-);
 const inValidFleetYaml = Fixtures.get('invalid_fleet.yaml');
 
 const validGitRepoYaml = Fixtures.get('valid_gitrepo.yaml');
@@ -130,6 +127,9 @@ kind: Fleet
         ]);
       });
       it('should parse valid configuration with target customization', () => {
+        const validFleetYamlWithCustom = Fixtures.get(
+          'valid_fleet_helm_target_customization.yaml',
+        );
         const result = extractPackageFile(
           validFleetYamlWithCustom,
           'fleet.yaml',

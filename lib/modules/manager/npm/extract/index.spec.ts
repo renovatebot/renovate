@@ -15,10 +15,6 @@ const defaultExtractConfig = {
 
 const input01Content = Fixtures.get('inputs/01.json', '..');
 const input02Content = Fixtures.get('inputs/02.json', '..');
-const input01PackageManager = Fixtures.get(
-  'inputs/01-package-manager.json',
-  '..',
-);
 const input01GlobContent = Fixtures.get('inputs/01-glob.json', '..');
 const workspacesContent = Fixtures.get('inputs/workspaces.json', '..');
 const vendorisedContent = Fixtures.get('is-object.json', '..');
@@ -1526,6 +1522,10 @@ describe('modules/manager/npm/extract/index', () => {
     });
 
     it('extracts yarnrc.yml and adds it as packageFile and packageManager to true', async () => {
+      const input01PackageManager = Fixtures.get(
+        'inputs/01-package-manager.json',
+        '..',
+      );
       const yarnrc = codeBlock`
         nodeLinker: node-modules
 
