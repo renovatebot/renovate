@@ -2589,6 +2589,38 @@ describe('config/validation', () => {
         expect(errors).toBeEmptyArray();
       });
 
+      it('customPresets', async () => {
+        const config = {
+          customPresets: {
+            myPreset: {
+              description: 'My custom preset', // requires migration to an array
+              labels: ['custom-label'],
+            },
+            badPreset: {
+              matchPackageNames: ['foo'], // invalid outside of packageRules
+            },
+            invalidPreset: 'not an object',
+          },
+        } as AllConfig;
+        const { warnings, errors } = await configValidation.validateConfig(
+          'global',
+          config,
+        );
+        expect(warnings).toEqual([
+          {
+            topic: 'Configuration Error',
+            message:
+              'Invalid `customPresets.invalidPreset` configuration: preset must be an object.',
+          },
+          {
+            topic: 'Configuration Error',
+            message:
+              'customPresets.badPreset.matchPackageNames: matchPackageNames should be inside a `packageRule` only',
+          },
+        ]);
+        expect(errors).toBeEmptyArray();
+      });
+
       it('force', async () => {
         const config = {
           force: {
