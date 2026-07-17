@@ -487,6 +487,32 @@ The above configuration approach will mean the values are redacted in logs like 
          "customEnvVariables": {"SECRET_TOKEN": "{{ secrets.SECRET_TOKEN }}"},
 ```
 
+## `customPresets`
+
+Use `customPresets` to define presets directly in the bot/admin config, instead of hosting them in a repository or on an HTTP server.
+Repositories can then extend from such presets by using the `custom:` prefix.
+
+For example, in your `config.js`:
+
+```js
+module.exports = {
+  customPresets: {
+    myPreset: {
+      description: 'My custom preset',
+      labels: ['custom-label'],
+    },
+  },
+};
+```
+
+Then in a repository's `renovate.json`:
+
+```json
+{
+  "extends": ["custom:myPreset"]
+}
+```
+
 ## `deleteAdditionalConfigFile`
 
 If set to `true` Renovate tries to delete the additional self-hosted config file after reading it.

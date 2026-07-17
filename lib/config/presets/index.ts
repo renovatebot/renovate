@@ -121,6 +121,10 @@ export async function getPreset(
       presetName,
       tag,
     });
+  } else if (presetSource === 'custom') {
+    presetConfig = clone(baseConfig?.customPresets?.[presetName]) as
+      | Preset
+      | undefined;
   } else {
     const cacheKey = `preset:${preset}`;
     const presetCachePersistence = GlobalConfig.get('presetCachePersistence');
@@ -288,7 +292,7 @@ export async function resolveConfigPresets(
     keyof AllConfig,
     unknown,
   ][]) {
-    const ignoredKeys = ['content', 'onboardingConfig'];
+    const ignoredKeys = ['content', 'customPresets', 'onboardingConfig'];
     if (isArray(val)) {
       // Resolve nested objects inside arrays
       config[key] = [] as never; // type can't be narrowed

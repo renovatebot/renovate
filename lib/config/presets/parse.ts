@@ -35,6 +35,9 @@ export function parsePreset(input: string): ParsedPreset {
   } else if (str.startsWith('local>')) {
     presetSource = 'local';
     str = str.substring('local>'.length);
+  } else if (str.startsWith('custom:')) {
+    presetSource = 'custom';
+    str = str.substring('custom:'.length);
   } else if (isHttpUrl(str)) {
     presetSource = 'http';
   } else if (
@@ -53,6 +56,9 @@ export function parsePreset(input: string): ParsedPreset {
   }
   if (presetSource === 'http') {
     return { presetSource, repo: str, presetName: '', params, rawParams };
+  }
+  if (presetSource === 'custom') {
+    return { presetSource, repo: '', presetName: str, params, rawParams };
   }
   const presetsPackages = [
     'abandonments',
