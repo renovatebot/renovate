@@ -690,6 +690,7 @@
     "shiki": "https://github.com/shikijs/shiki",
     "shopify-app-bridge": "https://github.com/Shopify/app-bridge",
     "sitecore-jss": "https://github.com/Sitecore/jss",
+    "size-limit": "https://github.com/ai/size-limit",
     "skiasharp": [
       "https://github.com/mono/SkiaSharp",
       "https://go.microsoft.com/fwlink/?linkid=868515"
