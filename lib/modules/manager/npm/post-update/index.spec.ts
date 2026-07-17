@@ -1,4 +1,3 @@
-// TODO: add tests
 import upath from 'upath';
 import { Fixtures } from '~test/fixtures.ts';
 import { fs, git, logger, partial, scm } from '~test/util.ts';
@@ -275,6 +274,29 @@ describe('modules/manager/npm/post-update/index', () => {
       );
       expect(originalNpmrcFiles).toEqual(
         new Map([['packages/core/.npmrc', 'original']]),
+      );
+    });
+
+    it('logs and continues if a temporary .npmrc cannot be prepared', async () => {
+      const err = new Error('read failed');
+      fs.readLocalFile.mockRejectedValueOnce(err);
+
+      await expect(
+        writeExistingFiles(updateConfig, {
+          npm: [
+            {
+              packageFile: 'packages/core/package.json',
+              npmrc: 'sanitized',
+              managerData: {},
+            },
+          ],
+        }),
+      ).toResolve();
+
+      expect(fs.writeLocalFile).not.toHaveBeenCalled();
+      expect(logger.logger.warn).toHaveBeenCalledWith(
+        { npmrcFilename: 'packages/core/.npmrc', err },
+        'Error writing .npmrc',
       );
     });
 
@@ -594,6 +616,37 @@ describe('modules/manager/npm/post-update/index', () => {
       expect(fs.writeLocalFile).toHaveBeenLastCalledWith(
         npmrcFilename,
         originalNpmrc,
+      );
+    });
+
+    it('logs and continues when restoring a repository .npmrc fails', async () => {
+      const npmrcFilename = '.npmrc';
+      const originalNpmrc = 'package-lock=false';
+      const err = new Error('restore failed');
+      fs.readLocalFile.mockResolvedValue(originalNpmrc);
+      fs.writeLocalFile.mockResolvedValueOnce().mockRejectedValueOnce(err);
+
+      await expect(
+        getAdditionalFiles(partial<PostUpdateConfig>({ upgrades: [] }), {
+          npm: [
+            {
+              packageFile: 'package.json',
+              npmrc: '',
+              managerData: { npmrcFileName: npmrcFilename },
+            },
+          ],
+        }),
+      ).toResolve();
+
+      expect(fs.writeLocalFile).toHaveBeenNthCalledWith(1, npmrcFilename, '\n');
+      expect(fs.writeLocalFile).toHaveBeenNthCalledWith(
+        2,
+        npmrcFilename,
+        originalNpmrc,
+      );
+      expect(logger.logger.warn).toHaveBeenCalledWith(
+        { npmrcFilename, err },
+        'Error restoring .npmrc',
       );
     });
 

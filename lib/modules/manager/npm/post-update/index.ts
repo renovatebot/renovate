@@ -164,7 +164,7 @@ export async function writeExistingFiles(
           }
         }
         await writeLocalFile(npmrcFilename, npmrc.replace(/\n?$/, '\n'));
-      } catch (err) /* v8 ignore next -- TODO: add test #40625 */ {
+      } catch (err) {
         logger.warn({ npmrcFilename, err }, 'Error writing .npmrc');
       }
     }
@@ -252,7 +252,7 @@ async function restoreNpmrcFiles(
   for (const [npmrcFilename, originalNpmrc] of originalNpmrcFiles) {
     try {
       await writeLocalFile(npmrcFilename, originalNpmrc);
-    } catch (err) /* v8 ignore next -- TODO: add test #40625 */ {
+    } catch (err) {
       logger.warn({ npmrcFilename, err }, 'Error restoring .npmrc');
     }
   }

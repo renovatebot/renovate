@@ -112,7 +112,6 @@ export async function resolveNpmrc(
 
   const repoNpmrc = await readLocalFile(npmrcFileName, 'utf8');
 
-  // v8 ignore if -- TODO: add test #40625
   if (!isString(repoNpmrc)) {
     return { npmrc: undefined, npmrcFileName };
   }

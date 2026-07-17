@@ -37,6 +37,17 @@ describe('modules/manager/npm/npmrc', () => {
       expect(res).toStrictEqual({ npmrc: undefined, npmrcFileName: null });
     });
 
+    it('returns undefined if the discovered .npmrc cannot be read', async () => {
+      fs.findLocalSiblingOrParent.mockResolvedValue('.npmrc');
+
+      const res = await resolveNpmrc('package.json', {});
+
+      expect(res).toStrictEqual({
+        npmrc: undefined,
+        npmrcFileName: '.npmrc',
+      });
+    });
+
     it('uses config.npmrc if no .npmrc is found', async () => {
       const res = await resolveNpmrc('package.json', {
         npmrc: 'config-npmrc',
