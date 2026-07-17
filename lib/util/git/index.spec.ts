@@ -1966,7 +1966,9 @@ describe('util/git/index', { timeout: 30000 }, () => {
   describe('virtualBranches', () => {
     it('fetches refspecs and populates branchCommits', async () => {
       const originRepo = simpleGit(origin.path);
-      const commit = (await originRepo.revparse(['HEAD'])) as LongCommitSha;
+      const commit = toLongCommitSha(
+        (await originRepo.revparse(['HEAD'])).trim(),
+      );
       await originRepo.raw(['update-ref', 'refs/changes/45/12345/1', commit]);
 
       await git.initRepo({
@@ -1986,7 +1988,9 @@ describe('util/git/index', { timeout: 30000 }, () => {
 
     it('throws on fetch error', async () => {
       const originRepo = simpleGit(origin.path);
-      const commit = (await originRepo.revparse(['HEAD'])) as LongCommitSha;
+      const commit = toLongCommitSha(
+        (await originRepo.revparse(['HEAD'])).trim(),
+      );
 
       await git.initRepo({
         url: origin.path,
@@ -2010,14 +2014,18 @@ describe('util/git/index', { timeout: 30000 }, () => {
       await fs.writeFile(`${base.path}/temp_1.txt`, 'content-1');
       await baseRepo.add(['temp_1.txt']);
       await baseRepo.commit('commit for ref 1');
-      const commit1 = (await baseRepo.revparse(['HEAD'])) as LongCommitSha;
+      const commit1 = toLongCommitSha(
+        (await baseRepo.revparse(['HEAD'])).trim(),
+      );
       commits.push(commit1);
       await baseRepo.raw(['update-ref', 'refs/changes/01/1001/1', commit1]);
 
       await fs.writeFile(`${base.path}/temp_2.txt`, 'content-2');
       await baseRepo.add(['temp_2.txt']);
       await baseRepo.commit('commit for ref 2');
-      const commit2 = (await baseRepo.revparse(['HEAD'])) as LongCommitSha;
+      const commit2 = toLongCommitSha(
+        (await baseRepo.revparse(['HEAD'])).trim(),
+      );
       commits.push(commit2);
       await baseRepo.raw(['update-ref', 'refs/changes/02/1002/1', commit2]);
 
@@ -2049,7 +2057,9 @@ describe('util/git/index', { timeout: 30000 }, () => {
   describe('deleteBranch() for virtual branches', () => {
     it('deletes local branch and remote tracking ref', async () => {
       const originRepo = simpleGit(origin.path);
-      const commit = (await originRepo.revparse(['HEAD'])) as LongCommitSha;
+      const commit = toLongCommitSha(
+        (await originRepo.revparse(['HEAD'])).trim(),
+      );
       await originRepo.raw(['update-ref', 'refs/changes/50/12350/1', commit]);
 
       await git.initRepo({
@@ -2072,7 +2082,9 @@ describe('util/git/index', { timeout: 30000 }, () => {
 
     it('handles a missing remote-tracking ref', async () => {
       const originRepo = simpleGit(origin.path);
-      const commit = (await originRepo.revparse(['HEAD'])) as LongCommitSha;
+      const commit = toLongCommitSha(
+        (await originRepo.revparse(['HEAD'])).trim(),
+      );
       await git.setVirtualBranch(
         'nonexistent',
         'refs/changes/99/99999/1',
@@ -2091,7 +2103,9 @@ describe('util/git/index', { timeout: 30000 }, () => {
   describe('mergeToLocal() for virtual branches', () => {
     it('merges the remote-tracking ref of an init virtual branch', async () => {
       const originRepo = simpleGit(origin.path);
-      const commit = (await originRepo.revparse(['HEAD'])) as LongCommitSha;
+      const commit = toLongCommitSha(
+        (await originRepo.revparse(['HEAD'])).trim(),
+      );
       await originRepo.raw(['update-ref', 'refs/changes/70/12370/1', commit]);
 
       await git.initRepo({
@@ -2120,7 +2134,9 @@ describe('util/git/index', { timeout: 30000 }, () => {
     it('marks branch as not modified after registration', async () => {
       modifiedCache.getCachedModifiedResult.mockReturnValue(null);
       const originRepo = simpleGit(origin.path);
-      const commit = (await originRepo.revparse(['HEAD'])) as LongCommitSha;
+      const commit = toLongCommitSha(
+        (await originRepo.revparse(['HEAD'])).trim(),
+      );
       await originRepo.raw(['update-ref', 'refs/changes/60/12360/1', commit]);
 
       await git.initRepo({
