@@ -167,6 +167,11 @@ export const communityActions: Record<string, CommunityActionConfig> = {
     packageName: '', // determined from `repo` input
     withSchema: InstallBinaryWith,
   },
+  'jdx/mise-action': {
+    datasource: GithubReleasesDatasource.id,
+    packageName: 'jdx/mise',
+    extractVersion: '^v(?<version>.+)$',
+  },
   'oven-sh/setup-bun': {
     datasource: NpmDatasource.id,
     packageName: 'bun',
