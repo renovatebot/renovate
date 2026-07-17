@@ -240,9 +240,15 @@ describe('modules/manager/azure-pipelines/extract', () => {
     });
 
     it('should return null when there is no dependency found', () => {
-      const azurePipelinesNoDependency = Fixtures.get(
-        'azure-pipelines-no-dependency.yaml',
-      );
+      const azurePipelinesNoDependency = codeBlock`
+        resources:
+          pipelines:
+            - pipeline: MyAppA
+              source: MyCIPipelineA
+            - pipeline: MyAppB
+              source: MyCIPipelineB
+              trigger: true
+      `;
       expect(
         extractPackageFile(azurePipelinesNoDependency, azurePipelinesFilename, {
           repository: 'repo',

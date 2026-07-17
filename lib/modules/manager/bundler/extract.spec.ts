@@ -111,12 +111,46 @@ describe('modules/manager/bundler/extract', () => {
   });
 
   it('parse source blocks with spaces in Gemfile', async () => {
-    const sourceBlockWithNewLinesGemfileLock = Fixtures.get(
-      'Gemfile.sourceBlockWithNewLines.lock',
-    );
-    const sourceBlockWithNewLinesGemfile = Fixtures.get(
-      'Gemfile.sourceBlockWithNewLines',
-    );
+    const sourceBlockWithNewLinesGemfileLock = codeBlock`
+      GEM
+        remote: https://rubygems.org/
+        specs:
+          ast (2.4.0)
+          brakeman (4.4.0)
+          jaro_winkler (1.5.4)
+          parallel (1.19.1)
+          parser (2.7.0.2)
+            ast (~> 2.4.0)
+          rainbow (3.0.0)
+          rubocop (0.68.1)
+            jaro_winkler (~> 1.5.1)
+            parallel (~> 1.10)
+            parser (>= 2.5, != 2.5.1.1)
+            rainbow (>= 2.2.2, < 4.0)
+            ruby-progressbar (~> 1.7)
+            unicode-display_width (>= 1.4.0, < 1.6)
+          ruby-progressbar (1.10.1)
+          unicode-display_width (1.5.0)
+
+      PLATFORMS
+        ruby
+
+      DEPENDENCIES
+        brakeman!
+        rubocop!
+
+      BUNDLED WITH
+         1.16.6
+    `;
+    const sourceBlockWithNewLinesGemfile = codeBlock`
+      # frozen_string_literal: true
+
+      source 'https://rubygems.org' do
+        gem 'rubocop'
+
+        gem 'brakeman'
+      end
+    `;
     fs.readLocalFile.mockResolvedValueOnce(sourceBlockWithNewLinesGemfileLock);
     const res = await extractPackageFile(
       sourceBlockWithNewLinesGemfile,
@@ -127,9 +161,20 @@ describe('modules/manager/bundler/extract', () => {
   });
 
   it('parses source blocks with groups in Gemfile', async () => {
-    const sourceBlockWithGroupsGemfile = Fixtures.get(
-      'Gemfile.sourceBlockWithGroups',
-    );
+    const sourceBlockWithGroupsGemfile = codeBlock`
+      source 'https://hub.tech.my.domain.de/artifactory/api/gems/my-gems-prod-local/' do
+        gem 'sfn_my_dep1', "~> 1"
+        gem 'sfn_my_dep2', "~> 1"
+
+        group :test, :development do
+          gem 'internal_test_gem', "~> 1"
+        end
+
+        group :production do
+          gem 'internal_production_gem', "~> 1"
+        end
+      end
+    `;
     fs.readLocalFile.mockResolvedValueOnce(sourceBlockWithGroupsGemfile);
     const res = await extractPackageFile(
       sourceBlockWithGroupsGemfile,

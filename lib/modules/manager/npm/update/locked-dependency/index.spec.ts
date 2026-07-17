@@ -1,3 +1,4 @@
+import { codeBlock } from 'common-tags';
 import { Fixtures } from '~test/fixtures.ts';
 import * as httpMock from '~test/http-mock.ts';
 import { clone } from '../../../../../util/clone.ts';
@@ -221,10 +222,22 @@ describe('modules/manager/npm/update/locked-dependency/index', () => {
     });
 
     it('fails remediation if bundled', async () => {
-      const bundledPackageJson = Fixtures.get(
-        'bundled.package.json',
-        './package-lock',
-      );
+      const bundledPackageJson = codeBlock`
+        {
+          "name": "repro-renovate-13977",
+          "version": "1.0.0",
+          "description": "",
+          "main": "index.js",
+          "scripts": {
+            "test": "echo \\"Error: no test specified\\" && exit 1"
+          },
+          "author": "",
+          "license": "ISC",
+          "devDependencies": {
+            "semantic-release": "19.0.2"
+          }
+        }
+      `;
       const bundledPackageLockJson = Fixtures.get(
         'bundled.package-lock.json',
         './package-lock',

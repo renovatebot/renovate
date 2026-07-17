@@ -41,17 +41,21 @@ describe('modules/manager/pre-commit/extract', () => {
     });
 
     it('returns null for empty repos', () => {
-      const emptyReposPrecommitConfig = Fixtures.get(
-        'empty_repos.pre-commit-config.yaml',
-      );
+      const emptyReposPrecommitConfig = codeBlock`
+        # empty repos element
+        repos:
+      `;
       const result = extractPackageFile(emptyReposPrecommitConfig, filename);
       expect(result).toBeNull();
     });
 
     it('returns null for invalid repo', () => {
-      const invalidRepoPrecommitConfig = Fixtures.get(
-        'invalid_repo.pre-commit-config.yaml',
-      );
+      const invalidRepoPrecommitConfig = codeBlock`
+        # invalid repo item
+        repos:
+          - repo: https://github.com/pre-commit/pre-commit-hooks
+            revv: v3.3.0
+      `;
       const result = extractPackageFile(invalidRepoPrecommitConfig, filename);
       expect(result).toBeNull();
     });
