@@ -3,21 +3,6 @@ import { extractPackageFile } from './index.ts';
 
 const typeBinFileContent = Fixtures.get('gradle-wrapper-bin.properties');
 const typeAllFileContent = Fixtures.get('gradle-wrapper-all.properties');
-const prereleaseVersionFileContent = Fixtures.get(
-  'gradle-wrapper-prerelease.properties',
-);
-const unknownFormatFileContent = Fixtures.get(
-  'gradle-wrapper-unknown-format.properties',
-);
-const whitespacePropertiesFile = Fixtures.get(
-  'gradle-wrapper-whitespace.properties',
-);
-const customTypeBinFileContent = Fixtures.get(
-  'custom-gradle-wrapper-bin.properties',
-);
-const customTypeAllFileContent = Fixtures.get(
-  'custom-gradle-wrapper-all.properties',
-);
 
 describe('modules/manager/gradle-wrapper/extract', () => {
   describe('extractPackageFile()', () => {
@@ -26,6 +11,9 @@ describe('modules/manager/gradle-wrapper/extract', () => {
     });
 
     it('returns null for property file with unsupported distributionUrl format', () => {
+      const unknownFormatFileContent = Fixtures.get(
+        'gradle-wrapper-unknown-format.properties',
+      );
       const res = extractPackageFile(unknownFormatFileContent);
       expect(res).toBeNull();
     });
@@ -59,6 +47,9 @@ describe('modules/manager/gradle-wrapper/extract', () => {
     });
 
     it('extracts version for property file with prerelease version in distributionUrl', () => {
+      const prereleaseVersionFileContent = Fixtures.get(
+        'gradle-wrapper-prerelease.properties',
+      );
       const res = extractPackageFile(prereleaseVersionFileContent);
       expect(res?.deps).toEqual([
         {
@@ -73,6 +64,9 @@ describe('modules/manager/gradle-wrapper/extract', () => {
     });
 
     it('extracts version for property file with unnecessary whitespace in distributionUrl', () => {
+      const whitespacePropertiesFile = Fixtures.get(
+        'gradle-wrapper-whitespace.properties',
+      );
       const res = extractPackageFile(whitespacePropertiesFile);
       expect(res?.deps).toEqual([
         {
@@ -87,6 +81,9 @@ describe('modules/manager/gradle-wrapper/extract', () => {
     });
 
     it('extracts version for property file with custom distribution of type "bin" in distributionUrl', () => {
+      const customTypeBinFileContent = Fixtures.get(
+        'custom-gradle-wrapper-bin.properties',
+      );
       const res = extractPackageFile(customTypeBinFileContent);
       expect(res?.deps).toEqual([
         {
@@ -101,6 +98,9 @@ describe('modules/manager/gradle-wrapper/extract', () => {
     });
 
     it('extracts version for property file with custom distribution of type "all" in distributionUrl', () => {
+      const customTypeAllFileContent = Fixtures.get(
+        'custom-gradle-wrapper-all.properties',
+      );
       const res = extractPackageFile(customTypeAllFileContent);
       expect(res?.deps).toEqual([
         {
