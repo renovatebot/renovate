@@ -48,17 +48,21 @@ function determineDatasource(host: string, repoPath: string): DatasourceResult {
   return { datasource: GitTagsDatasource.id, packageName: repoUrl };
 }
 
-const hostnameRegex = regEx(/\./);
+/**
+ * APM dependency path `[host/]owner/repo[/subpath...]`. APM only supports remote
+ * git references (no local paths). The optional host prefix is always a hostname
+ * (so it contains a dot), whereas owner names do not - `owner` therefore excludes
+ * dots, which disambiguates the leading segment. Dots in repo names or subpaths
+ * (e.g. `owner/repo.js`, `github/awesome-copilot/agents/api-architect.agent.md`)
+ * are left untouched.
+ */
+const apmDepRegex = regEx(
+  /^(?:(?<host>[^/]+\.[^/]+)\/)?(?<owner>[^/.]+)\/(?<repo>[^/]+)(?:\/.*)?$/,
+);
 
 /**
  * Parse a single APM dependency string of the form
  * `[host/]owner/repo[/subpath...][#ref]`.
- *
- * APM only supports remote git references (no local paths). The optional host
- * prefix is always a hostname, which contains a dot, whereas git host owner
- * names do not - so a dotted first segment denotes the host. Dots in later
- * segments (repo names, subpaths, e.g. `owner/repo.js` or
- * `github/awesome-copilot/agents/api-architect.agent.md`) are left untouched.
  */
 export function parseApmDependency(
   entry: string,
@@ -78,12 +82,8 @@ export function parseApmDependency(
     return { ...base, skipReason: 'unspecified-version' };
   }
 
-  const segments = pathPart.split('/').filter(Boolean);
-  const hasHost = hostnameRegex.test(segments[0] ?? '');
-  const host = hasHost ? segments[0] : 'github.com';
-  const repoSegments = hasHost ? segments.slice(1) : segments;
-
-  if (repoSegments.length < 2) {
+  const groups = apmDepRegex.exec(pathPart)?.groups;
+  if (!groups) {
     logger.debug({ entry }, 'apm: could not determine owner/repo');
     return {
       ...base,
@@ -92,7 +92,8 @@ export function parseApmDependency(
     };
   }
 
-  const repoPath = repoSegments.slice(0, 2).join('/');
+  const host = groups.host ?? 'github.com';
+  const repoPath = `${groups.owner}/${groups.repo}`;
   const { datasource, packageName, registryUrls } = determineDatasource(
     host,
     repoPath,
