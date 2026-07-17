@@ -98,7 +98,7 @@ export function replaceArgs(
 
 export async function getPreset(
   preset: string,
-  baseConfig?: RenovateConfig,
+  baseConfig?: AllConfig,
 ): Promise<RenovateConfig> {
   logger.trace(`getPreset(${preset})`);
   // Check if the preset has been removed or replaced
@@ -206,7 +206,7 @@ export interface ResolveConfigPresetsResult {
  */
 export async function resolveConfigPresets(
   inputConfig: AllConfig,
-  baseConfig?: RenovateConfig,
+  baseConfig?: AllConfig,
   _ignorePresets?: string[],
   existingPresets: string[] = [],
   mergeInternalPresets = true,
@@ -356,7 +356,7 @@ export async function resolveConfigPresets(
 
 async function fetchPreset(
   preset: string,
-  baseConfig: RenovateConfig | undefined,
+  baseConfig: AllConfig | undefined,
   inputConfig: AllConfig,
   existingPresets: string[],
 ): Promise<AllConfig> {
