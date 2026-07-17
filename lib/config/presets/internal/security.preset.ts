@@ -23,6 +23,26 @@ export const presets: Record<string, Preset> = {
       },
     ],
   },
+  minimumReleaseAgeCrates: {
+    description:
+      "Wait until the crates.io crate version is three days old before raising the update. This a) introduces a short delay to allow for malware researchers and scanners to (possibly) detect any malicious behaviour in crates, and b) reduces the risk of upgrading to a newly published crate that its owner deletes during crates.io's initial 72-hour deletion window.",
+    packageRules: [
+      {
+        internalChecksFilter: 'strict',
+        matchDatasources: ['crate'],
+        minimumReleaseAge: '3 days',
+      },
+      {
+        description: 'Do not require Minimum Release Age for package pinning',
+        matchDatasources: ['crate'],
+        matchUpdateTypes: ['pin'],
+        minimumReleaseAge: null,
+        prBodyNotes: [
+          "⚠️ Renovate's pin functionality [does not currently](https://github.com/renovatebot/renovate/issues/40288) wire in the release age for a package, so the Minimum Release Age checks can apply. You will need to manually validate the Minimum Release Age for these package(s).",
+        ],
+      },
+    ],
+  },
   minimumReleaseAgeNpm: {
     description:
       'Wait until the npm package is three days old before raising the update. This a) introduces a short delay to allow for malware researchers and scanners to (possibly) detect any malicious behaviour in packages, and b) prevents the maintainer and/or NPM from unpublishing a package you already upgraded to, breaking builds.',
