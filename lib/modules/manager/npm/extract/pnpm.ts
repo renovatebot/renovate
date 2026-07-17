@@ -16,8 +16,13 @@ import {
   localPathExists,
   readLocalFile,
 } from '../../../../util/fs/index.ts';
-import { parseSingleYaml } from '../../../../util/yaml.ts';
-import type { PackageFile, PackageFileContent } from '../../types.ts';
+import { parseSingleYaml, parseYaml } from '../../../../util/yaml.ts';
+import { NpmDatasource } from '../../../datasource/npm/index.ts';
+import type {
+  PackageDependency,
+  PackageFile,
+  PackageFileContent,
+} from '../../types.ts';
 import { pnpmWorkspaceOverrides } from '../dep-types.ts';
 import type { PnpmDependency, PnpmLockFile } from '../post-update/types.ts';
 import type { PnpmCatalogs, PnpmWorkspaceFile } from '../schema.ts';
@@ -160,7 +165,13 @@ export async function getPnpmLock(filePath: string): Promise<LockFile> {
       throw new Error('Unable to read pnpm-lock.yaml');
     }
 
-    const lockParsed = parseSingleYaml(pnpmLockRaw);
+    // pnpm writes a multi-document YAML lockfile when `pnpm-workspace.yaml`
+    // declares `configDependencies`; the env document (config-deps + integrity
+    // metadata) is unconditionally prepended before the main lockfile, so the
+    // main lockfile is always the last document.
+    // https://pnpm.io/config-dependencies.
+    const parsedDocs = parseYaml(pnpmLockRaw);
+    const lockParsed = parsedDocs.at(-1);
     if (!isPnpmLockfile(lockParsed)) {
       throw new Error('Invalid or empty lockfile');
     }
@@ -284,6 +295,9 @@ export async function extractPnpmWorkspaceFile(
     }
   }
 
+  const { registry, registries } = workspaceFile;
+  applyPnpmWorkspaceRegistries(deps, registries, registry);
+
   let pnpmShrinkwrap;
   const filePath = getSiblingFileName(packageFile, 'pnpm-lock.yaml');
 
@@ -321,4 +335,46 @@ function pnpmCatalogsToArray({
   }
 
   return result;
+}
+
+export function applyPnpmWorkspaceRegistries(
+  deps: PackageDependency[],
+  registries: Record<string, string> | undefined,
+  registry: string | undefined,
+): void {
+  if (!(registry ?? registries)) {
+    return;
+  }
+  for (const dep of deps) {
+    const lookupName = dep.packageName ?? dep.depName;
+    if (lookupName && dep.datasource === NpmDatasource.id) {
+      const registryUrl = resolveRegistryUrl(lookupName, registries, registry);
+      if (registryUrl) {
+        dep.registryUrls = [registryUrl];
+      }
+    }
+  }
+}
+
+export function resolveRegistryUrl(
+  packageName: string,
+  registries: Record<string, string> | undefined,
+  defaultRegistry: string | undefined,
+): string | null {
+  if (registries) {
+    for (const scope in registries) {
+      // `default` is the fallback registry, not a scope
+      if (scope === 'default') {
+        continue;
+      }
+      // pnpm scope keys keep the leading `@`, e.g. `@my-org`
+      if (packageName.startsWith(`${scope}/`)) {
+        return registries[scope];
+      }
+    }
+    if (registries.default) {
+      return registries.default;
+    }
+  }
+  return defaultRegistry ?? null;
 }

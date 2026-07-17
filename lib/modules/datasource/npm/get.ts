@@ -8,12 +8,12 @@ import { PackageHttpCacheProvider } from '../../../util/http/cache/package-http-
 import type { Http } from '../../../util/http/index.ts';
 import type { HttpOptions } from '../../../util/http/types.ts';
 import { regEx } from '../../../util/regex.ts';
+import { DeepNullish } from '../../../util/schema-utils/index.ts';
 import { asTimestamp } from '../../../util/timestamp.ts';
 import { joinUrlParts } from '../../../util/url.ts';
 import type { Release, ReleaseResult } from '../types.ts';
 import { defaultRegistryUrl } from './common.ts';
-import { CachedPackument } from './schema.ts';
-import type { NpmResponse } from './types.ts';
+import { CachedPackument, NpmResponse } from './schema.ts';
 
 const SHORT_REPO_REGEX = regEx(
   /^((?<platform>bitbucket|github|gitlab):)?(?<shortRepo>[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+)$/,
@@ -47,24 +47,24 @@ const PackageSource = z
         }
         return { sourceUrl, sourceDirectory };
       }),
-    z
-      .object({
-        url: z.string().nonempty().nullish(),
-        directory: z.string().nonempty().nullish(),
-      })
-      .transform(({ url, directory }) => {
-        const res: PackageSource = { sourceUrl: null, sourceDirectory: null };
-
-        if (url) {
-          res.sourceUrl = url;
-        }
-
-        if (directory) {
-          res.sourceDirectory = directory;
-        }
-
-        return res;
+    DeepNullish(
+      z.object({
+        url: z.string().nonempty().optional(),
+        directory: z.string().nonempty().optional(),
       }),
+    ).transform(({ url, directory }) => {
+      const res: PackageSource = { sourceUrl: null, sourceDirectory: null };
+
+      if (url) {
+        res.sourceUrl = url;
+      }
+
+      if (directory) {
+        res.sourceDirectory = directory;
+      }
+
+      return res;
+    }),
   ])
   .catch({ sourceUrl: null, sourceDirectory: null });
 
@@ -101,7 +101,7 @@ export async function getDependency(
       });
     }
 
-    const resp = await http.getJsonUnchecked<NpmResponse>(packageUrl, options);
+    const resp = await http.getJson(packageUrl, options, NpmResponse);
     const { body: res } = resp;
     if (!res.versions || !Object.keys(res.versions).length) {
       // Registry returned a 200 OK but with no versions

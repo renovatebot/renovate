@@ -7,9 +7,9 @@ import type { VersioningApi } from '../types.ts';
 export const id = 'rpm';
 export const displayName = 'RPM version';
 export const urls = [
-  'https://docs.fedoraproject.org/en-US/packaging-guidelines/Versioning/',
-  'https://fedoraproject.org/wiki/Package_Versioning_Examples',
-  'https://fedoraproject.org/wiki/User:Tibbs/TildeCaretVersioning',
+  '[Fedora packaging guidelines - Versioning](https://docs.fedoraproject.org/en-US/packaging-guidelines/Versioning/)',
+  '[Fedora package versioning examples](https://fedoraproject.org/wiki/Package_Versioning_Examples)',
+  '[Fedora tilde and caret versioning](https://fedoraproject.org/wiki/User:Tibbs/TildeCaretVersioning)',
 ];
 export const supportsRanges = false;
 
@@ -141,7 +141,8 @@ class RpmVersioningApi extends GenericVersioningApi {
 
       if (c1 > c2) {
         return 1;
-      } else if (c1 < c2) {
+      }
+      if (c1 < c2) {
         return -1;
       }
     }
@@ -193,7 +194,8 @@ class RpmVersioningApi extends GenericVersioningApi {
         }
 
         return Math.sign(result);
-      } else if (isNumericString(matchv2?.[0])) {
+      }
+      if (isNumericString(matchv2?.[0])) {
         return -1;
       }
 
@@ -258,7 +260,8 @@ class RpmVersioningApi extends GenericVersioningApi {
     // No Prerelease wins
     if (parsed1.rpmPreRelease === '' && parsed2.rpmPreRelease !== '') {
       return 1;
-    } else if (parsed1.rpmPreRelease !== '' && parsed2.rpmPreRelease === '') {
+    }
+    if (parsed1.rpmPreRelease !== '' && parsed2.rpmPreRelease === '') {
       return -1;
     }
 

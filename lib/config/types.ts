@@ -50,6 +50,7 @@ export interface GroupConfig extends Record<string, unknown> {
 }
 
 export type RecreateWhen = 'auto' | 'never' | 'always';
+export type StatusCheckWhen = 'always' | 'never' | 'failed';
 export type PlatformCommitOptions = 'auto' | 'disabled' | 'enabled';
 
 export type BinarySource = 'docker' | 'global' | 'install' | 'hermit';
@@ -106,6 +107,7 @@ export interface RenovateSharedConfig {
   gitIgnoredAuthors?: string[];
   group?: GroupConfig;
   groupName?: string;
+  groupSingleUpdates?: boolean;
   groupSlug?: string;
   hashedBranchLength?: number;
   ignoreDeps?: string[];
@@ -138,7 +140,6 @@ export interface RenovateSharedConfig {
   prPriority?: number;
   prTitle?: string;
   prTitleStrict?: boolean;
-  productLinks?: Record<string, string>;
   pruneBranchAfterAutomerge?: boolean;
   rangeStrategy?: RangeStrategy;
   rebaseLabel?: string;
@@ -241,6 +242,7 @@ export interface RepoGlobalConfig extends GlobalInheritableConfig {
   cacheDir?: string;
   cacheHardTtlMinutes?: number;
   cacheTtlOverride?: Record<string, number>;
+  checkedBranches?: string[];
   containerbaseDir?: string;
   customEnvVariables?: Record<string, string>;
   dockerChildPrefix?: string;
@@ -273,6 +275,8 @@ export interface RepoGlobalConfig extends GlobalInheritableConfig {
   ignorePrAuthor?: boolean;
   allowedUnsafeExecutions?: AllowedUnsafeExecution[];
   onboardingAutoCloseAge?: number;
+  productLinks?: Record<string, string>;
+  rebaseAllOpenBranches?: boolean;
   toolSettings?: ToolSettingsOptions;
   containerbasePackageRules?: PackageRule[];
 }
@@ -323,11 +327,11 @@ export type UpdateConfig<
   T extends RenovateSharedConfig = RenovateSharedConfig,
 > = Partial<Record<UpdateType, T | null>>;
 
-export type RenovateRepository =
-  | string
-  | (RenovateConfig & {
-      repository: string;
-    });
+export type RenovateRepositoryEntry = AllConfig & {
+  repository: string;
+};
+
+export type RenovateRepository = string | RenovateRepositoryEntry;
 
 export type UseBaseBranchConfigType = 'merge' | 'none';
 export type ConstraintsFilter = 'strict' | 'none';
@@ -471,10 +475,10 @@ export interface RenovateConfig
 
   constraintsFiltering?: ConstraintsFilter;
 
-  checkedBranches?: string[];
   customizeDashboard?: Record<string, string>;
 
   statusCheckNames?: Record<StatusCheckKey, string | null>;
+  statusCheckWhen?: Partial<Record<StatusCheckKey, StatusCheckWhen>>;
   /**
    * User configured environment variables that Renovate uses when executing package manager commands
    */
@@ -574,7 +578,8 @@ export type MergeStrategy =
 export type AllowedUnsafeExecution =
   | 'bazelModDeps'
   | 'goGenerate'
-  | 'gradleWrapper';
+  | 'gradleWrapper'
+  | 'mise';
 
 // TODO: Proper typings
 export interface PackageRule

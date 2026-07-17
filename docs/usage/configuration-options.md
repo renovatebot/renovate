@@ -352,9 +352,29 @@ By default, Renovate will detect and process only the repository's default branc
 For most projects, this is the expected approach.
 Renovate also allows users to explicitly configure `baseBranchPatterns`, e.g. for use cases such as:
 
-- You wish Renovate to process only a non-default branch, e.g. `dev`: `"baseBranchPatterns": ["dev"]`
-- You have multiple release streams you need Renovate to keep up to date, e.g. in branches `main` and `next`: `"baseBranchPatterns": ["main", "next"]`
-- You want to update your main branch and consistently named release branches, e.g. `main` and `release/<version>`: `"baseBranchPatterns": ["main", "/^release\\/.*/"]`
+- You wish Renovate to process only a non-default branch, e.g. `dev`:
+
+  ```json
+  {
+    "baseBranchPatterns": ["dev"]
+  }
+  ```
+
+- You have multiple release streams you need Renovate to keep up to date, e.g. in branches `main` and `next`:
+
+```json
+{
+  "baseBranchPatterns": ["main", "next"]
+}
+```
+
+- You want to update your main branch and consistently named release branches, e.g. `main` and `release/<version>`:
+
+```json
+{
+  "baseBranchPatterns": ["main", "/^release\\/.*/"]
+}
+```
 
 It's possible to add this setting into the `renovate.json` file as part of the "Configure Renovate" onboarding PR.
 If so then Renovate will reflect this setting in its description and use package file contents from the custom base branch(es) instead of default.
@@ -605,7 +625,7 @@ Supported values are:
 This field supports templates for conditional logic.
 For example:
 
-```json
+```json {configType=none}
 {
   "bumpType": "{{#if isPatch}}patch{{else}}minor{{/if}}"
 }
@@ -646,7 +666,7 @@ Templates can also be used for dynamic patterns. See [Templates](./templates.md)
 
 For example:
 
-```json
+```json {configType=none}
 {
   "filePatterns": ["**/version.txt", "{{packageFileDir}}/Chart.yaml"]
 }
@@ -666,7 +686,7 @@ The `name` field is an optional identifier for the bump version rule. It is used
 
 For example:
 
-```json
+```json {configType=none}
 {
   "name": "Update release version"
 }
@@ -868,16 +888,16 @@ For now this datasource constraint feature only supports `python`, other compati
 }
 ```
 
-If you need to _override_ constraints that Renovate detects from the repository, wrap it in the `force` object like so:
+If you need to _override_ constraints that Renovate detects from the repository, wrap it in the [global self-hosted configuration's `force` object](./self-hosted-configuration.md#force) like so:
 
-```json
-{
-  "force": {
-    "constraints": {
-      "node": "< 15.0.0"
-    }
-  }
-}
+```js
+module.exports = {
+  force: {
+    constraints: {
+      node: '< 15.0.0',
+    },
+  },
+};
 ```
 
 The following `constraints` are available to specify which package managers/language constraints/tools Renovate will install for your repository:
@@ -914,6 +934,7 @@ This feature is limited to the following datasources:
 - `jenkins-plugins`
 - `npm`
 - `packagist`
+- `pub`
 - `pypi`
 - `rubygems`
 
@@ -1122,7 +1143,8 @@ Example:
       "managerFilePatterns": ["/file.json/"],
       "matchStrings": [
         "packages.{ \"depName\": package, \"currentValue\": version }"
-      ]
+      ],
+      "datasourceTemplate": "github-tags"
     }
   ]
 }
@@ -1168,7 +1190,8 @@ Only the `json`, `toml` and `yaml` formats are supported.
       "managerFilePatterns": ["/.renovaterc/"],
       "matchStrings": [
         "packages.{ 'depName': package, 'currentValue': version }"
-      ]
+      ],
+      "datasourceTemplate": "github-tags"
     }
   ]
 }
@@ -1183,7 +1206,8 @@ Only the `json`, `toml` and `yaml` formats are supported.
       "managerFilePatterns": ["/file.yml/"],
       "matchStrings": [
         "packages.{ 'depName': package, 'currentValue': version }"
-      ]
+      ],
+      "datasourceTemplate": "github-tags"
     }
   ]
 }
@@ -1198,7 +1222,8 @@ Only the `json`, `toml` and `yaml` formats are supported.
       "managerFilePatterns": ["/file.toml/"],
       "matchStrings": [
         "packages.{ 'depName': package, 'currentValue': version }"
-      ]
+      ],
+      "datasourceTemplate": "github-tags"
     }
   ]
 }
@@ -1213,7 +1238,7 @@ Each `matchStrings` must be one of the following:
 
 Example:
 
-```json title="matchStrings with a valid regular expression"
+```json {title="matchStrings with a valid regular expression" configType=none}
 {
   "matchStrings": [
     "ENV .*?_VERSION=(?<currentValue>.*) # (?<datasource>.*?)/(?<depName>.*?)\\s"
@@ -1221,7 +1246,7 @@ Example:
 }
 ```
 
-```json title="matchStrings with a valid JSONata query"
+```json {title="matchStrings with a valid JSONata query" configType=none}
 {
   "matchStrings": [
     "packages.{ \"depName\": package, \"currentValue\": version }"
@@ -1317,7 +1342,7 @@ But the second custom manager will upgrade both definitions as its first `matchS
 }
 ```
 
-```json title="example.json"
+```json {title="example.json" configType=none}
 {
   "backup": {
     "test": {
@@ -1813,10 +1838,12 @@ The following re-enables fetching of changelogs when creating pull-requests for 
 ```json
 {
   "fetchChangeLogs": "off",
-  "packageRules": {
-    "matchSourceUrls": ["https://github.com/lodash/lodash"],
-    "fetchChangeLogs": "pr"
-  }
+  "packageRules": [
+    {
+      "matchSourceUrls": ["https://github.com/lodash/lodash"],
+      "fetchChangeLogs": "pr"
+    }
+  ]
 }
 ```
 
@@ -1825,10 +1852,12 @@ which can be time-consuming due to the repository's large number of tags:
 
 ```json
 {
-  "packageRules": {
-    "matchSourceUrls": ["https://github.com/aws/aws-sdk-go-v2{/**,}"],
-    "fetchChangeLogs": "off"
-  }
+  "packageRules": [
+    {
+      "matchSourceUrls": ["https://github.com/aws/aws-sdk-go-v2{/**,}"],
+      "fetchChangeLogs": "off"
+    }
+  ]
 }
 ```
 
@@ -2001,6 +2030,11 @@ For example, to group all non-major devDependencies updates together into a sing
   Replacement updates will never be grouped.
   <br>
   Lock file maintenance will never be grouped with other dependency updates.
+
+## `groupSingleUpdates`
+
+!!! note
+  This option was [recently made opt-in, instead of opt-out](https://github.com/renovatebot/renovate/pull/44168).
 
 ## `groupSlug`
 
@@ -3206,6 +3240,7 @@ Use this field to restrict rules to a particular branch. e.g.
 
 ```json
 {
+  "baseBranchPatterns": ["main"],
   "packageRules": [
     {
       "matchBaseBranches": ["main"],
@@ -3220,6 +3255,7 @@ This field also supports Regular Expressions if they begin and end with `/`. e.g
 
 ```json
 {
+  "baseBranchPatterns": ["main", "/^release\\/.*/"],
   "packageRules": [
     {
       "matchBaseBranches": ["/^release/.*/"],
@@ -3973,6 +4009,11 @@ If enabled Renovate will pin Docker images or GitHub Actions by means of their S
   [GitHub docs, require status checks before merging](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/defining-the-mergeability-of-pull-requests/about-protected-branches#require-status-checks-before-merging)
   If you're using another platform, search their documentation for a similar feature.
 
+<!-- prettier-ignore -->
+!!! note
+  If you mark `renovate/artifacts` as a required status check in your branch protection rules, you must also set [`statusCheckWhen.artifactError`](#statuscheckwhen) to `"always"`.
+  The default `"failed"` only sets the check when artifact updates fail, so a required check rule would block every PR that has no artifact errors (the check would never appear). Setting it to `"always"` makes Renovate report green when there are no errors and red when there are, which is what branch protection requires.
+
 If you have enabled `automerge` and set `automergeType=pr` in the Renovate config, then leaving `platformAutomerge` as `true` speeds up merging via the platform's native automerge functionality.
 
 On Bitbucket Server, GitHub and GitLab, Renovate re-enables the PR for platform-native automerge whenever it's rebased.
@@ -4005,29 +4046,92 @@ This way Renovate can use GitHub's [Commit signing support for bots and other Gi
 
 ## `postUpdateOptions`
 
-Table with options:
+### `bundlerConservative`
 
-| Name                         | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `bundlerConservative`        | Enable conservative mode for `bundler` (Ruby dependencies). This will only update the immediate dependency in the lockfile instead of all subdependencies.                                                                                                                                                                                                                                                                                                                         |
-| `composerNoMinimalChanges`   | Run `composer update` with no `--minimal-changes` flag (does not affect lock file maintenance, which will never use `--minimal-changes`).                                                                                                                                                                                                                                                                                                                                          |
-| `composerWithAll`            | Run `composer update` with `--with-all-dependencies` flag instead of the default `--with-dependencies`.                                                                                                                                                                                                                                                                                                                                                                            |
-| `dotnetWorkloadRestore`      | Run `dotnet workload restore` before `dotnet restore` commands.                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| `gomodMassage`               | Enable massaging `replace` directives before calling `go` commands.                                                                                                                                                                                                                                                                                                                                                                                                                |
-| `gomodTidy`                  | Run `go mod tidy` after Go module updates. This is implicitly enabled for major module updates when `gomodUpdateImportPaths` is enabled.                                                                                                                                                                                                                                                                                                                                           |
-| `gomodTidy1.17`              | Run `go mod tidy -compat=1.17` after Go module updates.                                                                                                                                                                                                                                                                                                                                                                                                                            |
-| `gomodTidyE`                 | Run `go mod tidy -e` after Go module updates.                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| `gomodUpdateImportPaths`     | Update source import paths on major module updates, using [mod](https://github.com/marwan-at-work/mod).                                                                                                                                                                                                                                                                                                                                                                            |
-| `gomodSkipVendor`            | Never run `go mod vendor` after Go module updates.                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| `gomodVendor`                | Always run `go mod vendor` after Go module updates even if vendor files aren't detected.                                                                                                                                                                                                                                                                                                                                                                                           |
-| `goGenerate`                 | Run `go generate ./...` after vendoring (if vendoring was required). This will then commit any files which were added or modified by running `go generate`. Note this will not install any other tools as part of the process. See [Go Tool](https://tip.golang.org/doc/go1.24#tools) usage for how to incorporate these as part of your build process. In order for this option to function, the global configuration option `allowedUnsafeExecutions` must include `goGenerate`. |
-| `helmUpdateSubChartArchives` | Update subchart archives in the `/charts` folder.                                                                                                                                                                                                                                                                                                                                                                                                                                  |
-| `kustomizeInflateHelmCharts` | Inflate updated helm charts referenced in the kustomization.                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| `npmDedupe`                  | Run `npm install` with `--prefer-dedupe` for npm >= 7 or `npm dedupe` after `package-lock.json` update for npm <= 6.                                                                                                                                                                                                                                                                                                                                                               |
-| `npmInstallTwice`            | Run `npm install` commands _twice_ to work around bugs where `npm` generates invalid lock files if run only once                                                                                                                                                                                                                                                                                                                                                                   |
-| `pnpmDedupe`                 | Run `pnpm dedupe --ignore-scripts` after `pnpm-lock.yaml` updates.                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| `yarnDedupeFewer`            | Run `yarn-deduplicate --strategy fewer` after `yarn.lock` updates.                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| `yarnDedupeHighest`          | Run `yarn-deduplicate --strategy highest` (`yarn dedupe --strategy highest` for Yarn >=2.2.0) after `yarn.lock` updates.                                                                                                                                                                                                                                                                                                                                                           |
+Enable conservative mode for `bundler` (Ruby dependencies).
+This will only update the immediate dependency in the lockfile instead of all subdependencies.
+
+### `composerNoMinimalChanges`
+
+Run `composer update` with no `--minimal-changes` flag (does not affect lock file maintenance, which will never use `--minimal-changes`).
+
+### `composerWithAll`
+
+Run `composer update` with `--with-all-dependencies` flag instead of the default `--with-dependencies`.
+
+### `dotnetWorkloadRestore`
+
+Run `dotnet workload restore` before `dotnet restore` commands.
+
+### `goGenerate`
+
+Run `go generate ./...`.
+This will then commit any files which were added or modified by running `go generate`.
+
+Note this will not install any other tools as part of the process.
+See [Go Tool](https://tip.golang.org/doc/go1.24#tools) usage for how to incorporate these as part of your build process.
+
+This runs after vendoring, if vendoring was required.
+
+!!! note
+  In order for this option to function, the global configuration option [`allowedUnsafeExecutions`](./self-hosted-configuration.md#allowedunsafeexecutions) must include `goGenerate`.
+
+### `gomodMassage`
+
+Enable massaging `replace` directives before calling `go` commands.
+
+### `gomodSkipVendor`
+
+Never run `go mod vendor` after Go module updates.
+
+### `gomodTidy`
+
+Run `go mod tidy` after Go module updates.
+This is implicitly enabled for major module updates when `gomodUpdateImportPaths` is enabled.
+
+### `gomodTidy1.17`
+
+Run `go mod tidy -compat=1.17` after Go module updates.
+
+### `gomodTidyE`
+
+Run `go mod tidy -e` after Go module updates.
+
+### `gomodUpdateImportPaths`
+
+Update source import paths on major module updates, using [mod](https://github.com/marwan-at-work/mod).
+
+### `gomodVendor`
+
+Always run `go mod vendor` after Go module updates even if vendor files aren't detected.
+
+### `helmUpdateSubChartArchives`
+
+Update subchart archives in the `/charts` folder.
+
+### `kustomizeInflateHelmCharts`
+
+Inflate updated helm charts referenced in the kustomization.
+
+### `npmDedupe`
+
+Run `npm install` with `--prefer-dedupe` for npm >= 7 or `npm dedupe` after `package-lock.json` update for npm <= 6.
+
+### `npmInstallTwice`
+
+Run `npm install` commands _twice_ to work around bugs where `npm` generates invalid lock files if run only once.
+
+### `pnpmDedupe`
+
+Run `pnpm dedupe --ignore-scripts` after `pnpm-lock.yaml` updates.
+
+### `yarnDedupeFewer`
+
+Run `yarn-deduplicate --strategy fewer` after `yarn.lock` updates.
+
+### `yarnDedupeHighest`
+
+Run `yarn-deduplicate --strategy highest` (`yarn dedupe --strategy highest` for Yarn >=2.2.0) after `yarn.lock` updates.
 
 ## `postUpgradeTasks`
 
@@ -4220,7 +4324,7 @@ This can include Markdown or any other syntax that the platform supports.
     "Package": "📦 Package",
     "Age": "[Age](https://docs.renovatebot.com/merge-confidence)"
   },
-  "prBodyColumn": ["Package", "Age"]
+  "prBodyColumns": ["Package", "Age"]
 }
 ```
 
@@ -4775,6 +4879,35 @@ This option is mergeable, which means you only have to specify the status checks
   "statusCheckNames": {
     "minimumReleaseAge": "custom/stability-days",
     "mergeConfidence": "custom/merge-confidence-level"
+  }
+}
+```
+
+## `statusCheckWhen`
+
+Control when each Renovate status check is set on branches.
+The keys match those available in [`statusCheckNames`](#statuschecknames).
+This option is mergeable, so you only need to specify the checks you want to change.
+
+Allowed values per key:
+
+- `always`: Renovate always sets the status check on every branch commit — green on success, red on failure.
+- `never`: Renovate never sets this status check. Use this to skip a check entirely.
+- `failed`: Renovate only sets the status check when there is a failure. Successes are silent (no green check).
+
+Default values:
+
+<!-- status-check-when-defaults-begin -->
+
+For example, to make `renovate/artifacts` a required check, set `artifactError` to `"always"` so it always reports green/red, allowing you to mark it as required in your branch protection rules.
+To skip a check entirely, set any key to `"never"` to suppress that status check.
+To only report failures for stability, set `minimumReleaseAge` to `"failed"` if you only care about the red/pending status.
+
+```json title="Example: always set artifacts check, skip merge confidence"
+{
+  "statusCheckWhen": {
+    "artifactError": "always",
+    "mergeConfidence": "never"
   }
 }
 ```

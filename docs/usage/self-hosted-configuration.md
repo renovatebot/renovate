@@ -36,7 +36,7 @@ Enabling this allows `postUpgradeTasks`' `commands` to execute as if they're in 
 
 This takes effect if you are using shell semantics, such as:
 
-```json title="allowShellExecutorForPostUpgradeCommands=true will allow this to run as expected"
+```json {title="allowShellExecutorForPostUpgradeCommands=true will allow this to run as expected" configType=global}
 {
   "postUpgradeTasks": {
     "commands": ["echo '...' > go.mod", "go mod tidy || true"],
@@ -48,7 +48,7 @@ This takes effect if you are using shell semantics, such as:
 
 This will not affect calling a script like:
 
-```json title="allowShellExecutorForPostUpgradeCommands=true will have not effect"
+```json {title="allowShellExecutorForPostUpgradeCommands=true will have not effect" configType=global}
 {
   "postUpgradeTasks": {
     "commands": ["bash .scripts/post-yarn-update.sh"],
@@ -72,7 +72,7 @@ If this list is empty then no tasks will be executed.
 
 For example:
 
-```json
+```json {configType=global}
 {
   "allowedCommands": ["^tslint --fix$", "^tslint --[a-z]+$"]
 }
@@ -125,8 +125,9 @@ Examples:
 | `X-*`          | Global pattern   | Any header starting with `X-`               |
 | `X`            | Exact match glob | Only the header matching exactly `X`        |
 
-```json
+```json {configType=global}
 {
+  "allowedHeaders": ["X-Auth-Token"],
   "hostRules": [
     {
       "matchHost": "https://domain.com/all-versions",
@@ -156,11 +157,12 @@ For more details of where this may be found, see ["Trusting Repository Developer
 
 Allowed options:
 
-| Option          | Description                                                                   |
-| --------------- | ----------------------------------------------------------------------------- |
-| `bazelModDeps`  | Allows the `bazel mod deps` when perfoming bazelisk or bazel-module updates.  |
-| `goGenerate`    | Allows the `goGenerate` `postUpdateOption` to run after a go mod update.      |
-| `gradleWrapper` | Allows using `./gradlew` or `gradle.bat` when performing updates with Gradle. |
+| Option          | Description                                                                                   |
+| --------------- | --------------------------------------------------------------------------------------------- |
+| `bazelModDeps`  | Allows the `bazel mod deps` when perfoming bazelisk or bazel-module updates.                  |
+| `goGenerate`    | Allows the `goGenerate` `postUpdateOption` to run after a go mod update.                      |
+| `gradleWrapper` | Allows using `./gradlew` or `gradle.bat` when performing updates with Gradle.                 |
+| `mise`          | Allows running any `mise` commands, for instance `mise lock` when updating `mise.lock` files. |
 
 ## `autodiscover`
 
@@ -193,7 +195,7 @@ RENOVATE_AUTODISCOVER_FILTER="/MyOrg\/(my|foo)-repo/"
 
 The configuration:
 
-```json
+```json {configType=global}
 {
   "autodiscoverFilter": ["my-org/*", "!my-org/old-*"]
 }
@@ -206,7 +208,7 @@ Glob patterns are case-insensitive.
 All text inside the start and end `/` will be treated as a regular expression.
 If using negations, all repositories except those who match the regex are added to the result:
 
-```json
+```json {configType=global}
 {
   "autodiscoverFilter": ["/project/.*/", "!/project/old-/"]
 }
@@ -219,7 +221,7 @@ In contrast to `autodiscoverFilter` the filtering is done by the platform and th
 
 For example:
 
-```json
+```json {configType=global}
 {
   "platform": "gitlab",
   "autodiscoverNamespaces": ["a-group", "another-group/some-subgroup"]
@@ -235,7 +237,7 @@ For example:
 You can use this option to filter the list of autodiscovered repositories by project names.
 This feature is useful for users who want Renovate to only work on repositories within specific projects or exclude certain repositories from being processed.
 
-```json title="Example for Bitbucket"
+```json {title="Example for Bitbucket" configType=global}
 {
   "platform": "bitbucket",
   "autodiscoverProjects": ["a-group", "!another-group/some-subgroup"]
@@ -271,7 +273,7 @@ topics. Set this variable to a list of strings, all of which will be topics for 
 
 For example:
 
-```json
+```json {configType=global}
 {
   "autodiscoverTopics": ["managed-by-renovate"]
 }
@@ -284,7 +286,7 @@ You can override this default with the `baseDir` option.
 
 For example:
 
-```json
+```json {configType=global}
 {
   "baseDir": "/my-own-different-temporary-folder"
 }
@@ -331,7 +333,7 @@ You can use one directory for the repo data, and another for the cache data.
 
 For example:
 
-```json
+```json {configType=global}
 {
   "baseDir": "/my-own-different-temporary-folder",
   "cacheDir": "/my-own-different-cache-folder"
@@ -393,7 +395,7 @@ Priority order:
 
 Example:
 
-```json
+```json {configType=global}
 {
   "cacheTtlOverride": {
     "datasource-rubygems": 120,
@@ -428,7 +430,7 @@ This array will allow you to set the names of the branches you want to rebase/cr
 It has been designed with the intention of being run on one repository, in a one-off manner, e.g. to "force" the rebase of a known existing branch.
 It is highly unlikely that you should ever need to add this to your permanent global config.
 
-Example: `renovate --checked-branches=renovate/chalk-4.x renovate-reproductions/checked` will rebase the `renovate/chalk-4.x` branch in the `renovate-reproductions/checked` repository.`
+Example: `renovate --checked-branches=renovate/chalk-4.x renovate-reproductions/checked` will rebase the `renovate/chalk-4.x` branch in the `renovate-reproductions/checked` repository.
 
 ## `configFileNames`
 
@@ -438,7 +440,7 @@ This list doesn't replace the existing list of default config filenames used int
 
 Example:
 
-```json
+```json {configType=global}
 {
   "configFileNames": ["myrenovate.json"]
 }
@@ -555,7 +557,7 @@ Periods (`.`) in host names must be replaced with a single underscore (`_`).
 
 `NPM_REGISTRY_NPMJS_ORG_TOKEN=abc123`:
 
-```json
+```json {configType=global}
 {
   "hostRules": [
     {
@@ -571,7 +573,7 @@ Periods (`.`) in host names must be replaced with a single underscore (`_`).
 
 `GITLAB__TAGS_CODE__HOST_COMPANY_COM_USERNAME=bot GITLAB__TAGS_CODE__HOST_COMPANY_COM_PASSWORD=botpass123`:
 
-```json
+```json {configType=global}
 {
   "hostRules": [
     {
@@ -590,7 +592,7 @@ You can skip the host part, and use only the datasource and credentials.
 
 `DOCKER_USERNAME=bot DOCKER_PASSWORD=botpass123`:
 
-```json
+```json {configType=global}
 {
   "hostRules": [
     {
@@ -606,7 +608,7 @@ You can skip the host part, and use only the datasource and credentials.
 
 `GITHUB_SOME_GITHUB__ENTERPRISE_HOST_HTTPSCERTIFICATE=certificate GITHUB_SOME_GITHUB__ENTERPRISE_HOST_HTTPSPRIVATEKEY=private-key GITHUB_SOME_GITHUB__ENTERPRISE_HOST_HTTPSCERTIFICATEAUTHORITY=certificate-authority`:
 
-```json
+```json {configType=global}
 {
   "hostRules": [
     {
@@ -653,7 +655,7 @@ You can use the `dockerSidecarImage` option to override this default.
 Say you want to pull a custom image from `ghcr.io/your_company/sidecar`.
 You would put this in your configuration file:
 
-```json
+```json {configType=global ignoreConfigWarnings=true}
 {
   "dockerSidecarImage": "ghcr.io/your_company/sidecar"
 }
@@ -669,7 +671,7 @@ The user-id (UID) and group-id (GID) must match the user that executes Renovate.
 Read the [Docker run reference](https://docs.docker.com/engine/reference/run/#user) for more information on user and group syntax.
 Set this to `1001:1002` to use UID 1001 and GID 1002.
 
-```json title="Setting UID to 1001 and GID to 1002"
+```json {title="Setting UID to 1001 and GID to 1002" configType=global ignoreConfigWarnings=true}
 {
   "dockerUser": "1001:1002"
 }
@@ -819,6 +821,11 @@ Possible values:
 - `default`: use HTTPS URLs provided by the platform for Git
 - `ssh`: use SSH URLs provided by the platform for Git
 - `endpoint`: ignore URLs provided by the platform and use the configured endpoint directly
+
+!!! note
+  On GitHub, `default` and `endpoint` are equivalent: both build the HTTPS URL from the configured endpoint with credentials embedded.
+  `ssh` uses the repository's `sshUrl` and authenticates via SSH key.
+  In fork mode (`forkToken` set with `forkCreation`), `ssh` applies to both the fork's working URL and the upstream URL.
 
 ## `githubTokenWarn`
 
@@ -1218,7 +1225,7 @@ Used to set environment variables through the configuration file instead of usin
 
 Example:
 
-```json
+```json {configType=global}
 {
   "processEnv": {
     "AWS_ACCESS_KEY_ID": "AKIAIOSFODNN7EXAMPLE",
@@ -1236,6 +1243,13 @@ Example:
 ## `productLinks`
 
 Override this object if you want to change the URLs that Renovate links to, e.g. if you have an internal forum for asking for help.
+
+## `rebaseAllOpenBranches`
+
+It has been designed with the intention of being run on one repository, in a one-off manner, e.g. to "force" the rebase of all open PRs.
+It is highly unlikely that you should ever need to add this to your permanent global config.
+
+Example: `renovate --rebase-all-open-branches=true renovate-reproductions/checked` will rebase all open PRs in the `renovate-reproductions/checked` repository.
 
 ## `redisPrefix`
 

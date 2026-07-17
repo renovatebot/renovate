@@ -16,6 +16,7 @@ const adminConfig: RepoGlobalConfig = {
   localDir: upath.join('/tmp/github/some/repo'),
   cacheDir: upath.join('/tmp/cache'),
   containerbaseDir: upath.join('/tmp/cache/containerbase'),
+  binarySource: 'global',
 };
 
 describe('modules/manager/bazel-module/lockfile', () => {
@@ -204,7 +205,8 @@ describe('modules/manager/bazel-module/lockfile', () => {
     expect(result).toBeNull();
     expect(execSnapshots).toBeEmptyArray();
     expect(logger.logger.once.warn).toHaveBeenCalledWith(
-      'Bazel command, `bazel mod deps --lockfile_mode=update`, was requested to run, but `bazelModDeps` is not permitted in the allowedUnsafeExecutions',
+      { command: 'bazel mod deps --lockfile_mode=update' },
+      'Bazel command was requested to run, but `bazelModDeps` is not permitted in the allowedUnsafeExecutions',
     );
   });
 });

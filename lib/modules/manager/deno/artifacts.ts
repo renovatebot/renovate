@@ -1,4 +1,5 @@
 import { isEmptyArray } from '@sindresorhus/is';
+import upath from 'upath';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
 import { exec } from '../../../util/exec/index.ts';
@@ -8,6 +9,13 @@ import {
   readLocalFile,
   writeLocalFile,
 } from '../../../util/fs/index.ts';
+import * as hostRules from '../../../util/host-rules.ts';
+import { processHostRules } from '../npm/post-update/rules.ts';
+import {
+  getNpmrcContent,
+  resetNpmrcContent,
+  updateNpmrcContent,
+} from '../npm/utils.ts';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
 import type { DenoManagerData } from './types.ts';
 
@@ -51,7 +59,12 @@ export async function updateArtifacts(
       updateDep.depType === 'tasks.command'
     ) {
       logger.warn(
-        `depType: "${updateDep.depType}", depName: "${updateDep.depName}" can't be updated with a lock file: "${lockFileName}"`,
+        {
+          depType: updateDep.depType,
+          depName: updateDep.depName,
+          lockFileName,
+        },
+        "Dependency can't be updated with a lock file",
       );
       return [
         {
@@ -64,15 +77,16 @@ export async function updateArtifacts(
     }
   }
 
+  const pkgFileDir = upath.dirname(packageFileName);
+  const { additionalNpmrcContent } = processHostRules();
+  const npmrcContent = await getNpmrcContent(pkgFileDir);
+  await updateNpmrcContent(pkgFileDir, npmrcContent, additionalNpmrcContent);
+
   try {
     await writeLocalFile(packageFileName, newPackageFileContent);
 
-    let args = '';
     if (isLockFileMaintenance) {
       await deleteLocalFile(lockFileName);
-      // force update lockfile when deleting it
-      // https://github.com/denoland/deno/blob/7eda90e61d107a2f48ef6eab954cda143707e01c/tests/specs/lockfile/frozen_lockfile/no_lockfile_run.out
-      args += ' --frozen=false';
     }
 
     // run from its referred deno.json/deno.jsonc location if import map is used
@@ -95,13 +109,37 @@ export async function updateArtifacts(
 
     // "deno install" don't execute lifecycle scripts of package.json by default
     // https://docs.deno.com/runtime/reference/cli/install/#native-node.js-addons
+    // deno.json(c) could have the `lock.frozen` field
+    // we should always override the `frozen` flag due to if it would be specified true
+    let command = 'deno install --frozen=false';
+
+    // defaults as per https://docs.deno.com/runtime/fundamentals/security/#importing-from-the-web
+    const defaultImportHosts = [
+      'deno.land:443',
+      'esm.sh:443',
+      'jsr.io:443',
+      'cdn.jsdelivr.net:443',
+      'raw.githubusercontent.com:443',
+      'gist.githubusercontent.com:443',
+    ];
+    const additionalImportHosts = hostRules
+      .findAll({ hostType: 'npm' })
+      .filter((rule) => rule.resolvedHost)
+      .map((rule) => rule.resolvedHost);
+
+    if (additionalImportHosts.length > 0) {
+      // combine default and additional import hosts, removing duplicates
+      const importHosts = [
+        ...new Set([...defaultImportHosts, ...additionalImportHosts]),
+      ].join(',');
+
+      command += ` --allow-import=${importHosts}`;
+    }
+
     // TODO: appending `--lockfile-only` is better to reduce disk usage
     // https://docs.deno.com/runtime/reference/cli/install/#options-lockfile-only
-    let command = 'deno install';
-    if (args) {
-      command += args;
-    }
     await exec(command, execOptions);
+    await resetNpmrcContent(pkgFileDir, npmrcContent);
 
     const newLockFileContent = await readLocalFile(lockFileName);
     if (

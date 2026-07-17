@@ -16,7 +16,7 @@ function parse(v: string): Version | null {
 export const id = 'conda';
 export const displayName = 'conda';
 export const urls = [
-  'https://docs.conda.io/projects/conda-build/en/stable/resources/package-spec.html#package-match-specifications',
+  '[Conda package match specifications](https://docs.conda.io/projects/conda-build/en/stable/resources/package-spec.html#package-match-specifications)',
 ];
 export const supportsRanges = true;
 export const supportedRangeStrategies: RangeStrategy[] = [
@@ -165,7 +165,7 @@ function getSatisfyingVersion(
     return null;
   }
 
-  return satisfiedVersions[satisfiedVersions.length - 1][1];
+  return satisfiedVersions.at(-1)![1];
 }
 
 function minSatisfyingVersion(

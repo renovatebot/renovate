@@ -22,19 +22,25 @@ program
   .option('--version <version>', 'the current version of the Renovate CLI')
   .option('--no-build', 'do not build docs from source')
   .option('--no-strict', 'do not build in strict mode')
+  .option('--no-announcement', 'do not include the announcement bar')
   .action(async (opts) => {
     await prepareDocs(opts);
-    logger.info('* running mkdocs build');
+    if (opts.announcement) {
+      logger.info('* running mkdocs build');
+    } else {
+      logger.info('* running mkdocs build (without announcement bar)');
+    }
     const args = ['run', 'mkdocs', 'build'];
     if (opts.strict) {
       args.push('--strict');
     }
-    const res = await exec('pdm', args, {
+    const res = await exec('uv', args, {
       cwd: 'tools/mkdocs',
       stdio: 'inherit',
       env: {
         ...process.env,
         RENOVATE_VERSION: opts.version ?? '',
+        MKDOCS_INCLUDE_ANNOUNCEMENT: opts.announcement ? 'true' : '',
       },
       reject: false,
     });
@@ -52,8 +58,8 @@ program
     if (opts.strict) {
       mkdocsArgs.push('--strict');
     }
-    const spawnServe = (): ExecaChildProcess<string> =>
-      execa('pdm', mkdocsArgs, {
+    const spawnServe = (): ExecaChildProcess =>
+      execa('uv', mkdocsArgs, {
         cwd: 'tools/mkdocs',
         stdio: 'inherit',
         reject: false,
@@ -67,7 +73,7 @@ program
       return;
     }
 
-    let activeChild: ExecaChildProcess<string> | null = null;
+    let activeChild: ExecaChildProcess | null = null;
     let shouldRestart = false;
     let debounceTimer: ReturnType<typeof setTimeout> | undefined;
 
@@ -104,7 +110,7 @@ async function prepareDocs(opts: any): Promise<void> {
   }
 }
 
-function checkResult(res: ExecaReturnValue<string>): void {
+function checkResult(res: ExecaReturnValue): void {
   if (res.signal) {
     logger.error(`Signal received: ${res.signal}`);
     process.exit(-1);

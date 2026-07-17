@@ -17,7 +17,7 @@ import { BaseGoDatasource } from './base.ts';
 import { getSourceUrl } from './common.ts';
 import { parseGoproxy, parseNoproxy } from './goproxy-parser.ts';
 import { GoDirectDatasource } from './releases-direct.ts';
-import type { VersionInfo } from './types.ts';
+import { VersionInfo } from './schema.ts';
 
 /** TODO #42566 */
 const goVersionRegex = regEx(/^\s*go\s+(?<version>[^\s]+)\s*$/);
@@ -181,7 +181,7 @@ export class GoProxyDatasource extends Datasource {
       '@v',
       `${version}.info`,
     );
-    const res = await this.http.getJsonUnchecked<VersionInfo>(url);
+    const res = await this.http.getJson(url, VersionInfo);
 
     const result: Release = {
       version: res.body.Version,
@@ -247,11 +247,11 @@ export class GoProxyDatasource extends Datasource {
     const parts = goDirective.split('.');
     if (parts.length === 1) {
       return `${parts[0]}.0.0`;
-    } else if (parts.length === 2) {
-      return `${parts[0]}.${parts[1]}.0`;
-    } else {
-      return `${parts[0]}.${parts[1]}.${parts[2]}`;
     }
+    if (parts.length === 2) {
+      return `${parts[0]}.${parts[1]}.0`;
+    }
+    return `${parts[0]}.${parts[1]}.${parts[2]}`;
   }
 
   async getLatestVersion(
@@ -264,7 +264,7 @@ export class GoProxyDatasource extends Datasource {
         this.encodeCase(packageName),
         '@latest',
       );
-      const res = await this.http.getJsonUnchecked<VersionInfo>(url);
+      const res = await this.http.getJson(url, VersionInfo);
       return res.body.Version;
     } catch (err) {
       logger.trace({ err }, 'Failed to get latest version');

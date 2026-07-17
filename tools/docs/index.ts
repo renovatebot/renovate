@@ -7,6 +7,7 @@ import { generateDatasources } from './datasources.ts';
 import { generateEnvOptions } from './env-options.ts';
 import { generateEnvVars } from './env-vars.ts';
 import { getOpenGitHubItems } from './github-query-items.ts';
+import { generateManagerGithubActionsCommunity } from './manager/github-actions/community.ts';
 import { generateManagers } from './manager.ts';
 import { generateManagerAsdfSupportedPlugins } from './manager-asdf-supported-plugins.ts';
 import { generateManagerMiseSupportedPlugins } from './manager-mise-supported-plugins.ts';
@@ -19,7 +20,7 @@ import { generateVersioning } from './versioning.ts';
 export async function generateDocs(
   root = 'tmp',
   pack = true,
-  version: string | undefined = undefined,
+  version?: string,
 ): Promise<void> {
   try {
     const dist = `${root}/docs`;
@@ -51,6 +52,10 @@ export async function generateDocs(
     // managers/asdf supported plugins
     logger.info('* managers/asdf/supported-plugins');
     await generateManagerAsdfSupportedPlugins(dist);
+
+    // managers/github-actions community actions
+    logger.info('* managers/github-actions/community');
+    await generateManagerGithubActionsCommunity(dist);
 
     // managers/mise supported plugins
     logger.info('* managers/mise/supported-plugins');

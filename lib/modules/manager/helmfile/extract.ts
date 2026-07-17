@@ -22,9 +22,8 @@ import {
 function isValidChartName(name: string | undefined, oci: boolean): boolean {
   if (oci) {
     return !!name && !regEx(/[!@#$%^&*(),.?":{}|<>A-Z]/).test(name);
-  } else {
-    return !!name && !regEx(/[!@#$%^&*(),.?":{}/|<>A-Z]/).test(name);
   }
+  return !!name && !regEx(/[!@#$%^&*(),.?":{}/|<>A-Z]/).test(name);
 }
 
 function isLocalPath(possiblePath: string): boolean {

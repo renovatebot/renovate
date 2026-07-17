@@ -1,4 +1,6 @@
 import { Readable } from 'node:stream';
+import type { GitPullRequest } from 'azure-devops-node-api/interfaces/GitInterfaces.js';
+import { partial } from '~test/util.ts';
 import { streamToString } from '../../../util/streams.ts';
 import {
   getBranchNameWithoutRefsheadsPrefix,
@@ -8,6 +10,7 @@ import {
   getRenovatePRFormat,
   getRepoByName,
   getStorageExtraCloneOpts,
+  getWorkItemTitle,
   max4000Chars,
 } from './util.ts';
 
@@ -89,17 +92,17 @@ describe('modules/platform/azure/util', () => {
 
   describe('getRenovatePRFormat', () => {
     it('should be formated (closed)', () => {
-      const res = getRenovatePRFormat({ status: 2 } as any);
+      const res = getRenovatePRFormat(partial<GitPullRequest>({ status: 2 }));
       expect(res).toMatchSnapshot();
     });
 
     it('should be formated (closed v2)', () => {
-      const res = getRenovatePRFormat({ status: 3 } as any);
+      const res = getRenovatePRFormat(partial<GitPullRequest>({ status: 3 }));
       expect(res).toMatchSnapshot();
     });
 
     it('should be formated (not closed)', () => {
-      const res = getRenovatePRFormat({ status: 1 } as any);
+      const res = getRenovatePRFormat(partial<GitPullRequest>({ status: 1 }));
       expect(res).toMatchSnapshot();
     });
   });
@@ -223,9 +226,48 @@ describe('modules/platform/azure/util', () => {
 
     it('throws when repo name is invalid', () => {
       // TODO: better error handling #22198
-      expect(() => getRepoByName(undefined as never, [])).toThrow();
-      expect(() => getRepoByName(null as never, [])).toThrow();
-      expect(() => getRepoByName('foo/bar/baz', [])).toThrow();
+      expect(() => getRepoByName(undefined as never, [])).toThrow(
+        "Cannot read properties of undefined (reading 'split')",
+      );
+      expect(() => getRepoByName(null as never, [])).toThrow(
+        "Cannot read properties of null (reading 'split')",
+      );
+      expect(() => getRepoByName('foo/bar/baz', [])).toThrow(
+        'Azure repository can be only structured this way',
+      );
     });
+  });
+  it('returns the raw title if not a dependency dashboard', () => {
+    expect(getWorkItemTitle('Some Issue', 'project/repo')).toBe('Some Issue');
+  });
+
+  it('returns the raw title if dependency dashboard and already prefixed', () => {
+    expect(
+      getWorkItemTitle('[repo] Dependency Dashboard', 'project/repo'),
+    ).toBe('[repo] Dependency Dashboard');
+  });
+
+  it('prefixes dependency dashboard title with repo name if not already prefixed', () => {
+    expect(getWorkItemTitle('Dependency Dashboard', 'project/repo')).toBe(
+      '[repo] Dependency Dashboard',
+    );
+  });
+
+  it('handles repository names with slashes', () => {
+    expect(getWorkItemTitle('Dependency Dashboard', 'org/project/repo')).toBe(
+      '[repo] Dependency Dashboard',
+    );
+  });
+
+  it('does not double prefix if repo name is already present', () => {
+    expect(
+      getWorkItemTitle('[repo] Dependency Dashboard', 'org/project/repo'),
+    ).toBe('[repo] Dependency Dashboard');
+  });
+
+  it('handles titles with apostrophes', () => {
+    expect(getWorkItemTitle("Dependency Dashboard's", 'project/repo')).toBe(
+      "[repo] Dependency Dashboard's",
+    );
   });
 });

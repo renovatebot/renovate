@@ -8,7 +8,7 @@ import type { NewValueConfig, VersioningApi } from '../types.ts';
 export const id = 'github-actions';
 export const displayName = 'GitHub Actions';
 export const urls = [
-  'https://docs.github.com/en/actions/how-tos/write-workflows/choose-what-workflows-do/find-and-customize-actions#using-release-management-for-your-custom-actions',
+  '[GitHub Actions - Using release management for custom actions](https://docs.github.com/en/actions/how-tos/write-workflows/choose-what-workflows-do/find-and-customize-actions#using-release-management-for-your-custom-actions)',
 ];
 export const supportsRanges = true;
 export const supportedRangeStrategies = ['pin', 'replace'];

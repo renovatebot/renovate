@@ -86,23 +86,25 @@ The Renovate team provide a ["Renovate Runner"](https://gitlab.com/renovate-bot/
 This supports both `gitlab.com` and self-hosted GitLab.
 Details for how it works can be found in the project.
 
-#### Mend Renovate Community Edition / Enterprise Edition
+#### Mend Renovate Self-Hosted (Community Edition / Enterprise Edition)
 
-Mend Renovate Community Edition (Renovate CE) and Enterprise Edition (Renovate EE) are closed-source offerings of Renovate for self-hosted users.
-Renovate CE and Renovate EE have support for GitHub (both `github.com` and GitHub Enterprise Server) as well as GitLab self-hosted.
+Mend Renovate Self-Hosted Community Edition (sometimes "Renovate CE"/"CE") and Enterprise Edition (sometimes "Renovate EE"/"EE") are closed-source offerings of Renovate for self-hosted users.
+
 It is built similarly to the default "full" Renovate image described above, but with these differences:
 
 - It is a stateful app and does not exit after processing all repositories
 - It is installed as an App on GitHub, and behaves similarly on GitLab - for example responding to webhooks
 - It includes a priority job queue which prioritizes events like merged PRs over scheduled jobs
-- It is released every 1-2 months in a slower, more stable cadence than Renovate OSS, which releases on every commit
-- It's licensed using an end-user license agreement (EULA) and not the Affero General Public License (AGPL)
+- It is released every 2 weeks in a slightly slower and more stable cadence than Renovate OSS, which releases on every commit
+- It's licensed using an end-user license agreement (EULA) and not the Affero General Public License (AGPL-3.0-only)
 
 Plus, the Enterprise Edition has:
 
 - Horizontal scaling to run multiple 'worker' containers
 - Dedicated support from Mend.io
 - Premium features, including Smart Merge Control
+
+Mend Renovate Self-Hosted CE and EE have support for GitHub.com, GitHub Enterprise Server, GitLab.com, GitLab Self-Managed, and Bitbucket Data Center.
 
 Go to the Mend.io website to learn more about [Renovate Enterprise Edition](https://www.mend.io/renovate-enterprise/).
 

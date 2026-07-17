@@ -11,10 +11,10 @@ Let Renovate use your PAT by doing _one_ of the following:
 
 Permissions for your PAT should be at minimum:
 
-| Scope        | Permission   | Description                       |
-| ------------ | ------------ | --------------------------------- |
-| `Code`       | Read & Write | Required                          |
-| `Work Items` | Read & write | Only needed for link to work item |
+| Scope        | Permission   | Description                                           |
+| ------------ | ------------ | ----------------------------------------------------- |
+| `Code`       | Read & Write | Required                                              |
+| `Work Items` | Read & write | Needed for link to work item and dependecy dashboards |
 
 Remember to set `platform=azure` somewhere in your Renovate config file.
 
@@ -109,7 +109,7 @@ To let Renovate use the Azure DevOps internal API, you must set these variables 
 - `endpoint` = `$(System.CollectionUri)`, this is an [Azure predefined variable](https://learn.microsoft.com/en-us/azure/devops/pipelines/build/variables?view=azure-devops&tabs=yaml)
 - `hostRules.hostType` = `azure-pipelines-tasks`
 
-```json title="Example config file in JSON format"
+```json {title="Example config file in JSON format" configType=global}
 {
   "platform": "azure",
   "endpoint": "https://dev.azure.com/ORG_NAME",
@@ -195,6 +195,14 @@ Make sure the user has the following permissions on the work item's _area path_:
 - View work items in this node
 
 If the user does not have these permissions, Renovate still creates a PR but it won't have a link to the work item.
+
+### Dependency Dashboard work item state
+
+On Azure DevOps, Renovate stores the Dependency Dashboard (and any other issues) as a work item of type `Issue`.
+Renovate resolves the correct open and closed state names from the process for the project automatically, so it works across the different processes (for example `To Do`/`Done` on _Basic_, `New`/`Active`/`Closed` on _Agile_, and custom inherited processes).
+
+When creating the work item, Renovate does not set a state, so Azure DevOps applies the default initial state of the work item type.
+If the states cannot be read (for example on older Azure DevOps Server versions), Renovate falls back to the `New` and `Closed` state names.
 
 ### Adding tags to Pull Requests
 

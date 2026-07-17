@@ -76,6 +76,27 @@ describe('modules/datasource/conda/index', () => {
       expect(res).toBeNull();
     });
 
+    it('handles null html_url and dev_url without throwing', async () => {
+      const packageName = 'pytest';
+      httpMock
+        .scope('https://api.anaconda.org/package/conda-forge')
+        .get(`/${packageName}`)
+        .reply(200, {
+          html_url: null,
+          dev_url: null,
+          versions: ['1.0.0'],
+          files: [],
+        });
+      const res = await getPkgReleases({
+        registryUrls: ['https://api.anaconda.org/package/conda-forge'],
+        datasource,
+        packageName,
+      });
+      expect(res).toMatchObject({ releases: [{ version: '1.0.0' }] });
+      expect(res?.homepage).toBeUndefined();
+      expect(res?.sourceUrl).toBeUndefined();
+    });
+
     it('supports multiple custom datasource urls', async () => {
       const packageName = 'pytest';
       httpMock
