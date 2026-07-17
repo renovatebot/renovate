@@ -1,5 +1,6 @@
 import {
   isArray,
+  isNonEmptyObject,
   isNullOrUndefined,
   isObject,
   isString,
@@ -17,7 +18,7 @@ import * as template from '../../util/template/index.ts';
 import { GlobalConfig } from '../global.ts';
 import * as massage from '../massage.ts';
 import * as migration from '../migration.ts';
-import type { AllConfig, RenovateConfig } from '../types.ts';
+import type { AllConfig, RenovateConfig, RepoGlobalConfig } from '../types.ts';
 import { mergeChildConfig } from '../utils.ts';
 import { removedPresets } from './common.ts';
 import * as internal from './internal/index.ts';
@@ -43,6 +44,31 @@ const presetSourceLoaders: Record<string, () => Promise<PresetApi>> = {
 };
 
 const presetCacheNamespace = 'preset';
+
+/**
+ * A repository can choose to extend a `custom:` preset, but only the
+ * self-hosted admin controls what that preset contains. So, like
+ * `repositories[]` object-entry config, a `custom:` preset is allowed to
+ * carry global-only options. Those options are applied here as a diff on
+ * top of the current `GlobalConfig`, scoped to this repository's run, and
+ * removed from the preset so they don't also end up as regular repo config.
+ */
+function applyGlobalPresetOptions(preset: Preset): void {
+  const globalOverrides: Partial<RepoGlobalConfig> = {};
+  for (const option of GlobalConfig.OPTIONS) {
+    if (option in preset) {
+      globalOverrides[option] = preset[option] as never;
+      delete preset[option];
+    }
+  }
+  if (isNonEmptyObject(globalOverrides)) {
+    logger.debug(
+      { globalOverrides },
+      'Applying global-only options from custom preset',
+    );
+    GlobalConfig.set({ ...GlobalConfig.get(), ...globalOverrides });
+  }
+}
 
 export function replaceArgs(
   obj: string,
@@ -122,9 +148,13 @@ export async function getPreset(
       tag,
     });
   } else if (presetSource === 'custom') {
-    presetConfig = clone(baseConfig?.customPresets?.[presetName]) as
+    const customPreset = clone(baseConfig?.customPresets?.[presetName]) as
       | Preset
       | undefined;
+    if (customPreset) {
+      applyGlobalPresetOptions(customPreset);
+    }
+    presetConfig = customPreset;
   } else {
     const cacheKey = `preset:${preset}`;
     const presetCachePersistence = GlobalConfig.get('presetCachePersistence');

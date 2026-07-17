@@ -198,7 +198,12 @@ export interface GlobalOnlyConfigLegacy {
   baseDir?: string;
   cacheDir?: string;
   containerbaseDir?: string;
-  customPresets?: Record<string, RenovateConfig>;
+  /**
+   * Repositories choose which preset to extend, but only the admin controls
+   * what a preset contains, so - like `repositories[]` object-entries -
+   * these presets may also carry global-only (`RepoGlobalConfig`) options.
+   */
+  customPresets?: Record<string, RenovateConfig & Partial<RepoGlobalConfig>>;
   detectHostRulesFromEnv?: boolean;
   dockerCliOptions?: string;
   endpoint?: string;

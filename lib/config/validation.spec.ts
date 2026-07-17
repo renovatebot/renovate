@@ -2599,6 +2599,10 @@ describe('config/validation', () => {
             badPreset: {
               matchPackageNames: ['foo'], // invalid outside of packageRules
             },
+            // global-only options are allowed, same as repositories[] entries
+            globalOptionsPreset: {
+              allowedCommands: ['^tslint --fix$'],
+            },
             invalidPreset: 'not an object',
           },
         } as AllConfig;

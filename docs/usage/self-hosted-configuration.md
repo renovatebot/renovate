@@ -513,6 +513,23 @@ Then in a repository's `renovate.json`:
 }
 ```
 
+Unlike other presets, a `custom:` preset may also set global-only options (any [self-hosted configuration option](./self-hosted-configuration.md), such as `allowedCommands`), the same way an object in the [`repositories`](#repositories) array can.
+This is because only the bot administrator can define what a `customPresets` preset contains, even though a repository picks which preset(s) it extends from:
+
+```js title="config.js"
+module.exports = {
+  customPresets: {
+    myPreset: {
+      allowedCommands: ['^tslint --fix$'],
+    },
+  },
+};
+```
+
+!!! warning
+  Any repository that's allowed to extend a `custom:` preset gets to opt itself into whatever global-only options that preset sets.
+  Don't put sensitive global-only options (for example, ones that loosen sandboxing) into a preset that untrusted repositories can extend from.
+
 ## `deleteAdditionalConfigFile`
 
 If set to `true` Renovate tries to delete the additional self-hosted config file after reading it.
