@@ -1,4 +1,4 @@
-import { isArray, isString } from '@sindresorhus/is';
+import { isArray, isString, isTruthy } from '@sindresorhus/is';
 import { logger } from '../../../../../logger/index.ts';
 import {
   getParentDir,
@@ -37,7 +37,7 @@ export async function detectMonorepos(
       );
       const internalPackageNames = internalPackageFiles
         .map((sp) => sp.managerData?.packageJsonName)
-        .filter(Boolean);
+        .filter(isTruthy);
 
       p.deps?.forEach((dep) => {
         if (
@@ -66,7 +66,10 @@ export async function detectMonorepos(
         }
 
         subPackage.deps?.forEach((dep) => {
-          if (internalPackageNames.includes(dep.depName)) {
+          if (
+            isString(dep.depName) &&
+            internalPackageNames.includes(dep.depName)
+          ) {
             dep.isInternal = true;
           }
         });

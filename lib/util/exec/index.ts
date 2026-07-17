@@ -1,4 +1,4 @@
-import { isNonEmptyString } from '@sindresorhus/is';
+import { isNonEmptyString, isString } from '@sindresorhus/is';
 import upath from 'upath';
 import { GlobalConfig } from '../../config/global.ts';
 import type { ToolSettingsOptions } from '../../config/types.ts';
@@ -92,7 +92,7 @@ async function prepareRawExec(
 
   let rawOptions = getRawExecOptions(opts);
 
-  let rawCommands = typeof cmd === 'string' ? [cmd] : cmd;
+  let rawCommands = isString(cmd) ? [cmd] : cmd;
 
   if (isDocker(docker)) {
     logger.debug({ image: sideCarImage }, 'Using docker to execute');

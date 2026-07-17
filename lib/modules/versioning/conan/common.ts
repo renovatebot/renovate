@@ -1,3 +1,4 @@
+import { isString } from '@sindresorhus/is';
 import * as semver from 'semver';
 import { regEx } from '../../../util/regex.ts';
 import { coerceString } from '../../../util/string.ts';
@@ -90,7 +91,7 @@ export function findSatisfyingVersion(
 
   for (const v of versions) {
     const versionFromList = makeVersion(v, options);
-    if (typeof versionFromList === 'string') {
+    if (isString(versionFromList)) {
       const cleanedVersion = cleanVersion(versionFromList);
       const options = getOptions(range);
       const cleanRange = cleanVersion(range);

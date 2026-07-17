@@ -1,4 +1,4 @@
-import { isNonEmptyArray, isNonEmptyObject } from '@sindresorhus/is';
+import { isNonEmptyArray, isNonEmptyObject, isString } from '@sindresorhus/is';
 import { setUserConfigFileNames } from '../../../../config/app-strings.ts';
 import { setPrivateKeys } from '../../../../config/decrypt.ts';
 import * as defaultsParser from '../../../../config/defaults.ts';
@@ -129,9 +129,7 @@ export async function parseConfigs(
     ];
 
     if (isNonEmptyArray(existingRepos)) {
-      const allStrings = existingRepos.every(
-        (repo) => typeof repo === 'string',
-      );
+      const allStrings = existingRepos.every((repo) => isString(repo));
       let shouldWarn = true;
 
       if (allStrings) {

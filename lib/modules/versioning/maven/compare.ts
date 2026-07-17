@@ -1,3 +1,4 @@
+import { isString } from '@sindresorhus/is';
 import { regEx } from '../../../util/regex.ts';
 
 const PREFIX_DOT = 'PREFIX_DOT';
@@ -280,7 +281,7 @@ function compare(left: string, right: string): number {
 }
 
 function isVersion(version: unknown): version is string {
-  if (!version || typeof version !== 'string') {
+  if (!version || !isString(version)) {
     return false;
   }
   if (!regEx(/^[-.a-z_+0-9]+$/i).test(version)) {

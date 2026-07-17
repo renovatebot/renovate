@@ -1,3 +1,4 @@
+import { isTruthy } from '@sindresorhus/is';
 import { regEx } from '../../../util/regex.ts';
 import type { GenericVersion } from '../generic.ts';
 import { GenericVersioningApi } from '../generic.ts';
@@ -82,7 +83,7 @@ class ApkVersioningApi extends GenericVersioningApi {
       const extraParts = extra
         .substring(1)
         .split('.')
-        .filter(Boolean)
+        .filter(isTruthy)
         .map(Number);
       release.push(...extraParts);
     }
