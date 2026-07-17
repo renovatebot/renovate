@@ -1328,11 +1328,10 @@ export async function prepareCommit({
     if (isNonEmptyArray(trailers)) {
       // simple-git joins message array elements with blank lines, so the
       // trailers become the final block of the commit message
-      const messageParts =
-        typeof message === 'string' ? [message] : [...message];
-      messageParts.push(trailers.join('\n'));
-      commitMessage = messageParts;
-      await verifyCommitTrailers(messageParts.join('\n\n'), trailers);
+      commitMessage = (
+        typeof message === 'string' ? [message] : message
+      ).concat(trailers.join('\n'));
+      await verifyCommitTrailers(commitMessage.join('\n\n'), trailers);
     }
 
     const commitRes = await git.commit(commitMessage, [], commitOptions);
