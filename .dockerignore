@@ -6,4 +6,6 @@
 !pnpm-workspace.yaml
 !patches/
 !renovate-schema.json
+!renovate-inherited-schema.json
+!renovate-global-schema.json
 !license
