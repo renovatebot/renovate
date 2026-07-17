@@ -2455,7 +2455,7 @@ const options: Readonly<RenovateOptions>[] = [
   {
     name: 'commitTrailers',
     description:
-      'Git trailers to add as the final block of commit messages, e.g. `["Signed-off-by: {{{gitAuthor}}}"]`.',
+      'Structured git trailers (`Key: value` lines) to add in the final block of the commit message.',
     type: 'array',
     subType: 'string',
     default: null,

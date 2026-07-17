@@ -722,7 +722,6 @@ For example, To add `[skip ci]` to every commit you could configure:
 ```
 
 To add [git trailers](https://git-scm.com/docs/git-interpret-trailers) like `Signed-off-by` to commits, use [`commitTrailers`](#committrailers) instead.
-Trailers added via `commitBody` may not be parsed as trailers by Git, because they may not end up in the final block of the commit message.
 
 ## `commitBodyTable`
 
@@ -808,16 +807,11 @@ For example:
 
 ```json
 {
-  "commitTrailers": [
-    "Co-authored-by: First Contributor <first@example.com>",
-    "Co-authored-by: Second Contributor <second@example.com>"
-  ]
+  "commitTrailers": ["Renovate-Update-Type: {{{updateType}}}"]
 }
 ```
 
-Renovate always puts the trailers in the final block of the commit message, so Git parses them as trailers.
-This also works on Gerrit, where Renovate adds its own `Renovate-Branch` and `Change-Id` trailers to the same block.
-The `Renovate-Branch` and `Change-Id` keys are reserved on Gerrit: Renovate ignores user-configured values for them.
+Another example would be if you want to configure a DCO sign off to each commit.
 
 If you want Renovate to sign off its commits, add the [`:gitSignOff` preset](./presets-default.md#gitsignoff) to your `extends` array:
 
