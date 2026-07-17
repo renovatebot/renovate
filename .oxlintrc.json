@@ -75,8 +75,8 @@
     "renovate/no-new-url": "error",
     "renovate/no-stateful-global-regex": "error",
     "renovate/no-tools-import": "error",
-    "renovate/prefer-fs-util": "warn",
-    "renovate/prefer-luxon": "warn",
+    "renovate/prefer-fs-util": "error",
+    "renovate/prefer-luxon": "error",
     "renovate/prefer-nullish-util": "error",
     "renovate/zod-schema-naming": "error",
 
