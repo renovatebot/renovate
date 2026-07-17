@@ -82,15 +82,17 @@ describe('modules/versioning/hashicorp/convertor', () => {
     expect(npm2hashicorp(npm)).toBe(hashicorp);
   });
 
-  test('hashicorp2npm doesnt support !=', () => {
-    expect(() => hashicorp2npm('!= 4')).toThrow();
+  it('hashicorp2npm doesnt support !=', () => {
+    expect(() => hashicorp2npm('!= 4')).toThrow(
+      'Unsupported hashicorp constraint',
+    );
   });
 
-  test('hashicorp2npm throws on invalid', () => {
-    expect(() => hashicorp2npm('^4')).toThrow();
+  it('hashicorp2npm throws on invalid', () => {
+    expect(() => hashicorp2npm('^4')).toThrow('Invalid hashicorp constraint');
   });
 
-  test('npm2hashicorp throws on unsupported', () => {
-    expect(() => npm2hashicorp('4.x.x')).toThrow();
+  it('npm2hashicorp throws on unsupported', () => {
+    expect(() => npm2hashicorp('4.x.x')).toThrow('invalid npm constraint');
   });
 });

@@ -1,6 +1,23 @@
 import { DEBUG, ERROR, FATAL, INFO, TRACE, WARN, nameFromLevel } from 'bunyan';
 import { getProblems } from '../../logger/index.ts';
+import type { PackageDependency } from '../../modules/manager/types.ts';
 import { emojify } from '../../util/emoji.ts';
+
+/**
+ * Checks whether a replacement target already exists as a sibling dependency
+ * in the same package file.
+ */
+export function replacementAlreadyExists(
+  deps: PackageDependency[],
+  currentDep: PackageDependency,
+  newName: string,
+): boolean {
+  return deps.some(
+    (sibling) =>
+      sibling !== currentDep &&
+      (sibling.depName === newName || sibling.packageName === newName),
+  );
+}
 
 export function extractRepoProblems(
   repository: string | undefined,

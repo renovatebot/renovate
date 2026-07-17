@@ -135,7 +135,6 @@ describe('modules/datasource/crate/index', () => {
       };
       GlobalConfig.set(adminConfig);
 
-      createSimpleGit.mockReset();
       memCache.init();
     });
 
@@ -289,6 +288,24 @@ describe('modules/datasource/crate/index', () => {
       const res = await getPkgReleases({
         datasource,
         packageName: 'amethyst',
+        registryUrls: [CRATES_IO_REGISTRY_URL],
+      });
+      expect(res).toMatchSnapshot();
+      expect(res).not.toBeNull();
+      expect(res).toBeDefined();
+    });
+
+    it('processes real data: sentry', async () => {
+      mockCratesIoConfig();
+      mockCratesApiCallFor('sentry', Fixtures.get('sentry.json'));
+
+      httpMock
+        .scope(CRATES_IO_REGISTRY_URL_PARSED)
+        .get('/se/nt/sentry')
+        .reply(200, Fixtures.get('sentry'));
+      const res = await getPkgReleases({
+        datasource,
+        packageName: 'sentry',
         registryUrls: [CRATES_IO_REGISTRY_URL],
       });
       expect(res).toMatchSnapshot();
@@ -492,11 +509,10 @@ describe('modules/datasource/crate/index', () => {
                 'fatal: dumb http transport does not support shallow capabilities',
               ),
             );
-          } else {
-            const path = `${clonePath}/my/pk/mypkg`;
-            fs.mkdirSync(upath.dirname(path), { recursive: true });
-            fs.writeFileSync(path, Fixtures.get('mypkg'), { encoding: 'utf8' });
           }
+          const path = `${clonePath}/my/pk/mypkg`;
+          fs.mkdirSync(upath.dirname(path), { recursive: true });
+          fs.writeFileSync(path, Fixtures.get('mypkg'), { encoding: 'utf8' });
         });
 
       const gitMock = partial<SimpleGit>({
@@ -538,9 +554,8 @@ describe('modules/datasource/crate/index', () => {
                 'fatal: dumb http transport does not support shallow capabilities',
               ),
             );
-          } else {
-            return Promise.reject(new Error('mocked error'));
           }
+          return Promise.reject(new Error('mocked error'));
         });
 
       const gitMock = partial<SimpleGit>({

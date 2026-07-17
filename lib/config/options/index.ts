@@ -563,6 +563,7 @@ const options: Readonly<RenovateOptions>[] = [
     default: false,
     supportedPlatforms: [
       'azure',
+      'bitbucket',
       'forgejo',
       'gitea',
       'github',
@@ -680,7 +681,7 @@ const options: Readonly<RenovateOptions>[] = [
     description:
       'Change this value to override the default Renovate sidecar image.',
     type: 'string',
-    default: 'ghcr.io/renovatebot/base-image:13.61.0',
+    default: 'ghcr.io/renovatebot/base-image:13.75.5',
     globalOnly: true,
     deprecationMsg:
       'The usage of `binarySource=docker` is deprecated, and will be removed in the future',
@@ -1811,6 +1812,7 @@ const options: Readonly<RenovateOptions>[] = [
     parents: ['packageRules'],
     cli: false,
     env: false,
+    supportsTemplating: true,
   },
   {
     name: 'pinDigests',
@@ -2350,6 +2352,7 @@ const options: Readonly<RenovateOptions>[] = [
     subType: 'string',
     parents: ['customDatasources'],
     default: [],
+    supportsTemplating: true,
   },
   {
     name: 'vulnerabilityAlerts',
@@ -2615,7 +2618,7 @@ const options: Readonly<RenovateOptions>[] = [
     description:
       'Apply group settings even when the group contains only one update.',
     type: 'boolean',
-    default: true,
+    default: false,
     cli: false,
     env: false,
   },
@@ -3159,12 +3162,13 @@ const options: Readonly<RenovateOptions>[] = [
   {
     name: 'matchStrings',
     description:
-      'Queries to use. Valid only within `bumpVersions` or `customManagers` object.',
+      'Queries to use. Valid only within `bumpVersions` or `customManagers` object. Templating is supported within `bumpVersions` only.',
     type: 'array',
     subType: 'string',
     parents: ['bumpVersions', 'customManagers'],
     cli: false,
     env: false,
+    supportsTemplating: true,
   },
   {
     name: 'matchStringsStrategy',
@@ -3406,9 +3410,20 @@ const options: Readonly<RenovateOptions>[] = [
       'A list of branch names to mark for creation or rebasing as if it was selected in the Dependency Dashboard issue.',
     type: 'array',
     subType: 'string',
+    cli: true,
     experimental: true,
     globalOnly: true,
     default: [],
+  },
+  {
+    name: 'rebaseAllOpenBranches',
+    description:
+      'Rebase all open branches at once, as if the rebase-all-open-PRs checkbox was selected in the Dependency Dashboard issue.',
+    type: 'boolean',
+    cli: true,
+    experimental: true,
+    globalOnly: true,
+    default: false,
   },
   {
     name: 'maxRetryAfter',

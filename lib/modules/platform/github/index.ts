@@ -291,13 +291,12 @@ async function fetchRepositories(): Promise<GhRestRepo[]> {
         paginate: 'all',
       });
       return res.body.repositories;
-    } else {
-      const res = await githubApi.getJsonUnchecked<GhRestRepo[]>(
-        `user/repos?per_page=100`,
-        { paginate: 'all' },
-      );
-      return res.body;
     }
+    const res = await githubApi.getJsonUnchecked<GhRestRepo[]>(
+      `user/repos?per_page=100`,
+      { paginate: 'all' },
+    );
+    return res.body;
   } catch (err) /* v8 ignore next */ {
     logger.error({ err }, `GitHub getRepos error`);
     throw err;
@@ -1459,7 +1458,7 @@ export async function ensureIssue({
         if (shouldReOpen) {
           logger.debug('Reopening previously closed issue');
         }
-        issue = issues[issues.length - 1];
+        issue = issues.at(-1)!;
       }
       for (const i of issues) {
         if (i.state === 'open' && i.number !== issue.number) {
@@ -1836,15 +1835,16 @@ async function tryPrAutomerge(
 
   // If GitHub Enterprise Server <3.3.0 it doesn't support automerge
   // TODO #22198
-  if (platformConfig.isGhe) {
-    // semver not null safe, accepts null and undefined
-    if (semver.satisfies(platformConfig.gheVersion!, '<3.3.0')) {
-      logger.debug(
-        { prNumber },
-        'GitHub-native automerge: not supported on this version of GHE. Use 3.3.0 or newer.',
-      );
-      return;
-    }
+  // semver not null safe, accepts null and undefined
+  if (
+    platformConfig.isGhe &&
+    semver.satisfies(platformConfig.gheVersion!, '<3.3.0')
+  ) {
+    logger.debug(
+      { prNumber },
+      'GitHub-native automerge: not supported on this version of GHE. Use 3.3.0 or newer.',
+    );
+    return;
   }
 
   if (!config.autoMergeAllowed) {
@@ -2191,8 +2191,7 @@ export async function getVulnerabilityAlerts(): Promise<GithubVulnerabilityAlert
     logger.debug({ err }, 'Error retrieving vulnerability alerts');
     logger.warn(
       {
-        // oxlint-disable-next-line renovate/no-hardcoded-docs-url -- no config access in platform code
-        url: 'https://docs.renovatebot.com/configuration-options/#vulnerabilityalerts',
+        url: `${GlobalConfig.get('productLinks').documentation}configuration-options/#vulnerabilityalerts`,
       },
       'Cannot access vulnerability alerts. Please ensure permissions have been granted.',
     );

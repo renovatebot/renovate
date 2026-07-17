@@ -54,7 +54,7 @@ export const PnpmWorkspaceFile = Yaml.pipe(
   z
     .object({
       packages: z.array(z.string()).optional(),
-      minimumReleaseAge: z.number().nullish(),
+      minimumReleaseAge: Nullish(z.number()),
       minimumReleaseAgeExclude: z.array(z.string()).optional(),
       overrides: z.record(z.string(), z.string()).optional(),
       registry: Nullish(z.string()),

@@ -93,7 +93,8 @@ export async function initPlatform({
   }
   if (endpoint && endpoint !== BITBUCKET_PROD_ENDPOINT) {
     logger.warn(
-      `Init: Bitbucket Cloud endpoint should generally be ${BITBUCKET_PROD_ENDPOINT} but is being configured to a different value. Did you mean to use Bitbucket Server?`,
+      { endpoint, defaultEndpoint: BITBUCKET_PROD_ENDPOINT },
+      'Init: Bitbucket Cloud endpoint should generally be the default but is being configured to a different value. Did you mean to use Bitbucket Server?',
     );
     defaults.endpoint = endpoint;
   }
@@ -969,11 +970,12 @@ async function sanitizeReviewers(
             )
           ).body;
 
-          if (reviewerUser.account_status === 'active') {
-            // There are cases where an active user may still not be a member of a workspace
-            if (await isAccountMemberOfWorkspace(reviewer, config.repository)) {
-              sanitizedReviewers.push(reviewer);
-            }
+          // There are cases where an active user may still not be a member of a workspace
+          if (
+            reviewerUser.account_status === 'active' &&
+            (await isAccountMemberOfWorkspace(reviewer, config.repository))
+          ) {
+            sanitizedReviewers.push(reviewer);
           }
         }
         // Bitbucket returns a 400 if any of the PR reviewer accounts are no longer members of this workspace
@@ -1044,6 +1046,7 @@ export async function createPr({
   targetBranch,
   prTitle: title,
   prBody: description,
+  draftPR = false,
   platformPrOptions,
 }: CreatePRConfig): Promise<Pr> {
   // labels is not supported in Bitbucket: https://bitbucket.org/site/master/issues/11976/ability-to-add-labels-to-pull-requests-bb
@@ -1085,6 +1088,7 @@ export async function createPr({
     },
     close_source_branch: true,
     reviewers,
+    draft: draftPR,
   };
 
   try {
