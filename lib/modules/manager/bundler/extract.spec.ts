@@ -21,15 +21,6 @@ const rubyCIGemfile = Fixtures.get('Gemfile.rubyci');
 const gitlabFossGemfileLock = Fixtures.get('Gemfile.gitlab-foss.lock');
 const gitlabFossGemfile = Fixtures.get('Gemfile.gitlab-foss');
 const sourceBlockGemfile = Fixtures.get('Gemfile.sourceBlock');
-const sourceBlockWithNewLinesGemfileLock = Fixtures.get(
-  'Gemfile.sourceBlockWithNewLines.lock',
-);
-const sourceBlockWithNewLinesGemfile = Fixtures.get(
-  'Gemfile.sourceBlockWithNewLines',
-);
-const sourceBlockWithGroupsGemfile = Fixtures.get(
-  'Gemfile.sourceBlockWithGroups',
-);
 
 describe('modules/manager/bundler/extract', () => {
   describe('extractPackageFile()', () => {
@@ -120,6 +111,12 @@ describe('modules/manager/bundler/extract', () => {
   });
 
   it('parse source blocks with spaces in Gemfile', async () => {
+    const sourceBlockWithNewLinesGemfileLock = Fixtures.get(
+      'Gemfile.sourceBlockWithNewLines.lock',
+    );
+    const sourceBlockWithNewLinesGemfile = Fixtures.get(
+      'Gemfile.sourceBlockWithNewLines',
+    );
     fs.readLocalFile.mockResolvedValueOnce(sourceBlockWithNewLinesGemfileLock);
     const res = await extractPackageFile(
       sourceBlockWithNewLinesGemfile,
@@ -130,6 +127,9 @@ describe('modules/manager/bundler/extract', () => {
   });
 
   it('parses source blocks with groups in Gemfile', async () => {
+    const sourceBlockWithGroupsGemfile = Fixtures.get(
+      'Gemfile.sourceBlockWithGroups',
+    );
     fs.readLocalFile.mockResolvedValueOnce(sourceBlockWithGroupsGemfile);
     const res = await extractPackageFile(
       sourceBlockWithGroupsGemfile,

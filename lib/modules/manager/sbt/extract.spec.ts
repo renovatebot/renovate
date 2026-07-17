@@ -16,9 +16,6 @@ const sbt = Fixtures.get(`sample.sbt`);
 const sbtScalaVersionVariable = Fixtures.get(`scala-version-variable.sbt`);
 const sbtMissingScalaVersion = Fixtures.get(`missing-scala-version.sbt`);
 const sbtDependencyFile = Fixtures.get(`dependency-file.scala`);
-const sbtPrivateVariableDependencyFile = Fixtures.get(
-  `private-variable-dependency-file.scala`,
-);
 
 describe('modules/manager/sbt/extract', () => {
   describe('extractPackageFile()', () => {
@@ -349,6 +346,9 @@ describe('modules/manager/sbt/extract', () => {
     });
 
     it('extract deps from native scala file with private variables', () => {
+      const sbtPrivateVariableDependencyFile = Fixtures.get(
+        `private-variable-dependency-file.scala`,
+      );
       expect(
         extractPackageFile(sbtPrivateVariableDependencyFile),
       ).toMatchSnapshot({
