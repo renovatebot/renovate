@@ -1,4 +1,4 @@
-import { isString } from '@sindresorhus/is';
+import { isObject, isString } from '@sindresorhus/is';
 import { hasKey } from '../../../util/object.ts';
 import { regEx } from '../../../util/regex.ts';
 import type { HelmDockerImageDependency } from './types.ts';
@@ -29,8 +29,7 @@ export function matchesHelmValuesDockerHeuristic(
 ): data is HelmDockerImageDependency {
   return !!(
     parentKeyRe.test(parentKey) &&
-    data &&
-    typeof data === 'object' &&
+    isObject(data) &&
     hasKey('repository', data) &&
     (hasKey('tag', data) || hasKey('version', data))
   );
