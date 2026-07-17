@@ -195,6 +195,7 @@
         "renovate/codeblock-in-spec-fixtures": "error",
         "renovate/no-redundant-mock-reset": "error",
         "renovate/prefer-nullish-util": "off",
+        "renovate/prefer-partial-in-specs": "error",
         "renovate/test-root-describe": "error",
         "typescript/explicit-function-return-type": "off"
       }

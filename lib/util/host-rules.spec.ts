@@ -115,6 +115,7 @@ describe('util/host-rules', () => {
     });
 
     it('warns and returns empty for bad search', () => {
+      // oxlint-disable-next-line renovate/prefer-partial-in-specs -- intentionally invalid search input
       expect(find({ abc: 'def' } as any)).toEqual({});
     });
 
@@ -397,6 +398,7 @@ describe('util/host-rules', () => {
 
   describe('findAll()', () => {
     it('warns and returns empty for bad search', () => {
+      // oxlint-disable-next-line renovate/prefer-partial-in-specs -- intentionally invalid search input
       expect(findAll({ abc: 'def' } as any)).toEqual([]);
     });
 

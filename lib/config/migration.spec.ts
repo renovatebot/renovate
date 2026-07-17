@@ -15,6 +15,7 @@ interface TestRenovateConfig extends RenovateConfig {
 describe('config/migration', () => {
   describe('migrateConfig(config, parentConfig)', () => {
     it('migrates config', () => {
+      // oxlint-disable-next-line renovate/prefer-partial-in-specs -- legacy config with removed options for migration test
       const config: TestRenovateConfig = {
         endpoints: [{}] as never,
         enabled: true,
@@ -661,7 +662,7 @@ describe('config/migration', () => {
     });
     const config: RenovateConfig = {
       extends: ['@org', '@org2/foo'],
-    } as any;
+    };
     const { isMigrated, migratedConfig } =
       configMigration.migrateConfig(config);
     expect(isMigrated).toBeTrue();
@@ -678,6 +679,7 @@ describe('config/migration', () => {
             '# renovate: datasource=(?<datasource>[a-z-]+?) depName=(?<depName>[^\\s]+?)(?: lookupName=(?<lookupName>[^\\s]+?))?(?: versioning=(?<versioning>[a-z-0-9]+?))?\\s(?:ENV|ARG) .+?_VERSION="?(?<currentValue>.+?)"?\\s',
           ],
         },
+        // oxlint-disable-next-line renovate/prefer-partial-in-specs -- legacy lookupNameTemplate field for migration test
         {
           fileMatch: ['(^|/|\\.)Dockerfile$', '(^|/)Dockerfile[^/]*$'],
           matchStrings: [
