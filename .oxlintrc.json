@@ -193,6 +193,7 @@
         "typescript/unbound-method": "off",
         "renovate/logger-static-message": "off",
         "renovate/codeblock-in-spec-fixtures": "error",
+        "renovate/inline-single-use-fixtures": "warn",
         "renovate/no-redundant-mock-reset": "error",
         "renovate/prefer-nullish-util": "off",
         "renovate/prefer-partial-in-specs": "error",
