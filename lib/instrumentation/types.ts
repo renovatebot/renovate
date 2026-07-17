@@ -1,6 +1,7 @@
 import type { Attributes, SpanKind, SpanOptions } from '@opentelemetry/api';
 import type { ATTR_CODE_FUNCTION_NAME } from '@opentelemetry/semantic-conventions';
 import type { RenovateSplit } from '../config/types.ts';
+import type { PlatformId } from '../constants/index.ts';
 import type { BunyanRecord } from '../logger/types.ts';
 import type { PackageFile } from '../modules/manager/types.ts';
 import type { BranchCache } from '../util/cache/repository/types.ts';
@@ -54,6 +55,35 @@ interface RepoReport {
   branches: Partial<BranchCache>[];
   packageFiles: Record<string, PackageFile[]>;
   libYearsWithStatus?: LibYearsWithStatus;
+  /**
+   * The platform type of the repository (ex: `github`, `gitlab`).
+   */
+  platform?: PlatformId;
+  /**
+   * The platform API endpoint used for the repository.
+   */
+  endpoint?: string;
+  /**
+   * The default branch name of the repository.
+   */
+  defaultBranch?: string;
+  /**
+   * The issue number of the Dependency Dashboard, or `null` if none exists.
+   */
+  dependencyDashboardIssue?: number | null;
+  /**
+   * Path to the repository's Renovate config file (ex: `.github/renovate.json5`).
+   * Empty when the repository has no in-repo config file.
+   */
+  configFileName?: string;
+  /**
+   * Whether the repository has already been onboarded (has a merged Renovate config).
+   */
+  repoIsOnboarded?: boolean;
+  /**
+   * The number of the open (unmerged) onboarding PR, or `null` if none exists.
+   */
+  onboardingPrNumber?: number | null;
 }
 
 export interface LibYearsWithStatus {
