@@ -1,6 +1,7 @@
 import { gte, lt, lte, satisfies } from '@renovatebot/pep440';
 import { parse as parseRange } from '@renovatebot/pep440/lib/specifier.js';
 import { parse as parseVersion } from '@renovatebot/pep440/lib/version.js';
+import { isTruthy } from '@sindresorhus/is';
 import { logger } from '../../../logger/index.ts';
 import { coerceArray } from '../../../util/array.ts';
 import { regEx } from '../../../util/regex.ts';
@@ -203,7 +204,7 @@ export function getNewValue({
       });
   }
 
-  let result = updatedRange.filter(Boolean).join(', ');
+  let result = updatedRange.filter(isTruthy).join(', ');
 
   if (result.includes(', ') && !currentValue.includes(', ')) {
     result = result.replace(regEx(/, /g), ',');
