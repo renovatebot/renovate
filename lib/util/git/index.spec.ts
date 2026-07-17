@@ -46,6 +46,15 @@ const SimpleGit = simpleGit().constructor as {
   prototype: ReturnType<typeof simpleGit>;
 };
 
+// Avoids flakiness when cleaning up temp directories
+async function disableGitAutoMaintenance(
+  repo: ReturnType<typeof simpleGit>,
+): Promise<void> {
+  await repo.addConfig('gc.auto', '0');
+  await repo.addConfig('maintenance.auto', 'false');
+  await repo.addConfig('receive.autogc', 'false');
+}
+
 describe('util/git/index', { timeout: 30000 }, () => {
   const masterCommitDate = new Date();
   masterCommitDate.setMilliseconds(0);
@@ -57,6 +66,7 @@ describe('util/git/index', { timeout: 30000 }, () => {
     base = await tmp.dir({ unsafeCleanup: true });
     const repo = simpleGit(base.path);
     await repo.init();
+    await disableGitAutoMaintenance(repo);
     defaultBranch = (await repo.raw('branch', '--show-current')).trim();
     await repo.addConfig('user.email', 'Jest@example.com');
     await repo.addConfig('user.name', 'Jest');
@@ -140,6 +150,7 @@ describe('util/git/index', { timeout: 30000 }, () => {
     origin = await tmp.dir({ unsafeCleanup: true });
     const repo = simpleGit(origin.path);
     await repo.clone(base.path, '.', ['--bare']);
+    await disableGitAutoMaintenance(repo);
     await repo.addConfig('commit.gpgsign', 'false');
     tmpDir = await tmp.dir({ unsafeCleanup: true });
     GlobalConfig.set({ localDir: tmpDir.path });
@@ -247,6 +258,7 @@ describe('util/git/index', { timeout: 30000 }, () => {
         await fs.mkdir(submoduleBasePath);
         const submodule = simpleGit(submoduleBasePath);
         await submodule.init();
+        await disableGitAutoMaintenance(submodule);
         await submodule.addConfig('user.email', 'Jest@example.com');
         await submodule.addConfig('user.name', 'Jest');
         await submodule.addConfig('commit.gpgsign', 'false');
@@ -1897,6 +1909,7 @@ describe('util/git/index', { timeout: 30000 }, () => {
       upstreamBase = await tmp.dir({ unsafeCleanup: true });
       const upstream = simpleGit(upstreamBase.path);
       await upstream.init();
+      await disableGitAutoMaintenance(upstream);
       const defaultUpsBranch = (
         await upstream.raw('branch', '--show-current')
       ).trim();
@@ -1913,6 +1926,7 @@ describe('util/git/index', { timeout: 30000 }, () => {
       upstreamOrigin = await tmp.dir({ unsafeCleanup: true });
       const upstreamRepo = simpleGit(upstreamOrigin.path);
       await upstreamRepo.clone(upstreamBase.path, '.', ['--bare']);
+      await disableGitAutoMaintenance(upstreamRepo);
       await upstreamRepo.addConfig('commit.gpgsign', 'false');
     });
 
