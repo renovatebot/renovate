@@ -145,7 +145,7 @@ describe('modules/platform/gerrit/index', () => {
         repoFingerprint: repoFingerprint('test/repo', `${gerritEndpointUrl}/`),
       });
       expect(git.initRepo).toHaveBeenCalledExactlyOnceWith({
-        url: 'https://user:pass@dev.gerrit.com/renovate/a/test%2Frepo',
+        url: 'https://user:pass@dev.gerrit.com/renovate/a/test/repo',
       });
     });
 
@@ -160,7 +160,7 @@ describe('modules/platform/gerrit/index', () => {
       });
 
       expect(git.initRepo).toHaveBeenCalledExactlyOnceWith({
-        url: 'https://user:pass@dev.gerrit.com/renovate/a/test%2Frepo',
+        url: 'https://user:pass@dev.gerrit.com/renovate/a/test/repo',
         cloneSubmodules: true,
         cloneSubmodulesFilter: ['test'],
       });
