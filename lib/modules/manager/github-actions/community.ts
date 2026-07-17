@@ -26,9 +26,9 @@ export interface CommunityActionConfig {
   withSchema?: z.ZodType<{ val: string | undefined } & Record<string, unknown>>;
 }
 
-type ActionSchema = z.ZodType<PackageDependency>;
+export type ActionSchema = z.ZodType<PackageDependency>;
 
-function actionSchema(
+export function actionSchema(
   name: string,
   { isInvalid, withSchema, ...cfg }: CommunityActionConfig,
 ): ActionSchema {
@@ -212,9 +212,3 @@ export const communityActions: Record<string, CommunityActionConfig> = {
     packageName: 'ghcr.io/zizmorcore/zizmor',
   },
 };
-
-export const CommunityActions = z.union(
-  Object.entries(communityActions).map(([name, cfg]) =>
-    actionSchema(name, cfg),
-  ) as [ActionSchema, ActionSchema, ...ActionSchema[]],
-);
