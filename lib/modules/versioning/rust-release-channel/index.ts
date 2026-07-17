@@ -1,4 +1,5 @@
 import { isNonEmptyString, isObject } from '@sindresorhus/is';
+import { DateTime } from 'luxon';
 import type { NewValueConfig, VersioningApi } from '../types.ts';
 import { parse } from './parse.ts';
 import { sortParsed } from './util.ts';
@@ -12,7 +13,7 @@ export const supportsRanges = true;
 export const supportedRangeStrategies = ['pin', 'replace'];
 
 /** Rust 1.0.0 release date for major version calculation */
-const rust1Date = new Date('2015-05-15');
+const rust1Date = DateTime.utc(2015, 5, 15);
 
 class RustReleaseChannelVersioning implements VersioningApi {
   isValid(input: string): boolean {
@@ -114,7 +115,7 @@ class RustReleaseChannelVersioning implements VersioningApi {
 
     // Nightly with date
     if (channel === 'nightly' && date) {
-      const versionDate = new Date(date.year, date.month - 1, date.day);
+      const versionDate = DateTime.utc(date.year, date.month, date.day);
       return versionDate >= rust1Date ? 1 : 0;
     }
 

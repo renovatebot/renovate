@@ -1209,7 +1209,7 @@ export async function getBranchLastCommitTime(
     if (errChecked) {
       throw errChecked;
     }
-    return new Date();
+    return DateTime.now().toJSDate();
   }
 }
 
