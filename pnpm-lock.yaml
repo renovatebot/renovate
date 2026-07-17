@@ -134,8 +134,8 @@ importers:
         specifier: 3.0.3
         version: 3.0.3
       adm-zip:
-        specifier: 0.5.18
-        version: 0.5.18
+        specifier: 0.6.0
+        version: 0.6.0
       ae-cvss-calculator:
         specifier: 1.0.13
         version: 1.0.13
@@ -2401,6 +2401,10 @@ packages:
   adm-zip@0.5.18:
     resolution: {integrity: sha512-ufJnssQGbxzLNS1Ho9bCtX4rQKCCvoVuDLHoJyc3F9dOGDB4BkWs2Ci0kv53lqocAEQ/Cbi+I2XCsNYGqVYqng==}
     engines: {node: '>=12.0'}
+
+  adm-zip@0.6.0:
+    resolution: {integrity: sha512-XleryMhbuksdKtofnWZ9Sk+4CUTbms4Mb/EU32SZwToAyZ5RgVos/ki8n+yr0LWHOGKuakbXTuuYNHLQjhddgg==}
+    engines: {node: '>=14.0'}
 
   ae-cvss-calculator@1.0.13:
     resolution: {integrity: sha512-QnPO1O5gZ/1NM+X4fbfqN/y5rImEZ8CSkbSk7Arv4RrmxPzxLXr9RSLmsQJykDtXFUXn9wHLxC0/fe/pO78t3w==}
@@ -7624,6 +7628,8 @@ snapshots:
     optional: true
 
   adm-zip@0.5.18: {}
+
+  adm-zip@0.6.0: {}
 
   ae-cvss-calculator@1.0.13: {}
 
