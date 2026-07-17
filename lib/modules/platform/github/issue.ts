@@ -4,8 +4,6 @@ import * as memCache from '../../../util/cache/memory/index.ts';
 import { getCache } from '../../../util/cache/repository/index.ts';
 import type { GithubIssue } from './schema.ts';
 
-export { GithubIssue } from './schema.ts';
-
 type CacheData = Record<number, GithubIssue>;
 
 export class GithubIssueCache {
