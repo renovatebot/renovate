@@ -24,6 +24,7 @@ export interface ChangeLogRelease {
 }
 
 export type ChangeLogPlatform =
+  | 'azure'
   | 'bitbucket'
   | 'bitbucket-server'
   | 'forgejo'

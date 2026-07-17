@@ -1,4 +1,5 @@
 import { Readable } from 'node:stream';
+import type { IGitApi } from 'azure-devops-node-api/GitApi.js';
 import { GitPullRequestMergeStrategy } from 'azure-devops-node-api/interfaces/GitInterfaces.js';
 import type { PolicyConfiguration } from 'azure-devops-node-api/interfaces/PolicyInterfaces.js';
 import type { IPolicyApi } from 'azure-devops-node-api/PolicyApi.js';
@@ -509,6 +510,32 @@ describe('modules/platform/azure/azure-helper', () => {
       );
       const res = await azureHelper.getAllProjectTeams('projectId');
       expect(res).toEqual(allTeams);
+    });
+  });
+
+  describe('getItem', () => {
+    it('should get item', async () => {
+      azureApi.gitApi.mockResolvedValueOnce(
+        partial<IGitApi>({
+          getItem: vi.fn(() => Promise.resolve({ objectId: '123' })),
+        }),
+      );
+
+      const res = await azureHelper.getItem('123', 'path', 'project', true);
+      expect(res).toEqual({ objectId: '123' });
+    });
+  });
+
+  describe('getTrees', () => {
+    it('should get trees', async () => {
+      azureApi.gitApi.mockResolvedValueOnce(
+        partial<IGitApi>({
+          getTree: vi.fn(() => Promise.resolve({ objectId: '132' })),
+        }),
+      );
+
+      const res = await azureHelper.getTrees('123', 'sha1');
+      expect(res).toEqual({ objectId: '132' });
     });
   });
 });
