@@ -15,7 +15,6 @@ import { resetRepositoryLogLevelRemaps } from '../../logger/remap.ts';
 import { getInheritedOrGlobal } from '../../util/common.ts';
 import { removeDanglingContainers } from '../../util/exec/docker/index.ts';
 import {
-  cachePathExists,
   deleteLocalFile,
   ensureDir,
   privateCacheDir,
@@ -207,10 +206,7 @@ export async function renovateRepository(
     }
   }
   try {
-    // the existence check keeps `fs.remove()` semantics: ignore a missing dir
-    if (await cachePathExists(privateCacheDir())) {
-      await rmCache(privateCacheDir());
-    }
+    await rmCache(privateCacheDir());
   } catch (err) /* istanbul ignore if */ {
     logger.warn({ err }, 'privateCacheDir deletion error');
   }
