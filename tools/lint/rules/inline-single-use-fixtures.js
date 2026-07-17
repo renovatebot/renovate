@@ -1,11 +1,15 @@
 /**
- * Suggest inlining module-scope `const` fixtures that are referenced from
+ * Require inlining module-scope `const` fixtures that are referenced from
  * exactly one `it()` / `test()` block ("inline to test if only used once").
  *
  * Keeping a fixture next to the only test that uses it makes the test
- * self-contained and easier to read. This is a nudge, not a hard rule:
- * naming a value can still aid clarity, so the rule is meant to run at
- * "warn" severity and never provides an autofix (moving code is risky).
+ * self-contained and easier to read. To make this enforceable at "error"
+ * severity, the rule is deliberately narrow: it only fires on initializer
+ * shapes where moving the declaration into the test body is always
+ * value-preserving and unambiguously an improvement. Everything else
+ * (plain object/array literals, untagged template literals whose
+ * leading-newline formatting would need ugly re-indentation, arbitrary
+ * call expressions, ...) is a per-site judgment call and stays unflagged.
  *
  * A declaration is only flagged when ALL of the following hold:
  *
@@ -15,11 +19,17 @@
  *   obvious mechanical meaning for them.
  * - The initializer spans multiple source lines. Single-line consts used
  *   once are often still clearer named (e.g. `const timeout = 60_000`), and
- *   inlining them saves nothing; multiline object/array/template fixtures
- *   are the real readability win.
- * - The initializer is not itself a function: `const helper = () => {...}`
- *   is a named helper, not a data fixture, and keeping helpers named aids
- *   readability and stack traces.
+ *   inlining them saves nothing.
+ * - The initializer is one of the relocation-safe fixture shapes:
+ *   - a template literal tagged with `codeBlock` or `stripIndent` (the
+ *     helpers this repo's `codeblock-in-spec-fixtures` rule mandates):
+ *     both strip the common leading indentation, so the declaration can be
+ *     re-indented to any nesting level without changing the produced
+ *     string, or
+ *   - a `Fixtures.get()` / `Fixtures.getPath()` / `Fixtures.getBinary()` /
+ *     `Fixtures.getJson()` / `Fixtures.getJsonc()` call: these resolve
+ *     relative to the spec file (not the call site's position in it), so
+ *     relocating the call into the test body has no effect.
  * - Every reference lives inside the callback function of one and the same
  *   `it()` / `test()` call (including `.only` / `.skip` / `.each(...)` and
  *   similar chained variants).
@@ -40,6 +50,44 @@
  */
 
 const TEST_NAMES = new Set(['it', 'test']);
+
+/** Indentation-normalizing `common-tags` helpers: safe to re-indent. */
+const RELOCATABLE_TAGS = new Set(['codeBlock', 'stripIndent']);
+
+/** `Fixtures` accessors that resolve relative to the spec file. */
+const FIXTURES_METHODS = new Set([
+  'get',
+  'getPath',
+  'getBinary',
+  'getJson',
+  'getJsonc',
+]);
+
+/**
+ * Whether the initializer is one of the shapes that can be moved into the
+ * test body mechanically without changing the produced value: an
+ * indentation-stripping tagged template, or a `Fixtures` accessor call.
+ * @param {import('estree').Expression} init
+ * @returns {boolean}
+ */
+function isRelocatableInitializer(init) {
+  if (
+    init.type === 'TaggedTemplateExpression' &&
+    init.tag.type === 'Identifier' &&
+    RELOCATABLE_TAGS.has(init.tag.name)
+  ) {
+    return true;
+  }
+  return (
+    init.type === 'CallExpression' &&
+    init.callee.type === 'MemberExpression' &&
+    !init.callee.computed &&
+    init.callee.object.type === 'Identifier' &&
+    init.callee.object.name === 'Fixtures' &&
+    init.callee.property.type === 'Identifier' &&
+    FIXTURES_METHODS.has(init.callee.property.name)
+  );
+}
 
 /**
  * Resolve the base identifier name of a (possibly chained) callee, e.g.
@@ -106,7 +154,7 @@ export default {
     type: 'suggestion',
     messages: {
       inlineSingleUseFixture:
-        'Fixture `{{name}}` is only used in a single test. Inline it into that `{{testName}}()` block, or keep it named only if the name genuinely aids clarity.',
+        'Fixture `{{name}}` is only used in a single test. Move its declaration into that `{{testName}}()` block.',
     },
   },
   create(context) {
@@ -124,11 +172,9 @@ export default {
         if (declarator.id.type !== 'Identifier' || !declarator.init) {
           return;
         }
-        // Named helper functions are not data fixtures.
-        if (
-          declarator.init.type === 'ArrowFunctionExpression' ||
-          declarator.init.type === 'FunctionExpression'
-        ) {
+        // Only relocation-safe fixture shapes (see the doc comment above):
+        // anything else is a per-site judgment call, not an error.
+        if (!isRelocatableInitializer(declarator.init)) {
           return;
         }
         // Only multiline initializers: one-line consts are often clearer
