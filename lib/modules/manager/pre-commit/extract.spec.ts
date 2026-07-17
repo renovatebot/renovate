@@ -13,40 +13,10 @@ const filename = '.pre-commit.yaml';
 
 const complexPrecommitConfig = Fixtures.get('complex.pre-commit-config.yaml');
 const examplePrecommitConfig = Fixtures.get('.pre-commit-config.yaml');
-const emptyReposPrecommitConfig = Fixtures.get(
-  'empty_repos.pre-commit-config.yaml',
-);
 const noReposPrecommitConfig = Fixtures.get('no_repos.pre-commit-config.yaml');
-const invalidRepoPrecommitConfig = Fixtures.get(
-  'invalid_repo.pre-commit-config.yaml',
-);
 const enterpriseGitPrecommitConfig = Fixtures.get(
   'enterprise.pre-commit-config.yaml',
 );
-const pinnedPrecommitConfig = codeBlock`
-  failfast: true
-  repos:
-    - repo: https://github.com/pre-commit/pre-commit-hooks
-      rev: v4.4.0
-      hooks:
-        - id: check-yaml
-
-    - repo: https://github.com/pre-commit/mirrors-prettier
-      rev: 6fd1ced85fc139abd7f5ab4f3d78dab37592cd5e # frozen: v3.0.0-alpha.9-for-vscode
-      hooks:
-        - id: prettier
-
-    - repo: https://github.com/crate-ci/typos
-      rev: 20b36ca07fa1bfe124912287ac8502cf12f140e6  # frozen: v1.14.12
-      hooks:
-        - id: typos
-
-    - repo: https://github.com/python-jsonschema/check-jsonschema
-      rev: a00caac4f0cec045f7f67d222c3fcd0744285c51 # frozen: 0.23.1
-      hooks:
-        - id: check-renovate
-`;
-
 describe('modules/manager/pre-commit/extract', () => {
   describe('extractPackageFile()', () => {
     it('returns null for invalid yaml file content', () => {
@@ -71,11 +41,17 @@ describe('modules/manager/pre-commit/extract', () => {
     });
 
     it('returns null for empty repos', () => {
+      const emptyReposPrecommitConfig = Fixtures.get(
+        'empty_repos.pre-commit-config.yaml',
+      );
       const result = extractPackageFile(emptyReposPrecommitConfig, filename);
       expect(result).toBeNull();
     });
 
     it('returns null for invalid repo', () => {
+      const invalidRepoPrecommitConfig = Fixtures.get(
+        'invalid_repo.pre-commit-config.yaml',
+      );
       const result = extractPackageFile(invalidRepoPrecommitConfig, filename);
       expect(result).toBeNull();
     });
@@ -218,6 +194,29 @@ describe('modules/manager/pre-commit/extract', () => {
     });
 
     it('can handle pinned repo versions', () => {
+      const pinnedPrecommitConfig = codeBlock`
+          failfast: true
+          repos:
+            - repo: https://github.com/pre-commit/pre-commit-hooks
+              rev: v4.4.0
+              hooks:
+                - id: check-yaml
+
+            - repo: https://github.com/pre-commit/mirrors-prettier
+              rev: 6fd1ced85fc139abd7f5ab4f3d78dab37592cd5e # frozen: v3.0.0-alpha.9-for-vscode
+              hooks:
+                - id: prettier
+
+            - repo: https://github.com/crate-ci/typos
+              rev: 20b36ca07fa1bfe124912287ac8502cf12f140e6  # frozen: v1.14.12
+              hooks:
+                - id: typos
+
+            - repo: https://github.com/python-jsonschema/check-jsonschema
+              rev: a00caac4f0cec045f7f67d222c3fcd0744285c51 # frozen: 0.23.1
+              hooks:
+                - id: check-renovate
+      `;
       const result = extractPackageFile(pinnedPrecommitConfig, filename);
       expect(result).toEqual({
         deps: [
