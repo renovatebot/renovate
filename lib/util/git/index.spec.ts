@@ -31,8 +31,6 @@ vi.mock('timers/promises');
 vi.mock('../cache/repository/index.ts');
 vi.mock('./auth.ts');
 vi.unmock('./index.ts');
-// commit trailer verification runs `git interpret-trailers` via rawExec
-vi.unmock('../exec/common.ts');
 
 const behindBaseCache = vi.mocked(_behindBaseCache);
 const conflictsCache = vi.mocked(_conflictsCache);
@@ -830,31 +828,6 @@ describe('util/git/index', { timeout: 30000 }, () => {
         'Signed-off-by: Renovate Bot <bot@renovateapp.com>\n' +
           'Co-authored-by: First Contributor <first@example.com>\n' +
           'Co-authored-by: Second Contributor <second@example.com>',
-      );
-      expect(logger.logger.warn).not.toHaveBeenCalled();
-    });
-
-    it('warns when a trailer is not parsed as a git trailer', async () => {
-      const file: FileChange = {
-        type: 'addition',
-        path: 'some-invalid-trailer-file',
-        contents: 'some new-contents',
-      };
-
-      const commit = await git.commitFiles({
-        branchName: 'renovate/branch_with_invalid_trailers',
-        files: [file],
-        message: 'Update something',
-        trailers: [
-          'Signed-off-by: Renovate Bot <bot@renovateapp.com>',
-          'not a trailer',
-        ],
-      });
-
-      expect(commit).not.toBeNull();
-      expect(logger.logger.warn).toHaveBeenCalledWith(
-        { missing: ['not a trailer'] },
-        'Some commit trailers were not parsed as git trailers',
       );
     });
 

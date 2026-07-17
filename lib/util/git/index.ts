@@ -38,7 +38,6 @@ import type { GitProtocol } from '../../types/git.ts';
 import { incCountValue, incLimitedValue } from '../../workers/global/limits.ts';
 import { getCache } from '../cache/repository/index.ts';
 import { getEnv } from '../env.ts';
-import { rawExec } from '../exec/common.ts';
 import type { ExtraEnv } from '../exec/types.ts';
 import { getChildEnv } from '../exec/utils.ts';
 import { newlineRegex, regEx } from '../regex.ts';
@@ -1331,7 +1330,6 @@ export async function prepareCommit({
       commitMessage = (
         typeof message === 'string' ? [message] : message
       ).concat(trailers.join('\n'));
-      await verifyCommitTrailers(commitMessage.join('\n\n'), trailers);
     }
 
     const commitRes = await git.commit(commitMessage, [], commitOptions);
@@ -1373,33 +1371,6 @@ export async function prepareCommit({
     return result;
   } catch (err) /* v8 ignore next -- TODO: add test #40625 */ {
     return handleCommitError(err, branchName, files);
-  }
-}
-
-/**
- * Warn if any of the configured trailers are not interpreted as git trailers
- * in the given commit message, e.g. because another message block broke the
- * trailer block. Uses git's own trailer parsing (`git-interpret-trailers`).
- */
-async function verifyCommitTrailers(
-  message: string,
-  trailers: string[],
-): Promise<void> {
-  // simple-git does not support stdin, so use rawExec instead.
-  // This is safe outside the git singleton because interpret-trailers is not repository-specific.
-  const { stdout } = await rawExec('git interpret-trailers --parse', {
-    cwd: GlobalConfig.get('localDir'),
-    input: message,
-  });
-  const parsedTrailers = stdout.split(newlineRegex).map((line) => line.trim());
-  const missing = trailers.filter(
-    (trailer) => !parsedTrailers.includes(trailer),
-  );
-  if (isNonEmptyArray(missing)) {
-    logger.warn(
-      { missing },
-      'Some commit trailers were not parsed as git trailers',
-    );
   }
 }
 
