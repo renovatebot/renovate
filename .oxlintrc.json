@@ -75,9 +75,9 @@
     "renovate/no-new-url": "error",
     "renovate/no-stateful-global-regex": "error",
     "renovate/no-tools-import": "error",
-    "renovate/prefer-json-pipe": "warn",
+    "renovate/prefer-json-pipe": "error",
     "renovate/prefer-nullish-util": "error",
-    "renovate/zod-schema-location": "warn",
+    "renovate/zod-schema-location": "error",
     "renovate/zod-schema-naming": "error",
 
     "typescript/await-thenable": "error",

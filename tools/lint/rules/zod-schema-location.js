@@ -1,3 +1,6 @@
+import fs from 'node:fs';
+import path from 'node:path';
+
 /**
  * Walk the init expression to its leftmost identifier by unwrapping
  * CallExpression.callee and MemberExpression.object chains.
@@ -26,6 +29,25 @@ function toPosix(filename) {
   return filename.replaceAll('\\', '/');
 }
 
+/** @type {Map<string, boolean>} */
+const schemaFileByDir = new Map();
+
+/**
+ * True when a `schema.ts` file exists next to the linted file. Cached per
+ * directory for the lifetime of the lint run.
+ * @param {string} filename
+ * @returns {boolean}
+ */
+function hasSiblingSchemaFile(filename) {
+  const dir = path.dirname(filename);
+  let result = schemaFileByDir.get(dir);
+  if (result === undefined) {
+    result = fs.existsSync(path.join(dir, 'schema.ts'));
+    schemaFileByDir.set(dir, result);
+  }
+  return result;
+}
+
 /** @type {import('eslint').Rule.RuleModule} */
 export default {
   meta: {
@@ -49,6 +71,18 @@ export default {
       filename.includes('/schema/') ||
       filename.includes('/lib/util/schema-utils/')
     ) {
+      return {};
+    }
+
+    // Only enforce in directories that already follow the colocated `schema.ts`
+    // convention. The mined reviewer feedback is "move this to schema.ts",
+    // which presumes a schema.ts exists next to the file and the schema is
+    // mixed into a logic file instead. Modules whose whole purpose is exporting
+    // schemas under a different name (e.g. bazel `rules/*.ts` Target schemas or
+    // bazel-module `parser/fragments.ts`) are a deliberate, accepted layout and
+    // are not "schema mixed into logic", so directories without a schema.ts are
+    // left alone.
+    if (!hasSiblingSchemaFile(context.physicalFilename ?? context.filename)) {
       return {};
     }
 
