@@ -1817,7 +1817,7 @@ describe('config/validation', () => {
     it('warns when registryUrls is set at the top level of repo config', async () => {
       const config = {
         registryUrls: ['https://registry.npmjs.org'],
-      } as any;
+      };
       const { warnings, errors } = await configValidation.validateConfig(
         'repo',
         config,
@@ -1835,7 +1835,7 @@ describe('config/validation', () => {
     it('warns when defaultRegistryUrls is set at the top level of repo config', async () => {
       const config = {
         defaultRegistryUrls: ['https://registry.npmjs.org'],
-      } as any;
+      };
       const { warnings, errors } = await configValidation.validateConfig(
         'repo',
         config,
@@ -2876,7 +2876,7 @@ describe('config/validation', () => {
     it('warns when registryUrls is set at the top level of global config', async () => {
       const config = {
         registryUrls: ['https://registry.npmjs.org'],
-      } as any;
+      };
       const { warnings, errors } = await configValidation.validateConfig(
         'global',
         config,
@@ -2894,7 +2894,7 @@ describe('config/validation', () => {
     it('warns when defaultRegistryUrls is set at the top level of global config', async () => {
       const config = {
         defaultRegistryUrls: ['https://registry.npmjs.org'],
-      } as any;
+      };
       const { warnings, errors } = await configValidation.validateConfig(
         'global',
         config,

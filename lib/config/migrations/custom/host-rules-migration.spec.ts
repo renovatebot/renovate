@@ -29,7 +29,7 @@ describe('config/migrations/custom/host-rules-migration', () => {
           { host: 'some.domain.com', token: '123test' },
           { matchHost: 'some.domain.com:8080', token: '123test' },
         ],
-      } as any,
+      },
       {
         hostRules: [
           {

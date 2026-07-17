@@ -661,7 +661,7 @@ describe('config/migration', () => {
     });
     const config: RenovateConfig = {
       extends: ['@org', '@org2/foo'],
-    } as any;
+    };
     const { isMigrated, migratedConfig } =
       configMigration.migrateConfig(config);
     expect(isMigrated).toBeTrue();
