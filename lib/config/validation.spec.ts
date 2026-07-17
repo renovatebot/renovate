@@ -425,6 +425,7 @@ describe('config/validation', () => {
     });
 
     it('catches invalid customDatasources content', async () => {
+      // oxlint-disable-next-line renovate/prefer-partial-in-specs -- intentionally invalid customDatasources content
       const config = {
         customDatasources: {
           foo: {
@@ -516,6 +517,7 @@ describe('config/validation', () => {
     });
 
     it('catches invalid customDatasources record type', async () => {
+      // oxlint-disable-next-line renovate/prefer-partial-in-specs -- intentionally invalid customDatasources record type
       const config = {
         customDatasources: {
           randomKey: '',
