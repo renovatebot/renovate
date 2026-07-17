@@ -1,5 +1,6 @@
 import codeblockInSpecFixtures from './rules/codeblock-in-spec-fixtures.js';
 import enforceTsExtension from './rules/enforce-ts-extension.js';
+import inlineSingleUseFixtures from './rules/inline-single-use-fixtures.js';
 import loggerStaticMessage from './rules/logger-static-message.js';
 import noExecShellOption from './rules/no-exec-shell-option.js';
 import noHardcodedDocsUrl from './rules/no-hardcoded-docs-url.js';
@@ -31,6 +32,7 @@ export default {
   rules: {
     'codeblock-in-spec-fixtures': codeblockInSpecFixtures,
     'enforce-ts-extension': enforceTsExtension,
+    'inline-single-use-fixtures': inlineSingleUseFixtures,
     'logger-static-message': loggerStaticMessage,
     'no-exec-shell-option': noExecShellOption,
     'no-hardcoded-docs-url': noHardcodedDocsUrl,
