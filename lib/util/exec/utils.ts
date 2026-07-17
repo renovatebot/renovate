@@ -1,6 +1,7 @@
 import {
   isBoolean,
   isNonEmptyStringAndNotWhitespace,
+  isObject,
   isString,
 } from '@sindresorhus/is';
 import { join } from 'shlex';
@@ -42,7 +43,7 @@ export function getChildEnv({
 }
 
 export function isCommandWithOptions(cmd: unknown): cmd is CommandWithOptions {
-  if (!(typeof cmd === 'object' && cmd !== null && 'command' in cmd)) {
+  if (!(isObject(cmd) && 'command' in cmd)) {
     return false;
   }
 

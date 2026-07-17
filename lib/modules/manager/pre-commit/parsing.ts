@@ -1,3 +1,4 @@
+import { isObject } from '@sindresorhus/is';
 import { hasKey } from '../../../util/object.ts';
 import type { PreCommitConfig, PreCommitDependency } from './types.ts';
 
@@ -12,7 +13,7 @@ import type { PreCommitConfig, PreCommitDependency } from './types.ts';
 export function matchesPrecommitConfigHeuristic(
   data: unknown,
 ): data is PreCommitConfig {
-  return !!(data && typeof data === 'object' && hasKey('repos', data));
+  return !!(isObject(data) && hasKey('repos', data));
 }
 
 /**
@@ -25,10 +26,5 @@ export function matchesPrecommitConfigHeuristic(
 export function matchesPrecommitDependencyHeuristic(
   data: unknown,
 ): data is PreCommitDependency {
-  return !!(
-    data &&
-    typeof data === 'object' &&
-    hasKey('repo', data) &&
-    hasKey('rev', data)
-  );
+  return !!(isObject(data) && hasKey('repo', data) && hasKey('rev', data));
 }
