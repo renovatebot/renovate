@@ -607,6 +607,10 @@ export function branchExists(branchName: string): boolean {
   return !!config.branchCommits[branchName];
 }
 
+export function getCurrentBranch(): string {
+  return config.currentBranch;
+}
+
 // Return the commit SHA for a branch
 export function getBranchCommit(branchName: string): LongCommitSha | null {
   return config.branchCommits?.[branchName] || null;
