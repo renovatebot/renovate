@@ -3,7 +3,7 @@ import { DateTime } from 'luxon';
 import type { PushResult } from 'simple-git';
 import { simpleGit } from 'simple-git';
 import tmp from 'tmp-promise';
-import { logger } from '~test/util.ts';
+import { logger, partial } from '~test/util.ts';
 import { GlobalConfig } from '../../config/global.ts';
 import {
   CONFIG_VALIDATION,
@@ -11,7 +11,10 @@ import {
   TEMPORARY_ERROR,
   UNKNOWN_ERROR,
 } from '../../constants/error-messages.ts';
+import { postUpgradeCommandsExecutor } from '../../workers/repository/update/branch/execute-post-upgrade-commands.ts';
+import type { BranchConfig, BranchUpgradeConfig } from '../../workers/types.ts';
 import { setCustomEnv } from '../env.ts';
+import * as _execCommon from '../exec/common.ts';
 import { newlineRegex, regEx } from '../regex.ts';
 import { toLongCommitSha } from '../schema-utils/git.ts';
 import * as _auth from './auth.ts';
@@ -37,6 +40,7 @@ const conflictsCache = vi.mocked(_conflictsCache);
 const modifiedCache = vi.mocked(_modifiedCache);
 const updateDateCache = vi.mocked(_updateDateCache);
 const auth = vi.mocked(_auth);
+const execCommon = vi.mocked(_execCommon);
 // Class is no longer exported
 const SimpleGit = simpleGit().constructor as {
   prototype: ReturnType<typeof simpleGit>;
@@ -997,6 +1001,104 @@ describe('util/git/index', { timeout: 30000 }, () => {
       const repo = simpleGit(tmpDir.path);
       const result = await repo.raw(['ls-tree', 'HEAD', 'some-executable']);
       expect(result).toStartWith('100755');
+    });
+
+    it('preserves a post-upgrade chmod in the committed tree', async ({
+      skip,
+    }) => {
+      const local = simpleGit(tmpDir.path);
+      const fileMode = await local.getConfig('core.fileMode');
+      skip(
+        fileMode.value !== 'true',
+        'Git does not track executable bits in this working tree',
+      );
+
+      await fs.chmod(`${tmpDir.path}/master_file`, 0o644);
+      auth.getGitEnvironmentVariables.mockReturnValue({});
+      execCommon.rawExec.mockImplementationOnce(async (command, options) => {
+        expect(command).toBe('chmod +x master_file');
+        expect(options.cwd).toBe(tmpDir.path);
+        await fs.chmod(`${tmpDir.path}/master_file`, 0o755);
+        return { stdout: '', stderr: '' };
+      });
+      GlobalConfig.set({
+        localDir: tmpDir.path,
+        allowedCommands: ['^chmod \\+x master_file$'],
+      });
+
+      const commands = partial<BranchUpgradeConfig>([
+        {
+          manager: 'some-manager',
+          branchName: 'renovate/executable-post-upgrade',
+          postUpgradeTasks: {
+            commands: ['chmod +x master_file'],
+            fileFilters: ['master_file'],
+            executionMode: 'branch',
+          },
+        },
+      ]);
+      const config: BranchConfig = {
+        manager: 'some-manager',
+        updatedPackageFiles: [],
+        updatedArtifacts: [],
+        upgrades: [],
+        branchName: 'renovate/executable-post-upgrade',
+        baseBranch: defaultBranch,
+      };
+
+      const { updatedArtifacts } = await postUpgradeCommandsExecutor(
+        commands,
+        config,
+      );
+      expect(updatedArtifacts).toEqual([
+        {
+          type: 'addition',
+          path: 'master_file',
+          contents: Buffer.from(defaultBranch),
+          isExecutable: true,
+        },
+      ]);
+
+      const commit = await git.prepareCommit({
+        branchName: 'renovate/executable-post-upgrade',
+        files: updatedArtifacts,
+        message: 'Preserve executable mode',
+      });
+      expect(commit).not.toBeNull();
+
+      const result = await local.raw(['ls-tree', 'HEAD', 'master_file']);
+      expect(result).toStartWith('100755');
+    });
+  });
+
+  describe('isFileModeEnabled()', () => {
+    it('defaults to enabled when core.fileMode is unset', async () => {
+      const repo = simpleGit(tmpDir.path);
+      await repo.raw(['config', '--unset', 'core.fileMode']);
+
+      await expect(git.isFileModeEnabled()).resolves.toBeTrue();
+    });
+
+    it.each([
+      { setting: 'true', expected: true },
+      { setting: 'false', expected: false },
+    ])(
+      'returns $expected when core.fileMode is $setting',
+      async ({ setting, expected }) => {
+        const repo = simpleGit(tmpDir.path);
+        await repo.addConfig('core.fileMode', setting);
+
+        await expect(git.isFileModeEnabled()).resolves.toBe(expected);
+      },
+    );
+
+    it('caches a disabled setting for the repository run', async () => {
+      const repo = simpleGit(tmpDir.path);
+      await repo.addConfig('core.fileMode', 'false');
+      await expect(git.isFileModeEnabled()).resolves.toBeFalse();
+
+      await repo.addConfig('core.fileMode', 'true');
+      await expect(git.isFileModeEnabled()).resolves.toBeFalse();
     });
   });
 
