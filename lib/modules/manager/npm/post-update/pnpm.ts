@@ -130,8 +130,13 @@ export async function generateLockFile(
     const lockUpdates = upgrades.filter((upgrade) => upgrade.isLockfileUpdate);
 
     if (lockUpdates.length !== upgrades.length) {
-      // This command updates the lock file based on package.json
-      commands.push(`pnpm install ${args}`);
+      // This command updates the lock file based on package.json.
+      // `--no-frozen-lockfile` overrides a `frozenLockfile: true` setting from
+      // `pnpm-workspace.yaml`, which pnpm applies even to `--lockfile-only`
+      // installs and which otherwise makes this command always fail with
+      // ERR_PNPM_OUTDATED_LOCKFILE. Only CLI flags take precedence over
+      // settings from `pnpm-workspace.yaml`. `pnpm update` is not affected.
+      commands.push(`pnpm install ${args} --no-frozen-lockfile`);
     }
 
     // rangeStrategy = update-lockfile
