@@ -1385,7 +1385,8 @@ async function verifyCommitTrailers(
   message: string,
   trailers: string[],
 ): Promise<void> {
-  // simple-git does not support stdin, so use rawExec instead
+  // simple-git does not support stdin, so use rawExec instead.
+  // This is safe outside the git singleton because interpret-trailers is not repository-specific.
   const { stdout } = await rawExec('git interpret-trailers --parse', {
     cwd: GlobalConfig.get('localDir'),
     input: message,
