@@ -1,6 +1,7 @@
 import type { ReleaseType } from 'semver';
 import type {
   MatchStringsStrategy,
+  MinimumReleaseAgeBehaviour,
   ToolSettingsOptions,
   UpdateType,
   ValidationMessage,
@@ -44,6 +45,8 @@ export interface UpdateArtifactsConfig {
   composerIgnorePlatformReqs?: string[];
   goGetDirs?: string[];
   currentValue?: string;
+  minimumReleaseAge?: string | null;
+  minimumReleaseAgeBehaviour?: MinimumReleaseAgeBehaviour;
   postUpdateOptions?: string[];
   ignorePlugins?: boolean;
   ignoreScripts?: boolean;
