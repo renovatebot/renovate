@@ -186,7 +186,7 @@
     "@sindresorhus/is": "8.1.0",
     "@yarnpkg/core": "4.9.0",
     "@yarnpkg/parsers": "3.0.3",
-    "adm-zip": "0.5.18",
+    "adm-zip": "0.6.0",
     "ae-cvss-calculator": "1.0.13",
     "agentkeepalive": "4.6.0",
     "async-mutex": "0.5.0",
