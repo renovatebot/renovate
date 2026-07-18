@@ -142,7 +142,7 @@ export class GoProxyDatasource extends Datasource {
    * @see https://golang.org/ref/mod#goproxy-protocol
    */
   encodeCase(input: string): string {
-    return input.replace(regEx(/([A-Z])/g), (x) => `!${x.toLowerCase()}`);
+    return input.replace(regEx(/(?:[A-Z])/g), (x) => `!${x.toLowerCase()}`);
   }
 
   async listVersions(baseUrl: string, packageName: string): Promise<Release[]> {

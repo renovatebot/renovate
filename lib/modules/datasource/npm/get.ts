@@ -16,7 +16,7 @@ import { defaultRegistryUrl } from './common.ts';
 import { CachedPackument, NpmResponse } from './schema.ts';
 
 const SHORT_REPO_REGEX = regEx(
-  /^((?<platform>bitbucket|github|gitlab):)?(?<shortRepo>[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+)$/,
+  /^(?:(?<platform>bitbucket|github|gitlab):)?(?<shortRepo>[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+)$/,
 );
 
 const platformMapping: Record<string, string> = {
