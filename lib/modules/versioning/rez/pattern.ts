@@ -75,22 +75,20 @@ export const exactVersion = regEx(
 export const inclusiveBound = regEx(
   `^(?<inclusive_bound>(?<inclusive_lower_version>${versionGroup})?\\.\\.(?<inclusive_upper_version>${versionGroup})?)$`,
 ); /* Match an inclusive bound (e.g. 1.0.0..2.0.0) */
+/* oxlint-disable renovate/require-regex-util -- the bound/range patterns below emulate Python conditional patterns via named backreferences (\k<...>) and lookaheads (?=...), neither of which RE2 supports, TODO #12872 */
 // Add ? after |\\+) in order to match >=1.15
-// oxlint-disable-next-line renovate/require-regex-util -- RE2 does not support the named backreference \k<lower_bound_prefix>, TODO #12872
 export const lowerBound = new RegExp(
   `^(?<lower_bound>(?<lower_bound_prefix>>|>=)?(?<lower_version>${versionGroup})?(\\k<lower_bound_prefix>|\\+)?)$`,
 ); /* Match a lower bound (e.g. 1.0.0+) */
-// oxlint-disable-next-line renovate/require-regex-util -- RE2 does not support the lookahead (?=...), TODO #12872
 export const upperBound = new RegExp(
   `^(?<upper_bound>(?<upper_bound_prefix><(?=${versionGroup})|<=)?(?<upper_version>${versionGroup})?)$`,
 ); /* Match an upper bound (e.g. <=1.0.0) */
 // Add ,? to match >=7,<9 (otherwise it just matches >=7<9)
-// oxlint-disable-next-line renovate/require-regex-util -- RE2 does not support named backreferences and lookaheads, TODO #12872
 export const ascendingRange = new RegExp(
   `^(?<range_asc>(?<range_lower_asc>(?<range_lower_asc_prefix>>|>=)?(?<range_lower_asc_version>${versionGroup})?(\\k<range_lower_asc_prefix>|\\+)?),?(?<range_upper_asc>(\\k<range_lower_asc_version>,?|)(?<range_upper_asc_prefix><(?=${versionGroup})|<=)(?<range_upper_asc_version>${versionGroup})?))$`,
 ); /* Match a range in ascending order (e.g. 1.0.0+<2.0.0) */
 // Add , to match <9,>=7 (otherwise it just matches <9>=7)
-// oxlint-disable-next-line renovate/require-regex-util -- RE2 does not support named backreferences and lookaheads, TODO #12872
 export const descendingRange = new RegExp(
   `^(?<range_desc>(?<range_upper_desc>(?<range_upper_desc_prefix><|<=)?(?<range_upper_desc_version>${versionGroup})?(\\k<range_upper_desc_prefix>|\\+)?),(?<range_lower_desc>(\\k<range_upper_desc_version>,|)(?<range_lower_desc_prefix><(?=${versionGroup})|>=?)(?<range_lower_desc_version>${versionGroup})?))$`,
 ); /* Match a range in descending order (e.g. <=2.0.0,1.0.0+) */
+/* oxlint-enable renovate/require-regex-util */

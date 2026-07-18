@@ -12,9 +12,11 @@ interface UrlMatch {
 }
 
 //according to https://github.com/dead-claudia/github-limits
-const urlRegex =
-  // oxlint-disable-next-line renovate/require-regex-util -- RE2 does not support the negative lookbehind (?<!api\.), TODO #12872
-  /(?:https?:)?(?:\/\/)?(?:www\.)?(?<!api\.)(?:to)?github\.com\/[-a-z0-9]+\/[-_a-z0-9.]+\/(?:discussions|issues|pull)\/[0-9]+(?:#[-_a-z0-9]+)?/i;
+// An optional `api.` prefix is captured (instead of a negative lookbehind,
+// which RE2 does not support) so that api.github.com matches can be skipped.
+const urlRegexSource =
+  '(?:https?:)?(?:\\/\\/)?(?:www\\.)?(?<apiPrefix>api\\.)?(?:to)?github\\.com\\/[-a-z0-9]+\\/[-_a-z0-9.]+\\/(?:discussions|issues|pull)\\/[0-9]+(?:#[-_a-z0-9]+)?';
+const urlRegex = regEx(urlRegexSource, 'i');
 
 function massageLink(input: string): string {
   return input.replace(
@@ -33,7 +35,8 @@ function collectLinkPosition(input: string, matches: UrlMatch[]): Plugin {
       const substr = input.slice(startOffset, endOffset);
       const url: string = tree.url;
       const offset: number = startOffset + substr.lastIndexOf(url);
-      if (urlRegex.test(url)) {
+      const urlMatch = urlRegex.exec(url);
+      if (urlMatch && !urlMatch.groups?.apiPrefix) {
         matches.push({
           start: offset,
           end: offset + url.length,
@@ -41,10 +44,12 @@ function collectLinkPosition(input: string, matches: UrlMatch[]): Plugin {
         });
       }
     } else if (tree.type === 'text') {
-      // oxlint-disable-next-line renovate/require-regex-util -- global variant of urlRegex, which RE2 cannot compile (negative lookbehind)
-      const globalUrlReg = new RegExp(urlRegex, 'gi');
+      const globalUrlReg = regEx(urlRegexSource, 'gi');
       const urlMatches = [...tree.value.matchAll(globalUrlReg)];
       for (const match of urlMatches) {
+        if (match.groups?.apiPrefix) {
+          continue;
+        }
         const [url] = match;
         const start = startOffset + coerceNumber(match.index);
         const end = start + url.length;
