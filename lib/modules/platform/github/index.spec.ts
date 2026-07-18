@@ -124,6 +124,9 @@ describe('modules/platform/github/index', () => {
         renovateUsername: 'renovate-bot',
         token: 'github_pat_XXXXXX',
       });
+      expect(git.setPlatformIgnoredAuthors).toHaveBeenCalledWith([
+        'noreply@ghe.renovatebot.com',
+      ]);
     });
 
     it('should throw if user failure', async () => {
@@ -165,6 +168,9 @@ describe('modules/platform/github/index', () => {
           gitAuthor: 'renovate@whitesourcesoftware.com',
         }),
       ).toMatchSnapshot();
+      expect(git.setPlatformIgnoredAuthors).toHaveBeenCalledWith([
+        'noreply@github.com',
+      ]);
     });
 
     describe('when using the default gitAuthor', () => {
@@ -373,6 +379,9 @@ describe('modules/platform/github/index', () => {
         renovateUsername: 'renovate-bot',
         token: '123test',
       });
+      expect(git.setPlatformIgnoredAuthors).toHaveBeenCalledWith([
+        'noreply@github.com',
+      ]);
     });
 
     it('should fall back to user/emails when there is no public email', async () => {
@@ -464,6 +473,9 @@ describe('modules/platform/github/index', () => {
         renovateUsername: 'my-app[bot]',
         token: 'x-access-token:ghs_123test',
       });
+      expect(git.setPlatformIgnoredAuthors).toHaveBeenCalledWith([
+        'noreply@github.com',
+      ]);
       expect(await github.initPlatform({ token: 'ghs_123test' })).toEqual({
         endpoint: 'https://api.github.com/',
         gitAuthor: 'my-app[bot] <12345+my-app[bot]@users.noreply.github.com>',
@@ -535,6 +547,9 @@ describe('modules/platform/github/index', () => {
         renovateUsername: 'my-app[bot]',
         token: 'x-access-token:ghs_123test',
       });
+      expect(git.setPlatformIgnoredAuthors).toHaveBeenCalledWith([
+        'noreply@ghe.renovatebot.com',
+      ]);
     });
 
     it('should autodetect email/user on GHE Cloud endpoint with GitHub App', async () => {
@@ -561,6 +576,9 @@ describe('modules/platform/github/index', () => {
         renovateUsername: 'my-app[bot]',
         token: 'x-access-token:ghs_123test',
       });
+      expect(git.setPlatformIgnoredAuthors).toHaveBeenCalledWith([
+        'noreply@ghe.com',
+      ]);
     });
 
     it('should support custom endpoint', async () => {

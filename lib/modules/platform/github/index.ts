@@ -206,21 +206,23 @@ export async function initPlatform({
     );
     renovateUsername = platformConfig.userDetails.username;
   }
+
+  let ghHostname: string;
+  /* v8 ignore next -- false negative due to V8/source-map artifact */
+  if (platformConfig.isGheCloud) {
+    ghHostname = 'ghe.com';
+  } else if (platformConfig.isGhe) {
+    // valid url ensured at the function start
+    const parsedEndpoint = parseUrl(platformConfig.endpoint)!;
+    ghHostname = parsedEndpoint.hostname;
+  } else {
+    ghHostname = 'github.com';
+  }
+
   let discoveredGitAuthor: string | undefined;
   if (!gitAuthor) {
     if (platformConfig.isGHApp) {
       platformConfig.userDetails ??= await getAppDetails(token);
-      let ghHostname: string;
-      /* v8 ignore next -- false negative due to V8/source-map artifact */
-      if (platformConfig.isGheCloud) {
-        ghHostname = 'ghe.com';
-      } else if (platformConfig.isGhe) {
-        // valid url ensured at the function start
-        const parsedEndpoint = parseUrl(platformConfig.endpoint)!;
-        ghHostname = parsedEndpoint.hostname;
-      } else {
-        ghHostname = 'github.com';
-      }
       discoveredGitAuthor = `${platformConfig.userDetails.name} <${platformConfig.userDetails.id}+${platformConfig.userDetails.username}@users.noreply.${ghHostname}>`;
     } else {
       platformConfig.userDetails ??= await getUserDetails(
@@ -236,6 +238,9 @@ export async function initPlatform({
       }
     }
   }
+
+  git.setPlatformIgnoredAuthors([`noreply@${ghHostname}`]);
+
   logger.debug({ platformConfig, renovateUsername }, 'Platform config');
   const platformResult: PlatformResult = {
     endpoint: platformConfig.endpoint,
