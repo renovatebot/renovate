@@ -1,3 +1,4 @@
+import type { Stats } from 'node:fs';
 import type { DirectoryResult } from 'tmp-promise';
 import { dir } from 'tmp-promise';
 import upath from 'upath';
@@ -6,7 +7,7 @@ import { GlobalConfig } from '../../../../config/global.ts';
 import * as _exec from '../../../../util/exec/index.ts';
 import type { ConstraintName, ToolName } from '../../../../util/exec/types.ts';
 import * as _gitAuth from '../../../../util/git/auth.ts';
-import type { StatusResult } from '../../../../util/git/types.ts';
+import type { FileChange, StatusResult } from '../../../../util/git/types.ts';
 import type { BranchConfig, BranchUpgradeConfig } from '../../../types.ts';
 import * as postUpgradeCommands from './execute-post-upgrade-commands.ts';
 
@@ -16,6 +17,11 @@ vi.mock('../../../../util/git/auth.ts');
 
 const exec = vi.mocked(_exec);
 const gitAuth = vi.mocked(_gitAuth);
+
+interface RepositoryChanges {
+  created?: string[];
+  modified?: string[];
+}
 
 describe('workers/repository/update/branch/execute-post-upgrade-commands', () => {
   describe('postUpgradeCommandsExecutor', () => {
@@ -523,6 +529,211 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
       expect(res.updatedArtifacts).toHaveLength(1);
       expect(res.updatedArtifacts[0].path).toBe('other-file.txt');
       expect(res.updatedArtifacts[0].type).toBe('addition');
+    });
+
+    describe('executable file modes', () => {
+      const postUpgradeTask = partial<BranchUpgradeConfig>([
+        {
+          manager: 'some-manager',
+          branchName: 'main',
+          postUpgradeTasks: {
+            executionMode: 'branch',
+            commands: ['post-upgrade-command'],
+            fileFilters: ['*.txt'],
+          },
+        },
+      ]);
+      const ownerExecutableMode = 0o744;
+      const groupAndOtherExecutableMode = 0o655;
+      const nonExecutableMode = 0o644;
+      const updatedContents = 'updated contents';
+
+      function createBranchConfig(
+        updatedArtifacts: FileChange[] = [],
+      ): BranchConfig {
+        return {
+          manager: 'some-manager',
+          updatedPackageFiles: [],
+          updatedArtifacts,
+          upgrades: [],
+          branchName: 'main',
+          baseBranch: 'base',
+        };
+      }
+
+      function mockRepositoryChanges({
+        created = [],
+        modified = [],
+      }: RepositoryChanges): void {
+        git.getRepoStatus.mockResolvedValueOnce(
+          partial<StatusResult>({
+            not_added: created,
+            modified,
+            deleted: [],
+          }),
+        );
+      }
+
+      async function runPostUpgradeTask(updatedArtifacts: FileChange[] = []) {
+        return postUpgradeCommands.postUpgradeCommandsExecutor(
+          postUpgradeTask,
+          createBranchConfig(updatedArtifacts),
+        );
+      }
+
+      beforeEach(() => {
+        GlobalConfig.set({
+          localDir: import.meta.dirname,
+          allowedCommands: ['post-upgrade-command'],
+        });
+        exec.exec.mockResolvedValue({ stdout: '', stderr: '' });
+        fs.localPathIsFile.mockResolvedValue(true);
+        fs.readLocalFile.mockResolvedValue(updatedContents);
+      });
+
+      it('marks a new file executable when the owner execute bit is set', async () => {
+        git.isFileModeEnabled.mockResolvedValue(true);
+        mockRepositoryChanges({ created: ['script.txt'] });
+        fs.statLocalFile.mockResolvedValue(
+          partial<Stats>({ mode: ownerExecutableMode }),
+        );
+
+        const result = await runPostUpgradeTask();
+
+        expect(result.updatedArtifacts).toEqual([
+          {
+            type: 'addition',
+            path: 'script.txt',
+            contents: updatedContents,
+            isExecutable: true,
+          },
+        ]);
+      });
+
+      it('marks an existing artifact executable when the owner execute bit is set', async () => {
+        git.isFileModeEnabled.mockResolvedValue(true);
+        mockRepositoryChanges({ modified: ['script.txt'] });
+        fs.statLocalFile.mockResolvedValue(
+          partial<Stats>({ mode: ownerExecutableMode }),
+        );
+
+        const result = await runPostUpgradeTask([
+          {
+            type: 'addition',
+            path: 'script.txt',
+            contents: 'old contents',
+          },
+        ]);
+
+        expect(result.updatedArtifacts).toEqual([
+          {
+            type: 'addition',
+            path: 'script.txt',
+            contents: updatedContents,
+            isExecutable: true,
+          },
+        ]);
+      });
+
+      it('does not infer executability from group or other execute bits', async () => {
+        git.isFileModeEnabled.mockResolvedValue(true);
+        mockRepositoryChanges({ created: ['script.txt'] });
+        fs.statLocalFile.mockResolvedValue(
+          partial<Stats>({ mode: groupAndOtherExecutableMode }),
+        );
+
+        const result = await runPostUpgradeTask();
+
+        expect(result.updatedArtifacts).toEqual([
+          {
+            type: 'addition',
+            path: 'script.txt',
+            contents: updatedContents,
+          },
+        ]);
+      });
+
+      it('preserves a known executable state when the owner bit is absent', async () => {
+        git.isFileModeEnabled.mockResolvedValue(true);
+        mockRepositoryChanges({ modified: ['script.txt'] });
+        fs.statLocalFile.mockResolvedValue(
+          partial<Stats>({ mode: nonExecutableMode }),
+        );
+
+        const result = await runPostUpgradeTask([
+          {
+            type: 'addition',
+            path: 'script.txt',
+            contents: 'old contents',
+            isExecutable: true,
+          },
+        ]);
+
+        expect(result.updatedArtifacts).toEqual([
+          {
+            type: 'addition',
+            path: 'script.txt',
+            contents: updatedContents,
+            isExecutable: true,
+          },
+        ]);
+      });
+
+      it('preserves a known executable state when stat is unavailable', async () => {
+        git.isFileModeEnabled.mockResolvedValue(true);
+        mockRepositoryChanges({ modified: ['script.txt'] });
+        fs.statLocalFile.mockResolvedValue(null);
+
+        const result = await runPostUpgradeTask([
+          {
+            type: 'addition',
+            path: 'script.txt',
+            contents: 'old contents',
+            isExecutable: true,
+          },
+        ]);
+
+        expect(result.updatedArtifacts).toEqual([
+          {
+            type: 'addition',
+            path: 'script.txt',
+            contents: updatedContents,
+            isExecutable: true,
+          },
+        ]);
+      });
+
+      it('does not inspect modes when file mode tracking is disabled', async () => {
+        git.isFileModeEnabled.mockResolvedValue(false);
+        mockRepositoryChanges({
+          created: ['new.txt'],
+          modified: ['known-executable.txt'],
+        });
+
+        const result = await runPostUpgradeTask([
+          {
+            type: 'addition',
+            path: 'known-executable.txt',
+            contents: 'old contents',
+            isExecutable: true,
+          },
+        ]);
+
+        expect(result.updatedArtifacts).toEqual([
+          {
+            type: 'addition',
+            path: 'known-executable.txt',
+            contents: updatedContents,
+            isExecutable: true,
+          },
+          {
+            type: 'addition',
+            path: 'new.txt',
+            contents: updatedContents,
+          },
+        ]);
+        expect(fs.statLocalFile).not.toHaveBeenCalled();
+      });
     });
 
     it('handles previously-deleted files which are re-added', async () => {
