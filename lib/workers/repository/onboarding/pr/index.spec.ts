@@ -587,6 +587,7 @@ describe('workers/repository/onboarding/pr/index', () => {
       beforeEach(() => {
         GlobalConfig.reset();
         scm.deleteBranch.mockResolvedValue();
+        // oxlint-disable-next-line renovate/no-redundant-mock-reset -- discards the once-value queued by the outer beforeEach
         platform.createPr.mockReset();
       });
 

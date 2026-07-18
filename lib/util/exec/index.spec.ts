@@ -914,7 +914,7 @@ describe('util/exec/index', () => {
       inOpts,
       outCmd: outCommand,
       outOpts,
-      adminConfig = {} as any,
+      adminConfig = {},
       hermitEnvs,
     } = testOpts;
 
@@ -929,7 +929,7 @@ describe('util/exec/index', () => {
       return Promise.resolve({ stdout: '', stderr: '' });
     });
     GlobalConfig.set({ ...globalConfig, localDir: cwd, ...adminConfig });
-    setCustomEnv(adminConfig.customEnvVariables);
+    setCustomEnv(adminConfig.customEnvVariables ?? {});
     if (hermitEnvs !== undefined) {
       getHermitEnvsMock.mockResolvedValue(hermitEnvs);
     }

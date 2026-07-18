@@ -401,6 +401,24 @@ npmRegistries:
     npmAuthToken: <Decrypted PAT Token>
 ```
 
+#### pnpm
+
+Renovate reads private registries declared in `pnpm-workspace.yaml` (supported by pnpm v11+): the top-level `registry` key and the `registries` map, including its `default` key and scoped keys like `@my-org`.
+
+```yaml
+registry: https://registry.npmjs.org/
+registries:
+  default: https://registry.npmjs.org/
+  '@my-org': https://private.example.com/
+```
+
+These registries are applied to dependencies in member `package.json` files as well as to `catalog`/`catalogs` and `overrides` entries in the workspace file itself.
+Registries set this way take precedence over `registry=`/`@scope:registry=` lines in `.npmrc`.
+
+Renovate does not read `namedRegistries`.
+Authentication is still read from `.npmrc`/`hostRules` (pnpm does not store auth in `pnpm-workspace.yaml`), so configure tokens as described above.
+Registry values that contain a `${...}` placeholder are ignored, matching pnpm's own behavior since v11.5.3.
+
 ### maven
 
 GitLab package registry can be authorized using `Authorization: Bearer <token>`.

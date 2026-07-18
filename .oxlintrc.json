@@ -66,11 +66,16 @@
     "prefer-template": "error",
     "prefer-arrow-callback": ["error", { "allowUnboundThis": false }],
     "no-nested-ternary": "error",
+    "no-else-return": ["error", { "allowElseIf": false }],
+    "unicorn/no-lonely-if": "error",
 
     "renovate/enforce-ts-extension": "error",
+    "renovate/logger-static-message": "error",
     "renovate/no-hardcoded-docs-url": "error",
     "renovate/no-new-url": "error",
+    "renovate/no-stateful-global-regex": "error",
     "renovate/no-tools-import": "error",
+    "renovate/prefer-nullish-util": "error",
     "renovate/zod-schema-naming": "error",
 
     "typescript/await-thenable": "error",
@@ -86,6 +91,7 @@
     "typescript/no-base-to-string": "error",
     "typescript/no-for-in-array": "error",
     "typescript/no-implied-eval": "error",
+    "typescript/no-unnecessary-type-arguments": "error",
     "typescript/no-unnecessary-type-assertion": "error",
     "typescript/only-throw-error": "error",
     "typescript/restrict-plus-operands": "error",
@@ -163,6 +169,7 @@
     "typescript/no-require-imports": "error",
     "typescript/no-unnecessary-type-constraint": "error",
     "typescript/no-unsafe-function-type": "error",
+    "unicorn/prefer-at": "error",
     "unicorn/prefer-node-protocol": "error",
 
     "typescript/no-useless-default-assignment": "error",
@@ -188,7 +195,13 @@
       "rules": {
         "no-template-curly-in-string": "off",
         "jest/valid-title": "error",
+        "vitest/consistent-test-it": ["error", { "fn": "it" }],
         "typescript/unbound-method": "off",
+        "renovate/logger-static-message": "off",
+        "renovate/codeblock-in-spec-fixtures": "error",
+        "renovate/no-redundant-mock-reset": "error",
+        "renovate/prefer-nullish-util": "off",
+        "renovate/prefer-partial-in-specs": "error",
         "renovate/test-root-describe": "error",
         "typescript/explicit-function-return-type": "off"
       }

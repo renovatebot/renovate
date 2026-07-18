@@ -125,18 +125,16 @@ export function parseAzurePipelines(
   const res = AzurePipelinesYaml.safeParse(content);
   if (res.success) {
     return res.data;
-  } else {
-    logger.debug(
-      { err: res.error, packageFile },
-      'Error parsing pubspec lockfile.',
-    );
   }
+  logger.debug(
+    { err: res.error, packageFile },
+    'Error parsing pubspec lockfile.',
+  );
+
   return null;
 }
 
-function extractSteps(
-  steps: Step[] | undefined,
-): PackageDependency<Record<string, any>>[] {
+function extractSteps(steps: Step[] | undefined): PackageDependency[] {
   const deps = [];
   for (const step of coerceArray(steps)) {
     const task = extractAzurePipelinesTasks(step.task);

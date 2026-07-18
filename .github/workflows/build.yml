@@ -370,9 +370,9 @@ jobs:
           args: -color -ignore "invalid activity type \"destroyed\" for \"merge_group\" Webhook event. available types are \"checks_requested\""
 
       - name: Run zizmor
-        uses: zizmorcore/zizmor-action@192e21d79ab29983730a13d1382995c2307fbcaa # v0.5.7
+        uses: zizmorcore/zizmor-action@6599ee8b7a49aef6a770f63d261d214911a7ce02 # v0.6.0
         with:
-          version: 1.26.1
+          version: 1.27.0
 
   test:
     needs: [setup, prefetch]
@@ -661,8 +661,6 @@ jobs:
     timeout-minutes: 15
     if: github.event_name != 'pull_request' || (github.event.pull_request.draft != true && contains(github.event.pull_request.labels.*.name, 'ci:fulltest'))
     steps:
-      - run: df -h
-
       - name: Checkout code
         uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
@@ -699,6 +697,7 @@ jobs:
           RENOVATE_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - run: df -h
+        if: ${{ !cancelled() }}
 
   build-docs:
     needs:
@@ -830,42 +829,6 @@ jobs:
             gh run cancel "$RUN_ID"
             sleep 5
           fi
-
-      - run: df -h
-
-      - name: check for old vm with low disk space
-        id: check
-        run: |
-          if [[ -e /dev/sdb1 ]]; then
-            echo "::warning::We're on old vm, running cleanup"
-            echo "do-cleanup=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "::notice::We're on new vm, no cleanup required"
-            echo "do-cleanup=false" >> "$GITHUB_OUTPUT"
-          fi
-
-      # Some runner vm's are smaller than others for unknown reasons
-      # https://github.com/orgs/community/discussions/199328
-      # To avoid disk space issues when performing a release, we can clear up some disk space ahead of time
-      - name: Free Disk Space
-        if: ${{ steps.check.outputs.do-cleanup == 'true' }}
-        uses: jlumbroso/free-disk-space@54081f138730dfa15788a46383842cd2f914a1be # v1.3.1
-        with:
-          # we're likely already using some of the globally installed tools
-          tool-cache: false
-          # there are no images by default
-          docker-images: false
-          # but we're definitely not using these
-          android: true
-          dotnet: true
-          haskell: true
-          # there is no swap storage anymore
-          swap-storage: false
-
-          large-packages: true # breaks docker cross platform support
-
-      - run: df -h
-        if: ${{ steps.check.outputs.do-cleanup == 'true' }}
 
       - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:

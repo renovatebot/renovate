@@ -1631,7 +1631,7 @@ describe('workers/repository/update/branch/get-updated', () => {
           branchName: 'renovate/pin',
           depName: undefined,
         },
-        "No depName found after updating 'composer.json'",
+        'No depName found after updating package file',
       );
     });
 
@@ -1711,7 +1711,7 @@ describe('workers/repository/update/branch/get-updated', () => {
           branchName: 'renovate/pin',
           depName: 'some-dep',
         },
-        "Could not determine resolved version for 'some-dep' after updating 'composer.json'; skipping pending-version check",
+        'Could not determine resolved version after updating package file; skipping pending-version check',
       );
     });
 
