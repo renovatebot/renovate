@@ -14,11 +14,11 @@ import { getDefaultConfigFileName } from '../onboarding/common.ts';
 // TODO: fix types (#22198)
 export type WorkerPlatformConfig = RepoResult &
   RenovateConfig &
-  Record<string, any>;
+  Record<string, unknown>;
 
 async function getJsonFile(file: string): Promise<RenovateConfig | null> {
   try {
-    return await platform.getJsonFile(file);
+    return (await platform.getJsonFile(file)) as RenovateConfig | null;
   } catch {
     return null;
   }

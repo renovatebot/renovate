@@ -115,7 +115,7 @@ export interface LocalRepoConfig {
   repository: string | null;
   renovateUsername: string | undefined;
   renovateForkUser: string | undefined;
-  productLinks: any;
+  productLinks?: Record<string, string>;
   ignorePrAuthor: boolean;
   autoMergeAllowed: boolean;
   hasIssuesEnabled: boolean;

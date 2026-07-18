@@ -25,7 +25,9 @@ const Package = z.object({
       { ecosystem: ctx.input },
       'Skipping vulnerability alert with unsupported ecosystem',
     );
-    return undefined as any;
+    // Alerts without a supported ecosystem are filtered out below, so the
+    // temporary `undefined` never escapes this schema.
+    return undefined as unknown as Ecosystem;
   }),
   name: z.string(),
 });

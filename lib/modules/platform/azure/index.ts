@@ -69,7 +69,7 @@ interface User {
   isRequired: boolean;
 }
 
-let config: Config = {} as any;
+let config: Config = {} as Config;
 let issueService: IssueService;
 
 const defaults: {
@@ -190,7 +190,7 @@ export async function getJsonFile(
   fileName: string,
   repoName?: string,
   branchOrTag?: string,
-): Promise<any> {
+): Promise<unknown> {
   const raw = await getRawFile(fileName, repoName, branchOrTag);
   return parseJson(raw, fileName);
 }

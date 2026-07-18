@@ -45,11 +45,11 @@ export async function getBaseBranchConfig(
     const configFileName = cache.configFileName!;
 
     try {
-      baseBranchConfig = await platform.getJsonFile(
+      baseBranchConfig = (await platform.getJsonFile(
         configFileName,
         config.repository,
         baseBranch,
-      );
+      )) as RenovateConfig;
       logger.debug({ config: baseBranchConfig }, 'Base branch config raw');
     } catch {
       logger.error(

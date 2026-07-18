@@ -29,7 +29,7 @@ const handler: ProxyHandler<Platform> = {
   },
 };
 
-export const platform = new Proxy<Platform>({} as any, handler);
+export const platform = new Proxy<Platform>({} as Platform, handler);
 
 export function setPlatformApi(name: PlatformId): void {
   if (!platforms.has(name)) {
@@ -50,13 +50,14 @@ export async function initPlatform(config: AllConfig): Promise<AllConfig> {
   setPlatformApi(config.platform!);
   // TODO: types
   const platformInfo = await platform.initPlatform(config);
-  const returnConfig: any = {
+  const combinedHostRules: HostRule[] = [
+    ...(platformInfo?.hostRules ?? []),
+    ...(config.hostRules ?? []),
+  ];
+  const returnConfig: AllConfig = {
     ...config,
     ...platformInfo,
-    hostRules: [
-      ...(platformInfo?.hostRules ?? []),
-      ...(config.hostRules ?? []),
-    ],
+    hostRules: combinedHostRules,
   };
   // v8 ignore else -- TODO: add test #40625
   if (config?.gitAuthor) {
@@ -87,7 +88,7 @@ export async function initPlatform(config: AllConfig): Promise<AllConfig> {
     ...platformRule,
     hostType: returnConfig.platform,
   };
-  returnConfig.hostRules.push(typedPlatformRule);
+  combinedHostRules.push(typedPlatformRule);
   hostRules.add(typedPlatformRule);
   return returnConfig;
 }

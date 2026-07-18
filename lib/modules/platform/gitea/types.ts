@@ -49,7 +49,7 @@ export interface PR {
   assignee?: {
     login?: string;
   };
-  assignees?: any[];
+  assignees?: { login?: string }[];
   user?: { login?: string };
 
   // labels returned from the Gitea API are represented as an array of objects

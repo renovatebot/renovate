@@ -86,12 +86,12 @@ const defaults = {
   isForgejo: false,
 };
 
-let config: GiteaRepoConfig = {} as any;
+let config: GiteaRepoConfig = {} as GiteaRepoConfig;
 let botUserID: number;
 let botUserName: string;
 
 export function resetPlatform(): void {
-  config = {} as any;
+  config = {} as GiteaRepoConfig;
   botUserID = undefined as never;
   botUserName = undefined as never;
   defaults.hostType = 'gitea';
@@ -271,7 +271,7 @@ const platform: Platform = {
     fileName: string,
     repoName?: string,
     branchOrTag?: string,
-  ): Promise<any> {
+  ): Promise<unknown> {
     // TODO #22198
     const raw = await platform.getRawFile(fileName, repoName, branchOrTag);
     return parseJson(raw, fileName);
@@ -285,7 +285,7 @@ const platform: Platform = {
   }: RepoParams): Promise<RepoResult> {
     let repo: Repo;
 
-    config = {} as any;
+    config = {} as GiteaRepoConfig;
     config.repository = repository;
     config.cloneSubmodules = !!cloneSubmodules;
     config.cloneSubmodulesFilter = cloneSubmodulesFilter;

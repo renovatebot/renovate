@@ -248,7 +248,7 @@ export interface Platform {
     fileName: string,
     repoName?: string,
     branchOrTag?: string,
-  ): Promise<any>;
+  ): Promise<unknown>;
   initRepo(config: RepoParams): Promise<RepoResult>;
   getPrList(): Promise<Pr[]>;
   ensureIssueClosing(title: string): Promise<void>;

@@ -409,7 +409,7 @@ export async function getJsonFile(
   fileName: string,
   repoName?: string,
   branchOrTag?: string,
-): Promise<any> {
+): Promise<unknown> {
   const raw = await getRawFile(fileName, repoName, branchOrTag);
   return parseJson(raw, fileName);
 }
@@ -517,7 +517,7 @@ export async function initRepo({
     cloneSubmodules,
     cloneSubmodulesFilter,
     ignorePrAuthor: GlobalConfig.get('ignorePrAuthor'),
-  } as any;
+  } as unknown as LocalRepoConfig;
   const opts = hostRules.find({
     hostType: 'github',
     url: platformConfig.endpoint,
@@ -867,7 +867,7 @@ export async function getBranchForceRebase(
 
 function handleBranchProtectionError(
   protection: 'branch-protection' | 'rulesets',
-  err: any,
+  err: Error & { statusCode?: number },
   branchName: string,
 ): void {
   if (err.statusCode === 404) {
@@ -1307,7 +1307,12 @@ export async function setBranchStatus({
       yellow: 'pending',
       red: 'failure',
     };
-    const options: any = {
+    const options: {
+      state: string;
+      description: string | undefined;
+      context: string | undefined;
+      target_url?: string;
+    } = {
       state: renovateToGitHubStateMapping[state],
       description,
       context,
@@ -1922,7 +1927,17 @@ export async function createPr({
   // TODO: can `repository` be null? (#22198)
 
   const head = `${config.repository!.split('/')[0]}:${sourceBranch}`;
-  const options: any = {
+  const options: {
+    body: {
+      title: string;
+      head: string;
+      base: string;
+      body: string;
+      draft: boolean;
+      maintainer_can_modify?: boolean;
+    };
+    token?: string;
+  } = {
     body: {
       title,
       head,
@@ -1972,7 +1987,12 @@ export async function updatePr({
 }: UpdatePrConfig): Promise<void> {
   logger.debug(`updatePr(${prNo}, ${title}, body)`);
   const body = sanitize(rawBody);
-  const patchBody: any = { title };
+  const patchBody: {
+    title: string;
+    body?: string;
+    base?: string;
+    state?: string;
+  } = { title };
   // v8 ignore else -- TODO: add test #40625
   if (body) {
     patchBody.body = body;
@@ -1983,7 +2003,10 @@ export async function updatePr({
   if (state) {
     patchBody.state = state;
   }
-  const options: any = {
+  const options: {
+    body: typeof patchBody;
+    token?: string;
+  } = {
     body: patchBody,
   };
   /* v8 ignore next */

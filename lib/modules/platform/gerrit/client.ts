@@ -117,7 +117,7 @@ class GerritClient {
       ? 1
       : (findPRConfig.pageLimit ?? 50);
 
-    const query: Record<string, any> = {
+    const query: { n: number; S?: number; o?: GerritRequestDetail[] } = {
       n: pageLimit,
     };
     if (findPRConfig.requestDetails) {

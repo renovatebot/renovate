@@ -67,10 +67,10 @@ const bitbucketHttp = new BitbucketHttp();
 
 const BITBUCKET_PROD_ENDPOINT = 'https://api.bitbucket.org/';
 
-let config: Config = {} as any;
+let config: Config = {} as Config;
 
 export function resetPlatform(): void {
-  config = {} as any;
+  config = {} as Config;
   renovateUserUuid = null;
 }
 
@@ -220,7 +220,7 @@ export async function getJsonFile(
   fileName: string,
   repoName?: string,
   branchOrTag?: string,
-): Promise<any> {
+): Promise<unknown> {
   // TODO #22198
   const raw = await getRawFile(fileName, repoName, branchOrTag);
   return parseJson(raw, fileName);
@@ -940,11 +940,17 @@ export function ensureCommentRemoval(
   return comments.ensureCommentRemoval(config, deleteConfig);
 }
 
+interface SanitizeReviewersError {
+  statusCode?: number;
+  body?: { error?: { fields?: { reviewers?: string[] } } };
+}
+
 async function sanitizeReviewers(
   reviewers: Account[],
-  err: any,
+  err: SanitizeReviewersError,
 ): Promise<Account[] | undefined> {
-  if (err.statusCode === 400 && err.body?.error?.fields?.reviewers) {
+  const reviewerMessages = err.body?.error?.fields?.reviewers;
+  if (err.statusCode === 400 && reviewerMessages) {
     const sanitizedReviewers: Account[] = [];
 
     const MSG_AUTHOR_AND_REVIEWER =
@@ -953,7 +959,7 @@ async function sanitizeReviewers(
     const MSG_NOT_WORKSPACE_MEMBER =
       'is not a member of this workspace and cannot be added to this pull request';
 
-    for (const msg of err.body.error.fields.reviewers) {
+    for (const msg of reviewerMessages) {
       // Bitbucket returns a 400 if any of the PR reviewer accounts are now inactive (ie: disabled/suspended)
       if (msg === MSG_MALFORMED_REVIEWERS_LIST) {
         logger.debug(
@@ -1206,7 +1212,12 @@ export async function updatePr({
 
   let updatedPrRes: PrResponse;
   try {
-    const body: any = {
+    const body: {
+      title: string;
+      description: string | null | undefined;
+      reviewers: PrResponse['reviewers'];
+      destination?: { branch: { name: string } };
+    } = {
       title,
       description: sanitize(description),
       reviewers: pr.reviewers,

@@ -9,13 +9,19 @@ import { regEx } from '../../../util/regex.ts';
 import { ensureTrailingSlash, parseUrl } from '../../../util/url.ts';
 import { getPrBodyStruct } from '../pr-body.ts';
 import type { GitUrlOption } from '../types.ts';
-import type { BbsPr, BbsRestPr, BbsRestRepo, BitbucketError } from './types.ts';
+import type {
+  BbsPr,
+  BbsRestPr,
+  BbsRestPrState,
+  BbsRestRepo,
+  BitbucketError,
+} from './types.ts';
 
 export const BITBUCKET_INVALID_REVIEWERS_EXCEPTION =
   'com.atlassian.bitbucket.pull.InvalidPullRequestReviewersException';
 
 // https://docs.atlassian.com/bitbucket-server/rest/6.0.0/bitbucket-rest.html#idp250
-const prStateMapping: any = {
+const prStateMapping: Record<BbsRestPrState, string> = {
   MERGED: 'merged',
   DECLINED: 'closed',
   OPEN: 'open',

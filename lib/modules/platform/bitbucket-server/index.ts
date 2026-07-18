@@ -86,7 +86,7 @@ import {
 
 export const id = 'bitbucket-server';
 
-let config: BbsConfig = {} as any;
+let config: BbsConfig = {} as BbsConfig;
 
 const bitbucketServerHttp = new BitbucketServerHttp();
 
@@ -240,7 +240,7 @@ export async function getJsonFile(
   fileName: string,
   repoName?: string,
   branchOrTag?: string,
-): Promise<any> {
+): Promise<unknown> {
   // TODO #22198
   const raw = await getRawFile(fileName, repoName, branchOrTag);
   return parseJson(raw, fileName);
@@ -268,7 +268,7 @@ export async function initRepo({
     prVersions: new Map<number, number>(),
     username: opts.username,
     ignorePrAuthor: GlobalConfig.get('ignorePrAuthor'),
-  } as any;
+  } as BbsConfig;
 
   try {
     const info = (
@@ -600,7 +600,12 @@ export async function setBranchStatus({
   const branchCommit = git.getBranchCommit(branchName);
 
   try {
-    const body: any = {
+    const body: {
+      key: string;
+      description: string | undefined;
+      url: string;
+      state?: utils.BitbucketBranchState;
+    } = {
       key: context,
       description,
       url: targetUrl ?? 'https://renovatebot.com',
@@ -813,7 +818,7 @@ async function updatePRAndAddReviewers(
   }
 }
 
-async function retry<T extends (...arg0: any[]) => Promise<any>>(
+async function retry<T extends (...arg0: never[]) => Promise<unknown>>(
   fn: T,
   args: Parameters<T>,
   maxTries: number,
@@ -823,7 +828,7 @@ async function retry<T extends (...arg0: any[]) => Promise<any>>(
   let lastError: Error | undefined;
   for (let attempt = 0; attempt < maxAttempts; attempt++) {
     try {
-      return await fn(...args);
+      return (await fn(...args)) as Awaited<ReturnType<T>>;
     } catch (e) {
       lastError = e;
       if (
@@ -1132,7 +1137,13 @@ export async function updatePr({
       throw Object.assign(new Error(REPOSITORY_NOT_FOUND), { statusCode: 404 });
     }
 
-    const body: any = {
+    const body: {
+      title: string;
+      description: string | null | undefined;
+      version: number | undefined;
+      reviewers: { user: { name: string } }[] | undefined;
+      toRef?: { id: string | undefined };
+    } = {
       title,
       description,
       version: pr.version,

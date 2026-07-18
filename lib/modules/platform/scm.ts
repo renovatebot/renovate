@@ -30,7 +30,7 @@ const handler: ProxyHandler<PlatformScm> = {
     return _scm[prop];
   },
 };
-export const scm = new Proxy<PlatformScm>({} as any, handler);
+export const scm = new Proxy<PlatformScm>({} as PlatformScm, handler);
 
 export function setPlatformScmApi(name: PlatformId): void {
   if (!platformScmImpls.has(name)) {

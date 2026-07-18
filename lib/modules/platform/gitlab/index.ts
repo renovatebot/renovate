@@ -87,7 +87,7 @@ import {
 
 export { extractRulesFromCodeOwnersLines } from './code-owners.ts';
 
-let config: {
+interface GitlabRepoConfig {
   repository: string;
   email: EmailAddress;
   issueList: GitlabIssue[] | undefined;
@@ -98,10 +98,12 @@ let config: {
   cloneSubmodulesFilter: string[] | undefined;
   ignorePrAuthor: boolean | undefined;
   squash: boolean;
-} = {} as any;
+}
+
+let config: GitlabRepoConfig = {} as GitlabRepoConfig;
 
 export function resetPlatform(): void {
-  config = {} as any;
+  config = {} as GitlabRepoConfig;
   draftPrefix = DRAFT_PREFIX;
   defaults.hostType = 'gitlab';
   defaults.endpoint = 'https://gitlab.com/api/v4/';
@@ -186,7 +188,7 @@ export async function initPlatform({
 export async function getRepos(config?: AutodiscoverConfig): Promise<string[]> {
   logger.debug('Autodiscovering GitLab repositories');
 
-  const queryParams: Record<string, any> = {
+  const queryParams: Record<string, string | number | boolean> = {
     membership: true,
     per_page: 100,
     with_merge_requests_enabled: true,
@@ -265,7 +267,7 @@ export async function getJsonFile(
   fileName: string,
   repoName?: string,
   branchOrTag?: string,
-): Promise<any> {
+): Promise<unknown> {
   const raw = await getRawFile(fileName, repoName, branchOrTag);
   return parseJson(raw, fileName);
 }
@@ -277,7 +279,7 @@ export async function initRepo({
   cloneSubmodulesFilter,
   gitUrl,
 }: RepoParams): Promise<RepoResult> {
-  config = {} as any;
+  config = {} as GitlabRepoConfig;
   config.repository = urlEscape(repository);
   config.cloneSubmodules = cloneSubmodules;
   config.cloneSubmodulesFilter = cloneSubmodulesFilter;
@@ -793,7 +795,14 @@ export async function updatePr({
     // TODO: null check (#22198)
   }[state!];
 
-  const body: any = {
+  const body: {
+    title: string;
+    description: string | null | undefined;
+    state_event?: string;
+    target_branch?: string;
+    add_labels?: string[];
+    remove_labels?: string[];
+  } = {
     title,
     description: sanitize(description),
     ...(newState && { state_event: newState }),
@@ -990,7 +999,13 @@ export async function setBranchStatus({
   } else if (renovateState === 'red') {
     state = 'failed';
   }
-  const options: any = {
+  const options: {
+    state: string;
+    description: string | undefined;
+    context: string | undefined;
+    target_url?: string;
+    pipeline_id?: number;
+  } = {
     state,
     description,
     context,

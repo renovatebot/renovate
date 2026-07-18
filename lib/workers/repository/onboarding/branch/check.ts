@@ -112,9 +112,9 @@ export async function isOnboarded(config: RenovateConfig): Promise<boolean> {
   if (cache.configFileName && !config.forkToken) {
     logger.debug('Checking cached config file name');
     try {
-      const configFileContent = await platform.getJsonFile(
+      const configFileContent = (await platform.getJsonFile(
         cache.configFileName,
-      );
+      )) as { renovate?: unknown } | null;
       if (
         configFileContent &&
         (cache.configFileName !== 'package.json' || configFileContent.renovate)

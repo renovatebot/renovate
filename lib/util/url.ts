@@ -74,7 +74,7 @@ export function replaceUrlPath(baseUrl: string | URL, path: string): string {
   return urlJoin(origin, path);
 }
 
-export function getQueryString(params: Record<string, any>): string {
+export function getQueryString(params: object): string {
   const usp = new URLSearchParams();
   for (const [k, v] of Object.entries(params)) {
     if (isArray<object>(v)) {

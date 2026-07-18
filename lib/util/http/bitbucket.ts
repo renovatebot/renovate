@@ -90,6 +90,6 @@ function hasPagelen(url: URL): boolean {
   return !isNullOrUndefined(url.searchParams.get('pagelen'));
 }
 
-function isPagedResult<T>(obj: any): obj is PagedResult<T> {
+function isPagedResult<T>(obj: unknown): obj is PagedResult<T> {
   return isNonEmptyObject(obj) && Array.isArray(obj.values);
 }

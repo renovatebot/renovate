@@ -47,7 +47,7 @@ interface SCMMRepoConfig {
 export const id = 'scm-manager';
 export const experimental = true;
 
-let config: SCMMRepoConfig = {} as any;
+let config: SCMMRepoConfig = {} as SCMMRepoConfig;
 
 export async function initPlatform({
   endpoint,
@@ -89,7 +89,7 @@ export async function initRepo({
   const defaultBranch = await getDefaultBranch(repo);
   const url = getRepoUrl(repo, gitUrl, getBaseUrl());
 
-  config = {} as any;
+  config = {} as SCMMRepoConfig;
   config.repository = repository;
   config.defaultBranch = defaultBranch;
   config.ignorePrAuthor = GlobalConfig.get('ignorePrAuthor');
@@ -327,7 +327,7 @@ export function getJsonFile(
   _fileName: string,
   _repoName?: string,
   _branchOrTag?: string,
-): Promise<any> {
+): Promise<unknown> {
   logger.debug('Not implemented getJsonFile');
   return Promise.resolve(null);
 }

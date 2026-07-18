@@ -18,7 +18,7 @@ export interface Config {
   is_private: boolean;
 }
 
-export interface PagedResult<T = any> {
+export interface PagedResult<T = unknown> {
   page?: number;
   pagelen: number;
   size?: number;

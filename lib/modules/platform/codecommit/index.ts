@@ -57,7 +57,7 @@ const platformConfig = {
   endpoint: 'https://git-codecommit.us-east-1.amazonaws.com',
 };
 
-let config: Config = {} as any;
+let config: Config = {} as Config;
 
 export async function initPlatform({
   endpoint,
@@ -344,7 +344,7 @@ export async function getJsonFile(
   fileName: string,
   repoName?: string,
   branchOrTag?: string,
-): Promise<any> {
+): Promise<unknown> {
   const raw = await getRawFile(fileName, repoName, branchOrTag);
   return parseJson(raw, fileName);
 }

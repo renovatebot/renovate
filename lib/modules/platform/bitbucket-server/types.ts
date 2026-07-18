@@ -3,7 +3,7 @@ import type { Pr } from '../types.ts';
 
 export interface BbsConfig {
   bbUseDefaultReviewers: boolean;
-  fileList: any[];
+  fileList: string[];
   mergeMethod: string;
   owner: string;
   projectKey: string;

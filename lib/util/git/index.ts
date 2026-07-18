@@ -208,7 +208,7 @@ async function getDefaultBranch(git: InstrumentedSimpleGit): Promise<string> {
   }
 }
 
-let config: LocalConfig = {} as any;
+let config: LocalConfig = {} as LocalConfig;
 
 // TODO: can be undefined
 let git: InstrumentedSimpleGit;
@@ -297,7 +297,7 @@ export async function fetchRevSpec(...revSpec: string[]): Promise<void> {
 }
 
 export async function initRepo(args: StorageConfig): Promise<void> {
-  config = { ...args } as any;
+  config = { ...args } as LocalConfig;
   config.ignoredAuthors = [];
   config.additionalBranches = [];
   config.branchIsModified = {};
