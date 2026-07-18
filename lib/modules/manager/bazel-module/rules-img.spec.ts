@@ -1,9 +1,10 @@
+import type { ResultFragment } from './parser/fragments.ts';
 import { transformRulesImgCalls } from './rules-img.ts';
 
 describe('modules/manager/bazel-module/rules-img', () => {
   describe('transformRulesImgCalls()', () => {
     it('ignores repo rule calls that are not rules_img', () => {
-      const fragments = [
+      const fragments: ResultFragment[] = [
         {
           type: 'useRepoRule',
           variableName: 'other_rule',
@@ -30,7 +31,7 @@ describe('modules/manager/bazel-module/rules-img', () => {
     });
 
     it('handles valid rules_img pull call', () => {
-      const fragments = [
+      const fragments: ResultFragment[] = [
         {
           type: 'useRepoRule',
           variableName: 'pull',
@@ -70,7 +71,7 @@ describe('modules/manager/bazel-module/rules-img', () => {
     });
 
     it('skips repo rule calls without corresponding use_repo_rule', () => {
-      const fragments = [
+      const fragments: ResultFragment[] = [
         {
           type: 'repoRuleCall',
           functionName: 'unknown_function',
@@ -89,7 +90,7 @@ describe('modules/manager/bazel-module/rules-img', () => {
     });
 
     it('skips malformed repo rule calls', () => {
-      const fragments = [
+      const fragments: ResultFragment[] = [
         {
           type: 'useRepoRule',
           variableName: 'pull',

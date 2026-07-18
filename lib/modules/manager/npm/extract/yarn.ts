@@ -68,8 +68,13 @@ export async function getYarnLock(filePath: string): Promise<LockFile> {
 }
 
 export function getZeroInstallPaths(yarnrcYml: string): string[] {
-  // TODO: fix type #22198
-  let conf: any;
+  let conf:
+    | {
+        cacheFolder?: string;
+        pnpEnableInlining?: unknown;
+        pnpDataPath?: string;
+      }
+    | undefined;
   try {
     conf = parseSyml(yarnrcYml);
   } catch (err) /* v8 ignore next -- TODO: add test #40625 */ {

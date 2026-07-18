@@ -1,7 +1,6 @@
 import { isArray, isNonEmptyArray } from '@sindresorhus/is';
 import upath from 'upath';
-import type { XmlElement } from 'xmldoc';
-import { XmlDocument } from 'xmldoc';
+import { XmlDocument, XmlElement } from 'xmldoc';
 import { logger } from '../../../logger/index.ts';
 import { readLocalFile } from '../../../util/fs/index.ts';
 import { regEx } from '../../../util/regex.ts';
@@ -56,7 +55,12 @@ function parsePom(raw: string, packageFile: string): XmlDocument | null {
   }
   if (
     isNonEmptyArray(children) &&
-    children.some((c: any) => c.name === 'modelVersion' && c.val === '4.0.0')
+    children.some(
+      (c) =>
+        c instanceof XmlElement &&
+        c.name === 'modelVersion' &&
+        c.val === '4.0.0',
+    )
   ) {
     return project;
   }
@@ -250,7 +254,7 @@ function deepExtract(
 function applyProps(
   dep: PackageDependency,
   depPackageFile: string,
-  props: MavenProp,
+  props: Record<string, MavenProp>,
 ): PackageDependency {
   let result = dep;
   let anyChange = false;
@@ -283,7 +287,7 @@ function applyProps(
 function applyPropsInternal(
   dep: PackageDependency,
   depPackageFile: string,
-  props: MavenProp,
+  props: Record<string, MavenProp>,
   previouslySeenProps: Set<string>,
 ): [PackageDependency, boolean, boolean] {
   let anyChange = false;
@@ -294,8 +298,7 @@ function applyPropsInternal(
   const replaceAll = (str: string): string =>
     str.replace(regEx(/\${[^}]*?}/g), (substr) => {
       const propKey = substr.slice(2, -1).trim();
-      // TODO: wrong types here, props is already `MavenProp`
-      const propValue = (props as any)[propKey] as MavenProp;
+      const propValue = props[propKey];
       if (propValue) {
         anyChange = true;
         if (previouslySeenProps.has(propKey)) {
@@ -323,8 +326,7 @@ function applyPropsInternal(
   if (dep.currentValue) {
     currentValue = dep.currentValue.replace(regEx(/^\${[^}]*?}$/), (substr) => {
       const propKey = substr.slice(2, -1).trim();
-      // TODO: wrong types here, props is already `MavenProp`
-      const propValue = (props as any)[propKey] as MavenProp;
+      const propValue = props[propKey];
       if (propValue) {
         sharedVariableName ??= propKey;
         fileReplacePosition = propValue.fileReplacePosition;
@@ -380,7 +382,7 @@ function resolveParentFile(packageFile: string, parentPath: string): string {
 }
 
 interface MavenInterimPackageFile extends PackageFile {
-  mavenProps?: Record<string, any>;
+  mavenProps?: Record<string, MavenProp>;
   parent?: string;
 }
 
@@ -513,7 +515,7 @@ export function resolveParents(packages: PackageFile[]): PackageFile[] {
   const packageFileNames: string[] = [];
   const extractedPackages: Record<string, MavenInterimPackageFile> = {};
   const extractedDeps: Record<string, PackageDependency[]> = {};
-  const extractedProps: Record<string, MavenProp> = {};
+  const extractedProps: Record<string, Record<string, MavenProp>> = {};
   const registryUrls: Record<string, Set<string>> = {};
   packages.forEach((pkg) => {
     const name = pkg.packageFile;
@@ -550,8 +552,7 @@ export function resolveParents(packages: PackageFile[]): PackageFile[] {
         pkg = null;
       }
     }
-    propsHierarchy.unshift({});
-    extractedProps[name] = Object.assign.apply(null, propsHierarchy as any);
+    extractedProps[name] = Object.assign({}, ...propsHierarchy);
   });
 
   // Resolve registryUrls

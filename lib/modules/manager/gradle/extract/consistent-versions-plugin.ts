@@ -72,7 +72,7 @@ export function parseGcv(
   // For each exact dep in props file
   for (const [propDep, versionAndPosition] of propsFileExactMap) {
     if (lockFileMap.has(propDep)) {
-      const newDep: Record<string, any> = {
+      const newDep: PackageDependency<GradleManagerData> = {
         managerData: {
           packageFile: propsFileName,
           fileReplacePosition: versionAndPosition.filePos,
@@ -93,7 +93,7 @@ export function parseGcv(
     const globRegex = globToRegex(propDepGlob);
     for (const [exactDep, lockVersionAndDepType] of lockFileMap) {
       if (globRegex.test(exactDep)) {
-        const newDep: Record<string, any> = {
+        const newDep: PackageDependency<GradleManagerData> = {
           managerData: {
             packageFile: propsFileName,
             fileReplacePosition: propVerAndPos.filePos,

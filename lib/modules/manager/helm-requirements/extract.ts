@@ -15,8 +15,17 @@ export function extractPackageFile(
   config: ExtractConfig,
 ): PackageFileContent | null {
   let deps = [];
-  // TODO: fix type
-  let doc: any;
+  // TODO: use schema (#9610)
+  let doc:
+    | {
+        dependencies?: {
+          name?: string;
+          version?: unknown;
+          repository?: string;
+        }[];
+      }
+    | null
+    | undefined;
   try {
     doc = parseSingleYaml(content); // TODO #9610
   } catch {
@@ -27,7 +36,7 @@ export function extractPackageFile(
     logger.debug({ packageFile }, `requirements.yaml has no dependencies`);
     return null;
   }
-  deps = doc.dependencies.map((dep: Record<string, any>) => {
+  deps = doc.dependencies.map((dep) => {
     let currentValue: string | undefined; // Remove when #9610 has been implemented
     switch (typeof dep.version) {
       case 'number':
@@ -60,7 +69,7 @@ export function extractPackageFile(
     res.registryUrls = [dep.repository];
     if (dep.repository.startsWith('@') || dep.repository.startsWith('alias:')) {
       const repoWithPrefixRemoved = dep.repository.slice(
-        dep.repository[0] === '@' ? 1 : 6,
+        dep.repository.startsWith('@') ? 1 : 6,
       );
       const alias = config.registryAliases?.[repoWithPrefixRemoved];
       if (alias) {

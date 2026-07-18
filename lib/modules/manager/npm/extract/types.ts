@@ -15,9 +15,9 @@ interface DevEngineItem {
 
 export type NpmPackage = PackageJson & {
   renovate?: unknown;
-  _from?: any;
-  _args?: any;
-  _id?: any;
+  _from?: unknown;
+  _args?: unknown;
+  _id?: unknown;
   dependenciesMeta?: DependenciesMeta;
   overrides?: OverrideDependency;
   volta?: PackageJson.Dependency;

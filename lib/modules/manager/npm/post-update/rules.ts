@@ -8,7 +8,7 @@ import type { YarnRcYmlFile } from './types.ts';
 
 export interface HostRulesResult {
   additionalNpmrcContent: string[];
-  additionalYarnRcYml?: any;
+  additionalYarnRcYml?: YarnRcYmlFile;
 }
 
 export function processHostRules(): HostRulesResult {

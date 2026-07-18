@@ -31,7 +31,7 @@ import { extractCatalogDeps } from './common/catalogs.ts';
 import { extractDependency } from './common/dependency.ts';
 import type { Catalog, LockFile } from './types.ts';
 
-function isPnpmLockfile(obj: any): obj is PnpmLockFile {
+function isPnpmLockfile(obj: unknown): obj is PnpmLockFile {
   return isPlainObject(obj) && 'lockfileVersion' in obj;
 }
 

@@ -1,3 +1,5 @@
+import type { PackageJson } from 'type-fest';
+
 interface LockFilePackage {
   name?: string;
   version?: string;
@@ -79,10 +81,12 @@ export interface NpmLockFiles {
   npmLock?: string;
 }
 
-export interface NpmManagerData extends NpmLockFiles, Record<string, any> {
+export interface NpmManagerData extends NpmLockFiles {
   hasPackageManager?: boolean;
+  npmrcFileName?: string | null;
   packageJsonName?: string;
   parents?: string[];
+  workspaces?: PackageJson['workspaces'];
   yarnZeroInstall?: boolean;
   workspacesPackages?: string[] | string;
 }

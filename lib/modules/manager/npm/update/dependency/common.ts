@@ -14,9 +14,10 @@ export function getNewGitValue(upgrade: Upgrade): string | null {
     );
   }
   logger.debug('Updating git version tag');
+  // TODO #22198
   return upgrade.currentRawValue.replace(
-    upgrade.currentValue,
-    upgrade.newValue,
+    upgrade.currentValue!,
+    upgrade.newValue!,
   );
 }
 

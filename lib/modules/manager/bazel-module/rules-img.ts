@@ -1,6 +1,7 @@
 import { z } from 'zod/v4';
 import { DockerDatasource } from '../../datasource/docker/index.ts';
 import type { PackageDependency } from '../types.ts';
+import type { ResultFragment } from './parser/fragments.ts';
 import { RepoRuleCallFragment, StringFragment } from './parser/fragments.ts';
 
 export const RulesImgPullCallToDep = RepoRuleCallFragment.extend({
@@ -41,7 +42,9 @@ export const RulesImgPullCallToDep = RepoRuleCallFragment.extend({
   },
 );
 
-export function transformRulesImgCalls(fragments: any[]): PackageDependency[] {
+export function transformRulesImgCalls(
+  fragments: ResultFragment[],
+): PackageDependency[] {
   const deps: PackageDependency[] = [];
 
   // First, collect all use_repo_rule assignments to know which variables are repo rules

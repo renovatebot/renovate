@@ -356,7 +356,7 @@ export async function generateLockFile(
 
 export function fuzzyMatchAdditionalYarnrcYml<
   T extends { npmRegistries?: Record<string, unknown> },
->(additionalYarnRcYml: T, existingYarnrRcYml: T): T {
+>(additionalYarnRcYml: T, existingYarnrRcYml: Record<string, unknown>): T {
   const keys = new Map(
     Object.keys(existingYarnrRcYml.npmRegistries ?? {}).map((x) => [
       x.replace(/\/$/, '').replace(/^https?:/, ''),

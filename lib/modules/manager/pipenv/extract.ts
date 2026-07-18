@@ -131,8 +131,8 @@ export async function extractPackageFile(
 
   let pipfile: PipFile;
   try {
-    // TODO: fix type (#9610)
-    pipfile = parseToml(content) as any;
+    // TODO: use schema (#9610)
+    pipfile = parseToml(content) as PipFile;
   } catch (err) {
     logger.debug({ err, packageFile }, 'Error parsing Pipfile');
     return null;

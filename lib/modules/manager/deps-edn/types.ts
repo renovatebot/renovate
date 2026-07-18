@@ -1,6 +1,6 @@
 export type UnionToIntersection<T> = (
-  T extends any ? (x: T) => any : never
-) extends (x: infer R) => any
+  T extends unknown ? (x: T) => void : never
+) extends (x: infer R) => void
   ? R
   : never;
 export type TokenTypes<T> = keyof UnionToIntersection<T[keyof T]>;

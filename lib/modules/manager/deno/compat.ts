@@ -33,10 +33,12 @@ export async function extractDenoCompatiblePackageJson(
     return null;
   }
 
+  const workspaces = extracted.managerData?.workspaces;
   const result = extracted as PackageFile<DenoManagerData>;
   result.managerData = {
     packageName: extracted.managerData?.packageJsonName,
-    workspaces: extracted.managerData?.workspaces,
+    // deno only supports the array form of npm workspaces
+    workspaces: Array.isArray(workspaces) ? workspaces : undefined,
   };
   result.packageFile = packageFile;
   return result;

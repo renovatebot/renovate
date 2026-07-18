@@ -28,6 +28,18 @@ export interface ManagerData<T> {
   managerData?: T;
 }
 
+/**
+ * Default type parameter for `managerData` generics.
+ *
+ * It must stay `Record<string, any>`: each manager declares its own concrete
+ * `managerData` interface, and the default has to remain assignable in both
+ * directions (`PackageDependency<CargoManagerData>` <-> `PackageDependency`)
+ * across dozens of call sites. `Record<string, unknown>` breaks that because
+ * interfaces have no implicit index signature. See #22198.
+ */
+// oxlint-disable-next-line typescript/no-explicit-any -- see doc comment above
+export type DefaultManagerData = Record<string, any>;
+
 export interface ExtractConfig extends CustomExtractConfig {
   registryAliases?: Record<string, string>;
   npmrc?: string;
@@ -57,7 +69,7 @@ export interface UpdateArtifactsConfig {
   toolSettings?: ToolSettingsOptions;
 }
 
-export interface RangeConfig<T = Record<string, any>> extends ManagerData<T> {
+export interface RangeConfig<T = DefaultManagerData> extends ManagerData<T> {
   currentValue?: string;
   depName?: string;
   depType?: string;
@@ -66,7 +78,7 @@ export interface RangeConfig<T = Record<string, any>> extends ManagerData<T> {
 }
 
 export interface PackageFileContent<
-  T = Record<string, any>,
+  T = DefaultManagerData,
 > extends ManagerData<T> {
   autoReplaceStringTemplate?: string;
   extractedConstraints?: Partial<Record<ConstraintName, string>>;
@@ -88,7 +100,7 @@ export interface PackageFileContent<
 }
 
 export interface PackageFile<
-  T = Record<string, any>,
+  T = DefaultManagerData,
 > extends PackageFileContent<T> {
   packageFile: string;
 }
@@ -149,7 +161,7 @@ export interface LookupUpdate {
  * @property {string} packageName - The name of the package, used in comparisons. depName is used as fallback if this is not set. See #16012
  */
 export interface PackageDependency<
-  T = Record<string, any>,
+  T = DefaultManagerData,
   DepType extends string = string,
 > extends ManagerData<T> {
   currentValue?: string | null;
@@ -217,12 +229,11 @@ export interface PackageDependency<
 }
 
 export interface Upgrade<
-  T = Record<string, any>,
+  T = DefaultManagerData,
   DepType extends string = string,
 > extends PackageDependency<T, DepType> {
   workspace?: string;
   isLockfileUpdate?: boolean;
-  currentRawValue?: any;
   depGroup?: string;
   lockFiles?: string[];
   manager?: string;
@@ -276,7 +287,7 @@ export interface UpdateArtifact<T = Record<string, unknown>> {
   config: UpdateArtifactsConfig;
 }
 
-export interface UpdateDependencyConfig<T = Record<string, any>> {
+export interface UpdateDependencyConfig<T = DefaultManagerData> {
   fileContent: string;
   packageFile: string;
   upgrade: Upgrade<T>;
@@ -381,8 +392,8 @@ export type ManagerApi = ManagerApiBase &
   );
 
 // TODO: name and properties used by npm manager
-export interface PostUpdateConfig<T = Record<string, any>>
-  extends Record<string, any>, ManagerData<T> {
+export interface PostUpdateConfig<T = DefaultManagerData>
+  extends DefaultManagerData, ManagerData<T> {
   // TODO: remove null
   constraints?: Partial<Record<ConstraintName, string>> | null;
   updatedPackageFiles?: FileChange[];
