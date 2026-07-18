@@ -1,5 +1,6 @@
 import { Readable } from 'node:stream';
 import { isString } from '@sindresorhus/is';
+import type { ICoreApi } from 'azure-devops-node-api/CoreApi.js';
 import type { IGitApi } from 'azure-devops-node-api/GitApi.js';
 import type {
   GitPullRequest,
@@ -69,32 +70,31 @@ describe('modules/platform/azure/index', () => {
   // do we need the args?
 
   function getRepos(_token: string, _endpoint: string) {
-    azureApi.gitApi.mockImplementationOnce(
-      () =>
-        ({
-          getRepositories: vi.fn(() => [
-            {
-              name: 'repo1',
-              project: {
-                name: 'prj1',
-              },
+    azureApi.gitApi.mockResolvedValueOnce(
+      partial<IGitApi>({
+        getRepositories: vi.fn().mockResolvedValue([
+          {
+            name: 'repo1',
+            project: {
+              name: 'prj1',
             },
-            {
-              name: 'repo2',
-              project: {
-                name: 'prj1',
-              },
-              isDisabled: false,
+          },
+          {
+            name: 'repo2',
+            project: {
+              name: 'prj1',
             },
-            {
-              name: 'repoDisabled',
-              project: {
-                name: 'prj1',
-              },
-              isDisabled: true,
+            isDisabled: false,
+          },
+          {
+            name: 'repoDisabled',
+            project: {
+              name: 'prj1',
             },
-          ]),
-        }) as any,
+            isDisabled: true,
+          },
+        ]),
+      }),
     );
     return azure.getRepos();
   }
@@ -234,24 +234,23 @@ describe('modules/platform/azure/index', () => {
 
   describe('findPr(branchName, prTitle, state, targetBranch)', () => {
     it('returns pr if found it open', async () => {
-      azureApi.gitApi.mockImplementationOnce(
-        () =>
-          ({
-            getPullRequests: vi
-              .fn()
-              .mockReturnValue([])
-              .mockReturnValueOnce([
-                {
-                  pullRequestId: 1,
-                  sourceRefName: 'refs/heads/branch-a',
-                  targetRefName: 'refs/heads/branch-b',
-                  title: 'branch a pr',
-                  status: PullRequestStatus.Active,
-                },
-              ]),
+      azureApi.gitApi.mockResolvedValueOnce(
+        partial<IGitApi>({
+          getPullRequests: vi
+            .fn()
+            .mockReturnValue([])
+            .mockReturnValueOnce([
+              {
+                pullRequestId: 1,
+                sourceRefName: 'refs/heads/branch-a',
+                targetRefName: 'refs/heads/branch-b',
+                title: 'branch a pr',
+                status: PullRequestStatus.Active,
+              },
+            ]),
 
-            getPullRequestCommits: vi.fn().mockReturnValue([]),
-          }) as any,
+          getPullRequestCommits: vi.fn().mockReturnValue([]),
+        }),
       );
       const res = await azure.findPr({
         branchName: 'branch-a',
@@ -276,24 +275,23 @@ describe('modules/platform/azure/index', () => {
     });
 
     it('returns pr if found not open', async () => {
-      azureApi.gitApi.mockImplementationOnce(
-        () =>
-          ({
-            getPullRequests: vi
-              .fn()
-              .mockReturnValue([])
-              .mockReturnValueOnce([
-                {
-                  pullRequestId: 1,
-                  sourceRefName: 'refs/heads/branch-a',
-                  targetRefName: 'refs/heads/branch-b',
-                  title: 'branch a pr',
-                  status: PullRequestStatus.Completed,
-                },
-              ]),
+      azureApi.gitApi.mockResolvedValueOnce(
+        partial<IGitApi>({
+          getPullRequests: vi
+            .fn()
+            .mockReturnValue([])
+            .mockReturnValueOnce([
+              {
+                pullRequestId: 1,
+                sourceRefName: 'refs/heads/branch-a',
+                targetRefName: 'refs/heads/branch-b',
+                title: 'branch a pr',
+                status: PullRequestStatus.Completed,
+              },
+            ]),
 
-            getPullRequestCommits: vi.fn().mockReturnValue([]),
-          }) as any,
+          getPullRequestCommits: vi.fn().mockReturnValue([]),
+        }),
       );
       const res = await azure.findPr({
         branchName: 'branch-a',
@@ -318,24 +316,23 @@ describe('modules/platform/azure/index', () => {
     });
 
     it('returns pr if found it close', async () => {
-      azureApi.gitApi.mockImplementationOnce(
-        () =>
-          ({
-            getPullRequests: vi
-              .fn()
-              .mockReturnValue([])
-              .mockReturnValueOnce([
-                {
-                  pullRequestId: 1,
-                  sourceRefName: 'refs/heads/branch-a',
-                  targetRefName: 'refs/heads/branch-b',
-                  title: 'branch a pr',
-                  status: PullRequestStatus.Abandoned,
-                },
-              ]),
+      azureApi.gitApi.mockResolvedValueOnce(
+        partial<IGitApi>({
+          getPullRequests: vi
+            .fn()
+            .mockReturnValue([])
+            .mockReturnValueOnce([
+              {
+                pullRequestId: 1,
+                sourceRefName: 'refs/heads/branch-a',
+                targetRefName: 'refs/heads/branch-b',
+                title: 'branch a pr',
+                status: PullRequestStatus.Abandoned,
+              },
+            ]),
 
-            getPullRequestCommits: vi.fn().mockReturnValue([]),
-          }) as any,
+          getPullRequestCommits: vi.fn().mockReturnValue([]),
+        }),
       );
       const res = await azure.findPr({
         branchName: 'branch-a',
@@ -360,24 +357,23 @@ describe('modules/platform/azure/index', () => {
     });
 
     it('returns pr if found it all state', async () => {
-      azureApi.gitApi.mockImplementationOnce(
-        () =>
-          ({
-            getPullRequests: vi
-              .fn()
-              .mockReturnValue([])
-              .mockReturnValueOnce([
-                {
-                  pullRequestId: 1,
-                  sourceRefName: 'refs/heads/branch-a',
-                  targetRefName: 'refs/heads/branch-b',
-                  title: 'branch a pr',
-                  status: PullRequestStatus.Abandoned,
-                },
-              ]),
+      azureApi.gitApi.mockResolvedValueOnce(
+        partial<IGitApi>({
+          getPullRequests: vi
+            .fn()
+            .mockReturnValue([])
+            .mockReturnValueOnce([
+              {
+                pullRequestId: 1,
+                sourceRefName: 'refs/heads/branch-a',
+                targetRefName: 'refs/heads/branch-b',
+                title: 'branch a pr',
+                status: PullRequestStatus.Abandoned,
+              },
+            ]),
 
-            getPullRequestCommits: vi.fn().mockReturnValue([]),
-          }) as any,
+          getPullRequestCommits: vi.fn().mockReturnValue([]),
+        }),
       );
       const res = await azure.findPr({
         branchName: 'branch-a',
@@ -512,11 +508,10 @@ describe('modules/platform/azure/index', () => {
 
   describe('getPrList()', () => {
     it('returns empty array', async () => {
-      azureApi.gitApi.mockImplementationOnce(
-        () =>
-          ({
-            getPullRequests: vi.fn(() => []),
-          }) as any,
+      azureApi.gitApi.mockResolvedValueOnce(
+        partial<IGitApi>({
+          getPullRequests: vi.fn().mockResolvedValue([]),
+        }),
       );
       expect(await azure.getPrList()).toEqual([]);
     });
@@ -576,18 +571,19 @@ describe('modules/platform/azure/index', () => {
   describe('getBranchStatusCheck(branchName, context)', () => {
     it('should return green if status is succeeded', async () => {
       await initRepo({ repository: 'some/repo' });
-      azureApi.gitApi.mockImplementationOnce(
-        () =>
-          ({
-            getBranch: vi.fn(() => ({ commit: { commitId: 'abcd1234' } })),
+      azureApi.gitApi.mockResolvedValueOnce(
+        partial<IGitApi>({
+          getBranch: vi
+            .fn()
+            .mockResolvedValue({ commit: { commitId: 'abcd1234' } }),
 
-            getStatuses: vi.fn(() => [
-              {
-                state: GitStatusState.Succeeded,
-                context: { genre: 'a-genre', name: 'a-name' },
-              },
-            ]),
-          }) as any,
+          getStatuses: vi.fn().mockResolvedValue([
+            {
+              state: GitStatusState.Succeeded,
+              context: { genre: 'a-genre', name: 'a-name' },
+            },
+          ]),
+        }),
       );
       const res = await azure.getBranchStatusCheck(
         'somebranch',
@@ -598,18 +594,19 @@ describe('modules/platform/azure/index', () => {
 
     it('should return green if status is not applicable', async () => {
       await initRepo({ repository: 'some/repo' });
-      azureApi.gitApi.mockImplementationOnce(
-        () =>
-          ({
-            getBranch: vi.fn(() => ({ commit: { commitId: 'abcd1234' } })),
+      azureApi.gitApi.mockResolvedValueOnce(
+        partial<IGitApi>({
+          getBranch: vi
+            .fn()
+            .mockResolvedValue({ commit: { commitId: 'abcd1234' } }),
 
-            getStatuses: vi.fn(() => [
-              {
-                state: GitStatusState.NotApplicable,
-                context: { genre: 'a-genre', name: 'a-name' },
-              },
-            ]),
-          }) as any,
+          getStatuses: vi.fn().mockResolvedValue([
+            {
+              state: GitStatusState.NotApplicable,
+              context: { genre: 'a-genre', name: 'a-name' },
+            },
+          ]),
+        }),
       );
       const res = await azure.getBranchStatusCheck(
         'somebranch',
@@ -620,18 +617,19 @@ describe('modules/platform/azure/index', () => {
 
     it('should return red if status is failed', async () => {
       await initRepo({ repository: 'some/repo' });
-      azureApi.gitApi.mockImplementationOnce(
-        () =>
-          ({
-            getBranch: vi.fn(() => ({ commit: { commitId: 'abcd1234' } })),
+      azureApi.gitApi.mockResolvedValueOnce(
+        partial<IGitApi>({
+          getBranch: vi
+            .fn()
+            .mockResolvedValue({ commit: { commitId: 'abcd1234' } }),
 
-            getStatuses: vi.fn(() => [
-              {
-                state: GitStatusState.Failed,
-                context: { genre: 'a-genre', name: 'a-name' },
-              },
-            ]),
-          }) as any,
+          getStatuses: vi.fn().mockResolvedValue([
+            {
+              state: GitStatusState.Failed,
+              context: { genre: 'a-genre', name: 'a-name' },
+            },
+          ]),
+        }),
       );
       const res = await azure.getBranchStatusCheck(
         'somebranch',
@@ -642,18 +640,19 @@ describe('modules/platform/azure/index', () => {
 
     it('should return red if context status is error', async () => {
       await initRepo({ repository: 'some/repo' });
-      azureApi.gitApi.mockImplementationOnce(
-        () =>
-          ({
-            getBranch: vi.fn(() => ({ commit: { commitId: 'abcd1234' } })),
+      azureApi.gitApi.mockResolvedValueOnce(
+        partial<IGitApi>({
+          getBranch: vi
+            .fn()
+            .mockResolvedValue({ commit: { commitId: 'abcd1234' } }),
 
-            getStatuses: vi.fn(() => [
-              {
-                state: GitStatusState.Error,
-                context: { genre: 'a-genre', name: 'a-name' },
-              },
-            ]),
-          }) as any,
+          getStatuses: vi.fn().mockResolvedValue([
+            {
+              state: GitStatusState.Error,
+              context: { genre: 'a-genre', name: 'a-name' },
+            },
+          ]),
+        }),
       );
       const res = await azure.getBranchStatusCheck(
         'somebranch',
@@ -664,18 +663,19 @@ describe('modules/platform/azure/index', () => {
 
     it('should return yellow if status is pending', async () => {
       await initRepo({ repository: 'some/repo' });
-      azureApi.gitApi.mockImplementationOnce(
-        () =>
-          ({
-            getBranch: vi.fn(() => ({ commit: { commitId: 'abcd1234' } })),
+      azureApi.gitApi.mockResolvedValueOnce(
+        partial<IGitApi>({
+          getBranch: vi
+            .fn()
+            .mockResolvedValue({ commit: { commitId: 'abcd1234' } }),
 
-            getStatuses: vi.fn(() => [
-              {
-                state: GitStatusState.Pending,
-                context: { genre: 'a-genre', name: 'a-name' },
-              },
-            ]),
-          }) as any,
+          getStatuses: vi.fn().mockResolvedValue([
+            {
+              state: GitStatusState.Pending,
+              context: { genre: 'a-genre', name: 'a-name' },
+            },
+          ]),
+        }),
       );
       const res = await azure.getBranchStatusCheck(
         'somebranch',
@@ -686,18 +686,19 @@ describe('modules/platform/azure/index', () => {
 
     it('should return yellow if status is not set', async () => {
       await initRepo({ repository: 'some/repo' });
-      azureApi.gitApi.mockImplementationOnce(
-        () =>
-          ({
-            getBranch: vi.fn(() => ({ commit: { commitId: 'abcd1234' } })),
+      azureApi.gitApi.mockResolvedValueOnce(
+        partial<IGitApi>({
+          getBranch: vi
+            .fn()
+            .mockResolvedValue({ commit: { commitId: 'abcd1234' } }),
 
-            getStatuses: vi.fn(() => [
-              {
-                state: GitStatusState.NotSet,
-                context: { genre: 'a-genre', name: 'a-name' },
-              },
-            ]),
-          }) as any,
+          getStatuses: vi.fn().mockResolvedValue([
+            {
+              state: GitStatusState.NotSet,
+              context: { genre: 'a-genre', name: 'a-name' },
+            },
+          ]),
+        }),
       );
       const res = await azure.getBranchStatusCheck(
         'somebranch',
@@ -730,18 +731,19 @@ describe('modules/platform/azure/index', () => {
 
     it('should return null if status not found', async () => {
       await initRepo({ repository: 'some/repo' });
-      azureApi.gitApi.mockImplementationOnce(
-        () =>
-          ({
-            getBranch: vi.fn(() => ({ commit: { commitId: 'abcd1234' } })),
+      azureApi.gitApi.mockResolvedValueOnce(
+        partial<IGitApi>({
+          getBranch: vi
+            .fn()
+            .mockResolvedValue({ commit: { commitId: 'abcd1234' } }),
 
-            getStatuses: vi.fn(() => [
-              {
-                state: GitStatusState.Pending,
-                context: { genre: 'another-genre', name: 'a-name' },
-              },
-            ]),
-          }) as any,
+          getStatuses: vi.fn().mockResolvedValue([
+            {
+              state: GitStatusState.Pending,
+              context: { genre: 'another-genre', name: 'a-name' },
+            },
+          ]),
+        }),
       );
       const res = await azure.getBranchStatusCheck(
         'somebranch',
@@ -754,18 +756,19 @@ describe('modules/platform/azure/index', () => {
   describe('getBranchStatus(branchName, ignoreTests)', () => {
     it('should pass through success', async () => {
       await initRepo({ repository: 'some/repo' });
-      azureApi.gitApi.mockImplementationOnce(
-        () =>
-          ({
-            getBranch: vi.fn(() => ({ commit: { commitId: 'abcd1234' } })),
+      azureApi.gitApi.mockResolvedValueOnce(
+        partial<IGitApi>({
+          getBranch: vi
+            .fn()
+            .mockResolvedValue({ commit: { commitId: 'abcd1234' } }),
 
-            getStatuses: vi.fn(() => [
-              {
-                state: GitStatusState.Succeeded,
-                context: { genre: 'renovate' },
-              },
-            ]),
-          }) as any,
+          getStatuses: vi.fn().mockResolvedValue([
+            {
+              state: GitStatusState.Succeeded,
+              context: { genre: 'renovate' },
+            },
+          ]),
+        }),
       );
       const res = await azure.getBranchStatus('somebranch', true);
       expect(res).toBe('green');
@@ -773,18 +776,19 @@ describe('modules/platform/azure/index', () => {
 
     it('should not treat internal checks as success', async () => {
       await initRepo({ repository: 'some/repo' });
-      azureApi.gitApi.mockImplementationOnce(
-        () =>
-          ({
-            getBranch: vi.fn(() => ({ commit: { commitId: 'abcd1234' } })),
+      azureApi.gitApi.mockResolvedValueOnce(
+        partial<IGitApi>({
+          getBranch: vi
+            .fn()
+            .mockResolvedValue({ commit: { commitId: 'abcd1234' } }),
 
-            getStatuses: vi.fn(() => [
-              {
-                state: GitStatusState.Succeeded,
-                context: { genre: 'renovate' },
-              },
-            ]),
-          }) as any,
+          getStatuses: vi.fn().mockResolvedValue([
+            {
+              state: GitStatusState.Succeeded,
+              context: { genre: 'renovate' },
+            },
+          ]),
+        }),
       );
       const res = await azure.getBranchStatus('somebranch', false);
       expect(res).toBe('yellow');
@@ -792,12 +796,15 @@ describe('modules/platform/azure/index', () => {
 
     it('should pass through failed', async () => {
       await initRepo({ repository: 'some/repo' });
-      azureApi.gitApi.mockImplementationOnce(
-        () =>
-          ({
-            getBranch: vi.fn(() => ({ commit: { commitId: 'abcd1234' } })),
-            getStatuses: vi.fn(() => [{ state: GitStatusState.Error }]),
-          }) as any,
+      azureApi.gitApi.mockResolvedValueOnce(
+        partial<IGitApi>({
+          getBranch: vi
+            .fn()
+            .mockResolvedValue({ commit: { commitId: 'abcd1234' } }),
+          getStatuses: vi
+            .fn()
+            .mockResolvedValue([{ state: GitStatusState.Error }]),
+        }),
       );
       const res = await azure.getBranchStatus('somebranch', true);
       expect(res).toBe('red');
@@ -805,12 +812,15 @@ describe('modules/platform/azure/index', () => {
 
     it('should pass through pending', async () => {
       await initRepo({ repository: 'some/repo' });
-      azureApi.gitApi.mockImplementationOnce(
-        () =>
-          ({
-            getBranch: vi.fn(() => ({ commit: { commitId: 'abcd1234' } })),
-            getStatuses: vi.fn(() => [{ state: GitStatusState.Pending }]),
-          }) as any,
+      azureApi.gitApi.mockResolvedValueOnce(
+        partial<IGitApi>({
+          getBranch: vi
+            .fn()
+            .mockResolvedValue({ commit: { commitId: 'abcd1234' } }),
+          getStatuses: vi
+            .fn()
+            .mockResolvedValue([{ state: GitStatusState.Pending }]),
+        }),
       );
       const res = await azure.getBranchStatus('somebranch', true);
       expect(res).toBe('yellow');
@@ -818,12 +828,13 @@ describe('modules/platform/azure/index', () => {
 
     it('should fall back to yellow if no statuses returned', async () => {
       await initRepo({ repository: 'some/repo' });
-      azureApi.gitApi.mockImplementationOnce(
-        () =>
-          ({
-            getBranch: vi.fn(() => ({ commit: { commitId: 'abcd1234' } })),
-            getStatuses: vi.fn(() => []),
-          }) as any,
+      azureApi.gitApi.mockResolvedValueOnce(
+        partial<IGitApi>({
+          getBranch: vi
+            .fn()
+            .mockResolvedValue({ commit: { commitId: 'abcd1234' } }),
+          getStatuses: vi.fn().mockResolvedValue([]),
+        }),
       );
       const res = await azure.getBranchStatus('somebranch', true);
       expect(res).toBe('yellow');
@@ -838,11 +849,10 @@ describe('modules/platform/azure/index', () => {
 
     it('should return null if no PR is returned from azure', async () => {
       await initRepo({ repository: 'some/repo' });
-      azureApi.gitApi.mockImplementationOnce(
-        () =>
-          ({
-            getPullRequests: vi.fn(() => []),
-          }) as any,
+      azureApi.gitApi.mockResolvedValueOnce(
+        partial<IGitApi>({
+          getPullRequests: vi.fn().mockResolvedValue([]),
+        }),
       );
       const pr = await azure.getPr(1234);
       expect(pr).toBeNull();
@@ -850,30 +860,29 @@ describe('modules/platform/azure/index', () => {
 
     it('should return a pr in the right format', async () => {
       await initRepo({ repository: 'some/repo' });
-      azureApi.gitApi.mockImplementation(
-        () =>
-          ({
-            getPullRequests: vi
-              .fn()
-              .mockReturnValue([])
-              .mockReturnValueOnce([
-                {
-                  pullRequestId: 1234,
-                },
-              ]),
-
-            getPullRequestLabels: vi
-              .fn()
-              .mockReturnValue([{ active: true, name: 'renovate' }]),
-
-            getPullRequestCommits: vi.fn().mockReturnValue([
+      azureApi.gitApi.mockResolvedValue(
+        partial<IGitApi>({
+          getPullRequests: vi
+            .fn()
+            .mockReturnValue([])
+            .mockReturnValueOnce([
               {
-                author: {
-                  name: 'renovate',
-                },
+                pullRequestId: 1234,
               },
             ]),
-          }) as any,
+
+          getPullRequestLabels: vi
+            .fn()
+            .mockReturnValue([{ active: true, name: 'renovate' }]),
+
+          getPullRequestCommits: vi.fn().mockReturnValue([
+            {
+              author: {
+                name: 'renovate',
+              },
+            },
+          ]),
+        }),
       );
       const pr = await azure.getPr(1234);
       expect(pr).toMatchSnapshot();
@@ -883,15 +892,14 @@ describe('modules/platform/azure/index', () => {
   describe('createPr()', () => {
     it('should create and return a PR object', async () => {
       await initRepo({ repository: 'some/repo' });
-      azureApi.gitApi.mockImplementationOnce(
-        () =>
-          ({
-            createPullRequest: vi.fn(() => ({
-              pullRequestId: 456,
-            })),
+      azureApi.gitApi.mockResolvedValueOnce(
+        partial<IGitApi>({
+          createPullRequest: vi.fn().mockResolvedValue({
+            pullRequestId: 456,
+          }),
 
-            createPullRequestLabel: vi.fn(() => ({})),
-          }) as any,
+          createPullRequestLabel: vi.fn().mockResolvedValue({}),
+        }),
       );
       const pr = await azure.createPr({
         sourceBranch: 'some-branch',
@@ -905,15 +913,14 @@ describe('modules/platform/azure/index', () => {
 
     it('should create and return a PR object from base branch', async () => {
       await initRepo({ repository: 'some/repo' });
-      azureApi.gitApi.mockImplementationOnce(
-        () =>
-          ({
-            createPullRequest: vi.fn(() => ({
-              pullRequestId: 456,
-            })),
+      azureApi.gitApi.mockResolvedValueOnce(
+        partial<IGitApi>({
+          createPullRequest: vi.fn().mockResolvedValue({
+            pullRequestId: 456,
+          }),
 
-            createPullRequestLabel: vi.fn(() => ({})),
-          }) as any,
+          createPullRequestLabel: vi.fn().mockResolvedValue({}),
+        }),
       );
       const pr = await azure.createPr({
         sourceBranch: 'some-branch',
@@ -1180,15 +1187,15 @@ describe('modules/platform/azure/index', () => {
         isRequired: false,
       };
       const updateFn = vi
-        .fn(() => prUpdateResult)
+        .fn()
+        .mockResolvedValue(prUpdateResult)
         .mockName('createPullRequestReviewer');
-      azureApi.gitApi.mockImplementationOnce(
-        () =>
-          ({
-            createPullRequest: vi.fn(() => prResult),
-            createPullRequestLabel: vi.fn(() => ({})),
-            createPullRequestReviewer: updateFn,
-          }) as any,
+      azureApi.gitApi.mockResolvedValueOnce(
+        partial<IGitApi>({
+          createPullRequest: vi.fn().mockResolvedValue(prResult),
+          createPullRequestLabel: vi.fn().mockResolvedValue({}),
+          createPullRequestReviewer: updateFn,
+        }),
       );
       const pr = await azure.createPr({
         sourceBranch: 'some-branch',
@@ -1206,12 +1213,11 @@ describe('modules/platform/azure/index', () => {
   describe('updatePr(prNo, title, body, platformPrOptions)', () => {
     it('should update the PR', async () => {
       await initRepo({ repository: 'some/repo' });
-      const updatePullRequest = vi.fn(() => ({}));
-      azureApi.gitApi.mockImplementationOnce(
-        () =>
-          ({
-            updatePullRequest,
-          }) as any,
+      const updatePullRequest = vi.fn().mockResolvedValue({});
+      azureApi.gitApi.mockResolvedValueOnce(
+        partial<IGitApi>({
+          updatePullRequest,
+        }),
       );
       await azure.updatePr({
         number: 1234,
@@ -1224,22 +1230,21 @@ describe('modules/platform/azure/index', () => {
 
     it('should update the PR including cache', async () => {
       await initRepo({ repository: 'some/repo' });
-      azureApi.gitApi.mockImplementation(
-        () =>
-          ({
-            createPullRequest: vi.fn(() => ({
-              pullRequestId: 456,
-              title: 'Title 1',
-            })),
+      azureApi.gitApi.mockResolvedValue(
+        partial<IGitApi>({
+          createPullRequest: vi.fn().mockResolvedValue({
+            pullRequestId: 456,
+            title: 'Title 1',
+          }),
 
-            createPullRequestLabel: vi.fn(() => ({})),
-            getPullRequests: vi.fn(() => []),
+          createPullRequestLabel: vi.fn().mockResolvedValue({}),
+          getPullRequests: vi.fn().mockResolvedValue([]),
 
-            updatePullRequest: vi.fn(() => ({
-              pullRequestId: 456,
-              title: 'Title 2',
-            })),
-          }) as any,
+          updatePullRequest: vi.fn().mockResolvedValue({
+            pullRequestId: 456,
+            title: 'Title 2',
+          }),
+        }),
       );
       expect(await azure.getPrList()).toEqual([]);
       const createdPr = await azure.createPr({
@@ -1262,12 +1267,11 @@ describe('modules/platform/azure/index', () => {
 
     it('should update the PR without description', async () => {
       await initRepo({ repository: 'some/repo' });
-      const updatePullRequest = vi.fn(() => ({}));
-      azureApi.gitApi.mockImplementationOnce(
-        () =>
-          ({
-            updatePullRequest,
-          }) as any,
+      const updatePullRequest = vi.fn().mockResolvedValue({});
+      azureApi.gitApi.mockResolvedValueOnce(
+        partial<IGitApi>({
+          updatePullRequest,
+        }),
       );
       await azure.updatePr({
         number: 1234,
@@ -1278,12 +1282,11 @@ describe('modules/platform/azure/index', () => {
 
     it('should close the PR', async () => {
       await initRepo({ repository: 'some/repo' });
-      const updatePullRequest = vi.fn(() => ({}));
-      azureApi.gitApi.mockImplementationOnce(
-        () =>
-          ({
-            updatePullRequest,
-          }) as any,
+      const updatePullRequest = vi.fn().mockResolvedValue({});
+      azureApi.gitApi.mockResolvedValueOnce(
+        partial<IGitApi>({
+          updatePullRequest,
+        }),
       );
       await azure.updatePr({
         number: 1234,
@@ -1296,12 +1299,11 @@ describe('modules/platform/azure/index', () => {
 
     it('should reopen the PR', async () => {
       await initRepo({ repository: 'some/repo' });
-      const updatePullRequest = vi.fn(() => ({}));
-      azureApi.gitApi.mockImplementationOnce(
-        () =>
-          ({
-            updatePullRequest,
-          }) as any,
+      const updatePullRequest = vi.fn().mockResolvedValue({});
+      azureApi.gitApi.mockResolvedValueOnce(
+        partial<IGitApi>({
+          updatePullRequest,
+        }),
       );
       await azure.updatePr({
         number: 1234,
@@ -1327,18 +1329,17 @@ describe('modules/platform/azure/index', () => {
         isFlagged: false,
         isRequired: false,
       };
-      const updateFn = vi.fn(() => prUpdateResult);
-      azureApi.gitApi.mockImplementationOnce(
-        () =>
-          ({
-            updatePullRequest: vi.fn(() => prResult),
-            createPullRequestReviewer: updateFn,
+      const updateFn = vi.fn().mockResolvedValue(prUpdateResult);
+      azureApi.gitApi.mockResolvedValueOnce(
+        partial<IGitApi>({
+          updatePullRequest: vi.fn().mockResolvedValue(prResult),
+          createPullRequestReviewer: updateFn,
 
-            getPullRequestById: vi.fn(() => ({
-              pullRequestId: prResult.pullRequestId,
-              createdBy: prResult.createdBy,
-            })),
-          }) as any,
+          getPullRequestById: vi.fn().mockResolvedValue({
+            pullRequestId: prResult.pullRequestId,
+            createdBy: prResult.createdBy,
+          }),
+        }),
       );
       const pr = await azure.updatePr({
         number: prResult.pullRequestId,
@@ -1563,21 +1564,23 @@ describe('modules/platform/azure/index', () => {
   describe('Assignees', () => {
     it('addAssignees', async () => {
       await initRepo({ repository: 'some/repo' });
-      azureApi.gitApi.mockImplementation(
-        () =>
-          ({
-            getRepositories: vi.fn(() => [{ id: '1', project: { id: 2 } }]),
-            createThread: vi.fn(() => [{ id: 123 }]),
-            getThreads: vi.fn(() => []),
-          }) as any,
+      azureApi.gitApi.mockResolvedValue(
+        partial<IGitApi>({
+          getRepositories: vi
+            .fn()
+            .mockResolvedValue([{ id: '1', project: { id: 2 } }]),
+          createThread: vi.fn().mockResolvedValue([{ id: 123 }]),
+          getThreads: vi.fn().mockResolvedValue([]),
+        }),
       );
-      azureApi.coreApi.mockImplementation(
-        () =>
-          ({
-            getTeamMembersWithExtendedProperties: vi.fn(() => [
+      azureApi.coreApi.mockResolvedValue(
+        partial<ICoreApi>({
+          getTeamMembersWithExtendedProperties: vi
+            .fn()
+            .mockResolvedValue([
               { identity: { displayName: 'jyc', uniqueName: 'jyc', id: 123 } },
             ]),
-          }) as any,
+        }),
       );
       azureHelper.getAllProjectTeams = vi.fn().mockReturnValue([
         { id: 3, name: 'abc' },
@@ -1591,20 +1594,22 @@ describe('modules/platform/azure/index', () => {
   describe('Reviewers', () => {
     it('addReviewers one valid', async () => {
       await initRepo({ repository: 'some/repo' });
-      azureApi.gitApi.mockImplementation(
-        () =>
-          ({
-            getRepositories: vi.fn(() => [{ id: '1', project: { id: 2 } }]),
-            createPullRequestReviewer: vi.fn(),
-          }) as any,
+      azureApi.gitApi.mockResolvedValue(
+        partial<IGitApi>({
+          getRepositories: vi
+            .fn()
+            .mockResolvedValue([{ id: '1', project: { id: 2 } }]),
+          createPullRequestReviewer: vi.fn(),
+        }),
       );
-      azureApi.coreApi.mockImplementation(
-        () =>
-          ({
-            getTeamMembersWithExtendedProperties: vi.fn(() => [
+      azureApi.coreApi.mockResolvedValue(
+        partial<ICoreApi>({
+          getTeamMembersWithExtendedProperties: vi
+            .fn()
+            .mockResolvedValue([
               { identity: { displayName: 'jyc', uniqueName: 'jyc', id: 123 } },
             ]),
-          }) as any,
+        }),
       );
       azureHelper.getAllProjectTeams = vi.fn().mockReturnValue([
         { id: 3, name: 'abc' },
@@ -1617,20 +1622,22 @@ describe('modules/platform/azure/index', () => {
 
     it('addReviewers all valid', async () => {
       await initRepo({ repository: 'some/repo' });
-      azureApi.gitApi.mockImplementation(
-        () =>
-          ({
-            getRepositories: vi.fn(() => [{ id: '1', project: { id: 2 } }]),
-            createPullRequestReviewer: vi.fn(),
-          }) as any,
+      azureApi.gitApi.mockResolvedValue(
+        partial<IGitApi>({
+          getRepositories: vi
+            .fn()
+            .mockResolvedValue([{ id: '1', project: { id: 2 } }]),
+          createPullRequestReviewer: vi.fn(),
+        }),
       );
-      azureApi.coreApi.mockImplementation(
-        () =>
-          ({
-            getTeamMembersWithExtendedProperties: vi.fn(() => [
+      azureApi.coreApi.mockResolvedValue(
+        partial<ICoreApi>({
+          getTeamMembersWithExtendedProperties: vi
+            .fn()
+            .mockResolvedValue([
               { identity: { displayName: 'jyc', uniqueName: 'jyc', id: 123 } },
             ]),
-          }) as any,
+        }),
       );
       azureHelper.getAllProjectTeams = vi.fn().mockReturnValue([
         { id: 3, name: 'abc' },
@@ -1679,12 +1686,13 @@ describe('modules/platform/azure/index', () => {
     it('should build and call the create status api properly', async () => {
       await initRepo({ repository: 'some/repo' });
       const createCommitStatusMock = vi.fn();
-      azureApi.gitApi.mockImplementationOnce(
-        () =>
-          ({
-            getBranch: vi.fn(() => ({ commit: { commitId: 'abcd1234' } })),
-            createCommitStatus: createCommitStatusMock,
-          }) as any,
+      azureApi.gitApi.mockResolvedValueOnce(
+        partial<IGitApi>({
+          getBranch: vi
+            .fn()
+            .mockResolvedValue({ commit: { commitId: 'abcd1234' } }),
+          createCommitStatus: createCommitStatusMock,
+        }),
       );
       await azure.setBranchStatus({
         branchName: 'test',
@@ -1711,12 +1719,13 @@ describe('modules/platform/azure/index', () => {
     it('should build and call the create status api properly with a complex context', async () => {
       await initRepo({ repository: 'some/repo' });
       const createCommitStatusMock = vi.fn();
-      azureApi.gitApi.mockImplementationOnce(
-        () =>
-          ({
-            getBranch: vi.fn(() => ({ commit: { commitId: 'abcd1234' } })),
-            createCommitStatus: createCommitStatusMock,
-          }) as any,
+      azureApi.gitApi.mockResolvedValueOnce(
+        partial<IGitApi>({
+          getBranch: vi
+            .fn()
+            .mockResolvedValue({ commit: { commitId: 'abcd1234' } }),
+          createCommitStatus: createCommitStatusMock,
+        }),
       );
       await azure.setBranchStatus({
         branchName: 'test',
@@ -1747,20 +1756,19 @@ describe('modules/platform/azure/index', () => {
       const pullRequestIdMock = 12345;
       const branchNameMock = 'test';
       const lastMergeSourceCommitMock = { commitId: 'abcd1234' };
-      const updatePullRequestMock = vi.fn(() => ({
+      const updatePullRequestMock = vi.fn().mockResolvedValue({
         status: 3,
-      }));
-      azureApi.gitApi.mockImplementationOnce(
-        () =>
-          ({
-            getPullRequestById: vi.fn(() => ({
-              lastMergeSourceCommit: lastMergeSourceCommitMock,
-              targetRefName: 'refs/heads/ding',
-              title: 'title',
-            })),
+      });
+      azureApi.gitApi.mockResolvedValueOnce(
+        partial<IGitApi>({
+          getPullRequestById: vi.fn().mockResolvedValue({
+            lastMergeSourceCommit: lastMergeSourceCommitMock,
+            targetRefName: 'refs/heads/ding',
+            title: 'title',
+          }),
 
-            updatePullRequest: updatePullRequestMock,
-          }) as any,
+          updatePullRequest: updatePullRequestMock,
+        }),
       );
 
       azureHelper.getMergeMethod = vi
@@ -1803,20 +1811,19 @@ describe('modules/platform/azure/index', () => {
         const pullRequestIdMock = 12345;
         const branchNameMock = 'test';
         const lastMergeSourceCommitMock = { commitId: 'abcd1234' };
-        const updatePullRequestMock = vi.fn(() => ({
+        const updatePullRequestMock = vi.fn().mockResolvedValue({
           status: 3,
-        }));
-        azureApi.gitApi.mockImplementationOnce(
-          () =>
-            ({
-              getPullRequestById: vi.fn(() => ({
-                lastMergeSourceCommit: lastMergeSourceCommitMock,
-                targetRefName: 'refs/heads/ding',
-                title: 'title',
-              })),
+        });
+        azureApi.gitApi.mockResolvedValueOnce(
+          partial<IGitApi>({
+            getPullRequestById: vi.fn().mockResolvedValue({
+              lastMergeSourceCommit: lastMergeSourceCommitMock,
+              targetRefName: 'refs/heads/ding',
+              title: 'title',
+            }),
 
-              updatePullRequest: updatePullRequestMock,
-            }) as any,
+            updatePullRequest: updatePullRequestMock,
+          }),
         );
 
         azureHelper.getMergeMethod = vi.fn().mockReturnValue(prMergeStrategy);
@@ -1849,17 +1856,16 @@ describe('modules/platform/azure/index', () => {
       const pullRequestIdMock = 12345;
       const branchNameMock = 'test';
       const lastMergeSourceCommitMock = { commitId: 'abcd1234' };
-      azureApi.gitApi.mockImplementationOnce(
-        () =>
-          ({
-            getPullRequestById: vi.fn(() => ({
-              lastMergeSourceCommit: lastMergeSourceCommitMock,
-            })),
+      azureApi.gitApi.mockResolvedValueOnce(
+        partial<IGitApi>({
+          getPullRequestById: vi.fn().mockResolvedValue({
+            lastMergeSourceCommit: lastMergeSourceCommitMock,
+          }),
 
-            updatePullRequest: vi
-              .fn()
-              .mockRejectedValue(new Error(`oh no pr couldn't be updated`)),
-          }) as any,
+          updatePullRequest: vi
+            .fn()
+            .mockRejectedValue(new Error(`oh no pr couldn't be updated`)),
+        }),
       );
 
       azureHelper.getMergeMethod = vi
@@ -1875,16 +1881,15 @@ describe('modules/platform/azure/index', () => {
 
     it('should cache the mergeMethod for subsequent merges', async () => {
       await initRepo({ repository: 'some/repo' });
-      azureApi.gitApi.mockImplementation(
-        () =>
-          ({
-            getPullRequestById: vi.fn(() => ({
-              lastMergeSourceCommit: { commitId: 'abcd1234' },
-              targetRefName: 'refs/heads/ding',
-            })),
+      azureApi.gitApi.mockResolvedValue(
+        partial<IGitApi>({
+          getPullRequestById: vi.fn().mockResolvedValue({
+            lastMergeSourceCommit: { commitId: 'abcd1234' },
+            targetRefName: 'refs/heads/ding',
+          }),
 
-            updatePullRequest: vi.fn(),
-          }) as any,
+          updatePullRequest: vi.fn(),
+        }),
       );
       azureHelper.getMergeMethod = vi
         .fn()
@@ -1909,20 +1914,19 @@ describe('modules/platform/azure/index', () => {
       const pullRequestIdMock = 12345;
       const branchNameMock = 'test';
       const lastMergeSourceCommitMock = { commitId: 'abcd1234' };
-      const getPullRequestByIdMock = vi.fn(() => ({
+      const getPullRequestByIdMock = vi.fn().mockResolvedValue({
         lastMergeSourceCommit: lastMergeSourceCommitMock,
         targetRefName: 'refs/heads/ding',
         status: 3,
-      }));
-      azureApi.gitApi.mockImplementationOnce(
-        () =>
-          ({
-            getPullRequestById: getPullRequestByIdMock,
+      });
+      azureApi.gitApi.mockResolvedValueOnce(
+        partial<IGitApi>({
+          getPullRequestById: getPullRequestByIdMock,
 
-            updatePullRequest: vi.fn(() => ({
-              status: 1,
-            })),
-          }) as any,
+          updatePullRequest: vi.fn().mockResolvedValue({
+            status: 1,
+          }),
+        }),
       );
       azureHelper.getMergeMethod = vi
         .fn()
@@ -1942,20 +1946,19 @@ describe('modules/platform/azure/index', () => {
       const branchNameMock = 'test';
       const lastMergeSourceCommitMock = { commitId: 'abcd1234' };
       const expectedNumRetries = 5;
-      const getPullRequestByIdMock = vi.fn(() => ({
+      const getPullRequestByIdMock = vi.fn().mockResolvedValue({
         lastMergeSourceCommit: lastMergeSourceCommitMock,
         targetRefName: 'refs/heads/ding',
         status: 1,
-      }));
-      azureApi.gitApi.mockImplementationOnce(
-        () =>
-          ({
-            getPullRequestById: getPullRequestByIdMock,
+      });
+      azureApi.gitApi.mockResolvedValueOnce(
+        partial<IGitApi>({
+          getPullRequestById: getPullRequestByIdMock,
 
-            updatePullRequest: vi.fn(() => ({
-              status: 1,
-            })),
-          }) as any,
+          updatePullRequest: vi.fn().mockResolvedValue({
+            status: 1,
+          }),
+        }),
       );
       azureHelper.getMergeMethod = vi
         .fn()
@@ -1975,11 +1978,10 @@ describe('modules/platform/azure/index', () => {
   describe('deleteLabel()', () => {
     it('Should delete a label', async () => {
       await initRepo({ repository: 'some/repo' });
-      azureApi.gitApi.mockImplementationOnce(
-        () =>
-          ({
-            deletePullRequestLabels: vi.fn(),
-          }) as any,
+      azureApi.gitApi.mockResolvedValueOnce(
+        partial<IGitApi>({
+          deletePullRequestLabels: vi.fn(),
+        }),
       );
       await azure.deleteLabel(1234, 'rebase');
       expect(azureApi.gitApi.mock.calls).toMatchSnapshot();
@@ -2127,17 +2129,16 @@ describe('modules/platform/azure/index', () => {
       },
     );
 
-    azureApi.gitApi.mockImplementationOnce(
-      () =>
-        ({
-          getItem: getItemMock,
+    azureApi.gitApi.mockResolvedValueOnce(
+      partial<IGitApi>({
+        getItem: getItemMock as IGitApi['getItem'],
 
-          getRepositories: vi
-            .fn()
-            .mockResolvedValue([
-              { id: '123456', name: 'repo', project: { name: 'some' } },
-            ]),
-        }) as any,
+        getRepositories: vi
+          .fn()
+          .mockResolvedValue([
+            { id: '123456', name: 'repo', project: { name: 'some' } },
+          ]),
+      }),
     );
     const result = await azure.getJsonFile(
       'file.json',
@@ -2210,6 +2211,7 @@ describe('modules/platform/azure/index', () => {
       partial<IWorkItemTrackingApi>({
         queryByWiql: vi.fn().mockResolvedValue({ workItems: [] }),
         createWorkItem: createWorkItemMock,
+        getWorkItemTypes: vi.fn().mockResolvedValue([{ name: 'Issue' }]),
       }),
     );
     const result = await azure.ensureIssue({

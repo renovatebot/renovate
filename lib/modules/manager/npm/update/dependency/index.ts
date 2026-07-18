@@ -304,7 +304,7 @@ function overrideDepPosition(
   overrideDepName: string;
 } {
   // get override dep position when its nested in an object
-  const lastParent = parents[parents.length - 1];
+  const lastParent = parents.at(-1);
   let overrideDep: OverrideDependency = overrideBlock;
   for (const parent of parents) {
     // v8 ignore else -- TODO: add test #40625
