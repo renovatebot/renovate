@@ -191,7 +191,7 @@
         "jest/valid-title": "error",
         "vitest/consistent-test-it": ["error", { "fn": "it" }],
         "typescript/unbound-method": "off",
-        "renovate/no-host-rules-mock": "warn",
+        "renovate/no-host-rules-mock": "error",
         "renovate/logger-static-message": "off",
         "renovate/codeblock-in-spec-fixtures": "error",
         "renovate/no-redundant-mock-reset": "error",
