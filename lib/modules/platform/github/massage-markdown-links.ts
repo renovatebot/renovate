@@ -70,7 +70,7 @@ export function massageMarkdownLinks(content: string): string {
       return leftPart + replaceTo + rightPart;
     }, content);
     return result.trimEnd() + rightSpaces;
-  } catch (err) /* v8 ignore next */ {
+  } catch (err) /* v8 ignore next -- defensive: remark parsing does not throw on any string input, failure not simulable */ {
     logger.warn({ err }, `Unable to massage markdown text`);
     return content;
   }

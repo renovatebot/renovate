@@ -167,7 +167,7 @@ export async function getRawFile(
       }
     }
     return item?.content ?? null;
-  } catch (err) /* v8 ignore next */ {
+  } catch (err) /* v8 ignore next -- Azure API failure modes (service unavailable, malformed items) are not mocked in specs */ {
     if (
       err.message?.includes('<title>Azure DevOps Services Unavailable</title>')
     ) {
@@ -214,7 +214,7 @@ export async function initRepo({
     logger.debug('Repository is disabled- throwing error to abort renovation');
     throw new Error(REPOSITORY_ARCHIVED);
   }
-  /* v8 ignore next */
+  /* v8 ignore next -- defensive: Azure omits defaultBranch only for empty repos, which abort earlier in specs */
   if (!repo.defaultBranch) {
     logger.debug('Repo is empty');
     throw new Error(REPOSITORY_EMPTY);

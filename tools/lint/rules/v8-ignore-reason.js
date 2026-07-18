@@ -49,6 +49,9 @@ export default {
           if (dashReasonRegex.test(text) || colonReasonRegex.test(text)) {
             continue;
           }
+          if (!comment.loc) {
+            continue;
+          }
           context.report({
             loc: comment.loc,
             messageId: 'missingReason',

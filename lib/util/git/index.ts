@@ -1790,7 +1790,7 @@ export async function getRemotes(): Promise<string[]> {
     const remotes = await git.getRemotes();
     logger.debug(`Found remotes: ${remotes.map((r) => r.name).join(', ')}`);
     return remotes.map((remote) => remote.name);
-  } catch (err) /* v8 ignore next */ {
+  } catch (err) /* v8 ignore next -- git.getRemotes only fails on repo corruption, not simulated in specs */ {
     logger.error({ err }, 'Error getting remotes');
     throw err;
   }

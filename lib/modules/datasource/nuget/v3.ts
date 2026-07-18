@@ -311,7 +311,7 @@ export class NugetV3Api {
     packageVersion: string | null,
     nupkgUrl: string,
   ): Promise<string | null> {
-    /* v8 ignore next 4 */
+    /* v8 ignore next 4 -- specs enable RENOVATE_X_NUGET_DOWNLOAD_NUPKGS, so the disabled path is unexercised */
     if (!getEnv().RENOVATE_X_NUGET_DOWNLOAD_NUPKGS) {
       logger.once.debug('RENOVATE_X_NUGET_DOWNLOAD_NUPKGS is not set');
       return null;
