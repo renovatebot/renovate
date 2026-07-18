@@ -1,6 +1,7 @@
 import { partial } from '~test/util.ts';
 import { rawExec as _rawExec } from '../../../util/exec/common.ts';
 import type { ExecResult } from '../../../util/exec/types.ts';
+import type { CommitFilesConfig } from '../../../util/git/types.ts';
 import { LocalFs } from './scm.ts';
 
 vi.mock('glob', () => ({
@@ -46,7 +47,9 @@ describe('modules/platform/local/scm', () => {
     });
 
     it('commitAndPush', async () => {
-      expect(await localFs.commitAndPush({} as any)).toBeNull();
+      expect(
+        await localFs.commitAndPush(partial<CommitFilesConfig>()),
+      ).toBeNull();
     });
 
     it('checkoutBranch', async () => {
