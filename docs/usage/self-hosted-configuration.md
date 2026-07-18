@@ -491,17 +491,17 @@ The above configuration approach will mean the values are redacted in logs like 
 
 Use `customPresets` to define presets directly in the global config, instead of hosting them in a repository or on an HTTP server.
 
-For example, in your `config.js`:
+For example, in your global config:
 
-```js {configType=global}
-module.exports = {
-  customPresets: {
-    myPreset: {
-      description: 'My custom preset',
-      labels: ['custom-label'],
-    },
-  },
-};
+```json {configType=global}
+{
+  "customPresets": {
+    "myPreset": {
+      "description": ["My custom preset"],
+      "labels": ["custom-label"]
+    }
+  }
+}
 ```
 
 Then in a repository's `renovate.json`:
@@ -511,6 +511,9 @@ Then in a repository's `renovate.json`:
   "extends": ["custom:myPreset"]
 }
 ```
+
+Custom presets may only contain repository configuration options, not global ones.
+They can also be referenced in [`globalExtends`](#globalextends).
 
 ## `deleteAdditionalConfigFile`
 
