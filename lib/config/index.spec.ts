@@ -26,7 +26,19 @@ describe('config/index', () => {
       expect(config.foo).toBe('bar');
       expect(config.rangeStrategy).toBe('replace');
       expect(config.lockFileMaintenance.schedule).toEqual(['on monday']);
-      expect(config.lockFileMaintenance).toMatchSnapshot();
+      expect(config.lockFileMaintenance).toEqual({
+        branchTopic: 'lock-file-maintenance',
+        commitMessageAction: 'Lock file maintenance',
+        commitMessageExtra: null,
+        commitMessageTopic: null,
+        enabled: false,
+        groupName: null,
+        prBodyDefinitions: {
+          Change: 'All locks refreshed',
+        },
+        recreateWhen: 'always',
+        schedule: ['on monday'],
+      });
     });
 
     it('merges packageRules', () => {
@@ -66,7 +78,10 @@ describe('config/index', () => {
         },
       };
       const config = mergeChildConfig(parentConfig, childConfig);
-      expect(config.constraints).toMatchSnapshot();
+      expect(config.constraints).toEqual({
+        node: '<15',
+        npm: '^6.0.0',
+      });
       expect(config.constraints.node).toBe('<15');
     });
 

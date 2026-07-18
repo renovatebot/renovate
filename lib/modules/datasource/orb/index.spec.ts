@@ -78,7 +78,53 @@ describe('modules/datasource/orb/index', () => {
         datasource,
         packageName: 'hyper-expanse/library-release-workflows',
       });
-      expect(res).toMatchSnapshot();
+      expect(res).toEqual({
+        homepage:
+          'https://circleci.com/developer/orbs/orb/hyper-expanse/library-release-workflows',
+        isPrivate: false,
+        registryUrl: 'https://circleci.com',
+        releases: [
+          {
+            releaseTimestamp: '2018-12-11T05:28:14.080Z',
+            version: '3.0.0',
+          },
+          {
+            releaseTimestamp: '2018-12-11T17:41:26.595Z',
+            version: '4.0.0',
+          },
+          {
+            releaseTimestamp: '2018-12-11T18:14:41.116Z',
+            version: '4.1.0',
+          },
+          {
+            version: '4.1.1',
+          },
+          {
+            releaseTimestamp: '2018-12-11T21:28:37.846Z',
+            version: '4.1.2',
+          },
+          {
+            releaseTimestamp: '2018-12-11T21:40:44.870Z',
+            version: '4.1.3',
+          },
+          {
+            releaseTimestamp: '2018-12-11T22:13:29.297Z',
+            version: '4.1.4',
+          },
+          {
+            releaseTimestamp: '2018-12-12T17:13:31.542Z',
+            version: '4.1.5',
+          },
+          {
+            releaseTimestamp: '2018-12-12T18:56:42.563Z',
+            version: '4.1.6',
+          },
+          {
+            releaseTimestamp: '2018-12-13T23:19:09.356Z',
+            version: '4.2.0',
+          },
+        ],
+      });
       expect(res).not.toBeNull();
     });
 
@@ -89,7 +135,52 @@ describe('modules/datasource/orb/index', () => {
         datasource,
         packageName: 'hyper-expanse/library-release-workflows',
       });
-      expect(res).toMatchSnapshot();
+      expect(res).toEqual({
+        homepage: 'https://google.com',
+        isPrivate: false,
+        registryUrl: 'https://circleci.com',
+        releases: [
+          {
+            releaseTimestamp: '2018-12-11T05:28:14.080Z',
+            version: '3.0.0',
+          },
+          {
+            releaseTimestamp: '2018-12-11T17:41:26.595Z',
+            version: '4.0.0',
+          },
+          {
+            releaseTimestamp: '2018-12-11T18:14:41.116Z',
+            version: '4.1.0',
+          },
+          {
+            version: '4.1.1',
+          },
+          {
+            releaseTimestamp: '2018-12-11T21:28:37.846Z',
+            version: '4.1.2',
+          },
+          {
+            releaseTimestamp: '2018-12-11T21:40:44.870Z',
+            version: '4.1.3',
+          },
+          {
+            releaseTimestamp: '2018-12-11T22:13:29.297Z',
+            version: '4.1.4',
+          },
+          {
+            releaseTimestamp: '2018-12-12T17:13:31.542Z',
+            version: '4.1.5',
+          },
+          {
+            releaseTimestamp: '2018-12-12T18:56:42.563Z',
+            version: '4.1.6',
+          },
+          {
+            releaseTimestamp: '2018-12-13T23:19:09.356Z',
+            version: '4.2.0',
+          },
+        ],
+      });
       expect(res?.homepage).toBe('https://google.com');
     });
 
