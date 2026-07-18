@@ -7,6 +7,7 @@ import {
   localPathIsSymbolicLink,
   readLocalSymlink,
 } from '../../../util/fs/index.ts';
+import { getGitEnvironmentVariables } from '../../../util/git/auth.ts';
 import { getRepoStatus } from '../../../util/git/index.ts';
 import * as p from '../../../util/promises.ts';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
@@ -22,13 +23,21 @@ export async function updateArtifacts(
   try {
     await updateHermitPackage(update);
   } catch (err) {
-    const execErr: UpdateHermitError = err;
     logger.debug({ err }, `error updating hermit packages.`);
+    if (err instanceof UpdateHermitError) {
+      return [
+        {
+          artifactError: {
+            fileName: `from: ${err.from}, to: ${err.to}`,
+            stderr: err.stderr,
+          },
+        },
+      ];
+    }
     return [
       {
         artifactError: {
-          fileName: `from: ${execErr.from}, to: ${execErr.to}`,
-          stderr: execErr.stderr,
+          stderr: err instanceof Error ? err.message : String(err),
         },
       },
     ];
@@ -219,6 +228,7 @@ async function updateHermitPackage(update: UpdateArtifact): Promise<void> {
   const execOptions: ExecOptions = {
     docker: {},
     cwdFile: update.packageFileName,
+    extraEnv: getGitEnvironmentVariables(['hermit']),
   };
 
   const fromPackages = from.map(quote).join(' ');

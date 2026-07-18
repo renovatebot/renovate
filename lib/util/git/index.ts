@@ -271,6 +271,13 @@ async function fetchBranchCommits(preferUpstream = true): Promise<void> {
         config.branchCommits[ref.replace('refs/heads/', '')] =
           toLongCommitSha(sha);
       });
+
+    if (isNonEmptyObject(config.virtualBranches)) {
+      for (const [name, branch] of Object.entries(config.virtualBranches)) {
+        config.branchCommits[name] = branch.sha;
+      }
+    }
+
     logger.trace({ branchCommits: config.branchCommits }, 'branch commits');
   } catch (err) /* v8 ignore next -- TODO: add test #40625 */ {
     const errChecked = checkForPlatformFailure(err);
@@ -285,8 +292,8 @@ async function fetchBranchCommits(preferUpstream = true): Promise<void> {
   }
 }
 
-export async function fetchRevSpec(revSpec: string): Promise<void> {
-  await gitRetry(() => git.fetch(['origin', revSpec]));
+export async function fetchRevSpec(...revSpec: string[]): Promise<void> {
+  await gitRetry(() => git.fetch(['origin', ...revSpec]));
 }
 
 export async function initRepo(args: StorageConfig): Promise<void> {
@@ -294,6 +301,7 @@ export async function initRepo(args: StorageConfig): Promise<void> {
   config.ignoredAuthors = [];
   config.additionalBranches = [];
   config.branchIsModified = {};
+  config.virtualBranches ??= {};
   git = instrumentGit(
     createSimpleGit({ config: { baseDir: GlobalConfig.get('localDir') } }),
   );
@@ -439,6 +447,21 @@ export function isCloned(): boolean {
   return gitInitialized;
 }
 
+export async function isFileModeEnabled(): Promise<boolean> {
+  if (config.fileModeEnabled === undefined) {
+    const value = await git.raw([
+      'config',
+      '--type=bool',
+      '--default=true',
+      '--get',
+      'core.fileMode',
+    ]);
+    config.fileModeEnabled = value.trim() === 'true';
+  }
+
+  return config.fileModeEnabled;
+}
+
 export const syncGit = withInstrumenting(
   { name: 'syncGit' },
   async (): Promise<void> => {
@@ -576,6 +599,19 @@ export const syncGit = withInstrumenting(
         }
         await syncForkWithUpstream(config.currentBranch);
         await fetchBranchCommits(false);
+      });
+    }
+
+    if (isNonEmptyObject(config.virtualBranches)) {
+      const virtualBranches = config.virtualBranches;
+      await instrument('fetch virtual branches', async () => {
+        const refSpecs = Object.entries(virtualBranches).map(
+          ([name, branch]) => `${branch.ref}:${remoteBranchRef(name)}`,
+        );
+        await fetchRevSpec(...refSpecs);
+        logger.debug(
+          `Fetched ${Object.keys(virtualBranches).length} virtual branches`,
+        );
       });
     }
 
@@ -725,6 +761,43 @@ export async function checkoutBranchFromRemote(
     }
     throw err;
   }
+}
+
+/**
+ * Returns the remote-tracking ref path for a virtual branch.
+ */
+export function remoteBranchRef(branchName: string): string {
+  return `refs/remotes/origin/${branchName}`;
+}
+
+/**
+ * Returns whether the given branch is tracked as a virtual branch.
+ */
+function isVirtualBranch(branchName: string): boolean {
+  return branchName in config.virtualBranches;
+}
+
+/**
+ * Set a virtual branch's remote-tracking ref and add it to the
+ * virtual-branch registry (config.virtualBranches).
+ *
+ * Used after pushing (to keep tracking in sync with the remote) and in
+ * createPr() when the Gerrit change ref becomes available.
+ *
+ * @param branchName Virtual branch name to set
+ * @param ref The ref this virtual branch is fetched from (e.g., 'refs/changes/34/1234/1')
+ * @param commitSha The commit SHA the virtual branch points to.
+ */
+export async function setVirtualBranch(
+  branchName: string,
+  ref: string,
+  commitSha: LongCommitSha,
+): Promise<void> {
+  logger.debug({ branchName, ref, commitSha }, 'setVirtualBranch()');
+  await git.raw(['update-ref', remoteBranchRef(branchName), commitSha]);
+  config.branchCommits[branchName] = commitSha;
+  config.virtualBranches[branchName] = { ref, sha: commitSha };
+  config.branchIsModified[branchName] = false;
 }
 
 export async function resetHardFromRemote(
@@ -997,12 +1070,16 @@ export async function isBranchConflicted(
   return result;
 }
 
-export async function deleteBranch(
-  branchName: string,
-  options?: { localBranch?: boolean },
-): Promise<void> {
+export async function deleteBranch(branchName: string): Promise<void> {
   await syncGit();
-  if (!options?.localBranch) {
+  if (isVirtualBranch(branchName)) {
+    // Delete the remote-tracking ref.
+    // Note: git update-ref -d succeeds even if the ref doesn't exist.
+    const ref = remoteBranchRef(branchName);
+    logger.debug({ branchName, ref }, 'Deleting virtual branch');
+    await git.raw(['update-ref', '-d', ref]);
+    delete config.virtualBranches[branchName];
+  } else {
     try {
       const deleteCommand = ['push', '--delete', 'origin', branchName];
 
@@ -1036,10 +1113,7 @@ export async function deleteBranch(
   delete config.branchCommits[branchName];
 }
 
-export async function mergeToLocal(
-  refSpecToMerge: string,
-  options?: { localBranch?: boolean },
-): Promise<void> {
+export async function mergeToLocal(branchName: string): Promise<void> {
   let status: StatusResult | undefined;
   try {
     await syncGit();
@@ -1053,10 +1127,17 @@ export async function mergeToLocal(
       ]),
     );
     status = await git.status();
-    if (options?.localBranch) {
-      await git.merge([refSpecToMerge]);
+    if (isVirtualBranch(branchName)) {
+      // Virtual branches are already local and tracked as a remote-tracking ref,
+      // so merge it directly without fetching from origin.
+      const ref = remoteBranchRef(branchName);
+      logger.debug(
+        { branchName, ref },
+        'mergeToLocal(): merging virtual branch',
+      );
+      await git.merge([ref]);
     } else {
-      await fetchRevSpec(refSpecToMerge);
+      await fetchRevSpec(branchName);
       await gitRetry(() => git.merge(['FETCH_HEAD']));
     }
   } catch (err) {
@@ -1064,7 +1145,7 @@ export async function mergeToLocal(
       {
         baseBranch: config.currentBranch,
         baseSha: config.currentBranchSha,
-        refSpecToMerge,
+        branchName,
         status,
         err,
       },
@@ -1400,7 +1481,7 @@ export async function fetchBranch(
   await syncGit();
   logger.debug(`Fetching branch ${branchName}`);
   try {
-    const ref = `refs/heads/${branchName}:refs/remotes/origin/${branchName}`;
+    const ref = `refs/heads/${branchName}:${remoteBranchRef(branchName)}`;
     await gitRetry(() => git.pull(['origin', ref, '--force']));
     const commit = toLongCommitSha((await git.revparse([branchName])).trim());
     config.branchCommits[branchName] = commit;
