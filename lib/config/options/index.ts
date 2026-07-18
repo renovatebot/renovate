@@ -447,6 +447,8 @@ const options: Readonly<RenovateOptions>[] = [
     globalOnly: true,
     default: {},
     mergeable: true,
+    cli: false,
+    env: false,
   },
   {
     name: 'globalExtends',

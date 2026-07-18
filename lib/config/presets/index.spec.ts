@@ -492,6 +492,27 @@ describe('config/presets/index', () => {
       );
     });
 
+    it('resolves custom presets from baseConfig only', async () => {
+      // Production path: repo config has extends, global/base config has customPresets
+      const repoConfig: AllConfig = {
+        extends: ['custom:myPreset'],
+      };
+      const baseConfig: AllConfig = {
+        customPresets: {
+          myPreset: {
+            labels: ['from-base'],
+          },
+        },
+      };
+
+      const { config: res } = await presets.resolveConfigPresets(
+        repoConfig,
+        baseConfig,
+      );
+
+      expect(res.labels).toEqual(['from-base']);
+    });
+
     it('resolves custom presets with params', async () => {
       config.customPresets = {
         group: {
