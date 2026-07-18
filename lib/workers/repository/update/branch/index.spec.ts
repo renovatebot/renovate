@@ -577,7 +577,9 @@ describe('workers/repository/update/branch/index', () => {
       scm.branchExists.mockResolvedValue(true);
       scm.isBranchModified.mockResolvedValueOnce(true);
       scm.getBranchCommit.mockResolvedValue('123test' as LongCommitSha);
-      platform.findPr.mockResolvedValueOnce({ sha: '123test' } as any);
+      platform.findPr.mockResolvedValueOnce(
+        partial<Pr>({ sha: '123test' as LongCommitSha }),
+      );
       const res = await branchWorker.processBranch(config);
       expect(res).toEqual({
         branchExists: true,
@@ -590,7 +592,9 @@ describe('workers/repository/update/branch/index', () => {
     it('skips branch if branch edited and and PR found with sha mismatch', async () => {
       scm.branchExists.mockResolvedValue(true);
       scm.isBranchModified.mockResolvedValueOnce(true);
-      platform.findPr.mockResolvedValueOnce({ sha: 'def456' } as any);
+      platform.findPr.mockResolvedValueOnce(
+        partial<Pr>({ sha: 'def456' as LongCommitSha }),
+      );
       const res = await branchWorker.processBranch(config);
       expect(res).toEqual({
         branchExists: true,
@@ -3247,7 +3251,9 @@ describe('workers/repository/update/branch/index', () => {
       scm.branchExists.mockResolvedValueOnce(true);
       scm.isBranchModified.mockResolvedValueOnce(true);
       scm.getBranchCommit.mockResolvedValueOnce('123test' as LongCommitSha);
-      platform.findPr.mockResolvedValueOnce({ sha: '123test' } as any);
+      platform.findPr.mockResolvedValueOnce(
+        partial<Pr>({ sha: '123test' as LongCommitSha }),
+      );
       const res = await branchWorker.processBranch(config);
       expect(automerge.tryBranchAutomerge).not.toHaveBeenCalled();
       expect(prAutomerge.checkAutoMerge).not.toHaveBeenCalled();
