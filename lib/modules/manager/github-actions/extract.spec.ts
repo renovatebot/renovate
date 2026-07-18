@@ -74,7 +74,152 @@ describe('modules/manager/github-actions/extract', () => {
         Fixtures.get('workflow_1.yml'),
         'workflow_1.yml',
       );
-      expect(res?.deps).toMatchSnapshot();
+      expect(res?.deps).toEqual([
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}/shellcheck@{{#if newDigest}}{{newDigest}}{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}',
+          commitMessageTopic: '{{{depName}}} action',
+          currentValue: 'master',
+          datasource: 'github-digest',
+          depName: 'actions/bin',
+          depType: 'action',
+          replaceString: 'actions/bin/shellcheck@master',
+          versioning: 'exact',
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentDigest: undefined,
+          currentValue: undefined,
+          datasource: 'docker',
+          depName: 'replicated/dockerfilelint',
+          depType: 'docker',
+          packageName: 'replicated/dockerfilelint',
+          replaceString: 'replicated/dockerfilelint',
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}/cli@{{#if newDigest}}{{newDigest}}{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}',
+          commitMessageTopic: '{{{depName}}} action',
+          currentValue: 'master',
+          datasource: 'github-digest',
+          depName: 'actions/docker',
+          depType: 'action',
+          replaceString: 'actions/docker/cli@master',
+          versioning: 'exact',
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentDigest:
+            'sha256:7b65413af120ec5328077775022c78101f103258a1876ec2f83890bce416e896',
+          currentValue: '6',
+          datasource: 'docker',
+          depName: 'node',
+          depType: 'docker',
+          packageName: 'node',
+          replaceString:
+            'node:6@sha256:7b65413af120ec5328077775022c78101f103258a1876ec2f83890bce416e896',
+        },
+        {
+          autoReplaceStringTemplate: '{{depName}}-{{newValue}}',
+          currentValue: 'latest',
+          datasource: 'github-runners',
+          depName: 'ubuntu',
+          depType: 'github-runner',
+          replaceString: 'ubuntu-latest',
+          skipReason: 'invalid-version',
+        },
+        {
+          autoReplaceStringTemplate: '{{depName}}-{{newValue}}',
+          currentValue: 'latest',
+          datasource: 'github-runners',
+          depName: 'ubuntu',
+          depType: 'github-runner',
+          replaceString: 'ubuntu-latest',
+          skipReason: 'invalid-version',
+        },
+        {
+          autoReplaceStringTemplate: '{{depName}}-{{newValue}}',
+          currentValue: 'latest',
+          datasource: 'github-runners',
+          depName: 'ubuntu',
+          depType: 'github-runner',
+          replaceString: 'ubuntu-latest',
+          skipReason: 'invalid-version',
+        },
+        {
+          autoReplaceStringTemplate: '{{depName}}-{{newValue}}',
+          currentValue: 'latest',
+          datasource: 'github-runners',
+          depName: 'ubuntu',
+          depType: 'github-runner',
+          replaceString: 'ubuntu-latest',
+          skipReason: 'invalid-version',
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentDigest: undefined,
+          currentValue: '16-bullseye',
+          datasource: 'docker',
+          depName: 'node',
+          depType: 'container',
+          packageName: 'node',
+          replaceString: 'node:16-bullseye',
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentDigest: undefined,
+          currentValue: '5',
+          datasource: 'docker',
+          depName: 'redis',
+          depType: 'service',
+          packageName: 'redis',
+          replaceString: 'redis:5',
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentDigest: undefined,
+          currentValue: '10',
+          datasource: 'docker',
+          depName: 'postgres',
+          depType: 'service',
+          packageName: 'postgres',
+          replaceString: 'postgres:10',
+        },
+        {
+          autoReplaceStringTemplate: '{{depName}}-{{newValue}}',
+          currentValue: 'latest',
+          datasource: 'github-runners',
+          depName: 'ubuntu',
+          depType: 'github-runner',
+          replaceString: 'ubuntu-latest',
+          skipReason: 'invalid-version',
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentDigest: undefined,
+          currentValue: '16-bullseye',
+          datasource: 'docker',
+          depName: 'node',
+          depType: 'container',
+          packageName: 'node',
+          replaceString: 'node:16-bullseye',
+        },
+        {
+          autoReplaceStringTemplate: '{{depName}}-{{newValue}}',
+          currentValue: 'latest',
+          datasource: 'github-runners',
+          depName: 'ubuntu',
+          depType: 'github-runner',
+          replaceString: 'ubuntu-latest',
+          skipReason: 'invalid-version',
+        },
+      ]);
       expect(res?.deps.filter((d) => d.datasource === 'docker')).toHaveLength(
         6,
       );
@@ -85,7 +230,133 @@ describe('modules/manager/github-actions/extract', () => {
         Fixtures.get('workflow_2.yml'),
         'workflow_2.yml',
       );
-      expect(res?.deps).toMatchSnapshot();
+      expect(res?.deps).toEqual([
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}/shellcheck@{{#if newDigest}}{{newDigest}}{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}',
+          commitMessageTopic: '{{{depName}}} action',
+          currentValue: 'master',
+          datasource: 'github-digest',
+          depName: 'actions/bin',
+          depType: 'action',
+          replaceString: 'actions/bin/shellcheck@master',
+          versioning: 'exact',
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}',
+          commitMessageTopic: '{{{depName}}} action',
+          currentDigest: 'c308fdd69d26ed66f4506ebd74b180abe5362145',
+          currentValue: 'v1.1.0',
+          datasource: 'github-tags',
+          depName: 'docker/setup-qemu-action',
+          depType: 'action',
+          replaceString:
+            'docker/setup-qemu-action@c308fdd69d26ed66f4506ebd74b180abe5362145 # renovate: tag=v1.1.0',
+          versioning: 'github-actions',
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}',
+          commitMessageTopic: '{{{depName}}} action',
+          currentValue: '1.0.0',
+          datasource: 'github-tags',
+          depName: 'actions/checkout',
+          depType: 'action',
+          replaceString: 'actions/checkout@1.0.0',
+          versioning: 'github-actions',
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}',
+          commitMessageTopic: '{{{depName}}} action',
+          currentDigest: 'c308fdd69d26ed66f4506ebd74b180abe5362145',
+          currentValue: undefined,
+          datasource: 'github-tags',
+          depName: 'docker/setup-qemu-action',
+          depType: 'action',
+          enabled: false,
+          replaceString:
+            'docker/setup-qemu-action@c308fdd69d26ed66f4506ebd74b180abe5362145',
+          skipReason: 'unversioned-reference',
+          versioning: 'github-actions',
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}',
+          commitMessageTopic: '{{{depName}}} action',
+          currentValue: 'v2',
+          datasource: 'github-tags',
+          depName: 'docker/build-push-action',
+          depType: 'action',
+          replaceString: 'docker/build-push-action@v2',
+          versioning: 'github-actions',
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}',
+          commitMessageTopic: '{{{depName}}} action',
+          currentDigest: 'ec3a7ce113134d7a93b817d10a8272cb61118579',
+          currentValue: 'v2.4.0',
+          datasource: 'github-tags',
+          depName: 'actions/checkout',
+          depType: 'action',
+          replaceString:
+            'actions/checkout@ec3a7ce113134d7a93b817d10a8272cb61118579 # tag=v2.4.0',
+          versioning: 'github-actions',
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}',
+          commitMessageTopic: '{{{depName}}} action',
+          currentDigest: '16499b5e05bf2e26879000db0c1d13f7e13fa3af',
+          currentValue: 'v1.0.7',
+          datasource: 'github-tags',
+          depName: 'actions-rs/toolchain',
+          depType: 'action',
+          replaceString:
+            'actions-rs/toolchain@16499b5e05bf2e26879000db0c1d13f7e13fa3af # renovate: tag=v1.0.7',
+          versioning: 'github-actions',
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}',
+          commitMessageTopic: '{{{depName}}} action',
+          currentValue: 'v1.0.3',
+          datasource: 'github-tags',
+          depName: 'actions-rs/cargo',
+          depType: 'action',
+          replaceString: 'actions-rs/cargo@v1.0.3',
+          versioning: 'github-actions',
+        },
+        {
+          autoReplaceStringTemplate: '{{depName}}-{{newValue}}',
+          currentValue: 'latest',
+          datasource: 'github-runners',
+          depName: 'ubuntu',
+          depType: 'github-runner',
+          replaceString: 'ubuntu-latest',
+          skipReason: 'invalid-version',
+        },
+        {
+          autoReplaceStringTemplate: '{{depName}}-{{newValue}}',
+          currentValue: 'latest',
+          datasource: 'github-runners',
+          depName: 'ubuntu',
+          depType: 'github-runner',
+          replaceString: 'ubuntu-latest',
+          skipReason: 'invalid-version',
+        },
+        {
+          autoReplaceStringTemplate: '{{depName}}-{{newValue}}',
+          currentValue: 'latest',
+          datasource: 'github-runners',
+          depName: 'ubuntu',
+          depType: 'github-runner',
+          replaceString: 'ubuntu-latest',
+          skipReason: 'invalid-version',
+        },
+      ]);
       expect(
         res?.deps.filter((d) => d.datasource === 'github-tags'),
       ).toHaveLength(7);
