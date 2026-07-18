@@ -489,8 +489,7 @@ The above configuration approach will mean the values are redacted in logs like 
 
 ## `customPresets`
 
-Use `customPresets` to define presets directly in the bot/admin config, instead of hosting them in a repository or on an HTTP server.
-Repositories can then extend from such presets by using the `custom:` prefix.
+Use `customPresets` to define presets directly in the global config, instead of hosting them in a repository or on an HTTP server.
 
 For example, in your `config.js`:
 
