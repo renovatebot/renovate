@@ -1,5 +1,6 @@
-import { generateKeyPairSync, sign as signPayload } from 'node:crypto';
-import { gzipSync } from 'node:zlib';
+import { generateKeyPair, sign as signPayload } from 'node:crypto';
+import { promisify } from 'node:util';
+import { gzip as _gzip } from 'node:zlib';
 import protobuf from 'protobufjs';
 import upath from 'upath';
 import { mockDeep } from 'vitest-mock-extended';
@@ -21,8 +22,10 @@ vi.mock('../../../util/host-rules.ts', () => mockDeep());
 
 const baseUrl = 'https://hex.pm/api';
 const datasource = HexDatasource.id;
+const gzip = promisify(_gzip);
+
 const { privateKey: testPrivateKey, publicKey: testPublicKey } =
-  generateKeyPairSync('rsa', {
+  await promisify(generateKeyPair)('rsa', {
     modulusLength: 2048,
     privateKeyEncoding: {
       format: 'pem',
@@ -86,7 +89,7 @@ async function makeV2Response(
     payload,
     signature,
   });
-  return gzipSync(signed);
+  return await gzip(signed);
 }
 
 function mockPublicKeyUnavailable(registryUrl: string): void {

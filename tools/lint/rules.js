@@ -5,7 +5,6 @@ import noHardcodedDocsUrl from './rules/no-hardcoded-docs-url.js';
 import noNewUrl from './rules/no-new-url.js';
 import noRedundantMockReset from './rules/no-redundant-mock-reset.js';
 import noStatefulGlobalRegex from './rules/no-stateful-global-regex.js';
-import noSyncIo from './rules/no-sync-io.js';
 import noToolsImport from './rules/no-tools-import.js';
 import preferNullishUtil from './rules/prefer-nullish-util.js';
 import preferPartialInSpecs from './rules/prefer-partial-in-specs.js';
@@ -24,7 +23,6 @@ export default {
     'no-new-url': noNewUrl,
     'no-redundant-mock-reset': noRedundantMockReset,
     'no-stateful-global-regex': noStatefulGlobalRegex,
-    'no-sync-io': noSyncIo,
     'no-tools-import': noToolsImport,
     'prefer-nullish-util': preferNullishUtil,
     'prefer-partial-in-specs': preferPartialInSpecs,

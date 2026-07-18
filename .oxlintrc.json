@@ -1,6 +1,6 @@
 {
   "$schema": "https://raw.githubusercontent.com/oxc-project/oxc/main/npm/oxlint/configuration_schema.json",
-  "plugins": ["import", "promise", "unicorn", "typescript", "vitest"],
+  "plugins": ["import", "node", "promise", "unicorn", "typescript", "vitest"],
   "jsPlugins": ["./tools/lint/rules.js"],
   "options": {
     "typeAware": true
@@ -187,7 +187,7 @@
     {
       "files": ["tools/**", "**/*.spec.ts"],
       "rules": {
-        "renovate/no-sync-io": "error"
+        "node/no-sync": "error"
       }
     },
     {
