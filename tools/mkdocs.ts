@@ -99,7 +99,10 @@ program
     }
   });
 
-async function prepareDocs(opts: any): Promise<void> {
+async function prepareDocs(opts: {
+  build?: boolean;
+  version?: string;
+}): Promise<void> {
   logger.info('Building docs');
   if (opts.build) {
     logger.info('* generate docs');

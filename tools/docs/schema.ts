@@ -47,9 +47,16 @@ function getOptionDocsUrl(option: RenovateOptions): string {
 }
 
 /**
+ * An ad-hoc JSON Schema tree node: nodes are heterogeneous and are accessed
+ * and mutated dynamically while the schema is being assembled.
+ */
+// oxlint-disable-next-line typescript/no-explicit-any -- see doc comment above
+type JsonSchemaNode = Record<string, any>;
+
+/**
  * When suggesting presets in `extends`, suggest a number of values that users may want to use
  */
-function createExtendsSchema(items: Record<string, any>): any[] {
+function createExtendsSchema(items: JsonSchemaNode): JsonSchemaNode[] {
   return [
     {
       type: 'array',
@@ -67,7 +74,7 @@ function createExtendsSchema(items: Record<string, any>): any[] {
 }
 
 function createSingleConfig(option: RenovateOptions): Record<string, unknown> {
-  const temp: Record<string, any> & {
+  const temp: JsonSchemaNode & {
     type?: JsonSchemaType;
   } & Omit<Partial<RenovateOptions>, 'type'> = {};
   if (option.description) {
@@ -206,8 +213,8 @@ function createSingleConfig(option: RenovateOptions): Record<string, unknown> {
 
 function createSchemaForParentConfigs(
   options: RenovateOptions[],
-  properties: Record<string, any>,
-  definitions: Record<string, any>,
+  properties: JsonSchemaNode,
+  definitions: JsonSchemaNode,
 ): void {
   for (const option of options) {
     if (!option.parents || option.parents.includes('.')) {
@@ -218,8 +225,8 @@ function createSchemaForParentConfigs(
 
 function addChildrenArrayInParents(
   options: RenovateOptions[],
-  properties: Record<string, any>,
-  definitions: Record<string, any>,
+  properties: JsonSchemaNode,
+  definitions: JsonSchemaNode,
 ): void {
   for (const option of options) {
     if (option.parents) {
@@ -259,7 +266,7 @@ function toRequiredPropertiesRule(
   prop: RenovateRequiredOption,
   option: RenovateOptions,
 ): Record<string, unknown> {
-  const properties = {} as Record<string, any>;
+  const properties = {} as JsonSchemaNode;
   const required = [];
   for (const { property, value } of prop.siblingProperties) {
     properties[property] = { const: value };
@@ -279,8 +286,8 @@ function toRequiredPropertiesRule(
 
 function createSchemaForChildConfigs(
   options: RenovateOptions[],
-  properties: Record<string, any>,
-  definitions: Record<string, any>,
+  properties: JsonSchemaNode,
+  definitions: JsonSchemaNode,
 ): void {
   for (const option of options) {
     if (option.parents) {
@@ -329,7 +336,7 @@ export async function generateSchema(
     'x-renovate-version': `${version}`,
     allowComments: true,
     type: 'object',
-    definitions: {} as Record<string, any>,
+    definitions: {} as JsonSchemaNode,
     properties: {},
 
     /* any configuration items that should not be set - only used in inherited or repo config */
@@ -402,7 +409,7 @@ export async function generateSchema(
     definitions[option.name] = createSingleConfig(option);
   }
 
-  const properties = schema.properties as Record<string, any>;
+  const properties = schema.properties as JsonSchemaNode;
 
   createSchemaForParentConfigs(configurationOptions, properties, definitions);
   addChildrenArrayInParents(configurationOptions, properties, definitions);

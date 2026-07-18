@@ -120,9 +120,13 @@ function buildHtmlTable(data: string[][]): string {
   return table;
 }
 
-function genTable(obj: [string, string][], type: string, def: any): string {
-  const data = [['Name', 'Value']];
-  const name = obj[0][1];
+function genTable(
+  obj: [string, unknown][],
+  type: string,
+  def: unknown,
+): string {
+  const data: [string, string][] = [['Name', 'Value']];
+  const name = obj[0][1] as string;
   const ignoredKeys = [
     'name',
     'description',
@@ -139,7 +143,7 @@ function genTable(obj: [string, string][], type: string, def: any): string {
     'patternMatch',
   ];
   obj.forEach(([key, val]) => {
-    const el = [key, val];
+    const el: [string, unknown] = [key, val];
     if (key === 'cli' && !val) {
       ignoredKeys.push('cli');
     }
@@ -153,14 +157,14 @@ function genTable(obj: [string, string][], type: string, def: any): string {
         name !== 'prBody')
     ) {
       if (type === 'string' && el[0] === 'default') {
-        el[1] = `<code>"${el[1]}"</code>`;
+        el[1] = `<code>"${el[1] as string}"</code>`;
       }
       if (
         (type === 'boolean' && el[0] === 'default') ||
         el[0] === 'cli' ||
         el[0] === 'env'
       ) {
-        el[1] = `<code>${el[1]}</code>`;
+        el[1] = `<code>${String(el[1])}</code>`;
       }
       if (
         // objects and arrays should be printed in JSON notation
@@ -177,7 +181,7 @@ function genTable(obj: [string, string][], type: string, def: any): string {
         }
         el[1] = `\n\`\`\`json\n${stringify(el[1], { indent: 2 })}\n\`\`\`\n`;
       }
-      data.push(el);
+      data.push(el as [string, string]);
     }
   });
 
@@ -199,7 +203,7 @@ function genTable(obj: [string, string][], type: string, def: any): string {
   return buildHtmlTable(data);
 }
 
-function stringifyArrays(el: Record<string, any>): void {
+function stringifyArrays(el: Record<string, unknown>): void {
   const ignoredKeys = [
     'allowedValues',
     'default',
@@ -214,7 +218,10 @@ function stringifyArrays(el: Record<string, any>): void {
   }
 }
 
-function genExperimentalMsg(el: Record<string, any>): string {
+function genExperimentalMsg(el: {
+  experimentalDescription?: string;
+  experimentalIssues?: number[];
+}): string {
   const ghIssuesUrl = 'https://github.com/renovatebot/renovate/issues/';
   let warning = '\n!!! warning "This feature is flagged as experimental"\n';
 
@@ -241,7 +248,7 @@ function genTemplatingMsg(): string {
   return `\n!!! tip "This option supports Renovate's template syntax"\n${indent`${1}See [templates](templates.md) for available variables and helpers.`}\n`;
 }
 
-function genDeprecationMsg(el: Record<string, any>): string {
+function genDeprecationMsg(el: { deprecationMsg?: string }): string {
   let warning = '\n!!! warning "This feature has been deprecated"\n';
 
   if (el.deprecationMsg) {
@@ -312,7 +319,9 @@ function generateCacheNamespacesList(): string {
 
 function generateStatusCheckWhenTable(): string {
   const option = options.find((o) => o.name === 'statusCheckWhen');
-  const defaults = coerceObject<Record<string, string>>(option?.default);
+  const defaults = coerceObject(
+    option?.default as Record<string, string> | null | undefined,
+  );
 
   const reasoning: Record<string, string> = {
     artifactError: 'Legacy behavior — only reports artifact failures',
@@ -408,8 +417,7 @@ export async function generateConfig(dist: string, bot = false): Promise<void> {
       (option) => !!option.globalOnly === bot && !managers.has(option.name),
     )
     .forEach((option) => {
-      // TODO: fix types (#22198,#9610)
-      const el: Record<string, any> = { ...option };
+      const el: Record<string, unknown> = { ...option };
 
       // Child options are indexed as "parent.optionName"; collect all matching keys
       let lookupKeys: string[] = [];
