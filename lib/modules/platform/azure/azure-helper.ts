@@ -148,7 +148,7 @@ export async function getMergeMethod(
     refName?: string;
     matchKind: 'Prefix' | 'Exact' | 'DefaultBranch';
   }
-  const isRelevantScope = (scope: Scope): boolean => {
+  function isRelevantScope(scope: Scope): boolean {
     if (
       scope.matchKind === 'DefaultBranch' &&
       // TODO: types (#22198)
@@ -166,7 +166,7 @@ export async function getMergeMethod(
     return scope.matchKind === 'Exact'
       ? scope.refName === branchRef
       : branchRef.startsWith(scope.refName!);
-  };
+  }
 
   const policyConfigurations = (
     await (
