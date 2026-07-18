@@ -1,8 +1,8 @@
 import type { StatusResult } from 'simple-git';
 import upath from 'upath';
-import { mockDeep } from 'vitest-mock-extended';
 import { envMock, mockExecAll, mockExecSequence } from '~test/exec-util.ts';
-import { env, fs, git, hostRules, partial } from '~test/util.ts';
+import { hostRules } from '~test/host-rules.ts';
+import { env, fs, git, partial } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import type { RepoGlobalConfig } from '../../../config/types.ts';
 import * as docker from '../../../util/exec/docker/index.ts';
@@ -11,7 +11,6 @@ import { updateArtifacts } from './index.ts';
 
 vi.mock('../../../util/exec/env.ts');
 vi.mock('../../../util/fs/index.ts');
-vi.mock('../../../util/host-rules.ts', () => mockDeep());
 
 const adminConfig: RepoGlobalConfig = {
   // `join` fixes Windows CI
@@ -50,7 +49,6 @@ describe('modules/manager/nix/artifacts', () => {
     });
     GlobalConfig.set(adminConfig);
     docker.resetPrefetchedImages();
-    hostRules.find.mockReturnValue({ token: undefined });
   });
 
   it('returns if no flake.lock found', async () => {
@@ -124,7 +122,7 @@ describe('modules/manager/nix/artifacts', () => {
       }),
     );
     fs.readLocalFile.mockResolvedValueOnce('new flake.lock');
-    hostRules.find.mockReturnValueOnce({ token: 'token' });
+    hostRules.add({ matchHost: 'github.com', token: 'token' });
 
     const res = await updateArtifacts({
       packageFileName: 'flake.nix',
@@ -154,7 +152,7 @@ describe('modules/manager/nix/artifacts', () => {
       }),
     );
     fs.readLocalFile.mockResolvedValueOnce('new flake.lock');
-    hostRules.find.mockReturnValueOnce({ token: 'x-access-token:token' });
+    hostRules.add({ matchHost: 'github.com', token: 'x-access-token:token' });
 
     const res = await updateArtifacts({
       packageFileName: 'flake.nix',
