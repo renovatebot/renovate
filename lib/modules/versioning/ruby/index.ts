@@ -31,7 +31,7 @@ export const supportedRangeStrategies: RangeStrategy[] = [
 
 function vtrim<T = unknown>(version: T): string | T {
   if (typeof version === 'string') {
-    return version.replace(regEx(/^v/), '').replace(regEx(/('|")/g), '');
+    return version.replace(regEx(/^v/), '').replace(regEx(/(?:'|")/g), '');
   }
   return version;
 }
@@ -157,7 +157,7 @@ function getNewValue({
         logger.warn({ rangeStrategy }, 'Unsupported range strategy');
     }
   }
-  if (newValue && regEx(/^('|")/).exec(currentValue)) {
+  if (newValue && regEx(/^(?:'|")/).exec(currentValue)) {
     const delimiter = currentValue[0];
     return newValue
       .split(',')

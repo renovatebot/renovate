@@ -9,9 +9,13 @@ export const urls = ['[Perl version module](https://metacpan.org/pod/version)'];
 export const supportsRanges = false;
 
 // https://metacpan.org/pod/version#Decimal-Versions
-const decimalVersionPattern = regEx(/^(\d+)\.(\d+(?:_\d+)?)$/);
+const decimalVersionPattern = regEx(
+  /^(?<intPart>\d+)\.(?<decimalPart>\d+(?:_\d+)?)$/,
+);
 // https://metacpan.org/pod/version#Dotted-Decimal-Versions
-const dottedDecimalVersionPattern = regEx(/^v?(\d+(?:\.\d+)*(?:_\d+)?)$/);
+const dottedDecimalVersionPattern = regEx(
+  /^v?(?<versionValue>\d+(?:\.\d+)*(?:_\d+)?)$/,
+);
 
 class PerlVersioningApi extends GenericVersioningApi {
   protected _parse(version: string): GenericVersion | null {
@@ -26,7 +30,7 @@ class PerlVersioningApi extends GenericVersioningApi {
     if (!matches) {
       return null;
     }
-    const [, intPart, decimalPart] = matches;
+    const { intPart, decimalPart } = matches.groups!;
     const prerelease = decimalPart.includes('_') ? 'alpha' : '';
 
     const decimalComponents =
@@ -49,7 +53,7 @@ class PerlVersioningApi extends GenericVersioningApi {
     if (!matches) {
       return null;
     }
-    const [, versionValue] = matches;
+    const { versionValue } = matches.groups!;
     const prerelease = versionValue.includes('_') ? 'alpha' : '';
     const release = versionValue.split(regEx(/[._]/)).map(Number);
     return { release, prerelease };
