@@ -896,7 +896,7 @@ export function massageMarkdown(input: string): string {
       // Replace GitHub-style PR references (#123) with Azure DevOps format, needed for text linking config migration PR.
       // Only match a standalone reference (preceded by start, whitespace or `(`) so we don't corrupt
       // HTML entities like `&#8203;` or URL anchors like `CHANGELOG.md#4780`.
-      .replace(regEx(/(^|[\s(])#(\d+)/g), '$1!$2')
+      .replace(regEx(/(?<lead>^|[\s(])#(?<num>\d+)/g), '$<lead>!$<num>')
   );
 }
 

@@ -295,7 +295,8 @@ export async function initRepo({
   // `api.bitbucket.org`  to `bitbucket.org`
   // `api-staging.<host>` to `staging.<host>`
   // TODO #22198
-  const hostnameWithoutApiPrefix = regEx(/api[.|-](.+)/).exec(hostname)?.[1];
+  const hostnameWithoutApiPrefix =
+    regEx(/api[.|-](?<host>.+)/).exec(hostname)?.groups?.host;
 
   let auth = '';
   if (opts.token) {
@@ -666,9 +667,9 @@ export function massageMarkdown(input: string): string {
     )
     .replace(
       regEx(
-        /<details>\n(<summary>View abandoned dependencies.*<\/summary>\n\n)([\s\S]*?)<\/details>/,
+        /<details>\n(?:<summary>View abandoned dependencies.*<\/summary>\n\n)(?<body>[\s\S]*?)<\/details>/,
       ),
-      '$2',
+      '$<body>',
     )
     .replace(regEx(`\n---\n\n.*?<!-- rebase-check -->.*?\n`), '')
     .replace(regEx(/\]\(\.\.\/issues\//g), '](../../issues/')
@@ -744,8 +745,8 @@ function massageDetailSummaryHtmlToNestedLists(body: string): string {
 
       if (partDepth > 1) {
         t = t.replace(
-          regEx(/^([ \t]*- [`[])/gm),
-          `${nestedListItemIndentation}$1`,
+          regEx(/^(?<prefix>[ \t]*- [`[])/gm),
+          `${nestedListItemIndentation}$<prefix>`,
         );
       }
 
@@ -758,7 +759,7 @@ function massageDetailSummaryHtmlToNestedLists(body: string): string {
       return result;
     })
     .join('')
-    .replace(/<\/?(summary|details|blockquote)>/g, '');
+    .replace(/<\/?(?:summary|details|blockquote)>/g, '');
 }
 
 export function maxBodyLength(): number {
