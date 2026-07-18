@@ -65,7 +65,7 @@
     "no-unassigned-vars": "error",
     "prefer-template": "error",
     "prefer-arrow-callback": ["error", { "allowUnboundThis": false }],
-    "func-style": ["warn", "declaration"],
+    "func-style": ["error", "declaration"],
     "no-nested-ternary": "error",
     "no-else-return": ["error", { "allowElseIf": false }],
     "unicorn/no-lonely-if": "error",
