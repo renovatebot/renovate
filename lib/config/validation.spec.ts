@@ -1878,6 +1878,25 @@ describe('config/validation', () => {
       ]);
     });
 
+    it('ignores packageRule presets which cannot be resolved during validation', async () => {
+      const config = {
+        packageRules: [
+          {
+            automerge: true,
+            extends: ['custom:myPreset'],
+          },
+        ],
+      };
+
+      const { warnings, errors } = await configValidation.validateConfig(
+        'repo',
+        config,
+      );
+
+      expect(warnings).toBeEmptyArray();
+      expect(errors).toBeEmptyArray();
+    });
+
     it('does not error on use of `global:` presets in `globalExtends`', async () => {
       const config = {
         globalExtends: ['global:safeEnv'],

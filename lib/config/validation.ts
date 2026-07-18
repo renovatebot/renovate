@@ -475,10 +475,20 @@ export async function validateConfig(
                 if (key === 'packageRules') {
                   for (const [subIndex, packageRule] of val.entries()) {
                     if (isObject(packageRule)) {
-                      const { config: resolved } = await resolveConfigPresets(
-                        packageRule as RenovateConfig,
-                        config,
-                      );
+                      let resolved: RenovateConfig;
+                      try {
+                        ({ config: resolved } = await resolveConfigPresets(
+                          packageRule as RenovateConfig,
+                          config,
+                        ));
+                      } catch (err) {
+                        // Presets like `custom:` ones may not be resolvable in this context, so skip the resolved checks and let actual resolution handle any errors
+                        logger.debug(
+                          { packageRule, err },
+                          'Failed to resolve presets in packageRule',
+                        );
+                        continue;
+                      }
                       const resolvedRule = migrateConfig({
                         packageRules: [resolved],
                       }).migratedConfig.packageRules![0];

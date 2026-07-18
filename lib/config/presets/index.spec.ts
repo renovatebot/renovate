@@ -513,6 +513,33 @@ describe('config/presets/index', () => {
       expect(res.labels).toEqual(['from-base']);
     });
 
+    it('resolves custom presets inside packageRules', async () => {
+      const repoConfig: AllConfig = {
+        packageRules: [
+          {
+            matchPackageNames: ['foo'],
+            extends: ['custom:myPreset'],
+          },
+        ],
+      };
+      const baseConfig: AllConfig = {
+        customPresets: {
+          myPreset: {
+            automerge: true,
+          },
+        },
+      };
+
+      const { config: res } = await presets.resolveConfigPresets(
+        repoConfig,
+        baseConfig,
+      );
+
+      expect(res.packageRules).toEqual([
+        { matchPackageNames: ['foo'], automerge: true },
+      ]);
+    });
+
     it('resolves custom presets with params', async () => {
       config.customPresets = {
         group: {
