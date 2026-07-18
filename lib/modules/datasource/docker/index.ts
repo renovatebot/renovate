@@ -366,7 +366,7 @@ export class DockerDatasource extends Datasource {
     currentDigest: string,
   ): Promise<string | null | undefined> {
     try {
-      let manifestResponse: HttpResponse<string> | null;
+      let manifestResponse: HttpResponse | null;
 
       try {
         manifestResponse = await this.getManifestResponse(
@@ -1184,7 +1184,7 @@ export class DockerDatasource extends Datasource {
     const tags = releases.map((release) => release.version);
     const latestTag = tags.includes('latest')
       ? 'latest'
-      : (findLatestStable(tags) ?? tags[tags.length - 1]);
+      : (findLatestStable(tags) ?? tags.at(-1));
 
     /* v8 ignore next 3 -- TODO: add test */
     if (!latestTag) {

@@ -138,9 +138,8 @@ function resolveHelmRepository(
             registryAliases,
           ).packageName;
           return null;
-        } else {
-          return repo.spec.url;
         }
+        return repo.spec.url;
       })
       .filter(isString);
 

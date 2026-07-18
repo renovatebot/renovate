@@ -1,4 +1,5 @@
 import { isTruthy } from '@sindresorhus/is';
+import { codeBlock } from 'common-tags';
 import semver from 'semver';
 import { mockDeep } from 'vitest-mock-extended';
 import * as httpMock from '~test/http-mock.ts';
@@ -2519,17 +2520,19 @@ describe('modules/platform/bitbucket-server/index', () => {
       });
 
       it('sanitizes HTML comments in the body', () => {
-        const prBody = bitbucket.massageMarkdown(`---
+        const prBody = bitbucket.massageMarkdown(codeBlock`
+          ---
 
-- [ ] <!-- rebase-check -->If you want to rebase/retry this PR, click this checkbox
-- [ ] <!-- recreate-branch=renovate/docker-renovate-renovate-16.x --><a href="/some/link">Update renovate/renovate to 16.1.2</a>
+          - [ ] <!-- rebase-check -->If you want to rebase/retry this PR, click this checkbox
+          - [ ] <!-- recreate-branch=renovate/docker-renovate-renovate-16.x --><a href="/some/link">Update renovate/renovate to 16.1.2</a>
 
----
-<!---->
-Empty comment.
-<!-- This is another comment -->
-Followed by some information.
-<!-- followed by some more comments -->`);
+          ---
+          <!---->
+          Empty comment.
+          <!-- This is another comment -->
+          Followed by some information.
+          <!-- followed by some more comments -->
+        `);
         expect(prBody).toMatchSnapshot();
       });
 

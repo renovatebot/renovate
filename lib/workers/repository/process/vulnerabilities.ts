@@ -635,11 +635,14 @@ export class Vulnerabilities {
     aliases = aliases.map((id) => {
       if (id.startsWith('CVE-')) {
         return `[${id}](https://nvd.nist.gov/vuln/detail/${id})`;
-      } else if (id.startsWith('GHSA-')) {
+      }
+      if (id.startsWith('GHSA-')) {
         return `[${id}](https://github.com/advisories/${id})`;
-      } else if (id.startsWith('GO-')) {
+      }
+      if (id.startsWith('GO-')) {
         return `[${id}](https://pkg.go.dev/vuln/${id})`;
-      } else if (id.startsWith('RUSTSEC-')) {
+      }
+      if (id.startsWith('RUSTSEC-')) {
         return `[${id}](https://rustsec.org/advisories/${id}.html)`;
       }
 

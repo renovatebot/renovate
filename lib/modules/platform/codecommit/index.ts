@@ -292,8 +292,8 @@ export async function getRepos(): Promise<string[]> {
   try {
     reposRes = await client.listRepositories();
     //todo do we need pagination? maximum number of repos is 1000 without pagination, also the same for free account
-  } catch (error) {
-    logger.error({ error }, 'Could not retrieve repositories');
+  } catch (err) {
+    logger.error({ err }, 'Could not retrieve repositories');
     return [];
   }
 

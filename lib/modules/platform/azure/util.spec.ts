@@ -1,4 +1,6 @@
 import { Readable } from 'node:stream';
+import type { GitPullRequest } from 'azure-devops-node-api/interfaces/GitInterfaces.js';
+import { partial } from '~test/util.ts';
 import { streamToString } from '../../../util/streams.ts';
 import {
   getBranchNameWithoutRefsheadsPrefix,
@@ -90,17 +92,17 @@ describe('modules/platform/azure/util', () => {
 
   describe('getRenovatePRFormat', () => {
     it('should be formated (closed)', () => {
-      const res = getRenovatePRFormat({ status: 2 } as any);
+      const res = getRenovatePRFormat(partial<GitPullRequest>({ status: 2 }));
       expect(res).toMatchSnapshot();
     });
 
     it('should be formated (closed v2)', () => {
-      const res = getRenovatePRFormat({ status: 3 } as any);
+      const res = getRenovatePRFormat(partial<GitPullRequest>({ status: 3 }));
       expect(res).toMatchSnapshot();
     });
 
     it('should be formated (not closed)', () => {
-      const res = getRenovatePRFormat({ status: 1 } as any);
+      const res = getRenovatePRFormat(partial<GitPullRequest>({ status: 1 }));
       expect(res).toMatchSnapshot();
     });
   });
