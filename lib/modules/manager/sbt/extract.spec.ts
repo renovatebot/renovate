@@ -47,53 +47,210 @@ describe('modules/manager/sbt/extract', () => {
     });
 
     it('extracts deps for generic use-cases', () => {
-      expect(extractPackageFile(sbt)).toMatchSnapshot({
+      const registryUrls = [
+        'https://example.com/repos/1/',
+        'https://example.com/repos/2/',
+        'https://example.com/repos/3/',
+        'https://example.com/repos/4/',
+        'https://example.com/repos/5/',
+      ];
+      expect(extractPackageFile(sbt)).toEqual({
         deps: [
           {
-            packageName: 'org.scala-lang:scala-library',
             currentValue: '2.9.10',
-          },
-          { packageName: 'org.example:foo', currentValue: '0.0.1' },
-          { packageName: 'org.example:bar_2.9.10', currentValue: '0.0.2' },
-          { packageName: 'org.example:baz_2.9.10', currentValue: '0.0.3' },
-          { packageName: 'org.example:qux', currentValue: '0.0.4' },
-          {
+            datasource: 'maven',
+            depName: 'scala',
             packageName: 'org.scala-lang:scala-library',
-            currentValue: '2.13.3',
+            registryUrls,
+            separateMinorPatch: true,
           },
-          { packageName: 'org.example:quux', currentValue: '0.0.5' },
-          { packageName: 'org.example:quuz_2.9.10', currentValue: '0.0.6' },
-          { packageName: 'org.example:abc_2.9.10', currentValue: '0.0.42' },
-          { packageName: 'org.example:corge', currentValue: '0.0.7' },
-          { packageName: 'org.example:grault', currentValue: '0.0.8' },
-          { packageName: 'org.example:waldo', currentValue: '0.0.9' },
-          { packageName: 'org.example:fred', currentValue: '(,8.4.0]' },
+          {
+            currentValue: '0.0.1',
+            datasource: 'sbt-package',
+            depName: 'org.example:foo',
+            packageName: 'org.example:foo',
+            registryUrls,
+          },
+          {
+            currentValue: '0.0.2',
+            datasource: 'sbt-package',
+            depName: 'org.example:bar',
+            packageName: 'org.example:bar_2.9.10',
+            registryUrls,
+          },
+          {
+            currentValue: '0.0.3',
+            datasource: 'sbt-package',
+            depName: 'org.example:baz',
+            packageName: 'org.example:baz_2.9.10',
+            registryUrls,
+          },
+          {
+            currentValue: '0.0.4',
+            datasource: 'sbt-package',
+            depName: 'org.example:qux',
+            packageName: 'org.example:qux',
+            registryUrls,
+          },
+          {
+            currentValue: '2.13.3',
+            datasource: 'sbt-package',
+            depName: 'org.scala-lang:scala-library',
+            depType: 'sources',
+            packageName: 'org.scala-lang:scala-library',
+            registryUrls,
+          },
+          {
+            currentValue: '0.0.5',
+            datasource: 'sbt-package',
+            depName: 'org.example:quux',
+            packageName: 'org.example:quux',
+            registryUrls,
+          },
+          {
+            currentValue: '0.0.6',
+            datasource: 'sbt-package',
+            depName: 'org.example:quuz',
+            depType: 'test',
+            packageName: 'org.example:quuz_2.9.10',
+            registryUrls,
+          },
+          {
+            currentValue: '0.0.42',
+            datasource: 'sbt-package',
+            depName: 'org.example:abc',
+            depType: 'test',
+            packageName: 'org.example:abc_2.9.10',
+            registryUrls,
+          },
+          {
+            currentValue: '0.0.7',
+            datasource: 'sbt-package',
+            depName: 'org.example:corge',
+            depType: 'Provided',
+            packageName: 'org.example:corge',
+            registryUrls,
+          },
+          {
+            currentValue: '0.0.8',
+            datasource: 'sbt-package',
+            depName: 'org.example:grault',
+            depType: 'Test',
+            packageName: 'org.example:grault',
+            registryUrls,
+            sharedVariableName: 'versionExample',
+            variableName: 'versionExample',
+          },
+          {
+            currentValue: '0.0.9',
+            datasource: 'sbt-plugin',
+            depName: 'org.example:waldo',
+            depType: 'plugin',
+            packageName: 'org.example:waldo',
+            registryUrls,
+          },
+          {
+            currentValue: '(,8.4.0]',
+            datasource: 'sbt-package',
+            depName: 'org.example:fred',
+            packageName: 'org.example:fred',
+            registryUrls,
+          },
         ],
+        managerData: { scalaVersion: '2.9.10' },
         packageFileVersion: '1.0',
       });
     });
 
     it('extracts deps when scala version is defined in a variable', () => {
-      expect(extractPackageFile(sbtScalaVersionVariable)).toMatchSnapshot({
+      const registryUrls = [
+        'https://example.com/repos/1/',
+        'https://example.com/repos/2/',
+        'https://example.com/repos/3/',
+        'https://example.com/repos/4/',
+        'https://example.com/repos/5/',
+      ];
+      expect(extractPackageFile(sbtScalaVersionVariable)).toEqual({
         deps: [
           {
-            packageName: 'org.scala-lang:scala-library',
             currentValue: '2.12.10',
+            datasource: 'maven',
+            depName: 'scala',
+            packageName: 'org.scala-lang:scala-library',
+            registryUrls,
+            separateMinorPatch: true,
           },
-          { packageName: 'org.example:foo', currentValue: '0.0.1' },
-          { packageName: 'org.example:bar_2.12', currentValue: '0.0.2' },
-          { packageName: 'org.example:baz_2.12', currentValue: '0.0.3' },
-          { packageName: 'org.example:qux', currentValue: '0.0.4' },
-          { packageName: 'org.example:quux', currentValue: '0.0.5' },
-          { packageName: 'org.example:quuz_2.12', currentValue: '0.0.6' },
-          { packageName: 'org.example:corge', currentValue: '0.0.7' },
-          { packageName: 'org.example:grault', currentValue: '0.0.8' },
           {
-            datasource: 'sbt-plugin',
-            packageName: 'org.example:waldo',
+            currentValue: '0.0.1',
+            datasource: 'sbt-package',
+            depName: 'org.example:foo',
+            packageName: 'org.example:foo',
+            registryUrls,
+          },
+          {
+            currentValue: '0.0.2',
+            datasource: 'sbt-package',
+            depName: 'org.example:bar',
+            packageName: 'org.example:bar_2.12',
+            registryUrls,
+          },
+          {
+            currentValue: '0.0.3',
+            datasource: 'sbt-package',
+            depName: 'org.example:baz',
+            packageName: 'org.example:baz_2.12',
+            registryUrls,
+          },
+          {
+            currentValue: '0.0.4',
+            datasource: 'sbt-package',
+            depName: 'org.example:qux',
+            packageName: 'org.example:qux',
+            registryUrls,
+          },
+          {
+            currentValue: '0.0.5',
+            datasource: 'sbt-package',
+            depName: 'org.example:quux',
+            packageName: 'org.example:quux',
+            registryUrls,
+          },
+          {
+            currentValue: '0.0.6',
+            datasource: 'sbt-package',
+            depName: 'org.example:quuz',
+            depType: 'test',
+            packageName: 'org.example:quuz_2.12',
+            registryUrls,
+          },
+          {
+            currentValue: '0.0.7',
+            datasource: 'sbt-package',
+            depName: 'org.example:corge',
+            depType: 'Provided',
+            packageName: 'org.example:corge',
+            registryUrls,
+          },
+          {
+            currentValue: '0.0.8',
+            datasource: 'sbt-package',
+            depName: 'org.example:grault',
+            depType: 'Test',
+            packageName: 'org.example:grault',
+            registryUrls,
+            sharedVariableName: 'versionExample',
+            variableName: 'versionExample',
+          },
+          {
             currentValue: '0.0.9',
+            datasource: 'sbt-plugin',
+            depName: 'org.example:waldo',
+            depType: 'plugin',
+            packageName: 'org.example:waldo',
+            registryUrls,
           },
         ],
+        managerData: { scalaVersion: '2.12' },
         packageFileVersion: '3.2.1',
       });
     });
@@ -213,21 +370,39 @@ describe('modules/manager/sbt/extract', () => {
     });
 
     it('extract deps from native scala file with variables', () => {
-      expect(extractPackageFile(sbtDependencyFile)).toMatchSnapshot({
+      const abcDep = (suffix: string) => ({
+        currentValue: '1.2.3',
+        datasource: 'sbt-package',
+        depName: `com.abc:abc${suffix}`,
+        packageName: `com.abc:abc${suffix}`,
+        registryUrls: [],
+        sharedVariableName: 'abcVersion',
+        variableName: 'abcVersion',
+      });
+      expect(extractPackageFile(sbtDependencyFile)).toEqual({
         deps: [
           {
-            packageName: 'org.scala-lang:scala-library',
             currentValue: '2.13.0-RC5',
+            datasource: 'maven',
+            depName: 'scala',
+            packageName: 'org.scala-lang:scala-library',
+            registryUrls: [],
+            separateMinorPatch: true,
           },
           {
-            packageName: 'com.example:foo_2.13.0-RC5',
             currentValue: '0.7.1',
+            datasource: 'sbt-package',
+            depName: 'com.example:foo',
+            packageName: 'com.example:foo_2.13.0-RC5',
+            registryUrls: [],
           },
-          { packageName: 'com.abc:abc', currentValue: '1.2.3' },
-          { packageName: 'com.abc:abc-a', currentValue: '1.2.3' },
-          { packageName: 'com.abc:abc-b', currentValue: '1.2.3' },
-          { packageName: 'com.abc:abc-c', currentValue: '1.2.3' },
+          abcDep(''),
+          abcDep('-a'),
+          abcDep('-b'),
+          abcDep('-c'),
         ],
+        managerData: { scalaVersion: '2.13.0-RC5' },
+        packageFileVersion: undefined,
       });
     });
 
@@ -238,17 +413,26 @@ describe('modules/manager/sbt/extract', () => {
         )
         libraryDependencies += "org.example" %% "bar" % "0.0.2"
       `;
-      expect(extractPackageFile(content)).toMatchSnapshot({
+      expect(extractPackageFile(content)).toEqual({
         deps: [
           {
-            packageName: 'org.scala-lang:scala-library',
             currentValue: '2.12.10',
+            datasource: 'maven',
+            depName: 'scala',
+            packageName: 'org.scala-lang:scala-library',
+            registryUrls: [],
+            separateMinorPatch: true,
           },
           {
-            packageName: 'org.example:bar_2.12',
             currentValue: '0.0.2',
+            datasource: 'sbt-package',
+            depName: 'org.example:bar',
+            packageName: 'org.example:bar_2.12',
+            registryUrls: [],
           },
         ],
+        managerData: { scalaVersion: '2.12' },
+        packageFileVersion: undefined,
       });
     });
 
@@ -260,17 +444,26 @@ describe('modules/manager/sbt/extract', () => {
         )
         libraryDependencies += "org.example" %% "bar" % "0.0.2"
       `;
-      expect(extractPackageFile(content)).toMatchSnapshot({
+      expect(extractPackageFile(content)).toEqual({
         deps: [
           {
-            packageName: 'org.scala-lang:scala-library',
             currentValue: '2.12.10',
+            datasource: 'maven',
+            depName: 'scala',
+            packageName: 'org.scala-lang:scala-library',
+            registryUrls: [],
+            separateMinorPatch: true,
           },
           {
-            packageName: 'org.example:bar_2.12',
             currentValue: '0.0.2',
+            datasource: 'sbt-package',
+            depName: 'org.example:bar',
+            packageName: 'org.example:bar_2.12',
+            registryUrls: [],
           },
         ],
+        managerData: { scalaVersion: '2.12' },
+        packageFileVersion: undefined,
       });
     });
 
@@ -279,17 +472,26 @@ describe('modules/manager/sbt/extract', () => {
         ThisBuild / scalaVersion := "2.12.10"
         libraryDependencies += "org.example" %% "bar" % "0.0.2"
       `;
-      expect(extractPackageFile(content)).toMatchSnapshot({
+      expect(extractPackageFile(content)).toEqual({
         deps: [
           {
-            packageName: 'org.scala-lang:scala-library',
             currentValue: '2.12.10',
+            datasource: 'maven',
+            depName: 'scala',
+            packageName: 'org.scala-lang:scala-library',
+            registryUrls: [],
+            separateMinorPatch: true,
           },
           {
-            packageName: 'org.example:bar_2.12',
             currentValue: '0.0.2',
+            datasource: 'sbt-package',
+            depName: 'org.example:bar',
+            packageName: 'org.example:bar_2.12',
+            registryUrls: [],
           },
         ],
+        managerData: { scalaVersion: '2.12' },
+        packageFileVersion: undefined,
       });
     });
 
@@ -334,38 +536,58 @@ describe('modules/manager/sbt/extract', () => {
         ThisBuild / scalaVersion := ScalaVersion
         libraryDependencies += "org.example" %% "bar" % "0.0.2"
       `;
-      expect(extractPackageFile(content)).toMatchSnapshot({
+      expect(extractPackageFile(content)).toEqual({
         deps: [
           {
-            packageName: 'org.scala-lang:scala-library',
             currentValue: '2.12.10',
+            datasource: 'maven',
+            depName: 'scala',
+            packageName: 'org.scala-lang:scala-library',
+            registryUrls: [],
+            separateMinorPatch: true,
           },
           {
-            packageName: 'org.example:bar_2.12',
             currentValue: '0.0.2',
+            datasource: 'sbt-package',
+            depName: 'org.example:bar',
+            packageName: 'org.example:bar_2.12',
+            registryUrls: [],
           },
         ],
+        managerData: { scalaVersion: '2.12' },
+        packageFileVersion: undefined,
       });
     });
 
     it('extract deps from native scala file with private variables', () => {
-      expect(
-        extractPackageFile(sbtPrivateVariableDependencyFile),
-      ).toMatchSnapshot({
+      expect(extractPackageFile(sbtPrivateVariableDependencyFile)).toEqual({
         deps: [
           {
-            packageName: 'org.scala-lang:scala-library',
             currentValue: '2.13.0-RC5',
+            datasource: 'maven',
+            depName: 'scala',
+            packageName: 'org.scala-lang:scala-library',
+            registryUrls: [],
+            separateMinorPatch: true,
           },
           {
-            packageName: 'com.example:foo_2.13.0-RC5',
             currentValue: '0.7.1',
+            datasource: 'sbt-package',
+            depName: 'com.example:foo',
+            packageName: 'com.example:foo_2.13.0-RC5',
+            registryUrls: [],
           },
           {
-            packageName: 'com.abc:abc',
             currentValue: '1.2.3',
+            datasource: 'sbt-package',
+            depName: 'com.abc:abc',
+            packageName: 'com.abc:abc',
+            registryUrls: [],
+            sharedVariableName: 'abcVersion',
+            variableName: 'abcVersion',
           },
         ],
+        managerData: { scalaVersion: '2.13.0-RC5' },
         packageFileVersion: undefined,
       });
     });

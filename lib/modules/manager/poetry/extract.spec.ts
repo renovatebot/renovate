@@ -50,8 +50,84 @@ describe('modules/manager/poetry/extract', () => {
 
     it('extracts multiple dependencies', async () => {
       const res = await extractPackageFile(pyproject1toml, filename);
-      expect(res?.deps).toMatchSnapshot();
-      expect(res?.deps).toHaveLength(9);
+      expect(res?.deps).toEqual([
+        {
+          currentValue: '>=1.0',
+          datasource: 'pypi',
+          depName: 'poetry',
+          depType: 'build-system.requires',
+          packageName: 'poetry',
+        },
+        {
+          datasource: 'pypi',
+          depName: 'wheel',
+          depType: 'build-system.requires',
+          packageName: 'wheel',
+          skipReason: 'unspecified-version',
+        },
+        {
+          currentValue: '0.0.0',
+          datasource: 'pypi',
+          depName: 'dep1_',
+          depType: 'dependencies',
+          managerData: { nestedVersion: false },
+          packageName: 'dep1-',
+          versioning: 'pep440',
+        },
+        {
+          currentValue: '0.0.0',
+          datasource: 'pypi',
+          depName: 'dep1',
+          depType: 'dependencies',
+          managerData: { nestedVersion: false },
+          versioning: 'pep440',
+        },
+        {
+          currentValue: '^0.6.0',
+          datasource: 'pypi',
+          depName: 'dep2',
+          depType: 'dependencies',
+          managerData: { nestedVersion: false },
+          versioning: 'poetry',
+        },
+        {
+          currentValue: '^0.33.6',
+          datasource: 'pypi',
+          depName: 'dep3',
+          depType: 'dependencies',
+          managerData: { nestedVersion: false },
+          versioning: 'poetry',
+        },
+        {
+          commitMessageTopic: 'Python',
+          currentValue: '~2.7 || ^3.4',
+          datasource: 'github-releases',
+          depName: 'python',
+          depType: 'dependencies',
+          managerData: { nestedVersion: false },
+          packageName: 'containerbase/python-prebuild',
+          registryUrls: null,
+          versioning: 'poetry',
+        },
+        {
+          currentValue: '^3.0',
+          datasource: 'pypi',
+          depName: 'dev_dep1',
+          depType: 'dev-dependencies',
+          managerData: { nestedVersion: false },
+          packageName: 'dev-dep1',
+          versioning: 'poetry',
+        },
+        {
+          currentValue: 'Invalid version.',
+          datasource: 'pypi',
+          depName: 'dev_dep2',
+          depType: 'dev-dependencies',
+          managerData: { nestedVersion: false },
+          packageName: 'dev-dep2',
+          skipReason: 'invalid-version',
+        },
+      ]);
       expect(res?.extractedConstraints).toEqual({
         python: '~2.7 || ^3.4',
       });
@@ -59,8 +135,125 @@ describe('modules/manager/poetry/extract', () => {
 
     it('extracts multiple dependencies (with dep = {version = "1.2.3"} case)', async () => {
       const res = await extractPackageFile(pyproject2toml, filename);
-      expect(res).toMatchSnapshot();
-      expect(res?.deps).toHaveLength(14);
+      expect(res).toEqual({
+        deps: [
+          {
+            currentValue: '>=1.0',
+            datasource: 'pypi',
+            depName: 'poetry',
+            depType: 'build-system.requires',
+            packageName: 'poetry',
+          },
+          {
+            datasource: 'pypi',
+            depName: 'wheel',
+            depType: 'build-system.requires',
+            packageName: 'wheel',
+            skipReason: 'unspecified-version',
+          },
+          {
+            currentValue: '*',
+            datasource: 'pypi',
+            depName: 'dep1',
+            depType: 'dependencies',
+            managerData: { nestedVersion: true },
+            versioning: 'poetry',
+          },
+          {
+            currentValue: '^0.6.0',
+            datasource: 'pypi',
+            depName: 'dep2',
+            depType: 'dependencies',
+            managerData: { nestedVersion: true },
+            versioning: 'poetry',
+          },
+          {
+            currentValue: '^0.33.6',
+            datasource: 'pypi',
+            depName: 'dep3',
+            depType: 'dependencies',
+            skipReason: 'path-dependency',
+          },
+          {
+            datasource: 'pypi',
+            depName: 'dep4',
+            depType: 'dependencies',
+            skipReason: 'path-dependency',
+          },
+          {
+            datasource: 'pypi',
+            depName: 'dep5',
+            depType: 'dependencies',
+            managerData: {},
+            skipReason: 'unspecified-version',
+          },
+          {
+            currentValue: '^0.8.3',
+            datasource: 'pypi',
+            depName: 'extra_dep1',
+            depType: 'extras',
+            managerData: { nestedVersion: true },
+            packageName: 'extra-dep1',
+            versioning: 'poetry',
+          },
+          {
+            currentValue: '^0.9.4',
+            datasource: 'pypi',
+            depName: 'extra_dep2',
+            depType: 'extras',
+            managerData: { nestedVersion: true },
+            packageName: 'extra-dep2',
+            versioning: 'poetry',
+          },
+          {
+            currentValue: '^0.4.0',
+            datasource: 'pypi',
+            depName: 'extra_dep3',
+            depType: 'extras',
+            managerData: { nestedVersion: true },
+            packageName: 'extra-dep3',
+            versioning: 'poetry',
+          },
+          {
+            currentValue: '^3.0',
+            datasource: 'pypi',
+            depName: 'required_dev_dep',
+            depType: 'dev-dependencies',
+            managerData: { nestedVersion: true },
+            packageName: 'required-dev-dep',
+            versioning: 'poetry',
+          },
+          {
+            currentValue: '^3.0',
+            datasource: 'pypi',
+            depName: 'optional_dev_dep',
+            depType: 'dev-dependencies',
+            managerData: { nestedVersion: true },
+            packageName: 'optional-dev-dep',
+            versioning: 'poetry',
+          },
+          {
+            currentValue: '^3.0',
+            datasource: 'pypi',
+            depName: 'required_group_dep',
+            depType: 'group1',
+            managerData: { nestedVersion: true },
+            packageName: 'required-group-dep',
+            versioning: 'poetry',
+          },
+          {
+            currentValue: '^3.0',
+            datasource: 'pypi',
+            depName: 'optional_group_dep',
+            depType: 'group1',
+            managerData: { nestedVersion: true },
+            packageName: 'optional-group-dep',
+            versioning: 'poetry',
+          },
+        ],
+        extractedConstraints: {},
+        packageFileVersion: '0.1.0',
+      });
     });
 
     it('handles case with no dependencies', async () => {
@@ -70,8 +263,39 @@ describe('modules/manager/poetry/extract', () => {
 
     it('handles multiple constraint dependencies', async () => {
       const res = await extractPackageFile(pyproject4toml, filename);
-      expect(res).toMatchSnapshot();
-      expect(res?.deps).toHaveLength(4);
+      expect(res).toEqual({
+        deps: [
+          {
+            currentValue: '>=1.1.2',
+            datasource: 'pypi',
+            depName: 'poetry',
+            depType: 'build-system.requires',
+            packageName: 'poetry',
+          },
+          {
+            datasource: 'pypi',
+            depName: 'setuptools',
+            depType: 'build-system.requires',
+            packageName: 'setuptools',
+            skipReason: 'unspecified-version',
+          },
+          {
+            datasource: 'pypi',
+            depName: 'poetry-dynamic-versioning',
+            depType: 'build-system.requires',
+            packageName: 'poetry-dynamic-versioning',
+            skipReason: 'unspecified-version',
+          },
+          {
+            datasource: 'pypi',
+            depName: 'foo',
+            depType: 'dependencies',
+            skipReason: 'multiple-constraint-dep',
+          },
+        ],
+        extractedConstraints: {},
+        packageFileVersion: '0.1.0',
+      });
     });
 
     it('extracts build-system.requires dependencies', async () => {
@@ -117,43 +341,53 @@ describe('modules/manager/poetry/extract', () => {
 
     it('extracts mixed versioning types', async () => {
       const res = await extractPackageFile(pyproject9toml, filename);
-      expect(res).toMatchSnapshot({
-        deps: [
-          { depName: 'dep1', currentValue: '0.2' },
-          { depName: 'dep2', currentValue: '1.1.0' },
-          { depName: 'dep3', currentValue: '1.0a1' },
-          { depName: 'dep4', currentValue: '1.0b2' },
-          { depName: 'dep5', currentValue: '1.0rc1' },
-          { depName: 'dep6', currentValue: '1.0.dev4' },
-          { depName: 'dep7', currentValue: '1.0c1' },
-          { depName: 'dep8', currentValue: '2012.2' },
-          { depName: 'dep9', currentValue: '1.0.dev456' },
-          { depName: 'dep10', currentValue: '1.0a1' },
-          { depName: 'dep11', currentValue: '1.0a2.dev456' },
-          { depName: 'dep12', currentValue: '1.0a12.dev456' },
-          { depName: 'dep13', currentValue: '1.0a12' },
-          { depName: 'dep14', currentValue: '1.0b1.dev456' },
-          { depName: 'dep15', currentValue: '1.0b2' },
-          { depName: 'dep16', currentValue: '1.0b2.post345.dev456' },
-          { depName: 'dep17', currentValue: '1.0b2.post345' },
-          { depName: 'dep18', currentValue: '1.0rc1.dev456' },
-          { depName: 'dep19', currentValue: '1.0rc1' },
-          { depName: 'dep20', currentValue: '1.0' },
-          { depName: 'dep21', currentValue: '1.0+abc.5' },
-          { depName: 'dep22', currentValue: '1.0+abc.7' },
-          { depName: 'dep23', currentValue: '1.0+5' },
-          { depName: 'dep24', currentValue: '1.0.post456.dev34' },
-          { depName: 'dep25', currentValue: '1.0.post456' },
-          { depName: 'dep26', currentValue: '1.1.dev1' },
-          { depName: 'dep27', currentValue: '~=3.1' },
-          { depName: 'dep28', currentValue: '~=3.1.2' },
-          { depName: 'dep29', currentValue: '~=3.1a1' },
-          { depName: 'dep30', currentValue: '==3.1' },
-          { depName: 'dep31', currentValue: '==3.1.*' },
-          { depName: 'dep32', currentValue: '~=3.1.0, !=3.1.3' },
-          { depName: 'dep33', currentValue: '<=2.0' },
-          { depName: 'dep34', currentValue: '<2.0' },
-        ],
+      const expectedVersions: [string, string][] = [
+        ['dep1', '0.2'],
+        ['dep2', '1.1.0'],
+        ['dep3', '1.0a1'],
+        ['dep4', '1.0b2'],
+        ['dep5', '1.0rc1'],
+        ['dep6', '1.0.dev4'],
+        ['dep7', '1.0c1'],
+        ['dep8', '2012.2'],
+        ['dep9', '1.0.dev456'],
+        ['dep10', '1.0a1'],
+        ['dep11', '1.0a2.dev456'],
+        ['dep12', '1.0a12.dev456'],
+        ['dep13', '1.0a12'],
+        ['dep14', '1.0b1.dev456'],
+        ['dep15', '1.0b2'],
+        ['dep16', '1.0b2.post345.dev456'],
+        ['dep17', '1.0b2.post345'],
+        ['dep18', '1.0rc1.dev456'],
+        ['dep19', '1.0rc1'],
+        ['dep20', '1.0'],
+        ['dep21', '1.0+abc.5'],
+        ['dep22', '1.0+abc.7'],
+        ['dep23', '1.0+5'],
+        ['dep24', '1.0.post456.dev34'],
+        ['dep25', '1.0.post456'],
+        ['dep26', '1.1.dev1'],
+        ['dep27', '~=3.1'],
+        ['dep28', '~=3.1.2'],
+        ['dep29', '~=3.1a1'],
+        ['dep30', '==3.1'],
+        ['dep31', '==3.1.*'],
+        ['dep32', '~=3.1.0, !=3.1.3'],
+        ['dep33', '<=2.0'],
+        ['dep34', '<2.0'],
+      ];
+      expect(res).toEqual({
+        deps: expectedVersions.map(([depName, currentValue]) => ({
+          currentValue,
+          datasource: 'pypi',
+          depName,
+          depType: 'dependencies',
+          managerData: { nestedVersion: false },
+          versioning: 'pep440',
+        })),
+        extractedConstraints: {},
+        packageFileVersion: '0.1.0',
       });
     });
 
@@ -197,12 +431,31 @@ describe('modules/manager/poetry/extract', () => {
     it('resolves lockedVersions from the lockfile', async () => {
       fs.readLocalFile.mockResolvedValue(pyproject11tomlLock);
       const res = await extractPackageFile(pyproject11toml, filename);
-      expect(res).toMatchSnapshot({
-        extractedConstraints: { python: '^3.9' },
+      expect(res).toEqual({
         deps: [
-          { depName: 'python', currentValue: '^3.9' },
-          { depName: 'boto3', lockedVersion: '1.17.5' },
+          {
+            commitMessageTopic: 'Python',
+            currentValue: '^3.9',
+            datasource: 'github-releases',
+            depName: 'python',
+            depType: 'dependencies',
+            managerData: { nestedVersion: false },
+            packageName: 'containerbase/python-prebuild',
+            registryUrls: null,
+            versioning: 'poetry',
+          },
+          {
+            currentValue: '*',
+            datasource: 'pypi',
+            depName: 'boto3',
+            depType: 'dependencies',
+            lockedVersion: '1.17.5',
+            managerData: { nestedVersion: false },
+            versioning: 'poetry',
+          },
         ],
+        extractedConstraints: { python: '^3.9' },
+        packageFileVersion: undefined,
       });
     });
 
