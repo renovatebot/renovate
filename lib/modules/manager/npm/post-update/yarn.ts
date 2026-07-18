@@ -359,7 +359,7 @@ export function fuzzyMatchAdditionalYarnrcYml<
 >(additionalYarnRcYml: T, existingYarnrRcYml: T): T {
   const keys = new Map(
     Object.keys(existingYarnrRcYml.npmRegistries ?? {}).map((x) => [
-      x.replace(/\/$/, '').replace(/^https?:/, ''),
+      x.replace(regEx(/\/$/), '').replace(regEx(/^https?:/), ''),
       x,
     ]),
   );
@@ -368,7 +368,7 @@ export function fuzzyMatchAdditionalYarnrcYml<
     ...additionalYarnRcYml,
     npmRegistries: Object.entries(additionalYarnRcYml.npmRegistries ?? {})
       .map(([k, v]) => {
-        const key = keys.get(k.replace(/\/$/, '')) ?? k;
+        const key = keys.get(k.replace(regEx(/\/$/), '')) ?? k;
         return { [key]: v };
       })
       .reduce((acc, cur) => ({ ...acc, ...cur }), {}),

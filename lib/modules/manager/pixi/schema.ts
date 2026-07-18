@@ -1,4 +1,5 @@
 import { z } from 'zod/v4';
+import { regEx } from '../../../util/regex.ts';
 import { LooseRecord, Toml, Yaml } from '../../../util/schema-utils/index.ts';
 import { CondaDatasource } from '../../datasource/conda//index.ts';
 import { GitRefsDatasource } from '../../datasource/git-refs/index.ts';
@@ -44,7 +45,7 @@ const PypiDependency = z
       datasource: PypiDatasource.id,
     };
     if (version.startsWith('==')) {
-      dep.currentVersion = version.replace(/^==\s*/, '');
+      dep.currentVersion = version.replace(regEx(/^==\s*/), '');
     }
     return dep;
   });

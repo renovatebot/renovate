@@ -1,5 +1,5 @@
 import { logger } from '../../../logger/index.ts';
-import { newlineRegex } from '../../../util/regex.ts';
+import { newlineRegex, regEx } from '../../../util/regex.ts';
 import type {
   ExtractConfig,
   PackageDependency,
@@ -23,8 +23,8 @@ export function extractPackageFile(
 
   try {
     const lines = content
-      .replaceAll(/^\s*\r?\n/gm, '') // replace empty lines
-      .replaceAll(/^\s*#.*\r?\n/gm, '') // replace comment lines
+      .replaceAll(regEx(/^\s*\r?\n/gm), '') // replace empty lines
+      .replaceAll(regEx(/^\s*#.*\r?\n/gm), '') // replace comment lines
       .split(newlineRegex);
     const len = lines.length;
     for (let lineIdx = 0; lineIdx < len; lineIdx++) {

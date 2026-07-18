@@ -170,7 +170,7 @@ export async function extractPackageFile(
           dep.packageName = gitUrl;
 
           if (isHttpUrl(gitUrl)) {
-            dep.sourceUrl = gitUrl.replace(/\.git$/, '');
+            dep.sourceUrl = gitUrl.replace(regEx(/\.git$/), '');
           }
         } else if (gitRefsMatch.repoName) {
           dep.packageName = `https://github.com/${gitRefsMatch.repoName}`;

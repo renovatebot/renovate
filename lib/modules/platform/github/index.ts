@@ -164,7 +164,7 @@ export async function initPlatform({
   if (!token) {
     throw new Error('Init: You must configure a GitHub token');
   }
-  token = token.replace(/^ghs_/, 'x-access-token:ghs_');
+  token = token.replace(regEx(/^ghs_/), 'x-access-token:ghs_');
   platformConfig.isGHApp = token.startsWith('x-access-token:');
 
   if (endpoint) {
@@ -256,14 +256,14 @@ export async function initPlatform({
         matchHost: 'ghcr.io',
         hostType: 'docker',
         username: 'USERNAME',
-        password: token.replace(/^x-access-token:/, ''),
+        password: token.replace(regEx(/^x-access-token:/), ''),
       },
     ];
     logger.debug('Adding GitHub token as npm.pkg.github.com Basic token');
     platformResult.hostRules.push({
       matchHost: 'npm.pkg.github.com',
       hostType: 'npm',
-      token: token.replace(/^x-access-token:/, ''),
+      token: token.replace(regEx(/^x-access-token:/), ''),
     });
     const usernamePasswordHostTypes = ['rubygems', 'maven', 'nuget'];
     for (const hostType of usernamePasswordHostTypes) {
@@ -274,7 +274,7 @@ export async function initPlatform({
         hostType,
         matchHost: `${hostType}.pkg.github.com`,
         username: renovateUsername,
-        password: token.replace(/^x-access-token:/, ''),
+        password: token.replace(regEx(/^x-access-token:/), ''),
       });
     }
   }
@@ -537,8 +537,8 @@ export async function initRepo({
       // semver not null safe, accepts null and undefined
       semver.satisfies(platformConfig.gheVersion!, '<3.3.0')
     ) {
-      infoQuery = infoQuery.replace(/\n\s*autoMergeAllowed\s*\n/, '\n');
-      infoQuery = infoQuery.replace(/\n\s*hasIssuesEnabled\s*\n/, '\n');
+      infoQuery = infoQuery.replace(regEx(/\n\s*autoMergeAllowed\s*\n/), '\n');
+      infoQuery = infoQuery.replace(regEx(/\n\s*hasIssuesEnabled\s*\n/), '\n');
     }
 
     // GitHub Enterprise Server <3.9.0 doesn't support hasVulnerabilityAlertsEnabled objects
@@ -548,7 +548,7 @@ export async function initRepo({
       semver.satisfies(platformConfig.gheVersion!, '<3.9.0')
     ) {
       infoQuery = infoQuery.replace(
-        /\n\s*hasVulnerabilityAlertsEnabled\s*\n/,
+        regEx(/\n\s*hasVulnerabilityAlertsEnabled\s*\n/),
         '\n',
       );
     }

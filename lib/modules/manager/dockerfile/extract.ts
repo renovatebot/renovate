@@ -326,10 +326,10 @@ export function extractPackageFile(
       args[argMatch.groups.name] = argMatchValue || '';
     }
 
-    const fromRegex = new RegExp(
+    const fromRegex = regEx(
       `^[ \\t]*FROM(?:${escapeChar}[ \\t]*\\r?\\n| |\\t|#.*?\\r?\\n|--platform=\\S+)+(?<image>\\S+)(?:(?:${escapeChar}[ \\t]*\\r?\\n| |\\t|#.*?\\r?\\n)+as[ \\t]+(?<name>\\S+))?`,
       'im',
-    ); // TODO #12875 complex for re2 has too many not supported groups
+    );
     const fromMatch = instruction.match(fromRegex);
     if (fromMatch?.groups?.image) {
       let fromImage = fromMatch.groups.image;
@@ -371,10 +371,10 @@ export function extractPackageFile(
       }
     }
 
-    const copyFromRegex = new RegExp(
+    const copyFromRegex = regEx(
       `^[ \\t]*COPY(?:${escapeChar}[ \\t]*\\r?\\n| |\\t|#.*?\\r?\\n|--[a-z]+(?:=[a-zA-Z0-9_.:-]+?)?)+--from=(?<image>\\S+)`,
       'im',
-    ); // TODO #12875 complex for re2 has too many not supported groups
+    );
     const copyFromMatch = instruction.match(copyFromRegex);
     if (copyFromMatch?.groups?.image) {
       if (stageNames.includes(copyFromMatch.groups.image)) {

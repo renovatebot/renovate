@@ -52,6 +52,7 @@ import * as aws4 from 'aws4';
 import { REPOSITORY_UNINITIATED } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
 import { getEnv } from '../../../util/env.ts';
+import { regEx } from '../../../util/regex.ts';
 
 let codeCommitClient: CodeCommitClient;
 
@@ -315,7 +316,7 @@ export function getCodeCommitUrl(
   // massaging username with the session token,
   /* v8 ignore next */
   if (username.includes('/')) {
-    username = username.replace(/\//g, '%2F');
+    username = username.replace(regEx(/\//g), '%2F');
   }
   return `https://${username}:${token}@git-codecommit.${
     env.AWS_REGION ?? 'us-east-1'

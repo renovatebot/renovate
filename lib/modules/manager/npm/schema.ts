@@ -1,4 +1,5 @@
 import { z } from 'zod/v4';
+import { regEx } from '../../../util/regex.ts';
 import {
   Json,
   LooseRecord,
@@ -101,7 +102,7 @@ export const PackageLockV3 = z.object({
   packages: LooseRecord(
     z
       .string()
-      .transform((x) => x.replace(/^node_modules\//, ''))
+      .transform((x) => x.replace(regEx(/^node_modules\//), ''))
       .refine((x) => x.trim() !== ''),
     z.object({ version: z.string() }),
   ),

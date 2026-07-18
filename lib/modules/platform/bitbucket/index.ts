@@ -757,7 +757,7 @@ function massageDetailSummaryHtmlToNestedLists(body: string): string {
       return result;
     })
     .join('')
-    .replace(/<\/?(summary|details|blockquote)>/g, '');
+    .replace(regEx(/<\/?(summary|details|blockquote)>/g), '');
 }
 
 export function maxBodyLength(): number {

@@ -16,10 +16,11 @@ export const defaultConfig = {
 
 export const supportedDatasources = [NugetDatasource.id];
 
+/* oxlint-disable renovate/require-regex-util -- moo lexer patterns must be native RegExp: moo recompiles their source with the native engine and rejects RE2 instances (TODO #12870) */
 const lexer = moo.states({
   main: {
     lineComment: { match: /\/\/.*?$/ }, // TODO #12870
-    multiLineComment: { match: /\/\*[^]*?\*\//, lineBreaks: true }, // TODO #12870
+    multiLineComment: { match: /\/\*[\s\S]*?\*\//, lineBreaks: true },
     dependency: {
       match: /^#(?:addin|tool|module|load|l)\s+(?:nuget|dotnet):.*$/, // TODO #12870
     },
@@ -34,6 +35,7 @@ const lexer = moo.states({
     unknown: moo.fallback,
   },
 });
+/* oxlint-enable renovate/require-regex-util */
 
 function parseDependencyLine(line: string): NugetPackageDependency | null {
   let url = line.replace(regEx(/^[^:]*:/), '');

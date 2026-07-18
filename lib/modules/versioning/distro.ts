@@ -1,6 +1,7 @@
 import { DateTime } from 'luxon';
 import type { DataFile } from '../../data-files.generated.ts';
 import dataFiles from '../../data-files.generated.ts';
+import { regEx } from '../../util/regex.ts';
 
 export interface DistroSchedule {
   codename: string;
@@ -37,7 +38,9 @@ export class DistroInfo {
 
   constructor(distroJsonKey: DistroDataFile) {
     this._distroInfo = JSON.parse(
-      dataFiles.get(distroJsonKey as DataFile)!.replace(/v([\d.]+)\b/gm, '$1'),
+      dataFiles
+        .get(distroJsonKey as DataFile)!
+        .replace(regEx(/v([\d.]+)\b/gm), '$1'),
     );
 
     for (const version of Object.keys(this._distroInfo)) {

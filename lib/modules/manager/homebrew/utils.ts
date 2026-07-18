@@ -6,7 +6,7 @@ export function extractRubyString(
   keyword: string,
 ): string | null {
   const regex = regEx(
-    new RegExp(`\\b${keyword}\\s+(?:"(?<double>[^"]+)"|'(?<single>[^']+)')`),
+    `\\b${keyword}\\s+(?:"(?<double>[^"]+)"|'(?<single>[^']+)')`,
   );
   const match = content.match(regex);
   return match?.groups?.double ?? match?.groups?.single ?? null;
@@ -19,11 +19,11 @@ export function updateRubyString(
   oldValue: string,
   newValue: string,
 ): string | null {
-  const doubleQuote = new RegExp(
+  const doubleQuote = regEx(
     `(\\b${keyword}\\s+)"${escapeRegExp(oldValue)}"`,
     'g',
   );
-  const singleQuote = new RegExp(
+  const singleQuote = regEx(
     `(\\b${keyword}\\s+)'${escapeRegExp(oldValue)}'`,
     'g',
   );

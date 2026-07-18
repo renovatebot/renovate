@@ -156,7 +156,7 @@ export async function writeExistingFiles(
         !packageFile.managerData.npmrcFileName)
     ) {
       try {
-        await writeLocalFile(npmrcFilename, npmrc.replace(/\n?$/, '\n'));
+        await writeLocalFile(npmrcFilename, npmrc.replace(regEx(/\n?$/), '\n'));
       } catch (err) /* v8 ignore next -- TODO: add test #40625 */ {
         logger.warn({ npmrcFilename, err }, 'Error writing .npmrc');
       }

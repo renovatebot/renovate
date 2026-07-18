@@ -5,6 +5,7 @@ import type {
 import type { IWorkItemTrackingApi } from 'azure-devops-node-api/WorkItemTrackingApi.js';
 import { logger } from '../../../logger/index.ts';
 import { Lazy } from '../../../util/lazy.ts';
+import { regEx } from '../../../util/regex.ts';
 import { sanitize } from '../../../util/sanitize.ts';
 import type { EnsureIssueConfig, EnsureIssueResult, Issue } from '../types.ts';
 import * as azureApi from './azure-got-wrapper.ts';
@@ -152,7 +153,7 @@ export class IssueService {
       `;
 
       if (titleFilter) {
-        const escapedTitle = titleFilter.replace(/'/g, "''");
+        const escapedTitle = titleFilter.replace(regEx(/'/g), "''");
         wiql += ` AND [System.Title] = '${escapedTitle}'`;
       }
 

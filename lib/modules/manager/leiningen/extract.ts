@@ -5,7 +5,9 @@ import type { PackageDependency, PackageFileContent } from '../types.ts';
 import type { ExtractContext, ExtractedVariables } from './types.ts';
 
 export function trimAtKey(str: string, kwName: string): string | null {
-  const regex = new RegExp(`:${kwName}(?=\\s)`); // TODO #12872 lookahead
+  // matching the whitespace instead of a lookahead is equivalent here,
+  // as only the match offset is used
+  const regex = regEx(`:${kwName}\\s`);
   const keyOffset = str.search(regex);
   if (keyOffset < 0) {
     return null;
@@ -124,7 +126,7 @@ function extractLeinRepos(content: string): string[] {
   const result: string[] = [];
 
   const repoContent = trimAtKey(
-    content.replace(/;;.*(?=[\r\n])/g, ''), // get rid of comments // TODO #12872 lookahead
+    content.replace(regEx(/;;.*([\r\n])/g), '$1'), // get rid of comments
     'repositories',
   );
 

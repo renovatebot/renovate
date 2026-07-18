@@ -26,7 +26,9 @@ function isTypesGroup(branchUpgrades: BranchUpgradeConfig[]): boolean {
   return (
     branchUpgrades.some(({ depName }) => depName?.startsWith('@types/')) &&
     new Set(
-      branchUpgrades.map(({ depName }) => depName?.replace(/^@types\//, '')),
+      branchUpgrades.map(({ depName }) =>
+        depName?.replace(regEx(/^@types\//), ''),
+      ),
     ).size === 1
   );
 }

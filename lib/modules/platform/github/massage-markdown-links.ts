@@ -13,7 +13,8 @@ interface UrlMatch {
 
 //according to https://github.com/dead-claudia/github-limits
 const urlRegex =
-  /(?:https?:)?(?:\/\/)?(?:www\.)?(?<!api\.)(?:to)?github\.com\/[-a-z0-9]+\/[-_a-z0-9.]+\/(?:discussions|issues|pull)\/[0-9]+(?:#[-_a-z0-9]+)?/i; // TODO #12872 (?<!re) after text not matching
+  // oxlint-disable-next-line renovate/require-regex-util -- RE2 does not support the negative lookbehind (?<!api\.), TODO #12872
+  /(?:https?:)?(?:\/\/)?(?:www\.)?(?<!api\.)(?:to)?github\.com\/[-a-z0-9]+\/[-_a-z0-9.]+\/(?:discussions|issues|pull)\/[0-9]+(?:#[-_a-z0-9]+)?/i;
 
 function massageLink(input: string): string {
   return input.replace(
@@ -40,6 +41,7 @@ function collectLinkPosition(input: string, matches: UrlMatch[]): Plugin {
         });
       }
     } else if (tree.type === 'text') {
+      // oxlint-disable-next-line renovate/require-regex-util -- global variant of urlRegex, which RE2 cannot compile (negative lookbehind)
       const globalUrlReg = new RegExp(urlRegex, 'gi');
       const urlMatches = [...tree.value.matchAll(globalUrlReg)];
       for (const match of urlMatches) {

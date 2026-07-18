@@ -1,5 +1,6 @@
 import upath from 'upath';
 import { logger } from '../../../logger/index.ts';
+import { regEx } from '../../../util/regex.ts';
 import { parseUrl } from '../../../util/url.ts';
 import { DockerDatasource } from '../../datasource/docker/index.ts';
 import type { PackageDependency } from '../types.ts';
@@ -93,7 +94,7 @@ export function aliasRecordToRepositories(
   registryAliases: Record<string, string>,
 ): Repository[] {
   return Object.entries(registryAliases)
-    .filter(([, url]) => /^(https?|oci):\/\/.+/.exec(url))
+    .filter(([, url]) => regEx(/^(https?|oci):\/\/.+/).exec(url))
     .map(([alias, url]) => {
       return {
         name: alias,

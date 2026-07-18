@@ -1,14 +1,14 @@
-import { coerceArray } from '../../../util/array.ts';
 import { filterMap } from '../../../util/filter-map.ts';
+import { regEx } from '../../../util/regex.ts';
 import { compare } from '../../versioning/maven/compare.ts';
 
-const linkRegExp = /(?<=href=['"])[^'"]*(?=\/['"])/gi;
+const linkRegExp = regEx(/href=['"]([^'"]*)\/['"]/gi);
 
 export function extractPageLinks(
   html: string,
   filterMapHref: (href: string) => string | null | undefined,
 ): string[] {
-  const unfiltered = coerceArray(html.match(linkRegExp));
+  const unfiltered = Array.from(html.matchAll(linkRegExp), (m) => m[1]);
   return filterMap(unfiltered, filterMapHref);
 }
 

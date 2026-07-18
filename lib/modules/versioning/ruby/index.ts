@@ -159,7 +159,10 @@ const getNewValue = ({
       )
       .map(
         (element) =>
-          element.replace(/(?<whitespace>\s*)$/, `${delimiter}$<whitespace>`), // TODO #12875 adds ' at front when re2 is used
+          element.replace(
+            regEx(/(?<whitespace>\s*)$/),
+            `${delimiter}$<whitespace>`,
+          ), // TODO #12875 adds ' at front when re2 is used
       )
       .join(',');
   }

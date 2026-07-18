@@ -2,6 +2,7 @@ import { Version, VersionSpec } from '@baszalmstra/rattler';
 import type { SemVer } from 'semver';
 
 import type { RangeStrategy } from '../../../types/versioning.ts';
+import { regEx } from '../../../util/regex.ts';
 import * as pep440 from '../pep440/index.ts';
 import type { NewValueConfig, VersioningApi } from '../types.ts';
 
@@ -60,7 +61,7 @@ function isSingleVersion(input: string): boolean {
     return false;
   }
 
-  return isValidVersion(input.replace(/^==/, '').trimStart());
+  return isValidVersion(input.replace(regEx(/^==/), '').trimStart());
 }
 
 function getPinnedValue(newVersion: string): string {
@@ -86,7 +87,7 @@ function getNewValue({
   const normalizedCurrentValue = new VersionSpec(currentValue).toString();
 
   // it's valid range spec in conda to write `3.12.*`, translate to pep440 `==3.12.*`
-  if (/^(\d+\.)+\*$/.test(normalizedCurrentValue)) {
+  if (regEx(/^(\d+\.)+\*$/).test(normalizedCurrentValue)) {
     const newValue = pep440.api.getNewValue({
       currentValue: `==${normalizedCurrentValue}`,
       rangeStrategy,
@@ -95,7 +96,7 @@ function getNewValue({
       isReplacement,
     });
 
-    return newValue?.replace(/^==/, '') ?? null;
+    return newValue?.replace(regEx(/^==/), '') ?? null;
   }
 
   return pep440.api.getNewValue({

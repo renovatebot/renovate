@@ -197,12 +197,12 @@ export function migrateConfig(
       ].managerFilePatterns.map((filePattern) => {
         const pattern = filePattern as string;
         if (pattern.endsWith('.in')) {
-          return pattern.replace(/\.in$/, '.txt');
+          return pattern.replace(regEx(/\.in$/), '.txt');
         }
         if (pattern.endsWith('.in/')) {
-          return pattern.replace(/\.in\/$/, '.txt/');
+          return pattern.replace(regEx(/\.in\/$/), '.txt/');
         }
-        return pattern.replace(/\.in\$\/$/, '.txt$/');
+        return pattern.replace(regEx(/\.in\$\/$/), '.txt$/');
       });
     }
     if (

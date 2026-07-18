@@ -1,4 +1,5 @@
 import type { CommitMessageJSON } from '../../../types/index.ts';
+import { regEx } from '../../../util/regex.ts';
 import { CommitMessage } from './commit-message.ts';
 
 export interface SemanticCommitMessageJSON extends CommitMessageJSON {
@@ -14,8 +15,9 @@ export interface SemanticCommitMessageJSON extends CommitMessageJSON {
  * [optional footer]
  */
 export class SemanticCommitMessage extends CommitMessage {
-  private static readonly REGEXP =
-    /^(?<type>[\w]+)(\((?<scope>[\w-]+)\))?(?<breaking>!)?: ((?<issue>([A-Z]+-|#)[\d]+) )?(?<description>.*)/;
+  private static readonly REGEXP = regEx(
+    /^(?<type>[\w]+)(\((?<scope>[\w-]+)\))?(?<breaking>!)?: ((?<issue>([A-Z]+-|#)[\d]+) )?(?<description>.*)/,
+  );
 
   private _scope = '';
   private _type = '';

@@ -82,7 +82,7 @@ function parseDep(
   };
 
   if (currentValue?.startsWith('==')) {
-    dep.currentVersion = currentValue.replace(/^==\s*/, '');
+    dep.currentVersion = currentValue.replace(regEx(/^==\s*/), '');
   }
 
   return dep;
