@@ -53,9 +53,9 @@ function setupGitMocks(delayMs?: number): {
         }
 
         const path = `${clonePath}/my/pk/mypkg`;
-        fs.mkdirSync(upath.dirname(path), { recursive: true });
-        fs.writeFileSync(path, Fixtures.get('mypkg'), { encoding: 'utf8' });
-        fs.writeFileSync(
+        await fs.mkdir(upath.dirname(path), { recursive: true });
+        await fs.writeFile(path, Fixtures.get('mypkg'), { encoding: 'utf8' });
+        await fs.writeFile(
           `${clonePath}/config.json`,
           JSON.stringify({ dl: 'https://example.com/crates' }),
           { encoding: 'utf8' },
@@ -502,18 +502,20 @@ describe('modules/datasource/crate/index', () => {
       const mockClone = vi
         .fn()
         .mockName('clone')
-        .mockImplementation((_registryUrl: string, clonePath: string, opts) => {
-          if (typeof opts !== 'undefined' && Object.hasOwn(opts, '--depth')) {
-            return Promise.reject(
-              new Error(
+        .mockImplementation(
+          async (_registryUrl: string, clonePath: string, opts) => {
+            if (typeof opts !== 'undefined' && Object.hasOwn(opts, '--depth')) {
+              throw new Error(
                 'fatal: dumb http transport does not support shallow capabilities',
-              ),
-            );
-          }
-          const path = `${clonePath}/my/pk/mypkg`;
-          fs.mkdirSync(upath.dirname(path), { recursive: true });
-          fs.writeFileSync(path, Fixtures.get('mypkg'), { encoding: 'utf8' });
-        });
+              );
+            }
+            const path = `${clonePath}/my/pk/mypkg`;
+            await fs.mkdir(upath.dirname(path), { recursive: true });
+            await fs.writeFile(path, Fixtures.get('mypkg'), {
+              encoding: 'utf8',
+            });
+          },
+        );
 
       const gitMock = partial<SimpleGit>({
         clone: mockClone,
