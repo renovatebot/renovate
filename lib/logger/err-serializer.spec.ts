@@ -99,13 +99,40 @@ describe('logger/err-serializer', () => {
       delete err.stack;
 
       // sanitize like Bunyan
-      expect(sanitizeValue(err)).toMatchSnapshot({
+      expect(sanitizeValue(err)).toEqual({
+        code: 'ERR_NON_2XX_3XX_RESPONSE',
+        input: undefined,
+        message:
+          'Request failed with status code 412 (Precondition Failed): POST https://**redacted**@github.com/api',
         name: 'HTTPError',
         options: {
+          headers: {
+            accept: 'application/json',
+            'accept-encoding': 'gzip, deflate, br, zstd',
+            authorization: '***********',
+            'user-agent':
+              'Renovate/0.0.0-semantic-release (https://github.com/renovatebot/renovate)',
+          },
+          hostType: 'any',
+          http2: false,
           method: 'POST',
           password: '***********',
           url: 'https://**redacted**@github.com/api',
           username: '',
+        },
+        response: {
+          body: {
+            err: {
+              message: 'failed',
+            },
+          },
+          headers: {
+            'content-type': 'application/json',
+          },
+          httpVersion: '1.1',
+          retryCount: 0,
+          statusCode: 412,
+          statusMessage: 'Precondition Failed',
         },
       });
     });
