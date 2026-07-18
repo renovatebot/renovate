@@ -18,7 +18,9 @@ export class GithubGraphqlMemoryCacheStrategy<
 
   load(): Promise<GithubGraphqlCacheRecord<GithubItem> | undefined> {
     const key = this.fullKey();
-    const res = memCache.get(key);
+    const res = memCache.get<GithubGraphqlCacheRecord<GithubItem> | undefined>(
+      key,
+    );
     return Promise.resolve(res);
   }
 

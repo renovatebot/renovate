@@ -7,7 +7,7 @@ import { ExternalHostError } from '../types/errors/external-host-error.ts';
 
 type PromiseFactory<T> = () => Promise<T>;
 
-function isExternalHostError(err: any): err is ExternalHostError {
+function isExternalHostError(err: unknown): err is ExternalHostError {
   return err instanceof ExternalHostError;
 }
 
@@ -27,7 +27,7 @@ function handleMultipleErrors(errors: Error[]): never {
   throw new AggregateError(errors);
 }
 
-function handleError(err: any): never {
+function handleError(err: unknown): never {
   if (!(err instanceof AggregateError)) {
     throw err;
   }

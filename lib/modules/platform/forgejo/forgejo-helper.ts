@@ -189,13 +189,8 @@ export async function updatePR(
   return res.body;
 }
 
-export async function closePR(
-  repoPath: string,
-  idx: number,
-  options?: ForgejoHttpOptions,
-): Promise<void> {
+export async function closePR(repoPath: string, idx: number): Promise<void> {
   await updatePR(repoPath, idx, {
-    ...options,
     state: 'closed',
   });
 }
@@ -311,13 +306,8 @@ export async function updateIssueLabels(
   return res.body;
 }
 
-export async function closeIssue(
-  repoPath: string,
-  idx: number,
-  options?: ForgejoHttpOptions,
-): Promise<void> {
+export async function closeIssue(repoPath: string, idx: number): Promise<void> {
   await updateIssue(repoPath, idx, {
-    ...options,
     state: 'closed',
   });
 }

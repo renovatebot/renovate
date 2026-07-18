@@ -17,10 +17,10 @@ export interface ChangeLogChange {
 export interface ChangeLogRelease {
   changes: ChangeLogChange[];
   compare: { url?: string };
-  date: string | Date;
+  date?: string | Date | null;
   releaseNotes?: ChangeLogNotes;
   version: string;
-  gitRef: string;
+  gitRef?: string;
 }
 
 export type ChangeLogPlatform =

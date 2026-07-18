@@ -149,7 +149,7 @@ export abstract class ChangeLogSource {
       if (!inRange(next.version)) {
         continue;
       }
-      let release = await packageCache.get(
+      let release = await packageCache.get<ChangeLogRelease>(
         this.cacheNamespace,
         this.getCacheKey(sourceUrl, packageName, prev.version, next.version),
       );

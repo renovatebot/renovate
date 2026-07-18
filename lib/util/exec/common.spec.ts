@@ -570,13 +570,13 @@ describe('util/exec/common', () => {
       execa.mockImplementationOnce((_cmd, _opts) => stub);
 
       const stdoutListenerBuffer: Buffer[] = [];
-      const stdoutListener: DataListener = (chunk: Buffer) => {
-        stdoutListenerBuffer.push(chunk);
+      const stdoutListener: DataListener = (chunk) => {
+        stdoutListenerBuffer.push(chunk as Buffer);
       };
 
       const stderrListenerBuffer: Buffer[] = [];
-      const stderrListener: DataListener = (chunk: Buffer) => {
-        stderrListenerBuffer.push(chunk);
+      const stderrListener: DataListener = (chunk) => {
+        stderrListenerBuffer.push(chunk as Buffer);
       };
 
       await expect(

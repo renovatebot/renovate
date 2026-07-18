@@ -3,11 +3,15 @@ import type {
   CommitResult,
   DefaultLogFields,
   DiffResult,
+  FetchResult,
   LogOptions,
   LogResult,
   Options,
+  PullResult,
+  PushResult,
   RemoteWithRefs,
   RemoteWithoutRefs,
+  ResetMode,
   Response,
   SimpleGit,
   StatusResult,
@@ -156,27 +160,46 @@ export class InstrumentedSimpleGit {
 
     await instrument(spanName, () => this.git.rm(files), options);
   }
-  async reset(modeOrOptions: any): Promise<void> {
+  async reset(modeOrOptions: ResetMode | TaskOptions): Promise<void> {
     const { spanName, options } = prepareInstrumentation('reset');
 
-    await instrument(spanName, () => this.git.reset(modeOrOptions), options);
+    await instrument(
+      spanName,
+      () =>
+        typeof modeOrOptions === 'string'
+          ? this.git.reset(modeOrOptions)
+          : this.git.reset(modeOrOptions),
+      options,
+    );
   }
   async merge(args: string[]): Promise<void> {
     const { spanName, options } = prepareInstrumentation('merge');
 
     await instrument(spanName, () => this.git.merge(args), options);
   }
-  async push(...args: any[]): Promise<any> {
+  push(
+    remote?: string,
+    branch?: string,
+    options?: TaskOptions,
+  ): Promise<PushResult>;
+  push(options?: TaskOptions): Promise<PushResult>;
+  async push(
+    ...args: [string?, string?, TaskOptions?] | [TaskOptions?]
+  ): Promise<PushResult> {
     const { spanName, options } = prepareInstrumentation('push');
 
-    return await instrument(spanName, () => this.git.push(...args), options);
+    return await instrument(
+      spanName,
+      () => this.git.push(...(args as [string?, string?, TaskOptions?])),
+      options,
+    );
   }
-  async pull(args: string[]): Promise<any> {
+  async pull(args: string[]): Promise<PullResult> {
     const { spanName, options } = prepareInstrumentation('pull');
 
     return await instrument(spanName, () => this.git.pull(args), options);
   }
-  async fetch(args: string[]): Promise<any> {
+  async fetch(args: string[]): Promise<FetchResult> {
     const { spanName, options } = prepareInstrumentation('fetch');
 
     return await instrument(spanName, () => this.git.fetch(args), options);

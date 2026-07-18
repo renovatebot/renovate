@@ -1,4 +1,4 @@
-let memCache: Record<string, any> | undefined;
+let memCache: Record<string, unknown> | undefined;
 
 export function init(): void {
   memCache = {};
@@ -8,8 +8,8 @@ export function reset(): void {
   memCache = undefined;
 }
 
-export function get<T = any>(key: string): T {
-  return memCache?.[key];
+export function get<T = unknown>(key: string): T {
+  return memCache?.[key] as T;
 }
 
 export function set(key: string, value: unknown): void {

@@ -10,7 +10,7 @@ export function getCacheType(): ReturnType<typeof backend.getCacheType> {
   return backend.getCacheType();
 }
 
-export async function get<T = any>(
+export async function get<T = unknown>(
   namespace: PackageCacheNamespace,
   key: string,
 ): Promise<T | undefined> {
@@ -19,7 +19,7 @@ export async function get<T = any>(
   }
 
   const combinedKey = getCombinedKey(namespace, key);
-  let cachedPromise = memCache.get(combinedKey);
+  let cachedPromise = memCache.get<Promise<unknown> | undefined>(combinedKey);
   if (!cachedPromise) {
     cachedPromise = PackageCacheStats.wrapGet(() =>
       backend.get(namespace, key),
@@ -27,7 +27,7 @@ export async function get<T = any>(
     memCache.set(combinedKey, cachedPromise);
   }
 
-  return await cachedPromise;
+  return (await cachedPromise) as T | undefined;
 }
 
 /**

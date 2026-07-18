@@ -286,7 +286,7 @@ export interface DockerOptions {
   cwd?: Opt<string>;
 }
 
-export type DataListener = (chunk: any) => void;
+export type DataListener = (chunk: unknown) => void;
 export interface OutputListeners {
   stdout?: DataListener[];
   stderr?: DataListener[];

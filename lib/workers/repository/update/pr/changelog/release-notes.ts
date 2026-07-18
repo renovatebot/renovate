@@ -451,7 +451,9 @@ export async function getReleaseNotesMd(
  * so only cache for about an hour when the release is less than a week old. Otherwise,
  * cache for days.
  */
-export function releaseNotesCacheMinutes(releaseDate?: string | Date): number {
+export function releaseNotesCacheMinutes(
+  releaseDate?: string | Date | null,
+): number {
   const dt = isDate(releaseDate)
     ? DateTime.fromJSDate(releaseDate)
     : DateTime.fromISO(releaseDate!);

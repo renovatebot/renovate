@@ -174,7 +174,10 @@ async function queryApi(
     newVersion,
   );
   const cacheKey = `${token}:${url}`;
-  const cachedResult = await packageCache.get(hostType, cacheKey);
+  const cachedResult = await packageCache.get<MergeConfidence>(
+    hostType,
+    cacheKey,
+  );
 
   // istanbul ignore if
   if (cachedResult) {
@@ -277,7 +280,9 @@ export function getApiToken(): string | undefined {
  * @param err - The error object returned by the API.
  * @throws {ExternalHostError} if a timeout or connection reset error, authentication failure, or internal server error occurs during the request.
  */
-function apiErrorHandler(err: any): void {
+function apiErrorHandler(
+  err: Error & { code?: string; statusCode?: number },
+): void {
   if (err.code === 'ETIMEDOUT' || err.code === 'ECONNRESET') {
     logger.error({ err }, 'merge confidence API request failed - aborting run');
     throw new ExternalHostError(err, hostType);
@@ -288,7 +293,7 @@ function apiErrorHandler(err: any): void {
     throw new ExternalHostError(err, hostType);
   }
 
-  if (err.statusCode >= 500 && err.statusCode < 600) {
+  if (err.statusCode && err.statusCode >= 500 && err.statusCode < 600) {
     logger.error({ err }, 'merge confidence API failure: 5xx - aborting run');
     throw new ExternalHostError(err, hostType);
   }

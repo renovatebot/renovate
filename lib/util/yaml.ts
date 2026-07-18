@@ -158,7 +158,7 @@ export function parseSingleYamlDocument(
   return rawDocument;
 }
 
-export function dump(obj: any, opts?: DumpOptions): string {
+export function dump(obj: unknown, opts?: DumpOptions): string {
   return stringify(obj, opts);
 }
 

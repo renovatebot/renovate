@@ -76,6 +76,10 @@ export interface GraphqlOptions {
  * Remember to delete these in `normalizeGotOptions` before passing to `got`.
  */
 export interface HttpOptions {
+  /**
+   * JSON payload; moved to got's `json` option before the request is made.
+   */
+  // oxlint-disable-next-line typescript/no-explicit-any -- must stay assignable to got's `body` type at the got boundary (`unknown` is not)
   body?: any;
   username?: string;
   password?: string;

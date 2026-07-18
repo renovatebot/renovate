@@ -28,6 +28,11 @@ export function addSplit(name: RenovateSplit): void {
   lastTime = now;
 }
 
-export function getSplits(): any {
+export interface Splits {
+  splits: Record<RenovateSplit, number>;
+  total: number;
+}
+
+export function getSplits(): Splits {
   return { splits, total: Date.now() - startTime };
 }
