@@ -341,7 +341,7 @@
     "semantic-release": "25.0.6",
     "tar": "catalog:",
     "tmp-promise": "3.0.3",
-    "tsdown": "0.22.4",
+    "tsdown": "0.22.5",
     "type-fest": "5.8.0",
     "typescript": "6.0.3",
     "unified": "11.0.5",
