@@ -3,7 +3,7 @@ import { DateTime } from 'luxon';
 import type { PushResult } from 'simple-git';
 import { simpleGit } from 'simple-git';
 import tmp from 'tmp-promise';
-import { logger } from '~test/util.ts';
+import { logger, partial } from '~test/util.ts';
 import { GlobalConfig } from '../../config/global.ts';
 import {
   CONFIG_VALIDATION,
@@ -11,7 +11,10 @@ import {
   TEMPORARY_ERROR,
   UNKNOWN_ERROR,
 } from '../../constants/error-messages.ts';
+import { postUpgradeCommandsExecutor } from '../../workers/repository/update/branch/execute-post-upgrade-commands.ts';
+import type { BranchConfig, BranchUpgradeConfig } from '../../workers/types.ts';
 import { setCustomEnv } from '../env.ts';
+import * as _execCommon from '../exec/common.ts';
 import { newlineRegex, regEx } from '../regex.ts';
 import { type LongCommitSha, toLongCommitSha } from '../schema-utils/git.ts';
 import * as _auth from './auth.ts';
@@ -37,10 +40,20 @@ const conflictsCache = vi.mocked(_conflictsCache);
 const modifiedCache = vi.mocked(_modifiedCache);
 const updateDateCache = vi.mocked(_updateDateCache);
 const auth = vi.mocked(_auth);
+const execCommon = vi.mocked(_execCommon);
 // Class is no longer exported
 const SimpleGit = simpleGit().constructor as {
   prototype: ReturnType<typeof simpleGit>;
 };
+
+// Avoids flakiness when cleaning up temp directories
+async function disableGitAutoMaintenance(
+  repo: ReturnType<typeof simpleGit>,
+): Promise<void> {
+  await repo.addConfig('gc.auto', '0');
+  await repo.addConfig('maintenance.auto', 'false');
+  await repo.addConfig('receive.autogc', 'false');
+}
 
 describe('util/git/index', { timeout: 30000 }, () => {
   const masterCommitDate = new Date();
@@ -53,6 +66,7 @@ describe('util/git/index', { timeout: 30000 }, () => {
     base = await tmp.dir({ unsafeCleanup: true });
     const repo = simpleGit(base.path);
     await repo.init();
+    await disableGitAutoMaintenance(repo);
     defaultBranch = (await repo.raw('branch', '--show-current')).trim();
     await repo.addConfig('user.email', 'Jest@example.com');
     await repo.addConfig('user.name', 'Jest');
@@ -136,6 +150,7 @@ describe('util/git/index', { timeout: 30000 }, () => {
     origin = await tmp.dir({ unsafeCleanup: true });
     const repo = simpleGit(origin.path);
     await repo.clone(base.path, '.', ['--bare']);
+    await disableGitAutoMaintenance(repo);
     await repo.addConfig('commit.gpgsign', 'false');
     tmpDir = await tmp.dir({ unsafeCleanup: true });
     GlobalConfig.set({ localDir: tmpDir.path });
@@ -243,6 +258,7 @@ describe('util/git/index', { timeout: 30000 }, () => {
         await fs.mkdir(submoduleBasePath);
         const submodule = simpleGit(submoduleBasePath);
         await submodule.init();
+        await disableGitAutoMaintenance(submodule);
         await submodule.addConfig('user.email', 'Jest@example.com');
         await submodule.addConfig('user.name', 'Jest');
         await submodule.addConfig('commit.gpgsign', 'false');
@@ -1011,6 +1027,104 @@ describe('util/git/index', { timeout: 30000 }, () => {
       const repo = simpleGit(tmpDir.path);
       const result = await repo.raw(['ls-tree', 'HEAD', 'some-executable']);
       expect(result).toStartWith('100755');
+    });
+
+    it('preserves a post-upgrade chmod in the committed tree', async ({
+      skip,
+    }) => {
+      const local = simpleGit(tmpDir.path);
+      const fileMode = await local.getConfig('core.fileMode');
+      skip(
+        fileMode.value !== 'true',
+        'Git does not track executable bits in this working tree',
+      );
+
+      await fs.chmod(`${tmpDir.path}/master_file`, 0o644);
+      auth.getGitEnvironmentVariables.mockReturnValue({});
+      execCommon.rawExec.mockImplementationOnce(async (command, options) => {
+        expect(command).toBe('chmod +x master_file');
+        expect(options.cwd).toBe(tmpDir.path);
+        await fs.chmod(`${tmpDir.path}/master_file`, 0o755);
+        return { stdout: '', stderr: '' };
+      });
+      GlobalConfig.set({
+        localDir: tmpDir.path,
+        allowedCommands: ['^chmod \\+x master_file$'],
+      });
+
+      const commands = partial<BranchUpgradeConfig>([
+        {
+          manager: 'some-manager',
+          branchName: 'renovate/executable-post-upgrade',
+          postUpgradeTasks: {
+            commands: ['chmod +x master_file'],
+            fileFilters: ['master_file'],
+            executionMode: 'branch',
+          },
+        },
+      ]);
+      const config: BranchConfig = {
+        manager: 'some-manager',
+        updatedPackageFiles: [],
+        updatedArtifacts: [],
+        upgrades: [],
+        branchName: 'renovate/executable-post-upgrade',
+        baseBranch: defaultBranch,
+      };
+
+      const { updatedArtifacts } = await postUpgradeCommandsExecutor(
+        commands,
+        config,
+      );
+      expect(updatedArtifacts).toEqual([
+        {
+          type: 'addition',
+          path: 'master_file',
+          contents: Buffer.from(defaultBranch),
+          isExecutable: true,
+        },
+      ]);
+
+      const commit = await git.prepareCommit({
+        branchName: 'renovate/executable-post-upgrade',
+        files: updatedArtifacts,
+        message: 'Preserve executable mode',
+      });
+      expect(commit).not.toBeNull();
+
+      const result = await local.raw(['ls-tree', 'HEAD', 'master_file']);
+      expect(result).toStartWith('100755');
+    });
+  });
+
+  describe('isFileModeEnabled()', () => {
+    it('defaults to enabled when core.fileMode is unset', async () => {
+      const repo = simpleGit(tmpDir.path);
+      await repo.raw(['config', '--unset', 'core.fileMode']);
+
+      await expect(git.isFileModeEnabled()).resolves.toBeTrue();
+    });
+
+    it.each([
+      { setting: 'true', expected: true },
+      { setting: 'false', expected: false },
+    ])(
+      'returns $expected when core.fileMode is $setting',
+      async ({ setting, expected }) => {
+        const repo = simpleGit(tmpDir.path);
+        await repo.addConfig('core.fileMode', setting);
+
+        await expect(git.isFileModeEnabled()).resolves.toBe(expected);
+      },
+    );
+
+    it('caches a disabled setting for the repository run', async () => {
+      const repo = simpleGit(tmpDir.path);
+      await repo.addConfig('core.fileMode', 'false');
+      await expect(git.isFileModeEnabled()).resolves.toBeFalse();
+
+      await repo.addConfig('core.fileMode', 'true');
+      await expect(git.isFileModeEnabled()).resolves.toBeFalse();
     });
   });
 
@@ -1809,6 +1923,7 @@ describe('util/git/index', { timeout: 30000 }, () => {
       upstreamBase = await tmp.dir({ unsafeCleanup: true });
       const upstream = simpleGit(upstreamBase.path);
       await upstream.init();
+      await disableGitAutoMaintenance(upstream);
       const defaultUpsBranch = (
         await upstream.raw('branch', '--show-current')
       ).trim();
@@ -1825,6 +1940,7 @@ describe('util/git/index', { timeout: 30000 }, () => {
       upstreamOrigin = await tmp.dir({ unsafeCleanup: true });
       const upstreamRepo = simpleGit(upstreamOrigin.path);
       await upstreamRepo.clone(upstreamBase.path, '.', ['--bare']);
+      await disableGitAutoMaintenance(upstreamRepo);
       await upstreamRepo.addConfig('commit.gpgsign', 'false');
     });
 
@@ -1966,7 +2082,9 @@ describe('util/git/index', { timeout: 30000 }, () => {
   describe('virtualBranches', () => {
     it('fetches refspecs and populates branchCommits', async () => {
       const originRepo = simpleGit(origin.path);
-      const commit = (await originRepo.revparse(['HEAD'])) as LongCommitSha;
+      const commit = toLongCommitSha(
+        (await originRepo.revparse(['HEAD'])).trim(),
+      );
       await originRepo.raw(['update-ref', 'refs/changes/45/12345/1', commit]);
 
       await git.initRepo({
@@ -1986,7 +2104,9 @@ describe('util/git/index', { timeout: 30000 }, () => {
 
     it('throws on fetch error', async () => {
       const originRepo = simpleGit(origin.path);
-      const commit = (await originRepo.revparse(['HEAD'])) as LongCommitSha;
+      const commit = toLongCommitSha(
+        (await originRepo.revparse(['HEAD'])).trim(),
+      );
 
       await git.initRepo({
         url: origin.path,
@@ -2010,14 +2130,18 @@ describe('util/git/index', { timeout: 30000 }, () => {
       await fs.writeFile(`${base.path}/temp_1.txt`, 'content-1');
       await baseRepo.add(['temp_1.txt']);
       await baseRepo.commit('commit for ref 1');
-      const commit1 = (await baseRepo.revparse(['HEAD'])) as LongCommitSha;
+      const commit1 = toLongCommitSha(
+        (await baseRepo.revparse(['HEAD'])).trim(),
+      );
       commits.push(commit1);
       await baseRepo.raw(['update-ref', 'refs/changes/01/1001/1', commit1]);
 
       await fs.writeFile(`${base.path}/temp_2.txt`, 'content-2');
       await baseRepo.add(['temp_2.txt']);
       await baseRepo.commit('commit for ref 2');
-      const commit2 = (await baseRepo.revparse(['HEAD'])) as LongCommitSha;
+      const commit2 = toLongCommitSha(
+        (await baseRepo.revparse(['HEAD'])).trim(),
+      );
       commits.push(commit2);
       await baseRepo.raw(['update-ref', 'refs/changes/02/1002/1', commit2]);
 
@@ -2049,7 +2173,9 @@ describe('util/git/index', { timeout: 30000 }, () => {
   describe('deleteBranch() for virtual branches', () => {
     it('deletes local branch and remote tracking ref', async () => {
       const originRepo = simpleGit(origin.path);
-      const commit = (await originRepo.revparse(['HEAD'])) as LongCommitSha;
+      const commit = toLongCommitSha(
+        (await originRepo.revparse(['HEAD'])).trim(),
+      );
       await originRepo.raw(['update-ref', 'refs/changes/50/12350/1', commit]);
 
       await git.initRepo({
@@ -2072,7 +2198,9 @@ describe('util/git/index', { timeout: 30000 }, () => {
 
     it('handles a missing remote-tracking ref', async () => {
       const originRepo = simpleGit(origin.path);
-      const commit = (await originRepo.revparse(['HEAD'])) as LongCommitSha;
+      const commit = toLongCommitSha(
+        (await originRepo.revparse(['HEAD'])).trim(),
+      );
       await git.setVirtualBranch(
         'nonexistent',
         'refs/changes/99/99999/1',
@@ -2091,7 +2219,9 @@ describe('util/git/index', { timeout: 30000 }, () => {
   describe('mergeToLocal() for virtual branches', () => {
     it('merges the remote-tracking ref of an init virtual branch', async () => {
       const originRepo = simpleGit(origin.path);
-      const commit = (await originRepo.revparse(['HEAD'])) as LongCommitSha;
+      const commit = toLongCommitSha(
+        (await originRepo.revparse(['HEAD'])).trim(),
+      );
       await originRepo.raw(['update-ref', 'refs/changes/70/12370/1', commit]);
 
       await git.initRepo({
@@ -2120,7 +2250,9 @@ describe('util/git/index', { timeout: 30000 }, () => {
     it('marks branch as not modified after registration', async () => {
       modifiedCache.getCachedModifiedResult.mockReturnValue(null);
       const originRepo = simpleGit(origin.path);
-      const commit = (await originRepo.revparse(['HEAD'])) as LongCommitSha;
+      const commit = toLongCommitSha(
+        (await originRepo.revparse(['HEAD'])).trim(),
+      );
       await originRepo.raw(['update-ref', 'refs/changes/60/12360/1', commit]);
 
       await git.initRepo({

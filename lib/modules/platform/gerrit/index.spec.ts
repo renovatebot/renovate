@@ -611,6 +611,16 @@ describe('modules/platform/gerrit/index', () => {
         files: [],
         pushOptions: ['notify=NONE', 'ready', 'label=Code-Review+2'],
       });
+      expect(git.setVirtualBranch).toHaveBeenCalledExactlyOnceWith(
+        'source',
+        'refs/changes/56/123456/1',
+        defaultRevision,
+      );
+      expect(clientMock.addMessage).toHaveBeenCalledExactlyOnceWith(
+        123456,
+        'body',
+        TAG_PULL_REQUEST_BODY,
+      );
     });
 
     it('createPr() - with labels', async () => {
@@ -636,6 +646,16 @@ describe('modules/platform/gerrit/index', () => {
           'hashtag=label2',
         ],
       });
+      expect(git.setVirtualBranch).toHaveBeenCalledExactlyOnceWith(
+        'source',
+        'refs/changes/56/123456/1',
+        defaultRevision,
+      );
+      expect(clientMock.addMessage).toHaveBeenCalledExactlyOnceWith(
+        123456,
+        'body',
+        TAG_PULL_REQUEST_BODY,
+      );
     });
 
     it('createPr() - no change found after push => rejects', async () => {

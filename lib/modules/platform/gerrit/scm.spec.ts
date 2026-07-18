@@ -1,5 +1,4 @@
-import { git, partial } from '~test/util.ts';
-import type { LongCommitSha } from '../../../util/schema-utils/git.ts';
+import { fakeSha, git, partial } from '~test/util.ts';
 import { client as _client } from './client.ts';
 import type { GerritChange, GerritRevisionInfo } from './schema.ts';
 import {
@@ -14,6 +13,9 @@ const clientMock = vi.mocked(_client);
 
 describe('modules/platform/gerrit/scm', () => {
   const gerritScm = new GerritScm();
+  const commitSha = fakeSha('commitSha');
+  const parentCommitSha = fakeSha('parentSha');
+  const currentRevision = fakeSha('abc123');
 
   beforeEach(() => {
     configureScm('test/repo');
@@ -100,8 +102,8 @@ describe('modules/platform/gerrit/scm', () => {
     it('commitAndPush() - create first commit but does not push', async () => {
       clientMock.getBranchChange.mockResolvedValueOnce(null);
       git.prepareCommit.mockResolvedValueOnce({
-        commitSha: 'commitSha' as LongCommitSha,
-        parentCommitSha: 'parentSha' as LongCommitSha,
+        commitSha,
+        parentCommitSha,
         files: [],
       });
 
@@ -113,7 +115,7 @@ describe('modules/platform/gerrit/scm', () => {
           files: [],
           prTitle: 'pr title',
         }),
-      ).toBe('commitSha');
+      ).toBe(commitSha);
       expect(git.prepareCommit).toHaveBeenCalledExactlyOnceWith({
         baseBranch: 'main',
         branchName: 'renovate/dependency-1.x',
@@ -131,7 +133,6 @@ describe('modules/platform/gerrit/scm', () => {
     });
 
     it('commitAndPush() - existing change keeps original target branch', async () => {
-      const currentRevision = 'abc123' as LongCommitSha;
       const existingChange = partial<GerritChange>({
         change_id: 'Ifcd936eef0ced620040a07a337c586d0a882725b',
         branch: 'main',
@@ -144,8 +145,8 @@ describe('modules/platform/gerrit/scm', () => {
       });
       clientMock.getBranchChange.mockResolvedValueOnce(existingChange);
       git.prepareCommit.mockResolvedValueOnce({
-        commitSha: 'commitSha' as LongCommitSha,
-        parentCommitSha: 'parentSha' as LongCommitSha,
+        commitSha,
+        parentCommitSha,
         files: [],
       });
       git.pushCommit.mockResolvedValueOnce(true);
@@ -158,7 +159,7 @@ describe('modules/platform/gerrit/scm', () => {
           files: [],
           prTitle: 'pr title',
         }),
-      ).toBe('commitSha');
+      ).toBe(commitSha);
       expect(git.prepareCommit).toHaveBeenCalledExactlyOnceWith({
         baseBranch: 'new-main',
         branchName: 'renovate/dependency-1.x',
@@ -178,7 +179,7 @@ describe('modules/platform/gerrit/scm', () => {
       expect(git.setVirtualBranch).toHaveBeenCalledExactlyOnceWith(
         'renovate/dependency-1.x',
         'refs/changes/56/123456/3',
-        'commitSha',
+        commitSha,
       );
     });
 
@@ -213,7 +214,6 @@ describe('modules/platform/gerrit/scm', () => {
     });
 
     it('commitAndPush() - existing change with new changes - auto-approve', async () => {
-      const currentRevision = 'abc123' as LongCommitSha;
       const existingChange = partial<GerritChange>({
         _number: 123456,
         change_id: 'I1bf983f8f6530c44826925b1308a45fe672408a6',
@@ -227,8 +227,8 @@ describe('modules/platform/gerrit/scm', () => {
       });
       clientMock.getBranchChange.mockResolvedValueOnce(existingChange);
       git.prepareCommit.mockResolvedValueOnce({
-        commitSha: 'commitSha' as LongCommitSha,
-        parentCommitSha: 'parentSha' as LongCommitSha,
+        commitSha,
+        parentCommitSha,
         files: [],
       });
       git.pushCommit.mockResolvedValueOnce(true);
@@ -241,7 +241,7 @@ describe('modules/platform/gerrit/scm', () => {
           prTitle: 'pr title',
           autoApprove: true,
         }),
-      ).toBe('commitSha');
+      ).toBe(commitSha);
       expect(git.prepareCommit).toHaveBeenCalledExactlyOnceWith({
         baseBranch: 'main',
         branchName: 'renovate/dependency-1.x',
@@ -262,7 +262,7 @@ describe('modules/platform/gerrit/scm', () => {
       expect(git.setVirtualBranch).toHaveBeenCalledExactlyOnceWith(
         'renovate/dependency-1.x',
         'refs/changes/56/123456/3',
-        'commitSha',
+        commitSha,
       );
     });
   });
