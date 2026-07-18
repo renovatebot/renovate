@@ -59,7 +59,7 @@ describe('modules/manager/jsonnet-bundler/artifacts', () => {
         config,
       }),
     ).toBeNull();
-    expect(execSnapshots).toMatchSnapshot();
+    expect(execSnapshots).toEqual([]);
   });
 
   it('updates the vendor dir when dependencies change', async () => {
@@ -134,7 +134,28 @@ describe('modules/manager/jsonnet-bundler/artifacts', () => {
         },
       },
     ]);
-    expect(execSnapshots).toMatchSnapshot();
+    expect(execSnapshots).toEqual([
+      {
+        cmd: 'jb update https://github.com/foo/foo.git ssh://git@github.com/foo/foo.git/bar',
+        options: {
+          cwd: '/tmp/github/some/repo',
+          env: {
+            HOME: '/home/user',
+            HTTPS_PROXY: 'https://example.com',
+            HTTP_PROXY: 'http://example.com',
+            LANG: 'en_US.UTF-8',
+            LC_ALL: 'en_US',
+            NO_PROXY: 'localhost',
+            PATH: '/tmp/path',
+          },
+          maxBuffer: 10485760,
+          stderr: 'pipe',
+          stdin: 'pipe',
+          stdout: 'pipe',
+          timeout: 900000,
+        },
+      },
+    ]);
   });
 
   it('performs lock file maintenance', async () => {
@@ -168,7 +189,28 @@ describe('modules/manager/jsonnet-bundler/artifacts', () => {
         },
       },
     ]);
-    expect(execSnapshots).toMatchSnapshot();
+    expect(execSnapshots).toEqual([
+      {
+        cmd: 'jb update',
+        options: {
+          cwd: '/tmp/github/some/repo',
+          env: {
+            HOME: '/home/user',
+            HTTPS_PROXY: 'https://example.com',
+            HTTP_PROXY: 'http://example.com',
+            LANG: 'en_US.UTF-8',
+            LC_ALL: 'en_US',
+            NO_PROXY: 'localhost',
+            PATH: '/tmp/path',
+          },
+          maxBuffer: 10485760,
+          stderr: 'pipe',
+          stdin: 'pipe',
+          stdout: 'pipe',
+          timeout: 900000,
+        },
+      },
+    ]);
   });
 
   it('returns error when jb update fails', async () => {
@@ -204,6 +246,27 @@ describe('modules/manager/jsonnet-bundler/artifacts', () => {
         },
       },
     ]);
-    expect(execSnapshots).toMatchSnapshot();
+    expect(execSnapshots).toEqual([
+      {
+        cmd: 'jb update',
+        options: {
+          cwd: '/tmp/github/some/repo',
+          env: {
+            HOME: '/home/user',
+            HTTPS_PROXY: 'https://example.com',
+            HTTP_PROXY: 'http://example.com',
+            LANG: 'en_US.UTF-8',
+            LC_ALL: 'en_US',
+            NO_PROXY: 'localhost',
+            PATH: '/tmp/path',
+          },
+          maxBuffer: 10485760,
+          stderr: 'pipe',
+          stdin: 'pipe',
+          stdout: 'pipe',
+          timeout: 900000,
+        },
+      },
+    ]);
   });
 });

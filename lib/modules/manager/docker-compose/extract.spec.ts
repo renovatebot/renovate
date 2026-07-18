@@ -23,19 +23,253 @@ describe('modules/manager/docker-compose/extract', () => {
 
     it('extracts multiple image lines for version 1', () => {
       const res = extractPackageFile(yamlFile1, '', {});
-      expect(res?.deps).toMatchSnapshot();
+      expect(res?.deps).toEqual([
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentDigest: undefined,
+          currentValue: 'alpine',
+          datasource: 'docker',
+          depName: 'quay.io/something/redis',
+          packageName: 'quay.io/something/redis',
+          replaceString: 'quay.io/something/redis:alpine',
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentDigest: undefined,
+          currentValue: '10.0.0',
+          datasource: 'docker',
+          depName: 'node',
+          packageName: 'node',
+          replaceString: 'node:10.0.0',
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentDigest: undefined,
+          currentValue: '9.4.0',
+          datasource: 'docker',
+          depName: 'postgres',
+          packageName: 'postgres',
+          replaceString: 'postgres:9.4.0',
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentDigest: undefined,
+          currentValue: 'before',
+          datasource: 'docker',
+          depName: 'dockersamples/examplevotingapp_vote',
+          packageName: 'dockersamples/examplevotingapp_vote',
+          replaceString: 'dockersamples/examplevotingapp_vote:before',
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentDigest: undefined,
+          currentValue: 'before',
+          datasource: 'docker',
+          depName: 'dockersamples/examplevotingapp_result',
+          packageName: 'dockersamples/examplevotingapp_result',
+          replaceString: 'dockersamples/examplevotingapp_result:before',
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentDigest: undefined,
+          currentValue: undefined,
+          datasource: 'docker',
+          depName: 'dockersamples/examplevotingapp_worker',
+          packageName: 'dockersamples/examplevotingapp_worker',
+          replaceString: 'dockersamples/examplevotingapp_worker',
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentDigest: undefined,
+          currentValue: 'stable',
+          datasource: 'docker',
+          depName: 'dockersamples/visualizer',
+          packageName: 'dockersamples/visualizer',
+          replaceString: 'dockersamples/visualizer:stable',
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          datasource: 'docker',
+          replaceString: '${IMAGE:-synkodevelopers/edplugins}:${TAG:-latest}',
+          skipReason: 'contains-variable',
+        },
+      ]);
       expect(res?.deps).toHaveLength(8);
     });
 
     it('extracts multiple image lines for version 3', () => {
       const res = extractPackageFile(yamlFile3, '', {});
-      expect(res?.deps).toMatchSnapshot();
+      expect(res?.deps).toEqual([
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentDigest: undefined,
+          currentValue: 'alpine',
+          datasource: 'docker',
+          depName: 'quay.io/something/redis',
+          packageName: 'quay.io/something/redis',
+          replaceString: 'quay.io/something/redis:alpine',
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentDigest: undefined,
+          currentValue: '10.0.0',
+          datasource: 'docker',
+          depName: 'node',
+          packageName: 'node',
+          replaceString: 'node:10.0.0',
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentDigest: undefined,
+          currentValue: '9.4.0',
+          datasource: 'docker',
+          depName: 'postgres',
+          packageName: 'postgres',
+          replaceString: 'postgres:9.4.0',
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentDigest: undefined,
+          currentValue: 'before',
+          datasource: 'docker',
+          depName: 'dockersamples/examplevotingapp_vote',
+          packageName: 'dockersamples/examplevotingapp_vote',
+          replaceString: 'dockersamples/examplevotingapp_vote:before',
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentDigest: undefined,
+          currentValue: 'before',
+          datasource: 'docker',
+          depName: 'dockersamples/examplevotingapp_result',
+          packageName: 'dockersamples/examplevotingapp_result',
+          replaceString: 'dockersamples/examplevotingapp_result:before',
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentDigest: undefined,
+          currentValue: undefined,
+          datasource: 'docker',
+          depName: 'dockersamples/examplevotingapp_worker',
+          packageName: 'dockersamples/examplevotingapp_worker',
+          replaceString: 'dockersamples/examplevotingapp_worker',
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentDigest: undefined,
+          currentValue: 'stable',
+          datasource: 'docker',
+          depName: 'dockersamples/visualizer',
+          packageName: 'dockersamples/visualizer',
+          replaceString: 'dockersamples/visualizer:stable',
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          datasource: 'docker',
+          replaceString: '${IMAGE:-synkodevelopers/edplugins}:${TAG:-latest}',
+          skipReason: 'contains-variable',
+        },
+      ]);
       expect(res?.deps).toHaveLength(8);
     });
 
     it('extracts multiple image lines for version 3 without set version key', () => {
       const res = extractPackageFile(yamlFile3NoVersion, '', {});
-      expect(res?.deps).toMatchSnapshot();
+      expect(res?.deps).toEqual([
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentDigest: undefined,
+          currentValue: 'alpine',
+          datasource: 'docker',
+          depName: 'quay.io/something/redis',
+          packageName: 'quay.io/something/redis',
+          replaceString: 'quay.io/something/redis:alpine',
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentDigest: undefined,
+          currentValue: '10.0.0',
+          datasource: 'docker',
+          depName: 'node',
+          packageName: 'node',
+          replaceString: 'node:10.0.0',
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentDigest: undefined,
+          currentValue: '9.4.0',
+          datasource: 'docker',
+          depName: 'postgres',
+          packageName: 'postgres',
+          replaceString: 'postgres:9.4.0',
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentDigest: undefined,
+          currentValue: 'before',
+          datasource: 'docker',
+          depName: 'dockersamples/examplevotingapp_vote',
+          packageName: 'dockersamples/examplevotingapp_vote',
+          replaceString: 'dockersamples/examplevotingapp_vote:before',
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentDigest: undefined,
+          currentValue: 'before',
+          datasource: 'docker',
+          depName: 'dockersamples/examplevotingapp_result',
+          packageName: 'dockersamples/examplevotingapp_result',
+          replaceString: 'dockersamples/examplevotingapp_result:before',
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentDigest: undefined,
+          currentValue: undefined,
+          datasource: 'docker',
+          depName: 'dockersamples/examplevotingapp_worker',
+          packageName: 'dockersamples/examplevotingapp_worker',
+          replaceString: 'dockersamples/examplevotingapp_worker',
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentDigest: undefined,
+          currentValue: 'stable',
+          datasource: 'docker',
+          depName: 'dockersamples/visualizer',
+          packageName: 'dockersamples/visualizer',
+          replaceString: 'dockersamples/visualizer:stable',
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          datasource: 'docker',
+          replaceString: '${IMAGE:-synkodevelopers/edplugins}:${TAG:-latest}',
+          skipReason: 'contains-variable',
+        },
+      ]);
       expect(res?.deps).toHaveLength(8);
     });
 

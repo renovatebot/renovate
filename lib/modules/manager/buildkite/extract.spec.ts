@@ -15,7 +15,15 @@ describe('modules/manager/buildkite/extract', () => {
               abc/detect-clowns#v2.0.0: ~
       `;
       const res = extractPackageFile(fileContent)?.deps;
-      expect(res).toMatchSnapshot();
+      expect(res).toEqual([
+        {
+          currentValue: 'v2.0.0',
+          datasource: 'github-tags',
+          depName: 'abc/detect-clowns',
+          packageName: 'abc/detect-clowns-buildkite-plugin',
+          skipReason: undefined,
+        },
+      ]);
       expect(res).toHaveLength(1);
     });
 
@@ -40,7 +48,22 @@ describe('modules/manager/buildkite/extract', () => {
                 run: app
       `;
       const res = extractPackageFile(fileContent)?.deps;
-      expect(res).toMatchSnapshot();
+      expect(res).toEqual([
+        {
+          currentValue: 'v1.3.2',
+          datasource: 'github-tags',
+          depName: 'docker-compose',
+          packageName: 'buildkite-plugins/docker-compose-buildkite-plugin',
+          skipReason: undefined,
+        },
+        {
+          currentValue: 'v1.3.2',
+          datasource: 'github-tags',
+          depName: 'docker-compose',
+          packageName: 'buildkite-plugins/docker-compose-buildkite-plugin',
+          skipReason: undefined,
+        },
+      ]);
       expect(res).toHaveLength(2);
     });
 
@@ -63,7 +86,18 @@ describe('modules/manager/buildkite/extract', () => {
                 run: app
       `;
       const res = extractPackageFile(fileContent)?.deps;
-      expect(res).toMatchSnapshot();
+      expect(res).toEqual([
+        {
+          currentValue: 'v1.3.2.5',
+          depName: 'namespace/docker-compose',
+          skipReason: 'invalid-version',
+        },
+        {
+          currentValue: 'v1.3.2',
+          depName: 'github.com/buildkite/plugin-docker-compose',
+          skipReason: 'invalid-dependency-specification',
+        },
+      ]);
       expect(res).toHaveLength(2);
     });
 
@@ -85,7 +119,36 @@ describe('modules/manager/buildkite/extract', () => {
                   run: app
       `;
       const res = extractPackageFile(fileContent)?.deps;
-      expect(res).toMatchSnapshot();
+      expect(res).toEqual([
+        {
+          currentValue: 'v2.0.1',
+          datasource: 'github-tags',
+          depName: 'docker-login',
+          packageName: 'buildkite-plugins/docker-login-buildkite-plugin',
+          skipReason: undefined,
+        },
+        {
+          currentValue: 'v2.5.1',
+          datasource: 'github-tags',
+          depName: 'docker-compose',
+          packageName: 'buildkite-plugins/docker-compose-buildkite-plugin',
+          skipReason: undefined,
+        },
+        {
+          currentValue: 'v2.0.1',
+          datasource: 'github-tags',
+          depName: 'docker-login',
+          packageName: 'buildkite-plugins/docker-login-buildkite-plugin',
+          skipReason: undefined,
+        },
+        {
+          currentValue: 'v2.5.1',
+          datasource: 'github-tags',
+          depName: 'docker-compose',
+          packageName: 'buildkite-plugins/docker-compose-buildkite-plugin',
+          skipReason: undefined,
+        },
+      ]);
       expect(res).toHaveLength(4);
     });
 
@@ -98,7 +161,20 @@ describe('modules/manager/buildkite/extract', () => {
                   build: app
       `;
       const res = extractPackageFile(fileContent)?.deps;
-      expect(res).toMatchSnapshot();
+      expect(res).toEqual([
+        {
+          currentValue: 'v3.2.7',
+          datasource: 'github-tags',
+          depName: 'some-org/some-plugin',
+          registryUrls: ['https://github.company.com'],
+        },
+        {
+          currentValue: 'v0.0.1',
+          datasource: 'github-tags',
+          depName: 'some-third-org/some-third-plugin',
+          registryUrls: ['https://github.company.com'],
+        },
+      ]);
       expect(res).toHaveLength(2);
     });
 

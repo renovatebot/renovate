@@ -63,7 +63,14 @@ describe('modules/manager/nuget/extract', () => {
         'with-centralized-package-versions/Directory.Packages.props';
       const sample = Fixtures.get(packageFile);
       const res = await extractPackageFile(sample, packageFile, config);
-      expect(res?.deps).toMatchSnapshot();
+      expect(res?.deps).toEqual([
+        {
+          currentValue: '4.5.0',
+          datasource: 'nuget',
+          depName: 'Autofac',
+          depType: 'nuget',
+        },
+      ]);
       expect(res?.deps).toHaveLength(1);
     });
 
@@ -87,7 +94,150 @@ describe('modules/manager/nuget/extract', () => {
       const packageFile = 'sample.csproj';
       const sample = Fixtures.get(packageFile);
       const res = await extractPackageFile(sample, packageFile, config);
-      expect(res?.deps).toMatchSnapshot();
+      expect(res?.deps).toEqual([
+        {
+          currentValue: '1.0.0',
+          datasource: 'nuget',
+          depName: 'My.Package',
+          depType: 'nuget',
+        },
+        {
+          currentValue: '1.0.0',
+          datasource: 'nuget',
+          depName: 'Microsoft.VisualStudio.Web.CodeGeneration.Tools',
+          depType: 'nuget',
+        },
+        {
+          currentValue: undefined,
+          datasource: 'nuget',
+          depName: 'NotUpdatable3',
+          depType: 'nuget',
+          skipReason: 'invalid-version',
+        },
+        {
+          currentValue: '[1.2.3, 3.2.1)',
+          datasource: 'nuget',
+          depName: 'NotUpdatable3',
+          depType: 'nuget',
+        },
+        {
+          currentValue: '[1.2.3, 3.2.1]',
+          datasource: 'nuget',
+          depName: 'NotUpdatable3',
+          depType: 'nuget',
+        },
+        {
+          currentValue: '(1.2.3, 3.2.1)',
+          datasource: 'nuget',
+          depName: 'NotUpdatable3',
+          depType: 'nuget',
+        },
+        {
+          currentValue: '(1.2.3,)',
+          datasource: 'nuget',
+          depName: 'NotUpdatable2',
+          depType: 'nuget',
+        },
+        {
+          currentValue: '[,1.2.3)',
+          datasource: 'nuget',
+          depName: 'NotUpdatable1',
+          depType: 'nuget',
+        },
+        {
+          currentValue: '[1.2.3,)',
+          datasource: 'nuget',
+          depName: 'Range3',
+          depType: 'nuget',
+        },
+        {
+          currentValue: '[1.2.3,]',
+          datasource: 'nuget',
+          depName: 'Range2',
+          depType: 'nuget',
+        },
+        {
+          currentValue: '[1.2.3]',
+          datasource: 'nuget',
+          depName: 'Range1',
+          depType: 'nuget',
+        },
+        {
+          currentValue: '3.1.0.5',
+          datasource: 'nuget',
+          depName: 'Stateless',
+          depType: 'nuget',
+        },
+        {
+          currentValue: '2.1.0',
+          datasource: 'nuget',
+          depName: 'Serilog.Sinks.Literate',
+          depType: 'nuget',
+        },
+        {
+          currentValue: '1.4.0',
+          datasource: 'nuget',
+          depName: 'Serilog.Extensions.Logging',
+          depType: 'nuget',
+        },
+        {
+          currentValue: '2.4.0',
+          datasource: 'nuget',
+          depName: 'Serilog',
+          depType: 'nuget',
+        },
+        {
+          currentValue: '10.0.2',
+          datasource: 'nuget',
+          depName: 'Newtonsoft.Json',
+          depType: 'nuget',
+        },
+        {
+          currentValue: '1.1.2',
+          datasource: 'nuget',
+          depName: 'Microsoft.Extensions.Logging.Debug',
+          depType: 'nuget',
+        },
+        {
+          currentValue: '1.1.2',
+          datasource: 'nuget',
+          depName: 'Microsoft.Extensions.Configuration.Json',
+          depType: 'nuget',
+        },
+        {
+          currentValue: '1.1.2',
+          datasource: 'nuget',
+          depName: 'Microsoft.AspNetCore.Server.Kestrel',
+          depType: 'nuget',
+        },
+        {
+          currentValue: '1.1.3',
+          datasource: 'nuget',
+          depName: 'Microsoft.AspNetCore.Mvc.Core',
+          depType: 'nuget',
+        },
+        {
+          currentValue: '$(UnknownVariable)',
+          datasource: 'nuget',
+          depName: 'Microsoft.AspNetCore.Hosting',
+          depType: 'nuget',
+          skipReason: 'contains-variable',
+        },
+        {
+          currentValue: '4.5.0',
+          datasource: 'nuget',
+          depName: 'Autofac.Extensions.DependencyInjection',
+          depType: 'nuget',
+          sharedVariableName: 'AutofacVersion',
+        },
+        {
+          currentValue: '4.5.0',
+          datasource: 'nuget',
+          depName: 'Autofac',
+          depType: 'nuget',
+          sharedVariableName: 'AutofacVersion',
+        },
+      ]);
       expect(res?.deps).toHaveLength(23);
     });
 
@@ -265,7 +415,140 @@ describe('modules/manager/nuget/extract', () => {
       const packageFile = 'packages.props';
       const sample = Fixtures.get(packageFile);
       const res = await extractPackageFile(sample, packageFile, config);
-      expect(res?.deps).toMatchSnapshot();
+      expect(res?.deps).toEqual([
+        {
+          currentValue: '1.0.0',
+          datasource: 'nuget',
+          depName: 'Microsoft.VisualStudio.Web.CodeGeneration.Tools',
+          depType: 'nuget',
+        },
+        {
+          currentValue: '[1.2.3, 3.2.1)',
+          datasource: 'nuget',
+          depName: 'NotUpdatable3',
+          depType: 'nuget',
+        },
+        {
+          currentValue: '[1.2.3, 3.2.1]',
+          datasource: 'nuget',
+          depName: 'NotUpdatable3',
+          depType: 'nuget',
+        },
+        {
+          currentValue: '(1.2.3, 3.2.1)',
+          datasource: 'nuget',
+          depName: 'NotUpdatable3',
+          depType: 'nuget',
+        },
+        {
+          currentValue: '(1.2.3,)',
+          datasource: 'nuget',
+          depName: 'NotUpdatable2',
+          depType: 'nuget',
+        },
+        {
+          currentValue: '[,1.2.3)',
+          datasource: 'nuget',
+          depName: 'NotUpdatable1',
+          depType: 'nuget',
+        },
+        {
+          currentValue: '[1.2.3,)',
+          datasource: 'nuget',
+          depName: 'Range3',
+          depType: 'nuget',
+        },
+        {
+          currentValue: '[1.2.3,]',
+          datasource: 'nuget',
+          depName: 'Range2',
+          depType: 'nuget',
+        },
+        {
+          currentValue: '[1.2.3]',
+          datasource: 'nuget',
+          depName: 'Range1',
+          depType: 'nuget',
+        },
+        {
+          currentValue: '3.1.0.5',
+          datasource: 'nuget',
+          depName: 'Stateless',
+          depType: 'nuget',
+        },
+        {
+          currentValue: '2.1.0',
+          datasource: 'nuget',
+          depName: 'Serilog.Sinks.Literate',
+          depType: 'nuget',
+        },
+        {
+          currentValue: '1.4.0',
+          datasource: 'nuget',
+          depName: 'Serilog.Extensions.Logging',
+          depType: 'nuget',
+        },
+        {
+          currentValue: '2.4.0',
+          datasource: 'nuget',
+          depName: 'Serilog',
+          depType: 'nuget',
+        },
+        {
+          currentValue: '10.0.2',
+          datasource: 'nuget',
+          depName: 'Newtonsoft.Json',
+          depType: 'nuget',
+        },
+        {
+          currentValue: '1.1.2',
+          datasource: 'nuget',
+          depName: 'Microsoft.Extensions.Logging.Debug',
+          depType: 'nuget',
+        },
+        {
+          currentValue: '1.1.2',
+          datasource: 'nuget',
+          depName: 'Microsoft.Extensions.Configuration.Json',
+          depType: 'nuget',
+        },
+        {
+          currentValue: '1.1.2',
+          datasource: 'nuget',
+          depName: 'Microsoft.AspNetCore.Server.Kestrel',
+          depType: 'nuget',
+        },
+        {
+          currentValue: '1.1.3',
+          datasource: 'nuget',
+          depName: 'Microsoft.AspNetCore.Mvc.Core',
+          depType: 'nuget',
+        },
+        {
+          currentValue: '1.1.2',
+          datasource: 'nuget',
+          depName: 'Microsoft.AspNetCore.Hosting',
+          depType: 'nuget',
+        },
+        {
+          currentValue: '4.1.0',
+          datasource: 'nuget',
+          depName: 'Autofac.Extensions.DependencyInjection',
+          depType: 'nuget',
+        },
+        {
+          currentValue: '4.5.0',
+          datasource: 'nuget',
+          depName: 'Autofac',
+          depType: 'nuget',
+        },
+        {
+          currentValue: '2.0.0',
+          datasource: 'nuget',
+          depName: 'Roslynator.Analyzers',
+          depType: 'nuget',
+        },
+      ]);
       expect(res?.deps).toHaveLength(22);
     });
 

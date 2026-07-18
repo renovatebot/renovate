@@ -89,7 +89,28 @@ describe('modules/manager/cargo/artifacts', () => {
         config,
       }),
     ).toBeNull();
-    expect(execSnapshots).toMatchSnapshot();
+    expect(execSnapshots).toEqual([
+      {
+        cmd: 'cargo update --config net.git-fetch-with-cli=true --manifest-path Cargo.toml --workspace',
+        options: {
+          cwd: '/tmp/github/some/repo',
+          env: {
+            HOME: '/home/user',
+            HTTPS_PROXY: 'https://example.com',
+            HTTP_PROXY: 'http://example.com',
+            LANG: 'en_US.UTF-8',
+            LC_ALL: 'en_US',
+            NO_PROXY: 'localhost',
+            PATH: '/tmp/path',
+          },
+          maxBuffer: 10485760,
+          stderr: 'pipe',
+          stdin: 'pipe',
+          stdout: 'pipe',
+          timeout: 900000,
+        },
+      },
+    ]);
   });
 
   it('returns updated Cargo.lock', async () => {
@@ -113,7 +134,28 @@ describe('modules/manager/cargo/artifacts', () => {
         config,
       }),
     ).not.toBeNull();
-    expect(execSnapshots).toMatchSnapshot();
+    expect(execSnapshots).toEqual([
+      {
+        cmd: 'cargo update --config net.git-fetch-with-cli=true --manifest-path Cargo.toml --workspace',
+        options: {
+          cwd: '/tmp/github/some/repo',
+          env: {
+            HOME: '/home/user',
+            HTTPS_PROXY: 'https://example.com',
+            HTTP_PROXY: 'http://example.com',
+            LANG: 'en_US.UTF-8',
+            LC_ALL: 'en_US',
+            NO_PROXY: 'localhost',
+            PATH: '/tmp/path',
+          },
+          maxBuffer: 10485760,
+          stderr: 'pipe',
+          stdin: 'pipe',
+          stdout: 'pipe',
+          timeout: 900000,
+        },
+      },
+    ]);
   });
 
   it('returns updated Cargo.lock with precise version update', async () => {
@@ -449,7 +491,28 @@ describe('modules/manager/cargo/artifacts', () => {
         config,
       }),
     ).not.toBeNull();
-    expect(execSnapshots).toMatchSnapshot();
+    expect(execSnapshots).toEqual([
+      {
+        cmd: 'cargo update --config net.git-fetch-with-cli=true --manifest-path Cargo.toml --workspace',
+        options: {
+          cwd: '/tmp/github/some/repo',
+          env: {
+            HOME: '/home/user',
+            HTTPS_PROXY: 'https://example.com',
+            HTTP_PROXY: 'http://example.com',
+            LANG: 'en_US.UTF-8',
+            LC_ALL: 'en_US',
+            NO_PROXY: 'localhost',
+            PATH: '/tmp/path',
+          },
+          maxBuffer: 10485760,
+          stderr: 'pipe',
+          stdin: 'pipe',
+          stdout: 'pipe',
+          timeout: 900000,
+        },
+      },
+    ]);
   });
 
   it('returns updated workspace Cargo.lock', async () => {
@@ -479,7 +542,28 @@ describe('modules/manager/cargo/artifacts', () => {
         config,
       }),
     ).not.toBeNull();
-    expect(execSnapshots).toMatchSnapshot();
+    expect(execSnapshots).toEqual([
+      {
+        cmd: 'cargo update --config net.git-fetch-with-cli=true --manifest-path crates/one/Cargo.toml --workspace',
+        options: {
+          cwd: '/tmp/github/some/repo',
+          env: {
+            HOME: '/home/user',
+            HTTPS_PROXY: 'https://example.com',
+            HTTP_PROXY: 'http://example.com',
+            LANG: 'en_US.UTF-8',
+            LC_ALL: 'en_US',
+            NO_PROXY: 'localhost',
+            PATH: '/tmp/path',
+          },
+          maxBuffer: 10485760,
+          stderr: 'pipe',
+          stdin: 'pipe',
+          stdout: 'pipe',
+          timeout: 900000,
+        },
+      },
+    ]);
   });
 
   it('returns updated Cargo.lock for lockfile maintenance', async () => {
@@ -500,7 +584,28 @@ describe('modules/manager/cargo/artifacts', () => {
         },
       }),
     ).not.toBeNull();
-    expect(execSnapshots).toMatchSnapshot();
+    expect(execSnapshots).toEqual([
+      {
+        cmd: 'cargo update --config net.git-fetch-with-cli=true --manifest-path Cargo.toml',
+        options: {
+          cwd: '/tmp/github/some/repo',
+          env: {
+            HOME: '/home/user',
+            HTTPS_PROXY: 'https://example.com',
+            HTTP_PROXY: 'http://example.com',
+            LANG: 'en_US.UTF-8',
+            LC_ALL: 'en_US',
+            NO_PROXY: 'localhost',
+            PATH: '/tmp/path',
+          },
+          maxBuffer: 10485760,
+          stderr: 'pipe',
+          stdin: 'pipe',
+          stdout: 'pipe',
+          timeout: 900000,
+        },
+      },
+    ]);
   });
 
   it('supports docker mode', async () => {

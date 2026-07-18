@@ -272,7 +272,212 @@ describe('modules/datasource/crate/index', () => {
         packageName: 'libc',
         registryUrls: [CRATES_IO_REGISTRY_URL],
       });
-      expect(res).toMatchSnapshot();
+      expect(res).toEqual({
+        dependencyUrl: 'https://crates.io/crates/libc',
+        registryUrl: 'sparse+https://index.crates.io',
+        releases: [
+          {
+            version: '0.1.0',
+          },
+          {
+            version: '0.1.1',
+          },
+          {
+            version: '0.1.2',
+          },
+          {
+            version: '0.1.3',
+          },
+          {
+            version: '0.1.4',
+          },
+          {
+            version: '0.1.5',
+          },
+          {
+            version: '0.1.6',
+          },
+          {
+            version: '0.1.7',
+          },
+          {
+            version: '0.1.8',
+          },
+          {
+            isDeprecated: true,
+            version: '0.1.9',
+          },
+          {
+            version: '0.1.10',
+          },
+          {
+            isDeprecated: true,
+            version: '0.1.11',
+          },
+          {
+            version: '0.1.12',
+          },
+          {
+            version: '0.2.0',
+          },
+          {
+            version: '0.2.1',
+          },
+          {
+            version: '0.2.2',
+          },
+          {
+            version: '0.2.3',
+          },
+          {
+            version: '0.2.4',
+          },
+          {
+            version: '0.2.5',
+          },
+          {
+            version: '0.2.6',
+          },
+          {
+            version: '0.2.7',
+          },
+          {
+            version: '0.2.8',
+          },
+          {
+            version: '0.2.9',
+          },
+          {
+            version: '0.2.10',
+          },
+          {
+            version: '0.2.11',
+          },
+          {
+            version: '0.2.12',
+          },
+          {
+            version: '0.2.13',
+          },
+          {
+            version: '0.2.14',
+          },
+          {
+            version: '0.2.15',
+          },
+          {
+            version: '0.2.16',
+          },
+          {
+            version: '0.2.17',
+          },
+          {
+            version: '0.2.18',
+          },
+          {
+            version: '0.2.19',
+          },
+          {
+            version: '0.2.20',
+          },
+          {
+            version: '0.2.21',
+          },
+          {
+            version: '0.2.22',
+          },
+          {
+            version: '0.2.23',
+          },
+          {
+            version: '0.2.24',
+          },
+          {
+            version: '0.2.25',
+          },
+          {
+            version: '0.2.26',
+          },
+          {
+            version: '0.2.27',
+          },
+          {
+            version: '0.2.28',
+          },
+          {
+            version: '0.2.29',
+          },
+          {
+            version: '0.2.30',
+          },
+          {
+            version: '0.2.31',
+          },
+          {
+            version: '0.2.32',
+          },
+          {
+            version: '0.2.33',
+          },
+          {
+            version: '0.2.34',
+          },
+          {
+            version: '0.2.35',
+          },
+          {
+            version: '0.2.36',
+          },
+          {
+            version: '0.2.37',
+          },
+          {
+            version: '0.2.38',
+          },
+          {
+            version: '0.2.39',
+          },
+          {
+            version: '0.2.40',
+          },
+          {
+            version: '0.2.41',
+          },
+          {
+            version: '0.2.42',
+          },
+          {
+            version: '0.2.43',
+          },
+          {
+            version: '0.2.44',
+          },
+          {
+            version: '0.2.45',
+          },
+          {
+            version: '0.2.46',
+          },
+          {
+            version: '0.2.47',
+          },
+          {
+            version: '0.2.48',
+          },
+          {
+            version: '0.2.49',
+          },
+          {
+            releaseTimestamp: '2019-03-05T11:06:03.000Z',
+            version: '0.2.50',
+          },
+          {
+            version: '0.2.51',
+            versionOrig: '0.2.51+metadata',
+          },
+        ],
+        sourceUrl: 'https://github.com/rust-lang/libc',
+      });
       expect(res).not.toBeNull();
       expect(res).toBeDefined();
     });
@@ -290,7 +495,72 @@ describe('modules/datasource/crate/index', () => {
         packageName: 'amethyst',
         registryUrls: [CRATES_IO_REGISTRY_URL],
       });
-      expect(res).toMatchSnapshot();
+      expect(res).toEqual({
+        dependencyUrl: 'https://crates.io/crates/amethyst',
+        homepage: 'https://amethyst.rs/',
+        registryUrl: 'sparse+https://index.crates.io',
+        releases: [
+          {
+            version: '0.1.0',
+          },
+          {
+            version: '0.1.1',
+          },
+          {
+            version: '0.1.3',
+          },
+          {
+            version: '0.1.4',
+          },
+          {
+            version: '0.2.1',
+          },
+          {
+            version: '0.3.0',
+          },
+          {
+            version: '0.3.1',
+          },
+          {
+            version: '0.4.0',
+          },
+          {
+            version: '0.4.1',
+          },
+          {
+            version: '0.4.2',
+          },
+          {
+            version: '0.4.3',
+          },
+          {
+            version: '0.5.0',
+          },
+          {
+            version: '0.5.1',
+          },
+          {
+            version: '0.6.0',
+          },
+          {
+            version: '0.7.0',
+          },
+          {
+            version: '0.8.0',
+          },
+          {
+            version: '0.9.0',
+          },
+          {
+            version: '0.10.0',
+          },
+          {
+            isDeprecated: true,
+            version: '0.10.1',
+          },
+        ],
+        sourceUrl: 'https://github.com/amethyst/amethyst',
+      });
       expect(res).not.toBeNull();
       expect(res).toBeDefined();
     });
@@ -308,7 +578,26 @@ describe('modules/datasource/crate/index', () => {
         packageName: 'sentry',
         registryUrls: [CRATES_IO_REGISTRY_URL],
       });
-      expect(res).toMatchSnapshot();
+      expect(res).toEqual({
+        dependencyUrl: 'https://crates.io/crates/sentry',
+        homepage: 'https://sentry.io/welcome/',
+        registryUrl: 'sparse+https://index.crates.io',
+        releases: [
+          {
+            releaseTimestamp: '2016-05-20T17:24:17.000Z',
+            version: '0.1.0',
+          },
+          {
+            releaseTimestamp: '2016-05-22T17:14:04.000Z',
+            version: '0.1.1',
+          },
+          {
+            releaseTimestamp: '2016-05-29T18:29:40.000Z',
+            version: '0.1.2',
+          },
+        ],
+        sourceUrl: 'https://github.com/getsentry/sentry-rust',
+      });
       expect(res).not.toBeNull();
       expect(res).toBeDefined();
     });
@@ -366,7 +655,20 @@ describe('modules/datasource/crate/index', () => {
         registryUrls: [url],
       });
       expect(mockClone).toHaveBeenCalled();
-      expect(res).toMatchSnapshot();
+      expect(res).toEqual({
+        dependencyUrl:
+          'https://cloudsmith.io/~myorg/repos/myrepo/packages/detail/cargo/mypkg',
+        registryUrl:
+          'https://dl.cloudsmith.io/basic/myorg/myrepo/cargo/index.git',
+        releases: [
+          {
+            version: '0.1.0',
+          },
+          {
+            version: '0.1.1',
+          },
+        ],
+      });
       expect(res).not.toBeNull();
       expect(res).toBeDefined();
     });
@@ -398,7 +700,18 @@ describe('modules/datasource/crate/index', () => {
         registryUrls: [url],
       });
       expect(mockClone).toHaveBeenCalled();
-      expect(res).toMatchSnapshot();
+      expect(res).toEqual({
+        dependencyUrl: 'https://github.com/mcorbin/testregistry/mypkg',
+        registryUrl: 'https://github.com/mcorbin/testregistry',
+        releases: [
+          {
+            version: '0.1.0',
+          },
+          {
+            version: '0.1.1',
+          },
+        ],
+      });
       expect(res).not.toBeNull();
       expect(res).toBeDefined();
     });
