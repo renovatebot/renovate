@@ -8,7 +8,7 @@ const googleAuth = vi.mocked(_googleAuth);
 
 describe('modules/datasource/utils', () => {
   it('is artifactory server invalid', () => {
-    const response: HttpResponse<string> = {
+    const response: HttpResponse = {
       statusCode: 200,
       body: 'test',
       headers: { 'invalid-header': 'version' },
@@ -17,7 +17,7 @@ describe('modules/datasource/utils', () => {
   });
 
   it('is artifactory server valid', () => {
-    const response: HttpResponse<string> = {
+    const response: HttpResponse = {
       statusCode: 200,
       body: 'test',
       headers: { 'x-jfrog-version': 'version' },

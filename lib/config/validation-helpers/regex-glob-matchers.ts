@@ -26,13 +26,11 @@ export function check({
       // Validate regex pattern
       // No need to validate if the string is a glob
       // minimatch allows any string as glob
-      if (isRegexMatch(matcher)) {
-        if (!getRegexPredicate(matcher)) {
-          res.push({
-            topic: 'Configuration Error',
-            message: `Failed to parse regex pattern for ${currentPath}: ${matcher}`,
-          });
-        }
+      if (isRegexMatch(matcher) && !getRegexPredicate(matcher)) {
+        res.push({
+          topic: 'Configuration Error',
+          message: `Failed to parse regex pattern for ${currentPath}: ${matcher}`,
+        });
       }
     }
   } else {

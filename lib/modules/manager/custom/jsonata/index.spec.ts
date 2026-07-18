@@ -52,17 +52,19 @@ describe('modules/manager/custom/jsonata/index', () => {
     const config = {
       fileFormat: 'json',
       matchStrings: [
-        `packages.{
-            "depName": dep_name,
-            "packageName": package_name,
-            "currentValue": current_value,
-            "currentDigest": current_digest,
-            "datasource": data_source,
-            "versioning": versioning,
-            "extractVersion": extract_version,
-            "registryUrl": registry_url,
-            "depType": dep_type
-        }`,
+        codeBlock`
+          packages.{
+                      "depName": dep_name,
+                      "packageName": package_name,
+                      "currentValue": current_value,
+                      "currentDigest": current_digest,
+                      "datasource": data_source,
+                      "versioning": versioning,
+                      "extractVersion": extract_version,
+                      "registryUrl": registry_url,
+                      "depType": dep_type
+                  }
+        `,
       ],
     };
     const res = await extractPackageFile(json, 'unused', config);
@@ -105,17 +107,19 @@ describe('modules/manager/custom/jsonata/index', () => {
     const config = {
       fileFormat: 'yaml',
       matchStrings: [
-        `packages.{
-            "depName": dep_name,
-            "packageName": package_name,
-            "currentValue": current_value,
-            "currentDigest": current_digest,
-            "datasource": data_source,
-            "versioning": versioning,
-            "extractVersion": extract_version,
-            "registryUrl": registry_url,
-            "depType": dep_type
-        }`,
+        codeBlock`
+          packages.{
+                      "depName": dep_name,
+                      "packageName": package_name,
+                      "currentValue": current_value,
+                      "currentDigest": current_digest,
+                      "datasource": data_source,
+                      "versioning": versioning,
+                      "extractVersion": extract_version,
+                      "registryUrl": registry_url,
+                      "depType": dep_type
+                  }
+        `,
       ],
     };
     const res = await extractPackageFile(json, 'unused', config);
@@ -159,17 +163,19 @@ describe('modules/manager/custom/jsonata/index', () => {
     const config = {
       fileFormat: 'json',
       matchStrings: [
-        `packages.{
-            "depName": dep_name,
-            "packageName": package_name,
-            "currentValue": current_value,
-            "currentDigest": current_digest,
-            "datasource": data_source,
-            "versioning": versioning,
-            "extractVersion": extract_version,
-            "registryUrl": registry_url,
-            "depType": dep_type
-        }`,
+        codeBlock`
+          packages.{
+                      "depName": dep_name,
+                      "packageName": package_name,
+                      "currentValue": current_value,
+                      "currentDigest": current_digest,
+                      "datasource": data_source,
+                      "versioning": versioning,
+                      "extractVersion": extract_version,
+                      "registryUrl": registry_url,
+                      "depType": dep_type
+                  }
+        `,
       ],
       depNameTemplate:
         '{{#if depName}}{{depName}}{{else}}default-dep-name{{/if}}',
@@ -241,11 +247,13 @@ describe('modules/manager/custom/jsonata/index', () => {
     const config = {
       fileFormat: 'json',
       matchStrings: [
-        `packages.{
-            "depName": dep_name,
-            "currentValue": current_value,
-            "datasource": data_source
-        }`,
+        codeBlock`
+          packages.{
+                      "depName": dep_name,
+                      "currentValue": current_value,
+                      "datasource": data_source
+                  }
+        `,
       ],
     };
     const res = await extractPackageFile(json, 'unused', config);
@@ -413,17 +421,19 @@ describe('modules/manager/custom/jsonata/index', () => {
     const config = {
       fileFormat: 'toml',
       matchStrings: [
-        `packages.{
-            "depName": dep_name,
-            "packageName": package_name,
-            "currentValue": current_value,
-            "currentDigest": current_digest,
-            "datasource": data_source,
-            "versioning": versioning,
-            "extractVersion": extract_version,
-            "registryUrl": registry_url,
-            "depType": dep_type
-        }`,
+        codeBlock`
+          packages.{
+                      "depName": dep_name,
+                      "packageName": package_name,
+                      "currentValue": current_value,
+                      "currentDigest": current_digest,
+                      "datasource": data_source,
+                      "versioning": versioning,
+                      "extractVersion": extract_version,
+                      "registryUrl": registry_url,
+                      "depType": dep_type
+                  }
+        `,
       ],
     };
     const res = await extractPackageFile(json, 'unused', config);

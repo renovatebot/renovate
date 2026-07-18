@@ -78,9 +78,8 @@ export async function isOnboardingBranchModified(
     !isUndefined(onboardingCache.isModified)
   ) {
     return onboardingCache.isModified;
-  } else {
-    isModified = await scm.isBranchModified(onboardingBranch, defaultBranch);
   }
+  isModified = await scm.isBranchModified(onboardingBranch, defaultBranch);
 
   return isModified;
 }
@@ -123,12 +122,8 @@ export async function isOnboardingBranchConflicted(
     !isUndefined(onboardingCache.isConflicted)
   ) {
     return onboardingCache.isConflicted;
-  } else {
-    isConflicted = await scm.isBranchConflicted(
-      defaultBranch,
-      onboardingBranch,
-    );
   }
+  isConflicted = await scm.isBranchConflicted(defaultBranch, onboardingBranch);
 
   return isConflicted;
 }

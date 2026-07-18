@@ -25,9 +25,8 @@ export function normalizeScalaVersion(str: string): string {
   if (regEx(/^\d+\.\d+\.\d+$/).test(str)) {
     if (isScala3) {
       return str.replace(regEx(/^(\d+)\.(\d+)\.\d+$/), '$1');
-    } else {
-      return str.replace(regEx(/^(\d+)\.(\d+)\.\d+$/), '$1.$2');
     }
+    return str.replace(regEx(/^(\d+)\.(\d+)\.\d+$/), '$1.$2');
   }
   // istanbul ignore next
   return str;

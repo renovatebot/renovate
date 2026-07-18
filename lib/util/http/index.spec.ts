@@ -657,7 +657,7 @@ describe('util/http/index', () => {
           .get('/')
           .reply(200, JSON.stringify({ x: 2, y: 2 }));
 
-        const { body }: HttpResponse<string> = await http.getJson(
+        const { body }: HttpResponse = await http.getJson(
           'http://renovate.com',
           { headers: { accept: 'application/json' } },
           Some,
@@ -731,7 +731,7 @@ describe('util/http/index', () => {
           .post('/')
           .reply(200, JSON.stringify({ x: 2, y: 2 }));
 
-        const { body }: HttpResponse<string> = await http.postJson(
+        const { body }: HttpResponse = await http.postJson(
           'http://renovate.com',
           Some,
         );

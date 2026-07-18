@@ -470,7 +470,8 @@ describe('util/http/github', () => {
         ).rejects.toThrow(PLATFORM_RATE_LIMIT_EXCEEDED);
 
         expect(logger.logger.once.warn).toHaveBeenCalledWith(
-          'Rate limit exceeded for github.enterprise.example.com, as no hostRules set for this host',
+          { host: 'github.enterprise.example.com' },
+          'Rate limit exceeded, as no hostRules set for this host',
         );
       });
 
