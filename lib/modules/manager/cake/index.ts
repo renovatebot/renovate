@@ -20,7 +20,7 @@ export const supportedDatasources = [NugetDatasource.id];
 const lexer = moo.states({
   main: {
     lineComment: { match: /\/\/.*?$/ }, // TODO #12870
-    multiLineComment: { match: /\/\*[\s\S]*?\*\//, lineBreaks: true },
+    multiLineComment: { match: /\/\*[^]*?\*\//, lineBreaks: true }, // TODO #12870
     dependency: {
       match: /^#(?:addin|tool|module|load|l)\s+(?:nuget|dotnet):.*$/, // TODO #12870
     },
