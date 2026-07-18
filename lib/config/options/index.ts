@@ -447,6 +447,10 @@ const options: Readonly<RenovateOptions>[] = [
     globalOnly: true,
     default: {},
     mergeable: true,
+    freeChoice: true,
+    additionalProperties: {
+      $ref: '#',
+    },
     cli: false,
     env: false,
   },
