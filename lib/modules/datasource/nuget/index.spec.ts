@@ -3,7 +3,7 @@ import upath from 'upath';
 import { mockDeep } from 'vitest-mock-extended';
 import { Fixtures } from '~test/fixtures.ts';
 import * as httpMock from '~test/http-mock.ts';
-import { hostRules, logger } from '~test/util.ts';
+import { logger } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import * as _packageCache from '../../../util/cache/package/index.ts';
 import { id as versioning } from '../../versioning/nuget/index.ts';
@@ -13,7 +13,6 @@ import { NugetDatasource } from './index.ts';
 
 const datasource = NugetDatasource.id;
 
-vi.mock('../../../util/host-rules.ts', () => mockDeep());
 vi.mock('../../../util/cache/package/index.ts', () => mockDeep());
 
 const packageCache = vi.mocked(_packageCache);
@@ -154,11 +153,6 @@ describe('modules/datasource/nuget/index', () => {
   });
 
   describe('getReleases', () => {
-    beforeEach(() => {
-      hostRules.hosts.mockReturnValue([]);
-      hostRules.find.mockReturnValue({});
-    });
-
     it(`can't detect nuget feed version`, async () => {
       const config = {
         datasource,
