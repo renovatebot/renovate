@@ -1,4 +1,14 @@
 /**
+ * Note on the `next <N>` count form of these coverage-ignore hints:
+ * empirically verified against vitest 4 (`@vitest/coverage-v8` with
+ * `ast-v8-to-istanbul`) that the count `N` is NOT honored — the hint parser
+ * only captures the keyword (`if`/`else`/`next`/`file`) and `next` always
+ * exempts exactly the next AST node, however many lines it spans: `next 2`
+ * before two sibling statements exempts only the first, while `next 1`
+ * before a multi-line `if` block exempts the whole block. Existing counts
+ * are inert noise and remain allowed by this rule; only a justification is
+ * required.
+ *
  * A `stop` marker only terminates a region opened by `start`; the
  * justification lives on the `start` marker, so bare stops are exempt.
  */
