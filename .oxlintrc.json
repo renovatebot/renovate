@@ -180,6 +180,16 @@
       { "assertFunctionNames": ["expect", "expectTypeOf", "checkKeysSorted"] }
     ],
     "vitest/no-conditional-expect": "error",
+    "vitest/no-restricted-matchers": [
+      "error",
+      {
+        "toMatchSnapshot": "Prefer explicit assertions; use toMatchInlineSnapshot for huge strings so the expected value stays visible in the test file.",
+        "toThrowErrorMatchingSnapshot": "Prefer toThrow with a message; use toThrowErrorMatchingInlineSnapshot for huge error messages.",
+        "rejects.toThrowErrorMatchingSnapshot": "Prefer rejects.toThrow with a message; use rejects.toThrowErrorMatchingInlineSnapshot for huge error messages.",
+        "resolves.toMatchSnapshot": "Prefer explicit assertions; use toMatchInlineSnapshot for huge strings so the expected value stays visible in the test file.",
+        "toMatchFileSnapshot": "Prefer explicit assertions; use toMatchInlineSnapshot for huge strings so the expected value stays visible in the test file."
+      }
+    ],
     "vitest/no-standalone-expect": "error",
     "vitest/prefer-snapshot-hint": "error",
     "vitest/require-to-throw-message": "error"
