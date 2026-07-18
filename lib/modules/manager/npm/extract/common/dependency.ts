@@ -16,7 +16,7 @@ import {
 import type { PackageDependency } from '../../../types.ts';
 
 const RE_REPOSITORY_GITHUB_SSH_FORMAT = regEx(
-  /(?:git@)github.com:([^/]+)\/([^/]+?)(?:\.git)?$/,
+  /(?:git@)github.com:(?<owner>[^/]+)\/(?<repo>[^/]+?)(?:\.git)?$/,
 );
 
 export function parseDepName(depType: string, key: string): string {
@@ -24,7 +24,8 @@ export function parseDepName(depType: string, key: string): string {
     return key;
   }
 
-  const [, depName] = regEx(/((?:@[^/]+\/)?[^/@]+)$/).exec(key) ?? [];
+  const { depName } =
+    regEx(/(?<depName>(?:@[^/]+\/)?[^/@]+)$/).exec(key)?.groups ?? {};
   return depName;
 }
 
@@ -153,8 +154,8 @@ export function extractDependency(
     }
     [githubOwner, githubRepo] = githubRepoSplit;
   } else {
-    githubOwner = matchUrlSshFormat[1];
-    githubRepo = matchUrlSshFormat[2];
+    githubOwner = matchUrlSshFormat.groups!.owner;
+    githubRepo = matchUrlSshFormat.groups!.repo;
     githubOwnerRepo = `${githubOwner}/${githubRepo}`;
   }
   const githubOwnerRegex = /^[a-z\d](?:[a-z\d]|-(?=[a-z\d])){0,38}$/i; // TODO #12872 lookahead

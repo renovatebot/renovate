@@ -63,9 +63,11 @@ export function getPoetryRequirement(
 ): undefined | string | null {
   // Read Poetry version from first line of poetry.lock
   const firstLine = existingLockFileContent.split('\n')[0];
-  const poetryVersionMatch = regEx(/by Poetry ([\d\\.]+)/).exec(firstLine);
-  if (poetryVersionMatch?.[1]) {
-    const poetryVersion = poetryVersionMatch[1];
+  const poetryVersionMatch = regEx(/by Poetry (?<version>[\d\\.]+)/).exec(
+    firstLine,
+  );
+  if (poetryVersionMatch?.groups?.version) {
+    const poetryVersion = poetryVersionMatch.groups.version;
     logger.debug(
       `Using poetry version ${poetryVersion} from poetry.lock header`,
     );
@@ -154,7 +156,7 @@ async function getSourceCredentialVars(
   for (const source of poetrySources) {
     const matchingHostRule = await getMatchingHostRule(source.url);
     const formattedSourceName = source.name
-      .replace(regEx(/(\.|-)+/g), '_')
+      .replace(regEx(/(?:\.|-)+/g), '_')
       .toUpperCase();
     if (matchingHostRule.username) {
       envVars[`POETRY_HTTP_BASIC_${formattedSourceName}_USERNAME`] =

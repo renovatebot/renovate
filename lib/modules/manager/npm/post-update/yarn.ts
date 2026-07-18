@@ -55,7 +55,10 @@ export async function checkYarnrc(
         .split(newlineRegex)
         .find((line) => line.startsWith('yarn-path '));
       if (pathLine) {
-        yarnPath = pathLine.replace(regEx(/^yarn-path\s+"?(.+?)"?$/), '$1');
+        yarnPath = pathLine.replace(
+          regEx(/^yarn-path\s+"?(?<path>.+?)"?$/),
+          '$<path>',
+        );
       }
       if (yarnPath) {
         // resolve binary relative to `yarnrc`

@@ -8,12 +8,14 @@ import { PypiDatasource } from '../../datasource/pypi/index.ts';
 import type { PackageDependency, PackageFileContent } from '../types.ts';
 
 function getSectionName(str: string): string {
-  const [, sectionName] = regEx(/^\[\s*([^\s]+)\s*]\s*$/).exec(str) ?? [];
+  const [, sectionName] =
+    regEx(/^\[\s*(?<sectionName>[^\s]+)\s*]\s*$/).exec(str) ?? [];
   return sectionName;
 }
 
 function getSectionRecord(str: string): string {
-  const [, sectionRecord] = regEx(/^([^\s]+)\s*=/).exec(str) ?? [];
+  const [, sectionRecord] =
+    regEx(/^(?<sectionRecord>[^\s]+)\s*=/).exec(str) ?? [];
   return sectionRecord;
 }
 
