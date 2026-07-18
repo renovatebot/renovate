@@ -8,18 +8,27 @@ import { regEx } from './regex.ts';
 export function sanitizeMarkdown(markdown: string): string {
   let res = markdown;
   // Put a zero width space after every # followed by a digit
-  res = res.replace(regEx(/(\W)#(\d)/gi), '$1#&#8203;$2');
+  res = res.replace(
+    regEx(/(?<pre>\W)#(?<digit>\d)/gi),
+    '$<pre>#&#8203;$<digit>',
+  );
   // Put a zero width space after every @ symbol to prevent unintended hyperlinking
   res = res.replace(regEx(/@/g), '@&#8203;');
-  res = res.replace(regEx(/(`\[?@)&#8203;/g), '$1');
-  res = res.replace(regEx(/([a-z]@)&#8203;/gi), '$1');
+  res = res.replace(regEx(/(?<pre>`\[?@)&#8203;/g), '$<pre>');
+  res = res.replace(regEx(/(?<pre>[a-z]@)&#8203;/gi), '$<pre>');
   res = res.replace(regEx(/\/compare\/@&#8203;/g), '/compare/@');
-  res = res.replace(regEx(/(\(https:\/\/[^)]*?)\.\.\.@&#8203;/g), '$1...@');
-  res = res.replace(regEx(/([\s(])#(\d+)([)\s]?)/g), '$1#&#8203;$2$3');
+  res = res.replace(
+    regEx(/(?<pre>\(https:\/\/[^)]*?)\.\.\.@&#8203;/g),
+    '$<pre>...@',
+  );
+  res = res.replace(
+    regEx(/(?<pre>[\s(])#(?<digits>\d+)(?<post>[)\s]?)/g),
+    '$<pre>#&#8203;$<digits>$<post>',
+  );
   // convert escaped backticks back to `
-  const backTickRe = regEx(/&#x60;([^/]*?)&#x60;/g);
-  res = res.replace(backTickRe, '`$1`');
-  res = res.replace(regEx(/`#&#8203;(\d+)`/g), '`#$1`');
+  const backTickRe = regEx(/&#x60;(?<content>[^/]*?)&#x60;/g);
+  res = res.replace(backTickRe, '`$<content>`');
+  res = res.replace(regEx(/`#&#8203;(?<digits>\d+)`/g), '`#$<digits>`');
   res = res.replace(
     regEx(/(?<before>[^\n]\n)(?<title>#.*)/g),
     '$<before>\n$<title>',
