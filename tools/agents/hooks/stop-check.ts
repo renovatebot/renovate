@@ -4,14 +4,12 @@ import { block } from './utils/output.ts';
 
 const changedFiles = await getChangedFiles();
 
-try {
-  if (changedFiles.length > 0) {
+if (changedFiles.length > 0) {
+  try {
     await exec('pnpm', ['check', '--all', ...changedFiles]);
-  } else {
-    await exec('pnpm', ['check', '--all']);
+  } catch {
+    block(
+      'pnpm check --all failed — the issues must be resolved before finishing',
+    );
   }
-} catch {
-  block(
-    'pnpm check --all failed — the issues must be resolved before finishing',
-  );
 }

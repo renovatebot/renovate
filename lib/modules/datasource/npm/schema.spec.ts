@@ -157,11 +157,11 @@ describe('modules/datasource/npm/schema', () => {
       };
       const result = NpmResponse.parse(input);
       expect(result.repository).toEqual({
-        url: null,
+        url: undefined,
         directory: 'packages/core',
       });
       expect(result.versions?.['1.0.0']?.repository).toEqual({
-        url: null,
+        url: undefined,
         directory: 'test',
       });
     });

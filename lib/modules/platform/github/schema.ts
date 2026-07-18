@@ -1,6 +1,10 @@
 import { z } from 'zod/v4';
 import { logger } from '../../../logger/index.ts';
-import { LooseArray } from '../../../util/schema-utils/index.ts';
+import {
+  DeepNullish,
+  LooseArray,
+  Nullish,
+} from '../../../util/schema-utils/index.ts';
 
 const Ecosystem = z.enum([
   'actions',
@@ -30,7 +34,7 @@ const Severity = z.enum(['low', 'medium', 'high', 'critical']);
 
 const SecurityVulnerability = z
   .object({
-    first_patched_version: z.object({ identifier: z.string() }).nullish(),
+    first_patched_version: Nullish(z.object({ identifier: z.string() })),
     package: Package,
     severity: Severity,
     vulnerable_version_range: z.string(),
@@ -54,18 +58,20 @@ const SecurityAdvisory = z.object({
   ),
   references: z.array(z.object({ url: z.string() })).optional(),
   severity: Severity,
-  cvss_severities: z
-    .object({
-      cvss_v3: CvssSeverity.nullish(),
-      cvss_v4: CvssSeverity.nullish(),
-    })
-    .nullish(),
+  cvss_severities: Nullish(
+    DeepNullish(
+      z.object({
+        cvss_v3: CvssSeverity.optional(),
+        cvss_v4: CvssSeverity.optional(),
+      }),
+    ),
+  ),
 });
 export type SecurityAdvisory = z.infer<typeof SecurityAdvisory>;
 
 export const GithubVulnerabilityAlerts = LooseArray(
   z.object({
-    dismissed_reason: z.string().nullish(),
+    dismissed_reason: Nullish(z.string()),
     security_advisory: SecurityAdvisory,
     security_vulnerability: SecurityVulnerability,
     dependency: z.object({
@@ -125,12 +131,11 @@ export type GithubElement = z.infer<typeof GithubElement>;
 export const GithubContentResponse = z.array(GithubElement).or(GithubElement);
 
 export const GithubBranchProtection = z.object({
-  required_status_checks: z
-    .object({
+  required_status_checks: Nullish(
+    z.object({
       strict: z.boolean(),
-    })
-    .nullish()
-    .optional(),
+    }),
+  ),
 });
 export type GithubBranchProtection = z.infer<typeof GithubBranchProtection>;
 

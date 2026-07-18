@@ -59,7 +59,12 @@ export async function updateArtifacts(
       updateDep.depType === 'tasks.command'
     ) {
       logger.warn(
-        `depType: "${updateDep.depType}", depName: "${updateDep.depName}" can't be updated with a lock file: "${lockFileName}"`,
+        {
+          depType: updateDep.depType,
+          depName: updateDep.depName,
+          lockFileName,
+        },
+        "Dependency can't be updated with a lock file",
       );
       return [
         {
@@ -80,12 +85,8 @@ export async function updateArtifacts(
   try {
     await writeLocalFile(packageFileName, newPackageFileContent);
 
-    let args = '';
     if (isLockFileMaintenance) {
       await deleteLocalFile(lockFileName);
-      // force update lockfile when deleting it
-      // https://github.com/denoland/deno/blob/7eda90e61d107a2f48ef6eab954cda143707e01c/tests/specs/lockfile/frozen_lockfile/no_lockfile_run.out
-      args += ' --frozen=false';
     }
 
     // run from its referred deno.json/deno.jsonc location if import map is used
@@ -105,6 +106,12 @@ export async function updateArtifacts(
         },
       ],
     };
+
+    // "deno install" don't execute lifecycle scripts of package.json by default
+    // https://docs.deno.com/runtime/reference/cli/install/#native-node.js-addons
+    // deno.json(c) could have the `lock.frozen` field
+    // we should always override the `frozen` flag due to if it would be specified true
+    let command = 'deno install --frozen=false';
 
     // defaults as per https://docs.deno.com/runtime/fundamentals/security/#importing-from-the-web
     const defaultImportHosts = [
@@ -126,17 +133,11 @@ export async function updateArtifacts(
         ...new Set([...defaultImportHosts, ...additionalImportHosts]),
       ].join(',');
 
-      args += ` --allow-import=${importHosts}`;
+      command += ` --allow-import=${importHosts}`;
     }
 
-    // "deno install" don't execute lifecycle scripts of package.json by default
-    // https://docs.deno.com/runtime/reference/cli/install/#native-node.js-addons
     // TODO: appending `--lockfile-only` is better to reduce disk usage
     // https://docs.deno.com/runtime/reference/cli/install/#options-lockfile-only
-    let command = 'deno install';
-    if (args) {
-      command += args;
-    }
     await exec(command, execOptions);
     await resetNpmrcContent(pkgFileDir, npmrcContent);
 
