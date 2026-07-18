@@ -242,6 +242,7 @@ export interface RepoGlobalConfig extends GlobalInheritableConfig {
   cacheDir?: string;
   cacheHardTtlMinutes?: number;
   cacheTtlOverride?: Record<string, number>;
+  checkedBranches?: string[];
   containerbaseDir?: string;
   customEnvVariables?: Record<string, string>;
   dockerChildPrefix?: string;
@@ -275,6 +276,7 @@ export interface RepoGlobalConfig extends GlobalInheritableConfig {
   allowedUnsafeExecutions?: AllowedUnsafeExecution[];
   onboardingAutoCloseAge?: number;
   productLinks?: Record<string, string>;
+  rebaseAllOpenBranches?: boolean;
   toolSettings?: ToolSettingsOptions;
 }
 
@@ -472,7 +474,6 @@ export interface RenovateConfig
 
   constraintsFiltering?: ConstraintsFilter;
 
-  checkedBranches?: string[];
   customizeDashboard?: Record<string, string>;
 
   statusCheckNames?: Record<StatusCheckKey, string | null>;

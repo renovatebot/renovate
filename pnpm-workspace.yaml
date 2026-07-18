@@ -16,9 +16,9 @@ allowBuilds:
 dedupePeers: true
 
 catalog:
-  esbuild: 0.28.0
+  esbuild: 0.28.1
   tar: 7.5.19
-  vite: 8.1.3
+  vite: 8.1.4
 
 overrides:
   '@aws-sdk/xml-builder@3.972.4>fast-xml-parser': '^5.3.6'
@@ -52,6 +52,3 @@ minimumReleaseAgeExclude:
   - '@containerbase/semantic-release-pnpm'
 
 provenance: true
-
-patchedDependencies:
-  install-artifact-from-github@1.6.0: patches/install-artifact-from-github@1.6.0.patch

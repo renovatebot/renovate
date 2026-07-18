@@ -373,6 +373,7 @@
     "enumeratum": "https://github.com/lloydmeta/enumeratum",
     "envelop": "https://github.com/n1ru4l/envelop",
     "error-prone": "https://github.com/google/error-prone",
+    "error-prone-support": "https://github.com/PicnicSupermarket/error-prone-support",
     "eslint": "https://github.com/eslint/eslint",
     "eslint-config-globex": "https://github.com/GlobexDesignsInc/eslint-config-globex",
     "eslint-stylistic": "https://github.com/eslint-stylistic/eslint-stylistic",
@@ -685,10 +686,12 @@
     "serenity-js": "https://github.com/serenity-js/serenity-js",
     "serilog-ui": "https://github.com/serilog-contrib/serilog-ui",
     "servicestack": "https://github.com/ServiceStack/ServiceStack",
+    "serwist": "https://github.com/serwist/serwist",
     "shedlock": "https://github.com/lukas-krecan/ShedLock",
     "shiki": "https://github.com/shikijs/shiki",
     "shopify-app-bridge": "https://github.com/Shopify/app-bridge",
     "sitecore-jss": "https://github.com/Sitecore/jss",
+    "size-limit": "https://github.com/ai/size-limit",
     "skiasharp": [
       "https://github.com/mono/SkiaSharp",
       "https://go.microsoft.com/fwlink/?linkid=868515"
