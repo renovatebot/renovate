@@ -76,7 +76,7 @@ describe('modules/platform/gitlab/index', () => {
 
   describe('initPlatform()', () => {
     it('should throw if no token', async () => {
-      await expect(gitlab.initPlatform({} as any)).rejects.toThrow(
+      await expect(gitlab.initPlatform({})).rejects.toThrow(
         'Init: You must configure a GitLab personal access token',
       );
     });

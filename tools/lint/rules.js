@@ -7,6 +7,7 @@ import noRedundantMockReset from './rules/no-redundant-mock-reset.js';
 import noStatefulGlobalRegex from './rules/no-stateful-global-regex.js';
 import noToolsImport from './rules/no-tools-import.js';
 import preferNullishUtil from './rules/prefer-nullish-util.js';
+import preferPartialInSpecs from './rules/prefer-partial-in-specs.js';
 import testRootDescribe from './rules/test-root-describe.js';
 import zodSchemaNaming from './rules/zod-schema-naming.js';
 
@@ -24,6 +25,7 @@ export default {
     'no-stateful-global-regex': noStatefulGlobalRegex,
     'no-tools-import': noToolsImport,
     'prefer-nullish-util': preferNullishUtil,
+    'prefer-partial-in-specs': preferPartialInSpecs,
     'test-root-describe': testRootDescribe,
     'zod-schema-naming': zodSchemaNaming,
   },
