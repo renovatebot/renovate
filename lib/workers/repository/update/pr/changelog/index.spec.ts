@@ -42,6 +42,71 @@ const upgrade = partial<BranchConfig>({
   ],
 });
 
+function expectedChangeLog({
+  baseUrl = 'https://github.com/',
+  apiBaseUrl = 'https://api.github.com/',
+  sourceUrl = 'https://github.com/chalk/chalk',
+  packageName = 'renovate',
+} = {}) {
+  return {
+    hasReleaseNotes: true,
+    project: {
+      apiBaseUrl,
+      baseUrl,
+      depName: undefined,
+      packageName,
+      repository: 'chalk/chalk',
+      sourceDirectory: undefined,
+      sourceUrl,
+      type: 'github',
+    },
+    versions: [
+      {
+        changes: [],
+        compare: {},
+        date: undefined,
+        gitRef: undefined,
+        releaseNotes: null,
+        version: '2.5.2',
+      },
+      {
+        changes: [],
+        compare: {},
+        date: '2017-12-24T03:20:46.238Z',
+        gitRef: undefined,
+        releaseNotes: null,
+        version: '2.4.2',
+      },
+      {
+        changes: [],
+        compare: {
+          url: `${baseUrl}chalk/chalk/compare/npm_2.2.2...npm_2.3.0`,
+        },
+        date: '2017-10-24T03:20:46.238Z',
+        gitRef: 'npm_2.3.0',
+        releaseNotes: {
+          notesSourceUrl: '',
+          url: `${baseUrl}chalk/chalk/compare/npm_2.2.2...npm_2.3.0`,
+        },
+        version: '2.3.0',
+      },
+      {
+        changes: [],
+        compare: {
+          url: `${baseUrl}chalk/chalk/compare/npm_1.0.0...npm_2.2.2`,
+        },
+        date: undefined,
+        gitRef: 'npm_2.2.2',
+        releaseNotes: {
+          notesSourceUrl: '',
+          url: `${baseUrl}chalk/chalk/compare/npm_1.0.0...npm_2.2.2`,
+        },
+        version: '2.2.2',
+      },
+    ],
+  };
+}
+
 describe('workers/repository/update/pr/changelog/index', () => {
   describe('getChangeLogJSON', () => {
     beforeEach(() => {
@@ -116,25 +181,7 @@ describe('workers/repository/update/pr/changelog/index', () => {
         await getChangeLogJSON({
           ...upgrade,
         }),
-      ).toMatchSnapshot({
-        hasReleaseNotes: true,
-        project: {
-          apiBaseUrl: 'https://api.github.com/',
-          baseUrl: 'https://github.com/',
-          depName: undefined,
-          packageName: 'renovate',
-          repository: 'chalk/chalk',
-          sourceDirectory: undefined,
-          sourceUrl: 'https://github.com/chalk/chalk',
-          type: 'github',
-        },
-        versions: [
-          { version: '2.5.2' },
-          { version: '2.4.2' },
-          { version: '2.3.0' },
-          { version: '2.2.2' },
-        ],
-      });
+      ).toEqual(expectedChangeLog());
     });
 
     it('uses GitHub tags', async () => {
@@ -152,7 +199,7 @@ describe('workers/repository/update/pr/changelog/index', () => {
         await getChangeLogJSON({
           ...upgrade,
         }),
-      ).toMatchSnapshot({
+      ).toEqual({
         hasReleaseNotes: true,
         project: {
           apiBaseUrl: 'https://api.github.com/',
@@ -165,10 +212,53 @@ describe('workers/repository/update/pr/changelog/index', () => {
           type: 'github',
         },
         versions: [
-          { version: '2.5.2' },
-          { version: '2.4.2' },
-          { version: '2.3.0' },
-          { version: '2.2.2' },
+          {
+            changes: [],
+            compare: {},
+            date: undefined,
+            gitRef: undefined,
+            releaseNotes: null,
+            version: '2.5.2',
+          },
+          {
+            changes: [],
+            compare: {
+              url: 'https://github.com/chalk/chalk/compare/v2.3.0...v2.4.2',
+            },
+            date: '2017-12-24T03:20:46.238Z',
+            gitRef: undefined,
+            releaseNotes: {
+              notesSourceUrl: '',
+              url: 'https://github.com/chalk/chalk/compare/v2.3.0...v2.4.2',
+            },
+            version: '2.4.2',
+          },
+          {
+            changes: [],
+            compare: {
+              url: 'https://github.com/chalk/chalk/compare/2.2.2...v2.3.0',
+            },
+            date: '2017-10-24T03:20:46.238Z',
+            gitRef: 'npm_2.3.0',
+            releaseNotes: {
+              notesSourceUrl: '',
+              url: 'https://github.com/chalk/chalk/compare/2.2.2...v2.3.0',
+            },
+            version: '2.3.0',
+          },
+          {
+            changes: [],
+            compare: {
+              url: 'https://github.com/chalk/chalk/compare/1.0.0...2.2.2',
+            },
+            date: undefined,
+            gitRef: 'npm_2.2.2',
+            releaseNotes: {
+              notesSourceUrl: '',
+              url: 'https://github.com/chalk/chalk/compare/1.0.0...2.2.2',
+            },
+            version: '2.2.2',
+          },
         ],
       });
     });
@@ -183,24 +273,7 @@ describe('workers/repository/update/pr/changelog/index', () => {
         ...upgrade,
         packageName: '@renovate/no',
       });
-      expect(res).toMatchSnapshot({
-        hasReleaseNotes: true,
-        project: {
-          apiBaseUrl: 'https://api.github.com/',
-          baseUrl: 'https://github.com/',
-          packageName: '@renovate/no',
-          repository: 'chalk/chalk',
-          sourceDirectory: undefined,
-          sourceUrl: 'https://github.com/chalk/chalk',
-          type: 'github',
-        },
-        versions: [
-          { version: '2.5.2' },
-          { version: '2.4.2' },
-          { version: '2.3.0' },
-          { version: '2.2.2' },
-        ],
-      });
+      expect(res).toEqual(expectedChangeLog({ packageName: '@renovate/no' }));
     });
 
     it('supports node engines', async () => {
@@ -212,25 +285,7 @@ describe('workers/repository/update/pr/changelog/index', () => {
           ...upgrade,
           depType: 'engines',
         }),
-      ).toMatchSnapshot({
-        hasReleaseNotes: true,
-        project: {
-          apiBaseUrl: 'https://api.github.com/',
-          baseUrl: 'https://github.com/',
-          depName: undefined,
-          packageName: 'renovate',
-          repository: 'chalk/chalk',
-          sourceDirectory: undefined,
-          sourceUrl: 'https://github.com/chalk/chalk',
-          type: 'github',
-        },
-        versions: [
-          { version: '2.5.2' },
-          { version: '2.4.2' },
-          { version: '2.3.0' },
-          { version: '2.2.2' },
-        ],
-      });
+      ).toEqual(expectedChangeLog());
     });
 
     it('handles no sourceUrl', async () => {
@@ -301,25 +356,7 @@ describe('workers/repository/update/pr/changelog/index', () => {
         await getChangeLogJSON({
           ...upgrade,
         }),
-      ).toMatchSnapshot({
-        hasReleaseNotes: true,
-        project: {
-          apiBaseUrl: 'https://api.github.com/',
-          baseUrl: 'https://github.com/',
-          depName: undefined,
-          packageName: 'renovate',
-          repository: 'chalk/chalk',
-          sourceDirectory: undefined,
-          sourceUrl: 'https://github.com/chalk/chalk',
-          type: 'github',
-        },
-        versions: [
-          { version: '2.5.2' },
-          { version: '2.4.2' },
-          { version: '2.3.0' },
-          { version: '2.2.2' },
-        ],
-      });
+      ).toEqual(expectedChangeLog());
     });
 
     it('supports github enterprise and github enterprise changelog', async () => {
@@ -341,24 +378,13 @@ describe('workers/repository/update/pr/changelog/index', () => {
           ...upgrade,
           sourceUrl: 'https://github-enterprise.example.com/chalk/chalk',
         }),
-      ).toMatchSnapshot({
-        hasReleaseNotes: true,
-        project: {
-          apiBaseUrl: 'https://github-enterprise.example.com/api/v3/',
+      ).toEqual(
+        expectedChangeLog({
           baseUrl: 'https://github-enterprise.example.com/',
-          packageName: 'renovate',
-          repository: 'chalk/chalk',
-          sourceDirectory: undefined,
+          apiBaseUrl: 'https://github-enterprise.example.com/api/v3/',
           sourceUrl: 'https://github-enterprise.example.com/chalk/chalk',
-          type: 'github',
-        },
-        versions: [
-          { version: '2.5.2' },
-          { version: '2.4.2' },
-          { version: '2.3.0' },
-          { version: '2.2.2' },
-        ],
-      });
+        }),
+      );
     });
 
     it('supports github.com and github enterprise changelog', async () => {
@@ -379,24 +405,13 @@ describe('workers/repository/update/pr/changelog/index', () => {
           ...upgrade,
           sourceUrl: 'https://github-enterprise.example.com/chalk/chalk',
         }),
-      ).toMatchSnapshot({
-        hasReleaseNotes: true,
-        project: {
-          apiBaseUrl: 'https://github-enterprise.example.com/api/v3/',
+      ).toEqual(
+        expectedChangeLog({
           baseUrl: 'https://github-enterprise.example.com/',
-          packageName: 'renovate',
-          repository: 'chalk/chalk',
-          sourceDirectory: undefined,
+          apiBaseUrl: 'https://github-enterprise.example.com/api/v3/',
           sourceUrl: 'https://github-enterprise.example.com/chalk/chalk',
-          type: 'github',
-        },
-        versions: [
-          { version: '2.5.2' },
-          { version: '2.4.2' },
-          { version: '2.3.0' },
-          { version: '2.2.2' },
-        ],
-      });
+        }),
+      );
     });
   });
 });
