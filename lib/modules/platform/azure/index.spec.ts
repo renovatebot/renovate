@@ -29,14 +29,13 @@ import { AzurePrVote } from './types.ts';
 
 vi.mock('./azure-got-wrapper.ts', () => mockDeep());
 vi.mock('./azure-helper.ts', () => mockDeep());
-vi.mock('../../../util/host-rules.ts', () => mockDeep());
 vi.mock('../../../util/sanitize.ts', () =>
   mockDeep({ sanitize: (s: string) => s }),
 );
 vi.mock('timers/promises');
 
 describe('modules/platform/azure/index', () => {
-  let hostRules: Mocked<typeof _hostRules>;
+  let hostRules: typeof _hostRules;
   let azure: Platform;
   let azureApi: Mocked<typeof import('./azure-got-wrapper.ts')>;
   let azureHelper: Mocked<typeof import('./azure-helper.ts')>;
@@ -46,7 +45,7 @@ describe('modules/platform/azure/index', () => {
   beforeEach(async () => {
     // reset module
     vi.resetModules();
-    hostRules = await vi.importMock('../../../util/host-rules.ts');
+    hostRules = await vi.importActual('../../../util/host-rules.ts');
     azure = await vi.importActual('./index.ts');
     azureApi = await vi.importMock('./azure-got-wrapper.ts');
     azureHelper = await vi.importMock('./azure-helper.ts');
@@ -58,9 +57,8 @@ describe('modules/platform/azure/index', () => {
     git = await vi.importMock('../../../util/git/index.ts');
     git.branchExists.mockReturnValue(true);
     git.isBranchBehindBase.mockResolvedValue(false);
-    hostRules.find.mockReturnValue({
-      token: 'token',
-    });
+    hostRules.clear();
+    hostRules.add({ token: 'token' });
     await azure.initPlatform({
       endpoint: 'https://dev.azure.com/renovate12345',
       token: 'token',
