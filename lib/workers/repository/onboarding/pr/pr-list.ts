@@ -19,11 +19,11 @@ export function getExpectedPrList(
   prDesc += branches.length > 1 ? `s:\n\n` : `:\n\n`;
 
   for (const branch of branches) {
-    const prTitleRe = regEx(/@([a-z]+\/[a-z]+)/);
+    const prTitleRe = regEx(/@(?<scope>[a-z]+\/[a-z]+)/);
     // TODO #22198
     prDesc += `<details>\n<summary>${branch.prTitle!.replace(
       prTitleRe,
-      '@&#8203;$1',
+      '@&#8203;$<scope>',
     )}</summary>\n\n`;
     if (branch.schedule?.length) {
       prDesc += `  - Schedule: ${JSON.stringify(branch.schedule)}\n`;
