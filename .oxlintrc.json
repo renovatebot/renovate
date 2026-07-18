@@ -160,6 +160,7 @@
     "no-regex-spaces": "error",
     "no-var": "error",
     "prefer-const": "error",
+    "prefer-named-capture-group": "error",
     "prefer-rest-params": "error",
     "prefer-spread": "error",
     "typescript/ban-ts-comment": "error",
