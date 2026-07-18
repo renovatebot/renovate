@@ -3,9 +3,11 @@ import { escapeRegExp, regEx } from '../../../util/regex.ts';
 import type { PackageDependency } from '../types.ts';
 import type { AntProp } from './types.ts';
 
-const fullPlaceholderRegex = regEx(/^\$\{([^}]+)}$/);
+const fullPlaceholderRegex = regEx(/^\$\{(?<key>[^}]+)}$/);
 const placeholderTestRegex = regEx(/\$\{[^}]+}/);
-const propertySeparatorRegex = regEx(/^([^=:\s]+)\s*[=:\s]\s*(.*)$/);
+const propertySeparatorRegex = regEx(
+  /^(?<key>[^=:\s]+)\s*[=:\s]\s*(?<value>.*)$/,
+);
 
 export function containsPlaceholder(str: string | null | undefined): boolean {
   return !!str && placeholderTestRegex.test(str);
@@ -25,11 +27,11 @@ export function findAttrValuePosition(
   const tagContent = content.slice(startTag, tagEnd + 1);
 
   const attrPattern = regEx(
-    `${escapeRegExp(attrName)}\\s*=\\s*(?:"([^"]*)"|'([^']*)')`,
+    `${escapeRegExp(attrName)}\\s*=\\s*(?:"(?<dq>[^"]*)"|'(?<sq>[^']*)')`,
   );
   const match = attrPattern.exec(tagContent)!;
 
-  const valueInMatch = match[1] ?? match[2];
+  const valueInMatch = match.groups!.dq ?? match.groups!.sq;
   const valueOffset = match[0].indexOf(valueInMatch);
   return startTag + match.index + valueOffset;
 }
@@ -55,14 +57,14 @@ export function parsePropertiesFile(
     // Match key=value, key:value, or key value (first separator wins)
     const separatorMatch = propertySeparatorRegex.exec(line);
     if (separatorMatch) {
-      const key = separatorMatch[1];
-      const val = separatorMatch[2].trim();
+      const key = separatorMatch.groups!.key;
+      const val = separatorMatch.groups!.value.trim();
 
       // First-definition-wins
       if (!(key in props)) {
         // fileReplacePosition points to the start of the value in the raw content
         const lineStart = offset + rawLine.indexOf(line);
-        const keyEnd = line.indexOf(separatorMatch[2]);
+        const keyEnd = line.indexOf(separatorMatch.groups!.value);
         const fileReplacePosition = lineStart + keyEnd;
 
         props[key] = { val, fileReplacePosition, packageFile };
@@ -96,7 +98,7 @@ export function applyProps(
     return dep;
   }
 
-  const propKey = fullMatch[1];
+  const propKey = fullMatch.groups!.key;
   const prop = props[propKey];
   if (!prop) {
     dep.skipReason = 'version-placeholder';
@@ -151,8 +153,8 @@ function resolveKey(
   chain.add(key);
   let isCircular = false;
   const val = prop.val.replace(
-    regEx(/\$\{([^}]+)}/g),
-    (match, refKey: string) => {
+    regEx(/\$\{(?<key>[^}]+)}/g),
+    (match: string, refKey: string) => {
       const refResult = resolveKey(refKey, props, resolved, chain);
       if (refResult === null) {
         isCircular = true;

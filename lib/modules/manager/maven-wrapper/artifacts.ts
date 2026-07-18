@@ -123,7 +123,7 @@ async function updateChecksums(
           // Add checksum after distributionUrl
           updatedContent = addChecksumAfterLine(
             updatedContent,
-            /^(distributionUrl\s*=\s*.+)$/m,
+            /^(?:distributionUrl\s*=\s*.+)$/m,
             'distributionSha256Sum',
             checksum,
           );
@@ -136,7 +136,7 @@ async function updateChecksums(
         if (!existingChecksum && fallbackChecksum) {
           updatedContent = addChecksumAfterLine(
             updatedContent,
-            /^(distributionUrl\s*=\s*.+)$/m,
+            /^(?:distributionUrl\s*=\s*.+)$/m,
             'distributionSha256Sum',
             fallbackChecksum,
           );
@@ -181,7 +181,7 @@ async function updateChecksums(
           // Add checksum after wrapperUrl or wrapperVersion
           updatedContent = addChecksumAfterLine(
             updatedContent,
-            /^(wrapperUrl\s*=\s*.+|wrapperVersion\s*=\s*.+)$/m,
+            /^(?:wrapperUrl\s*=\s*.+|wrapperVersion\s*=\s*.+)$/m,
             'wrapperSha256Sum',
             checksum,
           );
@@ -194,7 +194,7 @@ async function updateChecksums(
         if (!existingChecksum && fallbackChecksum) {
           updatedContent = addChecksumAfterLine(
             updatedContent,
-            /^(wrapperUrl\s*=\s*.+|wrapperVersion\s*=\s*.+)$/m,
+            /^(?:wrapperUrl\s*=\s*.+|wrapperVersion\s*=\s*.+)$/m,
             'wrapperSha256Sum',
             fallbackChecksum,
           );
@@ -439,7 +439,7 @@ function getCustomMavenWrapperRepoUrl(
     return null;
   }
 
-  const match = regEx(/^(.*?)\/org\/apache\/maven\/wrapper\//).exec(
+  const match = regEx(/^(?<repoUrl>.*?)\/org\/apache\/maven\/wrapper\//).exec(
     replaceString,
   );
 
@@ -447,7 +447,9 @@ function getCustomMavenWrapperRepoUrl(
     return null;
   }
 
-  return match[1] === DEFAULT_MAVEN_REPO_URL ? null : match[1];
+  return match.groups!.repoUrl === DEFAULT_MAVEN_REPO_URL
+    ? null
+    : match.groups!.repoUrl;
 }
 
 async function createWrapperCommand(

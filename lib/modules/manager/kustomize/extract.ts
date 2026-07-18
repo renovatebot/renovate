@@ -23,11 +23,11 @@ const gitUrl = regEx(
 );
 // regex to match URLs with ".git" delimiter
 const dotGitRegex = regEx(
-  /^(?:git::)?(?<url>(?:(?:(?:http|https|ssh):\/\/)?(?:.*@)?)?(?<path>(?:[^:/\s]+(?::[0-9]+)?[:/])?(?<project>[^?\s]*(\.git))))(?<subdir>[^?\s]*)\?(?<queryString>.+)$/,
+  /^(?:git::)?(?<url>(?:(?:(?:http|https|ssh):\/\/)?(?:.*@)?)?(?<path>(?:[^:/\s]+(?::[0-9]+)?[:/])?(?<project>[^?\s]*(?:\.git))))(?<subdir>[^?\s]*)\?(?<queryString>.+)$/,
 );
 // regex to match URLs with "_git" delimiter
 const underscoreGitRegex = regEx(
-  /^(?:git::)?(?<url>(?:(?:(?:http|https|ssh):\/\/)?(?:.*@)?)?(?<path>(?:[^:/\s]+(?::[0-9]+)?[:/])?(?<project>[^?\s]*)(_git\/[^/\s]+)))(?<subdir>[^?\s]*)\?(?<queryString>.+)$/,
+  /^(?:git::)?(?<url>(?:(?:(?:http|https|ssh):\/\/)?(?:.*@)?)?(?<path>(?:[^:/\s]+(?::[0-9]+)?[:/])?(?<project>[^?\s]*)(?:_git\/[^/\s]+)))(?<subdir>[^?\s]*)\?(?<queryString>.+)$/,
 );
 // regex to match URLs having an extra "//"
 const gitUrlWithPath = regEx(
@@ -62,7 +62,7 @@ export function extractResource(base: string): PackageDependency | null {
     return null;
   }
 
-  if (regEx(/(?:github\.com)(:|\/)/).test(path)) {
+  if (regEx(/(?:github\.com)(?::|\/)/).test(path)) {
     return {
       currentValue,
       datasource: GithubTagsDatasource.id,

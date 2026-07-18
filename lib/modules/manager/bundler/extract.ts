@@ -38,10 +38,10 @@ export async function extractPackageFile(
     repositoryUrl?: string,
     trimGroupLine = false,
   ): Promise<void> {
-    const groupMatch = regEx(/^group\s+(.*?)\s+do/).exec(line);
+    const groupMatch = regEx(/^group\s+(?<groups>.*?)\s+do/).exec(line);
     if (groupMatch) {
-      const depTypes = groupMatch[1]
-        .split(',')
+      const depTypes = groupMatch
+        .groups!.groups.split(',')
         .map((group) => group.trim())
         .map((group) => group.replace(regEx(/^:/), ''));
 
@@ -244,7 +244,7 @@ export async function extractPackageFile(
         }
       }
     }
-    const platformsMatch = regEx(/^platforms\s+(.*?)\s+do/).test(line);
+    const platformsMatch = regEx(/^platforms\s+(?:.*?)\s+do/).test(line);
     if (platformsMatch) {
       const platformsLineNumber = lineNumber;
       let platformsContent = '';
@@ -277,7 +277,7 @@ export async function extractPackageFile(
         );
       }
     }
-    const ifMatch = regEx(/^if\s+(.*?)/).test(line);
+    const ifMatch = regEx(/^if\s+(?:.*?)/).test(line);
     if (ifMatch) {
       const ifLineNumber = lineNumber;
       let ifContent = '';
