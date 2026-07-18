@@ -4,7 +4,7 @@ export default {
     type: 'problem',
     messages: {
       noHostRulesMock:
-        'Do not mock host-rules; configure real rules via hostRules.add() in the test instead.',
+        "Do not mock host-rules; configure real rules via the test util instead: import { hostRules } from '~test/host-rules.ts' and call hostRules.add() in the test.",
     },
   },
   create(context) {
