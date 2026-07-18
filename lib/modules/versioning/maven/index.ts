@@ -44,7 +44,7 @@ function matches(a: string, b: string): boolean {
   if (!ranges) {
     return false;
   }
-  return ranges.reduce((result, range): any => {
+  return ranges.reduce((result, range): boolean => {
     if (result) {
       return result;
     }

@@ -83,8 +83,8 @@ export function findSatisfyingVersion(
   compareRt: number,
 ): string | null {
   const options = getOptions(range);
-  let cur: any = null;
-  let curSV: any = null;
+  let cur: string | null = null;
+  let curSV: semver.SemVer | null = null;
   let index = 0;
   let curIndex = -1;
 
@@ -96,7 +96,7 @@ export function findSatisfyingVersion(
       const cleanRange = cleanVersion(range);
       if (
         matchesWithOptions(cleanedVersion, cleanRange, options) &&
-        (!cur || semver.compare(curSV, versionFromList, options) === compareRt)
+        (!cur || semver.compare(curSV!, versionFromList, options) === compareRt)
       ) {
         cur = versionFromList;
         curIndex = index;

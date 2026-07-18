@@ -50,8 +50,11 @@ export const getDatasourceList = (): string[] => Array.from(datasources.keys());
 
 type GetReleasesInternalConfig = GetReleasesConfig & GetPkgReleasesConfig;
 
-// TODO: fix error Type
-function logError(datasource: string, packageName: string, err: any): void {
+function logError(
+  datasource: string,
+  packageName: string,
+  err: Error & { statusCode?: number; code?: string; url?: string },
+): void {
   const { statusCode, code: errCode, url } = err;
   if (statusCode === 404) {
     logger.debug({ datasource, packageName, url }, 'Datasource 404');

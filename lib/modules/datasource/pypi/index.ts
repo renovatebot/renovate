@@ -319,10 +319,7 @@ export class PypiDatasource extends Datasource {
       }
       // There may be multiple releases with different requires_python, so we return all in an array
       result.constraints = {
-        // TODO: string[] isn't allowed here
-        python: versionReleases.map(
-          ({ requires_python }) => requires_python,
-        ) as any,
+        python: versionReleases.map(({ requires_python }) => requires_python),
       };
       return result;
     });

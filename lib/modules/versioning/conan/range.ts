@@ -55,7 +55,7 @@ export function getPatch(version: string): null | number {
   return null;
 }
 
-export function fixParsedRange(range: string): any {
+export function fixParsedRange(range: string): SemVer[] {
   const ordValues = [];
 
   // don't bump or'd single version values
@@ -310,7 +310,7 @@ export function bumpRange(
     }
   } else {
     const newRange = fixParsedRange(currentValue);
-    const versions = newRange.map((x: any) => {
+    const versions = newRange.map((x) => {
       // don't bump or'd single version values
       if (x.operator === '||') {
         return x.semver;
@@ -318,7 +318,8 @@ export function bumpRange(
       if (x.operator) {
         const bumpedSubRange = bumpRange(
           {
-            currentValue: x.semver,
+            // fixParsedRange() always sets `semver`
+            currentValue: x.semver!,
             rangeStrategy: 'bump',
             currentVersion,
             newVersion,
@@ -334,13 +335,14 @@ export function bumpRange(
       }
 
       return replaceRange({
-        currentValue: x.semver,
+        // fixParsedRange() always sets `semver`
+        currentValue: x.semver!,
         rangeStrategy: 'replace',
         currentVersion,
         newVersion,
       });
     });
-    return versions.filter((x: any) => x !== null && x !== '').join(' ');
+    return versions.filter((x) => x !== null && x !== '').join(' ');
   }
   logger.debug(
     `Unsupported range type for rangeStrategy=bump: ${currentValue}`,

@@ -126,30 +126,32 @@ export class AzurePipelinesTasksDatasource extends Datasource {
     );
   }
 
-  static compareSemanticVersions = (key: string) => (a: any, b: any) => {
-    const a1Version = AzurePipelinesTaskVersion.safeParse(a[key]).data;
-    const b1Version = AzurePipelinesTaskVersion.safeParse(b[key]).data;
+  static compareSemanticVersions =
+    (key: string) =>
+    (a: Record<string, unknown>, b: Record<string, unknown>) => {
+      const a1Version = AzurePipelinesTaskVersion.safeParse(a[key]).data;
+      const b1Version = AzurePipelinesTaskVersion.safeParse(b[key]).data;
 
-    const a1 =
-      a1Version === undefined
-        ? ''
-        : `${a1Version.major}.${a1Version.minor}.${a1Version.patch}`;
-    const b1 =
-      b1Version === undefined
-        ? ''
-        : `${b1Version.major}.${b1Version.minor}.${b1Version.patch}`;
+      const a1 =
+        a1Version === undefined
+          ? ''
+          : `${a1Version.major}.${a1Version.minor}.${a1Version.patch}`;
+      const b1 =
+        b1Version === undefined
+          ? ''
+          : `${b1Version.major}.${b1Version.minor}.${b1Version.patch}`;
 
-    const len = Math.min(a1.length, b1.length);
+      const len = Math.min(a1.length, b1.length);
 
-    for (let i = 0; i < len; i++) {
-      const a2 = +a1[i] || 0;
-      const b2 = +b1[i] || 0;
+      for (let i = 0; i < len; i++) {
+        const a2 = +a1[i] || 0;
+        const b2 = +b1[i] || 0;
 
-      if (a2 !== b2) {
-        return a2 > b2 ? 1 : -1;
+        if (a2 !== b2) {
+          return a2 > b2 ? 1 : -1;
+        }
       }
-    }
 
-    return b1.length - a1.length;
-  };
+      return b1.length - a1.length;
+    };
 }

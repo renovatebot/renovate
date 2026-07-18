@@ -76,7 +76,7 @@ export async function getReleases(
 async function getPagedResponse(
   http: Http,
   query: string,
-  data: any,
+  data: Record<string, unknown>,
 ): Promise<File[]> {
   const result: File[] = [];
 

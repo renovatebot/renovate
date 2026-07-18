@@ -87,14 +87,11 @@ function isLessThanRange(version: string, range: string): boolean {
   const cleanedVersion = cleanVersion(version);
   const cleanRange = cleanVersion(range);
   const options = getOptions(range);
-  const looseResult: any = looseAPI.isLessThanRange?.(
-    cleanedVersion,
-    cleanRange,
-  );
+  const looseResult = looseAPI.isLessThanRange?.(cleanedVersion, cleanRange);
   try {
-    return semver.ltr(cleanedVersion, cleanRange, options) || looseResult;
+    return semver.ltr(cleanedVersion, cleanRange, options) || !!looseResult;
   } catch {
-    return looseResult;
+    return !!looseResult;
   }
 }
 
@@ -174,7 +171,7 @@ function getNewValue({
   if (semver.validRange(cleanRange, options) === '*') {
     return currentValue;
   }
-  let newValue: any = '';
+  let newValue: string | null = '';
 
   if (rangeStrategy === 'widen') {
     newValue = widenRange(

@@ -81,7 +81,11 @@ export interface Release {
   /** The original value to which `extractVersion` was applied */
   versionOrig?: string;
   newDigest?: string | null;
-  constraints?: Partial<Record<ConstraintName, string[]>>;
+  /**
+   * `undefined` entries mean "this artifact declares no constraint" and make
+   * the release satisfy constraints filtering (see `applyConstraintsFiltering`).
+   */
+  constraints?: Partial<Record<ConstraintName, (string | undefined)[]>>;
   dependencies?: Record<string, string>;
   devDependencies?: Record<string, string>;
   registryUrl?: string;

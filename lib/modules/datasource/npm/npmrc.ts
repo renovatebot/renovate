@@ -12,11 +12,11 @@ import { ensureTrailingSlash, isHttpUrl } from '../../../util/url.ts';
 import { defaultRegistryUrl } from './common.ts';
 import type { NpmrcRules } from './types.ts';
 
-let npmrc: Record<string, any> = {};
+let npmrc: Record<string, unknown> = {};
 let npmrcRaw = '';
 let packageRules: PackageRule[] = [];
 
-function envReplace(value: any, env = getEnv()): any {
+function envReplace(value: unknown, env = getEnv()): unknown {
   /* v8 ignore next 3 -- TODO: add test */
   if (!isString(value)) {
     return value;
@@ -44,7 +44,9 @@ export function getMatchHostFromNpmrcHost(input: string): string {
   return input;
 }
 
-export function convertNpmrcToRules(npmrc: Record<string, any>): NpmrcRules {
+export function convertNpmrcToRules(
+  npmrc: Record<string, unknown>,
+): NpmrcRules {
   const rules: NpmrcRules = {
     hostRules: [],
     packageRules: [],
