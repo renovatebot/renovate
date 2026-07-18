@@ -25,7 +25,8 @@ export default {
         if (
           specifier?.type === 'Literal' &&
           typeof specifier.value === 'string' &&
-          specifier.value.includes('host-rules')
+          // only the host-rules module itself, not e.g. `host-rules-from-env`
+          /(?:^|\/)host-rules(?:\.[cm]?[jt]s)?$/.test(specifier.value)
         ) {
           context.report({ node, messageId: 'noHostRulesMock' });
         }
