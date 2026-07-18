@@ -271,7 +271,7 @@ export async function updatePr(prConfig: UpdatePrConfig): Promise<void> {
   const prs = await GerritPrCache.getPrs(config.repository!);
   const cached = prs.find((pr) => pr.number === prConfig.number);
   if (!cached) {
-    logger.warn(`updatePr: PR ${prConfig.number} not found in cache`);
+    logger.warn({ number: prConfig.number }, 'updatePr: PR not found in cache');
     return;
   }
 
@@ -418,7 +418,7 @@ export async function mergePr(mergeConfig: MergePRConfig): Promise<boolean> {
   const prs = await GerritPrCache.getPrs(config.repository!);
   const cached = prs.find((pr) => pr.number === mergeConfig.id);
   if (!cached) {
-    logger.warn(`mergePr: PR ${mergeConfig.id} not found in cache`);
+    logger.warn({ number: mergeConfig.id }, 'mergePr: PR not found in cache');
     return false;
   }
 
