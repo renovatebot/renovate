@@ -531,7 +531,7 @@ export class Result<T extends Val, E extends Val = Error> {
    * Given a `schema` and `input`, returns a `Result` with `val` being the parsed value.
    * Additionally, `null` and `undefined` values are converted into Zod error.
    */
-  static parse<Schema extends ZodType<any, any, any>>(
+  static parse<Schema extends ZodType>(
     input: unknown,
     schema: Schema,
   ): Result<NonNullable<ZodOutput<Schema>>, ZodError> {
@@ -564,7 +564,7 @@ export class Result<T extends Val, E extends Val = Error> {
    * Given a `schema`, returns a `Result` with `val` being the parsed value.
    * Additionally, `null` and `undefined` values are converted into Zod error.
    */
-  parse<Schema extends ZodType<any, any, any>>(
+  parse<Schema extends ZodType>(
     schema: Schema,
   ): Result<NonNullable<ZodOutput<Schema>>, E | ZodError> {
     if (this.res.ok) {
@@ -854,7 +854,7 @@ export class AsyncResult<T extends Val, E extends Val> implements PromiseLike<
    * Given a `schema`, returns a `Result` with `val` being the parsed value.
    * Additionally, `null` and `undefined` values are converted into Zod error.
    */
-  parse<Schema extends ZodType<any, any, any>>(
+  parse<Schema extends ZodType>(
     schema: Schema,
   ): AsyncResult<NonNullable<ZodOutput<Schema>>, E | ZodError> {
     return new AsyncResult(

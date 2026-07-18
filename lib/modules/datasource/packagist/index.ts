@@ -49,7 +49,7 @@ export class PackagistDatasource extends Datasource {
     return username && password ? { username, password } : {};
   }
 
-  private async getJson<Schema extends z.ZodType<any, any, any>>(
+  private async getJson<Schema extends z.ZodType>(
     url: string,
     schema: Schema,
   ): Promise<z.infer<Schema>> {

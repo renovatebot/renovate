@@ -32,6 +32,7 @@ interface LooseOpts<T> {
 export function LooseArray<Schema extends z.ZodTypeAny>(
   Elem: Schema,
   { onError }: LooseOpts<unknown[]> = {},
+  // oxlint-disable-next-line typescript/no-explicit-any -- zod declares `Input` covariantly, so `unknown` breaks `.pipe()` composition at call sites
 ): z.ZodType<z.TypeOf<Schema>[], any> {
   if (!onError) {
     // Avoid error-related computations inside the loop
@@ -76,6 +77,7 @@ export function LooseArray<Schema extends z.ZodTypeAny>(
 
 type LooseRecordResult<ValueSchema extends z.ZodTypeAny> = z.ZodType<
   Record<string, z.TypeOf<ValueSchema>>,
+  // oxlint-disable-next-line typescript/no-explicit-any -- zod declares `Input` covariantly, so `unknown` breaks `.pipe()` composition at call sites
   any
 >;
 

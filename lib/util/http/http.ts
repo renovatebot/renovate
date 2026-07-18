@@ -48,7 +48,7 @@ export interface InternalJsonUnsafeOptions<
 export interface InternalJsonOptions<
   Opts extends HttpOptions,
   ResT = unknown,
-  Schema extends ZodType<ResT, any> = ZodType<ResT, any>,
+  Schema extends ZodType<ResT> = ZodType<ResT>,
 > extends InternalJsonUnsafeOptions<Opts> {
   schema?: Schema;
 }
@@ -372,10 +372,7 @@ export abstract class HttpBase<
     return this.request<ResT>(url, { ...opts, responseType: 'json' });
   }
 
-  private async requestJson<
-    ResT,
-    Schema extends ZodType<ResT, any> = ZodType<ResT, any>,
-  >(
+  private async requestJson<ResT, Schema extends ZodType<ResT> = ZodType<ResT>>(
     method: HttpMethod,
     options: InternalJsonOptions<JSONOpts, ResT, Schema>,
   ): Promise<HttpResponse<ResT>> {
@@ -430,16 +427,16 @@ export abstract class HttpBase<
     return { ...res, body };
   }
 
-  async getYaml<Schema extends ZodType<any, any, any>>(
+  async getYaml<Schema extends ZodType>(
     url: string,
     schema: Schema,
   ): Promise<HttpResponse<z.infer<Schema>>>;
-  async getYaml<Schema extends ZodType<any, any, any>>(
+  async getYaml<Schema extends ZodType>(
     url: string,
     options: Opts,
     schema: Schema,
   ): Promise<HttpResponse<z.infer<Schema>>>;
-  async getYaml<Schema extends ZodType<any, any, any>>(
+  async getYaml<Schema extends ZodType>(
     arg1: string,
     arg2?: Opts | Schema,
     arg3?: Schema,
@@ -528,19 +525,19 @@ export abstract class HttpBase<
    * @param url
    * @param schema Zod schema for the response
    */
-  getJson<Schema extends ZodType<any, any, any>>(
+  getJson<Schema extends ZodType>(
     url: string,
     schema: Schema,
   ): Promise<HttpResponse<z.infer<Schema>>>;
-  getJson<Schema extends ZodType<any, any, any>>(
+  getJson<Schema extends ZodType>(
     url: string,
     options: JSONOpts,
     schema: Schema,
   ): Promise<HttpResponse<z.infer<Schema>>>;
-  getJson<Schema extends ZodType<any, any, any>>(
+  getJson<Schema extends ZodType>(
     arg1: string,
-    arg2?: JSONOpts | Schema,
-    arg3?: Schema,
+    arg2?: JSONOpts | ZodType<z.infer<Schema>>,
+    arg3?: ZodType<z.infer<Schema>>,
   ): Promise<HttpResponse<z.infer<Schema>>> {
     const args = this.resolveArgs<z.infer<Schema>>(arg1, arg2, arg3);
     return this.requestJson<z.infer<Schema>>('get', args);
@@ -689,19 +686,19 @@ export abstract class HttpBase<
     return stream(resolvedUrl, this._normalizeOptions(combinedOptions));
   }
 
-  async getToml<Schema extends ZodType<any, any, any>>(
+  async getToml<Schema extends ZodType>(
     url: string,
     schema?: Schema,
   ): Promise<HttpResponse<z.infer<Schema>>>;
-  async getToml<Schema extends ZodType<any, any, any>>(
+  async getToml<Schema extends ZodType>(
     url: string,
     options: JSONOpts,
     schema: Schema,
   ): Promise<HttpResponse<z.infer<Schema>>>;
-  async getToml<Schema extends ZodType<any, any, any>>(
+  async getToml<Schema extends ZodType>(
     arg1: string,
-    arg2?: JSONOpts | Schema,
-    arg3?: Schema,
+    arg2?: JSONOpts | ZodType<z.infer<Schema>>,
+    arg3?: ZodType<z.infer<Schema>>,
   ): Promise<HttpResponse<z.infer<Schema>>> {
     const { url, schema, httpOptions } = this.resolveArgs<z.infer<Schema>>(
       arg1,
@@ -719,12 +716,10 @@ export abstract class HttpBase<
     };
 
     const res = await this.getText(url, opts);
-    if (schema) {
-      res.body = await Toml.pipe(schema).parseAsync(res.body);
-    } else {
-      res.body = (await Toml.parseAsync(res.body)) as z.infer<Schema>;
-    }
+    const body = schema
+      ? await Toml.pipe(schema).parseAsync(res.body)
+      : ((await Toml.parseAsync(res.body)) as z.infer<Schema>);
 
-    return res as HttpResponse<z.infer<Schema>>;
+    return { ...res, body };
   }
 }
