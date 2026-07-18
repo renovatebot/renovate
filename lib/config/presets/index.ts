@@ -44,54 +44,28 @@ const presetSourceLoaders: Record<string, () => Promise<PresetApi>> = {
 
 const presetCacheNamespace = 'preset';
 
-export function replaceArgs(
-  obj: string,
-  argMapping: Record<string, any>,
-): string;
-export function replaceArgs(
-  obj: string[],
-  argMapping: Record<string, any>,
-): string[];
-export function replaceArgs(
-  obj: Record<string, any>,
-  argMapping: Record<string, any>,
-): Record<string, any>;
-export function replaceArgs(
-  obj: Record<string, any>[],
-  argMapping: Record<string, any>,
-): Record<string, any>[];
-
-/**
- * TODO: fix me #22198
- * @param obj
- * @param argMapping
- */
-export function replaceArgs(obj: any, argMapping: Record<string, any>): any;
-export function replaceArgs(
-  obj: string | string[] | Record<string, any> | Record<string, any>[],
-  argMapping: Record<string, any>,
-): any {
+export function replaceArgs<T>(obj: T, argMapping: Record<string, string>): T {
   if (isString(obj)) {
-    let returnStr = obj;
+    let returnStr: string = obj;
     for (const [arg, argVal] of Object.entries(argMapping)) {
       const re = regEx(`{{${arg}}}`, 'g', false);
       returnStr = returnStr.replace(re, argVal);
     }
-    return returnStr;
+    return returnStr as T;
   }
   if (isArray(obj)) {
-    const returnArray = [];
+    const returnArray: unknown[] = [];
     for (const item of obj) {
       returnArray.push(replaceArgs(item, argMapping));
     }
-    return returnArray;
+    return returnArray as T;
   }
   if (isObject(obj)) {
-    const returnObj: Record<string, any> = {};
+    const returnObj: Record<string, unknown> = {};
     for (const [key, val] of Object.entries(obj)) {
       returnObj[key] = replaceArgs(val, argMapping);
     }
-    return returnObj;
+    return returnObj as T;
   }
   return obj;
 }

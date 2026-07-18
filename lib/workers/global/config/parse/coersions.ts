@@ -26,7 +26,7 @@ export const coersions: Record<string, (arg: string) => unknown> = {
         .filter(isNonEmptyString);
     }
   },
-  object: (val: string): any => {
+  object: (val: string): unknown => {
     if (val === '') {
       return {};
     }

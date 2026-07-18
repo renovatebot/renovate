@@ -32,7 +32,9 @@ export function sanitizeDepName(depName: string): string {
     .toLowerCase();
 }
 
-export function applyUpdateConfig(input: BranchUpgradeConfig): any {
+export function applyUpdateConfig(
+  input: BranchUpgradeConfig,
+): BranchUpgradeConfig {
   const updateConfig = { ...input };
   delete updateConfig.packageRules;
   // TODO: Remove next line once #8075 is complete
@@ -211,12 +213,12 @@ export async function flattenUpdates(
         for (const lockFile of packageFileConfig.lockFiles ?? []) {
           const lockfileRemediations = config.remediations as Record<
             string,
-            Record<string, any>[]
+            Record<string, unknown>[]
           >;
           const remediations = lockfileRemediations?.[lockFile];
           if (remediations) {
             for (const remediation of remediations) {
-              let updateConfig = mergeChildConfig(
+              let updateConfig: BranchUpgradeConfig = mergeChildConfig(
                 packageFileConfig,
                 remediation,
               );

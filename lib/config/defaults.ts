@@ -14,7 +14,7 @@ const defaultValueFactories = {
   integer: () => null,
 } as const;
 
-export function getDefault(option: RenovateOptions): any {
+export function getDefault(option: RenovateOptions): unknown {
   return option.default === undefined
     ? defaultValueFactories[option.type]()
     : clone(option.default);
@@ -25,7 +25,7 @@ export function getConfig(): AllConfig {
   const config: AllConfig = {};
   options.forEach((option) => {
     if (!option.parents || option.parents.includes('.')) {
-      config[option.name as keyof AllConfig] = getDefault(option);
+      config[option.name as keyof AllConfig] = getDefault(option) as never;
     }
   });
   return config;

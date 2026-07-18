@@ -205,7 +205,7 @@ export function generateBranchConfig(
   logger.trace({ config: branchUpgrades }, 'generateBranchConfig');
   let config: BranchConfig = {
     upgrades: [],
-  } as any;
+  } as unknown as BranchConfig;
   const hasGroupName = branchUpgrades[0].groupName !== null;
   logger.trace(`hasGroupName: ${hasGroupName}`);
   // Use group settings only if multiple upgrades or lazy grouping is disabled

@@ -27,7 +27,7 @@ export async function fetchPreset({
   const [fileName, presetName, subPresetName] = filePreset.split('/');
   const pathPrefix = presetPath ? `${presetPath}/` : '';
   const buildFilePath = (name: string): string => `${pathPrefix}${name}`;
-  let jsonContent: any;
+  let jsonContent: Nullish<Preset>;
   if (fileName === 'default') {
     try {
       jsonContent = await fetch(
@@ -72,12 +72,12 @@ export async function fetchPreset({
     throw new Error(PRESET_DEP_NOT_FOUND);
   }
   if (presetName) {
-    const preset = jsonContent[presetName];
+    const preset = jsonContent[presetName] as Nullish<Preset>;
     if (!preset) {
       throw new Error(PRESET_NOT_FOUND);
     }
     if (subPresetName) {
-      const subPreset = preset[subPresetName];
+      const subPreset = preset[subPresetName] as Nullish<Preset>;
       if (!subPreset) {
         throw new Error(PRESET_NOT_FOUND);
       }

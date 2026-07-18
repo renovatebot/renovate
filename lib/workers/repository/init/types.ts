@@ -23,7 +23,7 @@ export interface RepoConfigError {
 
 export interface RepoFileConfig {
   configFileName?: string;
-  configFileParsed?: any;
+  configFileParsed?: RenovateConfig;
   configFileParseError?: RepoConfigError;
 }
 

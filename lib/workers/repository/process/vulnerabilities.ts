@@ -7,7 +7,6 @@ import {
   isNullOrUndefined,
   isTruthy,
 } from '@sindresorhus/is';
-import type { CvssVector } from 'ae-cvss-calculator';
 import * as _aeCvss from 'ae-cvss-calculator';
 import { z } from 'zod/v4';
 import { getManagerConfig, mergeChildConfig } from '../../../config/index.ts';
@@ -616,7 +615,7 @@ export class Vulnerabilities {
     });
 
     try {
-      const parsedCvssScore: CvssVector<any> | null = fromVector(vector);
+      const parsedCvssScore = fromVector(vector);
       const res = CvssJson.parse(parsedCvssScore?.createJsonSchema());
 
       return [res.baseScore.toFixed(1), res.baseSeverity];

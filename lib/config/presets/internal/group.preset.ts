@@ -1,9 +1,10 @@
+import type { UpdateType } from '../../types.ts';
 import type { Preset } from '../types.ts';
 import * as monorepos from './monorepos.preset.ts';
 
-const nonPinUpdateTypes = ['digest', 'patch', 'minor', 'major'];
+const nonPinUpdateTypes: UpdateType[] = ['digest', 'patch', 'minor', 'major'];
 
-const staticGroups = {
+const staticGroups: Record<string, Preset> = {
   all: {
     description: 'Group all updates together.',
     groupName: 'all dependencies',
@@ -899,7 +900,7 @@ const staticGroups = {
   },
 };
 
-const config: any = { ...staticGroups };
+const config: Record<string, Preset> = { ...staticGroups };
 
 const monorepoNames = [];
 for (const monorepo of Object.keys(monorepos.presets)) {

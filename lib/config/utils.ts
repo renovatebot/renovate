@@ -5,22 +5,22 @@ import * as options from './options/index.ts';
 import type { RenovateConfig } from './types.ts';
 
 export function mergeChildConfig<
-  T extends Record<string, any>,
-  TChild extends Record<string, any> | undefined,
+  T extends object,
+  TChild extends object | undefined,
 >(parent: T, child: TChild): T & TChild {
   logger.trace({ parent, child }, `mergeChildConfig`);
   if (!child) {
     return parent as never;
   }
-  const parentConfig = clone(parent);
-  const childConfig = clone(child);
-  const config: Record<string, any> = { ...parentConfig, ...childConfig };
+  const parentConfig = clone(parent) as Record<string, unknown>;
+  const childConfig = clone(child) as Record<string, unknown>;
+  const config: Record<string, unknown> = { ...parentConfig, ...childConfig };
 
   // Ensure highest severity survives parent / child merge
   if (config?.isVulnerabilityAlert) {
     config.vulnerabilitySeverity = getHighestVulnerabilitySeverity(
-      parent,
-      child,
+      parent as { vulnerabilitySeverity?: string },
+      child as { vulnerabilitySeverity?: string },
     );
   }
 
@@ -34,8 +34,8 @@ export function mergeChildConfig<
 
       if (option.name === 'constraints') {
         config[option.name] = {
-          ...parentConfig[option.name],
-          ...childConfig[option.name],
+          ...(parentConfig[option.name] as object),
+          ...(childConfig[option.name] as object),
         };
       } else if (option.type === 'array') {
         config[option.name] = (parentConfig[option.name] as unknown[]).concat(
@@ -53,5 +53,5 @@ export function mergeChildConfig<
       );
     }
   }
-  return { ...config, ...config.force };
+  return { ...config, ...(config.force as object | undefined) } as T & TChild;
 }

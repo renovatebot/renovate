@@ -22,7 +22,9 @@ export async function getPreset({
   repo: pkg,
   presetName = 'default',
 }: PresetConfig): Promise<Preset | undefined> {
-  let dep: (NpmResponseVersion & { 'renovate-config'?: any }) | undefined;
+  let dep:
+    | (NpmResponseVersion & { 'renovate-config'?: Record<string, Preset> })
+    | undefined;
   try {
     const registryUrl = resolveRegistryUrl(pkg);
     logger.once.warn(

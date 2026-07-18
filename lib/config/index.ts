@@ -25,7 +25,7 @@ export function getManagerConfig(
   }
   // TODO: fix types #22198
   // @ts-expect-error -- not easily typed
-  managerConfig = mergeChildConfig(managerConfig, config[manager] as any);
+  managerConfig = mergeChildConfig(managerConfig, config[manager]);
   for (const i of allManagersList) {
     // @ts-expect-error -- not easily typed
     delete managerConfig[i];

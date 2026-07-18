@@ -70,7 +70,8 @@ export function commitFilesToBranch(
     for (const file of logExtra.files) {
       if (file.type === 'addition') {
         // NOTE that we're copying this field with a different name so we get the raw contents logged, otherwise it'll be logged as `[content]`
-        (file as any).rawContents = file.contents;
+        (file as typeof file & { rawContents?: unknown }).rawContents =
+          file.contents;
       }
     }
 

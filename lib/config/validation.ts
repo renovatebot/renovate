@@ -1,6 +1,7 @@
-import is, {
+import {
   isArray,
   isEmptyString,
+  isFunction,
   isNonEmptyArray,
   isNonEmptyString,
   isObject,
@@ -285,7 +286,7 @@ export async function validateConfig(
         }
         if (
           !isIgnored(key) && // We need to ignore some reserved keys
-          !(is as any).function(val) // Ignore all functions
+          !isFunction(val) // Ignore all functions
         ) {
           if (getDeprecationMessage(key)) {
             warnings.push({

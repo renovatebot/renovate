@@ -34,7 +34,7 @@ export async function branchifyUpgrades(
   const branchUpgrades: Record<string, BranchUpgradeConfig[]> = {};
   const branches: BranchConfig[] = [];
   for (const u of updates) {
-    const update: BranchUpgradeConfig = { ...u } as any;
+    const update: BranchUpgradeConfig = { ...u } as BranchUpgradeConfig;
     branchUpgrades[update.branchName] = branchUpgrades[update.branchName] || [];
     branchUpgrades[update.branchName] = [update].concat(
       branchUpgrades[update.branchName],

@@ -58,13 +58,17 @@ export async function getReconfigureConfig(
     };
   }
 
-  let configFileParsed: any;
+  let configFileParsed: RenovateConfig | undefined;
   try {
-    configFileParsed = parseJson(configFileRaw, configFileName);
+    const parsed = parseJson(
+      configFileRaw,
+      configFileName,
+    ) as RenovateConfig & {
+      renovate?: RenovateConfig;
+    };
     // no need to confirm renovate field in package.json we already do it in `detectConfigFile()`
-    if (configFileName === 'package.json') {
-      configFileParsed = configFileParsed.renovate;
-    }
+    configFileParsed =
+      configFileName === 'package.json' ? parsed.renovate : parsed;
   } catch (err) {
     logger.debug({ err }, 'Error while parsing config file');
     return {
@@ -74,5 +78,6 @@ export async function getReconfigureConfig(
     };
   }
 
-  return { ok: true, config: configFileParsed, configFileName };
+  // package.json presence of the renovate field is guaranteed by detectConfigFile()
+  return { ok: true, config: configFileParsed!, configFileName };
 }

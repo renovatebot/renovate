@@ -14,7 +14,7 @@ export class HostRulesMigration extends AbstractMigration {
     const newHostRules: HostRule[] = [];
     for (const hostRule of value) {
       validateHostRule(hostRule);
-      const newRule: any = {};
+      const newRule: HostRule & Record<string, unknown> = {};
 
       for (const [key, value] of Object.entries(hostRule)) {
         if (key === 'platform') {
@@ -97,7 +97,7 @@ function validateHostRule(rule: LegacyHostRule & HostRule): void {
 }
 
 function removeUndefinedFields(
-  obj: Record<string, any>,
+  obj: Record<string, unknown>,
 ): Record<string, string> {
   const result: Record<string, string> = {};
   for (const key of Object.keys(obj)) {

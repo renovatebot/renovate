@@ -100,7 +100,7 @@ export function getConfig(input: string[]): AllConfig {
   const argv = migrateArgs(input);
   const options = getOptions();
 
-  const config: Record<string, any> = {};
+  const config: Record<string, unknown> = {};
 
   createProgram()
     .action((repositories: string[], opts: Record<string, unknown>) => {
@@ -144,5 +144,5 @@ export function getConfig(input: string[]): AllConfig {
     })
     .parse(argv);
 
-  return config;
+  return config as AllConfig;
 }

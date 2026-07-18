@@ -94,10 +94,14 @@ export async function detectRepoFileConfig(
       configFileRaw = null;
     }
     if (configFileRaw) {
-      let configFileParsed = parseJson(configFileRaw, configFileName) as any;
-      if (configFileName === 'package.json') {
-        configFileParsed = configFileParsed.renovate;
-      }
+      const parsed = parseJson(
+        configFileRaw,
+        configFileName,
+      ) as RenovateConfig & {
+        renovate?: RenovateConfig;
+      };
+      const configFileParsed =
+        configFileName === 'package.json' ? parsed.renovate : parsed;
       return { configFileName, configFileParsed };
     }
     logger.debug('Existing config file no longer exists');
@@ -117,8 +121,7 @@ export async function detectRepoFileConfig(
   }
   cache.configFileName = configFileName;
   logger.debug(`Found ${configFileName} config file`);
-  // TODO #22198
-  let configFileParsed: any;
+  let configFileParsed: RenovateConfig | undefined;
   let configFileRaw: string | undefined | null;
 
   if (OnboardingState.onboardingCacheValid) {
@@ -164,7 +167,7 @@ export async function detectRepoFileConfig(
         },
       };
     }
-    configFileParsed = parseResult.parsedContents;
+    configFileParsed = parseResult.parsedContents as RenovateConfig;
     logger.debug(
       { fileName: configFileName, config: configFileParsed },
       'Repository config',

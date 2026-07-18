@@ -150,7 +150,7 @@ export function migrateConfig(
       if (isNonEmptyObject(migratedConfig[language])) {
         migratedConfig.packageRules ??= [];
         // @ts-expect-error -- TODO: fix me
-        const currentContent = migratedConfig[language] as any;
+        const currentContent = migratedConfig[language];
         const packageRule = {
           matchCategories: [language],
           ...currentContent,

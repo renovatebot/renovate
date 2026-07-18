@@ -74,7 +74,7 @@ describe('config/options/index', () => {
     for (const option of opts.filter(
       (o) => o.allowedValues && !isNullOrUndefined(o.default),
     )) {
-      it(`${option.name}: \`${option.default}\` is in ${JSON.stringify(option.allowedValues)}`, () => {
+      it(`${option.name}: \`${JSON.stringify(option.default)}\` is in ${JSON.stringify(option.allowedValues)}`, () => {
         expect(option.allowedValues).toBeDefined();
 
         const defaults = Array.isArray(option.default)
