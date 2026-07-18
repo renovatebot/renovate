@@ -91,7 +91,11 @@ describe('workers/repository/update/branch/get-updated', () => {
       });
       autoReplace.doAutoReplace.mockResolvedValueOnce('updated-file');
       const res = await getUpdatedPackageFiles(config);
-      expect(res).toMatchSnapshot({
+      expect(res).toEqual({
+        artifactErrors: [],
+        artifactNotices: [],
+        reuseExistingBranch: undefined,
+        updatedArtifacts: [],
         updatedPackageFiles: [
           { type: 'addition', path: 'index.html', contents: 'updated-file' },
         ],
@@ -133,7 +137,11 @@ describe('workers/repository/update/branch/get-updated', () => {
       autoReplace.doAutoReplace.mockResolvedValueOnce(null);
       autoReplace.doAutoReplace.mockResolvedValueOnce('updated-file');
       const res = await getUpdatedPackageFiles(config);
-      expect(res).toMatchSnapshot({
+      expect(res).toEqual({
+        artifactErrors: [],
+        artifactNotices: [],
+        reuseExistingBranch: false,
+        updatedArtifacts: [],
         updatedPackageFiles: [
           { type: 'addition', path: 'index.html', contents: 'updated-file' },
         ],
@@ -171,7 +179,11 @@ describe('workers/repository/update/branch/get-updated', () => {
       } satisfies BranchUpgradeConfig);
       npm.updateDependency.mockReturnValue('some new content');
       const res = await getUpdatedPackageFiles(config);
-      expect(res).toMatchSnapshot({
+      expect(res).toEqual({
+        artifactErrors: [],
+        artifactNotices: [],
+        reuseExistingBranch: false,
+        updatedArtifacts: [],
         updatedPackageFiles: [
           {
             type: 'addition',
@@ -200,7 +212,10 @@ describe('workers/repository/update/branch/get-updated', () => {
         },
       ]);
       const res = await getUpdatedPackageFiles(config);
-      expect(res).toMatchSnapshot({
+      expect(res).toEqual({
+        artifactErrors: [],
+        artifactNotices: [],
+        reuseExistingBranch: true,
         updatedArtifacts: [
           {
             type: 'addition',
@@ -282,7 +297,10 @@ describe('workers/repository/update/branch/get-updated', () => {
         },
       ]);
       const res = await getUpdatedPackageFiles(config);
-      expect(res).toMatchSnapshot({
+      expect(res).toEqual({
+        artifactErrors: [],
+        artifactNotices: [],
+        reuseExistingBranch: undefined,
         updatedArtifacts: [
           {
             type: 'addition',
@@ -290,6 +308,7 @@ describe('workers/repository/update/branch/get-updated', () => {
             contents: 'some contents',
           },
         ],
+        updatedPackageFiles: [],
       });
     });
 
@@ -416,7 +435,11 @@ describe('workers/repository/update/branch/get-updated', () => {
         files: { 'package-lock.json': 'new contents' },
       });
       const res = await getUpdatedPackageFiles(config);
-      expect(res).toMatchSnapshot({
+      expect(res).toEqual({
+        artifactErrors: [],
+        artifactNotices: [],
+        reuseExistingBranch: undefined,
+        updatedArtifacts: [],
         updatedPackageFiles: [
           {
             type: 'addition',
@@ -462,7 +485,11 @@ describe('workers/repository/update/branch/get-updated', () => {
         files: { 'package-lock.json': 'new contents' },
       });
       const res = await getUpdatedPackageFiles(config);
-      expect(res).toMatchSnapshot({
+      expect(res).toEqual({
+        artifactErrors: [],
+        artifactNotices: [],
+        reuseExistingBranch: false,
+        updatedArtifacts: [],
         updatedPackageFiles: [
           {
             type: 'addition',
@@ -488,8 +515,12 @@ describe('workers/repository/update/branch/get-updated', () => {
         },
       ]);
       const res = await getUpdatedPackageFiles(config);
-      expect(res).toMatchSnapshot({
+      expect(res).toEqual({
         artifactErrors: [{ fileName: 'composer.lock', stderr: 'some error' }],
+        artifactNotices: [],
+        reuseExistingBranch: undefined,
+        updatedArtifacts: [],
+        updatedPackageFiles: [],
       });
     });
 
@@ -510,8 +541,18 @@ describe('workers/repository/update/branch/get-updated', () => {
         },
       ]);
       const res = await getUpdatedPackageFiles(config);
-      expect(res).toMatchSnapshot({
+      expect(res).toEqual({
         artifactErrors: [{ fileName: 'composer.lock', stderr: 'some error' }],
+        artifactNotices: [],
+        reuseExistingBranch: true,
+        updatedArtifacts: [],
+        updatedPackageFiles: [
+          {
+            type: 'addition',
+            path: 'composer.json',
+            contents: 'some new content',
+          },
+        ],
       });
     });
 
@@ -524,7 +565,11 @@ describe('workers/repository/update/branch/get-updated', () => {
       } satisfies BranchUpgradeConfig);
       gitSubmodules.updateDependency.mockResolvedValueOnce('existing content');
       const res = await getUpdatedPackageFiles(config);
-      expect(res).toMatchSnapshot({
+      expect(res).toEqual({
+        artifactErrors: [],
+        artifactNotices: [],
+        reuseExistingBranch: undefined,
+        updatedArtifacts: [],
         updatedPackageFiles: [
           {
             type: 'addition',
@@ -666,7 +711,10 @@ describe('workers/repository/update/branch/get-updated', () => {
         },
       ]);
       const res = await getUpdatedPackageFiles(config);
-      expect(res).toMatchSnapshot({
+      expect(res).toEqual({
+        artifactErrors: [],
+        artifactNotices: [],
+        reuseExistingBranch: undefined,
         updatedArtifacts: [
           {
             type: 'addition',
@@ -701,7 +749,10 @@ describe('workers/repository/update/branch/get-updated', () => {
         },
       ]);
       const res = await getUpdatedPackageFiles(config);
-      expect(res).toMatchSnapshot({
+      expect(res).toEqual({
+        artifactErrors: [],
+        artifactNotices: [],
+        reuseExistingBranch: undefined,
         updatedArtifacts: [
           {
             type: 'addition',
@@ -948,7 +999,11 @@ describe('workers/repository/update/branch/get-updated', () => {
       npm.updateDependency.mockReturnValue('old version');
       npm.bumpPackageVersion.mockReturnValue({ bumpedContent: 'new version' });
       const res = await getUpdatedPackageFiles(config);
-      expect(res).toMatchSnapshot({
+      expect(res).toEqual({
+        artifactErrors: [],
+        artifactNotices: [],
+        reuseExistingBranch: undefined,
+        updatedArtifacts: [],
         updatedPackageFiles: [
           {
             type: 'addition',
@@ -972,7 +1027,11 @@ describe('workers/repository/update/branch/get-updated', () => {
         bumpedContent: 'version: 0.0.2',
       });
       const res = await getUpdatedPackageFiles(config);
-      expect(res).toMatchSnapshot({
+      expect(res).toEqual({
+        artifactErrors: [],
+        artifactNotices: [],
+        reuseExistingBranch: undefined,
+        updatedArtifacts: [],
         updatedPackageFiles: [
           {
             type: 'addition',
