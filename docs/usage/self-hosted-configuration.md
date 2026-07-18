@@ -493,7 +493,7 @@ Use `customPresets` to define presets directly in the global config, instead of 
 
 For example, in your `config.js`:
 
-```js
+```js {configType=global}
 module.exports = {
   customPresets: {
     myPreset: {
