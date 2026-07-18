@@ -21,11 +21,12 @@ const loggerLevels: BunyanLogLevel[] = [
   'fatal',
 ];
 
-type LoggerFunction = (p1: string | Record<string, any>, p2?: string) => void;
+type LoggerFunction = (p1: string | object, p2?: string) => void;
 
 export class RenovateLogger implements Logger {
   private readonly queue: (() => void)[] = [];
-  readonly logger: Logger = { once: { reset: onceReset } } as any;
+  // filled with all log level functions in the constructor
+  readonly logger: Logger = { once: { reset: onceReset } } as unknown as Logger;
   readonly once = this.logger.once;
   private bunyanLogger: BunyanLogger | undefined;
   private uninitializedWarningFired: boolean;
@@ -48,38 +49,38 @@ export class RenovateLogger implements Logger {
   }
 
   trace(p1: string): void;
-  trace(p1: Record<string, any>, p2?: string): void;
-  trace(p1: string | Record<string, any>, p2?: string): void {
+  trace(p1: object, p2?: string): void;
+  trace(p1: string | object, p2?: string): void {
     this.log('trace', p1, p2);
   }
 
   debug(p1: string): void;
-  debug(p1: Record<string, any>, p2?: string): void;
-  debug(p1: string | Record<string, any>, p2?: string): void {
+  debug(p1: object, p2?: string): void;
+  debug(p1: string | object, p2?: string): void {
     this.log('debug', p1, p2);
   }
 
   info(p1: string): void;
-  info(p1: Record<string, any>, p2?: string): void;
-  info(p1: string | Record<string, any>, p2?: string): void {
+  info(p1: object, p2?: string): void;
+  info(p1: string | object, p2?: string): void {
     this.log('info', p1, p2);
   }
 
   warn(p1: string): void;
-  warn(p1: Record<string, any>, p2?: string): void;
-  warn(p1: string | Record<string, any>, p2?: string): void {
+  warn(p1: object, p2?: string): void;
+  warn(p1: string | object, p2?: string): void {
     this.log('warn', p1, p2);
   }
 
   error(p1: string): void;
-  error(p1: Record<string, any>, p2?: string): void;
-  error(p1: string | Record<string, any>, p2?: string): void {
+  error(p1: object, p2?: string): void;
+  error(p1: string | object, p2?: string): void {
     this.log('error', p1, p2);
   }
 
   fatal(p1: string): void;
-  fatal(p1: Record<string, any>, p2?: string): void;
-  fatal(p1: string | Record<string, any>, p2?: string): void {
+  fatal(p1: object, p2?: string): void;
+  fatal(p1: string | object, p2?: string): void {
     this.log('fatal', p1, p2);
   }
 
@@ -147,7 +148,7 @@ export class RenovateLogger implements Logger {
   }
 
   private logFactory(_level: BunyanLogLevel): LoggerFunction {
-    return (p1: string | Record<string, any>, p2?: string): void => {
+    return (p1: string | object, p2?: string): void => {
       const meta: Record<string, unknown> = {
         logContext: this.context,
         ...this.meta,
@@ -171,7 +172,7 @@ export class RenovateLogger implements Logger {
   }
 
   private logOnceFn(level: BunyanLogLevel): LoggerFunction {
-    const logOnceFn = (p1: string | Record<string, any>, p2?: string): void => {
+    const logOnceFn = (p1: string | object, p2?: string): void => {
       once(
         () => {
           const logFn = this[level].bind(this); // bind to the instance.
@@ -189,11 +190,7 @@ export class RenovateLogger implements Logger {
     return logOnceFn;
   }
 
-  private log(
-    level: BunyanLogLevel,
-    p1: string | Record<string, any>,
-    p2?: string,
-  ): void {
+  private log(level: BunyanLogLevel, p1: string | object, p2?: string): void {
     if (!this.bunyanLogger) {
       // defer logging until bunyan logger is initialized, to avoid losing logs during initialization
       this.queue.push(() => this.log(level, p1, p2));

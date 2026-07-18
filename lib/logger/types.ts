@@ -9,30 +9,30 @@ export type {
 
 export interface LogError {
   level: LogLevel;
-  meta: any;
+  meta: unknown;
   msg?: string;
 }
 
 export interface Logger {
   trace(msg: string): void;
-  trace(meta: Record<string, any>, msg?: string): void;
+  trace(meta: object, msg?: string): void;
   debug(msg: string): void;
-  debug(meta: Record<string, any>, msg?: string): void;
+  debug(meta: object, msg?: string): void;
   info(msg: string): void;
-  info(meta: Record<string, any>, msg?: string): void;
+  info(meta: object, msg?: string): void;
   warn(msg: string): void;
-  warn(meta: Record<string, any>, msg?: string): void;
+  warn(meta: object, msg?: string): void;
   error(msg: string): void;
-  error(meta: Record<string, any>, msg?: string): void;
+  error(meta: object, msg?: string): void;
   fatal(msg: string): void;
-  fatal(meta: Record<string, any>, msg?: string): void;
+  fatal(meta: object, msg?: string): void;
 
   once: Logger & {
     reset: () => void;
   };
 }
 
-export interface BunyanRecord extends Record<string, any> {
+export interface BunyanRecord extends Record<string, unknown> {
   level: number;
   msg: string;
   module?: string;
@@ -41,7 +41,7 @@ export interface BunyanRecord extends Record<string, any> {
 export type BunyanNodeStream = (NodeJS.WritableStream | Stream) & {
   writable?: boolean;
   write: (
-    chunk: BunyanRecord,
+    chunk: BunyanRecord | string,
     enc: BufferEncoding,
     cb: (err?: Error | null) => void,
   ) => void;

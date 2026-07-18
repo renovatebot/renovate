@@ -65,7 +65,7 @@ export function addLibYears(
 export function finalizeReport(): void {
   const allProblems = structuredClone(getProblems());
   for (const problem of allProblems) {
-    const repository = problem.repository;
+    const repository = problem.repository as string | undefined;
     delete problem.repository;
 
     // if the problem can be connected to a repository add it their else add to the root list

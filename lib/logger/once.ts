@@ -3,7 +3,7 @@
 import { createHash } from 'node:crypto';
 import { stringify } from 'safe-stable-stringify';
 
-type OmitFn = (...args: any[]) => any;
+type OmitFn = (...args: never[]) => unknown;
 
 // TODO: use `callsite` package instead?
 
@@ -50,7 +50,7 @@ const keys = new Set<string>();
 export function once(
   callback: () => void,
   omitFn: OmitFn = once,
-  p1: string | Record<string, any>,
+  p1: string | object,
   p2?: string,
 ): void {
   const callsite = getCallSite(omitFn);
@@ -77,7 +77,7 @@ export function reset(): void {
   keys.clear();
 }
 
-function hashParams(p1: string | Record<string, any>, p2?: string): string {
+function hashParams(p1: string | object, p2?: string): string {
   const data =
     p2 === undefined ? stringify(p1) : `${stringify(p1)}|${stringify(p2)}`;
   return createHash('sha256').update(data).digest('hex');

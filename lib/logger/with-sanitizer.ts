@@ -16,7 +16,7 @@ export function withSanitizer(streamConfig: BunyanStream): BunyanStream {
       enc: BufferEncoding,
       cb: (err?: Error | null) => void,
     ): void => {
-      const raw = sanitizeValue(chunk);
+      const raw = sanitizeValue(chunk) as BunyanRecord;
       const result =
         streamConfig.type === 'raw'
           ? raw

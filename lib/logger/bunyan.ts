@@ -37,7 +37,9 @@ export function createDefaultStreams(
   const problemsStream: BunyanStream = {
     name: 'problems',
     level: 'warn' as BunyanLogLevel,
-    stream: problems as any,
+    // ProblemStream is a raw bunyan stream taking record objects, which
+    // bunyan's `stream` typing cannot express
+    stream: problems as unknown as NodeJS.WritableStream,
     type: 'raw',
   };
 

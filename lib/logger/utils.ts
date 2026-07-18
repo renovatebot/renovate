@@ -162,7 +162,7 @@ function isNested(value: unknown): value is NestedValue {
 export function sanitizeValue(
   value: unknown,
   seen = new WeakMap<NestedValue, unknown>(),
-): any {
+): unknown {
   if (isString(value)) {
     return sanitize(sanitizeUrls(value));
   }
@@ -210,10 +210,10 @@ export function sanitizeValue(
   }
 
   if (isObject(value)) {
-    const objectResult: Record<string, any> = {};
+    const objectResult: Record<string, unknown> = {};
     seen.set(value, objectResult);
-    for (const [key, val] of Object.entries<any>(value)) {
-      let curValue: any;
+    for (const [key, val] of Object.entries(value)) {
+      let curValue: unknown;
       if (!val) {
         curValue = val;
       } else if (redactedFields.includes(key)) {
@@ -226,15 +226,16 @@ export function sanitizeValue(
       } else if (contentFields.includes(key)) {
         curValue = '[content]';
       } else if (key === 'secrets') {
-        curValue = {};
-        Object.keys(val).forEach((secretKey) => {
-          curValue[secretKey] = '***********';
+        const maskedSecrets: Record<string, string> = {};
+        Object.keys(val as object).forEach((secretKey) => {
+          maskedSecrets[secretKey] = '***********';
         });
+        curValue = maskedSecrets;
       } else {
         curValue = seen.has(val) ? seen.get(val) : sanitizeValue(val, seen);
       }
 
-      const sanitizedKey = sanitizeValue(key, seen);
+      const sanitizedKey = sanitizeValue(key, seen) as string;
       objectResult[sanitizedKey] = curValue;
     }
 
@@ -264,14 +265,12 @@ export function getEnv(key: string): string | undefined {
 }
 
 export function getMessage(
-  p1: string | Record<string, any>,
+  p1: string | object,
   p2?: string,
 ): string | undefined {
   return isString(p1) ? p1 : p2;
 }
 
-export function toMeta(
-  p1: string | Record<string, any>,
-): Record<string, unknown> {
+export function toMeta(p1: string | object): object {
   return isObject(p1) ? p1 : {};
 }

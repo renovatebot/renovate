@@ -38,7 +38,7 @@ export function setContext(value: string): void {
   loggerInternal.logContext = value;
 }
 
-export function getContext(): any {
+export function getContext(): string {
   return loggerInternal.logContext;
 }
 

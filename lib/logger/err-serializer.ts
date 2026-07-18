@@ -4,7 +4,7 @@ import prepareError from './utils.ts';
 
 Error.stackTraceLimit = 20;
 
-export default function errSerializer(err: Error): any {
+export default function errSerializer(err: Error): Record<string, unknown> {
   const response: Record<string, unknown> = prepareError(err);
 
   // already done by `sanitizeValue` ?
