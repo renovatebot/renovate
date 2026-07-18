@@ -577,7 +577,9 @@ describe('workers/repository/update/branch/index', () => {
       scm.branchExists.mockResolvedValue(true);
       scm.isBranchModified.mockResolvedValueOnce(true);
       scm.getBranchCommit.mockResolvedValue('123test' as LongCommitSha);
-      platform.findPr.mockResolvedValueOnce({ sha: '123test' } as any);
+      platform.findPr.mockResolvedValueOnce(
+        partial<Pr>({ sha: '123test' as LongCommitSha }),
+      );
       const res = await branchWorker.processBranch(config);
       expect(res).toEqual({
         branchExists: true,
@@ -590,7 +592,9 @@ describe('workers/repository/update/branch/index', () => {
     it('skips branch if branch edited and and PR found with sha mismatch', async () => {
       scm.branchExists.mockResolvedValue(true);
       scm.isBranchModified.mockResolvedValueOnce(true);
-      platform.findPr.mockResolvedValueOnce({ sha: 'def456' } as any);
+      platform.findPr.mockResolvedValueOnce(
+        partial<Pr>({ sha: 'def456' as LongCommitSha }),
+      );
       const res = await branchWorker.processBranch(config);
       expect(res).toEqual({
         branchExists: true,
@@ -719,6 +723,35 @@ describe('workers/repository/update/branch/index', () => {
       });
     });
 
+    it('does not return if commits per run limit exceeded but rebase requested via PR checkbox', async () => {
+      const pr = partial<Pr>({
+        number: 5,
+        state: 'open',
+        bodyStruct: {
+          hash: hashBody(`- [x] <!-- rebase-check -->`),
+          rebaseRequested: true,
+        },
+      });
+      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
+        ...updatedPackageFiles,
+      });
+      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+        artifactErrors: [],
+        updatedArtifacts: [],
+      });
+      scm.branchExists.mockResolvedValue(true);
+      platform.getBranchPr.mockResolvedValueOnce(pr);
+      scm.isBranchModified.mockResolvedValueOnce(false);
+      limits.isLimitReached.mockReturnValueOnce(true);
+      expect(await branchWorker.processBranch(config)).toEqual({
+        branchExists: true,
+        updatesVerified: true,
+        prNo: 5,
+        result: 'done',
+        commitSha: '123test',
+      });
+    });
+
     it('returns if commits hourly limit exceeded', async () => {
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
         ...updatedPackageFiles,
@@ -756,6 +789,36 @@ describe('workers/repository/update/branch/index', () => {
         updatesVerified: true,
         prNo: 5,
         result: 'pr-created',
+        commitSha: '123test',
+      });
+    });
+
+    it('does not return if commits hourly limit exceeded but rebase requested via PR checkbox', async () => {
+      const pr = partial<Pr>({
+        number: 5,
+        state: 'open',
+        bodyStruct: {
+          hash: hashBody(`- [x] <!-- rebase-check -->`),
+          rebaseRequested: true,
+        },
+      });
+      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
+        ...updatedPackageFiles,
+      });
+      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+        artifactErrors: [],
+        updatedArtifacts: [],
+      });
+      scm.branchExists.mockResolvedValue(true);
+      platform.getBranchPr.mockResolvedValueOnce(pr);
+      scm.isBranchModified.mockResolvedValueOnce(false);
+      limits.isLimitReached.mockReturnValueOnce(false);
+      limits.isLimitReached.mockReturnValueOnce(true);
+      expect(await branchWorker.processBranch(config)).toEqual({
+        branchExists: true,
+        updatesVerified: true,
+        prNo: 5,
+        result: 'done',
         commitSha: '123test',
       });
     });
@@ -3188,7 +3251,9 @@ describe('workers/repository/update/branch/index', () => {
       scm.branchExists.mockResolvedValueOnce(true);
       scm.isBranchModified.mockResolvedValueOnce(true);
       scm.getBranchCommit.mockResolvedValueOnce('123test' as LongCommitSha);
-      platform.findPr.mockResolvedValueOnce({ sha: '123test' } as any);
+      platform.findPr.mockResolvedValueOnce(
+        partial<Pr>({ sha: '123test' as LongCommitSha }),
+      );
       const res = await branchWorker.processBranch(config);
       expect(automerge.tryBranchAutomerge).not.toHaveBeenCalled();
       expect(prAutomerge.checkAutoMerge).not.toHaveBeenCalled();

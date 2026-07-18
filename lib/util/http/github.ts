@@ -148,11 +148,12 @@ function handleGotError(
           {
             documentationUrl: `${GlobalConfig.get('productLinks').documentation}getting-started/running/#githubcom-token-for-changelogs-and-tools`,
           },
-          `Rate limit exceeded for ${parsed.host}, as no hostRules set for this host. Please set a GITHUB_COM_TOKEN`,
+          'Rate limit exceeded for api.github.com, as no hostRules set for this host. Please set a GITHUB_COM_TOKEN',
         );
       } else {
         logger.once.warn(
-          `Rate limit exceeded for ${parsed!.host}, as no hostRules set for this host`,
+          { host: parsed!.host },
+          'Rate limit exceeded, as no hostRules set for this host',
         );
       }
     }

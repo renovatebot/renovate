@@ -1263,7 +1263,8 @@ describe('modules/manager/terraform/lockfile/index', () => {
           },
           '>= 2.41.0, <= 2.41.0, >= 2.0.0',
         ),
-      ).toBe('>= 2.41.0, <= 2.46.0, >= 2.0.0');
+        // normalized: boundary version ascending
+      ).toBe('>= 2.0.0, >= 2.41.0, <= 2.46.0');
     });
 
     it('create constraint with full version', () => {
@@ -1277,6 +1278,48 @@ describe('modules/manager/terraform/lockfile/index', () => {
           '>= 4.0.0, < 4.12.0',
         ),
       ).toBe('< 4.21.0');
+    });
+
+    it('normalizes constraint order when a bumped exact pin overtakes a range', () => {
+      // A root module pins an exact version while a child module keeps a `~>`
+      // range; after the bump the exact pin must sort after the range.
+      // https://github.com/renovatebot/renovate/issues/37273
+      expect(
+        getNewConstraint(
+          {
+            currentValue: '5.0.0',
+            newValue: '5.9.0',
+            newVersion: '5.9.0',
+          },
+          '5.0.0, ~> 5.0',
+        ),
+      ).toBe('~> 5.0, 5.9.0');
+    });
+
+    it('normalizes constraint order for three-part pessimistic ranges', () => {
+      expect(
+        getNewConstraint(
+          {
+            currentValue: '0.0.176',
+            newValue: '0.0.186',
+            newVersion: '0.0.186',
+          },
+          '0.0.176, ~> 0.0.176',
+        ),
+      ).toBe('~> 0.0.176, 0.0.186');
+    });
+
+    it('normalizes constraint order when a range is widened past a lower bound', () => {
+      expect(
+        getNewConstraint(
+          {
+            currentValue: '~> 5.0',
+            newValue: '~> 6.0',
+            newVersion: '6.6.0',
+          },
+          '~> 5.0, >= 5.81.0',
+        ),
+      ).toBe('>= 5.81.0, ~> 6.0');
     });
   });
 });

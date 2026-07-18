@@ -337,7 +337,8 @@ export class IssueService {
       // and log an actionable message instead of failing cryptically.
       if (!(await this.hasWorkItemType(azureApiWit))) {
         logger.warn(
-          `Azure: work item type '${workItemType}' does not exist in project '${this.config.project}' (or the token lacks permission to it); skipping issue. The Dependency Dashboard needs a process that defines the '${workItemType}' work item type.`,
+          { workItemType, project: this.config.project },
+          'Azure: work item type does not exist in project (or the token lacks permission to it); skipping issue. The Dependency Dashboard needs a process that defines this work item type.',
         );
         return null;
       }
