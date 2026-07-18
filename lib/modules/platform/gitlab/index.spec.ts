@@ -113,7 +113,10 @@ describe('modules/platform/gitlab/index', () => {
           token: 'some-token',
           endpoint: undefined,
         }),
-      ).toMatchSnapshot();
+      ).toEqual({
+        endpoint: 'https://gitlab.com/api/v4/',
+        gitAuthor: 'Renovate Bot <a@b.com>',
+      });
     });
 
     it('should accept custom endpoint', async () => {
@@ -134,7 +137,10 @@ describe('modules/platform/gitlab/index', () => {
           endpoint,
           token: 'some-token',
         }),
-      ).toMatchSnapshot();
+      ).toEqual({
+        endpoint: 'https://gitlab.renovatebot.com/',
+        gitAuthor: 'Renovate Bot <a@b.com>',
+      });
     });
 
     it('should reuse existing gitAuthor', async () => {
@@ -469,7 +475,20 @@ describe('modules/platform/gitlab/index', () => {
         gitUrl: 'ssh',
       });
 
-      expect(git.initRepo.mock.calls).toMatchSnapshot();
+      expect(git.initRepo.mock.calls).toEqual([
+        [
+          {
+            cloneSubmodules: undefined,
+            cloneSubmodulesFilter: undefined,
+            defaultBranch: 'master',
+            ignorePrAuthor: false,
+            mergeMethod: 'merge',
+            mergeTrainsEnabled: false,
+            repository: 'some%2Frepo%2Fproject',
+            url: 'ssh://git@gitlab.com/some%2Frepo%2Fproject.git',
+          },
+        ],
+      ]);
     });
 
     it('should throw if ssh_url_to_repo is not present but gitUrl is set to ssh', async () => {
@@ -516,7 +535,20 @@ describe('modules/platform/gitlab/index', () => {
       await gitlab.initRepo({
         repository: 'some/repo/project',
       });
-      expect(git.initRepo.mock.calls).toMatchSnapshot();
+      expect(git.initRepo.mock.calls).toEqual([
+        [
+          {
+            cloneSubmodules: undefined,
+            cloneSubmodulesFilter: undefined,
+            defaultBranch: 'master',
+            ignorePrAuthor: false,
+            mergeMethod: 'merge',
+            mergeTrainsEnabled: false,
+            repository: 'some%2Frepo%2Fproject',
+            url: 'http://oauth2:123test@mycompany.com/gitlab/some/repo/project.git',
+          },
+        ],
+      ]);
     });
   });
 
@@ -615,7 +647,18 @@ describe('modules/platform/gitlab/index', () => {
           },
         });
       const pr = await gitlab.getBranchPr('some-branch');
-      expect(pr).toMatchSnapshot();
+      expect(pr).toEqual({
+        bodyStruct: {
+          hash: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
+        },
+        createdAt: '2025-05-19T12:00:00.000Z',
+        hasAssignees: false,
+        number: 91,
+        sourceBranch: 'some-branch',
+        state: 'open',
+        targetBranch: 'master',
+        title: 'some change',
+      });
     });
 
     it('should strip draft prefix from title', async () => {
@@ -655,7 +698,19 @@ describe('modules/platform/gitlab/index', () => {
           },
         });
       const pr = await gitlab.getBranchPr('some-branch');
-      expect(pr).toMatchSnapshot();
+      expect(pr).toEqual({
+        bodyStruct: {
+          hash: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
+        },
+        createdAt: '2025-05-19T12:00:00.000Z',
+        hasAssignees: false,
+        isDraft: true,
+        number: 91,
+        sourceBranch: 'some-branch',
+        state: 'open',
+        targetBranch: 'master',
+        title: 'some change',
+      });
     });
 
     it('should strip deprecated draft prefix from title', async () => {
@@ -695,7 +750,19 @@ describe('modules/platform/gitlab/index', () => {
           },
         });
       const pr = await gitlab.getBranchPr('some-branch');
-      expect(pr).toMatchSnapshot();
+      expect(pr).toEqual({
+        bodyStruct: {
+          hash: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
+        },
+        createdAt: '2025-05-19T12:00:00.000Z',
+        hasAssignees: false,
+        isDraft: true,
+        number: 91,
+        sourceBranch: 'some-branch',
+        state: 'open',
+        targetBranch: 'master',
+        title: 'some change',
+      });
     });
   });
 
@@ -3533,7 +3600,18 @@ describe('modules/platform/gitlab/index', () => {
           assignees: [],
         });
       const pr = await gitlab.getPr(12345);
-      expect(pr).toMatchSnapshot();
+      expect(pr).toEqual({
+        bodyStruct: {
+          hash: '23f41dbec0785a6c77457dd6ebf99ae5970c5fffc9f7a8ad7f66c1b8eeba5b90',
+        },
+        createdAt: '2025-05-19T12:00:00.000Z',
+        hasAssignees: false,
+        number: 12345,
+        sourceBranch: 'some-branch',
+        state: 'merged',
+        targetBranch: 'master',
+        title: 'do something',
+      });
       expect(pr?.hasAssignees).toBeFalse();
     });
 
@@ -3557,7 +3635,19 @@ describe('modules/platform/gitlab/index', () => {
           assignees: [],
         });
       const pr = await gitlab.getPr(12345);
-      expect(pr).toMatchSnapshot();
+      expect(pr).toEqual({
+        bodyStruct: {
+          hash: '23f41dbec0785a6c77457dd6ebf99ae5970c5fffc9f7a8ad7f66c1b8eeba5b90',
+        },
+        createdAt: '2025-05-19T12:00:00.000Z',
+        hasAssignees: false,
+        isDraft: true,
+        number: 12345,
+        sourceBranch: 'some-branch',
+        state: 'merged',
+        targetBranch: 'master',
+        title: 'do something',
+      });
       expect(pr?.title).toBe('do something');
     });
 
@@ -3581,7 +3671,19 @@ describe('modules/platform/gitlab/index', () => {
           assignees: [],
         });
       const pr = await gitlab.getPr(12345);
-      expect(pr).toMatchSnapshot();
+      expect(pr).toEqual({
+        bodyStruct: {
+          hash: '23f41dbec0785a6c77457dd6ebf99ae5970c5fffc9f7a8ad7f66c1b8eeba5b90',
+        },
+        createdAt: '2025-05-19T12:00:00.000Z',
+        hasAssignees: false,
+        isDraft: true,
+        number: 12345,
+        sourceBranch: 'some-branch',
+        state: 'merged',
+        targetBranch: 'master',
+        title: 'do something',
+      });
       expect(pr?.title).toBe('do something');
     });
 
@@ -3606,7 +3708,18 @@ describe('modules/platform/gitlab/index', () => {
           },
         });
       const pr = await gitlab.getPr(12345);
-      expect(pr).toMatchSnapshot();
+      expect(pr).toEqual({
+        bodyStruct: {
+          hash: '23f41dbec0785a6c77457dd6ebf99ae5970c5fffc9f7a8ad7f66c1b8eeba5b90',
+        },
+        createdAt: '2025-05-19T12:00:00.000Z',
+        hasAssignees: true,
+        number: 12345,
+        sourceBranch: 'some-branch',
+        state: 'open',
+        targetBranch: 'master',
+        title: 'do something',
+      });
       expect(pr?.hasAssignees).toBeTrue();
     });
 
@@ -3634,7 +3747,18 @@ describe('modules/platform/gitlab/index', () => {
           ],
         });
       const pr = await gitlab.getPr(12345);
-      expect(pr).toMatchSnapshot();
+      expect(pr).toEqual({
+        bodyStruct: {
+          hash: '23f41dbec0785a6c77457dd6ebf99ae5970c5fffc9f7a8ad7f66c1b8eeba5b90',
+        },
+        createdAt: '2025-05-19T12:00:00.000Z',
+        hasAssignees: true,
+        number: 12345,
+        sourceBranch: 'some-branch',
+        state: 'open',
+        targetBranch: 'master',
+        title: 'do something',
+      });
       expect(pr?.hasAssignees).toBeTrue();
     });
 
@@ -4080,7 +4204,18 @@ These updates have all been created already. To force a retry/rebase of any, cli
 
     it('returns updated pr body', async () => {
       await initFakePlatform('13.4.0');
-      expect(gitlab.massageMarkdown(prBody)).toMatchSnapshot();
+      expect(gitlab.massageMarkdown(prBody)).toMatchInlineSnapshot(`
+        "https://github.com/foo/bar/issues/5 plus also [a link](https://github.com/foo/bar/issues/5
+
+          Merge Requests are the best, here are some MRs.
+
+          ## Open
+
+        These updates have all been created already. To force a retry/rebase of any, click on a checkbox below.
+
+         - [ ] <!-- rebase-branch=renovate/major-got-packages -->[build(deps): update got packages (major)](!2433) (\`gh-got\`, \`gl-got\`, \`got\`)
+        "
+      `);
       expect(prBodyModule.smartTruncate).toHaveBeenCalledExactlyOnceWith(
         expect.any(String),
         expect.any(Number),

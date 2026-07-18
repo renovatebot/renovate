@@ -43,7 +43,38 @@ describe('modules/manager/pip_requirements/extract', () => {
 
     it('extracts dependencies', () => {
       const res = extractPackageFile(requirements1);
-      expect(res).toMatchSnapshot();
+      expect(res).toEqual({
+        deps: [
+          {
+            currentValue: '==0.3.1',
+            currentVersion: '0.3.1',
+            datasource: 'pypi',
+            depName: 'some-package',
+            packageName: 'some-package',
+          },
+          {
+            currentValue: '==1.0.0',
+            currentVersion: '1.0.0',
+            datasource: 'pypi',
+            depName: 'some-other-package',
+            packageName: 'some-other-package',
+          },
+          {
+            currentValue: undefined,
+            datasource: 'pypi',
+            depName: 'sphinx',
+            packageName: 'sphinx',
+          },
+          {
+            currentValue: '==1.9',
+            currentVersion: '1.9',
+            datasource: 'pypi',
+            depName: 'not_semver',
+            packageName: 'not-semver',
+          },
+        ],
+        registryUrls: ['http://example.com/private-pypi/'],
+      });
       expect(res?.registryUrls).toEqual(['http://example.com/private-pypi/']);
       expect(res?.deps).toHaveLength(4);
     });
@@ -96,19 +127,119 @@ describe('modules/manager/pip_requirements/extract', () => {
 
     it('extracts multiple dependencies', () => {
       const res = extractPackageFile(requirements2)?.deps;
-      expect(res).toMatchSnapshot();
+      expect(res).toEqual([
+        {
+          currentValue: '==1',
+          currentVersion: '1',
+          datasource: 'pypi',
+          depName: 'Django',
+          packageName: 'django',
+        },
+        {
+          currentValue: '==0.6.27',
+          currentVersion: '0.6.27',
+          datasource: 'pypi',
+          depName: 'distribute',
+          packageName: 'distribute',
+        },
+        {
+          currentValue: '==0.2',
+          currentVersion: '0.2',
+          datasource: 'pypi',
+          depName: 'dj-database-url',
+          packageName: 'dj-database-url',
+        },
+        {
+          currentValue: '==2.4.5',
+          currentVersion: '2.4.5',
+          datasource: 'pypi',
+          depName: 'psycopg2',
+          packageName: 'psycopg2',
+        },
+        {
+          currentValue: '==0.1.2',
+          currentVersion: '0.1.2',
+          datasource: 'pypi',
+          depName: 'wsgiref',
+          packageName: 'wsgiref',
+        },
+      ]);
       expect(res).toHaveLength(5);
     });
 
     it('handles comments and commands', () => {
       const res = extractPackageFile(requirements3)?.deps;
-      expect(res).toMatchSnapshot();
+      expect(res).toEqual([
+        {
+          currentValue: '==1.11.23',
+          currentVersion: '1.11.23',
+          datasource: 'pypi',
+          depName: 'Django',
+          packageName: 'django',
+        },
+        {
+          currentValue: '==0.6.27',
+          currentVersion: '0.6.27',
+          datasource: 'pypi',
+          depName: 'distribute',
+          packageName: 'distribute',
+          skipReason: 'ignored',
+        },
+        {
+          currentValue: '==0.2',
+          currentVersion: '0.2',
+          datasource: 'pypi',
+          depName: 'dj-database-url',
+          packageName: 'dj-database-url',
+        },
+        {
+          currentValue: '==2.4.5',
+          currentVersion: '2.4.5',
+          datasource: 'pypi',
+          depName: 'psycopg2',
+          packageName: 'psycopg2',
+        },
+        {
+          currentValue: '==0.1.2',
+          currentVersion: '0.1.2',
+          datasource: 'pypi',
+          depName: 'wsgiref',
+          packageName: 'wsgiref',
+        },
+      ]);
       expect(res).toHaveLength(5);
     });
 
     it('handles extras and complex index url', () => {
       const res = extractPackageFile(requirements4);
-      expect(res).toMatchSnapshot();
+      expect(res).toEqual({
+        deps: [
+          {
+            currentValue: '==2.0.12',
+            currentVersion: '2.0.12',
+            datasource: 'pypi',
+            depName: 'Django',
+            packageName: 'django',
+          },
+          {
+            currentValue: '==4.1.1',
+            currentVersion: '4.1.1',
+            datasource: 'pypi',
+            depName: 'celery',
+            packageName: 'celery',
+          },
+          {
+            currentValue: '== 3.2.1',
+            currentVersion: '3.2.1',
+            datasource: 'pypi',
+            depName: 'foo',
+            packageName: 'foo',
+          },
+        ],
+        registryUrls: [
+          'https://artifactory.company.com/artifactory/api/pypi/python/simple',
+        ],
+      });
       expect(res?.registryUrls).toEqual([
         'https://artifactory.company.com/artifactory/api/pypi/python/simple',
       ]);
@@ -117,7 +248,56 @@ describe('modules/manager/pip_requirements/extract', () => {
 
     it('handles extra index url', () => {
       const res = extractPackageFile(requirements5);
-      expect(res).toMatchSnapshot();
+      expect(res).toEqual({
+        additionalRegistryUrls: ['http://example.com/private-pypi/'],
+        deps: [
+          {
+            currentValue: '==2.0.12',
+            currentVersion: '2.0.12',
+            datasource: 'pypi',
+            depName: 'Django',
+            packageName: 'django',
+          },
+          {
+            currentValue: '==4.1.1',
+            currentVersion: '4.1.1',
+            datasource: 'pypi',
+            depName: 'celery',
+            packageName: 'celery',
+          },
+          {
+            currentValue: '== 3.2.1',
+            currentVersion: '3.2.1',
+            datasource: 'pypi',
+            depName: 'foo',
+            packageName: 'foo',
+          },
+          {
+            currentValue: '==0.3.1',
+            currentVersion: '0.3.1',
+            datasource: 'pypi',
+            depName: 'some-package',
+            packageName: 'some-package',
+          },
+          {
+            currentValue: '==1.0.0',
+            currentVersion: '1.0.0',
+            datasource: 'pypi',
+            depName: 'some-other-package',
+            packageName: 'some-other-package',
+          },
+          {
+            currentValue: '==1.9',
+            currentVersion: '1.9',
+            datasource: 'pypi',
+            depName: 'not_semver',
+            packageName: 'not-semver',
+          },
+        ],
+        registryUrls: [
+          'https://artifactory.company.com/artifactory/api/pypi/python/simple',
+        ],
+      });
       expect(res?.registryUrls).toEqual([
         'https://artifactory.company.com/artifactory/api/pypi/python/simple',
       ]);
@@ -129,7 +309,53 @@ describe('modules/manager/pip_requirements/extract', () => {
 
     it('handles extra index url and defaults without index to config', () => {
       const res = extractPackageFile(requirements6);
-      expect(res).toMatchSnapshot();
+      expect(res).toEqual({
+        additionalRegistryUrls: ['http://example.com/private-pypi/'],
+        deps: [
+          {
+            currentValue: '==2.0.12',
+            currentVersion: '2.0.12',
+            datasource: 'pypi',
+            depName: 'Django',
+            packageName: 'django',
+          },
+          {
+            currentValue: '==4.1.1',
+            currentVersion: '4.1.1',
+            datasource: 'pypi',
+            depName: 'celery',
+            packageName: 'celery',
+          },
+          {
+            currentValue: '== 3.2.1',
+            currentVersion: '3.2.1',
+            datasource: 'pypi',
+            depName: 'foo',
+            packageName: 'foo',
+          },
+          {
+            currentValue: '==0.3.1',
+            currentVersion: '0.3.1',
+            datasource: 'pypi',
+            depName: 'some-package',
+            packageName: 'some-package',
+          },
+          {
+            currentValue: '==1.0.0',
+            currentVersion: '1.0.0',
+            datasource: 'pypi',
+            depName: 'some-other-package',
+            packageName: 'some-other-package',
+          },
+          {
+            currentValue: '==1.9',
+            currentVersion: '1.9',
+            datasource: 'pypi',
+            depName: 'not_semver',
+            packageName: 'not-semver',
+          },
+        ],
+      });
       expect(res?.additionalRegistryUrls).toEqual([
         'http://example.com/private-pypi/',
       ]);
@@ -138,7 +364,53 @@ describe('modules/manager/pip_requirements/extract', () => {
 
     it('handles extra index url and defaults without index to pypi', () => {
       const res = extractPackageFile(requirements6);
-      expect(res).toMatchSnapshot();
+      expect(res).toEqual({
+        additionalRegistryUrls: ['http://example.com/private-pypi/'],
+        deps: [
+          {
+            currentValue: '==2.0.12',
+            currentVersion: '2.0.12',
+            datasource: 'pypi',
+            depName: 'Django',
+            packageName: 'django',
+          },
+          {
+            currentValue: '==4.1.1',
+            currentVersion: '4.1.1',
+            datasource: 'pypi',
+            depName: 'celery',
+            packageName: 'celery',
+          },
+          {
+            currentValue: '== 3.2.1',
+            currentVersion: '3.2.1',
+            datasource: 'pypi',
+            depName: 'foo',
+            packageName: 'foo',
+          },
+          {
+            currentValue: '==0.3.1',
+            currentVersion: '0.3.1',
+            datasource: 'pypi',
+            depName: 'some-package',
+            packageName: 'some-package',
+          },
+          {
+            currentValue: '==1.0.0',
+            currentVersion: '1.0.0',
+            datasource: 'pypi',
+            depName: 'some-other-package',
+            packageName: 'some-other-package',
+          },
+          {
+            currentValue: '==1.9',
+            currentVersion: '1.9',
+            datasource: 'pypi',
+            depName: 'not_semver',
+            packageName: 'not-semver',
+          },
+        ],
+      });
       expect(res?.additionalRegistryUrls).toEqual([
         'http://example.com/private-pypi/',
       ]);
@@ -147,7 +419,34 @@ describe('modules/manager/pip_requirements/extract', () => {
 
     it('handles extra spaces around pinned dependency equal signs', () => {
       const res = extractPackageFile(requirements4);
-      expect(res).toMatchSnapshot();
+      expect(res).toEqual({
+        deps: [
+          {
+            currentValue: '==2.0.12',
+            currentVersion: '2.0.12',
+            datasource: 'pypi',
+            depName: 'Django',
+            packageName: 'django',
+          },
+          {
+            currentValue: '==4.1.1',
+            currentVersion: '4.1.1',
+            datasource: 'pypi',
+            depName: 'celery',
+            packageName: 'celery',
+          },
+          {
+            currentValue: '== 3.2.1',
+            currentVersion: '3.2.1',
+            datasource: 'pypi',
+            depName: 'foo',
+            packageName: 'foo',
+          },
+        ],
+        registryUrls: [
+          'https://artifactory.company.com/artifactory/api/pypi/python/simple',
+        ],
+      });
 
       expect(res?.deps[0].currentValue).toStartWith('==');
       expect(res?.deps[0].currentVersion).toStartWith('2.0.12');
@@ -184,7 +483,31 @@ describe('modules/manager/pip_requirements/extract', () => {
 
     it('should handle hashes', () => {
       const res = extractPackageFile(requirements8);
-      expect(res).toMatchSnapshot();
+      expect(res).toEqual({
+        deps: [
+          {
+            currentValue: '==1.9.1',
+            currentVersion: '1.9.1',
+            datasource: 'pypi',
+            depName: 'Django',
+            packageName: 'django',
+          },
+          {
+            currentValue: '==0.22.1',
+            currentVersion: '0.22.1',
+            datasource: 'pypi',
+            depName: 'bgg',
+            packageName: 'bgg',
+          },
+          {
+            currentValue: '==2016.1.8',
+            currentVersion: '2016.1.8',
+            datasource: 'pypi',
+            depName: 'html2text',
+            packageName: 'html2text',
+          },
+        ],
+      });
       expect(res?.deps).toHaveLength(3);
     });
 

@@ -110,7 +110,62 @@ describe('modules/manager/helmv3/artifacts', () => {
         config,
       }),
     ).toBeNull();
-    expect(execSnapshots).toMatchSnapshot();
+    expect(execSnapshots).toEqual([
+      {
+        cmd: 'helm repo add repo-test https://gitlab.com/api/v4/projects/xxxxxxx/packages/helm/stable --force-update',
+        options: {
+          cwd: '/tmp/github/some/repo',
+          env: {
+            HELM_EXPERIMENTAL_OCI: '1',
+            HELM_REGISTRY_CONFIG:
+              '/tmp/renovate/cache/__renovate-private-cache/registry.json',
+            HELM_REPOSITORY_CACHE:
+              '/tmp/renovate/cache/__renovate-private-cache/repositories',
+            HELM_REPOSITORY_CONFIG:
+              '/tmp/renovate/cache/__renovate-private-cache/repositories.yaml',
+            HOME: '/home/user',
+            HTTPS_PROXY: 'https://example.com',
+            HTTP_PROXY: 'http://example.com',
+            LANG: 'en_US.UTF-8',
+            LC_ALL: 'en_US',
+            NO_PROXY: 'localhost',
+            PATH: '/tmp/path',
+          },
+          maxBuffer: 10485760,
+          stderr: 'pipe',
+          stdin: 'pipe',
+          stdout: 'pipe',
+          timeout: 900000,
+        },
+      },
+      {
+        cmd: "helm dependency update ''",
+        options: {
+          cwd: '/tmp/github/some/repo',
+          env: {
+            HELM_EXPERIMENTAL_OCI: '1',
+            HELM_REGISTRY_CONFIG:
+              '/tmp/renovate/cache/__renovate-private-cache/registry.json',
+            HELM_REPOSITORY_CACHE:
+              '/tmp/renovate/cache/__renovate-private-cache/repositories',
+            HELM_REPOSITORY_CONFIG:
+              '/tmp/renovate/cache/__renovate-private-cache/repositories.yaml',
+            HOME: '/home/user',
+            HTTPS_PROXY: 'https://example.com',
+            HTTP_PROXY: 'http://example.com',
+            LANG: 'en_US.UTF-8',
+            LC_ALL: 'en_US',
+            NO_PROXY: 'localhost',
+            PATH: '/tmp/path',
+          },
+          maxBuffer: 10485760,
+          stderr: 'pipe',
+          stdin: 'pipe',
+          stdout: 'pipe',
+          timeout: 900000,
+        },
+      },
+    ]);
   });
 
   it('returns null if only "generated" is changed', async () => {
@@ -179,7 +234,62 @@ describe('modules/manager/helmv3/artifacts', () => {
       },
     ]);
     expect(execSnapshots).toBeArrayOfSize(2);
-    expect(execSnapshots).toMatchSnapshot();
+    expect(execSnapshots).toEqual([
+      {
+        cmd: 'helm repo add repo-test https://gitlab.com/api/v4/projects/xxxxxxx/packages/helm/stable --force-update',
+        options: {
+          cwd: '/tmp/github/some/repo',
+          env: {
+            HELM_EXPERIMENTAL_OCI: '1',
+            HELM_REGISTRY_CONFIG:
+              '/tmp/renovate/cache/__renovate-private-cache/registry.json',
+            HELM_REPOSITORY_CACHE:
+              '/tmp/renovate/cache/__renovate-private-cache/repositories',
+            HELM_REPOSITORY_CONFIG:
+              '/tmp/renovate/cache/__renovate-private-cache/repositories.yaml',
+            HOME: '/home/user',
+            HTTPS_PROXY: 'https://example.com',
+            HTTP_PROXY: 'http://example.com',
+            LANG: 'en_US.UTF-8',
+            LC_ALL: 'en_US',
+            NO_PROXY: 'localhost',
+            PATH: '/tmp/path',
+          },
+          maxBuffer: 10485760,
+          stderr: 'pipe',
+          stdin: 'pipe',
+          stdout: 'pipe',
+          timeout: 900000,
+        },
+      },
+      {
+        cmd: "helm dependency update ''",
+        options: {
+          cwd: '/tmp/github/some/repo',
+          env: {
+            HELM_EXPERIMENTAL_OCI: '1',
+            HELM_REGISTRY_CONFIG:
+              '/tmp/renovate/cache/__renovate-private-cache/registry.json',
+            HELM_REPOSITORY_CACHE:
+              '/tmp/renovate/cache/__renovate-private-cache/repositories',
+            HELM_REPOSITORY_CONFIG:
+              '/tmp/renovate/cache/__renovate-private-cache/repositories.yaml',
+            HOME: '/home/user',
+            HTTPS_PROXY: 'https://example.com',
+            HTTP_PROXY: 'http://example.com',
+            LANG: 'en_US.UTF-8',
+            LC_ALL: 'en_US',
+            NO_PROXY: 'localhost',
+            PATH: '/tmp/path',
+          },
+          maxBuffer: 10485760,
+          stderr: 'pipe',
+          stdin: 'pipe',
+          stdout: 'pipe',
+          timeout: 900000,
+        },
+      },
+    ]);
   });
 
   it('returns updated Chart.lock for lockfile maintenance', async () => {
@@ -208,7 +318,62 @@ describe('modules/manager/helmv3/artifacts', () => {
       },
     ]);
     expect(execSnapshots).toBeArrayOfSize(2);
-    expect(execSnapshots).toMatchSnapshot();
+    expect(execSnapshots).toEqual([
+      {
+        cmd: 'helm repo add repo-test https://gitlab.com/api/v4/projects/xxxxxxx/packages/helm/stable --force-update',
+        options: {
+          cwd: '/tmp/github/some/repo',
+          env: {
+            HELM_EXPERIMENTAL_OCI: '1',
+            HELM_REGISTRY_CONFIG:
+              '/tmp/renovate/cache/__renovate-private-cache/registry.json',
+            HELM_REPOSITORY_CACHE:
+              '/tmp/renovate/cache/__renovate-private-cache/repositories',
+            HELM_REPOSITORY_CONFIG:
+              '/tmp/renovate/cache/__renovate-private-cache/repositories.yaml',
+            HOME: '/home/user',
+            HTTPS_PROXY: 'https://example.com',
+            HTTP_PROXY: 'http://example.com',
+            LANG: 'en_US.UTF-8',
+            LC_ALL: 'en_US',
+            NO_PROXY: 'localhost',
+            PATH: '/tmp/path',
+          },
+          maxBuffer: 10485760,
+          stderr: 'pipe',
+          stdin: 'pipe',
+          stdout: 'pipe',
+          timeout: 900000,
+        },
+      },
+      {
+        cmd: "helm dependency update ''",
+        options: {
+          cwd: '/tmp/github/some/repo',
+          env: {
+            HELM_EXPERIMENTAL_OCI: '1',
+            HELM_REGISTRY_CONFIG:
+              '/tmp/renovate/cache/__renovate-private-cache/registry.json',
+            HELM_REPOSITORY_CACHE:
+              '/tmp/renovate/cache/__renovate-private-cache/repositories',
+            HELM_REPOSITORY_CONFIG:
+              '/tmp/renovate/cache/__renovate-private-cache/repositories.yaml',
+            HOME: '/home/user',
+            HTTPS_PROXY: 'https://example.com',
+            HTTP_PROXY: 'http://example.com',
+            LANG: 'en_US.UTF-8',
+            LC_ALL: 'en_US',
+            NO_PROXY: 'localhost',
+            PATH: '/tmp/path',
+          },
+          maxBuffer: 10485760,
+          stderr: 'pipe',
+          stdin: 'pipe',
+          stdout: 'pipe',
+          timeout: 900000,
+        },
+      },
+    ]);
   });
 
   it('returns updated Chart.lock with docker', async () => {
@@ -246,7 +411,44 @@ describe('modules/manager/helmv3/artifacts', () => {
       },
     ]);
     expect(execSnapshots).toBeArrayOfSize(3);
-    expect(execSnapshots).toMatchSnapshot();
+    expect(execSnapshots).toEqual([
+      {
+        cmd: 'docker pull ghcr.io/renovatebot/base-image',
+        options: {},
+      },
+      {
+        cmd: 'docker ps --filter name=renovate_sidecar -aq',
+        options: {},
+      },
+      {
+        cmd: 'docker run --rm --name=renovate_sidecar --label=renovate_child -v "/tmp/github/some/repo":"/tmp/github/some/repo" -v "/tmp/renovate/cache":"/tmp/renovate/cache" -e HELM_EXPERIMENTAL_OCI -e HELM_REGISTRY_CONFIG -e HELM_REPOSITORY_CONFIG -e HELM_REPOSITORY_CACHE -e CONTAINERBASE_CACHE_DIR -w "/tmp/github/some/repo" ghcr.io/renovatebot/base-image bash -l -c "install-tool helm v3.7.2 && helm repo add repo-test https://gitlab.com/api/v4/projects/xxxxxxx/packages/helm/stable --force-update && helm dependency update \'\'"',
+        options: {
+          cwd: '/tmp/github/some/repo',
+          env: {
+            CONTAINERBASE_CACHE_DIR: '/tmp/renovate/cache/containerbase',
+            HELM_EXPERIMENTAL_OCI: '1',
+            HELM_REGISTRY_CONFIG:
+              '/tmp/renovate/cache/__renovate-private-cache/registry.json',
+            HELM_REPOSITORY_CACHE:
+              '/tmp/renovate/cache/__renovate-private-cache/repositories',
+            HELM_REPOSITORY_CONFIG:
+              '/tmp/renovate/cache/__renovate-private-cache/repositories.yaml',
+            HOME: '/home/user',
+            HTTPS_PROXY: 'https://example.com',
+            HTTP_PROXY: 'http://example.com',
+            LANG: 'en_US.UTF-8',
+            LC_ALL: 'en_US',
+            NO_PROXY: 'localhost',
+            PATH: '/tmp/path',
+          },
+          maxBuffer: 10485760,
+          stderr: 'pipe',
+          stdin: 'pipe',
+          stdout: 'pipe',
+          timeout: 900000,
+        },
+      },
+    ]);
   });
 
   it('catches errors', async () => {
@@ -648,7 +850,116 @@ describe('modules/manager/helmv3/artifacts', () => {
       },
     ]);
     expect(execSnapshots).toBeArrayOfSize(4);
-    expect(execSnapshots).toMatchSnapshot();
+    expect(execSnapshots).toEqual([
+      {
+        cmd: 'helm repo add stable http://the_stable_url --force-update',
+        options: {
+          cwd: '/tmp/github/some/repo',
+          env: {
+            HELM_EXPERIMENTAL_OCI: '1',
+            HELM_REGISTRY_CONFIG:
+              '/tmp/renovate/cache/__renovate-private-cache/registry.json',
+            HELM_REPOSITORY_CACHE:
+              '/tmp/renovate/cache/__renovate-private-cache/repositories',
+            HELM_REPOSITORY_CONFIG:
+              '/tmp/renovate/cache/__renovate-private-cache/repositories.yaml',
+            HOME: '/home/user',
+            HTTPS_PROXY: 'https://example.com',
+            HTTP_PROXY: 'http://example.com',
+            LANG: 'en_US.UTF-8',
+            LC_ALL: 'en_US',
+            NO_PROXY: 'localhost',
+            PATH: '/tmp/path',
+          },
+          maxBuffer: 10485760,
+          stderr: 'pipe',
+          stdin: 'pipe',
+          stdout: 'pipe',
+          timeout: 900000,
+        },
+      },
+      {
+        cmd: 'helm repo add repo1 https://the_repo1_url --force-update',
+        options: {
+          cwd: '/tmp/github/some/repo',
+          env: {
+            HELM_EXPERIMENTAL_OCI: '1',
+            HELM_REGISTRY_CONFIG:
+              '/tmp/renovate/cache/__renovate-private-cache/registry.json',
+            HELM_REPOSITORY_CACHE:
+              '/tmp/renovate/cache/__renovate-private-cache/repositories',
+            HELM_REPOSITORY_CONFIG:
+              '/tmp/renovate/cache/__renovate-private-cache/repositories.yaml',
+            HOME: '/home/user',
+            HTTPS_PROXY: 'https://example.com',
+            HTTP_PROXY: 'http://example.com',
+            LANG: 'en_US.UTF-8',
+            LC_ALL: 'en_US',
+            NO_PROXY: 'localhost',
+            PATH: '/tmp/path',
+          },
+          maxBuffer: 10485760,
+          stderr: 'pipe',
+          stdin: 'pipe',
+          stdout: 'pipe',
+          timeout: 900000,
+        },
+      },
+      {
+        cmd: 'helm repo add repo-test https://gitlab.com/api/v4/projects/xxxxxxx/packages/helm/stable --force-update',
+        options: {
+          cwd: '/tmp/github/some/repo',
+          env: {
+            HELM_EXPERIMENTAL_OCI: '1',
+            HELM_REGISTRY_CONFIG:
+              '/tmp/renovate/cache/__renovate-private-cache/registry.json',
+            HELM_REPOSITORY_CACHE:
+              '/tmp/renovate/cache/__renovate-private-cache/repositories',
+            HELM_REPOSITORY_CONFIG:
+              '/tmp/renovate/cache/__renovate-private-cache/repositories.yaml',
+            HOME: '/home/user',
+            HTTPS_PROXY: 'https://example.com',
+            HTTP_PROXY: 'http://example.com',
+            LANG: 'en_US.UTF-8',
+            LC_ALL: 'en_US',
+            NO_PROXY: 'localhost',
+            PATH: '/tmp/path',
+          },
+          maxBuffer: 10485760,
+          stderr: 'pipe',
+          stdin: 'pipe',
+          stdout: 'pipe',
+          timeout: 900000,
+        },
+      },
+      {
+        cmd: "helm dependency update ''",
+        options: {
+          cwd: '/tmp/github/some/repo',
+          env: {
+            HELM_EXPERIMENTAL_OCI: '1',
+            HELM_REGISTRY_CONFIG:
+              '/tmp/renovate/cache/__renovate-private-cache/registry.json',
+            HELM_REPOSITORY_CACHE:
+              '/tmp/renovate/cache/__renovate-private-cache/repositories',
+            HELM_REPOSITORY_CONFIG:
+              '/tmp/renovate/cache/__renovate-private-cache/repositories.yaml',
+            HOME: '/home/user',
+            HTTPS_PROXY: 'https://example.com',
+            HTTP_PROXY: 'http://example.com',
+            LANG: 'en_US.UTF-8',
+            LC_ALL: 'en_US',
+            NO_PROXY: 'localhost',
+            PATH: '/tmp/path',
+          },
+          maxBuffer: 10485760,
+          stderr: 'pipe',
+          stdin: 'pipe',
+          stdout: 'pipe',
+          timeout: 900000,
+        },
+      },
+    ]);
   });
 
   it('sets repositories from registryAliases with docker', async () => {
@@ -693,7 +1004,44 @@ describe('modules/manager/helmv3/artifacts', () => {
       },
     ]);
     expect(execSnapshots).toBeArrayOfSize(3);
-    expect(execSnapshots).toMatchSnapshot();
+    expect(execSnapshots).toEqual([
+      {
+        cmd: 'docker pull ghcr.io/renovatebot/base-image',
+        options: {},
+      },
+      {
+        cmd: 'docker ps --filter name=renovate_sidecar -aq',
+        options: {},
+      },
+      {
+        cmd: 'docker run --rm --name=renovate_sidecar --label=renovate_child -v "/tmp/github/some/repo":"/tmp/github/some/repo" -v "/tmp/renovate/cache":"/tmp/renovate/cache" -e HELM_EXPERIMENTAL_OCI -e HELM_REGISTRY_CONFIG -e HELM_REPOSITORY_CONFIG -e HELM_REPOSITORY_CACHE -e CONTAINERBASE_CACHE_DIR -w "/tmp/github/some/repo" ghcr.io/renovatebot/base-image bash -l -c "install-tool helm v3.7.2 && helm repo add stable http://the_stable_url --force-update && helm repo add repo1 https://the_repo1_url --force-update && helm repo add repo-test https://gitlab.com/api/v4/projects/xxxxxxx/packages/helm/stable --force-update && helm dependency update \'\'"',
+        options: {
+          cwd: '/tmp/github/some/repo',
+          env: {
+            CONTAINERBASE_CACHE_DIR: '/tmp/renovate/cache/containerbase',
+            HELM_EXPERIMENTAL_OCI: '1',
+            HELM_REGISTRY_CONFIG:
+              '/tmp/renovate/cache/__renovate-private-cache/registry.json',
+            HELM_REPOSITORY_CACHE:
+              '/tmp/renovate/cache/__renovate-private-cache/repositories',
+            HELM_REPOSITORY_CONFIG:
+              '/tmp/renovate/cache/__renovate-private-cache/repositories.yaml',
+            HOME: '/home/user',
+            HTTPS_PROXY: 'https://example.com',
+            HTTP_PROXY: 'http://example.com',
+            LANG: 'en_US.UTF-8',
+            LC_ALL: 'en_US',
+            NO_PROXY: 'localhost',
+            PATH: '/tmp/path',
+          },
+          maxBuffer: 10485760,
+          stderr: 'pipe',
+          stdin: 'pipe',
+          stdout: 'pipe',
+          timeout: 900000,
+        },
+      },
+    ]);
   });
 
   it('log into private registries and repositories already defined in registryAliases', async () => {
@@ -743,7 +1091,143 @@ describe('modules/manager/helmv3/artifacts', () => {
       },
     ]);
     expect(execSnapshots).toBeArrayOfSize(5);
-    expect(execSnapshots).toMatchSnapshot();
+    expect(execSnapshots).toEqual([
+      {
+        cmd: 'helm registry login --username test --password aPassword registry.example.com',
+        options: {
+          cwd: '/tmp/github/some/repo',
+          env: {
+            HELM_EXPERIMENTAL_OCI: '1',
+            HELM_REGISTRY_CONFIG:
+              '/tmp/renovate/cache/__renovate-private-cache/registry.json',
+            HELM_REPOSITORY_CACHE:
+              '/tmp/renovate/cache/__renovate-private-cache/repositories',
+            HELM_REPOSITORY_CONFIG:
+              '/tmp/renovate/cache/__renovate-private-cache/repositories.yaml',
+            HOME: '/home/user',
+            HTTPS_PROXY: 'https://example.com',
+            HTTP_PROXY: 'http://example.com',
+            LANG: 'en_US.UTF-8',
+            LC_ALL: 'en_US',
+            NO_PROXY: 'localhost',
+            PATH: '/tmp/path',
+          },
+          maxBuffer: 10485760,
+          stderr: 'pipe',
+          stdin: 'pipe',
+          stdout: 'pipe',
+          timeout: 900000,
+        },
+      },
+      {
+        cmd: 'helm repo add stable http://the_stable_url --force-update',
+        options: {
+          cwd: '/tmp/github/some/repo',
+          env: {
+            HELM_EXPERIMENTAL_OCI: '1',
+            HELM_REGISTRY_CONFIG:
+              '/tmp/renovate/cache/__renovate-private-cache/registry.json',
+            HELM_REPOSITORY_CACHE:
+              '/tmp/renovate/cache/__renovate-private-cache/repositories',
+            HELM_REPOSITORY_CONFIG:
+              '/tmp/renovate/cache/__renovate-private-cache/repositories.yaml',
+            HOME: '/home/user',
+            HTTPS_PROXY: 'https://example.com',
+            HTTP_PROXY: 'http://example.com',
+            LANG: 'en_US.UTF-8',
+            LC_ALL: 'en_US',
+            NO_PROXY: 'localhost',
+            PATH: '/tmp/path',
+          },
+          maxBuffer: 10485760,
+          stderr: 'pipe',
+          stdin: 'pipe',
+          stdout: 'pipe',
+          timeout: 900000,
+        },
+      },
+      {
+        cmd: 'helm repo add repo1 https://the_repo1_url --force-update --username basicUser --password secret',
+        options: {
+          cwd: '/tmp/github/some/repo',
+          env: {
+            HELM_EXPERIMENTAL_OCI: '1',
+            HELM_REGISTRY_CONFIG:
+              '/tmp/renovate/cache/__renovate-private-cache/registry.json',
+            HELM_REPOSITORY_CACHE:
+              '/tmp/renovate/cache/__renovate-private-cache/repositories',
+            HELM_REPOSITORY_CONFIG:
+              '/tmp/renovate/cache/__renovate-private-cache/repositories.yaml',
+            HOME: '/home/user',
+            HTTPS_PROXY: 'https://example.com',
+            HTTP_PROXY: 'http://example.com',
+            LANG: 'en_US.UTF-8',
+            LC_ALL: 'en_US',
+            NO_PROXY: 'localhost',
+            PATH: '/tmp/path',
+          },
+          maxBuffer: 10485760,
+          stderr: 'pipe',
+          stdin: 'pipe',
+          stdout: 'pipe',
+          timeout: 900000,
+        },
+      },
+      {
+        cmd: 'helm repo add repo-test https://gitlab.com/api/v4/projects/xxxxxxx/packages/helm/stable --force-update',
+        options: {
+          cwd: '/tmp/github/some/repo',
+          env: {
+            HELM_EXPERIMENTAL_OCI: '1',
+            HELM_REGISTRY_CONFIG:
+              '/tmp/renovate/cache/__renovate-private-cache/registry.json',
+            HELM_REPOSITORY_CACHE:
+              '/tmp/renovate/cache/__renovate-private-cache/repositories',
+            HELM_REPOSITORY_CONFIG:
+              '/tmp/renovate/cache/__renovate-private-cache/repositories.yaml',
+            HOME: '/home/user',
+            HTTPS_PROXY: 'https://example.com',
+            HTTP_PROXY: 'http://example.com',
+            LANG: 'en_US.UTF-8',
+            LC_ALL: 'en_US',
+            NO_PROXY: 'localhost',
+            PATH: '/tmp/path',
+          },
+          maxBuffer: 10485760,
+          stderr: 'pipe',
+          stdin: 'pipe',
+          stdout: 'pipe',
+          timeout: 900000,
+        },
+      },
+      {
+        cmd: "helm dependency update ''",
+        options: {
+          cwd: '/tmp/github/some/repo',
+          env: {
+            HELM_EXPERIMENTAL_OCI: '1',
+            HELM_REGISTRY_CONFIG:
+              '/tmp/renovate/cache/__renovate-private-cache/registry.json',
+            HELM_REPOSITORY_CACHE:
+              '/tmp/renovate/cache/__renovate-private-cache/repositories',
+            HELM_REPOSITORY_CONFIG:
+              '/tmp/renovate/cache/__renovate-private-cache/repositories.yaml',
+            HOME: '/home/user',
+            HTTPS_PROXY: 'https://example.com',
+            HTTP_PROXY: 'http://example.com',
+            LANG: 'en_US.UTF-8',
+            LC_ALL: 'en_US',
+            NO_PROXY: 'localhost',
+            PATH: '/tmp/path',
+          },
+          maxBuffer: 10485760,
+          stderr: 'pipe',
+          stdin: 'pipe',
+          stdout: 'pipe',
+          timeout: 900000,
+        },
+      },
+    ]);
   });
 
   it('log into private registries and repositories NOT defined in registryAliases', async () => {
@@ -789,7 +1273,89 @@ describe('modules/manager/helmv3/artifacts', () => {
       },
     ]);
     expect(execSnapshots).toBeArrayOfSize(3);
-    expect(execSnapshots).toMatchSnapshot();
+    expect(execSnapshots).toEqual([
+      {
+        cmd: 'helm registry login --username registryUser --password password registry.gitlab.com',
+        options: {
+          cwd: '/tmp/github/some/repo',
+          env: {
+            HELM_EXPERIMENTAL_OCI: '1',
+            HELM_REGISTRY_CONFIG:
+              '/tmp/renovate/cache/__renovate-private-cache/registry.json',
+            HELM_REPOSITORY_CACHE:
+              '/tmp/renovate/cache/__renovate-private-cache/repositories',
+            HELM_REPOSITORY_CONFIG:
+              '/tmp/renovate/cache/__renovate-private-cache/repositories.yaml',
+            HOME: '/home/user',
+            HTTPS_PROXY: 'https://example.com',
+            HTTP_PROXY: 'http://example.com',
+            LANG: 'en_US.UTF-8',
+            LC_ALL: 'en_US',
+            NO_PROXY: 'localhost',
+            PATH: '/tmp/path',
+          },
+          maxBuffer: 10485760,
+          stderr: 'pipe',
+          stdin: 'pipe',
+          stdout: 'pipe',
+          timeout: 900000,
+        },
+      },
+      {
+        cmd: 'helm repo add repo-test https://gitlab.com/api/v4/projects/xxxxxxx/packages/helm/stable --force-update --username basicUser --password secret',
+        options: {
+          cwd: '/tmp/github/some/repo',
+          env: {
+            HELM_EXPERIMENTAL_OCI: '1',
+            HELM_REGISTRY_CONFIG:
+              '/tmp/renovate/cache/__renovate-private-cache/registry.json',
+            HELM_REPOSITORY_CACHE:
+              '/tmp/renovate/cache/__renovate-private-cache/repositories',
+            HELM_REPOSITORY_CONFIG:
+              '/tmp/renovate/cache/__renovate-private-cache/repositories.yaml',
+            HOME: '/home/user',
+            HTTPS_PROXY: 'https://example.com',
+            HTTP_PROXY: 'http://example.com',
+            LANG: 'en_US.UTF-8',
+            LC_ALL: 'en_US',
+            NO_PROXY: 'localhost',
+            PATH: '/tmp/path',
+          },
+          maxBuffer: 10485760,
+          stderr: 'pipe',
+          stdin: 'pipe',
+          stdout: 'pipe',
+          timeout: 900000,
+        },
+      },
+      {
+        cmd: "helm dependency update ''",
+        options: {
+          cwd: '/tmp/github/some/repo',
+          env: {
+            HELM_EXPERIMENTAL_OCI: '1',
+            HELM_REGISTRY_CONFIG:
+              '/tmp/renovate/cache/__renovate-private-cache/registry.json',
+            HELM_REPOSITORY_CACHE:
+              '/tmp/renovate/cache/__renovate-private-cache/repositories',
+            HELM_REPOSITORY_CONFIG:
+              '/tmp/renovate/cache/__renovate-private-cache/repositories.yaml',
+            HOME: '/home/user',
+            HTTPS_PROXY: 'https://example.com',
+            HTTP_PROXY: 'http://example.com',
+            LANG: 'en_US.UTF-8',
+            LC_ALL: 'en_US',
+            NO_PROXY: 'localhost',
+            PATH: '/tmp/path',
+          },
+          maxBuffer: 10485760,
+          stderr: 'pipe',
+          stdin: 'pipe',
+          stdout: 'pipe',
+          timeout: 900000,
+        },
+      },
+    ]);
   });
 
   it('supports ECR authentication', async () => {
@@ -1087,7 +1653,62 @@ describe('modules/manager/helmv3/artifacts', () => {
         ),
       ),
     ).toBeArrayOfSize(1);
-    expect(execSnapshots).toMatchSnapshot();
+    expect(execSnapshots).toEqual([
+      {
+        cmd: 'helm repo add repo1 https://gitlab.com/api/v4/projects/xxxxxxx/packages/helm/stable --force-update --username basicUser --password secret',
+        options: {
+          cwd: '/tmp/github/some/repo',
+          env: {
+            HELM_EXPERIMENTAL_OCI: '1',
+            HELM_REGISTRY_CONFIG:
+              '/tmp/renovate/cache/__renovate-private-cache/registry.json',
+            HELM_REPOSITORY_CACHE:
+              '/tmp/renovate/cache/__renovate-private-cache/repositories',
+            HELM_REPOSITORY_CONFIG:
+              '/tmp/renovate/cache/__renovate-private-cache/repositories.yaml',
+            HOME: '/home/user',
+            HTTPS_PROXY: 'https://example.com',
+            HTTP_PROXY: 'http://example.com',
+            LANG: 'en_US.UTF-8',
+            LC_ALL: 'en_US',
+            NO_PROXY: 'localhost',
+            PATH: '/tmp/path',
+          },
+          maxBuffer: 10485760,
+          stderr: 'pipe',
+          stdin: 'pipe',
+          stdout: 'pipe',
+          timeout: 900000,
+        },
+      },
+      {
+        cmd: "helm dependency update ''",
+        options: {
+          cwd: '/tmp/github/some/repo',
+          env: {
+            HELM_EXPERIMENTAL_OCI: '1',
+            HELM_REGISTRY_CONFIG:
+              '/tmp/renovate/cache/__renovate-private-cache/registry.json',
+            HELM_REPOSITORY_CACHE:
+              '/tmp/renovate/cache/__renovate-private-cache/repositories',
+            HELM_REPOSITORY_CONFIG:
+              '/tmp/renovate/cache/__renovate-private-cache/repositories.yaml',
+            HOME: '/home/user',
+            HTTPS_PROXY: 'https://example.com',
+            HTTP_PROXY: 'http://example.com',
+            LANG: 'en_US.UTF-8',
+            LC_ALL: 'en_US',
+            NO_PROXY: 'localhost',
+            PATH: '/tmp/path',
+          },
+          maxBuffer: 10485760,
+          stderr: 'pipe',
+          stdin: 'pipe',
+          stdout: 'pipe',
+          timeout: 900000,
+        },
+      },
+    ]);
   });
 
   it('do not add registryAliases to repository list', async () => {
@@ -1136,7 +1757,89 @@ describe('modules/manager/helmv3/artifacts', () => {
           value.cmd.includes('https://kubernetes.github.io/ingress-nginx'),
       ),
     ).toBeArrayOfSize(1);
-    expect(execSnapshots).toMatchSnapshot();
+    expect(execSnapshots).toEqual([
+      {
+        cmd: 'helm repo add jetstack https://charts.jetstack.io --force-update',
+        options: {
+          cwd: '/tmp/github/some/repo',
+          env: {
+            HELM_EXPERIMENTAL_OCI: '1',
+            HELM_REGISTRY_CONFIG:
+              '/tmp/renovate/cache/__renovate-private-cache/registry.json',
+            HELM_REPOSITORY_CACHE:
+              '/tmp/renovate/cache/__renovate-private-cache/repositories',
+            HELM_REPOSITORY_CONFIG:
+              '/tmp/renovate/cache/__renovate-private-cache/repositories.yaml',
+            HOME: '/home/user',
+            HTTPS_PROXY: 'https://example.com',
+            HTTP_PROXY: 'http://example.com',
+            LANG: 'en_US.UTF-8',
+            LC_ALL: 'en_US',
+            NO_PROXY: 'localhost',
+            PATH: '/tmp/path',
+          },
+          maxBuffer: 10485760,
+          stderr: 'pipe',
+          stdin: 'pipe',
+          stdout: 'pipe',
+          timeout: 900000,
+        },
+      },
+      {
+        cmd: 'helm repo add nginx https://kubernetes.github.io/ingress-nginx --force-update',
+        options: {
+          cwd: '/tmp/github/some/repo',
+          env: {
+            HELM_EXPERIMENTAL_OCI: '1',
+            HELM_REGISTRY_CONFIG:
+              '/tmp/renovate/cache/__renovate-private-cache/registry.json',
+            HELM_REPOSITORY_CACHE:
+              '/tmp/renovate/cache/__renovate-private-cache/repositories',
+            HELM_REPOSITORY_CONFIG:
+              '/tmp/renovate/cache/__renovate-private-cache/repositories.yaml',
+            HOME: '/home/user',
+            HTTPS_PROXY: 'https://example.com',
+            HTTP_PROXY: 'http://example.com',
+            LANG: 'en_US.UTF-8',
+            LC_ALL: 'en_US',
+            NO_PROXY: 'localhost',
+            PATH: '/tmp/path',
+          },
+          maxBuffer: 10485760,
+          stderr: 'pipe',
+          stdin: 'pipe',
+          stdout: 'pipe',
+          timeout: 900000,
+        },
+      },
+      {
+        cmd: "helm dependency update ''",
+        options: {
+          cwd: '/tmp/github/some/repo',
+          env: {
+            HELM_EXPERIMENTAL_OCI: '1',
+            HELM_REGISTRY_CONFIG:
+              '/tmp/renovate/cache/__renovate-private-cache/registry.json',
+            HELM_REPOSITORY_CACHE:
+              '/tmp/renovate/cache/__renovate-private-cache/repositories',
+            HELM_REPOSITORY_CONFIG:
+              '/tmp/renovate/cache/__renovate-private-cache/repositories.yaml',
+            HOME: '/home/user',
+            HTTPS_PROXY: 'https://example.com',
+            HTTP_PROXY: 'http://example.com',
+            LANG: 'en_US.UTF-8',
+            LC_ALL: 'en_US',
+            NO_PROXY: 'localhost',
+            PATH: '/tmp/path',
+          },
+          maxBuffer: 10485760,
+          stderr: 'pipe',
+          stdin: 'pipe',
+          stdout: 'pipe',
+          timeout: 900000,
+        },
+      },
+    ]);
   });
 
   it('prevents injections', async () => {
