@@ -134,8 +134,8 @@ describe('modules/platform/gerrit/scm', () => {
     it('commitAndPush() - merges user trailers and overrides reserved keys', async () => {
       clientMock.getBranchChange.mockResolvedValueOnce(null);
       git.prepareCommit.mockResolvedValueOnce({
-        commitSha: 'commitSha' as LongCommitSha,
-        parentCommitSha: 'parentSha' as LongCommitSha,
+        commitSha,
+        parentCommitSha,
         files: [],
       });
 
@@ -152,7 +152,7 @@ describe('modules/platform/gerrit/scm', () => {
             'Renovate-Branch: user-provided',
           ],
         }),
-      ).toBe('commitSha');
+      ).toBe(commitSha);
       expect(git.prepareCommit).toHaveBeenCalledExactlyOnceWith({
         baseBranch: 'main',
         branchName: 'renovate/dependency-1.x',
@@ -164,7 +164,6 @@ describe('modules/platform/gerrit/scm', () => {
           expect.stringMatching(/^Change-Id: I[a-z0-9]{40}$/),
         ],
         prTitle: 'pr title',
-        force: true,
       });
     });
 
