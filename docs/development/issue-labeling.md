@@ -176,6 +176,7 @@ Apply these labels when somebody opens a `feature` type issue requesting a new d
     auto:needs-details
     auto:no-coverage-ignore
     auto:no-done-comments
+    auto:pls-merge-main
     auto:reproduction
     auto:retry-latest
 
@@ -207,6 +208,8 @@ Add a label `auto:needs-details` to discussions which need more details to move 
 Add a label `auto:no-coverage-ignore` if PR authors avoid needed unit tests by v8 ignoring code with the `/* v8 ignore ... */` comment.
 
 Add a label `auto:no-done-comments` if PR authors unnecessary "Done" comments, or type comments to ask for a review instead of requesting a new review through GitHub's UI.
+
+Add a label `auto:pls-merge-main` to a PR (with base branch `main`) to have a GitHub Action automatically merge `main` into the PR's branch, and remove the label afterwards.
 
 Add a label `auto:reproduction` if nobody's reproduced it in a public repo yet and such a reproduction is necessary before further work can be done.
 
