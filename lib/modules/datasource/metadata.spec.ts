@@ -42,9 +42,28 @@ describe('modules/datasource/metadata', () => {
     const packageName = 'pycountry';
 
     addMetaData(dep, datasource, packageName);
-    expect(dep).toMatchSnapshot({
+    expect(dep).toEqual({
       changelogUrl:
         'https://github.com/flyingcircusio/pycountry/blob/master/HISTORY.txt',
+      sourceUrl: 'https://github.com/flyingcircusio/pycountry',
+      releases: [
+        {
+          version: '2.0.0',
+          releaseTimestamp: '2018-07-13T10:14:17.000Z',
+        },
+        {
+          version: '2.0.0.dev1',
+          releaseTimestamp: '2017-10-24T10:09:16.000Z',
+        },
+        {
+          version: '2.1.0',
+          releaseTimestamp: '2019-01-20T19:59:28.000Z',
+        },
+        {
+          version: '2.2.0',
+          releaseTimestamp: '2019-07-16T18:29:00.000Z',
+        },
+      ],
     });
   });
 
@@ -74,8 +93,26 @@ describe('modules/datasource/metadata', () => {
     const packageName = 'mkdocs';
 
     addMetaData(dep, datasource, packageName);
-    expect(dep).toMatchSnapshot({
+    expect(dep).toEqual({
       sourceUrl: 'https://github.com/mkdocs/mkdocs',
+      releases: [
+        {
+          version: '2.0.0',
+          releaseTimestamp: '2018-07-13T10:14:17.000Z',
+        },
+        {
+          version: '2.0.0.dev1',
+          releaseTimestamp: '2017-10-24T10:09:16.000Z',
+        },
+        {
+          version: '2.1.0',
+          releaseTimestamp: '2019-01-20T19:59:28.000Z',
+        },
+        {
+          version: '2.2.0',
+          releaseTimestamp: '2019-07-16T18:29:00.000Z',
+        },
+      ],
     });
   });
 
@@ -105,8 +142,26 @@ describe('modules/datasource/metadata', () => {
     const packageName = 'django-filter';
 
     addMetaData(dep, datasource, packageName);
-    expect(dep).toMatchSnapshot({
+    expect(dep).toEqual({
       sourceUrl: 'https://github.com/carltongibson/django-filter',
+      releases: [
+        {
+          version: '2.0.0',
+          releaseTimestamp: '2018-07-13T10:14:17.000Z',
+        },
+        {
+          version: '2.0.0.dev1',
+          releaseTimestamp: '2017-10-24T10:09:16.000Z',
+        },
+        {
+          version: '2.1.0',
+          releaseTimestamp: '2019-01-20T19:59:28.000Z',
+        },
+        {
+          version: '2.2.0',
+          releaseTimestamp: '2019-07-16T18:29:00.000Z',
+        },
+      ],
     });
   });
 
@@ -220,8 +275,26 @@ describe('modules/datasource/metadata', () => {
     const packageName = 'django-filter';
 
     addMetaData(dep, datasource, packageName);
-    expect(dep).toMatchSnapshot({
+    expect(dep).toEqual({
       sourceUrl: 'https://github.com/some/repo',
+      releases: [
+        {
+          version: '2.0.0',
+          releaseTimestamp: '2018-07-13T10:14:17.000Z',
+        },
+        {
+          version: '2.0.0.dev1',
+          releaseTimestamp: '2017-10-24T10:09:16.000Z',
+        },
+        {
+          version: '2.1.0',
+          releaseTimestamp: '2019-01-20T19:59:28.000Z',
+        },
+        {
+          version: '2.2.0',
+          releaseTimestamp: '2019-07-16T18:29:00.000Z',
+        },
+      ],
     });
   });
 
@@ -243,8 +316,18 @@ describe('modules/datasource/metadata', () => {
     const packageName = 'dropzone';
 
     addMetaData(dep, datasource, packageName);
-    expect(dep).toMatchSnapshot({
+    expect(dep).toEqual({
       sourceUrl: 'https://gitlab.com/meno/dropzone',
+      releases: [
+        {
+          version: '5.7.0',
+          releaseTimestamp: '2020-02-14T13:12:00.000Z',
+        },
+        {
+          version: '5.6.1',
+          releaseTimestamp: '2020-02-14T10:04:00.000Z',
+        },
+      ],
     });
   });
 
@@ -266,8 +349,18 @@ describe('modules/datasource/metadata', () => {
     const packageName = 'dropzone';
 
     addMetaData(dep, datasource, packageName);
-    expect(dep).toMatchSnapshot({
+    expect(dep).toEqual({
       sourceUrl: 'https://gitlab-nope',
+      releases: [
+        {
+          version: '5.7.0',
+          releaseTimestamp: '2020-02-14T13:12:00.000Z',
+        },
+        {
+          version: '5.6.1',
+          releaseTimestamp: '2020-02-14T10:04:00.000Z',
+        },
+      ],
     });
   });
 
@@ -289,8 +382,18 @@ describe('modules/datasource/metadata', () => {
     const packageName = 'dropzone';
 
     addMetaData(dep, datasource, packageName);
-    expect(dep).toMatchSnapshot({
+    expect(dep).toEqual({
       sourceUrl: 'https://nope-nope-nope',
+      releases: [
+        {
+          version: '5.7.0',
+          releaseTimestamp: '2020-02-14T13:12:00.000Z',
+        },
+        {
+          version: '5.6.1',
+          releaseTimestamp: '2020-02-14T10:04:00.000Z',
+        },
+      ],
     });
   });
 
@@ -312,8 +415,18 @@ describe('modules/datasource/metadata', () => {
     const packageName = 'dropzone';
 
     addMetaData(dep, datasource, packageName);
-    expect(dep).not.toContainKey('sourceUrl');
-    expect(dep).toMatchSnapshot();
+    expect(dep).toEqual({
+      releases: [
+        {
+          version: '5.7.0',
+          releaseTimestamp: '2020-02-14T13:12:00.000Z',
+        },
+        {
+          version: '5.6.1',
+          releaseTimestamp: '2020-02-14T10:04:00.000Z',
+        },
+      ],
+    });
   });
 
   it('Should handle parsing/converting of GitHub sourceUrls with http and www correctly', () => {

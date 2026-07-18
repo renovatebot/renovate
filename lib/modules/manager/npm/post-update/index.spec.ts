@@ -328,7 +328,23 @@ describe('modules/manager/npm/post-update/index', () => {
         undefined,
       );
       expect(yarnrcYmlContent).toBeUndefined();
-      expect(updatedArtifacts).toMatchSnapshot();
+      expect(updatedArtifacts).toEqual([
+        {
+          type: 'addition',
+          path: 'path/to/lockfile/.yarnrc.yml',
+          contents: 'yarnPath: .yarn/releases/yarn-3.0.2.cjs\na: b\n',
+        },
+        {
+          type: 'deletion',
+          path: 'path/to/lockfile/.yarn/releases/yarn-3.0.1.cjs',
+        },
+        {
+          type: 'addition',
+          path: 'path/to/lockfile/.yarn/releases/yarn-3.0.2.cjs',
+          contents: 'new yarn\n',
+          isExecutable: true,
+        },
+      ]);
     });
 
     it('should return .yarnrc.yml content if it has been overwritten', async () => {
@@ -341,8 +357,26 @@ describe('modules/manager/npm/post-update/index', () => {
         oldYarnrcYml,
       );
       expect(git.getFile).not.toHaveBeenCalled();
-      expect(existingYarnrcYmlContent).toMatchSnapshot('existing yarnrc.yml');
-      expect(updatedArtifacts).toMatchSnapshot('updatedArtifacts');
+      expect(existingYarnrcYmlContent).toBe(
+        'yarnPath: .yarn/releases/yarn-3.0.2.cjs\na: b\n',
+      );
+      expect(updatedArtifacts).toEqual([
+        {
+          type: 'addition',
+          path: 'path/to/lockfile/.yarnrc.yml',
+          contents: 'yarnPath: .yarn/releases/yarn-3.0.2.cjs\na: b\n',
+        },
+        {
+          type: 'deletion',
+          path: 'path/to/lockfile/.yarn/releases/yarn-3.0.1.cjs',
+        },
+        {
+          type: 'addition',
+          path: 'path/to/lockfile/.yarn/releases/yarn-3.0.2.cjs',
+          contents: 'new yarn\n',
+          isExecutable: true,
+        },
+      ]);
     });
 
     it("should not update the Yarn binary if the old .yarnrc.yml doesn't exist", async () => {

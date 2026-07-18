@@ -171,8 +171,14 @@ describe('workers/repository/onboarding/pr/index', () => {
           branches,
         );
         expect(platform.createPr).toHaveBeenCalledTimes(1);
-        expect(platform.createPr.mock.calls[0][0].prBody).toMatchSnapshot(
-          'PR body',
+        const prBody = platform.createPr.mock.calls[0][0].prBody;
+        expect(prBody).toStartWith('\n\nWelcome to [Renovate]');
+        expect(prBody).toContain('### Detected Package Files');
+        expect(prBody).toEndWith(
+          '<!--renovate-config-hash:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855-->\n',
+        );
+        expect(prBody.includes('<!-- rebase-check -->')).toBe(
+          onboardingRebaseCheckbox,
         );
       },
     );
@@ -198,8 +204,15 @@ describe('workers/repository/onboarding/pr/index', () => {
           branches,
         );
         expect(platform.createPr).toHaveBeenCalledTimes(1);
-        expect(platform.createPr.mock.calls[0][0].prBody).toMatchSnapshot(
-          'PR body',
+        const prBody = platform.createPr.mock.calls[0][0].prBody;
+        expect(prBody).toMatch(
+          /^\s+This should not be the first line of the PR/,
+        );
+        expect(prBody).toMatch(
+          /There should be several empty lines at the end of the PR\s{4,}<!--renovate-config-hash:/,
+        );
+        expect(prBody.includes('<!-- rebase-check -->')).toBe(
+          onboardingRebaseCheckbox,
         );
       },
     );
@@ -234,8 +247,13 @@ describe('workers/repository/onboarding/pr/index', () => {
         expect(platform.createPr.mock.calls[0][0].prBody).toMatch(
           /repository:test/,
         );
-        expect(platform.createPr.mock.calls[0][0].prBody).toMatchSnapshot(
-          'PR body',
+        const prBody = platform.createPr.mock.calls[0][0].prBody;
+        expect(prBody).toStartWith('This is a header for platform:github\n');
+        expect(prBody).toContain(
+          'And this is a footer for repository:test baseBranch:some-branch',
+        );
+        expect(prBody.includes('<!-- rebase-check -->')).toBe(
+          onboardingRebaseCheckbox,
         );
       },
     );
