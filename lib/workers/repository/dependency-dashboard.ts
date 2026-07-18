@@ -17,7 +17,7 @@ import { regEx } from '../../util/regex.ts';
 import { coerceString } from '../../util/string.ts';
 import * as template from '../../util/template/index.ts';
 import type { BranchConfig, SelectAllConfig } from '../types.ts';
-import { extractRepoProblems } from './common.ts';
+import { extractRepoProblems, replacementAlreadyExists } from './common.ts';
 import type { ConfigMigrationResult } from './config-migration/index.ts';
 import { getDepWarningsDashboard } from './errors-warnings.ts';
 import { PackageFiles } from './package-files.ts';
@@ -197,14 +197,19 @@ export async function readDashboardBody(
     }
   }
 
-  if (config.checkedBranches) {
+  const checkedBranches = GlobalConfig.get('checkedBranches');
+  if (isNonEmptyArray(checkedBranches)) {
     const checkedBranchesRec: Record<string, string> = Object.fromEntries(
-      config.checkedBranches.map((branchName) => [branchName, 'global-config']),
+      checkedBranches.map((branchName) => [branchName, 'global-config']),
     );
     dashboardChecks.dependencyDashboardChecks = {
       ...dashboardChecks.dependencyDashboardChecks,
       ...checkedBranchesRec,
     };
+  }
+
+  if (GlobalConfig.get('rebaseAllOpenBranches')) {
+    dashboardChecks.dependencyDashboardRebaseAllOpen = true;
   }
 
   Object.assign(config, dashboardChecks);
@@ -383,7 +388,10 @@ export async function ensureDependencyDashboard(
   let hasDeprecationsOrReplacements = false;
   const deprecatedPackages: Record<
     string,
-    Record<string, { hasReplacement: boolean; sourceUrl?: string | null }>
+    Record<
+      string,
+      { hasActionableReplacement: boolean; sourceUrl?: string | null }
+    >
   > = {};
   logger.debug('Checking packageFiles for deprecated or replacement packages');
   if (isNonEmptyObject(packageFiles)) {
@@ -391,14 +399,25 @@ export async function ensureDependencyDashboard(
       for (const fileName of fileNames) {
         for (const dep of fileName.deps) {
           const name = dep.packageName ?? dep.depName;
-          const hasReplacement = !!dep.updates?.find(
-            (updates) => updates.updateType === 'replacement',
+          const replacementUpdate = dep.updates?.find(
+            (update) => update.updateType === 'replacement',
           );
-          if (name && (dep.deprecationMessage ?? hasReplacement)) {
+          const hasAnyReplacement = !!replacementUpdate;
+          const hasActionableReplacement =
+            hasAnyReplacement &&
+            !(
+              replacementUpdate.newName &&
+              replacementAlreadyExists(
+                fileName.deps,
+                dep,
+                replacementUpdate.newName,
+              )
+            );
+          if (name && (dep.deprecationMessage ?? hasAnyReplacement)) {
             hasDeprecationsOrReplacements = true;
             deprecatedPackages[manager] ??= {};
             deprecatedPackages[manager][name] ??= {
-              hasReplacement,
+              hasActionableReplacement,
               sourceUrl: dep.sourceUrl,
             };
           }
@@ -450,11 +469,11 @@ export async function ensureDependencyDashboard(
     for (const manager of Object.keys(deprecatedPackages).sort()) {
       const deps = deprecatedPackages[manager];
       for (const depName of Object.keys(deps).sort()) {
-        const { hasReplacement, sourceUrl } = deps[depName];
+        const { hasActionableReplacement, sourceUrl } = deps[depName];
         const packageName = formatAsMarkdownLink(depName, sourceUrl);
 
         issueBody += `| ${manager} | ${packageName} | ${
-          hasReplacement
+          hasActionableReplacement
             ? '![Available](https://img.shields.io/badge/available-green?style=flat-square)'
             : '![Unavailable](https://img.shields.io/badge/unavailable-orange?style=flat-square)'
         } |\n`;
