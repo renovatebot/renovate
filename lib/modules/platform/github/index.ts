@@ -36,7 +36,6 @@ import {
 import type {
   CommitFilesConfig,
   CommitResult,
-  LongCommitSha,
 } from '../../../util/git/types.ts';
 import * as hostRules from '../../../util/host-rules.ts';
 import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider.ts';
@@ -47,6 +46,8 @@ import type { HttpResponse } from '../../../util/http/types.ts';
 import { coerceObject } from '../../../util/object.ts';
 import { regEx } from '../../../util/regex.ts';
 import { sanitize } from '../../../util/sanitize.ts';
+import type { LongCommitSha } from '../../../util/schema-utils/git.ts';
+import { toLongCommitSha } from '../../../util/schema-utils/git.ts';
 import { fromBase64, looseEquals } from '../../../util/string.ts';
 import { ensureTrailingSlash, isHttpUrl, parseUrl } from '../../../util/url.ts';
 import { incLimitedValue } from '../../../workers/global/limits.ts';
@@ -205,21 +206,23 @@ export async function initPlatform({
     );
     renovateUsername = platformConfig.userDetails.username;
   }
+
+  let ghHostname: string;
+  /* v8 ignore next -- false negative due to V8/source-map artifact */
+  if (platformConfig.isGheCloud) {
+    ghHostname = 'ghe.com';
+  } else if (platformConfig.isGhe) {
+    // valid url ensured at the function start
+    const parsedEndpoint = parseUrl(platformConfig.endpoint)!;
+    ghHostname = parsedEndpoint.hostname;
+  } else {
+    ghHostname = 'github.com';
+  }
+
   let discoveredGitAuthor: string | undefined;
   if (!gitAuthor) {
     if (platformConfig.isGHApp) {
       platformConfig.userDetails ??= await getAppDetails(token);
-      let ghHostname: string;
-      /* v8 ignore next -- false negative due to V8/source-map artifact */
-      if (platformConfig.isGheCloud) {
-        ghHostname = 'ghe.com';
-      } else if (platformConfig.isGhe) {
-        // valid url ensured at the function start
-        const parsedEndpoint = parseUrl(platformConfig.endpoint)!;
-        ghHostname = parsedEndpoint.hostname;
-      } else {
-        ghHostname = 'github.com';
-      }
       discoveredGitAuthor = `${platformConfig.userDetails.name} <${platformConfig.userDetails.id}+${platformConfig.userDetails.username}@users.noreply.${ghHostname}>`;
     } else {
       platformConfig.userDetails ??= await getUserDetails(
@@ -235,6 +238,9 @@ export async function initPlatform({
       }
     }
   }
+
+  git.setPlatformIgnoredAuthors([`noreply@${ghHostname}`]);
+
   logger.debug({ platformConfig, renovateUsername }, 'Platform config');
   const platformResult: PlatformResult = {
     endpoint: platformConfig.endpoint,
@@ -290,13 +296,12 @@ async function fetchRepositories(): Promise<GhRestRepo[]> {
         paginate: 'all',
       });
       return res.body.repositories;
-    } else {
-      const res = await githubApi.getJsonUnchecked<GhRestRepo[]>(
-        `user/repos?per_page=100`,
-        { paginate: 'all' },
-      );
-      return res.body;
     }
+    const res = await githubApi.getJsonUnchecked<GhRestRepo[]>(
+      `user/repos?per_page=100`,
+      { paginate: 'all' },
+    );
+    return res.body;
   } catch (err) /* v8 ignore next */ {
     logger.error({ err }, `GitHub getRepos error`);
     throw err;
@@ -1458,7 +1463,7 @@ export async function ensureIssue({
         if (shouldReOpen) {
           logger.debug('Reopening previously closed issue');
         }
-        issue = issues[issues.length - 1];
+        issue = issues.at(-1)!;
       }
       for (const i of issues) {
         if (i.state === 'open' && i.number !== issue.number) {
@@ -1835,15 +1840,16 @@ async function tryPrAutomerge(
 
   // If GitHub Enterprise Server <3.3.0 it doesn't support automerge
   // TODO #22198
-  if (platformConfig.isGhe) {
-    // semver not null safe, accepts null and undefined
-    if (semver.satisfies(platformConfig.gheVersion!, '<3.3.0')) {
-      logger.debug(
-        { prNumber },
-        'GitHub-native automerge: not supported on this version of GHE. Use 3.3.0 or newer.',
-      );
-      return;
-    }
+  // semver not null safe, accepts null and undefined
+  if (
+    platformConfig.isGhe &&
+    semver.satisfies(platformConfig.gheVersion!, '<3.3.0')
+  ) {
+    logger.debug(
+      { prNumber },
+      'GitHub-native automerge: not supported on this version of GHE. Use 3.3.0 or newer.',
+    );
+    return;
   }
 
   if (!config.autoMergeAllowed) {
@@ -2190,7 +2196,7 @@ export async function getVulnerabilityAlerts(): Promise<GithubVulnerabilityAlert
     logger.debug({ err }, 'Error retrieving vulnerability alerts');
     logger.warn(
       {
-        url: 'https://docs.renovatebot.com/configuration-options/#vulnerabilityalerts',
+        url: `${GlobalConfig.get('productLinks').documentation}configuration-options/#vulnerabilityalerts`,
       },
       'Cannot access vulnerability alerts. Please ensure permissions have been granted.',
     );
@@ -2275,7 +2281,7 @@ async function pushFiles(
       { body: { message, tree: treeSha, parents: [parentCommitSha] } },
     );
     incLimitedValue('Commits');
-    const remoteCommitSha = commitRes.body.sha as LongCommitSha;
+    const remoteCommitSha = toLongCommitSha(commitRes.body.sha);
     await ensureBranchSha(branchName, remoteCommitSha);
     return remoteCommitSha;
   } catch (err) {

@@ -5,7 +5,9 @@ import { getNewValue, getPinnedValue, isLessThanRange } from './range.ts';
 
 export const id = 'pep440';
 export const displayName = 'PEP440';
-export const urls = ['https://www.python.org/dev/peps/pep-0440/'];
+export const urls = [
+  '[PEP 440 - Version Identification](https://www.python.org/dev/peps/pep-0440/)',
+];
 export const supportsRanges = true;
 export const supportedRangeStrategies: RangeStrategy[] = [
   'bump',
@@ -50,7 +52,7 @@ function getSatisfyingVersion(
   range: string,
 ): string | null {
   const found = pep440.filter(versions, range).sort(sortVersions);
-  return found.length === 0 ? null : found[found.length - 1];
+  return found.length === 0 ? null : found.at(-1)!;
 }
 
 function minSatisfyingVersion(

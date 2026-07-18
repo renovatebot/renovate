@@ -16,7 +16,7 @@ import {
 export const id = 'gradle';
 export const displayName = 'Gradle';
 export const urls = [
-  'https://docs.gradle.org/current/userguide/single_versions.html#version_ordering',
+  '[Gradle version ordering](https://docs.gradle.org/current/userguide/single_versions.html#version_ordering)',
 ];
 export const supportsRanges = true;
 export const supportedRangeStrategies: RangeStrategy[] = ['bump'];
@@ -210,14 +210,12 @@ function getNewValue({
           .join('.');
 
         return `${newPrefixed}.+`;
-      } else {
-        // our new version is shorter than our prefix range so drop our prefix range
-        return newVersion;
       }
-    } else {
-      // our version is already "+" which includes ever version
-      return null;
+      // our new version is shorter than our prefix range so drop our prefix range
+      return newVersion;
     }
+    // our version is already "+" which includes ever version
+    return null;
   }
 
   const mavenRange = parseMavenBasedRange(currentValue);

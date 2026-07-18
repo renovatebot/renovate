@@ -1,5 +1,10 @@
 import { setTimeout } from 'node:timers/promises';
-import { isArray, isEmptyArray, isNonEmptyArray } from '@sindresorhus/is';
+import {
+  isArray,
+  isEmptyArray,
+  isNonEmptyArray,
+  isString,
+} from '@sindresorhus/is';
 import pMap from 'p-map';
 import semver from 'semver';
 import { GlobalConfig } from '../../../config/global.ts';
@@ -605,7 +610,7 @@ async function tryPrAutomerge(
       // Check for correct merge request status before setting `merge_when_pipeline_succeeds` to  `true`.
       for (let attempt = 1; attempt <= retryTimes; attempt += 1) {
         const { body } = await gitlabApi.getJsonUnchecked<{
-          merge_status: string;
+          merge_status?: string;
           detailed_merge_status?: string;
           merge_when_pipeline_succeeds?: boolean;
           pipeline: {
@@ -882,9 +887,8 @@ export function maxBodyLength(): number {
       'GitLab versions earlier than 13.4 have issues with long descriptions, truncating to 25K characters',
     );
     return 25000;
-  } else {
-    return 1000000;
   }
+  return 1000000;
 }
 
 /* v8 ignore next: no need to test */
@@ -1042,11 +1046,11 @@ export async function setBranchStatus({
 
     // update status cache
     await getStatus(branchName, false);
-  } catch (err) /* v8 ignore next */ {
+  } catch (err) {
+    const message = err.body?.message;
     if (
-      err.body?.message?.startsWith(
-        'Cannot transition status via :enqueue from :pending',
-      )
+      isString(message) &&
+      message.startsWith('Cannot transition status via :enqueue from :pending')
     ) {
       // https://gitlab.com/gitlab-org/gitlab-foss/issues/25807
       logger.debug('Ignoring status transition error');

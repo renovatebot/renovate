@@ -6,6 +6,7 @@ import { GithubReleasesDatasource } from '../../datasource/github-releases/index
 import { NpmDatasource } from '../../datasource/npm/index.ts';
 import { PypiDatasource } from '../../datasource/pypi/index.ts';
 import { RubyVersionDatasource } from '../../datasource/ruby-version/index.ts';
+import { RustVersionDatasource } from '../../datasource/rust-version/index.ts';
 import * as condaVersioning from '../../versioning/conda/index.ts';
 import * as npmVersioning from '../../versioning/npm/index.ts';
 import type { PackageDependency } from '../types.ts';
@@ -140,6 +141,12 @@ export const communityActions: Record<string, CommunityActionConfig> = {
     packageName: 'moby/moby',
     extractVersion: '^docker-(?<version>.+)$',
   },
+  // https://github.com/dtolnay/rust-toolchain
+  'dtolnay/rust-toolchain': {
+    datasource: RustVersionDatasource.id,
+    packageName: 'rust',
+    withSchema: valSchema('toolchain'),
+  },
   'golangci/golangci-lint-action': {
     datasource: GithubReleasesDatasource.id,
     packageName: 'golangci/golangci-lint',
@@ -159,6 +166,10 @@ export const communityActions: Record<string, CommunityActionConfig> = {
     datasource: GithubReleasesDatasource.id,
     packageName: '', // determined from `repo` input
     withSchema: InstallBinaryWith,
+  },
+  'jdx/mise-action': {
+    datasource: GithubReleasesDatasource.id,
+    packageName: 'jdx/mise',
   },
   'oven-sh/setup-bun': {
     datasource: NpmDatasource.id,

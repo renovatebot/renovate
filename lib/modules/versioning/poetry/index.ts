@@ -16,9 +16,9 @@ import {
 export const id = 'poetry';
 export const displayName = 'Poetry';
 export const urls = [
-  'https://python-poetry.org/docs/dependency-specification/',
-  'https://python-poetry.org/docs/faq#why-does-poetry-not-adhere-to-semantic-versioning',
-  'https://python-poetry.org/docs/faq#why-does-poetry-enforce-pep-440-versions',
+  '[Poetry dependency specification](https://python-poetry.org/docs/dependency-specification/)',
+  '[Poetry FAQ - Why does Poetry not adhere to semantic versioning?](https://python-poetry.org/docs/faq#why-does-poetry-not-adhere-to-semantic-versioning)',
+  '[Poetry FAQ - Why does Poetry enforce PEP 440 versions?](https://python-poetry.org/docs/faq#why-does-poetry-enforce-pep-440-versions)',
 ];
 export const supportsRanges = true;
 export const supportedRangeStrategies: RangeStrategy[] = [
@@ -182,7 +182,7 @@ function getNewValue({
       );
     }
     const parsedRange = parseRange(npmCurrentValue);
-    const element = parsedRange[parsedRange.length - 1];
+    const element = parsedRange.at(-1)!;
     if (parsedRange.length === 1 && element.operator) {
       if (element.operator === '^') {
         const version = handleShort('^', npmCurrentValue, newVersion);

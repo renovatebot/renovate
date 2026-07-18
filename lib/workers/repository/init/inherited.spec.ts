@@ -1,3 +1,4 @@
+import { codeBlock } from 'common-tags';
 import { hostRules, platform } from '~test/util.ts';
 import {
   getConfigFileNames,
@@ -101,14 +102,16 @@ describe('workers/repository/init/inherited', () => {
 
   it('should set hostRules from inherited config', async () => {
     platform.getRawFile.mockResolvedValue(
-      `{
-        "hostRules": [
-          {
-            "matchHost": "some-host-url",
-            "token": "some-token"
-          }
-        ]
-      }`,
+      codeBlock`
+        {
+                "hostRules": [
+                  {
+                    "matchHost": "some-host-url",
+                    "token": "some-token"
+                  }
+                ]
+              }
+      `,
     );
     const res = await mergeInheritedConfig(config);
     expect(hostRules.getAll()).toMatchObject([
@@ -122,16 +125,18 @@ describe('workers/repository/init/inherited', () => {
 
   it('should decrypt encrypted values from inherited config', async () => {
     platform.getRawFile.mockResolvedValue(
-      `{
-        "hostRules": [
-          {
-            "matchHost": "some-host-url",
-            "encrypted": {
-              "token": "some-secret-token"
-            }
-          }
-        ]
-      }`,
+      codeBlock`
+        {
+                "hostRules": [
+                  {
+                    "matchHost": "some-host-url",
+                    "encrypted": {
+                      "token": "some-secret-token"
+                    }
+                  }
+                ]
+              }
+      `,
     );
 
     vi.spyOn(decrypt, 'decryptConfig').mockResolvedValueOnce({
@@ -157,14 +162,16 @@ describe('workers/repository/init/inherited', () => {
 
   it('should apply secrets to inherited config', async () => {
     platform.getRawFile.mockResolvedValue(
-      `{
-        "hostRules": [
-          {
-            "matchHost": "some-host-url",
-            "token": "{{ secrets.SECRET_TOKEN }}"
-          }
-        ]
-      }`,
+      codeBlock`
+        {
+                "hostRules": [
+                  {
+                    "matchHost": "some-host-url",
+                    "token": "{{ secrets.SECRET_TOKEN }}"
+                  }
+                ]
+              }
+      `,
     );
     const res = await mergeInheritedConfig({
       ...config,

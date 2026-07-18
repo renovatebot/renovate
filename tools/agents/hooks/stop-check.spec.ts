@@ -13,9 +13,6 @@ const consoleSpy = vi.spyOn(console, 'log');
 
 beforeEach(() => {
   vi.resetModules();
-  exec.mockReset();
-  getChangedFiles.mockReset();
-  consoleSpy.mockReset();
 });
 
 it('runs pnpm check --all with changed files', async () => {
@@ -33,13 +30,13 @@ it('runs pnpm check --all with changed files', async () => {
   expect(consoleSpy).not.toHaveBeenCalled();
 });
 
-it('runs pnpm check --all without targets when no files changed', async () => {
+it('does not run pnpm check --all when no files changed', async () => {
   getChangedFiles.mockResolvedValue([]);
   exec.mockResolvedValue(undefined);
 
   await import('./stop-check.ts');
 
-  expect(exec).toHaveBeenCalledWith('pnpm', ['check', '--all']);
+  expect(exec).not.toHaveBeenCalled();
   expect(consoleSpy).not.toHaveBeenCalled();
 });
 

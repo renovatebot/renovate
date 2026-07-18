@@ -1,3 +1,4 @@
+import { partial } from '~test/util.ts';
 import type { HostRule } from '../types/index.ts';
 import { getConfigFileNames } from './app-strings.ts';
 import { GlobalConfig } from './global.ts';
@@ -424,6 +425,7 @@ describe('config/validation', () => {
     });
 
     it('catches invalid customDatasources content', async () => {
+      // oxlint-disable-next-line renovate/prefer-partial-in-specs -- intentionally invalid customDatasources content
       const config = {
         customDatasources: {
           foo: {
@@ -491,7 +493,31 @@ describe('config/validation', () => {
       expect(warnings).toBeEmptyArray();
     });
 
+    it('validates invalid statusCheckWhen', async () => {
+      const config = {
+        statusCheckWhen: {
+          randomKey: 'always',
+          mergeConfidence: 'invalid',
+          artifactError: 'always',
+        },
+      };
+      // @ts-expect-error invalid options
+      const { errors } = await configValidation.validateConfig('repo', config);
+      expect(errors).toMatchObject([
+        {
+          message:
+            'Invalid `statusCheckWhen.mergeConfidence` configuration: value must be one of "always", "never", or "failed".',
+        },
+        {
+          message:
+            'Invalid `statusCheckWhen.statusCheckWhen.randomKey` configuration: key is not allowed.',
+        },
+      ]);
+      expect(errors).toHaveLength(2);
+    });
+
     it('catches invalid customDatasources record type', async () => {
+      // oxlint-disable-next-line renovate/prefer-partial-in-specs -- intentionally invalid customDatasources record type
       const config = {
         customDatasources: {
           randomKey: '',
@@ -1769,14 +1795,14 @@ describe('config/validation', () => {
     });
 
     it('errors if invalid combinations in packageRules', async () => {
-      const config = {
+      const config = partial<AllConfig>({
         packageRules: [
           {
             matchUpdateTypes: ['major'],
             registryUrls: ['https://registry.npmjs.org'],
           },
         ],
-      } as any;
+      });
       const { warnings, errors } = await configValidation.validateConfig(
         'repo',
         config,
@@ -1794,7 +1820,7 @@ describe('config/validation', () => {
     it('warns when registryUrls is set at the top level of repo config', async () => {
       const config = {
         registryUrls: ['https://registry.npmjs.org'],
-      } as any;
+      };
       const { warnings, errors } = await configValidation.validateConfig(
         'repo',
         config,
@@ -1812,7 +1838,7 @@ describe('config/validation', () => {
     it('warns when defaultRegistryUrls is set at the top level of repo config', async () => {
       const config = {
         defaultRegistryUrls: ['https://registry.npmjs.org'],
-      } as any;
+      };
       const { warnings, errors } = await configValidation.validateConfig(
         'repo',
         config,
@@ -2853,7 +2879,7 @@ describe('config/validation', () => {
     it('warns when registryUrls is set at the top level of global config', async () => {
       const config = {
         registryUrls: ['https://registry.npmjs.org'],
-      } as any;
+      };
       const { warnings, errors } = await configValidation.validateConfig(
         'global',
         config,
@@ -2871,7 +2897,7 @@ describe('config/validation', () => {
     it('warns when defaultRegistryUrls is set at the top level of global config', async () => {
       const config = {
         defaultRegistryUrls: ['https://registry.npmjs.org'],
-      } as any;
+      };
       const { warnings, errors } = await configValidation.validateConfig(
         'global',
         config,
