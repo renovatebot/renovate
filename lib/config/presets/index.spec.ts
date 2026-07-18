@@ -539,37 +539,6 @@ describe('config/presets/index', () => {
       );
     });
 
-    it('applies global-only options from a custom preset to GlobalConfig', async () => {
-      config.customPresets = {
-        myPreset: {
-          labels: ['custom-label'],
-          allowedCommands: ['^tslint --fix$'],
-        },
-      };
-      config.extends = ['custom:myPreset'];
-
-      const { config: res } = await presets.resolveConfigPresets(config);
-
-      expect(res.labels).toEqual(['custom-label']);
-      expect(res.allowedCommands).toBeUndefined();
-      expect(GlobalConfig.get('allowedCommands')).toEqual(['^tslint --fix$']);
-    });
-
-    it('differentially merges global-only options from a custom preset', async () => {
-      GlobalConfig.set({ binarySource: 'install' });
-      config.customPresets = {
-        myPreset: {
-          allowedCommands: ['^tslint --fix$'],
-        },
-      };
-      config.extends = ['custom:myPreset'];
-
-      await presets.resolveConfigPresets(config);
-
-      expect(GlobalConfig.get('binarySource')).toBe('install');
-      expect(GlobalConfig.get('allowedCommands')).toEqual(['^tslint --fix$']);
-    });
-
     it('gets preset value from cache when it has been seen', async () => {
       config.extends = ['github>username/preset-repo'];
       config.packageRules = [

@@ -1180,10 +1180,8 @@ async function validateGlobalConfig(
               continue;
             }
             const { migratedConfig } = migrateConfig(preset);
-            // Validate as 'global', same as `repositories[]` object-entries,
-            // since a custom preset is allowed to carry global-only options.
             const subValidation = await validateConfig(
-              'global',
+              'repo',
               massageConfig(migratedConfig),
               true,
               `${currentPath}.${presetName}`,
