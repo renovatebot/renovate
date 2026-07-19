@@ -144,6 +144,14 @@ export async function reopenComments(
   return reopenComments;
 }
 
+function byTopic(comment: Comment, topic: string): boolean {
+  return comment.content.raw.startsWith(`### ${topic}\n\n`);
+}
+
+function byContent(comment: Comment, content: string): boolean {
+  return comment.content.raw.trim() === content;
+}
+
 export async function ensureCommentRemoval(
   config: CommentsConfig,
   deleteConfig: EnsureCommentRemovalConfig,
@@ -161,13 +169,11 @@ export async function ensureCommentRemoval(
 
     // v8 ignore else -- TODO: add test #40625
     if (deleteConfig.type === 'by-topic') {
-      const byTopic = (comment: Comment): boolean =>
-        comment.content.raw.startsWith(`### ${deleteConfig.topic}\n\n`);
-      commentId = comments.find(byTopic)?.id;
+      const topic = deleteConfig.topic;
+      commentId = comments.find((comment) => byTopic(comment, topic))?.id;
     } else if (deleteConfig.type === 'by-content') {
-      const byContent = (comment: Comment): boolean =>
-        comment.content.raw.trim() === deleteConfig.content;
-      commentId = comments.find(byContent)?.id;
+      const content = deleteConfig.content;
+      commentId = comments.find((comment) => byContent(comment, content))?.id;
     }
 
     if (commentId) {

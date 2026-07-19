@@ -1,9 +1,9 @@
 import { isTruthy } from '@sindresorhus/is';
 import { codeBlock } from 'common-tags';
 import semver from 'semver';
-import { mockDeep } from 'vitest-mock-extended';
+import { hostRules } from '~test/host-rules.ts';
 import * as httpMock from '~test/http-mock.ts';
-import { git, hostRules, logger } from '~test/util.ts';
+import { git, logger } from '~test/util.ts';
 import {
   REPOSITORY_CHANGED,
   REPOSITORY_EMPTY,
@@ -16,7 +16,6 @@ import type { ReattemptPlatformAutomergeConfig } from '../types.ts';
 import * as bitbucket from './index.ts';
 
 vi.mock('timers/promises');
-vi.mock('../../../util/host-rules.ts', () => mockDeep());
 
 function sshLink(projectKey: string, repositorySlug: string): string {
   return `ssh://git@stash.renovatebot.com:7999/${projectKey.toLowerCase()}/${repositorySlug}.git`;
@@ -215,7 +214,7 @@ describe('modules/platform/bitbucket-server/index', () => {
       git.getBranchCommit.mockReturnValue(
         '0d9c7726c3d628b7e28af234595cfd20febdbf8e' as LongCommitSha,
       );
-      hostRules.find.mockReturnValue({
+      hostRules.add({
         username,
         password,
       });
@@ -3548,7 +3547,7 @@ describe('modules/platform/bitbucket-server/index', () => {
       git.getBranchCommit.mockReturnValue(
         '0d9c7726c3d628b7e28af234595cfd20febdbf8e' as LongCommitSha,
       );
-      hostRules.find.mockReturnValue({
+      hostRules.add({
         username,
         password,
       });

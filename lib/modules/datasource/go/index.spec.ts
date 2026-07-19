@@ -1,13 +1,8 @@
-import { mockDeep } from 'vitest-mock-extended';
 import { Fixtures } from '~test/fixtures.ts';
 import * as httpMock from '~test/http-mock.ts';
-import * as _hostRules from '../../../util/host-rules.ts';
 import type { ReleaseResult } from '../index.ts';
 import { getPkgReleases } from '../index.ts';
 import { GoDatasource } from './index.ts';
-
-vi.mock('../../../util/host-rules.ts', () => mockDeep());
-const hostRules = vi.mocked(_hostRules);
 
 const getReleasesDirectMock = vi.fn();
 
@@ -56,11 +51,6 @@ const datasource = new GoDatasource();
 
 describe('modules/datasource/go/index', () => {
   describe('getReleases', () => {
-    beforeEach(() => {
-      hostRules.find.mockReturnValue({});
-      hostRules.hosts.mockReturnValue([]);
-    });
-
     afterEach(() => {
       delete process.env.GOPROXY;
     });
@@ -81,11 +71,6 @@ describe('modules/datasource/go/index', () => {
   });
 
   describe('getDigest', () => {
-    beforeEach(() => {
-      hostRules.find.mockReturnValue({});
-      hostRules.hosts.mockReturnValue([]);
-    });
-
     it('returns null for no go-source tag', async () => {
       httpMock
         .scope('https://golang.org/')
@@ -242,11 +227,6 @@ describe('modules/datasource/go/index', () => {
   });
 
   describe('using getPkgReleases', () => {
-    beforeEach(() => {
-      hostRules.find.mockReturnValue({});
-      hostRules.hosts.mockReturnValue([]);
-    });
-
     afterEach(() => {
       delete process.env.GOPROXY;
     });

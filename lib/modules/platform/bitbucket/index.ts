@@ -442,8 +442,9 @@ export async function getPr(prNo: number): Promise<Pr | null> {
   return res;
 }
 
-const escapeHash = (input: string): string =>
-  input?.replace(regEx(/#/g), '%23');
+function escapeHash(input: string): string {
+  return input?.replace(regEx(/#/g), '%23');
+}
 
 // Return the commit SHA for a branch
 async function getBranchCommit(

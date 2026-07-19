@@ -43,9 +43,12 @@ function normalizeNpmRange(range: string): string {
 }
 
 // If this is left as an alias, inputs like "17.04.0" throw errors
-export const isValid = (input: string): boolean =>
-  !!validRange(normalizeNpmRange(input));
-export const isVersion = (input: string): boolean => !!valid(input);
+export function isValid(input: string): boolean {
+  return !!validRange(normalizeNpmRange(input));
+}
+export function isVersion(input: string): boolean {
+  return !!valid(input);
+}
 
 function matches(version: string, range: string): boolean {
   return satisfies(version, normalizeNpmRange(range));
