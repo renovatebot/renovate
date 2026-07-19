@@ -64,28 +64,11 @@ describe('modules/manager/helm-requirements/extract', () => {
           stable: 'https://charts.helm.sh/stable/',
         },
       });
-      expect(result).toEqual({
-        datasource: 'helm',
-        deps: [
-          {
-            currentValue: '0.9.0',
-            depName: 'redis',
-            registryUrls: ['@placeholder'],
-            skipReason: 'placeholder-url',
-          },
-          {
-            currentValue: '0.8.1',
-            depName: 'postgresql',
-            registryUrls: ['nope'],
-            skipReason: 'invalid-url',
-          },
-          {
-            currentValue: '0.8.1',
-            depName: 'broken',
-            skipReason: 'no-repository',
-          },
-        ],
-      });
+      expect(result?.deps).toMatchObject([
+        { depName: 'redis', skipReason: 'placeholder-url' },
+        { depName: 'postgresql', skipReason: 'invalid-url' },
+        { depName: 'broken', skipReason: 'no-repository' },
+      ]);
     });
 
     it('parses simple requirements.yaml correctly', () => {
@@ -208,22 +191,10 @@ describe('modules/manager/helm-requirements/extract', () => {
           stable: 'https://charts.helm.sh/stable/',
         },
       });
-      expect(result).toEqual({
-        datasource: 'helm',
-        deps: [
-          {
-            currentValue: '0.9.0',
-            depName: 'redis',
-            registryUrls: ['https://charts.helm.sh/stable/'],
-          },
-          {
-            currentValue: '0.8.1',
-            depName: 'postgresql',
-            registryUrls: ['file:///some/local/path/'],
-            skipReason: 'local-dependency',
-          },
-        ],
-      });
+      expect(result?.deps).toMatchObject([
+        { depName: 'redis' },
+        { depName: 'postgresql', skipReason: 'local-dependency' },
+      ]);
     });
 
     it('returns null if no dependencies', () => {

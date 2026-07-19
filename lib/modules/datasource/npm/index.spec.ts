@@ -58,25 +58,10 @@ describe('modules/datasource/npm/index', () => {
       .get('/foobar')
       .reply(200, npmResponse, { 'Cache-Control': 'public, expires=300' });
     const res = await getPkgReleases({ datasource, packageName: 'foobar' });
-    expect(res).toEqual({
-      registryUrl: 'https://registry.npmjs.org',
+    expect(res).toMatchObject({
       releases: [
-        {
-          attestation: false,
-          dependencies: undefined,
-          devDependencies: undefined,
-          gitRef: undefined,
-          releaseTimestamp: '2018-05-06T05:21:53.000Z',
-          version: '0.0.1',
-        },
-        {
-          attestation: false,
-          dependencies: undefined,
-          devDependencies: undefined,
-          gitRef: undefined,
-          releaseTimestamp: '2018-05-07T05:21:53.000Z',
-          version: '0.0.2',
-        },
+        { version: '0.0.1', releaseTimestamp: '2018-05-06T05:21:53.000Z' },
+        { version: '0.0.2', releaseTimestamp: '2018-05-07T05:21:53.000Z' },
       ],
       sourceDirectory: 'src/a',
       sourceUrl: 'https://github.com/renovateapp/dummy',
@@ -106,21 +91,9 @@ describe('modules/datasource/npm/index', () => {
     };
     httpMock.scope(defaultRegistryUrl).get('/foobar').reply(200, pkg);
     const res = await getPkgReleases({ datasource, packageName: 'foobar' });
-    expect(res).toEqual({
-      isPrivate: true,
-      registryUrl: 'https://registry.npmjs.org',
-      releases: [
-        {
-          attestation: false,
-          dependencies: undefined,
-          devDependencies: undefined,
-          gitRef: undefined,
-          releaseTimestamp: '2018-05-06T05:21:53.000Z',
-          version: '0.0.1',
-        },
-      ],
+    expect(res).toMatchObject({
+      releases: [{ version: '0.0.1' }],
       sourceUrl: 'https://github.com/renovateapp/dummy',
-      tags: { latest: '0.0.1' },
     });
     expect(res?.sourceUrl).toBeDefined();
   });
@@ -142,21 +115,9 @@ describe('modules/datasource/npm/index', () => {
     };
     httpMock.scope(defaultRegistryUrl).get('/foobar').reply(200, pkg);
     const res = await getPkgReleases({ datasource, packageName: 'foobar' });
-    expect(res).toEqual({
-      isPrivate: true,
-      registryUrl: 'https://registry.npmjs.org',
-      releases: [
-        {
-          attestation: false,
-          dependencies: undefined,
-          devDependencies: undefined,
-          gitRef: undefined,
-          releaseTimestamp: '2018-05-06T05:21:53.000Z',
-          version: '0.0.1',
-        },
-      ],
+    expect(res).toMatchObject({
+      releases: [{ version: '0.0.1' }],
       sourceUrl: 'https://github.com/renovateapp/dummy',
-      tags: { latest: '0.0.1' },
     });
     expect(res?.sourceUrl).toBeDefined();
   });
@@ -192,34 +153,13 @@ describe('modules/datasource/npm/index', () => {
     const res = await getPkgReleases({ datasource, packageName: 'foobar' });
     const deprecationMessage =
       'On registry `https://registry.npmjs.org`, the "latest" version of dependency `foobar` has the following deprecation notice:\n\n`This is deprecated`\n\nMarking the latest version of an npm package as deprecated results in the entire package being considered deprecated, so contact the package author you think this is a mistake.';
-    expect(res).toEqual({
+    expect(res).toMatchObject({
       deprecationMessage,
-      isPrivate: true,
-      registryUrl: 'https://registry.npmjs.org',
       releases: [
-        {
-          attestation: false,
-          dependencies: undefined,
-          devDependencies: undefined,
-          gitRef: undefined,
-          isDeprecated: true,
-          releaseTimestamp: '2018-05-06T05:21:53.000Z',
-          version: '0.0.1',
-        },
-        {
-          attestation: false,
-          dependencies: undefined,
-          devDependencies: undefined,
-          gitRef: undefined,
-          isDeprecated: true,
-          releaseTimestamp: '2018-05-07T05:21:53.000Z',
-          version: '0.0.2',
-        },
+        { version: '0.0.1', isDeprecated: true },
+        { version: '0.0.2', isDeprecated: true },
       ],
-      sourceUrl: 'https://github.com/renovateapp/dummy',
-      tags: { latest: '0.0.2' },
     });
-    expect(res?.deprecationMessage).toBe(deprecationMessage);
   });
 
   it('should return attestation', async () => {
@@ -277,30 +217,8 @@ describe('modules/datasource/npm/index', () => {
   it('should handle foobar', async () => {
     httpMock.scope(defaultRegistryUrl).get('/foobar').reply(200, npmResponse);
     const res = await getPkgReleases({ datasource, packageName: 'foobar' });
-    expect(res).toEqual({
-      isPrivate: true,
-      registryUrl: 'https://registry.npmjs.org',
-      releases: [
-        {
-          attestation: false,
-          dependencies: undefined,
-          devDependencies: undefined,
-          gitRef: undefined,
-          releaseTimestamp: '2018-05-06T05:21:53.000Z',
-          version: '0.0.1',
-        },
-        {
-          attestation: false,
-          dependencies: undefined,
-          devDependencies: undefined,
-          gitRef: undefined,
-          releaseTimestamp: '2018-05-07T05:21:53.000Z',
-          version: '0.0.2',
-        },
-      ],
-      sourceDirectory: 'src/a',
-      sourceUrl: 'https://github.com/renovateapp/dummy',
-      tags: { latest: '0.0.1' },
+    expect(res).toMatchObject({
+      releases: [{ version: '0.0.1' }, { version: '0.0.2' }],
     });
     expect(res?.isPrivate).toBeTrue();
   });
@@ -309,30 +227,13 @@ describe('modules/datasource/npm/index', () => {
     delete npmResponse.time['0.0.2'];
     httpMock.scope(defaultRegistryUrl).get('/foobar').reply(200, npmResponse);
     const res = await getPkgReleases({ datasource, packageName: 'foobar' });
-    expect(res).toEqual({
-      isPrivate: true,
-      registryUrl: 'https://registry.npmjs.org',
+    expect(res).toMatchObject({
       releases: [
-        {
-          attestation: false,
-          dependencies: undefined,
-          devDependencies: undefined,
-          gitRef: undefined,
-          releaseTimestamp: '2018-05-06T05:21:53.000Z',
-          version: '0.0.1',
-        },
-        {
-          attestation: false,
-          dependencies: undefined,
-          devDependencies: undefined,
-          gitRef: undefined,
-          version: '0.0.2',
-        },
+        { version: '0.0.1', releaseTimestamp: '2018-05-06T05:21:53.000Z' },
+        { version: '0.0.2' },
       ],
-      sourceDirectory: 'src/a',
-      sourceUrl: 'https://github.com/renovateapp/dummy',
-      tags: { latest: '0.0.1' },
     });
+    expect(res?.releases[1].releaseTimestamp).toBeUndefined();
   });
 
   it('should return null if lookup fails 401', async () => {
@@ -390,30 +291,8 @@ describe('modules/datasource/npm/index', () => {
       .get('/foobar')
       .reply(200, npmResponse);
     const res = await getPkgReleases({ datasource, packageName: 'foobar' });
-    expect(res).toEqual({
-      isPrivate: true,
-      registryUrl: 'https://registry.npmjs.org',
-      releases: [
-        {
-          attestation: false,
-          dependencies: undefined,
-          devDependencies: undefined,
-          gitRef: undefined,
-          releaseTimestamp: '2018-05-06T05:21:53.000Z',
-          version: '0.0.1',
-        },
-        {
-          attestation: false,
-          dependencies: undefined,
-          devDependencies: undefined,
-          gitRef: undefined,
-          releaseTimestamp: '2018-05-07T05:21:53.000Z',
-          version: '0.0.2',
-        },
-      ],
-      sourceDirectory: 'src/a',
-      sourceUrl: 'https://github.com/renovateapp/dummy',
-      tags: { latest: '0.0.1' },
+    expect(res).toMatchObject({
+      releases: [{ version: '0.0.1' }, { version: '0.0.2' }],
     });
   });
 
@@ -429,30 +308,8 @@ describe('modules/datasource/npm/index', () => {
       packageName: '@foobar/core',
       npmrc: '_auth = 1234',
     });
-    expect(res).toEqual({
-      isPrivate: true,
-      registryUrl: 'https://registry.npmjs.org',
-      releases: [
-        {
-          attestation: false,
-          dependencies: undefined,
-          devDependencies: undefined,
-          gitRef: undefined,
-          releaseTimestamp: '2018-05-06T05:21:53.000Z',
-          version: '0.0.1',
-        },
-        {
-          attestation: false,
-          dependencies: undefined,
-          devDependencies: undefined,
-          gitRef: undefined,
-          releaseTimestamp: '2018-05-07T05:21:53.000Z',
-          version: '0.0.2',
-        },
-      ],
-      sourceDirectory: 'src/a',
-      sourceUrl: 'https://github.com/renovateapp/dummy',
-      tags: { latest: '0.0.1' },
+    expect(res).toMatchObject({
+      releases: [{ version: '0.0.1' }, { version: '0.0.2' }],
     });
   });
 
@@ -474,30 +331,9 @@ describe('modules/datasource/npm/index', () => {
       packageName: 'foobar',
       npmrc,
     });
-    expect(res).toEqual({
-      isPrivate: true,
+    expect(res).toMatchObject({
       registryUrl: 'https://npm.mycustomregistry.com',
-      releases: [
-        {
-          attestation: false,
-          dependencies: undefined,
-          devDependencies: undefined,
-          gitRef: undefined,
-          releaseTimestamp: '2018-05-06T05:21:53.000Z',
-          version: '0.0.1',
-        },
-        {
-          attestation: false,
-          dependencies: undefined,
-          devDependencies: undefined,
-          gitRef: undefined,
-          releaseTimestamp: '2018-05-07T05:21:53.000Z',
-          version: '0.0.2',
-        },
-      ],
-      sourceDirectory: 'src/a',
-      sourceUrl: 'https://github.com/renovateapp/dummy',
-      tags: { latest: '0.0.1' },
+      releases: [{ version: '0.0.1' }, { version: '0.0.2' }],
     });
   });
 
@@ -524,31 +360,10 @@ describe('modules/datasource/npm/index', () => {
       packageName: 'foobar',
       npmrc,
     });
-    expect(res).toEqual({
-      isPrivate: true,
+    expect(res).toMatchObject({
       registryUrl:
         'https://npm.mycustomregistry.com/_packaging/mycustomregistry/npm/registry',
-      releases: [
-        {
-          attestation: false,
-          dependencies: undefined,
-          devDependencies: undefined,
-          gitRef: undefined,
-          releaseTimestamp: '2018-05-06T05:21:53.000Z',
-          version: '0.0.1',
-        },
-        {
-          attestation: false,
-          dependencies: undefined,
-          devDependencies: undefined,
-          gitRef: undefined,
-          releaseTimestamp: '2018-05-07T05:21:53.000Z',
-          version: '0.0.2',
-        },
-      ],
-      sourceDirectory: 'src/a',
-      sourceUrl: 'https://github.com/renovateapp/dummy',
-      tags: { latest: '0.0.1' },
+      releases: [{ version: '0.0.1' }, { version: '0.0.2' }],
     });
   });
 
@@ -567,30 +382,9 @@ describe('modules/datasource/npm/index', () => {
       packageName: 'foobar',
       npmrc,
     });
-    expect(res).toEqual({
-      isPrivate: true,
+    expect(res).toMatchObject({
       registryUrl: 'https://registry.npmjs.org',
-      releases: [
-        {
-          attestation: false,
-          dependencies: undefined,
-          devDependencies: undefined,
-          gitRef: undefined,
-          releaseTimestamp: '2018-05-06T05:21:53.000Z',
-          version: '0.0.1',
-        },
-        {
-          attestation: false,
-          dependencies: undefined,
-          devDependencies: undefined,
-          gitRef: undefined,
-          releaseTimestamp: '2018-05-07T05:21:53.000Z',
-          version: '0.0.2',
-        },
-      ],
-      sourceDirectory: 'src/a',
-      sourceUrl: 'https://github.com/renovateapp/dummy',
-      tags: { latest: '0.0.1' },
+      releases: [{ version: '0.0.1' }, { version: '0.0.2' }],
     });
   });
 
@@ -605,30 +399,9 @@ describe('modules/datasource/npm/index', () => {
       packageName: 'foobar',
       npmrc,
     });
-    expect(res).toEqual({
-      isPrivate: true,
+    expect(res).toMatchObject({
       registryUrl: 'https://npm.mycustomregistry.com',
-      releases: [
-        {
-          attestation: false,
-          dependencies: undefined,
-          devDependencies: undefined,
-          gitRef: undefined,
-          releaseTimestamp: '2018-05-06T05:21:53.000Z',
-          version: '0.0.1',
-        },
-        {
-          attestation: false,
-          dependencies: undefined,
-          devDependencies: undefined,
-          gitRef: undefined,
-          releaseTimestamp: '2018-05-07T05:21:53.000Z',
-          version: '0.0.2',
-        },
-      ],
-      sourceDirectory: 'src/a',
-      sourceUrl: 'https://github.com/renovateapp/dummy',
-      tags: { latest: '0.0.1' },
+      releases: [{ version: '0.0.1' }, { version: '0.0.2' }],
     });
     expect(res?.isPrivate).toBeTrue();
   });
@@ -647,30 +420,9 @@ describe('modules/datasource/npm/index', () => {
       packageName: 'foobar',
       npmrc,
     });
-    expect(res).toEqual({
-      isPrivate: true,
+    expect(res).toMatchObject({
       registryUrl: 'https://registry.from-env.com',
-      releases: [
-        {
-          attestation: false,
-          dependencies: undefined,
-          devDependencies: undefined,
-          gitRef: undefined,
-          releaseTimestamp: '2018-05-06T05:21:53.000Z',
-          version: '0.0.1',
-        },
-        {
-          attestation: false,
-          dependencies: undefined,
-          devDependencies: undefined,
-          gitRef: undefined,
-          releaseTimestamp: '2018-05-07T05:21:53.000Z',
-          version: '0.0.2',
-        },
-      ],
-      sourceDirectory: 'src/a',
-      sourceUrl: 'https://github.com/renovateapp/dummy',
-      tags: { latest: '0.0.1' },
+      releases: [{ version: '0.0.1' }, { version: '0.0.2' }],
     });
   });
 

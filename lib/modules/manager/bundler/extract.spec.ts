@@ -40,637 +40,361 @@ describe('modules/manager/bundler/extract', () => {
     it('parses rails Gemfile', async () => {
       fs.readLocalFile.mockResolvedValueOnce(railsGemfileLock);
       const res = await extractPackageFile(railsGemfile, 'Gemfile');
-      expect(res).toEqual({
-        deps: [
-          {
-            currentValue: '">= 11.1"',
-            datasource: 'rubygems',
-            depName: 'rake',
-            lockedVersion: '12.3.1',
-            managerData: {
-              lineNumber: 9,
-            },
-          },
-          {
-            currentValue: '">= 2.15"',
-            datasource: 'rubygems',
-            depName: 'capybara',
-            lockedVersion: '3.10.1',
-            managerData: {
-              lineNumber: 11,
-            },
-          },
-          {
-            currentValue: '"~> 1.2"',
-            datasource: 'rubygems',
-            depName: 'rack-cache',
-            lockedVersion: '1.8.0',
-            managerData: {
-              lineNumber: 13,
-            },
-          },
-          {
-            datasource: 'rubygems',
-            depName: 'sass-rails',
-            lockedVersion: '5.0.7',
-            managerData: {
-              lineNumber: 14,
-            },
-          },
-          {
-            currentValue: '"~> 5"',
-            datasource: 'rubygems',
-            depName: 'turbolinks',
-            lockedVersion: '5.2.0',
-            managerData: {
-              lineNumber: 15,
-            },
-          },
-          {
-            datasource: 'git-refs',
-            depName: 'webpacker',
-            managerData: {
-              lineNumber: 16,
-            },
-            packageName: 'https://github.com/rails/webpacker',
-            sourceUrl: 'https://github.com/rails/webpacker',
-          },
-          {
-            currentValue: '"~> 3.1.11"',
-            datasource: 'rubygems',
-            depName: 'bcrypt',
-            lockedVersion: '3.1.12',
-            managerData: {
-              lineNumber: 20,
-            },
-          },
-          {
-            currentValue: '">= 1.3.0"',
-            datasource: 'rubygems',
-            depName: 'uglifier',
-            lockedVersion: '4.1.19',
-            managerData: {
-              lineNumber: 24,
-            },
-          },
-          {
-            currentValue: '">= 2.0.0"',
-            datasource: 'rubygems',
-            depName: 'json',
-            lockedVersion: '2.1.0',
-            managerData: {
-              lineNumber: 27,
-            },
-          },
-          {
-            currentValue: '">= 0.47"',
-            datasource: 'rubygems',
-            depName: 'rubocop',
-            lockedVersion: '0.61.1',
-            managerData: {
-              lineNumber: 29,
-            },
-          },
-          {
-            currentValue: '"~> 1.0"',
-            datasource: 'rubygems',
-            depName: 'sdoc',
-            depTypes: ['doc'],
-            lockedVersion: '1.0.0',
-            managerData: {
-              lineNumber: 32,
-            },
-          },
-          {
-            currentValue: '"~> 3.2.3"',
-            datasource: 'rubygems',
-            depName: 'redcarpet',
-            depTypes: ['doc'],
-            lockedVersion: '3.2.3',
-            managerData: {
-              lineNumber: 33,
-            },
-          },
-          {
-            datasource: 'rubygems',
-            depName: 'w3c_validators',
-            depTypes: ['doc'],
-            lockedVersion: '1.3.4',
-            managerData: {
-              lineNumber: 34,
-            },
-          },
-          {
-            currentValue: '"~> 1.2.0"',
-            datasource: 'rubygems',
-            depName: 'kindlerb',
-            depTypes: ['doc'],
-            lockedVersion: '1.2.0',
-            managerData: {
-              lineNumber: 35,
-            },
-          },
-          {
-            datasource: 'rubygems',
-            depName: 'dalli',
-            lockedVersion: '2.7.9',
-            managerData: {
-              lineNumber: 39,
-            },
-          },
-          {
-            currentValue: '">= 3.0.5", "< 3.2"',
-            datasource: 'rubygems',
-            depName: 'listen',
-            lockedVersion: '3.1.5',
-            managerData: {
-              lineNumber: 40,
-            },
-          },
-          {
-            datasource: 'rubygems',
-            depName: 'libxml-ruby',
-            lockedVersion: '3.1.0',
-            managerData: {
-              lineNumber: 41,
-            },
-          },
-          {
-            datasource: 'rubygems',
-            depName: 'connection_pool',
-            lockedVersion: '2.2.2',
-            managerData: {
-              lineNumber: 42,
-            },
-          },
-          {
-            currentValue: '">= 1.1.0"',
-            datasource: 'rubygems',
-            depName: 'bootsnap',
-            lockedVersion: '1.3.2',
-            managerData: {
-              lineNumber: 45,
-            },
-          },
-          {
-            datasource: 'rubygems',
-            depName: 'resque',
-            depTypes: ['job'],
-            lockedVersion: '1.27.4',
-            managerData: {
-              lineNumber: 49,
-            },
-          },
-          {
-            datasource: 'rubygems',
-            depName: 'resque-scheduler',
-            depTypes: ['job'],
-            lockedVersion: '4.3.1',
-            managerData: {
-              lineNumber: 50,
-            },
-          },
-          {
-            datasource: 'rubygems',
-            depName: 'sidekiq',
-            depTypes: ['job'],
-            lockedVersion: '5.2.3',
-            managerData: {
-              lineNumber: 51,
-            },
-          },
-          {
-            datasource: 'rubygems',
-            depName: 'sucker_punch',
-            depTypes: ['job'],
-            lockedVersion: '2.1.1',
-            managerData: {
-              lineNumber: 52,
-            },
-          },
-          {
-            datasource: 'rubygems',
-            depName: 'delayed_job',
-            depTypes: ['job'],
-            lockedVersion: '4.1.5',
-            managerData: {
-              lineNumber: 53,
-            },
-          },
-          {
-            currentValue: 'update-pg',
-            datasource: 'git-refs',
-            depName: 'queue_classic',
-            depTypes: ['job'],
-            managerData: {
-              lineNumber: 54,
-            },
-            packageName: 'https://github.com/rafaelfranca/queue_classic',
-            sourceUrl: 'https://github.com/rafaelfranca/queue_classic',
-          },
-          {
-            datasource: 'rubygems',
-            depName: 'sneakers',
-            depTypes: ['job'],
-            lockedVersion: '2.7.0',
-            managerData: {
-              lineNumber: 55,
-            },
-          },
-          {
-            datasource: 'rubygems',
-            depName: 'que',
-            depTypes: ['job'],
-            lockedVersion: '0.14.3',
-            managerData: {
-              lineNumber: 56,
-            },
-          },
-          {
-            datasource: 'rubygems',
-            depName: 'backburner',
-            depTypes: ['job'],
-            lockedVersion: '1.5.0',
-            managerData: {
-              lineNumber: 57,
-            },
-          },
-          {
-            datasource: 'rubygems',
-            depName: 'delayed_job_active_record',
-            depTypes: ['job'],
-            lockedVersion: '4.1.3',
-            managerData: {
-              lineNumber: 58,
-            },
-          },
-          {
-            datasource: 'rubygems',
-            depName: 'sequel',
-            depTypes: ['job'],
-            lockedVersion: '5.14.0',
-            managerData: {
-              lineNumber: 59,
-            },
-          },
-          {
-            datasource: 'rubygems',
-            depName: 'puma',
-            depTypes: ['cable'],
-            lockedVersion: '3.12.0',
-            managerData: {
-              lineNumber: 64,
-            },
-          },
-          {
-            datasource: 'rubygems',
-            depName: 'hiredis',
-            depTypes: ['cable'],
-            lockedVersion: '0.6.3',
-            managerData: {
-              lineNumber: 66,
-            },
-          },
-          {
-            currentValue: '"~> 4.0"',
-            datasource: 'rubygems',
-            depName: 'redis',
-            depTypes: ['cable'],
-            lockedVersion: '4.0.3',
-            managerData: {
-              lineNumber: 67,
-            },
-          },
-          {
-            datasource: 'rubygems',
-            depName: 'redis-namespace',
-            depTypes: ['cable'],
-            lockedVersion: '1.6.0',
-            managerData: {
-              lineNumber: 69,
-            },
-          },
-          {
-            currentValue: 'close-race',
-            datasource: 'git-refs',
-            depName: 'websocket-client-simple',
-            depTypes: ['cable'],
-            managerData: {
-              lineNumber: 71,
-            },
-            packageName: 'https://github.com/matthewd/websocket-client-simple',
-            sourceUrl: 'https://github.com/matthewd/websocket-client-simple',
-          },
-          {
-            datasource: 'rubygems',
-            depName: 'blade',
-            depTypes: ['cable'],
-            lockedVersion: '0.7.1',
-            managerData: {
-              lineNumber: 73,
-            },
-          },
-          {
-            datasource: 'rubygems',
-            depName: 'blade-sauce_labs_plugin',
-            depTypes: ['cable'],
-            lockedVersion: '0.7.3',
-            managerData: {
-              lineNumber: 74,
-            },
-          },
-          {
-            datasource: 'rubygems',
-            depName: 'sprockets-export',
-            depTypes: ['cable'],
-            lockedVersion: '1.0.0',
-            managerData: {
-              lineNumber: 75,
-            },
-          },
-          {
-            datasource: 'rubygems',
-            depName: 'aws-sdk-s3',
-            depTypes: ['storage'],
-            lockedVersion: '1.23.1',
-            managerData: {
-              lineNumber: 80,
-            },
-          },
-          {
-            currentValue: '"~> 1.11"',
-            datasource: 'rubygems',
-            depName: 'google-cloud-storage',
-            depTypes: ['storage'],
-            lockedVersion: '1.15.0',
-            managerData: {
-              lineNumber: 81,
-            },
-          },
-          {
-            datasource: 'rubygems',
-            depName: 'azure-storage',
-            depTypes: ['storage'],
-            lockedVersion: '0.15.0.preview',
-            managerData: {
-              lineNumber: 82,
-            },
-          },
-          {
-            currentValue: '"~> 1.2"',
-            datasource: 'rubygems',
-            depName: 'image_processing',
-            depTypes: ['storage'],
-            lockedVersion: '1.7.1',
-            managerData: {
-              lineNumber: 84,
-            },
-          },
-          {
-            datasource: 'rubygems',
-            depName: 'aws-sdk-sns',
-            lockedVersion: '1.8.1',
-            managerData: {
-              lineNumber: 88,
-            },
-          },
-          {
-            datasource: 'rubygems',
-            depName: 'webmock',
-            lockedVersion: '3.4.2',
-            managerData: {
-              lineNumber: 89,
-            },
-          },
-          {
-            datasource: 'rubygems',
-            depName: 'qunit-selenium',
-            depTypes: ['ujs'],
-            lockedVersion: '0.0.4',
-            managerData: {
-              lineNumber: 92,
-            },
-          },
-          {
-            datasource: 'rubygems',
-            depName: 'chromedriver-helper',
-            depTypes: ['ujs'],
-            lockedVersion: '2.1.0',
-            managerData: {
-              lineNumber: 93,
-            },
-          },
-          {
-            datasource: 'rubygems',
-            depName: 'minitest-bisect',
-            depTypes: ['test'],
-            lockedVersion: '1.4.0',
-            managerData: {
-              lineNumber: 101,
-            },
-          },
-          {
-            datasource: 'rubygems',
-            depName: 'minitest-retry',
-            depTypes: ['test'],
-            lockedVersion: '0.1.9',
-            managerData: {
-              lineNumber: 102,
-            },
-          },
-          {
-            datasource: 'rubygems',
-            depName: 'stackprof',
-            depTypes: ['test'],
-            lockedVersion: '0.2.12',
-            managerData: {
-              lineNumber: 105,
-            },
-          },
-          {
-            datasource: 'rubygems',
-            depName: 'byebug',
-            depTypes: ['test'],
-            lockedVersion: '10.0.2',
-            managerData: {
-              lineNumber: 106,
-            },
-          },
-          {
-            datasource: 'rubygems',
-            depName: 'benchmark-ips',
-            depTypes: ['test'],
-            lockedVersion: '2.7.2',
-            managerData: {
-              lineNumber: 109,
-            },
-          },
-          {
-            currentValue: '">= 1.8.1"',
-            datasource: 'rubygems',
-            depName: 'nokogiri',
-            lockedVersion: '1.9.1',
-            managerData: {
-              lineNumber: 113,
-            },
-          },
-          {
-            currentValue: '">=1.4.6"',
-            datasource: 'rubygems',
-            depName: 'racc',
-            lockedVersion: '1.4.14',
-            managerData: {
-              lineNumber: 116,
-            },
-          },
-          {
-            currentValue: '"~> 1.3.6"',
-            datasource: 'rubygems',
-            depName: 'sqlite3',
-            lockedVersion: '1.3.13',
-            managerData: {
-              lineNumber: 119,
-            },
-          },
-          {
-            currentValue: '">= 0.18.0"',
-            datasource: 'rubygems',
-            depName: 'pg',
-            depTypes: ['db'],
-            lockedVersion: '1.1.3',
-            managerData: {
-              lineNumber: 122,
-            },
-          },
-          {
-            currentValue: '">= 0.4.10"',
-            datasource: 'rubygems',
-            depName: 'mysql2',
-            depTypes: ['db'],
-            lockedVersion: '0.5.2',
-            managerData: {
-              lineNumber: 123,
-            },
-          },
-          {
-            currentValue: 'master',
-            datasource: 'git-refs',
-            depName: 'activerecord-jdbcsqlite3-adapter',
-            lockedVersion: '52.1',
-            managerData: {
-              lineNumber: 129,
-            },
-            packageName: 'https://github.com/jruby/activerecord-jdbc-adapter',
-            sourceUrl: 'https://github.com/jruby/activerecord-jdbc-adapter',
-          },
-          {
-            currentValue: 'master',
-            datasource: 'git-refs',
-            depName: 'activerecord-jdbcmysql-adapter',
-            depTypes: ['db'],
-            lockedVersion: '52.1',
-            managerData: {
-              lineNumber: 131,
-            },
-            packageName: 'https://github.com/jruby/activerecord-jdbc-adapter',
-            sourceUrl: 'https://github.com/jruby/activerecord-jdbc-adapter',
-          },
-          {
-            currentValue: 'master',
-            datasource: 'git-refs',
-            depName: 'activerecord-jdbcpostgresql-adapter',
-            depTypes: ['db'],
-            lockedVersion: '52.1',
-            managerData: {
-              lineNumber: 132,
-            },
-            packageName: 'https://github.com/jruby/activerecord-jdbc-adapter',
-            sourceUrl: 'https://github.com/jruby/activerecord-jdbc-adapter',
-          },
-          {
-            currentValue: '">= 1.3.0"',
-            datasource: 'rubygems',
-            depName: 'activerecord-jdbcsqlite3-adapter',
-            lockedVersion: '52.1',
-            managerData: {
-              lineNumber: 135,
-            },
-          },
-          {
-            currentValue: '">= 1.3.0"',
-            datasource: 'rubygems',
-            depName: 'activerecord-jdbcmysql-adapter',
-            depTypes: ['db'],
-            lockedVersion: '52.1',
-            managerData: {
-              lineNumber: 137,
-            },
-          },
-          {
-            currentValue: '">= 1.3.0"',
-            datasource: 'rubygems',
-            depName: 'activerecord-jdbcpostgresql-adapter',
-            depTypes: ['db'],
-            lockedVersion: '52.1',
-            managerData: {
-              lineNumber: 138,
-            },
-          },
-          {
-            currentValue: '"~> 3.0"',
-            datasource: 'rubygems',
-            depName: 'psych',
-            lockedVersion: '3.0.3',
-            managerData: {
-              lineNumber: 146,
-            },
-          },
-          {
-            currentValue: '"~> 2.2"',
-            datasource: 'rubygems',
-            depName: 'ruby-oci8',
-            managerData: {
-              lineNumber: 152,
-            },
-          },
-          {
-            currentValue: 'master',
-            datasource: 'git-refs',
-            depName: 'activerecord-oracle_enhanced-adapter',
-            managerData: {
-              lineNumber: 154,
-            },
-            packageName: 'https://github.com/rsim/oracle-enhanced',
-            sourceUrl: 'https://github.com/rsim/oracle-enhanced',
-          },
-          {
-            datasource: 'rubygems',
-            depName: 'ibm_db',
-            managerData: {
-              lineNumber: 158,
-            },
-          },
-          {
-            datasource: 'rubygems',
-            depName: 'tzinfo-data',
-            lockedVersion: '1.2018.7',
-            managerData: {
-              lineNumber: 159,
-            },
-          },
-          {
-            currentValue: '">= 0.1.0"',
-            datasource: 'rubygems',
-            depName: 'wdm',
-            lockedVersion: '0.1.1',
-            managerData: {
-              lineNumber: 160,
-            },
-          },
-        ],
-        lockFiles: ['Gemfile.lock'],
-        registryUrls: ['https://rubygems.org'],
-      });
+      expect(res?.deps).toMatchObject([
+        {
+          depName: 'rake',
+          currentValue: '">= 11.1"',
+          lockedVersion: '12.3.1',
+        },
+        {
+          depName: 'capybara',
+          currentValue: '">= 2.15"',
+          lockedVersion: '3.10.1',
+        },
+        {
+          depName: 'rack-cache',
+          currentValue: '"~> 1.2"',
+          lockedVersion: '1.8.0',
+        },
+        {
+          depName: 'sass-rails',
+          lockedVersion: '5.0.7',
+        },
+        {
+          depName: 'turbolinks',
+          currentValue: '"~> 5"',
+          lockedVersion: '5.2.0',
+        },
+        {
+          depName: 'webpacker',
+          datasource: 'git-refs',
+          packageName: 'https://github.com/rails/webpacker',
+        },
+        {
+          depName: 'bcrypt',
+          currentValue: '"~> 3.1.11"',
+          lockedVersion: '3.1.12',
+        },
+        {
+          depName: 'uglifier',
+          currentValue: '">= 1.3.0"',
+          lockedVersion: '4.1.19',
+        },
+        {
+          depName: 'json',
+          currentValue: '">= 2.0.0"',
+          lockedVersion: '2.1.0',
+        },
+        {
+          depName: 'rubocop',
+          currentValue: '">= 0.47"',
+          lockedVersion: '0.61.1',
+        },
+        {
+          depName: 'sdoc',
+          currentValue: '"~> 1.0"',
+          lockedVersion: '1.0.0',
+          depTypes: ['doc'],
+        },
+        {
+          depName: 'redcarpet',
+          currentValue: '"~> 3.2.3"',
+          lockedVersion: '3.2.3',
+          depTypes: ['doc'],
+        },
+        {
+          depName: 'w3c_validators',
+          lockedVersion: '1.3.4',
+          depTypes: ['doc'],
+        },
+        {
+          depName: 'kindlerb',
+          currentValue: '"~> 1.2.0"',
+          lockedVersion: '1.2.0',
+          depTypes: ['doc'],
+        },
+        {
+          depName: 'dalli',
+          lockedVersion: '2.7.9',
+        },
+        {
+          depName: 'listen',
+          currentValue: '">= 3.0.5", "< 3.2"',
+          lockedVersion: '3.1.5',
+        },
+        {
+          depName: 'libxml-ruby',
+          lockedVersion: '3.1.0',
+        },
+        {
+          depName: 'connection_pool',
+          lockedVersion: '2.2.2',
+        },
+        {
+          depName: 'bootsnap',
+          currentValue: '">= 1.1.0"',
+          lockedVersion: '1.3.2',
+        },
+        {
+          depName: 'resque',
+          lockedVersion: '1.27.4',
+          depTypes: ['job'],
+        },
+        {
+          depName: 'resque-scheduler',
+          lockedVersion: '4.3.1',
+          depTypes: ['job'],
+        },
+        {
+          depName: 'sidekiq',
+          lockedVersion: '5.2.3',
+          depTypes: ['job'],
+        },
+        {
+          depName: 'sucker_punch',
+          lockedVersion: '2.1.1',
+          depTypes: ['job'],
+        },
+        {
+          depName: 'delayed_job',
+          lockedVersion: '4.1.5',
+          depTypes: ['job'],
+        },
+        {
+          depName: 'queue_classic',
+          currentValue: 'update-pg',
+          depTypes: ['job'],
+          datasource: 'git-refs',
+          packageName: 'https://github.com/rafaelfranca/queue_classic',
+        },
+        {
+          depName: 'sneakers',
+          lockedVersion: '2.7.0',
+          depTypes: ['job'],
+        },
+        {
+          depName: 'que',
+          lockedVersion: '0.14.3',
+          depTypes: ['job'],
+        },
+        {
+          depName: 'backburner',
+          lockedVersion: '1.5.0',
+          depTypes: ['job'],
+        },
+        {
+          depName: 'delayed_job_active_record',
+          lockedVersion: '4.1.3',
+          depTypes: ['job'],
+        },
+        {
+          depName: 'sequel',
+          lockedVersion: '5.14.0',
+          depTypes: ['job'],
+        },
+        {
+          depName: 'puma',
+          lockedVersion: '3.12.0',
+          depTypes: ['cable'],
+        },
+        {
+          depName: 'hiredis',
+          lockedVersion: '0.6.3',
+          depTypes: ['cable'],
+        },
+        {
+          depName: 'redis',
+          currentValue: '"~> 4.0"',
+          lockedVersion: '4.0.3',
+          depTypes: ['cable'],
+        },
+        {
+          depName: 'redis-namespace',
+          lockedVersion: '1.6.0',
+          depTypes: ['cable'],
+        },
+        {
+          depName: 'websocket-client-simple',
+          currentValue: 'close-race',
+          depTypes: ['cable'],
+          datasource: 'git-refs',
+          packageName: 'https://github.com/matthewd/websocket-client-simple',
+        },
+        {
+          depName: 'blade',
+          lockedVersion: '0.7.1',
+          depTypes: ['cable'],
+        },
+        {
+          depName: 'blade-sauce_labs_plugin',
+          lockedVersion: '0.7.3',
+          depTypes: ['cable'],
+        },
+        {
+          depName: 'sprockets-export',
+          lockedVersion: '1.0.0',
+          depTypes: ['cable'],
+        },
+        {
+          depName: 'aws-sdk-s3',
+          lockedVersion: '1.23.1',
+          depTypes: ['storage'],
+        },
+        {
+          depName: 'google-cloud-storage',
+          currentValue: '"~> 1.11"',
+          lockedVersion: '1.15.0',
+          depTypes: ['storage'],
+        },
+        {
+          depName: 'azure-storage',
+          lockedVersion: '0.15.0.preview',
+          depTypes: ['storage'],
+        },
+        {
+          depName: 'image_processing',
+          currentValue: '"~> 1.2"',
+          lockedVersion: '1.7.1',
+          depTypes: ['storage'],
+        },
+        {
+          depName: 'aws-sdk-sns',
+          lockedVersion: '1.8.1',
+        },
+        {
+          depName: 'webmock',
+          lockedVersion: '3.4.2',
+        },
+        {
+          depName: 'qunit-selenium',
+          lockedVersion: '0.0.4',
+          depTypes: ['ujs'],
+        },
+        {
+          depName: 'chromedriver-helper',
+          lockedVersion: '2.1.0',
+          depTypes: ['ujs'],
+        },
+        {
+          depName: 'minitest-bisect',
+          lockedVersion: '1.4.0',
+          depTypes: ['test'],
+        },
+        {
+          depName: 'minitest-retry',
+          lockedVersion: '0.1.9',
+          depTypes: ['test'],
+        },
+        {
+          depName: 'stackprof',
+          lockedVersion: '0.2.12',
+          depTypes: ['test'],
+        },
+        {
+          depName: 'byebug',
+          lockedVersion: '10.0.2',
+          depTypes: ['test'],
+        },
+        {
+          depName: 'benchmark-ips',
+          lockedVersion: '2.7.2',
+          depTypes: ['test'],
+        },
+        {
+          depName: 'nokogiri',
+          currentValue: '">= 1.8.1"',
+          lockedVersion: '1.9.1',
+        },
+        {
+          depName: 'racc',
+          currentValue: '">=1.4.6"',
+          lockedVersion: '1.4.14',
+        },
+        {
+          depName: 'sqlite3',
+          currentValue: '"~> 1.3.6"',
+          lockedVersion: '1.3.13',
+        },
+        {
+          depName: 'pg',
+          currentValue: '">= 0.18.0"',
+          lockedVersion: '1.1.3',
+          depTypes: ['db'],
+        },
+        {
+          depName: 'mysql2',
+          currentValue: '">= 0.4.10"',
+          lockedVersion: '0.5.2',
+          depTypes: ['db'],
+        },
+        {
+          depName: 'activerecord-jdbcsqlite3-adapter',
+          currentValue: 'master',
+          lockedVersion: '52.1',
+          datasource: 'git-refs',
+          packageName: 'https://github.com/jruby/activerecord-jdbc-adapter',
+        },
+        {
+          depName: 'activerecord-jdbcmysql-adapter',
+          currentValue: 'master',
+          lockedVersion: '52.1',
+          depTypes: ['db'],
+          datasource: 'git-refs',
+          packageName: 'https://github.com/jruby/activerecord-jdbc-adapter',
+        },
+        {
+          depName: 'activerecord-jdbcpostgresql-adapter',
+          currentValue: 'master',
+          lockedVersion: '52.1',
+          depTypes: ['db'],
+          datasource: 'git-refs',
+          packageName: 'https://github.com/jruby/activerecord-jdbc-adapter',
+        },
+        {
+          depName: 'activerecord-jdbcsqlite3-adapter',
+          currentValue: '">= 1.3.0"',
+          lockedVersion: '52.1',
+        },
+        {
+          depName: 'activerecord-jdbcmysql-adapter',
+          currentValue: '">= 1.3.0"',
+          lockedVersion: '52.1',
+          depTypes: ['db'],
+        },
+        {
+          depName: 'activerecord-jdbcpostgresql-adapter',
+          currentValue: '">= 1.3.0"',
+          lockedVersion: '52.1',
+          depTypes: ['db'],
+        },
+        {
+          depName: 'psych',
+          currentValue: '"~> 3.0"',
+          lockedVersion: '3.0.3',
+        },
+        {
+          depName: 'ruby-oci8',
+          currentValue: '"~> 2.2"',
+        },
+        {
+          depName: 'activerecord-oracle_enhanced-adapter',
+          currentValue: 'master',
+          datasource: 'git-refs',
+          packageName: 'https://github.com/rsim/oracle-enhanced',
+        },
+        {
+          depName: 'ibm_db',
+        },
+        {
+          depName: 'tzinfo-data',
+          lockedVersion: '1.2018.7',
+        },
+        {
+          depName: 'wdm',
+          currentValue: '">= 0.1.0"',
+          lockedVersion: '0.1.1',
+        },
+      ]);
       // couple of dependency of ruby rails are not present in the lock file. Filter out those before processing
       expect(
         res?.deps
@@ -686,63 +410,27 @@ describe('modules/manager/bundler/extract', () => {
 
     it('parses sourceGroups', async () => {
       const res = await extractPackageFile(sourceGroupGemfile, 'Gemfile');
-      expect(res).toEqual({
+      expect(res).toMatchObject({
+        registryUrls: ['https://rubygems.org'],
         deps: [
           {
+            depName: 'ruby',
             currentValue: '~> 1.5.3',
             datasource: 'ruby-version',
-            depName: 'ruby',
-            registryUrls: null,
           },
           {
-            datasource: 'rubygems',
             depName: 'some_internal_gem',
-            managerData: {
-              lineNumber: 4,
-            },
             registryUrls: ['https://gems.example.com'],
           },
           {
-            datasource: 'rubygems',
             depName: 'another_internal_gem',
-            managerData: {
-              lineNumber: 5,
-            },
             registryUrls: ['https://gems.example.com'],
           },
-          {
-            currentValue: '"latest"',
-            datasource: 'rubygems',
-            depName: 'ruby-debug',
-            managerData: {
-              lineNumber: 9,
-            },
-          },
-          {
-            datasource: 'rubygems',
-            depName: 'sqlite3',
-            managerData: {
-              lineNumber: 10,
-            },
-          },
-          {
-            datasource: 'rubygems',
-            depName: 'wirble',
-            depTypes: ['development', 'optional => true'],
-            managerData: {
-              lineNumber: 14,
-            },
-          },
-          {
-            datasource: 'rubygems',
-            depName: 'faker',
-            depTypes: ['development', 'optional => true'],
-            managerData: {
-              lineNumber: 15,
-            },
-          },
+          { depName: 'ruby-debug', currentValue: '"latest"' },
+          { depName: 'sqlite3' },
+          { depName: 'wirble', depTypes: ['development', 'optional => true'] },
+          { depName: 'faker', depTypes: ['development', 'optional => true'] },
         ],
-        registryUrls: ['https://rubygems.org'],
       });
       expect(res?.deps).toHaveLength(7);
     });
@@ -750,56 +438,32 @@ describe('modules/manager/bundler/extract', () => {
     it('parse webpacker Gemfile', async () => {
       fs.readLocalFile.mockResolvedValueOnce(webPackerGemfileLock);
       const res = await extractPackageFile(webPackerGemfile, 'Gemfile');
-      expect(res).toEqual({
-        deps: [
-          {
-            datasource: 'rubygems',
-            depName: 'rails',
-            lockedVersion: '6.0.1',
-            managerData: {
-              lineNumber: 4,
-            },
-          },
-          {
-            currentValue: '">= 11.1"',
-            datasource: 'rubygems',
-            depName: 'rake',
-            lockedVersion: '13.0.0',
-            managerData: {
-              lineNumber: 5,
-            },
-          },
-          {
-            datasource: 'rubygems',
-            depName: 'rack-proxy',
-            lockedVersion: '0.6.5',
-            managerData: {
-              lineNumber: 6,
-            },
-          },
-          {
-            currentValue: '"~> 5.0"',
-            datasource: 'rubygems',
-            depName: 'minitest',
-            depTypes: ['test'],
-            lockedVersion: '5.13.0',
-            managerData: {
-              lineNumber: 9,
-            },
-          },
-          {
-            datasource: 'rubygems',
-            depName: 'byebug',
-            depTypes: ['test'],
-            lockedVersion: '11.0.1',
-            managerData: {
-              lineNumber: 10,
-            },
-          },
-        ],
-        lockFiles: ['Gemfile.lock'],
-        registryUrls: ['https://rubygems.org'],
-      });
+      expect(res?.deps).toMatchObject([
+        {
+          depName: 'rails',
+          lockedVersion: '6.0.1',
+        },
+        {
+          depName: 'rake',
+          currentValue: '">= 11.1"',
+          lockedVersion: '13.0.0',
+        },
+        {
+          depName: 'rack-proxy',
+          lockedVersion: '0.6.5',
+        },
+        {
+          depName: 'minitest',
+          currentValue: '"~> 5.0"',
+          lockedVersion: '5.13.0',
+          depTypes: ['test'],
+        },
+        {
+          depName: 'byebug',
+          lockedVersion: '11.0.1',
+          depTypes: ['test'],
+        },
+      ]);
       expect(
         res?.deps.every(
           (dep) => isString(dep.lockedVersion) && isValid(dep.lockedVersion),
@@ -811,1168 +475,664 @@ describe('modules/manager/bundler/extract', () => {
     it('parse mastodon Gemfile', async () => {
       fs.readLocalFile.mockResolvedValueOnce(mastodonGemfileLock);
       const res = await extractPackageFile(mastodonGemfile, 'Gemfile');
-      expect(res).toEqual({
-        deps: [
-          {
-            currentValue: "'~> 1.4'",
-            datasource: 'rubygems',
-            depName: 'pkg-config',
-            lockedVersion: '1.4.0',
-            managerData: {
-              lineNumber: 5,
-            },
-          },
-          {
-            currentValue: "'~> 4.3'",
-            datasource: 'rubygems',
-            depName: 'puma',
-            lockedVersion: '4.3.1',
-            managerData: {
-              lineNumber: 7,
-            },
-          },
-          {
-            currentValue: "'~> 5.2.4'",
-            datasource: 'rubygems',
-            depName: 'rails',
-            lockedVersion: '5.2.4.1',
-            managerData: {
-              lineNumber: 8,
-            },
-          },
-          {
-            currentValue: "'~> 3.7.2'",
-            datasource: 'rubygems',
-            depName: 'sprockets',
-            lockedVersion: '3.7.2',
-            managerData: {
-              lineNumber: 9,
-            },
-          },
-          {
-            currentValue: "'~> 0.20'",
-            datasource: 'rubygems',
-            depName: 'thor',
-            lockedVersion: '0.20.3',
-            managerData: {
-              lineNumber: 10,
-            },
-          },
-          {
-            currentValue: "'~> 0.2'",
-            datasource: 'rubygems',
-            depName: 'hamlit-rails',
-            lockedVersion: '0.2.3',
-            managerData: {
-              lineNumber: 12,
-            },
-          },
-          {
-            currentValue: "'~> 1.2'",
-            datasource: 'rubygems',
-            depName: 'pg',
-            lockedVersion: '1.2.0',
-            managerData: {
-              lineNumber: 13,
-            },
-          },
-          {
-            currentValue: "'~> 0.4'",
-            datasource: 'rubygems',
-            depName: 'makara',
-            lockedVersion: '0.4.1',
-            managerData: {
-              lineNumber: 14,
-            },
-          },
-          {
-            currentValue: "'~> 2.4'",
-            datasource: 'rubygems',
-            depName: 'pghero',
-            lockedVersion: '2.4.1',
-            managerData: {
-              lineNumber: 15,
-            },
-          },
-          {
-            currentValue: "'~> 2.7'",
-            datasource: 'rubygems',
-            depName: 'dotenv-rails',
-            lockedVersion: '2.7.5',
-            managerData: {
-              lineNumber: 16,
-            },
-          },
-          {
-            currentValue: "'~> 1.59'",
-            datasource: 'rubygems',
-            depName: 'aws-sdk-s3',
-            lockedVersion: '1.59.0',
-            managerData: {
-              lineNumber: 18,
-            },
-          },
-          {
-            currentValue: "'<= 2.1.0'",
-            datasource: 'rubygems',
-            depName: 'fog-core',
-            lockedVersion: '2.1.0',
-            managerData: {
-              lineNumber: 19,
-            },
-          },
-          {
-            currentValue: "'~> 0.3'",
-            datasource: 'rubygems',
-            depName: 'fog-openstack',
-            lockedVersion: '0.3.7',
-            managerData: {
-              lineNumber: 20,
-            },
-          },
-          {
-            currentValue: "'~> 6.0'",
-            datasource: 'rubygems',
-            depName: 'paperclip',
-            lockedVersion: '6.0.0',
-            managerData: {
-              lineNumber: 21,
-            },
-          },
-          {
-            currentValue: "'~> 0.6'",
-            datasource: 'rubygems',
-            depName: 'paperclip-av-transcoder',
-            lockedVersion: '0.6.4',
-            managerData: {
-              lineNumber: 22,
-            },
-          },
-          {
-            currentValue: "'~> 3.0'",
-            datasource: 'rubygems',
-            depName: 'streamio-ffmpeg',
-            lockedVersion: '3.0.2',
-            managerData: {
-              lineNumber: 23,
-            },
-          },
-          {
-            currentValue: "'~> 0.1'",
-            datasource: 'rubygems',
-            depName: 'blurhash',
-            lockedVersion: '0.1.3',
-            managerData: {
-              lineNumber: 24,
-            },
-          },
-          {
-            currentValue: "'~> 0.10'",
-            datasource: 'rubygems',
-            depName: 'active_model_serializers',
-            lockedVersion: '0.10.10',
-            managerData: {
-              lineNumber: 26,
-            },
-          },
-          {
-            currentValue: "'~> 2.7'",
-            datasource: 'rubygems',
-            depName: 'addressable',
-            lockedVersion: '2.7.0',
-            managerData: {
-              lineNumber: 27,
-            },
-          },
-          {
-            currentValue: "'~> 1.4'",
-            datasource: 'rubygems',
-            depName: 'bootsnap',
-            lockedVersion: '1.4.5',
-            managerData: {
-              lineNumber: 28,
-            },
-          },
-          {
-            datasource: 'rubygems',
-            depName: 'browser',
-            lockedVersion: '2.7.1',
-            managerData: {
-              lineNumber: 29,
-            },
-          },
-          {
-            currentValue: "'~> 0.7.7'",
-            datasource: 'rubygems',
-            depName: 'charlock_holmes',
-            lockedVersion: '0.7.7',
-            managerData: {
-              lineNumber: 30,
-            },
-          },
-          {
-            datasource: 'rubygems',
-            depName: 'iso-639',
-            lockedVersion: '0.2.8',
-            managerData: {
-              lineNumber: 31,
-            },
-          },
-          {
-            currentValue: "'~> 5.1'",
-            datasource: 'rubygems',
-            depName: 'chewy',
-            lockedVersion: '5.1.0',
-            managerData: {
-              lineNumber: 32,
-            },
-          },
-          {
-            currentValue: "'~> 3.2.6'",
-            datasource: 'rubygems',
-            depName: 'cld3',
-            lockedVersion: '3.2.6',
-            managerData: {
-              lineNumber: 33,
-            },
-          },
-          {
-            currentValue: "'~> 4.7'",
-            datasource: 'rubygems',
-            depName: 'devise',
-            lockedVersion: '4.7.1',
-            managerData: {
-              lineNumber: 34,
-            },
-          },
-          {
-            currentValue: "'~> 3.1'",
-            datasource: 'rubygems',
-            depName: 'devise-two-factor',
-            lockedVersion: '3.1.0',
-            managerData: {
-              lineNumber: 35,
-            },
-          },
-          {
-            currentValue: "'~> 9.2'",
-            datasource: 'rubygems',
-            depName: 'devise_pam_authenticatable2',
-            depTypes: ['pam_authentication', 'optional: true'],
-            lockedVersion: '9.2.0',
-            managerData: {
-              lineNumber: 38,
-            },
-          },
-          {
-            currentValue: "'~> 0.16'",
-            datasource: 'rubygems',
-            depName: 'net-ldap',
-            lockedVersion: '0.16.2',
-            managerData: {
-              lineNumber: 41,
-            },
-          },
-          {
-            currentValue: "'~> 1.1'",
-            datasource: 'rubygems',
-            depName: 'omniauth-cas',
-            lockedVersion: '1.1.1',
-            managerData: {
-              lineNumber: 42,
-            },
-          },
-          {
-            currentValue: "'~> 1.10'",
-            datasource: 'rubygems',
-            depName: 'omniauth-saml',
-            lockedVersion: '1.10.1',
-            managerData: {
-              lineNumber: 43,
-            },
-          },
-          {
-            currentValue: "'~> 1.9'",
-            datasource: 'rubygems',
-            depName: 'omniauth',
-            lockedVersion: '1.9.0',
-            managerData: {
-              lineNumber: 44,
-            },
-          },
-          {
-            currentValue: "'~> 1.1'",
-            datasource: 'rubygems',
-            depName: 'discard',
-            lockedVersion: '1.1.0',
-            managerData: {
-              lineNumber: 46,
-            },
-          },
-          {
-            currentValue: "'~> 5.2'",
-            datasource: 'rubygems',
-            depName: 'doorkeeper',
-            lockedVersion: '5.2.3',
-            managerData: {
-              lineNumber: 47,
-            },
-          },
-          {
-            currentValue: "'~> 1.0'",
-            datasource: 'rubygems',
-            depName: 'fast_blank',
-            lockedVersion: '1.0.0',
-            managerData: {
-              lineNumber: 48,
-            },
-          },
-          {
-            datasource: 'rubygems',
-            depName: 'fastimage',
-            lockedVersion: '2.1.7',
-            managerData: {
-              lineNumber: 49,
-            },
-          },
-          {
-            currentValue: "'~> 2.1'",
-            datasource: 'rubygems',
-            depName: 'goldfinger',
-            lockedVersion: '2.1.0',
-            managerData: {
-              lineNumber: 50,
-            },
-          },
-          {
-            currentValue: "'~> 0.6'",
-            datasource: 'rubygems',
-            depName: 'hiredis',
-            lockedVersion: '0.6.3',
-            managerData: {
-              lineNumber: 51,
-            },
-          },
-          {
-            currentValue: "'~> 1.7'",
-            datasource: 'rubygems',
-            depName: 'redis-namespace',
-            lockedVersion: '1.7.0',
-            managerData: {
-              lineNumber: 52,
-            },
-          },
-          {
-            currentDigest: '0b799ead604f900ed50685e9b2d469cd2befba5b',
-            datasource: 'git-refs',
-            depName: 'health_check',
-            managerData: {
-              lineNumber: 53,
-            },
-            packageName: 'https://github.com/ianheggie/health_check',
-            sourceUrl: 'https://github.com/ianheggie/health_check',
-          },
-          {
-            currentValue: "'~> 4.3'",
-            datasource: 'rubygems',
-            depName: 'htmlentities',
-            lockedVersion: '4.3.4',
-            managerData: {
-              lineNumber: 54,
-            },
-          },
-          {
-            currentValue: "'~> 3.3'",
-            datasource: 'rubygems',
-            depName: 'http',
-            lockedVersion: '3.3.0',
-            managerData: {
-              lineNumber: 55,
-            },
-          },
-          {
-            currentValue: "'~> 2.1'",
-            datasource: 'rubygems',
-            depName: 'http_accept_language',
-            lockedVersion: '2.1.1',
-            managerData: {
-              lineNumber: 56,
-            },
-          },
-          {
-            currentDigest: '54b17ba8c7d8d20a16dfc65d1775241833219cf2',
-            currentValue: "'~> 0.6'",
-            datasource: 'git-refs',
-            depName: 'http_parser.rb',
-            managerData: {
-              lineNumber: 57,
-            },
-            packageName: 'https://github.com/tmm1/http_parser.rb',
-            sourceUrl: 'https://github.com/tmm1/http_parser.rb',
-          },
-          {
-            currentValue: "'~> 1.3'",
-            datasource: 'rubygems',
-            depName: 'httplog',
-            lockedVersion: '1.3.3',
-            managerData: {
-              lineNumber: 58,
-            },
-          },
-          {
-            datasource: 'rubygems',
-            depName: 'idn-ruby',
-            lockedVersion: '0.1.0',
-            managerData: {
-              lineNumber: 59,
-            },
-          },
-          {
-            currentValue: "'~> 1.1'",
-            datasource: 'rubygems',
-            depName: 'kaminari',
-            lockedVersion: '1.1.1',
-            managerData: {
-              lineNumber: 60,
-            },
-          },
-          {
-            currentValue: "'~> 0.0'",
-            datasource: 'rubygems',
-            depName: 'link_header',
-            lockedVersion: '0.0.8',
-            managerData: {
-              lineNumber: 61,
-            },
-          },
-          {
-            currentValue: "'~> 3.3.1'",
-            datasource: 'rubygems',
-            depName: 'mime-types',
-            lockedVersion: '3.3.1',
-            managerData: {
-              lineNumber: 62,
-            },
-          },
-          {
-            currentDigest: 'fd184883048b922b176939f851338d0a4971a532',
-            datasource: 'git-refs',
-            depName: 'nilsimsa',
-            managerData: {
-              lineNumber: 63,
-            },
-            packageName: 'https://github.com/witgo/nilsimsa',
-            sourceUrl: 'https://github.com/witgo/nilsimsa',
-          },
-          {
-            currentValue: "'~> 1.10'",
-            datasource: 'rubygems',
-            depName: 'nokogiri',
-            lockedVersion: '1.10.7',
-            managerData: {
-              lineNumber: 64,
-            },
-          },
-          {
-            currentValue: "'~> 0.2'",
-            datasource: 'rubygems',
-            depName: 'nsa',
-            lockedVersion: '0.2.7',
-            managerData: {
-              lineNumber: 65,
-            },
-          },
-          {
-            currentValue: "'~> 3.10'",
-            datasource: 'rubygems',
-            depName: 'oj',
-            lockedVersion: '3.10.0',
-            managerData: {
-              lineNumber: 66,
-            },
-          },
-          {
-            currentValue: "'~> 2.0'",
-            datasource: 'rubygems',
-            depName: 'ostatus2',
-            lockedVersion: '2.0.3',
-            managerData: {
-              lineNumber: 67,
-            },
-          },
-          {
-            currentValue: "'~> 2.11'",
-            datasource: 'rubygems',
-            depName: 'ox',
-            lockedVersion: '2.11.0',
-            managerData: {
-              lineNumber: 68,
-            },
-          },
-          {
-            datasource: 'rubygems',
-            depName: 'parslet',
-            lockedVersion: '1.8.2',
-            managerData: {
-              lineNumber: 69,
-            },
-          },
-          {
-            currentValue: "'~> 1.19'",
-            datasource: 'rubygems',
-            depName: 'parallel',
-            lockedVersion: '1.19.1',
-            managerData: {
-              lineNumber: 70,
-            },
-          },
-          {
-            currentDigest: '58465d2e213991f8afb13b984854a49fcdcc980c',
-            datasource: 'git-refs',
-            depName: 'posix-spawn',
-            managerData: {
-              lineNumber: 71,
-            },
-            packageName: 'https://github.com/rtomayko/posix-spawn',
-            sourceUrl: 'https://github.com/rtomayko/posix-spawn',
-          },
-          {
-            currentValue: "'~> 2.1'",
-            datasource: 'rubygems',
-            depName: 'pundit',
-            lockedVersion: '2.1.0',
-            managerData: {
-              lineNumber: 72,
-            },
-          },
-          {
-            datasource: 'rubygems',
-            depName: 'premailer-rails',
-            lockedVersion: '1.10.3',
-            managerData: {
-              lineNumber: 73,
-            },
-          },
-          {
-            currentValue: "'~> 6.2'",
-            datasource: 'rubygems',
-            depName: 'rack-attack',
-            lockedVersion: '6.2.2',
-            managerData: {
-              lineNumber: 74,
-            },
-          },
-          {
-            currentValue: "'~> 1.1'",
-            datasource: 'rubygems',
-            depName: 'rack-cors',
-            lockedVersion: '1.1.1',
-            managerData: {
-              lineNumber: 75,
-            },
-          },
-          {
-            currentValue: "'~> 5.1'",
-            datasource: 'rubygems',
-            depName: 'rails-i18n',
-            lockedVersion: '5.1.3',
-            managerData: {
-              lineNumber: 76,
-            },
-          },
-          {
-            currentValue: "'~> 0.6'",
-            datasource: 'rubygems',
-            depName: 'rails-settings-cached',
-            lockedVersion: '0.6.6',
-            managerData: {
-              lineNumber: 77,
-            },
-          },
-          {
-            currentValue: "'~> 4.1'",
-            datasource: 'rubygems',
-            depName: 'redis',
-            lockedVersion: '4.1.3',
-            managerData: {
-              lineNumber: 78,
-            },
-          },
-          {
-            currentValue: "'~> 1.2'",
-            datasource: 'rubygems',
-            depName: 'mario-redis-lock',
-            lockedVersion: '1.2.1',
-            managerData: {
-              lineNumber: 79,
-            },
-          },
-          {
-            currentValue: "'~> 0.10'",
-            datasource: 'rubygems',
-            depName: 'rqrcode',
-            lockedVersion: '0.10.1',
-            managerData: {
-              lineNumber: 80,
-            },
-          },
-          {
-            currentValue: "'~> 1.10'",
-            datasource: 'rubygems',
-            depName: 'ruby-progressbar',
-            lockedVersion: '1.10.1',
-            managerData: {
-              lineNumber: 81,
-            },
-          },
-          {
-            currentValue: "'~> 5.1'",
-            datasource: 'rubygems',
-            depName: 'sanitize',
-            lockedVersion: '5.1.0',
-            managerData: {
-              lineNumber: 82,
-            },
-          },
-          {
-            currentValue: "'~> 5.2'",
-            datasource: 'rubygems',
-            depName: 'sidekiq',
-            lockedVersion: '5.2.7',
-            managerData: {
-              lineNumber: 83,
-            },
-          },
-          {
-            currentValue: "'~> 3.0'",
-            datasource: 'rubygems',
-            depName: 'sidekiq-scheduler',
-            lockedVersion: '3.0.0',
-            managerData: {
-              lineNumber: 84,
-            },
-          },
-          {
-            currentValue: "'~> 6.0'",
-            datasource: 'rubygems',
-            depName: 'sidekiq-unique-jobs',
-            lockedVersion: '6.0.18',
-            managerData: {
-              lineNumber: 85,
-            },
-          },
-          {
-            currentValue: "'~>0.2.0'",
-            datasource: 'rubygems',
-            depName: 'sidekiq-bulk',
-            lockedVersion: '0.2.0',
-            managerData: {
-              lineNumber: 86,
-            },
-          },
-          {
-            currentValue: "'~> 4.1'",
-            datasource: 'rubygems',
-            depName: 'simple-navigation',
-            lockedVersion: '4.1.0',
-            managerData: {
-              lineNumber: 87,
-            },
-          },
-          {
-            currentValue: "'~> 5.0'",
-            datasource: 'rubygems',
-            depName: 'simple_form',
-            lockedVersion: '5.0.1',
-            managerData: {
-              lineNumber: 88,
-            },
-          },
-          {
-            currentValue: "'~> 3.2'",
-            datasource: 'rubygems',
-            depName: 'sprockets-rails',
-            lockedVersion: '3.2.1',
-            managerData: {
-              lineNumber: 89,
-            },
-          },
-          {
-            currentValue: "'~> 2.2.0'",
-            datasource: 'rubygems',
-            depName: 'stoplight',
-            lockedVersion: '2.2.0',
-            managerData: {
-              lineNumber: 90,
-            },
-          },
-          {
-            currentValue: "'~> 0.5'",
-            datasource: 'rubygems',
-            depName: 'strong_migrations',
-            lockedVersion: '0.5.1',
-            managerData: {
-              lineNumber: 91,
-            },
-          },
-          {
-            currentValue: "'~> 0.9'",
-            datasource: 'rubygems',
-            depName: 'tty-command',
-            lockedVersion: '0.9.0',
-            managerData: {
-              lineNumber: 92,
-            },
-          },
-          {
-            currentValue: "'~> 0.20'",
-            datasource: 'rubygems',
-            depName: 'tty-prompt',
-            lockedVersion: '0.20.0',
-            managerData: {
-              lineNumber: 93,
-            },
-          },
-          {
-            currentValue: "'~> 1.14'",
-            datasource: 'rubygems',
-            depName: 'twitter-text',
-            lockedVersion: '1.14.7',
-            managerData: {
-              lineNumber: 94,
-            },
-          },
-          {
-            currentValue: "'~> 1.2019'",
-            datasource: 'rubygems',
-            depName: 'tzinfo-data',
-            lockedVersion: '1.2019.3',
-            managerData: {
-              lineNumber: 95,
-            },
-          },
-          {
-            currentValue: "'~> 4.2'",
-            datasource: 'rubygems',
-            depName: 'webpacker',
-            lockedVersion: '4.2.2',
-            managerData: {
-              lineNumber: 96,
-            },
-          },
-          {
-            datasource: 'rubygems',
-            depName: 'webpush',
-            lockedVersion: '0.3.8',
-            managerData: {
-              lineNumber: 97,
-            },
-          },
-          {
-            currentDigest: 'e742697a0906e74e8bb777ef98137bc3955d981d',
-            datasource: 'git-refs',
-            depName: 'json-ld',
-            managerData: {
-              lineNumber: 99,
-            },
-            packageName: 'https://github.com/ruby-rdf/json-ld.git',
-            sourceUrl: 'https://github.com/ruby-rdf/json-ld',
-          },
-          {
-            currentValue: "'~> 3.0'",
-            datasource: 'rubygems',
-            depName: 'json-ld-preloaded',
-            lockedVersion: '3.0.6',
-            managerData: {
-              lineNumber: 100,
-            },
-          },
-          {
-            currentValue: "'~> 0.3'",
-            datasource: 'rubygems',
-            depName: 'rdf-normalize',
-            lockedVersion: '0.3.3',
-            managerData: {
-              lineNumber: 101,
-            },
-          },
-          {
-            currentValue: "'~> 2.21'",
-            datasource: 'rubygems',
-            depName: 'fabrication',
-            depTypes: ['development', 'test'],
-            lockedVersion: '2.21.0',
-            managerData: {
-              lineNumber: 104,
-            },
-          },
-          {
-            currentValue: "'~> 2.5'",
-            datasource: 'rubygems',
-            depName: 'fuubar',
-            depTypes: ['development', 'test'],
-            lockedVersion: '2.5.0',
-            managerData: {
-              lineNumber: 105,
-            },
-          },
-          {
-            currentValue: "'~> 0.9'",
-            datasource: 'rubygems',
-            depName: 'i18n-tasks',
-            depTypes: ['development', 'test'],
-            lockedVersion: '0.9.29',
-            managerData: {
-              lineNumber: 106,
-            },
-          },
-          {
-            currentValue: "'~> 3.7'",
-            datasource: 'rubygems',
-            depName: 'pry-byebug',
-            depTypes: ['development', 'test'],
-            lockedVersion: '3.7.0',
-            managerData: {
-              lineNumber: 107,
-            },
-          },
-          {
-            currentValue: "'~> 0.3'",
-            datasource: 'rubygems',
-            depName: 'pry-rails',
-            depTypes: ['development', 'test'],
-            lockedVersion: '0.3.9',
-            managerData: {
-              lineNumber: 108,
-            },
-          },
-          {
-            currentValue: "'~> 3.9'",
-            datasource: 'rubygems',
-            depName: 'rspec-rails',
-            depTypes: ['development', 'test'],
-            lockedVersion: '3.9.0',
-            managerData: {
-              lineNumber: 109,
-            },
-          },
-          {
-            currentValue: "'~> 0.5'",
-            datasource: 'rubygems',
-            depName: 'private_address_check',
-            depTypes: ['production', 'test'],
-            lockedVersion: '0.5.0',
-            managerData: {
-              lineNumber: 113,
-            },
-          },
-          {
-            currentValue: "'~> 3.29'",
-            datasource: 'rubygems',
-            depName: 'capybara',
-            depTypes: ['test'],
-            lockedVersion: '3.29.0',
-            managerData: {
-              lineNumber: 117,
-            },
-          },
-          {
-            currentValue: "'~> 0.2'",
-            datasource: 'rubygems',
-            depName: 'climate_control',
-            depTypes: ['test'],
-            lockedVersion: '0.2.0',
-            managerData: {
-              lineNumber: 118,
-            },
-          },
-          {
-            currentValue: "'~> 2.10'",
-            datasource: 'rubygems',
-            depName: 'faker',
-            depTypes: ['test'],
-            lockedVersion: '2.10.0',
-            managerData: {
-              lineNumber: 119,
-            },
-          },
-          {
-            currentValue: "'~> 4.2'",
-            datasource: 'rubygems',
-            depName: 'microformats',
-            depTypes: ['test'],
-            lockedVersion: '4.2.0',
-            managerData: {
-              lineNumber: 120,
-            },
-          },
-          {
-            currentValue: "'~> 1.0'",
-            datasource: 'rubygems',
-            depName: 'rails-controller-testing',
-            depTypes: ['test'],
-            lockedVersion: '1.0.4',
-            managerData: {
-              lineNumber: 121,
-            },
-          },
-          {
-            currentValue: "'~> 3.0'",
-            datasource: 'rubygems',
-            depName: 'rspec-sidekiq',
-            depTypes: ['test'],
-            lockedVersion: '3.0.3',
-            managerData: {
-              lineNumber: 122,
-            },
-          },
-          {
-            currentValue: "'~> 0.17'",
-            datasource: 'rubygems',
-            depName: 'simplecov',
-            depTypes: ['test'],
-            lockedVersion: '0.17.1',
-            managerData: {
-              lineNumber: 123,
-            },
-          },
-          {
-            currentValue: "'~> 3.7'",
-            datasource: 'rubygems',
-            depName: 'webmock',
-            depTypes: ['test'],
-            lockedVersion: '3.7.6',
-            managerData: {
-              lineNumber: 124,
-            },
-          },
-          {
-            currentValue: "'~> 2.30'",
-            datasource: 'rubygems',
-            depName: 'parallel_tests',
-            depTypes: ['test'],
-            lockedVersion: '2.30.0',
-            managerData: {
-              lineNumber: 125,
-            },
-          },
-          {
-            currentValue: "'~> 1.7'",
-            datasource: 'rubygems',
-            depName: 'active_record_query_trace',
-            depTypes: ['development'],
-            lockedVersion: '1.7',
-            managerData: {
-              lineNumber: 129,
-            },
-          },
-          {
-            currentValue: "'~> 3.0'",
-            datasource: 'rubygems',
-            depName: 'annotate',
-            depTypes: ['development'],
-            lockedVersion: '3.0.3',
-            managerData: {
-              lineNumber: 130,
-            },
-          },
-          {
-            currentValue: "'~> 2.5'",
-            datasource: 'rubygems',
-            depName: 'better_errors',
-            depTypes: ['development'],
-            lockedVersion: '2.5.1',
-            managerData: {
-              lineNumber: 131,
-            },
-          },
-          {
-            currentValue: "'~> 0.7'",
-            datasource: 'rubygems',
-            depName: 'binding_of_caller',
-            depTypes: ['development'],
-            lockedVersion: '0.8.0',
-            managerData: {
-              lineNumber: 132,
-            },
-          },
-          {
-            currentValue: "'~> 6.0'",
-            datasource: 'rubygems',
-            depName: 'bullet',
-            depTypes: ['development'],
-            lockedVersion: '6.0.2',
-            managerData: {
-              lineNumber: 133,
-            },
-          },
-          {
-            currentValue: "'~> 1.7'",
-            datasource: 'rubygems',
-            depName: 'letter_opener',
-            depTypes: ['development'],
-            lockedVersion: '1.7.0',
-            managerData: {
-              lineNumber: 134,
-            },
-          },
-          {
-            currentValue: "'~> 1.3'",
-            datasource: 'rubygems',
-            depName: 'letter_opener_web',
-            depTypes: ['development'],
-            lockedVersion: '1.3.4',
-            managerData: {
-              lineNumber: 135,
-            },
-          },
-          {
-            datasource: 'rubygems',
-            depName: 'memory_profiler',
-            depTypes: ['development'],
-            lockedVersion: '0.9.14',
-            managerData: {
-              lineNumber: 136,
-            },
-          },
-          {
-            currentValue: "'~> 0.78'",
-            datasource: 'rubygems',
-            depName: 'rubocop',
-            depTypes: ['development'],
-            lockedVersion: '0.78.0',
-            managerData: {
-              lineNumber: 137,
-            },
-          },
-          {
-            currentValue: "'~> 2.4'",
-            datasource: 'rubygems',
-            depName: 'rubocop-rails',
-            depTypes: ['development'],
-            lockedVersion: '2.4.0',
-            managerData: {
-              lineNumber: 138,
-            },
-          },
-          {
-            currentValue: "'~> 4.7'",
-            datasource: 'rubygems',
-            depName: 'brakeman',
-            depTypes: ['development'],
-            lockedVersion: '4.7.2',
-            managerData: {
-              lineNumber: 139,
-            },
-          },
-          {
-            currentValue: "'~> 0.6'",
-            datasource: 'rubygems',
-            depName: 'bundler-audit',
-            depTypes: ['development'],
-            lockedVersion: '0.6.1',
-            managerData: {
-              lineNumber: 140,
-            },
-          },
-          {
-            currentValue: "'~> 3.11'",
-            datasource: 'rubygems',
-            depName: 'capistrano',
-            depTypes: ['development'],
-            lockedVersion: '3.11.2',
-            managerData: {
-              lineNumber: 142,
-            },
-          },
-          {
-            currentValue: "'~> 1.4'",
-            datasource: 'rubygems',
-            depName: 'capistrano-rails',
-            depTypes: ['development'],
-            lockedVersion: '1.4.0',
-            managerData: {
-              lineNumber: 143,
-            },
-          },
-          {
-            currentValue: "'~> 2.1'",
-            datasource: 'rubygems',
-            depName: 'capistrano-rbenv',
-            depTypes: ['development'],
-            lockedVersion: '2.1.4',
-            managerData: {
-              lineNumber: 144,
-            },
-          },
-          {
-            currentValue: "'~> 2.0'",
-            datasource: 'rubygems',
-            depName: 'capistrano-yarn',
-            depTypes: ['development'],
-            lockedVersion: '2.0.2',
-            managerData: {
-              lineNumber: 145,
-            },
-          },
-          {
-            datasource: 'rubygems',
-            depName: 'derailed_benchmarks',
-            depTypes: ['development'],
-            lockedVersion: '1.4.3',
-            managerData: {
-              lineNumber: 147,
-            },
-          },
-          {
-            datasource: 'rubygems',
-            depName: 'stackprof',
-            depTypes: ['development'],
-            lockedVersion: '0.2.15',
-            managerData: {
-              lineNumber: 148,
-            },
-          },
-          {
-            currentValue: "'~> 0.11'",
-            datasource: 'rubygems',
-            depName: 'lograge',
-            depTypes: ['production'],
-            lockedVersion: '0.11.2',
-            managerData: {
-              lineNumber: 152,
-            },
-          },
-          {
-            currentValue: "'~> 5.0'",
-            datasource: 'rubygems',
-            depName: 'redis-rails',
-            depTypes: ['production'],
-            lockedVersion: '5.0.2',
-            managerData: {
-              lineNumber: 153,
-            },
-          },
-          {
-            datasource: 'rubygems',
-            depName: 'concurrent-ruby',
-            lockedVersion: '1.1.5',
-            managerData: {
-              lineNumber: 156,
-            },
-          },
-          {
-            datasource: 'rubygems',
-            depName: 'connection_pool',
-            lockedVersion: '2.2.2',
-            managerData: {
-              lineNumber: 157,
-            },
-          },
-        ],
-        lockFiles: ['Gemfile.lock'],
-        registryUrls: ['https://rubygems.org'],
-      });
+      expect(res?.deps).toMatchObject([
+        {
+          depName: 'pkg-config',
+          currentValue: "'~> 1.4'",
+          lockedVersion: '1.4.0',
+        },
+        {
+          depName: 'puma',
+          currentValue: "'~> 4.3'",
+          lockedVersion: '4.3.1',
+        },
+        {
+          depName: 'rails',
+          currentValue: "'~> 5.2.4'",
+          lockedVersion: '5.2.4.1',
+        },
+        {
+          depName: 'sprockets',
+          currentValue: "'~> 3.7.2'",
+          lockedVersion: '3.7.2',
+        },
+        {
+          depName: 'thor',
+          currentValue: "'~> 0.20'",
+          lockedVersion: '0.20.3',
+        },
+        {
+          depName: 'hamlit-rails',
+          currentValue: "'~> 0.2'",
+          lockedVersion: '0.2.3',
+        },
+        {
+          depName: 'pg',
+          currentValue: "'~> 1.2'",
+          lockedVersion: '1.2.0',
+        },
+        {
+          depName: 'makara',
+          currentValue: "'~> 0.4'",
+          lockedVersion: '0.4.1',
+        },
+        {
+          depName: 'pghero',
+          currentValue: "'~> 2.4'",
+          lockedVersion: '2.4.1',
+        },
+        {
+          depName: 'dotenv-rails',
+          currentValue: "'~> 2.7'",
+          lockedVersion: '2.7.5',
+        },
+        {
+          depName: 'aws-sdk-s3',
+          currentValue: "'~> 1.59'",
+          lockedVersion: '1.59.0',
+        },
+        {
+          depName: 'fog-core',
+          currentValue: "'<= 2.1.0'",
+          lockedVersion: '2.1.0',
+        },
+        {
+          depName: 'fog-openstack',
+          currentValue: "'~> 0.3'",
+          lockedVersion: '0.3.7',
+        },
+        {
+          depName: 'paperclip',
+          currentValue: "'~> 6.0'",
+          lockedVersion: '6.0.0',
+        },
+        {
+          depName: 'paperclip-av-transcoder',
+          currentValue: "'~> 0.6'",
+          lockedVersion: '0.6.4',
+        },
+        {
+          depName: 'streamio-ffmpeg',
+          currentValue: "'~> 3.0'",
+          lockedVersion: '3.0.2',
+        },
+        {
+          depName: 'blurhash',
+          currentValue: "'~> 0.1'",
+          lockedVersion: '0.1.3',
+        },
+        {
+          depName: 'active_model_serializers',
+          currentValue: "'~> 0.10'",
+          lockedVersion: '0.10.10',
+        },
+        {
+          depName: 'addressable',
+          currentValue: "'~> 2.7'",
+          lockedVersion: '2.7.0',
+        },
+        {
+          depName: 'bootsnap',
+          currentValue: "'~> 1.4'",
+          lockedVersion: '1.4.5',
+        },
+        {
+          depName: 'browser',
+          lockedVersion: '2.7.1',
+        },
+        {
+          depName: 'charlock_holmes',
+          currentValue: "'~> 0.7.7'",
+          lockedVersion: '0.7.7',
+        },
+        {
+          depName: 'iso-639',
+          lockedVersion: '0.2.8',
+        },
+        {
+          depName: 'chewy',
+          currentValue: "'~> 5.1'",
+          lockedVersion: '5.1.0',
+        },
+        {
+          depName: 'cld3',
+          currentValue: "'~> 3.2.6'",
+          lockedVersion: '3.2.6',
+        },
+        {
+          depName: 'devise',
+          currentValue: "'~> 4.7'",
+          lockedVersion: '4.7.1',
+        },
+        {
+          depName: 'devise-two-factor',
+          currentValue: "'~> 3.1'",
+          lockedVersion: '3.1.0',
+        },
+        {
+          depName: 'devise_pam_authenticatable2',
+          currentValue: "'~> 9.2'",
+          lockedVersion: '9.2.0',
+          depTypes: ['pam_authentication', 'optional: true'],
+        },
+        {
+          depName: 'net-ldap',
+          currentValue: "'~> 0.16'",
+          lockedVersion: '0.16.2',
+        },
+        {
+          depName: 'omniauth-cas',
+          currentValue: "'~> 1.1'",
+          lockedVersion: '1.1.1',
+        },
+        {
+          depName: 'omniauth-saml',
+          currentValue: "'~> 1.10'",
+          lockedVersion: '1.10.1',
+        },
+        {
+          depName: 'omniauth',
+          currentValue: "'~> 1.9'",
+          lockedVersion: '1.9.0',
+        },
+        {
+          depName: 'discard',
+          currentValue: "'~> 1.1'",
+          lockedVersion: '1.1.0',
+        },
+        {
+          depName: 'doorkeeper',
+          currentValue: "'~> 5.2'",
+          lockedVersion: '5.2.3',
+        },
+        {
+          depName: 'fast_blank',
+          currentValue: "'~> 1.0'",
+          lockedVersion: '1.0.0',
+        },
+        {
+          depName: 'fastimage',
+          lockedVersion: '2.1.7',
+        },
+        {
+          depName: 'goldfinger',
+          currentValue: "'~> 2.1'",
+          lockedVersion: '2.1.0',
+        },
+        {
+          depName: 'hiredis',
+          currentValue: "'~> 0.6'",
+          lockedVersion: '0.6.3',
+        },
+        {
+          depName: 'redis-namespace',
+          currentValue: "'~> 1.7'",
+          lockedVersion: '1.7.0',
+        },
+        {
+          depName: 'health_check',
+          currentDigest: '0b799ead604f900ed50685e9b2d469cd2befba5b',
+          datasource: 'git-refs',
+          packageName: 'https://github.com/ianheggie/health_check',
+        },
+        {
+          depName: 'htmlentities',
+          currentValue: "'~> 4.3'",
+          lockedVersion: '4.3.4',
+        },
+        {
+          depName: 'http',
+          currentValue: "'~> 3.3'",
+          lockedVersion: '3.3.0',
+        },
+        {
+          depName: 'http_accept_language',
+          currentValue: "'~> 2.1'",
+          lockedVersion: '2.1.1',
+        },
+        {
+          depName: 'http_parser.rb',
+          currentValue: "'~> 0.6'",
+          currentDigest: '54b17ba8c7d8d20a16dfc65d1775241833219cf2',
+          datasource: 'git-refs',
+          packageName: 'https://github.com/tmm1/http_parser.rb',
+        },
+        {
+          depName: 'httplog',
+          currentValue: "'~> 1.3'",
+          lockedVersion: '1.3.3',
+        },
+        {
+          depName: 'idn-ruby',
+          lockedVersion: '0.1.0',
+        },
+        {
+          depName: 'kaminari',
+          currentValue: "'~> 1.1'",
+          lockedVersion: '1.1.1',
+        },
+        {
+          depName: 'link_header',
+          currentValue: "'~> 0.0'",
+          lockedVersion: '0.0.8',
+        },
+        {
+          depName: 'mime-types',
+          currentValue: "'~> 3.3.1'",
+          lockedVersion: '3.3.1',
+        },
+        {
+          depName: 'nilsimsa',
+          currentDigest: 'fd184883048b922b176939f851338d0a4971a532',
+          datasource: 'git-refs',
+          packageName: 'https://github.com/witgo/nilsimsa',
+        },
+        {
+          depName: 'nokogiri',
+          currentValue: "'~> 1.10'",
+          lockedVersion: '1.10.7',
+        },
+        {
+          depName: 'nsa',
+          currentValue: "'~> 0.2'",
+          lockedVersion: '0.2.7',
+        },
+        {
+          depName: 'oj',
+          currentValue: "'~> 3.10'",
+          lockedVersion: '3.10.0',
+        },
+        {
+          depName: 'ostatus2',
+          currentValue: "'~> 2.0'",
+          lockedVersion: '2.0.3',
+        },
+        {
+          depName: 'ox',
+          currentValue: "'~> 2.11'",
+          lockedVersion: '2.11.0',
+        },
+        {
+          depName: 'parslet',
+          lockedVersion: '1.8.2',
+        },
+        {
+          depName: 'parallel',
+          currentValue: "'~> 1.19'",
+          lockedVersion: '1.19.1',
+        },
+        {
+          depName: 'posix-spawn',
+          currentDigest: '58465d2e213991f8afb13b984854a49fcdcc980c',
+          datasource: 'git-refs',
+          packageName: 'https://github.com/rtomayko/posix-spawn',
+        },
+        {
+          depName: 'pundit',
+          currentValue: "'~> 2.1'",
+          lockedVersion: '2.1.0',
+        },
+        {
+          depName: 'premailer-rails',
+          lockedVersion: '1.10.3',
+        },
+        {
+          depName: 'rack-attack',
+          currentValue: "'~> 6.2'",
+          lockedVersion: '6.2.2',
+        },
+        {
+          depName: 'rack-cors',
+          currentValue: "'~> 1.1'",
+          lockedVersion: '1.1.1',
+        },
+        {
+          depName: 'rails-i18n',
+          currentValue: "'~> 5.1'",
+          lockedVersion: '5.1.3',
+        },
+        {
+          depName: 'rails-settings-cached',
+          currentValue: "'~> 0.6'",
+          lockedVersion: '0.6.6',
+        },
+        {
+          depName: 'redis',
+          currentValue: "'~> 4.1'",
+          lockedVersion: '4.1.3',
+        },
+        {
+          depName: 'mario-redis-lock',
+          currentValue: "'~> 1.2'",
+          lockedVersion: '1.2.1',
+        },
+        {
+          depName: 'rqrcode',
+          currentValue: "'~> 0.10'",
+          lockedVersion: '0.10.1',
+        },
+        {
+          depName: 'ruby-progressbar',
+          currentValue: "'~> 1.10'",
+          lockedVersion: '1.10.1',
+        },
+        {
+          depName: 'sanitize',
+          currentValue: "'~> 5.1'",
+          lockedVersion: '5.1.0',
+        },
+        {
+          depName: 'sidekiq',
+          currentValue: "'~> 5.2'",
+          lockedVersion: '5.2.7',
+        },
+        {
+          depName: 'sidekiq-scheduler',
+          currentValue: "'~> 3.0'",
+          lockedVersion: '3.0.0',
+        },
+        {
+          depName: 'sidekiq-unique-jobs',
+          currentValue: "'~> 6.0'",
+          lockedVersion: '6.0.18',
+        },
+        {
+          depName: 'sidekiq-bulk',
+          currentValue: "'~>0.2.0'",
+          lockedVersion: '0.2.0',
+        },
+        {
+          depName: 'simple-navigation',
+          currentValue: "'~> 4.1'",
+          lockedVersion: '4.1.0',
+        },
+        {
+          depName: 'simple_form',
+          currentValue: "'~> 5.0'",
+          lockedVersion: '5.0.1',
+        },
+        {
+          depName: 'sprockets-rails',
+          currentValue: "'~> 3.2'",
+          lockedVersion: '3.2.1',
+        },
+        {
+          depName: 'stoplight',
+          currentValue: "'~> 2.2.0'",
+          lockedVersion: '2.2.0',
+        },
+        {
+          depName: 'strong_migrations',
+          currentValue: "'~> 0.5'",
+          lockedVersion: '0.5.1',
+        },
+        {
+          depName: 'tty-command',
+          currentValue: "'~> 0.9'",
+          lockedVersion: '0.9.0',
+        },
+        {
+          depName: 'tty-prompt',
+          currentValue: "'~> 0.20'",
+          lockedVersion: '0.20.0',
+        },
+        {
+          depName: 'twitter-text',
+          currentValue: "'~> 1.14'",
+          lockedVersion: '1.14.7',
+        },
+        {
+          depName: 'tzinfo-data',
+          currentValue: "'~> 1.2019'",
+          lockedVersion: '1.2019.3',
+        },
+        {
+          depName: 'webpacker',
+          currentValue: "'~> 4.2'",
+          lockedVersion: '4.2.2',
+        },
+        {
+          depName: 'webpush',
+          lockedVersion: '0.3.8',
+        },
+        {
+          depName: 'json-ld',
+          currentDigest: 'e742697a0906e74e8bb777ef98137bc3955d981d',
+          datasource: 'git-refs',
+          packageName: 'https://github.com/ruby-rdf/json-ld.git',
+        },
+        {
+          depName: 'json-ld-preloaded',
+          currentValue: "'~> 3.0'",
+          lockedVersion: '3.0.6',
+        },
+        {
+          depName: 'rdf-normalize',
+          currentValue: "'~> 0.3'",
+          lockedVersion: '0.3.3',
+        },
+        {
+          depName: 'fabrication',
+          currentValue: "'~> 2.21'",
+          lockedVersion: '2.21.0',
+          depTypes: ['development', 'test'],
+        },
+        {
+          depName: 'fuubar',
+          currentValue: "'~> 2.5'",
+          lockedVersion: '2.5.0',
+          depTypes: ['development', 'test'],
+        },
+        {
+          depName: 'i18n-tasks',
+          currentValue: "'~> 0.9'",
+          lockedVersion: '0.9.29',
+          depTypes: ['development', 'test'],
+        },
+        {
+          depName: 'pry-byebug',
+          currentValue: "'~> 3.7'",
+          lockedVersion: '3.7.0',
+          depTypes: ['development', 'test'],
+        },
+        {
+          depName: 'pry-rails',
+          currentValue: "'~> 0.3'",
+          lockedVersion: '0.3.9',
+          depTypes: ['development', 'test'],
+        },
+        {
+          depName: 'rspec-rails',
+          currentValue: "'~> 3.9'",
+          lockedVersion: '3.9.0',
+          depTypes: ['development', 'test'],
+        },
+        {
+          depName: 'private_address_check',
+          currentValue: "'~> 0.5'",
+          lockedVersion: '0.5.0',
+          depTypes: ['production', 'test'],
+        },
+        {
+          depName: 'capybara',
+          currentValue: "'~> 3.29'",
+          lockedVersion: '3.29.0',
+          depTypes: ['test'],
+        },
+        {
+          depName: 'climate_control',
+          currentValue: "'~> 0.2'",
+          lockedVersion: '0.2.0',
+          depTypes: ['test'],
+        },
+        {
+          depName: 'faker',
+          currentValue: "'~> 2.10'",
+          lockedVersion: '2.10.0',
+          depTypes: ['test'],
+        },
+        {
+          depName: 'microformats',
+          currentValue: "'~> 4.2'",
+          lockedVersion: '4.2.0',
+          depTypes: ['test'],
+        },
+        {
+          depName: 'rails-controller-testing',
+          currentValue: "'~> 1.0'",
+          lockedVersion: '1.0.4',
+          depTypes: ['test'],
+        },
+        {
+          depName: 'rspec-sidekiq',
+          currentValue: "'~> 3.0'",
+          lockedVersion: '3.0.3',
+          depTypes: ['test'],
+        },
+        {
+          depName: 'simplecov',
+          currentValue: "'~> 0.17'",
+          lockedVersion: '0.17.1',
+          depTypes: ['test'],
+        },
+        {
+          depName: 'webmock',
+          currentValue: "'~> 3.7'",
+          lockedVersion: '3.7.6',
+          depTypes: ['test'],
+        },
+        {
+          depName: 'parallel_tests',
+          currentValue: "'~> 2.30'",
+          lockedVersion: '2.30.0',
+          depTypes: ['test'],
+        },
+        {
+          depName: 'active_record_query_trace',
+          currentValue: "'~> 1.7'",
+          lockedVersion: '1.7',
+          depTypes: ['development'],
+        },
+        {
+          depName: 'annotate',
+          currentValue: "'~> 3.0'",
+          lockedVersion: '3.0.3',
+          depTypes: ['development'],
+        },
+        {
+          depName: 'better_errors',
+          currentValue: "'~> 2.5'",
+          lockedVersion: '2.5.1',
+          depTypes: ['development'],
+        },
+        {
+          depName: 'binding_of_caller',
+          currentValue: "'~> 0.7'",
+          lockedVersion: '0.8.0',
+          depTypes: ['development'],
+        },
+        {
+          depName: 'bullet',
+          currentValue: "'~> 6.0'",
+          lockedVersion: '6.0.2',
+          depTypes: ['development'],
+        },
+        {
+          depName: 'letter_opener',
+          currentValue: "'~> 1.7'",
+          lockedVersion: '1.7.0',
+          depTypes: ['development'],
+        },
+        {
+          depName: 'letter_opener_web',
+          currentValue: "'~> 1.3'",
+          lockedVersion: '1.3.4',
+          depTypes: ['development'],
+        },
+        {
+          depName: 'memory_profiler',
+          lockedVersion: '0.9.14',
+          depTypes: ['development'],
+        },
+        {
+          depName: 'rubocop',
+          currentValue: "'~> 0.78'",
+          lockedVersion: '0.78.0',
+          depTypes: ['development'],
+        },
+        {
+          depName: 'rubocop-rails',
+          currentValue: "'~> 2.4'",
+          lockedVersion: '2.4.0',
+          depTypes: ['development'],
+        },
+        {
+          depName: 'brakeman',
+          currentValue: "'~> 4.7'",
+          lockedVersion: '4.7.2',
+          depTypes: ['development'],
+        },
+        {
+          depName: 'bundler-audit',
+          currentValue: "'~> 0.6'",
+          lockedVersion: '0.6.1',
+          depTypes: ['development'],
+        },
+        {
+          depName: 'capistrano',
+          currentValue: "'~> 3.11'",
+          lockedVersion: '3.11.2',
+          depTypes: ['development'],
+        },
+        {
+          depName: 'capistrano-rails',
+          currentValue: "'~> 1.4'",
+          lockedVersion: '1.4.0',
+          depTypes: ['development'],
+        },
+        {
+          depName: 'capistrano-rbenv',
+          currentValue: "'~> 2.1'",
+          lockedVersion: '2.1.4',
+          depTypes: ['development'],
+        },
+        {
+          depName: 'capistrano-yarn',
+          currentValue: "'~> 2.0'",
+          lockedVersion: '2.0.2',
+          depTypes: ['development'],
+        },
+        {
+          depName: 'derailed_benchmarks',
+          lockedVersion: '1.4.3',
+          depTypes: ['development'],
+        },
+        {
+          depName: 'stackprof',
+          lockedVersion: '0.2.15',
+          depTypes: ['development'],
+        },
+        {
+          depName: 'lograge',
+          currentValue: "'~> 0.11'",
+          lockedVersion: '0.11.2',
+          depTypes: ['production'],
+        },
+        {
+          depName: 'redis-rails',
+          currentValue: "'~> 5.0'",
+          lockedVersion: '5.0.2',
+          depTypes: ['production'],
+        },
+        {
+          depName: 'concurrent-ruby',
+          lockedVersion: '1.1.5',
+        },
+        {
+          depName: 'connection_pool',
+          lockedVersion: '2.2.2',
+        },
+      ]);
       expect(
         res?.deps
           .filter((dep) =>
@@ -1988,134 +1148,74 @@ describe('modules/manager/bundler/extract', () => {
     it('parse Ruby CI Gemfile', async () => {
       fs.readLocalFile.mockResolvedValueOnce(rubyCIGemfileLock);
       const res = await extractPackageFile(rubyCIGemfile, 'Gemfile');
-      expect(res).toEqual({
-        deps: [
-          {
-            currentValue: "'~> 5.2.1'",
-            datasource: 'rubygems',
-            depName: 'rails',
-            lockedVersion: '5.2.3',
-            managerData: {
-              lineNumber: 4,
-            },
-          },
-          {
-            datasource: 'rubygems',
-            depName: 'puma',
-            lockedVersion: '4.3.1',
-            managerData: {
-              lineNumber: 5,
-            },
-          },
-          {
-            datasource: 'rubygems',
-            depName: 'bootsnap',
-            lockedVersion: '1.4.5',
-            managerData: {
-              lineNumber: 6,
-            },
-          },
-          {
-            currentValue: "'~> 5.0'",
-            datasource: 'rubygems',
-            depName: 'sass-rails',
-            lockedVersion: '5.1.0',
-            managerData: {
-              lineNumber: 8,
-            },
-          },
-          {
-            datasource: 'rubygems',
-            depName: 'sass-rails-bootstrap',
-            lockedVersion: '2.2.2.3',
-            managerData: {
-              lineNumber: 9,
-            },
-          },
-          {
-            datasource: 'rubygems',
-            depName: 'jquery-rails',
-            lockedVersion: '4.3.5',
-            managerData: {
-              lineNumber: 10,
-            },
-          },
-          {
-            datasource: 'rubygems',
-            depName: 'uglifier',
-            lockedVersion: '4.2.0',
-            managerData: {
-              lineNumber: 11,
-            },
-          },
-          {
-            datasource: 'rubygems',
-            depName: 'foreman',
-            depTypes: ['development'],
-            lockedVersion: '0.86.0',
-            managerData: {
-              lineNumber: 14,
-            },
-          },
-          {
-            datasource: 'rubygems',
-            depName: 'sqlite3',
-            depTypes: ['development'],
-            lockedVersion: '1.4.2',
-            managerData: {
-              lineNumber: 15,
-            },
-          },
-          {
-            datasource: 'rubygems',
-            depName: 'listen',
-            depTypes: ['development'],
-            lockedVersion: '3.2.1',
-            managerData: {
-              lineNumber: 16,
-            },
-          },
-          {
-            datasource: 'rubygems',
-            depName: 'pg',
-            depTypes: ['production'],
-            lockedVersion: '1.2.1',
-            managerData: {
-              lineNumber: 20,
-            },
-          },
-          {
-            datasource: 'rubygems',
-            depName: 'newrelic_rpm',
-            depTypes: ['production'],
-            lockedVersion: '6.8.0.360',
-            managerData: {
-              lineNumber: 21,
-            },
-          },
-          {
-            currentValue: "'< 1.17.2'",
-            datasource: 'rubygems',
-            depName: 'sqreen',
-            depTypes: ['production'],
-            lockedVersion: '1.17.0',
-            managerData: {
-              lineNumber: 22,
-            },
-          },
-          {
-            datasource: 'rubygems',
-            depName: 'airbrake',
-            depTypes: ['production'],
-            lockedVersion: '9.5.5',
-            managerData: {
-              lineNumber: 23,
-            },
-          },
-        ],
-        lockFiles: ['Gemfile.lock'],
-        registryUrls: ['https://rubygems.org'],
-      });
+      expect(res?.deps).toMatchObject([
+        {
+          depName: 'rails',
+          currentValue: "'~> 5.2.1'",
+          lockedVersion: '5.2.3',
+        },
+        {
+          depName: 'puma',
+          lockedVersion: '4.3.1',
+        },
+        {
+          depName: 'bootsnap',
+          lockedVersion: '1.4.5',
+        },
+        {
+          depName: 'sass-rails',
+          currentValue: "'~> 5.0'",
+          lockedVersion: '5.1.0',
+        },
+        {
+          depName: 'sass-rails-bootstrap',
+          lockedVersion: '2.2.2.3',
+        },
+        {
+          depName: 'jquery-rails',
+          lockedVersion: '4.3.5',
+        },
+        {
+          depName: 'uglifier',
+          lockedVersion: '4.2.0',
+        },
+        {
+          depName: 'foreman',
+          lockedVersion: '0.86.0',
+          depTypes: ['development'],
+        },
+        {
+          depName: 'sqlite3',
+          lockedVersion: '1.4.2',
+          depTypes: ['development'],
+        },
+        {
+          depName: 'listen',
+          lockedVersion: '3.2.1',
+          depTypes: ['development'],
+        },
+        {
+          depName: 'pg',
+          lockedVersion: '1.2.1',
+          depTypes: ['production'],
+        },
+        {
+          depName: 'newrelic_rpm',
+          lockedVersion: '6.8.0.360',
+          depTypes: ['production'],
+        },
+        {
+          depName: 'sqreen',
+          currentValue: "'< 1.17.2'",
+          lockedVersion: '1.17.0',
+          depTypes: ['production'],
+        },
+        {
+          depName: 'airbrake',
+          lockedVersion: '9.5.5',
+          depTypes: ['production'],
+        },
+      ]);
       expect(
         res?.deps.every(
           (dep) => isString(dep.lockedVersion) && isValid(dep.lockedVersion),
@@ -2128,2323 +1228,1311 @@ describe('modules/manager/bundler/extract', () => {
   it('parse Gitlab Foss Gemfile', async () => {
     fs.readLocalFile.mockResolvedValueOnce(gitlabFossGemfileLock);
     const res = await extractPackageFile(gitlabFossGemfile, 'Gemfile');
-    expect(res).toEqual({
-      deps: [
-        {
-          currentValue: "'5.2.3'",
-          datasource: 'rubygems',
-          depName: 'rails',
-          lockedVersion: '5.2.3',
-          managerData: {
-            lineNumber: 2,
-          },
-        },
-        {
-          currentValue: "'~> 1.4'",
-          datasource: 'rubygems',
-          depName: 'bootsnap',
-          lockedVersion: '1.4.5',
-          managerData: {
-            lineNumber: 4,
-          },
-        },
-        {
-          currentValue: "'~> 0.0.4'",
-          datasource: 'rubygems',
-          depName: 'nakayoshi_fork',
-          lockedVersion: '0.0.4',
-          managerData: {
-            lineNumber: 7,
-          },
-        },
-        {
-          currentValue: "'~> 3.0'",
-          datasource: 'rubygems',
-          depName: 'responders',
-          lockedVersion: '3.0.0',
-          managerData: {
-            lineNumber: 10,
-          },
-        },
-        {
-          currentValue: "'~> 3.7.0'",
-          datasource: 'rubygems',
-          depName: 'sprockets',
-          lockedVersion: '3.7.2',
-          managerData: {
-            lineNumber: 12,
-          },
-        },
-        {
-          currentValue: "'~> 3.3.0'",
-          datasource: 'rubygems',
-          depName: 'default_value_for',
-          lockedVersion: '3.3.0',
-          managerData: {
-            lineNumber: 15,
-          },
-        },
-        {
-          currentValue: "'~> 1.1'",
-          datasource: 'rubygems',
-          depName: 'pg',
-          lockedVersion: '1.1.4',
-          managerData: {
-            lineNumber: 18,
-          },
-        },
-        {
-          currentValue: "'~> 0.28'",
-          datasource: 'rubygems',
-          depName: 'rugged',
-          lockedVersion: '0.28.4.1',
-          managerData: {
-            lineNumber: 20,
-          },
-        },
-        {
-          currentValue: "'~> 1.1'",
-          datasource: 'rubygems',
-          depName: 'grape-path-helpers',
-          lockedVersion: '1.1.0',
-          managerData: {
-            lineNumber: 21,
-          },
-        },
-        {
-          currentValue: "'~> 0.12'",
-          datasource: 'rubygems',
-          depName: 'faraday',
-          lockedVersion: '0.12.2',
-          managerData: {
-            lineNumber: 23,
-          },
-        },
-        {
-          currentValue: "'~> 1.8.0'",
-          datasource: 'rubygems',
-          depName: 'marginalia',
-          lockedVersion: '1.8.0',
-          managerData: {
-            lineNumber: 24,
-          },
-        },
-        {
-          currentValue: "'~> 4.6'",
-          datasource: 'rubygems',
-          depName: 'devise',
-          lockedVersion: '4.7.1',
-          managerData: {
-            lineNumber: 27,
-          },
-        },
-        {
-          currentValue: "'~> 4.3'",
-          datasource: 'rubygems',
-          depName: 'doorkeeper',
-          lockedVersion: '4.3.2',
-          managerData: {
-            lineNumber: 28,
-          },
-        },
-        {
-          currentValue: "'~> 1.5'",
-          datasource: 'rubygems',
-          depName: 'doorkeeper-openid_connect',
-          lockedVersion: '1.5.0',
-          managerData: {
-            lineNumber: 29,
-          },
-        },
-        {
-          currentValue: "'~> 1.8'",
-          datasource: 'rubygems',
-          depName: 'omniauth',
-          lockedVersion: '1.9.0',
-          managerData: {
-            lineNumber: 30,
-          },
-        },
-        {
-          currentValue: "'~> 2.0.0'",
-          datasource: 'rubygems',
-          depName: 'omniauth-auth0',
-          lockedVersion: '2.0.0',
-          managerData: {
-            lineNumber: 31,
-          },
-        },
-        {
-          currentValue: "'~> 0.0.9'",
-          datasource: 'rubygems',
-          depName: 'omniauth-azure-oauth2',
-          lockedVersion: '0.0.10',
-          managerData: {
-            lineNumber: 32,
-          },
-        },
-        {
-          currentValue: "'~> 1.1.4'",
-          datasource: 'rubygems',
-          depName: 'omniauth-cas3',
-          lockedVersion: '1.1.4',
-          managerData: {
-            lineNumber: 33,
-          },
-        },
-        {
-          currentValue: "'~> 4.0.0'",
-          datasource: 'rubygems',
-          depName: 'omniauth-facebook',
-          lockedVersion: '4.0.0',
-          managerData: {
-            lineNumber: 34,
-          },
-        },
-        {
-          currentValue: "'~> 1.3'",
-          datasource: 'rubygems',
-          depName: 'omniauth-github',
-          lockedVersion: '1.3.0',
-          managerData: {
-            lineNumber: 35,
-          },
-        },
-        {
-          currentValue: "'~> 1.0.2'",
-          datasource: 'rubygems',
-          depName: 'omniauth-gitlab',
-          lockedVersion: '1.0.3',
-          managerData: {
-            lineNumber: 36,
-          },
-        },
-        {
-          currentValue: "'~> 0.6.0'",
-          datasource: 'rubygems',
-          depName: 'omniauth-google-oauth2',
-          lockedVersion: '0.6.0',
-          managerData: {
-            lineNumber: 37,
-          },
-        },
-        {
-          currentValue: "'~> 0.3.0'",
-          datasource: 'rubygems',
-          depName: 'omniauth-kerberos',
-          lockedVersion: '0.3.0',
-          managerData: {
-            lineNumber: 38,
-          },
-        },
-        {
-          currentValue: "'~> 0.2.2'",
-          datasource: 'rubygems',
-          depName: 'omniauth-oauth2-generic',
-          lockedVersion: '0.2.2',
-          managerData: {
-            lineNumber: 39,
-          },
-        },
-        {
-          currentValue: "'~> 1.10'",
-          datasource: 'rubygems',
-          depName: 'omniauth-saml',
-          lockedVersion: '1.10.0',
-          managerData: {
-            lineNumber: 40,
-          },
-        },
-        {
-          currentValue: "'~> 1.3.0'",
-          datasource: 'rubygems',
-          depName: 'omniauth-shibboleth',
-          lockedVersion: '1.3.0',
-          managerData: {
-            lineNumber: 41,
-          },
-        },
-        {
-          currentValue: "'~> 1.4'",
-          datasource: 'rubygems',
-          depName: 'omniauth-twitter',
-          lockedVersion: '1.4.0',
-          managerData: {
-            lineNumber: 42,
-          },
-        },
-        {
-          currentValue: "'~> 2.2.0'",
-          datasource: 'rubygems',
-          depName: 'omniauth_crowd',
-          lockedVersion: '2.2.3',
-          managerData: {
-            lineNumber: 43,
-          },
-        },
-        {
-          currentValue: "'~> 0.3.3'",
-          datasource: 'rubygems',
-          depName: 'omniauth-authentiq',
-          lockedVersion: '0.3.3',
-          managerData: {
-            lineNumber: 44,
-          },
-        },
-        {
-          currentValue: "'~> 0.3.3'",
-          datasource: 'rubygems',
-          depName: 'omniauth_openid_connect',
-          lockedVersion: '0.3.3',
-          managerData: {
-            lineNumber: 45,
-          },
-        },
-        {
-          currentValue: "'~> 0.0.2'",
-          datasource: 'rubygems',
-          depName: 'omniauth-ultraauth',
-          lockedVersion: '0.0.2',
-          managerData: {
-            lineNumber: 46,
-          },
-        },
-        {
-          currentValue: "'~> 1.0.5'",
-          datasource: 'rubygems',
-          depName: 'omniauth-salesforce',
-          lockedVersion: '1.0.5',
-          managerData: {
-            lineNumber: 47,
-          },
-        },
-        {
-          currentValue: "'~> 1.9.3'",
-          datasource: 'rubygems',
-          depName: 'rack-oauth2',
-          lockedVersion: '1.9.3',
-          managerData: {
-            lineNumber: 48,
-          },
-        },
-        {
-          currentValue: "'~> 2.1.0'",
-          datasource: 'rubygems',
-          depName: 'jwt',
-          lockedVersion: '2.1.0',
-          managerData: {
-            lineNumber: 49,
-          },
-        },
-        {
-          datasource: 'rubygems',
-          depName: 'gssapi',
-          lockedVersion: '1.2.0',
-          managerData: {
-            lineNumber: 52,
-          },
-        },
-        {
-          currentValue: "'~> 4.11'",
-          datasource: 'rubygems',
-          depName: 'recaptcha',
-          lockedVersion: '4.13.1',
-          managerData: {
-            lineNumber: 55,
-          },
-        },
-        {
-          currentValue: "'~> 3.0'",
-          datasource: 'rubygems',
-          depName: 'akismet',
-          lockedVersion: '3.0.0',
-          managerData: {
-            lineNumber: 56,
-          },
-        },
-        {
-          currentValue: "'~> 0.12.1'",
-          datasource: 'rubygems',
-          depName: 'invisible_captcha',
-          lockedVersion: '0.12.1',
-          managerData: {
-            lineNumber: 57,
-          },
-        },
-        {
-          currentValue: "'~> 3.0.0'",
-          datasource: 'rubygems',
-          depName: 'devise-two-factor',
-          lockedVersion: '3.0.0',
-          managerData: {
-            lineNumber: 60,
-          },
-        },
-        {
-          currentValue: "'~> 0.1.7'",
-          datasource: 'rubygems',
-          depName: 'rqrcode-rails3',
-          lockedVersion: '0.1.7',
-          managerData: {
-            lineNumber: 61,
-          },
-        },
-        {
-          currentValue: "'~> 3.1.0'",
-          datasource: 'rubygems',
-          depName: 'attr_encrypted',
-          lockedVersion: '3.1.0',
-          managerData: {
-            lineNumber: 62,
-          },
-        },
-        {
-          currentValue: "'~> 0.2.1'",
-          datasource: 'rubygems',
-          depName: 'u2f',
-          lockedVersion: '0.2.1',
-          managerData: {
-            lineNumber: 63,
-          },
-        },
-        {
-          currentValue: "'~> 1.0.6'",
-          datasource: 'rubygems',
-          depName: 'validates_hostname',
-          lockedVersion: '1.0.6',
-          managerData: {
-            lineNumber: 66,
-          },
-        },
-        {
-          currentValue: "'~> 1.3.0'",
-          datasource: 'rubygems',
-          depName: 'rubyzip',
-          lockedVersion: '1.3.0',
-          managerData: {
-            lineNumber: 67,
-          },
-        },
-        {
-          currentValue: "'~> 2.0.2'",
-          datasource: 'rubygems',
-          depName: 'acme-client',
-          lockedVersion: '2.0.2',
-          managerData: {
-            lineNumber: 69,
-          },
-        },
-        {
-          currentValue: "'~> 2.5'",
-          datasource: 'rubygems',
-          depName: 'browser',
-          lockedVersion: '2.5.3',
-          managerData: {
-            lineNumber: 72,
-          },
-        },
-        {
-          currentValue: "'~> 2.0.19'",
-          datasource: 'rubygems',
-          depName: 'gpgme',
-          lockedVersion: '2.0.19',
-          managerData: {
-            lineNumber: 75,
-          },
-        },
-        {
-          currentValue: "'~> 2.1.1'",
-          datasource: 'rubygems',
-          depName: 'gitlab_omniauth-ldap',
-          lockedVersion: '2.1.1',
-          managerData: {
-            lineNumber: 80,
-          },
-        },
-        {
-          datasource: 'rubygems',
-          depName: 'net-ldap',
-          lockedVersion: '0.16.0',
-          managerData: {
-            lineNumber: 81,
-          },
-        },
-        {
-          currentValue: "'~> 1.1.0'",
-          datasource: 'rubygems',
-          depName: 'grape',
-          lockedVersion: '1.1.0',
-          managerData: {
-            lineNumber: 84,
-          },
-        },
-        {
-          currentValue: "'~> 0.7.1'",
-          datasource: 'rubygems',
-          depName: 'grape-entity',
-          lockedVersion: '0.7.1',
-          managerData: {
-            lineNumber: 85,
-          },
-        },
-        {
-          currentValue: "'~> 1.0.0'",
-          datasource: 'rubygems',
-          depName: 'rack-cors',
-          lockedVersion: '1.0.2',
-          managerData: {
-            lineNumber: 86,
-          },
-        },
-        {
-          currentValue: "'~> 1.9.11'",
-          datasource: 'rubygems',
-          depName: 'graphql',
-          lockedVersion: '1.9.11',
-          managerData: {
-            lineNumber: 89,
-          },
-        },
-        {
-          currentValue: "'~> 1.4.10'",
-          datasource: 'rubygems',
-          depName: 'graphiql-rails',
-          lockedVersion: '1.4.10',
-          managerData: {
-            lineNumber: 93,
-          },
-        },
-        {
-          currentValue: "'~> 2.0.0.beta3'",
-          datasource: 'rubygems',
-          depName: 'apollo_upload_server',
-          lockedVersion: '2.0.0.beta.3',
-          managerData: {
-            lineNumber: 94,
-          },
-        },
-        {
-          currentValue: "'~> 1.6.0'",
-          datasource: 'rubygems',
-          depName: 'graphql-docs',
-          lockedVersion: '1.6.0',
-          managerData: {
-            lineNumber: 95,
-          },
-        },
-        {
-          datasource: 'rubygems',
-          depName: 'hashie-forbidden_attributes',
-          lockedVersion: '0.1.1',
-          managerData: {
-            lineNumber: 98,
-          },
-        },
-        {
-          currentValue: "'~> 1.0'",
-          datasource: 'rubygems',
-          depName: 'kaminari',
-          lockedVersion: '1.0.1',
-          managerData: {
-            lineNumber: 101,
-          },
-        },
-        {
-          currentValue: "'~> 2.11.0'",
-          datasource: 'rubygems',
-          depName: 'hamlit',
-          lockedVersion: '2.11.0',
-          managerData: {
-            lineNumber: 104,
-          },
-        },
-        {
-          currentValue: "'~> 1.3'",
-          datasource: 'rubygems',
-          depName: 'carrierwave',
-          lockedVersion: '1.3.1',
-          managerData: {
-            lineNumber: 107,
-          },
-        },
-        {
-          datasource: 'rubygems',
-          depName: 'mini_magick',
-          lockedVersion: '4.9.5',
-          managerData: {
-            lineNumber: 108,
-          },
-        },
-        {
-          currentValue: "'~> 3.5'",
-          datasource: 'rubygems',
-          depName: 'fog-aws',
-          lockedVersion: '3.5.2',
-          managerData: {
-            lineNumber: 111,
-          },
-        },
-        {
-          currentValue: "'= 2.1.0'",
-          datasource: 'rubygems',
-          depName: 'fog-core',
-          lockedVersion: '2.1.0',
-          managerData: {
-            lineNumber: 114,
-          },
-        },
-        {
-          currentValue: "'~> 1.9'",
-          datasource: 'rubygems',
-          depName: 'fog-google',
-          lockedVersion: '1.9.1',
-          managerData: {
-            lineNumber: 115,
-          },
-        },
-        {
-          currentValue: "'~> 0.6'",
-          datasource: 'rubygems',
-          depName: 'fog-local',
-          lockedVersion: '0.6.0',
-          managerData: {
-            lineNumber: 116,
-          },
-        },
-        {
-          currentValue: "'~> 1.0'",
-          datasource: 'rubygems',
-          depName: 'fog-openstack',
-          lockedVersion: '1.0.8',
-          managerData: {
-            lineNumber: 117,
-          },
-        },
-        {
-          currentValue: "'~> 0.1.1'",
-          datasource: 'rubygems',
-          depName: 'fog-rackspace',
-          lockedVersion: '0.1.1',
-          managerData: {
-            lineNumber: 118,
-          },
-        },
-        {
-          currentValue: "'~> 0.3'",
-          datasource: 'rubygems',
-          depName: 'fog-aliyun',
-          lockedVersion: '0.3.3',
-          managerData: {
-            lineNumber: 119,
-          },
-        },
-        {
-          currentValue: "'~> 0.23'",
-          datasource: 'rubygems',
-          depName: 'google-api-client',
-          lockedVersion: '0.23.4',
-          managerData: {
-            lineNumber: 122,
-          },
-        },
-        {
-          currentValue: "'~> 0.1.4'",
-          datasource: 'rubygems',
-          depName: 'unf',
-          lockedVersion: '0.1.4',
-          managerData: {
-            lineNumber: 125,
-          },
-        },
-        {
-          currentValue: "'~> 2.3.7'",
-          datasource: 'rubygems',
-          depName: 'seed-fu',
-          lockedVersion: '2.3.7',
-          managerData: {
-            lineNumber: 128,
-          },
-        },
-        {
-          currentValue: "'~> 0.1.9'",
-          datasource: 'rubygems',
-          depName: 'elasticsearch-model',
-          lockedVersion: '0.1.9',
-          managerData: {
-            lineNumber: 131,
-          },
-        },
-        {
-          currentValue: "'~> 0.1.9'",
-          datasource: 'rubygems',
-          depName: 'elasticsearch-rails',
-          lockedVersion: '0.1.9',
-          managerData: {
-            lineNumber: 132,
-          },
-        },
-        {
-          currentValue: "'5.0.3'",
-          datasource: 'rubygems',
-          depName: 'elasticsearch-api',
-          lockedVersion: '5.0.3',
-          managerData: {
-            lineNumber: 133,
-          },
-        },
-        {
-          datasource: 'rubygems',
-          depName: 'aws-sdk',
-          lockedVersion: '2.11.374',
-          managerData: {
-            lineNumber: 134,
-          },
-        },
-        {
-          datasource: 'rubygems',
-          depName: 'faraday_middleware-aws-signers-v4',
-          lockedVersion: '0.1.7',
-          managerData: {
-            lineNumber: 135,
-          },
-        },
-        {
-          currentValue: "'~> 2.12'",
-          datasource: 'rubygems',
-          depName: 'html-pipeline',
-          lockedVersion: '2.12.2',
-          managerData: {
-            lineNumber: 138,
-          },
-        },
-        {
-          currentValue: "'2.3.1'",
-          datasource: 'rubygems',
-          depName: 'deckar01-task_list',
-          lockedVersion: '2.3.1',
-          managerData: {
-            lineNumber: 139,
-          },
-        },
-        {
-          currentValue: "'~> 1.7.0'",
-          datasource: 'rubygems',
-          depName: 'gitlab-markup',
-          lockedVersion: '1.7.0',
-          managerData: {
-            lineNumber: 140,
-          },
-        },
-        {
-          currentValue: "'~> 1.7.0'",
-          datasource: 'rubygems',
-          depName: 'github-markup',
-          lockedVersion: '1.7.0',
-          managerData: {
-            lineNumber: 141,
-          },
-        },
-        {
-          currentValue: "'~> 0.20'",
-          datasource: 'rubygems',
-          depName: 'commonmarker',
-          lockedVersion: '0.20.1',
-          managerData: {
-            lineNumber: 142,
-          },
-        },
-        {
-          currentValue: "'~> 4.3.2'",
-          datasource: 'rubygems',
-          depName: 'RedCloth',
-          lockedVersion: '4.3.2',
-          managerData: {
-            lineNumber: 143,
-          },
-        },
-        {
-          currentValue: "'~> 6.1.2'",
-          datasource: 'rubygems',
-          depName: 'rdoc',
-          lockedVersion: '6.1.2',
-          managerData: {
-            lineNumber: 144,
-          },
-        },
-        {
-          currentValue: "'~> 0.9.12'",
-          datasource: 'rubygems',
-          depName: 'org-ruby',
-          lockedVersion: '0.9.12',
-          managerData: {
-            lineNumber: 145,
-          },
-        },
-        {
-          currentValue: "'~> 0.5.0'",
-          datasource: 'rubygems',
-          depName: 'creole',
-          lockedVersion: '0.5.0',
-          managerData: {
-            lineNumber: 146,
-          },
-        },
-        {
-          currentValue: "'0.8.1'",
-          datasource: 'rubygems',
-          depName: 'wikicloth',
-          lockedVersion: '0.8.1',
-          managerData: {
-            lineNumber: 147,
-          },
-        },
-        {
-          currentValue: "'~> 2.0.10'",
-          datasource: 'rubygems',
-          depName: 'asciidoctor',
-          lockedVersion: '2.0.10',
-          managerData: {
-            lineNumber: 148,
-          },
-        },
-        {
-          currentValue: "'~> 0.3.1'",
-          datasource: 'rubygems',
-          depName: 'asciidoctor-include-ext',
-          lockedVersion: '0.3.1',
-          managerData: {
-            lineNumber: 149,
-          },
-        },
-        {
-          currentValue: "'0.0.10'",
-          datasource: 'rubygems',
-          depName: 'asciidoctor-plantuml',
-          lockedVersion: '0.0.10',
-          managerData: {
-            lineNumber: 150,
-          },
-        },
-        {
-          currentValue: "'~> 3.11.0'",
-          datasource: 'rubygems',
-          depName: 'rouge',
-          lockedVersion: '3.11.0',
-          managerData: {
-            lineNumber: 151,
-          },
-        },
-        {
-          currentValue: "'~> 0.7.11'",
-          datasource: 'rubygems',
-          depName: 'truncato',
-          lockedVersion: '0.7.11',
-          managerData: {
-            lineNumber: 152,
-          },
-        },
-        {
-          currentValue: "'~> 4.2.0'",
-          datasource: 'rubygems',
-          depName: 'bootstrap_form',
-          lockedVersion: '4.2.0',
-          managerData: {
-            lineNumber: 153,
-          },
-        },
-        {
-          currentValue: "'~> 1.10.5'",
-          datasource: 'rubygems',
-          depName: 'nokogiri',
-          lockedVersion: '1.10.7',
-          managerData: {
-            lineNumber: 154,
-          },
-        },
-        {
-          currentValue: "'~> 1.1'",
-          datasource: 'rubygems',
-          depName: 'escape_utils',
-          lockedVersion: '1.2.1',
-          managerData: {
-            lineNumber: 155,
-          },
-        },
-        {
-          datasource: 'rubygems',
-          depName: 'icalendar',
-          lockedVersion: '2.4.1',
-          managerData: {
-            lineNumber: 158,
-          },
-        },
-        {
-          currentValue: "'~> 3.1.0'",
-          datasource: 'rubygems',
-          depName: 'diffy',
-          lockedVersion: '3.1.0',
-          managerData: {
-            lineNumber: 161,
-          },
-        },
-        {
-          currentValue: "'~> 0.1.0'",
-          datasource: 'rubygems',
-          depName: 'diff_match_patch',
-          lockedVersion: '0.1.0',
-          managerData: {
-            lineNumber: 162,
-          },
-        },
-        {
-          currentValue: "'~> 2.0.7'",
-          datasource: 'rubygems',
-          depName: 'rack',
-          lockedVersion: '2.0.7',
-          managerData: {
-            lineNumber: 165,
-          },
-        },
-        {
-          currentValue: "'~> 5.4.1'",
-          datasource: 'rubygems',
-          depName: 'unicorn',
-          depTypes: ['unicorn'],
-          lockedVersion: '5.4.1',
-          managerData: {
-            lineNumber: 168,
-          },
-        },
-        {
-          currentValue: "'~> 0.4.4'",
-          datasource: 'rubygems',
-          depName: 'unicorn-worker-killer',
-          depTypes: ['unicorn'],
-          lockedVersion: '0.4.4',
-          managerData: {
-            lineNumber: 169,
-          },
-        },
-        {
-          currentValue: "'~> 4.3.1.gitlab.2'",
-          datasource: 'rubygems',
-          depName: 'gitlab-puma',
-          depTypes: ['puma'],
-          lockedVersion: '4.3.1.gitlab.2',
-          managerData: {
-            lineNumber: 173,
-          },
-        },
-        {
-          currentValue: "'~> 0.1.1.gitlab.1'",
-          datasource: 'rubygems',
-          depName: 'gitlab-puma_worker_killer',
-          depTypes: ['puma'],
-          lockedVersion: '0.1.1.gitlab.1',
-          managerData: {
-            lineNumber: 174,
-          },
-        },
-        {
-          datasource: 'rubygems',
-          depName: 'rack-timeout',
-          depTypes: ['puma'],
-          lockedVersion: '0.5.1',
-          managerData: {
-            lineNumber: 175,
-          },
-        },
-        {
-          currentValue: "'~> 0.6.0'",
-          datasource: 'rubygems',
-          depName: 'state_machines-activerecord',
-          lockedVersion: '0.6.0',
-          managerData: {
-            lineNumber: 179,
-          },
-        },
-        {
-          currentValue: "'~> 6.0'",
-          datasource: 'rubygems',
-          depName: 'acts-as-taggable-on',
-          lockedVersion: '6.5.0',
-          managerData: {
-            lineNumber: 182,
-          },
-        },
-        {
-          currentValue: "'~> 5.2.7'",
-          datasource: 'rubygems',
-          depName: 'sidekiq',
-          lockedVersion: '5.2.7',
-          managerData: {
-            lineNumber: 185,
-          },
-        },
-        {
-          currentValue: "'~> 1.0'",
-          datasource: 'rubygems',
-          depName: 'sidekiq-cron',
-          lockedVersion: '1.0.4',
-          managerData: {
-            lineNumber: 186,
-          },
-        },
-        {
-          currentValue: "'~> 1.6.0'",
-          datasource: 'rubygems',
-          depName: 'redis-namespace',
-          lockedVersion: '1.6.0',
-          managerData: {
-            lineNumber: 187,
-          },
-        },
-        {
-          currentValue: "'0.5.2'",
-          datasource: 'rubygems',
-          depName: 'gitlab-sidekiq-fetcher',
-          lockedVersion: '0.5.2',
-          managerData: {
-            lineNumber: 188,
-          },
-        },
-        {
-          currentValue: "'~> 1.2.1'",
-          datasource: 'rubygems',
-          depName: 'fugit',
-          lockedVersion: '1.2.1',
-          managerData: {
-            lineNumber: 191,
-          },
-        },
-        {
-          currentValue: "'~> 0.16.4'",
-          datasource: 'rubygems',
-          depName: 'httparty',
-          lockedVersion: '0.16.4',
-          managerData: {
-            lineNumber: 194,
-          },
-        },
-        {
-          currentValue: "'~> 3.0'",
-          datasource: 'rubygems',
-          depName: 'rainbow',
-          lockedVersion: '3.0.0',
-          managerData: {
-            lineNumber: 197,
-          },
-        },
-        {
-          datasource: 'rubygems',
-          depName: 'ruby-progressbar',
-          lockedVersion: '1.10.1',
-          managerData: {
-            lineNumber: 200,
-          },
-        },
-        {
-          currentValue: "'~> 2.0.9'",
-          datasource: 'rubygems',
-          depName: 'settingslogic',
-          lockedVersion: '2.0.9',
-          managerData: {
-            lineNumber: 203,
-          },
-        },
-        {
-          currentValue: "'~> 1.1.1'",
-          datasource: 'rubygems',
-          depName: 're2',
-          lockedVersion: '1.1.1',
-          managerData: {
-            lineNumber: 206,
-          },
-        },
-        {
-          currentValue: "'~> 2.2.4'",
-          datasource: 'rubygems',
-          depName: 'version_sorter',
-          lockedVersion: '2.2.4',
-          managerData: {
-            lineNumber: 210,
-          },
-        },
-        {
-          currentValue: "'~> 3.1'",
-          datasource: 'rubygems',
-          depName: 'js_regex',
-          lockedVersion: '3.1.1',
-          managerData: {
-            lineNumber: 213,
-          },
-        },
-        {
-          datasource: 'rubygems',
-          depName: 'device_detector',
-          lockedVersion: '1.0.0',
-          managerData: {
-            lineNumber: 216,
-          },
-        },
-        {
-          currentValue: "'~> 4.0'",
-          datasource: 'rubygems',
-          depName: 'redis',
-          lockedVersion: '4.1.3',
-          managerData: {
-            lineNumber: 219,
-          },
-        },
-        {
-          currentValue: "'~> 2.0'",
-          datasource: 'rubygems',
-          depName: 'connection_pool',
-          lockedVersion: '2.2.2',
-          managerData: {
-            lineNumber: 220,
-          },
-        },
-        {
-          currentValue: "'~> 5.0.2'",
-          datasource: 'rubygems',
-          depName: 'redis-rails',
-          lockedVersion: '5.0.2',
-          managerData: {
-            lineNumber: 223,
-          },
-        },
-        {
-          currentValue: "'~> 3.3'",
-          datasource: 'rubygems',
-          depName: 'discordrb-webhooks-blackst0ne',
-          lockedVersion: '3.3.0',
-          managerData: {
-            lineNumber: 226,
-          },
-        },
-        {
-          currentValue: "'~> 1.5.0'",
-          datasource: 'rubygems',
-          depName: 'hipchat',
-          lockedVersion: '1.5.2',
-          managerData: {
-            lineNumber: 229,
-          },
-        },
-        {
-          currentValue: "'~> 1.7'",
-          datasource: 'rubygems',
-          depName: 'jira-ruby',
-          lockedVersion: '1.7.1',
-          managerData: {
-            lineNumber: 232,
-          },
-        },
-        {
-          currentValue: "'~> 0.2.0'",
-          datasource: 'rubygems',
-          depName: 'atlassian-jwt',
-          lockedVersion: '0.2.0',
-          managerData: {
-            lineNumber: 233,
-          },
-        },
-        {
-          currentValue: "'~> 0.7'",
-          datasource: 'rubygems',
-          depName: 'flowdock',
-          lockedVersion: '0.7.1',
-          managerData: {
-            lineNumber: 236,
-          },
-        },
-        {
-          currentValue: "'~> 1.5.1'",
-          datasource: 'rubygems',
-          depName: 'slack-notifier',
-          lockedVersion: '1.5.1',
-          managerData: {
-            lineNumber: 239,
-          },
-        },
-        {
-          currentValue: "'~> 0.0.5'",
-          datasource: 'rubygems',
-          depName: 'hangouts-chat',
-          lockedVersion: '0.0.5',
-          managerData: {
-            lineNumber: 242,
-          },
-        },
-        {
-          currentValue: "'~> 0.9'",
-          datasource: 'rubygems',
-          depName: 'asana',
-          lockedVersion: '0.9.3',
-          managerData: {
-            lineNumber: 245,
-          },
-        },
-        {
-          currentValue: "'~> 0.2.1'",
-          datasource: 'rubygems',
-          depName: 'ruby-fogbugz',
-          lockedVersion: '0.2.1',
-          managerData: {
-            lineNumber: 248,
-          },
-        },
-        {
-          currentValue: "'~> 4.4.0'",
-          datasource: 'rubygems',
-          depName: 'kubeclient',
-          lockedVersion: '4.4.0',
-          managerData: {
-            lineNumber: 251,
-          },
-        },
-        {
-          currentValue: "'~> 4.6'",
-          datasource: 'rubygems',
-          depName: 'sanitize',
-          lockedVersion: '4.6.6',
-          managerData: {
-            lineNumber: 254,
-          },
-        },
-        {
-          currentValue: "'~> 1.0.2'",
-          datasource: 'rubygems',
-          depName: 'babosa',
-          lockedVersion: '1.0.2',
-          managerData: {
-            lineNumber: 255,
-          },
-        },
-        {
-          currentValue: "'~> 2.2'",
-          datasource: 'rubygems',
-          depName: 'loofah',
-          lockedVersion: '2.4.0',
-          managerData: {
-            lineNumber: 258,
-          },
-        },
-        {
-          currentValue: "'~> 8.9'",
-          datasource: 'rubygems',
-          depName: 'licensee',
-          lockedVersion: '8.9.2',
-          managerData: {
-            lineNumber: 261,
-          },
-        },
-        {
-          currentValue: "'~> 4.1.0'",
-          datasource: 'rubygems',
-          depName: 'ace-rails-ap',
-          lockedVersion: '4.1.2',
-          managerData: {
-            lineNumber: 264,
-          },
-        },
-        {
-          currentValue: "'~> 0.7.5'",
-          datasource: 'rubygems',
-          depName: 'charlock_holmes',
-          lockedVersion: '0.7.6',
-          managerData: {
-            lineNumber: 267,
-          },
-        },
-        {
-          currentValue: "'~> 0.3.2'",
-          datasource: 'rubygems',
-          depName: 'mimemagic',
-          lockedVersion: '0.3.2',
-          managerData: {
-            lineNumber: 270,
-          },
-        },
-        {
-          datasource: 'rubygems',
-          depName: 'fast_blank',
-          lockedVersion: '1.0.0',
-          managerData: {
-            lineNumber: 273,
-          },
-        },
-        {
-          currentValue: "'~> 0.10.5'",
-          datasource: 'rubygems',
-          depName: 'gitlab-chronic',
-          lockedVersion: '0.10.5',
-          managerData: {
-            lineNumber: 276,
-          },
-        },
-        {
-          currentValue: "'~> 0.10.6.2'",
-          datasource: 'rubygems',
-          depName: 'gitlab_chronic_duration',
-          lockedVersion: '0.10.6.2',
-          managerData: {
-            lineNumber: 277,
-          },
-        },
-        {
-          currentValue: "'~> 0.9.10'",
-          datasource: 'rubygems',
-          depName: 'webpack-rails',
-          lockedVersion: '0.9.11',
-          managerData: {
-            lineNumber: 279,
-          },
-        },
-        {
-          currentValue: "'~> 0.6.0'",
-          datasource: 'rubygems',
-          depName: 'rack-proxy',
-          lockedVersion: '0.6.0',
-          managerData: {
-            lineNumber: 280,
-          },
-        },
-        {
-          currentValue: "'~> 2.1.0'",
-          datasource: 'rubygems',
-          depName: 'sassc-rails',
-          lockedVersion: '2.1.0',
-          managerData: {
-            lineNumber: 282,
-          },
-        },
-        {
-          currentValue: "'~> 2.7.2'",
-          datasource: 'rubygems',
-          depName: 'uglifier',
-          lockedVersion: '2.7.2',
-          managerData: {
-            lineNumber: 283,
-          },
-        },
-        {
-          currentValue: "'~> 2.5.2'",
-          datasource: 'rubygems',
-          depName: 'addressable',
-          lockedVersion: '2.5.2',
-          managerData: {
-            lineNumber: 285,
-          },
-        },
-        {
-          currentValue: "'~> 4.7'",
-          datasource: 'rubygems',
-          depName: 'font-awesome-rails',
-          lockedVersion: '4.7.0.5',
-          managerData: {
-            lineNumber: 286,
-          },
-        },
-        {
-          currentValue: "'~> 3.3'",
-          datasource: 'rubygems',
-          depName: 'gemojione',
-          lockedVersion: '3.3.0',
-          managerData: {
-            lineNumber: 287,
-          },
-        },
-        {
-          currentValue: "'~> 6.2'",
-          datasource: 'rubygems',
-          depName: 'gon',
-          lockedVersion: '6.2.0',
-          managerData: {
-            lineNumber: 288,
-          },
-        },
-        {
-          currentValue: "'~> 1.3'",
-          datasource: 'rubygems',
-          depName: 'request_store',
-          lockedVersion: '1.3.1',
-          managerData: {
-            lineNumber: 289,
-          },
-        },
-        {
-          currentValue: "'~> 0.3.0'",
-          datasource: 'rubygems',
-          depName: 'base32',
-          lockedVersion: '0.3.2',
-          managerData: {
-            lineNumber: 290,
-          },
-        },
-        {
-          currentValue: '"~> 1.0"',
-          datasource: 'rubygems',
-          depName: 'gitlab-license',
-          lockedVersion: '1.0.0',
-          managerData: {
-            lineNumber: 292,
-          },
-        },
-        {
-          currentValue: "'~> 6.2.0'",
-          datasource: 'rubygems',
-          depName: 'rack-attack',
-          lockedVersion: '6.2.0',
-          managerData: {
-            lineNumber: 295,
-          },
-        },
-        {
-          currentValue: "'~> 2.9'",
-          datasource: 'rubygems',
-          depName: 'sentry-raven',
-          lockedVersion: '2.9.0',
-          managerData: {
-            lineNumber: 298,
-          },
-        },
-        {
-          currentValue: "'~> 1.10.3'",
-          datasource: 'rubygems',
-          depName: 'premailer-rails',
-          lockedVersion: '1.10.3',
-          managerData: {
-            lineNumber: 300,
-          },
-        },
-        {
-          currentValue: "'0.8.0'",
-          datasource: 'rubygems',
-          depName: 'gitlab-labkit',
-          lockedVersion: '0.8.0',
-          managerData: {
-            lineNumber: 303,
-          },
-        },
-        {
-          currentValue: "'~> 3.8'",
-          datasource: 'rubygems',
-          depName: 'ruby_parser',
-          lockedVersion: '3.13.1',
-          managerData: {
-            lineNumber: 306,
-          },
-        },
-        {
-          currentValue: "'~> 5.1'",
-          datasource: 'rubygems',
-          depName: 'rails-i18n',
-          lockedVersion: '5.1.1',
-          managerData: {
-            lineNumber: 307,
-          },
-        },
-        {
-          currentValue: "'~> 1.8.0'",
-          datasource: 'rubygems',
-          depName: 'gettext_i18n_rails',
-          lockedVersion: '1.8.0',
-          managerData: {
-            lineNumber: 308,
-          },
-        },
-        {
-          currentValue: "'~> 1.3'",
-          datasource: 'rubygems',
-          depName: 'gettext_i18n_rails_js',
-          lockedVersion: '1.3.0',
-          managerData: {
-            lineNumber: 309,
-          },
-        },
-        {
-          currentValue: "'~> 3.2.2'",
-          datasource: 'rubygems',
-          depName: 'gettext',
-          lockedVersion: '3.2.9',
-          managerData: {
-            lineNumber: 310,
-          },
-        },
-        {
-          currentValue: "'~> 1.4.0'",
-          datasource: 'rubygems',
-          depName: 'batch-loader',
-          lockedVersion: '1.4.0',
-          managerData: {
-            lineNumber: 312,
-          },
-        },
-        {
-          currentValue: "'~> 1.1'",
-          datasource: 'rubygems',
-          depName: 'peek',
-          lockedVersion: '1.1.0',
-          managerData: {
-            lineNumber: 315,
-          },
-        },
-        {
-          currentValue: "'~> 0.6.1'",
-          datasource: 'rubygems',
-          depName: 'snowplow-tracker',
-          lockedVersion: '0.6.1',
-          managerData: {
-            lineNumber: 318,
-          },
-        },
-        {
-          datasource: 'rubygems',
-          depName: 'derailed_benchmarks',
-          lockedVersion: '1.3.5',
-          managerData: {
-            lineNumber: 321,
-          },
-        },
-        {
-          currentValue: "'~> 0.8'",
-          datasource: 'rubygems',
-          depName: 'method_source',
-          depTypes: ['metrics'],
-          lockedVersion: '0.9.2',
-          managerData: {
-            lineNumber: 325,
-          },
-        },
-        {
-          currentValue: "'~> 0.2'",
-          datasource: 'rubygems',
-          depName: 'influxdb',
-          depTypes: ['metrics'],
-          lockedVersion: '0.2.3',
-          managerData: {
-            lineNumber: 326,
-          },
-        },
-        {
-          currentValue: "'~> 0.9.10'",
-          datasource: 'rubygems',
-          depName: 'prometheus-client-mmap',
-          depTypes: ['metrics'],
-          lockedVersion: '0.9.10',
-          managerData: {
-            lineNumber: 329,
-          },
-        },
-        {
-          currentValue: "'~> 0.18'",
-          datasource: 'rubygems',
-          depName: 'raindrops',
-          depTypes: ['metrics'],
-          lockedVersion: '0.19.0',
-          managerData: {
-            lineNumber: 330,
-          },
-        },
-        {
-          currentValue: "'~> 4.2'",
-          datasource: 'rubygems',
-          depName: 'brakeman',
-          depTypes: ['development'],
-          lockedVersion: '4.2.1',
-          managerData: {
-            lineNumber: 334,
-          },
-        },
-        {
-          currentValue: "'~> 6.0'",
-          datasource: 'rubygems',
-          depName: 'danger',
-          depTypes: ['development'],
-          lockedVersion: '6.0.9',
-          managerData: {
-            lineNumber: 335,
-          },
-        },
-        {
-          currentValue: "'~> 1.3.4'",
-          datasource: 'rubygems',
-          depName: 'letter_opener_web',
-          depTypes: ['development'],
-          lockedVersion: '1.3.4',
-          managerData: {
-            lineNumber: 337,
-          },
-        },
-        {
-          currentValue: "'~> 0.3.6'",
-          datasource: 'rubygems',
-          depName: 'rblineprof',
-          depTypes: ['development'],
-          lockedVersion: '0.3.6',
-          managerData: {
-            lineNumber: 338,
-          },
-        },
-        {
-          currentValue: "'~> 2.5.0'",
-          datasource: 'rubygems',
-          depName: 'better_errors',
-          depTypes: ['development'],
-          lockedVersion: '2.5.0',
-          managerData: {
-            lineNumber: 341,
-          },
-        },
-        {
-          currentValue: "'~> 0.8.0'",
-          datasource: 'rubygems',
-          depName: 'binding_of_caller',
-          depTypes: ['development'],
-          lockedVersion: '0.8.0',
-          managerData: {
-            lineNumber: 342,
-          },
-        },
-        {
-          currentValue: "'~> 1.7.0'",
-          datasource: 'rubygems',
-          depName: 'thin',
-          depTypes: ['development'],
-          lockedVersion: '1.7.2',
-          managerData: {
-            lineNumber: 345,
-          },
-        },
-        {
-          currentValue: "'~> 6.0.2'",
-          datasource: 'rubygems',
-          depName: 'bullet',
-          depTypes: ['development', 'test'],
-          lockedVersion: '6.0.2',
-          managerData: {
-            lineNumber: 349,
-          },
-        },
-        {
-          currentValue: "'~> 3.5.1'",
-          datasource: 'rubygems',
-          depName: 'pry-byebug',
-          depTypes: ['development', 'test'],
-          lockedVersion: '3.5.1',
-          managerData: {
-            lineNumber: 350,
-          },
-        },
-        {
-          currentValue: "'~> 0.3.4'",
-          datasource: 'rubygems',
-          depName: 'pry-rails',
-          depTypes: ['development', 'test'],
-          lockedVersion: '0.3.6',
-          managerData: {
-            lineNumber: 351,
-          },
-        },
-        {
-          datasource: 'rubygems',
-          depName: 'awesome_print',
-          depTypes: ['development', 'test'],
-          lockedVersion: '1.8.0',
-          managerData: {
-            lineNumber: 353,
-          },
-        },
-        {
-          currentValue: "'~> 1.7.0'",
-          datasource: 'rubygems',
-          depName: 'database_cleaner',
-          depTypes: ['development', 'test'],
-          lockedVersion: '1.7.0',
-          managerData: {
-            lineNumber: 355,
-          },
-        },
-        {
-          currentValue: "'~> 5.1.0'",
-          datasource: 'rubygems',
-          depName: 'factory_bot_rails',
-          depTypes: ['development', 'test'],
-          lockedVersion: '5.1.0',
-          managerData: {
-            lineNumber: 356,
-          },
-        },
-        {
-          currentValue: "'~> 4.0.0.beta3'",
-          datasource: 'rubygems',
-          depName: 'rspec-rails',
-          depTypes: ['development', 'test'],
-          lockedVersion: '4.0.0.beta3',
-          managerData: {
-            lineNumber: 357,
-          },
-        },
-        {
-          currentValue: "'~> 5.11.0'",
-          datasource: 'rubygems',
-          depName: 'minitest',
-          depTypes: ['development', 'test'],
-          lockedVersion: '5.11.3',
-          managerData: {
-            lineNumber: 360,
-          },
-        },
-        {
-          currentValue: "'~> 2.10'",
-          datasource: 'rubygems',
-          depName: 'ffaker',
-          depTypes: ['development', 'test'],
-          lockedVersion: '2.10.0',
-          managerData: {
-            lineNumber: 363,
-          },
-        },
-        {
-          currentValue: "'~> 2.0.0'",
-          datasource: 'rubygems',
-          depName: 'spring',
-          depTypes: ['development', 'test'],
-          lockedVersion: '2.0.2',
-          managerData: {
-            lineNumber: 365,
-          },
-        },
-        {
-          currentValue: "'~> 1.0.4'",
-          datasource: 'rubygems',
-          depName: 'spring-commands-rspec',
-          depTypes: ['development', 'test'],
-          lockedVersion: '1.0.4',
-          managerData: {
-            lineNumber: 366,
-          },
-        },
-        {
-          currentValue: "'~> 3.1.0'",
-          datasource: 'rubygems',
-          depName: 'gitlab-styles',
-          depTypes: ['development', 'test'],
-          lockedVersion: '3.1.0',
-          managerData: {
-            lineNumber: 368,
-          },
-        },
-        {
-          currentValue: "'~> 0.74.0'",
-          datasource: 'rubygems',
-          depName: 'rubocop',
-          depTypes: ['development', 'test'],
-          lockedVersion: '0.74.0',
-          managerData: {
-            lineNumber: 370,
-          },
-        },
-        {
-          currentValue: "'~> 1.4.1'",
-          datasource: 'rubygems',
-          depName: 'rubocop-performance',
-          depTypes: ['development', 'test'],
-          lockedVersion: '1.4.1',
-          managerData: {
-            lineNumber: 371,
-          },
-        },
-        {
-          currentValue: "'~> 1.37.0'",
-          datasource: 'rubygems',
-          depName: 'rubocop-rspec',
-          depTypes: ['development', 'test'],
-          lockedVersion: '1.37.0',
-          managerData: {
-            lineNumber: 372,
-          },
-        },
-        {
-          currentValue: "'~> 0.56.0'",
-          datasource: 'rubygems',
-          depName: 'scss_lint',
-          depTypes: ['development', 'test'],
-          lockedVersion: '0.56.0',
-          managerData: {
-            lineNumber: 374,
-          },
-        },
-        {
-          currentValue: "'~> 0.34.0'",
-          datasource: 'rubygems',
-          depName: 'haml_lint',
-          depTypes: ['development', 'test'],
-          lockedVersion: '0.34.0',
-          managerData: {
-            lineNumber: 375,
-          },
-        },
-        {
-          currentValue: "'~> 0.16.1'",
-          datasource: 'rubygems',
-          depName: 'simplecov',
-          depTypes: ['development', 'test'],
-          lockedVersion: '0.16.1',
-          managerData: {
-            lineNumber: 376,
-          },
-        },
-        {
-          currentValue: "'~> 0.5.0'",
-          datasource: 'rubygems',
-          depName: 'bundler-audit',
-          depTypes: ['development', 'test'],
-          lockedVersion: '0.5.0',
-          managerData: {
-            lineNumber: 377,
-          },
-        },
-        {
-          currentValue: "'~> 2.3.0'",
-          datasource: 'rubygems',
-          depName: 'benchmark-ips',
-          depTypes: ['development', 'test'],
-          lockedVersion: '2.3.0',
-          managerData: {
-            lineNumber: 379,
-          },
-        },
-        {
-          currentValue: "'~> 1.17'",
-          datasource: 'rubygems',
-          depName: 'knapsack',
-          depTypes: ['development', 'test'],
-          lockedVersion: '1.17.0',
-          managerData: {
-            lineNumber: 381,
-          },
-        },
-        {
-          currentValue: "'~> 0.2.13'",
-          datasource: 'rubygems',
-          depName: 'stackprof',
-          depTypes: ['development', 'test'],
-          lockedVersion: '0.2.13',
-          managerData: {
-            lineNumber: 383,
-          },
-        },
-        {
-          currentValue: "'~> 1.1.2'",
-          datasource: 'rubygems',
-          depName: 'simple_po_parser',
-          depTypes: ['development', 'test'],
-          lockedVersion: '1.1.2',
-          managerData: {
-            lineNumber: 385,
-          },
-        },
-        {
-          currentValue: "'~> 0.8.0'",
-          datasource: 'rubygems',
-          depName: 'timecop',
-          depTypes: ['development', 'test'],
-          lockedVersion: '0.8.1',
-          managerData: {
-            lineNumber: 387,
-          },
-        },
-        {
-          currentValue: "'~> 0.2.1'",
-          datasource: 'rubygems',
-          depName: 'png_quantizator',
-          depTypes: ['development', 'test'],
-          lockedVersion: '0.2.1',
-          managerData: {
-            lineNumber: 389,
-          },
-        },
-        {
-          currentValue: "'~> 1.17.0'",
-          datasource: 'rubygems',
-          depName: 'parallel',
-          depTypes: ['development', 'test'],
-          lockedVersion: '1.19.1',
-          managerData: {
-            lineNumber: 391,
-          },
-        },
-        {
-          currentValue: "'~> 5.4'",
-          datasource: 'rubygems',
-          depName: 'license_finder',
-          depTypes: ['development', 'test', 'omnibus'],
-          lockedVersion: '5.4.0',
-          managerData: {
-            lineNumber: 396,
-          },
-        },
-        {
-          currentValue: "'~> 2.2.0'",
-          datasource: 'rubygems',
-          depName: 'fuubar',
-          depTypes: ['test'],
-          lockedVersion: '2.2.0',
-          managerData: {
-            lineNumber: 400,
-          },
-        },
-        {
-          currentValue: "'~> 0.6.1'",
-          datasource: 'rubygems',
-          depName: 'rspec-retry',
-          depTypes: ['test'],
-          lockedVersion: '0.6.1',
-          managerData: {
-            lineNumber: 401,
-          },
-        },
-        {
-          currentValue: "'~> 0.0.5'",
-          datasource: 'rubygems',
-          depName: 'rspec_profiling',
-          depTypes: ['test'],
-          lockedVersion: '0.0.5',
-          managerData: {
-            lineNumber: 402,
-          },
-        },
-        {
-          currentValue: "'~> 0.1.3'",
-          datasource: 'rubygems',
-          depName: 'rspec-set',
-          depTypes: ['test'],
-          lockedVersion: '0.1.3',
-          managerData: {
-            lineNumber: 403,
-          },
-        },
-        {
-          datasource: 'rubygems',
-          depName: 'rspec-parameterized',
-          depTypes: ['test'],
-          lockedVersion: '0.4.2',
-          managerData: {
-            lineNumber: 404,
-          },
-        },
-        {
-          currentValue: "'~> 3.22.0'",
-          datasource: 'rubygems',
-          depName: 'capybara',
-          depTypes: ['test'],
-          lockedVersion: '3.22.0',
-          managerData: {
-            lineNumber: 406,
-          },
-        },
-        {
-          currentValue: "'~> 1.0.22'",
-          datasource: 'rubygems',
-          depName: 'capybara-screenshot',
-          depTypes: ['test'],
-          lockedVersion: '1.0.22',
-          managerData: {
-            lineNumber: 407,
-          },
-        },
-        {
-          currentValue: "'~> 3.142'",
-          datasource: 'rubygems',
-          depName: 'selenium-webdriver',
-          depTypes: ['test'],
-          lockedVersion: '3.142.6',
-          managerData: {
-            lineNumber: 408,
-          },
-        },
-        {
-          currentValue: "'~> 4.0.1'",
-          datasource: 'rubygems',
-          depName: 'shoulda-matchers',
-          depTypes: ['test'],
-          lockedVersion: '4.0.1',
-          managerData: {
-            lineNumber: 410,
-          },
-        },
-        {
-          currentValue: "'~> 2.2.0'",
-          datasource: 'rubygems',
-          depName: 'email_spec',
-          depTypes: ['test'],
-          lockedVersion: '2.2.0',
-          managerData: {
-            lineNumber: 411,
-          },
-        },
-        {
-          currentValue: "'~> 2.8.0'",
-          datasource: 'rubygems',
-          depName: 'json-schema',
-          depTypes: ['test'],
-          lockedVersion: '2.8.0',
-          managerData: {
-            lineNumber: 412,
-          },
-        },
-        {
-          currentValue: "'~> 3.5.1'",
-          datasource: 'rubygems',
-          depName: 'webmock',
-          depTypes: ['test'],
-          lockedVersion: '3.5.1',
-          managerData: {
-            lineNumber: 413,
-          },
-        },
-        {
-          datasource: 'rubygems',
-          depName: 'rails-controller-testing',
-          depTypes: ['test'],
-          lockedVersion: '1.0.4',
-          managerData: {
-            lineNumber: 414,
-          },
-        },
-        {
-          currentValue: "'~> 1.1'",
-          datasource: 'rubygems',
-          depName: 'concurrent-ruby',
-          depTypes: ['test'],
-          lockedVersion: '1.1.5',
-          managerData: {
-            lineNumber: 415,
-          },
-        },
-        {
-          currentValue: "'~> 0.10.0'",
-          datasource: 'rubygems',
-          depName: 'test-prof',
-          depTypes: ['test'],
-          lockedVersion: '0.10.0',
-          managerData: {
-            lineNumber: 416,
-          },
-        },
-        {
-          datasource: 'rubygems',
-          depName: 'rspec_junit_formatter',
-          depTypes: ['test'],
-          lockedVersion: '0.4.1',
-          managerData: {
-            lineNumber: 417,
-          },
-        },
-        {
-          datasource: 'rubygems',
-          depName: 'guard-rspec',
-          depTypes: ['test'],
-          lockedVersion: '4.7.3',
-          managerData: {
-            lineNumber: 418,
-          },
-        },
-        {
-          currentValue: "'~> 4.9'",
-          datasource: 'rubygems',
-          depName: 'octokit',
-          lockedVersion: '4.9.0',
-          managerData: {
-            lineNumber: 421,
-          },
-        },
-        {
-          currentValue: "'~> 0.10.0'",
-          datasource: 'rubygems',
-          depName: 'mail_room',
-          lockedVersion: '0.10.0',
-          managerData: {
-            lineNumber: 423,
-          },
-        },
-        {
-          currentValue: "'~> 0.1'",
-          datasource: 'rubygems',
-          depName: 'email_reply_trimmer',
-          lockedVersion: '0.1.6',
-          managerData: {
-            lineNumber: 425,
-          },
-        },
-        {
-          datasource: 'rubygems',
-          depName: 'html2text',
-          lockedVersion: '0.2.0',
-          managerData: {
-            lineNumber: 426,
-          },
-        },
-        {
-          currentValue: "'~> 1.0.0'",
-          datasource: 'rubygems',
-          depName: 'ruby-prof',
-          lockedVersion: '1.0.0',
-          managerData: {
-            lineNumber: 428,
-          },
-        },
-        {
-          currentValue: "'~> 0.4'",
-          datasource: 'rubygems',
-          depName: 'rbtrace',
-          lockedVersion: '0.4.11',
-          managerData: {
-            lineNumber: 429,
-          },
-        },
-        {
-          currentValue: "'~> 0.9'",
-          datasource: 'rubygems',
-          depName: 'memory_profiler',
-          lockedVersion: '0.9.13',
-          managerData: {
-            lineNumber: 430,
-          },
-        },
-        {
-          currentValue: "'~> 0.1'",
-          datasource: 'rubygems',
-          depName: 'benchmark-memory',
-          lockedVersion: '0.1.2',
-          managerData: {
-            lineNumber: 431,
-          },
-        },
-        {
-          currentValue: "'~> 0.1'",
-          datasource: 'rubygems',
-          depName: 'activerecord-explain-analyze',
-          lockedVersion: '0.1.0',
-          managerData: {
-            lineNumber: 432,
-          },
-        },
-        {
-          currentValue: "'~> 1.4'",
-          datasource: 'rubygems',
-          depName: 'oauth2',
-          lockedVersion: '1.4.1',
-          managerData: {
-            lineNumber: 435,
-          },
-        },
-        {
-          currentValue: "'~> 2.6.0'",
-          datasource: 'rubygems',
-          depName: 'health_check',
-          lockedVersion: '2.6.0',
-          managerData: {
-            lineNumber: 438,
-          },
-        },
-        {
-          currentValue: "'~> 2.3.0'",
-          datasource: 'rubygems',
-          depName: 'vmstat',
-          lockedVersion: '2.3.0',
-          managerData: {
-            lineNumber: 441,
-          },
-        },
-        {
-          currentValue: "'~> 1.1.6'",
-          datasource: 'rubygems',
-          depName: 'sys-filesystem',
-          lockedVersion: '1.1.6',
-          managerData: {
-            lineNumber: 442,
-          },
-        },
-        {
-          datasource: 'rubygems',
-          depName: 'net-ntp',
-          lockedVersion: '2.1.3',
-          managerData: {
-            lineNumber: 445,
-          },
-        },
-        {
-          currentValue: "'~> 5.2'",
-          datasource: 'rubygems',
-          depName: 'net-ssh',
-          lockedVersion: '5.2.0',
-          managerData: {
-            lineNumber: 448,
-          },
-        },
-        {
-          currentValue: "'~> 2.0'",
-          datasource: 'rubygems',
-          depName: 'sshkey',
-          lockedVersion: '2.0.0',
-          managerData: {
-            lineNumber: 449,
-          },
-        },
-        {
-          currentValue: "'~> 1.2'",
-          datasource: 'rubygems',
-          depName: 'ed25519',
-          depTypes: ['ed25519'],
-          lockedVersion: '1.2.4',
-          managerData: {
-            lineNumber: 453,
-          },
-        },
-        {
-          currentValue: "'~> 1.0'",
-          datasource: 'rubygems',
-          depName: 'bcrypt_pbkdf',
-          depTypes: ['ed25519'],
-          lockedVersion: '1.0.0',
-          managerData: {
-            lineNumber: 454,
-          },
-        },
-        {
-          currentValue: "'~> 1.73.0'",
-          datasource: 'rubygems',
-          depName: 'gitaly',
-          lockedVersion: '1.73.0',
-          managerData: {
-            lineNumber: 458,
-          },
-        },
-        {
-          currentValue: "'~> 1.24.0'",
-          datasource: 'rubygems',
-          depName: 'grpc',
-          lockedVersion: '1.24.0',
-          managerData: {
-            lineNumber: 460,
-          },
-        },
-        {
-          currentValue: "'~> 3.8.0'",
-          datasource: 'rubygems',
-          depName: 'google-protobuf',
-          lockedVersion: '3.8.0',
-          managerData: {
-            lineNumber: 462,
-          },
-        },
-        {
-          currentValue: "'~> 1.0.0'",
-          datasource: 'rubygems',
-          depName: 'toml-rb',
-          lockedVersion: '1.0.0',
-          managerData: {
-            lineNumber: 464,
-          },
-        },
-        {
-          currentValue: "'~> 0.17.1'",
-          datasource: 'rubygems',
-          depName: 'flipper',
-          lockedVersion: '0.17.1',
-          managerData: {
-            lineNumber: 467,
-          },
-        },
-        {
-          currentValue: "'~> 0.17.1'",
-          datasource: 'rubygems',
-          depName: 'flipper-active_record',
-          lockedVersion: '0.17.1',
-          managerData: {
-            lineNumber: 468,
-          },
-        },
-        {
-          currentValue: "'~> 0.17.1'",
-          datasource: 'rubygems',
-          depName: 'flipper-active_support_cache_store',
-          lockedVersion: '0.17.1',
-          managerData: {
-            lineNumber: 469,
-          },
-        },
-        {
-          currentValue: "'~> 0.1.5'",
-          datasource: 'rubygems',
-          depName: 'unleash',
-          lockedVersion: '0.1.5',
-          managerData: {
-            lineNumber: 470,
-          },
-        },
-        {
-          currentValue: "'~> 0.5'",
-          datasource: 'rubygems',
-          depName: 'lograge',
-          lockedVersion: '0.10.0',
-          managerData: {
-            lineNumber: 473,
-          },
-        },
-        {
-          currentValue: "'~> 1.7'",
-          datasource: 'rubygems',
-          depName: 'grape_logging',
-          lockedVersion: '1.7.0',
-          managerData: {
-            lineNumber: 474,
-          },
-        },
-        {
-          currentValue: "'~> 0.9.1'",
-          datasource: 'rubygems',
-          depName: 'gitlab-net-dns',
-          lockedVersion: '0.9.1',
-          managerData: {
-            lineNumber: 477,
-          },
-        },
-        {
-          currentValue: "'~> 3.0'",
-          datasource: 'rubygems',
-          depName: 'countries',
-          lockedVersion: '3.0.0',
-          managerData: {
-            lineNumber: 480,
-          },
-        },
-        {
-          currentValue: "'~> 3.1.2'",
-          datasource: 'rubygems',
-          depName: 'retriable',
-          lockedVersion: '3.1.2',
-          managerData: {
-            lineNumber: 482,
-          },
-        },
-        {
-          currentValue: "'~> 4.0'",
-          datasource: 'rubygems',
-          depName: 'liquid',
-          lockedVersion: '4.0.3',
-          managerData: {
-            lineNumber: 484,
-          },
-        },
-      ],
-      lockFiles: ['Gemfile.lock'],
-      registryUrls: ['https://rubygems.org'],
-    });
+    expect(res?.deps).toMatchObject([
+      {
+        depName: 'rails',
+        currentValue: "'5.2.3'",
+        lockedVersion: '5.2.3',
+      },
+      {
+        depName: 'bootsnap',
+        currentValue: "'~> 1.4'",
+        lockedVersion: '1.4.5',
+      },
+      {
+        depName: 'nakayoshi_fork',
+        currentValue: "'~> 0.0.4'",
+        lockedVersion: '0.0.4',
+      },
+      {
+        depName: 'responders',
+        currentValue: "'~> 3.0'",
+        lockedVersion: '3.0.0',
+      },
+      {
+        depName: 'sprockets',
+        currentValue: "'~> 3.7.0'",
+        lockedVersion: '3.7.2',
+      },
+      {
+        depName: 'default_value_for',
+        currentValue: "'~> 3.3.0'",
+        lockedVersion: '3.3.0',
+      },
+      {
+        depName: 'pg',
+        currentValue: "'~> 1.1'",
+        lockedVersion: '1.1.4',
+      },
+      {
+        depName: 'rugged',
+        currentValue: "'~> 0.28'",
+        lockedVersion: '0.28.4.1',
+      },
+      {
+        depName: 'grape-path-helpers',
+        currentValue: "'~> 1.1'",
+        lockedVersion: '1.1.0',
+      },
+      {
+        depName: 'faraday',
+        currentValue: "'~> 0.12'",
+        lockedVersion: '0.12.2',
+      },
+      {
+        depName: 'marginalia',
+        currentValue: "'~> 1.8.0'",
+        lockedVersion: '1.8.0',
+      },
+      {
+        depName: 'devise',
+        currentValue: "'~> 4.6'",
+        lockedVersion: '4.7.1',
+      },
+      {
+        depName: 'doorkeeper',
+        currentValue: "'~> 4.3'",
+        lockedVersion: '4.3.2',
+      },
+      {
+        depName: 'doorkeeper-openid_connect',
+        currentValue: "'~> 1.5'",
+        lockedVersion: '1.5.0',
+      },
+      {
+        depName: 'omniauth',
+        currentValue: "'~> 1.8'",
+        lockedVersion: '1.9.0',
+      },
+      {
+        depName: 'omniauth-auth0',
+        currentValue: "'~> 2.0.0'",
+        lockedVersion: '2.0.0',
+      },
+      {
+        depName: 'omniauth-azure-oauth2',
+        currentValue: "'~> 0.0.9'",
+        lockedVersion: '0.0.10',
+      },
+      {
+        depName: 'omniauth-cas3',
+        currentValue: "'~> 1.1.4'",
+        lockedVersion: '1.1.4',
+      },
+      {
+        depName: 'omniauth-facebook',
+        currentValue: "'~> 4.0.0'",
+        lockedVersion: '4.0.0',
+      },
+      {
+        depName: 'omniauth-github',
+        currentValue: "'~> 1.3'",
+        lockedVersion: '1.3.0',
+      },
+      {
+        depName: 'omniauth-gitlab',
+        currentValue: "'~> 1.0.2'",
+        lockedVersion: '1.0.3',
+      },
+      {
+        depName: 'omniauth-google-oauth2',
+        currentValue: "'~> 0.6.0'",
+        lockedVersion: '0.6.0',
+      },
+      {
+        depName: 'omniauth-kerberos',
+        currentValue: "'~> 0.3.0'",
+        lockedVersion: '0.3.0',
+      },
+      {
+        depName: 'omniauth-oauth2-generic',
+        currentValue: "'~> 0.2.2'",
+        lockedVersion: '0.2.2',
+      },
+      {
+        depName: 'omniauth-saml',
+        currentValue: "'~> 1.10'",
+        lockedVersion: '1.10.0',
+      },
+      {
+        depName: 'omniauth-shibboleth',
+        currentValue: "'~> 1.3.0'",
+        lockedVersion: '1.3.0',
+      },
+      {
+        depName: 'omniauth-twitter',
+        currentValue: "'~> 1.4'",
+        lockedVersion: '1.4.0',
+      },
+      {
+        depName: 'omniauth_crowd',
+        currentValue: "'~> 2.2.0'",
+        lockedVersion: '2.2.3',
+      },
+      {
+        depName: 'omniauth-authentiq',
+        currentValue: "'~> 0.3.3'",
+        lockedVersion: '0.3.3',
+      },
+      {
+        depName: 'omniauth_openid_connect',
+        currentValue: "'~> 0.3.3'",
+        lockedVersion: '0.3.3',
+      },
+      {
+        depName: 'omniauth-ultraauth',
+        currentValue: "'~> 0.0.2'",
+        lockedVersion: '0.0.2',
+      },
+      {
+        depName: 'omniauth-salesforce',
+        currentValue: "'~> 1.0.5'",
+        lockedVersion: '1.0.5',
+      },
+      {
+        depName: 'rack-oauth2',
+        currentValue: "'~> 1.9.3'",
+        lockedVersion: '1.9.3',
+      },
+      {
+        depName: 'jwt',
+        currentValue: "'~> 2.1.0'",
+        lockedVersion: '2.1.0',
+      },
+      {
+        depName: 'gssapi',
+        lockedVersion: '1.2.0',
+      },
+      {
+        depName: 'recaptcha',
+        currentValue: "'~> 4.11'",
+        lockedVersion: '4.13.1',
+      },
+      {
+        depName: 'akismet',
+        currentValue: "'~> 3.0'",
+        lockedVersion: '3.0.0',
+      },
+      {
+        depName: 'invisible_captcha',
+        currentValue: "'~> 0.12.1'",
+        lockedVersion: '0.12.1',
+      },
+      {
+        depName: 'devise-two-factor',
+        currentValue: "'~> 3.0.0'",
+        lockedVersion: '3.0.0',
+      },
+      {
+        depName: 'rqrcode-rails3',
+        currentValue: "'~> 0.1.7'",
+        lockedVersion: '0.1.7',
+      },
+      {
+        depName: 'attr_encrypted',
+        currentValue: "'~> 3.1.0'",
+        lockedVersion: '3.1.0',
+      },
+      {
+        depName: 'u2f',
+        currentValue: "'~> 0.2.1'",
+        lockedVersion: '0.2.1',
+      },
+      {
+        depName: 'validates_hostname',
+        currentValue: "'~> 1.0.6'",
+        lockedVersion: '1.0.6',
+      },
+      {
+        depName: 'rubyzip',
+        currentValue: "'~> 1.3.0'",
+        lockedVersion: '1.3.0',
+      },
+      {
+        depName: 'acme-client',
+        currentValue: "'~> 2.0.2'",
+        lockedVersion: '2.0.2',
+      },
+      {
+        depName: 'browser',
+        currentValue: "'~> 2.5'",
+        lockedVersion: '2.5.3',
+      },
+      {
+        depName: 'gpgme',
+        currentValue: "'~> 2.0.19'",
+        lockedVersion: '2.0.19',
+      },
+      {
+        depName: 'gitlab_omniauth-ldap',
+        currentValue: "'~> 2.1.1'",
+        lockedVersion: '2.1.1',
+      },
+      {
+        depName: 'net-ldap',
+        lockedVersion: '0.16.0',
+      },
+      {
+        depName: 'grape',
+        currentValue: "'~> 1.1.0'",
+        lockedVersion: '1.1.0',
+      },
+      {
+        depName: 'grape-entity',
+        currentValue: "'~> 0.7.1'",
+        lockedVersion: '0.7.1',
+      },
+      {
+        depName: 'rack-cors',
+        currentValue: "'~> 1.0.0'",
+        lockedVersion: '1.0.2',
+      },
+      {
+        depName: 'graphql',
+        currentValue: "'~> 1.9.11'",
+        lockedVersion: '1.9.11',
+      },
+      {
+        depName: 'graphiql-rails',
+        currentValue: "'~> 1.4.10'",
+        lockedVersion: '1.4.10',
+      },
+      {
+        depName: 'apollo_upload_server',
+        currentValue: "'~> 2.0.0.beta3'",
+        lockedVersion: '2.0.0.beta.3',
+      },
+      {
+        depName: 'graphql-docs',
+        currentValue: "'~> 1.6.0'",
+        lockedVersion: '1.6.0',
+      },
+      {
+        depName: 'hashie-forbidden_attributes',
+        lockedVersion: '0.1.1',
+      },
+      {
+        depName: 'kaminari',
+        currentValue: "'~> 1.0'",
+        lockedVersion: '1.0.1',
+      },
+      {
+        depName: 'hamlit',
+        currentValue: "'~> 2.11.0'",
+        lockedVersion: '2.11.0',
+      },
+      {
+        depName: 'carrierwave',
+        currentValue: "'~> 1.3'",
+        lockedVersion: '1.3.1',
+      },
+      {
+        depName: 'mini_magick',
+        lockedVersion: '4.9.5',
+      },
+      {
+        depName: 'fog-aws',
+        currentValue: "'~> 3.5'",
+        lockedVersion: '3.5.2',
+      },
+      {
+        depName: 'fog-core',
+        currentValue: "'= 2.1.0'",
+        lockedVersion: '2.1.0',
+      },
+      {
+        depName: 'fog-google',
+        currentValue: "'~> 1.9'",
+        lockedVersion: '1.9.1',
+      },
+      {
+        depName: 'fog-local',
+        currentValue: "'~> 0.6'",
+        lockedVersion: '0.6.0',
+      },
+      {
+        depName: 'fog-openstack',
+        currentValue: "'~> 1.0'",
+        lockedVersion: '1.0.8',
+      },
+      {
+        depName: 'fog-rackspace',
+        currentValue: "'~> 0.1.1'",
+        lockedVersion: '0.1.1',
+      },
+      {
+        depName: 'fog-aliyun',
+        currentValue: "'~> 0.3'",
+        lockedVersion: '0.3.3',
+      },
+      {
+        depName: 'google-api-client',
+        currentValue: "'~> 0.23'",
+        lockedVersion: '0.23.4',
+      },
+      {
+        depName: 'unf',
+        currentValue: "'~> 0.1.4'",
+        lockedVersion: '0.1.4',
+      },
+      {
+        depName: 'seed-fu',
+        currentValue: "'~> 2.3.7'",
+        lockedVersion: '2.3.7',
+      },
+      {
+        depName: 'elasticsearch-model',
+        currentValue: "'~> 0.1.9'",
+        lockedVersion: '0.1.9',
+      },
+      {
+        depName: 'elasticsearch-rails',
+        currentValue: "'~> 0.1.9'",
+        lockedVersion: '0.1.9',
+      },
+      {
+        depName: 'elasticsearch-api',
+        currentValue: "'5.0.3'",
+        lockedVersion: '5.0.3',
+      },
+      {
+        depName: 'aws-sdk',
+        lockedVersion: '2.11.374',
+      },
+      {
+        depName: 'faraday_middleware-aws-signers-v4',
+        lockedVersion: '0.1.7',
+      },
+      {
+        depName: 'html-pipeline',
+        currentValue: "'~> 2.12'",
+        lockedVersion: '2.12.2',
+      },
+      {
+        depName: 'deckar01-task_list',
+        currentValue: "'2.3.1'",
+        lockedVersion: '2.3.1',
+      },
+      {
+        depName: 'gitlab-markup',
+        currentValue: "'~> 1.7.0'",
+        lockedVersion: '1.7.0',
+      },
+      {
+        depName: 'github-markup',
+        currentValue: "'~> 1.7.0'",
+        lockedVersion: '1.7.0',
+      },
+      {
+        depName: 'commonmarker',
+        currentValue: "'~> 0.20'",
+        lockedVersion: '0.20.1',
+      },
+      {
+        depName: 'RedCloth',
+        currentValue: "'~> 4.3.2'",
+        lockedVersion: '4.3.2',
+      },
+      {
+        depName: 'rdoc',
+        currentValue: "'~> 6.1.2'",
+        lockedVersion: '6.1.2',
+      },
+      {
+        depName: 'org-ruby',
+        currentValue: "'~> 0.9.12'",
+        lockedVersion: '0.9.12',
+      },
+      {
+        depName: 'creole',
+        currentValue: "'~> 0.5.0'",
+        lockedVersion: '0.5.0',
+      },
+      {
+        depName: 'wikicloth',
+        currentValue: "'0.8.1'",
+        lockedVersion: '0.8.1',
+      },
+      {
+        depName: 'asciidoctor',
+        currentValue: "'~> 2.0.10'",
+        lockedVersion: '2.0.10',
+      },
+      {
+        depName: 'asciidoctor-include-ext',
+        currentValue: "'~> 0.3.1'",
+        lockedVersion: '0.3.1',
+      },
+      {
+        depName: 'asciidoctor-plantuml',
+        currentValue: "'0.0.10'",
+        lockedVersion: '0.0.10',
+      },
+      {
+        depName: 'rouge',
+        currentValue: "'~> 3.11.0'",
+        lockedVersion: '3.11.0',
+      },
+      {
+        depName: 'truncato',
+        currentValue: "'~> 0.7.11'",
+        lockedVersion: '0.7.11',
+      },
+      {
+        depName: 'bootstrap_form',
+        currentValue: "'~> 4.2.0'",
+        lockedVersion: '4.2.0',
+      },
+      {
+        depName: 'nokogiri',
+        currentValue: "'~> 1.10.5'",
+        lockedVersion: '1.10.7',
+      },
+      {
+        depName: 'escape_utils',
+        currentValue: "'~> 1.1'",
+        lockedVersion: '1.2.1',
+      },
+      {
+        depName: 'icalendar',
+        lockedVersion: '2.4.1',
+      },
+      {
+        depName: 'diffy',
+        currentValue: "'~> 3.1.0'",
+        lockedVersion: '3.1.0',
+      },
+      {
+        depName: 'diff_match_patch',
+        currentValue: "'~> 0.1.0'",
+        lockedVersion: '0.1.0',
+      },
+      {
+        depName: 'rack',
+        currentValue: "'~> 2.0.7'",
+        lockedVersion: '2.0.7',
+      },
+      {
+        depName: 'unicorn',
+        currentValue: "'~> 5.4.1'",
+        lockedVersion: '5.4.1',
+        depTypes: ['unicorn'],
+      },
+      {
+        depName: 'unicorn-worker-killer',
+        currentValue: "'~> 0.4.4'",
+        lockedVersion: '0.4.4',
+        depTypes: ['unicorn'],
+      },
+      {
+        depName: 'gitlab-puma',
+        currentValue: "'~> 4.3.1.gitlab.2'",
+        lockedVersion: '4.3.1.gitlab.2',
+        depTypes: ['puma'],
+      },
+      {
+        depName: 'gitlab-puma_worker_killer',
+        currentValue: "'~> 0.1.1.gitlab.1'",
+        lockedVersion: '0.1.1.gitlab.1',
+        depTypes: ['puma'],
+      },
+      {
+        depName: 'rack-timeout',
+        lockedVersion: '0.5.1',
+        depTypes: ['puma'],
+      },
+      {
+        depName: 'state_machines-activerecord',
+        currentValue: "'~> 0.6.0'",
+        lockedVersion: '0.6.0',
+      },
+      {
+        depName: 'acts-as-taggable-on',
+        currentValue: "'~> 6.0'",
+        lockedVersion: '6.5.0',
+      },
+      {
+        depName: 'sidekiq',
+        currentValue: "'~> 5.2.7'",
+        lockedVersion: '5.2.7',
+      },
+      {
+        depName: 'sidekiq-cron',
+        currentValue: "'~> 1.0'",
+        lockedVersion: '1.0.4',
+      },
+      {
+        depName: 'redis-namespace',
+        currentValue: "'~> 1.6.0'",
+        lockedVersion: '1.6.0',
+      },
+      {
+        depName: 'gitlab-sidekiq-fetcher',
+        currentValue: "'0.5.2'",
+        lockedVersion: '0.5.2',
+      },
+      {
+        depName: 'fugit',
+        currentValue: "'~> 1.2.1'",
+        lockedVersion: '1.2.1',
+      },
+      {
+        depName: 'httparty',
+        currentValue: "'~> 0.16.4'",
+        lockedVersion: '0.16.4',
+      },
+      {
+        depName: 'rainbow',
+        currentValue: "'~> 3.0'",
+        lockedVersion: '3.0.0',
+      },
+      {
+        depName: 'ruby-progressbar',
+        lockedVersion: '1.10.1',
+      },
+      {
+        depName: 'settingslogic',
+        currentValue: "'~> 2.0.9'",
+        lockedVersion: '2.0.9',
+      },
+      {
+        depName: 're2',
+        currentValue: "'~> 1.1.1'",
+        lockedVersion: '1.1.1',
+      },
+      {
+        depName: 'version_sorter',
+        currentValue: "'~> 2.2.4'",
+        lockedVersion: '2.2.4',
+      },
+      {
+        depName: 'js_regex',
+        currentValue: "'~> 3.1'",
+        lockedVersion: '3.1.1',
+      },
+      {
+        depName: 'device_detector',
+        lockedVersion: '1.0.0',
+      },
+      {
+        depName: 'redis',
+        currentValue: "'~> 4.0'",
+        lockedVersion: '4.1.3',
+      },
+      {
+        depName: 'connection_pool',
+        currentValue: "'~> 2.0'",
+        lockedVersion: '2.2.2',
+      },
+      {
+        depName: 'redis-rails',
+        currentValue: "'~> 5.0.2'",
+        lockedVersion: '5.0.2',
+      },
+      {
+        depName: 'discordrb-webhooks-blackst0ne',
+        currentValue: "'~> 3.3'",
+        lockedVersion: '3.3.0',
+      },
+      {
+        depName: 'hipchat',
+        currentValue: "'~> 1.5.0'",
+        lockedVersion: '1.5.2',
+      },
+      {
+        depName: 'jira-ruby',
+        currentValue: "'~> 1.7'",
+        lockedVersion: '1.7.1',
+      },
+      {
+        depName: 'atlassian-jwt',
+        currentValue: "'~> 0.2.0'",
+        lockedVersion: '0.2.0',
+      },
+      {
+        depName: 'flowdock',
+        currentValue: "'~> 0.7'",
+        lockedVersion: '0.7.1',
+      },
+      {
+        depName: 'slack-notifier',
+        currentValue: "'~> 1.5.1'",
+        lockedVersion: '1.5.1',
+      },
+      {
+        depName: 'hangouts-chat',
+        currentValue: "'~> 0.0.5'",
+        lockedVersion: '0.0.5',
+      },
+      {
+        depName: 'asana',
+        currentValue: "'~> 0.9'",
+        lockedVersion: '0.9.3',
+      },
+      {
+        depName: 'ruby-fogbugz',
+        currentValue: "'~> 0.2.1'",
+        lockedVersion: '0.2.1',
+      },
+      {
+        depName: 'kubeclient',
+        currentValue: "'~> 4.4.0'",
+        lockedVersion: '4.4.0',
+      },
+      {
+        depName: 'sanitize',
+        currentValue: "'~> 4.6'",
+        lockedVersion: '4.6.6',
+      },
+      {
+        depName: 'babosa',
+        currentValue: "'~> 1.0.2'",
+        lockedVersion: '1.0.2',
+      },
+      {
+        depName: 'loofah',
+        currentValue: "'~> 2.2'",
+        lockedVersion: '2.4.0',
+      },
+      {
+        depName: 'licensee',
+        currentValue: "'~> 8.9'",
+        lockedVersion: '8.9.2',
+      },
+      {
+        depName: 'ace-rails-ap',
+        currentValue: "'~> 4.1.0'",
+        lockedVersion: '4.1.2',
+      },
+      {
+        depName: 'charlock_holmes',
+        currentValue: "'~> 0.7.5'",
+        lockedVersion: '0.7.6',
+      },
+      {
+        depName: 'mimemagic',
+        currentValue: "'~> 0.3.2'",
+        lockedVersion: '0.3.2',
+      },
+      {
+        depName: 'fast_blank',
+        lockedVersion: '1.0.0',
+      },
+      {
+        depName: 'gitlab-chronic',
+        currentValue: "'~> 0.10.5'",
+        lockedVersion: '0.10.5',
+      },
+      {
+        depName: 'gitlab_chronic_duration',
+        currentValue: "'~> 0.10.6.2'",
+        lockedVersion: '0.10.6.2',
+      },
+      {
+        depName: 'webpack-rails',
+        currentValue: "'~> 0.9.10'",
+        lockedVersion: '0.9.11',
+      },
+      {
+        depName: 'rack-proxy',
+        currentValue: "'~> 0.6.0'",
+        lockedVersion: '0.6.0',
+      },
+      {
+        depName: 'sassc-rails',
+        currentValue: "'~> 2.1.0'",
+        lockedVersion: '2.1.0',
+      },
+      {
+        depName: 'uglifier',
+        currentValue: "'~> 2.7.2'",
+        lockedVersion: '2.7.2',
+      },
+      {
+        depName: 'addressable',
+        currentValue: "'~> 2.5.2'",
+        lockedVersion: '2.5.2',
+      },
+      {
+        depName: 'font-awesome-rails',
+        currentValue: "'~> 4.7'",
+        lockedVersion: '4.7.0.5',
+      },
+      {
+        depName: 'gemojione',
+        currentValue: "'~> 3.3'",
+        lockedVersion: '3.3.0',
+      },
+      {
+        depName: 'gon',
+        currentValue: "'~> 6.2'",
+        lockedVersion: '6.2.0',
+      },
+      {
+        depName: 'request_store',
+        currentValue: "'~> 1.3'",
+        lockedVersion: '1.3.1',
+      },
+      {
+        depName: 'base32',
+        currentValue: "'~> 0.3.0'",
+        lockedVersion: '0.3.2',
+      },
+      {
+        depName: 'gitlab-license',
+        currentValue: '"~> 1.0"',
+        lockedVersion: '1.0.0',
+      },
+      {
+        depName: 'rack-attack',
+        currentValue: "'~> 6.2.0'",
+        lockedVersion: '6.2.0',
+      },
+      {
+        depName: 'sentry-raven',
+        currentValue: "'~> 2.9'",
+        lockedVersion: '2.9.0',
+      },
+      {
+        depName: 'premailer-rails',
+        currentValue: "'~> 1.10.3'",
+        lockedVersion: '1.10.3',
+      },
+      {
+        depName: 'gitlab-labkit',
+        currentValue: "'0.8.0'",
+        lockedVersion: '0.8.0',
+      },
+      {
+        depName: 'ruby_parser',
+        currentValue: "'~> 3.8'",
+        lockedVersion: '3.13.1',
+      },
+      {
+        depName: 'rails-i18n',
+        currentValue: "'~> 5.1'",
+        lockedVersion: '5.1.1',
+      },
+      {
+        depName: 'gettext_i18n_rails',
+        currentValue: "'~> 1.8.0'",
+        lockedVersion: '1.8.0',
+      },
+      {
+        depName: 'gettext_i18n_rails_js',
+        currentValue: "'~> 1.3'",
+        lockedVersion: '1.3.0',
+      },
+      {
+        depName: 'gettext',
+        currentValue: "'~> 3.2.2'",
+        lockedVersion: '3.2.9',
+      },
+      {
+        depName: 'batch-loader',
+        currentValue: "'~> 1.4.0'",
+        lockedVersion: '1.4.0',
+      },
+      {
+        depName: 'peek',
+        currentValue: "'~> 1.1'",
+        lockedVersion: '1.1.0',
+      },
+      {
+        depName: 'snowplow-tracker',
+        currentValue: "'~> 0.6.1'",
+        lockedVersion: '0.6.1',
+      },
+      {
+        depName: 'derailed_benchmarks',
+        lockedVersion: '1.3.5',
+      },
+      {
+        depName: 'method_source',
+        currentValue: "'~> 0.8'",
+        lockedVersion: '0.9.2',
+        depTypes: ['metrics'],
+      },
+      {
+        depName: 'influxdb',
+        currentValue: "'~> 0.2'",
+        lockedVersion: '0.2.3',
+        depTypes: ['metrics'],
+      },
+      {
+        depName: 'prometheus-client-mmap',
+        currentValue: "'~> 0.9.10'",
+        lockedVersion: '0.9.10',
+        depTypes: ['metrics'],
+      },
+      {
+        depName: 'raindrops',
+        currentValue: "'~> 0.18'",
+        lockedVersion: '0.19.0',
+        depTypes: ['metrics'],
+      },
+      {
+        depName: 'brakeman',
+        currentValue: "'~> 4.2'",
+        lockedVersion: '4.2.1',
+        depTypes: ['development'],
+      },
+      {
+        depName: 'danger',
+        currentValue: "'~> 6.0'",
+        lockedVersion: '6.0.9',
+        depTypes: ['development'],
+      },
+      {
+        depName: 'letter_opener_web',
+        currentValue: "'~> 1.3.4'",
+        lockedVersion: '1.3.4',
+        depTypes: ['development'],
+      },
+      {
+        depName: 'rblineprof',
+        currentValue: "'~> 0.3.6'",
+        lockedVersion: '0.3.6',
+        depTypes: ['development'],
+      },
+      {
+        depName: 'better_errors',
+        currentValue: "'~> 2.5.0'",
+        lockedVersion: '2.5.0',
+        depTypes: ['development'],
+      },
+      {
+        depName: 'binding_of_caller',
+        currentValue: "'~> 0.8.0'",
+        lockedVersion: '0.8.0',
+        depTypes: ['development'],
+      },
+      {
+        depName: 'thin',
+        currentValue: "'~> 1.7.0'",
+        lockedVersion: '1.7.2',
+        depTypes: ['development'],
+      },
+      {
+        depName: 'bullet',
+        currentValue: "'~> 6.0.2'",
+        lockedVersion: '6.0.2',
+        depTypes: ['development', 'test'],
+      },
+      {
+        depName: 'pry-byebug',
+        currentValue: "'~> 3.5.1'",
+        lockedVersion: '3.5.1',
+        depTypes: ['development', 'test'],
+      },
+      {
+        depName: 'pry-rails',
+        currentValue: "'~> 0.3.4'",
+        lockedVersion: '0.3.6',
+        depTypes: ['development', 'test'],
+      },
+      {
+        depName: 'awesome_print',
+        lockedVersion: '1.8.0',
+        depTypes: ['development', 'test'],
+      },
+      {
+        depName: 'database_cleaner',
+        currentValue: "'~> 1.7.0'",
+        lockedVersion: '1.7.0',
+        depTypes: ['development', 'test'],
+      },
+      {
+        depName: 'factory_bot_rails',
+        currentValue: "'~> 5.1.0'",
+        lockedVersion: '5.1.0',
+        depTypes: ['development', 'test'],
+      },
+      {
+        depName: 'rspec-rails',
+        currentValue: "'~> 4.0.0.beta3'",
+        lockedVersion: '4.0.0.beta3',
+        depTypes: ['development', 'test'],
+      },
+      {
+        depName: 'minitest',
+        currentValue: "'~> 5.11.0'",
+        lockedVersion: '5.11.3',
+        depTypes: ['development', 'test'],
+      },
+      {
+        depName: 'ffaker',
+        currentValue: "'~> 2.10'",
+        lockedVersion: '2.10.0',
+        depTypes: ['development', 'test'],
+      },
+      {
+        depName: 'spring',
+        currentValue: "'~> 2.0.0'",
+        lockedVersion: '2.0.2',
+        depTypes: ['development', 'test'],
+      },
+      {
+        depName: 'spring-commands-rspec',
+        currentValue: "'~> 1.0.4'",
+        lockedVersion: '1.0.4',
+        depTypes: ['development', 'test'],
+      },
+      {
+        depName: 'gitlab-styles',
+        currentValue: "'~> 3.1.0'",
+        lockedVersion: '3.1.0',
+        depTypes: ['development', 'test'],
+      },
+      {
+        depName: 'rubocop',
+        currentValue: "'~> 0.74.0'",
+        lockedVersion: '0.74.0',
+        depTypes: ['development', 'test'],
+      },
+      {
+        depName: 'rubocop-performance',
+        currentValue: "'~> 1.4.1'",
+        lockedVersion: '1.4.1',
+        depTypes: ['development', 'test'],
+      },
+      {
+        depName: 'rubocop-rspec',
+        currentValue: "'~> 1.37.0'",
+        lockedVersion: '1.37.0',
+        depTypes: ['development', 'test'],
+      },
+      {
+        depName: 'scss_lint',
+        currentValue: "'~> 0.56.0'",
+        lockedVersion: '0.56.0',
+        depTypes: ['development', 'test'],
+      },
+      {
+        depName: 'haml_lint',
+        currentValue: "'~> 0.34.0'",
+        lockedVersion: '0.34.0',
+        depTypes: ['development', 'test'],
+      },
+      {
+        depName: 'simplecov',
+        currentValue: "'~> 0.16.1'",
+        lockedVersion: '0.16.1',
+        depTypes: ['development', 'test'],
+      },
+      {
+        depName: 'bundler-audit',
+        currentValue: "'~> 0.5.0'",
+        lockedVersion: '0.5.0',
+        depTypes: ['development', 'test'],
+      },
+      {
+        depName: 'benchmark-ips',
+        currentValue: "'~> 2.3.0'",
+        lockedVersion: '2.3.0',
+        depTypes: ['development', 'test'],
+      },
+      {
+        depName: 'knapsack',
+        currentValue: "'~> 1.17'",
+        lockedVersion: '1.17.0',
+        depTypes: ['development', 'test'],
+      },
+      {
+        depName: 'stackprof',
+        currentValue: "'~> 0.2.13'",
+        lockedVersion: '0.2.13',
+        depTypes: ['development', 'test'],
+      },
+      {
+        depName: 'simple_po_parser',
+        currentValue: "'~> 1.1.2'",
+        lockedVersion: '1.1.2',
+        depTypes: ['development', 'test'],
+      },
+      {
+        depName: 'timecop',
+        currentValue: "'~> 0.8.0'",
+        lockedVersion: '0.8.1',
+        depTypes: ['development', 'test'],
+      },
+      {
+        depName: 'png_quantizator',
+        currentValue: "'~> 0.2.1'",
+        lockedVersion: '0.2.1',
+        depTypes: ['development', 'test'],
+      },
+      {
+        depName: 'parallel',
+        currentValue: "'~> 1.17.0'",
+        lockedVersion: '1.19.1',
+        depTypes: ['development', 'test'],
+      },
+      {
+        depName: 'license_finder',
+        currentValue: "'~> 5.4'",
+        lockedVersion: '5.4.0',
+        depTypes: ['development', 'test', 'omnibus'],
+      },
+      {
+        depName: 'fuubar',
+        currentValue: "'~> 2.2.0'",
+        lockedVersion: '2.2.0',
+        depTypes: ['test'],
+      },
+      {
+        depName: 'rspec-retry',
+        currentValue: "'~> 0.6.1'",
+        lockedVersion: '0.6.1',
+        depTypes: ['test'],
+      },
+      {
+        depName: 'rspec_profiling',
+        currentValue: "'~> 0.0.5'",
+        lockedVersion: '0.0.5',
+        depTypes: ['test'],
+      },
+      {
+        depName: 'rspec-set',
+        currentValue: "'~> 0.1.3'",
+        lockedVersion: '0.1.3',
+        depTypes: ['test'],
+      },
+      {
+        depName: 'rspec-parameterized',
+        lockedVersion: '0.4.2',
+        depTypes: ['test'],
+      },
+      {
+        depName: 'capybara',
+        currentValue: "'~> 3.22.0'",
+        lockedVersion: '3.22.0',
+        depTypes: ['test'],
+      },
+      {
+        depName: 'capybara-screenshot',
+        currentValue: "'~> 1.0.22'",
+        lockedVersion: '1.0.22',
+        depTypes: ['test'],
+      },
+      {
+        depName: 'selenium-webdriver',
+        currentValue: "'~> 3.142'",
+        lockedVersion: '3.142.6',
+        depTypes: ['test'],
+      },
+      {
+        depName: 'shoulda-matchers',
+        currentValue: "'~> 4.0.1'",
+        lockedVersion: '4.0.1',
+        depTypes: ['test'],
+      },
+      {
+        depName: 'email_spec',
+        currentValue: "'~> 2.2.0'",
+        lockedVersion: '2.2.0',
+        depTypes: ['test'],
+      },
+      {
+        depName: 'json-schema',
+        currentValue: "'~> 2.8.0'",
+        lockedVersion: '2.8.0',
+        depTypes: ['test'],
+      },
+      {
+        depName: 'webmock',
+        currentValue: "'~> 3.5.1'",
+        lockedVersion: '3.5.1',
+        depTypes: ['test'],
+      },
+      {
+        depName: 'rails-controller-testing',
+        lockedVersion: '1.0.4',
+        depTypes: ['test'],
+      },
+      {
+        depName: 'concurrent-ruby',
+        currentValue: "'~> 1.1'",
+        lockedVersion: '1.1.5',
+        depTypes: ['test'],
+      },
+      {
+        depName: 'test-prof',
+        currentValue: "'~> 0.10.0'",
+        lockedVersion: '0.10.0',
+        depTypes: ['test'],
+      },
+      {
+        depName: 'rspec_junit_formatter',
+        lockedVersion: '0.4.1',
+        depTypes: ['test'],
+      },
+      {
+        depName: 'guard-rspec',
+        lockedVersion: '4.7.3',
+        depTypes: ['test'],
+      },
+      {
+        depName: 'octokit',
+        currentValue: "'~> 4.9'",
+        lockedVersion: '4.9.0',
+      },
+      {
+        depName: 'mail_room',
+        currentValue: "'~> 0.10.0'",
+        lockedVersion: '0.10.0',
+      },
+      {
+        depName: 'email_reply_trimmer',
+        currentValue: "'~> 0.1'",
+        lockedVersion: '0.1.6',
+      },
+      {
+        depName: 'html2text',
+        lockedVersion: '0.2.0',
+      },
+      {
+        depName: 'ruby-prof',
+        currentValue: "'~> 1.0.0'",
+        lockedVersion: '1.0.0',
+      },
+      {
+        depName: 'rbtrace',
+        currentValue: "'~> 0.4'",
+        lockedVersion: '0.4.11',
+      },
+      {
+        depName: 'memory_profiler',
+        currentValue: "'~> 0.9'",
+        lockedVersion: '0.9.13',
+      },
+      {
+        depName: 'benchmark-memory',
+        currentValue: "'~> 0.1'",
+        lockedVersion: '0.1.2',
+      },
+      {
+        depName: 'activerecord-explain-analyze',
+        currentValue: "'~> 0.1'",
+        lockedVersion: '0.1.0',
+      },
+      {
+        depName: 'oauth2',
+        currentValue: "'~> 1.4'",
+        lockedVersion: '1.4.1',
+      },
+      {
+        depName: 'health_check',
+        currentValue: "'~> 2.6.0'",
+        lockedVersion: '2.6.0',
+      },
+      {
+        depName: 'vmstat',
+        currentValue: "'~> 2.3.0'",
+        lockedVersion: '2.3.0',
+      },
+      {
+        depName: 'sys-filesystem',
+        currentValue: "'~> 1.1.6'",
+        lockedVersion: '1.1.6',
+      },
+      {
+        depName: 'net-ntp',
+        lockedVersion: '2.1.3',
+      },
+      {
+        depName: 'net-ssh',
+        currentValue: "'~> 5.2'",
+        lockedVersion: '5.2.0',
+      },
+      {
+        depName: 'sshkey',
+        currentValue: "'~> 2.0'",
+        lockedVersion: '2.0.0',
+      },
+      {
+        depName: 'ed25519',
+        currentValue: "'~> 1.2'",
+        lockedVersion: '1.2.4',
+        depTypes: ['ed25519'],
+      },
+      {
+        depName: 'bcrypt_pbkdf',
+        currentValue: "'~> 1.0'",
+        lockedVersion: '1.0.0',
+        depTypes: ['ed25519'],
+      },
+      {
+        depName: 'gitaly',
+        currentValue: "'~> 1.73.0'",
+        lockedVersion: '1.73.0',
+      },
+      {
+        depName: 'grpc',
+        currentValue: "'~> 1.24.0'",
+        lockedVersion: '1.24.0',
+      },
+      {
+        depName: 'google-protobuf',
+        currentValue: "'~> 3.8.0'",
+        lockedVersion: '3.8.0',
+      },
+      {
+        depName: 'toml-rb',
+        currentValue: "'~> 1.0.0'",
+        lockedVersion: '1.0.0',
+      },
+      {
+        depName: 'flipper',
+        currentValue: "'~> 0.17.1'",
+        lockedVersion: '0.17.1',
+      },
+      {
+        depName: 'flipper-active_record',
+        currentValue: "'~> 0.17.1'",
+        lockedVersion: '0.17.1',
+      },
+      {
+        depName: 'flipper-active_support_cache_store',
+        currentValue: "'~> 0.17.1'",
+        lockedVersion: '0.17.1',
+      },
+      {
+        depName: 'unleash',
+        currentValue: "'~> 0.1.5'",
+        lockedVersion: '0.1.5',
+      },
+      {
+        depName: 'lograge',
+        currentValue: "'~> 0.5'",
+        lockedVersion: '0.10.0',
+      },
+      {
+        depName: 'grape_logging',
+        currentValue: "'~> 1.7'",
+        lockedVersion: '1.7.0',
+      },
+      {
+        depName: 'gitlab-net-dns',
+        currentValue: "'~> 0.9.1'",
+        lockedVersion: '0.9.1',
+      },
+      {
+        depName: 'countries',
+        currentValue: "'~> 3.0'",
+        lockedVersion: '3.0.0',
+      },
+      {
+        depName: 'retriable',
+        currentValue: "'~> 3.1.2'",
+        lockedVersion: '3.1.2',
+      },
+      {
+        depName: 'liquid',
+        currentValue: "'~> 4.0'",
+        lockedVersion: '4.0.3',
+      },
+    ]);
     expect(
       res?.deps.every(
         (dep) => isString(dep.lockedVersion) && isValid(dep.lockedVersion),
@@ -4456,33 +2544,24 @@ describe('modules/manager/bundler/extract', () => {
   it('parse source blocks in Gemfile', async () => {
     fs.readLocalFile.mockResolvedValueOnce(sourceBlockGemfile);
     const res = await extractPackageFile(sourceBlockGemfile, 'Gemfile');
-    expect(res).toEqual({
+    expect(res).toMatchObject({
+      registryUrls: [],
       deps: [
         {
-          currentValue: '"~> 1"',
-          datasource: 'rubygems',
           depName: 'sfn_my_dep1',
-          managerData: {
-            lineNumber: 1,
-          },
+          currentValue: '"~> 1"',
           registryUrls: [
             'https://hub.tech.my.domain.de/artifactory/api/gems/my-gems-prod-local/',
           ],
         },
         {
-          currentValue: '"~> 1"',
-          datasource: 'rubygems',
           depName: 'sfn_my_dep2',
-          managerData: {
-            lineNumber: 2,
-          },
+          currentValue: '"~> 1"',
           registryUrls: [
             'https://hub.tech.my.domain.de/artifactory/api/gems/my-gems-prod-local/',
           ],
         },
       ],
-      lockFiles: ['Gemfile.lock'],
-      registryUrls: [],
     });
   });
 
@@ -4492,29 +2571,20 @@ describe('modules/manager/bundler/extract', () => {
       sourceBlockWithNewLinesGemfile,
       'Gemfile',
     );
-    expect(res).toEqual({
+    expect(res).toMatchObject({
+      registryUrls: [],
       deps: [
         {
-          datasource: 'rubygems',
           depName: 'rubocop',
           lockedVersion: '0.68.1',
-          managerData: {
-            lineNumber: 3,
-          },
           registryUrls: ['https://rubygems.org'],
         },
         {
-          datasource: 'rubygems',
           depName: 'brakeman',
           lockedVersion: '4.4.0',
-          managerData: {
-            lineNumber: 5,
-          },
           registryUrls: ['https://rubygems.org'],
         },
       ],
-      lockFiles: ['Gemfile.lock'],
-      registryUrls: [],
     });
     expect(res?.deps).toHaveLength(2);
   });

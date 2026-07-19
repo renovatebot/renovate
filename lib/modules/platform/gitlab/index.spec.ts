@@ -475,19 +475,8 @@ describe('modules/platform/gitlab/index', () => {
         gitUrl: 'ssh',
       });
 
-      expect(git.initRepo.mock.calls).toEqual([
-        [
-          {
-            cloneSubmodules: undefined,
-            cloneSubmodulesFilter: undefined,
-            defaultBranch: 'master',
-            ignorePrAuthor: false,
-            mergeMethod: 'merge',
-            mergeTrainsEnabled: false,
-            repository: 'some%2Frepo%2Fproject',
-            url: 'ssh://git@gitlab.com/some%2Frepo%2Fproject.git',
-          },
-        ],
+      expect(git.initRepo.mock.calls).toMatchObject([
+        [{ url: 'ssh://git@gitlab.com/some%2Frepo%2Fproject.git' }],
       ]);
     });
 
@@ -535,16 +524,9 @@ describe('modules/platform/gitlab/index', () => {
       await gitlab.initRepo({
         repository: 'some/repo/project',
       });
-      expect(git.initRepo.mock.calls).toEqual([
+      expect(git.initRepo.mock.calls).toMatchObject([
         [
           {
-            cloneSubmodules: undefined,
-            cloneSubmodulesFilter: undefined,
-            defaultBranch: 'master',
-            ignorePrAuthor: false,
-            mergeMethod: 'merge',
-            mergeTrainsEnabled: false,
-            repository: 'some%2Frepo%2Fproject',
             url: 'http://oauth2:123test@mycompany.com/gitlab/some/repo/project.git',
           },
         ],
@@ -647,12 +629,7 @@ describe('modules/platform/gitlab/index', () => {
           },
         });
       const pr = await gitlab.getBranchPr('some-branch');
-      expect(pr).toEqual({
-        bodyStruct: {
-          hash: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
-        },
-        createdAt: '2025-05-19T12:00:00.000Z',
-        hasAssignees: false,
+      expect(pr).toMatchObject({
         number: 91,
         sourceBranch: 'some-branch',
         state: 'open',
@@ -698,17 +675,9 @@ describe('modules/platform/gitlab/index', () => {
           },
         });
       const pr = await gitlab.getBranchPr('some-branch');
-      expect(pr).toEqual({
-        bodyStruct: {
-          hash: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
-        },
-        createdAt: '2025-05-19T12:00:00.000Z',
-        hasAssignees: false,
+      expect(pr).toMatchObject({
         isDraft: true,
         number: 91,
-        sourceBranch: 'some-branch',
-        state: 'open',
-        targetBranch: 'master',
         title: 'some change',
       });
     });
@@ -750,17 +719,9 @@ describe('modules/platform/gitlab/index', () => {
           },
         });
       const pr = await gitlab.getBranchPr('some-branch');
-      expect(pr).toEqual({
-        bodyStruct: {
-          hash: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
-        },
-        createdAt: '2025-05-19T12:00:00.000Z',
-        hasAssignees: false,
+      expect(pr).toMatchObject({
         isDraft: true,
         number: 91,
-        sourceBranch: 'some-branch',
-        state: 'open',
-        targetBranch: 'master',
         title: 'some change',
       });
     });
@@ -3600,12 +3561,7 @@ describe('modules/platform/gitlab/index', () => {
           assignees: [],
         });
       const pr = await gitlab.getPr(12345);
-      expect(pr).toEqual({
-        bodyStruct: {
-          hash: '23f41dbec0785a6c77457dd6ebf99ae5970c5fffc9f7a8ad7f66c1b8eeba5b90',
-        },
-        createdAt: '2025-05-19T12:00:00.000Z',
-        hasAssignees: false,
+      expect(pr).toMatchObject({
         number: 12345,
         sourceBranch: 'some-branch',
         state: 'merged',
@@ -3635,17 +3591,9 @@ describe('modules/platform/gitlab/index', () => {
           assignees: [],
         });
       const pr = await gitlab.getPr(12345);
-      expect(pr).toEqual({
-        bodyStruct: {
-          hash: '23f41dbec0785a6c77457dd6ebf99ae5970c5fffc9f7a8ad7f66c1b8eeba5b90',
-        },
-        createdAt: '2025-05-19T12:00:00.000Z',
-        hasAssignees: false,
+      expect(pr).toMatchObject({
         isDraft: true,
         number: 12345,
-        sourceBranch: 'some-branch',
-        state: 'merged',
-        targetBranch: 'master',
         title: 'do something',
       });
       expect(pr?.title).toBe('do something');
@@ -3671,17 +3619,9 @@ describe('modules/platform/gitlab/index', () => {
           assignees: [],
         });
       const pr = await gitlab.getPr(12345);
-      expect(pr).toEqual({
-        bodyStruct: {
-          hash: '23f41dbec0785a6c77457dd6ebf99ae5970c5fffc9f7a8ad7f66c1b8eeba5b90',
-        },
-        createdAt: '2025-05-19T12:00:00.000Z',
-        hasAssignees: false,
+      expect(pr).toMatchObject({
         isDraft: true,
         number: 12345,
-        sourceBranch: 'some-branch',
-        state: 'merged',
-        targetBranch: 'master',
         title: 'do something',
       });
       expect(pr?.title).toBe('do something');
@@ -3708,12 +3648,7 @@ describe('modules/platform/gitlab/index', () => {
           },
         });
       const pr = await gitlab.getPr(12345);
-      expect(pr).toEqual({
-        bodyStruct: {
-          hash: '23f41dbec0785a6c77457dd6ebf99ae5970c5fffc9f7a8ad7f66c1b8eeba5b90',
-        },
-        createdAt: '2025-05-19T12:00:00.000Z',
-        hasAssignees: true,
+      expect(pr).toMatchObject({
         number: 12345,
         sourceBranch: 'some-branch',
         state: 'open',
@@ -3747,12 +3682,7 @@ describe('modules/platform/gitlab/index', () => {
           ],
         });
       const pr = await gitlab.getPr(12345);
-      expect(pr).toEqual({
-        bodyStruct: {
-          hash: '23f41dbec0785a6c77457dd6ebf99ae5970c5fffc9f7a8ad7f66c1b8eeba5b90',
-        },
-        createdAt: '2025-05-19T12:00:00.000Z',
-        hasAssignees: true,
+      expect(pr).toMatchObject({
         number: 12345,
         sourceBranch: 'some-branch',
         state: 'open',

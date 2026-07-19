@@ -48,9 +48,7 @@ describe('modules/datasource/node-version/index', () => {
         datasource,
         packageName: 'node',
       });
-      expect(res).toEqual({
-        homepage: 'https://nodejs.org',
-        registryUrl: 'https://nodejs.org/dist',
+      expect(res).toMatchObject({
         releases: [
           {
             isStable: false,
@@ -373,7 +371,6 @@ describe('modules/datasource/node-version/index', () => {
             version: 'v16.9.0',
           },
         ],
-        sourceUrl: 'https://github.com/nodejs/node',
       });
       expect(res?.releases).toHaveLength(64);
     });

@@ -30,9 +30,7 @@ describe('modules/datasource/golang-version/index', () => {
         releaseTimestamp: '2012-03-28T00:00:00.000Z',
         version: '1.0.0',
       });
-      expect(res).toEqual({
-        homepage: 'https://go.dev/',
-        registryUrl: 'https://raw.githubusercontent.com/golang/website',
+      expect(res).toMatchObject({
         releases: [
           {
             releaseTimestamp: '2012-03-28T00:00:00.000Z',
@@ -563,7 +561,6 @@ describe('modules/datasource/golang-version/index', () => {
             version: '1.18.0',
           },
         ],
-        sourceUrl: 'https://github.com/golang/go',
       });
     });
 

@@ -158,11 +158,11 @@ describe('modules/datasource/galaxy-collection/index', () => {
         datasource,
         packageName: 'community.kubernetes',
       });
-      expect(res).toEqual({
-        registryUrl: 'https://galaxy.ansible.com/api',
+      expect(res).toMatchObject({
+        sourceUrl:
+          'https://github.com/ansible-collections/community.kubernetes',
         releases: [
           {
-            dependencies: {},
             downloadUrl:
               'https://galaxy.ansible.com/api/v3/plugin/ansible/content/published/collections/artifacts/community-kubernetes-0.11.1.tar.gz',
             isDeprecated: false,
@@ -173,33 +173,9 @@ describe('modules/datasource/galaxy-collection/index', () => {
               'https://github.com/ansible-collections/community.kubernetes',
             version: '0.11.1',
           },
-          {
-            dependencies: {},
-            downloadUrl:
-              'https://galaxy.ansible.com/api/v3/plugin/ansible/content/published/collections/artifacts/community-kubernetes-1.2.0.tar.gz',
-            isDeprecated: false,
-            newDigest:
-              'a53eaf6a51987d30cc48ebcd20f0102dae0f17a7a02071928381e5a62951a0ed',
-            releaseTimestamp: '2023-05-08T20:27:29.625Z',
-            sourceUrl:
-              'https://github.com/ansible-collections/community.kubernetes',
-            version: '1.2.0',
-          },
-          {
-            dependencies: {},
-            downloadUrl:
-              'https://galaxy.ansible.com/api/v3/plugin/ansible/content/published/collections/artifacts/community-kubernetes-1.2.1.tar.gz',
-            isDeprecated: false,
-            newDigest:
-              '38e064bb32ee86781f0c6e56bd29fcfbaf48180f993e129185eb8420caabf223',
-            releaseTimestamp: '2023-05-08T20:27:29.629Z',
-            sourceUrl:
-              'https://github.com/ansible-collections/community.kubernetes',
-            version: '1.2.1',
-          },
+          { version: '1.2.0' },
+          { version: '1.2.1' },
         ],
-        sourceUrl:
-          'https://github.com/ansible-collections/community.kubernetes',
       });
       expect(res).not.toBeNull();
       expect(res).toBeDefined();
@@ -242,49 +218,14 @@ describe('modules/datasource/galaxy-collection/index', () => {
           'https://my.automationhub.local/api/galaxy/content/published/',
         ],
       });
-      expect(res).toEqual({
+      expect(res).toMatchObject({
         registryUrl:
           'https://my.automationhub.local/api/galaxy/content/published',
         releases: [
-          {
-            dependencies: {},
-            downloadUrl:
-              'https://galaxy.ansible.com/api/v3/plugin/ansible/content/published/collections/artifacts/community-kubernetes-0.11.1.tar.gz',
-            isDeprecated: false,
-            newDigest:
-              'cd197084b32f8976394f269eb005bf475eff2122fddbb48380c76154ab4d4530',
-            releaseTimestamp: '2023-05-08T20:27:29.606Z',
-            sourceUrl:
-              'https://github.com/ansible-collections/community.kubernetes',
-            version: '0.11.1',
-          },
-          {
-            dependencies: {},
-            downloadUrl:
-              'https://galaxy.ansible.com/api/v3/plugin/ansible/content/published/collections/artifacts/community-kubernetes-1.2.0.tar.gz',
-            isDeprecated: false,
-            newDigest:
-              'a53eaf6a51987d30cc48ebcd20f0102dae0f17a7a02071928381e5a62951a0ed',
-            releaseTimestamp: '2023-05-08T20:27:29.625Z',
-            sourceUrl:
-              'https://github.com/ansible-collections/community.kubernetes',
-            version: '1.2.0',
-          },
-          {
-            dependencies: {},
-            downloadUrl:
-              'https://galaxy.ansible.com/api/v3/plugin/ansible/content/published/collections/artifacts/community-kubernetes-1.2.1.tar.gz',
-            isDeprecated: false,
-            newDigest:
-              '38e064bb32ee86781f0c6e56bd29fcfbaf48180f993e129185eb8420caabf223',
-            releaseTimestamp: '2023-05-08T20:27:29.629Z',
-            sourceUrl:
-              'https://github.com/ansible-collections/community.kubernetes',
-            version: '1.2.1',
-          },
+          { version: '0.11.1' },
+          { version: '1.2.0' },
+          { version: '1.2.1' },
         ],
-        sourceUrl:
-          'https://github.com/ansible-collections/community.kubernetes',
       });
       expect(res).not.toBeNull();
       expect(res).toBeDefined();

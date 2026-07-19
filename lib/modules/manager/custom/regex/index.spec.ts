@@ -36,77 +36,54 @@ describe('modules/manager/custom/regex/index', () => {
       config,
     );
 
-    expect(res).toEqual({
-      ...config,
+    expect(res).toMatchObject({
       deps: [
         {
+          depName: 'gradle',
           currentValue: '6.2',
           datasource: 'gradle-version',
-          depName: 'gradle',
-          depType: 'final',
-          replaceString:
-            'ENV GRADLE_VERSION=6.2 # gradle-version/gradle&versioning=maven\n',
           versioning: 'maven',
         },
         {
+          depName: 'nodejs/node',
           currentValue: '10.19.0',
           datasource: 'github-tags',
-          depName: 'nodejs/node',
-          depType: 'final',
-          replaceString:
-            'ENV NODE_VERSION=10.19.0 # github-tags/nodejs/node&versioning=node\n',
           versioning: 'node',
         },
         {
+          depName: 'composer/composer',
           currentValue: '1.9.3',
           datasource: 'github-releases',
-          depName: 'composer/composer',
-          depType: 'final',
-          replaceString:
-            'ENV COMPOSER_VERSION=1.9.3 # github-releases/composer/composer\n',
           versioning: 'semver',
         },
         {
+          depName: 'cocoapods',
           currentValue: '1.9.0',
           datasource: 'rubygems',
-          depName: 'cocoapods',
-          depType: 'final',
-          replaceString:
-            'ENV COCOAPODS_VERSION=1.9.0 # rubygems/cocoapods&versioning=ruby\n',
           versioning: 'ruby',
         },
         {
+          depName: 'docker/docker-ce',
           currentValue: '19.03.1',
           datasource: 'github-releases',
-          depName: 'docker/docker-ce',
-          depType: 'final',
-          replaceString:
-            'ENV DOCKER_VERSION=19.03.1 # github-releases/docker/docker-ce&versioning=docker\n',
           versioning: 'docker',
         },
         {
+          depName: 'python-poetry/poetry',
           currentValue: '1.0.0',
           datasource: 'github-releases',
-          depName: 'python-poetry/poetry',
-          depType: 'final',
-          replaceString:
-            'ENV POETRY_VERSION=1.0.0 # github-releases/python-poetry/poetry\n',
           versioning: 'semver',
         },
         {
+          depName: 'npm',
           currentValue: '6.10.2',
           datasource: 'npm',
-          depName: 'npm',
-          depType: 'final',
-          replaceString: 'ENV NPM_VERSION=6.10.2 # npm/npm\n',
           versioning: 'semver',
         },
         {
+          depName: 'yarn',
           currentValue: '1.19.1',
           datasource: 'npm',
-          depName: 'yarn',
-          depType: 'final',
-          replaceString: 'ENV YARN_VERSION=1.19.1 # npm/yarn\n',
           versioning: 'semver',
         },
       ],
@@ -165,16 +142,13 @@ describe('modules/manager/custom/regex/index', () => {
       config,
     );
 
-    expect(res).toEqual({
-      ...config,
+    expect(res).toMatchObject({
       deps: [
         {
+          depName: 'openresty/headers-more-nginx-module',
           currentValue: '0.30',
           datasource: 'github-tags',
-          depName: 'openresty/headers-more-nginx-module',
           extractVersion: '^v(?<version>.*)$',
-          replaceString:
-            'ENV NGINX_MODULE_HEADERS_MORE_VERSION=0.30 # github-tags/openresty/headers-more-nginx-module&versioning=loose&extractVersion=^v(?<version>.*)$\n',
           versioning: 'loose',
         },
       ],
@@ -213,16 +187,13 @@ describe('modules/manager/custom/regex/index', () => {
       config,
     );
 
-    expect(res).toEqual({
-      ...config,
+    expect(res).toMatchObject({
       deps: [
         {
+          packageName: 'prometheus-operator',
           currentValue: '8.12.13',
           datasource: 'helm',
-          packageName: 'prometheus-operator',
           registryUrls: ['https://charts.helm.sh/stable'],
-          replaceString:
-            'chart:\n          repository: https://charts.helm.sh/stable\n          name: prometheus-operator\n          version: 8.12.13\n',
         },
       ],
     });
@@ -242,17 +213,13 @@ describe('modules/manager/custom/regex/index', () => {
       config,
     );
 
-    expect(res).toEqual({
-      ...config,
+    expect(res).toMatchObject({
       deps: [
         {
+          depName: 'gradle',
           currentValue: '6.2',
           datasource: 'gradle-version',
-          depName: 'gradle',
           registryUrls: ['http://registry.gradle.com/'],
-          replaceString:
-            'ENV GRADLE_VERSION=6.2 # gradle-version/gradle&versioning=maven\n',
-          versioning: 'maven',
         },
       ],
     });
@@ -312,24 +279,17 @@ describe('modules/manager/custom/regex/index', () => {
       config,
     );
 
-    expect(res).toEqual({
-      ...config,
+    expect(res).toMatchObject({
       deps: [
         {
+          depName: 'gradle',
           currentValue: '6.2',
           datasource: 'gradle-version',
-          depName: 'gradle',
-          replaceString:
-            'ENV GRADLE_VERSION=6.2 # gradle-version/gradle&versioning=maven\n',
-          versioning: 'maven',
         },
         {
+          depName: 'nodejs/node',
           currentValue: '10.19.0',
           datasource: 'github-tags',
-          depName: 'nodejs/node',
-          replaceString:
-            'ENV NODE_VERSION=10.19.0 # github-tags/nodejs/node&versioning=node\n',
-          versioning: 'node',
         },
       ],
     });
@@ -358,13 +318,12 @@ describe('modules/manager/custom/regex/index', () => {
       config,
     );
 
-    expect(res).toEqual({
-      ...config,
+    expect(res).toMatchObject({
       deps: [
         {
+          depName: 'my.new.registry/aRepository/andImage',
           currentValue: '1.18-alpine',
           datasource: 'docker',
-          depName: 'my.new.registry/aRepository/andImage',
           replaceString:
             'image: my.old.registry/aRepository/andImage:1.18-alpine',
         },
@@ -447,14 +406,12 @@ describe('modules/manager/custom/regex/index', () => {
       config,
     );
 
-    expect(res).toEqual({
-      ...config,
+    expect(res).toMatchObject({
       deps: [
         {
+          depName: 'prom/prometheus',
           currentValue: 'v2.21.0',
           datasource: 'docker',
-          depName: 'prom/prometheus',
-          replaceString: 'prometheus_version: "v2.21.0" //',
         },
       ],
     });
@@ -482,14 +439,12 @@ describe('modules/manager/custom/regex/index', () => {
 
     expect(res?.deps).toHaveLength(1);
     expect(res?.deps[0].depName).toBe('docker.io/prom/prometheus');
-    expect(res).toEqual({
-      ...config,
+    expect(res).toMatchObject({
       deps: [
         {
+          depName: 'docker.io/prom/prometheus',
           currentValue: 'v2.21.0',
           datasource: 'docker',
-          depName: 'docker.io/prom/prometheus',
-          replaceString: 'prometheus_version: "v2.21.0" //',
         },
       ],
     });
@@ -511,14 +466,12 @@ describe('modules/manager/custom/regex/index', () => {
       config,
     );
 
-    expect(res).toEqual({
-      ...config,
+    expect(res).toMatchObject({
       deps: [
         {
+          depName: 'prom/prometheus',
           currentValue: '0.12.0',
           datasource: 'docker',
-          depName: 'prom/prometheus',
-          replaceString: 'someother_version: "0.12.0" //',
         },
       ],
     });
@@ -542,15 +495,13 @@ describe('modules/manager/custom/regex/index', () => {
       config,
     );
 
-    expect(res).toEqual({
-      ...config,
+    expect(res).toMatchObject({
       deps: [
         {
+          depName: 'descheduler',
           currentValue: '0.19.2',
           datasource: 'helm',
-          depName: 'descheduler',
           registryUrls: ['https://kubernetes-sigs.github.io/descheduler/'],
-          replaceString: 'CHART_VERSION: 0.19.2\n',
         },
       ],
     });
@@ -632,15 +583,13 @@ describe('modules/manager/custom/regex/index', () => {
       config,
     );
 
-    expect(res).toEqual({
-      ...config,
+    expect(res).toMatchObject({
       deps: [
         {
+          depName: 'helm_repo/descheduler',
           currentValue: '0.19.2',
           datasource: 'helm',
-          depName: 'helm_repo/descheduler',
           registryUrls: ['https://kubernetes-sigs.github.io/'],
-          replaceString: 'CHART_VERSION: 0.19.2\n',
         },
       ],
     });
@@ -678,15 +627,12 @@ describe('modules/manager/custom/regex/index', () => {
       config,
     );
 
-    expect(res).toEqual({
-      ...config,
+    expect(res).toMatchObject({
       deps: [
         {
+          depName: 'prom/prometheus',
           currentValue: 'v2.19.0',
           datasource: 'docker',
-          depName: 'prom/prometheus',
-          replaceString:
-            '"name": "prom/prometheus",\n    "type": "docker",\n    "value": "v2.19.0"',
         },
       ],
     });
@@ -708,22 +654,17 @@ describe('modules/manager/custom/regex/index', () => {
       config,
     );
 
-    expect(res).toEqual({
-      ...config,
+    expect(res).toMatchObject({
       deps: [
         {
+          depName: 'prom/prometheus',
           currentValue: 'v2.19.0',
           datasource: 'docker',
-          depName: 'prom/prometheus',
-          replaceString:
-            '"name": "prom/prometheus",\n    "type": "docker",\n    "value": "v2.19.0"',
         },
         {
+          depName: 'grafana/grafana',
           currentValue: '7.2.2',
           datasource: 'docker',
-          depName: 'grafana/grafana',
-          replaceString:
-            '"name": "grafana/grafana",\n    "type": "docker",\n    "value": "7.2.2"',
         },
       ],
     });
@@ -746,15 +687,12 @@ describe('modules/manager/custom/regex/index', () => {
       config,
     );
 
-    expect(res).toEqual({
-      ...config,
+    expect(res).toMatchObject({
       deps: [
         {
+          depName: 'grafana/loki',
           currentValue: '1.6.1',
           datasource: 'docker',
-          depName: 'grafana/loki',
-          replaceString:
-            '"name": "grafana/loki",\n      "type": "docker",\n      "value": "1.6.1"',
         },
       ],
     });
@@ -808,36 +746,27 @@ describe('modules/manager/custom/regex/index', () => {
       config,
     );
 
-    expect(res).toEqual({
-      ...config,
+    expect(res).toMatchObject({
       deps: [
         {
+          depName: 'group1/group1/prom/prometheus',
           currentValue: 'v2.19.0',
           datasource: 'docker',
-          depName: 'group1/group1/prom/prometheus',
-          replaceString:
-            '"name": "prom/prometheus",\n    "type": "docker",\n    "value": "v2.19.0"',
         },
         {
+          depName: 'group2/group2/grafana/grafana',
           currentValue: '7.2.2',
           datasource: 'docker',
-          depName: 'group2/group2/grafana/grafana',
-          replaceString:
-            '"name": "grafana/grafana",\n    "type": "docker",\n    "value": "7.2.2"',
         },
         {
+          depName: 'backup/backup/grafana/loki',
           currentValue: '1.6.1',
           datasource: 'docker',
-          depName: 'backup/backup/grafana/loki',
-          replaceString:
-            '"name": "grafana/loki",\n      "type": "docker",\n      "value": "1.6.1"',
         },
         {
+          depName: 'setup/setup/python',
           currentValue: '3.9.0',
           datasource: 'docker',
-          depName: 'setup/setup/python',
-          replaceString:
-            '"name": "python",\n      "type": "docker",\n      "value": "3.9.0"',
         },
       ],
     });

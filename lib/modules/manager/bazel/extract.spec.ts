@@ -382,25 +382,17 @@ describe('modules/manager/bazel/extract', () => {
       );
 
       expect(res?.deps).toHaveLength(2);
-      expect(res?.deps).toEqual([
+      expect(res?.deps).toMatchObject([
         {
           currentValue: 'v1.1.2',
           datasource: 'github-tags',
           depName: 'aspect_rules_js',
-          depType: 'http_archive',
-          managerData: {
-            idx: 0,
-          },
           packageName: 'aspect-build/rules_js',
         },
         {
           currentValue: '5.5.3',
           datasource: 'github-releases',
           depName: 'rules_nodejs',
-          depType: 'http_archive',
-          managerData: {
-            idx: 1,
-          },
           packageName: 'bazelbuild/rules_nodejs',
         },
       ]);

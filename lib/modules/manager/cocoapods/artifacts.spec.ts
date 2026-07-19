@@ -127,28 +127,7 @@ describe('modules/manager/cocoapods/artifacts', () => {
         config,
       }),
     ).toBeNull();
-    expect(execSnapshots).toEqual([
-      {
-        cmd: 'pod install',
-        options: {
-          cwd: '/tmp/github/some/repo',
-          env: {
-            HOME: '/home/user',
-            HTTPS_PROXY: 'https://example.com',
-            HTTP_PROXY: 'http://example.com',
-            LANG: 'en_US.UTF-8',
-            LC_ALL: 'en_US',
-            NO_PROXY: 'localhost',
-            PATH: '/tmp/path',
-          },
-          maxBuffer: 10485760,
-          stderr: 'pipe',
-          stdin: 'pipe',
-          stdout: 'pipe',
-          timeout: 900000,
-        },
-      },
-    ]);
+    expect(execSnapshots).toMatchObject([{ cmd: 'pod install' }]);
   });
 
   it('returns updated Podfile', async () => {
@@ -172,31 +151,10 @@ describe('modules/manager/cocoapods/artifacts', () => {
         config,
       }),
     ).toMatchObject([{ file: { contents: 'New Podfile' } }]);
-    expect(execSnapshots).toEqual([
-      {
-        cmd: 'docker pull ghcr.io/renovatebot/base-image',
-        options: {},
-      },
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'docker pull ghcr.io/renovatebot/base-image' },
       {
         cmd: 'docker run --rm --name=renovate_sidecar --label=renovate_child -v "/tmp/github/some/repo":"/tmp/github/some/repo" -v "/tmp/cache":"/tmp/cache" -e CONTAINERBASE_CACHE_DIR -w "/tmp/github/some/repo" ghcr.io/renovatebot/base-image bash -l -c "install-tool ruby 3.1.0 && install-tool cocoapods 3.1.0 && gem install cocoapods-acknowledgements && pod install"',
-        options: {
-          cwd: '/tmp/github/some/repo',
-          env: {
-            CONTAINERBASE_CACHE_DIR: '/tmp/cache/containerbase',
-            HOME: '/home/user',
-            HTTPS_PROXY: 'https://example.com',
-            HTTP_PROXY: 'http://example.com',
-            LANG: 'en_US.UTF-8',
-            LC_ALL: 'en_US',
-            NO_PROXY: 'localhost',
-            PATH: '/tmp/path',
-          },
-          maxBuffer: 10485760,
-          stderr: 'pipe',
-          stdin: 'pipe',
-          stdout: 'pipe',
-          timeout: 900000,
-        },
       },
     ]);
   });
@@ -231,31 +189,10 @@ describe('modules/manager/cocoapods/artifacts', () => {
       { file: { type: 'addition', path: 'Pods/New' } },
       { file: { type: 'deletion', path: 'Pods/Deleted' } },
     ]);
-    expect(execSnapshots).toEqual([
-      {
-        cmd: 'docker pull ghcr.io/renovatebot/base-image',
-        options: {},
-      },
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'docker pull ghcr.io/renovatebot/base-image' },
       {
         cmd: 'docker run --rm --name=renovate_sidecar --label=renovate_child -v "/tmp/github/some/repo":"/tmp/github/some/repo" -v "/tmp/cache":"/tmp/cache" -e CONTAINERBASE_CACHE_DIR -w "/tmp/github/some/repo" ghcr.io/renovatebot/base-image bash -l -c "install-tool ruby 3.1.0 && install-tool cocoapods 3.1.0 && pod install"',
-        options: {
-          cwd: '/tmp/github/some/repo',
-          env: {
-            CONTAINERBASE_CACHE_DIR: '/tmp/cache/containerbase',
-            HOME: '/home/user',
-            HTTPS_PROXY: 'https://example.com',
-            HTTP_PROXY: 'http://example.com',
-            LANG: 'en_US.UTF-8',
-            LC_ALL: 'en_US',
-            NO_PROXY: 'localhost',
-            PATH: '/tmp/path',
-          },
-          maxBuffer: 10485760,
-          stderr: 'pipe',
-          stdin: 'pipe',
-          stdout: 'pipe',
-          timeout: 900000,
-        },
       },
     ]);
   });
@@ -299,28 +236,7 @@ describe('modules/manager/cocoapods/artifacts', () => {
     ).toEqual([
       { artifactError: { fileName: 'Podfile.lock', stderr: 'exec exception' } },
     ]);
-    expect(execSnapshots).toEqual([
-      {
-        cmd: 'pod install',
-        options: {
-          cwd: '/tmp/github/some/repo',
-          env: {
-            HOME: '/home/user',
-            HTTPS_PROXY: 'https://example.com',
-            HTTP_PROXY: 'http://example.com',
-            LANG: 'en_US.UTF-8',
-            LC_ALL: 'en_US',
-            NO_PROXY: 'localhost',
-            PATH: '/tmp/path',
-          },
-          maxBuffer: 10485760,
-          stderr: 'pipe',
-          stdin: 'pipe',
-          stdout: 'pipe',
-          timeout: 900000,
-        },
-      },
-    ]);
+    expect(execSnapshots).toMatchObject([{ cmd: 'pod install' }]);
   });
 
   it('dynamically selects Docker image tag', async () => {

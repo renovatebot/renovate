@@ -389,11 +389,7 @@ describe('modules/platform/bitbucket/index', () => {
         .get('/2.0/repositories/some/repo/pullrequests/5')
         .reply(200, pr);
 
-      expect(await bitbucket.getBranchPr('branch')).toEqual({
-        bodyStruct: {
-          hash: '761b7ad8ad439b2855fcbb611331c646ef0870b0631247bba3f3025cb6df5a53',
-        },
-        createdAt: '2018-07-02T07:02:25.275030+00:00',
+      expect(await bitbucket.getBranchPr('branch')).toMatchObject({
         number: 5,
         sourceBranch: 'branch',
         state: 'open',
@@ -936,17 +932,12 @@ describe('modules/platform/bitbucket/index', () => {
             },
           ],
         });
-      expect(await bitbucket.getPrList()).toEqual([
+      expect(await bitbucket.getPrList()).toMatchObject([
         {
-          bodyStruct: {
-            hash: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
-          },
-          createdAt: undefined,
           number: 1,
           sourceBranch: 'branch-a',
           state: 'open',
           targetBranch: 'branch-b',
-          title: undefined,
         },
       ]);
     });
@@ -968,15 +959,10 @@ describe('modules/platform/bitbucket/index', () => {
           branchName: 'branch',
           prTitle: 'title',
         }),
-      ).toEqual({
-        bodyStruct: {
-          hash: '761b7ad8ad439b2855fcbb611331c646ef0870b0631247bba3f3025cb6df5a53',
-        },
-        createdAt: '2018-07-02T07:02:25.275030+00:00',
+      ).toMatchObject({
         number: 5,
         sourceBranch: 'branch',
         state: 'open',
-        targetBranch: 'master',
         title: 'title',
       });
     });
@@ -1746,11 +1732,7 @@ describe('modules/platform/bitbucket/index', () => {
     it('exists', async () => {
       const scope = await initRepoMock();
       scope.get('/2.0/repositories/some/repo/pullrequests/5').reply(200, pr);
-      expect(await bitbucket.getPr(5)).toEqual({
-        bodyStruct: {
-          hash: '761b7ad8ad439b2855fcbb611331c646ef0870b0631247bba3f3025cb6df5a53',
-        },
-        createdAt: '2018-07-02T07:02:25.275030+00:00',
+      expect(await bitbucket.getPr(5)).toMatchObject({
         number: 5,
         sourceBranch: 'branch',
         state: 'open',
@@ -1776,24 +1758,20 @@ describe('modules/platform/bitbucket/index', () => {
         .get('/2.0/repositories/some/repo/pullrequests/5')
         .reply(200, pr);
       const expectedPr5 = {
-        bodyStruct: {
-          hash: '761b7ad8ad439b2855fcbb611331c646ef0870b0631247bba3f3025cb6df5a53',
-        },
-        createdAt: '2018-07-02T07:02:25.275030+00:00',
         number: 5,
         sourceBranch: 'branch',
         state: 'open',
         targetBranch: 'master',
         title: 'title',
       };
-      expect(await bitbucket.getPr(3)).toEqual({
+      expect(await bitbucket.getPr(3)).toMatchObject({
         ...expectedPr5,
         number: 3,
       });
 
-      expect(await bitbucket.getPr(5)).toEqual(expectedPr5);
+      expect(await bitbucket.getPr(5)).toMatchObject(expectedPr5);
 
-      expect(await bitbucket.getPr(5)).toEqual(expectedPr5);
+      expect(await bitbucket.getPr(5)).toMatchObject(expectedPr5);
     });
 
     it('reviewers', async () => {

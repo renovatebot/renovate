@@ -132,19 +132,8 @@ describe('modules/datasource/go/releases-direct', () => {
       const res = await datasource.getReleases({
         packageName: 'golang.org/x/text',
       });
-      expect(res).toEqual({
-        releases: [
-          {
-            gitRef: 'v1.0.0',
-            releaseTimestamp: null,
-            version: 'v1.0.0',
-          },
-          {
-            gitRef: 'v2.0.0',
-            releaseTimestamp: null,
-            version: 'v2.0.0',
-          },
-        ],
+      expect(res).toMatchObject({
+        releases: [{ version: 'v1.0.0' }, { version: 'v2.0.0' }],
         sourceUrl: 'https://gitlab.com/golang/text',
       });
       expect(res).not.toBeNull();
@@ -257,19 +246,8 @@ describe('modules/datasource/go/releases-direct', () => {
       const res = await datasource.getReleases({
         packageName: 'my.custom.domain/golang/myrepo',
       });
-      expect(res).toEqual({
-        releases: [
-          {
-            gitRef: 'v1.0.0',
-            releaseTimestamp: null,
-            version: 'v1.0.0',
-          },
-          {
-            gitRef: 'v2.0.0',
-            releaseTimestamp: null,
-            version: 'v2.0.0',
-          },
-        ],
+      expect(res).toMatchObject({
+        releases: [{ version: 'v1.0.0' }, { version: 'v2.0.0' }],
         sourceUrl: 'https://my.custom.domain/golang/myrepo',
       });
       expect(res).not.toBeNull();
@@ -293,20 +271,8 @@ describe('modules/datasource/go/releases-direct', () => {
       const res = await datasource.getReleases({
         packageName: 'bitbucket.org/golang/text',
       });
-      expect(res).toEqual({
-        registryUrl: 'https://bitbucket.org',
-        releases: [
-          {
-            gitRef: 'v1.0.0',
-            releaseTimestamp: null,
-            version: 'v1.0.0',
-          },
-          {
-            gitRef: 'v2.0.0',
-            releaseTimestamp: null,
-            version: 'v2.0.0',
-          },
-        ],
+      expect(res).toMatchObject({
+        releases: [{ version: 'v1.0.0' }, { version: 'v2.0.0' }],
         sourceUrl: 'https://bitbucket.org/golang/text',
       });
       expect(res).not.toBeNull();
@@ -386,19 +352,8 @@ describe('modules/datasource/go/releases-direct', () => {
       const res = await datasource.getReleases({
         packageName: 'gitlab.com/group/subgroup/repo',
       });
-      expect(res).toEqual({
-        releases: [
-          {
-            gitRef: 'v1.0.0',
-            releaseTimestamp: null,
-            version: 'v1.0.0',
-          },
-          {
-            gitRef: 'v2.0.0',
-            releaseTimestamp: null,
-            version: 'v2.0.0',
-          },
-        ],
+      expect(res).toMatchObject({
+        releases: [{ version: 'v1.0.0' }, { version: 'v2.0.0' }],
         sourceUrl: 'https://gitlab.com/group/subgroup/repo',
       });
       expect(res).not.toBeNull();

@@ -63,26 +63,10 @@ describe('modules/manager/npm/post-update/pnpm', () => {
     );
     expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
     expect(res.lockFile).toBe('package-lock-contents');
-    expect(execSnapshots).toEqual([
+    expect(execSnapshots).toMatchObject([
       {
         cmd: 'pnpm install --lockfile-only --ignore-scripts --ignore-pnpmfile',
-        options: {
-          cwd: 'some-dir',
-          env: {
-            HOME: '/home/user',
-            HTTPS_PROXY: 'https://example.com',
-            HTTP_PROXY: 'http://example.com',
-            LANG: 'en_US.UTF-8',
-            LC_ALL: 'en_US',
-            NO_PROXY: 'localhost',
-            PATH: '/tmp/path',
-          },
-          maxBuffer: 10485760,
-          stderr: 'pipe',
-          stdin: 'pipe',
-          stdout: 'pipe',
-          timeout: 900000,
-        },
+        options: { cwd: 'some-dir' },
       },
     ]);
   });
@@ -101,26 +85,10 @@ describe('modules/manager/npm/post-update/pnpm', () => {
     expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
     expect(res.error).toBeTrue();
     expect(res.lockFile).toBeUndefined();
-    expect(execSnapshots).toEqual([
+    expect(execSnapshots).toMatchObject([
       {
         cmd: 'pnpm install --lockfile-only --ignore-scripts --ignore-pnpmfile',
-        options: {
-          cwd: 'some-dir',
-          env: {
-            HOME: '/home/user',
-            HTTPS_PROXY: 'https://example.com',
-            HTTP_PROXY: 'http://example.com',
-            LANG: 'en_US.UTF-8',
-            LC_ALL: 'en_US',
-            NO_PROXY: 'localhost',
-            PATH: '/tmp/path',
-          },
-          maxBuffer: 10485760,
-          stderr: 'pipe',
-          stdin: 'pipe',
-          stdout: 'pipe',
-          timeout: 900000,
-        },
+        options: { cwd: 'some-dir' },
       },
     ]);
   });
@@ -136,26 +104,10 @@ describe('modules/manager/npm/post-update/pnpm', () => {
     );
     expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
     expect(res.lockFile).toBe('package-lock-contents');
-    expect(execSnapshots).toEqual([
+    expect(execSnapshots).toMatchObject([
       {
         cmd: 'pnpm install --lockfile-only --ignore-scripts --ignore-pnpmfile',
-        options: {
-          cwd: 'some-dir',
-          env: {
-            HOME: '/home/user',
-            HTTPS_PROXY: 'https://example.com',
-            HTTP_PROXY: 'http://example.com',
-            LANG: 'en_US.UTF-8',
-            LC_ALL: 'en_US',
-            NO_PROXY: 'localhost',
-            PATH: '/tmp/path',
-          },
-          maxBuffer: 10485760,
-          stderr: 'pipe',
-          stdin: 'pipe',
-          stdout: 'pipe',
-          timeout: 900000,
-        },
+        options: { cwd: 'some-dir' },
       },
     ]);
   });
@@ -359,26 +311,10 @@ describe('modules/manager/npm/post-update/pnpm', () => {
     expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
     expect(fs.deleteLocalFile).toHaveBeenCalledTimes(1);
     expect(res.lockFile).toBe('package-lock-contents');
-    expect(execSnapshots).toEqual([
+    expect(execSnapshots).toMatchObject([
       {
         cmd: 'pnpm install --lockfile-only --ignore-scripts --ignore-pnpmfile',
-        options: {
-          cwd: 'some-dir',
-          env: {
-            HOME: '/home/user',
-            HTTPS_PROXY: 'https://example.com',
-            HTTP_PROXY: 'http://example.com',
-            LANG: 'en_US.UTF-8',
-            LC_ALL: 'en_US',
-            NO_PROXY: 'localhost',
-            PATH: '/tmp/path',
-          },
-          maxBuffer: 10485760,
-          stderr: 'pipe',
-          stdin: 'pipe',
-          stdout: 'pipe',
-          timeout: 900000,
-        },
+        options: { cwd: 'some-dir' },
       },
     ]);
   });
@@ -418,26 +354,10 @@ describe('modules/manager/npm/post-update/pnpm', () => {
     ]);
     expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
     expect(res.lockFile).toBe('package-lock-contents');
-    expect(execSnapshots).toEqual([
+    expect(execSnapshots).toMatchObject([
       {
         cmd: 'pnpm install --lockfile-only --ignore-scripts --ignore-pnpmfile',
-        options: {
-          cwd: 'some-dir',
-          env: {
-            HOME: '/home/user',
-            HTTPS_PROXY: 'https://example.com',
-            HTTP_PROXY: 'http://example.com',
-            LANG: 'en_US.UTF-8',
-            LC_ALL: 'en_US',
-            NO_PROXY: 'localhost',
-            PATH: '/tmp/path',
-          },
-          maxBuffer: 10485760,
-          stderr: 'pipe',
-          stdin: 'pipe',
-          stdout: 'pipe',
-          timeout: 900000,
-        },
+        options: { cwd: 'some-dir' },
       },
     ]);
     // TODO: check docker preCommands

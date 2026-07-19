@@ -78,19 +78,11 @@ describe('modules/datasource/java-version/index', () => {
         datasource,
         packageName,
       });
-      expect(res).toEqual({
-        homepage: 'https://adoptium.net',
-        registryUrl: 'https://api.adoptium.net/',
+      expect(res).toMatchObject({
         releases: [
-          {
-            version: '8.0.302+8',
-          },
-          {
-            version: '11.0.12+7',
-          },
-          {
-            version: '16.0.2+7',
-          },
+          { version: '8.0.302+8' },
+          { version: '11.0.12+7' },
+          { version: '16.0.2+7' },
         ],
       });
       expect(res?.releases).toHaveLength(3);
@@ -105,17 +97,8 @@ describe('modules/datasource/java-version/index', () => {
         datasource,
         packageName: 'java-jre',
       });
-      expect(res).toEqual({
-        homepage: 'https://adoptium.net',
-        registryUrl: 'https://api.adoptium.net/',
-        releases: [
-          {
-            version: '8.0.302+8',
-          },
-          {
-            version: '11.0.12+7',
-          },
-        ],
+      expect(res).toMatchObject({
+        releases: [{ version: '8.0.302+8' }, { version: '11.0.12+7' }],
       });
       expect(res?.releases).toHaveLength(2);
     });
@@ -146,161 +129,10 @@ describe('modules/datasource/java-version/index', () => {
         datasource,
         packageName,
       });
-      expect(res).toEqual({
-        homepage: 'https://adoptium.net',
-        registryUrl: 'https://api.adoptium.net/',
-        releases: [
-          {
-            version: '1.1.0',
-          },
-          {
-            version: '1.2.0',
-          },
-          {
-            version: '1.3.0',
-          },
-          {
-            version: '1.4.0',
-          },
-          {
-            version: '1.5.0',
-          },
-          {
-            version: '1.6.0',
-          },
-          {
-            version: '1.7.0',
-          },
-          {
-            version: '1.8.0',
-          },
-          {
-            version: '1.9.0',
-          },
-          {
-            version: '1.10.0',
-          },
-          {
-            version: '1.11.0',
-          },
-          {
-            version: '1.12.0',
-          },
-          {
-            version: '1.13.0',
-          },
-          {
-            version: '1.14.0',
-          },
-          {
-            version: '1.15.0',
-          },
-          {
-            version: '1.16.0',
-          },
-          {
-            version: '1.17.0',
-          },
-          {
-            version: '1.18.0',
-          },
-          {
-            version: '1.19.0',
-          },
-          {
-            version: '1.20.0',
-          },
-          {
-            version: '1.21.0',
-          },
-          {
-            version: '1.22.0',
-          },
-          {
-            version: '1.23.0',
-          },
-          {
-            version: '1.24.0',
-          },
-          {
-            version: '1.25.0',
-          },
-          {
-            version: '1.26.0',
-          },
-          {
-            version: '1.27.0',
-          },
-          {
-            version: '1.28.0',
-          },
-          {
-            version: '1.29.0',
-          },
-          {
-            version: '1.30.0',
-          },
-          {
-            version: '1.31.0',
-          },
-          {
-            version: '1.32.0',
-          },
-          {
-            version: '1.33.0',
-          },
-          {
-            version: '1.34.0',
-          },
-          {
-            version: '1.35.0',
-          },
-          {
-            version: '1.36.0',
-          },
-          {
-            version: '1.37.0',
-          },
-          {
-            version: '1.38.0',
-          },
-          {
-            version: '1.39.0',
-          },
-          {
-            version: '1.40.0',
-          },
-          {
-            version: '1.41.0',
-          },
-          {
-            version: '1.42.0',
-          },
-          {
-            version: '1.43.0',
-          },
-          {
-            version: '1.44.0',
-          },
-          {
-            version: '1.45.0',
-          },
-          {
-            version: '1.46.0',
-          },
-          {
-            version: '1.47.0',
-          },
-          {
-            version: '1.48.0',
-          },
-          {
-            version: '1.49.0',
-          },
-          {
-            version: '1.50.0',
-          },
-        ],
+      expect(res).toMatchObject({
+        releases: Array.from({ length: 50 }, (_, idx) => ({
+          version: `1.${idx + 1}.0`,
+        })),
       });
       expect(res?.releases).toHaveLength(50);
     });

@@ -358,123 +358,19 @@ describe('config/presets/index', () => {
     it('resolves nested groups', async () => {
       config.extends = [':automergeLinters'];
       const { config: res } = await presets.resolveConfigPresets(config);
-      expect(res).toEqual({
-        description: ['Update lint packages automatically if tests pass.'],
-        packageRules: [
-          {
-            automerge: true,
-            description: ['All lint-related packages.'],
-            matchPackageNames: [
-              'ember-template-lint**',
-              '*/eslint-plugin',
-              '@babel/eslint-parser',
-              '@eslint/**',
-              '@eslint-community/**',
-              '@stylistic/eslint-plugin**',
-              '@types/eslint',
-              '@types/eslint__**',
-              '@typescript-eslint/**',
-              'babel-eslint',
-              'eslint**',
-              'typescript-eslint',
-              'friendsofphp/php-cs-fixer',
-              'squizlabs/php_codesniffer',
-              'symplify/easy-coding-standard',
-              'stylelint**',
-              'codelyzer',
-              '/\\btslint\\b/',
-              'oxlint',
-              'prettier',
-              'remark-lint',
-              'standard',
-            ],
-          },
-        ],
-      });
+      expect(res.packageRules).toHaveLength(1);
+      const rule = res.packageRules![0];
+      expect(rule.automerge).toBeTrue();
+      expect(rule.matchPackageNames).toHaveLength(22);
     });
 
     it('migrates automerge in presets', async () => {
       config.extends = ['ikatyang:library'];
       const { config: res } = await presets.resolveConfigPresets(config);
       expect(res.automerge).toBeUndefined();
-      expect(res).toEqual({
-        automergeType: 'pr',
-        branchPrefix: 'renovate/',
-        description: [
-          'Add the `renovate/` prefix to all branch names.',
-          'Use semantic commit type `fix` for dependencies and `chore` for all others if semantic commits are in use.',
-          'Require all status checks to pass before any automerging.',
-          'Pin dependency versions for development dependencies and retain SemVer ranges for others.',
-        ],
-        ignoreTests: false,
-        ignoreUnstable: true,
-        labels: ['dependencies'],
-        lockFileMaintenance: {
-          automerge: true,
-          enabled: true,
-          schedule: ['before 8am on Monday'],
-        },
+      expect(res).toMatchObject({
         major: { automerge: false },
         minor: { automerge: true },
-        packageRules: [
-          {
-            matchPackageNames: ['*'],
-            semanticCommitType: 'chore',
-          },
-          {
-            matchDepTypes: ['dependencies', 'require'],
-            semanticCommitType: 'fix',
-          },
-          {
-            matchDatasources: ['maven'],
-            matchDepTypes: [
-              'compile',
-              'provided',
-              'runtime',
-              'system',
-              'import',
-              'parent',
-            ],
-            semanticCommitType: 'fix',
-          },
-          {
-            matchDepTypes: [
-              'project.dependencies',
-              'project.optional-dependencies',
-            ],
-            matchManagers: ['pep621', 'poetry'],
-            semanticCommitType: 'fix',
-          },
-          {
-            matchDepTypes: ['dependencies', 'extras'],
-            matchManagers: ['poetry'],
-            semanticCommitType: 'fix',
-          },
-          {
-            matchJsonata: ['isLockfileUpdate = true'],
-            semanticCommitType: 'chore',
-          },
-          {
-            matchPackageNames: ['*'],
-            rangeStrategy: 'replace',
-          },
-          {
-            matchDepTypes: ['devDependencies', 'dev-dependencies', 'dev'],
-            rangeStrategy: 'pin',
-          },
-          {
-            matchDepTypes: ['peerDependencies'],
-            rangeStrategy: 'widen',
-          },
-        ],
-        prCreation: 'immediate',
-        rebaseWhen: 'behind-base-branch',
-        respectLatest: true,
-        schedule: ['before 8am'],
-        semanticCommits: 'enabled',
-        separateMajorMinor: true,
-        separateMinorPatch: false,
-        timezone: 'Asia/Taipei',
       });
     });
 

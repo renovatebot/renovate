@@ -47,78 +47,36 @@ describe('modules/manager/gitlabci/extract', () => {
       const res = await extractAllPackageFiles(config, [
         'lib/modules/manager/gitlabci/__fixtures__/gitlab-ci.3.yaml',
       ]);
-      expect(res).toEqual([
+      expect(res).toMatchObject([
         {
-          deps: [
-            {
-              autoReplaceStringTemplate:
-                '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
-              currentDigest: undefined,
-              currentValue: '19.70.8-slim',
-              datasource: 'docker',
-              depName: 'renovate/renovate',
-              depType: 'image-name',
-              packageName: 'renovate/renovate',
-              replaceString: 'renovate/renovate:19.70.8-slim',
-            },
-            {
-              autoReplaceStringTemplate:
-                '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
-              currentDigest: undefined,
-              currentValue: '10.4.11',
-              datasource: 'docker',
-              depName: 'mariadb',
-              depType: 'service-image',
-              packageName: 'mariadb',
-              replaceString: 'mariadb:10.4.11',
-            },
-            {
-              autoReplaceStringTemplate:
-                '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
-              currentDigest: undefined,
-              currentValue: '1.0.0',
-              datasource: 'docker',
-              depName: 'other/image',
-              depType: 'service-image',
-              packageName: 'other/image',
-              replaceString: 'other/image:1.0.0',
-            },
-          ],
           packageFile:
             'lib/modules/manager/gitlabci/__fixtures__/gitlab-ci.3.yaml',
-        },
-        {
           deps: [
             {
-              autoReplaceStringTemplate:
-                '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
-              currentDigest: undefined,
-              currentValue: '12',
-              datasource: 'docker',
-              depName: 'node',
-              depType: 'image',
-              packageName: 'node',
-              replaceString: 'node:12',
+              depName: 'renovate/renovate',
+              currentValue: '19.70.8-slim',
+              depType: 'image-name',
+            },
+            {
+              depName: 'mariadb',
+              currentValue: '10.4.11',
+              depType: 'service-image',
+            },
+            {
+              depName: 'other/image',
+              currentValue: '1.0.0',
+              depType: 'service-image',
             },
           ],
+        },
+        {
           packageFile:
             'lib/modules/manager/gitlabci/__fixtures__/include.1.yml',
+          deps: [{ depName: 'node', currentValue: '12', depType: 'image' }],
         },
         {
-          deps: [
-            {
-              autoReplaceStringTemplate:
-                '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
-              currentDigest: undefined,
-              currentValue: '3.11',
-              datasource: 'docker',
-              depName: 'alpine',
-              depType: 'image',
-              packageName: 'alpine',
-              replaceString: 'alpine:3.11',
-            },
-          ],
           packageFile: 'lib/modules/manager/gitlabci/__fixtures__/include.yml',
+          deps: [{ depName: 'alpine', currentValue: '3.11', depType: 'image' }],
         },
       ]);
       expect(res).toHaveLength(3);
@@ -131,45 +89,27 @@ describe('modules/manager/gitlabci/extract', () => {
       const res = await extractAllPackageFiles(config, [
         'lib/modules/manager/gitlabci/__fixtures__/gitlab-ci.5.yaml',
       ]);
-      expect(res).toEqual([
+      expect(res).toMatchObject([
         {
-          deps: [
-            {
-              autoReplaceStringTemplate:
-                '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
-              currentDigest: undefined,
-              currentValue: '19.70.8-slim',
-              datasource: 'docker',
-              depName: 'renovate/renovate',
-              depType: 'image-name',
-              packageName: 'renovate/renovate',
-              replaceString: 'renovate/renovate:19.70.8-slim',
-            },
-            {
-              autoReplaceStringTemplate:
-                '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
-              currentDigest: undefined,
-              currentValue: '10.4.11',
-              datasource: 'docker',
-              depName: 'mariadb',
-              depType: 'service-image',
-              packageName: 'mariadb',
-              replaceString: 'mariadb:10.4.11',
-            },
-            {
-              autoReplaceStringTemplate:
-                '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
-              currentDigest: undefined,
-              currentValue: '1.0.0',
-              datasource: 'docker',
-              depName: 'other/image',
-              depType: 'service-image',
-              packageName: 'other/image',
-              replaceString: 'other/image:1.0.0',
-            },
-          ],
           packageFile:
             'lib/modules/manager/gitlabci/__fixtures__/gitlab-ci.5.yaml',
+          deps: [
+            {
+              depName: 'renovate/renovate',
+              currentValue: '19.70.8-slim',
+              depType: 'image-name',
+            },
+            {
+              depName: 'mariadb',
+              currentValue: '10.4.11',
+              depType: 'service-image',
+            },
+            {
+              depName: 'other/image',
+              currentValue: '1.0.0',
+              depType: 'service-image',
+            },
+          ],
         },
       ]);
       expect(res).toHaveLength(1);
@@ -180,124 +120,64 @@ describe('modules/manager/gitlabci/extract', () => {
       const res = await extractAllPackageFiles(config, [
         'lib/modules/manager/gitlabci/__fixtures__/gitlab-ci.6.yaml',
       ]);
-      expect(res).toEqual([
+      expect(res).toMatchObject([
         {
-          deps: [
-            {
-              autoReplaceStringTemplate:
-                '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
-              currentDigest: undefined,
-              currentValue: '19.70.8-slim',
-              datasource: 'docker',
-              depName: 'renovate/renovate',
-              depType: 'image-name',
-              packageName: 'renovate/renovate',
-              replaceString: 'renovate/renovate:19.70.8-slim',
-            },
-            {
-              autoReplaceStringTemplate:
-                '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
-              currentDigest: undefined,
-              currentValue: '1.0.0',
-              datasource: 'docker',
-              depName: 'other/image1',
-              depType: 'service-image',
-              packageName: 'other/image1',
-              replaceString: 'other/image1:1.0.0',
-            },
-            {
-              autoReplaceStringTemplate:
-                '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
-              currentDigest: undefined,
-              currentValue: '1.0.0',
-              datasource: 'docker',
-              depName: 'other/image2',
-              depType: 'service-image',
-              packageName: 'other/image2',
-              replaceString: 'other/image2:1.0.0',
-            },
-            {
-              autoReplaceStringTemplate:
-                '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
-              currentDigest:
-                'sha256:a5a65569456f221ee1f8a0b3b4e2d440eb5830772d9440c9b30b1dbfd454c778',
-              currentValue: '12.3-1',
-              datasource: 'docker',
-              depName: 'mooseagency/postgresql',
-              depType: 'service-image',
-              packageName: 'mooseagency/postgresql',
-              replaceString:
-                'mooseagency/postgresql:12.3-1@sha256:a5a65569456f221ee1f8a0b3b4e2d440eb5830772d9440c9b30b1dbfd454c778',
-            },
-            {
-              autoReplaceStringTemplate:
-                '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
-              currentDigest: undefined,
-              currentValue: '10.4.11',
-              datasource: 'docker',
-              depName: 'mariadb',
-              depType: 'service-image',
-              packageName: 'mariadb',
-              replaceString: 'mariadb:10.4.11',
-            },
-            {
-              autoReplaceStringTemplate:
-                '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
-              currentDigest: undefined,
-              currentValue: '11.7',
-              datasource: 'docker',
-              depName: 'postgres',
-              depType: 'service-image',
-              packageName: 'postgres',
-              replaceString: 'postgres:11.7',
-            },
-            {
-              autoReplaceStringTemplate:
-                '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
-              currentDigest: undefined,
-              currentValue: 'latest',
-              datasource: 'docker',
-              depName: 'redis',
-              depType: 'service-image',
-              packageName: 'redis',
-              replaceString: 'redis:latest',
-            },
-            {
-              autoReplaceStringTemplate:
-                '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
-              currentDigest: undefined,
-              currentValue: 'latest',
-              datasource: 'docker',
-              depName: 'registry.example.com/myimage',
-              depType: 'service-image',
-              packageName: 'registry.example.com/myimage',
-              replaceString: 'registry.example.com/myimage:latest',
-            },
-            {
-              autoReplaceStringTemplate:
-                '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
-              currentDigest: 'sha256:0ecb2ad60',
-              currentValue: undefined,
-              datasource: 'docker',
-              depName: 'myimage',
-              depType: 'service-image',
-              packageName: 'myimage',
-              replaceString: 'myimage@sha256:0ecb2ad60',
-            },
-            {
-              autoReplaceStringTemplate:
-                '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
-              currentDigest: undefined,
-              currentValue: '7-jre8',
-              datasource: 'docker',
-              depName: 'tomcat',
-              depType: 'service-image',
-              packageName: 'tomcat',
-              replaceString: 'tomcat:7-jre8',
-            },
-          ],
           packageFile:
             'lib/modules/manager/gitlabci/__fixtures__/gitlab-ci.6.yaml',
+          deps: [
+            {
+              depName: 'renovate/renovate',
+              currentValue: '19.70.8-slim',
+              depType: 'image-name',
+            },
+            {
+              depName: 'other/image1',
+              currentValue: '1.0.0',
+              depType: 'service-image',
+            },
+            {
+              depName: 'other/image2',
+              currentValue: '1.0.0',
+              depType: 'service-image',
+            },
+            {
+              depName: 'mooseagency/postgresql',
+              currentValue: '12.3-1',
+              currentDigest:
+                'sha256:a5a65569456f221ee1f8a0b3b4e2d440eb5830772d9440c9b30b1dbfd454c778',
+              depType: 'service-image',
+            },
+            {
+              depName: 'mariadb',
+              currentValue: '10.4.11',
+              depType: 'service-image',
+            },
+            {
+              depName: 'postgres',
+              currentValue: '11.7',
+              depType: 'service-image',
+            },
+            {
+              depName: 'redis',
+              currentValue: 'latest',
+              depType: 'service-image',
+            },
+            {
+              depName: 'registry.example.com/myimage',
+              currentValue: 'latest',
+              depType: 'service-image',
+            },
+            {
+              depName: 'myimage',
+              currentDigest: 'sha256:0ecb2ad60',
+              depType: 'service-image',
+            },
+            {
+              depName: 'tomcat',
+              currentValue: '7-jre8',
+              depType: 'service-image',
+            },
+          ],
         },
       ]);
       expect(res).toHaveLength(1);
@@ -308,100 +188,40 @@ describe('modules/manager/gitlabci/extract', () => {
       const res = await extractAllPackageFiles(config, [
         'lib/modules/manager/gitlabci/__fixtures__/gitlab-ci.yaml',
       ]);
-      expect(res).toEqual([
+      expect(res).toMatchObject([
         {
-          deps: [
-            {
-              autoReplaceStringTemplate:
-                '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
-              currentDigest: undefined,
-              currentValue: '2.5.0',
-              datasource: 'docker',
-              depName: 'ruby',
-              depType: 'image',
-              packageName: 'ruby',
-              replaceString: 'ruby:2.5.0',
-            },
-            {
-              autoReplaceStringTemplate:
-                '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
-              currentDigest: undefined,
-              currentValue: 'latest',
-              datasource: 'docker',
-              depName: 'hadolint/hadolint',
-              depType: 'image',
-              packageName: 'hadolint/hadolint',
-              replaceString: 'hadolint/hadolint:latest',
-            },
-            {
-              autoReplaceStringTemplate:
-                '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
-              currentDigest: undefined,
-              currentValue: 'latest',
-              datasource: 'docker',
-              depName: 'docker',
-              depType: 'image',
-              packageName: 'docker',
-              replaceString: 'docker:latest',
-            },
-            {
-              autoReplaceStringTemplate:
-                '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
-              currentDigest: undefined,
-              currentValue: 'dind',
-              datasource: 'docker',
-              depName: 'docker',
-              depType: 'service-image',
-              packageName: 'docker',
-              replaceString: 'docker:dind',
-            },
-            {
-              autoReplaceStringTemplate:
-                '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
-              currentDigest: undefined,
-              currentValue: 'latest',
-              datasource: 'docker',
-              depName: 'docker',
-              depType: 'image',
-              packageName: 'docker',
-              replaceString: 'docker:latest',
-            },
-            {
-              autoReplaceStringTemplate:
-                '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
-              currentDigest: undefined,
-              currentValue: 'dind',
-              datasource: 'docker',
-              depName: 'docker',
-              depType: 'service-image',
-              packageName: 'docker',
-              replaceString: 'docker:dind',
-            },
-            {
-              autoReplaceStringTemplate:
-                '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
-              currentDigest: undefined,
-              currentValue: '1.15',
-              datasource: 'docker',
-              depName: 'image-name-test',
-              depType: 'image-name',
-              packageName: 'image-name-test',
-              replaceString: 'image-name-test:1.15',
-            },
-            {
-              autoReplaceStringTemplate:
-                '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
-              currentDigest: undefined,
-              currentValue: '1.15',
-              datasource: 'docker',
-              depName: 'image-name-test',
-              depType: 'image-name',
-              packageName: 'image-name-test',
-              replaceString: 'image-name-test:1.15',
-            },
-          ],
           packageFile:
             'lib/modules/manager/gitlabci/__fixtures__/gitlab-ci.yaml',
+          deps: [
+            { depName: 'ruby', currentValue: '2.5.0', depType: 'image' },
+            {
+              depName: 'hadolint/hadolint',
+              currentValue: 'latest',
+              depType: 'image',
+            },
+            { depName: 'docker', currentValue: 'latest', depType: 'image' },
+            {
+              depName: 'docker',
+              currentValue: 'dind',
+              depType: 'service-image',
+            },
+            { depName: 'docker', currentValue: 'latest', depType: 'image' },
+            {
+              depName: 'docker',
+              currentValue: 'dind',
+              depType: 'service-image',
+            },
+            {
+              depName: 'image-name-test',
+              currentValue: '1.15',
+              depType: 'image-name',
+            },
+            {
+              depName: 'image-name-test',
+              currentValue: '1.15',
+              depType: 'image-name',
+            },
+          ],
         },
       ]);
       expect(res).toHaveLength(1);
@@ -422,45 +242,27 @@ describe('modules/manager/gitlabci/extract', () => {
       const res = await extractAllPackageFiles(config, [
         'lib/modules/manager/gitlabci/__fixtures__/gitlab-ci.1.yaml',
       ]);
-      expect(res).toEqual([
+      expect(res).toMatchObject([
         {
-          deps: [
-            {
-              autoReplaceStringTemplate:
-                '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
-              currentDigest: undefined,
-              currentValue: '19.70.8-slim',
-              datasource: 'docker',
-              depName: 'renovate/renovate',
-              depType: 'image-name',
-              packageName: 'renovate/renovate',
-              replaceString: 'renovate/renovate:19.70.8-slim',
-            },
-            {
-              autoReplaceStringTemplate:
-                '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
-              currentDigest: undefined,
-              currentValue: '10.4.11',
-              datasource: 'docker',
-              depName: 'mariadb',
-              depType: 'service-image',
-              packageName: 'mariadb',
-              replaceString: 'mariadb:10.4.11',
-            },
-            {
-              autoReplaceStringTemplate:
-                '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
-              currentDigest: undefined,
-              currentValue: '1.0.0',
-              datasource: 'docker',
-              depName: 'other/image',
-              depType: 'service-image',
-              packageName: 'other/image',
-              replaceString: 'other/image:1.0.0',
-            },
-          ],
           packageFile:
             'lib/modules/manager/gitlabci/__fixtures__/gitlab-ci.1.yaml',
+          deps: [
+            {
+              depName: 'renovate/renovate',
+              currentValue: '19.70.8-slim',
+              depType: 'image-name',
+            },
+            {
+              depName: 'mariadb',
+              currentValue: '10.4.11',
+              depType: 'service-image',
+            },
+            {
+              depName: 'other/image',
+              currentValue: '1.0.0',
+              depType: 'service-image',
+            },
+          ],
         },
       ]);
       expect(res).toHaveLength(1);

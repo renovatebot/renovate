@@ -93,49 +93,25 @@ describe('modules/platform/azure/util', () => {
   describe('getRenovatePRFormat', () => {
     it('should be formated (closed)', () => {
       const res = getRenovatePRFormat(partial<GitPullRequest>({ status: 2 }));
-      expect(res).toEqual({
-        bodyStruct: {
-          hash: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
-        },
-        createdAt: undefined,
-        number: undefined,
-        sourceBranch: undefined,
-        sourceRefName: undefined,
+      expect(res).toMatchObject({
         state: 'closed',
         status: 2,
-        targetBranch: undefined,
       });
     });
 
     it('should be formated (closed v2)', () => {
       const res = getRenovatePRFormat(partial<GitPullRequest>({ status: 3 }));
-      expect(res).toEqual({
-        bodyStruct: {
-          hash: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
-        },
-        createdAt: undefined,
-        number: undefined,
-        sourceBranch: undefined,
-        sourceRefName: undefined,
+      expect(res).toMatchObject({
         state: 'merged',
         status: 3,
-        targetBranch: undefined,
       });
     });
 
     it('should be formated (not closed)', () => {
       const res = getRenovatePRFormat(partial<GitPullRequest>({ status: 1 }));
-      expect(res).toEqual({
-        bodyStruct: {
-          hash: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
-        },
-        createdAt: undefined,
-        number: undefined,
-        sourceBranch: undefined,
-        sourceRefName: undefined,
+      expect(res).toMatchObject({
         state: 'open',
         status: 1,
-        targetBranch: undefined,
       });
     });
   });

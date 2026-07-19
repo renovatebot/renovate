@@ -93,7 +93,6 @@ describe('modules/datasource/bitbucket-tags/index', () => {
         datasource,
         packageName: 'some/dep2',
       });
-      expect(res).toBe('123');
       expect(res).toBeString();
       expect(res).toBe('123');
     });
@@ -146,7 +145,6 @@ describe('modules/datasource/bitbucket-tags/index', () => {
         },
         'v1.0.0',
       );
-      expect(res).toBe('123');
       expect(res).toBeString();
       expect(res).toBe('123');
     });

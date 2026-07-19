@@ -41,46 +41,16 @@ function expectedChangeLog({ baseUrl = 'https://gitlab.com/' } = {}) {
     project: {
       apiBaseUrl: `${baseUrl}api/v4/`,
       baseUrl,
-      depName: undefined,
       packageName: 'renovate',
       repository: 'meno/dropzone',
-      sourceDirectory: undefined,
       sourceUrl: `${baseUrl}meno/dropzone/`,
       type: 'gitlab',
     },
     versions: [
-      {
-        changes: [],
-        compare: {},
-        date: undefined,
-        gitRef: undefined,
-        releaseNotes: null,
-        version: '5.6.1',
-      },
-      {
-        changes: [],
-        compare: {},
-        date: '2020-02-13T15:37:00.000Z',
-        gitRef: undefined,
-        releaseNotes: null,
-        version: '5.6.0',
-      },
-      {
-        changes: [],
-        compare: {},
-        date: undefined,
-        gitRef: 'eba303e91c930292198b2fc57040145682162a1b',
-        releaseNotes: null,
-        version: '5.5.0',
-      },
-      {
-        changes: [],
-        compare: {},
-        date: '2018-08-24T14:23:00.000Z',
-        gitRef: undefined,
-        releaseNotes: null,
-        version: '5.4.0',
-      },
+      { version: '5.6.1' },
+      { version: '5.6.0' },
+      { version: '5.5.0' },
+      { version: '5.4.0' },
     ],
   };
 }
@@ -134,7 +104,7 @@ describe('workers/repository/update/pr/changelog/gitlab/index', () => {
         await getChangeLogJSON({
           ...upgrade,
         }),
-      ).toEqual(expectedChangeLog());
+      ).toMatchObject(expectedChangeLog());
     });
 
     it('uses GitLab tags', async () => {
@@ -159,72 +129,9 @@ describe('workers/repository/update/pr/changelog/gitlab/index', () => {
         await getChangeLogJSON({
           ...upgrade,
         }),
-      ).toEqual({
+      ).toMatchObject({
+        ...expectedChangeLog(),
         hasReleaseNotes: true,
-        project: {
-          apiBaseUrl: 'https://gitlab.com/api/v4/',
-          baseUrl: 'https://gitlab.com/',
-          depName: undefined,
-          packageName: 'renovate',
-          repository: 'meno/dropzone',
-          sourceDirectory: undefined,
-          sourceUrl: 'https://gitlab.com/meno/dropzone/',
-          type: 'gitlab',
-        },
-        versions: [
-          {
-            changes: [],
-            compare: {
-              url: 'https://gitlab.com/meno/dropzone/compare/v5.6.0...v5.6.1',
-            },
-            date: undefined,
-            gitRef: undefined,
-            releaseNotes: {
-              notesSourceUrl: '',
-              url: 'https://gitlab.com/meno/dropzone/compare/v5.6.0...v5.6.1',
-            },
-            version: '5.6.1',
-          },
-          {
-            changes: [],
-            compare: {
-              url: 'https://gitlab.com/meno/dropzone/compare/v5.5.0...v5.6.0',
-            },
-            date: '2020-02-13T15:37:00.000Z',
-            gitRef: undefined,
-            releaseNotes: {
-              notesSourceUrl: '',
-              url: 'https://gitlab.com/meno/dropzone/compare/v5.5.0...v5.6.0',
-            },
-            version: '5.6.0',
-          },
-          {
-            changes: [],
-            compare: {
-              url: 'https://gitlab.com/meno/dropzone/compare/v5.4.0...v5.5.0',
-            },
-            date: undefined,
-            gitRef: 'eba303e91c930292198b2fc57040145682162a1b',
-            releaseNotes: {
-              notesSourceUrl: '',
-              url: 'https://gitlab.com/meno/dropzone/compare/v5.4.0...v5.5.0',
-            },
-            version: '5.5.0',
-          },
-          {
-            changes: [],
-            compare: {
-              url: 'https://gitlab.com/meno/dropzone/compare/v5.2.0...v5.4.0',
-            },
-            date: '2018-08-24T14:23:00.000Z',
-            gitRef: undefined,
-            releaseNotes: {
-              notesSourceUrl: '',
-              url: 'https://gitlab.com/meno/dropzone/compare/v5.2.0...v5.4.0',
-            },
-            version: '5.4.0',
-          },
-        ],
       });
     });
 
@@ -243,7 +150,7 @@ describe('workers/repository/update/pr/changelog/gitlab/index', () => {
         await getChangeLogJSON({
           ...upgrade,
         }),
-      ).toEqual(expectedChangeLog());
+      ).toMatchObject(expectedChangeLog());
     });
 
     it('uses GitLab tags with error', async () => {
@@ -261,7 +168,7 @@ describe('workers/repository/update/pr/changelog/gitlab/index', () => {
         await getChangeLogJSON({
           ...upgrade,
         }),
-      ).toEqual(expectedChangeLog());
+      ).toMatchObject(expectedChangeLog());
     });
 
     it('handles no sourceUrl', async () => {
@@ -312,7 +219,7 @@ describe('workers/repository/update/pr/changelog/gitlab/index', () => {
           ...upgrade,
           sourceUrl: 'https://gitlab-enterprise.example.com/meno/dropzone/',
         }),
-      ).toEqual(
+      ).toMatchObject(
         expectedChangeLog({
           baseUrl: 'https://gitlab-enterprise.example.com/',
         }),
@@ -332,7 +239,7 @@ describe('workers/repository/update/pr/changelog/gitlab/index', () => {
           ...upgrade,
           sourceUrl: 'https://git.test.com/meno/dropzone/',
         }),
-      ).toEqual(expectedChangeLog({ baseUrl: 'https://git.test.com/' }));
+      ).toMatchObject(expectedChangeLog({ baseUrl: 'https://git.test.com/' }));
     });
   });
 

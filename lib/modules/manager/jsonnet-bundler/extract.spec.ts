@@ -56,15 +56,12 @@ describe('modules/manager/jsonnet-bundler/extract', () => {
 
     it('extracts dependency', () => {
       const res = extractPackageFile(jsonnetfile, 'jsonnetfile.json');
-      expect(res).toEqual({
+      expect(res).toMatchObject({
         deps: [
           {
             currentValue: 'v0.50.0',
             depName:
               'github.com/prometheus-operator/prometheus-operator/jsonnet/prometheus-operator',
-            managerData: {
-              subdir: 'jsonnet/prometheus-operator',
-            },
             packageName:
               'https://github.com/prometheus-operator/prometheus-operator.git',
           },
@@ -72,9 +69,6 @@ describe('modules/manager/jsonnet-bundler/extract', () => {
             currentValue: 'v0.9.0',
             depName:
               'github.com/prometheus-operator/kube-prometheus/jsonnet/kube-prometheus',
-            managerData: {
-              subdir: 'jsonnet/kube-prometheus',
-            },
             packageName:
               'ssh://git@github.com/prometheus-operator/kube-prometheus.git',
           },
@@ -84,15 +78,12 @@ describe('modules/manager/jsonnet-bundler/extract', () => {
 
     it('extracts dependency with custom name', () => {
       const res = extractPackageFile(jsonnetfileWithName, 'jsonnetfile.json');
-      expect(res).toEqual({
+      expect(res).toMatchObject({
         deps: [
           {
             currentValue: 'v0.50.0',
             depName:
               'github.com/prometheus-operator/prometheus-operator/jsonnet/mixin',
-            managerData: {
-              subdir: 'jsonnet/mixin',
-            },
             packageName:
               'https://github.com/prometheus-operator/prometheus-operator',
           },

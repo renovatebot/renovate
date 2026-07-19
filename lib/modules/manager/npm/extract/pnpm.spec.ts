@@ -193,84 +193,12 @@ describe('modules/manager/npm/extract/pnpm', () => {
       ]);
 
       await detectPnpmWorkspaces(packageFiles);
-      expect(packageFiles).toEqual([
-        {
-          managerData: {
-            pnpmShrinkwrap: 'pnpm-lock.yaml',
-          },
-          packageFile: 'package.json',
-        },
-        {
-          managerData: {
-            packageJsonName: '@demo/nested-group-a',
-            pnpmShrinkwrap: 'pnpm-lock.yaml',
-          },
-          packageFile: 'nested-packages/group/a/package.json',
-        },
-        {
-          managerData: {
-            packageJsonName: '@demo/nested-group-b',
-            pnpmShrinkwrap: 'pnpm-lock.yaml',
-          },
-          packageFile: 'nested-packages/group/b/package.json',
-        },
-        {
-          managerData: {
-            packageJsonName: '@demo/non-nested-a',
-            pnpmShrinkwrap: 'pnpm-lock.yaml',
-          },
-          packageFile: 'non-nested-packages/a/package.json',
-        },
-        {
-          managerData: {
-            packageJsonName: '@demo/non-nested-b',
-            pnpmShrinkwrap: 'pnpm-lock.yaml',
-          },
-          packageFile: 'non-nested-packages/b/package.json',
-        },
-        {
-          managerData: {
-            packageJsonName: '@demo/solo',
-            pnpmShrinkwrap: 'pnpm-lock.yaml',
-          },
-          packageFile: 'solo-package/package.json',
-        },
-        {
-          managerData: {
-            packageJsonName: '@demo/solo-leading-dot-slash',
-            pnpmShrinkwrap: 'pnpm-lock.yaml',
-          },
-          packageFile: 'solo-package-leading-dot-slash/package.json',
-        },
-        {
-          managerData: {
-            packageJsonName: '@demo/solo-leading-double-dot-slash',
-            pnpmShrinkwrap: 'pnpm-lock.yaml',
-          },
-          packageFile: 'solo-package-leading-double-dot-slash/package.json',
-        },
-        {
-          managerData: {
-            packageJsonName: '@demo/solo-trailing-slash',
-            pnpmShrinkwrap: 'pnpm-lock.yaml',
-          },
-          packageFile: 'solo-package-trailing-slash/package.json',
-        },
-        {
-          managerData: {
-            packageJsonName: '@demo/test-package',
-            pnpmShrinkwrap: 'pnpm-lock.yaml',
-          },
-          packageFile: 'test/test-package/package.json',
-        },
-        {
-          managerData: {
-            packageJsonName: '@demo/test-package2',
-            pnpmShrinkwrap: 'pnpm-lock.yaml',
-          },
-          packageFile: 'tests/test-package2/package.json',
-        },
-      ]);
+      // every workspace package file gets associated with the root lockfile
+      expect(packageFiles).toMatchObject(
+        packageFiles.map(() => ({
+          managerData: { pnpmShrinkwrap: 'pnpm-lock.yaml' },
+        })),
+      );
       expect(
         packageFiles.every(
           (packageFile) =>

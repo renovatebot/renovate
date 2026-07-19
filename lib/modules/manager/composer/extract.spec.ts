@@ -21,6 +21,161 @@ describe('modules/manager/composer/extract', () => {
       packageFile = 'composer.json';
     });
 
+    const requirements1Deps = [
+      {
+        depName: 'php',
+        currentValue: '>=5.3.2',
+        datasource: 'github-tags',
+        packageName: 'containerbase/php-prebuild',
+        depType: 'require',
+      },
+      {
+        depName: 'ext-intl',
+        currentValue: '*',
+        depType: 'require',
+        skipReason: 'unsupported',
+      },
+      {
+        depName: 'symfony/assetic-bundle',
+        currentValue: 'dev-master',
+        depType: 'require',
+      },
+      {
+        depName: 'symfony/monolog-bundle',
+        currentValue: 'dev-master',
+        depType: 'require',
+      },
+      {
+        depName: 'symfony/swiftmailer-bundle',
+        currentValue: 'dev-master',
+        depType: 'require',
+      },
+      { depName: 'symfony/symfony', currentValue: '2.1.*', depType: 'require' },
+      { depName: 'doctrine/common', currentValue: '2.2.2', depType: 'require' },
+      {
+        depName: 'doctrine/doctrine-bundle',
+        currentValue: 'dev-master',
+        depType: 'require',
+      },
+      {
+        depName: 'doctrine/doctrine-fixtures-bundle',
+        currentValue: 'dev-master',
+        depType: 'require',
+      },
+      {
+        depName: 'doctrine/orm',
+        currentValue: '2.2.x-dev',
+        depType: 'require',
+      },
+      {
+        depName: 'exercise/elastica-bundle',
+        currentValue: 'dev-master',
+        depType: 'require',
+      },
+      {
+        depName: 'friendsofsymfony/rest-bundle',
+        currentValue: 'dev-master',
+        depType: 'require',
+      },
+      {
+        depName: 'friendsofsymfony/user-bundle',
+        currentValue: '*',
+        depType: 'require',
+      },
+      { depName: 'fzaninotto/faker', currentValue: '*', depType: 'require' },
+      {
+        depName: 'jms/di-extra-bundle',
+        currentValue: '1.0.1',
+        depType: 'require',
+      },
+      {
+        depName: 'jms/payment-core-bundle',
+        currentValue: '*',
+        depType: 'require',
+      },
+      {
+        depName: 'jms/security-extra-bundle',
+        currentValue: '1.1.0',
+        depType: 'require',
+      },
+      {
+        depName: 'knplabs/knp-menu-bundle',
+        currentValue: 'dev-master',
+        depType: 'require',
+      },
+      {
+        depName: 'knplabs/knp-paginator-bundle',
+        currentValue: 'dev-master',
+        depType: 'require',
+      },
+      {
+        depName: 'liip/imagine-bundle',
+        currentValue: 'dev-master',
+        depType: 'require',
+      },
+      {
+        depName: 'merk/dough-bundle',
+        currentValue: 'dev-master',
+        depType: 'require',
+      },
+      {
+        depName: 'sensio/distribution-bundle',
+        currentValue: 'dev-master',
+        depType: 'require',
+      },
+      {
+        depName: 'sensio/framework-extra-bundle',
+        currentValue: 'dev-master',
+        depType: 'require',
+      },
+      {
+        depName: 'sensio/generator-bundle',
+        currentValue: 'dev-master',
+        depType: 'require',
+      },
+      {
+        depName: 'simplethings/entity-audit-bundle',
+        currentValue: 'dev-master',
+        depType: 'require',
+      },
+      {
+        depName: 'stof/doctrine-extensions-bundle',
+        currentValue: 'dev-master',
+        depType: 'require',
+      },
+      {
+        depName: 'twig/extensions',
+        currentValue: 'dev-master',
+        depType: 'require',
+      },
+      { depName: 'behat/behat', currentValue: '2.3.*', depType: 'require-dev' },
+      {
+        depName: 'behat/behat-bundle',
+        currentValue: '*',
+        depType: 'require-dev',
+      },
+      {
+        depName: 'behat/mink-bundle',
+        currentValue: '*',
+        depType: 'require-dev',
+      },
+      {
+        depName: 'behat/sahi-client',
+        currentValue: '*',
+        depType: 'require-dev',
+      },
+      {
+        depName: 'behat/common-contexts',
+        currentValue: '*',
+        depType: 'require-dev',
+      },
+      {
+        depName: 'composer/composer',
+        currentValue: '^1.10.0',
+        depType: 'require-dev',
+      },
+    ];
+
     it('returns null for invalid json', async () => {
       expect(await extractPackageFile('nothing here', packageFile)).toBeNull();
     });
@@ -31,213 +186,8 @@ describe('modules/manager/composer/extract', () => {
 
     it('extracts dependencies with no lock file', async () => {
       const res = await extractPackageFile(requirements1, packageFile);
-      expect(res).toEqual({
-        deps: [
-          {
-            currentValue: '>=5.3.2',
-            datasource: 'github-tags',
-            depName: 'php',
-            depType: 'require',
-            packageName: 'containerbase/php-prebuild',
-          },
-          {
-            currentValue: '*',
-            datasource: 'packagist',
-            depName: 'ext-intl',
-            depType: 'require',
-            skipReason: 'unsupported',
-          },
-          {
-            currentValue: 'dev-master',
-            datasource: 'packagist',
-            depName: 'symfony/assetic-bundle',
-            depType: 'require',
-          },
-          {
-            currentValue: 'dev-master',
-            datasource: 'packagist',
-            depName: 'symfony/monolog-bundle',
-            depType: 'require',
-          },
-          {
-            currentValue: 'dev-master',
-            datasource: 'packagist',
-            depName: 'symfony/swiftmailer-bundle',
-            depType: 'require',
-          },
-          {
-            currentValue: '2.1.*',
-            datasource: 'packagist',
-            depName: 'symfony/symfony',
-            depType: 'require',
-          },
-          {
-            currentValue: '2.2.2',
-            datasource: 'packagist',
-            depName: 'doctrine/common',
-            depType: 'require',
-          },
-          {
-            currentValue: 'dev-master',
-            datasource: 'packagist',
-            depName: 'doctrine/doctrine-bundle',
-            depType: 'require',
-          },
-          {
-            currentValue: 'dev-master',
-            datasource: 'packagist',
-            depName: 'doctrine/doctrine-fixtures-bundle',
-            depType: 'require',
-          },
-          {
-            currentValue: '2.2.x-dev',
-            datasource: 'packagist',
-            depName: 'doctrine/orm',
-            depType: 'require',
-          },
-          {
-            currentValue: 'dev-master',
-            datasource: 'packagist',
-            depName: 'exercise/elastica-bundle',
-            depType: 'require',
-          },
-          {
-            currentValue: 'dev-master',
-            datasource: 'packagist',
-            depName: 'friendsofsymfony/rest-bundle',
-            depType: 'require',
-          },
-          {
-            currentValue: '*',
-            datasource: 'packagist',
-            depName: 'friendsofsymfony/user-bundle',
-            depType: 'require',
-          },
-          {
-            currentValue: '*',
-            datasource: 'packagist',
-            depName: 'fzaninotto/faker',
-            depType: 'require',
-          },
-          {
-            currentValue: '1.0.1',
-            datasource: 'packagist',
-            depName: 'jms/di-extra-bundle',
-            depType: 'require',
-          },
-          {
-            currentValue: '*',
-            datasource: 'packagist',
-            depName: 'jms/payment-core-bundle',
-            depType: 'require',
-          },
-          {
-            currentValue: '1.1.0',
-            datasource: 'packagist',
-            depName: 'jms/security-extra-bundle',
-            depType: 'require',
-          },
-          {
-            currentValue: 'dev-master',
-            datasource: 'packagist',
-            depName: 'knplabs/knp-menu-bundle',
-            depType: 'require',
-          },
-          {
-            currentValue: 'dev-master',
-            datasource: 'packagist',
-            depName: 'knplabs/knp-paginator-bundle',
-            depType: 'require',
-          },
-          {
-            currentValue: 'dev-master',
-            datasource: 'packagist',
-            depName: 'liip/imagine-bundle',
-            depType: 'require',
-          },
-          {
-            currentValue: 'dev-master',
-            datasource: 'packagist',
-            depName: 'merk/dough-bundle',
-            depType: 'require',
-          },
-          {
-            currentValue: 'dev-master',
-            datasource: 'packagist',
-            depName: 'sensio/distribution-bundle',
-            depType: 'require',
-          },
-          {
-            currentValue: 'dev-master',
-            datasource: 'packagist',
-            depName: 'sensio/framework-extra-bundle',
-            depType: 'require',
-          },
-          {
-            currentValue: 'dev-master',
-            datasource: 'packagist',
-            depName: 'sensio/generator-bundle',
-            depType: 'require',
-          },
-          {
-            currentValue: 'dev-master',
-            datasource: 'packagist',
-            depName: 'simplethings/entity-audit-bundle',
-            depType: 'require',
-          },
-          {
-            currentValue: 'dev-master',
-            datasource: 'packagist',
-            depName: 'stof/doctrine-extensions-bundle',
-            depType: 'require',
-          },
-          {
-            currentValue: 'dev-master',
-            datasource: 'packagist',
-            depName: 'twig/extensions',
-            depType: 'require',
-          },
-          {
-            currentValue: '2.3.*',
-            datasource: 'packagist',
-            depName: 'behat/behat',
-            depType: 'require-dev',
-          },
-          {
-            currentValue: '*',
-            datasource: 'packagist',
-            depName: 'behat/behat-bundle',
-            depType: 'require-dev',
-          },
-          {
-            currentValue: '*',
-            datasource: 'packagist',
-            depName: 'behat/mink-bundle',
-            depType: 'require-dev',
-          },
-          {
-            currentValue: '*',
-            datasource: 'packagist',
-            depName: 'behat/sahi-client',
-            depType: 'require-dev',
-          },
-          {
-            currentValue: '*',
-            datasource: 'packagist',
-            depName: 'behat/common-contexts',
-            depType: 'require-dev',
-          },
-          {
-            currentValue: '^1.10.0',
-            datasource: 'packagist',
-            depName: 'composer/composer',
-            depType: 'require-dev',
-          },
-        ],
-        extractedConstraints: {
-          php: '>=5.3.2',
-        },
-      });
+      expect(res?.deps).toMatchObject(requirements1Deps);
+      expect(res?.extractedConstraints).toEqual({ php: '>=5.3.2' });
       expect(res?.deps).toHaveLength(33);
     });
 
@@ -519,214 +469,9 @@ describe('modules/manager/composer/extract', () => {
     it('extracts dependencies with lock file', async () => {
       fs.readLocalFile.mockResolvedValue('{}');
       const res = await extractPackageFile(requirements1, packageFile);
-      expect(res).toEqual({
-        deps: [
-          {
-            currentValue: '>=5.3.2',
-            datasource: 'github-tags',
-            depName: 'php',
-            depType: 'require',
-            packageName: 'containerbase/php-prebuild',
-          },
-          {
-            currentValue: '*',
-            datasource: 'packagist',
-            depName: 'ext-intl',
-            depType: 'require',
-            skipReason: 'unsupported',
-          },
-          {
-            currentValue: 'dev-master',
-            datasource: 'packagist',
-            depName: 'symfony/assetic-bundle',
-            depType: 'require',
-          },
-          {
-            currentValue: 'dev-master',
-            datasource: 'packagist',
-            depName: 'symfony/monolog-bundle',
-            depType: 'require',
-          },
-          {
-            currentValue: 'dev-master',
-            datasource: 'packagist',
-            depName: 'symfony/swiftmailer-bundle',
-            depType: 'require',
-          },
-          {
-            currentValue: '2.1.*',
-            datasource: 'packagist',
-            depName: 'symfony/symfony',
-            depType: 'require',
-          },
-          {
-            currentValue: '2.2.2',
-            datasource: 'packagist',
-            depName: 'doctrine/common',
-            depType: 'require',
-          },
-          {
-            currentValue: 'dev-master',
-            datasource: 'packagist',
-            depName: 'doctrine/doctrine-bundle',
-            depType: 'require',
-          },
-          {
-            currentValue: 'dev-master',
-            datasource: 'packagist',
-            depName: 'doctrine/doctrine-fixtures-bundle',
-            depType: 'require',
-          },
-          {
-            currentValue: '2.2.x-dev',
-            datasource: 'packagist',
-            depName: 'doctrine/orm',
-            depType: 'require',
-          },
-          {
-            currentValue: 'dev-master',
-            datasource: 'packagist',
-            depName: 'exercise/elastica-bundle',
-            depType: 'require',
-          },
-          {
-            currentValue: 'dev-master',
-            datasource: 'packagist',
-            depName: 'friendsofsymfony/rest-bundle',
-            depType: 'require',
-          },
-          {
-            currentValue: '*',
-            datasource: 'packagist',
-            depName: 'friendsofsymfony/user-bundle',
-            depType: 'require',
-          },
-          {
-            currentValue: '*',
-            datasource: 'packagist',
-            depName: 'fzaninotto/faker',
-            depType: 'require',
-          },
-          {
-            currentValue: '1.0.1',
-            datasource: 'packagist',
-            depName: 'jms/di-extra-bundle',
-            depType: 'require',
-          },
-          {
-            currentValue: '*',
-            datasource: 'packagist',
-            depName: 'jms/payment-core-bundle',
-            depType: 'require',
-          },
-          {
-            currentValue: '1.1.0',
-            datasource: 'packagist',
-            depName: 'jms/security-extra-bundle',
-            depType: 'require',
-          },
-          {
-            currentValue: 'dev-master',
-            datasource: 'packagist',
-            depName: 'knplabs/knp-menu-bundle',
-            depType: 'require',
-          },
-          {
-            currentValue: 'dev-master',
-            datasource: 'packagist',
-            depName: 'knplabs/knp-paginator-bundle',
-            depType: 'require',
-          },
-          {
-            currentValue: 'dev-master',
-            datasource: 'packagist',
-            depName: 'liip/imagine-bundle',
-            depType: 'require',
-          },
-          {
-            currentValue: 'dev-master',
-            datasource: 'packagist',
-            depName: 'merk/dough-bundle',
-            depType: 'require',
-          },
-          {
-            currentValue: 'dev-master',
-            datasource: 'packagist',
-            depName: 'sensio/distribution-bundle',
-            depType: 'require',
-          },
-          {
-            currentValue: 'dev-master',
-            datasource: 'packagist',
-            depName: 'sensio/framework-extra-bundle',
-            depType: 'require',
-          },
-          {
-            currentValue: 'dev-master',
-            datasource: 'packagist',
-            depName: 'sensio/generator-bundle',
-            depType: 'require',
-          },
-          {
-            currentValue: 'dev-master',
-            datasource: 'packagist',
-            depName: 'simplethings/entity-audit-bundle',
-            depType: 'require',
-          },
-          {
-            currentValue: 'dev-master',
-            datasource: 'packagist',
-            depName: 'stof/doctrine-extensions-bundle',
-            depType: 'require',
-          },
-          {
-            currentValue: 'dev-master',
-            datasource: 'packagist',
-            depName: 'twig/extensions',
-            depType: 'require',
-          },
-          {
-            currentValue: '2.3.*',
-            datasource: 'packagist',
-            depName: 'behat/behat',
-            depType: 'require-dev',
-          },
-          {
-            currentValue: '*',
-            datasource: 'packagist',
-            depName: 'behat/behat-bundle',
-            depType: 'require-dev',
-          },
-          {
-            currentValue: '*',
-            datasource: 'packagist',
-            depName: 'behat/mink-bundle',
-            depType: 'require-dev',
-          },
-          {
-            currentValue: '*',
-            datasource: 'packagist',
-            depName: 'behat/sahi-client',
-            depType: 'require-dev',
-          },
-          {
-            currentValue: '*',
-            datasource: 'packagist',
-            depName: 'behat/common-contexts',
-            depType: 'require-dev',
-          },
-          {
-            currentValue: '^1.10.0',
-            datasource: 'packagist',
-            depName: 'composer/composer',
-            depType: 'require-dev',
-          },
-        ],
-        extractedConstraints: {
-          php: '>=5.3.2',
-        },
-        lockFiles: ['composer.lock'],
-      });
+      expect(res?.deps).toMatchObject(requirements1Deps);
+      expect(res?.extractedConstraints).toEqual({ php: '>=5.3.2' });
+      expect(res?.lockFiles).toEqual(['composer.lock']);
       expect(res?.deps).toHaveLength(33);
     });
   });

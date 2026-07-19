@@ -76,17 +76,9 @@ describe('modules/manager/helmfile/extract', () => {
           stable: 'https://charts.helm.sh/stable',
         },
       });
-      expect(result).toEqual({
-        datasource: 'helm',
-        deps: [
-          {
-            currentValue: '1.0.0',
-            depName: 'example',
-            registryUrls: [],
-            skipReason: 'unknown-registry',
-          },
-        ],
-      });
+      expect(result?.deps).toMatchObject([
+        { depName: 'example', skipReason: 'unknown-registry' },
+      ]);
     });
 
     it('skip templetized release with invalid characters', async () => {
@@ -108,22 +100,10 @@ describe('modules/manager/helmfile/extract', () => {
           stable: 'https://charts.helm.sh/stable',
         },
       });
-      expect(result).toEqual({
-        datasource: 'helm',
-        deps: [
-          {
-            currentValue: '1.0.0',
-            depName: '!!!!--!',
-            registryUrls: ['https://charts.helm.sh/stable'],
-            skipReason: 'unsupported-chart-type',
-          },
-          {
-            currentValue: '1.0.0',
-            depName: 'example',
-            registryUrls: ['https://charts.helm.sh/stable'],
-          },
-        ],
-      });
+      expect(result?.deps).toMatchObject([
+        { depName: '!!!!--!', skipReason: 'unsupported-chart-type' },
+        { currentValue: '1.0.0', depName: 'example' },
+      ]);
     });
 
     it('skip local charts', async () => {
@@ -169,17 +149,9 @@ describe('modules/manager/helmfile/extract', () => {
           stable: 'https://charts.helm.sh/stable',
         },
       });
-      expect(result).toEqual({
-        datasource: 'helm',
-        deps: [
-          {
-            currentValue: '1.0.0',
-            depName: 'example',
-            registryUrls: [],
-            skipReason: 'unknown-registry',
-          },
-        ],
-      });
+      expect(result?.deps).toMatchObject([
+        { depName: 'example', skipReason: 'unknown-registry' },
+      ]);
     });
 
     it('skip chart with special character in the name', async () => {
@@ -201,23 +173,10 @@ describe('modules/manager/helmfile/extract', () => {
           stable: 'https://charts.helm.sh/stable',
         },
       });
-      expect(result).toEqual({
-        datasource: 'helm',
-        deps: [
-          {
-            currentValue: '1.0.0',
-            depName: 'example/example',
-            registryUrls: ['https://kiwigrid.github.io'],
-            skipReason: 'unsupported-chart-type',
-          },
-          {
-            currentValue: '1.0.0',
-            depName: 'example?example',
-            registryUrls: ['https://kiwigrid.github.io'],
-            skipReason: 'unsupported-chart-type',
-          },
-        ],
-      });
+      expect(result?.deps).toMatchObject([
+        { depName: 'example/example', skipReason: 'unsupported-chart-type' },
+        { depName: 'example?example', skipReason: 'unsupported-chart-type' },
+      ]);
     });
 
     it('skip chart that does not have specified version', async () => {

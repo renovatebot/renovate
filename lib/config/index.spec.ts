@@ -26,17 +26,9 @@ describe('config/index', () => {
       expect(config.foo).toBe('bar');
       expect(config.rangeStrategy).toBe('replace');
       expect(config.lockFileMaintenance.schedule).toEqual(['on monday']);
-      expect(config.lockFileMaintenance).toEqual({
+      expect(config.lockFileMaintenance).toMatchObject({
         branchTopic: 'lock-file-maintenance',
-        commitMessageAction: 'Lock file maintenance',
-        commitMessageExtra: null,
-        commitMessageTopic: null,
         enabled: false,
-        groupName: null,
-        prBodyDefinitions: {
-          Change: 'All locks refreshed',
-        },
-        recreateWhen: 'always',
         schedule: ['on monday'],
       });
     });

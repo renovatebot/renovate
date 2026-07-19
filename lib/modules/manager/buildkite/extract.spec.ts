@@ -21,7 +21,6 @@ describe('modules/manager/buildkite/extract', () => {
           datasource: 'github-tags',
           depName: 'abc/detect-clowns',
           packageName: 'abc/detect-clowns-buildkite-plugin',
-          skipReason: undefined,
         },
       ]);
       expect(res).toHaveLength(1);
@@ -54,14 +53,12 @@ describe('modules/manager/buildkite/extract', () => {
           datasource: 'github-tags',
           depName: 'docker-compose',
           packageName: 'buildkite-plugins/docker-compose-buildkite-plugin',
-          skipReason: undefined,
         },
         {
           currentValue: 'v1.3.2',
           datasource: 'github-tags',
           depName: 'docker-compose',
           packageName: 'buildkite-plugins/docker-compose-buildkite-plugin',
-          skipReason: undefined,
         },
       ]);
       expect(res).toHaveLength(2);
@@ -125,28 +122,24 @@ describe('modules/manager/buildkite/extract', () => {
           datasource: 'github-tags',
           depName: 'docker-login',
           packageName: 'buildkite-plugins/docker-login-buildkite-plugin',
-          skipReason: undefined,
         },
         {
           currentValue: 'v2.5.1',
           datasource: 'github-tags',
           depName: 'docker-compose',
           packageName: 'buildkite-plugins/docker-compose-buildkite-plugin',
-          skipReason: undefined,
         },
         {
           currentValue: 'v2.0.1',
           datasource: 'github-tags',
           depName: 'docker-login',
           packageName: 'buildkite-plugins/docker-login-buildkite-plugin',
-          skipReason: undefined,
         },
         {
           currentValue: 'v2.5.1',
           datasource: 'github-tags',
           depName: 'docker-compose',
           packageName: 'buildkite-plugins/docker-compose-buildkite-plugin',
-          skipReason: undefined,
         },
       ]);
       expect(res).toHaveLength(4);

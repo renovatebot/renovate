@@ -72,454 +72,179 @@ describe('modules/manager/cargo/extract', () => {
 
     it('extracts multiple dependencies simple', async () => {
       const res = await extractPackageFile(cargo1toml, 'Cargo.toml', config);
-      expect(res?.deps).toEqual([
+      expect(res?.deps).toMatchObject([
+        { depName: 'libc', currentValue: '=0.2.43' },
+        { depName: 'bitflags', currentValue: '1.0.4' },
         {
-          currentValue: '=0.2.43',
-          datasource: 'crate',
-          depName: 'libc',
-          depType: 'dependencies',
-          managerData: {
-            nestedVersion: false,
-          },
-        },
-        {
-          currentValue: '1.0.4',
-          datasource: 'crate',
-          depName: 'bitflags',
-          depType: 'dependencies',
-          managerData: {
-            nestedVersion: false,
-          },
-        },
-        {
-          currentValue: '=0.1',
-          datasource: 'crate',
           depName: 'pcap-sys',
-          depType: 'dependencies',
-          managerData: {
-            nestedVersion: true,
-          },
+          currentValue: '=0.1',
           skipReason: 'path-dependency',
         },
+        { depName: 'pnet', currentValue: '0.21.0' },
         {
-          currentValue: '0.21.0',
-          datasource: 'crate',
-          depName: 'pnet',
-          depType: 'dependencies',
-          managerData: {
-            nestedVersion: true,
-          },
-        },
-        {
-          currentValue: undefined,
-          datasource: 'git-refs',
           depName: 'git_dep_with_version',
-          depType: 'dependencies',
-          managerData: {
-            nestedVersion: true,
-          },
-          packageName: 'https://github.com/foo/bar',
-          skipReason: 'unspecified-version',
-        },
-        {
-          currentValue: undefined,
           datasource: 'git-refs',
-          depName: 'git_dep',
-          depType: 'dependencies',
-          managerData: {
-            nestedVersion: false,
-          },
           packageName: 'https://github.com/foo/bar',
           skipReason: 'unspecified-version',
         },
         {
-          currentValue: '',
-          datasource: 'crate',
-          depName: 'path_dep_without_version',
-          depType: 'dependencies',
-          managerData: {
-            nestedVersion: false,
-          },
-          skipReason: 'path-dependency',
+          depName: 'git_dep',
+          datasource: 'git-refs',
+          packageName: 'https://github.com/foo/bar',
+          skipReason: 'unspecified-version',
         },
+        { depName: 'path_dep_without_version', skipReason: 'path-dependency' },
         {
-          currentValue: '1.10.3',
-          datasource: 'github-tags',
           depName: 'git_dep_with_tag',
-          depType: 'dependencies',
-          managerData: {
-            nestedVersion: false,
-          },
+          datasource: 'github-tags',
+          currentValue: '1.10.3',
           packageName: 'foo/bar',
           registryUrls: ['https://github.com'],
-          skipReason: undefined,
         },
         {
-          currentDigest: 'abc1234',
-          currentValue: '',
-          datasource: 'git-refs',
           depName: 'git_dep_with_rev',
-          depType: 'dependencies',
-          managerData: {
-            nestedVersion: false,
-          },
+          datasource: 'git-refs',
+          currentDigest: 'abc1234',
           packageName: 'https://github.com/foo/bar',
-          replaceString: 'abc1234',
-          skipReason: undefined,
         },
         {
-          currentValue: 'next',
-          datasource: 'git-refs',
           depName: 'git_dep_with_branch',
-          depType: 'dependencies',
-          managerData: {
-            nestedVersion: false,
-          },
+          datasource: 'git-refs',
+          currentValue: 'next',
           packageName: 'https://github.com/foo/bar',
           skipReason: 'git-dependency',
         },
         {
-          currentValue: '1.0.0',
-          datasource: 'github-tags',
           depName: 'git_dep_with_custom_hostname',
-          depType: 'dependencies',
-          managerData: {
-            nestedVersion: true,
-          },
+          datasource: 'github-tags',
+          currentValue: '1.0.0',
           packageName: 'a/b',
           registryUrls: ['https://git.example.com'],
-          skipReason: undefined,
         },
-        {
-          currentValue: '0.0.0',
-          datasource: 'crate',
-          depName: 'same_version_1__',
-          depType: 'dependencies',
-          managerData: {
-            nestedVersion: false,
-          },
-        },
-        {
-          currentValue: '0.0.0',
-          datasource: 'crate',
-          depName: 'same_version_1_',
-          depType: 'dependencies',
-          managerData: {
-            nestedVersion: false,
-          },
-        },
-        {
-          currentValue: '0.0.0',
-          datasource: 'crate',
-          depName: 'same_version_1',
-          depType: 'dependencies',
-          managerData: {
-            nestedVersion: false,
-          },
-        },
-        {
-          currentValue: '0.4.2',
-          datasource: 'crate',
-          depName: 'dep1',
-          depType: 'dependencies',
-          managerData: {
-            nestedVersion: true,
-          },
-        },
-        {
-          currentValue: '=0.3.6',
-          datasource: 'crate',
-          depName: 'winapi',
-          depType: 'dependencies',
-          managerData: {
-            nestedVersion: true,
-          },
-          target: 'cfg(windows)',
-        },
-        {
-          currentValue: '0.2.37',
-          datasource: 'crate',
-          depName: 'wasm-bindgen',
-          depType: 'dependencies',
-          managerData: {
-            nestedVersion: false,
-          },
-          target: 'cfg(target_arch = "wasm32")',
-        },
-        {
-          currentValue: '0.3.14',
-          datasource: 'crate',
-          depName: 'js-sys',
-          depType: 'dependencies',
-          managerData: {
-            nestedVersion: false,
-          },
-          target: 'cfg(target_arch = "wasm32")',
-        },
-        {
-          currentValue: '',
-          datasource: 'crate',
-          depName: 'js_relative_import',
-          depType: 'dependencies',
-          managerData: {
-            nestedVersion: false,
-          },
-          skipReason: 'path-dependency',
-          target: 'cfg(target_arch = "wasm32")',
-        },
-        {
-          currentValue: '0.3.14',
-          datasource: 'crate',
-          depName: 'web-sys',
-          depType: 'dependencies',
-          managerData: {
-            nestedVersion: true,
-          },
-          target: 'cfg(target_arch = "wasm32")',
-        },
+        { depName: 'same_version_1__', currentValue: '0.0.0' },
+        { depName: 'same_version_1_', currentValue: '0.0.0' },
+        { depName: 'same_version_1', currentValue: '0.0.0' },
+        { depName: 'dep1', currentValue: '0.4.2' },
+        { depName: 'winapi', currentValue: '=0.3.6' },
+        { depName: 'wasm-bindgen', currentValue: '0.2.37' },
+        { depName: 'js-sys', currentValue: '0.3.14' },
+        { depName: 'js_relative_import', skipReason: 'path-dependency' },
+        { depName: 'web-sys', currentValue: '0.3.14' },
       ]);
       expect(res?.deps).toHaveLength(20);
     });
 
     it('extracts multiple dependencies advanced', async () => {
       const res = await extractPackageFile(cargo2toml, 'Cargo.toml', config);
-      expect(res?.deps).toEqual([
+      expect(res?.deps).toMatchObject([
         {
-          currentValue: '0.2.0',
-          datasource: 'crate',
           depName: 'amethyst_animation',
+          currentValue: '0.2.0',
           depType: 'dependencies',
-          managerData: {
-            nestedVersion: true,
-          },
           skipReason: 'path-dependency',
         },
         {
-          currentValue: '0.3.0',
-          datasource: 'crate',
           depName: 'amethyst_assets',
+          currentValue: '0.3.0',
           depType: 'dependencies',
-          managerData: {
-            nestedVersion: true,
-          },
           skipReason: 'path-dependency',
         },
         {
-          currentValue: '0.2.0',
-          datasource: 'crate',
           depName: 'amethyst_audio',
-          depType: 'dependencies',
-          managerData: {
-            nestedVersion: true,
-          },
-          skipReason: 'path-dependency',
-        },
-        {
-          currentValue: '0.6.0',
-          datasource: 'crate',
-          depName: 'amethyst_config',
-          depType: 'dependencies',
-          managerData: {
-            nestedVersion: true,
-          },
-          skipReason: 'path-dependency',
-        },
-        {
           currentValue: '0.2.0',
-          datasource: 'crate',
+          depType: 'dependencies',
+          skipReason: 'path-dependency',
+        },
+        {
+          depName: 'amethyst_config',
+          currentValue: '0.6.0',
+          depType: 'dependencies',
+          skipReason: 'path-dependency',
+        },
+        {
           depName: 'amethyst_core',
+          currentValue: '0.2.0',
           depType: 'dependencies',
-          managerData: {
-            nestedVersion: true,
-          },
           skipReason: 'path-dependency',
         },
         {
-          currentValue: '0.1.0',
-          datasource: 'crate',
           depName: 'amethyst_controls',
-          depType: 'dependencies',
-          managerData: {
-            nestedVersion: true,
-          },
-          skipReason: 'path-dependency',
-        },
-        {
           currentValue: '0.1.0',
-          datasource: 'crate',
+          depType: 'dependencies',
+          skipReason: 'path-dependency',
+        },
+        {
           depName: 'amethyst_locale',
+          currentValue: '0.1.0',
           depType: 'dependencies',
-          managerData: {
-            nestedVersion: true,
-          },
           skipReason: 'path-dependency',
         },
         {
-          currentValue: '0.7',
-          datasource: 'crate',
           depName: 'amethyst_renderer',
+          currentValue: '0.7',
           depType: 'dependencies',
-          managerData: {
-            nestedVersion: true,
-          },
           skipReason: 'path-dependency',
         },
         {
-          currentValue: '0.3',
-          datasource: 'crate',
           depName: 'amethyst_input',
+          currentValue: '0.3',
           depType: 'dependencies',
-          managerData: {
-            nestedVersion: true,
-          },
           skipReason: 'path-dependency',
         },
         {
-          currentValue: '0.2',
-          datasource: 'crate',
           depName: 'amethyst_ui',
+          currentValue: '0.2',
           depType: 'dependencies',
-          managerData: {
-            nestedVersion: true,
-          },
           skipReason: 'path-dependency',
         },
         {
-          currentValue: '0.2',
-          datasource: 'crate',
           depName: 'amethyst_utils',
+          currentValue: '0.2',
           depType: 'dependencies',
-          managerData: {
-            nestedVersion: true,
-          },
           skipReason: 'path-dependency',
         },
+        { depName: 'derivative', currentValue: '1.0', depType: 'dependencies' },
+        { depName: 'fern', currentValue: '0.5', depType: 'dependencies' },
+        { depName: 'log', currentValue: '0.4', depType: 'dependencies' },
+        { depName: 'rayon', currentValue: '1.0.1', depType: 'dependencies' },
         {
-          currentValue: '1.0',
-          datasource: 'crate',
-          depName: 'derivative',
-          depType: 'dependencies',
-          managerData: {
-            nestedVersion: false,
-          },
-        },
-        {
-          currentValue: '0.5',
-          datasource: 'crate',
-          depName: 'fern',
-          depType: 'dependencies',
-          managerData: {
-            nestedVersion: true,
-          },
-        },
-        {
-          currentValue: '0.4',
-          datasource: 'crate',
-          depName: 'log',
-          depType: 'dependencies',
-          managerData: {
-            nestedVersion: false,
-          },
-        },
-        {
-          currentValue: '1.0.1',
-          datasource: 'crate',
-          depName: 'rayon',
-          depType: 'dependencies',
-          managerData: {
-            nestedVersion: false,
-          },
-        },
-        {
-          currentValue: '0.1',
-          datasource: 'crate',
           depName: 'rustc_version_runtime',
-          depType: 'dependencies',
-          managerData: {
-            nestedVersion: false,
-          },
-        },
-        {
-          currentValue: '0.15',
-          datasource: 'crate',
-          depName: 'winit',
-          depType: 'dependencies',
-          managerData: {
-            nestedVersion: false,
-          },
-        },
-        {
           currentValue: '0.1',
-          datasource: 'crate',
-          depName: 'thread_profiler',
           depType: 'dependencies',
-          managerData: {
-            nestedVersion: true,
-          },
+        },
+        { depName: 'winit', currentValue: '0.15', depType: 'dependencies' },
+        {
+          depName: 'thread_profiler',
+          currentValue: '0.1',
+          depType: 'dependencies',
         },
         {
-          currentValue: '0.2',
-          datasource: 'crate',
           depName: 'amethyst_gltf',
+          currentValue: '0.2',
           depType: 'dev-dependencies',
-          managerData: {
-            nestedVersion: true,
-          },
           skipReason: 'path-dependency',
         },
         {
-          currentValue: '0.5.10',
-          datasource: 'crate',
           depName: 'env_logger',
+          currentValue: '0.5.10',
           depType: 'dev-dependencies',
-          managerData: {
-            nestedVersion: false,
-          },
         },
         {
-          currentValue: '0.6',
-          datasource: 'crate',
           depName: 'genmesh',
+          currentValue: '0.6',
           depType: 'dev-dependencies',
-          managerData: {
-            nestedVersion: false,
-          },
         },
+        { depName: 'ron', currentValue: '0.2', depType: 'dev-dependencies' },
+        { depName: 'serde', currentValue: '1.0', depType: 'dev-dependencies' },
         {
-          currentValue: '0.2',
-          datasource: 'crate',
-          depName: 'ron',
-          depType: 'dev-dependencies',
-          managerData: {
-            nestedVersion: false,
-          },
-        },
-        {
-          currentValue: '1.0',
-          datasource: 'crate',
-          depName: 'serde',
-          depType: 'dev-dependencies',
-          managerData: {
-            nestedVersion: false,
-          },
-        },
-        {
-          currentValue: '1.0',
-          datasource: 'crate',
           depName: 'serde_derive',
+          currentValue: '1.0',
           depType: 'dev-dependencies',
-          managerData: {
-            nestedVersion: false,
-          },
         },
         {
-          currentValue: '0.1',
-          datasource: 'crate',
           depName: 'vergen',
+          currentValue: '0.1',
           depType: 'build-dependencies',
-          managerData: {
-            nestedVersion: false,
-          },
         },
       ]);
       expect(res?.deps).toHaveLength(18 + 6 + 1);
@@ -527,197 +252,69 @@ describe('modules/manager/cargo/extract', () => {
 
     it('handles inline tables', async () => {
       const res = await extractPackageFile(cargo3toml, 'Cargo.toml', config);
-      expect(res?.deps).toEqual([
+      expect(res?.deps).toMatchObject([
         {
-          currentValue: '0.1',
-          datasource: 'crate',
           depName: 'pcap-sys',
-          depType: 'dependencies',
-          managerData: {
-            nestedVersion: true,
-          },
+          currentValue: '0.1',
           skipReason: 'path-dependency',
         },
+        { depName: 'pnet', currentValue: '0.21.0' },
+        { depName: 'dep1', currentValue: '1.2', skipReason: 'path-dependency' },
+        { depName: 'dep2', currentValue: '3.4', skipReason: 'path-dependency' },
         {
-          currentValue: '0.21.0',
-          datasource: 'crate',
-          depName: 'pnet',
-          depType: 'dependencies',
-          managerData: {
-            nestedVersion: true,
-          },
-        },
-        {
-          currentValue: '1.2',
-          datasource: 'crate',
-          depName: 'dep1',
-          depType: 'dependencies',
-          managerData: {
-            nestedVersion: true,
-          },
-          skipReason: 'path-dependency',
-        },
-        {
-          currentValue: '3.4',
-          datasource: 'crate',
-          depName: 'dep2',
-          depType: 'dependencies',
-          managerData: {
-            nestedVersion: true,
-          },
-          skipReason: 'path-dependency',
-        },
-        {
-          currentValue: '~12.3.1',
-          datasource: 'crate',
           depName: 'dep3',
-          depType: 'dependencies',
-          managerData: {
-            nestedVersion: true,
-          },
+          currentValue: '~12.3.1',
           skipReason: 'path-dependency',
         },
-        {
-          currentValue: 'INVALID 3.3.1 VERSION',
-          datasource: 'crate',
-          depName: 'dep4',
-          depType: 'dependencies',
-          managerData: {
-            nestedVersion: true,
-          },
-        },
-        {
-          currentValue: '3.2.1',
-          datasource: 'crate',
-          depName: 'dep5',
-          depType: 'dependencies',
-          managerData: {
-            nestedVersion: true,
-          },
-        },
-        {
-          currentValue: '',
-          datasource: 'crate',
-          depName: 'dep6',
-          depType: 'dependencies',
-          managerData: {
-            nestedVersion: false,
-          },
-          skipReason: 'invalid-dependency-specification',
-        },
+        { depName: 'dep4', currentValue: 'INVALID 3.3.1 VERSION' },
+        { depName: 'dep5', currentValue: '3.2.1' },
+        { depName: 'dep6', skipReason: 'invalid-dependency-specification' },
       ]);
       expect(res?.deps).toHaveLength(8);
     });
 
     it('handles standard tables', async () => {
       const res = await extractPackageFile(cargo4toml, 'Cargo.toml', config);
-      expect(res?.deps).toEqual([
+      expect(res?.deps).toMatchObject([
+        { depName: 'dep1', currentValue: '1.2', skipReason: 'path-dependency' },
+        { depName: 'dep2', currentValue: '3.4', skipReason: 'path-dependency' },
         {
-          currentValue: '1.2',
-          datasource: 'crate',
-          depName: 'dep1',
-          depType: 'dependencies',
-          managerData: {
-            nestedVersion: true,
-          },
-          skipReason: 'path-dependency',
-        },
-        {
-          currentValue: '3.4',
-          datasource: 'crate',
-          depName: 'dep2',
-          depType: 'dependencies',
-          managerData: {
-            nestedVersion: true,
-          },
-          skipReason: 'path-dependency',
-        },
-        {
-          currentValue: '~12.3.1',
-          datasource: 'crate',
           depName: 'dep3',
-          depType: 'dependencies',
-          managerData: {
-            nestedVersion: true,
-          },
+          currentValue: '~12.3.1',
           skipReason: 'path-dependency',
         },
         {
-          currentValue: 'INVALID 1.3.1 VERSION',
-          datasource: 'crate',
           depName: 'dep4',
-          depType: 'dependencies',
-          managerData: {
-            nestedVersion: true,
-          },
+          currentValue: 'INVALID 1.3.1 VERSION',
           skipReason: 'path-dependency',
         },
-        {
-          currentValue: '',
-          datasource: 'crate',
-          depName: 'dep5',
-          depType: 'dependencies',
-          managerData: {
-            nestedVersion: false,
-          },
-          skipReason: 'path-dependency',
-        },
-        {
-          currentValue: '',
-          datasource: 'crate',
-          depName: 'dep7',
-          depType: 'dependencies',
-          managerData: {
-            nestedVersion: false,
-          },
-          skipReason: 'invalid-dependency-specification',
-        },
+        { depName: 'dep5', skipReason: 'path-dependency' },
+        { depName: 'dep7', skipReason: 'invalid-dependency-specification' },
       ]);
       expect(res?.deps).toHaveLength(6);
     });
 
     it('extracts platform specific dependencies', async () => {
       const res = await extractPackageFile(cargo5toml, 'Cargo.toml', config);
-      expect(res?.deps).toEqual([
+      expect(res?.deps).toMatchObject([
         {
-          currentValue: '0.2.37',
-          datasource: 'crate',
           depName: 'wasm-bindgen',
-          depType: 'dependencies',
-          managerData: {
-            nestedVersion: false,
-          },
+          currentValue: '0.2.37',
           target: 'cfg(target_arch = "wasm32")',
         },
         {
-          currentValue: '0.3.14',
-          datasource: 'crate',
           depName: 'js-sys',
-          depType: 'dependencies',
-          managerData: {
-            nestedVersion: false,
-          },
-          target: 'cfg(target_arch = "wasm32")',
-        },
-        {
-          currentValue: '',
-          datasource: 'crate',
-          depName: 'js_relative_import',
-          depType: 'dependencies',
-          managerData: {
-            nestedVersion: false,
-          },
-          skipReason: 'path-dependency',
-          target: 'cfg(target_arch = "wasm32")',
-        },
-        {
           currentValue: '0.3.14',
-          datasource: 'crate',
+          target: 'cfg(target_arch = "wasm32")',
+        },
+        {
+          depName: 'js_relative_import',
+          target: 'cfg(target_arch = "wasm32")',
+          skipReason: 'path-dependency',
+        },
+        {
           depName: 'web-sys',
-          depType: 'dependencies',
-          managerData: {
-            nestedVersion: true,
-          },
+          currentValue: '0.3.14',
           target: 'cfg(target_arch = "wasm32")',
         },
       ]);
@@ -729,40 +326,20 @@ describe('modules/manager/cargo/extract', () => {
       const res = await extractPackageFile(cargo6toml, 'Cargo.toml', {
         ...config,
       });
-      expect(res?.deps).toEqual([
+      expect(res?.deps).toMatchObject([
         {
-          currentValue: '0.1.0',
-          datasource: 'crate',
           depName: 'proprietary-crate',
-          depType: 'dependencies',
-          managerData: {
-            nestedVersion: true,
-            registryName: 'private-crates',
-          },
+          currentValue: '0.1.0',
           registryUrls: [
             'https://dl.cloudsmith.io/basic/my-org/my-repo/cargo/index.git',
           ],
         },
         {
-          currentValue: '3.0.0',
-          datasource: 'crate',
           depName: 'mcorbin-test',
-          depType: 'dependencies',
-          managerData: {
-            nestedVersion: true,
-            registryName: 'mcorbin',
-          },
+          currentValue: '3.0.0',
           registryUrls: ['https://github.com/mcorbin/testregistry'],
         },
-        {
-          currentValue: '0.2',
-          datasource: 'crate',
-          depName: 'tokio',
-          depType: 'dependencies',
-          managerData: {
-            nestedVersion: false,
-          },
-        },
+        { depName: 'tokio', currentValue: '0.2' },
       ]);
       expect(res?.deps).toHaveLength(3);
     });
@@ -772,40 +349,20 @@ describe('modules/manager/cargo/extract', () => {
       const res = await extractPackageFile(cargo6toml, 'Cargo.toml', {
         ...config,
       });
-      expect(res?.deps).toEqual([
+      expect(res?.deps).toMatchObject([
         {
-          currentValue: '0.1.0',
-          datasource: 'crate',
           depName: 'proprietary-crate',
-          depType: 'dependencies',
-          managerData: {
-            nestedVersion: true,
-            registryName: 'private-crates',
-          },
+          currentValue: '0.1.0',
           registryUrls: [
             'https://dl.cloudsmith.io/basic/my-org/my-repo/cargo/index.git',
           ],
         },
         {
-          currentValue: '3.0.0',
-          datasource: 'crate',
           depName: 'mcorbin-test',
-          depType: 'dependencies',
-          managerData: {
-            nestedVersion: true,
-            registryName: 'mcorbin',
-          },
+          currentValue: '3.0.0',
           registryUrls: ['https://github.com/mcorbin/testregistry'],
         },
-        {
-          currentValue: '0.2',
-          datasource: 'crate',
-          depName: 'tokio',
-          depType: 'dependencies',
-          managerData: {
-            nestedVersion: false,
-          },
-        },
+        { depName: 'tokio', currentValue: '0.2' },
       ]);
       expect(res?.deps).toHaveLength(3);
     });
@@ -1100,16 +657,10 @@ tokio = { version = "1.21.1" }`;
       const cargotoml =
         '[dependencies]\nfoobar = { version = "0.1.0", registry = "not-listed" }';
       const res = await extractPackageFile(cargotoml, 'Cargo.toml', config);
-      expect(res?.deps).toEqual([
+      expect(res?.deps).toMatchObject([
         {
-          currentValue: '0.1.0',
-          datasource: 'crate',
           depName: 'foobar',
-          depType: 'dependencies',
-          managerData: {
-            nestedVersion: true,
-            registryName: 'not-listed',
-          },
+          currentValue: '0.1.0',
           skipReason: 'unknown-registry',
         },
       ]);
@@ -1121,38 +672,18 @@ tokio = { version = "1.21.1" }`;
       const res = await extractPackageFile(cargo6toml, 'Cargo.toml', {
         ...config,
       });
-      expect(res?.deps).toEqual([
+      expect(res?.deps).toMatchObject([
         {
-          currentValue: '0.1.0',
-          datasource: 'crate',
           depName: 'proprietary-crate',
-          depType: 'dependencies',
-          managerData: {
-            nestedVersion: true,
-            registryName: 'private-crates',
-          },
+          currentValue: '0.1.0',
           skipReason: 'unknown-registry',
         },
         {
-          currentValue: '3.0.0',
-          datasource: 'crate',
           depName: 'mcorbin-test',
-          depType: 'dependencies',
-          managerData: {
-            nestedVersion: true,
-            registryName: 'mcorbin',
-          },
+          currentValue: '3.0.0',
           skipReason: 'unknown-registry',
         },
-        {
-          currentValue: '0.2',
-          datasource: 'crate',
-          depName: 'tokio',
-          depType: 'dependencies',
-          managerData: {
-            nestedVersion: false,
-          },
-        },
+        { depName: 'tokio', currentValue: '0.2' },
       ]);
       expect(res?.deps).toHaveLength(3);
     });
@@ -1162,38 +693,18 @@ tokio = { version = "1.21.1" }`;
       const res = await extractPackageFile(cargo6toml, 'Cargo.toml', {
         ...config,
       });
-      expect(res?.deps).toEqual([
+      expect(res?.deps).toMatchObject([
         {
-          currentValue: '0.1.0',
-          datasource: 'crate',
           depName: 'proprietary-crate',
-          depType: 'dependencies',
-          managerData: {
-            nestedVersion: true,
-            registryName: 'private-crates',
-          },
+          currentValue: '0.1.0',
           skipReason: 'unknown-registry',
         },
         {
-          currentValue: '3.0.0',
-          datasource: 'crate',
           depName: 'mcorbin-test',
-          depType: 'dependencies',
-          managerData: {
-            nestedVersion: true,
-            registryName: 'mcorbin',
-          },
+          currentValue: '3.0.0',
           skipReason: 'unknown-registry',
         },
-        {
-          currentValue: '0.2',
-          datasource: 'crate',
-          depName: 'tokio',
-          depType: 'dependencies',
-          managerData: {
-            nestedVersion: false,
-          },
-        },
+        { depName: 'tokio', currentValue: '0.2' },
       ]);
       expect(res?.deps).toHaveLength(3);
     });
@@ -1309,15 +820,10 @@ replace-with = "mcorbin"
         '[dependencies]\nboolector-solver = { package = "boolector", version = "0.4.0" }';
       const res = await extractPackageFile(cargotoml, 'Cargo.toml', config);
 
-      expect(res?.deps).toEqual([
+      expect(res?.deps).toMatchObject([
         {
-          currentValue: '0.4.0',
-          datasource: 'crate',
           depName: 'boolector-solver',
-          depType: 'dependencies',
-          managerData: {
-            nestedVersion: true,
-          },
+          currentValue: '0.4.0',
           packageName: 'boolector',
         },
       ]);

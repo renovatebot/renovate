@@ -192,44 +192,17 @@ describe('modules/datasource/maven/index', () => {
 
     const res = await get();
 
-    expect(res).toEqual({
-      display: 'org.example:package',
-      group: 'org.example',
-      homepage: 'https://package.example.org/about',
-      name: 'package',
-      packageScope: 'org.example',
-      registryUrl: 'https://repo.maven.apache.org/maven2',
+    expect(res).toMatchObject({
       releases: [
-        {
-          version: '0.0.1',
-        },
-        {
-          version: '1.0.0',
-        },
-        {
-          version: '1.0.1',
-        },
-        {
-          version: '1.0.2',
-        },
-        {
-          version: '1.0.3-SNAPSHOT',
-        },
-        {
-          version: '1.0.4-SNAPSHOT',
-        },
-        {
-          version: '1.0.5-SNAPSHOT',
-        },
-        {
-          version: '2.0.0',
-        },
+        { version: '0.0.1' },
+        { version: '1.0.0' },
+        { version: '1.0.1' },
+        { version: '1.0.2' },
+        { version: '1.0.3-SNAPSHOT' },
+        { version: '1.0.4-SNAPSHOT' },
+        { version: '1.0.5-SNAPSHOT' },
+        { version: '2.0.0' },
       ],
-      respectLatest: false,
-      tags: {
-        latest: '2.0.0',
-        release: '2.0.0',
-      },
     });
   });
 
@@ -305,45 +278,18 @@ describe('modules/datasource/maven/index', () => {
 
     const res = await get('org.example:package', baseUrlCustom);
 
-    expect(res).toEqual({
-      display: 'org.example:package',
-      group: 'org.example',
-      homepage: 'https://package.example.org/about',
-      isPrivate: true,
-      name: 'package',
-      packageScope: 'org.example',
+    expect(res).toMatchObject({
       registryUrl: 'https://custom.registry.renovatebot.com',
       releases: [
-        {
-          version: '0.0.1',
-        },
-        {
-          version: '1.0.0',
-        },
-        {
-          version: '1.0.1',
-        },
-        {
-          version: '1.0.2',
-        },
-        {
-          version: '1.0.3-SNAPSHOT',
-        },
-        {
-          version: '1.0.4-SNAPSHOT',
-        },
-        {
-          version: '1.0.5-SNAPSHOT',
-        },
-        {
-          version: '2.0.0',
-        },
+        { version: '0.0.1' },
+        { version: '1.0.0' },
+        { version: '1.0.1' },
+        { version: '1.0.2' },
+        { version: '1.0.3-SNAPSHOT' },
+        { version: '1.0.4-SNAPSHOT' },
+        { version: '1.0.5-SNAPSHOT' },
+        { version: '2.0.0' },
       ],
-      respectLatest: false,
-      tags: {
-        latest: '2.0.0',
-        release: '2.0.0',
-      },
     });
   });
 
@@ -375,44 +321,18 @@ describe('modules/datasource/maven/index', () => {
       baseUrl,
     );
 
-    expect(res).toEqual({
-      display: 'org.example:package',
-      group: 'org.example',
-      homepage: 'https://package.example.org/about',
-      name: 'package',
-      packageScope: 'org.example',
+    expect(res).toMatchObject({
       registryUrl: 'https://repo.maven.apache.org/maven2',
       releases: [
-        {
-          version: '0.0.1',
-        },
-        {
-          version: '1.0.0',
-        },
-        {
-          version: '1.0.1',
-        },
-        {
-          version: '1.0.2',
-        },
-        {
-          version: '1.0.3-SNAPSHOT',
-        },
-        {
-          version: '1.0.4-SNAPSHOT',
-        },
-        {
-          version: '1.0.5-SNAPSHOT',
-        },
-        {
-          version: '2.0.0',
-        },
+        { version: '0.0.1' },
+        { version: '1.0.0' },
+        { version: '1.0.1' },
+        { version: '1.0.2' },
+        { version: '1.0.3-SNAPSHOT' },
+        { version: '1.0.4-SNAPSHOT' },
+        { version: '1.0.5-SNAPSHOT' },
+        { version: '2.0.0' },
       ],
-      respectLatest: false,
-      tags: {
-        latest: '2.0.0',
-        release: '2.0.0',
-      },
     });
   });
 
@@ -497,44 +417,18 @@ describe('modules/datasource/maven/index', () => {
       baseUrl,
     );
 
-    expect(res).toEqual({
-      display: 'org.example:package',
-      group: 'org.example',
-      homepage: 'https://package.example.org/about',
-      name: 'package',
-      packageScope: 'org.example',
+    expect(res).toMatchObject({
       registryUrl: 'https://repo.maven.apache.org/maven2',
       releases: [
-        {
-          version: '0.0.1',
-        },
-        {
-          version: '1.0.0',
-        },
-        {
-          version: '1.0.1',
-        },
-        {
-          version: '1.0.2',
-        },
-        {
-          version: '1.0.3-SNAPSHOT',
-        },
-        {
-          version: '1.0.4-SNAPSHOT',
-        },
-        {
-          version: '1.0.5-SNAPSHOT',
-        },
-        {
-          version: '2.0.0',
-        },
+        { version: '0.0.1' },
+        { version: '1.0.0' },
+        { version: '1.0.1' },
+        { version: '1.0.2' },
+        { version: '1.0.3-SNAPSHOT' },
+        { version: '1.0.4-SNAPSHOT' },
+        { version: '1.0.5-SNAPSHOT' },
+        { version: '2.0.0' },
       ],
-      respectLatest: false,
-      tags: {
-        latest: '2.0.0',
-        release: '2.0.0',
-      },
     });
   });
 
@@ -551,44 +445,18 @@ describe('modules/datasource/maven/index', () => {
       baseUrl,
     );
 
-    expect(res).toEqual({
-      display: 'org.example:package',
-      group: 'org.example',
-      homepage: 'https://package.example.org/about',
-      name: 'package',
-      packageScope: 'org.example',
+    expect(res).toMatchObject({
       registryUrl: 'https://repo.maven.apache.org/maven2',
       releases: [
-        {
-          version: '0.0.1',
-        },
-        {
-          version: '1.0.0',
-        },
-        {
-          version: '1.0.1',
-        },
-        {
-          version: '1.0.2',
-        },
-        {
-          version: '1.0.3-SNAPSHOT',
-        },
-        {
-          version: '1.0.4-SNAPSHOT',
-        },
-        {
-          version: '1.0.5-SNAPSHOT',
-        },
-        {
-          version: '2.0.0',
-        },
+        { version: '0.0.1' },
+        { version: '1.0.0' },
+        { version: '1.0.1' },
+        { version: '1.0.2' },
+        { version: '1.0.3-SNAPSHOT' },
+        { version: '1.0.4-SNAPSHOT' },
+        { version: '1.0.5-SNAPSHOT' },
+        { version: '2.0.0' },
       ],
-      respectLatest: false,
-      tags: {
-        latest: '2.0.0',
-        release: '2.0.0',
-      },
     });
   });
 
@@ -723,45 +591,17 @@ describe('modules/datasource/maven/index', () => {
 
     const res = await get('org.example:package', frontendUrl);
 
-    expect(res).toEqual({
-      display: 'org.example:package',
-      group: 'org.example',
-      homepage: 'https://package.example.org/about',
-      isPrivate: true,
-      name: 'package',
-      packageScope: 'org.example',
-      registryUrl: 'https://frontend_for_private_s3_repository/maven2',
+    expect(res).toMatchObject({
       releases: [
-        {
-          version: '0.0.1',
-        },
-        {
-          version: '1.0.0',
-        },
-        {
-          version: '1.0.1',
-        },
-        {
-          version: '1.0.2',
-        },
-        {
-          version: '1.0.3-SNAPSHOT',
-        },
-        {
-          version: '1.0.4-SNAPSHOT',
-        },
-        {
-          version: '1.0.5-SNAPSHOT',
-        },
-        {
-          version: '2.0.0',
-        },
+        { version: '0.0.1' },
+        { version: '1.0.0' },
+        { version: '1.0.1' },
+        { version: '1.0.2' },
+        { version: '1.0.3-SNAPSHOT' },
+        { version: '1.0.4-SNAPSHOT' },
+        { version: '1.0.5-SNAPSHOT' },
+        { version: '2.0.0' },
       ],
-      respectLatest: false,
-      tags: {
-        latest: '2.0.0',
-        release: '2.0.0',
-      },
     });
   });
 

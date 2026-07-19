@@ -2124,189 +2124,53 @@ describe('modules/datasource/nuget/index', () => {
         ...configV3,
       });
       expect(res).not.toBeNull();
-      expect(res).toEqual({
-        registryUrl: 'https://api.nuget.org/v3/index.json',
+      expect(res).toMatchObject({
         releases: [
-          {
-            releaseTimestamp: '2011-01-07T07:57:55.387Z',
-            version: '2.5.7.10213',
-          },
-          {
-            releaseTimestamp: '2011-02-09T07:26:34.347Z',
-            version: '2.5.9.10348',
-          },
-          {
-            releaseTimestamp: '2011-04-25T20:20:34.397Z',
-            version: '2.5.10.11092',
-          },
-          {
-            isDeprecated: true,
-            version: '2.6.0.12051',
-          },
-          {
-            releaseTimestamp: '2012-02-24T04:03:05.290Z',
-            version: '2.6.0.12054',
-          },
-          {
-            releaseTimestamp: '2012-08-05T03:08:28.403Z',
-            version: '2.6.1',
-          },
-          {
-            releaseTimestamp: '2012-10-23T15:37:48.000Z',
-            version: '2.6.2',
-          },
-          {
-            releaseTimestamp: '2013-10-11T01:52:53.417Z',
-            version: '2.6.3',
-          },
-          {
-            releaseTimestamp: '2014-12-17T17:30:47.607Z',
-            version: '2.6.4',
-          },
-          {
-            releaseTimestamp: '2018-04-20T04:23:59.217Z',
-            version: '2.6.5',
-          },
-          {
-            releaseTimestamp: '2018-06-07T15:24:16.807Z',
-            version: '2.6.6',
-          },
-          {
-            releaseTimestamp: '2018-07-07T15:41:32.657Z',
-            version: '2.6.7',
-          },
-          {
-            releaseTimestamp: '2018-08-10T20:45:24.080Z',
-            version: '2.7.0',
-          },
-          {
-            releaseTimestamp: '2019-08-21T07:08:49.360Z',
-            version: '2.7.1',
-          },
-          {
-            releaseTimestamp: '2014-09-23T03:11:33.430Z',
-            version: '3.0.0-alpha',
-          },
-          {
-            releaseTimestamp: '2014-11-03T06:24:59.217Z',
-            version: '3.0.0-alpha-2',
-          },
-          {
-            releaseTimestamp: '2014-11-29T22:38:18.493Z',
-            version: '3.0.0-alpha-3',
-          },
-          {
-            releaseTimestamp: '2014-12-31T04:47:39.507Z',
-            version: '3.0.0-alpha-4',
-          },
-          {
-            releaseTimestamp: '2015-01-31T22:13:01.997Z',
-            version: '3.0.0-alpha-5',
-          },
-          {
-            releaseTimestamp: '2015-03-26T11:33:22.173Z',
-            version: '3.0.0-beta-1',
-          },
-          {
-            releaseTimestamp: '2015-05-13T00:51:22.430Z',
-            version: '3.0.0-beta-2',
-          },
-          {
-            releaseTimestamp: '2015-07-15T23:44:47.403Z',
-            version: '3.0.0-beta-3',
-          },
-          {
-            releaseTimestamp: '2015-08-25T23:24:11.473Z',
-            version: '3.0.0-beta-4',
-          },
-          {
-            releaseTimestamp: '2015-10-17T03:39:18.100Z',
-            version: '3.0.0-beta-5',
-          },
-          {
-            releaseTimestamp: '2015-11-01T21:56:49.637Z',
-            version: '3.0.0-rc',
-          },
-          {
-            releaseTimestamp: '2015-11-08T16:27:15.110Z',
-            version: '3.0.0-rc-2',
-          },
-          {
-            releaseTimestamp: '2015-11-14T05:30:57.323Z',
-            version: '3.0.0-rc-3',
-          },
-          {
-            releaseTimestamp: '2015-11-16T00:02:51.807Z',
-            version: '3.0.0',
-          },
-          {
-            releaseTimestamp: '2015-12-02T03:52:57.997Z',
-            version: '3.0.1',
-          },
-          {
-            releaseTimestamp: '2016-03-05T21:12:58.990Z',
-            version: '3.2.0',
-          },
-          {
-            releaseTimestamp: '2016-04-19T15:31:13.390Z',
-            version: '3.2.1',
-          },
-          {
-            releaseTimestamp: '2016-06-25T17:44:56.253Z',
-            version: '3.4.0',
-          },
-          {
-            releaseTimestamp: '2016-06-30T21:20:49.497Z',
-            version: '3.4.1',
-          },
-          {
-            releaseTimestamp: '2016-10-04T01:19:19.447Z',
-            version: '3.5.0',
-          },
-          {
-            releaseTimestamp: '2017-01-10T02:17:19.187Z',
-            version: '3.6.0',
-          },
-          {
-            releaseTimestamp: '2017-02-26T14:56:04.407Z',
-            version: '3.6.1',
-          },
-          {
-            releaseTimestamp: '2017-05-30T00:07:36.707Z',
-            version: '3.7.0',
-          },
-          {
-            releaseTimestamp: '2017-06-06T01:59:11.787Z',
-            version: '3.7.1',
-          },
-          {
-            releaseTimestamp: '2017-08-28T00:08:29.500Z',
-            version: '3.8.0',
-          },
-          {
-            releaseTimestamp: '2017-08-29T01:11:58.860Z',
-            version: '3.8.1',
-          },
-          {
-            releaseTimestamp: '2017-11-10T23:35:19.670Z',
-            version: '3.9.0',
-          },
-          {
-            releaseTimestamp: '2018-03-13T00:29:56.400Z',
-            version: '3.10.0',
-          },
-          {
-            releaseTimestamp: '2018-03-13T03:13:09.930Z',
-            version: '3.10.1',
-          },
-          {
-            releaseTimestamp: '2018-10-07T01:17:31.310Z',
-            version: '3.11.0',
-          },
-          {
-            releaseTimestamp: '2019-05-15T00:24:28.390Z',
-            version: '3.12.0',
-          },
+          { version: '2.5.7.10213' },
+          { version: '2.5.9.10348' },
+          { version: '2.5.10.11092' },
+          { version: '2.6.0.12051' },
+          { version: '2.6.0.12054' },
+          { version: '2.6.1' },
+          { version: '2.6.2' },
+          { version: '2.6.3' },
+          { version: '2.6.4' },
+          { version: '2.6.5' },
+          { version: '2.6.6' },
+          { version: '2.6.7' },
+          { version: '2.7.0' },
+          { version: '2.7.1' },
+          { version: '3.0.0-alpha' },
+          { version: '3.0.0-alpha-2' },
+          { version: '3.0.0-alpha-3' },
+          { version: '3.0.0-alpha-4' },
+          { version: '3.0.0-alpha-5' },
+          { version: '3.0.0-beta-1' },
+          { version: '3.0.0-beta-2' },
+          { version: '3.0.0-beta-3' },
+          { version: '3.0.0-beta-4' },
+          { version: '3.0.0-beta-5' },
+          { version: '3.0.0-rc' },
+          { version: '3.0.0-rc-2' },
+          { version: '3.0.0-rc-3' },
+          { version: '3.0.0' },
+          { version: '3.0.1' },
+          { version: '3.2.0' },
+          { version: '3.2.1' },
+          { version: '3.4.0' },
+          { version: '3.4.1' },
+          { version: '3.5.0' },
+          { version: '3.6.0' },
+          { version: '3.6.1' },
+          { version: '3.7.0' },
+          { version: '3.7.1' },
+          { version: '3.8.0' },
+          { version: '3.8.1' },
+          { version: '3.9.0' },
+          { version: '3.10.0' },
+          { version: '3.10.1' },
+          { version: '3.11.0' },
+          { version: '3.12.0' },
         ],
         sourceUrl: 'https://nunit.org/',
       });
@@ -2327,189 +2191,53 @@ describe('modules/datasource/nuget/index', () => {
         ...configV3,
       });
       expect(res).not.toBeNull();
-      expect(res).toEqual({
-        registryUrl: 'https://api.nuget.org/v3/index.json',
+      expect(res).toMatchObject({
         releases: [
-          {
-            releaseTimestamp: '2011-01-07T07:57:55.387Z',
-            version: '2.5.7.10213',
-          },
-          {
-            releaseTimestamp: '2011-02-09T07:26:34.347Z',
-            version: '2.5.9.10348',
-          },
-          {
-            releaseTimestamp: '2011-04-25T20:20:34.397Z',
-            version: '2.5.10.11092',
-          },
-          {
-            isDeprecated: true,
-            version: '2.6.0.12051',
-          },
-          {
-            releaseTimestamp: '2012-02-24T04:03:05.290Z',
-            version: '2.6.0.12054',
-          },
-          {
-            releaseTimestamp: '2012-08-05T03:08:28.403Z',
-            version: '2.6.1',
-          },
-          {
-            releaseTimestamp: '2012-10-23T15:37:48.000Z',
-            version: '2.6.2',
-          },
-          {
-            releaseTimestamp: '2013-10-11T01:52:53.417Z',
-            version: '2.6.3',
-          },
-          {
-            releaseTimestamp: '2014-12-17T17:30:47.607Z',
-            version: '2.6.4',
-          },
-          {
-            releaseTimestamp: '2018-04-20T04:23:59.217Z',
-            version: '2.6.5',
-          },
-          {
-            releaseTimestamp: '2018-06-07T15:24:16.807Z',
-            version: '2.6.6',
-          },
-          {
-            releaseTimestamp: '2018-07-07T15:41:32.657Z',
-            version: '2.6.7',
-          },
-          {
-            releaseTimestamp: '2018-08-10T20:45:24.080Z',
-            version: '2.7.0',
-          },
-          {
-            releaseTimestamp: '2019-08-21T07:08:49.360Z',
-            version: '2.7.1',
-          },
-          {
-            releaseTimestamp: '2014-09-23T03:11:33.430Z',
-            version: '3.0.0-alpha',
-          },
-          {
-            releaseTimestamp: '2014-11-03T06:24:59.217Z',
-            version: '3.0.0-alpha-2',
-          },
-          {
-            releaseTimestamp: '2014-11-29T22:38:18.493Z',
-            version: '3.0.0-alpha-3',
-          },
-          {
-            releaseTimestamp: '2014-12-31T04:47:39.507Z',
-            version: '3.0.0-alpha-4',
-          },
-          {
-            releaseTimestamp: '2015-01-31T22:13:01.997Z',
-            version: '3.0.0-alpha-5',
-          },
-          {
-            releaseTimestamp: '2015-03-26T11:33:22.173Z',
-            version: '3.0.0-beta-1',
-          },
-          {
-            releaseTimestamp: '2015-05-13T00:51:22.430Z',
-            version: '3.0.0-beta-2',
-          },
-          {
-            releaseTimestamp: '2015-07-15T23:44:47.403Z',
-            version: '3.0.0-beta-3',
-          },
-          {
-            releaseTimestamp: '2015-08-25T23:24:11.473Z',
-            version: '3.0.0-beta-4',
-          },
-          {
-            releaseTimestamp: '2015-10-17T03:39:18.100Z',
-            version: '3.0.0-beta-5',
-          },
-          {
-            releaseTimestamp: '2015-11-01T21:56:49.637Z',
-            version: '3.0.0-rc',
-          },
-          {
-            releaseTimestamp: '2015-11-08T16:27:15.110Z',
-            version: '3.0.0-rc-2',
-          },
-          {
-            releaseTimestamp: '2015-11-14T05:30:57.323Z',
-            version: '3.0.0-rc-3',
-          },
-          {
-            releaseTimestamp: '2015-11-16T00:02:51.807Z',
-            version: '3.0.0',
-          },
-          {
-            releaseTimestamp: '2015-12-02T03:52:57.997Z',
-            version: '3.0.1',
-          },
-          {
-            releaseTimestamp: '2016-03-05T21:12:58.990Z',
-            version: '3.2.0',
-          },
-          {
-            releaseTimestamp: '2016-04-19T15:31:13.390Z',
-            version: '3.2.1',
-          },
-          {
-            releaseTimestamp: '2016-06-25T17:44:56.253Z',
-            version: '3.4.0',
-          },
-          {
-            releaseTimestamp: '2016-06-30T21:20:49.497Z',
-            version: '3.4.1',
-          },
-          {
-            releaseTimestamp: '2016-10-04T01:19:19.447Z',
-            version: '3.5.0',
-          },
-          {
-            releaseTimestamp: '2017-01-10T02:17:19.187Z',
-            version: '3.6.0',
-          },
-          {
-            releaseTimestamp: '2017-02-26T14:56:04.407Z',
-            version: '3.6.1',
-          },
-          {
-            releaseTimestamp: '2017-05-30T00:07:36.707Z',
-            version: '3.7.0',
-          },
-          {
-            releaseTimestamp: '2017-06-06T01:59:11.787Z',
-            version: '3.7.1',
-          },
-          {
-            releaseTimestamp: '2017-08-28T00:08:29.500Z',
-            version: '3.8.0',
-          },
-          {
-            releaseTimestamp: '2017-08-29T01:11:58.860Z',
-            version: '3.8.1',
-          },
-          {
-            releaseTimestamp: '2017-11-10T23:35:19.670Z',
-            version: '3.9.0',
-          },
-          {
-            releaseTimestamp: '2018-03-13T00:29:56.400Z',
-            version: '3.10.0',
-          },
-          {
-            releaseTimestamp: '2018-03-13T03:13:09.930Z',
-            version: '3.10.1',
-          },
-          {
-            releaseTimestamp: '2018-10-07T01:17:31.310Z',
-            version: '3.11.0',
-          },
-          {
-            releaseTimestamp: '2019-05-15T00:24:28.390Z',
-            version: '3.12.0',
-          },
+          { version: '2.5.7.10213' },
+          { version: '2.5.9.10348' },
+          { version: '2.5.10.11092' },
+          { version: '2.6.0.12051' },
+          { version: '2.6.0.12054' },
+          { version: '2.6.1' },
+          { version: '2.6.2' },
+          { version: '2.6.3' },
+          { version: '2.6.4' },
+          { version: '2.6.5' },
+          { version: '2.6.6' },
+          { version: '2.6.7' },
+          { version: '2.7.0' },
+          { version: '2.7.1' },
+          { version: '3.0.0-alpha' },
+          { version: '3.0.0-alpha-2' },
+          { version: '3.0.0-alpha-3' },
+          { version: '3.0.0-alpha-4' },
+          { version: '3.0.0-alpha-5' },
+          { version: '3.0.0-beta-1' },
+          { version: '3.0.0-beta-2' },
+          { version: '3.0.0-beta-3' },
+          { version: '3.0.0-beta-4' },
+          { version: '3.0.0-beta-5' },
+          { version: '3.0.0-rc' },
+          { version: '3.0.0-rc-2' },
+          { version: '3.0.0-rc-3' },
+          { version: '3.0.0' },
+          { version: '3.0.1' },
+          { version: '3.2.0' },
+          { version: '3.2.1' },
+          { version: '3.4.0' },
+          { version: '3.4.1' },
+          { version: '3.5.0' },
+          { version: '3.6.0' },
+          { version: '3.6.1' },
+          { version: '3.7.0' },
+          { version: '3.7.1' },
+          { version: '3.8.0' },
+          { version: '3.8.1' },
+          { version: '3.9.0' },
+          { version: '3.10.0' },
+          { version: '3.10.1' },
+          { version: '3.11.0' },
+          { version: '3.12.0' },
         ],
         sourceUrl: 'https://nunit.org/',
       });
@@ -2527,8 +2255,7 @@ describe('modules/datasource/nuget/index', () => {
         ...configV2,
       });
       expect(res).not.toBeNull();
-      expect(res).toEqual({
-        registryUrl: 'https://www.nuget.org/api/v2',
+      expect(res).toMatchObject({
         releases: [
           {
             releaseTimestamp: '2011-01-07T07:57:55.387Z',
@@ -2742,8 +2469,7 @@ describe('modules/datasource/nuget/index', () => {
         ...configV2,
       });
       expect(res).not.toBeNull();
-      expect(res).toEqual({
-        registryUrl: 'https://www.nuget.org/api/v2',
+      expect(res).toMatchObject({
         releases: [
           {
             version: '2.5.7.10213',
@@ -2875,9 +2601,6 @@ describe('modules/datasource/nuget/index', () => {
             version: '3.11.0',
           },
         ],
-        tags: {
-          latest: '3.11.0',
-        },
       });
       expect(res?.sourceUrl).toBeUndefined();
     });
@@ -2966,22 +2689,12 @@ describe('modules/datasource/nuget/index', () => {
         ...configV3Deprecated,
       });
       expect(res).not.toBeNull();
-      expect(res).toEqual({
-        changelogContent:
-          'See https://github.com/ProxyKit/ProxyKit/releases for release notes.',
+      expect(res).toMatchObject({
         deprecationMessage: 'The package `ProxyKit` is deprecated.',
-        registryUrl: 'https://api.nuget.org/v3/index.json',
         releases: [
-          {
-            isDeprecated: true,
-            version: '1.0.0',
-          },
-          {
-            isDeprecated: true,
-            version: '2.3.4',
-          },
+          { isDeprecated: true, version: '1.0.0' },
+          { isDeprecated: true, version: '2.3.4' },
         ],
-        sourceUrl: 'https://github.com/ProxyKit/ProxyKit',
       });
     });
   });

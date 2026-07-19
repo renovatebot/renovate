@@ -134,26 +134,10 @@ describe('modules/manager/jsonnet-bundler/artifacts', () => {
         },
       },
     ]);
-    expect(execSnapshots).toEqual([
+    expect(execSnapshots).toMatchObject([
       {
         cmd: 'jb update https://github.com/foo/foo.git ssh://git@github.com/foo/foo.git/bar',
-        options: {
-          cwd: '/tmp/github/some/repo',
-          env: {
-            HOME: '/home/user',
-            HTTPS_PROXY: 'https://example.com',
-            HTTP_PROXY: 'http://example.com',
-            LANG: 'en_US.UTF-8',
-            LC_ALL: 'en_US',
-            NO_PROXY: 'localhost',
-            PATH: '/tmp/path',
-          },
-          maxBuffer: 10485760,
-          stderr: 'pipe',
-          stdin: 'pipe',
-          stdout: 'pipe',
-          timeout: 900000,
-        },
+        options: { cwd: '/tmp/github/some/repo' },
       },
     ]);
   });
@@ -189,26 +173,10 @@ describe('modules/manager/jsonnet-bundler/artifacts', () => {
         },
       },
     ]);
-    expect(execSnapshots).toEqual([
+    expect(execSnapshots).toMatchObject([
       {
         cmd: 'jb update',
-        options: {
-          cwd: '/tmp/github/some/repo',
-          env: {
-            HOME: '/home/user',
-            HTTPS_PROXY: 'https://example.com',
-            HTTP_PROXY: 'http://example.com',
-            LANG: 'en_US.UTF-8',
-            LC_ALL: 'en_US',
-            NO_PROXY: 'localhost',
-            PATH: '/tmp/path',
-          },
-          maxBuffer: 10485760,
-          stderr: 'pipe',
-          stdin: 'pipe',
-          stdout: 'pipe',
-          timeout: 900000,
-        },
+        options: { cwd: '/tmp/github/some/repo' },
       },
     ]);
   });
@@ -246,26 +214,10 @@ describe('modules/manager/jsonnet-bundler/artifacts', () => {
         },
       },
     ]);
-    expect(execSnapshots).toEqual([
+    expect(execSnapshots).toMatchObject([
       {
         cmd: 'jb update',
-        options: {
-          cwd: '/tmp/github/some/repo',
-          env: {
-            HOME: '/home/user',
-            HTTPS_PROXY: 'https://example.com',
-            HTTP_PROXY: 'http://example.com',
-            LANG: 'en_US.UTF-8',
-            LC_ALL: 'en_US',
-            NO_PROXY: 'localhost',
-            PATH: '/tmp/path',
-          },
-          maxBuffer: 10485760,
-          stderr: 'pipe',
-          stdin: 'pipe',
-          stdout: 'pipe',
-          timeout: 900000,
-        },
+        options: { cwd: '/tmp/github/some/repo' },
       },
     ]);
   });

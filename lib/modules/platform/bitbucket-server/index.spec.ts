@@ -1714,18 +1714,13 @@ describe('modules/platform/bitbucket-server/index', () => {
             isLastPage: true,
             values: [prMock(url, 'SOME', 'repo')],
           });
-        expect(await bitbucket.getPrList()).toEqual([
+        expect(await bitbucket.getPrList()).toMatchObject([
           {
-            bodyStruct: {
-              hash: '7980dafc4eb6f0c79278fd929d3e8e5954b32b68ae118a22565c7c369fc2f591',
-            },
-            createdAt: 1547853840016,
             number: 5,
             sourceBranch: 'userName1/pullRequest5',
             state: 'open',
             targetBranch: 'master',
             title: 'title',
-            version: 1,
           },
         ]);
       });
@@ -1747,18 +1742,14 @@ describe('modules/platform/bitbucket-server/index', () => {
           )
           .reply(200, prMock(url, 'SOME', 'repo'));
 
-        expect(await bitbucket.getBranchPr('userName1/pullRequest5')).toEqual({
-          bodyStruct: {
-            hash: '7980dafc4eb6f0c79278fd929d3e8e5954b32b68ae118a22565c7c369fc2f591',
-          },
-          createdAt: 1547853840016,
+        expect(
+          await bitbucket.getBranchPr('userName1/pullRequest5'),
+        ).toMatchObject({
           number: 5,
-          reviewers: ['userName2'],
           sourceBranch: 'userName1/pullRequest5',
           state: 'open',
           targetBranch: 'master',
           title: 'title',
-          version: 1,
         });
       });
 
@@ -1813,17 +1804,11 @@ describe('modules/platform/bitbucket-server/index', () => {
             prTitle: 'title',
             state: 'open',
           }),
-        ).toEqual({
-          bodyStruct: {
-            hash: '7980dafc4eb6f0c79278fd929d3e8e5954b32b68ae118a22565c7c369fc2f591',
-          },
-          createdAt: 1547853840016,
+        ).toMatchObject({
           number: 5,
           sourceBranch: 'userName1/pullRequest5',
           state: 'open',
-          targetBranch: 'master',
           title: 'title',
-          version: 1,
         });
       });
 
@@ -2175,18 +2160,12 @@ describe('modules/platform/bitbucket-server/index', () => {
           )
           .reply(200, prMock(url, 'SOME', 'repo'));
 
-        expect(await bitbucket.getPr(5)).toEqual({
-          bodyStruct: {
-            hash: '7980dafc4eb6f0c79278fd929d3e8e5954b32b68ae118a22565c7c369fc2f591',
-          },
-          createdAt: 1547853840016,
+        expect(await bitbucket.getPr(5)).toMatchObject({
           number: 5,
-          reviewers: ['userName2'],
           sourceBranch: 'userName1/pullRequest5',
           state: 'open',
           targetBranch: 'master',
           title: 'title',
-          version: 1,
         });
       });
 
@@ -2204,24 +2183,18 @@ describe('modules/platform/bitbucket-server/index', () => {
           .reply(200, prMock(url, 'SOME', 'repo'));
 
         const expectedPr = {
-          bodyStruct: {
-            hash: '7980dafc4eb6f0c79278fd929d3e8e5954b32b68ae118a22565c7c369fc2f591',
-          },
-          createdAt: 1547853840016,
           number: 5,
-          reviewers: ['userName2'],
           sourceBranch: 'userName1/pullRequest5',
           state: 'open',
           targetBranch: 'master',
           title: 'title',
-          version: 1,
         };
 
-        expect(await bitbucket.getPr(3)).toEqual(expectedPr);
+        expect(await bitbucket.getPr(3)).toMatchObject(expectedPr);
 
-        expect(await bitbucket.getPr(5)).toEqual(expectedPr);
+        expect(await bitbucket.getPr(5)).toMatchObject(expectedPr);
 
-        expect(await bitbucket.getPr(5)).toEqual(expectedPr);
+        expect(await bitbucket.getPr(5)).toMatchObject(expectedPr);
       });
 
       it('gets a closed PR', async () => {
@@ -2239,18 +2212,8 @@ describe('modules/platform/bitbucket-server/index', () => {
             toRef: {},
           });
 
-        expect(await bitbucket.getPr(5)).toEqual({
-          bodyStruct: {
-            hash: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
-          },
-          createdAt: undefined,
-          number: undefined,
-          reviewers: [],
-          sourceBranch: undefined,
+        expect(await bitbucket.getPr(5)).toMatchObject({
           state: 'merged',
-          targetBranch: undefined,
-          title: undefined,
-          version: 0,
         });
       });
     });

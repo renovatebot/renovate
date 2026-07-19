@@ -144,7 +144,6 @@ describe('modules/platform/github/index', () => {
         .reply(400);
       expect(await github.initPlatform({ token: '123test' })).toEqual({
         endpoint: 'https://api.github.com/',
-        gitAuthor: undefined,
         renovateUsername: 'renovate-bot',
         token: '123test',
       });
@@ -161,7 +160,6 @@ describe('modules/platform/github/index', () => {
         .reply(200, [{}]);
       expect(await github.initPlatform({ token: '123test' })).toEqual({
         endpoint: 'https://api.github.com/',
-        gitAuthor: undefined,
         renovateUsername: 'renovate-bot',
         token: '123test',
       });

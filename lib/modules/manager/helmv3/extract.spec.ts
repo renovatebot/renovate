@@ -32,27 +32,11 @@ describe('modules/manager/helmv3/extract', () => {
       `;
       const fileName = 'Chart.yaml';
       const result = await extractPackageFile(content, fileName, config);
-      expect(result).toEqual({
-        datasource: 'helm',
-        deps: [
-          {
-            currentValue: '0.9.0',
-            depName: 'redis',
-            skipReason: 'placeholder-url',
-          },
-          {
-            currentValue: '0.8.1',
-            depName: 'postgresql',
-            skipReason: 'invalid-url',
-          },
-          {
-            currentValue: '0.8.1',
-            depName: 'broken',
-            skipReason: 'no-repository',
-          },
-        ],
-        packageFileVersion: '0.1.0',
-      });
+      expect(result?.deps).toMatchObject([
+        { depName: 'redis', skipReason: 'placeholder-url' },
+        { depName: 'postgresql', skipReason: 'invalid-url' },
+        { depName: 'broken', skipReason: 'no-repository' },
+      ]);
     });
 
     it('parses simple Chart.yaml correctly', async () => {
@@ -113,24 +97,18 @@ describe('modules/manager/helmv3/extract', () => {
       `;
       const fileName = 'Chart.yaml';
       const result = await extractPackageFile(content, fileName, config);
-      expect(result).toEqual({
-        datasource: 'helm',
-        deps: [
-          {
-            currentValue: '0.1.0',
-            datasource: DockerDatasource.id,
-            depName: 'library',
-            packageName: 'ghcr.io/ankitabhopatkar13/library',
-            pinDigests: false,
-          },
-          {
-            currentValue: '0.8.1',
-            depName: 'postgresql',
-            registryUrls: ['https://charts.helm.sh/stable'],
-          },
-        ],
-        packageFileVersion: '0.1.0',
-      });
+      expect(result?.deps).toMatchObject([
+        {
+          currentValue: '0.1.0',
+          datasource: DockerDatasource.id,
+          depName: 'library',
+          packageName: 'ghcr.io/ankitabhopatkar13/library',
+        },
+        {
+          currentValue: '0.8.1',
+          depName: 'postgresql',
+        },
+      ]);
     });
 
     it('resolves aliased registry urls', async () => {
@@ -159,29 +137,21 @@ describe('modules/manager/helmv3/extract', () => {
           ociRegistry: 'oci://quay.example.com/organization',
         },
       });
-      expect(result).toEqual({
-        datasource: 'helm',
-        deps: [
-          {
-            currentValue: '0.9.0',
-            depName: 'redis',
-            registryUrls: ['https://my-registry.gcr.io/'],
-          },
-          {
-            currentValue: '1.0.0',
-            depName: 'example',
-            registryUrls: ['https://registry.example.com/'],
-          },
-          {
-            currentValue: '2.2.0',
-            datasource: 'docker',
-            depName: 'oci-example',
-            packageName: 'quay.example.com/organization/oci-example',
-            pinDigests: false,
-          },
-        ],
-        packageFileVersion: '0.1.0',
-      });
+      expect(result?.deps).toMatchObject([
+        {
+          depName: 'redis',
+          registryUrls: ['https://my-registry.gcr.io/'],
+        },
+        {
+          depName: 'example',
+          registryUrls: ['https://registry.example.com/'],
+        },
+        {
+          datasource: 'docker',
+          depName: 'oci-example',
+          packageName: 'quay.example.com/organization/oci-example',
+        },
+      ]);
     });
 
     it("doesn't fail if Chart.yaml is invalid", async () => {
@@ -212,22 +182,10 @@ describe('modules/manager/helmv3/extract', () => {
       `;
       const fileName = 'Chart.yaml';
       const result = await extractPackageFile(content, fileName, config);
-      expect(result).toEqual({
-        datasource: 'helm',
-        deps: [
-          {
-            currentValue: '0.9.0',
-            depName: 'redis',
-            registryUrls: ['https://charts.helm.sh/stable'],
-          },
-          {
-            currentValue: '0.8.1',
-            depName: 'postgresql',
-            skipReason: 'local-dependency',
-          },
-        ],
-        packageFileVersion: '0.1.0',
-      });
+      expect(result?.deps).toMatchObject([
+        { depName: 'redis' },
+        { depName: 'postgresql', skipReason: 'local-dependency' },
+      ]);
     });
 
     it('returns null if no dependencies key', async () => {

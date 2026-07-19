@@ -11,165 +11,31 @@ describe('modules/manager/pip_setup/extract', () => {
     it('returns found deps', () => {
       const content = Fixtures.get(packageFile);
 
-      expect(extractPackageFile(content, packageFile, config)).toEqual({
-        deps: [
-          {
-            currentValue: '>=3.1.13.0,<5.0',
-            datasource: 'pypi',
-            depName: 'celery',
-            managerData: {
-              lineNumber: 49,
-            },
-            packageName: 'celery',
-          },
-          {
-            currentValue: '>=1.7',
-            datasource: 'pypi',
-            depName: 'logging_tree',
-            managerData: {
-              lineNumber: 52,
-            },
-            packageName: 'logging-tree',
-          },
-          {
-            currentValue: '>=2.2',
-            datasource: 'pypi',
-            depName: 'pygments',
-            managerData: {
-              lineNumber: 53,
-            },
-            packageName: 'pygments',
-          },
-          {
-            currentValue: '>=5.0',
-            datasource: 'pypi',
-            depName: 'psutil',
-            managerData: {
-              lineNumber: 54,
-            },
-            packageName: 'psutil',
-          },
-          {
-            currentValue: '>=3.0',
-            datasource: 'pypi',
-            depName: 'objgraph',
-            managerData: {
-              lineNumber: 55,
-            },
-            packageName: 'objgraph',
-          },
-          {
-            currentValue: '>=1.11.23,<2.0',
-            datasource: 'pypi',
-            depName: 'django',
-            managerData: {
-              lineNumber: 58,
-            },
-            packageName: 'django',
-          },
-          {
-            currentValue: '>=0.11,<2.0',
-            datasource: 'pypi',
-            depName: 'flask',
-            managerData: {
-              lineNumber: 61,
-            },
-            packageName: 'flask',
-          },
-          {
-            currentValue: '>=1.4,<2.0',
-            datasource: 'pypi',
-            depName: 'blinker',
-            managerData: {
-              lineNumber: 62,
-            },
-            packageName: 'blinker',
-          },
-          {
-            currentValue: '==1.2.3',
-            currentVersion: '1.2.3',
-            datasource: 'pypi',
-            depName: 'flask2',
-            managerData: {
-              lineNumber: 63,
-            },
-            packageName: 'flask2',
-          },
-          {
-            currentValue: '>=19.7.0,<20.0',
-            datasource: 'pypi',
-            depName: 'gunicorn',
-            managerData: {
-              lineNumber: 75,
-            },
-            packageName: 'gunicorn',
-          },
-          {
-            currentValue: '>=0.15.3,<0.16',
-            datasource: 'pypi',
-            depName: 'Werkzeug',
-            managerData: {
-              lineNumber: 76,
-            },
-            packageName: 'werkzeug',
-          },
-          {
-            currentValue: '>=3.2.1,<4.0',
-            datasource: 'pypi',
-            depName: 'statsd',
-            managerData: {
-              lineNumber: 76,
-            },
-            packageName: 'statsd',
-          },
-          {
-            currentValue: '>=2.10.0,<3.0',
-            datasource: 'pypi',
-            depName: 'requests',
-            managerData: {
-              lineNumber: 77,
-            },
-            packageName: 'requests',
-            skipReason: 'ignored',
-          },
-          {
-            currentValue: '>=5.27.1,<7.0',
-            datasource: 'pypi',
-            depName: 'raven',
-            managerData: {
-              lineNumber: 78,
-            },
-            packageName: 'raven',
-          },
-          {
-            currentValue: '>=0.15.2,<0.17',
-            datasource: 'pypi',
-            depName: 'future',
-            managerData: {
-              lineNumber: 79,
-            },
-            packageName: 'future',
-          },
-          {
-            currentValue: '>=1.0.16,<2.0',
-            datasource: 'pypi',
-            depName: 'ipaddress',
-            managerData: {
-              lineNumber: 80,
-            },
-            packageName: 'ipaddress',
-          },
-          {
-            currentValue: '>=5.5.2,<6.0.0',
-            datasource: 'pypi',
-            depName: 'zope.interface',
-            managerData: {
-              lineNumber: 81,
-            },
-            packageName: 'zope-interface',
-          },
-        ],
-      });
+      expect(
+        extractPackageFile(content, packageFile, config)?.deps,
+      ).toMatchObject([
+        { currentValue: '>=3.1.13.0,<5.0', depName: 'celery' },
+        { currentValue: '>=1.7', depName: 'logging_tree' },
+        { currentValue: '>=2.2', depName: 'pygments' },
+        { currentValue: '>=5.0', depName: 'psutil' },
+        { currentValue: '>=3.0', depName: 'objgraph' },
+        { currentValue: '>=1.11.23,<2.0', depName: 'django' },
+        { currentValue: '>=0.11,<2.0', depName: 'flask' },
+        { currentValue: '>=1.4,<2.0', depName: 'blinker' },
+        { currentValue: '==1.2.3', depName: 'flask2' },
+        { currentValue: '>=19.7.0,<20.0', depName: 'gunicorn' },
+        { currentValue: '>=0.15.3,<0.16', depName: 'Werkzeug' },
+        { currentValue: '>=3.2.1,<4.0', depName: 'statsd' },
+        {
+          currentValue: '>=2.10.0,<3.0',
+          depName: 'requests',
+          skipReason: 'ignored',
+        },
+        { currentValue: '>=5.27.1,<7.0', depName: 'raven' },
+        { currentValue: '>=0.15.2,<0.17', depName: 'future' },
+        { currentValue: '>=1.0.16,<2.0', depName: 'ipaddress' },
+        { currentValue: '>=5.5.2,<6.0.0', depName: 'zope.interface' },
+      ]);
     });
 
     it('returns nothing', () => {

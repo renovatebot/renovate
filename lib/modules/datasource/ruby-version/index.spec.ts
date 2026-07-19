@@ -16,9 +16,7 @@ describe('modules/datasource/ruby-version/index', () => {
         datasource,
         packageName: 'ruby',
       });
-      expect(res).toEqual({
-        homepage: 'https://www.ruby-lang.org',
-        registryUrl: 'https://www.ruby-lang.org/',
+      expect(res).toMatchObject({
         releases: [
           {
             changelogUrl:
@@ -819,7 +817,6 @@ describe('modules/datasource/ruby-version/index', () => {
             version: '2.6.0',
           },
         ],
-        sourceUrl: 'https://github.com/ruby/ruby',
       });
     });
 

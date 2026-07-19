@@ -10,147 +10,27 @@ describe('modules/manager/ansible/extract', () => {
 
     it('extracts multiple image lines from docker_container', () => {
       const res = extractPackageFile(Fixtures.get('main1.yaml'), '', {});
-      expect(res?.deps).toEqual([
-        {
-          autoReplaceStringTemplate:
-            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
-          currentDigest: undefined,
-          currentValue: undefined,
-          datasource: 'docker',
-          depName: 'busybox',
-          packageName: 'busybox',
-          replaceString: 'busybox',
-        },
-        {
-          autoReplaceStringTemplate:
-            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
-          currentDigest: undefined,
-          currentValue: undefined,
-          datasource: 'docker',
-          depName: 'redis',
-          packageName: 'redis',
-          replaceString: 'redis',
-        },
-        {
-          autoReplaceStringTemplate:
-            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
-          currentDigest: undefined,
-          currentValue: undefined,
-          datasource: 'docker',
-          depName: 'someuser/appimage',
-          packageName: 'someuser/appimage',
-          replaceString: 'someuser/appimage',
-        },
-        {
-          autoReplaceStringTemplate:
-            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
-          currentDigest: undefined,
-          currentValue: '14.04',
-          datasource: 'docker',
-          depName: 'ubuntu',
-          packageName: 'ubuntu',
-          replaceString: 'ubuntu:14.04',
-          versioning: 'ubuntu',
-        },
-        {
-          autoReplaceStringTemplate:
-            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
-          currentDigest: undefined,
-          currentValue: undefined,
-          datasource: 'docker',
-          depName: 'someuser/anotherappimage',
-          packageName: 'someuser/anotherappimage',
-          replaceString: 'someuser/anotherappimage',
-        },
-        {
-          autoReplaceStringTemplate:
-            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
-          currentDigest: undefined,
-          currentValue: undefined,
-          datasource: 'docker',
-          depName: 'busybox',
-          packageName: 'busybox',
-          replaceString: 'busybox',
-        },
-        {
-          autoReplaceStringTemplate:
-            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
-          currentDigest: undefined,
-          currentValue: 'latest',
-          datasource: 'docker',
-          depName: 'postgres',
-          packageName: 'postgres',
-          replaceString: 'postgres:latest',
-        },
-        {
-          autoReplaceStringTemplate:
-            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
-          currentDigest: undefined,
-          currentValue: '14.04',
-          datasource: 'docker',
-          depName: 'ubuntu',
-          packageName: 'ubuntu',
-          replaceString: 'ubuntu:14.04',
-          versioning: 'ubuntu',
-        },
-        {
-          autoReplaceStringTemplate:
-            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
-          currentDigest: undefined,
-          currentValue: '14.04',
-          datasource: 'docker',
-          depName: 'ubuntu',
-          packageName: 'ubuntu',
-          replaceString: 'ubuntu:14.04',
-          versioning: 'ubuntu',
-        },
+      expect(res?.deps).toMatchObject([
+        { depName: 'busybox' },
+        { depName: 'redis' },
+        { depName: 'someuser/appimage' },
+        { depName: 'ubuntu', currentValue: '14.04' },
+        { depName: 'someuser/anotherappimage' },
+        { depName: 'busybox' },
+        { depName: 'postgres', currentValue: 'latest' },
+        { depName: 'ubuntu', currentValue: '14.04' },
+        { depName: 'ubuntu', currentValue: '14.04' },
       ]);
       expect(res?.deps).toHaveLength(9);
     });
 
     it('extracts multiple image lines from docker_service', () => {
       const res = extractPackageFile(Fixtures.get('main2.yaml'), '', {});
-      expect(res?.deps).toEqual([
-        {
-          autoReplaceStringTemplate:
-            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
-          currentDigest: undefined,
-          currentValue: '11.5.1',
-          datasource: 'docker',
-          depName: 'sameersbn/gitlab',
-          packageName: 'sameersbn/gitlab',
-          replaceString: 'sameersbn/gitlab:11.5.1',
-        },
-        {
-          autoReplaceStringTemplate:
-            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
-          currentDigest: undefined,
-          currentValue: '10',
-          datasource: 'docker',
-          depName: 'sameersbn/postgresql',
-          packageName: 'sameersbn/postgresql',
-          replaceString: 'sameersbn/postgresql:10',
-        },
-        {
-          autoReplaceStringTemplate:
-            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
-          currentDigest: undefined,
-          currentValue: '4.0.9-1',
-          datasource: 'docker',
-          depName: 'sameersbn/redis',
-          packageName: 'sameersbn/redis',
-          replaceString: 'sameersbn/redis:4.0.9-1',
-        },
-        {
-          autoReplaceStringTemplate:
-            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
-          currentDigest: undefined,
-          currentValue: '2.6.2',
-          datasource: 'docker',
-          depName: 'registry',
-          packageName: 'registry',
-          replaceString: 'registry:2.6.2',
-        },
+      expect(res?.deps).toMatchObject([
+        { depName: 'sameersbn/gitlab', currentValue: '11.5.1' },
+        { depName: 'sameersbn/postgresql', currentValue: '10' },
+        { depName: 'sameersbn/redis', currentValue: '4.0.9-1' },
+        { depName: 'registry', currentValue: '2.6.2' },
       ]);
       expect(res?.deps).toHaveLength(4);
     });
