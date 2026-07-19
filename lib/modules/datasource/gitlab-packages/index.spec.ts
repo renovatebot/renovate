@@ -41,7 +41,23 @@ describe('modules/datasource/gitlab-packages/index', () => {
         registryUrls: ['https://gitlab.com'],
         packageName: 'user/project1:mypkg',
       });
-      expect(res).toMatchSnapshot();
+      expect(res).toEqual({
+        registryUrl: 'https://gitlab.com',
+        releases: [
+          {
+            releaseTimestamp: '2020-03-04T18:01:37.000Z',
+            version: '1.0.0',
+          },
+          {
+            releaseTimestamp: '2020-04-04T18:01:37.000Z',
+            version: 'v1.1.0',
+          },
+          {
+            releaseTimestamp: '2020-05-04T18:01:37.000Z',
+            version: 'v1.1.1',
+          },
+        ],
+      });
       expect(res?.releases).toHaveLength(3);
     });
 

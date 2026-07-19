@@ -142,7 +142,11 @@ describe('modules/platform/github/index', () => {
         })
         .get('/user/emails')
         .reply(400);
-      expect(await github.initPlatform({ token: '123test' })).toMatchSnapshot();
+      expect(await github.initPlatform({ token: '123test' })).toEqual({
+        endpoint: 'https://api.github.com/',
+        renovateUsername: 'renovate-bot',
+        token: '123test',
+      });
     });
 
     it('should support default endpoint no email result', async () => {
@@ -154,7 +158,11 @@ describe('modules/platform/github/index', () => {
         })
         .get('/user/emails')
         .reply(200, [{}]);
-      expect(await github.initPlatform({ token: '123test' })).toMatchSnapshot();
+      expect(await github.initPlatform({ token: '123test' })).toEqual({
+        endpoint: 'https://api.github.com/',
+        renovateUsername: 'renovate-bot',
+        token: '123test',
+      });
     });
 
     it('should support gitAuthor and username', async () => {
@@ -164,7 +172,12 @@ describe('modules/platform/github/index', () => {
           username: 'renovate-bot',
           gitAuthor: 'renovate@whitesourcesoftware.com',
         }),
-      ).toMatchSnapshot();
+      ).toEqual({
+        endpoint: 'https://api.github.com/',
+        gitAuthor: 'renovate@whitesourcesoftware.com',
+        renovateUsername: 'renovate-bot',
+        token: '123test',
+      });
       expect(git.setPlatformIgnoredAuthors).toHaveBeenCalledWith([
         'noreply@github.com',
       ]);
@@ -361,7 +374,12 @@ describe('modules/platform/github/index', () => {
             email: 'user@domain.com',
           },
         ]);
-      expect(await github.initPlatform({ token: '123test' })).toMatchSnapshot();
+      expect(await github.initPlatform({ token: '123test' })).toEqual({
+        endpoint: 'https://api.github.com/',
+        gitAuthor: 'undefined <user@domain.com>',
+        renovateUsername: 'renovate-bot',
+        token: '123test',
+      });
     });
 
     it('should use public email from user profile when available', async () => {
@@ -599,7 +617,12 @@ describe('modules/platform/github/index', () => {
           endpoint: 'https://ghe.renovatebot.com',
           token: '123test',
         }),
-      ).toMatchSnapshot();
+      ).toEqual({
+        endpoint: 'https://ghe.renovatebot.com/',
+        gitAuthor: 'undefined <user@domain.com>',
+        renovateUsername: 'renovate-bot',
+        token: '123test',
+      });
     });
 
     it('should support custom endpoint without version', async () => {
@@ -623,7 +646,12 @@ describe('modules/platform/github/index', () => {
           endpoint: 'https://ghe.renovatebot.com',
           token: '123test',
         }),
-      ).toMatchSnapshot();
+      ).toEqual({
+        endpoint: 'https://ghe.renovatebot.com/',
+        gitAuthor: 'undefined <user@domain.com>',
+        renovateUsername: 'renovate-bot',
+        token: '123test',
+      });
     });
   });
 
@@ -648,7 +676,7 @@ describe('modules/platform/github/index', () => {
           null,
         ]);
       const repos = await github.getRepos();
-      expect(repos).toMatchSnapshot();
+      expect(repos).toEqual(['a/b', 'c/d']);
     });
 
     it('should filters repositories by topics', async () => {
@@ -822,7 +850,12 @@ describe('modules/platform/github/index', () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
       const config = await github.initRepo({ repository: 'some/repo' });
-      expect(config).toMatchSnapshot();
+      expect(config).toEqual({
+        defaultBranch: 'master',
+        isFork: false,
+        repoFingerprint:
+          'cd69e13f03c1f8d5399903d4d5e8973cb05218f8b392011be98dd52f0faf2b28541830a9a847716aab9b56be6f4c8e0e4b7cb6d726e7cc992f0b02168bc53f11',
+      });
     });
 
     // for coverage
@@ -859,7 +892,12 @@ describe('modules/platform/github/index', () => {
         forkToken: 'token',
         forkCreation: true,
       });
-      expect(config).toMatchSnapshot();
+      expect(config).toEqual({
+        defaultBranch: 'master',
+        isFork: false,
+        repoFingerprint:
+          'cd69e13f03c1f8d5399903d4d5e8973cb05218f8b392011be98dd52f0faf2b28541830a9a847716aab9b56be6f4c8e0e4b7cb6d726e7cc992f0b02168bc53f11',
+      });
     });
 
     it('should throw if fork needed but forkCreation=false', async () => {
@@ -1009,7 +1047,12 @@ describe('modules/platform/github/index', () => {
         forkCreation: true,
         forkOrg: 'forked',
       });
-      expect(config).toMatchSnapshot();
+      expect(config).toEqual({
+        defaultBranch: 'master',
+        isFork: false,
+        repoFingerprint:
+          'cd69e13f03c1f8d5399903d4d5e8973cb05218f8b392011be98dd52f0faf2b28541830a9a847716aab9b56be6f4c8e0e4b7cb6d726e7cc992f0b02168bc53f11',
+      });
     });
 
     it('detects fork default branch mismatch', async () => {
@@ -1025,7 +1068,12 @@ describe('modules/platform/github/index', () => {
         forkToken: 'true',
         forkCreation: true,
       });
-      expect(config).toMatchSnapshot();
+      expect(config).toEqual({
+        defaultBranch: 'master',
+        isFork: false,
+        repoFingerprint:
+          'cd69e13f03c1f8d5399903d4d5e8973cb05218f8b392011be98dd52f0faf2b28541830a9a847716aab9b56be6f4c8e0e4b7cb6d726e7cc992f0b02168bc53f11',
+      });
     });
 
     it('should merge', async () => {
@@ -1054,7 +1102,12 @@ describe('modules/platform/github/index', () => {
       const config = await github.initRepo({
         repository: 'some/repo',
       });
-      expect(config).toMatchSnapshot();
+      expect(config).toEqual({
+        defaultBranch: 'master',
+        isFork: false,
+        repoFingerprint:
+          'cd69e13f03c1f8d5399903d4d5e8973cb05218f8b392011be98dd52f0faf2b28541830a9a847716aab9b56be6f4c8e0e4b7cb6d726e7cc992f0b02168bc53f11',
+      });
     });
 
     it('should rebase', async () => {
@@ -1081,7 +1134,12 @@ describe('modules/platform/github/index', () => {
           },
         });
       const config = await github.initRepo({ repository: 'some/repo' });
-      expect(config).toMatchSnapshot();
+      expect(config).toEqual({
+        defaultBranch: 'master',
+        isFork: false,
+        repoFingerprint:
+          'cd69e13f03c1f8d5399903d4d5e8973cb05218f8b392011be98dd52f0faf2b28541830a9a847716aab9b56be6f4c8e0e4b7cb6d726e7cc992f0b02168bc53f11',
+      });
     });
 
     it('should not guess at merge', async () => {
@@ -1101,7 +1159,12 @@ describe('modules/platform/github/index', () => {
           },
         });
       const config = await github.initRepo({ repository: 'some/repo' });
-      expect(config).toMatchSnapshot();
+      expect(config).toEqual({
+        defaultBranch: 'master',
+        isFork: false,
+        repoFingerprint:
+          'cd69e13f03c1f8d5399903d4d5e8973cb05218f8b392011be98dd52f0faf2b28541830a9a847716aab9b56be6f4c8e0e4b7cb6d726e7cc992f0b02168bc53f11',
+      });
     });
 
     it('should throw error if archived', async () => {
@@ -1288,9 +1351,9 @@ describe('modules/platform/github/index', () => {
         .scope(githubApiHost)
         .get('/repos/undefined/branches/main/protection')
         .reply(401);
-      await expect(
-        github.getBranchForceRebase('main'),
-      ).rejects.toThrowErrorMatchingSnapshot();
+      await expect(github.getBranchForceRebase('main')).rejects.toThrow(
+        'Request failed with status code 401 (Unauthorized): GET https://api.github.com/repos/undefined/branches/main/protection',
+      );
     });
 
     it('should return empty object when parentRepo is set', async () => {
@@ -5032,7 +5095,9 @@ describe('modules/platform/github/index', () => {
     it('returns updated pr body', () => {
       const input =
         'https://github.com/foo/bar/issues/5 plus also [a link](https://github.com/foo/bar/issues/5)';
-      expect(github.massageMarkdown(input)).toMatchSnapshot();
+      expect(github.massageMarkdown(input)).toBe(
+        '[https://github.com/foo/bar/issues/5](https://redirect.github.com/foo/bar/issues/5) plus also [a link](https://redirect.github.com/foo/bar/issues/5)',
+      );
     });
 
     it('returns not-updated pr body for GHE', async () => {

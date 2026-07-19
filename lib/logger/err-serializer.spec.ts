@@ -99,9 +99,14 @@ describe('logger/err-serializer', () => {
       delete err.stack;
 
       // sanitize like Bunyan
-      expect(sanitizeValue(err)).toMatchSnapshot({
+      expect(sanitizeValue(err)).toMatchObject({
+        message:
+          'Request failed with status code 412 (Precondition Failed): POST https://**redacted**@github.com/api',
         name: 'HTTPError',
         options: {
+          headers: {
+            authorization: '***********',
+          },
           method: 'POST',
           password: '***********',
           url: 'https://**redacted**@github.com/api',

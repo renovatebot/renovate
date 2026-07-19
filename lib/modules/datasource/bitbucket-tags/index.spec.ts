@@ -34,7 +34,25 @@ describe('modules/datasource/bitbucket-tags/index', () => {
         datasource,
         packageName: 'some/dep2',
       });
-      expect(res).toMatchSnapshot();
+      expect(res).toEqual({
+        registryUrl: 'https://bitbucket.org',
+        releases: [
+          {
+            gitRef: 'v1.0.0',
+            releaseTimestamp: '2020-11-19T09:05:35.000Z',
+            version: 'v1.0.0',
+          },
+          {
+            gitRef: 'v1.1.0',
+            version: 'v1.1.0',
+          },
+          {
+            gitRef: 'v1.1.1',
+            version: 'v1.1.1',
+          },
+        ],
+        sourceUrl: 'https://bitbucket.org/some/dep2',
+      });
       expect(res?.releases).toHaveLength(3);
     });
   });
@@ -75,7 +93,6 @@ describe('modules/datasource/bitbucket-tags/index', () => {
         datasource,
         packageName: 'some/dep2',
       });
-      expect(res).toMatchSnapshot();
       expect(res).toBeString();
       expect(res).toBe('123');
     });
@@ -128,7 +145,6 @@ describe('modules/datasource/bitbucket-tags/index', () => {
         },
         'v1.0.0',
       );
-      expect(res).toMatchSnapshot();
       expect(res).toBeString();
       expect(res).toBe('123');
     });

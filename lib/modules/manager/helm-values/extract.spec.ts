@@ -39,14 +39,13 @@ describe('modules/manager/helm-values/extract', () => {
         packageFile,
         config,
       );
-      expect(result).toMatchSnapshot({
-        deps: [
-          {
-            currentValue: '1.16.1',
-            depName: 'nginx',
-          },
-        ],
-      });
+      expect(result?.deps).toMatchObject([
+        {
+          currentValue: '1.16.1',
+          datasource: 'docker',
+          depName: 'nginx',
+        },
+      ]);
     });
 
     it('extracts from complex values file correctly"', () => {
@@ -55,7 +54,30 @@ describe('modules/manager/helm-values/extract', () => {
         packageFile,
         config,
       );
-      expect(result).toMatchSnapshot();
+      expect(result?.deps).toMatchObject([
+        {
+          currentValue: '1.18-alpine',
+          depName: 'docker.io/library/nginx',
+        },
+        {
+          currentValue: '11.6.0-debian-9-r0',
+          depName: 'bitnami/postgresql',
+        },
+        {
+          currentValue: '0.7.0-debian-9-r12',
+          depName: 'docker.io/bitnami/postgres-exporter',
+        },
+        {
+          currentDigest:
+            'sha256:4762726f1471ef048dd807afdc0e19265e95ffdcc7cb4a34891f680290022809',
+          currentValue: '11.5.0-debian-9-r0',
+          depName: 'docker.io/bitnami/postgresql',
+        },
+        {
+          currentValue: '2.1.3-debian-10-r38',
+          depName: 'docker.io/bitnami/harbor-core',
+        },
+      ]);
       expect(result?.deps).toHaveLength(5);
     });
 

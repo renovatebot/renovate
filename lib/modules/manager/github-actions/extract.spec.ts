@@ -74,7 +74,99 @@ describe('modules/manager/github-actions/extract', () => {
         Fixtures.get('workflow_1.yml'),
         'workflow_1.yml',
       );
-      expect(res?.deps).toMatchSnapshot();
+      expect(res?.deps).toMatchObject([
+        {
+          depName: 'actions/bin',
+          currentValue: 'master',
+          datasource: 'github-digest',
+          depType: 'action',
+        },
+        {
+          depName: 'replicated/dockerfilelint',
+          datasource: 'docker',
+          depType: 'docker',
+        },
+        {
+          depName: 'actions/docker',
+          currentValue: 'master',
+          datasource: 'github-digest',
+          depType: 'action',
+        },
+        {
+          depName: 'node',
+          currentValue: '6',
+          currentDigest:
+            'sha256:7b65413af120ec5328077775022c78101f103258a1876ec2f83890bce416e896',
+          datasource: 'docker',
+          depType: 'docker',
+        },
+        {
+          depName: 'ubuntu',
+          currentValue: 'latest',
+          datasource: 'github-runners',
+          depType: 'github-runner',
+          skipReason: 'invalid-version',
+        },
+        {
+          depName: 'ubuntu',
+          currentValue: 'latest',
+          datasource: 'github-runners',
+          depType: 'github-runner',
+          skipReason: 'invalid-version',
+        },
+        {
+          depName: 'ubuntu',
+          currentValue: 'latest',
+          datasource: 'github-runners',
+          depType: 'github-runner',
+          skipReason: 'invalid-version',
+        },
+        {
+          depName: 'ubuntu',
+          currentValue: 'latest',
+          datasource: 'github-runners',
+          depType: 'github-runner',
+          skipReason: 'invalid-version',
+        },
+        {
+          depName: 'node',
+          currentValue: '16-bullseye',
+          datasource: 'docker',
+          depType: 'container',
+        },
+        {
+          depName: 'redis',
+          currentValue: '5',
+          datasource: 'docker',
+          depType: 'service',
+        },
+        {
+          depName: 'postgres',
+          currentValue: '10',
+          datasource: 'docker',
+          depType: 'service',
+        },
+        {
+          depName: 'ubuntu',
+          currentValue: 'latest',
+          datasource: 'github-runners',
+          depType: 'github-runner',
+          skipReason: 'invalid-version',
+        },
+        {
+          depName: 'node',
+          currentValue: '16-bullseye',
+          datasource: 'docker',
+          depType: 'container',
+        },
+        {
+          depName: 'ubuntu',
+          currentValue: 'latest',
+          datasource: 'github-runners',
+          depType: 'github-runner',
+          skipReason: 'invalid-version',
+        },
+      ]);
       expect(res?.deps.filter((d) => d.datasource === 'docker')).toHaveLength(
         6,
       );
@@ -85,7 +177,90 @@ describe('modules/manager/github-actions/extract', () => {
         Fixtures.get('workflow_2.yml'),
         'workflow_2.yml',
       );
-      expect(res?.deps).toMatchSnapshot();
+      expect(res?.deps).toMatchObject([
+        {
+          depName: 'actions/bin',
+          currentValue: 'master',
+          datasource: 'github-digest',
+          depType: 'action',
+        },
+        {
+          depName: 'docker/setup-qemu-action',
+          currentValue: 'v1.1.0',
+          currentDigest: 'c308fdd69d26ed66f4506ebd74b180abe5362145',
+          datasource: 'github-tags',
+          depType: 'action',
+          replaceString:
+            'docker/setup-qemu-action@c308fdd69d26ed66f4506ebd74b180abe5362145 # renovate: tag=v1.1.0',
+        },
+        {
+          depName: 'actions/checkout',
+          currentValue: '1.0.0',
+          datasource: 'github-tags',
+          depType: 'action',
+        },
+        {
+          depName: 'docker/setup-qemu-action',
+          currentDigest: 'c308fdd69d26ed66f4506ebd74b180abe5362145',
+          datasource: 'github-tags',
+          depType: 'action',
+          enabled: false,
+          skipReason: 'unversioned-reference',
+          replaceString:
+            'docker/setup-qemu-action@c308fdd69d26ed66f4506ebd74b180abe5362145',
+        },
+        {
+          depName: 'docker/build-push-action',
+          currentValue: 'v2',
+          datasource: 'github-tags',
+          depType: 'action',
+        },
+        {
+          depName: 'actions/checkout',
+          currentValue: 'v2.4.0',
+          currentDigest: 'ec3a7ce113134d7a93b817d10a8272cb61118579',
+          datasource: 'github-tags',
+          depType: 'action',
+          replaceString:
+            'actions/checkout@ec3a7ce113134d7a93b817d10a8272cb61118579 # tag=v2.4.0',
+        },
+        {
+          depName: 'actions-rs/toolchain',
+          currentValue: 'v1.0.7',
+          currentDigest: '16499b5e05bf2e26879000db0c1d13f7e13fa3af',
+          datasource: 'github-tags',
+          depType: 'action',
+          replaceString:
+            'actions-rs/toolchain@16499b5e05bf2e26879000db0c1d13f7e13fa3af # renovate: tag=v1.0.7',
+        },
+        {
+          depName: 'actions-rs/cargo',
+          currentValue: 'v1.0.3',
+          datasource: 'github-tags',
+          depType: 'action',
+        },
+        {
+          depName: 'ubuntu',
+          currentValue: 'latest',
+          datasource: 'github-runners',
+          depType: 'github-runner',
+          skipReason: 'invalid-version',
+        },
+        {
+          depName: 'ubuntu',
+          currentValue: 'latest',
+          datasource: 'github-runners',
+          depType: 'github-runner',
+          skipReason: 'invalid-version',
+        },
+        {
+          depName: 'ubuntu',
+          currentValue: 'latest',
+          datasource: 'github-runners',
+          depType: 'github-runner',
+          skipReason: 'invalid-version',
+        },
+      ]);
       expect(
         res?.deps.filter((d) => d.datasource === 'github-tags'),
       ).toHaveLength(7);

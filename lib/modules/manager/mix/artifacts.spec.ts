@@ -89,7 +89,12 @@ describe('modules/manager/mix/artifacts', () => {
         config,
       }),
     ).toBeNull();
-    expect(execSnapshots).toMatchSnapshot();
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'mix deps.update plug',
+        options: { cwd: '/tmp/github/some/repo' },
+      },
+    ]);
   });
 
   it('returns null when trying to use lockFileMaintenance with no mix.lock file', async () => {
@@ -207,7 +212,21 @@ describe('modules/manager/mix/artifacts', () => {
         file: { type: 'addition', path: 'mix.lock', contents: 'New mix.lock' },
       },
     ]);
-    expect(execSnapshots).toMatchSnapshot();
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'docker pull ghcr.io/renovatebot/base-image' },
+      { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
+      {
+        cmd:
+          'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
+          '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
+          '-v "/tmp/cache":"/tmp/cache" ' +
+          '-e CONTAINERBASE_CACHE_DIR ' +
+          '-w "/tmp/github/some/repo" ' +
+          'ghcr.io/renovatebot/base-image ' +
+          'bash -l -c "install-tool erlang 25.0.0.0 && install-tool elixir v1.13.4 && mix deps.update plug"',
+        options: { cwd: '/tmp/github/some/repo' },
+      },
+    ]);
   });
 
   it('uses constraints on install mode', async () => {
@@ -289,20 +308,27 @@ describe('modules/manager/mix/artifacts', () => {
       config,
     });
 
-    expect(result).toMatchSnapshot('result');
-    expect(execSnapshots).toMatchSnapshot('execSnapshots');
-
-    // TODO #22198
-    const [updateResult] = result!;
-    expect(updateResult).toEqual({
-      file: { type: 'addition', path: 'mix.lock', contents: 'New mix.lock' },
-    });
-
-    const [, packageUpdateCommand] = execSnapshots;
-    expect(packageUpdateCommand.cmd).toInclude(
-      'mix hex.organization auth renovate_test --key valid_test_token && ' +
-        'mix deps.update private_package other_package',
-    );
+    expect(result).toEqual([
+      {
+        file: { type: 'addition', path: 'mix.lock', contents: 'New mix.lock' },
+      },
+    ]);
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
+      {
+        cmd:
+          'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
+          '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
+          '-v "/tmp/cache":"/tmp/cache" ' +
+          '-e CONTAINERBASE_CACHE_DIR ' +
+          '-w "/tmp/github/some/repo" ' +
+          'ghcr.io/renovatebot/base-image ' +
+          'bash -l -c "install-tool erlang 25.0.0.0 && install-tool elixir v1.13.4 && ' +
+          'mix hex.organization auth renovate_test --key valid_test_token && ' +
+          'mix deps.update private_package other_package"',
+        options: { cwd: '/tmp/github/some/repo' },
+      },
+    ]);
   });
 
   it('authenticates to private repositories configured in hostRules', async () => {

@@ -48,7 +48,12 @@ describe('modules/manager/npm/post-update/npm', () => {
     expect(fs.readLocalFile).toHaveBeenCalledTimes(3);
     expect(res.error).toBeFalse();
     expect(res.lockFile).toBe(packageLockContents);
-    expect(execSnapshots).toMatchSnapshot();
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'npm install --package-lock-only --no-audit --prefer-dedupe --ignore-scripts',
+        options: { cwd: 'some-dir' },
+      },
+    ]);
   });
 
   it('runs npm install twice', async () => {
@@ -101,7 +106,12 @@ describe('modules/manager/npm/post-update/npm', () => {
     expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
     expect(res.error).toBeFalse();
     expect(res.lockFile).toBe('package-lock-contents');
-    expect(execSnapshots).toMatchSnapshot();
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'npm install --package-lock-only --no-audit --ignore-scripts some-dep@1.0.1',
+        options: { cwd: 'some-dir' },
+      },
+    ]);
   });
 
   it('performs lock file updates retaining the package.json counterparts', async () => {
@@ -129,8 +139,22 @@ describe('modules/manager/npm/post-update/npm', () => {
     );
     expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
     expect(res.error).toBeFalse();
-    expect(res.lockFile).toMatchSnapshot('lockFile');
-    expect(execSnapshots).toMatchSnapshot('execSnapshots');
+    // the lock file update is applied to the "dependencies" section while the
+    // package.json counterpart in the "packages" section is retained
+    const lockFile = JSON.parse(res.lockFile!);
+    expect(lockFile.packages['']).toEqual({
+      name: 'update-lockfile-massage-1',
+      version: '1.0.0',
+      dependencies: { postcss: '^8.0.0' },
+    });
+    expect(lockFile.dependencies.postcss.version).toBe('8.4.8');
+    expect(lockFile.packages['node_modules/postcss'].version).toBe('8.4.31');
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'npm install --package-lock-only --no-audit --ignore-scripts postcss@8.4.8',
+        options: { cwd: 'some-dir' },
+      },
+    ]);
   });
 
   it('performs npm-shrinkwrap.json updates', async () => {
@@ -396,7 +420,12 @@ describe('modules/manager/npm/post-update/npm', () => {
     expect(fs.readLocalFile).toHaveBeenCalledTimes(3);
     expect(fs.deleteLocalFile).toHaveBeenCalledTimes(1);
     expect(res.lockFile).toBe('package-lock-contents');
-    expect(execSnapshots).toMatchSnapshot();
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'npm install --package-lock-only --no-audit --ignore-scripts',
+        options: { cwd: 'some-dir' },
+      },
+    ]);
   });
 
   it('works for docker mode', async () => {

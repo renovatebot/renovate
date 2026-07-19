@@ -17,7 +17,69 @@ describe('modules/manager/gomod/extract', () => {
 
     it('extracts single-line requires', () => {
       const res = extractPackageFile(gomod1)?.deps;
-      expect(res).toMatchSnapshot();
+      expect(res).toMatchObject([
+        {
+          depName: 'github.com/pkg/errors',
+          currentValue: 'v0.7.0',
+          depType: 'require',
+        },
+        {
+          depName: 'github.com/aws/aws-sdk-go',
+          currentValue: 'v1.15.21',
+          depType: 'require',
+        },
+        {
+          depName: 'github.com/davecgh/go-spew',
+          currentValue: 'v1.0.0',
+          depType: 'indirect',
+        },
+        {
+          depName: 'golang.org/x/foo',
+          currentValue: 'v1.0.0',
+          depType: 'require',
+        },
+        {
+          depName: 'github.com/rarkins/foo',
+          currentValue: 'abcdef1',
+          depType: 'require',
+          skipReason: 'invalid-version',
+        },
+        {
+          depName: 'gopkg.in/russross/blackfriday.v1',
+          currentValue: 'v1.0.0',
+          depType: 'require',
+        },
+        {
+          depName: 'github.com/Azure/azure-sdk-for-go',
+          currentValue: 'v25.1.0+incompatible',
+          depType: 'require',
+        },
+        {
+          depName: '../errors',
+          depType: 'replace',
+          skipReason: 'local-dependency',
+        },
+        {
+          depName: 'github.com/pravesht/gocql',
+          currentValue: 'v0.0.0',
+          depType: 'replace',
+        },
+        {
+          depName: 'github.com/caarlos0/env',
+          currentValue: 'v3.5.0+incompatible',
+          depType: 'require',
+        },
+        {
+          depName: 'sigs.k8s.io/structured-merge-diff/v4',
+          currentValue: 'v4.7.0',
+          depType: 'require',
+        },
+        {
+          depName: 'github.com/cucumber/common/messages/go/v18',
+          currentValue: 'v18.0.0',
+          depType: 'require',
+        },
+      ]);
       expect(res).toHaveLength(12);
       expect(res?.filter((e) => e.depType === 'require')).toHaveLength(9);
       expect(res?.filter((e) => e.depType === 'indirect')).toHaveLength(1);
@@ -27,7 +89,331 @@ describe('modules/manager/gomod/extract', () => {
 
     it('extracts multi-line requires', () => {
       const res = extractPackageFile(gomod2)?.deps;
-      expect(res).toMatchSnapshot();
+      expect(res).toMatchObject([
+        {
+          depName: 'github.com/aws/aws-sdk-go',
+          currentValue: 'v1.15.21',
+          depType: 'require',
+        },
+        {
+          depName: 'github.com/bgentry/go-netrc',
+          currentValue: 'v0.0.0-20140422174119-9fd32a8b3d3d',
+          currentDigest: '9fd32a8b3d3d',
+          depType: 'require',
+        },
+        {
+          depName: 'github.com/cloudfoundry/jibber_jabber',
+          currentValue: 'v0.0.0-20151120183258-bcc4c8345a21',
+          currentDigest: 'bcc4c8345a21',
+          depType: 'require',
+        },
+        {
+          depName: 'github.com/davecgh/go-spew',
+          currentValue: 'v1.1.0',
+          depType: 'require',
+        },
+        {
+          depName: 'github.com/emirpasic/gods',
+          currentValue: 'v1.9.0',
+          depType: 'require',
+        },
+        {
+          depName: 'github.com/fatih/color',
+          currentValue: 'v1.7.0',
+          depType: 'require',
+        },
+        {
+          depName: 'github.com/fsnotify/fsnotify',
+          currentValue: 'v1.4.7',
+          depType: 'require',
+        },
+        {
+          depName: 'github.com/go-ini/ini',
+          currentValue: 'v1.38.2',
+          depType: 'require',
+        },
+        {
+          depName: 'github.com/golang-collections/collections',
+          currentValue: 'v0.0.0-20130729185459-604e922904d3',
+          currentDigest: '604e922904d3',
+          depType: 'require',
+        },
+        {
+          depName: 'github.com/hashicorp/go-cleanhttp',
+          currentValue: 'v0.0.0-20171218145408-d5fe4b57a186',
+          currentDigest: 'd5fe4b57a186',
+          depType: 'require',
+        },
+        {
+          depName: 'github.com/hashicorp/go-getter',
+          currentValue: 'v0.0.0-20180809191950-4bda8fa99001',
+          currentDigest: '4bda8fa99001',
+          depType: 'require',
+        },
+        {
+          depName: 'github.com/hashicorp/go-safetemp',
+          currentValue: 'v0.0.0-20180326211150-b1a1dbde6fdc',
+          currentDigest: 'b1a1dbde6fdc',
+          depType: 'require',
+        },
+        {
+          depName: 'github.com/hashicorp/go-version',
+          currentValue: 'v1.0.0',
+          depType: 'require',
+        },
+        {
+          depName: 'github.com/hashicorp/hcl',
+          currentValue: 'v0.0.0-20180404174102-ef8a98b0bbce',
+          currentDigest: 'ef8a98b0bbce',
+          depType: 'require',
+        },
+        {
+          depName: 'github.com/heroku/rollrus',
+          currentValue: 'v0.0.0-20180515183152-fc0cef2ff331',
+          currentDigest: 'fc0cef2ff331',
+          depType: 'require',
+        },
+        {
+          depName: 'github.com/jbenet/go-context',
+          currentValue: 'v0.0.0-20150711004518-d14ea06fba99',
+          currentDigest: 'd14ea06fba99',
+          depType: 'require',
+        },
+        {
+          depName: 'github.com/jesseduffield/go-getter',
+          currentValue: 'v0.0.0-20180822080847-906e15686e63',
+          currentDigest: '906e15686e63',
+          depType: 'require',
+        },
+        {
+          depName: 'github.com/jesseduffield/gocui',
+          currentValue: 'v0.0.0-20180921065632-03e26ff3f1de',
+          currentDigest: '03e26ff3f1de',
+          depType: 'require',
+        },
+        {
+          depName: 'github.com/jesseduffield/termbox-go',
+          currentValue: 'v0.0.0-20180919093808-1e272ff78dcb',
+          currentDigest: '1e272ff78dcb',
+          depType: 'require',
+        },
+        {
+          depName: 'github.com/jmespath/go-jmespath',
+          currentValue: 'v0.0.0-20160202185014-0b12d6b521d8',
+          currentDigest: '0b12d6b521d8',
+          depType: 'require',
+        },
+        {
+          depName: 'github.com/kardianos/osext',
+          currentValue: 'v0.0.0-20170510131534-ae77be60afb1',
+          currentDigest: 'ae77be60afb1',
+          depType: 'require',
+        },
+        {
+          depName: 'github.com/kevinburke/ssh_config',
+          currentValue: 'v0.0.0-20180317175531-9fc7bb800b55',
+          currentDigest: '9fc7bb800b55',
+          depType: 'require',
+        },
+        {
+          depName: 'github.com/magiconair/properties',
+          currentValue: 'v1.8.0',
+          depType: 'require',
+        },
+        {
+          depName: 'github.com/mattn/go-colorable',
+          currentValue: 'v0.0.9',
+          depType: 'require',
+        },
+        {
+          depName: 'github.com/mattn/go-isatty',
+          currentValue: 'v0.0.3',
+          depType: 'require',
+        },
+        {
+          depName: 'github.com/mattn/go-runewidth',
+          currentValue: 'v0.0.2',
+          depType: 'require',
+        },
+        {
+          depName: 'github.com/mgutz/str',
+          currentValue: 'v1.2.0',
+          depType: 'require',
+        },
+        {
+          depName: 'github.com/mitchellh/go-homedir',
+          currentValue: 'v0.0.0-20180801233206-58046073cbff',
+          currentDigest: '58046073cbff',
+          depType: 'require',
+        },
+        {
+          depName: 'github.com/mitchellh/go-testing-interface',
+          currentValue: 'v0.0.0-20171004221916-a61a99592b77',
+          currentDigest: 'a61a99592b77',
+          depType: 'require',
+        },
+        {
+          depName: 'github.com/mitchellh/mapstructure',
+          currentValue: 'v0.0.0-20180715050151-f15292f7a699',
+          currentDigest: 'f15292f7a699',
+          depType: 'require',
+        },
+        {
+          depName: 'github.com/nicksnyder/go-i18n',
+          currentValue: 'v0.0.0-20180803040939-a16b91a3ba80',
+          currentDigest: 'a16b91a3ba80',
+          depType: 'require',
+        },
+        {
+          depName: 'github.com/pelletier/go-buffruneio',
+          currentValue: 'v0.2.0',
+          depType: 'require',
+        },
+        {
+          depName: 'github.com/pelletier/go-toml',
+          currentValue: 'v1.2.0',
+          depType: 'require',
+        },
+        {
+          depName: 'github.com/pkg/errors',
+          currentValue: 'v0.8.0',
+          depType: 'require',
+        },
+        {
+          depName: 'github.com/pmezard/go-difflib',
+          currentValue: 'v1.0.0',
+          depType: 'require',
+        },
+        {
+          depName: 'github.com/sergi/go-diff',
+          currentValue: 'v1.0.0',
+          depType: 'require',
+        },
+        {
+          depName: 'github.com/shibukawa/configdir',
+          currentValue: 'v0.0.0-20170330084843-e180dbdc8da0',
+          currentDigest: 'e180dbdc8da0',
+          depType: 'require',
+        },
+        {
+          depName: 'github.com/sirupsen/logrus',
+          currentValue: 'v1.0.6',
+          depType: 'require',
+        },
+        {
+          depName: 'github.com/spf13/afero',
+          currentValue: 'v1.1.1',
+          depType: 'require',
+        },
+        {
+          depName: 'github.com/spf13/cast',
+          currentValue: 'v1.2.0',
+          depType: 'require',
+        },
+        {
+          depName: 'github.com/spf13/jwalterweatherman',
+          currentValue: 'v0.0.0-20180814060501-14d3d4c51834',
+          currentDigest: '14d3d4c51834',
+          depType: 'require',
+        },
+        {
+          depName: 'github.com/spf13/pflag',
+          currentValue: 'v1.0.2',
+          depType: 'require',
+        },
+        {
+          depName: 'github.com/spf13/viper',
+          currentValue: 'v1.1.0',
+          depType: 'require',
+        },
+        {
+          depName: 'github.com/spkg/bom',
+          currentValue: 'v0.0.0-20160624110644-59b7046e48ad',
+          currentDigest: '59b7046e48ad',
+          depType: 'require',
+        },
+        {
+          depName: 'github.com/src-d/gcfg/v2',
+          currentValue: 'v2.3.0',
+          depType: 'require',
+        },
+        {
+          depName: 'github.com/stretchr/testify',
+          currentValue: 'v1.2.2',
+          depType: 'require',
+        },
+        {
+          depName: 'github.com/stvp/roll',
+          currentValue: 'v0.0.0-20170522205222-3627a5cbeaea',
+          currentDigest: '3627a5cbeaea',
+          depType: 'require',
+        },
+        {
+          depName: 'github.com/tcnksm/go-gitconfig',
+          currentValue: 'v0.1.2',
+          depType: 'require',
+        },
+        {
+          depName: 'github.com/ulikunitz/xz',
+          currentValue: 'v0.5.4',
+          depType: 'require',
+        },
+        {
+          depName: 'github.com/xanzy/ssh-agent',
+          currentValue: 'v0.2.0',
+          depType: 'require',
+        },
+        {
+          depName: 'golang.org/x/crypto',
+          currentValue: 'v0.0.0-20180808211826-de0752318171',
+          currentDigest: 'de0752318171',
+          depType: 'require',
+        },
+        {
+          depName: 'golang.org/x/net',
+          currentValue: 'v0.0.0-20180811021610-c39426892332',
+          currentDigest: 'c39426892332',
+          depType: 'require',
+        },
+        {
+          depName: 'golang.org/x/sys',
+          currentValue: 'v0.0.0-20180810173357-98c5dad5d1a0',
+          currentDigest: '98c5dad5d1a0',
+          depType: 'require',
+        },
+        {
+          depName: 'golang.org/x/text',
+          currentValue: 'v0.3.0',
+          depType: 'require',
+        },
+        {
+          depName: 'gopkg.in/src-d/go-billy.v4',
+          currentValue: 'v4.2.0',
+          depType: 'require',
+        },
+        {
+          depName: 'gopkg.in/src-d/go-git.v4',
+          currentValue: 'v4.0.0-20180807092216-43d17e14b714',
+          currentDigest: '43d17e14b714',
+          depType: 'require',
+        },
+        {
+          depName: 'gopkg.in/warnings.v0',
+          currentValue: 'v0.1.2',
+          depType: 'require',
+        },
+        {
+          depName: 'gopkg.in/yaml.v2',
+          currentValue: 'v2.2.1',
+          depType: 'require',
+        },
+        {
+          depName: 'golang.org/x/net',
+          currentValue: 'v0.0.0-20191003171128-d98b1b443823',
+          currentDigest: 'd98b1b443823',
+          depType: 'indirect',
+        },
+      ]);
       expect(res).toHaveLength(59);
       expect(res?.filter((e) => e.skipReason)).toHaveLength(0);
       expect(res?.filter((e) => e.depType === 'indirect')).toHaveLength(1);

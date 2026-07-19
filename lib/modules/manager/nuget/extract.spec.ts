@@ -63,7 +63,14 @@ describe('modules/manager/nuget/extract', () => {
         'with-centralized-package-versions/Directory.Packages.props';
       const sample = Fixtures.get(packageFile);
       const res = await extractPackageFile(sample, packageFile, config);
-      expect(res?.deps).toMatchSnapshot();
+      expect(res?.deps).toEqual([
+        {
+          currentValue: '4.5.0',
+          datasource: 'nuget',
+          depName: 'Autofac',
+          depType: 'nuget',
+        },
+      ]);
       expect(res?.deps).toHaveLength(1);
     });
 
@@ -87,7 +94,55 @@ describe('modules/manager/nuget/extract', () => {
       const packageFile = 'sample.csproj';
       const sample = Fixtures.get(packageFile);
       const res = await extractPackageFile(sample, packageFile, config);
-      expect(res?.deps).toMatchSnapshot();
+      expect(res?.deps).toMatchObject([
+        { currentValue: '1.0.0', depName: 'My.Package' },
+        {
+          currentValue: '1.0.0',
+          depName: 'Microsoft.VisualStudio.Web.CodeGeneration.Tools',
+        },
+        { depName: 'NotUpdatable3', skipReason: 'invalid-version' },
+        { currentValue: '[1.2.3, 3.2.1)', depName: 'NotUpdatable3' },
+        { currentValue: '[1.2.3, 3.2.1]', depName: 'NotUpdatable3' },
+        { currentValue: '(1.2.3, 3.2.1)', depName: 'NotUpdatable3' },
+        { currentValue: '(1.2.3,)', depName: 'NotUpdatable2' },
+        { currentValue: '[,1.2.3)', depName: 'NotUpdatable1' },
+        { currentValue: '[1.2.3,)', depName: 'Range3' },
+        { currentValue: '[1.2.3,]', depName: 'Range2' },
+        { currentValue: '[1.2.3]', depName: 'Range1' },
+        { currentValue: '3.1.0.5', depName: 'Stateless' },
+        { currentValue: '2.1.0', depName: 'Serilog.Sinks.Literate' },
+        { currentValue: '1.4.0', depName: 'Serilog.Extensions.Logging' },
+        { currentValue: '2.4.0', depName: 'Serilog' },
+        { currentValue: '10.0.2', depName: 'Newtonsoft.Json' },
+        {
+          currentValue: '1.1.2',
+          depName: 'Microsoft.Extensions.Logging.Debug',
+        },
+        {
+          currentValue: '1.1.2',
+          depName: 'Microsoft.Extensions.Configuration.Json',
+        },
+        {
+          currentValue: '1.1.2',
+          depName: 'Microsoft.AspNetCore.Server.Kestrel',
+        },
+        { currentValue: '1.1.3', depName: 'Microsoft.AspNetCore.Mvc.Core' },
+        {
+          currentValue: '$(UnknownVariable)',
+          depName: 'Microsoft.AspNetCore.Hosting',
+          skipReason: 'contains-variable',
+        },
+        {
+          currentValue: '4.5.0',
+          depName: 'Autofac.Extensions.DependencyInjection',
+          sharedVariableName: 'AutofacVersion',
+        },
+        {
+          currentValue: '4.5.0',
+          depName: 'Autofac',
+          sharedVariableName: 'AutofacVersion',
+        },
+      ]);
       expect(res?.deps).toHaveLength(23);
     });
 
@@ -265,7 +320,45 @@ describe('modules/manager/nuget/extract', () => {
       const packageFile = 'packages.props';
       const sample = Fixtures.get(packageFile);
       const res = await extractPackageFile(sample, packageFile, config);
-      expect(res?.deps).toMatchSnapshot();
+      expect(res?.deps).toMatchObject([
+        {
+          currentValue: '1.0.0',
+          depName: 'Microsoft.VisualStudio.Web.CodeGeneration.Tools',
+        },
+        { currentValue: '[1.2.3, 3.2.1)', depName: 'NotUpdatable3' },
+        { currentValue: '[1.2.3, 3.2.1]', depName: 'NotUpdatable3' },
+        { currentValue: '(1.2.3, 3.2.1)', depName: 'NotUpdatable3' },
+        { currentValue: '(1.2.3,)', depName: 'NotUpdatable2' },
+        { currentValue: '[,1.2.3)', depName: 'NotUpdatable1' },
+        { currentValue: '[1.2.3,)', depName: 'Range3' },
+        { currentValue: '[1.2.3,]', depName: 'Range2' },
+        { currentValue: '[1.2.3]', depName: 'Range1' },
+        { currentValue: '3.1.0.5', depName: 'Stateless' },
+        { currentValue: '2.1.0', depName: 'Serilog.Sinks.Literate' },
+        { currentValue: '1.4.0', depName: 'Serilog.Extensions.Logging' },
+        { currentValue: '2.4.0', depName: 'Serilog' },
+        { currentValue: '10.0.2', depName: 'Newtonsoft.Json' },
+        {
+          currentValue: '1.1.2',
+          depName: 'Microsoft.Extensions.Logging.Debug',
+        },
+        {
+          currentValue: '1.1.2',
+          depName: 'Microsoft.Extensions.Configuration.Json',
+        },
+        {
+          currentValue: '1.1.2',
+          depName: 'Microsoft.AspNetCore.Server.Kestrel',
+        },
+        { currentValue: '1.1.3', depName: 'Microsoft.AspNetCore.Mvc.Core' },
+        { currentValue: '1.1.2', depName: 'Microsoft.AspNetCore.Hosting' },
+        {
+          currentValue: '4.1.0',
+          depName: 'Autofac.Extensions.DependencyInjection',
+        },
+        { currentValue: '4.5.0', depName: 'Autofac' },
+        { currentValue: '2.0.0', depName: 'Roslynator.Analyzers' },
+      ]);
       expect(res?.deps).toHaveLength(22);
     });
 

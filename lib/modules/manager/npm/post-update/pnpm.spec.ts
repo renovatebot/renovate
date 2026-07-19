@@ -63,7 +63,12 @@ describe('modules/manager/npm/post-update/pnpm', () => {
     );
     expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
     expect(res.lockFile).toBe('package-lock-contents');
-    expect(execSnapshots).toMatchSnapshot();
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'pnpm install --lockfile-only --ignore-scripts --ignore-pnpmfile',
+        options: { cwd: 'some-dir' },
+      },
+    ]);
   });
 
   it('catches errors', async () => {
@@ -80,7 +85,12 @@ describe('modules/manager/npm/post-update/pnpm', () => {
     expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
     expect(res.error).toBeTrue();
     expect(res.lockFile).toBeUndefined();
-    expect(execSnapshots).toMatchSnapshot();
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'pnpm install --lockfile-only --ignore-scripts --ignore-pnpmfile',
+        options: { cwd: 'some-dir' },
+      },
+    ]);
   });
 
   it('finds pnpm globally', async () => {
@@ -94,7 +104,12 @@ describe('modules/manager/npm/post-update/pnpm', () => {
     );
     expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
     expect(res.lockFile).toBe('package-lock-contents');
-    expect(execSnapshots).toMatchSnapshot();
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'pnpm install --lockfile-only --ignore-scripts --ignore-pnpmfile',
+        options: { cwd: 'some-dir' },
+      },
+    ]);
   });
 
   it('performs lock file updates', async () => {
@@ -296,7 +311,12 @@ describe('modules/manager/npm/post-update/pnpm', () => {
     expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
     expect(fs.deleteLocalFile).toHaveBeenCalledTimes(1);
     expect(res.lockFile).toBe('package-lock-contents');
-    expect(execSnapshots).toMatchSnapshot();
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'pnpm install --lockfile-only --ignore-scripts --ignore-pnpmfile',
+        options: { cwd: 'some-dir' },
+      },
+    ]);
   });
 
   it('performs dedupe', async () => {
@@ -334,7 +354,12 @@ describe('modules/manager/npm/post-update/pnpm', () => {
     ]);
     expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
     expect(res.lockFile).toBe('package-lock-contents');
-    expect(execSnapshots).toMatchSnapshot();
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'pnpm install --lockfile-only --ignore-scripts --ignore-pnpmfile',
+        options: { cwd: 'some-dir' },
+      },
+    ]);
     // TODO: check docker preCommands
   });
 

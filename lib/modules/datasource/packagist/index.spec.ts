@@ -66,7 +66,13 @@ describe('modules/datasource/packagist/index', () => {
         versioning,
         packageName: 'vendor/package-name',
       });
-      expect(res).toMatchSnapshot();
+      expect(res).toMatchObject({
+        releases: [
+          { version: '0.0.1' },
+          { version: '1.0.x-dev' },
+          { version: '1.0.0' },
+        ],
+      });
     });
 
     it('handles timeouts', async () => {
@@ -164,7 +170,37 @@ describe('modules/datasource/packagist/index', () => {
         versioning,
         packageName: 'guzzlehttp/guzzle',
       });
-      expect(res).toMatchSnapshot();
+      expect(res).toMatchObject({
+        releases: [
+          { version: '3.0.0' },
+          { version: '3.0.1' },
+          { version: '3.0.2' },
+          { version: '3.0.3' },
+          { version: '3.0.4' },
+          { version: '3.0.5' },
+          { version: '3.0.6' },
+          { version: '3.0.7' },
+          { version: '3.1.0' },
+          { version: '3.1.1' },
+          { version: '3.1.2' },
+          { version: '3.2.0' },
+          { version: '3.3.0' },
+          { version: '3.3.1' },
+          { version: '3.4.0' },
+          { version: '3.4.1' },
+          { version: '3.4.2' },
+          { version: '3.4.3' },
+          { version: '3.5.0' },
+          { version: '3.6.0' },
+          { version: '3.7.0' },
+          { version: '3.7.1' },
+          { version: '3.7.2' },
+          { version: '3.7.3' },
+          { version: '3.7.4' },
+          { version: '3.8.0' },
+          { version: '3.8.1' },
+        ],
+      });
       expect(res).not.toBeNull();
     });
 
@@ -264,7 +300,10 @@ describe('modules/datasource/packagist/index', () => {
         versioning,
         packageName: 'guzzlehttp/guzzle',
       });
-      expect(res).toMatchSnapshot();
+      expect(res).toMatchObject({
+        registryUrl: 'https://composer.renovatebot.com/composer/lazy',
+        releases: [{ version: '5.3.4' }, { version: '7.0.0-beta.1' }],
+      });
       expect(res).not.toBeNull();
     });
 
@@ -309,7 +348,15 @@ describe('modules/datasource/packagist/index', () => {
         versioning,
         packageName: 'wpackagist-plugin/1beyt',
       });
-      expect(res).toMatchSnapshot();
+      expect(res).toMatchObject({
+        releases: [
+          { version: '1.0' },
+          { version: '1.1' },
+          { version: '1.4' },
+          { version: '1.5' },
+          { version: '1.5.1' },
+        ],
+      });
       expect(res).not.toBeNull();
     });
 
@@ -390,7 +437,15 @@ describe('modules/datasource/packagist/index', () => {
         versioning,
         packageName: 'wpackagist-plugin/1beyt',
       });
-      expect(res).toMatchSnapshot();
+      expect(res).toMatchObject({
+        releases: [
+          { version: '1.0' },
+          { version: '1.1' },
+          { version: '1.4' },
+          { version: '1.5' },
+          { version: '1.5.1' },
+        ],
+      });
       expect(res).not.toBeNull();
     });
 
@@ -419,7 +474,15 @@ describe('modules/datasource/packagist/index', () => {
         versioning,
         packageName: 'wpackagist-plugin/1beyt',
       });
-      expect(res).toMatchSnapshot();
+      expect(res).toMatchObject({
+        releases: [
+          { version: '1.0' },
+          { version: '1.1' },
+          { version: '1.4' },
+          { version: '1.5' },
+          { version: '1.5.1' },
+        ],
+      });
       expect(res).not.toBeNull();
     });
 
@@ -476,7 +539,107 @@ describe('modules/datasource/packagist/index', () => {
           versioning,
           packageName: 'drewm/mailchimp-api',
         }),
-      ).toMatchSnapshot();
+      ).toEqual({
+        registryUrl: 'https://repo.packagist.org',
+        releases: [
+          {
+            gitRef: 'v1.0',
+            releaseTimestamp: '2014-05-30T16:51:39.000Z',
+            version: '1.0',
+          },
+          {
+            gitRef: 'v1.1',
+            releaseTimestamp: '2015-07-07T15:38:25.000Z',
+            version: '1.1',
+          },
+          {
+            gitRef: 'v2.0',
+            releaseTimestamp: '2016-01-17T13:08:01.000Z',
+            version: '2.0',
+          },
+          {
+            gitRef: 'v2.1',
+            releaseTimestamp: '2016-01-30T16:12:54.000Z',
+            version: '2.1',
+          },
+          {
+            gitRef: 'v2.1.1',
+            releaseTimestamp: '2016-04-06T08:37:20.000Z',
+            version: '2.1.1',
+          },
+          {
+            gitRef: 'v2.1.2',
+            releaseTimestamp: '2016-04-06T12:41:37.000Z',
+            version: '2.1.2',
+          },
+          {
+            gitRef: 'v2.1.3',
+            releaseTimestamp: '2016-04-12T09:09:47.000Z',
+            version: '2.1.3',
+          },
+          {
+            gitRef: 'v2.2',
+            releaseTimestamp: '2016-04-23T12:43:28.000Z',
+            version: '2.2',
+          },
+          {
+            gitRef: 'v2.2.1',
+            releaseTimestamp: '2016-04-23T18:00:21.000Z',
+            version: '2.2.1',
+          },
+          {
+            gitRef: 'v2.2.2',
+            releaseTimestamp: '2016-07-01T09:58:24.000Z',
+            version: '2.2.2',
+          },
+          {
+            gitRef: 'v2.2.3',
+            releaseTimestamp: '2016-07-01T15:53:33.000Z',
+            version: '2.2.3',
+          },
+          {
+            gitRef: 'v2.2.4',
+            releaseTimestamp: '2016-07-01T15:53:33.000Z',
+            version: '2.2.4',
+          },
+          {
+            gitRef: 'v2.3',
+            releaseTimestamp: '2016-12-21T14:50:24.000Z',
+            version: '2.3',
+          },
+          {
+            gitRef: 'v2.4',
+            releaseTimestamp: '2017-02-16T13:24:20.000Z',
+            version: '2.4',
+          },
+          {
+            gitRef: 'v2.5',
+            releaseTimestamp: '2018-02-16T15:31:05.000Z',
+            version: '2.5',
+          },
+          {
+            gitRef: 'v2.5.1',
+            releaseTimestamp: '2019-03-19T11:43:38.000Z',
+            version: '2.5.1',
+          },
+          {
+            gitRef: 'v2.5.2',
+            releaseTimestamp: '2019-03-26T09:00:38.000Z',
+            version: '2.5.2',
+          },
+          {
+            gitRef: 'v2.5.3',
+            releaseTimestamp: '2019-03-28T15:20:43.000Z',
+            version: '2.5.3',
+          },
+          {
+            gitRef: 'v2.5.4',
+            releaseTimestamp: '2019-08-06T09:24:58.000Z',
+            version: '2.5.4',
+          },
+        ],
+        sourceUrl: 'https://github.com/drewm/mailchimp-api',
+      });
     });
 
     it('adds packagist source implicitly', async () => {
@@ -496,7 +659,30 @@ describe('modules/datasource/packagist/index', () => {
           versioning,
           packageName: 'drewm/mailchimp-api',
         }),
-      ).toMatchSnapshot();
+      ).toMatchObject({
+        registryUrl: 'https://repo.packagist.org',
+        releases: [
+          { version: '1.0' },
+          { version: '1.1' },
+          { version: '2.0' },
+          { version: '2.1' },
+          { version: '2.1.1' },
+          { version: '2.1.2' },
+          { version: '2.1.3' },
+          { version: '2.2' },
+          { version: '2.2.1' },
+          { version: '2.2.2' },
+          { version: '2.2.3' },
+          { version: '2.2.4' },
+          { version: '2.3' },
+          { version: '2.4' },
+          { version: '2.5' },
+          { version: '2.5.1' },
+          { version: '2.5.2' },
+          { version: '2.5.3' },
+          { version: '2.5.4' },
+        ],
+      });
     });
 
     it('fetches packagist V2 packages', async () => {

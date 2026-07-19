@@ -59,7 +59,7 @@ describe('modules/manager/jsonnet-bundler/artifacts', () => {
         config,
       }),
     ).toBeNull();
-    expect(execSnapshots).toMatchSnapshot();
+    expect(execSnapshots).toEqual([]);
   });
 
   it('updates the vendor dir when dependencies change', async () => {
@@ -134,7 +134,12 @@ describe('modules/manager/jsonnet-bundler/artifacts', () => {
         },
       },
     ]);
-    expect(execSnapshots).toMatchSnapshot();
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'jb update https://github.com/foo/foo.git ssh://git@github.com/foo/foo.git/bar',
+        options: { cwd: '/tmp/github/some/repo' },
+      },
+    ]);
   });
 
   it('performs lock file maintenance', async () => {
@@ -168,7 +173,12 @@ describe('modules/manager/jsonnet-bundler/artifacts', () => {
         },
       },
     ]);
-    expect(execSnapshots).toMatchSnapshot();
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'jb update',
+        options: { cwd: '/tmp/github/some/repo' },
+      },
+    ]);
   });
 
   it('returns error when jb update fails', async () => {
@@ -204,6 +214,11 @@ describe('modules/manager/jsonnet-bundler/artifacts', () => {
         },
       },
     ]);
-    expect(execSnapshots).toMatchSnapshot();
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'jb update',
+        options: { cwd: '/tmp/github/some/repo' },
+      },
+    ]);
   });
 });

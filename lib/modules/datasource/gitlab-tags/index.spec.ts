@@ -31,7 +31,25 @@ describe('modules/datasource/gitlab-tags/index', () => {
         registryUrls: ['https://gitlab.company.com/api/v4/'],
         packageName: 'some/dep2',
       });
-      expect(res).toMatchSnapshot();
+      expect(res).toEqual({
+        registryUrl: 'https://gitlab.company.com/api/v4',
+        releases: [
+          {
+            gitRef: 'v1.0.0',
+            releaseTimestamp: '2020-03-04T18:01:37.000Z',
+            version: 'v1.0.0',
+          },
+          {
+            gitRef: 'v1.1.0',
+            version: 'v1.1.0',
+          },
+          {
+            gitRef: 'v1.1.1',
+            version: 'v1.1.1',
+          },
+        ],
+        sourceUrl: 'https://gitlab.company.com/some/dep2',
+      });
       expect(res?.releases).toHaveLength(3);
     });
 
@@ -60,7 +78,25 @@ describe('modules/datasource/gitlab-tags/index', () => {
         registryUrls: ['https://my.company.com/gitlab'],
         packageName: 'some/dep2',
       });
-      expect(res).toMatchSnapshot();
+      expect(res).toEqual({
+        registryUrl: 'https://my.company.com/gitlab',
+        releases: [
+          {
+            gitRef: 'v1.0.0',
+            releaseTimestamp: '2020-03-04T18:01:37.000Z',
+            version: 'v1.0.0',
+          },
+          {
+            gitRef: 'v1.1.0',
+            version: 'v1.1.0',
+          },
+          {
+            gitRef: 'v1.1.1',
+            version: 'v1.1.1',
+          },
+        ],
+        sourceUrl: 'https://my.company.com/gitlab/some/dep2',
+      });
       expect(res?.releases).toHaveLength(3);
     });
 
@@ -74,7 +110,20 @@ describe('modules/datasource/gitlab-tags/index', () => {
         datasource,
         packageName: 'some/dep2',
       });
-      expect(res).toMatchSnapshot();
+      expect(res).toEqual({
+        registryUrl: 'https://gitlab.com',
+        releases: [
+          {
+            gitRef: 'v1.0.0',
+            version: 'v1.0.0',
+          },
+          {
+            gitRef: 'v1.1.0',
+            version: 'v1.1.0',
+          },
+        ],
+        sourceUrl: 'https://gitlab.com/some/dep2',
+      });
       expect(res?.releases).toHaveLength(2);
     });
   });

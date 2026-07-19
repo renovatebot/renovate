@@ -389,7 +389,13 @@ describe('modules/platform/bitbucket/index', () => {
         .get('/2.0/repositories/some/repo/pullrequests/5')
         .reply(200, pr);
 
-      expect(await bitbucket.getBranchPr('branch')).toMatchSnapshot();
+      expect(await bitbucket.getBranchPr('branch')).toMatchObject({
+        number: 5,
+        sourceBranch: 'branch',
+        state: 'open',
+        targetBranch: 'master',
+        title: 'title',
+      });
     });
 
     it('returns null if no PR for branch', async () => {
@@ -615,7 +621,10 @@ describe('modules/platform/bitbucket/index', () => {
             },
           ],
         });
-      expect(await bitbucket.findIssue('title')).toMatchSnapshot();
+      expect(await bitbucket.findIssue('title')).toEqual({
+        body: 'content',
+        number: 25,
+      });
     });
 
     it('returns null if no issues', async () => {
@@ -796,7 +805,20 @@ describe('modules/platform/bitbucket/index', () => {
       const issues = await bitbucket.getIssueList();
 
       expect(issues).toHaveLength(2);
-      expect(issues).toMatchSnapshot();
+      expect(issues).toEqual([
+        {
+          content: { raw: 'content' },
+          id: 25,
+          kind: 'task',
+          title: 'title',
+        },
+        {
+          content: { raw: 'content' },
+          id: 26,
+          kind: 'task',
+          title: 'title',
+        },
+      ]);
     });
 
     it('does not throw', async () => {
@@ -815,7 +837,7 @@ describe('modules/platform/bitbucket/index', () => {
 
   describe('addAssignees()', () => {
     it('does not throw', async () => {
-      expect(await bitbucket.addAssignees(3, ['some'])).toMatchSnapshot();
+      expect(await bitbucket.addAssignees(3, ['some'])).toBeUndefined();
     });
   });
 
@@ -866,7 +888,7 @@ describe('modules/platform/bitbucket/index', () => {
           topic: 'topic',
           content: 'content',
         }),
-      ).toMatchSnapshot();
+      ).toBeFalse();
     });
   });
 
@@ -882,7 +904,7 @@ describe('modules/platform/bitbucket/index', () => {
           number: 3,
           topic: 'topic',
         }),
-      ).toMatchSnapshot();
+      ).toBeUndefined();
     });
   });
 
@@ -910,7 +932,14 @@ describe('modules/platform/bitbucket/index', () => {
             },
           ],
         });
-      expect(await bitbucket.getPrList()).toMatchSnapshot();
+      expect(await bitbucket.getPrList()).toMatchObject([
+        {
+          number: 1,
+          sourceBranch: 'branch-a',
+          state: 'open',
+          targetBranch: 'branch-b',
+        },
+      ]);
     });
   });
 
@@ -930,7 +959,12 @@ describe('modules/platform/bitbucket/index', () => {
           branchName: 'branch',
           prTitle: 'title',
         }),
-      ).toMatchSnapshot();
+      ).toMatchObject({
+        number: 5,
+        sourceBranch: 'branch',
+        state: 'open',
+        title: 'title',
+      });
     });
 
     it('finds closed pr with no reopen comments', async () => {
@@ -1698,7 +1732,13 @@ describe('modules/platform/bitbucket/index', () => {
     it('exists', async () => {
       const scope = await initRepoMock();
       scope.get('/2.0/repositories/some/repo/pullrequests/5').reply(200, pr);
-      expect(await bitbucket.getPr(5)).toMatchSnapshot();
+      expect(await bitbucket.getPr(5)).toMatchObject({
+        number: 5,
+        sourceBranch: 'branch',
+        state: 'open',
+        targetBranch: 'master',
+        title: 'title',
+      });
     });
 
     it('canRebase', async () => {
@@ -1717,11 +1757,21 @@ describe('modules/platform/bitbucket/index', () => {
         })
         .get('/2.0/repositories/some/repo/pullrequests/5')
         .reply(200, pr);
-      expect(await bitbucket.getPr(3)).toMatchSnapshot('getPr(3)');
+      const expectedPr5 = {
+        number: 5,
+        sourceBranch: 'branch',
+        state: 'open',
+        targetBranch: 'master',
+        title: 'title',
+      };
+      expect(await bitbucket.getPr(3)).toMatchObject({
+        ...expectedPr5,
+        number: 3,
+      });
 
-      expect(await bitbucket.getPr(5)).toMatchSnapshot('getPr(5)');
+      expect(await bitbucket.getPr(5)).toMatchObject(expectedPr5);
 
-      expect(await bitbucket.getPr(5)).toMatchSnapshot('getPr(5) repeated');
+      expect(await bitbucket.getPr(5)).toMatchObject(expectedPr5);
     });
 
     it('reviewers', async () => {
@@ -1757,7 +1807,17 @@ describe('modules/platform/bitbucket/index', () => {
         '\n---\n\n - [ ] <!-- rebase-check --> rebase\n<!--renovate-config-hash:-->' +
         '\n\n</details>\n\n</blockquote>\n</details>';
 
-      expect(bitbucket.massageMarkdown(prBody)).toMatchSnapshot();
+      expect(bitbucket.massageMarkdown(prBody)).toMatchInlineSnapshot(`
+        " - **foo**
+
+
+        	 - \`text\`
+
+
+
+
+        "
+      `);
     });
 
     it('updates pull request url links', () => {
@@ -2105,7 +2165,9 @@ describe('modules/platform/bitbucket/index', () => {
         });
       await expect(() =>
         bitbucket.updatePr({ number: 5, prTitle: 'title', prBody: 'body' }),
-      ).rejects.toThrowErrorMatchingSnapshot();
+      ).rejects.toThrow(
+        'Request failed with status code 400 (Bad Request): PUT https://api.bitbucket.org/2.0/repositories/some/repo/pullrequests/5',
+      );
     });
 
     it('rethrows exception when PR create error not due to reviewers field', async () => {
@@ -2142,7 +2204,9 @@ describe('modules/platform/bitbucket/index', () => {
         .reply(500, undefined);
       await expect(() =>
         bitbucket.updatePr({ number: 5, prTitle: 'title', prBody: 'body' }),
-      ).rejects.toThrowErrorMatchingSnapshot();
+      ).rejects.toThrow(
+        'Request failed with status code 500 (Internal Server Error): GET https://api.bitbucket.org/2.0/repositories/some/repo/pullrequests/5',
+      );
     });
 
     it('closes PR', async () => {

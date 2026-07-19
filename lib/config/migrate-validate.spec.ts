@@ -33,7 +33,16 @@ describe('config/migrate-validate', () => {
       // @ts-expect-error -- invalid option
       const input: RenovateConfig = { foo: 'none' };
       const res = await migrateAndValidate(config, input);
-      expect(res).toMatchSnapshot();
+      expect(res).toEqual({
+        errors: [
+          {
+            message: 'Invalid configuration option: foo',
+            topic: 'Configuration Error',
+          },
+        ],
+        foo: 'none',
+        warnings: [],
+      });
       expect(res.errors).toHaveLength(1);
     });
 
@@ -44,7 +53,9 @@ describe('config/migrate-validate', () => {
         input,
       );
       expect(res.warnings).toBeUndefined();
-      expect(res).toMatchSnapshot();
+      expect(res).toEqual({
+        errors: [],
+      });
     });
 
     it('logs errors', async () => {

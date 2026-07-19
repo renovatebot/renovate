@@ -72,7 +72,41 @@ describe('modules/datasource/git-refs/index', () => {
         datasource,
         packageName,
       });
-      expect(versions).toMatchSnapshot();
+      expect(versions).toEqual({
+        releases: [
+          {
+            gitRef: 'v1.0.0',
+            newDigest: '7b756026fb2de270240a889a413e7e3a9d4d4d85',
+            version: 'v1.0.0',
+          },
+          {
+            gitRef: 'v1.0.1',
+            newDigest: 'e173183f932ba8a31d0e4f23cc1070e8ebfa59d6',
+            version: 'v1.0.1',
+          },
+          {
+            gitRef: 'v1.0.2',
+            newDigest: '3936a6bced3587dc9fd464b0a910e0dfd4cfe10d',
+            version: 'v1.0.2',
+          },
+          {
+            gitRef: 'v1.0.3',
+            newDigest: '125ca9f3df4151e50046e5327ecb29ec4c13efab',
+            version: 'v1.0.3',
+          },
+          {
+            gitRef: 'v1.0.4',
+            newDigest: '3ed9e7d7094fd4ee7751c24a3e6b706060f461ff',
+            version: 'v1.0.4',
+          },
+          {
+            gitRef: 'v1.0.5',
+            newDigest: '6d7a933c2e6b7b39e992b1f93b6b42de083b28f0',
+            version: 'v1.0.5',
+          },
+        ],
+        sourceUrl: 'https://github.com/example/example',
+      });
       const result = versions?.releases.map((x) => x.version).sort();
       expect(result).toHaveLength(6);
     });

@@ -461,7 +461,10 @@ describe('modules/platform/bitbucket-server/index', () => {
             username: 'abc',
             password: '123',
           }),
-        ).toMatchSnapshot();
+        ).toEqual({
+          endpoint: 'https://stash.renovatebot.com/',
+          gitAuthor: 'Abc Def <abc@def.com>',
+        });
       });
     });
 
@@ -501,7 +504,12 @@ describe('modules/platform/bitbucket-server/index', () => {
           await bitbucket.initRepo({
             repository: 'SOME/repo',
           }),
-        ).toMatchSnapshot();
+        ).toEqual({
+          defaultBranch: 'master',
+          isFork: false,
+          repoFingerprint:
+            '5cf9fcad2424fb392c571e8c68ae75132e5db7a1f74d89235bda8dbac1c6c40c45997bace756898176a8b898aa1580b0345dc6272284ecf18a055536402ffcf7',
+        });
       });
 
       it('no git url', async () => {
@@ -644,7 +652,12 @@ describe('modules/platform/bitbucket-server/index', () => {
         expect(git.initRepo).toHaveBeenCalledExactlyOnceWith(
           expect.objectContaining({ url: sshLink('SOME', 'repo') }),
         );
-        expect(res).toMatchSnapshot();
+        expect(res).toEqual({
+          defaultBranch: 'master',
+          isFork: false,
+          repoFingerprint:
+            '5cf9fcad2424fb392c571e8c68ae75132e5db7a1f74d89235bda8dbac1c6c40c45997bace756898176a8b898aa1580b0345dc6272284ecf18a055536402ffcf7',
+        });
       });
 
       it('uses http url from API with injected auth if http url in API response', async () => {
@@ -673,7 +686,12 @@ describe('modules/platform/bitbucket-server/index', () => {
             ),
           }),
         );
-        expect(res).toMatchSnapshot();
+        expect(res).toEqual({
+          defaultBranch: 'master',
+          isFork: false,
+          repoFingerprint:
+            '5cf9fcad2424fb392c571e8c68ae75132e5db7a1f74d89235bda8dbac1c6c40c45997bace756898176a8b898aa1580b0345dc6272284ecf18a055536402ffcf7',
+        });
       });
 
       it('generates URL if API does not contain clone links', async () => {
@@ -701,7 +719,12 @@ describe('modules/platform/bitbucket-server/index', () => {
             url: link,
           }),
         );
-        expect(res).toMatchSnapshot();
+        expect(res).toEqual({
+          defaultBranch: 'master',
+          isFork: false,
+          repoFingerprint:
+            '5cf9fcad2424fb392c571e8c68ae75132e5db7a1f74d89235bda8dbac1c6c40c45997bace756898176a8b898aa1580b0345dc6272284ecf18a055536402ffcf7',
+        });
       });
 
       it('throws REPOSITORY_EMPTY if there is no default branch', async () => {
@@ -799,7 +822,7 @@ describe('modules/platform/bitbucket-server/index', () => {
     describe('addAssignees()', () => {
       it('does not throw', async () => {
         await initRepo();
-        expect(await bitbucket.addAssignees(3, ['some'])).toMatchSnapshot();
+        expect(await bitbucket.addAssignees(3, ['some'])).toBeUndefined();
       });
     });
 
@@ -817,7 +840,7 @@ describe('modules/platform/bitbucket-server/index', () => {
           )
           .reply(200, prMock(url, 'SOME', 'repo'));
 
-        expect(await bitbucket.addReviewers(5, ['name'])).toMatchSnapshot();
+        expect(await bitbucket.addReviewers(5, ['name'])).toBeUndefined();
       });
 
       it('sends the reviewer name as a reviewer', async () => {
@@ -1088,9 +1111,9 @@ describe('modules/platform/bitbucket-server/index', () => {
             `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`,
           )
           .reply(405);
-        await expect(
-          bitbucket.addReviewers(5, ['name']),
-        ).rejects.toThrowErrorMatchingSnapshot();
+        await expect(bitbucket.addReviewers(5, ['name'])).rejects.toThrow(
+          'Request failed with status code 405 (Method Not Allowed): PUT https://stash.renovatebot.com/vcs/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5',
+        );
       });
     });
 
@@ -1227,7 +1250,7 @@ describe('modules/platform/bitbucket-server/index', () => {
 
     describe('deleteLAbel()', () => {
       it('does not throw', async () => {
-        expect(await bitbucket.deleteLabel(5, 'renovate')).toMatchSnapshot();
+        expect(await bitbucket.deleteLabel(5, 'renovate')).toBeUndefined();
       });
     });
 
@@ -1691,7 +1714,15 @@ describe('modules/platform/bitbucket-server/index', () => {
             isLastPage: true,
             values: [prMock(url, 'SOME', 'repo')],
           });
-        expect(await bitbucket.getPrList()).toMatchSnapshot();
+        expect(await bitbucket.getPrList()).toMatchObject([
+          {
+            number: 5,
+            sourceBranch: 'userName1/pullRequest5',
+            state: 'open',
+            targetBranch: 'master',
+            title: 'title',
+          },
+        ]);
       });
     });
 
@@ -1713,7 +1744,13 @@ describe('modules/platform/bitbucket-server/index', () => {
 
         expect(
           await bitbucket.getBranchPr('userName1/pullRequest5'),
-        ).toMatchSnapshot();
+        ).toMatchObject({
+          number: 5,
+          sourceBranch: 'userName1/pullRequest5',
+          state: 'open',
+          targetBranch: 'master',
+          title: 'title',
+        });
       });
 
       it('has no pr', async () => {
@@ -1767,7 +1804,12 @@ describe('modules/platform/bitbucket-server/index', () => {
             prTitle: 'title',
             state: 'open',
           }),
-        ).toMatchSnapshot();
+        ).toMatchObject({
+          number: 5,
+          sourceBranch: 'userName1/pullRequest5',
+          state: 'open',
+          title: 'title',
+        });
       });
 
       it('has no pr', async () => {
@@ -2118,7 +2160,13 @@ describe('modules/platform/bitbucket-server/index', () => {
           )
           .reply(200, prMock(url, 'SOME', 'repo'));
 
-        expect(await bitbucket.getPr(5)).toMatchSnapshot();
+        expect(await bitbucket.getPr(5)).toMatchObject({
+          number: 5,
+          sourceBranch: 'userName1/pullRequest5',
+          state: 'open',
+          targetBranch: 'master',
+          title: 'title',
+        });
       });
 
       it('canRebase', async () => {
@@ -2134,11 +2182,19 @@ describe('modules/platform/bitbucket-server/index', () => {
           .twice()
           .reply(200, prMock(url, 'SOME', 'repo'));
 
-        expect(await bitbucket.getPr(3)).toMatchSnapshot('getPr(3)');
+        const expectedPr = {
+          number: 5,
+          sourceBranch: 'userName1/pullRequest5',
+          state: 'open',
+          targetBranch: 'master',
+          title: 'title',
+        };
 
-        expect(await bitbucket.getPr(5)).toMatchSnapshot('getPr(5)');
+        expect(await bitbucket.getPr(3)).toMatchObject(expectedPr);
 
-        expect(await bitbucket.getPr(5)).toMatchSnapshot('getPr(5) repeated');
+        expect(await bitbucket.getPr(5)).toMatchObject(expectedPr);
+
+        expect(await bitbucket.getPr(5)).toMatchObject(expectedPr);
       });
 
       it('gets a closed PR', async () => {
@@ -2156,7 +2212,9 @@ describe('modules/platform/bitbucket-server/index', () => {
             toRef: {},
           });
 
-        expect(await bitbucket.getPr(5)).toMatchSnapshot();
+        expect(await bitbucket.getPr(5)).toMatchObject({
+          state: 'merged',
+        });
       });
     });
 
@@ -2398,7 +2456,9 @@ describe('modules/platform/bitbucket-server/index', () => {
 
         await expect(
           bitbucket.updatePr({ number: 5, prTitle: 'title', prBody: 'body' }),
-        ).rejects.toThrowErrorMatchingSnapshot();
+        ).rejects.toThrow(
+          'Request failed with status code 405 (Method Not Allowed): PUT https://stash.renovatebot.com/vcs/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5',
+        );
       });
     });
 
@@ -2515,7 +2575,7 @@ describe('modules/platform/bitbucket-server/index', () => {
           bitbucket.massageMarkdown(
             '<details><summary>foo</summary>bar</details>text<details>',
           ),
-        ).toMatchSnapshot();
+        ).toBe('**foo**bartext');
       });
 
       it('sanitizes HTML comments in the body', () => {
@@ -2532,7 +2592,19 @@ describe('modules/platform/bitbucket-server/index', () => {
           Followed by some information.
           <!-- followed by some more comments -->
         `);
-        expect(prBody).toMatchSnapshot();
+        expect(prBody).toMatchInlineSnapshot(`
+          "---
+
+          - [ ] If you want to rebase/retry this PR, click this checkbox
+          - [ ] <a href="/some/link">Update renovate/renovate to 16.1.2</a>
+
+          ---
+
+          Empty comment.
+
+          Followed by some information.
+          "
+        `);
       });
 
       it('resizes mend.io merge confidence badges', () => {

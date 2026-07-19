@@ -480,7 +480,19 @@ describe('workers/repository/dependency-dashboard', () => {
       expect(platform.ensureIssue.mock.calls[0][0].title).toBe(
         config.dependencyDashboardTitle,
       );
-      expect(platform.ensureIssue.mock.calls[0][0].body).toMatchSnapshot();
+      expect(platform.ensureIssue.mock.calls[0][0].body).toMatchInlineSnapshot(`
+        "This is a header
+
+        This repository currently has no open or pending branches.
+
+        ## Detected Dependencies
+
+        None detected
+
+        ---
+        And this is a footer
+        "
+      `);
 
       // same with dry run
       await dryRun(branches, platform, 0, 1);
@@ -516,7 +528,19 @@ describe('workers/repository/dependency-dashboard', () => {
       expect(platform.ensureIssue.mock.calls[0][0].body).toMatch(
         /repository:test/,
       );
-      expect(platform.ensureIssue.mock.calls[0][0].body).toMatchSnapshot();
+      expect(platform.ensureIssue.mock.calls[0][0].body).toMatchInlineSnapshot(`
+        "This is a header for platform:github
+
+        This repository currently has no open or pending branches.
+
+        ## Detected Dependencies
+
+        None detected
+
+        ---
+        And this is a footer for repository:test
+        "
+      `);
 
       // same with dry run
       await dryRun(branches, platform, 0, 1);
@@ -705,7 +729,77 @@ describe('workers/repository/dependency-dashboard', () => {
       );
       expect(platform.ensureIssueClosing).toHaveBeenCalledTimes(0);
       expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
-      expect(platform.ensureIssue.mock.calls[0][0].body).toMatchSnapshot();
+      expect(platform.ensureIssue.mock.calls[0][0].body).toMatchInlineSnapshot(`
+        "This issue lists Renovate updates and detected dependencies. Read the [Dependency Dashboard](https://docs.renovatebot.com/key-concepts/dashboard/) docs to learn more.
+
+        ## Pending Approval
+
+        The following branches are pending approval. To create them, click on a checkbox below.
+
+        ### Category #2
+
+         - [ ] <!-- approve-branch=branchName0 -->pr0
+
+        ### Category #10
+
+         - [ ] <!-- approve-branch=branchName2 -->pr2
+
+        ### Others
+
+         - [ ] <!-- approve-branch=branchName1 -->pr1
+
+        ### All
+
+         - [ ] <!-- approve-all-pending-prs -->🔐 **Create all pending approval PRs at once** 🔐
+
+        ## Awaiting Schedule
+
+        The following updates are awaiting their schedule. To get an update now, click on a checkbox below.
+
+        ### Category #1
+
+         - [ ] <!-- unschedule-branch=branchName4 -->pr4
+
+        ### Others
+
+         - [ ] <!-- unschedule-branch=branchName3 -->pr3
+
+        ### All
+
+         - [ ] <!-- create-all-awaiting-schedule-prs -->🔐 **Create all awaiting schedule PRs at once** 🔐
+
+        ## Rate-Limited
+
+        The following updates are currently rate-limited. To force their creation now, click on a checkbox below.
+
+        ### Category #3
+
+         - [ ] <!-- unlimit-branch=branchName5 -->pr5
+         - [ ] <!-- unlimit-branch=branchName6 -->pr6
+
+        ### All
+
+         - [ ] <!-- create-all-rate-limited-prs -->🔐 **Create all rate-limited PRs at once** 🔐
+
+        ## Errored
+
+        The following updates encountered an error and will be retried. To force a retry now, click on a checkbox below.
+
+         - [ ] <!-- retry-branch=branchName7 -->pr7
+         - [ ] <!-- retry-branch=branchName8 -->pr8
+
+        ## Pending Branch Automerge
+
+        The following updates await pending status checks before automerging. To abort the branch automerge and create a PR instead, click on a checkbox below.
+
+         - [ ] <!-- approvePr-branch=branchName9 -->pr9
+
+        ## Detected Dependencies
+
+        None detected
+
+        "
+      `);
 
       // same with dry run
       await dryRun(branches, platform, 0, 1);
@@ -1114,7 +1208,31 @@ None detected
         { result: 'no-migration' },
       );
       expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
-      expect(platform.ensureIssue.mock.calls[0][0].body).toMatchSnapshot();
+      expect(platform.ensureIssue.mock.calls[0][0].body).toMatchInlineSnapshot(`
+        "This issue lists Renovate updates and detected dependencies. Read the [Dependency Dashboard](https://docs.renovatebot.com/key-concepts/dashboard/) docs to learn more.
+
+        ## Repository Problems
+
+        Renovate tried to run on this repository, but found these problems.
+
+         - ❌ ERROR: everything is broken
+         - ⚠️ WARN: just a bit
+         - ❌ ERROR: i am a duplicated problem
+         - ❌ ERROR: i am a non-duplicated problem
+         - ⚠️ WARN: i am a non-duplicated problem
+
+        ## Pending Status Checks
+
+        The following updates await pending status checks. To force their creation now, click on a checkbox below.
+
+         - [ ] <!-- approvePr-branch=branchName1 -->pr1
+
+        ## Detected Dependencies
+
+        None detected
+
+        "
+      `);
     });
 
     it('contains logged problems with custom header', async () => {
@@ -1151,7 +1269,27 @@ None detected
       expect(platform.ensureIssue.mock.calls[0][0].body).toContain(
         'platform is github',
       );
-      expect(platform.ensureIssue.mock.calls[0][0].body).toMatchSnapshot();
+      expect(platform.ensureIssue.mock.calls[0][0].body).toMatchInlineSnapshot(`
+        "This issue lists Renovate updates and detected dependencies. Read the [Dependency Dashboard](https://docs.renovatebot.com/key-concepts/dashboard/) docs to learn more.
+
+        ## Repository Problems
+
+        platform is github
+
+         - ❌ ERROR: i am a non-duplicated problem
+
+        ## Pending Status Checks
+
+        The following updates await pending status checks. To force their creation now, click on a checkbox below.
+
+         - [ ] <!-- approvePr-branch=branchName1 -->pr1
+
+        ## Detected Dependencies
+
+        None detected
+
+        "
+      `);
     });
 
     it('dependency Dashboard All Pending Approval', async () => {
@@ -1346,7 +1484,29 @@ None detected
         {},
         { result: 'no-migration' },
       );
-      expect(platform.ensureIssue.mock.calls[0][0].body).toMatchSnapshot();
+      expect(platform.ensureIssue.mock.calls[0][0].body).toMatchInlineSnapshot(`
+        "This issue lists Renovate updates and detected dependencies. Read the [Dependency Dashboard](https://docs.renovatebot.com/key-concepts/dashboard/) docs to learn more.
+
+        ## Pending Approval
+
+        The following branches are pending approval. To create them, click on a checkbox below.
+
+         - [ ] <!-- approve-branch=branchName1 -->pr1
+         - [ ] <!-- approve-branch=branchName2 -->pr2
+         - [ ] <!-- approve-all-pending-prs -->🔐 **Create all pending approval PRs at once** 🔐
+
+        ## Awaiting Schedule
+
+        The following updates are awaiting their schedule. To get an update now, click on a checkbox below.
+
+         - [x] <!-- unschedule-branch=branchName3 -->pr3
+
+        ## Detected Dependencies
+
+        None detected
+
+        "
+      `);
     });
 
     it('skips fetching issue if content unchanged', async () => {
@@ -1427,7 +1587,59 @@ None detected
             { result: 'no-migration' },
           );
           expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
-          expect(platform.ensureIssue.mock.calls[0][0].body).toMatchSnapshot();
+          expect(platform.ensureIssue.mock.calls[0][0].body)
+            .toMatchInlineSnapshot(`
+            "This issue lists Renovate updates and detected dependencies. Read the [Dependency Dashboard](https://docs.renovatebot.com/key-concepts/dashboard/) docs to learn more.
+
+            This repository currently has no open or pending branches.
+
+            ## Detected Dependencies
+
+            <details><summary>dockerfile (1)</summary>
+            <blockquote>
+
+            <details><summary>Dockerfile (1)</summary>
+
+             - \`ubuntu 20.04\` → [Updates: \`22.04\`]
+
+            </details>
+
+            </blockquote>
+            </details>
+
+            <details><summary>npm (1)</summary>
+            <blockquote>
+
+            <details><summary>package.json (8)</summary>
+
+             - \`cookie-parser ^1.4.5\`
+             - \`express ~4.17.1\` → [Updates: \`~4.18.0\`]
+             - \`express-handlebars >=5.3.4\`
+             - \`geoip-lite 1.4.*\`
+             - \`nodemailer 6.7.0\` → [Updates: \`6.7.4\`]
+             - \`redis 3.1.2-3.4.0\` → [Updates: \`3.1.1\`, \`3.1.2\`, \`4.1.0\`]
+             - \`dotenv 10.0.0\` → [Updates: \`16.0.0\`]
+             - \`nodemon 2.0.14\` → [Updates: \`2.0.16\`]
+
+            </details>
+
+            </blockquote>
+            </details>
+
+            <details><summary>poetry (1)</summary>
+            <blockquote>
+
+            <details><summary>pyproject.toml (1)</summary>
+
+             - \`six <=1.3.0\` → [Updates: \`<=1.16.0\`]
+
+            </details>
+
+            </blockquote>
+            </details>
+
+            "
+          `);
 
           // same with dry run
           await dryRun(branches, platform, 0, 1);
@@ -1444,7 +1656,18 @@ None detected
             { result: 'no-migration' },
           );
           expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
-          expect(platform.ensureIssue.mock.calls[0][0].body).toMatchSnapshot();
+          expect(platform.ensureIssue.mock.calls[0][0].body)
+            .toMatchInlineSnapshot(`
+            "This issue lists Renovate updates and detected dependencies. Read the [Dependency Dashboard](https://docs.renovatebot.com/key-concepts/dashboard/) docs to learn more.
+
+            This repository currently has no open or pending branches.
+
+            ## Detected Dependencies
+
+            None detected
+
+            "
+          `);
 
           // same with dry run
           await dryRun(branches, platform, 0, 1);
@@ -1461,7 +1684,18 @@ None detected
             { result: 'no-migration' },
           );
           expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
-          expect(platform.ensureIssue.mock.calls[0][0].body).toMatchSnapshot();
+          expect(platform.ensureIssue.mock.calls[0][0].body)
+            .toMatchInlineSnapshot(`
+            "This issue lists Renovate updates and detected dependencies. Read the [Dependency Dashboard](https://docs.renovatebot.com/key-concepts/dashboard/) docs to learn more.
+
+            This repository currently has no open or pending branches.
+
+            ## Detected Dependencies
+
+            None detected
+
+            "
+          `);
 
           // same with dry run
           await dryRun(branches, platform, 0, 1);
@@ -1477,7 +1711,45 @@ None detected
             { result: 'no-migration' },
           );
           expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
-          expect(platform.ensureIssue.mock.calls[0][0].body).toMatchSnapshot();
+          expect(platform.ensureIssue.mock.calls[0][0].body)
+            .toMatchInlineSnapshot(`
+            "This issue lists Renovate updates and detected dependencies. Read the [Dependency Dashboard](https://docs.renovatebot.com/key-concepts/dashboard/) docs to learn more.
+
+            This repository currently has no open or pending branches.
+
+            ## Detected Dependencies
+
+            <details><summary>dockerfile (4)</summary>
+            <blockquote>
+
+            <details><summary>digest-only/Dockerfile (1)</summary>
+
+             - \`ubuntu sha256:06b5d30fabc1fc574f2ecab87375692299d45f8f190d9b71f512deb494114e1f\`
+
+            </details>
+
+            <details><summary>no-ver-no-digest/Dockerfile</summary>
+
+
+            </details>
+
+            <details><summary>ver-and-digest/Dockerfile (1)</summary>
+
+             - \`ubuntu 18.04@sha256:a7ed45c4a95fbe19f9c5fb9d1ca58b2431b2a4984754be2f50ccec99d9428b79\`
+
+            </details>
+
+            <details><summary>ver-only/Dockerfile (1)</summary>
+
+             - \`ubuntu 20.04\`
+
+            </details>
+
+            </blockquote>
+            </details>
+
+            "
+          `);
 
           // same with dry run
           await dryRun(branches, platform, 0, 1);
@@ -1676,7 +1948,114 @@ None detected
             { result: 'no-migration' },
           );
           expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
-          expect(platform.ensureIssue.mock.calls[0][0].body).toMatchSnapshot();
+          expect(platform.ensureIssue.mock.calls[0][0].body)
+            .toMatchInlineSnapshot(`
+            "This issue lists Renovate updates and detected dependencies. Read the [Dependency Dashboard](https://docs.renovatebot.com/key-concepts/dashboard/) docs to learn more.
+
+            This repository currently has no open or pending branches.
+
+            ## Detected Dependencies
+
+            <details><summary>Branch dev</summary>
+            <blockquote>
+
+            <details><summary>dockerfile (1)</summary>
+            <blockquote>
+
+            <details><summary>Dockerfile (1)</summary>
+
+             - \`ubuntu 20.04\` → [Updates: \`22.04\`]
+
+            </details>
+
+            </blockquote>
+            </details>
+
+            <details><summary>npm (1)</summary>
+            <blockquote>
+
+            <details><summary>package.json (8)</summary>
+
+             - \`cookie-parser ^1.4.5\`
+             - \`express ~4.17.1\` → [Updates: \`~4.18.0\`]
+             - \`express-handlebars >=5.3.4\`
+             - \`geoip-lite 1.4.*\`
+             - \`nodemailer 6.7.0\` → [Updates: \`6.7.4\`]
+             - \`redis 3.1.2-3.4.0\` → [Updates: \`3.1.1\`, \`3.1.2\`, \`4.1.0\`]
+             - \`dotenv 10.0.0\` → [Updates: \`16.0.0\`]
+             - \`nodemon 2.0.14\` → [Updates: \`2.0.16\`]
+
+            </details>
+
+            </blockquote>
+            </details>
+
+            <details><summary>poetry (1)</summary>
+            <blockquote>
+
+            <details><summary>pyproject.toml (1)</summary>
+
+             - \`six <=1.3.0\` → [Updates: \`<=1.16.0\`]
+
+            </details>
+
+            </blockquote>
+            </details>
+
+            </blockquote>
+            </details>
+
+            <details><summary>Branch main</summary>
+            <blockquote>
+
+            <details><summary>dockerfile (1)</summary>
+            <blockquote>
+
+            <details><summary>Dockerfile (1)</summary>
+
+             - \`ubuntu 20.04\` → [Updates: \`22.04\`]
+
+            </details>
+
+            </blockquote>
+            </details>
+
+            <details><summary>npm (1)</summary>
+            <blockquote>
+
+            <details><summary>package.json (8)</summary>
+
+             - \`cookie-parser ^1.4.5\`
+             - \`express ~4.17.1\` → [Updates: \`~4.18.0\`]
+             - \`express-handlebars >=5.3.4\`
+             - \`geoip-lite 1.4.*\`
+             - \`nodemailer 6.7.0\` → [Updates: \`6.7.4\`]
+             - \`redis 3.1.2-3.4.0\` → [Updates: \`3.1.1\`, \`3.1.2\`, \`4.1.0\`]
+             - \`dotenv 10.0.0\` → [Updates: \`16.0.0\`]
+             - \`nodemon 2.0.14\` → [Updates: \`2.0.16\`]
+
+            </details>
+
+            </blockquote>
+            </details>
+
+            <details><summary>poetry (1)</summary>
+            <blockquote>
+
+            <details><summary>pyproject.toml (1)</summary>
+
+             - \`six <=1.3.0\` → [Updates: \`<=1.16.0\`]
+
+            </details>
+
+            </blockquote>
+            </details>
+
+            </blockquote>
+            </details>
+
+            "
+          `);
 
           // same with dry run
           await dryRun(branches, platform, 0, 1);
@@ -1692,7 +2071,73 @@ None detected
             { result: 'no-migration' },
           );
           expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
-          expect(platform.ensureIssue.mock.calls[0][0].body).toMatchSnapshot();
+          expect(platform.ensureIssue.mock.calls[0][0].body)
+            .toMatchInlineSnapshot(`
+            "This issue lists Renovate updates and detected dependencies. Read the [Dependency Dashboard](https://docs.renovatebot.com/key-concepts/dashboard/) docs to learn more.
+
+            This repository currently has no open or pending branches.
+
+            ## Detected Dependencies
+
+            <details><summary>Branch dev</summary>
+            <blockquote>
+
+            <details><summary>dockerfile (1)</summary>
+            <blockquote>
+
+            <details><summary>Dockerfile (1)</summary>
+
+             - \`ubuntu 20.04\` → [Updates: \`22.04\`]
+
+            </details>
+
+            </blockquote>
+            </details>
+
+            <details><summary>npm (1)</summary>
+            <blockquote>
+
+            <details><summary>package.json (8)</summary>
+
+             - \`cookie-parser ^1.4.5\`
+             - \`express ~4.17.1\` → [Updates: \`~4.18.0\`]
+             - \`express-handlebars >=5.3.4\`
+             - \`geoip-lite 1.4.*\`
+             - \`nodemailer 6.7.0\` → [Updates: \`6.7.4\`]
+             - \`redis 3.1.2-3.4.0\` → [Updates: \`3.1.1\`, \`3.1.2\`, \`4.1.0\`]
+             - \`dotenv 10.0.0\` → [Updates: \`16.0.0\`]
+             - \`nodemon 2.0.14\` → [Updates: \`2.0.16\`]
+
+            </details>
+
+            </blockquote>
+            </details>
+
+            <details><summary>poetry (1)</summary>
+            <blockquote>
+
+            <details><summary>pyproject.toml (1)</summary>
+
+             - \`six <=1.3.0\` → [Updates: \`<=1.16.0\`]
+
+            </details>
+
+            </blockquote>
+            </details>
+
+            </blockquote>
+            </details>
+
+            <details><summary>Branch main</summary>
+            <blockquote>
+
+            None detected
+
+            </blockquote>
+            </details>
+
+            "
+          `);
 
           // same with dry run
           await dryRun(branches, platform, 0, 1);
@@ -1708,7 +2153,73 @@ None detected
             { result: 'no-migration' },
           );
           expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
-          expect(platform.ensureIssue.mock.calls[0][0].body).toMatchSnapshot();
+          expect(platform.ensureIssue.mock.calls[0][0].body)
+            .toMatchInlineSnapshot(`
+            "This issue lists Renovate updates and detected dependencies. Read the [Dependency Dashboard](https://docs.renovatebot.com/key-concepts/dashboard/) docs to learn more.
+
+            This repository currently has no open or pending branches.
+
+            ## Detected Dependencies
+
+            <details><summary>Branch dev</summary>
+            <blockquote>
+
+            <details><summary>dockerfile (1)</summary>
+            <blockquote>
+
+            <details><summary>Dockerfile (1)</summary>
+
+             - \`ubuntu 20.04\` → [Updates: \`22.04\`]
+
+            </details>
+
+            </blockquote>
+            </details>
+
+            <details><summary>npm (1)</summary>
+            <blockquote>
+
+            <details><summary>package.json (8)</summary>
+
+             - \`cookie-parser ^1.4.5\`
+             - \`express ~4.17.1\` → [Updates: \`~4.18.0\`]
+             - \`express-handlebars >=5.3.4\`
+             - \`geoip-lite 1.4.*\`
+             - \`nodemailer 6.7.0\` → [Updates: \`6.7.4\`]
+             - \`redis 3.1.2-3.4.0\` → [Updates: \`3.1.1\`, \`3.1.2\`, \`4.1.0\`]
+             - \`dotenv 10.0.0\` → [Updates: \`16.0.0\`]
+             - \`nodemon 2.0.14\` → [Updates: \`2.0.16\`]
+
+            </details>
+
+            </blockquote>
+            </details>
+
+            <details><summary>poetry (1)</summary>
+            <blockquote>
+
+            <details><summary>pyproject.toml (1)</summary>
+
+             - \`six <=1.3.0\` → [Updates: \`<=1.16.0\`]
+
+            </details>
+
+            </blockquote>
+            </details>
+
+            </blockquote>
+            </details>
+
+            <details><summary>Branch main</summary>
+            <blockquote>
+
+            None detected
+
+            </blockquote>
+            </details>
+
+            "
+          `);
 
           // same with dry run
           await dryRun(branches, platform, 0, 1);
@@ -1766,7 +2277,93 @@ None detected
             { result: 'no-migration' },
           );
           expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
-          expect(platform.ensureIssue.mock.calls[0][0].body).toMatchSnapshot();
+          expect(platform.ensureIssue.mock.calls[0][0].body)
+            .toMatchInlineSnapshot(`
+            "This issue lists Renovate updates and detected dependencies. Read the [Dependency Dashboard](https://docs.renovatebot.com/key-concepts/dashboard/) docs to learn more.
+
+
+            ---
+
+            > [!WARNING]
+            > Renovate failed to look up the following dependencies: \`dependency-2\`.
+            > 
+            > Files affected: \`package.json\`
+
+            ---
+
+
+            This repository currently has no open or pending branches.
+
+            ## Detected Dependencies
+
+            <details><summary>Branch dev</summary>
+            <blockquote>
+
+            <details><summary>dockerfile (1)</summary>
+            <blockquote>
+
+            <details><summary>Dockerfile (1)</summary>
+
+             - \`ubuntu 20.04\` → [Updates: \`22.04\`]
+
+            </details>
+
+            </blockquote>
+            </details>
+
+            <details><summary>npm (1)</summary>
+            <blockquote>
+
+            <details><summary>package.json (8)</summary>
+
+             - \`cookie-parser ^1.4.5\`
+             - \`express ~4.17.1\` → [Updates: \`~4.18.0\`]
+             - \`express-handlebars >=5.3.4\`
+             - \`geoip-lite 1.4.*\`
+             - \`nodemailer 6.7.0\` → [Updates: \`6.7.4\`]
+             - \`redis 3.1.2-3.4.0\` → [Updates: \`3.1.1\`, \`3.1.2\`, \`4.1.0\`]
+             - \`dotenv 10.0.0\` → [Updates: \`16.0.0\`]
+             - \`nodemon 2.0.14\` → [Updates: \`2.0.16\`]
+
+            </details>
+
+            </blockquote>
+            </details>
+
+            <details><summary>poetry (1)</summary>
+            <blockquote>
+
+            <details><summary>pyproject.toml (1)</summary>
+
+             - \`six <=1.3.0\` → [Updates: \`<=1.16.0\`]
+
+            </details>
+
+            </blockquote>
+            </details>
+
+            </blockquote>
+            </details>
+
+            <details><summary>Branch main</summary>
+            <blockquote>
+
+            <details><summary>npm (1)</summary>
+            <blockquote>
+
+            <details><summary>package.json</summary>
+
+
+            </details>
+
+            </blockquote>
+            </details>
+
+            </blockquote>
+            </details>
+
+            "
+          `);
           // same with dry run
           await dryRun(branches, platform, 0, 1);
         });

@@ -99,7 +99,7 @@ describe('modules/manager/vendir/artifacts', () => {
         config,
       }),
     ).toBeNull();
-    expect(execSnapshots).toMatchSnapshot([{ cmd: 'vendir sync' }]);
+    expect(execSnapshots).toMatchObject([{ cmd: 'vendir sync' }]);
   });
 
   it('returns updated vendir.lock', async () => {

@@ -93,17 +93,26 @@ describe('modules/platform/azure/util', () => {
   describe('getRenovatePRFormat', () => {
     it('should be formated (closed)', () => {
       const res = getRenovatePRFormat(partial<GitPullRequest>({ status: 2 }));
-      expect(res).toMatchSnapshot();
+      expect(res).toMatchObject({
+        state: 'closed',
+        status: 2,
+      });
     });
 
     it('should be formated (closed v2)', () => {
       const res = getRenovatePRFormat(partial<GitPullRequest>({ status: 3 }));
-      expect(res).toMatchSnapshot();
+      expect(res).toMatchObject({
+        state: 'merged',
+        status: 3,
+      });
     });
 
     it('should be formated (not closed)', () => {
       const res = getRenovatePRFormat(partial<GitPullRequest>({ status: 1 }));
-      expect(res).toMatchSnapshot();
+      expect(res).toMatchObject({
+        state: 'open',
+        status: 1,
+      });
     });
   });
 
@@ -127,26 +136,32 @@ describe('modules/platform/azure/util', () => {
         username: 'user',
         password: 'pass',
       });
-      expect(res).toMatchSnapshot();
+      expect(res).toEqual({
+        '-c': 'http.extraHeader=AUTHORIZATION: basic dXNlcjpwYXNz',
+      });
     });
 
     it('should configure personal access token', () => {
       const res = getStorageExtraCloneOpts({
         token: '123456789012345678901234567890123456789012345678test',
       });
-      expect(res).toMatchSnapshot();
+      expect(res).toEqual({
+        '-c': 'http.extraHeader=AUTHORIZATION: basic OjEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3OHRlc3Q=',
+      });
     });
 
     it('should configure bearer token', () => {
       const res = getStorageExtraCloneOpts({ token: 'token' });
-      expect(res).toMatchSnapshot();
+      expect(res).toEqual({
+        '-c': 'http.extraHeader=AUTHORIZATION: bearer token',
+      });
     });
   });
 
   describe('max4000Chars', () => {
     it('should be the same', () => {
       const res = max4000Chars('Hello');
-      expect(res).toMatchSnapshot();
+      expect(res).toBe('Hello');
     });
 
     it('should be truncated', () => {
@@ -162,12 +177,18 @@ describe('modules/platform/azure/util', () => {
   describe('getProjectAndRepo', () => {
     it('should return the object with same strings', () => {
       const res = getProjectAndRepo('myRepoName');
-      expect(res).toMatchSnapshot();
+      expect(res).toEqual({
+        project: 'myRepoName',
+        repo: 'myRepoName',
+      });
     });
 
     it('should return the object with project and repo', () => {
       const res = getProjectAndRepo('prjName/myRepoName');
-      expect(res).toMatchSnapshot();
+      expect(res).toEqual({
+        project: 'prjName',
+        repo: 'myRepoName',
+      });
     });
 
     it('should return an error', () => {

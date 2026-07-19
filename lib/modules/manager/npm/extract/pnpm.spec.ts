@@ -193,7 +193,12 @@ describe('modules/manager/npm/extract/pnpm', () => {
       ]);
 
       await detectPnpmWorkspaces(packageFiles);
-      expect(packageFiles).toMatchSnapshot();
+      // every workspace package file gets associated with the root lockfile
+      expect(packageFiles).toMatchObject(
+        packageFiles.map(() => ({
+          managerData: { pnpmShrinkwrap: 'pnpm-lock.yaml' },
+        })),
+      );
       expect(
         packageFiles.every(
           (packageFile) =>

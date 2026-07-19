@@ -1,9 +1,6 @@
 import { codeBlock } from 'common-tags';
 import { Fixtures } from '~test/fixtures.ts';
 import { hostRules } from '~test/host-rules.ts';
-import { GoDatasource } from '../../datasource/go/index.ts';
-import { NpmDatasource } from '../../datasource/npm/index.ts';
-import { PypiDatasource } from '../../datasource/pypi/index.ts';
 import { extractPackageFile } from './index.ts';
 
 const filename = '.pre-commit.yaml';
@@ -101,58 +98,90 @@ describe('modules/manager/pre-commit/extract', () => {
 
     it('extracts from complex config file correctly', () => {
       const result = extractPackageFile(complexPrecommitConfig, filename);
-      expect(result).toMatchSnapshot({
-        deps: [
-          { depName: 'pre-commit/pre-commit-hooks', currentValue: 'v3.3.0' },
-          {
-            currentValue: '==1.1.1',
-            currentVersion: '1.1.1',
-            datasource: PypiDatasource.id,
-            depName: 'request',
-            depType: 'pre-commit-python',
-            packageName: 'request',
-          },
-          { depName: 'psf/black', currentValue: '19.3b0' },
-          { depName: 'psf/black', currentValue: '19.3b0' },
-          { depName: 'psf/black', currentValue: '19.3b0' },
-          {
-            depName: 'my/dep',
-            currentValue: 'v42.0',
-            registryUrls: ['https://gitlab.mycompany.com'],
-          },
-          {
-            depName: 'my/dep',
-            currentValue: 'v42.0',
-            registryUrls: ['https://gitlab.mycompany.com'],
-          },
-          { depName: 'prettier/pre-commit', currentValue: 'v2.1.2' },
-          { depName: 'prettier/pre-commit', currentValue: 'v2.1.2' },
-          { depName: 'pre-commit/pre-commit-hooks', currentValue: 'v5.0.0' },
-          { skipReason: 'invalid-url' },
-          {
-            currentValue: '^5.2.2',
-            datasource: NpmDatasource.id,
-            depName: '@trivago/prettier-plugin-sort-imports',
-            depType: 'pre-commit-node',
-            packageName: '@trivago/prettier-plugin-sort-imports',
-          },
-          {
-            currentValue: '^3.6.2',
-            datasource: NpmDatasource.id,
-            depName: 'prettier',
-            depType: 'pre-commit-node',
-            packageName: 'prettier',
-          },
-          { depName: 'pre-commit/mirrors-prettier', currentValue: 'v3.1.0' },
-          {
-            currentValue: 'v0.10.0',
-            datasource: GoDatasource.id,
-            depName: 'github.com/wasilibs/go-shellcheck/cmd/shellcheck',
-            depType: 'pre-commit-golang',
-          },
-          { depName: 'rhysd/actionlint', currentValue: 'v1.7.7' },
-        ],
-      });
+      expect(result?.deps).toMatchObject([
+        {
+          currentValue: 'v3.3.0',
+          datasource: 'github-tags',
+          depName: 'pre-commit/pre-commit-hooks',
+        },
+        {
+          currentValue: '==1.1.1',
+          datasource: 'pypi',
+          depName: 'request',
+          depType: 'pre-commit-python',
+        },
+        {
+          currentValue: '19.3b0',
+          datasource: 'github-tags',
+          depName: 'psf/black',
+        },
+        {
+          currentValue: '19.3b0',
+          datasource: 'gitlab-tags',
+          depName: 'psf/black',
+        },
+        {
+          currentValue: '19.3b0',
+          datasource: 'gitlab-tags',
+          depName: 'psf/black',
+        },
+        {
+          currentValue: 'v42.0',
+          datasource: 'gitlab-tags',
+          depName: 'my/dep',
+          registryUrls: ['https://gitlab.mycompany.com'],
+        },
+        {
+          currentValue: 'v42.0',
+          datasource: 'gitlab-tags',
+          depName: 'my/dep',
+          registryUrls: ['https://gitlab.mycompany.com'],
+        },
+        {
+          currentValue: 'v2.1.2',
+          datasource: 'github-tags',
+          depName: 'prettier/pre-commit',
+        },
+        {
+          currentValue: 'v2.1.2',
+          datasource: 'github-tags',
+          depName: 'prettier/pre-commit',
+        },
+        {
+          currentValue: 'v5.0.0',
+          datasource: 'github-tags',
+          depName: 'pre-commit/pre-commit-hooks',
+        },
+        { currentValue: 'v1.0.0', skipReason: 'invalid-url' },
+        {
+          currentValue: '^5.2.2',
+          datasource: 'npm',
+          depName: '@trivago/prettier-plugin-sort-imports',
+          depType: 'pre-commit-node',
+        },
+        {
+          currentValue: '^3.6.2',
+          datasource: 'npm',
+          depName: 'prettier',
+          depType: 'pre-commit-node',
+        },
+        {
+          currentValue: 'v3.1.0',
+          datasource: 'github-tags',
+          depName: 'pre-commit/mirrors-prettier',
+        },
+        {
+          currentValue: 'v0.10.0',
+          datasource: 'go',
+          depName: 'github.com/wasilibs/go-shellcheck/cmd/shellcheck',
+          depType: 'pre-commit-golang',
+        },
+        {
+          currentValue: 'v1.7.7',
+          datasource: 'github-tags',
+          depName: 'rhysd/actionlint',
+        },
+      ]);
     });
 
     it('can handle private git repos', () => {

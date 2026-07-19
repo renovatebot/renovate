@@ -35,6 +35,26 @@ const matchHost = 'https://gitlab.com/';
 
 const changelogSource = new GitLabChangeLogSource();
 
+function expectedChangeLog({ baseUrl = 'https://gitlab.com/' } = {}) {
+  return {
+    hasReleaseNotes: false,
+    project: {
+      apiBaseUrl: `${baseUrl}api/v4/`,
+      baseUrl,
+      packageName: 'renovate',
+      repository: 'meno/dropzone',
+      sourceUrl: `${baseUrl}meno/dropzone/`,
+      type: 'gitlab',
+    },
+    versions: [
+      { version: '5.6.1' },
+      { version: '5.6.0' },
+      { version: '5.5.0' },
+      { version: '5.4.0' },
+    ],
+  };
+}
+
 describe('workers/repository/update/pr/changelog/gitlab/index', () => {
   afterEach(() => {
     // FIXME: add missing http mocks
@@ -84,25 +104,7 @@ describe('workers/repository/update/pr/changelog/gitlab/index', () => {
         await getChangeLogJSON({
           ...upgrade,
         }),
-      ).toMatchSnapshot({
-        hasReleaseNotes: false,
-        project: {
-          apiBaseUrl: 'https://gitlab.com/api/v4/',
-          baseUrl: 'https://gitlab.com/',
-          depName: undefined,
-          packageName: 'renovate',
-          repository: 'meno/dropzone',
-          sourceDirectory: undefined,
-          sourceUrl: 'https://gitlab.com/meno/dropzone/',
-          type: 'gitlab',
-        },
-        versions: [
-          { version: '5.6.1' },
-          { version: '5.6.0' },
-          { version: '5.5.0' },
-          { version: '5.4.0' },
-        ],
-      });
+      ).toMatchObject(expectedChangeLog());
     });
 
     it('uses GitLab tags', async () => {
@@ -127,24 +129,9 @@ describe('workers/repository/update/pr/changelog/gitlab/index', () => {
         await getChangeLogJSON({
           ...upgrade,
         }),
-      ).toMatchSnapshot({
+      ).toMatchObject({
+        ...expectedChangeLog(),
         hasReleaseNotes: true,
-        project: {
-          apiBaseUrl: 'https://gitlab.com/api/v4/',
-          baseUrl: 'https://gitlab.com/',
-          depName: undefined,
-          packageName: 'renovate',
-          repository: 'meno/dropzone',
-          sourceDirectory: undefined,
-          sourceUrl: 'https://gitlab.com/meno/dropzone/',
-          type: 'gitlab',
-        },
-        versions: [
-          { version: '5.6.1' },
-          { version: '5.6.0' },
-          { version: '5.5.0' },
-          { version: '5.4.0' },
-        ],
       });
     });
 
@@ -163,25 +150,7 @@ describe('workers/repository/update/pr/changelog/gitlab/index', () => {
         await getChangeLogJSON({
           ...upgrade,
         }),
-      ).toMatchSnapshot({
-        hasReleaseNotes: false,
-        project: {
-          apiBaseUrl: 'https://gitlab.com/api/v4/',
-          baseUrl: 'https://gitlab.com/',
-          depName: undefined,
-          packageName: 'renovate',
-          repository: 'meno/dropzone',
-          sourceDirectory: undefined,
-          sourceUrl: 'https://gitlab.com/meno/dropzone/',
-          type: 'gitlab',
-        },
-        versions: [
-          { version: '5.6.1' },
-          { version: '5.6.0' },
-          { version: '5.5.0' },
-          { version: '5.4.0' },
-        ],
-      });
+      ).toMatchObject(expectedChangeLog());
     });
 
     it('uses GitLab tags with error', async () => {
@@ -199,25 +168,7 @@ describe('workers/repository/update/pr/changelog/gitlab/index', () => {
         await getChangeLogJSON({
           ...upgrade,
         }),
-      ).toMatchSnapshot({
-        hasReleaseNotes: false,
-        project: {
-          apiBaseUrl: 'https://gitlab.com/api/v4/',
-          baseUrl: 'https://gitlab.com/',
-          depName: undefined,
-          packageName: 'renovate',
-          repository: 'meno/dropzone',
-          sourceDirectory: undefined,
-          sourceUrl: 'https://gitlab.com/meno/dropzone/',
-          type: 'gitlab',
-        },
-        versions: [
-          { version: '5.6.1' },
-          { version: '5.6.0' },
-          { version: '5.5.0' },
-          { version: '5.4.0' },
-        ],
-      });
+      ).toMatchObject(expectedChangeLog());
     });
 
     it('handles no sourceUrl', async () => {
@@ -268,24 +219,11 @@ describe('workers/repository/update/pr/changelog/gitlab/index', () => {
           ...upgrade,
           sourceUrl: 'https://gitlab-enterprise.example.com/meno/dropzone/',
         }),
-      ).toMatchSnapshot({
-        hasReleaseNotes: false,
-        project: {
-          apiBaseUrl: 'https://gitlab-enterprise.example.com/api/v4/',
+      ).toMatchObject(
+        expectedChangeLog({
           baseUrl: 'https://gitlab-enterprise.example.com/',
-          packageName: 'renovate',
-          repository: 'meno/dropzone',
-          sourceDirectory: undefined,
-          sourceUrl: 'https://gitlab-enterprise.example.com/meno/dropzone/',
-          type: 'gitlab',
-        },
-        versions: [
-          { version: '5.6.1' },
-          { version: '5.6.0' },
-          { version: '5.5.0' },
-          { version: '5.4.0' },
-        ],
-      });
+        }),
+      );
     });
 
     it('supports self-hosted gitlab changelog', async () => {
@@ -301,24 +239,7 @@ describe('workers/repository/update/pr/changelog/gitlab/index', () => {
           ...upgrade,
           sourceUrl: 'https://git.test.com/meno/dropzone/',
         }),
-      ).toMatchSnapshot({
-        hasReleaseNotes: false,
-        project: {
-          apiBaseUrl: 'https://git.test.com/api/v4/',
-          baseUrl: 'https://git.test.com/',
-          packageName: 'renovate',
-          repository: 'meno/dropzone',
-          sourceDirectory: undefined,
-          sourceUrl: 'https://git.test.com/meno/dropzone/',
-          type: 'gitlab',
-        },
-        versions: [
-          { version: '5.6.1' },
-          { version: '5.6.0' },
-          { version: '5.5.0' },
-          { version: '5.4.0' },
-        ],
-      });
+      ).toMatchObject(expectedChangeLog({ baseUrl: 'https://git.test.com/' }));
     });
   });
 

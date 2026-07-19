@@ -152,7 +152,7 @@ describe('modules/manager/terraform/lockfile/hash', () => {
       'hashicorp/azurerm',
       '2.56.0',
     );
-    expect(log.error.mock.calls).toMatchSnapshot();
+    expect(log.error.mock.calls).toEqual([]);
     expect(result).not.toBeNull();
     expect(result).toBeArrayOfSize(2);
     expect(result).toMatchObject([

@@ -163,7 +163,46 @@ describe('modules/datasource/helm/index', () => {
         registryUrls: ['https://example-repository.com'],
       });
       expect(releases).not.toBeNull();
-      expect(releases).toMatchSnapshot();
+      expect(releases).toMatchObject({
+        releases: [
+          {
+            newDigest:
+              'aa09c62be843190cc85736ba59d6411579d83ba30e9305e6b2420ea013bb5979',
+            version: '1.0.0',
+          },
+          {
+            newDigest:
+              '01da3c15cdec999b5afd73ee9186c62859c35a716688359c425fc04100a22144',
+            releaseTimestamp: '2019-02-14T15:25:43.743Z',
+            version: '1.1.0',
+          },
+          { version: '1.1.1' },
+          { version: '1.1.2' },
+          { version: '1.1.3' },
+          { version: '1.1.4' },
+          { version: '1.1.5' },
+          { version: '2.0.0' },
+          { version: '2.0.1' },
+          { version: '2.0.2' },
+          { version: '2.1.0' },
+          { version: '2.2.0' },
+          { version: '2.2.1' },
+          { version: '2.2.2' },
+          { version: '2.2.3' },
+          { version: '2.2.4' },
+          { version: '2.2.5' },
+          { version: '2.3.0' },
+          { version: '2.3.1' },
+          { version: '2.4.0' },
+          { version: '2.4.1' },
+          { version: '2.5.0' },
+          { version: '2.5.1' },
+          { version: '2.6.0' },
+          { version: '2.6.1' },
+          { version: '2.6.2' },
+          { version: '2.7.0' },
+        ],
+      });
     });
 
     it('returns list of versions for other packages if one packages has no versions', async () => {

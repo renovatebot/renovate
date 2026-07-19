@@ -25,10 +25,18 @@ describe('modules/manager/helm-requirements/extract', () => {
           stable: 'https://charts.helm.sh/stable/',
         },
       });
-      expect(result).not.toBeNull();
       expect(result?.deps[0]?.currentValue).toBeString();
-      expect(result).toMatchSnapshot();
-      expect(result?.deps.every((dep) => dep.skipReason)).toBe(true);
+      expect(result).toEqual({
+        datasource: 'helm',
+        deps: [
+          {
+            currentValue: '0.9',
+            depName: 'redis',
+            registryUrls: ['@placeholder'],
+            skipReason: 'placeholder-url',
+          },
+        ],
+      });
     });
 
     it('skips invalid registry urls', () => {
@@ -56,9 +64,11 @@ describe('modules/manager/helm-requirements/extract', () => {
           stable: 'https://charts.helm.sh/stable/',
         },
       });
-      expect(result).not.toBeNull();
-      expect(result).toMatchSnapshot();
-      expect(result?.deps.every((dep) => dep.skipReason)).toBe(true);
+      expect(result?.deps).toMatchObject([
+        { depName: 'redis', skipReason: 'placeholder-url' },
+        { depName: 'postgresql', skipReason: 'invalid-url' },
+        { depName: 'broken', skipReason: 'no-repository' },
+      ]);
     });
 
     it('parses simple requirements.yaml correctly', () => {
@@ -84,11 +94,19 @@ describe('modules/manager/helm-requirements/extract', () => {
           stable: 'https://charts.helm.sh/stable/',
         },
       });
-      expect(result).toMatchSnapshot({
+      expect(result).toEqual({
         datasource: 'helm',
         deps: [
-          { currentValue: '0.9.0', depName: 'redis' },
-          { currentValue: '0.8.1', depName: 'postgresql' },
+          {
+            currentValue: '0.9.0',
+            depName: 'redis',
+            registryUrls: ['https://charts.helm.sh/stable/'],
+          },
+          {
+            currentValue: '0.8.1',
+            depName: 'postgresql',
+            registryUrls: ['https://charts.helm.sh/stable/'],
+          },
         ],
       });
     });
@@ -133,9 +151,21 @@ describe('modules/manager/helm-requirements/extract', () => {
           longalias: 'https://registry.example.com/',
         },
       });
-      expect(result).not.toBeNull();
-      expect(result).toMatchSnapshot();
-      expect(result?.deps.every((dep) => dep.skipReason)).toBe(false);
+      expect(result).toEqual({
+        datasource: 'helm',
+        deps: [
+          {
+            currentValue: '0.9.0',
+            depName: 'redis',
+            registryUrls: ['https://my-registry.gcr.io/'],
+          },
+          {
+            currentValue: '1.0.0',
+            depName: 'example',
+            registryUrls: ['https://registry.example.com/'],
+          },
+        ],
+      });
     });
 
     it('skips local dependencies', () => {
@@ -161,12 +191,10 @@ describe('modules/manager/helm-requirements/extract', () => {
           stable: 'https://charts.helm.sh/stable/',
         },
       });
-      expect(result).toMatchSnapshot({
-        deps: [
-          { depName: 'redis' },
-          { depName: 'postgresql', skipReason: 'local-dependency' },
-        ],
-      });
+      expect(result?.deps).toMatchObject([
+        { depName: 'redis' },
+        { depName: 'postgresql', skipReason: 'local-dependency' },
+      ]);
     });
 
     it('returns null if no dependencies', () => {

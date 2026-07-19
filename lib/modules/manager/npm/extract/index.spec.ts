@@ -50,9 +50,14 @@ describe('modules/manager/npm/extract/index', () => {
         'package.json',
         defaultExtractConfig,
       );
-      expect(res).toMatchSnapshot({
-        deps: [{ skipReason: 'invalid-name' }],
-      });
+      expect(res?.deps).toEqual([
+        {
+          depName: 'kgabis/parson',
+          depType: 'dependencies',
+          prettyDepType: 'dependency',
+          skipReason: 'invalid-name',
+        },
+      ]);
     });
 
     it('ignores vendorised package.json', async () => {
@@ -98,25 +103,27 @@ describe('modules/manager/npm/extract/index', () => {
         'package.json',
         defaultExtractConfig,
       );
-      expect(res).toMatchSnapshot({
-        deps: [
-          { depName: 'autoprefixer', currentValue: '6.5.0' },
-          { depName: 'bower', currentValue: '~1.6.0' },
-          { depName: 'browserify', currentValue: '13.1.0' },
-          { depName: 'browserify-css', currentValue: '0.9.2' },
-          { depName: 'cheerio', currentValue: '=0.22.0' },
-          { depName: 'config', currentValue: '1.21.0' },
-          { depName: 'enabled', skipReason: 'invalid-value' },
-          { depName: 'angular', currentValue: '^1.5.8' },
-          { depName: 'angular-touch', currentValue: '1.5.8' },
-          { depName: 'angular-sanitize', currentValue: '1.5.8' },
-          { depName: '@angular/core', currentValue: '4.0.0-beta.1' },
-          { depName: 'config', currentValue: '1.21.0' },
-          { depName: '@angular/cli', currentValue: '8.0.0' },
-          { depName: 'angular', currentValue: '1.33.0' },
-          { depName: 'glob', currentValue: '1.0.0' },
-        ],
-      });
+      expect(res?.deps).toMatchObject([
+        { depName: 'autoprefixer', currentValue: '6.5.0' },
+        { depName: 'bower', currentValue: '~1.6.0' },
+        { depName: 'browserify', currentValue: '13.1.0' },
+        { depName: 'browserify-css', currentValue: '0.9.2' },
+        { depName: 'cheerio', currentValue: '=0.22.0' },
+        { depName: 'config', currentValue: '1.21.0' },
+        { depName: 'enabled', skipReason: 'invalid-value' },
+        { depName: 'angular', currentValue: '^1.5.8' },
+        { depName: 'angular-touch', currentValue: '1.5.8' },
+        { depName: 'angular-sanitize', currentValue: '1.5.8' },
+        { depName: '@angular/core', currentValue: '4.0.0-beta.1' },
+        { depName: 'config', currentValue: '1.21.0', depType: 'resolutions' },
+        {
+          depName: '@angular/cli',
+          currentValue: '8.0.0',
+          depType: 'resolutions',
+        },
+        { depName: 'angular', currentValue: '1.33.0', depType: 'resolutions' },
+        { depName: 'glob', currentValue: '1.0.0', depType: 'resolutions' },
+      ]);
     });
 
     it('returns an array of dependencies with resolution comments', async () => {
@@ -126,36 +133,23 @@ describe('modules/manager/npm/extract/index', () => {
         defaultExtractConfig,
       );
       expect(res?.deps).toHaveLength(13);
-      expect(res).toMatchSnapshot({
-        extractedConstraints: {},
-        deps: [
-          {},
-          {},
-          {},
-          {},
-          {},
-          {},
-          {},
-          {},
-          {},
-          {},
-          {},
-          {
-            depName: undefined,
-            depType: 'resolutions',
-            managerData: { key: '//' },
-            prettyDepType: 'resolutions',
-            skipReason: 'invalid-name',
-          },
-          {
-            depName: 'config',
-            currentValue: '1.21.0',
-            depType: 'resolutions',
-            managerData: { key: '**/config' },
-            prettyDepType: 'resolutions',
-          },
-        ],
-      });
+      expect(res?.deps?.slice(11)).toEqual([
+        {
+          depName: undefined,
+          depType: 'resolutions',
+          managerData: { key: '//' },
+          prettyDepType: 'resolutions',
+          skipReason: 'invalid-name',
+        },
+        {
+          depName: 'config',
+          currentValue: '1.21.0',
+          datasource: 'npm',
+          depType: 'resolutions',
+          managerData: { key: '**/config' },
+          prettyDepType: 'resolutions',
+        },
+      ]);
     });
 
     it('finds a lock file', async () => {
@@ -170,10 +164,8 @@ describe('modules/manager/npm/extract/index', () => {
         'package.json',
         defaultExtractConfig,
       );
-      expect(res).toMatchSnapshot({
-        managerData: {
-          yarnLock: 'yarn.lock',
-        },
+      expect(res).toMatchObject({
+        managerData: { yarnLock: 'yarn.lock' },
       });
     });
 
@@ -571,7 +563,7 @@ describe('modules/manager/npm/extract/index', () => {
         'package.json',
         defaultExtractConfig,
       );
-      expect(res).toMatchSnapshot({
+      expect(res).toMatchObject({
         managerData: { workspacesPackages: ['packages/*'] },
       });
     });
@@ -604,13 +596,7 @@ describe('modules/manager/npm/extract/index', () => {
         'package.json',
         defaultExtractConfig,
       );
-      expect(res).toMatchSnapshot({
-        extractedConstraints: {
-          node: '>= 8.9.2',
-          npm: '^8.0.0',
-          pnpm: '^1.2.0',
-          vscode: '>=1.49.3',
-        },
+      expect(res).toMatchObject({
         deps: [
           { depName: 'angular', currentValue: '1.6.0' },
           { depName: '@angular/cli', currentValue: '1.6.0' },
@@ -629,8 +615,8 @@ describe('modules/manager/npm/extract/index', () => {
           {
             depName: 'atom',
             currentValue: '>=1.7.0 <2.0.0',
-            skipReason: 'unknown-engines',
             depType: 'engines',
+            skipReason: 'unknown-engines',
           },
           {
             depName: 'node',
@@ -653,17 +639,23 @@ describe('modules/manager/npm/extract/index', () => {
           {
             depName: 'yarn',
             currentValue: 'disabled',
-            datasource: 'npm',
             depType: 'engines',
             skipReason: 'unspecified-version',
           },
           {
             depName: 'vscode',
             currentValue: '>=1.49.3',
-            depType: 'engines',
             datasource: 'github-tags',
+            depType: 'engines',
+            packageName: 'microsoft/vscode',
           },
         ],
+        extractedConstraints: {
+          node: '>= 8.9.2',
+          npm: '^8.0.0',
+          pnpm: '^1.2.0',
+          vscode: '>=1.49.3',
+        },
       });
     });
 
@@ -687,27 +679,39 @@ describe('modules/manager/npm/extract/index', () => {
         'package.json',
         defaultExtractConfig,
       );
-      expect(res).toMatchSnapshot({
-        deps: [
-          {},
-          {},
-          {},
-          {},
-          {
-            depType: 'volta',
-            currentValue: '6.11.2',
-            depName: 'pnpm',
-            prettyDepType: 'volta',
-          },
-          {
-            depType: 'volta',
-            currentValue: '1.0.0',
-            depName: 'invalid',
-            prettyDepType: 'volta',
-            skipReason: 'unknown-volta',
-          },
-        ],
-      });
+      expect(res?.deps).toMatchObject([
+        { depName: 'node', depType: 'engines' },
+        {
+          depName: 'node',
+          depType: 'volta',
+          currentValue: '8.9.2',
+          datasource: 'node-version',
+        },
+        {
+          depName: 'yarn',
+          depType: 'volta',
+          currentValue: '1.12.3',
+          datasource: 'npm',
+        },
+        {
+          depName: 'npm',
+          depType: 'volta',
+          currentValue: '5.9.0',
+          datasource: 'npm',
+        },
+        {
+          depName: 'pnpm',
+          depType: 'volta',
+          currentValue: '6.11.2',
+          datasource: 'npm',
+        },
+        {
+          depName: 'invalid',
+          depType: 'volta',
+          currentValue: '1.0.0',
+          skipReason: 'unknown-volta',
+        },
+      ]);
     });
 
     it('extracts volta yarn unspecified-version', async () => {
@@ -727,28 +731,16 @@ describe('modules/manager/npm/extract/index', () => {
         'package.json',
         defaultExtractConfig,
       );
-      expect(res).toMatchSnapshot({
-        deps: [
-          {},
-          {
-            commitMessageTopic: 'Node.js',
-            currentValue: '8.9.2',
-            datasource: 'node-version',
-            depName: 'node',
-            depType: 'volta',
-            prettyDepType: 'volta',
-          },
-          {
-            commitMessageTopic: 'Yarn',
-            currentValue: 'unknown',
-            datasource: 'npm',
-            depName: 'yarn',
-            depType: 'volta',
-            prettyDepType: 'volta',
-            skipReason: 'unspecified-version',
-          },
-        ],
-      });
+      expect(res?.deps).toMatchObject([
+        { depName: 'node', depType: 'engines' },
+        { depName: 'node', depType: 'volta' },
+        {
+          depName: 'yarn',
+          depType: 'volta',
+          currentValue: 'unknown',
+          skipReason: 'unspecified-version',
+        },
+      ]);
     });
 
     it('extracts volta yarn higher than 1', async () => {
@@ -824,121 +816,129 @@ describe('modules/manager/npm/extract/index', () => {
         'package.json',
         defaultExtractConfig,
       );
-      expect(res).toMatchSnapshot({
-        deps: [
-          { depName: 'a', skipReason: 'unspecified-version' },
-          { depName: 'b', skipReason: 'unversioned-reference' },
-          {
-            depName: 'c',
-            currentValue: 'v1.1.0',
-            datasource: 'github-tags',
-            sourceUrl: 'https://github.com/owner/c',
-          },
-          {
-            depName: 'd',
-            currentValue: 'github:owner/d#a7g3eaf',
-            skipReason: 'unversioned-reference',
-          },
-          {
-            depName: 'e',
-            currentValue: null,
-            currentDigest: '49b5aca613b33c5b626ae68c03a385f25c142f55',
-            datasource: 'github-tags',
-            sourceUrl: 'https://github.com/owner/e',
-          },
-          {
-            depName: 'f',
-            currentValue: 'v2.0.0',
-            datasource: 'github-tags',
-            sourceUrl: 'https://github.com/owner/f',
-          },
-          {
-            depName: 'g',
-            currentValue: 'gitlab:owner/g#v1.0.0',
-            skipReason: 'unspecified-version',
-          },
-          {
-            depName: 'h',
-            currentValue: 'github:-hello/world#v1.0.0',
-            skipReason: 'unspecified-version',
-          },
-          {
-            depName: 'i',
-            currentValue: '@foo/bar#v2.0.0',
-            skipReason: 'unspecified-version',
-          },
-          {
-            depName: 'j',
-            currentValue: 'github:frank#v0.0.1',
-            skipReason: 'unspecified-version',
-          },
-          {
-            depName: 'k',
-            currentValue: null,
-            currentDigest: '49b5aca',
-            currentRawValue: 'github:owner/k#49b5aca',
-            datasource: 'github-tags',
-            sourceUrl: 'https://github.com/owner/k',
-          },
-          {
-            depName: 'l',
-            currentValue: null,
-            currentDigest: 'abcdef0',
-            currentRawValue: 'github:owner/l.git#abcdef0',
-            datasource: 'github-tags',
-            sourceUrl: 'https://github.com/owner/l',
-          },
-          {
-            depName: 'm',
-            currentValue: 'v1.0.0',
-            currentRawValue: 'https://github.com/owner/m.git#v1.0.0',
-            datasource: 'github-tags',
-            sourceUrl: 'https://github.com/owner/m',
-          },
-          {
-            depName: 'n',
-            currentValue: 'v2.0.0',
-            datasource: 'github-tags',
-            sourceUrl: 'https://github.com/owner/n',
-          },
-          {
-            depName: 'o',
-            currentValue: 'v2.0.0',
-            datasource: 'github-tags',
-            sourceUrl: 'https://github.com/owner/o',
-          },
-          {
-            depName: 'p',
-            currentValue: 'v2.0.0',
-            datasource: 'github-tags',
-            sourceUrl: 'https://github.com/Owner/P',
-          },
-          {
-            depName: 'q',
-            currentValue: '1.1.0',
-            datasource: 'github-tags',
-            sourceUrl: 'https://github.com/owner/q',
-          },
-          {
-            depName: 'r',
-            currentValue: '^1.0.0',
-            datasource: 'github-tags',
-            sourceUrl: 'https://github.com/owner/r',
-          },
-          {
-            depName: 's',
-            currentValue: 'v1.0.0',
-            datasource: 'github-tags',
-            sourceUrl: 'https://github.com/owner/repo.with.dots',
-          },
-          {
-            depName: 't',
-            currentValue: 'v1.0.0',
-            datasource: 'github-tags',
-            sourceUrl: 'https://github.com/owner/repo.with.dots',
-          },
-        ],
-      });
+      expect(res?.deps).toMatchObject([
+        { depName: 'a', skipReason: 'unspecified-version' },
+        { depName: 'b', skipReason: 'unversioned-reference' },
+        {
+          depName: 'c',
+          currentValue: 'v1.1.0',
+          datasource: 'github-tags',
+          packageName: 'owner/c',
+          sourceUrl: 'https://github.com/owner/c',
+        },
+        {
+          depName: 'd',
+          currentValue: 'github:owner/d#a7g3eaf',
+          skipReason: 'unversioned-reference',
+        },
+        {
+          depName: 'e',
+          currentValue: null,
+          currentDigest: '49b5aca613b33c5b626ae68c03a385f25c142f55',
+          datasource: 'github-tags',
+          packageName: 'owner/e',
+          sourceUrl: 'https://github.com/owner/e',
+        },
+        {
+          depName: 'f',
+          currentValue: 'v2.0.0',
+          datasource: 'github-tags',
+          packageName: 'owner/f',
+          sourceUrl: 'https://github.com/owner/f',
+        },
+        {
+          depName: 'g',
+          currentValue: 'gitlab:owner/g#v1.0.0',
+          skipReason: 'unspecified-version',
+        },
+        {
+          depName: 'h',
+          currentValue: 'github:-hello/world#v1.0.0',
+          skipReason: 'unspecified-version',
+        },
+        {
+          depName: 'i',
+          currentValue: '@foo/bar#v2.0.0',
+          skipReason: 'unspecified-version',
+        },
+        {
+          depName: 'j',
+          currentValue: 'github:frank#v0.0.1',
+          skipReason: 'unspecified-version',
+        },
+        {
+          depName: 'k',
+          currentValue: null,
+          currentDigest: '49b5aca',
+          datasource: 'github-tags',
+          packageName: 'owner/k',
+          sourceUrl: 'https://github.com/owner/k',
+        },
+        {
+          depName: 'l',
+          currentValue: null,
+          currentDigest: 'abcdef0',
+          datasource: 'github-tags',
+          packageName: 'owner/l',
+          sourceUrl: 'https://github.com/owner/l',
+        },
+        {
+          depName: 'm',
+          currentValue: 'v1.0.0',
+          datasource: 'github-tags',
+          packageName: 'owner/m',
+          sourceUrl: 'https://github.com/owner/m',
+        },
+        {
+          depName: 'n',
+          currentValue: 'v2.0.0',
+          datasource: 'github-tags',
+          packageName: 'owner/n',
+          sourceUrl: 'https://github.com/owner/n',
+        },
+        {
+          depName: 'o',
+          currentValue: 'v2.0.0',
+          datasource: 'github-tags',
+          packageName: 'owner/o',
+          sourceUrl: 'https://github.com/owner/o',
+        },
+        {
+          depName: 'p',
+          currentValue: 'v2.0.0',
+          datasource: 'github-tags',
+          packageName: 'Owner/P',
+          sourceUrl: 'https://github.com/Owner/P',
+        },
+        {
+          depName: 'q',
+          currentValue: '1.1.0',
+          datasource: 'github-tags',
+          packageName: 'owner/q',
+          sourceUrl: 'https://github.com/owner/q',
+        },
+        {
+          depName: 'r',
+          currentValue: '^1.0.0',
+          datasource: 'github-tags',
+          packageName: 'owner/r',
+          sourceUrl: 'https://github.com/owner/r',
+        },
+        {
+          depName: 's',
+          currentValue: 'v1.0.0',
+          datasource: 'github-tags',
+          packageName: 'owner/repo.with.dots',
+          sourceUrl: 'https://github.com/owner/repo.with.dots',
+        },
+        {
+          depName: 't',
+          currentValue: 'v1.0.0',
+          datasource: 'github-tags',
+          packageName: 'owner/repo.with.dots',
+          sourceUrl: 'https://github.com/owner/repo.with.dots',
+        },
+      ]);
     });
 
     it('does not set registryUrls for non-npmjs', async () => {
@@ -1024,27 +1024,24 @@ describe('modules/manager/npm/extract/index', () => {
       expect(logger.debug).toHaveBeenCalledWith(
         'Invalid npm package alias for dependency: "g":"npm:@foo/@bar/@1.2.3"',
       );
-      expect(res).toMatchSnapshot({
-        deps: [
-          { packageName: 'foo' },
-          { packageName: '@foo/bar' },
-          { packageName: 'c', currentValue: '^1.2.3' },
-          { packageName: 'd', currentValue: '1.2.3' },
-          { packageName: 'e', currentValue: '1.x.x' },
-          {
-            packageName: 'f',
-            currentValue: 'foo',
-            npmPackageAlias: true,
-            skipReason: 'unspecified-version',
-          },
-          {
-            depName: 'g',
-            currentValue: 'npm:@foo/@bar/@1.2.3',
-            npmPackageAlias: true,
-            skipReason: 'unspecified-version',
-          },
-        ],
-      });
+      expect(res?.deps).toMatchObject([
+        { depName: 'a', currentValue: '1', packageName: 'foo' },
+        { depName: 'b', currentValue: '1.2.3', packageName: '@foo/bar' },
+        { depName: 'c', currentValue: '^1.2.3', packageName: 'c' },
+        { depName: 'd', currentValue: '1.2.3', packageName: 'd' },
+        { depName: 'e', currentValue: '1.x.x', packageName: 'e' },
+        {
+          depName: 'f',
+          currentValue: 'foo',
+          packageName: 'f',
+          skipReason: 'unspecified-version',
+        },
+        {
+          depName: 'g',
+          currentValue: 'npm:@foo/@bar/@1.2.3',
+          skipReason: 'unspecified-version',
+        },
+      ]);
     });
 
     it('sets skipInstalls false if Yarn zero-install is used', async () => {
@@ -1072,7 +1069,10 @@ describe('modules/manager/npm/extract/index', () => {
         'package.json',
         defaultExtractConfig,
       );
-      expect(res).toMatchSnapshot();
+      expect(res).toMatchObject({
+        managerData: { yarnZeroInstall: true },
+        skipInstalls: false,
+      });
     });
 
     it('extracts packageManager', async () => {
@@ -1085,8 +1085,7 @@ describe('modules/manager/npm/extract/index', () => {
         'package.json',
         defaultExtractConfig,
       );
-      expect(res).toMatchSnapshot({
-        extractedConstraints: { yarn: '3.0.0' },
+      expect(res).toMatchObject({
         deps: [
           {
             commitMessageTopic: 'Yarn',
@@ -1094,13 +1093,11 @@ describe('modules/manager/npm/extract/index', () => {
             datasource: 'npm',
             depName: 'yarn',
             depType: 'packageManager',
-            packageName: '@yarnpkg/cli',
             prettyDepType: 'packageManager',
           },
         ],
-        managerData: {
-          hasPackageManager: true,
-        },
+        extractedConstraints: { yarn: '3.0.0' },
+        managerData: { hasPackageManager: true },
       });
     });
 

@@ -194,7 +194,37 @@ describe('modules/datasource/hex/index', () => {
         datasource,
         packageName: 'certifi',
       });
-      expect(res).toMatchSnapshot();
+      expect(res).toMatchObject({
+        releases: [
+          {
+            version: '0.1.1',
+            isDeprecated: true,
+            releaseTimestamp: '2015-09-10T13:58:55.620Z',
+          },
+          { version: '0.2.0' },
+          { version: '0.3.0' },
+          { version: '0.4.0' },
+          { version: '0.5.0' },
+          { version: '0.6.0' },
+          { version: '0.7.0' },
+          { version: '1.0.0' },
+          { version: '1.1.0' },
+          { version: '1.2.0' },
+          { version: '1.2.1' },
+          { version: '2.0.0' },
+          { version: '2.1.0' },
+          { version: '2.2.0' },
+          { version: '2.3.0' },
+          { version: '2.3.1' },
+          { version: '2.4.1' },
+          { version: '2.4.2' },
+          { version: '2.5.1' },
+          {
+            version: '2.5.2',
+            releaseTimestamp: '2020-03-04T14:54:16.283Z',
+          },
+        ],
+      });
       expect(res).not.toBeNull();
       expect(res).toBeDefined();
     });
@@ -208,7 +238,30 @@ describe('modules/datasource/hex/index', () => {
         datasource,
         packageName: 'certifi',
       });
-      expect(res).toMatchSnapshot();
+      expect(res).toMatchObject({
+        releases: [
+          { version: '0.1.1' },
+          { version: '0.2.0' },
+          { version: '0.3.0' },
+          { version: '0.4.0' },
+          { version: '0.5.0' },
+          { version: '0.6.0' },
+          { version: '0.7.0' },
+          { version: '1.0.0' },
+          { version: '1.1.0' },
+          { version: '1.2.0' },
+          { version: '1.2.1' },
+          { version: '2.0.0' },
+          { version: '2.1.0' },
+          { version: '2.2.0' },
+          { version: '2.3.0' },
+          { version: '2.3.1' },
+          { version: '2.4.1' },
+          { version: '2.4.2' },
+          { version: '2.5.1' },
+          { version: '2.5.2' },
+        ],
+      });
       expect(res).not.toBeNull();
       expect(res).toBeDefined();
     });
@@ -244,8 +297,6 @@ describe('modules/datasource/hex/index', () => {
         datasource,
         packageName: 'private_package:renovate_test',
       });
-
-      expect(result).toMatchSnapshot();
 
       expect(result).toEqual({
         homepage: 'https://hex.pm/packages/renovate_test/private_package',

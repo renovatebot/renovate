@@ -78,7 +78,13 @@ describe('modules/datasource/java-version/index', () => {
         datasource,
         packageName,
       });
-      expect(res).toMatchSnapshot();
+      expect(res).toMatchObject({
+        releases: [
+          { version: '8.0.302+8' },
+          { version: '11.0.12+7' },
+          { version: '16.0.2+7' },
+        ],
+      });
       expect(res?.releases).toHaveLength(3);
     });
 
@@ -91,7 +97,9 @@ describe('modules/datasource/java-version/index', () => {
         datasource,
         packageName: 'java-jre',
       });
-      expect(res).toMatchSnapshot();
+      expect(res).toMatchObject({
+        releases: [{ version: '8.0.302+8' }, { version: '11.0.12+7' }],
+      });
       expect(res?.releases).toHaveLength(2);
     });
 
@@ -121,7 +129,11 @@ describe('modules/datasource/java-version/index', () => {
         datasource,
         packageName,
       });
-      expect(res).toMatchSnapshot();
+      expect(res).toMatchObject({
+        releases: Array.from({ length: 50 }, (_, idx) => ({
+          version: `1.${idx + 1}.0`,
+        })),
+      });
       expect(res?.releases).toHaveLength(50);
     });
 

@@ -291,9 +291,9 @@ if (end) {
   - `mockDeep` returns a mock for any property access, so typos in mocked names won't fail the test
 - Prefer `toEqual`
 - Use `toMatchObject` for huge objects when only parts need to be tested
-- Avoid `toMatchSnapshot`, only use it for:
-  - huge strings like the Renovate PR body text
-  - huge complex objects where you only need to test parts
+- Do not use file-based snapshot matchers (`toMatchSnapshot`, `toThrowErrorMatchingSnapshot`), write explicit assertions instead
+  - For huge strings like the Renovate PR body text, use `toMatchInlineSnapshot` so the expected value stays visible in the test file
+  - For huge complex objects where you only need to test parts, use `toMatchObject`
 - Avoid exporting functions purely for the purpose of testing unless you really need to
 - Avoid cast or prefer `x as T` instead of `<T>x` cast
   - Use `partial<T>()` from `test/util` if only a partial object is required
