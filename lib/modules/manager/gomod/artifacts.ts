@@ -179,7 +179,10 @@ export async function updateArtifacts({
      * @returns A commented out block with // renovate-replace
      */
     function blockCommentOut(match: string): string {
-      return match.replace(/(?<newline>\r?\n)/g, '$<newline>// renovate-replace ');
+      return match.replace(
+        /(?<newline>\r?\n)/g,
+        '$<newline>// renovate-replace ',
+      );
     }
 
     // Comment out golang replace directives
