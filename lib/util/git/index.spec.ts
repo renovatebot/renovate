@@ -1497,6 +1497,7 @@ describe('util/git/index', { timeout: 30000 }, () => {
         .split(newlineRegex)
         .map((line) => line.replace(regEx(/[0-9a-f]+\s+/i), ''))
         .filter(isTruthy);
+    }
 
     it('creates renovate ref in default section', async () => {
       const commit = git.getBranchCommit('develop')!;
