@@ -1,5 +1,5 @@
 import * as httpMock from '~test/http-mock.ts';
-import { git, hostRules, logger, partial } from '~test/util.ts';
+import { fakeSha, git, hostRules, logger, partial } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import type { RepoGlobalConfig } from '../../../config/types.ts';
 import {
@@ -14,7 +14,7 @@ import {
 } from '../../../constants/error-messages.ts';
 import * as memCache from '../../../util/cache/memory/index.ts';
 import * as repoCache from '../../../util/cache/repository/index.ts';
-import type { LongCommitSha } from '../../../util/schema-utils/git.ts';
+import { toBase64 } from '../../../util/string.ts';
 import { parseUrl } from '../../../util/url.ts';
 import type { EnsureIssueConfig, RepoParams } from '../index.ts';
 import * as helper from './gitea-helper.ts';
@@ -29,7 +29,7 @@ import type {
   Repo,
   RepoPermission,
   User,
-} from './types.ts';
+} from './schema.ts';
 
 /**
  * latest tested gitea version.
@@ -39,14 +39,21 @@ const GITEA_VERSION = '1.14.0+dev-754-g5d2b7ba63';
 describe('modules/platform/gitea/index', () => {
   function mockedRepo(opts: Partial<Repo>): Repo {
     return partial<Repo>({
-      permissions: partial<RepoPermission>({ push: true, pull: true }),
+      id: 0,
+      permissions: partial<RepoPermission>({
+        push: true,
+        pull: true,
+        admin: false,
+      }),
+      has_issues: true,
       has_pull_requests: true,
+      default_branch: 'master',
+      owner: partial<User>({ id: 0, login: 'some', full_name: '' }),
       ...opts,
     });
   }
 
-  const mockCommitHash =
-    '0d9c7726c3d628b7e28af234595cfd20febdbf8e' as LongCommitSha;
+  const mockCommitHash = fakeSha('gitea');
 
   const mockUser: User = {
     id: 1,
@@ -62,6 +69,11 @@ describe('modules/platform/gitea/index', () => {
     ssh_url: 'git@gitea.renovatebot.com/some/repo.git',
     default_branch: 'master',
     full_name: 'some/repo',
+    owner: partial<User>({
+      id: 0,
+      login: 'some',
+      full_name: '',
+    }),
   });
 
   type MockPr = PR & Required<Pick<PR, 'head' | 'base'>>;
@@ -94,7 +106,7 @@ describe('modules/platform/gitea/index', () => {
       base: { ref: 'some-base-branch' },
       head: {
         label: 'some-head-branch',
-        sha: 'some-head-sha' as LongCommitSha,
+        sha: fakeSha('some-head-sha'),
         repo: partial<Repo>({ full_name: mockRepo.full_name }),
       },
     }),
@@ -111,7 +123,7 @@ describe('modules/platform/gitea/index', () => {
       base: { ref: 'other-base-branch' },
       head: {
         label: 'other-head-branch',
-        sha: 'other-head-sha' as LongCommitSha,
+        sha: fakeSha('other-head-sha'),
         repo: partial<Repo>({ full_name: mockRepo.full_name }),
       },
       labels: [
@@ -134,7 +146,7 @@ describe('modules/platform/gitea/index', () => {
       base: { ref: 'draft-base-branch' },
       head: {
         label: 'draft-head-branch',
-        sha: 'draft-head-sha' as LongCommitSha,
+        sha: fakeSha('draft-head-sha'),
         repo: partial<Repo>({ full_name: mockRepo.full_name }),
       },
     }),
@@ -152,7 +164,7 @@ describe('modules/platform/gitea/index', () => {
       base: { ref: 'other-base-branch' },
       head: {
         label: 'merged-head-branch',
-        sha: 'merged-head-sha' as LongCommitSha,
+        sha: fakeSha('merged-head-sha'),
         repo: partial<Repo>({ full_name: mockRepo.full_name }),
       },
       labels: [
@@ -606,18 +618,22 @@ describe('modules/platform/gitea/index', () => {
       );
     });
 
-    it('should throw if unknown default merge style is configured', async () => {
+    it('should fall back to merge method when default merge style is unrecognized', async () => {
       const scope = httpMock
         .scope('https://gitea.com/api/v1')
         .get(`/repos/${initRepoCfg.repository}`)
         .reply(200, {
           ...mockRepo,
-          default_merge_style: 'unknown',
+          default_merge_style: 'manually-merged',
         });
       await initFakePlatform(scope);
 
-      await expect(gitea.initRepo(initRepoCfg)).rejects.toThrow(
-        REPOSITORY_BLOCKED,
+      await gitea.initRepo(initRepoCfg);
+
+      expect(git.initRepo).toHaveBeenCalledExactlyOnceWith(
+        expect.objectContaining({
+          mergeMethod: 'rebase',
+        }),
       );
     });
 
@@ -809,15 +825,17 @@ describe('modules/platform/gitea/index', () => {
     it('should create a new commit status', async () => {
       const scope = httpMock
         .scope('https://gitea.com/api/v1')
-        .post(
-          '/repos/some/repo/statuses/0d9c7726c3d628b7e28af234595cfd20febdbf8e',
-          {
-            state: 'success',
-            context: 'some-context',
-            description: 'some-description',
-          },
-        )
-        .reply(200)
+        .post(`/repos/some/repo/statuses/${mockCommitHash}`, {
+          state: 'success',
+          context: 'some-context',
+          description: 'some-description',
+        })
+        .reply(200, {
+          id: 1,
+          status: 'success',
+          context: 'some-context',
+          created_at: '2024-01-01T00:00:00Z',
+        })
         .get('/repos/some/repo/commits/some-branch/statuses')
         .reply(200, []);
 
@@ -837,15 +855,17 @@ describe('modules/platform/gitea/index', () => {
     it('should default to pending state', async () => {
       const scope = httpMock
         .scope('https://gitea.com/api/v1')
-        .post(
-          '/repos/some/repo/statuses/0d9c7726c3d628b7e28af234595cfd20febdbf8e',
-          {
-            state: 'pending',
-            context: 'some-context',
-            description: 'some-description',
-          },
-        )
-        .reply(200)
+        .post(`/repos/some/repo/statuses/${mockCommitHash}`, {
+          state: 'pending',
+          context: 'some-context',
+          description: 'some-description',
+        })
+        .reply(200, {
+          id: 1,
+          status: 'success',
+          context: 'some-context',
+          created_at: '2024-01-01T00:00:00Z',
+        })
         .get('/repos/some/repo/commits/some-branch/statuses')
         .reply(200, []);
 
@@ -865,16 +885,18 @@ describe('modules/platform/gitea/index', () => {
     it('should include url if specified', async () => {
       const scope = httpMock
         .scope('https://gitea.com/api/v1')
-        .post(
-          '/repos/some/repo/statuses/0d9c7726c3d628b7e28af234595cfd20febdbf8e',
-          {
-            state: 'success',
-            context: 'some-context',
-            description: 'some-description',
-            target_url: 'some-url',
-          },
-        )
-        .reply(200)
+        .post(`/repos/some/repo/statuses/${mockCommitHash}`, {
+          state: 'success',
+          context: 'some-context',
+          description: 'some-description',
+          target_url: 'some-url',
+        })
+        .reply(200, {
+          id: 1,
+          status: 'success',
+          context: 'some-context',
+          created_at: '2024-01-01T00:00:00Z',
+        })
         .get('/repos/some/repo/commits/some-branch/statuses')
         .reply(200, []);
 
@@ -895,9 +917,7 @@ describe('modules/platform/gitea/index', () => {
     it('should gracefully fail with warning', async () => {
       const scope = httpMock
         .scope('https://gitea.com/api/v1')
-        .post(
-          '/repos/some/repo/statuses/0d9c7726c3d628b7e28af234595cfd20febdbf8e',
-        )
+        .post(`/repos/some/repo/statuses/${mockCommitHash}`)
         .replyWithError('unknown error');
 
       await initFakePlatform(scope);
@@ -1174,14 +1194,15 @@ describe('modules/platform/gitea/index', () => {
         diff_url: 'https://gitea.renovatebot.com/some/repo/pulls/3.diff',
         created_at: '2011-08-18T22:30:38Z',
         closed_at: '2016-01-09T10:03:21Z',
+        updated_at: '2016-01-09T10:03:21Z',
         mergeable: true,
         base: { ref: 'third-party-base-branch' },
         head: {
           label: 'other-head-branch',
-          sha: 'other-head-sha' as LongCommitSha,
+          sha: fakeSha('other-head-sha'),
           repo: partial<Repo>({ full_name: mockRepo.full_name }),
         },
-        user: { login: 'not-renovate' },
+        user: { id: 2, login: 'not-renovate' },
       });
 
       const scope = httpMock
@@ -1192,7 +1213,7 @@ describe('modules/platform/gitea/index', () => {
           thirdPartyPr,
           ...mockPRs.map((pr) => ({
             ...pr,
-            user: { login: 'renovate' },
+            user: { id: 1, login: 'renovate' },
           })),
         ]);
       await initFakePlatform(scope);
@@ -1300,7 +1321,15 @@ describe('modules/platform/gitea/index', () => {
         .query({ state: 'all', sort: 'recentupdate', limit: 100 })
         .reply(200, [])
         .get('/repos/some/repo/pulls/42')
-        .reply(200); // TODO: 404 should be handled
+        .reply(200, {
+          number: 42,
+          state: 'open',
+          title: 'Missing PR',
+          body: '',
+          mergeable: false,
+          created_at: '2024-01-01T00:00:00Z',
+          updated_at: '2024-01-01T00:00:00Z',
+        }); // no head/base => toRenovatePR returns null
       await initFakePlatform(scope);
       await initFakeRepo(scope);
 
@@ -1687,7 +1716,7 @@ describe('modules/platform/gitea/index', () => {
         .query({ state: 'all', sort: 'recentupdate', limit: 100 })
         .reply(200, [mockNewPR])
         .patch('/repos/some/repo/pulls/42')
-        .reply(200);
+        .reply(200, { ...mockNewPR, title: 'new-title' });
       await initFakePlatform(scope);
       await initFakeRepo(scope);
 
@@ -1708,7 +1737,15 @@ describe('modules/platform/gitea/index', () => {
       const scope = httpMock
         .scope('https://gitea.com/api/v1')
         .post('/repos/some/repo/pulls')
-        .reply(200, {});
+        .reply(200, {
+          number: 42,
+          state: 'open',
+          title: 'pr-title',
+          body: 'pr-body',
+          mergeable: false,
+          created_at: '2024-01-01T00:00:00Z',
+          updated_at: '2024-01-01T00:00:00Z',
+        }); // no head/base => toRenovatePR returns null
       await initFakePlatform(scope);
       await initFakeRepo(scope);
 
@@ -1948,7 +1985,7 @@ describe('modules/platform/gitea/index', () => {
           title: 'New Title',
           base: 'New Base',
         })
-        .reply(200);
+        .reply(200, mockPRs[0]);
       await initFakePlatform(scope);
       await initFakeRepo(scope);
 
@@ -1971,7 +2008,7 @@ describe('modules/platform/gitea/index', () => {
           title: 'New Title',
           body: 'New Body',
         })
-        .reply(200);
+        .reply(200, mockPRs[0]);
       await initFakePlatform(scope);
       await initFakeRepo(scope);
 
@@ -1994,7 +2031,7 @@ describe('modules/platform/gitea/index', () => {
           title: 'WIP: New Title',
           body: 'New Body',
         })
-        .reply(200);
+        .reply(200, mockPRs[0]);
       await initFakePlatform(scope);
       await initFakeRepo(scope);
 
@@ -2018,7 +2055,7 @@ describe('modules/platform/gitea/index', () => {
           body: 'New Body',
           state: 'closed',
         })
-        .reply(200);
+        .reply(200, mockPRs[0]);
       await initFakePlatform(scope);
       await initFakeRepo(scope);
 
@@ -2266,7 +2303,7 @@ describe('modules/platform/gitea/index', () => {
           body: mockIssue.body,
           title: mockIssue.title,
         })
-        .reply(200, { number: 42 });
+        .reply(200, { number: 42, title: 'new-title', body: 'new-body' });
       await initFakePlatform(scope);
       await initFakeRepo(scope);
 
@@ -2301,7 +2338,7 @@ describe('modules/platform/gitea/index', () => {
           title: 'new-title',
           labels: [1, 3],
         })
-        .reply(200, { number: 42 });
+        .reply(200, { number: 42, title: 'new-title', body: 'new-body' });
       await initFakePlatform(scope);
       await initFakeRepo(scope);
 
@@ -2321,7 +2358,7 @@ describe('modules/platform/gitea/index', () => {
           body: closedIssue.body,
           title: closedIssue.title,
         })
-        .reply(200, { number: 42 });
+        .reply(200, { number: 42, title: 'new-title', body: 'new-body' });
       await initFakePlatform(scope);
       await initFakeRepo(scope);
 
@@ -2536,7 +2573,7 @@ describe('modules/platform/gitea/index', () => {
         .twice()
         .reply(200, mockIssues)
         .post('/repos/some/repo/issues')
-        .reply(200, { number: 42 });
+        .reply(200, { number: 42, title: 'new-title', body: 'new-body' });
       await initFakePlatform(scope);
       await initFakeRepo(scope);
 
@@ -2659,7 +2696,7 @@ describe('modules/platform/gitea/index', () => {
         .post('/repos/some/repo/issues/1/comments', {
           body: '### other-topic\n\nother-content',
         })
-        .reply(200);
+        .reply(200, partial<Comment>({ id: 1, body: 'x' }));
       await initFakePlatform(scope);
       await initFakeRepo(scope);
 
@@ -2678,7 +2715,7 @@ describe('modules/platform/gitea/index', () => {
         .get('/repos/some/repo/issues/1/comments')
         .reply(200, mockComments)
         .post('/repos/some/repo/issues/1/comments', { body: 'other-content' })
-        .reply(200);
+        .reply(200, partial<Comment>({ id: 1, body: 'x' }));
       await initFakePlatform(scope);
       await initFakeRepo(scope);
 
@@ -2699,7 +2736,7 @@ describe('modules/platform/gitea/index', () => {
         .patch('/repos/some/repo/issues/comments/13', {
           body: '### some-topic\n\nsome-new-content',
         })
-        .reply(200, partial<Comment>({ id: 13 }));
+        .reply(200, partial<Comment>({ id: 13, body: 'x' }));
       await initFakePlatform(scope);
       await initFakeRepo(scope);
 
@@ -2870,7 +2907,7 @@ describe('modules/platform/gitea/index', () => {
         .patch('/repos/some/repo/issues/1', {
           assignees: ['me', 'you'],
         })
-        .reply(200);
+        .reply(200, { number: 1, title: 'some-title', body: 'some-body' });
       await initFakePlatform(scope);
       await initFakeRepo(scope);
 
@@ -2952,7 +2989,10 @@ describe('modules/platform/gitea/index', () => {
         .scope('https://gitea.com/api/v1')
         .get('/repos/some/repo/contents/file.json')
         .reply(200, {
-          content: Buffer.from(JSON.stringify(data), 'utf-8'),
+          type: 'file',
+          name: 'file.json',
+          path: 'file.json',
+          content: toBase64(JSON.stringify(data)),
         });
       await initFakePlatform(scope);
       await initFakeRepo(scope);
@@ -2968,7 +3008,10 @@ describe('modules/platform/gitea/index', () => {
         .scope('https://gitea.com/api/v1')
         .get('/repos/different/repo/contents/file.json')
         .reply(200, {
-          content: Buffer.from(JSON.stringify(data), 'utf-8'),
+          type: 'file',
+          name: 'file.json',
+          path: 'file.json',
+          content: toBase64(JSON.stringify(data)),
         });
       await initFakePlatform(scope);
       await initFakeRepo(scope, { full_name: 'different/repo' });
@@ -2984,7 +3027,10 @@ describe('modules/platform/gitea/index', () => {
         .scope('https://gitea.com/api/v1')
         .get('/repos/some/repo/contents/file.json?ref=dev')
         .reply(200, {
-          content: Buffer.from(JSON.stringify(data), 'utf-8'),
+          type: 'file',
+          name: 'file.json',
+          path: 'file.json',
+          content: toBase64(JSON.stringify(data)),
         });
       await initFakePlatform(scope);
       await initFakeRepo(scope);
@@ -3005,7 +3051,10 @@ describe('modules/platform/gitea/index', () => {
         .scope('https://gitea.com/api/v1')
         .get('/repos/some/repo/contents/file.json5')
         .reply(200, {
-          content: Buffer.from(json5Data, 'utf-8'),
+          type: 'file',
+          name: 'file.json5',
+          path: 'file.json5',
+          content: toBase64(json5Data),
         });
       await initFakePlatform(scope);
       await initFakeRepo(scope);
@@ -3020,7 +3069,10 @@ describe('modules/platform/gitea/index', () => {
         .scope('https://gitea.com/api/v1')
         .get('/repos/some/repo/contents/file.json')
         .reply(200, {
-          content: Buffer.from('!@#', 'utf-8'),
+          type: 'file',
+          name: 'file.json',
+          path: 'file.json',
+          content: toBase64('!@#'),
         });
       await initFakePlatform(scope);
       await initFakeRepo(scope);
@@ -3029,11 +3081,11 @@ describe('modules/platform/gitea/index', () => {
       );
     });
 
-    it('returns null on missing content', async () => {
+    it('returns null for non-file entries', async () => {
       const scope = httpMock
         .scope('https://gitea.com/api/v1')
         .get('/repos/some/repo/contents/file.json')
-        .reply(200, {});
+        .reply(200, { type: 'dir', name: 'file.json', path: 'file.json' });
       await initFakePlatform(scope);
       await initFakeRepo(scope);
       expect(await gitea.getJsonFile('file.json')).toBeNull();

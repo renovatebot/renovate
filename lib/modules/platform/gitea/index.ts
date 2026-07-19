@@ -45,14 +45,8 @@ import { smartTruncate } from '../utils/pr-body.ts';
 import * as helper from './gitea-helper.ts';
 import { giteaHttp } from './gitea-helper.ts';
 import { GiteaPrCache } from './pr-cache.ts';
-import type {
-  CombinedCommitStatus,
-  Comment,
-  Label,
-  PRMergeMethod,
-  PRUpdateParams,
-  Repo,
-} from './types.ts';
+import type { Comment, Label, PRMergeMethod, Repo } from './schema.ts';
+import type { CombinedCommitStatus, PRUpdateParams } from './types.ts';
 import {
   DRAFT_PREFIX,
   getMergeMethod,
@@ -264,6 +258,9 @@ const platform: Platform = {
   ): Promise<string | null> {
     const repo = repoName ?? config.repository;
     const contents = await helper.getRepoContents(repo, fileName, branchOrTag);
+    if (contents.type !== 'file') {
+      return null;
+    }
     return contents.contentString ?? null;
   },
 
@@ -328,7 +325,7 @@ const platform: Platform = {
     // else fall back to predefined order. Order chosen to minimize commits - see
     // https://github.com/renovatebot/renovate/pull/37768 for discussion.
     const preferredOrder: PRMergeMethod[] = [
-      repo.default_merge_style,
+      ...(repo.default_merge_style ? [repo.default_merge_style] : []),
       'fast-forward-only',
       'squash',
       'merge',
@@ -473,8 +470,7 @@ const platform: Platform = {
       return 'yellow';
     }
 
-    /* v8 ignore next */
-    return helper.giteaToRenovateStatusMapping[ccs.worstStatus] ?? 'yellow';
+    return helper.giteaToRenovateStatusMapping[ccs.worstStatus];
   },
 
   async getBranchStatusCheck(
@@ -489,15 +485,7 @@ const platform: Platform = {
     if (!cs) {
       return null;
     } // no status check exists
-    const status = helper.giteaToRenovateStatusMapping[cs.status];
-    if (status) {
-      return status;
-    }
-    logger.warn(
-      { check: cs },
-      'Could not map Gitea status value to Renovate status',
-    );
-    return 'yellow';
+    return helper.giteaToRenovateStatusMapping[cs.status];
   },
 
   getPrList(): Promise<Pr[]> {
