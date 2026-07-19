@@ -1,8 +1,9 @@
 // TODO fix mocks
 import _timers from 'node:timers/promises';
 import { mockDeep } from 'vitest-mock-extended';
+import { hostRules } from '~test/host-rules.ts';
 import * as httpMock from '~test/http-mock.ts';
-import { fakeSha, git, hostRules, logger } from '~test/util.ts';
+import { fakeSha, git, logger } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import {
   CONFIG_GIT_URL_UNAVAILABLE,
@@ -20,7 +21,6 @@ import type { RepoParams } from '../index.ts';
 import * as prBodyModule from '../utils/pr-body.ts';
 import * as gitlab from './index.ts';
 
-vi.mock('../../../util/host-rules.ts', () => mockDeep());
 vi.mock('../../../util/git/index.ts', () => mockDeep());
 vi.mock('timers/promises');
 vi.mock('../utils/pr-body.ts', { spy: true });
@@ -37,7 +37,7 @@ describe('modules/platform/gitlab/index', () => {
     git.branchExists.mockReturnValue(true);
     git.isBranchBehindBase.mockResolvedValue(true);
     git.getBranchCommit.mockReturnValue(branchSha);
-    hostRules.find.mockReturnValue({
+    hostRules.add({
       token: '123test',
     });
     delete process.env.GITLAB_IGNORE_REPO_URL;

@@ -1,9 +1,9 @@
 import { isTruthy } from '@sindresorhus/is';
 import { codeBlock } from 'common-tags';
 import semver from 'semver';
-import { mockDeep } from 'vitest-mock-extended';
+import { hostRules } from '~test/host-rules.ts';
 import * as httpMock from '~test/http-mock.ts';
-import { fakeSha, git, hostRules, logger } from '~test/util.ts';
+import { fakeSha, git, logger } from '~test/util.ts';
 import {
   REPOSITORY_CHANGED,
   REPOSITORY_EMPTY,
@@ -15,7 +15,6 @@ import type { ReattemptPlatformAutomergeConfig } from '../types.ts';
 import * as bitbucket from './index.ts';
 
 vi.mock('timers/promises');
-vi.mock('../../../util/host-rules.ts', () => mockDeep());
 
 const commitSha = fakeSha('commitSha');
 
@@ -179,7 +178,8 @@ const endpointWithPath = parseUrl('https://stash.renovatebot.com/vcs')!;
 describe('modules/platform/bitbucket-server/index', () => {
   describe('endpoint with path', () => {
     const url = endpointWithPath;
-    const urlHost = url.origin;
+    const url
+    = url.origin;
     const urlPath = url.pathname === '/' ? '' : url.pathname;
 
     const username = 'abc';
@@ -214,7 +214,7 @@ describe('modules/platform/bitbucket-server/index', () => {
       git.branchExists.mockReturnValue(true);
       git.isBranchBehindBase.mockResolvedValue(false);
       git.getBranchCommit.mockReturnValue(commitSha);
-      hostRules.find.mockReturnValue({
+      hostRules.add({
         username,
         password,
       });
@@ -3517,7 +3517,7 @@ describe('modules/platform/bitbucket-server/index', () => {
       git.branchExists.mockReturnValue(true);
       git.isBranchBehindBase.mockResolvedValue(false);
       git.getBranchCommit.mockReturnValue(commitSha);
-      hostRules.find.mockReturnValue({
+      hostRules.add({
         username,
         password,
       });

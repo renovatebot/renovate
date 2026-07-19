@@ -33,7 +33,9 @@ describe('util/cache/package/with-cache', () => {
   });
 
   it('caches string result', async () => {
-    const fn = () => getValue();
+    function fn() {
+      return getValue();
+    }
 
     expect(
       await withCache({ namespace: '_test-namespace', key: 'some-key' }, fn),
@@ -55,7 +57,9 @@ describe('util/cache/package/with-cache', () => {
   });
 
   it('disables cache if cacheable is false', async () => {
-    const fn = () => getValue();
+    function fn() {
+      return getValue();
+    }
 
     expect(
       await withCache(
@@ -82,7 +86,9 @@ describe('util/cache/package/with-cache', () => {
 
   it('forces cache if cachePrivatePackages=true', async () => {
     GlobalConfig.set({ cachePrivatePackages: true });
-    const fn = () => getValue();
+    function fn() {
+      return getValue();
+    }
 
     expect(
       await withCache(
@@ -113,10 +119,10 @@ describe('util/cache/package/with-cache', () => {
   });
 
   it('caches null values', async () => {
-    const fn = async (): Promise<string | null> => {
+    async function fn(): Promise<string | null> {
       await getValue();
       return null;
-    };
+    }
 
     expect(
       await withCache({ namespace: '_test-namespace', key: 'key' }, fn),
@@ -138,11 +144,13 @@ describe('util/cache/package/with-cache', () => {
   });
 
   it('does not cache values rejected by cacheResult predicate', async () => {
-    const fn = async (): Promise<string | null> => {
+    async function fn(): Promise<string | null> {
       await getValue();
       return null;
-    };
-    const shouldCacheResult = (value: unknown): boolean => value !== null;
+    }
+    function shouldCacheResult(value: unknown): boolean {
+      return value !== null;
+    }
 
     expect(
       await withCache(
@@ -168,12 +176,16 @@ describe('util/cache/package/with-cache', () => {
   });
 
   it('ignores cached values rejected by cacheResult predicate', async () => {
-    const nullFn = async (): Promise<string | null> => {
+    async function nullFn(): Promise<string | null> {
       await getValue();
       return null;
-    };
-    const fn = () => getValue();
-    const cacheResult = (value: unknown): boolean => value !== null;
+    }
+    function fn() {
+      return getValue();
+    }
+    function cacheResult(value: unknown): boolean {
+      return value !== null;
+    }
 
     expect(
       await withCache({ namespace: '_test-namespace', key: 'key' }, nullFn),
@@ -210,10 +222,10 @@ describe('util/cache/package/with-cache', () => {
   });
 
   it('does not cache undefined', async () => {
-    const fn = async (): Promise<string | undefined> => {
+    async function fn(): Promise<string | undefined> {
       await getValue();
       return undefined;
-    };
+    }
 
     expect(
       await withCache({ namespace: '_test-namespace', key: 'key' }, fn),
@@ -230,7 +242,9 @@ describe('util/cache/package/with-cache', () => {
   });
 
   it('uses custom ttlMinutes', async () => {
-    const fn = () => getValue();
+    function fn() {
+      return getValue();
+    }
 
     expect(
       await withCache(
@@ -254,7 +268,9 @@ describe('util/cache/package/with-cache', () => {
     });
 
     it('updates cached result after soft TTL expires', async () => {
-      const fn = () => getValue();
+      function fn() {
+        return getValue();
+      }
 
       expect(
         await withCache(
@@ -315,7 +331,9 @@ describe('util/cache/package/with-cache', () => {
         cacheTtlOverride: { '_test-namespace': 2 },
         cacheHardTtlMinutes: 3,
       });
-      const fn = () => getValue();
+      function fn() {
+        return getValue();
+      }
 
       expect(
         await withCache(
@@ -373,7 +391,9 @@ describe('util/cache/package/with-cache', () => {
     });
 
     it('returns stale result on error', async () => {
-      const fn = () => getValue();
+      function fn() {
+        return getValue();
+      }
 
       expect(
         await withCache(
@@ -412,12 +432,16 @@ describe('util/cache/package/with-cache', () => {
     });
 
     it('does not return stale values rejected by cacheResult predicate', async () => {
-      const nullFn = async (): Promise<string | null> => {
+      async function nullFn(): Promise<string | null> {
         await getValue();
         return null;
-      };
-      const fn = () => getValue();
-      const shouldCacheResult = (value: unknown): boolean => value !== null;
+      }
+      function fn() {
+        return getValue();
+      }
+      function shouldCacheResult(value: unknown): boolean {
+        return value !== null;
+      }
 
       expect(
         await withCache(
@@ -452,7 +476,9 @@ describe('util/cache/package/with-cache', () => {
     });
 
     it('drops stale value after hard TTL expires', async () => {
-      const fn = () => getValue();
+      function fn() {
+        return getValue();
+      }
 
       expect(
         await withCache(
@@ -503,7 +529,9 @@ describe('util/cache/package/with-cache', () => {
     });
 
     it('does not use fallback when fallback=false', async () => {
-      const fn = () => getValue();
+      function fn() {
+        return getValue();
+      }
 
       expect(
         await withCache(
