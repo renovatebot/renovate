@@ -52,11 +52,13 @@ const berryV3Env = {
   YARN_ENABLE_IMMUTABLE_INSTALLS: 'false',
   YARN_HTTP_TIMEOUT: '100000',
 };
-const expectedExec = (
+function expectedExec(
   cmds: string[],
   env: Record<string, string>,
   cwd = 'some-dir',
-) => cmds.map((cmd) => ({ cmd, options: { cwd, env } }));
+): { cmd: string; options: { cwd: string; env: Record<string, string> } }[] {
+  return cmds.map((cmd) => ({ cmd, options: { cwd, env } }));
+}
 
 util.env.getChildProcessEnv.mockReturnValue(envMock.basic);
 

@@ -370,15 +370,17 @@ describe('modules/manager/sbt/extract', () => {
     });
 
     it('extract deps from native scala file with variables', () => {
-      const abcDep = (suffix: string) => ({
-        currentValue: '1.2.3',
-        datasource: 'sbt-package',
-        depName: `com.abc:abc${suffix}`,
-        packageName: `com.abc:abc${suffix}`,
-        registryUrls: [],
-        sharedVariableName: 'abcVersion',
-        variableName: 'abcVersion',
-      });
+      function abcDep(suffix: string): Record<string, unknown> {
+        return {
+          currentValue: '1.2.3',
+          datasource: 'sbt-package',
+          depName: `com.abc:abc${suffix}`,
+          packageName: `com.abc:abc${suffix}`,
+          registryUrls: [],
+          sharedVariableName: 'abcVersion',
+          variableName: 'abcVersion',
+        };
+      }
       expect(extractPackageFile(sbtDependencyFile)).toEqual({
         deps: [
           {
