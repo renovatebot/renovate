@@ -2,9 +2,9 @@ import { isNullOrUndefined, isString } from '@sindresorhus/is';
 import type { ExtractConfig, PackageDependency } from '../../../types.ts';
 import { TerraformProviderExtractor } from '../../base.ts';
 import type {
-  TerraformDefinitionFile,
+  TerraformDefinitionFileJSON,
   TerraformRequiredProvider,
-} from '../../hcl/types.ts';
+} from '../../hcl/schema.ts';
 import type { ProviderLock } from '../../lockfile/types.ts';
 
 export class RequiredProviderExtractor extends TerraformProviderExtractor {
@@ -13,7 +13,7 @@ export class RequiredProviderExtractor extends TerraformProviderExtractor {
   }
 
   extract(
-    hclRoot: TerraformDefinitionFile,
+    hclRoot: TerraformDefinitionFileJSON,
     locks: ProviderLock[],
     config: ExtractConfig,
   ): PackageDependency[] {
