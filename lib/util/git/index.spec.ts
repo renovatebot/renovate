@@ -1485,8 +1485,8 @@ describe('util/git/index', { timeout: 30000 }, () => {
   });
 
   describe('Renovate non-branch refs', () => {
-    const lsRenovateRefs = async (): Promise<string[]> =>
-      (
+    async function lsRenovateRefs(): Promise<string[]> {
+      return (
         await simpleGit(tmpDir.path).raw([
           'ls-remote',
           'origin',
@@ -1496,6 +1496,7 @@ describe('util/git/index', { timeout: 30000 }, () => {
         .split(newlineRegex)
         .map((line) => line.replace(regEx(/[0-9a-f]+\s+/i), ''))
         .filter(Boolean);
+    }
 
     it('creates renovate ref in default section', async () => {
       const commit = git.getBranchCommit('develop')!;

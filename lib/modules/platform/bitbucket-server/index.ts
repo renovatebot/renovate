@@ -971,6 +971,14 @@ export async function ensureComment({
   }
 }
 
+function byTopic(comment: Comment, topic: string): boolean {
+  return comment.text.startsWith(`### ${topic}\n\n`);
+}
+
+function byContent(comment: Comment, content: string): boolean {
+  return comment.text.trim() === content;
+}
+
 export async function ensureCommentRemoval(
   deleteConfig: EnsureCommentRemovalConfig,
 ): Promise<void> {
@@ -986,13 +994,11 @@ export async function ensureCommentRemoval(
     let commentId: number | null | undefined = null;
     // v8 ignore else -- TODO: add test #40625
     if (deleteConfig.type === 'by-topic') {
-      const byTopic = (comment: Comment): boolean =>
-        comment.text.startsWith(`### ${deleteConfig.topic}\n\n`);
-      commentId = comments.find(byTopic)?.id;
+      const topic = deleteConfig.topic;
+      commentId = comments.find((comment) => byTopic(comment, topic))?.id;
     } else if (deleteConfig.type === 'by-content') {
-      const byContent = (comment: Comment): boolean =>
-        comment.text.trim() === deleteConfig.content;
-      commentId = comments.find(byContent)?.id;
+      const content = deleteConfig.content;
+      commentId = comments.find((comment) => byContent(comment, content))?.id;
     }
 
     if (commentId) {
@@ -1005,8 +1011,9 @@ export async function ensureCommentRemoval(
 
 // Pull Request
 
-const escapeHash = (input: string): string =>
-  input?.replace(regEx(/#/g), '%23');
+function escapeHash(input: string): string {
+  return input?.replace(regEx(/#/g), '%23');
+}
 
 export async function createPr({
   sourceBranch,

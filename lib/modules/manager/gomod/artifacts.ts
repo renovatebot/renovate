@@ -178,8 +178,9 @@ export async function updateArtifacts({
      * @param match A string representing a golang replace directive block
      * @returns A commented out block with // renovate-replace
      */
-    const blockCommentOut = (match: string): string =>
-      match.replace(/(\r?\n)/g, '$1// renovate-replace ');
+    function blockCommentOut(match: string): string {
+      return match.replace(/(\r?\n)/g, '$1// renovate-replace ');
+    }
 
     // Comment out golang replace directives
     massagedGoMod = massagedGoMod

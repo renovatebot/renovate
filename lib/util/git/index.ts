@@ -531,12 +531,12 @@ export const syncGit = withInstrumenting(
               opts.push(e[0], `${e[1]!}`),
             );
           }
-          const emptyDirAndClone = async (): Promise<void> => {
+          async function emptyDirAndClone(): Promise<void> {
             await instrument(`fs.emptyDir(${localDir})`, () =>
               fs.emptyDir(localDir),
             );
             await git.clone(config.url, '.', opts);
-          };
+          }
           await gitRetry(() =>
             instrument('emptyDirAndClone', emptyDirAndClone),
           );
