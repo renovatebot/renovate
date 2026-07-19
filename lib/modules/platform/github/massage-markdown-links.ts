@@ -23,7 +23,7 @@ function massageLink(input: string): string {
 }
 
 function collectLinkPosition(input: string, matches: UrlMatch[]): Plugin {
-  const transformer = (tree: RootContent): void => {
+  function transformer(tree: RootContent): void {
     const startOffset = coerceNumber(tree.position?.start.offset);
     const endOffset = coerceNumber(tree.position?.end.offset);
 
@@ -54,7 +54,7 @@ function collectLinkPosition(input: string, matches: UrlMatch[]): Plugin {
         transformer(child);
       });
     }
-  };
+  }
 
   return () => transformer as Transformer;
 }

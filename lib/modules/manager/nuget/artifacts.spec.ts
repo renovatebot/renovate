@@ -5,7 +5,6 @@ import { GlobalConfig } from '../../../config/global.ts';
 import type { RepoGlobalConfig } from '../../../config/types.ts';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
 import * as docker from '../../../util/exec/docker/index.ts';
-import * as _hostRules from '../../../util/host-rules.ts';
 import { nugetOrg } from '../../datasource/nuget/index.ts';
 import type { UpdateArtifactsConfig } from '../types.ts';
 import * as nuget from './index.ts';
@@ -13,11 +12,9 @@ import * as util from './util.ts';
 
 vi.mock('../../../util/exec/env.ts');
 vi.mock('../../../util/fs/index.ts');
-vi.mock('../../../util/host-rules.ts');
 vi.mock('./util.ts');
 
 const { getDefaultRegistries, findGlobalJson } = vi.mocked(util);
-const hostRules = vi.mocked(_hostRules);
 
 process.env.CONTAINERBASE = 'true';
 
@@ -36,7 +33,6 @@ describe('modules/manager/nuget/artifacts', () => {
     const realFs = await vi.importActual<
       typeof import('../../../util/fs/index.ts')
     >('../../../util/fs/index.ts');
-    hostRules.find.mockReturnValue({});
     getDefaultRegistries.mockReturnValue([
       { url: nugetOrg, name: 'nuget.org' },
     ]);

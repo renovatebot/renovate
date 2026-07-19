@@ -1,5 +1,6 @@
 import { codeBlock } from 'common-tags';
-import { fakeSha, git, hostRules, partial } from '~test/util.ts';
+import { hostRules } from '~test/host-rules.ts';
+import { fakeSha, git, partial } from '~test/util.ts';
 import { REPOSITORY_ARCHIVED } from '../../../constants/error-messages.ts';
 import type { BranchStatus } from '../../../types/index.ts';
 import { repoFingerprint } from '../util.ts';
@@ -33,7 +34,6 @@ const codeReviewLabel: GerritLabelTypeInfo = {
   default_value: 0,
 };
 
-vi.mock('../../../util/host-rules.ts');
 vi.mock('./client.ts');
 const clientMock = vi.mocked(_client);
 
@@ -41,7 +41,7 @@ describe('modules/platform/gerrit/index', () => {
   const currentRevision = '0123456789abcdef0123456789abcdef01234567';
 
   beforeEach(async () => {
-    hostRules.find.mockReturnValue({
+    hostRules.add({
       username: 'user',
       password: 'pass',
     });

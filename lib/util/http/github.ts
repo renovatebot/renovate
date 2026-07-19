@@ -41,9 +41,9 @@ import type {
 
 const githubBaseUrl = 'https://api.github.com/';
 let baseUrl = githubBaseUrl;
-export const setBaseUrl = (url: string): void => {
+export function setBaseUrl(url: string): void {
   baseUrl = url;
-};
+}
 
 export interface GithubBaseHttpOptions extends HttpOptions {
   repository?: string;
