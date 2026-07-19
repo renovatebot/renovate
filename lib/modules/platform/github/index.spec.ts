@@ -1,6 +1,6 @@
 import { RequestError } from 'got';
 import { DateTime } from 'luxon';
-import { mockDeep } from 'vitest-mock-extended';
+import { hostRules } from '~test/host-rules.ts';
 import * as httpMock from '~test/http-mock.ts';
 import { logger } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
@@ -17,7 +17,6 @@ import {
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
 import * as repository from '../../../util/cache/repository/index.ts';
 import * as _git from '../../../util/git/index.ts';
-import * as _hostRules from '../../../util/host-rules.ts';
 import { setBaseUrl } from '../../../util/http/github.ts';
 import type { LongCommitSha } from '../../../util/schema-utils/git.ts';
 import { toBase64 } from '../../../util/string.ts';
@@ -35,9 +34,7 @@ const githubApiHost = 'https://api.github.com';
 
 vi.mock('timers/promises');
 
-vi.mock('../../../util/host-rules.ts', () => mockDeep());
 vi.mock('../../../util/http/queue.ts');
-const hostRules = vi.mocked(_hostRules);
 
 const git = vi.mocked(_git);
 
@@ -52,7 +49,7 @@ describe('modules/platform/github/index', () => {
     git.getBranchCommit.mockReturnValue(
       '0d9c7726c3d628b7e28af234595cfd20febdbf8e' as LongCommitSha,
     );
-    hostRules.find.mockReturnValue({
+    hostRules.add({
       token: '123test',
     });
 
@@ -830,7 +827,7 @@ describe('modules/platform/github/index', () => {
 
     // for coverage
     it('no token', async () => {
-      hostRules.find.mockReturnValue({});
+      hostRules.clear();
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
       await expect(github.initRepo({ repository: 'some/repo' })).toResolve();
@@ -838,7 +835,8 @@ describe('modules/platform/github/index', () => {
 
     // for coverage
     it('app token', async () => {
-      hostRules.find.mockReturnValue({
+      hostRules.clear();
+      hostRules.add({
         token: 'x-access-token:123test',
       });
       const scope = httpMock.scope(githubApiHost);
@@ -4115,9 +4113,6 @@ describe('modules/platform/github/index', () => {
           endpoint: 'https://github.company.com',
           token: '123test',
         });
-        hostRules.find.mockReturnValue({
-          token: '123test',
-        });
         await github.initRepo({ repository: 'some/repo' });
         await github.createPr(prConfig);
 
@@ -4160,9 +4155,6 @@ describe('modules/platform/github/index', () => {
         initRepoMock(scope, 'some/repo');
         await github.initPlatform({
           endpoint: 'https://github.company.com',
-          token: '123test',
-        });
-        hostRules.find.mockReturnValue({
           token: '123test',
         });
         await github.initRepo({ repository: 'some/repo' });
@@ -5053,9 +5045,6 @@ describe('modules/platform/github/index', () => {
       initRepoMock(scope, 'some/repo');
       await github.initPlatform({
         endpoint: 'https://github.company.com',
-        token: '123test',
-      });
-      hostRules.find.mockReturnValue({
         token: '123test',
       });
       await github.initRepo({ repository: 'some/repo' });

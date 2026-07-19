@@ -19,7 +19,6 @@ const datasource = vi.mocked(_datasource);
 
 vi.mock('../../../util/exec/env.ts');
 vi.mock('../../../util/fs/index.ts');
-vi.mock('../../../util/host-rules.ts', () => mockDeep());
 vi.mock('../../../util/http/index.ts');
 vi.mock('../../datasource/index.ts', () => mockDeep());
 
