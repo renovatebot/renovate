@@ -1,6 +1,6 @@
 import { codeBlock } from 'common-tags';
 import { Fixtures } from '~test/fixtures.ts';
-import { fs } from '~test/util.ts';
+import { fs, logger } from '~test/util.ts';
 import { extractPackageFile } from './index.ts';
 
 vi.mock('../../../util/fs/index.ts');
@@ -1155,6 +1155,47 @@ describe('modules/manager/mise/extract', () => {
         ],
       });
     });
+
+    it.each`
+      specifier
+      ${'^1.18.4'}
+      ${'~1.18.4'}
+      ${'>=1.18.4'}
+      ${'=1.18.4'}
+      ${'1.0.0 || 2.0.0'}
+      ${'1.0.0 - 2.0.0'}
+    `(
+      'warns that mise does not support the range specifier "$specifier"',
+      async ({ specifier }) => {
+        const content = codeBlock`
+          [tools]
+          "npm:typescript" = "${specifier}"
+        `;
+        await extractPackageFile(content, 'mise.toml');
+        expect(logger.logger.once.warn).toHaveBeenCalledWith(
+          { depName: 'npm:typescript', currentValue: specifier },
+          'mise does not support version ranges; use an exact or fuzzy version instead',
+        );
+      },
+    );
+
+    it.each`
+      version
+      ${'1.18.4'}
+      ${'3.11'}
+      ${'20'}
+      ${'latest'}
+    `(
+      'does not warn for the supported version "$version"',
+      async ({ version }) => {
+        const content = codeBlock`
+          [tools]
+          "npm:typescript" = "${version}"
+        `;
+        await extractPackageFile(content, 'mise.toml');
+        expect(logger.logger.once.warn).not.toHaveBeenCalled();
+      },
+    );
   });
 
   describe('extractPackageFile() with lock files', () => {

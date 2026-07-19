@@ -279,7 +279,25 @@ function extractToolEntry(name: string, toolData: MiseTool): PackageDependency {
     version === null
       ? null
       : getToolConfig(backend, toolName, version, options);
-  return createDependency(depName, version, toolConfig);
+  const dep = createDependency(depName, version, toolConfig);
+  warnOnUnsupportedRange(dep);
+  return dep;
+}
+
+/*
+ * mise resolves exact and fuzzy prefix versions (e.g. "20", "3.11") but rejects semver ranges.
+ * We match explicit range operators rather than the versioning API's range check, because
+ * npm-family versioning classifies valid fuzzy prefixes like "3.11" as ranges and would over-warn.
+ */
+const rangeSpecifierRegex = regEx(/^\s*[\^~=<>]|\|\||\s-\s/);
+
+function warnOnUnsupportedRange(dep: PackageDependency): void {
+  if (dep.currentValue && rangeSpecifierRegex.test(dep.currentValue)) {
+    logger.once.warn(
+      { depName: dep.depName, currentValue: dep.currentValue },
+      'mise does not support version ranges; use an exact or fuzzy version instead',
+    );
+  }
 }
 
 function createDependency(
