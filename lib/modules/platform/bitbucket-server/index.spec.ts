@@ -178,8 +178,7 @@ const endpointWithPath = parseUrl('https://stash.renovatebot.com/vcs')!;
 describe('modules/platform/bitbucket-server/index', () => {
   describe('endpoint with path', () => {
     const url = endpointWithPath;
-    const url
-    = url.origin;
+    const urlHost = url.origin;
     const urlPath = url.pathname === '/' ? '' : url.pathname;
 
     const username = 'abc';
