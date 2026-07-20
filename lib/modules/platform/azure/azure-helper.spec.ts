@@ -474,6 +474,29 @@ describe('modules/platform/azure/azure-helper', () => {
     });
   });
 
+  describe('getPolicyEvaluations', () => {
+    it('should get the policy evaluations for a pull request', async () => {
+      const policyEvaluations = [{ status: 2 }];
+      const getPolicyEvaluationsMock = vi
+        .fn()
+        .mockResolvedValue(policyEvaluations);
+      azureApi.policyApi.mockResolvedValueOnce(
+        partial<IPolicyApi>({
+          getPolicyEvaluations: getPolicyEvaluationsMock,
+        }),
+      );
+      const res = await azureHelper.getPolicyEvaluations(
+        'projectId',
+        'artifactId',
+      );
+      expect(getPolicyEvaluationsMock).toHaveBeenCalledWith(
+        'projectId',
+        'artifactId',
+      );
+      expect(res).toEqual(policyEvaluations);
+    });
+  });
+
   describe('getAllProjectTeams', () => {
     it('should get all teams', async () => {
       const team1 = Array.from({ length: 100 }, (_, index) => ({

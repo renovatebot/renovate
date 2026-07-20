@@ -3,21 +3,18 @@ import { ECRClient, GetAuthorizationTokenCommand } from '@aws-sdk/client-ecr';
 import { mockClient } from 'aws-sdk-client-mock';
 import { codeBlock } from 'common-tags';
 import * as _googleAuth from 'google-auth-library';
-import { mockDeep } from 'vitest-mock-extended';
+import { hostRules } from '~test/host-rules.ts';
 import * as httpMock from '~test/http-mock.ts';
 import { logger, partial } from '~test/util.ts';
 import { range } from '../../../../lib/util/range.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages.ts';
-import * as _hostRules from '../../../util/host-rules.ts';
 import { getDigest, getPkgReleases } from '../index.ts';
 import { DockerHubCache } from './dockerhub-cache.ts';
 import { DockerDatasource } from './index.ts';
 
-const hostRules = vi.mocked(_hostRules);
 const googleAuth = vi.mocked(_googleAuth, true);
 
-vi.mock('../../../util/host-rules.ts', () => mockDeep());
 vi.mock('google-auth-library');
 
 const ecrMock = mockClient(ECRClient);
@@ -168,11 +165,10 @@ describe('modules/datasource/docker/index', () => {
   beforeEach(() => {
     GlobalConfig.reset();
     ecrMock.reset();
-    hostRules.find.mockReturnValue({
+    hostRules.add({
       username: 'some-username',
       password: 'some-password',
     });
-    hostRules.hosts.mockReturnValue([]);
     delete process.env.RENOVATE_X_DOCKER_HUB_TAGS_DISABLE;
   });
 
@@ -224,7 +220,7 @@ describe('modules/datasource/docker/index', () => {
         )
         .reply(200, { token: 'some-token' });
 
-      hostRules.find.mockReturnValue({});
+      hostRules.clear();
       const res = await getDigest(
         {
           datasource: 'docker',
@@ -296,7 +292,8 @@ describe('modules/datasource/docker/index', () => {
         .reply(200)
         .head('/library/some-dep/manifests/latest')
         .reply(200, '', { 'docker-content-digest': 'some-digest' });
-      hostRules.find.mockReturnValue({ insecureRegistry: true });
+      hostRules.clear();
+      hostRules.add({ insecureRegistry: true });
       const res = await getDigest({
         datasource: 'docker',
         packageName: 'some-dep',
@@ -424,7 +421,8 @@ describe('modules/datasource/docker/index', () => {
           .matchHeader('authorization', 'Basic test_token')
           .reply(200, '', { 'docker-content-digest': 'some-digest' });
 
-        hostRules.find.mockReturnValue({
+        hostRules.clear();
+        hostRules.add({
           username: 'some-username',
           password: 'some-password',
           token: 'some-session-token',
@@ -509,7 +507,7 @@ describe('modules/datasource/docker/index', () => {
     it.each(amazonHosts)(
       'continues without token if ECR authentication fails for host $host',
       async ({ host }) => {
-        hostRules.find.mockReturnValue({});
+        hostRules.clear();
         httpMock.scope(`https://${host}/v2`).get('/').reply(401, '', {
           'www-authenticate': 'Basic realm="My Private Docker Registry Server"',
         });
@@ -539,7 +537,8 @@ describe('modules/datasource/docker/index', () => {
           .matchHeader('authorization', 'Basic QVdTOnNvbWUtcGFzc3dvcmQ=')
           .reply(200, '', { 'docker-content-digest': 'some-digest' });
 
-        hostRules.find.mockReturnValue({
+        hostRules.clear();
+        hostRules.add({
           username: 'AWS',
           password: 'some-password',
         });
@@ -579,7 +578,7 @@ describe('modules/datasource/docker/index', () => {
         ),
       );
 
-      hostRules.find.mockReturnValue({});
+      hostRules.clear();
       const res = await getDigest(
         {
           datasource: 'docker',
@@ -614,7 +613,7 @@ describe('modules/datasource/docker/index', () => {
         ),
       );
 
-      hostRules.find.mockReturnValue({});
+      hostRules.clear();
       const res = await getDigest(
         {
           datasource: 'docker',
@@ -704,7 +703,7 @@ describe('modules/datasource/docker/index', () => {
         .head('/google.com/some-project/some-package/manifests/some-tag')
         .reply(200, '', { 'docker-content-digest': 'some-digest' });
 
-      hostRules.find.mockReturnValue({});
+      hostRules.clear();
       const res = await getDigest(
         {
           datasource: 'docker',
@@ -726,7 +725,7 @@ describe('modules/datasource/docker/index', () => {
         .head('/some-project/some-repo/some-package/manifests/some-tag')
         .reply(200, '', { 'docker-content-digest': 'some-digest' });
 
-      hostRules.find.mockReturnValue({});
+      hostRules.clear();
       const res = await getDigest(
         {
           datasource: 'docker',
@@ -740,7 +739,7 @@ describe('modules/datasource/docker/index', () => {
     });
 
     it('continues without token if Google ADC fails for gcr', async () => {
-      hostRules.find.mockReturnValue({});
+      hostRules.clear();
       httpMock.scope(gcrUrl).get('/').reply(401, '', {
         'www-authenticate': 'Basic realm="My Private Docker Registry Server"',
       });
@@ -764,7 +763,7 @@ describe('modules/datasource/docker/index', () => {
     });
 
     it('continues without token if Google ADC fails for gar', async () => {
-      hostRules.find.mockReturnValue({});
+      hostRules.clear();
       httpMock.scope(garUrl).get('/').reply(401, '', {
         'www-authenticate': 'Basic realm="My Private Docker Registry Server"',
       });
@@ -1557,7 +1556,7 @@ describe('modules/datasource/docker/index', () => {
           'docker-content-digest': newDigest,
         });
 
-      hostRules.find.mockReturnValue({});
+      hostRules.clear();
       const res = await getDigest(
         {
           datasource: 'docker',
@@ -1660,7 +1659,7 @@ describe('modules/datasource/docker/index', () => {
           'docker-content-digest': newDigest,
         });
 
-      hostRules.find.mockReturnValue({});
+      hostRules.clear();
       const res = await getDigest(
         {
           datasource: 'docker',
@@ -2696,7 +2695,7 @@ describe('modules/datasource/docker/index', () => {
 
     it('returns null if no auth', async () => {
       process.env.RENOVATE_X_DOCKER_HUB_TAGS_DISABLE = 'true';
-      hostRules.find.mockReturnValue({});
+      hostRules.clear();
       httpMock
         .scope(baseUrl)
         .get('/library/node/tags/list?n=10000')

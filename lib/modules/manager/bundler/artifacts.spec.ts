@@ -1,9 +1,13 @@
 import upath from 'upath';
 import { mockDeep } from 'vitest-mock-extended';
 import { envMock, mockExecAll, mockExecSequence } from '~test/exec-util.ts';
+import { hostRules } from '~test/host-rules.ts';
 import { env, fs, git, partial } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
-import type { RepoGlobalConfig } from '../../../config/types.ts';
+import type {
+  InternalGlobalConfigOptions,
+  RepoGlobalConfig,
+} from '../../../config/types.ts';
 import {
   BUNDLER_INVALID_CREDENTIALS,
   TEMPORARY_ERROR,
@@ -13,21 +17,17 @@ import { ExecError } from '../../../util/exec/exec-error.ts';
 import type { StatusResult } from '../../../util/git/types.ts';
 import * as _datasource from '../../datasource/index.ts';
 import type { UpdateArtifactsConfig } from '../types.ts';
-import * as _bundlerHostRules from './host-rules.ts';
 import { updateArtifacts } from './index.ts';
 
 const datasource = vi.mocked(_datasource);
-const bundlerHostRules = vi.mocked(_bundlerHostRules);
 
 vi.mock('../../../util/exec/env.ts');
 vi.mock('../../datasource/index.ts', () => mockDeep());
 vi.mock('../../../util/fs/index.ts');
-vi.mock('../../../util/host-rules.ts', () => mockDeep());
-vi.mock('./host-rules.ts');
 
 process.env.CONTAINERBASE = 'true';
 
-const adminConfig: RepoGlobalConfig = {
+const adminConfig: RepoGlobalConfig & InternalGlobalConfigOptions = {
   // `join` fixes Windows CI
   localDir: upath.join('/tmp/github/some/repo'),
   cacheDir: upath.join('/tmp/cache'),
@@ -52,7 +52,6 @@ describe('modules/manager/bundler/artifacts', () => {
       delete process.env.GEM_HOME;
 
       env.getChildProcessEnv.mockReturnValue(envMock.basic);
-      bundlerHostRules.findAllAuthenticatable.mockReturnValue([]);
       docker.resetPrefetchedImages();
 
       GlobalConfig.set(adminConfig);
@@ -431,18 +430,12 @@ describe('modules/manager/bundler/artifacts', () => {
         datasource.getPkgReleases.mockResolvedValueOnce({
           releases: [{ version: '1.17.2' }, { version: '2.3.5' }],
         });
-        bundlerHostRules.findAllAuthenticatable.mockReturnValue([
-          {
-            hostType: 'bundler',
-            matchHost: 'gems-private.com',
-            resolvedHost: 'gems-private.com',
-            username: 'some-user',
-            password: 'some-password',
-          },
-        ]);
-        bundlerHostRules.getAuthenticationHeaderValue.mockReturnValue(
-          'some-user:some-password',
-        );
+        hostRules.add({
+          hostType: 'rubygems',
+          matchHost: 'gems-private.com',
+          username: 'some-user',
+          password: 'some-password',
+        });
         const execSnapshots = mockExecAll();
         git.getRepoStatus.mockResolvedValueOnce(
           partial<StatusResult>({
