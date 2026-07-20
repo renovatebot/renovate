@@ -647,12 +647,14 @@ describe('util/git/index', { timeout: 30000 }, () => {
         'renovate/branch_with_multiple_authors',
         'renovate/custom_author',
         'renovate/deeply/nested',
+        'renovate/different_committer',
         'renovate/equal_branch',
         'renovate/future_branch',
         'renovate/hidden-unicode',
         'renovate/modified_branch',
         'renovate/nested_files',
         'renovate/past_branch',
+        'renovate/platform_commit',
       ]);
     });
   });
