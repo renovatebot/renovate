@@ -9,7 +9,10 @@ import { Fixtures } from '~test/fixtures.ts';
 import * as httpMock from '~test/http-mock.ts';
 import { partial } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
-import type { RepoGlobalConfig } from '../../../config/types.ts';
+import type {
+  InternalGlobalConfigOptions,
+  RepoGlobalConfig,
+} from '../../../config/types.ts';
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages.ts';
 import * as memCache from '../../../util/cache/memory/index.ts';
 import * as git from '../../../util/git/index.ts';
@@ -124,7 +127,7 @@ describe('modules/datasource/crate/index', () => {
 
   describe('getReleases', () => {
     let tmpDir: DirectoryResult | null;
-    let adminConfig: RepoGlobalConfig;
+    let adminConfig: RepoGlobalConfig & InternalGlobalConfigOptions;
 
     beforeEach(async () => {
       tmpDir = await dir({ unsafeCleanup: true });

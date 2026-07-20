@@ -184,7 +184,7 @@ export async function getPrCache(
       },
       `PR cache: getPrList success`,
     );
-  } catch (err) /* v8 ignore next */ {
+  } catch (err) /* v8 ignore next -- PR cache sync failures are wrapped as ExternalHostError, not simulated in specs */ {
     logger.debug({ err }, 'PR cache: getPrList err');
     throw new ExternalHostError(err, 'github');
   }

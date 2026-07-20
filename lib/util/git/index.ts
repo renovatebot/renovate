@@ -217,6 +217,8 @@ let submodulesInitizialized: boolean;
 
 let privateKeySet = false;
 
+let platformIgnoredAuthors: string[] = [];
+
 export const GIT_MINIMUM_VERSION = '2.33.0'; // git show-current
 
 export async function validateGitVersion(): Promise<boolean> {
@@ -393,6 +395,10 @@ export function setUserRepoConfig({
   setGitAuthor(gitAuthor);
 }
 
+export function setPlatformIgnoredAuthors(emails: string[] = []): void {
+  platformIgnoredAuthors = emails;
+}
+
 export async function getSubmodules(): Promise<string[]> {
   try {
     return (
@@ -525,12 +531,12 @@ export const syncGit = withInstrumenting(
               opts.push(e[0], `${e[1]!}`),
             );
           }
-          const emptyDirAndClone = async (): Promise<void> => {
+          async function emptyDirAndClone(): Promise<void> {
             await instrument(`fs.emptyDir(${localDir})`, () =>
               fs.emptyDir(localDir),
             );
             await git.clone(config.url, '.', opts);
-          };
+          }
           await gitRetry(() =>
             instrument('emptyDirAndClone', emptyDirAndClone),
           );
@@ -929,12 +935,19 @@ export async function isBranchModified(
   await syncGit();
   const committedAuthors = new Set<string>();
   try {
-    const commits = await git.log([
-      `origin/${baseBranch}..origin/${branchName}`,
-    ]);
+    const commits = await git.log({
+      from: `origin/${baseBranch}`,
+      to: `origin/${branchName}`,
+      symmetric: false, // means <from>..<to> instead of <from>...<to>
+      format: {
+        author_email: '%ae',
+        committer_email: '%ce',
+      },
+    });
 
     for (const commit of commits.all) {
       committedAuthors.add(commit.author_email);
+      committedAuthors.add(commit.committer_email);
     }
   } catch (err) /* v8 ignore next -- TODO: add test #40625 */ {
     if (err.message?.includes('fatal: bad revision')) {
@@ -956,6 +969,10 @@ export async function isBranchModified(
   }
 
   for (const ignoredAuthor of ignoredAuthors) {
+    includedAuthors.delete(ignoredAuthor);
+  }
+
+  for (const ignoredAuthor of platformIgnoredAuthors) {
     includedAuthors.delete(ignoredAuthor);
   }
 
@@ -1790,7 +1807,7 @@ export async function getRemotes(): Promise<string[]> {
     const remotes = await git.getRemotes();
     logger.debug(`Found remotes: ${remotes.map((r) => r.name).join(', ')}`);
     return remotes.map((remote) => remote.name);
-  } catch (err) /* v8 ignore next */ {
+  } catch (err) /* v8 ignore next -- git.getRemotes only fails on repo corruption, not simulated in specs */ {
     logger.error({ err }, 'Error getting remotes');
     throw err;
   }

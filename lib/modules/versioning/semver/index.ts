@@ -24,7 +24,9 @@ const {
 } = semver;
 
 // If this is left as an alias, inputs like "17.04.0" throw errors
-export const isVersion = (input: string): boolean => !!valid(input);
+export function isVersion(input: string): boolean {
+  return !!valid(input);
+}
 
 export { getSatisfyingVersion, isVersion as isValid };
 

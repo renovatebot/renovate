@@ -207,21 +207,23 @@ export async function initPlatform({
     );
     renovateUsername = platformConfig.userDetails.username;
   }
+
+  let ghHostname: string;
+  /* v8 ignore next -- false negative due to V8/source-map artifact */
+  if (platformConfig.isGheCloud) {
+    ghHostname = 'ghe.com';
+  } else if (platformConfig.isGhe) {
+    // valid url ensured at the function start
+    const parsedEndpoint = parseUrl(platformConfig.endpoint)!;
+    ghHostname = parsedEndpoint.hostname;
+  } else {
+    ghHostname = 'github.com';
+  }
+
   let discoveredGitAuthor: string | undefined;
   if (!gitAuthor) {
     if (platformConfig.isGHApp) {
       platformConfig.userDetails ??= await getAppDetails(token);
-      let ghHostname: string;
-      /* v8 ignore next -- false negative due to V8/source-map artifact */
-      if (platformConfig.isGheCloud) {
-        ghHostname = 'ghe.com';
-      } else if (platformConfig.isGhe) {
-        // valid url ensured at the function start
-        const parsedEndpoint = parseUrl(platformConfig.endpoint)!;
-        ghHostname = parsedEndpoint.hostname;
-      } else {
-        ghHostname = 'github.com';
-      }
       discoveredGitAuthor = `${platformConfig.userDetails.name} <${platformConfig.userDetails.id}+${platformConfig.userDetails.username}@users.noreply.${ghHostname}>`;
     } else {
       platformConfig.userDetails ??= await getUserDetails(
@@ -237,6 +239,9 @@ export async function initPlatform({
       }
     }
   }
+
+  git.setPlatformIgnoredAuthors([`noreply@${ghHostname}`]);
+
   logger.debug({ platformConfig, renovateUsername }, 'Platform config');
   const platformResult: PlatformResult = {
     endpoint: platformConfig.endpoint,
@@ -298,7 +303,7 @@ async function fetchRepositories(): Promise<GhRestRepo[]> {
       { paginate: 'all' },
     );
     return res.body;
-  } catch (err) /* v8 ignore next */ {
+  } catch (err) /* v8 ignore next -- defensive: repo listing failures are logged and rethrown, not simulated in specs */ {
     logger.error({ err }, `GitHub getRepos error`);
     throw err;
   }
@@ -576,12 +581,12 @@ export async function initRepo({
     }
 
     repo = res?.data?.repository;
-    /* v8 ignore next */
+    /* v8 ignore next -- defensive: GraphQL errors are handled above, a null repository is not mocked in specs */
     if (!repo) {
       logger.debug({ res }, 'No repository returned');
       throw new Error(REPOSITORY_NOT_FOUND);
     }
-    /* v8 ignore next */
+    /* v8 ignore next -- empty-repo detection via missing defaultBranchRef is not mocked in specs */
     if (!repo.defaultBranchRef?.name) {
       logger.debug(
         { res },
@@ -628,7 +633,7 @@ export async function initRepo({
       .catch([])
       .parse(res?.data?.repository?.issues?.nodes);
     GithubIssueCache.addIssuesToReconcile(recentIssues);
-  } catch (err) /* v8 ignore next */ {
+  } catch (err) /* v8 ignore next -- initRepo error mapping needs failure shapes not mocked in specs */ {
     logger.debug({ err }, 'Caught initRepo error');
     if (
       err.message === REPOSITORY_ARCHIVED ||
@@ -704,7 +709,7 @@ export async function initRepo({
             token: forkToken,
           });
           logger.debug('Created new default branch in fork');
-        } catch (err) /* v8 ignore next */ {
+        } catch (err) /* v8 ignore next -- fork default-branch creation failures are not mocked in specs */ {
           if (err.response?.body?.message === 'Reference already exists') {
             logger.debug(
               `Branch ${config.defaultBranch} already exists in the fork`,
@@ -728,7 +733,7 @@ export async function initRepo({
             token: forkToken,
           });
           logger.debug('Successfully changed default branch for fork');
-        } catch (err) /* v8 ignore next */ {
+        } catch (err) /* v8 ignore next -- defensive: fork default-branch update failures are logged and swallowed, not simulated in specs */ {
           logger.warn({ err }, 'Could not set default branch');
         }
       }
@@ -747,7 +752,7 @@ export async function initRepo({
   if (forkToken) {
     logger.debug('Using forkToken for git init');
     authToken = coerceToNull(config.forkToken);
-  } /* v8 ignore next */ else {
+  } /* v8 ignore next -- token-type detection depends on opts.token shapes not varied in specs */ else {
     const tokenType = opts.token?.startsWith('x-access-token:')
       ? 'app'
       : 'personal access';
@@ -1143,7 +1148,7 @@ export async function getBranchStatus(
   let commitStatus: CombinedBranchStatus;
   try {
     commitStatus = await getStatus(branchName);
-  } catch (err) /* v8 ignore next */ {
+  } catch (err) /* v8 ignore next -- 404-to-REPOSITORY_CHANGED mapping for deleted branches is not mocked in specs */ {
     if (err.statusCode === 404) {
       logger.debug(
         'Received 404 when checking branch status, assuming that branch has been deleted',
@@ -1196,10 +1201,10 @@ export async function getBranchStatus(
         conclusion: run.conclusion,
       }));
       logger.debug({ checkRuns }, 'check runs result');
-    } /* v8 ignore next */ else {
+    } /* v8 ignore next -- specs always mock a non-empty check_runs response */ else {
       logger.debug({ result: checkRunsRaw }, 'No check runs found');
     }
-  } catch (err) /* v8 ignore next */ {
+  } catch (err) /* v8 ignore next -- check-run permission errors (403) are mapped to empty results, not mocked in specs */ {
     if (err instanceof ExternalHostError) {
       throw err;
     }
@@ -1273,7 +1278,7 @@ export async function getBranchStatusCheck(
       }
     }
     return null;
-  } catch (err) /* v8 ignore next */ {
+  } catch (err) /* v8 ignore next -- 404-to-REPOSITORY_CHANGED mapping for missing commits is not mocked in specs */ {
     if (err.statusCode === 404) {
       logger.debug('Commit not found when checking statuses');
       throw new Error(REPOSITORY_CHANGED);
@@ -1289,7 +1294,7 @@ export async function setBranchStatus({
   state,
   url: targetUrl,
 }: BranchStatusConfig): Promise<void> {
-  /* v8 ignore next */
+  /* v8 ignore next -- specs do not run setBranchStatus in forking mode */
   if (config.parentRepo) {
     logger.debug('Cannot set branch status when in forking mode');
     return;
@@ -1322,7 +1327,7 @@ export async function setBranchStatus({
     // update status cache
     await getStatus(branchName, false);
     await getStatusCheck(branchName, false);
-  } catch (err) /* v8 ignore next */ {
+  } catch (err) /* v8 ignore next -- defensive: status POST failures abort with REPOSITORY_CHANGED, not simulated in specs */ {
     logger.debug({ err, url }, 'Caught error setting branch status - aborting');
     throw new Error(REPOSITORY_CHANGED);
   }
@@ -1349,7 +1354,7 @@ async function getIssues(): Promise<Issue[]> {
 }
 
 export async function getIssueList(): Promise<Issue[]> {
-  /* v8 ignore next */
+  /* v8 ignore next -- specs initialize repos with issues enabled */
   if (config.hasIssuesEnabled === false) {
     return [];
   }
@@ -1432,7 +1437,7 @@ export async function ensureIssue({
   shouldReOpen = true,
 }: EnsureIssueConfig): Promise<EnsureIssueResult | null> {
   logger.debug(`ensureIssue(${title})`);
-  /* v8 ignore next */
+  /* v8 ignore next -- specs initialize repos with issues enabled */
   if (config.hasIssuesEnabled === false) {
     logger.info(
       'Cannot ensure issue because issues are disabled in this repository',
@@ -1516,7 +1521,7 @@ export async function ensureIssue({
     // reset issueList so that it will be fetched again as-needed
     GithubIssueCache.updateIssue(createdIssue);
     return 'created';
-  } catch (err) /* v8 ignore next */ {
+  } catch (err) /* v8 ignore next -- issue creation failure handling is not mocked in specs */ {
     if (err.body?.message?.startsWith('Issues are disabled for this repo')) {
       logger.debug(`Issues are disabled, so could not create issue: ${title}`);
     } else {
@@ -1528,7 +1533,7 @@ export async function ensureIssue({
 
 export async function ensureIssueClosing(title: string): Promise<void> {
   logger.trace(`ensureIssueClosing(${title})`);
-  /* v8 ignore next */
+  /* v8 ignore next -- specs initialize repos with issues enabled */
   if (config.hasIssuesEnabled === false) {
     return;
   }
@@ -1565,7 +1570,7 @@ async function tryAddMilestone(
     );
     GithubIssueCache.updateIssue(updatedIssue);
   } catch (err) {
-    /* v8 ignore next */
+    /* v8 ignore next -- defensive: the raw-error fallback is for non-HTTP failures not seen in specs */
     const actualError = err.response?.body ?? err;
     logger.warn(
       {
@@ -1632,7 +1637,7 @@ export async function addReviewers(
         },
       },
     );
-  } catch (err) /* v8 ignore next */ {
+  } catch (err) /* v8 ignore next -- defensive: reviewer assignment failures are logged and swallowed, not simulated in specs */ {
     logger.warn({ err }, 'Failed to assign reviewer');
   }
 }
@@ -1649,7 +1654,7 @@ export async function addLabels(
         body: labels,
       });
     }
-  } catch (err) /* v8 ignore next */ {
+  } catch (err) /* v8 ignore next -- defensive: label-adding failures are logged and swallowed, not simulated in specs */ {
     logger.warn(
       { err, issueNo, labels },
       'Error while adding labels. Skipping',
@@ -1667,7 +1672,7 @@ export async function deleteLabel(
     await githubApi.deleteJson(
       `repos/${repository}/issues/${issueNo}/labels/${label}`,
     );
-  } catch (err) /* v8 ignore next */ {
+  } catch (err) /* v8 ignore next -- defensive: label deletion failures are logged and swallowed, not simulated in specs */ {
     logger.warn({ err, issueNo, label }, 'Failed to delete label');
   }
 }
@@ -1720,7 +1725,7 @@ async function getComments(issueNo: number): Promise<Comment[]> {
     );
     logger.debug(`Found ${comments.length} comments`);
     return comments;
-  } catch (err) /* v8 ignore next */ {
+  } catch (err) /* v8 ignore next -- comment-fetch 404s are wrapped as ExternalHostError, not mocked in specs */ {
     if (err.statusCode === 404) {
       logger.debug('404 response when retrieving comments');
       throw new ExternalHostError(err, 'github');
@@ -1776,7 +1781,7 @@ export async function ensureComment({
       logger.debug('Comment is already up-to-date');
     }
     return true;
-  } catch (err) /* v8 ignore next */ {
+  } catch (err) /* v8 ignore next -- comment API failure handling (locked issues) is not mocked in specs */ {
     if (err instanceof ExternalHostError) {
       throw err;
     }
@@ -1787,6 +1792,14 @@ export async function ensureComment({
     }
     return false;
   }
+}
+
+function byTopic(comment: Comment, topic: string): boolean {
+  return comment.body.startsWith(`### ${topic}\n\n`);
+}
+
+function byContent(comment: Comment, content: string): boolean {
+  return comment.body.trim() === content;
 }
 
 export async function ensureCommentRemoval(
@@ -1803,13 +1816,11 @@ export async function ensureCommentRemoval(
 
   // v8 ignore else -- TODO: add test #40625
   if (deleteConfig.type === 'by-topic') {
-    const byTopic = (comment: Comment): boolean =>
-      comment.body.startsWith(`### ${deleteConfig.topic}\n\n`);
-    commentId = comments.find(byTopic)?.id;
+    const topic = deleteConfig.topic;
+    commentId = comments.find((comment) => byTopic(comment, topic))?.id;
   } else if (deleteConfig.type === 'by-content') {
-    const byContent = (comment: Comment): boolean =>
-      comment.body.trim() === deleteConfig.content;
-    commentId = comments.find(byContent)?.id;
+    const content = deleteConfig.content;
+    commentId = comments.find((comment) => byContent(comment, content))?.id;
   }
 
   try {
@@ -1818,7 +1829,7 @@ export async function ensureCommentRemoval(
       logger.debug(`Removing comment from issueNo: ${issueNo}`);
       await deleteComment(commentId);
     }
-  } catch (err) /* v8 ignore next */ {
+  } catch (err) /* v8 ignore next -- defensive: comment deletion failures are logged and swallowed, not simulated in specs */ {
     logger.warn({ err }, 'Error deleting comment');
   }
 }
@@ -1932,7 +1943,7 @@ export async function createPr({
       draft: draftPR,
     },
   };
-  /* v8 ignore next */
+  /* v8 ignore next -- fork mode is not exercised in createPr specs */
   if (config.forkToken) {
     options.token = config.forkToken;
     options.body.maintainer_can_modify =
@@ -1987,7 +1998,7 @@ export async function updatePr({
   const options: any = {
     body: patchBody,
   };
-  /* v8 ignore next */
+  /* v8 ignore next -- fork mode is not exercised in updatePr specs */
   if (config.forkToken) {
     options.token = config.forkToken;
   }
@@ -2011,7 +2022,7 @@ export async function updatePr({
     const result = coerceRestPr(ghPr);
     cachePr(result);
     logger.debug(`PR updated...prNo: ${prNo}`);
-  } catch (err) /* v8 ignore next */ {
+  } catch (err) /* v8 ignore next -- non-host update failures are logged and swallowed, not mocked in specs */ {
     if (err instanceof ExternalHostError) {
       throw err;
     }
@@ -2030,7 +2041,7 @@ export async function reattemptPlatformAutomerge({
     await tryPrAutomerge(number, node_id, platformPrOptions);
 
     logger.debug(`PR platform automerge re-attempted...prNo: ${number}`);
-  } catch (err) /* v8 ignore next */ {
+  } catch (err) /* v8 ignore next -- defensive: automerge re-attempt failures are logged and swallowed, not simulated in specs */ {
     logger.warn({ err }, 'Error re-attempting PR platform automerge');
   }
 }
@@ -2047,7 +2058,7 @@ export async function mergePr({
   const options: GithubHttpOptions = {
     body: {},
   };
-  /* v8 ignore next */
+  /* v8 ignore next -- fork mode is not exercised in mergePr specs */
   if (config.forkToken) {
     options.token = config.forkToken;
   }
@@ -2064,7 +2075,7 @@ export async function mergePr({
       logger.debug({ options, url }, `mergePr`);
       automergeResult = await githubApi.putJson(url, options);
       automerged = true;
-    } catch (err) /* v8 ignore next */ {
+    } catch (err) /* v8 ignore next -- merge rejection handling (404/405 status-check bodies) is not fully mocked in specs */ {
       if (err.statusCode === 404 || err.statusCode === 405) {
         const body = err.response?.body;
         if (
@@ -2170,7 +2181,7 @@ export function maxBodyLength(): number {
 }
 
 export async function getVulnerabilityAlerts(): Promise<GithubVulnerabilityAlerts> {
-  /* v8 ignore next */
+  /* v8 ignore next -- specs initialize repos with vulnerability alerts enabled */
   if (config.hasVulnerabilityAlertsEnabled === false) {
     logger.debug('No vulnerability alerts enabled for repo');
     return [];
@@ -2188,7 +2199,7 @@ export async function getVulnerabilityAlerts(): Promise<GithubVulnerabilityAlert
         GithubVulnerabilityAlerts,
       )
     ).body;
-  } catch (err) /* v8 ignore next */ {
+  } catch (err) /* v8 ignore next -- alert-permission failures are logged and swallowed, not mocked in specs */ {
     logger.debug({ err }, 'Error retrieving vulnerability alerts');
     logger.warn(
       {
@@ -2232,7 +2243,7 @@ export async function getVulnerabilityAlerts(): Promise<GithubVulnerabilityAlert
     } else {
       logger.debug('No vulnerability alerts found');
     }
-  } catch (err) /* v8 ignore next */ {
+  } catch (err) /* v8 ignore next -- defensive: processing already-parsed alerts does not throw in specs */ {
     logger.error({ err }, 'Error processing vulnerabity alerts');
   }
   return vulnerabilityAlerts ?? [];
