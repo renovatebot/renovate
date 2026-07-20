@@ -12,7 +12,7 @@
  *   --no-test         Skip tests
  */
 
-import { readdirSync } from 'node:fs';
+import { readdir } from 'node:fs/promises';
 import { extname } from 'node:path';
 import { parseArgs } from 'node:util';
 import {
@@ -142,11 +142,10 @@ function toSpecPath(file: string): string {
   return file.replace(/\.ts$/, '.spec.ts');
 }
 
-function countSpecFiles(dir: string): number {
+async function countSpecFiles(dir: string): Promise<number> {
   try {
-    return readdirSync(dir, { recursive: true, encoding: 'utf-8' }).filter(
-      (f) => f.endsWith('.spec.ts'),
-    ).length;
+    const files = await readdir(dir, { recursive: true, encoding: 'utf-8' });
+    return files.filter((f) => f.endsWith('.spec.ts')).length;
   } catch {
     return 0;
   }
@@ -204,7 +203,7 @@ function parseCliArgs(): CliArgs {
   };
 }
 
-function buildTestChecks(args: CliArgs): ParallelCheck[] {
+async function buildTestChecks(args: CliArgs): Promise<ParallelCheck[]> {
   if (args.noTest || (args.fix && !args.all)) {
     return [];
   }
@@ -225,7 +224,7 @@ function buildTestChecks(args: CliArgs): ParallelCheck[] {
   }
   let fileCount = 0;
   for (const p of patterns) {
-    fileCount += extname(p) === '' ? countSpecFiles(p) : 1;
+    fileCount += extname(p) === '' ? await countSpecFiles(p) : 1;
   }
   if (fileCount === 0) {
     return [];
@@ -239,7 +238,7 @@ function buildTestChecks(args: CliArgs): ParallelCheck[] {
 async function main(): Promise<void> {
   const startTime = Date.now();
   const args = parseCliArgs();
-  const testChecks = buildTestChecks(args);
+  const testChecks = await buildTestChecks(args);
 
   let fixChecks: ParallelCheck[];
   let lintChecks: ParallelCheck[];

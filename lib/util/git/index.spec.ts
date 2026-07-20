@@ -676,12 +676,12 @@ describe('util/git/index', { timeout: 30000 }, () => {
 
   describe('mergeToLocal(branchName)', () => {
     it('should perform a branch merge without push', async () => {
-      expect(fs.existsSync(`${tmpDir.path}/future_file`)).toBeFalse();
+      expect(await fs.pathExists(`${tmpDir.path}/future_file`)).toBeFalse();
       const pushSpy = vi.spyOn(SimpleGit.prototype, 'push');
 
       await git.mergeToLocal('renovate/future_branch');
 
-      expect(fs.existsSync(`${tmpDir.path}/future_file`)).toBeTrue();
+      expect(await fs.pathExists(`${tmpDir.path}/future_file`)).toBeTrue();
       expect(pushSpy).toHaveBeenCalledTimes(0);
     });
 
@@ -703,13 +703,13 @@ describe('util/git/index', { timeout: 30000 }, () => {
       const local = simpleGit(tmpDir.path);
       await local.checkout(defaultBranch);
 
-      expect(fs.existsSync(`${tmpDir.path}/local_only_file`)).toBeFalse();
+      expect(await fs.pathExists(`${tmpDir.path}/local_only_file`)).toBeFalse();
       const fetchSpy = vi.spyOn(SimpleGit.prototype, 'fetch');
       const pushSpy = vi.spyOn(SimpleGit.prototype, 'push');
 
       await git.mergeToLocal('renovate/local_only_branch');
 
-      expect(fs.existsSync(`${tmpDir.path}/local_only_file`)).toBeTrue();
+      expect(await fs.pathExists(`${tmpDir.path}/local_only_file`)).toBeTrue();
       expect(fetchSpy).not.toHaveBeenCalled();
       expect(pushSpy).not.toHaveBeenCalled();
     });

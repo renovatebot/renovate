@@ -1,6 +1,6 @@
 {
   "$schema": "https://raw.githubusercontent.com/oxc-project/oxc/main/npm/oxlint/configuration_schema.json",
-  "plugins": ["import", "promise", "unicorn", "typescript", "vitest"],
+  "plugins": ["import", "node", "promise", "unicorn", "typescript", "vitest"],
   "jsPlugins": ["./tools/lint/rules.js"],
   "options": {
     "typeAware": true
@@ -188,9 +188,15 @@
   },
   "overrides": [
     {
-      "files": ["**/*.spec.ts", "test/**", "tools/**"],
+      "files": ["tools/**", "**/*.spec.ts", "test/**"],
       "rules": {
         "renovate/require-regex-util": "off"
+      }
+    },
+    {
+      "files": ["tools/**", "**/*.spec.ts"],
+      "rules": {
+        "node/no-sync": "error"
       }
     },
     {

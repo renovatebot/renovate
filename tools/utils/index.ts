@@ -17,11 +17,11 @@ export function getEnv(key: string): string {
 /**
  * Find all module directories.
  * @param {string} dirname dir to search in
- * @returns {string[]}
+ * @returns {Promise<string[]>}
  */
-export function findModules(dirname: string): string[] {
-  return fs
-    .readdirSync(dirname, { withFileTypes: true })
+export async function findModules(dirname: string): Promise<string[]> {
+  const dirents = await fs.readdir(dirname, { withFileTypes: true });
+  return dirents
     .filter((dirent) => dirent.isDirectory())
     .map((dirent) => dirent.name)
     .filter((name) => !name.startsWith('__'))
@@ -46,7 +46,9 @@ export function camelCase(input: string): string {
  * @returns {Promise<void>}
  */
 export async function updateFile(file: string, code: string): Promise<void> {
-  const oldCode = fs.existsSync(file) ? await fs.readFile(file, 'utf8') : null;
+  const oldCode = (await fs.pathExists(file))
+    ? await fs.readFile(file, 'utf8')
+    : null;
   if (code !== oldCode) {
     if (!code) {
       logger.error({ file }, 'Missing content');
@@ -60,11 +62,11 @@ export async function updateFile(file: string, code: string): Promise<void> {
  * @param {string } file
  * @returns {Promise<string | null>}
  */
-export function readFile(file: string): Promise<string> {
-  if (fs.existsSync(file)) {
+export async function readFile(file: string): Promise<string> {
+  if (await fs.pathExists(file)) {
     return fs.readFile(file, 'utf8');
   }
-  return Promise.resolve('');
+  return '';
 }
 
 /**

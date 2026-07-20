@@ -271,7 +271,7 @@ describe('logger/index', () => {
       },
     );
 
-    it('writes pretty formatted data synchronously to log file', () => {
+    it('writes pretty formatted data synchronously to log file', async () => {
       process.env.LOG_FILE_FORMAT = 'pretty';
 
       const streams = createDefaultStreams(
@@ -287,10 +287,10 @@ describe('logger/index', () => {
 
       stream.write({ level: 30, msg: 'test message' });
 
-      expect(fs.readFileSync('file.log', 'utf8')).toContain('test message');
+      expect(await fs.readFile('file.log', 'utf8')).toContain('test message');
     });
 
-    it('writes json data synchronously to log file', () => {
+    it('writes json data synchronously to log file', async () => {
       const streams = createDefaultStreams(
         'info',
         new ProblemStream(),
@@ -304,7 +304,7 @@ describe('logger/index', () => {
 
       stream.write('{"level":30,"msg":"json message"}\n');
 
-      expect(fs.readFileSync('file.log', 'utf8')).toContain('json message');
+      expect(await fs.readFile('file.log', 'utf8')).toContain('json message');
     });
   });
 
