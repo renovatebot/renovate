@@ -7,7 +7,10 @@ import { Fixtures } from '~test/fixtures.ts';
 import { hostRules } from '~test/host-rules.ts';
 import { env, fs } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
-import type { RepoGlobalConfig } from '../../../config/types.ts';
+import type {
+  InternalGlobalConfigOptions,
+  RepoGlobalConfig,
+} from '../../../config/types.ts';
 import * as docker from '../../../util/exec/docker/index.ts';
 import * as _datasource from '../../datasource/index.ts';
 import type { UpdateArtifactsConfig } from '../types.ts';
@@ -35,7 +38,7 @@ process.env.CONTAINERBASE = 'true';
 const datasource = vi.mocked(_datasource);
 const googleAuth = vi.mocked(_googleAuth);
 
-const adminConfig: RepoGlobalConfig = {
+const adminConfig: RepoGlobalConfig & InternalGlobalConfigOptions = {
   localDir: upath.join('/tmp/github/some/repo'),
   cacheDir: upath.join('/tmp/cache'),
   containerbaseDir: upath.join('/tmp/cache/containerbase'),

@@ -2,7 +2,10 @@ import upath from 'upath';
 import { envMock, mockExecAll } from '~test/exec-util.ts';
 import { env, fs, git, logger, partial } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
-import type { RepoGlobalConfig } from '../../../config/types.ts';
+import type {
+  InternalGlobalConfigOptions,
+  RepoGlobalConfig,
+} from '../../../config/types.ts';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
 import * as docker from '../../../util/exec/docker/index.ts';
 import type { StatusResult } from '../../../util/git/types.ts';
@@ -11,7 +14,7 @@ import { updateBazelLockfile } from './lockfile.ts';
 vi.mock('../../../util/exec/env.ts');
 vi.mock('../../../util/fs/index.ts');
 
-const adminConfig: RepoGlobalConfig = {
+const adminConfig: RepoGlobalConfig & InternalGlobalConfigOptions = {
   allowedUnsafeExecutions: ['bazelModDeps'],
   localDir: upath.join('/tmp/github/some/repo'),
   cacheDir: upath.join('/tmp/cache'),

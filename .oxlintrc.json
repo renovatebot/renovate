@@ -79,6 +79,7 @@
     "renovate/prefer-is-helpers": "error",
     "renovate/prefer-is-object": "error",
     "renovate/prefer-nullish-util": "error",
+    "renovate/v8-ignore-reason": "error",
     "renovate/zod-schema-naming": "error",
 
     "typescript/await-thenable": "error",
@@ -198,6 +199,7 @@
         "renovate/logger-static-message": "off",
         "renovate/codeblock-in-spec-fixtures": "error",
         "renovate/no-redundant-mock-reset": "error",
+        "renovate/prefer-fake-sha-in-specs": "error",
         "renovate/prefer-nullish-util": "off",
         "renovate/prefer-partial-in-specs": "error",
         "renovate/test-root-describe": "error",
