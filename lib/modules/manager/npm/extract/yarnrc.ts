@@ -59,16 +59,6 @@ export function mergeYarnConfigs(
       ...parentConfig.npmScopes,
       ...childConfig.npmScopes,
     },
-    catalog: {
-      ...parentConfig.catalog,
-      ...childConfig.catalog,
-    },
-    // Intentionally do not deep-merge overlapping catalogs: child entries
-    // replace parent entries for the same catalog name.
-    catalogs: {
-      ...parentConfig.catalogs,
-      ...childConfig.catalogs,
-    },
   };
 }
 
