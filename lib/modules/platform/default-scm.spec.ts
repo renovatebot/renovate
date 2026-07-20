@@ -38,7 +38,7 @@ describe('modules/platform/default-scm', () => {
   });
 
   it('delegate getAllBranchUpdateDates to util/git', async () => {
-    git.getAllBranchUpdateDates.mockResolvedValueOnce(new Map());
+    git.getAllBranchUpdateDates.mockResolvedValueOnce({});
     await defaultGitScm.getAllBranchUpdateDates();
     expect(git.getAllBranchUpdateDates).toHaveBeenCalledTimes(1);
   });

@@ -1,6 +1,11 @@
 import { setTimeout } from 'node:timers/promises';
 import URL from 'node:url';
-import { isBoolean, isNonEmptyObject, isString } from '@sindresorhus/is';
+import {
+  isBoolean,
+  isNonEmptyObject,
+  isNonEmptyStringAndNotWhitespace,
+  isString,
+} from '@sindresorhus/is';
 import fs from 'fs-extra';
 import { DateTime } from 'luxon';
 import semver from 'semver';
@@ -641,7 +646,7 @@ export async function getBranchUpdateDate(
 // Return the commit date of every remote branch tip.
 // Uses a a single `git for-each-ref` call, instead of spawning a `git show` per branch
 export async function getAllBranchUpdateDates(): Promise<
-  Map<string, DateTime>
+  Record<string, DateTime>
 > {
   logger.debug('getAllBranchUpdateDates');
   await syncGit();
@@ -652,8 +657,11 @@ export async function getAllBranchUpdateDates(): Promise<
     // NOTE that using `origin/` (instead of i.e. `origin/*`) allows us to capture nested branch names
     'refs/remotes/origin/',
   ]);
-  const result = new Map<string, DateTime>();
-  const lines = raw.trim().split(newlineRegex).filter(Boolean);
+  const result: Record<string, DateTime> = {};
+  const lines = raw
+    .trim()
+    .split(newlineRegex)
+    .filter(isNonEmptyStringAndNotWhitespace);
   for (const line of lines) {
     const [refShort, isoDate] = line.split(' ');
     // refs/remotes/origin/HEAD, the default branch for the repo, is shortened to `origin`
@@ -661,8 +669,8 @@ export async function getAllBranchUpdateDates(): Promise<
       continue;
     }
 
-    const branchName = refShort.replace(/^origin\//, '');
-    result.set(branchName, DateTime.fromISO(isoDate).toUTC());
+    const branchName = refShort.replace(regEx(/^origin\//), '');
+    result[branchName] = DateTime.fromISO(isoDate).toUTC();
   }
   return result;
 }

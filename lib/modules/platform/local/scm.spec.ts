@@ -42,7 +42,7 @@ describe('modules/platform/local/scm', () => {
     });
 
     it('getAllBranchUpdateDates', async () => {
-      expect(await localFs.getAllBranchUpdateDates()).toEqual(new Map());
+      expect(await localFs.getAllBranchUpdateDates()).toEqual({});
     });
 
     it('deleteBranch', async () => {

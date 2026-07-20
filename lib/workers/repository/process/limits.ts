@@ -92,7 +92,7 @@ export async function getCommitsHourlyCount(
       );
       const fallbackUpdateDates = needsScmFallback
         ? await scm.getAllBranchUpdateDates()
-        : new Map<string, DateTime>();
+        : {};
 
       let soFarThisHour = 0;
       for (const branch of branches) {
@@ -110,7 +110,7 @@ export async function getCommitsHourlyCount(
           }
         } else {
           // Fallback to SCM if not in cache
-          const updateDate = fallbackUpdateDates.get(branch.branchName);
+          const updateDate = fallbackUpdateDates[branch.branchName];
           if (updateDate && updateDate > currentHourStart) {
             soFarThisHour++;
           }

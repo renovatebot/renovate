@@ -549,10 +549,10 @@ describe('util/git/index', { timeout: 30000 }, () => {
     it('returns update dates for every remote branch', async () => {
       const dates = await git.getAllBranchUpdateDates();
 
-      expect(dates.get('renovate/past_branch')).toBeInstanceOf(DateTime);
+      expect(dates['renovate/past_branch']).toBeInstanceOf(DateTime);
 
-      expect(dates.get(defaultBranch)).toBeInstanceOf(DateTime);
-      expect(dates.get(defaultBranch)?.toISO()).toEqual(
+      expect(dates[defaultBranch]).toBeInstanceOf(DateTime);
+      expect(dates[defaultBranch].toISO()).toEqual(
         masterCommitDate.toISOString(),
       );
     });
@@ -560,16 +560,16 @@ describe('util/git/index', { timeout: 30000 }, () => {
     it('returns the same date as getBranchUpdateDate for a given branch', async () => {
       const dates = await git.getAllBranchUpdateDates();
 
-      const batchDate = dates.get('renovate/equal_branch');
+      const batchDate = dates['renovate/equal_branch'];
       const singleDate = await git.getBranchUpdateDate('renovate/equal_branch');
 
-      expect(batchDate!.toISO()).toBe(singleDate!.toISO());
+      expect(batchDate.toISO()).toBe(singleDate!.toISO());
     });
 
     it('excludes the origin/HEAD symbolic ref', async () => {
       const dates = await git.getAllBranchUpdateDates();
 
-      expect(Array.from(dates.keys()).sort()).toEqual([
+      expect(Object.keys(dates).sort()).toEqual([
         'develop',
         'master',
         'renovate/binary-file',

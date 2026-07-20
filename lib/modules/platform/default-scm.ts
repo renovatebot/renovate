@@ -27,7 +27,7 @@ export class DefaultGitScm implements PlatformScm {
     return git.getBranchUpdateDate(branchName);
   }
 
-  getAllBranchUpdateDates(): Promise<Map<string, DateTime>> {
+  getAllBranchUpdateDates(): Promise<Record<string, DateTime>> {
     return git.getAllBranchUpdateDates();
   }
 
