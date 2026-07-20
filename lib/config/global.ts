@@ -23,7 +23,6 @@ export class GlobalConfig {
     'checkedBranches',
     'configFileNames',
     'containerbaseDir',
-    'containerbasePackageRules',
     'customEnvVariables',
     'dockerChildPrefix',
     'dockerCliOptions',
@@ -93,6 +92,8 @@ export class GlobalConfig {
       GlobalConfig.config[option] = config[option] as never;
       delete result[option];
     }
+
+    GlobalConfig.config.containerbasePackageRules = config.packageRules;
 
     return result;
   }

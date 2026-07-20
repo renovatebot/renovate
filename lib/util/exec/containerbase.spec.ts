@@ -262,9 +262,9 @@ describe('util/exec/containerbase', () => {
       },
     );
 
-    it('applies containerbasePackageRules to override datasource', async () => {
+    it('applies packageRules to override datasource for tool-constraint', async () => {
       GlobalConfig.set({
-        containerbasePackageRules: [
+        packageRules: [
           {
             matchDepNames: ['node'],
             matchDepTypes: ['tool-constraint'],
@@ -286,9 +286,9 @@ describe('util/exec/containerbase', () => {
       );
     });
 
-    it('passes registryUrls from containerbasePackageRules to getPkgReleases', async () => {
+    it('passes registryUrls from packageRules to getPkgReleases for tool-constraint', async () => {
       GlobalConfig.set({
-        containerbasePackageRules: [
+        packageRules: [
           {
             matchDepNames: ['node'],
             matchDepTypes: ['tool-constraint'],
@@ -311,9 +311,9 @@ describe('util/exec/containerbase', () => {
       );
     });
 
-    it('applies containerbasePackageRules versioning override', async () => {
+    it('applies packageRules versioning override for tool-constraint', async () => {
       GlobalConfig.set({
-        containerbasePackageRules: [
+        packageRules: [
           {
             matchDepNames: ['golang'],
             matchDepTypes: ['tool-constraint'],
@@ -328,9 +328,9 @@ describe('util/exec/containerbase', () => {
       expect(result).toBe('1.21.0');
     });
 
-    it('does not apply non-matching containerbasePackageRules', async () => {
+    it('does not apply non-matching packageRules to tool-constraint', async () => {
       GlobalConfig.set({
-        containerbasePackageRules: [
+        packageRules: [
           {
             matchDepNames: ['python'],
             matchDepTypes: ['tool-constraint'],
@@ -350,7 +350,7 @@ describe('util/exec/containerbase', () => {
       );
     });
 
-    it('works without containerbasePackageRules', async () => {
+    it('works without packageRules', async () => {
       datasource.getPkgReleases.mockResolvedValueOnce({
         releases: [{ version: '20.0.0' }],
       });

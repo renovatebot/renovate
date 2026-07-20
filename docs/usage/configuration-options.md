@@ -3022,6 +3022,23 @@ If Renovate finds a dependency update available, and that dependency update is f
 If multiple rules match a dependency, configurations from matching rules will be merged together.
 The order of rules matters, because later rules may override configuration options from earlier ones, if they both specify the same option.
 
+Package rules are also applied to tool installations when `binarySource=install` is used (containerbase dynamic installs).
+Tools use `depType=tool-constraint`, so you can use `matchDepTypes: ["tool-constraint"]` to target them specifically.
+For example, to override the Node.js tool datasource to a custom Artifactory registry:
+
+```json
+{
+  "packageRules": [
+    {
+      "matchDepNames": ["node"],
+      "matchDepTypes": ["tool-constraint"],
+      "overrideDatasource": "node-version",
+      "registryUrls": ["https://artifactory.example.com/nodejs"]
+    }
+  ]
+}
+```
+
 The matching process for a package rule:
 
 - Each package rule must include at least one `match...` matcher.

@@ -459,27 +459,6 @@ This directory is used to cache downloads when `binarySource=docker` or `binaryS
 
 Use this option if you need such downloads to be stored outside of Renovate's regular cache directory (`cacheDir`).
 
-## `containerbasePackageRules`
-
-Package rules that allow self-hosted admins to override `datasource`, `packageName`, or `versioning` for containerbase tool installations (tools resolved via `binarySource=install`).
-
-For example, to override the Node.js tool to use the `node-version` datasource instead of the default `github-releases`:
-
-```json
-{
-  "containerbasePackageRules": [
-    {
-      "matchDepNames": ["node"],
-      "matchDepTypes": ["tool-constraint"],
-      "overrideDatasource": "node-version",
-      "overridePackageName": "node"
-    }
-  ]
-}
-```
-
-For more information refer to [`packageRules`](configuration-options.md#packagerules) configuration option.
-
 ## `customEnvVariables`
 
 This configuration will be applied after all other environment variables so you can use it to override defaults.
