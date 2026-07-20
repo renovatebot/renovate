@@ -170,7 +170,6 @@ export const communityActions: Record<string, CommunityActionConfig> = {
   'jdx/mise-action': {
     datasource: GithubReleasesDatasource.id,
     packageName: 'jdx/mise',
-    extractVersion: '^v(?<version>.+)$',
   },
   'oven-sh/setup-bun': {
     datasource: NpmDatasource.id,
