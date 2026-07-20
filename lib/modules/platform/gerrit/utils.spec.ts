@@ -41,7 +41,7 @@ describe('modules/platform/gerrit/utils', () => {
       });
 
       it('preserves slashes for deeply nested repository paths', () => {
-        hostRules.find.mockReturnValue({
+        hostRules.add({
           username: 'abc',
           password: '123',
         });
