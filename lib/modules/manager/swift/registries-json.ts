@@ -72,7 +72,7 @@ export async function discoverRegistryUrls(
   const urls: string[] = [];
   const seen = new Set<string>();
 
-  const collect = (parsed: ParsedRegistries): void => {
+  function collect(parsed: ParsedRegistries): void {
     const ordered = [
       parsed.defaultUrl,
       ...Object.keys(parsed.named)
@@ -85,7 +85,7 @@ export async function discoverRegistryUrls(
         urls.push(url);
       }
     }
-  };
+  }
 
   const content = await readLocalFile(candidate, 'utf8');
   if (content) {
