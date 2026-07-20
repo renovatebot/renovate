@@ -227,25 +227,43 @@ export class NugetV3Api {
         registryUrl,
         'PackageBaseAddress',
       );
+      let shouldTryNupkg = false;
       if (isNonEmptyString(packageBaseAddress)) {
         const nuspecUrl = `${ensureTrailingSlash(
           packageBaseAddress,
         )}${pkgName.toLowerCase()}/${
           latestStable
         }/${pkgName.toLowerCase()}.nuspec`;
-        const metaresult = await http.getText(nuspecUrl, {
-          cacheProvider: memCacheProvider,
-        });
-        const nuspec = new XmlDocument(metaresult.body);
-        const releaseNotes = nuspec.valueWithPath('metadata.releaseNotes');
-        if (releaseNotes) {
-          dep.changelogContent = releaseNotes;
+        try {
+          const metaresult = await http.getText(nuspecUrl, {
+            cacheProvider: memCacheProvider,
+          });
+          const nuspec = new XmlDocument(metaresult.body);
+          const releaseNotes = nuspec.valueWithPath('metadata.releaseNotes');
+          if (releaseNotes) {
+            dep.changelogContent = releaseNotes;
+          }
+          const sourceUrl = nuspec.valueWithPath('metadata.repository@url');
+          if (sourceUrl) {
+            dep.sourceUrl = massageUrl(sourceUrl);
+          }
+        } catch (err) {
+          /* v8 ignore else -- not easy testable with nock */
+          if (err instanceof HttpError && err.response?.statusCode === 404) {
+            shouldTryNupkg = true;
+            logger.debug(
+              { registryUrl, pkgName, pkgVersion: latestStable },
+              `package manifest (.nuspec) not found`,
+            );
+          } else {
+            throw err;
+          }
         }
-        const sourceUrl = nuspec.valueWithPath('metadata.repository@url');
-        if (sourceUrl) {
-          dep.sourceUrl = massageUrl(sourceUrl);
-        }
-      } else if (nupkgUrl) {
+      } else {
+        shouldTryNupkg = true;
+      }
+
+      if (!dep.sourceUrl && shouldTryNupkg && nupkgUrl) {
         const sourceUrl = await this.getSourceUrlFromNupkg(
           http,
           registryUrl,
@@ -293,7 +311,7 @@ export class NugetV3Api {
     packageVersion: string | null,
     nupkgUrl: string,
   ): Promise<string | null> {
-    /* v8 ignore next 4 */
+    /* v8 ignore if -- specs enable RENOVATE_X_NUGET_DOWNLOAD_NUPKGS, so the disabled path is unexercised */
     if (!getEnv().RENOVATE_X_NUGET_DOWNLOAD_NUPKGS) {
       logger.once.debug('RENOVATE_X_NUGET_DOWNLOAD_NUPKGS is not set');
       return null;

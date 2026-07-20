@@ -7,7 +7,10 @@ import { Fixtures } from '~test/fixtures.ts';
 import * as httpMock from '~test/http-mock.ts';
 import { env, fs, git, logger, partial } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
-import type { RepoGlobalConfig } from '../../../config/types.ts';
+import type {
+  InternalGlobalConfigOptions,
+  RepoGlobalConfig,
+} from '../../../config/types.ts';
 import { resetPrefetchedImages } from '../../../util/exec/docker/index.ts';
 import type { StatusResult } from '../../../util/git/types.ts';
 import { getPkgReleases } from '../../datasource/index.ts';
@@ -23,7 +26,7 @@ vi.mock('../gradle/index.ts');
 
 process.env.CONTAINERBASE = 'true';
 
-const adminConfig: RepoGlobalConfig = {
+const adminConfig: RepoGlobalConfig & InternalGlobalConfigOptions = {
   // `join` fixes Windows CI
   localDir: upath.join('/tmp/github/some/repo'),
   cacheDir: upath.join('/tmp/cache'),

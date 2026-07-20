@@ -1,6 +1,6 @@
 {
   "$schema": "https://raw.githubusercontent.com/oxc-project/oxc/main/npm/oxlint/configuration_schema.json",
-  "plugins": ["import", "promise", "unicorn", "typescript", "vitest"],
+  "plugins": ["import", "node", "promise", "unicorn", "typescript", "vitest"],
   "jsPlugins": ["./tools/lint/rules.js"],
   "options": {
     "typeAware": true
@@ -65,6 +65,7 @@
     "no-unassigned-vars": "error",
     "prefer-template": "error",
     "prefer-arrow-callback": ["error", { "allowUnboundThis": false }],
+    "func-style": ["error", "declaration"],
     "no-nested-ternary": "error",
     "no-else-return": ["error", { "allowElseIf": false }],
     "unicorn/no-lonely-if": "error",
@@ -76,6 +77,7 @@
     "renovate/no-stateful-global-regex": "error",
     "renovate/no-tools-import": "error",
     "renovate/prefer-nullish-util": "error",
+    "renovate/v8-ignore-reason": "error",
     "renovate/zod-schema-naming": "error",
 
     "typescript/await-thenable": "error",
@@ -185,15 +187,23 @@
   },
   "overrides": [
     {
+      "files": ["tools/**", "**/*.spec.ts"],
+      "rules": {
+        "node/no-sync": "error"
+      }
+    },
+    {
       "files": ["**/*.spec.ts", "test/**"],
       "rules": {
         "no-template-curly-in-string": "off",
         "jest/valid-title": "error",
         "vitest/consistent-test-it": ["error", { "fn": "it" }],
         "typescript/unbound-method": "off",
+        "renovate/no-host-rules-mock": "error",
         "renovate/logger-static-message": "off",
         "renovate/codeblock-in-spec-fixtures": "error",
         "renovate/no-redundant-mock-reset": "error",
+        "renovate/prefer-fake-sha-in-specs": "error",
         "renovate/prefer-nullish-util": "off",
         "renovate/prefer-partial-in-specs": "error",
         "renovate/test-root-describe": "error",
