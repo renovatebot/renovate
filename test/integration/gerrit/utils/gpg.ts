@@ -23,10 +23,12 @@ export async function generateGpgKeyPair(
   email: string,
 ): Promise<GpgKeyPair> {
   const homedir = await mkdtemp(join(tmpdir(), 'renovate-gpg-'));
-  const gpg = async (...args: string[]) =>
-    execa('gpg', ['--homedir', homedir, '--batch', '--yes', ...args], {
+
+  async function gpg(...args: string[]) {
+    return execa('gpg', ['--homedir', homedir, '--batch', '--yes', ...args], {
       env: { GNUPGHOME: homedir },
     });
+  }
 
   // Non-expiring RSA key, no passphrase (batch mode)
   await gpg(
