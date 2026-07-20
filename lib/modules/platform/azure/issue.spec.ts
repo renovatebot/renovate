@@ -364,7 +364,8 @@ describe('modules/platform/azure/issue', () => {
       expect(createWorkItemMock).not.toHaveBeenCalled();
       expect(result).toBeNull();
       expect(logger.warn).toHaveBeenCalledWith(
-        expect.stringContaining("work item type 'Issue' does not exist"),
+        { workItemType: 'Issue', project: 'testProject' },
+        expect.stringContaining('work item type does not exist'),
       );
     });
 

@@ -138,9 +138,12 @@ export abstract class ChangeLogSource {
     const changelogReleases: ChangeLogRelease[] = [];
 
     // Check if `v` belongs to the range (currentVersion, newVersion]
-    const inRange = (v: string): boolean =>
-      versioningApi.isGreaterThan(v, currentVersion) &&
-      !versioningApi.isGreaterThan(v, newVersion);
+    function inRange(v: string): boolean {
+      return (
+        versioningApi.isGreaterThan(v, currentVersion) &&
+        !versioningApi.isGreaterThan(v, newVersion)
+      );
+    }
 
     const getTags = memoize(() => this.getAllTags(apiBaseUrl, repository));
     for (let i = 1; i < validReleases.length; i += 1) {

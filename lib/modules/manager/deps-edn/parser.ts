@@ -74,7 +74,7 @@ export function parseDepsEdnFile(content: string): ParsedEdnResult | null {
     EdnMetadata
   >();
 
-  const popState = (): boolean => {
+  function popState(): boolean {
     const savedState = stack.pop();
     if (!savedState) {
       return false;
@@ -104,7 +104,7 @@ export function parseDepsEdnFile(content: string): ParsedEdnResult | null {
 
     state = savedState;
     return true;
-  };
+  }
 
   for (const token of tokens) {
     const tokenType = token.type as TokenType;

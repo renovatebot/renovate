@@ -171,6 +171,12 @@ export class RenovateLogger implements Logger {
   }
 
   private logOnceFn(level: BunyanLogLevel): LoggerFunction {
+    // Must stay an arrow function: the returned function is stored on
+    // `this.logger.once[level]` and invoked from there, so it relies on
+    // lexically-bound `this` (this RenovateLogger instance) rather than
+    // whatever `this` the call site would otherwise supply to a plain
+    // `function` declaration.
+    // oxlint-disable-next-line func-style -- see comment above
     const logOnceFn = (p1: string | Record<string, any>, p2?: string): void => {
       once(
         () => {
