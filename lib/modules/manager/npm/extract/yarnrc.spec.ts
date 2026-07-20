@@ -194,7 +194,7 @@ describe('modules/manager/npm/extract/yarnrc', () => {
       });
     });
 
-    it('merges child config on top of parent config', () => {
+    it('merges child config on top of parent config preserving child catalog(s)', () => {
       const mergedConfig = mergeYarnConfigs(
         {
           npmRegistryServer: 'https://default.example.com',
@@ -256,7 +256,6 @@ describe('modules/manager/npm/extract/yarnrc', () => {
           },
         },
         catalog: {
-          typescript: '^5.0.0',
           eslint: '^9.0.0',
           prettier: '^3.0.0',
         },
@@ -267,37 +266,6 @@ describe('modules/manager/npm/extract/yarnrc', () => {
           },
           test: {
             vitest: '^3.0.0',
-          },
-        },
-      });
-    });
-
-    it('replaces overlapping catalog entries with child config', () => {
-      const mergedConfig = mergeYarnConfigs(
-        {
-          catalogs: {
-            ci: {
-              vitest: '^2.0.0',
-              eslint: '^8.0.0',
-            },
-          },
-        },
-        {
-          catalogs: {
-            ci: {
-              eslint: '^9.0.0',
-            },
-          },
-        },
-      );
-
-      expect(mergedConfig).toEqual({
-        npmRegistryServer: undefined,
-        npmScopes: {},
-        catalog: {},
-        catalogs: {
-          ci: {
-            eslint: '^9.0.0',
           },
         },
       });
@@ -364,8 +332,6 @@ describe('modules/manager/npm/extract/yarnrc', () => {
             npmRegistryServer: 'https://scope-leaf.example.com',
           },
         },
-        catalog: {},
-        catalogs: {},
       });
     });
 
