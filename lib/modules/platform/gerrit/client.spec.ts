@@ -313,11 +313,11 @@ describe('modules/platform/gerrit/client', () => {
     it('calls shouldFetchNextPage callback after each page', async () => {
       const calls: GerritChange[][] = [];
       let callCount = 0;
-      const shouldFetchNextPage = (changes: GerritChange[]): boolean => {
+      function shouldFetchNextPage(changes: GerritChange[]): boolean {
         calls.push(changes);
         callCount++;
         return callCount < 2; // Stop after second call
-      };
+      }
 
       httpMock
         .scope(gerritEndpointUrl)
@@ -367,10 +367,10 @@ describe('modules/platform/gerrit/client', () => {
 
     it('stops pagination when shouldFetchNextPage returns false', async () => {
       let callCount = 0;
-      const shouldFetchNextPage = (): boolean => {
+      function shouldFetchNextPage(): boolean {
         callCount++;
         return false;
-      };
+      }
 
       httpMock
         .scope(gerritEndpointUrl)
