@@ -16,7 +16,9 @@ import type { Platform } from './types.ts';
 
 export type * from './types.ts';
 
-export const getPlatformList = (): string[] => Array.from(platforms.keys());
+export function getPlatformList(): string[] {
+  return Array.from(platforms.keys());
+}
 
 let _platform: Platform | undefined;
 

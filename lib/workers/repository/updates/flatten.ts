@@ -18,8 +18,9 @@ import type { BranchUpgradeConfig } from '../../types.ts';
 import { replacementAlreadyExists } from '../common.ts';
 import { generateBranchName } from './branch-name.ts';
 
-const upper = (str: string): string =>
-  str.charAt(0).toUpperCase() + str.substring(1);
+function upper(str: string): string {
+  return str.charAt(0).toUpperCase() + str.substring(1);
+}
 
 export function sanitizeDepName(depName: string): string {
   return depName
