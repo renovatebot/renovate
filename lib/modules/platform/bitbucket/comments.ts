@@ -125,7 +125,7 @@ export async function ensureComment({
       logger.debug('Comment is already up-to-date');
     }
     return true;
-  } catch (err) /* v8 ignore next */ {
+  } catch (err) /* v8 ignore next -- defensive: comment API failures are logged and swallowed, not simulated in specs */ {
     logger.warn({ err }, 'Error ensuring comment');
     return false;
   }
@@ -179,7 +179,7 @@ export async function ensureCommentRemoval(
     if (commentId) {
       await deleteComment(config, prNo, commentId);
     }
-  } catch (err) /* v8 ignore next */ {
+  } catch (err) /* v8 ignore next -- defensive: comment API failures are logged and swallowed, not simulated in specs */ {
     logger.warn({ err }, 'Error ensuring comment removal');
   }
 }

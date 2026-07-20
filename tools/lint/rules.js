@@ -11,6 +11,7 @@ import preferFakeShaInSpecs from './rules/prefer-fake-sha-in-specs.js';
 import preferNullishUtil from './rules/prefer-nullish-util.js';
 import preferPartialInSpecs from './rules/prefer-partial-in-specs.js';
 import testRootDescribe from './rules/test-root-describe.js';
+import v8IgnoreReason from './rules/v8-ignore-reason.js';
 import zodSchemaNaming from './rules/zod-schema-naming.js';
 
 export default {
@@ -31,6 +32,7 @@ export default {
     'prefer-nullish-util': preferNullishUtil,
     'prefer-partial-in-specs': preferPartialInSpecs,
     'test-root-describe': testRootDescribe,
+    'v8-ignore-reason': v8IgnoreReason,
     'zod-schema-naming': zodSchemaNaming,
   },
 };
