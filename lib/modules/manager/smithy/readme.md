@@ -1,11 +1,12 @@
 Renovate updates the Maven dependencies declared in the `maven.dependencies` section of [Smithy](https://smithy.io) `smithy-build.json` files.
 For example:
 
-```json
+<!-- schema-validation-disable-next-block -->
+
+```json title="Smithy build file"
 {
   "version": "1.0",
   "maven": {
-    // Renovate understands comments in smithy-build.json files
     "dependencies": ["software.amazon.smithy:smithy-aws-traits:1.37.0"],
     "repositories": [{ "url": "https://repo.example.com/maven" }]
   }
