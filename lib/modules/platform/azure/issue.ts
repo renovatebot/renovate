@@ -10,7 +10,7 @@ import * as azureApi from './azure-got-wrapper.ts';
 import type { Config } from './types.ts';
 import { getWorkItemTitle } from './util.ts';
 
-const workItemType = 'Issue';
+const defaultWorkItemType = 'Issue';
 
 // Historical fallbacks, used when the work item type's states cannot be
 // resolved from the API (e.g. Azure DevOps Server versions without the
@@ -51,6 +51,9 @@ function namesByCategory(
 export class IssueService {
   private config: Config;
   private readonly workItemStates: Lazy<Promise<WorkItemStates>>;
+  // Work item type to create issues as. Repo-configurable via `azureWorkItemType`
+  // and set from `ensureIssue`; defaults to the historical `Issue` type.
+  private workItemType = defaultWorkItemType;
 
   constructor(config: Config) {
     this.config = config;
@@ -76,7 +79,7 @@ export class IssueService {
       const azureApiWit = await azureApi.workItemTrackingApi();
       const stateColors = await azureApiWit.getWorkItemTypeStates(
         this.config.project,
-        workItemType,
+        this.workItemType,
       );
 
       if (stateColors?.length) {
@@ -131,11 +134,14 @@ export class IssueService {
     try {
       const azureApiWit = await azureApi.workItemTrackingApi();
 
+      // Intentionally not filtering by [System.WorkItemType]: the type is
+      // configurable (`azureWorkItemType`) and a repo's Renovate issues have a
+      // unique title, so matching on title + project finds them regardless of
+      // which work item type they were created as.
       let wiql = `
         SELECT [System.Id]
         FROM WorkItems
-        WHERE [System.WorkItemType] = '${workItemType}'
-          AND [System.TeamProject] = '${this.config.project}'
+        WHERE [System.TeamProject] = '${this.config.project}'
       `;
 
       if (titleFilter) {
@@ -201,8 +207,15 @@ export class IssueService {
     body,
     once = false,
     shouldReOpen = true,
+    workItemType,
   }: EnsureIssueConfig): Promise<EnsureIssueResult | null> {
     logger.debug(`ensureIssue()`);
+
+    // Set before any work item state resolution so states are resolved against
+    // the configured type. Safe to set here: the value is repo-constant.
+    if (workItemType) {
+      this.workItemType = workItemType;
+    }
 
     try {
       const azureApiWit = await azureApi.workItemTrackingApi();
@@ -323,7 +336,7 @@ export class IssueService {
           {
             op: 'add',
             path: '/fields/System.WorkItemType',
-            value: workItemType,
+            value: this.workItemType,
           },
           { op: 'add', path: '/fields/System.Title', value: finalTitle },
           {
@@ -338,7 +351,7 @@ export class IssueService {
           },
         ],
         this.config.project,
-        workItemType,
+        this.workItemType,
       );
 
       logger.debug(`Created new issue #${newWorkItem.id}`);

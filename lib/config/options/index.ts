@@ -1433,6 +1433,14 @@ const options: Readonly<RenovateOptions>[] = [
     supportedPlatforms: ['azure'],
   },
   {
+    name: 'azureWorkItemType',
+    description:
+      'The work item type Renovate uses for its issues (e.g. the Dependency Dashboard) on Azure DevOps.',
+    type: 'string',
+    default: 'Issue',
+    supportedPlatforms: ['azure'],
+  },
+  {
     name: 'autoApprove',
     description: 'Set to `true` to automatically approve PRs.',
     type: 'boolean',
