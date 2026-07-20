@@ -27,11 +27,12 @@ vi.mock('../../../datasource/index.ts', () => mockDeep());
 delete process.env.NPM_CONFIG_CACHE;
 
 // TODO: figure out snapshot similarity for each CI platform (#9617)
-const fixSnapshots = (snapshots: ExecSnapshots): ExecSnapshots =>
-  snapshots.map((snapshot) => ({
+function fixSnapshots(snapshots: ExecSnapshots): ExecSnapshots {
+  return snapshots.map((snapshot) => ({
     ...snapshot,
     cmd: snapshot.cmd.replace(/^.*\/yarn.*?\.js\s+/, '<yarn> '),
   }));
+}
 
 const plocktest1PackageJson = Fixtures.get('plocktest1/package.json', '..');
 const plocktest1YarnLockV1 = Fixtures.get('plocktest1/yarn.lock', '..');

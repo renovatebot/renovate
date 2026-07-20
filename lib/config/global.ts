@@ -1,9 +1,16 @@
 import { globalConfigOptionDefaults } from '../global-config-option-defaults.generated.ts';
-import type { RenovateConfig, RepoGlobalConfig } from './types.ts';
+import type {
+  InternalGlobalConfigOptions,
+  RenovateConfig,
+  RepoGlobalConfig,
+} from './types.ts';
 
 export class GlobalConfig {
   // TODO: once global config work is complete, add a test to make sure this list includes all options with globalOnly=true (#9603)
-  static OPTIONS: readonly (keyof RepoGlobalConfig)[] = [
+  static OPTIONS: readonly (
+    | keyof RepoGlobalConfig
+    | keyof InternalGlobalConfigOptions
+  )[] = [
     'allowCustomCrateRegistries',
     'allowPlugins',
     'allowScripts',
@@ -20,6 +27,7 @@ export class GlobalConfig {
     'cacheHardTtlMinutes',
     'cachePrivatePackages',
     'cacheTtlOverride',
+    'checkedBranches',
     'configFileNames',
     'containerbaseDir',
     'customEnvVariables',
@@ -38,6 +46,7 @@ export class GlobalConfig {
     'httpCacheTtlDays',
     'ignorePrAuthor',
     'includeMirrors',
+    /** NOTE that this is not a config option, but an internal variable **/
     'localDir',
     'migratePresets',
     'onboarding',
@@ -52,6 +61,7 @@ export class GlobalConfig {
     'prCacheSyncMaxPages',
     'presetCachePersistence',
     'productLinks',
+    'rebaseAllOpenBranches',
     'repositoryCacheForceLocal',
     'requireConfig',
     's3Endpoint',
@@ -60,29 +70,35 @@ export class GlobalConfig {
     'userAgent',
   ];
 
-  private static config: RepoGlobalConfig = {};
+  private static config: RepoGlobalConfig & InternalGlobalConfigOptions = {};
 
-  static get(): RepoGlobalConfig;
-  static get<Key extends keyof RepoGlobalConfig>(
-    key: Key,
-  ): Required<RepoGlobalConfig>[Key];
-  static get<Key extends keyof RepoGlobalConfig>(
-    key: Key,
-  ): Required<RepoGlobalConfig>[Key];
-  static get<Key extends keyof RepoGlobalConfig>(
+  static get(): RepoGlobalConfig & InternalGlobalConfigOptions;
+  static get<
+    Key extends keyof RepoGlobalConfig | keyof InternalGlobalConfigOptions,
+  >(key: Key): Required<RepoGlobalConfig & InternalGlobalConfigOptions>[Key];
+  static get<
+    Key extends keyof RepoGlobalConfig | keyof InternalGlobalConfigOptions,
+  >(
     key?: Key,
-  ): RepoGlobalConfig | Required<RepoGlobalConfig>[Key] {
+  ):
+    | (RepoGlobalConfig & InternalGlobalConfigOptions)
+    | Required<RepoGlobalConfig & InternalGlobalConfigOptions>[Key] {
     const defaultValue = key
-      ? (globalConfigOptionDefaults[key] as Required<RepoGlobalConfig>[Key])
+      ? (globalConfigOptionDefaults[key] as Required<
+          RepoGlobalConfig & InternalGlobalConfigOptions
+        >[Key])
       : undefined;
 
     return key
-      ? ((GlobalConfig.config[key] ??
-          defaultValue) as Required<RepoGlobalConfig>[Key])
+      ? ((GlobalConfig.config[key] ?? defaultValue) as Required<
+          RepoGlobalConfig & InternalGlobalConfigOptions
+        >[Key])
       : GlobalConfig.config;
   }
 
-  static set(config: RenovateConfig & RepoGlobalConfig): RenovateConfig {
+  static set(
+    config: RenovateConfig & RepoGlobalConfig & InternalGlobalConfigOptions,
+  ): RenovateConfig {
     GlobalConfig.reset();
 
     const result = { ...config };

@@ -214,8 +214,8 @@ some-private-key
         cwd: repoDir,
       });
 
-      expect(fs.existsSync(privateKeyFile)).toBeTrue();
-      expect(fs.existsSync(publicKeyFile)).toBeTrue();
+      expect(await fs.pathExists(privateKeyFile)).toBeTrue();
+      expect(await fs.pathExists(publicKeyFile)).toBeTrue();
 
       processExitSpy.mockImplementationOnce(() => undefined as never);
     });
@@ -243,7 +243,7 @@ some-private-key
       setPrivateKey(privateKey, undefined);
       await expect(writePrivateKey()).resolves.not.toThrow();
 
-      expect(fs.existsSync(privateKeyFile)).toBeTrue();
+      expect(await fs.pathExists(privateKeyFile)).toBeTrue();
     });
   });
 

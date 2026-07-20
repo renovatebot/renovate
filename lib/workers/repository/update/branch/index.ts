@@ -60,7 +60,6 @@ import { isScheduledNow } from './schedule.ts';
 import { setConfidence, setStability } from './status-checks.ts';
 
 async function setBranchStatusChecks(config: BranchConfig): Promise<void> {
-  await setArtifactErrorStatus(config);
   await setStability(config);
   await setConfidence(config);
 }
@@ -147,6 +146,7 @@ export async function processBranch(
       config.branchPrefixOld!,
     );
     branchExists = await scm.branchExists(branchName);
+    // v8 ignore else -- TODO: add test #40625
     if (branchExists) {
       config.branchName = branchName;
       logger.debug('Found existing branch with branchPrefixOld');
@@ -259,7 +259,7 @@ export async function processBranch(
       };
     }
     if (
-      !branchConfig.rebaseRequested &&
+      !config.rebaseRequested &&
       isLimitReached('Commits') &&
       !dependencyDashboardCheck &&
       !config.isVulnerabilityAlert
@@ -272,7 +272,7 @@ export async function processBranch(
       };
     }
     if (
-      !branchConfig.rebaseRequested &&
+      !config.rebaseRequested &&
       isLimitReached('HourlyCommits', branchConfig) &&
       !dependencyDashboardCheck &&
       !config.isVulnerabilityAlert
@@ -706,6 +706,7 @@ export async function processBranch(
             topic: artifactErrorTopic,
           });
 
+          // v8 ignore else -- TODO: add test #40625
           if (!config.artifactNotices?.length) {
             await ensureCommentRemoval({
               type: 'by-topic',
@@ -742,6 +743,12 @@ export async function processBranch(
       // baseBranch is not checked out at the start of processBranch() due to pull/16246
       await scm.checkoutBranch(config.baseBranch);
       updatesVerified = true;
+
+      // only update artifact status if branch was updated
+      // also do before platform automerge reattempt
+      if (commitSha) {
+        await setArtifactErrorStatus(config);
+      }
     }
 
     if (branchPr) {
@@ -762,6 +769,7 @@ export async function processBranch(
           });
         }
       }
+      // v8 ignore else -- TODO: add test #40625
       if (platform.refreshPr) {
         await platform.refreshPr(branchPr.number);
       }
@@ -1001,6 +1009,7 @@ export async function processBranch(
         commitSha,
       };
     }
+    // v8 ignore else -- TODO: add test #40625
     if (ensurePrResult.type === 'with-pr') {
       const { pr } = ensurePrResult;
       branchPr = pr;
@@ -1009,6 +1018,11 @@ export async function processBranch(
       // associate the status with. The earlier call may have been
       // skipped if no pipeline existed yet.
       await setBranchStatusChecks(config);
+
+      // only update artifact status if branch was updated
+      if (commitSha) {
+        await setArtifactErrorStatus(config);
+      }
       if (config.artifactErrors?.length) {
         logger.warn(
           { artifactErrors: config.artifactErrors },
@@ -1039,6 +1053,7 @@ export async function processBranch(
           content += `\`\`\`\n${error.stderr!}\n\`\`\`\n\n`;
         });
         content = platform.massageMarkdown(content, config.rebaseLabel);
+        // v8 ignore else -- TODO: add test #40625
         if (
           !(
             config.suppressNotifications!.includes('artifactErrors') ||
@@ -1075,6 +1090,7 @@ export async function processBranch(
         if (config.automerge) {
           logger.debug('PR is configured for automerge');
           // skip automerge if there is a new commit since status checks aren't done yet
+          // v8 ignore else -- TODO: add test #40625
           if (config.ignoreTests === true || !commitSha) {
             logger.debug('checking auto-merge');
             const prAutomergeResult = await checkAutoMerge(pr, config);

@@ -653,8 +653,9 @@ export class DockerDatasource extends Datasource {
     let tags: string[] = [];
     const limit = 100;
 
-    const pageUrl = (page: number): string =>
-      `${registry}/api/v1/repository/${repository}/tag/?limit=${limit}&page=${page}&onlyActiveTags=true`;
+    function pageUrl(page: number): string {
+      return `${registry}/api/v1/repository/${repository}/tag/?limit=${limit}&page=${page}&onlyActiveTags=true`;
+    }
 
     let page = 1;
     let url: string | null = pageUrl(page);
