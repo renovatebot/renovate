@@ -8,7 +8,7 @@ import { regEx } from '../../../util/regex.ts';
 import { addSecretForSanitizing } from '../../../util/sanitize.ts';
 
 export const ecrRegex = regEx(
-  /\d+\.(?:dkr\.ecr|dkr-ecr)(?:-fips)?\.([-a-z0-9]+)\.(?:amazonaws\.com|on\.aws)/,
+  /\d+\.(?:dkr\.ecr|dkr-ecr)(?:-fips)?\.([-a-z0-9]+)\.(?:amazonaws\.com|on\.aws|amazonaws\.com\.cn|on\.amazonwebservices\.com\.cn|amazonaws\.eu|on\.amazonwebservices\.eu|c2s\.ic\.gov|on\.aws\.ic\.gov|sc2s\.sgov\.gov|on\.aws\.scloud|scloud\.adc-e\.uk|on\.cloud-aws\.adc-e\.uk|csp\.hci\.ic\.gov|on\.aws\.hci\.ic\.gov|)/,
 );
 export const ecrPublicRegex = regEx(/public\.ecr\.aws|ecr-public\.aws\.com/);
 
@@ -22,7 +22,8 @@ export async function getECRAuthToken(
       `AWS user specified, encoding basic auth credentials for ECR registry`,
     );
     return Buffer.from(`AWS:${opts.password}`).toString('base64');
-  } else if (opts.username && opts.password) {
+  }
+  if (opts.username && opts.password) {
     logger.trace(
       `Using AWS accessKey to get Authorization token for ECR registry`,
     );
@@ -52,14 +53,19 @@ export async function getECRAuthToken(
   return null;
 }
 
-export function isECRMaxResultsError(err: HttpError): boolean {
-  const resp = err.response as HttpResponse<any> | undefined;
+// https://docs.aws.amazon.com/AmazonECR/latest/APIReference/API_DescribeRepositories.html#ECR-DescribeRepositories-request-maxResults
+export function isECRMaxResultsResponse(resp: HttpResponse<unknown>): boolean {
+  const body = resp.body as { errors?: { message?: string }[] } | undefined;
   return !!(
-    resp?.statusCode === 405 &&
+    resp.statusCode === 405 &&
     resp.headers?.['docker-distribution-api-version'] &&
-    // https://docs.aws.amazon.com/AmazonECR/latest/APIReference/API_DescribeRepositories.html#ECR-DescribeRepositories-request-maxResults
-    resp.body?.errors?.[0]?.message?.includes(
+    body?.errors?.[0]?.message?.includes(
       'Member must have value less than or equal to 1000',
     )
   );
+}
+
+export function isECRMaxResultsError(err: HttpError): boolean {
+  const resp = err.response as HttpResponse<unknown> | undefined;
+  return !!resp && isECRMaxResultsResponse(resp);
 }

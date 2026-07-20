@@ -54,13 +54,12 @@ export function smartTruncate(input: string, len: number): string {
       truncatedInput.substring(0, len - truncationNotice.length) +
       truncationNotice
     );
-  } else {
-    return (
-      preNotes +
-      releaseNotes.slice(0, availableLength) +
-      truncationNotice +
-      divider +
-      postNotes
-    );
   }
+  return (
+    preNotes +
+    releaseNotes.slice(0, availableLength) +
+    truncationNotice +
+    divider +
+    postNotes
+  );
 }

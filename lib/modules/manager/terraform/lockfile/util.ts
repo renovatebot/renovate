@@ -212,7 +212,7 @@ export function writeLockUpdates(
   });
 
   const trailingNotUpdatedLines = lines.slice(
-    updates[updates.length - 1].lineNumbers.block?.end,
+    updates.at(-1)!.lineNumbers.block?.end,
   );
   sections.push(trailingNotUpdatedLines);
 
@@ -228,6 +228,122 @@ export function writeLockUpdates(
       contents: newContent,
     },
   };
+}
+
+const hashicorpVersioning = getVersioning('hashicorp');
+
+// Operators Terraform allows in a version constraint, matched longest-first so
+// ">=" wins over ">" and "<=" over "<". The normalization implemented below
+// (operator set, boundary-version sort, priority tie-break) mirrors Terraform's
+// getproviders.VersionConstraintsString and versionSelectionsBoundaryPriority:
+// https://github.com/hashicorp/terraform/blob/main/internal/getproviders/providerreqs/version.go
+const constraintOperators = ['>=', '<=', '!=', '~>', '=', '>', '<'];
+
+interface ParsedConstraint {
+  raw: string;
+  operator: string;
+  rawVersion: string;
+  cmpVersion: string;
+}
+
+// Mirrors Terraform's getproviders.versionSelectionsBoundaryPriority: when two
+// constraints share the same boundary version, this decides their relative
+// order in the normalized string.
+function operatorPriority(operator: string, rawVersion: string): number {
+  switch (operator) {
+    case '>':
+      return 1;
+    case '>=':
+      return 2;
+    case '': // exact pin, serialized without an operator
+      return 3;
+    case '~>':
+      // patch-only (~> x.y.z) sorts before minor-only (~> x.y)
+      return rawVersion.split('.').length > 2 ? 4 : 5;
+    case '<=':
+      return 6;
+    case '<':
+      return 7;
+    case '!=':
+      return 8;
+    /* v8 ignore next -- unreachable for constraints that parsed successfully */
+    default:
+      return 0;
+  }
+}
+
+// Pad the numeric core to three components, matching Terraform's
+// VersionSpec.ConstrainToZero so "5.0" and "5.0.0" compare (and dedupe) equal.
+function constrainToZero(version: string): string {
+  const sep = version.search(regEx(/[-+]/)); // start of prerelease/build metadata, -1 if none
+  const core = sep === -1 ? version : version.slice(0, sep);
+  const extra = sep === -1 ? '' : version.slice(sep);
+  const segments = core.split('.');
+  while (segments.length < 3) {
+    segments.push('0');
+  }
+  return segments.join('.') + extra;
+}
+
+function parseConstraint(token: string): ParsedConstraint {
+  const raw = token.trim();
+  for (const operator of constraintOperators) {
+    if (raw.startsWith(operator)) {
+      const rawVersion = raw.slice(operator.length).trim();
+      return {
+        raw,
+        // Terraform serializes an exact pin without an operator, so treat "="
+        // the same as a bare version.
+        operator: operator === '=' ? '' : operator,
+        rawVersion,
+        cmpVersion: constrainToZero(rawVersion),
+      };
+    }
+  }
+  return {
+    raw,
+    operator: '',
+    rawVersion: raw,
+    cmpVersion: constrainToZero(raw),
+  };
+}
+
+/**
+ * Reorder the sub-constraints of a Terraform lock `constraints` string into the
+ * normalized form Terraform/OpenTofu require: boundary version ascending, ties
+ * broken by operator priority. Renovate updates a version in place without
+ * re-sorting, which produces strings Terraform rejects with "must be written in
+ * normalized form" once a bumped exact pin overtakes an inherited `~>` range.
+ * See https://github.com/renovatebot/renovate/issues/37273.
+ */
+export function sortConstraints(
+  constraint: string | undefined,
+): string | undefined {
+  if (!constraint?.includes(',')) {
+    return constraint;
+  }
+  const parsed: ParsedConstraint[] = [];
+  for (const token of constraint.split(',')) {
+    const entry = parseConstraint(token);
+    // Leave the constraint untouched if any token is unrecognizable, rather
+    // than risk corrupting it.
+    if (!hashicorpVersioning.isValid(entry.cmpVersion)) {
+      return constraint;
+    }
+    parsed.push(entry);
+  }
+  parsed.sort((a, b) => {
+    if (!hashicorpVersioning.equals(a.cmpVersion, b.cmpVersion)) {
+      return hashicorpVersioning.isGreaterThan(a.cmpVersion, b.cmpVersion)
+        ? 1
+        : -1;
+    }
+    return (
+      operatorPriority(a.operator, a.rawVersion) -
+      operatorPriority(b.operator, b.rawVersion)
+    );
+  });
+  return parsed.map((entry) => entry.raw).join(', ');
 }
 
 export function massageNewValue(value: string | undefined): string | undefined {

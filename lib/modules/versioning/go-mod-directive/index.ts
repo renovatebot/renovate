@@ -5,7 +5,7 @@ import type { NewValueConfig, VersioningApi } from '../types.ts';
 
 export const id = 'go-mod-directive';
 export const displayName = 'Go Modules Directive';
-export const urls = ['https://go.dev/ref/mod'];
+export const urls = ['[Go Modules Reference](https://go.dev/ref/mod)'];
 export const supportsRanges = true;
 export const supportedRangeStrategies: RangeStrategy[] = ['bump', 'replace'];
 
@@ -43,13 +43,17 @@ function getSatisfyingVersion(
   return npm.getSatisfyingVersion(versions, toNpmRange(range));
 }
 
-const isLessThanRange = (version: string, range: string): boolean =>
-  npm.isLessThanRange!(version, toNpmRange(range));
+function isLessThanRange(version: string, range: string): boolean {
+  return npm.isLessThanRange!(version, toNpmRange(range));
+}
 
-export const isValid = (input: string): boolean => !!input.match(validRegex);
+export function isValid(input: string): boolean {
+  return !!input.match(validRegex);
+}
 
-const matches = (version: string, range: string): boolean =>
-  npm.matches(version, toNpmRange(range));
+function matches(version: string, range: string): boolean {
+  return npm.matches(version, toNpmRange(range));
+}
 
 function minSatisfyingVersion(
   versions: string[],

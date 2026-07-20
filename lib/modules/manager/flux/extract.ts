@@ -138,9 +138,8 @@ function resolveHelmRepository(
             registryAliases,
           ).packageName;
           return null;
-        } else {
-          return repo.spec.url;
         }
+        return repo.spec.url;
       })
       .filter(isString);
 
@@ -402,6 +401,9 @@ function resolveResourceManifest(
           dep.replaceString = resource.spec.ref.commit;
           if (isHttpUrl(gitUrl)) {
             dep.sourceUrl = gitUrl.replace(/\.git$/, '');
+          }
+          if (resource.spec.ref?.branch) {
+            dep.currentValue = resource.spec.ref.branch;
           }
         } else if (resource.spec.ref?.tag) {
           dep.currentValue = resource.spec.ref.tag;

@@ -5,7 +5,10 @@ import { envMock, mockExecAll, mockExecSequence } from '~test/exec-util.ts';
 import { Fixtures } from '~test/fixtures.ts';
 import { env, fs, git, partial } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
-import type { RepoGlobalConfig } from '../../../config/types.ts';
+import type {
+  InternalGlobalConfigOptions,
+  RepoGlobalConfig,
+} from '../../../config/types.ts';
 import { logger } from '../../../logger/index.ts';
 import * as docker from '../../../util/exec/docker/index.ts';
 import type { StatusResult } from '../../../util/git/types.ts';
@@ -19,7 +22,6 @@ const datasource = vi.mocked(_datasource);
 
 vi.mock('../../../util/exec/env.ts');
 vi.mock('../../../util/fs/index.ts');
-vi.mock('../../../util/host-rules.ts', () => mockDeep());
 vi.mock('../../../util/http/index.ts');
 vi.mock('../../datasource/index.ts', () => mockDeep());
 
@@ -53,7 +55,7 @@ function getCommandInUvHeader(command: string) {
 
 const simpleHeader = getCommandInHeader('pip-compile requirements.in');
 
-const adminConfig: RepoGlobalConfig = {
+const adminConfig: RepoGlobalConfig & InternalGlobalConfigOptions = {
   // `join` fixes Windows CI
   localDir: upath.join('/tmp/github/some/repo'),
   cacheDir: upath.join('/tmp/renovate/cache'),
@@ -64,7 +66,7 @@ const dockerAdminConfig = {
   ...adminConfig,
   binarySource: 'docker',
   dockerSidecarImage: 'ghcr.io/renovatebot/base-image',
-} satisfies RepoGlobalConfig;
+} satisfies RepoGlobalConfig & InternalGlobalConfigOptions;
 
 process.env.CONTAINERBASE = 'true';
 

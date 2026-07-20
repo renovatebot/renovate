@@ -6,7 +6,7 @@ import { sortParsed } from './util.ts';
 export const id = 'rust-release-channel';
 export const displayName = 'Rust Release Channel';
 export const urls = [
-  'https://rust-lang.github.io/rustup/concepts/toolchains.html',
+  '[Rustup - Toolchains](https://rust-lang.github.io/rustup/concepts/toolchains.html)',
 ];
 export const supportsRanges = true;
 export const supportedRangeStrategies = ['pin', 'replace'];
@@ -193,7 +193,7 @@ class RustReleaseChannelVersioning implements VersioningApi {
 
     // Sort and return the highest (last in sorted array)
     matching.sort((a, b) => this.sortVersions(a, b));
-    return matching.slice(-1)[0];
+    return matching.at(-1)!;
   }
 
   minSatisfyingVersion(versions: string[], range: string): string | null {

@@ -87,7 +87,7 @@ export function extractPackageFile(
     return null;
   }
   try {
-    const deps: PackageDependency<Record<string, any>>[] = [];
+    const deps: PackageDependency[] = [];
 
     for (const con of parsedContent) {
       deps.push(...findDependencies(con, config.registryAliases));

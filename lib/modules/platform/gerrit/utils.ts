@@ -1,9 +1,9 @@
 import { CONFIG_GIT_URL_UNAVAILABLE } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
 import type { BranchStatus, PrState } from '../../../types/index.ts';
-import type { LongCommitSha } from '../../../util/git/types.ts';
 import * as hostRules from '../../../util/host-rules.ts';
 import { regEx } from '../../../util/regex.ts';
+import { toLongCommitSha } from '../../../util/schema-utils/git.ts';
 import { joinUrlParts, parseUrl } from '../../../util/url.ts';
 import { hashBody } from '../pr-body.ts';
 import type { GitUrlOption, Pr } from '../types.ts';
@@ -34,6 +34,7 @@ export function getGerritRepoUrl(
   repository: string,
   endpoint: string,
   gitUrl: GitUrlOption | undefined,
+  username: string,
 ): string {
   const endpointUrl = parseUrl(endpoint);
   if (!endpointUrl) {
@@ -42,15 +43,15 @@ export function getGerritRepoUrl(
 
   const url =
     gitUrl === 'ssh'
-      ? createSshUrl(endpointUrl, repository)
+      ? createSshUrl(endpointUrl, repository, username)
       : createHttpUrl(endpointUrl, endpoint, repository);
   logger.trace({ url }, 'using URL based on configured endpoint');
 
   return url;
 }
 
-function createSshUrl(url: URL, repository: string): string {
-  return `ssh://${url.host}:${DEFAULT_SSH_PORT}/${repository}`;
+function createSshUrl(url: URL, repository: string, username: string): string {
+  return `ssh://${username}@${url.host}:${DEFAULT_SSH_PORT}/${repository}`;
 }
 
 function createHttpUrl(url: URL, endpoint: string, repository: string): string {
@@ -117,7 +118,7 @@ export function mapGerritChangeToPr(
     bodyStruct: {
       hash: hashBody(knownProperties?.prBody ?? findPullRequestBody(change)),
     },
-    sha: change.current_revision as LongCommitSha,
+    sha: toLongCommitSha(change.current_revision),
   };
 }
 

@@ -19,6 +19,7 @@ export interface Config {
   owner: string;
   repoId: string;
   project: string;
+  projectId: string;
   prList: AzurePr[];
   fileList: null;
   repository: string;
