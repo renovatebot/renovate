@@ -34,7 +34,7 @@ export async function getDenoLock(filePath: string): Promise<LockFile> {
   if (parsedLockfile.data.lockfileVersion < 5) {
     logger.warn(
       { filePath },
-      `Deno: unsupported lockfile version. Please update ${filePath} on your own.`,
+      'Deno: unsupported lockfile version. Please update the lock file on your own.',
     );
     return { lockedVersions: {} };
   }

@@ -2,6 +2,8 @@
 
 ## Authentication
 
+### Personal Access Token (PAT)
+
 First, [create a Personal Access Token](https://learn.microsoft.com/azure/devops/organizations/accounts/use-personal-access-tokens-to-authenticate) for the bot account.
 Let Renovate use your PAT by doing _one_ of the following:
 
@@ -17,6 +19,64 @@ Permissions for your PAT should be at minimum:
 | `Work Items` | Read & write | Needed for link to work item and dependecy dashboards |
 
 Remember to set `platform=azure` somewhere in your Renovate config file.
+
+### Microsoft Entra ID Bearer Token (OAuth)
+
+Renovate also supports authenticating to Azure DevOps Services using Microsoft Entra ID (formerly Azure AD) Bearer tokens.
+This works with service principals, managed identities, and user-delegated tokens.
+
+Renovate **automatically detects** whether a token is a JWT (Bearer token) or a PAT based on its format.
+No additional configuration is needed. Just set the `token` field to your Entra ID access token:
+
+```js
+// config.js
+module.exports = {
+  platform: 'azure',
+  endpoint: 'https://dev.azure.com/your-organization',
+  token: '<your-entra-access-token>',
+};
+```
+
+Or via environment variables:
+
+```bash
+export RENOVATE_PLATFORM=azure
+export RENOVATE_ENDPOINT=https://dev.azure.com/your-organization
+export RENOVATE_TOKEN=<your-entra-access-token>
+```
+
+Renovate inspects the token structure to decide the authentication method:
+
+- If the token is a valid JWT (three base64url-encoded segments with a JSON header containing `typ` or `alg`), it is treated as a **Bearer token** (Microsoft Entra ID).
+- Otherwise, the token is treated as a **Personal Access Token** (PAT).
+
+#### Obtaining a Bearer token
+
+For **service principals**:
+
+```bash
+az login --service-principal -u <client-id> -p <client-secret> --tenant <tenant-id>
+az account get-access-token --resource 499b84ac-1321-427f-aa17-267ca6975798 --query accessToken -o tsv
+```
+
+For **managed identities** (Azure-hosted Renovate):
+
+```bash
+az login --identity
+az account get-access-token --resource 499b84ac-1321-427f-aa17-267ca6975798 --query accessToken -o tsv
+```
+
+#### Requirements for service principals / managed identities
+
+1. The identity must be added to the Azure DevOps organization (Organization Settings → Users).
+1. The identity must have at least a **Basic** license.
+1. Grant permissions: Code (Read & Write) at the project level.
+
+#### Limitations
+
+- **Token lifetime**: Entra tokens expire after ~1 hour. Refresh the token before each Renovate run.
+- **Azure DevOps Services only**: Bearer tokens are **not** supported on Azure DevOps Server (on-premises). Use PATs for on-premises.
+- **Conditional Access**: Your organization's Conditional Access policies may block service principal tokens.
 
 ## Running Renovate in Azure Pipelines
 
@@ -195,6 +255,14 @@ Make sure the user has the following permissions on the work item's _area path_:
 - View work items in this node
 
 If the user does not have these permissions, Renovate still creates a PR but it won't have a link to the work item.
+
+### Dependency Dashboard work item state
+
+On Azure DevOps, Renovate stores the Dependency Dashboard (and any other issues) as a work item of type `Issue`.
+Renovate resolves the correct open and closed state names from the process for the project automatically, so it works across the different processes (for example `To Do`/`Done` on _Basic_, `New`/`Active`/`Closed` on _Agile_, and custom inherited processes).
+
+When creating the work item, Renovate does not set a state, so Azure DevOps applies the default initial state of the work item type.
+If the states cannot be read (for example on older Azure DevOps Server versions), Renovate falls back to the `New` and `Closed` state names.
 
 ### Adding tags to Pull Requests
 

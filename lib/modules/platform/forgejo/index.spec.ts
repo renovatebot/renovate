@@ -281,7 +281,9 @@ describe('modules/platform/forgejo/index', () => {
 
   describe('initPlatform()', () => {
     it('should throw if no token', async () => {
-      await expect(forgejo.initPlatform({})).rejects.toThrow();
+      await expect(forgejo.initPlatform({})).rejects.toThrow(
+        'Init: You must configure a Forgejo personal access token',
+      );
     });
 
     it('should throw if auth fails', async () => {
@@ -290,7 +292,7 @@ describe('modules/platform/forgejo/index', () => {
 
       await expect(
         forgejo.initPlatform({ token: 'some-token' }),
-      ).rejects.toThrow();
+      ).rejects.toThrow('Init: Authentication failure');
     });
 
     it('should support default endpoint', async () => {
@@ -976,14 +978,16 @@ describe('modules/platform/forgejo/index', () => {
   });
 
   describe('getBranchStatus', () => {
-    const commitStatus = (status: CommitStatusType): CommitStatus => ({
-      id: 1,
-      status,
-      context: '',
-      description: '',
-      target_url: '',
-      created_at: '',
-    });
+    function commitStatus(status: CommitStatusType): CommitStatus {
+      return {
+        id: 1,
+        status,
+        context: '',
+        description: '',
+        target_url: '',
+        created_at: '',
+      };
+    }
 
     it('should return yellow for unknown result', async () => {
       const scope = httpMock
@@ -1804,7 +1808,7 @@ describe('modules/platform/forgejo/index', () => {
           prTitle: mockNewPR.title,
           prBody: mockNewPR.body,
         }),
-      ).rejects.toThrow();
+      ).rejects.toThrow('Invalid input: expected number, received undefined');
     });
 
     it('should abort when the created pull request author is not the bot', async () => {
@@ -3172,7 +3176,9 @@ describe('modules/platform/forgejo/index', () => {
         });
       await initFakePlatform(scope);
       await initFakeRepo(scope);
-      await expect(forgejo.getJsonFile('file.json')).rejects.toThrow();
+      await expect(forgejo.getJsonFile('file.json')).rejects.toThrow(
+        "JSON5: invalid character '!' at 1:1",
+      );
     });
 
     it('throws when file content is missing', async () => {
@@ -3182,7 +3188,9 @@ describe('modules/platform/forgejo/index', () => {
         .reply(200, { type: 'file', name: 'file.json', path: 'file.json' });
       await initFakePlatform(scope);
       await initFakeRepo(scope);
-      await expect(forgejo.getJsonFile('file.json')).rejects.toThrow();
+      await expect(forgejo.getJsonFile('file.json')).rejects.toThrow(
+        'Invalid input: expected string, received undefined',
+      );
     });
 
     it('returns null for non-file entries', async () => {
@@ -3202,7 +3210,7 @@ describe('modules/platform/forgejo/index', () => {
         .replyWithError('unknown');
       await initFakePlatform(scope);
       await initFakeRepo(scope);
-      await expect(forgejo.getJsonFile('file.json')).rejects.toThrow();
+      await expect(forgejo.getJsonFile('file.json')).rejects.toThrow('unknown');
     });
   });
 });

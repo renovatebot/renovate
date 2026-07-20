@@ -13,6 +13,8 @@ import {
   GitVersionType,
   PullRequestStatus,
 } from 'azure-devops-node-api/interfaces/GitInterfaces.js';
+import type { PolicyEvaluationRecord } from 'azure-devops-node-api/interfaces/PolicyInterfaces.js';
+import { PolicyEvaluationStatus } from 'azure-devops-node-api/interfaces/PolicyInterfaces.js';
 import {
   REPOSITORY_ARCHIVED,
   REPOSITORY_EMPTY,
@@ -167,7 +169,7 @@ export async function getRawFile(
       }
     }
     return item?.content ?? null;
-  } catch (err) /* v8 ignore next */ {
+  } catch (err) /* v8 ignore next -- Azure API failure modes (service unavailable, malformed items) are not mocked in specs */ {
     if (
       err.message?.includes('<title>Azure DevOps Services Unavailable</title>')
     ) {
@@ -214,7 +216,7 @@ export async function initRepo({
     logger.debug('Repository is disabled- throwing error to abort renovation');
     throw new Error(REPOSITORY_ARCHIVED);
   }
-  /* v8 ignore next */
+  /* v8 ignore next -- defensive: Azure omits defaultBranch only for empty repos, which abort earlier in specs */
   if (!repo.defaultBranch) {
     logger.debug('Repo is empty');
     throw new Error(REPOSITORY_EMPTY);
@@ -223,6 +225,7 @@ export async function initRepo({
   config.repoId = repo.id!;
 
   config.project = repo.project!.name!;
+  config.projectId = repo.project!.id!;
   issueService = new IssueService(config);
   config.owner = '?owner?';
   logger.debug(`${repository} owner = ${config.owner}`);
@@ -470,6 +473,26 @@ async function getMergeStrategy(
       targetRefName,
       config.defaultBranch,
     ))
+  );
+}
+
+async function getPendingBlockingPolicyEvaluations(
+  pullRequestId: number,
+): Promise<PolicyEvaluationRecord[]> {
+  const artifactId = `vstfs:///CodeReview/CodeReviewId/${config.projectId}/${pullRequestId}`;
+  const policyEvaluations = await azureHelper.getPolicyEvaluations(
+    config.project,
+    artifactId,
+  );
+  logger.debug(
+    { pullRequestId, artifactId, policyEvaluations },
+    'Retrieved policy evaluations for PR',
+  );
+  return policyEvaluations.filter(
+    (evaluation) =>
+      evaluation.configuration?.isBlocking &&
+      evaluation.status !== PolicyEvaluationStatus.Approved &&
+      evaluation.status !== PolicyEvaluationStatus.NotApplicable,
   );
 }
 
@@ -808,6 +831,23 @@ export async function mergePr({
   strategy,
 }: MergePRConfig): Promise<boolean> {
   logger.debug(`mergePr(${pullRequestId}, ${branchName!})`);
+
+  const pendingPolicyEvaluations =
+    await getPendingBlockingPolicyEvaluations(pullRequestId);
+  if (pendingPolicyEvaluations.length) {
+    logger.debug(
+      {
+        pullRequestId,
+        pendingPolicies: pendingPolicyEvaluations.map((evaluation) => ({
+          name: evaluation.configuration?.type?.displayName,
+          status: PolicyEvaluationStatus[evaluation.status!],
+        })),
+      },
+      'Not completing PR because branch policies have not been satisfied yet',
+    );
+    return false;
+  }
+
   const azureApiGit = await azureApi.gitApi();
 
   let pr = await azureApiGit.getPullRequestById(pullRequestId, config.project);
@@ -954,19 +994,18 @@ async function getUserIds(users: string[]): Promise<User[]> {
           isRequired = true;
         }
         if (
-          reviewer.toLowerCase() === m.identity?.displayName?.toLowerCase() ||
-          reviewer.toLowerCase() === m.identity?.uniqueName?.toLowerCase()
+          (reviewer.toLowerCase() === m.identity?.displayName?.toLowerCase() ||
+            reviewer.toLowerCase() === m.identity?.uniqueName?.toLowerCase()) &&
+          ids.filter((c) => c.id === m.identity?.id).length === 0
         ) {
-          if (ids.filter((c) => c.id === m.identity?.id).length === 0) {
-            // TODO #22198
-            ids.push({
-              id: m.identity.id!,
-              name: reviewer,
-              isRequired,
-            });
+          // TODO #22198
+          ids.push({
+            id: m.identity.id!,
+            name: reviewer,
+            isRequired,
+          });
 
-            validReviewers.add(reviewer);
-          }
+          validReviewers.add(reviewer);
         }
       });
     });
@@ -980,14 +1019,15 @@ async function getUserIds(users: string[]): Promise<User[]> {
         reviewer = reviewer.replace(requiredReviewerPrefix, '');
         isRequired = true;
       }
-      if (reviewer.toLowerCase() === t.name?.toLowerCase()) {
-        // v8 ignore else -- TODO: add test #40625
-        if (ids.filter((c) => c.id === t.id).length === 0) {
-          // TODO #22198
-          ids.push({ id: t.id!, name: reviewer, isRequired });
+      // v8 ignore else -- TODO: add test #40625
+      if (
+        reviewer.toLowerCase() === t.name?.toLowerCase() &&
+        ids.filter((c) => c.id === t.id).length === 0
+      ) {
+        // TODO #22198
+        ids.push({ id: t.id!, name: reviewer, isRequired });
 
-          validReviewers.add(reviewer);
-        }
+        validReviewers.add(reviewer);
       }
     });
   });

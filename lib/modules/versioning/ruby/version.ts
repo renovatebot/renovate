@@ -19,68 +19,75 @@ function releaseSegments(version: string): SegmentElement[] {
   return [];
 }
 
-const parse = (version: string): RubyVersion => ({
-  major: major(version),
-  minor: minor(version),
-  patch: patch(version),
-  prerelease: prerelease(version),
-});
+function parse(version: string): RubyVersion {
+  return {
+    major: major(version),
+    minor: minor(version),
+    patch: patch(version),
+    prerelease: prerelease(version),
+  };
+}
 
-const floor = (version: string): string => {
+function floor(version: string): string {
   const segments = releaseSegments(version);
   if (segments.length <= 1) {
     // '~> 2' is equivalent to '~> 2.0', thus no need to floor
     return segments.join('.');
   }
   return [...segments.slice(0, -1), 0].join('.');
-};
+}
 
-const adapt = (left: string, right: string): string =>
-  left.split('.').slice(0, right.split('.').length).join('.');
+function adapt(left: string, right: string): string {
+  return left.split('.').slice(0, right.split('.').length).join('.');
+}
 
-const trimZeroes = (version: string): string => {
+function trimZeroes(version: string): string {
   const segments = version.split('.');
-  while (segments.length > 0 && segments[segments.length - 1] === '0') {
+  while (segments.length > 0 && segments.at(-1) === '0') {
     segments.pop();
   }
   return segments.join('.');
-};
+}
 
 // Returns the upper bound of `~>` operator.
-const pgteUpperBound = (version: string): string => {
+function pgteUpperBound(version: string): string {
   const segments = releaseSegments(version);
   if (segments.length > 1) {
     segments.pop();
   }
   return incrementLastSegment(segments.join('.'));
-};
+}
 
 // istanbul ignore next
-const incrementLastSegment = (version: string): string => {
+function incrementLastSegment(version: string): string {
   const segments = releaseSegments(version);
   const nextLast = parseInt(segments.pop() as string, 10) + 1;
 
   return [...segments, nextLast].join('.');
-};
+}
 
 // istanbul ignore next
-const incrementMajor = (
+function incrementMajor(
   maj: number,
   min: number,
   ptch: number,
   pre: string[],
-): number => (min === 0 || ptch === 0 || pre.length === 0 ? maj + 1 : maj);
+): number {
+  return min === 0 || ptch === 0 || pre.length === 0 ? maj + 1 : maj;
+}
 
 // istanbul ignore next
-const incrementMinor = (min: number, ptch: number, pre: string[]): number =>
-  ptch === 0 || pre.length === 0 ? min + 1 : min;
+function incrementMinor(min: number, ptch: number, pre: string[]): number {
+  return ptch === 0 || pre.length === 0 ? min + 1 : min;
+}
 
 // istanbul ignore next
-const incrementPatch = (ptch: number, pre: string[]): number =>
-  pre.length === 0 ? ptch + 1 : ptch;
+function incrementPatch(ptch: number, pre: string[]): number {
+  return pre.length === 0 ? ptch + 1 : ptch;
+}
 
 // istanbul ignore next
-const increment = (from: string, to: string): string => {
+function increment(from: string, to: string): string {
   const parsed = parse(from);
   const { major: maj, prerelease: pre } = parsed;
   let { minor: min, patch: ptch } = parsed;
@@ -93,7 +100,9 @@ const increment = (from: string, to: string): string => {
     return incrementLastSegment(from);
   }
 
-  const isStable = (x: string): boolean => regEx(/^[0-9.-/]+$/).test(x);
+  function isStable(x: string): boolean {
+    return regEx(/^[0-9.-/]+$/).test(x);
+  }
   if (major(from) !== major(adapted)) {
     nextVersion = [incrementMajor(maj, min, ptch, pre ?? []), 0, 0].join('.');
   } else if (minor(from) !== minor(adapted)) {
@@ -107,10 +116,10 @@ const increment = (from: string, to: string): string => {
   }
 
   return increment(nextVersion, to);
-};
+}
 
 // istanbul ignore next
-const decrement = (version: string): string => {
+function decrement(version: string): string {
   const segments = releaseSegments(version);
   const nextSegments = segments
     .reverse()
@@ -138,7 +147,7 @@ const decrement = (version: string): string => {
     );
 
   return nextSegments.reverse().join('.');
-};
+}
 
 export {
   adapt,

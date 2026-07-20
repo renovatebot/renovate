@@ -16,15 +16,15 @@ allowBuilds:
 dedupePeers: true
 
 catalog:
-  esbuild: 0.28.0
-  tar: 7.5.19
-  vite: 8.1.0
+  esbuild: 0.28.1
+  tar: 7.5.20
+  vite: 8.1.4
 
 overrides:
   '@aws-sdk/xml-builder@3.972.4>fast-xml-parser': '^5.3.6'
   '@yarnpkg/core@4.5.0>tar': 'catalog:'
   esbuild: 'catalog:'
-  protobufjs@8.0.1: 8.6.5
+  protobufjs@8.0.1: 8.7.1
   vite: 'catalog:'
 
 ignoredOptionalDependencies:
@@ -52,6 +52,3 @@ minimumReleaseAgeExclude:
   - '@containerbase/semantic-release-pnpm'
 
 provenance: true
-
-patchedDependencies:
-  install-artifact-from-github@1.6.0: patches/install-artifact-from-github@1.6.0.patch

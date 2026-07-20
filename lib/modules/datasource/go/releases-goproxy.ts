@@ -247,11 +247,11 @@ export class GoProxyDatasource extends Datasource {
     const parts = goDirective.split('.');
     if (parts.length === 1) {
       return `${parts[0]}.0.0`;
-    } else if (parts.length === 2) {
-      return `${parts[0]}.${parts[1]}.0`;
-    } else {
-      return `${parts[0]}.${parts[1]}.${parts[2]}`;
     }
+    if (parts.length === 2) {
+      return `${parts[0]}.${parts[1]}.0`;
+    }
+    return `${parts[0]}.${parts[1]}.${parts[2]}`;
   }
 
   async getLatestVersion(
@@ -280,7 +280,9 @@ export class GoProxyDatasource extends Datasource {
     const isGopkgin = packageName.startsWith('gopkg.in/');
     const majorSuffixSeparator = isGopkgin ? '.' : '/';
     const modParts = packageName.match(modRegex)?.groups;
-    const baseMod = modParts?.baseMod ?? /* v8 ignore next */ packageName;
+    const baseMod =
+      modParts?.baseMod ??
+      /* v8 ignore next -- defensive: modRegex matches any non-empty package name, so baseMod is always set */ packageName;
     const packageMajor = parseInt(modParts?.majorVersion ?? '0', 10);
 
     const result: ReleaseResult = { releases: [] };
