@@ -94,6 +94,7 @@ async function validate(
           );
       })
       .join('\n');
+    // oxlint-disable-next-line renovate/logger-static-message -- the multi-line, colorized diff must be interpolated to stay readable; as a metadata field it is JSON-escaped onto one line
     logger.warn(`Config migration diff:\n${msg}`);
     if (strict) {
       returnVal = 1;
@@ -289,14 +290,12 @@ If you have specified global self-hosted configuration (https://docs.renovatebot
 
   await program.parseAsync();
 })().catch((e) => {
-  if (e instanceof CommanderError) {
-    // Commander throws an error at the end of Action execution i.e. as part of the `help` and `version` commands, and so we don't want to return an error code in this case
-    if (
-      e.code === 'commander.helpDisplayed' ||
-      e.code === 'commander.version'
-    ) {
-      return;
-    }
+  // Commander throws an error at the end of Action execution i.e. as part of the `help` and `version` commands, and so we don't want to return an error code in this case
+  if (
+    e instanceof CommanderError &&
+    (e.code === 'commander.helpDisplayed' || e.code === 'commander.version')
+  ) {
+    return;
   }
 
   // oxlint-disable-next-line no-console -- intentional: display critical error on CLI

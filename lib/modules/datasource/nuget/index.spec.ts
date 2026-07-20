@@ -1,9 +1,10 @@
 import { Readable } from 'node:stream';
+import { codeBlock } from 'common-tags';
 import upath from 'upath';
 import { mockDeep } from 'vitest-mock-extended';
 import { Fixtures } from '~test/fixtures.ts';
 import * as httpMock from '~test/http-mock.ts';
-import { hostRules, logger } from '~test/util.ts';
+import { logger } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import * as _packageCache from '../../../util/cache/package/index.ts';
 import { id as versioning } from '../../versioning/nuget/index.ts';
@@ -13,7 +14,6 @@ import { NugetDatasource } from './index.ts';
 
 const datasource = NugetDatasource.id;
 
-vi.mock('../../../util/host-rules.ts', () => mockDeep());
 vi.mock('../../../util/cache/package/index.ts', () => mockDeep());
 
 const packageCache = vi.mocked(_packageCache);
@@ -154,11 +154,6 @@ describe('modules/datasource/nuget/index', () => {
   });
 
   describe('getReleases', () => {
-    beforeEach(() => {
-      hostRules.hosts.mockReturnValue([]);
-      hostRules.find.mockReturnValue({});
-    });
-
     it(`can't detect nuget feed version`, async () => {
       const config = {
         datasource,
@@ -431,6 +426,88 @@ describe('modules/datasource/nuget/index', () => {
           60 * 24 * 7,
         );
         expect(res?.sourceUrl).toBeDefined();
+      });
+
+      it('can determine source URL from nupkg when nuspec endpoint returns 404', async () => {
+        const nugetIndex = codeBlock`
+          {
+            "version": "3.0.0",
+            "resources": [
+              {
+                "@id": "https://some-registry/v3/metadata",
+                "@type": "RegistrationsBaseUrl/3.0.0-beta",
+                "comment": "Get package metadata."
+              },
+              {
+                "@id": "https://some-registry/v3-flatcontainer",
+                "@type": "PackageBaseAddress/3.0.0",
+                "comment": "Base URL of where NuGet packages are stored."
+              }
+            ]
+          }
+        `;
+        const nlogRegistration = codeBlock`
+          {
+            "count": 1,
+            "items": [
+              {
+                "@id": "https://some-registry/v3/metadata/nlog/4.7.3.json",
+                "lower": "4.7.3",
+                "upper": "4.7.3",
+                "count": 1,
+                "items": [
+                  {
+                    "@id": "foo",
+                    "catalogEntry": {
+                      "id": "NLog",
+                      "version": "4.7.3",
+                      "packageContent": "https://some-registry/v3-flatcontainer/nlog/4.7.3/nlog.4.7.3.nupkg"
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        `;
+        httpMock
+          .scope('https://some-registry')
+          .get('/v3/index.json')
+          .twice()
+          .reply(200, nugetIndex)
+          .get('/v3/metadata/nlog/index.json')
+          .reply(200, nlogRegistration)
+          .get('/v3-flatcontainer/nlog/4.7.3/nlog.nuspec')
+          .reply(404)
+          .get('/v3-flatcontainer/nlog/4.7.3/nlog.4.7.3.nupkg')
+          .reply(200, () => {
+            const readableStream = new Readable();
+            readableStream.push(Fixtures.getBinary('nlog/NLog.4.7.3.nupkg'));
+            readableStream.push(null);
+            return readableStream;
+          });
+        const res = await getPkgReleases({
+          datasource,
+          versioning,
+          packageName: 'NLog',
+          registryUrls: ['https://some-registry/v3/index.json'],
+        });
+
+        expect(logger.logger.debug.mock.calls).toEqual(
+          expect.arrayContaining([
+            [
+              {
+                registryUrl: 'https://some-registry/v3/index.json',
+                pkgName: 'NLog',
+                pkgVersion: '4.7.3',
+              },
+              'package manifest (.nuspec) not found',
+            ],
+            [
+              'Determined sourceUrl https://github.com/NLog/NLog.git from https://some-registry/v3-flatcontainer/nlog/4.7.3/nlog.4.7.3.nupkg',
+            ],
+          ]),
+        );
+        expect(res?.sourceUrl).toBe('https://github.com/NLog/NLog');
       });
 
       it('can handle nupkg without repository metadata', async () => {

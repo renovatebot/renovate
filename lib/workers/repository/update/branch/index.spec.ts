@@ -1,10 +1,13 @@
 import { codeBlock } from 'common-tags';
 import { dir } from 'tmp-promise';
 import upath from 'upath';
-import { fs, git, partial, platform, scm } from '~test/util.ts';
+import { fakeSha, fs, git, partial, platform, scm } from '~test/util.ts';
 import { getConfig } from '../../../../config/defaults.ts';
 import { GlobalConfig } from '../../../../config/global.ts';
-import type { RepoGlobalConfig } from '../../../../config/types.ts';
+import type {
+  InternalGlobalConfigOptions,
+  RepoGlobalConfig,
+} from '../../../../config/types.ts';
 import {
   MANAGER_LOCKFILE_ERROR,
   REPOSITORY_CHANGED,
@@ -25,7 +28,6 @@ import * as _exec from '../../../../util/exec/index.ts';
 import type { FileChange, StatusResult } from '../../../../util/git/types.ts';
 import * as _mergeConfidence from '../../../../util/merge-confidence/index.ts';
 import * as _sanitize from '../../../../util/sanitize.ts';
-import type { LongCommitSha } from '../../../../util/schema-utils/git.ts';
 import type { Timestamp } from '../../../../util/timestamp.ts';
 import * as _limits from '../../../global/limits.ts';
 import type {
@@ -37,6 +39,7 @@ import * as _changelog from '../../changelog/index.ts';
 import * as _prAutomerge from '../pr/automerge.ts';
 import type { ResultWithPr } from '../pr/index.ts';
 import * as _prWorker from '../pr/index.ts';
+import * as artifacts from './artifacts.ts';
 import * as _automerge from './automerge.ts';
 import * as _checkExisting from './check-existing.ts';
 import * as _commit from './commit.ts';
@@ -79,7 +82,12 @@ const limits = vi.mocked(_limits);
 const repoCache = vi.mocked(_repoCache);
 const changelog = vi.mocked(_changelog);
 
-const adminConfig: RepoGlobalConfig = { localDir: '', cacheDir: '' };
+const adminConfig: RepoGlobalConfig & InternalGlobalConfigOptions = {
+  localDir: '',
+  cacheDir: '',
+};
+
+const commitSha = fakeSha('123test');
 
 function findFileContent(
   files: FileChange[] | undefined,
@@ -123,7 +131,7 @@ describe('workers/repository/update/branch/index', () => {
         major: undefined,
       } satisfies BranchConfig;
       schedule.isScheduledNow.mockReturnValue(true);
-      commit.commitFilesToBranch.mockResolvedValue('123test' as LongCommitSha);
+      commit.commitFilesToBranch.mockResolvedValue(commitSha);
 
       platform.massageMarkdown.mockImplementation((prBody) => prBody);
       prWorker.ensurePr.mockResolvedValue({
@@ -145,9 +153,6 @@ describe('workers/repository/update/branch/index', () => {
     });
 
     afterEach(() => {
-      platform.ensureComment.mockClear();
-      platform.ensureCommentRemoval.mockClear();
-      commit.commitFilesToBranch.mockClear();
       GlobalConfig.reset();
     });
 
@@ -578,8 +583,8 @@ describe('workers/repository/update/branch/index', () => {
     it('continues branch if branch edited and but PR found', async () => {
       scm.branchExists.mockResolvedValue(true);
       scm.isBranchModified.mockResolvedValueOnce(true);
-      scm.getBranchCommit.mockResolvedValue('123test' as LongCommitSha);
-      platform.findPr.mockResolvedValueOnce({ sha: '123test' } as any);
+      scm.getBranchCommit.mockResolvedValue(commitSha);
+      platform.findPr.mockResolvedValueOnce(partial<Pr>({ sha: commitSha }));
       const res = await branchWorker.processBranch(config);
       expect(res).toEqual({
         branchExists: true,
@@ -592,7 +597,9 @@ describe('workers/repository/update/branch/index', () => {
     it('skips branch if branch edited and and PR found with sha mismatch', async () => {
       scm.branchExists.mockResolvedValue(true);
       scm.isBranchModified.mockResolvedValueOnce(true);
-      platform.findPr.mockResolvedValueOnce({ sha: 'def456' } as any);
+      platform.findPr.mockResolvedValueOnce(
+        partial<Pr>({ sha: fakeSha('def456') }),
+      );
       const res = await branchWorker.processBranch(config);
       expect(res).toEqual({
         branchExists: true,
@@ -673,7 +680,7 @@ describe('workers/repository/update/branch/index', () => {
         branchExists: true,
         prBlockedBy: 'RateLimited',
         result: 'pr-limit-reached',
-        commitSha: '123test',
+        commitSha,
       });
     });
 
@@ -717,7 +724,36 @@ describe('workers/repository/update/branch/index', () => {
         updatesVerified: true,
         prNo: 5,
         result: 'done',
-        commitSha: '123test',
+        commitSha,
+      });
+    });
+
+    it('does not return if commits per run limit exceeded but rebase requested via PR checkbox', async () => {
+      const pr = partial<Pr>({
+        number: 5,
+        state: 'open',
+        bodyStruct: {
+          hash: hashBody(`- [x] <!-- rebase-check -->`),
+          rebaseRequested: true,
+        },
+      });
+      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
+        ...updatedPackageFiles,
+      });
+      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+        artifactErrors: [],
+        updatedArtifacts: [],
+      });
+      scm.branchExists.mockResolvedValue(true);
+      platform.getBranchPr.mockResolvedValueOnce(pr);
+      scm.isBranchModified.mockResolvedValueOnce(false);
+      limits.isLimitReached.mockReturnValueOnce(true);
+      expect(await branchWorker.processBranch(config)).toEqual({
+        branchExists: true,
+        updatesVerified: true,
+        prNo: 5,
+        result: 'done',
+        commitSha,
       });
     });
 
@@ -758,7 +794,37 @@ describe('workers/repository/update/branch/index', () => {
         updatesVerified: true,
         prNo: 5,
         result: 'pr-created',
-        commitSha: '123test',
+        commitSha,
+      });
+    });
+
+    it('does not return if commits hourly limit exceeded but rebase requested via PR checkbox', async () => {
+      const pr = partial<Pr>({
+        number: 5,
+        state: 'open',
+        bodyStruct: {
+          hash: hashBody(`- [x] <!-- rebase-check -->`),
+          rebaseRequested: true,
+        },
+      });
+      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
+        ...updatedPackageFiles,
+      });
+      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+        artifactErrors: [],
+        updatedArtifacts: [],
+      });
+      scm.branchExists.mockResolvedValue(true);
+      platform.getBranchPr.mockResolvedValueOnce(pr);
+      scm.isBranchModified.mockResolvedValueOnce(false);
+      limits.isLimitReached.mockReturnValueOnce(false);
+      limits.isLimitReached.mockReturnValueOnce(true);
+      expect(await branchWorker.processBranch(config)).toEqual({
+        branchExists: true,
+        updatesVerified: true,
+        prNo: 5,
+        result: 'done',
+        commitSha,
       });
     });
 
@@ -870,7 +936,7 @@ describe('workers/repository/update/branch/index', () => {
         updatedArtifacts: [partial<FileChange>()],
       });
       scm.branchExists.mockResolvedValue(false);
-      scm.getBranchCommit.mockResolvedValue('123test' as LongCommitSha); //TODO: not needed?
+      scm.getBranchCommit.mockResolvedValue(commitSha); //TODO: not needed?
       automerge.tryBranchAutomerge.mockResolvedValueOnce('automerged');
       await branchWorker.processBranch({
         ...config,
@@ -952,7 +1018,11 @@ describe('workers/repository/update/branch/index', () => {
     });
 
     it('returns if branch automerge is pending', async () => {
-      expect.assertions(1);
+      expect.assertions(2);
+      const setArtifactErrorStatus = vi.spyOn(
+        artifacts,
+        'setArtifactErrorStatus',
+      );
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce(
         partial<PackageFilesResult>({
           updatedPackageFiles: [partial<FileChange>()],
@@ -975,6 +1045,7 @@ describe('workers/repository/update/branch/index', () => {
         result: 'done',
         commitSha: null,
       });
+      expect(setArtifactErrorStatus).not.toHaveBeenCalled();
     });
 
     it('returns if PR creation failed', async () => {
@@ -1030,6 +1101,10 @@ describe('workers/repository/update/branch/index', () => {
     });
 
     it('retries setting branch status checks after PR creation', async () => {
+      const setArtifactErrorStatus = vi.spyOn(
+        artifacts,
+        'setArtifactErrorStatus',
+      );
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce(
         partial<PackageFilesResult>({
           updatedPackageFiles: [partial<FileChange>()],
@@ -1059,6 +1134,7 @@ describe('workers/repository/update/branch/index', () => {
       });
       // Called twice: once before ensurePr, once after PR creation
       expect(platform.setBranchStatus).toHaveBeenCalledTimes(2);
+      expect(setArtifactErrorStatus).not.toHaveBeenCalled();
     });
 
     it('does not retry setting branch status checks when PR is not created', async () => {
@@ -1094,7 +1170,11 @@ describe('workers/repository/update/branch/index', () => {
     });
 
     it('returns if branch exists but updated', async () => {
-      expect.assertions(3);
+      expect.assertions(4);
+      const setArtifactErrorStatus = vi.spyOn(
+        artifacts,
+        'setArtifactErrorStatus',
+      );
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce(
         partial<PackageFilesResult>({
           updatedPackageFiles: [partial<FileChange>()],
@@ -1111,21 +1191,26 @@ describe('workers/repository/update/branch/index', () => {
         commitBody: '[skip-ci]',
         fetchChangeLogs: 'branch',
       } satisfies BranchConfig;
-      scm.getBranchCommit.mockResolvedValue('123test' as LongCommitSha); //TODO:not needed?
+      scm.getBranchCommit.mockResolvedValue(commitSha); //TODO:not needed?
       expect(await branchWorker.processBranch(inconfig)).toEqual({
         branchExists: true,
         updatesVerified: true,
         prNo: undefined,
         result: 'pending',
-        commitSha: '123test',
+        commitSha,
       });
 
       expect(automerge.tryBranchAutomerge).toHaveBeenCalledTimes(0);
       expect(prWorker.ensurePr).toHaveBeenCalledTimes(0);
+      expect(setArtifactErrorStatus).toHaveBeenCalledTimes(1);
     });
 
     it('updates branch when no fingerprint match', async () => {
-      expect.assertions(3);
+      expect.assertions(4);
+      const setArtifactErrorStatus = vi.spyOn(
+        artifacts,
+        'setArtifactErrorStatus',
+      );
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce(
         partial<PackageFilesResult>({
           updatedPackageFiles: [partial<FileChange>()],
@@ -1143,17 +1228,18 @@ describe('workers/repository/update/branch/index', () => {
         fetchChangeLogs: 'branch',
         cacheFingerprintMatch: 'no-match',
       } satisfies BranchConfig;
-      scm.getBranchCommit.mockResolvedValue('123test' as LongCommitSha); //TODO:not needed?
+      scm.getBranchCommit.mockResolvedValue(commitSha); //TODO:not needed?
       expect(await branchWorker.processBranch(inconfig)).toEqual({
         branchExists: true,
         updatesVerified: true,
         prNo: undefined,
         result: 'pending',
-        commitSha: '123test',
+        commitSha,
       });
 
       expect(automerge.tryBranchAutomerge).toHaveBeenCalledTimes(0);
       expect(prWorker.ensurePr).toHaveBeenCalledTimes(0);
+      expect(setArtifactErrorStatus).toHaveBeenCalledTimes(1);
     });
 
     it('updates branch when forceRebase=true', async () => {
@@ -1175,13 +1261,13 @@ describe('workers/repository/update/branch/index', () => {
         fetchChangeLogs: 'branch',
         cacheFingerprintMatch: 'no-match',
       } satisfies BranchConfig;
-      scm.getBranchCommit.mockResolvedValue('123test' as LongCommitSha); //TODO:not needed?
+      scm.getBranchCommit.mockResolvedValue(commitSha); //TODO:not needed?
       expect(await branchWorker.processBranch(inconfig, true)).toEqual({
         branchExists: true,
         updatesVerified: true,
         prNo: undefined,
         result: 'pending',
-        commitSha: '123test',
+        commitSha,
       });
 
       expect(automerge.tryBranchAutomerge).toHaveBeenCalledTimes(0);
@@ -1610,14 +1696,14 @@ describe('workers/repository/update/branch/index', () => {
         artifactErrors: [partial<ArtifactError>()],
         updatedArtifacts: [partial<FileChange>()],
       });
-      scm.getBranchCommit.mockResolvedValue('123test' as LongCommitSha); //TODO:not needed?
+      scm.getBranchCommit.mockResolvedValue(commitSha); //TODO:not needed?
       const processBranchResult = await branchWorker.processBranch(config);
       expect(processBranchResult).toEqual({
         branchExists: true,
         updatesVerified: true,
         prNo: 5,
         result: 'pr-created',
-        commitSha: '123test',
+        commitSha,
       });
     });
 
@@ -1744,14 +1830,14 @@ describe('workers/repository/update/branch/index', () => {
       prWorker.ensurePr.mockImplementationOnce(() => {
         throw new Error('some error');
       });
-      scm.getBranchCommit.mockResolvedValue('123test' as LongCommitSha); //TODO:not needed?
+      scm.getBranchCommit.mockResolvedValue(commitSha); //TODO:not needed?
       const processBranchResult = await branchWorker.processBranch(config);
       expect(processBranchResult).toEqual({
         branchExists: true,
         updatesVerified: true,
         prNo: undefined,
         result: 'done',
-        commitSha: '123test',
+        commitSha,
       });
     });
 
@@ -1964,7 +2050,7 @@ describe('workers/repository/update/branch/index', () => {
 
     it('skips branch update if same updates', async () => {
       scm.branchExists.mockResolvedValueOnce(true);
-      scm.getBranchCommit.mockResolvedValue('111' as LongCommitSha); //TODO:not needed?
+      scm.getBranchCommit.mockResolvedValue(fakeSha('111')); //TODO:not needed?
       platform.getBranchPr.mockResolvedValueOnce(
         partial<Pr>({
           sourceBranch: 'old/some-branch',
@@ -2990,13 +3076,13 @@ describe('workers/repository/update/branch/index', () => {
         branchPrefix: 'new/',
         branchPrefixOld: 'old/',
       };
-      scm.getBranchCommit.mockResolvedValue('123test' as LongCommitSha); //TODO:not needed?
+      scm.getBranchCommit.mockResolvedValue(commitSha); //TODO:not needed?
       expect(await branchWorker.processBranch(inconfig)).toEqual({
         branchExists: true,
         updatesVerified: true,
         prNo: 5,
         result: 'done',
-        commitSha: '123test',
+        commitSha,
       });
 
       expect(logger.debug).toHaveBeenCalledWith('Found existing branch PR #5');
@@ -3067,7 +3153,7 @@ describe('workers/repository/update/branch/index', () => {
           },
         }),
       );
-      scm.getBranchCommit.mockResolvedValue('123test' as LongCommitSha); //TODO:not needed?
+      scm.getBranchCommit.mockResolvedValue(commitSha); //TODO:not needed?
       expect(
         await branchWorker.processBranch({
           ...config,
@@ -3076,7 +3162,7 @@ describe('workers/repository/update/branch/index', () => {
       ).toEqual({
         branchExists: true,
         updatesVerified: true,
-        commitSha: '123test',
+        commitSha,
         prNo: 5,
         result: 'done',
       });
@@ -3104,7 +3190,7 @@ describe('workers/repository/update/branch/index', () => {
           },
         }),
       );
-      scm.getBranchCommit.mockResolvedValue('123test' as LongCommitSha); //TODO:not needed?
+      scm.getBranchCommit.mockResolvedValue(commitSha); //TODO:not needed?
       expect(
         await branchWorker.processBranch({
           ...config,
@@ -3113,7 +3199,7 @@ describe('workers/repository/update/branch/index', () => {
       ).toEqual({
         branchExists: true,
         updatesVerified: true,
-        commitSha: '123test',
+        commitSha,
         prNo: 5,
         result: 'done',
       });
@@ -3141,7 +3227,7 @@ describe('workers/repository/update/branch/index', () => {
           },
         }),
       );
-      scm.getBranchCommit.mockResolvedValue('123test' as LongCommitSha); //TODO:not needed?
+      scm.getBranchCommit.mockResolvedValue(commitSha); //TODO:not needed?
       expect(
         await branchWorker.processBranch({
           ...config,
@@ -3150,7 +3236,7 @@ describe('workers/repository/update/branch/index', () => {
       ).toEqual({
         branchExists: true,
         updatesVerified: true,
-        commitSha: '123test',
+        commitSha,
         prNo: 5,
         result: 'done',
       });
@@ -3169,14 +3255,14 @@ describe('workers/repository/update/branch/index', () => {
       });
       scm.branchExists.mockResolvedValueOnce(true);
       scm.isBranchModified.mockResolvedValueOnce(true);
-      scm.getBranchCommit.mockResolvedValueOnce('123test' as LongCommitSha);
-      platform.findPr.mockResolvedValueOnce({ sha: '123test' } as any);
+      scm.getBranchCommit.mockResolvedValueOnce(commitSha);
+      platform.findPr.mockResolvedValueOnce(partial<Pr>({ sha: commitSha }));
       const res = await branchWorker.processBranch(config);
       expect(automerge.tryBranchAutomerge).not.toHaveBeenCalled();
       expect(prAutomerge.checkAutoMerge).not.toHaveBeenCalled();
       expect(res).toEqual({
         branchExists: true,
-        commitSha: '123test',
+        commitSha,
         prNo: 5,
         result: 'done',
         updatesVerified: true,
@@ -3186,7 +3272,7 @@ describe('workers/repository/update/branch/index', () => {
     it('continues to update PR, if branch got updated, even when prCreation!==immediate', async () => {
       scm.branchExists.mockResolvedValueOnce(true);
       scm.isBranchModified.mockResolvedValueOnce(false);
-      scm.getBranchCommit.mockResolvedValueOnce('123test' as LongCommitSha);
+      scm.getBranchCommit.mockResolvedValueOnce(commitSha);
       npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
         artifactErrors: [],
         updatedArtifacts: [partial<FileChange>()],
@@ -3210,7 +3296,7 @@ describe('workers/repository/update/branch/index', () => {
         updatesVerified: true,
         prNo: 5,
         result: 'done',
-        commitSha: '123test',
+        commitSha,
       });
       expect(automerge.tryBranchAutomerge).not.toHaveBeenCalled();
       expect(prWorker.ensurePr).toHaveBeenCalledTimes(1);

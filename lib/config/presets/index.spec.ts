@@ -1381,9 +1381,9 @@ describe('config/presets/index', () => {
         e = err;
       }
       expect(e).toBeDefined();
-      expect(e!.validationSource).toMatchSnapshot();
-      expect(e!.validationError).toMatchSnapshot();
-      expect(e!.validationMessage).toMatchSnapshot();
+      expect(e!.validationSource).toMatchSnapshot('validationSource');
+      expect(e!.validationError).toMatchSnapshot('validationError');
+      expect(e!.validationMessage).toMatchSnapshot('validationMessage');
     });
 
     it('handles no config', async () => {

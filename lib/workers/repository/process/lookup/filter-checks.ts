@@ -181,20 +181,18 @@ export async function filterInternalChecks(
       );
     }
 
-    if (!release) {
-      // v8 ignore else -- TODO: add test #40625
-      if (pendingReleases.length) {
-        // If all releases were pending then just take the highest
-        logger.trace(
-          { depName, bucket },
-          'All releases are pending - using latest',
-        );
-        release = pendingReleases.pop();
-        // None are pending anymore because we took the latest, so empty the array
-        pendingReleases = [];
-        if (internalChecksFilter === 'strict') {
-          pendingChecks = true;
-        }
+    // v8 ignore else -- TODO: add test #40625
+    if (!release && pendingReleases.length) {
+      // If all releases were pending then just take the highest
+      logger.trace(
+        { depName, bucket },
+        'All releases are pending - using latest',
+      );
+      release = pendingReleases.pop();
+      // None are pending anymore because we took the latest, so empty the array
+      pendingReleases = [];
+      if (internalChecksFilter === 'strict') {
+        pendingChecks = true;
       }
     }
   }

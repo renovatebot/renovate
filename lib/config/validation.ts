@@ -925,13 +925,14 @@ export async function validateConfig(
               : GlobalConfig.get('allowedHeaders');
           for (const rule of val as HostRule[]) {
             if (isNonEmptyString(rule.matchHost)) {
-              if (rule.matchHost.includes('://')) {
-                if (parseUrl(rule.matchHost) === null) {
-                  errors.push({
-                    topic: 'Configuration Error',
-                    message: `hostRules matchHost \`${rule.matchHost}\` is not a valid URL.`,
-                  });
-                }
+              if (
+                rule.matchHost.includes('://') &&
+                parseUrl(rule.matchHost) === null
+              ) {
+                errors.push({
+                  topic: 'Configuration Error',
+                  message: `hostRules matchHost \`${rule.matchHost}\` is not a valid URL.`,
+                });
               }
             } else if (isEmptyString(rule.matchHost)) {
               errors.push({

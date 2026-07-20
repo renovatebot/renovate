@@ -83,7 +83,9 @@ describe('modules/platform/scm-manager/scm-manager-helper', () => {
       'should throw expected response $expectedResponse',
       async ({ expectedResponse }: { expectedResponse: number }) => {
         httpMock.scope(endpoint).get('/me').reply(expectedResponse);
-        await expect(getCurrentUser(token)).rejects.toThrow();
+        await expect(getCurrentUser(token)).rejects.toThrow(
+          'Request failed with status code',
+        );
       },
     );
   });
@@ -112,9 +114,9 @@ describe('modules/platform/scm-manager/scm-manager-helper', () => {
           .get(`/repositories/${repo.namespace}/${repo.name}`)
           .reply(expectedResponse);
 
-        await expect(
-          getRepo(`${repo.namespace}/${repo.name}`),
-        ).rejects.toThrow();
+        await expect(getRepo(`${repo.namespace}/${repo.name}`)).rejects.toThrow(
+          'Request failed with status code',
+        );
       },
     );
   });
@@ -146,7 +148,9 @@ describe('modules/platform/scm-manager/scm-manager-helper', () => {
           .get('/repositories?pageSize=1000000')
           .reply(expectedResponse);
 
-        await expect(getAllRepos()).rejects.toThrow();
+        await expect(getAllRepos()).rejects.toThrow(
+          'Request failed with status code',
+        );
       },
     );
   });
@@ -177,7 +181,9 @@ describe('modules/platform/scm-manager/scm-manager-helper', () => {
           .get('/config/git/default/repo/default-branch')
           .reply(expectedResponse);
 
-        await expect(getDefaultBranch(repo)).rejects.toThrow();
+        await expect(getDefaultBranch(repo)).rejects.toThrow(
+          'Request failed with status code',
+        );
       },
     );
   });
@@ -239,7 +245,7 @@ describe('modules/platform/scm-manager/scm-manager-helper', () => {
 
         await expect(
           getAllRepoPrs(`${repo.namespace}/${repo.name}`, true),
-        ).rejects.toThrow();
+        ).rejects.toThrow('Request failed with status code');
       },
     );
   });
@@ -274,7 +280,7 @@ describe('modules/platform/scm-manager/scm-manager-helper', () => {
 
         await expect(
           getRepoPr(`${repo.namespace}/${repo.name}`, 1337),
-        ).rejects.toThrow();
+        ).rejects.toThrow('Request failed with status code');
       },
     );
   });
@@ -333,7 +339,7 @@ describe('modules/platform/scm-manager/scm-manager-helper', () => {
             description: 'PR description',
             status: 'OPEN',
           }),
-        ).rejects.toThrow();
+        ).rejects.toThrow('Request failed with status code');
       },
     );
   });
@@ -395,7 +401,7 @@ describe('modules/platform/scm-manager/scm-manager-helper', () => {
             description: 'PR description',
             status: 'OPEN',
           }),
-        ).rejects.toThrow();
+        ).rejects.toThrow('Request failed with status code');
       },
     );
   });

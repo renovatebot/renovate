@@ -17,7 +17,10 @@ export function makeTimingReport(data: number[]): TimingStatsReport {
   const count = data.length;
   const totalMs = data.reduce((a, c) => a + c, 0);
   const avgMs = count ? Math.round(totalMs / count) : 0;
-  const maxMs = Math.max(0, ...data);
+  let maxMs = 0;
+  for (const duration of data) {
+    maxMs = Math.max(maxMs, duration);
+  }
   const sorted = data.sort((a, b) => a - b);
   const medianMs = count ? sorted[Math.floor(count / 2)] : 0;
   return { count, avgMs, medianMs, maxMs, totalMs };
