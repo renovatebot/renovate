@@ -110,8 +110,8 @@ We recommend you use the `major.minor.patch` tagging scheme, so change `myimage:
 This way you can see the changes in Renovate PRs.
 You can see the difference between a PR that upgrades `myimage` from `1.1.1` to `1.1.2` and a PR that changes the contents of the version you already use (`1.1.1`).
 
-By default, Renovate will upgrade `minor` and `patch` versions, so from `1.2.0` to `1.2.1`, but _not_ upgrade `major` versions.
-If you wish to enable `major` versions: add the preset `docker:enableMajor` to the `extends` array in your `renovate.json` file.
+By default, Renovate will upgrade `major`, `minor` and `patch` versions.
+If you do _not_ want `major` updates: add the preset `docker:disableMajor` to the `extends` array in your `renovate.json` file.
 
 Renovate has some Docker-specific intelligence when it comes to versions.
 For example:
@@ -189,9 +189,9 @@ Add all paths to ignore into the `ignorePaths` configuration field. e.g.
 }
 ```
 
-### Enable Docker major updates
+### Disable Docker major updates
 
-Add `"docker:enableMajor"` to your `extends` array.
+Add `"docker:disableMajor"` to your `extends` array.
 
 ### Disable digest pinning
 
