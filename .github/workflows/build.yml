@@ -722,7 +722,7 @@ jobs:
       - name: Setup uv
         uses: astral-sh/setup-uv@11f9893b081a58869d3b5fccaea48c9e9e46f990 # v8.3.2
         with:
-          version: 0.11.29
+          version: 0.11.30
           enable-cache: true
           cache-python: true
 
@@ -859,7 +859,7 @@ jobs:
       - name: Setup uv
         uses: astral-sh/setup-uv@11f9893b081a58869d3b5fccaea48c9e9e46f990 # v8.3.2
         with:
-          version: 0.11.29
+          version: 0.11.30
           enable-cache: true
           cache-python: true
 
