@@ -28,10 +28,10 @@ describe('config/migrations/custom/branch-name-migration', () => {
     await expect(BranchNameMigration).toMigrate(
       {
         branchName: true,
-      } as any,
+      },
       {
         branchName: true,
-      } as any,
+      },
       false,
     );
   });
