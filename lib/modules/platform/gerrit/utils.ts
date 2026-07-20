@@ -175,7 +175,7 @@ export function mapBranchStatusToLabel(
     case 'red':
       return Math.min(...numbers);
   }
-  /* v8 ignore next */
+  /* v8 ignore next -- only reachable for the artificial 'UNKNOWN' state, which callers never pass */
   return label.default_value;
 }
 

@@ -137,6 +137,24 @@ describe('util/git/index', { timeout: 30000 }, () => {
     await repo.addConfig('user.email', 'author2@example.com');
     await repo.commit('second commit', undefined, { '--allow-empty': null });
 
+    // Renovate author, foreign committer (e.g. rebase/amend by someone else)
+    await repo.checkoutBranch('renovate/different_committer', defaultBranch);
+    await repo.addConfig('user.email', 'Jest@example.com');
+    await fs.writeFile(`${base.path}/committer_file`, 'test');
+    await repo.add(['committer_file']);
+    await repo
+      .env({ GIT_COMMITTER_EMAIL: 'someone-else@example.com' })
+      .commit('committed by someone else');
+
+    // Renovate author, GitHub platformCommit committer
+    await repo.checkoutBranch('renovate/platform_commit', defaultBranch);
+    await repo.addConfig('user.email', 'Jest@example.com');
+    await fs.writeFile(`${base.path}/platform_commit_file`, 'test');
+    await repo.add(['platform_commit_file']);
+    await repo
+      .env({ GIT_COMMITTER_EMAIL: 'noreply@github.com' })
+      .commit('platform api commit');
+
     await repo.checkout(defaultBranch);
   });
 
@@ -159,6 +177,7 @@ describe('util/git/index', { timeout: 30000 }, () => {
     });
     git.setUserRepoConfig({ branchPrefix: 'renovate/' });
     git.setGitAuthor('Jest <Jest@example.com>');
+    git.setPlatformIgnoredAuthors([]);
     setNoVerify([]);
     await git.syncGit();
     // override some local git settings for better testing
@@ -444,11 +463,47 @@ describe('util/git/index', { timeout: 30000 }, () => {
       ).toBeTrue();
     });
 
+    it('should return true when committer is different from author', async () => {
+      expect(
+        await git.isBranchModified(
+          'renovate/different_committer',
+          defaultBranch,
+        ),
+      ).toBeTrue();
+    });
+
+    it('should return false for ignored platformCommit committer', async () => {
+      git.setPlatformIgnoredAuthors(['noreply@github.com']);
+      expect(
+        await git.isBranchModified('renovate/platform_commit', defaultBranch),
+      ).toBeFalse();
+    });
+
     it('should return value stored in modifiedCacheResult', async () => {
       modifiedCache.getCachedModifiedResult.mockReturnValue(true);
       expect(
         await git.isBranchModified('renovate/future_branch', defaultBranch),
       ).toBeTrue();
+    });
+
+    it('should not be affected by new commits on the base branch', async () => {
+      // Add a commit to the base branch from a different author,
+      // causing the branches to diverge
+      const local = simpleGit(tmpDir.path);
+      await local.checkout(defaultBranch);
+      await local.addConfig('user.email', 'other-dev@example.com');
+      await fs.writeFile(`${tmpDir.path}/diverge_file`, 'diverge');
+      await local.add(['diverge_file']);
+      await local.commit('diverge commit');
+      await local.push('origin', defaultBranch);
+      // Re-init so Renovate picks up the new origin state
+      await git.initRepo({ url: origin.path });
+      git.setGitAuthor('Jest <Jest@example.com>');
+      await git.syncGit();
+
+      expect(
+        await git.isBranchModified('renovate/future_branch', defaultBranch),
+      ).toBeFalse();
     });
   });
 
@@ -621,12 +676,12 @@ describe('util/git/index', { timeout: 30000 }, () => {
 
   describe('mergeToLocal(branchName)', () => {
     it('should perform a branch merge without push', async () => {
-      expect(fs.existsSync(`${tmpDir.path}/future_file`)).toBeFalse();
+      expect(await fs.pathExists(`${tmpDir.path}/future_file`)).toBeFalse();
       const pushSpy = vi.spyOn(SimpleGit.prototype, 'push');
 
       await git.mergeToLocal('renovate/future_branch');
 
-      expect(fs.existsSync(`${tmpDir.path}/future_file`)).toBeTrue();
+      expect(await fs.pathExists(`${tmpDir.path}/future_file`)).toBeTrue();
       expect(pushSpy).toHaveBeenCalledTimes(0);
     });
 
@@ -648,13 +703,13 @@ describe('util/git/index', { timeout: 30000 }, () => {
       const local = simpleGit(tmpDir.path);
       await local.checkout(defaultBranch);
 
-      expect(fs.existsSync(`${tmpDir.path}/local_only_file`)).toBeFalse();
+      expect(await fs.pathExists(`${tmpDir.path}/local_only_file`)).toBeFalse();
       const fetchSpy = vi.spyOn(SimpleGit.prototype, 'fetch');
       const pushSpy = vi.spyOn(SimpleGit.prototype, 'push');
 
       await git.mergeToLocal('renovate/local_only_branch');
 
-      expect(fs.existsSync(`${tmpDir.path}/local_only_file`)).toBeTrue();
+      expect(await fs.pathExists(`${tmpDir.path}/local_only_file`)).toBeTrue();
       expect(fetchSpy).not.toHaveBeenCalled();
       expect(pushSpy).not.toHaveBeenCalled();
     });
@@ -1430,8 +1485,8 @@ describe('util/git/index', { timeout: 30000 }, () => {
   });
 
   describe('Renovate non-branch refs', () => {
-    const lsRenovateRefs = async (): Promise<string[]> =>
-      (
+    async function lsRenovateRefs(): Promise<string[]> {
+      return (
         await simpleGit(tmpDir.path).raw([
           'ls-remote',
           'origin',
@@ -1441,6 +1496,7 @@ describe('util/git/index', { timeout: 30000 }, () => {
         .split(newlineRegex)
         .map((line) => line.replace(regEx(/[0-9a-f]+\s+/i), ''))
         .filter(Boolean);
+    }
 
     it('creates renovate ref in default section', async () => {
       const commit = git.getBranchCommit('develop')!;

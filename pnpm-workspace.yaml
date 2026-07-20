@@ -17,14 +17,14 @@ dedupePeers: true
 
 catalog:
   esbuild: 0.28.1
-  tar: 7.5.19
+  tar: 7.5.20
   vite: 8.1.4
 
 overrides:
   '@aws-sdk/xml-builder@3.972.4>fast-xml-parser': '^5.3.6'
   '@yarnpkg/core@4.5.0>tar': 'catalog:'
   esbuild: 'catalog:'
-  protobufjs@8.0.1: 8.7.0
+  protobufjs@8.0.1: 8.7.1
   vite: 'catalog:'
 
 ignoredOptionalDependencies:

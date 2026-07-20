@@ -1,4 +1,5 @@
-import { hostRules, partial } from '~test/util.ts';
+import { hostRules } from '~test/host-rules.ts';
+import { partial } from '~test/util.ts';
 import { CONFIG_GIT_URL_UNAVAILABLE } from '../../../constants/error-messages.ts';
 import type { BranchStatus } from '../../../types/index.ts';
 import { setBaseUrl } from '../../../util/http/gerrit.ts';
@@ -14,8 +15,6 @@ import type { GerritChangeStatus } from './types.ts';
 import * as utils from './utils.ts';
 import { mapBranchStatusToLabel } from './utils.ts';
 
-vi.mock('../../../util/host-rules.ts');
-
 const baseUrl = 'https://gerrit.example.com';
 
 describe('modules/platform/gerrit/utils', () => {
@@ -28,7 +27,7 @@ describe('modules/platform/gerrit/utils', () => {
   describe('getGerritRepoUrl()', () => {
     describe('no gitUrl provided', () => {
       it('create a git url with username/password', () => {
-        hostRules.find.mockReturnValue({
+        hostRules.add({
           username: 'abc',
           password: '123',
         });
@@ -42,7 +41,6 @@ describe('modules/platform/gerrit/utils', () => {
       });
 
       it('create a git url without username/password', () => {
-        hostRules.find.mockReturnValue({});
         expect(() =>
           utils.getGerritRepoUrl('web/apps', baseUrl, undefined, 'abc'),
         ).toThrow('Init: You must configure a Gerrit Server username/password');
@@ -56,7 +54,7 @@ describe('modules/platform/gerrit/utils', () => {
     });
     describe('default gitUrl', () => {
       it('create a git url with username/password', () => {
-        hostRules.find.mockReturnValue({
+        hostRules.add({
           username: 'abc',
           password: '123',
         });
@@ -71,7 +69,7 @@ describe('modules/platform/gerrit/utils', () => {
     });
     describe('endpoint gitUrl', () => {
       it('create a git url with username/password', () => {
-        hostRules.find.mockReturnValue({
+        hostRules.add({
           username: 'abc',
           password: '123',
         });
@@ -86,7 +84,7 @@ describe('modules/platform/gerrit/utils', () => {
     });
     describe('ssh gitUrl', () => {
       it('create a simple url', () => {
-        hostRules.find.mockReturnValue({
+        hostRules.add({
           username: 'abc',
           password: '123',
         });
@@ -100,7 +98,7 @@ describe('modules/platform/gerrit/utils', () => {
       });
 
       it('create a url with trailing slash', () => {
-        hostRules.find.mockReturnValue({
+        hostRules.add({
           username: 'abc',
           password: '123',
         });
@@ -114,7 +112,7 @@ describe('modules/platform/gerrit/utils', () => {
       });
 
       it('create a url when base has context', () => {
-        hostRules.find.mockReturnValue({
+        hostRules.add({
           username: 'abc',
           password: '123',
         });
