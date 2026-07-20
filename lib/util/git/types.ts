@@ -12,6 +12,18 @@ export interface GitAuthor {
 
 export type GitNoVerifyOption = 'commit' | 'push';
 
+/**
+ * Represents a virtual branch tracked as `refs/remotes/origin/<name>`.
+ * Used by platforms like Gerrit where changes are represented as refs
+ * (e.g., refs/changes/34/1234/1) instead of regular branches.
+ */
+export interface VirtualBranch {
+  /** The ref this virtual branch is fetched from (e.g., 'refs/changes/34/1234/1') */
+  ref: string;
+  /** The commit SHA this virtual branch points to */
+  sha: LongCommitSha;
+}
+
 export interface StorageConfig {
   currentBranch?: string;
   defaultBranch?: string;
@@ -21,6 +33,12 @@ export interface StorageConfig {
   cloneSubmodules?: boolean;
   cloneSubmodulesFilter?: string[];
   fullClone?: boolean;
+  /**
+   * Virtual branches to initialize from non-standard refs (e.g., Gerrit change refs).
+   * Each virtual branch is fetched and stored as refs/remotes/origin/<name>.
+   * Keyed by branch name.
+   */
+  virtualBranches?: Record<string, VirtualBranch>;
 }
 
 export interface LocalConfig extends StorageConfig {
@@ -28,11 +46,14 @@ export interface LocalConfig extends StorageConfig {
   currentBranch: string;
   currentBranchSha: LongCommitSha;
   branchCommits: Record<string, LongCommitSha>;
+  /** Single registry of virtual branches, always initialized in initRepo. Keyed by branch name. */
+  virtualBranches: Record<string, VirtualBranch>;
   branchIsModified: Record<string, boolean>;
   commitBranches: Record<string, string[]>;
   ignoredAuthors: string[];
   gitAuthorName?: string | null;
   gitAuthorEmail?: EmailAddress;
+  fileModeEnabled?: boolean;
 
   writeGitDone?: boolean;
 }

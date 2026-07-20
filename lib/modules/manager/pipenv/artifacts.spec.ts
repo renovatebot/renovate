@@ -3,14 +3,17 @@ import upath from 'upath';
 import { mockDeep } from 'vitest-mock-extended';
 import { envMock, mockExecAll } from '~test/exec-util.ts';
 import { Fixtures } from '~test/fixtures.ts';
+import { hostRules } from '~test/host-rules.ts';
 import { env, git, partial } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
-import type { RepoGlobalConfig } from '../../../config/types.ts';
+import type {
+  InternalGlobalConfigOptions,
+  RepoGlobalConfig,
+} from '../../../config/types.ts';
 import { logger } from '../../../logger/index.ts';
 import * as docker from '../../../util/exec/docker/index.ts';
 import type { ExtraEnv, Opt } from '../../../util/exec/types.ts';
 import type { StatusResult } from '../../../util/git/types.ts';
-import { find as _find } from '../../../util/host-rules.ts';
 import * as _datasource from '../../datasource/index.ts';
 import type { UpdateArtifactsConfig } from '../types.ts';
 import {
@@ -31,17 +34,15 @@ vi.hoisted(() => {
 vi.mock('fs-extra', () => fixtures.fsExtra());
 vi.mock('../../../util/exec/env.ts', () => mockDeep());
 vi.mock('../../../util/git/index.ts', () => mockDeep());
-vi.mock('../../../util/host-rules.ts', () => mockDeep());
 vi.mock('../../../util/http/index.ts', () => mockDeep());
 vi.mock('../../datasource/index.ts', () => mockDeep());
 
 const datasource = vi.mocked(_datasource);
-const find = vi.mocked(_find);
 const fsExtra = vi.mocked(_fsExtra);
 
 process.env.CONTAINERBASE = 'true';
 
-const adminConfig: RepoGlobalConfig = {
+const adminConfig: RepoGlobalConfig & InternalGlobalConfigOptions = {
   // `join` fixes Windows CI
   localDir: upath.join(upath.join('/tmp/github/some/repo')),
   cacheDir: upath.join(upath.join('/tmp/renovate/cache')),
@@ -52,7 +53,7 @@ const dockerAdminConfig = {
   ...adminConfig,
   binarySource: 'docker',
   dockerSidecarImage: 'ghcr.io/renovatebot/base-image',
-} satisfies RepoGlobalConfig;
+} satisfies RepoGlobalConfig & InternalGlobalConfigOptions;
 
 const config: UpdateArtifactsConfig = {};
 const lockMaintenanceConfig = { ...config, isLockFileMaintenance: true };
@@ -1100,7 +1101,8 @@ describe('modules/manager/pipenv/artifacts', () => {
       }),
     );
 
-    find.mockReturnValueOnce({
+    hostRules.add({
+      matchHost: 'mypypi.example.com',
       username: 'usernameOne',
       password: 'passwordTwo',
     });
@@ -1183,7 +1185,8 @@ describe('modules/manager/pipenv/artifacts', () => {
       }),
     );
 
-    find.mockReturnValueOnce({
+    hostRules.add({
+      matchHost: 'mypypi.example.com',
       username: 'usernameOne',
       password: 'passwordTwo',
     });

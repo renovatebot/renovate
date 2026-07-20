@@ -206,21 +206,23 @@ export async function initPlatform({
     );
     renovateUsername = platformConfig.userDetails.username;
   }
+
+  let ghHostname: string;
+  /* v8 ignore next -- false negative due to V8/source-map artifact */
+  if (platformConfig.isGheCloud) {
+    ghHostname = 'ghe.com';
+  } else if (platformConfig.isGhe) {
+    // valid url ensured at the function start
+    const parsedEndpoint = parseUrl(platformConfig.endpoint)!;
+    ghHostname = parsedEndpoint.hostname;
+  } else {
+    ghHostname = 'github.com';
+  }
+
   let discoveredGitAuthor: string | undefined;
   if (!gitAuthor) {
     if (platformConfig.isGHApp) {
       platformConfig.userDetails ??= await getAppDetails(token);
-      let ghHostname: string;
-      /* v8 ignore next -- false negative due to V8/source-map artifact */
-      if (platformConfig.isGheCloud) {
-        ghHostname = 'ghe.com';
-      } else if (platformConfig.isGhe) {
-        // valid url ensured at the function start
-        const parsedEndpoint = parseUrl(platformConfig.endpoint)!;
-        ghHostname = parsedEndpoint.hostname;
-      } else {
-        ghHostname = 'github.com';
-      }
       discoveredGitAuthor = `${platformConfig.userDetails.name} <${platformConfig.userDetails.id}+${platformConfig.userDetails.username}@users.noreply.${ghHostname}>`;
     } else {
       platformConfig.userDetails ??= await getUserDetails(
@@ -236,6 +238,9 @@ export async function initPlatform({
       }
     }
   }
+
+  git.setPlatformIgnoredAuthors([`noreply@${ghHostname}`]);
+
   logger.debug({ platformConfig, renovateUsername }, 'Platform config');
   const platformResult: PlatformResult = {
     endpoint: platformConfig.endpoint,
@@ -1788,6 +1793,14 @@ export async function ensureComment({
   }
 }
 
+function byTopic(comment: Comment, topic: string): boolean {
+  return comment.body.startsWith(`### ${topic}\n\n`);
+}
+
+function byContent(comment: Comment, content: string): boolean {
+  return comment.body.trim() === content;
+}
+
 export async function ensureCommentRemoval(
   deleteConfig: EnsureCommentRemovalConfig,
 ): Promise<void> {
@@ -1802,13 +1815,11 @@ export async function ensureCommentRemoval(
 
   // v8 ignore else -- TODO: add test #40625
   if (deleteConfig.type === 'by-topic') {
-    const byTopic = (comment: Comment): boolean =>
-      comment.body.startsWith(`### ${deleteConfig.topic}\n\n`);
-    commentId = comments.find(byTopic)?.id;
+    const topic = deleteConfig.topic;
+    commentId = comments.find((comment) => byTopic(comment, topic))?.id;
   } else if (deleteConfig.type === 'by-content') {
-    const byContent = (comment: Comment): boolean =>
-      comment.body.trim() === deleteConfig.content;
-    commentId = comments.find(byContent)?.id;
+    const content = deleteConfig.content;
+    commentId = comments.find((comment) => byContent(comment, content))?.id;
   }
 
   try {

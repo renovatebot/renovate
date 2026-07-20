@@ -93,7 +93,8 @@ export async function initPlatform({
   }
   if (endpoint && endpoint !== BITBUCKET_PROD_ENDPOINT) {
     logger.warn(
-      `Init: Bitbucket Cloud endpoint should generally be ${BITBUCKET_PROD_ENDPOINT} but is being configured to a different value. Did you mean to use Bitbucket Server?`,
+      { endpoint, defaultEndpoint: BITBUCKET_PROD_ENDPOINT },
+      'Init: Bitbucket Cloud endpoint should generally be the default but is being configured to a different value. Did you mean to use Bitbucket Server?',
     );
     defaults.endpoint = endpoint;
   }
@@ -441,8 +442,9 @@ export async function getPr(prNo: number): Promise<Pr | null> {
   return res;
 }
 
-const escapeHash = (input: string): string =>
-  input?.replace(regEx(/#/g), '%23');
+function escapeHash(input: string): string {
+  return input?.replace(regEx(/#/g), '%23');
+}
 
 // Return the commit SHA for a branch
 async function getBranchCommit(

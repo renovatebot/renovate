@@ -589,7 +589,7 @@ async function checkForPendingVersions(
           branchName: config.branchName,
           depName: dep.depName,
         },
-        `No depName found after updating '${packageFileName}'`,
+        'No depName found after updating package file',
       );
       throw new Error(WORKER_FILE_UPDATE_FAILED);
     }
@@ -611,7 +611,7 @@ async function checkForPendingVersions(
           branchName: config.branchName,
           depName,
         },
-        `Could not determine resolved version for '${depName}' after updating '${packageFileName}'; skipping pending-version check`,
+        'Could not determine resolved version after updating package file; skipping pending-version check',
       );
       continue;
     }
@@ -629,7 +629,7 @@ async function checkForPendingVersions(
             newVersion: resolvedVersion,
             expectedVersion,
           },
-          `No expectedVersion found for '${depName}' after updating '${packageFileName}'`,
+          'No expectedVersion found after updating package file',
         );
         continue;
       }
