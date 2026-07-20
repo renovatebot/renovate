@@ -30,16 +30,8 @@ export const presets: Record<string, Preset> = {
       {
         internalChecksFilter: 'strict',
         matchDatasources: ['crate'],
+        matchUpdateTypes: ['major', 'minor', 'patch'],
         minimumReleaseAge: '3 days',
-      },
-      {
-        description: 'Do not require Minimum Release Age for package pinning',
-        matchDatasources: ['crate'],
-        matchUpdateTypes: ['pin'],
-        minimumReleaseAge: null,
-        prBodyNotes: [
-          "⚠️ Renovate's pin functionality [does not currently](https://github.com/renovatebot/renovate/issues/40288) wire in the release age for a package, so the Minimum Release Age checks can apply. You will need to manually validate the Minimum Release Age for these package(s).",
-        ],
       },
     ],
   },
