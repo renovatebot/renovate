@@ -53,6 +53,7 @@ export function mergeYarnConfigs(
   }
 
   return {
+    ...childConfig,
     npmRegistryServer:
       childConfig.npmRegistryServer ?? parentConfig.npmRegistryServer,
     npmScopes: {
