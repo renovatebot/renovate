@@ -19,6 +19,7 @@ import { resolveConfigPresets } from '../../config/presets/index.ts';
 import { validateConfigSecretsAndVariables } from '../../config/secrets.ts';
 import type {
   AllConfig,
+  InternalGlobalConfigOptions,
   RenovateConfig,
   RenovateRepository,
   RepoGlobalConfig,
@@ -46,9 +47,11 @@ import { parseConfigs } from './config/parse/index.ts';
 import { globalFinalize, globalInitialize } from './initialize.ts';
 import { isLimitReached } from './limits.ts';
 
-function applyGlobalOption<K extends keyof RepoGlobalConfig>(
-  target: RepoGlobalConfig,
-  source: RepoGlobalConfig,
+function applyGlobalOption<
+  K extends keyof RepoGlobalConfig | keyof InternalGlobalConfigOptions,
+>(
+  target: RepoGlobalConfig & InternalGlobalConfigOptions,
+  source: RepoGlobalConfig & InternalGlobalConfigOptions,
   key: K,
 ): void {
   target[key] = source[key];

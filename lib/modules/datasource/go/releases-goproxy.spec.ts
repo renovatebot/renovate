@@ -1,14 +1,10 @@
 import { codeBlock } from 'common-tags';
-import { mockDeep } from 'vitest-mock-extended';
 import { Fixtures } from '~test/fixtures.ts';
+import { hostRules } from '~test/host-rules.ts';
 import * as httpMock from '~test/http-mock.ts';
-import * as _hostRules from '../../../util/host-rules.ts';
 import { GithubReleasesDatasource } from '../github-releases/index.ts';
 import { GithubTagsDatasource } from '../github-tags/index.ts';
 import { GoProxyDatasource } from './releases-goproxy.ts';
-
-const hostRules = vi.mocked(_hostRules);
-vi.mock('../../../util/host-rules.ts', () => mockDeep());
 
 const datasource = new GoProxyDatasource();
 
@@ -19,10 +15,6 @@ describe('modules/datasource/go/releases-goproxy', () => {
   );
 
   const githubGetTags = vi.spyOn(GithubTagsDatasource.prototype, 'getReleases');
-
-  beforeEach(() => {
-    hostRules.find.mockReturnValue({});
-  });
 
   it('encodeCase', () => {
     expect(datasource.encodeCase('foo')).toBe('foo');
@@ -209,7 +201,7 @@ describe('modules/datasource/go/releases-goproxy', () => {
       'handles pipe fallback when abortOnError is $abortOnError',
       async ({ abortOnError }: { abortOnError: boolean }) => {
         process.env.GOPROXY = `https://example.com|${baseUrl}`;
-        hostRules.find.mockReturnValue({ abortOnError });
+        hostRules.add({ abortOnError });
 
         httpMock
           .scope('https://example.com/github.com/google/btree')
@@ -428,7 +420,7 @@ describe('modules/datasource/go/releases-goproxy', () => {
       'handles major releases with abortOnError is $abortOnError',
       async ({ abortOnError }: { abortOnError: boolean }) => {
         process.env.GOPROXY = baseUrl;
-        hostRules.find.mockReturnValue({ abortOnError });
+        hostRules.add({ abortOnError });
 
         httpMock
           .scope(`${baseUrl}/github.com/google/btree`)

@@ -36,37 +36,45 @@ function vtrim<T = unknown>(version: T): string | T {
   return version;
 }
 
-const equals = (left: string, right: string): boolean =>
-  eq(vtrim(left), vtrim(right));
+function equals(left: string, right: string): boolean {
+  return eq(vtrim(left), vtrim(right));
+}
 
-const getMajor = (version: string): number =>
-  parseVersion(vtrim(version)).major;
-const getMinor = (version: string): number =>
-  parseVersion(vtrim(version)).minor;
-const getPatch = (version: string): number =>
-  parseVersion(vtrim(version)).patch;
+function getMajor(version: string): number {
+  return parseVersion(vtrim(version)).major;
+}
+function getMinor(version: string): number {
+  return parseVersion(vtrim(version)).minor;
+}
+function getPatch(version: string): number {
+  return parseVersion(vtrim(version)).patch;
+}
 
-export const isVersion = (version: string): boolean => !!valid(vtrim(version));
-const isGreaterThan = (left: string, right: string): boolean =>
-  gt(vtrim(left), vtrim(right));
-const isLessThanRange = (version: string, range: string): boolean =>
-  !!ltr(vtrim(version), vtrim(range));
+export function isVersion(version: string): boolean {
+  return !!valid(vtrim(version));
+}
+function isGreaterThan(left: string, right: string): boolean {
+  return gt(vtrim(left), vtrim(right));
+}
+function isLessThanRange(version: string, range: string): boolean {
+  return !!ltr(vtrim(version), vtrim(range));
+}
 
-const isSingleVersion = (range: string): boolean => {
+function isSingleVersion(range: string): boolean {
   const { version, operator } = parseRange(vtrim(range));
 
   return operator
     ? isVersion(version) && isSingleOperator(operator)
     : isVersion(version);
-};
+}
 
 function isStable(version: string): boolean {
   const v = vtrim(version);
   return parseVersion(v).prerelease ? false : isVersion(v);
 }
 
-export const isValid = (input: string): boolean =>
-  input
+export function isValid(input: string): boolean {
+  return input
     .split(',')
     .map((piece) => vtrim(piece.trim()))
     .every((range) => {
@@ -76,9 +84,11 @@ export const isValid = (input: string): boolean =>
         ? isVersion(version) && isValidOperator(operator)
         : isVersion(version);
     });
+}
 
-export const matches = (version: string, range: string): boolean =>
-  satisfies(vtrim(version), vtrim(range));
+export function matches(version: string, range: string): boolean {
+  return satisfies(vtrim(version), vtrim(range));
+}
 
 function getSatisfyingVersion(
   versions: string[],
@@ -94,16 +104,16 @@ function minSatisfyingVersion(
   return minSatisfying(versions.map(vtrim), vtrim(range));
 }
 
-const getPinnedValue = (value: string): string => {
+function getPinnedValue(value: string): string {
   return vtrim(value);
-};
+}
 
-const getNewValue = ({
+function getNewValue({
   currentValue,
   rangeStrategy,
   currentVersion,
   newVersion,
-}: NewValueConfig): string | null => {
+}: NewValueConfig): string | null {
   let newValue = null;
   if (isVersion(currentValue)) {
     newValue =
@@ -164,10 +174,11 @@ const getNewValue = ({
       .join(',');
   }
   return newValue;
-};
+}
 
-export const sortVersions = (left: string, right: string): number =>
-  gt(vtrim(left), vtrim(right)) ? 1 : -1;
+export function sortVersions(left: string, right: string): number {
+  return gt(vtrim(left), vtrim(right)) ? 1 : -1;
+}
 
 export const api: VersioningApi = {
   equals,

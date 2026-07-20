@@ -3,7 +3,10 @@ import upath from 'upath';
 import { Fixtures } from '~test/fixtures.ts';
 import { fs } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
-import type { RepoGlobalConfig } from '../../../config/types.ts';
+import type {
+  InternalGlobalConfigOptions,
+  RepoGlobalConfig,
+} from '../../../config/types.ts';
 import * as hashicorp from '../../versioning/hashicorp/index.ts';
 import { extractPackageFile } from './index.ts';
 
@@ -20,7 +23,7 @@ const lockedVersionLockfile = Fixtures.get('rangeStrategy.hcl');
 const terraformBlock = Fixtures.get('terraformBlock.tf');
 const tfeWorkspaceBlock = Fixtures.get('tfeWorkspace.tf');
 
-const adminConfig: RepoGlobalConfig = {
+const adminConfig: RepoGlobalConfig & InternalGlobalConfigOptions = {
   // `join` fixes Windows CI
   localDir: upath.join('/tmp/github/some/repo'),
   cacheDir: upath.join('/tmp/cache'),
