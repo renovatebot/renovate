@@ -1,6 +1,6 @@
 {
   "$schema": "https://raw.githubusercontent.com/oxc-project/oxc/main/npm/oxlint/configuration_schema.json",
-  "plugins": ["import", "promise", "unicorn", "typescript", "vitest"],
+  "plugins": ["import", "node", "promise", "unicorn", "typescript", "vitest"],
   "jsPlugins": ["./tools/lint/rules.js"],
   "options": {
     "typeAware": true
@@ -186,6 +186,12 @@
     "vitest/require-to-throw-message": "error"
   },
   "overrides": [
+    {
+      "files": ["tools/**", "**/*.spec.ts"],
+      "rules": {
+        "node/no-sync": "error"
+      }
+    },
     {
       "files": ["**/*.spec.ts", "test/**"],
       "rules": {
