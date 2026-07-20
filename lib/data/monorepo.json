@@ -474,6 +474,7 @@
     ],
     "jetty": "https://github.com/jetty/jetty.project",
     "jna": "https://github.com/java-native-access/jna",
+    "joint": "https://github.com/clientIO/joint",
     "json-smart-v2": "https://github.com/netplex/json-smart-v2",
     "jsplumb": "https://github.com/jsplumb/jsplumb",
     "junior": "https://github.com/getsentry/junior",
