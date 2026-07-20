@@ -73,7 +73,7 @@ interface RepoReport {
   dependencyDashboardIssue?: number | null;
   /**
    * Path to the repository's Renovate config file (ex: `.github/renovate.json5`).
-   * Empty when the repository has no in-repo config file.
+   * Omitted when the repository has no in-repo config file.
    */
   configFileName?: string;
   /**

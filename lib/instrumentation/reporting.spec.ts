@@ -142,6 +142,20 @@ describe('instrumentation/reporting', () => {
     ).toBeNull();
   });
 
+  it('omits configFileName when the repo has no in-repo config file', () => {
+    const config: RenovateConfig = {
+      repository: 'myOrg/myRepo',
+      reportType: 'logging',
+      defaultBranch: 'main',
+    };
+
+    addRepositoryMetadata(config, '');
+
+    expect(getReport().repositories['myOrg/myRepo']).not.toHaveProperty(
+      'configFileName',
+    );
+  });
+
   it('adds onboarding status with an open onboarding PR', () => {
     GlobalConfig.set({ onboardingBranch: 'renovate/configure' });
     const config: RenovateConfig = {

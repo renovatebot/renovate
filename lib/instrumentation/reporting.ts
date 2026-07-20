@@ -53,7 +53,10 @@ export function addRepositoryMetadata(
   repoReport.endpoint = GlobalConfig.get('endpoint');
   repoReport.defaultBranch = config.defaultBranch;
   repoReport.dependencyDashboardIssue = config.dependencyDashboardIssue ?? null;
-  repoReport.configFileName = configFileName;
+  // Omit when there is no in-repo config file (cache stores an empty string).
+  if (configFileName) {
+    repoReport.configFileName = configFileName;
+  }
 }
 
 export function addOnboardingStatus(
