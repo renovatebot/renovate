@@ -336,6 +336,61 @@ describe('integration/gerrit/index', { timeout: 120_000 }, () => {
     );
   });
 
+  it('respects commitHourlyLimit and allows rebase hashtag to bypass it', async () => {
+    // Arrange — two separate update branches, but only one commit allowed per hour
+    const REPO = 'test-gerrit-commit-hourly-limit';
+    await seed(REPO, 'test-commit-hourly', {
+      deps: { semver: '7.0.0', lodash: '4.0.0' },
+      renovate: { commitHourlyLimit: 1 },
+    });
+
+    // Act — first run creates at most one commit this hour
+    await renovate([REPO]);
+
+    // Assert
+    expect(await getOpenChanges(REPO)).toHaveLength(1);
+
+    // Act — second run still blocked by hourly commit count (cache/SCM)
+    await renovate([REPO]);
+
+    // Assert
+    const open = await getOpenChanges(REPO);
+    expect(open).toHaveLength(1);
+
+    // Arrange — move master so an automatic rebase would normally be needed
+    const changeNum = open[0]._number;
+    const originalRev = (await getChange(changeNum, ['CURRENT_REVISION']))
+      .current_revision!;
+    await pushFilesToGerrit(REPO, {
+      'package.json': pkgJson(
+        'test-commit-hourly',
+        { semver: '7.0.0', lodash: '4.0.0' },
+        { extra: 'force-behind-base' },
+      ),
+    });
+
+    // Act — automatic rebase is also subject to commitHourlyLimit
+    await renovate([REPO]);
+
+    // Assert — no new commit on the existing change; second dep still not opened
+    expect(
+      (await getChange(changeNum, ['CURRENT_REVISION'])).current_revision,
+    ).toEqual(originalRev);
+    expect(await getOpenChanges(REPO)).toHaveLength(1);
+
+    // Arrange — manual rebase via Gerrit hashtag (mapped to PR labels)
+    await setHashtags(changeNum, ['rebase']);
+
+    // Act — manual rebase bypasses commitHourlyLimit
+    await renovate([REPO]);
+
+    // Assert — rebase committed despite the limit; hashtag cleared; still one change
+    const rebased = await getChange(changeNum, ['CURRENT_REVISION']);
+    expect(rebased.current_revision).not.toEqual(originalRev);
+    expect(rebased.hashtags ?? []).not.toContain('rebase');
+    expect(await getOpenChanges(REPO)).toHaveLength(1);
+  });
+
   it('groups multiple deps into one change via groupName', async () => {
     // Arrange
     const REPO = 'test-gerrit-grouped-deps';
