@@ -1,7 +1,6 @@
-import { git, partial } from '~test/util.ts';
+import { fakeSha, git, partial } from '~test/util.ts';
 import { RENOVATE_FORK_UPSTREAM } from '../../util/git/index.ts';
 import type { CommitFilesConfig } from '../../util/git/types.ts';
-import type { LongCommitSha } from '../../util/schema-utils/git.ts';
 import { DefaultGitScm } from './default-scm.ts';
 
 describe('modules/platform/default-scm', () => {
@@ -14,7 +13,7 @@ describe('modules/platform/default-scm', () => {
   });
 
   it('delegate commitAndPush to util/git', async () => {
-    git.commitFiles.mockResolvedValueOnce('sha' as LongCommitSha);
+    git.commitFiles.mockResolvedValueOnce(fakeSha('sha'));
     await defaultGitScm.commitAndPush(partial<CommitFilesConfig>());
     expect(git.commitFiles).toHaveBeenCalledTimes(1);
   });
@@ -26,7 +25,7 @@ describe('modules/platform/default-scm', () => {
   });
 
   it('delegate getBranchCommit to util/git', async () => {
-    git.getBranchCommit.mockReturnValueOnce('sha' as LongCommitSha);
+    git.getBranchCommit.mockReturnValueOnce(fakeSha('sha'));
     await defaultGitScm.getBranchCommit('branchName');
     expect(git.getBranchCommit).toHaveBeenCalledTimes(1);
   });
@@ -62,7 +61,7 @@ describe('modules/platform/default-scm', () => {
   });
 
   it('delegate checkoutBranch to util/git', async () => {
-    git.checkoutBranch.mockResolvedValueOnce('sha' as LongCommitSha);
+    git.checkoutBranch.mockResolvedValueOnce(fakeSha('sha'));
     await defaultGitScm.checkoutBranch('branchName');
     expect(git.checkoutBranch).toHaveBeenCalledTimes(1);
   });

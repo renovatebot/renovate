@@ -12,6 +12,12 @@ import {
   GitVersionType,
   PullRequestStatus,
 } from 'azure-devops-node-api/interfaces/GitInterfaces.js';
+import type {
+  PolicyConfiguration,
+  PolicyEvaluationRecord,
+  PolicyTypeRef,
+} from 'azure-devops-node-api/interfaces/PolicyInterfaces.js';
+import { PolicyEvaluationStatus } from 'azure-devops-node-api/interfaces/PolicyInterfaces.js';
 import type { IWorkItemTrackingApi } from 'azure-devops-node-api/WorkItemTrackingApi.js';
 import type { Mocked, MockedObject } from 'vitest';
 import { vi } from 'vitest';
@@ -59,6 +65,7 @@ describe('modules/platform/azure/index', () => {
     git.isBranchBehindBase.mockResolvedValue(false);
     hostRules.clear();
     hostRules.add({ token: 'token' });
+    azureHelper.getPolicyEvaluations.mockResolvedValue([]);
     await azure.initPlatform({
       endpoint: 'https://dev.azure.com/renovate12345',
       token: 'token',
@@ -1749,6 +1756,103 @@ describe('modules/platform/azure/index', () => {
   });
 
   describe('mergePr', () => {
+    it('should not complete the PR if there are pending blocking policy evaluations', async () => {
+      await initRepo({ repository: 'some/repo' });
+      const pullRequestIdMock = 12345;
+      const branchNameMock = 'test';
+      const updatePullRequestMock = vi.fn();
+      azureApi.gitApi.mockResolvedValueOnce(
+        partial<IGitApi>({
+          getPullRequestById: vi.fn(),
+          updatePullRequest: updatePullRequestMock,
+        }),
+      );
+      const pendingEvaluationMock = partial<PolicyEvaluationRecord>({
+        configuration: partial<PolicyConfiguration>({
+          isBlocking: true,
+          type: partial<PolicyTypeRef>({
+            displayName: 'Minimum number of reviewers',
+          }),
+        }),
+        status: PolicyEvaluationStatus.Running,
+      });
+      azureHelper.getPolicyEvaluations.mockResolvedValueOnce([
+        pendingEvaluationMock,
+      ]);
+
+      const res = await azure.mergePr({
+        branchName: branchNameMock,
+        id: pullRequestIdMock,
+        strategy: 'auto',
+      });
+
+      expect(logger.debug).toHaveBeenCalledWith(
+        {
+          pullRequestId: pullRequestIdMock,
+          artifactId: `vstfs:///CodeReview/CodeReviewId/undefined/${pullRequestIdMock}`,
+          policyEvaluations: [pendingEvaluationMock],
+        },
+        'Retrieved policy evaluations for PR',
+      );
+      expect(logger.debug).toHaveBeenCalledWith(
+        {
+          pullRequestId: pullRequestIdMock,
+          pendingPolicies: [
+            { name: 'Minimum number of reviewers', status: 'Running' },
+          ],
+        },
+        'Not completing PR because branch policies have not been satisfied yet',
+      );
+      expect(updatePullRequestMock).not.toHaveBeenCalled();
+      expect(res).toBeFalse();
+    });
+
+    it('should complete the PR if blocking policies have been approved or are not applicable', async () => {
+      await initRepo({ repository: 'some/repo' });
+      const pullRequestIdMock = 12345;
+      const branchNameMock = 'test';
+      const lastMergeSourceCommitMock = { commitId: 'abcd1234' };
+      const updatePullRequestMock = vi.fn().mockResolvedValue({
+        status: 3,
+      });
+      azureApi.gitApi.mockResolvedValueOnce(
+        partial<IGitApi>({
+          getPullRequestById: vi.fn().mockResolvedValue({
+            lastMergeSourceCommit: lastMergeSourceCommitMock,
+            targetRefName: 'refs/heads/ding',
+            title: 'title',
+          }),
+          updatePullRequest: updatePullRequestMock,
+        }),
+      );
+      azureHelper.getMergeMethod = vi
+        .fn()
+        .mockReturnValue(GitPullRequestMergeStrategy.Squash);
+      azureHelper.getPolicyEvaluations.mockResolvedValueOnce([
+        partial<PolicyEvaluationRecord>({
+          configuration: partial<PolicyConfiguration>({ isBlocking: true }),
+          status: PolicyEvaluationStatus.Approved,
+        }),
+        partial<PolicyEvaluationRecord>({
+          configuration: partial<PolicyConfiguration>({ isBlocking: true }),
+          status: PolicyEvaluationStatus.NotApplicable,
+        }),
+        partial<PolicyEvaluationRecord>({
+          configuration: partial<PolicyConfiguration>({ isBlocking: false }),
+          status: PolicyEvaluationStatus.Running,
+        }),
+      ]);
+
+      const res = await azure.mergePr({
+        branchName: branchNameMock,
+        id: pullRequestIdMock,
+        strategy: 'auto',
+      });
+
+      expect(updatePullRequestMock).toHaveBeenCalledOnce();
+      expect(res).toBeTrue();
+    });
+
     it('should complete the PR', async () => {
       await initRepo({ repository: 'some/repo' });
       const pullRequestIdMock = 12345;
