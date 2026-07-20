@@ -17,6 +17,6 @@ Repositories from `maven.repositories` are used as the registries for version lo
 When the file defines no repositories, Renovate defaults to Maven Central, which matches Smithy's own resolution behavior.
 
 Dependency coordinates or repository URLs that contain `${ENV_VAR}` placeholders are skipped.
-If all your repositories use placeholders, configure [`registryUrls`](https://docs.renovatebot.com/configuration-options/#registryurls) in your Renovate config instead.
+If all your repositories use placeholders, configure [`registryUrls`](../../../configuration-options.md#registryurls) in your Renovate config instead.
 
 Maven version ranges like `[1.0, 2.0)` are supported via Maven versioning.
