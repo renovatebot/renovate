@@ -358,7 +358,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
         "
         ### What to Expect
 
-        With your current configuration, Renovate will create 3 Pull Requests:
+        With your current configuration, Renovate will create 3 Pull Requests (at a maximum of 2 PRs per hour):
 
         | Manager | major | pin | replacement |
         | --- | --- | --- | --- |
@@ -510,6 +510,93 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
         | **Total** |  | 1 | 1 |
 
         <small>Note that a single PR can update multiple files and/or managers, so the above rows may not align with the number of PRs being listed above.</small>
+        "
+      `);
+    });
+
+    it('includes the limits when using multiple base branches', () => {
+      const branches: BranchConfig[] = [
+        {
+          prTitle: 'Pin dependencies',
+          baseBranch: 'base',
+          branchName: 'renovate/pin-dependencies',
+          manager: 'some-manager',
+          upgrades: [
+            {
+              manager: 'some-manager',
+              updateType: 'pin',
+              sourceUrl: 'https://a',
+              depName: 'a',
+              depType: 'devDependencies',
+              newValue: '1.1.0',
+              branchName: 'ignored',
+            },
+            {
+              manager: 'some-manager',
+              updateType: 'pin',
+              depName: 'b',
+              newValue: '1.5.3',
+              branchName: 'ignored',
+            },
+          ],
+        },
+        {
+          prTitle: 'Update b to v2',
+          branchName: 'renovate/b-2.x',
+          baseBranch: '',
+          manager: 'some-manager',
+          upgrades: [
+            {
+              manager: 'some-manager',
+              updateType: 'minor',
+              depName: 'b',
+              newValue: '2.0.0',
+              branchName: 'ignored',
+            },
+          ],
+        },
+        {
+          prTitle: 'Update a to v2',
+          branchName: 'renovate/a-2.x',
+          baseBranch: '', // the default branch
+          manager: 'some-manager',
+          upgrades: [
+            {
+              manager: 'some-manager',
+              sourceUrl: 'https://a',
+              depName: 'a',
+              currentValue: '^1.0.0',
+              depType: 'devDependencies',
+              newValue: '2.0.1',
+              isLockfileUpdate: true,
+              branchName: 'ignored',
+            },
+          ],
+        },
+      ];
+
+      config.commitHourlyLimit = 1;
+      config.prHourlyLimit = 1;
+
+      const res = getExpectedPrListSummary(config, branches);
+
+      expect(res).toMatchInlineSnapshot(`
+        "
+        ### What to Expect
+
+        With your current configuration, Renovate will create 2 Pull Requests to the default branch and 1 Pull Request to the \`base\` branch (at a maximum of 1 PR/rebase per hour):
+
+        | Branch | Manager | minor | pin | lockfileUpdate |
+        | --- | --- | --- | --- | --- |
+        | $default | some-manager | 1 | 0 | 1 |
+        | base | some-manager | 0 | 1 | 0 |
+        | **Total** |  | 1 | 1 | 1 |
+
+        <small>Note that a single PR can update multiple files and/or managers, so the above rows may not align with the number of PRs being listed above.</small>
+
+
+        🚸 Branch creation and rebasing will be limited to maximum 1 per hour, so it doesn't swamp any CI resources or overwhelm the project. See [docs for \`commitHourlyLimit\`](https://docs.renovatebot.com/configuration-options/#commithourlylimit) for details.
+
         "
       `);
     });
@@ -770,7 +857,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
         "
         ### What to Expect
 
-        With your current configuration, Renovate will create 2 Pull Requests:
+        With your current configuration, Renovate will create 2 Pull Requests (at a maximum of 1 PR per hour):
 
         | Manager | pin | lockfileUpdate | other |
         | --- | --- | --- | --- |
@@ -863,7 +950,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
         "
         ### What to Expect
 
-        With your current configuration, Renovate will create 4 Pull Requests:
+        With your current configuration, Renovate will create 4 Pull Requests (at a maximum of 1 PR per hour):
 
         | Manager | major | minor | patch | pin |
         | --- | --- | --- | --- | --- |
@@ -959,7 +1046,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
           "
           ### What to Expect
 
-          With your current configuration, Renovate will create 3 Pull Requests:
+          With your current configuration, Renovate will create 3 Pull Requests (at a maximum of 2 PRs per hour):
 
           | Manager | security |
           | --- | --- |
@@ -1374,6 +1461,43 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
       const res = getExpectedPrListSummary(config, branches);
       expect(res).toContain('commitHourlyLimit');
       expect(res).not.toContain('prHourlyLimit');
+    });
+
+    it('shows there is no limit when both commitHourlyLimit and prHourlyLimit are set to 0 (unlimited)', () => {
+      const branches: BranchConfig[] = [
+        {
+          prTitle: 'Update a to v1',
+          branchName: 'renovate/a-1.x',
+          baseBranch: 'base',
+          manager: 'some-manager',
+          upgrades: [
+            {
+              manager: 'some-manager',
+              depName: 'a',
+              newValue: '1.0.0',
+              branchName: 'ignored',
+            },
+          ],
+        },
+        {
+          prTitle: 'Update b to v1',
+          branchName: 'renovate/b-1.x',
+          baseBranch: 'base',
+          manager: 'some-manager',
+          upgrades: [
+            {
+              manager: 'some-manager',
+              depName: 'b',
+              newValue: '1.0.0',
+              branchName: 'ignored',
+            },
+          ],
+        },
+      ];
+      config.prHourlyLimit = 0;
+      config.commitHourlyLimit = 0;
+      const res = getExpectedPrListSummary(config, branches);
+      expect(res).toContain('(with no configured maximum of PRs per hour)');
     });
   });
 });

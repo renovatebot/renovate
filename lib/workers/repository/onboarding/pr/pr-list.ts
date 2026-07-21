@@ -319,15 +319,30 @@ export function getExpectedPrListSummary(
   const sortedBases = sortBaseBranches(Object.keys(stats.prCountByBase));
   const hasMultipleBaseBranches = sortedBases.length > 1;
 
+  const prHourlyLimit = coerceNumber(config.prHourlyLimit);
+  const commitHourlyLimit = coerceNumber(config.commitHourlyLimit);
+
   if (hasMultipleBaseBranches) {
+    let total = 0;
     const parts = sortedBases.map((base) => {
       const count = stats.prCountByBase[base];
+      total += count;
       const label = base ? `the \`${base}\` branch` : 'the default branch';
       return `${count} Pull Request${count > 1 ? 's' : ''} to ${label}`;
     });
-    prDesc += `With your current configuration, Renovate will create ${parts.join(' and ')}:\n\n`;
+    const hourlyLimitsNotice = determineHourlyLimitsNotice(
+      prHourlyLimit,
+      commitHourlyLimit,
+      total,
+    );
+    prDesc += `With your current configuration, Renovate will create ${parts.join(' and ')}${hourlyLimitsNotice}:\n\n`;
   } else {
-    prDesc += `With your current configuration, Renovate will create ${stats.prCount} Pull Request${stats.prCount > 1 ? 's' : ''}:\n\n`;
+    const hourlyLimitsNotice = determineHourlyLimitsNotice(
+      prHourlyLimit,
+      commitHourlyLimit,
+      stats.prCount,
+    );
+    prDesc += `With your current configuration, Renovate will create ${stats.prCount} Pull Request${stats.prCount > 1 ? 's' : ''}${hourlyLimitsNotice}:\n\n`;
   }
 
   const categoryColumns = getCategoryColumns(stats.presentCategories);
@@ -372,8 +387,6 @@ export function getExpectedPrListSummary(
     }
   }
 
-  const prHourlyLimit = coerceNumber(config.prHourlyLimit);
-  const commitHourlyLimit = coerceNumber(config.commitHourlyLimit);
   if (
     commitHourlyLimit > 0 &&
     commitHourlyLimit < 5 &&
@@ -392,4 +405,32 @@ export function getExpectedPrListSummary(
     );
   }
   return prDesc;
+}
+
+function determineHourlyLimitsNotice(
+  prHourlyLimit: number,
+  commitHourlyLimit: number,
+  prCount: number,
+): string {
+  if (commitHourlyLimit === 0 && prHourlyLimit === 0) {
+    return ' (with no configured maximum of PRs per hour)';
+  } else if (
+    commitHourlyLimit > 0 &&
+    commitHourlyLimit < 5 &&
+    commitHourlyLimit < prCount
+  ) {
+    return emojify(
+      ` (at a maximum of ${commitHourlyLimit} PR${commitHourlyLimit > 1 ? 's' : ''}/rebase${commitHourlyLimit > 1 ? 's' : ''} per hour)`,
+    );
+  } else if (
+    prHourlyLimit > 0 &&
+    prHourlyLimit < 5 &&
+    prHourlyLimit < prCount
+  ) {
+    return emojify(
+      ` (at a maximum of ${prHourlyLimit} PR${prHourlyLimit > 1 ? 's' : ''} per hour)`,
+    );
+  } else {
+    return '';
+  }
 }
