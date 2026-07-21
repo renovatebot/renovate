@@ -2654,7 +2654,7 @@ const options: Readonly<RenovateOptions>[] = [
   {
     name: 'expandCodeOwnersGroups',
     description:
-      'Expand the configured code owner groups into a full list of group members. On GitLab, also expands role handles (`@@developer`, `@@maintainer`, `@@owner`) into the project members holding that role.',
+      'Expand the configured code owner groups into a full list of group members.',
     type: 'boolean',
     default: false,
     supportedPlatforms: ['gitlab'],
