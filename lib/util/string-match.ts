@@ -31,18 +31,14 @@ export function getRegexOrGlobPredicate(pattern: string): StringMatchPredicate {
     return regExPredicate;
   }
 
-  // If the pattern doesn't contain glob wildcards, do exact string matching.
-  // This prevents emails with `[bot]` from being interpreted as glob character classes.
-  if (!isGlobPattern(pattern)) {
-    const isPositive = !pattern.startsWith('!');
-    const exactPattern = isPositive ? pattern : pattern.slice(1);
-    return (x: string): boolean => {
-      const matches = x.toLowerCase() === exactPattern.toLowerCase();
-      return isPositive ? matches : !matches;
-    };
-  }
-
-  const mm = minimatch(pattern, { dot: true, nocase: true });
+  // Non-glob patterns may contain literal square brackets, e.g. GitHub bot emails
+  // like `foo+renovate[bot]@example.com`. Escape those brackets so minimatch treats
+  // them as literal characters instead of glob character classes. Case-sensitivity
+  // and all other matching behavior are left to minimatch, unchanged.
+  const globPattern = isGlobPattern(pattern)
+    ? pattern
+    : pattern.replace(/[[\]]/g, '\\$&');
+  const mm = minimatch(globPattern, { dot: true, nocase: true });
   return (x: string): boolean => mm.match(x);
 }
 

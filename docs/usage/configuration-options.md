@@ -1965,13 +1965,10 @@ Development Bot <dev-bot@my-software-company.com>
 ## `gitIgnoredAuthors`
 
 Specify commit author emails ignored by Renovate.
-This field accepts exact [RFC5322](https://datatracker.ietf.org/doc/html/rfc5322)-compliant email strings, glob patterns, or regex patterns using Renovate regex syntax.
 
 By default, Renovate will treat any PR as modified if another Git author has added to the branch.
 When a PR is considered modified, Renovate won't perform any further commits such as if it's conflicted or needs a version update.
 If you have other bots which commit on top of Renovate PRs, and don't want Renovate to treat these PRs as modified, then add the other Git author(s) to `gitIgnoredAuthors`.
-
-Exact string example:
 
 ```json
 {
@@ -1979,21 +1976,8 @@ Exact string example:
 }
 ```
 
-Glob example:
-
-```json
-{
-  "gitIgnoredAuthors": ["project_*_bot@noreply.example.com"]
-}
-```
-
-Regex example:
-
-```json
-{
-  "gitIgnoredAuthors": ["/^project_\\d+_bot_[a-f0-9]+@noreply\\..+$/"]
-}
-```
+`gitIgnoredAuthors` values can be exact [RFC5322](https://datatracker.ietf.org/doc/html/rfc5322)-compliant email strings, glob patterns, or regex patterns.
+For more details on the syntax and supported patterns, see Renovate's [String Pattern Matching documentation](./string-pattern-matching.md).
 
 ## `gitLabIgnoreApprovals`
 
