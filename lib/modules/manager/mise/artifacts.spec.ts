@@ -265,6 +265,25 @@ describe('modules/manager/mise/artifacts', () => {
     ]);
   });
 
+  it('runs mise lock --bump for lockFileMaintenance when mise supports it', async () => {
+    fs.readLocalFile
+      .mockResolvedValueOnce('existing content')
+      .mockResolvedValueOnce('existing content');
+    const execSnapshots = mockExecAll();
+
+    await updateArtifacts({
+      packageFileName: 'mise.toml',
+      updatedDeps: [{ depName: 'node' }],
+      newPackageFileContent: '',
+      config: { ...lockMaintenanceConfig, constraints: { mise: '2026.7.12' } },
+    });
+
+    expect(execSnapshots).toMatchObject([
+      { cmd: trustCmd },
+      { cmd: 'mise lock --bump' },
+    ]);
+  });
+
   it('runs mise lock <tools> for targeted updates', async () => {
     fs.readLocalFile
       .mockResolvedValueOnce('existing content')

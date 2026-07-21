@@ -19,39 +19,43 @@ import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
 import { getConfigType, getLockFileName } from './lockfile.ts';
 
 /**
- * First mise release whose `MISE_SAFE=1` safe mode is a hard boundary against
- * project configuration executing code during `mise lock`.
+ * First mise release that supports the features this manager relies on:
+ * `MISE_SAFE=1` safe mode (a hard boundary against project config executing
+ * code during `mise lock`) and `mise lock --bump` (advancing fuzzy selectors).
  *
  * Safe mode (jdx/mise#11146) and lockfile bumping (jdx/mise#11145) merged after
  * v2026.7.11, so the first release to include them is expected to be 2026.7.12.
  * TODO(mise-safe): confirm this once that release is tagged.
  *
  * @see https://github.com/jdx/mise/pull/11146
+ * @see https://github.com/jdx/mise/pull/11145
  * @see https://mise.jdx.dev/configuration/settings.html#safe
  */
 const MISE_SAFE_MODE_MIN_VERSION = '2026.7.12';
 
 /**
- * Returns true when the configured `mise` constraint *guarantees* a version
- * that enforces safe mode, so `mise lock` can run against untrusted config
- * without requiring `allowedUnsafeExecutions`.
+ * Returns true when the configured `mise` constraint *guarantees* a version at
+ * or above `minVersion`. Used to gate both the safe-mode bypass of
+ * `allowedUnsafeExecutions` and the `mise lock --bump` flag, which require a
+ * new enough mise.
  *
- * Because this gates a security bypass, the check is deliberately conservative:
- * it accepts only a single pinned version (`mise = "2026.7.12"`) at or above the
- * safe-mode release. Ranges such as `>=2026.7.12` are safe in principle but are
+ * Because it gates a security bypass, the check is deliberately conservative:
+ * it accepts only a single pinned version (`mise = "2026.7.12"`) at or above
+ * `minVersion`. Ranges such as `>=2026.7.12` are safe in principle but are
  * intentionally not accepted yet — supporting them (and/or runtime detection
  * via `mise version`) is left for follow-up; see the PR discussion.
  */
-function miseSupportsSafeMode(
-  constraints?: Partial<Record<ConstraintName, string>> | null,
+function miseConstraintGuarantees(
+  constraints: Partial<Record<ConstraintName, string>> | null | undefined,
+  minVersion: string,
 ): boolean {
   const constraint = constraints?.mise;
   if (!isString(constraint) || !miseVersioning.isVersion(constraint)) {
     return false;
   }
   return (
-    miseVersioning.equals(constraint, MISE_SAFE_MODE_MIN_VERSION) ||
-    miseVersioning.isGreaterThan(constraint, MISE_SAFE_MODE_MIN_VERSION)
+    miseVersioning.equals(constraint, minVersion) ||
+    miseVersioning.isGreaterThan(constraint, minVersion)
   );
 }
 
@@ -110,7 +114,12 @@ export async function updateArtifacts({
   // the config executing code — so the allowlist is not required on that path.
   const allowlist = GlobalConfig.get('allowedUnsafeExecutions');
   const miseAllowlisted = allowlist.includes('mise');
-  const safeMode = !miseAllowlisted && miseSupportsSafeMode(config.constraints);
+  // Safe mode and `mise lock --bump` both require mise >= MISE_SAFE_MODE_MIN_VERSION.
+  const miseSupportsSafeFeatures = miseConstraintGuarantees(
+    config.constraints,
+    MISE_SAFE_MODE_MIN_VERSION,
+  );
+  const safeMode = !miseAllowlisted && miseSupportsSafeFeatures;
   if (!miseAllowlisted && !safeMode) {
     logger.once.warn(
       { safeModeMinVersion: MISE_SAFE_MODE_MIN_VERSION },
@@ -124,7 +133,13 @@ export async function updateArtifacts({
 
   let lockCmd: string;
   if (config.isLockFileMaintenance) {
-    lockCmd = `mise lock${localFlag}`;
+    // Lock file maintenance means "update to the latest versions". Plain
+    // `mise lock` only refreshes metadata for already-locked versions, so use
+    // `mise lock --bump` to also advance fuzzy selectors (e.g. `node = "22"`)
+    // to the latest matching version. `--bump` requires a new enough mise, so
+    // fall back to a plain refresh when the version cannot be guaranteed.
+    const bumpFlag = miseSupportsSafeFeatures ? ' --bump' : '';
+    lockCmd = `mise lock${localFlag}${bumpFlag}`;
   } else {
     const tools = updatedDeps
       .map(({ depName }) => depName)
