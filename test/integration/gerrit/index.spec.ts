@@ -154,6 +154,27 @@ describe('integration/gerrit/index', { timeout: 120_000 }, () => {
     expect(after[0]._number).toEqual(changeNum);
   });
 
+  it('collects Gerrit-only HTTP stats for cold vs warm runs', async () => {
+    // Arrange — dedicated repo so cold = empty PR-cache for this project
+    const REPO = 'test-gerrit-http-stats';
+    await seed(REPO, 'test-http-stats');
+
+    // Act
+    const cold = await renovate([REPO]);
+    const warm = await renovate([REPO]);
+
+    // Always print a single consolidated report for this test only.
+    // oxlint-disable-next-line no-console -- intentional: HTTP benchmark output
+    console.log(
+      'Gerrit HTTP cold vs warm\n',
+      JSON.stringify({ cold, warm }, null, 2),
+    );
+
+    // Assert — smoke-check the harness (absolute counts can vary)
+    expect(cold.requests).toBeGreaterThan(0);
+    expect(warm.requests).toBeGreaterThan(0);
+  });
+
   it('applies hashtags from packageRules labels', async () => {
     // Arrange
     const REPO = 'test-gerrit-hashtags';
