@@ -96,7 +96,7 @@ describe('modules/manager/mise/artifacts', () => {
       packageFileName: 'mise.toml',
       updatedDeps: [{ depName: 'node' }],
       newPackageFileContent: '',
-      config: { ...config, constraints: { mise: '2026.8.0' } },
+      config: { ...config, constraints: { mise: '2026.7.12' } },
     });
 
     expect(res).toEqual([

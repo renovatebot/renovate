@@ -55,7 +55,7 @@ When your `constraints.mise` pins a mise version that supports safe mode, Renova
 ```json
 {
   "constraints": {
-    "mise": "2026.8.0"
+    "mise": "2026.7.12"
   }
 }
 ```

@@ -22,14 +22,14 @@ import { getConfigType, getLockFileName } from './lockfile.ts';
  * First mise release whose `MISE_SAFE=1` safe mode is a hard boundary against
  * project configuration executing code during `mise lock`.
  *
- * TODO(mise-safe): mise added safe mode in jdx/mise#11146 and lockfile bumping
- * in jdx/mise#11145, but these have not shipped in a tagged release yet. Update
- * this constant to the first release that includes them before merging.
+ * Safe mode (jdx/mise#11146) and lockfile bumping (jdx/mise#11145) merged after
+ * v2026.7.11, so the first release to include them is expected to be 2026.7.12.
+ * TODO(mise-safe): confirm this once that release is tagged.
  *
  * @see https://github.com/jdx/mise/pull/11146
  * @see https://mise.jdx.dev/configuration/settings.html#safe
  */
-const MISE_SAFE_MODE_MIN_VERSION = '2026.8.0';
+const MISE_SAFE_MODE_MIN_VERSION = '2026.7.12';
 
 /**
  * Returns true when the configured `mise` constraint *guarantees* a version
@@ -37,8 +37,8 @@ const MISE_SAFE_MODE_MIN_VERSION = '2026.8.0';
  * without requiring `allowedUnsafeExecutions`.
  *
  * Because this gates a security bypass, the check is deliberately conservative:
- * it accepts only a single pinned version (`mise = "2026.8.1"`) at or above the
- * safe-mode release. Ranges such as `>=2026.8.0` are safe in principle but are
+ * it accepts only a single pinned version (`mise = "2026.7.12"`) at or above the
+ * safe-mode release. Ranges such as `>=2026.7.12` are safe in principle but are
  * intentionally not accepted yet — supporting them (and/or runtime detection
  * via `mise version`) is left for follow-up; see the PR discussion.
  */
@@ -113,7 +113,8 @@ export async function updateArtifacts({
   const safeMode = !miseAllowlisted && miseSupportsSafeMode(config.constraints);
   if (!miseAllowlisted && !safeMode) {
     logger.once.warn(
-      `\`mise lock\` was requested to run, but \`mise\` is not permitted in \`allowedUnsafeExecutions\` and no \`mise\` constraint guaranteeing safe-mode support (>= ${MISE_SAFE_MODE_MIN_VERSION}) is configured`,
+      { safeModeMinVersion: MISE_SAFE_MODE_MIN_VERSION },
+      '`mise lock` was requested to run, but `mise` is not permitted in `allowedUnsafeExecutions` and no `mise` constraint guaranteeing safe-mode support is configured',
     );
     return null;
   }
