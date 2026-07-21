@@ -414,7 +414,9 @@ function determineHourlyLimitsNotice(
 ): string {
   if (commitHourlyLimit === 0 && prHourlyLimit === 0) {
     return ' (with no configured maximum of PRs per hour)';
-  } else if (
+  }
+
+  if (
     commitHourlyLimit > 0 &&
     commitHourlyLimit < 5 &&
     commitHourlyLimit < prCount
@@ -422,15 +424,13 @@ function determineHourlyLimitsNotice(
     return emojify(
       ` (at a maximum of ${commitHourlyLimit} PR${commitHourlyLimit > 1 ? 's' : ''}/rebase${commitHourlyLimit > 1 ? 's' : ''} per hour)`,
     );
-  } else if (
-    prHourlyLimit > 0 &&
-    prHourlyLimit < 5 &&
-    prHourlyLimit < prCount
-  ) {
+  }
+
+  if (prHourlyLimit > 0 && prHourlyLimit < 5 && prHourlyLimit < prCount) {
     return emojify(
       ` (at a maximum of ${prHourlyLimit} PR${prHourlyLimit > 1 ? 's' : ''} per hour)`,
     );
-  } else {
-    return '';
   }
+
+  return '';
 }
