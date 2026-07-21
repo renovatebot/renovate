@@ -69,15 +69,14 @@ export function isFalseGlobal(
   optionName: string,
   parentPath?: string,
 ): boolean {
-  if (parentPath?.includes('hostRules')) {
-    // v8 ignore else -- TODO: add test #40625
-    if (
-      optionName === 'token' ||
+  // v8 ignore else -- TODO: add test #40625
+  if (
+    parentPath?.includes('hostRules') &&
+    (optionName === 'token' ||
       optionName === 'username' ||
-      optionName === 'password'
-    ) {
-      return true;
-    }
+      optionName === 'password')
+  ) {
+    return true;
   }
 
   return false;

@@ -319,7 +319,7 @@ describe('util/http/github', () => {
       });
       async function fail(
         code: number,
-        body: any = undefined,
+        body?: any,
         headers: httpMock.ReplyHeaders = {},
       ) {
         const url = '/some-url';
@@ -436,7 +436,7 @@ describe('util/http/github', () => {
       it('when the rate limit is exceeded to GitHub Enterprise, but no host rules are set, a warn is logged', async () => {
         async function fail(
           code: number,
-          body: any = undefined,
+          body?: any,
           headers: httpMock.ReplyHeaders = {},
         ) {
           const url = '/some-url';
@@ -470,7 +470,8 @@ describe('util/http/github', () => {
         ).rejects.toThrow(PLATFORM_RATE_LIMIT_EXCEEDED);
 
         expect(logger.logger.once.warn).toHaveBeenCalledWith(
-          'Rate limit exceeded for github.enterprise.example.com, as no hostRules set for this host',
+          { host: 'github.enterprise.example.com' },
+          'Rate limit exceeded, as no hostRules set for this host',
         );
       });
 
@@ -553,6 +554,24 @@ describe('util/http/github', () => {
         await expect(
           fail(422, {
             message: 'foobar',
+          }),
+        ).rejects.toThrow(EXTERNAL_HOST_ERROR);
+      });
+
+      it('should throw on repository change with a non-array error with code `invalid`', async () => {
+        await expect(
+          fail(422, {
+            message: 'foobar',
+            errors: { code: 'invalid' },
+          }),
+        ).rejects.toThrow(REPOSITORY_CHANGED);
+      });
+
+      it('should throw platform failure on 422 response with an unrecognized non-array errors', async () => {
+        await expect(
+          fail(422, {
+            message: 'foobar',
+            errors: 'Validation Failed',
           }),
         ).rejects.toThrow(EXTERNAL_HOST_ERROR);
       });

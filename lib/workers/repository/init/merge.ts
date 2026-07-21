@@ -99,10 +99,9 @@ export async function detectRepoFileConfig(
         configFileParsed = configFileParsed.renovate;
       }
       return { configFileName, configFileParsed };
-    } else {
-      logger.debug('Existing config file no longer exists');
-      delete cache.configFileName;
     }
+    logger.debug('Existing config file no longer exists');
+    delete cache.configFileName;
   }
 
   if (OnboardingState.onboardingCacheValid) {

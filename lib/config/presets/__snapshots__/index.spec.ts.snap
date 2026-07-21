@@ -21,11 +21,11 @@ exports[`config/presets/index > getPreset > gets linters 1`] = `
 }
 `;
 
-exports[`config/presets/index > getPreset > handles 404 packages 1`] = `undefined`;
+exports[`config/presets/index > getPreset > handles 404 packages > validationError 1`] = `undefined`;
 
-exports[`config/presets/index > getPreset > handles 404 packages 2`] = `undefined`;
+exports[`config/presets/index > getPreset > handles 404 packages > validationMessage 1`] = `undefined`;
 
-exports[`config/presets/index > getPreset > handles 404 packages 3`] = `undefined`;
+exports[`config/presets/index > getPreset > handles 404 packages > validationSource 1`] = `undefined`;
 
 exports[`config/presets/index > resolveConfigPresets > migrates automerge in presets 1`] = `
 {

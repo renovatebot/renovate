@@ -193,7 +193,7 @@ class RustReleaseChannelVersioning implements VersioningApi {
 
     // Sort and return the highest (last in sorted array)
     matching.sort((a, b) => this.sortVersions(a, b));
-    return matching.slice(-1)[0];
+    return matching.at(-1)!;
   }
 
   minSatisfyingVersion(versions: string[], range: string): string | null {

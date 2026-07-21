@@ -11,13 +11,14 @@ export function check({
   baseBranchPatterns,
 }: CheckBaseBranchesArgs): ValidationMessage[] {
   const warnings: ValidationMessage[] = [];
-  if (Array.isArray(resolvedRule.matchBaseBranches)) {
-    if (!isNonEmptyArray(baseBranchPatterns)) {
-      warnings.push({
-        topic: 'Configuration Error',
-        message: `${currentPath}: You must configure baseBranchPatterns in order to use them inside matchBaseBranches.`,
-      });
-    }
+  if (
+    Array.isArray(resolvedRule.matchBaseBranches) &&
+    !isNonEmptyArray(baseBranchPatterns)
+  ) {
+    warnings.push({
+      topic: 'Configuration Error',
+      message: `${currentPath}: You must configure baseBranchPatterns in order to use them inside matchBaseBranches.`,
+    });
   }
 
   return warnings;

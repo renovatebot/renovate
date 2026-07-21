@@ -67,11 +67,9 @@ function massageEnvKeyValues(env: NodeJS.ProcessEnv): NodeJS.ProcessEnv {
   const result = { ...env };
   for (const { oldName, newName, from, to } of migratedKeysWithValues) {
     const key = getEnvName({ name: oldName });
-    if (env[key] !== undefined) {
-      if (result[key] === from) {
-        delete result[key];
-        result[getEnvName({ name: newName })] = to;
-      }
+    if (env[key] !== undefined && result[key] === from) {
+      delete result[key];
+      result[getEnvName({ name: newName })] = to;
     }
   }
   return result;
@@ -285,7 +283,10 @@ export async function parseAndValidateOrExit(
 
     return await migrateAndValidateConfig(config, `${configEnvKey}`);
   } catch (err) {
-    logger.fatal({ err }, `Could not parse ${configEnvKey}`);
+    logger.fatal(
+      { err, configEnvKey },
+      'Could not parse config environment variable',
+    );
     process.exit(1);
   }
 }

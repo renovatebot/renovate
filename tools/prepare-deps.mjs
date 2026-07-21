@@ -1,7 +1,7 @@
-import { execaSync } from 'execa';
+import { execa } from 'execa';
 
-function testRe2() {
-  execaSync(
+async function testRe2() {
+  await execa(
     'node',
     [
       '-e',
@@ -12,19 +12,19 @@ function testRe2() {
   console.log(`Ok.`);
 }
 
-(() => {
+await (async () => {
   console.log('Checking re2 ... ');
   try {
-    testRe2();
+    await testRe2();
   } catch (e) {
     console.error(`Failed.\n${e}`);
     try {
       if (e.exitCode === 1) {
         console.log(`Retry re2 install ...`);
-        execaSync('pnpm', ['rb', 're2'], {
+        await execa('pnpm', ['rb', 're2'], {
           stdio: 'inherit',
         });
-        testRe2();
+        await testRe2();
         return;
       }
     } catch (e1) {

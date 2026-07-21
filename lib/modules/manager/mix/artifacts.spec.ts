@@ -1,9 +1,13 @@
 import upath from 'upath';
 import { mockDeep } from 'vitest-mock-extended';
 import { envMock, mockExecAll } from '~test/exec-util.ts';
-import { env, fs, hostRules, logger } from '~test/util.ts';
+import { hostRules } from '~test/host-rules.ts';
+import { env, fs, logger } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
-import type { RepoGlobalConfig } from '../../../config/types.ts';
+import type {
+  InternalGlobalConfigOptions,
+  RepoGlobalConfig,
+} from '../../../config/types.ts';
 import type { ConstraintName } from '../../../util/exec/types.ts';
 import { getPkgReleases as _getPkgReleases } from '../../datasource/index.ts';
 import type { UpdateArtifactsConfig } from '../types.ts';
@@ -11,12 +15,11 @@ import { updateArtifacts } from './index.ts';
 
 vi.mock('../../../util/exec/env.ts');
 vi.mock('../../../util/fs/index.ts');
-vi.mock('../../../util/host-rules.ts', () => mockDeep());
 vi.mock('../../datasource/index.ts', () => mockDeep());
 
 const getPkgReleases = vi.mocked(_getPkgReleases);
 
-const adminConfig: RepoGlobalConfig = {
+const adminConfig: RepoGlobalConfig & InternalGlobalConfigOptions = {
   // `join` fixes Windows CI
   localDir: upath.join('/tmp/github/some/repo'),
   cacheDir: upath.join('/tmp/cache'),
@@ -35,8 +38,6 @@ const constraints: Partial<Record<ConstraintName, string>> = {
 
 describe('modules/manager/mix/artifacts', () => {
   beforeEach(() => {
-    hostRules.getAll.mockReturnValue([]);
-
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
     GlobalConfig.set(adminConfig);
   });
@@ -251,8 +252,10 @@ describe('modules/manager/mix/artifacts', () => {
     fs.getSiblingFileName.mockReturnValueOnce('mix.lock');
     const execSnapshots = mockExecAll();
     fs.readLocalFile.mockResolvedValueOnce('New mix.lock');
-    hostRules.find.mockReturnValueOnce({ token: 'valid_test_token' });
-    hostRules.find.mockReturnValueOnce({});
+    hostRules.add({
+      matchHost: 'https://hex.pm/api/repos/renovate_test/',
+      token: 'valid_test_token',
+    });
 
     // erlang
     getPkgReleases.mockResolvedValueOnce({
@@ -289,8 +292,8 @@ describe('modules/manager/mix/artifacts', () => {
       config,
     });
 
-    expect(result).toMatchSnapshot();
-    expect(execSnapshots).toMatchSnapshot();
+    expect(result).toMatchSnapshot('result');
+    expect(execSnapshots).toMatchSnapshot('execSnapshots');
 
     // TODO #22198
     const [updateResult] = result!;
@@ -311,18 +314,26 @@ describe('modules/manager/mix/artifacts', () => {
     fs.getSiblingFileName.mockReturnValueOnce('mix.lock');
     const execSnapshots = mockExecAll();
     fs.readLocalFile.mockResolvedValueOnce('New mix.lock');
-    hostRules.getAll.mockReturnValueOnce([
-      { matchHost: 'https://hex.pm/api/repos/an_organization/' },
-      { matchHost: 'https://hex.pm/api/repos/unauthorized_organization/' },
-      { matchHost: 'https://hex.pm/api/repos/other_organization/' },
-      { matchHost: 'https://hex.pm/api/repos/does_not_match_org/packages/' },
-      { matchHost: 'https://example.com/api/repos/also_does_not_match_org/' },
-      { matchHost: 'hex.pm' },
-    ]);
-    hostRules.find.mockReturnValueOnce({ token: 'an_organization_token' });
-    hostRules.find.mockReturnValueOnce({}); // unauthorized_organization token missing
-    hostRules.find.mockReturnValueOnce({ token: 'other_org_token' });
-    hostRules.find.mockReturnValueOnce({ token: 'does_not_match_org_token' });
+    hostRules.add({
+      matchHost: 'https://hex.pm/api/repos/an_organization/',
+      token: 'an_organization_token',
+    });
+    // unauthorized_organization token missing
+    hostRules.add({
+      matchHost: 'https://hex.pm/api/repos/unauthorized_organization/',
+    });
+    hostRules.add({
+      matchHost: 'https://hex.pm/api/repos/other_organization/',
+      token: 'other_org_token',
+    });
+    hostRules.add({
+      matchHost: 'https://hex.pm/api/repos/does_not_match_org/packages/',
+      token: 'does_not_match_org_token',
+    });
+    hostRules.add({
+      matchHost: 'https://example.com/api/repos/also_does_not_match_org/',
+    });
+    hostRules.add({ matchHost: 'hex.pm' });
 
     // erlang
     getPkgReleases.mockResolvedValueOnce({

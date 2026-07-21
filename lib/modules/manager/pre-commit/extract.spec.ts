@@ -1,13 +1,10 @@
 import { codeBlock } from 'common-tags';
-import { mockDeep } from 'vitest-mock-extended';
 import { Fixtures } from '~test/fixtures.ts';
-import { hostRules } from '~test/util.ts';
+import { hostRules } from '~test/host-rules.ts';
 import { GoDatasource } from '../../datasource/go/index.ts';
 import { NpmDatasource } from '../../datasource/npm/index.ts';
 import { PypiDatasource } from '../../datasource/pypi/index.ts';
 import { extractPackageFile } from './index.ts';
-
-vi.mock('../../../util/host-rules.ts', () => mockDeep());
 
 const filename = '.pre-commit.yaml';
 
@@ -159,12 +156,15 @@ describe('modules/manager/pre-commit/extract', () => {
     });
 
     it('can handle private git repos', () => {
+      // a real host rule cannot simultaneously match the url-only query and
+      // miss the github-scoped query, so spy to reach the gitlab loop branch
+      const find = vi.spyOn(hostRules, 'find');
       // url only
-      hostRules.find.mockReturnValueOnce({ token: 'value1' });
+      find.mockReturnValueOnce({ token: 'value1' });
       // hostType=github
-      hostRules.find.mockReturnValueOnce({});
+      find.mockReturnValueOnce({});
       // hostType=gitlab
-      hostRules.find.mockReturnValueOnce({ token: 'value' });
+      find.mockReturnValueOnce({ token: 'value' });
       const result = extractPackageFile(enterpriseGitPrecommitConfig, filename);
       expect(result).toEqual({
         deps: [
@@ -181,7 +181,6 @@ describe('modules/manager/pre-commit/extract', () => {
     });
 
     it('can handle invalid private git repos', () => {
-      hostRules.find.mockReturnValue({});
       const result = extractPackageFile(enterpriseGitPrecommitConfig, filename);
       expect(result).toEqual({
         deps: [
@@ -198,10 +197,13 @@ describe('modules/manager/pre-commit/extract', () => {
     });
 
     it('can handle unknown private git repos', () => {
+      // a real host rule cannot match the url-only query while missing all
+      // hostType-scoped queries, so spy to reach the loop fall-through
+      const find = vi.spyOn(hostRules, 'find');
       // First attempt returns a result
-      hostRules.find.mockReturnValueOnce({ token: 'value' });
+      find.mockReturnValueOnce({ token: 'value' });
       // But all subsequent checks (those with hostType), then fail:
-      hostRules.find.mockReturnValue({});
+      find.mockReturnValue({});
       const result = extractPackageFile(enterpriseGitPrecommitConfig, filename);
       expect(result).toEqual({
         deps: [
