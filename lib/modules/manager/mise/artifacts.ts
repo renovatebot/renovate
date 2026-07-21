@@ -14,6 +14,7 @@ import type {
 } from '../../../util/exec/types.ts';
 import { readLocalFile } from '../../../util/fs/index.ts';
 import * as hostRules from '../../../util/host-rules.ts';
+import { regEx } from '../../../util/regex.ts';
 import { api as miseVersioning } from '../../versioning/semver/index.ts';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
 import { getConfigType, getLockFileName } from './lockfile.ts';
@@ -34,28 +35,37 @@ import { getConfigType, getLockFileName } from './lockfile.ts';
 const MISE_SAFE_MODE_MIN_VERSION = '2026.7.12';
 
 /**
- * Returns true when the configured `mise` constraint *guarantees* a version at
- * or above `minVersion`. Used to gate both the safe-mode bypass of
- * `allowedUnsafeExecutions` and the `mise lock --bump` flag, which require a
- * new enough mise.
+ * Detects the mise version that will actually run, by executing `mise version`.
+ * `mise version` only prints the binary's version — it does not load or execute
+ * project configuration — so it is safe to run even without allowlisting.
  *
- * Because it gates a security bypass, the check is deliberately conservative:
- * it accepts only a single pinned version (`mise = "2026.7.12"`) at or above
- * `minVersion`. Ranges such as `>=2026.7.12` are safe in principle but are
- * intentionally not accepted yet — supporting them (and/or runtime detection
- * via `mise version`) is left for follow-up; see the PR discussion.
+ * Output looks like `2026.7.12 macos-arm64 (2026-07-21)`; we take the leading
+ * `major.minor.patch`. Returns `null` if the probe fails or cannot be parsed,
+ * in which case callers fall back to the conservative (pre-safe-mode) behavior.
  */
-function miseConstraintGuarantees(
-  constraints: Partial<Record<ConstraintName, string>> | null | undefined,
-  minVersion: string,
-): boolean {
-  const constraint = constraints?.mise;
-  if (!isString(constraint) || !miseVersioning.isVersion(constraint)) {
-    return false;
+async function detectMiseVersion(
+  execOptions: ExecOptions,
+): Promise<string | null> {
+  try {
+    const { stdout } = await exec('mise version', execOptions);
+    const version = regEx(/\d+\.\d+\.\d+/).exec(stdout)?.[0];
+    if (version && miseVersioning.isVersion(version)) {
+      return version;
+    }
+    logger.debug({ stdout }, 'Could not parse mise version output');
+    return null;
+  } catch (err) {
+    logger.debug({ err }, 'Failed to determine mise version');
+    return null;
   }
+}
+
+/** True when `version` is at or above the safe-mode / `--bump` release. */
+function versionSupportsSafeFeatures(version: string | null): boolean {
   return (
-    miseVersioning.equals(constraint, minVersion) ||
-    miseVersioning.isGreaterThan(constraint, minVersion)
+    !!version &&
+    (miseVersioning.equals(version, MISE_SAFE_MODE_MIN_VERSION) ||
+      miseVersioning.isGreaterThan(version, MISE_SAFE_MODE_MIN_VERSION))
   );
 }
 
@@ -109,21 +119,34 @@ export async function updateArtifacts({
   }
 
   // `mise lock` normally executes the project's mise config, so it requires
-  // `allowedUnsafeExecutions`. When the configured mise version guarantees safe
-  // mode, we instead run with `MISE_SAFE=1`, which is a hard boundary against
-  // the config executing code — so the allowlist is not required on that path.
+  // `allowedUnsafeExecutions`. When the mise that will run supports safe mode,
+  // we instead run with `MISE_SAFE=1`, which is a hard boundary against the
+  // config executing code — so the allowlist is not required on that path.
   const allowlist = GlobalConfig.get('allowedUnsafeExecutions');
   const miseAllowlisted = allowlist.includes('mise');
-  // Safe mode and `mise lock --bump` both require mise >= MISE_SAFE_MODE_MIN_VERSION.
-  const miseSupportsSafeFeatures = miseConstraintGuarantees(
-    config.constraints,
-    MISE_SAFE_MODE_MIN_VERSION,
-  );
+
+  // The mise version is needed to decide safe mode (untrusted path) and
+  // `mise lock --bump` (lock file maintenance). Detect it at runtime rather
+  // than requiring a pinned `constraints.mise`. Skip the probe when it cannot
+  // change the outcome: an allowlisted, non-maintenance run behaves the same
+  // regardless of version.
+  let miseSupportsSafeFeatures = false;
+  if (!miseAllowlisted || config.isLockFileMaintenance) {
+    const miseVersion = await detectMiseVersion({
+      cwdFile: packageFileName,
+      toolConstraints: [
+        { toolName: 'mise', constraint: config.constraints?.mise },
+      ],
+      docker: {},
+    });
+    miseSupportsSafeFeatures = versionSupportsSafeFeatures(miseVersion);
+  }
+
   const safeMode = !miseAllowlisted && miseSupportsSafeFeatures;
   if (!miseAllowlisted && !safeMode) {
     logger.once.warn(
       { safeModeMinVersion: MISE_SAFE_MODE_MIN_VERSION },
-      '`mise lock` was requested to run, but `mise` is not permitted in `allowedUnsafeExecutions` and no `mise` constraint guaranteeing safe-mode support is configured',
+      '`mise lock` requires either `mise` in `allowedUnsafeExecutions`, or a mise version that supports safe mode',
     );
     return null;
   }

@@ -22,7 +22,7 @@ When a lock file is present:
 
 - Dependencies will have their `lockedVersion` extracted from the lock file
 - Renovate can update lock files when dependencies change
-- Lock file maintenance is supported via the `lockFileMaintenance` option. When the configured mise version supports it (see [safe mode](#safe-mode-no-allowlist-required) for how the version is determined), maintenance runs `mise lock --bump`, which advances fuzzy selectors (e.g. `node = "22"`) to the latest matching version rather than only refreshing existing locked versions.
+- Lock file maintenance is supported via the `lockFileMaintenance` option. When the `mise` version Renovate runs supports it (see [safe mode](#safe-mode-no-allowlist-required) for how the version is detected), maintenance runs `mise lock --bump`, which advances fuzzy selectors (e.g. `node = "22"`) to the latest matching version rather than only refreshing existing locked versions.
 
 Renovate recognizes environment-specific lock files:
 
@@ -50,15 +50,7 @@ In particular:
 
 mise's [safe mode](https://mise.jdx.dev/configuration/settings.html#safe) (`MISE_SAFE=1`) is a hard boundary against project configuration executing code: templates that call `exec()`/`read_file()`, `_.source` scripts, hooks, tasks, asdf plugin scripts, and plugin installs are all refused, while version resolution over HTTP-based backends still works.
 
-When your `constraints.mise` pins a mise version that supports safe mode, Renovate runs `mise lock` with `MISE_SAFE=1` and no longer requires `mise` in `allowedUnsafeExecutions` — the safe-mode boundary, not the allowlist, is what protects the host:
-
-```json
-{
-  "constraints": {
-    "mise": "2026.7.12"
-  }
-}
-```
+When the `mise` binary that Renovate runs is new enough to support safe mode, Renovate runs `mise lock` with `MISE_SAFE=1` and no longer requires `mise` in `allowedUnsafeExecutions` — the safe-mode boundary, not the allowlist, is what protects the host. Renovate determines this at runtime by running `mise version` (which does not load or execute project configuration), so no extra configuration is needed; installing or pinning a recent enough `mise` is enough.
 
 The `allowedUnsafeExecutions` path is unchanged: if `mise` is allowlisted, Renovate runs `mise lock` exactly as before (without forcing safe mode), so configs that legitimately rely on code execution during locking keep working.
 
