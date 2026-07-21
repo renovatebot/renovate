@@ -3,6 +3,7 @@ import type {
   WorkItemStateColor,
 } from 'azure-devops-node-api/interfaces/WorkItemTrackingInterfaces.js';
 import type { IWorkItemTrackingApi } from 'azure-devops-node-api/WorkItemTrackingApi.js';
+import { GlobalConfig } from '../../../config/global.ts';
 import { logger } from '../../../logger/index.ts';
 import { Lazy } from '../../../util/lazy.ts';
 import { sanitize } from '../../../util/sanitize.ts';
@@ -345,6 +346,7 @@ export class IssueService {
           {
             workItemType: this.config.workItemType,
             project: this.config.project,
+            documentationUrl: `${GlobalConfig.get('productLinks').documentation}configuration-options/#azureworkitemtype`,
           },
           'Azure: work item type does not exist in project (or the token lacks permission to it); skipping issue. The Dependency Dashboard needs a process that defines this work item type. Set one your project defines via the `azureWorkItemType` repo config option.',
         );

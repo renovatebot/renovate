@@ -380,7 +380,12 @@ describe('modules/platform/azure/issue', () => {
       expect(createWorkItemMock).not.toHaveBeenCalled();
       expect(result).toBeNull();
       expect(logger.warn).toHaveBeenCalledWith(
-        { workItemType: 'Issue', project: 'testProject' },
+        {
+          workItemType: 'Issue',
+          project: 'testProject',
+          documentationUrl:
+            'https://docs.renovatebot.com/configuration-options/#azureworkitemtype',
+        },
         expect.stringContaining('work item type does not exist'),
       );
     });
