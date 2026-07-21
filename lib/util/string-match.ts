@@ -32,12 +32,13 @@ export function getRegexOrGlobPredicate(pattern: string): StringMatchPredicate {
   }
 
   // Non-glob patterns may contain literal square brackets, e.g. GitHub bot emails
-  // like `foo+renovate[bot]@example.com`. Escape those brackets so minimatch treats
-  // them as literal characters instead of glob character classes. Case-sensitivity
-  // and all other matching behavior are left to minimatch, unchanged.
+  // like `foo+renovate[bot]@example.com`. Escape those brackets (and the backslash
+  // escape character itself) so minimatch treats them as literal characters instead
+  // of glob syntax. Case-sensitivity and all other matching behavior are left to
+  // minimatch, unchanged.
   const globPattern = isGlobPattern(pattern)
     ? pattern
-    : pattern.replace(/[[\]]/g, '\\$&');
+    : pattern.replace(/[\\[\]]/g, '\\$&');
   const mm = minimatch(globPattern, { dot: true, nocase: true });
   return (x: string): boolean => mm.match(x);
 }
