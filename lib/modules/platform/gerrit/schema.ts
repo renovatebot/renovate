@@ -105,3 +105,8 @@ export type GerritMergeableInfo = z.infer<typeof GerritMergeableInfo>;
 export const GerritRepos = z.record(z.string(), z.object({}).loose());
 
 export const GerritChangeMessages = LooseArray(GerritChangeMessageInfo);
+
+export const GerritReviewResult = z.object({
+  change_info: GerritChange,
+});
+export type GerritReviewResult = z.infer<typeof GerritReviewResult>;

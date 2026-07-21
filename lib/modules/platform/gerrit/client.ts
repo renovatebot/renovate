@@ -6,7 +6,11 @@ import { logger } from '../../../logger/index.ts';
 import { GerritHttp } from '../../../util/http/gerrit.ts';
 import type { HttpOptions } from '../../../util/http/types.ts';
 import { getQueryString } from '../../../util/url.ts';
-import type { GerritAccountInfo, GerritChangeMessageInfo } from './schema.ts';
+import type {
+  GerritAccountInfo,
+  GerritChangeMessageInfo,
+  GerritReviewResult,
+} from './schema.ts';
 import {
   GerritBranchInfo,
   GerritChange,
@@ -219,12 +223,13 @@ class GerritClient {
     changeNumber: number,
     fullMessage: string,
     tag?: string,
-  ): Promise<void> {
+  ): Promise<GerritChange> {
     const message = this.normalizeMessage(fullMessage);
-    await this.gerritHttp.postJson(
+    const response = await this.gerritHttp.postJson<GerritReviewResult>(
       `a/changes/${changeNumber}/revisions/current/review`,
       { body: { message, tag, notify: 'NONE' } },
     );
+    return response.body.change_info;
   }
 
   async checkForExistingMessage(

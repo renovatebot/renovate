@@ -281,7 +281,7 @@ export async function updatePr(prConfig: UpdatePrConfig): Promise<void> {
   // Only add message if the body has really changed
   const newBodyHash = prConfig.prBody ? hashBody(prConfig.prBody) : undefined;
   if (newBodyHash && newBodyHash !== pr.bodyStruct?.hash) {
-    await client.addMessage(
+    const change = await client.addMessage(
       prConfig.number,
       prConfig.prBody!,
       TAG_PULL_REQUEST_BODY,
@@ -289,7 +289,7 @@ export async function updatePr(prConfig: UpdatePrConfig): Promise<void> {
     pr.bodyStruct = {
       hash: newBodyHash,
     };
-    pr.updatedAt = new Date().toISOString();
+    pr.updatedAt = convertGerritDateToISO(change.updated);
     updated = true;
   }
   await client.setHashtags(prConfig.number, {
@@ -297,8 +297,12 @@ export async function updatePr(prConfig: UpdatePrConfig): Promise<void> {
     remove: prConfig.removeLabels,
   });
   if (prConfig.targetBranch) {
-    await client.moveChange(prConfig.number, prConfig.targetBranch);
-    pr.targetBranch = prConfig.targetBranch;
+    const change = await client.moveChange(
+      prConfig.number,
+      prConfig.targetBranch,
+    );
+    pr.targetBranch = change.branch;
+    pr.updatedAt = convertGerritDateToISO(change.updated);
     updated = true;
   }
   // TODO: support restoring change if prConfig.state === 'open'
@@ -361,12 +365,12 @@ export async function createPr(prConfig: CreatePRConfig): Promise<Pr | null> {
   const ref = change.revisions![sha].ref;
   await git.setVirtualBranch(prConfig.sourceBranch, ref, sha);
 
-  await client.addMessage(
+  const updatedChange = await client.addMessage(
     change._number,
     prConfig.prBody,
     TAG_PULL_REQUEST_BODY,
   );
-  const pr = mapGerritChangeToPr(change, {
+  const pr = mapGerritChangeToPr(updatedChange, {
     sourceBranch: prConfig.sourceBranch,
     prBody: prConfig.prBody,
   })!;

@@ -454,7 +454,9 @@ describe('modules/platform/gerrit/index', () => {
       const pr = mapGerritChangeToPr(change)!;
       prCacheMock.getPrs.mockResolvedValueOnce([pr]);
       prCacheMock.setPr.mockResolvedValueOnce();
-      clientMock.addMessage.mockResolvedValueOnce();
+      clientMock.addMessage.mockResolvedValueOnce(
+        makeChange({ updated: '2025-04-14 16:45:00.000000000' }),
+      );
       await gerrit.updatePr({
         number: 123456,
         prTitle: change.subject,
@@ -469,7 +471,7 @@ describe('modules/platform/gerrit/index', () => {
         'test/repo',
         expect.objectContaining({
           number: 123456,
-          updatedAt: expect.any(String),
+          updatedAt: '2025-04-14T16:45:00.000000000',
         }),
       );
     });
@@ -542,8 +544,12 @@ describe('modules/platform/gerrit/index', () => {
       const change = makeChange({ branch: 'main' });
       const pr = mapGerritChangeToPr(change)!;
       prCacheMock.getPrs.mockResolvedValueOnce([pr]);
+      prCacheMock.setPr.mockResolvedValueOnce();
       clientMock.moveChange.mockResolvedValueOnce(
-        partial<GerritChange>({ branch: 'new-main' }),
+        partial<GerritChange>({
+          branch: 'new-main',
+          updated: '2025-04-14 16:48:00.000000000',
+        }),
       );
       await gerrit.updatePr({
         number: 123456,
@@ -554,6 +560,14 @@ describe('modules/platform/gerrit/index', () => {
         123456,
         'new-main',
       );
+      expect(prCacheMock.setPr).toHaveBeenCalledExactlyOnceWith(
+        'test/repo',
+        expect.objectContaining({
+          number: 123456,
+          targetBranch: 'new-main',
+          updatedAt: '2025-04-14T16:48:00.000000000',
+        }),
+      );
     });
   });
 
@@ -562,6 +576,7 @@ describe('modules/platform/gerrit/index', () => {
       git.pushCommit.mockResolvedValueOnce(true);
       const change = makeChange();
       clientMock.findChanges.mockResolvedValueOnce([change]);
+      clientMock.addMessage.mockResolvedValueOnce(change);
       const pr = await gerrit.createPr({
         sourceBranch: 'source',
         targetBranch: 'target',
@@ -595,6 +610,7 @@ describe('modules/platform/gerrit/index', () => {
       git.pushCommit.mockResolvedValueOnce(true);
       const change = makeChange();
       clientMock.findChanges.mockResolvedValueOnce([change]);
+      clientMock.addMessage.mockResolvedValueOnce(change);
       const pr = await gerrit.createPr({
         sourceBranch: 'source',
         targetBranch: 'target',
@@ -627,6 +643,7 @@ describe('modules/platform/gerrit/index', () => {
       git.pushCommit.mockResolvedValueOnce(true);
       const change = makeChange();
       clientMock.findChanges.mockResolvedValueOnce([change]);
+      clientMock.addMessage.mockResolvedValueOnce(change);
       const pr = await gerrit.createPr({
         sourceBranch: 'source',
         targetBranch: 'target',
