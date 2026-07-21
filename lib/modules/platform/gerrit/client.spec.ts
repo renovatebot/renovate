@@ -245,7 +245,7 @@ describe('modules/platform/gerrit/client', () => {
       ).resolves.toEqual([gerritChange({ _number: 1 })]);
     });
 
-    it('sets query.S as 0 if startOffset is not provided', async () => {
+    it('sets query.S to 0 on the first page', async () => {
       httpMock
         .scope(gerritEndpointUrl)
         .get('/a/changes/')
