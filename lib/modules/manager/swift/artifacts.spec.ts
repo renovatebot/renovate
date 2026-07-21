@@ -72,37 +72,6 @@ const v3Fixture = JSON.stringify(
   2,
 );
 
-// Package.resolved that mixes source-control pins and SwiftPM Package
-// Registry (SE-0292) pins. Registry pins have `kind: "registry"`,
-// `location: ""`, and only a `version` in `state` — no `revision`,
-// because registry packages are identified by version alone.
-const v2MixedFixture = JSON.stringify(
-  {
-    pins: [
-      {
-        identity: 'alamofire',
-        kind: 'remoteSourceControl',
-        location: 'https://github.com/Alamofire/Alamofire',
-        state: {
-          revision: 'f455c2975872ccd2d9c81594c658af65716e9b9a',
-          version: '5.9.1',
-        },
-      },
-      {
-        identity: 'example.registry-package',
-        kind: 'registry',
-        location: '',
-        state: {
-          version: '1.2.3',
-        },
-      },
-    ],
-    version: 2,
-  },
-  null,
-  2,
-);
-
 describe('modules/manager/swift/artifacts', () => {
   it('returns null when no Package.resolved files exist', async () => {
     scm.getFileList.mockResolvedValue(['Package.swift', 'Sources/main.swift']);
@@ -231,14 +200,35 @@ describe('modules/manager/swift/artifacts', () => {
   });
 
   it('parses lockfile with mixed source-control and registry pins', async () => {
-    // Regression test: SwiftPM Package Registry (SE-0292) pins have
-    // `kind: "registry"` and no `revision` field, because registry packages
-    // are identified by version alone. Before revision was made optional in
-    // the Zod schema, any Package.resolved mixing source-control and
-    // registry pins failed to parse and updateArtifacts silently returned
-    // null with `swift: could not parse Package.resolved`. Verify the mixed
-    // lockfile parses, the source-control pin gets updated, and the
-    // registry pin is preserved untouched.
+    // Regression test: SwiftPM Package Registry (SE-0292) registry pins have
+    // `kind: "registry"` and no `revision`; a lockfile mixing them with
+    // source-control pins must still parse and update correctly.
+    const v2MixedFixture = JSON.stringify(
+      {
+        pins: [
+          {
+            identity: 'alamofire',
+            kind: 'remoteSourceControl',
+            location: 'https://github.com/Alamofire/Alamofire',
+            state: {
+              revision: 'f455c2975872ccd2d9c81594c658af65716e9b9a',
+              version: '5.9.1',
+            },
+          },
+          {
+            identity: 'example.registry-package',
+            kind: 'registry',
+            location: '',
+            state: {
+              version: '1.2.3',
+            },
+          },
+        ],
+        version: 2,
+      },
+      null,
+      2,
+    );
     scm.getFileList.mockResolvedValue(['Package.resolved']);
     fs.readLocalFile.mockResolvedValue(v2MixedFixture);
     vi.mocked(datasource.getDigest).mockResolvedValue('newrevisionsha123');
@@ -259,18 +249,23 @@ describe('modules/manager/swift/artifacts', () => {
 
     expect(result).toHaveLength(1);
     const { contents } = result![0].file as { contents: string };
-    // Source-control pin updated
-    expect(contents).toContain('"version": "5.10.0"');
-    expect(contents).toContain('"revision": "newrevisionsha123"');
-    // Registry pin preserved
-    expect(contents).toContain('"identity": "example.registry-package"');
-    expect(contents).toContain('"kind": "registry"');
-    expect(contents).toContain('"version": "1.2.3"');
-    // Registry pin has no revision — must NOT gain one after the update
-    const registryBlock = contents.slice(
-      contents.indexOf('example.registry-package'),
+    const parsed = JSON.parse(contents) as {
+      pins: { identity: string; kind: string; state: Record<string, string> }[];
+    };
+    const scmPin = parsed.pins.find((p) => p.identity === 'alamofire');
+    const registryPin = parsed.pins.find(
+      (p) => p.identity === 'example.registry-package',
     );
-    expect(registryBlock).not.toContain('revision');
+    // Source-control pin updated
+    expect(scmPin).toMatchObject({
+      state: { version: '5.10.0', revision: 'newrevisionsha123' },
+    });
+    // Registry pin preserved, and must NOT gain a revision after the update
+    expect(registryPin).toMatchObject({
+      kind: 'registry',
+      state: { version: '1.2.3' },
+    });
+    expect(registryPin!.state).not.toHaveProperty('revision');
   });
 
   it('does not write `from:` range to Package.resolved', async () => {
