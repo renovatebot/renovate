@@ -1,4 +1,4 @@
-import { isString } from '@sindresorhus/is';
+import { isString, isTruthy } from '@sindresorhus/is';
 import { regEx } from '../../../util/regex.ts';
 import { MavenDatasource } from '../../datasource/maven/index.ts';
 import type { PackageDependency, PackageFileContent } from '../types.ts';
@@ -29,14 +29,14 @@ export function extractPackageFile(
 
   const deps: PackageDependency[] = [];
   for (const block of fileContent.matchAll(dependsOnBlockRegex)) {
-    for (const m of (block.groups?.args ?? '').matchAll(dependencyRegex)) {
-      if (!m.groups) {
-        continue;
-      }
+    const matches = [...(block.groups?.args ?? '').matchAll(dependencyRegex)]
+      .map((m) => m.groups)
+      .filter(isTruthy);
+    for (const { replaceString, groupId, artifactId, version } of matches) {
       deps.push({
-        currentValue: m.groups.version,
-        depName: `${m.groups.groupId}:${m.groups.artifactId}`,
-        replaceString: m.groups.replaceString,
+        currentValue: version,
+        depName: `${groupId}:${artifactId}`,
+        replaceString,
         datasource: MavenDatasource.id,
       });
     }
