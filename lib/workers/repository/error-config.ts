@@ -83,7 +83,6 @@ async function raiseWarningIssue(
     once: false,
     shouldReOpen: config.configWarningReuseIssue,
     confidential: config.confidential,
-    workItemType: config.azureWorkItemType,
   });
   if (res === 'updated' || res === 'created') {
     logger.warn({ configError: error, res }, 'Configuration Warning');
