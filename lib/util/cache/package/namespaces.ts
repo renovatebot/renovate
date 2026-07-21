@@ -31,6 +31,7 @@ export const packageCacheNamespaces = [
   'datasource-bitbucket-tags',
   'datasource-bitbucket-server-tags',
   'datasource-bitrise',
+  'datasource-buf-plugin',
   'datasource-buildpacks-registry',
   'datasource-cdnjs',
   'datasource-conan',

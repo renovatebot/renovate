@@ -1,0 +1,4 @@
+{
+    "code": "not_found",
+    "message": "plugin with name \"totally-bogus-owner-xyz/nope\" was not found"
+}
