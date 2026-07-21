@@ -215,6 +215,15 @@ describe('workers/repository/update/branch/schedule', () => {
       expect(res).toBeFalse();
     });
 
+    it('matches cron schedules in the last minute of an hour window', () => {
+      config.schedule = ['* 3-7 * * *'];
+      vi.setSystemTime(new Date('2026-06-30T07:59:01.000'));
+      expect(schedule.isScheduledNow(config)).toBeTrue();
+
+      vi.setSystemTime(new Date('2026-06-30T08:00:00.000'));
+      expect(schedule.isScheduledNow(config)).toBeFalse();
+    });
+
     it('supports cron syntax with days', () => {
       config.schedule = ['* * 30 * *'];
       let res = schedule.isScheduledNow(config);
