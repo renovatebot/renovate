@@ -85,6 +85,80 @@ describe('modules/manager/mise/artifacts', () => {
     expect(execSnapshots).toEqual([]);
   });
 
+  it('runs mise lock with MISE_SAFE when mise is pinned to a safe-mode version and not allowlisted', async () => {
+    GlobalConfig.set({ ...adminConfig, allowedUnsafeExecutions: [] });
+    fs.readLocalFile
+      .mockResolvedValueOnce('existing content')
+      .mockResolvedValueOnce(`[[tools.node]]\nversion = "24.16.0"\n`);
+    const execSnapshots = mockExecAll();
+
+    const res = await updateArtifacts({
+      packageFileName: 'mise.toml',
+      updatedDeps: [{ depName: 'node' }],
+      newPackageFileContent: '',
+      config: { ...config, constraints: { mise: '2026.8.0' } },
+    });
+
+    expect(res).toEqual([
+      {
+        file: {
+          contents: expect.stringContaining('version = "24.16.0"'),
+          path: 'mise.lock',
+          type: 'addition',
+        },
+      },
+    ]);
+    expect(execSnapshots).toMatchObject([
+      { cmd: trustCmd },
+      {
+        cmd: updateToolCmd,
+        options: {
+          env: expect.objectContaining({ MISE_SAFE: '1' }),
+        },
+      },
+    ]);
+  });
+
+  it('returns null when mise is not allowlisted and the constraint predates safe mode', async () => {
+    GlobalConfig.set({ ...adminConfig, allowedUnsafeExecutions: [] });
+    fs.readLocalFile.mockResolvedValueOnce('existing content');
+    const execSnapshots = mockExecAll();
+
+    const res = await updateArtifacts({
+      packageFileName: 'mise.toml',
+      updatedDeps: [{ depName: 'node' }],
+      newPackageFileContent: '',
+      config: { ...config, constraints: { mise: '2026.7.11' } },
+    });
+
+    expect(res).toBeNull();
+    expect(execSnapshots).toEqual([]);
+  });
+
+  it('does not set MISE_SAFE on the allowlisted path', async () => {
+    fs.readLocalFile
+      .mockResolvedValueOnce('existing content')
+      .mockResolvedValueOnce(`[[tools.node]]\nversion = "24.16.0"\n`);
+    const execSnapshots = mockExecAll();
+
+    await updateArtifacts({
+      packageFileName: 'mise.toml',
+      updatedDeps: [{ depName: 'node' }],
+      newPackageFileContent: '',
+      config,
+    });
+
+    expect(execSnapshots).toMatchObject([
+      { cmd: trustCmd },
+      {
+        cmd: updateToolCmd,
+        options: {
+          env: expect.not.objectContaining({ MISE_SAFE: '1' }),
+        },
+      },
+    ]);
+  });
+
   it('returns null if lock file unchanged after exec', async () => {
     fs.readLocalFile
       .mockResolvedValueOnce('existing content')
