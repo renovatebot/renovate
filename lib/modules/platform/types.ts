@@ -44,6 +44,8 @@ export interface RepoParams {
   renovateUsername?: string;
   cloneSubmodules?: boolean;
   cloneSubmodulesFilter?: string[];
+  /** Azure only: work item type to use when creating issues. */
+  azureWorkItemType?: string;
 }
 
 export interface PrDebugData {
@@ -156,8 +158,6 @@ export interface EnsureIssueConfig {
   once?: boolean;
   shouldReOpen?: boolean;
   confidential?: boolean;
-  /** Azure only: work item type to use when creating the issue. */
-  workItemType?: string;
 }
 export interface StatusCheckConfig {
   context: string;

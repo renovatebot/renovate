@@ -51,7 +51,7 @@ import { smartTruncate } from '../utils/pr-body.ts';
 import { readOnlyIssueBody } from '../utils/read-only-issue-body.ts';
 import * as azureApi from './azure-got-wrapper.ts';
 import * as azureHelper from './azure-helper.ts';
-import { IssueService } from './issue.ts';
+import { IssueService, defaultWorkItemType } from './issue.ts';
 import type { AzurePr, Config } from './types.ts';
 import { AzurePrVote } from './types.ts';
 import {
@@ -201,6 +201,7 @@ export async function initRepo({
   repository,
   cloneSubmodules,
   cloneSubmodulesFilter,
+  azureWorkItemType,
 }: RepoParams): Promise<RepoResult> {
   logger.debug(`initRepo("${repository}")`);
   config = { repository } as Config;
@@ -226,6 +227,7 @@ export async function initRepo({
 
   config.project = repo.project!.name!;
   config.projectId = repo.project!.id!;
+  config.workItemType = azureWorkItemType ?? defaultWorkItemType;
   issueService = new IssueService(config);
   config.owner = '?owner?';
   logger.debug(`${repository} owner = ${config.owner}`);

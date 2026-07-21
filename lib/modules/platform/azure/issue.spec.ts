@@ -28,6 +28,7 @@ describe('modules/platform/azure/issue', () => {
       repository: 'test/repo',
       project: 'testProject',
       repoId: '123',
+      workItemType: 'Issue',
     } as Config;
 
     issueService = new IssueService(config);
@@ -1158,7 +1159,7 @@ describe('modules/platform/azure/issue', () => {
   });
 
   describe('work item type configuration', () => {
-    it('defaults to the Issue work item type when none configured', async () => {
+    it('uses the configured Issue work item type', async () => {
       vi.spyOn(issueService, 'getIssueList').mockResolvedValue([]);
 
       const createWorkItemMock = vi.fn().mockResolvedValue({ id: 123 });
@@ -1180,7 +1181,11 @@ describe('modules/platform/azure/issue', () => {
     });
 
     it('creates the work item using the configured type', async () => {
-      vi.spyOn(issueService, 'getIssueList').mockResolvedValue([]);
+      const taskService = new IssueService({
+        ...config,
+        workItemType: 'Task',
+      } as Config);
+      vi.spyOn(taskService, 'getIssueList').mockResolvedValue([]);
 
       const createWorkItemMock = vi.fn().mockResolvedValue({ id: 123 });
       azureApi.workItemTrackingApi.mockResolvedValue(
@@ -1190,10 +1195,9 @@ describe('modules/platform/azure/issue', () => {
         }),
       );
 
-      await issueService.ensureIssue({
+      await taskService.ensureIssue({
         title: 'Test Issue',
         body: 'body',
-        workItemType: 'Task',
       });
 
       expect(createWorkItemMock.mock.calls[0][1]).toContainEqual({
@@ -1205,7 +1209,11 @@ describe('modules/platform/azure/issue', () => {
     });
 
     it('resolves work item states against the configured type', async () => {
-      vi.spyOn(issueService, 'getIssueList').mockResolvedValue([]);
+      const taskService = new IssueService({
+        ...config,
+        workItemType: 'Task',
+      } as Config);
+      vi.spyOn(taskService, 'getIssueList').mockResolvedValue([]);
 
       const getWorkItemTypeStatesMock = vi.fn().mockResolvedValue([]);
       azureApi.workItemTrackingApi.mockResolvedValue(
@@ -1216,10 +1224,9 @@ describe('modules/platform/azure/issue', () => {
         }),
       );
 
-      await issueService.ensureIssue({
+      await taskService.ensureIssue({
         title: 'Test Issue',
         body: 'body',
-        workItemType: 'Task',
       });
 
       expect(getWorkItemTypeStatesMock).toHaveBeenCalledWith(

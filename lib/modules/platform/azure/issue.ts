@@ -11,7 +11,7 @@ import * as azureApi from './azure-got-wrapper.ts';
 import type { Config } from './types.ts';
 import { getWorkItemTitle } from './util.ts';
 
-const defaultWorkItemType = 'Issue';
+export const defaultWorkItemType = 'Issue';
 
 // Historical fallbacks, used when the work item type's states cannot be
 // resolved from the API (e.g. Azure DevOps Server versions without the
@@ -52,9 +52,6 @@ function namesByCategory(
 export class IssueService {
   private config: Config;
   private readonly workItemStates: Lazy<Promise<WorkItemStates>>;
-  // Work item type to create issues as. Repo-configurable via `azureWorkItemType`
-  // and set from `ensureIssue`; defaults to the historical `Issue` type.
-  private workItemType = defaultWorkItemType;
 
   constructor(config: Config) {
     this.config = config;
@@ -80,7 +77,7 @@ export class IssueService {
       const azureApiWit = await azureApi.workItemTrackingApi();
       const stateColors = await azureApiWit.getWorkItemTypeStates(
         this.config.project,
-        this.workItemType,
+        this.config.workItemType,
       );
 
       if (stateColors?.length) {
@@ -140,7 +137,7 @@ export class IssueService {
     azureApiWit: IWorkItemTrackingApi,
   ): Promise<boolean> {
     const types = await azureApiWit.getWorkItemTypes(this.config.project);
-    return types.some((t) => t.name === this.workItemType);
+    return types.some((t) => t.name === this.config.workItemType);
   }
 
   async getIssueList(titleFilter?: string): Promise<Issue[]> {
@@ -221,15 +218,8 @@ export class IssueService {
     body,
     once = false,
     shouldReOpen = true,
-    workItemType,
   }: EnsureIssueConfig): Promise<EnsureIssueResult | null> {
     logger.debug(`ensureIssue()`);
-
-    // Set before any work item state resolution so states are resolved against
-    // the configured type. Safe to set here: the value is repo-constant.
-    if (workItemType) {
-      this.workItemType = workItemType;
-    }
 
     try {
       const azureApiWit = await azureApi.workItemTrackingApi();
@@ -352,8 +342,11 @@ export class IssueService {
       // cryptically.
       if (!(await this.hasWorkItemType(azureApiWit))) {
         logger.warn(
-          { workItemType: this.workItemType, project: this.config.project },
-          'Azure: work item type does not exist in project (or the token lacks permission to it); skipping issue. The Dependency Dashboard needs a process that defines this work item type.',
+          {
+            workItemType: this.config.workItemType,
+            project: this.config.project,
+          },
+          'Azure: work item type does not exist in project (or the token lacks permission to it); skipping issue. The Dependency Dashboard needs a process that defines this work item type. Set one your project defines via the `azureWorkItemType` repo config option.',
         );
         return null;
       }
@@ -364,7 +357,7 @@ export class IssueService {
           {
             op: 'add',
             path: '/fields/System.WorkItemType',
-            value: this.workItemType,
+            value: this.config.workItemType,
           },
           { op: 'add', path: '/fields/System.Title', value: finalTitle },
           {
@@ -379,7 +372,7 @@ export class IssueService {
           },
         ],
         this.config.project,
-        this.workItemType,
+        this.config.workItemType,
       );
 
       // Azure DevOps normally returns the created work item, but the
