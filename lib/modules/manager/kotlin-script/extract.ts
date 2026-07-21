@@ -17,28 +17,26 @@ const repositoryUrlRegex = regEx(/"(?<repositoryName>[^"]+)"/g);
 export function extractPackageFile(
   fileContent: string,
 ): PackageFileContent | null {
-  const registryUrls: string[] = [];
-  for (const block of fileContent.matchAll(repositoryBlockRegex)) {
-    for (const m of (block.groups?.args ?? '').matchAll(repositoryUrlRegex)) {
-      const url = m.groups?.repositoryName;
-      if (isString(url)) {
-        registryUrls.push(url);
-      }
-    }
-  }
+  const registryUrls: string[] = [...fileContent.matchAll(repositoryBlockRegex)]
+    .flatMap((block) => [
+      ...(block.groups?.args ?? '').matchAll(repositoryUrlRegex),
+    ])
+    .map((match) => match.groups?.repositoryName)
+    .filter(isString);
 
   const deps: PackageDependency[] = [];
   for (const block of fileContent.matchAll(dependsOnBlockRegex)) {
     const matches = [...(block.groups?.args ?? '').matchAll(dependencyRegex)]
       .map((m) => m.groups)
       .filter(isTruthy);
-    for (const { replaceString, groupId, artifactId, version } of matches) {
-      deps.push({
-        currentValue: version,
-        depName: `${groupId}:${artifactId}`,
-        replaceString,
+    for (const match of matches) {
+      const dep: PackageDependency = {
+        currentValue: match.version,
+        depName: `${match.groupId}:${match.artifactId}`,
+        replaceString: match.replaceString,
         datasource: MavenDatasource.id,
-      });
+      };
+      deps.push(dep);
     }
   }
 
