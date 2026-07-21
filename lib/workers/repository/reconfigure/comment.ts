@@ -14,7 +14,14 @@ import {
 } from '../errors-warnings.ts';
 import { getBaseBranchDesc } from '../onboarding/pr/base-branch.ts';
 import { getScheduleDesc } from '../onboarding/pr/config-description.ts';
-import { getExpectedPrList } from '../onboarding/pr/pr-list.ts';
+import {
+  getPackageFilesDesc,
+  getPackageFilesSummary,
+} from '../onboarding/pr/package-files.ts';
+import {
+  getExpectedPrList,
+  getExpectedPrListSummary,
+} from '../onboarding/pr/pr-list.ts';
 
 export async function ensureReconfigurePrComment(
   config: RenovateConfig,
@@ -38,17 +45,9 @@ export async function ensureReconfigurePrComment(
 {{ERRORS}}
 `;
   let prBody = prCommentTemplate;
-  if (packageFiles && Object.entries(packageFiles).length) {
-    let files: string[] = [];
-    for (const [manager, managerFiles] of Object.entries(packageFiles)) {
-      files = files.concat(
-        managerFiles.map((file) => ` * \`${file.packageFile}\` (${manager})`),
-      );
-    }
-    prBody = `${prBody.replace(
-      '{{PACKAGE FILES}}',
-      `### Detected Package Files\n\n${files.join('\n')}`,
-    )}\n`;
+  const packageFilesDesc = getPackageFilesDesc(packageFiles);
+  if (packageFilesDesc) {
+    prBody = `${prBody.replace('{{PACKAGE FILES}}', packageFilesDesc)}\n`;
   } else {
     prBody = prBody.replace('{{PACKAGE FILES}}\n', '');
   }
@@ -65,7 +64,22 @@ export async function ensureReconfigurePrComment(
   );
   prBody = prBody.replace('{{ERRORS}}\n', getErrors(config));
   prBody = prBody.replace('{{BASEBRANCH}}\n', getBaseBranchDesc(config));
-  prBody = prBody.replace('{{PRLIST}}\n', getExpectedPrList(config, branches));
+  const prList = getExpectedPrList(config, branches);
+  prBody = prBody.replace('{{PRLIST}}\n', prList);
+
+  if (prBody.length > platform.maxBodyLength()) {
+    logger.debug(
+      'Reconfigure PR body exceeds platform limit, switching to summary PR list and package files',
+    );
+    prBody = prBody.replace(prList, getExpectedPrListSummary(config, branches));
+    if (packageFilesDesc) {
+      prBody = prBody.replace(
+        packageFilesDesc,
+        `### Detected Package Files\n\n${getPackageFilesSummary(packageFiles)}`,
+      );
+    }
+  }
+
   logger.trace(`prBody:\n${prBody}`);
 
   prBody = platform.massageMarkdown(prBody);

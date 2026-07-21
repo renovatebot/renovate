@@ -210,6 +210,42 @@ export const presets: Record<string, Preset> = {
           'regex:^(?<major>\\d+)?(\\.(?<minor>\\d+))?(\\.(?<patch>\\d+))?([\\._+](?<build>(\\d\\.?)+)(LTS)?)?(-(?<compatibility>.*))?$',
       },
       {
+        description:
+          'Use docker versioning for major-only Java image tags so rolling tags (e.g. 21-jre) are not upgraded to full-precision tags (e.g. 21.0.11_10-jre).',
+        matchCurrentValue: '/^\\d+(-|$)/',
+        matchDatasources: ['docker'],
+        matchPackageNames: [
+          'eclipse-temurin',
+          'amazoncorretto',
+          'adoptopenjdk',
+          'openjdk',
+          'java',
+          'java-jdk',
+          'java-jre',
+          'sapmachine',
+          '/^azul/zulu-openjdk/',
+          '/^bellsoft/liberica-openj(dk|re)-/',
+          '/^cimg/openjdk/',
+        ],
+        versioning: 'docker',
+      },
+      {
+        description:
+          'Use docker versioning for major-only Java image tags so rolling tags (e.g. 21-jre) are not upgraded to full-precision tags (e.g. 21.0.11_10-jre).',
+        matchCurrentValue: '/^\\d+(-|$)/',
+        matchDatasources: ['docker'],
+        matchDepNames: [
+          'eclipse-temurin',
+          'amazoncorretto',
+          'adoptopenjdk',
+          'openjdk',
+          'java',
+          'java-jre',
+          'sapmachine',
+        ],
+        versioning: 'docker',
+      },
+      {
         allowedVersions: '/^(?:jdk|jdk-all|jre)-(?:8|11|17|21|25)(?:\\.|-|$)/',
         description:
           'Limit Java runtime versions to LTS releases. To receive all major releases add `workarounds:javaLTSVersions` to the `ignorePresets` array.',

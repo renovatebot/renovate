@@ -107,11 +107,10 @@ export async function checkOnboardingBranch(
 
     if (
       Object.entries((await extractAllDependencies(mergedConfig)).packageFiles)
-        .length === 0
+        .length === 0 &&
+      getInheritedOrGlobal('onboardingNoDeps') !== 'enabled'
     ) {
-      if (getInheritedOrGlobal('onboardingNoDeps') !== 'enabled') {
-        throw new Error(REPOSITORY_NO_PACKAGE_FILES);
-      }
+      throw new Error(REPOSITORY_NO_PACKAGE_FILES);
     }
     logger.debug('Need to create onboarding PR');
     if (config.onboardingRebaseCheckbox) {
@@ -126,12 +125,10 @@ export async function checkOnboardingBranch(
       );
     }
   }
-  if (!GlobalConfig.get('dryRun')) {
-    // TODO #22198
-    if (!isConflicted) {
-      logger.debug('Merge onboarding branch in default branch');
-      await scm.mergeToLocal(onboardingBranch!);
-    }
+  // TODO #22198
+  if (!GlobalConfig.get('dryRun') && !isConflicted) {
+    logger.debug('Merge onboarding branch in default branch');
+    await scm.mergeToLocal(onboardingBranch!);
   }
   setOnboardingCache(
     getBranchCommit(config.defaultBranch!)!,

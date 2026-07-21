@@ -137,8 +137,8 @@ describe('modules/datasource/npm/index', () => {
       .get('/foobar')
       .reply(200, deprecatedPackage);
     const res = await getPkgReleases({ datasource, packageName: 'foobar' });
-    expect(res).toMatchSnapshot();
-    expect(res?.deprecationMessage).toMatchSnapshot();
+    expect(res).toMatchSnapshot('releases');
+    expect(res?.deprecationMessage).toMatchSnapshot('deprecationMessage');
   });
 
   it('should return attestation', async () => {
@@ -223,14 +223,14 @@ describe('modules/datasource/npm/index', () => {
     httpMock.scope(defaultRegistryUrl).get('/foobar').reply(200, 'oops');
     await expect(
       getPkgReleases({ datasource, packageName: 'foobar' }),
-    ).rejects.toThrow();
+    ).rejects.toThrow('external-host-error');
   });
 
   it('should throw error for 429', async () => {
     httpMock.scope(defaultRegistryUrl).get('/foobar').reply(429);
     await expect(
       getPkgReleases({ datasource, packageName: 'foobar' }),
-    ).rejects.toThrow();
+    ).rejects.toThrow('external-host-error');
   });
 
   it('should throw error for 5xx', async () => {
@@ -251,7 +251,7 @@ describe('modules/datasource/npm/index', () => {
     httpMock.scope(defaultRegistryUrl).get('/foobar').reply(451);
     await expect(
       getPkgReleases({ datasource, packageName: 'foobar' }),
-    ).rejects.toThrow();
+    ).rejects.toThrow('external-host-error');
   });
 
   it('should not send an authorization header if public package', async () => {

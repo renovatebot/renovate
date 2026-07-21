@@ -5,6 +5,7 @@ import { getConfig } from '../../../config/defaults.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import { getManagerConfig, mergeChildConfig } from '../../../config/index.ts';
 import type {
+  InternalGlobalConfigOptions,
   RenovateConfig,
   RepoGlobalConfig,
 } from '../../../config/types.ts';
@@ -21,7 +22,7 @@ import { extractPackageFile } from './index.ts';
 
 vi.mock('../../../util/fs/index.ts');
 
-const adminConfig: RepoGlobalConfig = {
+const adminConfig: RepoGlobalConfig & InternalGlobalConfigOptions = {
   localDir: upath.resolve('/tmp/repo'),
 };
 
