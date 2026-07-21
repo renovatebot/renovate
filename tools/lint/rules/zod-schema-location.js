@@ -42,6 +42,7 @@ function hasSiblingSchemaFile(filename) {
   const dir = path.dirname(filename);
   let result = schemaFileByDir.get(dir);
   if (result === undefined) {
+    // oxlint-disable-next-line no-sync -- lint rules run synchronously, so async fs is not an option
     result = fs.existsSync(path.join(dir, 'schema.ts'));
     schemaFileByDir.set(dir, result);
   }
