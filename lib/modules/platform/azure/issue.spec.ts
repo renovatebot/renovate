@@ -382,6 +382,7 @@ describe('modules/platform/azure/issue', () => {
       expect(logger.warn).toHaveBeenCalledWith(
         {
           workItemType: 'Issue',
+          availableTypes: ['Bug'],
           project: 'testProject',
           documentationUrl:
             'https://docs.renovatebot.com/configuration-options/#azureworkitemtype',

@@ -12,8 +12,6 @@ import * as azureApi from './azure-got-wrapper.ts';
 import type { Config } from './types.ts';
 import { getWorkItemTitle } from './util.ts';
 
-export const defaultWorkItemType = 'Issue';
-
 // Historical fallbacks, used when the work item type's states cannot be
 // resolved from the API (e.g. Azure DevOps Server versions without the
 // endpoint). These match the values Renovate hardcoded previously.
@@ -129,16 +127,16 @@ export class IssueService {
   }
 
   /**
-   * Whether the project's process defines the configured work item type. Some
-   * processes (e.g. Scrum) do not define `Issue`, in which case creating one
-   * fails; checking up front lets us log an actionable message instead of a
-   * cryptic error.
+   * The work item type names the project's process defines. Some processes
+   * (e.g. Scrum) do not define `Issue`, in which case creating one fails;
+   * checking up front lets us log an actionable message (including the types
+   * that *are* available) instead of a cryptic error.
    */
-  private async hasWorkItemType(
+  private async getWorkItemTypeNames(
     azureApiWit: IWorkItemTrackingApi,
-  ): Promise<boolean> {
+  ): Promise<string[]> {
     const types = await azureApiWit.getWorkItemTypes(this.config.project);
-    return types.some((t) => t.name === this.config.workItemType);
+    return types.map((t) => t.name).filter((name): name is string => !!name);
   }
 
   async getIssueList(titleFilter?: string): Promise<Issue[]> {
@@ -341,10 +339,12 @@ export class IssueService {
       // on a process without it returns a 404 that the REST client surfaces as
       // `null`, so check first and log an actionable message instead of failing
       // cryptically.
-      if (!(await this.hasWorkItemType(azureApiWit))) {
+      const availableTypes = await this.getWorkItemTypeNames(azureApiWit);
+      if (!availableTypes.includes(this.config.workItemType)) {
         logger.warn(
           {
             workItemType: this.config.workItemType,
+            availableTypes,
             project: this.config.project,
             documentationUrl: `${GlobalConfig.get('productLinks').documentation}configuration-options/#azureworkitemtype`,
           },

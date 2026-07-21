@@ -15,6 +15,7 @@ import {
 } from 'azure-devops-node-api/interfaces/GitInterfaces.js';
 import type { PolicyEvaluationRecord } from 'azure-devops-node-api/interfaces/PolicyInterfaces.js';
 import { PolicyEvaluationStatus } from 'azure-devops-node-api/interfaces/PolicyInterfaces.js';
+import { getConfig } from '../../../config/defaults.ts';
 import {
   REPOSITORY_ARCHIVED,
   REPOSITORY_EMPTY,
@@ -51,7 +52,7 @@ import { smartTruncate } from '../utils/pr-body.ts';
 import { readOnlyIssueBody } from '../utils/read-only-issue-body.ts';
 import * as azureApi from './azure-got-wrapper.ts';
 import * as azureHelper from './azure-helper.ts';
-import { IssueService, defaultWorkItemType } from './issue.ts';
+import { IssueService } from './issue.ts';
 import type { AzurePr, Config } from './types.ts';
 import { AzurePrVote } from './types.ts';
 import {
@@ -227,7 +228,7 @@ export async function initRepo({
 
   config.project = repo.project!.name!;
   config.projectId = repo.project!.id!;
-  config.workItemType = azureWorkItemType ?? defaultWorkItemType;
+  config.workItemType = azureWorkItemType ?? getConfig().azureWorkItemType!;
   issueService = new IssueService(config);
   config.owner = '?owner?';
   logger.debug(`${repository} owner = ${config.owner}`);
