@@ -46,6 +46,7 @@ describe('modules/platform/gitlab/index', () => {
     delete process.env.RENOVATE_X_GITLAB_AUTO_MERGEABLE_CHECK_ATTEMPS;
     delete process.env.RENOVATE_X_GITLAB_AUTO_APPROVE_TOKEN;
     delete process.env.RENOVATE_X_GITLAB_MERGE_REQUEST_DELAY;
+    delete process.env.RENOVATE_X_GITLAB_CREATE_MERGE_REQUEST_DELAY;
     delete process.env.RENOVATE_X_GITLAB_SKIP_STATUS_WITHOUT_PIPELINE;
     delete process.env.RENOVATE_X_PLATFORM_VERSION;
 
@@ -2272,9 +2273,10 @@ describe('modules/platform/gitlab/index', () => {
     beforeEach(() => {
       process.env.RENOVATE_X_GITLAB_AUTO_MERGEABLE_CHECK_ATTEMPS = '2';
       process.env.RENOVATE_X_GITLAB_MERGE_REQUEST_DELAY = '100';
+      process.env.RENOVATE_X_GITLAB_CREATE_MERGE_REQUEST_DELAY = '0';
     });
 
-    it('returns the PR', async () => {
+    it('returns the PR without delay', async () => {
       await initPlatform('13.3.6-ee');
       httpMock
         .scope(gitlabApiHost)
@@ -2304,6 +2306,41 @@ describe('modules/platform/gitlab/index', () => {
         sourceBranch: 'some-branch',
         targetBranch: 'master',
       });
+      expect(timers.setTimeout.mock.calls).toMatchObject([[0]]);
+    });
+
+    it('returns the PR with delay', async () => {
+      process.env.RENOVATE_X_GITLAB_CREATE_MERGE_REQUEST_DELAY = '10';
+      await initPlatform('13.3.6-ee');
+      httpMock
+        .scope(gitlabApiHost)
+        .get(
+          '/api/v4/projects/undefined/merge_requests?per_page=100&order_by=updated_at&sort=desc&scope=created_by_me',
+        )
+        .reply(200, [])
+        .post('/api/v4/projects/undefined/merge_requests')
+        .reply(200, {
+          id: 1,
+          iid: 12345,
+          title: 'some title',
+          source_branch: 'some-branch',
+          target_branch: 'master',
+          description: 'the-body',
+        });
+      const pr = await gitlab.createPr({
+        sourceBranch: 'some-branch',
+        targetBranch: 'master',
+        prTitle: 'some-title',
+        prBody: 'the-body',
+        labels: null,
+      });
+      expect(pr).toMatchObject({
+        number: 12345,
+        title: 'some title',
+        sourceBranch: 'some-branch',
+        targetBranch: 'master',
+      });
+      expect(timers.setTimeout.mock.calls).toMatchObject([[10000]]);
     });
 
     it('uses default branch', async () => {

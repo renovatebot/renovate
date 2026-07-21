@@ -82,6 +82,12 @@ If set, Renovate will use this as a delay to proceed with an automerge.
 
 Default value: `250` (milliseconds).
 
+## `RENOVATE_X_GITLAB_CREATE_MERGE_REQUEST_DELAY`
+
+If set, Renovate will use this as a delay to create a merge request.
+
+Default value: `0` (seconds).
+
 ## `RENOVATE_X_GITLAB_SKIP_STATUS_WITHOUT_PIPELINE`
 
 If set to `true` value, Renovate will skip setting a branch status check on GitLab when no pipeline is found for the commit.
