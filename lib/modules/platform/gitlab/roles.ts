@@ -12,7 +12,7 @@ const roleAccessLevels: Record<string, number> = {
   owner: 50,
 };
 
-const roleRegex = regEx(/^@@(\w+)$/);
+const roleRegex = regEx(/^@@(?<role>\w+)$/);
 
 /**
  * Parse a GitLab CODEOWNERS role handle (`@@developer`, `@@maintainer`,
@@ -20,7 +20,7 @@ const roleRegex = regEx(/^@@(\w+)$/);
  * recognized role, so `getRoleAccessLevel(x) !== null` doubles as a role check.
  */
 export function getRoleAccessLevel(handle: string): number | null {
-  const match = roleRegex.exec(handle);
-  const level = match ? roleAccessLevels[match[1].toLowerCase()] : undefined;
+  const role = roleRegex.exec(handle)?.groups?.role;
+  const level = role ? roleAccessLevels[role.toLowerCase()] : undefined;
   return level ?? null;
 }
