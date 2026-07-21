@@ -1,3 +1,4 @@
+import { isNullOrUndefined } from '@sindresorhus/is';
 import { logger } from '../../../logger/index.ts';
 import { regEx } from '../../../util/regex.ts';
 import { parseUrl } from '../../../util/url.ts';
@@ -13,7 +14,7 @@ export function removeBuildMeta(version: string): string {
 const urlWhitespaceRe = regEx(/\s/g);
 
 export function massageUrl(url: string | null | undefined): string | null {
-  if (url === null || url === undefined) {
+  if (isNullOrUndefined(url)) {
     return null;
   }
 

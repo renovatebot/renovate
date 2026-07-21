@@ -38,7 +38,7 @@ export function extractDependency(
     dep.skipReason = 'invalid-name';
     return dep;
   }
-  if (typeof input !== 'string') {
+  if (!isString(input)) {
     dep.skipReason = 'invalid-value';
     return dep;
   }

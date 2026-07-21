@@ -3,6 +3,7 @@ import {
   isNonEmptyObject,
   isNullOrUndefined,
   isPlainObject,
+  isString,
 } from '@sindresorhus/is';
 import { DateTime } from 'luxon';
 import { z } from 'zod/v4';
@@ -232,8 +233,7 @@ interface GraphqlPaginatedContent<T = unknown> {
 
 function constructAcceptString(input?: unknown): string {
   const defaultAccept = 'application/vnd.github.v3+json';
-  const acceptStrings =
-    typeof input === 'string' ? input.split(regEx(/\s*,\s*/)) : [];
+  const acceptStrings = isString(input) ? input.split(regEx(/\s*,\s*/)) : [];
 
   // TODO: regression of #6736
   // v8 ignore else -- TODO: add test #40625

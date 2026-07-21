@@ -76,6 +76,8 @@
     "renovate/no-new-url": "error",
     "renovate/no-stateful-global-regex": "error",
     "renovate/no-tools-import": "error",
+    "renovate/prefer-is-helpers": "error",
+    "renovate/prefer-is-object": "error",
     "renovate/prefer-nullish-util": "error",
     "renovate/v8-ignore-reason": "error",
     "renovate/zod-schema-naming": "error",

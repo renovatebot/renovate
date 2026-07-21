@@ -1,3 +1,4 @@
+import { isTruthy } from '@sindresorhus/is';
 import fs from 'fs-extra';
 import { DateTime } from 'luxon';
 import type { PushResult } from 'simple-git';
@@ -1495,7 +1496,7 @@ describe('util/git/index', { timeout: 30000 }, () => {
       )
         .split(newlineRegex)
         .map((line) => line.replace(regEx(/[0-9a-f]+\s+/i), ''))
-        .filter(Boolean);
+        .filter(isTruthy);
     }
 
     it('creates renovate ref in default section', async () => {

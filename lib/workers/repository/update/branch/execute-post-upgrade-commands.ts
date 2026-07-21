@@ -1,7 +1,7 @@
 // TODO #22198
 
 import crypto from 'node:crypto';
-import { isArray, isNonEmptyArray } from '@sindresorhus/is';
+import { isArray, isNonEmptyArray, isString } from '@sindresorhus/is';
 import upath from 'upath';
 import { GlobalConfig } from '../../../../config/global.ts';
 import { mergeChildConfig } from '../../../../config/index.ts';
@@ -87,7 +87,7 @@ export async function postUpgradeCommandsExecutor(
         const canWriteFile = await localPathIsFile(file.path);
         if (file.type === 'addition' && !file.isSymlink && canWriteFile) {
           let contents: Buffer | null;
-          if (typeof file.contents === 'string') {
+          if (isString(file.contents)) {
             contents = Buffer.from(file.contents);
           } else {
             contents = file.contents;

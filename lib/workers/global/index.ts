@@ -217,7 +217,7 @@ export async function start(): Promise<number> {
       }
 
       const { owner, repo } = repositoryToOwnerAndRepo(
-        typeof repository === 'string' ? repository : repository.repository,
+        isString(repository) ? repository : repository.repository,
       );
 
       await instrument(
@@ -244,10 +244,9 @@ export async function start(): Promise<number> {
             [ATTR_VCS_OWNER_NAME]: owner,
             [ATTR_VCS_REPOSITORY_NAME]: repo,
             /** @deprecated TODO remove */
-            repository:
-              typeof repository === 'string'
-                ? repository
-                : repository.repository,
+            repository: isString(repository)
+              ? repository
+              : repository.repository,
           },
         },
       );
