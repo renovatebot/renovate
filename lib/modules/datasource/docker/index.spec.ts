@@ -170,6 +170,7 @@ describe('modules/datasource/docker/index', () => {
       password: 'some-password',
     });
     delete process.env.RENOVATE_X_DOCKER_HUB_TAGS_DISABLE;
+    delete process.env.RENOVATE_X_DOCKER_HUB_DISABLE_LABEL_LOOKUP;
   });
 
   describe('getDigest', () => {
@@ -1780,6 +1781,7 @@ describe('modules/datasource/docker/index', () => {
     });
 
     it('uses custom max pages', async () => {
+      process.env.RENOVATE_X_DOCKER_HUB_DISABLE_LABEL_LOOKUP = 'true';
       GlobalConfig.set({ dockerMaxPages: 2 });
       process.env.RENOVATE_X_DOCKER_HUB_TAGS_DISABLE = 'true';
       httpMock
@@ -2405,6 +2407,7 @@ describe('modules/datasource/docker/index', () => {
     });
 
     it('Uses Docker Hub tags for registry-1.docker.io', async () => {
+      process.env.RENOVATE_X_DOCKER_HUB_DISABLE_LABEL_LOOKUP = 'true';
       httpMock
         .scope(dockerHubUrl)
         .get('/library/node/tags?page_size=1000&ordering=last_updated')
@@ -2451,6 +2454,7 @@ describe('modules/datasource/docker/index', () => {
     });
 
     it('Uses custom page limit for Docker hub repository tags', async () => {
+      process.env.RENOVATE_X_DOCKER_HUB_DISABLE_LABEL_LOOKUP = 'true';
       GlobalConfig.set({ dockerMaxPages: 2 });
       httpMock
         .scope(dockerHubUrl)
@@ -2501,6 +2505,7 @@ describe('modules/datasource/docker/index', () => {
     });
 
     it('adds library/ prefix for Docker Hub (implicit)', async () => {
+      process.env.RENOVATE_X_DOCKER_HUB_DISABLE_LABEL_LOOKUP = 'true';
       const tags = ['1.0.0'];
       httpMock
         .scope(dockerHubUrl)
@@ -2529,6 +2534,7 @@ describe('modules/datasource/docker/index', () => {
     });
 
     it('adds library/ prefix for Docker Hub (explicit)', async () => {
+      process.env.RENOVATE_X_DOCKER_HUB_DISABLE_LABEL_LOOKUP = 'true';
       httpMock
         .scope(dockerHubUrl)
         .get('/library/node/tags?page_size=1000&ordering=last_updated')
@@ -2575,6 +2581,7 @@ describe('modules/datasource/docker/index', () => {
     });
 
     it('sets releaseTimestamp on digests from Docker Hub', async () => {
+      process.env.RENOVATE_X_DOCKER_HUB_DISABLE_LABEL_LOOKUP = 'true';
       httpMock
         .scope(dockerHubUrl)
         .get('/library/node/tags?page_size=1000&ordering=last_updated')
@@ -3305,6 +3312,60 @@ describe('modules/datasource/docker/index', () => {
             'https://github.com/bitnami/charts/tree/main/bitnami/harbor',
         },
       );
+    });
+
+    it('uses descriptor annotations for docker hub library images', async () => {
+      httpMock
+        .scope('https://index.docker.io/v2')
+        .get('/')
+        .reply(200)
+        .get('/library/convertigo/manifests/8.4.3')
+        .reply(200, {
+          schemaVersion: 2,
+          mediaType: 'application/vnd.oci.image.index.v1+json',
+          manifests: [
+            {
+              digest: 'sha256:attestation',
+              mediaType: 'application/vnd.oci.image.manifest.v1+json',
+              platform: {
+                architecture: 'unknown',
+                os: 'unknown',
+              },
+              annotations: {
+                'vnd.docker.reference.type': 'attestation-manifest',
+              },
+            },
+            {
+              digest: 'sha256:amd64',
+              mediaType: 'application/vnd.oci.image.manifest.v1+json',
+              platform: {
+                architecture: 'amd64',
+                os: 'linux',
+              },
+              annotations: {
+                'org.opencontainers.image.source':
+                  'https://github.com/convertigo/convertigo.git#7b29f6f312a4582ccc7dd325dcf8f425ac8dfdbd:docker/default',
+                'org.opencontainers.image.revision':
+                  '7b29f6f312a4582ccc7dd325dcf8f425ac8dfdbd',
+                'org.opencontainers.image.version': '8.4.3',
+              },
+            },
+          ],
+        });
+
+      expect(
+        await ds.getLabels(
+          'https://index.docker.io',
+          'library/convertigo',
+          '8.4.3',
+        ),
+      ).toEqual({
+        'org.opencontainers.image.source':
+          'https://github.com/convertigo/convertigo.git#7b29f6f312a4582ccc7dd325dcf8f425ac8dfdbd:docker/default',
+        'org.opencontainers.image.revision':
+          '7b29f6f312a4582ccc7dd325dcf8f425ac8dfdbd',
+        'org.opencontainers.image.version': '8.4.3',
+      });
     });
 
     it('uses annotations for docker hub', async () => {

@@ -330,6 +330,7 @@ export interface PlatformScm {
   branchExists(branchName: string): Promise<boolean>;
   getBranchCommit(branchName: string): Promise<LongCommitSha | null>;
   getBranchUpdateDate(branchName: string): Promise<DateTime | null>;
+  getAllBranchUpdateDates(): Promise<Record<string, DateTime>>;
   deleteBranch(branchName: string): Promise<void>;
   commitAndPush(commitConfig: CommitFilesConfig): Promise<LongCommitSha | null>;
   getFileList(): Promise<string[]>;
