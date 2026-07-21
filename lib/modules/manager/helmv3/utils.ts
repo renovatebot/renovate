@@ -93,7 +93,7 @@ export function aliasRecordToRepositories(
   registryAliases: Record<string, string>,
 ): Repository[] {
   return Object.entries(registryAliases)
-    .filter(([, url]) => /^(https?|oci):\/\/.+/.exec(url))
+    .filter(([, url]) => /^(?:https?|oci):\/\/.+/.exec(url))
     .map(([alias, url]) => {
       return {
         name: alias,

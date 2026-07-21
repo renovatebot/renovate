@@ -159,19 +159,19 @@ export async function updateArtifacts({
       .join('\n');
 
     const inlineReplaceRegEx = regEx(
-      /(\r?\n)(replace\s+[^\s]+\s+=>\s+\.\.\/.*)/g,
+      /(?<newline>\r?\n)(?<directive>replace\s+[^\s]+\s+=>\s+\.\.\/.*)/g,
     );
 
-    // $1 will be matched with the (\r?n) group
-    // $2 will be matched with the inline replace match, example
+    // $<newline> will be matched with the (\r?\n) group
+    // $<directive> will be matched with the inline replace match, example
     // "// renovate-replace replace golang.org/x/net v1.2.3 => example.com/fork/net v1.4.5"
-    const inlineCommentOut = '$1// renovate-replace $2';
+    const inlineCommentOut = '$<newline>// renovate-replace $<directive>';
 
     // Regex match replace directive block, example:
     // replace (
     //     golang.org/x/net v1.2.3 => example.com/fork/net v1.4.5
     // )
-    const blockReplaceRegEx = regEx(/(\r?\n)replace\s*\([^)]+\s*\)/g);
+    const blockReplaceRegEx = regEx(/(?:\r?\n)replace\s*\([^)]+\s*\)/g);
 
     /**
      * replacerFunction for commenting out replace blocks
@@ -179,7 +179,10 @@ export async function updateArtifacts({
      * @returns A commented out block with // renovate-replace
      */
     function blockCommentOut(match: string): string {
-      return match.replace(/(\r?\n)/g, '$1// renovate-replace ');
+      return match.replace(
+        /(?<newline>\r?\n)/g,
+        '$<newline>// renovate-replace ',
+      );
     }
 
     // Comment out golang replace directives

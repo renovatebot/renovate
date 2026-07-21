@@ -100,8 +100,8 @@ function compileCommitMessage(upgrade: BranchUpgradeConfig): string {
   upgrade.commitMessage = upgrade.commitMessage.trim(); // Trim exterior whitespace
   upgrade.commitMessage = upgrade.commitMessage.replace(regEx(/\s+/g), ' '); // Trim extra whitespace inside string
   upgrade.commitMessage = upgrade.commitMessage.replace(
-    regEx(/to vv(\d)/),
-    'to v$1',
+    regEx(/to vv(?<digit>\d)/),
+    'to v$<digit>',
   );
   if (upgrade.toLowerCase && upgrade.commitMessageLowerCase !== 'never') {
     // We only need to lowercase the first line

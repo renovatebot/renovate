@@ -6,7 +6,7 @@ import { readFile } from '../utils/index.ts';
 
 const defaultReplaceStart =
   '<!-- Autogenerate in https://github.com/renovatebot/renovate -->';
-const goodUrlRegex = regEx(/\[(.+?)\]\((.+?)\)/);
+const goodUrlRegex = regEx(/\[(?:.+?)\]\((?:.+?)\)/);
 
 export function formatName(input: string): string {
   return input.split('-').map(capitalize).join(' ');

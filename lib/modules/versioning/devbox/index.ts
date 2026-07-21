@@ -8,8 +8,8 @@ export const displayName = 'devbox';
 export const urls = [];
 export const supportsRanges = false;
 
-const validPattern = regEx(/^((\d|[1-9]\d*)(\.(\d|[1-9]\d*)){0,2})$/);
-const versionPattern = regEx(/^((\d|[1-9]\d*)(\.(\d|[1-9]\d*)){2})$/);
+const validPattern = regEx(/^(?:(?:\d|[1-9]\d*)(?:\.(?:\d|[1-9]\d*)){0,2})$/);
+const versionPattern = regEx(/^(?:(?:\d|[1-9]\d*)(?:\.(?:\d|[1-9]\d*)){2})$/);
 
 class DevboxVersioningApi extends GenericVersioningApi {
   protected _parse(version: string): GenericVersion | null {

@@ -15,7 +15,7 @@ export interface SemanticCommitMessageJSON extends CommitMessageJSON {
  */
 export class SemanticCommitMessage extends CommitMessage {
   private static readonly REGEXP =
-    /^(?<type>[\w]+)(\((?<scope>[\w-]+)\))?(?<breaking>!)?: ((?<issue>([A-Z]+-|#)[\d]+) )?(?<description>.*)/;
+    /^(?<type>[\w]+)(?:\((?<scope>[\w-]+)\))?(?<breaking>!)?: (?:(?<issue>(?:[A-Z]+-|#)[\d]+) )?(?<description>.*)/;
 
   private _scope = '';
   private _type = '';

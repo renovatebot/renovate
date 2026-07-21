@@ -83,7 +83,7 @@ function isErrorIsh(value) {
     return isErrorIsh(node.expression);
   }
   if (node.type === 'Identifier') {
-    return node.name !== undefined && /err(or)?$/i.test(node.name);
+    return node.name !== undefined && /err(?:or)?$/i.test(node.name);
   }
   if (
     node.type === 'MemberExpression' &&
@@ -91,7 +91,8 @@ function isErrorIsh(value) {
     node.property?.type === 'Identifier'
   ) {
     return (
-      node.property.name !== undefined && /err(or)?$/i.test(node.property.name)
+      node.property.name !== undefined &&
+      /err(?:or)?$/i.test(node.property.name)
     );
   }
   if (node.type === 'NewExpression') {

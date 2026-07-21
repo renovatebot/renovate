@@ -1423,9 +1423,9 @@ export function massageMarkdown(input: string): string {
     .replace(regEx(/<!--.*?-->/gs), '')
     .replace(
       regEx(
-        /(!\[.+?\]\(https:\/\/developer\.mend\.io\/api\/mc\/badges\/.+?\))/g,
+        /(?<badge>!\[.+?\]\(https:\/\/developer\.mend\.io\/api\/mc\/badges\/.+?\))/g,
       ),
-      '$1{height=20}',
+      '$<badge>{height=20}',
     );
 }
 

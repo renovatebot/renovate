@@ -267,7 +267,7 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: (version) => ({
       datasource: FlutterVersionDatasource.id,
       // asdf-flutter plugin supports channel on version suffix.
-      currentValue: version.replace(regEx(/-(stable|beta|dev)$/), ''),
+      currentValue: version.replace(regEx(/-(?:stable|beta|dev)$/), ''),
     }),
   },
   flux2: {

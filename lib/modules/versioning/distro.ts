@@ -37,7 +37,9 @@ export class DistroInfo {
 
   constructor(distroJsonKey: DistroDataFile) {
     this._distroInfo = JSON.parse(
-      dataFiles.get(distroJsonKey as DataFile)!.replace(/v([\d.]+)\b/gm, '$1'),
+      dataFiles
+        .get(distroJsonKey as DataFile)!
+        .replace(/v(?<version>[\d.]+)\b/gm, '$<version>'),
     );
 
     for (const version of Object.keys(this._distroInfo)) {

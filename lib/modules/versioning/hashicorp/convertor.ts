@@ -5,7 +5,7 @@ import { regEx } from '../../../util/regex.ts';
 // Removed the ^ and $.
 // Made minor and patch versions optional by surrounding them in parentheses followed by a question mark.
 const semverRegex =
-  /(0|[1-9]\d*)(\.(0|[1-9]\d*))?(\.(0|[1-9]\d*))?(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?/;
+  /(?:0|[1-9]\d*)(?:\.(?:0|[1-9]\d*))?(?:\.(?:0|[1-9]\d*))?(?:-(?:(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+(?:[0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?/;
 
 /**
  * This can convert most hashicorp ranges to valid npm syntax
@@ -97,15 +97,19 @@ export function npm2hashicorp(input: string): string {
           if (version.match(regEx(/^\d+$/))) {
             return `~> ${version}.0`;
           }
-          const withZero = version.match(regEx(/^(\d+\.\d+)\.0$/));
+          const withZero = version.match(
+            regEx(/^(?<major_minor>\d+\.\d+)\.0$/),
+          );
           if (withZero) {
-            return `~> ${withZero[1]}`;
+            return `~> ${withZero.groups!.major_minor}`;
           }
-          const nonZero = version.match(regEx(/^(\d+\.\d+)\.\d+$/));
+          const nonZero = version.match(
+            regEx(/^(?<major_minor>\d+\.\d+)\.\d+$/),
+          );
           if (nonZero) {
             // not including`>= ${version}`, which makes this less accurate
             // but makes the results cleaner
-            return `~> ${nonZero[1]}`;
+            return `~> ${nonZero.groups!.major_minor}`;
           }
           return `~> ${version}`;
         }

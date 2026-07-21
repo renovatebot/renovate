@@ -86,7 +86,7 @@ export function parsePreset(input: string): ParsedPreset {
     presetName = str.slice(1);
   } else if (str.startsWith('@')) {
     // scoped namespace
-    [, repo] = regEx(/(@.*?)(:|$)/).exec(str)!;
+    repo = regEx(/(?<scope>@.*?)(?::|$)/).exec(str)!.groups!.scope;
     str = str.slice(repo.length);
     if (!repo.includes('/')) {
       repo += '/renovate-config';

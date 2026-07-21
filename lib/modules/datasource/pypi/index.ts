@@ -257,12 +257,12 @@ export class PypiDatasource extends Datasource {
         .replace(regEx(/<\/?pre>/), '')
         // Certain simple repositories like artifactory don't escape > and <
         .replace(
-          regEx(/data-requires-python="([^"]*?)>([^"]*?)"/g),
-          'data-requires-python="$1&gt;$2"',
+          regEx(/data-requires-python="(?<before>[^"]*?)>(?<after>[^"]*?)"/g),
+          'data-requires-python="$<before>&gt;$<after>"',
         )
         .replace(
-          regEx(/data-requires-python="([^"]*?)<([^"]*?)"/g),
-          'data-requires-python="$1&lt;$2"',
+          regEx(/data-requires-python="(?<before>[^"]*?)<(?<after>[^"]*?)"/g),
+          'data-requires-python="$<before>&lt;$<after>"',
         )
     );
   }
