@@ -88,8 +88,8 @@ function determineDatasource(
 
 const gitUrlRegex = regEx(/\.git$/i);
 
-// Matches: rev: <digest> with optional quotes and frozen version comment
-const revLineWithFrozenCommentRegex = regEx(
+// Matches: rev: <sha> with optional quotes and frozen version comment
+const shaRevLineRegex = regEx(
   /^\s*rev:\s*(?<replaceString>(?:"(?<doubleQuotedDigest>(?:[a-f0-9]{40}|[a-f0-9]{64}|[a-f0-9]{6,7}))"|'(?<singleQuotedDigest>(?:[a-f0-9]{40}|[a-f0-9]{64}|[a-f0-9]{6,7}))'|(?<bareDigest>(?:[a-f0-9]{40}|[a-f0-9]{64}|[a-f0-9]{6,7})))(?:(?<commentWhiteSpaces>\s+)#\s*frozen:\s*(?<currentValue>\S+))?)(?:\s+#.*|\s*)$/,
 );
 
@@ -110,7 +110,7 @@ function extractWithRegex(content: string): Map<string, RegexDep[]> {
       continue;
     }
 
-    const match = revLineWithFrozenCommentRegex.exec(line);
+    const match = shaRevLineRegex.exec(line);
     if (match?.groups) {
       const {
         bareDigest,
