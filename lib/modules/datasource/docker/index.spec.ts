@@ -3212,6 +3212,203 @@ describe('modules/datasource/docker/index', () => {
     });
   });
 
+  describe('getReleases > OCI referrers / attestation', () => {
+    beforeEach(() => {
+      delete process.env.RENOVATE_X_DOCKER_CHECK_REFERRERS;
+    });
+
+    it('sets attestation=true when the latest tag has referrers', async () => {
+      process.env.RENOVATE_X_DOCKER_CHECK_REFERRERS = 'true';
+      httpMock
+        .scope(gcrUrl)
+        .get('/some-package/tags/list?n=10000')
+        .reply(200, '', {})
+        .get('/some-package/tags/list?n=10000')
+        .reply(200, { tags: ['1.0.0'] })
+        .get('/')
+        .reply(200, '', {})
+        .get('/some-package/manifests/1.0.0')
+        .reply(200, '', {})
+        .get('/')
+        .reply(200, '', {})
+        .head('/some-package/manifests/1.0.0')
+        .reply(200, '', { 'docker-content-digest': 'sha256:abc' })
+        .get('/')
+        .reply(200, '', {})
+        .get('/some-package/referrers/sha256:abc')
+        .reply(200, {
+          schemaVersion: 2,
+          mediaType: 'application/vnd.oci.image.index.v1+json',
+          manifests: [
+            {
+              mediaType: 'application/vnd.oci.image.manifest.v1+json',
+              size: 123,
+              digest: 'sha256:def',
+              artifactType: 'application/json',
+            },
+          ],
+        });
+
+      const res = await getPkgReleases({
+        datasource: DockerDatasource.id,
+        packageName: 'eu.gcr.io/some-package',
+      });
+
+      expect(res?.releases).toEqual([{ version: '1.0.0', attestation: true }]);
+    });
+
+    it('sets attestation=false when referrers is empty (404)', async () => {
+      process.env.RENOVATE_X_DOCKER_CHECK_REFERRERS = 'true';
+      httpMock
+        .scope(gcrUrl)
+        .get('/some-package/tags/list?n=10000')
+        .reply(200, '', {})
+        .get('/some-package/tags/list?n=10000')
+        .reply(200, { tags: ['1.0.0'] })
+        .get('/')
+        .reply(200, '', {})
+        .get('/some-package/manifests/1.0.0')
+        .reply(200, '', {})
+        .get('/')
+        .reply(200, '', {})
+        .head('/some-package/manifests/1.0.0')
+        .reply(200, '', { 'docker-content-digest': 'sha256:abc' })
+        .get('/')
+        .reply(200, '', {})
+        .get('/some-package/referrers/sha256:abc')
+        .reply(404);
+
+      const res = await getPkgReleases({
+        datasource: DockerDatasource.id,
+        packageName: 'eu.gcr.io/some-package',
+      });
+
+      expect(res?.releases).toEqual([{ version: '1.0.0', attestation: false }]);
+    });
+
+    it('does not check referrers when the flag is not set', async () => {
+      httpMock
+        .scope(gcrUrl)
+        .get('/some-package/tags/list?n=10000')
+        .reply(200, '', {})
+        .get('/some-package/tags/list?n=10000')
+        .reply(200, { tags: ['1.0.0'] })
+        .get('/')
+        .reply(200, '', {})
+        .get('/some-package/manifests/1.0.0')
+        .reply(200, '', {});
+
+      const res = await getPkgReleases({
+        datasource: DockerDatasource.id,
+        packageName: 'eu.gcr.io/some-package',
+      });
+
+      expect(res?.releases).toEqual([{ version: '1.0.0' }]);
+    });
+
+    it('returns null attestation when no auth headers can be resolved', async () => {
+      process.env.RENOVATE_X_DOCKER_CHECK_REFERRERS = 'true';
+      httpMock
+        .scope(gcrUrl)
+        .get('/some-package/tags/list?n=10000')
+        .reply(200, '', {})
+        .get('/some-package/tags/list?n=10000')
+        .reply(200, { tags: ['1.0.0'] })
+        .get('/')
+        .reply(200, '', {})
+        .get('/some-package/manifests/1.0.0')
+        .reply(200, '', {})
+        .get('/')
+        .reply(200, '', {})
+        .head('/some-package/manifests/1.0.0')
+        .reply(200, '', { 'docker-content-digest': 'sha256:abc' })
+        .get('/')
+        .reply(401); // no www-authenticate header -> getAuthHeaders() resolves null
+
+      const res = await getPkgReleases({
+        datasource: DockerDatasource.id,
+        packageName: 'eu.gcr.io/some-package',
+      });
+
+      expect(res?.releases).toEqual([{ version: '1.0.0' }]);
+    });
+
+    it('returns null attestation when the referrers response cannot be parsed', async () => {
+      process.env.RENOVATE_X_DOCKER_CHECK_REFERRERS = 'true';
+      httpMock
+        .scope(gcrUrl)
+        .get('/some-package/tags/list?n=10000')
+        .reply(200, '', {})
+        .get('/some-package/tags/list?n=10000')
+        .reply(200, { tags: ['1.0.0'] })
+        .get('/')
+        .reply(200, '', {})
+        .get('/some-package/manifests/1.0.0')
+        .reply(200, '', {})
+        .get('/')
+        .reply(200, '', {})
+        .head('/some-package/manifests/1.0.0')
+        .reply(200, '', { 'docker-content-digest': 'sha256:abc' })
+        .get('/')
+        .reply(200, '', {})
+        .get('/some-package/referrers/sha256:abc')
+        .reply(200, 'not-valid-json-{');
+
+      const res = await getPkgReleases({
+        datasource: DockerDatasource.id,
+        packageName: 'eu.gcr.io/some-package',
+      });
+
+      expect(res?.releases).toEqual([{ version: '1.0.0' }]);
+    });
+
+    it('skips the referrers check when the digest cannot be resolved', async () => {
+      process.env.RENOVATE_X_DOCKER_CHECK_REFERRERS = 'true';
+      httpMock
+        .scope(gcrUrl)
+        .get('/some-package/tags/list?n=10000')
+        .reply(200, '', {})
+        .get('/some-package/tags/list?n=10000')
+        .reply(200, { tags: ['1.0.0'] })
+        .get('/')
+        .reply(200, '', {})
+        .get('/some-package/manifests/1.0.0')
+        .reply(200, '', {})
+        .get('/')
+        .reply(200, '', {})
+        .head('/some-package/manifests/1.0.0')
+        .reply(404);
+
+      const res = await getPkgReleases({
+        datasource: DockerDatasource.id,
+        packageName: 'eu.gcr.io/some-package',
+      });
+
+      expect(res?.releases).toEqual([{ version: '1.0.0' }]);
+    });
+
+    it('does not check referrers for non-Google registries', async () => {
+      process.env.RENOVATE_X_DOCKER_CHECK_REFERRERS = 'true';
+      httpMock
+        .scope('https://ghcr.io/v2')
+        .get('/some-package/tags/list?n=10000')
+        .reply(200, '', {})
+        .get('/some-package/tags/list?n=10000')
+        .reply(200, { tags: ['1.0.0'] })
+        .get('/')
+        .reply(200, '', {})
+        .get('/some-package/manifests/1.0.0')
+        .reply(200, '', {});
+
+      const res = await getPkgReleases({
+        datasource: DockerDatasource.id,
+        packageName: 'ghcr.io/some-package',
+      });
+
+      expect(res?.releases).toEqual([{ version: '1.0.0' }]);
+    });
+  });
+
   describe('getLabels', () => {
     const ds = new DockerDatasource();
 
