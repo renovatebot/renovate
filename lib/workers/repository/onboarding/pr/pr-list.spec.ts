@@ -1463,6 +1463,57 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
       expect(res).not.toContain('prHourlyLimit');
     });
 
+    it('shows commitHourlyLimit message with plurals when limit is greater than 1', () => {
+      const branches: BranchConfig[] = [
+        {
+          prTitle: 'Update a to v1',
+          branchName: 'renovate/a-1.x',
+          baseBranch: 'base',
+          manager: 'some-manager',
+          upgrades: [
+            {
+              manager: 'some-manager',
+              depName: 'a',
+              newValue: '1.0.0',
+              branchName: 'ignored',
+            },
+          ],
+        },
+        {
+          prTitle: 'Update b to v1',
+          branchName: 'renovate/b-1.x',
+          baseBranch: 'base',
+          manager: 'some-manager',
+          upgrades: [
+            {
+              manager: 'some-manager',
+              depName: 'b',
+              newValue: '1.0.0',
+              branchName: 'ignored',
+            },
+          ],
+        },
+        {
+          prTitle: 'Update c to v1',
+          branchName: 'renovate/c-1.x',
+          baseBranch: 'base',
+          manager: 'some-manager',
+          upgrades: [
+            {
+              manager: 'some-manager',
+              depName: 'c',
+              newValue: '1.0.0',
+              branchName: 'ignored',
+            },
+          ],
+        },
+      ];
+      config.commitHourlyLimit = 2;
+      const res = getExpectedPrListSummary(config, branches);
+      expect(res).toContain('at a maximum of 2 PRs');
+      expect(res).toContain('rebases per hour');
+    });
+
     it('shows there is no limit when both commitHourlyLimit and prHourlyLimit are set to 0 (unlimited)', () => {
       const branches: BranchConfig[] = [
         {
