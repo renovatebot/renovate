@@ -18,15 +18,13 @@ export function extractPackageFile(
   fileContent: string,
 ): PackageFileContent | null {
   const registryUrls: string[] = [...fileContent.matchAll(repositoryBlockRegex)]
-    .flatMap((block) => [
-      ...(block.groups?.args ?? '').matchAll(repositoryUrlRegex),
-    ])
+    .flatMap((block) => [...block.groups!.args.matchAll(repositoryUrlRegex)])
     .map((match) => match.groups?.repositoryName)
     .filter(isString);
 
   const deps: PackageDependency[] = [];
   for (const block of fileContent.matchAll(dependsOnBlockRegex)) {
-    const matches = [...(block.groups?.args ?? '').matchAll(dependencyRegex)]
+    const matches = [...block.groups!.args.matchAll(dependencyRegex)]
       .map((m) => m.groups)
       .filter(isTruthy);
     for (const match of matches) {
