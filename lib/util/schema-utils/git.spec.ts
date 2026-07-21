@@ -56,7 +56,9 @@ describe('util/schema-utils/git', () => {
       ['uppercase short sha', '012ABC'],
       ['non-hex 6-char string', 'g'.repeat(6)],
     ])('rejects a %s', (_label, value) => {
-      expect(() => ShortCommitSha.parse(value)).toThrow();
+      expect(() => ShortCommitSha.parse(value)).toThrow(
+        'Invalid string: must match pattern /^(?:[a-f0-9]{6,7})$/u',
+      );
     });
   });
 
