@@ -71,7 +71,7 @@ export async function stopGerritContainer(): Promise<void> {
     return;
   }
 
-  if (['true', '1'].includes(process.env.KEEP_GERRIT ?? '')) {
+  if (['true', '1'].includes(process.env.KEEP_CONTAINERS ?? '')) {
     // oxlint-disable-next-line no-console -- intentional: display container info for debugging
     console.log(codeBlock`
       Gerrit container kept running. Access it at: ${baseUrl}

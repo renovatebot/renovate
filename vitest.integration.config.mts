@@ -12,6 +12,11 @@ for (const key of Object.keys(process.env)) {
   }
 }
 
+// prevent ryuk from reaping containers if KEEP_CONTAINERS is enabled
+if (['true', '1'].includes(process.env.KEEP_CONTAINERS ?? '')) {
+  process.env.TESTCONTAINERS_RYUK_DISABLED = 'true';
+}
+
 export default defineConfig({
   test: {
     globals: true,
