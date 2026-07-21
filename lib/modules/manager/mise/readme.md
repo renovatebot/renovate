@@ -48,11 +48,11 @@ In particular:
 
 #### Safe mode (no allowlist required)
 
-mise's [safe mode](https://mise.jdx.dev/configuration/settings.html#safe) (`MISE_SAFE=1`) is a hard boundary against project configuration executing code: templates that call `exec()`/`read_file()`, `_.source` scripts, hooks, tasks, asdf plugin scripts, and plugin installs are all refused, while version resolution over HTTP-based backends still works.
+mise's [safe mode](https://mise.jdx.dev/configuration/settings.html#safe) (`MISE_SAFE=1`) makes an untrusted project config inert: code execution is refused (`exec()`/`read_file()`, `_.source`, hooks, tasks, asdf plugin scripts, plugin installs) and project `[env]`, `_.path`, `[shell_alias]`, and `[settings]` are ignored, while version resolution over HTTP-based backends still works.
 
-When the `mise` binary that Renovate runs is new enough to support safe mode, Renovate runs `mise lock` with `MISE_SAFE=1` and no longer requires `mise` in `allowedUnsafeExecutions` — the safe-mode boundary, not the allowlist, is what protects the host. Renovate determines this at runtime by running `mise version` (which does not load or execute project configuration), so no extra configuration is needed; installing or pinning a recent enough `mise` is enough.
+When the `mise` binary that Renovate runs is new enough to support safe mode, Renovate runs `mise lock` with `MISE_SAFE=1`. Because the config is inert, this needs neither `mise` in `allowedUnsafeExecutions` **nor** a preceding `mise trust` — the safe-mode boundary, not the allowlist or trust store, is what protects the host. Renovate determines support at runtime by running `mise version` (which does not load or execute project configuration), so no extra configuration is needed; installing or pinning a recent enough `mise` is enough.
 
-The `allowedUnsafeExecutions` path is unchanged: if `mise` is allowlisted, Renovate runs `mise lock` exactly as before (without forcing safe mode), so configs that legitimately rely on code execution during locking keep working.
+The `allowedUnsafeExecutions` path is unchanged: if `mise` is allowlisted, Renovate runs `mise trust` and `mise lock` exactly as before (without forcing safe mode), so configs that legitimately rely on code execution during locking keep working.
 
 ### Renovate only updates primary versions
 

@@ -198,10 +198,16 @@ export async function updateArtifacts({
     docker: {},
   };
 
-  const trustCmd = `mise trust ${quote(upath.basename(packageFileName))}`;
+  // `mise trust` is only needed on the allowlisted path. In safe mode mise
+  // loads untrusted config without a trust prompt (the config is inert — it
+  // can neither execute code nor inject environment), so the trust step is
+  // unnecessary and is skipped.
+  const commands = safeMode
+    ? [lockCmd]
+    : [`mise trust ${quote(upath.basename(packageFileName))}`, lockCmd];
 
   try {
-    await exec([trustCmd, lockCmd], execOptions);
+    await exec(commands, execOptions);
     const newLockFileContent = await readLocalFile(lockFileName, 'utf8');
     if (!newLockFileContent || existingLockFileContent === newLockFileContent) {
       return null;

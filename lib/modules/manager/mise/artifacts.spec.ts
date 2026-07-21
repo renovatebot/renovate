@@ -115,9 +115,9 @@ describe('modules/manager/mise/artifacts', () => {
         },
       },
     ]);
+    // safe mode does not require trust, so `mise trust` is not run
     expect(execSnapshots).toMatchObject([
       { cmd: miseVersionCmd },
-      { cmd: trustCmd },
       {
         cmd: updateToolCmd,
         options: {
