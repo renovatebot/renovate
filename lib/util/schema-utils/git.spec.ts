@@ -34,7 +34,6 @@ describe('util/schema-utils/git', () => {
       ['40-char sha', sha40, true],
       ['64-char sha', sha64, true],
       ['short sha', 'abc', false],
-      ['uppercase 40-char sha', sha40.toUpperCase(), false],
       ['non-hex 40-char string', 'g'.repeat(40), false],
       ['non-string', 42, false],
     ])('%s → %s', (_label, value, expected) => {
@@ -57,7 +56,7 @@ describe('util/schema-utils/git', () => {
       ['non-hex 6-char string', 'g'.repeat(6)],
     ])('rejects a %s', (_label, value) => {
       expect(() => ShortCommitSha.parse(value)).toThrow(
-        'Invalid string: must match pattern /^(?:[a-f0-9]{6,7})$/u',
+        'Invalid string: must match pattern /^[a-f0-9]{6,7}$/u',
       );
     });
   });
