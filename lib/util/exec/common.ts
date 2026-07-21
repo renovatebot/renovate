@@ -235,11 +235,11 @@ function kill(cp: ChildProcess, signal: NodeJS.Signals): boolean {
   }
 }
 
-export const rawExec: (
+export function rawExec(
   cmd: string | CommandWithOptions,
   opts: RawExecOptions,
-) => Promise<ExecResult> = (
-  cmd: string | CommandWithOptions,
-  opts: RawExecOptions,
-) =>
-  instrument(`rawExec: ${sanitize(asRawCommand(cmd))}`, () => exec(cmd, opts));
+): Promise<ExecResult> {
+  return instrument(`rawExec: ${sanitize(asRawCommand(cmd))}`, () =>
+    exec(cmd, opts),
+  );
+}

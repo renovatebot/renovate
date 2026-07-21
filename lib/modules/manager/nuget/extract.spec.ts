@@ -3,7 +3,10 @@ import upath from 'upath';
 import { Fixtures } from '~test/fixtures.ts';
 import { fs, logger } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
-import type { RepoGlobalConfig } from '../../../config/types.ts';
+import type {
+  InternalGlobalConfigOptions,
+  RepoGlobalConfig,
+} from '../../../config/types.ts';
 import { DotnetVersionDatasource } from '../../datasource/dotnet-version/index.ts';
 import type { ExtractConfig } from '../types.ts';
 import { extractPackageFile } from './index.ts';
@@ -11,7 +14,7 @@ import * as nugetExtractUtil from './util.ts';
 
 const config: ExtractConfig = {};
 
-const adminConfig: RepoGlobalConfig = {
+const adminConfig: RepoGlobalConfig & InternalGlobalConfigOptions = {
   localDir: upath.resolve('lib/modules/manager/nuget/__fixtures__'),
 };
 

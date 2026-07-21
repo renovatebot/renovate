@@ -13,7 +13,9 @@ describe('util/uniq', () => {
     }
     const input: T[] = [{ id: 1 }, { id: 2 }, { id: 1 }];
     const expectedOutput = [{ id: 1 }, { id: 2 }];
-    const eql = (x: T, y: T) => x.id === y.id;
+    function eql(x: T, y: T) {
+      return x.id === y.id;
+    }
     expect(uniq(input, eql)).toEqual(expectedOutput);
   });
 });

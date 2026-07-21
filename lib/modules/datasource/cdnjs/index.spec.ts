@@ -7,11 +7,13 @@ import { CdnjsDatasource } from './index.ts';
 
 const baseUrl = 'https://api.cdnjs.com/';
 
-const pathFor = (s: string): string =>
-  `/libraries/${s.split('/').shift()}?fields=homepage,repository,versions`;
+function pathFor(s: string): string {
+  return `/libraries/${s.split('/').shift()}?fields=homepage,repository,versions`;
+}
 
-const pathForDigest = (s: string, version: string): string =>
-  `/libraries/${s.split('/').shift()}/${version}?fields=sri`;
+function pathForDigest(s: string, version: string): string {
+  return `/libraries/${s.split('/').shift()}/${version}?fields=sri`;
+}
 
 describe('modules/datasource/cdnjs/index', () => {
   describe('getReleases', () => {
