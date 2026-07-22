@@ -348,7 +348,7 @@
     "unified": "11.0.5",
     "vite": "catalog:",
     "vitest": "4.1.10",
-    "vitest-mock-extended": "4.0.0"
+    "vitest-mock-extended": "5.0.0"
   },
   "packageManager": "pnpm@11.11.0",
   "files": [
