@@ -28,7 +28,7 @@ import type {
 const markdown = new MarkdownIt('zero');
 markdown.enable(['heading', 'lheading', 'fence']);
 
-const repositoriesToSkipMdFetching = ['facebook/react-native'];
+const repositoriesToSkipMdFetching = ['react/react-native'];
 
 export async function getReleaseList(
   project: ChangeLogProject,
