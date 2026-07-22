@@ -4199,17 +4199,9 @@ These updates have all been created already. To force a retry/rebase of any, cli
         .reply(200, [{ username: 'maria' }, { username: 'jimmy' }])
         .get('/api/v4/groups/group-b/members')
         .reply(200, [{ username: 'john' }]);
-      const expandedGroupMembers = await gitlab.expandGroupMembers?.([
-        'u@email.com',
-        '@group-a',
-        '@group-b',
-      ]);
-      expect(expandedGroupMembers).toEqual([
-        'u@email.com',
-        'maria',
-        'jimmy',
-        'john',
-      ]);
+      await expect(
+        gitlab.expandGroupMembers?.(['u@email.com', '@group-a', '@group-b']),
+      ).resolves.toEqual(['u@email.com', 'maria', 'jimmy', 'john']);
     });
 
     it('users are not expanded when 404', async () => {
@@ -4217,8 +4209,9 @@ These updates have all been created already. To force a retry/rebase of any, cli
         .scope(gitlabApiHost)
         .get('/api/v4/groups/john/members')
         .reply(404, { message: '404 Group Not Found' });
-      const expandedGroupMembers = await gitlab.expandGroupMembers?.(['john']);
-      expect(expandedGroupMembers).toEqual(['john']);
+      await expect(gitlab.expandGroupMembers?.(['john'])).resolves.toEqual([
+        'john',
+      ]);
     });
 
     it('users are not expanded when non 404', async () => {
@@ -4226,10 +4219,9 @@ These updates have all been created already. To force a retry/rebase of any, cli
         .scope(gitlabApiHost)
         .get('/api/v4/groups/group/members')
         .reply(403, { message: '403 Authorization' });
-      const expandedGroupMembers = await gitlab.expandGroupMembers?.([
-        '@group',
+      await expect(gitlab.expandGroupMembers?.(['@group'])).resolves.toEqual([
+        'group',
       ]);
-      expect(expandedGroupMembers).toEqual(['group']);
 
       expect(logger.logger.debug).toHaveBeenCalledWith(
         expect.any(Object),
@@ -4242,17 +4234,15 @@ These updates have all been created already. To force a retry/rebase of any, cli
         .scope(gitlabApiHost)
         .get('/api/v4/groups/group-c/members')
         .reply(200, []);
-      const expandedGroupMembers = await gitlab.expandGroupMembers?.([
-        '@group-c',
-      ]);
-      expect(expandedGroupMembers).toEqual([]);
+      await expect(gitlab.expandGroupMembers?.(['@group-c'])).resolves.toEqual(
+        [],
+      );
     });
 
     it('includes email in final result', async () => {
-      const expandedGroupMembers = await gitlab.expandGroupMembers?.([
-        'u@email.com',
-      ]);
-      expect(expandedGroupMembers).toEqual(['u@email.com']);
+      await expect(
+        gitlab.expandGroupMembers?.(['u@email.com']),
+      ).resolves.toEqual(['u@email.com']);
     });
 
     it('expands a role handle into members holding exactly that role', async () => {
@@ -4265,10 +4255,9 @@ These updates have all been created already. To force a retry/rebase of any, cli
           { username: 'dev-two', access_level: 30 },
           { username: 'owner', access_level: 50 },
         ]);
-      const expandedGroupMembers = await gitlab.expandGroupMembers?.([
-        '@@developer',
-      ]);
-      expect(expandedGroupMembers).toEqual(['dev-one', 'dev-two']);
+      await expect(
+        gitlab.expandGroupMembers?.(['@@developer']),
+      ).resolves.toEqual(['dev-one', 'dev-two']);
     });
 
     it('resolves roles, groups, emails and users together', async () => {
@@ -4283,18 +4272,14 @@ These updates have all been created already. To force a retry/rebase of any, cli
         .reply(200, [{ username: 'maria' }])
         .get('/api/v4/groups/john/members')
         .reply(404, { message: '404 Group Not Found' });
-      const expandedGroupMembers = await gitlab.expandGroupMembers?.([
-        '@@maintainer',
-        '@group-a',
-        'u@email.com',
-        'john',
-      ]);
-      expect(expandedGroupMembers).toEqual([
-        'alice',
-        'u@email.com',
-        'maria',
-        'john',
-      ]);
+      await expect(
+        gitlab.expandGroupMembers?.([
+          '@@maintainer',
+          '@group-a',
+          'u@email.com',
+          'john',
+        ]),
+      ).resolves.toEqual(['alice', 'u@email.com', 'maria', 'john']);
     });
 
     it('swallows role member fetch errors', async () => {
@@ -4302,10 +4287,9 @@ These updates have all been created already. To force a retry/rebase of any, cli
         .scope(gitlabApiHost)
         .get('/api/v4/projects/undefined/members')
         .reply(403, { message: '403 Authorization' });
-      const expandedGroupMembers = await gitlab.expandGroupMembers?.([
-        '@@developer',
-      ]);
-      expect(expandedGroupMembers).toEqual([]);
+      await expect(
+        gitlab.expandGroupMembers?.(['@@developer']),
+      ).resolves.toEqual([]);
 
       expect(logger.logger.debug).toHaveBeenCalledWith(
         expect.any(Object),
