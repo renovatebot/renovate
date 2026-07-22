@@ -79,7 +79,7 @@ export function init(): void {
 
   if (isFileExporterEnabled()) {
     spanProcessors.push(
-      new SimpleSpanProcessor(new FileSpanExporter(getFileExporterPath())),
+      new BatchSpanProcessor(new FileSpanExporter(getFileExporterPath())),
     );
   }
 

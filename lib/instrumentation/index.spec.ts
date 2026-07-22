@@ -1,6 +1,7 @@
 import * as api from '@opentelemetry/api';
 import { ProxyTracerProvider } from '@opentelemetry/api';
 import {
+  BatchSpanProcessor,
   NodeTracerProvider,
   SimpleSpanProcessor,
 } from '@opentelemetry/sdk-trace-node';
@@ -94,7 +95,7 @@ describe('instrumentation/index', () => {
         _spanProcessors: [
           new GitOperationSpanProcessor(),
           new GetDatasourceReleasesSpanProcessor(),
-          expect.any(SimpleSpanProcessor),
+          expect.any(BatchSpanProcessor),
         ],
       },
     });
