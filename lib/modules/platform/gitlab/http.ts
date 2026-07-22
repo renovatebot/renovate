@@ -48,25 +48,22 @@ export async function getMemberUsernames(group: string): Promise<string[]> {
   return members.map((u) => u.username);
 }
 
-async function getProjectMembersByRole(
-  repo: string,
-  accessLevel: number,
-): Promise<GitLabUser[]> {
-  const members = (
+async function getProjectMembers(repo: string): Promise<GitLabUser[]> {
+  const repoEncoded = encodeURIComponent(repo);
+  return (
     await gitlabApi.getJsonUnchecked<GitLabUser[]>(
-      `projects/${encodeURIComponent(repo)}/members`,
+      `projects/${repoEncoded}/members`,
       { paginate: true },
     )
   ).body;
-  return members.filter((m) => m.access_level === accessLevel);
 }
 
-export async function getRoleMemberUsernames(
+export async function getProjectMembersByRole(
   repo: string,
   accessLevel: number,
-): Promise<string[]> {
-  const members = await getProjectMembersByRole(repo, accessLevel);
-  return members.map((u) => u.username);
+): Promise<GitLabUser[]> {
+  const members = await getProjectMembers(repo);
+  return members.filter((m) => m.access_level === accessLevel);
 }
 
 export async function isUserBusy(user: string): Promise<boolean> {

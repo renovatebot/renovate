@@ -57,7 +57,7 @@ import { smartTruncate } from '../utils/pr-body.ts';
 import {
   getMemberUserIDs,
   getMemberUsernames,
-  getRoleMemberUsernames,
+  getProjectMembersByRole,
   getUserID,
   gitlabApi,
   isUserBusy,
@@ -1482,11 +1482,11 @@ export async function expandGroupMembers(
     const roleAccessLevel = getRoleAccessLevel(reviewerOrAssignee);
     if (roleAccessLevel !== null) {
       try {
-        const members = await getRoleMemberUsernames(
+        const members = await getProjectMembersByRole(
           config.repository,
           roleAccessLevel,
         );
-        expandedReviewersOrAssignees.push(...members);
+        expandedReviewersOrAssignees.push(...members.map((u) => u.username));
       } catch (err) {
         logger.debug(
           { err, reviewerOrAssignee },
