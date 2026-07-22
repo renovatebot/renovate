@@ -59,7 +59,9 @@ describe('config/presets/github/index', () => {
         .get(`${basePath}/renovate.json`)
         .reply(200, {});
 
-      await expect(github.getPreset({ repo: 'some/repo' })).rejects.toThrow();
+      await expect(github.getPreset({ repo: 'some/repo' })).rejects.toThrow(
+        'The first argument must be of type string or an instance of Buffer,',
+      );
     });
 
     it('throws if invalid content', async () => {

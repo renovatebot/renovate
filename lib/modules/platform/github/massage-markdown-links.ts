@@ -23,7 +23,7 @@ function massageLink(input: string): string {
 }
 
 function collectLinkPosition(input: string, matches: UrlMatch[]): Plugin {
-  const transformer = (tree: RootContent): void => {
+  function transformer(tree: RootContent): void {
     const startOffset = coerceNumber(tree.position?.start.offset);
     const endOffset = coerceNumber(tree.position?.end.offset);
 
@@ -54,7 +54,7 @@ function collectLinkPosition(input: string, matches: UrlMatch[]): Plugin {
         transformer(child);
       });
     }
-  };
+  }
 
   return () => transformer as Transformer;
 }
@@ -70,7 +70,7 @@ export function massageMarkdownLinks(content: string): string {
       return leftPart + replaceTo + rightPart;
     }, content);
     return result.trimEnd() + rightSpaces;
-  } catch (err) /* v8 ignore next */ {
+  } catch (err) /* v8 ignore next -- defensive: remark parsing does not throw on any string input, failure not simulable */ {
     logger.warn({ err }, `Unable to massage markdown text`);
     return content;
   }

@@ -315,7 +315,7 @@ function getNewValue({
     const hasOr = currentValue.includes(' || ');
     if (hasOr || rangeStrategy === 'widen') {
       const splitValues = currentValue.split('||');
-      const lastValue = splitValues[splitValues.length - 1];
+      const lastValue = splitValues.at(-1)!;
       const replacementValue = getNewValue({
         currentValue: lastValue.trim(),
         rangeStrategy: 'replace',
@@ -326,7 +326,7 @@ function getNewValue({
         newValue = replacementValue;
       } else if (replacementValue) {
         const parsedRange = parseRange(replacementValue);
-        const element = parsedRange[parsedRange.length - 1];
+        const element = parsedRange.at(-1)!;
         if (element.operator?.startsWith('<')) {
           const splitCurrent = currentValue.split(element.operator);
           splitCurrent.pop();
@@ -364,15 +364,13 @@ function sortVersions(a: string, b: string): number {
   if (aContainsPatch === bContainsPatch) {
     // If both [a and b] contain patch version or both [a and b] do not contain patch version, then npm comparison deliveres correct results
     return npm.sortVersions(composer2npm(a), composer2npm(b));
-  } else if (
-    npm.equals(composer2npm(aWithoutPatch), composer2npm(bWithoutPatch))
-  ) {
+  }
+  if (npm.equals(composer2npm(aWithoutPatch), composer2npm(bWithoutPatch))) {
     // If only one [a or b] contains patch version and the parts without patch versions are equal, then the version with patch is greater (this is the case where npm comparison fails)
     return aContainsPatch ? 1 : -1;
-  } else {
-    // All other cases can be compared correctly by npm
-    return npm.sortVersions(composer2npm(a), composer2npm(b));
   }
+  // All other cases can be compared correctly by npm
+  return npm.sortVersions(composer2npm(a), composer2npm(b));
 }
 
 function isCompatible(version: string): boolean {

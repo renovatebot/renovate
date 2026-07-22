@@ -22,7 +22,9 @@ describe('util/host-rules', () => {
           domainName: 'github.com',
           hostName: 'api.github.com',
         } as never),
-      ).toThrow();
+      ).toThrow(
+        'hostRules cannot contain more than one host-matching field - use',
+      );
     });
 
     it('throws if both domainName and baseUrl', () => {
@@ -32,7 +34,9 @@ describe('util/host-rules', () => {
           domainName: 'github.com',
           matchHost: 'https://api.github.com',
         } as never),
-      ).toThrow();
+      ).toThrow(
+        'hostRules cannot contain more than one host-matching field - use',
+      );
     });
 
     it('throws if both hostName and baseUrl', () => {
@@ -42,7 +46,9 @@ describe('util/host-rules', () => {
           hostName: 'api.github.com',
           matchHost: 'https://api.github.com',
         } as never),
-      ).toThrow();
+      ).toThrow(
+        'hostRules cannot contain more than one host-matching field - use',
+      );
     });
 
     it('supports baseUrl-only', () => {
@@ -109,6 +115,7 @@ describe('util/host-rules', () => {
     });
 
     it('warns and returns empty for bad search', () => {
+      // oxlint-disable-next-line renovate/prefer-partial-in-specs -- intentionally invalid search input
       expect(find({ abc: 'def' } as any)).toEqual({});
     });
 
@@ -391,6 +398,7 @@ describe('util/host-rules', () => {
 
   describe('findAll()', () => {
     it('warns and returns empty for bad search', () => {
+      // oxlint-disable-next-line renovate/prefer-partial-in-specs -- intentionally invalid search input
       expect(findAll({ abc: 'def' } as any)).toEqual([]);
     });
 

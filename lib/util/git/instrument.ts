@@ -115,9 +115,8 @@ export class InstrumentedSimpleGit {
       async () => {
         if (typeof whatOrOptions === 'string') {
           return await this.git.checkout(whatOrOptions);
-        } else {
-          return await this.git.checkout(whatOrOptions);
         }
+        return await this.git.checkout(whatOrOptions);
       },
       options,
     );
@@ -224,9 +223,8 @@ export class InstrumentedSimpleGit {
       async () => {
         if (typeof optionOrOptions === 'string') {
           return await this.git.revparse(optionOrOptions);
-        } else {
-          return await this.git.revparse(optionOrOptions);
         }
+        return await this.git.revparse(optionOrOptions);
       },
       options,
     );
@@ -261,9 +259,8 @@ export class InstrumentedSimpleGit {
       async () => {
         if (verbose === true) {
           return await instrument('other', () => this.git.getRemotes(true));
-        } else {
-          return await instrument('other', () => this.git.getRemotes());
         }
+        return await instrument('other', () => this.git.getRemotes());
       },
       options,
     );

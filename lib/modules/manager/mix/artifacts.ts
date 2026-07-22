@@ -145,6 +145,9 @@ export async function updateArtifacts({
     return acc;
   }, [] as string[]);
 
+  // renovate: will update this
+  const erlangVersion = '26';
+
   const execOptions: ExecOptions = {
     extraEnv: {
       // https://hexdocs.pm/mix/1.15.0/Mix.Tasks.Archive.html
@@ -157,7 +160,7 @@ export async function updateArtifacts({
       {
         toolName: 'erlang',
         // https://hexdocs.pm/elixir/1.14.5/compatibility-and-deprecations.html#compatibility-between-elixir-and-erlang-otp
-        constraint: config.constraints?.erlang ?? '^26',
+        constraint: config.constraints?.erlang ?? `^${erlangVersion}`,
       },
       {
         toolName: 'elixir',
@@ -184,7 +187,7 @@ export async function updateArtifacts({
   try {
     await exec(command, execOptions);
   } catch (err) {
-    /* v8 ignore next 3 */
+    /* v8 ignore if -- defensive rethrow of TEMPORARY_ERROR from exec, not reproduced in mix specs */
     if (err.message === TEMPORARY_ERROR) {
       throw err;
     }

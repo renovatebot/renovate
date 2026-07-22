@@ -100,7 +100,7 @@ function maskAdmonitions(text) {
           bodyLines.push(lines[i]);
           i++;
         }
-        while (bodyLines.length > 0 && bodyLines[bodyLines.length - 1] === '') {
+        while (bodyLines.length > 0 && bodyLines.at(-1) === '') {
           bodyLines.pop();
           i--;
         }
@@ -124,7 +124,7 @@ function maskAdmonitions(text) {
 
       // Strip trailing blank lines to avoid double-blank in prettier output;
       // they will be re-emitted to the masked stream as normal blank lines.
-      while (bodyLines.length > 0 && bodyLines[bodyLines.length - 1] === '') {
+      while (bodyLines.length > 0 && bodyLines.at(-1) === '') {
         bodyLines.pop();
         i--;
       }

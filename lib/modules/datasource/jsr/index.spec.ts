@@ -109,7 +109,7 @@ describe('modules/datasource/jsr/index', () => {
         packageName: '@scope/package-name',
         registryUrl: jsr.defaultRegistryUrls[0],
       }),
-    ).rejects.toThrow();
+    ).rejects.toThrow('Request failed with status code 404 (Not Found)');
   });
 
   it('should throw error for unparseable', async () => {
@@ -122,6 +122,6 @@ describe('modules/datasource/jsr/index', () => {
         packageName: '@scope/package-name',
         registryUrl: jsr.defaultRegistryUrls[0],
       }),
-    ).rejects.toThrow();
+    ).rejects.toThrow('Unexpected token \'o\', "oops" is not valid JSON');
   });
 });

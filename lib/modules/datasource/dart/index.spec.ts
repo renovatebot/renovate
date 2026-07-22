@@ -90,5 +90,60 @@ describe('modules/datasource/dart/index', () => {
       });
       expect(res).toMatchSnapshot();
     });
+
+    it('includes constraints from pubspec environment', async () => {
+      httpMock
+        .scope(baseUrl)
+        .get('/test_pkg')
+        .reply(200, {
+          versions: [
+            {
+              version: '1.0.0',
+              published: '2023-01-01T00:00:00.000Z',
+              pubspec: {
+                environment: {
+                  sdk: '>=2.19.0 <3.0.0',
+                },
+              },
+            },
+            {
+              version: '2.0.0',
+              published: '2024-01-01T00:00:00.000Z',
+              pubspec: {
+                environment: {
+                  sdk: '^3.0.0',
+                  flutter: '>=3.10.0',
+                },
+              },
+            },
+            {
+              version: '3.0.0',
+              published: '2024-06-01T00:00:00.000Z',
+            },
+          ],
+          latest: {
+            pubspec: {},
+          },
+        });
+      const res = await getPkgReleases({
+        datasource: DartDatasource.id,
+        packageName: 'test_pkg',
+        constraintsFiltering: 'strict',
+        constraints: { dart: '>=2.19.0 <3.0.0' },
+      });
+      expect(res).toEqual({
+        registryUrl: 'https://pub.dartlang.org',
+        releases: [
+          {
+            version: '1.0.0',
+            releaseTimestamp: '2023-01-01T00:00:00.000Z',
+          },
+          {
+            version: '3.0.0',
+            releaseTimestamp: '2024-06-01T00:00:00.000Z',
+          },
+        ],
+      });
+    });
   });
 });
