@@ -215,15 +215,6 @@ describe('workers/repository/update/branch/schedule', () => {
       expect(res).toBeFalse();
     });
 
-    it('matches cron schedules in the last minute of an hour window', () => {
-      config.schedule = ['* 3-7 * * *'];
-      vi.setSystemTime(new Date('2026-06-30T07:59:01.000'));
-      expect(schedule.isScheduledNow(config)).toBeTrue();
-
-      vi.setSystemTime(new Date('2026-06-30T08:00:00.000'));
-      expect(schedule.isScheduledNow(config)).toBeFalse();
-    });
-
     it('supports cron syntax with days', () => {
       config.schedule = ['* * 30 * *'];
       let res = schedule.isScheduledNow(config);
@@ -252,6 +243,30 @@ describe('workers/repository/update/branch/schedule', () => {
       config.schedule = ['* * * * 6'];
       res = schedule.isScheduledNow(config);
       expect(res).toBeFalse();
+    });
+
+    describe('matches cron schedules in the last minute of an hour', () => {
+      beforeEach(() => {
+        config.schedule = ['* 3-7 * * *'];
+      });
+
+      it('does not allow the previous hour', () => {
+        vi.setSystemTime(new Date('2026-06-30T02:59:01.000'));
+        expect(schedule.isScheduledNow(config)).toBeFalse();
+      });
+
+      it.each(['00.000', '01.000', '59.000', '59.999'])(
+        'allows %s seconds after the last minute',
+        (secondsAndMillis) => {
+          vi.setSystemTime(new Date(`2026-06-30T07:59:${secondsAndMillis}`));
+          expect(schedule.isScheduledNow(config)).toBeTrue();
+        },
+      );
+
+      it('does not allow the next hour', () => {
+        vi.setSystemTime(new Date('2026-06-30T08:00:00.000'));
+        expect(schedule.isScheduledNow(config)).toBeFalse();
+      });
     });
 
     describe('supports cron syntax on Sundays', () => {
