@@ -59,8 +59,10 @@ export async function extractPackageFile(
   // Post-process: for SHA-pinned GitHub module sources, extract version from
   // inline comment in the raw file content (the HCL parser strips comments).
   // Scan the content once and build a lookup map before iterating over deps.
+  // The version comment must be semver-shaped so arbitrary trailing comments
+  // (e.g. `# updated 2026-04-01`) are not mistaken for a version.
   const shaCommentRegex = regEx(
-    /\?ref=(?<sha>[0-9a-f]{40})"(?:[^\S\r\n]*#[^\S\r\n]*(?<version>v?[^\s]+))?/gi,
+    /\?ref=(?<sha>[0-9a-f]{40})"(?:[^\S\r\n]*#[^\S\r\n]*(?<version>v?\d+(?:\.\d+){0,2}\S*))?/gi,
   );
   const shaInfoMap = new Map<
     string,
@@ -68,6 +70,12 @@ export async function extractPackageFile(
   >();
   for (const match of content.matchAll(shaCommentRegex)) {
     const sha = match.groups!.sha;
+    // Prefer an occurrence that carries a version comment: when the same SHA is
+    // pinned by multiple modules, a bare `?ref=<sha>` must not overwrite a
+    // `?ref=<sha> # v1.2.3` recorded for that SHA.
+    if (shaInfoMap.get(sha)?.version && !match.groups?.version) {
+      continue;
+    }
     shaInfoMap.set(sha, {
       version: match.groups?.version,
       replaceString: match[0].slice('?ref='.length),

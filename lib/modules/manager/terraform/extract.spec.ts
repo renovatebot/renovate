@@ -278,6 +278,49 @@ module "pinned-no-ver" {
       });
     });
 
+    it('does not treat a non-semver trailing comment as a version', async () => {
+      const src = `
+module "pinned-comment" {
+  source = "github.com/hashicorp/example?ref=aabbccddee1122334455667788990011aabbccdd" # updated 2026-04-01
+}
+`;
+      const res = await extractPackageFile(src, 'main.tf', {});
+      expect(res?.deps).toHaveLength(1);
+      expect(res?.deps[0]).toMatchObject({
+        depName: 'github.com/hashicorp/example',
+        packageName: 'hashicorp/example',
+        depType: 'module',
+        datasource: 'github-tags',
+        currentDigest: 'aabbccddee1122334455667788990011aabbccdd',
+        skipReason: 'unversioned-reference',
+      });
+      expect(res?.deps[0].currentValue).toBeUndefined();
+    });
+
+    it('prefers the versioned occurrence when the same SHA is pinned twice', async () => {
+      const src = `
+module "pinned-versioned" {
+  source = "github.com/hashicorp/example?ref=aabbccddee1122334455667788990011aabbccdd" # v1.2.3
+}
+
+module "pinned-bare" {
+  source = "github.com/hashicorp/example?ref=aabbccddee1122334455667788990011aabbccdd"
+}
+`;
+      const res = await extractPackageFile(src, 'main.tf', {});
+      expect(res?.deps).toHaveLength(2);
+      // A bare `?ref=<sha>` occurrence must not downgrade the versioned entry
+      // recorded for the same SHA to `unversioned-reference`.
+      expect(res?.deps.every((dep) => dep.skipReason === undefined)).toBe(true);
+      expect(res?.deps).toIncludeAllPartialMembers([
+        {
+          depName: 'github.com/hashicorp/example',
+          currentDigest: 'aabbccddee1122334455667788990011aabbccdd',
+          currentValue: 'v1.2.3',
+        },
+      ]);
+    });
+
     it('extracts bitbucket modules', async () => {
       const res = await extractPackageFile(bitbucketModules, 'modules.tf', {});
       expect(res?.deps).toHaveLength(11);
