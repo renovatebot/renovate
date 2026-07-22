@@ -31,27 +31,25 @@ describe('modules/manager/npm/extract/common/dependency', () => {
     });
 
     // https://github.com/renovatebot/renovate/discussions/44768
-    // A version discriminator on the final path segment is incorrectly
-    // treated as the package name instead of being stripped.
-    it('incorrectly returns version discriminator instead of unscoped package name', () => {
-      expect(parseDepName('resolutions', 'foo/bar@1.0.0')).toBe('1.0.0');
+    it('strips version discriminator from unscoped final segment', () => {
+      expect(parseDepName('resolutions', 'foo/bar@1.0.0')).toBe('bar');
     });
 
-    it('incorrectly returns version discriminator instead of package name behind scoped parent path', () => {
+    it('strips version discriminator from scoped parent path', () => {
       expect(parseDepName('resolutions', '@cypress/request/qs@~6.14.1')).toBe(
-        '~6.14.1',
+        'qs',
       );
     });
 
-    it('incorrectly returns plain semver instead of package name', () => {
+    it('strips version discriminator with plain semver final segment', () => {
       expect(parseDepName('resolutions', '@verdaccio/core/ajv@8.17.1')).toBe(
-        '8.17.1',
+        'ajv',
       );
     });
 
-    it('incorrectly returns version discriminator instead of scoped package name', () => {
+    it('strips version discriminator when final segment is itself scoped', () => {
       expect(parseDepName('resolutions', 'foo/@babel/core@7.0.0')).toBe(
-        '7.0.0',
+        '@babel/core',
       );
     });
   });

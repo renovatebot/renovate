@@ -24,7 +24,26 @@ export function parseDepName(depType: string, key: string): string {
     return key;
   }
 
-  const [, depName] = regEx(/((?:@[^/]+\/)?[^/@]+)$/).exec(key) ?? [];
+  // Yarn selective dependency resolutions may nest a path of parent
+  // packages before the target package, e.g. `parent/child` or
+  // `@scope/parent/child`, and any segment (including the last) may carry
+  // a `@range` suffix used to disambiguate which version of that package
+  // to match, e.g. `@cypress/request/qs@~6.14.1`.
+  const parts = key.split('/');
+  const segments: string[] = [];
+  for (let i = 0; i < parts.length; i += 1) {
+    const part = parts[i];
+    if (part.startsWith('@') && i + 1 < parts.length) {
+      i += 1;
+      segments.push(`${part}/${parts[i]}`);
+    } else {
+      segments.push(part);
+    }
+  }
+
+  const lastSegment = segments.at(-1);
+  const [, depName] =
+    regEx(/^((?:@[^/]+\/)?[^@]+)/).exec(lastSegment ?? '') ?? [];
   return depName;
 }
 
