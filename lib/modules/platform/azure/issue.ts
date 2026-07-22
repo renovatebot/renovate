@@ -136,7 +136,7 @@ export class IssueService {
     azureApiWit: IWorkItemTrackingApi,
   ): Promise<string[]> {
     const types = await azureApiWit.getWorkItemTypes(this.config.project);
-    return types.map((t) => t.name).filter((name): name is string => !!name);
+    return types.map((t) => t.name).filter(isNonEmptyString);
   }
 
   async getIssueList(titleFilter?: string): Promise<Issue[]> {
