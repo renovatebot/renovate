@@ -1,4 +1,3 @@
-import { ZodError } from 'zod/v3';
 import * as httpMock from '~test/http-mock.ts';
 import { logger } from '~test/util.ts';
 import { DenoDatasource } from './index.ts';
@@ -65,7 +64,7 @@ describe('modules/datasource/deno/index', () => {
 
       expect(logger.logger.warn).toHaveBeenCalledWith(
         expect.objectContaining({
-          err: expect.any(ZodError),
+          err: expect.objectContaining({ issues: expect.any(Array) }),
           version: '0.161.0',
         }),
         'Deno: failed to get version details',
@@ -83,7 +82,7 @@ describe('modules/datasource/deno/index', () => {
           packageName: 'https://deno.land/std',
           registryUrl: deno.defaultRegistryUrls[0],
         }),
-      ).rejects.toThrow();
+      ).rejects.toThrow('Request failed with status code 404 (Not Found)');
     });
 
     it('throws error if version endpoint fails', async () => {
@@ -111,7 +110,9 @@ describe('modules/datasource/deno/index', () => {
           packageName: 'https://deno.land/std',
           registryUrl: deno.defaultRegistryUrls[0],
         }),
-      ).rejects.toThrow();
+      ).rejects.toThrow(
+        'Request failed with status code 503 (Service Unavailable)',
+      );
     });
 
     it('returns null if we could not match a deno land dependency', async () => {

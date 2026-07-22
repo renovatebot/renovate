@@ -12,6 +12,32 @@ describe('modules/platform/local/index', () => {
         }
       `);
     });
+
+    it('preserves an explicit dryRun=extract override', async () => {
+      await expect(
+        platform.initPlatform({
+          dryRun: 'extract',
+        }),
+      ).resolves.toEqual({
+        dryRun: 'extract',
+        endpoint: 'local',
+        persistRepoData: true,
+        requireConfig: 'optional',
+      });
+    });
+
+    it('falls back to lookup when dryRun=full is requested', async () => {
+      await expect(
+        platform.initPlatform({
+          dryRun: 'full',
+        }),
+      ).resolves.toEqual({
+        dryRun: 'lookup',
+        endpoint: 'local',
+        persistRepoData: true,
+        requireConfig: 'optional',
+      });
+    });
   });
 
   describe('getRepos', () => {

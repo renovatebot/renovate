@@ -1,4 +1,5 @@
 import { isNullOrUndefined } from '@sindresorhus/is';
+import { codeBlock } from 'common-tags';
 import type { MockInstance } from 'vitest';
 import type { RenovateConfig } from '~test/util.ts';
 import { fs, logger, partial, platform, scm } from '~test/util.ts';
@@ -31,6 +32,7 @@ import {
 import type { RepositoryWorkerConfig } from './types.ts';
 
 vi.mock('../../../util/fs/index.ts');
+vi.mock('../onboarding/branch/config.ts');
 vi.mock('../onboarding/branch/onboarding-branch-cache.ts');
 
 const migrate = vi.mocked(_migrate);
@@ -212,9 +214,11 @@ describe('workers/repository/init/merge', () => {
     });
 
     it('finds and parse renovate.json5', async () => {
-      const configFileRaw = `{
-        // this is json5 format
-      }`;
+      const configFileRaw = codeBlock`
+        {
+                // this is json5 format
+              }
+      `;
       scm.getFileList.mockResolvedValue(['package.json', 'renovate.json5']);
       fs.readLocalFile.mockResolvedValue(configFileRaw);
       expect(await detectRepoFileConfig()).toEqual({
@@ -290,7 +294,7 @@ describe('workers/repository/init/merge', () => {
         checkForRepoConfigError({
           configFileParseError: { validationError: '', validationMessage: '' },
         }),
-      ).toThrow();
+      ).toThrow('config-validation');
     });
   });
 

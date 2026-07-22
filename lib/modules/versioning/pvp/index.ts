@@ -7,7 +7,9 @@ import { compareIntArray, extractAllParts, getParts, plusOne } from './util.ts';
 
 export const id = 'pvp';
 export const displayName = 'Package Versioning Policy (Haskell)';
-export const urls = ['https://pvp.haskell.org'];
+export const urls = [
+  '[Haskell Package Versioning Policy](https://pvp.haskell.org)',
+];
 export const supportsRanges = true;
 export const supportedRangeStrategies: RangeStrategy[] = ['widen'];
 
@@ -46,7 +48,7 @@ function getPatch(version: string): number | null {
   if (parts === null || parts.patch.length === 0) {
     return null;
   }
-  return Number(parts.patch[0] + '.' + parts.patch.slice(1).join(''));
+  return Number(`${parts.patch[0]}.${parts.patch.slice(1).join('')}`);
 }
 
 function matches(version: string, range: string): boolean {
@@ -163,11 +165,11 @@ function isSame(
   }
   if (type === 'major') {
     return 'eq' === compareIntArray(aParts.major, bParts.major);
-  } else if (type === 'minor') {
-    return 'eq' === compareIntArray(aParts.minor, bParts.minor);
-  } else {
-    return 'eq' === compareIntArray(aParts.patch, bParts.patch);
   }
+  if (type === 'minor') {
+    return 'eq' === compareIntArray(aParts.minor, bParts.minor);
+  }
+  return 'eq' === compareIntArray(aParts.patch, bParts.patch);
 }
 
 function subset(subRange: string, superRange: string): boolean | undefined {

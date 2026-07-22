@@ -4,6 +4,11 @@ import type {
   RenovateRequiredOption,
 } from '../../lib/config/types.ts';
 import { pkg } from '../../lib/expose.ts';
+import type { ConstraintDefinition } from '../../lib/util/exec/types.ts';
+import {
+  additionalConstraintDefinitions,
+  toolDefinitions,
+} from '../../lib/util/exec/types.ts';
 import { hasKey } from '../../lib/util/object.ts';
 import { updateFile } from '../utils/index.ts';
 
@@ -28,6 +33,18 @@ const presetsToSuggest = [
   'security:minimumReleaseAgeNpm',
   'security:only-security-updates',
 ];
+
+function getOptionDocsUrl(option: RenovateOptions): string {
+  const parent = option.parents?.find((parent) => parent !== '.');
+  const anchor = parent
+    ? `${parent}${option.name}`.toLowerCase()
+    : option.name.toLowerCase();
+  const page = option.globalOnly
+    ? 'self-hosted-configuration'
+    : 'configuration-options';
+
+  return `https://docs.renovatebot.com/${page}/#${anchor}`;
+}
 
 /**
  * When suggesting presets in `extends`, suggest a number of values that users may want to use
@@ -54,8 +71,9 @@ function createSingleConfig(option: RenovateOptions): Record<string, unknown> {
     type?: JsonSchemaType;
   } & Omit<Partial<RenovateOptions>, 'type'> = {};
   if (option.description) {
-    temp.description = option.description;
-    temp.markdownDescription = option.description;
+    const docsUrl = getOptionDocsUrl(option);
+    temp.description = `${option.description}\nSee also: ${docsUrl}`;
+    temp.markdownDescription = `${option.description}\n\nSee also: [${option.name}](${docsUrl})`;
   }
   temp.type = option.type;
   if (option.type === 'array') {
@@ -97,7 +115,7 @@ function createSingleConfig(option: RenovateOptions): Record<string, unknown> {
         { type: 'string', pattern: '^regex:' },
       ];
     } else if (option.allowedValues) {
-      if (option.allowString) {
+      if (option.allowString || option.supportsTemplating) {
         temp.anyOf = [{ enum: option.allowedValues }, { type: 'string' }];
       } else {
         temp.enum = option.allowedValues;
@@ -122,16 +140,78 @@ function createSingleConfig(option: RenovateOptions): Record<string, unknown> {
   ) {
     temp.$ref = '#';
   }
+
+  if (option.name === 'constraints') {
+    temp.additionalProperties = false;
+    temp.properties = {};
+
+    for (const {
+      name,
+      description,
+    } of toolDefinitions as readonly ConstraintDefinition[]) {
+      const base = `A constraint for the \`${name}\` Containerbase tool`;
+      temp.properties[name] = {
+        type: 'string',
+        description: description ? `${base}. ${description}` : base,
+      };
+    }
+
+    for (const {
+      name,
+      description,
+    } of additionalConstraintDefinitions as readonly ConstraintDefinition[]) {
+      temp.properties[name] = {
+        type: 'string',
+        // prioritise contraint definitions, as they're more useful than the generated one
+        description: description ?? `A constraint for \`${name}\``,
+      };
+    }
+  }
+
+  if (option.name === 'constraintsVersioning') {
+    temp.additionalProperties = false;
+    temp.properties = {};
+
+    for (const {
+      name,
+      description,
+    } of additionalConstraintDefinitions as readonly ConstraintDefinition[]) {
+      temp.properties[name] = {
+        type: 'string',
+        // prioritise contraint definitions, as they're more useful than the generated one
+        description: description ?? `A constraint for \`${name}\``,
+      };
+    }
+  }
+
+  if (option.name === 'installTools') {
+    temp.additionalProperties = false;
+    temp.properties = {};
+
+    for (const {
+      name,
+      description,
+    } of toolDefinitions as readonly ConstraintDefinition[]) {
+      const base = `Install the \`${name}\` Containerbase tool`;
+      temp.properties[name] = {
+        type: 'object',
+        description: description ? `${base}. ${description}` : base,
+        additionalProperties: false,
+      };
+    }
+  }
+
   return temp;
 }
 
 function createSchemaForParentConfigs(
   options: RenovateOptions[],
   properties: Record<string, any>,
+  definitions: Record<string, any>,
 ): void {
   for (const option of options) {
     if (!option.parents || option.parents.includes('.')) {
-      properties[option.name] = createSingleConfig(option);
+      properties[option.name] = { $ref: `#/definitions/${option.name}` };
     }
   }
 }
@@ -139,11 +219,12 @@ function createSchemaForParentConfigs(
 function addChildrenArrayInParents(
   options: RenovateOptions[],
   properties: Record<string, any>,
+  definitions: Record<string, any>,
 ): void {
   for (const option of options) {
     if (option.parents) {
       for (const parent of option.parents.filter((parent) => parent !== '.')) {
-        properties[parent].items = {
+        definitions[parent].items = {
           allOf: [
             {
               type: 'object',
@@ -189,6 +270,7 @@ function toRequiredPropertiesRule(
       properties,
       required,
     },
+    // oxlint-disable-next-line unicorn/no-thenable -- JSON Schema if/then/else pattern
     then: {
       required: [option.name],
     },
@@ -198,15 +280,17 @@ function toRequiredPropertiesRule(
 function createSchemaForChildConfigs(
   options: RenovateOptions[],
   properties: Record<string, any>,
+  definitions: Record<string, any>,
 ): void {
   for (const option of options) {
     if (option.parents) {
       for (const parent of option.parents.filter((parent) => parent !== '.')) {
-        properties[parent].items.allOf[0].properties[option.name] =
-          createSingleConfig(option);
+        definitions[parent].items.allOf[0].properties[option.name] = {
+          $ref: `#/definitions/${option.name}`,
+        };
 
         for (const prop of option.requiredIf ?? []) {
-          properties[parent].items.allOf.push(
+          definitions[parent].items.allOf.push(
             toRequiredPropertiesRule(prop, option),
           );
         }
@@ -245,6 +329,7 @@ export async function generateSchema(
     'x-renovate-version': `${version}`,
     allowComments: true,
     type: 'object',
+    definitions: {} as Record<string, any>,
     properties: {},
 
     /* any configuration items that should not be set - only used in inherited or repo config */
@@ -312,11 +397,16 @@ export async function generateSchema(
     }
     return 0;
   });
+  const definitions = schema.definitions;
+  for (const option of configurationOptions) {
+    definitions[option.name] = createSingleConfig(option);
+  }
+
   const properties = schema.properties as Record<string, any>;
 
-  createSchemaForParentConfigs(configurationOptions, properties);
-  addChildrenArrayInParents(configurationOptions, properties);
-  createSchemaForChildConfigs(configurationOptions, properties);
+  createSchemaForParentConfigs(configurationOptions, properties, definitions);
+  addChildrenArrayInParents(configurationOptions, properties, definitions);
+  createSchemaForChildConfigs(configurationOptions, properties, definitions);
   await updateFile(
     `${dist}/${filename}`,
     `${JSON.stringify(schema, null, 2)}\n`,

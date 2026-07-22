@@ -9,8 +9,9 @@ import { REPOSITORY_CLOSED_ONBOARDING } from '../../../../constants/error-messag
 import { logger } from '../../../../logger/index.ts';
 import type { PackageFile } from '../../../../modules/manager/types.ts';
 import type { Pr } from '../../../../modules/platform/index.ts';
+import { hashBody } from '../../../../modules/platform/pr-body.ts';
 import * as memCache from '../../../../util/cache/memory/index.ts';
-import type { BranchConfig } from '../../../types.ts';
+import type { BranchConfig, BranchUpgradeConfig } from '../../../types.ts';
 import { OnboardingState } from '../common.ts';
 import { ensureOnboardingPr } from './index.ts';
 
@@ -20,8 +21,36 @@ describe('workers/repository/onboarding/pr/index', () => {
     let packageFiles: Record<string, PackageFile[]>;
     let branches: BranchConfig[];
 
+    // NOTE that when the test below fails, these will need to be updated
+    const ONBOARDING_PR_BODY_HASH_WITH_REBASE =
+      '3864212140a13f6ddfaf19c2c812187369a6b00e680a0ac443b4d23539317c41';
+    const ONBOARDING_PR_BODY_HASH_WITHOUT_REBASE =
+      '1280e47eeebf596351163aef6d1367d083276b37bcc97fb3b05c4b4312ef357a';
+
+    // NOTE that if you're intentionally changing the onboarding PR's contents, these hashes will change - update them above
+    describe('generates a consistent hash of the body', () => {
+      it('when the rebase checkbox is present', async () => {
+        config.onboardingRebaseCheckbox = true;
+        OnboardingState.prUpdateRequested = true;
+
+        await ensureOnboardingPr(config, packageFiles, branches);
+        const prBody = platform.createPr.mock.calls[0][0].prBody;
+
+        expect(hashBody(prBody)).toBe(ONBOARDING_PR_BODY_HASH_WITH_REBASE);
+      });
+
+      it('when the rebase checkbox is not present', async () => {
+        config.onboardingRebaseCheckbox = false;
+
+        await ensureOnboardingPr(config, packageFiles, branches);
+        const prBody = platform.createPr.mock.calls[0][0].prBody;
+
+        expect(hashBody(prBody)).toBe(ONBOARDING_PR_BODY_HASH_WITHOUT_REBASE);
+      });
+    });
+
     const bodyStruct = {
-      hash: 'ca7d8b2b5477b8db83231a2584c4e0a1748e4c19e26089507ee1447b8eeb6894',
+      hash: ONBOARDING_PR_BODY_HASH_WITH_REBASE,
     };
 
     beforeEach(() => {
@@ -88,6 +117,70 @@ describe('workers/repository/onboarding/pr/index', () => {
       expect(platform.createPr).toHaveBeenCalledTimes(1);
     });
 
+    describe('when the PR body exceeds the platform limit', () => {
+      beforeEach(() => {
+        branches = [
+          partial<BranchConfig>({
+            prTitle: 'Update dependency foo to v2',
+            branchName: 'renovate/foo-2.x',
+            baseBranch: 'base',
+            manager: 'npm',
+            upgrades: [
+              partial<BranchUpgradeConfig>({
+                manager: 'npm',
+                branchName: 'renovate/foo-2.x',
+                updateType: 'major',
+                depName: 'foo',
+                newValue: '2.0.0',
+              }),
+            ],
+          }),
+        ];
+      });
+
+      it('replaces the full PR list and package files with their summaries', async () => {
+        platform.maxBodyLength.mockReturnValueOnce(1);
+        await ensureOnboardingPr(config, packageFiles, branches);
+
+        expect(platform.createPr).toHaveBeenCalledTimes(1);
+        expect(logger.debug).toHaveBeenCalledWith(
+          'Onboarding PR body exceeds platform limit, switching to summary PR list and package files',
+        );
+
+        const prBody = platform.createPr.mock.calls[0][0].prBody;
+        // the full PR list renders each branch as a `<details>` block, the summary uses a table instead
+        expect(prBody).not.toContain('<details>');
+        expect(prBody).toContain('| Manager | major |');
+        // the full package files description lists files inline suffixed with the manager,
+        // the summary groups them under a manager heading instead
+        expect(prBody).not.toContain('`package.json` (npm)');
+        expect(prBody).toContain('#### npm\n\n * `package.json`');
+      });
+
+      it('does not attempt to replace package files when none were detected', async () => {
+        platform.maxBodyLength.mockReturnValueOnce(1);
+        await ensureOnboardingPr(config, {}, branches);
+
+        expect(platform.createPr).toHaveBeenCalledTimes(1);
+        const prBody = platform.createPr.mock.calls[0][0].prBody;
+        expect(prBody).not.toContain('Detected Package Files');
+        expect(prBody).toContain('| Manager | major |');
+      });
+
+      it('leaves the PR body untouched when it is within the platform limit', async () => {
+        await ensureOnboardingPr(config, packageFiles, branches);
+
+        expect(platform.createPr).toHaveBeenCalledTimes(1);
+        expect(logger.debug).not.toHaveBeenCalledWith(
+          'Onboarding PR body exceeds platform limit, switching to summary PR list and package files',
+        );
+
+        const prBody = platform.createPr.mock.calls[0][0].prBody;
+        expect(prBody).toContain('<details>');
+        expect(prBody).toContain('`package.json` (npm)');
+      });
+    });
+
     it('creates semantic PR', async () => {
       await ensureOnboardingPr(
         {
@@ -142,7 +235,9 @@ describe('workers/repository/onboarding/pr/index', () => {
           branches,
         );
         expect(platform.createPr).toHaveBeenCalledTimes(1);
-        expect(platform.createPr.mock.calls[0][0].prBody).toMatchSnapshot();
+        expect(platform.createPr.mock.calls[0][0].prBody).toMatchSnapshot(
+          'PR body',
+        );
       },
     );
 
@@ -167,7 +262,9 @@ describe('workers/repository/onboarding/pr/index', () => {
           branches,
         );
         expect(platform.createPr).toHaveBeenCalledTimes(1);
-        expect(platform.createPr.mock.calls[0][0].prBody).toMatchSnapshot();
+        expect(platform.createPr.mock.calls[0][0].prBody).toMatchSnapshot(
+          'PR body',
+        );
       },
     );
 
@@ -201,7 +298,9 @@ describe('workers/repository/onboarding/pr/index', () => {
         expect(platform.createPr.mock.calls[0][0].prBody).toMatch(
           /repository:test/,
         );
-        expect(platform.createPr.mock.calls[0][0].prBody).toMatchSnapshot();
+        expect(platform.createPr.mock.calls[0][0].prBody).toMatchSnapshot(
+          'PR body',
+        );
       },
     );
 
@@ -213,8 +312,7 @@ describe('workers/repository/onboarding/pr/index', () => {
       'returns if PR does not need updating' +
         '(onboardingRebaseCheckbox="$onboardingRebaseCheckbox")',
       async ({ onboardingRebaseCheckbox }) => {
-        const hash =
-          '16d923d407af84b1d00c4336c5dd88fc3cd0e6695b7e4e13debd02c7b8c4b60d'; // no rebase checkbox PR hash
+        const hash = ONBOARDING_PR_BODY_HASH_WITHOUT_REBASE;
         config.onboardingRebaseCheckbox = onboardingRebaseCheckbox;
         OnboardingState.prUpdateRequested = true; // case 'false' is tested in "breaks early when onboarding"
         platform.getBranchPr.mockResolvedValue(
@@ -553,6 +651,7 @@ describe('workers/repository/onboarding/pr/index', () => {
       beforeEach(() => {
         GlobalConfig.reset();
         scm.deleteBranch.mockResolvedValue();
+        // oxlint-disable-next-line renovate/no-redundant-mock-reset -- discards the once-value queued by the outer beforeEach
         platform.createPr.mockReset();
       });
 

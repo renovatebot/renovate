@@ -178,8 +178,9 @@ export async function updateArtifacts({
      * @param match A string representing a golang replace directive block
      * @returns A commented out block with // renovate-replace
      */
-    const blockCommentOut = (match: string): string =>
-      match.replace(/(\r?\n)/g, '$1// renovate-replace ');
+    function blockCommentOut(match: string): string {
+      return match.replace(/(\r?\n)/g, '$1// renovate-replace ');
+    }
 
     // Comment out golang replace directives
     massagedGoMod = massagedGoMod
@@ -192,8 +193,7 @@ export async function updateArtifacts({
       );
     }
   }
-  const goConstraints =
-    config.constraints?.go ?? getGoConstraints(newGoModContent);
+  const goConstraints = deriveGoToolchainConstraints(config, newGoModContent);
 
   try {
     await writeLocalFile(goModFileName, massagedGoMod);
@@ -539,4 +539,24 @@ function getGoConstraints(content: string): string | undefined {
     return undefined;
   }
   return `^${match.groups.gover}`;
+}
+
+/**
+ * Derive the version of the Go toolchain needed to run this project.
+ *
+ * This matches with the `golang` Containerbase tool.
+ *
+ * In precedence order:
+ *
+ * 1. config: \`constraints.go\`
+ * 1. \`go.mod\`: \`toolchain\` directive
+ * 1. \`go.mod\`: \`go\` directive
+ *
+ * NOTE that the \`constraints.golang\` is not used (TODO #42601)
+ */
+export function deriveGoToolchainConstraints(
+  config: UpdateArtifactsConfig,
+  newGoModContent: string,
+): string | undefined {
+  return config.constraints?.go ?? getGoConstraints(newGoModContent);
 }

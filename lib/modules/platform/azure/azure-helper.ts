@@ -4,7 +4,10 @@ import type {
   GitRef,
 } from 'azure-devops-node-api/interfaces/GitInterfaces.js';
 import { GitPullRequestMergeStrategy } from 'azure-devops-node-api/interfaces/GitInterfaces.js';
-import type { PolicyConfiguration } from 'azure-devops-node-api/interfaces/PolicyInterfaces.js';
+import type {
+  PolicyConfiguration,
+  PolicyEvaluationRecord,
+} from 'azure-devops-node-api/interfaces/PolicyInterfaces.js';
 import { logger } from '../../../logger/index.ts';
 import { streamToString } from '../../../util/streams.ts';
 import { getNewBranchName } from '../util.ts';
@@ -97,7 +100,7 @@ export async function getFile(
           return null;
         }
       }
-    } catch /* v8 ignore next */ {
+    } catch /* v8 ignore next -- non-JSON error body falls through to raw file content, parse failure not simulated in specs */ {
       // it 's not a JSON, so I send the content directly with the line under
     }
 
@@ -117,6 +120,23 @@ export async function getCommitDetails(
   return results;
 }
 
+interface MergeStrategyPolicyConfiguration {
+  allowNoFastForward?: boolean;
+  allowSquash?: boolean;
+  allowRebase?: boolean;
+  allowRebaseMerge?: boolean;
+}
+
+const policyKeyByStrategy: Record<
+  GitPullRequestMergeStrategy,
+  keyof MergeStrategyPolicyConfiguration
+> = {
+  [GitPullRequestMergeStrategy.NoFastForward]: 'allowNoFastForward',
+  [GitPullRequestMergeStrategy.Squash]: 'allowSquash',
+  [GitPullRequestMergeStrategy.Rebase]: 'allowRebase',
+  [GitPullRequestMergeStrategy.RebaseMerge]: 'allowRebaseMerge',
+};
+
 export async function getMergeMethod(
   repoId: string,
   project: string,
@@ -131,7 +151,7 @@ export async function getMergeMethod(
     refName?: string;
     matchKind: 'Prefix' | 'Exact' | 'DefaultBranch';
   }
-  const isRelevantScope = (scope: Scope): boolean => {
+  function isRelevantScope(scope: Scope): boolean {
     if (
       scope.matchKind === 'DefaultBranch' &&
       // TODO: types (#22198)
@@ -149,7 +169,7 @@ export async function getMergeMethod(
     return scope.matchKind === 'Exact'
       ? scope.refName === branchRef
       : branchRef.startsWith(scope.refName!);
-  };
+  }
 
   const policyConfigurations = (
     await (
@@ -165,19 +185,35 @@ export async function getMergeMethod(
     `getMergeMethod(branchRef=${branchRef!}) determining mergeMethod from matched policy`,
   );
 
-  try {
-    // TODO: fix me, wrong types
-    return Object.keys(policyConfigurations)
-      .map(
-        (p) =>
-          GitPullRequestMergeStrategy[
-            p.slice(5) as never
-          ] as never as GitPullRequestMergeStrategy,
-      )
-      .find((p) => p)!;
-  } catch {
-    return GitPullRequestMergeStrategy.NoFastForward;
+  // Note that this will iterate in the order of GitPullRequestMergeStrategy
+  for (const [key, policyKey] of Object.entries(policyKeyByStrategy)) {
+    if (policyConfigurations?.[policyKey] === true) {
+      const method = parseInt(key, 10) satisfies GitPullRequestMergeStrategy;
+      logger.debug(
+        { policyConfigurations },
+        `getMergeMethod(branchRef=${branchRef!})=${GitPullRequestMergeStrategy[method]}`,
+      );
+      return method;
+    }
   }
+
+  logger.debug(
+    { policyConfigurations },
+    // TODO: types (#22198)
+    `getMergeMethod(branchRef=${branchRef!})=${GitPullRequestMergeStrategy[GitPullRequestMergeStrategy.NoFastForward]}`,
+  );
+  return GitPullRequestMergeStrategy.NoFastForward;
+}
+
+export async function getPolicyEvaluations(
+  project: string,
+  artifactId: string,
+): Promise<PolicyEvaluationRecord[]> {
+  logger.debug(`getPolicyEvaluations(${project}, ${artifactId})`);
+  const policyEvaluations = await (
+    await azureApi.policyApi()
+  ).getPolicyEvaluations(project, artifactId);
+  return policyEvaluations;
 }
 
 export async function getAllProjectTeams(

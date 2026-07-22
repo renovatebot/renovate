@@ -79,10 +79,7 @@ export function getDepWarningsOnboardingPR(
   for (const w of warnings) {
     warningText += `> -   \`${w}\`\n`;
   }
-  warningText +=
-    '> \n> Files affected: ' +
-    warningFiles.map((f) => '`' + f + '`').join(', ') +
-    '\n\n';
+  warningText += `> \n> Files affected: ${warningFiles.map((f) => `\`${f}\``).join(', ')}\n\n`;
   return warningText;
 }
 
@@ -128,7 +125,7 @@ export function getDepWarningsDashboard(
     .map((w) =>
       w.replace(regEx(/^Failed to look up(?: [-\w]+)? dependency /), ''),
     )
-    .map((dep) => '`' + dep + '`')
+    .map((dep) => `\`${dep}\``)
     .join(', ');
 
   let warningText = emojify(
@@ -136,7 +133,7 @@ export function getDepWarningsDashboard(
   );
   warningText += depWarnings;
   warningText += '.\n> \n> Files affected: ';
-  warningText += warningFiles.map((f) => '`' + f + '`').join(', ');
+  warningText += warningFiles.map((f) => `\`${f}\``).join(', ');
   warningText += '\n\n---\n\n';
   return warningText;
 }

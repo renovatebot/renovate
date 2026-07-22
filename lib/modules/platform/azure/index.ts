@@ -1,3 +1,4 @@
+import { setTimeout } from 'node:timers/promises';
 import { isString } from '@sindresorhus/is';
 import type {
   GitItem,
@@ -12,7 +13,8 @@ import {
   GitVersionType,
   PullRequestStatus,
 } from 'azure-devops-node-api/interfaces/GitInterfaces.js';
-import { setTimeout } from 'timers/promises';
+import type { PolicyEvaluationRecord } from 'azure-devops-node-api/interfaces/PolicyInterfaces.js';
+import { PolicyEvaluationStatus } from 'azure-devops-node-api/interfaces/PolicyInterfaces.js';
 import {
   REPOSITORY_ARCHIVED,
   REPOSITORY_EMPTY,
@@ -32,6 +34,7 @@ import type {
   CreatePRConfig,
   EnsureCommentConfig,
   EnsureCommentRemovalConfig,
+  EnsureIssueConfig,
   EnsureIssueResult,
   FindPRConfig,
   Issue,
@@ -45,9 +48,11 @@ import type {
 } from '../types.ts';
 import { getNewBranchName, repoFingerprint } from '../util.ts';
 import { smartTruncate } from '../utils/pr-body.ts';
+import { readOnlyIssueBody } from '../utils/read-only-issue-body.ts';
 import * as azureApi from './azure-got-wrapper.ts';
 import * as azureHelper from './azure-helper.ts';
-import type { AzurePr } from './types.ts';
+import { IssueService } from './issue.ts';
+import type { AzurePr, Config } from './types.ts';
 import { AzurePrVote } from './types.ts';
 import {
   getBranchNameWithoutRefsheadsPrefix,
@@ -60,18 +65,6 @@ import {
   max4000Chars,
 } from './util.ts';
 
-interface Config {
-  repoForceRebase: boolean;
-  mergeMethods: Record<string, GitPullRequestMergeStrategy>;
-  owner: string;
-  repoId: string;
-  project: string;
-  prList: AzurePr[];
-  fileList: null;
-  repository: string;
-  defaultBranch: string;
-}
-
 interface User {
   id: string;
   name: string;
@@ -79,6 +72,7 @@ interface User {
 }
 
 let config: Config = {} as any;
+let issueService: IssueService;
 
 const defaults: {
   endpoint?: string;
@@ -175,7 +169,7 @@ export async function getRawFile(
       }
     }
     return item?.content ?? null;
-  } catch (err) /* v8 ignore next */ {
+  } catch (err) /* v8 ignore next -- Azure API failure modes (service unavailable, malformed items) are not mocked in specs */ {
     if (
       err.message?.includes('<title>Azure DevOps Services Unavailable</title>')
     ) {
@@ -222,7 +216,7 @@ export async function initRepo({
     logger.debug('Repository is disabled- throwing error to abort renovation');
     throw new Error(REPOSITORY_ARCHIVED);
   }
-  /* v8 ignore next */
+  /* v8 ignore next -- defensive: Azure omits defaultBranch only for empty repos, which abort earlier in specs */
   if (!repo.defaultBranch) {
     logger.debug('Repo is empty');
     throw new Error(REPOSITORY_EMPTY);
@@ -231,6 +225,8 @@ export async function initRepo({
   config.repoId = repo.id!;
 
   config.project = repo.project!.name!;
+  config.projectId = repo.project!.id!;
+  issueService = new IssueService(config);
   config.owner = '?owner?';
   logger.debug(`${repository} owner = ${config.owner}`);
   const defaultBranch = repo.defaultBranch.replace('refs/heads/', '');
@@ -477,6 +473,26 @@ async function getMergeStrategy(
       targetRefName,
       config.defaultBranch,
     ))
+  );
+}
+
+async function getPendingBlockingPolicyEvaluations(
+  pullRequestId: number,
+): Promise<PolicyEvaluationRecord[]> {
+  const artifactId = `vstfs:///CodeReview/CodeReviewId/${config.projectId}/${pullRequestId}`;
+  const policyEvaluations = await azureHelper.getPolicyEvaluations(
+    config.project,
+    artifactId,
+  );
+  logger.debug(
+    { pullRequestId, artifactId, policyEvaluations },
+    'Retrieved policy evaluations for PR',
+  );
+  return policyEvaluations.filter(
+    (evaluation) =>
+      evaluation.configuration?.isBlocking &&
+      evaluation.status !== PolicyEvaluationStatus.Approved &&
+      evaluation.status !== PolicyEvaluationStatus.NotApplicable,
   );
 }
 
@@ -815,6 +831,23 @@ export async function mergePr({
   strategy,
 }: MergePRConfig): Promise<boolean> {
   logger.debug(`mergePr(${pullRequestId}, ${branchName!})`);
+
+  const pendingPolicyEvaluations =
+    await getPendingBlockingPolicyEvaluations(pullRequestId);
+  if (pendingPolicyEvaluations.length) {
+    logger.debug(
+      {
+        pullRequestId,
+        pendingPolicies: pendingPolicyEvaluations.map((evaluation) => ({
+          name: evaluation.configuration?.type?.displayName,
+          status: PolicyEvaluationStatus[evaluation.status!],
+        })),
+      },
+      'Not completing PR because branch policies have not been satisfied yet',
+    );
+    return false;
+  }
+
   const azureApiGit = await azureApi.gitApi();
 
   let pr = await azureApiGit.getPullRequestById(pullRequestId, config.project);
@@ -886,47 +919,47 @@ export async function mergePr({
 
 export function massageMarkdown(input: string): string {
   // Remove any HTML we use
-  return smartTruncate(input, maxBodyLength())
-    .replace(
-      'you tick the rebase/retry checkbox',
-      'PR is renamed to start with "rebase!"',
-    )
-    .replace(
-      'checking the rebase/retry box above',
-      'renaming the PR to start with "rebase!"',
-    )
-    .replace(regEx(`\n---\n\n.*?<!-- rebase-check -->.*?\n`), '')
-    .replace(regEx(/<!--renovate-(?:debug|config-hash):.*?-->/g), '');
+  return (
+    smartTruncate(readOnlyIssueBody(input), maxBodyLength())
+      .replace(
+        'you tick the rebase/retry checkbox',
+        'PR is renamed to start with "rebase!"',
+      )
+      .replace(
+        'checking the rebase/retry box above',
+        'renaming the PR to start with "rebase!"',
+      )
+      .replace(regEx(`\n---\n\n.*?<!-- rebase-check -->.*?\n`), '')
+      .replace(regEx(/<!--renovate-(?:debug|config-hash):.*?-->/g), '')
+      // Replace GitHub-style PR links with Azure DevOps format
+      .replace(regEx(/\]\(\.\.\/pull\//g), '](!')
+      // Replace GitHub-style PR references (#123) with Azure DevOps format, needed for text linking config migration PR.
+      // Only match a standalone reference (preceded by start, whitespace or `(`) so we don't corrupt
+      // HTML entities like `&#8203;` or URL anchors like `CHANGELOG.md#4780`.
+      .replace(regEx(/(^|[\s(])#(\d+)/g), '$1!$2')
+  );
 }
 
 export function maxBodyLength(): number {
   return 4000;
 }
 
-/* v8 ignore next */
-export function findIssue(): Promise<Issue | null> {
-  // TODO: Needs implementation (#9592)
-  logger.debug(`findIssue() is not implemented`);
-  return Promise.resolve(null);
+export async function findIssue(title: string): Promise<Issue | null> {
+  return await issueService.findIssue(title);
 }
 
-/* v8 ignore next */
-export function ensureIssue(): Promise<EnsureIssueResult | null> {
-  // TODO: Needs implementation (#9592)
-  logger.debug(`ensureIssue() is not implemented`);
-  return Promise.resolve(null);
+export async function ensureIssue(
+  issueConfig: EnsureIssueConfig,
+): Promise<EnsureIssueResult | null> {
+  return await issueService.ensureIssue(issueConfig);
 }
 
-/* v8 ignore next */
-export function ensureIssueClosing(): Promise<void> {
-  return Promise.resolve();
+export async function ensureIssueClosing(title: string): Promise<void> {
+  return await issueService.ensureIssueClosing(title);
 }
 
-/* v8 ignore next */
-export function getIssueList(): Promise<Issue[]> {
-  logger.debug(`getIssueList()`);
-  // TODO: Needs implementation (#9592)
-  return Promise.resolve([]);
+export async function getIssueList(titleFilter?: string): Promise<Issue[]> {
+  return await issueService.getIssueList(titleFilter);
 }
 
 async function getUserIds(users: string[]): Promise<User[]> {
@@ -961,19 +994,18 @@ async function getUserIds(users: string[]): Promise<User[]> {
           isRequired = true;
         }
         if (
-          reviewer.toLowerCase() === m.identity?.displayName?.toLowerCase() ||
-          reviewer.toLowerCase() === m.identity?.uniqueName?.toLowerCase()
+          (reviewer.toLowerCase() === m.identity?.displayName?.toLowerCase() ||
+            reviewer.toLowerCase() === m.identity?.uniqueName?.toLowerCase()) &&
+          ids.filter((c) => c.id === m.identity?.id).length === 0
         ) {
-          if (ids.filter((c) => c.id === m.identity?.id).length === 0) {
-            // TODO #22198
-            ids.push({
-              id: m.identity.id!,
-              name: reviewer,
-              isRequired,
-            });
+          // TODO #22198
+          ids.push({
+            id: m.identity.id!,
+            name: reviewer,
+            isRequired,
+          });
 
-            validReviewers.add(reviewer);
-          }
+          validReviewers.add(reviewer);
         }
       });
     });
@@ -987,14 +1019,15 @@ async function getUserIds(users: string[]): Promise<User[]> {
         reviewer = reviewer.replace(requiredReviewerPrefix, '');
         isRequired = true;
       }
-      if (reviewer.toLowerCase() === t.name?.toLowerCase()) {
-        // v8 ignore else -- TODO: add test #40625
-        if (ids.filter((c) => c.id === t.id).length === 0) {
-          // TODO #22198
-          ids.push({ id: t.id!, name: reviewer, isRequired });
+      // v8 ignore else -- TODO: add test #40625
+      if (
+        reviewer.toLowerCase() === t.name?.toLowerCase() &&
+        ids.filter((c) => c.id === t.id).length === 0
+      ) {
+        // TODO #22198
+        ids.push({ id: t.id!, name: reviewer, isRequired });
 
-          validReviewers.add(reviewer);
-        }
+        validReviewers.add(reviewer);
       }
     });
   });

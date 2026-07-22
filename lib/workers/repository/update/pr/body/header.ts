@@ -5,5 +5,5 @@ export function getPrHeader(config: BranchConfig): string {
   if (!config.prHeader) {
     return '';
   }
-  return template.compile(config.prHeader, config) + '\n\n';
+  return `${template.compile(config.prHeader, config)}\n\n`;
 }

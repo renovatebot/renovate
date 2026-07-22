@@ -6,6 +6,7 @@
       "replacements:actions-attest-build-provenance-to-actions-attest",
       "replacements:airbnb-prop-types-to-prop-types-tools",
       "replacements:apollo-server-to-scoped",
+      "replacements:aws-sdk-smithy-client-to-smithy",
       "replacements:babel-eslint-to-eslint-parser",
       "replacements:base-ui-components-to-base-ui",
       "replacements:containerbase",
@@ -149,6 +150,17 @@
       }
     ]
   },
+  "aws-sdk-smithy-client-to-smithy": {
+    "description": "`@aws-sdk/smithy-client` was moved to `@smithy/smithy-client`.",
+    "packageRules": [
+      {
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["@aws-sdk/smithy-client"],
+        "replacementName": "@smithy/smithy-client",
+        "replacementVersion": "1.0.5"
+      }
+    ]
+  },
   "babel-eslint-to-eslint-parser": {
     "description": "`babel-eslint` was renamed under the `@babel` scope.",
     "packageRules": [
@@ -238,6 +250,17 @@
           "/^(?:docker\\.io/)?renovate/renovate$/"
         ],
         "versioning": "semver"
+      }
+    ]
+  },
+  "corentinmusard-otel-cicd-action-to-dash0hq": {
+    "description": "`corentinmusard/otel-cicd-action` was transferred to `dash0hq/otel-cicd-action`.",
+    "packageRules": [
+      {
+        "matchDatasources": ["github-releases", "github-tags"],
+        "matchPackageNames": ["corentinmusard/otel-cicd-action"],
+        "replacementName": "dash0hq/otel-cicd-action",
+        "replacementVersion": "4.0.1"
       }
     ]
   },

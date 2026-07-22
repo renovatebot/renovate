@@ -92,7 +92,7 @@ export async function initRepo({
   config = {} as any;
   config.repository = repository;
   config.defaultBranch = defaultBranch;
-  config.ignorePrAuthor = GlobalConfig.get('ignorePrAuthor', false);
+  config.ignorePrAuthor = GlobalConfig.get('ignorePrAuthor');
 
   await git.initRepo({
     ...config,
@@ -162,8 +162,8 @@ export async function getPr(number: number): Promise<Pr | null> {
     const result = await getRepoPr(config.repository, number);
     logger.debug('Returning PR from API');
     return mapPrFromScmToRenovate(result);
-  } catch (error) {
-    logger.error({ error }, `Can not find a PR with id ${number}`);
+  } catch (err) {
+    logger.error({ err, number }, 'Can not find a PR with the given id');
     return null;
   }
 }

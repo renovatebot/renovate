@@ -4,7 +4,7 @@ import { asTimestamp } from '../../../util/timestamp.ts';
 import * as gradleVersioning from '../../versioning/gradle/index.ts';
 import { Datasource } from '../datasource.ts';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types.ts';
-import type { GradleRelease } from './types.ts';
+import { GradleReleases } from './schema.ts';
 
 export class GradleVersionDatasource extends Datasource {
   static readonly id = 'gradle-version';
@@ -38,8 +38,7 @@ export class GradleVersionDatasource extends Datasource {
 
     let releases: Release[];
     try {
-      const response =
-        await this.http.getJsonUnchecked<GradleRelease[]>(registryUrl);
+      const response = await this.http.getJson(registryUrl, GradleReleases);
       releases = response.body
         .filter((release) => !release.snapshot && !release.nightly)
         .map((release) => {

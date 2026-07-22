@@ -60,6 +60,7 @@ export function getPlatformPrOptions(
 
   return {
     autoApprove: !!config.autoApprove,
+    automergeCommitMessage: config.commitMessage,
     automergeStrategy: config.automergeStrategy,
     azureWorkItemId: config.azureWorkItemId ?? 0,
     bbAutoResolvePrTasks: !!config.bbAutoResolvePrTasks,
@@ -287,10 +288,11 @@ export async function ensurePr(
     }`;
   }
 
-  if (config.fetchChangeLogs === 'pr') {
-    // fetch changelogs when not already done;
-    await embedChangelogs(upgrades);
-  }
+  // fetch changelogs for matching upgrades.
+  await embedChangelogs({
+    upgrades: upgrades,
+    stage: 'pr',
+  });
 
   // Get changelog and then generate template strings
   for (const upgrade of upgrades) {
@@ -483,6 +485,8 @@ export async function ensurePr(
           },
           'PR title changed',
         );
+      } else if (config.autoApprove) {
+        logger.debug({ prTitle }, 'PR approval required');
       } else if (!config.committedFiles && !config.rebaseRequested) {
         logger.debug(
           {
@@ -495,11 +499,11 @@ export async function ensurePr(
       if (GlobalConfig.get('dryRun')) {
         logger.info(`DRY-RUN: Would update PR #${existingPr.number}`);
         return { type: 'with-pr', pr: existingPr };
-      } else {
-        await platform.updatePr(updatePrConfig);
-        logger.info({ pr: existingPr.number, prTitle }, `PR updated`);
-        setPrCache(branchName, prBodyFingerprint, true);
       }
+      await platform.updatePr(updatePrConfig);
+      logger.info({ pr: existingPr.number, prTitle }, `PR updated`);
+      setPrCache(branchName, prBodyFingerprint, true);
+
       return {
         type: 'with-pr',
         pr: {
@@ -518,7 +522,7 @@ export async function ensurePr(
     if (GlobalConfig.get('dryRun')) {
       logger.info(
         { labels: prepareLabels(config) },
-        'DRY-RUN: Would create PR: ' + prTitle,
+        `DRY-RUN: Would create PR: ${prTitle}`,
       );
       pr = { number: 0 } as never;
     } else {

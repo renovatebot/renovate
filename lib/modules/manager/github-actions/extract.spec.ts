@@ -4,7 +4,23 @@ import { GlobalConfig } from '../../../config/global.ts';
 import * as yaml from '../../../util/yaml.ts';
 import { extractPackageFile } from './index.ts';
 
-const runnerTestWorkflow = codeBlock`
+const runnerTestWorkflowMacos = codeBlock`
+jobs:
+  test1:
+     runs-on: \${{ env.RUNNER }}
+  test2:
+      runs-on: abc-123
+  test3:
+    runs-on: "macos-12-large"
+  test4:
+    runs-on: 'macos-latest'
+  test5:
+      runs-on: macos-15-intel
+  test6:
+      runs-on: macos-26-intel
+`;
+
+const runnerTestWorkflowUbuntu = codeBlock`
 jobs:
   test1:
     runs-on: ubuntu-latest
@@ -12,25 +28,27 @@ jobs:
     runs-on:
       ubuntu-22.04
   test3:
-    runs-on: "macos-12-large"
-  test4:
-    runs-on: 'macos-latest'
-  test5:
-    runs-on: |
-      windows-2019
-  test6:
-    runs-on: >
-      windows-2022
-  test7:
-    runs-on: [windows-2022, selfhosted]
-  test8:
-     runs-on: \${{ env.RUNNER }}
-  test9:
      runs-on:
        group: ubuntu-runners
        labels: ubuntu-20.04-16core
-  test10:
-      runs-on: abc-123
+  test4:
+      runs-on: ubuntu-22.04-arm
+`;
+
+const runnerTestWorkflowWindows = codeBlock`
+jobs:
+  test1:
+    runs-on: |
+      windows-2019
+  test2:
+    runs-on: >
+      windows-2022
+  test3:
+    runs-on: [windows-2022, selfhosted]
+  test4:
+      runs-on: windows-11-arm
+  test5:
+      runs-on: windows-2025
 `;
 
 describe('modules/manager/github-actions/extract', () => {
@@ -142,6 +160,18 @@ describe('modules/manager/github-actions/extract', () => {
       GlobalConfig.set({
         platform: 'github',
         endpoint: 'https://api.github.com',
+      });
+      const res = extractPackageFile(
+        Fixtures.get('workflow_2.yml'),
+        'workflow_2.yml',
+      );
+      expect(res?.deps[0].registryUrls).toBeUndefined();
+    });
+
+    it('returns undefined registryUrls when endpoint is invalid URL', () => {
+      GlobalConfig.set({
+        platform: 'github',
+        endpoint: 'not-a-valid-url',
       });
       const res = extractPackageFile(
         Fixtures.get('workflow_2.yml'),
@@ -670,8 +700,51 @@ describe('modules/manager/github-actions/extract', () => {
       expect(res!.deps[3]).not.toHaveProperty('registryUrls');
     });
 
-    it('extracts multiple action runners from yaml configuration file', () => {
-      const res = extractPackageFile(runnerTestWorkflow, 'workflow.yml');
+    it('extracts multiple macos action runners from yaml configuration file', () => {
+      const res = extractPackageFile(runnerTestWorkflowMacos, 'workflow.yml');
+
+      expect(res?.deps).toMatchObject([
+        {
+          depName: 'macos',
+          currentValue: '12-large',
+          replaceString: 'macos-12-large',
+          depType: 'github-runner',
+          datasource: 'github-runners',
+          autoReplaceStringTemplate: '{{depName}}-{{newValue}}',
+        },
+        {
+          depName: 'macos',
+          currentValue: 'latest',
+          replaceString: 'macos-latest',
+          depType: 'github-runner',
+          datasource: 'github-runners',
+          autoReplaceStringTemplate: '{{depName}}-{{newValue}}',
+          skipReason: 'invalid-version',
+        },
+        {
+          depName: 'macos',
+          currentValue: '15-intel',
+          replaceString: 'macos-15-intel',
+          depType: 'github-runner',
+          datasource: 'github-runners',
+          autoReplaceStringTemplate: '{{depName}}-{{newValue}}',
+        },
+        {
+          depName: 'macos',
+          currentValue: '26-intel',
+          replaceString: 'macos-26-intel',
+          depType: 'github-runner',
+          datasource: 'github-runners',
+          autoReplaceStringTemplate: '{{depName}}-{{newValue}}',
+        },
+      ]);
+      expect(
+        res?.deps.filter((d) => d.datasource === 'github-runners'),
+      ).toHaveLength(4);
+    });
+
+    it('extracts multiple ubuntu action runners from yaml configuration file', () => {
+      const res = extractPackageFile(runnerTestWorkflowUbuntu, 'workflow.yml');
 
       expect(res?.deps).toMatchObject([
         {
@@ -692,22 +765,23 @@ describe('modules/manager/github-actions/extract', () => {
           autoReplaceStringTemplate: '{{depName}}-{{newValue}}',
         },
         {
-          depName: 'macos',
-          currentValue: '12-large',
-          replaceString: 'macos-12-large',
+          depName: 'ubuntu',
+          currentValue: '22.04-arm',
+          replaceString: 'ubuntu-22.04-arm',
           depType: 'github-runner',
           datasource: 'github-runners',
           autoReplaceStringTemplate: '{{depName}}-{{newValue}}',
         },
-        {
-          depName: 'macos',
-          currentValue: 'latest',
-          replaceString: 'macos-latest',
-          depType: 'github-runner',
-          datasource: 'github-runners',
-          autoReplaceStringTemplate: '{{depName}}-{{newValue}}',
-          skipReason: 'invalid-version',
-        },
+      ]);
+      expect(
+        res?.deps.filter((d) => d.datasource === 'github-runners'),
+      ).toHaveLength(3);
+    });
+
+    it('extracts multiple windows action runners from yaml configuration file', () => {
+      const res = extractPackageFile(runnerTestWorkflowWindows, 'workflow.yml');
+
+      expect(res?.deps).toMatchObject([
         {
           depName: 'windows',
           currentValue: '2019',
@@ -732,10 +806,26 @@ describe('modules/manager/github-actions/extract', () => {
           datasource: 'github-runners',
           autoReplaceStringTemplate: '{{depName}}-{{newValue}}',
         },
+        {
+          depName: 'windows',
+          currentValue: '11-arm',
+          replaceString: 'windows-11-arm',
+          depType: 'github-runner',
+          datasource: 'github-runners',
+          autoReplaceStringTemplate: '{{depName}}-{{newValue}}',
+        },
+        {
+          depName: 'windows',
+          currentValue: '2025',
+          replaceString: 'windows-2025',
+          depType: 'github-runner',
+          datasource: 'github-runners',
+          autoReplaceStringTemplate: '{{depName}}-{{newValue}}',
+        },
       ]);
       expect(
         res?.deps.filter((d) => d.datasource === 'github-runners'),
-      ).toHaveLength(7);
+      ).toHaveLength(5);
     });
 
     it('extracts x-version from actions/setup-x', () => {
@@ -1027,6 +1117,113 @@ describe('modules/manager/github-actions/extract', () => {
           main: 'index.js'
         `;
       expect(extractPackageFile(yamlContent, 'action.yml')).toBeNull();
+    });
+
+    it('extracts actions and with-version inputs nested in a parallel block', () => {
+      const yamlContent = codeBlock`
+        jobs:
+          build:
+            steps:
+              - uses: actions/checkout@v4
+              - parallel:
+                  - name: Setup Node.js
+                    uses: actions/setup-node@v5
+                    with:
+                      node-version: '20.0.0'
+                  - name: Setup Go
+                    uses: actions/setup-go@v5
+                    with:
+                      go-version: '1.23'
+              - run: npm test
+        `;
+
+      const res = extractPackageFile(yamlContent, 'workflow.yml');
+      expect(res?.deps).toMatchObject([
+        { depName: 'actions/checkout', depType: 'action' },
+        { depName: 'actions/setup-node', depType: 'action' },
+        { depName: 'actions/setup-go', depType: 'action' },
+        { depName: 'node', depType: 'uses-with', currentValue: '20.0.0' },
+        { depName: 'go', depType: 'uses-with', currentValue: '1.23' },
+      ]);
+    });
+
+    it('extracts community action with-inputs nested in a parallel block', () => {
+      const yamlContent = codeBlock`
+        jobs:
+          build:
+            steps:
+              - parallel:
+                  - uses: astral-sh/setup-uv@v8.2.0
+                    with:
+                      version: '0.4.x'
+        `;
+
+      const res = extractPackageFile(yamlContent, 'workflow.yml');
+      expect(res?.deps).toMatchObject([
+        { depName: 'astral-sh/setup-uv', depType: 'action' },
+        {
+          depName: 'astral-sh/uv',
+          depType: 'uses-with',
+          currentValue: '0.4.x',
+          datasource: 'github-releases',
+        },
+      ]);
+    });
+
+    it('extracts the mise version from jdx/mise-action', () => {
+      const yamlContent = codeBlock`
+        jobs:
+          build:
+            steps:
+              - uses: jdx/mise-action@e6a8b3978addb5a52f2b4cd9d91eafa7f0ab959d # v4.2.0
+                with:
+                  version: 2026.7.10
+                  install_args: cargo:cargo-deny
+        `;
+
+      const res = extractPackageFile(yamlContent, 'workflow.yml');
+      expect(res?.deps).toMatchObject([
+        {
+          currentDigest: 'e6a8b3978addb5a52f2b4cd9d91eafa7f0ab959d',
+          currentValue: 'v4.2.0',
+          datasource: 'github-tags',
+          depName: 'jdx/mise-action',
+          depType: 'action',
+        },
+        {
+          currentValue: '2026.7.10',
+          datasource: 'github-releases',
+          depName: 'jdx/mise',
+          depType: 'uses-with',
+          packageName: 'jdx/mise',
+        },
+      ]);
+    });
+
+    it('extracts steps nested in nested parallel blocks', () => {
+      const yamlContent = codeBlock`
+        jobs:
+          build:
+            steps:
+              - parallel:
+                  - name: Setup Node.js
+                    uses: actions/setup-node@v5
+                    with:
+                      node-version: '18.0.0'
+                  - parallel:
+                      - name: Setup Go
+                        uses: actions/setup-go@v5
+                        with:
+                          go-version: '1.22'
+        `;
+
+      const res = extractPackageFile(yamlContent, 'workflow.yml');
+      expect(res?.deps).toMatchObject([
+        { depName: 'actions/setup-node', depType: 'action' },
+        { depName: 'actions/setup-go', depType: 'action' },
+        { depName: 'node', depType: 'uses-with', currentValue: '18.0.0' },
+        { depName: 'go', depType: 'uses-with', currentValue: '1.22' },
+      ]);
     });
   });
 
@@ -1576,6 +1773,225 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'ghcr.io/zizmorcore/zizmor',
           depType: 'uses-with',
           packageName: 'ghcr.io/zizmorcore/zizmor',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'docker/setup-docker-action@v4',
+        with: { version: 'v27.1.0' },
+      },
+      expected: [
+        {
+          currentValue: 'v27.1.0',
+          datasource: 'github-releases',
+          depName: 'docker',
+          depType: 'uses-with',
+          packageName: 'moby/moby',
+          extractVersion: '^docker-(?<version>.+)$',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'dtolnay/rust-toolchain@master',
+        with: { toolchain: '1.89.0' },
+      },
+      expected: [
+        {
+          currentValue: '1.89.0',
+          datasource: 'rust-version',
+          depName: 'rust',
+          depType: 'uses-with',
+          packageName: 'rust',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'dtolnay/rust-toolchain@master',
+        with: { toolchain: 'nightly-2025-01-01' },
+      },
+      expected: [
+        {
+          currentValue: 'nightly-2025-01-01',
+          datasource: 'rust-version',
+          depName: 'rust',
+          depType: 'uses-with',
+          packageName: 'rust',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'dtolnay/rust-toolchain@stable',
+        with: { toolchain: 'stable' },
+      },
+      expected: [
+        {
+          currentValue: 'stable',
+          datasource: 'rust-version',
+          depName: 'rust',
+          depType: 'uses-with',
+          packageName: 'rust',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'dtolnay/rust-toolchain@master',
+        with: {},
+      },
+      expected: [
+        {
+          datasource: 'rust-version',
+          depName: 'rust',
+          depType: 'uses-with',
+          packageName: 'rust',
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'azure/setup-helm@v4',
+        with: { version: 'v3.17.0' },
+      },
+      expected: [
+        {
+          currentValue: 'v3.17.0',
+          datasource: 'github-releases',
+          depName: 'helm',
+          depType: 'uses-with',
+          packageName: 'helm/helm',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'azure/setup-helm@v4',
+        with: {},
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'github-releases',
+          depName: 'helm',
+          depType: 'uses-with',
+          packageName: 'helm/helm',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'docker/setup-buildx-action@v3',
+        with: { version: 'v0.19.3' },
+      },
+      expected: [
+        {
+          currentValue: 'v0.19.3',
+          datasource: 'github-releases',
+          depName: 'buildx',
+          depType: 'uses-with',
+          packageName: 'docker/buildx',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'docker/setup-buildx-action@v3',
+        with: {},
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'github-releases',
+          depName: 'buildx',
+          depType: 'uses-with',
+          packageName: 'docker/buildx',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'docker/setup-compose-action@v1',
+        with: { version: 'v2.36.1' },
+      },
+      expected: [
+        {
+          currentValue: 'v2.36.1',
+          datasource: 'github-releases',
+          depName: 'docker/compose',
+          depType: 'uses-with',
+          packageName: 'docker/compose',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'docker/setup-compose-action@v1',
+        with: {},
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'github-releases',
+          depName: 'docker/compose',
+          depType: 'uses-with',
+          packageName: 'docker/compose',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'helm/chart-testing-action@v2',
+        with: { version: 'v3.12.0' },
+      },
+      expected: [
+        {
+          currentValue: 'v3.12.0',
+          datasource: 'github-releases',
+          depName: 'chart-testing',
+          depType: 'uses-with',
+          packageName: 'helm/chart-testing',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'helm/chart-testing-action@v2',
+        with: {},
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'github-releases',
+          depName: 'chart-testing',
+          depType: 'uses-with',
+          packageName: 'helm/chart-testing',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'sigoden/install-binary@v1',
+        with: {
+          repo: 'sigoden/argc',
+          tag: 'v1.22.0',
+        },
+      },
+      expected: [
+        {
+          currentValue: 'v1.22.0',
+          datasource: 'github-releases',
+          depName: 'sigoden/argc',
+          depType: 'uses-with',
+          packageName: 'sigoden/argc',
         },
       ],
     },

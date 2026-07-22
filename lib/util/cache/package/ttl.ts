@@ -11,7 +11,7 @@ import type { PackageCacheNamespace } from './types.ts';
 export function getTtlOverride(
   namespace: PackageCacheNamespace,
 ): number | undefined {
-  const overrides = GlobalConfig.get('cacheTtlOverride', {});
+  const overrides = GlobalConfig.get('cacheTtlOverride');
   let ttl: number | undefined = overrides[namespace];
   if (isNumber(ttl)) {
     return ttl;
@@ -58,10 +58,7 @@ export function resolveTtlValues(
 ): TTLValues {
   const softTtlMinutes = getTtlOverride(namespace) ?? ttlMinutes;
 
-  const cacheHardTtlMinutes = GlobalConfig.get(
-    'cacheHardTtlMinutes',
-    7 * 24 * 60,
-  );
+  const cacheHardTtlMinutes = GlobalConfig.get('cacheHardTtlMinutes');
   const hardTtlMinutes = Math.max(softTtlMinutes, cacheHardTtlMinutes);
 
   return { softTtlMinutes, hardTtlMinutes };

@@ -1,5 +1,6 @@
 import type { PlatformCommitOptions } from '../../config/types.ts';
 import type { GitOptions } from '../../types/git.ts';
+import type { LongCommitSha } from '../schema-utils/git.ts';
 import type { EmailAddress } from '../schema-utils/index.ts';
 
 export type { DiffResult, StatusResult } from 'simple-git';
@@ -12,9 +13,16 @@ export interface GitAuthor {
 export type GitNoVerifyOption = 'commit' | 'push';
 
 /**
- * We want to make sure this is a long sha of 40 characters and not just any string
+ * Represents a virtual branch tracked as `refs/remotes/origin/<name>`.
+ * Used by platforms like Gerrit where changes are represented as refs
+ * (e.g., refs/changes/34/1234/1) instead of regular branches.
  */
-export type LongCommitSha = string & { __longCommitSha: never };
+export interface VirtualBranch {
+  /** The ref this virtual branch is fetched from (e.g., 'refs/changes/34/1234/1') */
+  ref: string;
+  /** The commit SHA this virtual branch points to */
+  sha: LongCommitSha;
+}
 
 export interface StorageConfig {
   currentBranch?: string;
@@ -25,6 +33,12 @@ export interface StorageConfig {
   cloneSubmodules?: boolean;
   cloneSubmodulesFilter?: string[];
   fullClone?: boolean;
+  /**
+   * Virtual branches to initialize from non-standard refs (e.g., Gerrit change refs).
+   * Each virtual branch is fetched and stored as refs/remotes/origin/<name>.
+   * Keyed by branch name.
+   */
+  virtualBranches?: Record<string, VirtualBranch>;
 }
 
 export interface LocalConfig extends StorageConfig {
@@ -32,11 +46,14 @@ export interface LocalConfig extends StorageConfig {
   currentBranch: string;
   currentBranchSha: LongCommitSha;
   branchCommits: Record<string, LongCommitSha>;
+  /** Single registry of virtual branches, always initialized in initRepo. Keyed by branch name. */
+  virtualBranches: Record<string, VirtualBranch>;
   branchIsModified: Record<string, boolean>;
   commitBranches: Record<string, string[]>;
   ignoredAuthors: string[];
   gitAuthorName?: string | null;
   gitAuthorEmail?: EmailAddress;
+  fileModeEnabled?: boolean;
 
   writeGitDone?: boolean;
 }
@@ -90,8 +107,6 @@ export interface CommitFilesConfig {
   prTitle?: string;
   /** Only needed by Gerrit platform */
   autoApprove?: boolean;
-  /** Only needed by Gerrit platform */
-  labels?: string[];
 }
 
 export interface PushFilesConfig {
@@ -109,11 +124,30 @@ export interface CommitResult {
   files: FileChange[];
 }
 
-export interface TreeItem {
+export type GitObjectType = 'blob' | 'tree' | 'commit';
+
+/**
+ * Git tree entry modes (octal file-type representations).
+ * @see https://git-scm.com/docs/gitdatamodel
+ */
+export const GitTreeMode = {
+  /** Regular non-executable file */
+  RegularFile: '100644',
+  /** Regular executable file */
+  ExecutableFile: '100755',
+  /** Symbolic link */
+  SymbolicLink: '120000',
+  /** Directory / subtree */
+  Directory: '040000',
+  /** Gitlink (submodule) */
+  Gitlink: '160000',
+} as const;
+
+export interface DiffTreeItem {
   path: string;
   mode: string;
-  type: string;
-  sha: LongCommitSha;
+  type: GitObjectType;
+  sha: LongCommitSha | null;
 }
 
 /**

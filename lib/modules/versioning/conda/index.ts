@@ -16,7 +16,7 @@ function parse(v: string): Version | null {
 export const id = 'conda';
 export const displayName = 'conda';
 export const urls = [
-  'https://docs.conda.io/projects/conda-build/en/stable/resources/package-spec.html#package-match-specifications',
+  '[Conda package match specifications](https://docs.conda.io/projects/conda-build/en/stable/resources/package-spec.html#package-match-specifications)',
 ];
 export const supportsRanges = true;
 export const supportedRangeStrategies: RangeStrategy[] = [
@@ -76,7 +76,7 @@ function getNewValue({
 }: NewValueConfig): string | null {
   if (currentValue === '*') {
     if (rangeStrategy === 'bump') {
-      return '>=' + newVersion;
+      return `>=${newVersion}`;
     }
 
     // don't think you can widen or replace `*`
@@ -88,7 +88,7 @@ function getNewValue({
   // it's valid range spec in conda to write `3.12.*`, translate to pep440 `==3.12.*`
   if (/^(\d+\.)+\*$/.test(normalizedCurrentValue)) {
     const newValue = pep440.api.getNewValue({
-      currentValue: '==' + normalizedCurrentValue,
+      currentValue: `==${normalizedCurrentValue}`,
       rangeStrategy,
       currentVersion,
       newVersion,
@@ -165,7 +165,7 @@ function getSatisfyingVersion(
     return null;
   }
 
-  return satisfiedVersions[satisfiedVersions.length - 1][1];
+  return satisfiedVersions.at(-1)![1];
 }
 
 function minSatisfyingVersion(

@@ -2,7 +2,7 @@ import upath from 'upath';
 import type { XmlElement } from 'xmldoc';
 import { XmlDocument } from 'xmldoc';
 import { logger } from '../../../logger/index.ts';
-import { readLocalFile } from '../../../util/fs/index.ts';
+import { isValidLocalPath, readLocalFile } from '../../../util/fs/index.ts';
 import { MavenDatasource } from '../../datasource/maven/index.ts';
 import { extractRegistries } from '../maven/extract.ts';
 import { isXmlElement } from '../nuget/util.ts';
@@ -14,6 +14,7 @@ import type {
 } from '../types.ts';
 import {
   applyProps,
+  containsPlaceholder,
   findAttrValuePosition,
   parsePropertiesFile,
   resolveChainedProps,
@@ -76,27 +77,41 @@ interface RawDep {
   depPackageFile: string;
 }
 
+async function readSettingsRegistries(
+  settingsFile: string,
+  baseDir: string,
+): Promise<string[]> {
+  const settingsPath = settingsFile.startsWith('/')
+    ? settingsFile
+    : upath.join(baseDir, settingsFile);
+
+  if (!isValidLocalPath(settingsPath)) {
+    logger.debug(
+      `ant manager: skipping settings file outside repository: ${settingsPath}`,
+    );
+    return [];
+  }
+
+  const settingsContent = await readLocalFile(settingsPath, 'utf8');
+  if (!settingsContent) {
+    logger.debug(`ant manager: could not read settings file ${settingsPath}`);
+    return [];
+  }
+
+  return extractRegistries(settingsContent);
+}
+
 async function collectRegistryUrls(
   node: XmlElement,
   baseDir: string,
 ): Promise<string[]> {
   const urls: string[] = [];
 
-  // Read registry URLs from settingsFile attribute
   const settingsFile = node.attr.settingsFile;
   if (settingsFile) {
-    const settingsPath = settingsFile.startsWith('/')
-      ? settingsFile
-      : upath.join(baseDir, settingsFile);
-    const settingsContent = await readLocalFile(settingsPath, 'utf8');
-    if (settingsContent) {
-      urls.push(...extractRegistries(settingsContent));
-    } else {
-      logger.debug(`ant manager: could not read settings file ${settingsPath}`);
-    }
+    urls.push(...(await readSettingsRegistries(settingsFile, baseDir)));
   }
 
-  // Collect inline <remoteRepository url="..." /> elements
   for (const child of node.children) {
     if (
       isXmlElement(child) &&
@@ -214,6 +229,67 @@ export function extractPackageFile(
   return { deps };
 }
 
+async function loadPropertyFile(
+  file: string,
+  baseDir: string,
+  visitedFiles: Set<string>,
+  allProps: Record<string, AntProp>,
+): Promise<void> {
+  if (containsPlaceholder(file)) {
+    logger.debug(
+      `ant manager: skipping properties file with unresolved placeholders in path: ${file}`,
+    );
+    return;
+  }
+
+  const propFilePath = file.startsWith('/') ? file : upath.join(baseDir, file);
+
+  if (!isValidLocalPath(propFilePath)) {
+    logger.debug(
+      `ant manager: skipping properties file outside repository: ${propFilePath}`,
+    );
+    return;
+  }
+
+  if (visitedFiles.has(propFilePath)) {
+    return;
+  }
+  visitedFiles.add(propFilePath);
+
+  const propContent = await readLocalFile(propFilePath, 'utf8');
+  if (!propContent) {
+    logger.debug(`ant manager: could not read properties file ${propFilePath}`);
+    return;
+  }
+
+  parsePropertiesFile(propContent, propFilePath, allProps);
+}
+
+async function loadImportedFile(
+  file: string,
+  baseDir: string,
+  visitedFiles: Set<string>,
+  allProps: Record<string, AntProp>,
+  allRawDeps: RawDep[],
+): Promise<void> {
+  if (containsPlaceholder(file)) {
+    logger.debug(
+      `ant manager: skipping import file with unresolved placeholders in path: ${file}`,
+    );
+    return;
+  }
+
+  const importedFile = upath.normalize(upath.join(baseDir, file));
+  if (!isValidLocalPath(importedFile)) {
+    logger.debug(
+      `ant manager: skipping import file outside repository: ${importedFile}`,
+    );
+    return;
+  }
+
+  await walkXmlFile(importedFile, visitedFiles, allProps, allRawDeps);
+}
+
 /**
  * Walk an XML node tree in document order, processing properties,
  * property file references, and dependencies as they appear.
@@ -235,7 +311,6 @@ async function walkNodeInOrder(
     }
 
     if (child.name === 'property') {
-      // Handle inline property definition
       const name = child.attr.name;
       const value = child.attr.value;
       if (name && value && !(name in allProps)) {
@@ -243,30 +318,22 @@ async function walkNodeInOrder(
         allProps[name] = { val: value, fileReplacePosition: pos, packageFile };
       }
 
-      // Handle property file reference
-      const file = child.attr.file;
-      if (file) {
-        const propFilePath = file.startsWith('/')
-          ? file
-          : upath.join(baseDir, file);
-
-        if (!visitedFiles.has(propFilePath)) {
-          visitedFiles.add(propFilePath);
-          const propContent = await readLocalFile(propFilePath, 'utf8');
-          if (propContent) {
-            parsePropertiesFile(propContent, propFilePath, allProps);
-          } else {
-            logger.debug(
-              `ant manager: could not read properties file ${propFilePath}`,
-            );
-          }
-        }
+      if (child.attr.file) {
+        await loadPropertyFile(
+          child.attr.file,
+          baseDir,
+          visitedFiles,
+          allProps,
+        );
       }
     } else if (child.name === 'import' && child.attr.file) {
-      const importedFile = upath.normalize(
-        upath.join(baseDir, child.attr.file),
+      await loadImportedFile(
+        child.attr.file,
+        baseDir,
+        visitedFiles,
+        allProps,
+        allRawDeps,
       );
-      await walkXmlFile(importedFile, visitedFiles, allProps, allRawDeps);
     } else if (child.name === 'dependency') {
       const rawDep = collectDependency(
         child,

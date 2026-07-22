@@ -1,3 +1,4 @@
+import { ZodError } from 'zod/v4';
 import { logger } from '~test/util.ts';
 import { GithubContentResponse, GithubVulnerabilityAlerts } from './schema.ts';
 
@@ -172,7 +173,7 @@ describe('modules/platform/github/schema', () => {
     expect(data).toBeEmptyArray();
     expect(logger.logger.debug).toHaveBeenCalledWith(
       expect.objectContaining({
-        error: expect.any(Error),
+        error: expect.any(ZodError),
       }),
       'Vulnerability Alert: Failed to parse some alerts',
     );
@@ -197,7 +198,7 @@ describe('modules/platform/github/schema', () => {
     expect(data).toBeEmptyArray();
     expect(logger.logger.debug).not.toHaveBeenCalledWith(
       expect.objectContaining({
-        error: expect.any(Error),
+        error: expect.any(ZodError),
       }),
       'Vulnerability Alert: Failed to parse some alerts',
     );
@@ -238,6 +239,8 @@ describe('modules/platform/github/schema', () => {
       vector_string: 'CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H',
       score: 9.8,
     });
-    expect(result[0].security_advisory.cvss_severities?.cvss_v4).toBeNull();
+    expect(
+      result[0].security_advisory.cvss_severities?.cvss_v4,
+    ).toBeUndefined();
   });
 });

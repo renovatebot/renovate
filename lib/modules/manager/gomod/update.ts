@@ -80,22 +80,47 @@ export function updateDependency({
     }
     let newLine: string;
     if (upgrade.updateType === 'digest') {
-      const newDigestRightSized = upgrade.newDigest!.substring(
-        0,
-        upgrade.currentDigest!.length,
-      );
-      if (lineToChange.includes(newDigestRightSized)) {
-        return fileContent;
+      // Since the 2024 goproxy datasource changes, newValue and newDigest are
+      // both extracted from the same proxy version string and always reference
+      // the same commit, so newValue can be written directly for pseudo-versions.
+      // However, for private modules (GONOPROXY / direct datasource), the proxy
+      // has no data and newValue may equal currentValue. In that case, fall
+      // through to the bare hash path so that gomodTidy can resolve it.
+      if (
+        upgrade.newValue?.startsWith('v0.0.0-') &&
+        upgrade.newValue !== upgrade.currentValue
+      ) {
+        logger.debug(
+          { depName: currentName, lineToChange, newValue: upgrade.newValue },
+          'gomod: updating pseudo-version digest',
+        );
+        newLine = lineToChange.replace(
+          // TODO: can be undefined? (#22198)
+          updateLineExp!,
+          `$<depPart>$<divider>${upgrade.newValue}`,
+        );
+      } else {
+        // Fallback for private modules where the proxy could not resolve a new
+        // pseudo-version, or non-pseudo-version digest updates.
+        // Writes the bare hash so that postUpdateOptions like gomodTidy can
+        // normalize it into a valid pseudo-version via `go get`.
+        const newDigestRightSized = upgrade.newDigest!.substring(
+          0,
+          upgrade.currentDigest!.length,
+        );
+        if (lineToChange.includes(newDigestRightSized)) {
+          return fileContent;
+        }
+        logger.debug(
+          { depName: currentName, lineToChange, newDigestRightSized },
+          'gomod: need to update digest',
+        );
+        newLine = lineToChange.replace(
+          // TODO: can be undefined? (#22198)
+          updateLineExp!,
+          `$<depPart>$<divider>${newDigestRightSized}`,
+        );
       }
-      logger.debug(
-        { depName: currentName, lineToChange, newDigestRightSized },
-        'gomod: need to update digest',
-      );
-      newLine = lineToChange.replace(
-        // TODO: can be undefined? (#22198)
-        updateLineExp!,
-        `$<depPart>$<divider>${newDigestRightSized}`,
-      );
     } else {
       newLine = lineToChange.replace(
         // TODO: can be undefined? (#22198)

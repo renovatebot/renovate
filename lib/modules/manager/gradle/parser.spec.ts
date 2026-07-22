@@ -1261,7 +1261,7 @@ describe('modules/manager/gradle/parser', () => {
     };
 
     const fileContents = {
-      'foo/bar.gradle': key + ' = "' + value + '"',
+      'foo/bar.gradle': `${key} = "${value}"`,
     };
 
     it.each`

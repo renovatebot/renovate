@@ -14,13 +14,14 @@ export async function updateBazelLockfile(
   bazeliskConstraint: string | undefined,
 ): Promise<UpdateArtifactsResult[] | null> {
   try {
-    const allowlist = GlobalConfig.get('allowedUnsafeExecutions', []);
+    const allowlist = GlobalConfig.get('allowedUnsafeExecutions');
 
     const command = 'bazel mod deps --lockfile_mode=update';
 
     if (!allowlist.includes('bazelModDeps')) {
       logger.once.warn(
-        `Bazel command, \`${command}\`, was requested to run, but \`bazelModDeps\` is not permitted in the allowedUnsafeExecutions`,
+        { command },
+        'Bazel command was requested to run, but `bazelModDeps` is not permitted in the allowedUnsafeExecutions',
       );
       return null;
     }

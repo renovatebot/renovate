@@ -117,14 +117,9 @@ export function formatRecord(rec: BunyanRecord, colorize = true): string {
   return util.format('%s: %s%s\n%s', level, msg, meta, details);
 }
 
-export class RenovateStream extends Writable {
-  private colorize: boolean;
-  private destination: NodeJS.WritableStream;
-
-  constructor(destination: NodeJS.WritableStream, colorize = true) {
+export class PrettyStdoutStream extends Writable {
+  constructor() {
     super({ objectMode: true });
-    this.colorize = colorize;
-    this.destination = destination;
   }
 
   override _write(
@@ -132,6 +127,7 @@ export class RenovateStream extends Writable {
     _encoding: string,
     callback: (error?: Error | null) => void,
   ): void {
-    this.destination.write(formatRecord(data, this.colorize), callback);
+    process.stdout.write(formatRecord(data));
+    callback();
   }
 }
