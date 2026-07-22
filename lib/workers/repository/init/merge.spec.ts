@@ -358,7 +358,10 @@ describe('workers/repository/init/merge', () => {
         automerge: true,
         packageRules: [
           {
-            matchSourceUrls: ['https://github.com/react/react'],
+            matchSourceUrls: [
+              'https://github.com/facebook/react',
+              'https://github.com/react/react',
+            ],
           },
         ],
       });
