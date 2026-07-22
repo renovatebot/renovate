@@ -21,7 +21,7 @@ export async function getUserID(username: string): Promise<number> {
   return userInfo[0].id;
 }
 
-async function getMembers(group: string): Promise<GitLabUser[]> {
+async function getGroupMembers(group: string): Promise<GitLabUser[]> {
   const groupEncoded = encodeURIComponent(group);
   return (
     await gitlabApi.getJsonUnchecked<GitLabUser[]>(
@@ -32,7 +32,7 @@ async function getMembers(group: string): Promise<GitLabUser[]> {
 
 export async function getMemberUserIDs(group: string): Promise<number[]> {
   try {
-    const members = await getMembers(group);
+    const members = await getGroupMembers(group);
     return members.map((u) => u.id);
   } catch (err) {
     logger.once.warn(
@@ -44,7 +44,7 @@ export async function getMemberUserIDs(group: string): Promise<number[]> {
 }
 
 export async function getMemberUsernames(group: string): Promise<string[]> {
-  const members = await getMembers(group);
+  const members = await getGroupMembers(group);
   return members.map((u) => u.username);
 }
 
