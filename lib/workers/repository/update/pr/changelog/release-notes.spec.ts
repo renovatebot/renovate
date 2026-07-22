@@ -279,7 +279,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
       const firstInput = {
         project: partial<ChangeLogProject>({
           type: 'github',
-          repository: 'facebook/react-native',
+          repository: 'react/react-native',
           packageName: 'unrelated-package',
           apiBaseUrl: 'https://api.github.com/',
           baseUrl: 'https://github.com/',
@@ -296,7 +296,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
       const secondInput = {
         project: partial<ChangeLogProject>({
           type: 'github',
-          repository: 'facebook/react-native',
+          repository: 'react/react-native',
           packageName: 'unrelated-package',
           apiBaseUrl: 'https://api.github.com/',
           baseUrl: 'https://github.com/',
@@ -343,7 +343,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
       const input = {
         project: partial<ChangeLogProject>({
           type: 'github',
-          repository: 'facebook/react-native',
+          repository: 'react/react-native',
           packageName: 'unrelated-package',
           apiBaseUrl: 'https://api.github.com/',
           baseUrl: 'https://github.com/',
@@ -360,7 +360,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
 
       expect(packageCacheGetSpy).toHaveBeenCalledWith(
         'changelog-github-notes@v2',
-        'facebook/react-native:1.0.0',
+        'react/react-native:1.0.0',
       );
     });
 
@@ -380,7 +380,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
       const input = {
         project: partial<ChangeLogProject>({
           type: 'github',
-          repository: 'facebook/react-native',
+          repository: 'react/react-native',
           sourceDirectory: 'packages/core',
           packageName: 'unrelated-package',
           apiBaseUrl: 'https://api.github.com/',
@@ -399,7 +399,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
 
       expect(packageCacheGetSpy).toHaveBeenCalledWith(
         'changelog-github-notes@v2',
-        'facebook/react-native:packages/core:1.0.0:custom-a/1.0.0',
+        'react/react-native:packages/core:1.0.0:custom-a/1.0.0',
       );
     });
 
@@ -1919,7 +1919,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
         const res = await getReleaseNotesMd(
           {
             ...githubProject,
-            repository: 'facebook/react-native',
+            repository: 'react/react-native',
           },
           partial<ChangeLogRelease>({
             version: '0.72.3',
@@ -1964,7 +1964,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
 
     describe('shouldSkipChangelogMd', () => {
       it('should skip for flagged repository', () => {
-        expect(shouldSkipChangelogMd('facebook/react-native')).toBeTrue();
+        expect(shouldSkipChangelogMd('react/react-native')).toBeTrue();
       });
 
       it('should continue for other repository', () => {
