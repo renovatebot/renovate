@@ -233,39 +233,52 @@ describe('modules/manager/swift/artifacts', () => {
     fs.readLocalFile.mockResolvedValue(v2MixedFixture);
     vi.mocked(datasource.getDigest).mockResolvedValue('newrevisionsha123');
 
-    const result = await updateArtifacts({
-      packageFileName: 'Package.swift',
-      updatedDeps: [
-        {
-          depName: 'Alamofire/Alamofire',
-          datasource: GithubTagsDatasource.id,
-          newVersion: 'v5.10.0',
-          newValue: '5.10.0',
+    await expect(
+      updateArtifacts({
+        packageFileName: 'Package.swift',
+        updatedDeps: [
+          {
+            depName: 'Alamofire/Alamofire',
+            datasource: GithubTagsDatasource.id,
+            newVersion: 'v5.10.0',
+            newValue: '5.10.0',
+          },
+        ],
+        newPackageFileContent: '',
+        config: {},
+      }),
+    ).resolves.toEqual([
+      {
+        file: {
+          type: 'addition',
+          path: 'Package.resolved',
+          contents: JSON.stringify(
+            {
+              pins: [
+                {
+                  identity: 'alamofire',
+                  kind: 'remoteSourceControl',
+                  location: 'https://github.com/Alamofire/Alamofire',
+                  state: {
+                    revision: 'newrevisionsha123',
+                    version: '5.10.0',
+                  },
+                },
+                {
+                  identity: 'example.registry-package',
+                  kind: 'registry',
+                  location: '',
+                  state: { version: '1.2.3' },
+                },
+              ],
+              version: 2,
+            },
+            null,
+            2,
+          ),
         },
-      ],
-      newPackageFileContent: '',
-      config: {},
-    });
-
-    expect(result).toHaveLength(1);
-    const { contents } = result![0].file as { contents: string };
-    const parsed = JSON.parse(contents) as {
-      pins: { identity: string; kind: string; state: Record<string, string> }[];
-    };
-    const scmPin = parsed.pins.find((p) => p.identity === 'alamofire');
-    const registryPin = parsed.pins.find(
-      (p) => p.identity === 'example.registry-package',
-    );
-    // Source-control pin updated
-    expect(scmPin).toMatchObject({
-      state: { version: '5.10.0', revision: 'newrevisionsha123' },
-    });
-    // Registry pin preserved, and must NOT gain a revision after the update
-    expect(registryPin).toMatchObject({
-      kind: 'registry',
-      state: { version: '1.2.3' },
-    });
-    expect(registryPin!.state).not.toHaveProperty('revision');
+      },
+    ]);
   });
 
   it('does not write `from:` range to Package.resolved', async () => {
