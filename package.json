@@ -166,6 +166,7 @@
     "@opentelemetry/instrumentation-bunyan": "0.65.0",
     "@opentelemetry/instrumentation-http": "0.220.0",
     "@opentelemetry/instrumentation-redis": "0.68.0",
+    "@opentelemetry/otlp-transformer": "0.213.0",
     "@opentelemetry/resource-detector-aws": "2.20.0",
     "@opentelemetry/resource-detector-azure": "0.28.0",
     "@opentelemetry/resource-detector-gcp": "0.55.0",
