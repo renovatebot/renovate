@@ -3,9 +3,11 @@ import { diag } from '@opentelemetry/api';
 import { JsonTraceSerializer } from '@opentelemetry/otlp-transformer';
 import type { ReadableSpan, SpanExporter } from '@opentelemetry/sdk-trace-base';
 
-// ExportResultCode values from @opentelemetry/core (not a direct dependency)
-const SUCCESS = 0;
-const FAILED = 1;
+// Taken from https://github.com/open-telemetry/opentelemetry-js/blob/2.10.0/packages/opentelemetry-core/src/ExportResult.ts and inlined, as we don't need to add an unnecessary dependency for this type that doesn't change
+export enum ExportResultCode {
+  SUCCESS,
+  FAILED,
+}
 
 export class FileSpanExporter implements SpanExporter {
   private readonly filePath: string;
@@ -21,15 +23,15 @@ export class FileSpanExporter implements SpanExporter {
     resultCallback: (result: { code: number; error?: Error }) => void,
   ): void {
     if (this.stopped) {
-      resultCallback({ code: FAILED });
+      resultCallback({ code: ExportResultCode.SUCCESS });
       return;
     }
 
     const pending = this.writeSpans(spans).then(
-      () => resultCallback({ code: SUCCESS }),
+      () => resultCallback({ code: ExportResultCode.SUCCESS }),
       (error) => {
         diag.error('FileSpanExporter failed to write spans', error);
-        resultCallback({ code: FAILED, error });
+        resultCallback({ code: ExportResultCode.FAILED, error });
       },
     );
     this.pendingWrites.add(pending);
