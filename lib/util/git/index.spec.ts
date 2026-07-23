@@ -727,6 +727,7 @@ describe('util/git/index', { timeout: 30000 }, () => {
         'renovate/binary-file',
         'renovate/branch_with_multiple_authors',
         'renovate/custom_author',
+        'renovate/custom_author_brackets',
         'renovate/deeply/nested',
         'renovate/different_committer',
         'renovate/equal_branch',
