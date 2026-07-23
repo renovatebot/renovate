@@ -2,7 +2,10 @@ import upath from 'upath';
 import { envMock, mockExecAll } from '~test/exec-util.ts';
 import { env, fs, git, partial } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
-import type { RepoGlobalConfig } from '../../../config/types.ts';
+import type {
+  InternalGlobalConfigOptions,
+  RepoGlobalConfig,
+} from '../../../config/types.ts';
 import type { StatusResult } from '../../../util/git/types.ts';
 import type { UpdateArtifactsConfig } from '../types.ts';
 import { updateArtifacts } from './index.ts';
@@ -10,7 +13,7 @@ import { updateArtifacts } from './index.ts';
 vi.mock('../../../util/exec/env.ts');
 vi.mock('../../../util/fs/index.ts');
 
-const adminConfig: RepoGlobalConfig = {
+const adminConfig: RepoGlobalConfig & InternalGlobalConfigOptions = {
   // `join` fixes Windows CI
   localDir: upath.join('/tmp/github/some/repo'),
   cacheDir: upath.join('/tmp/renovate/cache'),

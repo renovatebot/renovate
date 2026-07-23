@@ -1,14 +1,17 @@
 import upath from 'upath';
 import { fs } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
-import type { RepoGlobalConfig } from '../../../config/types.ts';
+import type {
+  InternalGlobalConfigOptions,
+  RepoGlobalConfig,
+} from '../../../config/types.ts';
 import type { UpdateArtifactsConfig } from '../types.ts';
 import { updateArtifacts } from './artifacts.ts';
 
 vi.mock('../../../util/fs/index.ts');
 vi.mock('./lockfile.ts');
 
-const adminConfig: RepoGlobalConfig = {
+const adminConfig: RepoGlobalConfig & InternalGlobalConfigOptions = {
   localDir: upath.join('/tmp/github/some/repo'),
   cacheDir: upath.join('/tmp/cache'),
   containerbaseDir: upath.join('/tmp/cache/containerbase'),

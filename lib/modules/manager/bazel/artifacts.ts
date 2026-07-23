@@ -151,13 +151,13 @@ export async function updateArtifacts(
         continue;
       }
 
-      const updateValues = (oldUrl: string): string => {
+      function updateValues(oldUrl: string): string {
         let url = oldUrl;
         url = replaceValues(url, upgrade.currentValue, upgrade.newValue);
         url = replaceValues(url, upgrade.currentDigest, upgrade.newDigest);
         url = migrateUrl(url, upgrade);
         return url;
-      };
+      }
 
       const urls = urlFragments.map(({ value }) => updateValues(value));
       const hash = await getHashFromUrls(urls);

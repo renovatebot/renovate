@@ -25,6 +25,7 @@ export const Descriptor = z.object({
   mediaType: z.string(),
   digest: z.string(),
   size: Nullish(z.number().int().gte(0)),
+  annotations: Nullish(z.record(z.string(), z.string())),
 });
 /**
  * OCI platform properties
