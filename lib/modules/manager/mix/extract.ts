@@ -42,9 +42,8 @@ export async function extractPackageFile(
         depBuffer += `${contentArr[lineNumber]}\n`;
         lineNumber += 1;
       } while (contentArr[lineNumber].trim() !== 'end');
-      let depMatchGroups = depMatchRegExp.exec(depBuffer)?.groups;
-      while (depMatchGroups) {
-        const { app, requirement, opts } = depMatchGroups;
+      for (const depMatch of depBuffer.matchAll(depMatchRegExp)) {
+        const { app, requirement, opts } = depMatch.groups!;
         const github = githubRegexp.exec(opts)?.groups?.value;
         const git = gitRegexp.exec(opts)?.groups?.value;
         const ref = refRegexp.exec(opts)?.groups?.value;
@@ -55,9 +54,8 @@ export async function extractPackageFile(
 
         const onlyValue = onlyValueRegexp.exec(opts)?.groups?.only;
         const onlyEnvironments = [];
-        let match;
         if (onlyValue) {
-          while ((match = onlyEnvironmentsRegexp.exec(onlyValue)) !== null) {
+          for (const match of onlyValue.matchAll(onlyEnvironmentsRegexp)) {
             onlyEnvironments.push(match[1]);
           }
         }
@@ -94,7 +92,6 @@ export async function extractPackageFile(
 
         deps.set(app, dep);
         logger.trace({ dep }, `setting ${app}`);
-        depMatchGroups = depMatchRegExp.exec(depBuffer)?.groups;
       }
     }
   }

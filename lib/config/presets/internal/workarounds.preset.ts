@@ -21,6 +21,7 @@ export const presets: Record<string, Preset> = {
       'workarounds:containerbase',
       'workarounds:bitnamiDockerImageVersioning',
       'workarounds:clamavDockerImageVersioning',
+      'workarounds:grafanaDockerImageVersioning',
       'workarounds:k3sKubernetesVersioning',
       'workarounds:rke2KubernetesVersioning',
       'workarounds:libericaJdkDockerVersioning',
@@ -119,6 +120,22 @@ export const presets: Record<string, Preset> = {
       },
     ],
   },
+  grafanaDockerImageVersioning: {
+    description: 'Support security releases on Grafana (product) images',
+    packageRules: [
+      {
+        matchDatasources: ['docker'],
+        matchPackageNames: [
+          'grafana/grafana',
+          'docker.io/grafana/grafana',
+          'grafana/grafana-enterprise',
+          'docker.io/grafana/grafana-enterprise',
+        ],
+        versioning:
+          'regex:^(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)(?:-security-(?<build>\\d+))?(?:-(?<compatibility>.*))?$',
+      },
+    ],
+  },
   ignoreHttp4sDigestMilestones: {
     description: 'Ignore `http4s` digest-based `1.x` milestones.',
     packageRules: [
@@ -191,6 +208,42 @@ export const presets: Record<string, Preset> = {
         ],
         versioning:
           'regex:^(?<major>\\d+)?(\\.(?<minor>\\d+))?(\\.(?<patch>\\d+))?([\\._+](?<build>(\\d\\.?)+)(LTS)?)?(-(?<compatibility>.*))?$',
+      },
+      {
+        description:
+          'Use docker versioning for major-only Java image tags so rolling tags (e.g. 21-jre) are not upgraded to full-precision tags (e.g. 21.0.11_10-jre).',
+        matchCurrentValue: '/^\\d+(-|$)/',
+        matchDatasources: ['docker'],
+        matchPackageNames: [
+          'eclipse-temurin',
+          'amazoncorretto',
+          'adoptopenjdk',
+          'openjdk',
+          'java',
+          'java-jdk',
+          'java-jre',
+          'sapmachine',
+          '/^azul/zulu-openjdk/',
+          '/^bellsoft/liberica-openj(dk|re)-/',
+          '/^cimg/openjdk/',
+        ],
+        versioning: 'docker',
+      },
+      {
+        description:
+          'Use docker versioning for major-only Java image tags so rolling tags (e.g. 21-jre) are not upgraded to full-precision tags (e.g. 21.0.11_10-jre).',
+        matchCurrentValue: '/^\\d+(-|$)/',
+        matchDatasources: ['docker'],
+        matchDepNames: [
+          'eclipse-temurin',
+          'amazoncorretto',
+          'adoptopenjdk',
+          'openjdk',
+          'java',
+          'java-jre',
+          'sapmachine',
+        ],
+        versioning: 'docker',
       },
       {
         allowedVersions: '/^(?:jdk|jdk-all|jre)-(?:8|11|17|21|25)(?:\\.|-|$)/',

@@ -21,7 +21,7 @@ export async function getUserID(username: string): Promise<number> {
   return userInfo[0].id;
 }
 
-async function getMembers(group: string): Promise<GitLabUser[]> {
+async function getGroupMembers(group: string): Promise<GitLabUser[]> {
   const groupEncoded = encodeURIComponent(group);
   return (
     await gitlabApi.getJsonUnchecked<GitLabUser[]>(
@@ -32,20 +32,38 @@ async function getMembers(group: string): Promise<GitLabUser[]> {
 
 export async function getMemberUserIDs(group: string): Promise<number[]> {
   try {
-    const members = await getMembers(group);
+    const members = await getGroupMembers(group);
     return members.map((u) => u.id);
   } catch (err) {
     logger.once.warn(
       { group, errorMessage: err.message },
-      `Unable to fetch user IDs for members of the ${group} group`,
+      'Unable to fetch user IDs for group members',
     );
     return [];
   }
 }
 
 export async function getMemberUsernames(group: string): Promise<string[]> {
-  const members = await getMembers(group);
+  const members = await getGroupMembers(group);
   return members.map((u) => u.username);
+}
+
+async function getProjectMembers(repo: string): Promise<GitLabUser[]> {
+  const repoEncoded = encodeURIComponent(repo);
+  return (
+    await gitlabApi.getJsonUnchecked<GitLabUser[]>(
+      `projects/${repoEncoded}/members`,
+      { paginate: true },
+    )
+  ).body;
+}
+
+export async function getProjectMembersByRole(
+  repo: string,
+  accessLevel: number,
+): Promise<GitLabUser[]> {
+  const members = await getProjectMembers(repo);
+  return members.filter((m) => m.access_level === accessLevel);
 }
 
 export async function isUserBusy(user: string): Promise<boolean> {

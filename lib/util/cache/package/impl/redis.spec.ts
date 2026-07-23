@@ -1,8 +1,8 @@
-import { createClient, createCluster } from '@redis/client';
+import { RESP_TYPES, createClient, createCluster } from '@redis/client';
 import { DateTime } from 'luxon';
 import { logger as _logger } from '~test/util.ts';
 import { compressToBase64 } from '../../../compress.ts';
-import { encodeEntry } from '../codec.ts';
+import { decodeEntry, encodeEntry } from '../codec.ts';
 import { PackageCacheRedis, normalizeRedisUrl } from './redis.ts';
 
 const { logger } = _logger;
@@ -25,15 +25,17 @@ describe('util/cache/package/impl/redis', () => {
   describe('PackageCacheRedis', () => {
     const clientMock = {
       connect: vi.fn(),
-      get: vi.fn(),
       set: vi.fn(),
       del: vi.fn(),
       destroy: vi.fn(),
       withTypeMapping: vi.fn(),
     };
+    const binaryClientMock = {
+      get: vi.fn(),
+    };
 
     beforeEach(() => {
-      clientMock.withTypeMapping.mockReturnValue(clientMock);
+      clientMock.withTypeMapping.mockReturnValue(binaryClientMock);
       vi.mocked(createClient).mockReturnValue(
         clientMock as unknown as ReturnType<typeof createClient>,
       );
@@ -52,7 +54,9 @@ describe('util/cache/package/impl/redis', () => {
           url: 'redis://host',
         });
         expect(clientMock.connect).toHaveBeenCalled();
-        expect(clientMock.withTypeMapping).toHaveBeenCalled();
+        expect(clientMock.withTypeMapping).toHaveBeenCalledWith({
+          [RESP_TYPES.BLOB_STRING]: Buffer,
+        });
 
         const reconnectStrategy = vi.mocked(createClient).mock.calls[0][0]!
           .socket!.reconnectStrategy as (retries: number) => number;
@@ -79,6 +83,9 @@ describe('util/cache/package/impl/redis', () => {
               url: 'redis://host',
             },
           ],
+        });
+        expect(clientMock.withTypeMapping).toHaveBeenCalledWith({
+          [RESP_TYPES.BLOB_STRING]: Buffer,
         });
       });
 
@@ -123,7 +130,9 @@ describe('util/cache/package/impl/redis', () => {
     });
 
     describe('get', () => {
-      it('returns value from cache payload', async () => {
+      // TODO: Delete this legacy JSON-wrapper read case once legacy.ts is
+      // removed.
+      it('returns value from legacy JSON-wrapper payload', async () => {
         const cache = await PackageCacheRedis.create('redis://host', 'p:');
         const value = { foo: 'bar' };
         const payloadValue = await compressToBase64(JSON.stringify(value));
@@ -132,23 +141,27 @@ describe('util/cache/package/impl/redis', () => {
           value: payloadValue,
           expiry: DateTime.local().plus({ minutes: 5 }),
         });
-        clientMock.get.mockResolvedValueOnce(Buffer.from(payload));
+        binaryClientMock.get.mockResolvedValueOnce(Buffer.from(payload));
 
         expect(await cache.get('_test-namespace', 'key')).toEqual(value);
+        // Redis cleanup uses native TTL, so it must not rewrite on read.
+        expect(clientMock.set).not.toHaveBeenCalled();
       });
 
       it('returns value from envelope payload', async () => {
         const cache = await PackageCacheRedis.create('redis://host', 'p:');
         const value = { foo: 'bar' };
 
-        clientMock.get.mockResolvedValueOnce(
+        binaryClientMock.get.mockResolvedValueOnce(
           await encodeEntry(value, DateTime.local()),
         );
 
         expect(await cache.get('_test-namespace', 'key')).toEqual(value);
       });
 
-      it('removes expired cached entry', async () => {
+      // TODO: Delete this legacy JSON-wrapper expiry case once legacy.ts is
+      // removed.
+      it('removes expired legacy JSON-wrapper entry', async () => {
         const cache = await PackageCacheRedis.create('redis://host', 'p:');
         const value = { foo: 'bar' };
         const payloadValue = await compressToBase64(JSON.stringify(value));
@@ -157,32 +170,38 @@ describe('util/cache/package/impl/redis', () => {
           value: payloadValue,
           expiry: DateTime.local().minus({ minutes: 1 }),
         });
-        clientMock.get.mockResolvedValueOnce(Buffer.from(payload));
+        binaryClientMock.get.mockResolvedValueOnce(Buffer.from(payload));
 
         expect(await cache.get('_test-namespace', 'key')).toBeUndefined();
         expect(clientMock.del).toHaveBeenCalledWith('p:_test-namespace-key');
       });
 
-      it('returns undefined for missing expiry', async () => {
+      // TODO: Delete this legacy JSON-wrapper malformed-entry case once
+      // legacy.ts is removed.
+      it('returns undefined for legacy JSON-wrapper payload with missing expiry', async () => {
         const cache = await PackageCacheRedis.create('redis://host', 'p:');
         const value = { foo: 'bar' };
         const payloadValue = await compressToBase64(JSON.stringify(value));
 
         const payload = JSON.stringify({ value: payloadValue });
-        clientMock.get.mockResolvedValueOnce(Buffer.from(payload));
+        binaryClientMock.get.mockResolvedValueOnce(Buffer.from(payload));
 
         expect(await cache.get('_test-namespace', 'key')).toBeUndefined();
         expect(clientMock.del).toHaveBeenCalledWith('p:_test-namespace-key');
       });
 
-      it('returns undefined for invalid expiry', async () => {
+      // TODO: Delete this legacy JSON-wrapper malformed-entry case once
+      // legacy.ts is removed.
+      it('returns undefined for legacy JSON-wrapper payload with invalid expiry', async () => {
         const cache = await PackageCacheRedis.create('redis://host', 'p:');
+        const value = { foo: 'bar' };
+        const payloadValue = await compressToBase64(JSON.stringify(value));
 
         const payload = JSON.stringify({
-          value: 1234,
+          value: payloadValue,
           expiry: 'not-a-date',
         });
-        clientMock.get.mockResolvedValueOnce(Buffer.from(payload));
+        binaryClientMock.get.mockResolvedValueOnce(Buffer.from(payload));
 
         expect(await cache.get('_test-namespace', 'key')).toBeUndefined();
         expect(clientMock.del).toHaveBeenCalledWith('p:_test-namespace-key');
@@ -191,7 +210,7 @@ describe('util/cache/package/impl/redis', () => {
       it('removes invalid entries', async () => {
         const cache = await PackageCacheRedis.create('redis://host', 'p:');
 
-        clientMock.get.mockResolvedValueOnce(Buffer.from('garbage'));
+        binaryClientMock.get.mockResolvedValueOnce(Buffer.from('garbage'));
 
         expect(await cache.get('_test-namespace', 'key')).toBeUndefined();
         expect(logger.once.debug).toHaveBeenCalledWith(
@@ -204,7 +223,7 @@ describe('util/cache/package/impl/redis', () => {
       it('returns undefined when invalid entry removal fails', async () => {
         const cache = await PackageCacheRedis.create('redis://host', 'p:');
 
-        clientMock.get.mockResolvedValueOnce(Buffer.from('garbage'));
+        binaryClientMock.get.mockResolvedValueOnce(Buffer.from('garbage'));
         clientMock.del.mockRejectedValueOnce(new Error('delete failed'));
 
         expect(await cache.get('_test-namespace', 'key')).toBeUndefined();
@@ -217,7 +236,7 @@ describe('util/cache/package/impl/redis', () => {
       it('returns undefined on cache miss', async () => {
         const cache = await PackageCacheRedis.create('redis://host', '');
 
-        clientMock.get.mockResolvedValueOnce(null);
+        binaryClientMock.get.mockResolvedValueOnce(null);
 
         expect(await cache.get('_test-namespace', 'key')).toBeUndefined();
       });
@@ -225,32 +244,45 @@ describe('util/cache/package/impl/redis', () => {
       it('returns undefined on error', async () => {
         const cache = await PackageCacheRedis.create('redis://host', '');
 
-        clientMock.get.mockRejectedValueOnce(new Error('connection lost'));
+        binaryClientMock.get.mockRejectedValueOnce(
+          new Error('connection lost'),
+        );
 
         expect(await cache.get('_test-namespace', 'key')).toBeUndefined();
       });
     });
 
     describe('set', () => {
-      it('stores payload with value and expiry', async () => {
+      it('stores envelope payload with native TTL', async () => {
         const cache = await PackageCacheRedis.create('redis://host', 'p:');
+        const value = { foo: 'bar' };
 
-        await cache.set('_test-namespace', 'key', { foo: 'bar' }, 10);
+        await cache.set('_test-namespace', 'key', value, 10);
 
         const [, rawPayload] = vi.mocked(clientMock.set).mock.calls[0];
-        const payload = JSON.parse(rawPayload as string);
+        const decoded = await decodeEntry(rawPayload as Buffer);
 
         expect(clientMock.set).toHaveBeenCalledWith(
           'p:_test-namespace-key',
-          expect.any(String),
+          expect.any(Buffer),
           { EX: 600 },
         );
-        expect(Object.keys(payload).sort()).toEqual(['expiry', 'value']);
-        expect(payload.value).toBeString();
-        expect(payload.expiry).toBeString();
+        expect(decoded.value).toEqual(value);
       });
 
-      it('deletes entry with negative TTL', async () => {
+      it('round-trips the written envelope payload', async () => {
+        const cache = await PackageCacheRedis.create('redis://host', 'p:');
+        const value = { foo: 'bar' };
+
+        await cache.set('_test-namespace', 'key', value, 10);
+
+        const [, rawPayload] = vi.mocked(clientMock.set).mock.calls[0];
+        binaryClientMock.get.mockResolvedValueOnce(rawPayload);
+
+        expect(await cache.get('_test-namespace', 'key')).toEqual(value);
+      });
+
+      it('deletes entry with non-positive TTL', async () => {
         const cache = await PackageCacheRedis.create('redis://host', 'p:');
 
         await cache.set('_test-namespace', 'key', { foo: 'bar' }, -1);
@@ -267,6 +299,10 @@ describe('util/cache/package/impl/redis', () => {
         await expect(
           cache.set('_test-namespace', 'key', 'val', 5),
         ).resolves.not.toThrow();
+        expect(logger.once.warn).toHaveBeenCalledWith(
+          { err: expect.any(Error) },
+          'Error while setting package cache value',
+        );
       });
     });
 

@@ -20,7 +20,7 @@ import { generateVersioning } from './versioning.ts';
 export async function generateDocs(
   root = 'tmp',
   pack = true,
-  version: string | undefined = undefined,
+  version?: string,
 ): Promise<void> {
   try {
     const dist = `${root}/docs`;

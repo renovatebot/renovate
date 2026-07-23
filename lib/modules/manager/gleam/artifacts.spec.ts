@@ -1,7 +1,10 @@
 import { exec, mockExecAll } from '~test/exec-util.ts';
 import { fs } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
-import type { RepoGlobalConfig } from '../../../config/types.ts';
+import type {
+  InternalGlobalConfigOptions,
+  RepoGlobalConfig,
+} from '../../../config/types.ts';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
 import { ExecError } from '../../../util/exec/exec-error.ts';
 import type { UpdateArtifact } from '../types.ts';
@@ -9,7 +12,7 @@ import { updateArtifacts } from './index.ts';
 
 vi.mock('../../../util/fs/index.ts');
 
-const globalConfig: RepoGlobalConfig = {
+const globalConfig: RepoGlobalConfig & InternalGlobalConfigOptions = {
   localDir: '',
   binarySource: 'global',
 };
