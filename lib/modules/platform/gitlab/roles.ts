@@ -8,7 +8,7 @@ const roleAccessLevels: Record<string, number> = {
   developer: 30,
   maintainer: 40,
   owner: 50,
-} as const;
+};
 
 /**
  * Parse a GitLab CODEOWNERS role handle (`@@developer`, `@@maintainer`,
