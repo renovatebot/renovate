@@ -1,6 +1,9 @@
 import { isNonEmptyString, isNullOrUndefined } from '@sindresorhus/is';
 import { mergeChildConfig } from '../../../../config/index.ts';
-import type { MinimumReleaseAgeBehaviour } from '../../../../config/types.ts';
+import type {
+  MinimumReleaseAgeBehaviour,
+  UpdateType,
+} from '../../../../config/types.ts';
 import { logger } from '../../../../logger/index.ts';
 import type { Release } from '../../../../modules/datasource/index.ts';
 import { postprocessRelease } from '../../../../modules/datasource/postprocess-release.ts';
@@ -21,6 +24,40 @@ export interface InternalChecksResult {
   release?: Release;
   pendingChecks: boolean;
   pendingReleases: Release[];
+}
+
+/** Given an UpdateType, should `minimumReleaseAge` apply to it? **/
+export function isMinimumReleaseAgeApplicable(
+  updateType: UpdateType | undefined,
+): boolean {
+  return (
+    // Possible, but not wanted, as this is intentionally rolling back to a previous (generally older) release to unblock the build
+    updateType !== 'rollback' &&
+    // Not yet supported: TODO #40288
+    updateType !== 'pin' &&
+    // Not yet supported: TODO #44820
+    updateType !== 'pinDigest' &&
+    // Not yet supported: TODO #39400
+    updateType !== 'replacement' &&
+    // Not possible, as we delegate to the package manager to perform the required changes to update package(s).
+    updateType !== 'lockFileMaintenance' &&
+    // Not supported
+    updateType !== 'bump' &&
+    // Not supported
+    updateType !== 'lockfileUpdate'
+  );
+}
+
+/** Given an UpdateType, should `minimumConfidence` apply to it? **/
+export function isMinimumConfidenceApplicable(
+  updateType: UpdateType | undefined,
+): boolean {
+  return (
+    // data collection doesn't include digest updates
+    updateType !== 'digest' &&
+    // data collection doesn't include digest updates
+    updateType !== 'pinDigest'
+  );
 }
 
 export async function filterInternalChecks(
