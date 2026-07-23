@@ -229,6 +229,24 @@ describe('workers/global/config/parse/index', () => {
       expect(parsedConfig).toContainEntries([['dryRun', 'extract']]);
     });
 
+    it('resolves custom presets in globalExtends', async () => {
+      fileConfigParser.getConfig.mockResolvedValue({
+        customPresets: {
+          myPreset: {
+            labels: ['custom-label'],
+          },
+        },
+        globalExtends: ['custom:myPreset'],
+      });
+
+      const parsedConfig = await configParser.parseConfigs(
+        defaultEnv,
+        defaultArgv,
+      );
+
+      expect(parsedConfig).toContainEntries([['labels', ['custom-label']]]);
+    });
+
     it('throws exception if global presets cannot be resolved', async () => {
       fileConfigParser.getConfig.mockResolvedValue({});
       httpMock

@@ -487,6 +487,34 @@ The above configuration approach will mean the values are redacted in logs like 
          "customEnvVariables": {"SECRET_TOKEN": "{{ secrets.SECRET_TOKEN }}"},
 ```
 
+## `customPresets`
+
+Use `customPresets` to define presets directly in the global config, instead of hosting them in a repository or on an HTTP server.
+
+For example, in your global config:
+
+```json {configType=global}
+{
+  "customPresets": {
+    "myPreset": {
+      "description": ["My custom preset"],
+      "labels": ["custom-label"]
+    }
+  }
+}
+```
+
+Then in a repository's `renovate.json`:
+
+```json
+{
+  "extends": ["custom:myPreset"]
+}
+```
+
+Custom presets may only contain repository configuration options, not global ones.
+They can also be referenced in [`globalExtends`](#globalextends).
+
 ## `deleteAdditionalConfigFile`
 
 If set to `true` Renovate tries to delete the additional self-hosted config file after reading it.

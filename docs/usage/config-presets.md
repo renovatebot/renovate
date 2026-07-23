@@ -117,6 +117,11 @@ For instance, if you have `platform=github` and `endpoint=https://github.company
   This means that anything in the form `provider>owner/repo//path/to/file:subsubpreset` is not supported.
   One workaround is to use distinct files instead of sub-presets.
 
+### Self-hosted global config
+
+If you self-host Renovate, you can define presets directly in your global config with the [`customPresets`](./self-hosted-configuration.md#custompresets) option.
+Repositories can then extend from such presets with the `custom:` prefix, for example: `custom:myPreset`.
+
 ## Example configs
 
 An example of a small rule is `:preserveSemverRanges`, which has the description "Preserve (but continue to upgrade) any existing SemVer ranges.".

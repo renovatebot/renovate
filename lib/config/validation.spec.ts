@@ -1878,6 +1878,25 @@ describe('config/validation', () => {
       ]);
     });
 
+    it('ignores packageRule presets which cannot be resolved during validation', async () => {
+      const config = {
+        packageRules: [
+          {
+            automerge: true,
+            extends: ['custom:myPreset'],
+          },
+        ],
+      };
+
+      const { warnings, errors } = await configValidation.validateConfig(
+        'repo',
+        config,
+      );
+
+      expect(warnings).toBeEmptyArray();
+      expect(errors).toBeEmptyArray();
+    });
+
     it('does not error on use of `global:` presets in `globalExtends`', async () => {
       const config = {
         globalExtends: ['global:safeEnv'],
@@ -2584,6 +2603,38 @@ describe('config/validation', () => {
             message: expect.toStartWith(
               `"managerFilePatterns" can't be used in ".". Allowed objects: `,
             ),
+          },
+        ]);
+        expect(errors).toBeEmptyArray();
+      });
+
+      it('customPresets', async () => {
+        const config = {
+          customPresets: {
+            myPreset: {
+              description: 'My custom preset', // requires migration to an array
+              labels: ['custom-label'],
+            },
+            badPreset: {
+              matchPackageNames: ['foo'], // invalid outside of packageRules
+            },
+            invalidPreset: 'not an object',
+          },
+        } as AllConfig;
+        const { warnings, errors } = await configValidation.validateConfig(
+          'global',
+          config,
+        );
+        expect(warnings).toEqual([
+          {
+            topic: 'Configuration Error',
+            message:
+              'Invalid `customPresets.invalidPreset` configuration: preset must be an object.',
+          },
+          {
+            topic: 'Configuration Error',
+            message:
+              'customPresets.badPreset.matchPackageNames: matchPackageNames should be inside a `packageRule` only',
           },
         ]);
         expect(errors).toBeEmptyArray();

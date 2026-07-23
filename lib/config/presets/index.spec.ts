@@ -474,6 +474,119 @@ describe('config/presets/index', () => {
       expect(res).toEqual({ labels: ['gitlab'] });
     });
 
+    it('resolves custom presets', async () => {
+      config.customPresets = {
+        myPreset: {
+          description: 'My custom preset',
+          labels: ['custom-label'],
+        },
+      };
+      config.extends = ['custom:myPreset'];
+
+      const { config: res } = await presets.resolveConfigPresets(config);
+
+      expect(res.labels).toEqual(['custom-label']);
+      expect(res.description).toEqual(['My custom preset']);
+      expect(config.customPresets.myPreset.description).toBe(
+        'My custom preset',
+      );
+    });
+
+    it('resolves custom presets from baseConfig only', async () => {
+      // Production path: repo config has extends, global/base config has customPresets
+      const repoConfig: AllConfig = {
+        extends: ['custom:myPreset'],
+      };
+      const baseConfig: AllConfig = {
+        customPresets: {
+          myPreset: {
+            labels: ['from-base'],
+          },
+        },
+      };
+
+      const { config: res } = await presets.resolveConfigPresets(
+        repoConfig,
+        baseConfig,
+      );
+
+      expect(res.labels).toEqual(['from-base']);
+    });
+
+    it('resolves custom presets inside packageRules', async () => {
+      const repoConfig: AllConfig = {
+        packageRules: [
+          {
+            matchPackageNames: ['foo'],
+            extends: ['custom:myPreset'],
+          },
+        ],
+      };
+      const baseConfig: AllConfig = {
+        customPresets: {
+          myPreset: {
+            automerge: true,
+          },
+        },
+      };
+
+      const { config: res } = await presets.resolveConfigPresets(
+        repoConfig,
+        baseConfig,
+      );
+
+      expect(res.packageRules).toEqual([
+        { matchPackageNames: ['foo'], automerge: true },
+      ]);
+    });
+
+    it('resolves custom presets with params', async () => {
+      config.customPresets = {
+        group: {
+          groupName: '{{arg0}}',
+        },
+      };
+      config.extends = ['custom:group(my-group)'];
+
+      const { config: res } = await presets.resolveConfigPresets(config);
+
+      expect(res.groupName).toBe('my-group');
+    });
+
+    it('resolves nested custom presets', async () => {
+      config.customPresets = {
+        base: {
+          addLabels: ['base-label'],
+        },
+        derived: {
+          extends: ['custom:base'],
+          addLabels: ['derived-label'],
+        },
+      };
+      config.extends = ['custom:derived'];
+
+      const { config: res } = await presets.resolveConfigPresets(config);
+
+      expect(res.addLabels).toEqual(['base-label', 'derived-label']);
+    });
+
+    it('throws if custom preset is not found', async () => {
+      config.customPresets = {
+        myPreset: {},
+      };
+      config.extends = ['custom:otherPreset'];
+      let e: Error | undefined;
+      try {
+        await presets.resolveConfigPresets(config);
+      } catch (err) {
+        e = err;
+      }
+      expect(e).toBeDefined();
+      expect(e!.validationError).toBe(
+        "Cannot find preset's package (custom:otherPreset)",
+      );
+    });
+
     it('gets preset value from cache when it has been seen', async () => {
       config.extends = ['github>username/preset-repo'];
       config.packageRules = [

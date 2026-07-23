@@ -339,6 +339,36 @@ describe('config/presets/parse', () => {
       });
     });
 
+    it('parses custom', () => {
+      expect(parsePreset('custom:myPreset')).toEqual({
+        repo: '',
+        params: undefined,
+        rawParams: undefined,
+        presetName: 'myPreset',
+        presetSource: 'custom',
+      });
+    });
+
+    it('parses custom with params', () => {
+      expect(parsePreset('custom:group(my-group)')).toEqual({
+        repo: '',
+        params: ['my-group'],
+        rawParams: 'my-group',
+        presetName: 'group',
+        presetSource: 'custom',
+      });
+    });
+
+    it('parses custom with colons in the preset name', () => {
+      expect(parsePreset('custom:group:my-group')).toEqual({
+        repo: '',
+        params: undefined,
+        rawParams: undefined,
+        presetName: 'group:my-group',
+        presetSource: 'custom',
+      });
+    });
+
     it('returns default package name with params', () => {
       expect(parsePreset(':group(packages/eslint, eslint)')).toEqual({
         repo: 'default',

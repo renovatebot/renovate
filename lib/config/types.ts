@@ -198,6 +198,7 @@ export interface GlobalOnlyConfigLegacy {
   baseDir?: string;
   cacheDir?: string;
   containerbaseDir?: string;
+  customPresets?: Record<string, RenovateConfig>;
   detectHostRulesFromEnv?: boolean;
   dockerCliOptions?: string;
   endpoint?: string;
