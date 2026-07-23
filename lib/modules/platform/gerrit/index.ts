@@ -281,7 +281,7 @@ export async function updatePr(prConfig: UpdatePrConfig): Promise<void> {
   // Only add message if the body has really changed
   const newBodyHash = prConfig.prBody ? hashBody(prConfig.prBody) : undefined;
   if (newBodyHash && newBodyHash !== pr.bodyStruct?.hash) {
-    const change = await client.addMessage(
+    const updatedDate = await client.addMessage(
       prConfig.number,
       prConfig.prBody!,
       TAG_PULL_REQUEST_BODY,
@@ -289,7 +289,7 @@ export async function updatePr(prConfig: UpdatePrConfig): Promise<void> {
     pr.bodyStruct = {
       hash: newBodyHash,
     };
-    pr.updatedAt = convertGerritDateToISO(change.updated);
+    pr.updatedAt = convertGerritDateToISO(updatedDate);
     updated = true;
   }
   await client.setHashtags(prConfig.number, {
@@ -365,16 +365,17 @@ export async function createPr(prConfig: CreatePRConfig): Promise<Pr | null> {
   const ref = change.revisions![sha].ref;
   await git.setVirtualBranch(prConfig.sourceBranch, ref, sha);
 
-  const updatedChange = await client.addMessage(
+  const updatedDate = await client.addMessage(
     change._number,
     prConfig.prBody,
     TAG_PULL_REQUEST_BODY,
   );
-  const pr = mapGerritChangeToPr(updatedChange, {
+
+  const pr = mapGerritChangeToPr(change, {
     sourceBranch: prConfig.sourceBranch,
     prBody: prConfig.prBody,
   })!;
-
+  pr.updatedAt = convertGerritDateToISO(updatedDate);
   logger.debug(`createPr: saving gerrit change ${pr.number} to cache`);
   await GerritPrCache.setPr(config.repository!, pr);
 

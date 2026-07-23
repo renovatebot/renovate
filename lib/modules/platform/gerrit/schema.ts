@@ -107,6 +107,7 @@ export const GerritRepos = z.record(z.string(), z.object({}).loose());
 export const GerritChangeMessages = LooseArray(GerritChangeMessageInfo);
 
 export const GerritReviewResult = z.object({
-  change_info: GerritChange,
+  /** Only present on Gerrit >= 3.10 */
+  change_info: GerritChange.optional(),
 });
 export type GerritReviewResult = z.infer<typeof GerritReviewResult>;

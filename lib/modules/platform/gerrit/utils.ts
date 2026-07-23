@@ -1,3 +1,4 @@
+import { DateTime } from 'luxon';
 import { CONFIG_GIT_URL_UNAVAILABLE } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
 import type { BranchStatus, PrState } from '../../../types/index.ts';
@@ -182,4 +183,11 @@ export function mapBranchStatusToLabel(
 // Convert Gerrit date format to ISO format
 export function convertGerritDateToISO(date: string): string {
   return date.replace(' ', 'T');
+}
+
+/**
+ * Current time formatted like a Gerrit timestamp
+ */
+export function currentGerritTimestamp(): string {
+  return DateTime.utc().toFormat('yyyy-MM-dd HH:mm:ss.SSS000000');
 }

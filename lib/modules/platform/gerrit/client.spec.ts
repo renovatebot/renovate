@@ -1,3 +1,4 @@
+import { DateTime } from 'luxon';
 import * as httpMock from '~test/http-mock.ts';
 import { partial } from '~test/util.ts';
 import { REPOSITORY_ARCHIVED } from '../../../constants/error-messages.ts';
@@ -633,7 +634,11 @@ describe('modules/platform/gerrit/client', () => {
   });
 
   describe('addMessage()', () => {
-    it('add with tag', async () => {
+    it('returns updated timestamp from change_info when Gerrit provides it (>= 3.10)', async () => {
+      const change = gerritChange({
+        _number: 123456,
+        updated: '2025-01-01 12:00:00.000000000',
+      });
       httpMock
         .scope(gerritEndpointUrl)
         .post('/a/changes/123456/revisions/current/review', {
@@ -641,19 +646,33 @@ describe('modules/platform/gerrit/client', () => {
           tag: 'tag',
           notify: 'NONE',
         })
-        .reply(200, gerritRestResponse([]), jsonResultHeader);
-      await expect(client.addMessage(123456, 'message', 'tag')).toResolve();
+        .reply(
+          200,
+          gerritRestResponse({ change_info: change }),
+          jsonResultHeader,
+        );
+      await expect(client.addMessage(123456, 'message', 'tag')).resolves.toBe(
+        '2025-01-01 12:00:00.000000000',
+      );
     });
 
-    it('add without tag', async () => {
+    it('synthesizes a Gerrit-formatted timestamp when change_info is absent (< 3.10)', async () => {
+      const t0 = DateTime.fromISO('2025-06-15T09:30:45.123Z', {
+        zone: 'utc',
+      });
+      vi.useFakeTimers();
+      vi.setSystemTime(t0.toMillis());
       httpMock
         .scope(gerritEndpointUrl)
         .post('/a/changes/123456/revisions/current/review', {
           message: 'message',
           notify: 'NONE',
         })
-        .reply(200, gerritRestResponse([]), jsonResultHeader);
-      await expect(client.addMessage(123456, 'message')).toResolve();
+        .reply(200, gerritRestResponse({}), jsonResultHeader);
+      await expect(client.addMessage(123456, 'message')).resolves.toBe(
+        '2025-06-15 09:30:45.123000000',
+      );
+      vi.useRealTimers();
     });
 
     it('add too big message', async () => {
@@ -663,14 +682,13 @@ describe('modules/platform/gerrit/client', () => {
       const truncatedMessage =
         tooBigMessage.slice(0, 16 * 1024 - truncationNotice.length) +
         truncationNotice;
-      httpMock.scope(gerritEndpointUrl);
       httpMock
         .scope(gerritEndpointUrl)
         .post('/a/changes/123456/revisions/current/review', {
           message: truncatedMessage,
           notify: 'NONE',
         })
-        .reply(200, gerritRestResponse([]), jsonResultHeader);
+        .reply(200, gerritRestResponse({}), jsonResultHeader);
       await expect(client.addMessage(123456, tooBigMessage)).toResolve();
     });
   });

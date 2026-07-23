@@ -28,6 +28,7 @@ import type {
 import {
   MAX_GERRIT_COMMENT_SIZE,
   MIN_GERRIT_VERSION,
+  currentGerritTimestamp,
   mapPrStateToGerritFilter,
 } from './utils.ts';
 
@@ -223,13 +224,14 @@ class GerritClient {
     changeNumber: number,
     fullMessage: string,
     tag?: string,
-  ): Promise<GerritChange> {
+  ): Promise<string> {
     const message = this.normalizeMessage(fullMessage);
-    const response = await this.gerritHttp.postJson<GerritReviewResult>(
-      `a/changes/${changeNumber}/revisions/current/review`,
-      { body: { message, tag, notify: 'NONE' } },
-    );
-    return response.body.change_info;
+    const url = `a/changes/${changeNumber}/revisions/current/review`;
+    const response = await this.gerritHttp.postJson<GerritReviewResult>(url, {
+      body: { message, tag, notify: 'NONE' },
+    });
+    // change_info is only present on Gerrit >= 3.10
+    return response.body.change_info?.updated ?? currentGerritTimestamp();
   }
 
   async checkForExistingMessage(

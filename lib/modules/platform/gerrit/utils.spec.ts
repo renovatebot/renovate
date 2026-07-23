@@ -1,3 +1,4 @@
+import { DateTime } from 'luxon';
 import { hostRules } from '~test/host-rules.ts';
 import { partial } from '~test/util.ts';
 import { CONFIG_GIT_URL_UNAVAILABLE } from '../../../constants/error-messages.ts';
@@ -455,6 +456,24 @@ describe('modules/platform/gerrit/utils', () => {
       expect(
         utils.convertGerritDateToISO('2023-05-20 14:25:30.123456789'),
       ).toBe('2023-05-20T14:25:30.123456789');
+    });
+  });
+
+  describe('currentGerritTimestamp()', () => {
+    beforeAll(() => {
+      vi.useFakeTimers();
+      const t0 = DateTime.fromISO('2025-06-15T09:30:45.123Z', { zone: 'utc' });
+      vi.setSystemTime(t0.toMillis());
+    });
+
+    afterAll(() => {
+      vi.useRealTimers();
+    });
+
+    it('formats the current time like a Gerrit timestamp', () => {
+      expect(utils.currentGerritTimestamp()).toBe(
+        '2025-06-15 09:30:45.123000000',
+      );
     });
   });
 });
