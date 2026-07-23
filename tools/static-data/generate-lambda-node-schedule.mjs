@@ -25,7 +25,7 @@ await (async () => {
     return RuntimesArray.parseAsync(await response.json());
   });
 
-  /** @type {Record<string, z.infer<Runtimes>>} */
+  /** @type {Record<string, z.infer<typeof Runtimes>>} */
   const nodeRuntimes = {};
   for (const lambda of lambdas) {
     if (!lambda.cycle.startsWith('nodejs')) {

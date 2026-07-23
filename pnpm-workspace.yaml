@@ -20,7 +20,7 @@ dedupePeers: true
 catalog:
   esbuild: 0.28.1
   tar: 7.5.20
-  vite: 8.1.4
+  vite: 8.1.5
 
 overrides:
   '@aws-sdk/xml-builder@3.972.4>fast-xml-parser': '^5.3.6'

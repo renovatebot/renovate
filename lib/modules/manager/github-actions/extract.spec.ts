@@ -1995,6 +1995,21 @@ describe('modules/manager/github-actions/extract', () => {
         },
       ],
     },
+    {
+      step: {
+        uses: 'sigstore/cosign-installer@v4.1.2',
+        with: { 'cosign-release': 'v3.1.2' },
+      },
+      expected: [
+        {
+          currentValue: 'v3.1.2',
+          datasource: 'github-releases',
+          depName: 'sigstore/cosign',
+          depType: 'uses-with',
+          packageName: 'sigstore/cosign',
+        },
+      ],
+    },
   ])('extract from $step.uses', ({ step, expected }) => {
     const yamlContent = yaml.dump({ jobs: { build: { steps: [step] } } });
 
