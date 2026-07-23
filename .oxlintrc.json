@@ -204,6 +204,7 @@
         "renovate/no-host-rules-mock": "error",
         "renovate/logger-static-message": "off",
         "renovate/codeblock-in-spec-fixtures": "error",
+        "renovate/inline-single-use-fixtures": "error",
         "renovate/no-redundant-mock-reset": "error",
         "renovate/prefer-fake-sha-in-specs": "error",
         "renovate/prefer-nullish-util": "off",

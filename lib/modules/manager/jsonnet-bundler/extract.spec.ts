@@ -1,14 +1,9 @@
+import { codeBlock } from 'common-tags';
 import { Fixtures } from '~test/fixtures.ts';
 import { extractPackageFile } from './index.ts';
 
 const jsonnetfile = Fixtures.get('jsonnetfile.json');
 const jsonnetfileWithName = Fixtures.get('jsonnetfile-with-name.json');
-const jsonnetfileNoDependencies = Fixtures.get(
-  'jsonnetfile-no-dependencies.json',
-);
-const jsonnetfileLocalDependencies = Fixtures.get(
-  'jsonnetfile-local-dependencies.json',
-);
 const jsonnetfileEmptyGitSource = JSON.stringify({
   version: 1,
   dependencies: [
@@ -28,12 +23,35 @@ describe('modules/manager/jsonnet-bundler/extract', () => {
     });
 
     it('returns null for jsonnetfile with no dependencies', () => {
+      const jsonnetfileNoDependencies = codeBlock`
+        {
+          "version": 1,
+          "dependencies": [],
+          "legacyImports": true
+        }
+      `;
       expect(
         extractPackageFile(jsonnetfileNoDependencies, 'jsonnetfile.json'),
       ).toBeNull();
     });
 
     it('returns null for local dependencies', () => {
+      const jsonnetfileLocalDependencies = codeBlock`
+        {
+          "version": 1,
+          "dependencies": [
+            {
+              "source": {
+                "local": {
+                  "directory": "jsonnet"
+                }
+              },
+              "version": ""
+            }
+          ],
+          "legacyImports": true
+        }
+      `;
       expect(
         extractPackageFile(jsonnetfileLocalDependencies, 'jsonnetfile.json'),
       ).toBeNull();
