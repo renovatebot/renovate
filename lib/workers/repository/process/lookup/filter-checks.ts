@@ -77,6 +77,37 @@ export function checkMinimumReleaseAge(
   };
 }
 
+/**
+ * `minimumReleaseAge` only makes sense for updates that adopt a specific,
+ * newly-published release. It's intentionally not applied to:
+ *  - `rollback`: moves to an older, already-published version because the
+ *    current one disappeared from the datasource entirely - waiting would
+ *    be backwards (this is about urgency, not caution).
+ *  - `pin`: converts a range to `currentVersion`, which is already
+ *    installed - there's no *new* release being adopted, so there's
+ *    nothing to wait on.
+ *  - `replacement`: Renovate does not currently look up release data for the
+ *    *replacement* package/version at all (renovatebot/renovate#39400), so
+ *    there's no correct timestamp available to check. `res.currentVersionTimestamp`
+ *    (the age of the *current*, already-installed version) is available at
+ *    the replacement call site, but was deliberately not used here: it
+ *    answers "how long have you been running this" rather than "how new/
+ *    risky is the thing you're being asked to adopt", and in practice is
+ *    almost always already older than any realistic minimumReleaseAge -
+ *    wiring it in would look like protection without providing any. The
+ *    real fix needs a genuine datasource lookup against the replacement
+ *    target, tracked in #39400 rather than being folded in here.
+ */
+export function isMinimumReleaseAgeApplicable(
+  updateType: UpdateType | undefined,
+): boolean {
+  return (
+    updateType !== 'rollback' &&
+    updateType !== 'pin' &&
+    updateType !== 'replacement'
+  );
+}
+
 export interface MinimumConfidenceCheckResult {
   isPending: boolean;
 }
@@ -111,6 +142,17 @@ export async function checkMinimumConfidence(
   return {
     isPending: !satisfiesConfidenceLevel(confidenceLevel, minimumConfidence!),
   };
+}
+
+/**
+ * Merge confidence measures adoption of a specific new release. Digest-only
+ * updates (`digest`, `pinDigest`) don't adopt a new release - the version
+ * string is unchanged - so there's no meaningful release to score.
+ */
+export function isMinimumConfidenceApplicable(
+  updateType: UpdateType | undefined,
+): boolean {
+  return updateType !== 'digest' && updateType !== 'pinDigest';
 }
 
 export async function filterInternalChecks(

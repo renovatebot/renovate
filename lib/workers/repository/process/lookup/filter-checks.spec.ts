@@ -17,6 +17,8 @@ import {
   checkMinimumConfidence,
   checkMinimumReleaseAge,
   filterInternalChecks,
+  isMinimumConfidenceApplicable,
+  isMinimumReleaseAgeApplicable,
 } from './filter-checks.ts';
 import type { LookupUpdateConfig, UpdateResult } from './types.ts';
 
@@ -418,6 +420,26 @@ describe('workers/repository/process/lookup/filter-checks', () => {
     });
   });
 
+  describe('.isMinimumReleaseAgeApplicable()', () => {
+    it.each`
+      updateType       | expected
+      ${'rollback'}    | ${false}
+      ${'pin'}         | ${false}
+      ${'replacement'} | ${false}
+      ${'patch'}       | ${true}
+      ${'minor'}       | ${true}
+      ${'major'}       | ${true}
+      ${'digest'}      | ${true}
+      ${'pinDigest'}   | ${true}
+      ${undefined}     | ${true}
+    `(
+      'returns $expected for updateType=$updateType',
+      ({ updateType, expected }) => {
+        expect(isMinimumReleaseAgeApplicable(updateType)).toBe(expected);
+      },
+    );
+  });
+
   describe('.checkMinimumConfidence()', () => {
     it('is not pending if minimumConfidence is not active', async () => {
       mergeConfidence.isActiveConfidenceLevel.mockReturnValue(false);
@@ -463,5 +485,25 @@ describe('workers/repository/process/lookup/filter-checks', () => {
       );
       expect(res).toEqual({ isPending: false });
     });
+  });
+
+  describe('.isMinimumConfidenceApplicable()', () => {
+    it.each`
+      updateType       | expected
+      ${'digest'}      | ${false}
+      ${'pinDigest'}   | ${false}
+      ${'patch'}       | ${true}
+      ${'minor'}       | ${true}
+      ${'major'}       | ${true}
+      ${'pin'}         | ${true}
+      ${'rollback'}    | ${true}
+      ${'replacement'} | ${true}
+      ${undefined}     | ${true}
+    `(
+      'returns $expected for updateType=$updateType',
+      ({ updateType, expected }) => {
+        expect(isMinimumConfidenceApplicable(updateType)).toBe(expected);
+      },
+    );
   });
 });
