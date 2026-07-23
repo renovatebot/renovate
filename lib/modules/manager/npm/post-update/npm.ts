@@ -25,6 +25,7 @@ import {
 } from '../../../../util/fs/index.ts';
 import { minimatch } from '../../../../util/minimatch.ts';
 import { toMs } from '../../../../util/pretty-time.ts';
+import { regEx } from '../../../../util/regex.ts';
 import { Result } from '../../../../util/result.ts';
 import { trimSlashes } from '../../../../util/url.ts';
 import type { PostUpdateConfig, Upgrade } from '../../types.ts';
@@ -436,7 +437,7 @@ export function divideWorkspaceAndRootDeps(
         // add workspaceDir to workspaces set and upgrade object
         for (const workspacePattern of workspacePatterns) {
           const massagedPattern = (workspacePattern as string).replace(
-            /^\.\//,
+            regEx(/^\.\//),
             '',
           );
           if (minimatch(massagedPattern).match(workspaceDir)) {

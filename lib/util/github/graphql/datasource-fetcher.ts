@@ -11,6 +11,7 @@ import type {
   GithubHttpOptions,
 } from '../../http/github.ts';
 import type { HttpResponse } from '../../http/types.ts';
+import { regEx } from '../../regex.ts';
 import { getApiBaseUrl } from '../url.ts';
 import { GithubGraphqlMemoryCacheStrategy } from './cache-strategies/memory-cache-strategy.ts';
 import { GithubGraphqlPackageCacheStrategy } from './cache-strategies/package-cache-strategy.ts';
@@ -87,7 +88,7 @@ export class GithubGraphqlDatasourceFetcher<
     this.datasourceAdapter = datasourceAdapter;
     const { packageName, registryUrl } = packageConfig;
     [this.repoOwner, this.repoName] = packageName.split('/');
-    this.baseUrl = getApiBaseUrl(registryUrl).replace(/\/v3\/$/, '/'); // Replace for GHE
+    this.baseUrl = getApiBaseUrl(registryUrl).replace(regEx(/\/v3\/$/), '/'); // Replace for GHE
   }
 
   private getCacheNs(): PackageCacheNamespace {

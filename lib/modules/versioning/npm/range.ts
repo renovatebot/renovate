@@ -56,7 +56,7 @@ function replaceCaretValue(oldValue: string, newValue: string): string {
 }
 
 function stripV(value: string): string {
-  return value.replace(/^v/, '');
+  return value.replace(regEx(/^v/), '');
 }
 
 function satisfiesRange(version: string, range: string): boolean {

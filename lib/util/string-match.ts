@@ -5,7 +5,7 @@ import { regEx } from './regex.ts';
 export type StringMatchPredicate = (s: string) => boolean;
 
 export function isDockerDigest(input: string): boolean {
-  return /^sha256:[a-f0-9]{64}$/i.test(input);
+  return regEx(/^sha256:[a-f0-9]{64}$/i).test(input);
 }
 
 export function getRegexOrGlobPredicate(pattern: string): StringMatchPredicate {

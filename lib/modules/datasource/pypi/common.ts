@@ -9,5 +9,5 @@ export function isGitHubRepo(url: string): boolean {
 
 // https://packaging.python.org/en/latest/specifications/name-normalization/
 export function normalizePythonDepName(name: string): string {
-  return name.replace(/[-_.]+/g, '-').toLowerCase();
+  return name.replace(regEx(/[-_.]+/g), '-').toLowerCase();
 }

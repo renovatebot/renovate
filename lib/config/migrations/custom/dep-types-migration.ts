@@ -9,6 +9,7 @@ interface DepTypesRule extends PackageRule {
 export class DepTypesMigration extends AbstractMigration {
   override readonly deprecated = true;
   override readonly propertyName =
+    // oxlint-disable-next-line renovate/require-regex-util -- must stay a native RegExp: MigrationsService matches propertyName via isRegExp(), which RE2 instances fail
     /^(?:(?:d|devD|optionalD|peerD)ependencies|engines|depTypes)$/;
 
   override run(value: unknown, key: string): void {

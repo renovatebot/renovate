@@ -244,10 +244,9 @@ export function sanitizeValue(
   return value;
 }
 
-// Can't use `util/regex` because of circular reference to logger
-const urlRe = /[a-z]{3,9}:\/\/[^@/]+@[a-z0-9.-]+/gi;
-const urlCredRe = /\/\/[^@]+@/g;
-const dataUriCredRe = /^(data:[0-9a-z-]+\/[0-9a-z-]+;).+/i;
+const urlRe = regEx(/[a-z]{3,9}:\/\/[^@/]+@[a-z0-9.-]+/gi);
+const urlCredRe = regEx(/\/\/[^@]+@/g);
+const dataUriCredRe = regEx(/^(data:[0-9a-z-]+\/[0-9a-z-]+;).+/i);
 
 export function sanitizeUrls(text: string): string {
   return text

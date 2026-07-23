@@ -5,6 +5,7 @@ import { logger } from '../../logger/index.ts';
 import type { ReleaseResult } from '../../modules/datasource/index.ts';
 import type { VersioningApi } from '../../modules/versioning/types.ts';
 import { getEnv } from '../env.ts';
+import { regEx } from '../regex.ts';
 import type { Opt, ToolConfig, ToolConstraint, ToolName } from './types.ts';
 
 export const allToolConfig: Record<ToolName, ToolConfig> = {
@@ -311,7 +312,7 @@ export async function resolveConstraint(
   if (constraint) {
     if (versioning.isValid(constraint)) {
       if (versioning.isSingleVersion(constraint)) {
-        return constraint.replace(/^=+/, '').trim();
+        return constraint.replace(regEx(/^=+/), '').trim();
       }
     } else {
       logger.warn(

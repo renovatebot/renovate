@@ -1,6 +1,7 @@
 import { isUndefined } from '@sindresorhus/is';
 import { z } from 'zod/v4';
 import { logger } from '../../../logger/index.ts';
+import { regEx } from '../../../util/regex.ts';
 import {
   LooseArray,
   LooseRecord,
@@ -105,7 +106,7 @@ export function extractReleaseResult(
 
   for (const composerReleasesArray of composerReleasesArrays) {
     for (const composerRelease of composerReleasesArray) {
-      const version = composerRelease.version.replace(/^v/, '');
+      const version = composerRelease.version.replace(regEx(/^v/), '');
       const gitRef = composerRelease.version;
 
       const dep: Release = { version, gitRef };

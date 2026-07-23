@@ -1,6 +1,7 @@
 import upath from 'upath';
 import { logger } from '../../../logger/index.ts';
 import { isNotNullOrUndefined } from '../../../util/array.ts';
+import { regEx } from '../../../util/regex.ts';
 import { LooseArray } from '../../../util/schema-utils/index.ts';
 import { getDep } from '../dockerfile/extract.ts';
 import type {
@@ -90,7 +91,7 @@ async function extractBazelPfc(
     // Ignore any entries for custom configurations
     .filter((ce) => ce.config === undefined)
     .map((ce) => ce.getOption('registry')?.value)
-    .map((url) => url?.replace(/^["']|["']$/g, ''))
+    .map((url) => url?.replace(regEx(/^["']|["']$/g), ''))
     .filter(isNotNullOrUndefined);
   if (registryUrls.length) {
     pfc.registryUrls = registryUrls;

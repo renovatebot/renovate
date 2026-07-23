@@ -7,7 +7,7 @@ export function removeRepositoryName(
   const repoNameWithSlash = regEx(`^${repositoryName}/`, undefined, false);
   let modifiedChartName = chartName.replace(repoNameWithSlash, '');
 
-  modifiedChartName = modifiedChartName.replace(/\/+$/, '');
+  modifiedChartName = modifiedChartName.replace(regEx(/\/+$/), '');
 
   return modifiedChartName;
 }

@@ -354,7 +354,7 @@ export class TerraformProviderDatasource extends TerraformDatasource {
     return rawHashData
       .trimEnd()
       .split('\n')
-      .map((line) => line.split(/\s/)[0]);
+      .map((line) => line.split(regEx(/\s/))[0]);
   }
 
   getZipHashes(zipHashUrl: string): Promise<string[] | undefined> {

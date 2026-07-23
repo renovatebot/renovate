@@ -2,6 +2,7 @@ import { isString } from '@sindresorhus/is';
 import semver from 'semver';
 import upath from 'upath';
 import { logger } from '../../../../../logger/index.ts';
+import { regEx } from '../../../../../util/regex.ts';
 import type { PackageFile } from '../../../types.ts';
 import type { NpmManagerData } from '../../types.ts';
 import { getNpmLock } from '../npm.ts';
@@ -9,7 +10,7 @@ import { getPnpmLock } from '../pnpm.ts';
 import type { LockFile } from '../types.ts';
 import { getYarnLock, getYarnVersionFromLock } from '../yarn.ts';
 
-const pnpmCatalogDepTypeRe = /pnpm\.catalog\.(?<version>.*)/;
+const pnpmCatalogDepTypeRe = regEx(/pnpm\.catalog\.(?<version>.*)/);
 
 export async function getLockedVersions(
   packageFiles: PackageFile<NpmManagerData>[],

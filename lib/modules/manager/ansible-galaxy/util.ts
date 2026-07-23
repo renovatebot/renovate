@@ -1,9 +1,9 @@
 import { regEx } from '../../../util/regex.ts';
 
-export const newBlockRegEx = /^\s*-\s*((\w+):\s*(.*))$/;
-export const blockLineRegEx = /^\s*((\w+):\s*(\S+))\s*$/;
-export const galaxyDepRegex = /[\w-]+\.[\w-]+/;
-export const dependencyRegex = /^dependencies:/;
+export const newBlockRegEx = regEx(/^\s*-\s*((\w+):\s*(.*))$/);
+export const blockLineRegEx = regEx(/^\s*((\w+):\s*(\S+))\s*$/);
+export const galaxyDepRegex = regEx(/[\w-]+\.[\w-]+/);
+export const dependencyRegex = regEx(/^dependencies:/);
 export const galaxyRegEx = regEx(
   /^\s+["']?(?<packageName>[\w.]+)["']?:\s*["']?(?<version>.+?)["']?\s*(\s#.*)?$/,
 );
