@@ -75,8 +75,8 @@ describe('util/exec/env', () => {
     delete process.env.LANG;
   });
 
-  describe('getChildProcessEnv when trustlevel set to high', () => {
-    it('returns process.env if trustlevel set to high', () => {
+  describe('getChildProcessEnv when exposeAllEnv=true', () => {
+    it('returns process.env if exposeAllEnv=true', () => {
       GlobalConfig.set({ exposeAllEnv: true });
       expect(getChildProcessEnv()).toMatchObject(process.env);
     });

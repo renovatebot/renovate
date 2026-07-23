@@ -79,10 +79,12 @@ describe('workers/global/config/parse/file', () => {
                 "prTitle":"something",
               };
       `;
-      fs.writeFileSync(configFile, fileContent, { encoding: 'utf8' });
+      await fs.promises.writeFile(configFile, fileContent, {
+        encoding: 'utf8',
+      });
       await file.getConfig({ RENOVATE_CONFIG_FILE: configFile });
       expect(logger.warn).toHaveBeenCalledTimes(2);
-      fs.unlinkSync(configFile);
+      await fs.promises.unlink(configFile);
     });
 
     it('parse and returns empty config if there is no RENOVATE_CONFIG_FILE in env', async () => {
@@ -113,10 +115,12 @@ describe('workers/global/config/parse/file', () => {
       async (fileName, fileContent) => {
         processExitSpy.mockImplementationOnce(() => undefined as never);
         const configFile = upath.resolve(tmp.path, fileName);
-        fs.writeFileSync(configFile, fileContent, { encoding: 'utf8' });
+        await fs.promises.writeFile(configFile, fileContent, {
+          encoding: 'utf8',
+        });
         await file.getConfig({ RENOVATE_CONFIG_FILE: configFile });
         expect(processExitSpy).toHaveBeenCalledExactlyOnceWith(1);
-        fs.unlinkSync(configFile);
+        await fs.promises.unlink(configFile);
       },
     );
 
@@ -166,12 +170,14 @@ describe('workers/global/config/parse/file', () => {
     ])('fatal error and exit if %s', async (fileType, filePath) => {
       processExitSpy.mockImplementationOnce(() => undefined as never);
       const configFile = upath.resolve(tmp.path, filePath);
-      fs.writeFileSync(configFile, `{"token": "abc"}`, { encoding: 'utf8' });
+      await fs.promises.writeFile(configFile, `{"token": "abc"}`, {
+        encoding: 'utf8',
+      });
       await file.getConfig({ RENOVATE_CONFIG_FILE: configFile });
       expect(processExitSpy).toHaveBeenCalledExactlyOnceWith(1);
 
       expect(logger.fatal).toHaveBeenCalledWith('Unsupported file type');
-      fs.unlinkSync(configFile);
+      await fs.promises.unlink(configFile);
     });
 
     it('exports env variables to environment from processEnv object', async () => {
@@ -184,7 +190,7 @@ describe('workers/global/config/parse/file', () => {
                 "labels": ["renovate"]
               }
       `;
-      fs.writeFileSync(configFile, fileContent1, {
+      await fs.promises.writeFile(configFile, fileContent1, {
         encoding: 'utf8',
       });
       const fileConfig = await file.getConfig({
@@ -195,7 +201,7 @@ describe('workers/global/config/parse/file', () => {
       });
       expect(fileConfig.processEnv).toBeUndefined();
       expect(process.env.SOME_KEY).toBe('SOME_VALUE');
-      fs.unlinkSync(configFile);
+      await fs.promises.unlink(configFile);
       delete process.env.SOME_KEY;
     });
 
@@ -211,7 +217,7 @@ describe('workers/global/config/parse/file', () => {
                 "labels": ["renovate"]
               }
       `;
-      fs.writeFileSync(configFile, fileContent1, {
+      await fs.promises.writeFile(configFile, fileContent1, {
         encoding: 'utf8',
       });
       const fileConfig = await file.getConfig({
@@ -224,7 +230,7 @@ describe('workers/global/config/parse/file', () => {
       expect(process.env.SOME_KEY).toBe('SOME_VALUE');
       expect(process.env.valid_Key).toBe('true');
       expect(process.env.SOME_OTHER_KEY).toBeUndefined();
-      fs.unlinkSync(configFile);
+      await fs.promises.unlink(configFile);
       delete process.env.SOME_KEY;
       delete process.env.valid_Key;
     });

@@ -1,6 +1,6 @@
 {
   "$schema": "https://raw.githubusercontent.com/oxc-project/oxc/main/npm/oxlint/configuration_schema.json",
-  "plugins": ["import", "promise", "unicorn", "typescript", "vitest"],
+  "plugins": ["import", "node", "promise", "unicorn", "typescript", "vitest"],
   "jsPlugins": ["./tools/lint/rules.js"],
   "options": {
     "typeAware": true
@@ -77,8 +77,10 @@
     "renovate/no-stateful-global-regex": "error",
     "renovate/no-tools-import": "error",
     "renovate/prefer-fs-util": "error",
+    "renovate/prefer-json-pipe": "error",
     "renovate/prefer-luxon": "error",
     "renovate/prefer-nullish-util": "error",
+    "renovate/zod-schema-location": "error",
     "renovate/v8-ignore-reason": "error",
     "renovate/zod-schema-naming": "error",
 
@@ -188,6 +190,12 @@
     "vitest/require-to-throw-message": "error"
   },
   "overrides": [
+    {
+      "files": ["tools/**", "**/*.spec.ts"],
+      "rules": {
+        "node/no-sync": "error"
+      }
+    },
     {
       "files": ["**/*.spec.ts", "test/**"],
       "rules": {

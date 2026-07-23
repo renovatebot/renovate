@@ -1245,7 +1245,6 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
       });
 
       it(`logs when skipping a constraint that isn't a known tool`, async () => {
-        // @ts-expect-error -- installTools.jenkins is not valid
         const commands = partial<BranchUpgradeConfig>([
           {
             constraints: {
@@ -1257,6 +1256,7 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
               commands: ['some-command'],
               executionMode: 'update',
               installTools: {
+                // @ts-expect-error -- installTools.jenkins is not valid
                 jenkins: {},
               },
             },
@@ -1318,10 +1318,10 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
       });
 
       it(`logs when skipping a value that isn't a known constraint`, async () => {
-        // @ts-expect-error -- not using a valid constraints or installTools value
         const commands = partial<BranchUpgradeConfig>([
           {
             constraints: {
+              // @ts-expect-error -- not a valid constraint
               'not-valid': '1.2.3',
             },
             manager: 'some-manager',
@@ -1330,6 +1330,7 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
               commands: ['some-command'],
               executionMode: 'update',
               installTools: {
+                // @ts-expect-error -- not a valid installTools value
                 'not-valid': {},
               },
             },

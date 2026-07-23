@@ -166,6 +166,7 @@
     "@opentelemetry/instrumentation-bunyan": "0.65.0",
     "@opentelemetry/instrumentation-http": "0.220.0",
     "@opentelemetry/instrumentation-redis": "0.68.0",
+    "@opentelemetry/otlp-transformer": "0.220.0",
     "@opentelemetry/resource-detector-aws": "2.20.0",
     "@opentelemetry/resource-detector-azure": "0.28.0",
     "@opentelemetry/resource-detector-gcp": "0.55.0",
@@ -272,7 +273,7 @@
     "re2": "1.26.0"
   },
   "devDependencies": {
-    "@biomejs/biome": "2.5.3",
+    "@biomejs/biome": "2.5.4",
     "@commander-js/extra-typings": "14.0.0",
     "@containerbase/istanbul-reports-html": "2.0.13",
     "@containerbase/semantic-release-pnpm": "1.4.2",
@@ -280,7 +281,7 @@
     "@ls-lint/ls-lint": "2.3.1",
     "@openpgp/web-stream-tools": "0.3.1",
     "@semantic-release/exec": "7.1.0",
-    "@smithy/util-stream": "4.7.8",
+    "@smithy/util-stream": "4.7.9",
     "@types/adm-zip": "0.5.8",
     "@types/aws4": "1.11.6",
     "@types/breejs__later": "4.1.5",
@@ -341,15 +342,15 @@
     "semantic-release": "25.0.7",
     "tar": "catalog:",
     "tmp-promise": "3.0.3",
-    "tsdown": "0.22.7",
+    "tsdown": "0.22.8",
     "type-fest": "5.8.0",
-    "typescript": "6.0.3",
+    "typescript": "7.0.2",
     "unified": "11.0.5",
     "vite": "catalog:",
     "vitest": "4.1.10",
-    "vitest-mock-extended": "4.0.0"
+    "vitest-mock-extended": "5.0.0"
   },
-  "packageManager": "pnpm@11.11.0",
+  "packageManager": "pnpm@11.13.1",
   "files": [
     "dist",
     "renovate-schema.json"
