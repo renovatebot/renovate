@@ -1,6 +1,7 @@
 import { Fixtures } from '~test/fixtures.ts';
 import * as httpMock from '~test/http-mock.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
+import { HttpError } from '../../../util/http/index.ts';
 import { getPkgReleases } from '../index.ts';
 import { TerraformProviderDatasource } from './index.ts';
 
@@ -13,6 +14,7 @@ const telmateProxmoxVersions = Fixtures.get(
   'telmate-proxmox-versions-response.json',
 );
 
+const openTofuRegistryUrl = TerraformProviderDatasource.openTofuRegistryUrl;
 const terraformProviderDatasource = new TerraformProviderDatasource();
 const primaryUrl = terraformProviderDatasource.defaultRegistryUrls[0];
 const secondaryUrl = terraformProviderDatasource.defaultRegistryUrls[1];
@@ -480,6 +482,157 @@ describe('modules/datasource/terraform-provider/index', () => {
         '2.6.1',
       );
       await expect(res).rejects.toThrow(ExternalHostError);
+    });
+  });
+
+  describe('getProviderPackages', () => {
+    it('returns flat hash list from the linux/amd64 packages map', async () => {
+      httpMock
+        .scope(openTofuRegistryUrl)
+        .get('/v1/providers/hashicorp/local/2.5.1/download/linux/amd64')
+        .reply(200, {
+          packages: {
+            linux_amd64: {
+              hashes: [
+                'zh:422ce45691b2f384dbd4596fdc8209d95cb43d85a82aaa0173089d38976d6e96',
+                'h1:GgW5qncKu4KnXLE1ZYv5iwmhSYtTNzsOvJAOQIyFR7E=',
+              ],
+            },
+            darwin_arm64: {
+              hashes: [
+                'zh:c66529133599a419123ad2e42874afbd9aba82bd1de2b15cc68d2a1e665d4c8e',
+                'h1:87L+rpGao062xifb1VuG9YVFwp9vbDP6G2fgfYxUkQs=',
+              ],
+            },
+          },
+        });
+
+      const res = await terraformProviderDatasource.getProviderPackages(
+        'hashicorp/local',
+        '2.5.1',
+      );
+
+      expect(res).toIncludeAllMembers([
+        'zh:422ce45691b2f384dbd4596fdc8209d95cb43d85a82aaa0173089d38976d6e96',
+        'h1:GgW5qncKu4KnXLE1ZYv5iwmhSYtTNzsOvJAOQIyFR7E=',
+        'zh:c66529133599a419123ad2e42874afbd9aba82bd1de2b15cc68d2a1e665d4c8e',
+        'h1:87L+rpGao062xifb1VuG9YVFwp9vbDP6G2fgfYxUkQs=',
+      ]);
+    });
+
+    it('falls back to platform discovery when linux/amd64 is unavailable', async () => {
+      httpMock
+        .scope(openTofuRegistryUrl)
+        .get('/v1/providers/hashicorp/local/2.5.1/download/linux/amd64')
+        .reply(404)
+        .get('/v1/providers/hashicorp/local/versions')
+        .reply(200, {
+          versions: [
+            { version: '2.5.1', platforms: [{ os: 'darwin', arch: 'arm64' }] },
+          ],
+        })
+        .get('/v1/providers/hashicorp/local/2.5.1/download/darwin/arm64')
+        .reply(200, {
+          packages: {
+            darwin_arm64: {
+              hashes: [
+                'zh:c66529133599a419123ad2e42874afbd9aba82bd1de2b15cc68d2a1e665d4c8e',
+                'h1:87L+rpGao062xifb1VuG9YVFwp9vbDP6G2fgfYxUkQs=',
+              ],
+            },
+          },
+        });
+
+      const res = await terraformProviderDatasource.getProviderPackages(
+        'hashicorp/local',
+        '2.5.1',
+      );
+
+      expect(res).toIncludeAllMembers([
+        'zh:c66529133599a419123ad2e42874afbd9aba82bd1de2b15cc68d2a1e665d4c8e',
+        'h1:87L+rpGao062xifb1VuG9YVFwp9vbDP6G2fgfYxUkQs=',
+      ]);
+    });
+
+    it('returns null when the requested version is missing from /versions', async () => {
+      httpMock
+        .scope(openTofuRegistryUrl)
+        .get('/v1/providers/hashicorp/local/2.5.1/download/linux/amd64')
+        .reply(404)
+        .get('/v1/providers/hashicorp/local/versions')
+        .reply(200, { versions: [] });
+
+      const res = await terraformProviderDatasource.getProviderPackages(
+        'hashicorp/local',
+        '2.5.1',
+      );
+
+      expect(res).toBeNull();
+    });
+
+    it('returns null when /versions has no platforms for the version', async () => {
+      httpMock
+        .scope(openTofuRegistryUrl)
+        .get('/v1/providers/hashicorp/local/2.5.1/download/linux/amd64')
+        .reply(404)
+        .get('/v1/providers/hashicorp/local/versions')
+        .reply(200, {
+          versions: [{ version: '2.5.1', platforms: [] }],
+        });
+
+      const res = await terraformProviderDatasource.getProviderPackages(
+        'hashicorp/local',
+        '2.5.1',
+      );
+
+      expect(res).toBeNull();
+    });
+
+    it('returns null when the download response has no packages field', async () => {
+      httpMock
+        .scope(openTofuRegistryUrl)
+        .get('/v1/providers/hashicorp/local/2.5.1/download/linux/amd64')
+        .reply(200, {
+          os: 'linux',
+          arch: 'amd64',
+          filename: 'terraform-provider-local_2.5.1_linux_amd64.zip',
+          download_url: 'https://example.com/terraform-provider-local.zip',
+        });
+
+      const res = await terraformProviderDatasource.getProviderPackages(
+        'hashicorp/local',
+        '2.5.1',
+      );
+
+      expect(res).toBeNull();
+    });
+
+    it('returns null when packages map is empty', async () => {
+      httpMock
+        .scope(openTofuRegistryUrl)
+        .get('/v1/providers/hashicorp/local/2.5.1/download/linux/amd64')
+        .reply(200, { packages: {} });
+
+      const res = await terraformProviderDatasource.getProviderPackages(
+        'hashicorp/local',
+        '2.5.1',
+      );
+
+      expect(res).toBeNull();
+    });
+
+    it('throws when the download request errors', async () => {
+      httpMock
+        .scope(openTofuRegistryUrl)
+        .get('/v1/providers/hashicorp/local/2.5.1/download/linux/amd64')
+        .reply(500);
+
+      const res = terraformProviderDatasource.getProviderPackages(
+        'hashicorp/local',
+        '2.5.1',
+      );
+
+      await expect(res).rejects.toThrow(HttpError);
     });
   });
 
