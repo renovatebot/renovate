@@ -49,6 +49,7 @@ export const GerritChange = z.object({
   subject: z.string(),
   status: z.enum(['NEW', 'MERGED', 'ABANDONED']),
   created: z.string(),
+  updated: z.string(),
   hashtags: z.array(z.string()),
   submittable: z.boolean().optional(),
   _number: z.number(),
@@ -104,3 +105,9 @@ export type GerritMergeableInfo = z.infer<typeof GerritMergeableInfo>;
 export const GerritRepos = z.record(z.string(), z.object({}).loose());
 
 export const GerritChangeMessages = LooseArray(GerritChangeMessageInfo);
+
+export const GerritReviewResult = z.object({
+  /** Only present on Gerrit >= 3.10 */
+  change_info: GerritChange.optional(),
+});
+export type GerritReviewResult = z.infer<typeof GerritReviewResult>;
