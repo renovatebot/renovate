@@ -13,7 +13,11 @@ import * as _dateUtil from '../../../../util/date.ts';
 import * as _mergeConfidence from '../../../../util/merge-confidence/index.ts';
 import { toMs } from '../../../../util/pretty-time.ts';
 import type { Timestamp } from '../../../../util/timestamp.ts';
-import { filterInternalChecks } from './filter-checks.ts';
+import {
+  checkMinimumConfidence,
+  checkMinimumReleaseAge,
+  filterInternalChecks,
+} from './filter-checks.ts';
 import type { LookupUpdateConfig, UpdateResult } from './types.ts';
 
 vi.mock('../../../../util/date.ts');
@@ -336,6 +340,128 @@ describe('workers/repository/process/lookup/filter-checks', () => {
       expect(res.pendingChecks).toBeFalse();
       expect(res.pendingReleases).toHaveLength(3);
       expect(res.release?.version).toBe('1.0.1');
+    });
+  });
+
+  describe('.checkMinimumReleaseAge()', () => {
+    beforeEach(() => {
+      // oxlint-disable-next-line renovate/no-redundant-mock-reset -- discards the once-values queued by the outer beforeEach
+      dateUtil.getElapsedMs.mockReset();
+    });
+
+    it('is not pending if minimumReleaseAge is not set', () => {
+      const res = checkMinimumReleaseAge(
+        {},
+        '2021-01-01T00:00:00.000Z' as Timestamp,
+      );
+      expect(res).toEqual({
+        isPending: false,
+        minimumReleaseAgeMs: 0,
+        hasTimestamp: true,
+      });
+    });
+
+    it('is pending if the release is younger than minimumReleaseAge', () => {
+      dateUtil.getElapsedMs.mockReturnValueOnce(toMs('1 day') ?? 0);
+      const res = checkMinimumReleaseAge(
+        { minimumReleaseAge: '3 days' },
+        '2021-01-01T00:00:00.000Z' as Timestamp,
+      );
+      expect(res).toEqual({
+        isPending: true,
+        minimumReleaseAgeMs: toMs('3 days'),
+        hasTimestamp: true,
+      });
+    });
+
+    it('is not pending if the release is older than minimumReleaseAge', () => {
+      dateUtil.getElapsedMs.mockReturnValueOnce(toMs('5 days') ?? 0);
+      const res = checkMinimumReleaseAge(
+        { minimumReleaseAge: '3 days' },
+        '2021-01-01T00:00:00.000Z' as Timestamp,
+      );
+      expect(res).toEqual({
+        isPending: false,
+        minimumReleaseAgeMs: toMs('3 days'),
+        hasTimestamp: true,
+      });
+    });
+
+    it('is pending with a missing timestamp if minimumReleaseAgeBehaviour=timestamp-required', () => {
+      const res = checkMinimumReleaseAge(
+        {
+          minimumReleaseAge: '3 days',
+          minimumReleaseAgeBehaviour: 'timestamp-required',
+        },
+        undefined,
+      );
+      expect(res).toEqual({
+        isPending: true,
+        minimumReleaseAgeMs: toMs('3 days'),
+        hasTimestamp: false,
+      });
+    });
+
+    it('is not pending with a missing timestamp if minimumReleaseAgeBehaviour=timestamp-optional', () => {
+      const res = checkMinimumReleaseAge(
+        {
+          minimumReleaseAge: '3 days',
+          minimumReleaseAgeBehaviour: 'timestamp-optional',
+        },
+        undefined,
+      );
+      expect(res).toEqual({
+        isPending: false,
+        minimumReleaseAgeMs: toMs('3 days'),
+        hasTimestamp: false,
+      });
+    });
+  });
+
+  describe('.checkMinimumConfidence()', () => {
+    it('is not pending if minimumConfidence is not active', async () => {
+      mergeConfidence.isActiveConfidenceLevel.mockReturnValue(false);
+      const res = await checkMinimumConfidence(
+        { minimumConfidence: 'high' },
+        '1.0.0',
+        '1.0.1',
+        'patch',
+      );
+      expect(res).toEqual({ isPending: false });
+    });
+
+    it('is pending if the confidence level does not satisfy minimumConfidence', async () => {
+      mergeConfidence.isActiveConfidenceLevel.mockReturnValue(true);
+      mergeConfidence.getMergeConfidenceLevel.mockResolvedValueOnce('low');
+      mergeConfidence.satisfiesConfidenceLevel.mockReturnValueOnce(false);
+      const res = await checkMinimumConfidence(
+        {
+          minimumConfidence: 'high',
+          datasource: 'npm',
+          packageName: 'some-package',
+        },
+        '1.0.0',
+        '1.0.1',
+        'patch',
+      );
+      expect(res).toEqual({ isPending: true });
+    });
+
+    it('is not pending if the confidence level satisfies minimumConfidence', async () => {
+      mergeConfidence.isActiveConfidenceLevel.mockReturnValue(true);
+      mergeConfidence.getMergeConfidenceLevel.mockResolvedValueOnce('high');
+      mergeConfidence.satisfiesConfidenceLevel.mockReturnValueOnce(true);
+      const res = await checkMinimumConfidence(
+        {
+          minimumConfidence: 'high',
+          datasource: 'npm',
+          packageName: 'some-package',
+        },
+        '1.0.0',
+        '1.0.1',
+        'patch',
+      );
+      expect(res).toEqual({ isPending: false });
     });
   });
 });
