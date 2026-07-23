@@ -30,11 +30,10 @@ export interface GerritHttpStats {
 }
 
 /**
- * Collect HttpStats data points aimed at the integration Gerrit host.
+ * Collect HttpStats data points for a given host (hostname[:port]).
  * Call immediately after `start()` — memCache is still populated for that repo.
  */
-export function getGerritHttpStats(): GerritHttpStats {
-  const gerritHost = new URL(getBaseUrl()).host;
+export function getHttpStatsForHost(host: string): GerritHttpStats {
   const paths: Record<string, number> = {};
   let requests = 0;
 
@@ -45,7 +44,7 @@ export function getGerritHttpStats(): GerritHttpStats {
     } catch {
       continue;
     }
-    if (url.host !== gerritHost) {
+    if (url.host !== host) {
       continue;
     }
     requests += 1;
@@ -54,6 +53,14 @@ export function getGerritHttpStats(): GerritHttpStats {
   }
 
   return { requests, paths };
+}
+
+/**
+ * Collect HttpStats data points aimed at the integration Gerrit host.
+ * Call immediately after `start()` — memCache is still populated for that repo.
+ */
+export function getGerritHttpStats(): GerritHttpStats {
+  return getHttpStatsForHost(new URL(getBaseUrl()).host);
 }
 
 /** Run Renovate in-process via workers/global `start()`. */

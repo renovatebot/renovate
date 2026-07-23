@@ -292,6 +292,27 @@ export async function getFileContent(
   return Buffer.from(await res.text(), 'base64').toString();
 }
 
+/** File content from a change's current revision (base64-decoded). */
+export async function getChangeFileContent(
+  changeNumber: number,
+  filePath: string,
+): Promise<string | null> {
+  const path = `/a/changes/${changeNumber}/revisions/current/files/${encodeURIComponent(filePath)}/content`;
+  const url = `${getBaseUrl()}${path}`;
+  const res = await fetch(url, {
+    headers: { Authorization: basicAuth() },
+  });
+  if (res.status === 404) {
+    return null;
+  }
+  if (!res.ok) {
+    throw new Error(
+      `Gerrit request failed: GET ${url} → ${res.status} ${res.statusText}\n${await res.text()}`,
+    );
+  }
+  return Buffer.from(await res.text(), 'base64').toString();
+}
+
 export async function abandonChange(changeNumber: number): Promise<void> {
   await gerritFetch(`/a/changes/${changeNumber}/abandon`, {
     method: 'POST',
@@ -410,6 +431,51 @@ export async function createBranch(
       body: JSON.stringify({ revision }),
     },
   );
+}
+
+/** HEAD revision of a project branch (default: master). */
+export async function getBranchRevision(
+  project: string,
+  branch = 'master',
+): Promise<string> {
+  const body = await gerritJson<{ revision: string }>(
+    `/a/projects/${encodeURIComponent(project)}/branches/${encodeURIComponent(branch)}`,
+  );
+  if (!isNonEmptyString(body.revision)) {
+    throw new Error(
+      `Branch ${branch} of project ${project} has no revision in response`,
+    );
+  }
+  return body.revision;
+}
+
+/**
+ * Create a git tag on a project.
+ * With `message`, Gerrit creates an annotated tag; without it, a lightweight tag.
+ * @see https://gerrit-review.googlesource.com/Documentation/rest-api-projects.html#create-tag
+ */
+export async function createTag(
+  project: string,
+  tag: string,
+  revision: string,
+  opts: { message?: string } = {},
+): Promise<void> {
+  await gerritFetch(
+    `/a/projects/${encodeURIComponent(project)}/tags/${encodeURIComponent(tag)}`,
+    {
+      method: 'PUT',
+      body: JSON.stringify({
+        revision,
+        ...(isNonEmptyString(opts.message) ? { message: opts.message } : {}),
+      }),
+    },
+  );
+}
+
+export async function listTags(
+  project: string,
+): Promise<{ ref: string; revision: string; object?: string }[]> {
+  return gerritJson(`/a/projects/${encodeURIComponent(project)}/tags/`);
 }
 
 export async function createGerritUser(

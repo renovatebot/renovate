@@ -8,7 +8,10 @@ on:
       - maint/**
     paths:
       - 'lib/modules/platform/gerrit/**'
+      - 'lib/modules/datasource/gerrit-tags/**'
+      - 'lib/modules/datasource/go/**'
       - 'lib/util/http/gerrit.ts'
+      - 'lib/util/common.ts'
       - 'test/integration/gerrit/**'
       - 'package.json'
       - 'pnpm-lock.yaml'
@@ -21,7 +24,10 @@ on:
       - ready_for_review
     paths:
       - 'lib/modules/platform/gerrit/**'
+      - 'lib/modules/datasource/gerrit-tags/**'
+      - 'lib/modules/datasource/go/**'
       - 'lib/util/http/gerrit.ts'
+      - 'lib/util/common.ts'
       - 'test/integration/gerrit/**'
       - 'package.json'
       - 'pnpm-lock.yaml'

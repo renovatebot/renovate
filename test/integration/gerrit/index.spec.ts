@@ -15,14 +15,18 @@ import {
   createGerritUser,
   createOpenRenovateChange,
   createProject,
+  createTag,
   deleteProjectLabel,
   ensureRenovateBotAccount,
+  getBranchRevision,
   getChange,
+  getChangeFileContent,
   getFileContent,
   getOpenChanges,
   getPrBodies,
   getProjectLabel,
   getReviewers,
+  listTags,
   pushFilesToGerrit,
   registerGpgKey,
   registerSshKey,
@@ -35,11 +39,13 @@ import {
   GERRIT_RENOVATE_DISPLAY_NAME,
   GERRIT_RENOVATE_EMAIL,
   GERRIT_RENOVATE_USERNAME,
+  getBaseUrl,
   startGerritContainer,
   stopGerritContainer,
 } from './utils/gerrit-container.ts';
+import { startGoGetServer } from './utils/go-get-server.ts';
 import { generateGpgKeyPair } from './utils/gpg.ts';
-import { renovate } from './utils/renovate.ts';
+import { getHttpStatsForHost, renovate } from './utils/renovate.ts';
 import { generateSshKeyPair, gitSshCommand } from './utils/ssh.ts';
 
 const REPO_NAME = 'test-renovate-integration';
@@ -65,6 +71,26 @@ function renovateJson(extra: Record<string, unknown> = {}): string {
     null,
     2,
   );
+}
+
+/** Dockerfile ARG tracked by `customManagers:dockerfileVersions`. */
+function dockerfileVersionArg(opts: {
+  depName: string;
+  packageName: string;
+  version: string;
+  registryUrl: string;
+  extractVersion?: string;
+  argName?: string;
+}): string {
+  const extract = isNonEmptyString(opts.extractVersion)
+    ? ` extractVersion=${opts.extractVersion}`
+    : '';
+  const argName = opts.argName ?? 'LIB_VERSION';
+  return [
+    `# renovate: datasource=gerrit-tags depName=${opts.depName} packageName=${opts.packageName}${extract} registryUrl=${opts.registryUrl}`,
+    `ARG ${argName}="${opts.version}"`,
+    '',
+  ].join('\n');
 }
 
 /** Default seed: package.json + renovate.json for a single outdated dep. */
@@ -737,5 +763,194 @@ describe('integration/gerrit/index', { timeout: 120_000 }, () => {
     // Assert
     const after = await getChange(synth.number);
     expect(after.status).toEqual('ABANDONED');
+  });
+
+  it('updates a dependency via the gerrit-tags datasource', async () => {
+    // Arrange — tagged library project on this Gerrit instance
+    const LIB = 'test-gerrit-tags-lib';
+    const CONSUMER = 'test-gerrit-tags-consumer';
+
+    await createAndConfigureProject(LIB, {
+      'README.md': '# gerrit-tags lib 1.0.0\n',
+    });
+    await createTag(LIB, '1.0.0', await getBranchRevision(LIB));
+    await pushFilesToGerrit(LIB, {
+      'README.md': '# gerrit-tags lib 2.0.0\n',
+    });
+    // Annotated tag
+    await createTag(LIB, '2.0.0', await getBranchRevision(LIB), {
+      message: 'release 2.0.0',
+    });
+
+    expect(
+      (await listTags(LIB))
+        .map((t) => t.ref.replace(regEx(/^refs\/tags\//), ''))
+        .sort(),
+    ).toEqual(['1.0.0', '2.0.0']);
+
+    // Consumer uses builtin customManagers:dockerfileVersions (Dockerfile ARG)
+    await createAndConfigureProject(CONSUMER, {
+      Dockerfile: dockerfileVersionArg({
+        depName: 'gerrit-tags-lib',
+        packageName: LIB,
+        version: '1.0.0',
+        registryUrl: getBaseUrl(),
+      }),
+      'renovate.json': renovateJson({
+        extends: ['customManagers:dockerfileVersions'],
+      }),
+    });
+
+    // Act
+    const stats = await renovate([CONSUMER]);
+
+    // Assert — authenticated gerrit-tags lookup used the /a/ REST prefix
+    const tagListPaths = Object.keys(stats.paths).filter((p) =>
+      regEx(/\/a\/projects\/.*\/tags\/?$/).test(p),
+    );
+    expect(tagListPaths.length).toBeGreaterThan(0);
+
+    // Assert — Renovate opened an update from 1.0.0 → 2.0.0 via gerrit-tags
+    const changes = await getOpenChanges(CONSUMER);
+    const update = changes.find((c) =>
+      regEx(/gerrit-tags-lib/i).test(c.subject),
+    );
+    expect(update).toBeDefined();
+    // Major updates use prettyNewMajor in the subject (e.g. "to v2")
+    expect(update!.subject).toMatch(regEx(/to v2\b/i));
+
+    const dockerfile = await getChangeFileContent(
+      update!._number,
+      'Dockerfile',
+    );
+    expect(dockerfile).toMatch(regEx(/ARG LIB_VERSION="2\.0\.0"/));
+  });
+
+  it('looks up public Gerrit tags without credentials (GerritHub)', async () => {
+    // Arrange — consumer on local Gerrit, datasource hits public review.gerrithub.io
+    // with no hostRules for that host (platform credentials only match localhost).
+    // Anonymous Gerrit access must NOT use the /a/ prefix (that path returns 401).
+    const CONSUMER = 'test-gerrit-tags-public-gerrithub';
+
+    await createAndConfigureProject(CONSUMER, {
+      Dockerfile: dockerfileVersionArg({
+        depName: 'gerrit-code-review-plugin',
+        packageName: 'jenkinsci/gerrit-code-review-plugin',
+        version: '0.4.1',
+        registryUrl: 'https://review.gerrithub.io',
+        extractVersion: '^gerrit-code-review-(?<version>.*)$',
+        argName: 'GERRIT_CODE_REVIEW_PLUGIN_VERSION',
+      }),
+      'renovate.json': renovateJson({
+        extends: ['customManagers:dockerfileVersions'],
+      }),
+    });
+
+    // Act
+    await renovate([CONSUMER]);
+
+    // Assert — requests to GerritHub used the public path (no /a/)
+    const gerrithubStats = getHttpStatsForHost('review.gerrithub.io');
+    expect(gerrithubStats.requests).toBeGreaterThan(0);
+    const tagPaths = Object.keys(gerrithubStats.paths).filter((p) =>
+      regEx(/\/projects\/.*\/tags\/?$/).test(p),
+    );
+    expect(tagPaths.length).toBeGreaterThan(0);
+    expect(tagPaths.every((p) => !p.includes('/a/projects/'))).toBe(true);
+
+    // Assert — Renovate opened an update past 0.4.1
+    const changes = await getOpenChanges(CONSUMER);
+    const update = changes.find((c) =>
+      regEx(/gerrit-code-review-plugin/i).test(c.subject),
+    );
+    expect(update).toBeDefined();
+
+    const dockerfile = await getChangeFileContent(
+      update!._number,
+      'Dockerfile',
+    );
+    expect(dockerfile).toMatch(
+      regEx(/ARG GERRIT_CODE_REVIEW_PLUGIN_VERSION="0\.4\.[2-9]/),
+    );
+  });
+
+  it('gomod finds tags from a Gerrit repository via gerrit-tags', async () => {
+    // Arrange — library project on Gerrit with go-module-style tags
+    const LIB = 'test-go-gerrit-lib';
+    const CONSUMER = 'test-go-gerrit-consumer';
+
+    await createAndConfigureProject(LIB, {
+      'go.mod': 'module placeholder\n\ngo 1.22\n',
+      'lib.go': 'package lib\n',
+    });
+    await createTag(LIB, 'v1.0.0', await getBranchRevision(LIB));
+    await pushFilesToGerrit(LIB, {
+      'lib.go': 'package lib\n\n// v2\n',
+    });
+    await createTag(LIB, 'v2.0.0', await getBranchRevision(LIB), {
+      message: 'v2.0.0',
+    });
+
+    // Vanity go-get server so BaseGoDatasource can resolve the module to Gerrit
+    const goGet = await startGoGetServer({
+      project: LIB,
+      gerritBaseUrl: getBaseUrl(),
+    });
+    const modulePath = `${goGet.moduleHost}/${LIB}`;
+
+    try {
+      await createAndConfigureProject(CONSUMER, {
+        'go.mod': [
+          'module example.com/gerrit-go-consumer',
+          '',
+          'go 1.22',
+          '',
+          `require ${modulePath} v1.0.0`,
+          '',
+        ].join('\n'),
+        'renovate.json': renovateJson({
+          // Prefer direct lookups for this private module path
+        }),
+      });
+
+      // Act — force direct lookups; allow self-signed go-get vanity cert
+      const prevGoproxy = process.env.GOPROXY;
+      const prevTls = process.env.NODE_TLS_REJECT_UNAUTHORIZED;
+      process.env.GOPROXY = 'direct';
+      process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+      try {
+        const stats = await renovate([CONSUMER]);
+
+        // Assert — gerrit-tags REST was used (authenticated /a/ on local Gerrit)
+        const tagListPaths = Object.keys(stats.paths).filter((p) =>
+          regEx(/\/a\/projects\/.*\/tags\/?$/).test(p),
+        );
+        expect(tagListPaths.length).toBeGreaterThan(0);
+
+        const changes = await getOpenChanges(CONSUMER);
+        const update = changes.find((c) =>
+          regEx(/test-go-gerrit-lib|127\.0\.0\.1/i).test(c.subject),
+        );
+        expect(update).toBeDefined();
+        expect(update!.subject).toMatch(regEx(/to v2\b/i));
+
+        // Go major modules use a /v2 path suffix for v2+
+        const goMod = await getChangeFileContent(update!._number, 'go.mod');
+        expect(goMod).toMatch(regEx(new RegExp(`${LIB}/v2 v2\\.0\\.0`)));
+      } finally {
+        if (prevGoproxy === undefined) {
+          delete process.env.GOPROXY;
+        } else {
+          process.env.GOPROXY = prevGoproxy;
+        }
+        if (prevTls === undefined) {
+          delete process.env.NODE_TLS_REJECT_UNAUTHORIZED;
+        } else {
+          process.env.NODE_TLS_REJECT_UNAUTHORIZED = prevTls;
+        }
+      }
+    } finally {
+      await goGet.close();
+    }
   });
 });
