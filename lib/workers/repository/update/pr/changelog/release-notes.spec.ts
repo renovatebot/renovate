@@ -1963,9 +1963,12 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
     });
 
     describe('shouldSkipChangelogMd', () => {
-      it('should skip for flagged repository', () => {
-        expect(shouldSkipChangelogMd('react/react-native')).toBeTrue();
-      });
+      it.each(['facebook/react-native', 'react/react-native'])(
+        'should skip for flagged repository %s',
+        (repo: string) => {
+          expect(shouldSkipChangelogMd(repo)).toBeTrue();
+        },
+      );
 
       it('should continue for other repository', () => {
         expect(shouldSkipChangelogMd('some/repo')).toBeFalse();
