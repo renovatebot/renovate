@@ -801,22 +801,25 @@ describe('util/http/host-rules', () => {
 
   it('no fallback to gerrit', () => {
     hostRules.add({
+      hostType: 'gerrit-tags',
+      matchHost: 'gerrit.example.com',
+      username: 'specific-user',
+      password: 'specific-pass',
+    });
+    hostRules.add({
       hostType: 'gerrit',
       matchHost: 'gerrit.example.com',
       username: 'user',
       password: 'pass',
     });
-    hostRules.add({
-      hostType: 'git-refs',
-      matchHost: 'gerrit.example.com',
-      token: 'specific-token',
-    });
-    const gerritUrl = 'https://gerrit.example.com/some/repo';
-    const opts: GotOptions = { hostType: 'git-refs' };
+    const gerritUrl = 'https://gerrit.example.com/a/projects/some%2Frepo/tags/';
+    const opts: GotOptions = { hostType: 'gerrit-tags' };
     const hostRule = findMatchingRule(gerritUrl, opts);
-    // git-refs rule found first → early return, gerrit fallback not reached
-    expect(hostRule).toMatchObject({ token: 'specific-token' });
-    expect(hostRule).not.toHaveProperty('password');
+    // gerrit-tags rule found first → early return, gerrit fallback not reached
+    expect(hostRule).toMatchObject({
+      username: 'specific-user',
+      password: 'specific-pass',
+    });
   });
 
   it('fallback to gerrit', () => {
@@ -826,25 +829,8 @@ describe('util/http/host-rules', () => {
       username: 'user',
       password: 'pass',
     });
-    const gerritUrl = 'https://gerrit.example.com/some/repo';
-    const opts: GotOptions = { hostType: 'git-refs' };
-    const hostRule = findMatchingRule(gerritUrl, opts);
-    expect(hostRule).toMatchObject({ username: 'user', password: 'pass' });
-    expect(applyHostRule(gerritUrl, opts, hostRule)).toMatchObject({
-      username: 'user',
-      password: 'pass',
-    });
-  });
-
-  it('fallback to gerrit without hostType', () => {
-    hostRules.add({
-      hostType: 'gerrit',
-      matchHost: 'gerrit.example.com',
-      username: 'user',
-      password: 'pass',
-    });
-    const gerritUrl = 'https://gerrit.example.com/some/repo';
-    const opts: GotOptions = {};
+    const gerritUrl = 'https://gerrit.example.com/a/projects/some%2Frepo/tags/';
+    const opts: GotOptions = { hostType: 'gerrit-tags' };
     const hostRule = findMatchingRule(gerritUrl, opts);
     expect(hostRule).toMatchObject({ username: 'user', password: 'pass' });
     expect(applyHostRule(gerritUrl, opts, hostRule)).toMatchObject({
@@ -860,8 +846,9 @@ describe('util/http/host-rules', () => {
       username: 'subuser',
       password: 'subpass',
     });
-    const subpathUrl = 'https://example.com/gerrit/some/repo';
-    const opts: GotOptions = { hostType: 'git-refs' };
+    const subpathUrl =
+      'https://example.com/gerrit/a/projects/some%2Frepo/tags/';
+    const opts: GotOptions = { hostType: 'gerrit-tags' };
     const hostRule = findMatchingRule(subpathUrl, opts);
     expect(hostRule).toMatchObject({
       username: 'subuser',
