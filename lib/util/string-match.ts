@@ -8,38 +8,13 @@ export function isDockerDigest(input: string): boolean {
   return /^sha256:[a-f0-9]{64}$/i.test(input);
 }
 
-/**
- * Check if a string is an intentional glob pattern.
- * We treat patterns containing `*`, `?` (wildcards), `{` (brace expansion) or
- * `\` (escape character) as globs.
- * Square brackets `[...]` are deliberately excluded because email addresses
- * (like GitHub bot emails `foo+renovate[bot]@example.com`) contain literal
- * brackets that must not be interpreted as glob character classes.
- */
-function isGlobPattern(pattern: string): boolean {
-  // Remove the '!' prefix if present (used for negation)
-  const cleanPattern = pattern.startsWith('!') ? pattern.slice(1) : pattern;
-  // Treat `*`, `?` (wildcards), `{` (brace expansion) and `\` (escape) as glob
-  // indicators. `[` is intentionally omitted so literal brackets in emails match
-  // exactly.
-  return /[*?{\\]/.test(cleanPattern);
-}
-
 export function getRegexOrGlobPredicate(pattern: string): StringMatchPredicate {
   const regExPredicate = getRegexPredicate(pattern);
   if (regExPredicate) {
     return regExPredicate;
   }
 
-  // Non-glob patterns may contain literal square brackets, e.g. GitHub bot emails
-  // like `foo+renovate[bot]@example.com`. Escape those brackets (and the backslash
-  // escape character itself) so minimatch treats them as literal characters instead
-  // of glob syntax. Case-sensitivity and all other matching behavior are left to
-  // minimatch, unchanged.
-  const globPattern = isGlobPattern(pattern)
-    ? pattern
-    : pattern.replace(/[\\[\]]/g, '\\$&');
-  const mm = minimatch(globPattern, { dot: true, nocase: true });
+  const mm = minimatch(pattern, { dot: true, nocase: true });
   return (x: string): boolean => mm.match(x);
 }
 

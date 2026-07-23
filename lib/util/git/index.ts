@@ -876,7 +876,14 @@ export async function isBranchModified(
   const { gitAuthorEmail, ignoredAuthors } = config;
 
   function isIgnoredAuthor(committedAuthor: string): boolean {
-    return matchRegexOrGlobList(committedAuthor, ignoredAuthors);
+    // Normalize invalid GitHub app/bot email addresses (e.g.
+    // `renovate[bot]@users.noreply.github.com`) the same way `parseGitAuthor`
+    // does, so their literal brackets aren't treated as glob character classes.
+    const normalizedAuthor = committedAuthor.replace('[bot]@', '@');
+    const normalizedIgnoredAuthors = ignoredAuthors.map((author) =>
+      author.replace('[bot]@', '@'),
+    );
+    return matchRegexOrGlobList(normalizedAuthor, normalizedIgnoredAuthors);
   }
 
   const includedAuthors = new Set<string>();
