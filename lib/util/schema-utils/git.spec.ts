@@ -1,4 +1,10 @@
-import { LongCommitSha, isLongCommitSha, toLongCommitSha } from './git.ts';
+import {
+  LongCommitSha,
+  ShortCommitSha,
+  isLongCommitSha,
+  isShortCommitSha,
+  toLongCommitSha,
+} from './git.ts';
 
 describe('util/schema-utils/git', () => {
   const sha40 = '0123456789abcdef0123456789abcdef01234567';
@@ -32,6 +38,40 @@ describe('util/schema-utils/git', () => {
       ['non-string', 42, false],
     ])('%s → %s', (_label, value, expected) => {
       expect(isLongCommitSha(value)).toBe(expected);
+    });
+  });
+
+  describe('ShortCommitSha', () => {
+    it.each([
+      ['6-char sha', '012abc'],
+      ['7-char sha', '012abcd'],
+    ])('parses a valid %s', (_label, sha) => {
+      expect(ShortCommitSha.parse(sha)).toBe(sha);
+    });
+
+    it.each([
+      ['5-char sha', '012ab'],
+      ['8-char sha', '012abcde'],
+      ['uppercase short sha', '012ABC'],
+      ['non-hex 6-char string', 'g'.repeat(6)],
+    ])('rejects a %s', (_label, value) => {
+      expect(() => ShortCommitSha.parse(value)).toThrow(
+        'Invalid string: must match pattern /^[a-f0-9]{6,7}$/u',
+      );
+    });
+  });
+
+  describe('isShortCommitSha', () => {
+    it.each([
+      ['6-char sha', '012abc', true],
+      ['7-char sha', '012abcd', true],
+      ['5-char sha', '012ab', false],
+      ['8-char sha', '012abcde', false],
+      ['uppercase short sha', '012ABC', false],
+      ['non-hex 6-char string', 'g'.repeat(6), false],
+      ['non-string', 42, false],
+    ])('%s → %s', (_label, value, expected) => {
+      expect(isShortCommitSha(value)).toBe(expected);
     });
   });
 

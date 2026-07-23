@@ -108,17 +108,6 @@ export interface ParsedUsesLine {
   quote: string;
 }
 
-const shaRe = regEx(/^(?:[a-f0-9]{40}|[a-f0-9]{64})$/);
-const shaShortRe = regEx(/^[a-f0-9]{6,7}$/);
-
-export function isSha(str: string): boolean {
-  return shaRe.test(str);
-}
-
-export function isShortSha(str: string): boolean {
-  return shaShortRe.test(str);
-}
-
 const DOCKER_PREFIX = 'docker://';
 
 function parseDockerReference(input: string): DockerReference | null {

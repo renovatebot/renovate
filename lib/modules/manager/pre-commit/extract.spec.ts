@@ -42,6 +42,11 @@ const pinnedPrecommitConfig = codeBlock`
       rev: a00caac4f0cec045f7f67d222c3fcd0744285c51 # frozen: 0.23.1
       hooks:
         - id: check-renovate
+
+    - repo: https://github.com/astral-sh/ruff-pre-commit
+      rev: 745be0  # frozen: v0.14.8
+      hooks:
+        - id: ruff-check
 `;
 
 describe('modules/manager/pre-commit/extract', () => {
@@ -262,6 +267,222 @@ describe('modules/manager/pre-commit/extract', () => {
             packageName: 'python-jsonschema/check-jsonschema',
             replaceString:
               'a00caac4f0cec045f7f67d222c3fcd0744285c51 # frozen: 0.23.1',
+          },
+          {
+            autoReplaceStringTemplate: '{{newDigest}}  # frozen: {{newValue}}',
+            currentValue: 'v0.14.8',
+            currentDigestShort: '745be0',
+            datasource: 'github-tags',
+            depName: 'astral-sh/ruff-pre-commit',
+            depType: 'repository',
+            packageName: 'astral-sh/ruff-pre-commit',
+            replaceString: '745be0  # frozen: v0.14.8',
+          },
+        ],
+      });
+    });
+
+    it('preserves quoted frozen SHA repo revs', () => {
+      const result = extractPackageFile(
+        codeBlock`
+          repos:
+            - repo: https://github.com/pre-commit/mirrors-prettier
+              rev: "6fd1ced85fc139abd7f5ab4f3d78dab37592cd5e" # frozen: v3.0.0-alpha.9-for-vscode
+              hooks:
+                - id: prettier
+
+            - repo: https://github.com/crate-ci/typos
+              rev: '20b36ca07fa1bfe124912287ac8502cf12f140e6'  # frozen: v1.14.12
+              hooks:
+                - id: typos
+
+            - repo: https://github.com/astral-sh/ruff-pre-commit
+              rev: "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef" # frozen: v0.14.8
+              hooks:
+                - id: ruff-check
+        `,
+        filename,
+      );
+
+      expect(result).toEqual({
+        deps: [
+          {
+            autoReplaceStringTemplate: '"{{newDigest}}" # frozen: {{newValue}}',
+            currentDigest: '6fd1ced85fc139abd7f5ab4f3d78dab37592cd5e',
+            currentValue: 'v3.0.0-alpha.9-for-vscode',
+            datasource: 'github-tags',
+            depName: 'pre-commit/mirrors-prettier',
+            depType: 'repository',
+            packageName: 'pre-commit/mirrors-prettier',
+            replaceString:
+              '"6fd1ced85fc139abd7f5ab4f3d78dab37592cd5e" # frozen: v3.0.0-alpha.9-for-vscode',
+          },
+          {
+            autoReplaceStringTemplate:
+              "'{{newDigest}}'  # frozen: {{newValue}}",
+            currentDigest: '20b36ca07fa1bfe124912287ac8502cf12f140e6',
+            currentValue: 'v1.14.12',
+            datasource: 'github-tags',
+            depName: 'crate-ci/typos',
+            depType: 'repository',
+            packageName: 'crate-ci/typos',
+            replaceString:
+              "'20b36ca07fa1bfe124912287ac8502cf12f140e6'  # frozen: v1.14.12",
+          },
+          {
+            autoReplaceStringTemplate: '"{{newDigest}}" # frozen: {{newValue}}',
+            currentDigest:
+              '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef',
+            currentValue: 'v0.14.8',
+            datasource: 'github-tags',
+            depName: 'astral-sh/ruff-pre-commit',
+            depType: 'repository',
+            packageName: 'astral-sh/ruff-pre-commit',
+            replaceString:
+              '"0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef" # frozen: v0.14.8',
+          },
+        ],
+      });
+    });
+
+    it('disables bare SHA repo revs without frozen comments', () => {
+      const result = extractPackageFile(
+        codeBlock`
+          repos:
+            - repo: https://github.com/pre-commit/mirrors-prettier
+              rev: 6fd1ced85fc139abd7f5ab4f3d78dab37592cd5e
+              hooks:
+                - id: prettier
+
+            - repo: https://github.com/astral-sh/ruff-pre-commit
+              rev: 6fd1ced
+              hooks:
+                - id: ruff-check
+
+            - repo: https://github.com/crate-ci/typos
+              rev: 0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
+              hooks:
+                - id: typos
+        `,
+        filename,
+      );
+
+      expect(result).toEqual({
+        deps: [
+          {
+            currentDigest: '6fd1ced85fc139abd7f5ab4f3d78dab37592cd5e',
+            currentValue: undefined,
+            datasource: 'github-tags',
+            depName: 'pre-commit/mirrors-prettier',
+            depType: 'repository',
+            enabled: false,
+            packageName: 'pre-commit/mirrors-prettier',
+            skipReason: 'unversioned-reference',
+          },
+          {
+            currentDigestShort: '6fd1ced',
+            currentValue: undefined,
+            datasource: 'github-tags',
+            depName: 'astral-sh/ruff-pre-commit',
+            depType: 'repository',
+            enabled: false,
+            packageName: 'astral-sh/ruff-pre-commit',
+            skipReason: 'unversioned-reference',
+          },
+          {
+            currentDigest:
+              '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef',
+            currentValue: undefined,
+            datasource: 'github-tags',
+            depName: 'crate-ci/typos',
+            depType: 'repository',
+            enabled: false,
+            packageName: 'crate-ci/typos',
+            skipReason: 'unversioned-reference',
+          },
+        ],
+      });
+    });
+
+    it('does not consume shorter SHA side-channel entries for longer hex revs', () => {
+      const result = extractPackageFile(
+        codeBlock`
+          repos:
+            - repo: https://github.com/crate-ci/typos
+              rev: 20b36ca1
+              hooks:
+                - id: typos
+
+            - repo: https://github.com/crate-ci/typos
+              rev: 20b36ca  # frozen: v1.14.12
+              hooks:
+                - id: typos
+        `,
+        filename,
+      );
+
+      expect(result).toEqual({
+        deps: [
+          {
+            currentValue: '20b36ca1',
+            datasource: 'github-tags',
+            depName: 'crate-ci/typos',
+            depType: 'repository',
+            packageName: 'crate-ci/typos',
+          },
+          {
+            autoReplaceStringTemplate: '{{newDigest}}  # frozen: {{newValue}}',
+            currentDigestShort: '20b36ca',
+            currentValue: 'v1.14.12',
+            datasource: 'github-tags',
+            depName: 'crate-ci/typos',
+            depType: 'repository',
+            packageName: 'crate-ci/typos',
+            replaceString: '20b36ca  # frozen: v1.14.12',
+          },
+        ],
+      });
+    });
+
+    it('does not apply frozen comments to separate bare SHA repo revs', () => {
+      const sha = '6fd1ced85fc139abd7f5ab4f3d78dab37592cd5e';
+      const result = extractPackageFile(
+        codeBlock`
+          repos:
+            - repo: https://github.com/pre-commit/mirrors-prettier
+              rev: ${sha}
+              hooks:
+                - id: prettier
+
+            - repo: https://github.com/pre-commit/mirrors-prettier
+              rev: ${sha}  # frozen: v3.0.0-alpha.9-for-vscode
+              hooks:
+                - id: prettier
+        `,
+        filename,
+      );
+
+      expect(result).toEqual({
+        deps: [
+          {
+            currentDigest: sha,
+            currentValue: undefined,
+            datasource: 'github-tags',
+            depName: 'pre-commit/mirrors-prettier',
+            depType: 'repository',
+            enabled: false,
+            packageName: 'pre-commit/mirrors-prettier',
+            skipReason: 'unversioned-reference',
+          },
+          {
+            autoReplaceStringTemplate: '{{newDigest}}  # frozen: {{newValue}}',
+            currentDigest: sha,
+            currentValue: 'v3.0.0-alpha.9-for-vscode',
+            datasource: 'github-tags',
+            depName: 'pre-commit/mirrors-prettier',
+            depType: 'repository',
+            packageName: 'pre-commit/mirrors-prettier',
+            replaceString: `${sha}  # frozen: v3.0.0-alpha.9-for-vscode`,
           },
         ],
       });

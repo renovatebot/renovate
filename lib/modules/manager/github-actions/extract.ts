@@ -3,6 +3,10 @@ import { GlobalConfig } from '../../../config/global.ts';
 import { logger, withMeta } from '../../../logger/index.ts';
 import { detectPlatform } from '../../../util/common.ts';
 import { newlineRegex, regEx } from '../../../util/regex.ts';
+import {
+  isLongCommitSha,
+  isShortCommitSha,
+} from '../../../util/schema-utils/git.ts';
 import { parseUrl } from '../../../util/url.ts';
 import { ForgejoTagsDatasource } from '../../datasource/forgejo-tags/index.ts';
 import { GiteaTagsDatasource } from '../../datasource/gitea-tags/index.ts';
@@ -22,7 +26,7 @@ import type {
   PackageFileContent,
 } from '../types.ts';
 import type { DockerReference, RepositoryReference } from './parse.ts';
-import { isSha, isShortSha, parseUsesLine, versionLikeRe } from './parse.ts';
+import { parseUsesLine, versionLikeRe } from './parse.ts';
 import type { UsesStep } from './schema.ts';
 import { CommunityActions, Workflow } from './schema.ts';
 
@@ -87,6 +91,8 @@ function extractRepositoryAction(
   const depName = `${registryUrl}${packageName}`;
   const pathSuffix = subPath ? `/${subPath}` : '';
   const commentWs = commentPrecedingWhitespace || ' ';
+  const isLongSha = isLongCommitSha(ref);
+  const isShortSha = isShortCommitSha(ref);
 
   const dep: PackageDependency = {
     depName,
@@ -109,7 +115,7 @@ function extractRepositoryAction(
   // - Ratchet exclude: include the full comment to preserve the marker
   const pinComment =
     commentData.pinnedVersion ??
-    (isSha(ref) || isShortSha(ref) ? commentData.ref : undefined);
+    (isLongSha || isShortSha ? commentData.ref : undefined);
   if (
     pinComment &&
     !is.undefined(commentData.index) &&
@@ -124,10 +130,10 @@ function extractRepositoryAction(
       valueString + commentPrecedingWhitespace + parsed.commentString;
   }
 
-  if (isSha(ref)) {
+  if (isLongSha) {
     dep.currentValue = commentData.pinnedVersion ?? commentData.ref;
     dep.currentDigest = ref;
-  } else if (isShortSha(ref)) {
+  } else if (isShortSha) {
     dep.currentValue = commentData.pinnedVersion ?? commentData.ref;
     dep.currentDigestShort = ref;
   } else {
