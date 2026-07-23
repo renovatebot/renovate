@@ -17,8 +17,8 @@ type ParseFileChangesResult =
   | { state: 'unmodified' };
 
 export async function bumpVersions(config: BranchConfig): Promise<void> {
-  const bumpVersions = config.bumpVersions;
-  if (!bumpVersions?.length) {
+  const bumpVersions = getBumpVersions(config);
+  if (!bumpVersions.length) {
     return;
   }
 
@@ -46,6 +46,33 @@ export async function bumpVersions(config: BranchConfig): Promise<void> {
   // update the config with the new files
   config.updatedPackageFiles = Object.values(packageFileChanges).flat();
   config.updatedArtifacts = Object.values(artifactFileChanges).flat();
+}
+
+/**
+ * `config.bumpVersions` is derived from `upgrades[0]` only (see `generateBranchConfig()`), so
+ * relying on it alone would silently drop `bumpVersions` config attached (e.g. via a `packageRule`)
+ * to any upgrade other than the first one in the branch. Collect `bumpVersions` from every
+ * upgrade instead, de-duplicating identical entries, and fall back to the top-level value for
+ * back-compat (e.g. when `config.upgrades` is empty).
+ */
+function getBumpVersions(config: BranchConfig): BumpVersionConfig[] {
+  const seen = new Set<string>();
+  const bumpVersions: BumpVersionConfig[] = [];
+  for (const upgrade of config.upgrades ?? []) {
+    for (const bumpVersionConfig of upgrade.bumpVersions ?? []) {
+      const key = JSON.stringify(bumpVersionConfig);
+      if (!seen.has(key)) {
+        seen.add(key);
+        bumpVersions.push(bumpVersionConfig);
+      }
+    }
+  }
+
+  if (!bumpVersions.length) {
+    bumpVersions.push(...(config.bumpVersions ?? []));
+  }
+
+  return bumpVersions;
 }
 
 async function bumpVersion(
