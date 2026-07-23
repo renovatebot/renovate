@@ -865,6 +865,50 @@ describe('workers/repository/update/branch/bump-versions', () => {
       });
     });
 
+    it('should deduplicate identical bumpVersions entries from multiple upgrades', async () => {
+      const sharedBumpVersionConfig = {
+        name: 'first',
+        filePatterns: ['first-file'],
+        bumpType: 'minor' as const,
+        matchStrings: ['^(?<version>.+)$'],
+      };
+      const config = partial<BranchConfig>({
+        upgrades: [
+          {
+            branchName: 'test-branch',
+            manager: 'npm',
+            bumpVersions: [sharedBumpVersionConfig],
+          },
+          {
+            branchName: 'test-branch',
+            manager: 'npm',
+            // identical entry as the previous upgrade - should not be applied twice
+            bumpVersions: [sharedBumpVersionConfig],
+          },
+        ],
+        updatedPackageFiles: [
+          {
+            type: 'addition',
+            path: 'foo',
+            contents: 'bar',
+          },
+        ],
+      });
+      scm.getFileList.mockResolvedValueOnce(['foo', 'first-file']);
+      fs.readLocalFile.mockResolvedValueOnce('1.0.0');
+
+      await bumpVersions(config);
+
+      // if the duplicate entry wasn't deduplicated, the file would be bumped
+      // twice (to 1.2.0) instead of once (to 1.1.0)
+      expect(config).toMatchObject({
+        updatedArtifacts: [
+          { type: 'addition', path: 'first-file', contents: '1.1.0' },
+        ],
+      });
+      expect(config.updatedArtifacts).toHaveLength(1);
+    });
+
     it('should fall back to top-level bumpVersions when no upgrade defines any', async () => {
       const config = partial<BranchConfig>({
         bumpVersions: [
