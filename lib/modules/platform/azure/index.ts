@@ -918,9 +918,17 @@ export async function mergePr({
 }
 
 export function massageMarkdown(input: string): string {
+  return massageMarkdownWithLimit(input, maxBodyLength());
+}
+
+export function massageIssueMarkdown(input: string): string {
+  return massageMarkdownWithLimit(input, maxIssueBodyLength());
+}
+
+function massageMarkdownWithLimit(input: string, maxLength: number): string {
   // Remove any HTML we use
   return (
-    smartTruncate(readOnlyIssueBody(input), maxBodyLength())
+    smartTruncate(readOnlyIssueBody(input), maxLength)
       .replace(
         'you tick the rebase/retry checkbox',
         'PR is renamed to start with "rebase!"',
@@ -942,6 +950,10 @@ export function massageMarkdown(input: string): string {
 
 export function maxBodyLength(): number {
   return 4000;
+}
+
+export function maxIssueBodyLength(): number {
+  return 1048576;
 }
 
 export async function findIssue(title: string): Promise<Issue | null> {

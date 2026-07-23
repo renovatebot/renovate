@@ -1734,6 +1734,36 @@ None detected
           // same with dry run
           await dryRun(branches, platform, 0, 1);
         });
+
+        it('uses issue-specific body limits and formatter when available', async () => {
+          const branches: BranchConfig[] = [];
+          const packageFilesBigRepo = genRandPackageFile(100, 700);
+          PackageFiles.clear();
+          PackageFiles.add('main', packageFilesBigRepo);
+
+          platform.maxBodyLength.mockReturnValue(1000);
+          platform.maxIssueBodyLength.mockReturnValue(60_000);
+          platform.massageIssueMarkdown.mockImplementation((body) => body);
+
+          await dependencyDashboard.ensureDependencyDashboard(
+            config,
+            branches,
+            {},
+            { result: 'no-migration' },
+          );
+
+          expect(platform.maxIssueBodyLength).toHaveBeenCalledTimes(1);
+          expect(platform.massageIssueMarkdown).toHaveBeenCalledTimes(1);
+          expect(platform.massageMarkdown).toHaveBeenCalledTimes(0);
+          expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
+          expect(
+            platform.ensureIssue.mock.calls[0][0].body.length >
+              platform.maxBodyLength(),
+          ).toBeTrue();
+
+          // same with dry run
+          await dryRun(branches, platform, 0, 1);
+        });
       });
 
       describe('dependency dashboard lookup warnings', () => {

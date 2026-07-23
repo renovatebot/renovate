@@ -1685,6 +1685,12 @@ describe('modules/platform/azure/index', () => {
         '[`v4.78.0`](https://github.com/org/repo/blob/HEAD/CHANGELOG.md#4780-june-18-2026)';
       expect(azure.massageMarkdown(input)).toBe(input);
     });
+
+    it('uses a higher limit for issue markdown than PR markdown', () => {
+      const input = 'a'.repeat(4100);
+      expect(azure.massageIssueMarkdown?.(input)).toBe(input);
+      expect(azure.massageMarkdown(input).length).toBeLessThan(input.length);
+    });
   });
 
   describe('setBranchStatus', () => {
