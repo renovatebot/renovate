@@ -61,9 +61,12 @@ describe('modules/manager/git-submodules/extract', () => {
 
     it('submodule packageName is constructed from relative path', async () => {
       const res = await extractPackageFile('', '.gitmodules.4', {});
-      expect(res?.deps).toHaveLength(1);
+      expect(res?.deps).toHaveLength(2);
       expect(res?.deps[0].packageName).toBe(
         'https://github.com/PowerShell/PowerShell-Docs',
+      );
+      expect(res?.deps[1].packageName).toBe(
+        'https://github.com/PowerShell/PowerShell-Docs-2',
       );
     });
 
@@ -77,9 +80,12 @@ describe('modules/manager/git-submodules/extract', () => {
       });
       it('when using a relative path', async () => {
         const res = await extractPackageFile('', '.gitmodules.4', {});
-        expect(res?.deps).toHaveLength(1);
+        expect(res?.deps).toHaveLength(2);
         expect(res?.deps[0].sourceUrl).toBe(
           'https://github.com/PowerShell/PowerShell-Docs',
+        );
+        expect(res?.deps[1].sourceUrl).toBe(
+          'https://github.com/PowerShell/PowerShell-Docs-2',
         );
       });
     });

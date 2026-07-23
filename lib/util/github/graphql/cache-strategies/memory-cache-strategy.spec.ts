@@ -14,7 +14,7 @@ const hourMinRe = /T\d{2}:\d{2}$/;
 const hourMinSecRe = /T\d{2}:\d{2}:\d{2}$/;
 const hourMinSecMillisRe = /T\d{2}:\d{2}:\d{2}\.\d\d\d$/;
 
-const isoTs = (t: string) => {
+function isoTs(t: string) {
   let iso = t.replace(' ', 'T');
   if (hourMinSecMillisRe.test(iso)) {
     iso = `${iso}Z`;
@@ -26,12 +26,12 @@ const isoTs = (t: string) => {
     throw new Error(`Unrecognized date-time string. ${t}`);
   }
   return iso as Timestamp;
-};
+}
 
-const mockTime = (input: string): void => {
+function mockTime(input: string): void {
   const now = DateTime.fromISO(isoTs(input)).valueOf();
   Settings.now = () => now;
-};
+}
 
 type CacheRecord = GithubGraphqlCacheRecord<GithubDatasourceItem>;
 

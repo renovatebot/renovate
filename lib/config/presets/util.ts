@@ -26,7 +26,9 @@ export async function fetchPreset({
   const endpoint = ensureTrailingSlash(_endpoint!);
   const [fileName, presetName, subPresetName] = filePreset.split('/');
   const pathPrefix = presetPath ? `${presetPath}/` : '';
-  const buildFilePath = (name: string): string => `${pathPrefix}${name}`;
+  function buildFilePath(name: string): string {
+    return `${pathPrefix}${name}`;
+  }
   let jsonContent: any;
   if (fileName === 'default') {
     try {
