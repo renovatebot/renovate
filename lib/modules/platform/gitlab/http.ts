@@ -1,6 +1,8 @@
 import { isEmptyArray } from '@sindresorhus/is';
 import { logger } from '../../../logger/index.ts';
 import { GitlabHttp } from '../../../util/http/gitlab.ts';
+import type { GitLabProjectMember } from './schema.ts';
+import { GitLabProjectMembers } from './schema.ts';
 import type { GitLabUser, GitlabUserStatus } from './types.ts';
 
 export const gitlabApi = new GitlabHttp();
@@ -48,12 +50,13 @@ export async function getMemberUsernames(group: string): Promise<string[]> {
   return members.map((u) => u.username);
 }
 
-async function getProjectMembers(repo: string): Promise<GitLabUser[]> {
+async function getProjectMembers(repo: string): Promise<GitLabProjectMember[]> {
   const repoEncoded = encodeURIComponent(repo);
   return (
-    await gitlabApi.getJsonUnchecked<GitLabUser[]>(
+    await gitlabApi.getJson(
       `projects/${repoEncoded}/members`,
       { paginate: true },
+      GitLabProjectMembers,
     )
   ).body;
 }
@@ -61,7 +64,7 @@ async function getProjectMembers(repo: string): Promise<GitLabUser[]> {
 export async function getProjectMembersByRole(
   repo: string,
   accessLevel: number,
-): Promise<GitLabUser[]> {
+): Promise<GitLabProjectMember[]> {
   const members = await getProjectMembers(repo);
   return members.filter((m) => m.access_level === accessLevel);
 }
