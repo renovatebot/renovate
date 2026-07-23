@@ -141,6 +141,30 @@ function createSingleConfig(option: RenovateOptions): Record<string, unknown> {
     temp.$ref = '#';
   }
 
+  if (option.name === 'repositories') {
+    temp.items = {
+      oneOf: [
+        { type: 'string' },
+        {
+          allOf: [
+            {
+              type: 'object',
+              required: ['repository'],
+              properties: {
+                repository: {
+                  type: 'string',
+                  minLength: 1,
+                  description: 'Repository name (e.g. `owner/repo`).',
+                },
+              },
+            },
+            { $ref: '#' },
+          ],
+        },
+      ],
+    };
+  }
+
   if (option.name === 'constraints') {
     temp.additionalProperties = false;
     temp.properties = {};
