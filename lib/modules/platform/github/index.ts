@@ -514,6 +514,7 @@ export async function initRepo({
   gitUrl,
   renovateUsername,
   cloneSubmodules,
+  cloneSubmodulesRecursive,
   cloneSubmodulesFilter,
 }: RepoParams): Promise<RepoResult> {
   logger.debug(`initRepo("${repository}")`);
@@ -521,6 +522,7 @@ export async function initRepo({
   config = {
     repository,
     cloneSubmodules,
+    cloneSubmodulesRecursive,
     cloneSubmodulesFilter,
     ignorePrAuthor: GlobalConfig.get('ignorePrAuthor'),
   } as any;
