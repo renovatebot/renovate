@@ -2479,7 +2479,7 @@ describe('modules/platform/gitlab/index', () => {
         title: 'some title',
       });
 
-      expect(timers.setTimeout.mock.calls).toMatchObject([[100], [400]]);
+      expect(timers.setTimeout.mock.calls).toMatchObject([[0], [100], [400]]);
     });
 
     it('adds the MR to a merge train when merge trains are enabled on the project', async () => {
@@ -2696,6 +2696,7 @@ describe('modules/platform/gitlab/index', () => {
         'PR not yet in mergeable state. Retrying 3',
       );
       expect(timers.setTimeout.mock.calls).toMatchObject([
+        [0],
         [100],
         [400],
         [900],
@@ -2758,7 +2759,7 @@ describe('modules/platform/gitlab/index', () => {
       expect(logger.logger.debug).toHaveBeenCalledWith(
         'PR not yet in mergeable state. Retrying 3',
       );
-      expect(timers.setTimeout.mock.calls).toMatchObject([[100], [400], [900]]);
+      expect(timers.setTimeout.mock.calls).toMatchObject([[0], [100], [400], [900]]);
     });
 
     it('should retry auto merge creation on 405 method not allowed', async () => {
@@ -2831,6 +2832,7 @@ describe('modules/platform/gitlab/index', () => {
         'Automerge on PR creation failed. Retrying 2',
       );
       expect(timers.setTimeout.mock.calls).toMatchObject([
+        [0],
         [100],
         [400],
         [900],
@@ -2880,7 +2882,7 @@ describe('modules/platform/gitlab/index', () => {
         sourceBranch: 'some-branch',
         title: 'some title',
       });
-      expect(timers.setTimeout.mock.calls).toMatchObject([]);
+      expect(timers.setTimeout.mock.calls).toMatchObject([[0]]);
     });
 
     it('raises with squash enabled when repository squash option is default_on', async () => {
