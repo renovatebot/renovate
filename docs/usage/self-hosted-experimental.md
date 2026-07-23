@@ -76,6 +76,12 @@ Can be useful for slow-running, self-hosted GitLab instances that don't react fa
 
 Default value: `1000` (milliseconds).
 
+## `RENOVATE_X_GITLAB_CREATE_MERGE_REQUEST_DELAY`
+
+If set, Renovate will use this as a delay to create a merge request.
+
+Default value: `0` (seconds).
+
 ## `RENOVATE_X_GITLAB_MERGE_REQUEST_DELAY`
 
 If set, Renovate will use this as a delay to proceed with an automerge.

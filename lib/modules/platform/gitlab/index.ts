@@ -734,6 +734,12 @@ export async function createPr({
   }
   const description = sanitize(rawDescription);
   logger.debug(`Creating Merge Request: ${title}`);
+  const env = getEnv();
+  const mergeCreateDelay = parseInteger(
+    env.RENOVATE_X_GITLAB_CREATE_MERGE_REQUEST_DELAY,
+    0,
+  );
+  await setTimeout(mergeCreateDelay * 1000); // use seconds
   const res = await gitlabApi.postJson<GitLabMergeRequest>(
     `projects/${config.repository}/merge_requests`,
     {
