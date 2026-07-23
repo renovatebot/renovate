@@ -1,10 +1,16 @@
 import * as api from '@opentelemetry/api';
 import { ProxyTracerProvider } from '@opentelemetry/api';
 import {
+  BatchSpanProcessor,
   NodeTracerProvider,
   SimpleSpanProcessor,
 } from '@opentelemetry/sdk-trace-node';
+import { type DirectoryResult, dir } from 'tmp-promise';
+import upath from 'upath';
+import { bunyan } from '../expose.ts';
+import { GetDatasourceReleasesSpanProcessor } from '../modules/datasource/span-processor.ts';
 import { GitOperationSpanProcessor } from '../util/git/span-processor.ts';
+import { FileSpanExporter } from './file-exporter.ts';
 import {
   disableInstrumentations,
   getTracerProvider,
@@ -15,9 +21,12 @@ import {
 afterAll(disableInstrumentations);
 
 describe('instrumentation/index', () => {
+  let tmpDir: DirectoryResult;
   const oldEnv = process.env;
 
-  beforeEach(() => {
+  beforeEach(async () => {
+    tmpDir = await dir({ unsafeCleanup: true });
+
     api.trace.disable(); // clear global components
     process.env = { ...oldEnv };
 
@@ -28,11 +37,15 @@ describe('instrumentation/index', () => {
       }
     }
     delete process.env.RENOVATE_TRACING_CONSOLE_EXPORTER;
-    delete process.env.RENOVATE_USE_CLOUD_METADATA_SERVICES;
+    delete process.env.RENOVATE_TRACING_FILE_EXPORTER_PATH;
+    // prevent real network calls to cloud metadata endpoints (AWS/GCP/Azure) during tests
+    process.env.RENOVATE_USE_CLOUD_METADATA_SERVICES = 'false';
   });
 
-  afterAll(() => {
+  afterAll(async () => {
     process.env = oldEnv; // Restore old environment
+
+    await tmpDir.cleanup();
   });
 
   it('should use NoopTraceProvider if not activated', () => {
@@ -55,7 +68,60 @@ describe('instrumentation/index', () => {
     const nodeProvider = delegateProvider as NodeTracerProvider;
     expect(nodeProvider).toMatchObject({
       _activeSpanProcessor: {
-        _spanProcessors: [expect.any(SimpleSpanProcessor)],
+        _spanProcessors: [
+          new GitOperationSpanProcessor(),
+          new GetDatasourceReleasesSpanProcessor(),
+          expect.any(SimpleSpanProcessor),
+        ],
+      },
+    });
+  });
+
+  it('registers OpenTelemetry file exporter if enabled', () => {
+    process.env.RENOVATE_TRACING_FILE_EXPORTER_PATH = upath.join(
+      tmpDir.path,
+      'test-traces.jsonl',
+    );
+
+    init();
+    const traceProvider = getTracerProvider();
+    expect(traceProvider).toBeInstanceOf(ProxyTracerProvider);
+    const proxyProvider = traceProvider as ProxyTracerProvider;
+    const delegateProvider = proxyProvider.getDelegate();
+    expect(delegateProvider).toBeInstanceOf(NodeTracerProvider);
+    const nodeProvider = delegateProvider as NodeTracerProvider;
+    expect(nodeProvider).toMatchObject({
+      _activeSpanProcessor: {
+        _spanProcessors: [
+          new GitOperationSpanProcessor(),
+          new GetDatasourceReleasesSpanProcessor(),
+          expect.any(BatchSpanProcessor),
+        ],
+      },
+    });
+    // Verify the SimpleSpanProcessor wraps a FileSpanExporter
+    const spanProcessors = (nodeProvider as any)._activeSpanProcessor
+      ._spanProcessors;
+    const fileProcessor = spanProcessors[2];
+    expect(fileProcessor._exporter).toBeInstanceOf(FileSpanExporter);
+  });
+
+  it('registers GitOperationSpanProcessor, GetDatasourceReleasesSpanProcessor regardless of tracing being enabled', () => {
+    // intentionally don't set it
+    delete process.env.RENOVATE_TRACING_CONSOLE_EXPORTER;
+    delete process.env.OTEL_EXPORTER_OTLP_ENDPOINT;
+
+    init();
+    const traceProvider = getTracerProvider();
+    const proxyProvider = traceProvider as ProxyTracerProvider;
+    const delegateProvider = proxyProvider.getDelegate();
+    const nodeProvider = delegateProvider as NodeTracerProvider;
+    expect(nodeProvider).toMatchObject({
+      _activeSpanProcessor: {
+        _spanProcessors: expect.arrayContaining([
+          new GitOperationSpanProcessor(),
+          new GetDatasourceReleasesSpanProcessor(),
+        ]),
       },
     });
   });
@@ -73,6 +139,8 @@ describe('instrumentation/index', () => {
     expect(nodeProvider).toMatchObject({
       _activeSpanProcessor: {
         _spanProcessors: [
+          new GitOperationSpanProcessor(),
+          new GetDatasourceReleasesSpanProcessor(),
           {
             _exporter: {
               _delegate: {
@@ -86,7 +154,6 @@ describe('instrumentation/index', () => {
               },
             },
           },
-          new GitOperationSpanProcessor(),
         ],
       },
     });
@@ -106,6 +173,8 @@ describe('instrumentation/index', () => {
     expect(nodeProvider).toMatchObject({
       _activeSpanProcessor: {
         _spanProcessors: [
+          new GitOperationSpanProcessor(),
+          new GetDatasourceReleasesSpanProcessor(),
           { _exporter: {} },
           {
             _exporter: {
@@ -120,9 +189,25 @@ describe('instrumentation/index', () => {
               },
             },
           },
-          new GitOperationSpanProcessor(),
         ],
       },
+    });
+  });
+
+  describe('BunyanInstrumentation', () => {
+    // OpenTelemetry's context propagation currently uses `AsyncLocalStorage`, which does not behave the same way in vitest worker threads as in a real Node.js process, so we cannot write a full end-to-end here to validate the `span_id`, `trace_id` and `trace_flags` are set
+    //
+    // Claude Sonnet 4.6 suggests that we instead create an (admittedly brittle) test to validate that this is marked as `__wrapped`.
+    it('patches bunyan Logger._emit when tracing is enabled', () => {
+      process.env.RENOVATE_TRACING_CONSOLE_EXPORTER = 'true';
+      init();
+
+      const mod = bunyan();
+
+      // shimmer marks wrapped functions with __wrapped = true
+      expect(
+        (mod.prototype as unknown as Record<string, unknown>)._emit,
+      ).toHaveProperty('__wrapped', true);
     });
   });
 

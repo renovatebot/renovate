@@ -9,11 +9,11 @@ import { mapPrFromScmToRenovate } from './mapper.ts';
 import type { PullRequest, Repo, User } from './schema.ts';
 import type { PrFilterByState } from './types.ts';
 
-vi.mock('../util');
-vi.mock('../../../util/git');
+vi.mock('../util.ts');
+vi.mock('../../../util/git/index.ts');
 
-const endpoint = 'https://localhost:8080';
-const baseUrl = `${endpoint}/scm/api/v2`;
+const endpoint = 'https://localhost:8080/scm/';
+const baseUrl = `${endpoint}api/v2`;
 const token = 'TEST_TOKEN';
 
 const user: User = {
@@ -68,7 +68,6 @@ const renovatePr = mapPrFromScmToRenovate(pullRequest);
 describe('modules/platform/scm-manager/index', () => {
   beforeEach(() => {
     GlobalConfig.reset();
-    vi.resetAllMocks();
     hostRules.add({ token, username: user.name });
     scmPlatform.invalidatePrCache();
   });
@@ -201,7 +200,7 @@ describe('modules/platform/scm-manager/index', () => {
           createdAt: pullRequest.creationDate,
           labels: pullRequest.labels,
           number: parseInt(pullRequest.id, 10),
-          state: pullRequest.status,
+          state: 'open',
           targetBranch: pullRequest.target,
           title: pullRequest.title,
           hasAssignees: false,
@@ -407,15 +406,14 @@ describe('modules/platform/scm-manager/index', () => {
 
   describe('createPr', () => {
     it.each`
-      draftPr      | expectedState | expectedIsDraft
-      ${undefined} | ${'OPEN'}     | ${false}
-      ${false}     | ${'OPEN'}     | ${false}
-      ${true}      | ${'DRAFT'}    | ${true}
+      draftPr      | expectedIsDraft
+      ${undefined} | ${false}
+      ${false}     | ${false}
+      ${true}      | ${true}
     `(
       'should create PR with $draftPR and state $expectedState',
       async ({
         draftPr,
-        expectedState,
         expectedIsDraft,
       }: {
         draftPr: boolean | undefined;
@@ -469,7 +467,7 @@ describe('modules/platform/scm-manager/index', () => {
           labels: [],
           number: 1337,
           reviewers: [],
-          state: expectedState,
+          state: 'open',
         });
       },
     );

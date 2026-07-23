@@ -39,6 +39,7 @@ describe('config/secrets', () => {
 
     it('throws for secrets in repositories', () => {
       expect(() =>
+        // oxlint-disable-next-line renovate/prefer-partial-in-specs -- intentionally invalid secret value type
         validateConfigSecretsAndVariables({
           repositories: [{ repository: 'x/y', secrets: { abc: 123 } }],
         } as any),
@@ -47,6 +48,7 @@ describe('config/secrets', () => {
 
     it('throws for variables in repositories', () => {
       expect(() =>
+        // oxlint-disable-next-line renovate/prefer-partial-in-specs -- intentionally invalid variable value type
         validateConfigSecretsAndVariables({
           repositories: [{ repository: 'x/y', variables: { abc: 123 } }],
         } as any),
@@ -88,6 +90,40 @@ describe('config/secrets', () => {
           SECRETS: 'foo bar baz',
           VARIABLES: 'foo bar baz',
         },
+      });
+    });
+
+    it('handles a mix of space characters around the curly braces', () => {
+      const config = {
+        secrets: { TOKEN: 'secret123' },
+        variables: { MANAGER: 'npm' },
+        hostRules: [
+          {
+            hostType: '{{variables.MANAGER   }}',
+            token: '{{secrets.TOKEN}}',
+          },
+        ],
+      };
+      const result = applySecretsAndVariablesToConfig({ config });
+      expect(result).toEqual({
+        hostRules: [{ hostType: 'npm', token: 'secret123' }],
+      });
+    });
+
+    it('does not handle non-space characters around the curly braces', () => {
+      const config = {
+        secrets: { TOKEN: 'secret123' },
+        variables: { MANAGER: 'npm' },
+        hostRules: [
+          {
+            hostType: '{{variables.MANAGER   }}',
+            token: '{{\tsecrets.token\t}}',
+          },
+        ],
+      };
+      const result = applySecretsAndVariablesToConfig({ config });
+      expect(result).toEqual({
+        hostRules: [{ hostType: 'npm', token: '{{\tsecrets.token\t}}' }],
       });
     });
 

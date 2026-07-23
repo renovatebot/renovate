@@ -245,6 +245,46 @@ describe('modules/manager/github-actions/parse', () => {
         pinnedVersion: 'node/v20',
       });
     });
+
+    it('parses prerelease version like v2.2-rc.1', () => {
+      const result = parseComment('v2.2-rc.1');
+      expect(result).toEqual({
+        index: 0,
+        matchedString: 'v2.2-rc.1',
+        pinnedVersion: 'v2.2-rc.1',
+      });
+    });
+
+    it('parses full semver prerelease version like v2.2.0-rc.1', () => {
+      const result = parseComment('v2.2.0-rc.1');
+      expect(result).toEqual({
+        index: 0,
+        matchedString: 'v2.2.0-rc.1',
+        pinnedVersion: 'v2.2.0-rc.1',
+      });
+    });
+
+    it('parses bare non-semver ref', () => {
+      const result = parseComment(' cargo-llvm-cov');
+      expect(result).toEqual({
+        index: 0,
+        matchedString: ' cargo-llvm-cov',
+        ref: 'cargo-llvm-cov',
+      });
+    });
+
+    it('parses bare branch name', () => {
+      const result = parseComment(' main');
+      expect(result).toEqual({
+        index: 0,
+        matchedString: ' main',
+        ref: 'main',
+      });
+    });
+
+    it('ignores multi-word comments', () => {
+      expect(parseComment('do not update')).toEqual({});
+    });
   });
 
   describe('parseQuote', () => {

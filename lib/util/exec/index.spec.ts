@@ -21,7 +21,7 @@ import { asRawCommand } from './utils.ts';
 const getHermitEnvsMock = vi.mocked(getHermitEnvs);
 
 vi.mock('./hermit.ts', async () => ({
-  ...(await vi.importActual<typeof import('./hermit.ts')>('./hermit')),
+  ...(await vi.importActual<typeof import('./hermit.ts')>('./hermit.ts')),
   getHermitEnvs: vi.fn(),
 }));
 vi.mock('../../modules/datasource/index.ts', () => mockDeep());
@@ -199,7 +199,7 @@ describe('util/exec/index', () => {
     ],
 
     [
-      'Low trust level',
+      'By default, exposeAllEnv=false',
       {
         processEnv,
         inCmd,
@@ -220,7 +220,7 @@ describe('util/exec/index', () => {
     ],
 
     [
-      'High trust level',
+      'When exposeAllEnv=true, all environment variables are passed to child',
       {
         processEnv: envMock.full,
         inCmd,
@@ -914,7 +914,7 @@ describe('util/exec/index', () => {
       inOpts,
       outCmd: outCommand,
       outOpts,
-      adminConfig = {} as any,
+      adminConfig = {},
       hermitEnvs,
     } = testOpts;
 
@@ -929,7 +929,7 @@ describe('util/exec/index', () => {
       return Promise.resolve({ stdout: '', stderr: '' });
     });
     GlobalConfig.set({ ...globalConfig, localDir: cwd, ...adminConfig });
-    setCustomEnv(adminConfig.customEnvVariables);
+    setCustomEnv(adminConfig.customEnvVariables ?? {});
     if (hermitEnvs !== undefined) {
       getHermitEnvsMock.mockResolvedValue(hermitEnvs);
     }
@@ -1082,6 +1082,41 @@ describe('util/exec/index', () => {
     process.env.CONTAINERBASE = 'true';
     const promise = exec('foobar', { toolConstraints: [{ toolName: 'npm' }] });
     await expect(promise).rejects.toThrow('No tool releases found.');
+  });
+
+  it('logs "Executing command" with the command and environment variable names', async () => {
+    process.env = processEnv;
+    cpExec.mockResolvedValue({ stdout: '', stderr: '' });
+    GlobalConfig.set({ ...globalConfig, localDir: cwd });
+
+    await exec(inCmd);
+
+    expect(logger.logger.debug).toHaveBeenCalledWith(
+      {
+        command: inCmd,
+        env: [
+          'HTTP_PROXY',
+          'HTTPS_PROXY',
+          'NO_PROXY',
+          'HOME',
+          'PATH',
+          'LC_ALL',
+          'LANG',
+        ],
+      },
+      'Executing command',
+    );
+  });
+
+  it('logs ignored tool constraints for binarySource=global', async () => {
+    process.env = processEnv;
+    cpExec.mockResolvedValue({ stdout: '', stderr: '' });
+    GlobalConfig.set({ ...globalConfig, binarySource: 'global' });
+    await exec('foobar', { toolConstraints: [{ toolName: 'npm' }] });
+    expect(logger.logger.once.debug).toHaveBeenCalledWith(
+      { toolConstraints: [{ toolName: 'npm' }] },
+      'Ignoring tool contraints because of `binarySource=global`',
+    );
   });
 
   it('Supports binarySource=install preCommands', async () => {

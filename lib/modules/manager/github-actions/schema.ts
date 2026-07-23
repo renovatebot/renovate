@@ -1,18 +1,36 @@
-import { z } from 'zod/v3';
+import { z } from 'zod/v4';
 import {
   LooseArray,
   LooseRecord,
   Yaml,
   withDebugMessage,
 } from '../../../util/schema-utils/index.ts';
+import type { ActionSchema } from './community.ts';
+import { actionSchema, communityActions } from './community.ts';
 
-const Steps = z.object({
+const UsesStep = z.object({
   uses: z.string(),
   with: LooseRecord(
     z.union([z.string(), z.number().transform((s) => s.toString())]),
   ),
 });
-export type Steps = z.infer<typeof Steps>;
+export type UsesStep = z.infer<typeof UsesStep>;
+
+// A `parallel:` group flattens its (recursively resolved) sub-steps into leaf steps.
+// See: https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax#example-running-steps-in-parallel
+const ParallelStep: z.ZodType<UsesStep[]> = z
+  .object({ parallel: LooseArray(z.lazy(() => Step)) })
+  .transform(({ parallel }) => parallel.flat());
+
+// A step resolves to a flat list of `uses:` steps: a normal step yields itself,
+// a `parallel:` group yields its flattened sub-steps.
+const Step: z.ZodType<UsesStep[]> = z.union([
+  UsesStep.transform((step) => [step]),
+  ParallelStep,
+]);
+
+// Flatten the per-element `UsesStep[]` groups into a single `UsesStep[]`.
+const Steps = LooseArray(Step).transform((groups) => groups.flat());
 
 const WorkFlowJobs = z.object({
   jobs: LooseRecord(
@@ -35,7 +53,7 @@ const WorkFlowJobs = z.object({
       'runs-on': z
         .union([z.string().transform((v) => [v]), z.array(z.string())])
         .catch([]),
-      steps: LooseArray(Steps).catch([]),
+      steps: Steps.catch([]),
     }),
   ),
 });
@@ -43,9 +61,15 @@ const WorkFlowJobs = z.object({
 const Actions = z.object({
   runs: z.object({
     using: z.string(),
-    steps: LooseArray(Steps).optional().catch([]),
+    steps: Steps.optional().catch([]),
   }),
 });
 export const Workflow = Yaml.pipe(
   z.union([WorkFlowJobs, Actions, z.null()]),
 ).catch(withDebugMessage(null, 'Does not match schema'));
+
+export const CommunityActions = z.union(
+  Object.entries(communityActions).map(([name, cfg]) =>
+    actionSchema(name, cfg),
+  ) as [ActionSchema, ActionSchema, ...ActionSchema[]],
+);

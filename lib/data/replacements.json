@@ -6,6 +6,7 @@
       "replacements:actions-attest-build-provenance-to-actions-attest",
       "replacements:airbnb-prop-types-to-prop-types-tools",
       "replacements:apollo-server-to-scoped",
+      "replacements:aws-sdk-smithy-client-to-smithy",
       "replacements:babel-eslint-to-eslint-parser",
       "replacements:base-ui-components-to-base-ui",
       "replacements:containerbase",
@@ -29,6 +30,7 @@
       "replacements:joi-to-scoped",
       "replacements:joi-to-unscoped",
       "replacements:k8s-registry-move",
+      "replacements:kotlin-logging-to-oshai",
       "replacements:mem-rename",
       "replacements:middie-to-scoped",
       "replacements:now-to-vercel",
@@ -58,6 +60,7 @@
       "replacements:vitest-coverage-c8-to-coverage-v8",
       "replacements:vso-task-lib-to-azure-pipelines-task-lib",
       "replacements:vsts-task-lib-to-azure-pipelines-task-lib",
+      "replacements:wuchale-vite-plugin-to-wuchale",
       "replacements:xmldom-to-scoped",
       "replacements:zap"
     ],
@@ -144,6 +147,17 @@
         "matchPackageNames": ["apollo-reporting-protobuf"],
         "replacementName": "@apollo/usage-reporting-protobuf",
         "replacementVersion": "4.0.0"
+      }
+    ]
+  },
+  "aws-sdk-smithy-client-to-smithy": {
+    "description": "`@aws-sdk/smithy-client` was moved to `@smithy/smithy-client`.",
+    "packageRules": [
+      {
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["@aws-sdk/smithy-client"],
+        "replacementName": "@smithy/smithy-client",
+        "replacementVersion": "1.0.5"
       }
     ]
   },
@@ -236,6 +250,17 @@
           "/^(?:docker\\.io/)?renovate/renovate$/"
         ],
         "versioning": "semver"
+      }
+    ]
+  },
+  "corentinmusard-otel-cicd-action-to-dash0hq": {
+    "description": "`corentinmusard/otel-cicd-action` was transferred to `dash0hq/otel-cicd-action`.",
+    "packageRules": [
+      {
+        "matchDatasources": ["github-releases", "github-tags"],
+        "matchPackageNames": ["corentinmusard/otel-cicd-action"],
+        "replacementName": "dash0hq/otel-cicd-action",
+        "replacementVersion": "4.0.1"
       }
     ]
   },
@@ -846,6 +871,18 @@
       }
     ]
   },
+  "kotlin-logging-to-oshai": {
+    "description": "replaces kotlin-logging github organization and maven group from MicroUtils to oshai",
+    "packageRules": [
+      {
+        "matchCurrentVersion": "[3,4)",
+        "matchDatasources": ["maven"],
+        "matchPackageNames": ["/^io\\.github\\.microutils:kotlin-logging/"],
+        "replacementNameTemplate": "{{{replace 'io.github.microutils' 'io.github.oshai' packageName}}}",
+        "replacementVersion": "5.1.4"
+      }
+    ]
+  },
   "mem-rename": {
     "description": "`mem` was renamed to `memoize`.",
     "packageRules": [
@@ -1230,6 +1267,18 @@
         "matchPackageNames": ["vsts-task-lib"],
         "replacementName": "azure-pipelines-task-lib",
         "replacementVersion": "3.4.0"
+      }
+    ]
+  },
+  "wuchale-vite-plugin-to-wuchale": {
+    "description": "The `@wuchale/vite-plugin` package is now included in `wuchale` at `wuchale/vite`.",
+    "packageRules": [
+      {
+        "matchCurrentVersion": "^0.17.0",
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["@wuchale/vite-plugin"],
+        "replacementName": "wuchale",
+        "replacementVersion": "0.22.0"
       }
     ]
   },

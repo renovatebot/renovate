@@ -48,7 +48,7 @@ export function processHostRules(): HostRulesResult {
 
     const matchedHost = hostRule.matchHost;
     // Should never be necessary as if we have a resolvedHost, there has to be a matchHost
-    /* v8 ignore next 4 */
+    /* v8 ignore if -- unreachable: a resolvedHost implies matchHost is set (see comment above) */
     if (!matchedHost) {
       logger.debug('Skipping host rule without matchHost');
       continue;
@@ -84,6 +84,7 @@ export function processHostRules(): HostRulesResult {
       continue;
     }
 
+    // v8 ignore else -- TODO: add test #40625
     if (isString(hostRule.username) && isString(hostRule.password)) {
       logger.debug(
         `Adding npmrc entry for ${cleanedUri} with username/password`,

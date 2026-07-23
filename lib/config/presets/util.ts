@@ -26,7 +26,9 @@ export async function fetchPreset({
   const endpoint = ensureTrailingSlash(_endpoint!);
   const [fileName, presetName, subPresetName] = filePreset.split('/');
   const pathPrefix = presetPath ? `${presetPath}/` : '';
-  const buildFilePath = (name: string): string => `${pathPrefix}${name}`;
+  function buildFilePath(name: string): string {
+    return `${pathPrefix}${name}`;
+  }
   let jsonContent: any;
   if (fileName === 'default') {
     try {
@@ -61,7 +63,7 @@ export async function fetchPreset({
     jsonContent = await fetch(
       repo,
       buildFilePath(
-        regEx(/\.json5?$/).test(fileName) ? fileName : `${fileName}.json`,
+        regEx(/\.json[5c]?$/).test(fileName) ? fileName : `${fileName}.json`,
       ),
       endpoint,
       tag,

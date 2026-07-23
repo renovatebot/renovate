@@ -149,13 +149,15 @@ export async function updateLockedDependency(
       constraint,
       depType,
     } of constraints) {
+      // v8 ignore else -- TODO: add test #40625
       if (semver.matches(newVersion, constraint)) {
         // Parent dependency is compatible with the new version we want
         logger.debug(
           `${depName} can be updated to ${newVersion} in-range with matching constraint "${constraint}" in ${
             // TODO: types (#22198)
-            /* v8 ignore next -- hard to test */
+            // v8 ignore start -- hard to test
             parentDepName ? `${parentDepName}@${parentVersion!}` : packageFile
+            // v8 ignore stop
           }`,
         );
       } else if (parentDepName && parentVersion) {
@@ -208,6 +210,7 @@ export async function updateLockedDependency(
         newPackageJsonContent = updateDependency({
           // TODO #22198
           fileContent: packageFileContent!,
+          packageFile,
           upgrade: { depName, depType, newValue },
         });
       }
@@ -250,6 +253,7 @@ export async function updateLockedDependency(
         parentUpdateResult.files[lockFile] || newLockFileContent;
     }
     const files: Record<string, string> = {};
+    // v8 ignore else -- TODO: add test #40625
     if (newLockFileContent) {
       files[lockFile] = newLockFileContent;
     }
@@ -262,8 +266,7 @@ export async function updateLockedDependency(
       return { status: 'unsupported' };
     }
     return { status: 'updated', files };
-    /* v8 ignore next -- needs test */
-  } catch (err) {
+  } catch (err) /* v8 ignore next -- TODO: add test #40625 */ {
     logger.error({ err }, 'updateLockedDependency() error');
     return { status: 'update-failed' };
   }

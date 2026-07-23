@@ -2,10 +2,10 @@ import { GlobalConfig } from '../../../../config/global.ts';
 import type { RenovateConfig } from '../../../../config/types.ts';
 import { logger } from '../../../../logger/index.ts';
 import { platform } from '../../../../modules/platform/index.ts';
+import type { BranchStatusConfig } from '../../../../modules/platform/types.ts';
 import type { BranchStatus } from '../../../../types/index.ts';
 import { isActiveConfidenceLevel } from '../../../../util/merge-confidence/index.ts';
 import type { MergeConfidence } from '../../../../util/merge-confidence/types.ts';
-import { coerceString } from '../../../../util/string.ts';
 import { joinUrlParts } from '../../../../util/url.ts';
 
 export async function resolveBranchStatus(
@@ -31,13 +31,13 @@ export async function resolveBranchStatus(
   return status;
 }
 
-async function setStatusCheck(
-  branchName: string,
-  context: string,
-  description: string,
-  state: BranchStatus,
-  url?: string,
-): Promise<void> {
+async function setStatusCheck({
+  branchName,
+  context,
+  description,
+  state,
+  url,
+}: BranchStatusConfig): Promise<void> {
   const existingState = await platform.getBranchStatusCheck(
     branchName,
     context,
@@ -68,7 +68,22 @@ export interface StabilityConfig extends RenovateConfig {
 }
 
 export async function setStability(config: StabilityConfig): Promise<void> {
+  const mode = config.statusCheckWhen?.minimumReleaseAge ?? 'always';
+
+  if (mode === 'never') {
+    if (config.stabilityStatus) {
+      logger.debug(
+        'statusCheckWhen.minimumReleaseAge is set to "never", skipping stability status check.',
+      );
+    }
+    return;
+  }
+
   if (!config.stabilityStatus) {
+    return;
+  }
+
+  if (mode === 'failed' && config.stabilityStatus === 'green') {
     return;
   }
 
@@ -86,17 +101,17 @@ export async function setStability(config: StabilityConfig): Promise<void> {
       : 'Updates have not met minimum release age requirement';
 
   const docsLink = joinUrlParts(
-    coerceString(config.productLinks?.documentation),
+    GlobalConfig.get('productLinks').documentation,
     'key-concepts/minimum-release-age/',
   );
 
-  await setStatusCheck(
-    config.branchName,
+  await setStatusCheck({
+    branchName: config.branchName,
     context,
     description,
-    config.stabilityStatus,
-    docsLink,
-  );
+    state: config.stabilityStatus,
+    url: docsLink,
+  });
 }
 
 export interface ConfidenceConfig extends RenovateConfig {
@@ -105,6 +120,17 @@ export interface ConfidenceConfig extends RenovateConfig {
 }
 
 export async function setConfidence(config: ConfidenceConfig): Promise<void> {
+  const mode = config.statusCheckWhen?.mergeConfidence ?? 'always';
+
+  if (mode === 'never') {
+    if (config.branchName && config.confidenceStatus) {
+      logger.debug(
+        'statusCheckWhen.mergeConfidence is set to "never", skipping merge confidence status check.',
+      );
+    }
+    return;
+  }
+
   if (
     !config.branchName ||
     !config.confidenceStatus ||
@@ -113,6 +139,11 @@ export async function setConfidence(config: ConfidenceConfig): Promise<void> {
   ) {
     return;
   }
+
+  if (mode === 'failed' && config.confidenceStatus === 'green') {
+    return;
+  }
+
   const context = config.statusCheckNames?.mergeConfidence;
   if (!context) {
     logger.debug(
@@ -127,15 +158,15 @@ export async function setConfidence(config: ConfidenceConfig): Promise<void> {
       : 'Updates have not met Merge Confidence requirement';
 
   const docsLink = joinUrlParts(
-    coerceString(config.productLinks?.documentation),
+    GlobalConfig.get('productLinks').documentation,
     'merge-confidence',
   );
 
-  await setStatusCheck(
-    config.branchName,
+  await setStatusCheck({
+    branchName: config.branchName,
     context,
     description,
-    config.confidenceStatus,
-    docsLink,
-  );
+    state: config.confidenceStatus,
+    url: docsLink,
+  });
 }

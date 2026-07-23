@@ -1,4 +1,5 @@
 import type { Attributes, SpanKind, SpanOptions } from '@opentelemetry/api';
+import type { ATTR_CODE_FUNCTION_NAME } from '@opentelemetry/semantic-conventions';
 import type { RenovateSplit } from '../config/types.ts';
 import type { BunyanRecord } from '../logger/types.ts';
 import type { PackageFile } from '../modules/manager/types.ts';
@@ -12,6 +13,10 @@ export type RenovateSpanOptions = {
 export type RenovateSpanAttributes = {
   [ATTR_RENOVATE_SPLIT]?: RenovateSplit;
   [ATTR_VCS_GIT_OPERATION_TYPE]?: GitOperationType;
+  [ATTR_CODE_FUNCTION_NAME]?: string;
+  [ATTR_RENOVATE_DATASOURCE]?: string;
+  [ATTR_RENOVATE_REGISTRY_URL]?: string;
+  [ATTR_RENOVATE_PACKAGE_NAME]?: string;
 } & Attributes;
 
 /**
@@ -67,6 +72,21 @@ export interface DependencyStatus {
 }
 
 export const ATTR_RENOVATE_SPLIT = 'renovate.split';
+
+/**
+ * The name of a Renovate datasource (ex: `github-tags`, `npm`, `docker`, etc).
+ */
+export const ATTR_RENOVATE_DATASOURCE = 'renovate.datasource';
+
+/**
+ * The registry URL of a registry URL as might be used with a datasource and package name.
+ */
+export const ATTR_RENOVATE_REGISTRY_URL = 'renovate.registryUrl';
+
+/**
+ * The package name of a package.
+ */
+export const ATTR_RENOVATE_PACKAGE_NAME = 'renovate.packageName';
 
 /**
  * the Git Version Control System (VCS)'s Operation Type

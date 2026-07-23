@@ -1,7 +1,14 @@
+import { ATTR_CODE_FUNCTION_NAME } from '@opentelemetry/semantic-conventions';
 import { isFunction, isNonEmptyArray, isString } from '@sindresorhus/is';
 import { dequal } from 'dequal';
 import { GlobalConfig } from '../../config/global.ts';
 import { HOST_DISABLED } from '../../constants/error-messages.ts';
+import { instrument } from '../../instrumentation/index.ts';
+import {
+  ATTR_RENOVATE_DATASOURCE,
+  ATTR_RENOVATE_PACKAGE_NAME,
+  ATTR_RENOVATE_REGISTRY_URL,
+} from '../../instrumentation/types.ts';
 import { logger } from '../../logger/index.ts';
 import { ExternalHostError } from '../../types/errors/external-host-error.ts';
 import { coerceArray } from '../../util/array.ts';
@@ -38,8 +45,12 @@ import type {
 export { isGetPkgReleasesConfig } from './common.ts';
 export * from './types.ts';
 
-export const getDatasources = (): Map<string, DatasourceApi> => datasources;
-export const getDatasourceList = (): string[] => Array.from(datasources.keys());
+export function getDatasources(): Map<string, DatasourceApi> {
+  return datasources;
+}
+export function getDatasourceList(): string[] {
+  return Array.from(datasources.keys());
+}
 
 type GetReleasesInternalConfig = GetReleasesConfig & GetPkgReleasesConfig;
 
@@ -69,7 +80,7 @@ async function getRegistryReleases(
   const cacheKey = `${registryUrl}:${config.packageName}`;
 
   const cacheEnabled = !!datasource.caching; // tells if `isPrivate` flag is supported in datasource result
-  const cacheForced = GlobalConfig.get('cachePrivatePackages', false); // tells if caching is forced via admin config
+  const cacheForced = GlobalConfig.get('cachePrivatePackages'); // tells if caching is forced via admin config
 
   if (cacheEnabled || cacheForced) {
     const cachedResult = await packageCache.get<ReleaseResult>(
@@ -86,7 +97,18 @@ async function getRegistryReleases(
     DatasourceCacheStats.miss(datasource.id, registryUrl, config.packageName);
   }
 
-  const res = await datasource.getReleases({ ...config, registryUrl });
+  const res = await instrument(
+    'getReleases',
+    () => datasource.getReleases({ ...config, registryUrl }),
+    {
+      attributes: {
+        [ATTR_CODE_FUNCTION_NAME]: 'getReleases',
+        [ATTR_RENOVATE_DATASOURCE]: datasource.id,
+        [ATTR_RENOVATE_REGISTRY_URL]: registryUrl,
+        [ATTR_RENOVATE_PACKAGE_NAME]: config.packageName,
+      },
+    },
+  );
   if (res?.releases.length) {
     res.registryUrl ??= registryUrl;
   }
@@ -371,7 +393,18 @@ async function fetchReleases(
         dep = await mergeRegistries(config, datasource, registryUrls);
       }
     } else {
-      dep = await datasource.getReleases(config);
+      dep = await instrument(
+        'getReleases',
+        () => datasource.getReleases(config),
+        {
+          attributes: {
+            [ATTR_CODE_FUNCTION_NAME]: 'getReleases',
+            [ATTR_RENOVATE_DATASOURCE]: datasource.id,
+            [ATTR_RENOVATE_REGISTRY_URL]: config.registryUrl ?? '',
+            [ATTR_RENOVATE_PACKAGE_NAME]: config.packageName,
+          },
+        },
+      );
     }
   } catch (err) {
     if (err.message === HOST_DISABLED || err.err?.message === HOST_DISABLED) {

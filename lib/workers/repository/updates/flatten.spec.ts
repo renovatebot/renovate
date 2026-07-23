@@ -1,6 +1,8 @@
 import { isNumber } from '@sindresorhus/is';
 import type { RenovateConfig } from '~test/util.ts';
 import { getConfig } from '../../../config/defaults.ts';
+import type { PackageFile } from '../../../modules/manager/types.ts';
+import type { SkipReason } from '../../../types/skip-reason.ts';
 import { flattenUpdates, sanitizeDepName } from './flatten.ts';
 
 vi.mock('../../../util/git/semantic.ts');
@@ -236,6 +238,84 @@ describe('workers/repository/updates/flatten', () => {
       expect(res.filter((r) => r.isVulnerabilityAlert)).toHaveLength(1);
     });
 
+    it('when a dependency is enabled=false, it is filtered', async () => {
+      const packageFiles = {
+        npm: [
+          {
+            packageFile: 'package.json',
+            lockFiles: ['package-lock.json'],
+            deps: [
+              {
+                depName: '@org/a',
+                updates: [
+                  {
+                    newValue: '1.0.0',
+                    sourceUrl: 'https://github.com/org/repo',
+                  },
+                ],
+                enabled: false,
+              },
+              {
+                depName: 'foo',
+                updates: [
+                  {
+                    newValue: '2.0.0',
+                    sourceUrl: 'https://github.com/org/repo',
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      };
+
+      const res = await flattenUpdates(config, packageFiles);
+      expect(res).toHaveLength(1);
+      expect(
+        res.find((update) => update.depName === '@org/a'),
+      ).not.toBeDefined();
+      expect(res.find((update) => update.depName === 'foo')).toBeDefined();
+    });
+
+    it('when a skipReason is found on a dependency, it is filtered', async () => {
+      const packageFiles = {
+        npm: [
+          {
+            packageFile: 'package.json',
+            lockFiles: ['package-lock.json'],
+            deps: [
+              {
+                depName: '@org/a',
+                updates: [
+                  {
+                    newValue: '1.0.0',
+                    sourceUrl: 'https://github.com/org/repo',
+                  },
+                ],
+                skipReason: 'disabled' as SkipReason,
+              },
+              {
+                depName: 'foo',
+                updates: [
+                  {
+                    newValue: '2.0.0',
+                    sourceUrl: 'https://github.com/org/repo',
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      };
+
+      const res = await flattenUpdates(config, packageFiles);
+      expect(res).toHaveLength(1);
+      expect(
+        res.find((update) => update.depName === '@org/a'),
+      ).not.toBeDefined();
+      expect(res.find((update) => update.depName === 'foo')).toBeDefined();
+    });
+
     it('separates lockfile maintenance updates from other update types if grouping is applied', async () => {
       // TODO #22198
       config.lockFileMaintenance!.enabled = true;
@@ -276,6 +356,114 @@ describe('workers/repository/updates/flatten', () => {
       expect(lockFileUpdate!.branchName).toContain('lock-file-maintenance');
       expect(regularUpdate!.branchName).not.toContain('lock-file-maintenance');
       expect(lockFileUpdate!.branchName).not.toBe(regularUpdate!.branchName);
+    });
+
+    describe('hasAttestation is taken from the current value', () => {
+      it.each([[true], [false], [undefined]])(
+        'current attestation %s, new attestation %s',
+        async (currentAttestation) => {
+          config = getConfig(); // HACK
+          const packageFiles: Record<string, PackageFile[]> = {
+            npm: [
+              {
+                packageFile: 'package.json',
+                deps: [
+                  {
+                    depName: 'foo',
+                    currentValue: '1.0.0',
+                    hasAttestation: currentAttestation,
+                    updates: [
+                      {
+                        newValue: '2.0.0',
+                        // but the new update may have a different value
+                        hasAttestation: false,
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          };
+          const res = await flattenUpdates(config, packageFiles);
+          expect(res).toHaveLength(1);
+          expect(res[0].hasAttestation).toEqual(currentAttestation);
+        },
+      );
+    });
+
+    it('skips replacement update when replacement already exists as sibling dep', async () => {
+      const packageFiles: Record<string, PackageFile[]> = {
+        npm: [
+          {
+            packageFile: 'package.json',
+            deps: [
+              {
+                depName: '@material-ui/core',
+                updates: [
+                  {
+                    newName: '@mui/material',
+                    newValue: '^5.0.0',
+                    updateType: 'replacement',
+                  },
+                ],
+              },
+              {
+                depName: '@mui/material',
+                updates: [
+                  {
+                    newValue: '^6.2.0',
+                    updateType: 'minor',
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      };
+      const res = await flattenUpdates(config, packageFiles);
+      expect(
+        res.find((update) => update.depName === '@material-ui/core'),
+      ).toBeUndefined();
+      expect(
+        res.find((update) => update.depName === '@mui/material'),
+      ).toBeDefined();
+    });
+
+    it('skips replacement update when sibling packageName matches newName', async () => {
+      const packageFiles: Record<string, PackageFile[]> = {
+        npm: [
+          {
+            packageFile: 'package.json',
+            deps: [
+              {
+                depName: 'old-pkg',
+                updates: [
+                  {
+                    newName: '@scope/new-pkg',
+                    newValue: '^2.0.0',
+                    updateType: 'replacement',
+                  },
+                ],
+              },
+              {
+                depName: 'alias',
+                packageName: '@scope/new-pkg',
+                updates: [
+                  {
+                    newValue: '^3.0.0',
+                    updateType: 'minor',
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      };
+      const res = await flattenUpdates(config, packageFiles);
+      expect(
+        res.find((update) => update.depName === 'old-pkg'),
+      ).toBeUndefined();
+      expect(res.find((update) => update.depName === 'alias')).toBeDefined();
     });
   });
 });

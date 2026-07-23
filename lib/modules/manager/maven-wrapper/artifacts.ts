@@ -278,11 +278,13 @@ export async function updateArtifacts({
         'maven-wrapper.properties',
         'maven-wrapper.jar',
       );
-      try {
-        await deleteLocalFile(jarPath);
-        logger.debug({ jarPath }, 'Deleted old maven-wrapper.jar');
-      } catch {
-        // File may not exist, ignore
+      if (jarPath.endsWith('maven-wrapper.jar')) {
+        try {
+          await deleteLocalFile(jarPath);
+          logger.debug({ jarPath }, 'Deleted old maven-wrapper.jar');
+        } catch {
+          // File may not exist, ignore
+        }
       }
     }
 
@@ -511,7 +513,8 @@ async function prepareCommand(
       // add the execution permission to the owner, group and others
       logger.warn('Maven wrapper is missing the executable bit');
       await chmodLocalFile(
-        upath.join(cwd, fileName),
+        // TODO: types (#22198)
+        upath.join(cwd!, fileName),
         pathFileStats.mode | 0o111,
       );
     }

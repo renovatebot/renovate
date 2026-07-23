@@ -7,6 +7,7 @@ import {
   isString,
 } from '@sindresorhus/is';
 import { logger } from '../../../logger/index.ts';
+import { readLocalFile } from '../../../util/fs/index.ts';
 import { regEx } from '../../../util/regex.ts';
 import type { StaticTooling } from '../asdf/upgradeable-tooling.ts';
 import type { PackageDependency, PackageFileContent } from '../types.ts';
@@ -23,19 +24,30 @@ import {
   createSpmToolConfig,
   createUbiToolConfig,
 } from './backends.ts';
+import { getLockFileName, getLockedVersion } from './lockfile.ts';
 import type { MiseTool, MiseToolOptions } from './schema.ts';
+import { MiseLockFile } from './schema.ts';
 import type { ToolingDefinition } from './upgradeable-tooling.ts';
-import { asdfTooling, miseTooling } from './upgradeable-tooling.ts';
+import {
+  asdfTooling,
+  getOrderedMiseRegistryBackends,
+  miseTooling,
+} from './upgradeable-tooling.ts';
 import { parseTomlFile } from './utils.ts';
 
 // Tool names can have options in the tool name
 // e.g. ubi:tamasfe/taplo[matching=full,exe=taplo]
 const optionInToolNameRegex = regEx(/^(?<name>.+?)(?:\[(?<options>.+)\])?$/);
 
-export function extractPackageFile(
+/**
+ * Extracts mise tool dependencies from a mise configuration file.
+ * Supports various backends (core, asdf, aqua, cargo, etc.) and
+ * extracts locked versions when a corresponding lock file exists.
+ */
+export async function extractPackageFile(
   content: string,
   packageFile: string,
-): PackageFileContent | null {
+): Promise<PackageFileContent | null> {
   logger.trace(`mise.extractPackageFile(${packageFile})`);
 
   const misefile = parseTomlFile(content, packageFile);
@@ -44,31 +56,48 @@ export function extractPackageFile(
   }
 
   const deps: PackageDependency[] = [];
-  const tools = misefile.tools;
 
-  if (tools) {
-    for (const [name, toolData] of Object.entries(tools)) {
-      const version = parseVersion(toolData);
-      // Parse the tool options in the tool name
-      const { name: depName, options: optionsInName } =
-        optionInToolNameRegex.exec(name.trim())!.groups!;
-      const delimiterIndex = name.indexOf(':');
-      const backend = depName.substring(0, delimiterIndex);
-      const toolName = depName.substring(delimiterIndex + 1);
-      const options = parseOptions(
-        optionsInName,
-        isNonEmptyObject(toolData) ? toolData : {},
-      );
-      const toolConfig =
-        version === null
-          ? null
-          : getToolConfig(backend, toolName, version, options);
-      const dep = createDependency(depName, version, toolConfig);
-      deps.push(dep);
+  for (const [name, toolData] of Object.entries(misefile.tools)) {
+    deps.push(extractToolEntry(name, toolData));
+  }
+
+  for (const taskData of Object.values(misefile.tasks)) {
+    for (const [name, toolData] of Object.entries(taskData.tools ?? {})) {
+      deps.push(extractToolEntry(name, toolData));
     }
   }
 
-  return deps.length ? { deps } : null;
+  if (!deps.length) {
+    return null;
+  }
+
+  const result: PackageFileContent = { deps };
+
+  const lockFileName = getLockFileName(packageFile);
+  const lockFileContent = await readLocalFile(lockFileName, 'utf8');
+
+  if (lockFileContent) {
+    const lockFileParsed = MiseLockFile.safeParse(lockFileContent);
+    if (lockFileParsed.success) {
+      result.lockFiles = [lockFileName];
+      for (const dep of deps) {
+        const lockedVersion = getLockedVersion(
+          lockFileParsed.data,
+          dep.depName!,
+        );
+        if (lockedVersion) {
+          dep.lockedVersion = lockedVersion;
+        }
+      }
+    } else {
+      logger.debug(
+        { lockFileName, error: lockFileParsed.error },
+        'Failed to parse mise lock file',
+      );
+    }
+  }
+
+  return result;
 }
 
 function parseVersion(toolData: MiseTool): string | null {
@@ -113,9 +142,44 @@ function getToolConfig(
   toolOptions: MiseToolOptions,
 ): StaticTooling | BackendToolingConfig | null {
   switch (backend) {
-    case '':
+    case '': {
       // If the tool name does not specify a backend, it should be a short name or an alias defined by users
-      return getRegistryToolConfig(toolName, version);
+      const staticResult = getRegistryToolConfig(toolName, version);
+      if (staticResult) {
+        return staticResult;
+      }
+
+      // Otherwise, see if we have any known short tool names that are in the `mise-registry.json` data file
+      const backends = getOrderedMiseRegistryBackends(toolName);
+
+      // prioritise the github backend as the best source for data
+      if (backends.github) {
+        const result = getToolConfig(
+          'github',
+          backends.github,
+          version,
+          toolOptions,
+        );
+        // v8 ignore else -- TODO: add test #40625
+        if (result !== null) {
+          return result;
+        }
+      }
+
+      for (const [backendType, backendName] of Object.entries(backends)) {
+        const result = getToolConfig(
+          backendType,
+          backendName,
+          version,
+          toolOptions,
+        );
+        // v8 ignore else -- TODO: add test #40625
+        if (result !== null) {
+          return result;
+        }
+      }
+      return null;
+    }
     // We can specify core, asdf, vfox, aqua backends for tools in the default registry
     // e.g. 'core:rust', 'asdf:rust', 'vfox:clang', 'aqua:act'
     case 'core':
@@ -183,6 +247,25 @@ function getConfigFromTooling(
       ? toolDefinition.config(version)
       : toolDefinition.config) ?? null
   ); // Ensure null is returned instead of undefined
+}
+
+function extractToolEntry(name: string, toolData: MiseTool): PackageDependency {
+  const version = parseVersion(toolData);
+  const { name: depName, options: optionsInName } = optionInToolNameRegex.exec(
+    name.trim(),
+  )!.groups!;
+  const delimiterIndex = depName.indexOf(':');
+  const backend = depName.substring(0, delimiterIndex);
+  const toolName = depName.substring(delimiterIndex + 1);
+  const options = parseOptions(
+    optionsInName,
+    isNonEmptyObject(toolData) ? toolData : {},
+  );
+  const toolConfig =
+    version === null
+      ? null
+      : getToolConfig(backend, toolName, version, options);
+  return createDependency(depName, version, toolConfig);
 }
 
 function createDependency(

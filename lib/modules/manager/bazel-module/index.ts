@@ -6,6 +6,7 @@ import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
 import { MavenDatasource } from '../../datasource/maven/index.ts';
 
 export { updateArtifacts } from './artifacts.ts';
+export { knownDepTypes } from './dep-types.ts';
 export { extractPackageFile } from './extract.ts';
 
 export const url = 'https://bazel.build/external/module';

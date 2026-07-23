@@ -1,0 +1,84 @@
+# See https://github.com/renovatebot/renovate/discussions/42965 and related issues in the past
+name: 'Check npm packument size'
+
+on:
+  # run daily
+  schedule:
+    - cron: '0 6 * * *'
+
+  # allow manual trigger
+  workflow_dispatch: {}
+
+permissions: {}
+
+jobs:
+  check-npm-packument-size:
+    runs-on: ubuntu-latest
+    if: github.repository == 'renovatebot/renovate'
+
+    steps:
+      - name: Check npm packument size
+        id: check
+        env:
+          PACKAGE_NAME: renovate
+          # npm rejects publishes once the packument exceeds 100 MB
+          WARNING_THRESHOLD_MB: 85
+          CRITICAL_THRESHOLD_MB: 90
+        run: |
+          set -euo pipefail
+
+          packument_file="$(mktemp)"
+          curl -fsS -o "$packument_file" "https://registry.npmjs.org/$PACKAGE_NAME"
+
+          size_bytes="$(wc -c < "$packument_file")"
+          size_mb="$(awk -v bytes="$size_bytes" 'BEGIN { printf "%.2f", bytes / 1024 / 1024 }')"
+          version_count="$(jq '.versions | length' "$packument_file")"
+          rm -f "$packument_file"
+
+          status="$(awk -v size="$size_mb" -v warn="$WARNING_THRESHOLD_MB" -v crit="$CRITICAL_THRESHOLD_MB" \
+            'BEGIN { if (size >= crit) print "critical"; else if (size >= warn) print "warning"; else print "ok" }')"
+
+          echo "::notice title=npm packument size::npm packument size for '$PACKAGE_NAME': ${size_mb} MB across ${version_count} versions (status: $status)"
+
+          {
+            echo "size-mb=$size_mb"
+            echo "version-count=$version_count"
+            echo "status=$status"
+          } >> "$GITHUB_OUTPUT"
+
+          {
+            echo "### npm packument size"
+            echo "\`$PACKAGE_NAME\` packument is **${size_mb} MB** across **${version_count} versions** (status: \`$status\`, warning: ${WARNING_THRESHOLD_MB} MB, critical: ${CRITICAL_THRESHOLD_MB} MB, npm hard limit: 100 MB)."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Post warning to Slack
+        if: steps.check.outputs.status == 'warning'
+        uses: slackapi/slack-github-action@0d95c9a7becc1e6e297d76df9bc735c44f4cbcbc # v3.0.5
+        with:
+          webhook: ${{ secrets.RENOVATEBOT_SLACK_WEBHOOK_MAIN_FAILURES }}
+          webhook-type: incoming-webhook
+          payload: |
+            text: ":warning: *npm packument for `renovate` is getting large*: ${{ steps.check.outputs.size-mb }} MB across ${{ steps.check.outputs.version-count }} versions. Warning threshold is 85 MB, npm rejects publishes at 100 MB.\nhttps://registry.npmjs.org/renovate"
+            blocks:
+              - type: "section"
+                text:
+                  type: "mrkdwn"
+                  text: ":warning: *npm packument for `renovate` is getting large*: ${{ steps.check.outputs.size-mb }} MB across ${{ steps.check.outputs.version-count }} versions. Warning threshold is 85 MB, npm rejects publishes at 100 MB.\nhttps://registry.npmjs.org/renovate"
+
+      - name: Post critical warning to Slack
+        if: steps.check.outputs.status == 'critical'
+        uses: slackapi/slack-github-action@0d95c9a7becc1e6e297d76df9bc735c44f4cbcbc # v3.0.5
+        with:
+          webhook: ${{ secrets.RENOVATEBOT_SLACK_WEBHOOK_MAIN_FAILURES }}
+          webhook-type: incoming-webhook
+          payload: |
+            text: ":rotating_light: *npm packument for `renovate` is close to the 100 MB publish limit*: ${{ steps.check.outputs.size-mb }} MB across ${{ steps.check.outputs.version-count }} versions. Publishing will start failing soon - action needed.\nhttps://registry.npmjs.org/renovate"
+            blocks:
+              - type: "section"
+                text:
+                  type: "mrkdwn"
+                  text: ":rotating_light: *npm packument for `renovate` is close to the 100 MB publish limit*: ${{ steps.check.outputs.size-mb }} MB across ${{ steps.check.outputs.version-count }} versions. Publishing will start failing soon - action needed.\nhttps://registry.npmjs.org/renovate"
+
+      - name: Fail job if size is critical
+        if: steps.check.outputs.status == 'critical'
+        run: exit 50

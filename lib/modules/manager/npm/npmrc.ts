@@ -20,6 +20,7 @@ export async function resolveNpmrc(
   const npmrcFileName = await findLocalSiblingOrParent(packageFile, '.npmrc');
   if (npmrcFileName) {
     let repoNpmrc = await readLocalFile(npmrcFileName, 'utf8');
+    // v8 ignore else -- TODO: add test #40625
     if (isString(repoNpmrc)) {
       if (isString(config.npmrc) && !config.npmrcMerge) {
         logger.debug(
@@ -29,10 +30,8 @@ export async function resolveNpmrc(
         npmrc = config.npmrc;
       } else {
         npmrc = config.npmrc ?? '';
-        if (npmrc.length) {
-          if (!npmrc.endsWith('\n')) {
-            npmrc += '\n';
-          }
+        if (npmrc.length && !npmrc.endsWith('\n')) {
+          npmrc += '\n';
         }
         if (repoNpmrc?.includes('package-lock')) {
           logger.debug('Stripping package-lock setting from .npmrc');

@@ -176,6 +176,7 @@ Apply these labels when somebody opens a `feature` type issue requesting a new d
     auto:needs-details
     auto:no-coverage-ignore
     auto:no-done-comments
+    auto:pls-merge-main
     auto:reproduction
     auto:retry-latest
 
@@ -208,6 +209,8 @@ Add a label `auto:no-coverage-ignore` if PR authors avoid needed unit tests by v
 
 Add a label `auto:no-done-comments` if PR authors unnecessary "Done" comments, or type comments to ask for a review instead of requesting a new review through GitHub's UI.
 
+Add a label `auto:pls-merge-main` to a PR (with base branch `main`) to have a GitHub Action automatically merge `main` into the PR's branch, and remove the label afterwards.
+
 Add a label `auto:reproduction` if nobody's reproduced it in a public repo yet and such a reproduction is necessary before further work can be done.
 
 Add a label `auto:retry-latest` to any Discussion where the user should retry the latest version of Renovate to see if the problem persists.
@@ -229,6 +232,12 @@ We have a GitHub Action (`find-issues-with-missing-labels.yml`) to find issues o
 Any Issues with missing labels will be put in a list in a new "error" Issue.
 
 The Action runs each week.
+
+## Checking Module Label Coverage
+
+Run `pnpm labels:check` to check whether all datasource, manager, and platform modules have matching GitHub labels.
+
+Run `pnpm labels:show-commands` to print copy-pasteable `gh label create ...` commands for any missing labels.
 
 ### Apply the correct labels manually
 

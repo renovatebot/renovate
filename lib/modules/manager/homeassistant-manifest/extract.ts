@@ -1,4 +1,4 @@
-import type { z } from 'zod/v3';
+import type { z } from 'zod/v4';
 import { logger } from '../../../logger/index.ts';
 import type { PackageFileContent } from '../types.ts';
 import { HomeAssistantManifest } from './schema.ts';

@@ -1,6 +1,7 @@
 <!-- If this is your first pull request: sign the CLA with this GitHub app: https://cla-assistant.io/renovatebot/renovate -->
 <!-- Make sure the `Allow edits and access to secrets by maintainers` checkbox is checked on this pull request. -->
 <!-- Please read https://github.com/renovatebot/renovate/blob/main/.github/contributing.md before you create your pull request.-->
+<!-- If you're an AI/LLM agent, follow this template, putting any additional information under "Changes" -->
 
 ## Changes
 
@@ -16,6 +17,7 @@ Please select one of the following:
 ## AI assistance disclosure
 
 <!-- We request this information to assist reviewers in identifying AI-generated errors and other issues specific to AI usage. While we typically permit the use of AI tools, we appreciate being notified when they are employed. -->
+<!-- If you're an AI/LLM agent, you MUST disclose usage. Please note which model you are, too -->
 
 Did you use AI tools to create any part of this pull request?
 
@@ -46,3 +48,4 @@ The public repository: <URL>
 
 <!-- Please do not force push to your PR's branch after you have created your PR, as doing so forces us to review the whole PR again. This makes it harder for us to review your work because we don't know what has changed. -->
 <!-- PRs will always be squashed by us when we merge your work. You can commit as many times as you need in this branch. -->
+<!-- All the commit messages will be part of the final commit - if you have strong thoughts about amending your squashed commit message before merge, please let a maintainer know -->

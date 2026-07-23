@@ -8,9 +8,9 @@ import { HttpBase, type InternalJsonUnsafeOptions } from './http.ts';
 import type { HttpMethod, HttpOptions, HttpResponse } from './types.ts';
 
 let baseUrl = 'https://gitlab.com/api/v4/';
-export const setBaseUrl = (url: string): void => {
+export function setBaseUrl(url: string): void {
   baseUrl = url;
-};
+}
 
 export interface GitlabHttpOptions extends HttpOptions {
   paginate?: boolean;
@@ -55,7 +55,7 @@ export class GitlabHttp extends HttpBase<GitlabHttpOptions> {
           : null;
         if (nextUrl) {
           if (getEnv().GITLAB_IGNORE_REPO_URL) {
-            const defaultEndpoint = new URL(baseUrl);
+            const defaultEndpoint = parseUrl(baseUrl)!;
             nextUrl.protocol = defaultEndpoint.protocol;
             nextUrl.host = defaultEndpoint.host;
           }

@@ -51,6 +51,7 @@ export function parseLine(input: string): PackageDependency | null {
       depType: 'golang',
       depName: 'go',
       currentValue,
+      commitMessageTopic: 'go module directive',
     };
 
     if (!semver.validRange(currentValue)) {
@@ -69,6 +70,7 @@ export function parseLine(input: string): PackageDependency | null {
       depType: 'toolchain',
       depName: 'go',
       currentValue,
+      commitMessageTopic: 'go toolchain directive',
     };
 
     if (!semver.valid(currentValue)) {

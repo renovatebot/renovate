@@ -1,83 +1,42 @@
-const CWD = process.cwd();
-const TOOLS_IMPORT_PATTERN = /(?:^|\/|\.\.\/)tools\//;
+import codeblockInSpecFixtures from './rules/codeblock-in-spec-fixtures.js';
+import enforceTsExtension from './rules/enforce-ts-extension.js';
+import loggerStaticMessage from './rules/logger-static-message.js';
+import noHardcodedDocsUrl from './rules/no-hardcoded-docs-url.js';
+import noHostRulesMock from './rules/no-host-rules-mock.js';
+import noNewUrl from './rules/no-new-url.js';
+import noRedundantMockReset from './rules/no-redundant-mock-reset.js';
+import noStatefulGlobalRegex from './rules/no-stateful-global-regex.js';
+import noToolsImport from './rules/no-tools-import.js';
+import preferFakeShaInSpecs from './rules/prefer-fake-sha-in-specs.js';
+import preferJsonPipe from './rules/prefer-json-pipe.js';
+import preferNullishUtil from './rules/prefer-nullish-util.js';
+import preferPartialInSpecs from './rules/prefer-partial-in-specs.js';
+import testRootDescribe from './rules/test-root-describe.js';
+import v8IgnoreReason from './rules/v8-ignore-reason.js';
+import zodSchemaLocation from './rules/zod-schema-location.js';
+import zodSchemaNaming from './rules/zod-schema-naming.js';
 
-/** @type {import('eslint').ESLint.Plugin} */
 export default {
   meta: {
     name: 'renovate',
   },
   rules: {
-    'no-tools-import': {
-      meta: {
-        type: 'problem',
-        messages: {
-          noToolsImport: 'Importing from tools/ is not allowed in lib/',
-        },
-      },
-      create(context) {
-        const filename = context.filename ?? context.physicalFilename ?? '';
-        if (!filename.includes('/lib/')) {
-          return {};
-        }
-
-        return {
-          ImportDeclaration(node) {
-            if (TOOLS_IMPORT_PATTERN.test(node.source.value)) {
-              context.report({ node: node.source, messageId: 'noToolsImport' });
-            }
-          },
-        };
-      },
-    },
-    'test-root-describe': {
-      meta: {
-        fixable: 'code',
-      },
-      create(context) {
-        const absoluteFileName = context.filename;
-        if (!absoluteFileName.endsWith('.spec.ts')) {
-          return {};
-        }
-        const relativeFileName = absoluteFileName
-          .replace(CWD, '')
-          .replace(/\\/g, '/')
-          .replace(/^(?:\/(?:lib|src|test))?\//, '');
-        const testName = relativeFileName.replace(/\.spec\.ts$/, '');
-        return {
-          CallExpression(node) {
-            const { callee } = node;
-            if (
-              callee.type === 'Identifier' &&
-              callee.name === 'describe' &&
-              node.parent.parent.type === 'Program'
-            ) {
-              const [descr] = node.arguments;
-
-              if (!descr) {
-                context.report({
-                  node,
-                  message: `Test root describe must have arguments`,
-                });
-                return;
-              }
-
-              const isOkay =
-                descr.type === 'Literal' &&
-                typeof descr.value === 'string' &&
-                testName === descr.value;
-              if (!isOkay) {
-                context.report({
-                  node: descr,
-                  message: `Test must be described by this string: '${testName}'`,
-                  fix(fixer) {
-                    return fixer.replaceText(descr, `'${testName}'`);
-                  },
-                });
-              }
-            }
-          },
-        };
-      },
-    },
+    'codeblock-in-spec-fixtures': codeblockInSpecFixtures,
+    'enforce-ts-extension': enforceTsExtension,
+    'logger-static-message': loggerStaticMessage,
+    'no-hardcoded-docs-url': noHardcodedDocsUrl,
+    'no-host-rules-mock': noHostRulesMock,
+    'no-new-url': noNewUrl,
+    'no-redundant-mock-reset': noRedundantMockReset,
+    'no-stateful-global-regex': noStatefulGlobalRegex,
+    'no-tools-import': noToolsImport,
+    'prefer-fake-sha-in-specs': preferFakeShaInSpecs,
+    'prefer-json-pipe': preferJsonPipe,
+    'prefer-nullish-util': preferNullishUtil,
+    'prefer-partial-in-specs': preferPartialInSpecs,
+    'test-root-describe': testRootDescribe,
+    'v8-ignore-reason': v8IgnoreReason,
+    'zod-schema-location': zodSchemaLocation,
+    'zod-schema-naming': zodSchemaNaming,
   },
 };

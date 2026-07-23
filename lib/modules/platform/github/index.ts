@@ -1,6 +1,6 @@
+import { setTimeout } from 'node:timers/promises';
 import { isArray, isNonEmptyObject, isNonEmptyString } from '@sindresorhus/is';
 import semver from 'semver';
-import { setTimeout } from 'timers/promises';
 import { GlobalConfig } from '../../../config/global.ts';
 import {
   PLATFORM_INTEGRATION_UNAUTHORIZED,
@@ -22,20 +22,20 @@ import {
 import { instrument } from '../../../instrumentation/index.ts';
 import { logger } from '../../../logger/index.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
-import type { BranchStatus, VulnerabilityAlert } from '../../../types/index.ts';
+import type { BranchStatus } from '../../../types/index.ts';
 import { isGithubFineGrainedPersonalAccessToken } from '../../../util/check-token.ts';
 import { coerceToNull } from '../../../util/coerce.ts';
 import { parseJson } from '../../../util/common.ts';
 import { getEnv } from '../../../util/env.ts';
 import * as git from '../../../util/git/index.ts';
 import {
-  listCommitTree,
+  diffCommitTree,
+  getCommitTreeSha,
   pushCommitToRenovateRef,
 } from '../../../util/git/index.ts';
 import type {
   CommitFilesConfig,
   CommitResult,
-  LongCommitSha,
 } from '../../../util/git/types.ts';
 import * as hostRules from '../../../util/host-rules.ts';
 import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider.ts';
@@ -46,11 +46,13 @@ import type { HttpResponse } from '../../../util/http/types.ts';
 import { coerceObject } from '../../../util/object.ts';
 import { regEx } from '../../../util/regex.ts';
 import { sanitize } from '../../../util/sanitize.ts';
+import type { LongCommitSha } from '../../../util/schema-utils/git.ts';
+import { toLongCommitSha } from '../../../util/schema-utils/git.ts';
 import { fromBase64, looseEquals } from '../../../util/string.ts';
-import { ensureTrailingSlash } from '../../../util/url.ts';
+import { ensureTrailingSlash, isHttpUrl, parseUrl } from '../../../util/url.ts';
 import { incLimitedValue } from '../../../workers/global/limits.ts';
+import { normalizePythonDepName } from '../../datasource/pypi/common.ts';
 import type {
-  AggregatedVulnerabilities,
   AutodiscoverConfig,
   BranchStatusConfig,
   CreatePRConfig,
@@ -70,7 +72,6 @@ import type {
   UpdatePrConfig,
 } from '../types.ts';
 import { repoFingerprint } from '../util.ts';
-import { normalizeNamePerEcosystem } from '../utils/github-alerts.ts';
 import { smartTruncate } from '../utils/pr-body.ts';
 import { remoteBranchExists } from './branch.ts';
 import { coerceRestPr, githubApi, mapMergeStartegy } from './common.ts';
@@ -79,15 +80,17 @@ import {
   getIssuesQuery,
   repoInfoQuery,
 } from './graphql.ts';
-import { GithubIssueCache, GithubIssue as Issue } from './issue.ts';
+import { GithubIssueCache } from './issue.ts';
 import { massageMarkdownLinks } from './massage-markdown-links.ts';
 import { getPrCache, updatePrCache } from './pr.ts';
 import {
   GithubBranchProtection,
   GithubBranchRulesets,
-  GithubVulnerabilityAlert,
+  GithubVulnerabilityAlerts,
+  GithubIssue as Issue,
 } from './schema.ts';
 import type {
+  AggregatedVulnerabilities,
   CombinedBranchStatus,
   Comment,
   GhAutomergeResponse,
@@ -100,7 +103,7 @@ import type {
   PlatformConfig,
 } from './types.ts';
 import { getAppDetails, getUserDetails, getUserEmail } from './user.ts';
-import { warnIfDefaultGitAuthorEmail } from './utils.ts';
+import { getRepoUrl, warnIfDefaultGitAuthorEmail } from './utils.ts';
 
 export const id = 'github';
 
@@ -129,8 +132,14 @@ export function isGHApp(): boolean {
 }
 
 export async function detectGhe(token: string): Promise<void> {
-  platformConfig.isGhe =
-    new URL(platformConfig.endpoint).host !== 'api.github.com';
+  const parsedEndpoint = parseUrl(platformConfig.endpoint);
+  /* v8 ignore next -- endpoint is validated in initPlatform before detectGhe is called */
+  if (!parsedEndpoint) {
+    throw new Error(`Invalid GitHub endpoint: ${platformConfig.endpoint}`);
+  }
+  const host = parsedEndpoint.host;
+  platformConfig.isGhe = host !== 'api.github.com';
+  platformConfig.isGheCloud = host.endsWith('.ghe.com');
   if (platformConfig.isGhe) {
     const gheHeaderKey = 'x-github-enterprise-version';
     const gheQueryRes = await githubApi.headJson('/', { token });
@@ -160,10 +169,13 @@ export async function initPlatform({
   platformConfig.isGHApp = token.startsWith('x-access-token:');
 
   if (endpoint) {
+    if (!isHttpUrl(endpoint)) {
+      throw new Error(`Init: Invalid GitHub endpoint URL: ${endpoint}`);
+    }
     platformConfig.endpoint = ensureTrailingSlash(endpoint);
     githubHttp.setBaseUrl(platformConfig.endpoint);
   } else {
-    logger.debug('Using default github endpoint: ' + platformConfig.endpoint);
+    logger.debug(`Using default github endpoint: ${platformConfig.endpoint}`);
   }
 
   await detectGhe(token);
@@ -195,14 +207,23 @@ export async function initPlatform({
     );
     renovateUsername = platformConfig.userDetails.username;
   }
+
+  let ghHostname: string;
+  /* v8 ignore next -- false negative due to V8/source-map artifact */
+  if (platformConfig.isGheCloud) {
+    ghHostname = 'ghe.com';
+  } else if (platformConfig.isGhe) {
+    // valid url ensured at the function start
+    const parsedEndpoint = parseUrl(platformConfig.endpoint)!;
+    ghHostname = parsedEndpoint.hostname;
+  } else {
+    ghHostname = 'github.com';
+  }
+
   let discoveredGitAuthor: string | undefined;
   if (!gitAuthor) {
     if (platformConfig.isGHApp) {
       platformConfig.userDetails ??= await getAppDetails(token);
-      // v8 ignore next -- TODO: add test #40625
-      const ghHostname = platformConfig.isGhe
-        ? new URL(platformConfig.endpoint).hostname
-        : 'github.com';
       discoveredGitAuthor = `${platformConfig.userDetails.name} <${platformConfig.userDetails.id}+${platformConfig.userDetails.username}@users.noreply.${ghHostname}>`;
     } else {
       platformConfig.userDetails ??= await getUserDetails(
@@ -210,15 +231,17 @@ export async function initPlatform({
         token,
       );
       // v8 ignore next -- TODO: coverage error #40625
-      platformConfig.userEmail = await getUserEmail(
-        platformConfig.endpoint,
-        token,
-      );
+      platformConfig.userEmail =
+        platformConfig.userDetails.email ??
+        (await getUserEmail(platformConfig.endpoint, token));
       if (platformConfig.userEmail) {
         discoveredGitAuthor = `${platformConfig.userDetails.name} <${platformConfig.userEmail}>`;
       }
     }
   }
+
+  git.setPlatformIgnoredAuthors([`noreply@${ghHostname}`]);
+
   logger.debug({ platformConfig, renovateUsername }, 'Platform config');
   const platformResult: PlatformResult = {
     endpoint: platformConfig.endpoint,
@@ -274,14 +297,13 @@ async function fetchRepositories(): Promise<GhRestRepo[]> {
         paginate: 'all',
       });
       return res.body.repositories;
-    } else {
-      const res = await githubApi.getJsonUnchecked<GhRestRepo[]>(
-        `user/repos?per_page=100`,
-        { paginate: 'all' },
-      );
-      return res.body;
     }
-  } catch (err) /* v8 ignore next */ {
+    const res = await githubApi.getJsonUnchecked<GhRestRepo[]>(
+      `user/repos?per_page=100`,
+      { paginate: 'all' },
+    );
+    return res.body;
+  } catch (err) /* v8 ignore next -- defensive: repo listing failures are logged and rethrown, not simulated in specs */ {
     logger.error({ err }, `GitHub getRepos error`);
     throw err;
   }
@@ -378,7 +400,7 @@ export async function getRawFile(
 
   let url = `repos/${repo}/contents/${fileName}`;
   if (branchOrTag) {
-    url += `?ref=` + branchOrTag;
+    url += `?ref=${branchOrTag}`;
   }
   const res = await githubApi.getJsonUnchecked<{ content: string }>(
     url,
@@ -489,6 +511,7 @@ export async function initRepo({
   forkCreation,
   forkOrg,
   forkToken,
+  gitUrl,
   renovateUsername,
   cloneSubmodules,
   cloneSubmodulesFilter,
@@ -499,7 +522,7 @@ export async function initRepo({
     repository,
     cloneSubmodules,
     cloneSubmodulesFilter,
-    ignorePrAuthor: GlobalConfig.get('ignorePrAuthor', false),
+    ignorePrAuthor: GlobalConfig.get('ignorePrAuthor'),
   } as any;
   const opts = hostRules.find({
     hostType: 'github',
@@ -509,6 +532,7 @@ export async function initRepo({
   config.renovateUsername = renovateUsername;
   [config.repositoryOwner, config.repositoryName] = repository.split('/');
   let repo: GhRepo | undefined;
+  let forkSshUrl: string | null = null;
   try {
     let infoQuery = repoInfoQuery;
 
@@ -544,6 +568,7 @@ export async function initRepo({
         ...(!config.ignorePrAuthor && { user: renovateUsername }),
       },
       readOnly: true,
+      count: 1, // bypass graphql check
     });
 
     if (res?.errors) {
@@ -556,12 +581,12 @@ export async function initRepo({
     }
 
     repo = res?.data?.repository;
-    /* v8 ignore next */
+    /* v8 ignore next -- defensive: GraphQL errors are handled above, a null repository is not mocked in specs */
     if (!repo) {
       logger.debug({ res }, 'No repository returned');
       throw new Error(REPOSITORY_NOT_FOUND);
     }
-    /* v8 ignore next */
+    /* v8 ignore next -- empty-repo detection via missing defaultBranchRef is not mocked in specs */
     if (!repo.defaultBranchRef?.name) {
       logger.debug(
         { res },
@@ -608,7 +633,7 @@ export async function initRepo({
       .catch([])
       .parse(res?.data?.repository?.issues?.nodes);
     GithubIssueCache.addIssuesToReconcile(recentIssues);
-  } catch (err) /* v8 ignore next */ {
+  } catch (err) /* v8 ignore next -- initRepo error mapping needs failure shapes not mocked in specs */ {
     logger.debug({ err }, 'Caught initRepo error');
     if (
       err.message === REPOSITORY_ARCHIVED ||
@@ -663,6 +688,7 @@ export async function initRepo({
     let forkedRepo = await findFork(forkToken, repository, forkOrg);
     if (forkedRepo) {
       config.repository = forkedRepo.full_name;
+      forkSshUrl = forkedRepo.ssh_url;
       const forkDefaultBranch = forkedRepo.default_branch;
       if (forkDefaultBranch !== config.defaultBranch) {
         const body = {
@@ -683,7 +709,7 @@ export async function initRepo({
             token: forkToken,
           });
           logger.debug('Created new default branch in fork');
-        } catch (err) /* v8 ignore next */ {
+        } catch (err) /* v8 ignore next -- fork default-branch creation failures are not mocked in specs */ {
           if (err.response?.body?.message === 'Reference already exists') {
             logger.debug(
               `Branch ${config.defaultBranch} already exists in the fork`,
@@ -707,7 +733,7 @@ export async function initRepo({
             token: forkToken,
           });
           logger.debug('Successfully changed default branch for fork');
-        } catch (err) /* v8 ignore next */ {
+        } catch (err) /* v8 ignore next -- defensive: fork default-branch update failures are logged and swallowed, not simulated in specs */ {
           logger.warn({ err }, 'Could not set default branch');
         }
       }
@@ -715,39 +741,43 @@ export async function initRepo({
       logger.debug('Forked repo is not found - attempting to create it');
       forkedRepo = await createFork(forkToken, repository, forkOrg);
       config.repository = forkedRepo.full_name;
+      forkSshUrl = forkedRepo.ssh_url;
     } else {
       logger.debug('Forked repo is not found and forkCreation is disabled');
       throw new Error(REPOSITORY_FORK_MISSING);
     }
   }
 
-  const parsedEndpoint = new URL(platformConfig.endpoint);
   let authToken: string | null;
   if (forkToken) {
     logger.debug('Using forkToken for git init');
     authToken = coerceToNull(config.forkToken);
-  } /* v8 ignore next */ else {
+  } /* v8 ignore next -- token-type detection depends on opts.token shapes not varied in specs */ else {
     const tokenType = opts.token?.startsWith('x-access-token:')
       ? 'app'
       : 'personal access';
     logger.debug(`Using ${tokenType} token for git init`);
     authToken = opts.token ?? null;
   }
-  if (authToken) {
-    const [username, password] = authToken.split(':');
-    parsedEndpoint.username = username;
-    parsedEndpoint.password = password ?? '';
-  }
-  parsedEndpoint.host = parsedEndpoint.host.replace(
-    'api.github.com',
-    'github.com',
+  // endpoint is validated during initPlatform
+  const parsedEndpoint = parseUrl(platformConfig.endpoint)!;
+  const workingSshUrl = forkToken ? forkSshUrl : repo.sshUrl;
+  const url = getRepoUrl(
+    config.repository!,
+    gitUrl,
+    workingSshUrl,
+    parsedEndpoint,
+    authToken,
   );
-  parsedEndpoint.pathname = `${config.repository}.git`;
-  const url = parsedEndpoint.href;
-  let upstreamUrl = undefined;
+  let upstreamUrl: string | undefined;
   if (forkCreation && config.parentRepo) {
-    parsedEndpoint.pathname = config.parentRepo + '.git';
-    upstreamUrl = parsedEndpoint.href;
+    upstreamUrl = getRepoUrl(
+      config.parentRepo,
+      gitUrl,
+      repo.sshUrl,
+      parsedEndpoint,
+      authToken,
+    );
   }
   await git.initRepo({
     ...config,
@@ -1118,7 +1148,7 @@ export async function getBranchStatus(
   let commitStatus: CombinedBranchStatus;
   try {
     commitStatus = await getStatus(branchName);
-  } catch (err) /* v8 ignore next */ {
+  } catch (err) /* v8 ignore next -- 404-to-REPOSITORY_CHANGED mapping for deleted branches is not mocked in specs */ {
     if (err.statusCode === 404) {
       logger.debug(
         'Received 404 when checking branch status, assuming that branch has been deleted',
@@ -1171,10 +1201,10 @@ export async function getBranchStatus(
         conclusion: run.conclusion,
       }));
       logger.debug({ checkRuns }, 'check runs result');
-    } /* v8 ignore next */ else {
+    } /* v8 ignore next -- specs always mock a non-empty check_runs response */ else {
       logger.debug({ result: checkRunsRaw }, 'No check runs found');
     }
-  } catch (err) /* v8 ignore next */ {
+  } catch (err) /* v8 ignore next -- check-run permission errors (403) are mapped to empty results, not mocked in specs */ {
     if (err instanceof ExternalHostError) {
       throw err;
     }
@@ -1248,7 +1278,7 @@ export async function getBranchStatusCheck(
       }
     }
     return null;
-  } catch (err) /* v8 ignore next */ {
+  } catch (err) /* v8 ignore next -- 404-to-REPOSITORY_CHANGED mapping for missing commits is not mocked in specs */ {
     if (err.statusCode === 404) {
       logger.debug('Commit not found when checking statuses');
       throw new Error(REPOSITORY_CHANGED);
@@ -1264,7 +1294,7 @@ export async function setBranchStatus({
   state,
   url: targetUrl,
 }: BranchStatusConfig): Promise<void> {
-  /* v8 ignore next */
+  /* v8 ignore next -- specs do not run setBranchStatus in forking mode */
   if (config.parentRepo) {
     logger.debug('Cannot set branch status when in forking mode');
     return;
@@ -1297,7 +1327,7 @@ export async function setBranchStatus({
     // update status cache
     await getStatus(branchName, false);
     await getStatusCheck(branchName, false);
-  } catch (err) /* v8 ignore next */ {
+  } catch (err) /* v8 ignore next -- defensive: status POST failures abort with REPOSITORY_CHANGED, not simulated in specs */ {
     logger.debug({ err, url }, 'Caught error setting branch status - aborting');
     throw new Error(REPOSITORY_CHANGED);
   }
@@ -1324,7 +1354,7 @@ async function getIssues(): Promise<Issue[]> {
 }
 
 export async function getIssueList(): Promise<Issue[]> {
-  /* v8 ignore next */
+  /* v8 ignore next -- specs initialize repos with issues enabled */
   if (config.hasIssuesEnabled === false) {
     return [];
   }
@@ -1378,12 +1408,24 @@ export async function findIssue(title: string): Promise<Issue | null> {
 async function closeIssue(issueNumber: number): Promise<void> {
   logger.debug(`closeIssue(${issueNumber})`);
   const repo = config.parentRepo ?? config.repository;
-  const { body: closedIssue } = await githubApi.patchJson(
-    `repos/${repo}/issues/${issueNumber}`,
-    { body: { state: 'closed' } },
-    Issue,
-  );
-  GithubIssueCache.updateIssue(closedIssue);
+  try {
+    const { body: closedIssue } = await githubApi.patchJson(
+      `repos/${repo}/issues/${issueNumber}`,
+      { body: { state: 'closed' } },
+      Issue,
+    );
+    GithubIssueCache.updateIssue(closedIssue);
+  } catch (err) {
+    const statusCode = err.response?.statusCode;
+    if (statusCode === 404 || statusCode === 410) {
+      logger.debug(
+        `Issue #${issueNumber} no longer exists on the platform, removing from cache`,
+      );
+      GithubIssueCache.deleteIssue(issueNumber);
+      return;
+    }
+    throw err;
+  }
 }
 
 export async function ensureIssue({
@@ -1395,7 +1437,7 @@ export async function ensureIssue({
   shouldReOpen = true,
 }: EnsureIssueConfig): Promise<EnsureIssueResult | null> {
   logger.debug(`ensureIssue(${title})`);
-  /* v8 ignore next */
+  /* v8 ignore next -- specs initialize repos with issues enabled */
   if (config.hasIssuesEnabled === false) {
     logger.info(
       'Cannot ensure issue because issues are disabled in this repository',
@@ -1422,7 +1464,7 @@ export async function ensureIssue({
         if (shouldReOpen) {
           logger.debug('Reopening previously closed issue');
         }
-        issue = issues[issues.length - 1];
+        issue = issues.at(-1)!;
       }
       for (const i of issues) {
         if (i.state === 'open' && i.number !== issue.number) {
@@ -1479,7 +1521,7 @@ export async function ensureIssue({
     // reset issueList so that it will be fetched again as-needed
     GithubIssueCache.updateIssue(createdIssue);
     return 'created';
-  } catch (err) /* v8 ignore next */ {
+  } catch (err) /* v8 ignore next -- issue creation failure handling is not mocked in specs */ {
     if (err.body?.message?.startsWith('Issues are disabled for this repo')) {
       logger.debug(`Issues are disabled, so could not create issue: ${title}`);
     } else {
@@ -1491,7 +1533,7 @@ export async function ensureIssue({
 
 export async function ensureIssueClosing(title: string): Promise<void> {
   logger.trace(`ensureIssueClosing(${title})`);
-  /* v8 ignore next */
+  /* v8 ignore next -- specs initialize repos with issues enabled */
   if (config.hasIssuesEnabled === false) {
     return;
   }
@@ -1528,7 +1570,7 @@ async function tryAddMilestone(
     );
     GithubIssueCache.updateIssue(updatedIssue);
   } catch (err) {
-    /* v8 ignore next */
+    /* v8 ignore next -- defensive: the raw-error fallback is for non-HTTP failures not seen in specs */
     const actualError = err.response?.body ?? err;
     logger.warn(
       {
@@ -1547,12 +1589,30 @@ export async function addAssignees(
 ): Promise<void> {
   logger.debug(`Adding assignees '${assignees.join(', ')}' to #${issueNo}`);
   const repository = config.parentRepo ?? config.repository;
-  const { body: updatedIssue } = await githubApi.postJson(
-    `repos/${repository}/issues/${issueNo}/assignees`,
-    { body: { assignees } },
-    Issue,
-  );
-  GithubIssueCache.updateIssue(updatedIssue);
+  const url = `repos/${repository}/issues/${issueNo}/assignees`;
+  let lastErr: Error | undefined;
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    try {
+      const { body: updatedIssue } = await githubApi.postJson(
+        url,
+        { body: { assignees } },
+        Issue,
+      );
+      GithubIssueCache.updateIssue(updatedIssue);
+      return;
+    } catch (err) {
+      if (err.statusCode !== 404) {
+        throw err;
+      }
+      lastErr = err;
+      logger.debug(
+        { attempt: attempt + 1 },
+        `Retrying addAssignees for #${issueNo} after 404`,
+      );
+      await setTimeout(1000);
+    }
+  }
+  throw lastErr!;
 }
 
 export async function addReviewers(
@@ -1577,7 +1637,7 @@ export async function addReviewers(
         },
       },
     );
-  } catch (err) /* v8 ignore next */ {
+  } catch (err) /* v8 ignore next -- defensive: reviewer assignment failures are logged and swallowed, not simulated in specs */ {
     logger.warn({ err }, 'Failed to assign reviewer');
   }
 }
@@ -1594,7 +1654,7 @@ export async function addLabels(
         body: labels,
       });
     }
-  } catch (err) /* v8 ignore next */ {
+  } catch (err) /* v8 ignore next -- defensive: label-adding failures are logged and swallowed, not simulated in specs */ {
     logger.warn(
       { err, issueNo, labels },
       'Error while adding labels. Skipping',
@@ -1612,7 +1672,7 @@ export async function deleteLabel(
     await githubApi.deleteJson(
       `repos/${repository}/issues/${issueNo}/labels/${label}`,
     );
-  } catch (err) /* v8 ignore next */ {
+  } catch (err) /* v8 ignore next -- defensive: label deletion failures are logged and swallowed, not simulated in specs */ {
     logger.warn({ err, issueNo, label }, 'Failed to delete label');
   }
 }
@@ -1665,7 +1725,7 @@ async function getComments(issueNo: number): Promise<Comment[]> {
     );
     logger.debug(`Found ${comments.length} comments`);
     return comments;
-  } catch (err) /* v8 ignore next */ {
+  } catch (err) /* v8 ignore next -- comment-fetch 404s are wrapped as ExternalHostError, not mocked in specs */ {
     if (err.statusCode === 404) {
       logger.debug('404 response when retrieving comments');
       throw new ExternalHostError(err, 'github');
@@ -1721,7 +1781,7 @@ export async function ensureComment({
       logger.debug('Comment is already up-to-date');
     }
     return true;
-  } catch (err) /* v8 ignore next */ {
+  } catch (err) /* v8 ignore next -- comment API failure handling (locked issues) is not mocked in specs */ {
     if (err instanceof ExternalHostError) {
       throw err;
     }
@@ -1732,6 +1792,14 @@ export async function ensureComment({
     }
     return false;
   }
+}
+
+function byTopic(comment: Comment, topic: string): boolean {
+  return comment.body.startsWith(`### ${topic}\n\n`);
+}
+
+function byContent(comment: Comment, content: string): boolean {
+  return comment.body.trim() === content;
 }
 
 export async function ensureCommentRemoval(
@@ -1748,13 +1816,11 @@ export async function ensureCommentRemoval(
 
   // v8 ignore else -- TODO: add test #40625
   if (deleteConfig.type === 'by-topic') {
-    const byTopic = (comment: Comment): boolean =>
-      comment.body.startsWith(`### ${deleteConfig.topic}\n\n`);
-    commentId = comments.find(byTopic)?.id;
+    const topic = deleteConfig.topic;
+    commentId = comments.find((comment) => byTopic(comment, topic))?.id;
   } else if (deleteConfig.type === 'by-content') {
-    const byContent = (comment: Comment): boolean =>
-      comment.body.trim() === deleteConfig.content;
-    commentId = comments.find(byContent)?.id;
+    const content = deleteConfig.content;
+    commentId = comments.find((comment) => byContent(comment, content))?.id;
   }
 
   try {
@@ -1763,7 +1829,7 @@ export async function ensureCommentRemoval(
       logger.debug(`Removing comment from issueNo: ${issueNo}`);
       await deleteComment(commentId);
     }
-  } catch (err) /* v8 ignore next */ {
+  } catch (err) /* v8 ignore next -- defensive: comment deletion failures are logged and swallowed, not simulated in specs */ {
     logger.warn({ err }, 'Error deleting comment');
   }
 }
@@ -1781,15 +1847,16 @@ async function tryPrAutomerge(
 
   // If GitHub Enterprise Server <3.3.0 it doesn't support automerge
   // TODO #22198
-  if (platformConfig.isGhe) {
-    // semver not null safe, accepts null and undefined
-    if (semver.satisfies(platformConfig.gheVersion!, '<3.3.0')) {
-      logger.debug(
-        { prNumber },
-        'GitHub-native automerge: not supported on this version of GHE. Use 3.3.0 or newer.',
-      );
-      return;
-    }
+  // semver not null safe, accepts null and undefined
+  if (
+    platformConfig.isGhe &&
+    semver.satisfies(platformConfig.gheVersion!, '<3.3.0')
+  ) {
+    logger.debug(
+      { prNumber },
+      'GitHub-native automerge: not supported on this version of GHE. Use 3.3.0 or newer.',
+    );
+    return;
   }
 
   if (!config.autoMergeAllowed) {
@@ -1802,8 +1869,34 @@ async function tryPrAutomerge(
 
   try {
     const mergeMethod = config.mergeMethod?.toUpperCase() || 'MERGE';
-    const variables = { pullRequestId: prNodeId, mergeMethod };
-    const queryOptions = { variables };
+
+    let commitHeadline: string | undefined;
+    let commitBody: string | undefined;
+    // For SQUASH and MERGE methods, pass the commit message explicitly to avoid
+    // GitHub using the PR description as the commit body when "Use PR title and
+    // body as commit message" is enabled in repository settings.
+    const automergeCommitMessage = platformPrOptions?.automergeCommitMessage;
+    if (mergeMethod !== 'REBASE' && automergeCommitMessage) {
+      const newlineIndex = automergeCommitMessage.indexOf('\n');
+      if (newlineIndex === -1) {
+        commitHeadline = automergeCommitMessage;
+      } else {
+        commitHeadline = automergeCommitMessage.slice(0, newlineIndex);
+        commitBody = automergeCommitMessage.slice(newlineIndex + 1).trim();
+      }
+
+      // Add PR number to the commit headline to match the default GitHub behavior
+      commitHeadline = `${commitHeadline} (#${prNumber})`;
+    }
+
+    const variables = {
+      pullRequestId: prNodeId,
+      mergeMethod,
+      commitHeadline,
+      commitBody,
+    };
+    // set count to one bypass graphql check
+    const queryOptions = { variables, count: 1 };
 
     const res = await githubApi.requestGraphql<GhAutomergeResponse>(
       enableAutoMergeMutation,
@@ -1850,7 +1943,7 @@ export async function createPr({
       draft: draftPR,
     },
   };
-  /* v8 ignore next */
+  /* v8 ignore next -- fork mode is not exercised in createPr specs */
   if (config.forkToken) {
     options.token = config.forkToken;
     options.body.maintainer_can_modify =
@@ -1905,7 +1998,7 @@ export async function updatePr({
   const options: any = {
     body: patchBody,
   };
-  /* v8 ignore next */
+  /* v8 ignore next -- fork mode is not exercised in updatePr specs */
   if (config.forkToken) {
     options.token = config.forkToken;
   }
@@ -1929,7 +2022,7 @@ export async function updatePr({
     const result = coerceRestPr(ghPr);
     cachePr(result);
     logger.debug(`PR updated...prNo: ${prNo}`);
-  } catch (err) /* v8 ignore next */ {
+  } catch (err) /* v8 ignore next -- non-host update failures are logged and swallowed, not mocked in specs */ {
     if (err instanceof ExternalHostError) {
       throw err;
     }
@@ -1948,7 +2041,7 @@ export async function reattemptPlatformAutomerge({
     await tryPrAutomerge(number, node_id, platformPrOptions);
 
     logger.debug(`PR platform automerge re-attempted...prNo: ${number}`);
-  } catch (err) /* v8 ignore next */ {
+  } catch (err) /* v8 ignore next -- defensive: automerge re-attempt failures are logged and swallowed, not simulated in specs */ {
     logger.warn({ err }, 'Error re-attempting PR platform automerge');
   }
 }
@@ -1965,7 +2058,7 @@ export async function mergePr({
   const options: GithubHttpOptions = {
     body: {},
   };
-  /* v8 ignore next */
+  /* v8 ignore next -- fork mode is not exercised in mergePr specs */
   if (config.forkToken) {
     options.token = config.forkToken;
   }
@@ -1982,7 +2075,7 @@ export async function mergePr({
       logger.debug({ options, url }, `mergePr`);
       automergeResult = await githubApi.putJson(url, options);
       automerged = true;
-    } catch (err) /* v8 ignore next */ {
+    } catch (err) /* v8 ignore next -- merge rejection handling (404/405 status-check bodies) is not fully mocked in specs */ {
       if (err.statusCode === 404 || err.statusCode === 405) {
         const body = err.response?.body;
         if (
@@ -2087,13 +2180,13 @@ export function maxBodyLength(): number {
   return GitHubMaxPrBodyLen;
 }
 
-export async function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
-  /* v8 ignore next */
+export async function getVulnerabilityAlerts(): Promise<GithubVulnerabilityAlerts> {
+  /* v8 ignore next -- specs initialize repos with vulnerability alerts enabled */
   if (config.hasVulnerabilityAlertsEnabled === false) {
     logger.debug('No vulnerability alerts enabled for repo');
     return [];
   }
-  let vulnerabilityAlerts: VulnerabilityAlert[] | undefined;
+  let vulnerabilityAlerts: GithubVulnerabilityAlerts | undefined;
   try {
     vulnerabilityAlerts = (
       await githubApi.getJson(
@@ -2103,14 +2196,14 @@ export async function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
           headers: { accept: 'application/vnd.github+json' },
           cacheProvider: repoCacheProvider,
         },
-        GithubVulnerabilityAlert,
+        GithubVulnerabilityAlerts,
       )
     ).body;
-  } catch (err) /* v8 ignore next */ {
+  } catch (err) /* v8 ignore next -- alert-permission failures are logged and swallowed, not mocked in specs */ {
     logger.debug({ err }, 'Error retrieving vulnerability alerts');
     logger.warn(
       {
-        url: 'https://docs.renovatebot.com/configuration-options/#vulnerabilityalerts',
+        url: `${GlobalConfig.get('productLinks').documentation}configuration-options/#vulnerabilityalerts`,
       },
       'Cannot access vulnerability alerts. Please ensure permissions have been granted.',
     );
@@ -2137,7 +2230,8 @@ export async function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
         } = alert.security_vulnerability;
         const patch = firstPatchedVersion?.identifier;
 
-        const normalizedName = normalizeNamePerEcosystem({ name, ecosystem });
+        const normalizedName =
+          ecosystem === 'pip' ? normalizePythonDepName(name) : name;
         alert.security_vulnerability.package.name = normalizedName;
         const key = `${ecosystem.toLowerCase()}/${normalizedName}`;
         const range = vulnerableVersionRange;
@@ -2149,7 +2243,7 @@ export async function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
     } else {
       logger.debug('No vulnerability alerts found');
     }
-  } catch (err) /* v8 ignore next */ {
+  } catch (err) /* v8 ignore next -- defensive: processing already-parsed alerts does not throw in specs */ {
     logger.error({ err }, 'Error processing vulnerabity alerts');
   }
   return vulnerabilityAlerts ?? [];
@@ -2160,18 +2254,31 @@ async function pushFiles(
   { parentCommitSha, commitSha }: CommitResult,
 ): Promise<LongCommitSha | null> {
   try {
-    // Push the commit to GitHub using a custom ref
-    // The associated blobs will be pushed automatically
+    // Hybrid git/REST commit strategy (see #13824, #14271):
+    // 1. The git push below uploads blobs to GitHub via a custom ref
+    //    (refs/renovate/branches/*) which does NOT trigger CI/Actions.
+    // 2. We then recreate the tree+commit via REST API so that:
+    //    - The commit is signed by GitHub ("committed via GitHub" badge)
+    //    - Force-push and file mode bits are supported (GraphQL can't do this)
+    //    - We can use base_tree to send only changed files, avoiding org
+    //      ruleset file-path restrictions on unchanged files (#42554)
+    // Reusing the pushed commit/tree SHAs directly does not work because
+    // the branch ref must point to an API-created commit for signing.
     await pushCommitToRenovateRef(commitSha, branchName);
-    // Get all the blobs which the commit/tree points to
-    // The blob SHAs will be the same locally as on GitHub
-    const treeItems = await listCommitTree(commitSha);
+    const baseTreeSha = await getCommitTreeSha(parentCommitSha);
+    const treeItems = await diffCommitTree(parentCommitSha, commitSha);
 
-    // For reasons unknown, we need to recreate our tree+commit on GitHub
-    // Attempting to reuse the tree or commit SHA we pushed does not work
+    if (treeItems.length === 0) {
+      logger.debug(
+        { branchName },
+        'Platform-native commit: no changed files between commits',
+      );
+      return null;
+    }
+
     const treeRes = await githubApi.postJson<{ sha: string }>(
       `/repos/${config.repository}/git/trees`,
-      { body: { tree: treeItems } },
+      { body: { base_tree: baseTreeSha, tree: treeItems } },
     );
     const treeSha = treeRes.body.sha;
 
@@ -2181,7 +2288,7 @@ async function pushFiles(
       { body: { message, tree: treeSha, parents: [parentCommitSha] } },
     );
     incLimitedValue('Commits');
-    const remoteCommitSha = commitRes.body.sha as LongCommitSha;
+    const remoteCommitSha = toLongCommitSha(commitRes.body.sha);
     await ensureBranchSha(branchName, remoteCommitSha);
     return remoteCommitSha;
   } catch (err) {

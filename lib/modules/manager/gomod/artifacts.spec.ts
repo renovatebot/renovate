@@ -4,13 +4,17 @@ import { mockDeep } from 'vitest-mock-extended';
 import { envMock, mockExecAll } from '~test/exec-util.ts';
 import { env, fs, git, partial } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
-import type { RepoGlobalConfig } from '../../../config/types.ts';
+import type {
+  InternalGlobalConfigOptions,
+  RepoGlobalConfig,
+} from '../../../config/types.ts';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
 import * as docker from '../../../util/exec/docker/index.ts';
 import type { StatusResult } from '../../../util/git/types.ts';
 import * as hostRules from '../../../util/host-rules.ts';
 import * as _datasource from '../../datasource/index.ts';
 import type { UpdateArtifactsConfig } from '../types.ts';
+import { deriveGoToolchainConstraints } from './artifacts.ts';
 import * as _artifactsExtra from './artifacts-extra.ts';
 import * as gomod from './index.ts';
 
@@ -21,7 +25,7 @@ vi.mock('../../../util/http/index.ts');
 vi.mock('../../../util/fs/index.ts', async () => {
   // restore
   return mockDeep({
-    isValidLocalPath: (await vi.importActual<FS>('../../../util/fs'))
+    isValidLocalPath: (await vi.importActual<FS>('../../../util/fs/index.ts'))
       .isValidLocalPath,
   });
 });
@@ -54,12 +58,13 @@ const gomod1 = codeBlock`
   )
 `;
 
-const adminConfig: RepoGlobalConfig = {
+const adminConfig: RepoGlobalConfig & InternalGlobalConfigOptions = {
   // `join` fixes Windows CI
   localDir: upath.join('/tmp/github/some/repo'),
   cacheDir: upath.join('/tmp/renovate/cache'),
   containerbaseDir: upath.join('/tmp/renovate/cache/containerbase'),
   dockerSidecarImage: 'ghcr.io/renovatebot/base-image',
+  binarySource: 'global',
 };
 
 const config: UpdateArtifactsConfig = {
@@ -2829,5 +2834,52 @@ describe('modules/manager/gomod/artifacts', () => {
         options: { cwd: '/tmp/github/some/repo' },
       },
     ]);
+  });
+
+  describe('deriveGoToolchainConstraints', () => {
+    it('returns config constraint when set', () => {
+      expect(
+        deriveGoToolchainConstraints({ constraints: { go: '1.21' } }, ''),
+      ).toBe('1.21');
+    });
+
+    it('config constraint takes precedence over go.mod content', () => {
+      expect(
+        deriveGoToolchainConstraints(
+          { constraints: { go: '1.20' } },
+          'go 1.23.5',
+        ),
+      ).toBe('1.20');
+    });
+
+    it('returns toolchain version when toolchain directive is present', () => {
+      expect(
+        deriveGoToolchainConstraints({}, 'go 1.13\ntoolchain go1.23.6'),
+      ).toBe('1.23.6');
+    });
+
+    it('returns full go version when only full go directive is present (no toolchain)', () => {
+      expect(deriveGoToolchainConstraints({}, 'go 1.23.5')).toBe('1.23.5');
+    });
+
+    it('returns range constraint for major.minor go directive', () => {
+      expect(deriveGoToolchainConstraints({}, 'go 1.17')).toBe('^1.17');
+    });
+
+    it('returns undefined when no go version in content and no config constraint', () => {
+      expect(
+        deriveGoToolchainConstraints({}, 'module example.com/foo'),
+      ).toBeUndefined();
+    });
+
+    // TODO #42601
+    it('ignores constraints.golang and falls back to go.mod content', () => {
+      expect(
+        deriveGoToolchainConstraints(
+          { constraints: { golang: '1.21' } },
+          'go 1.23.5',
+        ),
+      ).toBe('1.23.5');
+    });
   });
 });

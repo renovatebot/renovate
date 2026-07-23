@@ -70,7 +70,7 @@ async function getTimestamp(
 
 export async function lookupUpdates(
   inconfig: LookupUpdateConfig,
-): Promise<Result<UpdateResult, Error>> {
+): Promise<Result<UpdateResult>> {
   let config: LookupUpdateConfig = { ...inconfig };
   config.versioning ??= getDefaultVersioning(config.datasource);
 
@@ -93,6 +93,7 @@ export async function lookupUpdates(
     );
     if (config.currentValue && !isString(config.currentValue)) {
       // If currentValue is not a string, then it's invalid
+      // v8 ignore else -- TODO: add test #40625
       if (config.currentValue) {
         logger.debug(
           `Invalid currentValue for ${config.packageName}: ${JSON.stringify(config.currentValue)} (${typeof config.currentValue})`,
@@ -171,7 +172,7 @@ export async function lookupUpdates(
         // If dependency lookup fails then warn and return
         const warning: ValidationMessage = {
           topic: config.packageName,
-          message: `Failed to look up ${config.datasource} package ${config.packageName}`,
+          message: `Failed to look up ${config.datasource} package ${config.packageName}: ${lookupError}`,
         };
         logger.debug(
           {
@@ -213,6 +214,7 @@ export async function lookupUpdates(
       let allVersions = dependency.releases.filter((release) =>
         versioningApi.isVersion(release.version),
       );
+      const allReleaseVersions = new Set(allVersions.map((r) => r.version));
       // istanbul ignore if
       if (allVersions.length === 0) {
         const message = `Found no results from datasource that look like a version`;
@@ -303,8 +305,12 @@ export async function lookupUpdates(
       let currentVersion: string;
       if (rangeStrategy === 'update-lockfile') {
         currentVersion = config.lockedVersion!;
-      } else if (allVersions.find((v) => v.version === compareValue)) {
-        currentVersion = compareValue!;
+      } else if (
+        compareValue &&
+        versioningApi.isSingleVersion(compareValue) &&
+        allVersions.find((v) => v.version === compareValue)
+      ) {
+        currentVersion = compareValue;
       }
       // TODO #22198
       currentVersion ??=
@@ -326,6 +332,7 @@ export async function lookupUpdates(
         )!;
 
       if (!currentVersion) {
+        // v8 ignore else -- TODO: add test #40625
         if (!config.lockedVersion) {
           logger.debug(
             `No currentVersion or lockedVersion found for ${config.packageName}`,
@@ -335,11 +342,18 @@ export async function lookupUpdates(
         return Result.ok(res);
       }
 
-      res.currentVersion = currentVersion!;
+      res.currentVersion = currentVersion;
+
+      // Use lockedVersion for the timestamp lookup when available, because
+      // res.currentVersion is later overwritten to lockedVersion (see below).
+      // Without this, strategies like "replace" would compute the timestamp
+      // for the highest satisfying version (e.g. 1.4.1) while the reported
+      // currentVersion ends up being the locked one (e.g. 1.0.0).
+      const versionForTimestamp = config.lockedVersion ?? currentVersion;
       const currentVersionTimestamp = await getTimestamp(
         config,
         allVersions,
-        currentVersion,
+        versionForTimestamp,
         versioningApi,
       );
 
@@ -470,6 +484,7 @@ export async function lookupUpdates(
           release.version,
           versioningApi,
         );
+        // v8 ignore else -- TODO: add test #40625
         if (isString(bucket)) {
           if (buckets[bucket]) {
             buckets[bucket].push(release);
@@ -505,6 +520,7 @@ export async function lookupUpdates(
           config.lockedVersion ?? currentVersion!,
           bucket,
           release,
+          allReleaseVersions,
         );
 
         // #29034
@@ -616,6 +632,7 @@ export async function lookupUpdates(
     ) {
       for (const update of res.updates) {
         logger.debug({ update });
+        // v8 ignore else -- TODO: add test #40625
         if (isString(config.currentValue) && isString(update.newValue)) {
           update.newValue = config.currentValue.replace(
             compareValue,
@@ -635,21 +652,23 @@ export async function lookupUpdates(
             newValue: config.currentValue,
           });
         }
-      } else if (config.pinDigests) {
+      } else if (
+        config.pinDigests &&
         // Create a pin only if one doesn't already exists
-        if (!res.updates.some((update) => update.updateType === 'pin')) {
-          // pin digest
-          res.updates.push({
-            isPinDigest: true,
-            updateType: 'pinDigest',
-            newValue: config.currentValue,
-          });
-        }
+        // v8 ignore else -- TODO: add test #40625
+        !res.updates.some((update) => update.updateType === 'pin')
+      ) {
+        // pin digest
+        res.updates.push({
+          isPinDigest: true,
+          updateType: 'pinDigest',
+          newValue: config.currentValue,
+        });
       }
       if (versioningApi.valueToVersion) {
         // TODO #22198
         res.currentVersion = versioningApi.valueToVersion(res.currentVersion!);
-        for (const update of res.updates || /* istanbul ignore next*/ []) {
+        for (const update of res.updates) {
           // TODO #22198
           update.newVersion = versioningApi.valueToVersion(update.newVersion!);
         }
@@ -679,13 +698,25 @@ export async function lookupUpdates(
           ) {
             delete getDigestConfig.lookupName;
             delete getDigestConfig.currentDigest;
+            getDigestConfig.replacementName = update.newName;
           }
 
-          // TODO #22198
-          update.newDigest ??=
-            dependency?.releases.find((r) => r.version === update.newValue)
-              ?.newDigest ??
-            (await getDigest(getDigestConfig, update.newValue))!;
+          // Don't use current releases if replacement changes name, otherwise we use the wrong new digest.
+          // This happens on datasources which return the digest in release info like `github-tags`.
+          // We can still use it when only version is changing.
+          if (
+            update.updateType !== 'replacement' ||
+            update.newName === config.packageName
+          ) {
+            update.newDigest ??= dependency?.releases.find(
+              (r) => r.version === update.newValue,
+            )?.newDigest;
+          }
+
+          update.newDigest ??= await getDigest(
+            getDigestConfig,
+            update.newValue,
+          );
 
           // If the digest could not be determined, report this as otherwise the
           // update will be omitted later on without notice.
@@ -753,16 +784,18 @@ export async function lookupUpdates(
     if (config.rollbackPrs && config.followTag) {
       res.updates = res.updates.filter(
         (update) =>
-          res.updates.length === 1 ||
-          /* istanbul ignore next */ update.updateType !== 'rollback',
+          update.updateType !== 'rollback' || res.updates.length === 1,
       );
     }
 
     const release =
       res.updates.length > 0
-        ? dependency?.releases.find(
+        ? (dependency?.releases.find(
             (r) => r.version === res.updates[0].newValue,
-          )
+          ) ??
+          dependency?.releases.find(
+            (r) => r.version === res.updates[0].newVersion,
+          ))
         : null;
 
     if (release?.changelogContent) {

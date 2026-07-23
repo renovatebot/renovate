@@ -23,13 +23,18 @@
     "embroider": "/^@embroider//",
     "forge": "/^@forge//",
     "fullcalendar": "/^@fullcalendar//",
-    "hotchocolate": "/^HotChocolate\\./",
     "oracle-database": [
       "/^com.oracle.database.jdbc:/",
       "/^com.oracle.database.nls:/"
     ],
+    "oxlint": ["oxlint", "eslint-plugin-oxlint"],
     "prometheus-simpleclient": "/^io.prometheus:simpleclient/",
     "russh": ["/^russh$/", "/^russh-keys$/"],
+    "solid": [
+      "@solid-design-system/tokens",
+      "@solid-design-system/styles",
+      "@solid-design-system/components"
+    ],
     "spfx": ["/^@microsoft/sp-/", "/^@microsoft/eslint-.+-spfx$/"],
     "spock": "/^org\\.spockframework:spock-/",
     "syncfusion-dotnet": "/^Syncfusion\\./",
@@ -68,10 +73,17 @@
     "arcus.security": "https://github.com/arcus-azure/arcus.security",
     "arcus.webapi": "https://github.com/arcus-azure/arcus.webapi",
     "arrow-kt": "https://github.com/arrow-kt/arrow",
-    "aspire": "https://github.com/dotnet/aspire",
+    "arrow-rs": "https://github.com/apache/arrow-rs",
+    "aspire": [
+      "https://github.com/dotnet/aspire",
+      "https://github.com/microsoft/aspire"
+    ],
     "aspnet aspnetwebstack": "https://github.com/aspnet/AspNetWebStack",
     "aspnet extensions": "https://github.com/aspnet/Extensions",
-    "aspnet-api-versioning": "https://github.com/Microsoft/aspnet-api-versioning",
+    "aspnet-api-versioning": [
+      "https://github.com/Microsoft/aspnet-api-versioning",
+      "https://github.com/dotnet/aspnet-api-versioning"
+    ],
     "aspnet-health-checks": "https://github.com/xabaril/AspNetCore.Diagnostics.HealthChecks",
     "aspnet-security-oauth-providers": "https://github.com/aspnet-contrib/AspNet.Security.OAuth.Providers",
     "astro": "https://github.com/withastro/astro",
@@ -123,6 +135,7 @@
     "babel": "https://github.com/babel/babel",
     "backstage": "https://github.com/backstage/backstage",
     "baset": "https://github.com/igmat/baset",
+    "better-auth": "https://github.com/better-auth/better-auth",
     "brave": "https://github.com/openzipkin/brave",
     "bugsnag-js": "https://github.com/bugsnag/bugsnag-js",
     "bull-board": "https://github.com/felixmosh/bull-board",
@@ -143,6 +156,8 @@
       "https://github.com/Microsoft/ClearScript"
     ],
     "commitlint": "https://github.com/conventional-changelog/commitlint",
+    "confect": "https://github.com/rjdellecese/confect",
+    "conform": "https://github.com/edmundhung/conform",
     "contentful-rich-text": "https://github.com/contentful/rich-text",
     "cspell": "https://github.com/streetsidesoftware/cspell",
     "datadog-browser-sdk": "https://github.com/DataDog/browser-sdk",
@@ -344,6 +359,7 @@
     "dotnetcore-cap": "https://github.com/dotnetcore/CAP",
     "dropwizard": "https://github.com/dropwizard/dropwizard",
     "duende-identityserver": "https://github.com/DuendeSoftware/IdentityServer",
+    "effect": "https://github.com/Effect-TS/effect-smol",
     "elastic-apm-agent-rum-js": "https://github.com/elastic/apm-agent-rum-js",
     "elastic-ecs-dotnet": "https://github.com/elastic/ecs-dotnet",
     "electron-forge": [
@@ -357,6 +373,7 @@
     "enumeratum": "https://github.com/lloydmeta/enumeratum",
     "envelop": "https://github.com/n1ru4l/envelop",
     "error-prone": "https://github.com/google/error-prone",
+    "error-prone-support": "https://github.com/PicnicSupermarket/error-prone-support",
     "eslint": "https://github.com/eslint/eslint",
     "eslint-config-globex": "https://github.com/GlobexDesignsInc/eslint-config-globex",
     "eslint-stylistic": "https://github.com/eslint-stylistic/eslint-stylistic",
@@ -394,6 +411,7 @@
     "graphql-hive-gateway": "https://github.com/graphql-hive/gateway",
     "graphql-mesh": "https://github.com/Urigo/graphql-mesh",
     "graphql-modules": "https://github.com/Urigo/graphql-modules",
+    "graphql-platform": "https://github.com/ChilliCream/graphql-platform",
     "graphql-tools": "https://github.com/ardatan/graphql-tools",
     "graphql-yoga": "https://github.com/dotansimha/graphql-yoga",
     "graphqlcodegenerator": [
@@ -414,6 +432,7 @@
     "hibernate-search": "https://github.com/hibernate/hibernate-search",
     "hibernate-tools": "https://github.com/hibernate/hibernate-tools",
     "hickory-dns": "https://github.com/hickory-dns/hickory-dns",
+    "hocuspocus": "https://github.com/ueberdosis/hocuspocus",
     "html-eslint": "https://github.com/yeonjuan/html-eslint",
     "humanizer": "https://github.com/Humanizr/Humanizer",
     "immich": "https://github.com/immich-app/immich",
@@ -457,6 +476,7 @@
     "jna": "https://github.com/java-native-access/jna",
     "json-smart-v2": "https://github.com/netplex/json-smart-v2",
     "jsplumb": "https://github.com/jsplumb/jsplumb",
+    "junior": "https://github.com/getsentry/junior",
     "junit-framework": [
       "https://github.com/junit-team/junit5",
       "https://github.com/junit-team/junit-framework"
@@ -588,16 +608,14 @@
     "opentelemetry-java-contrib": "https://github.com/open-telemetry/opentelemetry-java-contrib",
     "opentelemetry-js": "https://github.com/open-telemetry/opentelemetry-js",
     "opentelemetry-js-contrib": "https://github.com/open-telemetry/opentelemetry-js-contrib",
+    "opentelemetry-php": "https://github.com/open-telemetry/opentelemetry-php",
+    "opentelemetry-php-contrib": "https://github.com/open-telemetry/opentelemetry-php-contrib",
     "opentelemetry-python": "https://github.com/open-telemetry/opentelemetry-python",
     "opentelemetry-python-contrib": "https://github.com/open-telemetry/opentelemetry-python-contrib",
     "opentelemetry-rust": "https://github.com/open-telemetry/opentelemetry-rust",
     "opentelemetry-rust-contrib": "https://github.com/open-telemetry/opentelemetry-rust-contrib",
     "orleans": "https://github.com/dotnet/orleans",
     "orpc": "https://github.com/middleapi/orpc",
-    "oxlint": [
-      "https://github.com/oxc-project/oxc",
-      "https://github.com/oxc-project/eslint-plugin-oxlint"
-    ],
     "panda-css": "https://github.com/chakra-ui/panda",
     "parcel": "https://github.com/parcel-bundler/parcel",
     "payloadcms": "https://github.com/payloadcms/payload",
@@ -624,7 +642,10 @@
     "quartznet": "https://github.com/quartznet/quartznet",
     "radix-ui-primitives": "https://github.com/radix-ui/primitives",
     "reach-ui": "https://github.com/reach/reach-ui",
-    "react": "https://github.com/facebook/react",
+    "react": [
+      "https://github.com/facebook/react",
+      "https://github.com/react/react"
+    ],
     "react-admin": "https://github.com/marmelab/react-admin",
     "react-apollo": "https://github.com/apollographql/react-apollo",
     "react-dnd": "https://github.com/react-dnd/react-dnd",
@@ -668,10 +689,12 @@
     "serenity-js": "https://github.com/serenity-js/serenity-js",
     "serilog-ui": "https://github.com/serilog-contrib/serilog-ui",
     "servicestack": "https://github.com/ServiceStack/ServiceStack",
+    "serwist": "https://github.com/serwist/serwist",
     "shedlock": "https://github.com/lukas-krecan/ShedLock",
     "shiki": "https://github.com/shikijs/shiki",
     "shopify-app-bridge": "https://github.com/Shopify/app-bridge",
     "sitecore-jss": "https://github.com/Sitecore/jss",
+    "size-limit": "https://github.com/ai/size-limit",
     "skiasharp": [
       "https://github.com/mono/SkiaSharp",
       "https://go.microsoft.com/fwlink/?linkid=868515"
@@ -721,6 +744,7 @@
     "tiptap": "https://github.com/ueberdosis/tiptap",
     "tokio-prost": "https://github.com/tokio-rs/prost",
     "tokio-tracing": "https://github.com/tokio-rs/tracing",
+    "tomcat": "https://github.com/apache/tomcat",
     "tonic": "https://github.com/hyperium/tonic",
     "treat": "https://github.com/seek-oss/treat",
     "trpc": "https://github.com/trpc/trpc",
@@ -754,6 +778,7 @@
     "vstest": "https://github.com/microsoft/vstest",
     "vue": ["https://github.com/vuejs/vue", "https://github.com/vuejs/core"],
     "vue-cli": "https://github.com/vuejs/vue-cli",
+    "vue-language-tools": "https://github.com/vuejs/language-tools",
     "vuepress": "https://github.com/vuejs/vuepress",
     "vueuse": "https://github.com/vueuse/vueuse",
     "weasel": "https://github.com/JasperFx/weasel",

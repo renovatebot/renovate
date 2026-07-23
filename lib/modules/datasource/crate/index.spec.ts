@@ -1,7 +1,6 @@
+import { setTimeout } from 'node:timers/promises';
 import fs from 'fs-extra';
 import type { SimpleGit } from 'simple-git';
-import { simpleGit as _simpleGit } from 'simple-git';
-import { setTimeout } from 'timers/promises';
 import type { DirectoryResult } from 'tmp-promise';
 import { dir } from 'tmp-promise';
 import upath from 'upath';
@@ -10,17 +9,20 @@ import { Fixtures } from '~test/fixtures.ts';
 import * as httpMock from '~test/http-mock.ts';
 import { partial } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
-import type { RepoGlobalConfig } from '../../../config/types.ts';
+import type {
+  InternalGlobalConfigOptions,
+  RepoGlobalConfig,
+} from '../../../config/types.ts';
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages.ts';
 import * as memCache from '../../../util/cache/memory/index.ts';
+import * as git from '../../../util/git/index.ts';
 import type { Timestamp } from '../../../util/timestamp.ts';
 import { getPkgReleases } from '../index.ts';
 import { CrateDatasource } from './index.ts';
-import type { RegistryConfigSchema } from './schema.ts';
+import type { RegistryConfig } from './schema.ts';
 
-vi.unmock('../../../util/mutex');
-vi.mock('simple-git');
-const simpleGit = vi.mocked(_simpleGit);
+vi.unmock('../../../util/mutex.ts');
+const createSimpleGit = vi.mocked(git.createSimpleGit);
 
 const API_BASE_URL = 'https://crates.io';
 const DL_BASE_URL = 'https://static.crates.io/crates';
@@ -29,7 +31,7 @@ const CRATES_IO_REGISTRY_URL_PARSED = 'https://index.crates.io/';
 
 const datasource = CrateDatasource.id;
 
-const cratesIoConfig: RegistryConfigSchema = {
+const cratesIoConfig: RegistryConfig = {
   dl: DL_BASE_URL,
   api: API_BASE_URL,
 };
@@ -54,9 +56,9 @@ function setupGitMocks(delayMs?: number): {
         }
 
         const path = `${clonePath}/my/pk/mypkg`;
-        fs.mkdirSync(upath.dirname(path), { recursive: true });
-        fs.writeFileSync(path, Fixtures.get('mypkg'), { encoding: 'utf8' });
-        fs.writeFileSync(
+        await fs.mkdir(upath.dirname(path), { recursive: true });
+        await fs.writeFile(path, Fixtures.get('mypkg'), { encoding: 'utf8' });
+        await fs.writeFile(
           `${clonePath}/config.json`,
           JSON.stringify({ dl: 'https://example.com/crates' }),
           { encoding: 'utf8' },
@@ -65,8 +67,7 @@ function setupGitMocks(delayMs?: number): {
     );
 
   const gitMock = partial<SimpleGit>({ clone: mockClone });
-  gitMock.env = () => gitMock;
-  simpleGit.mockReturnValue(gitMock);
+  createSimpleGit.mockReturnValue(gitMock);
   return { mockClone };
 }
 
@@ -83,8 +84,7 @@ function setupErrorGitMock(): {
   const gitMock = partial<SimpleGit>({
     clone: mockClone,
   });
-  gitMock.env = () => gitMock;
-  simpleGit.mockReturnValue(gitMock);
+  createSimpleGit.mockReturnValue(gitMock);
 
   return { mockClone };
 }
@@ -127,7 +127,7 @@ describe('modules/datasource/crate/index', () => {
 
   describe('getReleases', () => {
     let tmpDir: DirectoryResult | null;
-    let adminConfig: RepoGlobalConfig;
+    let adminConfig: RepoGlobalConfig & InternalGlobalConfigOptions;
 
     beforeEach(async () => {
       tmpDir = await dir({ unsafeCleanup: true });
@@ -138,7 +138,6 @@ describe('modules/datasource/crate/index', () => {
       };
       GlobalConfig.set(adminConfig);
 
-      simpleGit.mockReset();
       memCache.init();
     });
 
@@ -299,6 +298,24 @@ describe('modules/datasource/crate/index', () => {
       expect(res).toBeDefined();
     });
 
+    it('processes real data: sentry', async () => {
+      mockCratesIoConfig();
+      mockCratesApiCallFor('sentry', Fixtures.get('sentry.json'));
+
+      httpMock
+        .scope(CRATES_IO_REGISTRY_URL_PARSED)
+        .get('/se/nt/sentry')
+        .reply(200, Fixtures.get('sentry'));
+      const res = await getPkgReleases({
+        datasource,
+        packageName: 'sentry',
+        registryUrls: [CRATES_IO_REGISTRY_URL],
+      });
+      expect(res).toMatchSnapshot();
+      expect(res).not.toBeNull();
+      expect(res).toBeDefined();
+    });
+
     it('uses cached registry config for subsequent packages', async () => {
       mockCratesIoConfig();
       mockCratesApiCallFor('libc', Fixtures.get('libc.json'));
@@ -355,6 +372,23 @@ describe('modules/datasource/crate/index', () => {
       expect(res).toMatchSnapshot();
       expect(res).not.toBeNull();
       expect(res).toBeDefined();
+    });
+
+    it('clones other private registry with explicit gitTimeout', async () => {
+      const { mockClone } = setupGitMocks();
+      GlobalConfig.set({
+        ...adminConfig,
+        allowCustomCrateRegistries: true,
+        gitTimeout: 30000,
+      });
+      const url = 'https://github.com/mcorbin/testregistry';
+      const res = await getPkgReleases({
+        datasource,
+        packageName: 'mypkg',
+        registryUrls: [url],
+      });
+      expect(mockClone).toHaveBeenCalled();
+      expect(res).not.toBeNull();
     });
 
     it('clones other private registry', async () => {
@@ -471,25 +505,25 @@ describe('modules/datasource/crate/index', () => {
       const mockClone = vi
         .fn()
         .mockName('clone')
-        .mockImplementation((_registryUrl: string, clonePath: string, opts) => {
-          if (typeof opts !== 'undefined' && Object.hasOwn(opts, '--depth')) {
-            return Promise.reject(
-              new Error(
+        .mockImplementation(
+          async (_registryUrl: string, clonePath: string, opts) => {
+            if (typeof opts !== 'undefined' && Object.hasOwn(opts, '--depth')) {
+              throw new Error(
                 'fatal: dumb http transport does not support shallow capabilities',
-              ),
-            );
-          } else {
+              );
+            }
             const path = `${clonePath}/my/pk/mypkg`;
-            fs.mkdirSync(upath.dirname(path), { recursive: true });
-            fs.writeFileSync(path, Fixtures.get('mypkg'), { encoding: 'utf8' });
-          }
-        });
+            await fs.mkdir(upath.dirname(path), { recursive: true });
+            await fs.writeFile(path, Fixtures.get('mypkg'), {
+              encoding: 'utf8',
+            });
+          },
+        );
 
       const gitMock = partial<SimpleGit>({
         clone: mockClone,
       });
-      gitMock.env = () => gitMock;
-      simpleGit.mockReturnValue(gitMock);
+      createSimpleGit.mockReturnValue(gitMock);
       GlobalConfig.set({ ...adminConfig, allowCustomCrateRegistries: true });
       const url = 'https://github.com/mcorbin/testregistry';
       const res = await getPkgReleases({
@@ -525,16 +559,14 @@ describe('modules/datasource/crate/index', () => {
                 'fatal: dumb http transport does not support shallow capabilities',
               ),
             );
-          } else {
-            return Promise.reject(new Error('mocked error'));
           }
+          return Promise.reject(new Error('mocked error'));
         });
 
       const gitMock = partial<SimpleGit>({
         clone: mockClone,
       });
-      gitMock.env = () => gitMock;
-      simpleGit.mockReturnValue(gitMock);
+      createSimpleGit.mockReturnValue(gitMock);
       GlobalConfig.set({ ...adminConfig, allowCustomCrateRegistries: true });
       const url = 'https://github.com/mcorbin/testregistry';
       const res = await getPkgReleases({

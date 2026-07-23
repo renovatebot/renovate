@@ -1,11 +1,10 @@
-// v8 ignore file
+// v8 ignore file -- barrel re-exports only, no executable logic (#40625)
 // TODO: add test #40625 (zero coverage?)
 import { EmptyResultError } from './errors.ts';
 import { RequestError } from './got.ts';
 import { HttpBase } from './http.ts';
 
-export { RequestError as HttpError, EmptyResultError };
-
 export type * from './types.ts';
+export { EmptyResultError, RequestError as HttpError };
 
 export class Http extends HttpBase {}

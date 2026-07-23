@@ -1,18 +1,24 @@
+import { isNonEmptyArray } from '@sindresorhus/is';
 import semver from 'semver';
-import { z } from 'zod/v3';
+import { z } from 'zod/v4';
 import { REPOSITORY_ARCHIVED } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
 import { GerritHttp } from '../../../util/http/gerrit.ts';
 import type { HttpOptions } from '../../../util/http/types.ts';
 import { getQueryString } from '../../../util/url.ts';
-import type {
-  GerritAccountInfo,
+import type { GerritAccountInfo, GerritChangeMessageInfo } from './schema.ts';
+import {
   GerritBranchInfo,
   GerritChange,
-  GerritChangeMessageInfo,
-  GerritFindPRConfig,
+  GerritChangeMessages,
+  GerritChanges,
   GerritMergeableInfo,
   GerritProjectInfo,
+  GerritRepos,
+} from './schema.ts';
+import type {
+  GerritFindPRConfig,
+  GerritHashtagsInput,
   GerritRequestDetail,
 } from './types.ts';
 import {
@@ -42,17 +48,18 @@ class GerritClient {
   }
 
   async getRepos(): Promise<string[]> {
-    const res = await this.gerritHttp.getJsonUnchecked<string[]>(
+    const res = await this.gerritHttp.getJson(
       'a/projects/?type=CODE&state=ACTIVE',
+      GerritRepos,
     );
     return Object.keys(res.body);
   }
 
   async getProjectInfo(repository: string): Promise<GerritProjectInfo> {
-    const projectInfo =
-      await this.gerritHttp.getJsonUnchecked<GerritProjectInfo>(
-        `a/projects/${encodeURIComponent(repository)}`,
-      );
+    const projectInfo = await this.gerritHttp.getJson(
+      `a/projects/${encodeURIComponent(repository)}`,
+      GerritProjectInfo,
+    );
     if (projectInfo.body.state !== 'ACTIVE') {
       throw new Error(REPOSITORY_ARCHIVED);
     }
@@ -60,8 +67,9 @@ class GerritClient {
   }
 
   async getBranchInfo(repository: string): Promise<GerritBranchInfo> {
-    const branchInfo = await this.gerritHttp.getJsonUnchecked<GerritBranchInfo>(
+    const branchInfo = await this.gerritHttp.getJson(
       `a/projects/${encodeURIComponent(repository)}/branches/HEAD`,
+      GerritBranchInfo,
     );
     return branchInfo.body;
   }
@@ -123,8 +131,9 @@ class GerritClient {
     while (true) {
       query.S = allChanges.length + startOffset;
       const queryString = `q=${filters.join('+')}&${getQueryString(query)}`;
-      const changes = await this.gerritHttp.getJsonUnchecked<GerritChange[]>(
+      const changes = await this.gerritHttp.getJson(
         `a/changes/?${queryString}`,
+        GerritChanges,
       );
 
       logger.trace(
@@ -157,17 +166,18 @@ class GerritClient {
     requestDetails?: GerritRequestDetail[],
   ): Promise<GerritChange> {
     const queryString = getQueryString({ o: requestDetails });
-    const changes = await this.gerritHttp.getJsonUnchecked<GerritChange>(
+    const changes = await this.gerritHttp.getJson(
       `a/changes/${changeNumber}?${queryString}`,
+      GerritChange,
     );
     return changes.body;
   }
 
   async getMergeableInfo(change: GerritChange): Promise<GerritMergeableInfo> {
-    const mergeable =
-      await this.gerritHttp.getJsonUnchecked<GerritMergeableInfo>(
-        `a/changes/${change._number}/revisions/current/mergeable`,
-      );
+    const mergeable = await this.gerritHttp.getJson(
+      `a/changes/${change._number}/revisions/current/mergeable`,
+      GerritMergeableInfo,
+    );
     return mergeable.body;
   }
 
@@ -188,9 +198,10 @@ class GerritClient {
   }
 
   async getMessages(changeNumber: number): Promise<GerritChangeMessageInfo[]> {
-    const messages = await this.gerritHttp.getJsonUnchecked<
-      GerritChangeMessageInfo[]
-    >(`a/changes/${changeNumber}/messages`);
+    const messages = await this.gerritHttp.getJson(
+      `a/changes/${changeNumber}/messages`,
+      GerritChangeMessages,
+    );
     return messages.body;
   }
 
@@ -242,10 +253,16 @@ class GerritClient {
     );
   }
 
-  async deleteHashtag(changeNumber: number, hashtag: string): Promise<void> {
-    await this.gerritHttp.postJson(`a/changes/${changeNumber}/hashtags`, {
-      body: { remove: [hashtag] },
-    });
+  async setHashtags(
+    changeNumber: number,
+    hashtagsInput: GerritHashtagsInput,
+  ): Promise<void> {
+    const { add, remove } = hashtagsInput;
+    if (isNonEmptyArray(add) || isNonEmptyArray(remove)) {
+      await this.gerritHttp.postJson(`a/changes/${changeNumber}/hashtags`, {
+        body: { add, remove },
+      });
+    }
   }
 
   async addReviewers(changeNumber: number, reviewers: string[]): Promise<void> {
@@ -262,7 +279,7 @@ class GerritClient {
 
   async addAssignee(changeNumber: number, assignee: string): Promise<void> {
     await this.gerritHttp.putJson<GerritAccountInfo>(
-      // TODO: refactor this as this API removed in Gerrit 3.8
+      // TODO: use CCs instead as Gerrit 3.8+ no longer supports assignees
       `a/changes/${changeNumber}/assignee`,
       {
         body: { assignee },

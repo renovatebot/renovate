@@ -4,7 +4,7 @@ import {
   isString,
   isUrlInstance,
 } from '@sindresorhus/is';
-// eslint-disable-next-line no-restricted-imports
+// oxlint-disable-next-line no-restricted-imports
 import _parseLinkHeader from 'parse-link-header';
 import urlJoin from 'url-join';
 import { logger } from '../logger/index.ts';
@@ -143,10 +143,10 @@ export function parseLinkHeader(
  */
 export function massageHostUrl(url: string): string {
   if (!url.includes('://') && url.includes('/')) {
-    return 'https://' + url;
-  } else if (!url.includes('://') && url.includes(':')) {
-    return 'https://' + url;
-  } else {
-    return url;
+    return `https://${url}`;
   }
+  if (!url.includes('://') && url.includes(':')) {
+    return `https://${url}`;
+  }
+  return url;
 }

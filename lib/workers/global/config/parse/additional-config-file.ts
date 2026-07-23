@@ -27,7 +27,7 @@ export async function getConfig(env: NodeJS.ProcessEnv): Promise<AllConfig> {
     process.exit(1);
   }
 
-  logger.debug('Checking for additional config file in ' + configFile);
+  logger.debug(`Checking for additional config file in ${configFile}`);
   try {
     config = await getParsedContent(configFile);
   } catch (err) {
@@ -41,7 +41,8 @@ export async function getConfig(env: NodeJS.ProcessEnv): Promise<AllConfig> {
     } else if (err instanceof ReferenceError) {
       // Unsure what behavior is expected here
       logger.fatal(
-        `Error parsing additional config file due to unresolved variable(s): ${err.message}`,
+        { err },
+        'Error parsing additional config file due to unresolved variable(s)',
       );
       process.exit(1);
     } else if (err.message === 'Unsupported file type') {

@@ -13,7 +13,7 @@ import {
 } from '@sindresorhus/is';
 import { RequestError as HttpError } from 'got';
 import { DateTime } from 'luxon';
-import { ZodError } from 'zod/v3';
+import { ZodError } from 'zod/v4';
 import { ExecError } from '../util/exec/exec-error.ts';
 import { regEx } from '../util/regex.ts';
 import { redactedFields, sanitize } from '../util/sanitize.ts';
@@ -165,6 +165,13 @@ export function sanitizeValue(
 ): any {
   if (isString(value)) {
     return sanitize(sanitizeUrls(value));
+  }
+
+  // Handle boxed String objects (e.g. from `new String()`), which `isString`
+  // rejects but `isObject` would iterate character-by-character producing
+  // `{"0":"h","1":"e",...}` in log output.
+  if (value instanceof String) {
+    return sanitize(sanitizeUrls(value.toString()));
   }
 
   if (isDate(value)) {

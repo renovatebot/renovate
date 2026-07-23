@@ -1,6 +1,7 @@
 import { isEmptyArray, isString } from '@sindresorhus/is';
 import { logger } from '../../../logger/index.ts';
 import { coerceArray } from '../../../util/array.ts';
+import { coerceObject } from '../../../util/object.ts';
 import { regEx } from '../../../util/regex.ts';
 import { parseYaml } from '../../../util/yaml.ts';
 import { DockerDatasource } from '../../datasource/docker/index.ts';
@@ -21,9 +22,8 @@ import {
 function isValidChartName(name: string | undefined, oci: boolean): boolean {
   if (oci) {
     return !!name && !regEx(/[!@#$%^&*(),.?":{}|<>A-Z]/).test(name);
-  } else {
-    return !!name && !regEx(/[!@#$%^&*(),.?":{}/|<>A-Z]/).test(name);
   }
+  return !!name && !regEx(/[!@#$%^&*(),.?":{}/|<>A-Z]/).test(name);
 }
 
 function isLocalPath(possiblePath: string): boolean {
@@ -67,7 +67,10 @@ export async function extractPackageFile(
       );
     }
 
-    for (const dep of coerceArray(doc.releases)) {
+    for (const dep of [
+      ...coerceArray(doc.releases),
+      ...Object.values(coerceObject(doc.templates)),
+    ]) {
       let depName = dep.chart;
       let packageName: string | null = null;
       let repoName: string | null = null;
