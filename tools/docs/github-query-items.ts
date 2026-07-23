@@ -1,6 +1,7 @@
 import { DateTime } from 'luxon';
 import { z } from 'zod/v4';
 import { logger } from '../../lib/logger/index.ts';
+import { Json } from '../../lib/util/schema-utils/index.ts';
 import { exec } from '../utils/exec.ts';
 
 export interface ItemsEntity {
@@ -29,17 +30,19 @@ export interface Items {
   features: ItemsEntity[];
 }
 
-const GhOutput = z.array(
-  z.object({
-    url: z.string(),
-    title: z.string(),
-    labels: z.array(
-      z.object({
-        name: z.string(),
-      }),
-    ),
-    number: z.number(),
-  }),
+const GhOutput = Json.pipe(
+  z.array(
+    z.object({
+      url: z.string(),
+      title: z.string(),
+      labels: z.array(
+        z.object({
+          name: z.string(),
+        }),
+      ),
+      number: z.number(),
+    }),
+  ),
 );
 
 async function getIssuesByIssueType(
@@ -63,12 +66,9 @@ async function getIssuesByIssueType(
       },
     },
   );
-  const res = GhOutput.safeParse(JSON.parse(execRes.stdout));
-  if (res.error) {
-    throw res.error;
-  }
+  const res = GhOutput.parse(execRes.stdout);
 
-  return res.data.map((issue) => {
+  return res.map((issue) => {
     return { ...issue, issueType };
   });
 }
