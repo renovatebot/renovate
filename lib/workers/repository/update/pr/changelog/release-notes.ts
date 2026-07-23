@@ -414,13 +414,18 @@ export async function getReleaseNotesMd(
             const linkRefDefRegex = regEx(/^\s*\[[^\]]+\]:\s*\S+/);
             const bodyLines = body.split('\n');
             if (
-              bodyLines.some(
-                (line) =>
-                  line.includes(packageName) &&
-                  line.includes(version) &&
+              bodyLines.some((line) => {
+                const lineWithoutUrls = line.replace(
+                  regEx(/https?:\/\/\S+/g),
+                  ' ',
+                );
+                return (
+                  lineWithoutUrls.includes(packageName) &&
+                  lineWithoutUrls.includes(version) &&
                   !isHttpUrl(line) &&
-                  !linkRefDefRegex.test(line),
-              )
+                  !linkRefDefRegex.test(line)
+                );
+              })
             ) {
               logger.trace({ body }, `Found release notes for v${version}`);
               return {
