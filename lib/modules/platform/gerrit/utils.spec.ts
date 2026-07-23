@@ -124,6 +124,20 @@ describe('modules/platform/gerrit/utils', () => {
         );
         expect(repoUrl).toBe('ssh://abc@gerrit.example.com:29418/web/apps');
       });
+
+      it('ignores non-default HTTP port from the endpoint', () => {
+        hostRules.find.mockReturnValue({
+          username: 'abc',
+          password: '123',
+        });
+        const repoUrl = utils.getGerritRepoUrl(
+          'web/apps',
+          'http://gerrit.example.com:8080/',
+          'ssh',
+          'abc',
+        );
+        expect(repoUrl).toBe('ssh://abc@gerrit.example.com:29418/web/apps');
+      });
     });
   });
 
