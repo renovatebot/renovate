@@ -36,6 +36,11 @@ export async function createOnboardingBranch(
     logger.trace(`commitMessage: ${commitMessage}`);
   }
 
+  // only allow gitAuthor template value in the commitTrailers
+  const trailers = config.commitTrailers?.map((trailer) =>
+    compile(trailer, { gitAuthor: config.gitAuthor }),
+  );
+
   // istanbul ignore if
   if (GlobalConfig.get('dryRun')) {
     logger.info('DRY-RUN: Would commit files to onboarding branch');
@@ -59,6 +64,7 @@ export async function createOnboardingBranch(
       },
     ],
     message: commitMessage,
+    trailers,
     platformCommit: config.platformCommit,
     force: true,
     // Only needed by Gerrit platform

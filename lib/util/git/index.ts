@@ -2,6 +2,7 @@ import { setTimeout } from 'node:timers/promises';
 import URL from 'node:url';
 import {
   isBoolean,
+  isNonEmptyArray,
   isNonEmptyObject,
   isNonEmptyStringAndNotWhitespace,
   isString,
@@ -1370,6 +1371,7 @@ export async function prepareCommit({
   branchName,
   files,
   message,
+  trailers,
   force = false,
 }: CommitFilesConfig): Promise<CommitResult | null> {
   const localDir = GlobalConfig.get('localDir');
@@ -1452,7 +1454,16 @@ export async function prepareCommit({
       commitOptions['--no-verify'] = null;
     }
 
-    const commitRes = await git.commit(message, [], commitOptions);
+    let commitMessage = message;
+    if (isNonEmptyArray(trailers)) {
+      // simple-git joins message array elements with blank lines, so the
+      // trailers become the final block of the commit message
+      commitMessage = (
+        typeof message === 'string' ? [message] : message
+      ).concat(trailers.join('\n'));
+    }
+
+    const commitRes = await git.commit(commitMessage, [], commitOptions);
     if (
       isNonEmptyObject(commitRes.summary) &&
       commitRes.summary.changes === 0 &&

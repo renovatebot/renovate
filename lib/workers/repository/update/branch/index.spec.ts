@@ -1205,6 +1205,34 @@ describe('workers/repository/update/branch/index', () => {
       expect(setArtifactErrorStatus).toHaveBeenCalledTimes(1);
     });
 
+    it('compiles commit trailers', async () => {
+      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce(
+        partial<PackageFilesResult>({
+          updatedPackageFiles: [partial<FileChange>()],
+        }),
+      );
+      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+        artifactErrors: [],
+        updatedArtifacts: [partial<FileChange>()],
+      });
+      const inconfig = {
+        ...config,
+        ignoreTests: true,
+        prCreation: 'not-pending',
+        commitTrailers: ['Signed-off-by: {{{gitAuthor}}}'],
+        gitAuthor: 'Renovate Bot <bot@renovateapp.com>',
+      } satisfies BranchConfig;
+      scm.getBranchCommit.mockResolvedValue(commitSha);
+
+      await branchWorker.processBranch(inconfig);
+
+      expect(commit.commitFilesToBranch).toHaveBeenCalledWith(
+        expect.objectContaining({
+          commitTrailers: ['Signed-off-by: Renovate Bot <bot@renovateapp.com>'],
+        }),
+      );
+    });
+
     it('updates branch when no fingerprint match', async () => {
       expect.assertions(4);
       const setArtifactErrorStatus = vi.spyOn(

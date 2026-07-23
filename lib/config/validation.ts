@@ -104,6 +104,7 @@ const ignoredNodes = [
   'minimumConfidence', // undocumented feature flag
 ];
 const tzRe = regEx(/^:timezone\((.+)\)$/);
+const commitTrailerRe = regEx(/^[A-Za-z0-9-]+: [^\r\n]+$/);
 const rulesRe = regEx(/p.*Rules\[\d+\]$/);
 
 function isIgnored(key: string): boolean {
@@ -445,6 +446,19 @@ export async function validateConfig(
                       errors.push({
                         topic: 'Configuration Error',
                         message: `${currentPath}: preset value is not a string`,
+                      });
+                    }
+                  }
+                }
+
+                if (key === 'commitTrailers') {
+                  for (const subval of val) {
+                    if (!isString(subval) || !commitTrailerRe.test(subval)) {
+                      errors.push({
+                        topic: 'Configuration Error',
+                        message: `Invalid commit trailer: \`${JSON.stringify(
+                          subval,
+                        )}\`. Must be a single-line string in the form \`Key: value\`, where the key contains only letters, digits and \`-\`.`,
                       });
                     }
                   }

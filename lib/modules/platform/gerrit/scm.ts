@@ -72,9 +72,15 @@ export class GerritScm extends DefaultGitScm {
     }
 
     const changeId = existingChange?.change_id ?? generateChangeId();
-    commit.message = [
-      ...message,
-      `Renovate-Branch: ${commit.branchName}\nChange-Id: ${changeId}`,
+    commit.message = message;
+    commit.trailers = [
+      ...(commit.trailers ?? []).filter(
+        (trailer) =>
+          !trailer.startsWith('Renovate-Branch:') &&
+          !trailer.startsWith('Change-Id:'),
+      ),
+      `Renovate-Branch: ${commit.branchName}`,
+      `Change-Id: ${changeId}`,
     ];
     // prepareCommit already checks hasDiff('HEAD', 'origin/<branchName>') when
     // force is not set, which works because virtual branches are fetched as

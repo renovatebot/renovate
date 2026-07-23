@@ -2453,6 +2453,17 @@ const options: Readonly<RenovateOptions>[] = [
     default: false,
   },
   {
+    name: 'commitTrailers',
+    description:
+      'Structured git trailers (`Key: value` lines) to add in the final block of the commit message.',
+    type: 'array',
+    subType: 'string',
+    default: null,
+    mergeable: true,
+    cli: false,
+    supportsTemplating: true,
+  },
+  {
     name: 'commitMessagePrefix',
     description:
       'Prefix to add to start of commit messages and PR titles. Uses a semantic prefix if `semanticCommits` is enabled.',
