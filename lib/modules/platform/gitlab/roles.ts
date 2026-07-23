@@ -1,5 +1,3 @@
-import { regEx } from '../../../util/regex.ts';
-
 // See: https://docs.gitlab.com/api/users/#list-projects-and-groups-that-a-user-is-a-member-of
 const roleAccessLevels: Record<string, number> = {
   no_access: 0,
@@ -10,9 +8,7 @@ const roleAccessLevels: Record<string, number> = {
   developer: 30,
   maintainer: 40,
   owner: 50,
-} as const;
-
-const roleRegex = regEx(/^@@(?<role>\w+)$/);
+};
 
 /**
  * Parse a GitLab CODEOWNERS role handle (`@@developer`, `@@maintainer`,
@@ -20,7 +16,9 @@ const roleRegex = regEx(/^@@(?<role>\w+)$/);
  * recognized role, so `getRoleAccessLevel(x) !== null` doubles as a role check.
  */
 export function getRoleAccessLevel(handle: string): number | null {
-  const role = roleRegex.exec(handle)?.groups?.role;
-  const level = role ? roleAccessLevels[role.toLowerCase()] : undefined;
-  return level ?? null;
+  if (!handle.startsWith('@@')) {
+    return null;
+  }
+  const role = handle.slice(2).toLowerCase();
+  return roleAccessLevels[role] ?? null;
 }
