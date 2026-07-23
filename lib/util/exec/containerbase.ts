@@ -8,6 +8,11 @@ import { getEnv } from '../env.ts';
 import type { Opt, ToolConfig, ToolConstraint, ToolName } from './types.ts';
 
 export const allToolConfig: Record<ToolName, ToolConfig> = {
+  aube: {
+    datasource: 'npm',
+    packageName: '@endevco/aube',
+    versioning: 'npm',
+  },
   bazelisk: {
     datasource: 'github-releases',
     packageName: 'bazelbuild/bazelisk',
