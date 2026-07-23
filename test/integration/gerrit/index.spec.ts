@@ -201,24 +201,24 @@ describe('integration/gerrit/index', { timeout: 120_000 }, () => {
     );
   });
 
-  it('autoApprove votes Code-Review +2 (submit if Gerrit allows)', async () => {
+  it('automerge with autoApprove submits the change in one run', async () => {
     // Arrange
     const REPO = 'test-gerrit-automerge';
     await seed(REPO, 'test-automerge');
 
-    // Act
-    await renovate([REPO], { automerge: true, autoApprove: true });
+    // Act — ignoreTests allows same-run submit after the branch commit
+    await renovate([REPO], {
+      automerge: true,
+      autoApprove: true,
+      ignoreTests: true,
+    });
 
-    // Assert
-    const ch = findSemverChange(await getOpenChanges(REPO));
+    // Assert — change submitted onto master; no open update left behind
     const pkgRaw = await getFileContent(REPO, 'master', 'package.json');
     expect(isNonEmptyString(pkgRaw)).toBe(true);
     const pkg = JSON.parse(pkgRaw!);
-    const approved = isTruthy(ch?.labels?.['Code-Review']?.approved);
-    const merged = pkg.dependencies.semver !== '7.0.0';
-
-    // +2 on open change, or already merged to master
-    expect(approved || merged).toBe(true);
+    expect(pkg.dependencies.semver).not.toBe('7.0.0');
+    expect(await getOpenChanges(REPO)).toHaveLength(0);
   });
 
   // Expected to fail until #44425 lands (autoApprove uses max Code-Review value).
