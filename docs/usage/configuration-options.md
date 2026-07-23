@@ -813,7 +813,7 @@ For example:
 
 Another example would be if you want to configure a DCO sign off to each commit.
 
-If you want Renovate to sign off its commits, add the [`:gitSignOff` preset](./presets-default.md#gitsignoff) to your `extends` array:
+If you want Renovate to sign off its commits, you can add the [`:gitSignOff` preset](./presets-default.md#gitsignoff) to your `extends` array:
 
 ```json
 {
