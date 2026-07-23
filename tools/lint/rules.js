@@ -8,7 +8,9 @@ import noRedundantMockReset from './rules/no-redundant-mock-reset.js';
 import noStatefulGlobalRegex from './rules/no-stateful-global-regex.js';
 import noToolsImport from './rules/no-tools-import.js';
 import preferFakeShaInSpecs from './rules/prefer-fake-sha-in-specs.js';
+import preferFsUtil from './rules/prefer-fs-util.js';
 import preferJsonPipe from './rules/prefer-json-pipe.js';
+import preferLuxon from './rules/prefer-luxon.js';
 import preferNullishUtil from './rules/prefer-nullish-util.js';
 import preferPartialInSpecs from './rules/prefer-partial-in-specs.js';
 import testRootDescribe from './rules/test-root-describe.js';
@@ -31,7 +33,9 @@ export default {
     'no-stateful-global-regex': noStatefulGlobalRegex,
     'no-tools-import': noToolsImport,
     'prefer-fake-sha-in-specs': preferFakeShaInSpecs,
+    'prefer-fs-util': preferFsUtil,
     'prefer-json-pipe': preferJsonPipe,
+    'prefer-luxon': preferLuxon,
     'prefer-nullish-util': preferNullishUtil,
     'prefer-partial-in-specs': preferPartialInSpecs,
     'test-root-describe': testRootDescribe,

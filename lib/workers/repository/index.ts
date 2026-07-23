@@ -1,4 +1,3 @@
-import fs from 'fs-extra';
 import { GlobalConfig } from '../../config/global.ts';
 import { applySecretsAndVariablesToConfig } from '../../config/secrets.ts';
 import type { RenovateConfig } from '../../config/types.ts';
@@ -15,7 +14,12 @@ import { logger, setMeta } from '../../logger/index.ts';
 import { resetRepositoryLogLevelRemaps } from '../../logger/remap.ts';
 import { getInheritedOrGlobal } from '../../util/common.ts';
 import { removeDanglingContainers } from '../../util/exec/docker/index.ts';
-import { deleteLocalFile, privateCacheDir } from '../../util/fs/index.ts';
+import {
+  deleteLocalFile,
+  ensureDir,
+  privateCacheDir,
+  rmCache,
+} from '../../util/fs/index.ts';
 import { isCloned } from '../../util/git/index.ts';
 import { detectSemanticCommits } from '../../util/git/semantic.ts';
 import * as queue from '../../util/http/queue.ts';
@@ -78,7 +82,7 @@ export async function renovateRepository(
       const localDir = GlobalConfig.get('localDir');
 
       try {
-        await fs.ensureDir(localDir);
+        await ensureDir(localDir);
         logger.debug(`Using localDir: ${localDir}`);
         config = await initRepo(config);
         addSplit('init');
@@ -202,7 +206,7 @@ export async function renovateRepository(
     }
   }
   try {
-    await fs.remove(privateCacheDir());
+    await rmCache(privateCacheDir());
   } catch (err) /* istanbul ignore if */ {
     logger.warn({ err }, 'privateCacheDir deletion error');
   }
