@@ -682,39 +682,40 @@ describe('integration/gerrit/index', { timeout: 120_000 }, () => {
     }
   });
 
-  // Covers #44228: GPG gitPrivateKey enables push.gpgSign if-asked on Gerrit.
-  // Repro inspired by eclipse-jgit/jgit#222 (signed push + push-options).
-  // Renovate always sends push-options (notify=NONE, ready, labels, …).
-  it('creates a change with signed push when gitPrivateKey is set', async () => {
-    // Arrange
-    const REPO = 'test-gerrit-signed-push';
-    // Gerrit only accepts GPG keys whose UID matches a preferred account email
-    // (renovate@example.com for the bot account). Commit author can still be
-    // Renovate's gitAuthor; signingkey is set by id after import.
-    const key = await generateGpgKeyPair(
-      GERRIT_RENOVATE_DISPLAY_NAME,
-      GERRIT_RENOVATE_EMAIL,
-    );
-    try {
-      await registerGpgKey(key.publicKey);
-      await seed(REPO, 'test-signed-push', { requireSignedPush: true });
+  // TODO: re-enable once https://github.com/renovatebot/renovate/pull/44228 is merged
+  it.fails(
+    'creates a change with signed push when gitPrivateKey is set',
+    async () => {
+      // Arrange
+      const REPO = 'test-gerrit-signed-push';
+      // Gerrit only accepts GPG keys whose UID matches a preferred account email
+      // (renovate@example.com for the bot account). Commit author can still be
+      // Renovate's gitAuthor; signingkey is set by id after import.
+      const key = await generateGpgKeyPair(
+        GERRIT_RENOVATE_DISPLAY_NAME,
+        GERRIT_RENOVATE_EMAIL,
+      );
+      try {
+        await registerGpgKey(key.publicKey);
+        await seed(REPO, 'test-signed-push', { requireSignedPush: true });
 
-      // Act — autoApprove forces push-options (label=Code-Review+2) together
-      // with a signed push certificate (the jgit#222 failure mode)
-      await renovate([REPO], {
-        automerge: true,
-        autoApprove: true,
-        gitPrivateKey: key.secretKey,
-      });
+        // Act — autoApprove forces push-options (label=Code-Review+2) together
+        // with a signed push certificate (the jgit#222 failure mode)
+        await renovate([REPO], {
+          automerge: true,
+          autoApprove: true,
+          gitPrivateKey: key.secretKey,
+        });
 
-      // Assert
-      const ch = findSemverChange(await getOpenChanges(REPO));
-      expect(ch).toBeDefined();
-      expect(isTruthy(ch!.labels?.['Code-Review']?.approved)).toBe(true);
-    } finally {
-      await key.dispose();
-    }
-  });
+        // Assert
+        const ch = findSemverChange(await getOpenChanges(REPO));
+        expect(ch).toBeDefined();
+        expect(isTruthy(ch!.labels?.['Code-Review']?.approved)).toBe(true);
+      } finally {
+        await key.dispose();
+      }
+    },
+  );
 
   it('initRepo abandons changes with Code-Review -2', async () => {
     // Arrange

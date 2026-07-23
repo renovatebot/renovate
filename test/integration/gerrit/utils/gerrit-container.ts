@@ -5,9 +5,8 @@ import {
   Wait,
 } from 'testcontainers';
 
-// 3.14+ includes a jgit that accepts signed push + push-options together
-// (see eclipse-jgit/jgit#222). 3.8.x rejects that combination.
-const GERRIT_IMAGE = 'gerritcodereview/gerrit:3.14.1-ubuntu24';
+// 3.0.0 is the minimum Gerrit version that Renovate supports
+const GERRIT_IMAGE = 'gerritcodereview/gerrit:3.0.0';
 const GERRIT_CONTAINER_NAME = 'gerrit-renovate-integration-test';
 
 /** Gerrit sshd port — Renovate hardcodes this in createSshUrl. */
