@@ -146,6 +146,24 @@ describe('modules/manager/mise/artifacts', () => {
     expect(execSnapshots).toMatchObject([{ cmd: miseVersionCmd }]);
   });
 
+  it('falls back to conservative behavior when the version probe throws', async () => {
+    GlobalConfig.set({ ...adminConfig, allowedUnsafeExecutions: [] });
+    fs.readLocalFile.mockResolvedValueOnce('existing content');
+    const execSnapshots = mockExecSequence([new Error('mise not found')]);
+
+    const res = await updateArtifacts({
+      packageFileName: 'mise.toml',
+      updatedDeps: [{ depName: 'node' }],
+      newPackageFileContent: '',
+      config,
+    });
+
+    // an unparseable/failed probe means safe mode cannot be guaranteed, so the
+    // allowlist is still required and locking is skipped
+    expect(res).toBeNull();
+    expect(execSnapshots).toMatchObject([{ cmd: miseVersionCmd }]);
+  });
+
   it('does not set MISE_SAFE or probe the version on the allowlisted path', async () => {
     fs.readLocalFile
       .mockResolvedValueOnce('existing content')
