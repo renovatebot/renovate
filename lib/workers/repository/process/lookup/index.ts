@@ -21,6 +21,7 @@ import {
 } from '../../../../modules/datasource/index.ts';
 import { postprocessRelease } from '../../../../modules/datasource/postprocess-release.ts';
 import { getRangeStrategy } from '../../../../modules/manager/index.ts';
+import type { LookupUpdate } from '../../../../modules/manager/types.ts';
 import { id as dockerVersioningId } from '../../../../modules/versioning/docker/index.ts';
 import * as allVersioning from '../../../../modules/versioning/index.ts';
 import { ExternalHostError } from '../../../../types/errors/external-host-error.ts';
@@ -34,7 +35,11 @@ import { calculateAbandonment } from './abandonment.ts';
 import { getBucket } from './bucket.ts';
 import { getCurrentVersion } from './current.ts';
 import { filterVersions } from './filter.ts';
-import { filterInternalChecks } from './filter-checks.ts';
+import {
+  checkMinimumReleaseAge,
+  filterInternalChecks,
+  isMinimumReleaseAgeApplicable,
+} from './filter-checks.ts';
 import { generateUpdate } from './generate.ts';
 import { getRollbackUpdate } from './rollback.ts';
 import { calculateMostRecentTimestamp } from './timestamps.ts';
@@ -66,6 +71,36 @@ async function getTimestamp(
 
   const remoteRelease = await postprocessRelease(config, currentRelease);
   return remoteRelease?.releaseTimestamp;
+}
+
+/**
+ * A digest-only refresh (`digest`/`pinDigest`) - e.g. a floating tag like
+ * GitHub Actions' `v7` being repointed at a newer commit - never goes
+ * through the bucket/filterInternalChecks loop, because config.currentValue
+ * doesn't change - only the digest does. Left alone, that means
+ * minimumReleaseAge/internalChecksFilter is silently bypassed for these
+ * updates. Re-apply the same age check here using the currentVersionTimestamp
+ * already resolved for this value (e.g. the release that `v7` currently
+ * satisfies to highest).
+ */
+function applyMinimumReleaseAgeToDigestUpdate(
+  update: LookupUpdate,
+  config: LookupUpdateConfig,
+  currentVersionTimestamp: Timestamp | undefined,
+): void {
+  if (
+    !currentVersionTimestamp ||
+    !isMinimumReleaseAgeApplicable(update.updateType)
+  ) {
+    return;
+  }
+
+  update.releaseTimestamp = currentVersionTimestamp;
+
+  const ageCheck = checkMinimumReleaseAge(config, currentVersionTimestamp);
+  if (ageCheck.isPending && config.internalChecksFilter === 'strict') {
+    update.pendingChecks = true;
+  }
 }
 
 export async function lookupUpdates(
@@ -505,6 +540,7 @@ export async function lookupUpdates(
             bucket,
             sortedReleases,
           );
+
         // istanbul ignore next
         if (!release) {
           return Result.ok(res);
@@ -533,6 +569,7 @@ export async function lookupUpdates(
           update.updateType = 'digest';
         }
 
+        // TODO is this right??
         if (pendingChecks) {
           update.pendingChecks = pendingChecks;
         }
@@ -647,10 +684,16 @@ export async function lookupUpdates(
       if (config.currentDigest) {
         if (!config.digestOneAndOnly || !res.updates.length) {
           // digest update
-          res.updates.push({
+          const digestUpdate: LookupUpdate = {
             updateType: 'digest',
             newValue: config.currentValue,
-          });
+          };
+          applyMinimumReleaseAgeToDigestUpdate(
+            digestUpdate,
+            config,
+            res.currentVersionTimestamp as Timestamp | undefined,
+          );
+          res.updates.push(digestUpdate);
         }
       } else if (
         config.pinDigests &&
@@ -659,11 +702,17 @@ export async function lookupUpdates(
         !res.updates.some((update) => update.updateType === 'pin')
       ) {
         // pin digest
-        res.updates.push({
+        const pinDigestUpdate: LookupUpdate = {
           isPinDigest: true,
           updateType: 'pinDigest',
           newValue: config.currentValue,
-        });
+        };
+        applyMinimumReleaseAgeToDigestUpdate(
+          pinDigestUpdate,
+          config,
+          res.currentVersionTimestamp as Timestamp | undefined,
+        );
+        res.updates.push(pinDigestUpdate);
       }
       if (versioningApi.valueToVersion) {
         // TODO #22198

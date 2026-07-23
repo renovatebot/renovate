@@ -3188,6 +3188,7 @@ describe('workers/repository/process/lookup/index', () => {
           isPinDigest: true,
           newDigest: 'digest1234',
           newValue: 'v1.0.0',
+          releaseTimestamp: '2022-01-01T00:00:00.000Z',
           updateType: 'pinDigest',
         },
       ]);
@@ -4426,6 +4427,162 @@ describe('workers/repository/process/lookup/index', () => {
         versioning: 'github-actions',
         warnings: [],
       });
+    });
+
+    it('marks github actions major-tag digest updates as pendingChecks under internalChecksFilter=strict', async () => {
+      config.currentValue = 'v7';
+      config.currentDigest = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
+      config.packageName = 'actions/checkout';
+      config.versioning = githubActionsVersioningId;
+      config.datasource = GithubTagsDatasource.id;
+      config.minimumReleaseAge = '3 days';
+      config.internalChecksFilter = 'strict';
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+      getGithubTags.mockResolvedValueOnce({
+        releases: [
+          { version: 'v7.0.0' },
+          {
+            version: 'v7.0.1',
+            releaseTimestamp: yesterday.toISOString() as Timestamp,
+          },
+        ],
+      });
+      vi.spyOn(
+        GithubTagsDatasource.prototype,
+        'getDigest',
+      ).mockResolvedValueOnce('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb');
+
+      const { updates } = await Result.wrap(
+        lookup.lookupUpdates(config),
+      ).unwrapOrThrow();
+
+      expect(updates).toEqual([
+        {
+          updateType: 'digest',
+          newValue: 'v7',
+          newDigest: 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
+          pendingChecks: true,
+          releaseTimestamp: expect.any(String),
+        },
+      ]);
+    });
+
+    it('does not mark github actions major-tag digest updates as pendingChecks once minimumReleaseAge has elapsed', async () => {
+      config.currentValue = 'v7';
+      config.currentDigest = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
+      config.packageName = 'actions/checkout';
+      config.versioning = githubActionsVersioningId;
+      config.datasource = GithubTagsDatasource.id;
+      config.minimumReleaseAge = '3 days';
+      config.internalChecksFilter = 'strict';
+      const lastWeek = new Date();
+      lastWeek.setDate(lastWeek.getDate() - 7);
+      getGithubTags.mockResolvedValueOnce({
+        releases: [
+          { version: 'v7.0.0' },
+          {
+            version: 'v7.0.1',
+            releaseTimestamp: lastWeek.toISOString() as Timestamp,
+          },
+        ],
+      });
+      vi.spyOn(
+        GithubTagsDatasource.prototype,
+        'getDigest',
+      ).mockResolvedValueOnce('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb');
+
+      const { updates } = await Result.wrap(
+        lookup.lookupUpdates(config),
+      ).unwrapOrThrow();
+
+      expect(updates).toEqual([
+        {
+          updateType: 'digest',
+          newValue: 'v7',
+          newDigest: 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
+          releaseTimestamp: expect.any(String),
+        },
+      ]);
+    });
+
+    it('marks github actions major-tag pinDigest updates as pendingChecks under internalChecksFilter=strict', async () => {
+      config.currentValue = 'v7';
+      config.pinDigests = true;
+      config.packageName = 'actions/checkout';
+      config.versioning = githubActionsVersioningId;
+      config.datasource = GithubTagsDatasource.id;
+      config.minimumReleaseAge = '3 days';
+      config.internalChecksFilter = 'strict';
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+      getGithubTags.mockResolvedValueOnce({
+        releases: [
+          { version: 'v7.0.0' },
+          {
+            version: 'v7.0.1',
+            releaseTimestamp: yesterday.toISOString() as Timestamp,
+          },
+        ],
+      });
+      vi.spyOn(
+        GithubTagsDatasource.prototype,
+        'getDigest',
+      ).mockResolvedValueOnce('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb');
+
+      const { updates } = await Result.wrap(
+        lookup.lookupUpdates(config),
+      ).unwrapOrThrow();
+
+      expect(updates).toEqual([
+        {
+          isPinDigest: true,
+          updateType: 'pinDigest',
+          newValue: 'v7',
+          newDigest: 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
+          pendingChecks: true,
+          releaseTimestamp: expect.any(String),
+        },
+      ]);
+    });
+
+    it('does not mark github actions major-tag pinDigest updates as pendingChecks once minimumReleaseAge has elapsed', async () => {
+      config.currentValue = 'v7';
+      config.pinDigests = true;
+      config.packageName = 'actions/checkout';
+      config.versioning = githubActionsVersioningId;
+      config.datasource = GithubTagsDatasource.id;
+      config.minimumReleaseAge = '3 days';
+      config.internalChecksFilter = 'strict';
+      const lastWeek = new Date();
+      lastWeek.setDate(lastWeek.getDate() - 7);
+      getGithubTags.mockResolvedValueOnce({
+        releases: [
+          { version: 'v7.0.0' },
+          {
+            version: 'v7.0.1',
+            releaseTimestamp: lastWeek.toISOString() as Timestamp,
+          },
+        ],
+      });
+      vi.spyOn(
+        GithubTagsDatasource.prototype,
+        'getDigest',
+      ).mockResolvedValueOnce('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb');
+
+      const { updates } = await Result.wrap(
+        lookup.lookupUpdates(config),
+      ).unwrapOrThrow();
+
+      expect(updates).toEqual([
+        {
+          isPinDigest: true,
+          updateType: 'pinDigest',
+          newValue: 'v7',
+          newDigest: 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
+          releaseTimestamp: expect.any(String),
+        },
+      ]);
     });
 
     it('handles no fitting version and no version in lock file', async () => {
