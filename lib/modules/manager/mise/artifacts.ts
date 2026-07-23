@@ -25,8 +25,7 @@ import { getConfigType, getLockFileName } from './lockfile.ts';
  * code during `mise lock`) and `mise lock --bump` (advancing fuzzy selectors).
  *
  * Safe mode (jdx/mise#11146) and lockfile bumping (jdx/mise#11145) merged after
- * v2026.7.11, so the first release to include them is expected to be 2026.7.12.
- * TODO(mise-safe): confirm this once that release is tagged.
+ * v2026.7.11 and first shipped in v2026.7.12.
  *
  * @see https://github.com/jdx/mise/pull/11146
  * @see https://github.com/jdx/mise/pull/11145

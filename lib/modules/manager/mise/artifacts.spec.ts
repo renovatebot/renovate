@@ -45,7 +45,7 @@ const lockfileMaintenanceCmd = 'mise lock';
 const miseVersionCmd = 'mise version';
 // `mise version` output for a release that supports safe mode / `mise lock --bump`
 const safeMiseVersionOutput = {
-  stdout: '2026.7.12 linux-x64 (2026-07-30)',
+  stdout: '2026.7.12 linux-x64 (2026-07-23)',
   stderr: '',
 };
 
