@@ -2759,7 +2759,12 @@ describe('modules/platform/gitlab/index', () => {
       expect(logger.logger.debug).toHaveBeenCalledWith(
         'PR not yet in mergeable state. Retrying 3',
       );
-      expect(timers.setTimeout.mock.calls).toMatchObject([[0], [100], [400], [900]]);
+      expect(timers.setTimeout.mock.calls).toMatchObject([
+        [0],
+        [100],
+        [400],
+        [900],
+      ]);
     });
 
     it('should retry auto merge creation on 405 method not allowed', async () => {
