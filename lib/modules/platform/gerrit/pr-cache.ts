@@ -4,7 +4,11 @@ import { getCache } from '../../../util/cache/repository/index.ts';
 import type { Pr } from '../types.ts';
 import { client } from './client.ts';
 import type { GerritChange } from './schema.ts';
-import { REQUEST_DETAILS_FOR_PRS, mapGerritChangeToPr } from './utils.ts';
+import {
+  REQUEST_DETAILS_FOR_PRS,
+  convertGerritDateToISO,
+  mapGerritChangeToPr,
+} from './utils.ts';
 
 /**
  * Page size for initial cache population (when cache is empty).
@@ -100,13 +104,13 @@ export class GerritPrCache {
 
     for (const change of changes) {
       const cachedPr = items[change._number];
-      const cachedUpdated = cachedPr?.updatedAt?.replace('T', ' ');
+      const changeUpdatedAt = convertGerritDateToISO(change.updated);
 
       // If this change exists in cache and has the same updated timestamp, it
       // hasn't been modified. Since changes are sorted by update time, further
       // changes hasn't been modified either, but we still process the current
       // page as it's already fetched anyway.
-      if (cachedUpdated === change.updated) {
+      if (cachedPr?.updatedAt === changeUpdatedAt) {
         needNextPage = false;
         continue;
       }
