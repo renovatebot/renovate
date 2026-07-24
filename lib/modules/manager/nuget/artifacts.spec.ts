@@ -515,4 +515,33 @@ describe('modules/manager/nuget/artifacts', () => {
     ]);
     expect(execSnapshots).toBeEmptyArray();
   });
+
+  it('respects defaultRegistryUrls', async () => {
+    const execSnapshots = mockExecAll();
+    fs.getSiblingFileName.mockReturnValueOnce('packages.lock.json');
+    git.getFiles.mockResolvedValueOnce({
+      'packages.lock.json': 'Current packages.lock.json',
+    });
+    fs.getLocalFiles.mockResolvedValueOnce({
+      'packages.lock.json': 'New packages.lock.json',
+    });
+    const defaultRegistryUrls = [
+      'https://my-private-nuget-feed.com/v3/index.json',
+    ];
+
+    await nuget.updateArtifacts({
+      packageFileName: 'project.csproj',
+      updatedDeps: [{ depName: 'dep', defaultRegistryUrls }],
+      newPackageFileContent: '{}',
+      config: { ...config, defaultRegistryUrls },
+    });
+
+    expect(fs.outputCacheFile).toHaveBeenCalledWith(
+      expect.stringContaining('nuget.config'),
+      expect.stringContaining(
+        'https://my-private-nuget-feed.com/v3/index.json',
+      ),
+    );
+    expect(execSnapshots).toHaveLength(1);
+  });
 });
