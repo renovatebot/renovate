@@ -140,7 +140,7 @@ Depending on your manager, datasource and the given package(s), it may be that s
 | `patch`               | ✅                            | Depends on the Manager, Datasource, and package(s)                                                        |
 | `pin`                 | ❌                            | [Not yet supported](https://github.com/renovatebot/renovate/issues/40288)                                 |
 | `digest`              | 🟡                            | Generally not supported. Depends on the Manager, Datasource, and package(s)                               |
-| `pinDigest`           | ❌                            | [Not yet supported](https://github.com/renovatebot/renovate/issues/40288)                                 |
+| `pinDigest`           | ❌                            | [Not yet supported](https://github.com/renovatebot/renovate/issues/44820)                                 |
 | `lockFileMaintenance` | ❌                            | Not possible, as we delegate to the package manager to perform the required changes to update package(s). |
 | `lockFileUpdate`      | ❌                            |                                                                                                           |
 | `rollback`            | ❌                            |                                                                                                           |
