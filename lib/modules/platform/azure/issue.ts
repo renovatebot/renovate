@@ -1,3 +1,4 @@
+import { isNonEmptyString } from '@sindresorhus/is';
 import type {
   WorkItem,
   WorkItemStateColor,
