@@ -282,7 +282,7 @@ describe('modules/platform/gerrit/pr-cache', () => {
 
       const pr1 = mapGerritChangeToPr(makeChange({ _number: 1 }))!;
       const pr2 = mapGerritChangeToPr(makeChange({ _number: 2 }))!;
-      pr1.updatedAt = undefined as never;
+      pr1.updatedAt = undefined;
 
       await GerritPrCache.setPr('test/repo', pr1);
       await GerritPrCache.setPr('test/repo', pr2);
