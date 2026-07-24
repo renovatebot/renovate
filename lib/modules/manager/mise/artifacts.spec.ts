@@ -42,6 +42,12 @@ const trustEnvLocalCmd = 'mise trust mise.test.local.toml';
 const trustSubdirCmd = 'mise trust mise.toml';
 const updateMultipleToolsCmd = 'mise lock node python';
 const lockfileMaintenanceCmd = 'mise lock';
+const miseVersionCmd = 'mise version';
+// `mise version` output for a release that supports safe mode / `mise lock --bump`
+const safeMiseVersionOutput = {
+  stdout: '2026.7.12 linux-x64 (2026-07-23)',
+  stderr: '',
+};
 
 describe('modules/manager/mise/artifacts', () => {
   beforeEach(() => {
@@ -69,9 +75,10 @@ describe('modules/manager/mise/artifacts', () => {
     expect(execSnapshots).toEqual([]);
   });
 
-  it('returns null when mise is not allowlisted', async () => {
+  it('returns null when mise is not allowlisted and version cannot be determined', async () => {
     GlobalConfig.set({ ...adminConfig, allowedUnsafeExecutions: [] });
     fs.readLocalFile.mockResolvedValueOnce('existing content');
+    // default mock returns empty stdout, so the version probe cannot parse a version
     const execSnapshots = mockExecAll();
 
     const res = await updateArtifacts({
@@ -82,7 +89,103 @@ describe('modules/manager/mise/artifacts', () => {
     });
 
     expect(res).toBeNull();
-    expect(execSnapshots).toEqual([]);
+    expect(execSnapshots).toMatchObject([{ cmd: miseVersionCmd }]);
+  });
+
+  it('runs mise lock with MISE_SAFE when a safe-mode mise version is detected and not allowlisted', async () => {
+    GlobalConfig.set({ ...adminConfig, allowedUnsafeExecutions: [] });
+    fs.readLocalFile
+      .mockResolvedValueOnce('existing content')
+      .mockResolvedValueOnce(`[[tools.node]]\nversion = "24.16.0"\n`);
+    const execSnapshots = mockExecAll(safeMiseVersionOutput);
+
+    const res = await updateArtifacts({
+      packageFileName: 'mise.toml',
+      updatedDeps: [{ depName: 'node' }],
+      newPackageFileContent: '',
+      config,
+    });
+
+    expect(res).toEqual([
+      {
+        file: {
+          contents: expect.stringContaining('version = "24.16.0"'),
+          path: 'mise.lock',
+          type: 'addition',
+        },
+      },
+    ]);
+    // safe mode does not require trust, so `mise trust` is not run
+    expect(execSnapshots).toMatchObject([
+      { cmd: miseVersionCmd },
+      {
+        cmd: updateToolCmd,
+        options: {
+          env: expect.objectContaining({ MISE_SAFE: '1' }),
+        },
+      },
+    ]);
+  });
+
+  it('returns null when mise is not allowlisted and the detected version predates safe mode', async () => {
+    GlobalConfig.set({ ...adminConfig, allowedUnsafeExecutions: [] });
+    fs.readLocalFile.mockResolvedValueOnce('existing content');
+    const execSnapshots = mockExecAll({
+      stdout: '2026.7.11 linux-x64 (2026-07-20)',
+      stderr: '',
+    });
+
+    const res = await updateArtifacts({
+      packageFileName: 'mise.toml',
+      updatedDeps: [{ depName: 'node' }],
+      newPackageFileContent: '',
+      config,
+    });
+
+    expect(res).toBeNull();
+    expect(execSnapshots).toMatchObject([{ cmd: miseVersionCmd }]);
+  });
+
+  it('falls back to conservative behavior when the version probe throws', async () => {
+    GlobalConfig.set({ ...adminConfig, allowedUnsafeExecutions: [] });
+    fs.readLocalFile.mockResolvedValueOnce('existing content');
+    const execSnapshots = mockExecSequence([new Error('mise not found')]);
+
+    const res = await updateArtifacts({
+      packageFileName: 'mise.toml',
+      updatedDeps: [{ depName: 'node' }],
+      newPackageFileContent: '',
+      config,
+    });
+
+    // an unparseable/failed probe means safe mode cannot be guaranteed, so the
+    // allowlist is still required and locking is skipped
+    expect(res).toBeNull();
+    expect(execSnapshots).toMatchObject([{ cmd: miseVersionCmd }]);
+  });
+
+  it('does not set MISE_SAFE or probe the version on the allowlisted path', async () => {
+    fs.readLocalFile
+      .mockResolvedValueOnce('existing content')
+      .mockResolvedValueOnce(`[[tools.node]]\nversion = "24.16.0"\n`);
+    const execSnapshots = mockExecAll();
+
+    await updateArtifacts({
+      packageFileName: 'mise.toml',
+      updatedDeps: [{ depName: 'node' }],
+      newPackageFileContent: '',
+      config,
+    });
+
+    expect(execSnapshots).toMatchObject([
+      { cmd: trustCmd },
+      {
+        cmd: updateToolCmd,
+        options: {
+          env: expect.not.objectContaining({ MISE_SAFE: '1' }),
+        },
+      },
+    ]);
   });
 
   it('returns null if lock file unchanged after exec', async () => {
@@ -185,9 +288,31 @@ describe('modules/manager/mise/artifacts', () => {
       config: lockMaintenanceConfig,
     });
 
+    // version probe returns nothing here, so no --bump
     expect(execSnapshots).toMatchObject([
+      { cmd: miseVersionCmd },
       { cmd: trustCmd },
       { cmd: lockfileMaintenanceCmd },
+    ]);
+  });
+
+  it('runs mise lock --bump for lockFileMaintenance when mise supports it', async () => {
+    fs.readLocalFile
+      .mockResolvedValueOnce('existing content')
+      .mockResolvedValueOnce('existing content');
+    const execSnapshots = mockExecAll(safeMiseVersionOutput);
+
+    await updateArtifacts({
+      packageFileName: 'mise.toml',
+      updatedDeps: [{ depName: 'node' }],
+      newPackageFileContent: '',
+      config: lockMaintenanceConfig,
+    });
+
+    expect(execSnapshots).toMatchObject([
+      { cmd: miseVersionCmd },
+      { cmd: trustCmd },
+      { cmd: 'mise lock --bump' },
     ]);
   });
 
@@ -478,6 +603,7 @@ describe('modules/manager/mise/artifacts', () => {
     });
 
     expect(execSnapshots).toMatchObject([
+      { cmd: miseVersionCmd },
       { cmd: trustLocalCmd },
       { cmd: 'mise lock --local' },
     ]);
