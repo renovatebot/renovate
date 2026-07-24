@@ -417,6 +417,30 @@ describe('workers/repository/init/merge', () => {
       ).toBeDefined();
     });
 
+    it('preserves global config overrides over preset defaults when requireConfig=ignored', async () => {
+      // Regression test: when requireConfig=ignored and the global config has
+      // extends + an explicit override, the override must not be lost to preset
+      // re-expansion in the repo-config pipeline.
+      migrateAndValidate.migrateAndValidate.mockResolvedValue({
+        warnings: [],
+        errors: [],
+      });
+      migrate.migrateConfig.mockImplementation((c) => ({
+        isMigrated: false,
+        migratedConfig: c,
+      }));
+      GlobalConfig.set({ requireConfig: 'ignored' });
+      // config:recommended pulls in :dependencyDashboard which sets dependencyDashboard=true.
+      // The global config explicitly sets it to false — that must survive.
+      const res = await mergeRenovateConfig({
+        ...config,
+        requireConfig: 'ignored',
+        extends: [':dependencyDashboard'],
+        dependencyDashboard: false,
+      });
+      expect(res.dependencyDashboard).toBe(false);
+    });
+
     it('sets npmToken to npmrc when it is not inside encrypted', async () => {
       scm.getFileList.mockResolvedValue(['package.json', '.renovaterc.json']);
       fs.readLocalFile.mockResolvedValue(
