@@ -85,4 +85,5 @@ export interface NpmManagerData extends NpmLockFiles, Record<string, any> {
   parents?: string[];
   yarnZeroInstall?: boolean;
   workspacesPackages?: string[] | string;
+  devEnginesIndex?: number;
 }
