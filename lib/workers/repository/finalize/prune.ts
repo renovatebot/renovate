@@ -161,6 +161,15 @@ export async function pruneStaleBranches(
     logger.debug('No defaultBranch set - skipping branch pruning');
     return;
   }
+  if (!isNonEmptyStringAndNotWhitespace(config.branchPrefix)) {
+    // An empty branchPrefix matches every branch in the repo, so Renovate
+    // cannot reliably tell its own branches apart from unrelated ones. Skip
+    // pruning to avoid deleting non-Renovate branches as orphans.
+    logger.debug(
+      'config.branchPrefix is empty - skipping branch pruning to avoid treating all branches as Renovate-managed',
+    );
+    return;
+  }
   // TODO: types (#22198)
   let renovateBranches = getBranchList().filter(
     (branchName) =>
@@ -178,8 +187,8 @@ export async function pruneStaleBranches(
     },
     'Branch lists',
   );
-  // TODO: types (#22198)
-  const lockFileBranch = `${config.branchPrefix!}lock-file-maintenance`;
+
+  const lockFileBranch = `${config.branchPrefix}lock-file-maintenance`;
   renovateBranches = renovateBranches.filter(
     (branch) => branch !== lockFileBranch,
   );
