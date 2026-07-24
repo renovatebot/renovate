@@ -12,6 +12,7 @@ import {
 } from '../../../util/url.ts';
 import { BitbucketTagsDatasource } from '../bitbucket-tags/index.ts';
 import { ForgejoTagsDatasource } from '../forgejo-tags/index.ts';
+import { GerritTagsDatasource } from '../gerrit-tags/index.ts';
 import { GitTagsDatasource } from '../git-tags/index.ts';
 import { GiteaTagsDatasource } from '../gitea-tags/index.ts';
 import { GithubTagsDatasource } from '../github-tags/index.ts';
@@ -297,6 +298,19 @@ export class BaseGoDatasource {
 
         return {
           datasource: GithubTagsDatasource.id,
+          registryUrl: `${parsedUrl.protocol}//${parsedUrl.host}`,
+          packageName,
+        };
+      }
+      case 'gerrit': {
+        // Gerrit project names may contain slashes; strip optional /a/ auth prefix
+        const packageName = trimTrailingSlash(parsedUrl.pathname)
+          .replace(regEx(/^\//), '')
+          .replace(regEx(/^a\//), '')
+          .replace(regEx(/\.git$/), '');
+
+        return {
+          datasource: GerritTagsDatasource.id,
           registryUrl: `${parsedUrl.protocol}//${parsedUrl.host}`,
           packageName,
         };
