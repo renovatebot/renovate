@@ -199,6 +199,88 @@ describe('modules/manager/swift/artifacts', () => {
     );
   });
 
+  it('parses lockfile with mixed source-control and registry pins', async () => {
+    // Regression test: SwiftPM Package Registry (SE-0292) registry pins have
+    // `kind: "registry"` and no `revision`; a lockfile mixing them with
+    // source-control pins must still parse and update correctly.
+    const v2MixedFixture = JSON.stringify(
+      {
+        pins: [
+          {
+            identity: 'alamofire',
+            kind: 'remoteSourceControl',
+            location: 'https://github.com/Alamofire/Alamofire',
+            state: {
+              revision: 'f455c2975872ccd2d9c81594c658af65716e9b9a',
+              version: '5.9.1',
+            },
+          },
+          {
+            identity: 'example.registry-package',
+            kind: 'registry',
+            location: '',
+            state: {
+              version: '1.2.3',
+            },
+          },
+        ],
+        version: 2,
+      },
+      null,
+      2,
+    );
+    scm.getFileList.mockResolvedValue(['Package.resolved']);
+    fs.readLocalFile.mockResolvedValue(v2MixedFixture);
+    vi.mocked(datasource.getDigest).mockResolvedValue('newrevisionsha123');
+
+    await expect(
+      updateArtifacts({
+        packageFileName: 'Package.swift',
+        updatedDeps: [
+          {
+            depName: 'Alamofire/Alamofire',
+            datasource: GithubTagsDatasource.id,
+            newVersion: 'v5.10.0',
+            newValue: '5.10.0',
+          },
+        ],
+        newPackageFileContent: '',
+        config: {},
+      }),
+    ).resolves.toEqual([
+      {
+        file: {
+          type: 'addition',
+          path: 'Package.resolved',
+          contents: JSON.stringify(
+            {
+              pins: [
+                {
+                  identity: 'alamofire',
+                  kind: 'remoteSourceControl',
+                  location: 'https://github.com/Alamofire/Alamofire',
+                  state: {
+                    revision: 'newrevisionsha123',
+                    version: '5.10.0',
+                  },
+                },
+                {
+                  identity: 'example.registry-package',
+                  kind: 'registry',
+                  location: '',
+                  state: { version: '1.2.3' },
+                },
+              ],
+              version: 2,
+            },
+            null,
+            2,
+          ),
+        },
+      },
+    ]);
+  });
+
   it('does not write `from:` range to Package.resolved', async () => {
     scm.getFileList.mockResolvedValue(['Package.resolved']);
     fs.readLocalFile.mockResolvedValue(v2Fixture);
