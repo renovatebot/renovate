@@ -5,6 +5,7 @@ import upath from 'upath';
 import { any, mockFn } from 'vitest-mock-extended';
 import { Fixtures } from '~test/fixtures.ts';
 import { logger, mockedExtended } from '~test/util.ts';
+import { GlobalConfig } from '../../config/global.ts';
 import * as exec_ from '../exec/index.ts';
 import * as sanitize_ from '../sanitize.ts';
 import { toBase64 } from '../string.ts';
@@ -484,6 +485,74 @@ some-private-key
       expect(sanitize.addSecretForSanitizing).toHaveBeenCalledWith(
         passphrase,
         'global',
+      );
+    });
+  });
+
+  describe('push signing', () => {
+    beforeEach(() => {
+      Fixtures.reset();
+      GlobalConfig.reset();
+    });
+
+    it.each`
+      platform    | expected
+      ${'gerrit'} | ${true}
+      ${'github'} | ${false}
+    `(
+      'sets push.gpgSign if-asked=$expected for $platform',
+      async ({ platform, expected }) => {
+        const repoDir = '/tmp/some-repo';
+        GlobalConfig.set({ platform });
+
+        exec.exec
+          .calledWith(any())
+          .mockResolvedValue({ stdout: '', stderr: '' });
+        exec.exec
+          .calledWith(
+            `gpg --batch --no-tty --import ${upath.join(`${os.tmpdir()}/git-private-gpg.key`)}`,
+          )
+          .mockResolvedValueOnce({
+            stderr: 'gpg: key BADC0FFEE: secret key imported\nfoo\n',
+            stdout: '',
+          });
+
+        setPrivateKey('some-key', undefined);
+        await writePrivateKey();
+        await configSigningKey(repoDir);
+
+        const setPushGpgSign = exec.exec.mock.calls.some(
+          (call) =>
+            call[0] === 'git config push.gpgSign if-asked' &&
+            (call[1] as { cwd?: string } | undefined)?.cwd === repoDir,
+        );
+        expect(setPushGpgSign).toBe(expected);
+      },
+    );
+
+    it('does not set push.gpgSign for SSH key on gerrit', async () => {
+      const sshKey = `\
+-----BEGIN OPENSSH PRIVATE KEY-----
+some-private-key
+some-private-key
+-----END OPENSSH PRIVATE KEY-----
+`;
+      const privateKeyFile = upath.join(`${os.tmpdir()}/git-private-ssh.key`);
+      const repoDir = '/tmp/some-repo';
+      GlobalConfig.set({ platform: 'gerrit' });
+
+      exec.exec.calledWith(any()).mockResolvedValue({ stdout: '', stderr: '' });
+      exec.exec
+        .calledWith(`ssh-keygen -y -f ${privateKeyFile}`)
+        .mockResolvedValue({ stderr: '', stdout: 'some-public-key' });
+
+      setPrivateKey(sshKey, undefined);
+      await writePrivateKey();
+      await configSigningKey(repoDir);
+
+      expect(exec.exec).not.toHaveBeenCalledWith(
+        'git config push.gpgSign if-asked',
+        { cwd: repoDir },
       );
     });
   });

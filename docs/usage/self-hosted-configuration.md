@@ -770,6 +770,7 @@ Before the first commit in a repository, Renovate will:
 
 1. Run `gpg import` (if you haven't before) when using PGP
 1. Run `git config user.signingkey`, `git config commit.gpgsign true` and `git config gpg.format`
+1. Run `git config push.gpgSign if-asked` when using Gerrit
 
 The `git` commands are run locally in the cloned repo instead of globally.
 This reduces the chance of unintended consequences with global Git configs on shared systems.
