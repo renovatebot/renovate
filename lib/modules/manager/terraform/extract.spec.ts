@@ -297,6 +297,25 @@ module "pinned-comment" {
       expect(res?.deps[0].currentValue).toBeUndefined();
     });
 
+    it('does not treat a bare date comment as a version', async () => {
+      const src = `
+module "pinned-date" {
+  source = "github.com/hashicorp/example?ref=aabbccddee1122334455667788990011aabbccdd" # 2026-04-01
+}
+`;
+      const res = await extractPackageFile(src, 'main.tf', {});
+      expect(res?.deps).toHaveLength(1);
+      expect(res?.deps[0]).toMatchObject({
+        depName: 'github.com/hashicorp/example',
+        packageName: 'hashicorp/example',
+        depType: 'module',
+        datasource: 'github-tags',
+        currentDigest: 'aabbccddee1122334455667788990011aabbccdd',
+        skipReason: 'unversioned-reference',
+      });
+      expect(res?.deps[0].currentValue).toBeUndefined();
+    });
+
     it('prefers the versioned occurrence when the same SHA is pinned twice', async () => {
       const src = `
 module "pinned-versioned" {

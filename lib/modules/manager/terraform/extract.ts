@@ -59,25 +59,32 @@ export async function extractPackageFile(
   // Post-process: for SHA-pinned GitHub module sources, extract version from
   // inline comment in the raw file content (the HCL parser strips comments).
   // Scan the content once and build a lookup map before iterating over deps.
-  // The version comment must be semver-shaped so arbitrary trailing comments
-  // (e.g. `# updated 2026-04-01`) are not mistaken for a version.
+  // The version must be dotted-numeric (e.g. `v1.2.3`) so trailing comments
+  // such as `# updated ...`, a bare date `# 2026-04-01`, or a bare integer are
+  // not mistaken for a version. A dot-separated date (`# 2026.04.01`) remains
+  // an accepted but unlikely false positive.
   const shaCommentRegex = regEx(
-    /\?ref=(?<sha>[0-9a-f]{40})"(?:[^\S\r\n]*#[^\S\r\n]*(?<version>v?\d+(?:\.\d+){0,2}\S*))?/gi,
+    /\?ref=(?<sha>[0-9a-f]{40})"(?:[^\S\r\n]*#[^\S\r\n]*(?<version>v?\d+(?:\.\d+){1,2}\S*))?/gi,
   );
   const shaInfoMap = new Map<
     string,
     { version: string | undefined; replaceString: string }
   >();
   for (const match of content.matchAll(shaCommentRegex)) {
-    const sha = match.groups!.sha;
+    const groups = match.groups;
+    /* v8 ignore next 3 -- named groups are always present on a match */
+    if (!groups) {
+      continue;
+    }
+    const { sha, version } = groups;
     // Prefer an occurrence that carries a version comment: when the same SHA is
     // pinned by multiple modules, a bare `?ref=<sha>` must not overwrite a
     // `?ref=<sha> # v1.2.3` recorded for that SHA.
-    if (shaInfoMap.get(sha)?.version && !match.groups?.version) {
+    if (shaInfoMap.get(sha)?.version && !version) {
       continue;
     }
     shaInfoMap.set(sha, {
-      version: match.groups?.version,
+      version,
       replaceString: match[0].slice('?ref='.length),
     });
   }
