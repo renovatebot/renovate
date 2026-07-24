@@ -58,6 +58,7 @@ const adminConfig: RepoGlobalConfig & InternalGlobalConfigOptions = {
   containerbaseDir: upath.join('/tmp/cache/containerbase'),
   dockerSidecarImage: 'ghcr.io/renovatebot/base-image',
   binarySource: 'global',
+  allowedUnsafeExecutions: ['pixi'],
 };
 
 const config: UpdateArtifactsConfig = {};
@@ -89,6 +90,22 @@ describe('modules/manager/pixi/artifacts', () => {
         await updateArtifacts({
           packageFileName: 'pyproject.toml',
           updatedDeps: [],
+          newPackageFileContent: '',
+          config,
+        }),
+      ).toBeNull();
+      expect(execSnapshots).toEqual([]);
+    });
+
+    it('returns null when pixi is not in allowedUnsafeExecutions', async () => {
+      GlobalConfig.set({ ...adminConfig, allowedUnsafeExecutions: [] });
+      const execSnapshots = mockExecAll();
+      fs.getSiblingFileName.mockReturnValueOnce('pixi.lock');
+      fs.readLocalFile.mockResolvedValueOnce('Current pixi.lock');
+      expect(
+        await updateArtifacts({
+          packageFileName: 'pyproject.toml',
+          updatedDeps: [{ depName: 'dep1' }],
           newPackageFileContent: '',
           config,
         }),
