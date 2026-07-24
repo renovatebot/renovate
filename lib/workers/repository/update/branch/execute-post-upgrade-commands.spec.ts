@@ -1392,4 +1392,382 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
       });
     });
   });
+
+  describe('executePostUpgradeCommands', () => {
+    beforeEach(() => {
+      GlobalConfig.reset();
+      gitAuth.getGitEnvironmentVariables.mockReturnValue({});
+    });
+
+    it('returns null when there are no changed files', async () => {
+      const config: BranchConfig = {
+        manager: 'some-manager',
+        updatedPackageFiles: [],
+        updatedArtifacts: [],
+        upgrades: [],
+        branchName: 'main',
+        baseBranch: 'base',
+      } as BranchConfig;
+
+      const res = await postUpgradeCommands.default(config);
+
+      expect(res).toBeNull();
+    });
+
+    it('executes branch-mode task when only a non-first upgrade defines it', async () => {
+      GlobalConfig.set({
+        localDir: '/localDir',
+        allowedCommands: ['^echo branch-task$'],
+      });
+      git.getRepoStatus.mockResolvedValueOnce(
+        partial<StatusResult>({
+          modified: [],
+          not_added: [],
+          deleted: [],
+        }),
+      );
+      fs.localPathIsFile.mockResolvedValue(true);
+
+      // Simulates generateBranchConfig spreading the first upgrade onto config.
+      // The first upgrade has default postUpgradeTasks (executionMode: 'update', empty commands).
+      // The second upgrade has executionMode: 'branch' with actual commands.
+      const config: BranchConfig = {
+        manager: 'some-manager',
+        branchName: 'renovate/some-branch',
+        baseBranch: 'main',
+        updatedPackageFiles: [
+          {
+            type: 'addition',
+            path: 'some-file',
+            contents: 'updated',
+          },
+        ],
+        updatedArtifacts: [],
+        // This comes from config.upgrades[0] via spread in generateBranchConfig
+        postUpgradeTasks: {
+          executionMode: 'update',
+          commands: [],
+          fileFilters: [],
+        },
+        upgrades: [
+          {
+            depName: 'some-dep-name',
+            manager: 'some-manager',
+            branchName: 'renovate/some-branch',
+            postUpgradeTasks: {
+              executionMode: 'update',
+              commands: [],
+              fileFilters: [],
+            },
+          },
+          {
+            depName: 'some-dep-name',
+            manager: 'some-manager',
+            branchName: 'renovate/some-branch',
+            postUpgradeTasks: {
+              executionMode: 'branch',
+              commands: ['echo branch-task'],
+              fileFilters: ['**/*'],
+            },
+          },
+        ],
+      } as BranchConfig;
+
+      const res = await postUpgradeCommands.default(config);
+
+      expect(res).not.toBeNull();
+      expect(exec.exec).toHaveBeenCalledWith(
+        'echo branch-task',
+        expect.objectContaining({
+          cwd: '/localDir',
+        }),
+      );
+    });
+
+    it('executes branch-mode task when other upgrades have no postUpgradeTasks', async () => {
+      GlobalConfig.set({
+        localDir: '/localDir',
+        allowedCommands: ['^echo branch-task$'],
+      });
+      git.getRepoStatus.mockResolvedValue(
+        partial<StatusResult>({
+          modified: [],
+          not_added: [],
+          deleted: [],
+        }),
+      );
+      fs.localPathIsFile.mockResolvedValue(true);
+
+      // First upgrade has no postUpgradeTasks at all (the common case).
+      // Second upgrade has executionMode: 'branch'.
+      // The branch-mode task should execute, and the first upgrade should
+      // be excluded from both update and branch command lists.
+      const config: BranchConfig = {
+        manager: 'some-manager',
+        branchName: 'renovate/some-branch',
+        baseBranch: 'main',
+        updatedPackageFiles: [
+          {
+            type: 'addition',
+            path: 'some-file',
+            contents: 'updated',
+          },
+        ],
+        updatedArtifacts: [],
+        postUpgradeTasks: {
+          executionMode: 'update',
+          commands: [],
+          fileFilters: [],
+        },
+        upgrades: [
+          {
+            depName: 'some-dep-name-1',
+            manager: 'some-manager',
+            branchName: 'renovate/some-branch',
+          },
+          {
+            depName: 'some-dep-name-2',
+            manager: 'some-manager',
+            branchName: 'renovate/some-branch',
+            postUpgradeTasks: {
+              executionMode: 'branch',
+              commands: ['echo branch-task'],
+              fileFilters: ['**/*'],
+            },
+          },
+        ],
+      } as BranchConfig;
+
+      const res = await postUpgradeCommands.default(config);
+
+      expect(res).not.toBeNull();
+      expect(exec.exec).toHaveBeenCalledWith(
+        'echo branch-task',
+        expect.objectContaining({
+          cwd: '/localDir',
+        }),
+      );
+      expect(exec.exec).toHaveBeenCalledTimes(1);
+    });
+
+    it('executes both tasks when first upgrade is branch-mode and second is update-mode', async () => {
+      GlobalConfig.set({
+        localDir: '/localDir',
+        allowedCommands: ['^echo'],
+      });
+      git.getRepoStatus.mockResolvedValue(
+        partial<StatusResult>({
+          modified: [],
+          not_added: [],
+          deleted: [],
+        }),
+      );
+      fs.localPathIsFile.mockResolvedValue(true);
+
+      // First upgrade has executionMode: 'branch', second has 'update'.
+      // Both tasks should execute.
+      const config: BranchConfig = {
+        manager: 'some-manager',
+        branchName: 'renovate/some-branch',
+        baseBranch: 'main',
+        updatedPackageFiles: [
+          {
+            type: 'addition',
+            path: 'some-file',
+            contents: 'updated',
+          },
+        ],
+        updatedArtifacts: [],
+        // From first upgrade via generateBranchConfig spread
+        postUpgradeTasks: {
+          executionMode: 'branch',
+          commands: ['echo branch-task'],
+          fileFilters: ['**/*'],
+        },
+        upgrades: [
+          {
+            depName: 'some-dep-name-1',
+            manager: 'some-manager',
+            branchName: 'renovate/some-branch',
+            postUpgradeTasks: {
+              executionMode: 'branch',
+              commands: ['echo branch-task'],
+              fileFilters: ['**/*'],
+            },
+          },
+          {
+            depName: 'some-dep-name-2',
+            manager: 'some-manager',
+            branchName: 'renovate/some-branch',
+            postUpgradeTasks: {
+              executionMode: 'update',
+              commands: ['echo update-task'],
+              fileFilters: ['**/*'],
+            },
+          },
+        ],
+      } as BranchConfig;
+
+      const res = await postUpgradeCommands.default(config);
+
+      expect(res).not.toBeNull();
+      expect(exec.exec).toHaveBeenCalledWith(
+        'echo update-task',
+        expect.anything(),
+      );
+      expect(exec.exec).toHaveBeenCalledWith(
+        'echo branch-task',
+        expect.objectContaining({
+          cwd: '/localDir',
+        }),
+      );
+      expect(exec.exec).toHaveBeenCalledTimes(2);
+    });
+
+    it('executes branch-mode commands from all upgrades that define them', async () => {
+      GlobalConfig.set({
+        localDir: '/localDir',
+        allowedCommands: ['^echo'],
+      });
+      git.getRepoStatus.mockResolvedValue(
+        partial<StatusResult>({
+          modified: [],
+          not_added: [],
+          deleted: [],
+        }),
+      );
+      fs.localPathIsFile.mockResolvedValue(true);
+
+      // Two upgrades both have executionMode: 'branch' but with different commands.
+      // Both sets of commands should execute.
+      const config: BranchConfig = {
+        manager: 'some-manager',
+        branchName: 'renovate/some-branch',
+        baseBranch: 'main',
+        updatedPackageFiles: [
+          {
+            type: 'addition',
+            path: 'some-file',
+            contents: 'updated',
+          },
+        ],
+        updatedArtifacts: [],
+        // From first upgrade via generateBranchConfig spread
+        postUpgradeTasks: {
+          executionMode: 'branch',
+          commands: ['echo branch-task-1'],
+          fileFilters: ['**/*'],
+        },
+        upgrades: [
+          {
+            depName: 'some-dep-name-1',
+            manager: 'some-manager',
+            branchName: 'renovate/some-branch',
+            postUpgradeTasks: {
+              executionMode: 'branch',
+              commands: ['echo branch-task-1'],
+              fileFilters: ['**/*'],
+            },
+          },
+          {
+            depName: 'some-dep-name-2',
+            manager: 'some-manager',
+            branchName: 'renovate/some-branch',
+            postUpgradeTasks: {
+              executionMode: 'branch',
+              commands: ['echo branch-task-2'],
+              fileFilters: ['**/*'],
+            },
+          },
+        ],
+      } as BranchConfig;
+
+      const res = await postUpgradeCommands.default(config);
+
+      expect(res).not.toBeNull();
+      expect(exec.exec).toHaveBeenCalledWith(
+        'echo branch-task-1',
+        expect.anything(),
+      );
+      expect(exec.exec).toHaveBeenCalledWith(
+        'echo branch-task-2',
+        expect.anything(),
+      );
+    });
+
+    it('executes branch-mode task when upgrades have mixed execution modes', async () => {
+      GlobalConfig.set({
+        localDir: '/localDir',
+        allowedCommands: ['^echo'],
+      });
+      git.getRepoStatus.mockResolvedValue(
+        partial<StatusResult>({
+          modified: [],
+          not_added: [],
+          deleted: [],
+        }),
+      );
+      fs.localPathIsFile.mockResolvedValue(true);
+
+      // First upgrade has executionMode: 'update' with commands.
+      // Second upgrade has executionMode: 'branch' with commands.
+      // Both should execute.
+      const config: BranchConfig = {
+        manager: 'some-manager',
+        branchName: 'renovate/some-branch',
+        baseBranch: 'main',
+        updatedPackageFiles: [
+          {
+            type: 'addition',
+            path: 'some-file',
+            contents: 'updated',
+          },
+        ],
+        updatedArtifacts: [],
+        // From first upgrade via generateBranchConfig spread
+        postUpgradeTasks: {
+          executionMode: 'update',
+          commands: ['echo update-task'],
+          fileFilters: ['**/*'],
+        },
+        upgrades: [
+          {
+            depName: 'some-dep-name-1',
+            manager: 'some-manager',
+            branchName: 'renovate/some-branch',
+            postUpgradeTasks: {
+              executionMode: 'update',
+              commands: ['echo update-task'],
+              fileFilters: ['**/*'],
+            },
+          },
+          {
+            depName: 'some-dep-name-2',
+            manager: 'some-manager',
+            branchName: 'renovate/some-branch',
+            postUpgradeTasks: {
+              executionMode: 'branch',
+              commands: ['echo branch-task'],
+              fileFilters: ['**/*'],
+            },
+          },
+        ],
+      } as BranchConfig;
+
+      const res = await postUpgradeCommands.default(config);
+
+      expect(res).not.toBeNull();
+      // The update-mode task should run for the first upgrade
+      expect(exec.exec).toHaveBeenCalledWith(
+        'echo update-task',
+        expect.anything(),
+      );
+      // The branch-mode task should also run
+      expect(exec.exec).toHaveBeenCalledWith(
+        'echo branch-task',
+        expect.anything(),
+      );
+      expect(exec.exec).toHaveBeenCalledTimes(2);
+    });
+  });
 });
