@@ -69,11 +69,7 @@ function createHttpUrl(url: URL, endpoint: string, repository: string): string {
 
   url.username = opts.username;
   url.password = opts.password;
-  url.pathname = joinUrlParts(
-    url.pathname,
-    'a',
-    encodeURIComponent(repository),
-  );
+  url.pathname = joinUrlParts(url.pathname, 'a', repository);
   return url.toString();
 }
 

@@ -146,7 +146,7 @@ describe('modules/platform/gerrit/index', () => {
         repoFingerprint: repoFingerprint('test/repo', `${gerritEndpointUrl}/`),
       });
       expect(git.initRepo).toHaveBeenCalledExactlyOnceWith({
-        url: 'https://user:pass@dev.gerrit.com/renovate/a/test%2Frepo',
+        url: 'https://user:pass@dev.gerrit.com/renovate/a/test/repo',
         virtualBranches: {},
       });
     });
@@ -163,7 +163,7 @@ describe('modules/platform/gerrit/index', () => {
       });
 
       expect(git.initRepo).toHaveBeenCalledExactlyOnceWith({
-        url: 'https://user:pass@dev.gerrit.com/renovate/a/test%2Frepo',
+        url: 'https://user:pass@dev.gerrit.com/renovate/a/test/repo',
         cloneSubmodules: true,
         cloneSubmodulesFilter: ['test'],
         virtualBranches: {},
@@ -269,7 +269,7 @@ describe('modules/platform/gerrit/index', () => {
         },
       ]);
       expect(git.initRepo).toHaveBeenCalledExactlyOnceWith({
-        url: 'https://user:pass@dev.gerrit.com/renovate/a/test%2Frepo',
+        url: 'https://user:pass@dev.gerrit.com/renovate/a/test/repo',
         virtualBranches: {
           'renovate/dep-1': {
             ref: 'refs/changes/45/12345/1',
