@@ -140,9 +140,9 @@ Depending on your manager, datasource and the given package(s), it may be that s
 | `patch`               | ✅                            | Depends on the Manager, Datasource, and package(s)                                                        |
 | `pin`                 | ❌                            | [Not yet supported](https://github.com/renovatebot/renovate/issues/40288)                                 |
 | `digest`              | 🟡                            | Generally not supported. Depends on the Manager, Datasource, and package(s)                               |
-| `pinDigest`           | ❌                            | [Not yet supported](https://github.com/renovatebot/renovate/issues/40288)                                 |
+| `pinDigest`           | ❌                            | [Not yet supported](https://github.com/renovatebot/renovate/issues/44820)                                 |
 | `lockFileMaintenance` | ❌                            | Not possible, as we delegate to the package manager to perform the required changes to update package(s). |
-| `lockFileUpdate`      | ❌                            |                                                                                                           |
+| `lockfileUpdate`      | ❌                            |                                                                                                           |
 | `rollback`            | ❌                            |                                                                                                           |
 | `bump`                | ❌                            |                                                                                                           |
 | `replacement`         | ❌                            | [Not yet supported](https://github.com/renovatebot/renovate/issues/39400)                                 |
@@ -203,14 +203,13 @@ To opt out a dependency from minimum release age checks, create a package rule w
 
 ### Which datasources support release timestamps?
 
-!!! tip
-  You can confirm if your datasource supports the release timestamp by viewing [the documentation for the given datasource](../modules/datasource/index.md).
-
 The datasource that Renovate uses must have a release timestamp for the `minimumReleaseAge` config option to work.
 Some datasources may have a release timestamp, but in a format Renovate does not support.
 In those cases a feature request needs to be implemented.
 
-Note that you will also need to [verify if the registry you're using](#which-registries-support-release-timestamps) provides the release timestamp.
+The table below lists every datasource Renovate supports, and whether it provides a release timestamp.
+
+<!-- Autogenerate datasourceReleaseTimestampSupport -->
 
 ### Which registries support release timestamps?
 
