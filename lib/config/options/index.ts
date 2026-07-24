@@ -5,6 +5,7 @@ import { AllManagersListLiteral } from '../../manager-list.generated.ts';
 import { AllVersioningsListLiteral } from '../../versioning-list.generated.ts';
 import { supportedDatasources } from '../presets/internal/merge-confidence.preset.ts';
 import { type RenovateOptions, UpdateTypesOptions } from '../types.ts';
+import { ConfigOptionName } from '../../config-options.generated.ts';
 
 const options: Readonly<RenovateOptions>[] = [
   {
@@ -3605,6 +3606,15 @@ export function getOptions(): Readonly<RenovateOptions>[] {
   return options;
 }
 
+// export function getOption(name: ConfigOptionName): RenovateOptions | undefined {
+//   const option = options.find((o) => o.name === name);
+//   if (!option) {
+//     throw new Error('')
+//   }
+//
+//   return option
+// }
+//
 function loadManagerOptions(): void {
   for (const [name, defaultConfig] of Object.entries(managerDefaultConfigs)) {
     const managerConfig: Readonly<RenovateOptions> = {
