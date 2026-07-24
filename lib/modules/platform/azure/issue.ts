@@ -1,8 +1,10 @@
+import { isNonEmptyString } from '@sindresorhus/is';
 import type {
   WorkItem,
   WorkItemStateColor,
 } from 'azure-devops-node-api/interfaces/WorkItemTrackingInterfaces.js';
 import type { IWorkItemTrackingApi } from 'azure-devops-node-api/WorkItemTrackingApi.js';
+import { GlobalConfig } from '../../../config/global.ts';
 import { logger } from '../../../logger/index.ts';
 import { Lazy } from '../../../util/lazy.ts';
 import { sanitize } from '../../../util/sanitize.ts';
@@ -10,8 +12,6 @@ import type { EnsureIssueConfig, EnsureIssueResult, Issue } from '../types.ts';
 import * as azureApi from './azure-got-wrapper.ts';
 import type { Config } from './types.ts';
 import { getWorkItemTitle } from './util.ts';
-
-const workItemType = 'Issue';
 
 // Historical fallbacks, used when the work item type's states cannot be
 // resolved from the API (e.g. Azure DevOps Server versions without the
@@ -77,7 +77,7 @@ export class IssueService {
       const azureApiWit = await azureApi.workItemTrackingApi();
       const stateColors = await azureApiWit.getWorkItemTypeStates(
         this.config.project,
-        workItemType,
+        this.config.workItemType,
       );
 
       if (stateColors?.length) {
@@ -128,15 +128,16 @@ export class IssueService {
   }
 
   /**
-   * Whether the project's process defines the `Issue` work item type. Some
-   * processes (e.g. Scrum) do not, in which case creating one fails; checking
-   * up front lets us log an actionable message instead of a cryptic error.
+   * The work item type names the project's process defines. Some processes
+   * (e.g. Scrum) do not define `Issue`, in which case creating one fails;
+   * checking up front lets us log an actionable message (including the types
+   * that *are* available) instead of a cryptic error.
    */
-  private async hasWorkItemType(
+  private async getWorkItemTypeNames(
     azureApiWit: IWorkItemTrackingApi,
-  ): Promise<boolean> {
+  ): Promise<string[]> {
     const types = await azureApiWit.getWorkItemTypes(this.config.project);
-    return types.some((t) => t.name === workItemType);
+    return types.map((t) => t.name).filter(isNonEmptyString);
   }
 
   async getIssueList(titleFilter?: string): Promise<Issue[]> {
@@ -144,11 +145,14 @@ export class IssueService {
     try {
       const azureApiWit = await azureApi.workItemTrackingApi();
 
+      // Intentionally not filtering by [System.WorkItemType]: the type is
+      // configurable (`azureWorkItemType`) and a repo's Renovate issues have a
+      // unique title, so matching on title + project finds them regardless of
+      // which work item type they were created as.
       let wiql = `
         SELECT [System.Id]
         FROM WorkItems
-        WHERE [System.WorkItemType] = '${workItemType}'
-          AND [System.TeamProject] = '${this.config.project}'
+        WHERE [System.TeamProject] = '${this.config.project}'
       `;
 
       if (titleFilter) {
@@ -331,14 +335,21 @@ export class IssueService {
       // state for the project's process (e.g. `To Do` on Basic, `New`/`Active`
       // on Agile). Passing a hardcoded state fails on processes that lack it.
 
-      // The `Issue` work item type only exists in some processes (Basic, Agile,
-      // CMMI) but not others (e.g. Scrum). Creating one on a process without it
-      // returns a 404 that the REST client surfaces as `null`, so check first
-      // and log an actionable message instead of failing cryptically.
-      if (!(await this.hasWorkItemType(azureApiWit))) {
+      // The configured work item type (default `Issue`) only exists in some
+      // processes (Basic, Agile, CMMI) but not others (e.g. Scrum). Creating one
+      // on a process without it returns a 404 that the REST client surfaces as
+      // `null`, so check first and log an actionable message instead of failing
+      // cryptically.
+      const availableTypes = await this.getWorkItemTypeNames(azureApiWit);
+      if (!availableTypes.includes(this.config.workItemType)) {
         logger.warn(
-          { workItemType, project: this.config.project },
-          'Azure: work item type does not exist in project (or the token lacks permission to it); skipping issue. The Dependency Dashboard needs a process that defines this work item type.',
+          {
+            workItemType: this.config.workItemType,
+            availableTypes,
+            project: this.config.project,
+            documentationUrl: `${GlobalConfig.get('productLinks').documentation}configuration-options/#azureworkitemtype`,
+          },
+          'Azure: work item type does not exist in project (or the token lacks permission to it); skipping issue. The Dependency Dashboard needs a process that defines this work item type. Set one your project defines via the `azureWorkItemType` repo config option.',
         );
         return null;
       }
@@ -349,7 +360,7 @@ export class IssueService {
           {
             op: 'add',
             path: '/fields/System.WorkItemType',
-            value: workItemType,
+            value: this.config.workItemType,
           },
           { op: 'add', path: '/fields/System.Title', value: finalTitle },
           {
@@ -364,7 +375,7 @@ export class IssueService {
           },
         ],
         this.config.project,
-        workItemType,
+        this.config.workItemType,
       );
 
       // Azure DevOps normally returns the created work item, but the
