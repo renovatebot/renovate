@@ -19,17 +19,58 @@ export const renameMap = {
 };
 type RenameMapKey = keyof typeof renameMap;
 
+const legacyMatchAllPatterns = new Set(['*', '^*$']);
+
+function migratePattern(pattern: string): string {
+  if (legacyMatchAllPatterns.has(pattern)) {
+    return '*';
+  }
+  return `/${pattern}/`;
+}
+
+function migrateExcludePattern(pattern: string): string {
+  if (legacyMatchAllPatterns.has(pattern)) {
+    return '!**';
+  }
+  return `!/${pattern}/`;
+}
+
+function normalizeMigratedMatchers(matchers: string[]): string[] {
+  const matchAll = matchers.find(
+    (matcher) => matcher === '*' || matcher === '**',
+  );
+  if (!matchAll) {
+    return matchers;
+  }
+
+  const negativeMatchers = matchers.filter((matcher) =>
+    matcher.startsWith('!'),
+  );
+  return negativeMatchers.length ? negativeMatchers : [matchAll];
+}
+
 function renameKeys(packageRule: PackageRule): PackageRule {
   const newPackageRule: PackageRule = {};
   for (const [key, val] of Object.entries(packageRule)) {
+    const renamedKey = renameMap[key as RenameMapKey];
+    const renamedValue =
+      renamedKey &&
+      renamedKey !== 'matchPackagePatterns' &&
+      renamedKey !== 'matchSourceUrlPrefixes' &&
+      isArray(val, isString)
+        ? normalizeMigratedMatchers(val)
+        : val;
     // @ts-expect-error -- TODO: fix me
-    newPackageRule[renameMap[key as RenameMapKey] ?? key] = val;
+    newPackageRule[renamedKey ?? key] = renamedValue;
   }
   return newPackageRule;
 }
 
 function mergeMatchers(packageRule: PackageRule): PackageRule {
   const newPackageRule: PackageRule = { ...packageRule };
+  let migratedDepMatchers = false;
+  let migratedPackageMatchers = false;
+
   for (const [key, val] of Object.entries(packageRule)) {
     const patterns = isString(val) ? [val] : val;
 
@@ -39,6 +80,7 @@ function mergeMatchers(packageRule: PackageRule): PackageRule {
       if (isArray(patterns, isString)) {
         newPackageRule.matchDepNames ??= [];
         newPackageRule.matchDepNames.push(...patterns.map((v) => `${v}{/,}**`));
+        migratedDepMatchers = true;
       }
       // @ts-expect-error -- TODO: fix me
       delete newPackageRule.matchDepPrefixes;
@@ -47,7 +89,8 @@ function mergeMatchers(packageRule: PackageRule): PackageRule {
       // v8 ignore else -- TODO: add test #40625
       if (isArray(patterns, isString)) {
         newPackageRule.matchDepNames ??= [];
-        newPackageRule.matchDepNames.push(...patterns.map((v) => `/${v}/`));
+        newPackageRule.matchDepNames.push(...patterns.map(migratePattern));
+        migratedDepMatchers = true;
       }
       // @ts-expect-error -- TODO: fix me
       delete newPackageRule.matchDepPatterns;
@@ -57,6 +100,7 @@ function mergeMatchers(packageRule: PackageRule): PackageRule {
       if (isArray(patterns, isString)) {
         newPackageRule.matchDepNames ??= [];
         newPackageRule.matchDepNames.push(...patterns.map((v) => `!${v}`));
+        migratedDepMatchers = true;
       }
       // @ts-expect-error -- TODO: fix me
       delete newPackageRule.excludeDepNames;
@@ -68,6 +112,7 @@ function mergeMatchers(packageRule: PackageRule): PackageRule {
         newPackageRule.matchDepNames.push(
           ...patterns.map((v) => `!${v}{/,}**`),
         );
+        migratedDepMatchers = true;
       }
       // @ts-expect-error -- TODO: fix me
       delete newPackageRule.excludeDepPrefixes;
@@ -76,7 +121,10 @@ function mergeMatchers(packageRule: PackageRule): PackageRule {
       // v8 ignore else -- TODO: add test #40625
       if (isArray(patterns, isString)) {
         newPackageRule.matchDepNames ??= [];
-        newPackageRule.matchDepNames.push(...patterns.map((v) => `!/${v}/`));
+        newPackageRule.matchDepNames.push(
+          ...patterns.map(migrateExcludePattern),
+        );
+        migratedDepMatchers = true;
       }
       // @ts-expect-error -- TODO: fix me
       delete newPackageRule.excludeDepPatterns;
@@ -89,6 +137,7 @@ function mergeMatchers(packageRule: PackageRule): PackageRule {
         newPackageRule.matchPackageNames.push(
           ...patterns.map((v) => `${v}{/,}**`),
         );
+        migratedPackageMatchers = true;
       }
       // @ts-expect-error -- TODO: fix me
       delete newPackageRule.matchPackagePrefixes;
@@ -97,14 +146,8 @@ function mergeMatchers(packageRule: PackageRule): PackageRule {
       // v8 ignore else -- TODO: add test #40625
       if (isArray(patterns, isString)) {
         newPackageRule.matchPackageNames ??= [];
-        newPackageRule.matchPackageNames.push(
-          ...patterns.map((v) => {
-            if (v === '*') {
-              return '*';
-            }
-            return `/${v}/`;
-          }),
-        );
+        newPackageRule.matchPackageNames.push(...patterns.map(migratePattern));
+        migratedPackageMatchers = true;
       }
       // @ts-expect-error -- TODO: fix me
       delete newPackageRule.matchPackagePatterns;
@@ -114,6 +157,7 @@ function mergeMatchers(packageRule: PackageRule): PackageRule {
       if (isArray(patterns, isString)) {
         newPackageRule.matchPackageNames ??= [];
         newPackageRule.matchPackageNames.push(...patterns.map((v) => `!${v}`));
+        migratedPackageMatchers = true;
       }
       // @ts-expect-error -- TODO: fix me
       delete newPackageRule.excludePackageNames;
@@ -125,6 +169,7 @@ function mergeMatchers(packageRule: PackageRule): PackageRule {
         newPackageRule.matchPackageNames.push(
           ...patterns.map((v) => `!${v}{/,}**`),
         );
+        migratedPackageMatchers = true;
       }
       // @ts-expect-error -- TODO: fix me
       delete newPackageRule.excludePackagePrefixes;
@@ -134,8 +179,9 @@ function mergeMatchers(packageRule: PackageRule): PackageRule {
       if (isArray(patterns, isString)) {
         newPackageRule.matchPackageNames ??= [];
         newPackageRule.matchPackageNames.push(
-          ...patterns.map((v) => `!/${v}/`),
+          ...patterns.map(migrateExcludePattern),
         );
+        migratedPackageMatchers = true;
       }
       // @ts-expect-error -- TODO: fix me
       delete newPackageRule.excludePackagePatterns;
@@ -148,6 +194,9 @@ function mergeMatchers(packageRule: PackageRule): PackageRule {
         newPackageRule.matchSourceUrls.push(
           ...patterns.map((v) => `${v}{/,}**`),
         );
+        newPackageRule.matchSourceUrls = normalizeMigratedMatchers(
+          newPackageRule.matchSourceUrls,
+        );
       }
       // @ts-expect-error -- TODO: fix me
       delete newPackageRule.matchSourceUrlPrefixes;
@@ -158,11 +207,26 @@ function mergeMatchers(packageRule: PackageRule): PackageRule {
       if (isArray(patterns, isString)) {
         newPackageRule.matchRepositories ??= [];
         newPackageRule.matchRepositories.push(...patterns.map((v) => `!${v}`));
+        newPackageRule.matchRepositories = normalizeMigratedMatchers(
+          newPackageRule.matchRepositories,
+        );
       }
       // @ts-expect-error -- TODO: fix me
       delete newPackageRule.excludeRepositories;
     }
   }
+
+  if (migratedDepMatchers) {
+    newPackageRule.matchDepNames = normalizeMigratedMatchers(
+      newPackageRule.matchDepNames!,
+    );
+  }
+  if (migratedPackageMatchers) {
+    newPackageRule.matchPackageNames = normalizeMigratedMatchers(
+      newPackageRule.matchPackageNames!,
+    );
+  }
+
   return newPackageRule;
 }
 
