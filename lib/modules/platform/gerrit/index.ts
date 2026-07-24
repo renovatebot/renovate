@@ -259,19 +259,44 @@ export async function findPr(findPRConfig: FindPRConfig): Promise<Pr | null> {
 
 export async function getPr(number: number): Promise<Pr | null> {
   const prs = await GerritPrCache.getPrs(config.repository!);
-  const cached = prs.find((pr) => pr.number === number) ?? null;
-  logger.trace(
-    `getPr: using cached gerrit change ${cached?.sourceBranch} for ${number}`,
-  );
-  return cached;
+  let pr = prs.find((p) => p.number === number) ?? null;
+  if (pr) {
+    logger.trace(
+      `getPr: using cached gerrit change ${pr.sourceBranch} for ${number}`,
+    );
+  } else {
+    logger.debug(
+      { number },
+      'PR not found in cached PRs - trying to fetch directly',
+    );
+    try {
+      const change = await client.getChange(number, REQUEST_DETAILS_FOR_PRS);
+      pr = mapGerritChangeToPr(change);
+
+      // Add to cache for further queries
+      if (pr) {
+        await GerritPrCache.setPr(config.repository!, pr);
+      }
+    } catch (err) {
+      if (err.statusCode === 404) {
+        logger.debug({ number }, 'Change not found in Gerrit');
+        return null;
+      }
+      throw err;
+    }
+  }
+
+  return pr;
 }
 
 export async function updatePr(prConfig: UpdatePrConfig): Promise<void> {
   logger.debug(`updatePr(${prConfig.number}, ${prConfig.prTitle})`);
-  const prs = await GerritPrCache.getPrs(config.repository!);
-  const cached = prs.find((pr) => pr.number === prConfig.number);
+  const cached = await getPr(prConfig.number);
   if (!cached) {
-    logger.warn({ number: prConfig.number }, 'updatePr: PR not found in cache');
+    logger.warn(
+      { number: prConfig.number },
+      'updatePr: change not found in cache or Gerrit',
+    );
     return;
   }
 
@@ -420,12 +445,6 @@ export async function mergePr(mergeConfig: MergePRConfig): Promise<boolean> {
   logger.debug(
     `mergePr(${mergeConfig.id}, ${mergeConfig.branchName!}, ${mergeConfig.strategy!})`,
   );
-  const prs = await GerritPrCache.getPrs(config.repository!);
-  const cached = prs.find((pr) => pr.number === mergeConfig.id);
-  if (!cached) {
-    logger.warn({ number: mergeConfig.id }, 'mergePr: PR not found in cache');
-    return false;
-  }
 
   let change: GerritChange;
   try {
@@ -444,11 +463,20 @@ export async function mergePr(mergeConfig: MergePRConfig): Promise<boolean> {
     throw err;
   }
 
-  const pr = clone(cached);
-  pr.state = 'merged';
-  pr.updatedAt = convertGerritDateToISO(change.updated);
-  logger.debug(`mergePr: updating gerrit change ${mergeConfig.id} in cache`);
-  await GerritPrCache.setPr(config.repository!, pr);
+  const cached = await getPr(mergeConfig.id);
+  if (cached) {
+    const pr = clone(cached);
+    pr.state = 'merged';
+    pr.updatedAt = convertGerritDateToISO(change.updated);
+    logger.debug(`mergePr: updating gerrit change ${mergeConfig.id} in cache`);
+    await GerritPrCache.setPr(config.repository!, pr);
+  } else {
+    logger.warn(
+      { number: mergeConfig.id },
+      'mergePr: merged change but could not update PR cache',
+    );
+  }
+
   return true;
 }
 

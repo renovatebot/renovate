@@ -16,7 +16,11 @@ import type {
   GerritProjectInfo,
   GerritRevisionInfo,
 } from './schema.ts';
-import { TAG_PULL_REQUEST_BODY, mapGerritChangeToPr } from './utils.ts';
+import {
+  REQUEST_DETAILS_FOR_PRS,
+  TAG_PULL_REQUEST_BODY,
+  mapGerritChangeToPr,
+} from './utils.ts';
 
 const gerritEndpointUrl = 'https://dev.gerrit.com/renovate';
 
@@ -399,11 +403,56 @@ describe('modules/platform/gerrit/index', () => {
       expect(clientMock.getChange).not.toHaveBeenCalled();
     });
 
-    it('getPr() - not found in cache', async () => {
+    it('getPr() - not in cache, fetches by id and stores', async () => {
+      const change = makeChange();
+      const pr = mapGerritChangeToPr(change)!;
       prCacheMock.getPrs.mockResolvedValueOnce([]);
+      clientMock.getChange.mockResolvedValueOnce(change);
+      prCacheMock.setPr.mockResolvedValueOnce();
+      await expect(gerrit.getPr(123456)).resolves.toEqual(pr);
+      expect(clientMock.getChange).toHaveBeenCalledExactlyOnceWith(
+        123456,
+        REQUEST_DETAILS_FOR_PRS,
+      );
+      expect(prCacheMock.setPr).toHaveBeenCalledExactlyOnceWith(
+        'test/repo',
+        pr,
+      );
+    });
+
+    it('getPr() - 404 returns null', async () => {
+      prCacheMock.getPrs.mockResolvedValueOnce([]);
+      clientMock.getChange.mockRejectedValueOnce({ statusCode: 404 });
       await expect(gerrit.getPr(123456)).resolves.toBeNull();
-      expect(prCacheMock.getPrs).toHaveBeenCalledExactlyOnceWith('test/repo');
-      expect(clientMock.getChange).not.toHaveBeenCalled();
+      expect(prCacheMock.setPr).not.toHaveBeenCalled();
+    });
+
+    it('getPr() - non-404 errors propagate', async () => {
+      prCacheMock.getPrs.mockResolvedValueOnce([]);
+      clientMock.getChange.mockRejectedValueOnce({
+        statusCode: 500,
+        message: 'server error',
+      });
+      await expect(gerrit.getPr(123456)).rejects.toMatchObject({
+        statusCode: 500,
+      });
+      expect(prCacheMock.setPr).not.toHaveBeenCalled();
+    });
+
+    it('getPr() - unmappable change is not cached', async () => {
+      prCacheMock.getPrs.mockResolvedValueOnce([]);
+      clientMock.getChange.mockResolvedValueOnce(
+        makeChange({
+          current_revision: defaultRevision,
+          revisions: {
+            [defaultRevision]: partial<GerritRevisionInfo>({
+              commit_with_footers: 'no branch footer here',
+            }),
+          },
+        }),
+      );
+      await expect(gerrit.getPr(123456)).resolves.toBeNull();
+      expect(prCacheMock.setPr).not.toHaveBeenCalled();
     });
   });
 
@@ -438,8 +487,9 @@ describe('modules/platform/gerrit/index', () => {
       );
     });
 
-    it('updatePr() - PR not found in cache', async () => {
+    it('updatePr() - PR not found', async () => {
       prCacheMock.getPrs.mockResolvedValueOnce([]);
+      clientMock.getChange.mockRejectedValueOnce({ statusCode: 404 });
       await gerrit.updatePr({
         number: 123456,
         prTitle: 'title',
@@ -827,10 +877,52 @@ describe('modules/platform/gerrit/index', () => {
       await expect(gerrit.mergePr({ id: 123456 })).resolves.toBeFalse();
     });
 
-    it('mergePr() - PR not found in cache', async () => {
+    it('mergePr() - still submits when PR is missing from list cache', async () => {
+      // submit first; then getPr fills via get-by-id and updates cache
       prCacheMock.getPrs.mockResolvedValueOnce([]);
-      await expect(gerrit.mergePr({ id: 123456 })).resolves.toBeFalse();
-      expect(clientMock.submitChange).not.toHaveBeenCalled();
+      clientMock.submitChange.mockResolvedValueOnce(
+        partial<GerritChange>({
+          status: 'MERGED',
+          updated: '2025-04-14 16:50:00.000000000',
+        }),
+      );
+      clientMock.getChange.mockResolvedValueOnce(
+        makeChange({
+          status: 'MERGED',
+          updated: '2025-04-14 16:40:00.000000000',
+        }),
+      );
+      prCacheMock.setPr.mockResolvedValue();
+      await expect(gerrit.mergePr({ id: 123456 })).resolves.toBeTrue();
+      expect(clientMock.submitChange).toHaveBeenCalledExactlyOnceWith(123456);
+      expect(clientMock.getChange).toHaveBeenCalledExactlyOnceWith(
+        123456,
+        REQUEST_DETAILS_FOR_PRS,
+      );
+      // getPr stores the fetched change; mergePr then writes merged + submit timestamp
+      expect(prCacheMock.setPr).toHaveBeenLastCalledWith(
+        'test/repo',
+        expect.objectContaining({
+          number: 123456,
+          state: 'merged',
+          updatedAt: '2025-04-14T16:50:00.000000000',
+        }),
+      );
+    });
+
+    it('mergePr() - merges without updating cache when PR cannot be loaded', async () => {
+      prCacheMock.getPrs.mockResolvedValueOnce([]);
+      clientMock.submitChange.mockResolvedValueOnce(
+        partial<GerritChange>({
+          status: 'MERGED',
+          updated: '2025-04-14 16:50:00.000000000',
+        }),
+      );
+      // post-submit getPr: list empty and get-by-id 404
+      clientMock.getChange.mockRejectedValueOnce({ statusCode: 404 });
+      await expect(gerrit.mergePr({ id: 123456 })).resolves.toBeTrue();
+      expect(clientMock.submitChange).toHaveBeenCalledExactlyOnceWith(123456);
+      expect(prCacheMock.setPr).not.toHaveBeenCalled();
     });
 
     it('mergePr() - other errors', async () => {
