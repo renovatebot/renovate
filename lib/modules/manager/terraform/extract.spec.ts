@@ -225,7 +225,8 @@ describe('modules/manager/terraform/extract', () => {
           currentDigest: 'aabbccddee1122334455667788990011aabbccdd',
           currentValue: 'v1.2.3',
           datasource: 'github-tags',
-          autoReplaceStringTemplate: '{{currentDigest}}" # {{newValue}}',
+          autoReplaceStringTemplate:
+            '{{newDigest}}"{{#if newValue}} # {{newValue}}{{/if}}',
           replaceString: 'aabbccddee1122334455667788990011aabbccdd" # v1.2.3',
         },
         {
@@ -256,7 +257,8 @@ module "pinned" {
         currentDigest: 'aabbccddee1122334455667788990011aabbccdd',
         currentValue: 'v1.2.3',
         replaceString: 'aabbccddee1122334455667788990011aabbccdd" # v1.2.3',
-        autoReplaceStringTemplate: '{{currentDigest}}" # {{newValue}}',
+        autoReplaceStringTemplate:
+          '{{newDigest}}"{{#if newValue}} # {{newValue}}{{/if}}',
       });
     });
 
@@ -316,6 +318,22 @@ module "pinned-date" {
       expect(res?.deps[0].currentValue).toBeUndefined();
     });
 
+    it('accepts a pre-release version comment', async () => {
+      const src = `
+module "pinned-prerelease" {
+  source = "github.com/hashicorp/example?ref=aabbccddee1122334455667788990011aabbccdd" # v1.2.3-rc.1
+}
+`;
+      const res = await extractPackageFile(src, 'main.tf', {});
+      expect(res?.deps).toHaveLength(1);
+      expect(res?.deps[0]).toMatchObject({
+        currentDigest: 'aabbccddee1122334455667788990011aabbccdd',
+        currentValue: 'v1.2.3-rc.1',
+        replaceString:
+          'aabbccddee1122334455667788990011aabbccdd" # v1.2.3-rc.1',
+      });
+    });
+
     it('prefers the versioned occurrence when the same SHA is pinned twice', async () => {
       const src = `
 module "pinned-versioned" {
@@ -338,6 +356,66 @@ module "pinned-bare" {
           currentValue: 'v1.2.3',
         },
       ]);
+    });
+
+    it('picks up the version when the bare occurrence comes first', async () => {
+      const src = `
+module "pinned-bare" {
+  source = "github.com/hashicorp/example?ref=aabbccddee1122334455667788990011aabbccdd"
+}
+
+module "pinned-versioned" {
+  source = "github.com/hashicorp/example?ref=aabbccddee1122334455667788990011aabbccdd" # v1.2.3
+}
+`;
+      const res = await extractPackageFile(src, 'main.tf', {});
+      expect(res?.deps).toHaveLength(2);
+      // A later versioned occurrence must overwrite the bare-seeded entry.
+      expect(res?.deps.every((dep) => dep.skipReason === undefined)).toBe(true);
+      expect(res?.deps).toIncludeAllPartialMembers([
+        {
+          depName: 'github.com/hashicorp/example',
+          currentDigest: 'aabbccddee1122334455667788990011aabbccdd',
+          currentValue: 'v1.2.3',
+        },
+      ]);
+    });
+
+    it('handles a version comment when ref is followed by other params', async () => {
+      const src = `
+module "pinned-trailing" {
+  source = "github.com/hashicorp/example?ref=aabbccddee1122334455667788990011aabbccdd&depth=1" # v1.2.3
+}
+`;
+      const res = await extractPackageFile(src, 'main.tf', {});
+      expect(res?.deps).toHaveLength(1);
+      expect(res?.deps[0]).toMatchObject({
+        depName: 'github.com/hashicorp/example',
+        currentDigest: 'aabbccddee1122334455667788990011aabbccdd',
+        currentValue: 'v1.2.3',
+        replaceString:
+          'aabbccddee1122334455667788990011aabbccdd&depth=1" # v1.2.3',
+        autoReplaceStringTemplate:
+          '{{newDigest}}&depth=1"{{#if newValue}} # {{newValue}}{{/if}}',
+      });
+    });
+
+    it('handles a version comment when ref is preceded by other params', async () => {
+      const src = `
+module "pinned-leading" {
+  source = "github.com/hashicorp/example?depth=1&ref=aabbccddee1122334455667788990011aabbccdd" # v1.2.3
+}
+`;
+      const res = await extractPackageFile(src, 'main.tf', {});
+      expect(res?.deps).toHaveLength(1);
+      expect(res?.deps[0]).toMatchObject({
+        depName: 'github.com/hashicorp/example',
+        currentDigest: 'aabbccddee1122334455667788990011aabbccdd',
+        currentValue: 'v1.2.3',
+        replaceString: 'aabbccddee1122334455667788990011aabbccdd" # v1.2.3',
+        autoReplaceStringTemplate:
+          '{{newDigest}}"{{#if newValue}} # {{newValue}}{{/if}}',
+      });
     });
 
     it('extracts bitbucket modules', async () => {

@@ -1,4 +1,4 @@
-import { isNullOrUndefined } from '@sindresorhus/is';
+import { isNullOrUndefined, isString } from '@sindresorhus/is';
 import { logger } from '../../../logger/index.ts';
 import { regEx } from '../../../util/regex.ts';
 import type {
@@ -56,50 +56,51 @@ export async function extractPackageFile(
     dependencies.push(...deps);
   }
 
-  // Post-process: for SHA-pinned GitHub module sources, extract version from
-  // inline comment in the raw file content (the HCL parser strips comments).
-  // Scan the content once and build a lookup map before iterating over deps.
-  // The version must be dotted-numeric (e.g. `v1.2.3`) so trailing comments
-  // such as `# updated ...`, a bare date `# 2026-04-01`, or a bare integer are
-  // not mistaken for a version. A dot-separated date (`# 2026.04.01`) remains
-  // an accepted but unlikely false positive.
-  const shaCommentRegex = regEx(
-    /\?ref=(?<sha>[0-9a-f]{40})"(?:[^\S\r\n]*#[^\S\r\n]*(?<version>v?\d+(?:\.\d+){1,2}\S*))?/gi,
-  );
-  const shaInfoMap = new Map<
-    string,
-    { version: string | undefined; replaceString: string }
-  >();
-  for (const match of content.matchAll(shaCommentRegex)) {
-    const groups = match.groups;
-    /* v8 ignore next 3 -- named groups are always present on a match */
-    if (!groups) {
-      continue;
+  // Post-process: for SHA-pinned GitHub module sources, recover the version
+  // from the inline comment in the raw file content (the HCL parser strips
+  // comments). Only relevant when a module resolved to a commit digest, so
+  // files without a SHA-pinned module are not scanned at all.
+  if (
+    dependencies.some(
+      (dep) => dep.depType === 'module' && isString(dep.currentDigest),
+    )
+  ) {
+    // The version must be dotted-numeric (e.g. `v1.2.3`) so trailing comments
+    // such as `# updated ...`, a bare date `# 2026-04-01`, or a bare integer
+    // are not mistaken for a version (a dot-separated date like `# 2026.04.01`
+    // remains an accepted but unlikely false positive). `[?&]ref=` plus the
+    // trailing-parameter capture supports sources such as `?ref=<sha>&depth=1`
+    // and `?depth=1&ref=<sha>`.
+    const shaCommentRegex = regEx(
+      /[?&]ref=(?<replaceString>(?<sha>[0-9a-f]{40})(?<suffix>[^"\r\n]*)"(?:[^\S\r\n]*#[^\S\r\n]*(?<version>v?\d+(?:\.\d+){1,2}\S*))?)/gi,
+    );
+    const shaInfoMap = new Map<
+      string,
+      { version: string | undefined; suffix: string; replaceString: string }
+    >();
+    for (const match of content.matchAll(shaCommentRegex)) {
+      const { sha, suffix, version, replaceString } = match.groups!;
+      // Prefer an occurrence that carries a version comment: when the same SHA
+      // is pinned by multiple modules, a bare `?ref=<sha>` must not overwrite a
+      // `?ref=<sha> # v1.2.3` recorded for that SHA.
+      if (shaInfoMap.get(sha)?.version && !version) {
+        continue;
+      }
+      shaInfoMap.set(sha, { version, suffix, replaceString });
     }
-    const { sha, version } = groups;
-    // Prefer an occurrence that carries a version comment: when the same SHA is
-    // pinned by multiple modules, a bare `?ref=<sha>` must not overwrite a
-    // `?ref=<sha> # v1.2.3` recorded for that SHA.
-    if (shaInfoMap.get(sha)?.version && !version) {
-      continue;
-    }
-    shaInfoMap.set(sha, {
-      version,
-      replaceString: match[0].slice('?ref='.length),
-    });
-  }
 
-  for (const dep of dependencies) {
-    if (dep.currentDigest && dep.depType === 'module') {
-      const info = shaInfoMap.get(dep.currentDigest);
-      if (info?.version) {
-        dep.currentValue = info.version;
-        // replaceString: SHA + closing quote + inline comment
-        // e.g. `6c5e082b...29" # v5.12.0`
-        dep.replaceString = info.replaceString;
-        dep.autoReplaceStringTemplate = '{{currentDigest}}" # {{newValue}}';
-      } else {
-        dep.skipReason = 'unversioned-reference';
+    for (const dep of dependencies) {
+      if (dep.depType === 'module' && isString(dep.currentDigest)) {
+        const info = shaInfoMap.get(dep.currentDigest);
+        if (info?.version) {
+          dep.currentValue = info.version;
+          // Replace `<sha>[<params>]" # <version>`, bumping both the digest and
+          // the version comment while preserving any trailing parameters.
+          dep.replaceString = info.replaceString;
+          dep.autoReplaceStringTemplate = `{{newDigest}}${info.suffix}"{{#if newValue}} # {{newValue}}{{/if}}`;
+        } else {
+          dep.skipReason = 'unversioned-reference';
+        }
       }
     }
   }
