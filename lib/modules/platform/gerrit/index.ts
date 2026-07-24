@@ -51,6 +51,7 @@ import {
   getGerritRepoUrl,
   mapBranchStatusToLabel,
   mapGerritChangeToPr,
+  prStateMatchesFilter,
 } from './utils.ts';
 
 export const id = 'gerrit';
@@ -241,12 +242,7 @@ export async function findPr(findPRConfig: FindPRConfig): Promise<Pr | null> {
     if (findPRConfig.prTitle && pr.title !== findPRConfig.prTitle) {
       return false;
     }
-    if (
-      !isUndefined(findPRConfig.state) &&
-      findPRConfig.state !== 'all' &&
-      pr.state !== findPRConfig.state &&
-      !(findPRConfig.state === '!open' && pr.state !== 'open')
-    ) {
+    if (!prStateMatchesFilter(pr.state, findPRConfig.state)) {
       return false;
     }
     return true;

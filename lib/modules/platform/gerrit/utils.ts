@@ -1,3 +1,4 @@
+import { isUndefined } from '@sindresorhus/is';
 import { DateTime } from 'luxon';
 import { CONFIG_GIT_URL_UNAVAILABLE } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
@@ -7,7 +8,7 @@ import { regEx } from '../../../util/regex.ts';
 import { toLongCommitSha } from '../../../util/schema-utils/git.ts';
 import { joinUrlParts, parseUrl } from '../../../util/url.ts';
 import { hashBody } from '../pr-body.ts';
-import type { GitUrlOption, Pr } from '../types.ts';
+import type { FindPRConfig, GitUrlOption, Pr } from '../types.ts';
 import type { GerritChange, GerritLabelTypeInfo } from './schema.ts';
 import type { GerritChangeStatus, GerritRequestDetail } from './types.ts';
 
@@ -92,6 +93,19 @@ export function mapPrStateToGerritFilter(state?: PrState): string | null {
     default:
       return null;
   }
+}
+
+export function prStateMatchesFilter(
+  prState: Pr['state'],
+  findState: FindPRConfig['state'],
+): boolean {
+  if (isUndefined(findState) || findState === 'all') {
+    return true;
+  }
+  if (findState === '!open') {
+    return prState !== 'open';
+  }
+  return prState === findState;
 }
 
 export function mapGerritChangeToPr(

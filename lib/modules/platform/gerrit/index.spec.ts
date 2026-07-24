@@ -370,6 +370,21 @@ describe('modules/platform/gerrit/index', () => {
       ).resolves.toMatchObject({ sourceBranch: 'branch' });
     });
 
+    it('findPr() - state all matches any PR state from cache', async () => {
+      const pr = mapGerritChangeToPr(
+        makeChange({ status: 'MERGED', branch: 'master' }),
+        { sourceBranch: 'branch' },
+      )!;
+      prCacheMock.getPrs.mockResolvedValueOnce([pr]);
+      await expect(
+        gerrit.findPr({
+          branchName: 'branch',
+          state: 'all',
+          targetBranch: 'master',
+        }),
+      ).resolves.toMatchObject({ sourceBranch: 'branch' });
+    });
+
     it('findPr() - filters by branchName, targetBranch, and prTitle from cache', async () => {
       const pr = mapGerritChangeToPr(
         makeChange({ status: 'NEW', branch: 'master', subject: 'my title' }),

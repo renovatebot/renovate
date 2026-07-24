@@ -144,6 +144,25 @@ describe('modules/platform/gerrit/utils', () => {
     );
   });
 
+  describe('prStateMatchesFilter()', () => {
+    it.each([
+      ['open', undefined, true],
+      ['open', 'all', true],
+      ['closed', 'all', true],
+      ['closed', '!open', true],
+      ['merged', '!open', true],
+      ['open', '!open', false],
+      ['open', 'open', true],
+      ['closed', 'open', false],
+      ['open', 'closed', false],
+    ])(
+      'prStateMatchesFilter(%p, %p) -> %p',
+      (prState: string, findState: any, expected: boolean) => {
+        expect(utils.prStateMatchesFilter(prState, findState)).toBe(expected);
+      },
+    );
+  });
+
   describe('mapGerritChangeStateToPrState()', () => {
     it.each([
       ['NEW' as GerritChangeStatus, 'open'],
