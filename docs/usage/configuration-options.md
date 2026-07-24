@@ -4577,7 +4577,9 @@ This feature works with the following managers:
 - [`helm-values`](modules/manager/helm-values/index.md)
 - [`helmfile`](modules/manager/helmfile/index.md)
 - [`helmv3`](modules/manager/helmv3/index.md)
+- [`jsonata`](modules/manager/jsonata/index.md)
 - [`kubernetes`](modules/manager/kubernetes/index.md)
+- [`regex`](modules/manager/regex/index.md)
 - [`terraform`](modules/manager/terraform/index.md)
 - [`woodpecker`](modules/manager/woodpecker/index.md)
 
