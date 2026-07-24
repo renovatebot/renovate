@@ -79,6 +79,8 @@ describe('modules/manager/sbt/extract', () => {
           {
             packageName: 'org.scala-lang:scala-library',
             currentValue: '2.12.10',
+            sharedVariableName: 'ScalaVersion',
+            variableName: 'ScalaVersion',
           },
           { packageName: 'org.example:foo', currentValue: '0.0.1' },
           { packageName: 'org.example:bar_2.12', currentValue: '0.0.2' },
@@ -265,6 +267,8 @@ describe('modules/manager/sbt/extract', () => {
           {
             packageName: 'org.scala-lang:scala-library',
             currentValue: '2.12.10',
+            sharedVariableName: 'ScalaVersion',
+            variableName: 'ScalaVersion',
           },
           {
             packageName: 'org.example:bar_2.12',
@@ -339,6 +343,8 @@ describe('modules/manager/sbt/extract', () => {
           {
             packageName: 'org.scala-lang:scala-library',
             currentValue: '2.12.10',
+            sharedVariableName: 'ScalaVersion',
+            variableName: 'ScalaVersion',
           },
           {
             packageName: 'org.example:bar_2.12',
