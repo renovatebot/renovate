@@ -182,6 +182,41 @@ describe('modules/platform/gerrit/pr-cache', () => {
       await GerritPrCache.getPrs('test/repo');
     });
 
+    it('finishes reconciling the rest of the page after an unchanged change', async () => {
+      const cachedChange = makeChange({
+        _number: 100,
+        updated: '2025-04-14 16:40:00.000000000',
+      });
+      mockFindChanges([cachedChange]);
+
+      // First call populates the cache with change 100 only
+      await GerritPrCache.getPrs('test/repo');
+      memCacheReset();
+
+      // Same page: unchanged cached change, then an older never-cached change.
+      // Finish the page (cache the older change) but do not request the next page.
+      const olderNeverCached = makeChange({
+        _number: 50,
+        updated: '2025-04-14 15:00:00.000000000',
+        revisions: {
+          [defaultSha]: partial<GerritRevisionInfo>({
+            commit_with_footers: 'msg\n\nRenovate-Branch: renovate/dep-2',
+          }),
+        },
+      });
+      clientMock.findChanges.mockImplementationOnce((_repo, config) => {
+        const page = [cachedChange, olderNeverCached];
+        const shouldContinue = config.shouldFetchNextPage!(page);
+        expect(shouldContinue).toBeFalse();
+        return Promise.resolve(page);
+      });
+
+      const prs = await GerritPrCache.getPrs('test/repo');
+      expect(prs.map((pr) => pr.number).sort((a, b) => a - b)).toEqual([
+        50, 100,
+      ]);
+    });
+
     it('continues when changes are new or updated', async () => {
       mockFindChanges([]);
 

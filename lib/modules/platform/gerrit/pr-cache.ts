@@ -86,28 +86,29 @@ export class GerritPrCache {
    * Reconciles a page of changes with the cache.
    *
    * Gerrit API returns changes sorted by last update time (most recent first).
-   * We stop processing when we encounter a change whose "updated" timestamp
-   * matches our cached Pr's updatedAt, as all subsequent changes will be even older.
+   * When we encounter a change whose "updated" timestamp matches our cached
+   * Pr's updatedAt, we finish reconciling the rest of this page and skip
+   * further pages.
    *
-   * @param changes - Page of changes from Gerrit API
+   * @param changes Page of changes from Gerrit API
    * @returns true if more pages can be fetched, false if not needed
    */
   private reconcile(changes: GerritChange[]): boolean {
     const { items } = this.cache;
     let changeCount = 0;
+    let needNextPage = true;
 
     for (const change of changes) {
       const cachedPr = items[change._number];
       const cachedUpdated = cachedPr?.updatedAt?.replace('T', ' ');
 
-      // If this change exists in cache and has the same updated timestamp,
-      // it hasn't been modified. Since changes are sorted by update time,
-      // all subsequent changes are also unchanged.
+      // If this change exists in cache and has the same updated timestamp, it
+      // hasn't been modified. Since changes are sorted by update time, further
+      // changes hasn't been modified either, but we still process the current
+      // page as it's already fetched anyway.
       if (cachedUpdated === change.updated) {
-        logger.debug(
-          `Reconciled ${changeCount} changes before hitting unchanged change ${change._number}`,
-        );
-        return false;
+        needNextPage = false;
+        continue;
       }
 
       const pr = mapGerritChangeToPr(change);
@@ -119,7 +120,13 @@ export class GerritPrCache {
       changeCount++;
     }
 
-    return true;
+    if (!needNextPage) {
+      logger.debug(
+        `Reconciled ${changeCount} changes on page; skipping further pages as the rest is already cached`,
+      );
+    }
+
+    return needNextPage;
   }
 
   private async sync(): Promise<GerritPrCache> {
