@@ -28,6 +28,8 @@ export interface GenerateLockFileResult {
   stderr?: string;
   stdout?: string;
   beforeFallback?: boolean;
+  /** pnpm: retried lockfile gen with CLI maturity excludes for base-lockfile / security pins */
+  maturityFallback?: boolean;
 }
 
 // the dependencies schema is different for v6 and other lockfile versions
