@@ -4508,6 +4508,12 @@ The `in-range-only` strategy behaves like `update-lockfile`, but discards any up
 We recommend you avoid using the `in-range-only` strategy unless you strictly need it.
 Using the `in-range-only` strategy may result in you being multiple releases behind without knowing it.
 
+## `reRequestApprovedReviews`
+
+When enabled, Renovate will re-request review from users whose approvals were dismissed on existing PRs.
+This is useful when branch protection rules dismiss stale approvals after new commits are pushed, leaving PRs without active reviewers.
+This option is only supported on the GitHub platform.
+
 ## `rebaseLabel`
 
 On supported platforms it is possible to add a label to a PR to manually request Renovate to recreate/rebase it.

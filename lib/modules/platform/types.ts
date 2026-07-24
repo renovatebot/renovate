@@ -316,6 +316,7 @@ export interface Platform {
   commitFiles?(config: CommitFilesConfig): Promise<LongCommitSha | null>;
   expandGroupMembers?(reviewersOrAssignees: string[]): Promise<string[]>;
   extractRulesFromCodeOwnersLines?(cleanedLines: string[]): FileOwnerRule[];
+  getPrDismissedReviewers?(prNo: number): Promise<string[]>;
 
   maxBodyLength(): number;
   labelCharLimit?(): number;
