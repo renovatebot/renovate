@@ -38,6 +38,16 @@ describe('modules/manager/ansible-galaxy/extract', () => {
       expect(res?.deps[0].currentValue).toBe('1.1.3');
     });
 
+    // via #44240
+    it('extracts dependencies from requirements.yml with a comment', () => {
+      const yamlFile = codeBlock`collections:
+      - name: community.aws       # obtains secrets from AWS SM
+      version: 7.1.0`;
+      const res = extractPackageFile(yamlFile, 'requirements.yml');
+      expect(res?.deps).toHaveLength(1);
+      expect(res?.deps[0].depName).toEqual('community.aws');
+    });
+
     it('extracts git@ dependencies', () => {
       const yamlFile = codeBlock`collections:
       - name: community.docker
