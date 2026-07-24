@@ -2326,12 +2326,13 @@ describe('modules/platform/bitbucket/index', () => {
     });
 
     it('does not post Merge with rebase', async () => {
-      await bitbucket.mergePr({
-        branchName: 'branch',
-        id: 5,
-        strategy: 'rebase',
-      });
-      expect(httpMock.getTrace()).toBeEmptyArray();
+      expect(
+        await bitbucket.mergePr({
+          branchName: 'branch',
+          id: 5,
+          strategy: 'rebase',
+        }),
+      ).toBeFalse();
     });
 
     it('posts Merge with fast-forward', async () => {
