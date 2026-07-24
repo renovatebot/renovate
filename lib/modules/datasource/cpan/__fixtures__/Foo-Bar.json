@@ -1,0 +1,59 @@
+{
+   "took" : 2,
+   "_shards" : {
+      "total" : 3,
+      "successful" : 3,
+      "failed" : 0
+   },
+   "hits" : {
+      "total" : 2,
+      "hits" : [
+         {
+            "_type" : "file",
+            "_index" : "cpan_v1_01",
+            "_id" : "aaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "_score" : null,
+            "sort" : [
+               1685577600000
+            ],
+            "_source" : {
+               "deprecated" : false,
+               "module" : [
+                  {
+                     "name" : "Foo::Bar",
+                     "version" : "v1.1.1"
+                  }
+               ],
+               "status" : "latest",
+               "date" : "2023-06-01T00:00:00",
+               "maturity" : "released",
+               "distribution" : "Foo-Bar"
+            }
+         },
+         {
+            "_type" : "file",
+            "_index" : "cpan_v1_01",
+            "_id" : "bbbbbbbbbbbbbbbbbbbbbbbbbbb",
+            "_score" : null,
+            "sort" : [
+               1640995200000
+            ],
+            "_source" : {
+               "deprecated" : false,
+               "module" : [
+                  {
+                     "name" : "Foo::Bar",
+                     "version" : "v1.1.0"
+                  }
+               ],
+               "status" : "cpan",
+               "date" : "2022-01-01T00:00:00",
+               "maturity" : "released",
+               "distribution" : "Foo-Bar"
+            }
+         }
+      ],
+      "max_score" : null
+   },
+   "timed_out" : false
+}
