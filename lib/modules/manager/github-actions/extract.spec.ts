@@ -1979,6 +1979,52 @@ describe('modules/manager/github-actions/extract', () => {
     },
     {
       step: {
+        uses: 'jdx/mise-action@v3',
+        with: { version: '2025.7.10' },
+      },
+      expected: [
+        {
+          currentValue: '2025.7.10',
+          datasource: 'github-releases',
+          depName: 'jdx/mise',
+          depType: 'uses-with',
+          packageName: 'jdx/mise',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'jdx/mise-action@v3',
+        with: { version: 'v2025.7.10' },
+      },
+      expected: [
+        {
+          currentValue: 'v2025.7.10',
+          datasource: 'github-releases',
+          depName: 'jdx/mise',
+          depType: 'uses-with',
+          packageName: 'jdx/mise',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'jdx/mise-action@v3',
+        with: {},
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'github-releases',
+          depName: 'jdx/mise',
+          depType: 'uses-with',
+          packageName: 'jdx/mise',
+        },
+      ],
+    },
+    {
+      step: {
         uses: 'sigoden/install-binary@v1',
         with: {
           repo: 'sigoden/argc',
