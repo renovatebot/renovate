@@ -303,6 +303,8 @@ If possible, Renovate follows the merge strategy set on the platform itself for 
 If you've set `automerge=true` and `automergeType=pr` for any of your dependencies, then you may choose what automerge strategy Renovate uses by setting the `automergeStrategy` config option.
 If you're happy with the default behavior, you don't need to do anything.
 
+On supported platforms, `automergeStrategy` also applies when using platform-native automerge.
+
 You may choose from these values:
 
 - `auto`, Renovate decides how to merge
@@ -4017,6 +4019,8 @@ If enabled Renovate will pin Docker images or GitHub Actions by means of their S
   The default `"failed"` only sets the check when artifact updates fail, so a required check rule would block every PR that has no artifact errors (the check would never appear). Setting it to `"always"` makes Renovate report green when there are no errors and red when there are, which is what branch protection requires.
 
 If you have enabled `automerge` and set `automergeType=pr` in the Renovate config, then leaving `platformAutomerge` as `true` speeds up merging via the platform's native automerge functionality.
+
+Where supported, platform-native automerge uses [`automergeStrategy`](#automergestrategy) to select the merge method.
 
 On Bitbucket Server, GitHub and GitLab, Renovate re-enables the PR for platform-native automerge whenever it's rebased.
 

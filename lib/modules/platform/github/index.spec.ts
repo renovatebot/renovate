@@ -4172,6 +4172,36 @@ describe('modules/platform/github/index', () => {
         ]);
       });
 
+      it('should use the configured automerge strategy', async () => {
+        const scope = await mockScope();
+        scope.post('/graphql').reply(200, graphqlAutomergeResp);
+
+        const pr = await github.createPr({
+          ...prConfig,
+          platformPrOptions: {
+            usePlatformAutomerge: true,
+            automergeStrategy: 'rebase',
+          },
+        });
+
+        expect(pr).toMatchObject({ number: 123 });
+        expect(httpMock.getTrace()).toMatchObject([
+          graphqlGetRepo,
+          restCreatePr,
+          restAddLabels,
+          {
+            ...graphqlAutomerge,
+            graphql: {
+              ...graphqlAutomerge.graphql,
+              variables: {
+                pullRequestId: 'abcd',
+                mergeMethod: 'REBASE',
+              },
+            },
+          },
+        ]);
+      });
+
       it('should handle GraphQL errors', async () => {
         const scope = await mockScope();
         scope.post('/graphql').reply(200, graphqlAutomergeErrorResp);
