@@ -22,6 +22,23 @@ When a lock file is present:
 
 - Dependencies will have their `lockedVersion` extracted from the lock file
 - Renovate can update lock files when dependencies change
+- Fuzzy selectors such as `latest`, `lts`, `25`, `25.1`, and `temurin-25` are
+  resolved against their locked version and updated in `mise.lock` only
+- `latest` remains unbounded; partial selectors remain restricted to their
+  major/minor range; `lts` is supported for the core Node.js and Java tools
+- Concrete versions such as `25.0.3` retain Renovate's normal source-file
+  update behavior
+- To keep concrete versions pinned, set `updatePinnedDependencies` to `false`
+  in the `mise` manager configuration
+
+  ```json
+  {
+    "mise": {
+      "updatePinnedDependencies": false
+    }
+  }
+  ```
+
 - Lock file maintenance is supported via the `lockFileMaintenance` option
 
 Renovate recognizes environment-specific lock files:

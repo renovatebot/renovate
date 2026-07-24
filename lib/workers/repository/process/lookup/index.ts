@@ -149,6 +149,7 @@ export async function lookupUpdates(
     if (isValid || unconstrainedValue) {
       if (
         !config.updatePinnedDependencies &&
+        !config.isLockfileOnly &&
         // TODO #22198
         versioningApi.isSingleVersion(compareValue!)
       ) {
@@ -407,12 +408,13 @@ export async function lookupUpdates(
         latestVersion!,
         inRangeOnlyStrategy ? allSatisfyingVersions : allVersions,
         versioningApi,
-      ).filter(
-        (v) =>
-          // Leave only compatible versions
-          unconstrainedValue ||
-          versioningApi.isCompatible(v.version, compareValue),
-      );
+      ).filter((v) => {
+        // Leave only compatible versions
+        if (unconstrainedValue || config.isLockfileOnly === true) {
+          return true;
+        }
+        return versioningApi.isCompatible(v.version, compareValue);
+      });
       let shrinkedViaVulnerability = false;
       if (config.isVulnerabilityAlert) {
         if (config.vulnerabilityFixVersion) {

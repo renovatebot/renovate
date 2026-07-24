@@ -1179,12 +1179,12 @@ describe('modules/manager/mise/extract', () => {
         deps: [
           {
             depName: 'node',
-            currentValue: '20',
+            currentValue: '20.11.0',
             lockedVersion: '20.11.0',
           },
           {
             depName: 'python',
-            currentValue: '3.10',
+            currentValue: '3.10.17',
             lockedVersion: '3.10.17',
           },
         ],
@@ -1238,7 +1238,7 @@ describe('modules/manager/mise/extract', () => {
       expect(result?.lockFiles).toEqual(['mise.test.lock']);
       expect(result?.deps[0]).toMatchObject({
         depName: 'node',
-        currentValue: '18',
+        currentValue: '18.19.0',
         lockedVersion: '18.19.0',
       });
     });
@@ -1252,7 +1252,7 @@ describe('modules/manager/mise/extract', () => {
       const result = await extractPackageFile(content, 'mise.toml');
       expect(result?.deps[0]).toMatchObject({
         depName: 'core:node',
-        currentValue: '20',
+        currentValue: '20.11.0',
         lockedVersion: '20.11.0',
       });
     });
@@ -1289,9 +1289,157 @@ describe('modules/manager/mise/extract', () => {
       const result = await extractPackageFile(content, 'mise.toml');
       expect(result?.deps[0]).toMatchObject({
         depName: 'python',
-        currentValue: '3.10',
+        currentValue: '3.10.17',
         lockedVersion: '3.10.17',
       });
+    });
+
+    it('treats fuzzy selectors as lockfile-only dependencies', async () => {
+      const fuzzyLockFileContent = codeBlock`
+        [[tools.node]]
+        version = "22.14.0"
+
+        [[tools.java]]
+        version = "temurin-25.0.3+9.0.LTS"
+
+        [[tools.protoc]]
+        version = "30.2"
+      `;
+      fs.readLocalFile.mockResolvedValueOnce(fuzzyLockFileContent);
+      const content = codeBlock`
+        [tools]
+        node = "lts"
+        java = "temurin-25"
+        protoc = "latest"
+      `;
+
+      const result = await extractPackageFile(content, 'mise.toml');
+
+      expect(result?.deps).toMatchObject([
+        {
+          depName: 'node',
+          currentValue: '22.14.0',
+          currentRawValue: 'lts',
+          lockedVersion: '22.14.0',
+          ignoreUnstable: true,
+          isLockfileOnly: true,
+          rangeStrategy: 'update-lockfile',
+        },
+        {
+          depName: 'java',
+          currentValue: '25.0.3+9.0.LTS',
+          currentRawValue: 'temurin-25',
+          lockedVersion: '25.0.3+9.0.LTS',
+          allowedVersions: '/^(?:temurin\\-)?25(?:\\.|-|\\+|$)/',
+          isLockfileOnly: true,
+          rangeStrategy: 'update-lockfile',
+        },
+        {
+          depName: 'protoc',
+          currentValue: '30.2',
+          currentRawValue: 'latest',
+          lockedVersion: '30.2',
+          isLockfileOnly: true,
+          rangeStrategy: 'update-lockfile',
+        },
+      ]);
+    });
+
+    it('supports Java LTS selectors and leaves unsupported LTS tools unchanged', async () => {
+      const ltsLockFileContent = codeBlock`
+        [[tools.java]]
+        version = "25.0.3+9.0.LTS"
+
+        [[tools.erlang]]
+        version = "27.0.0"
+
+        [[tools.unknown]]
+        version = "1.0.0"
+
+        [[tools."vfox:unknown"]]
+        version = "1.0.0"
+      `;
+      fs.readLocalFile.mockResolvedValueOnce(ltsLockFileContent);
+      const content = codeBlock`
+        [tools]
+        java = "lts"
+        erlang = "lts"
+        "core:unknown" = "lts"
+        "vfox:unknown" = "lts"
+      `;
+
+      const result = await extractPackageFile(content, 'mise.toml');
+
+      expect(result?.deps).toMatchObject([
+        {
+          depName: 'java',
+          currentValue: '25.0.3+9.0.LTS',
+          currentRawValue: 'lts',
+          lockedVersion: '25.0.3+9.0.LTS',
+          allowedVersions: '/^(?:8|11|17|21|25)(?:\\.|-|$)/',
+          ignoreUnstable: true,
+          isLockfileOnly: true,
+        },
+        {
+          depName: 'erlang',
+          currentValue: 'lts',
+          lockedVersion: '27.0.0',
+        },
+        {
+          depName: 'core:unknown',
+          lockedVersion: '1.0.0',
+        },
+        {
+          depName: 'vfox:unknown',
+          lockedVersion: '1.0.0',
+        },
+      ]);
+      expect(result?.deps[1]).not.toHaveProperty('isLockfileOnly');
+      expect(result?.deps[2]).not.toHaveProperty('isLockfileOnly');
+      expect(result?.deps[3]).not.toHaveProperty('isLockfileOnly');
+    });
+
+    it('does not reinterpret a value that is exact in the lockfile', async () => {
+      const lockFile = codeBlock`
+        [[tools.node]]
+        version = "20.11"
+      `;
+      fs.readLocalFile.mockResolvedValueOnce(lockFile);
+      const content = codeBlock`
+        [tools]
+        node = "20.11"
+      `;
+
+      const result = await extractPackageFile(content, 'mise.toml');
+
+      expect(result?.deps[0]).toMatchObject({
+        depName: 'node',
+        currentValue: '20.11',
+        lockedVersion: '20.11',
+      });
+      expect(result?.deps[0]).not.toHaveProperty('isLockfileOnly');
+    });
+
+    it('keeps concrete versions on the normal update path', async () => {
+      const lockFile = codeBlock`
+        [[tools.node]]
+        version = "20.11.1"
+      `;
+      fs.readLocalFile.mockResolvedValueOnce(lockFile);
+      const content = codeBlock`
+        [tools]
+        node = "20.11.0"
+      `;
+
+      const result = await extractPackageFile(content, 'mise.toml');
+
+      expect(result?.deps[0]).toMatchObject({
+        depName: 'node',
+        currentValue: '20.11.0',
+        lockedVersion: '20.11.1',
+      });
+      expect(result?.deps[0]).not.toHaveProperty('isLockfileOnly');
+      expect(result?.deps[0]).not.toHaveProperty('currentRawValue');
     });
 
     it('skips kafka tool when version has no apache- prefix', async () => {
