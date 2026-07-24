@@ -1274,7 +1274,8 @@ const options: Readonly<RenovateOptions>[] = [
   {
     name: 'gitIgnoredAuthors',
     description:
-      'Git authors which are ignored by Renovate. Must conform to [RFC5322](https://datatracker.ietf.org/doc/html/rfc5322).',
+      'Git author emails ignored by Renovate. Entries can be exact [RFC5322](https://datatracker.ietf.org/doc/html/rfc5322) strings, glob patterns, or regex patterns using Renovate regex syntax.',
+    patternMatch: true,
     type: 'array',
     subType: 'string',
     stage: 'repository',

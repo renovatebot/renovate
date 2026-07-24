@@ -998,15 +998,25 @@ export async function isBranchModified(
   }
   const { gitAuthorEmail, ignoredAuthors } = config;
 
-  const includedAuthors = new Set(committedAuthors);
-
-  // v8 ignore else -- TODO: add test #40625
-  if (gitAuthorEmail) {
-    includedAuthors.delete(gitAuthorEmail);
+  function isIgnoredAuthor(committedAuthor: string): boolean {
+    // Normalize invalid GitHub app/bot email addresses (e.g.
+    // `renovate[bot]@users.noreply.github.com`) the same way `parseGitAuthor`
+    // does, so their literal brackets aren't treated as glob character classes.
+    const normalizedAuthor = committedAuthor.replace('[bot]@', '@');
+    const normalizedIgnoredAuthors = ignoredAuthors.map((author) =>
+      author.replace('[bot]@', '@'),
+    );
+    return matchRegexOrGlobList(normalizedAuthor, normalizedIgnoredAuthors);
   }
 
-  for (const ignoredAuthor of ignoredAuthors) {
-    includedAuthors.delete(ignoredAuthor);
+  const includedAuthors = new Set<string>();
+  for (const committedAuthor of committedAuthors) {
+    if (
+      committedAuthor !== gitAuthorEmail &&
+      !isIgnoredAuthor(committedAuthor)
+    ) {
+      includedAuthors.add(committedAuthor);
+    }
   }
 
   for (const ignoredAuthor of platformIgnoredAuthors) {
