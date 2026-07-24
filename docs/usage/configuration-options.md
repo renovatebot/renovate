@@ -344,6 +344,22 @@ If you're not already using `bors-ng` or similar, don't worry about this option.
 When creating a PR in Azure DevOps, some branches can be protected with branch policies to [check for linked work items](https://learn.microsoft.com/azure/devops/repos/git/branch-policies#check-for-linked-work-items).
 Creating a work item in Azure DevOps is beyond the scope of Renovate, but Renovate can link an already existing work item when creating PRs.
 
+## `azureWorkItemType`
+
+The work item type Renovate uses when creating its issues (such as the Dependency Dashboard) on Azure DevOps.
+
+Azure DevOps has no dedicated "issue" concept, so Renovate creates a work item instead.
+It defaults to the `Issue` type, which only exists in the `Basic` process.
+Projects using another process (for example `Agile` or `Scrum`), or a custom inherited process, may not have an `Issue` type, in which case creation fails.
+Set this to a work item type that exists in your project, such as `Task`.
+
+<!-- prettier-ignore -->
+!!! note
+  Renovate finds its existing issues by title, not by work item type.
+  If you change `azureWorkItemType` while an issue (such as the Dependency Dashboard) already exists, Renovate keeps using the existing work item and does _not_ recreate it with the new type.
+  To switch an existing issue to the new type, either rename the old work item (so its title no longer matches) and close it, or close and delete the old work item.
+  Renovate then creates a fresh work item of the configured type on the next run.
+
 ## `baseBranchPatterns`
 
 This configuration option was formerly known as `baseBranches`.
