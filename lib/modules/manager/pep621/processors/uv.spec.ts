@@ -1,7 +1,7 @@
 import { codeBlock } from 'common-tags';
 import { GoogleAuth as _googleAuth } from 'google-auth-library';
 import upath from 'upath';
-import { mockExecAll } from '~test/exec-util.ts';
+import { mockExecAll, mockExecSequence } from '~test/exec-util.ts';
 import { fs, hostRules, logger, partial } from '~test/util.ts';
 import { GlobalConfig } from '../../../../config/global.ts';
 import type {
@@ -9,6 +9,7 @@ import type {
   RepoGlobalConfig,
 } from '../../../../config/types.ts';
 import { TEMPORARY_ERROR } from '../../../../constants/error-messages.ts';
+import { ExecError } from '../../../../util/exec/exec-error.ts';
 import { GitRefsDatasource } from '../../../datasource/git-refs/index.ts';
 import { GitTagsDatasource } from '../../../datasource/git-tags/index.ts';
 import { GithubTagsDatasource } from '../../../datasource/github-tags/index.ts';
@@ -894,6 +895,373 @@ describe('modules/manager/pep621/processors/uv', () => {
           },
         },
       ]);
+    });
+
+    describe('--exclude-newer with minimumReleaseAge', () => {
+      let execSnapshots: ReturnType<typeof mockExecAll>;
+
+      beforeEach(() => {
+        vi.useFakeTimers();
+        vi.setSystemTime(new Date('2026-06-15T12:00:00.000Z'));
+        execSnapshots = mockExecAll();
+        GlobalConfig.set(adminConfig);
+        fs.findLocalSiblingOrParent.mockResolvedValueOnce('uv.lock');
+        fs.readLocalFile.mockResolvedValueOnce('test content');
+        fs.readLocalFile.mockResolvedValueOnce('changed test content');
+        // python
+        getPkgReleases.mockResolvedValueOnce({
+          releases: [{ version: '3.11.1' }],
+        });
+        // uv
+        getPkgReleases.mockResolvedValueOnce({
+          releases: [{ version: '0.2.35' }],
+        });
+      });
+
+      afterEach(() => {
+        vi.useRealTimers();
+      });
+
+      it('sets --exclude-newer from minimumReleaseAge on dep update', async () => {
+        const result = await processor.updateArtifacts(
+          {
+            packageFileName: 'pyproject.toml',
+            newPackageFileContent: '',
+            config: { minimumReleaseAge: '3 days' },
+            updatedDeps: [
+              { packageName: 'dep1', depType: depTypes.dependencies },
+            ],
+          },
+          parsePyProject('')!,
+        );
+        expect(result).toEqual([
+          {
+            file: {
+              contents: 'changed test content',
+              path: 'uv.lock',
+              type: 'addition',
+            },
+          },
+        ]);
+        expect(execSnapshots).toMatchObject([
+          {
+            cmd: 'uv lock --upgrade-package dep1 --exclude-newer 2026-06-12T12:00:00.000Z',
+          },
+        ]);
+      });
+
+      it('sets --exclude-newer from minimumReleaseAge on lockFileMaintenance', async () => {
+        const result = await processor.updateArtifacts(
+          {
+            packageFileName: 'pyproject.toml',
+            newPackageFileContent: '',
+            config: {
+              isLockFileMaintenance: true,
+              minimumReleaseAge: '1 week',
+            },
+            updatedDeps: [],
+          },
+          parsePyProject('')!,
+        );
+        expect(result).toEqual([
+          {
+            file: {
+              contents: 'changed test content',
+              path: 'uv.lock',
+              type: 'addition',
+            },
+          },
+        ]);
+        expect(execSnapshots).toMatchObject([
+          {
+            cmd: 'uv lock --upgrade --exclude-newer 2026-06-08T12:00:00.000Z',
+          },
+        ]);
+      });
+
+      it('skips --exclude-newer on unparseable minimumReleaseAge', async () => {
+        const result = await processor.updateArtifacts(
+          {
+            packageFileName: 'pyproject.toml',
+            newPackageFileContent: '',
+            config: { minimumReleaseAge: 'invalid garbage' },
+            updatedDeps: [
+              { packageName: 'dep1', depType: depTypes.dependencies },
+            ],
+          },
+          parsePyProject('')!,
+        );
+        expect(result).toEqual([
+          {
+            file: {
+              contents: 'changed test content',
+              path: 'uv.lock',
+              type: 'addition',
+            },
+          },
+        ]);
+        expect(execSnapshots).toMatchObject([
+          {
+            cmd: 'uv lock --upgrade-package dep1',
+          },
+        ]);
+        expect(logger.logger.debug).toHaveBeenCalledWith(
+          { minimumReleaseAge: 'invalid garbage' },
+          'Invalid minimumReleaseAge, skipping --exclude-newer for uv lock',
+        );
+      });
+
+      it('uses stricter [tool.uv].exclude-newer date when older than minimumReleaseAge', async () => {
+        const pyproject = parsePyProject(codeBlock`
+          [tool.uv]
+          exclude-newer = "1 week"
+        `)!;
+        const result = await processor.updateArtifacts(
+          {
+            packageFileName: 'pyproject.toml',
+            newPackageFileContent: '',
+            config: { minimumReleaseAge: '3 days' },
+            updatedDeps: [
+              { packageName: 'dep1', depType: depTypes.dependencies },
+            ],
+          },
+          pyproject,
+        );
+        expect(result).toEqual([
+          {
+            file: {
+              contents: 'changed test content',
+              path: 'uv.lock',
+              type: 'addition',
+            },
+          },
+        ]);
+        expect(execSnapshots).toMatchObject([
+          {
+            cmd: 'uv lock --upgrade-package dep1 --exclude-newer 2026-06-08T12:00:00.000Z',
+          },
+        ]);
+        expect(logger.logger.debug).toHaveBeenCalledWith(
+          {
+            uvExcludeNewerDate: '2026-06-08T12:00:00.000Z',
+            minimumReleaseAge: '3 days',
+            minimumReleaseAgeDate: '2026-06-12T12:00:00.000Z',
+          },
+          'Using stricter [tool.uv].exclude-newer date over minimumReleaseAge date',
+        );
+      });
+
+      it('uses minimumReleaseAge date when stricter than [tool.uv].exclude-newer', async () => {
+        const pyproject = parsePyProject(codeBlock`
+          [tool.uv]
+          exclude-newer = "3 days"
+        `)!;
+        await processor.updateArtifacts(
+          {
+            packageFileName: 'pyproject.toml',
+            newPackageFileContent: '',
+            config: { minimumReleaseAge: '1 week' },
+            updatedDeps: [
+              { packageName: 'dep1', depType: depTypes.dependencies },
+            ],
+          },
+          pyproject,
+        );
+        expect(execSnapshots).toMatchObject([
+          {
+            cmd: 'uv lock --upgrade-package dep1 --exclude-newer 2026-06-08T12:00:00.000Z',
+          },
+        ]);
+      });
+
+      it('uses stricter [tool.uv].exclude-newer ISO 8601 duration', async () => {
+        const pyproject = parsePyProject(codeBlock`
+          [tool.uv]
+          exclude-newer = "P7D"
+        `)!;
+        await processor.updateArtifacts(
+          {
+            packageFileName: 'pyproject.toml',
+            newPackageFileContent: '',
+            config: { minimumReleaseAge: '3 days' },
+            updatedDeps: [
+              { packageName: 'dep1', depType: depTypes.dependencies },
+            ],
+          },
+          pyproject,
+        );
+        expect(execSnapshots).toMatchObject([
+          {
+            cmd: 'uv lock --upgrade-package dep1 --exclude-newer 2026-06-08T12:00:00.000Z',
+          },
+        ]);
+      });
+
+      it('uses stricter [tool.uv].exclude-newer RFC3339 timestamp', async () => {
+        const pyproject = parsePyProject(codeBlock`
+          [tool.uv]
+          exclude-newer = "2026-06-01T00:00:00Z"
+        `)!;
+        await processor.updateArtifacts(
+          {
+            packageFileName: 'pyproject.toml',
+            newPackageFileContent: '',
+            config: { minimumReleaseAge: '3 days' },
+            updatedDeps: [
+              { packageName: 'dep1', depType: depTypes.dependencies },
+            ],
+          },
+          pyproject,
+        );
+        expect(execSnapshots).toMatchObject([
+          {
+            cmd: 'uv lock --upgrade-package dep1 --exclude-newer 2026-06-01T00:00:00.000Z',
+          },
+        ]);
+      });
+
+      it('falls back to minimumReleaseAge date when [tool.uv].exclude-newer is unparseable', async () => {
+        const pyproject = parsePyProject(codeBlock`
+          [tool.uv]
+          exclude-newer = "not a date"
+        `)!;
+        await processor.updateArtifacts(
+          {
+            packageFileName: 'pyproject.toml',
+            newPackageFileContent: '',
+            config: { minimumReleaseAge: '3 days' },
+            updatedDeps: [
+              { packageName: 'dep1', depType: depTypes.dependencies },
+            ],
+          },
+          pyproject,
+        );
+        expect(execSnapshots).toMatchObject([
+          {
+            cmd: 'uv lock --upgrade-package dep1 --exclude-newer 2026-06-12T12:00:00.000Z',
+          },
+        ]);
+        expect(logger.logger.debug).toHaveBeenCalledWith(
+          'Could not parse [tool.uv].exclude-newer in pyproject.toml, falling back to minimumReleaseAge',
+        );
+      });
+
+      it('skips --exclude-newer on unparseable minimumReleaseAge and logs even when [tool.uv].exclude-newer is set', async () => {
+        const pyproject = parsePyProject(codeBlock`
+          [tool.uv]
+          exclude-newer = "1 week"
+        `)!;
+        const result = await processor.updateArtifacts(
+          {
+            packageFileName: 'pyproject.toml',
+            newPackageFileContent: '',
+            config: { minimumReleaseAge: 'invalid garbage' },
+            updatedDeps: [
+              { packageName: 'dep1', depType: depTypes.dependencies },
+            ],
+          },
+          pyproject,
+        );
+        expect(result).toEqual([
+          {
+            file: {
+              contents: 'changed test content',
+              path: 'uv.lock',
+              type: 'addition',
+            },
+          },
+        ]);
+        expect(execSnapshots).toMatchObject([
+          {
+            cmd: 'uv lock --upgrade-package dep1',
+          },
+        ]);
+        expect(logger.logger.debug).toHaveBeenCalledWith(
+          { minimumReleaseAge: 'invalid garbage' },
+          'Invalid minimumReleaseAge, skipping --exclude-newer for uv lock',
+        );
+      });
+
+      it('retries without --exclude-newer when uv fails because the lock contains too-new packages', async () => {
+        const error = new ExecError('uv exit 1', {
+          cmd: 'uv lock --upgrade-package dep1 --exclude-newer 2026-06-12T12:00:00.000Z',
+          stdout: '',
+          stderr:
+            "  × No solution found when resolving dependencies:\n  ╰─▶ Because dep1==0.2.35 was published after the exclude newer time and your project depends on dep1==0.2.35, we can conclude that your project's requirements are unsatisfiable.",
+          options: {},
+        });
+        const success = { stdout: '', stderr: '' };
+        execSnapshots = mockExecSequence([
+          error, // uv lock with --exclude-newer
+          success, // uv lock without --exclude-newer (retry)
+        ]);
+        const result = await processor.updateArtifacts(
+          {
+            packageFileName: 'pyproject.toml',
+            newPackageFileContent: '',
+            config: { minimumReleaseAge: '3 days' },
+            updatedDeps: [
+              { packageName: 'dep1', depType: depTypes.dependencies },
+            ],
+          },
+          parsePyProject('')!,
+        );
+        expect(result).toEqual([
+          {
+            file: {
+              contents: 'changed test content',
+              path: 'uv.lock',
+              type: 'addition',
+            },
+          },
+        ]);
+        expect(execSnapshots).toMatchObject([
+          {
+            cmd: 'uv lock --upgrade-package dep1 --exclude-newer 2026-06-12T12:00:00.000Z',
+          },
+          {
+            cmd: 'uv lock --upgrade-package dep1',
+          },
+        ]);
+        expect(logger.logger.warn).toHaveBeenCalledWith(
+          { err: error },
+          'uv --exclude-newer caused a resolution error, retrying without --exclude-newer',
+        );
+      });
+
+      it('does not retry on unrelated uv errors', async () => {
+        const error = new ExecError('uv exit 1', {
+          cmd: 'uv lock --upgrade-package dep1 --exclude-newer 2026-06-12T12:00:00.000Z',
+          stdout: '',
+          stderr: 'some other failure',
+          options: {},
+        });
+        execSnapshots = mockExecSequence([error]);
+        const result = await processor.updateArtifacts(
+          {
+            packageFileName: 'pyproject.toml',
+            newPackageFileContent: '',
+            config: { minimumReleaseAge: '3 days' },
+            updatedDeps: [
+              { packageName: 'dep1', depType: depTypes.dependencies },
+            ],
+          },
+          parsePyProject('')!,
+        );
+        expect(result).toEqual([
+          {
+            artifactError: {
+              fileName: 'uv.lock',
+              stderr: 'uv exit 1',
+            },
+          },
+        ]);
+        expect(execSnapshots).toMatchObject([
+          {
+            cmd: 'uv lock --upgrade-package dep1 --exclude-newer 2026-06-12T12:00:00.000Z',
+          },
+        ]);
+      });
     });
   });
 });

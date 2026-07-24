@@ -1,4 +1,5 @@
-import { isString } from '@sindresorhus/is';
+import { isNullOrUndefined, isString } from '@sindresorhus/is';
+import { DateTime, Duration } from 'luxon';
 import { quote } from 'shlex';
 import { TEMPORARY_ERROR } from '../../../../constants/error-messages.ts';
 import { logger } from '../../../../logger/index.ts';
@@ -14,6 +15,7 @@ import {
 } from '../../../../util/fs/index.ts';
 import { getGitEnvironmentVariables } from '../../../../util/git/auth.ts';
 import { find } from '../../../../util/host-rules.ts';
+import { toMs } from '../../../../util/pretty-time.ts';
 import { Result } from '../../../../util/result.ts';
 import { parseUrl } from '../../../../util/url.ts';
 import { PypiDatasource } from '../../../datasource/pypi/index.ts';
@@ -215,7 +217,61 @@ export class UvProcessor extends BasePyProjectProcessor {
       } else {
         cmd = generateCMD(updatedDeps);
       }
-      await exec(cmd, execOptions);
+      let excludeNewerFlag = '';
+      if (config.minimumReleaseAge) {
+        const minimumReleaseAgeMs = toMs(config.minimumReleaseAge);
+        if (minimumReleaseAgeMs === null) {
+          logger.debug(
+            { minimumReleaseAge: config.minimumReleaseAge },
+            'Invalid minimumReleaseAge, skipping --exclude-newer for uv lock',
+          );
+        } else {
+          const now = DateTime.now();
+          let excludeNewerDate = now.minus(minimumReleaseAgeMs).toUTC();
+          const rawUvExcludeNewer = project.tool?.uv?.['exclude-newer'];
+          const uvExcludeNewerDate = rawUvExcludeNewer
+            ? resolveUvExcludeNewerDate(rawUvExcludeNewer, now)
+            : undefined;
+          if (rawUvExcludeNewer && uvExcludeNewerDate === null) {
+            logger.debug(
+              'Could not parse [tool.uv].exclude-newer in pyproject.toml, falling back to minimumReleaseAge',
+            );
+          } else if (
+            !isNullOrUndefined(uvExcludeNewerDate) &&
+            uvExcludeNewerDate < excludeNewerDate
+          ) {
+            logger.debug(
+              {
+                uvExcludeNewerDate: uvExcludeNewerDate.toISO(),
+                minimumReleaseAge: config.minimumReleaseAge,
+                minimumReleaseAgeDate: excludeNewerDate.toISO(),
+              },
+              'Using stricter [tool.uv].exclude-newer date over minimumReleaseAge date',
+            );
+            excludeNewerDate = uvExcludeNewerDate;
+          }
+          excludeNewerFlag = `--exclude-newer ${excludeNewerDate.toISO()}`;
+        }
+      }
+      // Run the command, retrying without --exclude-newer if uv fails to
+      // resolve because the existing lock file contains packages published
+      // after the cutoff.
+      try {
+        await exec(
+          excludeNewerFlag ? `${cmd} ${excludeNewerFlag}` : cmd,
+          execOptions,
+        );
+      } catch (err) {
+        if (excludeNewerFlag && err.stderr?.includes('exclude newer time')) {
+          logger.warn(
+            { err },
+            'uv --exclude-newer caused a resolution error, retrying without --exclude-newer',
+          );
+          await exec(cmd, execOptions);
+        } else {
+          throw err;
+        }
+      }
 
       // check for changes
       const fileChanges: UpdateArtifactsResult[] = [];
@@ -249,6 +305,25 @@ export class UvProcessor extends BasePyProjectProcessor {
       ];
     }
   }
+}
+
+function resolveUvExcludeNewerDate(
+  value: string,
+  now: DateTime<true>,
+): DateTime<true> | null {
+  const dur = Duration.fromISO(value);
+  if (dur.isValid) {
+    return now.minus(dur).toUTC();
+  }
+  const ts = DateTime.fromISO(value, { zone: 'utc' });
+  if (ts.isValid) {
+    return ts;
+  }
+  const millis = toMs(value);
+  if (millis === null) {
+    return null;
+  }
+  return now.minus(millis).toUTC();
 }
 
 function generateCMD(updatedDeps: Upgrade[]): string {
