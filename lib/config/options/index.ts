@@ -2819,6 +2819,17 @@ const options: Readonly<RenovateOptions>[] = [
     env: false,
   },
   {
+    name: 'hostTypes',
+    description:
+      'A list of hostTypes for a host rules. Can be platform names or datasource names.',
+    type: 'array',
+    subType: 'string',
+    stage: 'repository',
+    parents: ['hostRules'],
+    cli: false,
+    env: false,
+  },
+  {
     name: 'matchHost',
     description: 'A domain name, host name or base URL to match against.',
     type: 'string',

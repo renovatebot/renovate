@@ -2025,6 +2025,33 @@ describe('config/validation', () => {
       expect(warnings).toBeEmptyArray();
     });
 
+    it('errors if both hostType and hostTypes in a host rule', async () => {
+      GlobalConfig.set({ allowedHeaders: ['X-*'] });
+
+      const config = {
+        hostRules: [
+          {
+            matchHost: 'https://nexus.example.com',
+            hostType: 'npm',
+            hostTypes: ['npm', 'maven'],
+            token: 'token',
+          },
+        ],
+      };
+      const { errors, warnings } = await configValidation.validateConfig(
+        'repo',
+        config,
+      );
+      expect(errors).toMatchObject([
+        {
+          topic: 'Configuration Error',
+          message:
+            'hostRules cannot contain both `hostType` and `hostTypes` - use one or the other.',
+        },
+      ]);
+      expect(warnings).toBeEmptyArray();
+    });
+
     it('errors if forbidden header in hostRules', async () => {
       GlobalConfig.set({ allowedHeaders: ['X-*'] });
 
