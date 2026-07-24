@@ -2498,7 +2498,7 @@ The above is the same as if you wrote this package rule:
 {
   "packageRules": [
     {
-      "matchPackageNames": ["eslint", "eslint-config-base"],
+      "matchDepNames": ["eslint", "eslint-config-base"],
       "enabled": false
     }
   ]
