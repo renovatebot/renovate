@@ -21,6 +21,7 @@ import type { HostRule } from '../types/index.ts';
 import { packageCacheNamespaces } from '../util/cache/package/namespaces.ts';
 import { getToolConfig } from '../util/exec/containerbase.ts';
 import { isConstraintName, isToolName } from '../util/exec/types.ts';
+import { isValidCommitTrailer } from '../util/git/commit-trailers.ts';
 import { getExpression } from '../util/jsonata.ts';
 import { regEx } from '../util/regex.ts';
 import {
@@ -104,7 +105,6 @@ const ignoredNodes = [
   'minimumConfidence', // undocumented feature flag
 ];
 const tzRe = regEx(/^:timezone\((.+)\)$/);
-const commitTrailerRe = regEx(/^[A-Za-z0-9-]+: [^\r\n]+$/);
 const rulesRe = regEx(/p.*Rules\[\d+\]$/);
 
 function isIgnored(key: string): boolean {
@@ -453,7 +453,7 @@ export async function validateConfig(
 
                 if (key === 'commitTrailers') {
                   for (const subval of val) {
-                    if (!isString(subval) || !commitTrailerRe.test(subval)) {
+                    if (!isValidCommitTrailer(subval)) {
                       errors.push({
                         topic: 'Configuration Error',
                         message: `Invalid commit trailer: \`${JSON.stringify(

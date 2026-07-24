@@ -3,6 +3,7 @@ import type { RenovateConfig } from '../../../../config/types.ts';
 import { logger } from '../../../../logger/index.ts';
 import { scm } from '../../../../modules/platform/scm.ts';
 import { getInheritedOrGlobal } from '../../../../util/common.ts';
+import { filterValidCommitTrailers } from '../../../../util/git/commit-trailers.ts';
 import { compile } from '../../../../util/template/index.ts';
 import {
   getDefaultConfigFileName,
@@ -37,9 +38,13 @@ export async function createOnboardingBranch(
   }
 
   // only allow gitAuthor template value in the commitTrailers
-  const trailers = config.commitTrailers?.map((trailer) =>
-    compile(trailer, { gitAuthor: config.gitAuthor }),
-  );
+  const trailers = config.commitTrailers
+    ? filterValidCommitTrailers(
+        config.commitTrailers.map((trailer) =>
+          compile(trailer, { gitAuthor: config.gitAuthor }),
+        ),
+      )
+    : undefined;
 
   // istanbul ignore if
   if (GlobalConfig.get('dryRun')) {

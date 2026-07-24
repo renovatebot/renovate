@@ -148,6 +148,23 @@ describe('workers/repository/onboarding/branch/create', () => {
           prTitle: 'Configure Renovate',
         });
       });
+
+      it('drops trailers that are invalid after compilation', async () => {
+        await createOnboardingBranch({
+          ...config,
+          commitTrailers: [
+            'Signed-off-by: {{{gitAuthor}}}',
+            'Static-Trailer: kept',
+          ],
+          gitAuthor: '',
+        });
+
+        expect(scm.commitAndPush).toHaveBeenCalledExactlyOnceWith(
+          expect.objectContaining({
+            trailers: ['Static-Trailer: kept'],
+          }),
+        );
+      });
     });
 
     describe('applies the commitMessagePrefix value', () => {
