@@ -799,7 +799,7 @@ We recommend you use `matchManagers` and `commitMessageTopic` in a `packageRules
 
 ## `commitTrailers`
 
-Use this option to add [git trailers](https://git-scm.com/docs/git-interpret-trailers) to Renovate's commits.
+Use this option to add [git trailers](https://git-scm.com/docs/git-interpret-trailers) to the commits Renovate creates.
 Each entry must be a full trailer line in the form `Key: value`, where the key may only have letters, digits and `-`.
 Repeated keys are allowed.
 
@@ -807,11 +807,14 @@ For example:
 
 ```json
 {
-  "commitTrailers": ["Renovate-Update-Type: {{{updateType}}}"]
+  "packageRules": [
+    {
+      "matchDepTypes": ["devDependencies"],
+      "commitTrailers": ["Changelog: skip"]
+    }
+  ]
 }
 ```
-
-Another example would be if you want to configure a DCO sign off to each commit.
 
 If you want Renovate to sign off its commits, you can add the [`:gitSignOff` preset](./presets-default.md#gitsignoff) to your `extends` array:
 
