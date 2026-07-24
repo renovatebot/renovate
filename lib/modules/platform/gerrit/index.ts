@@ -197,7 +197,7 @@ export async function initRepo({
     gitUrl,
     config.gerritUsername!,
   );
-  configureScm(repository);
+  configureScm(repository, config.labels);
   await git.initRepo({
     url,
     cloneSubmodules,

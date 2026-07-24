@@ -1,6 +1,10 @@
-import { fakeSha, git, partial } from '~test/util.ts';
+import { fakeSha, git, logger, partial } from '~test/util.ts';
 import { client as _client } from './client.ts';
-import type { GerritChange, GerritRevisionInfo } from './schema.ts';
+import type {
+  GerritChange,
+  GerritLabelTypeInfo,
+  GerritRevisionInfo,
+} from './schema.ts';
 import {
   GerritScm,
   configureScm,
@@ -59,6 +63,53 @@ describe('modules/platform/gerrit/scm', () => {
           'hashtag=team:backend',
           'hashtag=priority:high',
         ],
+      });
+    });
+
+    it('skips voting and logs a warning when autoApprove is set but the project has no known Code-Review label definition', async () => {
+      configureScm('test/repo');
+      git.pushCommit.mockResolvedValueOnce(true);
+      await expect(
+        pushForReview({
+          sourceRef: 'renovate/feat',
+          targetBranch: 'main',
+          files: [],
+          autoApprove: true,
+        }),
+      ).resolves.toBeTrue();
+      expect(git.pushCommit).toHaveBeenCalledExactlyOnceWith({
+        sourceRef: 'renovate/feat',
+        targetRef: 'refs/for/main',
+        files: [],
+        pushOptions: ['notify=NONE', 'ready'],
+      });
+      expect(logger.logger.warn).toHaveBeenCalledWith(
+        { repository: 'test/repo', label: 'Code-Review' },
+        'Cannot auto-approve: label is not defined on the project',
+      );
+    });
+
+    it('uses the maximum value configured for the Code-Review label when autoApprove is set', async () => {
+      configureScm('test/repo', {
+        'Code-Review': {
+          values: { '-1': 'disliked', '0': 'default', '1': 'looksOkay' },
+          default_value: 0,
+        } satisfies GerritLabelTypeInfo,
+      });
+      git.pushCommit.mockResolvedValueOnce(true);
+      await expect(
+        pushForReview({
+          sourceRef: 'renovate/feat',
+          targetBranch: 'main',
+          files: [],
+          autoApprove: true,
+        }),
+      ).resolves.toBeTrue();
+      expect(git.pushCommit).toHaveBeenCalledExactlyOnceWith({
+        sourceRef: 'renovate/feat',
+        targetRef: 'refs/for/main',
+        files: [],
+        pushOptions: ['notify=NONE', 'ready', 'label=Code-Review+1'],
       });
     });
 
@@ -214,6 +265,18 @@ describe('modules/platform/gerrit/scm', () => {
     });
 
     it('commitAndPush() - existing change with new changes - auto-approve', async () => {
+      configureScm('test/repo', {
+        'Code-Review': {
+          values: {
+            '-2': 'rejected',
+            '-1': 'disliked',
+            '0': 'default',
+            '1': 'looksOkay',
+            '2': 'approved',
+          },
+          default_value: 0,
+        } satisfies GerritLabelTypeInfo,
+      });
       const existingChange = partial<GerritChange>({
         _number: 123456,
         change_id: 'I1bf983f8f6530c44826925b1308a45fe672408a6',
