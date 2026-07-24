@@ -113,6 +113,8 @@ export class MigrationsService {
     ['regexManagers', 'customManagers'],
     ['baseBranches', 'baseBranchPatterns'],
     ['renovate-config-presets', 'renovate-config'],
+    ['httpCacheTtlDays', 'repositoryCacheMaximumHttpDays'],
+    ['prCacheSyncMaxPages', 'repositoryCacheMaxPrPages'],
   ]);
 
   static readonly customMigrations: readonly MigrationConstructor[] = [

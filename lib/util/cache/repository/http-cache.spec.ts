@@ -48,7 +48,7 @@ describe('util/cache/repository/http-cache', () => {
   });
 
   it('should remove all items if ttlDays is not configured', () => {
-    GlobalConfig.set({ httpCacheTtlDays: 0 });
+    GlobalConfig.set({ repositoryCacheMaximumHttpDays: 0 });
 
     const now = DateTime.now();
     const cache = {
