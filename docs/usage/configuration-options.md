@@ -357,11 +357,7 @@ Set this to a work item type that exists in your project, such as `Task`.
 !!! note
   Renovate finds its existing issues by title, not by work item type.
   If you change `azureWorkItemType` while an issue (such as the Dependency Dashboard) already exists, Renovate keeps using the existing work item and does _not_ recreate it with the new type.
-  To switch an existing issue to the new type, either:
-
-  - rename the old work item (so its title no longer matches) and close it, or
-  - close and delete the old work item.
-
+  To switch an existing issue to the new type, either rename the old work item (so its title no longer matches) and close it, or close and delete the old work item.
   Renovate then creates a fresh work item of the configured type on the next run.
 
 ## `baseBranchPatterns`
