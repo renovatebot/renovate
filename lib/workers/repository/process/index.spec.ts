@@ -4,6 +4,7 @@ import { getConfig } from '../../../config/defaults.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import { CONFIG_VALIDATION } from '../../../constants/error-messages.ts';
 import { addMeta } from '../../../logger/index.ts';
+import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
 import { getCache } from '../../../util/cache/repository/index.ts';
 import * as _extractUpdate from './extract-update.ts';
 import { lookup } from './extract-update.ts';
@@ -46,9 +47,8 @@ describe('workers/repository/process/index', () => {
       });
     });
 
-    it('reads config from default branch if useBaseBranchConfig not specified', async () => {
+    it('reads config from default branch if useBaseBranchConfig=none', async () => {
       scm.branchExists.mockResolvedValue(true);
-      platform.getJsonFile.mockResolvedValueOnce({});
       config.baseBranchPatterns = ['master', 'dev'];
       config.useBaseBranchConfig = 'none';
       getCache().configFileName = 'renovate.json';
@@ -63,6 +63,64 @@ describe('workers/repository/process/index', () => {
         undefined,
         'dev',
       );
+    });
+
+    it('applies branch-specific config for non-default branches when useBaseBranchConfig=fallback', async () => {
+      scm.branchExists.mockResolvedValue(true);
+      platform.getJsonFile.mockResolvedValue({
+        extends: ['config:recommended'],
+      });
+      config.baseBranchPatterns = ['main', 'dev'];
+      config.defaultBranch = 'main';
+      config.useBaseBranchConfig = 'fallback';
+      getCache().configFileName = 'renovate.json';
+      const res = await extractDependencies(config);
+      expect(res).toEqual({
+        branchList: [undefined, undefined],
+        branches: [undefined, undefined],
+        packageFiles: undefined,
+      });
+      expect(platform.getJsonFile).not.toHaveBeenCalledWith(
+        'renovate.json',
+        config.repository,
+        'main',
+      );
+      expect(platform.getJsonFile).toHaveBeenCalledWith(
+        'renovate.json',
+        config.repository,
+        'dev',
+      );
+      expect(addMeta).toHaveBeenNthCalledWith(1, { baseBranch: 'main' });
+      expect(addMeta).toHaveBeenNthCalledWith(2, { baseBranch: 'dev' });
+    });
+
+    it('falls back gracefully when branch-specific config not found (useBaseBranchConfig=fallback)', async () => {
+      scm.branchExists.mockResolvedValue(true);
+      platform.getJsonFile.mockResolvedValue(null);
+      config.baseBranchPatterns = ['main', 'dev'];
+      config.defaultBranch = 'main';
+      config.useBaseBranchConfig = 'fallback';
+      getCache().configFileName = 'renovate.json';
+      const res = await extractDependencies(config);
+      expect(res).toEqual({
+        branchList: [undefined, undefined],
+        branches: [undefined, undefined],
+        packageFiles: undefined,
+      });
+      expect(addMeta).toHaveBeenNthCalledWith(1, { baseBranch: 'main' });
+      expect(addMeta).toHaveBeenNthCalledWith(2, { baseBranch: 'dev' });
+    });
+
+    it('throws on invalid branch-specific config (useBaseBranchConfig=fallback)', async () => {
+      scm.branchExists.mockResolvedValue(true);
+      platform.getJsonFile.mockResolvedValue({ labels: 'not-an-array' });
+      config.baseBranchPatterns = ['main', 'dev'];
+      config.defaultBranch = 'main';
+      config.useBaseBranchConfig = 'fallback';
+      getCache().configFileName = 'renovate.json';
+      await expect(extractDependencies(config)).rejects.toMatchObject({
+        message: CONFIG_VALIDATION,
+      });
     });
 
     it('reads config from branches in baseBranchPatterns if useBaseBranchConfig specified', async () => {
@@ -247,6 +305,109 @@ describe('workers/repository/process/index', () => {
       expect(res.baseBranch).toBe('main');
       expect(res.hasBaseBranches).toBeUndefined();
       expect(res.branchPrefix).toBe('renovate/');
+    });
+
+    it('does not attempt branch-specific config fetch when useBaseBranchConfig=none', async () => {
+      getCache().configFileName = 'renovate.json';
+      const res = await getBaseBranchConfig('feature', {
+        ...config,
+        defaultBranch: 'main',
+        useBaseBranchConfig: 'none',
+      });
+      expect(res.baseBranch).toBe('feature');
+      expect(platform.getRawFile).not.toHaveBeenCalled();
+      expect(platform.getJsonFile).not.toHaveBeenCalled();
+    });
+
+    it('does not attempt branch-specific config fetch when useBaseBranchConfig=merge', async () => {
+      getCache().configFileName = 'renovate.json';
+      platform.getJsonFile.mockResolvedValueOnce({});
+      const res = await getBaseBranchConfig('feature', {
+        ...config,
+        defaultBranch: 'main',
+        useBaseBranchConfig: 'merge',
+      });
+      expect(res.baseBranch).toBe('feature');
+      expect(platform.getRawFile).not.toHaveBeenCalled();
+      expect(platform.getJsonFile).toHaveBeenCalledOnce();
+    });
+
+    describe('useBaseBranchConfig=fallback', () => {
+      beforeEach(() => {
+        config.defaultBranch = 'main';
+        config.useBaseBranchConfig = 'fallback';
+        getCache().configFileName = 'renovate.json';
+      });
+
+      it('applies branch-specific config when present on branch', async () => {
+        platform.getJsonFile.mockResolvedValueOnce({
+          extends: ['config:recommended'],
+        });
+        const res = await getBaseBranchConfig('postgresql/v18/dev', config);
+        expect(res.baseBranch).toBe('postgresql/v18/dev');
+        expect(platform.getJsonFile).toHaveBeenCalledWith(
+          'renovate.json',
+          config.repository,
+          'postgresql/v18/dev',
+        );
+        expect(logger.logger.debug).toHaveBeenCalledWith(
+          { baseBranch: 'postgresql/v18/dev' },
+          'Applied branch-specific renovate config',
+        );
+      });
+
+      it('falls back to default config when getJsonFile returns null', async () => {
+        platform.getJsonFile.mockResolvedValueOnce(null);
+        const res = await getBaseBranchConfig('postgresql/v18/dev', config);
+        expect(res.baseBranch).toBe('postgresql/v18/dev');
+        expect(logger.logger.debug).not.toHaveBeenCalledWith(
+          expect.anything(),
+          'Applied branch-specific renovate config',
+        );
+      });
+
+      it('throws CONFIG_VALIDATION when getJsonFile throws', async () => {
+        platform.getJsonFile.mockRejectedValueOnce(new Error('fetch error'));
+        await expect(
+          getBaseBranchConfig('postgresql/v18/dev', config),
+        ).rejects.toMatchObject({ message: CONFIG_VALIDATION });
+      });
+
+      it('rethrows ExternalHostError', async () => {
+        platform.getJsonFile.mockRejectedValueOnce(
+          new ExternalHostError(new Error('network error')),
+        );
+        await expect(
+          getBaseBranchConfig('postgresql/v18/dev', config),
+        ).rejects.toThrow(ExternalHostError);
+      });
+
+      it('throws when branch config has validation errors', async () => {
+        platform.getJsonFile.mockResolvedValueOnce({ labels: 'not-an-array' });
+        await expect(
+          getBaseBranchConfig('postgresql/v18/dev', config),
+        ).rejects.toMatchObject({ message: CONFIG_VALIDATION });
+      });
+
+      it('skips when baseBranch equals defaultBranch', async () => {
+        const res = await getBaseBranchConfig('main', config);
+        expect(res.baseBranch).toBe('main');
+        expect(platform.getJsonFile).not.toHaveBeenCalled();
+      });
+
+      it('skips when configFileName is package.json', async () => {
+        getCache().configFileName = 'package.json';
+        const res = await getBaseBranchConfig('postgresql/v18/dev', config);
+        expect(res.baseBranch).toBe('postgresql/v18/dev');
+        expect(platform.getJsonFile).not.toHaveBeenCalled();
+      });
+
+      it('skips when configFileName is missing from cache', async () => {
+        getCache().configFileName = undefined;
+        const res = await getBaseBranchConfig('postgresql/v18/dev', config);
+        expect(res.baseBranch).toBe('postgresql/v18/dev');
+        expect(platform.getJsonFile).not.toHaveBeenCalled();
+      });
     });
   });
 });
