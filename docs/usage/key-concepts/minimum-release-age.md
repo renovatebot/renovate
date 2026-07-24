@@ -151,7 +151,16 @@ You can validate which update types may have release timestamps by following som
 
 ### What happens to security updates?
 
-Security updates bypass any `minimumReleaseAge` checks, and so will be raised as soon as Renovate detects them.
+As noted in the [Vulnerability Alerts documentation](./vulnerability-alerts.md), when Renovate detects that a dependency update has a vulnerability alert associated with it, the PR will be raised _regardless_ of the release timestamp of the release.
+
+This ensures that you do not have to wait until the Minimum Release Age has passed until **??**, leaving you open to a known vulnerability.
+
+!!! note
+  This behaviour _should not_ make it possible to use as a means to bypass Minimum Release Age, [due to trust in how vulnerability alerts are sourced](./vulnerability-alerts.md#can-maintainers-abuse-vulnerability-alerts-to-introduce-malicious-package-updates).
+
+#### pnpm-specific handling
+
+Currently, Renovate will specify a `minimumReleaseAgeExclude` in your `pnpm-workspace.yaml` when introducing a security update, so it bypasses `minimumReleaseAge` settings in pnpm.
 
 ### What happens if a package has multiple updates available?
 
