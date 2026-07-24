@@ -1,9 +1,11 @@
 import { logger } from '../../../logger/index.ts';
 import type { ConstraintName } from '../../../util/exec/types.ts';
+import { regEx } from '../../../util/regex.ts';
 import {
   massage as massageToml,
   parse as parseToml,
 } from '../../../util/toml.ts';
+import { GithubReleasesDatasource } from '../../datasource/github-releases/index.ts';
 import { PythonVersionDatasource } from '../../datasource/python-version/index.ts';
 import * as pep440 from '../../versioning/pep440/index.ts';
 import type {
@@ -13,6 +15,7 @@ import type {
 } from '../types.ts';
 import { processors } from './processors/index.ts';
 import { PyProject } from './schema.ts';
+import { depTypes } from './utils.ts';
 
 export function parsePyProject(
   content: string,
@@ -28,6 +31,49 @@ export function parsePyProject(
     );
     return null;
   }
+}
+
+const lineSplitRegex = regEx(/\r?\n/);
+const toolUvSectionHeaderRegex = regEx(/^\s*\[tool\.uv]\s*(?:#.*)?$/);
+const tomlSectionHeaderRegex = regEx(/^\s*\[/);
+const uvRequiredVersionLineRegex = regEx(
+  /^(?<prefix>\s*required-version\s*=\s*)(?:"(?<doubleValue>[^"]+)"|'(?<singleValue>[^']+)')/,
+);
+
+function getUvRequiredVersionReplacement(
+  content: string,
+  uvRequiredVersion: string,
+): Pick<PackageDependency, 'autoReplaceStringTemplate' | 'replaceString'> {
+  let isToolUvSection = false;
+
+  for (const line of content.split(lineSplitRegex)) {
+    if (toolUvSectionHeaderRegex.test(line)) {
+      isToolUvSection = true;
+      continue;
+    }
+
+    if (tomlSectionHeaderRegex.test(line)) {
+      isToolUvSection = false;
+      continue;
+    }
+
+    if (!isToolUvSection) {
+      continue;
+    }
+
+    const match = uvRequiredVersionLineRegex.exec(line);
+
+    if (match?.groups) {
+      const quote = match.groups.doubleValue ? '"' : "'";
+      const currentValue = match.groups.doubleValue ?? match.groups.singleValue;
+      return {
+        replaceString: `${match.groups.prefix}${quote}${currentValue}${quote}`,
+        autoReplaceStringTemplate: `${match.groups.prefix}${quote}{{newValue}}${quote}`,
+      };
+    }
+  }
+
+  return {};
 }
 
 export async function extractPackageFile(
@@ -61,6 +107,23 @@ export async function extractPackageFile(
   const projectDependencies = def.project?.dependencies;
   if (projectDependencies) {
     deps.push(...projectDependencies);
+  }
+
+  const uvRequiredVersion = def.tool?.uv?.['required-version'];
+  if (uvRequiredVersion) {
+    const replacement = getUvRequiredVersionReplacement(
+      content,
+      uvRequiredVersion,
+    );
+    deps.push({
+      depName: 'uv',
+      packageName: 'astral-sh/uv',
+      datasource: GithubReleasesDatasource.id,
+      versioning: pep440.id,
+      depType: depTypes.uvRequiredVersion,
+      currentValue: uvRequiredVersion,
+      ...replacement,
+    });
   }
 
   const dependencyGroups = def['dependency-groups'];
