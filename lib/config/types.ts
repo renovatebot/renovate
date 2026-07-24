@@ -1,6 +1,7 @@
 import type { Category, PlatformId } from '../constants/index.ts';
 import type { LogLevelRemap } from '../logger/types.ts';
 import type { ManagerName } from '../manager-list.generated.ts';
+import type { RegistryStrategy } from '../modules/datasource/types.ts';
 import type { CustomManager } from '../modules/manager/custom/types.ts';
 import type {
   GitUrlOption,
@@ -143,6 +144,7 @@ export interface RenovateSharedConfig {
   pruneBranchAfterAutomerge?: boolean;
   rangeStrategy?: RangeStrategy;
   rebaseLabel?: string;
+  registryStrategy?: RegistryStrategy;
   rebaseWhen?: string;
   recreateClosed?: boolean;
   recreateWhen?: RecreateWhen;
