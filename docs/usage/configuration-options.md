@@ -4143,6 +4143,10 @@ Run `npm install` commands _twice_ to work around bugs where `npm` generates inv
 
 Run `pnpm dedupe --ignore-scripts` after `pnpm-lock.yaml` updates.
 
+### `uvExportRequirements`
+
+Re-run `uv export` after `uv.lock` updates when a `requirements.txt` with a `uv export` header is found alongside `pyproject.toml`.
+
 ### `yarnDedupeFewer`
 
 Run `yarn-deduplicate --strategy fewer` after `yarn.lock` updates.
