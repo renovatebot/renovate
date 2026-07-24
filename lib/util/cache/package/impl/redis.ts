@@ -1,3 +1,4 @@
+import { isIP } from 'node:net';
 import type { RedisClusterOptions } from '@redis/client';
 import { RESP_TYPES, createClient, createCluster } from '@redis/client';
 import { logger } from '../../../../logger/index.ts';
@@ -29,10 +30,15 @@ export class PackageCacheRedis extends PackageCacheBase {
     const rewrittenUrl = normalizeRedisUrl(url);
     const clusteredMode = rewrittenUrl !== url;
 
+    const parsedUrl = parseUrl(rewrittenUrl);
+    const rawHostname = parsedUrl?.hostname.replace(/^\[(.+)\]$/, '$1') ?? '';
     const config = {
       url: rewrittenUrl,
       socket: {
         reconnectStrategy: (retries: number) => Math.min(retries * 100, 3000),
+        ...(parsedUrl?.protocol === 'rediss:' && !isIP(rawHostname)
+          ? { servername: parsedUrl.hostname }
+          : {}),
       },
       pingInterval: 30000,
     };
@@ -42,7 +48,6 @@ export class PackageCacheRedis extends PackageCacheBase {
     if (clusteredMode) {
       const clusterConfig: RedisClusterOptions = { rootNodes: [config] };
 
-      const parsedUrl = parseUrl(rewrittenUrl);
       if (parsedUrl?.username) {
         clusterConfig.defaults = {
           username: parsedUrl.username,
