@@ -4,6 +4,7 @@ import { GitRefsDatasource } from '../../datasource/git-refs/index.ts';
 import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
 import { GithubReleasesDatasource } from '../../datasource/github-releases/index.ts';
 import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
+import { GitlabReleasesDatasource } from '../../datasource/gitlab-releases/index.ts';
 import { GoDatasource } from '../../datasource/go/index.ts';
 import { JavaVersionDatasource } from '../../datasource/java-version/index.ts';
 import { NodeVersionDatasource } from '../../datasource/node-version/index.ts';
@@ -50,6 +51,7 @@ const backendDatasources = {
   dotnet: [NugetDatasource.id],
   gem: [RubygemsDatasource.id],
   github: [GithubReleasesDatasource.id],
+  gitlab: [GitlabReleasesDatasource.id],
   go: [GoDatasource.id],
   npm: [NpmDatasource.id],
   pipx: [PypiDatasource.id, GithubTagsDatasource.id, GitRefsDatasource.id],
