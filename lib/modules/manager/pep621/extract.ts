@@ -42,7 +42,6 @@ const uvRequiredVersionLineRegex = regEx(
 
 function getUvRequiredVersionReplacement(
   content: string,
-  uvRequiredVersion: string,
 ): Pick<PackageDependency, 'autoReplaceStringTemplate' | 'replaceString'> {
   let isToolUvSection = false;
 
@@ -73,6 +72,10 @@ function getUvRequiredVersionReplacement(
     }
   }
 
+  // Inline tables (`tool.uv = { required-version = "..." }`) and dotted keys
+  // (`tool.uv.required-version = "..."`) fall through here by choice: we only
+  // match the section-header form. Callers fall back to a bare value search
+  // without replaceString/autoReplaceStringTemplate for those forms.
   return {};
 }
 
@@ -111,10 +114,7 @@ export async function extractPackageFile(
 
   const uvRequiredVersion = def.tool?.uv?.['required-version'];
   if (uvRequiredVersion) {
-    const replacement = getUvRequiredVersionReplacement(
-      content,
-      uvRequiredVersion,
-    );
+    const replacement = getUvRequiredVersionReplacement(content);
     deps.push({
       depName: 'uv',
       packageName: 'astral-sh/uv',
