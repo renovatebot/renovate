@@ -1,6 +1,6 @@
 {
   "meta": {
-    "version": "2026.7.5 linux-x64 (2026-07-09)"
+    "version": "2026.7.7 linux-x64 (2026-07-15)"
   },
   "tools": {
     "1password": {
@@ -421,6 +421,9 @@
     },
     "bun": {
       "core": "bun"
+    },
+    "bundler": {
+      "gem": "bundler"
     },
     "cabal": {
       "aqua": "haskell/cabal/cabal-install"
@@ -1236,6 +1239,9 @@
     },
     "git-lfs": {
       "aqua": "git-lfs/git-lfs"
+    },
+    "git-town": {
+      "aqua": "git-town/git-town"
     },
     "gitconfig": {
       "asdf": "0ghny/asdf-gitconfig",
@@ -2162,6 +2168,9 @@
     "micronaut": {
       "asdf": "mise-plugins/mise-micronaut",
       "github": "micronaut-projects/micronaut-starter"
+    },
+    "microsandbox": {
+      "aqua": "superradcompany/microsandbox"
     },
     "miller": {
       "aqua": "johnkerl/miller"

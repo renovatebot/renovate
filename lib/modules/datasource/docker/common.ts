@@ -225,12 +225,12 @@ export async function getAuthHeaders(
       authorization: `Bearer ${token}`,
     };
   } catch (err) /* istanbul ignore next */ {
-    /* v8 ignore if */
+    /* v8 ignore if -- quay.io errors are swallowed pending #9604, not reproduced in specs */
     if (err.host === 'quay.io') {
       // TODO: debug why quay throws errors (#9604)
       return null;
     }
-    /* v8 ignore if */
+    /* v8 ignore if -- registry auth rejection is logged and swallowed, not mocked in specs */
     if (err.statusCode === 401) {
       logger.debug(
         { registryHost, dockerRepository },
@@ -239,7 +239,7 @@ export async function getAuthHeaders(
       logger.debug({ err });
       return null;
     }
-    /* v8 ignore if */
+    /* v8 ignore if -- registry permission rejection is logged and swallowed, not mocked in specs */
     if (err.statusCode === 403) {
       logger.debug(
         { registryHost, dockerRepository },
@@ -251,18 +251,18 @@ export async function getAuthHeaders(
     if (err.name === 'RequestError' && isDockerHost(registryHost)) {
       throw new ExternalHostError(err);
     }
-    /* v8 ignore if */
+    /* v8 ignore if -- Docker Hub rate limiting maps to ExternalHostError, not mocked in specs */
     if (err.statusCode === 429 && isDockerHost(registryHost)) {
       throw new ExternalHostError(err);
     }
-    /* v8 ignore if */
+    /* v8 ignore if -- registry server errors map to ExternalHostError, not mocked in specs */
     if (err.statusCode >= 500 && err.statusCode < 600) {
       throw new ExternalHostError(err);
     }
     if (err.message === PAGE_NOT_FOUND_ERROR) {
       throw err;
     }
-    /* v8 ignore if */
+    /* v8 ignore if -- hostRules-disabled host is swallowed silently, not mocked in specs */
     if (err.message === HOST_DISABLED) {
       logger.trace({ registryHost, dockerRepository, err }, 'Host disabled');
       return null;

@@ -55,20 +55,21 @@ describe('util/http/cache/package-http-cache-provider', () => {
     GlobalConfig.reset();
   });
 
-  const mockTime = (time: string) => {
+  function mockTime(time: string) {
     const value = DateTime.fromISO(time).valueOf();
     Settings.now = () => value;
-  };
+  }
 
-  const createCacheProvider = (
+  function createCacheProvider(
     options: Partial<PackageHttpCacheProviderOptions> = {},
-  ) =>
-    new PackageHttpCacheProvider({
+  ) {
+    return new PackageHttpCacheProvider({
       namespace,
       checkAuthorizationHeader: false,
       checkCacheControlHeader: false,
       ...options,
     });
+  }
 
   it('skips persisting null cache values', async () => {
     const cacheProvider = createCacheProvider();

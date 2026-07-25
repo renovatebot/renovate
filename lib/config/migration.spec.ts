@@ -762,8 +762,9 @@ describe('config/migration', () => {
   });
 
   it('migrates azureAutoComplete', () => {
-    const migrate = (config: RenovateConfig): MigratedConfig =>
-      configMigration.migrateConfig(config);
+    function migrate(config: RenovateConfig): MigratedConfig {
+      return configMigration.migrateConfig(config);
+    }
 
     // @ts-expect-error -- TODO: fix me
     expect(migrate({ azureAutoComplete: true })).toEqual({
@@ -791,8 +792,9 @@ describe('config/migration', () => {
   });
 
   it('migrates gitLabAutomerge', () => {
-    const migrate = (config: RenovateConfig): MigratedConfig =>
-      configMigration.migrateConfig(config);
+    function migrate(config: RenovateConfig): MigratedConfig {
+      return configMigration.migrateConfig(config);
+    }
 
     // @ts-expect-error -- TODO: fix me
     expect(migrate({ gitLabAutomerge: true })).toEqual({

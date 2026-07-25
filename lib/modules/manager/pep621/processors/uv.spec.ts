@@ -4,7 +4,10 @@ import upath from 'upath';
 import { mockExecAll } from '~test/exec-util.ts';
 import { fs, hostRules, logger, partial } from '~test/util.ts';
 import { GlobalConfig } from '../../../../config/global.ts';
-import type { RepoGlobalConfig } from '../../../../config/types.ts';
+import type {
+  InternalGlobalConfigOptions,
+  RepoGlobalConfig,
+} from '../../../../config/types.ts';
 import { TEMPORARY_ERROR } from '../../../../constants/error-messages.ts';
 import { GitRefsDatasource } from '../../../datasource/git-refs/index.ts';
 import { GitTagsDatasource } from '../../../datasource/git-tags/index.ts';
@@ -25,7 +28,7 @@ const googleAuth = vi.mocked(_googleAuth);
 const getPkgReleases = vi.mocked(_getPkgReleases);
 
 const config: UpdateArtifactsConfig = {};
-const adminConfig: RepoGlobalConfig = {
+const adminConfig: RepoGlobalConfig & InternalGlobalConfigOptions = {
   localDir: upath.join('/tmp/github/some/repo'),
   cacheDir: upath.join('/tmp/cache'),
   containerbaseDir: upath.join('/tmp/cache/containerbase'),

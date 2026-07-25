@@ -154,11 +154,12 @@ describe('modules/datasource/index', () => {
   });
 
   describe('Validations', () => {
-    it('returns datasources', () => {
+    it('returns datasources', async () => {
       expect(getDatasources()).toBeDefined();
 
-      const managerList = fs
-        .readdirSync(import.meta.dirname, { withFileTypes: true })
+      const managerList = (
+        await fs.readdir(import.meta.dirname, { withFileTypes: true })
+      )
         .filter(
           (dirent) => dirent.isDirectory() && !dirent.name.startsWith('_'),
         )
