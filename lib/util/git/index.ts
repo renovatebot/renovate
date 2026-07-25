@@ -3,6 +3,7 @@ import URL from 'node:url';
 import {
   isBoolean,
   isNonEmptyObject,
+  isNonEmptyStringAndNotWhitespace,
   isString,
   isTruthy,
 } from '@sindresorhus/is';
@@ -685,6 +686,38 @@ export async function getBranchUpdateDate(
   }
 }
 
+// Return the commit date of every remote branch tip.
+// Uses a a single `git for-each-ref` call, instead of spawning a `git show` per branch
+export async function getAllBranchUpdateDates(): Promise<
+  Record<string, DateTime>
+> {
+  logger.debug('getAllBranchUpdateDates');
+  await syncGit();
+
+  const raw = await git.raw([
+    'for-each-ref',
+    '--format=%(refname:short) %(committerdate:iso-strict)',
+    // NOTE that using `origin/` (instead of i.e. `origin/*`) allows us to capture nested branch names
+    'refs/remotes/origin/',
+  ]);
+  const result: Record<string, DateTime> = {};
+  const lines = raw
+    .trim()
+    .split(newlineRegex)
+    .filter(isNonEmptyStringAndNotWhitespace);
+  for (const line of lines) {
+    const [refShort, isoDate] = line.split(' ');
+    // refs/remotes/origin/HEAD, the default branch for the repo, is shortened to `origin`
+    if (refShort === 'origin') {
+      continue;
+    }
+
+    const branchName = refShort.replace(regEx(/^origin\//), '');
+    result[branchName] = DateTime.fromISO(isoDate).toUTC();
+  }
+  return result;
+}
+
 export async function getCommitMessages(): Promise<string[]> {
   logger.debug('getCommitMessages');
   // v8 ignore else -- TODO: add test #40625
@@ -1231,7 +1264,7 @@ export async function getBranchLastCommitTime(
     if (errChecked) {
       throw errChecked;
     }
-    return new Date();
+    return DateTime.now().toJSDate();
   }
 }
 
