@@ -22,7 +22,7 @@ When a lock file is present:
 
 - Dependencies will have their `lockedVersion` extracted from the lock file
 - Renovate can update lock files when dependencies change
-- Lock file maintenance is supported via the `lockFileMaintenance` option. When the `mise` version Renovate runs supports it (see [safe mode](#safe-mode-no-allowlist-required) for how the version is detected), maintenance runs `mise lock --bump`, which advances fuzzy selectors (e.g. `node = "22"`) to the latest matching version rather than only refreshing existing locked versions.
+- Lock file maintenance is supported via the `lockFileMaintenance` option. When the `mise` version Renovate runs supports it (see [safe mode](#trust-model-for-lock-file-updates) for how the version is detected), maintenance runs `mise lock --bump`, which advances fuzzy selectors (e.g. `node = "22"`) to the latest matching version rather than only refreshing existing locked versions.
 
 Renovate recognizes environment-specific lock files:
 
