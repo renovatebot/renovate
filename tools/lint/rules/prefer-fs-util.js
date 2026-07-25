@@ -33,10 +33,7 @@ const RESTRICTED_MODULES = new Set([
  *   helpers cannot express.
  * - `lib/instrumentation/` bootstraps OpenTelemetry and writes traces to a
  *   user-configured system path (`RENOVATE_TRACING_FILE_EXPORTER_PATH`)
- *   outside `localDir`/`cacheDir`, before any `GlobalConfig` exists. It is
- *   also deliberately kept out of the module graph of instrumented libraries
- *   (see the `⚠️` note in `lib/renovate.ts`), so it must not pull in
- *   `lib/util/fs` and its `config`/`logger` dependencies.
+ *   outside `localDir`/`cacheDir`, before any `GlobalConfig` exists.
  */
 const EXEMPT_PATHS = [
   '/lib/util/fs/',
