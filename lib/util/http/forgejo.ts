@@ -4,6 +4,7 @@ import { HttpBase, type InternalJsonUnsafeOptions } from './http.ts';
 import type { HttpMethod, HttpOptions, HttpResponse } from './types.ts';
 
 let baseUrl: string;
+
 export function setBaseUrl(newBaseUrl: string): void {
   baseUrl = newBaseUrl.replace(regEx(/\/*$/), '/'); // TODO #12875
 }
