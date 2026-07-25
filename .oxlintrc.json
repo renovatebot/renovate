@@ -76,8 +76,10 @@
     "renovate/no-new-url": "error",
     "renovate/no-stateful-global-regex": "error",
     "renovate/no-tools-import": "error",
+    "renovate/prefer-json-pipe": "error",
     "renovate/prefer-nullish-util": "error",
     "renovate/require-regex-util": "error",
+    "renovate/zod-schema-location": "error",
     "renovate/v8-ignore-reason": "error",
     "renovate/zod-schema-naming": "error",
 

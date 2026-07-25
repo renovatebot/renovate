@@ -80,13 +80,14 @@ import {
   getIssuesQuery,
   repoInfoQuery,
 } from './graphql.ts';
-import { GithubIssueCache, GithubIssue as Issue } from './issue.ts';
+import { GithubIssueCache } from './issue.ts';
 import { massageMarkdownLinks } from './massage-markdown-links.ts';
 import { getPrCache, updatePrCache } from './pr.ts';
 import {
   GithubBranchProtection,
   GithubBranchRulesets,
   GithubVulnerabilityAlerts,
+  GithubIssue as Issue,
 } from './schema.ts';
 import type {
   AggregatedVulnerabilities,

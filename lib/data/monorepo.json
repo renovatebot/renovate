@@ -642,7 +642,10 @@
     "quartznet": "https://github.com/quartznet/quartznet",
     "radix-ui-primitives": "https://github.com/radix-ui/primitives",
     "reach-ui": "https://github.com/reach/reach-ui",
-    "react": "https://github.com/facebook/react",
+    "react": [
+      "https://github.com/facebook/react",
+      "https://github.com/react/react"
+    ],
     "react-admin": "https://github.com/marmelab/react-admin",
     "react-apollo": "https://github.com/apollographql/react-apollo",
     "react-dnd": "https://github.com/react-dnd/react-dnd",
