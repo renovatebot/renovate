@@ -36,6 +36,12 @@ describe('modules/platform/default-scm', () => {
     expect(git.getBranchUpdateDate).toHaveBeenCalledTimes(1);
   });
 
+  it('delegate getAllBranchUpdateDates to util/git', async () => {
+    git.getAllBranchUpdateDates.mockResolvedValueOnce({});
+    await defaultGitScm.getAllBranchUpdateDates();
+    expect(git.getAllBranchUpdateDates).toHaveBeenCalledTimes(1);
+  });
+
   it('delegate isBranchBehindBase to util/git', async () => {
     git.isBranchBehindBase.mockResolvedValueOnce(true);
     await defaultGitScm.isBranchBehindBase('abc', 'main');

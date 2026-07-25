@@ -42,6 +42,10 @@ describe('modules/platform/local/scm', () => {
       expect(await localFs.getBranchUpdateDate('')).toBeNull();
     });
 
+    it('getAllBranchUpdateDates', async () => {
+      expect(await localFs.getAllBranchUpdateDates()).toEqual({});
+    });
+
     it('deleteBranch', async () => {
       expect(await localFs.deleteBranch('')).toBeUndefined();
     });

@@ -8,12 +8,17 @@ import type {
   ReleaseResult,
 } from '../../../../modules/datasource/index.ts';
 import * as allVersioning from '../../../../modules/versioning/index.ts';
+import type { UpdateType } from '../../../../types/index.ts';
 import { clone } from '../../../../util/clone.ts';
 import * as _dateUtil from '../../../../util/date.ts';
 import * as _mergeConfidence from '../../../../util/merge-confidence/index.ts';
 import { toMs } from '../../../../util/pretty-time.ts';
 import type { Timestamp } from '../../../../util/timestamp.ts';
-import { filterInternalChecks } from './filter-checks.ts';
+import {
+  filterInternalChecks,
+  isMinimumConfidenceApplicable,
+  isMinimumReleaseAgeApplicable,
+} from './filter-checks.ts';
 import type { LookupUpdateConfig, UpdateResult } from './types.ts';
 
 vi.mock('../../../../util/date.ts');
@@ -336,6 +341,66 @@ describe('workers/repository/process/lookup/filter-checks', () => {
       expect(res.pendingChecks).toBeFalse();
       expect(res.pendingReleases).toHaveLength(3);
       expect(res.release?.version).toBe('1.0.1');
+    });
+  });
+
+  describe('.isMinimumReleaseAgeApplicable()', () => {
+    // Exhaustive by construction, so we get a type error if we add a new UpdateType
+    const expectedByUpdateType: Record<UpdateType, boolean> = {
+      major: true,
+      minor: true,
+      patch: true,
+      digest: true,
+      pinDigest: false,
+      pin: false,
+      replacement: false,
+      lockFileMaintenance: false,
+      lockfileUpdate: false,
+      rollback: false,
+      bump: false,
+    };
+
+    it.each(Object.entries(expectedByUpdateType))(
+      'updateType=%s returns %s',
+      (updateType, expected) => {
+        expect(isMinimumReleaseAgeApplicable(updateType as UpdateType)).toBe(
+          expected,
+        );
+      },
+    );
+
+    it('returns true for updateType=undefined', () => {
+      expect(isMinimumReleaseAgeApplicable(undefined)).toBeTrue();
+    });
+  });
+
+  describe('.isMinimumConfidenceApplicable()', () => {
+    // Exhaustive by construction, so we get a type error if we add a new UpdateType
+    const expectedByUpdateType: Record<UpdateType, boolean> = {
+      digest: false,
+      pinDigest: false,
+      major: true,
+      minor: true,
+      patch: true,
+      pin: true,
+      rollback: true,
+      replacement: true,
+      lockFileMaintenance: true,
+      lockfileUpdate: true,
+      bump: true,
+    };
+
+    it.each(Object.entries(expectedByUpdateType))(
+      'updateType=%s returns %s',
+      (updateType, expected) => {
+        expect(isMinimumConfidenceApplicable(updateType as UpdateType)).toBe(
+          expected,
+        );
+      },
+    );
+
+    it('returns true for updateType=undefined', () => {
+      expect(isMinimumConfidenceApplicable(undefined)).toBeTrue();
     });
   });
 });

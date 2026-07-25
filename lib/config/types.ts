@@ -78,6 +78,7 @@ export interface RenovateSharedConfig {
   automergeStrategy?: MergeStrategy;
   automergeType?: AutoMergeType;
   azureWorkItemId?: number;
+  azureWorkItemType?: string;
   branchName?: string;
   branchNameStrict?: boolean;
   branchPrefix?: string;
