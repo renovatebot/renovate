@@ -46,13 +46,11 @@ function getUvRequiredVersionReplacement(
   let isToolUvSection = false;
 
   for (const line of content.split(lineSplitRegex)) {
-    if (toolUvSectionHeaderRegex.test(line)) {
-      isToolUvSection = true;
-      continue;
-    }
-
+    // toolUvSectionHeaderRegex only ever matches a line tomlSectionHeaderRegex
+    // also matches, so one check on entering any section header covers both
+    // "entering [tool.uv]" and "leaving it for some other section".
     if (tomlSectionHeaderRegex.test(line)) {
-      isToolUvSection = false;
+      isToolUvSection = toolUvSectionHeaderRegex.test(line);
       continue;
     }
 
