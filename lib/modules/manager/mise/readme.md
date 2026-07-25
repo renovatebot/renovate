@@ -46,14 +46,6 @@ In particular:
 - an existing `mise.lock` is required
 - self-hosted administrators decide whether this unsafe execution is acceptable for their environment
 
-#### Safe mode (no allowlist required)
-
-mise's [safe mode](https://mise.jdx.dev/configuration/settings.html#safe) (`MISE_SAFE=1`) makes an untrusted project config inert: code execution is refused (`exec()`/`read_file()`, `_.source`, hooks, tasks, asdf plugin scripts, plugin installs) and project `[env]`, `_.path`, `[shell_alias]`, and `[settings]` are ignored, while version resolution over HTTP-based backends still works.
-
-When the `mise` binary that Renovate runs is new enough to support safe mode, Renovate runs `mise lock` with `MISE_SAFE=1`. Because the config is inert, this needs neither `mise` in `allowedUnsafeExecutions` **nor** a preceding `mise trust` — the safe-mode boundary, not the allowlist or trust store, is what protects the host. Renovate determines support at runtime by running `mise version` (which does not load or execute project configuration), so no extra configuration is needed; installing or pinning a recent enough `mise` is enough.
-
-The `allowedUnsafeExecutions` path is unchanged: if `mise` is allowlisted, Renovate runs `mise trust` and `mise lock` exactly as before (without forcing safe mode), so configs that legitimately rely on code execution during locking keep working.
-
 ### Renovate only updates primary versions
 
 Renovate's `mise` manager is designed to automatically update the _first_ (primary) version listed for each tool in the `mise.toml` file.
