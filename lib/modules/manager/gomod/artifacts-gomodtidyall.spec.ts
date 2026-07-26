@@ -113,10 +113,10 @@ describe('modules/manager/gomod/artifacts-gomodtidyall', () => {
     expect(execSnapshots).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          cmd: '(cd ../api && go mod tidy -compat=1.17 -e)',
+          cmd: 'go -C ../api mod tidy -compat=1.17 -e',
         }),
         expect.objectContaining({
-          cmd: '(cd ../cmd && go mod tidy -compat=1.17 -e)',
+          cmd: 'go -C ../cmd mod tidy -compat=1.17 -e',
         }),
       ]),
     );
@@ -152,7 +152,7 @@ describe('modules/manager/gomod/artifacts-gomodtidyall', () => {
     expect(execSnapshots).toEqual(
       expect.arrayContaining([
         expect.objectContaining({ cmd: 'go mod tidy' }),
-        expect.objectContaining({ cmd: '(cd api && go mod tidy)' }),
+        expect.objectContaining({ cmd: 'go -C api mod tidy' }),
       ]),
     );
   });

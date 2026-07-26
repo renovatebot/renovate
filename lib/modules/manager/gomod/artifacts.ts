@@ -286,12 +286,9 @@ export async function updateArtifacts({
       tidyOpts += ' -e';
     }
 
+    // dependent modules can only be tidied once the updated module is settled
     const isGoModTidyAllRequired =
       config.postUpdateOptions?.includes('gomodTidyAll') === true;
-    // gomodTidyAll implies a primary tidy — dependent modules reference the
-    // primary via `replace`, so they can only be correctly tidied once the
-    // primary go.sum is settled. Users who set only `gomodTidyAll` still get
-    // a tidy on the package being updated.
     const isGoModTidyRequired =
       !mustSkipGoModTidy &&
       (config.postUpdateOptions?.includes('gomodTidy') === true ||
@@ -346,19 +343,17 @@ export async function updateArtifacts({
       execCommands.push(`${cmd} ${args}`);
     }
 
-    // gomodTidyAll: run `go mod tidy` on every transitively dependent module
-    // in topological order so their go.sum files pick up the primary change.
     let dependentModules: string[] = [];
     if (isGoModTidyAllRequired) {
       try {
         dependentModules = await getGoModulesInTidyOrder(goModFileName);
-        for (const m of dependentModules) {
-          const dir = upath.relative(goModDir, upath.dirname(m));
-          execCommands.push(`(cd ${quote(dir)} && ${cmd} mod tidy${tidyOpts})`);
+        for (const dependent of dependentModules) {
+          const dir = upath.relative(goModDir, upath.dirname(dependent));
+          execCommands.push(`${cmd} -C ${quote(dir)} mod tidy${tidyOpts}`);
         }
-        logger.debug({ dependentModules }, 'gomodTidyAll: dependents queued');
+        logger.debug({ dependentModules }, 'go mod tidy commands included');
       } catch (err) {
-        logger.warn({ err }, 'gomodTidyAll: failed to resolve dependents');
+        logger.warn({ err }, 'Failed to find dependent Go modules');
       }
     }
 
@@ -376,25 +371,22 @@ export async function updateArtifacts({
     await exec(execCommands, execOptions);
 
     const status = await getRepoStatus();
-    const modifiedSet = new Set(status.modified);
-
-    // Flatten dependent modules into [go.mod, go.sum, go.mod, go.sum, …] pairs.
-    const dependentFiles = dependentModules.flatMap((m) => [
-      m,
-      m.replace(regEx(/\.mod$/), '.sum'),
+    const dependentFiles = dependentModules.flatMap((f) => [
+      f,
+      f.replace(regEx(/\.mod$/), '.sum'),
     ]);
-    const hasAnyChanges =
-      modifiedSet.has(sumFileName) ||
-      modifiedSet.has(goModFileName) ||
-      modifiedSet.has(goWorkSumFileName) ||
-      dependentFiles.some((f) => modifiedSet.has(f));
 
-    if (!hasAnyChanges) {
+    if (
+      !status.modified.includes(sumFileName) &&
+      !status.modified.includes(goModFileName) &&
+      !status.modified.includes(goWorkSumFileName) &&
+      !dependentFiles.some((f) => status.modified.includes(f))
+    ) {
       return null;
     }
 
     const res: UpdateArtifactsResult[] = [];
-    if (modifiedSet.has(sumFileName)) {
+    if (status.modified.includes(sumFileName)) {
       logger.debug('Returning updated go.sum');
       res.push({
         file: {
@@ -405,7 +397,7 @@ export async function updateArtifacts({
       });
     }
 
-    if (modifiedSet.has(goWorkSumFileName)) {
+    if (status.modified.includes(goWorkSumFileName)) {
       logger.debug('Returning updated go.work.sum');
       res.push({
         file: {
@@ -416,11 +408,15 @@ export async function updateArtifacts({
       });
     }
 
-    // Include go.mod / go.sum changes from dependent modules (gomodTidyAll).
     for (const f of dependentFiles) {
-      if (modifiedSet.has(f)) {
+      if (status.modified.includes(f)) {
+        logger.debug(`Returning updated ${f}`);
         res.push({
-          file: { type: 'addition', path: f, contents: await readLocalFile(f) },
+          file: {
+            type: 'addition',
+            path: f,
+            contents: await readLocalFile(f),
+          },
         });
       }
     }
