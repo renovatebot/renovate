@@ -38,13 +38,10 @@ export async function createOnboardingBranch(
   }
 
   // only allow gitAuthor template value in the commitTrailers
-  const trailers = config.commitTrailers
-    ? filterValidCommitTrailers(
-        config.commitTrailers.map((trailer) =>
-          compile(trailer, { gitAuthor: config.gitAuthor }),
-        ),
-      )
-    : undefined;
+  const compiledTrailers = coerceArray(config.commitTrailers).map((trailer) =>
+    compile(trailer, { gitAuthor: config.gitAuthor }),
+  );
+  const trailers = filterValidCommitTrailers(compiledTrailers);
 
   // istanbul ignore if
   if (GlobalConfig.get('dryRun')) {
