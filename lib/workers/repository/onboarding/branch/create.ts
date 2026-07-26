@@ -2,6 +2,7 @@ import { GlobalConfig } from '../../../../config/global.ts';
 import type { RenovateConfig } from '../../../../config/types.ts';
 import { logger } from '../../../../logger/index.ts';
 import { scm } from '../../../../modules/platform/scm.ts';
+import { coerceArray } from '../../../../util/array.ts';
 import { getInheritedOrGlobal } from '../../../../util/common.ts';
 import { filterValidCommitTrailers } from '../../../../util/git/commit-trailers.ts';
 import { compile } from '../../../../util/template/index.ts';
