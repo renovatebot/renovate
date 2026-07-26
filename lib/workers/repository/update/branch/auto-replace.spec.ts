@@ -90,6 +90,28 @@ describe('workers/repository/update/branch/auto-replace', () => {
       expect(res).toEqual(src.replace('7.1.0', '7.1.1'));
     });
 
+    it('updates a Python-constrained Poetry array entry', async () => {
+      const pyproject = codeBlock`
+        [tool.poetry.dependencies]
+        numpy = [
+          {python = "^3.9", version = "^1.26"},
+          {python = "^3.8, <3.12", version = "^1.24"}
+        ]
+      `;
+      upgrade.manager = 'poetry';
+      upgrade.packageFile = 'pyproject.toml';
+      upgrade.depName = 'numpy';
+      upgrade.currentValue = '^1.26';
+      upgrade.newValue = '^2.0.0';
+      upgrade.depIndex = 0;
+      upgrade.splitPythonMarkers = true;
+
+      const res = await doAutoReplace(upgrade, pyproject, reuseExistingBranch);
+
+      expect(res).toContain('{python = "^3.9", version = "^2.0.0"}');
+      expect(res).toContain('{python = "^3.8, <3.12", version = "^1.24"}');
+    });
+
     it('handles a double attempt', async () => {
       const script =
         '<script src="https://cdnjs.cloudflare.com/ajax/libs/reactstrap/7.1.0/reactstrap.min.js">';

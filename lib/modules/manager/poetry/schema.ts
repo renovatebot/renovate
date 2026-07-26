@@ -137,74 +137,136 @@ const PoetryArrayDependency = z.array(z.unknown()).transform(
   }),
 );
 
-const PoetryDependency = z.union([
-  PoetryPathDependency,
-  PoetryGitDependency,
-  PoetryPypiDependency,
-  PoetryArrayDependency,
-]);
+const SplitPoetryArrayEntry = z
+  .object({
+    version: z.string(),
+    python: z.string(),
+    source: z.string().optional(),
+    optional: z.boolean().optional().catch(false),
+  })
+  .transform(
+    ({ version, python, source, optional }): PackageDependency => ({
+      datasource: PypiDatasource.id,
+      currentValue: version,
+      depType: optional ? 'extras' : undefined,
+      managerData: {
+        nestedVersion: true,
+        pythonConstraint: python,
+        ...(source ? { sourceName: source.toLowerCase() } : {}),
+      },
+    }),
+  );
 
-export const PoetryDependencies = LooseRecord(
-  z.string(),
-  PoetryDependency.transform((dep) => {
-    if (dep.skipReason) {
-      return dep;
+const SplitPoetryArrayDependency = z
+  .array(z.unknown())
+  .nonempty()
+  .transform((values): PackageDependency[] => {
+    const deps: PackageDependency[] = [];
+    for (const value of values) {
+      const parsed = SplitPoetryArrayEntry.safeParse(value);
+      if (!parsed.success) {
+        return [
+          {
+            datasource: PypiDatasource.id,
+            skipReason: 'multiple-constraint-dep',
+          },
+        ];
+      }
+      deps.push(parsed.data);
     }
+    return deps;
+  });
 
-    if (dep.datasource === GitRefsDatasource.id && dep.currentDigest) {
-      dep.versioning = gitVersioning.id;
-      return dep;
-    }
+function createPoetryDependencies(
+  splitPythonMarkers: boolean,
+): z.ZodType<PackageDependency[]> {
+  const PoetryDependency = z.union([
+    PoetryPathDependency,
+    PoetryGitDependency,
+    PoetryPypiDependency,
+    splitPythonMarkers ? SplitPoetryArrayDependency : PoetryArrayDependency,
+  ]);
 
-    // istanbul ignore if: normaly should not happen
-    if (!dep.currentValue) {
-      dep.skipReason = 'unspecified-version';
-      return dep;
-    }
+  return LooseRecord(
+    z.string(),
+    PoetryDependency.transform((value) => {
+      const deps = Array.isArray(value) ? value : [value];
+      for (const dep of deps) {
+        if (dep.skipReason) {
+          continue;
+        }
 
-    if (pep440Versioning.isValid(dep.currentValue)) {
-      dep.versioning = pep440Versioning.id;
-      return dep;
-    }
+        if (dep.datasource === GitRefsDatasource.id && dep.currentDigest) {
+          dep.versioning = gitVersioning.id;
+          continue;
+        }
 
-    if (poetryVersioning.isValid(dep.currentValue)) {
-      dep.versioning = poetryVersioning.id;
-      return dep;
-    }
+        // istanbul ignore if: normaly should not happen
+        if (!dep.currentValue) {
+          dep.skipReason = 'unspecified-version';
+          continue;
+        }
 
-    dep.skipReason = 'invalid-version';
-    return dep;
-  }),
-).transform((record) => {
-  const deps: PackageDependency[] = [];
-  for (const [depName, dep] of Object.entries(record)) {
-    dep.depName = depName;
-    if (!dep.packageName) {
-      const packageName = normalizePythonDepName(depName);
-      if (depName !== packageName) {
-        dep.packageName = packageName;
+        if (pep440Versioning.isValid(dep.currentValue)) {
+          dep.versioning = pep440Versioning.id;
+          continue;
+        }
+
+        if (poetryVersioning.isValid(dep.currentValue)) {
+          dep.versioning = poetryVersioning.id;
+          continue;
+        }
+
+        dep.skipReason = 'invalid-version';
+      }
+      return deps;
+    }),
+  ).transform((record) => {
+    const deps: PackageDependency[] = [];
+    for (const [depName, entries] of Object.entries(record)) {
+      for (const dep of entries) {
+        dep.depName = depName;
+        if (!dep.packageName) {
+          const packageName = normalizePythonDepName(depName);
+          if (depName !== packageName) {
+            dep.packageName = packageName;
+          }
+        }
+        deps.push(dep);
       }
     }
-    deps.push(dep);
-  }
-  return deps;
-});
+    return deps;
+  });
+}
 
-export const PoetryGroupDependencies = LooseRecord(
-  z.string(),
-  z
-    .object({ dependencies: PoetryDependencies })
-    .transform(({ dependencies }) => dependencies),
-).transform((record) => {
-  const deps: PackageDependency[] = [];
-  for (const [name, val] of Object.entries(record)) {
-    for (const dep of Object.values(val)) {
-      dep.depType = name;
-      deps.push(dep);
+export const PoetryDependencies = createPoetryDependencies(false);
+const SplitPoetryDependencies = createPoetryDependencies(true);
+
+function createPoetryGroupDependencies(
+  dependenciesSchema: z.ZodType<PackageDependency[]>,
+): z.ZodType<PackageDependency[]> {
+  return LooseRecord(
+    z.string(),
+    z
+      .object({ dependencies: dependenciesSchema })
+      .transform(({ dependencies }) => dependencies),
+  ).transform((record) => {
+    const deps: PackageDependency[] = [];
+    for (const [name, val] of Object.entries(record)) {
+      for (const dep of Object.values(val)) {
+        dep.depType = name;
+        deps.push(dep);
+      }
     }
-  }
-  return deps;
-});
+    return deps;
+  });
+}
+
+export const PoetryGroupDependencies =
+  createPoetryGroupDependencies(PoetryDependencies);
+const SplitPoetryGroupDependencies = createPoetryGroupDependencies(
+  SplitPoetryDependencies,
+);
 
 const PoetrySourceOrder = [
   'default',
@@ -270,20 +332,42 @@ export const PoetrySources = LooseArray(PoetrySource, {
   })
   .catch([]);
 
-export const PoetrySection = z.object({
-  version: z.string().optional().catch(undefined),
-  dependencies: withDepType(
-    PoetryDependencies,
-    'dependencies',
-    false,
-  ).optional(),
-  'dev-dependencies': withDepType(
-    PoetryDependencies,
-    'dev-dependencies',
-  ).optional(),
-  group: PoetryGroupDependencies.optional(),
-  source: PoetrySources,
-});
+interface ParsedPoetrySection {
+  version?: string;
+  dependencies?: PackageDependency[];
+  'dev-dependencies'?: PackageDependency[];
+  group?: PackageDependency[];
+  source: PoetrySource[];
+}
+
+function createPoetrySection(
+  dependenciesSchema: z.ZodType<PackageDependency[]>,
+  groupDependenciesSchema: z.ZodType<PackageDependency[]>,
+): z.ZodType<ParsedPoetrySection> {
+  return z.object({
+    version: z.string().optional().catch(undefined),
+    dependencies: withDepType(
+      dependenciesSchema,
+      'dependencies',
+      false,
+    ).optional(),
+    'dev-dependencies': withDepType(
+      dependenciesSchema,
+      'dev-dependencies',
+    ).optional(),
+    group: groupDependenciesSchema.optional(),
+    source: PoetrySources,
+  });
+}
+
+export const PoetrySection = createPoetrySection(
+  PoetryDependencies,
+  PoetryGroupDependencies,
+);
+const SplitPoetrySection = createPoetrySection(
+  SplitPoetryDependencies,
+  SplitPoetryGroupDependencies,
+);
 
 export type PoetrySection = z.infer<typeof PoetrySection>;
 
@@ -297,140 +381,181 @@ const BuildSystemRequires = LooseArray(
     .refine((dep) => dep !== null),
 ).catch([]);
 
-export const PoetryPyProject = Toml.pipe(
-  z
-    .object({
-      project: ProjectSection.optional().catch(undefined),
-      tool: z.object({ poetry: PoetrySection }).optional().catch(undefined),
-      'dependency-groups': DependencyGroup(depTypes.dependencyGroups).catch([]),
-      'build-system': z
-        .object({
-          'build-backend': z.string().refine(
-            // https://python-poetry.org/docs/pyproject/#poetry-and-pep-517
-            (buildBackend) =>
-              buildBackend === 'poetry.masonry.api' ||
-              buildBackend === 'poetry.core.masonry.api',
-          ),
-          requires: BuildSystemRequires,
-        })
-        .transform(({ requires }) => {
-          const req = requires.find(
-            ({ depName }) =>
-              depName === 'poetry' ||
-              depName === 'poetry_core' ||
-              depName === 'poetry-core',
-          );
-          return {
-            poetryRequirement: req?.currentValue,
-            requires,
-          };
-        })
-        .optional()
-        .catch(undefined),
-    })
-    .transform((pyproject) => {
-      const {
-        project,
-        tool,
-        'build-system': buildSystem,
-        'dependency-groups': dependencyGroups,
-      } = pyproject;
+interface ParsedPoetryPyProject {
+  packageFileContent: PackageFileContent;
+  poetryRequirement?: string | null;
+}
 
-      const deps: PackageDependency[] = [];
-      const projectDependencies = coerceArray(project?.dependencies);
-      const projectOptionalDependencies = coerceArray(
-        project?.['optional-dependencies'],
-      );
-
-      const projectDepsByName: Record<string, PackageDependency> = {};
-      for (const dep of [
-        ...projectDependencies,
-        ...dependencyGroups,
-        ...projectOptionalDependencies,
-      ]) {
-        projectDepsByName[dep.depName!] = dep;
-      }
-
-      if (buildSystem?.requires) {
-        deps.push(...buildSystem.requires);
-      }
-
-      const poetryDependencies = coerceArray(tool?.poetry?.dependencies);
-
-      const poetryDevDependencies = coerceArray(
-        tool?.poetry?.['dev-dependencies'],
-      );
-
-      const poetryGroupDependencies = coerceArray(tool?.poetry?.group);
-
-      for (const poetryDep of [
-        ...poetryDependencies,
-        ...poetryDevDependencies,
-        ...poetryGroupDependencies,
-      ]) {
-        const depName = poetryDep.depName;
-        const projectDep = depName && projectDepsByName[depName];
-        // When the same dep exists in project.dependencies or dependency-groups,
-        // Poetry just uses the Poetry dep to enrich the project dependency.
-        if (projectDep) {
-          const mergedDep = deepmerge<PackageDependency>(poetryDep, projectDep);
-          // Poetry supports specifying the version in project.dependencies and
-          // tool.poetry.dependencies *at the same time* and only errors if both
-          // are not compatible - we require a single constraint per dependency.
-          if (projectDep.currentValue && poetryDep.currentValue) {
-            mergedDep.skipReason = 'invalid-dependency-specification';
-          }
-          // When a skipReason is 'unspecified-version', we defer to the other skipReason,
-          // so that 'unspecified-version' only persists if both deps have no version.
-          if (mergedDep.skipReason === 'unspecified-version') {
-            if (poetryDep.skipReason === 'unspecified-version') {
-              mergedDep.skipReason = projectDep.skipReason;
-            } else {
-              mergedDep.skipReason = poetryDep.skipReason;
-            }
-          }
-          projectDepsByName[depName] = mergedDep;
-        } else {
-          deps.push(poetryDep);
-        }
-      }
-
-      deps.push(...Object.values(projectDepsByName));
-
-      const packageFileVersion = tool?.poetry?.version;
-      const packageFileContent: PackageFileContent = {
-        deps,
-        packageFileVersion,
-      };
-
-      const sourceUrls = tool?.poetry?.source;
-      if (sourceUrls) {
-        for (const dep of deps) {
-          if (dep.managerData?.sourceName) {
-            const sourceUrl = sourceUrls.find(
-              ({ name }) => name === dep.managerData?.sourceName,
+function createPoetryPyProject(
+  poetrySection: z.ZodType<ParsedPoetrySection>,
+  splitPythonMarkers: boolean,
+): z.ZodType<ParsedPoetryPyProject> {
+  return Toml.pipe(
+    z
+      .object({
+        project: ProjectSection.optional().catch(undefined),
+        tool: z.object({ poetry: poetrySection }).optional().catch(undefined),
+        'dependency-groups': DependencyGroup(depTypes.dependencyGroups).catch(
+          [],
+        ),
+        'build-system': z
+          .object({
+            'build-backend': z.string().refine(
+              // https://python-poetry.org/docs/pyproject/#poetry-and-pep-517
+              (buildBackend) =>
+                buildBackend === 'poetry.masonry.api' ||
+                buildBackend === 'poetry.core.masonry.api',
+            ),
+            requires: BuildSystemRequires,
+          })
+          .transform(({ requires }) => {
+            const req = requires.find(
+              ({ depName }) =>
+                depName === 'poetry' ||
+                depName === 'poetry_core' ||
+                depName === 'poetry-core',
             );
-            if (sourceUrl?.url) {
-              dep.registryUrls = [sourceUrl.url];
+            return {
+              poetryRequirement: req?.currentValue,
+              requires,
+            };
+          })
+          .optional()
+          .catch(undefined),
+      })
+      .transform((pyproject) => {
+        const {
+          project,
+          tool,
+          'build-system': buildSystem,
+          'dependency-groups': dependencyGroups,
+        } = pyproject;
+
+        const deps: PackageDependency[] = [];
+        const projectDependencies = coerceArray(project?.dependencies);
+        const projectOptionalDependencies = coerceArray(
+          project?.['optional-dependencies'],
+        );
+
+        // Project deps may repeat the same depName for different python markers
+        // (e.g. `pytest; python_version < "3.10"` plus `pytest; python_version >= "3.10"`).
+        // Key the dedup map by `depName + marker` so those marker variants survive,
+        // while still letting Poetry-section deps merge with the unmarked variant.
+        function projectDepKey(dep: PackageDependency): string {
+          if (!splitPythonMarkers) {
+            return dep.depName!;
+          }
+          const marker = (dep.managerData as { marker?: string } | undefined)
+            ?.marker;
+          return marker ? `${dep.depName!}__${marker}` : dep.depName!;
+        }
+
+        const projectDepsByKey: Record<string, PackageDependency> = {};
+        for (const dep of [
+          ...projectDependencies,
+          ...dependencyGroups,
+          ...projectOptionalDependencies,
+        ]) {
+          projectDepsByKey[projectDepKey(dep)] = dep;
+        }
+
+        if (buildSystem?.requires) {
+          deps.push(...buildSystem.requires);
+        }
+
+        const poetryDependencies = coerceArray(tool?.poetry?.dependencies);
+
+        const poetryDevDependencies = coerceArray(
+          tool?.poetry?.['dev-dependencies'],
+        );
+
+        const poetryGroupDependencies = coerceArray(tool?.poetry?.group);
+
+        for (const poetryDep of [
+          ...poetryDependencies,
+          ...poetryDevDependencies,
+          ...poetryGroupDependencies,
+        ]) {
+          const depName = poetryDep.depName;
+          // Poetry-section deps don't carry PEP 508 markers, so they only ever
+          // merge with the unmarked project variant of the same depName.
+          const projectDep = depName && projectDepsByKey[depName];
+          // When the same dep exists in project.dependencies or dependency-groups,
+          // Poetry just uses the Poetry dep to enrich the project dependency.
+          if (projectDep) {
+            const mergedDep = deepmerge<PackageDependency>(
+              poetryDep,
+              projectDep,
+            );
+            // Poetry supports specifying the version in project.dependencies and
+            // tool.poetry.dependencies *at the same time* and only errors if both
+            // are not compatible - we require a single constraint per dependency.
+            if (projectDep.currentValue && poetryDep.currentValue) {
+              mergedDep.skipReason = 'invalid-dependency-specification';
             }
+            // When a skipReason is 'unspecified-version', we defer to the other skipReason,
+            // so that 'unspecified-version' only persists if both deps have no version.
+            if (mergedDep.skipReason === 'unspecified-version') {
+              if (poetryDep.skipReason === 'unspecified-version') {
+                mergedDep.skipReason = projectDep.skipReason;
+              } else {
+                mergedDep.skipReason = poetryDep.skipReason;
+              }
+            }
+            projectDepsByKey[depName] = mergedDep;
+          } else {
+            deps.push(poetryDep);
           }
         }
 
-        const sourceUrlsFiltered = sourceUrls.filter(
-          ({ priority }) => priority !== 'explicit',
-        );
-        if (sourceUrlsFiltered.length) {
-          packageFileContent.registryUrls = uniq(
-            sourceUrlsFiltered.map(({ url }) => url!),
-          );
-        }
-      }
+        deps.push(...Object.values(projectDepsByKey));
 
-      return {
-        packageFileContent,
-        poetryRequirement: buildSystem?.poetryRequirement,
-      };
-    }),
+        const packageFileVersion = tool?.poetry?.version;
+        const packageFileContent: PackageFileContent = {
+          deps,
+          packageFileVersion,
+        };
+        if (project?.['requires-python']) {
+          packageFileContent.extractedConstraints = {
+            python: project['requires-python'],
+          };
+        }
+
+        const sourceUrls = tool?.poetry?.source;
+        if (sourceUrls) {
+          for (const dep of deps) {
+            if (dep.managerData?.sourceName) {
+              const sourceUrl = sourceUrls.find(
+                ({ name }) => name === dep.managerData?.sourceName,
+              );
+              if (sourceUrl?.url) {
+                dep.registryUrls = [sourceUrl.url];
+              }
+            }
+          }
+
+          const sourceUrlsFiltered = sourceUrls.filter(
+            ({ priority }) => priority !== 'explicit',
+          );
+          if (sourceUrlsFiltered.length) {
+            packageFileContent.registryUrls = uniq(
+              sourceUrlsFiltered.map(({ url }) => url!),
+            );
+          }
+        }
+
+        return {
+          packageFileContent,
+          poetryRequirement: buildSystem?.poetryRequirement,
+        };
+      }),
+  );
+}
+
+export const PoetryPyProject = createPoetryPyProject(PoetrySection, false);
+export const SplitPoetryPyProject = createPoetryPyProject(
+  SplitPoetrySection,
+  true,
 );
 
 export type PoetryPyProject = z.infer<typeof PoetryPyProject>;

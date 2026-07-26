@@ -6,6 +6,11 @@ In addition to standard dependencies, these toolsets are also supported:
 - `uv` (including `uv.lock` files and `uv` workspaces)
 - `hatch`
 
+### Dependencies with Python version markers
+
+By default, dependencies with the same name can be combined even when their PEP 508 declarations target different Python versions.
+Enable [`splitPythonMarkers`](../../../configuration-options.md#splitpythonmarkers) to extract standalone `python_version` and `python_full_version` variants independently and receive a separate update for each Python range.
+
 ### Private Modules Authentication
 
 Before running the `pdm` or `uv` commands to update the `pdm.lock` or `uv.lock` respectively, Renovate exports `git` [`insteadOf`](https://git-scm.com/docs/git-config#Documentation/git-config.txt-urlltbasegtinsteadOf) directives in environment variables.
