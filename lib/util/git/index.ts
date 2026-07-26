@@ -1454,13 +1454,9 @@ export async function prepareCommit({
       commitOptions['--no-verify'] = null;
     }
 
-    let commitMessage = message;
+    const commitMessage = isString(message) ? [message] : message
     if (isNonEmptyArray(trailers)) {
-      // simple-git joins message array elements with blank lines, so the
-      // trailers become the final block of the commit message
-      commitMessage = (isString(message) ? [message] : message).concat(
-        trailers.join('\n'),
-      );
+      commitMessage.push(trailers.join('\n'))
     }
 
     const commitRes = await git.commit(commitMessage, [], commitOptions);
