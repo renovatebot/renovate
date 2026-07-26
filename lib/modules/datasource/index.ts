@@ -45,8 +45,12 @@ import type {
 export { isGetPkgReleasesConfig } from './common.ts';
 export * from './types.ts';
 
-export const getDatasources = (): Map<string, DatasourceApi> => datasources;
-export const getDatasourceList = (): string[] => Array.from(datasources.keys());
+export function getDatasources(): Map<string, DatasourceApi> {
+  return datasources;
+}
+export function getDatasourceList(): string[] {
+  return Array.from(datasources.keys());
+}
 
 type GetReleasesInternalConfig = GetReleasesConfig & GetPkgReleasesConfig;
 
@@ -76,7 +80,7 @@ async function getRegistryReleases(
   const cacheKey = `${registryUrl}:${config.packageName}`;
 
   const cacheEnabled = !!datasource.caching; // tells if `isPrivate` flag is supported in datasource result
-  const cacheForced = GlobalConfig.get('cachePrivatePackages', false); // tells if caching is forced via admin config
+  const cacheForced = GlobalConfig.get('cachePrivatePackages'); // tells if caching is forced via admin config
 
   if (cacheEnabled || cacheForced) {
     const cachedResult = await packageCache.get<ReleaseResult>(

@@ -12,13 +12,14 @@ import { readFileAsXmlDocument } from './util.ts';
 export const GLOBAL_JSON = 'global.json';
 export const NUGET_CENTRAL_FILE = 'Directory.Packages.props';
 export const MSBUILD_CENTRAL_FILE = 'Packages.props';
+export const DIRECTORY_BUILD_PROPS = 'Directory.Build.props';
 
 /**
  * Get all leaf package files of ancestry that depend on packageFileName.
  */
 export async function getDependentPackageFiles(
   packageFileName: string,
-  isCentralManagement = false,
+  isPropsFile = false,
   isGlobalJson = false,
 ): Promise<ProjectFile[]> {
   const packageFiles = getMatchingFiles(
@@ -27,7 +28,7 @@ export async function getDependentPackageFiles(
   );
   const graph = new Graph();
 
-  if (isCentralManagement) {
+  if (isPropsFile) {
     graph.addNode(packageFileName);
   }
 
@@ -38,7 +39,8 @@ export async function getDependentPackageFiles(
   const parentDir =
     packageFileName === NUGET_CENTRAL_FILE ||
     packageFileName === MSBUILD_CENTRAL_FILE ||
-    packageFileName === GLOBAL_JSON
+    packageFileName === GLOBAL_JSON ||
+    packageFileName === DIRECTORY_BUILD_PROPS
       ? ''
       : upath.dirname(packageFileName);
 
@@ -46,7 +48,7 @@ export async function getDependentPackageFiles(
     graph.addNode(f);
 
     if (
-      (isCentralManagement || isGlobalJson) &&
+      (isPropsFile || isGlobalJson) &&
       upath.dirname(f).startsWith(parentDir)
     ) {
       graph.addEdge(packageFileName, f);
@@ -78,7 +80,7 @@ export async function getDependentPackageFiles(
   const visited = new Map<string, boolean>();
   collectDependents(packageFileName, graph, visited);
 
-  if (isCentralManagement || isGlobalJson) {
+  if (isPropsFile || isGlobalJson) {
     // remove props file, as we don't need it
     visited.delete(packageFileName);
   }

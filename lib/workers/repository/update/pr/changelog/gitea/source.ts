@@ -7,7 +7,7 @@ export class GiteaChangeLogSource extends ChangeLogSource {
   }
 
   getAPIBaseUrl(config: BranchUpgradeConfig): string {
-    return this.getBaseUrl(config) + 'api/v1/';
+    return `${this.getBaseUrl(config)}api/v1/`;
   }
 
   getCompareURL(

@@ -147,7 +147,9 @@ describe('util/common', () => {
     });
 
     it('throws error for invalid json', () => {
-      expect(() => parseJson(invalidJsonString, 'renovate.json')).toThrow();
+      expect(() => parseJson(invalidJsonString, 'renovate.json')).toThrow(
+        "JSON5: invalid character '\\\"' at 7:3",
+      );
     });
 
     it('catches and warns if content parsing failed with JSONC.parse but not with JSON5.parse', () => {
@@ -185,7 +187,9 @@ describe('util/common', () => {
     });
 
     it('throws error for invalid jsonc', () => {
-      expect(() => parseJson(invalidJsonString, 'renovate.jsonc')).toThrow();
+      expect(() => parseJson(invalidJsonString, 'renovate.jsonc')).toThrow(
+        'Parse error: Expected comma on line 6 column 47',
+      );
     });
   });
 

@@ -50,10 +50,10 @@ function determineDatasource(
     );
     return {
       datasource: GitlabTagsDatasource.id,
-      registryUrls: ['https://' + hostname],
+      registryUrls: [`https://${hostname}`],
     };
   }
-  const hostUrl = 'https://' + hostname;
+  const hostUrl = `https://${hostname}`;
   const res = find({ url: hostUrl });
   if (isEmptyObject(res)) {
     // 1 check, to possibly prevent 3 failures in combined query of hostType & url.

@@ -38,7 +38,7 @@ describe('modules/datasource/ruby-version/index', () => {
         .reply(404);
       await expect(
         getPkgReleases({ datasource, packageName: 'ruby' }),
-      ).rejects.toThrow();
+      ).rejects.toThrow('external-host-error');
     });
   });
 });

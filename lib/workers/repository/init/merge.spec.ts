@@ -1,4 +1,5 @@
 import { isNullOrUndefined } from '@sindresorhus/is';
+import { codeBlock } from 'common-tags';
 import type { MockInstance } from 'vitest';
 import type { RenovateConfig } from '~test/util.ts';
 import { fs, logger, partial, platform, scm } from '~test/util.ts';
@@ -28,8 +29,10 @@ import {
   resolveStaticRepoConfig,
   setNpmTokenInNpmrc,
 } from './merge.ts';
+import type { RepositoryWorkerConfig } from './types.ts';
 
 vi.mock('../../../util/fs/index.ts');
+vi.mock('../onboarding/branch/config.ts');
 vi.mock('../onboarding/branch/onboarding-branch-cache.ts');
 
 const migrate = vi.mocked(_migrate);
@@ -63,6 +66,7 @@ vi.mock('../../../config/migrate-validate.ts');
 describe('workers/repository/init/merge', () => {
   afterEach(() => {
     vi.restoreAllMocks();
+    hostRules.clear();
   });
 
   describe('detectRepoFileConfig()', () => {
@@ -210,9 +214,11 @@ describe('workers/repository/init/merge', () => {
     });
 
     it('finds and parse renovate.json5', async () => {
-      const configFileRaw = `{
-        // this is json5 format
-      }`;
+      const configFileRaw = codeBlock`
+        {
+                // this is json5 format
+              }
+      `;
       scm.getFileList.mockResolvedValue(['package.json', 'renovate.json5']);
       fs.readLocalFile.mockResolvedValue(configFileRaw);
       expect(await detectRepoFileConfig()).toEqual({
@@ -288,7 +294,7 @@ describe('workers/repository/init/merge', () => {
         checkForRepoConfigError({
           configFileParseError: { validationError: '', validationMessage: '' },
         }),
-      ).toThrow();
+      ).toThrow('config-validation');
     });
   });
 
@@ -352,7 +358,10 @@ describe('workers/repository/init/merge', () => {
         automerge: true,
         packageRules: [
           {
-            matchSourceUrls: ['https://github.com/facebook/react'],
+            matchSourceUrls: [
+              'https://github.com/facebook/react',
+              'https://github.com/react/react',
+            ],
           },
         ],
       });
@@ -478,6 +487,160 @@ describe('workers/repository/init/merge', () => {
       expect(getUserEnv()).toEqual({
         var: 'value',
       });
+    });
+
+    it('applies repositoryEntryConfig between global and repo file config', async () => {
+      migrateAndValidate.migrateAndValidate.mockImplementation((_, c) =>
+        Promise.resolve({ ...c, warnings: [], errors: [] }),
+      );
+      migrate.migrateConfig.mockImplementation((c) => ({
+        isMigrated: true,
+        migratedConfig: c,
+      }));
+
+      const setNpmrcSpy = vi.spyOn(npmApi, 'setNpmrc');
+      const npmrcValue = '//registry.npmjs.org/:_authToken=preset-token\n';
+
+      const globalPresetRule = {
+        matchPackageNames: ['globalPresetDep'],
+        enabled: false,
+      };
+      const ignoredByGlobalRule = {
+        matchPackageNames: ['ignoredByGlobalDep'],
+        enabled: false,
+      };
+      const ignoredByEntryRule = {
+        matchPackageNames: ['ignoredByEntryDep'],
+        enabled: false,
+      };
+      const ignoredByRepoRule = {
+        matchPackageNames: ['ignoredByRepoDep'],
+        enabled: false,
+      };
+      const repoEntryPresetRule = {
+        matchPackageNames: ['repoEntryPresetDep'],
+        enabled: false,
+      };
+      const repoFilePresetRule = {
+        matchPackageNames: ['repoFilePresetDep'],
+        enabled: false,
+      };
+      const globalRule = {
+        matchPackageNames: ['globalDep'],
+        enabled: false,
+      };
+      const repoEntryRule = {
+        matchPackageNames: ['repoEntryDep'],
+        enabled: false,
+      };
+      const repoFileRule = {
+        matchPackageNames: ['repoFileDep'],
+        enabled: false,
+      };
+
+      memCache.set('preset:local>globalPreset', {
+        packageRules: [globalPresetRule],
+        hostRules: [
+          {
+            matchHost: 'https://npm.example.com',
+            token: '{{ secrets.HOST_TOKEN }}',
+          },
+        ],
+        npmrc: npmrcValue,
+      });
+      memCache.set('preset:local>ignoredByGlobal', {
+        packageRules: [ignoredByGlobalRule],
+      });
+      memCache.set('preset:local>ignoredByEntry', {
+        packageRules: [ignoredByEntryRule],
+      });
+      memCache.set('preset:local>ignoredByRepo', {
+        packageRules: [ignoredByRepoRule],
+      });
+      memCache.set('preset:local>repoEntryPreset', {
+        packageRules: [repoEntryPresetRule],
+      });
+      memCache.set('preset:local>repoFilePreset', {
+        packageRules: [repoFilePresetRule],
+      });
+
+      scm.getFileList.mockResolvedValue(['renovate.json']);
+      fs.readLocalFile.mockResolvedValue(
+        JSON.stringify({
+          extends: ['local>repoFilePreset'],
+          ignorePresets: ['local>ignoredByRepo'],
+          packageRules: [repoFileRule],
+        }),
+      );
+
+      const inputConfig: RepositoryWorkerConfig = {
+        ...config,
+        extends: [
+          'local>globalPreset',
+          'local>ignoredByGlobal',
+          'local>ignoredByEntry',
+          'local>ignoredByRepo',
+        ],
+        ignorePresets: ['local>ignoredByGlobal'],
+        packageRules: [globalRule],
+        secrets: { HOST_TOKEN: 'resolved-secret-token' },
+        repositoryEntryConfig: {
+          extends: ['local>repoEntryPreset'],
+          ignorePresets: ['local>ignoredByEntry'],
+          packageRules: [repoEntryRule],
+        },
+      };
+
+      const res = await mergeRenovateConfig(inputConfig);
+
+      expect(res.packageRules).toMatchObject([
+        globalRule,
+        globalPresetRule,
+        // ignoredByGlobalRule should not be here
+        // ignoredByEntryRule should not be here
+        // ignoredByRepoRule should not be here
+        repoEntryPresetRule,
+        repoEntryRule,
+        repoFilePresetRule,
+        repoFileRule,
+      ]);
+
+      expect(hostRules.find({ url: 'https://npm.example.com' })).toMatchObject({
+        token: 'resolved-secret-token',
+      });
+
+      expect(setNpmrcSpy).toHaveBeenCalledWith(npmrcValue);
+    });
+
+    it('supports repositoryEntryConfig without extends or ignorePresets', async () => {
+      migrateAndValidate.migrateAndValidate.mockImplementation((_, c) =>
+        Promise.resolve({ ...c, warnings: [], errors: [] }),
+      );
+      migrate.migrateConfig.mockImplementation((c) => ({
+        isMigrated: true,
+        migratedConfig: c,
+      }));
+
+      const repoEntryRule = {
+        matchPackageNames: ['repoEntryDep'],
+        enabled: false,
+      };
+
+      scm.getFileList.mockResolvedValue([]);
+      fs.readLocalFile.mockResolvedValue(null);
+
+      const inputConfig: RepositoryWorkerConfig = {
+        ...config,
+        extends: undefined,
+        ignorePresets: undefined,
+        repositoryEntryConfig: {
+          packageRules: [repoEntryRule],
+        },
+      };
+
+      const res = await mergeRenovateConfig(inputConfig);
+
+      expect(res.packageRules).toMatchObject([repoEntryRule]);
     });
   });
 

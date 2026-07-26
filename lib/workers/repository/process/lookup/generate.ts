@@ -17,7 +17,7 @@ export async function generateUpdate(
   currentVersion: string,
   bucket: string,
   release: Release,
-  allVersions: string[],
+  allVersions: Set<string>,
 ): Promise<LookupUpdate> {
   const newVersion = release.version;
   const update: LookupUpdate = {

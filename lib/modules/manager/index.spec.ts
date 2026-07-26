@@ -117,11 +117,9 @@ describe('modules/manager/index', () => {
         supportedDatasources: [],
       });
       expect(
-        await manager.extractAllPackageFiles('unknown', {} as any, []),
+        await manager.extractAllPackageFiles('unknown', {}, []),
       ).toBeNull();
-      expect(
-        await manager.extractAllPackageFiles('dummy', {} as any, []),
-      ).toBeNull();
+      expect(await manager.extractAllPackageFiles('dummy', {}, [])).toBeNull();
     });
 
     it('returns non-null', async () => {
@@ -131,7 +129,7 @@ describe('modules/manager/index', () => {
         extractAllPackageFiles: () => Promise.resolve([]),
       });
       expect(
-        await manager.extractAllPackageFiles('dummy', {} as any, []),
+        await manager.extractAllPackageFiles('dummy', {}, []),
       ).not.toBeNull();
     });
 

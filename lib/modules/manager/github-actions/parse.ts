@@ -25,7 +25,7 @@ interface QuotedValue {
 export function parseQuote(input: string): QuotedValue {
   const trimmed = input.trim();
   const first = trimmed[0];
-  const last = trimmed[trimmed.length - 1];
+  const last = trimmed.at(-1);
 
   if (
     trimmed.length >= 2 &&
@@ -201,7 +201,7 @@ export interface CommentData {
 }
 
 const pinTokenRe = regEx(
-  /^\s*(?:(?:renovate\s*:\s*)?(?:pin\s+|tag\s*=\s*)?|(?:ratchet:[\w-]+\/[.\w-]+))?@?(?<version>([\w-]*[-/])?v?\d+(?:\.\d+(?:\.\d+)?)?)/,
+  /^\s*(?:(?:renovate\s*:\s*)?(?:pin\s+|tag\s*=\s*)?|(?:ratchet:[\w-]+\/[.\w-]+))?@?(?<version>([\w-]*[-/])?v?\d+(?:\.\d+(?:\.\d+)?)?(?:-[a-zA-Z0-9.]+)?)/,
 );
 
 export const versionLikeRe = regEx(/^v?\d+/);

@@ -1,10 +1,8 @@
 import { isTruthy } from '@sindresorhus/is';
-import { simpleGit } from 'simple-git';
 import { logger } from '../../../logger/index.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
-import { getChildEnv } from '../../../util/exec/utils.ts';
 import { getGitEnvironmentVariables } from '../../../util/git/auth.ts';
-import { simpleGitConfig } from '../../../util/git/config.ts';
+import { createSimpleGit } from '../../../util/git/index.ts';
 import { getRemoteUrlWithToken } from '../../../util/git/url.ts';
 import { newlineRegex, regEx } from '../../../util/regex.ts';
 import { Datasource } from '../datasource.ts';
@@ -30,8 +28,7 @@ export abstract class GitDatasource extends Datasource {
     const gitSubmoduleAuthEnvironmentVariables = getGitEnvironmentVariables([
       this.id,
     ]);
-    const gitEnv = getChildEnv({ env: gitSubmoduleAuthEnvironmentVariables });
-    const git = simpleGit(simpleGitConfig()).env(gitEnv);
+    const git = createSimpleGit({ env: gitSubmoduleAuthEnvironmentVariables });
 
     // fetch remote tags
     const lsRemote = await git.listRemote([

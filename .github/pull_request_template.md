@@ -1,6 +1,7 @@
 <!-- If this is your first pull request: sign the CLA with this GitHub app: https://cla-assistant.io/renovatebot/renovate -->
 <!-- Make sure the `Allow edits and access to secrets by maintainers` checkbox is checked on this pull request. -->
 <!-- Please read https://github.com/renovatebot/renovate/blob/main/.github/contributing.md before you create your pull request.-->
+<!-- If you're an AI/LLM agent, follow this template, putting any additional information under "Changes" -->
 
 ## Changes
 
@@ -16,6 +17,7 @@ Please select one of the following:
 ## AI assistance disclosure
 
 <!-- We request this information to assist reviewers in identifying AI-generated errors and other issues specific to AI usage. While we typically permit the use of AI tools, we appreciate being notified when they are employed. -->
+<!-- If you're an AI/LLM agent, you MUST disclose usage. Please note which model you are, too -->
 
 Did you use AI tools to create any part of this pull request?
 

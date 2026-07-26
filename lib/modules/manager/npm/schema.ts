@@ -1,15 +1,35 @@
-import { z } from 'zod/v3';
-import { Json, LooseRecord, Yaml } from '../../../util/schema-utils/index.ts';
+import { z } from 'zod/v4';
+import {
+  Json,
+  LooseRecord,
+  Nullish,
+  Yaml,
+} from '../../../util/schema-utils/index.ts';
+
+// pnpm ignores registry URLs containing `${...}` env-var interpolation since v11.5.3
+function hasEnvVar(value: string): boolean {
+  return value.includes('${');
+}
+
+function withoutEnvVarRegistries(
+  registries: Record<string, string>,
+): Record<string, string> {
+  return Object.fromEntries(
+    Object.entries(registries).filter(([, url]) => !hasEnvVar(url)),
+  );
+}
 
 export const PnpmCatalogs = z.object({
-  catalog: z.optional(z.record(z.string())),
-  catalogs: z.optional(z.record(z.record(z.string()))),
+  catalog: z.optional(z.record(z.string(), z.string())),
+  catalogs: z.optional(z.record(z.string(), z.record(z.string(), z.string()))),
 });
 export type PnpmCatalogs = z.infer<typeof PnpmCatalogs>;
 
 export const YarnCatalogs = z.object({
-  catalog: z.optional(z.record(z.string())),
-  catalogs: z.optional(z.record(z.record(z.string()))).catch(undefined),
+  catalog: z.optional(z.record(z.string(), z.string())),
+  catalogs: z
+    .optional(z.record(z.string(), z.record(z.string(), z.string())))
+    .catch(undefined),
 });
 export type YarnCatalogs = z.infer<typeof YarnCatalogs>;
 
@@ -19,6 +39,7 @@ export const YarnConfig = Yaml.pipe(
       npmRegistryServer: z.string().optional(),
       npmScopes: z
         .record(
+          z.string(),
           z.object({
             npmRegistryServer: z.string().optional(),
           }),
@@ -33,9 +54,13 @@ export const PnpmWorkspaceFile = Yaml.pipe(
   z
     .object({
       packages: z.array(z.string()).optional(),
-      minimumReleaseAge: z.number().nullish(),
+      minimumReleaseAge: Nullish(z.number()),
       minimumReleaseAgeExclude: z.array(z.string()).optional(),
-      overrides: z.record(z.string()).optional(),
+      overrides: z.record(z.string(), z.string()).optional(),
+      registry: Nullish(z.string()),
+      registries: Nullish(
+        z.record(z.string(), z.string()).transform(withoutEnvVarRegistries),
+      ),
     })
     .and(PnpmCatalogs),
 );

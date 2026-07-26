@@ -13,7 +13,7 @@ import {
 } from '@sindresorhus/is';
 import { RequestError as HttpError } from 'got';
 import { DateTime } from 'luxon';
-import { ZodError } from 'zod/v3';
+import { ZodError } from 'zod/v4';
 import { ExecError } from '../util/exec/exec-error.ts';
 import { regEx } from '../util/regex.ts';
 import { redactedFields, sanitize } from '../util/sanitize.ts';

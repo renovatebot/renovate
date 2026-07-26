@@ -1,4 +1,13 @@
 import { isString } from '@sindresorhus/is';
+import {
+  type Document,
+  type Scalar,
+  type YAMLMap,
+  isMap,
+  isPair,
+  isScalar,
+  parseAllDocuments,
+} from 'yaml';
 import { logger } from '../../../logger/index.ts';
 import { coerceArray } from '../../../util/array.ts';
 import { readLocalFile } from '../../../util/fs/index.ts';
@@ -48,6 +57,7 @@ function readManifest(
     return {
       kind: 'system',
       file: packageFile,
+      content,
       version: versionMatch[1],
       components: versionMatch[2],
     };
@@ -56,6 +66,7 @@ function readManifest(
   return {
     kind: 'resource',
     file: packageFile,
+    content,
     resources: parseYaml(content, {
       customSchema: FluxResource,
       failureBehaviour: 'filter',
@@ -127,9 +138,8 @@ function resolveHelmRepository(
             registryAliases,
           ).packageName;
           return null;
-        } else {
-          return repo.spec.url;
         }
+        return repo.spec.url;
       })
       .filter(isString);
 
@@ -176,11 +186,122 @@ function resolveSystemManifest(
   ];
 }
 
+/**
+ * Returns all `spec.ref` map nodes for OCIRepository resources matching `resourceName`.
+ */
+function findOCIRefNodes(
+  docs: Document.Parsed[],
+  resourceName: string,
+): YAMLMap[] {
+  const refNodes: YAMLMap[] = [];
+  for (const doc of docs) {
+    const docContents = doc.contents;
+    if (!isMap(docContents)) {
+      continue;
+    }
+    const kindNode = docContents.get('kind', true);
+    if (
+      !isScalar(kindNode) ||
+      (kindNode.value as unknown) !== 'OCIRepository'
+    ) {
+      continue;
+    }
+    const nameNode = docContents.getIn(['metadata', 'name'], true);
+    if (!isScalar(nameNode) || nameNode.value !== resourceName) {
+      continue;
+    }
+    const specNode = docContents.get('spec');
+    if (!isMap(specNode)) {
+      continue;
+    }
+    const refNode = specNode.get('ref');
+    if (isMap(refNode)) {
+      refNodes.push(refNode);
+    }
+  }
+
+  return refNodes;
+}
+
+function extractOCIRefTagAndDigestRange(
+  docs: Document.Parsed[],
+  content: string,
+  resourceName: string,
+): { replaceString: string; tagFirst: boolean } | null {
+  for (const refNode of findOCIRefNodes(docs, resourceName)) {
+    let tagKey: Scalar | undefined;
+    let tagValue: Scalar | undefined;
+    let digestKey: Scalar | undefined;
+    let digestValue: Scalar | undefined;
+
+    for (const item of refNode.items) {
+      if (!isPair(item) || !isScalar(item.key)) {
+        continue;
+      }
+      if (item.key.value === 'tag' && isScalar(item.value)) {
+        tagKey = item.key;
+        tagValue = item.value;
+      } else if (item.key.value === 'digest' && isScalar(item.value)) {
+        digestKey = item.key;
+        digestValue = item.value;
+      }
+    }
+
+    if (
+      !tagKey?.range ||
+      !tagValue?.range ||
+      !digestKey?.range ||
+      !digestValue?.range
+    ) {
+      continue;
+    }
+
+    const tagFirst = tagKey.range[0] < digestKey.range[0];
+    const start = tagFirst ? tagKey.range[0] : digestKey.range[0];
+    const end = tagFirst ? digestValue.range[1] : tagValue.range[1];
+
+    return { replaceString: content.slice(start, end), tagFirst };
+  }
+
+  return null;
+}
+
+function extractOCIRefTagRange(
+  docs: Document.Parsed[],
+  content: string,
+  resourceName: string,
+): { replaceString: string; indentation: string } | null {
+  for (const refNode of findOCIRefNodes(docs, resourceName)) {
+    for (const item of refNode.items) {
+      if (
+        isPair(item) &&
+        isScalar(item.key) &&
+        item.key.value === 'tag' &&
+        isScalar(item.value) &&
+        item.key.range &&
+        item.value.range
+      ) {
+        const keyStart = item.key.range[0];
+        const valueEnd = item.value.range[1];
+        const lineStart = content.lastIndexOf('\n', keyStart - 1) + 1;
+        return {
+          replaceString: content.slice(keyStart, valueEnd),
+          indentation: content.slice(lineStart, keyStart),
+        };
+      }
+    }
+  }
+
+  return null;
+}
+
 function resolveResourceManifest(
   manifest: ResourceFluxManifest,
   helmRepositories: HelmRepository[],
   registryAliases: Record<string, string> | undefined,
+  content: string,
 ): PackageDependency[] {
+  let docs: Document.Parsed[] | undefined;
   const deps: PackageDependency[] = [];
   for (const resource of manifest.resources) {
     switch (resource.kind) {
@@ -281,6 +402,9 @@ function resolveResourceManifest(
           if (isHttpUrl(gitUrl)) {
             dep.sourceUrl = gitUrl.replace(/\.git$/, '');
           }
+          if (resource.spec.ref?.branch) {
+            dep.currentValue = resource.spec.ref.branch;
+          }
         } else if (resource.spec.ref?.tag) {
           dep.currentValue = resource.spec.ref.tag;
           resolveGitRepositoryPerSourceTag(dep, resource.spec.url);
@@ -292,29 +416,79 @@ function resolveResourceManifest(
       }
       case 'OCIRepository': {
         const container = removeOCIPrefix(resource.spec.url);
-        let dep = getDep(container, false, registryAliases);
-        if (resource.spec.ref?.digest) {
-          dep = getDep(
+        if (resource.spec.ref?.digest && resource.spec.ref?.tag) {
+          const combinedDep = getDep(
             `${container}@${resource.spec.ref.digest}`,
             false,
             registryAliases,
           );
-          if (resource.spec.ref?.tag) {
-            logger.debug('A digest and tag was found, ignoring tag');
+          // Set currentValue to the tag so the docker datasource can look up the image's new digest
+          combinedDep.currentValue = resource.spec.ref.tag;
+
+          const refRange = extractOCIRefTagAndDigestRange(
+            (docs ??= parseAllDocuments(content, { strict: false })),
+            content,
+            resource.metadata.name,
+          );
+          if (refRange) {
+            combinedDep.replaceString = refRange.replaceString;
+            if (refRange.tagFirst) {
+              combinedDep.autoReplaceStringTemplate = refRange.replaceString
+                .replace(resource.spec.ref.tag, '{{newValue}}')
+                .replace(resource.spec.ref.digest, '{{newDigest}}');
+            } else {
+              combinedDep.autoReplaceStringTemplate = refRange.replaceString
+                .replace(resource.spec.ref.digest, '{{newDigest}}')
+                .replace(resource.spec.ref.tag, '{{newValue}}');
+            }
+          } else {
+            logger.debug(
+              { file: manifest.file, name: resource.metadata.name },
+              'Could not find tag/digest nodes in content, skipping replacement',
+            );
+            combinedDep.skipReason = 'invalid-value';
           }
+
+          deps.push(combinedDep);
+        } else if (resource.spec.ref?.digest) {
+          const dep = getDep(
+            `${container}@${resource.spec.ref.digest}`,
+            false,
+            registryAliases,
+          );
+          deps.push(dep);
         } else if (resource.spec.ref?.tag) {
-          dep = getDep(
+          const dep = getDep(
             `${container}:${resource.spec.ref.tag}`,
             false,
             registryAliases,
           );
-          dep.autoReplaceStringTemplate =
-            '{{#if newValue}}{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}';
-          dep.replaceString = resource.spec.ref.tag;
+          const refTagRange = extractOCIRefTagRange(
+            (docs ??= parseAllDocuments(content, { strict: false })),
+            content,
+            resource.metadata.name,
+          );
+          if (refTagRange) {
+            dep.replaceString = refTagRange.replaceString;
+            const newline = content.includes('\r\n') ? '\r\n' : '\n';
+            dep.autoReplaceStringTemplate = `${refTagRange.replaceString.replace(
+              resource.spec.ref.tag,
+              '{{newValue}}',
+            )}{{#if newDigest}}${newline}${refTagRange.indentation}digest: {{newDigest}}{{/if}}`;
+          } else {
+            logger.debug(
+              { file: manifest.file, name: resource.metadata.name },
+              'Unable to locate tag node for replacement (may be YAML alias or alias reference), digest pinning will not be possible',
+            );
+            dep.replaceString = resource.spec.ref.tag;
+            dep.autoReplaceStringTemplate = '{{newValue}}';
+          }
+          deps.push(dep);
         } else {
+          const dep = getDep(container, false, registryAliases);
           dep.skipReason = 'unversioned-reference';
+          deps.push(dep);
         }
-        deps.push(dep);
         break;
       }
 
@@ -351,6 +525,7 @@ export function extractPackageFile(
         manifest,
         helmRepositories,
         config?.registryAliases,
+        content,
       );
       break;
     }
@@ -367,10 +542,11 @@ export async function extractAllPackageFiles(
 
   for (const file of packageFiles) {
     const content = await readLocalFile(file, 'utf8');
-    // TODO #22198
-    const manifest = readManifest(content!, file);
-    if (manifest) {
-      manifests.push(manifest);
+    if (content) {
+      const manifest = readManifest(content, file);
+      if (manifest) {
+        manifests.push(manifest);
+      }
     }
   }
 
@@ -387,6 +563,7 @@ export async function extractAllPackageFiles(
           manifest,
           helmRepositories,
           config.registryAliases,
+          manifest.content,
         );
         break;
       }

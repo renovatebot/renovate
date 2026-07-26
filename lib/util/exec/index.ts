@@ -5,6 +5,7 @@ import type { ToolSettingsOptions } from '../../config/types.ts';
 import { TEMPORARY_ERROR } from '../../constants/error-messages.ts';
 import { logger } from '../../logger/index.ts';
 import { getCustomEnv, getUserEnv } from '../env.ts';
+import { coerceObject } from '../object.ts';
 import { rawExec } from './common.ts';
 import { generateInstallCommands, isDynamicInstall } from './containerbase.ts';
 import {
@@ -29,6 +30,7 @@ function dockerEnvVars(extraEnv: ExtraEnv, childEnv: ExtraEnv): string[] {
 }
 
 function getCwd({ cwd, cwdFile }: ExecOptions): string | undefined {
+  // TODO: types (#22198)
   const defaultCwd = GlobalConfig.get('localDir');
   const paramCwd = cwdFile
     ? upath.join(defaultCwd, upath.dirname(cwdFile))
@@ -41,14 +43,7 @@ function getRawExecOptions(opts: ExecOptions): RawExecOptions {
   const childEnv = getChildEnv(opts);
   const cwd = getCwd(opts);
   let timeout = opts.timeout;
-  // Set default timeout config.executionTimeout if specified; othrwise to 15 minutes
-  if (!timeout) {
-    if (defaultExecutionTimeout) {
-      timeout = defaultExecutionTimeout * 60 * 1000;
-    } else {
-      timeout = 15 * 60 * 1000;
-    }
-  }
+  timeout ??= defaultExecutionTimeout * 60 * 1000;
 
   // Set default max buffer size to 10MB
   const maxBuffer = opts.maxBuffer ?? 10 * 1024 * 1024;
@@ -167,8 +162,8 @@ export async function exec(
   opts: ExecOptions = {},
 ): Promise<ExecResult> {
   const { docker } = opts;
-  const dockerChildPrefix = GlobalConfig.get('dockerChildPrefix', 'renovate_');
-  const sideCarImage = GlobalConfig.get('dockerSidecarImage')!;
+  const dockerChildPrefix = GlobalConfig.get('dockerChildPrefix');
+  const sideCarImage = GlobalConfig.get('dockerSidecarImage');
 
   const { rawCommands, rawOptions } = await prepareRawExec(
     cmd,
@@ -183,7 +178,10 @@ export async function exec(
     if (useDocker) {
       await removeDockerContainer(sideCarImage, dockerChildPrefix);
     }
-    logger.debug({ command: rawCmd }, 'Executing command');
+    logger.debug(
+      { command: rawCmd, env: Object.keys(coerceObject(rawOptions.env)) },
+      'Executing command',
+    );
     logger.trace({ commandOptions: rawOptions }, 'Command options');
     try {
       res = await rawExec(rawCmd, rawOptions);

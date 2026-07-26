@@ -67,10 +67,9 @@ When Renovate updates the shared module, running `go mod tidy` only in that modu
 Vendoring of Go Modules is done automatically if `vendor/modules.txt` is present.
 Renovate will commit all files changed within the `vendor/` folder.
 
-<!-- prettier-ignore -->
 !!! note
-    Renovate does not support vendoring major upgrades of Go modules.
-    Follow issue [#21010](https://github.com/renovatebot/renovate/issues/21010).
+  Renovate does not support vendoring major upgrades of Go modules.
+  Follow issue [#21010](https://github.com/renovatebot/renovate/issues/21010).
 
 ### Go binary version
 

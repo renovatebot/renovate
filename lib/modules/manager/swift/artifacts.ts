@@ -1,6 +1,8 @@
 import { logger } from '../../../logger/index.ts';
 import { readLocalFile } from '../../../util/fs/index.ts';
+import { parseGitUrl } from '../../../util/git/url.ts';
 import { escapeRegExp, regEx } from '../../../util/regex.ts';
+import { trimTrailingSlash } from '../../../util/url.ts';
 import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
 import { getDigest } from '../../datasource/index.ts';
 import { scm } from '../../platform/scm.ts';
@@ -19,6 +21,19 @@ async function findPackageResolvedFiles(): Promise<string[]> {
 }
 
 function normalizeUrl(url: string): string {
+  try {
+    const parsed = parseGitUrl(url);
+    // Only use parsed result when both resource and full_name are present,
+    // otherwise fall through to basic normalization
+    if (parsed.resource && parsed.full_name) {
+      // Normalize to host/full_name form to allow cross-protocol matching
+      // e.g. https://github.com/owner/repo, git@github.com:owner/repo.git
+      //   -> github.com/owner/repo
+      return `${parsed.resource}/${trimTrailingSlash(parsed.full_name)}`.toLowerCase();
+    }
+  } catch {
+    // Fall through to basic normalization
+  }
   return url
     .replace(regEx(/\.git$/), '')
     .replace(regEx(/\/$/), '')
