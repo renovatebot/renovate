@@ -55,8 +55,8 @@ async function lookup(
   let depConfig = mergeChildConfig(packageFileConfig, dep);
   if (dep.extractedConstraints) {
     depConfig.constraints = {
-      ...depConfig.constraints,
       ...dep.extractedConstraints,
+      ...depConfig.constraints,
     };
   }
   const datasourceDefaultConfig = await getDefaultConfig(depConfig.datasource!);

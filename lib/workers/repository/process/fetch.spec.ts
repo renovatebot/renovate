@@ -208,7 +208,7 @@ describe('workers/repository/process/fetch', () => {
       });
     });
 
-    it('applies dependency extractedConstraints on top of package constraints', async () => {
+    it('prefers configured constraints over extracted constraints', async () => {
       config.rangeStrategy = 'auto';
       config.constraints = { python: '>=3.9' };
       const packageFiles: any = {
@@ -232,7 +232,7 @@ describe('workers/repository/process/fetch', () => {
 
       expect(lookupUpdates).toHaveBeenCalledWith(
         expect.objectContaining({
-          constraints: { python: '<3.12' },
+          constraints: { python: '>=3.9' },
           datasource: 'maven',
           depName: 'bbb',
         }),
