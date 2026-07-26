@@ -1,4 +1,7 @@
 import { Readable } from 'node:stream';
+import type { GitPullRequest } from 'azure-devops-node-api/interfaces/GitInterfaces.js';
+import { buildTestJwt } from '~test/jwt-util.ts';
+import { partial } from '~test/util.ts';
 import { streamToString } from '../../../util/streams.ts';
 import {
   getBranchNameWithoutRefsheadsPrefix,
@@ -8,6 +11,7 @@ import {
   getRenovatePRFormat,
   getRepoByName,
   getStorageExtraCloneOpts,
+  getWorkItemTitle,
   max4000Chars,
 } from './util.ts';
 
@@ -89,17 +93,17 @@ describe('modules/platform/azure/util', () => {
 
   describe('getRenovatePRFormat', () => {
     it('should be formated (closed)', () => {
-      const res = getRenovatePRFormat({ status: 2 } as any);
+      const res = getRenovatePRFormat(partial<GitPullRequest>({ status: 2 }));
       expect(res).toMatchSnapshot();
     });
 
     it('should be formated (closed v2)', () => {
-      const res = getRenovatePRFormat({ status: 3 } as any);
+      const res = getRenovatePRFormat(partial<GitPullRequest>({ status: 3 }));
       expect(res).toMatchSnapshot();
     });
 
     it('should be formated (not closed)', () => {
-      const res = getRenovatePRFormat({ status: 1 } as any);
+      const res = getRenovatePRFormat(partial<GitPullRequest>({ status: 1 }));
       expect(res).toMatchSnapshot();
     });
   });
@@ -134,9 +138,39 @@ describe('modules/platform/azure/util', () => {
       expect(res).toMatchSnapshot();
     });
 
-    it('should configure bearer token', () => {
+    it('should configure non-JWT token as PAT', () => {
       const res = getStorageExtraCloneOpts({ token: 'token' });
-      expect(res).toMatchSnapshot();
+      expect(res['-c']).toContain('AUTHORIZATION: basic');
+    });
+
+    it('should use bearer when token is a JWT', () => {
+      const token = buildTestJwt(
+        { typ: 'JWT', alg: 'RS256' },
+        { aud: '499b84ac', sub: 'test', exp: 9999999999 },
+        'fake-sig',
+      );
+      const res = getStorageExtraCloneOpts({ token });
+      expect(res['-c']).toContain('AUTHORIZATION: bearer');
+      expect(res['-c']).toContain(token);
+    });
+
+    it('should use basic for a 52-char PAT', () => {
+      const token = '1234567890123456789012345678901234567890123456789012';
+      const res = getStorageExtraCloneOpts({ token });
+      expect(res['-c']).toContain('AUTHORIZATION: basic');
+      expect(res['-c']).not.toContain('bearer');
+    });
+
+    it('should use basic for a short opaque token', () => {
+      const res = getStorageExtraCloneOpts({ token: 'short-token' });
+      expect(res['-c']).toContain('AUTHORIZATION: basic');
+      expect(res['-c']).not.toContain('bearer');
+    });
+
+    it('should use basic for an invalid JWT-like token', () => {
+      const res = getStorageExtraCloneOpts({ token: 'not.valid.jwt' });
+      expect(res['-c']).toContain('AUTHORIZATION: basic');
+      expect(res['-c']).not.toContain('bearer');
     });
   });
 
@@ -223,9 +257,48 @@ describe('modules/platform/azure/util', () => {
 
     it('throws when repo name is invalid', () => {
       // TODO: better error handling #22198
-      expect(() => getRepoByName(undefined as never, [])).toThrow();
-      expect(() => getRepoByName(null as never, [])).toThrow();
-      expect(() => getRepoByName('foo/bar/baz', [])).toThrow();
+      expect(() => getRepoByName(undefined as never, [])).toThrow(
+        "Cannot read properties of undefined (reading 'split')",
+      );
+      expect(() => getRepoByName(null as never, [])).toThrow(
+        "Cannot read properties of null (reading 'split')",
+      );
+      expect(() => getRepoByName('foo/bar/baz', [])).toThrow(
+        'Azure repository can be only structured this way',
+      );
     });
+  });
+  it('returns the raw title if not a dependency dashboard', () => {
+    expect(getWorkItemTitle('Some Issue', 'project/repo')).toBe('Some Issue');
+  });
+
+  it('returns the raw title if dependency dashboard and already prefixed', () => {
+    expect(
+      getWorkItemTitle('[repo] Dependency Dashboard', 'project/repo'),
+    ).toBe('[repo] Dependency Dashboard');
+  });
+
+  it('prefixes dependency dashboard title with repo name if not already prefixed', () => {
+    expect(getWorkItemTitle('Dependency Dashboard', 'project/repo')).toBe(
+      '[repo] Dependency Dashboard',
+    );
+  });
+
+  it('handles repository names with slashes', () => {
+    expect(getWorkItemTitle('Dependency Dashboard', 'org/project/repo')).toBe(
+      '[repo] Dependency Dashboard',
+    );
+  });
+
+  it('does not double prefix if repo name is already present', () => {
+    expect(
+      getWorkItemTitle('[repo] Dependency Dashboard', 'org/project/repo'),
+    ).toBe('[repo] Dependency Dashboard');
+  });
+
+  it('handles titles with apostrophes', () => {
+    expect(getWorkItemTitle("Dependency Dashboard's", 'project/repo')).toBe(
+      "[repo] Dependency Dashboard's",
+    );
   });
 });

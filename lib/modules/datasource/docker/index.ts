@@ -16,6 +16,7 @@ import {
   ensurePathPrefix,
   joinUrlParts,
   parseLinkHeader,
+  parseUrl,
 } from '../../../util/url.ts';
 import { id as dockerVersioningId } from '../../versioning/docker/index.ts';
 import { Datasource } from '../datasource.ts';
@@ -42,12 +43,18 @@ import {
 } from './common.ts';
 import { DockerHubCache } from './dockerhub-cache.ts';
 import { ecrPublicRegex, ecrRegex, isECRMaxResultsError } from './ecr.ts';
-import type { DistributionManifest, OciImageManifest } from './schema.ts';
+import type {
+  DistributionManifest,
+  Manifest,
+  OciImageManifest,
+} from './schema.ts';
 import {
   DockerHubTagsPage,
   ManifestJson,
   OciHelmConfig,
   OciImageConfig,
+  QuayTagsResponse,
+  RegistryTagsList,
 } from './schema.ts';
 
 const defaultConfig = {
@@ -291,11 +298,11 @@ export class DockerDatasource extends Datasource {
     );
   }
 
-  private async getManifest(
+  private async getManifestDocument(
     registry: string,
     dockerRepository: string,
     tag: string,
-  ): Promise<OciImageManifest | DistributionManifest | null> {
+  ): Promise<Manifest | null> {
     const manifestResponse = await this.getManifestResponse(
       registry,
       dockerRepository,
@@ -327,8 +334,15 @@ export class DockerDatasource extends Datasource {
       return null;
     }
 
-    const manifest = parsed.data;
+    return parsed.data;
+  }
 
+  private async resolveImageManifest(
+    registry: string,
+    dockerRepository: string,
+    tag: string,
+    manifest: Manifest,
+  ): Promise<OciImageManifest | DistributionManifest | null> {
     switch (manifest.mediaType) {
       case 'application/vnd.docker.distribution.manifest.v2+json':
       case 'application/vnd.oci.image.manifest.v1+json':
@@ -357,13 +371,29 @@ export class DockerDatasource extends Datasource {
     }
   }
 
+  private async getManifest(
+    registry: string,
+    dockerRepository: string,
+    tag: string,
+  ): Promise<OciImageManifest | DistributionManifest | null> {
+    const manifest = await this.getManifestDocument(
+      registry,
+      dockerRepository,
+      tag,
+    );
+    if (!manifest) {
+      return null;
+    }
+    return this.resolveImageManifest(registry, dockerRepository, tag, manifest);
+  }
+
   private async _getImageArchitecture(
     registryHost: string,
     dockerRepository: string,
     currentDigest: string,
   ): Promise<string | null | undefined> {
     try {
-      let manifestResponse: HttpResponse<string> | null;
+      let manifestResponse: HttpResponse | null;
 
       try {
         manifestResponse = await this.getManifestResponse(
@@ -453,6 +483,7 @@ export class DockerDatasource extends Datasource {
         namespace: 'datasource-docker-architecture',
         key: `${registryHost}:${dockerRepository}@${currentDigest}`,
         ttlMinutes: 1440 * 28,
+        shouldCacheResult: isNonEmptyString,
       },
       () =>
         this._getImageArchitecture(
@@ -485,23 +516,15 @@ export class DockerDatasource extends Datasource {
       );
       return {};
     }
-    // Docker Hub library images don't have labels we need
-    if (
-      registryHost === DOCKER_HUB &&
-      dockerRepository.startsWith('library/')
-    ) {
-      logger.debug('Docker Hub library image - skipping label lookup');
-      return {};
-    }
     try {
       let labels: Record<string, string> | undefined = {};
-      const manifest = await this.getManifest(
+      const manifestDocument = await this.getManifestDocument(
         registryHost,
         dockerRepository,
         tag,
       );
 
-      if (!manifest) {
+      if (!manifestDocument) {
         logger.debug(
           { registryHost, dockerRepository, tag },
           'No manifest found',
@@ -509,8 +532,43 @@ export class DockerDatasource extends Datasource {
         return undefined;
       }
 
+      if ('annotations' in manifestDocument && manifestDocument.annotations) {
+        labels = manifestDocument.annotations;
+      }
+
+      if ('manifests' in manifestDocument) {
+        const descriptorAnnotations = manifestDocument.manifests
+          .map((descriptor) => descriptor.annotations)
+          .find(
+            (annotations) =>
+              isNonEmptyString(annotations?.[sourceLabel]) &&
+              isNonEmptyString(annotations?.[gitRefLabel]),
+          );
+        if (descriptorAnnotations) {
+          labels = { ...labels, ...descriptorAnnotations };
+        }
+      }
+
+      if (
+        'manifests' in manifestDocument &&
+        labels[sourceLabel] &&
+        labels[gitRefLabel]
+      ) {
+        return labels;
+      }
+
+      const manifest = await this.resolveImageManifest(
+        registryHost,
+        dockerRepository,
+        tag,
+        manifestDocument,
+      );
+      if (!manifest) {
+        return undefined;
+      }
+
       if ('annotations' in manifest && manifest.annotations) {
-        labels = manifest.annotations;
+        labels = { ...labels, ...manifest.annotations };
       }
 
       switch (manifest.config.mediaType) {
@@ -649,25 +707,17 @@ export class DockerDatasource extends Datasource {
     let tags: string[] = [];
     const limit = 100;
 
-    const pageUrl = (page: number): string =>
-      `${registry}/api/v1/repository/${repository}/tag/?limit=${limit}&page=${page}&onlyActiveTags=true`;
+    function pageUrl(page: number): string {
+      return `${registry}/api/v1/repository/${repository}/tag/?limit=${limit}&page=${page}&onlyActiveTags=true`;
+    }
 
     let page = 1;
     let url: string | null = pageUrl(page);
     while (url && page <= 20) {
-      interface QuayRestDockerTags {
-        tags: {
-          name: string;
-        }[];
-        has_additional: boolean;
-      }
-
-      // typescript issue :-/
-      // oxlint-disable typescript/no-unnecessary-type-assertion
-      const res = (await this.http.getJsonUnchecked<QuayRestDockerTags>(
+      const res: HttpResponse<QuayTagsResponse> = await this.http.getJson(
         url,
-      )) as HttpResponse<QuayRestDockerTags>;
-      // oxlint-enable typescript/no-unnecessary-type-assertion
+        QuayTagsResponse,
+      );
       const pageTags = res.body.tags.map((tag) => tag.name);
       tags = tags.concat(pageTags);
       page += 1;
@@ -708,16 +758,17 @@ export class DockerDatasource extends Datasource {
     ];
     const pages = hostsNeedingAllPages.includes(registryHost)
       ? 1000
-      : GlobalConfig.get('dockerMaxPages', 20);
+      : GlobalConfig.get('dockerMaxPages');
     logger.trace({ registryHost, dockerRepository, pages }, 'docker.getTags');
     let foundMaxResultsError = false;
     do {
-      let res: HttpResponse<{ tags: string[] }>;
+      let res: HttpResponse<RegistryTagsList>;
       try {
-        res = await this.http.getJsonUnchecked<{ tags: string[] }>(url, {
-          headers,
-          noAuth: true,
-        });
+        res = await this.http.getJson(
+          url,
+          { headers, noAuth: true },
+          RegistryTagsList,
+        );
       } catch (err) {
         if (
           !foundMaxResultsError &&
@@ -738,7 +789,12 @@ export class DockerDatasource extends Datasource {
         // Artifactory bug: next link comes back without virtual-repo prefix (RTFACT-18971)
         if (linkHeader?.next?.last) {
           // parse the current URL, strip any old "last" param, then set the new one
-          const parsed: URL = new URL(url);
+          const parsed = parseUrl(url);
+          // v8 ignore if: url is always a valid HTTP URL as `ensurePathPrefix`
+          if (!parsed) {
+            url = null;
+            break;
+          }
           parsed.searchParams.delete('last');
           parsed.searchParams.set('last', linkHeader.next.last);
           url = parsed.href;
@@ -793,7 +849,7 @@ export class DockerDatasource extends Datasource {
         logger.debug(
           `Retrying Tags for ${registryHost}/${dockerRepository} using library/ prefix`,
         );
-        return this.getTags(registryHost, 'library/' + dockerRepository);
+        return this.getTags(registryHost, `library/${dockerRepository}`);
       }
       // JFrog Artifactory - Retry handling when resolving Docker Official Images
       // These follow the format of {{registryHost}}{{jFrogRepository}}/library/{{dockerRepository}}
@@ -812,7 +868,7 @@ export class DockerDatasource extends Datasource {
 
         return this.getTags(
           registryHost,
-          jfrogRepository + '/library/' + dockerImage,
+          `${jfrogRepository}/library/${dockerImage}`,
         );
       }
       if (err.statusCode === 429 && isDockerHost(registryHost)) {
@@ -1014,7 +1070,7 @@ export class DockerDatasource extends Datasource {
         return this.getDigest(
           {
             registryUrl,
-            packageName: 'library/' + packageName,
+            packageName: `library/${packageName}`,
             currentDigest,
           },
           newValue,
@@ -1056,6 +1112,7 @@ export class DockerDatasource extends Datasource {
         namespace: 'datasource-docker-digest',
         key: `${registryHost}:${dockerRepository}:${newTag}${digest}`,
         fallback: true,
+        shouldCacheResult: isNonEmptyString,
       },
       () => this._getDigest(config, newValue),
     );
@@ -1067,7 +1124,7 @@ export class DockerDatasource extends Datasource {
     let url = `https://hub.docker.com/v2/repositories/${dockerRepository}/tags?page_size=1000&ordering=last_updated`;
 
     const cache = await DockerHubCache.init(dockerRepository);
-    const maxPages = GlobalConfig.get('dockerMaxPages', 20);
+    const maxPages = GlobalConfig.get('dockerMaxPages');
     let page = 0,
       needNextPage = true;
     while (needNextPage && page < maxPages) {
@@ -1182,7 +1239,7 @@ export class DockerDatasource extends Datasource {
     const tags = releases.map((release) => release.version);
     const latestTag = tags.includes('latest')
       ? 'latest'
-      : (findLatestStable(tags) ?? tags[tags.length - 1]);
+      : (findLatestStable(tags) ?? tags.at(-1));
 
     /* v8 ignore next 3 -- TODO: add test */
     if (!latestTag) {

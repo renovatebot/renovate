@@ -53,8 +53,9 @@ import type {
 import * as yarn from './yarn.ts';
 
 // Strips empty values, deduplicates, and returns the directories from filenames
-const getDirs = (arr: (string | null | undefined)[]): string[] =>
-  Array.from(new Set(arr.filter(isString)));
+function getDirs(arr: (string | null | undefined)[]): string[] {
+  return Array.from(new Set(arr.filter(isString)));
+}
 
 export function determineLockFileDirs(
   config: PostUpdateConfig,
@@ -94,7 +95,7 @@ export function determineLockFileDirs(
   function getPackageFile(
     fileName: string,
   ): Partial<PackageFile<NpmManagerData>> {
-    logger.trace('Looking for packageFile: ' + fileName);
+    logger.trace(`Looking for packageFile: ${fileName}`);
 
     for (const packageFile of packageFiles.npm!) {
       if (packageFile.packageFile === fileName) {

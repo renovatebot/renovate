@@ -1,12 +1,12 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`modules/manager/npm/post-update/index > updateYarnBinary() > should return .yarnrc.yml content if it has been overwritten 1`] = `
+exports[`modules/manager/npm/post-update/index > updateYarnBinary() > should return .yarnrc.yml content if it has been overwritten > existing yarnrc.yml 1`] = `
 "yarnPath: .yarn/releases/yarn-3.0.2.cjs
 a: b
 "
 `;
 
-exports[`modules/manager/npm/post-update/index > updateYarnBinary() > should return .yarnrc.yml content if it has been overwritten 2`] = `
+exports[`modules/manager/npm/post-update/index > updateYarnBinary() > should return .yarnrc.yml content if it has been overwritten > updatedArtifacts 1`] = `
 [
   {
     "contents": "yarnPath: .yarn/releases/yarn-3.0.2.cjs

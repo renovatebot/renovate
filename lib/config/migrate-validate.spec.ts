@@ -52,6 +52,7 @@ describe('config/migrate-validate', () => {
         throw new Error('test error');
       });
       await expect(
+        // oxlint-disable-next-line renovate/prefer-partial-in-specs -- intentionally invalid config for error path
         migrateAndValidate(config, { invalid: 'config' } as any),
       ).rejects.toThrow('test error');
       expect(logger.logger.debug).toHaveBeenCalledTimes(2);

@@ -6,6 +6,7 @@ on:
       - opened
       - ready_for_review
       - converted_to_draft
+      - labeled
 
 jobs:
   review:
@@ -27,7 +28,10 @@ jobs:
   remove-review:
     if: >-
       !endsWith(github.event.pull_request.user.login, '[bot]') &&
-      github.event.action == 'converted_to_draft'
+      (
+        github.event.action == 'converted_to_draft' ||
+        (github.event.action == 'labeled' && github.event.label.name == 'auto:cla')
+      )
     runs-on: ubuntu-24.04
     permissions:
       pull-requests: write

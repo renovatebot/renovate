@@ -756,3 +756,25 @@
         - This is not be the intended behaviour, and is generally not recommended by Renovate maintainers. We only accept it if the packages strictly need to be updated together.
 
     It is worth both the author of the PR and the reviewer confirming that this is the intended behaviour.
+
+'auto:pr-template':
+  comment: >
+    Hi there,
+
+    We notice that the Pull Request you've created doesn't quite follow our template.
+
+    Please update the PR description to follow our template.
+
+    This improves the maintainers' time to triage, as key information is clearly indicated in the format we expect.
+
+    Thanks, the Renovate team
+
+'auto:cla':
+  comment: >
+    Hi there,
+
+    We notice that the Pull Request author hasn't yet signed [Renovate's Contributor License Agreement (CLA)](https://cla-assistant.io/renovateapp/renovate).
+
+    Because this means we can't accept the contribution until that is signed, maintainers will not review the PR.
+
+    Thanks, the Renovate team

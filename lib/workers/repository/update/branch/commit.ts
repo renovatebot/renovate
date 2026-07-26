@@ -4,12 +4,10 @@ import { GlobalConfig } from '../../../../config/global.ts';
 import { CONFIG_SECRETS_EXPOSED } from '../../../../constants/error-messages.ts';
 import { logger } from '../../../../logger/index.ts';
 import { scm } from '../../../../modules/platform/scm.ts';
-import type {
-  CommitFilesConfig,
-  LongCommitSha,
-} from '../../../../util/git/types.ts';
+import type { CommitFilesConfig } from '../../../../util/git/types.ts';
 import { minimatch } from '../../../../util/minimatch.ts';
 import { sanitize } from '../../../../util/sanitize.ts';
+import type { LongCommitSha } from '../../../../util/schema-utils/git.ts';
 import type { BranchConfig } from '../../../types.ts';
 
 export function commitFilesToBranch(
@@ -36,7 +34,7 @@ export function commitFilesToBranch(
     logger.debug(`No files to commit`);
     return Promise.resolve(null);
   }
-  const fileLength = [...new Set(updatedFiles.map((file) => file.path))].length;
+  const fileLength = new Set(updatedFiles.map((file) => file.path)).size;
   logger.debug(`${fileLength} file(s) to commit`);
   // istanbul ignore if
   if (

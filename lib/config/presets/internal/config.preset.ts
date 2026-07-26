@@ -41,6 +41,7 @@ export const presets: Record<string, Preset> = {
       'helpers:gitlabDigestChangelogs',
       'helpers:goXPackagesChangelogLink',
       'helpers:goXPackagesNameLink',
+      'helpers:renovateChangelog',
     ],
   },
   semverAllMonthly: {

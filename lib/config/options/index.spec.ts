@@ -3,6 +3,7 @@ import { join } from 'node:path';
 import { isNullOrUndefined } from '@sindresorhus/is';
 import * as manager from '../../modules/manager/index.ts';
 import * as platform from '../../modules/platform/index.ts';
+import { migrateConfig } from '../migration.ts';
 import { getOptions } from './index.ts';
 
 vi.unmock('../../modules/platform/index.ts');
@@ -145,6 +146,10 @@ describe('config/options/index', () => {
       'prBodyNotes', // prBodyNotes.map(note => template.compile(note, ...))
       'commands', // postUpgradeTasks.commands iterated and compiled
       'filePatterns', // bumpVersions.filePatterns iterated and compiled
+      'changelogUrl', // compiled via local var: template.compile(changelogUrl, ...)
+      'bumpType', // compiled via intermediate var rawBumpType
+      'matchStrings', // bumpVersions.matchStrings iterated and compiled
+      'transformTemplates', // customDatasources.transformTemplates iterated and compiled
     ];
     for (const name of indirectlyCompiled) {
       detectedOptions.add(name);
@@ -177,6 +182,24 @@ describe('config/options/index', () => {
           }
         }
       }
+    }
+  });
+
+  describe('every option with a default must not need migrating', () => {
+    const opts = getOptions();
+
+    for (const option of opts.filter((o) => o.default)) {
+      const defaultConfig = {
+        [option.name]: option.default,
+      };
+      const { isMigrated, migratedConfig } = migrateConfig(defaultConfig);
+      it(`${option.name}'s default config should not need any migrations`, () => {
+        expect(defaultConfig).toEqual(migratedConfig);
+        expect(isMigrated).toBeFalse();
+        // expect(isMigrated,
+        //   `${option.name}'s default config needs to be migrated: \n${JSON.stringify(migratedConfig, null, 2)}`
+        // ).toBeFalse()
+      });
     }
   });
 });

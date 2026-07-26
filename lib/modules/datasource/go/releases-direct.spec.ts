@@ -1,26 +1,18 @@
-import { mockDeep } from 'vitest-mock-extended';
+import { hostRules } from '~test/host-rules.ts';
 import * as httpMock from '~test/http-mock.ts';
-import * as _hostRules from '../../../util/host-rules.ts';
 import { GitTagsDatasource } from '../git-tags/index.ts';
 import { GithubTagsDatasource } from '../github-tags/index.ts';
 import { BaseGoDatasource } from './base.ts';
 import { GoDirectDatasource } from './releases-direct.ts';
 
-vi.mock('../../../util/host-rules.ts', () => mockDeep());
 vi.mock('./base.ts');
 
 const datasource = new GoDirectDatasource();
 const getDatasourceSpy = vi.spyOn(BaseGoDatasource, 'getDatasource');
-const hostRules = vi.mocked(_hostRules);
 
 describe('modules/datasource/go/releases-direct', () => {
   const gitGetTags = vi.spyOn(GitTagsDatasource.prototype, 'getReleases');
   const githubGetTags = vi.spyOn(GithubTagsDatasource.prototype, 'getReleases');
-
-  beforeEach(() => {
-    hostRules.find.mockReturnValue({});
-    hostRules.hosts.mockReturnValue([]);
-  });
 
   describe('getReleases', () => {
     it('returns null for null getDatasource result', async () => {
@@ -37,7 +29,7 @@ describe('modules/datasource/go/releases-direct', () => {
         datasource.getReleases({
           packageName: 'golang.org/foo/something',
         }),
-      ).rejects.toThrow();
+      ).rejects.toThrow('unknown');
     });
 
     it('processes real data', async () => {
@@ -231,7 +223,7 @@ describe('modules/datasource/go/releases-direct', () => {
         registryUrl: 'https://my.custom.domain',
         packageName: 'golang/myrepo',
       });
-      hostRules.find.mockReturnValue({ token: 'some-token' });
+      hostRules.add({ token: 'some-token' });
       httpMock
         .scope('https://my.custom.domain/')
         .get('/api/v4/projects/golang%2Fmyrepo/repository/tags?per_page=100')

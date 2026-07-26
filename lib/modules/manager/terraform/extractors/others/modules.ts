@@ -90,14 +90,11 @@ export class ModuleExtractor extends DependencyExtractor {
         regEx(/\.git$/),
         '',
       );
-      dep.depName = 'github.com/' + dep.packageName;
+      dep.depName = `github.com/${dep.packageName}`;
       dep.currentValue = githubRefMatch.groups.tag;
       dep.datasource = GithubTagsDatasource.id;
     } else if (bitbucketRefMatch?.groups) {
-      dep.depName =
-        bitbucketRefMatch.groups.workspace +
-        '/' +
-        bitbucketRefMatch.groups.project;
+      dep.depName = `${bitbucketRefMatch.groups.workspace}/${bitbucketRefMatch.groups.project}`;
       dep.packageName = dep.depName;
       dep.currentValue = bitbucketRefMatch.groups.tag;
       dep.datasource = BitbucketTagsDatasource.id;
@@ -110,8 +107,8 @@ export class ModuleExtractor extends DependencyExtractor {
       if (gitTagsRefMatch.groups.subfolder) {
         logger.debug('Terraform module contains subdirectory');
       }
-      dep.depName = gitTagsRefMatch.groups.path.replace('.git', '');
-      dep.packageName = gitTagsRefMatch.groups.url.replace('.git', '');
+      dep.depName = gitTagsRefMatch.groups.path.replace(regEx(/\.git$/), '');
+      dep.packageName = gitTagsRefMatch.groups.url.replace(regEx(/\.git$/), '');
       dep.currentValue = gitTagsRefMatch.groups.tag;
       dep.datasource = GitTagsDatasource.id;
     } else if (source) {

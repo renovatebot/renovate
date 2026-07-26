@@ -1,9 +1,10 @@
 import fs from 'fs-extra';
 import { glob } from 'glob';
 import { getOptions } from '../../lib/config/options/index.ts';
-import { packageCacheNamespaces } from '../../lib/util/cache/package/namespaces.ts';
+import type { UpdateType } from '../../lib/config/types.ts';
 import { regEx } from '../../lib/util/regex.ts';
 import { templateHelperNames } from '../../lib/util/template/index.ts';
+import { isMinimumReleaseAgeApplicable } from '../../lib/workers/repository/process/lookup/filter-checks.ts';
 
 const options = getOptions();
 const markdownGlob = '{docs,lib}/**/*.md';
@@ -27,10 +28,10 @@ describe('docs/documentation', () => {
     ): Promise<string[]> {
       const subHeadings = [];
       const content = await fs.readFile(`docs/usage/${file}`, 'utf8');
-      const reg = regEx(`##\\s${configOption}[\\s\\S]+?\n##\\s`);
+      const reg = regEx(`##\\s\`?${configOption}\`?[\\s\\S]+?\n##\\s`);
       const match = reg.exec(content);
       const subHeadersMatch = match?.[0]?.matchAll(
-        /\n###\s(?<child>[\w.]+)\n/g,
+        /\n###\s`?(?<child>[\w.]+)`?\n/g,
       );
       if (subHeadersMatch) {
         for (const subHeaderStr of subHeadersMatch) {
@@ -50,7 +51,10 @@ describe('docs/documentation', () => {
           .map((match) =>
             match.substring(4, match.length - 1).replace(/^`|`$/g, ''),
           )
-          .filter((header) => header !== 'managerFilePatterns');
+          .filter((header) => header !== 'managerFilePatterns')
+          .filter(
+            (header) => header !== 'Locations for configuration filenames',
+          );
       }
 
       function getRequiredConfigOptions(): string[] {
@@ -83,13 +87,20 @@ describe('docs/documentation', () => {
         );
       });
 
+      function getPostUpdateOptionsValues(): Set<string> {
+        const option = options.find((o) => o.name === 'postUpdateOptions');
+        return new Set(option?.allowedValues ?? []);
+      }
+
       async function getConfigSubHeaders(file: string): Promise<string[]> {
+        const postUpdateValues = getPostUpdateOptionsValues();
         const content = await fs.readFile(`docs/usage/${file}`, 'utf8');
         const matches = content.match(/\n### (.*?)\n/g) ?? [];
         return matches
           .map((match) =>
             match.substring(5, match.length - 1).replace(/^`|`$/g, ''),
           )
+          .filter((header) => !postUpdateValues.has(header))
           .sort();
       }
 
@@ -156,6 +167,20 @@ describe('docs/documentation', () => {
           );
         },
       );
+
+      it('has a sorted header for every postUpdateOptions value', async () => {
+        const postUpdateHeaders = await getConfigOptionSubHeaders(
+          'configuration-options.md',
+          'postUpdateOptions',
+        );
+        const postUpdateOption = options.find(
+          (o) => o.name === 'postUpdateOptions',
+        );
+        const allowedValues = [
+          ...(postUpdateOption?.allowedValues ?? []),
+        ].sort();
+        expect(postUpdateHeaders).toEqual(allowedValues);
+      });
     });
 
     describe('docs/usage/self-hosted-configuration.md', () => {
@@ -186,41 +211,6 @@ describe('docs/documentation', () => {
         expect(
           await getSelfHostedHeaders('self-hosted-configuration.md'),
         ).toEqual(getRequiredSelfHostedOptions());
-      });
-
-      function getCacheNamespacesFromDocs(file: string): string[] {
-        const content = fs.readFileSync(`docs/usage/${file}`, 'utf8');
-        const beginMarker = '<!-- cache-namespaces-begin -->';
-        const endMarker = '<!-- cache-namespaces-end -->';
-
-        const beginIndex = content.indexOf(beginMarker);
-        const endIndex = content.indexOf(endMarker);
-
-        if (beginIndex === -1 || endIndex === -1) {
-          return [];
-        }
-
-        const cacheNamespacesSection = content.substring(
-          beginIndex + beginMarker.length,
-          endIndex,
-        );
-        const matches = cacheNamespacesSection.match(/- `([^`]+)`/g) ?? [];
-
-        return matches
-          .map((match) => match.substring(3, match.length - 1))
-          .sort();
-      }
-
-      function getExpectedCacheNamespaces(): string[] {
-        return packageCacheNamespaces
-          .filter((namespace) => namespace !== '_test-namespace')
-          .sort();
-      }
-
-      it('has complete cache namespaces list', () => {
-        expect(
-          getCacheNamespacesFromDocs('self-hosted-configuration.md'),
-        ).toEqual(getExpectedCacheNamespaces());
       });
     });
 
@@ -270,6 +260,50 @@ describe('docs/documentation', () => {
         expect(additionalHandlebarsHelpers).toEqual(
           templateHelperNames.toSorted(),
         );
+      });
+    });
+
+    describe('docs/usage/key-concepts/minimum-release-age.md', () => {
+      const supportEmoji: Record<string, boolean> = {
+        '✅': true,
+        '🟡': true,
+        '❌': false,
+      };
+
+      async function getUpdateTypeSupportTable(): Promise<
+        Record<string, boolean>
+      > {
+        const content = await fs.readFile(
+          'docs/usage/key-concepts/minimum-release-age.md',
+          'utf8',
+        );
+        // RE2 (renovate's regex engine) doesn't support lookahead, so bound
+        // the section with plain index lookups instead of `(?=\n### )`.
+        const start = regEx(/### Which update types take/).exec(content)?.index;
+        let section: string | undefined;
+        if (start !== undefined) {
+          const end = content.indexOf('\n### ', start + 1);
+          section = content.slice(start, end === -1 ? undefined : end);
+        }
+        const rows =
+          section?.matchAll(
+            /^\|\s*`(?<updateType>\w+)`\s*\|\s*(?<emoji>[^\s|]+)\s*\|/gm,
+          ) ?? [];
+        const table: Record<string, boolean> = {};
+        for (const row of rows) {
+          const { updateType, emoji } = row.groups!;
+          table[updateType] = supportEmoji[emoji];
+        }
+        return table;
+      }
+
+      it('matches isMinimumReleaseAgeApplicable() for every documented update type', async () => {
+        const table = await getUpdateTypeSupportTable();
+        for (const [updateType, docsSupport] of Object.entries(table)) {
+          expect(isMinimumReleaseAgeApplicable(updateType as UpdateType)).toBe(
+            docsSupport,
+          );
+        }
       });
     });
   });

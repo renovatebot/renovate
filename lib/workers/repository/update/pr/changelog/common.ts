@@ -44,7 +44,8 @@ export function compareChangelogFilePath(a: string, b: string): number {
   const bPreferedIndex = preferedChangelogRegexList.findIndex((f) => f.test(b));
   if (aPreferedIndex === bPreferedIndex) {
     return a.localeCompare(b);
-  } else if (aPreferedIndex >= 0 && bPreferedIndex >= 0) {
+  }
+  if (aPreferedIndex >= 0 && bPreferedIndex >= 0) {
     return aPreferedIndex - bPreferedIndex;
   }
   return aPreferedIndex >= 0 ? -1 : 1;

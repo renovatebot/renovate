@@ -26,17 +26,15 @@ export async function getGoogleAuthHostRule(): Promise<HostRule | null> {
         username: 'oauth2accesstoken',
         password: accessToken,
       };
-    } else {
-      logger.warn(
-        'Could not retrieve access token using google-auth-library getAccessToken',
-      );
     }
+    logger.warn(
+      'Could not retrieve access token using google-auth-library getAccessToken',
+    );
   } catch (err) {
     if (err.message?.includes('Could not load the default credentials')) {
       return null;
-    } else {
-      throw err;
     }
+    throw err;
   }
   return null;
 }

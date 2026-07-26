@@ -61,9 +61,12 @@ describe('modules/manager/git-submodules/extract', () => {
 
     it('submodule packageName is constructed from relative path', async () => {
       const res = await extractPackageFile('', '.gitmodules.4', {});
-      expect(res?.deps).toHaveLength(1);
+      expect(res?.deps).toHaveLength(2);
       expect(res?.deps[0].packageName).toBe(
         'https://github.com/PowerShell/PowerShell-Docs',
+      );
+      expect(res?.deps[1].packageName).toBe(
+        'https://github.com/PowerShell/PowerShell-Docs-2',
       );
     });
 
@@ -77,9 +80,12 @@ describe('modules/manager/git-submodules/extract', () => {
       });
       it('when using a relative path', async () => {
         const res = await extractPackageFile('', '.gitmodules.4', {});
-        expect(res?.deps).toHaveLength(1);
+        expect(res?.deps).toHaveLength(2);
         expect(res?.deps[0].sourceUrl).toBe(
           'https://github.com/PowerShell/PowerShell-Docs',
+        );
+        expect(res?.deps[1].sourceUrl).toBe(
+          'https://github.com/PowerShell/PowerShell-Docs-2',
         );
       });
     });
@@ -132,7 +138,7 @@ describe('modules/manager/git-submodules/extract', () => {
             currentValue: 'v0.0.1',
             depName: 'deps/renovate1',
             packageName: 'https://github.com/renovatebot/renovate.git',
-            sourceUrl: 'https://github.com/renovatebot/renovate.git',
+            sourceUrl: 'https://github.com/renovatebot/renovate',
             versioning: 'semver',
           },
           {
@@ -140,14 +146,14 @@ describe('modules/manager/git-submodules/extract', () => {
             currentValue: '0.0.1',
             depName: 'deps/renovate2',
             packageName: 'https://github.com/renovatebot/renovate.git',
-            sourceUrl: 'https://github.com/renovatebot/renovate.git',
+            sourceUrl: 'https://github.com/renovatebot/renovate',
             versioning: 'semver',
           },
           {
             currentDigest: '4b825dc642cb6eb9a060e54bf8d69288fbee4904',
             currentValue: 'not-a-semver',
             packageName: 'https://github.com/renovatebot/renovate.git',
-            sourceUrl: 'https://github.com/renovatebot/renovate.git',
+            sourceUrl: 'https://github.com/renovatebot/renovate',
             depName: 'deps/renovate3',
           },
         ],

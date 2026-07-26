@@ -12,7 +12,7 @@ export function isHermit(): boolean {
 }
 
 export async function findHermitCwd(cwd: string): Promise<string> {
-  const relativeCwd = upath.relative(GlobalConfig.get('localDir', ''), cwd);
+  const relativeCwd = upath.relative(GlobalConfig.get('localDir'), cwd);
   const hermitFile = await findUpLocal('bin/hermit', relativeCwd);
 
   if (hermitFile === null) {
@@ -20,7 +20,7 @@ export async function findHermitCwd(cwd: string): Promise<string> {
   }
 
   // TODO: types (#22198)
-  return upath.join(GlobalConfig.get('localDir')!, upath.dirname(hermitFile));
+  return upath.join(GlobalConfig.get('localDir'), upath.dirname(hermitFile));
 }
 
 export async function getHermitEnvs(

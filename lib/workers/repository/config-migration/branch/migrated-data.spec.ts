@@ -131,7 +131,7 @@ describe('workers/repository/config-migration/branch/migrated-data', () => {
         'Error weaving JSONC to preserve comments, falling back to JSON.stringify',
       );
       expect(res?.content).toBe(
-        JSON.stringify(migratedConfigObj, undefined, 2) + '\n',
+        `${JSON.stringify(migratedConfigObj, undefined, 2)}\n`,
       );
     });
 
@@ -143,7 +143,7 @@ describe('workers/repository/config-migration/branch/migrated-data', () => {
 
       expect(weave).not.toHaveBeenCalled();
       expect(res?.content).toBe(
-        JSON.stringify(migratedConfigObj, undefined, 2) + '\n',
+        `${JSON.stringify(migratedConfigObj, undefined, 2)}\n`,
       );
     });
 

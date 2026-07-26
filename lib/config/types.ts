@@ -2,7 +2,11 @@ import type { Category, PlatformId } from '../constants/index.ts';
 import type { LogLevelRemap } from '../logger/types.ts';
 import type { ManagerName } from '../manager-list.generated.ts';
 import type { CustomManager } from '../modules/manager/custom/types.ts';
-import type { RepoSortMethod, SortMethod } from '../modules/platform/types.ts';
+import type {
+  GitUrlOption,
+  RepoSortMethod,
+  SortMethod,
+} from '../modules/platform/types.ts';
 import type {
   AutoMergeType,
   HostRule,
@@ -46,6 +50,7 @@ export interface GroupConfig extends Record<string, unknown> {
 }
 
 export type RecreateWhen = 'auto' | 'never' | 'always';
+export type StatusCheckWhen = 'always' | 'never' | 'failed';
 export type PlatformCommitOptions = 'auto' | 'disabled' | 'enabled';
 
 export type BinarySource = 'docker' | 'global' | 'install' | 'hermit';
@@ -73,6 +78,7 @@ export interface RenovateSharedConfig {
   automergeStrategy?: MergeStrategy;
   automergeType?: AutoMergeType;
   azureWorkItemId?: number;
+  azureWorkItemType?: string;
   branchName?: string;
   branchNameStrict?: boolean;
   branchPrefix?: string;
@@ -102,6 +108,7 @@ export interface RenovateSharedConfig {
   gitIgnoredAuthors?: string[];
   group?: GroupConfig;
   groupName?: string;
+  groupSingleUpdates?: boolean;
   groupSlug?: string;
   hashedBranchLength?: number;
   ignoreDeps?: string[];
@@ -134,7 +141,6 @@ export interface RenovateSharedConfig {
   prPriority?: number;
   prTitle?: string;
   prTitleStrict?: boolean;
-  productLinks?: Record<string, string>;
   pruneBranchAfterAutomerge?: boolean;
   rangeStrategy?: RangeStrategy;
   rebaseLabel?: string;
@@ -237,6 +243,7 @@ export interface RepoGlobalConfig extends GlobalInheritableConfig {
   cacheDir?: string;
   cacheHardTtlMinutes?: number;
   cacheTtlOverride?: Record<string, number>;
+  checkedBranches?: string[];
   containerbaseDir?: string;
   customEnvVariables?: Record<string, string>;
   dockerChildPrefix?: string;
@@ -251,7 +258,6 @@ export interface RepoGlobalConfig extends GlobalInheritableConfig {
   gitTimeout?: number;
   githubTokenWarn?: boolean;
   includeMirrors?: boolean;
-  localDir?: string;
   migratePresets?: Record<string, string>;
   platform?: PlatformId;
   prCacheSyncMaxPages?: number;
@@ -269,7 +275,16 @@ export interface RepoGlobalConfig extends GlobalInheritableConfig {
   ignorePrAuthor?: boolean;
   allowedUnsafeExecutions?: AllowedUnsafeExecution[];
   onboardingAutoCloseAge?: number;
+  productLinks?: Record<string, string>;
+  rebaseAllOpenBranches?: boolean;
   toolSettings?: ToolSettingsOptions;
+}
+
+/**
+ * Internal variables which are referenced from `GlobalConfig`, but are *not* user-configurable options.
+ */
+export interface InternalGlobalConfigOptions {
+  localDir?: string;
 }
 
 /**
@@ -318,11 +333,11 @@ export type UpdateConfig<
   T extends RenovateSharedConfig = RenovateSharedConfig,
 > = Partial<Record<UpdateType, T | null>>;
 
-export type RenovateRepository =
-  | string
-  | (RenovateConfig & {
-      repository: string;
-    });
+export type RenovateRepositoryEntry = AllConfig & {
+  repository: string;
+};
+
+export type RenovateRepository = string | RenovateRepositoryEntry;
 
 export type UseBaseBranchConfigType = 'merge' | 'none';
 export type ConstraintsFilter = 'strict' | 'none';
@@ -466,10 +481,10 @@ export interface RenovateConfig
 
   constraintsFiltering?: ConstraintsFilter;
 
-  checkedBranches?: string[];
   customizeDashboard?: Record<string, string>;
 
   statusCheckNames?: Record<StatusCheckKey, string | null>;
+  statusCheckWhen?: Partial<Record<StatusCheckKey, StatusCheckWhen>>;
   /**
    * User configured environment variables that Renovate uses when executing package manager commands
    */
@@ -506,6 +521,7 @@ export interface CustomDatasourceConfig {
  */
 export interface AllConfig
   extends RenovateConfig, GlobalOnlyConfigLegacy, RepoGlobalConfig {
+  gitUrl?: GitUrlOption;
   password?: string;
   token?: string;
   username?: string;
@@ -568,7 +584,8 @@ export type MergeStrategy =
 export type AllowedUnsafeExecution =
   | 'bazelModDeps'
   | 'goGenerate'
-  | 'gradleWrapper';
+  | 'gradleWrapper'
+  | 'mise';
 
 // TODO: Proper typings
 export interface PackageRule

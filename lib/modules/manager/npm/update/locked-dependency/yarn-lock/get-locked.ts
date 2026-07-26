@@ -11,7 +11,7 @@ export function parseEntry(depNameConstraint: string): {
   if (split.length === 2) {
     [entryName, constraint] = split;
   } else if (split.length === 3) {
-    entryName = '@' + split[1];
+    entryName = `@${split[1]}`;
     constraint = split[2];
   } else {
     logger.debug({ depNameConstraint }, 'Unexpected depNameConstraint');

@@ -1,11 +1,11 @@
-import { ZodError } from 'zod/v3';
+import { ZodError } from 'zod/v4';
 import { logger } from '../../../logger/index.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { joinUrlParts } from '../../../util/url.ts';
 import * as elmVersioning from '../../versioning/elm/index.ts';
 import { Datasource } from '../datasource.ts';
 import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
-import { ElmPackageReleasesSchema } from './schema.ts';
+import { ElmPackageReleases } from './schema.ts';
 
 export class ElmPackageDatasource extends Datasource {
   static readonly id = 'elm-package';
@@ -45,7 +45,7 @@ export class ElmPackageDatasource extends Datasource {
     );
 
     const { val: result, err } = await this.http
-      .getJsonSafe(pkgUrl, ElmPackageReleasesSchema)
+      .getJsonSafe(pkgUrl, ElmPackageReleases)
       .onError((err) => {
         logger.debug(
           {
