@@ -1454,9 +1454,9 @@ export async function prepareCommit({
       commitOptions['--no-verify'] = null;
     }
 
-    const commitMessage = isString(message) ? [message] : message
+    const commitMessage = isString(message) ? [message] : message;
     if (isNonEmptyArray(trailers)) {
-      commitMessage.push(trailers.join('\n'))
+      commitMessage.push(trailers.join('\n'));
     }
 
     const commitRes = await git.commit(commitMessage, [], commitOptions);
