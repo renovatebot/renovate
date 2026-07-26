@@ -60,7 +60,11 @@ In Go monorepos it is common for one module to depend on another in the same rep
 replace example.com/shared => ../shared
 ```
 
-When Renovate updates the shared module, running `go mod tidy` only in that module leaves dependent `go.sum` files stale. Add `gomodTidyAll` to [`postUpdateOptions`](./configuration-options.md#postupdateoptions) to make Renovate discover every `go.mod` that transitively depends on the updated module via local `replace` directives, and run `go mod tidy` on each of them in dependency order. Any `gomodTidy1.17` and `gomodTidyE` flags are applied to the dependent tidy commands as well. `gomodTidyAll` implies `gomodTidy`, so you only need one.
+When Renovate updates the shared module, running `go mod tidy` only in that module leaves the dependent `go.sum` files stale.
+Add `gomodTidyAll` to [`postUpdateOptions`](./configuration-options.md#postupdateoptions) to also tidy every `go.mod` which transitively depends on the updated module, in dependency order.
+The `gomodTidy1.17` and `gomodTidyE` flags apply to those commands as well.
+`gomodTidyAll` implies `gomodTidy`, so you only need to set one of them.
+Renovate runs these commands with `go -C`, so this option needs Go 1.20 or later.
 
 ### Module Vendoring
 

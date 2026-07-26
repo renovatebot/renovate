@@ -1,11 +1,12 @@
 import { isNonEmptyString } from '@sindresorhus/is';
 import { Graph, hasCycle } from 'graph-data-structure';
 import upath from 'upath';
-import { scm } from '../../../modules/platform/scm.ts';
+import { logger } from '../../../logger/index.ts';
 import {
   getMatchingFiles,
   resolveRelativePathToRoot,
 } from '../../../util/fs/util.ts';
+import { scm } from '../../platform/scm.ts';
 import type { ProjectFile } from './types.ts';
 import { readFileAsXmlDocument } from './util.ts';
 
@@ -22,10 +23,7 @@ export async function getDependentPackageFiles(
   isPropsFile = false,
   isGlobalJson = false,
 ): Promise<ProjectFile[]> {
-  const packageFiles = getMatchingFiles(
-    '*.{cs,vb,fs}proj',
-    await scm.getFileList(),
-  );
+  const packageFiles = await getAllPackageFiles();
   const graph = new Graph();
 
   if (isPropsFile) {
@@ -61,14 +59,21 @@ export async function getDependentPackageFiles(
       continue;
     }
 
-    const projectReferences = doc
+    const projectReferenceAttributes = doc
       .childrenNamed('ItemGroup')
-      .flatMap((ig) => ig.childrenNamed('ProjectReference'))
+      .map((ig) => ig.childrenNamed('ProjectReference'))
+      .flat()
       .map((pf) => pf.attr.Include)
-      .filter(isNonEmptyString)
-      .map((a) => resolveRelativePathToRoot(f, upath.normalize(a)));
+      .filter(isNonEmptyString);
 
-    for (const ref of projectReferences) {
+    const projectReferences = projectReferenceAttributes.map((a) =>
+      upath.normalize(a),
+    );
+    const normalizedRelativeProjectReferences = projectReferences.map((r) =>
+      resolveRelativePathToRoot(f, r),
+    );
+
+    for (const ref of normalizedRelativeProjectReferences) {
       graph.addEdge(ref, f);
     }
 
@@ -77,36 +82,53 @@ export async function getDependentPackageFiles(
     }
   }
 
-  const visited = new Map<string, boolean>();
-  collectDependents(packageFileName, graph, visited);
+  const deps = new Map<string, boolean>();
+  recursivelyGetDependentPackageFiles(packageFileName, graph, deps);
 
   if (isPropsFile || isGlobalJson) {
     // remove props file, as we don't need it
-    visited.delete(packageFileName);
+    deps.delete(packageFileName);
   }
 
-  return Array.from(visited).map(([name, isLeaf]) => ({ name, isLeaf }));
+  // deduplicate
+  return Array.from(deps).map(([name, isLeaf]) => ({ name, isLeaf }));
 }
 
 /**
- * Pre-order DFS, marking each visited node with isLeaf=true when it has
- * no further dependents.
+ * Traverse graph and find dependent package files at any level of ancestry
  */
-function collectDependents(
-  node: string,
+function recursivelyGetDependentPackageFiles(
+  packageFileName: string,
   graph: Graph,
-  visited: Map<string, boolean>,
+  deps: Map<string, boolean>,
 ): void {
-  if (visited.has(node)) {
+  if (deps.has(packageFileName)) {
+    // we have already visited this package file
     return;
   }
-  const dependents = graph.adjacent(node);
+
+  const dependents = graph.adjacent(packageFileName);
+
   if (!dependents || dependents.size === 0) {
-    visited.set(node, true);
+    deps.set(packageFileName, true);
     return;
   }
-  visited.set(node, false);
-  for (const dependent of dependents) {
-    collectDependents(dependent, graph, visited);
+
+  deps.set(packageFileName, false);
+
+  for (const dep of dependents) {
+    recursivelyGetDependentPackageFiles(dep, graph, deps);
   }
+}
+
+/**
+ * Get a list of package files in localDir
+ */
+async function getAllPackageFiles(): Promise<string[]> {
+  const allFiles = await scm.getFileList();
+  const filteredPackageFiles = getMatchingFiles('*.{cs,vb,fs}proj', allFiles);
+
+  logger.trace({ filteredPackageFiles }, 'Found package files');
+
+  return filteredPackageFiles;
 }

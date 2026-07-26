@@ -1,102 +1,83 @@
 import { Graph, depthFirstSearch, topologicalSort } from 'graph-data-structure';
 import upath from 'upath';
-import { scm } from '../../../modules/platform/scm.ts';
 import { readLocalFile } from '../../../util/fs/index.ts';
 import {
   getMatchingFiles,
   resolveRelativePathToRoot,
 } from '../../../util/fs/util.ts';
 import { regEx } from '../../../util/regex.ts';
+import { scm } from '../../platform/scm.ts';
 
-export interface ReplaceDirective {
-  oldPath: string;
-  newPath: string;
-}
-
-// `[^\S\n]` is horizontal whitespace; avoids matches crossing line boundaries.
-const singleLineReplace = regEx(
-  /^replace[^\S\n]+(?<oldPath>\S+)(?:[^\S\n]+\S+)?[^\S\n]+=>[^\S\n]+(?<newPath>\S+)(?:[^\S\n]+\S+)?$/gm,
-);
-const blockReplace = regEx(/^replace\s*\((?<body>[^)]*)\)/gm);
-const blockReplaceLine = regEx(
-  /(?<oldPath>\S+)(?:[^\S\n]+\S+)?[^\S\n]+=>[^\S\n]+(?<newPath>\S+)/g,
+// `[^\S\n]` is horizontal whitespace, so a match never crosses a line boundary.
+// `[^\s/]` rules out comment lines, and lets this match the single line form as
+// well as the lines inside a `replace (...)` block.
+const localReplace = regEx(
+  /^[^\S\n]*(?:replace[^\S\n]+)?[^\s/]\S*(?:[^\S\n]+\S+)?[^\S\n]+=>[^\S\n]+(?<localPath>\.{1,2}\/\S+)/gm,
 );
 
 /**
- * Parse local replace directives. Only returns entries whose replacement is a
- * local path (`./foo` or `../foo`).
+ * Get the target paths of all `replace` directives which point to a local directory.
  */
-export function parseReplaceDirectives(content: string): ReplaceDirective[] {
-  const directives: ReplaceDirective[] = [];
-
-  function push(match: RegExpMatchArray): void {
-    const { oldPath, newPath } = match.groups!;
-    if (newPath.startsWith('./') || newPath.startsWith('../')) {
-      directives.push({ oldPath, newPath });
-    }
-  }
-
-  for (const match of content.matchAll(singleLineReplace)) {
-    push(match);
-  }
-
-  for (const block of content.matchAll(blockReplace)) {
-    for (const match of block.groups!.body.matchAll(blockReplaceLine)) {
-      push(match);
-    }
-  }
-
-  return directives;
+export function parseLocalReplacePaths(content: string): string[] {
+  return Array.from(
+    content.matchAll(localReplace),
+    (match) => match.groups!.localPath,
+  );
 }
 
 /**
- * Build a dependency graph of all `go.mod` files based on local replace
- * directives. Edge direction is `dependency -> dependent`, matching the NuGet
- * convention so `graph.adjacent(X)` returns modules that depend on `X`.
+ * Build a graph of all `go.mod` files based on their local `replace` directives.
+ * Edges point from a module to the modules which depend on it, so
+ * `graph.adjacent(x)` returns the dependents of `x`.
  */
-export async function buildGoModDependencyGraph(): Promise<Graph> {
+async function buildDependencyGraph(): Promise<Graph> {
   const graph = new Graph();
-  const files = getMatchingFiles('go.mod', await scm.getFileList());
-  const known = new Set(files);
-  for (const f of files) {
+  const goModFiles = getMatchingFiles('go.mod', await scm.getFileList());
+  const known = new Set(goModFiles);
+
+  for (const f of goModFiles) {
     graph.addNode(f);
   }
 
-  for (const f of files) {
+  for (const f of goModFiles) {
     const content = await readLocalFile(f, 'utf8');
     if (!content) {
       continue;
     }
-    for (const { newPath } of parseReplaceDirectives(content)) {
-      const dep = upath.join(resolveRelativePathToRoot(f, newPath), 'go.mod');
-      if (known.has(dep)) {
-        graph.addEdge(dep, f);
+
+    for (const localPath of parseLocalReplacePaths(content)) {
+      const dependency = upath.join(
+        resolveRelativePathToRoot(f, localPath),
+        'go.mod',
+      );
+      if (known.has(dependency)) {
+        graph.addEdge(dependency, f);
       }
     }
   }
+
   return graph;
 }
 
 /**
- * All `go.mod` files that transitively depend on `target`, in topological
- * order (dependencies before dependents). Excludes `target` itself. Returns
- * an empty array if `target` has no known dependents.
+ * Get all `go.mod` files which transitively depend on `packageFileName`, ordered
+ * so that a module always comes before the modules which depend on it.
+ * The given `packageFileName` is not included.
  */
 export async function getGoModulesInTidyOrder(
-  target: string,
+  packageFileName: string,
 ): Promise<string[]> {
-  const graph = await buildGoModDependencyGraph();
-  if (!graph.adjacent(target)) {
+  const graph = await buildDependencyGraph();
+  if (!graph.adjacent(packageFileName)) {
     return [];
   }
+
   const dependents = new Set(
     depthFirstSearch(graph, {
-      sourceNodes: [target],
+      sourceNodes: [packageFileName],
       includeSourceNodes: false,
     }),
   );
-  if (dependents.size === 0) {
-    return [];
-  }
-  return topologicalSort(graph).filter((n) => dependents.has(n));
+
+  return topologicalSort(graph).filter((f) => dependents.has(f));
 }
