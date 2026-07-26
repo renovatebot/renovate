@@ -66,6 +66,11 @@ The `gomodTidy1.17` and `gomodTidyE` flags apply to those commands as well.
 `gomodTidyAll` implies `gomodTidy`, so you only need to set one of them.
 Renovate runs these commands with `go -C`, so this option needs Go 1.20 or later.
 
+Avoid combining `gomodTidyAll` with `gomodMassage`.
+Massaging comments out the relative `replace` directives that `gomodTidyAll` follows, so the two options work against each other.
+Massaging only rewrites the `go.mod` of the updated module, and Go ignores `replace` directives outside the main module, so the tidy commands for the dependent modules still behave correctly.
+But if the updated module itself uses a relative `replace`, then massaging removes that directive and `go mod tidy` fails for that module.
+
 ### Module Vendoring
 
 Vendoring of Go Modules is done automatically if `vendor/modules.txt` is present.
