@@ -4,13 +4,17 @@ import { mockDeep } from 'vitest-mock-extended';
 import { envMock, mockExecAll } from '~test/exec-util.ts';
 import { env, fs, git, partial } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
-import type { RepoGlobalConfig } from '../../../config/types.ts';
+import type {
+  InternalGlobalConfigOptions,
+  RepoGlobalConfig,
+} from '../../../config/types.ts';
 import * as docker from '../../../util/exec/docker/index.ts';
 import type { StatusResult } from '../../../util/git/types.ts';
 import * as hostRules from '../../../util/host-rules.ts';
+import * as _datasource from '../../datasource/index.ts';
 import type { UpdateArtifactsConfig } from '../types.ts';
 import * as gomod from './index.ts';
-import { getGoModulesInTidyOrder } from './package-tree.ts';
+import * as _packageTree from './package-tree.ts';
 
 type FS = typeof import('../../../util/fs/index.ts');
 
@@ -26,7 +30,8 @@ vi.mock('../../datasource/index.ts', () => mockDeep());
 vi.mock('./artifacts-extra.ts', () => mockDeep());
 vi.mock('./package-tree.ts', () => ({ getGoModulesInTidyOrder: vi.fn() }));
 
-const mockedDepends = vi.mocked(getGoModulesInTidyOrder);
+const datasource = vi.mocked(_datasource);
+const packageTree = vi.mocked(_packageTree);
 
 process.env.CONTAINERBASE = 'true';
 
@@ -38,7 +43,7 @@ const gomod1 = codeBlock`
   replace github.com/pkg/errors => ../errors
 `;
 
-const adminConfig: RepoGlobalConfig = {
+const adminConfig: RepoGlobalConfig & InternalGlobalConfigOptions = {
   localDir: upath.join('/tmp/github/some/repo'),
   cacheDir: upath.join('/tmp/renovate/cache'),
   containerbaseDir: upath.join('/tmp/renovate/cache/containerbase'),
@@ -71,7 +76,9 @@ describe('modules/manager/gomod/artifacts-gomodtidyall', () => {
     GlobalConfig.set(adminConfig);
     docker.resetPrefetchedImages();
     hostRules.clear();
-    mockedDepends.mockReset();
+    datasource.getPkgReleases.mockResolvedValue({
+      releases: [{ version: '1.21.0' }],
+    });
     fs.findLocalSiblingOrParent.mockResolvedValueOnce('vendor');
     fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
     fs.readLocalFile.mockResolvedValueOnce(null); // vendor modules.txt
@@ -79,7 +86,10 @@ describe('modules/manager/gomod/artifacts-gomodtidyall', () => {
 
   it('emits subshell tidy commands with correct relative dirs, tidyOpts, and returns dependent sum files', async () => {
     const execSnapshots = mockExecAll();
-    mockedDepends.mockResolvedValueOnce(['api/go.mod', 'cmd/go.mod']);
+    packageTree.getGoModulesInTidyOrder.mockResolvedValueOnce([
+      'api/go.mod',
+      'cmd/go.mod',
+    ]);
     git.getRepoStatus.mockResolvedValueOnce(
       partial<StatusResult>({
         modified: ['shared/go.sum', 'api/go.sum', 'cmd/go.sum'],
@@ -124,7 +134,7 @@ describe('modules/manager/gomod/artifacts-gomodtidyall', () => {
 
   it('implies primary tidy when only gomodTidyAll is set', async () => {
     const execSnapshots = mockExecAll();
-    mockedDepends.mockResolvedValueOnce(['api/go.mod']);
+    packageTree.getGoModulesInTidyOrder.mockResolvedValueOnce(['api/go.mod']);
     git.getRepoStatus.mockResolvedValueOnce(
       partial<StatusResult>({ modified: ['go.sum', 'api/go.sum'] }),
     );
@@ -149,7 +159,7 @@ describe('modules/manager/gomod/artifacts-gomodtidyall', () => {
 
   it('collects updated dependent go.mod when only that file changed', async () => {
     mockExecAll();
-    mockedDepends.mockResolvedValueOnce(['api/go.mod']);
+    packageTree.getGoModulesInTidyOrder.mockResolvedValueOnce(['api/go.mod']);
     git.getRepoStatus.mockResolvedValueOnce(
       partial<StatusResult>({ modified: ['api/go.mod'] }),
     );
@@ -174,7 +184,7 @@ describe('modules/manager/gomod/artifacts-gomodtidyall', () => {
 
   it('is a no-op when no dependents are found', async () => {
     mockExecAll();
-    mockedDepends.mockResolvedValueOnce([]);
+    packageTree.getGoModulesInTidyOrder.mockResolvedValueOnce([]);
     git.getRepoStatus.mockResolvedValueOnce(
       partial<StatusResult>({ modified: ['go.sum'] }),
     );
@@ -194,7 +204,9 @@ describe('modules/manager/gomod/artifacts-gomodtidyall', () => {
 
   it('continues when dependent-module resolution throws', async () => {
     mockExecAll();
-    mockedDepends.mockRejectedValueOnce(new Error('graph build failed'));
+    packageTree.getGoModulesInTidyOrder.mockRejectedValueOnce(
+      new Error('graph build failed'),
+    );
     git.getRepoStatus.mockResolvedValueOnce(
       partial<StatusResult>({ modified: ['go.sum'] }),
     );
@@ -227,6 +239,6 @@ describe('modules/manager/gomod/artifacts-gomodtidyall', () => {
       config: baseConfig({ postUpdateOptions: ['gomodTidy'] }),
     });
 
-    expect(mockedDepends).not.toHaveBeenCalled();
+    expect(packageTree.getGoModulesInTidyOrder).not.toHaveBeenCalled();
   });
 });

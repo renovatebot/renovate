@@ -8,8 +8,6 @@ import { minimatchFilter } from '../minimatch.ts';
  * Take a relative path reference from a repo-relative file and resolve it
  * to a repo-relative path. Uses a virtual root to avoid upath.resolve
  * prepending the real cwd for relative paths.
- *
- * Shared between NuGet (ProjectReference) and Go (replace directive) managers.
  */
 export function resolveRelativePathToRoot(
   baseFilePath: string,
@@ -26,7 +24,6 @@ export function resolveRelativePathToRoot(
 
 /**
  * Filter a list of repo-relative file paths by a minimatch pattern.
- * Shared between managers for building dependency graphs from specific file types.
  */
 export function getMatchingFiles(
   pattern: string,

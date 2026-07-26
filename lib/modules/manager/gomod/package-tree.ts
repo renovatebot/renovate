@@ -1,11 +1,11 @@
 import { Graph, depthFirstSearch, topologicalSort } from 'graph-data-structure';
 import upath from 'upath';
 import { scm } from '../../../modules/platform/scm.ts';
+import { readLocalFile } from '../../../util/fs/index.ts';
 import {
   getMatchingFiles,
-  readLocalFile,
   resolveRelativePathToRoot,
-} from '../../../util/fs/index.ts';
+} from '../../../util/fs/util.ts';
 import { regEx } from '../../../util/regex.ts';
 
 export interface ReplaceDirective {
@@ -15,10 +15,12 @@ export interface ReplaceDirective {
 
 // `[^\S\n]` is horizontal whitespace; avoids matches crossing line boundaries.
 const singleLineReplace = regEx(
-  /^replace[^\S\n]+(\S+)(?:[^\S\n]+\S+)?[^\S\n]+=>[^\S\n]+(\S+)(?:[^\S\n]+\S+)?$/gm,
+  /^replace[^\S\n]+(?<oldPath>\S+)(?:[^\S\n]+\S+)?[^\S\n]+=>[^\S\n]+(?<newPath>\S+)(?:[^\S\n]+\S+)?$/gm,
 );
-const blockReplace = regEx(/^replace\s*\(([^)]*)\)/gm);
-const blockReplaceLine = regEx(/(\S+)(?:[^\S\n]+\S+)?[^\S\n]+=>[^\S\n]+(\S+)/g);
+const blockReplace = regEx(/^replace\s*\((?<body>[^)]*)\)/gm);
+const blockReplaceLine = regEx(
+  /(?<oldPath>\S+)(?:[^\S\n]+\S+)?[^\S\n]+=>[^\S\n]+(?<newPath>\S+)/g,
+);
 
 /**
  * Parse local replace directives. Only returns entries whose replacement is a
@@ -26,27 +28,24 @@ const blockReplaceLine = regEx(/(\S+)(?:[^\S\n]+\S+)?[^\S\n]+=>[^\S\n]+(\S+)/g);
  */
 export function parseReplaceDirectives(content: string): ReplaceDirective[] {
   const directives: ReplaceDirective[] = [];
-  const push = (m: RegExpExecArray): void => {
-    const [, oldPath, newPath] = m;
+
+  function push(match: RegExpMatchArray): void {
+    const { oldPath, newPath } = match.groups!;
     if (newPath.startsWith('./') || newPath.startsWith('../')) {
       directives.push({ oldPath, newPath });
     }
-  };
-
-  singleLineReplace.lastIndex = 0;
-  let m: RegExpExecArray | null;
-  while ((m = singleLineReplace.exec(content)) !== null) {
-    push(m);
   }
 
-  blockReplace.lastIndex = 0;
-  let b: RegExpExecArray | null;
-  while ((b = blockReplace.exec(content)) !== null) {
-    blockReplaceLine.lastIndex = 0;
-    while ((m = blockReplaceLine.exec(b[1])) !== null) {
-      push(m);
+  for (const match of content.matchAll(singleLineReplace)) {
+    push(match);
+  }
+
+  for (const block of content.matchAll(blockReplace)) {
+    for (const match of block.groups!.body.matchAll(blockReplaceLine)) {
+      push(match);
     }
   }
+
   return directives;
 }
 

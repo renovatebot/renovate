@@ -5,7 +5,7 @@ import { scm } from '../../../modules/platform/scm.ts';
 import {
   getMatchingFiles,
   resolveRelativePathToRoot,
-} from '../../../util/fs/index.ts';
+} from '../../../util/fs/util.ts';
 import type { ProjectFile } from './types.ts';
 import { readFileAsXmlDocument } from './util.ts';
 

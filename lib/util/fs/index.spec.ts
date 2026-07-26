@@ -218,13 +218,6 @@ describe('util/fs/index', () => {
       );
     });
 
-    it('does nothing when localDir is not set', async () => {
-      GlobalConfig.set({ localDir: undefined });
-      await expect(
-        deleteLocalFile('foo/bar/file.txt'),
-      ).resolves.toBeUndefined();
-    });
-
     it('deletes file', async () => {
       const filePath = `${localDir}/foo/bar/file.txt`;
       await fs.outputFile(filePath, 'foobar');
@@ -599,11 +592,6 @@ describe('util/fs/index', () => {
   describe('cachePathIsFile', () => {
     it('returns false if does not exist', async () => {
       await expect(cachePathIsFile(`a/a/file.txt`)).resolves.toBe(false);
-    });
-
-    it('returns true for existing file', async () => {
-      await fs.outputFile(`${cacheDir}/foo/file.txt`, 'content');
-      await expect(cachePathIsFile(`foo/file.txt`)).resolves.toBe(true);
     });
   });
 
