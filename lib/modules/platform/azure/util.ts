@@ -14,6 +14,7 @@ import type { HostRule, PrState } from '../../../types/index.ts';
 import { isProbablyJwt } from '../../../util/http/jwt.ts';
 import { addSecretForSanitizing } from '../../../util/sanitize.ts';
 import { toBase64 } from '../../../util/string.ts';
+import { parseUrl } from '../../../util/url.ts';
 import { getPrBodyStruct } from '../pr-body.ts';
 import type { AzurePr } from './types.ts';
 
@@ -212,4 +213,21 @@ export function getWorkItemTitle(rawTitle: string, repository: string): string {
     return `[${repoName}] ${rawTitle}`;
   }
   return rawTitle;
+}
+
+export function encodeUrlPathSegments(inputUrl: string): string {
+  // Parsing the URL is not enough. URL doesn't encode
+  // every reserved character.
+  const url: URL | null = parseUrl(inputUrl);
+  if (!url) {
+    return inputUrl;
+  }
+
+  // Decode each segment, re-encode it and join them together.
+  url.pathname = url.pathname
+    .split('/')
+    .map((segment) => encodeURIComponent(decodeURIComponent(segment)))
+    .join('/');
+
+  return url.toString();
 }
