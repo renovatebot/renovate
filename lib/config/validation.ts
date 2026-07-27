@@ -21,6 +21,7 @@ import type { HostRule } from '../types/index.ts';
 import { packageCacheNamespaces } from '../util/cache/package/namespaces.ts';
 import { getToolConfig } from '../util/exec/containerbase.ts';
 import { isConstraintName, isToolName } from '../util/exec/types.ts';
+import { isValidCommitTrailer } from '../util/git/commit-trailers.ts';
 import { getExpression } from '../util/jsonata.ts';
 import { regEx } from '../util/regex.ts';
 import {
@@ -445,6 +446,19 @@ export async function validateConfig(
                       errors.push({
                         topic: 'Configuration Error',
                         message: `${currentPath}: preset value is not a string`,
+                      });
+                    }
+                  }
+                }
+
+                if (key === 'commitTrailers') {
+                  for (const subval of val) {
+                    if (!isValidCommitTrailer(subval)) {
+                      errors.push({
+                        topic: 'Configuration Error',
+                        message: `Invalid commit trailer: \`${JSON.stringify(
+                          subval,
+                        )}\`. Must be a single-line string in the form \`Key: value\`, where the key contains only letters, digits and \`-\`.`,
                       });
                     }
                   }
