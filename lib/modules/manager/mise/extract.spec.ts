@@ -430,6 +430,93 @@ describe('modules/manager/mise/extract', () => {
       });
     });
 
+    it('extracts the dotnet core tool', async () => {
+      const content = codeBlock`
+      [tools]
+      dotnet = "10.0.301"
+    `;
+      const result = await extractPackageFile(content, miseFilename);
+      expect(result).toMatchObject({
+        deps: [
+          {
+            depName: 'dotnet',
+            currentValue: '10.0.301',
+            datasource: 'dotnet-version',
+            packageName: 'dotnet-sdk',
+          },
+        ],
+      });
+    });
+
+    it('extracts only the primary entry from a dotnet mixed sdk/runtime array', async () => {
+      const content = codeBlock`
+      [tools]
+      dotnet = [{ version = "8.0.14", runtime = "dotnet" }, { version = "10.0.301" }]
+    `;
+      const result = await extractPackageFile(content, miseFilename);
+      expect(result).toMatchObject({
+        deps: [
+          {
+            depName: 'dotnet',
+            currentValue: '8.0.14',
+            datasource: 'dotnet-version',
+            packageName: 'dotnet-runtime',
+          },
+        ],
+      });
+      expect(result?.deps).toHaveLength(1);
+    });
+
+    it('extracts dotnet with a runtime option', async () => {
+      const content = codeBlock`
+      [tools]
+      dotnet = { version = "8.0.14", runtime = "dotnet" }
+    `;
+      const result = await extractPackageFile(content, miseFilename);
+      expect(result).toMatchObject({
+        deps: [
+          {
+            depName: 'dotnet',
+            currentValue: '8.0.14',
+            datasource: 'dotnet-version',
+            packageName: 'dotnet-runtime',
+          },
+        ],
+      });
+    });
+
+    it('skips dotnet with an unsupported runtime', async () => {
+      const content = codeBlock`
+      [tools]
+      dotnet = [{ version = "9.0.0", runtime = "aspnetcore" }]
+    `;
+      const result = await extractPackageFile(content, miseFilename);
+      expect(result).toMatchObject({
+        deps: [
+          {
+            depName: 'dotnet',
+            skipReason: 'unsupported-datasource',
+          },
+        ],
+      });
+    });
+
+    it('skips array entries without a version', async () => {
+      const content = codeBlock`
+      [tools]
+      dotnet = [{ runtime = "dotnet" }]
+    `;
+      const result = await extractPackageFile(content, miseFilename);
+      expect(result).toMatchObject({
+        deps: [
+          {
+            depName: 'dotnet',
+            skipReason: 'unspecified-version',
+          },
+        ],
+      });
+    });
+
     it('extracts tools with plugin options', async () => {
       const content = codeBlock`
       [tools]
@@ -1291,6 +1378,25 @@ describe('modules/manager/mise/extract', () => {
         depName: 'python',
         currentValue: '3.10',
         lockedVersion: '3.10.17',
+      });
+    });
+
+    it('extracts lockedVersion for the dotnet core tool', async () => {
+      const dotnetLockFileContent = codeBlock`
+        [[tools.dotnet]]
+        version = "10.0.301"
+        backend = "core:dotnet"
+      `;
+      fs.readLocalFile.mockResolvedValueOnce(dotnetLockFileContent);
+      const content = codeBlock`
+        [tools]
+        dotnet = "10.0.301"
+      `;
+      const result = await extractPackageFile(content, 'mise.toml');
+      expect(result?.deps[0]).toMatchObject({
+        depName: 'dotnet',
+        currentValue: '10.0.301',
+        lockedVersion: '10.0.301',
       });
     });
 

@@ -13,15 +13,19 @@ const MiseToolOptions = z.object({
   tag_regex: z.string().optional(),
   // github backend only
   version_prefix: z.string().optional(),
+  // dotnet core tool only
+  runtime: z.string().optional(),
 });
 export type MiseToolOptions = z.infer<typeof MiseToolOptions>;
 
+const MiseToolEntry = MiseToolOptions.extend({
+  version: z.string().optional(),
+});
+
 const MiseTool = z.union([
   z.string(),
-  MiseToolOptions.extend({
-    version: z.string().optional(),
-  }),
-  z.array(z.string()),
+  MiseToolEntry,
+  z.array(z.union([z.string(), MiseToolEntry])),
 ]);
 export type MiseTool = z.infer<typeof MiseTool>;
 

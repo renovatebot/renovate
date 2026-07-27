@@ -1,10 +1,8 @@
 import {
   isArray,
   isFunction,
-  isNonEmptyObject,
   isNonEmptyString,
   isObject,
-  isString,
 } from '@sindresorhus/is';
 import { logger } from '../../../logger/index.ts';
 import { readLocalFile } from '../../../util/fs/index.ts';
@@ -100,21 +98,34 @@ export async function extractPackageFile(
   return result;
 }
 
-function parseVersion(toolData: MiseTool): string | null {
+interface ToolVersionSpec {
+  version: string;
+  options: MiseToolOptions;
+}
+
+function parseVersion(toolData: MiseTool): ToolVersionSpec | null {
   if (isNonEmptyString(toolData)) {
     // Handle the string case
     // e.g. 'erlang = "23.3"'
-    return toolData;
+    return { version: toolData, options: {} };
   }
-  if (isArray(toolData, isString)) {
-    // Handle the array case
-    // e.g. 'erlang = ["23.3", "24.0"]'
-    return toolData.length ? toolData[0] : null; // Get the first version in the array
+  if (isArray(toolData)) {
+    // Handle the array case, only the first (primary) version is used
+    // e.g. 'erlang = ["23.3", "24.0"]' -> "23.3"
+    // or 'dotnet = [{ version = "8.0.14", runtime = "dotnet" }, { version = "10.0.301" }]' -> "8.0.14"
+    const first = toolData.length ? toolData[0] : undefined;
+    if (isNonEmptyString(first)) {
+      return { version: first, options: {} };
+    }
+    if (isObject(first) && isNonEmptyString(first.version)) {
+      return { version: first.version, options: first };
+    }
+    return null;
   }
   if (isObject(toolData) && isNonEmptyString(toolData.version)) {
     // Handle the object case with a string version
     // e.g. 'python = { version = "3.11.2" }'
-    return toolData.version;
+    return { version: toolData.version, options: toolData };
   }
   return null; // Return null if no version is found
 }
@@ -144,7 +155,11 @@ function getToolConfig(
   switch (backend) {
     case '': {
       // If the tool name does not specify a backend, it should be a short name or an alias defined by users
-      const staticResult = getRegistryToolConfig(toolName, version);
+      const staticResult = getRegistryToolConfig(
+        toolName,
+        version,
+        toolOptions,
+      );
       if (staticResult) {
         return staticResult;
       }
@@ -183,14 +198,14 @@ function getToolConfig(
     // We can specify core, asdf, vfox, aqua backends for tools in the default registry
     // e.g. 'core:rust', 'asdf:rust', 'vfox:clang', 'aqua:act'
     case 'core':
-      return getConfigFromTooling(miseTooling, toolName, version);
+      return getConfigFromTooling(miseTooling, toolName, version, toolOptions);
     case 'asdf':
-      return getConfigFromTooling(asdfTooling, toolName, version);
+      return getConfigFromTooling(asdfTooling, toolName, version, toolOptions);
     case 'vfox':
-      return getRegistryToolConfig(toolName, version);
+      return getRegistryToolConfig(toolName, version, toolOptions);
     case 'aqua':
       return (
-        getRegistryToolConfig(toolName, version) ??
+        getRegistryToolConfig(toolName, version, toolOptions) ??
         createAquaToolConfig(toolName, version)
       );
     case 'cargo':
@@ -224,11 +239,12 @@ function getToolConfig(
 function getRegistryToolConfig(
   short: string,
   version: string,
+  toolOptions: MiseToolOptions,
 ): StaticTooling | null {
   // Try to get the config from miseTooling first, then asdfTooling
   return (
-    getConfigFromTooling(miseTooling, short, version) ??
-    getConfigFromTooling(asdfTooling, short, version)
+    getConfigFromTooling(miseTooling, short, version, toolOptions) ??
+    getConfigFromTooling(asdfTooling, short, version, toolOptions)
   );
 }
 
@@ -236,6 +252,7 @@ function getConfigFromTooling(
   toolingSource: Record<string, ToolingDefinition>,
   name: string,
   version: string,
+  toolOptions: MiseToolOptions,
 ): StaticTooling | null {
   const toolDefinition = toolingSource[name];
   if (!toolDefinition) {
@@ -244,28 +261,25 @@ function getConfigFromTooling(
 
   return (
     (isFunction(toolDefinition.config)
-      ? toolDefinition.config(version)
+      ? toolDefinition.config(version, toolOptions)
       : toolDefinition.config) ?? null
   ); // Ensure null is returned instead of undefined
 }
 
 function extractToolEntry(name: string, toolData: MiseTool): PackageDependency {
-  const version = parseVersion(toolData);
   const { name: depName, options: optionsInName } = optionInToolNameRegex.exec(
     name.trim(),
   )!.groups!;
   const delimiterIndex = depName.indexOf(':');
   const backend = depName.substring(0, delimiterIndex);
   const toolName = depName.substring(delimiterIndex + 1);
-  const options = parseOptions(
-    optionsInName,
-    isNonEmptyObject(toolData) ? toolData : {},
-  );
-  const toolConfig =
-    version === null
-      ? null
-      : getToolConfig(backend, toolName, version, options);
-  return createDependency(depName, version, toolConfig);
+  const spec = parseVersion(toolData);
+  if (!spec) {
+    return createDependency(depName, null, null);
+  }
+  const options = parseOptions(optionsInName, spec.options);
+  const toolConfig = getToolConfig(backend, toolName, spec.version, options);
+  return createDependency(depName, spec.version, toolConfig);
 }
 
 function createDependency(

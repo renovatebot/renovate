@@ -1,5 +1,6 @@
 import miseRegistry from '../../../data/mise-registry.json' with { type: 'json' };
 import { regEx } from '../../../util/regex.ts';
+import { DotnetVersionDatasource } from '../../datasource/dotnet-version/index.ts';
 import { GithubReleasesDatasource } from '../../datasource/github-releases/index.ts';
 import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
 import { HexpmBobDatasource } from '../../datasource/hexpm-bob/index.ts';
@@ -10,13 +11,19 @@ import { RubyVersionDatasource } from '../../datasource/ruby-version/index.ts';
 import * as regexVersioning from '../../versioning/regex/index.ts';
 import * as semverVersioning from '../../versioning/semver/index.ts';
 import * as semverPartialVersioning from '../../versioning/semver-partial/index.ts';
-import type { ToolingConfig } from '../asdf/upgradeable-tooling.ts';
+import type { StaticTooling } from '../asdf/upgradeable-tooling.ts';
 import { upgradeableTooling } from '../asdf/upgradeable-tooling.ts';
+import type { MiseToolOptions } from './schema.ts';
 import { MiseRegistryJson } from './schema.ts';
 import type { MiseRegistryData } from './types.ts';
 
 export interface ToolingDefinition {
-  config: ToolingConfig;
+  config:
+    | StaticTooling
+    | ((
+        version: string,
+        options: MiseToolOptions,
+      ) => StaticTooling | undefined);
   misePluginUrl?: string;
 }
 
@@ -44,6 +51,28 @@ const miseCoreTooling: Record<string, ToolingDefinition> = {
       packageName: 'denoland/deno',
       datasource: GithubReleasesDatasource.id,
       extractVersion: '^v(?<version>\\S+)',
+    },
+  },
+  dotnet: {
+    misePluginUrl: 'https://mise.jdx.dev/lang/dotnet.html',
+    config: (_version, options) => {
+      // A plain version installs the .NET SDK.
+      // `runtime = "dotnet"` installs the .NET runtime for that version instead.
+      // https://mise.jdx.dev/lang/dotnet.html#example-mix-sdk-and-runtime
+      if (!options.runtime) {
+        return {
+          packageName: 'dotnet-sdk',
+          datasource: DotnetVersionDatasource.id,
+        };
+      }
+      if (options.runtime === 'dotnet') {
+        return {
+          packageName: 'dotnet-runtime',
+          datasource: DotnetVersionDatasource.id,
+        };
+      }
+      // Other runtimes (e.g. "aspnetcore") have no matching datasource
+      return undefined;
     },
   },
   elixir: {
