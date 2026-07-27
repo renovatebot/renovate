@@ -512,9 +512,6 @@ Then in a repository's `renovate.json`:
 }
 ```
 
-Custom presets may only contain repository configuration options, not global ones.
-They can also be referenced in [`globalExtends`](#globalextends).
-
 ## `deleteAdditionalConfigFile`
 
 If set to `true` Renovate tries to delete the additional self-hosted config file after reading it.

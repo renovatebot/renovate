@@ -119,8 +119,7 @@ For instance, if you have `platform=github` and `endpoint=https://github.company
 
 ### Self-hosted global config
 
-If you self-host Renovate, you can define presets directly in your global config with the [`customPresets`](./self-hosted-configuration.md#custompresets) option.
-Repositories can then extend from such presets with the `custom:` prefix, for example: `custom:myPreset`.
+If you self-host Renovate, you can define presets directly in your global config with the [`customPresets`](./self-hosted-configuration.md#custompresets) option so that repositories can extend from them.
 
 ## Example configs
 
