@@ -21,8 +21,10 @@
     "promise/catch-or-return": "error",
     "promise/no-callback-in-promise": "warn",
     "promise/no-new-statics": "error",
+    "promise/no-return-in-finally": "error",
     "promise/valid-params": "warn",
     "import/default": "error",
+    "import/export": "error",
     "import/named": "error",
     "import/namespace": "error",
     "typescript/consistent-type-imports": [
@@ -175,6 +177,7 @@
     "typescript/no-require-imports": "error",
     "typescript/no-unnecessary-type-constraint": "error",
     "typescript/no-unsafe-function-type": "error",
+    "unicorn/no-useless-iterator-to-array": "error",
     "unicorn/prefer-at": "error",
     "unicorn/prefer-node-protocol": "error",
 
