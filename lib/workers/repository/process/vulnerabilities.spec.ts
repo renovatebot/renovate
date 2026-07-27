@@ -38,7 +38,7 @@ describe('workers/repository/process/vulnerabilities', () => {
     it('throws when osv-offline error', async () => {
       createMock.mockRejectedValue(new Error());
 
-      await expect(Vulnerabilities.create()).rejects.toThrow();
+      await expect(Vulnerabilities.create()).rejects.toThrow(Error);
     });
   });
 

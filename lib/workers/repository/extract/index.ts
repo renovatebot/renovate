@@ -21,12 +21,12 @@ export async function extractAllDependencies(
   const extractList: WorkerExtractConfig[] = [];
   const fileList = await scm.getFileList();
 
-  const tryConfig = (managerConfig: ManagerConfig): void => {
+  function tryConfig(managerConfig: ManagerConfig): void {
     const matchingFileList = getMatchingFiles(managerConfig, fileList);
     if (matchingFileList.length) {
       extractList.push({ ...managerConfig, fileList: matchingFileList });
     }
-  };
+  }
 
   instrument('filter packageFiles for managers', () => {
     for (const manager of managerList) {

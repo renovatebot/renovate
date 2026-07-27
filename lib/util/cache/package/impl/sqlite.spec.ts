@@ -311,7 +311,9 @@ describe('util/cache/package/impl/sqlite', () => {
           { err: expect.any(Error) },
           'SQLite package cache cleanup failed',
         );
-        expect(() => sqlite.client.prepare('SELECT 1').get()).toThrow();
+        expect(() => sqlite.client.prepare('SELECT 1').get()).toThrow(
+          'database is not open',
+        );
       });
     });
 

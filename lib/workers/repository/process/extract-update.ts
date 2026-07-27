@@ -250,7 +250,7 @@ export async function lookup(
 }
 
 export function reportMaliciousSkippedDependencies(
-  allPackageFiles: Record<string, PackageFile<Record<string, any>>[]>,
+  allPackageFiles: Record<string, PackageFile[]>,
 ): void {
   if (allPackageFiles === undefined) {
     return;
@@ -268,7 +268,7 @@ export function reportMaliciousSkippedDependencies(
               manager: manager,
               datasource: dep.datasource,
             },
-            `Dependency ${dep.depName} is currently using a malicious version`,
+            'Dependency is currently using a malicious version',
           );
 
           // and make sure that it then gets updates proposed in the update phase
@@ -287,7 +287,7 @@ export function reportMaliciousSkippedDependencies(
               datasource: dep.datasource,
               newVersions,
             },
-            `Dependency ${dep.depName} has update(s) proposed which would update you to a malicious version - skipping`,
+            'Dependency has update(s) proposed which would update you to a malicious version - skipping',
           );
         }
       }

@@ -90,17 +90,37 @@ export async function confirmIfDepUpdated(
   }
 
   if (upgrade.newValue && upgrade.newValue !== newUpgrade.currentValue) {
-    logger.debug(
-      {
-        depName: upgrade.depName,
-        manager,
-        packageFile,
-        expectedValue: upgrade.newValue,
-        foundValue: newUpgrade.currentValue,
-      },
-      'Value is not updated',
-    );
-    return false;
+    // accept reshaped values produced by autoReplaceStringTemplate
+    let templateMatchesExtractedValue = false;
+    if (upgrade.autoReplaceStringTemplate) {
+      try {
+        const compiledValue = compile(
+          upgrade.autoReplaceStringTemplate,
+          upgrade,
+          false,
+        );
+        templateMatchesExtractedValue =
+          compiledValue === newUpgrade.currentValue;
+      } catch (err) {
+        logger.debug(
+          { err, manager, packageFile },
+          'Failed to compile autoReplaceStringTemplate in confirmIfDepUpdated',
+        );
+      }
+    }
+    if (!templateMatchesExtractedValue) {
+      logger.debug(
+        {
+          depName: upgrade.depName,
+          manager,
+          packageFile,
+          expectedValue: upgrade.newValue,
+          foundValue: newUpgrade.currentValue,
+        },
+        'Value is not updated',
+      );
+      return false;
+    }
   }
 
   if (

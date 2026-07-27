@@ -1,4 +1,5 @@
 import type { DatabaseSync, StatementSync } from 'node:sqlite';
+// oxlint-disable-next-line renovate/prefer-fs-util -- create() runs during global initialization with cacheDir passed as an explicit argument, before GlobalConfig (which the scoped cache helpers resolve against) contains cacheDir
 import fs from 'fs-extra';
 import upath from 'upath';
 import { logger } from '../../../../logger/index.ts';
