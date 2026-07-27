@@ -531,6 +531,22 @@ describe('config/presets/index', () => {
       expect(res.labels).toEqual(['from-base']);
     });
 
+    it('resolves custom presets from GlobalConfig when baseConfig has none', async () => {
+      GlobalConfig.set({
+        customPresets: {
+          myPreset: {
+            labels: ['from-global-config'],
+          },
+        },
+      });
+
+      const { config: res } = await presets.resolveConfigPresets({
+        extends: ['custom:myPreset'],
+      });
+
+      expect(res.labels).toEqual(['from-global-config']);
+    });
+
     it('resolves custom presets inside packageRules', async () => {
       const repoConfig: AllConfig = {
         packageRules: [

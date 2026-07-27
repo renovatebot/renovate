@@ -28,6 +28,7 @@ export class GlobalConfig {
     'configFileNames',
     'containerbaseDir',
     'customEnvVariables',
+    'customPresets',
     'dockerChildPrefix',
     'dockerCliOptions',
     'dockerMaxPages',
