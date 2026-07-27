@@ -15,13 +15,13 @@ import type {
   AzurePipelines,
   Container,
   Deploy,
-  Deployment,
   Job,
   Jobs,
   Repository,
+  Stage,
   Step,
 } from './schema.ts';
-import { AzurePipelinesYaml } from './schema.ts';
+import { AzurePipelinesYaml, isTemplateExprNode } from './schema.ts';
 
 const AzurePipelinesTaskRegex = regEx(/^(?<name>[^@]+)@(?<version>.*)$/);
 
@@ -135,17 +135,23 @@ export function parseAzurePipelines(
 }
 
 function extractSteps(steps: Step[] | undefined): PackageDependency[] {
-  const deps = [];
+  const deps: PackageDependency[] = [];
   for (const step of coerceArray(steps)) {
-    const task = extractAzurePipelinesTasks(step.task);
-    if (task) {
-      deps.push(task);
+    if (isTemplateExprNode(step)) {
+      for (const nested of Object.values(step)) {
+        deps.push(...extractSteps(nested as Step[]));
+      }
+    } else {
+      const task = extractAzurePipelinesTasks(step.task);
+      if (task) {
+        deps.push(task);
+      }
     }
   }
   return deps;
 }
 
-function extractJob(job: Job | undefined): PackageDependency[] {
+function extractJob(job: Job): PackageDependency[] {
   return extractSteps(job?.steps);
 }
 
@@ -162,16 +168,54 @@ function extractDeploy(deploy: Deploy | undefined): PackageDependency[] {
 function extractJobs(jobs: Jobs | undefined): PackageDependency[] {
   const deps: PackageDependency[] = [];
   for (const jobOrDeployment of coerceArray(jobs)) {
-    const deployment = jobOrDeployment as Deployment;
-    if (deployment.strategy) {
-      deps.push(...extractDeploy(deployment.strategy.canary));
-      deps.push(...extractDeploy(deployment.strategy.rolling));
-      deps.push(...extractDeploy(deployment.strategy.runOnce));
+    if (isTemplateExprNode(jobOrDeployment)) {
+      for (const nested of Object.values(jobOrDeployment)) {
+        deps.push(...extractJobs(nested as Jobs));
+      }
       continue;
     }
 
-    const job = jobOrDeployment as Job;
-    deps.push(...extractJob(job));
+    if (jobOrDeployment.strategy) {
+      deps.push(...extractDeploy(jobOrDeployment.strategy.canary));
+      deps.push(...extractDeploy(jobOrDeployment.strategy.rolling));
+      deps.push(...extractDeploy(jobOrDeployment.strategy.runOnce));
+      continue;
+    }
+
+    deps.push(...extractJob(jobOrDeployment));
+  }
+  return deps;
+}
+
+function extractContainers(
+  containers: Container[] | undefined,
+): PackageDependency[] {
+  const deps: PackageDependency[] = [];
+  for (const container of coerceArray(containers)) {
+    if (isTemplateExprNode(container)) {
+      for (const nested of Object.values(container)) {
+        deps.push(...extractContainers(nested as Container[]));
+      }
+    } else {
+      const dep = extractContainer(container);
+      if (dep) {
+        deps.push(dep);
+      }
+    }
+  }
+  return deps;
+}
+
+function extractStages(stages: Stage[] | undefined): PackageDependency[] {
+  const deps: PackageDependency[] = [];
+  for (const stage of coerceArray(stages)) {
+    if (isTemplateExprNode(stage)) {
+      for (const nested of Object.values(stage)) {
+        deps.push(...extractStages(nested as Stage[]));
+      }
+    } else {
+      deps.push(...extractJobs(stage.jobs));
+    }
   }
   return deps;
 }
@@ -196,17 +240,8 @@ export function extractPackageFile(
     }
   }
 
-  for (const container of coerceArray(pkg.resources?.containers)) {
-    const dep = extractContainer(container);
-    if (dep) {
-      deps.push(dep);
-    }
-  }
-
-  for (const { jobs } of coerceArray(pkg.stages)) {
-    deps.push(...extractJobs(jobs));
-  }
-
+  deps.push(...extractContainers(pkg.resources?.containers));
+  deps.push(...extractStages(pkg.stages));
   deps.push(...extractJobs(pkg.jobs));
   deps.push(...extractSteps(pkg.steps));
 

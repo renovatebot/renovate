@@ -1,14 +1,39 @@
 import { z } from 'zod/v4';
+import { regEx } from '../../../util/regex.ts';
 import { LooseArray, Yaml } from '../../../util/schema-utils/index.ts';
 
-export const Step = z.object({
-  task: z.string(),
-});
-export type Step = z.infer<typeof Step>;
+const templateExpressionRegex = regEx(/^\$\{\{.+\}\}$/);
 
-export const Job = z.object({
-  steps: LooseArray(Step),
-});
+export function isTemplateExprNode(
+  obj: unknown,
+): obj is Record<string, unknown[]> {
+  return (
+    obj !== null &&
+    typeof obj === 'object' &&
+    !Array.isArray(obj) &&
+    Object.keys(obj).length === 1 &&
+    templateExpressionRegex.test(Object.keys(obj)[0].trim())
+  );
+}
+
+function withTemplateExpr(schema: z.ZodType<any>): z.ZodType<any> {
+  const combined: z.ZodType<any> = z.lazy(() =>
+    z.union([
+      z.record(z.string(), z.array(combined)).refine(isTemplateExprNode),
+      schema,
+    ]),
+  );
+  return combined;
+}
+
+export const Step = withTemplateExpr(z.object({ task: z.string() }));
+export type Step = { task: string } | Record<string, Step[]>;
+
+export const Job = withTemplateExpr(
+  z.object({
+    steps: LooseArray(Step),
+  }),
+);
 export type Job = z.infer<typeof Job>;
 
 export const Deploy = z
@@ -27,30 +52,28 @@ export const Deploy = z
   .partial();
 export type Deploy = z.infer<typeof Deploy>;
 
-export const Deployment = z
-  .object({
-    strategy: z
-      .object({
-        runOnce: Deploy,
-        rolling: Deploy,
-        canary: Deploy,
-      })
-      .partial(),
-  })
-  .partial();
+export const Deployment = withTemplateExpr(
+  z
+    .object({
+      strategy: z
+        .object({
+          runOnce: Deploy,
+          rolling: Deploy,
+          canary: Deploy,
+        })
+        .partial(),
+    })
+    .partial(),
+);
 export type Deployment = z.infer<typeof Deployment>;
 
 export const Jobs = LooseArray(z.union([Job, Deployment]));
 export type Jobs = z.infer<typeof Jobs>;
 
-export const Stage = z.object({
-  jobs: Jobs,
-});
+export const Stage = withTemplateExpr(z.object({ jobs: Jobs }));
 export type Stage = z.infer<typeof Stage>;
 
-export const Container = z.object({
-  image: z.string(),
-});
+export const Container = withTemplateExpr(z.object({ image: z.string() }));
 export type Container = z.infer<typeof Container>;
 
 export const Repository = z.object({

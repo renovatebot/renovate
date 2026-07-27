@@ -517,5 +517,148 @@ describe('modules/manager/azure-pipelines/extract', () => {
       });
       expect(res).toBeNull();
     });
+
+    it('should extract steps wrapped in a template expression conditional', () => {
+      const packageFile = [
+        'steps:',
+        "- ${{ if eq(variables.foo, 'bar') }}:",
+        '  - task: Bash@3',
+        '    inputs:',
+        "      script: 'echo Hello World'",
+      ].join('\n');
+      const res = extractPackageFile(packageFile, azurePipelinesFilename, {
+        repository: 'repo',
+      });
+      expect(res?.deps).toEqual([
+        {
+          depName: 'Bash',
+          currentValue: '3',
+          datasource: AzurePipelinesTasksDatasource.id,
+        },
+      ]);
+    });
+
+    it('should extract jobs wrapped in a template expression conditional', () => {
+      const packageFile = [
+        'jobs:',
+        "- ${{ if eq(parameters.environment, 'prod') }}:",
+        '  - job: build',
+        '    steps:',
+        '      - task: Bash@3',
+      ].join('\n');
+      const res = extractPackageFile(packageFile, azurePipelinesFilename, {
+        repository: 'repo',
+      });
+      expect(res?.deps).toEqual([
+        {
+          depName: 'Bash',
+          currentValue: '3',
+          datasource: AzurePipelinesTasksDatasource.id,
+        },
+      ]);
+    });
+
+    it('should extract stages wrapped in a template expression conditional', () => {
+      const packageFile = [
+        'stages:',
+        "- ${{ if eq(parameters.environment, 'prod') }}:",
+        '  - stage: deploy',
+        '    jobs:',
+        '      - job: build',
+        '        steps:',
+        '          - task: Bash@3',
+      ].join('\n');
+      const res = extractPackageFile(packageFile, azurePipelinesFilename, {
+        repository: 'repo',
+      });
+      expect(res?.deps).toEqual([
+        {
+          depName: 'Bash',
+          currentValue: '3',
+          datasource: AzurePipelinesTasksDatasource.id,
+        },
+      ]);
+    });
+
+    it('should extract containers wrapped in a template expression each', () => {
+      const packageFile = [
+        'resources:',
+        '  containers:',
+        '  - ${{ each container in parameters.containers }}:',
+        '    - container: linux',
+        '      image: ubuntu:20.04',
+      ].join('\n');
+      const res = extractPackageFile(packageFile, azurePipelinesFilename, {
+        repository: 'repo',
+      });
+      expect(res?.deps).toMatchObject([
+        {
+          depName: 'ubuntu',
+          currentValue: '20.04',
+          datasource: 'docker',
+        },
+      ]);
+    });
+
+    it('should extract items mixed with template expression conditionals', () => {
+      const packageFile = [
+        'steps:',
+        "- ${{ if eq(variables.foo, 'bar') }}:",
+        '  - task: Bash@3',
+        '- task: PowerShell@2',
+      ].join('\n');
+      const res = extractPackageFile(packageFile, azurePipelinesFilename, {
+        repository: 'repo',
+      });
+      expect(res?.deps).toEqual([
+        {
+          depName: 'Bash',
+          currentValue: '3',
+          datasource: AzurePipelinesTasksDatasource.id,
+        },
+        {
+          depName: 'PowerShell',
+          currentValue: '2',
+          datasource: AzurePipelinesTasksDatasource.id,
+        },
+      ]);
+    });
+
+    it('should ignore simple insertion expressions and extract remaining steps', () => {
+      const packageFile = [
+        'steps:',
+        '- ${{ parameters.mySteps }}',
+        '- task: Bash@3',
+      ].join('\n');
+      const res = extractPackageFile(packageFile, azurePipelinesFilename, {
+        repository: 'repo',
+      });
+      expect(res?.deps).toEqual([
+        {
+          depName: 'Bash',
+          currentValue: '3',
+          datasource: AzurePipelinesTasksDatasource.id,
+        },
+      ]);
+    });
+
+    it('should extract items from nested template expression conditionals', () => {
+      const packageFile = [
+        'steps:',
+        '- ${{ if condition1 }}:',
+        '  - ${{ if condition2 }}:',
+        '    - task: Bash@3',
+      ].join('\n');
+      const res = extractPackageFile(packageFile, azurePipelinesFilename, {
+        repository: 'repo',
+      });
+      expect(res?.deps).toEqual([
+        {
+          depName: 'Bash',
+          currentValue: '3',
+          datasource: AzurePipelinesTasksDatasource.id,
+        },
+      ]);
+    });
   });
 });
