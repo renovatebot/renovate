@@ -80,6 +80,7 @@
     "renovate/prefer-json-pipe": "error",
     "renovate/prefer-luxon": "error",
     "renovate/prefer-nullish-util": "error",
+    "renovate/require-regex-util": "error",
     "renovate/zod-schema-location": "error",
     "renovate/v8-ignore-reason": "error",
     "renovate/zod-schema-naming": "error",
@@ -190,6 +191,12 @@
     "vitest/require-to-throw-message": "error"
   },
   "overrides": [
+    {
+      "files": ["**/*.spec.ts", "test/**", "tools/**"],
+      "rules": {
+        "renovate/require-regex-util": "off"
+      }
+    },
     {
       "files": ["tools/**", "**/*.spec.ts"],
       "rules": {

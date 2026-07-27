@@ -184,7 +184,9 @@ export function createPipxToolConfig(name: string): BackendToolingConfig {
       // If the url is not a github repo, treat the version as a git ref
       if (isUndefined(repoName)) {
         return {
-          packageName: name.replace(/^git\+/g, '').replaceAll(/\.git$/g, ''),
+          packageName: name
+            .replace(regEx(/^git\+/g), '')
+            .replaceAll(regEx(/\.git$/g), ''),
           datasource: GitRefsDatasource.id,
         };
       }
@@ -248,10 +250,10 @@ export function createUbiToolConfig(
     // ref: https://mise.jdx.dev/dev-tools/backends/ubi.html#ubi-uses-weird-versions
     if (isString(toolOptions.tag_regex)) {
       // Remove the leading '^' if it exists to avoid duplication
-      tagRegex = toolOptions.tag_regex.replace(/^\^/, '');
+      tagRegex = toolOptions.tag_regex.replace(regEx(/^\^/), '');
       if (!hasVPrefix) {
         // Remove the leading 'v?' if it exists to avoid duplication
-        tagRegex = tagRegex.replace(/^v\??/, '');
+        tagRegex = tagRegex.replace(regEx(/^v\??/), '');
       }
     }
 

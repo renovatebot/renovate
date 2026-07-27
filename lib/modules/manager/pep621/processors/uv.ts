@@ -14,6 +14,7 @@ import {
 } from '../../../../util/fs/index.ts';
 import { getGitEnvironmentVariables } from '../../../../util/git/auth.ts';
 import { find } from '../../../../util/host-rules.ts';
+import { regEx } from '../../../../util/regex.ts';
 import { Result } from '../../../../util/result.ts';
 import { parseUrl } from '../../../../util/url.ts';
 import { PypiDatasource } from '../../../datasource/pypi/index.ts';
@@ -27,7 +28,6 @@ import type {
 import { applyGitSource } from '../../util.ts';
 import { type PyProject, UvLockfile } from '../schema.ts';
 import { depTypes } from '../utils.ts';
-
 import { BasePyProjectProcessor } from './abstract.ts';
 
 const uvUpdateCMD = 'uv lock';
@@ -376,7 +376,7 @@ async function getUvIndexCredentials(
 
     const { username, password } = await getUsernamePassword(parsedUrl);
 
-    const NAME = name.toUpperCase().replace(/[^A-Z0-9]/g, '_');
+    const NAME = name.toUpperCase().replace(regEx(/[^A-Z0-9]/g), '_');
 
     if (username) {
       entries.push([`UV_INDEX_${NAME}_USERNAME`, username]);

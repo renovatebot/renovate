@@ -115,7 +115,7 @@ function resolveGitRepositoryPerSourceTag(
   dep.datasource = GitTagsDatasource.id;
   dep.packageName = gitUrl;
   if (isHttpUrl(gitUrl)) {
-    dep.sourceUrl = gitUrl.replace(/\.git$/, '');
+    dep.sourceUrl = gitUrl.replace(regEx(/\.git$/), '');
   }
 }
 
@@ -400,7 +400,7 @@ function resolveResourceManifest(
           dep.packageName = gitUrl;
           dep.replaceString = resource.spec.ref.commit;
           if (isHttpUrl(gitUrl)) {
-            dep.sourceUrl = gitUrl.replace(/\.git$/, '');
+            dep.sourceUrl = gitUrl.replace(regEx(/\.git$/), '');
           }
           if (resource.spec.ref?.branch) {
             dep.currentValue = resource.spec.ref.branch;
