@@ -25,7 +25,9 @@ export function migrateRule(rule: LegacyHostRule & HostRule): HostRule {
 
   const { matchHost } = result;
   const { hostName, domainName, baseUrl } = rule;
-  const hostValues = [matchHost, hostName, domainName, baseUrl].filter(Boolean);
+  const hostValues = [matchHost, hostName, domainName, baseUrl].filter(
+    isTruthy,
+  );
   if (hostValues.length === 1) {
     const [matchHost] = hostValues;
     result.matchHost = matchHost;

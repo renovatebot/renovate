@@ -9,6 +9,8 @@ import noStatefulGlobalRegex from './rules/no-stateful-global-regex.js';
 import noToolsImport from './rules/no-tools-import.js';
 import preferFakeShaInSpecs from './rules/prefer-fake-sha-in-specs.js';
 import preferFsUtil from './rules/prefer-fs-util.js';
+import preferIsHelpers from './rules/prefer-is-helpers.js';
+import preferIsObject from './rules/prefer-is-object.js';
 import preferJsonPipe from './rules/prefer-json-pipe.js';
 import preferLuxon from './rules/prefer-luxon.js';
 import preferNullishUtil from './rules/prefer-nullish-util.js';
@@ -34,6 +36,8 @@ export default {
     'no-tools-import': noToolsImport,
     'prefer-fake-sha-in-specs': preferFakeShaInSpecs,
     'prefer-fs-util': preferFsUtil,
+    'prefer-is-helpers': preferIsHelpers,
+    'prefer-is-object': preferIsObject,
     'prefer-json-pipe': preferJsonPipe,
     'prefer-luxon': preferLuxon,
     'prefer-nullish-util': preferNullishUtil,

@@ -1,3 +1,4 @@
+import { isString } from '@sindresorhus/is';
 import * as semver from 'semver';
 import type { SemVer } from 'semver-utils';
 import { parseRange } from 'semver-utils';
@@ -18,7 +19,7 @@ export function getMajor(version: string): null | number {
   const options = getOptions(version);
   options.includePrerelease = true;
   const cleanerVersion = makeVersion(cleanedVersion, options);
-  if (typeof cleanerVersion === 'string') {
+  if (isString(cleanerVersion)) {
     return Number(cleanerVersion.split('.')[0]);
   }
   return null;
@@ -30,7 +31,7 @@ export function getMinor(version: string): null | number {
   const options = getOptions(version);
   options.includePrerelease = true;
   const cleanerVersion = makeVersion(cleanedVersion, options);
-  if (typeof cleanerVersion === 'string') {
+  if (isString(cleanerVersion)) {
     return Number(cleanerVersion.split('.')[1]);
   }
   return null;
@@ -43,7 +44,7 @@ export function getPatch(version: string): null | number {
   options.includePrerelease = true;
   const cleanerVersion = makeVersion(cleanedVersion, options);
 
-  if (typeof cleanerVersion === 'string') {
+  if (isString(cleanerVersion)) {
     const newVersion = semver.valid(
       semver.coerce(cleanedVersion, {
         loose: false,

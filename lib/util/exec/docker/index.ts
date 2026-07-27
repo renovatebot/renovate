@@ -1,4 +1,4 @@
-import { isNonEmptyString, isString } from '@sindresorhus/is';
+import { isNonEmptyString, isString, isTruthy } from '@sindresorhus/is';
 import { join } from 'shlex';
 import { GlobalConfig } from '../../../config/global.ts';
 import { SYSTEM_INSUFFICIENT_MEMORY } from '../../../constants/error-messages.ts';
@@ -124,7 +124,7 @@ export async function removeDanglingContainers(): Promise<void> {
         .trim()
         .split(newlineRegex)
         .map((container) => container.trim())
-        .filter(Boolean);
+        .filter(isTruthy);
       logger.debug({ containerIds }, 'Removing dangling child containers');
       await rawExec(`docker rm -f ${containerIds.join(' ')}`, {});
     } else {

@@ -1,3 +1,4 @@
+import { isObject } from '@sindresorhus/is';
 import { codeBlock } from 'common-tags';
 import { DateTime } from 'luxon';
 import * as httpMock from '~test/http-mock.ts';
@@ -332,7 +333,7 @@ describe('util/http/github', () => {
             // eslint-disable-next-line prefer-arrow-callback
             function reply() {
               // https://github.com/nock/nock/issues/1979
-              if (typeof body === 'object' && 'message' in body) {
+              if (isObject(body) && 'message' in body) {
                 (this.req as any).response.statusMessage = body?.message;
               }
               return body;
@@ -449,7 +450,7 @@ describe('util/http/github', () => {
               // eslint-disable-next-line prefer-arrow-callback
               function reply() {
                 // https://github.com/nock/nock/issues/1979
-                if (typeof body === 'object' && 'message' in body) {
+                if (isObject(body) && 'message' in body) {
                   (this.req as any).response.statusMessage = body?.message;
                 }
                 return body;

@@ -1,4 +1,4 @@
-import { isUndefined } from '@sindresorhus/is';
+import { isString, isUndefined } from '@sindresorhus/is';
 import { z } from 'zod/v4';
 import { logger } from '../../../logger/index.ts';
 import {
@@ -163,7 +163,7 @@ export function extractReleaseResult(
 
 function getAbandonedMessage(abandoned: string | boolean): string {
   const message = 'This package is abandoned and no longer maintained.';
-  if (typeof abandoned === 'string') {
+  if (isString(abandoned)) {
     return `${message} The author suggests using the \`${abandoned}\` package instead.`;
   }
   return message;

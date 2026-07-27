@@ -6,6 +6,7 @@ import {
   isNonEmptyObject,
   isNonEmptyStringAndNotWhitespace,
   isString,
+  isTruthy,
 } from '@sindresorhus/is';
 import fs from 'fs-extra';
 import { DateTime } from 'luxon';
@@ -273,7 +274,7 @@ async function fetchBranchCommits(preferUpstream = true): Promise<void> {
     logger.trace({ lsRemoteRes }, 'git ls-remote result');
     lsRemoteRes
       .split(newlineRegex)
-      .filter(Boolean)
+      .filter(isTruthy)
       .map((line) => line.trim().split(regEx(/\s+/)))
       .forEach(([sha, ref]) => {
         config.branchCommits[ref.replace('refs/heads/', '')] =
@@ -1411,7 +1412,7 @@ export async function prepareCommit({
         } else {
           let contents: Buffer;
           /* v8 ignore else -- TODO: add test #40625 */
-          if (typeof file.contents === 'string') {
+          if (isString(file.contents)) {
             contents = Buffer.from(file.contents);
           } else {
             contents = file.contents;
