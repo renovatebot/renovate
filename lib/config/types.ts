@@ -78,6 +78,7 @@ export interface RenovateSharedConfig {
   automergeStrategy?: MergeStrategy;
   automergeType?: AutoMergeType;
   azureWorkItemId?: number;
+  azureWorkItemType?: string;
   branchName?: string;
   branchNameStrict?: boolean;
   branchPrefix?: string;
@@ -91,6 +92,7 @@ export interface RenovateSharedConfig {
   commitMessageLowerCase?: 'auto' | 'never';
   commitMessagePrefix?: string;
   commitMessageTopic?: string;
+  commitTrailers?: string[];
   confidential?: boolean;
   configValidationError?: boolean;
   changelogUrl?: string;
@@ -257,7 +259,6 @@ export interface RepoGlobalConfig extends GlobalInheritableConfig {
   gitTimeout?: number;
   githubTokenWarn?: boolean;
   includeMirrors?: boolean;
-  localDir?: string;
   migratePresets?: Record<string, string>;
   platform?: PlatformId;
   prCacheSyncMaxPages?: number;
@@ -278,6 +279,13 @@ export interface RepoGlobalConfig extends GlobalInheritableConfig {
   productLinks?: Record<string, string>;
   rebaseAllOpenBranches?: boolean;
   toolSettings?: ToolSettingsOptions;
+}
+
+/**
+ * Internal variables which are referenced from `GlobalConfig`, but are *not* user-configurable options.
+ */
+export interface InternalGlobalConfigOptions {
+  localDir?: string;
 }
 
 /**

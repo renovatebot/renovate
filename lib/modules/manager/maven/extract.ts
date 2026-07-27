@@ -291,8 +291,8 @@ function applyPropsInternal(
 
   const seenProps = new Set<string>();
 
-  const replaceAll = (str: string): string =>
-    str.replace(regEx(/\${[^}]*?}/g), (substr) => {
+  function replaceAll(str: string): string {
+    return str.replace(regEx(/\${[^}]*?}/g), (substr) => {
       const propKey = substr.slice(2, -1).trim();
       // TODO: wrong types here, props is already `MavenProp`
       const propValue = (props as any)[propKey] as MavenProp;
@@ -307,6 +307,7 @@ function applyPropsInternal(
       }
       return substr;
     });
+  }
 
   let depName = dep.depName;
   if (dep.depName) {

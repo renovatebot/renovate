@@ -54,7 +54,9 @@ function isLessThanRange(version: string, range: string): boolean {
   return !!npm.isLessThanRange?.(hex2npm(version), hex2npm(range));
 }
 
-const isValid = (input: string): boolean => !!npm.isValid(hex2npm(input));
+function isValid(input: string): boolean {
+  return !!npm.isValid(hex2npm(input));
+}
 
 function isSingleVersion(constraint: string): boolean {
   return (
@@ -68,8 +70,9 @@ function getPinnedValue(newVersion: string): string {
   return `== ${newVersion}`;
 }
 
-const matches = (version: string, range: string): boolean =>
-  npm.matches(hex2npm(version), hex2npm(range));
+function matches(version: string, range: string): boolean {
+  return npm.matches(hex2npm(version), hex2npm(range));
+}
 
 function getSatisfyingVersion(
   versions: string[],

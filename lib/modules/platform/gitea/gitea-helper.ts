@@ -34,7 +34,9 @@ import { API_PATH } from './utils.ts';
 
 export const giteaHttp = new GiteaHttp();
 
-const urlEscape = (raw: string): string => encodeURIComponent(raw);
+function urlEscape(raw: string): string {
+  return encodeURIComponent(raw);
+}
 const commitStatusStates: CommitStatusType[] = [
   'unknown',
   'success',

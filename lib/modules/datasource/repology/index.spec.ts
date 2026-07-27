@@ -17,7 +17,7 @@ interface ResponseMock {
   code?: string;
 }
 
-const mockApiCall = (name: string, response: ResponseMock) => {
+function mockApiCall(name: string, response: ResponseMock) {
   const interceptor = httpMock
     .scope(repologyHost)
     .get(`/api/v1/project/${name}`);
@@ -26,14 +26,14 @@ const mockApiCall = (name: string, response: ResponseMock) => {
   } else {
     interceptor.replyWithError(httpMock.error({ code: response.code }));
   }
-};
+}
 
-const mockResolverCall = (
+function mockResolverCall(
   repo: string,
   name: string,
   name_type: string,
   response: ResponseMock,
-) => {
+) {
   const query = {
     repo,
     name_type,
@@ -51,7 +51,7 @@ const mockResolverCall = (
   } else {
     interceptor.replyWithError(httpMock.error({ code: response.code }));
   }
-};
+}
 
 const fixtureNginx = Fixtures.get(`nginx.json`);
 const fixtureGccDefaults = Fixtures.get(`gcc-defaults.json`);

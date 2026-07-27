@@ -1,6 +1,6 @@
 {
   "meta": {
-    "version": "2026.7.5 linux-x64 (2026-07-09)"
+    "version": "2026.7.13 linux-x64 (2026-07-24)"
   },
   "tools": {
     "1password": {
@@ -421,6 +421,9 @@
     },
     "bun": {
       "core": "bun"
+    },
+    "bundler": {
+      "gem": "bundler"
     },
     "cabal": {
       "aqua": "haskell/cabal/cabal-install"
@@ -888,7 +891,7 @@
       "aqua": "docker/cli"
     },
     "docker-compose": {
-      "aqua": "docker/compose"
+      "github": "docker/compose"
     },
     "docker-slim": {
       "aqua": "mintoolkit/mint",
@@ -1063,8 +1066,8 @@
     },
     "eza": {
       "aqua": "eza-community/eza",
-      "asdf": "mise-plugins/mise-eza",
-      "cargo": "eza"
+      "cargo": "eza",
+      "vfox": "jdx/vfox-eza"
     },
     "fastfetch": {
       "aqua": "fastfetch-cli/fastfetch"
@@ -1236,6 +1239,9 @@
     },
     "git-lfs": {
       "aqua": "git-lfs/git-lfs"
+    },
+    "git-town": {
+      "aqua": "git-town/git-town"
     },
     "gitconfig": {
       "asdf": "0ghny/asdf-gitconfig",
@@ -2162,6 +2168,9 @@
     "micronaut": {
       "asdf": "mise-plugins/mise-micronaut",
       "github": "micronaut-projects/micronaut-starter"
+    },
+    "microsandbox": {
+      "aqua": "superradcompany/microsandbox"
     },
     "miller": {
       "aqua": "johnkerl/miller"
@@ -3767,6 +3776,9 @@
     },
     "zls": {
       "aqua": "zigtools/zls"
+    },
+    "zmx": {
+      "github": "neurosnap/zmx"
     },
     "zola": {
       "aqua": "getzola/zola",
