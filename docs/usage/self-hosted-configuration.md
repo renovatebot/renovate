@@ -504,7 +504,7 @@ For example, in your global config:
 }
 ```
 
-Then in a repository's `renovate.json`:
+Then in the `renovate.json` of a repository:
 
 ```json
 {
