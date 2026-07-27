@@ -1,5 +1,6 @@
 import { isNonEmptyString } from '@sindresorhus/is';
 import type { MinimumReleaseAgeBehaviour } from '../config/types.ts';
+import { logger } from '../logger/index.ts';
 import { getElapsedMs } from './date.ts';
 import { coerceNumber } from './number.ts';
 import { toMs } from './pretty-time.ts';
@@ -15,8 +16,8 @@ export interface MinimumReleaseAgeCheckResult {
  * Checks whether a release satisfies `minimumReleaseAge`.
  *
  * Lives here rather than alongside `filterInternalChecks` so that managers can
- * reuse it: importing from the lookup worker pulls in `config/index.ts`, which
- * loads every manager and so forms an import cycle.
+ * reuse it: `filter-checks.ts` currently imports the `config/index.ts` barrel,
+ * which loads every manager and so forms an import cycle.
  */
 export function checkMinimumReleaseAge(
   config: {
@@ -50,4 +51,21 @@ export function checkMinimumReleaseAge(
     minimumReleaseAgeMs,
     hasTimestamp: false,
   };
+}
+
+/**
+ * Reports releases which were let through despite having no `releaseTimestamp`,
+ * because we're running with `minimumReleaseAgeBehaviour=timestamp-optional`.
+ */
+export function logReleasesWithoutTimestamp(
+  depName: string | undefined,
+  versions: string[],
+): void {
+  logger.once.warn(
+    "Some release(s) did not have a releaseTimestamp, but as we're running with minimumReleaseAgeBehaviour=timestamp-optional, proceeding. See debug logs for more information",
+  );
+  logger.once.debug(
+    { depName, versions, check: 'minimumReleaseAge' },
+    `${versions.length} release(s) did not have a releaseTimestamp, but as we're running with minimumReleaseAgeBehaviour=timestamp-optional, proceeding`,
+  );
 }

@@ -1,6 +1,9 @@
 import { isTruthy } from '@sindresorhus/is';
 import { logger } from '../../../../logger/index.ts';
-import { checkMinimumReleaseAge } from '../../../../util/minimum-release-age.ts';
+import {
+  checkMinimumReleaseAge,
+  logReleasesWithoutTimestamp,
+} from '../../../../util/minimum-release-age.ts';
 import * as p from '../../../../util/promises.ts';
 import { escapeRegExp, regEx } from '../../../../util/regex.ts';
 import { getDefaultVersioning } from '../../../datasource/common.ts';
@@ -33,49 +36,39 @@ function getLatestAllowedVersion(
   config: UpdateArtifactsConfig,
 ): string | null {
   const versioning = getVersioning(getDefaultVersioning('terraform-provider'));
+  const versionsWithoutTimestamp: string[] = [];
 
-  // Highest first, so a release held back by `minimumReleaseAge` can fall back
-  // to the newest release which does pass the check.
-  const candidates = releases
-    .filter((release) => versioning.matches(release.version, lock.constraints))
-    .sort((a, b) => versioning.sortVersions(b.version, a.version));
+  const allowedVersions = releases
+    .filter((release) => {
+      const { isPending, minimumReleaseAgeMs, hasTimestamp } =
+        checkMinimumReleaseAge(config, release.releaseTimestamp);
 
-  for (const release of candidates) {
-    const { isPending, minimumReleaseAgeMs, hasTimestamp } =
-      checkMinimumReleaseAge(config, release.releaseTimestamp);
+      if (isPending) {
+        logger.trace(
+          {
+            depName: lock.packageName,
+            version: release.version,
+            hasTimestamp,
+            check: 'minimumReleaseAge',
+          },
+          'Release is pending minimumReleaseAge',
+        );
+        return false;
+      }
 
-    if (isPending) {
-      logger.trace(
-        {
-          depName: lock.packageName,
-          version: release.version,
-          check: 'minimumReleaseAge',
-        },
-        hasTimestamp
-          ? 'Release is pending minimumReleaseAge'
-          : "Release is pending, as it has no releaseTimestamp and we're running with minimumReleaseAgeBehaviour=timestamp-required",
-      );
-      continue;
-    }
+      if (minimumReleaseAgeMs && !hasTimestamp) {
+        versionsWithoutTimestamp.push(release.version);
+      }
 
-    if (minimumReleaseAgeMs && !hasTimestamp) {
-      logger.once.warn(
-        "Some release(s) did not have a releaseTimestamp, but as we're running with minimumReleaseAgeBehaviour=timestamp-optional, proceeding. See debug logs for more information",
-      );
-      logger.once.debug(
-        {
-          depName: lock.packageName,
-          version: release.version,
-          check: 'minimumReleaseAge',
-        },
-        `${release.version} did not have a releaseTimestamp, but as we're running with minimumReleaseAgeBehaviour=timestamp-optional, proceeding`,
-      );
-    }
+      return true;
+    })
+    .map((release) => release.version);
 
-    return release.version;
+  if (versionsWithoutTimestamp.length) {
+    logReleasesWithoutTimestamp(lock.packageName, versionsWithoutTimestamp);
   }
 
-  return null;
+  return versioning.getSatisfyingVersion(allowedVersions, lock.constraints);
 }
 
 async function updateAllLocks(

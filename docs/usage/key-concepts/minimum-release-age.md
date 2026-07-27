@@ -151,12 +151,11 @@ You can validate which update types may have release timestamps by following som
 
 #### Lock file maintenance
 
-For most managers, `lockFileMaintenance` runs the package manager's own install command, so Renovate cannot filter the versions it picks.
-Where Renovate resolves the versions itself, `minimumReleaseAge` and `minimumReleaseAgeBehaviour` are applied to that resolution:
+Where Renovate resolves the versions itself instead of delegating to the package manager, `minimumReleaseAge` and `minimumReleaseAgeBehaviour` are applied to that resolution:
 
 - `terraform`, when updating `.terraform.lock.hcl`: Renovate selects the newest provider version which satisfies the existing lock file constraints _and_ passes the minimum release age check.
 
-Some package managers accept a date cutoff of their own (such as `--exclude-newer` or `--before`), which Renovate passes through where supported.
+For `npm`, Renovate instead passes the cutoff to the package manager as [`--before`](#npm).
 
 ### What happens to security updates?
 
