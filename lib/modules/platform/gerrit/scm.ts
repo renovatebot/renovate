@@ -7,7 +7,7 @@ import { hash } from '../../../util/hash.ts';
 import type { LongCommitSha } from '../../../util/schema-utils/git.ts';
 import { DefaultGitScm } from '../default-scm.ts';
 import { client } from './client.ts';
-import type { GerritLabelTypeInfo } from './schema.ts';
+import type { GerritLabels } from './schema.ts';
 import { mapBranchStatusToLabel } from './utils.ts';
 
 const CODE_REVIEW_LABEL = 'Code-Review';
@@ -21,11 +21,8 @@ const CODE_REVIEW_LABEL = 'Code-Review';
  */
 
 let repository: string;
-let projectLabels: Record<string, GerritLabelTypeInfo> = {};
-export function configureScm(
-  repo: string,
-  labels: Record<string, GerritLabelTypeInfo> = {},
-): void {
+let projectLabels: GerritLabels = {};
+export function configureScm(repo: string, labels: GerritLabels = {}): void {
   repository = repo;
   projectLabels = labels;
 }
