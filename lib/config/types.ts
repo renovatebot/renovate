@@ -199,7 +199,6 @@ export interface GlobalOnlyConfigLegacy {
   baseDir?: string;
   cacheDir?: string;
   containerbaseDir?: string;
-  customPresets?: Record<string, RenovateConfig>;
   detectHostRulesFromEnv?: boolean;
   dockerCliOptions?: string;
   endpoint?: string;
@@ -247,6 +246,7 @@ export interface RepoGlobalConfig extends GlobalInheritableConfig {
   checkedBranches?: string[];
   containerbaseDir?: string;
   customEnvVariables?: Record<string, string>;
+  customPresets?: Record<string, RenovateConfig>;
   dockerChildPrefix?: string;
   dockerCliOptions?: string;
   dockerSidecarImage?: string;
