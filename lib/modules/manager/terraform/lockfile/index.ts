@@ -23,6 +23,7 @@ import {
   isPinnedVersion,
   massageNewValue,
   readLockFile,
+  sortConstraints,
   writeLockUpdates,
 } from './util.ts';
 
@@ -32,37 +33,46 @@ function getLatestAllowedVersion(
   config: UpdateArtifactsConfig,
 ): string | null {
   const versioning = getVersioning(getDefaultVersioning('terraform-provider'));
-  const satisfyingReleases = releases.filter((release) =>
-    versioning.matches(release.version, lock.constraints),
-  );
 
-  for (const release of [...satisfyingReleases].reverse()) {
-    const status = checkMinimumReleaseAge(release, config);
-    if (status === 'allowed') {
-      return release.version;
+  // Highest first, so a release held back by `minimumReleaseAge` can fall back
+  // to the newest release which does pass the check.
+  const candidates = releases
+    .filter((release) => versioning.matches(release.version, lock.constraints))
+    .sort((a, b) => versioning.sortVersions(b.version, a.version));
+
+  for (const release of candidates) {
+    const { isPending, minimumReleaseAgeMs, hasTimestamp } =
+      checkMinimumReleaseAge(config, release.releaseTimestamp);
+
+    if (isPending) {
+      logger.trace(
+        {
+          depName: lock.packageName,
+          version: release.version,
+          check: 'minimumReleaseAge',
+        },
+        hasTimestamp
+          ? 'Release is pending minimumReleaseAge'
+          : "Release is pending, as it has no releaseTimestamp and we're running with minimumReleaseAgeBehaviour=timestamp-required",
+      );
+      continue;
     }
 
-    if (status === 'allowed-no-timestamp') {
+    if (minimumReleaseAgeMs && !hasTimestamp) {
       logger.once.warn(
         "Some release(s) did not have a releaseTimestamp, but as we're running with minimumReleaseAgeBehaviour=timestamp-optional, proceeding. See debug logs for more information",
       );
       logger.once.debug(
         {
           depName: lock.packageName,
-          versions: [release.version],
+          version: release.version,
           check: 'minimumReleaseAge',
         },
         `${release.version} did not have a releaseTimestamp, but as we're running with minimumReleaseAgeBehaviour=timestamp-optional, proceeding`,
       );
-      return release.version;
     }
 
-    logger.trace(
-      { depName: lock.packageName, check: 'minimumReleaseAge' },
-      status === 'pending-elapsed'
-        ? `Skipping pending lockfile maintenance release ${release.version}`
-        : `Skipping lockfile maintenance release ${release.version} without releaseTimestamp`,
-    );
+    return release.version;
   }
 
   return null;
@@ -140,9 +150,11 @@ export function getNewConstraint(
       `Updating constraint "${oldConstraint}" to replace "${currentValue}" with "${newValue}" for "${packageName}"`,
     );
     //remove surplus .0 version
-    return oldConstraint.replace(
-      regEx(`(,\\s|^)${escapeRegExp(currentValue)}(\\.0)*`),
-      `$1${newValue}`,
+    return sortConstraints(
+      oldConstraint.replace(
+        regEx(`(,\\s|^)${escapeRegExp(currentValue)}(\\.0)*`),
+        `$1${newValue}`,
+      ),
     );
   }
 
@@ -155,7 +167,7 @@ export function getNewConstraint(
     logger.debug(
       `Updating constraint "${oldConstraint}" to replace "${currentVersion}" with "${newVersion}" for "${packageName}"`,
     );
-    return oldConstraint.replace(currentVersion, newVersion);
+    return sortConstraints(oldConstraint.replace(currentVersion, newVersion));
   }
 
   if (isPinnedVersion(newValue)) {

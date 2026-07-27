@@ -94,7 +94,7 @@ export function handleDepString(ctx: Ctx): Ctx {
   }
 
   if (!dep.managerData) {
-    const lastToken = stringTokens[stringTokens.length - 1];
+    const lastToken = stringTokens.at(-1);
     if (
       lastToken?.type === 'string-value' &&
       dep.currentValue &&

@@ -287,6 +287,64 @@ const Versions = LooseArray(
 );
 ```
 
+### Use `Nullish` and `DeepNullish` to handle null as absent
+
+External APIs sometimes return `null` for fields that are conceptually absent rather than intentionally null.
+`Nullish` and `DeepNullish` normalise this by converting `null` (and `undefined`) to `undefined`, which Zod then treats as absent.
+
+#### `Nullish` — single field
+
+Wrap one field with `Nullish` when only that field needs to accept `null`:
+
+```ts
+const Release = z.object({
+  version: z.string(),
+  releaseTimestamp: Nullish(z.string()),
+});
+
+Release.parse({ version: '1.0.0', releaseTimestamp: null });
+// => { version: '1.0.0' }  (releaseTimestamp absent)
+```
+
+#### `DeepNullish` — whole schema at once
+
+When an API returns `null` in many optional fields, applying `Nullish` to each one individually is tedious.
+`DeepNullish` walks the schema at build time and replaces every `.optional()` field with `Nullish` semantics in one call.
+
+Prefer `DeepNullish` over manual `Nullish` wrapping when the schema has multiple optional fields:
+
+```ts
+const Release = DeepNullish(
+  z.object({
+    version: z.string(),
+    releaseTimestamp: z.string().optional(),
+    gitRef: z.string().optional(),
+  }),
+);
+
+Release.parse({ version: '1.0.0', releaseTimestamp: null, gitRef: null });
+// => { version: '1.0.0' }
+```
+
+`DeepNullish` also recurses into the **output side** of `pipe` / transform nodes, so it works directly with `Json.pipe(…)`:
+
+```ts
+const Release = DeepNullish(
+  Json.pipe(
+    z.object({
+      version: z.string(),
+      releaseTimestamp: z.string().optional(),
+    }),
+  ),
+);
+
+Release.parse('{"version":"1.0.0","releaseTimestamp":null}');
+// => { version: '1.0.0' }
+```
+
+!!! note
+  Intentional `.nullable()` fields are preserved — `null` is kept, not stripped.
+
 ### Combining with `Result` class
 
 The `Result` (and `AsyncResult`) class represents the result of an operation, like `Result.ok(200)` or `Result.err(404)`.

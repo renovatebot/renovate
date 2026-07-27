@@ -48,7 +48,7 @@ export function generateMermaidGraph(
     lockFiles.push(`  ${lockFile}[[${lockFile}]]`);
   }
   const edges = depsBetweenFiles.map(({ sourceFile, outputFile, type }) => {
-    return `  ${sourceFile} -${type === 'constraint' ? '.' : ''}-> ${outputFile}`;
+    return `  ${sourceFile} -${type === 'requirement' ? '' : '.'}-> ${outputFile}`;
   });
   return `graph TD\n${lockFiles.join('\n')}\n${edges.join('\n')}`;
 }

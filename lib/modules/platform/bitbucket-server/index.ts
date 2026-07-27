@@ -1,7 +1,7 @@
+import { setTimeout } from 'node:timers/promises';
 import { isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
 import ignore from 'ignore';
 import semver from 'semver';
-import { setTimeout } from 'timers/promises';
 import type { PartialDeep } from 'type-fest';
 import { GlobalConfig } from '../../../config/global.ts';
 import {
@@ -99,7 +99,7 @@ const defaults: {
   version: '0.0.0',
 };
 
-/* v8 ignore next */
+/* v8 ignore next -- exercised only via mocked call sites, direct coverage tracked in #40625 */
 function updatePrVersion(pr: number, version: number): number {
   const res = Math.max(config.prVersions.get(pr) ?? 0, version);
   config.prVersions.set(pr, res);
@@ -146,7 +146,7 @@ export async function initPlatform({
       );
       config.username = headers['x-ausername'];
     }
-    logger.debug('Bitbucket Server version is: ' + bitbucketServerVersion);
+    logger.debug(`Bitbucket Server version is: ${bitbucketServerVersion}`);
 
     // v8 ignore else -- TODO: add test #40625
     if (semver.valid(bitbucketServerVersion)) {
@@ -213,7 +213,7 @@ export async function getRepos(): Promise<string[]> {
     const result = repos.map((repo) => `${repo.project.key}/${repo.slug}`);
     logger.debug({ result }, 'result of getRepos()');
     return result;
-  } catch (err) /* v8 ignore next */ {
+  } catch (err) /* v8 ignore next -- defensive: repo listing failures are logged and rethrown, not simulated in specs */ {
     logger.error({ err }, `bitbucket getRepos error`);
     throw err;
   }
@@ -226,9 +226,7 @@ export async function getRawFile(
 ): Promise<string | null> {
   const repo = repoName ?? config.repository;
   const [project, slug] = repo.split('/');
-  const fileUrl =
-    `./rest/api/1.0/projects/${project}/repos/${slug}/browse/${fileName}?limit=20000` +
-    (branchOrTag ? '&at=' + branchOrTag : '');
+  const fileUrl = `./rest/api/1.0/projects/${project}/repos/${slug}/browse/${fileName}?limit=20000${branchOrTag ? `&at=${branchOrTag}` : ''}`;
   const res = await bitbucketServerHttp.getJsonUnchecked<FileData>(fileUrl);
   const { isLastPage, lines, size } = res.body;
   if (isLastPage) {
@@ -269,7 +267,7 @@ export async function initRepo({
     repository,
     prVersions: new Map<number, number>(),
     username: opts.username,
-    ignorePrAuthor: GlobalConfig.get('ignorePrAuthor', false),
+    ignorePrAuthor: GlobalConfig.get('ignorePrAuthor'),
   } as any;
 
   try {
@@ -315,7 +313,7 @@ export async function initRepo({
     };
 
     return repoConfig;
-  } catch (err) /* v8 ignore next */ {
+  } catch (err) /* v8 ignore next -- initRepo error mapping (404, empty repo) is not mocked in specs */ {
     if (err.statusCode === 404) {
       throw new Error(REPOSITORY_NOT_FOUND);
     }
@@ -381,7 +379,7 @@ export async function getPr(
 }
 
 // TODO: coverage (#40625)
-/* v8 ignore next */
+/* v8 ignore next -- covered only through findPr callers, direct coverage tracked in #40625 */
 function matchesState(state: string, desiredState: string): boolean {
   if (desiredState === 'all') {
     return true;
@@ -393,7 +391,7 @@ function matchesState(state: string, desiredState: string): boolean {
 }
 
 // TODO: coverage (#40625)
-/* v8 ignore next */
+/* v8 ignore next -- covered only through findPr callers, direct coverage tracked in #40625 */
 function isRelevantPr(
   branchName: string,
   prTitle: string | null | undefined,
@@ -418,7 +416,7 @@ export async function getPrList(): Promise<Pr[]> {
 }
 
 // TODO: coverage (#40625)
-/* v8 ignore next */
+/* v8 ignore next -- pr-cache-backed lookup paths lack direct specs, tracked in #40625 */
 export async function findPr({
   branchName,
   prTitle,
@@ -474,7 +472,7 @@ export async function getBranchPr(branchName: string): Promise<BbsPr | null> {
   return existingPr ? getPr(existingPr.number) : null;
 }
 
-/* v8 ignore next */
+/* v8 ignore next -- real-time propagation delay helper, sleeping 1s in specs is not worthwhile */
 export async function refreshPr(number: number): Promise<void> {
   // wait for pr change propagation
   await setTimeout(1000);
@@ -637,7 +635,7 @@ export async function setBranchStatus({
 
 // Issue
 
-/* v8 ignore next */
+/* v8 ignore next -- no-op stub: Bitbucket Server has no issues */
 export function findIssue(title: string): Promise<Issue | null> {
   logger.debug(`findIssue(${title})`);
   // This is used by Renovate when creating its own issues,
@@ -648,7 +646,7 @@ export function findIssue(title: string): Promise<Issue | null> {
   return Promise.resolve(null);
 }
 
-/* v8 ignore next */
+/* v8 ignore next -- no-op stub: Bitbucket Server has no issues */
 export function ensureIssue({
   title,
 }: EnsureIssueConfig): Promise<EnsureIssueResult | null> {
@@ -661,7 +659,7 @@ export function ensureIssue({
   return Promise.resolve(null);
 }
 
-/* v8 ignore next */
+/* v8 ignore next -- no-op stub: Bitbucket Server has no issues */
 export function getIssueList(): Promise<Issue[]> {
   logger.debug(`getIssueList()`);
   // This is used by Renovate when creating its own issues,
@@ -672,7 +670,7 @@ export function getIssueList(): Promise<Issue[]> {
   return Promise.resolve([]);
 }
 
-/* v8 ignore next */
+/* v8 ignore next -- no-op stub: Bitbucket Server has no issues */
 export function ensureIssueClosing(title: string): Promise<void> {
   logger.debug(`ensureIssueClosing(${title})`);
   // This is used by Renovate when creating its own issues,
@@ -967,10 +965,18 @@ export async function ensureComment({
       logger.debug('Comment is already up-to-date');
     }
     return true;
-  } catch (err) /* v8 ignore next */ {
+  } catch (err) /* v8 ignore next -- defensive: comment API failures are logged and swallowed, not simulated in specs */ {
     logger.warn({ err }, 'Error ensuring comment');
     return false;
   }
+}
+
+function byTopic(comment: Comment, topic: string): boolean {
+  return comment.text.startsWith(`### ${topic}\n\n`);
+}
+
+function byContent(comment: Comment, content: string): boolean {
+  return comment.text.trim() === content;
 }
 
 export async function ensureCommentRemoval(
@@ -988,27 +994,26 @@ export async function ensureCommentRemoval(
     let commentId: number | null | undefined = null;
     // v8 ignore else -- TODO: add test #40625
     if (deleteConfig.type === 'by-topic') {
-      const byTopic = (comment: Comment): boolean =>
-        comment.text.startsWith(`### ${deleteConfig.topic}\n\n`);
-      commentId = comments.find(byTopic)?.id;
+      const topic = deleteConfig.topic;
+      commentId = comments.find((comment) => byTopic(comment, topic))?.id;
     } else if (deleteConfig.type === 'by-content') {
-      const byContent = (comment: Comment): boolean =>
-        comment.text.trim() === deleteConfig.content;
-      commentId = comments.find(byContent)?.id;
+      const content = deleteConfig.content;
+      commentId = comments.find((comment) => byContent(comment, content))?.id;
     }
 
     if (commentId) {
       await deleteComment(prNo, commentId);
     }
-  } catch (err) /* v8 ignore next */ {
+  } catch (err) /* v8 ignore next -- defensive: comment API failures are logged and swallowed, not simulated in specs */ {
     logger.warn({ err }, 'Error ensuring comment removal');
   }
 }
 
 // Pull Request
 
-const escapeHash = (input: string): string =>
-  input?.replace(regEx(/#/g), '%23');
+function escapeHash(input: string): string {
+  return input?.replace(regEx(/#/g), '%23');
+}
 
 export async function createPr({
   sourceBranch,
@@ -1062,7 +1067,7 @@ export async function createPr({
       `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests`,
       { body },
     );
-  } catch (err) /* v8 ignore next */ {
+  } catch (err) /* v8 ignore next -- EmptyPullRequestException handling is not mocked in specs */ {
     if (
       err.body?.errors?.[0]?.exceptionName ===
       'com.atlassian.bitbucket.pull.EmptyPullRequestException'

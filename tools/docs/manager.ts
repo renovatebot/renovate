@@ -138,7 +138,8 @@ export async function generateManagers(
       }
       md += `For details on how to extend a manager's \`managerFilePatterns\` value, please follow [this link](../index.md#file-matching).\n\n`;
       md += '## Supported datasources\n\n';
-      const escapedDatasources = (supportedDatasources || [])
+      const escapedDatasources = Array.from(new Set(supportedDatasources || []))
+        .sort()
         .map(
           (datasource) =>
             `[\`${datasource}\`](../../datasource/${datasource}/index.md)`,
@@ -172,7 +173,7 @@ export async function generateManagers(
         md += '\n';
       }
       if (definition.supportsDynamicDepTypesNote) {
-        md += definition.supportsDynamicDepTypesNote + '\n\n';
+        md += `${definition.supportsDynamicDepTypesNote}\n\n`;
       }
       if (
         (!definition.knownDepTypes || definition.knownDepTypes.length === 0) &&
@@ -182,7 +183,7 @@ export async function generateManagers(
       }
       md += '## Default config\n\n';
       md += '```json\n';
-      md += JSON.stringify(definition.defaultConfig, null, 2) + '\n';
+      md += `${JSON.stringify(definition.defaultConfig, null, 2)}\n`;
       md += '```\n\n';
     }
     const managerReadmeContent = await readFile(

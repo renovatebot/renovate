@@ -81,7 +81,7 @@ export async function getPrCache(
   const cutoffTime = lastModifiedRaw ? DateTime.fromISO(lastModifiedRaw) : null;
 
   try {
-    const maxSyncPages = GlobalConfig.get('prCacheSyncMaxPages', 100);
+    const maxSyncPages = GlobalConfig.get('prCacheSyncMaxPages');
     const startTime = Date.now();
     let requestsTotal = 0;
     let apiQuotaAffected = false;
@@ -126,9 +126,7 @@ export async function getPrCache(
           // even if no Renovate PRs are found.
           prApiCache.updateLastModified(page[0].updated_at);
 
-          const oldestOnPage = DateTime.fromISO(
-            page[page.length - 1].updated_at,
-          );
+          const oldestOnPage = DateTime.fromISO(page.at(-1)!.updated_at);
           if (oldestOnPage < cutoffTime) {
             needNextPageSync = false;
           }
@@ -186,7 +184,7 @@ export async function getPrCache(
       },
       `PR cache: getPrList success`,
     );
-  } catch (err) /* v8 ignore next */ {
+  } catch (err) /* v8 ignore next -- PR cache sync failures are wrapped as ExternalHostError, not simulated in specs */ {
     logger.debug({ err }, 'PR cache: getPrList err');
     throw new ExternalHostError(err, 'github');
   }

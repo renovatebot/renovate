@@ -1,4 +1,4 @@
-import { z } from 'zod/v3';
+import { z } from 'zod/v4';
 import {
   LooseArray,
   LooseRecord,
@@ -9,7 +9,7 @@ import { PypiDatasource } from '../../datasource/pypi/index.ts';
 import type { PackageDependency } from '../types.ts';
 import { depTypes, pep508ToPackageDependency } from './utils.ts';
 
-type Pep508Dependency = z.ZodType<PackageDependency<Record<string, any>>>;
+type Pep508Dependency = z.ZodType<PackageDependency>;
 
 function Pep508Dependency(depType: string): Pep508Dependency {
   return z.string().transform((x, ctx) => {
@@ -29,7 +29,7 @@ function Pep508Dependency(depType: string): Pep508Dependency {
   }) as Pep508Dependency;
 }
 
-type DependencyGroup = z.ZodType<PackageDependency<Record<string, any>>[]>;
+type DependencyGroup = z.ZodType<PackageDependency[]>;
 
 export function DependencyGroup(depType: string): DependencyGroup {
   return LooseRecord(LooseArray(Pep508Dependency(depType))).transform(
@@ -93,8 +93,8 @@ const HatchConfig = z
     envs: LooseRecord(
       z.string(),
       z.object({
-        dependencies: z.unknown(),
-        'extra-dependencies': z.unknown(),
+        dependencies: z.unknown().optional(),
+        'extra-dependencies': z.unknown().optional(),
       }),
     ),
   })

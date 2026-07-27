@@ -1,4 +1,4 @@
-import { z } from 'zod/v3';
+import { z } from 'zod/v4';
 import { LooseRecord, Toml, Yaml } from '../../../util/schema-utils/index.ts';
 import { CondaDatasource } from '../../datasource/conda//index.ts';
 import { GitRefsDatasource } from '../../datasource/git-refs/index.ts';
@@ -98,8 +98,8 @@ const CondaDependencies = LooseRecord(z.string(), CondaDependency).transform(
 const Targets = LooseRecord(
   z.string(),
   z.object({
-    dependencies: z.optional(CondaDependencies).default({}),
-    'pypi-dependencies': z.optional(PypiDependencies).default({}),
+    dependencies: z.optional(CondaDependencies).default([]),
+    'pypi-dependencies': z.optional(PypiDependencies).default([]),
   }),
 ).transform((val) => {
   const conda: PixiPackageDependency[] = [];
@@ -123,9 +123,9 @@ const Project = z.object({
 
 const DependenciesMixin = z
   .object({
-    dependencies: z.optional(CondaDependencies).default({}),
-    'pypi-dependencies': z.optional(PypiDependencies).default({}),
-    target: z.optional(Targets).default({}),
+    dependencies: z.optional(CondaDependencies).default([]),
+    'pypi-dependencies': z.optional(PypiDependencies).default([]),
+    target: z.optional(Targets).default({ pypi: [], conda: [] }),
   })
   .transform(
     (
@@ -195,7 +195,7 @@ const PixiProject = z.object({
  */
 export const PixiConfig = z
   .union([PixiWorkspace, PixiProject])
-  .and(z.object({ feature: Features.default({}) }))
+  .and(z.object({ feature: Features.default({ pypi: [], conda: [] }) }))
   .and(DependenciesMixin);
 
 export type PixiConfig = z.infer<typeof PixiConfig>;

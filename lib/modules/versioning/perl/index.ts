@@ -5,7 +5,7 @@ import type { VersioningApi } from '../types.ts';
 
 export const id = 'perl';
 export const displayName = 'Perl';
-export const urls = ['https://metacpan.org/pod/version'];
+export const urls = ['[Perl version module](https://metacpan.org/pod/version)'];
 export const supportsRanges = false;
 
 // https://metacpan.org/pod/version#Decimal-Versions

@@ -1,6 +1,6 @@
 import { mock } from 'vitest-mock-extended';
 import type { RenovateConfig } from '~test/util.ts';
-import { fs, git, platform, scm } from '~test/util.ts';
+import { fakeSha, fs, git, platform, scm } from '~test/util.ts';
 import { getConfigFileNames } from '../../../../config/app-strings.ts';
 import { getConfig } from '../../../../config/defaults.ts';
 import { GlobalConfig } from '../../../../config/global.ts';
@@ -14,10 +14,7 @@ import type { Pr } from '../../../../modules/platform/index.ts';
 import * as memCache from '../../../../util/cache/memory/index.ts';
 import * as _cache from '../../../../util/cache/repository/index.ts';
 import type { RepoCacheData } from '../../../../util/cache/repository/types.ts';
-import type {
-  FileAddition,
-  LongCommitSha,
-} from '../../../../util/git/types.ts';
+import type { FileAddition } from '../../../../util/git/types.ts';
 import { OnboardingState } from '../common.ts';
 import * as _config from './config.ts';
 import { checkOnboardingBranch } from './index.ts';
@@ -35,6 +32,10 @@ vi.mock('./onboarding-branch-cache.ts');
 const cache = vi.mocked(_cache);
 const rebase = vi.mocked(_rebase);
 const onboardingCache = vi.mocked(_onboardingCache);
+
+const defaultSha = fakeSha('default-sha');
+const onboardingSha = fakeSha('onboarding-sha');
+const newOnboardingSha = fakeSha('new-onboarding-sha');
 
 describe('workers/repository/onboarding/branch/index', () => {
   describe('checkOnboardingBranch', () => {
@@ -304,7 +305,9 @@ describe('workers/repository/onboarding/branch/index', () => {
           state: 'open',
         },
       ]);
-      await expect(checkOnboardingBranch(config)).rejects.toThrow();
+      await expect(checkOnboardingBranch(config)).rejects.toThrow(
+        'disabled-closed-onboarding',
+      );
     });
 
     it('rebases onboarding branch', async () => {
@@ -322,7 +325,7 @@ describe('workers/repository/onboarding/branch/index', () => {
       scm.getFileList.mockResolvedValue(['package.json']);
       platform.findPr.mockResolvedValue(null);
       platform.getBranchPr.mockResolvedValueOnce(mock<Pr>());
-      rebase.rebaseOnboardingBranch.mockResolvedValueOnce('new-onboarding-sha');
+      rebase.rebaseOnboardingBranch.mockResolvedValueOnce(newOnboardingSha);
       const res = await checkOnboardingBranch(config);
       expect(res.repoIsOnboarded).toBeFalse();
       expect(res.branchList).toEqual(['renovate/configure']);
@@ -337,7 +340,7 @@ describe('workers/repository/onboarding/branch/index', () => {
       expect(logger.info).toHaveBeenCalledWith(
         {
           branch: config.onboardingBranch,
-          commit: 'new-onboarding-sha',
+          commit: newOnboardingSha,
           onboarding: true,
         },
         'Branch updated',
@@ -352,8 +355,8 @@ describe('workers/repository/onboarding/branch/index', () => {
       });
       const dummyCache = {
         onboardingBranchCache: {
-          defaultBranchSha: 'default-sha',
-          onboardingBranchSha: 'onboarding-sha',
+          defaultBranchSha: defaultSha,
+          onboardingBranchSha: onboardingSha,
           isConflicted: false,
           isModified: false,
           configFileParsed: 'raw',
@@ -367,9 +370,9 @@ describe('workers/repository/onboarding/branch/index', () => {
         mock<Pr>({ bodyStruct: { rebaseRequested: false } }),
       ); // finds open onboarding pr
       git.getBranchCommit
-        .mockReturnValueOnce('default-sha' as LongCommitSha)
-        .mockReturnValueOnce('default-sha' as LongCommitSha)
-        .mockReturnValueOnce('onboarding-sha' as LongCommitSha);
+        .mockReturnValueOnce(defaultSha)
+        .mockReturnValueOnce(defaultSha)
+        .mockReturnValueOnce(onboardingSha);
       config.onboardingRebaseCheckbox = true;
       await checkOnboardingBranch(config);
       expect(scm.commitAndPush).not.toHaveBeenCalled();
@@ -380,7 +383,7 @@ describe('workers/repository/onboarding/branch/index', () => {
       const dummyCache = {
         scan: {
           master: {
-            sha: 'default-sha',
+            sha: defaultSha,
             configHash: 'hash',
             packageFiles: {},
             extractionFingerprints: {},
@@ -391,8 +394,8 @@ describe('workers/repository/onboarding/branch/index', () => {
       platform.findPr.mockResolvedValue(null);
       platform.getBranchPr.mockResolvedValueOnce(mock<Pr>());
       git.getBranchCommit
-        .mockReturnValueOnce('default-sha' as LongCommitSha)
-        .mockReturnValueOnce('new-onboarding-sha' as LongCommitSha);
+        .mockReturnValueOnce(defaultSha)
+        .mockReturnValueOnce(newOnboardingSha);
       config.baseBranch = 'master';
       onboardingCache.isOnboardingBranchModified.mockResolvedValueOnce(true);
       onboardingCache.hasOnboardingBranchChanged.mockReturnValueOnce(true);
@@ -404,8 +407,8 @@ describe('workers/repository/onboarding/branch/index', () => {
       expect(
         onboardingCache.setOnboardingCache,
       ).toHaveBeenCalledExactlyOnceWith(
-        'default-sha',
-        'new-onboarding-sha',
+        defaultSha,
+        newOnboardingSha,
         false,
         true,
       );
@@ -420,8 +423,8 @@ describe('workers/repository/onboarding/branch/index', () => {
       platform.getBranchPr.mockResolvedValueOnce(mock<Pr>());
       platform.getBranchPr.mockResolvedValueOnce(mock<Pr>());
       git.getBranchCommit
-        .mockReturnValueOnce('default-sha' as LongCommitSha)
-        .mockReturnValueOnce('onboarding-sha' as LongCommitSha);
+        .mockReturnValueOnce(defaultSha)
+        .mockReturnValueOnce(onboardingSha);
       onboardingCache.isOnboardingBranchModified.mockResolvedValueOnce(true);
       onboardingCache.hasOnboardingBranchChanged.mockReturnValueOnce(true);
       onboardingCache.isOnboardingBranchConflicted.mockResolvedValueOnce(true);
@@ -429,12 +432,7 @@ describe('workers/repository/onboarding/branch/index', () => {
       expect(scm.mergeToLocal).not.toHaveBeenCalled();
       expect(
         onboardingCache.setOnboardingCache,
-      ).toHaveBeenCalledExactlyOnceWith(
-        'default-sha',
-        'onboarding-sha',
-        true,
-        true,
-      );
+      ).toHaveBeenCalledExactlyOnceWith(defaultSha, onboardingSha, true, true);
     });
 
     it('sets onboarding cache for existing onboarding branch', async () => {
@@ -442,16 +440,16 @@ describe('workers/repository/onboarding/branch/index', () => {
       platform.findPr.mockResolvedValue(null);
       platform.getBranchPr.mockResolvedValueOnce(mock<Pr>());
       git.getBranchCommit
-        .mockReturnValueOnce('default-sha' as LongCommitSha)
-        .mockReturnValueOnce('onboarding-sha' as LongCommitSha);
+        .mockReturnValueOnce(defaultSha)
+        .mockReturnValueOnce(onboardingSha);
       onboardingCache.isOnboardingBranchModified.mockResolvedValueOnce(false);
       await checkOnboardingBranch(config);
       expect(scm.mergeToLocal).toHaveBeenCalled();
       expect(
         onboardingCache.setOnboardingCache,
       ).toHaveBeenCalledExactlyOnceWith(
-        'default-sha',
-        'onboarding-sha',
+        defaultSha,
+        onboardingSha,
         false,
         false,
       );

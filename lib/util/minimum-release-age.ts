@@ -3,42 +3,51 @@ import type { MinimumReleaseAgeBehaviour } from '../config/types.ts';
 import { getElapsedMs } from './date.ts';
 import { coerceNumber } from './number.ts';
 import { toMs } from './pretty-time.ts';
+import type { Timestamp } from './timestamp.ts';
 
-export type MinimumReleaseAgeStatus =
-  | 'allowed'
-  | 'allowed-no-timestamp'
-  | 'pending-elapsed'
-  | 'pending-no-timestamp';
-
-export interface MinimumReleaseAgeOptions {
-  minimumReleaseAge?: string | null;
-  minimumReleaseAgeBehaviour?: MinimumReleaseAgeBehaviour | null;
+export interface MinimumReleaseAgeCheckResult {
+  isPending: boolean;
+  minimumReleaseAgeMs: number;
+  hasTimestamp: boolean;
 }
 
-export function getMinimumReleaseAgeMs(
-  minimumReleaseAge: string | null | undefined,
-): number {
-  return isNonEmptyString(minimumReleaseAge)
-    ? coerceNumber(toMs(minimumReleaseAge), 0)
-    : 0;
-}
-
+/**
+ * Checks whether a release satisfies `minimumReleaseAge`.
+ *
+ * Lives here rather than alongside `filterInternalChecks` so that managers can
+ * reuse it: importing from the lookup worker pulls in `config/index.ts`, which
+ * loads every manager and so forms an import cycle.
+ */
 export function checkMinimumReleaseAge(
-  release: { releaseTimestamp?: string | null },
-  { minimumReleaseAge, minimumReleaseAgeBehaviour }: MinimumReleaseAgeOptions,
-): MinimumReleaseAgeStatus {
-  const minimumReleaseAgeMs = getMinimumReleaseAgeMs(minimumReleaseAge);
+  config: {
+    minimumReleaseAge?: string | null;
+    minimumReleaseAgeBehaviour?: MinimumReleaseAgeBehaviour | null;
+  },
+  releaseTimestamp: Timestamp | null | undefined,
+): MinimumReleaseAgeCheckResult {
+  const minimumReleaseAgeMs = isNonEmptyString(config.minimumReleaseAge)
+    ? coerceNumber(toMs(config.minimumReleaseAge), 0)
+    : 0;
+
   if (!minimumReleaseAgeMs) {
-    return 'allowed';
+    return {
+      isPending: false,
+      minimumReleaseAgeMs,
+      hasTimestamp: !!releaseTimestamp,
+    };
   }
 
-  if (release.releaseTimestamp) {
-    return getElapsedMs(release.releaseTimestamp) >= minimumReleaseAgeMs
-      ? 'allowed'
-      : 'pending-elapsed';
+  if (releaseTimestamp) {
+    return {
+      isPending: getElapsedMs(releaseTimestamp) < minimumReleaseAgeMs,
+      minimumReleaseAgeMs,
+      hasTimestamp: true,
+    };
   }
 
-  return minimumReleaseAgeBehaviour === 'timestamp-optional'
-    ? 'allowed-no-timestamp'
-    : 'pending-no-timestamp';
+  return {
+    isPending: config.minimumReleaseAgeBehaviour === 'timestamp-required',
+    minimumReleaseAgeMs,
+    hasTimestamp: false,
+  };
 }

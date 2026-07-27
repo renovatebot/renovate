@@ -12,9 +12,13 @@
 <!-- 1. Open the tools/mkdocs/mkdocs.yml file. -->
 <!-- 2. Make sure the `theme.custom_dir` entry is plain code. -->
 
+<!-- When building a release, MKDOCS_INCLUDE_ANNOUNCEMENT=false, so the release notes don't include the announcement bar -->
+<!-- When building locally, you can set MKDOCS_INCLUDE_ANNOUNCEMENT=true to see the announcement bar -->
 
 {% block announce %}
+{% if config.extra.include_announcement %}
 The Renovate maintainers would like to hear your feedback about <a href="https://github.com/renovatebot/renovate/discussions/41414"> monorepos, getting started + "week 1" problems, where you see complexity in Renovate, and to hear what's on your wishlist</a>.
+{% endif %}
 {% endblock %}
 
 <!-- add to block above when done -->

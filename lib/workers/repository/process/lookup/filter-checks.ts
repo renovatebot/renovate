@@ -1,5 +1,8 @@
 import { mergeChildConfig } from '../../../../config/index.ts';
-import type { MinimumReleaseAgeBehaviour } from '../../../../config/types.ts';
+import type {
+  MinimumReleaseAgeBehaviour,
+  UpdateType,
+} from '../../../../config/types.ts';
 import { logger } from '../../../../logger/index.ts';
 import type { Release } from '../../../../modules/datasource/index.ts';
 import { postprocessRelease } from '../../../../modules/datasource/postprocess-release.ts';
@@ -9,6 +12,7 @@ import {
   isActiveConfidenceLevel,
   satisfiesConfidenceLevel,
 } from '../../../../util/merge-confidence/index.ts';
+import type { MergeConfidence } from '../../../../util/merge-confidence/types.ts';
 import { checkMinimumReleaseAge } from '../../../../util/minimum-release-age.ts';
 import { applyPackageRules } from '../../../../util/package-rules/index.ts';
 import type { LookupUpdateConfig, UpdateResult } from './types.ts';
@@ -20,19 +24,84 @@ export interface InternalChecksResult {
   pendingReleases: Release[];
 }
 
+/** Given an UpdateType, should `minimumReleaseAge` apply to it? **/
+export function isMinimumReleaseAgeApplicable(
+  updateType: UpdateType | undefined,
+): boolean {
+  return (
+    // Possible, but not wanted, as this is intentionally rolling back to a previous (generally older) release to unblock the build
+    updateType !== 'rollback' &&
+    // Not yet supported: TODO #40288
+    updateType !== 'pin' &&
+    // Not yet supported: TODO #44820
+    updateType !== 'pinDigest' &&
+    // Not yet supported: TODO #39400
+    updateType !== 'replacement' &&
+    // Not possible, as we delegate to the package manager to perform the required changes to update package(s).
+    updateType !== 'lockFileMaintenance' &&
+    // Not supported
+    updateType !== 'bump' &&
+    // Not supported
+    updateType !== 'lockfileUpdate'
+  );
+}
+
+/** Given an UpdateType, should `minimumConfidence` apply to it? **/
+export function isMinimumConfidenceApplicable(
+  updateType: UpdateType | undefined,
+): boolean {
+  return (
+    // data collection doesn't include digest updates
+    updateType !== 'digest' &&
+    // data collection doesn't include digest updates
+    updateType !== 'pinDigest'
+  );
+}
+
+export interface MinimumConfidenceCheckResult {
+  isPending: boolean;
+}
+
+/**
+ * Checks whether a release satisfies `minimumConfidence`.
+ *
+ * Separate from `internalChecksFilter` to allow reuse.
+ */
+export async function checkMinimumConfidence(
+  config: {
+    minimumConfidence?: MergeConfidence;
+    datasource?: string;
+    packageName?: string;
+  },
+  currentVersion: string,
+  candidateVersion: string,
+  updateType: UpdateType,
+): Promise<MinimumConfidenceCheckResult> {
+  const { minimumConfidence, datasource, packageName } = config;
+  if (!isActiveConfidenceLevel(minimumConfidence!)) {
+    return { isPending: false };
+  }
+
+  const confidenceLevel =
+    (await getMergeConfidenceLevel(
+      datasource!,
+      packageName!,
+      currentVersion,
+      candidateVersion,
+      updateType,
+    )) ?? 'neutral';
+  return {
+    isPending: !satisfiesConfidenceLevel(confidenceLevel, minimumConfidence!),
+  };
+}
+
 export async function filterInternalChecks(
   config: Partial<LookupUpdateConfig & UpdateResult>,
   versioningApi: VersioningApi,
   bucket: string,
   sortedReleases: Release[],
 ): Promise<InternalChecksResult> {
-  const {
-    currentVersion,
-    datasource,
-    depName,
-    packageName,
-    internalChecksFilter,
-  } = config;
+  const { currentVersion, depName, internalChecksFilter } = config;
   let release: Release | undefined = undefined;
   let pendingChecks = false;
   let pendingReleases: Release[] = [];
@@ -76,55 +145,55 @@ export async function filterInternalChecks(
       }
       candidateRelease = updatedCandidateRelease;
 
-      const { minimumConfidence, updateType } = releaseConfig;
+      // Now check for a minimumReleaseAge config
+      const { updateType } = releaseConfig;
 
-      const minimumReleaseAgeStatus = checkMinimumReleaseAge(
-        candidateRelease,
+      const ageCheck = checkMinimumReleaseAge(
         releaseConfig,
+        candidateRelease.releaseTimestamp,
       );
+      if (ageCheck.minimumReleaseAgeMs) {
+        if (!ageCheck.hasTimestamp) {
+          const minimumReleaseAgeBehaviour =
+            releaseConfig.minimumReleaseAgeBehaviour;
+          // v8 ignore else -- TODO: add test #40625
+          if (
+            minimumReleaseAgeBehaviour === 'timestamp-required' ||
+            minimumReleaseAgeBehaviour === 'timestamp-optional'
+          ) {
+            candidateVersionsWithoutReleaseTimestamp[
+              minimumReleaseAgeBehaviour
+            ].push(candidateRelease.version);
+          }
+        }
 
-      if (minimumReleaseAgeStatus === 'pending-elapsed') {
+        if (ageCheck.isPending) {
+          // v8 ignore else -- TODO: add test #40625
+          if (ageCheck.hasTimestamp) {
+            // Skip it if it doesn't pass checks
+            logger.trace(
+              { depName, check: 'minimumReleaseAge' },
+              `Release ${candidateRelease.version} is pending status checks`,
+            );
+          } // or if there is no timestamp, and we're running in `minimumReleaseAgeBehaviour=timestamp-required`, skip it as we require a timestamp
+          pendingReleases.unshift(candidateRelease);
+          continue;
+        }
+      }
+
+      const confidenceCheck = await checkMinimumConfidence(
+        releaseConfig,
+        currentVersion!,
+        candidateRelease.version,
+        updateType!,
+      );
+      if (confidenceCheck.isPending) {
         logger.trace(
-          { depName, check: 'minimumReleaseAge' },
+          { depName, check: 'minimumConfidence' },
           `Release ${candidateRelease.version} is pending status checks`,
         );
         pendingReleases.unshift(candidateRelease);
         continue;
-      }
-
-      if (minimumReleaseAgeStatus === 'pending-no-timestamp') {
-        candidateVersionsWithoutReleaseTimestamp['timestamp-required'].push(
-          candidateRelease.version,
-        );
-        pendingReleases.unshift(candidateRelease);
-        continue;
-      }
-
-      if (minimumReleaseAgeStatus === 'allowed-no-timestamp') {
-        candidateVersionsWithoutReleaseTimestamp['timestamp-optional'].push(
-          candidateRelease.version,
-        );
-      }
-
-      // TODO #22198
-      if (isActiveConfidenceLevel(minimumConfidence!)) {
-        const confidenceLevel =
-          (await getMergeConfidenceLevel(
-            datasource!,
-            packageName!,
-            currentVersion!,
-            candidateRelease.version,
-            updateType!,
-          )) ?? 'neutral';
-        // TODO #22198
-        if (!satisfiesConfidenceLevel(confidenceLevel, minimumConfidence!)) {
-          logger.trace(
-            { depName, check: 'minimumConfidence' },
-            `Release ${candidateRelease.version} is pending status checks`,
-          );
-          pendingReleases.unshift(candidateRelease);
-          continue;
-        }
       }
       // If we get to here, then the release is OK and we can stop iterating
       release = candidateRelease;
@@ -158,20 +227,18 @@ export async function filterInternalChecks(
       );
     }
 
-    if (!release) {
-      // v8 ignore else -- TODO: add test #40625
-      if (pendingReleases.length) {
-        // If all releases were pending then just take the highest
-        logger.trace(
-          { depName, bucket },
-          'All releases are pending - using latest',
-        );
-        release = pendingReleases.pop();
-        // None are pending anymore because we took the latest, so empty the array
-        pendingReleases = [];
-        if (internalChecksFilter === 'strict') {
-          pendingChecks = true;
-        }
+    // v8 ignore else -- TODO: add test #40625
+    if (!release && pendingReleases.length) {
+      // If all releases were pending then just take the highest
+      logger.trace(
+        { depName, bucket },
+        'All releases are pending - using latest',
+      );
+      release = pendingReleases.pop();
+      // None are pending anymore because we took the latest, so empty the array
+      pendingReleases = [];
+      if (internalChecksFilter === 'strict') {
+        pendingChecks = true;
       }
     }
   }

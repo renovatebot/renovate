@@ -1,13 +1,16 @@
-import { ZodError, z } from 'zod/v3';
+import { ZodError, z } from 'zod/v4';
 import * as httpMock from '~test/http-mock.ts';
 import { logger } from '~test/util.ts';
+import { GlobalConfig } from '../../config/global.ts';
 import {
   EXTERNAL_HOST_ERROR,
   HOST_DISABLED,
 } from '../../constants/error-messages.ts';
+import { pkg } from '../../expose.ts';
 import * as memCache from '../cache/memory/index.ts';
 import { resetCache } from '../cache/repository/index.ts';
 import * as hostRules from '../host-rules.ts';
+import { applyDefaultHeaders } from './http.ts';
 import { Http, HttpError } from './index.ts';
 import * as queue from './queue.ts';
 import * as throttle from './throttle.ts';
@@ -24,6 +27,85 @@ describe('util/http/index', () => {
     queue.clear();
     throttle.clear();
     resetCache();
+  });
+
+  describe('applyDefaultHeaders', () => {
+    afterEach(() => {
+      GlobalConfig.reset();
+    });
+
+    it('sets default user-agent', () => {
+      const options = {};
+      applyDefaultHeaders(options);
+      expect(options).toMatchObject({
+        headers: {
+          'user-agent': `Renovate/${pkg.version} (https://github.com/renovatebot/renovate)`,
+        },
+      });
+    });
+
+    it('uses userAgent when set as a plain string', () => {
+      GlobalConfig.set({ userAgent: 'custom-agent/1.0' });
+      const options = {};
+      applyDefaultHeaders(options);
+      expect(options).toMatchObject({
+        headers: { 'user-agent': 'custom-agent/1.0' },
+      });
+    });
+
+    it('interpolates {{renovateVersion}} in a custom userAgent template', () => {
+      GlobalConfig.set({
+        userAgent: 'MyRenovate/{{renovateVersion}} (my-instance)',
+      });
+      const options = {};
+      applyDefaultHeaders(options);
+      expect(options).toMatchObject({
+        headers: {
+          'user-agent': `MyRenovate/${pkg.version} (my-instance)`,
+        },
+      });
+    });
+
+    it('renders unknown template variables as empty string', () => {
+      GlobalConfig.set({ userAgent: 'my-agent/{{unknownVar}}' });
+      const options = {};
+      applyDefaultHeaders(options);
+      expect(options).toMatchObject({
+        headers: { 'user-agent': 'my-agent/' },
+      });
+    });
+
+    it('supports Handlebars helpers in userAgent template', () => {
+      GlobalConfig.set({
+        userAgent: '{{lowercase "MyRenovate"}}/{{renovateVersion}}',
+      });
+      const options = {};
+      applyDefaultHeaders(options);
+      expect(options).toMatchObject({
+        headers: { 'user-agent': `myrenovate/${pkg.version}` },
+      });
+    });
+
+    it('supports conditional Handlebars syntax in userAgent template', () => {
+      GlobalConfig.set({
+        userAgent:
+          '{{#if renovateVersion}}Renovate/{{renovateVersion}}{{else}}Renovate{{/if}}',
+      });
+      const options = {};
+      applyDefaultHeaders(options);
+      expect(options).toMatchObject({
+        headers: { 'user-agent': `Renovate/${pkg.version}` },
+      });
+    });
+
+    it('preserves existing headers', () => {
+      const options = { headers: { authorization: 'Bearer token' } };
+      applyDefaultHeaders(options);
+      expect(options.headers).toMatchObject({
+        authorization: 'Bearer token',
+        'user-agent': `Renovate/${pkg.version} (https://github.com/renovatebot/renovate)`,
+      });
+    });
   });
 
   it('get', async () => {
@@ -263,9 +345,9 @@ describe('util/http/index', () => {
     let bar = false;
     let baz = false;
 
-    const dummyResolve = (_: unknown): void => {
+    function dummyResolve(_: unknown): void {
       return;
-    };
+    }
 
     interface MockedRequestResponse<T = unknown> {
       request: Promise<T>;
@@ -274,7 +356,7 @@ describe('util/http/index', () => {
       resolveResponse: (_?: T) => void;
     }
 
-    const mockRequestResponse = (): MockedRequestResponse => {
+    function mockRequestResponse(): MockedRequestResponse {
       let resolveRequest = dummyResolve;
       const request = new Promise((resolve) => {
         resolveRequest = resolve;
@@ -286,7 +368,7 @@ describe('util/http/index', () => {
       });
 
       return { request, resolveRequest, response, resolveResponse };
-    };
+    }
 
     const {
       request: fooReq,
@@ -575,7 +657,7 @@ describe('util/http/index', () => {
           .get('/')
           .reply(200, JSON.stringify({ x: 2, y: 2 }));
 
-        const { body }: HttpResponse<string> = await http.getJson(
+        const { body }: HttpResponse = await http.getJson(
           'http://renovate.com',
           { headers: { accept: 'application/json' } },
           Some,
@@ -649,7 +731,7 @@ describe('util/http/index', () => {
           .post('/')
           .reply(200, JSON.stringify({ x: 2, y: 2 }));
 
-        const { body }: HttpResponse<string> = await http.postJson(
+        const { body }: HttpResponse = await http.postJson(
           'http://renovate.com',
           Some,
         );
@@ -759,7 +841,9 @@ describe('util/http/index', () => {
         .get('/')
         .reply(200, '!@#$%^');
 
-      await expect(http.getToml('http://renovate.com')).rejects.toThrow();
+      await expect(http.getToml('http://renovate.com')).rejects.toThrow(
+        'Invalid TOML',
+      );
     });
   });
 });

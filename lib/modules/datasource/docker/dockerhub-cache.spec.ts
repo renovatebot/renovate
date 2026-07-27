@@ -15,6 +15,7 @@ function oldCacheData(): DockerHubCacheData {
         name: '1',
         tag_last_pushed: '2022-01-01',
         digest: 'sha256:111',
+        images: [],
       },
       2: {
         id: 2,
@@ -22,6 +23,10 @@ function oldCacheData(): DockerHubCacheData {
         name: '2',
         tag_last_pushed: '2022-01-02',
         digest: 'sha256:222',
+        images: [
+          { architecture: 'amd64', digest: 'sha256:222-amd64' },
+          { architecture: 'arm64', digest: 'sha256:222-arm64' },
+        ],
       },
       3: {
         id: 3,
@@ -29,6 +34,7 @@ function oldCacheData(): DockerHubCacheData {
         name: '3',
         tag_last_pushed: '2022-01-03',
         digest: 'sha256:333',
+        images: [],
       },
     },
     updatedAt: '2022-01-01',
@@ -42,6 +48,7 @@ function newItem(): DockerHubTag {
     name: '4',
     tag_last_pushed: '2022-01-04',
     digest: 'sha256:444',
+    images: [],
   };
 }
 
@@ -58,10 +65,6 @@ function newCacheData(): DockerHubCacheData {
 }
 
 describe('modules/datasource/docker/dockerhub-cache', () => {
-  beforeEach(() => {
-    vi.resetAllMocks();
-  });
-
   const dockerRepository = 'foo/bar';
 
   it('initializes empty cache', async () => {
@@ -188,6 +191,24 @@ describe('modules/datasource/docker/dockerhub-cache', () => {
 
     await cache.save();
     expect(packageCache.set).toHaveBeenCalled();
+  });
+
+  it('returns cached digest for a known tag', async () => {
+    packageCache.get.mockResolvedValue(oldCacheData());
+    const cache = await DockerHubCache.init(dockerRepository);
+
+    expect(cache.getDigestForTag('2')).toBe('sha256:222');
+    expect(cache.getDigestForTag('nope')).toBeNull();
+  });
+
+  it('returns cached arch-specific digest', async () => {
+    packageCache.get.mockResolvedValue(oldCacheData());
+    const cache = await DockerHubCache.init(dockerRepository);
+
+    expect(cache.getArchDigestForTag('2', 'amd64')).toBe('sha256:222-amd64');
+    expect(cache.getArchDigestForTag('2', 'arm64')).toBe('sha256:222-arm64');
+    expect(cache.getArchDigestForTag('2', 'unknown')).toBeNull();
+    expect(cache.getArchDigestForTag('nope', 'amd64')).toBeNull();
   });
 
   it('reconciles from empty cache', async () => {
