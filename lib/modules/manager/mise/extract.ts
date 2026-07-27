@@ -61,9 +61,9 @@ export async function extractPackageFile(
     deps.push(extractToolEntry(name, toolData, 'tools'));
   }
 
-  for (const taskData of Object.values(misefile.tasks)) {
+  for (const [taskName, taskData] of Object.entries(misefile.tasks)) {
     for (const [name, toolData] of Object.entries(taskData.tools ?? {})) {
-      deps.push(extractToolEntry(name, toolData, 'task-tools'));
+      deps.push(extractToolEntry(name, toolData, `task-${taskName}-tools`));
     }
   }
 

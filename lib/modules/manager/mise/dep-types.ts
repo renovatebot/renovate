@@ -5,8 +5,7 @@ export const knownDepTypes = [
     depType: 'tools',
     description: 'A tool defined under the top-level `[tools]` table',
   },
-  {
-    depType: 'task-tools',
-    description: 'A tool defined under `tasks.*.tools`',
-  },
 ] as const satisfies readonly DepTypeMetadata[];
+
+export const supportsDynamicDepTypesNote =
+  'Tools defined under `tasks.<name>.tools` produce dynamic `depType` values in the form `task-<name>-tools`, where `<name>` is the task name (e.g. `task-lint-tools`).';

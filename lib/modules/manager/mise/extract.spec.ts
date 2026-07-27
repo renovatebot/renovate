@@ -1315,12 +1315,10 @@ describe('modules/manager/mise/extract', () => {
   describe('extractPackageFile() with tasks', () => {
     const RUST_197 = {
       depName: 'rust',
-      depType: 'task-tools',
       currentValue: '1.97.0',
     };
     const ZOXIDE = {
       depName: 'cargo:zoxide',
-      depType: 'task-tools',
       currentValue: '0.9.6',
     };
 
@@ -1332,7 +1330,7 @@ describe('modules/manager/mise/extract', () => {
           run = "cargo build"
           tools = {rust = "1.97.0"}
         `,
-        expectedDeps: [RUST_197],
+        expectedDeps: [{ ...RUST_197, depType: 'task-build-tools' }],
       },
       {
         description: 'dotted key tools under [tasks.build]',
@@ -1340,7 +1338,7 @@ describe('modules/manager/mise/extract', () => {
           [tasks.build]
           tools.rust = "1.97.0"
         `,
-        expectedDeps: [RUST_197],
+        expectedDeps: [{ ...RUST_197, depType: 'task-build-tools' }],
       },
       {
         description: 'subtable [tasks.<name>.tools]',
@@ -1349,7 +1347,10 @@ describe('modules/manager/mise/extract', () => {
           rust = "1.97.0"
           "cargo:zoxide" = "0.9.6"
         `,
-        expectedDeps: [RUST_197, ZOXIDE],
+        expectedDeps: [
+          { ...RUST_197, depType: 'task-build-tools' },
+          { ...ZOXIDE, depType: 'task-build-tools' },
+        ],
       },
       {
         description: 'top level and task tools',
@@ -1362,7 +1363,11 @@ describe('modules/manager/mise/extract', () => {
         `,
         expectedDeps: [
           { ...RUST_197, depType: 'tools' },
-          { ...RUST_197, currentValue: '1.80.0' },
+          {
+            ...RUST_197,
+            depType: 'task-lint-tools',
+            currentValue: '1.80.0',
+          },
         ],
       },
       {
