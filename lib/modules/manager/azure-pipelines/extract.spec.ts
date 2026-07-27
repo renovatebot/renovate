@@ -519,13 +519,13 @@ describe('modules/manager/azure-pipelines/extract', () => {
     });
 
     it('should extract steps wrapped in a template expression conditional', () => {
-      const packageFile = [
-        'steps:',
-        "- ${{ if eq(variables.foo, 'bar') }}:",
-        '  - task: Bash@3',
-        '    inputs:',
-        "      script: 'echo Hello World'",
-      ].join('\n');
+      const packageFile = codeBlock`
+        steps:
+        - \${{ if eq(variables.foo, 'bar') }}:
+          - task: Bash@3
+            inputs:
+              script: 'echo Hello World'
+      `;
       const res = extractPackageFile(packageFile, azurePipelinesFilename, {
         repository: 'repo',
       });
@@ -539,13 +539,13 @@ describe('modules/manager/azure-pipelines/extract', () => {
     });
 
     it('should extract jobs wrapped in a template expression conditional', () => {
-      const packageFile = [
-        'jobs:',
-        "- ${{ if eq(parameters.environment, 'prod') }}:",
-        '  - job: build',
-        '    steps:',
-        '      - task: Bash@3',
-      ].join('\n');
+      const packageFile = codeBlock`
+        jobs:
+        - \${{ if eq(parameters.environment, 'prod') }}:
+          - job: build
+            steps:
+              - task: Bash@3
+      `;
       const res = extractPackageFile(packageFile, azurePipelinesFilename, {
         repository: 'repo',
       });
@@ -559,15 +559,15 @@ describe('modules/manager/azure-pipelines/extract', () => {
     });
 
     it('should extract stages wrapped in a template expression conditional', () => {
-      const packageFile = [
-        'stages:',
-        "- ${{ if eq(parameters.environment, 'prod') }}:",
-        '  - stage: deploy',
-        '    jobs:',
-        '      - job: build',
-        '        steps:',
-        '          - task: Bash@3',
-      ].join('\n');
+      const packageFile = codeBlock`
+        stages:
+        - \${{ if eq(parameters.environment, 'prod') }}:
+          - stage: deploy
+            jobs:
+              - job: build
+                steps:
+                  - task: Bash@3
+      `;
       const res = extractPackageFile(packageFile, azurePipelinesFilename, {
         repository: 'repo',
       });
@@ -581,13 +581,13 @@ describe('modules/manager/azure-pipelines/extract', () => {
     });
 
     it('should extract containers wrapped in a template expression each', () => {
-      const packageFile = [
-        'resources:',
-        '  containers:',
-        '  - ${{ each container in parameters.containers }}:',
-        '    - container: linux',
-        '      image: ubuntu:20.04',
-      ].join('\n');
+      const packageFile = codeBlock`
+        resources:
+          containers:
+          - \${{ each container in parameters.containers }}:
+            - container: linux
+              image: ubuntu:20.04
+      `;
       const res = extractPackageFile(packageFile, azurePipelinesFilename, {
         repository: 'repo',
       });
@@ -601,12 +601,12 @@ describe('modules/manager/azure-pipelines/extract', () => {
     });
 
     it('should extract items mixed with template expression conditionals', () => {
-      const packageFile = [
-        'steps:',
-        "- ${{ if eq(variables.foo, 'bar') }}:",
-        '  - task: Bash@3',
-        '- task: PowerShell@2',
-      ].join('\n');
+      const packageFile = codeBlock`
+        steps:
+        - \${{ if eq(variables.foo, 'bar') }}:
+          - task: Bash@3
+        - task: PowerShell@2
+      `;
       const res = extractPackageFile(packageFile, azurePipelinesFilename, {
         repository: 'repo',
       });
@@ -625,11 +625,11 @@ describe('modules/manager/azure-pipelines/extract', () => {
     });
 
     it('should ignore simple insertion expressions and extract remaining steps', () => {
-      const packageFile = [
-        'steps:',
-        '- ${{ parameters.mySteps }}',
-        '- task: Bash@3',
-      ].join('\n');
+      const packageFile = codeBlock`
+        steps:
+        - \${{ parameters.mySteps }}
+        - task: Bash@3
+      `;
       const res = extractPackageFile(packageFile, azurePipelinesFilename, {
         repository: 'repo',
       });
@@ -643,12 +643,12 @@ describe('modules/manager/azure-pipelines/extract', () => {
     });
 
     it('should extract items from nested template expression conditionals', () => {
-      const packageFile = [
-        'steps:',
-        '- ${{ if condition1 }}:',
-        '  - ${{ if condition2 }}:',
-        '    - task: Bash@3',
-      ].join('\n');
+      const packageFile = codeBlock`
+        steps:
+        - \${{ if condition1 }}:
+          - \${{ if condition2 }}:
+            - task: Bash@3
+      `;
       const res = extractPackageFile(packageFile, azurePipelinesFilename, {
         repository: 'repo',
       });
