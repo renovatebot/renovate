@@ -1313,14 +1313,8 @@ describe('modules/manager/mise/extract', () => {
 
   // https://mise.jdx.dev/tasks/task-configuration.html#task-properties
   describe('extractPackageFile() with tasks', () => {
-    const RUST_197 = {
-      depName: 'rust',
-      currentValue: '1.97.0',
-    };
-    const ZOXIDE = {
-      depName: 'cargo:zoxide',
-      currentValue: '0.9.6',
-    };
+    const RUST_197 = { depName: 'rust', currentValue: '1.97.0' };
+    const ZOXIDE = { depName: 'cargo:zoxide', currentValue: '0.9.6' };
 
     it.each([
       {
