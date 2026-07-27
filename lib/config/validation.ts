@@ -49,7 +49,6 @@ import { parsePreset } from './presets/parse.ts';
 import type {
   AllConfig,
   AllowedParents,
-  RenovateConfig,
   RenovateOptions,
   StatusCheckKey,
   ValidationMessage,
@@ -382,7 +381,7 @@ export async function validateConfig(
                   if (isObject(subval)) {
                     const subValidation = await validateConfig(
                       configType,
-                      subval as RenovateConfig,
+                      subval,
                       isPreset,
                       `${currentPath}[${subIndex}]`,
                     );
@@ -475,7 +474,7 @@ export async function validateConfig(
                   for (const [subIndex, packageRule] of val.entries()) {
                     if (isObject(packageRule)) {
                       const { config: resolved } = await resolveConfigPresets(
-                        packageRule as RenovateConfig,
+                        packageRule,
                         config,
                       );
                       const resolvedRule = migrateConfig({
@@ -1113,7 +1112,7 @@ async function validateGlobalConfig(
           if (isObject(subval)) {
             const subValidation = await validateConfig(
               'global',
-              subval as AllConfig,
+              subval,
               false,
               `${currentPath}[${subIndex}]`,
             );

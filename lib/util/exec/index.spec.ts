@@ -934,7 +934,7 @@ describe('util/exec/index', () => {
       getHermitEnvsMock.mockResolvedValue(hermitEnvs);
     }
 
-    await exec(cmd as string, inOpts);
+    await exec(cmd, inOpts);
 
     expect(actualCmd).toEqual(outCommand);
     expect(actualOpts).toEqual(outOpts);

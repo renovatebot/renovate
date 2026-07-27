@@ -1,7 +1,7 @@
 import _slugify from 'slugify';
 import { regEx } from '../../../../../util/regex.ts';
 
-const slugify = _slugify as unknown as typeof _slugify.default;
+const slugify = _slugify;
 
 export function slugifyUrl(url: string): string {
   const r = regEx(/[:/.]+/g);

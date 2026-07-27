@@ -10,7 +10,7 @@ import type { StageName } from '../../types/skip-reason.ts';
 import { compile } from '../template/index.ts';
 import matchers from './matchers.ts';
 
-const slugify = _slugify as unknown as typeof _slugify.default;
+const slugify = _slugify;
 
 async function matchesRule(
   inputConfig: PackageRuleInputConfig,
