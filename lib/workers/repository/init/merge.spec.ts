@@ -642,6 +642,40 @@ describe('workers/repository/init/merge', () => {
 
       expect(res.packageRules).toMatchObject([repoEntryRule]);
     });
+
+    it('resolves custom presets from repositoryEntryConfig', async () => {
+      migrateAndValidate.migrateAndValidate.mockImplementation((_, c) =>
+        Promise.resolve({ ...c, warnings: [], errors: [] }),
+      );
+      migrate.migrateConfig.mockImplementation((c) => ({
+        isMigrated: true,
+        migratedConfig: c,
+      }));
+
+      const customPresetRule = {
+        matchPackageNames: ['customPresetDep'],
+        enabled: false,
+      };
+
+      scm.getFileList.mockResolvedValue([]);
+      fs.readLocalFile.mockResolvedValue(null);
+
+      const inputConfig: RepositoryWorkerConfig = {
+        ...config,
+        customPresets: {
+          myPreset: {
+            packageRules: [customPresetRule],
+          },
+        },
+        repositoryEntryConfig: {
+          extends: ['custom:myPreset'],
+        },
+      };
+
+      const res = await mergeRenovateConfig(inputConfig);
+
+      expect(res.packageRules).toMatchObject([customPresetRule]);
+    });
   });
 
   describe('setNpmTokenInNpmrc', () => {
