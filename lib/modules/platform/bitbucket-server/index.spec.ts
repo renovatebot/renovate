@@ -1,22 +1,22 @@
 import { isTruthy } from '@sindresorhus/is';
 import { codeBlock } from 'common-tags';
 import semver from 'semver';
-import { mockDeep } from 'vitest-mock-extended';
+import { hostRules } from '~test/host-rules.ts';
 import * as httpMock from '~test/http-mock.ts';
-import { git, hostRules, logger } from '~test/util.ts';
+import { fakeSha, git, logger } from '~test/util.ts';
 import {
   REPOSITORY_CHANGED,
   REPOSITORY_EMPTY,
   REPOSITORY_NOT_FOUND,
 } from '../../../constants/error-messages.ts';
 import * as repoCache from '../../../util/cache/repository/index.ts';
-import type { LongCommitSha } from '../../../util/schema-utils/git.ts';
 import { ensureTrailingSlash, parseUrl } from '../../../util/url.ts';
 import type { ReattemptPlatformAutomergeConfig } from '../types.ts';
 import * as bitbucket from './index.ts';
 
 vi.mock('timers/promises');
-vi.mock('../../../util/host-rules.ts', () => mockDeep());
+
+const commitSha = fakeSha('commitSha');
 
 function sshLink(projectKey: string, repositorySlug: string): string {
   return `ssh://git@stash.renovatebot.com:7999/${projectKey.toLowerCase()}/${repositorySlug}.git`;
@@ -120,7 +120,7 @@ function prMock(
     toRef: {
       id: 'refs/heads/master',
       displayId: 'master',
-      latestCommit: '0d9c7726c3d628b7e28af234595cfd20febdbf8e',
+      latestCommit: commitSha,
       // Removed this with the idea it's not needed
       // repository: {},
     },
@@ -212,10 +212,8 @@ describe('modules/platform/bitbucket-server/index', () => {
     beforeEach(async () => {
       git.branchExists.mockReturnValue(true);
       git.isBranchBehindBase.mockResolvedValue(false);
-      git.getBranchCommit.mockReturnValue(
-        '0d9c7726c3d628b7e28af234595cfd20febdbf8e' as LongCommitSha,
-      );
-      hostRules.find.mockReturnValue({
+      git.getBranchCommit.mockReturnValue(commitSha);
+      hostRules.add({
         username,
         password,
       });
@@ -2177,7 +2175,7 @@ describe('modules/platform/bitbucket-server/index', () => {
             toRef: {
               id: 'refs/heads/new_base',
               displayId: 'new_base',
-              latestCommit: '0d9c7726c3d628b7e28af234595cfd20febdbf8e',
+              latestCommit: commitSha,
             },
           })
           .get(
@@ -2548,9 +2546,7 @@ describe('modules/platform/bitbucket-server/index', () => {
       it('should be success', async () => {
         const scope = await initRepo();
         scope
-          .get(
-            `${urlPath}/rest/build-status/1.0/commits/stats/0d9c7726c3d628b7e28af234595cfd20febdbf8e`,
-          )
+          .get(`${urlPath}/rest/build-status/1.0/commits/stats/${commitSha}`)
           .reply(200, {
             successful: 3,
             inProgress: 0,
@@ -2563,9 +2559,7 @@ describe('modules/platform/bitbucket-server/index', () => {
       it('should be pending', async () => {
         const scope = await initRepo();
         scope
-          .get(
-            `${urlPath}/rest/build-status/1.0/commits/stats/0d9c7726c3d628b7e28af234595cfd20febdbf8e`,
-          )
+          .get(`${urlPath}/rest/build-status/1.0/commits/stats/${commitSha}`)
           .reply(200, {
             successful: 3,
             inProgress: 1,
@@ -2575,9 +2569,7 @@ describe('modules/platform/bitbucket-server/index', () => {
         expect(await bitbucket.getBranchStatus('somebranch')).toBe('yellow');
 
         scope
-          .get(
-            `${urlPath}/rest/build-status/1.0/commits/stats/0d9c7726c3d628b7e28af234595cfd20febdbf8e`,
-          )
+          .get(`${urlPath}/rest/build-status/1.0/commits/stats/${commitSha}`)
           .reply(200, {
             successful: 0,
             inProgress: 0,
@@ -2590,9 +2582,7 @@ describe('modules/platform/bitbucket-server/index', () => {
       it('should be failed', async () => {
         const scope = await initRepo();
         scope
-          .get(
-            `${urlPath}/rest/build-status/1.0/commits/stats/0d9c7726c3d628b7e28af234595cfd20febdbf8e`,
-          )
+          .get(`${urlPath}/rest/build-status/1.0/commits/stats/${commitSha}`)
           .reply(200, {
             successful: 1,
             inProgress: 1,
@@ -2602,9 +2592,7 @@ describe('modules/platform/bitbucket-server/index', () => {
         expect(await bitbucket.getBranchStatus('somebranch')).toBe('red');
 
         scope
-          .get(
-            `${urlPath}/rest/build-status/1.0/commits/stats/0d9c7726c3d628b7e28af234595cfd20febdbf8e`,
-          )
+          .get(`${urlPath}/rest/build-status/1.0/commits/stats/${commitSha}`)
           .replyWithError('requst-failed');
 
         expect(await bitbucket.getBranchStatus('somebranch')).toBe('red');
@@ -2624,7 +2612,7 @@ describe('modules/platform/bitbucket-server/index', () => {
         const scope = await initRepo();
         scope
           .get(
-            `${urlPath}/rest/build-status/1.0/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e?limit=100`,
+            `${urlPath}/rest/build-status/1.0/commits/${commitSha}?limit=100`,
           )
           .reply(200, {
             isLastPage: true,
@@ -2646,7 +2634,7 @@ describe('modules/platform/bitbucket-server/index', () => {
         const scope = await initRepo();
         scope
           .get(
-            `${urlPath}/rest/build-status/1.0/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e?limit=100`,
+            `${urlPath}/rest/build-status/1.0/commits/${commitSha}?limit=100`,
           )
           .reply(200, {
             isLastPage: true,
@@ -2668,7 +2656,7 @@ describe('modules/platform/bitbucket-server/index', () => {
         const scope = await initRepo();
         scope
           .get(
-            `${urlPath}/rest/build-status/1.0/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e?limit=100`,
+            `${urlPath}/rest/build-status/1.0/commits/${commitSha}?limit=100`,
           )
           .reply(200, {
             isLastPage: true,
@@ -2690,7 +2678,7 @@ describe('modules/platform/bitbucket-server/index', () => {
         const scope = await initRepo();
         scope
           .get(
-            `${urlPath}/rest/build-status/1.0/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e?limit=100`,
+            `${urlPath}/rest/build-status/1.0/commits/${commitSha}?limit=100`,
           )
           .replyWithError('requst-failed');
 
@@ -2700,7 +2688,7 @@ describe('modules/platform/bitbucket-server/index', () => {
 
         scope
           .get(
-            `${urlPath}/rest/build-status/1.0/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e?limit=100`,
+            `${urlPath}/rest/build-status/1.0/commits/${commitSha}?limit=100`,
           )
           .reply(200, {
             isLastPage: true,
@@ -2718,20 +2706,16 @@ describe('modules/platform/bitbucket-server/index', () => {
         const scope = await initRepo();
         scope
           .get(
-            `${urlPath}/rest/build-status/1.0/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e?limit=100`,
+            `${urlPath}/rest/build-status/1.0/commits/${commitSha}?limit=100`,
           )
           .twice()
           .reply(200, {
             isLastPage: true,
             values: [{ key: 'context-1', state: 'SUCCESSFUL' }],
           })
-          .post(
-            `${urlPath}/rest/build-status/1.0/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e`,
-          )
+          .post(`${urlPath}/rest/build-status/1.0/commits/${commitSha}`)
           .reply(200)
-          .get(
-            `${urlPath}/rest/build-status/1.0/commits/stats/0d9c7726c3d628b7e28af234595cfd20febdbf8e`,
-          )
+          .get(`${urlPath}/rest/build-status/1.0/commits/stats/${commitSha}`)
           .reply(200, {});
 
         await expect(
@@ -2748,20 +2732,16 @@ describe('modules/platform/bitbucket-server/index', () => {
         const scope = await initRepo();
         scope
           .get(
-            `${urlPath}/rest/build-status/1.0/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e?limit=100`,
+            `${urlPath}/rest/build-status/1.0/commits/${commitSha}?limit=100`,
           )
           .twice()
           .reply(200, {
             isLastPage: true,
             values: [{ key: 'context-1', state: 'SUCCESSFUL' }],
           })
-          .post(
-            `${urlPath}/rest/build-status/1.0/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e`,
-          )
+          .post(`${urlPath}/rest/build-status/1.0/commits/${commitSha}`)
           .reply(200)
-          .get(
-            `${urlPath}/rest/build-status/1.0/commits/stats/0d9c7726c3d628b7e28af234595cfd20febdbf8e`,
-          )
+          .get(`${urlPath}/rest/build-status/1.0/commits/stats/${commitSha}`)
           .reply(200, {});
 
         await expect(
@@ -2778,20 +2758,16 @@ describe('modules/platform/bitbucket-server/index', () => {
         const scope = await initRepo();
         scope
           .get(
-            `${urlPath}/rest/build-status/1.0/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e?limit=100`,
+            `${urlPath}/rest/build-status/1.0/commits/${commitSha}?limit=100`,
           )
           .twice()
           .reply(200, {
             isLastPage: true,
             values: [{ key: 'context-1', state: 'SUCCESSFUL' }],
           })
-          .post(
-            `${urlPath}/rest/build-status/1.0/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e`,
-          )
+          .post(`${urlPath}/rest/build-status/1.0/commits/${commitSha}`)
           .reply(200)
-          .get(
-            `${urlPath}/rest/build-status/1.0/commits/stats/0d9c7726c3d628b7e28af234595cfd20febdbf8e`,
-          )
+          .get(`${urlPath}/rest/build-status/1.0/commits/stats/${commitSha}`)
           .reply(200, {});
 
         await expect(
@@ -2808,20 +2784,16 @@ describe('modules/platform/bitbucket-server/index', () => {
         const scope = await initRepo();
         scope
           .get(
-            `${urlPath}/rest/build-status/1.0/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e?limit=100`,
+            `${urlPath}/rest/build-status/1.0/commits/${commitSha}?limit=100`,
           )
           .twice()
           .reply(200, {
             isLastPage: true,
             values: [{ key: 'context-1', state: 'SUCCESSFUL' }],
           })
-          .post(
-            `${urlPath}/rest/build-status/1.0/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e`,
-          )
+          .post(`${urlPath}/rest/build-status/1.0/commits/${commitSha}`)
           .reply(200)
-          .get(
-            `${urlPath}/rest/build-status/1.0/commits/stats/0d9c7726c3d628b7e28af234595cfd20febdbf8e`,
-          )
+          .get(`${urlPath}/rest/build-status/1.0/commits/stats/${commitSha}`)
           .reply(200, {});
 
         await expect(
@@ -2838,15 +2810,13 @@ describe('modules/platform/bitbucket-server/index', () => {
         const scope = await initRepo();
         scope
           .get(
-            `${urlPath}/rest/build-status/1.0/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e?limit=100`,
+            `${urlPath}/rest/build-status/1.0/commits/${commitSha}?limit=100`,
           )
           .reply(200, {
             isLastPage: true,
             values: [{ key: 'context-1', state: 'SUCCESSFUL' }],
           })
-          .post(
-            `${urlPath}/rest/build-status/1.0/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e`,
-          )
+          .post(`${urlPath}/rest/build-status/1.0/commits/${commitSha}`)
           .replyWithError('requst-failed');
 
         await expect(
@@ -2863,7 +2833,7 @@ describe('modules/platform/bitbucket-server/index', () => {
         const scope = await initRepo();
         scope
           .get(
-            `${urlPath}/rest/build-status/1.0/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e?limit=100`,
+            `${urlPath}/rest/build-status/1.0/commits/${commitSha}?limit=100`,
           )
           .reply(200, {
             isLastPage: true,
@@ -3545,10 +3515,8 @@ describe('modules/platform/bitbucket-server/index', () => {
     beforeEach(async () => {
       git.branchExists.mockReturnValue(true);
       git.isBranchBehindBase.mockResolvedValue(false);
-      git.getBranchCommit.mockReturnValue(
-        '0d9c7726c3d628b7e28af234595cfd20febdbf8e' as LongCommitSha,
-      );
-      hostRules.find.mockReturnValue({
+      git.getBranchCommit.mockReturnValue(commitSha);
+      hostRules.add({
         username,
         password,
       });

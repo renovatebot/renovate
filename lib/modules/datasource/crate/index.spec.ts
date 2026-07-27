@@ -9,7 +9,10 @@ import { Fixtures } from '~test/fixtures.ts';
 import * as httpMock from '~test/http-mock.ts';
 import { partial } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
-import type { RepoGlobalConfig } from '../../../config/types.ts';
+import type {
+  InternalGlobalConfigOptions,
+  RepoGlobalConfig,
+} from '../../../config/types.ts';
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages.ts';
 import * as memCache from '../../../util/cache/memory/index.ts';
 import * as git from '../../../util/git/index.ts';
@@ -53,9 +56,9 @@ function setupGitMocks(delayMs?: number): {
         }
 
         const path = `${clonePath}/my/pk/mypkg`;
-        fs.mkdirSync(upath.dirname(path), { recursive: true });
-        fs.writeFileSync(path, Fixtures.get('mypkg'), { encoding: 'utf8' });
-        fs.writeFileSync(
+        await fs.mkdir(upath.dirname(path), { recursive: true });
+        await fs.writeFile(path, Fixtures.get('mypkg'), { encoding: 'utf8' });
+        await fs.writeFile(
           `${clonePath}/config.json`,
           JSON.stringify({ dl: 'https://example.com/crates' }),
           { encoding: 'utf8' },
@@ -124,7 +127,7 @@ describe('modules/datasource/crate/index', () => {
 
   describe('getReleases', () => {
     let tmpDir: DirectoryResult | null;
-    let adminConfig: RepoGlobalConfig;
+    let adminConfig: RepoGlobalConfig & InternalGlobalConfigOptions;
 
     beforeEach(async () => {
       tmpDir = await dir({ unsafeCleanup: true });
@@ -502,18 +505,20 @@ describe('modules/datasource/crate/index', () => {
       const mockClone = vi
         .fn()
         .mockName('clone')
-        .mockImplementation((_registryUrl: string, clonePath: string, opts) => {
-          if (typeof opts !== 'undefined' && Object.hasOwn(opts, '--depth')) {
-            return Promise.reject(
-              new Error(
+        .mockImplementation(
+          async (_registryUrl: string, clonePath: string, opts) => {
+            if (typeof opts !== 'undefined' && Object.hasOwn(opts, '--depth')) {
+              throw new Error(
                 'fatal: dumb http transport does not support shallow capabilities',
-              ),
-            );
-          }
-          const path = `${clonePath}/my/pk/mypkg`;
-          fs.mkdirSync(upath.dirname(path), { recursive: true });
-          fs.writeFileSync(path, Fixtures.get('mypkg'), { encoding: 'utf8' });
-        });
+              );
+            }
+            const path = `${clonePath}/my/pk/mypkg`;
+            await fs.mkdir(upath.dirname(path), { recursive: true });
+            await fs.writeFile(path, Fixtures.get('mypkg'), {
+              encoding: 'utf8',
+            });
+          },
+        );
 
       const gitMock = partial<SimpleGit>({
         clone: mockClone,

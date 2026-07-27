@@ -58,14 +58,15 @@ program
     if (opts.strict) {
       mkdocsArgs.push('--strict');
     }
-    const spawnServe = (): ExecaChildProcess =>
-      execa('uv', mkdocsArgs, {
+    function spawnServe(): ExecaChildProcess {
+      return execa('uv', mkdocsArgs, {
         cwd: 'tools/mkdocs',
         stdio: 'inherit',
         reject: false,
         maxBuffer: 20 * 1024 * 1024,
         encoding: 'utf8',
       });
+    }
 
     if (!opts.build) {
       await prepareDocs(opts);

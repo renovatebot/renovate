@@ -59,7 +59,12 @@ export async function updateArtifacts(
       updateDep.depType === 'tasks.command'
     ) {
       logger.warn(
-        `depType: "${updateDep.depType}", depName: "${updateDep.depName}" can't be updated with a lock file: "${lockFileName}"`,
+        {
+          depType: updateDep.depType,
+          depName: updateDep.depName,
+          lockFileName,
+        },
+        "Dependency can't be updated with a lock file",
       );
       return [
         {

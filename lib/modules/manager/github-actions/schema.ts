@@ -5,6 +5,8 @@ import {
   Yaml,
   withDebugMessage,
 } from '../../../util/schema-utils/index.ts';
+import type { ActionSchema } from './community.ts';
+import { actionSchema, communityActions } from './community.ts';
 
 const UsesStep = z.object({
   uses: z.string(),
@@ -65,3 +67,9 @@ const Actions = z.object({
 export const Workflow = Yaml.pipe(
   z.union([WorkFlowJobs, Actions, z.null()]),
 ).catch(withDebugMessage(null, 'Does not match schema'));
+
+export const CommunityActions = z.union(
+  Object.entries(communityActions).map(([name, cfg]) =>
+    actionSchema(name, cfg),
+  ) as [ActionSchema, ActionSchema, ...ActionSchema[]],
+);

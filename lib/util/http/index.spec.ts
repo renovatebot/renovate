@@ -345,9 +345,9 @@ describe('util/http/index', () => {
     let bar = false;
     let baz = false;
 
-    const dummyResolve = (_: unknown): void => {
+    function dummyResolve(_: unknown): void {
       return;
-    };
+    }
 
     interface MockedRequestResponse<T = unknown> {
       request: Promise<T>;
@@ -356,7 +356,7 @@ describe('util/http/index', () => {
       resolveResponse: (_?: T) => void;
     }
 
-    const mockRequestResponse = (): MockedRequestResponse => {
+    function mockRequestResponse(): MockedRequestResponse {
       let resolveRequest = dummyResolve;
       const request = new Promise((resolve) => {
         resolveRequest = resolve;
@@ -368,7 +368,7 @@ describe('util/http/index', () => {
       });
 
       return { request, resolveRequest, response, resolveResponse };
-    };
+    }
 
     const {
       request: fooReq,
