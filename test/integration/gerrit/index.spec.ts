@@ -962,4 +962,365 @@ describe('integration/gerrit/index', { timeout: 120_000 }, () => {
       }
     },
   );
+
+  describe('customPresets', () => {
+    it('applies labels when renovate.json extends a custom preset', async () => {
+      // Arrange
+      const REPO = 'test-gerrit-custom-preset-json';
+      await seed(REPO, 'test-custom-json', {
+        renovate: {
+          extends: ['config:recommended', 'custom:labeled'],
+        },
+      });
+
+      // Act
+      await renovate([REPO], {
+        customPresets: {
+          labeled: { labels: ['from-custom-json'] },
+        },
+      });
+
+      // Assert
+      const ch = findSemverChange(await getOpenChanges(REPO));
+      expect(ch).toBeDefined();
+      expect(ch!.hashtags).toContain('from-custom-json');
+    });
+
+    it('applies labels when repositories[] object entry extends a custom preset', async () => {
+      // Arrange
+      const REPO = 'test-gerrit-custom-preset-repo-entry';
+      await seed(REPO, 'test-custom-repo-entry');
+
+      // Act
+      await renovate(
+        [
+          {
+            repository: REPO,
+            extends: ['custom:labeled'],
+          },
+        ],
+        {
+          customPresets: {
+            labeled: { labels: ['from-repo-entry'] },
+          },
+        },
+      );
+
+      // Assert
+      const ch = findSemverChange(await getOpenChanges(REPO));
+      expect(ch).toBeDefined();
+      expect(ch!.hashtags).toContain('from-repo-entry');
+    });
+
+    it('merges labels from repositories[] entry and renovate.json custom presets', async () => {
+      // Arrange — addLabels so both sources contribute
+      const REPO = 'test-gerrit-custom-preset-both';
+      await seed(REPO, 'test-custom-both', {
+        renovate: {
+          extends: ['config:recommended', 'custom:fromJson'],
+        },
+      });
+
+      // Act
+      await renovate(
+        [
+          {
+            repository: REPO,
+            extends: ['custom:fromEntry'],
+          },
+        ],
+        {
+          customPresets: {
+            fromJson: { addLabels: ['from-json'] },
+            fromEntry: { addLabels: ['from-entry'] },
+          },
+        },
+      );
+
+      // Assert
+      const ch = findSemverChange(await getOpenChanges(REPO));
+      expect(ch).toBeDefined();
+      expect(ch!.hashtags).toEqual(
+        expect.arrayContaining(['from-json', 'from-entry']),
+      );
+    });
+
+    it('resolves nested custom presets', async () => {
+      // Arrange — use addLabels (mergeable); plain labels would overwrite
+      const REPO = 'test-gerrit-custom-preset-nested';
+      await seed(REPO, 'test-custom-nested', {
+        renovate: {
+          extends: ['config:recommended', 'custom:derived'],
+        },
+      });
+
+      // Act
+      await renovate([REPO], {
+        customPresets: {
+          base: { addLabels: ['from-base'] },
+          derived: {
+            extends: ['custom:base'],
+            addLabels: ['from-derived'],
+          },
+        },
+      });
+
+      // Assert
+      const ch = findSemverChange(await getOpenChanges(REPO));
+      expect(ch).toBeDefined();
+      expect(ch!.hashtags).toEqual(
+        expect.arrayContaining(['from-base', 'from-derived']),
+      );
+    });
+
+    it('substitutes custom preset parameters', async () => {
+      // Arrange
+      const REPO = 'test-gerrit-custom-preset-params';
+      await seed(REPO, 'test-custom-params', {
+        renovate: {
+          extends: ['config:recommended', 'custom:withArg(from-param)'],
+        },
+      });
+
+      // Act
+      await renovate([REPO], {
+        customPresets: {
+          withArg: { labels: ['{{arg0}}'] },
+        },
+      });
+
+      // Assert
+      const ch = findSemverChange(await getOpenChanges(REPO));
+      expect(ch).toBeDefined();
+      expect(ch!.hashtags).toContain('from-param');
+    });
+
+    it('honors ignorePresets for custom: presets', async () => {
+      // Arrange
+      const REPO = 'test-gerrit-custom-preset-ignore';
+      await seed(REPO, 'test-custom-ignore', {
+        renovate: {
+          extends: ['config:recommended', 'custom:labeled'],
+          ignorePresets: ['custom:labeled'],
+        },
+      });
+
+      // Act
+      await renovate([REPO], {
+        customPresets: {
+          labeled: { labels: ['should-be-ignored'] },
+        },
+      });
+
+      // Assert
+      const ch = findSemverChange(await getOpenChanges(REPO));
+      expect(ch).toBeDefined();
+      expect(ch!.hashtags ?? []).not.toContain('should-be-ignored');
+    });
+
+    it('applies custom presets via globalExtends', async () => {
+      // Arrange
+      const REPO = 'test-gerrit-custom-preset-global-extends';
+      await seed(REPO, 'test-custom-global-extends');
+
+      // Act
+      await renovate([REPO], {
+        customPresets: {
+          globalLabeled: { labels: ['from-global-extends'] },
+        },
+        globalExtends: ['custom:globalLabeled'],
+      });
+
+      // Assert
+      const ch = findSemverChange(await getOpenChanges(REPO));
+      expect(ch).toBeDefined();
+      expect(ch!.hashtags).toContain('from-global-extends');
+    });
+
+    it('groups deps when groupName comes from a custom preset', async () => {
+      // Arrange
+      const REPO = 'test-gerrit-custom-preset-group';
+      await seed(REPO, 'test-custom-group', {
+        deps: { semver: '7.0.0', lodash: '4.0.0' },
+        renovate: {
+          extends: ['config:recommended', 'custom:groupAll'],
+        },
+      });
+
+      // Act
+      await renovate([REPO], {
+        customPresets: {
+          groupAll: {
+            packageRules: [
+              {
+                matchPackageNames: ['*'],
+                groupName: 'all-deps',
+              },
+            ],
+          },
+        },
+      });
+
+      // Assert — both deps land in a single change
+      const changes = await getOpenChanges(REPO);
+      expect(changes).toHaveLength(1);
+      expect(changes[0].subject.toLowerCase()).toMatch(
+        regEx(/all-deps|group/i),
+      );
+    });
+
+    it('resolves custom: extends inside packageRules', async () => {
+      // Arrange — packageRule owns match*; custom preset only contributes labels
+      const REPO = 'test-gerrit-custom-preset-package-rules';
+      await seed(REPO, 'test-custom-package-rules', {
+        renovate: {
+          extends: ['config:recommended'],
+          packageRules: [
+            {
+              matchDepNames: ['semver'],
+              extends: ['custom:semverHashtag'],
+            },
+          ],
+        },
+      });
+
+      // Act
+      await renovate([REPO], {
+        customPresets: {
+          semverHashtag: {
+            labels: ['from-package-rule-preset'],
+          },
+        },
+      });
+
+      // Assert
+      const ch = findSemverChange(await getOpenChanges(REPO));
+      expect(ch).toBeDefined();
+      expect(ch!.hashtags).toContain('from-package-rule-preset');
+    });
+
+    it('does not create an update when a referenced custom preset is missing', async () => {
+      // Arrange
+      const REPO = 'test-gerrit-custom-preset-missing';
+      await seed(REPO, 'test-custom-missing', {
+        renovate: {
+          extends: ['config:recommended', 'custom:doesNotExist'],
+        },
+      });
+
+      // Act — CONFIG_VALIDATION is handled per-repo (warn); run still exits 0
+      await renovate([REPO], {
+        customPresets: {
+          otherPreset: { labels: ['unused'] },
+        },
+      });
+
+      // Assert — no update branch opened
+      expect(findSemverChange(await getOpenChanges(REPO))).toBeUndefined();
+    });
+
+    it('combines custom: with local> presets', async () => {
+      // Arrange — addLabels so both presets contribute (labels is not mergeable)
+      const PRESET_REPO = 'test-gerrit-custom-and-local-preset';
+      const CONSUMER = 'test-gerrit-custom-and-local-consumer';
+      await createAndConfigureProject(PRESET_REPO, {
+        'default.json': JSON.stringify(
+          { $schema: SCHEMA, addLabels: ['from-local'] },
+          null,
+          2,
+        ),
+      });
+      await seed(CONSUMER, 'test-custom-and-local', {
+        renovate: {
+          extends: [
+            'config:recommended',
+            'custom:labeled',
+            `local>${PRESET_REPO}`,
+          ],
+        },
+      });
+
+      // Act
+      await renovate([CONSUMER], {
+        customPresets: {
+          labeled: { addLabels: ['from-custom'] },
+        },
+      });
+
+      // Assert
+      const ch = findSemverChange(await getOpenChanges(CONSUMER));
+      expect(ch).toBeDefined();
+      expect(ch!.hashtags).toEqual(
+        expect.arrayContaining(['from-custom', 'from-local']),
+      );
+    });
+
+    it('merges repositories[] entry custom preset with packageRules labels from renovate.json', async () => {
+      // Arrange
+      const REPO = 'test-gerrit-custom-preset-entry-and-rule';
+      await seed(REPO, 'test-custom-entry-and-rule', {
+        renovate: {
+          extends: ['config:recommended'],
+          packageRules: [
+            {
+              matchDepNames: ['semver'],
+              addLabels: ['from-repo-rule'],
+            },
+          ],
+        },
+      });
+
+      // Act
+      await renovate(
+        [
+          {
+            repository: REPO,
+            extends: ['custom:entryLabeled'],
+          },
+        ],
+        {
+          customPresets: {
+            entryLabeled: { addLabels: ['from-entry-preset'] },
+          },
+        },
+      );
+
+      // Assert
+      const ch = findSemverChange(await getOpenChanges(REPO));
+      expect(ch).toBeDefined();
+      expect(ch!.hashtags).toEqual(
+        expect.arrayContaining(['from-entry-preset', 'from-repo-rule']),
+      );
+    });
+
+    it('applies the same custom preset to two repositories in one run', async () => {
+      // Arrange
+      const REPO_A = 'test-gerrit-custom-preset-multi-a';
+      const REPO_B = 'test-gerrit-custom-preset-multi-b';
+      await seed(REPO_A, 'test-custom-multi-a', {
+        renovate: {
+          extends: ['config:recommended', 'custom:shared'],
+        },
+      });
+      await seed(REPO_B, 'test-custom-multi-b', {
+        renovate: {
+          extends: ['config:recommended', 'custom:shared'],
+        },
+      });
+
+      // Act
+      await renovate([REPO_A, REPO_B], {
+        customPresets: {
+          shared: { labels: ['from-shared'] },
+        },
+      });
+
+      // Assert
+      for (const repo of [REPO_A, REPO_B]) {
+        const ch = findSemverChange(await getOpenChanges(repo));
+        expect(ch).toBeDefined();
+        expect(ch!.hashtags).toContain('from-shared');
+      }
+    });
+  });
 });
