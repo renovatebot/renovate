@@ -75,6 +75,9 @@ export const GerritLabelTypeInfo = z.object({
 });
 export type GerritLabelTypeInfo = z.infer<typeof GerritLabelTypeInfo>;
 
+/** Map of label name (e.g. "Code-Review") to its definition on a project. */
+export type GerritLabels = Record<string, GerritLabelTypeInfo>;
+
 export const GerritProjectInfo = z.object({
   id: z.string(),
   name: z.string(),

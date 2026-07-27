@@ -119,8 +119,7 @@ export class GitlabHttp extends HttpBase<GitlabHttpOptions> {
     if (
       attemptCount <= retryOptions.limit &&
       error.options.method === 'POST' &&
-      error.response?.statusCode === 409 &&
-      error.response.rawBody.toString().includes('Resource lock')
+      isRetryablePostError(error)
     ) {
       const noise = Math.random() * 100;
       return 2 ** (attemptCount - 1) * 1000 + noise;
@@ -128,4 +127,29 @@ export class GitlabHttp extends HttpBase<GitlabHttpOptions> {
 
     return super.calculateRetryDelay(retryObject);
   }
+}
+
+/**
+ * Detects transient GitLab errors on POST requests that are safe to retry:
+ *
+ * - `409` with a `Resource lock` message, which happens when concurrent
+ *   requests conflict.
+ * - `400` with a `source_branch does not exist` message, which happens when a
+ *   freshly pushed branch is not yet visible to the API due to Gitaly eventual
+ *   consistency.
+ */
+function isRetryablePostError(error: RequestError): boolean {
+  const { response } = error;
+  if (response?.statusCode === 409) {
+    return response.rawBody.toString().includes('Resource lock');
+  }
+
+  if (response?.statusCode === 400) {
+    const rawBody = response.rawBody.toString();
+    return (
+      rawBody.includes('source_branch') && rawBody.includes('does not exist')
+    );
+  }
+
+  return false;
 }

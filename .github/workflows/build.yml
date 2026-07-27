@@ -128,7 +128,7 @@ jobs:
           FILTER_SHARDS: ${{ github.event.pull_request.draft && 'true' || '' }}
           CHANGED_FILES: ${{ steps.changed-files.outputs.changed-files }}
         run: |
-          pnpm -s schedule-test-shards >> "$GITHUB_OUTPUT"
+          pnpm -s --config.verify-deps-before-run=false schedule-test-shards >> "$GITHUB_OUTPUT"
 
   setup-build:
     runs-on: ubuntu-latest

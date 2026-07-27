@@ -1205,6 +1205,71 @@ describe('workers/repository/update/branch/index', () => {
       expect(setArtifactErrorStatus).toHaveBeenCalledTimes(1);
     });
 
+    it('compiles commit trailers', async () => {
+      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce(
+        partial<PackageFilesResult>({
+          updatedPackageFiles: [partial<FileChange>()],
+        }),
+      );
+      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+        artifactErrors: [],
+        updatedArtifacts: [partial<FileChange>()],
+      });
+      const inconfig = {
+        ...config,
+        ignoreTests: true,
+        prCreation: 'not-pending',
+        commitTrailers: ['Signed-off-by: {{{gitAuthor}}}'],
+        gitAuthor: 'Renovate Bot <bot@renovateapp.com>',
+      } satisfies BranchConfig;
+      scm.getBranchCommit.mockResolvedValue(commitSha);
+
+      await branchWorker.processBranch(inconfig);
+
+      expect(commit.commitFilesToBranch).toHaveBeenCalledWith(
+        expect.objectContaining({
+          commitTrailers: ['Signed-off-by: Renovate Bot <bot@renovateapp.com>'],
+        }),
+      );
+    });
+
+    it('drops invalid commit trailers after template compilation', async () => {
+      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce(
+        partial<PackageFilesResult>({
+          updatedPackageFiles: [partial<FileChange>()],
+        }),
+      );
+      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+        artifactErrors: [],
+        updatedArtifacts: [partial<FileChange>()],
+      });
+      const inconfig = {
+        ...config,
+        ignoreTests: true,
+        prCreation: 'not-pending',
+        commitTrailers: [
+          'Signed-off-by: {{{gitAuthor}}}',
+          'Renovate-Update-Type: {{{updateType}}}',
+        ],
+        // empty gitAuthor expands to "Signed-off-by: " which is invalid
+        gitAuthor: '',
+        updateType: 'minor',
+      } satisfies BranchConfig;
+      scm.getBranchCommit.mockResolvedValue(commitSha);
+
+      await branchWorker.processBranch(inconfig);
+
+      expect(commit.commitFilesToBranch).toHaveBeenCalledWith(
+        expect.objectContaining({
+          commitTrailers: ['Renovate-Update-Type: minor'],
+        }),
+      );
+      expect(logger.warn).toHaveBeenCalledWith(
+        { invalid: ['Signed-off-by: '] },
+        'Ignoring invalid commit trailers (must be a single-line Key: value)',
+      );
+    });
+
     it('updates branch when no fingerprint match', async () => {
       expect.assertions(4);
       const setArtifactErrorStatus = vi.spyOn(

@@ -38,7 +38,7 @@ import { client } from './client.ts';
 import { GerritPrCache } from './pr-cache.ts';
 import type {
   GerritChange,
-  GerritLabelTypeInfo,
+  GerritLabels,
   GerritProjectInfo,
 } from './schema.ts';
 import { configureScm, pushForReview } from './scm.ts';
@@ -65,7 +65,7 @@ let config: {
   repository?: string;
   head?: string;
   config?: GerritProjectInfo;
-  labels: Record<string, GerritLabelTypeInfo>;
+  labels: GerritLabels;
   gerritUsername?: string;
 } = {
   labels: {},
@@ -207,7 +207,7 @@ export async function initRepo({
     gitUrl,
     config.gerritUsername!,
   );
-  configureScm(repository);
+  configureScm(repository, config.labels);
   await git.initRepo({
     url,
     cloneSubmodules,

@@ -16,6 +16,7 @@ import type {
   GerritProjectInfo,
   GerritRevisionInfo,
 } from './schema.ts';
+import { configureScm } from './scm.ts';
 import {
   REQUEST_DETAILS_FOR_PRS,
   TAG_PULL_REQUEST_BODY,
@@ -672,6 +673,7 @@ describe('modules/platform/gerrit/index', () => {
     });
 
     it('createPr() - with autoApprove', async () => {
+      configureScm('test/repo', { 'Code-Review': codeReviewLabel });
       git.pushCommit.mockResolvedValueOnce(true);
       const change = makeChange();
       clientMock.findChanges.mockResolvedValueOnce([change]);

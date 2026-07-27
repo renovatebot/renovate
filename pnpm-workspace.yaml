@@ -17,7 +17,7 @@ dedupePeers: true
 
 catalog:
   esbuild: 0.28.1
-  tar: 7.5.20
+  tar: 7.5.21
   vite: 8.1.5
 
 overrides:
@@ -50,5 +50,7 @@ minimumReleaseAgeExclude:
   - '@containerbase/eslint-plugin'
   - '@containerbase/istanbul-reports-html'
   - '@containerbase/semantic-release-pnpm'
+  # Renovate security update: tar@7.5.21
+  - tar@7.5.21
 
 provenance: true
