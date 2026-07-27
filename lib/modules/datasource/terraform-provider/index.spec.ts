@@ -1,6 +1,8 @@
 import { Fixtures } from '~test/fixtures.ts';
 import * as httpMock from '~test/http-mock.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
+import * as hostRules from '../../../util/host-rules.ts';
+import { HttpError } from '../../../util/http/index.ts';
 import { getPkgReleases } from '../index.ts';
 import { TerraformProviderDatasource } from './index.ts';
 
@@ -485,6 +487,10 @@ describe('modules/datasource/terraform-provider/index', () => {
   });
 
   describe('getProviderPackages', () => {
+    afterEach(() => {
+      hostRules.clear();
+    });
+
     it('returns flat hash list from the linux/amd64 packages map', async () => {
       httpMock
         .scope(openTofuRegistryUrl)
@@ -632,6 +638,42 @@ describe('modules/datasource/terraform-provider/index', () => {
       );
 
       await expect(res).rejects.toThrow(ExternalHostError);
+    });
+
+    it('throws when platform discovery errors', async () => {
+      httpMock
+        .scope(openTofuRegistryUrl)
+        .get('/v1/providers/hashicorp/local/2.5.1/download/linux/amd64')
+        .reply(404)
+        .get('/v1/providers/hashicorp/local/versions')
+        .reply(500);
+
+      const res = terraformProviderDatasource.getProviderPackages(
+        'hashicorp/local',
+        '2.5.1',
+      );
+
+      await expect(res).rejects.toThrow(ExternalHostError);
+    });
+
+    it('does not rewrap an ExternalHostError', async () => {
+      hostRules.add({
+        matchHost: openTofuRegistryUrl,
+        abortOnError: true,
+      });
+      httpMock
+        .scope(openTofuRegistryUrl)
+        .get('/v1/providers/hashicorp/local/2.5.1/download/linux/amd64')
+        .reply(500);
+
+      const res = terraformProviderDatasource.getProviderPackages(
+        'hashicorp/local',
+        '2.5.1',
+      );
+      const err = await res.catch((err: unknown) => err);
+
+      expect(err).toBeInstanceOf(ExternalHostError);
+      expect(err).toHaveProperty('err', expect.any(HttpError));
     });
   });
 
