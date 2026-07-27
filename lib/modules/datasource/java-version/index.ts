@@ -85,10 +85,8 @@ export class JavaVersionDatasource extends Datasource {
         releases = await this.getPageReleases(url, page);
       }
     } catch (err) {
-      if (err instanceof HttpError) {
-        if (err.response?.statusCode !== 404) {
-          throw new ExternalHostError(err);
-        }
+      if (err instanceof HttpError && err.response?.statusCode !== 404) {
+        throw new ExternalHostError(err);
       }
       this.handleGenericErrors(err);
     }

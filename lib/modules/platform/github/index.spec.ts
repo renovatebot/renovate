@@ -1,8 +1,8 @@
 import { RequestError } from 'got';
 import { DateTime } from 'luxon';
-import { mockDeep } from 'vitest-mock-extended';
+import { hostRules } from '~test/host-rules.ts';
 import * as httpMock from '~test/http-mock.ts';
-import { logger } from '~test/util.ts';
+import { fakeSha, logger } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import {
   CONFIG_GIT_URL_UNAVAILABLE,
@@ -17,9 +17,7 @@ import {
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
 import * as repository from '../../../util/cache/repository/index.ts';
 import * as _git from '../../../util/git/index.ts';
-import * as _hostRules from '../../../util/host-rules.ts';
 import { setBaseUrl } from '../../../util/http/github.ts';
-import type { LongCommitSha } from '../../../util/schema-utils/git.ts';
 import { toBase64 } from '../../../util/string.ts';
 import { hashBody } from '../pr-body.ts';
 import type {
@@ -35,11 +33,11 @@ const githubApiHost = 'https://api.github.com';
 
 vi.mock('timers/promises');
 
-vi.mock('../../../util/host-rules.ts', () => mockDeep());
 vi.mock('../../../util/http/queue.ts');
-const hostRules = vi.mocked(_hostRules);
 
 const git = vi.mocked(_git);
+
+const branchCommitSha = fakeSha('0d9c7726c3d628b7e28af234595cfd20febdbf8e');
 
 describe('modules/platform/github/index', () => {
   beforeEach(() => {
@@ -49,10 +47,8 @@ describe('modules/platform/github/index', () => {
     setBaseUrl(githubApiHost);
 
     git.isBranchBehindBase.mockResolvedValue(true);
-    git.getBranchCommit.mockReturnValue(
-      '0d9c7726c3d628b7e28af234595cfd20febdbf8e' as LongCommitSha,
-    );
-    hostRules.find.mockReturnValue({
+    git.getBranchCommit.mockReturnValue(branchCommitSha);
+    hostRules.add({
       token: '123test',
     });
 
@@ -124,11 +120,16 @@ describe('modules/platform/github/index', () => {
         renovateUsername: 'renovate-bot',
         token: 'github_pat_XXXXXX',
       });
+      expect(git.setPlatformIgnoredAuthors).toHaveBeenCalledWith([
+        'noreply@ghe.renovatebot.com',
+      ]);
     });
 
     it('should throw if user failure', async () => {
       httpMock.scope(githubApiHost).get('/user').reply(404);
-      await expect(github.initPlatform({ token: '123test' })).rejects.toThrow();
+      await expect(github.initPlatform({ token: '123test' })).rejects.toThrow(
+        'Init: Authentication failure',
+      );
     });
 
     it('should support default endpoint no email access', async () => {
@@ -163,6 +164,9 @@ describe('modules/platform/github/index', () => {
           gitAuthor: 'renovate@whitesourcesoftware.com',
         }),
       ).toMatchSnapshot();
+      expect(git.setPlatformIgnoredAuthors).toHaveBeenCalledWith([
+        'noreply@github.com',
+      ]);
     });
 
     describe('when using the default gitAuthor', () => {
@@ -371,6 +375,9 @@ describe('modules/platform/github/index', () => {
         renovateUsername: 'renovate-bot',
         token: '123test',
       });
+      expect(git.setPlatformIgnoredAuthors).toHaveBeenCalledWith([
+        'noreply@github.com',
+      ]);
     });
 
     it('should fall back to user/emails when there is no public email', async () => {
@@ -462,6 +469,9 @@ describe('modules/platform/github/index', () => {
         renovateUsername: 'my-app[bot]',
         token: 'x-access-token:ghs_123test',
       });
+      expect(git.setPlatformIgnoredAuthors).toHaveBeenCalledWith([
+        'noreply@github.com',
+      ]);
       expect(await github.initPlatform({ token: 'ghs_123test' })).toEqual({
         endpoint: 'https://api.github.com/',
         gitAuthor: 'my-app[bot] <12345+my-app[bot]@users.noreply.github.com>',
@@ -533,6 +543,9 @@ describe('modules/platform/github/index', () => {
         renovateUsername: 'my-app[bot]',
         token: 'x-access-token:ghs_123test',
       });
+      expect(git.setPlatformIgnoredAuthors).toHaveBeenCalledWith([
+        'noreply@ghe.renovatebot.com',
+      ]);
     });
 
     it('should autodetect email/user on GHE Cloud endpoint with GitHub App', async () => {
@@ -559,6 +572,9 @@ describe('modules/platform/github/index', () => {
         renovateUsername: 'my-app[bot]',
         token: 'x-access-token:ghs_123test',
       });
+      expect(git.setPlatformIgnoredAuthors).toHaveBeenCalledWith([
+        'noreply@ghe.com',
+      ]);
     });
 
     it('should support custom endpoint', async () => {
@@ -810,7 +826,7 @@ describe('modules/platform/github/index', () => {
 
     // for coverage
     it('no token', async () => {
-      hostRules.find.mockReturnValue({});
+      hostRules.clear();
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
       await expect(github.initRepo({ repository: 'some/repo' })).toResolve();
@@ -818,7 +834,8 @@ describe('modules/platform/github/index', () => {
 
     // for coverage
     it('app token', async () => {
-      hostRules.find.mockReturnValue({
+      hostRules.clear();
+      hostRules.add({
         token: 'x-access-token:123test',
       });
       const scope = httpMock.scope(githubApiHost);
@@ -1107,7 +1124,7 @@ describe('modules/platform/github/index', () => {
         });
       await expect(
         github.initRepo({ repository: 'some/repo' }),
-      ).rejects.toThrow();
+      ).rejects.toThrow('archived');
     });
 
     it('throws not-found', async () => {
@@ -1466,7 +1483,7 @@ describe('modules/platform/github/index', () => {
       number: 1,
       head: {
         ref: 'branch-1',
-        sha: '111' as LongCommitSha,
+        sha: fakeSha('111'),
         repo: { full_name: 'some/repo' },
       },
       base: { repo: { pushed_at: '' }, ref: 'repo/fork_branch' },
@@ -1483,7 +1500,7 @@ describe('modules/platform/github/index', () => {
       number: 2,
       head: {
         ref: 'branch-2',
-        sha: '222' as LongCommitSha,
+        sha: fakeSha('222'),
         repo: { full_name: 'some/repo' },
       },
       state: 'open',
@@ -1496,7 +1513,7 @@ describe('modules/platform/github/index', () => {
       number: 3,
       head: {
         ref: 'branch-3',
-        sha: '333' as LongCommitSha,
+        sha: fakeSha('333'),
         repo: { full_name: 'some/repo' },
       },
       state: 'open',
@@ -1504,10 +1521,12 @@ describe('modules/platform/github/index', () => {
       updated_at: t3,
     };
 
-    const pagePath = (x: number, perPage = 100) =>
-      `/repos/some/repo/pulls?per_page=${perPage}&state=all&sort=updated&direction=desc&page=${x}`;
-    const pageLink = (x: number) =>
-      `<${githubApiHost}${pagePath(x)}>; rel="next"`;
+    function pagePath(x: number, perPage = 100) {
+      return `/repos/some/repo/pulls?per_page=${perPage}&state=all&sort=updated&direction=desc&page=${x}`;
+    }
+    function pageLink(x: number) {
+      return `<${githubApiHost}${pagePath(x)}>; rel="next"`;
+    }
 
     it('fetches single page', async () => {
       const scope = httpMock.scope(githubApiHost);
@@ -1587,10 +1606,12 @@ describe('modules/platform/github/index', () => {
     describe('Body compaction', () => {
       type PrCache = ApiPageCache<GhRestPr>;
 
-      const prWithBody = (body: string): GhRestPr => ({
-        ...pr1,
-        body,
-      });
+      function prWithBody(body: string): GhRestPr {
+        return {
+          ...pr1,
+          body,
+        };
+      }
 
       it('compacts body from response', async () => {
         const scope = httpMock.scope(githubApiHost);
@@ -1618,7 +1639,7 @@ describe('modules/platform/github/index', () => {
         number: 1,
         head: {
           ref: 'renovate-branch',
-          sha: '111' as LongCommitSha,
+          sha: fakeSha('111'),
           repo: { full_name: 'some/repo' },
         },
         title: 'Renovate PR',
@@ -1630,7 +1651,7 @@ describe('modules/platform/github/index', () => {
         number: 2,
         head: {
           ref: 'other-branch',
-          sha: '222' as LongCommitSha,
+          sha: fakeSha('222'),
           repo: { full_name: 'some/repo' },
         },
         title: 'Other PR',
@@ -2106,18 +2127,20 @@ describe('modules/platform/github/index', () => {
   });
 
   describe('tryReuseAutoclosedPr()', () => {
+    const prSha = fakeSha('1234');
+
     it('should reopen autoclosed PR', async () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
       scope
-        .head('/repos/some/repo/git/commits/1234')
+        .head(`/repos/some/repo/git/commits/${prSha}`)
         .reply(200)
         .post('/repos/some/repo/git/refs')
         .reply(201)
         .patch('/repos/some/repo/pulls/91')
         .reply(200, {
           number: 91,
-          base: { sha: '1234' },
+          base: { sha: prSha },
           head: { ref: 'somebranch', repo: { full_name: 'some/repo' } },
           state: 'open',
           title: 'old title',
@@ -2133,7 +2156,7 @@ describe('modules/platform/github/index', () => {
           state: 'closed',
           closedAt: DateTime.now().minus({ days: 6 }).toISO(),
           sourceBranch: 'somebranch',
-          sha: '1234' as LongCommitSha,
+          sha: prSha,
         },
         'new title',
       );
@@ -2145,14 +2168,14 @@ describe('modules/platform/github/index', () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
       scope
-        .head('/repos/some/repo/git/commits/1234')
+        .head(`/repos/some/repo/git/commits/${prSha}`)
         .reply(200)
         .post('/repos/some/repo/git/refs')
         .reply(201)
         .patch('/repos/some/repo/pulls/91')
         .reply(200, {
           number: 91,
-          base: { sha: '1234' },
+          base: { sha: prSha },
           head: { ref: 'somebranch', repo: { full_name: 'some/repo' } },
           state: 'open',
           title: 'old title',
@@ -2160,7 +2183,8 @@ describe('modules/platform/github/index', () => {
         });
       await github.initRepo({ repository: 'some/repo' });
       vi.spyOn(branch, 'remoteBranchExists').mockResolvedValueOnce(false);
-      git.getBranchCommit.mockReturnValueOnce('5678' as LongCommitSha);
+      const localSha = fakeSha('5678');
+      git.getBranchCommit.mockReturnValueOnce(localSha);
 
       const pr = await github.tryReuseAutoclosedPr(
         {
@@ -2169,7 +2193,7 @@ describe('modules/platform/github/index', () => {
           state: 'closed',
           closedAt: DateTime.now().minus({ days: 6 }).toISO(),
           sourceBranch: 'somebranch',
-          sha: '1234' as LongCommitSha,
+          sha: prSha,
         },
         'new title',
       );
@@ -2177,7 +2201,7 @@ describe('modules/platform/github/index', () => {
       expect(pr).toMatchObject({
         number: 91,
         sourceBranch: 'somebranch',
-        sha: '5678',
+        sha: localSha,
       });
       expect(git.forcePushToRemote).toHaveBeenCalledExactlyOnceWith(
         'somebranch',
@@ -2189,7 +2213,7 @@ describe('modules/platform/github/index', () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
       scope
-        .head('/repos/some/repo/git/commits/1234')
+        .head(`/repos/some/repo/git/commits/${prSha}`)
         .reply(200)
         .post('/repos/some/repo/git/refs')
         .reply(201)
@@ -2206,7 +2230,7 @@ describe('modules/platform/github/index', () => {
           state: 'closed',
           closedAt: DateTime.now().minus({ days: 6 }).toISO(),
           sourceBranch: 'somebranch',
-          sha: '1234' as LongCommitSha,
+          sha: prSha,
         },
         'new title',
       );
@@ -2217,7 +2241,7 @@ describe('modules/platform/github/index', () => {
     it('aborts reopening if PR reopening fails', async () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
-      scope.head('/repos/some/repo/git/commits/1234').reply(400);
+      scope.head(`/repos/some/repo/git/commits/${prSha}`).reply(400);
 
       await github.initRepo({ repository: 'some/repo' });
 
@@ -2228,7 +2252,7 @@ describe('modules/platform/github/index', () => {
           state: 'closed',
           closedAt: DateTime.now().minus({ days: 6 }).toISO(),
           sourceBranch: 'somebranch',
-          sha: '1234' as LongCommitSha,
+          sha: prSha,
         },
         'new title',
       );
@@ -2414,9 +2438,7 @@ describe('modules/platform/github/index', () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
       scope
-        .get(
-          '/repos/some/repo/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses',
-        )
+        .get(`/repos/some/repo/commits/${branchCommitSha}/statuses`)
         .reply(200, [
           {
             context: 'context-1',
@@ -2443,9 +2465,7 @@ describe('modules/platform/github/index', () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
       scope
-        .get(
-          '/repos/some/repo/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses',
-        )
+        .get(`/repos/some/repo/commits/${branchCommitSha}/statuses`)
         .reply(200, [
           {
             context: 'context-1',
@@ -2469,9 +2489,7 @@ describe('modules/platform/github/index', () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
       scope
-        .get(
-          '/repos/some/repo/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses',
-        )
+        .get(`/repos/some/repo/commits/${branchCommitSha}/statuses`)
         .reply(200, [
           {
             context: 'context-1',
@@ -2488,9 +2506,7 @@ describe('modules/platform/github/index', () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
       scope
-        .get(
-          '/repos/some/repo/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses',
-        )
+        .get(`/repos/some/repo/commits/${branchCommitSha}/statuses`)
         .reply(200, [
           {
             context: 'some-context',
@@ -2513,9 +2529,7 @@ describe('modules/platform/github/index', () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
       scope
-        .get(
-          '/repos/some/repo/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses',
-        )
+        .get(`/repos/some/repo/commits/${branchCommitSha}/statuses`)
         .reply(200, [
           {
             context: 'context-1',
@@ -2530,15 +2544,11 @@ describe('modules/platform/github/index', () => {
             state: 'state-3',
           },
         ])
-        .post(
-          '/repos/some/repo/statuses/0d9c7726c3d628b7e28af234595cfd20febdbf8e',
-        )
+        .post(`/repos/some/repo/statuses/${branchCommitSha}`)
         .reply(200)
         .get('/repos/some/repo/commits/some-branch/status')
         .reply(200, {})
-        .get(
-          '/repos/some/repo/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses',
-        )
+        .get(`/repos/some/repo/commits/${branchCommitSha}/statuses`)
         .reply(200, {});
 
       await github.initRepo({ repository: 'some/repo' });
@@ -3421,7 +3431,7 @@ describe('modules/platform/github/index', () => {
       await github.initRepo({ repository: 'some/repo' });
       await expect(
         github.addAssignees(42, ['someuser', 'someotheruser']),
-      ).rejects.toThrow();
+      ).rejects.toThrow('Request failed with status code 404 (Not Found)');
     });
 
     it('should throw immediately on non-404 errors', async () => {
@@ -3431,7 +3441,7 @@ describe('modules/platform/github/index', () => {
       await github.initRepo({ repository: 'some/repo' });
       await expect(
         github.addAssignees(42, ['someuser', 'someotheruser']),
-      ).rejects.toThrow();
+      ).rejects.toThrow('external-host-error');
     });
   });
 
@@ -4006,7 +4016,7 @@ describe('modules/platform/github/index', () => {
         platformPrOptions: { usePlatformAutomerge: true },
       };
 
-      const mockScope = async (repoOpts: any = {}): Promise<httpMock.Scope> => {
+      async function mockScope(repoOpts: any = {}): Promise<httpMock.Scope> {
         const scope = httpMock.scope(githubApiHost);
         initRepoMock(scope, 'some/repo', repoOpts);
         scope
@@ -4016,7 +4026,7 @@ describe('modules/platform/github/index', () => {
           .reply(200, []);
         await github.initRepo({ repository: 'some/repo' });
         return scope;
-      };
+      }
 
       const graphqlGetRepo = {
         method: 'POST',
@@ -4095,9 +4105,6 @@ describe('modules/platform/github/index', () => {
           endpoint: 'https://github.company.com',
           token: '123test',
         });
-        hostRules.find.mockReturnValue({
-          token: '123test',
-        });
         await github.initRepo({ repository: 'some/repo' });
         await github.createPr(prConfig);
 
@@ -4140,9 +4147,6 @@ describe('modules/platform/github/index', () => {
         initRepoMock(scope, 'some/repo');
         await github.initPlatform({
           endpoint: 'https://github.company.com',
-          token: '123test',
-        });
-        hostRules.find.mockReturnValue({
           token: '123test',
         });
         await github.initRepo({ repository: 'some/repo' });
@@ -4776,7 +4780,7 @@ describe('modules/platform/github/index', () => {
       platformPrOptions: { usePlatformAutomerge: true },
     };
 
-    const mockScope = async (repoOpts: any = {}): Promise<httpMock.Scope> => {
+    async function mockScope(repoOpts: any = {}): Promise<httpMock.Scope> {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo', repoOpts);
       scope
@@ -4787,7 +4791,7 @@ describe('modules/platform/github/index', () => {
       scope.get('/repos/some/repo/pulls/123').reply(200, getPrResp);
       await github.initRepo({ repository: 'some/repo' });
       return scope;
-    };
+    }
 
     const graphqlGetRepo = {
       method: 'POST',
@@ -5033,9 +5037,6 @@ describe('modules/platform/github/index', () => {
       initRepoMock(scope, 'some/repo');
       await github.initPlatform({
         endpoint: 'https://github.company.com',
-        token: '123test',
-      });
-      hostRules.find.mockReturnValue({
         token: '123test',
       });
       await github.initRepo({ repository: 'some/repo' });
@@ -5503,7 +5504,9 @@ describe('modules/platform/github/index', () => {
       scope.get('/repos/some/repo/contents/file.json').reply(200, {
         content: toBase64('!@#'),
       });
-      await expect(github.getJsonFile('file.json')).rejects.toThrow();
+      await expect(github.getJsonFile('file.json')).rejects.toThrow(
+        "JSON5: invalid character '!' at 1:1",
+      );
     });
 
     it('throws on errors', async () => {
@@ -5514,32 +5517,34 @@ describe('modules/platform/github/index', () => {
         .get('/repos/some/repo/contents/file.json')
         .replyWithError('some error');
 
-      await expect(github.getJsonFile('file.json')).rejects.toThrow();
+      await expect(github.getJsonFile('file.json')).rejects.toThrow(
+        'some error',
+      );
     });
   });
 
   describe('pushFiles', () => {
+    const fetchedSha = fakeSha('0abcdef');
+
     beforeEach(() => {
       git.prepareCommit.mockImplementation(({ files }) =>
         Promise.resolve({
-          parentCommitSha: '1234567' as LongCommitSha,
-          commitSha: '7654321' as LongCommitSha,
+          parentCommitSha: fakeSha('1234567'),
+          commitSha: fakeSha('7654321'),
           files,
         }),
       );
-      git.fetchBranch.mockImplementation(() =>
-        Promise.resolve('0abcdef' as LongCommitSha),
-      );
+      git.fetchBranch.mockImplementation(() => Promise.resolve(fetchedSha));
       git.pushCommitToRenovateRef.mockResolvedValue(undefined);
       git.getCommitTreeSha.mockResolvedValue(
-        '0000000000000000000000000000000000000000' as LongCommitSha,
+        fakeSha('0000000000000000000000000000000000000000'),
       );
       git.diffCommitTree.mockResolvedValue([
         {
           path: 'foo.bar',
           mode: '100644',
           type: 'blob',
-          sha: 'abc0000000000000000000000000000000000000' as LongCommitSha,
+          sha: fakeSha('abc0000000000000000000000000000000000000'),
         },
       ]);
     });
@@ -5619,7 +5624,7 @@ describe('modules/platform/github/index', () => {
         message: 'Foobar',
       });
 
-      expect(res).toBe('0abcdef');
+      expect(res).toBe(fetchedSha);
     });
 
     it('performs rebase', async () => {
@@ -5647,7 +5652,7 @@ describe('modules/platform/github/index', () => {
         message: 'Foobar',
       });
 
-      expect(res).toBe('0abcdef');
+      expect(res).toBe(fetchedSha);
     });
 
     it('continues if rebase fails due to 422', async () => {
@@ -5677,7 +5682,7 @@ describe('modules/platform/github/index', () => {
         message: 'Foobar',
       });
 
-      expect(res).toBe('0abcdef');
+      expect(res).toBe(fetchedSha);
     });
 
     it('aborts if rebase fails due to non-422', async () => {

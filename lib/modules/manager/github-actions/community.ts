@@ -26,9 +26,9 @@ export interface CommunityActionConfig {
   withSchema?: z.ZodType<{ val: string | undefined } & Record<string, unknown>>;
 }
 
-type ActionSchema = z.ZodType<PackageDependency>;
+export type ActionSchema = z.ZodType<PackageDependency>;
 
-function actionSchema(
+export function actionSchema(
   name: string,
   { isInvalid, withSchema, ...cfg }: CommunityActionConfig,
 ): ActionSchema {
@@ -167,6 +167,10 @@ export const communityActions: Record<string, CommunityActionConfig> = {
     packageName: '', // determined from `repo` input
     withSchema: InstallBinaryWith,
   },
+  'jdx/mise-action': {
+    datasource: GithubReleasesDatasource.id,
+    packageName: 'jdx/mise',
+  },
   'oven-sh/setup-bun': {
     datasource: NpmDatasource.id,
     packageName: 'bun',
@@ -203,14 +207,13 @@ export const communityActions: Record<string, CommunityActionConfig> = {
     packageName: '', // determined from `repo` input
     withSchema: InstallBinaryWith,
   },
+  'sigstore/cosign-installer': {
+    datasource: GithubReleasesDatasource.id,
+    packageName: 'sigstore/cosign',
+    withSchema: valSchema('cosign-release'),
+  },
   'zizmorcore/zizmor-action': {
     datasource: DockerDatasource.id,
     packageName: 'ghcr.io/zizmorcore/zizmor',
   },
 };
-
-export const CommunityActions = z.union(
-  Object.entries(communityActions).map(([name, cfg]) =>
-    actionSchema(name, cfg),
-  ) as [ActionSchema, ActionSchema, ...ActionSchema[]],
-);

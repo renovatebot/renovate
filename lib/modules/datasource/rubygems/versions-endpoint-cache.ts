@@ -1,3 +1,4 @@
+import { DateTime } from 'luxon';
 import { z } from 'zod/v4';
 import { logger } from '../../../logger/index.ts';
 import { getElapsedMinutes } from '../../../util/date.ts';
@@ -70,7 +71,7 @@ function parseFullBody(body: string): VersionsEndpointResult {
     new Map<string, string[]>(),
     VersionLines.parse(body),
   );
-  const syncedAt = new Date();
+  const syncedAt = DateTime.now().toJSDate();
   const contentLength = body.length;
   const contentTail = getContentTail(body);
 
@@ -266,7 +267,7 @@ export class VersionsEndpointCache {
         oldCache.packageVersions,
         VersionLines.parse(delta),
       );
-      const syncedAt = new Date();
+      const syncedAt = DateTime.now().toJSDate();
       const contentLength = oldCache.contentLength + delta.length;
       const contentTail = getContentTail(body);
 

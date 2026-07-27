@@ -33,7 +33,6 @@ describe('util/git/private-key', () => {
   describe('writePrivateKey()', () => {
     beforeEach(() => {
       Fixtures.reset();
-      exec.exec.mockReset();
     });
 
     it('returns if no private key', async () => {
@@ -53,7 +52,7 @@ describe('util/git/private-key', () => {
           stderr: `something wrong`,
           stdout: '',
         });
-      await expect(writePrivateKey()).rejects.toThrow();
+      await expect(writePrivateKey()).rejects.toThrow('gpg-failed');
     });
 
     it('imports the private GPG key', async () => {
@@ -112,7 +111,7 @@ some-private-key with-passphrase
 `,
         passphrase,
       );
-      await expect(writePrivateKey()).rejects.toThrow();
+      await expect(writePrivateKey()).rejects.toThrow('gpg-failed');
     });
 
     it('imports SSH key with passphrase successfully', async () => {
@@ -215,8 +214,8 @@ some-private-key
         cwd: repoDir,
       });
 
-      expect(fs.existsSync(privateKeyFile)).toBeTrue();
-      expect(fs.existsSync(publicKeyFile)).toBeTrue();
+      expect(await fs.pathExists(privateKeyFile)).toBeTrue();
+      expect(await fs.pathExists(publicKeyFile)).toBeTrue();
 
       processExitSpy.mockImplementationOnce(() => undefined as never);
     });
@@ -244,16 +243,13 @@ some-private-key
       setPrivateKey(privateKey, undefined);
       await expect(writePrivateKey()).resolves.not.toThrow();
 
-      expect(fs.existsSync(privateKeyFile)).toBeTrue();
+      expect(await fs.pathExists(privateKeyFile)).toBeTrue();
     });
   });
 
   describe('base64 key encoding', () => {
     beforeEach(() => {
       Fixtures.reset();
-      exec.exec.mockReset();
-      logger.logger.warn.mockReset();
-      sanitize.addSecretForSanitizing.mockReset();
     });
 
     it('decodes base64-encoded GPG key', async () => {

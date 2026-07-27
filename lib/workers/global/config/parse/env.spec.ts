@@ -88,7 +88,7 @@ describe('workers/global/config/parse/env', () => {
       expect(res).toMatchObject({ hostRules: [{ foo: 'bar' }] });
     });
 
-    test.each`
+    it.each`
       envArg                                           | config
       ${{ RENOVATE_RECREATE_CLOSED: 'true' }}          | ${{ recreateWhen: 'always' }}
       ${{ RENOVATE_RECREATE_CLOSED: 'false' }}         | ${{ recreateWhen: 'auto' }}

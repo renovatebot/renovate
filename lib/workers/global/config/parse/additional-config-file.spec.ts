@@ -1,4 +1,5 @@
 import fs from 'node:fs';
+import { codeBlock } from 'common-tags';
 import fsExtra from 'fs-extra';
 import type { DirectoryResult } from 'tmp-promise';
 import { dir } from 'tmp-promise';
@@ -67,14 +68,18 @@ describe('workers/global/config/parse/additional-config-file', () => {
 
     it('warns if config is invalid', async () => {
       const configFile = upath.resolve(tmp.path, 'config.js');
-      const fileContent = `module.exports = {
-        "enabled": "invalid-value",
-        "prTitle":"something",
-      };`;
-      fs.writeFileSync(configFile, fileContent, { encoding: 'utf8' });
+      const fileContent = codeBlock`
+        module.exports = {
+                "enabled": "invalid-value",
+                "prTitle":"something",
+              };
+      `;
+      await fs.promises.writeFile(configFile, fileContent, {
+        encoding: 'utf8',
+      });
       await file.getConfig({ RENOVATE_ADDITIONAL_CONFIG_FILE: configFile });
       expect(logger.warn).toHaveBeenCalledTimes(2);
-      fs.unlinkSync(configFile);
+      await fs.promises.unlink(configFile);
     });
 
     it('parse and returns empty config if there is no RENOVATE_ADDITIONAL_CONFIG_FILE in env', async () => {
@@ -84,16 +89,18 @@ describe('workers/global/config/parse/additional-config-file', () => {
     it.each([
       [
         'config.invalid.js',
-        `module.exports = {
-        "platform": "github",
-        "token":"abcdef",
-        "onboarding": false,
-        "gitAuthor": "Renovate Bot <renovate@whitesourcesoftware.com>"
-        "onboardingConfig": {
-          "extends": ["config:recommended"],
-        },
-        "repositories": [ "test/test" ],
-      };`,
+        codeBlock`
+          module.exports = {
+                  "platform": "github",
+                  "token":"abcdef",
+                  "onboarding": false,
+                  "gitAuthor": "Renovate Bot <renovate@whitesourcesoftware.com>"
+                  "onboardingConfig": {
+                    "extends": ["config:recommended"],
+                  },
+                  "repositories": [ "test/test" ],
+                };
+        `,
       ],
       ['config.invalid.json5', `"invalid":`],
       ['config.invalid.yaml', `clearly: "invalid" "yaml"`],
@@ -102,10 +109,12 @@ describe('workers/global/config/parse/additional-config-file', () => {
       async (fileName, fileContent) => {
         processExitSpy.mockImplementationOnce(() => undefined as never);
         const configFile = upath.resolve(tmp.path, fileName);
-        fs.writeFileSync(configFile, fileContent, { encoding: 'utf8' });
+        await fs.promises.writeFile(configFile, fileContent, {
+          encoding: 'utf8',
+        });
         await file.getConfig({ RENOVATE_ADDITIONAL_CONFIG_FILE: configFile });
         expect(processExitSpy).toHaveBeenCalledExactlyOnceWith(1);
-        fs.unlinkSync(configFile);
+        await fs.promises.unlink(configFile);
       },
     );
 
@@ -138,7 +147,12 @@ describe('workers/global/config/parse/additional-config-file', () => {
       await file.getConfig({ RENOVATE_ADDITIONAL_CONFIG_FILE: tmpConfigFile });
 
       expect(logger.fatal).toHaveBeenCalledWith(
-        'Error parsing additional config file due to unresolved variable(s): CI_API_V4_URL is not defined',
+        {
+          err: expect.objectContaining({
+            message: 'CI_API_V4_URL is not defined',
+          }),
+        },
+        'Error parsing additional config file due to unresolved variable(s)',
       );
       expect(processExitSpy).toHaveBeenCalledExactlyOnceWith(1);
     });
@@ -149,23 +163,27 @@ describe('workers/global/config/parse/additional-config-file', () => {
     ])('fatal error and exit if %s', async (fileType, filePath) => {
       processExitSpy.mockImplementationOnce(() => undefined as never);
       const configFile = upath.resolve(tmp.path, filePath);
-      fs.writeFileSync(configFile, `{"token": "abc"}`, { encoding: 'utf8' });
+      await fs.promises.writeFile(configFile, `{"token": "abc"}`, {
+        encoding: 'utf8',
+      });
       await file.getConfig({ RENOVATE_ADDITIONAL_CONFIG_FILE: configFile });
       expect(processExitSpy).toHaveBeenCalledExactlyOnceWith(1);
 
       expect(logger.fatal).toHaveBeenCalledWith('Unsupported file type');
-      fs.unlinkSync(configFile);
+      await fs.promises.unlink(configFile);
     });
 
     it('exports env variables to environment from processEnv object', async () => {
       const configFile = upath.resolve(tmp.path, 'config2.js');
-      const fileContent1 = `module.exports = {
-        "processEnv": {
-        "SOME_KEY": "SOME_VALUE"
-        },
-        "labels": ["renovate"]
-      }`;
-      fs.writeFileSync(configFile, fileContent1, {
+      const fileContent1 = codeBlock`
+        module.exports = {
+                "processEnv": {
+                "SOME_KEY": "SOME_VALUE"
+                },
+                "labels": ["renovate"]
+              }
+      `;
+      await fs.promises.writeFile(configFile, fileContent1, {
         encoding: 'utf8',
       });
       const fileConfig = await file.getConfig({
@@ -176,21 +194,23 @@ describe('workers/global/config/parse/additional-config-file', () => {
       });
       expect(fileConfig.processEnv).toBeUndefined();
       expect(process.env.SOME_KEY).toBe('SOME_VALUE');
-      fs.unlinkSync(configFile);
+      await fs.promises.unlink(configFile);
       delete process.env.SOME_KEY;
     });
 
     it('does not export env variables to environment from processEnv object if key/value is invalid', async () => {
       const configFile = upath.resolve(tmp.path, 'config3.js');
-      const fileContent1 = `module.exports = {
-        "processEnv": {
-        "SOME_KEY": "SOME_VALUE",
-        "SOME_OTHER_KEY": true,
-        "valid_Key": "true",
-        },
-        "labels": ["renovate"]
-      }`;
-      fs.writeFileSync(configFile, fileContent1, {
+      const fileContent1 = codeBlock`
+        module.exports = {
+                "processEnv": {
+                "SOME_KEY": "SOME_VALUE",
+                "SOME_OTHER_KEY": true,
+                "valid_Key": "true",
+                },
+                "labels": ["renovate"]
+              }
+      `;
+      await fs.promises.writeFile(configFile, fileContent1, {
         encoding: 'utf8',
       });
       const fileConfig = await file.getConfig({
@@ -203,7 +223,7 @@ describe('workers/global/config/parse/additional-config-file', () => {
       expect(process.env.SOME_KEY).toBe('SOME_VALUE');
       expect(process.env.valid_Key).toBe('true');
       expect(process.env.SOME_OTHER_KEY).toBeUndefined();
-      fs.unlinkSync(configFile);
+      await fs.promises.unlink(configFile);
       delete process.env.SOME_KEY;
       delete process.env.valid_Key;
     });
