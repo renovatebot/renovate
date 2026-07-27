@@ -642,7 +642,7 @@ describe('util/git/index', { timeout: 30000 }, () => {
 
       expect(Object.keys(dates).sort()).toEqual([
         'develop',
-        'master',
+        defaultBranch,
         'renovate/binary-file',
         'renovate/branch_with_multiple_authors',
         'renovate/custom_author',
