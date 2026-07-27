@@ -402,8 +402,8 @@ importers:
         specifier: 7.1.0
         version: 7.1.0(semantic-release@25.0.8)(supports-color@7.2.0)
       '@smithy/util-stream':
-        specifier: 4.7.9
-        version: 4.7.9
+        specifier: 4.7.10
+        version: 4.7.10
       '@types/adm-zip':
         specifier: 0.5.8
         version: 0.5.8
@@ -2107,8 +2107,8 @@ packages:
     resolution: {integrity: sha512-IJdWBbTcMQ6DA0gdNhh/BwrLkDR+ADW5Kr1aZmd4k3DIF6ezMV4R2NIAmT08wQJ3yUK82thHWmC/TnK/wpMMIA==}
     engines: {node: '>=14.0.0'}
 
-  '@smithy/util-stream@4.7.9':
-    resolution: {integrity: sha512-mXmwBoZ91Pjvngg5Aoze4WubJieqbhKxBIoSCURtyAdNO3zwBgIVr53OBbClym0EMUfHpmkmdtlwDszVt6rsfw==}
+  '@smithy/util-stream@4.7.10':
+    resolution: {integrity: sha512-4BC4NZReiHMurGeBUNWqpRj4hHvrxZY9Ai7QTctIDIZWOXKjf+d6Kcf259drOqlouiLjfMhaIx+b4NQ6jJ7+1Q==}
     engines: {node: '>=18.0.0'}
 
   '@smithy/util-utf8@2.3.0':
@@ -7480,7 +7480,7 @@ snapshots:
       '@smithy/is-array-buffer': 2.2.0
       tslib: 2.8.1
 
-  '@smithy/util-stream@4.7.9':
+  '@smithy/util-stream@4.7.10':
     dependencies:
       '@smithy/core': 3.29.5
       tslib: 2.8.1
