@@ -220,6 +220,8 @@ let git: InstrumentedSimpleGit;
 let gitInitialized: boolean;
 let submodulesInitizialized: boolean;
 
+let privateKeySet = false;
+
 let platformIgnoredAuthors: string[] = [];
 
 export const GIT_MINIMUM_VERSION = '2.33.0'; // git show-current
@@ -1344,10 +1346,10 @@ export async function hasDiff(
 }
 
 async function handleCommitAuth(localDir: string): Promise<void> {
-  // Always attempt import: setPrivateKey() may be called with a key only on a
-  // later run in the same process (e.g. integration tests). writeKey() is
-  // idempotent per key instance (`keyId ??=`).
-  await writePrivateKey();
+  if (!privateKeySet) {
+    await writePrivateKey();
+    privateKeySet = true;
+  }
   await configSigningKey(localDir);
   await writeGitAuthor();
 }
