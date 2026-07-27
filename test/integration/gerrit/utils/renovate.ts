@@ -2,10 +2,7 @@ import { mkdtemp } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { isNonEmptyArray } from '@sindresorhus/is';
 import { GlobalConfig } from '../../../../lib/config/global.ts';
-import type {
-  AllConfig,
-  RenovateRepository,
-} from '../../../../lib/config/types.ts';
+import type { AllConfig } from '../../../../lib/config/types.ts';
 import {
   clearProblems,
   init as initLogger,
@@ -68,7 +65,7 @@ export function getGerritHttpStats(): GerritHttpStats {
 
 /** Run Renovate in-process via workers/global `start()`. */
 export async function renovate(
-  repositories?: RenovateRepository[],
+  repositories?: string[],
   overrides: AllConfig = {},
 ): Promise<GerritHttpStats> {
   if (!loggerReady) {
