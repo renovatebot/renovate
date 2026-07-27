@@ -1357,11 +1357,7 @@ describe('modules/manager/mise/extract', () => {
         `,
         expectedDeps: [
           { ...RUST_197, depType: 'tools' },
-          {
-            ...RUST_197,
-            depType: 'task-lint-tools',
-            currentValue: '1.80.0',
-          },
+          { ...RUST_197, depType: 'task-lint-tools', currentValue: '1.80.0' },
         ],
       },
       {
