@@ -1173,6 +1173,7 @@ describe('modules/manager/github-actions/extract', () => {
     it.each`
       sha256                                                                | currentDigest
       ${'dad54e0b843908324282b8673f9c0ebc3a4da0c49ad2da309a49bfbc918ba180'} | ${'dad54e0b843908324282b8673f9c0ebc3a4da0c49ad2da309a49bfbc918ba180'}
+      ${'DAD54E0B843908324282B8673F9C0EBC3A4DA0C49AD2DA309A49BFBC918BA180'} | ${undefined}
       ${'${{ inputs.mise-sha256 }}'}                                        | ${undefined}
       ${undefined}                                                          | ${undefined}
     `(
