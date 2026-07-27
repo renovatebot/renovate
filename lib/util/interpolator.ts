@@ -102,7 +102,6 @@ export function replaceInterpolatedValuesInObject(
     delete config[name];
   }
   for (const [key, value] of Object.entries(config)) {
-    // Presets in `customPresets` and `onboardingConfig` are applied to repositories later, which may define additional secrets and variables
     if (
       isPlainObject(value) &&
       key !== 'customPresets' &&
