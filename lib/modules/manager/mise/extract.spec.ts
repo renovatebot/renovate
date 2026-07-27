@@ -37,11 +37,13 @@ describe('modules/manager/mise/extract', () => {
         deps: [
           {
             depName: 'erlang',
+            depType: 'tools',
             currentValue: '23.3',
             datasource: 'github-tags',
           },
           {
             depName: 'node',
+            depType: 'tools',
             currentValue: '16',
             datasource: 'node-version',
           },
@@ -1311,8 +1313,16 @@ describe('modules/manager/mise/extract', () => {
 
   // https://mise.jdx.dev/tasks/task-configuration.html#task-properties
   describe('extractPackageFile() with tasks', () => {
-    const RUST_197 = { depName: 'rust', currentValue: '1.97.0' };
-    const ZOXIDE = { depName: 'cargo:zoxide', currentValue: '0.9.6' };
+    const RUST_197 = {
+      depName: 'rust',
+      depType: 'task-tools',
+      currentValue: '1.97.0',
+    };
+    const ZOXIDE = {
+      depName: 'cargo:zoxide',
+      depType: 'task-tools',
+      currentValue: '0.9.6',
+    };
 
     it.each([
       {
@@ -1350,7 +1360,10 @@ describe('modules/manager/mise/extract', () => {
           [tasks.lint.tools]
           rust = "1.80.0"
         `,
-        expectedDeps: [RUST_197, { ...RUST_197, currentValue: '1.80.0' }],
+        expectedDeps: [
+          { depName: 'rust', depType: 'tools', currentValue: '1.97.0' },
+          { ...RUST_197, currentValue: '1.80.0' },
+        ],
       },
       {
         description: 'inline table task with top level tools',
@@ -1361,7 +1374,9 @@ describe('modules/manager/mise/extract', () => {
           [tasks]
           build = { run = "cargo build" }
         `,
-        expectedDeps: [RUST_197],
+        expectedDeps: [
+          { depName: 'rust', depType: 'tools', currentValue: '1.97.0' },
+        ],
       },
       {
         description: 'string shorthand task with top level tools',
@@ -1372,7 +1387,9 @@ describe('modules/manager/mise/extract', () => {
           [tasks]
           build = "echo 'rust is a must'"
         `,
-        expectedDeps: [RUST_197],
+        expectedDeps: [
+          { depName: 'rust', depType: 'tools', currentValue: '1.97.0' },
+        ],
       },
       {
         description: 'array shorthand task with top level tools',
@@ -1383,7 +1400,9 @@ describe('modules/manager/mise/extract', () => {
           [tasks]
           test = ["echo '🦀🦀🦀'"]
         `,
-        expectedDeps: [RUST_197],
+        expectedDeps: [
+          { depName: 'rust', depType: 'tools', currentValue: '1.97.0' },
+        ],
       },
     ])(
       'extracts task tools - $description',
