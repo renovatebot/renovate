@@ -539,7 +539,7 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
           postUpgradeTasks: {
             executionMode: 'branch',
             commands: ['post-upgrade-command'],
-            fileFilters: ['*.txt', 'common-dev-assets'],
+            fileFilters: ['*'],
           },
         },
       ]);
@@ -643,7 +643,7 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
 
       it('does not mark a submodule directory executable', async () => {
         git.isFileModeEnabled.mockResolvedValue(true);
-        mockRepositoryChanges({ modified: ['common-dev-assets'] });
+        mockRepositoryChanges({ modified: ['submodule'] });
         fs.readLocalFile.mockResolvedValueOnce(null);
         fs.statLocalFile.mockResolvedValue(
           partial<Stats>({
@@ -657,7 +657,7 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
         expect(result.updatedArtifacts).toEqual([
           {
             type: 'addition',
-            path: 'common-dev-assets',
+            path: 'submodule',
             contents: null,
           },
         ]);
