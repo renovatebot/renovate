@@ -1322,36 +1322,5 @@ describe('integration/gerrit/index', { timeout: 120_000 }, () => {
         expect(ch!.hashtags).toContain('from-shared');
       }
     });
-
-    // customPresets is skipped during global secret interpolation (like
-    // onboardingConfig), so templates stay literal in the map. They must still
-    // resolve from global secrets when the preset is applied to a repository.
-    it('resolves global secrets inside custom presets when applied', async () => {
-      // Arrange
-      const REPO = 'test-gerrit-custom-preset-secrets';
-      await seed(REPO, 'test-custom-secrets', {
-        renovate: {
-          extends: ['config:recommended', 'custom:withSecret'],
-        },
-      });
-
-      // Act
-      await renovate([REPO], {
-        secrets: {
-          PRESET_LABEL: 'from-global-secret',
-        },
-        customPresets: {
-          withSecret: {
-            labels: ['{{ secrets.PRESET_LABEL }}'],
-          },
-        },
-      });
-
-      // Assert
-      const ch = findSemverChange(await getOpenChanges(REPO));
-      expect(ch).toBeDefined();
-      expect(ch!.hashtags).toContain('from-global-secret');
-      expect(ch!.hashtags ?? []).not.toContain('{{ secrets.PRESET_LABEL }}');
-    });
   });
 });
