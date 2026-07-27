@@ -35,7 +35,6 @@ export type GerritRequestDetail =
   | 'MESSAGES'
   | 'DETAILED_ACCOUNTS'
   | 'LABELS'
-  | 'DETAILED_LABELS'
   | 'CURRENT_ACTIONS'
   | 'CURRENT_REVISION'
   | 'COMMIT_FOOTERS';
