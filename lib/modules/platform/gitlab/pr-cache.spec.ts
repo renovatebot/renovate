@@ -1,3 +1,4 @@
+import { fakeSha } from '~test/util.ts';
 import * as httpMock from '../../../../test/http-mock.ts';
 import { reset as memCacheReset } from '../../../util/cache/memory/index.ts';
 import {
@@ -5,13 +6,14 @@ import {
   resetCache as repoCacheReset,
 } from '../../../util/cache/repository/index.ts';
 import { GitlabHttp, setBaseUrl } from '../../../util/http/gitlab.ts';
-import type { LongCommitSha } from '../../../util/schema-utils/git.ts';
 import { GitlabPrCache } from './pr-cache.ts';
 import type { GitLabMergeRequest } from './schema.ts';
 import type { GitlabPrCacheData } from './types.ts';
 import { prInfo } from './utils.ts';
 
 const http = new GitlabHttp();
+
+const sha = fakeSha('sha');
 
 const pr1: GitLabMergeRequest = {
   iid: 1,
@@ -26,7 +28,7 @@ const pr1: GitLabMergeRequest = {
   labels: [],
   detailed_merge_status: 'not_approved',
   description: 'a merge request',
-  sha: '0123456789abcdef0123456789abcdef01234567' as LongCommitSha,
+  sha,
   assignee: undefined,
   assignees: [],
 };
@@ -43,7 +45,7 @@ const pr2: GitLabMergeRequest = {
   labels: [],
   detailed_merge_status: 'not_approved',
   description: 'a merge request',
-  sha: '0123456789abcdef0123456789abcdef01234567' as LongCommitSha,
+  sha,
   assignee: undefined,
   assignees: [],
   reviewers: [],
@@ -61,7 +63,7 @@ const pr3: GitLabMergeRequest = {
   labels: [],
   detailed_merge_status: 'not_approved',
   description: 'a merge request',
-  sha: '0123456789abcdef0123456789abcdef01234567' as LongCommitSha,
+  sha,
   assignee: undefined,
   assignees: [],
   reviewers: [],

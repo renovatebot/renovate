@@ -20,7 +20,7 @@ export interface Range {
   companion?: Range;
 }
 
-const parse = (range: string): Range => {
+function parse(range: string): Range {
   const regExp = regEx(
     /^(?<operator>[^\d\s]+)?(?<delimiter>\s*)(?<version>[0-9a-zA-Z-.]+)$/,
   );
@@ -38,7 +38,7 @@ const parse = (range: string): Range => {
     operator: '',
     delimiter: ' ',
   };
-};
+}
 
 /** Wrapper for {@link satisfies} for {@link Range} record. */
 export function satisfiesRange(ver: string, range: Range): boolean {
@@ -94,7 +94,7 @@ export function stringifyRanges(ranges: Range[]): string {
 
 type GemRequirement = [string, Version];
 
-const ltr = (version: string, range: string): boolean => {
+function ltr(version: string, range: string): boolean {
   const gemVersion = create(version);
   if (!gemVersion) {
     logger.warn({ version }, `Invalid ruby version`);
@@ -125,6 +125,6 @@ const ltr = (version: string, range: string): boolean => {
   });
 
   return results.reduce((accumulator, value) => accumulator && value, true);
-};
+}
 
 export { ltr, parse };

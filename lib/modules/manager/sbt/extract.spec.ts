@@ -8,7 +8,9 @@ import {
 
 vi.mock('../../../util/fs/index.ts');
 
-const extractPackageFile = (content: string) => extract(content, 'build.sbt');
+function extractPackageFile(content: string) {
+  return extract(content, 'build.sbt');
+}
 
 const sbt = Fixtures.get(`sample.sbt`);
 const sbtScalaVersionVariable = Fixtures.get(`scala-version-variable.sbt`);

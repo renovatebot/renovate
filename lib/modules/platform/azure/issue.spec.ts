@@ -28,6 +28,7 @@ describe('modules/platform/azure/issue', () => {
       repository: 'test/repo',
       project: 'testProject',
       repoId: '123',
+      workItemType: 'Issue',
     } as Config;
 
     issueService = new IssueService(config);
@@ -134,6 +135,21 @@ describe('modules/platform/azure/issue', () => {
       const result = await issueService.getIssueList();
       expect(result).toEqual([]);
       expect(logger.warn).toHaveBeenCalled();
+    });
+
+    it('does not filter the query by work item type', async () => {
+      const queryByWiqlMock = vi.fn().mockResolvedValue({ workItems: [] });
+      azureApi.workItemTrackingApi.mockResolvedValue(
+        partial<IWorkItemTrackingApi>({
+          queryByWiql: queryByWiqlMock,
+        }),
+      );
+
+      await issueService.getIssueList('Test Filter');
+
+      expect(queryByWiqlMock.mock.calls[0][0].query).not.toContain(
+        'System.WorkItemType',
+      );
     });
 
     it('should map various Azure states to open/closed', async () => {
@@ -364,7 +380,13 @@ describe('modules/platform/azure/issue', () => {
       expect(createWorkItemMock).not.toHaveBeenCalled();
       expect(result).toBeNull();
       expect(logger.warn).toHaveBeenCalledWith(
-        { workItemType: 'Issue', project: 'testProject' },
+        {
+          workItemType: 'Issue',
+          availableTypes: ['Bug'],
+          project: 'testProject',
+          documentationUrl:
+            'https://docs.renovatebot.com/configuration-options/#azureworkitemtype',
+        },
         expect.stringContaining('work item type does not exist'),
       );
     });
@@ -1139,6 +1161,84 @@ describe('modules/platform/azure/issue', () => {
       });
 
       expect(getWorkItemTypeStatesMock).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('work item type configuration', () => {
+    it('uses the configured Issue work item type', async () => {
+      vi.spyOn(issueService, 'getIssueList').mockResolvedValue([]);
+
+      const createWorkItemMock = vi.fn().mockResolvedValue({ id: 123 });
+      azureApi.workItemTrackingApi.mockResolvedValue(
+        partial<IWorkItemTrackingApi>({
+          createWorkItem: createWorkItemMock,
+          getWorkItemTypes: vi.fn().mockResolvedValue([{ name: 'Issue' }]),
+        }),
+      );
+
+      await issueService.ensureIssue({ title: 'Test Issue', body: 'body' });
+
+      expect(createWorkItemMock.mock.calls[0][1]).toContainEqual({
+        op: 'add',
+        path: '/fields/System.WorkItemType',
+        value: 'Issue',
+      });
+      expect(createWorkItemMock.mock.calls[0][3]).toBe('Issue');
+    });
+
+    it('creates the work item using the configured type', async () => {
+      const taskService = new IssueService({
+        ...config,
+        workItemType: 'Task',
+      } as Config);
+      vi.spyOn(taskService, 'getIssueList').mockResolvedValue([]);
+
+      const createWorkItemMock = vi.fn().mockResolvedValue({ id: 123 });
+      azureApi.workItemTrackingApi.mockResolvedValue(
+        partial<IWorkItemTrackingApi>({
+          createWorkItem: createWorkItemMock,
+          getWorkItemTypes: vi.fn().mockResolvedValue([{ name: 'Task' }]),
+        }),
+      );
+
+      await taskService.ensureIssue({
+        title: 'Test Issue',
+        body: 'body',
+      });
+
+      expect(createWorkItemMock.mock.calls[0][1]).toContainEqual({
+        op: 'add',
+        path: '/fields/System.WorkItemType',
+        value: 'Task',
+      });
+      expect(createWorkItemMock.mock.calls[0][3]).toBe('Task');
+    });
+
+    it('resolves work item states against the configured type', async () => {
+      const taskService = new IssueService({
+        ...config,
+        workItemType: 'Task',
+      } as Config);
+      vi.spyOn(taskService, 'getIssueList').mockResolvedValue([]);
+
+      const getWorkItemTypeStatesMock = vi.fn().mockResolvedValue([]);
+      azureApi.workItemTrackingApi.mockResolvedValue(
+        partial<IWorkItemTrackingApi>({
+          createWorkItem: vi.fn().mockResolvedValue({ id: 1 }),
+          getWorkItemTypes: vi.fn().mockResolvedValue([{ name: 'Task' }]),
+          getWorkItemTypeStates: getWorkItemTypeStatesMock,
+        }),
+      );
+
+      await taskService.ensureIssue({
+        title: 'Test Issue',
+        body: 'body',
+      });
+
+      expect(getWorkItemTypeStatesMock).toHaveBeenCalledWith(
+        'testProject',
+        'Task',
+      );
     });
   });
 });
