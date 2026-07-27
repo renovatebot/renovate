@@ -340,7 +340,7 @@ export class TerraformProviderDatasource extends TerraformDatasource {
    * provider lacks that platform (404).
    * See https://github.com/opentofu/opentofu/pull/3434
    */
-  private _getProviderPackages(
+  private async _getProviderPackages(
     repository: string,
     version: string,
   ): Promise<string[] | null> {
@@ -350,31 +350,32 @@ export class TerraformProviderDatasource extends TerraformDatasource {
       repository,
     );
 
-    return this.http
-      .getJson(
-        `${baseUrl}/${version}/download/linux/amd64`,
-        OpenTofuProviderPackagesResponse,
-      )
-      .then(({ body }) => body)
-      .catch((err) => {
-        if (err instanceof HttpError && err.response?.statusCode === 404) {
-          return this._getProviderPackagesForAvailablePlatform(
-            baseUrl,
-            version,
-          );
-        }
-        throw err;
-      })
-      .catch((err) => {
-        if (err instanceof ExternalHostError) {
+    try {
+      try {
+        const { body } = await this.http.getJson(
+          `${baseUrl}/${version}/download/linux/amd64`,
+          OpenTofuProviderPackagesResponse,
+        );
+        return body;
+      } catch (err) {
+        if (!(err instanceof HttpError) || err.response?.statusCode !== 404) {
           throw err;
         }
-        logger.debug(
-          { err, repository, version },
-          `Failed to retrieve provider packages for ${repository}@${version}`,
-        );
-        throw new ExternalHostError(err);
-      });
+      }
+      return await this._getProviderPackagesForAvailablePlatform(
+        baseUrl,
+        version,
+      );
+    } catch (err) {
+      if (err instanceof ExternalHostError) {
+        throw err;
+      }
+      logger.debug(
+        { err, repository, version },
+        `Failed to retrieve provider packages for ${repository}@${version}`,
+      );
+      throw new ExternalHostError(err);
+    }
   }
 
   /**
