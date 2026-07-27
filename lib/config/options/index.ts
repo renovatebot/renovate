@@ -681,7 +681,7 @@ const options: Readonly<RenovateOptions>[] = [
     description:
       'Change this value to override the default Renovate sidecar image.',
     type: 'string',
-    default: 'ghcr.io/renovatebot/base-image:13.77.4',
+    default: 'ghcr.io/renovatebot/base-image:13.77.7',
     globalOnly: true,
     deprecationMsg:
       'The usage of `binarySource=docker` is deprecated, and will be removed in the future',
@@ -2459,6 +2459,17 @@ const options: Readonly<RenovateOptions>[] = [
       'If enabled, append a table in the commit message body describing all updates in the commit.',
     type: 'boolean',
     default: false,
+  },
+  {
+    name: 'commitTrailers',
+    description:
+      'Structured git trailers (`Key: value` lines) to add in the final block of the commit message.',
+    type: 'array',
+    subType: 'string',
+    default: null,
+    mergeable: true,
+    cli: false,
+    supportsTemplating: true,
   },
   {
     name: 'commitMessagePrefix',
