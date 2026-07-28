@@ -65,15 +65,15 @@ export async function extractPackageFile(
     return null;
   }
 
-  const toolEntries: [string, MiseTool][] = [];
+  const toolEntries: [string, MiseTool, string][] = [];
 
   for (const [name, toolData] of Object.entries(misefile.tools)) {
-    toolEntries.push([name, toolData]);
+    toolEntries.push([name, toolData, 'tools']);
   }
 
-  for (const taskData of Object.values(misefile.tasks)) {
+  for (const [taskName, taskData] of Object.entries(misefile.tasks)) {
     for (const [name, toolData] of Object.entries(taskData.tools ?? {})) {
-      toolEntries.push([name, toolData]);
+      toolEntries.push([name, toolData, `task-${taskName}-tools`]);
     }
   }
 
@@ -96,10 +96,11 @@ export async function extractPackageFile(
     }
   }
 
-  const deps = toolEntries.map(([name, toolData]) =>
+  const deps = toolEntries.map(([name, toolData, depType]) =>
     extractToolEntry(
       name,
       toolData,
+      depType,
       lockFileData ? getLockedVersion(lockFileData, name) : undefined,
     ),
   );
@@ -293,6 +294,7 @@ function getSelectorConfig(
     }
     if (ltsDatasource === JavaVersionDatasource.id) {
       return {
+        // Update this list when the OpenJDK release roadmap designates a new LTS.
         allowedVersions: '/^(?:8|11|17|21|25)(?:\\.|-|$)/',
         ignoreUnstable: true,
       };
@@ -315,9 +317,54 @@ function getSelectorConfig(
   };
 }
 
+function extractSelectorLockedDependency(
+  depName: string,
+  version: string,
+  backend: string,
+  toolName: string,
+  options: MiseToolOptions,
+  toolConfig: StaticTooling | BackendToolingConfig | null,
+  lockedVersion: string,
+  depType: string,
+): PackageDependency | null {
+  const selectorConfig = getSelectorConfig(
+    version,
+    backend,
+    toolName,
+    toolConfig?.datasource,
+    lockedVersion,
+  );
+  if (!selectorConfig) {
+    return null;
+  }
+
+  const resolvedToolConfig = getToolConfig(
+    backend,
+    toolName,
+    lockedVersion,
+    options,
+  );
+  if (!resolvedToolConfig) {
+    return null;
+  }
+
+  const comparableLockedVersion =
+    resolvedToolConfig.currentValue ?? lockedVersion;
+  return {
+    ...createDependency(depName, version, resolvedToolConfig, depType),
+    currentValue: comparableLockedVersion,
+    currentRawValue: version,
+    lockedVersion: comparableLockedVersion,
+    rangeStrategy: 'update-lockfile',
+    isLockfileOnly: true,
+    ...selectorConfig,
+  };
+}
+
 function extractToolEntry(
   name: string,
   toolData: MiseTool,
+  depType: string,
   lockedVersion?: string,
 ): PackageDependency {
   const version = parseVersion(toolData);
@@ -335,67 +382,54 @@ function extractToolEntry(
     version === null
       ? null
       : getToolConfig(backend, toolName, version, options);
-  const selectorConfig =
-    version === null
-      ? null
-      : getSelectorConfig(
-          version,
-          backend,
-          toolName,
-          toolConfig?.datasource,
-          lockedVersion,
-        );
-  const resolvedToolConfig =
-    version !== null && lockedVersion && selectorConfig
-      ? getToolConfig(backend, toolName, lockedVersion, options)
-      : toolConfig;
-  const dependency = createDependency(depName, version, resolvedToolConfig);
+  const dependency = createDependency(depName, version, toolConfig, depType);
 
-  if (
-    version === null ||
-    !lockedVersion ||
-    !selectorConfig ||
-    !resolvedToolConfig
-  ) {
-    if (lockedVersion) {
-      dependency.lockedVersion = lockedVersion;
+  if (version !== null && lockedVersion) {
+    const selectorDependency = extractSelectorLockedDependency(
+      depName,
+      version,
+      backend,
+      toolName,
+      options,
+      toolConfig,
+      lockedVersion,
+      depType,
+    );
+    if (selectorDependency) {
+      return selectorDependency;
     }
-    return dependency;
   }
 
-  const comparableLockedVersion =
-    resolvedToolConfig.currentValue ?? lockedVersion;
-  return {
-    ...dependency,
-    currentValue: comparableLockedVersion,
-    currentRawValue: version,
-    lockedVersion: comparableLockedVersion,
-    rangeStrategy: 'update-lockfile',
-    isLockfileOnly: true,
-    ...selectorConfig,
-  };
+  if (lockedVersion) {
+    return { ...dependency, lockedVersion };
+  }
+  return dependency;
 }
 
 function createDependency(
   name: string,
   version: string | null,
   config: StaticTooling | BackendToolingConfig | null,
+  depType: string,
 ): PackageDependency {
   if (version === null) {
     return {
       depName: name,
+      depType,
       skipReason: 'unspecified-version',
     };
   }
   if (config === null) {
     return {
       depName: name,
+      depType,
       skipReason: 'unsupported-datasource',
     };
   }
 
   return {
     depName: name,
+    depType,
     currentValue: version,
     // Spread the config last to override other properties
     ...config,

@@ -37,11 +37,13 @@ describe('modules/manager/mise/extract', () => {
         deps: [
           {
             depName: 'erlang',
+            depType: 'tools',
             currentValue: '23.3',
             datasource: 'github-tags',
           },
           {
             depName: 'node',
+            depType: 'tools',
             currentValue: '16',
             datasource: 'node-version',
           },
@@ -1399,6 +1401,27 @@ describe('modules/manager/mise/extract', () => {
       expect(result?.deps[3]).not.toHaveProperty('isLockfileOnly');
     });
 
+    it('leaves a selector unchanged when the locked version is unsupported', async () => {
+      const lockFile = codeBlock`
+        [[tools.java]]
+        version = "not-a-version"
+      `;
+      fs.readLocalFile.mockResolvedValueOnce(lockFile);
+      const content = codeBlock`
+        [tools]
+        java = "lts"
+      `;
+
+      const result = await extractPackageFile(content, 'mise.toml');
+
+      expect(result?.deps[0]).toMatchObject({
+        depName: 'java',
+        lockedVersion: 'not-a-version',
+        skipReason: 'unsupported-datasource',
+      });
+      expect(result?.deps[0]).not.toHaveProperty('isLockfileOnly');
+    });
+
     it('does not reinterpret a value that is exact in the lockfile', async () => {
       const lockFile = codeBlock`
         [[tools.node]]
@@ -1470,7 +1493,7 @@ describe('modules/manager/mise/extract', () => {
           run = "cargo build"
           tools = {rust = "1.97.0"}
         `,
-        expectedDeps: [RUST_197],
+        expectedDeps: [{ ...RUST_197, depType: 'task-build-tools' }],
       },
       {
         description: 'dotted key tools under [tasks.build]',
@@ -1478,7 +1501,7 @@ describe('modules/manager/mise/extract', () => {
           [tasks.build]
           tools.rust = "1.97.0"
         `,
-        expectedDeps: [RUST_197],
+        expectedDeps: [{ ...RUST_197, depType: 'task-build-tools' }],
       },
       {
         description: 'subtable [tasks.<name>.tools]',
@@ -1487,7 +1510,10 @@ describe('modules/manager/mise/extract', () => {
           rust = "1.97.0"
           "cargo:zoxide" = "0.9.6"
         `,
-        expectedDeps: [RUST_197, ZOXIDE],
+        expectedDeps: [
+          { ...RUST_197, depType: 'task-build-tools' },
+          { ...ZOXIDE, depType: 'task-build-tools' },
+        ],
       },
       {
         description: 'top level and task tools',
@@ -1498,7 +1524,10 @@ describe('modules/manager/mise/extract', () => {
           [tasks.lint.tools]
           rust = "1.80.0"
         `,
-        expectedDeps: [RUST_197, { ...RUST_197, currentValue: '1.80.0' }],
+        expectedDeps: [
+          { ...RUST_197, depType: 'tools' },
+          { ...RUST_197, depType: 'task-lint-tools', currentValue: '1.80.0' },
+        ],
       },
       {
         description: 'inline table task with top level tools',
@@ -1509,7 +1538,7 @@ describe('modules/manager/mise/extract', () => {
           [tasks]
           build = { run = "cargo build" }
         `,
-        expectedDeps: [RUST_197],
+        expectedDeps: [{ ...RUST_197, depType: 'tools' }],
       },
       {
         description: 'string shorthand task with top level tools',
@@ -1520,7 +1549,7 @@ describe('modules/manager/mise/extract', () => {
           [tasks]
           build = "echo 'rust is a must'"
         `,
-        expectedDeps: [RUST_197],
+        expectedDeps: [{ ...RUST_197, depType: 'tools' }],
       },
       {
         description: 'array shorthand task with top level tools',
@@ -1531,7 +1560,7 @@ describe('modules/manager/mise/extract', () => {
           [tasks]
           test = ["echo '🦀🦀🦀'"]
         `,
-        expectedDeps: [RUST_197],
+        expectedDeps: [{ ...RUST_197, depType: 'tools' }],
       },
     ])(
       'extracts task tools - $description',

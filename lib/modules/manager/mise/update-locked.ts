@@ -123,9 +123,7 @@ export function updateLockedDependency(
 
     const quote = currentLockedVersion.startsWith("'") ? "'" : '"';
     const replacement =
-      quote === "'"
-        ? `'${updatedVersion.replaceAll("'", "''")}'`
-        : JSON.stringify(updatedVersion);
+      quote === "'" ? `'${updatedVersion}'` : JSON.stringify(updatedVersion);
     const files = {
       [lockFile]:
         lockFileContent.slice(0, versionNode.range[0]) +

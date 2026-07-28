@@ -178,6 +178,7 @@ export interface PackageDependency<
    * version ranges but still describe a set of compatible versions.
    */
   allowedVersions?: string;
+  /** Whether unstable releases should be excluded from update candidates. */
   ignoreUnstable?: boolean;
   /** True when the dependency selector must remain unchanged in the source file. */
   isLockfileOnly?: boolean;

@@ -410,7 +410,7 @@ export async function lookupUpdates(
         versioningApi,
       ).filter((v) => {
         // Leave only compatible versions
-        if (unconstrainedValue || config.isLockfileOnly === true) {
+        if (unconstrainedValue || config.isLockfileOnly) {
           return true;
         }
         return versioningApi.isCompatible(v.version, compareValue);

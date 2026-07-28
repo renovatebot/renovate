@@ -1170,35 +1170,46 @@ describe('modules/manager/github-actions/extract', () => {
       ]);
     });
 
-    it('extracts the mise version from jdx/mise-action', () => {
-      const yamlContent = codeBlock`
+    it.each`
+      sha256                                                                | currentDigest
+      ${'dad54e0b843908324282b8673f9c0ebc3a4da0c49ad2da309a49bfbc918ba180'} | ${'dad54e0b843908324282b8673f9c0ebc3a4da0c49ad2da309a49bfbc918ba180'}
+      ${'DAD54E0B843908324282B8673F9C0EBC3A4DA0C49AD2DA309A49BFBC918BA180'} | ${undefined}
+      ${'${{ inputs.mise-sha256 }}'}                                        | ${undefined}
+      ${undefined}                                                          | ${undefined}
+    `(
+      'extracts the mise version and checksum from jdx/mise-action',
+      ({ sha256, currentDigest }) => {
+        const yamlContent = codeBlock`
         jobs:
           build:
             steps:
               - uses: jdx/mise-action@e6a8b3978addb5a52f2b4cd9d91eafa7f0ab959d # v4.2.0
                 with:
                   version: 2026.7.10
+                  ${sha256 ? `sha256: ${sha256}` : ''}
                   install_args: cargo:cargo-deny
         `;
 
-      const res = extractPackageFile(yamlContent, 'workflow.yml');
-      expect(res?.deps).toMatchObject([
-        {
-          currentDigest: 'e6a8b3978addb5a52f2b4cd9d91eafa7f0ab959d',
-          currentValue: 'v4.2.0',
-          datasource: 'github-tags',
-          depName: 'jdx/mise-action',
-          depType: 'action',
-        },
-        {
-          currentValue: '2026.7.10',
-          datasource: 'github-releases',
-          depName: 'jdx/mise',
-          depType: 'uses-with',
-          packageName: 'jdx/mise',
-        },
-      ]);
-    });
+        const res = extractPackageFile(yamlContent, 'workflow.yml');
+        expect(res?.deps).toMatchObject([
+          {
+            currentDigest: 'e6a8b3978addb5a52f2b4cd9d91eafa7f0ab959d',
+            currentValue: 'v4.2.0',
+            datasource: 'github-tags',
+            depName: 'jdx/mise-action',
+            depType: 'action',
+          },
+          {
+            ...(currentDigest ? { currentDigest } : {}),
+            currentValue: '2026.7.10',
+            datasource: 'github-release-attachments',
+            depName: 'jdx/mise',
+            depType: 'uses-with',
+            packageName: 'jdx/mise',
+          },
+        ]);
+      },
+    );
 
     it('extracts steps nested in nested parallel blocks', () => {
       const yamlContent = codeBlock`
