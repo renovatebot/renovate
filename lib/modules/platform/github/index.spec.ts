@@ -5628,7 +5628,7 @@ describe('modules/platform/github/index', () => {
       expect(res).toBe(fetchedSha);
     });
 
-    it('includes commit trailers in the platform-native commit message', async () => {
+    it('forwards a commit message that already includes trailers', async () => {
       const scope = httpMock.scope(githubApiHost);
 
       initRepoMock(scope, 'some/repo');
@@ -5658,8 +5658,11 @@ describe('modules/platform/github/index', () => {
       const res = await github.commitFiles({
         branchName: 'foo/bar',
         files: [{ type: 'addition', path: 'foo.bar', contents: 'foobar' }],
-        message: 'Foobar',
-        trailers: ['Signed-off-by: Renovate Bot <bot@renovateapp.com>'],
+        message: codeBlock`
+          Foobar
+
+          Signed-off-by: Renovate Bot <bot@renovateapp.com>
+        `,
       });
 
       expect(res).toBe(fetchedSha);

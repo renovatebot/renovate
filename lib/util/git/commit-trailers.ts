@@ -49,3 +49,30 @@ export function formatCommitMessage(
   }
   return parts.join('\n\n');
 }
+
+/**
+ * Split a commit message into body and trailing trailer lines.
+ * The trailer block is the final paragraph when every line in it is a valid
+ * `Key: value` trailer (same shape we accept for `commitTrailers`).
+ */
+export function splitCommitMessage(message: string): {
+  body: string;
+  trailers: string[];
+} {
+  // Trim a single trailing newline often left by editors / git log %B
+  const normalized = message.replace(regEx(/\n$/), '');
+  if (!normalized) {
+    return { body: '', trailers: [] };
+  }
+
+  const paragraphs = normalized.split(regEx(/\n\n+/));
+  const last = paragraphs.at(-1)!;
+  const lines = last.split('\n');
+  if (isNonEmptyArray(lines) && lines.every(isValidCommitTrailer)) {
+    return {
+      body: paragraphs.slice(0, -1).join('\n\n'),
+      trailers: lines,
+    };
+  }
+  return { body: normalized, trailers: [] };
+}

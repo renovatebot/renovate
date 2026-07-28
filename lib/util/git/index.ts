@@ -1371,7 +1371,6 @@ export async function prepareCommit({
   branchName,
   files,
   message,
-  trailers,
   force = false,
 }: CommitFilesConfig): Promise<CommitResult | null> {
   const localDir = GlobalConfig.get('localDir');
@@ -1454,7 +1453,8 @@ export async function prepareCommit({
       commitOptions['--no-verify'] = null;
     }
 
-    const commitMessage = formatCommitMessage(message, trailers);
+    // Message is expected to already include trailers (see formatCommitMessage).
+    const commitMessage = formatCommitMessage(message);
 
     const commitRes = await git.commit(commitMessage, [], commitOptions);
     if (

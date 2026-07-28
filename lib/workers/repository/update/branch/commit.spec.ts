@@ -1,3 +1,4 @@
+import { codeBlock } from 'common-tags';
 import { fakeSha, logger, scm } from '~test/util.ts';
 import { GlobalConfig } from '../../../../config/global.ts';
 import type { BranchConfig } from '../../../types.ts';
@@ -58,7 +59,7 @@ describe('workers/repository/update/branch/commit', () => {
       ]);
     });
 
-    it('passes commit trailers', async () => {
+    it('includes commit trailers in the commit message', async () => {
       config.updatedPackageFiles?.push({
         type: 'addition',
         path: 'package.json',
@@ -72,7 +73,11 @@ describe('workers/repository/update/branch/commit', () => {
 
       expect(scm.commitAndPush).toHaveBeenCalledExactlyOnceWith(
         expect.objectContaining({
-          trailers: ['Signed-off-by: Renovate Bot <bot@renovateapp.com>'],
+          message: codeBlock`
+            some commit message
+
+            Signed-off-by: Renovate Bot <bot@renovateapp.com>
+          `,
         }),
       );
     });

@@ -4,6 +4,7 @@ import {
   filterValidCommitTrailers,
   formatCommitMessage,
   isValidCommitTrailer,
+  splitCommitMessage,
 } from './commit-trailers.ts';
 
 describe('util/git/commit-trailers', () => {
@@ -113,6 +114,75 @@ describe('util/git/commit-trailers', () => {
       expect(formatCommitMessage('Update something', [])).toBe(
         'Update something',
       );
+    });
+  });
+
+  describe('splitCommitMessage', () => {
+    it('returns the whole message as body when there is no trailer block', () => {
+      expect(
+        splitCommitMessage(codeBlock`
+          Update something
+
+          Some body text
+        `),
+      ).toEqual({
+        body: codeBlock`
+          Update something
+
+          Some body text
+        `,
+        trailers: [],
+      });
+    });
+
+    it('splits a trailing trailer block from the body', () => {
+      expect(
+        splitCommitMessage(codeBlock`
+          Update something
+
+          Some body text
+
+          Signed-off-by: Renovate Bot <bot@renovateapp.com>
+          Co-authored-by: First Contributor <first@example.com>
+        `),
+      ).toEqual({
+        body: codeBlock`
+          Update something
+
+          Some body text
+        `,
+        trailers: [
+          'Signed-off-by: Renovate Bot <bot@renovateapp.com>',
+          'Co-authored-by: First Contributor <first@example.com>',
+        ],
+      });
+    });
+
+    it('treats a single-line subject with no trailers as body only', () => {
+      expect(splitCommitMessage('Update something')).toEqual({
+        body: 'Update something',
+        trailers: [],
+      });
+    });
+
+    it('handles an empty message', () => {
+      expect(splitCommitMessage('')).toEqual({ body: '', trailers: [] });
+      expect(splitCommitMessage('\n')).toEqual({ body: '', trailers: [] });
+    });
+
+    it('treats a message that is only trailers as an empty body', () => {
+      expect(
+        splitCommitMessage(codeBlock`
+          Signed-off-by: Renovate Bot <bot@renovateapp.com>
+          Change-Id: Iabc
+        `),
+      ).toEqual({
+        body: '',
+        trailers: [
+          'Signed-off-by: Renovate Bot <bot@renovateapp.com>',
+          'Change-Id: Iabc',
+        ],
+      });
     });
   });
 });

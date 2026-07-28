@@ -2251,7 +2251,7 @@ export async function getVulnerabilityAlerts(): Promise<GithubVulnerabilityAlert
 }
 
 async function pushFiles(
-  { branchName, message, trailers }: CommitFilesConfig,
+  { branchName, message }: CommitFilesConfig,
   { parentCommitSha, commitSha }: CommitResult,
 ): Promise<LongCommitSha | null> {
   try {
@@ -2283,7 +2283,9 @@ async function pushFiles(
     );
     const treeSha = treeRes.body.sha;
 
-    const commitMessage = formatCommitMessage(message, trailers);
+    // Message already includes trailers (formatted by the worker).
+    // formatCommitMessage only normalizes string | string[].
+    const commitMessage = formatCommitMessage(message);
 
     // Now we recreate the commit using the tree we recreated the step before
     const commitRes = await githubApi.postJson<{ sha: string }>(

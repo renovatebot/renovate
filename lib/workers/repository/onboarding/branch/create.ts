@@ -4,7 +4,10 @@ import { logger } from '../../../../logger/index.ts';
 import { scm } from '../../../../modules/platform/scm.ts';
 import { coerceArray } from '../../../../util/array.ts';
 import { getInheritedOrGlobal } from '../../../../util/common.ts';
-import { filterValidCommitTrailers } from '../../../../util/git/commit-trailers.ts';
+import {
+  filterValidCommitTrailers,
+  formatCommitMessage,
+} from '../../../../util/git/commit-trailers.ts';
 import { compile } from '../../../../util/template/index.ts';
 import {
   getDefaultConfigFileName,
@@ -42,7 +45,10 @@ export async function createOnboardingBranch(
   const compiledTrailers = coerceArray(config.commitTrailers).map((trailer) =>
     compile(trailer, { gitAuthor: config.gitAuthor }),
   );
-  const trailers = filterValidCommitTrailers(compiledTrailers);
+  commitMessage = formatCommitMessage(
+    commitMessage,
+    filterValidCommitTrailers(compiledTrailers),
+  );
 
   // istanbul ignore if
   if (GlobalConfig.get('dryRun')) {
@@ -67,7 +73,6 @@ export async function createOnboardingBranch(
       },
     ],
     message: commitMessage,
-    trailers,
     platformCommit: config.platformCommit,
     force: true,
     // Only needed by Gerrit platform
