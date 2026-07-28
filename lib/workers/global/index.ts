@@ -136,7 +136,7 @@ export async function validatePresets(config: AllConfig): Promise<void> {
   logger.debug('validatePresets()');
   try {
     // Pass config as baseConfig so nested extends (e.g. repositories[] object
-    // entries) can resolve custom: presets defined on the global config.
+    // entries) can resolve customPresets defined on the global config.
     await resolveConfigPresets(config, config);
   } catch (err) /* istanbul ignore next */ {
     logger.error({ err }, CONFIG_PRESETS_INVALID);

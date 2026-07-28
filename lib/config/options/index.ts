@@ -442,7 +442,7 @@ const options: Readonly<RenovateOptions>[] = [
   {
     name: 'customPresets',
     description:
-      'Define presets here which repositories can extend from using a `custom:` prefix.',
+      'Define presets here which repositories can extend from using a `custom.` prefix.',
     type: 'object',
     globalOnly: true,
     default: {},

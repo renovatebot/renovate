@@ -668,7 +668,7 @@ describe('workers/repository/init/merge', () => {
           },
         },
         repositoryEntryConfig: {
-          extends: ['custom:myPreset'],
+          extends: ['custom.myPreset'],
         },
       };
 

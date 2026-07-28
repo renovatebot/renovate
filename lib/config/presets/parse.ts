@@ -35,9 +35,9 @@ export function parsePreset(input: string): ParsedPreset {
   } else if (str.startsWith('local>')) {
     presetSource = 'local';
     str = str.substring('local>'.length);
-  } else if (str.startsWith('custom:')) {
+  } else if (str.startsWith('custom.')) {
     presetSource = 'custom';
-    str = str.substring('custom:'.length);
+    str = str.substring('custom.'.length);
   } else if (isHttpUrl(str)) {
     presetSource = 'http';
   } else if (

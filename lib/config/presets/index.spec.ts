@@ -499,7 +499,7 @@ describe('config/presets/index', () => {
           labels: ['custom-label'],
         },
       };
-      config.extends = ['custom:myPreset'];
+      config.extends = ['custom.myPreset'];
 
       const { config: res } = await presets.resolveConfigPresets(config);
 
@@ -513,7 +513,7 @@ describe('config/presets/index', () => {
     it('resolves custom presets from baseConfig only', async () => {
       // Production path: repo config has extends, global/base config has customPresets
       const repoConfig: AllConfig = {
-        extends: ['custom:myPreset'],
+        extends: ['custom.myPreset'],
       };
       const baseConfig: AllConfig = {
         customPresets: {
@@ -541,7 +541,7 @@ describe('config/presets/index', () => {
       });
 
       const { config: res } = await presets.resolveConfigPresets({
-        extends: ['custom:myPreset'],
+        extends: ['custom.myPreset'],
       });
 
       expect(res.labels).toEqual(['from-global-config']);
@@ -552,7 +552,7 @@ describe('config/presets/index', () => {
         packageRules: [
           {
             matchPackageNames: ['foo'],
-            extends: ['custom:myPreset'],
+            extends: ['custom.myPreset'],
           },
         ],
       };
@@ -580,7 +580,7 @@ describe('config/presets/index', () => {
           groupName: '{{arg0}}',
         },
       };
-      config.extends = ['custom:group(my-group)'];
+      config.extends = ['custom.group(my-group)'];
 
       const { config: res } = await presets.resolveConfigPresets(config);
 
@@ -593,11 +593,11 @@ describe('config/presets/index', () => {
           addLabels: ['base-label'],
         },
         derived: {
-          extends: ['custom:base'],
+          extends: ['custom.base'],
           addLabels: ['derived-label'],
         },
       };
-      config.extends = ['custom:derived'];
+      config.extends = ['custom.derived'];
 
       const { config: res } = await presets.resolveConfigPresets(config);
 
@@ -608,7 +608,7 @@ describe('config/presets/index', () => {
       config.customPresets = {
         myPreset: {},
       };
-      config.extends = ['custom:otherPreset'];
+      config.extends = ['custom.otherPreset'];
       let e: Error | undefined;
       try {
         await presets.resolveConfigPresets(config);
@@ -617,7 +617,7 @@ describe('config/presets/index', () => {
       }
       expect(e).toBeDefined();
       expect(e!.validationError).toBe(
-        "Cannot find preset's package (custom:otherPreset)",
+        "Cannot find preset's package (custom.otherPreset)",
       );
     });
 

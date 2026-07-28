@@ -508,7 +508,7 @@ Then in the `renovate.json` of a repository:
 
 ```json
 {
-  "extends": ["custom:myPreset"]
+  "extends": ["custom.myPreset"]
 }
 ```
 
