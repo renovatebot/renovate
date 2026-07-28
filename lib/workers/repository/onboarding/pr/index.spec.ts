@@ -155,6 +155,10 @@ describe('workers/repository/onboarding/pr/index', () => {
         // the summary groups them under a manager heading instead
         expect(prBody).not.toContain('`package.json` (npm)');
         expect(prBody).toContain('#### npm\n\n * `package.json`');
+        // in the summary view, "What to Expect" should render before "Detected Package Files"
+        expect(prBody.indexOf('### What to Expect')).toBeLessThan(
+          prBody.indexOf('### Detected Package Files'),
+        );
       });
 
       it('does not attempt to replace package files when none were detected', async () => {

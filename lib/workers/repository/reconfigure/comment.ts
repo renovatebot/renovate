@@ -71,12 +71,20 @@ export async function ensureReconfigurePrComment(
     logger.debug(
       'Reconfigure PR body exceeds platform limit, switching to summary PR list and package files',
     );
-    prBody = prBody.replace(prList, getExpectedPrListSummary(config, branches));
+    const prListSummary = getExpectedPrListSummary(config, branches);
     if (packageFilesDesc) {
-      prBody = prBody.replace(
-        packageFilesDesc,
-        `### Detected Package Files\n\n${getPackageFilesSummary(packageFiles)}`,
-      );
+      const packageFilesSummary = `### Detected Package Files\n\n${getPackageFilesSummary(packageFiles)}`;
+      const packageFilesIndex = prBody.indexOf(packageFilesDesc);
+      const prListIndex = prBody.indexOf(prList);
+      // swap positions so "What to Expect" renders before "Detected Package Files" in the summary view
+      prBody =
+        prBody.slice(0, packageFilesIndex) +
+        prListSummary +
+        prBody.slice(packageFilesIndex + packageFilesDesc.length, prListIndex) +
+        packageFilesSummary +
+        prBody.slice(prListIndex + prList.length);
+    } else {
+      prBody = prBody.replace(prList, prListSummary);
     }
   }
 
