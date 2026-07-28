@@ -27,9 +27,10 @@ To enable the `pre-commit` manager, add the following config:
 
 Alternatively, add `:enablePreCommit` to your `extends` array.
 
-Repository `rev` values pinned to a bare full SHA or 6-7 character short SHA without a frozen version comment are disabled by default, because Renovate cannot determine which tag or version the SHA belongs to.
-Prefer using a tag or version directly.
-If you need SHA pinning, add the version with `# frozen: ...`:
+### Digest pinning and updating
+
+Instead of a version tag, the `rev` field can pin a hook repository to an exact commit SHA.
+If you pin hooks this way, include the version in a `# frozen:` comment so Renovate can track updates:
 
 <!-- prettier-ignore -->
 ```yaml
@@ -39,6 +40,13 @@ repos:
     hooks:
       - id: check-yaml
 ```
+
+Renovate updates the SHA and frozen version together when a new release is available.
+This matches the format that `pre-commit autoupdate --freeze` writes.
+Renovate can update digests that use SHA1 and SHA256 algorithms, as well as short commit SHAs.
+
+Repositories pinned to a bare SHA without a `# frozen:` comment are skipped, because Renovate cannot determine which tag the SHA belongs to.
+To enable updates, add the version as a `# frozen:` comment, as shown above.
 
 ### Additional Dependencies
 
