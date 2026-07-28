@@ -1,4 +1,4 @@
-import { z } from 'zod/v3';
+import { z } from 'zod/v4';
 import { toArray } from '../../../util/array.ts';
 import { LooseArray, LooseRecord } from '../../../util/schema-utils/index.ts';
 import { trimLeadingSlash } from '../../../util/url.ts';
@@ -58,7 +58,7 @@ const GitlabIncludes = z
   .catch([]);
 
 export const GitlabDocument = z
-  .record(z.unknown())
+  .record(z.string(), z.unknown())
   .transform((obj) => {
     const { include, ...rest } = obj;
     const children = Object.values(rest);

@@ -1,6 +1,9 @@
 import _fs from 'fs-extra';
 import { GlobalConfig } from '../../../config/global.ts';
-import type { RepoGlobalConfig } from '../../../config/types.ts';
+import type {
+  InternalGlobalConfigOptions,
+  RepoGlobalConfig,
+} from '../../../config/types.ts';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
 import { ExecError } from '../../../util/exec/exec-error.ts';
 import { exec as _exec } from '../../../util/exec/index.ts';
@@ -13,7 +16,7 @@ vi.mock('fs-extra');
 const exec = vi.mocked(_exec);
 const fs = vi.mocked(_fs);
 
-const globalConfig: RepoGlobalConfig = {
+const globalConfig: RepoGlobalConfig & InternalGlobalConfigOptions = {
   localDir: '',
   binarySource: 'global',
 };

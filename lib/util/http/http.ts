@@ -2,8 +2,8 @@ import { isPlainObject, isUndefined } from '@sindresorhus/is';
 import merge from 'deepmerge';
 import type { Options, OptionsInit, RetryObject } from 'got';
 import type { Merge, SetRequired } from 'type-fest';
-import type { z } from 'zod/v3';
-import { ZodType } from 'zod/v3';
+import type { z } from 'zod/v4';
+import { ZodType } from 'zod/v4';
 import { GlobalConfig } from '../../config/global.ts';
 import { HOST_DISABLED } from '../../constants/error-messages.ts';
 import { pkg } from '../../expose.ts';
@@ -48,7 +48,7 @@ export interface InternalJsonUnsafeOptions<
 export interface InternalJsonOptions<
   Opts extends HttpOptions,
   ResT = unknown,
-  Schema extends ZodType<ResT> = ZodType<ResT>,
+  Schema extends ZodType<ResT, any> = ZodType<ResT, any>,
 > extends InternalJsonUnsafeOptions<Opts> {
   schema?: Schema;
 }
@@ -107,11 +107,11 @@ export abstract class HttpBase<
   private async request(
     requestUrl: string | URL,
     httpOptions: InternalHttpOptions,
-  ): Promise<HttpResponse<string>>;
+  ): Promise<HttpResponse>;
   private async request(
     requestUrl: string | URL,
     httpOptions: InternalHttpOptions & { responseType: 'text' },
-  ): Promise<HttpResponse<string>>;
+  ): Promise<HttpResponse>;
   private async request(
     requestUrl: string | URL,
     httpOptions: InternalHttpOptions & { responseType: 'buffer' },
@@ -297,10 +297,7 @@ export abstract class HttpBase<
     throw err;
   }
 
-  resolveUrl(
-    requestUrl: string | URL,
-    options: HttpOptions | undefined = undefined,
-  ): URL {
+  resolveUrl(requestUrl: string | URL, options?: HttpOptions): URL {
     let url = requestUrl;
 
     if (url instanceof URL) {
@@ -344,10 +341,7 @@ export abstract class HttpBase<
     }) as Promise<HttpResponse<never>>;
   }
 
-  getText(
-    url: string | URL,
-    options: HttpOptions = {},
-  ): Promise<HttpResponse<string>> {
+  getText(url: string | URL, options: HttpOptions = {}): Promise<HttpResponse> {
     return this.request(url, { ...options, responseType: 'text' });
   }
 
@@ -378,7 +372,10 @@ export abstract class HttpBase<
     return this.request<ResT>(url, { ...opts, responseType: 'json' });
   }
 
-  private async requestJson<ResT, Schema extends ZodType<ResT> = ZodType<ResT>>(
+  private async requestJson<
+    ResT,
+    Schema extends ZodType<ResT, any> = ZodType<ResT, any>,
+  >(
     method: HttpMethod,
     options: InternalJsonOptions<JSONOpts, ResT, Schema>,
   ): Promise<HttpResponse<ResT>> {
@@ -615,9 +612,9 @@ export abstract class HttpBase<
   putJson<T = unknown, Schema extends ZodType<T> = ZodType<T>>(
     arg1: string,
     arg2?: JSONOpts | Schema,
-    arg3?: ZodType,
+    arg3?: Schema,
   ): Promise<HttpResponse<T>> {
-    const args = this.resolveArgs(arg1, arg2, arg3);
+    const args = this.resolveArgs<T>(arg1, arg2, arg3);
     return this.requestJson<T>('put', args);
   }
 
@@ -728,6 +725,6 @@ export abstract class HttpBase<
       res.body = (await Toml.parseAsync(res.body)) as z.infer<Schema>;
     }
 
-    return res;
+    return res as HttpResponse<z.infer<Schema>>;
   }
 }

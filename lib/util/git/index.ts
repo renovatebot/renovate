@@ -1,5 +1,12 @@
+import { setTimeout } from 'node:timers/promises';
 import URL from 'node:url';
-import { isBoolean, isNonEmptyObject, isString } from '@sindresorhus/is';
+import {
+  isBoolean,
+  isNonEmptyArray,
+  isNonEmptyObject,
+  isNonEmptyStringAndNotWhitespace,
+  isString,
+} from '@sindresorhus/is';
 import fs from 'fs-extra';
 import { DateTime } from 'luxon';
 import semver from 'semver';
@@ -10,7 +17,6 @@ import type {
   TaskOptions,
 } from 'simple-git';
 import { ResetMode, simpleGit } from 'simple-git';
-import { setTimeout } from 'timers/promises';
 import upath from 'upath';
 import { getConfigFileNames } from '../../config/app-strings.ts';
 import { GlobalConfig } from '../../config/global.ts';
@@ -36,6 +42,8 @@ import { getEnv } from '../env.ts';
 import type { ExtraEnv } from '../exec/types.ts';
 import { getChildEnv } from '../exec/utils.ts';
 import { newlineRegex, regEx } from '../regex.ts';
+import type { LongCommitSha } from '../schema-utils/git.ts';
+import { toLongCommitSha } from '../schema-utils/git.ts';
 import { matchRegexOrGlobList } from '../string-match.ts';
 import { logWarningIfUnicodeHiddenCharactersInPackageFile } from '../unicode.ts';
 import { getGitEnvironmentVariables } from './auth.ts';
@@ -64,13 +72,14 @@ import { configSigningKey, writePrivateKey } from './private-key.ts';
 import type {
   CommitFilesConfig,
   CommitResult,
+  DiffTreeItem,
+  GitObjectType,
   LocalConfig,
-  LongCommitSha,
   PushFilesConfig,
   StatusResult,
   StorageConfig,
-  TreeItem,
 } from './types.ts';
+import { GitTreeMode } from './types.ts';
 import {
   getCachedUpdateDateResult,
   setCachedUpdateDateResult,
@@ -214,6 +223,8 @@ let submodulesInitizialized: boolean;
 
 let privateKeySet = false;
 
+let platformIgnoredAuthors: string[] = [];
+
 export const GIT_MINIMUM_VERSION = '2.33.0'; // git show-current
 
 export async function validateGitVersion(): Promise<boolean> {
@@ -266,8 +277,15 @@ async function fetchBranchCommits(preferUpstream = true): Promise<void> {
       .map((line) => line.trim().split(regEx(/\s+/)))
       .forEach(([sha, ref]) => {
         config.branchCommits[ref.replace('refs/heads/', '')] =
-          sha as LongCommitSha;
+          toLongCommitSha(sha);
       });
+
+    if (isNonEmptyObject(config.virtualBranches)) {
+      for (const [name, branch] of Object.entries(config.virtualBranches)) {
+        config.branchCommits[name] = branch.sha;
+      }
+    }
+
     logger.trace({ branchCommits: config.branchCommits }, 'branch commits');
   } catch (err) /* v8 ignore next -- TODO: add test #40625 */ {
     const errChecked = checkForPlatformFailure(err);
@@ -282,8 +300,8 @@ async function fetchBranchCommits(preferUpstream = true): Promise<void> {
   }
 }
 
-export async function fetchRevSpec(revSpec: string): Promise<void> {
-  await gitRetry(() => git.fetch(['origin', revSpec]));
+export async function fetchRevSpec(...revSpec: string[]): Promise<void> {
+  await gitRetry(() => git.fetch(['origin', ...revSpec]));
 }
 
 export async function initRepo(args: StorageConfig): Promise<void> {
@@ -291,6 +309,7 @@ export async function initRepo(args: StorageConfig): Promise<void> {
   config.ignoredAuthors = [];
   config.additionalBranches = [];
   config.branchIsModified = {};
+  config.virtualBranches ??= {};
   git = instrumentGit(
     createSimpleGit({ config: { baseDir: GlobalConfig.get('localDir') } }),
   );
@@ -382,6 +401,10 @@ export function setUserRepoConfig({
   setGitAuthor(gitAuthor);
 }
 
+export function setPlatformIgnoredAuthors(emails: string[] = []): void {
+  platformIgnoredAuthors = emails;
+}
+
 export async function getSubmodules(): Promise<string[]> {
   try {
     return (
@@ -436,9 +459,24 @@ export function isCloned(): boolean {
   return gitInitialized;
 }
 
+export async function isFileModeEnabled(): Promise<boolean> {
+  if (config.fileModeEnabled === undefined) {
+    const value = await git.raw([
+      'config',
+      '--type=bool',
+      '--default=true',
+      '--get',
+      'core.fileMode',
+    ]);
+    config.fileModeEnabled = value.trim() === 'true';
+  }
+
+  return config.fileModeEnabled;
+}
+
 export const syncGit = withInstrumenting(
   { name: 'syncGit' },
-  async function (): Promise<void> {
+  async (): Promise<void> => {
     if (gitInitialized) {
       if (getEnv().RENOVATE_X_CLEAR_HOOKS) {
         await git.raw(['config', 'core.hooksPath', '/dev/null']);
@@ -499,12 +537,12 @@ export const syncGit = withInstrumenting(
               opts.push(e[0], `${e[1]!}`),
             );
           }
-          const emptyDirAndClone = async (): Promise<void> => {
+          async function emptyDirAndClone(): Promise<void> {
             await instrument(`fs.emptyDir(${localDir})`, () =>
               fs.emptyDir(localDir),
             );
             await git.clone(config.url, '.', opts);
-          };
+          }
           await gitRetry(() =>
             instrument('emptyDirAndClone', emptyDirAndClone),
           );
@@ -523,9 +561,9 @@ export const syncGit = withInstrumenting(
       });
     }
     try {
-      config.currentBranchSha = (
-        await git.raw(['rev-parse', 'HEAD'])
-      ).trim() as LongCommitSha;
+      config.currentBranchSha = toLongCommitSha(
+        (await git.raw(['rev-parse', 'HEAD'])).trim(),
+      );
     } catch (err) /* v8 ignore next -- TODO: add test #40625 */ {
       if (err.message?.includes('fatal: not a git repository')) {
         throw new Error(REPOSITORY_CHANGED);
@@ -576,9 +614,22 @@ export const syncGit = withInstrumenting(
       });
     }
 
-    config.currentBranchSha = (
-      await git.revparse('HEAD')
-    ).trim() as LongCommitSha;
+    if (isNonEmptyObject(config.virtualBranches)) {
+      const virtualBranches = config.virtualBranches;
+      await instrument('fetch virtual branches', async () => {
+        const refSpecs = Object.entries(virtualBranches).map(
+          ([name, branch]) => `${branch.ref}:${remoteBranchRef(name)}`,
+        );
+        await fetchRevSpec(...refSpecs);
+        logger.debug(
+          `Fetched ${Object.keys(virtualBranches).length} virtual branches`,
+        );
+      });
+    }
+
+    config.currentBranchSha = toLongCommitSha(
+      (await git.revparse('HEAD')).trim(),
+    );
     logger.debug(`Current branch SHA: ${config.currentBranchSha}`);
   },
 );
@@ -635,6 +686,38 @@ export async function getBranchUpdateDate(
   }
 }
 
+// Return the commit date of every remote branch tip.
+// Uses a a single `git for-each-ref` call, instead of spawning a `git show` per branch
+export async function getAllBranchUpdateDates(): Promise<
+  Record<string, DateTime>
+> {
+  logger.debug('getAllBranchUpdateDates');
+  await syncGit();
+
+  const raw = await git.raw([
+    'for-each-ref',
+    '--format=%(refname:short) %(committerdate:iso-strict)',
+    // NOTE that using `origin/` (instead of i.e. `origin/*`) allows us to capture nested branch names
+    'refs/remotes/origin/',
+  ]);
+  const result: Record<string, DateTime> = {};
+  const lines = raw
+    .trim()
+    .split(newlineRegex)
+    .filter(isNonEmptyStringAndNotWhitespace);
+  for (const line of lines) {
+    const [refShort, isoDate] = line.split(' ');
+    // refs/remotes/origin/HEAD, the default branch for the repo, is shortened to `origin`
+    if (refShort === 'origin') {
+      continue;
+    }
+
+    const branchName = refShort.replace(regEx(/^origin\//), '');
+    result[branchName] = DateTime.fromISO(isoDate).toUTC();
+  }
+  return result;
+}
+
 export async function getCommitMessages(): Promise<string[]> {
   logger.debug('getCommitMessages');
   // v8 ignore else -- TODO: add test #40625
@@ -667,9 +750,9 @@ export async function checkoutBranch(
       ),
     );
     config.currentBranch = branchName;
-    config.currentBranchSha = (
-      await git.raw(['rev-parse', 'HEAD'])
-    ).trim() as LongCommitSha;
+    config.currentBranchSha = toLongCommitSha(
+      (await git.raw(['rev-parse', 'HEAD'])).trim(),
+    );
     const latestCommitDate = await getCommitDate(config.currentBranchSha);
     // v8 ignore else -- TODO: add test #40625
     if (latestCommitDate) {
@@ -704,9 +787,9 @@ export async function checkoutBranchFromRemote(
       git.checkoutBranch(branchName, `${remoteName}/${branchName}`),
     );
     config.currentBranch = branchName;
-    config.currentBranchSha = (
-      await git.revparse('HEAD')
-    ).trim() as LongCommitSha;
+    config.currentBranchSha = toLongCommitSha(
+      (await git.revparse('HEAD')).trim(),
+    );
     logger.debug(`Checked out branch ${branchName} from remote ${remoteName}`);
     config.branchCommits[branchName] = config.currentBranchSha;
     return config.currentBranchSha;
@@ -722,6 +805,43 @@ export async function checkoutBranchFromRemote(
     }
     throw err;
   }
+}
+
+/**
+ * Returns the remote-tracking ref path for a virtual branch.
+ */
+export function remoteBranchRef(branchName: string): string {
+  return `refs/remotes/origin/${branchName}`;
+}
+
+/**
+ * Returns whether the given branch is tracked as a virtual branch.
+ */
+function isVirtualBranch(branchName: string): boolean {
+  return branchName in config.virtualBranches;
+}
+
+/**
+ * Set a virtual branch's remote-tracking ref and add it to the
+ * virtual-branch registry (config.virtualBranches).
+ *
+ * Used after pushing (to keep tracking in sync with the remote) and in
+ * createPr() when the Gerrit change ref becomes available.
+ *
+ * @param branchName Virtual branch name to set
+ * @param ref The ref this virtual branch is fetched from (e.g., 'refs/changes/34/1234/1')
+ * @param commitSha The commit SHA the virtual branch points to.
+ */
+export async function setVirtualBranch(
+  branchName: string,
+  ref: string,
+  commitSha: LongCommitSha,
+): Promise<void> {
+  logger.debug({ branchName, ref, commitSha }, 'setVirtualBranch()');
+  await git.raw(['update-ref', remoteBranchRef(branchName), commitSha]);
+  config.branchCommits[branchName] = commitSha;
+  config.virtualBranches[branchName] = { ref, sha: commitSha };
+  config.branchIsModified[branchName] = false;
 }
 
 export async function resetHardFromRemote(
@@ -853,12 +973,19 @@ export async function isBranchModified(
   await syncGit();
   const committedAuthors = new Set<string>();
   try {
-    const commits = await git.log([
-      `origin/${baseBranch}..origin/${branchName}`,
-    ]);
+    const commits = await git.log({
+      from: `origin/${baseBranch}`,
+      to: `origin/${branchName}`,
+      symmetric: false, // means <from>..<to> instead of <from>...<to>
+      format: {
+        author_email: '%ae',
+        committer_email: '%ce',
+      },
+    });
 
     for (const commit of commits.all) {
       committedAuthors.add(commit.author_email);
+      committedAuthors.add(commit.committer_email);
     }
   } catch (err) /* v8 ignore next -- TODO: add test #40625 */ {
     if (err.message?.includes('fatal: bad revision')) {
@@ -880,6 +1007,10 @@ export async function isBranchModified(
   }
 
   for (const ignoredAuthor of ignoredAuthors) {
+    includedAuthors.delete(ignoredAuthor);
+  }
+
+  for (const ignoredAuthor of platformIgnoredAuthors) {
     includedAuthors.delete(ignoredAuthor);
   }
 
@@ -994,12 +1125,16 @@ export async function isBranchConflicted(
   return result;
 }
 
-export async function deleteBranch(
-  branchName: string,
-  options?: { localBranch?: boolean },
-): Promise<void> {
+export async function deleteBranch(branchName: string): Promise<void> {
   await syncGit();
-  if (!options?.localBranch) {
+  if (isVirtualBranch(branchName)) {
+    // Delete the remote-tracking ref.
+    // Note: git update-ref -d succeeds even if the ref doesn't exist.
+    const ref = remoteBranchRef(branchName);
+    logger.debug({ branchName, ref }, 'Deleting virtual branch');
+    await git.raw(['update-ref', '-d', ref]);
+    delete config.virtualBranches[branchName];
+  } else {
     try {
       const deleteCommand = ['push', '--delete', 'origin', branchName];
 
@@ -1033,10 +1168,7 @@ export async function deleteBranch(
   delete config.branchCommits[branchName];
 }
 
-export async function mergeToLocal(
-  refSpecToMerge: string,
-  options?: { localBranch?: boolean },
-): Promise<void> {
+export async function mergeToLocal(branchName: string): Promise<void> {
   let status: StatusResult | undefined;
   try {
     await syncGit();
@@ -1050,10 +1182,17 @@ export async function mergeToLocal(
       ]),
     );
     status = await git.status();
-    if (options?.localBranch) {
-      await git.merge([refSpecToMerge]);
+    if (isVirtualBranch(branchName)) {
+      // Virtual branches are already local and tracked as a remote-tracking ref,
+      // so merge it directly without fetching from origin.
+      const ref = remoteBranchRef(branchName);
+      logger.debug(
+        { branchName, ref },
+        'mergeToLocal(): merging virtual branch',
+      );
+      await git.merge([ref]);
     } else {
-      await fetchRevSpec(refSpecToMerge);
+      await fetchRevSpec(branchName);
       await gitRetry(() => git.merge(['FETCH_HEAD']));
     }
   } catch (err) {
@@ -1061,7 +1200,7 @@ export async function mergeToLocal(
       {
         baseBranch: config.currentBranch,
         baseSha: config.currentBranchSha,
-        refSpecToMerge,
+        branchName,
         status,
         err,
       },
@@ -1125,7 +1264,7 @@ export async function getBranchLastCommitTime(
     if (errChecked) {
       throw errChecked;
     }
-    return new Date();
+    return DateTime.now().toJSDate();
   }
 }
 
@@ -1232,6 +1371,7 @@ export async function prepareCommit({
   branchName,
   files,
   message,
+  trailers,
   force = false,
 }: CommitFilesConfig): Promise<CommitResult | null> {
   const localDir = GlobalConfig.get('localDir');
@@ -1314,7 +1454,12 @@ export async function prepareCommit({
       commitOptions['--no-verify'] = null;
     }
 
-    const commitRes = await git.commit(message, [], commitOptions);
+    const commitMessage = isString(message) ? [message] : message;
+    if (isNonEmptyArray(trailers)) {
+      commitMessage.push(trailers.join('\n'));
+    }
+
+    const commitRes = await git.commit(commitMessage, [], commitOptions);
     if (
       isNonEmptyObject(commitRes.summary) &&
       commitRes.summary.changes === 0 &&
@@ -1336,9 +1481,9 @@ export async function prepareCommit({
       return null;
     }
 
-    const commitSha = (
-      await git.revparse([branchName])
-    ).trim() as LongCommitSha;
+    const commitSha = toLongCommitSha(
+      (await git.revparse([branchName])).trim(),
+    );
     const result: CommitResult = {
       parentCommitSha,
       commitSha,
@@ -1397,9 +1542,9 @@ export async function fetchBranch(
   await syncGit();
   logger.debug(`Fetching branch ${branchName}`);
   try {
-    const ref = `refs/heads/${branchName}:refs/remotes/origin/${branchName}`;
+    const ref = `refs/heads/${branchName}:${remoteBranchRef(branchName)}`;
     await gitRetry(() => git.pull(['origin', ref, '--force']));
-    const commit = (await git.revparse([branchName])).trim() as LongCommitSha;
+    const commit = toLongCommitSha((await git.revparse([branchName])).trim());
     config.branchCommits[branchName] = commit;
     config.branchIsModified[branchName] = false;
     return commit;
@@ -1553,48 +1698,100 @@ export async function clearRenovateRefs(): Promise<void> {
   remoteRefsExist = false;
 }
 
-const treeItemRegex = regEx(
-  /^(?<mode>\d{6})\s+(?<type>blob|tree|commit)\s+(?<sha>[0-9a-f]{40})\s+(?<path>.*)$/,
+const diffTreeLineRegex = regEx(
+  /^:(?<oldMode>\d{6})\s+(?<newMode>\d{6})\s+(?<oldSha>[0-9a-f]{40})\s+(?<newSha>[0-9a-f]{40})\s+(?<status>[A-Z]\d*)\t(?<paths>.+)$/,
 );
 
 const treeShaRegex = regEx(/tree\s+(?<treeSha>[0-9a-f]{40})\s*/);
 
 /**
- *
- * Obtain top-level items of commit tree.
- * We don't need subtree items, so here are 2 steps only.
- *
- * Step 1: commit SHA -> tree SHA
- *
- *   $ git cat-file -p <commit-sha>
- *
- *   > tree <tree-sha>
- *   > parent 59b8b0e79319b7dc38f7a29d618628f3b44c2fd7
- *   > ...
- *
- * Step 2: tree SHA -> tree items (top-level)
- *
- *   $ git cat-file -p <tree-sha>
- *
- *   > 040000 tree 389400684d1f004960addc752be13097fe85d776    src
- *   > ...
- *   > 100644 blob 7d2edde437ad4e7bceb70dbfe70e93350d99c98b    package.json
- *
+ * Get the tree SHA for a commit.
  */
-export async function listCommitTree(
+export async function getCommitTreeSha(
   commitSha: LongCommitSha,
-): Promise<TreeItem[]> {
+): Promise<LongCommitSha> {
   const commitOutput = await git.catFile(['-p', commitSha]);
-  /* v8 ignore next -- will never happen */
   const { treeSha } = treeShaRegex.exec(commitOutput)?.groups ?? {};
-  const contents = await git.catFile(['-p', treeSha]);
-  const lines = contents.split(newlineRegex);
-  const result: TreeItem[] = [];
-  for (const line of lines) {
-    const matchGroups = treeItemRegex.exec(line)?.groups;
+  if (!treeSha) {
+    const snippet = commitOutput.split(newlineRegex)[0];
+    /* v8 ignore next -- tested, but v8 reports template literal as partial */
+    throw new Error(
+      `Could not extract tree SHA from commit ${commitSha}: ${snippet}`,
+    );
+  }
+  return toLongCommitSha(treeSha);
+}
+
+function treeTypeFromMode(mode: string): GitObjectType {
+  switch (mode) {
+    case GitTreeMode.Gitlink:
+      return 'commit';
+    case GitTreeMode.Directory:
+      return 'tree';
+    default:
+      return 'blob';
+  }
+}
+
+/**
+ * Return only the files that changed between two commits.
+ * Deletions have `sha: null` (for use with GitHub's `base_tree` API).
+ */
+export async function diffCommitTree(
+  parentCommitSha: LongCommitSha,
+  commitSha: LongCommitSha,
+): Promise<DiffTreeItem[]> {
+  const output = await git.raw([
+    'diff-tree',
+    '-M',
+    '-r',
+    '--no-commit-id',
+    parentCommitSha,
+    commitSha,
+  ]);
+  const result: DiffTreeItem[] = [];
+  for (const line of output.split(newlineRegex)) {
+    const matchGroups = diffTreeLineRegex.exec(line)?.groups;
     if (matchGroups) {
-      const { path, mode, type, sha } = matchGroups;
-      result.push({ path, mode, type, sha: sha as LongCommitSha });
+      const { oldMode, newMode, newSha, status, paths } = matchGroups;
+      const statusCode = status[0];
+      // R has two tab-separated paths (old\tnew); A/M/D/T have one.
+      // C also has two paths but falls through to default (only the target matters).
+      const [sourcePath, targetPath] = paths.split('\t');
+      switch (statusCode) {
+        case 'D':
+          result.push({
+            path: sourcePath,
+            mode: oldMode,
+            type: treeTypeFromMode(oldMode),
+            sha: null,
+          });
+          break;
+        case 'R':
+          // Rename: delete source, add target
+          result.push({
+            path: sourcePath,
+            mode: oldMode,
+            type: treeTypeFromMode(oldMode),
+            sha: null,
+          });
+          result.push({
+            path: targetPath,
+            mode: newMode,
+            type: treeTypeFromMode(newMode),
+            sha: toLongCommitSha(newSha),
+          });
+          break;
+        default:
+          // A (add), M (modify), T (type change), C (copy)
+          result.push({
+            path: targetPath ?? sourcePath,
+            mode: newMode,
+            type: treeTypeFromMode(newMode),
+            sha: toLongCommitSha(newSha),
+          });
+          break;
+      }
     }
   }
   return result;
@@ -1654,7 +1851,7 @@ export async function getRemotes(): Promise<string[]> {
     const remotes = await git.getRemotes();
     logger.debug(`Found remotes: ${remotes.map((r) => r.name).join(', ')}`);
     return remotes.map((remote) => remote.name);
-  } catch (err) /* v8 ignore next */ {
+  } catch (err) /* v8 ignore next -- git.getRemotes only fails on repo corruption, not simulated in specs */ {
     logger.error({ err }, 'Error getting remotes');
     throw err;
   }

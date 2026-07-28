@@ -51,8 +51,8 @@ export class MetadataCache {
     const cacheKey = `metadata-cache:${registryUrl}:${packageName}`;
     const versionsHash = hashVersions(versions);
 
-    const loadCache = (): AsyncResult<ReleaseResult, CacheLoadError> =>
-      Result.wrapNullable<CacheRecord, CacheLoadError, CacheLoadError>(
+    function loadCache(): AsyncResult<ReleaseResult, CacheLoadError> {
+      return Result.wrapNullable<CacheRecord, CacheLoadError, CacheLoadError>(
         packageCache.get<CacheRecord>(cacheNs, cacheKey),
         { type: 'cache-not-found' },
       ).transform((cache) => {
@@ -60,19 +60,20 @@ export class MetadataCache {
           ? Result.ok(cache.data)
           : Result.err({ type: 'cache-stale', cache });
       });
+    }
 
-    const saveCache = async (
+    async function saveCache(
       cache: CacheRecord,
       ttlMinutes = 100 * 24 * 60,
       ttlDelta = 10 * 24 * 60,
-    ): Promise<void> => {
+    ): Promise<void> {
       const registryHostname = parseUrl(registryUrl)?.hostname;
       if (registryHostname === 'rubygems.org') {
         const ttlRandomDelta = Math.floor(Math.random() * ttlDelta);
         const ttl = ttlMinutes + ttlRandomDelta;
         await packageCache.set(cacheNs, cacheKey, cache, ttl);
       }
-    };
+    }
 
     return await loadCache()
       .catch((err) =>

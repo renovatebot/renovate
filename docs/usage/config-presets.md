@@ -8,11 +8,10 @@ description: Renovate's support for ESLint-like shareable configs
 This page describes how to configure your shared presets.
 Read the [Key concepts, presets](./key-concepts/presets.md) page to learn more about presets in general.
 
-Shareable config presets must use the JSON or JSON5 formats, other formats are not supported.
+Shareable config presets must use the JSON, JSONC or JSON5 formats, other formats are not supported.
 
-<!-- prettier-ignore -->
 !!! tip
-    Describe what your preset does in the `"description"` field or add comments as Renovate supports `JSONC` syntax within its preset files.
+  Describe what your preset does in the `"description"` field or add comments as Renovate supports `JSONC` syntax within its preset files.
 
 ## Extending from a preset
 
@@ -25,10 +24,9 @@ Presets should be hosted in repositories, which usually means the same platform 
 
 Alternatively, Renovate can fetch preset files from an HTTP server.
 
-<!-- prettier-ignore -->
 !!! warning
-    We deprecated npm-based presets.
-    We plan to drop the npm-based presets feature in a future major release of Renovate.
+  We deprecated npm-based presets.
+  We plan to drop the npm-based presets feature in a future major release of Renovate.
 
 You can set a Git tag (like a SemVer) to use a specific release of your shared config.
 
@@ -38,10 +36,9 @@ Presets are repo-hosted, and you can have one or more presets hosted per reposit
 If you omit a file name from your preset (e.g. `github>abc/foo`) then Renovate will look for a `default.json` file in the repo.
 If you wish to have an alternative file name, you need to specify it (e.g. `github>abc/foo//alternative-name.json5`).
 
-<!-- prettier-ignore -->
 !!! warning
-    We've deprecated using a `renovate.json` file for the default _preset_ file name in a repository.
-    If you're using a `renovate.json` file to share your presets, rename it to `default.json`.
+  We've deprecated using a `renovate.json` file for the default _preset_ file name in a repository.
+  If you're using a `renovate.json` file to share your presets, rename it to `default.json`.
 
 ### GitHub
 
@@ -49,6 +46,7 @@ If you wish to have an alternative file name, you need to specify it (e.g. `gith
 | ------------------------------------------- | -------------------------------- | --------- | ---------------------------- | --------------- | -------------- |
 | GitHub default                              | `github>abc/foo`                 | `default` | `https://github.com/abc/foo` | `default.json`  | Default branch |
 | GitHub with preset name                     | `github>abc/foo:xyz`             | `xyz`     | `https://github.com/abc/foo` | `xyz.json`      | Default branch |
+| GitHub with preset name (JSONC)             | `github>abc/foo:xyz.jsonc`       | `xyz`     | `https://github.com/abc/foo` | `xyz.jsonc`     | Default branch |
 | GitHub with preset name (JSON5)             | `github>abc/foo:xyz.json5`       | `xyz`     | `https://github.com/abc/foo` | `xyz.json5`     | Default branch |
 | GitHub with preset name and path            | `github>abc/foo//path/xyz`       | `xyz`     | `https://github.com/abc/foo` | `path/xyz.json` | Default branch |
 | GitHub default with a tag                   | `github>abc/foo#1.2.3`           | `default` | `https://github.com/abc/foo` | `default.json`  | `1.2.3`        |
@@ -62,6 +60,7 @@ If you wish to have an alternative file name, you need to specify it (e.g. `gith
 | ------------------------------------------- | -------------------------------- | --------- | ---------------------------- | --------------- | -------------- |
 | GitLab default                              | `gitlab>abc/foo`                 | `default` | `https://gitlab.com/abc/foo` | `default.json`  | Default branch |
 | GitLab with preset name                     | `gitlab>abc/foo:xyz`             | `xyz`     | `https://gitlab.com/abc/foo` | `xyz.json`      | Default branch |
+| GitLab with preset name (JSONC)             | `gitlab>abc/foo:xyz.jsonc`       | `xyz`     | `https://gitlab.com/abc/foo` | `xyz.jsonc`     | Default branch |
 | GitLab with preset name (JSON5)             | `gitlab>abc/foo:xyz.json5`       | `xyz`     | `https://gitlab.com/abc/foo` | `xyz.json5`     | Default branch |
 | GitLab default with a tag                   | `gitlab>abc/foo#1.2.3`           | `default` | `https://gitlab.com/abc/foo` | `default.json`  | `1.2.3`        |
 | GitLab with preset name with a tag          | `gitlab>abc/foo:xyz#1.2.3`       | `xyz`     | `https://gitlab.com/abc/foo` | `xyz.json`      | `1.2.3`        |
@@ -92,7 +91,15 @@ If you wish to have an alternative file name, you need to specify it (e.g. `gith
 | Forgejo with preset name and path with a tag | `forgejo>abc/foo//path/xyz#1.2.3` | `xyz`     | `https://codeberg.org/abc/foo` | `path/xyz.json` | `1.2.3`        |
 | Forgejo with subpreset name and tag          | `forgejo>abc/foo:xyz/sub#1.2.3`   | `sub`     | `https://codeberg.org/abc/foo` | `xyz.json`      | `1.2.3`        |
 
-### Self-hosted Git
+### Self-hosted Git / current Git server
+
+!!! note
+  If you're self-hosting your platform, for instance a GitHub Enterprise Server instance, you'll want to use `local>` to look up presets on the current Git server.
+  <br>
+  You can also use `local>` if you're running on `github.com`, and this will work as if you had written `github>`.
+  This can make your presets more portable if you run across many different Git platforms.
+
+For instance, if you have `platform=github` and `endpoint=https://github.company.com`:
 
 | name                                       | example use                     | preset    | resolves as                          | filename        | Git tag        |
 | ------------------------------------------ | ------------------------------- | --------- | ------------------------------------ | --------------- | -------------- |
@@ -105,11 +112,10 @@ If you wish to have an alternative file name, you need to specify it (e.g. `gith
 | Local with preset name and path with a tag | `local>abc/foo//path/xyz#1.2.3` | `xyz`     | `https://github.company.com/abc/foo` | `path/xyz.json` | `1.2.3`        |
 | Local with subpreset name and tag          | `local>abc/foo:xyz/sub#1.2.3`   | `sub`     | `https://github.company.com/abc/foo` | `xyz.json`      | `1.2.3`        |
 
-<!-- prettier-ignore -->
 !!! tip
-    You can't combine the path and sub-preset syntaxes.
-    This means that anything in the form `provider>owner/repo//path/to/file:subsubpreset` is not supported.
-    One workaround is to use distinct files instead of sub-presets.
+  You can't combine the path and sub-preset syntaxes.
+  This means that anything in the form `provider>owner/repo//path/to/file:subsubpreset` is not supported.
+  One workaround is to use distinct files instead of sub-presets.
 
 ## Example configs
 
@@ -119,10 +125,9 @@ It simply sets the configuration option `rangeStrategy` to `replace`.
 An example of a full config is `config:recommended`, which is Renovate's default configuration.
 It mostly uses Renovate config defaults but adds a few smart customizations such as grouping monorepo packages together.
 
-<!-- prettier-ignore -->
 !!! note
-    The `:xyz` naming convention (with `:` prefix) is shorthand for the `default:` presets.
-    For example: `:xyz` is the same as `default:xyz`.
+  The `:xyz` naming convention (with `:` prefix) is shorthand for the `default:` presets.
+  For example: `:xyz` is the same as `default:xyz`.
 
 ## How to Use Preset Configs
 
@@ -264,9 +269,8 @@ Parameters are supported similar to other methods:
 You can use [Handlebars](https://handlebarsjs.com/) templates to be flexible with your presets.
 This can be handy when you want to include presets conditionally.
 
-<!-- prettier-ignore -->
 !!! note
-    The template only supports a small subset of options, but you can extend them via `customEnvVariables`.
+  The template only supports a small subset of options, but you can extend them via `customEnvVariables`.
 
 Read the [templates](./templates.md) section to learn more.
 
@@ -321,9 +325,8 @@ For example the result may be:
 
 ## npm-hosted presets
 
-<!-- prettier-ignore -->
 !!! warning
-    Using npm-hosted presets is deprecated, we recommend you do not follow these instructions and instead use a `local` preset.
+  Using npm-hosted presets is deprecated, we recommend you do not follow these instructions and instead use a `local` preset.
 
 If you manage multiple repositories using Renovate and want the same custom config across all or most of them, then you might want to consider publishing your own preset config so that you can "extend" it in every applicable repository.
 That way when you want to change your Renovate configuration you can make the change in one location rather than having to copy/paste it to every repository individually.
@@ -335,7 +338,7 @@ Let's assume you choose `renovate-config-fastcore` as the package name.
 You then need to publish the `renovate-config-fastcore` package where the `package.json` has the field `renovate-config` and then put your config under the field `default`.
 For example:
 
-```json
+```json {configType=none}
 {
   "name": "renovate-config-fastcore",
   "version": "0.0.1",

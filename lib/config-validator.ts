@@ -77,18 +77,24 @@ async function validate(
     const added = styleText('green', '+ ');
     const removed = styleText('red', '- ');
     const msg = changedObjects
-      .flatMap((part) =>
-        part.value
+      .flatMap((part) => {
+        let linePrefix: string;
+        if (part.added) {
+          linePrefix = added;
+        } else if (part.removed) {
+          linePrefix = removed;
+        } else {
+          linePrefix = '  ';
+        }
+        return part.value
           .split('\n')
           .filter(isNonEmptyStringAndNotWhitespace)
           .map((line) =>
-            line.replace(
-              regEx(/^(?<ws> *)/),
-              `${part.added ? added : part.removed ? removed : '  '}$<ws>`,
-            ),
-          ),
-      )
+            line.replace(regEx(/^(?<ws> *)/), `${linePrefix}$<ws>`),
+          );
+      })
       .join('\n');
+    // oxlint-disable-next-line renovate/logger-static-message -- the multi-line, colorized diff must be interpolated to stay readable; as a metadata field it is JSON-escaped onto one line
     logger.warn(`Config migration diff:\n${msg}`);
     if (strict) {
       returnVal = 1;
@@ -124,10 +130,12 @@ interface PackageJson {
     .summary('Validate Renovate configuration files')
     .description(
       `Validate your Renovate configuration (repo config, shared presets or global configuration) files\n` +
+        // oxlint-disable-next-line renovate/no-hardcoded-docs-url -- CLI help text, no config available
         'If no [config-files...] are given, renovate-config-validator will look at the default config file locations (https://docs.renovatebot.com/configuration-options/)',
     )
     .addHelpText(
       'after',
+      // oxlint-disable-next-line renovate/no-hardcoded-docs-url -- CLI help text, no config available
       `
 When specifying [config-files...], Renovate will treat them as global self-hosted configuration files. You can disable this behaviour with --no-global
 
@@ -273,7 +281,7 @@ If you have specified global self-hosted configuration (https://docs.renovatebot
       logger.info(
         `Config validated successfully against ${filesValidated} file(s)`,
       );
-    } else {
+    } else if (!filesValidated) {
       logger.warn(`No files to perform configuration validation against`);
     }
     // Use exitCode (not process.exit) so async log streams can flush
@@ -282,14 +290,12 @@ If you have specified global self-hosted configuration (https://docs.renovatebot
 
   await program.parseAsync();
 })().catch((e) => {
-  if (e instanceof CommanderError) {
-    // Commander throws an error at the end of Action execution i.e. as part of the `help` and `version` commands, and so we don't want to return an error code in this case
-    if (
-      e.code === 'commander.helpDisplayed' ||
-      e.code === 'commander.version'
-    ) {
-      return;
-    }
+  // Commander throws an error at the end of Action execution i.e. as part of the `help` and `version` commands, and so we don't want to return an error code in this case
+  if (
+    e instanceof CommanderError &&
+    (e.code === 'commander.helpDisplayed' || e.code === 'commander.version')
+  ) {
+    return;
   }
 
   // oxlint-disable-next-line no-console -- intentional: display critical error on CLI

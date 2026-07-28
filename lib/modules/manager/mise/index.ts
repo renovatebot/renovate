@@ -15,6 +15,7 @@ import { RubygemsDatasource } from '../../datasource/rubygems/index.ts';
 import { supportedDatasources as asdfSupportedDatasources } from '../asdf/index.ts';
 
 export { updateArtifacts } from './artifacts.ts';
+export { knownDepTypes, supportsDynamicDepTypesNote } from './dep-types.ts';
 export { extractPackageFile } from './extract.ts';
 export { updateLockedDependency } from './update-locked.ts';
 
@@ -32,6 +33,7 @@ export const defaultConfig = {
     '**/.config/mise/conf.d/*.toml',
     '**/.rtx{,.*}.toml',
   ],
+  pinDigests: false,
 };
 
 const backendDatasources = {
