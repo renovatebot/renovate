@@ -53,7 +53,11 @@ function getLatestAllowedVersion(
         return false;
       }
 
-      if (minimumReleaseAgeMs && !hasTimestamp) {
+      if (
+        minimumReleaseAgeMs &&
+        !hasTimestamp &&
+        config.minimumReleaseAgeBehaviour === 'timestamp-optional'
+      ) {
         versionsWithoutTimestamp.push(release.version);
       }
 
