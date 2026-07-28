@@ -2283,8 +2283,6 @@ async function pushFiles(
     );
     const treeSha = treeRes.body.sha;
 
-    // Must include trailers here: prepareCommit already wrote them into the
-    // local commit, but the REST recreate path builds the message from config.
     const commitMessage = formatCommitMessage(message, trailers);
 
     // Now we recreate the commit using the tree we recreated the step before
