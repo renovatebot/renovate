@@ -151,11 +151,11 @@ You can validate which update types may have release timestamps by following som
 
 #### Lock file maintenance
 
-Where Renovate resolves the versions itself instead of delegating to the package manager, `minimumReleaseAge` and `minimumReleaseAgeBehaviour` are applied to that resolution:
+Generally, Renovate delegates lock file maintenance to the package manager.
 
-- `terraform`, when updating `.terraform.lock.hcl`: Renovate selects the newest provider version which satisfies the existing lock file constraints _and_ passes the minimum release age check.
+In some cases, Renovate performs the resolution of versions itself, which leads to Renovate applying `minimumReleaseAge` and `minimumReleaseAgeBehaviour` to the version resolution. This applies to the following managers:
 
-For `npm`, Renovate instead passes the cutoff to the package manager as [`--before`](#npm).
+- [Terraform manager](../modules/manager/terraform/index.md): when updating `.terraform.lock.hcl`: Renovate selects the newest provider version which satisfies the existing lock file constraints _and_ passes the minimum release age check
 
 ### What happens to security updates?
 
