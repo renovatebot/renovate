@@ -95,6 +95,9 @@ export async function checkMinimumConfidence(
   };
 }
 
+/*
+ * NOTE that this should be kept in sync with `applyMinimumReleaseAgeToDigestUpdate`()
+ */
 export async function filterInternalChecks(
   config: Partial<LookupUpdateConfig & UpdateResult>,
   versioningApi: VersioningApi,
