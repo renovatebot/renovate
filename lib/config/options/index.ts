@@ -450,6 +450,7 @@ const options: Readonly<RenovateOptions>[] = [
     freeChoice: true,
     cli: false,
     env: false,
+    experimental: true,
   },
   {
     name: 'globalExtends',
