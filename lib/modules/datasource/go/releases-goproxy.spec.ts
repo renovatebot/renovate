@@ -160,7 +160,7 @@ describe('modules/datasource/go/releases-goproxy', () => {
       });
     });
 
-    it('resolves sourceUrl from goproxy Origin without go-get', async () => {
+    it('resolves sourceUrl from goproxy Origin without calling the vanity domain', async () => {
       process.env.GOPROXY = baseUrl;
 
       httpMock
