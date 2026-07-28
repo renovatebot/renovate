@@ -281,7 +281,7 @@ function findDependencies(
         dep.autoReplaceStringTemplate = regexDep.autoReplaceStringTemplate;
       } else if (isLongCommitSha(tag)) {
         dep.currentDigest = tag;
-        dep.currentValue = undefined;
+        delete dep.currentValue;
         dep.enabled = false;
         dep.skipReason = 'unversioned-reference';
       } else if (isShortCommitSha(tag)) {
