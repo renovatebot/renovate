@@ -270,7 +270,8 @@ export class GoProxyDatasource extends Datasource {
       );
       const res = await this.http.getJson(url, VersionInfo);
       const { Version: version, Origin: origin } = res.body;
-      // Prefer Origin from the proxy when present (avoids go-get to vanity hosts)
+      // Extract sourceUrl from GOPROXY Origin when present, avoiding go-get to
+      // vanity hosts (https://github.com/renovatebot/renovate/discussions/44898)
       const sourceUrl =
         origin?.VCS === 'git' && isNonEmptyString(origin.URL)
           ? origin.URL.replace(regEx(/\.git$/), '')
