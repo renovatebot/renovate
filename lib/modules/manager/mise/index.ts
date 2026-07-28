@@ -22,6 +22,7 @@ export { updateLockedDependency } from './update-locked.ts';
 export const displayName = 'mise-en-place';
 export const supportsLockFileMaintenance = true;
 export const lockFileNames = ['mise.lock'];
+export const lockFileMaintenanceIsDelegatedToPackageManager = true;
 export const url = 'https://mise.jdx.dev';
 
 export const defaultConfig = {
