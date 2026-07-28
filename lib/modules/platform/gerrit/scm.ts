@@ -1,10 +1,7 @@
 import { randomUUID } from 'node:crypto';
-import { isNonEmptyArray } from '@sindresorhus/is';
+import { isNonEmptyArray, isString } from '@sindresorhus/is';
 import { logger } from '../../../logger/index.ts';
-import {
-  formatCommitMessage,
-  splitCommitMessage,
-} from '../../../util/git/commit-trailers.ts';
+import { splitCommitMessage } from '../../../util/git/commit-trailers.ts';
 import * as git from '../../../util/git/index.ts';
 import type { CommitFilesConfig, FileChange } from '../../../util/git/types.ts';
 import { hash } from '../../../util/hash.ts';
@@ -92,7 +89,9 @@ export class GerritScm extends DefaultGitScm {
     // Message already includes user trailers from the worker. Normalize to a
     // single string, apply prTitle to the subject, then merge Gerrit reserved
     // trailers into the final trailer block.
-    let message = formatCommitMessage(commit.message);
+    let message = isString(commit.message)
+      ? commit.message
+      : commit.message.join('\n\n');
 
     // In Gerrit, the change subject/title is the first line of the commit message
     // v8 ignore else -- TODO: add test #40625
@@ -104,7 +103,7 @@ export class GerritScm extends DefaultGitScm {
 
     const changeId = existingChange?.change_id ?? generateChangeId();
     const { body, trailers: existingTrailers } = splitCommitMessage(message);
-    commit.message = formatCommitMessage(body, [
+    const trailers = [
       ...existingTrailers.filter(
         (trailer) =>
           !trailer.startsWith('Renovate-Branch:') &&
@@ -112,7 +111,8 @@ export class GerritScm extends DefaultGitScm {
       ),
       `Renovate-Branch: ${commit.branchName}`,
       `Change-Id: ${changeId}`,
-    ]);
+    ];
+    commit.message = `${body}\n\n${trailers.join('\n')}`;
     // prepareCommit already checks hasDiff('HEAD', 'origin/<branchName>') when
     // force is not set, which works because virtual branches are fetched as
     // refs/remotes/origin/<branchName> during init.  This avoids pushing empty

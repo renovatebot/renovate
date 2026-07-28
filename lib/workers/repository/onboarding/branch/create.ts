@@ -1,13 +1,11 @@
+import { isNonEmptyArray } from '@sindresorhus/is';
 import { GlobalConfig } from '../../../../config/global.ts';
 import type { RenovateConfig } from '../../../../config/types.ts';
 import { logger } from '../../../../logger/index.ts';
 import { scm } from '../../../../modules/platform/scm.ts';
 import { coerceArray } from '../../../../util/array.ts';
 import { getInheritedOrGlobal } from '../../../../util/common.ts';
-import {
-  filterValidCommitTrailers,
-  formatCommitMessage,
-} from '../../../../util/git/commit-trailers.ts';
+import { filterValidCommitTrailers } from '../../../../util/git/commit-trailers.ts';
 import { compile } from '../../../../util/template/index.ts';
 import {
   getDefaultConfigFileName,
@@ -42,13 +40,14 @@ export async function createOnboardingBranch(
   }
 
   // only allow gitAuthor template value in the commitTrailers
-  const compiledTrailers = coerceArray(config.commitTrailers).map((trailer) =>
-    compile(trailer, { gitAuthor: config.gitAuthor }),
+  const trailers = filterValidCommitTrailers(
+    coerceArray(config.commitTrailers).map((trailer) =>
+      compile(trailer, { gitAuthor: config.gitAuthor }),
+    ),
   );
-  commitMessage = formatCommitMessage(
-    commitMessage,
-    filterValidCommitTrailers(compiledTrailers),
-  );
+  if (isNonEmptyArray(trailers)) {
+    commitMessage = `${commitMessage}\n\n${trailers.join('\n')}`;
+  }
 
   // istanbul ignore if
   if (GlobalConfig.get('dryRun')) {

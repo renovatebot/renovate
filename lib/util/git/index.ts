@@ -51,7 +51,6 @@ import {
   getCachedBehindBaseResult,
   setCachedBehindBaseResult,
 } from './behind-base-branch-cache.ts';
-import { formatCommitMessage } from './commit-trailers.ts';
 import { getNoVerify, simpleGitConfig } from './config.ts';
 import {
   getCachedConflictResult,
@@ -1453,8 +1452,8 @@ export async function prepareCommit({
       commitOptions['--no-verify'] = null;
     }
 
-    // Message is expected to already include trailers (see formatCommitMessage).
-    const commitMessage = formatCommitMessage(message);
+    // Message is expected to already include any trailers.
+    const commitMessage = isString(message) ? message : message.join('\n\n');
 
     const commitRes = await git.commit(commitMessage, [], commitOptions);
     if (

@@ -1,5 +1,10 @@
 import { setTimeout } from 'node:timers/promises';
-import { isArray, isNonEmptyObject, isNonEmptyString } from '@sindresorhus/is';
+import {
+  isArray,
+  isNonEmptyObject,
+  isNonEmptyString,
+  isString,
+} from '@sindresorhus/is';
 import semver from 'semver';
 import { GlobalConfig } from '../../../config/global.ts';
 import {
@@ -27,7 +32,6 @@ import { isGithubFineGrainedPersonalAccessToken } from '../../../util/check-toke
 import { coerceToNull } from '../../../util/coerce.ts';
 import { parseJson } from '../../../util/common.ts';
 import { getEnv } from '../../../util/env.ts';
-import { formatCommitMessage } from '../../../util/git/commit-trailers.ts';
 import * as git from '../../../util/git/index.ts';
 import {
   diffCommitTree,
@@ -2283,9 +2287,8 @@ async function pushFiles(
     );
     const treeSha = treeRes.body.sha;
 
-    // Message already includes trailers (formatted by the worker).
-    // formatCommitMessage only normalizes string | string[].
-    const commitMessage = formatCommitMessage(message);
+    // Message already includes any trailers (formatted by the worker).
+    const commitMessage = isString(message) ? message : message.join('\n\n');
 
     // Now we recreate the commit using the tree we recreated the step before
     const commitRes = await githubApi.postJson<{ sha: string }>(

@@ -101,8 +101,8 @@ export interface CommitFilesConfig {
   branchName: string;
   files: FileChange[];
   /**
-   * Full commit message, including any trailers already formatted into the
-   * final block (see `formatCommitMessage`).
+   * Full commit message, including any trailers already appended as the final
+   * block (`Key: value` lines after a blank line).
    */
   message: string | string[];
   force?: boolean;

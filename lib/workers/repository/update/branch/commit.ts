@@ -4,7 +4,6 @@ import { GlobalConfig } from '../../../../config/global.ts';
 import { CONFIG_SECRETS_EXPOSED } from '../../../../constants/error-messages.ts';
 import { logger } from '../../../../logger/index.ts';
 import { scm } from '../../../../modules/platform/scm.ts';
-import { formatCommitMessage } from '../../../../util/git/commit-trailers.ts';
 import type { CommitFilesConfig } from '../../../../util/git/types.ts';
 import { minimatch } from '../../../../util/minimatch.ts';
 import { sanitize } from '../../../../util/sanitize.ts';
@@ -50,11 +49,16 @@ export function commitFilesToBranch(
     throw new Error(CONFIG_SECRETS_EXPOSED);
   }
 
+  let message = config.commitMessage!;
+  if (isNonEmptyArray(config.commitTrailers)) {
+    message = `${message}\n\n${config.commitTrailers.join('\n')}`;
+  }
+
   const commitFilesConfig: CommitFilesConfig = {
     baseBranch: config.baseBranch,
     branchName: config.branchName,
     files: updatedFiles,
-    message: formatCommitMessage(config.commitMessage!, config.commitTrailers),
+    message,
     force: !!config.forceCommit,
     platformCommit: config.platformCommit,
     // Only needed by Gerrit platform
