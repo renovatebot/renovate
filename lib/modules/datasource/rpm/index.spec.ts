@@ -1081,7 +1081,7 @@ describe('modules/datasource/rpm/index', () => {
 
     it('strips explicit auto rpmMetadataSource from registryUrl', async () => {
       mockRepomdResponse();
-      mockPrimaryXmlResponse(
+      await mockPrimaryXmlResponse(
         buildPrimaryXml(codeBlock`
           <package type="rpm">
             <name>example-package</name>
@@ -1167,7 +1167,7 @@ describe('modules/datasource/rpm/index', () => {
         primaryDbHref: 'repodata/somesha256-primary.sqlite.gz',
       });
       mockPrimaryDbProviderFailure('not-a-sqlite-error');
-      mockPrimaryXmlResponse(
+      await mockPrimaryXmlResponse(
         buildPrimaryXml(codeBlock`
           <package type="rpm">
             <name>example-package</name>
