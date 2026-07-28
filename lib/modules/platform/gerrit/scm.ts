@@ -1,6 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { isNonEmptyArray, isString } from '@sindresorhus/is';
 import { logger } from '../../../logger/index.ts';
+import { formatCommitMessage } from '../../../util/git/commit-trailers.ts';
 import * as git from '../../../util/git/index.ts';
 import type { CommitFilesConfig, FileChange } from '../../../util/git/types.ts';
 import { hash } from '../../../util/hash.ts';
@@ -85,21 +86,20 @@ export class GerritScm extends DefaultGitScm {
       requestDetails: ['CURRENT_REVISION'],
     });
 
-    const message = isString(commit.message)
+    const messageParts = isString(commit.message)
       ? [commit.message]
-      : commit.message;
+      : [...commit.message];
 
     // In Gerrit, the change subject/title is the first line of the commit message
     // v8 ignore else -- TODO: add test #40625
     if (commit.prTitle) {
-      const firstMessageLines = message[0].split('\n');
+      const firstMessageLines = messageParts[0].split('\n');
       firstMessageLines[0] = commit.prTitle;
-      message[0] = firstMessageLines.join('\n');
+      messageParts[0] = firstMessageLines.join('\n');
     }
 
     const changeId = existingChange?.change_id ?? generateChangeId();
-    commit.message = message;
-    commit.trailers = [
+    const trailers = [
       ...(commit.trailers ?? []).filter(
         (trailer) =>
           !trailer.startsWith('Renovate-Branch:') &&
@@ -108,6 +108,11 @@ export class GerritScm extends DefaultGitScm {
       `Renovate-Branch: ${commit.branchName}`,
       `Change-Id: ${changeId}`,
     ];
+    // Format here so Gerrit's reserved trailers go through the same helper as
+    // the git and GitHub platform-native paths. Clear trailers so prepareCommit
+    // does not append them a second time.
+    commit.message = formatCommitMessage(messageParts, trailers);
+    commit.trailers = undefined;
     // prepareCommit already checks hasDiff('HEAD', 'origin/<branchName>') when
     // force is not set, which works because virtual branches are fetched as
     // refs/remotes/origin/<branchName> during init.  This avoids pushing empty
