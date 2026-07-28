@@ -431,7 +431,7 @@ describe('config/migration', () => {
       expect(res.isMigrated).toBeTrue();
       expect(res.migratedConfig).toMatchObject({ extends: ['foo'] });
 
-      config = { extends: ['foo', ':js-app', 'bar'] } as never;
+      config = { extends: ['foo', ':js-app', 'bar'] };
       res = configMigration.migrateConfig(config);
       expect(res.isMigrated).toBeTrue();
       expect(res.migratedConfig).toMatchObject({
@@ -541,7 +541,7 @@ describe('config/migration', () => {
         extends: ['security:minimumReleaseAgeNpm'],
       });
 
-      config = { extends: ['foo', 'npm:unpublishSafe'] } as never;
+      config = { extends: ['foo', 'npm:unpublishSafe'] };
       res = configMigration.migrateConfig(config);
       expect(res.isMigrated).toBeTrue();
       expect(res.migratedConfig).toMatchObject({

@@ -33,7 +33,7 @@ describe('modules/manager/nuget/integration', () => {
 
   beforeEach(() => {
     GlobalConfig.set(adminConfig);
-    baseConfig = getConfig() as RenovateConfig;
+    baseConfig = getConfig();
     baseConfig.rangeStrategy = 'replace';
   });
 
