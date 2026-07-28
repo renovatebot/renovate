@@ -40,6 +40,16 @@ repos:
     rev: v42.0
     hooks:
       - id: custom-hook
+  - repo: https://code.forgejo.org/forgejo/runner
+    # should also detect forgejo
+    rev: v12.13.0
+    hooks:
+      - id: forgejo-runner-validate
+  - repo: https://codeberg.org/gherynos/pre-commit-java
+    # should also detect codeberg as forgejo
+    rev: v0.6.37
+    hooks:
+      - id: cpd
   - repo: https://github.com/prettier/pre-commit
     # should accept different order of keys
     hooks:
@@ -55,7 +65,7 @@ repos:
   - repo: ssh://git@github.com/pre-commit/pre-commit-hooks
     # should allow explicit ssh protocol
     hooks:
-    - id: check-merge-conflict
+      - id: check-merge-conflict
     rev: v5.0.0
   - repo: some_invalid_url
     # case with invlalid url.
@@ -77,7 +87,6 @@ repos:
         additional_dependencies:
           - "github.com/wasilibs/go-shellcheck/cmd/shellcheck@v0.10.0"
           - "" # invalid go package
-
   # pre-commit meta hooks
   - repo: meta
     hooks: []
