@@ -78,6 +78,7 @@ export interface RenovateSharedConfig {
   automergeStrategy?: MergeStrategy;
   automergeType?: AutoMergeType;
   azureWorkItemId?: number;
+  azureWorkItemType?: string;
   branchName?: string;
   branchNameStrict?: boolean;
   branchPrefix?: string;
@@ -91,6 +92,7 @@ export interface RenovateSharedConfig {
   commitMessageLowerCase?: 'auto' | 'never';
   commitMessagePrefix?: string;
   commitMessageTopic?: string;
+  commitTrailers?: string[];
   confidential?: boolean;
   configValidationError?: boolean;
   changelogUrl?: string;
