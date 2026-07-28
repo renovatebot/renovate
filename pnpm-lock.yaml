@@ -610,8 +610,8 @@ importers:
         specifier: 6.3.1
         version: 6.3.1(@openpgp/web-stream-tools@0.3.1)
       re2:
-        specifier: 1.26.0
-        version: 1.26.0
+        specifier: 1.26.1
+        version: 1.26.1
 
 packages:
 
@@ -4963,8 +4963,8 @@ packages:
     resolution: {integrity: sha512-y3bGgqKj3QBdxLbLkomlohkvsA8gdAiUQlSBJnBhfn+BPxg4bc62d8TcBW15wavDfgexCgccckhcZvywyQYPOw==}
     hasBin: true
 
-  re2@1.26.0:
-    resolution: {integrity: sha512-QTEfFp0nu1eT/HKKZC+2BKM9Lb8uqprGkcHhro9r3giiKS+1SnNZBZ1m7C7Axi/VR1YGXiu3mp35UA53yHAuNw==}
+  re2@1.26.1:
+    resolution: {integrity: sha512-oi79a4h6EO3PAwNsDMWgeCcsRGQEUa52DIgOiFTZGDEZocEXG9h+oXy0qZqndo47huUeJuVWSoOJIEhOupqOcg==}
     engines: {node: ^22.22.2 || ^24.15.0 || >=26.0.0}
 
   react-is@18.3.1:
@@ -10369,7 +10369,7 @@ snapshots:
       minimist: 1.2.8
       strip-json-comments: 2.0.1
 
-  re2@1.26.0:
+  re2@1.26.1:
     dependencies:
       install-artifact-from-github: 1.7.0
       nan: 2.28.0
