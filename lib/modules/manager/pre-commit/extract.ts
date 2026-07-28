@@ -286,7 +286,7 @@ function findDependencies(
         dep.skipReason = 'unversioned-reference';
       } else if (isShortCommitSha(tag)) {
         dep.currentDigestShort = tag;
-        dep.currentValue = undefined;
+        delete dep.currentValue;
         dep.enabled = false;
         dep.skipReason = 'unversioned-reference';
       }
