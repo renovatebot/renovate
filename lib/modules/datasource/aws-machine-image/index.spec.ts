@@ -159,7 +159,7 @@ describe('modules/datasource/aws-machine-image/index', () => {
       expect(ec2Mock.calls()).toHaveLength(1);
     });
 
-    it('uses host rule credentials', async () => {
+    it('prefers host rule credentials over the configured profile', async () => {
       hostRules.add({
         hostType: datasource,
         username: 'access-key-id',
@@ -170,7 +170,7 @@ describe('modules/datasource/aws-machine-image/index', () => {
 
       const ec2DataSource = new AwsMachineImageDatasource();
       await ec2DataSource.getSortedAwsMachineImages(
-        '[{"Name":"name","Values":["host-rule-credentials"]}]',
+        '[{"Name":"name","Values":["host-rule-credentials"]},{"profile":"ignored-profile"}]',
       );
 
       const ec2 = ec2Mock.call(0).thisValue as EC2Client;
