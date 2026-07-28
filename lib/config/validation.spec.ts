@@ -1776,6 +1776,48 @@ describe('config/validation', () => {
       expect(errors).toBeEmptyArray();
     });
 
+    it('validates valid commitTrailers', async () => {
+      const config = {
+        commitTrailers: [
+          'Signed-off-by: {{{gitAuthor}}}',
+          'Co-authored-by: First Contributor <first@example.com>',
+          'Co-authored-by: Second Contributor <second@example.com>',
+        ],
+      };
+
+      const { warnings, errors } = await configValidation.validateConfig(
+        'repo',
+        config,
+      );
+
+      expect(warnings).toBeEmptyArray();
+      expect(errors).toBeEmptyArray();
+    });
+
+    it('errors on invalid commitTrailers', async () => {
+      const config = {
+        commitTrailers: [
+          'no colon',
+          'Bad key: value',
+          'Key:no-space',
+          'Key: multi\nline',
+          42,
+        ] as never,
+      };
+
+      const { warnings, errors } = await configValidation.validateConfig(
+        'repo',
+        config,
+      );
+
+      expect(warnings).toBeEmptyArray();
+      expect(errors).toHaveLength(5);
+      expect(errors[0]).toMatchObject({
+        topic: 'Configuration Error',
+        message: expect.stringContaining('Invalid commit trailer'),
+      });
+    });
+
     it('warns if only selectors in packageRules', async () => {
       const config = {
         packageRules: [{ matchDepTypes: ['foo'], matchPackageNames: ['bar'] }],

@@ -303,7 +303,7 @@ export async function resolveConfigPresets(
         if (isObject(element)) {
           const { config: presetConfig, visitedPresets: visited } =
             await resolveConfigPresets(
-              element as RenovateConfig,
+              element,
               baseConfig,
               ignorePresets,
               existingPresets,
@@ -328,7 +328,7 @@ export async function resolveConfigPresets(
       logger.trace(`Resolving object "${key}"`);
       const { config: presetConfig, visitedPresets: visited } =
         await resolveConfigPresets(
-          val as RenovateConfig,
+          val,
           baseConfig,
           ignorePresets,
           existingPresets,
