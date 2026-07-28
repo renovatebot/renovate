@@ -4,7 +4,7 @@ import { GlobalConfig } from '../../../config/global.ts';
 import { AzurePipelinesTasksDatasource } from '../../datasource/azure-pipelines-tasks/index.ts';
 import {
   extractAzurePipelinesTasks,
-  extractContainer,
+  extractContainerValue,
   extractRepository,
   parseAzurePipelines,
 } from './extract.ts';
@@ -186,7 +186,7 @@ describe('modules/manager/azure-pipelines/extract', () => {
   describe('extractContainer()', () => {
     it('should extract container information', () => {
       expect(
-        extractContainer({
+        extractContainerValue({
           image: 'ubuntu:16.04',
         }),
       ).toMatchObject({
@@ -648,6 +648,9 @@ describe('modules/manager/azure-pipelines/extract', () => {
         - \${{ if condition1 }}:
           - \${{ if condition2 }}:
             - task: Bash@3
+            - task: Other@4
+              property: value
+            - script: testing alias
       `;
       const res = extractPackageFile(packageFile, azurePipelinesFilename, {
         repository: 'repo',
@@ -656,6 +659,11 @@ describe('modules/manager/azure-pipelines/extract', () => {
         {
           depName: 'Bash',
           currentValue: '3',
+          datasource: AzurePipelinesTasksDatasource.id,
+        },
+        {
+          depName: 'Other',
+          currentValue: '4',
           datasource: AzurePipelinesTasksDatasource.id,
         },
       ]);

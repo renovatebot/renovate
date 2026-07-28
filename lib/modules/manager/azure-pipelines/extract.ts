@@ -13,13 +13,14 @@ import type {
 } from '../types.ts';
 import type {
   AzurePipelines,
-  Container,
+  Containers,
   Deploy,
   Job,
   Jobs,
   Repository,
   Stage,
-  Step,
+  Stages,
+  Task,
 } from './schema.ts';
 import { AzurePipelinesYaml, isTemplateExprNode } from './schema.ts';
 
@@ -87,9 +88,9 @@ export function extractRepository(
   };
 }
 
-export function extractContainer(
-  container: Container,
-): PackageDependency | null {
+export function extractContainerValue(container: {
+  image: string;
+}): PackageDependency | null {
   const dep = getDep(container.image);
   logger.debug(
     {
@@ -134,12 +135,12 @@ export function parseAzurePipelines(
   return null;
 }
 
-function extractSteps(steps: Step[] | undefined): PackageDependency[] {
+function extractTaskes(steps: Task[] | undefined): PackageDependency[] {
   const deps: PackageDependency[] = [];
   for (const step of coerceArray(steps)) {
     if (isTemplateExprNode(step)) {
       for (const nested of Object.values(step)) {
-        deps.push(...extractSteps(nested as Step[]));
+        deps.push(...extractTaskes(nested));
       }
     } else {
       const task = extractAzurePipelinesTasks(step.task);
@@ -151,8 +152,12 @@ function extractSteps(steps: Step[] | undefined): PackageDependency[] {
   return deps;
 }
 
-function extractJob(job: Job): PackageDependency[] {
-  return extractSteps(job?.steps);
+function extractJob(job: Job | undefined): PackageDependency[] {
+  if (job === undefined || isTemplateExprNode(job)) {
+    return [];
+  }
+
+  return extractTaskes(job.steps);
 }
 
 function extractDeploy(deploy: Deploy | undefined): PackageDependency[] {
@@ -170,34 +175,37 @@ function extractJobs(jobs: Jobs | undefined): PackageDependency[] {
   for (const jobOrDeployment of coerceArray(jobs)) {
     if (isTemplateExprNode(jobOrDeployment)) {
       for (const nested of Object.values(jobOrDeployment)) {
-        deps.push(...extractJobs(nested as Jobs));
+        deps.push(...extractJobs(nested));
       }
       continue;
     }
 
-    if (jobOrDeployment.strategy) {
-      deps.push(...extractDeploy(jobOrDeployment.strategy.canary));
-      deps.push(...extractDeploy(jobOrDeployment.strategy.rolling));
-      deps.push(...extractDeploy(jobOrDeployment.strategy.runOnce));
+    if ('steps' in jobOrDeployment) {
+      deps.push(...extractJob(jobOrDeployment));
       continue;
     }
 
-    deps.push(...extractJob(jobOrDeployment));
+    const { strategy } = jobOrDeployment;
+    if (strategy) {
+      deps.push(...extractDeploy(strategy.canary));
+      deps.push(...extractDeploy(strategy.rolling));
+      deps.push(...extractDeploy(strategy.runOnce));
+    }
   }
   return deps;
 }
 
 function extractContainers(
-  containers: Container[] | undefined,
+  containers: Containers | undefined,
 ): PackageDependency[] {
   const deps: PackageDependency[] = [];
   for (const container of coerceArray(containers)) {
     if (isTemplateExprNode(container)) {
       for (const nested of Object.values(container)) {
-        deps.push(...extractContainers(nested as Container[]));
+        deps.push(...extractContainers(nested));
       }
     } else {
-      const dep = extractContainer(container);
+      const dep = extractContainerValue(container);
       if (dep) {
         deps.push(dep);
       }
@@ -206,16 +214,22 @@ function extractContainers(
   return deps;
 }
 
-function extractStages(stages: Stage[] | undefined): PackageDependency[] {
+function extractStages(stages: Stages | undefined): PackageDependency[] {
   const deps: PackageDependency[] = [];
   for (const stage of coerceArray(stages)) {
-    if (isTemplateExprNode(stage)) {
-      for (const nested of Object.values(stage)) {
-        deps.push(...extractStages(nested as Stage[]));
-      }
-    } else {
-      deps.push(...extractJobs(stage.jobs));
+    deps.push(...extractStage(stage));
+  }
+  return deps;
+}
+
+function extractStage(stage: Stage): PackageDependency[] {
+  const deps: PackageDependency[] = [];
+  if (isTemplateExprNode(stage)) {
+    for (const nested of Object.values(stage)) {
+      deps.push(...extractStages(nested));
     }
+  } else {
+    deps.push(...extractJobs(stage.jobs));
   }
   return deps;
 }
@@ -243,7 +257,7 @@ export function extractPackageFile(
   deps.push(...extractContainers(pkg.resources?.containers));
   deps.push(...extractStages(pkg.stages));
   deps.push(...extractJobs(pkg.jobs));
-  deps.push(...extractSteps(pkg.steps));
+  deps.push(...extractTaskes(pkg.steps));
 
   if (!deps.length) {
     return null;
