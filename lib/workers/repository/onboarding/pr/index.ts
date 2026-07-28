@@ -86,10 +86,35 @@ async function ensureOnboardingAutoCloseAge(existingPr: Pr): Promise<boolean> {
   return false;
 }
 
+/**
+ * Full onboarding PRs list package files before the PR list.
+ */
+const FULL_SECTION_ORDER = [
+  'PACKAGE FILES',
+  'CONFIG',
+  'BASEBRANCH',
+  'PRLIST',
+  'WARNINGS',
+  'ERRORS',
+] as const;
+
+/**
+ * "Summarised" onboarding PRs list PRs before other sections.
+ */
+const SUMMARY_SECTION_ORDER = [
+  'PRLIST',
+  'CONFIG',
+  'BASEBRANCH',
+  'PACKAGE FILES',
+  'WARNINGS',
+  'ERRORS',
+] as const;
+
 function buildOnboardingPrTemplate(
   config: RenovateConfig,
   configFile: string,
   rebaseCheckBox: string,
+  sectionOrder: readonly string[],
 ): string {
   let prTemplate = `Welcome to [Renovate](${
     GlobalConfig.get('productLinks').homepage
@@ -121,12 +146,7 @@ function buildOnboardingPrTemplate(
     `
 
 ---
-{{PACKAGE FILES}}
-{{CONFIG}}
-{{BASEBRANCH}}
-{{PRLIST}}
-{{WARNINGS}}
-{{ERRORS}}
+${sectionOrder.map((section) => `{{${section}}}`).join('\n')}
 
 ---
 
@@ -249,7 +269,12 @@ export async function ensureOnboardingPr(
 
   let prBody = finalizeOnboardingPrBody(
     fillOnboardingPrBody(
-      buildOnboardingPrTemplate(config, configFile, rebaseCheckBox),
+      buildOnboardingPrTemplate(
+        config,
+        configFile,
+        rebaseCheckBox,
+        FULL_SECTION_ORDER,
+      ),
       {
         packageFiles: packageFilesDesc,
         config: configDesc,
@@ -267,12 +292,33 @@ export async function ensureOnboardingPr(
     logger.debug(
       'Onboarding PR body exceeds platform limit, switching to summary PR list and package files',
     );
-    prBody = prBody.replace(prList, getExpectedPrListSummary(config, branches));
+    const prListSummary = getExpectedPrListSummary(config, branches);
     if (packageFilesDesc) {
-      prBody = prBody.replace(
-        packageFilesDesc,
-        `### Detected Package Files\n\n${getPackageFilesSummary(packageFiles)}`,
+      const packageFilesSummary = `### Detected Package Files\n\n${getPackageFilesSummary(packageFiles)}`;
+      // "What to Expect" should render before "Detected Package Files" in the summary view,
+      // so rebuild from a template with that section order rather than reordering the rendered body.
+      prBody = finalizeOnboardingPrBody(
+        fillOnboardingPrBody(
+          buildOnboardingPrTemplate(
+            config,
+            configFile,
+            rebaseCheckBox,
+            SUMMARY_SECTION_ORDER,
+          ),
+          {
+            packageFiles: packageFilesSummary,
+            config: configDesc,
+            baseBranch: baseBranchDesc,
+            prList: prListSummary,
+            warnings,
+            errors,
+          },
+        ),
+        config,
+        onboardingConfigHashComment,
       );
+    } else {
+      prBody = prBody.replace(prList, prListSummary);
     }
   }
 
