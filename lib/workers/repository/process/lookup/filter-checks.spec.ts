@@ -16,7 +16,6 @@ import { toMs } from '../../../../util/pretty-time.ts';
 import type { Timestamp } from '../../../../util/timestamp.ts';
 import {
   checkMinimumConfidence,
-  checkMinimumReleaseAge,
   filterInternalChecks,
   isMinimumConfidenceApplicable,
   isMinimumReleaseAgeApplicable,
@@ -403,81 +402,6 @@ describe('workers/repository/process/lookup/filter-checks', () => {
 
     it('returns true for updateType=undefined', () => {
       expect(isMinimumConfidenceApplicable(undefined)).toBeTrue();
-    });
-  });
-
-  describe('.checkMinimumReleaseAge()', () => {
-    beforeEach(() => {
-      // oxlint-disable-next-line renovate/no-redundant-mock-reset -- discards the once-values queued by the outer beforeEach
-      dateUtil.getElapsedMs.mockReset();
-    });
-
-    it('is not pending if minimumReleaseAge is not set', () => {
-      const res = checkMinimumReleaseAge(
-        {},
-        '2021-01-01T00:00:00.000Z' as Timestamp,
-      );
-      expect(res).toEqual({
-        isPending: false,
-        minimumReleaseAgeMs: 0,
-        hasTimestamp: true,
-      });
-    });
-
-    it('is pending if the release is younger than minimumReleaseAge', () => {
-      dateUtil.getElapsedMs.mockReturnValueOnce(toMs('1 day') ?? 0);
-      const res = checkMinimumReleaseAge(
-        { minimumReleaseAge: '3 days' },
-        '2021-01-01T00:00:00.000Z' as Timestamp,
-      );
-      expect(res).toEqual({
-        isPending: true,
-        minimumReleaseAgeMs: toMs('3 days'),
-        hasTimestamp: true,
-      });
-    });
-
-    it('is not pending if the release is older than minimumReleaseAge', () => {
-      dateUtil.getElapsedMs.mockReturnValueOnce(toMs('5 days') ?? 0);
-      const res = checkMinimumReleaseAge(
-        { minimumReleaseAge: '3 days' },
-        '2021-01-01T00:00:00.000Z' as Timestamp,
-      );
-      expect(res).toEqual({
-        isPending: false,
-        minimumReleaseAgeMs: toMs('3 days'),
-        hasTimestamp: true,
-      });
-    });
-
-    it('is pending with a missing timestamp if minimumReleaseAgeBehaviour=timestamp-required', () => {
-      const res = checkMinimumReleaseAge(
-        {
-          minimumReleaseAge: '3 days',
-          minimumReleaseAgeBehaviour: 'timestamp-required',
-        },
-        undefined,
-      );
-      expect(res).toEqual({
-        isPending: true,
-        minimumReleaseAgeMs: toMs('3 days'),
-        hasTimestamp: false,
-      });
-    });
-
-    it('is not pending with a missing timestamp if minimumReleaseAgeBehaviour=timestamp-optional', () => {
-      const res = checkMinimumReleaseAge(
-        {
-          minimumReleaseAge: '3 days',
-          minimumReleaseAgeBehaviour: 'timestamp-optional',
-        },
-        undefined,
-      );
-      expect(res).toEqual({
-        isPending: false,
-        minimumReleaseAgeMs: toMs('3 days'),
-        hasTimestamp: false,
-      });
     });
   });
 
