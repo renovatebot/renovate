@@ -15,6 +15,7 @@ import type {
   AzurePipelines,
   Containers,
   Deploy,
+  Deployment,
   Job,
   Jobs,
   Repository,
@@ -153,7 +154,7 @@ function extractTaskes(steps: Task[] | undefined): PackageDependency[] {
 }
 
 function extractJob(job: Job | undefined): PackageDependency[] {
-  if (job === undefined || isTemplateExprNode(job)) {
+  if (job === undefined) {
     return [];
   }
 
@@ -170,27 +171,35 @@ function extractDeploy(deploy: Deploy | undefined): PackageDependency[] {
   return deps;
 }
 
+function extractJobOrDeployment(
+  jobOrDeployment: Job | Deployment,
+): PackageDependency[] {
+  const deps: PackageDependency[] = [];
+
+  if (isTemplateExprNode(jobOrDeployment)) {
+    for (const nested of Object.values(jobOrDeployment)) {
+      deps.push(...extractJobs(nested));
+    }
+  } else {
+    if ('steps' in jobOrDeployment) {
+      deps.push(...extractJob(jobOrDeployment));
+    } else {
+      const { strategy } = jobOrDeployment;
+      if (strategy) {
+        deps.push(...extractDeploy(strategy.canary));
+        deps.push(...extractDeploy(strategy.rolling));
+        deps.push(...extractDeploy(strategy.runOnce));
+      }
+    }
+  }
+
+  return deps;
+}
+
 function extractJobs(jobs: Jobs | undefined): PackageDependency[] {
   const deps: PackageDependency[] = [];
   for (const jobOrDeployment of coerceArray(jobs)) {
-    if (isTemplateExprNode(jobOrDeployment)) {
-      for (const nested of Object.values(jobOrDeployment)) {
-        deps.push(...extractJobs(nested));
-      }
-      continue;
-    }
-
-    if ('steps' in jobOrDeployment) {
-      deps.push(...extractJob(jobOrDeployment));
-      continue;
-    }
-
-    const { strategy } = jobOrDeployment;
-    if (strategy) {
-      deps.push(...extractDeploy(strategy.canary));
-      deps.push(...extractDeploy(strategy.rolling));
-      deps.push(...extractDeploy(strategy.runOnce));
-    }
+    deps.push(...extractJobOrDeployment(jobOrDeployment));
   }
   return deps;
 }
