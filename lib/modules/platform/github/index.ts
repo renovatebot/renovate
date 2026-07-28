@@ -1,10 +1,5 @@
 import { setTimeout } from 'node:timers/promises';
-import {
-  isArray,
-  isNonEmptyObject,
-  isNonEmptyString,
-  isString,
-} from '@sindresorhus/is';
+import { isArray, isNonEmptyObject, isNonEmptyString } from '@sindresorhus/is';
 import semver from 'semver';
 import { GlobalConfig } from '../../../config/global.ts';
 import {
@@ -32,6 +27,7 @@ import { isGithubFineGrainedPersonalAccessToken } from '../../../util/check-toke
 import { coerceToNull } from '../../../util/coerce.ts';
 import { parseJson } from '../../../util/common.ts';
 import { getEnv } from '../../../util/env.ts';
+import { formatCommitMessage } from '../../../util/git/commit-trailers.ts';
 import * as git from '../../../util/git/index.ts';
 import {
   diffCommitTree,
@@ -2255,7 +2251,7 @@ export async function getVulnerabilityAlerts(): Promise<GithubVulnerabilityAlert
 }
 
 async function pushFiles(
-  { branchName, message }: CommitFilesConfig,
+  { branchName, message, trailers }: CommitFilesConfig,
   { parentCommitSha, commitSha }: CommitResult,
 ): Promise<LongCommitSha | null> {
   try {
@@ -2287,8 +2283,7 @@ async function pushFiles(
     );
     const treeSha = treeRes.body.sha;
 
-    // Message already includes any trailers (formatted by the worker).
-    const commitMessage = isString(message) ? message : message.join('\n\n');
+    const commitMessage = formatCommitMessage(message, trailers);
 
     // Now we recreate the commit using the tree we recreated the step before
     const commitRes = await githubApi.postJson<{ sha: string }>(

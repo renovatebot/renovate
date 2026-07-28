@@ -929,7 +929,7 @@ describe('util/git/index', { timeout: 30000 }, () => {
       expect(files).toContainEqual(['120000', 'blob', 'future_link']);
     });
 
-    it('commits a message that already includes trailers', async () => {
+    it('adds trailers as the final block of the commit message', async () => {
       const file: FileChange = {
         type: 'addition',
         path: 'some-trailer-file',
@@ -939,15 +939,12 @@ describe('util/git/index', { timeout: 30000 }, () => {
       const commit = await git.commitFiles({
         branchName: 'renovate/branch_with_trailers',
         files: [file],
-        message: codeBlock`
-          Update something
-
-          Some commit body
-
-          Signed-off-by: Renovate Bot <bot@renovateapp.com>
-          Co-authored-by: First Contributor <first@example.com>
-          Co-authored-by: Second Contributor <second@example.com>
-        `,
+        message: ['Update something', 'Some commit body'],
+        trailers: [
+          'Signed-off-by: Renovate Bot <bot@renovateapp.com>',
+          'Co-authored-by: First Contributor <first@example.com>',
+          'Co-authored-by: Second Contributor <second@example.com>',
+        ],
       });
 
       expect(commit).not.toBeNull();
@@ -963,6 +960,33 @@ describe('util/git/index', { timeout: 30000 }, () => {
         Co-authored-by: First Contributor <first@example.com>
         Co-authored-by: Second Contributor <second@example.com>
       `);
+    });
+
+    it('adds trailers when commit message is a string', async () => {
+      const file: FileChange = {
+        type: 'addition',
+        path: 'some-string-trailer-file',
+        contents: 'some new-contents',
+      };
+
+      const commit = await git.commitFiles({
+        branchName: 'renovate/branch_with_string_message_trailers',
+        files: [file],
+        message: 'Update something',
+        trailers: ['Signed-off-by: Renovate Bot <bot@renovateapp.com>'],
+      });
+
+      expect(commit).not.toBeNull();
+      const tmpGit = simpleGit(tmpDir.path);
+      const parsedTrailers = await tmpGit.raw([
+        'log',
+        '-1',
+        '--format=%(trailers:only)',
+        commit!,
+      ]);
+      expect(parsedTrailers.trim()).toBe(
+        'Signed-off-by: Renovate Bot <bot@renovateapp.com>',
+      );
     });
 
     it('deletes file', async () => {

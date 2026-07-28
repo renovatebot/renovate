@@ -2,8 +2,8 @@ import { codeBlock } from 'common-tags';
 import { logger } from '~test/util.ts';
 import {
   filterValidCommitTrailers,
+  formatCommitMessage,
   isValidCommitTrailer,
-  splitCommitMessage,
 } from './commit-trailers.ts';
 
 describe('util/git/commit-trailers', () => {
@@ -66,72 +66,53 @@ describe('util/git/commit-trailers', () => {
     });
   });
 
-  describe('splitCommitMessage', () => {
-    it('returns the whole message as body when there is no trailer block', () => {
-      expect(
-        splitCommitMessage(codeBlock`
-          Update something
-
-          Some body text
-        `),
-      ).toEqual({
-        body: codeBlock`
-          Update something
-
-          Some body text
-        `,
-        trailers: [],
-      });
+  describe('formatCommitMessage', () => {
+    it('returns string message unchanged when there are no trailers', () => {
+      expect(formatCommitMessage('Update something')).toBe('Update something');
     });
 
-    it('splits a trailing trailer block from the body', () => {
+    it('joins array message parts with blank lines', () => {
+      expect(formatCommitMessage(['Update something', 'Some commit body']))
+        .toBe(codeBlock`
+        Update something
+
+        Some commit body
+      `);
+    });
+
+    it('appends trailers as the final block for a string message', () => {
       expect(
-        splitCommitMessage(codeBlock`
-          Update something
-
-          Some body text
-
-          Signed-off-by: Renovate Bot <bot@renovateapp.com>
-          Co-authored-by: First Contributor <first@example.com>
-        `),
-      ).toEqual({
-        body: codeBlock`
-          Update something
-
-          Some body text
-        `,
-        trailers: [
+        formatCommitMessage('Update something', [
           'Signed-off-by: Renovate Bot <bot@renovateapp.com>',
           'Co-authored-by: First Contributor <first@example.com>',
-        ],
-      });
+        ]),
+      ).toBe(codeBlock`
+        Update something
+
+        Signed-off-by: Renovate Bot <bot@renovateapp.com>
+        Co-authored-by: First Contributor <first@example.com>
+      `);
     });
 
-    it('treats a single-line subject with no trailers as body only', () => {
-      expect(splitCommitMessage('Update something')).toEqual({
-        body: 'Update something',
-        trailers: [],
-      });
-    });
-
-    it('handles an empty message', () => {
-      expect(splitCommitMessage('')).toEqual({ body: '', trailers: [] });
-      expect(splitCommitMessage('\n')).toEqual({ body: '', trailers: [] });
-    });
-
-    it('treats a message that is only trailers as an empty body', () => {
+    it('appends trailers as the final block for an array message', () => {
       expect(
-        splitCommitMessage(codeBlock`
-          Signed-off-by: Renovate Bot <bot@renovateapp.com>
-          Change-Id: Iabc
-        `),
-      ).toEqual({
-        body: '',
-        trailers: [
-          'Signed-off-by: Renovate Bot <bot@renovateapp.com>',
-          'Change-Id: Iabc',
-        ],
-      });
+        formatCommitMessage(
+          ['Update something', 'Some commit body'],
+          ['Signed-off-by: Renovate Bot <bot@renovateapp.com>'],
+        ),
+      ).toBe(codeBlock`
+        Update something
+
+        Some commit body
+
+        Signed-off-by: Renovate Bot <bot@renovateapp.com>
+      `);
+    });
+
+    it('ignores empty trailer lists', () => {
+      expect(formatCommitMessage('Update something', [])).toBe(
+        'Update something',
+      );
     });
   });
 });

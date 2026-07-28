@@ -49,16 +49,12 @@ export function commitFilesToBranch(
     throw new Error(CONFIG_SECRETS_EXPOSED);
   }
 
-  let message = config.commitMessage!;
-  if (isNonEmptyArray(config.commitTrailers)) {
-    message = `${message}\n\n${config.commitTrailers.join('\n')}`;
-  }
-
   const commitFilesConfig: CommitFilesConfig = {
     baseBranch: config.baseBranch,
     branchName: config.branchName,
     files: updatedFiles,
-    message,
+    message: config.commitMessage!,
+    trailers: config.commitTrailers,
     force: !!config.forceCommit,
     platformCommit: config.platformCommit,
     // Only needed by Gerrit platform

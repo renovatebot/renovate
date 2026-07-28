@@ -1,4 +1,3 @@
-import { isNonEmptyArray } from '@sindresorhus/is';
 import { GlobalConfig } from '../../../../config/global.ts';
 import type { RenovateConfig } from '../../../../config/types.ts';
 import { logger } from '../../../../logger/index.ts';
@@ -40,14 +39,10 @@ export async function createOnboardingBranch(
   }
 
   // only allow gitAuthor template value in the commitTrailers
-  const trailers = filterValidCommitTrailers(
-    coerceArray(config.commitTrailers).map((trailer) =>
-      compile(trailer, { gitAuthor: config.gitAuthor }),
-    ),
+  const compiledTrailers = coerceArray(config.commitTrailers).map((trailer) =>
+    compile(trailer, { gitAuthor: config.gitAuthor }),
   );
-  if (isNonEmptyArray(trailers)) {
-    commitMessage = `${commitMessage}\n\n${trailers.join('\n')}`;
-  }
+  const trailers = filterValidCommitTrailers(compiledTrailers);
 
   // istanbul ignore if
   if (GlobalConfig.get('dryRun')) {
@@ -72,6 +67,7 @@ export async function createOnboardingBranch(
       },
     ],
     message: commitMessage,
+    trailers,
     platformCommit: config.platformCommit,
     force: true,
     // Only needed by Gerrit platform

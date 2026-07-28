@@ -1,4 +1,3 @@
-import { codeBlock } from 'common-tags';
 import type { RenovateConfig } from '~test/util.ts';
 import { scm } from '~test/util.ts';
 import { getConfig } from '../../../../config/defaults.ts';
@@ -38,6 +37,7 @@ describe('workers/repository/onboarding/branch/create', () => {
         ],
         force: true,
         message: 'Add renovate.json',
+        trailers: [],
         platformCommit: 'auto',
         prTitle: 'Configure Renovate',
       });
@@ -66,6 +66,7 @@ describe('workers/repository/onboarding/branch/create', () => {
         ],
         force: true,
         message,
+        trailers: [],
         platformCommit: 'auto',
         prTitle: 'Configure Renovate',
       });
@@ -88,6 +89,7 @@ describe('workers/repository/onboarding/branch/create', () => {
           ],
           force: true,
           message: `Add renovate.json\n\nsome commit body`,
+          trailers: [],
           platformCommit: 'auto',
           prTitle: 'Configure Renovate',
         });
@@ -119,6 +121,7 @@ describe('workers/repository/onboarding/branch/create', () => {
           ],
           force: true,
           message: `We can Renovate if we want to, we can leave PRs in decline\n\nSigned Off: <Bot bot@botland.com>`,
+          trailers: [],
           platformCommit: 'auto',
           prTitle: 'Configure Renovate',
         });
@@ -126,7 +129,7 @@ describe('workers/repository/onboarding/branch/create', () => {
     });
 
     describe('applies the commitTrailers value', () => {
-      it('compiles gitAuthor and includes trailers in the message', async () => {
+      it('compiles gitAuthor and passes trailers', async () => {
         await createOnboardingBranch({
           ...config,
           commitTrailers: ['Signed-off-by: {{{gitAuthor}}}'],
@@ -143,11 +146,8 @@ describe('workers/repository/onboarding/branch/create', () => {
             },
           ],
           force: true,
-          message: codeBlock`
-            Add renovate.json
-
-            Signed-off-by: Bot <bot@botland.com>
-          `,
+          message: 'Add renovate.json',
+          trailers: ['Signed-off-by: Bot <bot@botland.com>'],
           platformCommit: 'auto',
           prTitle: 'Configure Renovate',
         });
@@ -165,11 +165,7 @@ describe('workers/repository/onboarding/branch/create', () => {
 
         expect(scm.commitAndPush).toHaveBeenCalledExactlyOnceWith(
           expect.objectContaining({
-            message: codeBlock`
-              Add renovate.json
-
-              Static-Trailer: kept
-            `,
+            trailers: ['Static-Trailer: kept'],
           }),
         );
       });
@@ -195,6 +191,7 @@ describe('workers/repository/onboarding/branch/create', () => {
           ],
           force: true,
           message,
+          trailers: [],
           platformCommit: 'auto',
           prTitle: 'Configure Renovate',
         });
@@ -228,6 +225,7 @@ describe('workers/repository/onboarding/branch/create', () => {
           ],
           force: true,
           message,
+          trailers: [],
           platformCommit: 'auto',
           prTitle: 'Configure Renovate',
         });
@@ -254,6 +252,7 @@ describe('workers/repository/onboarding/branch/create', () => {
           ],
           force: true,
           message,
+          trailers: [],
           platformCommit: 'auto',
           prTitle: 'chore: Configure Renovate',
         });
@@ -287,6 +286,7 @@ describe('workers/repository/onboarding/branch/create', () => {
           ],
           force: true,
           message,
+          trailers: [],
           platformCommit: 'auto',
           prTitle: 'chore: Configure Renovate',
         });
@@ -317,6 +317,7 @@ describe('workers/repository/onboarding/branch/create', () => {
           ],
           force: true,
           message,
+          trailers: [],
           platformCommit: 'auto',
           prTitle: 'chore: Configure Renovate',
         });
@@ -346,6 +347,7 @@ describe('workers/repository/onboarding/branch/create', () => {
           ],
           force: true,
           message,
+          trailers: [],
           platformCommit: 'auto',
           prTitle: 'chore: Configure Renovate',
         });
@@ -376,6 +378,7 @@ describe('workers/repository/onboarding/branch/create', () => {
           ],
           force: true,
           message,
+          trailers: [],
           platformCommit: 'auto',
           prTitle: 'chore: Configure Renovate',
         });
@@ -399,6 +402,7 @@ describe('workers/repository/onboarding/branch/create', () => {
           branchName: 'renovate/configure',
           files: [{ type: 'addition', path, contents: '{"foo":"bar"}' }],
           message,
+          trailers: [],
           force: true,
           platformCommit: 'auto',
           prTitle: 'chore: Configure Renovate',

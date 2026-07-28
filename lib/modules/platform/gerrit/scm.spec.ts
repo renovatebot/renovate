@@ -1,4 +1,3 @@
-import { codeBlock } from 'common-tags';
 import { fakeSha, git, logger, partial } from '~test/util.ts';
 import { client as _client } from './client.ts';
 import type {
@@ -172,9 +171,11 @@ describe('modules/platform/gerrit/scm', () => {
         baseBranch: 'main',
         branchName: 'renovate/dependency-1.x',
         files: [],
-        message: expect.stringMatching(
-          /^pr title\n\nRenovate-Branch: renovate\/dependency-1\.x\nChange-Id: I[a-z0-9]{40}$/,
-        ),
+        message: ['pr title'],
+        trailers: [
+          'Renovate-Branch: renovate/dependency-1.x',
+          expect.stringMatching(/^Change-Id: I[a-z0-9]{40}$/),
+        ],
         prTitle: 'pr title',
       });
       // For new changes, push should NOT be called - it will be done by createPr()
@@ -193,24 +194,26 @@ describe('modules/platform/gerrit/scm', () => {
         await gerritScm.commitAndPush({
           branchName: 'renovate/dependency-1.x',
           baseBranch: 'main',
-          message: codeBlock`
-            commit msg
-
-            Signed-off-by: Renovate Bot <bot@renovateapp.com>
-            Change-Id: Iuserprovided
-            Renovate-Branch: user-provided
-          `,
+          message: 'commit msg',
           files: [],
           prTitle: 'pr title',
+          trailers: [
+            'Signed-off-by: Renovate Bot <bot@renovateapp.com>',
+            'Change-Id: Iuserprovided',
+            'Renovate-Branch: user-provided',
+          ],
         }),
       ).toBe(commitSha);
       expect(git.prepareCommit).toHaveBeenCalledExactlyOnceWith({
         baseBranch: 'main',
         branchName: 'renovate/dependency-1.x',
         files: [],
-        message: expect.stringMatching(
-          /^pr title\n\nSigned-off-by: Renovate Bot <bot@renovateapp\.com>\nRenovate-Branch: renovate\/dependency-1\.x\nChange-Id: I[a-z0-9]{40}$/,
-        ),
+        message: ['pr title'],
+        trailers: [
+          'Signed-off-by: Renovate Bot <bot@renovateapp.com>',
+          'Renovate-Branch: renovate/dependency-1.x',
+          expect.stringMatching(/^Change-Id: I[a-z0-9]{40}$/),
+        ],
         prTitle: 'pr title',
       });
     });
@@ -247,12 +250,11 @@ describe('modules/platform/gerrit/scm', () => {
         baseBranch: 'new-main',
         branchName: 'renovate/dependency-1.x',
         files: [],
-        message: codeBlock`
-          pr title
-
-          Renovate-Branch: renovate/dependency-1.x
-          Change-Id: Ifcd936eef0ced620040a07a337c586d0a882725b
-        `,
+        message: ['pr title'],
+        trailers: [
+          'Renovate-Branch: renovate/dependency-1.x',
+          'Change-Id: Ifcd936eef0ced620040a07a337c586d0a882725b',
+        ],
         prTitle: 'pr title',
       });
       expect(git.pushCommit).toHaveBeenCalledExactlyOnceWith({
@@ -289,12 +291,11 @@ describe('modules/platform/gerrit/scm', () => {
         baseBranch: 'main',
         branchName: 'renovate/dependency-1.x',
         files: [],
-        message: codeBlock`
-          pr title
-
-          Renovate-Branch: renovate/dependency-1.x
-          Change-Id: I1bf983f8f6530c44826925b1308a45fe672408a6
-        `,
+        message: ['pr title'],
+        trailers: [
+          'Renovate-Branch: renovate/dependency-1.x',
+          'Change-Id: I1bf983f8f6530c44826925b1308a45fe672408a6',
+        ],
         prTitle: 'pr title',
       });
       expect(git.pushCommit).not.toHaveBeenCalled();
@@ -345,12 +346,11 @@ describe('modules/platform/gerrit/scm', () => {
         baseBranch: 'main',
         branchName: 'renovate/dependency-1.x',
         files: [],
-        message: codeBlock`
-          pr title
-
-          Renovate-Branch: renovate/dependency-1.x
-          Change-Id: I1bf983f8f6530c44826925b1308a45fe672408a6
-        `,
+        message: ['pr title'],
+        trailers: [
+          'Renovate-Branch: renovate/dependency-1.x',
+          'Change-Id: I1bf983f8f6530c44826925b1308a45fe672408a6',
+        ],
         prTitle: 'pr title',
         autoApprove: true,
       });
