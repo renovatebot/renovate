@@ -57,6 +57,23 @@ describe('modules/manager/apm/extract', () => {
       });
     });
 
+    it('skips SHA-pinned entries (tag comment is stripped by YAML)', () => {
+      // APM documents `owner/repo#<sha> # v2.0.0`, but the trailing tag is a
+      // YAML comment that parsing strips, so the entry arrives as a bare SHA.
+      const content = codeBlock`
+        dependencies:
+          apm:
+            - acme/playbooks#b1c2d3e4f5a6b7c8d9e0f1234567890abcdef123 # v2.0.0
+      `;
+      expect(extractPackageFile(content, packageFile)?.deps).toMatchObject([
+        {
+          depName: 'acme/playbooks',
+          currentDigest: 'b1c2d3e4f5a6b7c8d9e0f1234567890abcdef123',
+          skipReason: 'unversioned-reference',
+        },
+      ]);
+    });
+
     it('keeps subpath in depName but uses owner/repo as packageName', () => {
       const content = codeBlock`
         dependencies:
@@ -113,6 +130,38 @@ describe('modules/manager/apm/extract', () => {
       expect(
         extractPackageFile(content, packageFile)?.deps[0].registryUrls,
       ).toBeUndefined();
+    });
+
+    it('supports GitLab nested groups (project slug spans 3+ segments)', () => {
+      const content = codeBlock`
+        dependencies:
+          apm:
+            - gitlab.com/group/subgroup/project#v1.0.0
+      `;
+      expect(extractPackageFile(content, packageFile)?.deps).toMatchObject([
+        {
+          depName: 'gitlab.com/group/subgroup/project',
+          packageName: 'group/subgroup/project',
+          datasource: GitlabTagsDatasource.id,
+          currentValue: 'v1.0.0',
+        },
+      ]);
+    });
+
+    it('splits a GitLab nested project from a virtual subpath', () => {
+      const content = codeBlock`
+        dependencies:
+          apm:
+            - gitlab.com/group/subgroup/project/prompts/foo#v1.0.0
+      `;
+      expect(extractPackageFile(content, packageFile)?.deps).toMatchObject([
+        {
+          depName: 'gitlab.com/group/subgroup/project/prompts/foo',
+          packageName: 'group/subgroup/project',
+          datasource: GitlabTagsDatasource.id,
+          currentValue: 'v1.0.0',
+        },
+      ]);
     });
 
     it('extracts self-hosted github dependencies with registryUrls', () => {

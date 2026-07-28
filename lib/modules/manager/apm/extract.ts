@@ -17,17 +17,17 @@ interface DatasourceResult {
 
 /**
  * Determine which Renovate datasource to use for an APM dependency, based on
- * the git host. Reuses `detectPlatform` (which also honors `hostRules`) to map
- * github.com/gitlab.com and their self-hosted variants to the `github-tags` and
- * `gitlab-tags` datasources, and falls back to the generic `git-tags`
- * datasource for every other host (Bitbucket, Azure DevOps, etc.).
+ * the git host `platform` (already resolved via `detectPlatform`, which honors
+ * `hostRules`). github/gitlab (and their self-hosted variants) map to the
+ * `github-tags` / `gitlab-tags` datasources; every other host (Bitbucket, Azure
+ * DevOps, etc.) falls back to the generic `git-tags` datasource.
  */
-function determineDatasource(host: string, repoPath: string): DatasourceResult {
-  const repoUrl = `https://${host}/${repoPath}`;
-  const platform = detectPlatform(repoUrl);
-
+function determineDatasource(
+  host: string,
+  platform: string | null,
+  repoPath: string,
+): DatasourceResult {
   if (platform === 'github') {
-    logger.debug({ repoUrl }, 'apm: found github dependency');
     return {
       datasource: GithubTagsDatasource.id,
       packageName: repoPath,
@@ -36,7 +36,6 @@ function determineDatasource(host: string, repoPath: string): DatasourceResult {
   }
 
   if (platform === 'gitlab') {
-    logger.debug({ repoUrl }, 'apm: found gitlab dependency');
     return {
       datasource: GitlabTagsDatasource.id,
       packageName: repoPath,
@@ -44,25 +43,66 @@ function determineDatasource(host: string, repoPath: string): DatasourceResult {
     };
   }
 
-  logger.debug({ repoUrl }, 'apm: using git-tags datasource');
-  return { datasource: GitTagsDatasource.id, packageName: repoUrl };
+  return {
+    datasource: GitTagsDatasource.id,
+    packageName: `https://${host}/${repoPath}`,
+  };
+}
+
+/** A full commit SHA (git sha1 or sha256). */
+const shaRegex = regEx(/^(?:[a-f0-9]{40}|[a-f0-9]{64})$/i);
+
+/**
+ * APM virtual-package subpaths (skills/prompts/etc.) begin at one of these
+ * "primitive" directories or at a file with a virtual extension. APM only uses
+ * these to find where a repo path ends for hosts with nested namespaces; see
+ * `_GITLAB_VIRTUAL_ROOT_SEGMENTS` / `VIRTUAL_FILE_EXTENSIONS` in apm.
+ */
+const virtualRootSegments = new Set(['prompts', 'instructions', 'collections']);
+const virtualFileRegex = regEx(/\.(?:prompt|instructions|agent)\.md$/);
+
+/**
+ * Resolve the repository path from the host-stripped path segments.
+ *
+ * GitHub repos are always `owner/repo`. GitLab (and other hosts) allow nested
+ * groups, so the project slug can span 3+ segments; the virtual-package subpath,
+ * if any, begins at a primitive directory or virtual file (index >= 2). Returns
+ * `null` when there is no `owner/repo` (fewer than two segments).
+ */
+function resolveRepoPath(
+  platform: string | null,
+  segments: string[],
+): string | null {
+  if (segments.length < 2) {
+    return null;
+  }
+  if (platform === 'github') {
+    return segments.slice(0, 2).join('/');
+  }
+  let boundary = segments.length;
+  for (let i = 2; i < segments.length; i++) {
+    if (
+      virtualRootSegments.has(segments[i]) ||
+      virtualFileRegex.test(segments[i])
+    ) {
+      boundary = i;
+      break;
+    }
+  }
+  return segments.slice(0, boundary).join('/');
 }
 
 /**
- * APM dependency path `[host/]owner/repo[/subpath...]`. APM only supports remote
- * git references (no local paths). The optional host prefix is always a hostname
- * (so it contains a dot), whereas owner names do not - `owner` therefore excludes
- * dots, which disambiguates the leading segment. Dots in repo names or subpaths
- * (e.g. `owner/repo.js`, `github/awesome-copilot/agents/api-architect.agent.md`)
- * are left untouched.
- */
-const apmDepRegex = regEx(
-  /^(?:(?<host>[^/]+\.[^/]+)\/)?(?<owner>[^/.]+)\/(?<repo>[^/]+)(?:\/.*)?$/,
-);
-
-/**
  * Parse a single APM dependency string of the form
- * `[host/]owner/repo[/subpath...][#ref]`.
+ * `[host/]owner/repo[/subpath...][#<ref>]`, where `<ref>` is a semver tag/range,
+ * a branch, or a commit SHA.
+ *
+ * APM documents pinning to a commit SHA with the release tag kept as a trailing
+ * YAML comment (`owner/repo#<sha> # v2.0.0`). YAML parsing strips that comment,
+ * so the tag isn't visible here; such entries are skipped rather than treating
+ * the SHA as a version (which no `*-tags` datasource can resolve) or rewriting
+ * it. Keeping SHA-pinned entries current would need `pinDigests`/digest support
+ * built on a comment-preserving parse - a larger, separate change.
  */
 export function parseApmDependency(
   entry: string,
@@ -70,38 +110,52 @@ export function parseApmDependency(
 ): PackageDependency {
   const hashIndex = entry.indexOf('#');
   const pathPart = hashIndex === -1 ? entry : entry.slice(0, hashIndex);
-  const currentValue = hashIndex === -1 ? '' : entry.slice(hashIndex + 1);
+  const ref = hashIndex === -1 ? '' : entry.slice(hashIndex + 1).trim();
 
   const base: PackageDependency = {
     depName: pathPart,
     depType,
   };
 
-  if (!currentValue) {
+  if (!ref) {
     // Unpinned dependency (no `#ref`) - nothing for Renovate to update.
     return { ...base, skipReason: 'unspecified-version' };
   }
 
-  const groups = apmDepRegex.exec(pathPart)?.groups;
-  if (!groups) {
+  // The optional host prefix is a hostname (so it contains a dot); git host
+  // owner names never do, which disambiguates the leading segment.
+  const segments = pathPart.split('/').filter(Boolean);
+  const hasHost = (segments[0] ?? '').includes('.');
+  const host = hasHost ? segments[0] : 'github.com';
+  const platform = detectPlatform(`https://${host}`);
+  const repoPath = resolveRepoPath(
+    platform,
+    hasHost ? segments.slice(1) : segments,
+  );
+
+  if (!repoPath) {
     logger.debug({ entry }, 'apm: could not determine owner/repo');
     return {
       ...base,
-      currentValue,
+      currentValue: ref,
       skipReason: 'invalid-dependency-specification',
     };
   }
 
-  const host = groups.host ?? 'github.com';
-  const repoPath = `${groups.owner}/${groups.repo}`;
+  if (shaRegex.test(ref)) {
+    // SHA-pinned entry - recognized and left intact (see note above).
+    return { ...base, currentDigest: ref, skipReason: 'unversioned-reference' };
+  }
+
   const { datasource, packageName, registryUrls } = determineDatasource(
     host,
+    platform,
     repoPath,
   );
 
   return {
     ...base,
-    currentValue,
+    currentValue: ref,
     datasource,
     packageName,
     ...(registryUrls ? { registryUrls } : {}),
