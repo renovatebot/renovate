@@ -1,9 +1,6 @@
 import { isTruthy } from '@sindresorhus/is';
 import { logger } from '../../../../logger/index.ts';
-import {
-  checkMinimumReleaseAge,
-  logReleasesWithoutTimestamp,
-} from '../../../../util/minimum-release-age.ts';
+import { checkMinimumReleaseAge } from '../../../../util/minimum-release-age.ts';
 import * as p from '../../../../util/promises.ts';
 import { escapeRegExp, regEx } from '../../../../util/regex.ts';
 import { getDefaultVersioning } from '../../../datasource/common.ts';
@@ -65,7 +62,17 @@ function getLatestAllowedVersion(
     .map((release) => release.version);
 
   if (versionsWithoutTimestamp.length) {
-    logReleasesWithoutTimestamp(lock.packageName, versionsWithoutTimestamp);
+    logger.once.warn(
+      "Some release(s) did not have a releaseTimestamp, but as we're running with minimumReleaseAgeBehaviour=timestamp-optional, proceeding. See debug logs for more information",
+    );
+    logger.once.debug(
+      {
+        depName: lock.packageName,
+        versions: versionsWithoutTimestamp,
+        check: 'minimumReleaseAge',
+      },
+      `${versionsWithoutTimestamp.length} release(s) did not have a releaseTimestamp, but as we're running with minimumReleaseAgeBehaviour=timestamp-optional, proceeding`,
+    );
   }
 
   return versioning.getSatisfyingVersion(allowedVersions, lock.constraints);

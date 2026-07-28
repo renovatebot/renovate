@@ -13,10 +13,7 @@ import {
   satisfiesConfidenceLevel,
 } from '../../../../util/merge-confidence/index.ts';
 import type { MergeConfidence } from '../../../../util/merge-confidence/types.ts';
-import {
-  checkMinimumReleaseAge,
-  logReleasesWithoutTimestamp,
-} from '../../../../util/minimum-release-age.ts';
+import { checkMinimumReleaseAge } from '../../../../util/minimum-release-age.ts';
 import { applyPackageRules } from '../../../../util/package-rules/index.ts';
 import type { LookupUpdateConfig, UpdateResult } from './types.ts';
 import { getUpdateType } from './update-type.ts';
@@ -40,8 +37,7 @@ export function isMinimumReleaseAgeApplicable(
     updateType !== 'pinDigest' &&
     // Not yet supported: TODO #39400
     updateType !== 'replacement' &&
-    // Generally not possible, as we delegate to the package manager to perform the required changes.
-    // Managers which resolve the versions themselves apply the check in `updateArtifacts` instead.
+    // Not possible, as we delegate to the package manager to perform the required changes to update package(s).
     updateType !== 'lockFileMaintenance' &&
     // Not supported
     updateType !== 'bump' &&
@@ -217,9 +213,17 @@ export async function filterInternalChecks(
     }
 
     if (candidateVersionsWithoutReleaseTimestamp['timestamp-optional'].length) {
-      logReleasesWithoutTimestamp(
-        depName,
-        candidateVersionsWithoutReleaseTimestamp['timestamp-optional'],
+      logger.once.warn(
+        "Some release(s) did not have a releaseTimestamp, but as we're running with minimumReleaseAgeBehaviour=timestamp-optional, proceeding. See debug logs for more information",
+      );
+      logger.once.debug(
+        {
+          depName,
+          versions:
+            candidateVersionsWithoutReleaseTimestamp['timestamp-optional'],
+          check: 'minimumReleaseAge',
+        },
+        `${candidateVersionsWithoutReleaseTimestamp['timestamp-optional'].length} release(s) did not have a releaseTimestamp, but as we're running with minimumReleaseAgeBehaviour=timestamp-optional, proceeding`,
       );
     }
 
