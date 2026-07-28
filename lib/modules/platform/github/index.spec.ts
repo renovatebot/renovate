@@ -1,3 +1,4 @@
+import { codeBlock } from 'common-tags';
 import { RequestError } from 'got';
 import { DateTime } from 'luxon';
 import { hostRules } from '~test/host-rules.ts';
@@ -5637,8 +5638,11 @@ describe('modules/platform/github/index', () => {
         .post('/repos/some/repo/git/trees')
         .reply(200, { sha: '111' })
         .post('/repos/some/repo/git/commits', {
-          message:
-            'Foobar\n\nSigned-off-by: Renovate Bot <bot@renovateapp.com>',
+          message: codeBlock`
+            Foobar
+
+            Signed-off-by: Renovate Bot <bot@renovateapp.com>
+          `,
           tree: '111',
           parents: [fakeSha('1234567')],
         })

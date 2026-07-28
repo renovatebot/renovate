@@ -1,3 +1,4 @@
+import { codeBlock } from 'common-tags';
 import { logger } from '~test/util.ts';
 import {
   filterValidCommitTrailers,
@@ -71,9 +72,12 @@ describe('util/git/commit-trailers', () => {
     });
 
     it('joins array message parts with blank lines', () => {
-      expect(
-        formatCommitMessage(['Update something', 'Some commit body']),
-      ).toBe('Update something\n\nSome commit body');
+      expect(formatCommitMessage(['Update something', 'Some commit body']))
+        .toBe(codeBlock`
+        Update something
+
+        Some commit body
+      `);
     });
 
     it('appends trailers as the final block for a string message', () => {
@@ -82,11 +86,12 @@ describe('util/git/commit-trailers', () => {
           'Signed-off-by: Renovate Bot <bot@renovateapp.com>',
           'Co-authored-by: First Contributor <first@example.com>',
         ]),
-      ).toBe(
-        'Update something\n\n' +
-          'Signed-off-by: Renovate Bot <bot@renovateapp.com>\n' +
-          'Co-authored-by: First Contributor <first@example.com>',
-      );
+      ).toBe(codeBlock`
+        Update something
+
+        Signed-off-by: Renovate Bot <bot@renovateapp.com>
+        Co-authored-by: First Contributor <first@example.com>
+      `);
     });
 
     it('appends trailers as the final block for an array message', () => {
@@ -95,11 +100,13 @@ describe('util/git/commit-trailers', () => {
           ['Update something', 'Some commit body'],
           ['Signed-off-by: Renovate Bot <bot@renovateapp.com>'],
         ),
-      ).toBe(
-        'Update something\n\n' +
-          'Some commit body\n\n' +
-          'Signed-off-by: Renovate Bot <bot@renovateapp.com>',
-      );
+      ).toBe(codeBlock`
+        Update something
+
+        Some commit body
+
+        Signed-off-by: Renovate Bot <bot@renovateapp.com>
+      `);
     });
 
     it('ignores empty trailer lists', () => {
