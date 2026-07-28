@@ -2551,10 +2551,10 @@ describe('workers/repository/update/branch/index', () => {
         );
 
       fs.readLocalFile
-        .mockResolvedValueOnce('modified file content' as never)
-        .mockResolvedValueOnce('this file will not exists' as never)
-        .mockResolvedValueOnce('modified file content again' as never)
-        .mockResolvedValueOnce('this file was once deleted' as never);
+        .mockResolvedValueOnce('modified file content')
+        .mockResolvedValueOnce('this file will not exists')
+        .mockResolvedValueOnce('modified file content again')
+        .mockResolvedValueOnce('this file was once deleted');
       fs.localPathExists.mockResolvedValue(true).mockResolvedValueOnce(true);
       fs.localPathIsFile
         .mockResolvedValueOnce(true)

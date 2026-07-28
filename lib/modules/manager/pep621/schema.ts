@@ -46,7 +46,7 @@ export function DependencyGroup(depType: string): DependencyGroup {
       }
       return deps;
     },
-  ) as unknown as DependencyGroup;
+  );
 }
 
 const PdmConfig = z

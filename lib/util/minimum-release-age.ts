@@ -15,9 +15,8 @@ export interface MinimumReleaseAgeCheckResult {
 /**
  * Checks whether a release satisfies `minimumReleaseAge`.
  *
- * Lives here rather than alongside `filterInternalChecks` so that managers can
- * reuse it: `filter-checks.ts` currently imports the `config/index.ts` barrel,
- * which loads every manager and so forms an import cycle.
+ * Separate from `internalChecksFilter` to allow reuse, and lives here so that
+ * managers can import it without an import cycle.
  */
 export function checkMinimumReleaseAge(
   config: {
