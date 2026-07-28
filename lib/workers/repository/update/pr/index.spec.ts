@@ -151,6 +151,8 @@ describe('workers/repository/update/pr/index', () => {
         expect(res).toEqual({
           type: 'without-pr',
           prBlockedBy: 'AwaitingTests',
+          pendingChecksReason:
+            'Awaiting all status checks to pass before PR creation',
         });
         expect(prCache.setPrCache).not.toHaveBeenCalled();
       });
@@ -194,6 +196,8 @@ describe('workers/repository/update/pr/index', () => {
         expect(res).toEqual({
           type: 'without-pr',
           prBlockedBy: 'AwaitingTests',
+          pendingChecksReason:
+            'Awaiting 2h status stability before PR creation',
         });
         expect(prCache.setPrCache).not.toHaveBeenCalled();
       });
@@ -214,6 +218,8 @@ describe('workers/repository/update/pr/index', () => {
         expect(res).toEqual({
           type: 'without-pr',
           prBlockedBy: 'AwaitingTests',
+          pendingChecksReason:
+            'Awaiting branch status checks to become non-pending before PR creation',
         });
         expect(prCache.setPrCache).not.toHaveBeenCalled();
       });
@@ -570,6 +576,8 @@ describe('workers/repository/update/pr/index', () => {
         expect(res).toEqual({
           type: 'without-pr',
           prBlockedBy: 'BranchAutomerge',
+          pendingChecksReason:
+            'Awaiting status checks to pass before branch automerge',
         });
         expect(platform.updatePr).not.toHaveBeenCalled();
         expect(platform.createPr).not.toHaveBeenCalled();
@@ -690,6 +698,8 @@ describe('workers/repository/update/pr/index', () => {
         expect(res).toEqual({
           type: 'without-pr',
           prBlockedBy: 'BranchAutomerge',
+          pendingChecksReason:
+            'Awaiting status checks to pass before branch automerge',
         });
         expect(platform.createPr).not.toHaveBeenCalled();
       });

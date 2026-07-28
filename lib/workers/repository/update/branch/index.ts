@@ -1,11 +1,6 @@
-import { isNonEmptyString } from '@sindresorhus/is';
 import { DateTime } from 'luxon';
 import { GlobalConfig } from '../../../../config/global.ts';
-import {
-  type MinimumReleaseAgeBehaviour,
-  type RenovateConfig,
-  type UpdateType,
-} from '../../../../config/types.ts';
+import type { RenovateConfig } from '../../../../config/types.ts';
 import {
   CONFIG_VALIDATION,
   MANAGER_LOCKFILE_ERROR,
@@ -28,16 +23,8 @@ import type { Pr } from '../../../../modules/platform/index.ts';
 import { platform } from '../../../../modules/platform/index.ts';
 import { scm } from '../../../../modules/platform/scm.ts';
 import { ExternalHostError } from '../../../../types/errors/external-host-error.ts';
-import { getElapsedMs } from '../../../../util/date.ts';
 import { emojify } from '../../../../util/emoji.ts';
 import { filterValidCommitTrailers } from '../../../../util/git/commit-trailers.ts';
-import {
-  getMergeConfidenceLevel,
-  isActiveConfidenceLevel,
-  satisfiesConfidenceLevel,
-} from '../../../../util/merge-confidence/index.ts';
-import { coerceNumber } from '../../../../util/number.ts';
-import { toMs } from '../../../../util/pretty-time.ts';
 import * as template from '../../../../util/template/index.ts';
 import { getCount, isLimitReached } from '../../../global/limits.ts';
 import type {
@@ -48,6 +35,7 @@ import type {
 import { embedChangelogs } from '../../changelog/index.ts';
 import { checkAutoMerge } from '../pr/automerge.ts';
 import { ensurePr, getPlatformPrOptions } from '../pr/index.ts';
+import { getPrCreationStatusRequirement } from '../pr/status-checks.ts';
 import { setArtifactErrorStatus } from './artifacts.ts';
 import { tryBranchAutomerge } from './automerge.ts';
 import { bumpVersions } from './bump-versions.ts';
@@ -56,9 +44,24 @@ import { commitFilesToBranch } from './commit.ts';
 import executePostUpgradeCommands from './execute-post-upgrade-commands.ts';
 import { getUpdatedPackageFiles } from './get-updated.ts';
 import { handleClosedPr, handleModifiedPr } from './handle-existing.ts';
+import { applyInternalChecksStatus } from './internal-checks.ts';
 import { shouldReuseExistingBranch } from './reuse.ts';
 import { isScheduledNow } from './schedule.ts';
 import { setConfidence, setStability } from './status-checks.ts';
+
+function getPendingBranchReasons(
+  config: BranchConfig,
+  pendingChecksReason?: string,
+  fallbackReason = 'Awaiting status checks before PR creation',
+): string[] {
+  const reasons = [...(config.pendingChecksReasons ?? [])];
+
+  if (pendingChecksReason) {
+    reasons.push(pendingChecksReason);
+  }
+
+  return reasons.length > 0 ? reasons : [fallbackReason];
+}
 
 async function setBranchStatusChecks(config: BranchConfig): Promise<void> {
   await setStability(config);
@@ -126,6 +129,7 @@ export interface ProcessBranchResult {
   updatesVerified?: boolean;
   prBlockedBy?: PrBlockedBy;
   prNo?: number;
+  pendingChecksReasons?: string[];
   result: BranchResult;
   commitSha?: string | null;
 }
@@ -210,6 +214,12 @@ export async function processBranch(
       };
     }
     if (
+      !dependencyDashboardCheck &&
+      (branchConfig.pendingChecks || config.pendingChecks)
+    ) {
+      await applyInternalChecksStatus(config);
+    }
+    if (
       !branchExists &&
       branchConfig.pendingChecks &&
       !dependencyDashboardCheck
@@ -217,8 +227,20 @@ export async function processBranch(
       logger.debug(
         `Branch ${config.branchName} creation is disabled because internalChecksFilter was not met`,
       );
+      const pendingChecksReasons = getPendingBranchReasons(
+        config,
+        undefined,
+        'Awaiting internal checks to pass before branch creation',
+      );
+      const pendingReason = pendingChecksReasons.join('; ');
+      if (pendingReason) {
+        logger.debug(
+          `Pending status check reason for branch ${config.branchName}: ${pendingReason}`,
+        );
+      }
       return {
         branchExists: false,
+        pendingChecksReasons,
         result: 'pending',
       };
     }
@@ -309,9 +331,21 @@ export async function processBranch(
           logger.info(
             'Branch updating is skipped because internalChecksFilter was not met',
           );
+          const pendingChecksReasons = getPendingBranchReasons(
+            config,
+            undefined,
+            'Awaiting internal checks to pass before branch update',
+          );
+          const pendingReason = pendingChecksReasons.join('; ');
+          if (pendingReason) {
+            logger.debug(
+              `Pending status check reason for branch ${config.branchName}: ${pendingReason}`,
+            );
+          }
           return {
             branchExists: true,
             prNo: branchPr?.number,
+            pendingChecksReasons,
             result: 'pending',
           };
         }
@@ -406,131 +440,33 @@ export async function processBranch(
         'Branch + PR exists but is not scheduled -- will update if necessary',
       );
     }
-    //stability checks
+    await applyInternalChecksStatus(config);
+    // Don't create a branch if we know it will be status 'pending'
     if (
-      config.upgrades.some(
-        (upgrade) =>
-          isNonEmptyString(upgrade.minimumReleaseAge) ||
-          isActiveConfidenceLevel(upgrade.minimumConfidence!),
-      )
+      !dependencyDashboardCheck &&
+      !branchExists &&
+      config.stabilityStatus === 'yellow' &&
+      ['not-pending', 'status-success'].includes(config.prCreation!)
     ) {
-      const depNamesWithoutReleaseTimestamp: Record<
-        MinimumReleaseAgeBehaviour,
-        {
-          depName: string;
-          updateType: UpdateType;
-        }[]
-      > = {
-        'timestamp-required': [],
-        'timestamp-optional': [],
-      };
-
-      // Only set a stability status check if one or more of the updates contain
-      // both a minimumReleaseAge setting and a releaseTimestamp
-      config.stabilityStatus = 'green';
-      // Default to 'success' but set 'pending' if any update is pending
-      for (const upgrade of config.upgrades) {
-        const minimumReleaseAgeMs = isNonEmptyString(upgrade.minimumReleaseAge)
-          ? coerceNumber(toMs(upgrade.minimumReleaseAge), 0)
-          : 0;
-
-        if (minimumReleaseAgeMs) {
-          const minimumReleaseAgeBehaviour: MinimumReleaseAgeBehaviour =
-            upgrade.minimumReleaseAgeBehaviour ?? 'timestamp-required';
-
-          // regardless of the value of `minimumReleaseAgeBehaviour`, if there is a timestamp, we will process it according to `minimumReleaseAge`
-          if (upgrade.releaseTimestamp) {
-            const timeElapsed = getElapsedMs(upgrade.releaseTimestamp);
-            if (timeElapsed < minimumReleaseAgeMs) {
-              logger.debug(
-                {
-                  depName: upgrade.depName,
-                  timeElapsed,
-                  minimumReleaseAge: upgrade.minimumReleaseAge,
-                },
-                'Update has not passed minimum release age',
-              );
-              config.stabilityStatus = 'yellow';
-              continue;
-            }
-          } else {
-            // if we're set to `minimumReleaseAgeBehaviour=timestamp-required`, and there isn't a timestamp, always mark the update as pending
-            if (minimumReleaseAgeBehaviour === 'timestamp-required') {
-              depNamesWithoutReleaseTimestamp['timestamp-required'].push({
-                depName: upgrade.depName!,
-                updateType: upgrade.updateType!,
-              });
-              config.stabilityStatus = 'yellow';
-              continue;
-            } else {
-              // if there is no timestamp, and we're running in `optional` mode, we can allow it, but make sure to warn the user
-              depNamesWithoutReleaseTimestamp['timestamp-optional'].push({
-                depName: upgrade.depName!,
-                updateType: upgrade.updateType!,
-              });
-            }
-          }
-        }
-        const datasource = upgrade.datasource!;
-        const depName = upgrade.depName!;
-        const packageName = upgrade.packageName!;
-        const minimumConfidence = upgrade.minimumConfidence!;
-        const updateType = upgrade.updateType!;
-        const currentVersion = upgrade.currentVersion!;
-        const newVersion = upgrade.newVersion!;
-        if (isActiveConfidenceLevel(minimumConfidence)) {
-          const confidence =
-            (await getMergeConfidenceLevel(
-              datasource,
-              packageName,
-              currentVersion,
-              newVersion,
-              updateType,
-            )) ?? 'neutral';
-          if (satisfiesConfidenceLevel(confidence, minimumConfidence)) {
-            config.confidenceStatus = 'green';
-          } else {
-            logger.debug(
-              { depName, confidence, minimumConfidence },
-              'Update does not meet minimum confidence scores',
-            );
-            config.confidenceStatus = 'yellow';
-            continue;
-          }
-        }
-      }
-
-      if (depNamesWithoutReleaseTimestamp['timestamp-required'].length) {
-        logger.once.debug(
-          { updates: depNamesWithoutReleaseTimestamp['timestamp-required'] },
-          `Marking ${depNamesWithoutReleaseTimestamp['timestamp-required'].length} release(s) as pending, as they do not have a releaseTimestamp and we're running with minimumReleaseAgeBehaviour=timestamp-required`,
-        );
-      }
-      if (depNamesWithoutReleaseTimestamp['timestamp-optional'].length) {
-        logger.once.warn(
-          "Some upgrade(s) did not have a releaseTimestamp, but as we're running with minimumReleaseAgeBehaviour=timestamp-optional, proceeding. See debug logs for more information",
-        );
-        logger.once.debug(
-          { updates: depNamesWithoutReleaseTimestamp['timestamp-optional'] },
-          `${depNamesWithoutReleaseTimestamp['timestamp-optional'].length} upgrade(s) did not have a releaseTimestamp, but as we're running with minimumReleaseAgeBehaviour=timestamp-optional, proceeding`,
-        );
-      }
-
-      // Don't create a branch if we know it will be status 'pending'
-      if (
-        !dependencyDashboardCheck &&
-        !branchExists &&
-        config.stabilityStatus === 'yellow' &&
-        ['not-pending', 'status-success'].includes(config.prCreation!)
-      ) {
+      logger.debug(
+        'Skipping branch creation due to internal status checks not met',
+      );
+      const pendingChecksReasons = getPendingBranchReasons(
+        config,
+        undefined,
+        'Awaiting internal checks to pass before branch creation',
+      );
+      const pendingReason = pendingChecksReasons.join('; ');
+      if (pendingReason) {
         logger.debug(
-          'Skipping branch creation due to internal status checks not met',
+          `Pending status check reason for branch ${config.branchName}: ${pendingReason}`,
         );
-        return {
-          branchExists,
-          result: 'pending',
-        };
       }
+      return {
+        branchExists,
+        pendingChecksReasons,
+        result: 'pending',
+      };
     }
 
     let userRebaseRequested =
@@ -798,20 +734,31 @@ export async function processBranch(
       logger.info({ commitSha }, `Branch ${action}`);
     }
     await setBranchStatusChecks(config);
-    // new commit means status check are pretty sure pending but maybe not reported yet
-    // if PR has not been created + new commit + prCreation !== immediate skip
+    // New commit status checks are likely pending but may not be reported yet.
     // but do not break when there are artifact errors
     if (
       !branchPr &&
       !config.artifactErrors?.length &&
       !userRebaseRequested &&
       commitSha &&
-      config.prCreation !== 'immediate'
+      getPrCreationStatusRequirement(config)
     ) {
       logger.debug(`Branch status pending, current sha: ${commitSha}`);
+      const pendingChecksReasons = getPendingBranchReasons(
+        config,
+        undefined,
+        'Awaiting branch status checks for the new commit before PR creation',
+      );
+      const pendingReason = pendingChecksReasons.join('; ');
+      if (pendingReason) {
+        logger.debug(
+          `Pending status check reason for branch ${config.branchName}: ${pendingReason}`,
+        );
+      }
       return {
         branchExists: true,
         updatesVerified,
+        pendingChecksReasons,
         result: 'pending',
         commitSha,
       };
@@ -991,17 +938,31 @@ export async function processBranch(
         };
       }
       if (prBlockedBy === 'AwaitingTests') {
+        const pendingChecksReasons = getPendingBranchReasons(
+          config,
+          ensurePrResult.pendingChecksReason,
+        );
+        const pendingReason = pendingChecksReasons.join('; ');
+        logger.debug(
+          `Pending status check reason for branch ${config.branchName}: ${pendingReason}`,
+        );
         return {
           branchExists,
           prBlockedBy,
+          pendingChecksReasons,
           result: 'pending',
           commitSha,
         };
       }
       if (prBlockedBy === 'BranchAutomerge') {
+        const pendingChecksReasons = getPendingBranchReasons(
+          config,
+          ensurePrResult.pendingChecksReason,
+        );
         return {
           branchExists,
           prBlockedBy,
+          pendingChecksReasons,
           result: 'done',
           commitSha,
         };
