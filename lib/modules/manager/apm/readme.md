@@ -18,5 +18,9 @@ devDependencies:
 Only entries that pin an exact `#<ref>` are updated.
 Entries without a `#<ref>` are skipped because there is no version to bump.
 
+APM also documents pinning to a commit SHA with the release tag kept as a trailing comment (`owner/repo#<sha> # v2.0.0`).
+With `pinDigests` enabled (part of the `config:best-practices` preset) Renovate keeps both the SHA and the tag comment current, the same way it does for `github-actions` (`uses: owner/action@<sha> # v4`).
+A SHA pin without a tag comment is skipped, as there is no version to track.
+
 When an `apm.lock.yaml` lockfile is present, Renovate refreshes it by running `apm install` after updating the manifest.
 This requires the `apm` CLI to be available (for example, with `binarySource=global`).

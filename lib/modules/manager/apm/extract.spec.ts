@@ -51,19 +51,54 @@ describe('modules/manager/apm/extract', () => {
             datasource: GithubTagsDatasource.id,
             packageName: 'microsoft/apm-sample-package',
             replaceString: 'microsoft/apm-sample-package#v1.0.0',
-            autoReplaceStringTemplate: '{{depName}}#{{newValue}}',
+            autoReplaceStringTemplate:
+              '{{depName}}#{{#if newDigest}}{{newDigest}} # {{newValue}}{{else}}{{newValue}}{{/if}}',
           },
         ],
       });
     });
 
-    it('skips SHA-pinned entries (tag comment is stripped by YAML)', () => {
-      // APM documents `owner/repo#<sha> # v2.0.0`, but the trailing tag is a
-      // YAML comment that parsing strips, so the entry arrives as a bare SHA.
+    it('parses the SHA-pinned digest form (tag recovered from comment)', () => {
       const content = codeBlock`
         dependencies:
           apm:
+            - owner/tool#v1.0.0
             - acme/playbooks#b1c2d3e4f5a6b7c8d9e0f1234567890abcdef123 # v2.0.0
+      `;
+      expect(extractPackageFile(content, packageFile)?.deps).toMatchObject([
+        { depName: 'owner/tool', currentValue: 'v1.0.0' },
+        {
+          depName: 'acme/playbooks',
+          packageName: 'acme/playbooks',
+          datasource: GithubTagsDatasource.id,
+          currentDigest: 'b1c2d3e4f5a6b7c8d9e0f1234567890abcdef123',
+          currentValue: 'v2.0.0',
+          replaceString:
+            'acme/playbooks#b1c2d3e4f5a6b7c8d9e0f1234567890abcdef123 # v2.0.0',
+        },
+      ]);
+    });
+
+    it('skips a bare SHA with no tag comment', () => {
+      const content = codeBlock`
+        dependencies:
+          apm:
+            - acme/playbooks#b1c2d3e4f5a6b7c8d9e0f1234567890abcdef123
+      `;
+      expect(extractPackageFile(content, packageFile)?.deps).toMatchObject([
+        {
+          depName: 'acme/playbooks',
+          currentDigest: 'b1c2d3e4f5a6b7c8d9e0f1234567890abcdef123',
+          skipReason: 'unversioned-reference',
+        },
+      ]);
+    });
+
+    it('skips a quoted SHA-pin (exact text not recoverable)', () => {
+      const content = codeBlock`
+        dependencies:
+          apm:
+            - "acme/playbooks#b1c2d3e4f5a6b7c8d9e0f1234567890abcdef123" # v2.0.0
       `;
       expect(extractPackageFile(content, packageFile)?.deps).toMatchObject([
         {
@@ -289,7 +324,8 @@ describe('modules/manager/apm/extract', () => {
           datasource: GithubTagsDatasource.id,
           packageName: 'owner/repo',
           replaceString: 'owner/repo#v1.0.0',
-          autoReplaceStringTemplate: '{{depName}}#{{newValue}}',
+          autoReplaceStringTemplate:
+            '{{depName}}#{{#if newDigest}}{{newDigest}} # {{newValue}}{{else}}{{newValue}}{{/if}}',
         },
       ]);
     });

@@ -52,6 +52,20 @@ function determineDatasource(
 /** A full commit SHA (git sha1 or sha256). */
 const shaRegex = regEx(/^(?:[a-f0-9]{40}|[a-f0-9]{64})$/i);
 
+const newlineRegex = regEx(/\r?\n/);
+
+/** A trailing ` # <tag>` comment on a manifest line. */
+const commentTagRegex = regEx(/^\s+#\s*(?<tag>\S.*?)\s*$/);
+
+/**
+ * Renders both `owner/repo#<tag>` and the digest-pinned
+ * `owner/repo#<sha> # <tag>` form, mirroring the github-actions
+ * `uses: owner/action@<sha> # v4` behaviour so `pinDigests` can pin a bare tag
+ * to a SHA and keep the trailing tag comment current.
+ */
+const autoReplaceStringTemplate =
+  '{{depName}}#{{#if newDigest}}{{newDigest}} # {{newValue}}{{else}}{{newValue}}{{/if}}';
+
 /**
  * APM virtual-package subpaths (skills/prompts/etc.) begin at one of these
  * "primitive" directories or at a file with a virtual extension. APM only uses
@@ -93,20 +107,52 @@ function resolveRepoPath(
 }
 
 /**
+ * APM keeps the release tag for a SHA-pinned dependency in a trailing YAML
+ * comment (`owner/repo#<sha> # v2.0.0`), which the structured parse strips. Scan
+ * the raw manifest for the (unquoted) entry to recover the tag as `currentValue`
+ * and the exact text to replace, so `pinDigests` can update both the SHA and the
+ * tag. Returns `undefined` for a bare SHA (no tag comment) or a form we can't
+ * recover verbatim (e.g. quoted), which the caller then skips.
+ */
+function findPinnedTail(
+  content: string,
+  value: string,
+): { replaceString: string; currentValue: string } | undefined {
+  for (const line of content.split(newlineRegex)) {
+    const item = line.trimStart();
+    if (!item.startsWith('-')) {
+      continue;
+    }
+    const afterDash = item.slice(1).trimStart();
+    if (!afterDash.startsWith(value)) {
+      continue;
+    }
+    const tail = commentTagRegex.exec(afterDash.slice(value.length));
+    if (!tail?.groups?.tag) {
+      return undefined;
+    }
+    return {
+      replaceString: afterDash.trimEnd(),
+      currentValue: tail.groups.tag,
+    };
+  }
+  return undefined;
+}
+
+/**
  * Parse a single APM dependency string of the form
  * `[host/]owner/repo[/subpath...][#<ref>]`, where `<ref>` is a semver tag/range,
  * a branch, or a commit SHA.
  *
- * APM documents pinning to a commit SHA with the release tag kept as a trailing
- * YAML comment (`owner/repo#<sha> # v2.0.0`). YAML parsing strips that comment,
- * so the tag isn't visible here; such entries are skipped rather than treating
- * the SHA as a version (which no `*-tags` datasource can resolve) or rewriting
- * it. Keeping SHA-pinned entries current would need `pinDigests`/digest support
- * built on a comment-preserving parse - a larger, separate change.
+ * For a SHA-pinned entry the release tag lives in a trailing YAML comment; when
+ * present it is recovered from `content` so the entry updates as a digest
+ * (`currentDigest` + `currentValue`). A bare SHA with no tag comment has no
+ * version to track and is skipped.
  */
 export function parseApmDependency(
   entry: string,
   depType: string,
+  content: string,
 ): PackageDependency {
   const hashIndex = entry.indexOf('#');
   const pathPart = hashIndex === -1 ? entry : entry.slice(0, hashIndex);
@@ -142,34 +188,51 @@ export function parseApmDependency(
     };
   }
 
-  if (shaRegex.test(ref)) {
-    // SHA-pinned entry - recognized and left intact (see note above).
-    return { ...base, currentDigest: ref, skipReason: 'unversioned-reference' };
-  }
-
   const { datasource, packageName, registryUrls } = determineDatasource(
     host,
     platform,
     repoPath,
   );
-
-  return {
+  const dep: PackageDependency = {
     ...base,
-    currentValue: ref,
     datasource,
     packageName,
     ...(registryUrls ? { registryUrls } : {}),
+    autoReplaceStringTemplate,
+  };
+
+  if (shaRegex.test(ref)) {
+    const tail = findPinnedTail(content, entry);
+    if (!tail) {
+      // Bare SHA with no recoverable tag comment - no version to track.
+      return {
+        ...base,
+        currentDigest: ref,
+        skipReason: 'unversioned-reference',
+      };
+    }
+    return {
+      ...dep,
+      currentValue: tail.currentValue,
+      currentDigest: ref,
+      replaceString: tail.replaceString,
+    };
+  }
+
+  return {
+    ...dep,
+    currentValue: ref,
     replaceString: entry,
-    autoReplaceStringTemplate: '{{depName}}#{{newValue}}',
   };
 }
 
 function extractSection(
   entries: string[] | undefined,
   depType: string,
+  content: string,
 ): PackageDependency[] {
   return coerceArray(entries).map((entry) =>
-    parseApmDependency(entry, depType),
+    parseApmDependency(entry, depType, content),
   );
 }
 
@@ -186,8 +249,8 @@ export function extractPackageFile(
   }
 
   const deps = [
-    ...extractSection(manifest.dependencies?.apm, 'apm'),
-    ...extractSection(manifest.devDependencies?.apm, 'apm-dev'),
+    ...extractSection(manifest.dependencies?.apm, 'apm', content),
+    ...extractSection(manifest.devDependencies?.apm, 'apm-dev', content),
   ];
 
   if (!deps.length) {
