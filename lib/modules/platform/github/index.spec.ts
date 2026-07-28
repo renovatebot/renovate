@@ -5627,6 +5627,40 @@ describe('modules/platform/github/index', () => {
       expect(res).toBe(fetchedSha);
     });
 
+    it('includes commit trailers in the platform-native commit message', async () => {
+      const scope = httpMock.scope(githubApiHost);
+
+      initRepoMock(scope, 'some/repo');
+      await github.initRepo({ repository: 'some/repo' });
+
+      scope
+        .post('/repos/some/repo/git/trees')
+        .reply(200, { sha: '111' })
+        .post('/repos/some/repo/git/commits', {
+          message:
+            'Foobar\n\nSigned-off-by: Renovate Bot <bot@renovateapp.com>',
+          tree: '111',
+          parents: [fakeSha('1234567')],
+        })
+        .reply(200, { sha: '0123456789abcdef0123456789abcdef01234567' })
+        .head(
+          '/repos/some/repo/git/commits/0123456789abcdef0123456789abcdef01234567',
+        )
+        .reply(200)
+        .post('/repos/some/repo/git/refs')
+        .reply(200);
+      vi.spyOn(branch, 'remoteBranchExists').mockResolvedValueOnce(false);
+
+      const res = await github.commitFiles({
+        branchName: 'foo/bar',
+        files: [{ type: 'addition', path: 'foo.bar', contents: 'foobar' }],
+        message: 'Foobar',
+        trailers: ['Signed-off-by: Renovate Bot <bot@renovateapp.com>'],
+      });
+
+      expect(res).toBe(fetchedSha);
+    });
+
     it('performs rebase', async () => {
       const scope = httpMock.scope(githubApiHost);
 
