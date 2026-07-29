@@ -5,6 +5,9 @@ export const categories: Category[] = ['python'];
 
 import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
 import { GitlabTagsDatasource } from '../../datasource/gitlab-tags/index.ts';
+import { GoDatasource } from '../../datasource/go/index.ts';
+import { NpmDatasource } from '../../datasource/npm/index.ts';
+import { PypiDatasource } from '../../datasource/pypi/index.ts';
 
 export { extractPackageFile } from './extract.ts';
 
@@ -26,6 +29,9 @@ export const defaultConfig = {
 export const supportedDatasources = [
   GithubTagsDatasource.id,
   GitlabTagsDatasource.id,
+  NpmDatasource.id,
+  PypiDatasource.id,
+  GoDatasource.id,
 ];
 
 export { knownDepTypes } from './dep-types.ts';
