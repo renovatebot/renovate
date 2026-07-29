@@ -181,7 +181,7 @@ If you have specified global self-hosted configuration (https://docs.renovatebot
         'RE2 not usable, falling back to RegExp: regex validation may be inaccurate',
       );
     } else if (regexEngineStatus.type === 'ignored') {
-      logger.warn(
+      logger.debug(
         'RE2 ignored via RENOVATE_X_IGNORE_RE2: regex validation may be inaccurate',
       );
     }

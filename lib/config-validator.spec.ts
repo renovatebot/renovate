@@ -176,11 +176,11 @@ describe.concurrent('config-validator', () => {
   });
 
   describe('regex engine', () => {
-    it('warns that validation may be inaccurate when RE2 is not used', async () => {
+    it('logs that validation may be inaccurate when RE2 is not used', async () => {
       await withTmpDir(async (dirPath) => {
         const { all } = await runValidator([], {
           cwd: dirPath,
-          env: { RENOVATE_X_IGNORE_RE2: 'true' },
+          env: { LOG_LEVEL: 'debug', RENOVATE_X_IGNORE_RE2: 'true' },
         });
 
         expect(all).toContain('regex validation may be inaccurate');
