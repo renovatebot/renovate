@@ -21,11 +21,6 @@ inputs:
 runs:
   using: 'composite'
   steps:
-    - name: DEBUG
-      shell: bash
-      run: |
-        pnpm store path
-
     # Per #41288 and #41289, make sure that we fail if the values are provided as an empty string
     - name: Make sure that required parameters aren't an empty string
       shell: bash
@@ -80,6 +75,11 @@ runs:
       uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
       with:
         node-version: ${{ inputs.node-version }}
+
+    - name: DEBUG
+      shell: bash
+      run: |
+        pnpm store path
 
     - name: Calculate `PNPM_STORE`
       shell: bash
