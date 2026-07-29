@@ -75,6 +75,7 @@ git push
 ## Post-release
 
 - Monitor Discussions for early insights about post-release bugs that need to be resolved
+- Approve and merge the major bump to the documentation for the new Renovate version [i.e.](https://github.com/renovatebot/renovate/pull/44942)
 - Update GitHub Action to next major
   - Approve and merge the major version bump from Renovate, which will release the next major of the GitHub Action
   - [i.e.](https://github.com/renovatebot/github-action/pull/1067)
