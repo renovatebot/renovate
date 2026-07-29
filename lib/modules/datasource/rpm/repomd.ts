@@ -15,7 +15,7 @@ function getRepodataUrl(
   registryUrl: string,
   repomdUrl: string,
   type: 'primary' | 'primary_db',
-  optional = false,
+  optional: boolean,
 ): string | undefined {
   const data = xml.childWithAttribute('type', type);
 
@@ -25,28 +25,28 @@ function getRepodataUrl(
 
   const locationElement = data.childNamed('location');
   if (!locationElement) {
-    if (optional) {
-      logger.debug(
-        { datasource, repomdUrl, type },
-        'Optional repomd entry does not contain a location element',
-      );
-      return undefined;
+    if (!optional) {
+      throw new Error(`No location element found in ${repomdUrl}`);
     }
 
-    throw new Error(`No location element found in ${repomdUrl}`);
+    logger.debug(
+      { datasource, repomdUrl, type },
+      'Optional repomd entry does not contain a location element',
+    );
+    return undefined;
   }
 
   const href = locationElement.attr.href;
   if (!href) {
-    if (optional) {
-      logger.debug(
-        { datasource, repomdUrl, type },
-        'Optional repomd entry does not contain an href attribute',
-      );
-      return undefined;
+    if (!optional) {
+      throw new Error(`No href found in ${repomdUrl}`);
     }
 
-    throw new Error(`No href found in ${repomdUrl}`);
+    logger.debug(
+      { datasource, repomdUrl, type },
+      'Optional repomd entry does not contain an href attribute',
+    );
+    return undefined;
   }
 
   // replace trailing "repodata/" from registryUrl, if it exists, with a "/"
@@ -59,7 +59,7 @@ function getRepodataUrl(
 export async function fetchRepositoryMetadata(
   http: Http,
   registryUrl: string,
-  { primaryRequired = false }: { primaryRequired?: boolean } = {},
+  metadataSource: 'auto' | 'primary' | 'primary_db' = 'auto',
 ): Promise<RpmRepositoryMetadata> {
   const repomdUrl = joinUrlParts(registryUrl, repomdXmlFileName);
   const response = await http.getText(repomdUrl.toString());
@@ -74,19 +74,20 @@ export async function fetchRepositoryMetadata(
   }
 
   const xml = new XmlDocument(repomdBody);
-  const primaryGzipUrl = getRepodataUrl(
-    xml,
-    registryUrl,
-    repomdUrl.toString(),
-    'primary',
-    !primaryRequired,
-  );
   const primaryDbUrl = getRepodataUrl(
     xml,
     registryUrl,
     repomdUrl.toString(),
     'primary_db',
-    true,
+    metadataSource !== 'primary_db',
+  );
+  const primaryGzipUrl = getRepodataUrl(
+    xml,
+    registryUrl,
+    repomdUrl.toString(),
+    'primary',
+    metadataSource === 'primary_db' ||
+      (metadataSource === 'auto' && primaryDbUrl !== undefined),
   );
 
   if (!primaryGzipUrl && !primaryDbUrl) {
@@ -101,19 +102,4 @@ export async function fetchRepositoryMetadata(
     primaryGzipUrl,
     repomdUrl: repomdUrl.toString(),
   };
-}
-
-export async function fetchPrimaryGzipUrl(
-  http: Http,
-  registryUrl: string,
-): Promise<string> {
-  const metadata = await fetchRepositoryMetadata(http, registryUrl, {
-    primaryRequired: true,
-  });
-
-  if (!metadata.primaryGzipUrl) {
-    throw new Error(`No primary data found in ${metadata.repomdUrl}`);
-  }
-
-  return metadata.primaryGzipUrl;
 }
