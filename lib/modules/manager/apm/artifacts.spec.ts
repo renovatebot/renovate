@@ -2,7 +2,7 @@ import upath from 'upath';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { mockDeep } from 'vitest-mock-extended';
 import { envMock, mockExecAll } from '~test/exec-util.ts';
-import { env, fs } from '~test/util.ts';
+import { env, fs, git, partial } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import type {
   InternalGlobalConfigOptions,
@@ -10,6 +10,7 @@ import type {
 } from '../../../config/types.ts';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
 import * as docker from '../../../util/exec/docker/index.ts';
+import type { StatusResult } from '../../../util/git/types.ts';
 import * as _datasource from '../../datasource/index.ts';
 import type { UpdateArtifactsConfig } from '../types.ts';
 import { updateArtifacts } from './index.ts';
@@ -32,12 +33,23 @@ const adminConfig: RepoGlobalConfig & InternalGlobalConfigOptions = {
 
 const config: UpdateArtifactsConfig = {};
 
+/** A `getRepoStatus` result with only the fields the manager reads. */
+function repoStatus(status: Partial<StatusResult> = {}): StatusResult {
+  return partial<StatusResult>({
+    modified: [],
+    not_added: [],
+    deleted: [],
+    ...status,
+  });
+}
+
 describe('modules/manager/apm/artifacts', () => {
   describe('updateArtifacts', () => {
     beforeEach(() => {
       env.getChildProcessEnv.mockReturnValue(envMock.basic);
       GlobalConfig.set(adminConfig);
       docker.resetPrefetchedImages();
+      git.getRepoStatus.mockResolvedValue(repoStatus());
     });
 
     it('returns null if no updated deps and no lock file maintenance', async () => {
@@ -67,10 +79,9 @@ describe('modules/manager/apm/artifacts', () => {
       expect(execSnapshots).toEqual([]);
     });
 
-    it('returns null if lock file is unchanged', async () => {
+    it('returns null if nothing changed after install', async () => {
       const execSnapshots = mockExecAll();
       fs.getSiblingFileName.mockReturnValueOnce('apm.lock.yaml');
-      fs.readLocalFile.mockResolvedValueOnce('Current apm.lock.yaml');
       fs.readLocalFile.mockResolvedValueOnce('Current apm.lock.yaml');
       expect(
         await updateArtifacts({
@@ -83,10 +94,13 @@ describe('modules/manager/apm/artifacts', () => {
       expect(execSnapshots).toMatchObject([{ cmd: 'apm install' }]);
     });
 
-    it('returns updated apm.lock.yaml', async () => {
+    it('returns the updated lockfile', async () => {
       const execSnapshots = mockExecAll();
       fs.getSiblingFileName.mockReturnValueOnce('apm.lock.yaml');
       fs.readLocalFile.mockResolvedValueOnce('Old apm.lock.yaml');
+      git.getRepoStatus.mockResolvedValueOnce(
+        repoStatus({ modified: ['apm.lock.yaml'] }),
+      );
       fs.readLocalFile.mockResolvedValueOnce('New apm.lock.yaml');
       expect(
         await updateArtifacts({
@@ -107,10 +121,69 @@ describe('modules/manager/apm/artifacts', () => {
       expect(execSnapshots).toMatchObject([{ cmd: 'apm install' }]);
     });
 
+    it('returns regenerated harness files alongside the lockfile', async () => {
+      const execSnapshots = mockExecAll();
+      fs.getSiblingFileName.mockReturnValueOnce('apm.lock.yaml');
+      fs.readLocalFile.mockResolvedValueOnce('Old apm.lock.yaml');
+      // `apm install` on a `targets: [claude, copilot]` manifest rewrites the
+      // lockfile and the deployed harness files, and removes a stale one.
+      git.getRepoStatus.mockResolvedValueOnce(
+        repoStatus({
+          modified: [
+            'apm.yml',
+            'apm.lock.yaml',
+            '.github/copilot-instructions.md',
+          ],
+          not_added: ['.claude/commands/review.md'],
+          deleted: ['.claude/commands/old.md'],
+        }),
+      );
+      fs.readLocalFile.mockResolvedValueOnce('New apm.lock.yaml');
+      fs.readLocalFile.mockResolvedValueOnce('# copilot');
+      fs.readLocalFile.mockResolvedValueOnce('# review');
+      expect(
+        await updateArtifacts({
+          packageFileName: 'apm.yml',
+          updatedDeps: [{ depName: 'owner/repo' }],
+          newPackageFileContent: 'new',
+          config,
+        }),
+      ).toEqual([
+        {
+          file: {
+            type: 'addition',
+            path: 'apm.lock.yaml',
+            contents: 'New apm.lock.yaml',
+          },
+        },
+        {
+          file: {
+            type: 'addition',
+            path: '.github/copilot-instructions.md',
+            contents: '# copilot',
+          },
+        },
+        {
+          file: {
+            type: 'addition',
+            path: '.claude/commands/review.md',
+            contents: '# review',
+          },
+        },
+        {
+          file: { type: 'deletion', path: '.claude/commands/old.md' },
+        },
+      ]);
+      expect(execSnapshots).toMatchObject([{ cmd: 'apm install' }]);
+    });
+
     it('deletes lock file on lockFileMaintenance', async () => {
       const execSnapshots = mockExecAll();
       fs.getSiblingFileName.mockReturnValueOnce('apm.lock.yaml');
       fs.readLocalFile.mockResolvedValueOnce('Old apm.lock.yaml');
+      git.getRepoStatus.mockResolvedValueOnce(
+        repoStatus({ modified: ['apm.lock.yaml'] }),
+      );
       fs.readLocalFile.mockResolvedValueOnce('New apm.lock.yaml');
       expect(
         await updateArtifacts({
@@ -137,6 +210,9 @@ describe('modules/manager/apm/artifacts', () => {
       const execSnapshots = mockExecAll();
       fs.getSiblingFileName.mockReturnValueOnce('apm.lock.yaml');
       fs.readLocalFile.mockResolvedValueOnce('Old apm.lock.yaml');
+      git.getRepoStatus.mockResolvedValueOnce(
+        repoStatus({ modified: ['apm.lock.yaml'] }),
+      );
       fs.readLocalFile.mockResolvedValueOnce('New apm.lock.yaml');
       datasource.getPkgReleases.mockResolvedValueOnce({
         releases: [{ version: '0.1.0' }, { version: '0.2.0' }],

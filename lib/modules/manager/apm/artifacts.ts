@@ -9,6 +9,7 @@ import {
   readLocalFile,
   writeLocalFile,
 } from '../../../util/fs/index.ts';
+import { getRepoStatus } from '../../../util/git/index.ts';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
 
 export async function updateArtifacts({
@@ -47,20 +48,30 @@ export async function updateArtifacts({
     };
     await exec('apm install', execOptions);
 
-    const newLockFileContent = await readLocalFile(lockFileName, 'utf8');
-    if (existingLockFileContent === newLockFileContent) {
-      logger.debug(`${lockFileName} is unchanged`);
+    // `apm install` regenerates the lockfile and re-deploys the harness
+    // directories (`.github/`, `.claude/`, ...) that APM consumers commit, so
+    // return every file it changed - not just the lockfile - or the committed
+    // instruction files go stale after a bump. `apm_modules/` is the gitignored
+    // cache, so it is not reported here.
+    const status = await getRepoStatus();
+    const res: UpdateArtifactsResult[] = [];
+    for (const path of [...status.modified, ...status.not_added]) {
+      // the manifest itself is committed as an updated package file
+      if (path === packageFileName) {
+        continue;
+      }
+      res.push({
+        file: { type: 'addition', path, contents: await readLocalFile(path) },
+      });
+    }
+    for (const path of status.deleted) {
+      res.push({ file: { type: 'deletion', path } });
+    }
+    if (!res.length) {
+      logger.debug('apm: no changed files after install');
       return null;
     }
-    return [
-      {
-        file: {
-          type: 'addition',
-          path: lockFileName,
-          contents: newLockFileContent,
-        },
-      },
-    ];
+    return res;
   } catch (err) {
     if (err.message === TEMPORARY_ERROR) {
       throw err;
