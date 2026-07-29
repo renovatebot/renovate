@@ -5,11 +5,8 @@ import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
 import { datasource } from './common.ts';
 import { RpmSqliteMetadataProvider } from './providers/sqlite.ts';
 import { RpmXmlMetadataProvider } from './providers/xml.ts';
-import {
-  type RpmRepositoryMetadata,
-  fetchPrimaryUrl,
-  fetchRepositoryMetadata,
-} from './repomd.ts';
+import type { RpmRepositoryMetadata } from './repomd.ts';
+import { fetchRepositoryMetadata } from './repomd.ts';
 
 type RpmMetadataSource = 'primary' | 'primary_db';
 type ResolvedRpmMetadataSource = 'auto' | RpmMetadataSource;
@@ -63,56 +60,51 @@ export class RpmDatasource extends Datasource {
   /**
    * Fetches the release information for a given package from the registry URL.
    *
-   * @param registryUrl - the registryUrl should be the folder which contains repodata.xml and its corresponding file list <sha256>-primary.xml.gz, e.g.: https://packages.microsoft.com/azurelinux/3.0/prod/cloud-native/x86_64/repodata/
+   * @param parsedRegistryUrl - the parsed registry URL and selected metadata source.
    * @param packageName - the name of the package to fetch releases for.
    * @returns The release result if the package is found, otherwise null.
    */
-  private async fetchReleases({
-    registryUrl,
-    packageName,
-  }: GetReleasesConfig): Promise<ReleaseResult | null> {
+  private async fetchReleases(
+    parsedRegistryUrl: ParsedRpmRegistryUrl,
+    packageName: string,
+  ): Promise<ReleaseResult | null> {
+    const metadata = await this.getRepositoryMetadata(parsedRegistryUrl);
+
+    if (parsedRegistryUrl.metadataSource !== 'auto') {
+      return await this.getProviderReleases(
+        parsedRegistryUrl.metadataSource,
+        metadata,
+        packageName,
+      );
+    }
+
+    return await this.getAutoReleases(
+      metadata,
+      packageName,
+      parsedRegistryUrl.registryUrl,
+    );
+  }
+
+  async getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+    const { registryUrl, packageName } = config;
     if (!registryUrl || !packageName) {
       return null;
     }
 
     try {
       const parsedRegistryUrl = this.parseRegistryUrl(registryUrl);
-      const metadata = await this.getRepositoryMetadata(
-        parsedRegistryUrl.registryUrl,
-      );
 
-      if (parsedRegistryUrl.metadataSource !== 'auto') {
-        return await this.getProviderReleases(
-          parsedRegistryUrl.metadataSource,
-          metadata,
-          packageName,
-        );
-      }
-
-      return await this.getAutoReleases(
-        metadata,
-        packageName,
-        parsedRegistryUrl.registryUrl,
+      return await this.cached(
+        {
+          key: `${parsedRegistryUrl.registryUrl}:${packageName}:${parsedRegistryUrl.metadataSource}`,
+          ttlMinutes: 1440,
+          fallback: true,
+        },
+        () => this.fetchReleases(parsedRegistryUrl, packageName),
       );
     } catch (err) {
       this.handleGenericErrors(err);
     }
-  }
-
-  getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
-    const parsedRegistryUrl = config.registryUrl
-      ? this.parseRegistryUrl(config.registryUrl)
-      : undefined;
-    const metadataSource = parsedRegistryUrl?.metadataSource ?? 'auto';
-
-    return this.cached(
-      {
-        key: `${parsedRegistryUrl?.registryUrl}:${config.packageName}:${metadataSource}`,
-        ttlMinutes: 1440,
-        fallback: true,
-      },
-      () => this.fetchReleases(config),
-    );
   }
 
   private parseRegistryUrl(registryUrl: string): ParsedRpmRegistryUrl {
@@ -200,34 +192,17 @@ export class RpmDatasource extends Datasource {
   }
 
   private getRepositoryMetadata(
-    registryUrl: string,
+    parsedRegistryUrl: ParsedRpmRegistryUrl,
   ): Promise<RpmRepositoryMetadata> {
-    return this.cached(
-      {
-        key: `repomd:${registryUrl}`,
-        ttlMinutes: 1440,
-      },
-      () => fetchRepositoryMetadata(this.http, registryUrl),
-    );
-  }
-
-  getPrimaryUrl(registryUrl: string): Promise<string> {
-    const parsedRegistryUrl = this.parseRegistryUrl(registryUrl);
+    const { metadataSource, registryUrl } = parsedRegistryUrl;
 
     return this.cached(
       {
-        key: parsedRegistryUrl.registryUrl,
+        key: `repomd:${registryUrl}:${metadataSource}`,
         ttlMinutes: 1440,
       },
-      () => fetchPrimaryUrl(this.http, parsedRegistryUrl.registryUrl),
+      () => fetchRepositoryMetadata(this.http, registryUrl, metadataSource),
     );
-  }
-
-  getReleasesByPackageName(
-    primaryUrl: string,
-    packageName: string,
-  ): Promise<ReleaseResult | null> {
-    return this.providers.primary.getReleases(primaryUrl, packageName);
   }
 
   private getMetadataUrlOrThrow(

@@ -15,6 +15,7 @@ import { RpmDatasource } from './index.ts';
 import { RpmSqliteMetadataProvider } from './providers/sqlite.ts';
 
 const registryUrl = 'https://example.com/repo/repodata/';
+const primaryRegistryUrl = `${registryUrl}#rpmMetadataSource=primary`;
 const primaryXmlUrl =
   'https://example.com/repo/repodata/somesha256-primary.xml.gz';
 const primaryXmlRegistryUrl = primaryXmlUrl.replace(/\/[^/]+$/, '');
@@ -173,17 +174,20 @@ describe('modules/datasource/rpm/index', () => {
     cacheDirResult = null;
   });
 
-  describe('getPrimaryUrl', () => {
-    it('returns the correct primary.xml URL', async () => {
+  describe('getReleases with primary metadata', () => {
+    it('resolves and reads the primary.xml URL', async () => {
       mockRepomdResponse();
+      await mockPrimaryXmlResponse(buildPrimaryXml(''));
 
-      const resolvedPrimaryXmlUrl =
-        await rpmDatasource.getPrimaryUrl(registryUrl);
-
-      expect(resolvedPrimaryXmlUrl).toBe(primaryXmlUrl);
+      await expect(
+        rpmDatasource.getReleases({
+          registryUrl: primaryRegistryUrl,
+          packageName: 'example-package',
+        }),
+      ).resolves.toBeNull();
     });
 
-    it('returns the correct primary.xml URL when repomd.xml omits xml declaration', async () => {
+    it('reads repomd.xml without an XML declaration', async () => {
       const repomdXml = codeBlock`
         <repomd xmlns="http://linux.duke.edu/metadata/repo"
           xmlns:rpm="http://linux.duke.edu/metadata/rpm">
@@ -197,17 +201,25 @@ describe('modules/datasource/rpm/index', () => {
         .scope(registryUrl)
         .get('/repomd.xml')
         .reply(200, repomdXml, { 'Content-Type': 'application/xml' });
+      await mockPrimaryXmlResponse(buildPrimaryXml(''));
 
-      const resolvedPrimaryXmlUrl =
-        await rpmDatasource.getPrimaryUrl(registryUrl);
-
-      expect(resolvedPrimaryXmlUrl).toBe(primaryXmlUrl);
+      await expect(
+        rpmDatasource.getReleases({
+          registryUrl: primaryRegistryUrl,
+          packageName: 'example-package',
+        }),
+      ).resolves.toBeNull();
     });
 
     it('throws an error if repomd.xml is missing', async () => {
       httpMock.scope(registryUrl).get('/repomd.xml').reply(404, 'Not Found');
 
-      await expect(rpmDatasource.getPrimaryUrl(registryUrl)).rejects.toThrow(
+      await expect(
+        rpmDatasource.getReleases({
+          registryUrl: primaryRegistryUrl,
+          packageName: 'example-package',
+        }),
+      ).rejects.toThrow(
         `Request failed with status code 404 (Not Found): GET ${registryUrl}repomd.xml`,
       );
     });
@@ -218,9 +230,12 @@ describe('modules/datasource/rpm/index', () => {
         .get('/repomd.xml')
         .replyWithError('Network error');
 
-      await expect(rpmDatasource.getPrimaryUrl(registryUrl)).rejects.toThrow(
-        'Network error',
-      );
+      await expect(
+        rpmDatasource.getReleases({
+          registryUrl: primaryRegistryUrl,
+          packageName: 'example-package',
+        }),
+      ).rejects.toThrow('Network error');
     });
 
     it('throws an error if repomdXml is not in XML format', async () => {
@@ -238,9 +253,12 @@ describe('modules/datasource/rpm/index', () => {
         .get('/repomd.xml')
         .reply(200, repomdXml, { 'Content-Type': 'application/xml' });
 
-      await expect(rpmDatasource.getPrimaryUrl(registryUrl)).rejects.toThrow(
-        `is not in XML format.`,
-      );
+      await expect(
+        rpmDatasource.getReleases({
+          registryUrl: primaryRegistryUrl,
+          packageName: 'example-package',
+        }),
+      ).rejects.toThrow(`is not in XML format.`);
     });
 
     it('throws an error if no primary data is found', async () => {
@@ -258,9 +276,12 @@ describe('modules/datasource/rpm/index', () => {
         .get('/repomd.xml')
         .reply(200, repomdXml, { 'Content-Type': 'application/xml' });
 
-      await expect(rpmDatasource.getPrimaryUrl(registryUrl)).rejects.toThrow(
-        `No primary data found in ${registryUrl}repomd.xml`,
-      );
+      await expect(
+        rpmDatasource.getReleases({
+          registryUrl: primaryRegistryUrl,
+          packageName: 'example-package',
+        }),
+      ).rejects.toThrow(`No primary data found in ${registryUrl}repomd.xml`);
     });
 
     it('throws an error if no location element is found', async () => {
@@ -278,7 +299,12 @@ describe('modules/datasource/rpm/index', () => {
         .get('/repomd.xml')
         .reply(200, repomdXml, { 'Content-Type': 'application/xml' });
 
-      await expect(rpmDatasource.getPrimaryUrl(registryUrl)).rejects.toThrow(
+      await expect(
+        rpmDatasource.getReleases({
+          registryUrl: primaryRegistryUrl,
+          packageName: 'example-package',
+        }),
+      ).rejects.toThrow(
         `No location element found in ${registryUrl}repomd.xml`,
       );
     });
@@ -298,9 +324,12 @@ describe('modules/datasource/rpm/index', () => {
         .get('/repomd.xml')
         .reply(200, repomdXml, { 'Content-Type': 'application/xml' });
 
-      await expect(rpmDatasource.getPrimaryUrl(registryUrl)).rejects.toThrow(
-        `No href found in ${registryUrl}repomd.xml`,
-      );
+      await expect(
+        rpmDatasource.getReleases({
+          registryUrl: primaryRegistryUrl,
+          packageName: 'example-package',
+        }),
+      ).rejects.toThrow(`No href found in ${registryUrl}repomd.xml`);
     });
 
     it('ignores primary_db entries without a location element', async () => {
@@ -320,10 +349,14 @@ describe('modules/datasource/rpm/index', () => {
         .scope(registryUrl)
         .get('/repomd.xml')
         .reply(200, repomdXml, { 'Content-Type': 'application/xml' });
+      await mockPrimaryXmlResponse(buildPrimaryXml(''));
 
-      await expect(rpmDatasource.getPrimaryUrl(registryUrl)).resolves.toBe(
-        primaryXmlUrl,
-      );
+      await expect(
+        rpmDatasource.getReleases({
+          registryUrl: primaryRegistryUrl,
+          packageName: 'example-package',
+        }),
+      ).resolves.toBeNull();
     });
 
     it('ignores primary_db entries without an href attribute', async () => {
@@ -343,10 +376,14 @@ describe('modules/datasource/rpm/index', () => {
         .scope(registryUrl)
         .get('/repomd.xml')
         .reply(200, repomdXml, { 'Content-Type': 'application/xml' });
+      await mockPrimaryXmlResponse(buildPrimaryXml(''));
 
-      await expect(rpmDatasource.getPrimaryUrl(registryUrl)).resolves.toBe(
-        primaryXmlUrl,
-      );
+      await expect(
+        rpmDatasource.getReleases({
+          registryUrl: primaryRegistryUrl,
+          packageName: 'example-package',
+        }),
+      ).resolves.toBeNull();
     });
 
     it('validates primary metadata even when primary_db is present', async () => {
@@ -363,7 +400,10 @@ describe('modules/datasource/rpm/index', () => {
       `);
 
       await expect(
-        rpmDatasource.getPrimaryUrl(registryUrl),
+        rpmDatasource.getReleases({
+          registryUrl: primaryRegistryUrl,
+          packageName: 'example-package',
+        }),
       ).rejects.toThrow(`No href found in ${registryUrl}repomd.xml`);
     });
 
@@ -374,16 +414,18 @@ describe('modules/datasource/rpm/index', () => {
       });
 
       await expect(
-        rpmDatasource.getPrimaryGzipUrl(registryUrl),
+        rpmDatasource.getReleases({
+          registryUrl: primaryRegistryUrl,
+          packageName: 'example-package',
+        }),
       ).rejects.toThrow(`No primary data found in ${registryUrl}repomd.xml`);
     });
-  });
 
-  describe('getReleasesByPackageName', () => {
     const packageName = 'example-package';
     const extractedPrimaryXmlPath = `others/rpm/${toSha256(primaryXmlUrl)}.xml`;
 
     it('returns the correct releases', async () => {
+      mockRepomdResponse();
       await mockPrimaryXmlResponse(
         buildPrimaryXml(codeBlock`
           <package type="rpm">
@@ -409,10 +451,10 @@ describe('modules/datasource/rpm/index', () => {
         `),
       );
 
-      const releases = await rpmDatasource.getReleasesByPackageName(
-        primaryXmlUrl,
+      const releases = await rpmDatasource.getReleases({
+        registryUrl: primaryRegistryUrl,
         packageName,
-      );
+      });
 
       expect(releases).toEqual({
         releases: [
@@ -425,30 +467,39 @@ describe('modules/datasource/rpm/index', () => {
     });
 
     it('throws an error if somesha256-primary.xml.gz is not found', async () => {
+      mockRepomdResponse();
       httpMock
         .scope(primaryXmlRegistryUrl)
         .get('/somesha256-primary.xml.gz')
         .reply(404, 'Not Found');
 
       await expect(
-        rpmDatasource.getReleasesByPackageName(primaryXmlUrl, packageName),
+        rpmDatasource.getReleases({
+          registryUrl: primaryRegistryUrl,
+          packageName,
+        }),
       ).rejects.toThrow(
         `Request failed with status code 404 (Not Found): GET ${primaryXmlUrl}`,
       );
     });
 
     it('throws an error if response.body is empty', async () => {
+      mockRepomdResponse();
       httpMock
         .scope(primaryXmlRegistryUrl)
         .get('/somesha256-primary.xml.gz')
         .reply(200, '', { 'Content-Type': 'application/gzip' });
 
       await expect(
-        rpmDatasource.getReleasesByPackageName(primaryXmlUrl, packageName),
+        rpmDatasource.getReleases({
+          registryUrl: primaryRegistryUrl,
+          packageName,
+        }),
       ).rejects.toThrow(`Empty response body from getting ${primaryXmlUrl}.`);
     });
 
     it('rethrows non-Error fetch failures', async () => {
+      mockRepomdResponse();
       vi.spyOn(
         (
           rpmDatasource as unknown as {
@@ -460,11 +511,15 @@ describe('modules/datasource/rpm/index', () => {
       vi.spyOn(cacheFs, 'pipeline').mockRejectedValue('boom');
 
       await expect(
-        rpmDatasource.getReleasesByPackageName(primaryXmlUrl, packageName),
+        rpmDatasource.getReleases({
+          registryUrl: primaryRegistryUrl,
+          packageName,
+        }),
       ).rejects.toBe('boom');
     });
 
     it('reuses the extracted primary.xml file across package lookups', async () => {
+      mockRepomdResponse();
       const primaryXml = buildPrimaryXml(codeBlock`
         <package type="rpm">
           <name>bash</name>
@@ -491,14 +546,14 @@ describe('modules/datasource/rpm/index', () => {
         .once()
         .reply(304);
 
-      const bashReleases = await rpmDatasource.getReleasesByPackageName(
-        primaryXmlUrl,
-        'bash',
-      );
-      const curlReleases = await rpmDatasource.getReleasesByPackageName(
-        primaryXmlUrl,
-        'curl',
-      );
+      const bashReleases = await rpmDatasource.getReleases({
+        registryUrl: primaryRegistryUrl,
+        packageName: 'bash',
+      });
+      const curlReleases = await rpmDatasource.getReleases({
+        registryUrl: primaryRegistryUrl,
+        packageName: 'curl',
+      });
 
       expect(bashReleases).toEqual({
         releases: [{ version: '5.2.15-1.azl3' }],
@@ -509,6 +564,7 @@ describe('modules/datasource/rpm/index', () => {
     });
 
     it('re-downloads primary.xml if the freshness check fails', async () => {
+      mockRepomdResponse();
       const primaryXml = buildPrimaryXml(codeBlock`
         <package type="rpm">
           <name>bash</name>
@@ -535,14 +591,14 @@ describe('modules/datasource/rpm/index', () => {
         .once()
         .replyWithError('Unexpected Error');
 
-      const bashReleases = await rpmDatasource.getReleasesByPackageName(
-        primaryXmlUrl,
-        'bash',
-      );
-      const curlReleases = await rpmDatasource.getReleasesByPackageName(
-        primaryXmlUrl,
-        'curl',
-      );
+      const bashReleases = await rpmDatasource.getReleases({
+        registryUrl: primaryRegistryUrl,
+        packageName: 'bash',
+      });
+      const curlReleases = await rpmDatasource.getReleases({
+        registryUrl: primaryRegistryUrl,
+        packageName: 'curl',
+      });
 
       expect(bashReleases).toEqual({
         releases: [{ version: '5.2.15-1.azl3' }],
@@ -554,6 +610,7 @@ describe('modules/datasource/rpm/index', () => {
 
     it('throws if extracting primary.xml fails without an existing cache file', async () => {
       const originalPipeline = cacheFs.pipeline;
+      mockRepomdResponse();
 
       httpMock
         .scope(primaryXmlRegistryUrl)
@@ -582,12 +639,17 @@ describe('modules/datasource/rpm/index', () => {
         .mockRejectedValueOnce('extract failed');
 
       await expect(
-        rpmDatasource.getReleasesByPackageName(primaryXmlUrl, packageName),
+        rpmDatasource.getReleases({
+          registryUrl: primaryRegistryUrl,
+          packageName,
+        }),
       ).rejects.toThrow('Missing metadata in extracted RPM metadata file!');
     });
 
     it('keeps the previous extracted primary.xml if a refresh extract fails', async () => {
       const originalPipeline = cacheFs.pipeline;
+      const refreshPackageName = 'refresh-package';
+      mockRepomdResponse();
 
       await mockPrimaryXmlResponse(
         buildPrimaryXml(codeBlock`
@@ -596,11 +658,19 @@ describe('modules/datasource/rpm/index', () => {
             <arch>x86_64</arch>
             <version epoch="0" ver="1.0" rel="2.azl3"/>
           </package>
+          <package type="rpm">
+            <name>${refreshPackageName}</name>
+            <arch>x86_64</arch>
+            <version epoch="0" ver="1.0" rel="2.azl3"/>
+          </package>
         `),
       );
 
       await expect(
-        rpmDatasource.getReleasesByPackageName(primaryXmlUrl, packageName),
+        rpmDatasource.getReleases({
+          registryUrl: primaryRegistryUrl,
+          packageName,
+        }),
       ).resolves.toEqual({
         releases: [{ version: '1.0-2.azl3' }],
       });
@@ -613,7 +683,7 @@ describe('modules/datasource/rpm/index', () => {
       await mockPrimaryXmlResponse(
         buildPrimaryXml(codeBlock`
           <package type="rpm">
-            <name>example-package</name>
+            <name>${refreshPackageName}</name>
             <arch>x86_64</arch>
             <version epoch="0" ver="2.0" rel="1.azl3"/>
           </package>
@@ -628,7 +698,10 @@ describe('modules/datasource/rpm/index', () => {
         .mockRejectedValueOnce(new Error('extract failed'));
 
       await expect(
-        rpmDatasource.getReleasesByPackageName(primaryXmlUrl, packageName),
+        rpmDatasource.getReleases({
+          registryUrl: primaryRegistryUrl,
+          packageName: refreshPackageName,
+        }),
       ).resolves.toEqual({
         releases: [{ version: '1.0-2.azl3' }],
       });
@@ -638,6 +711,8 @@ describe('modules/datasource/rpm/index', () => {
     });
 
     it('replaces the extracted primary.xml after a successful refresh', async () => {
+      const refreshPackageName = 'refresh-package';
+      mockRepomdResponse();
       await mockPrimaryXmlResponse(
         buildPrimaryXml(codeBlock`
           <package type="rpm">
@@ -645,11 +720,19 @@ describe('modules/datasource/rpm/index', () => {
             <arch>x86_64</arch>
             <version epoch="0" ver="1.0" rel="2.azl3"/>
           </package>
+          <package type="rpm">
+            <name>${refreshPackageName}</name>
+            <arch>x86_64</arch>
+            <version epoch="0" ver="1.0" rel="2.azl3"/>
+          </package>
         `),
       );
 
       await expect(
-        rpmDatasource.getReleasesByPackageName(primaryXmlUrl, packageName),
+        rpmDatasource.getReleases({
+          registryUrl: primaryRegistryUrl,
+          packageName,
+        }),
       ).resolves.toEqual({
         releases: [{ version: '1.0-2.azl3' }],
       });
@@ -662,7 +745,7 @@ describe('modules/datasource/rpm/index', () => {
       await mockPrimaryXmlResponse(
         buildPrimaryXml(codeBlock`
           <package type="rpm">
-            <name>example-package</name>
+            <name>${refreshPackageName}</name>
             <arch>x86_64</arch>
             <version epoch="0" ver="2.0" rel="1.azl3"/>
           </package>
@@ -670,7 +753,10 @@ describe('modules/datasource/rpm/index', () => {
       );
 
       await expect(
-        rpmDatasource.getReleasesByPackageName(primaryXmlUrl, packageName),
+        rpmDatasource.getReleases({
+          registryUrl: primaryRegistryUrl,
+          packageName: refreshPackageName,
+        }),
       ).resolves.toEqual({
         releases: [{ version: '2.0-1.azl3' }],
       });
@@ -680,6 +766,7 @@ describe('modules/datasource/rpm/index', () => {
     });
 
     it('returns null if no element package is found in primary.xml', async () => {
+      mockRepomdResponse();
       await mockPrimaryXmlResponse(
         buildPrimaryXml(codeBlock`
           <nonpackage type="rpm">
@@ -690,15 +777,16 @@ describe('modules/datasource/rpm/index', () => {
         `),
       );
 
-      const result = await rpmDatasource.getReleasesByPackageName(
-        primaryXmlUrl,
+      const result = await rpmDatasource.getReleases({
+        registryUrl: primaryRegistryUrl,
         packageName,
-      );
+      });
 
       expect(result).toBeNull();
     });
 
     it('returns null if the specific packageName is not found in primary.xml', async () => {
+      mockRepomdResponse();
       await mockPrimaryXmlResponse(
         buildPrimaryXml(codeBlock`
           <package type="rpm">
@@ -710,11 +798,15 @@ describe('modules/datasource/rpm/index', () => {
       );
 
       await expect(
-        rpmDatasource.getReleasesByPackageName(primaryXmlUrl, packageName),
+        rpmDatasource.getReleases({
+          registryUrl: primaryRegistryUrl,
+          packageName,
+        }),
       ).resolves.toBeNull();
     });
 
     it('returns null if version is not found in a version element', async () => {
+      mockRepomdResponse();
       await mockPrimaryXmlResponse(
         buildPrimaryXml(codeBlock`
           <package type="rpm">
@@ -725,15 +817,16 @@ describe('modules/datasource/rpm/index', () => {
         `),
       );
 
-      const releases = await rpmDatasource.getReleasesByPackageName(
-        primaryXmlUrl,
+      const releases = await rpmDatasource.getReleases({
+        registryUrl: primaryRegistryUrl,
         packageName,
-      );
+      });
 
       expect(releases).toBeNull();
     });
 
     it('returns null if version element is missing the ver attribute', async () => {
+      mockRepomdResponse();
       await mockPrimaryXmlResponse(
         buildPrimaryXml(codeBlock`
           <package type="rpm">
@@ -744,15 +837,16 @@ describe('modules/datasource/rpm/index', () => {
         `),
       );
 
-      const releases = await rpmDatasource.getReleasesByPackageName(
-        primaryXmlUrl,
+      const releases = await rpmDatasource.getReleases({
+        registryUrl: primaryRegistryUrl,
         packageName,
-      );
+      });
 
       expect(releases).toBeNull();
     });
 
     it('returns an array of releases without duplicate versionWithRel', async () => {
+      mockRepomdResponse();
       await mockPrimaryXmlResponse(
         buildPrimaryXml(codeBlock`
           <package type="rpm">
@@ -768,17 +862,18 @@ describe('modules/datasource/rpm/index', () => {
         `),
       );
 
-      const releases = await rpmDatasource.getReleasesByPackageName(
-        primaryXmlUrl,
+      const releases = await rpmDatasource.getReleases({
+        registryUrl: primaryRegistryUrl,
         packageName,
-      );
+      });
 
       expect(releases).toEqual({
         releases: [{ version: '1.0-dulp.azl3' }],
       });
     });
 
-    it('handles parser error event in getReleasesByPackageName', async () => {
+    it('handles parser error events', async () => {
+      mockRepomdResponse();
       await mockPrimaryXmlResponse(codeBlock`
         <?xml version="1.0" encoding="UTF-8"?>
         <%$#metadata xmlns="http://linux.duke.edu/metadata/common">
@@ -791,7 +886,10 @@ describe('modules/datasource/rpm/index', () => {
       `);
 
       await expect(
-        rpmDatasource.getReleasesByPackageName(primaryXmlUrl, packageName),
+        rpmDatasource.getReleases({
+          registryUrl: primaryRegistryUrl,
+          packageName,
+        }),
       ).rejects.toThrowError('Unencoded <');
     });
   });
@@ -893,9 +991,10 @@ describe('modules/datasource/rpm/index', () => {
     });
 
     it('prefers primary_db metadata when available', async () => {
-      mockRepomdResponse({
+      const metadata = {
         primaryDbHref: 'repodata/somesha256-primary.sqlite.gz',
-      });
+      };
+      mockRepomdResponse(metadata);
       mockPrimaryDbResponse(
         await createPrimaryDbGzip([
           {
@@ -983,7 +1082,7 @@ describe('modules/datasource/rpm/index', () => {
       ).rejects.toThrow(/database/);
     });
 
-    it('uses primary_db when primary metadata is malformed', async () => {
+    it('validates malformed primary metadata separately from auto mode', async () => {
       mockRawRepomdResponse(codeBlock`
         <?xml version="1.0" encoding="UTF-8"?>
         <repomd xmlns="http://linux.duke.edu/metadata/repo" xmlns:rpm="http://linux.duke.edu/metadata/rpm">
@@ -1007,12 +1106,18 @@ describe('modules/datasource/rpm/index', () => {
 
       await expect(
         rpmDatasource.getReleases({
-          registryUrl: `${registryUrl}#rpmMetadataSource=primary_db`,
+          registryUrl,
           packageName: 'example-package',
         }),
       ).resolves.toEqual({
         releases: [{ version: '1.0-2.azl3' }],
       });
+      await expect(
+        rpmDatasource.getReleases({
+          registryUrl: primaryRegistryUrl,
+          packageName: 'example-package',
+        }),
+      ).rejects.toThrow(`No href found in ${registryUrl}repomd.xml`);
     });
 
     it('throws when registryUrl requires primary_db and primary_db metadata is absent', async () => {
@@ -1024,6 +1129,27 @@ describe('modules/datasource/rpm/index', () => {
           packageName: 'example-package',
         }),
       ).rejects.toThrow(`No primary_db data found in ${registryUrl}repomd.xml`);
+    });
+
+    it('throws when required primary_db metadata has no href', async () => {
+      mockRawRepomdResponse(codeBlock`
+        <?xml version="1.0" encoding="UTF-8"?>
+        <repomd xmlns="http://linux.duke.edu/metadata/repo" xmlns:rpm="http://linux.duke.edu/metadata/rpm">
+          <data type="primary">
+            <location href="repodata/somesha256-primary.xml.gz"/>
+          </data>
+          <data type="primary_db">
+            <location non-href="repodata/somesha256-primary.sqlite.gz"/>
+          </data>
+        </repomd>
+      `);
+
+      await expect(
+        rpmDatasource.getReleases({
+          registryUrl: `${registryUrl}#rpmMetadataSource=primary_db`,
+          packageName: 'example-package',
+        }),
+      ).rejects.toThrow(`No href found in ${registryUrl}repomd.xml`);
     });
 
     it('throws when registryUrl requires primary and primary metadata is absent', async () => {
@@ -1313,6 +1439,34 @@ describe('modules/datasource/rpm/index', () => {
       expect(releases).toBeNull();
     });
 
+    it('formats and deduplicates primary_db rows without a release', async () => {
+      mockRepomdResponse({
+        primaryDbHref: 'repodata/somesha256-primary.sqlite.gz',
+        primaryHref: '',
+      });
+      mockPrimaryDbResponse(
+        await createPrimaryDbGzip([
+          {
+            name: 'example-package',
+            version: '1.0',
+          },
+          {
+            name: 'example-package',
+            version: '1.0',
+          },
+        ]),
+      );
+
+      await expect(
+        rpmDatasource.getReleases({
+          registryUrl: `${registryUrl}#rpmMetadataSource=primary_db`,
+          packageName: 'example-package',
+        }),
+      ).resolves.toEqual({
+        releases: [{ version: '1.0' }],
+      });
+    });
+
     it('throws when primary_db rows contain an invalid version value', async () => {
       mockRepomdResponse({
         primaryDbHref: 'repodata/somesha256-primary.sqlite.gz',
@@ -1334,6 +1488,29 @@ describe('modules/datasource/rpm/index', () => {
           packageName: 'example-package',
         }),
       ).rejects.toThrow('Invalid version value in RPM metadata');
+    });
+
+    it('throws when primary_db rows contain an invalid release value', async () => {
+      mockRepomdResponse({
+        primaryDbHref: 'repodata/somesha256-primary.sqlite.gz',
+        primaryHref: '',
+      });
+      mockPrimaryDbResponse(
+        await createPrimaryDbGzip([
+          {
+            name: 'example-package',
+            release: Buffer.from('1.azl3'),
+            version: '1.0',
+          },
+        ]),
+      );
+
+      await expect(
+        rpmDatasource.getReleases({
+          registryUrl: `${registryUrl}#rpmMetadataSource=primary_db`,
+          packageName: 'example-package',
+        }),
+      ).rejects.toThrow('Invalid release value in RPM metadata');
     });
 
     it('throws an error if neither primary nor primary_db metadata is present', async () => {
