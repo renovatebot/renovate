@@ -156,7 +156,6 @@ export class RpmDatasource extends Datasource {
     registryUrl: string,
   ): Promise<ReleaseResult | null> {
     const { primaryDbUrl, primaryGzipUrl } = metadata;
-    let sqliteError: Error | undefined;
 
     if (primaryDbUrl) {
       try {
@@ -166,7 +165,10 @@ export class RpmDatasource extends Datasource {
           packageName,
         );
       } catch (err) {
-        sqliteError = err instanceof Error ? err : new Error(String(err));
+        if (!primaryGzipUrl) {
+          throw err;
+        }
+
         logger.debug(
           {
             datasource: RpmDatasource.id,
@@ -181,17 +183,7 @@ export class RpmDatasource extends Datasource {
       }
     }
 
-    if (primaryGzipUrl) {
-      return await this.getProviderReleases('primary', metadata, packageName);
-    }
-
-    /* v8 ignore if -- fetchRepositoryMetadata guarantees at least one source */
-    if (sqliteError) {
-      throw sqliteError;
-    }
-
-    /* v8 ignore next -- fetchRepositoryMetadata guarantees at least one source */
-    return null;
+    return await this.getProviderReleases('primary', metadata, packageName);
   }
 
   private async getProviderReleases(
