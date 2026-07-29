@@ -295,10 +295,21 @@ export interface OutputListeners {
   stderr?: DataListener[];
 }
 
+export interface OutputWriter {
+  write(chunk: Buffer): void;
+  toString(): string;
+}
+
+export interface OutputWriters {
+  stdout?: OutputWriter;
+  stderr?: OutputWriter;
+}
+
 export interface RawExecOptions extends ExecaOptions {
   maxBuffer?: number | undefined;
   cwd?: string;
   outputListeners?: OutputListeners;
+  outputWriters?: OutputWriters;
 }
 
 export interface ExecResult {

@@ -28,7 +28,7 @@ describe('modules/manager/custom/jsonata/index', () => {
       matchStrings: [
         'packages.{ "depName": package, "currentValue": version, "versioning ": versioning }',
       ],
-    } as JsonataExtractConfig);
+    });
     expect(res).toBeNull();
   });
 

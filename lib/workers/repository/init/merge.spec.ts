@@ -115,7 +115,7 @@ describe('workers/repository/init/merge', () => {
         'package.json',
       );
       onboardingCache.getOnboardingConfigFromCache.mockReturnValueOnce(
-        undefined as never,
+        undefined,
       );
       scm.getFileList.mockResolvedValueOnce(['package.json']);
       const pJson = JSON.stringify({

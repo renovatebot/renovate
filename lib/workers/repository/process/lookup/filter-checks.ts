@@ -1,4 +1,3 @@
-import { isNonEmptyString } from '@sindresorhus/is';
 import { mergeChildConfig } from '../../../../config/index.ts';
 import type {
   MinimumReleaseAgeBehaviour,
@@ -8,17 +7,14 @@ import { logger } from '../../../../logger/index.ts';
 import type { Release } from '../../../../modules/datasource/index.ts';
 import { postprocessRelease } from '../../../../modules/datasource/postprocess-release.ts';
 import type { VersioningApi } from '../../../../modules/versioning/index.ts';
-import { getElapsedMs } from '../../../../util/date.ts';
 import {
   getMergeConfidenceLevel,
   isActiveConfidenceLevel,
   satisfiesConfidenceLevel,
 } from '../../../../util/merge-confidence/index.ts';
 import type { MergeConfidence } from '../../../../util/merge-confidence/types.ts';
-import { coerceNumber } from '../../../../util/number.ts';
+import { checkMinimumReleaseAge } from '../../../../util/minimum-release-age.ts';
 import { applyPackageRules } from '../../../../util/package-rules/index.ts';
-import { toMs } from '../../../../util/pretty-time.ts';
-import type { Timestamp } from '../../../../util/timestamp.ts';
 import type { LookupUpdateConfig, UpdateResult } from './types.ts';
 import { getUpdateType } from './update-type.ts';
 
@@ -60,51 +56,6 @@ export function isMinimumConfidenceApplicable(
     // data collection doesn't include digest updates
     updateType !== 'pinDigest'
   );
-}
-
-export interface MinimumReleaseAgeCheckResult {
-  isPending: boolean;
-  minimumReleaseAgeMs: number;
-  hasTimestamp: boolean;
-}
-
-/**
- * Checks whether a release satisfies `minimumConfidence`.
- *
- * Separate from `internalChecksFilter` to allow reuse.
- */
-export function checkMinimumReleaseAge(
-  config: {
-    minimumReleaseAge?: string | null;
-    minimumReleaseAgeBehaviour?: MinimumReleaseAgeBehaviour | null;
-  },
-  releaseTimestamp: Timestamp | null | undefined,
-): MinimumReleaseAgeCheckResult {
-  const minimumReleaseAgeMs = isNonEmptyString(config.minimumReleaseAge)
-    ? coerceNumber(toMs(config.minimumReleaseAge), 0)
-    : 0;
-
-  if (!minimumReleaseAgeMs) {
-    return {
-      isPending: false,
-      minimumReleaseAgeMs,
-      hasTimestamp: !!releaseTimestamp,
-    };
-  }
-
-  if (releaseTimestamp) {
-    return {
-      isPending: getElapsedMs(releaseTimestamp) < minimumReleaseAgeMs,
-      minimumReleaseAgeMs,
-      hasTimestamp: true,
-    };
-  }
-
-  return {
-    isPending: config.minimumReleaseAgeBehaviour === 'timestamp-required',
-    minimumReleaseAgeMs,
-    hasTimestamp: false,
-  };
 }
 
 export interface MinimumConfidenceCheckResult {
