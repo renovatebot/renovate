@@ -6,7 +6,6 @@ import type {
   InternalGlobalConfigOptions,
   RepoGlobalConfig,
 } from '../../../../config/types.ts';
-import { TEMPORARY_ERROR } from '../../../../constants/error-messages.ts';
 import * as docker from '../../../../util/exec/docker/index.ts';
 import { getPkgReleases as _getPkgReleases } from '../../../datasource/index.ts';
 import type { UpdateArtifactsConfig } from '../../types.ts';
@@ -84,88 +83,21 @@ describe('modules/manager/pep621/processors/pixi', () => {
     });
   });
 
+  // The exec flow, the `allowedUnsafeExecutions` gate, and the error handling
+  // live in the shared `updatePixiLockfile` helper and are covered by
+  // `../../pixi/lockfile.spec.ts`. These tests only assert the `pep621`
+  // processor's own behavior: how it derives the `pixi` constraint and that it
+  // delegates without writing the package file (the `pep621` manager writes it
+  // elsewhere).
   describe('updateArtifacts()', () => {
-    it('throws TEMPORARY_ERROR', async () => {
-      fs.getSiblingFileName.mockReturnValueOnce('pixi.lock');
-      fs.readLocalFile.mockResolvedValueOnce('Current pixi.lock');
-      fs.ensureCacheDir.mockRejectedValueOnce(new Error(TEMPORARY_ERROR));
-
-      const result = processor.updateArtifacts(
-        {
-          packageFileName: 'pyproject.toml',
-          newPackageFileContent: '',
-          config,
-          updatedDeps: [{ depName: 'dep1' }],
-        },
-        parsePyProject('')!,
-      );
-
-      await expect(result).rejects.toThrow(TEMPORARY_ERROR);
-    });
-
-    it('returns null when no updated deps and not lock file maintenance', async () => {
-      const execSnapshots = mockExecAll();
-
-      const result = await processor.updateArtifacts(
-        {
-          packageFileName: 'pyproject.toml',
-          newPackageFileContent: '',
-          config,
-          updatedDeps: [],
-        },
-        parsePyProject('')!,
-      );
-
-      expect(result).toBeNull();
-      expect(execSnapshots).toEqual([]);
-    });
-
-    it('returns null when pixi.lock does not exist', async () => {
+    it('delegates to the shared helper without writing the package file', async () => {
       const execSnapshots = mockExecAll();
       fs.getSiblingFileName.mockReturnValueOnce('pixi.lock');
-
-      const result = await processor.updateArtifacts(
-        {
-          packageFileName: 'pyproject.toml',
-          newPackageFileContent: '',
-          config,
-          updatedDeps: [{ depName: 'dep1' }],
-        },
-        parsePyProject('')!,
-      );
-
-      expect(result).toBeNull();
-      expect(execSnapshots).toEqual([]);
-    });
-
-    it('returns null when pixi is not in allowedUnsafeExecutions', async () => {
-      GlobalConfig.set({ ...adminConfig, allowedUnsafeExecutions: [] });
-      const execSnapshots = mockExecAll();
-      fs.getSiblingFileName.mockReturnValueOnce('pixi.lock');
-      fs.readLocalFile.mockResolvedValueOnce('Current pixi.lock');
-
-      const result = await processor.updateArtifacts(
-        {
-          packageFileName: 'pyproject.toml',
-          newPackageFileContent: '',
-          config,
-          updatedDeps: [{ depName: 'dep1' }],
-        },
-        parsePyProject('')!,
-      );
-
-      expect(result).toBeNull();
-      expect(execSnapshots).toEqual([]);
-    });
-
-    it('returns null when lock file is unchanged', async () => {
-      const execSnapshots = mockExecAll();
-      fs.getSiblingFileName.mockReturnValueOnce('pixi.lock');
-      fs.readLocalFile.mockResolvedValueOnce('Current pixi.lock');
+      fs.readLocalFile.mockResolvedValueOnce('Old pixi.lock');
       fs.ensureCacheDir.mockResolvedValueOnce(
         '/tmp/renovate/cache/others/pixi',
       );
-      fs.readLocalFile.mockResolvedValueOnce('Current pixi.lock');
+      fs.readLocalFile.mockResolvedValueOnce('New pixi.lock');
 
       const result = await processor.updateArtifacts(
         {
@@ -177,145 +109,22 @@ describe('modules/manager/pep621/processors/pixi', () => {
         parsePyProject('')!,
       );
 
-      expect(result).toBeNull();
+      expect(result).toEqual([
+        {
+          file: {
+            type: 'addition',
+            path: 'pixi.lock',
+            contents: 'New pixi.lock',
+          },
+        },
+      ]);
+      expect(fs.writeLocalFile).not.toHaveBeenCalled();
       expect(execSnapshots).toMatchObject([
         { cmd: 'pixi lock --no-progress --color=never --quiet' },
       ]);
     });
 
-    it('returns updated pixi.lock for dep update', async () => {
-      const execSnapshots = mockExecAll();
-      fs.getSiblingFileName.mockReturnValueOnce('pixi.lock');
-      fs.readLocalFile.mockResolvedValueOnce('Old pixi.lock');
-      fs.ensureCacheDir.mockResolvedValueOnce(
-        '/tmp/renovate/cache/others/pixi',
-      );
-      fs.readLocalFile.mockResolvedValueOnce('New pixi.lock');
-
-      const result = await processor.updateArtifacts(
-        {
-          packageFileName: 'pyproject.toml',
-          newPackageFileContent: '',
-          config,
-          updatedDeps: [{ depName: 'dep1' }],
-        },
-        parsePyProject('')!,
-      );
-
-      expect(result).toEqual([
-        {
-          file: {
-            type: 'addition',
-            path: 'pixi.lock',
-            contents: 'New pixi.lock',
-          },
-        },
-      ]);
-      expect(execSnapshots).toMatchObject([
-        {
-          cmd: 'pixi lock --no-progress --color=never --quiet',
-          options: {
-            cwd: '/tmp/github/some/repo',
-            env: { PIXI_CACHE_DIR: '/tmp/renovate/cache/others/pixi' },
-          },
-        },
-      ]);
-    });
-
-    it('returns updated pixi.lock for dep update using docker', async () => {
-      GlobalConfig.set({
-        ...adminConfig,
-        binarySource: 'docker',
-        dockerSidecarImage: 'ghcr.io/renovatebot/base-image',
-      });
-      const execSnapshots = mockExecAll();
-      fs.getSiblingFileName.mockReturnValueOnce('pixi.lock');
-      fs.readLocalFile.mockResolvedValueOnce('Old pixi.lock');
-      fs.ensureCacheDir.mockResolvedValueOnce(
-        '/tmp/renovate/cache/others/pixi',
-      );
-      fs.readLocalFile.mockResolvedValueOnce('New pixi.lock');
-      // pixi version lookup
-      getPkgReleases.mockResolvedValueOnce({
-        releases: [{ version: '0.41.4' }, { version: '0.42.0' }],
-      });
-
-      const result = await processor.updateArtifacts(
-        {
-          packageFileName: 'pyproject.toml',
-          newPackageFileContent: '',
-          config,
-          updatedDeps: [{ depName: 'dep1' }],
-        },
-        parsePyProject('')!,
-      );
-
-      expect(result).toEqual([
-        {
-          file: {
-            type: 'addition',
-            path: 'pixi.lock',
-            contents: 'New pixi.lock',
-          },
-        },
-      ]);
-      expect(execSnapshots).toMatchObject([
-        { cmd: 'docker pull ghcr.io/renovatebot/base-image' },
-        { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
-        {
-          cmd:
-            'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
-            '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
-            '-v "/tmp/cache":"/tmp/cache" ' +
-            '-e PIXI_CACHE_DIR ' +
-            '-e RATTLER_CACHE_DIR ' +
-            '-e CONTAINERBASE_CACHE_DIR ' +
-            '-w "/tmp/github/some/repo" ' +
-            'ghcr.io/renovatebot/base-image ' +
-            'bash -l -c "' +
-            'install-tool pixi 0.42.0 ' +
-            '&& ' +
-            'pixi lock --no-progress --color=never --quiet' +
-            '"',
-        },
-      ]);
-    });
-
-    it('returns updated pixi.lock for lock file maintenance', async () => {
-      const execSnapshots = mockExecAll();
-      fs.getSiblingFileName.mockReturnValueOnce('pixi.lock');
-      fs.readLocalFile.mockResolvedValueOnce('Old pixi.lock');
-      fs.ensureCacheDir.mockResolvedValueOnce(
-        '/tmp/renovate/cache/others/pixi',
-      );
-      fs.readLocalFile.mockResolvedValueOnce('New pixi.lock');
-
-      const result = await processor.updateArtifacts(
-        {
-          packageFileName: 'pyproject.toml',
-          newPackageFileContent: '',
-          config: { isLockFileMaintenance: true },
-          updatedDeps: [],
-        },
-        parsePyProject('')!,
-      );
-
-      expect(result).toEqual([
-        {
-          file: {
-            type: 'addition',
-            path: 'pixi.lock',
-            contents: 'New pixi.lock',
-          },
-        },
-      ]);
-      expect(fs.deleteLocalFile).toHaveBeenCalledWith('pixi.lock');
-      expect(execSnapshots).toMatchObject([
-        { cmd: 'pixi lock --no-progress --color=never --quiet' },
-      ]);
-    });
-
-    it('uses requires-pixi version constraint from pyproject.toml', async () => {
+    it('derives the pixi constraint from requires-pixi in the pyproject', async () => {
       GlobalConfig.set({
         ...adminConfig,
         binarySource: 'docker',
@@ -384,7 +193,7 @@ requires-pixi = ">=0.40,<0.41"
       ]);
     });
 
-    it('uses requires-pixi version constraint from workspace table', async () => {
+    it('prefers config.constraints.pixi over the pyproject requires-pixi', async () => {
       GlobalConfig.set({
         ...adminConfig,
         binarySource: 'docker',
@@ -405,18 +214,18 @@ requires-pixi = ">=0.40,<0.41"
         ],
       });
       const project = parsePyProject(`
-[tool.pixi.workspace]
+[tool.pixi.project]
 name = "test"
 channels = ["conda-forge"]
 platforms = ["linux-64"]
-requires-pixi = ">=0.40,<0.41"
+requires-pixi = ">=0.38,<0.39"
 `);
 
       const result = await processor.updateArtifacts(
         {
           packageFileName: 'pyproject.toml',
           newPackageFileContent: '',
-          config: { constraints: {} },
+          config: { constraints: { pixi: '>=0.40,<0.41' } },
           updatedDeps: [{ depName: 'dep1' }],
         },
         project!,
@@ -451,93 +260,6 @@ requires-pixi = ">=0.40,<0.41"
             '"',
         },
       ]);
-    });
-
-    it('uses pixi version constraint from config.constraints', async () => {
-      GlobalConfig.set({
-        ...adminConfig,
-        binarySource: 'docker',
-        dockerSidecarImage: 'ghcr.io/renovatebot/base-image',
-      });
-      const execSnapshots = mockExecAll();
-      fs.getSiblingFileName.mockReturnValueOnce('pixi.lock');
-      fs.readLocalFile.mockResolvedValueOnce('Old pixi.lock');
-      fs.ensureCacheDir.mockResolvedValueOnce(
-        '/tmp/renovate/cache/others/pixi',
-      );
-      fs.readLocalFile.mockResolvedValueOnce('New pixi.lock');
-      getPkgReleases.mockResolvedValueOnce({
-        releases: [{ version: '0.40.1' }, { version: '0.41.4' }],
-      });
-
-      const result = await processor.updateArtifacts(
-        {
-          packageFileName: 'pyproject.toml',
-          newPackageFileContent: '',
-          config: { constraints: { pixi: '>=0.40,<0.41' } },
-          updatedDeps: [{ depName: 'dep1' }],
-        },
-        parsePyProject('')!,
-      );
-
-      expect(result).toEqual([
-        {
-          file: {
-            type: 'addition',
-            path: 'pixi.lock',
-            contents: 'New pixi.lock',
-          },
-        },
-      ]);
-      expect(execSnapshots).toMatchObject([
-        { cmd: 'docker pull ghcr.io/renovatebot/base-image' },
-        { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
-        {
-          cmd:
-            'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
-            '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
-            '-v "/tmp/cache":"/tmp/cache" ' +
-            '-e PIXI_CACHE_DIR ' +
-            '-e RATTLER_CACHE_DIR ' +
-            '-e CONTAINERBASE_CACHE_DIR ' +
-            '-w "/tmp/github/some/repo" ' +
-            'ghcr.io/renovatebot/base-image ' +
-            'bash -l -c "' +
-            'install-tool pixi 0.40.1 ' +
-            '&& ' +
-            'pixi lock --no-progress --color=never --quiet' +
-            '"',
-        },
-      ]);
-    });
-
-    it('returns artifact error on exec failure', async () => {
-      const execSnapshots = mockExecAll();
-      fs.getSiblingFileName.mockReturnValueOnce('pixi.lock');
-      fs.readLocalFile.mockResolvedValueOnce('Old pixi.lock');
-      fs.ensureCacheDir.mockImplementationOnce(() => {
-        throw new Error('exec failed');
-      });
-
-      const result = await processor.updateArtifacts(
-        {
-          packageFileName: 'pyproject.toml',
-          newPackageFileContent: '',
-          config,
-          updatedDeps: [{ depName: 'dep1' }],
-        },
-        parsePyProject('')!,
-      );
-
-      expect(result).toEqual([
-        {
-          artifactError: {
-            fileName: 'pixi.lock',
-            stderr: 'Error: exec failed',
-          },
-        },
-      ]);
-      expect(execSnapshots).toEqual([]);
     });
   });
 });
