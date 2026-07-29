@@ -43,13 +43,7 @@ runs:
     - name: Calculate `CACHE_KEY`
       shell: bash
       run: |
-        echo 'CACHE_KEY=node_modules-${{
-          inputs.os
-        }}-${{
-          inputs.node-version
-        }}-${{
-          hashFiles('pnpm-lock.yaml', 'package.json')
-        }}' >> "$GITHUB_ENV"
+        echo 'CACHE_KEY=node_modules-Linux-24-e646d798c1aa40cd0c0598eeede6d635c20e2f4f812ffdc3cdef844a3f1a786c' >> "$GITHUB_ENV"
 
     - name: Restore `node_modules`
       id: node-modules-restore
