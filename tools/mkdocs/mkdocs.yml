@@ -30,6 +30,7 @@ hooks:
 # Metadata
 extra:
   version: !ENV RENOVATE_VERSION
+  include_announcement: !ENV MKDOCS_INCLUDE_ANNOUNCEMENT
 
 # Set the main title for the project.
 # Required setting.

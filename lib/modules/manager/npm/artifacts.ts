@@ -200,7 +200,7 @@ async function updatePnpmWorkspace(
 
     if (!excludeNode) {
       logger.debug('Adding new exclude block');
-      excludeNode = doc.createNode([]) as YAMLSeq;
+      excludeNode = doc.createNode([]);
       const newItem = doc.createNode(`${excludeDepName}@${newVersion}`);
       newItem.commentBefore = ` Renovate security update: ${excludeDepName}@${newVersion}`;
       excludeNode.items.push(newItem);

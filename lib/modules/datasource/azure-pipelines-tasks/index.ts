@@ -81,27 +81,22 @@ export class AzurePipelinesTasksDatasource extends Datasource {
         });
 
       return result;
-    } else {
-      const versions =
-        (
-          await this.getTasks(
-            BUILT_IN_TASKS_URL,
-            {},
-            AzurePipelinesFallbackTasks,
-          )
-        )[packageName.toLowerCase()] ??
-        (
-          await this.getTasks(
-            MARKETPLACE_TASKS_URL,
-            {},
-            AzurePipelinesFallbackTasks,
-          )
-        )[packageName.toLowerCase()];
+    }
+    const versions =
+      (
+        await this.getTasks(BUILT_IN_TASKS_URL, {}, AzurePipelinesFallbackTasks)
+      )[packageName.toLowerCase()] ??
+      (
+        await this.getTasks(
+          MARKETPLACE_TASKS_URL,
+          {},
+          AzurePipelinesFallbackTasks,
+        )
+      )[packageName.toLowerCase()];
 
-      if (versions) {
-        const releases = versions.map((version) => ({ version }));
-        return { releases };
-      }
+    if (versions) {
+      const releases = versions.map((version) => ({ version }));
+      return { releases };
     }
 
     return null;

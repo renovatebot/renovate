@@ -32,9 +32,11 @@ module.exports = async ({ github, context, discussionAnsweredDays }) => {
 
   let pageNumber = 0;
   while (true) {
+    // oxlint-disable-next-line no-console
     console.debug({ cursor }, 'Starting query');
     const { repository } = await github.graphql(query, { cursor });
 
+    // oxlint-disable-next-line no-console
     console.debug(
       { pageNumber },
       `Found ${repository.discussions.edges.length} discussions in this page of data`,
@@ -42,8 +44,8 @@ module.exports = async ({ github, context, discussionAnsweredDays }) => {
 
     let numMutating = 0;
     let mutation = 'mutation {';
-    for (let i in repository.discussions.edges) {
-      let edge = repository.discussions.edges[i];
+    for (const i in repository.discussions.edges) {
+      const edge = repository.discussions.edges[i];
       if (
         isOlderThanDaysAgo(edge.node.answerChosenAt, discussionAnsweredDays)
       ) {
@@ -56,6 +58,7 @@ module.exports = async ({ github, context, discussionAnsweredDays }) => {
     mutation += '}';
 
     if (numMutating > 0) {
+      // oxlint-disable-next-line no-console
       console.debug(
         { pageNumber },
         `Attempting the following mutation:\n${mutation}`,
@@ -63,8 +66,10 @@ module.exports = async ({ github, context, discussionAnsweredDays }) => {
 
       await github.graphql(mutation);
 
+      // oxlint-disable-next-line no-console
       console.log({ pageNumber }, `Closed ${numMutating} answered Discussions`);
     } else {
+      // oxlint-disable-next-line no-console
       console.debug(
         { pageNumber },
         `Did not find any Discussions to close in this page of data`,

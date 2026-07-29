@@ -36,7 +36,7 @@ export function createDefaultStreams(
 
   const problemsStream: BunyanStream = {
     name: 'problems',
-    level: 'warn' as BunyanLogLevel,
+    level: 'warn',
     stream: problems as any,
     type: 'raw',
   };
@@ -71,7 +71,7 @@ function createLogFileStream(logFile: string): BunyanStream {
           fs.writeSync(fd, formatRecord(rec as BunyanRecord, false));
         },
       },
-    } as BunyanStream;
+    };
   }
 
   return {

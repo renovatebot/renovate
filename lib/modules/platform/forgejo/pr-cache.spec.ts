@@ -1,4 +1,4 @@
-import { partial } from '~test/util.ts';
+import { fakeSha, partial } from '~test/util.ts';
 import * as httpMock from '../../../../test/http-mock.ts';
 import { reset as memCacheReset } from '../../../util/cache/memory/index.ts';
 import {
@@ -6,9 +6,8 @@ import {
   resetCache as repoCacheReset,
 } from '../../../util/cache/repository/index.ts';
 import { ForgejoHttp, setBaseUrl } from '../../../util/http/forgejo.ts';
-import type { LongCommitSha } from '../../../util/schema-utils/git.ts';
 import { ForgejoPrCache } from './pr-cache.ts';
-import type { PR, Repo } from './types.ts';
+import type { PR, Repo } from './schema.ts';
 import { toRenovatePR } from './utils.ts';
 
 const http = new ForgejoHttp();
@@ -25,15 +24,15 @@ const pr1: PR = {
   diff_url: 'https://forgejo.renovatebot.com/some/repo/pulls/3.diff',
   created_at: '2011-08-18T22:30:38Z',
   updated_at: '2011-08-18T22:30:38Z',
-  closed_at: null,
+  closed_at: undefined,
   mergeable: true,
   base: { ref: 'third-party-base-branch' },
   head: {
     label: 'other-head-branch',
-    sha: 'other-head-sha' as LongCommitSha,
+    sha: fakeSha('other-head-sha'),
     repo: partial<Repo>({ full_name: 'SOME/repo' }),
   },
-  user: { login: 'some-author' },
+  user: { id: 1, login: 'some-author' },
 };
 
 const pr2: PR = {
@@ -44,15 +43,15 @@ const pr2: PR = {
   diff_url: 'https://forgejo.renovatebot.com/some/repo/pulls/3.diff',
   created_at: '2011-08-18T22:30:38Z',
   updated_at: '2011-08-18T22:30:38Z',
-  closed_at: null,
+  closed_at: undefined,
   mergeable: true,
   base: { ref: 'third-party-base-branch' },
   head: {
     label: 'other-head-branch',
-    sha: 'other-head-sha' as LongCommitSha,
+    sha: fakeSha('other-head-sha'),
     repo: partial<Repo>({ full_name: 'SOME/repo' }),
   },
-  user: { login: 'some-author' },
+  user: { id: 1, login: 'some-author' },
 };
 
 describe('modules/platform/forgejo/pr-cache', () => {

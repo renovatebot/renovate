@@ -157,12 +157,60 @@ describe('modules/datasource/npm/schema', () => {
       };
       const result = NpmResponse.parse(input);
       expect(result.repository).toEqual({
-        url: null,
+        url: undefined,
         directory: 'packages/core',
       });
       expect(result.versions?.['1.0.0']?.repository).toEqual({
-        url: null,
+        url: undefined,
         directory: 'test',
+      });
+    });
+
+    describe('parses a response with an array of objects for the `repository`, and returns the first element', () => {
+      // https://registry.npmjs.org/tmp
+      it('as a package response', () => {
+        const input = {
+          name: 'tmp',
+          versions: {
+            '0.0.4': {
+              repository: [
+                {
+                  url: 'git://github.com/raszi/tmp.git',
+                  type: 'git',
+                },
+              ],
+            },
+          },
+          repository: {
+            url: 'git://github.com/raszi/tmp.git',
+            type: 'git',
+          },
+        };
+        const result = NpmResponse.parse(input);
+        expect(result.repository).toEqual({
+          url: 'git://github.com/raszi/tmp.git',
+        });
+        expect(result.versions?.['0.0.4'].repository).toEqual({
+          url: 'git://github.com/raszi/tmp.git',
+        });
+      });
+
+      // https://registry.npmjs.org/tmp/0.0.4
+      it('as a version response', () => {
+        const input = {
+          name: 'tmp',
+          version: '0.0.4',
+          repository: [
+            {
+              url: 'git://github.com/raszi/tmp.git',
+              type: 'git',
+            },
+          ],
+        };
+        const result = NpmResponse.parse(input);
+        expect(result.repository).toEqual({
+          url: 'git://github.com/raszi/tmp.git',
+        });
       });
     });
   });

@@ -43,7 +43,11 @@ import {
 } from './common.ts';
 import { DockerHubCache } from './dockerhub-cache.ts';
 import { ecrPublicRegex, ecrRegex, isECRMaxResultsError } from './ecr.ts';
-import type { DistributionManifest, OciImageManifest } from './schema.ts';
+import type {
+  DistributionManifest,
+  Manifest,
+  OciImageManifest,
+} from './schema.ts';
 import {
   DockerHubTagsPage,
   ManifestJson,
@@ -294,11 +298,11 @@ export class DockerDatasource extends Datasource {
     );
   }
 
-  private async getManifest(
+  private async getManifestDocument(
     registry: string,
     dockerRepository: string,
     tag: string,
-  ): Promise<OciImageManifest | DistributionManifest | null> {
+  ): Promise<Manifest | null> {
     const manifestResponse = await this.getManifestResponse(
       registry,
       dockerRepository,
@@ -330,8 +334,15 @@ export class DockerDatasource extends Datasource {
       return null;
     }
 
-    const manifest = parsed.data;
+    return parsed.data;
+  }
 
+  private async resolveImageManifest(
+    registry: string,
+    dockerRepository: string,
+    tag: string,
+    manifest: Manifest,
+  ): Promise<OciImageManifest | DistributionManifest | null> {
     switch (manifest.mediaType) {
       case 'application/vnd.docker.distribution.manifest.v2+json':
       case 'application/vnd.oci.image.manifest.v1+json':
@@ -360,13 +371,29 @@ export class DockerDatasource extends Datasource {
     }
   }
 
+  private async getManifest(
+    registry: string,
+    dockerRepository: string,
+    tag: string,
+  ): Promise<OciImageManifest | DistributionManifest | null> {
+    const manifest = await this.getManifestDocument(
+      registry,
+      dockerRepository,
+      tag,
+    );
+    if (!manifest) {
+      return null;
+    }
+    return this.resolveImageManifest(registry, dockerRepository, tag, manifest);
+  }
+
   private async _getImageArchitecture(
     registryHost: string,
     dockerRepository: string,
     currentDigest: string,
   ): Promise<string | null | undefined> {
     try {
-      let manifestResponse: HttpResponse<string> | null;
+      let manifestResponse: HttpResponse | null;
 
       try {
         manifestResponse = await this.getManifestResponse(
@@ -489,23 +516,15 @@ export class DockerDatasource extends Datasource {
       );
       return {};
     }
-    // Docker Hub library images don't have labels we need
-    if (
-      registryHost === DOCKER_HUB &&
-      dockerRepository.startsWith('library/')
-    ) {
-      logger.debug('Docker Hub library image - skipping label lookup');
-      return {};
-    }
     try {
       let labels: Record<string, string> | undefined = {};
-      const manifest = await this.getManifest(
+      const manifestDocument = await this.getManifestDocument(
         registryHost,
         dockerRepository,
         tag,
       );
 
-      if (!manifest) {
+      if (!manifestDocument) {
         logger.debug(
           { registryHost, dockerRepository, tag },
           'No manifest found',
@@ -513,8 +532,43 @@ export class DockerDatasource extends Datasource {
         return undefined;
       }
 
+      if ('annotations' in manifestDocument && manifestDocument.annotations) {
+        labels = manifestDocument.annotations;
+      }
+
+      if ('manifests' in manifestDocument) {
+        const descriptorAnnotations = manifestDocument.manifests
+          .map((descriptor) => descriptor.annotations)
+          .find(
+            (annotations) =>
+              isNonEmptyString(annotations?.[sourceLabel]) &&
+              isNonEmptyString(annotations?.[gitRefLabel]),
+          );
+        if (descriptorAnnotations) {
+          labels = { ...labels, ...descriptorAnnotations };
+        }
+      }
+
+      if (
+        'manifests' in manifestDocument &&
+        labels[sourceLabel] &&
+        labels[gitRefLabel]
+      ) {
+        return labels;
+      }
+
+      const manifest = await this.resolveImageManifest(
+        registryHost,
+        dockerRepository,
+        tag,
+        manifestDocument,
+      );
+      if (!manifest) {
+        return undefined;
+      }
+
       if ('annotations' in manifest && manifest.annotations) {
-        labels = manifest.annotations;
+        labels = { ...labels, ...manifest.annotations };
       }
 
       switch (manifest.config.mediaType) {
@@ -653,8 +707,9 @@ export class DockerDatasource extends Datasource {
     let tags: string[] = [];
     const limit = 100;
 
-    const pageUrl = (page: number): string =>
-      `${registry}/api/v1/repository/${repository}/tag/?limit=${limit}&page=${page}&onlyActiveTags=true`;
+    function pageUrl(page: number): string {
+      return `${registry}/api/v1/repository/${repository}/tag/?limit=${limit}&page=${page}&onlyActiveTags=true`;
+    }
 
     let page = 1;
     let url: string | null = pageUrl(page);
@@ -1184,7 +1239,7 @@ export class DockerDatasource extends Datasource {
     const tags = releases.map((release) => release.version);
     const latestTag = tags.includes('latest')
       ? 'latest'
-      : (findLatestStable(tags) ?? tags[tags.length - 1]);
+      : (findLatestStable(tags) ?? tags.at(-1));
 
     /* v8 ignore next 3 -- TODO: add test */
     if (!latestTag) {

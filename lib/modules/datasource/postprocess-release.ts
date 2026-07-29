@@ -64,7 +64,7 @@ export async function postprocessRelease(
 
     return result;
   } catch (err) {
-    logger.once.warn({ err }, `Release interceptor failed for "${datasource}"`);
+    logger.once.warn({ err, datasource }, 'Release interceptor failed');
     return release;
   }
 }

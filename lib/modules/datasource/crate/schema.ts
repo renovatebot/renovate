@@ -1,4 +1,5 @@
 import { z } from 'zod/v4';
+import { DeepNullish } from '../../../util/schema-utils/index.ts';
 import { MaybeTimestamp } from '../../../util/timestamp.ts';
 
 export const RegistryConfig = z.object({
@@ -17,12 +18,14 @@ export const ReleaseTimestamp = z
   .nullable()
   .catch(null);
 
-export const CrateMetadata = z.object({
-  description: z.string().optional(),
-  documentation: z.string().optional(),
-  homepage: z.string().optional(),
-  repository: z.string().optional(),
-});
+export const CrateMetadata = DeepNullish(
+  z.object({
+    description: z.string().optional(),
+    documentation: z.string().optional(),
+    homepage: z.string().optional(),
+    repository: z.string().optional(),
+  }),
+);
 export type CrateMetadata = z.infer<typeof CrateMetadata>;
 
 export const CrateMetadataResponse = z.object({

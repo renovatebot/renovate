@@ -587,14 +587,17 @@ describe('util/result', () => {
       });
 
       it('accumulates error types into union type during chained transform', async () => {
-        const fn1 = (x: string): Result<string, string> =>
-          Result.ok(x.toUpperCase());
+        function fn1(x: string): Result<string, string> {
+          return Result.ok(x.toUpperCase());
+        }
 
-        const fn2 = (x: string): Result<string[], number> =>
-          Result.ok(x.split(''));
+        function fn2(x: string): Result<string[], number> {
+          return Result.ok(x.split(''));
+        }
 
-        const fn3 = (x: string[]): Result<string, boolean> =>
-          Result.ok(x.join('-'));
+        function fn3(x: string[]): Result<string, boolean> {
+          return Result.ok(x.join('-'));
+        }
 
         type Res = Result<string, string | number | boolean>;
         const res: Res = await AsyncResult.ok('foo')

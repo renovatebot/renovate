@@ -36,7 +36,8 @@ function isBuildpackRegistryId(ref: string): boolean {
   const bpRegistryMatch = buildpackRegistryId.exec(ref);
   if (!bpRegistryMatch) {
     return false;
-  } else if (!bpRegistryMatch.groups?.version) {
+  }
+  if (!bpRegistryMatch.groups?.version) {
     return true;
   }
   return isVersion(bpRegistryMatch.groups.version);

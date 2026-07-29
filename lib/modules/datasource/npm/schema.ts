@@ -1,13 +1,20 @@
 import { z } from 'zod/v4';
-import { LooseRecord } from '../../../util/schema-utils/index.ts';
+import { DeepNullish, LooseRecord } from '../../../util/schema-utils/index.ts';
 
 const Repository = z.union([
   z.string(),
-  z.object({
-    url: z.string().nullish(),
-    directory: z.string().nullish(),
-  }),
+  DeepNullish(
+    z.object({
+      url: z.string().optional(),
+      directory: z.string().optional(),
+    }),
+  ),
 ]);
+
+const RepositoryNpmResponse = z
+  .unknown()
+  .transform((val) => (Array.isArray(val) ? val[0] : val))
+  .pipe(Repository);
 
 const Attestations = z.object({
   url: z.string().optional(),
@@ -18,7 +25,7 @@ const Distribution = z.object({
 });
 
 export const NpmResponseVersion = z.object({
-  repository: Repository.optional(),
+  repository: RepositoryNpmResponse.optional(),
   homepage: z.string().optional().catch(undefined),
   deprecated: z.union([z.string(), z.boolean()]).optional(),
   gitHead: z.string().optional(),
@@ -54,7 +61,7 @@ export const NpmResponse = z.object({
   _id: z.string().optional(),
   name: z.string().optional(),
   versions: z.record(z.string(), NpmResponseVersionLoose).optional(),
-  repository: Repository.optional(),
+  repository: RepositoryNpmResponse.optional(),
   homepage: z.string().optional(),
   time: LooseRecord(z.string()).optional(),
   'dist-tags': z.record(z.string(), z.string()).optional(),

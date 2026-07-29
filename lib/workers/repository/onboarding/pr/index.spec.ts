@@ -11,7 +11,7 @@ import type { PackageFile } from '../../../../modules/manager/types.ts';
 import type { Pr } from '../../../../modules/platform/index.ts';
 import { hashBody } from '../../../../modules/platform/pr-body.ts';
 import * as memCache from '../../../../util/cache/memory/index.ts';
-import type { BranchConfig } from '../../../types.ts';
+import type { BranchConfig, BranchUpgradeConfig } from '../../../types.ts';
 import { OnboardingState } from '../common.ts';
 import { ensureOnboardingPr } from './index.ts';
 
@@ -117,6 +117,70 @@ describe('workers/repository/onboarding/pr/index', () => {
       expect(platform.createPr).toHaveBeenCalledTimes(1);
     });
 
+    describe('when the PR body exceeds the platform limit', () => {
+      beforeEach(() => {
+        branches = [
+          partial<BranchConfig>({
+            prTitle: 'Update dependency foo to v2',
+            branchName: 'renovate/foo-2.x',
+            baseBranch: 'base',
+            manager: 'npm',
+            upgrades: [
+              partial<BranchUpgradeConfig>({
+                manager: 'npm',
+                branchName: 'renovate/foo-2.x',
+                updateType: 'major',
+                depName: 'foo',
+                newValue: '2.0.0',
+              }),
+            ],
+          }),
+        ];
+      });
+
+      it('replaces the full PR list and package files with their summaries', async () => {
+        platform.maxBodyLength.mockReturnValueOnce(1);
+        await ensureOnboardingPr(config, packageFiles, branches);
+
+        expect(platform.createPr).toHaveBeenCalledTimes(1);
+        expect(logger.debug).toHaveBeenCalledWith(
+          'Onboarding PR body exceeds platform limit, switching to summary PR list and package files',
+        );
+
+        const prBody = platform.createPr.mock.calls[0][0].prBody;
+        // the full PR list renders each branch as a `<details>` block, the summary uses a table instead
+        expect(prBody).not.toContain('<details>');
+        expect(prBody).toContain('| Manager | major |');
+        // the full package files description lists files inline suffixed with the manager,
+        // the summary groups them under a manager heading instead
+        expect(prBody).not.toContain('`package.json` (npm)');
+        expect(prBody).toContain('#### npm\n\n * `package.json`');
+      });
+
+      it('does not attempt to replace package files when none were detected', async () => {
+        platform.maxBodyLength.mockReturnValueOnce(1);
+        await ensureOnboardingPr(config, {}, branches);
+
+        expect(platform.createPr).toHaveBeenCalledTimes(1);
+        const prBody = platform.createPr.mock.calls[0][0].prBody;
+        expect(prBody).not.toContain('Detected Package Files');
+        expect(prBody).toContain('| Manager | major |');
+      });
+
+      it('leaves the PR body untouched when it is within the platform limit', async () => {
+        await ensureOnboardingPr(config, packageFiles, branches);
+
+        expect(platform.createPr).toHaveBeenCalledTimes(1);
+        expect(logger.debug).not.toHaveBeenCalledWith(
+          'Onboarding PR body exceeds platform limit, switching to summary PR list and package files',
+        );
+
+        const prBody = platform.createPr.mock.calls[0][0].prBody;
+        expect(prBody).toContain('<details>');
+        expect(prBody).toContain('`package.json` (npm)');
+      });
+    });
+
     it('creates semantic PR', async () => {
       await ensureOnboardingPr(
         {
@@ -171,7 +235,9 @@ describe('workers/repository/onboarding/pr/index', () => {
           branches,
         );
         expect(platform.createPr).toHaveBeenCalledTimes(1);
-        expect(platform.createPr.mock.calls[0][0].prBody).toMatchSnapshot();
+        expect(platform.createPr.mock.calls[0][0].prBody).toMatchSnapshot(
+          'PR body',
+        );
       },
     );
 
@@ -196,7 +262,9 @@ describe('workers/repository/onboarding/pr/index', () => {
           branches,
         );
         expect(platform.createPr).toHaveBeenCalledTimes(1);
-        expect(platform.createPr.mock.calls[0][0].prBody).toMatchSnapshot();
+        expect(platform.createPr.mock.calls[0][0].prBody).toMatchSnapshot(
+          'PR body',
+        );
       },
     );
 
@@ -230,7 +298,9 @@ describe('workers/repository/onboarding/pr/index', () => {
         expect(platform.createPr.mock.calls[0][0].prBody).toMatch(
           /repository:test/,
         );
-        expect(platform.createPr.mock.calls[0][0].prBody).toMatchSnapshot();
+        expect(platform.createPr.mock.calls[0][0].prBody).toMatchSnapshot(
+          'PR body',
+        );
       },
     );
 
@@ -581,6 +651,7 @@ describe('workers/repository/onboarding/pr/index', () => {
       beforeEach(() => {
         GlobalConfig.reset();
         scm.deleteBranch.mockResolvedValue();
+        // oxlint-disable-next-line renovate/no-redundant-mock-reset -- discards the once-value queued by the outer beforeEach
         platform.createPr.mockReset();
       });
 

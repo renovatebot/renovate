@@ -21,9 +21,11 @@ export const urls = [
 export const supportsRanges = true;
 export const supportedRangeStrategies: RangeStrategy[] = ['bump'];
 
-const equals = (a: string, b: string): boolean => compare(a, b) === 0;
+function equals(a: string, b: string): boolean {
+  return compare(a, b) === 0;
+}
 
-const getMajor = (version: string): number | null => {
+function getMajor(version: string): number | null {
   const tokens = parse(version?.replace(regEx(/^v/i), ''));
   if (tokens) {
     const majorToken = tokens?.[0];
@@ -32,9 +34,9 @@ const getMajor = (version: string): number | null => {
     }
   }
   return null;
-};
+}
 
-const getMinor = (version: string): number | null => {
+function getMinor(version: string): number | null {
   const tokens = parse(version?.replace(regEx(/^v/i), ''));
   if (tokens) {
     const majorToken = tokens[0];
@@ -48,9 +50,9 @@ const getMinor = (version: string): number | null => {
     return 0;
   }
   return null;
-};
+}
 
-const getPatch = (version: string): number | null => {
+function getPatch(version: string): number | null {
   const tokens = parse(version?.replace(regEx(/^v/i), ''));
   if (tokens) {
     const majorToken = tokens[0];
@@ -66,9 +68,11 @@ const getPatch = (version: string): number | null => {
     return 0;
   }
   return null;
-};
+}
 
-const isGreaterThan = (a: string, b: string): boolean => compare(a, b) === 1;
+function isGreaterThan(a: string, b: string): boolean {
+  return compare(a, b) === 1;
+}
 
 const unstable = new Set([
   'dev',
@@ -85,7 +89,7 @@ const unstable = new Set([
   'snapshot',
 ]);
 
-const isStable = (version: string): boolean => {
+function isStable(version: string): boolean {
   const tokens = parse(version);
   if (tokens) {
     for (const token of tokens) {
@@ -99,9 +103,9 @@ const isStable = (version: string): boolean => {
     return true;
   }
   return false;
-};
+}
 
-const matches = (a: string, b: string): boolean => {
+function matches(a: string, b: string): boolean {
   const versionTokens = parse(a);
   if (!a || !versionTokens || !b) {
     return false;
@@ -154,7 +158,7 @@ const matches = (a: string, b: string): boolean => {
   }
 
   return leftResult && rightResult;
-};
+}
 
 function getSatisfyingVersion(
   versions: string[],
@@ -210,14 +214,12 @@ function getNewValue({
           .join('.');
 
         return `${newPrefixed}.+`;
-      } else {
-        // our new version is shorter than our prefix range so drop our prefix range
-        return newVersion;
       }
-    } else {
-      // our version is already "+" which includes ever version
-      return null;
+      // our new version is shorter than our prefix range so drop our prefix range
+      return newVersion;
     }
+    // our version is already "+" which includes ever version
+    return null;
   }
 
   const mavenRange = parseMavenBasedRange(currentValue);

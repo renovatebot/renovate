@@ -4,6 +4,7 @@ import { getConfig } from '../../../config/defaults.ts';
 import { Result } from '../../../util/result.ts';
 import * as lookup from '../../../workers/repository/process/lookup/index.ts';
 import type { LookupUpdateConfig } from '../../../workers/repository/process/lookup/types.ts';
+import { GithubReleaseAttachmentsDatasource } from '../../datasource/github-release-attachments/index.ts';
 import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
 import type { PackageDependency } from '../types.ts';
 import { extractPackageFile } from './index.ts';
@@ -11,6 +12,14 @@ import { extractPackageFile } from './index.ts';
 describe('modules/manager/github-actions/integration', () => {
   const getGithubTags = vi.spyOn(GithubTagsDatasource.prototype, 'getReleases');
   const getGithubDigest = vi.spyOn(GithubTagsDatasource.prototype, 'getDigest');
+  const getGithubReleaseAttachments = vi.spyOn(
+    GithubReleaseAttachmentsDatasource.prototype,
+    'getReleases',
+  );
+  const getGithubReleaseAttachmentDigest = vi.spyOn(
+    GithubReleaseAttachmentsDatasource.prototype,
+    'getDigest',
+  );
 
   let baseConfig: LookupUpdateConfig;
 
@@ -29,6 +38,51 @@ describe('modules/manager/github-actions/integration', () => {
       packageName: dep.packageName ?? dep.depName!,
     };
   }
+
+  it('updates the mise version and checksum together', async () => {
+    const currentDigest =
+      '429f71e7e989908bf975aafac9066329c16e2d8fc7cd8e74fdf21dd6300ffe7c';
+    const newDigest =
+      'dad54e0b843908324282b8673f9c0ebc3a4da0c49ad2da309a49bfbc918ba180';
+    const workflow = codeBlock`
+      on: push
+      jobs:
+        test:
+          runs-on: ubuntu-latest
+          steps:
+            - uses: jdx/mise-action@v4
+              with:
+                version: v2026.7.7
+                sha256: ${currentDigest}
+    `;
+
+    const extracted = extractPackageFile(
+      workflow,
+      '.github/workflows/test.yml',
+      {},
+    );
+    const dep = extracted!.deps.find(
+      (dependency) => dependency.depType === 'uses-with',
+    );
+    getGithubReleaseAttachments.mockResolvedValueOnce({
+      releases: [{ version: 'v2026.7.7' }, { version: 'v2026.7.12' }],
+    });
+    getGithubReleaseAttachmentDigest.mockImplementation((_config, newValue) =>
+      Promise.resolve(newValue === 'v2026.7.12' ? newDigest : currentDigest),
+    );
+
+    const { updates } = await Result.wrap(
+      lookup.lookupUpdates(makeConfig(dep!)),
+    ).unwrapOrThrow();
+
+    expect(updates).toEqual([
+      expect.objectContaining({
+        newDigest,
+        newValue: 'v2026.7.12',
+        updateType: 'patch',
+      }),
+    ]);
+  });
 
   it('proposes major update when using tagged major, if a major is available', async () => {
     const workflow = codeBlock`
