@@ -79,6 +79,31 @@ describe('modules/manager/apm/extract', () => {
       ]);
     });
 
+    it('maps a SHA pinned in both sections to its own line', () => {
+      const content = codeBlock`
+        dependencies:
+          apm:
+            - acme/playbooks#b1c2d3e4f5a6b7c8d9e0f1234567890abcdef123 # v2.0.0
+        devDependencies:
+          apm:
+            - acme/playbooks#b1c2d3e4f5a6b7c8d9e0f1234567890abcdef123 # v2.1.0
+      `;
+      expect(extractPackageFile(content, packageFile)?.deps).toMatchObject([
+        {
+          depType: 'apm',
+          currentValue: 'v2.0.0',
+          replaceString:
+            'acme/playbooks#b1c2d3e4f5a6b7c8d9e0f1234567890abcdef123 # v2.0.0',
+        },
+        {
+          depType: 'apm-dev',
+          currentValue: 'v2.1.0',
+          replaceString:
+            'acme/playbooks#b1c2d3e4f5a6b7c8d9e0f1234567890abcdef123 # v2.1.0',
+        },
+      ]);
+    });
+
     it('skips a bare SHA with no tag comment', () => {
       const content = codeBlock`
         dependencies:

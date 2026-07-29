@@ -106,37 +106,53 @@ function resolveRepoPath(
   return segments.slice(0, boundary).join('/');
 }
 
+interface PinnedTail {
+  replaceString: string;
+  currentValue: string;
+}
+
 /**
  * APM keeps the release tag for a SHA-pinned dependency in a trailing YAML
- * comment (`owner/repo#<sha> # v2.0.0`), which the structured parse strips. Scan
- * the raw manifest for the (unquoted) entry to recover the tag as `currentValue`
- * and the exact text to replace, so `pinDigests` can update both the SHA and the
- * tag. Returns `undefined` for a bare SHA (no tag comment) or a form we can't
+ * comment (`owner/repo#<sha> # v2.0.0`), which the structured parse strips.
+ *
+ * Returns a matcher that scans the raw manifest for the (unquoted) entry to
+ * recover the tag as `currentValue` and the exact text to replace, so
+ * `pinDigests` can update both the SHA and the tag. Each line is consumed at
+ * most once (in file order), so the same `owner/repo#<sha>` pinned in more than
+ * one section maps to distinct lines rather than all resolving to the first
+ * match. Yields `undefined` for a bare SHA (no tag comment) or a form we can't
  * recover verbatim (e.g. quoted), which the caller then skips.
  */
-function findPinnedTail(
+function createPinnedTailFinder(
   content: string,
-  value: string,
-): { replaceString: string; currentValue: string } | undefined {
-  for (const line of content.split(newlineRegex)) {
-    const item = line.trimStart();
-    if (!item.startsWith('-')) {
-      continue;
+): (value: string) => PinnedTail | undefined {
+  const lines = content.split(newlineRegex);
+  const consumed = new Set<number>();
+  return (value) => {
+    for (let i = 0; i < lines.length; i++) {
+      if (consumed.has(i)) {
+        continue;
+      }
+      const item = lines[i].trimStart();
+      if (!item.startsWith('-')) {
+        continue;
+      }
+      const afterDash = item.slice(1).trimStart();
+      if (!afterDash.startsWith(value)) {
+        continue;
+      }
+      consumed.add(i);
+      const tail = commentTagRegex.exec(afterDash.slice(value.length));
+      if (!tail?.groups?.tag) {
+        return undefined;
+      }
+      return {
+        replaceString: afterDash.trimEnd(),
+        currentValue: tail.groups.tag,
+      };
     }
-    const afterDash = item.slice(1).trimStart();
-    if (!afterDash.startsWith(value)) {
-      continue;
-    }
-    const tail = commentTagRegex.exec(afterDash.slice(value.length));
-    if (!tail?.groups?.tag) {
-      return undefined;
-    }
-    return {
-      replaceString: afterDash.trimEnd(),
-      currentValue: tail.groups.tag,
-    };
-  }
-  return undefined;
+    return undefined;
+  };
 }
 
 /**
@@ -152,7 +168,7 @@ function findPinnedTail(
 export function parseApmDependency(
   entry: string,
   depType: string,
-  content: string,
+  findPinnedTail: (value: string) => PinnedTail | undefined,
 ): PackageDependency {
   const hashIndex = entry.indexOf('#');
   const pathPart = hashIndex === -1 ? entry : entry.slice(0, hashIndex);
@@ -202,7 +218,7 @@ export function parseApmDependency(
   };
 
   if (shaRegex.test(ref)) {
-    const tail = findPinnedTail(content, entry);
+    const tail = findPinnedTail(entry);
     if (!tail) {
       // Bare SHA with no recoverable tag comment - no version to track.
       return {
@@ -229,10 +245,10 @@ export function parseApmDependency(
 function extractSection(
   entries: string[] | undefined,
   depType: string,
-  content: string,
+  findPinnedTail: (value: string) => PinnedTail | undefined,
 ): PackageDependency[] {
   return coerceArray(entries).map((entry) =>
-    parseApmDependency(entry, depType, content),
+    parseApmDependency(entry, depType, findPinnedTail),
   );
 }
 
@@ -248,9 +264,10 @@ export function extractPackageFile(
     return null;
   }
 
+  const findPinnedTail = createPinnedTailFinder(content);
   const deps = [
-    ...extractSection(manifest.dependencies?.apm, 'apm', content),
-    ...extractSection(manifest.devDependencies?.apm, 'apm-dev', content),
+    ...extractSection(manifest.dependencies?.apm, 'apm', findPinnedTail),
+    ...extractSection(manifest.devDependencies?.apm, 'apm-dev', findPinnedTail),
   ];
 
   if (!deps.length) {
