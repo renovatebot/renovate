@@ -80,6 +80,37 @@ describe('modules/manager/quadlet/extract', () => {
       });
     });
 
+    it('handles a volume unit without an image', () => {
+      const volume = codeBlock`
+      [Volume]
+      Driver=local
+      `;
+
+      const result = extractPackageFile(volume, packageFile, config);
+      expect(result).toBeNull();
+    });
+
+    it('extracts from a container unit alongside an imageless volume unit', () => {
+      const combined = codeBlock`
+      [Container]
+      Image=docker.io/library/alpine:3.22
+
+      [Volume]
+      Driver=local
+      `;
+
+      const result = extractPackageFile(combined, packageFile, config);
+      expect(result).toMatchObject({
+        deps: [
+          {
+            currentValue: '3.22',
+            depName: 'docker.io/library/alpine',
+            datasource: DockerDatasource.id,
+          },
+        ],
+      });
+    });
+
     it('handles docker prefix', () => {
       const simple = codeBlock`
       [Volume]
