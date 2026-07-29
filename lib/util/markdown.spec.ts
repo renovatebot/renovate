@@ -96,7 +96,7 @@ describe('util/markdown', () => {
     });
 
     it('should not add zero-width space to @ inside inline code spans', () => {
-      const input = "Use `@atlaskit/tokens` here";
+      const input = 'Use `@atlaskit/tokens` here';
       expect(sanitizeMarkdown(input)).toEqual(input);
     });
 
