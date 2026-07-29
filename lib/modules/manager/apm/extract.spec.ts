@@ -104,6 +104,25 @@ describe('modules/manager/apm/extract', () => {
       ]);
     });
 
+    it('emits a digest dep for a SHA pin on a git-tags host', () => {
+      // git-tags resolves digests via `git ls-remote`, so the SHA is preserved
+      // on a bump rather than dropped to a digest-less tag.
+      const content = codeBlock`
+        dependencies:
+          apm:
+            - bitbucket.org/team/project#b1c2d3e4f5a6b7c8d9e0f1234567890abcdef123 # v2.0.0
+      `;
+      expect(extractPackageFile(content, packageFile)?.deps).toMatchObject([
+        {
+          depName: 'bitbucket.org/team/project',
+          packageName: 'https://bitbucket.org/team/project',
+          datasource: GitTagsDatasource.id,
+          currentDigest: 'b1c2d3e4f5a6b7c8d9e0f1234567890abcdef123',
+          currentValue: 'v2.0.0',
+        },
+      ]);
+    });
+
     it('skips a bare SHA with no tag comment', () => {
       const content = codeBlock`
         dependencies:
