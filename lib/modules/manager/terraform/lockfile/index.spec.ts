@@ -1,8 +1,9 @@
 import { codeBlock } from 'common-tags';
 import upath from 'upath';
 import { mockDeep } from 'vitest-mock-extended';
-import { fs } from '~test/util.ts';
+import { fs, logger } from '~test/util.ts';
 import { GlobalConfig } from '../../../../config/global.ts';
+import { asTimestamp } from '../../../../util/timestamp.ts';
 import { getPkgReleases } from '../../../datasource/index.ts';
 import type { UpdateArtifactsConfig } from '../../types.ts';
 import { updateArtifacts } from '../index.ts';
@@ -867,6 +868,244 @@ describe('modules/manager/terraform/lockfile/index', () => {
         ],
       ]
     `,
+    );
+  });
+
+  describe('minimumReleaseAge', () => {
+    const oneMonthOld = asTimestamp('2026-03-01T00:00:00.000Z');
+    const twelveDaysOld = asTimestamp('2026-03-20T00:00:00.000Z');
+    const fourDaysOld = asTimestamp('2026-03-28T00:00:00.000Z');
+    const twoDaysOld = asTimestamp('2026-03-30T00:00:00.000Z');
+    const twelveHoursOld = asTimestamp('2026-03-31T12:00:00.000Z');
+
+    const releasesWithMissingTimestamp = [
+      { version: '2.50.0', releaseTimestamp: oneMonthOld },
+      { version: '2.56.0' },
+    ];
+
+    beforeEach(() => {
+      vi.useFakeTimers();
+      vi.setSystemTime(new Date('2026-04-01T00:00:00.000Z'));
+    });
+
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    it('do full lock file maintenance, skipping releases pending minimumReleaseAge', async () => {
+      fs.readLocalFile.mockResolvedValueOnce(codeBlock`
+        provider "registry.terraform.io/hashicorp/azurerm" {
+          version     = "2.50.0"
+          constraints = "~> 2.50"
+          hashes = [
+            "bar",
+          ]
+        }
+
+        provider "registry.opentofu.org/hashicorp/random" {
+          version     = "2.2.1"
+          constraints = "~> 2.2"
+          hashes = [
+            "baz",
+          ]
+        }
+      `);
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce('.terraform.lock.hcl');
+
+      mockGetPkgReleases
+        .mockResolvedValueOnce({
+          releases: [
+            { version: '2.50.0', releaseTimestamp: oneMonthOld },
+            { version: '2.55.0', releaseTimestamp: twelveDaysOld },
+            { version: '2.56.0', releaseTimestamp: twelveHoursOld },
+          ],
+        })
+        .mockResolvedValueOnce({
+          releases: [
+            { version: '2.2.1', releaseTimestamp: oneMonthOld },
+            { version: '2.2.2', releaseTimestamp: fourDaysOld },
+            { version: '2.2.3', releaseTimestamp: twelveHoursOld },
+          ],
+        });
+      mockHash.mockResolvedValue([
+        'h1:lDsKRxDRXPEzA4AxkK4t+lJd3IQIP2UoaplJGjQSp2s=',
+        'h1:6zB2hX7YIOW26OrKsLJn0uLMnjqbPNxcz9RhlWEuuSY=',
+      ]);
+
+      const result = await updateArtifacts({
+        packageFileName: '',
+        updatedDeps: [],
+        newPackageFileContent: '',
+        config: {
+          ...config,
+          isLockFileMaintenance: true,
+          minimumReleaseAge: '3 days',
+        },
+      });
+
+      expect(result).toEqual([
+        {
+          file: {
+            contents: codeBlock`
+              provider "registry.terraform.io/hashicorp/azurerm" {
+                version     = "2.55.0"
+                constraints = "~> 2.50"
+                hashes = [
+                  "h1:lDsKRxDRXPEzA4AxkK4t+lJd3IQIP2UoaplJGjQSp2s=",
+                  "h1:6zB2hX7YIOW26OrKsLJn0uLMnjqbPNxcz9RhlWEuuSY=",
+                ]
+              }
+
+              provider "registry.opentofu.org/hashicorp/random" {
+                version     = "2.2.2"
+                constraints = "~> 2.2"
+                hashes = [
+                  "h1:lDsKRxDRXPEzA4AxkK4t+lJd3IQIP2UoaplJGjQSp2s=",
+                  "h1:6zB2hX7YIOW26OrKsLJn0uLMnjqbPNxcz9RhlWEuuSY=",
+                ]
+              }
+            `,
+            path: '.terraform.lock.hcl',
+            type: 'addition',
+          },
+        },
+      ]);
+
+      expect(mockHash.mock.calls).toEqual([
+        ['https://registry.terraform.io', 'hashicorp/azurerm', '2.55.0'],
+        ['https://registry.opentofu.org', 'hashicorp/random', '2.2.2'],
+      ]);
+    });
+
+    it('do full lock file maintenance with missing releaseTimestamp and minimumReleaseAgeBehaviour=timestamp-optional', async () => {
+      fs.readLocalFile.mockResolvedValueOnce(codeBlock`
+        provider "registry.terraform.io/hashicorp/azurerm" {
+          version     = "2.50.0"
+          constraints = "~> 2.50"
+          hashes = [
+            "bar",
+          ]
+        }
+      `);
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce('.terraform.lock.hcl');
+
+      mockGetPkgReleases.mockResolvedValueOnce({
+        releases: releasesWithMissingTimestamp,
+      });
+      mockHash.mockResolvedValue([
+        'h1:lDsKRxDRXPEzA4AxkK4t+lJd3IQIP2UoaplJGjQSp2s=',
+        'h1:6zB2hX7YIOW26OrKsLJn0uLMnjqbPNxcz9RhlWEuuSY=',
+      ]);
+
+      const result = await updateArtifacts({
+        packageFileName: '',
+        updatedDeps: [],
+        newPackageFileContent: '',
+        config: {
+          ...config,
+          isLockFileMaintenance: true,
+          minimumReleaseAge: '3 days',
+          minimumReleaseAgeBehaviour: 'timestamp-optional',
+        },
+      });
+
+      expect(result).toEqual([
+        {
+          file: {
+            contents: codeBlock`
+              provider "registry.terraform.io/hashicorp/azurerm" {
+                version     = "2.56.0"
+                constraints = "~> 2.50"
+                hashes = [
+                  "h1:lDsKRxDRXPEzA4AxkK4t+lJd3IQIP2UoaplJGjQSp2s=",
+                  "h1:6zB2hX7YIOW26OrKsLJn0uLMnjqbPNxcz9RhlWEuuSY=",
+                ]
+              }
+            `,
+            path: '.terraform.lock.hcl',
+            type: 'addition',
+          },
+        },
+      ]);
+
+      expect(mockHash.mock.calls).toEqual([
+        ['https://registry.terraform.io', 'hashicorp/azurerm', '2.56.0'],
+      ]);
+      expect(logger.logger.once.warn).toHaveBeenCalledExactlyOnceWith(
+        "Some release(s) did not have a releaseTimestamp, but as we're running with minimumReleaseAgeBehaviour=timestamp-optional, proceeding. See debug logs for more information",
+      );
+    });
+
+    it.each([
+      {
+        description: 'all satisfying releases are pending',
+        releases: [
+          { version: '2.50.0', releaseTimestamp: twoDaysOld },
+          { version: '2.55.0', releaseTimestamp: twelveHoursOld },
+        ],
+      },
+      {
+        description: 'no releases satisfy the constraints',
+        releases: [{ version: '3.0.0', releaseTimestamp: oneMonthOld }],
+      },
+      {
+        description:
+          'releaseTimestamp is missing and minimumReleaseAgeBehaviour=timestamp-required',
+        releases: releasesWithMissingTimestamp,
+        minimumReleaseAgeBehaviour: 'timestamp-required' as const,
+      },
+      {
+        description:
+          'releaseTimestamp is missing and minimumReleaseAgeBehaviour is unset, defaulting to timestamp-required',
+        releases: releasesWithMissingTimestamp,
+      },
+      {
+        description:
+          'the locked version is pending and updating would downgrade it to an older passing release',
+        lockedVersion: '2.56.0',
+        releases: [
+          { version: '2.50.0', releaseTimestamp: oneMonthOld },
+          { version: '2.55.0', releaseTimestamp: twelveDaysOld },
+          { version: '2.56.0', releaseTimestamp: twelveHoursOld },
+        ],
+      },
+    ])(
+      'do not update during lock file maintenance when $description',
+      async ({
+        releases,
+        minimumReleaseAgeBehaviour,
+        lockedVersion = '2.50.0',
+      }) => {
+        fs.readLocalFile.mockResolvedValueOnce(codeBlock`
+          provider "registry.terraform.io/hashicorp/azurerm" {
+            version     = "${lockedVersion}"
+            constraints = "~> 2.50"
+            hashes = [
+              "bar",
+            ]
+          }
+        `);
+        fs.findLocalSiblingOrParent.mockResolvedValueOnce(
+          '.terraform.lock.hcl',
+        );
+
+        mockGetPkgReleases.mockResolvedValueOnce({ releases });
+
+        const result = await updateArtifacts({
+          packageFileName: '',
+          updatedDeps: [],
+          newPackageFileContent: '',
+          config: {
+            ...config,
+            isLockFileMaintenance: true,
+            minimumReleaseAge: '3 days',
+            minimumReleaseAgeBehaviour,
+          },
+        });
+
+        expect(result).toBeNull();
+        expect(mockHash).not.toHaveBeenCalled();
+      },
     );
   });
 
