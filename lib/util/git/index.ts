@@ -2,7 +2,6 @@ import { setTimeout } from 'node:timers/promises';
 import URL from 'node:url';
 import {
   isBoolean,
-  isNonEmptyArray,
   isNonEmptyObject,
   isNonEmptyStringAndNotWhitespace,
   isString,
@@ -52,6 +51,7 @@ import {
   getCachedBehindBaseResult,
   setCachedBehindBaseResult,
 } from './behind-base-branch-cache.ts';
+import { formatCommitMessage } from './commit-trailers.ts';
 import { getNoVerify, simpleGitConfig } from './config.ts';
 import {
   getCachedConflictResult,
@@ -1454,10 +1454,7 @@ export async function prepareCommit({
       commitOptions['--no-verify'] = null;
     }
 
-    const commitMessage = isString(message) ? [message] : message;
-    if (isNonEmptyArray(trailers)) {
-      commitMessage.push(trailers.join('\n'));
-    }
+    const commitMessage = formatCommitMessage(message, trailers);
 
     const commitRes = await git.commit(commitMessage, [], commitOptions);
     if (
