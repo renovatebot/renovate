@@ -56,9 +56,7 @@ runs:
     - name: Calculate `CACHE_HIT`
       shell: bash
       run: |
-        echo 'CACHE_HIT=${{
-          (steps.node-modules-restore.outputs.cache-hit == 'true') && 'true' || ''
-        }}' >> "$GITHUB_ENV"
+        echo 'CACHE_HIT=true' >> "$GITHUB_ENV"
 
     - name: Setup pnpm
       uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v6.0.9
