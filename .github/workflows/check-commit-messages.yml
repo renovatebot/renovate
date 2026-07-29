@@ -9,6 +9,7 @@ on:
 
 permissions:
   contents: read
+  pull-requests: read
   statuses: write
 
 jobs:
@@ -53,3 +54,39 @@ jobs:
             } else {
               core.info('✓ No commits with issue closing keywords found');
             }
+
+  # Fails when any commit in the PR would make semantic-release publish a new major version (a `!` breaking-change marker or a `BREAKING CHANGE:` note).
+  # Major releases are prepared deliberately (see docs/development/major-release.md), so when a major bump is intended, override/ignore this check manually
+  no-unexpected-major-release:
+    runs-on: ubuntu-latest
+    env:
+      NODE_VERSION: 24
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          persist-credentials: false
+          show-progress: false
+
+      # use the GitHub API to avoid needing a full repository checkout
+      - name: Collect PR commit messages
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        with:
+          script: |
+            const commits = await github.paginate(github.rest.pulls.listCommits, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.payload.pull_request.number,
+              per_page: 100,
+            });
+            const messages = commits.map((commit) => commit.commit.message);
+            require('node:fs').writeFileSync('pr-commits.json', JSON.stringify(messages));
+            core.info(`Collected ${messages.length} commit message(s)`);
+
+      - name: Setup Node.js
+        uses: ./.github/actions/setup-node
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          os: ${{ runner.os }}
+
+      - name: Check for unexpected major release
+        run: node tools/check-major-release.ts pr-commits.json

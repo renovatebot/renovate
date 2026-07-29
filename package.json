@@ -280,6 +280,7 @@
     "@hyrious/marshal": "0.3.3",
     "@ls-lint/ls-lint": "2.3.1",
     "@openpgp/web-stream-tools": "0.3.1",
+    "@semantic-release/commit-analyzer": "13.0.1",
     "@semantic-release/exec": "7.1.0",
     "@smithy/util-stream": "4.7.11",
     "@types/adm-zip": "0.5.8",
