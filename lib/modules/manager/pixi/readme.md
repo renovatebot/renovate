@@ -4,6 +4,8 @@ Currently support channels from anaconda and prefix.dev, other channels are not 
 
 Whenever the pixi config in `pyproject.toml` or `pixi.toml` file is updated, `pixi.lock` file will be checked for updates as well.
 
+When using `pyproject.toml`, standard PEP 621 dependencies (e.g. `[project.dependencies]` or `[dependency-groups]`) are handled by the `pep621` manager, which also updates `pixi.lock` when those dependencies change.
+
 ### Trust model for pixi lock file updates
 
 Running `pixi lock` can execute arbitrary code from conda package hooks, so Renovate treats `pixi.lock` refreshes as an unsafe execution.
