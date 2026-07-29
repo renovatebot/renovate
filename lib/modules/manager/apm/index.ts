@@ -9,6 +9,8 @@ export const displayName = 'APM';
 export const url = 'https://github.com/microsoft/apm';
 
 export const supportsLockFileMaintenance = true;
+// `apm install` regenerates `apm.lock.yaml` (and the deployed harness files).
+export const lockFileMaintenanceIsDelegatedToPackageManager = true;
 export const lockFileNames = ['apm.lock.yaml'];
 
 export const defaultConfig = {
