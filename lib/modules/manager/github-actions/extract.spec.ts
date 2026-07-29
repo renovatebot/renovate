@@ -2021,6 +2021,21 @@ describe('modules/manager/github-actions/extract', () => {
         },
       ],
     },
+    {
+      step: {
+        uses: 'UpCloudLtd/upcloud-cli-action@main',
+        with: { version: 'v3.35.0' },
+      },
+      expected: [
+        {
+          currentValue: 'v3.35.0',
+          datasource: 'github-releases',
+          depName: 'UpCloudLtd/upcloud-cli',
+          depType: 'uses-with',
+          packageName: 'UpCloudLtd/upcloud-cli',
+        },
+      ],
+    },
   ])('extract from $step.uses', ({ step, expected }) => {
     const yamlContent = yaml.dump({ jobs: { build: { steps: [step] } } });
 

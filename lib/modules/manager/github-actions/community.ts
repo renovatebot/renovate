@@ -225,6 +225,10 @@ export const communityActions: Record<string, CommunityActionConfig> = {
     packageName: 'sigstore/cosign',
     withSchema: valSchema('cosign-release'),
   },
+  'UpCloudLtd/upcloud-cli-action': {
+    datasource: GithubReleasesDatasource.id,
+    packageName: 'UpCloudLtd/upcloud-cli',
+  },
   'zizmorcore/zizmor-action': {
     datasource: DockerDatasource.id,
     packageName: 'ghcr.io/zizmorcore/zizmor',
