@@ -21,6 +21,10 @@ inputs:
 runs:
   using: 'composite'
   steps:
+    - name: DEBUG
+      run: |
+        pnpm store path
+
     # Per #41288 and #41289, make sure that we fail if the values are provided as an empty string
     - name: Make sure that required parameters aren't an empty string
       shell: bash
