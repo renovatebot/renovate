@@ -224,6 +224,22 @@ describe('modules/manager/apm/extract', () => {
       ]);
     });
 
+    it('treats a GitLab .chatmode.md virtual file as a subpath boundary', () => {
+      const content = codeBlock`
+        dependencies:
+          apm:
+            - gitlab.com/group/subgroup/project/my.chatmode.md#v1.0.0
+      `;
+      expect(extractPackageFile(content, packageFile)?.deps).toMatchObject([
+        {
+          depName: 'gitlab.com/group/subgroup/project/my.chatmode.md',
+          packageName: 'group/subgroup/project',
+          datasource: GitlabTagsDatasource.id,
+          currentValue: 'v1.0.0',
+        },
+      ]);
+    });
+
     it('extracts self-hosted github dependencies with registryUrls', () => {
       const content = codeBlock`
         dependencies:

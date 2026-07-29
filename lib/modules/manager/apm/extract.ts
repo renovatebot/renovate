@@ -73,7 +73,7 @@ const autoReplaceStringTemplate =
  * `_GITLAB_VIRTUAL_ROOT_SEGMENTS` / `VIRTUAL_FILE_EXTENSIONS` in apm.
  */
 const virtualRootSegments = new Set(['prompts', 'instructions', 'collections']);
-const virtualFileRegex = regEx(/\.(?:prompt|instructions|agent)\.md$/);
+const virtualFileRegex = regEx(/\.(?:prompt|instructions|chatmode|agent)\.md$/);
 
 /**
  * Resolve the repository path from the host-stripped path segments.
