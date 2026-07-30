@@ -134,6 +134,8 @@ The maintainers will merge `main` into PRs that we believe need it.
 
 That being said, if you notice that your branch is conflicted with `main`, we very much do recommend updating that, to make sure that you apply the latest changes, and make it an easier merge when it's reviewed and ready.
 
+Alternatively, if your PR was put into the Merge Queue, and subsequently removed due to a status check failure, but these issues didn't appear on your PR, you may need to merge `main` in, and then fix any issues appearing.
+
 ## Apply maintainer provided review suggestions
 
 Maintainers can suggest changes while reviewing your pull request.
