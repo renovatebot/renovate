@@ -1,9 +1,8 @@
-import { logger, scm } from '~test/util.ts';
+import { fakeSha, logger, scm } from '~test/util.ts';
 import type { PackageFile } from '../../../modules/manager/types.ts';
 import * as _repositoryCache from '../../../util/cache/repository/index.ts';
 import type { BaseBranchCache } from '../../../util/cache/repository/types.ts';
 import { fingerprint } from '../../../util/fingerprint.ts';
-import type { LongCommitSha } from '../../../util/schema-utils/git.ts';
 import { generateFingerprintConfig } from '../extract/extract-fingerprint-config.ts';
 import * as _branchify from '../updates/branchify.ts';
 import {
@@ -39,6 +38,8 @@ const repositoryCache = vi.mocked(_repositoryCache);
 const fetch = vi.mocked(_fetch);
 
 describe('workers/repository/process/extract-update', () => {
+  const branchSha = fakeSha('123test');
+
   beforeEach(() => {
     branchify.branchifyUpgrades.mockResolvedValue({
       branches: [
@@ -59,7 +60,7 @@ describe('workers/repository/process/extract-update', () => {
         repoIsOnboarded: true,
       };
       repositoryCache.getCache.mockReturnValueOnce({ scan: {} });
-      scm.checkoutBranch.mockResolvedValueOnce('123test' as LongCommitSha);
+      scm.checkoutBranch.mockResolvedValueOnce(branchSha);
       const packageFiles = await extract(config);
       const res = await lookup(config, packageFiles);
       expect(res).toEqual({
@@ -90,7 +91,7 @@ describe('workers/repository/process/extract-update', () => {
           addLabels: 'npm',
         },
       };
-      scm.checkoutBranch.mockResolvedValueOnce('123test' as LongCommitSha);
+      scm.checkoutBranch.mockResolvedValueOnce(branchSha);
       repositoryCache.getCache.mockReturnValueOnce({ scan: {} });
       const packageFiles = await extract(config);
       expect(packageFiles).toBeUndefined();
@@ -106,15 +107,15 @@ describe('workers/repository/process/extract-update', () => {
         scan: {
           master: {
             revision: EXTRACT_CACHE_REVISION,
-            sha: '123test',
+            sha: branchSha,
             configHash: fingerprint(generateFingerprintConfig(config)),
             extractionFingerprints: {},
             packageFiles,
           },
         },
       });
-      scm.getBranchCommit.mockResolvedValueOnce('123test' as LongCommitSha);
-      scm.checkoutBranch.mockResolvedValueOnce('123test' as LongCommitSha);
+      scm.getBranchCommit.mockResolvedValueOnce(branchSha);
+      scm.checkoutBranch.mockResolvedValueOnce(branchSha);
       const res = await extract(config);
       expect(res).toEqual(packageFiles);
     });
@@ -129,7 +130,7 @@ describe('workers/repository/process/extract-update', () => {
         appendVulnerabilityPackageRules: appendVulnerabilityPackageRulesMock,
       });
       repositoryCache.getCache.mockReturnValueOnce({ scan: {} });
-      scm.checkoutBranch.mockResolvedValueOnce('123test' as LongCommitSha);
+      scm.checkoutBranch.mockResolvedValueOnce(branchSha);
 
       const packageFiles = await extract(config);
       await lookup(config, packageFiles);
@@ -145,7 +146,7 @@ describe('workers/repository/process/extract-update', () => {
       };
       createVulnerabilitiesMock.mockRejectedValueOnce(new Error());
       repositoryCache.getCache.mockReturnValueOnce({ scan: {} });
-      scm.checkoutBranch.mockResolvedValueOnce('123test' as LongCommitSha);
+      scm.checkoutBranch.mockResolvedValueOnce(branchSha);
 
       const packageFiles = await extract(config);
       await lookup(config, packageFiles);
@@ -306,7 +307,7 @@ describe('workers/repository/process/extract-update', () => {
                 manager: 'npm',
                 datasource: 'npm',
               },
-              'Dependency axios is currently using a malicious version',
+              'Dependency is currently using a malicious version',
             );
           });
 
@@ -426,7 +427,7 @@ describe('workers/repository/process/extract-update', () => {
               datasource: 'npm',
               newVersions: ['1.14.1', '1.14.2', '2.0.0'],
             },
-            'Dependency axios has update(s) proposed which would update you to a malicious version - skipping',
+            'Dependency has update(s) proposed which would update you to a malicious version - skipping',
           );
         });
       });

@@ -32,8 +32,9 @@ function isTypesGroup(branchUpgrades: BranchUpgradeConfig[]): boolean {
 }
 
 function sortTypesGroup(upgrades: BranchUpgradeConfig[]): void {
-  const isTypesUpgrade = ({ depName }: BranchUpgradeConfig): boolean =>
-    !!depName?.startsWith('@types/');
+  function isTypesUpgrade({ depName }: BranchUpgradeConfig): boolean {
+    return !!depName?.startsWith('@types/');
+  }
   const regularUpgrades = upgrades.filter(
     (upgrade) => !isTypesUpgrade(upgrade),
   );
@@ -301,9 +302,7 @@ export function generateBranchConfig(
 
     const pendingVersionsLength = upgrade.pendingVersions?.length;
     if (pendingVersionsLength) {
-      upgrade.displayPending = `\`${upgrade
-        .pendingVersions!.slice(-1)
-        .pop()!}\``;
+      upgrade.displayPending = `\`${upgrade.pendingVersions!.at(-1)!}\``;
       if (pendingVersionsLength > 1) {
         upgrade.displayPending += ` (+${pendingVersionsLength - 1})`;
       }

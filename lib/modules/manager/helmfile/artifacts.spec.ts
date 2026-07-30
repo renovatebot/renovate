@@ -4,7 +4,10 @@ import { mockDeep } from 'vitest-mock-extended';
 import { envMock, mockExecAll } from '~test/exec-util.ts';
 import { env, fs, git } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
-import type { RepoGlobalConfig } from '../../../config/types.ts';
+import type {
+  InternalGlobalConfigOptions,
+  RepoGlobalConfig,
+} from '../../../config/types.ts';
 import * as docker from '../../../util/exec/docker/index.ts';
 import * as hostRules from '../../../util/host-rules.ts';
 import * as _datasource from '../../datasource/index.ts';
@@ -20,7 +23,7 @@ const datasource = vi.mocked(_datasource);
 
 process.env.CONTAINERBASE = 'true';
 
-const adminConfig: RepoGlobalConfig = {
+const adminConfig: RepoGlobalConfig & InternalGlobalConfigOptions = {
   localDir: upath.join('/tmp/github/some/repo'), // `join` fixes Windows CI
   cacheDir: upath.join('/tmp/renovate/cache'),
   containerbaseDir: upath.join('/tmp/renovate/cache/containerbase'),
@@ -105,10 +108,10 @@ describe('modules/manager/helmfile/artifacts', () => {
   });
 
   it('returns null if unchanged', async () => {
-    git.getFile.mockResolvedValueOnce(lockFile as never);
+    git.getFile.mockResolvedValueOnce(lockFile);
     fs.getSiblingFileName.mockReturnValueOnce('helmfile.lock');
     const execSnapshots = mockExecAll();
-    fs.readLocalFile.mockResolvedValueOnce(lockFile as never);
+    fs.readLocalFile.mockResolvedValueOnce(lockFile);
     fs.privateCacheDir.mockReturnValue(
       '/tmp/renovate/cache/__renovate-private-cache',
     );
@@ -127,10 +130,10 @@ describe('modules/manager/helmfile/artifacts', () => {
   });
 
   it('returns updated helmfile.lock', async () => {
-    git.getFile.mockResolvedValueOnce(lockFile as never);
+    git.getFile.mockResolvedValueOnce(lockFile);
     fs.getSiblingFileName.mockReturnValueOnce('helmfile.lock');
     const execSnapshots = mockExecAll();
-    fs.readLocalFile.mockResolvedValueOnce(lockFileTwo as never);
+    fs.readLocalFile.mockResolvedValueOnce(lockFileTwo);
     fs.privateCacheDir.mockReturnValue(
       '/tmp/renovate/cache/__renovate-private-cache',
     );
@@ -185,12 +188,10 @@ describe('modules/manager/helmfile/artifacts', () => {
     generated: "2023-03-08T21:30:48.273709455+01:00"
     `;
 
-    git.getFile.mockResolvedValueOnce(lockFileWithoutRepositories as never);
+    git.getFile.mockResolvedValueOnce(lockFileWithoutRepositories);
     fs.getSiblingFileName.mockReturnValueOnce('helmfile.lock');
     const execSnapshots = mockExecAll();
-    fs.readLocalFile.mockResolvedValueOnce(
-      lockFileTwoWithoutRepositories as never,
-    );
+    fs.readLocalFile.mockResolvedValueOnce(lockFileTwoWithoutRepositories);
     fs.privateCacheDir.mockReturnValue(
       '/tmp/renovate/cache/__renovate-private-cache',
     );
@@ -253,10 +254,10 @@ describe('modules/manager/helmfile/artifacts', () => {
       matchHost: 'ghcr.io',
     });
 
-    git.getFile.mockResolvedValueOnce(lockFileOCIPrivateRepo as never);
+    git.getFile.mockResolvedValueOnce(lockFileOCIPrivateRepo);
     fs.getSiblingFileName.mockReturnValueOnce('helmfile.lock');
     const execSnapshots = mockExecAll();
-    fs.readLocalFile.mockResolvedValueOnce(lockFileOCIPrivateRepoTwo as never);
+    fs.readLocalFile.mockResolvedValueOnce(lockFileOCIPrivateRepoTwo);
     fs.privateCacheDir.mockReturnValue(
       '/tmp/renovate/cache/__renovate-private-cache',
     );
@@ -479,10 +480,10 @@ describe('modules/manager/helmfile/artifacts', () => {
     generated: "2023-03-08T21:30:48.273709455+01:00"
     `;
 
-    git.getFile.mockResolvedValueOnce(lockFileMultidoc as never);
+    git.getFile.mockResolvedValueOnce(lockFileMultidoc);
     fs.getSiblingFileName.mockReturnValueOnce('helmfile.lock');
     const execSnapshots = mockExecAll();
-    fs.readLocalFile.mockResolvedValueOnce(lockFileMultidocUpdated as never);
+    fs.readLocalFile.mockResolvedValueOnce(lockFileMultidocUpdated);
     fs.privateCacheDir.mockReturnValue(
       '/tmp/renovate/cache/__renovate-private-cache',
     );

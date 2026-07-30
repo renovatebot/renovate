@@ -1,4 +1,5 @@
-import { hostRules, partial } from '~test/util.ts';
+import { hostRules } from '~test/host-rules.ts';
+import { partial } from '~test/util.ts';
 import { CONFIG_GIT_URL_UNAVAILABLE } from '../../../constants/error-messages.ts';
 import type { BranchStatus } from '../../../types/index.ts';
 import { setBaseUrl } from '../../../util/http/gerrit.ts';
@@ -14,11 +15,11 @@ import type { GerritChangeStatus } from './types.ts';
 import * as utils from './utils.ts';
 import { mapBranchStatusToLabel } from './utils.ts';
 
-vi.mock('../../../util/host-rules.ts');
-
 const baseUrl = 'https://gerrit.example.com';
 
 describe('modules/platform/gerrit/utils', () => {
+  const currentRevision = '0123456789abcdef0123456789abcdef01234567';
+
   beforeEach(() => {
     setBaseUrl(baseUrl);
   });
@@ -26,59 +27,78 @@ describe('modules/platform/gerrit/utils', () => {
   describe('getGerritRepoUrl()', () => {
     describe('no gitUrl provided', () => {
       it('create a git url with username/password', () => {
-        hostRules.find.mockReturnValue({
+        hostRules.add({
           username: 'abc',
           password: '123',
         });
-        const repoUrl = utils.getGerritRepoUrl('web/apps', baseUrl, undefined);
+        const repoUrl = utils.getGerritRepoUrl(
+          'web/apps',
+          baseUrl,
+          undefined,
+          'abc',
+        );
         expect(repoUrl).toBe('https://abc:123@gerrit.example.com/a/web%2Fapps');
       });
 
       it('create a git url without username/password', () => {
-        hostRules.find.mockReturnValue({});
         expect(() =>
-          utils.getGerritRepoUrl('web/apps', baseUrl, undefined),
+          utils.getGerritRepoUrl('web/apps', baseUrl, undefined, 'abc'),
         ).toThrow('Init: You must configure a Gerrit Server username/password');
       });
 
       it('throws on invalid endpoint', () => {
         expect(() =>
-          utils.getGerritRepoUrl('web/apps', '...', undefined),
+          utils.getGerritRepoUrl('web/apps', '...', undefined, 'abc'),
         ).toThrow(Error(CONFIG_GIT_URL_UNAVAILABLE));
       });
     });
     describe('default gitUrl', () => {
       it('create a git url with username/password', () => {
-        hostRules.find.mockReturnValue({
+        hostRules.add({
           username: 'abc',
           password: '123',
         });
-        const repoUrl = utils.getGerritRepoUrl('web/apps', baseUrl, 'default');
+        const repoUrl = utils.getGerritRepoUrl(
+          'web/apps',
+          baseUrl,
+          'default',
+          'abc',
+        );
         expect(repoUrl).toBe('https://abc:123@gerrit.example.com/a/web%2Fapps');
       });
     });
     describe('endpoint gitUrl', () => {
       it('create a git url with username/password', () => {
-        hostRules.find.mockReturnValue({
+        hostRules.add({
           username: 'abc',
           password: '123',
         });
-        const repoUrl = utils.getGerritRepoUrl('web/apps', baseUrl, 'endpoint');
+        const repoUrl = utils.getGerritRepoUrl(
+          'web/apps',
+          baseUrl,
+          'endpoint',
+          'abc',
+        );
         expect(repoUrl).toBe('https://abc:123@gerrit.example.com/a/web%2Fapps');
       });
     });
     describe('ssh gitUrl', () => {
       it('create a simple url', () => {
-        hostRules.find.mockReturnValue({
+        hostRules.add({
           username: 'abc',
           password: '123',
         });
-        const repoUrl = utils.getGerritRepoUrl('web/apps', baseUrl, 'ssh');
-        expect(repoUrl).toBe('ssh://gerrit.example.com:29418/web/apps');
+        const repoUrl = utils.getGerritRepoUrl(
+          'web/apps',
+          baseUrl,
+          'ssh',
+          'abc',
+        );
+        expect(repoUrl).toBe('ssh://abc@gerrit.example.com:29418/web/apps');
       });
 
       it('create a url with trailing slash', () => {
-        hostRules.find.mockReturnValue({
+        hostRules.add({
           username: 'abc',
           password: '123',
         });
@@ -86,12 +106,13 @@ describe('modules/platform/gerrit/utils', () => {
           'web/apps',
           'https://gerrit.example.com/',
           'ssh',
+          'abc',
         );
-        expect(repoUrl).toBe('ssh://gerrit.example.com:29418/web/apps');
+        expect(repoUrl).toBe('ssh://abc@gerrit.example.com:29418/web/apps');
       });
 
       it('create a url when base has context', () => {
-        hostRules.find.mockReturnValue({
+        hostRules.add({
           username: 'abc',
           password: '123',
         });
@@ -99,8 +120,9 @@ describe('modules/platform/gerrit/utils', () => {
           'web/apps',
           'https://gerrit.example.com/context',
           'ssh',
+          'abc',
         );
-        expect(repoUrl).toBe('ssh://gerrit.example.com:29418/web/apps');
+        expect(repoUrl).toBe('ssh://abc@gerrit.example.com:29418/web/apps');
       });
     });
   });
@@ -123,16 +145,15 @@ describe('modules/platform/gerrit/utils', () => {
 
   describe('mapGerritChangeStateToPrState()', () => {
     it.each([
-      ['NEW' as GerritChangeStatus, 'open'],
-      ['MERGED' as GerritChangeStatus, 'merged'],
-      ['ABANDONED' as GerritChangeStatus, 'closed'],
-      ['unknown' as GerritChangeStatus, undefined],
-    ])(
-      'maps gerrit change state %p to PrState %p',
-      (state: GerritChangeStatus, prState: any) => {
-        expect(utils.mapGerritChangeStateToPrState(state)).toEqual(prState);
-      },
-    );
+      ['NEW', 'open'],
+      ['MERGED', 'merged'],
+      ['ABANDONED', 'closed'],
+      ['unknown', undefined],
+    ])('maps gerrit change state %p to PrState %p', (state, prState) => {
+      expect(
+        utils.mapGerritChangeStateToPrState(state as GerritChangeStatus),
+      ).toEqual(prState);
+    });
   });
 
   describe('mapGerritChangeToPr()', () => {
@@ -147,13 +168,12 @@ describe('modules/platform/gerrit/utils', () => {
         reviewers: {
           REVIEWER: [partial<GerritAccountInfo>({ username: 'username' })],
         },
-        current_revision: '0123456789abcdef0123456789abcdef01234567',
+        current_revision: currentRevision,
         revisions: {
-          '0123456789abcdef0123456789abcdef01234567':
-            partial<GerritRevisionInfo>({
-              commit_with_footers:
-                'Some change\n\nRenovate-Branch: renovate/dependency-1.x\nChange-Id: ...',
-            }),
+          [currentRevision]: partial<GerritRevisionInfo>({
+            commit_with_footers:
+              'Some change\n\nRenovate-Branch: renovate/dependency-1.x\nChange-Id: ...',
+          }),
         },
         messages: [
           partial<GerritChangeMessageInfo>({
@@ -185,7 +205,7 @@ describe('modules/platform/gerrit/utils', () => {
         bodyStruct: {
           hash: hashBody('Last PR-Body'),
         },
-        sha: '0123456789abcdef0123456789abcdef01234567',
+        sha: currentRevision,
       });
     });
 
@@ -196,13 +216,12 @@ describe('modules/platform/gerrit/utils', () => {
         branch: 'main',
         subject: 'Fix for',
         reviewers: {},
-        current_revision: '0123456789abcdef0123456789abcdef01234567',
+        current_revision: currentRevision,
         revisions: {
-          '0123456789abcdef0123456789abcdef01234567':
-            partial<GerritRevisionInfo>({
-              commit_with_footers:
-                'Some change\n\nRenovate-Branch: renovate/dependency-1.x\nChange-Id: ...',
-            }),
+          [currentRevision]: partial<GerritRevisionInfo>({
+            commit_with_footers:
+              'Some change\n\nRenovate-Branch: renovate/dependency-1.x\nChange-Id: ...',
+          }),
         },
         created: '2025-04-14 16:33:37.000000000',
       });
@@ -213,7 +232,7 @@ describe('modules/platform/gerrit/utils', () => {
         sourceBranch: 'renovate/dependency-1.x',
         targetBranch: 'main',
         reviewers: [],
-        sha: '0123456789abcdef0123456789abcdef01234567',
+        sha: currentRevision,
         bodyStruct: {
           hash: hashBody(''),
         },
@@ -227,13 +246,12 @@ describe('modules/platform/gerrit/utils', () => {
         status: 'NEW',
         branch: 'main',
         subject: 'Fix for',
-        current_revision: '0123456789abcdef0123456789abcdef01234567',
+        current_revision: currentRevision,
         revisions: {
-          '0123456789abcdef0123456789abcdef01234567':
-            partial<GerritRevisionInfo>({
-              commit_with_footers:
-                'Some change\n\nRenovate-Broke: renovate/dependency-1.x\nChange-Id: ...',
-            }),
+          [currentRevision]: partial<GerritRevisionInfo>({
+            commit_with_footers:
+              'Some change\n\nRenovate-Broke: renovate/dependency-1.x\nChange-Id: ...',
+          }),
         },
         created: '2025-04-14 16:33:37.000000000',
       });
@@ -246,13 +264,12 @@ describe('modules/platform/gerrit/utils', () => {
         status: 'NEW',
         branch: 'main',
         subject: 'Fix for',
-        current_revision: '0123456789abcdef0123456789abcdef01234567',
+        current_revision: currentRevision,
         revisions: {
-          '0123456789abcdef0123456789abcdef01234567':
-            partial<GerritRevisionInfo>({
-              commit_with_footers:
-                'Some change\n\nRenovate-Broke: renovate/dependency-1.x\nChange-Id: ...',
-            }),
+          [currentRevision]: partial<GerritRevisionInfo>({
+            commit_with_footers:
+              'Some change\n\nRenovate-Broke: renovate/dependency-1.x\nChange-Id: ...',
+          }),
         },
         created: '2025-04-14 16:33:37.000000000',
       });
@@ -267,7 +284,7 @@ describe('modules/platform/gerrit/utils', () => {
         sourceBranch: 'renovate/dependency-1.x',
         targetBranch: 'main',
         reviewers: [],
-        sha: '0123456789abcdef0123456789abcdef01234567',
+        sha: currentRevision,
         bodyStruct: {
           hash: hashBody(''),
         },
@@ -281,13 +298,12 @@ describe('modules/platform/gerrit/utils', () => {
         status: 'NEW',
         branch: 'main',
         subject: 'Fix for',
-        current_revision: '0123456789abcdef0123456789abcdef01234567',
+        current_revision: currentRevision,
         revisions: {
-          '0123456789abcdef0123456789abcdef01234567':
-            partial<GerritRevisionInfo>({
-              commit_with_footers:
-                'Some change\n\nRenovate-Branch: renovate/dependency-1.x\nChange-Id: ...',
-            }),
+          [currentRevision]: partial<GerritRevisionInfo>({
+            commit_with_footers:
+              'Some change\n\nRenovate-Branch: renovate/dependency-1.x\nChange-Id: ...',
+          }),
         },
         created: '2025-04-14 16:33:37.000000000',
       });
@@ -302,7 +318,7 @@ describe('modules/platform/gerrit/utils', () => {
         sourceBranch: 'renovate/dependency-1.x',
         targetBranch: 'main',
         reviewers: [],
-        sha: '0123456789abcdef0123456789abcdef01234567',
+        sha: currentRevision,
         bodyStruct: {
           hash: hashBody('PR Body'),
         },
@@ -319,12 +335,11 @@ describe('modules/platform/gerrit/utils', () => {
 
     it('commit message with no footer', () => {
       const change = partial<GerritChange>({
-        current_revision: '0123456789abcdef0123456789abcdef01234567',
+        current_revision: currentRevision,
         revisions: {
-          '0123456789abcdef0123456789abcdef01234567':
-            partial<GerritRevisionInfo>({
-              commit_with_footers: 'some message...',
-            }),
+          [currentRevision]: partial<GerritRevisionInfo>({
+            commit_with_footers: 'some message...',
+          }),
         },
       });
       expect(utils.extractSourceBranch(change)).toBeUndefined();
@@ -332,13 +347,12 @@ describe('modules/platform/gerrit/utils', () => {
 
     it('commit message with footer', () => {
       const change = partial<GerritChange>({
-        current_revision: '0123456789abcdef0123456789abcdef01234567',
+        current_revision: currentRevision,
         revisions: {
-          '0123456789abcdef0123456789abcdef01234567':
-            partial<GerritRevisionInfo>({
-              commit_with_footers:
-                'Some change\n\nRenovate-Branch: renovate/dependency-1.x\nChange-Id: ...',
-            }),
+          [currentRevision]: partial<GerritRevisionInfo>({
+            commit_with_footers:
+              'Some change\n\nRenovate-Branch: renovate/dependency-1.x\nChange-Id: ...',
+          }),
         },
       });
       expect(utils.extractSourceBranch(change)).toBe('renovate/dependency-1.x');
@@ -390,15 +404,15 @@ describe('modules/platform/gerrit/utils', () => {
     };
 
     it.each([
-      ['red' as BranchStatus, -1],
-      ['yellow' as BranchStatus, -1],
-      ['green' as BranchStatus, 1],
+      ['red', -1],
+      ['yellow', -1],
+      ['green', 1],
     ])(
       'Label with +1/-1 map branchState=%p to %p',
       (branchState, expectedValue) => {
-        expect(mapBranchStatusToLabel(branchState, labelWithOne)).toEqual(
-          expectedValue,
-        );
+        expect(
+          mapBranchStatusToLabel(branchState as BranchStatus, labelWithOne),
+        ).toEqual(expectedValue);
       },
     );
 
@@ -414,15 +428,15 @@ describe('modules/platform/gerrit/utils', () => {
     };
 
     it.each([
-      ['red' as BranchStatus, -2],
-      ['yellow' as BranchStatus, -2],
-      ['green' as BranchStatus, 2],
+      ['red', -2],
+      ['yellow', -2],
+      ['green', 2],
     ])(
       'Label with +2/-2, map branchState=%p to %p',
       (branchState, expectedValue) => {
-        expect(mapBranchStatusToLabel(branchState, labelWithTwo)).toEqual(
-          expectedValue,
-        );
+        expect(
+          mapBranchStatusToLabel(branchState as BranchStatus, labelWithTwo),
+        ).toEqual(expectedValue);
       },
     );
   });

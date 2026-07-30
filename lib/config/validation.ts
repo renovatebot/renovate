@@ -21,6 +21,7 @@ import type { HostRule } from '../types/index.ts';
 import { packageCacheNamespaces } from '../util/cache/package/namespaces.ts';
 import { getToolConfig } from '../util/exec/containerbase.ts';
 import { isConstraintName, isToolName } from '../util/exec/types.ts';
+import { isValidCommitTrailer } from '../util/git/commit-trailers.ts';
 import { getExpression } from '../util/jsonata.ts';
 import { regEx } from '../util/regex.ts';
 import {
@@ -49,7 +50,6 @@ import { parsePreset } from './presets/parse.ts';
 import type {
   AllConfig,
   AllowedParents,
-  RenovateConfig,
   RenovateOptions,
   StatusCheckKey,
   ValidationMessage,
@@ -382,7 +382,7 @@ export async function validateConfig(
                   if (isObject(subval)) {
                     const subValidation = await validateConfig(
                       configType,
-                      subval as RenovateConfig,
+                      subval,
                       isPreset,
                       `${currentPath}[${subIndex}]`,
                     );
@@ -450,6 +450,19 @@ export async function validateConfig(
                   }
                 }
 
+                if (key === 'commitTrailers') {
+                  for (const subval of val) {
+                    if (!isValidCommitTrailer(subval)) {
+                      errors.push({
+                        topic: 'Configuration Error',
+                        message: `Invalid commit trailer: \`${JSON.stringify(
+                          subval,
+                        )}\`. Must be a single-line string in the form \`Key: value\`, where the key contains only letters, digits and \`-\`.`,
+                      });
+                    }
+                  }
+                }
+
                 const selectors = [
                   'matchFileNames',
                   'matchLanguages',
@@ -475,7 +488,7 @@ export async function validateConfig(
                   for (const [subIndex, packageRule] of val.entries()) {
                     if (isObject(packageRule)) {
                       const { config: resolved } = await resolveConfigPresets(
-                        packageRule as RenovateConfig,
+                        packageRule,
                         config,
                       );
                       const resolvedRule = migrateConfig({
@@ -925,13 +938,14 @@ export async function validateConfig(
               : GlobalConfig.get('allowedHeaders');
           for (const rule of val as HostRule[]) {
             if (isNonEmptyString(rule.matchHost)) {
-              if (rule.matchHost.includes('://')) {
-                if (parseUrl(rule.matchHost) === null) {
-                  errors.push({
-                    topic: 'Configuration Error',
-                    message: `hostRules matchHost \`${rule.matchHost}\` is not a valid URL.`,
-                  });
-                }
+              if (
+                rule.matchHost.includes('://') &&
+                parseUrl(rule.matchHost) === null
+              ) {
+                errors.push({
+                  topic: 'Configuration Error',
+                  message: `hostRules matchHost \`${rule.matchHost}\` is not a valid URL.`,
+                });
               }
             } else if (isEmptyString(rule.matchHost)) {
               errors.push({
@@ -1112,7 +1126,7 @@ async function validateGlobalConfig(
           if (isObject(subval)) {
             const subValidation = await validateConfig(
               'global',
-              subval as AllConfig,
+              subval,
               false,
               `${currentPath}[${subIndex}]`,
             );

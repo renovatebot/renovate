@@ -63,7 +63,7 @@ The resources, scheduling and concurrency of Renovate jobs is determined by the 
 | ----------------------------- | ----------------------------- | ----------------------------------- | ------------------------------ |
 | Concurrent jobs per Org       | 1                             | 2                                   | 16                             |
 | Job scheduling (active repos) | Every 4 hours                 | Every 4 hours                       | Hourly<sup>1</sup>             |
-| Job runner CPUs               | 1 vCPU                        | 2 vCPU                              | 2 vCPU                         |
+| Job runner CPUs               | 1 vCPU                        | 1 vCPU                              | 2 vCPU                         |
 | Job runner Memory             | 3GB                           | 6GB                                 | 8GB                            |
 | Job runner Disk space         | 15GB                          | 25GB                                | 40GB                           |
 | Job timeout                   | 30 minutes                    | 60 minutes                          | 60 minutes                     |

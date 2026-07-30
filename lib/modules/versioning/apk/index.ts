@@ -195,13 +195,14 @@ class ApkVersioningApi extends GenericVersioningApi {
 
         if (matchv1 && /^\d+$/.test(matchv1)) {
           return 1;
-        } else if (matchv2 && /^\d+$/.test(matchv2)) {
-          return -1;
-        } else if (matchv1) {
-          return -1;
-        } else {
-          return 1;
         }
+        if (matchv2 && /^\d+$/.test(matchv2)) {
+          return -1;
+        }
+        if (matchv1) {
+          return -1;
+        }
+        return 1;
       }
     }
 

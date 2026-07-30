@@ -70,19 +70,19 @@ const PoetryGitDependency = z
           currentValue: tag,
           packageName: repo,
         };
-      } else if (source === 'gitlab.com') {
+      }
+      if (source === 'gitlab.com') {
         return {
           datasource: GitlabTagsDatasource.id,
           currentValue: tag,
           packageName: repo,
         };
-      } else {
-        return {
-          datasource: GitTagsDatasource.id,
-          currentValue: tag,
-          packageName: git,
-        };
       }
+      return {
+        datasource: GitTagsDatasource.id,
+        currentValue: tag,
+        packageName: git,
+      };
     }
 
     if (rev) {

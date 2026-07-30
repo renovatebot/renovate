@@ -1,16 +1,18 @@
 import { z } from 'zod/v4';
-import { Json } from '../../../util/schema-utils/index.ts';
+import { DeepNullish, Json } from '../../../util/schema-utils/index.ts';
 
-const PackageResolvedPin = z.object({
-  identity: z.string(),
-  kind: z.string(),
-  location: z.string(),
-  state: z.object({
-    revision: z.string(),
-    version: z.string().nullable().optional(),
-    branch: z.string().nullable().optional(),
+const PackageResolvedPin = DeepNullish(
+  z.object({
+    identity: z.string(),
+    kind: z.string(),
+    location: z.string(),
+    state: z.object({
+      revision: z.string(),
+      version: z.string().optional(),
+      branch: z.string().optional(),
+    }),
   }),
-});
+);
 
 export type PackageResolvedPin = z.infer<typeof PackageResolvedPin>;
 

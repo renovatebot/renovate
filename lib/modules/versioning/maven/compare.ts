@@ -435,7 +435,9 @@ function rangeToStr(fullRange: Range[] | null): string | null {
     return null;
   }
 
-  const valToStr = (val: string | null): string => val ?? '';
+  function valToStr(val: string | null): string {
+    return val ?? '';
+  }
 
   if (fullRange.length === 1) {
     const { leftBracket, rightBracket, leftValue, rightValue } = fullRange[0];
@@ -489,7 +491,7 @@ function coerceRangeValue(prev: string, next: string): string {
 
 function incrementRangeValue(value: string): string {
   const tokens = tokenize(value);
-  const lastToken = tokens[tokens.length - 1];
+  const lastToken = tokens.at(-1)!;
   if (typeof lastToken.val === 'number') {
     lastToken.val += 1;
     return coerceRangeValue(value, tokensToStr(tokens));
@@ -505,7 +507,7 @@ function autoExtendMavenRange(
   if (!range) {
     return currentRepresentation;
   }
-  const isPoint = (vals: Range[]): boolean => {
+  function isPoint(vals: Range[]): boolean {
     if (vals.length !== 1) {
       return false;
     }
@@ -515,7 +517,7 @@ function autoExtendMavenRange(
       leftType === rightType &&
       leftValue === rightValue
     );
-  };
+  }
   if (isPoint(range)) {
     return `[${newValue}]`;
   }
@@ -568,7 +570,7 @@ function autoExtendMavenRange(
   } else if (rightValue !== null) {
     if (interval.rightType === INCLUDING_POINT) {
       const tokens = tokenize(rightValue);
-      const lastToken = tokens[tokens.length - 1];
+      const lastToken = tokens.at(-1)!;
       if (typeof lastToken.val === 'number') {
         interval.rightValue = coerceRangeValue(rightValue, newValue);
       } else {

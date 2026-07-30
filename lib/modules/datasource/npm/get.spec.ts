@@ -23,8 +23,6 @@ const http = new Http('npm');
 
 describe('modules/datasource/npm/get', () => {
   beforeEach(() => {
-    packageCache.get.mockReset();
-    packageCache.setWithRawTtl.mockReset();
     hostRules.clear();
     setNpmrc();
   });

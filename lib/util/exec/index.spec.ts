@@ -199,7 +199,7 @@ describe('util/exec/index', () => {
     ],
 
     [
-      'Low trust level',
+      'By default, exposeAllEnv=false',
       {
         processEnv,
         inCmd,
@@ -220,7 +220,7 @@ describe('util/exec/index', () => {
     ],
 
     [
-      'High trust level',
+      'When exposeAllEnv=true, all environment variables are passed to child',
       {
         processEnv: envMock.full,
         inCmd,
@@ -914,7 +914,7 @@ describe('util/exec/index', () => {
       inOpts,
       outCmd: outCommand,
       outOpts,
-      adminConfig = {} as any,
+      adminConfig = {},
       hermitEnvs,
     } = testOpts;
 
@@ -929,12 +929,12 @@ describe('util/exec/index', () => {
       return Promise.resolve({ stdout: '', stderr: '' });
     });
     GlobalConfig.set({ ...globalConfig, localDir: cwd, ...adminConfig });
-    setCustomEnv(adminConfig.customEnvVariables);
+    setCustomEnv(adminConfig.customEnvVariables ?? {});
     if (hermitEnvs !== undefined) {
       getHermitEnvsMock.mockResolvedValue(hermitEnvs);
     }
 
-    await exec(cmd as string, inOpts);
+    await exec(cmd, inOpts);
 
     expect(actualCmd).toEqual(outCommand);
     expect(actualOpts).toEqual(outOpts);

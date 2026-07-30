@@ -387,7 +387,8 @@ const platform: Platform = {
         );
         const repos = await map(fetchRepoArgs, fetchRepositories);
         return deduplicateArray(repos.flat());
-      } else if (config?.namespaces) {
+      }
+      if (config?.namespaces) {
         logger.debug(
           { namespaces: config.namespaces },
           'Auto-discovering by organization',
@@ -402,12 +403,11 @@ const platform: Platform = {
           },
         );
         return deduplicateArray(repos.flat());
-      } else {
-        return await fetchRepositories({
-          sort: config?.sort,
-          order: config?.order,
-        });
       }
+      return await fetchRepositories({
+        sort: config?.sort,
+        order: config?.order,
+      });
     } catch (err) {
       logger.error({ err }, 'Gitea getRepos() error');
       throw err;
@@ -473,7 +473,7 @@ const platform: Platform = {
       return 'yellow';
     }
 
-    /* v8 ignore next */
+    /* v8 ignore next -- the mapping covers every status Gitea returns, 'yellow' fallback is defensive */
     return helper.giteaToRenovateStatusMapping[ccs.worstStatus] ?? 'yellow';
   },
 
@@ -794,7 +794,7 @@ const platform: Platform = {
         number,
         body,
       };
-    } catch (err) /* v8 ignore next */ {
+    } catch (err) /* v8 ignore next -- defensive: issue fetch failures are logged and swallowed, not simulated in specs */ {
       logger.debug({ err, number }, 'Error getting issue');
       return null;
     }
@@ -860,7 +860,7 @@ const platform: Platform = {
           }
 
           // Pick the last issue in the list as the active one
-          activeIssue = issues[issues.length - 1];
+          activeIssue = issues.at(-1)!;
         }
 
         // Close any duplicate issues

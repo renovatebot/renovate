@@ -148,7 +148,9 @@ describe('util/template/index', () => {
 
   it('to Object passing illegal number of elements', () => {
     const userTemplate = "{{{ toJSON (toObject 'foo') }}}";
-    const outputFunc = () => template.compile(userTemplate, {});
+    function outputFunc() {
+      return template.compile(userTemplate, {});
+    }
     expect(outputFunc).toThrow('Must contain an even number of elements');
   });
 
