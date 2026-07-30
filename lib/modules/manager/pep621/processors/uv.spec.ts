@@ -240,6 +240,11 @@ describe('modules/manager/pep621/processors/uv', () => {
         { index = "unknown", marker = "sys_platform == 'darwin'" },
         { index = "foo", marker = "sys_platform == 'linux'" },
       ]
+      dep6 = [
+        { index = "unknown", marker = "sys_platform == 'darwin'" },
+        { index = "unknown2", marker = "sys_platform == 'linux'" },
+      ]
+      dep7 = [{ index = "unknown" }]
 
       [[tool.uv.index]]
       name = "foo"
@@ -274,6 +279,14 @@ describe('modules/manager/pep621/processors/uv', () => {
         {
           depName: 'dep5',
           packageName: 'dep5',
+        },
+        {
+          depName: 'dep6',
+          packageName: 'dep6',
+        },
+        {
+          depName: 'dep7',
+          packageName: 'dep7',
         },
       ];
 
@@ -311,6 +324,16 @@ describe('modules/manager/pep621/processors/uv', () => {
           depType: depTypes.uvSources,
           registryUrls: ['https://foo.com/simple'],
           packageName: 'dep5',
+        },
+        {
+          depName: 'dep6',
+          depType: depTypes.uvSources,
+          packageName: 'dep6',
+        },
+        {
+          depName: 'dep7',
+          depType: depTypes.uvSources,
+          packageName: 'dep7',
         },
       ]);
     });
