@@ -493,7 +493,6 @@ some-private-key
   describe('push signing', () => {
     beforeEach(() => {
       Fixtures.reset();
-      exec.exec.mockReset();
       GlobalConfig.reset();
     });
 
