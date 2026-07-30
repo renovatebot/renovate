@@ -56,9 +56,7 @@ export class ApkDatasource extends Datasource {
   /**
    * Gets all available packages from an APK repository
    */
-  private async getPackagesUncached(
-    registryUrl: string,
-  ): Promise<ApkPackage[]> {
+  private async _getPackages(registryUrl: string): Promise<ApkPackage[]> {
     logger.debug(`Fetching APK packages from ${registryUrl}`);
 
     const indexUrl = joinUrlParts(registryUrl, 'APKINDEX.tar.gz');
@@ -125,7 +123,7 @@ export class ApkDatasource extends Datasource {
         ttlMinutes: 60,
         fallback: true,
       },
-      () => this.getPackagesUncached(registryUrl),
+      () => this._getPackages(registryUrl),
     );
   }
 
