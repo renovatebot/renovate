@@ -125,6 +125,16 @@ describe('modules/manager/pre-commit/extract', () => {
             currentValue: 'v42.0',
             registryUrls: ['https://gitlab.mycompany.com'],
           },
+          {
+            depName: 'forgejo/runner',
+            currentValue: 'v12.13.0',
+            registryUrls: ['https://code.forgejo.org'],
+          },
+          {
+            depName: 'gherynos/pre-commit-java',
+            currentValue: 'v0.6.37',
+            registryUrls: ['https://codeberg.org'],
+          },
           { depName: 'prettier/pre-commit', currentValue: 'v2.1.2' },
           { depName: 'prettier/pre-commit', currentValue: 'v2.1.2' },
           { depName: 'pre-commit/pre-commit-hooks', currentValue: 'v5.0.0' },
@@ -161,6 +171,8 @@ describe('modules/manager/pre-commit/extract', () => {
       const find = vi.spyOn(hostRules, 'find');
       // url only
       find.mockReturnValueOnce({ token: 'value1' });
+      // hostType=forgejo
+      find.mockReturnValueOnce({});
       // hostType=github
       find.mockReturnValueOnce({});
       // hostType=gitlab
