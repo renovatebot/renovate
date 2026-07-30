@@ -71,7 +71,7 @@ export interface UpdateResult {
   warnings: ValidationMessage[];
   versioning?: string;
   currentVersionAgeInDays?: number;
-  currentVersionTimestamp?: string;
+  currentVersionTimestamp?: Timestamp;
   vulnerabilityFixVersion?: string;
   vulnerabilityFixStrategy?: string;
   mostRecentTimestamp?: Timestamp | null;
