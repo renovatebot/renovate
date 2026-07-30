@@ -19,8 +19,11 @@ export interface Config {
   owner: string;
   repoId: string;
   project: string;
+  projectId: string;
   prList: AzurePr[];
   fileList: null;
   repository: string;
   defaultBranch: string;
+  /** Work item type for issues; from `azureWorkItemType`, defaults to `Issue`. */
+  workItemType: string;
 }

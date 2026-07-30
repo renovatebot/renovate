@@ -194,14 +194,12 @@ export async function generatePresets(dist: string): Promise<void> {
     const frontMatter = generateFrontMatter(formattedName, index, name);
     let content = `\n`;
     for (const [preset, value] of Object.entries(presetConfig)) {
-      let header = `\n### ${name === 'default' ? '' : name}:${preset}`;
+      let header = `\n### \`${name === 'default' ? '' : name}:${preset}\``;
       let presetDescription = value.description as string;
       delete value.description;
-      if (!presetDescription) {
-        if (value.packageRules?.[0].description) {
-          presetDescription = value.packageRules[0].description as string;
-          delete value.packageRules[0].description;
-        }
+      if (!presetDescription && value.packageRules?.[0].description) {
+        presetDescription = value.packageRules[0].description as string;
+        delete value.packageRules[0].description;
       }
       let body = '';
       if (presetDescription) {

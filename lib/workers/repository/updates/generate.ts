@@ -32,8 +32,9 @@ function isTypesGroup(branchUpgrades: BranchUpgradeConfig[]): boolean {
 }
 
 function sortTypesGroup(upgrades: BranchUpgradeConfig[]): void {
-  const isTypesUpgrade = ({ depName }: BranchUpgradeConfig): boolean =>
-    !!depName?.startsWith('@types/');
+  function isTypesUpgrade({ depName }: BranchUpgradeConfig): boolean {
+    return !!depName?.startsWith('@types/');
+  }
   const regularUpgrades = upgrades.filter(
     (upgrade) => !isTypesUpgrade(upgrade),
   );
@@ -275,9 +276,13 @@ export function generateBranchConfig(
   const typesGroup =
     depNames.length > 1 && !hasGroupName && isTypesGroup(branchUpgrades);
   logger.trace(`groupEligible: ${groupEligible}`);
+  const singleUpdateGroup =
+    hasGroupName && !groupEligible && !branchUpgrades[0].sharedVariableName;
+  logger.trace(`singleUpdateGroup: ${singleUpdateGroup}`);
   const useGroupSettings =
     hasGroupName &&
-    (groupEligible || branchUpgrades[0].groupSingleUpdates === true);
+    (groupEligible ||
+      (singleUpdateGroup && branchUpgrades[0].groupSingleUpdates === true));
   logger.trace(`useGroupSettings: ${useGroupSettings}`);
   let releaseTimestamp: Timestamp;
 
@@ -297,9 +302,7 @@ export function generateBranchConfig(
 
     const pendingVersionsLength = upgrade.pendingVersions?.length;
     if (pendingVersionsLength) {
-      upgrade.displayPending = `\`${upgrade
-        .pendingVersions!.slice(-1)
-        .pop()!}\``;
+      upgrade.displayPending = `\`${upgrade.pendingVersions!.at(-1)!}\``;
       if (pendingVersionsLength > 1) {
         upgrade.displayPending += ` (+${pendingVersionsLength - 1})`;
       }
@@ -312,6 +315,12 @@ export function generateBranchConfig(
       // Now overwrite original config with group config
       upgrade = mergeChildConfig(upgrade, upgrade.group);
       upgrade.isGroup = true;
+      if (singleUpdateGroup) {
+        // Single update using group name instead of dependency name,
+        // so remove version from commit message.
+        delete upgrade.commitMessageExtra;
+        upgrade.recreateClosed = upgrade.recreateWhen !== 'never';
+      }
     } else {
       delete upgrade.groupName;
     }

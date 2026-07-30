@@ -139,15 +139,44 @@ Depending on your manager, datasource and the given package(s), it may be that s
 | `minor`               | ✅                            | Depends on the Manager, Datasource, and package(s)                                                        |
 | `patch`               | ✅                            | Depends on the Manager, Datasource, and package(s)                                                        |
 | `pin`                 | ❌                            | [Not yet supported](https://github.com/renovatebot/renovate/issues/40288)                                 |
-| `digest`              | 🟡                            | Generally not supported. Depends on the Manager, Datasource, and package(s)                               |
-| `pinDigest`           | ❌                            | [Not yet supported](https://github.com/renovatebot/renovate/issues/40288)                                 |
+| `digest`              | 🟡                            | Depends on the Manager, Datasource, and package(s). [See below for more info](#digest-updates).           |
+| `pinDigest`           | ❌                            | [Not yet supported](https://github.com/renovatebot/renovate/issues/44820)                                 |
 | `lockFileMaintenance` | ❌                            | Not possible, as we delegate to the package manager to perform the required changes to update package(s). |
-| `lockFileUpdate`      | ❌                            |                                                                                                           |
+| `lockfileUpdate`      | ❌                            |                                                                                                           |
 | `rollback`            | ❌                            |                                                                                                           |
 | `bump`                | ❌                            |                                                                                                           |
 | `replacement`         | ❌                            | [Not yet supported](https://github.com/renovatebot/renovate/issues/39400)                                 |
 
 You can validate which update types may have release timestamps by following something similar to how [verify if the registry you're using](#which-registries-support-release-timestamps).
+
+#### `digest` updates
+
+A `digest` update repoints an existing digest - usually a `sha256:...` Docker image digest, or the commit a floating tag like `v7` points to - at whatever the current version resolves to now.
+
+For instance:
+
+```diff
+   steps:
+-    - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
++    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+```
+
+In this case, the version `v7` is not updated, but the digest is.
+When Renovate resolves this update, it looks for the _newest_ version matching the current value (which would be the `v7.0.1` version in this case), and then ages the update against the release timestamp for this new version.
+
+!!! warning
+  Most registries do not expose when a digest itself was published, so to determine the Minimum Release Age cutoff, we age against the release timestamp of the matched _version_.
+  The strength of the guarantee depends on what that timestamp means for your datasource.
+
+What this means in practice:
+
+- On Docker Hub, the release timestamp is the tag's `tag_last_pushed` field, so re-pushing an existing tag restarts the delay and the digest update is held.
+- Registries which do not return release timestamps (such as GHCR, Quay or ECR) cannot be aged, and the same applies to unversioned tags like `latest`, where no matching version exists to age against.
+  With the default `minimumReleaseAgeBehaviour=timestamp-required`, these digest updates are held indefinitely - configure `minimumReleaseAgeBehaviour=timestamp-optional` to raise them without an age check instead.
+- Datasources whose timestamps reflect when the matched version was first released (such as `github-tags` for digest-pinned GitHub Actions) cannot detect re-published content.
+  If an existing tag is force-pushed to new commits, the digest update ages against the original release date, so it may pass Minimum Release Age immediately.
+  - Note that this is not true when using `github-releases`, which has metadata to indicate when the GitHub Release was created and published, whereas `github-tags` uses the `committedDate`, which is separate from when it was pushed.
+    GitHub no longer provides that metadata in their API.
 
 ### What happens to security updates?
 
@@ -203,14 +232,13 @@ To opt out a dependency from minimum release age checks, create a package rule w
 
 ### Which datasources support release timestamps?
 
-!!! tip
-  You can confirm if your datasource supports the release timestamp by viewing [the documentation for the given datasource](../modules/datasource/index.md).
-
 The datasource that Renovate uses must have a release timestamp for the `minimumReleaseAge` config option to work.
 Some datasources may have a release timestamp, but in a format Renovate does not support.
 In those cases a feature request needs to be implemented.
 
-Note that you will also need to [verify if the registry you're using](#which-registries-support-release-timestamps) provides the release timestamp.
+The table below lists every datasource Renovate supports, and whether it provides a release timestamp.
+
+<!-- Autogenerate datasourceReleaseTimestampSupport -->
 
 ### Which registries support release timestamps?
 

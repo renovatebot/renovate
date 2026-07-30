@@ -11,7 +11,7 @@ import {
 } from '../sanitize.ts';
 import { exec, rawExec } from './common.ts';
 import { ExecError } from './exec-error.ts';
-import type { DataListener, RawExecOptions } from './types.ts';
+import type { OutputWriter, RawExecOptions } from './types.ts';
 
 vi.mock('../../instrumentation/index.ts');
 vi.mock('node:child_process');
@@ -84,7 +84,7 @@ function getSpawnStub(args: StubArgs): any {
   const listeners: Events = {};
 
   // init listeners
-  const on = (name: string, cb: Listener) => {
+  function on(name: string, cb: Listener) {
     const event = name as keyof Events;
     if (listeners[event]) {
       return;
@@ -99,14 +99,14 @@ function getSpawnStub(args: StubArgs): any {
       default:
         break;
     }
-  };
+  }
 
   // init readable streams
   const stdoutStream = getReadable(stdout, 'utf8');
   const stderrStream = getReadable(stderr, 'utf8');
 
   // define class methods
-  const emit = (name: string, ...arg: (string | number | Error)[]): boolean => {
+  function emit(name: string, ...arg: (string | number | Error)[]): boolean {
     const event = name as keyof Events;
 
     switch (event) {
@@ -121,16 +121,16 @@ function getSpawnStub(args: StubArgs): any {
     }
 
     return !!listeners[event];
-  };
+  }
 
-  const unref = (): void => {
+  function unref(): void {
     /* do nothing*/
-  };
+  }
 
-  const kill = (_signal?: number | NodeJS.Signals): boolean => {
+  function kill(_signal?: number | NodeJS.Signals): boolean {
     /* do nothing*/
     return true;
-  };
+  }
 
   // queue events and wait for event loop to clear
   setTimeout(() => {
@@ -570,14 +570,14 @@ describe('util/exec/common', () => {
       execa.mockImplementationOnce((_cmd, _opts) => stub);
 
       const stdoutListenerBuffer: Buffer[] = [];
-      const stdoutListener: DataListener = (chunk: Buffer) => {
+      function stdoutListener(chunk: Buffer): void {
         stdoutListenerBuffer.push(chunk);
-      };
+      }
 
       const stderrListenerBuffer: Buffer[] = [];
-      const stderrListener: DataListener = (chunk: Buffer) => {
+      function stderrListener(chunk: Buffer): void {
         stderrListenerBuffer.push(chunk);
-      };
+      }
 
       await expect(
         exec(
@@ -700,6 +700,75 @@ describe('util/exec/common', () => {
         message: 'stderr maxBuffer exceeded',
         stderr: '',
         stdout: '',
+      });
+    });
+
+    it('uses output writers instead of buffering stream output', async () => {
+      const stdout = 'stdout writer output';
+      const stdoutWriter: OutputWriter = {
+        write: vi.fn(),
+        toString: () => stdout,
+      };
+      const stderr = 'stderr writer output';
+      const stderrWriter: OutputWriter = {
+        write: vi.fn(),
+        toString: () => stderr,
+      };
+      const stub = getSpawnStub({
+        cmd,
+        exitCode: 0,
+        exitSignal: null,
+        stdout,
+        stderr,
+      });
+      execa.mockImplementationOnce((_cmd, _opts) => stub);
+
+      await expect(
+        exec(
+          cmd,
+          partial<RawExecOptions>({
+            maxBuffer: 1,
+            outputWriters: { stderr: stderrWriter, stdout: stdoutWriter },
+          }),
+        ),
+      ).resolves.toEqual({
+        stderr,
+        stdout,
+      });
+
+      expect(stdoutWriter.write).toHaveBeenCalledExactlyOnceWith(
+        Buffer.from(stdout),
+      );
+      expect(stderrWriter.write).toHaveBeenCalledExactlyOnceWith(
+        Buffer.from(stderr),
+      );
+    });
+
+    it('uses stderr writer output in command errors', async () => {
+      const stderr = 'stderr tail';
+      const stderrWriter: OutputWriter = {
+        write: vi.fn(),
+        toString: () => stderr,
+      };
+      const stub = getSpawnStub({
+        cmd,
+        exitCode: 1,
+        exitSignal: null,
+        stderr,
+      });
+      execa.mockImplementationOnce((_cmd, _opts) => stub);
+
+      await expect(
+        exec(
+          cmd,
+          partial<RawExecOptions>({
+            maxBuffer: 1,
+            outputWriters: { stderr: stderrWriter },
+          }),
+        ),
+      ).rejects.toMatchObject({
+        message: `Command failed: ${cmd}\nstderr tail`,
+        stderr,
       });
     });
   });

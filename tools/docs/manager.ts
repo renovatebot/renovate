@@ -138,7 +138,8 @@ export async function generateManagers(
       }
       md += `For details on how to extend a manager's \`managerFilePatterns\` value, please follow [this link](../index.md#file-matching).\n\n`;
       md += '## Supported datasources\n\n';
-      const escapedDatasources = (supportedDatasources || [])
+      const escapedDatasources = Array.from(new Set(supportedDatasources || []))
+        .sort()
         .map(
           (datasource) =>
             `[\`${datasource}\`](../../datasource/${datasource}/index.md)`,
@@ -201,6 +202,18 @@ export async function generateManagers(
         md += `- \`${lockFile}\`\n`;
       }
       md += '\n';
+
+      const delegated =
+        definition.lockFileMaintenanceIsDelegatedToPackageManager;
+      if (typeof delegated === 'string') {
+        md += `${delegated}\n\n`;
+      } else if (delegated === true) {
+        md +=
+          'Lock file maintenance is delegated to the underlying package manager, which Renovate runs as an external command.\n\n';
+      } else if (delegated === false) {
+        md +=
+          'Renovate performs lock file maintenance itself, without calling the underlying package manager.\n\n';
+      }
     }
 
     if (!isCustomMgr) {

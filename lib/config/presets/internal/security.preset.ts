@@ -1,6 +1,28 @@
+import { UpdateTypesOptions } from '../../types.ts';
 import type { Preset } from '../types.ts';
 
 export const presets: Record<string, Preset> = {
+  gomodIndirectSecurityUpdates: {
+    description:
+      'Enable go.mod indirect dependency updates only when vulnerabilities have been detected.',
+    extends: [':enableVulnerabilityAlerts'],
+    packageRules: [
+      {
+        description: 'Enable lookups for indirect go.mod dependencies',
+        enabled: true,
+        matchDepTypes: ['indirect'],
+        matchManagers: ['gomod'],
+      },
+      {
+        description:
+          'Disable non-security updates for indirect go.mod dependencies (vulnerability alerts use force to override this)',
+        enabled: false,
+        matchDepTypes: ['indirect'],
+        matchManagers: ['gomod'],
+        matchUpdateTypes: [...UpdateTypesOptions],
+      },
+    ],
+  },
   minimumReleaseAgeNpm: {
     description:
       'Wait until the npm package is three days old before raising the update. This a) introduces a short delay to allow for malware researchers and scanners to (possibly) detect any malicious behaviour in packages, and b) prevents the maintainer and/or NPM from unpublishing a package you already upgraded to, breaking builds.',

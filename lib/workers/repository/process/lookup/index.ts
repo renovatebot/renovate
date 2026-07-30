@@ -21,11 +21,13 @@ import {
 } from '../../../../modules/datasource/index.ts';
 import { postprocessRelease } from '../../../../modules/datasource/postprocess-release.ts';
 import { getRangeStrategy } from '../../../../modules/manager/index.ts';
+import type { LookupUpdate } from '../../../../modules/manager/types.ts';
 import { id as dockerVersioningId } from '../../../../modules/versioning/docker/index.ts';
 import * as allVersioning from '../../../../modules/versioning/index.ts';
 import { ExternalHostError } from '../../../../types/errors/external-host-error.ts';
 import { assignKeys } from '../../../../util/assign-keys.ts';
 import { getElapsedDays } from '../../../../util/date.ts';
+import { checkMinimumReleaseAge } from '../../../../util/minimum-release-age.ts';
 import { applyPackageRules } from '../../../../util/package-rules/index.ts';
 import { regEx } from '../../../../util/regex.ts';
 import { Result } from '../../../../util/result.ts';
@@ -68,9 +70,103 @@ async function getTimestamp(
   return remoteRelease?.releaseTimestamp;
 }
 
+/** The only `updateType` that `applyMinimumReleaseAgeToDigestUpdate()` can be called with */
+type DigestLikeUpdate = LookupUpdate & { updateType: 'digest' };
+
+/**
+ * A helper function to allow a short-circuit for `minimumReleaseAge` functionality if a package may have config that applies it.
+ *
+ * Allows avoiding unnecessary calls to more expensive checks like merge + `applyPackageRules()` and `getTimestamp()`.
+ */
+function couldApplyMinimumReleaseAgeToDigest(
+  config: LookupUpdateConfig,
+): boolean {
+  // Match filterInternalChecks(): under `none` the user opted out of internal
+  // checks entirely, so do no merging, no package rules, no age check and no
+  // logging claiming an age check ran.
+  if (config.internalChecksFilter === 'none') {
+    return false;
+  }
+
+  return (
+    isNonEmptyString(config.minimumReleaseAge) ||
+    isNonEmptyString(config.digest?.minimumReleaseAge) ||
+    !!config.packageRules?.some((rule) =>
+      isNonEmptyString(rule.minimumReleaseAge),
+    )
+  );
+}
+
+/**
+ * Ensure `minimumReleaseAge`/`internalChecksFilter` applies to digest updates, as they don't currently get run through `filterInternalChecks()`.
+ *
+ * NOTE that this should be kept in sync with `filterInternalChecks`()
+ */
+async function applyMinimumReleaseAgeToDigestUpdate(
+  update: DigestLikeUpdate,
+  config: LookupUpdateConfig,
+  res: UpdateResult,
+  newestMatchingVersionTimestamp: Timestamp | null | undefined,
+): Promise<void> {
+  if (!couldApplyMinimumReleaseAgeToDigest(config)) {
+    return;
+  }
+
+  let releaseConfig: LookupUpdateConfig = {
+    ...mergeChildConfig(config, res),
+    updateType: update.updateType,
+  };
+  releaseConfig = mergeChildConfig(
+    releaseConfig,
+    releaseConfig[update.updateType]!,
+  );
+  releaseConfig = await applyPackageRules(releaseConfig, 'update-type');
+
+  const ageCheck = checkMinimumReleaseAge(
+    releaseConfig,
+    // intentionally used instead of `update.releaseTimestamp`
+    newestMatchingVersionTimestamp,
+  );
+
+  // Mirror filterInternalChecks()'s logging so a held/passed digest update is diagnosable.
+  if (ageCheck.minimumReleaseAgeMs && !ageCheck.hasTimestamp) {
+    if (releaseConfig.minimumReleaseAgeBehaviour === 'timestamp-optional') {
+      logger.once.warn(
+        "Some release(s) did not have a releaseTimestamp, but as we're running with minimumReleaseAgeBehaviour=timestamp-optional, proceeding. See debug logs for more information",
+      );
+    }
+
+    logger.once.debug(
+      {
+        depName: config.depName,
+        updateType: update.updateType,
+        minimumReleaseAgeBehaviour: releaseConfig.minimumReleaseAgeBehaviour,
+        check: 'minimumReleaseAge',
+      },
+      `${update.updateType} update of ${config.depName} has no releaseTimestamp to age against`,
+    );
+  }
+  if (ageCheck.isPending) {
+    logger.trace(
+      {
+        depName: config.depName,
+        updateType: update.updateType,
+        releaseTimestamp: newestMatchingVersionTimestamp,
+        check: 'minimumReleaseAge',
+      },
+      `${update.updateType} update is pending minimumReleaseAge status checks`,
+    );
+
+    // internalChecksFilter is read from the unmerged top-level config, like filterInternalChecks().
+    if (config.internalChecksFilter === 'strict') {
+      update.pendingChecks = true;
+    }
+  }
+}
+
 export async function lookupUpdates(
   inconfig: LookupUpdateConfig,
-): Promise<Result<UpdateResult, Error>> {
+): Promise<Result<UpdateResult>> {
   let config: LookupUpdateConfig = { ...inconfig };
   config.versioning ??= getDefaultVersioning(config.datasource);
 
@@ -82,6 +178,10 @@ export async function lookupUpdates(
     updates: [],
     warnings: [],
   };
+  // Timestamp of the release a `digest` update repoints to (the newest version matching the current value), as opposed to `res.currentVersionTimestamp` which tracks whatever the configured rangeStrategy resolves `currentVersion` to (e.g. the oldest for `bump`)
+  let newestMatchingVersionTimestamp: Timestamp | null | undefined;
+  // The `digest` update for `config.currentDigest` (if one is added), so its age check can run after `newDigest` is fetched and no-op updates are stripped.
+  let digestUpdate: DigestLikeUpdate | undefined;
 
   try {
     logger.trace(
@@ -342,11 +442,18 @@ export async function lookupUpdates(
         return Result.ok(res);
       }
 
-      res.currentVersion = currentVersion!;
+      res.currentVersion = currentVersion;
+
+      // Use lockedVersion for the timestamp lookup when available, because
+      // res.currentVersion is later overwritten to lockedVersion (see below).
+      // Without this, strategies like "replace" would compute the timestamp
+      // for the highest satisfying version (e.g. 1.4.1) while the reported
+      // currentVersion ends up being the locked one (e.g. 1.0.0).
+      const versionForTimestamp = config.lockedVersion ?? currentVersion;
       const currentVersionTimestamp = await getTimestamp(
         config,
         allVersions,
-        currentVersion,
+        versionForTimestamp,
         versioningApi,
       );
 
@@ -363,6 +470,35 @@ export async function lookupUpdates(
           config = await applyPackageRules(
             { ...config, currentVersionTimestamp },
             'current-timestamp',
+          );
+        }
+      }
+
+      if (config.currentDigest && couldApplyMinimumReleaseAgeToDigest(config)) {
+        // Resolve from `allVersions` (not `dependency.releases`) so that filters like followTag apply, preferring non-deprecated versions with a fallback - both like the `currentVersion` resolution above.
+        const newestMatchingVersion =
+          getCurrentVersion(
+            compareValue!,
+            '',
+            versioningApi,
+            'replace',
+            latestVersion!,
+            allVersions.filter((v) => !v.isDeprecated).map((v) => v.version),
+          ) ??
+          getCurrentVersion(
+            compareValue!,
+            '',
+            versioningApi,
+            'replace',
+            latestVersion!,
+            allVersions.map((v) => v.version),
+          );
+        if (newestMatchingVersion) {
+          newestMatchingVersionTimestamp = await getTimestamp(
+            config,
+            allVersions,
+            newestMatchingVersion,
+            versioningApi,
           );
         }
       }
@@ -524,6 +660,14 @@ export async function lookupUpdates(
           config.currentDigest !== update.newDigest
         ) {
           update.updateType = 'digest';
+
+          // As this has already been processed by `filterInternalChecks()`, but we're changing the `updateType`, we need to apply the digest-scoped minimumReleaseAge rules
+          await applyMinimumReleaseAgeToDigestUpdate(
+            update as DigestLikeUpdate,
+            config,
+            res,
+            release.releaseTimestamp,
+          );
         }
 
         if (pendingChecks) {
@@ -639,23 +783,25 @@ export async function lookupUpdates(
     if (supportsDigests(config.datasource)) {
       if (config.currentDigest) {
         if (!config.digestOneAndOnly || !res.updates.length) {
-          // digest update
-          res.updates.push({
+          // digest update - age-checked after the strip below, once newDigest is known
+          digestUpdate = {
             updateType: 'digest',
             newValue: config.currentValue,
-          });
+          };
+          res.updates.push(digestUpdate);
         }
-      } else if (config.pinDigests) {
+      } else if (
+        config.pinDigests &&
         // Create a pin only if one doesn't already exists
         // v8 ignore else -- TODO: add test #40625
-        if (!res.updates.some((update) => update.updateType === 'pin')) {
-          // pin digest
-          res.updates.push({
-            isPinDigest: true,
-            updateType: 'pinDigest',
-            newValue: config.currentValue,
-          });
-        }
+        !res.updates.some((update) => update.updateType === 'pin')
+      ) {
+        // pin digest
+        res.updates.push({
+          isPinDigest: true,
+          updateType: 'pinDigest',
+          newValue: config.currentValue,
+        });
       }
       if (versioningApi.valueToVersion) {
         // TODO #22198
@@ -777,6 +923,16 @@ export async function lookupUpdates(
       res.updates = res.updates.filter(
         (update) =>
           update.updateType !== 'rollback' || res.updates.length === 1,
+      );
+    }
+
+    // If there is a digest update proposed which is in the pending updates for this dependency, ensure that `minimumReleaseAge` is applied
+    if (digestUpdate && res.updates.includes(digestUpdate)) {
+      await applyMinimumReleaseAgeToDigestUpdate(
+        digestUpdate,
+        config,
+        res,
+        newestMatchingVersionTimestamp,
       );
     }
 
