@@ -141,6 +141,12 @@ function createSingleConfig(option: RenovateOptions): Record<string, unknown> {
     temp.$ref = '#';
   }
 
+  if (option.name === 'customPresets') {
+    temp.additionalProperties = {
+      $ref: 'renovate-schema.json',
+    };
+  }
+
   if (option.name === 'constraints') {
     temp.additionalProperties = false;
     temp.properties = {};

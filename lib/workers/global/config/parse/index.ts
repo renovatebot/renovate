@@ -4,7 +4,7 @@ import { setPrivateKeys } from '../../../../config/decrypt.ts';
 import * as defaultsParser from '../../../../config/defaults.ts';
 import { resolveConfigPresets } from '../../../../config/presets/index.ts';
 import { applySecretsAndVariablesToConfig } from '../../../../config/secrets.ts';
-import type { AllConfig } from '../../../../config/types.ts';
+import type { AllConfig, RenovateConfig } from '../../../../config/types.ts';
 import { mergeChildConfig } from '../../../../config/utils.ts';
 import { CONFIG_PRESETS_INVALID } from '../../../../constants/error-messages.ts';
 import { logger, setContext } from '../../../../logger/index.ts';
@@ -22,10 +22,11 @@ import * as fileParser from './file.ts';
 export async function resolveGlobalExtends(
   globalExtends: string[],
   ignorePresets?: string[],
+  customPresets?: Record<string, RenovateConfig>,
 ): Promise<AllConfig> {
   try {
     // Make a "fake" config to pass to resolveConfigPresets and resolve globalPresets
-    const config = { extends: globalExtends, ignorePresets };
+    const config = { extends: globalExtends, ignorePresets, customPresets };
     const { config: resolvedConfig } = await resolveConfigPresets(config);
     return resolvedConfig;
   } catch (err) {
@@ -67,6 +68,7 @@ export async function parseConfigs(
     resolvedGlobalExtends = await resolveGlobalExtends(
       config.globalExtends,
       config.ignorePresets,
+      config.customPresets,
     );
     config = mergeChildConfig(resolvedGlobalExtends, config);
     delete config.globalExtends;

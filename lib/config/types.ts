@@ -247,6 +247,7 @@ export interface RepoGlobalConfig extends GlobalInheritableConfig {
   checkedBranches?: string[];
   containerbaseDir?: string;
   customEnvVariables?: Record<string, string>;
+  customPresets?: Record<string, RenovateConfig>;
   dockerChildPrefix?: string;
   dockerCliOptions?: string;
   dockerSidecarImage?: string;

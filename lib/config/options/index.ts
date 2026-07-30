@@ -440,6 +440,19 @@ const options: Readonly<RenovateOptions>[] = [
     globalOnly: true,
   },
   {
+    name: 'customPresets',
+    description:
+      'Define presets here which repositories can extend from using a `custom.` prefix.',
+    type: 'object',
+    globalOnly: true,
+    default: {},
+    mergeable: true,
+    freeChoice: true,
+    cli: false,
+    env: false,
+    experimental: true,
+  },
+  {
     name: 'globalExtends',
     description:
       'Configuration presets to use or extend for a self-hosted config.',

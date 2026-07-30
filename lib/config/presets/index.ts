@@ -98,7 +98,7 @@ export function replaceArgs(
 
 export async function getPreset(
   preset: string,
-  baseConfig?: RenovateConfig,
+  baseConfig?: AllConfig,
 ): Promise<RenovateConfig> {
   logger.trace(`getPreset(${preset})`);
   // Check if the preset has been removed or replaced
@@ -121,6 +121,13 @@ export async function getPreset(
       presetName,
       tag,
     });
+  } else if (presetSource === 'custom') {
+    // baseConfig is only set during globalExtends
+    presetConfig = clone(
+      (baseConfig?.customPresets ?? GlobalConfig.get('customPresets'))?.[
+        presetName
+      ],
+    ) as Preset | undefined;
   } else {
     const cacheKey = `preset:${preset}`;
     const presetCachePersistence = GlobalConfig.get('presetCachePersistence');
@@ -206,7 +213,7 @@ export interface ResolveConfigPresetsResult {
  */
 export async function resolveConfigPresets(
   inputConfig: AllConfig,
-  baseConfig?: RenovateConfig,
+  baseConfig?: AllConfig,
   _ignorePresets?: string[],
   existingPresets: string[] = [],
   mergeInternalPresets = true,
@@ -288,7 +295,7 @@ export async function resolveConfigPresets(
     keyof AllConfig,
     unknown,
   ][]) {
-    const ignoredKeys = ['content', 'onboardingConfig'];
+    const ignoredKeys = ['content', 'customPresets', 'onboardingConfig'];
     if (isArray(val)) {
       // Resolve nested objects inside arrays
       config[key] = [] as never; // type can't be narrowed
@@ -356,7 +363,7 @@ export async function resolveConfigPresets(
 
 async function fetchPreset(
   preset: string,
-  baseConfig: RenovateConfig | undefined,
+  baseConfig: AllConfig | undefined,
   inputConfig: AllConfig,
   existingPresets: string[],
 ): Promise<AllConfig> {
