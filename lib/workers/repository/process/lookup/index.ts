@@ -70,8 +70,8 @@ async function getTimestamp(
   return remoteRelease?.releaseTimestamp;
 }
 
-/** The only `updateType` that `applyMinimumReleaseAgeToDigestUpdate()` can be called with */
-type DigestLikeUpdate = LookupUpdate & { updateType: 'digest' };
+/** The only two `updateType`s that `applyMinimumReleaseAgeToDigestUpdate()` can be called with */
+type DigestLikeUpdate = LookupUpdate & { updateType: 'digest' | 'pinDigest' };
 
 /**
  * A helper function to allow a short-circuit for `minimumReleaseAge` functionality if a package may have config that applies it.
@@ -80,6 +80,7 @@ type DigestLikeUpdate = LookupUpdate & { updateType: 'digest' };
  */
 function couldApplyMinimumReleaseAgeToDigest(
   config: LookupUpdateConfig,
+  updateType: DigestLikeUpdate['updateType'],
 ): boolean {
   // Match filterInternalChecks(): under `none` the user opted out of internal
   // checks entirely, so do no merging, no package rules, no age check and no
@@ -90,7 +91,7 @@ function couldApplyMinimumReleaseAgeToDigest(
 
   return (
     isNonEmptyString(config.minimumReleaseAge) ||
-    isNonEmptyString(config.digest?.minimumReleaseAge) ||
+    isNonEmptyString(config[updateType]?.minimumReleaseAge) ||
     !!config.packageRules?.some((rule) =>
       isNonEmptyString(rule.minimumReleaseAge),
     )
@@ -98,7 +99,7 @@ function couldApplyMinimumReleaseAgeToDigest(
 }
 
 /**
- * Ensure `minimumReleaseAge`/`internalChecksFilter` applies to digest updates, as they don't currently get run through `filterInternalChecks()`.
+ * Ensure `minimumReleaseAge`/`internalChecksFilter` applies to digest/pinDigest updates, as they don't currently get run through `filterInternalChecks()`.
  *
  * NOTE that this should be kept in sync with `filterInternalChecks`()
  */
@@ -106,9 +107,23 @@ async function applyMinimumReleaseAgeToDigestUpdate(
   update: DigestLikeUpdate,
   config: LookupUpdateConfig,
   res: UpdateResult,
+  currentVersionWasResolved: boolean,
   newestMatchingVersionTimestamp: Timestamp | null | undefined,
 ): Promise<void> {
-  if (!couldApplyMinimumReleaseAgeToDigest(config)) {
+  if (!couldApplyMinimumReleaseAgeToDigest(config, update.updateType)) {
+    return;
+  }
+
+  if (update.updateType === 'pinDigest' && !currentVersionWasResolved) {
+    // Not `!res.currentVersion` - that's force-set to lockedVersion further down regardless of timestamp resolution.
+    // `pinDigest` doesn't repoint anywhere, unlike `digest` - it just freezes whatever the ref already resolves to.
+    // An unversioned tag (e.g. `latest`) has no versioned release to age against, and holding the pin would only
+    // prolong the less-pinned (less safe) state, so skip the check entirely rather than treating the missing
+    // timestamp as pending.
+    logger.once.debug(
+      { depName: config.depName, updateType: update.updateType },
+      `Skipping minimumReleaseAge check for ${update.updateType} update of ${config.depName}, as its current value does not resolve to a versioned release`,
+    );
     return;
   }
 
@@ -122,9 +137,12 @@ async function applyMinimumReleaseAgeToDigestUpdate(
   );
   releaseConfig = await applyPackageRules(releaseConfig, 'update-type');
 
+  // Not update.releaseTimestamp - that field means "age of the new release" elsewhere (generate.ts, libyear.ts).
+  // Not res.currentVersionTimestamp either - that tracks whatever rangeStrategy resolves currentVersion to (e.g.
+  // the oldest matching release under `bump`), whereas both `digest` and `pinDigest` reflect whatever the current
+  // value's ref actually resolves to *right now*, which is always the newest matching version.
   const ageCheck = checkMinimumReleaseAge(
     releaseConfig,
-    // intentionally used instead of `update.releaseTimestamp`
     newestMatchingVersionTimestamp,
   );
 
@@ -178,7 +196,7 @@ export async function lookupUpdates(
     updates: [],
     warnings: [],
   };
-  // Timestamp of the release a `digest` update repoints to (the newest version matching the current value), as opposed to `res.currentVersionTimestamp` which tracks whatever the configured rangeStrategy resolves `currentVersion` to (e.g. the oldest for `bump`)
+  // Timestamp of the release a `digest`/`pinDigest` update's current value currently resolves to (the newest version matching it, regardless of `rangeStrategy`), as opposed to `res.currentVersionTimestamp` which tracks whatever the configured rangeStrategy resolves `currentVersion` to (e.g. the oldest for `bump`)
   let newestMatchingVersionTimestamp: Timestamp | null | undefined;
   // The `digest` update for `config.currentDigest` (if one is added), so its age check can run after `newDigest` is fetched and no-op updates are stripped.
   let digestUpdate: DigestLikeUpdate | undefined;
@@ -474,7 +492,12 @@ export async function lookupUpdates(
         }
       }
 
-      if (config.currentDigest && couldApplyMinimumReleaseAgeToDigest(config)) {
+      if (
+        config.currentDigest
+          ? couldApplyMinimumReleaseAgeToDigest(config, 'digest')
+          : config.pinDigests &&
+            couldApplyMinimumReleaseAgeToDigest(config, 'pinDigest')
+      ) {
         // Resolve from `allVersions` (not `dependency.releases`) so that filters like followTag apply, preferring non-deprecated versions with a fallback - both like the `currentVersion` resolution above.
         const newestMatchingVersion =
           getCurrentVersion(
@@ -661,11 +684,13 @@ export async function lookupUpdates(
         ) {
           update.updateType = 'digest';
 
-          // As this has already been processed by `filterInternalChecks()`, but we're changing the `updateType`, we need to apply the digest-scoped minimumReleaseAge rules
+          // As this has already been processed by `filterInternalChecks()`, but we're changing the `updateType`, we need to apply the digest-scoped minimumReleaseAge rules.
+          // `currentVersionWasResolved` only matters for `pinDigest`, which `update.updateType` never is here - true is a safe constant.
           await applyMinimumReleaseAgeToDigestUpdate(
             update as DigestLikeUpdate,
             config,
             res,
+            true,
             release.releaseTimestamp,
           );
         }
@@ -797,11 +822,19 @@ export async function lookupUpdates(
         !res.updates.some((update) => update.updateType === 'pin')
       ) {
         // pin digest
-        res.updates.push({
+        const pinDigestUpdate: DigestLikeUpdate = {
           isPinDigest: true,
           updateType: 'pinDigest',
           newValue: config.currentValue,
-        });
+        };
+        await applyMinimumReleaseAgeToDigestUpdate(
+          pinDigestUpdate,
+          config,
+          res,
+          isValid || unconstrainedValue,
+          newestMatchingVersionTimestamp,
+        );
+        res.updates.push(pinDigestUpdate);
       }
       if (versioningApi.valueToVersion) {
         // TODO #22198
@@ -926,12 +959,14 @@ export async function lookupUpdates(
       );
     }
 
-    // If there is a digest update proposed which is in the pending updates for this dependency, ensure that `minimumReleaseAge` is applied
+    // If there is a digest update proposed which is in the pending updates for this dependency, ensure that `minimumReleaseAge` is applied.
+    // `currentVersionWasResolved` only matters for `pinDigest`, which `digestUpdate` never is - true is a safe constant.
     if (digestUpdate && res.updates.includes(digestUpdate)) {
       await applyMinimumReleaseAgeToDigestUpdate(
         digestUpdate,
         config,
         res,
+        true,
         newestMatchingVersionTimestamp,
       );
     }

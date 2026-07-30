@@ -4951,6 +4951,168 @@ describe('workers/repository/process/lookup/index', () => {
       ]);
     });
 
+    it('marks github actions major-tag `pinDigest` updates as `pendingChecks` under `internalChecksFilter=strict`', async () => {
+      config.currentValue = 'v7';
+      config.pinDigests = true;
+      config.packageName = 'actions/checkout';
+      config.versioning = githubActionsVersioningId;
+      config.datasource = GithubTagsDatasource.id;
+      config.minimumReleaseAge = '3 days';
+      config.internalChecksFilter = 'strict';
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+      getGithubTags.mockResolvedValueOnce({
+        releases: [
+          { version: 'v7.0.0' },
+          {
+            version: 'v7.0.1',
+            releaseTimestamp: yesterday.toISOString() as Timestamp,
+          },
+        ],
+      });
+      vi.spyOn(
+        GithubTagsDatasource.prototype,
+        'getDigest',
+      ).mockResolvedValueOnce(fakeSha('new'));
+
+      const { updates } = await Result.wrap(
+        lookup.lookupUpdates(config),
+      ).unwrapOrThrow();
+
+      expect(updates).toEqual([
+        {
+          isPinDigest: true,
+          updateType: 'pinDigest',
+          newValue: 'v7',
+          newDigest: fakeSha('new'),
+          pendingChecks: true,
+        },
+      ]);
+    });
+
+    it('does not mark github actions major-tag `pinDigest` updates as `pendingChecks` once `minimumReleaseAge` has elapsed', async () => {
+      config.currentValue = 'v7';
+      config.pinDigests = true;
+      config.packageName = 'actions/checkout';
+      config.versioning = githubActionsVersioningId;
+      config.datasource = GithubTagsDatasource.id;
+      config.minimumReleaseAge = '3 days';
+      config.internalChecksFilter = 'strict';
+      const lastWeek = new Date();
+      lastWeek.setDate(lastWeek.getDate() - 7);
+      getGithubTags.mockResolvedValueOnce({
+        releases: [
+          { version: 'v7.0.0' },
+          {
+            version: 'v7.0.1',
+            releaseTimestamp: lastWeek.toISOString() as Timestamp,
+          },
+        ],
+      });
+      vi.spyOn(
+        GithubTagsDatasource.prototype,
+        'getDigest',
+      ).mockResolvedValueOnce(fakeSha('new'));
+
+      const { updates } = await Result.wrap(
+        lookup.lookupUpdates(config),
+      ).unwrapOrThrow();
+
+      expect(updates).toEqual([
+        {
+          isPinDigest: true,
+          updateType: 'pinDigest',
+          newValue: 'v7',
+          newDigest: fakeSha('new'),
+        },
+      ]);
+    });
+
+    // `rangeStrategy=bump` makes `currentVersion` (and thus `res.currentVersionTimestamp`) resolve to the oldest
+    // matching release (v7.0.0, which already clears `minimumReleaseAge`), but the ref itself has moved on to
+    // v7.0.1 - which is what actually gets pinned, and hasn't yet cleared `minimumReleaseAge`.
+    it('ages a `pinDigest` update against the newest matching version, not whatever `rangeStrategy` resolves `currentVersion` to', async () => {
+      config.currentValue = 'v7';
+      config.pinDigests = true;
+      config.rangeStrategy = 'bump';
+      config.packageName = 'actions/checkout';
+      config.versioning = githubActionsVersioningId;
+      config.datasource = GithubTagsDatasource.id;
+      config.minimumReleaseAge = '3 days';
+      config.internalChecksFilter = 'strict';
+      const lastWeek = new Date();
+      lastWeek.setDate(lastWeek.getDate() - 7);
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+      getGithubTags.mockResolvedValueOnce({
+        releases: [
+          {
+            version: 'v7.0.0',
+            releaseTimestamp: lastWeek.toISOString() as Timestamp,
+          },
+          {
+            version: 'v7.0.1',
+            releaseTimestamp: yesterday.toISOString() as Timestamp,
+          },
+        ],
+      });
+      vi.spyOn(
+        GithubTagsDatasource.prototype,
+        'getDigest',
+      ).mockResolvedValueOnce(fakeSha('new'));
+
+      const { updates } = await Result.wrap(
+        lookup.lookupUpdates(config),
+      ).unwrapOrThrow();
+
+      expect(updates).toEqual([
+        {
+          isPinDigest: true,
+          updateType: 'pinDigest',
+          newValue: 'v7',
+          newDigest: fakeSha('new'),
+          pendingChecks: true,
+        },
+      ]);
+    });
+
+    // Unlike `digest`, an unversioned `currentValue` (e.g. `latest`) is exempt from `minimumReleaseAge` entirely for `pinDigest`:
+    // pinning a ref that already floats to latest is strictly safer, so holding it would only prolong the un-pinned state.
+    it('does not hold `pinDigest` updates for unversioned `currentValue`s (e.g. `latest`)', async () => {
+      config.currentValue = 'alpine';
+      config.packageName = 'node';
+      config.datasource = DockerDatasource.id;
+      config.pinDigests = true;
+      config.minimumReleaseAge = '3 days';
+      config.internalChecksFilter = 'strict';
+      getDockerReleases.mockResolvedValueOnce({
+        releases: [
+          { version: 'alpine' },
+          { version: '8.0.0' },
+          { version: '8.1.0' },
+        ],
+      });
+      getDockerDigest.mockResolvedValueOnce('sha256:abcdef1234567890');
+
+      const { updates } = await Result.wrap(
+        lookup.lookupUpdates(config),
+      ).unwrapOrThrow();
+
+      expect(updates).toEqual([
+        {
+          isPinDigest: true,
+          newDigest: 'sha256:abcdef1234567890',
+          newValue: 'alpine',
+          updateType: 'pinDigest',
+        },
+      ]);
+      // Short-circuited: no age check ran, so no "no releaseTimestamp to age against" log noise.
+      expect(logger.logger.once.debug).not.toHaveBeenCalledWith(
+        expect.anything(),
+        expect.stringContaining('has no releaseTimestamp to age against'),
+      );
+    });
+
     it('handles no fitting version and no version in lock file', async () => {
       config.currentValue = '~9.5.0';
       config.packageName = 'typo3/cms-saltedpasswords';
