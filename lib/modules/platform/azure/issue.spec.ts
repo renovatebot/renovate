@@ -1190,7 +1190,7 @@ describe('modules/platform/azure/issue', () => {
       const taskService = new IssueService({
         ...config,
         workItemType: 'Task',
-      } as Config);
+      });
       vi.spyOn(taskService, 'getIssueList').mockResolvedValue([]);
 
       const createWorkItemMock = vi.fn().mockResolvedValue({ id: 123 });
@@ -1218,7 +1218,7 @@ describe('modules/platform/azure/issue', () => {
       const taskService = new IssueService({
         ...config,
         workItemType: 'Task',
-      } as Config);
+      });
       vi.spyOn(taskService, 'getIssueList').mockResolvedValue([]);
 
       const getWorkItemTypeStatesMock = vi.fn().mockResolvedValue([]);

@@ -11,7 +11,7 @@ import {
 } from '../sanitize.ts';
 import { exec, rawExec } from './common.ts';
 import { ExecError } from './exec-error.ts';
-import type { RawExecOptions } from './types.ts';
+import type { OutputWriter, RawExecOptions } from './types.ts';
 
 vi.mock('../../instrumentation/index.ts');
 vi.mock('node:child_process');
@@ -700,6 +700,75 @@ describe('util/exec/common', () => {
         message: 'stderr maxBuffer exceeded',
         stderr: '',
         stdout: '',
+      });
+    });
+
+    it('uses output writers instead of buffering stream output', async () => {
+      const stdout = 'stdout writer output';
+      const stdoutWriter: OutputWriter = {
+        write: vi.fn(),
+        toString: () => stdout,
+      };
+      const stderr = 'stderr writer output';
+      const stderrWriter: OutputWriter = {
+        write: vi.fn(),
+        toString: () => stderr,
+      };
+      const stub = getSpawnStub({
+        cmd,
+        exitCode: 0,
+        exitSignal: null,
+        stdout,
+        stderr,
+      });
+      execa.mockImplementationOnce((_cmd, _opts) => stub);
+
+      await expect(
+        exec(
+          cmd,
+          partial<RawExecOptions>({
+            maxBuffer: 1,
+            outputWriters: { stderr: stderrWriter, stdout: stdoutWriter },
+          }),
+        ),
+      ).resolves.toEqual({
+        stderr,
+        stdout,
+      });
+
+      expect(stdoutWriter.write).toHaveBeenCalledExactlyOnceWith(
+        Buffer.from(stdout),
+      );
+      expect(stderrWriter.write).toHaveBeenCalledExactlyOnceWith(
+        Buffer.from(stderr),
+      );
+    });
+
+    it('uses stderr writer output in command errors', async () => {
+      const stderr = 'stderr tail';
+      const stderrWriter: OutputWriter = {
+        write: vi.fn(),
+        toString: () => stderr,
+      };
+      const stub = getSpawnStub({
+        cmd,
+        exitCode: 1,
+        exitSignal: null,
+        stderr,
+      });
+      execa.mockImplementationOnce((_cmd, _opts) => stub);
+
+      await expect(
+        exec(
+          cmd,
+          partial<RawExecOptions>({
+            maxBuffer: 1,
+            outputWriters: { stderr: stderrWriter },
+          }),
+        ),
+      ).rejects.toMatchObject({
+        message: `Command failed: ${cmd}\nstderr tail`,
+        stderr,
       });
     });
   });
