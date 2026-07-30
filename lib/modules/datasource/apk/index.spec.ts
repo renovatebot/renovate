@@ -80,7 +80,7 @@ describe('modules/datasource/apk/index', () => {
 
   it('should have default registry URLs', () => {
     expect(apkDatasource.defaultRegistryUrls).toEqual([
-      'https://dl-cdn.alpinelinux.org/alpine/latest-stable/main/x86_64',
+      'https://dl-cdn.alpinelinux.org/alpine?branch=latest-stable&components=main&arch=x86_64',
     ]);
   });
 
@@ -118,7 +118,7 @@ describe('modules/datasource/apk/index', () => {
       expect(res).toEqual({
         homepage: 'https://www.nginx.org/',
         registryUrl:
-          'https://dl-cdn.alpinelinux.org/alpine/latest-stable/main/x86_64',
+          'https://dl-cdn.alpinelinux.org/alpine?branch=latest-stable&components=main&arch=x86_64',
         releases: [
           {
             version: '1.24.0-r16',
@@ -133,7 +133,7 @@ describe('modules/datasource/apk/index', () => {
         datasource: 'apk',
         packageName: 'nginx',
         registryUrls: [
-          'https://dl-cdn.alpinelinux.org/alpine/v3.19/main/x86_64',
+          'https://dl-cdn.alpinelinux.org/alpine?branch=v3.19&components=main&arch=x86_64',
         ],
       };
 
@@ -145,7 +145,8 @@ describe('modules/datasource/apk/index', () => {
       const res = await getPkgReleases(config);
       expect(res).toEqual({
         homepage: 'https://www.nginx.org/',
-        registryUrl: 'https://dl-cdn.alpinelinux.org/alpine/v3.19/main/x86_64',
+        registryUrl:
+          'https://dl-cdn.alpinelinux.org/alpine?branch=v3.19&components=main&arch=x86_64',
         releases: [
           {
             version: '1.24.0-r16',
@@ -153,6 +154,113 @@ describe('modules/datasource/apk/index', () => {
           },
         ],
       });
+    });
+
+    it('should aggregate releases across components', async () => {
+      const communityArchive = await createTarGz([
+        {
+          name: 'APKINDEX',
+          content: ['P:nginx', 'V:1.26.2-r0', 't:1747894670'].join('\n'),
+        },
+      ]);
+
+      httpMock
+        .scope('https://dl-cdn.alpinelinux.org')
+        .get('/alpine/v3.19/main/x86_64/APKINDEX.tar.gz')
+        .reply(200, apkIndexArchive)
+        .get('/alpine/v3.19/community/x86_64/APKINDEX.tar.gz')
+        .reply(200, communityArchive);
+
+      const res = await apkDatasource.getReleases({
+        packageName: 'nginx',
+        registryUrl:
+          'https://dl-cdn.alpinelinux.org/alpine?branch=v3.19&components=main,community&arch=x86_64',
+      });
+
+      expect(res).toEqual({
+        homepage: 'https://www.nginx.org/',
+        registryUrl:
+          'https://dl-cdn.alpinelinux.org/alpine?branch=v3.19&components=main,community&arch=x86_64',
+        releases: [
+          {
+            version: '1.24.0-r16',
+            releaseTimestamp: '2024-04-26T22:27:14.000Z',
+          },
+          {
+            version: '1.26.2-r0',
+            releaseTimestamp: '2025-05-22T06:17:50.000Z',
+          },
+        ],
+      });
+    });
+
+    it('should skip components which do not contain the package', async () => {
+      const communityArchive = await createTarGz([
+        {
+          name: 'APKINDEX',
+          content: ['P:docker', 'V:27.3.1-r0', 't:1747894670'].join('\n'),
+        },
+      ]);
+
+      httpMock
+        .scope('https://dl-cdn.alpinelinux.org')
+        .get('/alpine/v3.19/main/x86_64/APKINDEX.tar.gz')
+        .reply(200, apkIndexArchive)
+        .get('/alpine/v3.19/community/x86_64/APKINDEX.tar.gz')
+        .reply(200, communityArchive);
+
+      const res = await apkDatasource.getReleases({
+        packageName: 'docker',
+        registryUrl:
+          'https://dl-cdn.alpinelinux.org/alpine?branch=v3.19&components=main,community&arch=x86_64',
+      });
+
+      expect(res).toEqual({
+        registryUrl:
+          'https://dl-cdn.alpinelinux.org/alpine?branch=v3.19&components=main,community&arch=x86_64',
+        releases: [
+          {
+            version: '27.3.1-r0',
+            releaseTimestamp: '2025-05-22T06:17:50.000Z',
+          },
+        ],
+      });
+    });
+
+    it('should skip components which cannot be fetched', async () => {
+      httpMock
+        .scope('https://dl-cdn.alpinelinux.org')
+        .get('/alpine/v3.19/testing/x86_64/APKINDEX.tar.gz')
+        .reply(404)
+        .get('/alpine/v3.19/main/x86_64/APKINDEX.tar.gz')
+        .reply(200, apkIndexArchive);
+
+      const res = await apkDatasource.getReleases({
+        packageName: 'nginx',
+        registryUrl:
+          'https://dl-cdn.alpinelinux.org/alpine?branch=v3.19&components=testing,main&arch=x86_64',
+      });
+
+      expect(res).toEqual({
+        homepage: 'https://www.nginx.org/',
+        registryUrl:
+          'https://dl-cdn.alpinelinux.org/alpine?branch=v3.19&components=testing,main&arch=x86_64',
+        releases: [
+          {
+            version: '1.24.0-r16',
+            releaseTimestamp: '2024-04-26T22:27:14.000Z',
+          },
+        ],
+      });
+    });
+
+    it('should throw for a registry URL without arch', async () => {
+      await expect(
+        apkDatasource.getReleases({
+          packageName: 'nginx',
+          registryUrl: 'https://dl-cdn.alpinelinux.org/alpine?components=main',
+        }),
+      ).rejects.toThrow('Invalid apk repo URL');
     });
   });
 
@@ -217,12 +325,12 @@ describe('modules/datasource/apk/index', () => {
 
       const result = await apkDatasource.getReleases({
         packageName: 'bash',
-        registryUrl: 'https://packages.wolfi.dev/os/x86_64',
+        registryUrl: 'https://packages.wolfi.dev/os?arch=x86_64',
       });
 
       expect(result).toEqual({
         homepage: undefined, // No URL field in the test data
-        registryUrl: 'https://packages.wolfi.dev/os/x86_64',
+        registryUrl: 'https://packages.wolfi.dev/os?arch=x86_64',
         releases: [
           {
             version: '5.3-r1',
@@ -272,13 +380,13 @@ describe('modules/datasource/apk/index', () => {
       const result = await apkDatasource.getReleases({
         packageName: 'nginx',
         registryUrl:
-          'https://dl-cdn.alpinelinux.org/alpine/latest-stable/main/x86_64',
+          'https://dl-cdn.alpinelinux.org/alpine?branch=latest-stable&components=main&arch=x86_64',
       });
 
       expect(result).toEqual({
         homepage: 'https://www.nginx.org/',
         registryUrl:
-          'https://dl-cdn.alpinelinux.org/alpine/latest-stable/main/x86_64',
+          'https://dl-cdn.alpinelinux.org/alpine?branch=latest-stable&components=main&arch=x86_64',
         releases: [
           {
             version: '1.28.0-r3',
@@ -318,7 +426,7 @@ describe('modules/datasource/apk/index', () => {
 
       const result = await apkDatasource.getReleases({
         packageName: 'unknown-package',
-        registryUrl: 'https://packages.wolfi.dev/os/x86_64',
+        registryUrl: 'https://packages.wolfi.dev/os?arch=x86_64',
       });
 
       expect(result).toBeNull();
@@ -351,12 +459,12 @@ describe('modules/datasource/apk/index', () => {
 
       const result = await apkDatasource.getReleases({
         packageName: 'minimal-package',
-        registryUrl: 'https://packages.wolfi.dev/os/x86_64',
+        registryUrl: 'https://packages.wolfi.dev/os?arch=x86_64',
       });
 
       expect(result).toEqual({
         homepage: undefined,
-        registryUrl: 'https://packages.wolfi.dev/os/x86_64',
+        registryUrl: 'https://packages.wolfi.dev/os?arch=x86_64',
         releases: [
           {
             version: '1.0.0',
@@ -377,7 +485,7 @@ describe('modules/datasource/apk/index', () => {
       await expect(
         apkDatasource.getReleases({
           packageName: 'bash',
-          registryUrl: 'https://packages.wolfi.dev/os/x86_64',
+          registryUrl: 'https://packages.wolfi.dev/os?arch=x86_64',
         }),
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
     });
@@ -391,7 +499,7 @@ describe('modules/datasource/apk/index', () => {
       await expect(
         apkDatasource.getReleases({
           packageName: 'bash',
-          registryUrl: 'https://packages.wolfi.dev/os/x86_64',
+          registryUrl: 'https://packages.wolfi.dev/os?arch=x86_64',
         }),
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
     });
@@ -404,7 +512,7 @@ describe('modules/datasource/apk/index', () => {
 
       const result = await apkDatasource.getReleases({
         packageName: 'bash',
-        registryUrl: 'https://packages.wolfi.dev/os/x86_64',
+        registryUrl: 'https://packages.wolfi.dev/os?arch=x86_64',
       });
 
       expect(result).toBeNull();
@@ -418,7 +526,7 @@ describe('modules/datasource/apk/index', () => {
 
       const result = await apkDatasource.getReleases({
         packageName: 'bash',
-        registryUrl: 'https://packages.wolfi.dev/os/x86_64',
+        registryUrl: 'https://packages.wolfi.dev/os?arch=x86_64',
       });
 
       expect(result).toBeNull();
@@ -433,7 +541,7 @@ describe('modules/datasource/apk/index', () => {
       await expect(
         apkDatasource.getReleases({
           packageName: 'bash',
-          registryUrl: 'https://packages.wolfi.dev/os/x86_64',
+          registryUrl: 'https://packages.wolfi.dev/os?arch=x86_64',
         }),
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
     });
@@ -447,7 +555,7 @@ describe('modules/datasource/apk/index', () => {
       await expect(
         apkDatasource.getReleases({
           packageName: 'bash',
-          registryUrl: 'https://packages.wolfi.dev/os/x86_64',
+          registryUrl: 'https://packages.wolfi.dev/os?arch=x86_64',
         }),
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
     });
@@ -469,7 +577,7 @@ describe('modules/datasource/apk/index', () => {
 
       const result = await apkDatasource.getReleases({
         packageName: 'bash',
-        registryUrl: 'https://packages.wolfi.dev/os/x86_64',
+        registryUrl: 'https://packages.wolfi.dev/os?arch=x86_64',
       });
 
       expect(result).toBeNull();
@@ -484,7 +592,7 @@ describe('modules/datasource/apk/index', () => {
 
       const result = await new ApkDatasource().getReleases({
         packageName: 'bash',
-        registryUrl: 'https://packages.wolfi.dev/os/x86_64',
+        registryUrl: 'https://packages.wolfi.dev/os?arch=x86_64',
       });
 
       expect(result).toBeNull();
@@ -502,7 +610,7 @@ describe('modules/datasource/apk/index', () => {
 
       const result = await new ApkDatasource().getReleases({
         packageName: 'bash',
-        registryUrl: 'https://packages.wolfi.dev/os/x86_64',
+        registryUrl: 'https://packages.wolfi.dev/os?arch=x86_64',
       });
 
       expect(result).toBeNull();
@@ -518,7 +626,7 @@ describe('modules/datasource/apk/index', () => {
 
       const result = await new ApkDatasource().getReleases({
         packageName: 'bash',
-        registryUrl: 'https://packages.wolfi.dev/os/x86_64',
+        registryUrl: 'https://packages.wolfi.dev/os?arch=x86_64',
       });
 
       expect(result).toBeNull();
