@@ -1,3 +1,4 @@
+import { codeBlock } from 'common-tags';
 import fs from 'fs-extra';
 import { DateTime } from 'luxon';
 import type { PushResult } from 'simple-git';
@@ -954,11 +955,11 @@ describe('util/git/index', { timeout: 30000 }, () => {
         '--format=%(trailers:only)',
         commit!,
       ]);
-      expect(parsedTrailers.trim()).toBe(
-        'Signed-off-by: Renovate Bot <bot@renovateapp.com>\n' +
-          'Co-authored-by: First Contributor <first@example.com>\n' +
-          'Co-authored-by: Second Contributor <second@example.com>',
-      );
+      expect(parsedTrailers.trim()).toBe(codeBlock`
+        Signed-off-by: Renovate Bot <bot@renovateapp.com>
+        Co-authored-by: First Contributor <first@example.com>
+        Co-authored-by: Second Contributor <second@example.com>
+      `);
     });
 
     it('adds trailers when commit message is a string', async () => {
