@@ -603,8 +603,8 @@ importers:
         specifier: 4.1.10
         version: 4.1.10(@opentelemetry/api@1.9.1)(@types/node@24.13.3)(@vitest/coverage-v8@4.1.10)(vite@8.1.5)
       vitest-mock-extended:
-        specifier: 5.0.0
-        version: 5.0.0(typescript@7.0.2)(vitest@4.1.10)
+        specifier: 5.1.0
+        version: 5.1.0(typescript@7.0.2)(vitest@4.1.10)
     optionalDependencies:
       openpgp:
         specifier: 6.3.1
@@ -5716,8 +5716,8 @@ packages:
       yaml:
         optional: true
 
-  vitest-mock-extended@5.0.0:
-    resolution: {integrity: sha512-fnPf7Q5eVQPs8cCoNVdRA46khG1t1PL4LkdE7cYYZeT665jm0dGibYdBKCAQRCJhaw4Aam1QgraFiHMYnheTag==}
+  vitest-mock-extended@5.1.0:
+    resolution: {integrity: sha512-xW28qmo6CbEROzwFRKw+fhLQcwoxBbUHdezDtBJXiHinthfyYZ3pwt4ez4r+XPdimTbXJcFetjzKBJqMw1A6Jw==}
     peerDependencies:
       typescript: 3.x || 4.x || 5.x || 6.x || 7.x
       vitest: '>=4.0.0'
@@ -11177,7 +11177,7 @@ snapshots:
       fsevents: 2.3.3
       yaml: 2.9.0
 
-  vitest-mock-extended@5.0.0(typescript@7.0.2)(vitest@4.1.10):
+  vitest-mock-extended@5.1.0(typescript@7.0.2)(vitest@4.1.10):
     dependencies:
       ts-essentials: 10.2.1(typescript@7.0.2)
       typescript: 7.0.2
