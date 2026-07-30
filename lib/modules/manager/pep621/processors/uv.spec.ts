@@ -223,6 +223,98 @@ describe('modules/manager/pep621/processors/uv', () => {
       ]);
     });
 
+    it('handles the array form of uv sources', () => {
+      const pyproject = parsePyProject(codeBlock`
+      [tool.uv.sources]
+      dep1 = [{ index = "foo" }]
+      dep2 = [
+        { index = "foo", marker = "sys_platform == 'darwin'" },
+        { index = "bar", marker = "sys_platform == 'linux'" },
+      ]
+      dep3 = [{ git = "https://github.com/foo/dep3", tag = "0.3.0" }]
+      dep4 = [
+        { index = "foo", marker = "sys_platform == 'darwin'" },
+        { git = "https://github.com/foo/dep4", marker = "sys_platform == 'linux'" },
+      ]
+      dep5 = [
+        { index = "unknown", marker = "sys_platform == 'darwin'" },
+        { index = "foo", marker = "sys_platform == 'linux'" },
+      ]
+
+      [[tool.uv.index]]
+      name = "foo"
+      url = "https://foo.com/simple"
+      default = false
+      explicit = true
+
+      [[tool.uv.index]]
+      name = "bar"
+      url = "https://bar.com/simple"
+      default = false
+      explicit = true
+    `)!;
+
+      const dependencies = [
+        {
+          depName: 'dep1',
+          packageName: 'dep1',
+        },
+        {
+          depName: 'dep2',
+          packageName: 'dep2',
+        },
+        {
+          depName: 'dep3',
+          packageName: 'dep3',
+        },
+        {
+          depName: 'dep4',
+          packageName: 'dep4',
+        },
+        {
+          depName: 'dep5',
+          packageName: 'dep5',
+        },
+      ];
+
+      const result = processor.process(pyproject, dependencies);
+
+      expect(result).toEqual([
+        {
+          depName: 'dep1',
+          depType: depTypes.uvSources,
+          registryUrls: ['https://foo.com/simple'],
+          packageName: 'dep1',
+        },
+        {
+          depName: 'dep2',
+          depType: depTypes.uvSources,
+          registryUrls: ['https://foo.com/simple', 'https://bar.com/simple'],
+          packageName: 'dep2',
+        },
+        {
+          depName: 'dep3',
+          depType: depTypes.uvSources,
+          datasource: GithubTagsDatasource.id,
+          registryUrls: ['https://github.com'],
+          packageName: 'foo/dep3',
+          currentValue: '0.3.0',
+        },
+        {
+          depName: 'dep4',
+          depType: depTypes.uvSources,
+          skipReason: 'unsupported',
+          packageName: 'dep4',
+        },
+        {
+          depName: 'dep5',
+          depType: depTypes.uvSources,
+          registryUrls: ['https://foo.com/simple'],
+          packageName: 'dep5',
+        },
+      ]);
+    });
+
     it('index with optional name', () => {
       const pyproject = parsePyProject(codeBlock`
       [[tool.uv.index]]
