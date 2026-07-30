@@ -163,7 +163,7 @@ export class ApkDatasource extends Datasource {
       const releases = matchingPackages.map((pkg) => ({
         version: pkg.version,
         releaseTimestamp: pkg.buildDate
-          ? asTimestamp(new Date(pkg.buildDate * 1000))
+          ? asTimestamp(pkg.buildDate * 1000)
           : undefined,
       }));
 
