@@ -93,7 +93,7 @@ describe('util/markdown', () => {
     it('should not add zero-width space to @ inside triple-backtick code blocks', () => {
       const input = codeBlock`
         \`\`\`
-        import foo from '@atlaskit/tokens';
+          import foo from '@atlaskit/tokens';
         \`\`\`
       `;
 
