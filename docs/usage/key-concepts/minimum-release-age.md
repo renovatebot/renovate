@@ -140,7 +140,7 @@ Depending on your manager, datasource and the given package(s), it may be that s
 | `patch`               | ✅                            | Depends on the Manager, Datasource, and package(s)                                                        |
 | `pin`                 | ❌                            | [Not yet supported](https://github.com/renovatebot/renovate/issues/40288)                                 |
 | `digest`              | 🟡                            | Depends on the Manager, Datasource, and package(s). [See below for more info](#digest-updates).           |
-| `pinDigest`           | ❌                            | [Not yet supported](https://github.com/renovatebot/renovate/issues/44820)                                 |
+| `pinDigest`           | 🟡                            | Depends on the Manager, Datasource, and package(s). [See below for more info](#pindigest-updates).        |
 | `lockFileMaintenance` | ❌                            | Not possible, as we delegate to the package manager to perform the required changes to update package(s). |
 | `lockfileUpdate`      | ❌                            |                                                                                                           |
 | `rollback`            | ❌                            |                                                                                                           |
@@ -177,6 +177,58 @@ What this means in practice:
   If an existing tag is force-pushed to new commits, the digest update ages against the original release date, so it may pass Minimum Release Age immediately.
   - Note that this is not true when using `github-releases`, which has metadata to indicate when the GitHub Release was created and published, whereas `github-tags` uses the `committedDate`, which is separate from when it was pushed.
     GitHub no longer provides that metadata in their API.
+
+#### `pinDigest` updates
+
+A `pinDigest` update (enabled via [`pinDigests`](../configuration-options.md#pindigests)) pins an existing versioned tag to its currently resolved digest, without changing the tag itself.
+
+For instance:
+
+```diff
+-    - uses: actions/checkout@v7
++    - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
+```
+
+Unlike a `digest` update, `pinDigest` doesn't repoint the reference to a different value - it freezes whatever the current value already resolves to.
+The reference itself (e.g. the `v7` major tag above) is floating though, so what it resolves to right now may not be what `currentVersion` would resolve to under your configured `rangeStrategy` (for example, `rangeStrategy=bump` resolves `currentVersion` to the _oldest_ matching release).
+So, like `digest`, a `pinDigest` update is aged against the release timestamp of the newest version matching the current value, not whatever `currentVersion` resolves to.
+
+Unlike `digest` updates, an _unversioned_ current value (such as `latest`) is exempt from `minimumReleaseAge` entirely, rather than being held indefinitely: pinning a reference which already floats to the latest content is strictly safer than leaving it unpinned, so holding it back would only prolong the less-safe, unpinned state.
+
+If the current value _does_ resolve to a version, but that version's datasource doesn't expose a release timestamp (for example GHCR, Quay or ECR), the same caveats as [`digest` updates](#digest-updates) apply: the update is held indefinitely under the default `minimumReleaseAgeBehaviour=timestamp-required`, and needs `minimumReleaseAgeBehaviour=timestamp-optional` configured to raise it without an age check.
+
+##### Avoiding `pinDigest` updates not being raised due to frequently-releasing packages
+
+Because a `pinDigest` update ages against the newest matching version, a reference that releases faster than your configured `minimumReleaseAge` may never clear the check - leaving it perpetually unpinned, which is _less_ safe than pinning to a slightly-stale release.
+
+In particular, because Renovate raises a `pinDigest` PR across all applicable dependencies (by grouping them together), this can lead to the whole `pinDigest` update group being delayed.
+
+Renovate does not fall back to pinning an older, already-aged release instead: doing so would mean the pin no longer reflects what the reference currently, genuinely points to, which is the property `pinDigest` exists to preserve.
+
+If you want Renovate to raise `pinDigest` updates sooner than your regular version/digest updates, scope a shorter (or disabled) `minimumReleaseAge` to it specifically, using [`packageRules`](../configuration-options.md#packagerules) and [`matchUpdateTypes`](../configuration-options.md#packagerulesmatchupdatetypes):
+
+```json
+{
+  "packageRules": [
+    {
+      "matchUpdateTypes": ["pinDigest"],
+      "minimumReleaseAge": null
+    }
+  ]
+}
+```
+
+This decouples "how fresh must a release be before I trust it enough to upgrade to it" (your regular `minimumReleaseAge`) from "how long to wait before freezing whatever's already there" (the `pinDigest`-scoped override) - the same idea as using `digest.minimumReleaseAge`:
+
+```json
+{
+  "digest": {
+    "minimumReleaseAge": null
+  }
+}
+```
+
+These are functionally identical options.
 
 ### What happens to security updates?
 
