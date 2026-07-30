@@ -65,7 +65,7 @@ repos:
   - repo: ssh://git@github.com/pre-commit/pre-commit-hooks
     # should allow explicit ssh protocol
     hooks:
-      - id: check-merge-conflict
+    - id: check-merge-conflict
     rev: v5.0.0
   - repo: some_invalid_url
     # case with invlalid url.
@@ -87,6 +87,7 @@ repos:
         additional_dependencies:
           - "github.com/wasilibs/go-shellcheck/cmd/shellcheck@v0.10.0"
           - "" # invalid go package
+
   # pre-commit meta hooks
   - repo: meta
     hooks: []
