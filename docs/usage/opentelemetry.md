@@ -8,7 +8,7 @@ description: How to use OpenTelemetry with Renovate
 !!! warning "This feature is flagged as experimental"
   Experimental features might be changed at any time.
   <br /> <br />
-  Renovate's OpenTelemetry support is stable enough to use in production, but there may be changes that rename attributes or fix bugs in a breaking, even in non-major version updates.
+  Renovate's OpenTelemetry support is stable enough to use in production, but there may be changes that rename attributes or fix bugs in a way that could be breaking to users, even in non-major version updates.
 
 Renovate supports the [OpenTelemetry](https://opentelemetry.io/) monitoring and observability standard.
 
@@ -62,6 +62,22 @@ The default values is `all`, which means all of the above detectors are used. Se
 - `gcp`
 - `github`
 - `env`
+
+### File exporter
+
+The OpenTelemetry data can also be exported into a newline-delimited JSON (NDJSON) file, in OTLP JSON format.
+
+This is configured using the `RENOVATE_TRACING_FILE_EXPORTER_PATH` environment variable.
+
+You can then ingest this data into other tools, for instance:
+
+```sh title="Exporting the JSONL OTLP file to a local OpenTelemetry traces API"
+while IFS= read -r line; do
+  curl -s -X POST http://localhost:4318/v1/traces \
+    -H 'Content-Type: application/json' \
+    -d "$line"
+done < /tmp/traces.jsonl
+```
 
 ## Supported OTLP data
 

@@ -509,10 +509,12 @@ function handleReplaceStrategy(
       // trim last element of the newBase when new accepted version is out of range.
       // example: let new bound be >8.2.5 & newVersion be 8.2.5
       // return value will be: >8.2
-      if (range.operator === '>') {
-        if (newVersion === newBase.join('.') && newBase.length > 1) {
-          newBase.pop();
-        }
+      if (
+        range.operator === '>' &&
+        newVersion === newBase.join('.') &&
+        newBase.length > 1
+      ) {
+        newBase.pop();
       }
       return range.operator + newBase.join('.');
     }
@@ -560,11 +562,10 @@ export function checkRangeAndRemoveUnnecessaryRangeLimit(
     if (
       newRes[0].includes('.*') &&
       newRes[0].includes('==') &&
-      newRes[1].includes('>=')
+      newRes[1].includes('>=') &&
+      satisfies(newVersion, newRes[0])
     ) {
-      if (satisfies(newVersion, newRes[0])) {
-        newRange = newRes[0];
-      }
+      newRange = newRes[0];
     }
   } else {
     return rangeInput;

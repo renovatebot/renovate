@@ -20,7 +20,7 @@ You can use common AWS configuration options, for example:
 
 Read the [AWS Developer Guide - Configuring the SDK for JavaScript](https://docs.aws.amazon.com/sdk-for-javascript/v3/developer-guide/configuring-the-jssdk.html) for more information on these configuration options.
 
-```json title="Minimal IAM privileges needed for this datasource"
+```{json title="Minimal IAM privileges needed for this datasource" configType=none}
 {
   "Sid": "AllowDBEngineVersionLookup",
   "Effect": "Allow",

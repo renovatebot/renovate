@@ -1,4 +1,4 @@
-import { fs, partial } from '~test/util.ts';
+import { fs, logger, partial } from '~test/util.ts';
 import { DockerDatasource } from '../../datasource/docker/index.ts';
 import type { ExtractConfig } from '../types.ts';
 import { extractPackageFile } from './index.ts';
@@ -247,6 +247,40 @@ describe('modules/manager/helmv3/extract', () => {
       const fileName = 'Chart.yaml';
       const result = await extractPackageFile(content, fileName, config);
       expect(result).toBeNull();
+    });
+
+    it('skips helm-git repos', async () => {
+      const content = `
+      apiVersion: v2
+      appVersion: "1.0"
+      description: A Helm chart for Kubernetes
+      name: example
+      version: 0.1.0
+      dependencies:
+        - name: csdp-add-cluster
+          version: 0.4.0
+          repository: git+https://github.com/codefresh-io/csdp-official@add-cluster/helm
+      `;
+      const fileName = 'Chart.yaml';
+      const result = await extractPackageFile(content, fileName, config);
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        {
+          repository:
+            'git+https://github.com/codefresh-io/csdp-official@add-cluster/helm',
+          packageFile: 'Chart.yaml',
+        },
+        'Skipping unsupported helm-git repository.',
+      );
+      expect(result).toMatchObject({
+        datasource: 'helm',
+        deps: [
+          {
+            currentValue: '0.4.0',
+            depName: 'csdp-add-cluster',
+            skipReason: 'unknown-registry',
+          },
+        ],
+      });
     });
   });
 });

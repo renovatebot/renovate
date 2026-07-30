@@ -95,7 +95,9 @@ describe('config/presets/gitea/index', () => {
         .get(`${basePath}/renovate.json`)
         .reply(200, {});
 
-      await expect(gitea.getPreset({ repo: 'some/repo' })).rejects.toThrow();
+      await expect(gitea.getPreset({ repo: 'some/repo' })).rejects.toThrow(
+        'dep not found',
+      );
     });
 
     it('throws if invalid content', async () => {

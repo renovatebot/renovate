@@ -126,12 +126,27 @@ export const presets: Record<string, Preset> = {
   },
   pinGitHubActionDigestsToSemver: {
     description: 'Convert pinned GitHub Action digests to SemVer.',
+    extends: ['helpers:pinGitHubActionDigests'],
     packageRules: [
       {
-        extends: ['helpers:pinGitHubActionDigests'],
         extractVersion: '^(?<version>v?\\d+\\.\\d+\\.\\d+)$',
+        matchDepTypes: ['action'],
         versioning:
           'regex:^v?(?<major>\\d+)(\\.(?<minor>\\d+)\\.(?<patch>\\d+))?$',
+      },
+    ],
+  },
+  renovateChangelog: {
+    description:
+      "Provide a link to octochangelog's improved breakdown for Renovate's changelogs",
+    packageRules: [
+      {
+        matchSourceUrls: ['https://github.com/renovatebot/renovate'],
+        matchUpdateTypes: ['major', 'minor', 'patch'],
+        prBodyDefinitions: {
+          Change:
+            '[`{{{displayFrom}}}` → `{{{displayTo}}}`](https://octochangelog.com/compare?repo=renovatebot%2Frenovate&from={{ currentVersion }}&to={{ newVersion }})',
+        },
       },
     ],
   },

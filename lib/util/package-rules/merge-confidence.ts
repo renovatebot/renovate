@@ -4,6 +4,7 @@ import {
   isNullOrUndefined,
   isUndefined,
 } from '@sindresorhus/is';
+import { GlobalConfig } from '../../config/global.ts';
 import type {
   PackageRule,
   PackageRuleInputConfig,
@@ -28,8 +29,7 @@ export class MergeConfidenceMatcher extends Matcher {
       const error = new Error(MISSING_API_CREDENTIALS);
       error.validationSource = 'MatchConfidence Authenticator';
       error.validationError = 'Missing credentials';
-      error.validationMessage =
-        'The `matchConfidence` matcher in `packageRules` requires authentication. Please refer to the [documentation](https://docs.renovatebot.com/configuration-options/#packagerulesmatchconfidence) and add the required host rule.';
+      error.validationMessage = `The \`matchConfidence\` matcher in \`packageRules\` requires authentication. Please refer to the [documentation](${GlobalConfig.get('productLinks').documentation}configuration-options/#packagerulesmatchconfidence) and add the required host rule.`;
       throw error;
     }
 

@@ -66,3 +66,79 @@ export const OpenTofuProviderDocsResponse = z
 export type OpenTofuProviderDocsResponse = z.infer<
   typeof OpenTofuProviderDocsResponse
 >;
+
+// VersionDetailResponse — used by the releases.hashicorp.com backend
+export const TerraformBuild = z.object({
+  name: z.string(),
+  version: z.string(),
+  os: z.string(),
+  arch: z.string(),
+  filename: z.string(),
+  url: z.string(),
+  shasums_url: z.string().optional(),
+});
+
+export type TerraformBuild = z.infer<typeof TerraformBuild>;
+
+export const VersionDetailResponse = z.object({
+  name: z.string().optional(),
+  version: z.string().optional(),
+  builds: z.array(TerraformBuild),
+});
+
+export type VersionDetailResponse = z.infer<typeof VersionDetailResponse>;
+
+// TerraformProviderReleaseBackend — index.json from releases.hashicorp.com
+export const TerraformProviderReleaseBackend = z.object({
+  name: z.string().optional(),
+  versions: z.record(z.string(), VersionDetailResponse),
+});
+
+export type TerraformProviderReleaseBackend = z.infer<
+  typeof TerraformProviderReleaseBackend
+>;
+
+// TerraformProviderVersions — Provider Registry Protocol /versions endpoint
+const TerraformProviderVersionsVersion = z.object({
+  version: z.string(),
+});
+
+export const TerraformProviderVersions = z.object({
+  versions: LooseArray(TerraformProviderVersionsVersion),
+});
+
+export type TerraformProviderVersions = z.infer<
+  typeof TerraformProviderVersions
+>;
+
+// TerraformRegistryVersions — registry /versions endpoint (for getBuilds)
+const TerraformRegistryPlatform = z.object({
+  os: z.string(),
+  arch: z.string(),
+});
+
+const TerraformRegistryVersionItem = z.object({
+  version: z.string(),
+  platforms: LooseArray(TerraformRegistryPlatform),
+});
+
+export const TerraformRegistryVersions = z.object({
+  versions: LooseArray(TerraformRegistryVersionItem).optional(),
+});
+
+export type TerraformRegistryVersions = z.infer<
+  typeof TerraformRegistryVersions
+>;
+
+// TerraformRegistryBuildResponse — per-platform download info
+export const TerraformRegistryBuildResponse = z.object({
+  os: z.string(),
+  arch: z.string(),
+  filename: z.string(),
+  download_url: z.string(),
+  shasums_url: z.string().optional(),
+});
+
+export type TerraformRegistryBuildResponse = z.infer<
+  typeof TerraformRegistryBuildResponse
+>;

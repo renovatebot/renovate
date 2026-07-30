@@ -66,8 +66,8 @@ export const Vendir = VendirResource.extend({
   ),
 });
 
-export type VendirDefinition = z.infer<typeof Vendir>;
-export type HelmChartDefinition = z.infer<typeof HelmChart>;
-export type GitRefDefinition = z.infer<typeof GitRef>;
-export type GithubReleaseDefinition = z.infer<typeof GithubRelease>;
-export type HttpReleaseDefinition = z.infer<typeof HttpRelease>;
+export type Vendir = z.infer<typeof Vendir>;
+export type HelmChart = z.infer<typeof HelmChart>;
+export type GitRef = z.infer<typeof GitRef>;
+export type GithubRelease = z.infer<typeof GithubRelease>;
+export type HttpRelease = z.infer<typeof HttpRelease>;

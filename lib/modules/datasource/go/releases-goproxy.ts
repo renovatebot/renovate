@@ -1,4 +1,8 @@
-import { isNonEmptyStringAndNotWhitespace, isTruthy } from '@sindresorhus/is';
+import {
+  isNonEmptyString,
+  isNonEmptyStringAndNotWhitespace,
+  isTruthy,
+} from '@sindresorhus/is';
 import type { ConstraintsFilter } from '../../../config/types.ts';
 import { logger } from '../../../logger/index.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
@@ -17,7 +21,7 @@ import { BaseGoDatasource } from './base.ts';
 import { getSourceUrl } from './common.ts';
 import { parseGoproxy, parseNoproxy } from './goproxy-parser.ts';
 import { GoDirectDatasource } from './releases-direct.ts';
-import type { VersionInfo } from './types.ts';
+import { VersionInfo } from './schema.ts';
 
 /** TODO #42566 */
 const goVersionRegex = regEx(/^\s*go\s+(?<version>[^\s]+)\s*$/);
@@ -181,7 +185,7 @@ export class GoProxyDatasource extends Datasource {
       '@v',
       `${version}.info`,
     );
-    const res = await this.http.getJsonUnchecked<VersionInfo>(url);
+    const res = await this.http.getJson(url, VersionInfo);
 
     const result: Release = {
       version: res.body.Version,
@@ -247,25 +251,32 @@ export class GoProxyDatasource extends Datasource {
     const parts = goDirective.split('.');
     if (parts.length === 1) {
       return `${parts[0]}.0.0`;
-    } else if (parts.length === 2) {
-      return `${parts[0]}.${parts[1]}.0`;
-    } else {
-      return `${parts[0]}.${parts[1]}.${parts[2]}`;
     }
+    if (parts.length === 2) {
+      return `${parts[0]}.${parts[1]}.0`;
+    }
+    return `${parts[0]}.${parts[1]}.${parts[2]}`;
   }
 
   async getLatestVersion(
     baseUrl: string,
     packageName: string,
-  ): Promise<string | null> {
+  ): Promise<{ version: string; sourceUrl?: string } | null> {
     try {
       const url = joinUrlParts(
         baseUrl,
         this.encodeCase(packageName),
         '@latest',
       );
-      const res = await this.http.getJsonUnchecked<VersionInfo>(url);
-      return res.body.Version;
+      const res = await this.http.getJson(url, VersionInfo);
+      const { Version: version, Origin: origin } = res.body;
+      // Extract sourceUrl from GOPROXY Origin when present, avoiding go-get to
+      // vanity hosts (https://github.com/renovatebot/renovate/discussions/44898)
+      const sourceUrl =
+        origin?.VCS === 'git' && isNonEmptyString(origin.URL)
+          ? origin.URL.replace(regEx(/\.git$/), '')
+          : undefined;
+      return { version, sourceUrl };
     } catch (err) {
       logger.trace({ err }, 'Failed to get latest version');
       return null;
@@ -280,7 +291,9 @@ export class GoProxyDatasource extends Datasource {
     const isGopkgin = packageName.startsWith('gopkg.in/');
     const majorSuffixSeparator = isGopkgin ? '.' : '/';
     const modParts = packageName.match(modRegex)?.groups;
-    const baseMod = modParts?.baseMod ?? /* v8 ignore next */ packageName;
+    const baseMod =
+      modParts?.baseMod ??
+      /* v8 ignore next -- defensive: modRegex matches any non-empty package name, so baseMod is always set */ packageName;
     const packageMajor = parseInt(modParts?.majorVersion ?? '0', 10);
 
     const result: ReleaseResult = { releases: [] };
@@ -363,12 +376,16 @@ export class GoProxyDatasource extends Datasource {
         throw err;
       }
 
-      const latestVersion = await this.getLatestVersion(baseUrl, pkg);
-      if (latestVersion) {
+      const latest = await this.getLatestVersion(baseUrl, pkg);
+      if (latest) {
+        const { version: latestVersion, sourceUrl } = latest;
         result.tags ??= {};
         result.tags.latest ??= latestVersion;
         if (goVersioning.isGreaterThan(latestVersion, result.tags.latest)) {
           result.tags.latest = latestVersion;
+        }
+        if (sourceUrl) {
+          result.sourceUrl ??= sourceUrl;
         }
         if (!result.releases.length) {
           const releaseFromLatest = pseudoVersionToRelease(latestVersion);

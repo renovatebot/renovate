@@ -15,6 +15,7 @@ interface TestRenovateConfig extends RenovateConfig {
 describe('config/migration', () => {
   describe('migrateConfig(config, parentConfig)', () => {
     it('migrates config', () => {
+      // oxlint-disable-next-line renovate/prefer-partial-in-specs -- legacy config with removed options for migration test
       const config: TestRenovateConfig = {
         endpoints: [{}] as never,
         enabled: true,
@@ -430,7 +431,7 @@ describe('config/migration', () => {
       expect(res.isMigrated).toBeTrue();
       expect(res.migratedConfig).toMatchObject({ extends: ['foo'] });
 
-      config = { extends: ['foo', ':js-app', 'bar'] } as never;
+      config = { extends: ['foo', ':js-app', 'bar'] };
       res = configMigration.migrateConfig(config);
       expect(res.isMigrated).toBeTrue();
       expect(res.migratedConfig).toMatchObject({
@@ -540,7 +541,7 @@ describe('config/migration', () => {
         extends: ['security:minimumReleaseAgeNpm'],
       });
 
-      config = { extends: ['foo', 'npm:unpublishSafe'] } as never;
+      config = { extends: ['foo', 'npm:unpublishSafe'] };
       res = configMigration.migrateConfig(config);
       expect(res.isMigrated).toBeTrue();
       expect(res.migratedConfig).toMatchObject({
@@ -661,7 +662,7 @@ describe('config/migration', () => {
     });
     const config: RenovateConfig = {
       extends: ['@org', '@org2/foo'],
-    } as any;
+    };
     const { isMigrated, migratedConfig } =
       configMigration.migrateConfig(config);
     expect(isMigrated).toBeTrue();
@@ -678,6 +679,7 @@ describe('config/migration', () => {
             '# renovate: datasource=(?<datasource>[a-z-]+?) depName=(?<depName>[^\\s]+?)(?: lookupName=(?<lookupName>[^\\s]+?))?(?: versioning=(?<versioning>[a-z-0-9]+?))?\\s(?:ENV|ARG) .+?_VERSION="?(?<currentValue>.+?)"?\\s',
           ],
         },
+        // oxlint-disable-next-line renovate/prefer-partial-in-specs -- legacy lookupNameTemplate field for migration test
         {
           fileMatch: ['(^|/|\\.)Dockerfile$', '(^|/)Dockerfile[^/]*$'],
           matchStrings: [
@@ -760,8 +762,9 @@ describe('config/migration', () => {
   });
 
   it('migrates azureAutoComplete', () => {
-    const migrate = (config: RenovateConfig): MigratedConfig =>
-      configMigration.migrateConfig(config);
+    function migrate(config: RenovateConfig): MigratedConfig {
+      return configMigration.migrateConfig(config);
+    }
 
     // @ts-expect-error -- TODO: fix me
     expect(migrate({ azureAutoComplete: true })).toEqual({
@@ -789,8 +792,9 @@ describe('config/migration', () => {
   });
 
   it('migrates gitLabAutomerge', () => {
-    const migrate = (config: RenovateConfig): MigratedConfig =>
-      configMigration.migrateConfig(config);
+    function migrate(config: RenovateConfig): MigratedConfig {
+      return configMigration.migrateConfig(config);
+    }
 
     // @ts-expect-error -- TODO: fix me
     expect(migrate({ gitLabAutomerge: true })).toEqual({

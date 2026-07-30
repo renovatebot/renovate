@@ -13,7 +13,9 @@ const rubygemsOrgVersions = codeBlock`
   foobar 1.0.0,2.0.0,3.0.0 01010101010101010101010101010101
 `;
 
-const rubyMarshal = (data: unknown) => Buffer.from(marshal.dump(data));
+function rubyMarshal(data: unknown) {
+  return Buffer.from(marshal.dump(data));
+}
 
 describe('modules/datasource/rubygems/index', () => {
   describe('getReleases', () => {
