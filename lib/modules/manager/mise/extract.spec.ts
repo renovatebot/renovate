@@ -530,6 +530,7 @@ describe('modules/manager/mise/extract', () => {
             currentValue: '0.18.21',
             packageName: 'eza',
             datasource: 'crate',
+            versioning: 'semver',
           },
           {
             depName: 'cargo:https://github.com/username/demo1',
