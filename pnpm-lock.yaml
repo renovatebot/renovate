@@ -71,20 +71,20 @@ importers:
         specifier: 0.221.0
         version: 0.221.0(@opentelemetry/api@1.9.1)(supports-color@7.2.0)
       '@opentelemetry/instrumentation-redis':
-        specifier: 0.68.0
-        version: 0.68.0(@opentelemetry/api@1.9.1)(supports-color@7.2.0)
+        specifier: 0.69.0
+        version: 0.69.0(@opentelemetry/api@1.9.1)(supports-color@7.2.0)
       '@opentelemetry/otlp-transformer':
         specifier: 0.221.0
         version: 0.221.0(@opentelemetry/api@1.9.1)
       '@opentelemetry/resource-detector-aws':
-        specifier: 2.20.0
-        version: 2.20.0(@opentelemetry/api@1.9.1)
+        specifier: 2.21.0
+        version: 2.21.0(@opentelemetry/api@1.9.1)
       '@opentelemetry/resource-detector-azure':
-        specifier: 0.28.0
-        version: 0.28.0(@opentelemetry/api@1.9.1)
+        specifier: 0.29.0
+        version: 0.29.0(@opentelemetry/api@1.9.1)
       '@opentelemetry/resource-detector-gcp':
-        specifier: 0.55.0
-        version: 0.55.0(@opentelemetry/api@1.9.1)(supports-color@7.2.0)
+        specifier: 0.56.0
+        version: 0.56.0(@opentelemetry/api@1.9.1)(supports-color@7.2.0)
       '@opentelemetry/resource-detector-github':
         specifier: 0.32.0
         version: 0.32.0(@opentelemetry/api@1.9.1)
@@ -1433,8 +1433,8 @@ packages:
     peerDependencies:
       '@opentelemetry/api': ^1.3.0
 
-  '@opentelemetry/instrumentation-redis@0.68.0':
-    resolution: {integrity: sha512-D5N4CLWLjBRFa1Ee8D1U1tWCkED+Ob0AMzQlYJjlnnqfw0ofRMaJmoUrdI5ASKEcfDezzhELT1Slo4VesDpA/w==}
+  '@opentelemetry/instrumentation-redis@0.69.0':
+    resolution: {integrity: sha512-lyCIEW89cYhMwaUSMBzsKHdwH2wOoqmuwXOARJneo9UL55govLIUCbYYAJ457oM8kdKADymlY4+SUW0DKQeIHw==}
     engines: {node: ^18.19.0 || >=20.6.0}
     peerDependencies:
       '@opentelemetry/api': ^1.3.0
@@ -1467,20 +1467,20 @@ packages:
     resolution: {integrity: sha512-VCghU1JYs/4gP6Gqf/xro9MEsZ7LrMv2uONVsaESKL38ZOB9BqnI98FfS23wjMnHlpuE+TTaWSoAVNpTwYXzjw==}
     engines: {node: ^18.19.0 || >=20.6.0}
 
-  '@opentelemetry/resource-detector-aws@2.20.0':
-    resolution: {integrity: sha512-3ZkhvVHqJgJ75ObpZQwZIBySNfd4h772QRb2NBPU1A3lSUzDlRen9x5Kzv/K7HNkL/Azl8XEanykwa73YjWmQA==}
+  '@opentelemetry/resource-detector-aws@2.21.0':
+    resolution: {integrity: sha512-Veavy+khoywR+Hv065SU5jucFTGTiW1KXo39CsJ+8wqdYYz8jiRJPnQ20Kd+X9HbV2+Abb0l5CrJIdxK1ZOqBg==}
     engines: {node: ^18.19.0 || >=20.6.0}
     peerDependencies:
       '@opentelemetry/api': ^1.0.0
 
-  '@opentelemetry/resource-detector-azure@0.28.0':
-    resolution: {integrity: sha512-YMMgH/ZIiZgy2CHTHjOBNEYhcsi/l67Q272vAgwMqegRFIME4KljDhmTmjLGzjE3b0sErLtXBqF8Y/3bKn89+Q==}
+  '@opentelemetry/resource-detector-azure@0.29.0':
+    resolution: {integrity: sha512-lWm0vjjlQMoc4Xvvd+dW/OZWT/SI4w+cIN7kbm8KimIZCr1EpAyvyQ7WEOrGoBoXCpQCrsZ18uKTooDgiBCGIw==}
     engines: {node: ^18.19.0 || >=20.6.0}
     peerDependencies:
       '@opentelemetry/api': ^1.0.0
 
-  '@opentelemetry/resource-detector-gcp@0.55.0':
-    resolution: {integrity: sha512-uWU27lJcTbeXDY+uWEapsIyMx8mKi14/IGvUY1DkmMmLQnKRibnbpZEsRVeWBPdjOWSjH9LfWTXp9yDcBHZOeg==}
+  '@opentelemetry/resource-detector-gcp@0.56.0':
+    resolution: {integrity: sha512-H8yNeqTsuapbXs6MLZTtelfUCk+5D8jD3+KosCJaXOyx5gl3EWWvs70HbNXTUO4VYLxccySFYJYVCd8YMM0NJw==}
     engines: {node: ^18.19.0 || >=20.6.0}
     peerDependencies:
       '@opentelemetry/api': ^1.0.0
@@ -6905,10 +6905,10 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@opentelemetry/instrumentation-redis@0.68.0(@opentelemetry/api@1.9.1)(supports-color@7.2.0)':
+  '@opentelemetry/instrumentation-redis@0.69.0(@opentelemetry/api@1.9.1)(supports-color@7.2.0)':
     dependencies:
       '@opentelemetry/api': 1.9.1
-      '@opentelemetry/instrumentation': 0.220.0(@opentelemetry/api@1.9.1)(supports-color@7.2.0)
+      '@opentelemetry/instrumentation': 0.221.0(@opentelemetry/api@1.9.1)(supports-color@7.2.0)
       '@opentelemetry/redis-common': 0.38.3
       '@opentelemetry/semantic-conventions': 1.43.0
     transitivePeerDependencies:
@@ -6950,21 +6950,21 @@ snapshots:
 
   '@opentelemetry/redis-common@0.38.3': {}
 
-  '@opentelemetry/resource-detector-aws@2.20.0(@opentelemetry/api@1.9.1)':
+  '@opentelemetry/resource-detector-aws@2.21.0(@opentelemetry/api@1.9.1)':
     dependencies:
       '@opentelemetry/api': 1.9.1
       '@opentelemetry/core': 2.10.0(@opentelemetry/api@1.9.1)
       '@opentelemetry/resources': 2.10.0(@opentelemetry/api@1.9.1)
       '@opentelemetry/semantic-conventions': 1.43.0
 
-  '@opentelemetry/resource-detector-azure@0.28.0(@opentelemetry/api@1.9.1)':
+  '@opentelemetry/resource-detector-azure@0.29.0(@opentelemetry/api@1.9.1)':
     dependencies:
       '@opentelemetry/api': 1.9.1
       '@opentelemetry/core': 2.10.0(@opentelemetry/api@1.9.1)
       '@opentelemetry/resources': 2.10.0(@opentelemetry/api@1.9.1)
       '@opentelemetry/semantic-conventions': 1.43.0
 
-  '@opentelemetry/resource-detector-gcp@0.55.0(@opentelemetry/api@1.9.1)(supports-color@7.2.0)':
+  '@opentelemetry/resource-detector-gcp@0.56.0(@opentelemetry/api@1.9.1)(supports-color@7.2.0)':
     dependencies:
       '@opentelemetry/api': 1.9.1
       '@opentelemetry/core': 2.10.0(@opentelemetry/api@1.9.1)
