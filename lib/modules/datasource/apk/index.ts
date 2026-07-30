@@ -136,7 +136,7 @@ export class ApkDatasource extends Datasource {
     packageName,
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    /* v8 ignore next 3 -- should never happen */
+    /* v8 ignore if -- should never happen */
     if (!registryUrl) {
       return null;
     }
