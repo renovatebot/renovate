@@ -17,6 +17,7 @@ import { getPkgReleases as _getPkgReleases } from '../../../datasource/index.ts'
 import { PypiDatasource } from '../../../datasource/pypi/index.ts';
 import type { UpdateArtifact, UpdateArtifactsConfig } from '../../types.ts';
 import { parsePyProject } from '../extract.ts';
+import type { PyProject, UvSource } from '../schema.ts';
 import { depTypes } from '../utils.ts';
 import { UvProcessor } from './uv.ts';
 
@@ -334,6 +335,33 @@ describe('modules/manager/pep621/processors/uv', () => {
           depName: 'dep7',
           depType: depTypes.uvSources,
           packageName: 'dep7',
+        },
+      ]);
+    });
+
+    it('skips source types the schema does not produce', () => {
+      // Cannot be expressed in pyproject.toml, as the schema only emits the
+      // known source shapes. Exercises the defensive fallback.
+      const uv = partial<NonNullable<NonNullable<PyProject['tool']>['uv']>>({
+        sources: { dep1: [partial<UvSource>({})] },
+      });
+      const pyproject = partial<PyProject>({ tool: { uv } });
+
+      const dependencies = [
+        {
+          depName: 'dep1',
+          packageName: 'dep1',
+        },
+      ];
+
+      const result = processor.process(pyproject, dependencies);
+
+      expect(result).toEqual([
+        {
+          depName: 'dep1',
+          depType: depTypes.uvSources,
+          packageName: 'dep1',
+          skipReason: 'unknown-registry',
         },
       ]);
     });

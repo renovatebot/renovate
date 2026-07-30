@@ -114,7 +114,6 @@ export class UvProcessor extends BasePyProjectProcessor {
             } else if ('workspace' in depSource) {
               dep.skipReason = 'inherited-dependency';
             } else {
-              /* v8 ignore next -- unreachable through schema */
               dep.skipReason = 'unknown-registry';
             }
           } else {
