@@ -1,23 +1,23 @@
-# syntax=docker/dockerfile:1.25.0@sha256:0adf442eae370b6087e08edc7c50b552d80ddf261576f4ebd6421006b2461f12
+# syntax=docker/dockerfile:1.26.0@sha256:ecfaec9ed6d810b56388c508f4121597bfbba70d41a6dfeee4d8cad5f295fc32
 
 ARG BASE_IMAGE_TYPE=slim
 
 # --------------------------------------
 # slim image
 # --------------------------------------
-FROM ghcr.io/renovatebot/base-image:13.78.1@sha256:fcfba02cfa34c4e839ce00eeb661aec26a3048677888b48ab6bc64cf7c7a3ff7 AS slim-base
+FROM ghcr.io/renovatebot/base-image:13.78.8@sha256:6de3c3b31ee4b99ae0f262f73035d0eea42427dfcbaec14e7ffe4dc5ab42eb01 AS slim-base
 
 # --------------------------------------
 # full image
 # --------------------------------------
-FROM ghcr.io/renovatebot/base-image:13.78.1-full@sha256:e0d3d02dc075b33b9feb1420db6f2b0aeea53c994a1bdbbeb8ed2d57187e18f9 AS full-base
+FROM ghcr.io/renovatebot/base-image:13.78.8-full@sha256:9b61845ee5c9229d08d727f74411fafb51ccf9953b7bdbd6132ea54c6fe49bc4 AS full-base
 
 ENV RENOVATE_BINARY_SOURCE=global
 
 # --------------------------------------
 # build image
 # --------------------------------------
-FROM --platform=$BUILDPLATFORM ghcr.io/renovatebot/base-image:13.78.1@sha256:fcfba02cfa34c4e839ce00eeb661aec26a3048677888b48ab6bc64cf7c7a3ff7 AS build
+FROM --platform=$BUILDPLATFORM ghcr.io/renovatebot/base-image:13.78.8@sha256:6de3c3b31ee4b99ae0f262f73035d0eea42427dfcbaec14e7ffe4dc5ab42eb01 AS build
 
 # We want a specific node version here
 # renovate: datasource=github-releases packageName=containerbase/node-prebuild versioning=node
@@ -25,7 +25,7 @@ RUN install-tool node 24.18.0
 
 # corepack is too buggy 😞
 # renovate: datasource=npm
-RUN install-tool pnpm 11.15.1
+RUN install-tool pnpm 11.17.0
 
 WORKDIR /usr/local/renovate
 
