@@ -25,7 +25,7 @@ export const presets: Record<string, Preset> = {
   },
   minimumReleaseAgeCrate: {
     description:
-      "Wait until the crates.io crate version is three days old before raising the update. This a) introduces a short delay to allow for malware researchers and scanners to (possibly) detect any malicious behaviour in crates, and b) reduces the risk of upgrading to a newly published crate that its owner deletes during crates.io's initial 72-hour deletion window.",
+      "Wait until the Crate version is three days old before raising the update. This a) introduces a short delay to allow for malware researchers and scanners to (possibly) detect any malicious behaviour in crates, and b) reduces the risk of upgrading to a newly published crate that its owner deletes during crates.io's initial 72-hour deletion window.",
     packageRules: [
       {
         internalChecksFilter: 'strict',
