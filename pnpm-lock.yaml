@@ -8,12 +8,12 @@ settings:
 catalogs:
   default:
     tar:
-      specifier: 7.5.21
-      version: 7.5.21
+      specifier: 7.5.22
+      version: 7.5.22
 
 overrides:
   '@aws-sdk/xml-builder@3.972.4>fast-xml-parser': ^5.3.6
-  '@yarnpkg/core@4.5.0>tar': 7.5.21
+  '@yarnpkg/core@4.5.0>tar': 7.5.22
   esbuild: 0.28.1
   protobufjs@8.0.1: 8.7.1
   vite: 8.1.5
@@ -580,7 +580,7 @@ importers:
         version: 25.0.8(supports-color@7.2.0)(typescript@7.0.2)
       tar:
         specifier: 'catalog:'
-        version: 7.5.21
+        version: 7.5.22
       tmp-promise:
         specifier: 3.0.3
         version: 3.0.3
@@ -5365,8 +5365,8 @@ packages:
     resolution: {integrity: sha512-yEFYrVhod+hdNyx7g5Bnkkb0G6si8HJurOoOEgC8B/O0uXLHlaey/65KRv6cuWBNhBgHKAROVpc7QyYqE5gFng==}
     engines: {node: '>=20'}
 
-  tar@7.5.21:
-    resolution: {integrity: sha512-XdhtCvlMywwxpCW8YEq3lOXBJpUPTR2OHHcwLPO3HwsJqOHa2Ok/oJ7ruGzp+JrKoRPVCzJwAdEjqLW/vNRPHA==}
+  tar@7.5.22:
+    resolution: {integrity: sha512-MFO/QzvtAOmJbkhOaCTvbGcFN9L9b+JunIsDwaKljSOdcLMea3NJ1k9Usz/rjdfSXTq4dfzfeS7W4p4YOAAHeA==}
     engines: {node: '>=18'}
 
   temp-dir@3.0.0:
@@ -7833,7 +7833,7 @@ snapshots:
       p-limit: 2.3.0
       semver: 7.8.5
       strip-ansi: 6.0.1
-      tar: 7.5.21
+      tar: 7.5.22
       tinylogic: 2.0.0
       treeify: 1.1.0
       tslib: 2.8.1
@@ -9969,7 +9969,7 @@ snapshots:
       nopt: 10.0.1
       proc-log: 7.0.0
       semver: 7.8.5
-      tar: 7.5.21
+      tar: 7.5.22
       tinyglobby: 0.2.17
       undici: 8.7.0
       which: 7.0.0
@@ -10873,7 +10873,7 @@ snapshots:
 
   tagged-tag@1.0.0: {}
 
-  tar@7.5.21:
+  tar@7.5.22:
     dependencies:
       '@isaacs/fs-minipass': 4.0.1
       chownr: 3.0.0
