@@ -17,15 +17,15 @@ import {
 import { handleRegistryContent, handleRegistryUrl } from './handlers.ts';
 import { qPlugins } from './plugins.ts';
 
-const cleanupTmpContentSpec = (ctx: Ctx): Ctx => {
+function cleanupTmpContentSpec(ctx: Ctx): Ctx {
   ctx.tmpRegistryContent = [];
   return ctx;
-};
+}
 
-const qContentDescriptorSpec = (
+function qContentDescriptorSpec(
   methodName: RegExp,
   matcher: q.QueryBuilder<Ctx, parser.Node>,
-): q.QueryBuilder<Ctx, parser.Node> => {
+): q.QueryBuilder<Ctx, parser.Node> {
   return q
     .sym<Ctx>(methodName, storeVarToken)
     .handler((ctx) => storeInTokenMap(ctx, 'methodName'))
@@ -41,13 +41,13 @@ const qContentDescriptorSpec = (
         search: q.begin<Ctx>().join(matcher).end(),
       }),
     );
-};
+}
 
 // includeModule('foo')
 // excludeModuleByRegex('bar')
-const qContentDescriptor = (
+function qContentDescriptor(
   mode: 'include' | 'exclude',
-): q.QueryBuilder<Ctx, parser.Node> => {
+): q.QueryBuilder<Ctx, parser.Node> {
   return q
     .alt<Ctx>(
       qContentDescriptorSpec(
@@ -66,7 +66,7 @@ const qContentDescriptor = (
       ),
     )
     .handler(handleRegistryContent);
-};
+}
 
 // content { includeModule('foo'); excludeModule('bar') }
 const qRegistryContent = q.sym<Ctx>('content').tree({

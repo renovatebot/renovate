@@ -1,7 +1,10 @@
 import { codeBlock } from 'common-tags';
 import { Fixtures } from '~test/fixtures.ts';
 import { GlobalConfig } from '../../../config/global.ts';
-import type { RepoGlobalConfig } from '../../../config/types.ts';
+import type {
+  InternalGlobalConfigOptions,
+  RepoGlobalConfig,
+} from '../../../config/types.ts';
 import { compile } from '../../../util/template/index.ts';
 import { BitbucketTagsDatasource } from '../../datasource/bitbucket-tags/index.ts';
 import { DockerDatasource } from '../../datasource/docker/index.ts';
@@ -14,7 +17,9 @@ import type { ExtractConfig } from '../types.ts';
 import { extractAllPackageFiles, extractPackageFile } from './index.ts';
 
 const config: ExtractConfig = {};
-const adminConfig: RepoGlobalConfig = { localDir: '' };
+const adminConfig: RepoGlobalConfig & InternalGlobalConfigOptions = {
+  localDir: '',
+};
 const fixtureHelmSource = Fixtures.get('helmSource.yaml');
 const fixtureHelmChart = Fixtures.get('helmChart.yaml');
 const fixtureHelmChartRefRelease = Fixtures.get('helmChartRefRelease.yaml');

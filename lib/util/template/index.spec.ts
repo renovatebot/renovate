@@ -1,4 +1,5 @@
 import { getOptions } from '../../config/options/index.ts';
+import { pkg } from '../../expose.ts';
 import * as _execUtils from '../exec/utils.ts';
 import * as template from './index.ts';
 
@@ -38,6 +39,11 @@ describe('util/template/index', () => {
     };
     const output = template.compile(userTemplate, input);
     expect(output).toBe('github token = ""');
+  });
+
+  it('exposes renovateVersion to every template, without needing to pass it explicitly', () => {
+    const output = template.compile('{{renovateVersion}}', {});
+    expect(output).toBe(pkg.version);
   });
 
   it('containsString', () => {
@@ -148,7 +154,9 @@ describe('util/template/index', () => {
 
   it('to Object passing illegal number of elements', () => {
     const userTemplate = "{{{ toJSON (toObject 'foo') }}}";
-    const outputFunc = () => template.compile(userTemplate, {});
+    function outputFunc() {
+      return template.compile(userTemplate, {});
+    }
     expect(outputFunc).toThrow('Must contain an even number of elements');
   });
 

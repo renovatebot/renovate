@@ -1,11 +1,11 @@
-import { generateKeyPairSync, sign as signPayload } from 'node:crypto';
-import { gzipSync } from 'node:zlib';
+import { generateKeyPair, sign as signPayload } from 'node:crypto';
+import { promisify } from 'node:util';
+import { gzip as _gzip } from 'node:zlib';
 import protobuf from 'protobufjs';
 import upath from 'upath';
-import { mockDeep } from 'vitest-mock-extended';
 import { Fixtures } from '~test/fixtures.ts';
+import { hostRules } from '~test/host-rules.ts';
 import * as httpMock from '~test/http-mock.ts';
-import { hostRules } from '~test/util.ts';
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages.ts';
 import * as memCache from '../../../util/cache/memory/index.ts';
 import { getPkgReleases } from '../index.ts';
@@ -17,12 +17,12 @@ import { Signed as SignedCodec } from './v2/signed.ts';
 const certifiResponse = Fixtures.get('certifi.json');
 const privatePackageResponse = Fixtures.get('private_package.json');
 
-vi.mock('../../../util/host-rules.ts', () => mockDeep());
-
 const baseUrl = 'https://hex.pm/api';
 const datasource = HexDatasource.id;
+const gzip = promisify(_gzip);
+
 const { privateKey: testPrivateKey, publicKey: testPublicKey } =
-  generateKeyPairSync('rsa', {
+  await promisify(generateKeyPair)('rsa', {
     modulusLength: 2048,
     privateKeyEncoding: {
       format: 'pem',
@@ -86,7 +86,7 @@ async function makeV2Response(
     payload,
     signature,
   });
-  return gzipSync(signed);
+  return await gzip(signed);
 }
 
 function mockPublicKeyUnavailable(registryUrl: string): void {
@@ -100,8 +100,6 @@ function mockPublicKey(registryUrl: string, publicKey: string): void {
 describe('modules/datasource/hex/index', () => {
   beforeEach(() => {
     memCache.init();
-    hostRules.hosts.mockReturnValue([]);
-    hostRules.find.mockReturnValue({});
   });
 
   afterEach(() => {
@@ -177,7 +175,7 @@ describe('modules/datasource/hex/index', () => {
         .get('/packages/certifi')
         .reply(401);
 
-      hostRules.find.mockReturnValueOnce({
+      hostRules.add({
         authType: 'Token-Only',
         token: 'abc',
       });
@@ -209,7 +207,6 @@ describe('modules/datasource/hex/index', () => {
         .scope(baseUrl)
         .get('/packages/certifi')
         .reply(200, certifiResponse);
-      hostRules.find.mockReturnValueOnce({});
       const res = await getPkgReleases({
         datasource,
         packageName: 'certifi',
@@ -224,7 +221,6 @@ describe('modules/datasource/hex/index', () => {
         .scope(baseUrl)
         .get('/packages/certifi')
         .reply(200, certifiResponse);
-      hostRules.find.mockReturnValueOnce({});
       const res = await getPkgReleases({
         datasource,
         packageName: 'certifi',
@@ -242,7 +238,7 @@ describe('modules/datasource/hex/index', () => {
         .get('/repos/renovate_test/packages/private_package')
         .reply(200, privatePackageResponse);
 
-      hostRules.find.mockReturnValueOnce({
+      hostRules.add({
         authType: 'Token-Only',
         token: 'abc',
       });
