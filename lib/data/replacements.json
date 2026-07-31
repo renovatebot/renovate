@@ -39,6 +39,7 @@
       "replacements:opencost-registry-move",
       "replacements:parcel-css-to-lightningcss",
       "replacements:passport-saml",
+      "replacements:react-native-magic-modal-to-magic-modal",
       "replacements:react-query-devtools-to-scoped",
       "replacements:react-query-to-scoped",
       "replacements:react-scripts-ts-to-react-scripts",
@@ -987,6 +988,17 @@
         "matchPackageNames": ["passport-saml"],
         "replacementName": "@node-saml/passport-saml",
         "replacementVersion": "4.0.4"
+      }
+    ]
+  },
+  "react-native-magic-modal-to-magic-modal": {
+    "description": "`react-native-magic-modal` was renamed to `magic-modal` in version 10.0.0. The old name is deprecated but still published at the same version, depending on and re-exporting `magic-modal`.",
+    "packageRules": [
+      {
+        "matchCurrentVersion": ">=10.0.0",
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["react-native-magic-modal"],
+        "replacementName": "magic-modal"
       }
     ]
   },
