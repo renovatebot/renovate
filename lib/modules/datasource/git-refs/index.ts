@@ -43,6 +43,17 @@ export class GitRefsDatasource extends GitDatasource {
 
     const uniqueRefs = [...new Set(refs)];
 
+    // A ref value can exist as both a tag and a branch. Prefer treating it
+    // as a tag when ambiguous, matching Nix's own resolution behavior for
+    // refs written without an explicit refs/heads/ or refs/tags/ qualifier.
+    function gitRefType(ref: string, refs: RawRefs[]): 'tags' | 'heads' {
+      return refs.some(
+        (rawRef) => rawRef.type === 'tags' && rawRef.value === ref,
+      )
+        ? 'tags'
+        : 'heads';
+    }
+
     const sourceUrl = packageName
       .replace(regEx(/\.git$/), '')
       .replace(regEx(/\/$/), '');
@@ -52,6 +63,7 @@ export class GitRefsDatasource extends GitDatasource {
       releases: uniqueRefs.map((ref) => ({
         version: ref,
         gitRef: ref,
+        gitRefType: gitRefType(ref, rawRefs),
         newDigest: rawRefs.find((rawRef) => rawRef.value === ref)?.hash,
       })),
     };
