@@ -89,6 +89,7 @@ Renovate normally cleans up its own branches and PRs once it decides they are no
 Depending on the state of the branch, Renovate either autocloses the PR and deletes the branch, or leaves the branch alone.
 
 If someone other than Renovate modified the branch, Renovate will not destroy that work by autoclosing the PR and deleting the branch.
+
 Instead, Renovate:
 
 - Appends ` - abandoned` to the PR title
