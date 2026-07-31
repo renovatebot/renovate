@@ -113,6 +113,22 @@ describe('modules/manager/gemspec/extract', () => {
     ]);
   });
 
+  it('skips interpolated dependency names', () => {
+    const content = codeBlock`
+      %w[core model controller].each do |variant|
+        spec.add_dependency "my-framework-#{variant}", '~> 1.0'
+      end
+    `;
+    expect(extractPackageFile(content)?.deps).toEqual([
+      {
+        depName: 'my-framework-#{variant}',
+        depType: 'runtime',
+        datasource: 'rubygems',
+        skipReason: 'contains-variable',
+      },
+    ]);
+  });
+
   it('ignores commented-out dependency declarations', () => {
     const content = codeBlock`
       Gem::Specification.new do |spec|

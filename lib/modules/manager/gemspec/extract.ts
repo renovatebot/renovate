@@ -35,7 +35,9 @@ export function extractPackageFile(
       datasource: RubygemsDatasource.id,
     };
     const rest = stripTail(match.groups.rest);
-    if (rest !== '' && constraintsRegex.test(rest)) {
+    if (depName.includes('#{')) {
+      dep.skipReason = 'contains-variable';
+    } else if (rest !== '' && constraintsRegex.test(rest)) {
       // keep the surrounding quotes so ruby versioning can re-quote each part
       dep.currentValue = rest.replace(regEx(/^\s*,\s*/), '');
     } else {
