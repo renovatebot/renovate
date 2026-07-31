@@ -36,7 +36,7 @@ export const knownDepTypes = [
   {
     depType: 'uv.lock',
     description:
-      'Transitive dependency resolved in `uv.lock`. Only surfaced for `osvVulnerabilityAlerts`; never updated routinely.',
+      'Transitive dependency resolved in `uv.lock`. Only extracted when `osvVulnerabilityAlerts` is enabled, and only updated to remediate a vulnerability.',
   },
 ] as const satisfies readonly DepTypeMetadata[];
 

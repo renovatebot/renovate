@@ -1,6 +1,7 @@
 import { logger } from '../../../../logger/index.ts';
 import { findLocalSiblingOrParent } from '../../../../util/fs/index.ts';
 import type {
+  ExtractConfig,
   PackageDependency,
   UpdateArtifact,
   UpdateArtifactsResult,
@@ -28,6 +29,7 @@ export abstract class BasePyProjectProcessor implements PyProjectProcessor {
     project: PyProject,
     deps: PackageDependency[],
     packageFile: string,
+    config?: ExtractConfig,
   ): Promise<PackageDependency[]>;
 
   async getLockfiles(

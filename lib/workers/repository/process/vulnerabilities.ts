@@ -272,6 +272,13 @@ export class Vulnerabilities {
         }
       }
 
+      this.unskipLockfileOnlyDependency(
+        dep,
+        vulnerabilities,
+        packageFileConfig.manager,
+        packageFileConfig.packageFile,
+      );
+
       return { vulnerabilities, versioningApi };
     } catch (err) {
       logger.warn(
@@ -280,6 +287,40 @@ export class Vulnerabilities {
       );
       return null;
     }
+  }
+
+  private unskipLockfileOnlyDependency(
+    dep: PackageDependency,
+    vulnerabilities: Vulnerability[],
+    manager: string | undefined,
+    packageFile: string | undefined,
+  ): void {
+    if (dep.skipReason !== 'lockfile-only') {
+      return;
+    }
+
+    const remediable = vulnerabilities.filter(({ fixedVersion }) =>
+      isNonEmptyString(fixedVersion),
+    );
+    if (isEmptyArray(remediable)) {
+      return;
+    }
+
+    logger.debug(
+      {
+        packageFile,
+        depName: dep.depName,
+        packageName: dep.packageName,
+        manager,
+        datasource: dep.datasource,
+        vulnerabilities: remediable.map(
+          ({ vulnerability }) => vulnerability.id,
+        ),
+      },
+      `Clearing skipReason=lockfile-only for ${dep.depName}, as a fixed version is available`,
+    );
+    delete dep.skipReason;
+    delete dep.skipStage;
   }
 
   private skipMaliciousPackages(
@@ -600,12 +641,6 @@ export class Vulnerabilities {
       matchCurrentVersion: depVersion,
       versioning,
       allowedVersions: fixedVersion,
-      /**
-       * Remediate even when updates are otherwise disabled for the dependency,
-       * e.g. transitive deps surfaced from a lockfile. Consistent with how
-       * vulnerability alerts already override schedule and minimumReleaseAge.
-       */
-      enabled: true,
       isVulnerabilityAlert: true,
       vulnerabilitySeverity: severityDetails.severityLevel,
       prBodyNotes: this.generatePrBodyNotes(vulnerability, affected),

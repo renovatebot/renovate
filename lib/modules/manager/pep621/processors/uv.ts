@@ -19,13 +19,14 @@ import { parseUrl } from '../../../../util/url.ts';
 import { PypiDatasource } from '../../../datasource/pypi/index.ts';
 import { getGoogleAuthHostRule } from '../../../datasource/util.ts';
 import type {
+  ExtractConfig,
   PackageDependency,
   UpdateArtifact,
   UpdateArtifactsResult,
   Upgrade,
 } from '../../types.ts';
 import { applyGitSource } from '../../util.ts';
-import { type PyProject, UvLockfile } from '../schema.ts';
+import { type PyProject, type UvLockedPackage, UvLockfile } from '../schema.ts';
 import { depTypes } from '../utils.ts';
 
 import { BasePyProjectProcessor } from './abstract.ts';
@@ -136,6 +137,7 @@ export class UvProcessor extends BasePyProjectProcessor {
     project: PyProject,
     deps: PackageDependency[],
     packageFile: string,
+    config?: ExtractConfig,
   ): Promise<PackageDependency[]> {
     const lockFileName = await findLocalSiblingOrParent(
       packageFile,
@@ -160,41 +162,58 @@ export class UvProcessor extends BasePyProjectProcessor {
               dep.lockedVersion = lockFileMapping[packageName].version;
             }
           }
-          const knownPackageNames = new Set(
-            deps.map((dep) => dep.packageName).filter(isString),
-          );
 
-          // Surface transitive (lockfile-only) packages as disabled
-          // dependencies. They produce no routine updates, but
-          // `osvVulnerabilityAlerts` can still match them and re-enable a
-          // targeted `uv lock --upgrade-package` when a fixed version exists.
-          for (const [packageName, locked] of Object.entries(lockFileMapping)) {
-            if (knownPackageNames.has(packageName)) {
-              continue;
-            }
-            // Only registry-sourced packages can be remediated by name. Skip
-            // the workspace root and any virtual/editable/path/git packages.
-            if (!locked.registryUrl) {
-              continue;
-            }
-            const indirectDep: PackageDependency = {
-              packageName,
-              depName: packageName,
-              depType: depTypes.uvIndirectDependencies,
-              datasource: PypiDatasource.id,
-              lockedVersion: locked.version,
-              enabled: false,
-            };
-            if (!defaultPypiRegistries.has(locked.registryUrl)) {
-              indirectDep.registryUrls = [locked.registryUrl];
-            }
-            deps.push(indirectDep);
+          // Transitive dependencies are only of use to `osvVulnerabilityAlerts`,
+          // and a large `uv.lock` holds a lot of them, so don't surface any
+          // unless that feature is enabled.
+          if (config?.osvVulnerabilityAlerts) {
+            this.addTransitiveDeps(deps, lockFileMapping);
           }
         }
       }
     }
 
     return Promise.resolve(deps);
+  }
+
+  /**
+   * Appends the packages which only exist in `uv.lock` to the given dependencies.
+   *
+   * They are skipped, so they produce no routine updates, but
+   * `osvVulnerabilityAlerts` can still match them and clear the skip to get a
+   * targeted `uv lock --upgrade-package` when a fixed version exists.
+   */
+  private addTransitiveDeps(
+    deps: PackageDependency[],
+    lockFileMapping: Record<string, UvLockedPackage>,
+  ): void {
+    const declaredPackageNames = new Set(
+      deps.map((dep) => dep.packageName).filter(isString),
+    );
+
+    for (const [packageName, locked] of Object.entries(lockFileMapping)) {
+      if (declaredPackageNames.has(packageName)) {
+        continue;
+      }
+      // Only registry-sourced packages can be remediated by name. Skip the
+      // workspace root and any virtual/editable/path/git packages.
+      if (!locked.registryUrl) {
+        continue;
+      }
+      const transitiveDep: PackageDependency = {
+        packageName,
+        depName: packageName,
+        depType: depTypes.uvTransitiveDependencies,
+        datasource: PypiDatasource.id,
+        lockedVersion: locked.version,
+        skipReason: 'lockfile-only',
+        skipStage: 'extract',
+      };
+      if (!defaultPypiRegistries.has(locked.registryUrl)) {
+        transitiveDep.registryUrls = [locked.registryUrl];
+      }
+      deps.push(transitiveDep);
+    }
   }
 
   async updateArtifacts(
