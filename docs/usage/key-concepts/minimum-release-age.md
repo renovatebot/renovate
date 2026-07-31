@@ -131,6 +131,14 @@ The recommendation is to set `internalChecksFilter=strict` when using `minimumRe
 
 Depending on your manager, datasource and the given package(s), it may be that some updates provide a release timestamp that can have `minimumReleaseAge` enforced.
 
+<!--
+  Keep the update types marked as not supported (❌) below in sync with the
+  `unsupportedUpdateTypeRules` carve-outs in
+  `lib/config/presets/internal/security.preset.ts`, so the
+  `security:minimumReleaseAge*` presets keep raising those update types (with a
+  warning) rather than holding them back indefinitely.
+-->
+
 <!-- markdownlint-disable MD060 -->
 
 | Update Type           | Supports `minimumReleaseAge`? | Notes                                                                                                     |
