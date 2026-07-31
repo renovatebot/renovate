@@ -79,7 +79,7 @@ If you're an advanced user, you may use the [`dependabot-core` repository](https
 
 ### Compatibility score badges
 
-Renovate shows four _Merge Confidence_ badges in its PRs:
+Renovate shows five _Merge Confidence_ badges in its PRs:
 
 - **Lib Year**: The age of the current package version
 - **Age**: The age of the update package version
