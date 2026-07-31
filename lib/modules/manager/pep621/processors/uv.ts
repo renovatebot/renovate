@@ -321,6 +321,17 @@ function generateCMD(updatedDeps: Upgrade[]): string {
         deps.push(dep.depName!);
         break;
       }
+      case depTypes.uvTransitiveDependencies: {
+        // Nothing in `pyproject.toml` constrains a transitive dependency, so an
+        // unpinned upgrade would resolve to the newest release instead of the
+        // version we determined, e.g. the lowest one fixing a vulnerability.
+        deps.push(
+          dep.newVersion
+            ? `${dep.packageName!}==${dep.newVersion}`
+            : dep.packageName!,
+        );
+        break;
+      }
       case depTypes.buildSystemRequires:
         // build requirements are not locked in the lock files, no need to update.
         break;
