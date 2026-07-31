@@ -119,7 +119,9 @@ function isSingleVersion(version: string): boolean {
 }
 
 // If this is left as an alias, inputs like "17.04.0" throw errors
-export const isVersion = (input: string): boolean => isValid(input);
+export function isVersion(input: string): boolean {
+  return isValid(input);
+}
 
 export { getSatisfyingVersion, isVersion as isValid };
 

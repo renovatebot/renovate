@@ -1,8 +1,7 @@
-import { mockDeep } from 'vitest-mock-extended';
+import { hostRules } from '~test/host-rules.ts';
 import * as httpMock from '~test/http-mock.ts';
 import { partial } from '~test/util.ts';
 import { PAGE_NOT_FOUND_ERROR } from '../../../constants/error-messages.ts';
-import * as _hostRules from '../../../util/host-rules.ts';
 import { Http } from '../../../util/http/index.ts';
 import {
   dockerDatasourceId,
@@ -13,11 +12,7 @@ import {
 } from './common.ts';
 import type { OciHelmConfig } from './schema.ts';
 
-const hostRules = vi.mocked(_hostRules);
-
 const http = new Http(dockerDatasourceId);
-
-vi.mock('../../../util/host-rules.ts', () => mockDeep());
 
 describe('modules/datasource/docker/common', () => {
   describe('getRegistryRepository', () => {
@@ -66,7 +61,7 @@ describe('modules/datasource/docker/common', () => {
     });
 
     it('supports insecure registryUrls', () => {
-      hostRules.find.mockReturnValueOnce({ insecureRegistry: true });
+      hostRules.add({ insecureRegistry: true });
       const res = getRegistryRepository(
         'prefix/image',
         'my.local.registry/prefix',
@@ -126,11 +121,10 @@ describe('modules/datasource/docker/common', () => {
 
   describe('getAuthHeaders', () => {
     beforeEach(() => {
-      hostRules.find.mockReturnValue({
+      hostRules.add({
         username: 'some-username',
         password: 'some-password',
       });
-      hostRules.hosts.mockReturnValue([]);
     });
 
     it('throw page not found exception', async () => {
@@ -221,8 +215,8 @@ describe('modules/datasource/docker/common', () => {
         .scope('https://my.local.registry')
         .get('/v2/', undefined, { badheaders: ['authorization'] })
         .reply(401, '', { 'www-authenticate': 'Authenticate you must' });
-      hostRules.hosts.mockReturnValue([]);
-      hostRules.find.mockReturnValue({
+      hostRules.clear();
+      hostRules.add({
         authType: 'some-authType',
         token: 'some-token',
       });
@@ -246,8 +240,8 @@ describe('modules/datasource/docker/common', () => {
         .scope('https://my.local.registry')
         .get('/v2/', undefined, { badheaders: ['authorization'] })
         .reply(401, '', { 'www-authenticate': 'Authenticate you must' });
-      hostRules.hosts.mockReturnValue([]);
-      hostRules.find.mockReturnValue({
+      hostRules.clear();
+      hostRules.add({
         token: 'some-token',
       });
 
@@ -270,7 +264,6 @@ describe('modules/datasource/docker/common', () => {
         .scope('https://my.local.registry')
         .get('/v2/', undefined, { badheaders: ['authorization'] })
         .reply(401, '', { 'www-authenticate': 'Authenticate you must' });
-      hostRules.hosts.mockReturnValue([]);
       httpMock.clear(false);
 
       httpMock

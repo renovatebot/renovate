@@ -34,6 +34,18 @@ describe('modules/manager/index', () => {
     }
   });
 
+  describe('lockFileMaintenanceIsDelegatedToPackageManager', () => {
+    for (const [name, mgr] of [...manager.getManagers()].filter(
+      ([_, mgr]) => mgr.supportsLockFileMaintenance,
+    )) {
+      it(`has lockFileMaintenanceIsDelegatedToPackageManager for ${name}`, () => {
+        expect(mgr.lockFileMaintenanceIsDelegatedToPackageManager).toSatisfy(
+          (value) => typeof value === 'boolean' || typeof value === 'string',
+        );
+      });
+    }
+  });
+
   describe('get()', () => {
     it('gets something', () => {
       expect(manager.get('dockerfile', 'extractPackageFile')).not.toBeNull(); // gets built-in manager

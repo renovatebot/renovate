@@ -8,7 +8,7 @@ vi.mock('glob', () => ({
   glob: vi.fn().mockImplementation(() => Promise.resolve(['file1', 'file2'])),
 }));
 vi.mock('../../../util/exec/common.ts');
-const execSync = vi.mocked(_rawExec);
+const execMock = vi.mocked(_rawExec);
 
 describe('modules/platform/local/scm', () => {
   let localFs: LocalFs;
@@ -42,6 +42,10 @@ describe('modules/platform/local/scm', () => {
       expect(await localFs.getBranchUpdateDate('')).toBeNull();
     });
 
+    it('getAllBranchUpdateDates', async () => {
+      expect(await localFs.getAllBranchUpdateDates()).toEqual({});
+    });
+
     it('deleteBranch', async () => {
       expect(await localFs.deleteBranch('')).toBeUndefined();
     });
@@ -59,7 +63,7 @@ describe('modules/platform/local/scm', () => {
 
   describe('getFileList', () => {
     it('should return file list using git', async () => {
-      execSync.mockReturnValueOnce(
+      execMock.mockReturnValueOnce(
         Promise.resolve(
           partial<ExecResult>({
             stdout: 'file1\nfile2',
@@ -68,13 +72,13 @@ describe('modules/platform/local/scm', () => {
       );
       expect(await localFs.getFileList()).toHaveLength(2);
 
-      expect(execSync).toHaveBeenCalledExactlyOnceWith('git ls-files', {
+      expect(execMock).toHaveBeenCalledExactlyOnceWith('git ls-files', {
         maxBuffer: 1024 * 1024 * 10,
       });
     });
 
     it('should return file list using glob', async () => {
-      execSync.mockImplementationOnce(() => {
+      execMock.mockImplementationOnce(() => {
         throw new Error();
       });
 

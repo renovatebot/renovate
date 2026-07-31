@@ -1,5 +1,6 @@
 import { codeBlock } from 'common-tags';
-import { fakeSha, git, hostRules, partial } from '~test/util.ts';
+import { hostRules } from '~test/host-rules.ts';
+import { fakeSha, git, partial } from '~test/util.ts';
 import { REPOSITORY_ARCHIVED } from '../../../constants/error-messages.ts';
 import type { BranchStatus } from '../../../types/index.ts';
 import { repoFingerprint } from '../util.ts';
@@ -14,6 +15,7 @@ import type {
   GerritProjectInfo,
   GerritRevisionInfo,
 } from './schema.ts';
+import { configureScm } from './scm.ts';
 import {
   REQUEST_DETAILS_FOR_PRS,
   TAG_PULL_REQUEST_BODY,
@@ -33,7 +35,6 @@ const codeReviewLabel: GerritLabelTypeInfo = {
   default_value: 0,
 };
 
-vi.mock('../../../util/host-rules.ts');
 vi.mock('./client.ts');
 const clientMock = vi.mocked(_client);
 
@@ -41,7 +42,7 @@ describe('modules/platform/gerrit/index', () => {
   const currentRevision = '0123456789abcdef0123456789abcdef01234567';
 
   beforeEach(async () => {
-    hostRules.find.mockReturnValue({
+    hostRules.add({
       username: 'user',
       password: 'pass',
     });
@@ -487,6 +488,7 @@ describe('modules/platform/gerrit/index', () => {
     });
 
     it('createPr() - with autoApprove', async () => {
+      configureScm('test/repo', { 'Code-Review': codeReviewLabel });
       git.pushCommit.mockResolvedValueOnce(true);
       const change = partial<GerritChange>({
         _number: 123456,

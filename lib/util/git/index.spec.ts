@@ -1,3 +1,4 @@
+import { codeBlock } from 'common-tags';
 import fs from 'fs-extra';
 import { DateTime } from 'luxon';
 import type { PushResult } from 'simple-git';
@@ -137,6 +138,26 @@ describe('util/git/index', { timeout: 30000 }, () => {
     await repo.addConfig('user.email', 'author2@example.com');
     await repo.commit('second commit', undefined, { '--allow-empty': null });
 
+    await repo.checkoutBranch('renovate/deeply/nested', defaultBranch);
+
+    // Renovate author, foreign committer (e.g. rebase/amend by someone else)
+    await repo.checkoutBranch('renovate/different_committer', defaultBranch);
+    await repo.addConfig('user.email', 'Jest@example.com');
+    await fs.writeFile(`${base.path}/committer_file`, 'test');
+    await repo.add(['committer_file']);
+    await repo
+      .env({ GIT_COMMITTER_EMAIL: 'someone-else@example.com' })
+      .commit('committed by someone else');
+
+    // Renovate author, GitHub platformCommit committer
+    await repo.checkoutBranch('renovate/platform_commit', defaultBranch);
+    await repo.addConfig('user.email', 'Jest@example.com');
+    await fs.writeFile(`${base.path}/platform_commit_file`, 'test');
+    await repo.add(['platform_commit_file']);
+    await repo
+      .env({ GIT_COMMITTER_EMAIL: 'noreply@github.com' })
+      .commit('platform api commit');
+
     await repo.checkout(defaultBranch);
   });
 
@@ -159,6 +180,7 @@ describe('util/git/index', { timeout: 30000 }, () => {
     });
     git.setUserRepoConfig({ branchPrefix: 'renovate/' });
     git.setGitAuthor('Jest <Jest@example.com>');
+    git.setPlatformIgnoredAuthors([]);
     setNoVerify([]);
     await git.syncGit();
     // override some local git settings for better testing
@@ -444,11 +466,47 @@ describe('util/git/index', { timeout: 30000 }, () => {
       ).toBeTrue();
     });
 
+    it('should return true when committer is different from author', async () => {
+      expect(
+        await git.isBranchModified(
+          'renovate/different_committer',
+          defaultBranch,
+        ),
+      ).toBeTrue();
+    });
+
+    it('should return false for ignored platformCommit committer', async () => {
+      git.setPlatformIgnoredAuthors(['noreply@github.com']);
+      expect(
+        await git.isBranchModified('renovate/platform_commit', defaultBranch),
+      ).toBeFalse();
+    });
+
     it('should return value stored in modifiedCacheResult', async () => {
       modifiedCache.getCachedModifiedResult.mockReturnValue(true);
       expect(
         await git.isBranchModified('renovate/future_branch', defaultBranch),
       ).toBeTrue();
+    });
+
+    it('should not be affected by new commits on the base branch', async () => {
+      // Add a commit to the base branch from a different author,
+      // causing the branches to diverge
+      const local = simpleGit(tmpDir.path);
+      await local.checkout(defaultBranch);
+      await local.addConfig('user.email', 'other-dev@example.com');
+      await fs.writeFile(`${tmpDir.path}/diverge_file`, 'diverge');
+      await local.add(['diverge_file']);
+      await local.commit('diverge commit');
+      await local.push('origin', defaultBranch);
+      // Re-init so Renovate picks up the new origin state
+      await git.initRepo({ url: origin.path });
+      git.setGitAuthor('Jest <Jest@example.com>');
+      await git.syncGit();
+
+      expect(
+        await git.isBranchModified('renovate/future_branch', defaultBranch),
+      ).toBeFalse();
     });
   });
 
@@ -559,6 +617,49 @@ describe('util/git/index', { timeout: 30000 }, () => {
     });
   });
 
+  describe('getAllBranchUpdateDates()', () => {
+    it('returns update dates for every remote branch', async () => {
+      const dates = await git.getAllBranchUpdateDates();
+
+      expect(dates['renovate/past_branch']).toBeInstanceOf(DateTime);
+
+      expect(dates[defaultBranch]).toBeInstanceOf(DateTime);
+      expect(dates[defaultBranch].toISO()).toEqual(
+        masterCommitDate.toISOString(),
+      );
+    });
+
+    it('returns the same date as getBranchUpdateDate for a given branch', async () => {
+      const dates = await git.getAllBranchUpdateDates();
+
+      const batchDate = dates['renovate/equal_branch'];
+      const singleDate = await git.getBranchUpdateDate('renovate/equal_branch');
+
+      expect(batchDate.toISO()).toBe(singleDate!.toISO());
+    });
+
+    it('excludes the origin/HEAD symbolic ref', async () => {
+      const dates = await git.getAllBranchUpdateDates();
+
+      expect(Object.keys(dates).sort()).toEqual([
+        'develop',
+        defaultBranch,
+        'renovate/binary-file',
+        'renovate/branch_with_multiple_authors',
+        'renovate/custom_author',
+        'renovate/deeply/nested',
+        'renovate/different_committer',
+        'renovate/equal_branch',
+        'renovate/future_branch',
+        'renovate/hidden-unicode',
+        'renovate/modified_branch',
+        'renovate/nested_files',
+        'renovate/past_branch',
+        'renovate/platform_commit',
+      ]);
+    });
+  });
+
   describe('getBranchFiles(branchName)', () => {
     it('detects changed files compared to current base branch', async () => {
       const file: FileChange = {
@@ -621,12 +722,12 @@ describe('util/git/index', { timeout: 30000 }, () => {
 
   describe('mergeToLocal(branchName)', () => {
     it('should perform a branch merge without push', async () => {
-      expect(fs.existsSync(`${tmpDir.path}/future_file`)).toBeFalse();
+      expect(await fs.pathExists(`${tmpDir.path}/future_file`)).toBeFalse();
       const pushSpy = vi.spyOn(SimpleGit.prototype, 'push');
 
       await git.mergeToLocal('renovate/future_branch');
 
-      expect(fs.existsSync(`${tmpDir.path}/future_file`)).toBeTrue();
+      expect(await fs.pathExists(`${tmpDir.path}/future_file`)).toBeTrue();
       expect(pushSpy).toHaveBeenCalledTimes(0);
     });
 
@@ -648,13 +749,13 @@ describe('util/git/index', { timeout: 30000 }, () => {
       const local = simpleGit(tmpDir.path);
       await local.checkout(defaultBranch);
 
-      expect(fs.existsSync(`${tmpDir.path}/local_only_file`)).toBeFalse();
+      expect(await fs.pathExists(`${tmpDir.path}/local_only_file`)).toBeFalse();
       const fetchSpy = vi.spyOn(SimpleGit.prototype, 'fetch');
       const pushSpy = vi.spyOn(SimpleGit.prototype, 'push');
 
       await git.mergeToLocal('renovate/local_only_branch');
 
-      expect(fs.existsSync(`${tmpDir.path}/local_only_file`)).toBeTrue();
+      expect(await fs.pathExists(`${tmpDir.path}/local_only_file`)).toBeTrue();
       expect(fetchSpy).not.toHaveBeenCalled();
       expect(pushSpy).not.toHaveBeenCalled();
     });
@@ -826,6 +927,66 @@ describe('util/git/index', { timeout: 30000 }, () => {
         .map(([mode, type, _hash, name]) => [mode, type, name]);
       expect(files).toContainEqual(['100644', 'blob', 'past_file']);
       expect(files).toContainEqual(['120000', 'blob', 'future_link']);
+    });
+
+    it('adds trailers as the final block of the commit message', async () => {
+      const file: FileChange = {
+        type: 'addition',
+        path: 'some-trailer-file',
+        contents: 'some new-contents',
+      };
+
+      const commit = await git.commitFiles({
+        branchName: 'renovate/branch_with_trailers',
+        files: [file],
+        message: ['Update something', 'Some commit body'],
+        trailers: [
+          'Signed-off-by: Renovate Bot <bot@renovateapp.com>',
+          'Co-authored-by: First Contributor <first@example.com>',
+          'Co-authored-by: Second Contributor <second@example.com>',
+        ],
+      });
+
+      expect(commit).not.toBeNull();
+      const tmpGit = simpleGit(tmpDir.path);
+      const parsedTrailers = await tmpGit.raw([
+        'log',
+        '-1',
+        '--format=%(trailers:only)',
+        commit!,
+      ]);
+      expect(parsedTrailers.trim()).toBe(codeBlock`
+        Signed-off-by: Renovate Bot <bot@renovateapp.com>
+        Co-authored-by: First Contributor <first@example.com>
+        Co-authored-by: Second Contributor <second@example.com>
+      `);
+    });
+
+    it('adds trailers when commit message is a string', async () => {
+      const file: FileChange = {
+        type: 'addition',
+        path: 'some-string-trailer-file',
+        contents: 'some new-contents',
+      };
+
+      const commit = await git.commitFiles({
+        branchName: 'renovate/branch_with_string_message_trailers',
+        files: [file],
+        message: 'Update something',
+        trailers: ['Signed-off-by: Renovate Bot <bot@renovateapp.com>'],
+      });
+
+      expect(commit).not.toBeNull();
+      const tmpGit = simpleGit(tmpDir.path);
+      const parsedTrailers = await tmpGit.raw([
+        'log',
+        '-1',
+        '--format=%(trailers:only)',
+        commit!,
+      ]);
+      expect(parsedTrailers.trim()).toBe(
+        'Signed-off-by: Renovate Bot <bot@renovateapp.com>',
+      );
     });
 
     it('deletes file', async () => {
@@ -1430,8 +1591,8 @@ describe('util/git/index', { timeout: 30000 }, () => {
   });
 
   describe('Renovate non-branch refs', () => {
-    const lsRenovateRefs = async (): Promise<string[]> =>
-      (
+    async function lsRenovateRefs(): Promise<string[]> {
+      return (
         await simpleGit(tmpDir.path).raw([
           'ls-remote',
           'origin',
@@ -1441,6 +1602,7 @@ describe('util/git/index', { timeout: 30000 }, () => {
         .split(newlineRegex)
         .map((line) => line.replace(regEx(/[0-9a-f]+\s+/i), ''))
         .filter(Boolean);
+    }
 
     it('creates renovate ref in default section', async () => {
       const commit = git.getBranchCommit('develop')!;

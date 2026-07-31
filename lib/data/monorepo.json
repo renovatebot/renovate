@@ -642,7 +642,10 @@
     "quartznet": "https://github.com/quartznet/quartznet",
     "radix-ui-primitives": "https://github.com/radix-ui/primitives",
     "reach-ui": "https://github.com/reach/reach-ui",
-    "react": "https://github.com/facebook/react",
+    "react": [
+      "https://github.com/facebook/react",
+      "https://github.com/react/react"
+    ],
     "react-admin": "https://github.com/marmelab/react-admin",
     "react-apollo": "https://github.com/apollographql/react-apollo",
     "react-dnd": "https://github.com/react-dnd/react-dnd",
@@ -792,6 +795,7 @@
       "https://github.com/xunit/xunit",
       "https://github.com/xunit/xunit.analyzers"
     ],
+    "yamldotnet": "https://github.com/aaubry/YamlDotNet",
     "yarn": "https://github.com/yarnpkg/berry",
     "zag-js": "https://github.com/chakra-ui/zag",
     "zxcvbn-ts": "https://github.com/zxcvbn-ts/zxcvbn",

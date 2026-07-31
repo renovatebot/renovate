@@ -3,21 +3,18 @@ import { ECRClient, GetAuthorizationTokenCommand } from '@aws-sdk/client-ecr';
 import { mockClient } from 'aws-sdk-client-mock';
 import { codeBlock } from 'common-tags';
 import * as _googleAuth from 'google-auth-library';
-import { mockDeep } from 'vitest-mock-extended';
+import { hostRules } from '~test/host-rules.ts';
 import * as httpMock from '~test/http-mock.ts';
 import { logger, partial } from '~test/util.ts';
 import { range } from '../../../../lib/util/range.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages.ts';
-import * as _hostRules from '../../../util/host-rules.ts';
 import { getDigest, getPkgReleases } from '../index.ts';
 import { DockerHubCache } from './dockerhub-cache.ts';
 import { DockerDatasource } from './index.ts';
 
-const hostRules = vi.mocked(_hostRules);
 const googleAuth = vi.mocked(_googleAuth, true);
 
-vi.mock('../../../util/host-rules.ts', () => mockDeep());
 vi.mock('google-auth-library');
 
 const ecrMock = mockClient(ECRClient);
@@ -168,12 +165,12 @@ describe('modules/datasource/docker/index', () => {
   beforeEach(() => {
     GlobalConfig.reset();
     ecrMock.reset();
-    hostRules.find.mockReturnValue({
+    hostRules.add({
       username: 'some-username',
       password: 'some-password',
     });
-    hostRules.hosts.mockReturnValue([]);
     delete process.env.RENOVATE_X_DOCKER_HUB_TAGS_DISABLE;
+    delete process.env.RENOVATE_X_DOCKER_HUB_DISABLE_LABEL_LOOKUP;
   });
 
   describe('getDigest', () => {
@@ -224,7 +221,7 @@ describe('modules/datasource/docker/index', () => {
         )
         .reply(200, { token: 'some-token' });
 
-      hostRules.find.mockReturnValue({});
+      hostRules.clear();
       const res = await getDigest(
         {
           datasource: 'docker',
@@ -296,7 +293,8 @@ describe('modules/datasource/docker/index', () => {
         .reply(200)
         .head('/library/some-dep/manifests/latest')
         .reply(200, '', { 'docker-content-digest': 'some-digest' });
-      hostRules.find.mockReturnValue({ insecureRegistry: true });
+      hostRules.clear();
+      hostRules.add({ insecureRegistry: true });
       const res = await getDigest({
         datasource: 'docker',
         packageName: 'some-dep',
@@ -424,7 +422,8 @@ describe('modules/datasource/docker/index', () => {
           .matchHeader('authorization', 'Basic test_token')
           .reply(200, '', { 'docker-content-digest': 'some-digest' });
 
-        hostRules.find.mockReturnValue({
+        hostRules.clear();
+        hostRules.add({
           username: 'some-username',
           password: 'some-password',
           token: 'some-session-token',
@@ -509,7 +508,7 @@ describe('modules/datasource/docker/index', () => {
     it.each(amazonHosts)(
       'continues without token if ECR authentication fails for host $host',
       async ({ host }) => {
-        hostRules.find.mockReturnValue({});
+        hostRules.clear();
         httpMock.scope(`https://${host}/v2`).get('/').reply(401, '', {
           'www-authenticate': 'Basic realm="My Private Docker Registry Server"',
         });
@@ -539,7 +538,8 @@ describe('modules/datasource/docker/index', () => {
           .matchHeader('authorization', 'Basic QVdTOnNvbWUtcGFzc3dvcmQ=')
           .reply(200, '', { 'docker-content-digest': 'some-digest' });
 
-        hostRules.find.mockReturnValue({
+        hostRules.clear();
+        hostRules.add({
           username: 'AWS',
           password: 'some-password',
         });
@@ -579,7 +579,7 @@ describe('modules/datasource/docker/index', () => {
         ),
       );
 
-      hostRules.find.mockReturnValue({});
+      hostRules.clear();
       const res = await getDigest(
         {
           datasource: 'docker',
@@ -614,7 +614,7 @@ describe('modules/datasource/docker/index', () => {
         ),
       );
 
-      hostRules.find.mockReturnValue({});
+      hostRules.clear();
       const res = await getDigest(
         {
           datasource: 'docker',
@@ -704,7 +704,7 @@ describe('modules/datasource/docker/index', () => {
         .head('/google.com/some-project/some-package/manifests/some-tag')
         .reply(200, '', { 'docker-content-digest': 'some-digest' });
 
-      hostRules.find.mockReturnValue({});
+      hostRules.clear();
       const res = await getDigest(
         {
           datasource: 'docker',
@@ -726,7 +726,7 @@ describe('modules/datasource/docker/index', () => {
         .head('/some-project/some-repo/some-package/manifests/some-tag')
         .reply(200, '', { 'docker-content-digest': 'some-digest' });
 
-      hostRules.find.mockReturnValue({});
+      hostRules.clear();
       const res = await getDigest(
         {
           datasource: 'docker',
@@ -740,7 +740,7 @@ describe('modules/datasource/docker/index', () => {
     });
 
     it('continues without token if Google ADC fails for gcr', async () => {
-      hostRules.find.mockReturnValue({});
+      hostRules.clear();
       httpMock.scope(gcrUrl).get('/').reply(401, '', {
         'www-authenticate': 'Basic realm="My Private Docker Registry Server"',
       });
@@ -764,7 +764,7 @@ describe('modules/datasource/docker/index', () => {
     });
 
     it('continues without token if Google ADC fails for gar', async () => {
-      hostRules.find.mockReturnValue({});
+      hostRules.clear();
       httpMock.scope(garUrl).get('/').reply(401, '', {
         'www-authenticate': 'Basic realm="My Private Docker Registry Server"',
       });
@@ -1557,7 +1557,7 @@ describe('modules/datasource/docker/index', () => {
           'docker-content-digest': newDigest,
         });
 
-      hostRules.find.mockReturnValue({});
+      hostRules.clear();
       const res = await getDigest(
         {
           datasource: 'docker',
@@ -1660,7 +1660,7 @@ describe('modules/datasource/docker/index', () => {
           'docker-content-digest': newDigest,
         });
 
-      hostRules.find.mockReturnValue({});
+      hostRules.clear();
       const res = await getDigest(
         {
           datasource: 'docker',
@@ -1781,6 +1781,7 @@ describe('modules/datasource/docker/index', () => {
     });
 
     it('uses custom max pages', async () => {
+      process.env.RENOVATE_X_DOCKER_HUB_DISABLE_LABEL_LOOKUP = 'true';
       GlobalConfig.set({ dockerMaxPages: 2 });
       process.env.RENOVATE_X_DOCKER_HUB_TAGS_DISABLE = 'true';
       httpMock
@@ -2406,6 +2407,7 @@ describe('modules/datasource/docker/index', () => {
     });
 
     it('Uses Docker Hub tags for registry-1.docker.io', async () => {
+      process.env.RENOVATE_X_DOCKER_HUB_DISABLE_LABEL_LOOKUP = 'true';
       httpMock
         .scope(dockerHubUrl)
         .get('/library/node/tags?page_size=1000&ordering=last_updated')
@@ -2452,6 +2454,7 @@ describe('modules/datasource/docker/index', () => {
     });
 
     it('Uses custom page limit for Docker hub repository tags', async () => {
+      process.env.RENOVATE_X_DOCKER_HUB_DISABLE_LABEL_LOOKUP = 'true';
       GlobalConfig.set({ dockerMaxPages: 2 });
       httpMock
         .scope(dockerHubUrl)
@@ -2502,6 +2505,7 @@ describe('modules/datasource/docker/index', () => {
     });
 
     it('adds library/ prefix for Docker Hub (implicit)', async () => {
+      process.env.RENOVATE_X_DOCKER_HUB_DISABLE_LABEL_LOOKUP = 'true';
       const tags = ['1.0.0'];
       httpMock
         .scope(dockerHubUrl)
@@ -2530,6 +2534,7 @@ describe('modules/datasource/docker/index', () => {
     });
 
     it('adds library/ prefix for Docker Hub (explicit)', async () => {
+      process.env.RENOVATE_X_DOCKER_HUB_DISABLE_LABEL_LOOKUP = 'true';
       httpMock
         .scope(dockerHubUrl)
         .get('/library/node/tags?page_size=1000&ordering=last_updated')
@@ -2576,6 +2581,7 @@ describe('modules/datasource/docker/index', () => {
     });
 
     it('sets releaseTimestamp on digests from Docker Hub', async () => {
+      process.env.RENOVATE_X_DOCKER_HUB_DISABLE_LABEL_LOOKUP = 'true';
       httpMock
         .scope(dockerHubUrl)
         .get('/library/node/tags?page_size=1000&ordering=last_updated')
@@ -2696,7 +2702,7 @@ describe('modules/datasource/docker/index', () => {
 
     it('returns null if no auth', async () => {
       process.env.RENOVATE_X_DOCKER_HUB_TAGS_DISABLE = 'true';
-      hostRules.find.mockReturnValue({});
+      hostRules.clear();
       httpMock
         .scope(baseUrl)
         .get('/library/node/tags/list?n=10000')
@@ -3306,6 +3312,60 @@ describe('modules/datasource/docker/index', () => {
             'https://github.com/bitnami/charts/tree/main/bitnami/harbor',
         },
       );
+    });
+
+    it('uses descriptor annotations for docker hub library images', async () => {
+      httpMock
+        .scope('https://index.docker.io/v2')
+        .get('/')
+        .reply(200)
+        .get('/library/convertigo/manifests/8.4.3')
+        .reply(200, {
+          schemaVersion: 2,
+          mediaType: 'application/vnd.oci.image.index.v1+json',
+          manifests: [
+            {
+              digest: 'sha256:attestation',
+              mediaType: 'application/vnd.oci.image.manifest.v1+json',
+              platform: {
+                architecture: 'unknown',
+                os: 'unknown',
+              },
+              annotations: {
+                'vnd.docker.reference.type': 'attestation-manifest',
+              },
+            },
+            {
+              digest: 'sha256:amd64',
+              mediaType: 'application/vnd.oci.image.manifest.v1+json',
+              platform: {
+                architecture: 'amd64',
+                os: 'linux',
+              },
+              annotations: {
+                'org.opencontainers.image.source':
+                  'https://github.com/convertigo/convertigo.git#7b29f6f312a4582ccc7dd325dcf8f425ac8dfdbd:docker/default',
+                'org.opencontainers.image.revision':
+                  '7b29f6f312a4582ccc7dd325dcf8f425ac8dfdbd',
+                'org.opencontainers.image.version': '8.4.3',
+              },
+            },
+          ],
+        });
+
+      expect(
+        await ds.getLabels(
+          'https://index.docker.io',
+          'library/convertigo',
+          '8.4.3',
+        ),
+      ).toEqual({
+        'org.opencontainers.image.source':
+          'https://github.com/convertigo/convertigo.git#7b29f6f312a4582ccc7dd325dcf8f425ac8dfdbd:docker/default',
+        'org.opencontainers.image.revision':
+          '7b29f6f312a4582ccc7dd325dcf8f425ac8dfdbd',
+        'org.opencontainers.image.version': '8.4.3',
+      });
     });
 
     it('uses annotations for docker hub', async () => {
