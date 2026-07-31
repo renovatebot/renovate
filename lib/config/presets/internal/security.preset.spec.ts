@@ -10,6 +10,7 @@ describe('config/presets/internal/security.preset', () => {
       expect.arrayContaining([
         'minimumReleaseAgeCrate',
         'minimumReleaseAgeNpm',
+        'minimumReleaseAgePypi',
       ]),
     );
   });
