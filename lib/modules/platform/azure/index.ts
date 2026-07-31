@@ -15,6 +15,7 @@ import {
 } from 'azure-devops-node-api/interfaces/GitInterfaces.js';
 import type { PolicyEvaluationRecord } from 'azure-devops-node-api/interfaces/PolicyInterfaces.js';
 import { PolicyEvaluationStatus } from 'azure-devops-node-api/interfaces/PolicyInterfaces.js';
+import { getConfig } from '../../../config/defaults.ts';
 import {
   REPOSITORY_ARCHIVED,
   REPOSITORY_EMPTY,
@@ -201,6 +202,7 @@ export async function initRepo({
   repository,
   cloneSubmodules,
   cloneSubmodulesFilter,
+  azureWorkItemType,
 }: RepoParams): Promise<RepoResult> {
   logger.debug(`initRepo("${repository}")`);
   config = { repository } as Config;
@@ -226,6 +228,7 @@ export async function initRepo({
 
   config.project = repo.project!.name!;
   config.projectId = repo.project!.id!;
+  config.workItemType = azureWorkItemType ?? getConfig().azureWorkItemType!;
   issueService = new IssueService(config);
   config.owner = '?owner?';
   logger.debug(`${repository} owner = ${config.owner}`);

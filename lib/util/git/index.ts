@@ -51,6 +51,7 @@ import {
   getCachedBehindBaseResult,
   setCachedBehindBaseResult,
 } from './behind-base-branch-cache.ts';
+import { formatCommitMessage } from './commit-trailers.ts';
 import { getNoVerify, simpleGitConfig } from './config.ts';
 import {
   getCachedConflictResult,
@@ -1261,7 +1262,7 @@ export async function getBranchLastCommitTime(
     if (errChecked) {
       throw errChecked;
     }
-    return new Date();
+    return DateTime.now().toJSDate();
   }
 }
 
@@ -1368,6 +1369,7 @@ export async function prepareCommit({
   branchName,
   files,
   message,
+  trailers,
   force = false,
 }: CommitFilesConfig): Promise<CommitResult | null> {
   const localDir = GlobalConfig.get('localDir');
@@ -1450,7 +1452,9 @@ export async function prepareCommit({
       commitOptions['--no-verify'] = null;
     }
 
-    const commitRes = await git.commit(message, [], commitOptions);
+    const commitMessage = formatCommitMessage(message, trailers);
+
+    const commitRes = await git.commit(commitMessage, [], commitOptions);
     if (
       isNonEmptyObject(commitRes.summary) &&
       commitRes.summary.changes === 0 &&

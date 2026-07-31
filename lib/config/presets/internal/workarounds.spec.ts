@@ -275,39 +275,45 @@ describe('config/presets/internal/workarounds', () => {
       });
 
       it('applies docker versioning for major-only current values', async () => {
-        const res = await applyPackageRules({
+        const res = await applyPackageRules<
+          PackageRuleInputConfig & Pick<PackageRule, 'allowedVersions'>
+        >({
           datasource: 'docker',
           depName: 'eclipse-temurin',
           packageName: 'eclipse-temurin',
           currentValue: '21-jre',
           packageRules,
-        } as PackageRuleInputConfig & Pick<PackageRule, 'allowedVersions'>);
+        });
 
         expect(res.versioning).toEqual('docker');
         expect(res.allowedVersions).toEqual('/^(?:8|11|17|21|25)(?:\\.|-|$)/');
       });
 
       it('keeps regex versioning for full-precision current values', async () => {
-        const res = await applyPackageRules({
+        const res = await applyPackageRules<
+          PackageRuleInputConfig & Pick<PackageRule, 'allowedVersions'>
+        >({
           datasource: 'docker',
           depName: 'eclipse-temurin',
           packageName: 'eclipse-temurin',
           currentValue: '21.0.9_10-jre',
           packageRules,
-        } as PackageRuleInputConfig & Pick<PackageRule, 'allowedVersions'>);
+        });
 
         expect(res.versioning).toEqual(javaRegexVersioning);
         expect(res.allowedVersions).toEqual('/^(?:8|11|17|21|25)(?:\\.|-|$)/');
       });
 
       it('keeps regex versioning for java-version major-only values', async () => {
-        const res = await applyPackageRules({
+        const res = await applyPackageRules<
+          PackageRuleInputConfig & Pick<PackageRule, 'allowedVersions'>
+        >({
           datasource: 'java-version',
           depName: 'java',
           packageName: 'java-jdk',
           currentValue: '21',
           packageRules,
-        } as PackageRuleInputConfig & Pick<PackageRule, 'allowedVersions'>);
+        });
 
         expect(res.versioning).toEqual(javaRegexVersioning);
       });

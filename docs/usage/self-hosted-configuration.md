@@ -163,6 +163,7 @@ Allowed options:
 | `goGenerate`    | Allows the `goGenerate` `postUpdateOption` to run after a go mod update.                      |
 | `gradleWrapper` | Allows using `./gradlew` or `gradle.bat` when performing updates with Gradle.                 |
 | `mise`          | Allows running any `mise` commands, for instance `mise lock` when updating `mise.lock` files. |
+| `pixi`          | Allows running `pixi lock` when updating `pixi.lock` files (`pixi` and `pep621` managers).    |
 
 ## `autodiscover`
 
