@@ -90,10 +90,10 @@ Depending on the state of the branch, Renovate either autocloses the PR and dele
 
 If someone other than Renovate modified the branch, Renovate will not destroy that work by autoclosing the PR and deleting the branch.
 
-Instead, Renovate:
+Instead, Renovate flags the PR as abandoned by:
 
-- Appends ` - abandoned` to the PR title
-- Adds a comment to the PR explaining that autoclosing was skipped
+- Appending ` - abandoned` to the PR title
+- Adding a comment to the PR explaining that autoclosing was skipped
 
 This tells you that Renovate no longer considers the branch or PR its own, and will not touch it again.
 
