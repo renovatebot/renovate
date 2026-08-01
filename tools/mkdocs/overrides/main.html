@@ -4,7 +4,8 @@
 <!-- https://ogp.me/ -->
 <!-- https://squidfunk.github.io/mkdocs-material/customization/#extending-the-theme -->
 {% block extrahead %}
-{% set og_title = page.title ~ ' - ' ~ config.site_name if page and page.title else config.site_name %}
+{% set og_page_title = page.meta.title if page and page.meta and page.meta.title else page.title %}
+{% set og_title = og_page_title ~ ' - ' ~ config.site_name if page and og_page_title else config.site_name %}
 {% set og_description = page.meta.description if page and page.meta and page.meta.description else config.site_description %}
 {% set og_image = config.site_url | trim('/') ~ '/assets/images/logo.png' %}
 <meta property="og:type" content="website">
