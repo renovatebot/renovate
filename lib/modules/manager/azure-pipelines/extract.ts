@@ -15,6 +15,7 @@ import type {
   AzurePipelines,
   Container,
   Deploy,
+  Deployment,
   Job,
   Jobs,
   Repository,
@@ -159,14 +160,16 @@ function extractDeploy(deploy: Deploy | undefined): PackageDependency[] {
 function extractJobs(jobs: Jobs | undefined): PackageDependency[] {
   const deps: PackageDependency[] = [];
   for (const jobOrDeployment of coerceArray(jobs)) {
-    if ('steps' in jobOrDeployment) {
-      deps.push(...extractJob(jobOrDeployment));
-    } else if (jobOrDeployment.strategy) {
-      const { strategy } = jobOrDeployment;
-      deps.push(...extractDeploy(strategy.canary));
-      deps.push(...extractDeploy(strategy.rolling));
-      deps.push(...extractDeploy(strategy.runOnce));
+    const deployment = jobOrDeployment as Deployment;
+    if (deployment.strategy) {
+      deps.push(...extractDeploy(deployment.strategy.canary));
+      deps.push(...extractDeploy(deployment.strategy.rolling));
+      deps.push(...extractDeploy(deployment.strategy.runOnce));
+      continue;
     }
+
+    const job = jobOrDeployment as Job;
+    deps.push(...extractJob(job));
   }
   return deps;
 }
