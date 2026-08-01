@@ -20,7 +20,7 @@ export interface Range {
   companion?: Range;
 }
 
-const parse = (range: string): Range => {
+function parse(range: string): Range {
   const regExp = regEx(
     /^(?<operator>[^\d\s]+)?(?<delimiter>\s*)(?<version>[0-9a-zA-Z-.]+)$/,
   );
@@ -38,7 +38,7 @@ const parse = (range: string): Range => {
     operator: '',
     delimiter: ' ',
   };
-};
+}
 
 /** Wrapper for {@link satisfies} for {@link Range} record. */
 export function satisfiesRange(ver: string, range: Range): boolean {
@@ -47,9 +47,8 @@ export function satisfiesRange(ver: string, range: Range): boolean {
       satisfies(ver, `${range.operator}${range.version}`) &&
       satisfiesRange(ver, range.companion)
     );
-  } else {
-    return satisfies(ver, `${range.operator}${range.version}`);
   }
+  return satisfies(ver, `${range.operator}${range.version}`);
 }
 
 /**
@@ -87,16 +86,15 @@ export function stringifyRanges(ranges: Range[]): string {
     .map((r) => {
       if (r.companion) {
         return `${r.operator}${r.delimiter}${r.version}, ${r.companion.operator}${r.companion.delimiter}${r.companion.version}`;
-      } else {
-        return `${r.operator}${r.delimiter}${r.version}`;
       }
+      return `${r.operator}${r.delimiter}${r.version}`;
     })
     .join(', ');
 }
 
 type GemRequirement = [string, Version];
 
-const ltr = (version: string, range: string): boolean => {
+function ltr(version: string, range: string): boolean {
   const gemVersion = create(version);
   if (!gemVersion) {
     logger.warn({ version }, `Invalid ruby version`);
@@ -127,6 +125,6 @@ const ltr = (version: string, range: string): boolean => {
   });
 
   return results.reduce((accumulator, value) => accumulator && value, true);
-};
+}
 
 export { ltr, parse };

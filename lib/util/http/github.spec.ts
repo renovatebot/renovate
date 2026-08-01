@@ -319,7 +319,7 @@ describe('util/http/github', () => {
       });
       async function fail(
         code: number,
-        body: any = undefined,
+        body?: any,
         headers: httpMock.ReplyHeaders = {},
       ) {
         const url = '/some-url';
@@ -436,7 +436,7 @@ describe('util/http/github', () => {
       it('when the rate limit is exceeded to GitHub Enterprise, but no host rules are set, a warn is logged', async () => {
         async function fail(
           code: number,
-          body: any = undefined,
+          body?: any,
           headers: httpMock.ReplyHeaders = {},
         ) {
           const url = '/some-url';
@@ -470,7 +470,8 @@ describe('util/http/github', () => {
         ).rejects.toThrow(PLATFORM_RATE_LIMIT_EXCEEDED);
 
         expect(logger.logger.once.warn).toHaveBeenCalledWith(
-          'Rate limit exceeded for github.enterprise.example.com, as no hostRules set for this host',
+          { host: 'github.enterprise.example.com' },
+          'Rate limit exceeded, as no hostRules set for this host',
         );
       });
 

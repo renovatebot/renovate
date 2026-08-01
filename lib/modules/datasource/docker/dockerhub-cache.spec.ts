@@ -65,10 +65,6 @@ function newCacheData(): DockerHubCacheData {
 }
 
 describe('modules/datasource/docker/dockerhub-cache', () => {
-  beforeEach(() => {
-    vi.resetAllMocks();
-  });
-
   const dockerRepository = 'foo/bar';
 
   it('initializes empty cache', async () => {

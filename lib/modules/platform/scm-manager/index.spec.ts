@@ -68,7 +68,6 @@ const renovatePr = mapPrFromScmToRenovate(pullRequest);
 describe('modules/platform/scm-manager/index', () => {
   beforeEach(() => {
     GlobalConfig.reset();
-    vi.resetAllMocks();
     hostRules.add({ token, username: user.name });
     scmPlatform.invalidatePrCache();
   });

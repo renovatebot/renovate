@@ -129,8 +129,8 @@ describe('modules/manager/npm/post-update/npm', () => {
     );
     expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
     expect(res.error).toBeFalse();
-    expect(res.lockFile).toMatchSnapshot();
-    expect(execSnapshots).toMatchSnapshot();
+    expect(res.lockFile).toMatchSnapshot('lockFile');
+    expect(execSnapshots).toMatchSnapshot('execSnapshots');
   });
 
   it('performs npm-shrinkwrap.json updates', async () => {

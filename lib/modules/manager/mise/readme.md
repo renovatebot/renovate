@@ -22,7 +22,7 @@ When a lock file is present:
 
 - Dependencies will have their `lockedVersion` extracted from the lock file
 - Renovate can update lock files when dependencies change
-- Lock file maintenance is supported via the `lockFileMaintenance` option
+- Lock file maintenance is supported via the `lockFileMaintenance` option. When the `mise` version Renovate runs supports it (see [safe mode](#trust-model-for-lock-file-updates) for how the version is detected), maintenance runs `mise lock --bump`, which advances fuzzy selectors (e.g. `node = "22"`) to the latest matching version rather than only refreshing existing locked versions.
 
 Renovate recognizes environment-specific lock files:
 
@@ -39,7 +39,15 @@ Running `mise lock` can execute repository-defined behavior, so Renovate treats 
 
 Self-hosted administrators must explicitly allow this path by including `mise` in the global [`allowedUnsafeExecutions`](../../../self-hosted-configuration.md#allowedunsafeexecutions) setting.
 
-When `mise` is allowed and an existing `mise.lock` is present, Renovate explicitly runs `mise trust` before `mise lock` from the repository checkout. This makes the trust step visible in logs and lets mise own any future trust behavior changes.
+Because mise lock can execute repository-defined scripts, Renovate treats lockfile refreshes as an unsafe execution and attempts to run mise in [safe mode](https://mise.jdx.dev/configuration/settings.html#safe).
+
+If mise does not support safe mode or version detection fails, Renovate blocks all mise operations.
+
+#### Allowing Unsafe Executions
+
+Self-hosted administrators can permit these operations by adding "mise" to the global [`allowedUnsafeExecutions`](../../../self-hosted-configuration.md#allowedunsafeexecutions) configuration.
+
+Once allowed, Renovate runs mise trust before mise lock when a mise.lock file is present. This exposes the trust step in execution logs and defers trust rules to mise.
 
 In particular:
 

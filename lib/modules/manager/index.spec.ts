@@ -34,6 +34,18 @@ describe('modules/manager/index', () => {
     }
   });
 
+  describe('lockFileMaintenanceIsDelegatedToPackageManager', () => {
+    for (const [name, mgr] of [...manager.getManagers()].filter(
+      ([_, mgr]) => mgr.supportsLockFileMaintenance,
+    )) {
+      it(`has lockFileMaintenanceIsDelegatedToPackageManager for ${name}`, () => {
+        expect(mgr.lockFileMaintenanceIsDelegatedToPackageManager).toSatisfy(
+          (value) => typeof value === 'boolean' || typeof value === 'string',
+        );
+      });
+    }
+  });
+
   describe('get()', () => {
     it('gets something', () => {
       expect(manager.get('dockerfile', 'extractPackageFile')).not.toBeNull(); // gets built-in manager
@@ -117,11 +129,9 @@ describe('modules/manager/index', () => {
         supportedDatasources: [],
       });
       expect(
-        await manager.extractAllPackageFiles('unknown', {} as any, []),
+        await manager.extractAllPackageFiles('unknown', {}, []),
       ).toBeNull();
-      expect(
-        await manager.extractAllPackageFiles('dummy', {} as any, []),
-      ).toBeNull();
+      expect(await manager.extractAllPackageFiles('dummy', {}, [])).toBeNull();
     });
 
     it('returns non-null', async () => {
@@ -131,7 +141,7 @@ describe('modules/manager/index', () => {
         extractAllPackageFiles: () => Promise.resolve([]),
       });
       expect(
-        await manager.extractAllPackageFiles('dummy', {} as any, []),
+        await manager.extractAllPackageFiles('dummy', {}, []),
       ).not.toBeNull();
     });
 

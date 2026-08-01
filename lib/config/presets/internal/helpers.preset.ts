@@ -126,10 +126,11 @@ export const presets: Record<string, Preset> = {
   },
   pinGitHubActionDigestsToSemver: {
     description: 'Convert pinned GitHub Action digests to SemVer.',
+    extends: ['helpers:pinGitHubActionDigests'],
     packageRules: [
       {
-        extends: ['helpers:pinGitHubActionDigests'],
         extractVersion: '^(?<version>v?\\d+\\.\\d+\\.\\d+)$',
+        matchDepTypes: ['action'],
         versioning:
           'regex:^v?(?<major>\\d+)(\\.(?<minor>\\d+)\\.(?<patch>\\d+))?$',
       },

@@ -38,7 +38,7 @@ describe('modules/manager/rust-toolchain/schema', () => {
     it('throws error for invalid TOML', () => {
       const toml = 'this is not valid toml [';
 
-      expect(() => RustToolchain.parse(toml)).toThrow();
+      expect(() => RustToolchain.parse(toml)).toThrow('Invalid TOML');
     });
 
     it('throws error for missing toolchain section', () => {
@@ -47,7 +47,9 @@ describe('modules/manager/rust-toolchain/schema', () => {
         channel = "1.89.1"
       `;
 
-      expect(() => RustToolchain.parse(toml)).toThrow();
+      expect(() => RustToolchain.parse(toml)).toThrow(
+        'Invalid input: expected object, received undefined',
+      );
     });
 
     it('throws error for missing channel field', () => {
@@ -56,7 +58,9 @@ describe('modules/manager/rust-toolchain/schema', () => {
         components = ["rustfmt"]
       `;
 
-      expect(() => RustToolchain.parse(toml)).toThrow();
+      expect(() => RustToolchain.parse(toml)).toThrow(
+        'Invalid input: expected string, received undefined',
+      );
     });
 
     it('throws error for non-string channel', () => {
@@ -65,7 +69,9 @@ describe('modules/manager/rust-toolchain/schema', () => {
         channel = 123
       `;
 
-      expect(() => RustToolchain.parse(toml)).toThrow();
+      expect(() => RustToolchain.parse(toml)).toThrow(
+        'Invalid input: expected string, received number',
+      );
     });
 
     it('throws error for empty channel', () => {
@@ -74,7 +80,9 @@ describe('modules/manager/rust-toolchain/schema', () => {
         channel = ""
       `;
 
-      expect(() => RustToolchain.parse(toml)).toThrow();
+      expect(() => RustToolchain.parse(toml)).toThrow(
+        'Too small: expected string to have >=1 characters',
+      );
     });
 
     it('parses nightly channel', () => {
