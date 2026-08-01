@@ -1,15 +1,21 @@
 import { isNotNullOrUndefined } from '../../../util/array.ts';
+import { regEx } from '../../../util/regex.ts';
 import { joinUrlParts, parseUrl } from '../../../util/url.ts';
 
 const REQUIRED_PARAMS = ['arch'];
 const OPTIONAL_PARAMS = ['branch', 'components'];
+const KNOWN_PARAMS = [...REQUIRED_PARAMS, ...OPTIONAL_PARAMS];
+
+// Parameter values become path segments verbatim, so anything which could escape
+// or reshape the resulting URL is rejected
+const validSegment = regEx(/^[A-Za-z0-9][A-Za-z0-9._+-]*$/);
 
 /**
  * Constructs the `APKINDEX` directory URLs from the given registry URL.
  *
  * @param registryUrl - The base URL of the registry, with the path segments encoded as query parameters.
  * @returns One URL per component, or an empty array if the registry URL cannot be parsed.
- * @throws Will throw an error if required parameters are missing from the URL.
+ * @throws Will throw an error if the query parameters are missing, unknown or malformed.
  *
  * @example
  * // Returns ['https://dl-cdn.alpinelinux.org/alpine/v3.19/main/x86_64',
@@ -23,20 +29,18 @@ export function constructComponentUrls(registryUrl: string): string[] {
       return [];
     }
 
-    validateUrlAndParams(url, REQUIRED_PARAMS);
+    validateParams(url);
 
-    const arch = url.searchParams.get('arch')!;
-    const branch = url.searchParams.get('branch');
+    const arch = validateSegment('arch', url.searchParams.get('arch')!);
+    const branch = getBranch(url);
     const components = getComponents(url);
 
-    // Clean up URL search parameters for constructing new URLs
-    [...REQUIRED_PARAMS, ...OPTIONAL_PARAMS].forEach((param) =>
-      url.searchParams.delete(param),
-    );
+    // Only the parameters describe the path, so anything else in the URL is dropped
+    const baseUrl = `${url.origin}${url.pathname}`;
 
     return components.map((component) =>
       joinUrlParts(
-        url.toString(),
+        baseUrl,
         ...[branch, component, arch].filter(isNotNullOrUndefined),
       ),
     );
@@ -48,18 +52,57 @@ export function constructComponentUrls(registryUrl: string): string[] {
 }
 
 /**
- * Validates that the required parameters are present in the URL.
+ * Validates that the required parameters are present, and that no unknown parameters are given.
+ *
+ * Unknown parameters are rejected so that a typo such as `component=main` fails loudly
+ * instead of being silently treated as a repository without components.
  *
  * @param url - The URL to validate.
- * @param requiredParams - The list of required query parameters.
- * @throws Will throw an error if a required parameter is missing.
+ * @throws Will throw an error if a required parameter is missing or an unknown parameter is present.
  */
-function validateUrlAndParams(url: URL, requiredParams: string[]): void {
-  for (const param of requiredParams) {
+function validateParams(url: URL): void {
+  for (const param of REQUIRED_PARAMS) {
     if (!url.searchParams.has(param)) {
       throw new Error(`Missing required query parameter '${param}'`);
     }
   }
+
+  for (const param of url.searchParams.keys()) {
+    if (!KNOWN_PARAMS.includes(param)) {
+      throw new Error(`Unknown query parameter '${param}'`);
+    }
+  }
+}
+
+/**
+ * Validates a single parameter value which is used as a path segment.
+ *
+ * @param param - The name of the query parameter, used for the error message.
+ * @param value - The value to validate.
+ * @returns The validated value.
+ * @throws Will throw an error if the value is not usable as a path segment.
+ */
+function validateSegment(param: string, value: string): string {
+  if (!validSegment.test(value)) {
+    throw new Error(`Invalid '${param}' query parameter: '${value}'`);
+  }
+
+  return value;
+}
+
+/**
+ * Retrieves the branch from the URL.
+ *
+ * Repositories such as Wolfi have no branch in their path, so `null` is returned
+ * when `branch` is absent.
+ *
+ * @param url - The URL to retrieve the branch from.
+ * @returns The branch, or `null` when there is none.
+ */
+function getBranch(url: URL): string | null {
+  const branch = url.searchParams.get('branch');
+
+  return branch === null ? null : validateSegment('branch', branch);
 }
 
 /**
@@ -76,7 +119,8 @@ function getComponents(url: URL): (string | undefined)[] {
     .get('components')
     ?.split(',')
     .map((component) => component.trim())
-    .filter((component) => component !== '');
+    .filter((component) => component !== '')
+    .map((component) => validateSegment('components', component));
 
   return components?.length ? components : [undefined];
 }

@@ -254,6 +254,86 @@ describe('modules/datasource/apk/index', () => {
       });
     });
 
+    it('should use the homepage of the first version which has one', async () => {
+      const archive = await createTarGz([
+        {
+          name: 'APKINDEX',
+          content: codeBlock`
+            P:bash
+            V:5.3-r1
+            t:1752770415
+
+            P:bash
+            V:5.3-r2
+            U:https://www.gnu.org/software/bash/
+            t:1752888034
+          `,
+        },
+      ]);
+
+      httpMock
+        .scope('https://packages.wolfi.dev')
+        .get('/os/x86_64/APKINDEX.tar.gz')
+        .reply(200, archive);
+
+      const res = await apkDatasource.getReleases({
+        packageName: 'bash',
+        registryUrl: 'https://packages.wolfi.dev/os?arch=x86_64',
+      });
+
+      expect(res).toEqual({
+        homepage: 'https://www.gnu.org/software/bash/',
+        registryUrl: 'https://packages.wolfi.dev/os?arch=x86_64',
+        releases: [
+          { version: '5.3-r1', releaseTimestamp: '2025-07-17T16:40:15.000Z' },
+          { version: '5.3-r2', releaseTimestamp: '2025-07-19T01:20:34.000Z' },
+        ],
+      });
+    });
+
+    it('should use the homepage of a later component when the first has none', async () => {
+      const mainArchive = await createTarGz([
+        {
+          name: 'APKINDEX',
+          content: ['P:bash', 'V:5.3-r1', 't:1752770415'].join('\n'),
+        },
+      ]);
+      const communityArchive = await createTarGz([
+        {
+          name: 'APKINDEX',
+          content: [
+            'P:bash',
+            'V:5.3-r2',
+            'U:https://www.gnu.org/software/bash/',
+            't:1752888034',
+          ].join('\n'),
+        },
+      ]);
+
+      httpMock
+        .scope('https://dl-cdn.alpinelinux.org')
+        .get('/alpine/v3.19/main/x86_64/APKINDEX.tar.gz')
+        .reply(200, mainArchive)
+        .get('/alpine/v3.19/community/x86_64/APKINDEX.tar.gz')
+        .reply(200, communityArchive);
+
+      const res = await apkDatasource.getReleases({
+        packageName: 'bash',
+        registryUrl:
+          'https://dl-cdn.alpinelinux.org/alpine?branch=v3.19&components=main,community&arch=x86_64',
+      });
+
+      expect(res).toEqual({
+        homepage: 'https://www.gnu.org/software/bash/',
+        registryUrl:
+          'https://dl-cdn.alpinelinux.org/alpine?branch=v3.19&components=main,community&arch=x86_64',
+        releases: [
+          { version: '5.3-r1', releaseTimestamp: '2025-07-17T16:40:15.000Z' },
+          { version: '5.3-r2', releaseTimestamp: '2025-07-19T01:20:34.000Z' },
+        ],
+      });
+    });
+
     it('should throw for a registry URL without arch', async () => {
       await expect(
         apkDatasource.getReleases({

@@ -1,4 +1,5 @@
 import { randomUUID } from 'node:crypto';
+import { isNonEmptyArray } from '@sindresorhus/is';
 import { extract as tarExtract } from 'tar';
 import upath from 'upath';
 import { logger } from '../../../logger/index.ts';
@@ -134,6 +135,8 @@ export class ApkDatasource extends Datasource {
         key: componentUrl,
         ttlMinutes: 60,
         fallback: true,
+        // Soft failures resolve to an empty list, which must not be cached as a valid index
+        shouldCacheResult: isNonEmptyArray,
       },
       () => this._getPackages(componentUrl),
     );

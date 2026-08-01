@@ -57,12 +57,66 @@ describe('modules/datasource/apk/url', () => {
       ]);
     });
 
+    it('drops anything else in the base URL', () => {
+      const registryUrl =
+        'https://dl-cdn.alpinelinux.org/alpine?branch=v3.19&components=main&arch=x86_64#fragment';
+
+      expect(constructComponentUrls(registryUrl)).toEqual([
+        'https://dl-cdn.alpinelinux.org/alpine/v3.19/main/x86_64',
+      ]);
+    });
+
     it('throws when arch is missing', () => {
       const registryUrl =
         'https://dl-cdn.alpinelinux.org/alpine?branch=v3.19&components=main';
 
       expect(() => constructComponentUrls(registryUrl)).toThrow(
         `Missing required query parameter 'arch'`,
+      );
+    });
+
+    it('throws for an unknown parameter', () => {
+      const registryUrl =
+        'https://dl-cdn.alpinelinux.org/alpine?branch=v3.19&components=main&arch=x86_64&token=secret';
+
+      expect(() => constructComponentUrls(registryUrl)).toThrow(
+        `Unknown query parameter 'token'`,
+      );
+    });
+
+    it('throws for a misspelt parameter instead of ignoring it', () => {
+      const registryUrl =
+        'https://dl-cdn.alpinelinux.org/alpine?branch=v3.19&component=main&arch=x86_64';
+
+      expect(() => constructComponentUrls(registryUrl)).toThrow(
+        `Unknown query parameter 'component'`,
+      );
+    });
+
+    it('throws for an arch which is not a usable path segment', () => {
+      const registryUrl =
+        'https://dl-cdn.alpinelinux.org/alpine?branch=v3.19&components=main&arch=../..';
+
+      expect(() => constructComponentUrls(registryUrl)).toThrow(
+        `Invalid 'arch' query parameter: '../..'`,
+      );
+    });
+
+    it('throws for a branch which is not a usable path segment', () => {
+      const registryUrl =
+        'https://dl-cdn.alpinelinux.org/alpine?branch=../../etc&components=main&arch=x86_64';
+
+      expect(() => constructComponentUrls(registryUrl)).toThrow(
+        `Invalid 'branch' query parameter: '../../etc'`,
+      );
+    });
+
+    it('throws for a component which is not a usable path segment', () => {
+      const registryUrl =
+        'https://dl-cdn.alpinelinux.org/alpine?branch=v3.19&components=main,../..&arch=x86_64';
+
+      expect(() => constructComponentUrls(registryUrl)).toThrow(
+        `Invalid 'components' query parameter: '../..'`,
       );
     });
 

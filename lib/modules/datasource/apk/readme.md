@@ -24,6 +24,7 @@ To use an APK repository with the datasource, you must set a properly formatted 
 !!! note
   Renovate does not fetch the `registryUrl` as-is.
   It combines the base URL with these parameters to build the actual index URLs, for example `<base>/<branch>/<component>/<arch>/APKINDEX.tar.gz`.
+  Only the parameters above are accepted, so that a typo fails loudly instead of being ignored.
 
 **Examples**:
 
