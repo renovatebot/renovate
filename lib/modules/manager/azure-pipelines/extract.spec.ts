@@ -4,7 +4,7 @@ import { GlobalConfig } from '../../../config/global.ts';
 import { AzurePipelinesTasksDatasource } from '../../datasource/azure-pipelines-tasks/index.ts';
 import {
   extractAzurePipelinesTasks,
-  extractContainerValue,
+  extractContainer,
   extractRepository,
   parseAzurePipelines,
 } from './extract.ts';
@@ -186,7 +186,7 @@ describe('modules/manager/azure-pipelines/extract', () => {
   describe('extractContainer()', () => {
     it('should extract container information', () => {
       expect(
-        extractContainerValue({
+        extractContainer({
           image: 'ubuntu:16.04',
         }),
       ).toMatchObject({
@@ -507,6 +507,28 @@ describe('modules/manager/azure-pipelines/extract', () => {
       ]);
     });
 
+    it('should return null when task has no version', () => {
+      const packageFile = codeBlock`
+        steps:
+        - task: Bash_3
+      `;
+      const res = extractPackageFile(packageFile, azurePipelinesFilename, {
+        repository: 'repo',
+      });
+      expect(res).toBeNull();
+    });
+
+    it('should return null when job has neither steps nor strategy', () => {
+      const packageFile = codeBlock`
+        jobs:
+        - job: build
+      `;
+      const res = extractPackageFile(packageFile, azurePipelinesFilename, {
+        repository: 'repo',
+      });
+      expect(res).toBeNull();
+    });
+
     it('should return null when task alias used', () => {
       const packageFile = codeBlock`
         steps:
@@ -629,6 +651,90 @@ describe('modules/manager/azure-pipelines/extract', () => {
         steps:
         - \${{ parameters.mySteps }}
         - task: Bash@3
+      `;
+      const res = extractPackageFile(packageFile, azurePipelinesFilename, {
+        repository: 'repo',
+      });
+      expect(res?.deps).toEqual([
+        {
+          depName: 'Bash',
+          currentValue: '3',
+          datasource: AzurePipelinesTasksDatasource.id,
+        },
+      ]);
+    });
+
+    it('should extract deployments wrapped in a template expression conditional', () => {
+      const packageFile = codeBlock`
+        jobs:
+        - \${{ if eq(parameters.environment, 'prod') }}:
+          - deployment: deploy
+            strategy:
+              runOnce:
+                deploy:
+                  steps:
+                    - task: Bash@3
+      `;
+      const res = extractPackageFile(packageFile, azurePipelinesFilename, {
+        repository: 'repo',
+      });
+      expect(res?.deps).toEqual([
+        {
+          depName: 'Bash',
+          currentValue: '3',
+          datasource: AzurePipelinesTasksDatasource.id,
+        },
+      ]);
+    });
+
+    it('should extract jobs and stages without a name', () => {
+      const packageFile = codeBlock`
+        stages:
+        - jobs:
+          - steps:
+            - task: Bash@3
+      `;
+      const res = extractPackageFile(packageFile, azurePipelinesFilename, {
+        repository: 'repo',
+      });
+      expect(res?.deps).toEqual([
+        {
+          depName: 'Bash',
+          currentValue: '3',
+          datasource: AzurePipelinesTasksDatasource.id,
+        },
+      ]);
+    });
+
+    it('should ignore simple insertion expressions and extract remaining jobs', () => {
+      const packageFile = codeBlock`
+        jobs:
+        - \${{ parameters.myJobs }}
+        - job: build
+          steps:
+            - task: Bash@3
+      `;
+      const res = extractPackageFile(packageFile, azurePipelinesFilename, {
+        repository: 'repo',
+      });
+      expect(res?.deps).toEqual([
+        {
+          depName: 'Bash',
+          currentValue: '3',
+          datasource: AzurePipelinesTasksDatasource.id,
+        },
+      ]);
+    });
+
+    it('should ignore simple insertion expressions and extract remaining stages', () => {
+      const packageFile = codeBlock`
+        stages:
+        - \${{ parameters.myStages }}
+        - stage: build
+          jobs:
+            - job: build
+              steps:
+                - task: Bash@3
       `;
       const res = extractPackageFile(packageFile, azurePipelinesFilename, {
         repository: 'repo',
