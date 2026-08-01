@@ -5,7 +5,46 @@ runs:
   using: 'composite'
 
   steps:
-    - name: Set Up contained image store
+    - run: df -h
+      shell: bash
+
+    - name: Check for old vm with low disk space
+      id: check
+      shell: bash
+      run: |
+        if [[ -e /dev/sdb1 ]]; then
+          echo "::warning::We're on old vm, running cleanup"
+          echo "do-cleanup=true" >> "$GITHUB_OUTPUT"
+        else
+          echo "::notice::We're on new vm, no cleanup required"
+          echo "do-cleanup=false" >> "$GITHUB_OUTPUT"
+        fi
+
+    # Some runner vm's are smaller than others for unknown reasons
+    # https://github.com/orgs/community/discussions/199328
+    # To avoid disk space issues when performing a multi-platform docker build, we can clear up some disk space ahead of time
+    - name: Free Disk Space
+      if: ${{ steps.check.outputs.do-cleanup == 'true' }}
+      uses: jlumbroso/free-disk-space@54081f138730dfa15788a46383842cd2f914a1be # v1.3.1
+      with:
+        # we're likely already using some of the globally installed tools
+        tool-cache: false
+        # there are no images by default
+        docker-images: false
+        # but we're definitely not using these
+        android: true
+        dotnet: true
+        haskell: true
+        # there is no swap storage anymore
+        swap-storage: false
+
+        large-packages: true # breaks docker cross platform support
+
+    - run: df -h
+      if: ${{ steps.check.outputs.do-cleanup == 'true' }}
+      shell: bash
+
+    - name: Set up containerd image store
       shell: bash
       run: |
         if [ ! -f /etc/docker/daemon.json ]; then

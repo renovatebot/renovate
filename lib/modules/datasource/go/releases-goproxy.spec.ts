@@ -1,14 +1,10 @@
 import { codeBlock } from 'common-tags';
-import { mockDeep } from 'vitest-mock-extended';
 import { Fixtures } from '~test/fixtures.ts';
+import { hostRules } from '~test/host-rules.ts';
 import * as httpMock from '~test/http-mock.ts';
-import * as _hostRules from '../../../util/host-rules.ts';
 import { GithubReleasesDatasource } from '../github-releases/index.ts';
 import { GithubTagsDatasource } from '../github-tags/index.ts';
 import { GoProxyDatasource } from './releases-goproxy.ts';
-
-const hostRules = vi.mocked(_hostRules);
-vi.mock('../../../util/host-rules.ts', () => mockDeep());
 
 const datasource = new GoProxyDatasource();
 
@@ -19,10 +15,6 @@ describe('modules/datasource/go/releases-goproxy', () => {
   );
 
   const githubGetTags = vi.spyOn(GithubTagsDatasource.prototype, 'getReleases');
-
-  beforeEach(() => {
-    hostRules.find.mockReturnValue({});
-  });
 
   it('encodeCase', () => {
     expect(datasource.encodeCase('foo')).toBe('foo');
@@ -168,6 +160,51 @@ describe('modules/datasource/go/releases-goproxy', () => {
       });
     });
 
+    it('resolves sourceUrl from goproxy Origin without calling the vanity domain', async () => {
+      process.env.GOPROXY = baseUrl;
+
+      httpMock
+        .scope(`${baseUrl}/k8s.io/api`)
+        .get('/@v/list')
+        .reply(
+          200,
+          codeBlock`
+            v0.28.0 2023-08-15T19:57:34Z
+            v0.36.3 2026-07-23T01:42:44Z
+          `,
+        )
+        .get('/@latest')
+        .reply(200, {
+          Version: 'v0.36.3',
+          Time: '2026-07-23T01:42:44Z',
+          Origin: {
+            VCS: 'git',
+            URL: 'https://github.com/kubernetes/api.git',
+          },
+        })
+        .get('/v2/@v/list')
+        .reply(404);
+
+      const res = await datasource.getReleases({
+        packageName: 'k8s.io/api',
+      });
+
+      expect(res).toEqual({
+        releases: [
+          {
+            version: 'v0.28.0',
+            releaseTimestamp: '2023-08-15T19:57:34.000Z',
+          },
+          {
+            version: 'v0.36.3',
+            releaseTimestamp: '2026-07-23T01:42:44.000Z',
+          },
+        ],
+        sourceUrl: 'https://github.com/kubernetes/api',
+        tags: { latest: 'v0.36.3' },
+      });
+    });
+
     it('handles timestamp fetch errors', async () => {
       process.env.GOPROXY = baseUrl;
 
@@ -209,7 +246,7 @@ describe('modules/datasource/go/releases-goproxy', () => {
       'handles pipe fallback when abortOnError is $abortOnError',
       async ({ abortOnError }: { abortOnError: boolean }) => {
         process.env.GOPROXY = `https://example.com|${baseUrl}`;
-        hostRules.find.mockReturnValue({ abortOnError });
+        hostRules.add({ abortOnError });
 
         httpMock
           .scope('https://example.com/github.com/google/btree')
@@ -428,7 +465,7 @@ describe('modules/datasource/go/releases-goproxy', () => {
       'handles major releases with abortOnError is $abortOnError',
       async ({ abortOnError }: { abortOnError: boolean }) => {
         process.env.GOPROXY = baseUrl;
-        hostRules.find.mockReturnValue({ abortOnError });
+        hostRules.add({ abortOnError });
 
         httpMock
           .scope(`${baseUrl}/github.com/google/btree`)

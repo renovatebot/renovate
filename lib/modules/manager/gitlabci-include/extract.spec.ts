@@ -49,10 +49,12 @@ describe('modules/manager/gitlabci-include/extract', () => {
     });
 
     it('ignores includes without project and file keys', () => {
-      const includeWithoutProjectRef = `include:
-      - 'https://gitlab.com/mikebryant/include-source-example.yml'
-      - remote: 'https://gitlab.com/mikebryant/include-source-example.yml'
-      - local: mikebryant/include-source-example`;
+      const includeWithoutProjectRef = codeBlock`
+        include:
+              - 'https://gitlab.com/mikebryant/include-source-example.yml'
+              - remote: 'https://gitlab.com/mikebryant/include-source-example.yml'
+              - local: mikebryant/include-source-example
+      `;
       const res = extractPackageFile(includeWithoutProjectRef);
       expect(res).toBeNull();
     });

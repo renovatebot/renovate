@@ -100,9 +100,3 @@ export const envMock = {
   full: fullEnvMock,
   filtered: filteredEnvMock,
 };
-
-// reset exec mock, otherwise there can be some left over from previous test
-beforeEach(() => {
-  // maybe not mocked
-  exec.mockReset?.();
-});

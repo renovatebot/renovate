@@ -8,6 +8,7 @@ import { PackageHttpCacheProvider } from '../../../util/http/cache/package-http-
 import type { Http } from '../../../util/http/index.ts';
 import type { HttpOptions } from '../../../util/http/types.ts';
 import { regEx } from '../../../util/regex.ts';
+import { DeepNullish } from '../../../util/schema-utils/index.ts';
 import { asTimestamp } from '../../../util/timestamp.ts';
 import { joinUrlParts } from '../../../util/url.ts';
 import type { Release, ReleaseResult } from '../types.ts';
@@ -46,24 +47,24 @@ const PackageSource = z
         }
         return { sourceUrl, sourceDirectory };
       }),
-    z
-      .object({
-        url: z.string().nonempty().nullish(),
-        directory: z.string().nonempty().nullish(),
-      })
-      .transform(({ url, directory }) => {
-        const res: PackageSource = { sourceUrl: null, sourceDirectory: null };
-
-        if (url) {
-          res.sourceUrl = url;
-        }
-
-        if (directory) {
-          res.sourceDirectory = directory;
-        }
-
-        return res;
+    DeepNullish(
+      z.object({
+        url: z.string().nonempty().optional(),
+        directory: z.string().nonempty().optional(),
       }),
+    ).transform(({ url, directory }) => {
+      const res: PackageSource = { sourceUrl: null, sourceDirectory: null };
+
+      if (url) {
+        res.sourceUrl = url;
+      }
+
+      if (directory) {
+        res.sourceDirectory = directory;
+      }
+
+      return res;
+    }),
   ])
   .catch({ sourceUrl: null, sourceDirectory: null });
 

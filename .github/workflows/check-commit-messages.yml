@@ -11,6 +11,10 @@ permissions:
   contents: read
   statuses: write
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   closes-issue-or-discussion:
     runs-on: ubuntu-latest
@@ -53,3 +57,65 @@ jobs:
             } else {
               core.info('✓ No commits with issue closing keywords found');
             }
+
+  # Runs a full `semantic-release` dry-run for the state that would exist right
+  # after this PR merges, and fails if it would publish a new *major* version.
+  # Major releases are prepared deliberately (see docs/development/major-release.md),
+  # so when a major bump is intended, override this check manually.
+  dry-run-major:
+    runs-on: ubuntu-latest
+    env:
+      NODE_VERSION: 24
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          persist-credentials: false
+          show-progress: false
+          # semantic-release needs the full history and all tags to find the
+          # previous release and the commits since it.
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: ./.github/actions/setup-node
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          os: ${{ runner.os }}
+
+      - name: Full semantic-release dry-run
+        env:
+          BASE_REF: ${{ github.event.pull_request.base.ref }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+
+          # `tools/check-release-dry-run.ts` runs a full `semantic-release` dry-run
+          # via its programmatic API and inspects the returned `nextRelease.type`.
+          # A real release needs a writable remote and GitHub-authenticating plugins
+          # - neither is available for fork PRs - so the run is fully offline:
+          #   * a local bare mirror stands in for the remote (no network, no token);
+          #   * only the analysis plugins run (see the script); dropping the publish
+          #     plugins does not change the computed version;
+          #   * it is presented as a push to the base branch at the merge commit,
+          #     i.e. exactly the state that would exist right after this PR merges.
+
+          # Only main / next / maint/* ever publish a release.
+          case "$BASE_REF" in
+            main | next | maint/*) ;;
+            *)
+              echo "Base branch '$BASE_REF' is not a release branch; skipping."
+              exit 0
+              ;;
+          esac
+
+          # The checkout is a detached merge commit; semantic-release runs
+          # `git tag --merged <baseRef>`, so the base ref must exist locally.
+          git branch -f "$BASE_REF" "$HEAD_SHA"
+
+          mirror="$RUNNER_TEMP/release-mirror.git"
+          git clone --bare --quiet . "$mirror"
+          # Pin the mirror's base branch to the PR base so the checked-out merge
+          # commit is strictly ahead of it (semantic-release treats it as releasable).
+          git -C "$mirror" branch -f "$BASE_REF" "$BASE_SHA"
+
+          node tools/check-release-dry-run.ts "file://$mirror" "$BASE_REF" "$HEAD_SHA"

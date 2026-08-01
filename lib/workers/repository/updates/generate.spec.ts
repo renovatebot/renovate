@@ -1761,7 +1761,7 @@ describe('workers/repository/updates/generate', () => {
             '{{#each upgrades}}{{{prBodyDefinitions.Issue}}} {{/each}}',
           newVersion: '1.2.0',
           newValue: '1.2.0',
-          updateType: 'minor' as UpdateType,
+          updateType: 'minor',
           fileReplacePosition: 1,
           prBodyDefinitions: {
             Issue: 'I1',
@@ -1794,7 +1794,7 @@ describe('workers/repository/updates/generate', () => {
           depName: 'dep1',
           newVersion: '1.2.0',
           newValue: '1.2.0',
-          updateType: 'minor' as UpdateType,
+          updateType: 'minor',
           fileReplacePosition: 1,
           prBodyDefinitions: {
             Issue: 'I1',
@@ -1805,7 +1805,7 @@ describe('workers/repository/updates/generate', () => {
           depName: 'dep2',
           newVersion: '1.0.0',
           newValue: '1.0.0',
-          updateType: 'major' as UpdateType,
+          updateType: 'major',
           fileReplacePosition: 2,
           prBodyDefinitions: {
             Issue: 'I2',
@@ -1816,7 +1816,7 @@ describe('workers/repository/updates/generate', () => {
           depName: 'dep3',
           newVersion: '1.2.3',
           newValue: '1.2.3',
-          updateType: 'patch' as UpdateType,
+          updateType: 'patch',
           fileReplacePosition: 0,
           prBodyDefinitions: {
             Issue: 'I3',
@@ -1843,7 +1843,7 @@ describe('workers/repository/updates/generate', () => {
           depName: 'dep1',
           newVersion: '1.2.0',
           newValue: '1.2.0',
-          updateType: 'minor' as UpdateType,
+          updateType: 'minor',
           fileReplacePosition: 1,
           prBodyDefinitions: {
             Issue: 'I1',
@@ -1854,7 +1854,7 @@ describe('workers/repository/updates/generate', () => {
           depName: 'dep2',
           newVersion: '1.0.0',
           newValue: '1.0.0',
-          updateType: 'major' as UpdateType,
+          updateType: 'major',
           fileReplacePosition: 2,
           prBodyDefinitions: {
             Issue: 'I2',
@@ -1865,7 +1865,7 @@ describe('workers/repository/updates/generate', () => {
           depName: 'dep3',
           newVersion: '1.2.3',
           newValue: '1.2.3',
-          updateType: 'patch' as UpdateType,
+          updateType: 'patch',
           fileReplacePosition: 0,
           prBodyDefinitions: {
             Issue: 'I3',
@@ -1891,7 +1891,7 @@ describe('workers/repository/updates/generate', () => {
           depName: 'dep1',
           newVersion: '1.2.0',
           newValue: '1.2.0',
-          updateType: 'minor' as UpdateType,
+          updateType: 'minor',
           skipArtifactsUpdate: true,
           fileReplacePosition: 1,
           prBodyDefinitions: {
@@ -1903,7 +1903,7 @@ describe('workers/repository/updates/generate', () => {
           depName: 'dep2',
           newVersion: '1.0.0',
           newValue: '1.0.0',
-          updateType: 'major' as UpdateType,
+          updateType: 'major',
           skipArtifactsUpdate: true,
           fileReplacePosition: 2,
           prBodyDefinitions: {
@@ -1915,7 +1915,7 @@ describe('workers/repository/updates/generate', () => {
           depName: 'dep3',
           newVersion: '1.2.3',
           newValue: '1.2.3',
-          updateType: 'patch' as UpdateType,
+          updateType: 'patch',
           skipArtifactsUpdate: true,
           fileReplacePosition: 0,
           prBodyDefinitions: {
@@ -1944,7 +1944,7 @@ describe('workers/repository/updates/generate', () => {
             depName: 'dep1',
             newVersion: '1.2.0',
             newValue: '1.2.0',
-            updateType: 'minor' as UpdateType,
+            updateType: 'minor',
             skipArtifactsUpdate: first,
             fileReplacePosition: 1,
             prBodyDefinitions: {
@@ -1956,7 +1956,7 @@ describe('workers/repository/updates/generate', () => {
             depName: 'dep2',
             newVersion: '1.0.0',
             newValue: '1.0.0',
-            updateType: 'major' as UpdateType,
+            updateType: 'major',
             fileReplacePosition: 2,
             prBodyDefinitions: {
               Issue: 'I2',
@@ -1967,7 +1967,7 @@ describe('workers/repository/updates/generate', () => {
             depName: 'dep3',
             newVersion: '1.2.3',
             newValue: '1.2.3',
-            updateType: 'patch' as UpdateType,
+            updateType: 'patch',
             skipArtifactsUpdate: true,
             fileReplacePosition: 0,
             prBodyDefinitions: {

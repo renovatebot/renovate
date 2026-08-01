@@ -1,11 +1,12 @@
 import { mockExecAll } from '~test/exec-util.ts';
-import { partial } from '~test/util.ts';
+import { hostRules, partial } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import { ExecError } from '../../../util/exec/exec-error.ts';
 import {
   localPathIsSymbolicLink,
   readLocalSymlink,
 } from '../../../util/fs/index.ts';
+import * as gitAuth from '../../../util/git/auth.ts';
 import { getRepoStatus } from '../../../util/git/index.ts';
 import type { StatusResult } from '../../../util/git/types.ts';
 import type { UpdateArtifact } from '../types.ts';
@@ -551,6 +552,133 @@ describe('modules/manager/hermit/artifacts', () => {
         },
         {
           cmd: "./hermit install '|| date; echo -1.0.1' go-1.24.1",
+        },
+      ]);
+    });
+
+    it('propagates git credentials from hostRules to hermit install', async () => {
+      lstatsMock.mockResolvedValue(true);
+      readlinkMock.mockResolvedValue('hermit');
+      GlobalConfig.set({ localDir: '', binarySource: 'global' });
+
+      hostRules.add({
+        hostType: 'github',
+        matchHost: 'github.com',
+        token: 'abc123',
+      });
+      hostRules.add({
+        hostType: 'hermit',
+        matchHost: 'hermit.example.com',
+        username: 'hermit-user',
+        password: 'hermit-pass',
+      });
+
+      const execSnapshots = mockExecAll();
+      getRepoStatusMock.mockResolvedValue(
+        partial<StatusResult>({
+          not_added: [],
+          deleted: [],
+          modified: [],
+          created: [],
+          renamed: [],
+        }),
+      );
+
+      await updateArtifacts(
+        partial<UpdateArtifact>({
+          updatedDeps: [
+            {
+              depName: 'go',
+              currentVersion: '1.17',
+              newValue: '1.17.1',
+            },
+          ],
+          packageFileName: 'go/bin/hermit',
+        }),
+      );
+
+      expect(execSnapshots).toMatchObject([
+        {
+          cmd: './hermit install go-1.17.1',
+          options: {
+            env: {
+              GIT_CONFIG_COUNT: '6',
+              GIT_CONFIG_KEY_0: 'url.https://ssh:abc123@github.com/.insteadOf',
+              GIT_CONFIG_KEY_1: 'url.https://git:abc123@github.com/.insteadOf',
+              GIT_CONFIG_KEY_2: 'url.https://abc123@github.com/.insteadOf',
+              GIT_CONFIG_KEY_3:
+                'url.https://hermit-user:hermit-pass@hermit.example.com/.insteadOf',
+              GIT_CONFIG_KEY_4:
+                'url.https://hermit-user:hermit-pass@hermit.example.com/.insteadOf',
+              GIT_CONFIG_KEY_5:
+                'url.https://hermit-user:hermit-pass@hermit.example.com/.insteadOf',
+              GIT_CONFIG_VALUE_0: 'ssh://git@github.com/',
+              GIT_CONFIG_VALUE_1: 'git@github.com:',
+              GIT_CONFIG_VALUE_2: 'https://github.com/',
+              GIT_CONFIG_VALUE_3: 'ssh://git@hermit.example.com/',
+              GIT_CONFIG_VALUE_4: 'git@hermit.example.com:',
+              GIT_CONFIG_VALUE_5: 'https://hermit.example.com/',
+            },
+          },
+        },
+      ]);
+    });
+
+    it('returns generic error when a non-UpdateHermitError propagates from updateHermitPackage', async () => {
+      vi.spyOn(gitAuth, 'getGitEnvironmentVariables').mockImplementationOnce(
+        () => {
+          throw new Error('unexpected auth failure');
+        },
+      );
+
+      const res = await updateArtifacts(
+        partial<UpdateArtifact>({
+          updatedDeps: [
+            {
+              depName: 'go',
+              currentVersion: '1.17',
+              newValue: '1.17.1',
+            },
+          ],
+          packageFileName: 'go/bin/hermit',
+        }),
+      );
+
+      expect(res).toStrictEqual([
+        {
+          artifactError: {
+            stderr: 'unexpected auth failure',
+          },
+        },
+      ]);
+    });
+
+    it('stringifies non-Error thrown values in the generic fallback', async () => {
+      vi.spyOn(gitAuth, 'getGitEnvironmentVariables').mockImplementationOnce(
+        () => {
+          // eslint-disable-next-line @typescript-eslint/only-throw-error -- deliberately testing non-Error throw path
+          throw 'raw string failure';
+        },
+      );
+
+      const res = await updateArtifacts(
+        partial<UpdateArtifact>({
+          updatedDeps: [
+            {
+              depName: 'go',
+              currentVersion: '1.17',
+              newValue: '1.17.1',
+            },
+          ],
+          packageFileName: 'go/bin/hermit',
+        }),
+      );
+
+      expect(res).toStrictEqual([
+        {
+          artifactError: {
+            stderr: 'raw string failure',
+          },
         },
       ]);
     });

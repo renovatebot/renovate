@@ -1,5 +1,6 @@
+import { hostRules } from '~test/host-rules.ts';
 import * as httpMock from '~test/http-mock.ts';
-import { git, hostRules, logger } from '~test/util.ts';
+import { git, logger } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import { InheritConfig } from '../../../config/inherit.ts';
 import * as memCache from '../../../util/cache/memory/index.ts';
@@ -7,8 +8,6 @@ import { setBaseUrl } from '../../../util/http/bitbucket.ts';
 import type { PlatformResult, RepoParams } from '../types.ts';
 import * as bitbucket from './index.ts';
 import type { PrTask } from './schema.ts';
-
-vi.mock('../../../util/host-rules.ts');
 
 const baseUrl = 'https://api.bitbucket.org';
 
@@ -20,14 +19,14 @@ const pr = {
   summary: { raw: 'summary' },
   state: 'OPEN',
   created_on: '2018-07-02T07:02:25.275030+00:00',
+  draft: false,
 };
 
 describe('modules/platform/bitbucket/index', () => {
   beforeEach(() => {
     git.branchExists.mockReturnValue(true);
     git.isBranchBehindBase.mockResolvedValue(false);
-    hostRules.clear();
-    hostRules.find.mockReturnValue({
+    hostRules.add({
       username: 'abc',
       password: '123',
     });
@@ -80,7 +79,11 @@ describe('modules/platform/bitbucket/index', () => {
       });
 
       expect(logger.logger.warn).toHaveBeenCalledWith(
-        'Init: Bitbucket Cloud endpoint should generally be https://api.bitbucket.org/ but is being configured to a different value. Did you mean to use Bitbucket Server?',
+        {
+          endpoint: 'endpoint',
+          defaultEndpoint: 'https://api.bitbucket.org/',
+        },
+        'Init: Bitbucket Cloud endpoint should generally be the default but is being configured to a different value. Did you mean to use Bitbucket Server?',
       );
     });
 
@@ -256,7 +259,7 @@ describe('modules/platform/bitbucket/index', () => {
 
     it('works with only API token', async () => {
       hostRules.clear();
-      hostRules.find.mockReturnValue({
+      hostRules.add({
         password: 'ATATIAMACONTAINERTOKEN3407361359',
       });
       httpMock
@@ -280,7 +283,7 @@ describe('modules/platform/bitbucket/index', () => {
 
     it('works with only access token', async () => {
       hostRules.clear();
-      hostRules.find.mockReturnValue({
+      hostRules.add({
         token: 'abc',
       });
       httpMock
@@ -1174,6 +1177,36 @@ describe('modules/platform/bitbucket/index', () => {
         platformPrOptions: {
           bbUseDefaultReviewers: true,
         },
+        draftPR: false,
+      });
+      expect(pr?.number).toBe(5);
+    });
+
+    it('posts draft PR', async () => {
+      const scope = await initRepoMock();
+      scope
+        .get(
+          '/2.0/repositories/some/repo/effective-default-reviewers?pagelen=100',
+        )
+        .reply(200, {
+          values: [],
+        })
+        .post('/2.0/repositories/some/repo/pullrequests')
+        .reply(200, { id: 5 })
+        .get(`/2.0/repositories/some/repo/pullrequests`)
+        .query(true)
+        .reply(200, {
+          values: [{ id: 5 }],
+        });
+      const pr = await bitbucket.createPr({
+        sourceBranch: 'branch',
+        targetBranch: 'master',
+        prTitle: 'title',
+        prBody: 'body',
+        platformPrOptions: {
+          bbUseDefaultReviewers: true,
+        },
+        draftPR: true,
       });
       expect(pr?.number).toBe(5);
     });

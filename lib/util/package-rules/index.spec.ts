@@ -767,7 +767,7 @@ describe('util/package-rules/index', () => {
         {
           matchSourceUrls: [
             'https://github.com/foo/bar',
-            'https://github.com/facebook/react',
+            'https://github.com/react/react',
           ],
           // @ts-expect-error -- testing
           x: 1,
@@ -778,7 +778,7 @@ describe('util/package-rules/index', () => {
       depType: 'dependencies',
       packageName: 'a',
       updateType: 'patch' as UpdateType,
-      sourceUrl: 'https://github.com/facebook/react-native',
+      sourceUrl: 'https://github.com/react/react-native',
     };
     const res = await applyPackageRules({ ...config, ...dep });
     expect(res.x).toBeUndefined();
