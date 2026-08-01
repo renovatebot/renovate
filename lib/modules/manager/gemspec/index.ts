@@ -19,3 +19,5 @@ export const supportedDatasources = [RubygemsDatasource.id];
 
 export const supportsLockFileMaintenance = true;
 export const lockFileNames = ['Gemfile.lock'];
+export const lockFileMaintenanceIsDelegatedToPackageManager =
+  'Delegated to the `bundler` CLI, but only when a sibling `Gemfile` pulls the gemspec in via the `gemspec` directive. Without it the `Gemfile.lock` cannot reflect the gemspec constraints, so Renovate leaves it unchanged.';
