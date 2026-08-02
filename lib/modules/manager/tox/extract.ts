@@ -14,8 +14,8 @@ function extractToxConfig(
     const result = ToxPyProject.safeParse(content);
     if (!result.success) {
       logger.debug(
-        { packageFile, error: result.error },
-        `error parsing ${packageFile}`,
+        { packageFile, err: result.error },
+        'Error parsing Tox configuration.',
       );
       return null;
     }
@@ -25,8 +25,8 @@ function extractToxConfig(
   const result = ToxFile.safeParse(content);
   if (!result.success) {
     logger.debug(
-      { packageFile, error: result.error },
-      `error parsing ${packageFile}`,
+      { packageFile, err: result.error },
+      'Error parsing Tox configuration.',
     );
     return null;
   }
