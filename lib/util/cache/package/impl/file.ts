@@ -64,6 +64,7 @@ export class PackageCacheFile extends PackageCacheBase {
     logger.debug(
       `Cache GC: kept ${gcStats.verifiedContent} content entries (${gcStats.keptSize} bytes), removed ${gcStats.reclaimedCount} orphaned (${gcStats.reclaimedSize} bytes) in ${gcStats.runTime.total}ms`,
     );
+
     const durationMs = Date.now() - startTime;
     logger.debug(
       `Deleted ${deletedCount} of ${totalCount} file cached entries in ${durationMs}ms`,
