@@ -88,17 +88,12 @@ export class JsDelivrDatasource extends Datasource {
       asset,
     } = parseJsDelivrPackageName(packageName);
 
-    const result = Result.parse(config, DigestsConfig)
-      .transform(({ registryUrl }) => {
+    const result = Result.parse(config, DigestsConfig).transform(
+      ({ registryUrl }) => {
         const url = `${ensureTrailingSlash(registryUrl)}packages/${type}/${parsedPackageName}@${newValue}?structure=flat`;
         return this.http.getJsonSafe(url, JsDelivrDigestResponse);
-      })
-      .transform(({ files }): string => {
-        const file = files.find(
-          (file) => file.name.replace(/^\/+/, '') === asset,
-        );
-        return `sha256-${file?.hash}`;
-      });
+      },
+    );
 
     const { val, err } = await result.unwrap();
     if (err instanceof ZodError) {
@@ -108,7 +103,11 @@ export class JsDelivrDatasource extends Datasource {
     if (err) {
       this.handleGenericErrors(err);
     }
-    return val;
+
+    const file = val?.files.find(
+      (file) => file.name.replace(/^\/+/, '') === asset,
+    );
+    return file ? `sha256-${file.hash}` : null;
   }
 
   override getDigest(
