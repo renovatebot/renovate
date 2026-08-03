@@ -110,6 +110,16 @@ Skip initializing `RE2` for regular expressions and instead use Node-native `Reg
 
 If set to any value, Renovate will download `nupkg` files for determining package metadata.
 
+## `RENOVATE_X_NUGET_PAGINATION_ALLOW_CROSS_ORIGIN`
+
+!!! warning
+  This is an explicit opt-out of a security control.
+
+If set to any value, the `nuget` datasource will follow paginated `next` links pointing to a different origin than the feed it is querying.
+
+By default Renovate drops such cross-origin pagination links, so a malicious or compromised feed cannot redirect an authenticated request to an attacker-controlled host and exfiltrate credentials.
+Set this only if you trust the feed and it legitimately paginates across hosts (for example, an absolute `next` link pointing at a backend host).
+
 ## `RENOVATE_X_PGP_RUNTIME`
 
 Specify which PGP runtime to use for decrypting Renovate config.

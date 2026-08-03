@@ -16,6 +16,7 @@ const JFROG_ARTIFACTORY_RES_HEADER = 'x-jfrog-version';
  */
 const crossOriginPaginationEnv: Record<string, string> = {
   docker: 'RENOVATE_X_DOCKER_PAGINATION_ALLOW_CROSS_ORIGIN',
+  nuget: 'RENOVATE_X_NUGET_PAGINATION_ALLOW_CROSS_ORIGIN',
 };
 
 /**

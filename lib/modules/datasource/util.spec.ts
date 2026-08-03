@@ -8,15 +8,25 @@ describe('modules/datasource/util', () => {
   describe('isCrossOriginPaginationAllowed', () => {
     afterEach(() => {
       delete process.env.RENOVATE_X_DOCKER_PAGINATION_ALLOW_CROSS_ORIGIN;
+      delete process.env.RENOVATE_X_NUGET_PAGINATION_ALLOW_CROSS_ORIGIN;
     });
 
     it('returns false when the flag is unset', () => {
       expect(isCrossOriginPaginationAllowed('docker')).toBe(false);
+      expect(isCrossOriginPaginationAllowed('nuget')).toBe(false);
     });
 
-    it('returns true for the opted-in datasource', () => {
+    it('returns true only for the opted-in datasource', () => {
       process.env.RENOVATE_X_DOCKER_PAGINATION_ALLOW_CROSS_ORIGIN = 'true';
       expect(isCrossOriginPaginationAllowed('docker')).toBe(true);
+      // per-datasource: docker's flag must not opt nuget in
+      expect(isCrossOriginPaginationAllowed('nuget')).toBe(false);
+    });
+
+    it('reads a separate flag for nuget', () => {
+      process.env.RENOVATE_X_NUGET_PAGINATION_ALLOW_CROSS_ORIGIN = 'true';
+      expect(isCrossOriginPaginationAllowed('nuget')).toBe(true);
+      expect(isCrossOriginPaginationAllowed('docker')).toBe(false);
     });
 
     it('returns false for a datasource without a flag', () => {
