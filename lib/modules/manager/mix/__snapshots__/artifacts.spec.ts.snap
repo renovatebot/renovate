@@ -1,18 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`modules/manager/mix/artifacts > authenticates to private repositories in updated dependencies 1`] = `
-[
-  {
-    "file": {
-      "contents": "New mix.lock",
-      "path": "mix.lock",
-      "type": "addition",
-    },
-  },
-]
-`;
-
-exports[`modules/manager/mix/artifacts > authenticates to private repositories in updated dependencies 2`] = `
+exports[`modules/manager/mix/artifacts > authenticates to private repositories in updated dependencies > execSnapshots 1`] = `
 [
   {
     "cmd": "docker ps --filter name=renovate_sidecar -aq",
@@ -37,6 +25,18 @@ exports[`modules/manager/mix/artifacts > authenticates to private repositories i
       "stdin": "pipe",
       "stdout": "pipe",
       "timeout": 900000,
+    },
+  },
+]
+`;
+
+exports[`modules/manager/mix/artifacts > authenticates to private repositories in updated dependencies > result 1`] = `
+[
+  {
+    "file": {
+      "contents": "New mix.lock",
+      "path": "mix.lock",
+      "type": "addition",
     },
   },
 ]

@@ -9,19 +9,21 @@ import type { NewValueConfig, VersioningApi } from '../types.ts';
 export const id = 'cargo';
 export const displayName = 'Cargo';
 export const urls = [
-  'https://doc.rust-lang.org/cargo/reference/specifying-dependencies.html',
+  '[Cargo - Specifying Dependencies](https://doc.rust-lang.org/cargo/reference/specifying-dependencies.html)',
 ];
 export const supportsRanges = true;
 export const supportedRangeStrategies: RangeStrategy[] = ['bump', 'replace'];
 
-const isVersion = (input: string): boolean => npm.isVersion(input);
+function isVersion(input: string): boolean {
+  return npm.isVersion(input);
+}
 
 function convertToCaret(item: string): string {
   // In Cargo, caret versions are used by default, so "1.2.3" actually means ^1.2.3.
   // Similarly, "0.4" actually means ^0.4.
   // See: https://doc.rust-lang.org/stable/cargo/reference/specifying-dependencies.html#caret-requirements
-  if (isVersion(item) || isVersion(item + '.0') || isVersion(item + '.0.0')) {
-    return '^' + item.trim();
+  if (isVersion(item) || isVersion(`${item}.0`) || isVersion(`${item}.0.0`)) {
+    return `^${item.trim()}`;
   }
   return item.trim();
 }
@@ -49,21 +51,24 @@ function npm2cargo(input: string): string {
   const operators = ['^', '~', '=', '>', '<', '<=', '>='];
   for (let i = 0; i < res.length - 1; i += 1) {
     if (operators.includes(res[i])) {
-      const newValue = res[i] + ' ' + res[i + 1];
+      const newValue = `${res[i]} ${res[i + 1]}`;
       res.splice(i, 2, newValue);
     }
   }
   return res.join(', ');
 }
 
-const isLessThanRange = (version: string, range: string): boolean =>
-  !!npm.isLessThanRange?.(version, cargo2npm(range));
+function isLessThanRange(version: string, range: string): boolean {
+  return !!npm.isLessThanRange?.(version, cargo2npm(range));
+}
 
-export const isValid = (input: string): boolean =>
-  npm.isValid(cargo2npm(input));
+export function isValid(input: string): boolean {
+  return npm.isValid(cargo2npm(input));
+}
 
-const matches = (version: string, range: string): boolean =>
-  npm.matches(version, cargo2npm(range));
+function matches(version: string, range: string): boolean {
+  return npm.matches(version, cargo2npm(range));
+}
 
 function getSatisfyingVersion(
   versions: string[],
@@ -79,9 +84,12 @@ function minSatisfyingVersion(
   return npm.minSatisfyingVersion(versions, cargo2npm(range));
 }
 
-const isSingleVersion = (constraint: string): boolean =>
-  constraint.trim().startsWith('=') &&
-  isVersion(constraint.trim().substring(1).trim());
+function isSingleVersion(constraint: string): boolean {
+  return (
+    constraint.trim().startsWith('=') &&
+    isVersion(constraint.trim().substring(1).trim())
+  );
+}
 
 function getPinnedValue(newVersion: string): string {
   return `=${newVersion}`;

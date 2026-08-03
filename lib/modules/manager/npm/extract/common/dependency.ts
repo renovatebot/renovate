@@ -16,7 +16,7 @@ import {
 import type { PackageDependency } from '../../../types.ts';
 
 const RE_REPOSITORY_GITHUB_SSH_FORMAT = regEx(
-  /(?:git@)github.com:([^/]+)\/([^/.]+)(?:\.git)?/,
+  /(?:git@)github.com:([^/]+)\/([^/]+?)(?:\.git)?$/,
 );
 
 export function parseDepName(depType: string, key: string): string {
@@ -24,7 +24,26 @@ export function parseDepName(depType: string, key: string): string {
     return key;
   }
 
-  const [, depName] = regEx(/((?:@[^/]+\/)?[^/@]+)$/).exec(key) ?? [];
+  // Yarn selective dependency resolutions may nest a path of parent
+  // packages before the target package, e.g. `parent/child` or
+  // `@scope/parent/child`, and any segment (including the last) may carry
+  // a `@range` suffix used to disambiguate which version of that package
+  // to match, e.g. `@cypress/request/qs@~6.14.1`.
+  const parts = key.split('/');
+  const segments: string[] = [];
+  for (let i = 0; i < parts.length; i += 1) {
+    const part = parts[i];
+    if (part.startsWith('@') && i + 1 < parts.length) {
+      i += 1;
+      segments.push(`${part}/${parts[i]}`);
+    } else {
+      segments.push(part);
+    }
+  }
+
+  const lastSegment = segments.at(-1);
+  const [, depName] =
+    regEx(/^((?:@[^/]+\/)?[^@]+)/).exec(lastSegment ?? '') ?? [];
   return depName;
 }
 
@@ -109,7 +128,7 @@ export function extractDependency(
       dep.packageName = valSplit[0];
       dep.currentValue = valSplit[1];
     } else if (valSplit.length === 3) {
-      dep.packageName = valSplit[0] + '@' + valSplit[1];
+      dep.packageName = `${valSplit[0]}@${valSplit[1]}`;
       dep.currentValue = valSplit[2];
     } else {
       logger.debug(
@@ -157,10 +176,11 @@ export function extractDependency(
     githubRepo = matchUrlSshFormat[2];
     githubOwnerRepo = `${githubOwner}/${githubRepo}`;
   }
-  const githubValidRegex = /^[a-z\d](?:[a-z\d]|-(?=[a-z\d])){0,38}$/i; // TODO #12872 lookahead
+  const githubOwnerRegex = /^[a-z\d](?:[a-z\d]|-(?=[a-z\d])){0,38}$/i; // TODO #12872 lookahead
+  const githubRepoRegex = regEx(/^[a-zA-Z0-9._-]{1,100}$/);
   if (
-    !githubValidRegex.test(githubOwner) ||
-    !githubValidRegex.test(githubRepo)
+    !githubOwnerRegex.test(githubOwner) ||
+    !githubRepoRegex.test(githubRepo)
   ) {
     dep.skipReason = 'unspecified-version';
     return dep;

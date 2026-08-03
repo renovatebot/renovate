@@ -15,12 +15,16 @@ You need the following dependencies for local development:
 - pnpm `^10.0.0`
 - C++ compiler
 
-We recommend you use the version of Node.js defined in the repository's `.nvmrc` or use [Mise](https://mise.jdx.dev/) to manage your tool versions.
-
 For building the documentation, you also need:
 
 - Python `>=3.11`
 - PDM `>=2.26.0`
+
+#### Recommended: Mise
+
+We recommend [Mise](https://mise.jdx.dev/) to install and manage all of the tools above.
+After installing Mise, run `mise install` from the repository root.
+This installs the pinned versions of tools used in the project and triggers the installation of all dependencies.
 
 #### Linux
 
@@ -99,6 +103,9 @@ If you want to contribute to the project, you should first "fork" the main proje
 The Renovate project uses the [pnpm](https://github.com/pnpm/pnpm) package management system instead of npm.
 
 To ensure everything is working properly on your end, you must:
+
+!!! tip "Mise users"
+  If you ran `mise install`, the `postinstall` hook already executed `pnpm install`.
 
 1. Install all dependencies with `pnpm install`
 1. Make a build with `pnpm build`, which should pass with no errors
@@ -206,7 +213,7 @@ To get real-time oxlint diagnostics, install the extension for your editor:
 ## Documentation
 
 We use [MkDocs](https://www.mkdocs.org) to generate the documentation.
-To install the required dependency, use `pdm install`.
+To install the required dependency, use `uv sync`.
 You can run `pnpm build:docs` to generate the docs.
 Then use `pnpm mkdocs serve` to preview the documentation locally.
 The docs will update automatically when you run `pnpm build:docs` again, no need to stop the `pnpm mkdocs serve` command.
@@ -247,6 +254,48 @@ So most new functionality should be controllable via configuration options.
 
 Create your new configuration option in the `lib/config/options/index.ts` file.
 Also create documentation for the option in the `docs/usage/configuration-options.md` file.
+
+### `Error: Cannot find module './build/Release/re2.node'`
+
+If you're seeing errors related to `re2`, such as:
+
+```
+> renovate@0.0.0-semantic-release prepare:deps ...
+> node tools/prepare-deps.mjs
+
+Checking re2 ...
+Error: Cannot find module './build/Release/re2.node'
+Require stack:
+- .../renovate/node_modules/.pnpm/re2@1.24.0/node_modules/re2/re2.js
+- .../renovate/[eval]
+    at Module._resolveFilename (node:internal/modules/cjs/loader:1475:15)
+    at wrapResolveFilename (node:internal/modules/cjs/loader:1048:27)
+    at defaultResolveImplForCJSLoading (node:internal/modules/cjs/loader:1072:10)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1093:12)
+    at Module._load (node:internal/modules/cjs/loader:1261:25)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)
+    at Module.require (node:internal/modules/cjs/loader:1575:12)
+    at require (node:internal/modules/helpers:191:16)
+    at Object.<anonymous> (.../node_modules/.pnpm/re2@1.24.0/node_modules/re2/re2.js:3:13)
+    at Module._compile (node:internal/modules/cjs/loader:1829:14) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [
+    '.../node_modules/.pnpm/re2@1.24.0/node_modules/re2/re2.js',
+    '.../[eval]'
+  ]
+}
+Failed.
+```
+
+This is likely due to the version of `re2` being out-of-sync with your Node version.
+
+You can rebuild it with:
+
+```sh
+pnpm rebuild re2
+```
+
+This will rebuild it for the current Node version in use.
 
 ## Debugging
 

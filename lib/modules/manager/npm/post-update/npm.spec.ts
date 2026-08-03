@@ -16,7 +16,7 @@ process.env.CONTAINERBASE = 'true';
 describe('modules/manager/npm/post-update/npm', () => {
   beforeEach(() => {
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
-    GlobalConfig.set({ localDir: '' });
+    GlobalConfig.set({ localDir: '', binarySource: 'global' });
     vi.mocked(getNodeToolConstraint).mockResolvedValueOnce({
       toolName: 'node',
       constraint: '16.16.0',
@@ -129,8 +129,8 @@ describe('modules/manager/npm/post-update/npm', () => {
     );
     expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
     expect(res.error).toBeFalse();
-    expect(res.lockFile).toMatchSnapshot();
-    expect(execSnapshots).toMatchSnapshot();
+    expect(res.lockFile).toMatchSnapshot('lockFile');
+    expect(execSnapshots).toMatchSnapshot('execSnapshots');
   });
 
   it('performs npm-shrinkwrap.json updates', async () => {
@@ -497,6 +497,7 @@ describe('modules/manager/npm/post-update/npm', () => {
         toolSettings: {
           nodeMaxMemory: 3456,
         },
+        binarySource: 'global',
       });
 
       const execSnapshots = mockExecAll();

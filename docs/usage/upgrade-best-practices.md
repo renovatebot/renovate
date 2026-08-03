@@ -136,7 +136,7 @@ If you want a third-party dependency update _now_, instead of waiting two weeks,
 #### Use GitHub Pull Request Merge Queues
 
 You may also start using [GitHub's pull request merge queues](./key-concepts/automerge.md#github-merge-queue) to speed up the merge process.
-Renovate does not support GitLab's Merge Trains, see [issue #5573](https://github.com/renovatebot/renovate/issues/5573).
+On GitLab projects with merge trains enabled, Renovate adds automerged MRs to the merge train automatically (requires GitLab 17.11 or later).
 
 ## Starting from a new project
 

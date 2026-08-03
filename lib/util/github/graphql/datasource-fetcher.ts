@@ -139,11 +139,10 @@ export class GithubGraphqlDatasourceFetcher<
         const { message } = errors[0];
         const err = new Error(message);
         return [null, err];
-      } else {
-        const errorInstances = errors.map(({ message }) => new Error(message));
-        const err = new AggregateError(errorInstances);
-        return [null, err];
       }
+      const errorInstances = errors.map(({ message }) => new Error(message));
+      const err = new AggregateError(errorInstances);
+      return [null, err];
     }
 
     if (!data) {
@@ -229,10 +228,7 @@ export class GithubGraphqlDatasourceFetcher<
     }
     const cacheNs = this.getCacheNs();
     const cacheKey = this.getCacheKey();
-    const cachePrivatePackages = GlobalConfig.get(
-      'cachePrivatePackages',
-      false,
-    );
+    const cachePrivatePackages = GlobalConfig.get('cachePrivatePackages');
     const skipStabilization = !is.undefined(this.datasourceAdapter.maxItems);
     this._cacheStrategy =
       cachePrivatePackages || this.isPersistent

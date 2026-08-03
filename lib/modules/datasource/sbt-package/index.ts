@@ -7,7 +7,11 @@ import { Http } from '../../../util/http/index.ts';
 import { regEx } from '../../../util/regex.ts';
 import type { Timestamp } from '../../../util/timestamp.ts';
 import { asTimestamp } from '../../../util/timestamp.ts';
-import { ensureTrailingSlash, trimTrailingSlash } from '../../../util/url.ts';
+import {
+  ensureTrailingSlash,
+  parseUrl,
+  trimTrailingSlash,
+} from '../../../util/url.ts';
 import * as ivyVersioning from '../../versioning/ivy/index.ts';
 import { compare } from '../../versioning/maven/compare.ts';
 import { MAVEN_REPO } from '../maven/common.ts';
@@ -80,8 +84,9 @@ export class SbtPackageDatasource extends MavenDatasource {
     if (validRootUrl) {
       packageRootUrls.push(validRootUrl);
     } else {
-      const packageRootUrlWith = (sep: string): string =>
-        `${repoRootUrl}${groupIdSplit.join(sep)}`;
+      function packageRootUrlWith(sep: string): string {
+        return `${repoRootUrl}${groupIdSplit.join(sep)}`;
+      }
       packageRootUrls.push(ensureTrailingSlash(packageRootUrlWith('/')));
       packageRootUrls.push(ensureTrailingSlash(packageRootUrlWith('.')));
     }
@@ -106,7 +111,12 @@ export class SbtPackageDatasource extends MavenDatasource {
 
       dependencyUrl = trimTrailingSlash(packageRootUrl);
 
-      const rootPath = new URL(packageRootUrl).pathname;
+      const parsedPackageRootUrl = parseUrl(packageRootUrl);
+      if (!parsedPackageRootUrl) {
+        logger.warn({ packageRootUrl }, 'Failed to parse packageURL');
+        continue;
+      }
+      const rootPath = parsedPackageRootUrl.pathname;
       const artifactSubdirs = extractPageLinks(packageRootContent, (href) => {
         const path = href.replace(rootPath, '');
 
@@ -153,6 +163,12 @@ export class SbtPackageDatasource extends MavenDatasource {
 
     const allVersions = new Set<string>();
     for (const pkgUrl of packageUrls) {
+      const parsedPkgUrl = parseUrl(pkgUrl);
+      if (!parsedPkgUrl) {
+        invalidPackageUrls.add(pkgUrl);
+        continue;
+      }
+
       const packageContent = await downloadHttpContent(this.http, pkgUrl);
       // istanbul ignore if
       if (!packageContent) {
@@ -160,7 +176,7 @@ export class SbtPackageDatasource extends MavenDatasource {
         continue;
       }
 
-      const rootPath = new URL(pkgUrl).pathname;
+      const rootPath = parsedPkgUrl.pathname;
       const versions = extractPageLinks(packageContent, (href) => {
         const path = href.replace(rootPath, '');
         if (path.startsWith('.')) {
@@ -256,7 +272,7 @@ export class SbtPackageDatasource extends MavenDatasource {
       ),
     );
 
-    const saveCache = async (): Promise<void> => {
+    async function saveCache(): Promise<void> {
       if (invalidPomFiles.size > 0) {
         await packageCache.set(
           'datasource-sbt-package',
@@ -265,7 +281,7 @@ export class SbtPackageDatasource extends MavenDatasource {
           30 * 24 * 60,
         );
       }
-    };
+    }
 
     for (const packageUrl of packageUrls) {
       const artifactDir = upath.basename(packageUrl);

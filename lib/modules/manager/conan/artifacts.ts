@@ -17,9 +17,7 @@ async function conanLockUpdate(
   conanConstraint?: string,
   pythonConstraint?: string,
 ): Promise<void> {
-  const command =
-    `conan lock create ${quote(conanFilePath)}` +
-    (isLockFileMaintenance ? ' --lockfile=""' : '');
+  const command = `conan lock create ${quote(conanFilePath)}${isLockFileMaintenance ? ' --lockfile=""' : ''}`;
 
   const execOptions: ExecOptions = {
     extraEnv: { ...getGitEnvironmentVariables(['conan']) },

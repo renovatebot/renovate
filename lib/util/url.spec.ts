@@ -91,7 +91,7 @@ describe('util/url', () => {
     ${'http://foo.io'}      | ${'aaa/?bbb=z'}         | ${'http://foo.io/aaa?bbb=z'}
   `('replaceUrlPath("$baseUrl", "$x") => $result', ({ baseUrl, x, result }) => {
     expect(replaceUrlPath(baseUrl, x)).toBe(result);
-    expect(replaceUrlPath(new URL(baseUrl), x)).toBe(result);
+    expect(replaceUrlPath(parseUrl(baseUrl)!, x)).toBe(result);
   });
 
   it('getQueryString', () => {
@@ -106,7 +106,7 @@ describe('util/url', () => {
     expect(isHttpUrl('ssh://github.com')).toBeFalse();
     expect(isHttpUrl('http://github.com')).toBeTrue();
     expect(isHttpUrl('https://github.com')).toBeTrue();
-    expect(isHttpUrl(new URL('https://github.com'))).toBeTrue();
+    expect(isHttpUrl(parseUrl('https://github.com')!)).toBeTrue();
   });
 
   it('parses URL', () => {
@@ -179,10 +179,10 @@ describe('util/url', () => {
 
   it('createURLFromHostOrURL', () => {
     expect(createURLFromHostOrURL('https://some.test')).toEqual(
-      new URL('https://some.test/'),
+      parseUrl('https://some.test/')!,
     );
     expect(createURLFromHostOrURL('some.test')).toEqual(
-      new URL('https://some.test/'),
+      parseUrl('https://some.test/')!,
     );
   });
 

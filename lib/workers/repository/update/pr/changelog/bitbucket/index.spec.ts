@@ -87,7 +87,7 @@ describe('workers/repository/update/pr/changelog/bitbucket/index', () => {
 
     expect(res).toMatchObject({
       changelogFile: 'CHANGELOG.md',
-      changelogMd: changelogMd + '\n#\n##',
+      changelogMd: `${changelogMd}\n#\n##`,
     });
   });
 

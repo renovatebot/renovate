@@ -267,6 +267,11 @@ describe('modules/manager/kustomize/extract', () => {
   });
 
   describe('image extraction', () => {
+    it('should return null for image with name only (no newTag/newName/digest)', () => {
+      const pkg = extractImage({ name: 'foo' });
+      expect(pkg).toBeNull();
+    });
+
     it('should return null on a null input', () => {
       const pkg = extractImage({
         name: '',
