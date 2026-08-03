@@ -100,6 +100,24 @@ describe('modules/datasource/npm/schema', () => {
     expect(result.time).toEqual({ '1.0.0': '2026-01-23T01:23:37.982Z' });
   });
 
+  it('drops non-string dependencies/devDependencies entries (e.g. old-style nested dependency trees)', () => {
+    const result = CachedPackument.parse({
+      name: 'deep-diff',
+      versions: {
+        '0.1.0': {
+          dependencies: { foo: '^1.0.0', bar: { version: '0.6.4' } },
+          devDependencies: { vows: { version: '0.6.4' } },
+        },
+      },
+    });
+    expect(result.versions).toEqual({
+      '0.1.0': {
+        dependencies: { foo: '^1.0.0' },
+        devDependencies: {},
+      },
+    });
+  });
+
   describe('NpmResponseSchema', () => {
     it('parses a full npm registry response and preserves extra version fields', () => {
       const input = {
