@@ -13,9 +13,9 @@ import { Result } from '../../../util/result.ts';
 import { getS3Client, parseS3Url } from '../../../util/s3.ts';
 import { streamToString } from '../../../util/streams.ts';
 import { asTimestamp } from '../../../util/timestamp.ts';
-import { ensureTrailingSlash, isHttpUrl, parseUrl } from '../../../util/url.ts';
+import { ensureTrailingSlash, isHttpUrl } from '../../../util/url.ts';
 import { getGoogleAuthToken } from '../util.ts';
-import { MAVEN_REPO } from './common.ts';
+import { isMavenCentral } from './common.ts';
 import { CachedMavenXml } from './schema.ts';
 import type {
   DependencyInfo,
@@ -23,10 +23,6 @@ import type {
   MavenFetchResult,
   MavenFetchSuccess,
 } from './types.ts';
-
-function getHost(url: string): string | undefined {
-  return parseUrl(url)?.host;
-}
 
 function isTemporaryError(err: HttpError): boolean {
   if (err.code === 'ECONNRESET') {
@@ -126,7 +122,7 @@ export async function downloadHttpProtocol(
     }
   }
 
-  const fetchResult = await Result.wrap<HttpResponse, Error>(
+  const fetchResult = await Result.wrap<HttpResponse>(
     http.getText(url, { ...opts, cacheProvider: selectCacheProvider(url) }),
   )
     .transform((res): MavenFetchSuccess => {
@@ -182,7 +178,8 @@ export async function downloadHttpProtocol(
 
       if (isTemporaryError(err)) {
         logger.debug({ failedUrl, err }, 'Temporary error');
-        if (getHost(url) === getHost(MAVEN_REPO)) {
+
+        if (isMavenCentral(url)) {
           const statusCode = err?.response?.statusCode;
           if (statusCode === 429) {
             if (packageCache.getCacheType() === 'redis') {
@@ -198,9 +195,8 @@ export async function downloadHttpProtocol(
             }
           }
           return Result.err({ type: 'maven-central-temporary-error', err });
-        } else {
-          return Result.err({ type: 'temporary-error' });
         }
+        return Result.err({ type: 'temporary-error' });
       }
 
       if (isConnectionError(err)) {

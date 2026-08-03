@@ -176,7 +176,7 @@ export function splitEscapedSpaces(str: string): string[] {
 
   for (const part of parts) {
     if (last?.endsWith('\\\\')) {
-      result[result.length - 1] = last.slice(0, -2) + ' ' + part;
+      result[result.length - 1] = `${last.slice(0, -2)} ${part}`;
     } else {
       result.push(part);
     }

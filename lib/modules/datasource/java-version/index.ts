@@ -10,7 +10,7 @@ import {
   pageSize,
   parsePackage,
 } from './common.ts';
-import type { AdoptiumJavaResponse } from './types.ts';
+import { AdoptiumJavaResponse } from './schema.ts';
 
 export class JavaVersionDatasource extends Datasource {
   static readonly id = datasource;
@@ -31,8 +31,7 @@ export class JavaVersionDatasource extends Datasource {
   ): Promise<Release[] | null> {
     const pgUrl = `${url}&page=${page}`;
     try {
-      const pgRes =
-        await this.http.getJsonUnchecked<AdoptiumJavaResponse>(pgUrl);
+      const pgRes = await this.http.getJson(pgUrl, AdoptiumJavaResponse);
       return (
         pgRes?.body?.versions?.map(({ semver }) => ({
           version: semver,
@@ -86,10 +85,8 @@ export class JavaVersionDatasource extends Datasource {
         releases = await this.getPageReleases(url, page);
       }
     } catch (err) {
-      if (err instanceof HttpError) {
-        if (err.response?.statusCode !== 404) {
-          throw new ExternalHostError(err);
-        }
+      if (err instanceof HttpError && err.response?.statusCode !== 404) {
+        throw new ExternalHostError(err);
       }
       this.handleGenericErrors(err);
     }

@@ -5,7 +5,7 @@ import type { VersioningApi } from '../types.ts';
 
 export const id = 'git';
 export const displayName = 'git';
-export const urls = ['https://git-scm.com/'];
+export const urls = ['[Git](https://git-scm.com/)'];
 export const supportsRanges = false;
 
 const regex = regEx('^[0-9a-f]{7,40}$', 'i');

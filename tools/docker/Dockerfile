@@ -1,31 +1,31 @@
-# syntax=docker/dockerfile:1.24.0@sha256:87999aa3d42bdc6bea60565083ee17e86d1f3339802f543c0d03998580f9cb89
+# syntax=docker/dockerfile:1.26.0@sha256:ecfaec9ed6d810b56388c508f4121597bfbba70d41a6dfeee4d8cad5f295fc32
 
 ARG BASE_IMAGE_TYPE=slim
 
 # --------------------------------------
 # slim image
 # --------------------------------------
-FROM ghcr.io/renovatebot/base-image:13.47.2@sha256:2525d512ffedb074583ef9710011c96d17563a32b3d421ca14f753e062a1a93a AS slim-base
+FROM ghcr.io/renovatebot/base-image:13.79.0@sha256:fab68fb00e50e65251ab717c37e37d2b510910138dae9718c152fdac0eb244e9 AS slim-base
 
 # --------------------------------------
 # full image
 # --------------------------------------
-FROM ghcr.io/renovatebot/base-image:13.47.2-full@sha256:469411b52b72b362e6a949d6aeb131a34686f17ae79f5ddaa05baecbc7382641 AS full-base
+FROM ghcr.io/renovatebot/base-image:13.79.0-full@sha256:1c5fbf87877f457f53c96c85af38b0dc20dcb5c077c415ba02e1d6fc42299445 AS full-base
 
 ENV RENOVATE_BINARY_SOURCE=global
 
 # --------------------------------------
 # build image
 # --------------------------------------
-FROM --platform=$BUILDPLATFORM ghcr.io/renovatebot/base-image:13.47.2@sha256:2525d512ffedb074583ef9710011c96d17563a32b3d421ca14f753e062a1a93a AS build
+FROM --platform=$BUILDPLATFORM ghcr.io/renovatebot/base-image:13.79.0@sha256:fab68fb00e50e65251ab717c37e37d2b510910138dae9718c152fdac0eb244e9 AS build
 
 # We want a specific node version here
 # renovate: datasource=github-releases packageName=containerbase/node-prebuild versioning=node
-RUN install-tool node 24.15.0
+RUN install-tool node 24.18.1
 
 # corepack is too buggy 😞
 # renovate: datasource=npm
-RUN install-tool pnpm 10.33.4
+RUN install-tool pnpm 11.17.0
 
 WORKDIR /usr/local/renovate
 
@@ -52,8 +52,8 @@ RUN set -ex; \
   true
 
 # prepare pnpm env
-ENV CI=1 npm_config_modules_cache_max_age=0 \
-  npm_config_loglevel=info
+ENV CI=1 pnpm_config_modules_cache_max_age=0 \
+  pnpm_config_loglevel=info
 
 # replace `amd64` with `x64` for `node`
 ENV ARCH=${TARGETARCH/amd64/x64}
@@ -61,7 +61,6 @@ ENV ARCH=${TARGETARCH/amd64/x64}
 # set `npm_config_platform_arch` for `install-artifact-from-github`
 ENV npm_config_arch=${ARCH} npm_config_platform_arch=${ARCH}
 
-COPY --link .npmrc ./
 COPY --link patches ./patches
 COPY --link pnpm-lock.yaml ./
 COPY --link pnpm-workspace.yaml ./

@@ -3,7 +3,7 @@ import semver from 'semver';
 import semverUtils from 'semver-utils';
 import { logger } from '../../../logger/index.ts';
 import { regEx } from '../../../util/regex.ts';
-import { isSemVerXRange } from '../semver/common.ts';
+import { isSemVerXRange, normalizeLegacyXRanges } from '../semver/common.ts';
 import type { NewValueConfig } from '../types.ts';
 
 const {
@@ -36,11 +36,9 @@ function replaceCaretValue(oldValue: string, newValue: string): string {
     const newVal = newTuple[idx];
 
     let leadingDigit = false;
-    if (oldVal !== 0 || newVal !== 0) {
-      if (leadingZero) {
-        leadingZero = false;
-        leadingDigit = true;
-      }
+    if ((oldVal !== 0 || newVal !== 0) && leadingZero) {
+      leadingZero = false;
+      leadingDigit = true;
     }
 
     if (leadingDigit && newVal > oldVal) {
@@ -61,6 +59,10 @@ function stripV(value: string): string {
   return value.replace(/^v/, '');
 }
 
+function satisfiesRange(version: string, range: string): boolean {
+  return satisfies(version, normalizeLegacyXRanges(range));
+}
+
 // TODO: #22198
 export function getNewValue({
   currentValue,
@@ -75,7 +77,7 @@ export function getNewValue({
     return newVersion;
   }
   if (rangeStrategy === 'update-lockfile') {
-    if (satisfies(newVersion, currentValue)) {
+    if (satisfiesRange(newVersion, currentValue)) {
       return currentValue;
     }
     return getNewValue({
@@ -86,9 +88,9 @@ export function getNewValue({
     });
   }
   const parsedRange = semverUtils.parseRange(currentValue);
-  const element = parsedRange[parsedRange.length - 1];
+  const element = parsedRange.at(-1)!;
   if (rangeStrategy === 'widen') {
-    if (satisfies(newVersion, currentValue)) {
+    if (satisfiesRange(newVersion, currentValue)) {
       return currentValue;
     }
     const newValue = getNewValue({
@@ -105,7 +107,7 @@ export function getNewValue({
       return `${splitCurrent.join(element.operator)}${newValue!}`;
     }
     if (parsedRange.length > 1) {
-      const previousElement = parsedRange[parsedRange.length - 2];
+      const previousElement = parsedRange.at(-2)!;
       if (previousElement.operator === '-') {
         const splitCurrent = currentValue.split('-');
         splitCurrent.pop();
@@ -160,7 +162,7 @@ export function getNewValue({
             currentVersion,
             newVersion,
           });
-          if (bumpedSubRange && satisfies(newVersion, bumpedSubRange)) {
+          if (bumpedSubRange && satisfiesRange(newVersion, bumpedSubRange)) {
             return bumpedSubRange;
           }
 
@@ -175,7 +177,7 @@ export function getNewValue({
         .join(' ');
     }
     logger.debug(
-      'Unsupported range type for rangeStrategy=bump: ' + currentValue,
+      `Unsupported range type for rangeStrategy=bump: ${currentValue}`,
     );
     return null;
   }

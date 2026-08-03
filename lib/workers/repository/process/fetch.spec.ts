@@ -294,7 +294,7 @@ describe('workers/repository/process/fetch', () => {
 
       await expect(
         fetchUpdates({ ...config, repoIsOnboarded: true }, packageFiles),
-      ).rejects.toThrow();
+      ).rejects.toThrow('some error');
     });
 
     it('throws lookup errors for not onboarded repos', async () => {
@@ -311,7 +311,7 @@ describe('workers/repository/process/fetch', () => {
 
       await expect(
         fetchUpdates({ ...config, repoIsOnboarded: true }, packageFiles),
-      ).rejects.toThrow();
+      ).rejects.toThrow('some error');
     });
 
     it('produces external host warnings for not onboarded repos', async () => {

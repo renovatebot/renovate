@@ -57,7 +57,7 @@ export async function getLockedVersions(
       logger.debug(`Found ${npmLock} for ${packageFile.packageFile}`);
       lockFiles.push(npmLock);
       if (!lockFileCache[npmLock]) {
-        logger.trace('Retrieving/parsing ' + npmLock);
+        logger.trace(`Retrieving/parsing ${npmLock}`);
         const cache = await getNpmLock(npmLock);
         /* v8 ignore next 4 -- needs test */
         if (!cache) {
@@ -75,7 +75,7 @@ export async function getLockedVersions(
           if (
             semver.satisfies('6.14.18', packageFile.extractedConstraints.npm)
           ) {
-            npm = packageFile.extractedConstraints.npm + ' <7';
+            npm = `${packageFile.extractedConstraints.npm} <7`;
           }
         } else {
           npm = '<7';
@@ -86,7 +86,7 @@ export async function getLockedVersions(
           if (
             semver.satisfies('8.19.3', packageFile.extractedConstraints.npm)
           ) {
-            npm = packageFile.extractedConstraints.npm + ' <9';
+            npm = `${packageFile.extractedConstraints.npm} <9`;
           }
         } else {
           npm = '<9';

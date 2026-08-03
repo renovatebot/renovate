@@ -25,7 +25,7 @@ interface QuotedValue {
 export function parseQuote(input: string): QuotedValue {
   const trimmed = input.trim();
   const first = trimmed[0];
-  const last = trimmed[trimmed.length - 1];
+  const last = trimmed.at(-1);
 
   if (
     trimmed.length >= 2 &&

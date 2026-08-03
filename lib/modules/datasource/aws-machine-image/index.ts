@@ -88,11 +88,11 @@ export class AwsMachineImageDatasource extends Datasource {
     return matchingImages.Images.sort((image1, image2) => {
       const ts1 = image1.CreationDate
         ? Date.parse(image1.CreationDate)
-        : /* v8 ignore next */ 0; // TODO: add date coersion util
+        : /* v8 ignore next -- AWS SDK types CreationDate as optional, but EC2 always returns it for images */ 0; // TODO: add date coersion util
 
       const ts2 = image2.CreationDate
         ? Date.parse(image2.CreationDate)
-        : /* v8 ignore next */ 0; // TODO: add date coersion util
+        : /* v8 ignore next -- AWS SDK types CreationDate as optional, but EC2 always returns it for images */ 0; // TODO: add date coersion util
       return ts1 - ts2;
     });
   }
@@ -130,7 +130,10 @@ export class AwsMachineImageDatasource extends Datasource {
     }
 
     const res = await this.getReleases({ packageName: serializedAmiFilter });
-    return res?.releases?.[0]?.newDigest ?? /* v8 ignore next */ null; // TODO: needs test
+    return (
+      res?.releases?.[0]?.newDigest ??
+      /* v8 ignore next -- fallback when the AMI filter matches no image */ null
+    ); // TODO: needs test
   }
 
   override getDigest(
@@ -151,7 +154,7 @@ export class AwsMachineImageDatasource extends Datasource {
     packageName: serializedAmiFilter,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     const images = await this.getSortedAwsMachineImages(serializedAmiFilter);
-    const latestImage = images[images.length - 1];
+    const latestImage = images.at(-1);
     if (!latestImage?.ImageId) {
       return null;
     }

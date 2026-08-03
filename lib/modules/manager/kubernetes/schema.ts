@@ -1,4 +1,4 @@
-import { z } from 'zod/v3';
+import { z } from 'zod/v4';
 import { LooseArray, multidocYaml } from '../../../util/schema-utils/index.ts';
 
 const PodSpecVolumes = z.object({
@@ -48,7 +48,7 @@ export const KubernetesResource = z.object({
 });
 
 export const KubernetesManifest = KubernetesResource.extend({
-  spec: z.unknown(),
+  spec: z.unknown().optional(),
 }).transform(({ spec, ...resource }) => ({
   ...resource,
   imageVolumeReferences: ImageVolumeReferences.parse({
