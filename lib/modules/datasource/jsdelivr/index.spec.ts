@@ -1,5 +1,7 @@
 import { Fixtures } from '~test/fixtures.ts';
 import * as httpMock from '~test/http-mock.ts';
+import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages.ts';
+import { HttpError } from '../../../util/http/index.ts';
 import { getDigest, getPkgReleases } from '../index.ts';
 import { parseJsDelivrPackageName } from './common.ts';
 import { JsDelivrDatasource } from './index.ts';
@@ -19,6 +21,95 @@ function pathForDigest(packageName: string, version: string): string {
 
 describe('modules/datasource/jsdelivr/index', () => {
   describe('getReleases', () => {
+    it('throws for empty result', async () => {
+      httpMock.scope(baseUrl).get(pathFor('npm/foo/bar')).reply(200, '}');
+      await expect(
+        getPkgReleases({
+          datasource: JsDelivrDatasource.id,
+          packageName: 'npm/foo/bar',
+        }),
+      ).rejects.toThrow(EXTERNAL_HOST_ERROR);
+    });
+
+    it('throws for error', async () => {
+      httpMock
+        .scope(baseUrl)
+        .get(pathFor('npm/foo/bar'))
+        .replyWithError('error');
+      await expect(
+        getPkgReleases({
+          datasource: JsDelivrDatasource.id,
+          packageName: 'npm/foo/bar',
+        }),
+      ).rejects.toThrow(EXTERNAL_HOST_ERROR);
+    });
+
+    it('returns null for 404', async () => {
+      httpMock.scope(baseUrl).get(pathFor('npm/foo/bar')).reply(404);
+      expect(
+        await getPkgReleases({
+          datasource: JsDelivrDatasource.id,
+          packageName: 'npm/foo/bar',
+        }),
+      ).toBeNull();
+    });
+
+    it('returns null for empty 200 OK', async () => {
+      httpMock
+        .scope(baseUrl)
+        .get(pathFor('npm/doesnotexist/doesnotexist'))
+        .reply(200, {});
+      expect(
+        await getPkgReleases({
+          datasource: JsDelivrDatasource.id,
+          packageName: 'npm/doesnotexist/doesnotexist',
+        }),
+      ).toBeNull();
+    });
+
+    it('throws for 401', async () => {
+      httpMock.scope(baseUrl).get(pathFor('npm/foo/bar')).reply(401);
+      await expect(
+        getPkgReleases({
+          datasource: JsDelivrDatasource.id,
+          packageName: 'npm/foo/bar',
+        }),
+      ).rejects.toThrow(EXTERNAL_HOST_ERROR);
+    });
+
+    it('throws for 429', async () => {
+      httpMock.scope(baseUrl).get(pathFor('npm/foo/bar')).reply(429);
+      await expect(
+        getPkgReleases({
+          datasource: JsDelivrDatasource.id,
+          packageName: 'npm/foo/bar',
+        }),
+      ).rejects.toThrow(EXTERNAL_HOST_ERROR);
+    });
+
+    it('throws for 5xx', async () => {
+      httpMock.scope(baseUrl).get(pathFor('npm/foo/bar')).reply(502);
+      await expect(
+        getPkgReleases({
+          datasource: JsDelivrDatasource.id,
+          packageName: 'npm/foo/bar',
+        }),
+      ).rejects.toThrow(EXTERNAL_HOST_ERROR);
+    });
+
+    it('throws for unknown error', async () => {
+      httpMock
+        .scope(baseUrl)
+        .get(pathFor('npm/foo/bar'))
+        .replyWithError('error');
+      await expect(
+        getPkgReleases({
+          datasource: JsDelivrDatasource.id,
+          packageName: 'npm/foo/bar',
+        }),
+      ).rejects.toThrow(EXTERNAL_HOST_ERROR);
+    });
+
     it('processes real gh data', async () => {
       httpMock
         .scope(baseUrl)
@@ -78,6 +169,73 @@ describe('modules/datasource/jsdelivr/index', () => {
   });
 
   describe('getDigest', () => {
+    it('returs null for no result', async () => {
+      httpMock
+        .scope(baseUrl)
+        .get(pathForDigest('npm/foo/bar', '1.2.0'))
+        .reply(200, '{}');
+
+      const res = await getDigest(
+        {
+          datasource: JsDelivrDatasource.id,
+          packageName: 'npm/foo/bar',
+        },
+        '1.2.0',
+      );
+      expect(res).toBeNull();
+    });
+
+    it('returs null for empty "files" array', async () => {
+      httpMock
+        .scope(baseUrl)
+        .get(pathForDigest('npm/foo/bar', '1.2.0'))
+        .reply(200, JSON.stringify({ files: [] }));
+
+      const res = await getDigest(
+        {
+          datasource: JsDelivrDatasource.id,
+          packageName: 'npm/foo/bar',
+        },
+        '1.2.0',
+      );
+      expect(res).toBeNull();
+    });
+
+    it('returs null if file not found', async () => {
+      httpMock
+        .scope(baseUrl)
+        .get(pathForDigest('npm/foo/bar', '1.2.0'))
+        .reply(
+          200,
+          JSON.stringify({ files: [{ name: 'not-real', string: 'hash' }] }),
+        );
+
+      const res = await getDigest(
+        {
+          datasource: JsDelivrDatasource.id,
+          packageName: 'npm/foo/bar',
+        },
+        '1.2.0',
+      );
+      expect(res).toBeNull();
+    });
+
+    it('returns null for 404', async () => {
+      httpMock
+        .scope(baseUrl)
+        .get(pathForDigest('npm/foo/bar', '1.2.0'))
+        .reply(404);
+      await expect(
+        getDigest(
+          {
+            datasource: JsDelivrDatasource.id,
+            packageName: 'npm/foo/bar',
+          },
+          '1.2.0',
+        ),
+      ).rejects.toThrow(HttpError);
+    });
+
     it('returns digest for scoped npm packages', async () => {
       httpMock
         .scope(baseUrl)
