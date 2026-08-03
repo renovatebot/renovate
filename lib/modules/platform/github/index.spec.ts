@@ -848,12 +848,9 @@ describe('modules/platform/github/index', () => {
         }),
         {
           GIT_CONFIG_COUNT: '3',
-          GIT_CONFIG_KEY_0:
-            'url.https://github.com/some/repo.git.insteadOf',
-          GIT_CONFIG_KEY_1:
-            'url.https://github.com/some/repo.git.insteadOf',
-          GIT_CONFIG_KEY_2:
-            'http.https://github.com/some/repo.git.extraHeader',
+          GIT_CONFIG_KEY_0: 'url.https://github.com/some/repo.git.insteadOf',
+          GIT_CONFIG_KEY_1: 'url.https://github.com/some/repo.git.insteadOf',
+          GIT_CONFIG_KEY_2: 'http.https://github.com/some/repo.git.extraHeader',
           GIT_CONFIG_VALUE_0: 'ssh://git@github.com/some/repo.git',
           GIT_CONFIG_VALUE_1: 'git@github.com:some/repo.git',
           GIT_CONFIG_VALUE_2:

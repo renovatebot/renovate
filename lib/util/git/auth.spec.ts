@@ -328,12 +328,9 @@ describe('util/git/auth', () => {
         ),
       ).toStrictEqual({
         GIT_CONFIG_COUNT: '3',
-        GIT_CONFIG_KEY_0:
-          'url.https://github.com:89/org/repo.git.insteadOf',
-        GIT_CONFIG_KEY_1:
-          'url.https://github.com:89/org/repo.git.insteadOf',
-        GIT_CONFIG_KEY_2:
-          'http.https://github.com:89/org/repo.git.extraHeader',
+        GIT_CONFIG_KEY_0: 'url.https://github.com:89/org/repo.git.insteadOf',
+        GIT_CONFIG_KEY_1: 'url.https://github.com:89/org/repo.git.insteadOf',
+        GIT_CONFIG_KEY_2: 'http.https://github.com:89/org/repo.git.extraHeader',
         GIT_CONFIG_VALUE_0: 'ssh://git@github.com:89/org/repo.git',
         GIT_CONFIG_VALUE_1: 'ssh://git@github.com:89/org/repo.git',
         GIT_CONFIG_VALUE_2: 'Authorization: Basic dG9rZW4xMjM0Og==',
@@ -349,12 +346,9 @@ describe('util/git/auth', () => {
         }),
       ).toStrictEqual({
         GIT_CONFIG_COUNT: '3',
-        GIT_CONFIG_KEY_0:
-          'url.https://git.mycompany.com/scm/.insteadOf',
-        GIT_CONFIG_KEY_1:
-          'url.https://git.mycompany.com/scm/.insteadOf',
-        GIT_CONFIG_KEY_2:
-          'http.https://git.mycompany.com/scm/.extraHeader',
+        GIT_CONFIG_KEY_0: 'url.https://git.mycompany.com/scm/.insteadOf',
+        GIT_CONFIG_KEY_1: 'url.https://git.mycompany.com/scm/.insteadOf',
+        GIT_CONFIG_KEY_2: 'http.https://git.mycompany.com/scm/.extraHeader',
         GIT_CONFIG_VALUE_0: 'ssh://git@git.mycompany.com:7999/',
         GIT_CONFIG_VALUE_1: 'ssh://git@git.mycompany.com:7999/',
         GIT_CONFIG_VALUE_2: 'Authorization: Basic dG9rZW4xMjM0Og==',
@@ -442,7 +436,7 @@ describe('util/git/auth', () => {
         GIT_CONFIG_VALUE_0: 'ssh://git@gitlab.example.com/',
         GIT_CONFIG_VALUE_1: 'git@gitlab.example.com:',
         GIT_CONFIG_VALUE_2:
-          'Authorization: Basic Z2l0bGFiLWNpLXRva2VuOnRva2VuMTIzNA==',
+          'Authorization: Basic Z2l0bGFiLWNpLXRva2VuOnRva2VuMTIz',
       });
     });
 
@@ -544,12 +538,9 @@ describe('util/git/auth', () => {
       });
       expect(getGitEnvironmentVariables()).toStrictEqual({
         GIT_CONFIG_COUNT: '3',
-        GIT_CONFIG_KEY_0:
-          'url.https://git.mycompany.com/scm/.insteadOf',
-        GIT_CONFIG_KEY_1:
-          'url.https://git.mycompany.com/scm/.insteadOf',
-        GIT_CONFIG_KEY_2:
-          'http.https://git.mycompany.com/scm/.extraHeader',
+        GIT_CONFIG_KEY_0: 'url.https://git.mycompany.com/scm/.insteadOf',
+        GIT_CONFIG_KEY_1: 'url.https://git.mycompany.com/scm/.insteadOf',
+        GIT_CONFIG_KEY_2: 'http.https://git.mycompany.com/scm/.extraHeader',
         GIT_CONFIG_VALUE_0: 'ssh://git@git.mycompany.com:7999/',
         GIT_CONFIG_VALUE_1: 'ssh://git@git.mycompany.com:7999/',
         GIT_CONFIG_VALUE_2: 'Authorization: Basic dG9rZW4xMjM6',

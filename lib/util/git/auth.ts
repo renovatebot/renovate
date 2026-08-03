@@ -7,7 +7,7 @@ import { getEnv } from '../env.ts';
 import { find, getAll } from '../host-rules.ts';
 import { regEx } from '../regex.ts';
 import { toBase64 } from '../string.ts';
-import { createURLFromHostOrURL, isHttpUrl } from '../url.ts';
+import { createURLFromHostOrURL, isHttpUrl, parseUrl } from '../url.ts';
 import type { AuthenticationRule } from './types.ts';
 import { parseGitUrl } from './url.ts';
 
@@ -57,7 +57,7 @@ export function getGitAuthenticatedEnvironmentVariables(
   }
 
   const credentialRule = authenticationRules.at(-1)!;
-  const authenticatedUrl = new URL(credentialRule.url);
+  const authenticatedUrl = parseUrl(credentialRule.url)!;
   const authUsername = decodeURIComponent(authenticatedUrl.username);
   const authPassword = decodeURIComponent(authenticatedUrl.password);
   authenticatedUrl.username = '';
@@ -87,9 +87,7 @@ export function getGitAuthenticatedEnvironmentVariables(
   return newEnvironmentVariables;
 }
 
-function getGitConfigCount(
-  environmentVariables?: NodeJS.ProcessEnv,
-): number {
+function getGitConfigCount(environmentVariables?: NodeJS.ProcessEnv): number {
   const env = getEnv();
   const gitConfigCountEnvVariable =
     environmentVariables?.GIT_CONFIG_COUNT ?? env.GIT_CONFIG_COUNT;
