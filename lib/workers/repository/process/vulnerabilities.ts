@@ -289,6 +289,19 @@ export class Vulnerabilities {
     }
   }
 
+  /**
+   * Clears the `lockfile-only` skip reason, so a remediation can be looked up.
+   *
+   * Dependencies which only exist in a lockfile are surfaced with that reason
+   * purely so vulnerabilities in them can be found. The skip is only cleared
+   * once a fixed version is known; any other reason a dependency is skipped,
+   * e.g. the user's own config, is left untouched.
+   *
+   * @param dep Dependency to clear the skip reason of
+   * @param vulnerabilities Vulnerabilities found for that dependency
+   * @param manager Manager the dependency was extracted by, for logging
+   * @param packageFile Package file the dependency was extracted from, for logging
+   */
   private unskipLockfileOnlyDependency(
     dep: PackageDependency,
     vulnerabilities: Vulnerability[],
