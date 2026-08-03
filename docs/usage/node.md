@@ -25,6 +25,13 @@ Renovate can manage the Node.js version in the following files:
 - The mise [configuration files](https://mise.jdx.dev/configuration.html#mise-toml) (e.g., `mise.toml`, `.mise.toml`, `.config/mise.toml`) for the [mise](https://github.com/jdx/mise) version manager
 - The [`node_js`](https://docs.travis-ci.com/user/languages/javascript-with-nodejs/#Specifying-Node.js-versions) field in [`.travis.yml`](https://docs.travis-ci.com/user/customizing-the-build/)
 
+## Package manager versions
+
+Renovate can manage the package manager version in the following fields in [`package.json`](https://docs.npmjs.com/files/package.json):
+
+- The [`packageManager`](https://nodejs.org/api/packages.html#packagemanager) field
+- The [`devEngines.packageManager`](https://docs.npmjs.com/cli/v11/configuring-npm/package-json#devengines) field
+
 ## Configuring which version of npm Renovate uses
 
 When `binarySource=install`, such as in the Mend Renovate App, Renovate will choose and install an `npm` version dynamically.
