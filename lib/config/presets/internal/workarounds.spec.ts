@@ -334,7 +334,7 @@ describe('config/presets/internal/workarounds', () => {
             currentValue,
             packageRules,
             versioning: 'semver-partial',
-          } as PackageRuleInputConfig & Pick<PackageRule, 'allowedVersions'>);
+          });
 
           expect(res.versioning).toEqual(expectedVersioning);
           expect(res.allowedVersions).toEqual(
