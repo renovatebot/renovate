@@ -2093,7 +2093,7 @@ None detected
         '<summary>View abandoned dependencies (1)</summary>',
       );
       expect(result).toContain(
-        '> ℹ️ **Note**\n> \n> Packages are marked as abandoned when they exceed the [`abandonmentThreshold`](https://docs.renovatebot.com/configuration-options/#abandonmentthreshold) since their last release.\n> Unlike deprecated packages with official notices, abandonment is detected by release inactivity.\n\n',
+        `> ℹ️ **Note**\n> \n> Packages are marked as abandoned when they exceed the [\`abandonmentThreshold\`](${GlobalConfig.get('productLinks').documentation}configuration-options/#abandonmentthreshold) since their last release.\n> Unlike deprecated packages with official notices, abandonment is detected by release inactivity.\n\n`,
       );
       expect(result).toContain('| Datasource | Package | Last Updated |');
       expect(result).toContain('| npm | `abandoned-pkg` | `2020-05-15` |');

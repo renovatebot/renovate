@@ -719,7 +719,7 @@ export function getAbandonedPackagesMd(
   abandonedMd += `<summary>View abandoned dependencies (${abandonedCount})</summary>\n\n`;
 
   abandonedMd += emojify('> :information_source: **Note**\n> \n');
-  abandonedMd += `> Packages are marked as abandoned when they exceed the [\`abandonmentThreshold\`](${GlobalConfig.get('productLinks').documentation}configuration-options/#abandonmentthreshold) since their last release. \n`;
+  abandonedMd += `> Packages are marked as abandoned when they exceed the [\`abandonmentThreshold\`](${GlobalConfig.get('productLinks').documentation}configuration-options/#abandonmentthreshold) since their last release.\n`;
   abandonedMd +=
     '> Unlike deprecated packages with official notices, abandonment is detected by release inactivity.\n\n';
 
