@@ -9,6 +9,7 @@ import type {
   NpmrcDocument,
   NpmrcLine,
   NpmrcLineEnding,
+  NpmrcSettingLine,
 } from './npmrc-parser.ts';
 import { parseNpmrc, renderNpmrc } from './npmrc-parser.ts';
 
@@ -22,6 +23,23 @@ interface SanitizedRepoNpmrc {
   detectedLineEnding: NpmrcDocument['detectedLineEnding'];
 }
 
+// npm substitutes references preceded by an even number of backslashes.
+const environmentVariableReferenceRegex =
+  /(?<!\\)(?:\\\\)*\$\{[^${}?]+(?:\?)?\}/;
+
+function containsEnvironmentVariableReference(value: unknown): boolean {
+  return (
+    typeof value === 'string' && environmentVariableReferenceRegex.test(value)
+  );
+}
+
+function hasEnvironmentVariableReference(line: NpmrcSettingLine): boolean {
+  return (
+    containsEnvironmentVariableReference(line.key) ||
+    containsEnvironmentVariableReference(line.value)
+  );
+}
+
 function sanitizeRepoNpmrc(
   repoNpmrc: string,
   npmrcFileName: string,
@@ -33,25 +51,19 @@ function sanitizeRepoNpmrc(
   let removedPackageLockSetting = false;
 
   for (const line of document.lines) {
-    if (line.type === 'other') {
+    if (line.type !== 'setting' || line.section !== null) {
       retainedLines.push(line);
       continue;
     }
 
-    const isTopLevelSettingForNpm = line.npmSection === null;
-    if (
-      line.type === 'setting' &&
-      isTopLevelSettingForNpm &&
-      line.key === 'package-lock'
-    ) {
+    if (line.key === 'package-lock') {
       removedPackageLockSetting = true;
       continue;
     }
 
     if (
-      isTopLevelSettingForNpm &&
       !allowEnvironmentVariableReferences &&
-      line.environmentVariableReferences.length > 0
+      hasEnvironmentVariableReference(line)
     ) {
       removedEnvironmentVariableReferenceLine = true;
       continue;
@@ -117,7 +129,7 @@ export async function resolveNpmrc(
   }
 
   if (isString(config.npmrc) && !config.npmrcMerge) {
-    logger.debug(
+    logger.info(
       { npmrcFileName },
       'Repo .npmrc file is ignored due to config.npmrc with config.npmrcMerge=false',
     );

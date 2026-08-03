@@ -151,7 +151,7 @@ describe('modules/manager/npm/npmrc', () => {
         npmrc: 'config-npmrc',
         npmrcFileName: '.npmrc',
       });
-      expect(logger.debug).toHaveBeenCalledWith(
+      expect(logger.info).toHaveBeenCalledWith(
         { npmrcFileName: '.npmrc' },
         'Repo .npmrc file is ignored due to config.npmrc with config.npmrcMerge=false',
       );
@@ -313,6 +313,7 @@ describe('modules/manager/npm/npmrc', () => {
         source
         ${'auth="${TOKEN}"'}
         ${"auth='${TOKEN}'"}
+        ${"auth='prefix${TOKEN}'"}
         ${'auth=prefix${TOKEN}'}
         ${'auth=${TOKEN}suffix'}
         ${'auth=prefix=${TOKEN}'}
@@ -326,9 +327,12 @@ describe('modules/manager/npm/npmrc', () => {
         source
         ${'auth=${TOKEN?}'}
         ${'auth=$${TOKEN}'}
-        ${'auth=\\\\\\${TOKEN}'}
-        ${'auth=\\\\\\\\${TOKEN}'}
         ${'${SCOPE}:registry=https://registry.test'}
+        ${'auth="${TOKEN NAME}"'}
+        ${'auth=${FIRST}-${SECOND?}'}
+        ${'auth=value \\# ${TOKEN}'}
+        ${'auth=value \\; ${TOKEN}'}
+        ${'auth=${BAD${GOOD}}'}
       `('removes active environment expression $source', async ({ source }) => {
         const npmrc = await resolveRepoNpmrc(source);
 
@@ -337,16 +341,49 @@ describe('modules/manager/npm/npmrc', () => {
 
       it.each`
         source
-        ${'auth=\\${TOKEN}'}
-        ${'auth=\\\\${TOKEN}'}
         ${'auth=${}'}
         ${'auth=${TOKEN??}'}
         ${'auth=${TOKEN'}
+        ${'auth=${TO$KEN}'}
+        ${'auth=${TO{KEN}'}
       `('keeps inactive environment expression $source', async ({ source }) => {
         const npmrc = await resolveRepoNpmrc(source);
 
         expect(npmrc).toBe(source);
       });
+
+      it.each`
+        rawEscapeCount | removed
+        ${1}           | ${false}
+        ${2}           | ${false}
+        ${3}           | ${true}
+        ${4}           | ${true}
+        ${5}           | ${false}
+        ${6}           | ${false}
+      `(
+        'handles $rawEscapeCount unquoted escapes',
+        async ({ rawEscapeCount, removed }) => {
+          const source = `auth=${'\\'.repeat(rawEscapeCount)}${'${TOKEN}'}`;
+          const npmrc = await resolveRepoNpmrc(source);
+
+          expect(npmrc).toBe(removed ? '' : source);
+        },
+      );
+
+      it.each`
+        decodedEscapeCount | removed
+        ${1}               | ${false}
+        ${2}               | ${true}
+      `(
+        'handles $decodedEscapeCount quoted escapes',
+        async ({ decodedEscapeCount, removed }) => {
+          const value = `${'\\'.repeat(decodedEscapeCount)}${'${TOKEN}'}`;
+          const source = `auth=${JSON.stringify(value)}`;
+          const npmrc = await resolveRepoNpmrc(source);
+
+          expect(npmrc).toBe(removed ? '' : source);
+        },
+      );
 
       it.each`
         source
