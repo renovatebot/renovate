@@ -5,11 +5,10 @@ description: How to use OpenTelemetry with Renovate
 
 # OpenTelemetry and Renovate
 
-<!-- prettier-ignore -->
 !!! warning "This feature is flagged as experimental"
-    Experimental features might be changed at any time.
-    <br /> <br />
-    Renovate's OpenTelemetry support is stable enough to use in production, but there may be changes that rename attributes or fix bugs in a breaking, even in non-major version updates.
+  Experimental features might be changed at any time.
+  <br /> <br />
+  Renovate's OpenTelemetry support is stable enough to use in production, but there may be changes that rename attributes or fix bugs in a way that could be breaking to users, even in non-major version updates.
 
 Renovate supports the [OpenTelemetry](https://opentelemetry.io/) monitoring and observability standard.
 
@@ -19,11 +18,10 @@ OpenTelemetry has three types of observability data it supports within the OpenT
 - metrics
 - logs
 
-<!-- prettier-ignore -->
 !!! note
-    While the OpenTelemetry Protocol (OTLP) support traces, metrics, and logs, Renovate only supports traces, and some metrics.
-    <br /> <br />
-    This means Renovate does not support other observability data like: stats on caching, error events, number of found updates, and so on.
+  While the OpenTelemetry Protocol (OTLP) support traces, metrics, and logs, Renovate only supports traces, and some metrics.
+  <br /> <br />
+  This means Renovate does not support other observability data like: stats on caching, error events, number of found updates, and so on.
 
 Renovate uses [`@opentelemetry/exporter-trace-otlp-http`](https://www.npmjs.com/package/@opentelemetry/exporter-trace-otlp-http) under the hood.
 This means that Renovate sends traces via [OTLP/HTTP](https://opentelemetry.io/docs/reference/specification/protocol/otlp/#otlphttp) in JSON-encoded protobuf format only.
@@ -65,6 +63,22 @@ The default values is `all`, which means all of the above detectors are used. Se
 - `github`
 - `env`
 
+### File exporter
+
+The OpenTelemetry data can also be exported into a newline-delimited JSON (NDJSON) file, in OTLP JSON format.
+
+This is configured using the `RENOVATE_TRACING_FILE_EXPORTER_PATH` environment variable.
+
+You can then ingest this data into other tools, for instance:
+
+```sh title="Exporting the JSONL OTLP file to a local OpenTelemetry traces API"
+while IFS= read -r line; do
+  curl -s -X POST http://localhost:4318/v1/traces \
+    -H 'Content-Type: application/json' \
+    -d "$line"
+done < /tmp/traces.jsonl
+```
+
 ## Supported OTLP data
 
 ### Traces
@@ -77,6 +91,7 @@ Renovate provides instrumentation through traces for (non-exhaustively):
 - Any Git operations
 - Per-manager traces when performing the `lookup` and `extract` splits
 - Per-branch traces when performing the `update` split
+- Cache lifecycle operations (repository cache load/save, package cache init/destroy)
 - Important functions (more instrumentation be added)
 
 As well as following [OpenTelemetry's semantic conventions](https://opentelemetry.io/docs/specs/semconv/) where possible, Renovate defines several Custom Attributes, which can be found in [`lib/instrumentation/types.ts`](https://github.com/renovatebot/renovate/blob/main/lib/instrumentation/types.ts).

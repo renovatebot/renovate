@@ -24,7 +24,7 @@ function emptyCtx(source: string): Ctx {
 }
 
 function currentFragment(ctx: Ctx): NestedFragment {
-  const deepestFragment = ctx.stack[ctx.stack.length - 1];
+  const deepestFragment = ctx.stack.at(-1)!;
   return deepestFragment;
 }
 

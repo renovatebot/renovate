@@ -62,7 +62,7 @@ exports[`modules/platform/bitbucket/index > getIssueList() > get issues 1`] = `
 ]
 `;
 
-exports[`modules/platform/bitbucket/index > getPr() > canRebase 1`] = `
+exports[`modules/platform/bitbucket/index > getPr() > canRebase > getPr(3) 1`] = `
 {
   "bodyStruct": {
     "hash": "761b7ad8ad439b2855fcbb611331c646ef0870b0631247bba3f3025cb6df5a53",
@@ -76,7 +76,7 @@ exports[`modules/platform/bitbucket/index > getPr() > canRebase 1`] = `
 }
 `;
 
-exports[`modules/platform/bitbucket/index > getPr() > canRebase 2`] = `
+exports[`modules/platform/bitbucket/index > getPr() > canRebase > getPr(5) 1`] = `
 {
   "bodyStruct": {
     "hash": "761b7ad8ad439b2855fcbb611331c646ef0870b0631247bba3f3025cb6df5a53",
@@ -90,7 +90,7 @@ exports[`modules/platform/bitbucket/index > getPr() > canRebase 2`] = `
 }
 `;
 
-exports[`modules/platform/bitbucket/index > getPr() > canRebase 3`] = `
+exports[`modules/platform/bitbucket/index > getPr() > canRebase > getPr(5) repeated 1`] = `
 {
   "bodyStruct": {
     "hash": "761b7ad8ad439b2855fcbb611331c646ef0870b0631247bba3f3025cb6df5a53",

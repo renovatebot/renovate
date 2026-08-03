@@ -112,6 +112,7 @@ export class MigrationsService {
     ['masterIssueLabels', 'dependencyDashboardLabels'],
     ['regexManagers', 'customManagers'],
     ['baseBranches', 'baseBranchPatterns'],
+    ['renovate-config-presets', 'renovate-config'],
   ]);
 
   static readonly customMigrations: readonly MigrationConstructor[] = [

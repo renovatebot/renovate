@@ -4,7 +4,7 @@
 //   protoc               v6.33.4
 // source: package.proto
 
-/* eslint-disable */
+/* oxlint-disable */
 import _m0 from "protobufjs/minimal.js";
 
 export const protobufPackage = "";

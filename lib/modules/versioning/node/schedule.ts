@@ -3,6 +3,7 @@ import type { Nullish } from '../../../types/index.ts';
 import semver from '../semver/index.ts';
 
 interface NodeJsSchedule {
+  alpha?: string;
   lts?: string;
   maintenance?: string;
   end: string;

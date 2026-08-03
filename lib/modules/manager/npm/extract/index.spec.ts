@@ -27,7 +27,9 @@ const invalidNameContent = Fixtures.get('invalid-name.json', '..');
 describe('modules/manager/npm/extract/index', () => {
   describe('.extractPackageFile()', () => {
     beforeEach(async () => {
-      const realFs = await vi.importActual<typeof fs>('../../../../util/fs');
+      const realFs = await vi.importActual<typeof fs>(
+        '../../../../util/fs/index.ts',
+      );
       fs.readLocalFile.mockResolvedValue(null);
       fs.localPathExists.mockResolvedValue(false);
       fs.getSiblingFileName.mockImplementation(realFs.getSiblingFileName);
@@ -69,7 +71,7 @@ describe('modules/manager/npm/extract/index', () => {
           'backend/package.json',
           defaultExtractConfig,
         ),
-      ).rejects.toThrow();
+      ).rejects.toThrow('config-validation');
     });
 
     it('returns null if no deps', async () => {
@@ -127,7 +129,17 @@ describe('modules/manager/npm/extract/index', () => {
       expect(res).toMatchSnapshot({
         extractedConstraints: {},
         deps: [
-          ...[{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}],
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
           {
             depName: undefined,
             depType: 'resolutions',
@@ -393,6 +405,163 @@ describe('modules/manager/npm/extract/index', () => {
       ]);
     });
 
+    it('reads scoped registryUrls from pnpm-workspace.yaml', async () => {
+      fs.findLocalSiblingOrParent.mockImplementation(
+        (packageFile, otherFile): Promise<string | null> => {
+          if (
+            packageFile === 'package.json' &&
+            otherFile === 'pnpm-workspace.yaml'
+          ) {
+            return Promise.resolve('pnpm-workspace.yaml');
+          }
+          return Promise.resolve(null);
+        },
+      );
+      fs.readLocalFile.mockImplementation((fileName): Promise<any> => {
+        if (fileName === 'pnpm-workspace.yaml') {
+          return Promise.resolve(codeBlock`
+            registries:
+              "@babel": https://private.example.com/
+          `);
+        }
+        return Promise.resolve(null);
+      });
+      const res = await npmExtract.extractPackageFile(
+        input02Content,
+        'package.json',
+        {},
+      );
+      expect(res?.deps).toMatchObject([
+        {
+          depName: '@babel/core',
+          registryUrls: ['https://private.example.com/'],
+        },
+        { depName: 'config' },
+        { depName: 'express>cookie' },
+      ]);
+      expect(
+        res?.deps.flatMap((dep) => dep.registryUrls),
+      ).toBeArrayIncludingOnly(['https://private.example.com/', undefined]);
+    });
+
+    it('reads top-level registry from pnpm-workspace.yaml', async () => {
+      fs.findLocalSiblingOrParent.mockImplementation(
+        (packageFile, otherFile): Promise<string | null> => {
+          if (
+            packageFile === 'package.json' &&
+            otherFile === 'pnpm-workspace.yaml'
+          ) {
+            return Promise.resolve('pnpm-workspace.yaml');
+          }
+          return Promise.resolve(null);
+        },
+      );
+      fs.readLocalFile.mockImplementation((fileName): Promise<any> => {
+        if (fileName === 'pnpm-workspace.yaml') {
+          return Promise.resolve('registry: https://private.example.com/');
+        }
+        return Promise.resolve(null);
+      });
+      const res = await npmExtract.extractPackageFile(
+        input02Content,
+        'package.json',
+        {},
+      );
+      expect(res?.deps.flatMap((dep) => dep.registryUrls)).toEqual([
+        'https://private.example.com/',
+        'https://private.example.com/',
+        'https://private.example.com/',
+      ]);
+    });
+
+    it('skips pnpm-workspace.yaml registry values containing env vars', async () => {
+      fs.findLocalSiblingOrParent.mockImplementation(
+        (packageFile, otherFile): Promise<string | null> => {
+          if (
+            packageFile === 'package.json' &&
+            otherFile === 'pnpm-workspace.yaml'
+          ) {
+            return Promise.resolve('pnpm-workspace.yaml');
+          }
+          return Promise.resolve(null);
+        },
+      );
+      fs.readLocalFile.mockImplementation((fileName): Promise<any> => {
+        if (fileName === 'pnpm-workspace.yaml') {
+          return Promise.resolve(codeBlock`
+            registries:
+              "@babel": https://\${TOKEN}.example.com/
+          `);
+        }
+        return Promise.resolve(null);
+      });
+      const res = await npmExtract.extractPackageFile(
+        input02Content,
+        'package.json',
+        {},
+      );
+      expect(
+        res?.deps.flatMap((dep) => dep.registryUrls),
+      ).toBeArrayIncludingOnly([undefined]);
+    });
+
+    it('does not set pnpm-workspace.yaml registryUrls for non-npm deps', async () => {
+      fs.findLocalSiblingOrParent.mockImplementation(
+        (packageFile, otherFile): Promise<string | null> => {
+          if (
+            packageFile === 'package.json' &&
+            otherFile === 'pnpm-workspace.yaml'
+          ) {
+            return Promise.resolve('pnpm-workspace.yaml');
+          }
+          return Promise.resolve(null);
+        },
+      );
+      fs.readLocalFile.mockImplementation((fileName): Promise<any> => {
+        if (fileName === 'pnpm-workspace.yaml') {
+          return Promise.resolve('registry: https://private.example.com/');
+        }
+        return Promise.resolve(null);
+      });
+      const res = await npmExtract.extractPackageFile(
+        '{"dependencies":{"a":"github:owner/a#v1.1.0"}}',
+        'package.json',
+        defaultExtractConfig,
+      );
+      expect(res?.deps).toMatchObject([
+        { depName: 'a', datasource: 'github-tags' },
+      ]);
+      expect(res?.deps[0].registryUrls).toBeUndefined();
+    });
+
+    it('ignores an unparseable pnpm-workspace.yaml', async () => {
+      fs.findLocalSiblingOrParent.mockImplementation(
+        (packageFile, otherFile): Promise<string | null> => {
+          if (
+            packageFile === 'package.json' &&
+            otherFile === 'pnpm-workspace.yaml'
+          ) {
+            return Promise.resolve('pnpm-workspace.yaml');
+          }
+          return Promise.resolve(null);
+        },
+      );
+      fs.readLocalFile.mockImplementation((fileName): Promise<any> => {
+        if (fileName === 'pnpm-workspace.yaml') {
+          return Promise.resolve('registries: not-an-object');
+        }
+        return Promise.resolve(null);
+      });
+      const res = await npmExtract.extractPackageFile(
+        input02Content,
+        'package.json',
+        {},
+      );
+      expect(
+        res?.deps.flatMap((dep) => dep.registryUrls),
+      ).toBeArrayIncludingOnly([undefined]);
+    });
+
     it('finds complex yarn workspaces', async () => {
       fs.readLocalFile.mockImplementation((): Promise<any> => {
         return Promise.resolve(null);
@@ -520,7 +689,10 @@ describe('modules/manager/npm/extract/index', () => {
       );
       expect(res).toMatchSnapshot({
         deps: [
-          ...[{}, {}, {}, {}],
+          {},
+          {},
+          {},
+          {},
           {
             depType: 'volta',
             currentValue: '6.11.2',
@@ -642,6 +814,8 @@ describe('modules/manager/npm/extract/index', () => {
           p: 'Owner/P.git#v2.0.0',
           q: 'github:owner/q#semver:1.1.0',
           r: 'github:owner/r#semver:^1.0.0',
+          s: 'github:owner/repo.with.dots#v1.0.0',
+          t: 'git@github.com:owner/repo.with.dots.git#v1.0.0',
         },
       };
       const pJsonStr = JSON.stringify(pJson);
@@ -750,6 +924,18 @@ describe('modules/manager/npm/extract/index', () => {
             currentValue: '^1.0.0',
             datasource: 'github-tags',
             sourceUrl: 'https://github.com/owner/r',
+          },
+          {
+            depName: 's',
+            currentValue: 'v1.0.0',
+            datasource: 'github-tags',
+            sourceUrl: 'https://github.com/owner/repo.with.dots',
+          },
+          {
+            depName: 't',
+            currentValue: 'v1.0.0',
+            datasource: 'github-tags',
+            sourceUrl: 'https://github.com/owner/repo.with.dots',
           },
         ],
       });
@@ -953,26 +1139,28 @@ describe('modules/manager/npm/extract/index', () => {
     });
 
     it('extracts dependencies from overrides', async () => {
-      const content = `{
-        "devDependencies": {
-          "@types/react": "18.0.5"
-        },
-        "overrides": {
-          "node": "8.9.2",
-          "@types/react": "18.0.5",
-          "baz": {
-            "node": "8.9.2",
-            "bar": {
-              "foo": "1.0.0"
-            }
-          },
-          "foo2": {
-            ".": "1.0.0",
-            "bar2": "1.0.0"
-          },
-          "emptyObject":{}
-        }
-      }`;
+      const content = codeBlock`
+        {
+                "devDependencies": {
+                  "@types/react": "18.0.5"
+                },
+                "overrides": {
+                  "node": "8.9.2",
+                  "@types/react": "18.0.5",
+                  "baz": {
+                    "node": "8.9.2",
+                    "bar": {
+                      "foo": "1.0.0"
+                    }
+                  },
+                  "foo2": {
+                    ".": "1.0.0",
+                    "bar2": "1.0.0"
+                  },
+                  "emptyObject":{}
+                }
+              }
+      `;
       const res = await npmExtract.extractPackageFile(
         content,
         'package.json',
@@ -1032,28 +1220,30 @@ describe('modules/manager/npm/extract/index', () => {
     });
 
     it('extracts dependencies from pnpm.overrides', async () => {
-      const content = `{
-        "devDependencies": {
-          "@types/react": "18.0.5"
-        },
-        "pnpm": {
-          "overrides": {
-            "node": "8.9.2",
-            "@types/react": "18.0.5",
-            "baz": {
-              "node": "8.9.2",
-              "bar": {
-                "foo": "1.0.0"
+      const content = codeBlock`
+        {
+                "devDependencies": {
+                  "@types/react": "18.0.5"
+                },
+                "pnpm": {
+                  "overrides": {
+                    "node": "8.9.2",
+                    "@types/react": "18.0.5",
+                    "baz": {
+                      "node": "8.9.2",
+                      "bar": {
+                        "foo": "1.0.0"
+                      }
+                    },
+                    "foo2": {
+                      ".": "1.0.0",
+                      "bar2": "1.0.0"
+                    },
+                    "emptyObject":{}
+                  }
+                }
               }
-            },
-            "foo2": {
-              ".": "1.0.0",
-              "bar2": "1.0.0"
-            },
-            "emptyObject":{}
-          }
-        }
-      }`;
+      `;
       const res = await npmExtract.extractPackageFile(
         content,
         'package.json',
@@ -1243,6 +1433,32 @@ describe('modules/manager/npm/extract/index', () => {
           skipInstalls: true,
         },
       ]);
+    });
+
+    it('warns for invalid pnpm workspace yaml files', async () => {
+      fs.readLocalFile.mockResolvedValueOnce(codeBlock`
+        **:
+      `);
+      const res = await extractAllPackageFiles(defaultExtractConfig, [
+        'pnpm-workspace.yaml',
+      ]);
+      expect(res).toEqual([]);
+      expect(logger.warn).toHaveBeenCalledWith(
+        {
+          packageFile: 'pnpm-workspace.yaml',
+          err: expect.any(Error),
+        },
+        'Failed to parse pnpm-workspace.yaml file',
+      );
+    });
+
+    it('parses empty pnpm workspace yaml files', async () => {
+      fs.readLocalFile.mockResolvedValueOnce('');
+      const res = await extractAllPackageFiles(defaultExtractConfig, [
+        'pnpm-workspace.yaml',
+      ]);
+      expect(res).toEqual([]);
+      expect(logger.warn).not.toHaveBeenCalled();
     });
 
     it('extracts pnpm workspace yaml files', async () => {

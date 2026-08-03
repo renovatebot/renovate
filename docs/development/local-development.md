@@ -15,13 +15,16 @@ You need the following dependencies for local development:
 - pnpm `^10.0.0`
 - C++ compiler
 
-We recommend you use the version of Node.js defined in the repository's `.nvmrc` or use [Volta](https://volta.sh/) to manage your tool versions.
-Volta will apply automatically the correct version of Node.js and pnpm when you enter the repository directory.
-
 For building the documentation, you also need:
 
 - Python `>=3.11`
 - PDM `>=2.26.0`
+
+#### Recommended: Mise
+
+We recommend [Mise](https://mise.jdx.dev/) to install and manage all of the tools above.
+After installing Mise, run `mise install` from the repository root.
+This installs the pinned versions of tools used in the project and triggers the installation of all dependencies.
 
 #### Linux
 
@@ -101,6 +104,9 @@ The Renovate project uses the [pnpm](https://github.com/pnpm/pnpm) package manag
 
 To ensure everything is working properly on your end, you must:
 
+!!! tip "Mise users"
+  If you ran `mise install`, the `postinstall` hook already executed `pnpm install`.
+
 1. Install all dependencies with `pnpm install`
 1. Make a build with `pnpm build`, which should pass with no errors
 1. Verify all tests pass and have 100% test coverage, by running `pnpm test`
@@ -149,16 +155,19 @@ If this is working then in future you can create other test repos to verify your
 
 You can run `pnpm test` locally to test your code.
 We test all PRs using the same tests, run on GitHub Actions.
-`pnpm test` runs an `eslint` check, a `prettier` check, a `type` check and then all the unit tests using `vitest`.
+`pnpm test` runs lint checks (`oxlint`, `biome`, `prettier`, etc.), a type check, and then all the unit tests using `vitest`.
 
 Refactor PRs should ideally not change or remove tests (adding tests is OK).
 
 ### Quick Local CI
 
-For fast iteration during development, use `pnpm check`, which runs all checks in parallel and only tests the shards affected by your changes:
+For fast iteration during development, use `pnpm check`, which runs lint and tests in parallel:
 
 ```bash
 pnpm check
+pnpm check lib/util/http        # scope to a directory
+pnpm check lib/util/hash.ts     # scope to a file
+pnpm check --fix lib/util/http  # auto-fix only
 ```
 
 ### Vitest
@@ -182,7 +191,7 @@ Also, it can be good to submit your PR as a work in progress (WIP) without tests
 ## Linting and formatting
 
 We use [Prettier](https://github.com/prettier/prettier) to format our code.
-If your code fails `pnpm test` due to a `prettier` rule then run `pnpm lint-fix` to fix it or most `eslint` errors automatically before running `pnpm test` again.
+If your code fails `pnpm test` due to a `prettier` rule then run `pnpm lint-fix` to fix it or most lint errors automatically before running `pnpm test` again.
 You usually don't need to fix any Prettier errors by hand.
 
 If you're only working on the documentation files, you can use the `pnpm doc-fix` command to format your work.
@@ -192,10 +201,7 @@ If you're only working on the documentation files, you can use the `pnpm doc-fix
 We recommend installing the extensions listed in `.vscode/extensions.json`.
 VS Code will prompt you to install them when you open the project.
 
-For linting, we use both ESLint and [oxlint](https://oxc.rs):
-
-- **ESLint** handles type-aware rules (requires TypeScript)
-- **oxlint** handles syntax rules (near-instant feedback)
+For linting, we use [oxlint](https://oxc.rs) with type-aware analysis.
 
 To get real-time oxlint diagnostics, install the extension for your editor:
 
@@ -207,7 +213,7 @@ To get real-time oxlint diagnostics, install the extension for your editor:
 ## Documentation
 
 We use [MkDocs](https://www.mkdocs.org) to generate the documentation.
-To install the required dependency, use `pdm install`.
+To install the required dependency, use `uv sync`.
 You can run `pnpm build:docs` to generate the docs.
 Then use `pnpm mkdocs serve` to preview the documentation locally.
 The docs will update automatically when you run `pnpm build:docs` again, no need to stop the `pnpm mkdocs serve` command.
@@ -248,6 +254,48 @@ So most new functionality should be controllable via configuration options.
 
 Create your new configuration option in the `lib/config/options/index.ts` file.
 Also create documentation for the option in the `docs/usage/configuration-options.md` file.
+
+### `Error: Cannot find module './build/Release/re2.node'`
+
+If you're seeing errors related to `re2`, such as:
+
+```
+> renovate@0.0.0-semantic-release prepare:deps ...
+> node tools/prepare-deps.mjs
+
+Checking re2 ...
+Error: Cannot find module './build/Release/re2.node'
+Require stack:
+- .../renovate/node_modules/.pnpm/re2@1.24.0/node_modules/re2/re2.js
+- .../renovate/[eval]
+    at Module._resolveFilename (node:internal/modules/cjs/loader:1475:15)
+    at wrapResolveFilename (node:internal/modules/cjs/loader:1048:27)
+    at defaultResolveImplForCJSLoading (node:internal/modules/cjs/loader:1072:10)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1093:12)
+    at Module._load (node:internal/modules/cjs/loader:1261:25)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)
+    at Module.require (node:internal/modules/cjs/loader:1575:12)
+    at require (node:internal/modules/helpers:191:16)
+    at Object.<anonymous> (.../node_modules/.pnpm/re2@1.24.0/node_modules/re2/re2.js:3:13)
+    at Module._compile (node:internal/modules/cjs/loader:1829:14) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [
+    '.../node_modules/.pnpm/re2@1.24.0/node_modules/re2/re2.js',
+    '.../[eval]'
+  ]
+}
+Failed.
+```
+
+This is likely due to the version of `re2` being out-of-sync with your Node version.
+
+You can rebuild it with:
+
+```sh
+pnpm rebuild re2
+```
+
+This will rebuild it for the current Node version in use.
 
 ## Debugging
 

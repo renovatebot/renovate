@@ -20,6 +20,7 @@ import {
   isPinnedVersion,
   massageNewValue,
   readLockFile,
+  sortConstraints,
   writeLockUpdates,
 } from './util.ts';
 
@@ -101,9 +102,11 @@ export function getNewConstraint(
       `Updating constraint "${oldConstraint}" to replace "${currentValue}" with "${newValue}" for "${packageName}"`,
     );
     //remove surplus .0 version
-    return oldConstraint.replace(
-      regEx(`(,\\s|^)${escapeRegExp(currentValue)}(\\.0)*`),
-      `$1${newValue}`,
+    return sortConstraints(
+      oldConstraint.replace(
+        regEx(`(,\\s|^)${escapeRegExp(currentValue)}(\\.0)*`),
+        `$1${newValue}`,
+      ),
     );
   }
 
@@ -116,7 +119,7 @@ export function getNewConstraint(
     logger.debug(
       `Updating constraint "${oldConstraint}" to replace "${currentVersion}" with "${newVersion}" for "${packageName}"`,
     );
-    return oldConstraint.replace(currentVersion, newVersion);
+    return sortConstraints(oldConstraint.replace(currentVersion, newVersion));
   }
 
   if (isPinnedVersion(newValue)) {
@@ -228,7 +231,7 @@ export async function updateArtifacts({
     return [
       {
         artifactError: {
-          lockFile: lockFilePath,
+          fileName: lockFilePath,
           stderr: err.message,
         },
       },

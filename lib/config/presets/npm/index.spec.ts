@@ -1,4 +1,5 @@
 import * as httpMock from '~test/http-mock.ts';
+import { defaultRegistryUrl } from '../../../modules/datasource/npm/common.ts';
 import { GlobalConfig } from '../../global.ts';
 import * as npm from './index.ts';
 
@@ -8,7 +9,7 @@ describe('config/presets/npm/index', () => {
   });
 
   it('should throw if no package', async () => {
-    httpMock.scope('https://registry.npmjs.org').get('/nopackage').reply(404);
+    httpMock.scope(defaultRegistryUrl).get('/nopackage').reply(404);
     await expect(
       npm.getPreset({ repo: 'nopackage', presetName: 'default' }),
     ).rejects.toThrow(/dep not found/);
@@ -39,7 +40,7 @@ describe('config/presets/npm/index', () => {
       },
     };
     httpMock
-      .scope('https://registry.npmjs.org')
+      .scope(defaultRegistryUrl)
       .get('/norenovateconfig')
       .reply(200, presetPackage);
     await expect(
@@ -73,7 +74,7 @@ describe('config/presets/npm/index', () => {
       },
     };
     httpMock
-      .scope('https://registry.npmjs.org')
+      .scope(defaultRegistryUrl)
       .get('/presetnamenotfound')
       .reply(200, presetPackage);
     await expect(
@@ -110,7 +111,7 @@ describe('config/presets/npm/index', () => {
       },
     };
     httpMock
-      .scope('https://registry.npmjs.org')
+      .scope(defaultRegistryUrl)
       .get('/workingpreset')
       .reply(200, presetPackage);
     const res = await npm.getPreset({ repo: 'workingpreset' });

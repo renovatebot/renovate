@@ -1,7 +1,12 @@
-import { isArray, isEmptyArray, isNonEmptyArray } from '@sindresorhus/is';
+import { setTimeout } from 'node:timers/promises';
+import {
+  isArray,
+  isEmptyArray,
+  isNonEmptyArray,
+  isString,
+} from '@sindresorhus/is';
 import pMap from 'p-map';
 import semver from 'semver';
-import { setTimeout } from 'timers/promises';
 import { GlobalConfig } from '../../../config/global.ts';
 import {
   REPOSITORY_ACCESS_FORBIDDEN,
@@ -28,7 +33,11 @@ import * as p from '../../../util/promises.ts';
 import { regEx } from '../../../util/regex.ts';
 import { sanitize } from '../../../util/sanitize.ts';
 import type { EmailAddress } from '../../../util/schema-utils/index.ts';
-import { ensureTrailingSlash, getQueryString } from '../../../util/url.ts';
+import {
+  ensureTrailingSlash,
+  getQueryString,
+  parseUrl,
+} from '../../../util/url.ts';
 import type {
   AutodiscoverConfig,
   BranchStatusConfig,
@@ -53,12 +62,14 @@ import { smartTruncate } from '../utils/pr-body.ts';
 import {
   getMemberUserIDs,
   getMemberUsernames,
+  getProjectMembersByRole,
   getUserID,
   gitlabApi,
   isUserBusy,
 } from './http.ts';
 import { getMR, updateMR } from './merge-request.ts';
 import { GitlabPrCache } from './pr-cache.ts';
+import { getRoleAccessLevel } from './roles.ts';
 import type { GitLabMergeRequest } from './schema.ts';
 import { LastPipelineId } from './schema.ts';
 import type {
@@ -114,11 +125,13 @@ export async function initPlatform({
   if (!token) {
     throw new Error('Init: You must configure a GitLab personal access token');
   }
-  if (endpoint) {
+  if (!endpoint) {
+    logger.debug(`Using default GitLab endpoint: ${defaults.endpoint}`);
+  } else if (parseUrl(endpoint) === null) {
+    throw new Error(`Invalid GitLab endpoint URL: ${endpoint}`);
+  } else {
     defaults.endpoint = ensureTrailingSlash(endpoint);
     setBaseUrl(defaults.endpoint);
-  } else {
-    logger.debug('Using default GitLab endpoint: ' + defaults.endpoint);
   }
   const platformConfig: PlatformResult = {
     endpoint: defaults.endpoint,
@@ -151,7 +164,7 @@ export async function initPlatform({
       ).body;
       gitlabVersion = version.version;
     }
-    logger.debug('GitLab version is: ' + gitlabVersion);
+    logger.debug(`GitLab version is: ${gitlabVersion}`);
     // version is 'x.y.z-edition', so not strictly semver; need to strip edition
     [gitlabVersion] = gitlabVersion.split('-');
     defaults.version = gitlabVersion;
@@ -201,7 +214,7 @@ export async function getRepos(config?: AutodiscoverConfig): Promise<string[]> {
       ),
     );
   } else {
-    urls.push('projects?' + getQueryString(queryParams));
+    urls.push(`projects?${getQueryString(queryParams)}`);
   }
 
   try {
@@ -241,9 +254,7 @@ export async function getRawFile(
 ): Promise<string | null> {
   const escapedFileName = urlEscape(fileName);
   const repo = urlEscape(repoName) ?? config.repository;
-  const url =
-    `projects/${repo}/repository/files/${escapedFileName}?ref=` +
-    (branchOrTag ?? `HEAD`);
+  const url = `projects/${repo}/repository/files/${escapedFileName}?ref=${branchOrTag ?? `HEAD`}`;
   const res = await gitlabApi.getJsonUnchecked<{ content: string }>(url, {
     cacheProvider: memCacheProvider,
   });
@@ -308,7 +319,7 @@ export async function initRepo({
       throw new Error(REPOSITORY_EMPTY);
     }
     config.defaultBranch = res.body.default_branch;
-    /* v8 ignore next */
+    /* v8 ignore next -- unreachable: null/empty default_branch already threw REPOSITORY_EMPTY above */
     if (!config.defaultBranch) {
       logger.warn({ resBody: res.body }, 'Error fetching GitLab project');
       throw new Error(TEMPORARY_ERROR);
@@ -327,7 +338,7 @@ export async function initRepo({
       ...config,
       url,
     });
-  } catch (err) /* v8 ignore next */ {
+  } catch (err) /* v8 ignore next -- initRepo error mapping needs git-level failures not mocked in specs */ {
     logger.debug({ err }, 'Caught initRepo error');
     if (err.message.includes('HEAD is not a symbolic ref')) {
       throw new Error(REPOSITORY_EMPTY);
@@ -404,7 +415,7 @@ async function getStatus(
 
     return (await gitlabApi.getJsonUnchecked<GitlabBranchStatus[]>(url, opts))
       .body;
-  } catch (err) /* v8 ignore next */ {
+  } catch (err) /* v8 ignore next -- commit status fetch failures map 404 to REPOSITORY_CHANGED, not mocked in specs */ {
     logger.debug({ err }, 'Error getting commit status');
     if (err.response?.statusCode === 404) {
       throw new Error(REPOSITORY_CHANGED);
@@ -438,7 +449,7 @@ export async function getBranchStatus(
   }
 
   const branchStatuses = await getStatus(branchName);
-  /* v8 ignore next */
+  /* v8 ignore next -- defensive: getStatus always resolves to an array in specs */
   if (!isArray(branchStatuses)) {
     logger.warn(
       { branchName, branchStatuses },
@@ -601,7 +612,7 @@ async function tryPrAutomerge(
       // Check for correct merge request status before setting `merge_when_pipeline_succeeds` to  `true`.
       for (let attempt = 1; attempt <= retryTimes; attempt += 1) {
         const { body } = await gitlabApi.getJsonUnchecked<{
-          merge_status: string;
+          merge_status?: string;
           detailed_merge_status?: string;
           merge_when_pipeline_succeeds?: boolean;
           pipeline: {
@@ -639,19 +650,43 @@ async function tryPrAutomerge(
         await setTimeout(mergeDelay * attempt ** 2); // exponential backoff
       }
 
+      // The merge_trains endpoint's auto_merge parameter requires GitLab
+      // 17.11+. On older versions we fall back to the /merge endpoint so the
+      // MR still automerges, just not on the train.
+      // https://docs.gitlab.com/api/merge_trains/#add-a-merge-request-to-a-merge-train
+      const useMergeTrain =
+        config.mergeTrainsEnabled && !semver.lt(defaults.version, '17.11.0');
+      if (config.mergeTrainsEnabled && !useMergeTrain) {
+        logger.once.warn(
+          { version: defaults.version },
+          'Merge trains require GitLab 17.11.0 or later, falling back to /merge endpoint',
+        );
+      }
+
       // Even if Gitlab returns a "merge-able" merge request status, enabling auto-merge sometimes
       // returns a 405 Method Not Allowed. It seems to be a timing issue within Gitlab.
       for (let attempt = 1; attempt <= retryTimes; attempt += 1) {
         try {
-          await gitlabApi.putJson(
-            `projects/${config.repository}/merge_requests/${pr}/merge`,
-            {
-              body: {
-                should_remove_source_branch: true,
-                merge_when_pipeline_succeeds: true,
+          if (useMergeTrain) {
+            await gitlabApi.postJson(
+              `projects/${config.repository}/merge_trains/merge_requests/${pr}`,
+              {
+                body: {
+                  auto_merge: true,
+                },
               },
-            },
-          );
+            );
+          } else {
+            await gitlabApi.putJson(
+              `projects/${config.repository}/merge_requests/${pr}/merge`,
+              {
+                body: {
+                  should_remove_source_branch: true,
+                  merge_when_pipeline_succeeds: true,
+                },
+              },
+            );
+          }
           break;
         } catch (err) {
           logger.debug(
@@ -662,7 +697,7 @@ async function tryPrAutomerge(
         await setTimeout(mergeDelay * attempt ** 2); // exponential backoff
       }
     }
-  } catch (err) /* v8 ignore next */ {
+  } catch (err) /* v8 ignore next -- defensive: retry loop already swallows errors, outer catch is a last resort */ {
     logger.debug({ err }, 'Automerge on PR creation failed');
   }
 }
@@ -818,7 +853,7 @@ export async function mergePr({ id }: MergePRConfig): Promise<boolean> {
       },
     );
     return true;
-  } catch (err) /* v8 ignore next */ {
+  } catch (err) /* v8 ignore next -- merge rejection statuses (401/406) are mapped to false, not mocked in specs */ {
     if (err.statusCode === 401) {
       logger.debug('No permissions to merge PR');
       return false;
@@ -842,7 +877,8 @@ export function massageMarkdown(input: string): string {
     .replace(regEx(/\]\(\.\.\/pull\//g), '](!')
     .replace(regEx(/\]\(\.\.\/issues\//g), '](#')
     // Strip unicode null characters as GitLab markdown does not permit them
-    .replace(regEx(/\u0000/g), ''); // eslint-disable-line no-control-regex
+    // oxlint-disable-next-line no-control-regex
+    .replace(regEx(/\u0000/g), '');
   return smartTruncate(desc, maxBodyLength());
 }
 
@@ -853,9 +889,8 @@ export function maxBodyLength(): number {
       'GitLab versions earlier than 13.4 have issues with long descriptions, truncating to 25K characters',
     );
     return 25000;
-  } else {
-    return 1000000;
   }
+  return 1000000;
 }
 
 /* v8 ignore next: no need to test */
@@ -1013,11 +1048,11 @@ export async function setBranchStatus({
 
     // update status cache
     await getStatus(branchName, false);
-  } catch (err) /* v8 ignore next */ {
+  } catch (err) {
+    const message = err.body?.message;
     if (
-      err.body?.message?.startsWith(
-        'Cannot transition status via :enqueue from :pending',
-      )
+      isString(message) &&
+      message.startsWith('Cannot transition status via :enqueue from :pending')
     ) {
       // https://gitlab.com/gitlab-org/gitlab-foss/issues/25807
       logger.debug('Ignoring status transition error');
@@ -1048,7 +1083,7 @@ export async function getIssueList(): Promise<GitlabIssue[]> {
       memCache: false,
       paginate: true,
     });
-    /* v8 ignore next */
+    /* v8 ignore next -- defensive: paginated issues endpoint always yields an array in specs */
     if (!isArray(res.body)) {
       logger.warn({ responseBody: res.body }, 'Could not retrieve issue list');
       return [];
@@ -1084,7 +1119,7 @@ export async function getIssue(
       number,
       body: issueBody,
     };
-  } catch (err) /* v8 ignore next */ {
+  } catch (err) /* v8 ignore next -- defensive: issue fetch failures are logged and swallowed, not simulated in specs */ {
     logger.debug({ err, number }, 'Error getting issue');
     return null;
   }
@@ -1099,7 +1134,7 @@ export async function findIssue(title: string): Promise<Issue | null> {
       return null;
     }
     return await getIssue(issue.iid);
-  } catch /* v8 ignore next */ {
+  } catch /* v8 ignore next -- defensive: getIssueList/getIssue failures are swallowed, not simulated in specs */ {
     logger.warn('Error finding issue');
     return null;
   }
@@ -1153,7 +1188,7 @@ export async function ensureIssue({
       delete config.issueList;
       return 'created';
     }
-  } catch (err) /* v8 ignore next */ {
+  } catch (err) /* v8 ignore next -- issue API failures (e.g. issues disabled) are swallowed, not simulated in specs */ {
     if (err.message.startsWith('Issues are disabled for this repo')) {
       logger.debug(`Could not create issue: ${(err as Error).message}`);
     } else {
@@ -1285,7 +1320,7 @@ export async function deleteLabel(
         body: { labels },
       },
     );
-  } catch (err) /* v8 ignore next */ {
+  } catch (err) /* v8 ignore next -- defensive: label deletion failures are logged and swallowed, not simulated in specs */ {
     logger.warn({ err, issueNo, label }, 'Failed to delete label');
   }
 }
@@ -1396,6 +1431,14 @@ export async function ensureComment({
   return true;
 }
 
+function byTopic(comment: GitlabComment, topic: string): boolean {
+  return comment.body.startsWith(`### ${topic}\n\n`);
+}
+
+function byContent(comment: GitlabComment, content: string): boolean {
+  return comment.body.trim() === content;
+}
+
 export async function ensureCommentRemoval(
   deleteConfig: EnsureCommentRemovalConfig,
 ): Promise<void> {
@@ -1411,13 +1454,11 @@ export async function ensureCommentRemoval(
 
   // v8 ignore else -- TODO: add test #40625
   if (deleteConfig.type === 'by-topic') {
-    const byTopic = (comment: GitlabComment): boolean =>
-      comment.body.startsWith(`### ${deleteConfig.topic}\n\n`);
-    commentId = comments.find(byTopic)?.id;
+    const topic = deleteConfig.topic;
+    commentId = comments.find((comment) => byTopic(comment, topic))?.id;
   } else if (deleteConfig.type === 'by-content') {
-    const byContent = (comment: GitlabComment): boolean =>
-      comment.body.trim() === deleteConfig.content;
-    commentId = comments.find(byContent)?.id;
+    const content = deleteConfig.content;
+    commentId = comments.find((comment) => byContent(comment, content))?.id;
   }
 
   // v8 ignore else -- TODO: add test #40625
@@ -1446,6 +1487,25 @@ export async function expandGroupMembers(
 
   // Skip passing user emails to Gitlab API, but include them in the final result
   for (const reviewerOrAssignee of reviewersOrAssignees) {
+    // Resolve GitLab CODEOWNERS role handles (@@developer, @@maintainer,
+    // @@owner) to project members instead of treating them as groups
+    const roleAccessLevel = getRoleAccessLevel(reviewerOrAssignee);
+    if (roleAccessLevel !== null) {
+      try {
+        const members = await getProjectMembersByRole(
+          config.repository,
+          roleAccessLevel,
+        );
+        expandedReviewersOrAssignees.push(...members.map((u) => u.username));
+      } catch (err) {
+        logger.debug(
+          { err, reviewerOrAssignee },
+          'Unable to fetch role members',
+        );
+      }
+      continue;
+    }
+
     if (reviewerOrAssignee.indexOf('@') > 0) {
       expandedReviewersOrAssignees.push(reviewerOrAssignee);
       continue;

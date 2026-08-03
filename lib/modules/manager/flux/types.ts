@@ -6,6 +6,7 @@ export interface FluxManagerData {
 
 export interface FluxFile {
   file: string;
+  content: string;
 }
 
 export interface ResourceFluxManifest extends FluxFile {

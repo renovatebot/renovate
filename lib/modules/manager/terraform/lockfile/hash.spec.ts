@@ -44,7 +44,9 @@ describe('modules/manager/terraform/lockfile/hash', () => {
     httpMock
       .scope('https://example.com')
       .get('/.well-known/terraform.json')
-      .reply(200, '');
+      .reply(200, {})
+      .get('/test/gitlab/versions')
+      .reply(200, { versions: [] });
     const result = TerraformProviderHash.createHashes(
       'https://example.com',
       'test/gitlab',
@@ -120,7 +122,9 @@ describe('modules/manager/terraform/lockfile/hash', () => {
         'hashicorp/azurerm',
         '2.56.0',
       ),
-    ).rejects.toThrow();
+    ).rejects.toThrow(
+      'ADM-ZIP: Invalid or unsupported zip format. No END header found',
+    );
   });
 
   it('full walkthrough', async () => {

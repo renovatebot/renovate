@@ -335,46 +335,6 @@ const staticGroups = {
       },
     ],
   },
-  kubernetes: {
-    description: 'Group Kubernetes packages together.',
-    packageRules: [
-      {
-        groupName: 'kubernetes packages',
-        groupSlug: 'kubernetes-go',
-        matchDatasources: ['go'],
-        matchPackageNames: [
-          'k8s.io/api**',
-          'k8s.io/apiextensions-apiserver**',
-          'k8s.io/apimachinery**',
-          'k8s.io/apiserver**',
-          'k8s.io/cli-runtime**',
-          'k8s.io/client-go**',
-          'k8s.io/cloud-provider**',
-          'k8s.io/cluster-bootstrap**',
-          'k8s.io/code-generator**',
-          'k8s.io/component-base**',
-          'k8s.io/component-helpers**',
-          'k8s.io/controller-manager**',
-          'k8s.io/cri-api**',
-          // 'k8s.io/csi-api', has no go.mod set up and does not follow the versioning of other repos
-          'k8s.io/csi-translation-lib**',
-          'k8s.io/kube-aggregator**',
-          'k8s.io/kube-controller-manager**',
-          'k8s.io/kube-proxy**',
-          'k8s.io/kube-scheduler**',
-          'k8s.io/kubectl**',
-          'k8s.io/kubelet**',
-          'k8s.io/legacy-cloud-providers**',
-          'k8s.io/metrics**',
-          'k8s.io/mount-utils**',
-          'k8s.io/pod-security-admission**',
-          'k8s.io/sample-apiserver**',
-          'k8s.io/sample-cli-plugin**',
-          'k8s.io/sample-controller**',
-        ],
-      },
-    ],
-  },
   linters: {
     description: 'Group various lint packages together.',
     packageRules: [
@@ -407,6 +367,7 @@ const staticGroups = {
           '!docker.io/calico/node',
           '!ghcr.io/devcontainers/features/node',
           '!kindest/node',
+          '!docker.io/kindest/node',
         ],
       },
     ],
@@ -423,6 +384,16 @@ const staticGroups = {
           '//larastan/',
           'phpstan/extension-installer',
         ],
+      },
+    ],
+  },
+  pnpm: {
+    description: 'Group pnpm packages together.',
+    packageRules: [
+      {
+        groupName: 'pnpm packages',
+        matchDatasources: ['docker', 'npm'],
+        matchPackageNames: ['pnpm', 'ghcr.io/pnpm/pnpm'],
       },
     ],
   },
@@ -531,7 +502,6 @@ const staticGroups = {
       'group:jestPlusTSJest',
       'group:jestPlusTypes',
       'group:jwtFramework',
-      'group:kubernetes',
       'group:micrometer',
       'group:phpstan',
       'group:polymer',
@@ -839,6 +809,17 @@ const staticGroups = {
       {
         groupName: 'spring ws',
         matchPackageNames: ['org.springframework.ws:**'],
+      },
+    ],
+  },
+  stylelint: {
+    description: 'Group stylelint packages together.',
+    packageRules: [
+      {
+        extends: ['packages:stylelint'],
+        groupName: 'stylelint packages',
+        groupSlug: 'stylelint',
+        separateMajorMinor: false,
       },
     ],
   },

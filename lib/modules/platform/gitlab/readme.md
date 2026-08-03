@@ -96,6 +96,7 @@ By setting the server version yourself, you save a API call that fetches the ser
 - Use `Draft:` MR prefix instead of `WIP:` prefix since `v13.2.0`
 - Do not truncate Markdown body to 25K chars since `v13.4.0`
 - Allow configure reviewers since `v13.9.0`
+- Add automerged MRs to merge trains since `v17.11.0` (when [merge trains](https://docs.gitlab.com/ci/pipelines/merge_trains/) are enabled on the project)
 
 ## Multiple merge request assignees
 

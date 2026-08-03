@@ -1,6 +1,9 @@
 import _fs from 'fs-extra';
 import { GlobalConfig } from '../../../config/global.ts';
-import type { RepoGlobalConfig } from '../../../config/types.ts';
+import type {
+  InternalGlobalConfigOptions,
+  RepoGlobalConfig,
+} from '../../../config/types.ts';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
 import { ExecError } from '../../../util/exec/exec-error.ts';
 import { exec as _exec } from '../../../util/exec/index.ts';
@@ -13,8 +16,9 @@ vi.mock('fs-extra');
 const exec = vi.mocked(_exec);
 const fs = vi.mocked(_fs);
 
-const globalConfig: RepoGlobalConfig = {
+const globalConfig: RepoGlobalConfig & InternalGlobalConfigOptions = {
   localDir: '',
+  binarySource: 'global',
 };
 
 describe('modules/manager/bun/artifacts', () => {
@@ -187,7 +191,7 @@ describe('modules/manager/bun/artifacts', () => {
         fs.readFile.mockResolvedValueOnce(oldLock as never);
         exec.mockRejectedValueOnce(execError);
         expect(await updateArtifacts(updateArtifact)).toEqual([
-          { artifactError: { lockFile: 'bun.lockb', stderr: 'nope' } },
+          { artifactError: { fileName: 'bun.lockb', stderr: 'nope' } },
         ]);
       });
     });
@@ -305,7 +309,7 @@ describe('modules/manager/bun/artifacts', () => {
         fs.readFile.mockResolvedValueOnce(oldLock as never);
         exec.mockRejectedValueOnce(execError);
         expect(await updateArtifacts(updateArtifact)).toEqual([
-          { artifactError: { lockFile: 'bun.lock', stderr: 'nope' } },
+          { artifactError: { fileName: 'bun.lock', stderr: 'nope' } },
         ]);
       });
     });

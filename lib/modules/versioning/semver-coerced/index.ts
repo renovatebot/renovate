@@ -8,7 +8,7 @@ import type { NewValueConfig, VersioningApi } from '../types.ts';
 
 export const id = 'semver-coerced';
 export const displayName = 'Coerced Semantic Versioning';
-export const urls = ['https://semver.org/'];
+export const urls = ['[Semantic Versioning](https://semver.org/)'];
 export const supportsRanges = false;
 
 function isStable(version: string): boolean {
@@ -119,9 +119,11 @@ function isSingleVersion(version: string): boolean {
 }
 
 // If this is left as an alias, inputs like "17.04.0" throw errors
-export const isVersion = (input: string): boolean => isValid(input);
+export function isVersion(input: string): boolean {
+  return isValid(input);
+}
 
-export { isVersion as isValid, getSatisfyingVersion };
+export { getSatisfyingVersion, isVersion as isValid };
 
 function getNewValue({
   currentValue,

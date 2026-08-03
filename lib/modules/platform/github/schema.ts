@@ -1,6 +1,10 @@
-import { z } from 'zod/v3';
+import { z } from 'zod/v4';
 import { logger } from '../../../logger/index.ts';
-import { LooseArray } from '../../../util/schema-utils/index.ts';
+import {
+  DeepNullish,
+  LooseArray,
+  Nullish,
+} from '../../../util/schema-utils/index.ts';
 
 const Ecosystem = z.enum([
   'actions',
@@ -26,15 +30,25 @@ const Package = z.object({
   name: z.string(),
 });
 
+const Severity = z.enum(['low', 'medium', 'high', 'critical']);
+
 const SecurityVulnerability = z
   .object({
-    first_patched_version: z.object({ identifier: z.string() }).nullish(),
+    first_patched_version: Nullish(z.object({ identifier: z.string() })),
     package: Package,
+    severity: Severity,
     vulnerable_version_range: z.string(),
   })
   .nullable();
 
+const CvssSeverity = z.object({
+  vector_string: z.string().nullable(),
+  score: z.number().nullable(),
+});
+
 const SecurityAdvisory = z.object({
+  ghsa_id: z.string(),
+  summary: z.string(),
   description: z.string(),
   identifiers: z.array(
     z.object({
@@ -43,11 +57,21 @@ const SecurityAdvisory = z.object({
     }),
   ),
   references: z.array(z.object({ url: z.string() })).optional(),
+  severity: Severity,
+  cvss_severities: Nullish(
+    DeepNullish(
+      z.object({
+        cvss_v3: CvssSeverity.optional(),
+        cvss_v4: CvssSeverity.optional(),
+      }),
+    ),
+  ),
 });
+export type SecurityAdvisory = z.infer<typeof SecurityAdvisory>;
 
-export const GithubVulnerabilityAlert = LooseArray(
+export const GithubVulnerabilityAlerts = LooseArray(
   z.object({
-    dismissed_reason: z.string().nullish(),
+    dismissed_reason: Nullish(z.string()),
     security_advisory: SecurityAdvisory,
     security_vulnerability: SecurityVulnerability,
     dependency: z.object({
@@ -65,7 +89,10 @@ export const GithubVulnerabilityAlert = LooseArray(
 ).transform((alerts) =>
   alerts.filter((alert) => alert.security_vulnerability?.package?.ecosystem),
 );
-export type GithubVulnerabilityAlert = z.infer<typeof GithubVulnerabilityAlert>;
+export type GithubVulnerabilityAlerts = z.infer<
+  typeof GithubVulnerabilityAlerts
+>;
+export type GithubVulnerabilityAlert = GithubVulnerabilityAlerts[number];
 
 // https://docs.github.com/en/rest/repos/contents?apiVersion=2022-11-28#get-repository-content
 const GithubResponseMetadata = z.object({
@@ -104,12 +131,11 @@ export type GithubElement = z.infer<typeof GithubElement>;
 export const GithubContentResponse = z.array(GithubElement).or(GithubElement);
 
 export const GithubBranchProtection = z.object({
-  required_status_checks: z
-    .object({
+  required_status_checks: Nullish(
+    z.object({
       strict: z.boolean(),
-    })
-    .nullish()
-    .optional(),
+    }),
+  ),
 });
 export type GithubBranchProtection = z.infer<typeof GithubBranchProtection>;
 
@@ -131,3 +157,29 @@ const GithubRulesetRule = z.discriminatedUnion('type', [
 
 export const GithubBranchRulesets = LooseArray(GithubRulesetRule);
 export type GithubBranchRulesets = z.infer<typeof GithubBranchRulesets>;
+
+const GithubIssueBase = z.object({
+  number: z.number(),
+  state: z.string().transform((val) => val.toLowerCase()),
+  title: z.string(),
+  body: z.string(),
+});
+
+const GithubGraphqlIssue = GithubIssueBase.extend({
+  updatedAt: z.string(),
+}).transform((issue) => {
+  const lastModified = issue.updatedAt;
+  const { number, state, title, body } = issue;
+  return { number, state, title, body, lastModified };
+});
+
+const GithubRestIssue = GithubIssueBase.extend({
+  updated_at: z.string(),
+}).transform((issue) => {
+  const lastModified = issue.updated_at;
+  const { number, state, title, body } = issue;
+  return { number, state, title, body, lastModified };
+});
+
+export const GithubIssue = z.union([GithubGraphqlIssue, GithubRestIssue]);
+export type GithubIssue = z.infer<typeof GithubIssue>;

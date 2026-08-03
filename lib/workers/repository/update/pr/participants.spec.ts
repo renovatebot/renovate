@@ -204,6 +204,22 @@ describe('workers/repository/update/pr/participants', () => {
       ]);
     });
 
+    it('filters out bare @ from malformed CODEOWNERS entries', async () => {
+      codeOwners.codeOwnersForPr.mockResolvedValueOnce([
+        '@UserOne',
+        '@UserTwo',
+        '@',
+      ]);
+      await addParticipants(
+        { ...config, reviewers: [], reviewersFromCodeOwners: true },
+        pr,
+      );
+      expect(platform.addReviewers).toHaveBeenCalledExactlyOnceWith(123, [
+        'UserOne',
+        'UserTwo',
+      ]);
+    });
+
     it('supports additionalReviewers', async () => {
       await addParticipants(
         { ...config, additionalReviewers: ['foo', 'bar', 'baz'] },

@@ -5,13 +5,14 @@ import { DateTime } from 'luxon';
 import { partial } from '~test/util.ts';
 import { add } from '../util/host-rules.ts';
 import { addSecretForSanitizing as addSecret } from '../util/sanitize.ts';
+import { createDefaultStreams } from './bunyan.ts';
 import {
   addMeta,
   addStream,
   clearProblems,
-  createDefaultStreams,
   getContext,
   getProblems,
+  init,
   levels,
   logLevel,
   logger,
@@ -20,17 +21,20 @@ import {
   setMeta,
   withMeta,
 } from './index.ts';
+import { ProblemStream } from './problem-stream.ts';
 import type { RenovateLogger } from './renovate-logger.ts';
-import { ProblemStream } from './utils.ts';
 
 const logContext = 'initial_context';
 
-vi.unmock('.');
+vi.unmock('./index.ts');
 vi.mock('node:crypto', () => ({
   randomUUID: vi.fn(() => 'initial_context'),
 }));
 
 const bunyanDebugSpy = vi.spyOn(bunyan.prototype, 'debug');
+
+// init logger
+await init();
 
 describe('logger/index', () => {
   beforeEach(() => {
@@ -199,6 +203,10 @@ describe('logger/index', () => {
   });
 
   describe('createDefaultStreams', () => {
+    beforeEach(() => {
+      delete process.env.LOG_FILE_FORMAT;
+    });
+
     it('creates log file stream', () => {
       expect(
         createDefaultStreams('info', new ProblemStream(), 'file.log'),
@@ -262,6 +270,42 @@ describe('logger/index', () => {
         expect(logFileStream.type).toBe(expectedType);
       },
     );
+
+    it('writes pretty formatted data synchronously to log file', async () => {
+      process.env.LOG_FILE_FORMAT = 'pretty';
+
+      const streams = createDefaultStreams(
+        'info',
+        new ProblemStream(),
+        'file.log',
+      );
+
+      const logFileStream = streams[2];
+      const stream = logFileStream.stream as {
+        write: (...args: unknown[]) => void;
+      };
+
+      stream.write({ level: 30, msg: 'test message' });
+
+      expect(await fs.readFile('file.log', 'utf8')).toContain('test message');
+    });
+
+    it('writes json data synchronously to log file', async () => {
+      const streams = createDefaultStreams(
+        'info',
+        new ProblemStream(),
+        'file.log',
+      );
+
+      const logFileStream = streams[2];
+      const stream = logFileStream.stream as {
+        write: (...args: unknown[]) => void;
+      };
+
+      stream.write('{"level":30,"msg":"json message"}\n');
+
+      expect(await fs.readFile('file.log', 'utf8')).toContain('json message');
+    });
   });
 
   it('sets level', () => {
@@ -462,7 +506,7 @@ describe('logger/index', () => {
     const childLogger = (logger as RenovateLogger).childLogger();
     childLogger.addSerializers({
       baz: (baz: string): any => {
-        return 'baz custom serializer: ' + baz;
+        return `baz custom serializer: ${baz}`;
       },
     });
 

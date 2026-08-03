@@ -2,6 +2,7 @@ import type { Category } from '../../../constants/index.ts';
 import { CpanDatasource } from '../../datasource/cpan/index.ts';
 import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
 
+export { knownDepTypes } from './dep-types.ts';
 export { extractPackageFile } from './extract.ts';
 
 export const displayName = 'cpanfile';

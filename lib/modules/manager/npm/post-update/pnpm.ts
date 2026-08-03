@@ -4,7 +4,7 @@ import upath from 'upath';
 import { GlobalConfig } from '../../../../config/global.ts';
 import { TEMPORARY_ERROR } from '../../../../constants/error-messages.ts';
 import { logger } from '../../../../logger/index.ts';
-import { exec } from '../../../../util/exec/index.ts';
+import { exec, getToolSettingsOptions } from '../../../../util/exec/index.ts';
 import type {
   ExecOptions,
   ExtraEnv,
@@ -24,7 +24,11 @@ import { PNPM_CACHE_DIR, PNPM_STORE_DIR } from '../constants.ts';
 import type { PnpmWorkspaceFile } from '../extract/types.ts';
 import { getNodeToolConstraint } from './node-version.ts';
 import type { GenerateLockFileResult, PnpmLockFile } from './types.ts';
-import { getPackageManagerVersion, lazyLoadPackageJson } from './utils.ts';
+import {
+  getNodeOptions,
+  getPackageManagerVersion,
+  lazyLoadPackageJson,
+} from './utils.ts';
 
 function getPnpmConstraintFromUpgrades(upgrades: Upgrade[]): string | null {
   for (const upgrade of upgrades) {
@@ -69,6 +73,12 @@ export async function generateLockFile(
       pnpm_config_cache_dir: pnpmConfigCacheDir,
       pnpm_config_store_dir: pnpmConfigStoreDir,
     };
+
+    const { nodeMaxMemory } = getToolSettingsOptions(config.toolSettings);
+    if (nodeMaxMemory) {
+      extraEnv.NODE_OPTIONS = getNodeOptions(nodeMaxMemory);
+    }
+
     const execOptions: ExecOptions = {
       cwdFile: lockFileName,
       extraEnv,
@@ -148,8 +158,7 @@ export async function generateLockFile(
       );
       try {
         await deleteLocalFile(lockFileName);
-        /* v8 ignore next -- needs test */
-      } catch (err) {
+      } catch (err) /* v8 ignore next -- TODO: add test #40625 */ {
         logger.debug(
           { err, lockFileName },
           'Error removing `pnpm-lock.yaml` for lock file maintenance',
@@ -159,8 +168,8 @@ export async function generateLockFile(
 
     await exec(commands, execOptions);
     lockFile = await readLocalFile(lockFileName, 'utf8');
-    /* v8 ignore next -- needs test */
   } catch (err) {
+    // v8 ignore if -- TODO: add test #40625
     if (err.message === TEMPORARY_ERROR) {
       throw err;
     }

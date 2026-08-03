@@ -28,6 +28,8 @@ describe('modules/manager/gradle-wrapper/util', () => {
         ${'8.0.1'}    | ${'^17.0.0'}
         ${'8.5.0'}    | ${'^21.0.0'}
         ${'9.0.1'}    | ${'^21.0.0'}
+        ${'9.1.0'}    | ${'^25.0.0'}
+        ${'10.0.1'}   | ${'^25.0.0'}
       `(
         '$gradleVersion | $javaConstraint',
         async ({ gradleVersion, javaConstraint }) => {

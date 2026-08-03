@@ -6,11 +6,11 @@ import { hashFile, hashFromArray } from './utils/hash.mjs';
 
 const newFiles = new Set();
 
-if (!fs.existsSync('lib')) {
+if (!(await fs.pathExists('lib'))) {
   process.exit(0);
 }
 
-if (!fs.existsSync('data')) {
+if (!(await fs.pathExists('data'))) {
   process.exit(0);
 }
 
@@ -20,7 +20,9 @@ if (!fs.existsSync('data')) {
  * @param {string} code
  */
 async function updateFile(file, code) {
-  const oldCode = fs.existsSync(file) ? await fs.readFile(file, 'utf8') : null;
+  const oldCode = (await fs.pathExists(file))
+    ? await fs.readFile(file, 'utf8')
+    : null;
   if (code !== oldCode) {
     await fs.writeFile(file, code);
   }
@@ -35,20 +37,20 @@ const dataPaths = [
 /**
  *
  * @param {string[]} paths
- * @returns {string[]}
+ * @returns {Promise<string[]>}
  */
-function expandPaths(paths) {
-  return paths
-    .map((pathName) => {
-      const stat = fs.statSync(pathName);
+async function expandPaths(paths) {
+  const expanded = await Promise.all(
+    paths.map(async (pathName) => {
+      const stat = await fs.stat(pathName);
 
       if (stat.isFile()) {
         return [pathName];
       }
 
       if (stat.isDirectory()) {
-        const dirPaths = fs
-          .readdirSync(pathName, { withFileTypes: true })
+        const dirents = await fs.readdir(pathName, { withFileTypes: true });
+        const dirPaths = dirents
           .filter(
             (dirent) =>
               !(dirent.isFile() && ['.DS_Store'].includes(dirent.name)),
@@ -58,8 +60,9 @@ function expandPaths(paths) {
       }
 
       return [];
-    })
-    .reduce((x, y) => x.concat(y));
+    }),
+  );
+  return expanded.reduce((x, y) => x.concat(y));
 }
 
 /**
@@ -83,7 +86,7 @@ async function getFileHash(filePath) {
  */
 export async function getManagerHash(managerName, isCustomManager) {
   /** @type {string[]} */
-  let hashes = [];
+  const hashes = [];
   let folderPattern = `lib/modules/manager/${managerName}/**`;
   if (isCustomManager) {
     folderPattern = `lib/modules/manager/custom/${managerName}/**`;
@@ -109,7 +112,7 @@ export async function getManagerHash(managerName, isCustomManager) {
 }
 
 async function generateData() {
-  const files = expandPaths(dataPaths).sort();
+  const files = (await expandPaths(dataPaths)).sort();
 
   const importDataFileType = files.map((x) => `  | '${x}'`).join('\n');
 
@@ -148,19 +151,110 @@ async function generateManagerList() {
     .sort()
     .map((fname) => `"${fname}"`);
 
+  // get custom managers list
+  const customManagers = (
+    await fs.readdir('lib/modules/manager/custom', { withFileTypes: true })
+  )
+    .filter((file) => file.isDirectory())
+    .map((file) => file.name)
+    .sort()
+    .map((fname) => `"${fname}"`);
+
   const content = `
 export const AllManagersListLiteral = [${managers.join(',')}] as const;
 export type ManagerName = typeof AllManagersListLiteral[number];
+export const CustomManagersListLiteral = [${customManagers.join(',')}] as const;
+export type CustomManagerName = typeof CustomManagersListLiteral[number];
 `;
 
   await updateFile(`lib/manager-list.generated.ts`, content);
+}
+
+async function generateManagerDefaultConfigs() {
+  const { default: managers } = await import('../lib/modules/manager/api.ts');
+  const { default: customManagers } =
+    await import('../lib/modules/manager/custom/api.ts');
+
+  const allManagers = new Map([
+    ...managers.entries(),
+    ...customManagers.entries(),
+  ]);
+  /** @type {Record<string, Record<string, unknown>>} */
+  const managerDefaultConfigs = {};
+  for (const [name, manager] of allManagers) {
+    if (manager.defaultConfig) {
+      managerDefaultConfigs[name] = manager.defaultConfig;
+    }
+  }
+
+  const content = `
+export const managerDefaultConfigs: Record<string, Record<string, unknown>> = ${JSON.stringify(managerDefaultConfigs, null, 2)};
+`;
+
+  await updateFile('lib/manager-default-configs.generated.ts', content);
+}
+
+async function generateVersioningList() {
+  const versionings = (
+    await fs.readdir('lib/modules/versioning', { withFileTypes: true })
+  )
+    .filter((file) => file.isDirectory())
+    .map((file) => file.name)
+    .sort()
+    .map((fname) => `"${fname}"`);
+
+  const content = `
+export const AllVersioningsListLiteral = [${versionings.join(',')}] as const;
+export type VersioningName = typeof AllVersioningsListLiteral[number];
+`;
+
+  await updateFile(`lib/versioning-list.generated.ts`, content);
+}
+
+async function generateDatasourceList() {
+  const datasources = (
+    await fs.readdir('lib/modules/datasource', { withFileTypes: true })
+  )
+    .filter((file) => file.isDirectory() && !file.name.startsWith('__'))
+    .map((file) => file.name)
+    .sort()
+    .map((fname) => `"${fname}"`);
+
+  const content = `
+export const AllDatasourcesListLiteral = [${datasources.join(',')}] as const;
+export type DatasourceName = typeof AllDatasourcesListLiteral[number];
+`;
+
+  await updateFile(`lib/datasource-list.generated.ts`, content);
+}
+
+async function generateGlobalConfigOptionDefaults() {
+  const { getOptions } = await import('../lib/config/options/index.ts');
+  const options = getOptions();
+
+  /** @type {Record<string, unknown>} */
+  const defaults = {};
+  for (const option of options
+    .filter((o) => o.globalOnly)
+    .filter((o) => 'default' in o)
+    // if the default is null, it means there is no default, so don't include it
+    .filter((o) => o.default !== null)
+    .sort((a, b) => a.name.localeCompare(b.name))) {
+    defaults[option.name] = option.default;
+  }
+
+  const content = `
+export const globalConfigOptionDefaults: Record<string, unknown> = ${JSON.stringify(defaults, null, 2)};
+`;
+
+  await updateFile('lib/global-config-option-defaults.generated.ts', content);
 }
 
 async function generateHash() {
   try {
     const hashMap = `export const hashMap = new Map<string, string>();`;
     /** @type {Record<string, string>[]} */
-    let hashes = [];
+    const hashes = [];
     // get managers list
     const managers = (
       await fs.readdir('lib/modules/manager', { withFileTypes: true })
@@ -203,9 +297,22 @@ async function generateHash() {
 
 await (async () => {
   try {
+    // prevent import cycles when trying to generate config options
+    const stubFile = 'lib/global-config-option-defaults.generated.ts';
+    if (!(await fs.pathExists(stubFile))) {
+      await fs.writeFile(
+        stubFile,
+        '\nexport const globalConfigOptionDefaults: Record<string, unknown> = {};\n',
+      );
+    }
+
     // data-files
     await generateData();
     await generateManagerList();
+    await generateManagerDefaultConfigs();
+    await generateVersioningList();
+    await generateDatasourceList();
+    await generateGlobalConfigOptionDefaults();
     await generateHash();
     await Promise.all(
       (await glob('lib/**/*.generated.ts'))

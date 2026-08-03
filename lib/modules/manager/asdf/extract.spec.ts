@@ -47,6 +47,7 @@ describe('modules/manager/asdf/extract', () => {
 act 0.2.54
 actionlint 0.7.0
 adr-tools 3.0.0
+apm 0.9.2
 argocd 2.5.4
 asdf-plugin-manager 1.1.1
 atmos 1.100.0
@@ -174,6 +175,13 @@ dummy 1.2.3
             datasource: 'github-tags',
             packageName: 'npryce/adr-tools',
             depName: 'adr-tools',
+          },
+          {
+            currentValue: '0.9.2',
+            datasource: 'github-releases',
+            packageName: 'microsoft/apm',
+            depName: 'apm',
+            extractVersion: '^v(?<version>\\S+)',
           },
           {
             currentValue: '2.5.4',

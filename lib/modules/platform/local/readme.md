@@ -7,6 +7,8 @@ This can be handy when testing a new Renovate configuration for example.
 
 Run the `renovate --platform=local` command in the directory you want Renovate to run in.
 In this mode, Renovate defaults to `dryRun=lookup`.
+You can override this by passing `--dry-run=extract` to stop after the extract phase.
+Other `dryRun` values (such as `full`) are not supported on the local platform and fall back to `lookup`.
 
 Avoid giving "repositories" arguments, as this command can only run in a _single_ directory, and it can only run in the _current working_ directory.
 
