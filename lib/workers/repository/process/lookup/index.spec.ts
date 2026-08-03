@@ -4,6 +4,7 @@ import * as httpMock from '~test/http-mock.ts';
 import { fakeSha, logger, partial } from '~test/util.ts';
 import * as hostRules from '../../../../../lib/util/host-rules.ts';
 import { getConfig } from '../../../../config/defaults.ts';
+import { resolveConfigPresets } from '../../../../config/presets/index.ts';
 import { supportedDatasources as presetSupportedDatasources } from '../../../../config/presets/internal/merge-confidence.preset.ts';
 import type { AllConfig } from '../../../../config/types.ts';
 import { CONFIG_VALIDATION } from '../../../../constants/error-messages.ts';
@@ -35,6 +36,7 @@ import {
   initConfig,
   resetConfig,
 } from '../../../../util/merge-confidence/index.ts';
+import { applyPackageRules } from '../../../../util/package-rules/index.ts';
 import { Result } from '../../../../util/result.ts';
 import type { Timestamp } from '../../../../util/timestamp.ts';
 import * as lookup from './index.ts';
@@ -4466,6 +4468,55 @@ describe('workers/repository/process/lookup/index', () => {
         },
       ]);
     });
+
+    it.each([
+      {
+        name: 'digest is already pinned',
+        config: { currentDigest: fakeSha('current') },
+        expectedUpdate: {
+          updateType: 'digest',
+          newValue: 'v8',
+          newDigest: fakeSha('new'),
+        },
+      },
+      {
+        name: 'digest is not yet pinned',
+        config: { pinDigests: true },
+        expectedUpdate: {
+          updateType: 'pinDigest',
+          newValue: 'v8',
+          newDigest: fakeSha('new'),
+          isPinDigest: true,
+        },
+      },
+    ])(
+      'does not bump a floating major tag to an exact version for any config that requests digest pinning ($name), regardless of a global `rangeStrategy=pin` and independent of any preset',
+      async ({ config: extraConfig, expectedUpdate }) => {
+        config = {
+          ...config,
+          ...extraConfig,
+          currentValue: 'v8',
+          packageName: 'actions/checkout',
+          rangeStrategy: 'pin',
+          versioning: githubActionsVersioningId,
+          datasource: GithubTagsDatasource.id,
+        };
+
+        getGithubTags.mockResolvedValueOnce({
+          releases: [{ version: 'v8.0.1' }, { version: 'v8' }],
+        });
+        vi.spyOn(
+          GithubTagsDatasource.prototype,
+          'getDigest',
+        ).mockResolvedValueOnce(fakeSha('new'));
+
+        const { updates } = await Result.wrap(
+          lookup.lookupUpdates(config),
+        ).unwrapOrThrow();
+
+        expect(updates).toEqual([expectedUpdate]);
+      },
+    );
 
     it('marks a too-new GitHub Actions major-tag digest update as pending when using `internalChecksFilter=strict`', async () => {
       config.currentValue = 'v7';
