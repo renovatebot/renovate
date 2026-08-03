@@ -66,7 +66,7 @@ export const NpmResponse = z.object({
   name: z.string().optional(),
   versions: z.record(z.string(), NpmResponseVersionLoose).optional(),
   repository: RepositoryNpmResponse.optional(),
-  homepage: z.string().optional().catch(undefined),
+  homepage: z.string().optional(),
   time: LooseRecord(z.string()).optional(),
   'dist-tags': z.record(z.string(), z.string()).optional(),
 });
