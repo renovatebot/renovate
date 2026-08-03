@@ -118,6 +118,14 @@ describe('modules/datasource/npm/schema', () => {
     });
   });
 
+  it('drops an invalid package-level `homepage` (e.g. `null`)', () => {
+    const result = CachedPackument.parse({
+      homepage: null,
+      versions: { '1.0.0': {} },
+    });
+    expect(result.homepage).toBeUndefined();
+  });
+
   describe('NpmResponseSchema', () => {
     it('parses a full npm registry response and preserves extra version fields', () => {
       const input = {
