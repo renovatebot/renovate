@@ -126,7 +126,10 @@ function recursivelyGetDependentPackageFiles(
  */
 async function getAllPackageFiles(): Promise<string[]> {
   const allFiles = await scm.getFileList();
-  const filteredPackageFiles = getMatchingFiles('*.{cs,vb,fs}proj', allFiles);
+  const filteredPackageFiles = getMatchingFiles(
+    '**/*.{cs,vb,fs}proj',
+    allFiles,
+  );
 
   logger.trace({ filteredPackageFiles }, 'Found package files');
 

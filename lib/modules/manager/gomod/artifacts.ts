@@ -410,7 +410,7 @@ export async function updateArtifacts({
 
     for (const f of dependentFiles) {
       if (status.modified.includes(f)) {
-        logger.debug(`Returning updated ${f}`);
+        logger.trace(`Returning updated ${f}`);
         res.push({
           file: {
             type: 'addition',

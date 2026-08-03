@@ -2,7 +2,7 @@ import upath from 'upath';
 import { GlobalConfig } from '../../config/global.ts';
 import { FILE_ACCESS_VIOLATION_ERROR } from '../../constants/error-messages.ts';
 import { logger } from '../../logger/index.ts';
-import { minimatchFilter } from '../minimatch.ts';
+import { matchRegexOrGlob } from '../string-match.ts';
 
 /**
  * Take a relative path reference from a repo-relative file and resolve it
@@ -23,15 +23,13 @@ export function resolveRelativePathToRoot(
 }
 
 /**
- * Filter a list of repo-relative file paths by a minimatch pattern.
+ * Filter a list of repo-relative file paths by a glob or regex pattern.
  */
 export function getMatchingFiles(
   pattern: string,
   allFiles: string[],
 ): string[] {
-  return allFiles.filter(
-    minimatchFilter(pattern, { matchBase: true, nocase: true }),
-  );
+  return allFiles.filter((file) => matchRegexOrGlob(file, pattern));
 }
 
 function assertBaseDir(path: string, allowedDir: string): void {

@@ -136,8 +136,8 @@ describe('util/fs/util', () => {
       'package.json',
     ];
 
-    it('filters files using minimatch pattern', () => {
-      expect(getMatchingFiles('*.{cs,vb,fs}proj', allFiles)).toEqual([
+    it('filters files using glob pattern', () => {
+      expect(getMatchingFiles('**/*.{cs,vb,fs}proj', allFiles)).toEqual([
         'one/one.csproj',
         'two/two.vbproj',
         'three/three.fsproj',
@@ -145,17 +145,30 @@ describe('util/fs/util', () => {
     });
 
     it('filters go.mod files', () => {
-      expect(getMatchingFiles('go.mod', allFiles)).toEqual([
+      expect(getMatchingFiles('**/go.mod', allFiles)).toEqual([
         'go.mod',
         'api/go.mod',
         'cmd/go.mod',
       ]);
     });
 
+    it('does not match files with a matching suffix only', () => {
+      expect(
+        getMatchingFiles('**/go.mod', ['rego.mod', 'sub/rego.mod']),
+      ).toEqual([]);
+    });
+
+    it('filters files using regex pattern', () => {
+      expect(getMatchingFiles('/^.*\\/go\\.mod$/', allFiles)).toEqual([
+        'api/go.mod',
+        'cmd/go.mod',
+      ]);
+    });
+
     it('returns empty array when no files match', () => {
-      expect(getMatchingFiles('go.mod', ['readme.md', 'package.json'])).toEqual(
-        [],
-      );
+      expect(
+        getMatchingFiles('**/go.mod', ['readme.md', 'package.json']),
+      ).toEqual([]);
     });
   });
 });

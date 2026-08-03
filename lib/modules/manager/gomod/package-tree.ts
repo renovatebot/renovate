@@ -32,7 +32,7 @@ export function parseLocalReplacePaths(content: string): string[] {
  */
 async function buildDependencyGraph(): Promise<Graph> {
   const graph = new Graph();
-  const goModFiles = getMatchingFiles('go.mod', await scm.getFileList());
+  const goModFiles = getMatchingFiles('**/go.mod', await scm.getFileList());
   const known = new Set(goModFiles);
 
   for (const f of goModFiles) {
