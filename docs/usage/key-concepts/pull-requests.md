@@ -92,7 +92,7 @@ If someone other than Renovate modified the branch, Renovate will not destroy th
 
 Instead, Renovate flags the PR as abandoned by:
 
-- Appending ` - abandoned` to the PR title
+- Appending `- abandoned` to the PR title
 - Adding a comment to the PR explaining that autoclosing was skipped
 
 This tells you that Renovate no longer considers the branch or PR its own, and will not touch it again.
