@@ -16,13 +16,13 @@ import * as rules from './post-update/rules.ts';
 vi.mock('../../../util/exec/env.ts');
 vi.mock('../../../util/fs/index.ts');
 
-const adminConfig: RepoGlobalConfig & InternalGlobalConfigOptions = {
+const adminConfig = {
   // `join` fixes Windows CI
   localDir: upath.join('/tmp/github/some/repo'),
   cacheDir: upath.join('/tmp/renovate/cache'),
   containerbaseDir: upath.join('/tmp/renovate/cache/containerbase'),
   binarySource: 'global',
-};
+} satisfies RepoGlobalConfig & InternalGlobalConfigOptions;
 const dockerAdminConfig = {
   ...adminConfig,
   binarySource: 'docker',
@@ -183,8 +183,9 @@ describe('modules/manager/npm/artifacts', () => {
       config,
     });
 
-    const contents = (res![0].file as FileAddition).contents;
-    expect(JSON.parse(contents)).toEqual({
+    const contents = (res![0].file as FileAddition).contents?.toString();
+    expect(contents).toBeJsonString();
+    expect(JSON.parse(contents!)).toEqual({
       devEngines: {
         packageManager: {
           name: 'pnpm',
@@ -265,8 +266,9 @@ describe('modules/manager/npm/artifacts', () => {
       config,
     });
 
-    const contents = (res![0].file as FileAddition).contents;
-    expect(JSON.parse(contents)).toEqual({
+    const contents = (res![0].file as FileAddition).contents?.toString();
+    expect(contents).toBeJsonString();
+    expect(JSON.parse(contents!)).toEqual({
       devEngines: {
         packageManager: [
           { name: 'pnpm', version: generatedVersion },
@@ -278,7 +280,10 @@ describe('modules/manager/npm/artifacts', () => {
       { cmd: 'corepack use pnpm@8.15.6' },
       { cmd: 'corepack use yarn@4.6.0' },
     ]);
-    expect(execSnapshots[0].options.cwd).toBe(execSnapshots[1].options.cwd);
+    const firstCwd = execSnapshots[0]?.options?.cwd;
+    const secondCwd = execSnapshots[1]?.options?.cwd;
+    expect(firstCwd).toEqual(expect.any(String));
+    expect(firstCwd).toBe(secondCwd);
   });
 
   it('reuses a generated hash for matching packageManager updates', async () => {
@@ -308,8 +313,9 @@ describe('modules/manager/npm/artifacts', () => {
       config,
     });
 
-    const contents = (res![0].file as FileAddition).contents;
-    expect(JSON.parse(contents)).toEqual({
+    const contents = (res![0].file as FileAddition).contents?.toString();
+    expect(contents).toBeJsonString();
+    expect(JSON.parse(contents!)).toEqual({
       packageManager: `pnpm@${generatedVersion}`,
       devEngines: {
         packageManager: { name: 'pnpm', version: generatedVersion },

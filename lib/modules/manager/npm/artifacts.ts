@@ -224,14 +224,15 @@ async function handlePackageManagerUpdates(
             'utf8',
           );
         }
-        corepackVersion = getCorepackVersion(
+        const generatedCorepackVersion = getCorepackVersion(
           corepackPackageFileContent ?? '',
           depName,
         );
-        if (!corepackVersion) {
+        if (!generatedCorepackVersion) {
           throw new Error(`Corepack did not generate a hash for ${locator}`);
         }
-        generatedVersions.set(locator, corepackVersion);
+        corepackVersion = generatedCorepackVersion;
+        generatedVersions.set(locator, generatedCorepackVersion);
 
         if (packageManagerUpdate.depType === 'packageManager') {
           newPackageFileContent = corepackPackageFileContent!;
