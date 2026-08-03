@@ -84,6 +84,12 @@ export function extractDependency(
     } else if (depName === 'pnpm') {
       dep.datasource = NpmDatasource.id;
       dep.commitMessageTopic = 'pnpm';
+    } else if (depType === 'devEngines.runtime' && depName === 'bun') {
+      dep.datasource = NpmDatasource.id;
+      dep.commitMessageTopic = 'Bun';
+    } else if (depType === 'devEngines.runtime' && depName === 'deno') {
+      dep.datasource = NpmDatasource.id;
+      dep.commitMessageTopic = 'Deno';
     } else if (depName === 'vscode') {
       dep.datasource = GithubTagsDatasource.id;
       dep.packageName = 'microsoft/vscode';

@@ -1179,6 +1179,48 @@ describe('modules/manager/npm/extract/index', () => {
       });
     });
 
+    it('extracts Bun and Deno from devEngines.runtime', async () => {
+      const pJson = {
+        devEngines: {
+          runtime: [
+            { name: 'node', version: '24.7.0' },
+            { name: 'bun', version: '1.2.0' },
+            { name: 'deno', version: '2.4.0' },
+          ],
+        },
+      };
+      const res = await npmExtract.extractPackageFile(
+        JSON.stringify(pJson),
+        'package.json',
+        defaultExtractConfig,
+      );
+      expect(res?.deps).toMatchObject([
+        {
+          currentValue: '24.7.0',
+          datasource: 'node-version',
+          depName: 'node',
+          depType: 'devEngines.runtime',
+          managerData: { devEnginesIndex: 0 },
+        },
+        {
+          commitMessageTopic: 'Bun',
+          currentValue: '1.2.0',
+          datasource: 'npm',
+          depName: 'bun',
+          depType: 'devEngines.runtime',
+          managerData: { devEnginesIndex: 1 },
+        },
+        {
+          commitMessageTopic: 'Deno',
+          currentValue: '2.4.0',
+          datasource: 'npm',
+          depName: 'deno',
+          depType: 'devEngines.runtime',
+          managerData: { devEnginesIndex: 2 },
+        },
+      ]);
+    });
+
     it('sets hasPackageManager when devEngines.packageManager is an array', async () => {
       const pJson = {
         devEngines: {
