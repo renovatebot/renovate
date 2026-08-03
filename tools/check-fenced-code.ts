@@ -65,7 +65,7 @@ function checkSchemaCompliantJson(
 ): RenovateConfig | undefined {
   const isValid = validate(value);
   if (isValid) {
-    return value as RenovateConfig;
+    return value;
   }
   for (const error of validate.errors ?? []) {
     reportIssue(file, token, `${error.instancePath} ${error.message}`);

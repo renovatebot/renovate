@@ -6,7 +6,10 @@ import upath from 'upath';
 import { mock } from 'vitest-mock-extended';
 import { fs } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
-import type { RepoGlobalConfig } from '../../../config/types.ts';
+import type {
+  InternalGlobalConfigOptions,
+  RepoGlobalConfig,
+} from '../../../config/types.ts';
 import * as git from '../../../util/git/index.ts';
 import * as hostRules from '../../../util/host-rules.ts';
 import type { Upgrade } from '../types.ts';
@@ -31,7 +34,7 @@ describe('modules/manager/git-submodules/update', () => {
 
   describe('updateDependency', () => {
     let upgrade: Upgrade;
-    let adminConfig: RepoGlobalConfig;
+    let adminConfig: RepoGlobalConfig & InternalGlobalConfigOptions;
     let tmpDir: DirectoryResult;
 
     beforeAll(async () => {

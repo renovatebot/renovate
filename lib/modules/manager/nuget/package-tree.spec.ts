@@ -2,7 +2,10 @@ import upath from 'upath';
 import { Fixtures } from '~test/fixtures.ts';
 import { scm } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
-import type { RepoGlobalConfig } from '../../../config/types.ts';
+import type {
+  InternalGlobalConfigOptions,
+  RepoGlobalConfig,
+} from '../../../config/types.ts';
 import { getDependentPackageFiles } from './package-tree.ts';
 
 vi.mock('fs-extra', async () =>
@@ -13,7 +16,7 @@ vi.mock('fs-extra', async () =>
   ).fsExtra(),
 );
 
-const adminConfig: RepoGlobalConfig = {
+const adminConfig: RepoGlobalConfig & InternalGlobalConfigOptions = {
   localDir: upath.resolve('/tmp/repo'),
 };
 

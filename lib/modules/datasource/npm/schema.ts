@@ -29,8 +29,10 @@ export const NpmResponseVersion = z.object({
   homepage: z.string().optional().catch(undefined),
   deprecated: z.union([z.string(), z.boolean()]).optional(),
   gitHead: z.string().optional(),
-  dependencies: z.record(z.string(), z.string()).optional(),
-  devDependencies: z.record(z.string(), z.string()).optional(),
+  // `LooseRecord` drops non-string entries i.e. pre-1.0 npm's nested a full dependency tree under `devDependencies`
+  // (e.g. `{ "foo": { "version": "1.0.0" } }`) instead of a version string.
+  dependencies: LooseRecord(z.string()).optional(),
+  devDependencies: LooseRecord(z.string()).optional(),
   engines: z
     .object({ node: z.string().optional() })
     .optional()

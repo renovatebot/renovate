@@ -414,7 +414,7 @@ describe('modules/manager/npm/post-update/index', () => {
 
     it("should not update the Yarn binary if the new .yarnrc.yml doesn't exist", async () => {
       git.getFile.mockResolvedValueOnce(oldYarnrcYml);
-      fs.readLocalFile.mockResolvedValueOnce(null as never);
+      fs.readLocalFile.mockResolvedValueOnce(null);
       const updatedArtifacts: FileChange[] = [];
       const yarnrcYmlContent = await updateYarnBinary(
         lockFileDir,
@@ -426,7 +426,7 @@ describe('modules/manager/npm/post-update/index', () => {
     });
 
     it("should return existing .yarnrc.yml if the new one doesn't exist", async () => {
-      fs.readLocalFile.mockResolvedValueOnce(null as never);
+      fs.readLocalFile.mockResolvedValueOnce(null);
       const updatedArtifacts: FileChange[] = [];
       const existingYarnrcYmlContent = await updateYarnBinary(
         lockFileDir,
