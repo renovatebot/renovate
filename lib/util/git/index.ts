@@ -304,14 +304,20 @@ export async function fetchRevSpec(...revSpec: string[]): Promise<void> {
   await gitRetry(() => git.fetch(['origin', ...revSpec]));
 }
 
-export async function initRepo(args: StorageConfig): Promise<void> {
+export async function initRepo(
+  args: StorageConfig,
+  gitEnvironmentVariables?: NodeJS.ProcessEnv,
+): Promise<void> {
   config = { ...args } as any;
   config.ignoredAuthors = [];
   config.additionalBranches = [];
   config.branchIsModified = {};
   config.virtualBranches ??= {};
   git = instrumentGit(
-    createSimpleGit({ config: { baseDir: GlobalConfig.get('localDir') } }),
+    createSimpleGit({
+      config: { baseDir: GlobalConfig.get('localDir') },
+      env: gitEnvironmentVariables,
+    }),
   );
   gitInitialized = false;
   submodulesInitizialized = false;

@@ -6,6 +6,7 @@ import { detectPlatform } from '../common.ts';
 import { getEnv } from '../env.ts';
 import { find, getAll } from '../host-rules.ts';
 import { regEx } from '../regex.ts';
+import { toBase64 } from '../string.ts';
 import { createURLFromHostOrURL, isHttpUrl } from '../url.ts';
 import type { AuthenticationRule } from './types.ts';
 import { parseGitUrl } from './url.ts';
@@ -18,7 +19,9 @@ const githubApiUrls = new Set([
 ]);
 
 /**
- * Add authorization to a Git Url and returns a new environment variables object
+ * Add authorization to a Git URL and return a new environment variables object.
+ * Credentials are passed as a URL-scoped HTTP header while URL rewrite rules
+ * remain credential-free.
  * @returns a new NodeJS.ProcessEnv object without modifying any input parameters
  */
 export function getGitAuthenticatedEnvironmentVariables(
@@ -34,24 +37,7 @@ export function getGitAuthenticatedEnvironmentVariables(
     return { ...environmentVariables };
   }
 
-  const env = getEnv();
-  // check if the environmentVariables already contain a GIT_CONFIG_COUNT or if the process has one
-  const gitConfigCountEnvVariable =
-    environmentVariables?.GIT_CONFIG_COUNT ?? env.GIT_CONFIG_COUNT;
-  let gitConfigCount = 0;
-  if (gitConfigCountEnvVariable) {
-    // passthrough the gitConfigCountEnvVariable environment variable as start value of the index count
-    gitConfigCount = parseInt(gitConfigCountEnvVariable, 10);
-    if (Number.isNaN(gitConfigCount)) {
-      logger.warn(
-        {
-          GIT_CONFIG_COUNT: env.GIT_CONFIG_COUNT,
-        },
-        `Found GIT_CONFIG_COUNT env variable, but couldn't parse the value to an integer. Ignoring it.`,
-      );
-      gitConfigCount = 0;
-    }
-  }
+  let gitConfigCount = getGitConfigCount(environmentVariables);
   let authenticationRules: AuthenticationRule[];
   if (token) {
     authenticationRules = getAuthenticationRulesWithToken(
@@ -70,22 +56,59 @@ export function getGitAuthenticatedEnvironmentVariables(
     );
   }
 
-  // create a shallow copy of the environmentVariables as base so we don't modify the input parameter object
-  // add the two new config key and value to the returnEnvironmentVariables object
-  // increase the CONFIG_COUNT by one for each rule and add it to the object
+  const credentialRule = authenticationRules.at(-1)!;
+  const authenticatedUrl = new URL(credentialRule.url);
+  const authUsername = decodeURIComponent(authenticatedUrl.username);
+  const authPassword = decodeURIComponent(authenticatedUrl.password);
+  authenticatedUrl.username = '';
+  authenticatedUrl.password = '';
+  const cleanUrl = authenticatedUrl.href;
+
   const newEnvironmentVariables = {
     ...environmentVariables,
   };
   for (const rule of authenticationRules) {
+    if (rule.insteadOf === cleanUrl) {
+      continue;
+    }
     newEnvironmentVariables[`GIT_CONFIG_KEY_${gitConfigCount}`] =
-      `url.${rule.url}.insteadOf`;
+      `url.${cleanUrl}.insteadOf`;
     newEnvironmentVariables[`GIT_CONFIG_VALUE_${gitConfigCount}`] =
       rule.insteadOf;
     gitConfigCount++;
   }
+  newEnvironmentVariables[`GIT_CONFIG_KEY_${gitConfigCount}`] =
+    `http.${cleanUrl}.extraHeader`;
+  newEnvironmentVariables[`GIT_CONFIG_VALUE_${gitConfigCount}`] =
+    `Authorization: Basic ${toBase64(`${authUsername}:${authPassword}`)}`;
+  gitConfigCount++;
   newEnvironmentVariables.GIT_CONFIG_COUNT = gitConfigCount.toString();
 
   return newEnvironmentVariables;
+}
+
+function getGitConfigCount(
+  environmentVariables?: NodeJS.ProcessEnv,
+): number {
+  const env = getEnv();
+  const gitConfigCountEnvVariable =
+    environmentVariables?.GIT_CONFIG_COUNT ?? env.GIT_CONFIG_COUNT;
+  if (!gitConfigCountEnvVariable) {
+    return 0;
+  }
+
+  const gitConfigCount = parseInt(gitConfigCountEnvVariable, 10);
+  if (Number.isNaN(gitConfigCount)) {
+    logger.warn(
+      {
+        GIT_CONFIG_COUNT: env.GIT_CONFIG_COUNT,
+      },
+      `Found GIT_CONFIG_COUNT env variable, but couldn't parse the value to an integer. Ignoring it.`,
+    );
+    return 0;
+  }
+
+  return gitConfigCount;
 }
 
 function getAuthenticationRulesWithToken(
