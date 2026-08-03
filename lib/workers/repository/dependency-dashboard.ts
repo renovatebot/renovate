@@ -455,7 +455,7 @@ export async function ensureDependencyDashboard(
     issueBody += '## Deprecations / Replacements\n';
     issueBody += emojify('> :warning: **Warning**\n> \n');
     issueBody +=
-      'The following dependencies are either deprecated or have replacements available.\n\n';
+      '> The following dependencies are either deprecated or have replacements available.\n\n';
     issueBody += '| Datasource | Package | Replacement PR? |\n';
     issueBody += '|------------|------|--------------|\n';
     for (const manager of Object.keys(deprecatedPackages).sort()) {
