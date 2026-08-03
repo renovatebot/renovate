@@ -326,7 +326,9 @@ describe('config/presets/internal/workarounds', () => {
       `(
         'uses $expectedVersioning versioning for mise Java version $currentValue',
         async ({ currentValue, expectedVersioning }) => {
-          const res = await applyPackageRules({
+          const res = await applyPackageRules<
+            PackageRuleInputConfig & Pick<PackageRule, 'allowedVersions'>
+          >({
             datasource: 'java-version',
             depName: 'java',
             manager: 'mise',
