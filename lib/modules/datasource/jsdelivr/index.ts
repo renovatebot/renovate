@@ -12,7 +12,6 @@ import { DigestsConfig, ReleasesConfig } from '../schema.ts';
 import type {
   DigestConfig,
   GetReleasesConfig,
-  Release,
   ReleaseResult,
 } from '../types.ts';
 
@@ -44,11 +43,10 @@ export class JsDelivrDatasource extends Datasource {
         );
       })
       .transform(({ versions, tags }): ReleaseResult => {
-        const releases: Release[] = versions;
-        const res: ReleaseResult = { releases };
-        if (tags) {
-          res.tags = tags;
-        }
+        const res: ReleaseResult = {
+          releases: versions,
+          tags: tags,
+        };
         return res;
       });
 
