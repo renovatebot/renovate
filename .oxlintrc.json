@@ -76,6 +76,7 @@
     "renovate/no-new-url": "error",
     "renovate/no-stateful-global-regex": "error",
     "renovate/no-tools-import": "error",
+    "renovate/no-unvalidated-pagination-url": "error",
     "renovate/prefer-fs-util": "error",
     "renovate/prefer-json-pipe": "error",
     "renovate/prefer-luxon": "error",
