@@ -93,7 +93,7 @@ export function migrateConfig(
           // @ts-expect-error -- TODO: fix me
           for (const item of migratedConfig[key]) {
             if (isObject(item) && !isArray(item)) {
-              const arrMigrate = migrateConfig(item as RenovateConfig);
+              const arrMigrate = migrateConfig(item);
               newArray.push(arrMigrate.migratedConfig);
             } else {
               newArray.push(item);

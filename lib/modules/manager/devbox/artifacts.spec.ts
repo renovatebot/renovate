@@ -455,7 +455,7 @@ describe('modules/manager/devbox/artifacts', () => {
       const newLockFileContent = `{}`;
       const oldLockFileContent = Buffer.from('New devbox.lock');
       fs.readLocalFile.mockResolvedValueOnce(oldLockFileContent as never);
-      fs.readLocalFile.mockResolvedValueOnce(newLockFileContent as never);
+      fs.readLocalFile.mockResolvedValueOnce(newLockFileContent);
       expect(
         await updateArtifacts({
           packageFileName: 'devbox.json',

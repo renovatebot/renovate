@@ -57,7 +57,7 @@ const platformConfig = {
   endpoint: 'https://git-codecommit.us-east-1.amazonaws.com',
 };
 
-let config: Config = {} as any;
+let config: Config = {};
 
 export async function initPlatform({
   endpoint,
@@ -111,7 +111,7 @@ export async function initRepo({
 }: RepoParams): Promise<RepoResult> {
   logger.debug(`initRepo("${repository}")`);
 
-  config = { repository } as Config;
+  config = { repository };
 
   let repo;
   try {

@@ -18,7 +18,7 @@ import { pkg } from './expose.ts';
 import { init, logger } from './logger/index.ts';
 import { getEnv } from './util/env.ts';
 import { add as addHostRule } from './util/host-rules.ts';
-import { regEx } from './util/regex.ts';
+import { regEx, regexEngineStatus } from './util/regex.ts';
 import { getConfig as getFileConfig } from './workers/global/config/parse/file.ts';
 import { parseConfigs } from './workers/global/config/parse/index.ts';
 import { getParsedContent } from './workers/global/config/parse/util.ts';
@@ -173,6 +173,18 @@ If you have specified global self-hosted configuration (https://docs.renovatebot
   program.action(async (files, opts) => {
     const strict = opts.strict ?? false;
     let filesValidated = 0;
+
+    // without RE2, patterns are checked by RegExp, which accepts syntax RE2 rejects (e.g. lookahead)
+    if (regexEngineStatus.type === 'unavailable') {
+      logger.warn(
+        { err: regexEngineStatus.err },
+        'RE2 not usable, falling back to RegExp: regex validation may be inaccurate',
+      );
+    } else if (regexEngineStatus.type === 'ignored') {
+      logger.debug(
+        'RE2 ignored via RENOVATE_X_IGNORE_RE2: regex validation may be inaccurate',
+      );
+    }
 
     if (files.length) {
       let isGlobalConfig = true;
