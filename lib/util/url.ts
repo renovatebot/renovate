@@ -74,6 +74,38 @@ export function replaceUrlPath(baseUrl: string | URL, path: string): string {
   return urlJoin(origin, path);
 }
 
+/**
+ * Resolves a server-provided pagination "next" URL against the current request
+ * URL, returning it only when it stays on the same origin.
+ *
+ * Registries paginate by returning a `Link` header (or Atom `<link rel="next">`)
+ * pointing at the next page.
+ *
+ * However, if we were to follow that URL without validating it, this could lead to us being redirected to a different host, which could lead to Server-Side Request Forgery (SSRF).
+ *
+ * This guard drops any `next` URL that resolves to a different origin.
+ *
+ * @param baseUrl - the URL of the request that produced `nextUrl`
+ * @param nextUrl - the remote-server-provided pagination target (may be relative, and may be malicious)
+ * @returns the resolved absolute URL if same-origin, otherwise `null`
+ */
+export function resolveSameOriginUrl(
+  baseUrl: string | URL,
+  nextUrl: string | URL,
+): string | null {
+  const base = parseUrl(baseUrl);
+  if (!base) {
+    return null;
+  }
+  let resolved: URL;
+  try {
+    resolved = new URL(nextUrl.toString(), base);
+  } catch {
+    return null;
+  }
+  return resolved.origin === base.origin ? resolved.href : null;
+}
+
 export function getQueryString(params: Record<string, any>): string {
   const usp = new URLSearchParams();
   for (const [k, v] of Object.entries(params)) {
