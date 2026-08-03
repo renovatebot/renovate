@@ -164,9 +164,11 @@ export class HermitVersioning extends RegExpVersioningApi {
         verVal !== otherVal
       ) {
         return verVal - otherVal;
-      } else if (verVal === undefined) {
+      }
+      if (verVal === undefined) {
         return 1;
-      } else if (otherVal === undefined) {
+      }
+      if (otherVal === undefined) {
         return -1;
       }
     }

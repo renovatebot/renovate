@@ -13,3 +13,8 @@
   display: grid;
   grid-template-columns: repeat(3, 1fr);
 }
+
+/** don't show the client-side rendered version number for Renovate (but keep the stars + forks) */
+.md-source__fact .md-source__fact--version {
+  display: none;
+}

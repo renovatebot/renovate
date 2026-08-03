@@ -203,9 +203,9 @@ export const allToolConfig: Record<ToolName, ToolConfig> = {
     versioning: 'ruby',
   },
   rust: {
-    datasource: 'docker',
+    datasource: 'rust-version',
     packageName: 'rust',
-    versioning: 'semver',
+    versioning: 'rust-release-channel',
   },
   uv: {
     datasource: 'pypi',
@@ -289,10 +289,8 @@ function isStable(
   if (!versioningApi.isStable(version)) {
     return false;
   }
-  if (isString(latest)) {
-    if (versioningApi.isGreaterThan(version, latest)) {
-      return false;
-    }
+  if (isString(latest) && versioningApi.isGreaterThan(version, latest)) {
+    return false;
   }
   return true;
 }

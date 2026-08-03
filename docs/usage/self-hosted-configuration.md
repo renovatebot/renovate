@@ -163,6 +163,7 @@ Allowed options:
 | `goGenerate`    | Allows the `goGenerate` `postUpdateOption` to run after a go mod update.                      |
 | `gradleWrapper` | Allows using `./gradlew` or `gradle.bat` when performing updates with Gradle.                 |
 | `mise`          | Allows running any `mise` commands, for instance `mise lock` when updating `mise.lock` files. |
+| `pixi`          | Allows running `pixi lock` when updating `pixi.lock` files (`pixi` and `pep621` managers).    |
 
 ## `autodiscover`
 
@@ -430,7 +431,7 @@ This array will allow you to set the names of the branches you want to rebase/cr
 It has been designed with the intention of being run on one repository, in a one-off manner, e.g. to "force" the rebase of a known existing branch.
 It is highly unlikely that you should ever need to add this to your permanent global config.
 
-Example: `renovate --checked-branches=renovate/chalk-4.x renovate-reproductions/checked` will rebase the `renovate/chalk-4.x` branch in the `renovate-reproductions/checked` repository.`
+Example: `renovate --checked-branches=renovate/chalk-4.x renovate-reproductions/checked` will rebase the `renovate/chalk-4.x` branch in the `renovate-reproductions/checked` repository.
 
 ## `configFileNames`
 
@@ -1222,6 +1223,13 @@ Example:
 ## `productLinks`
 
 Override this object if you want to change the URLs that Renovate links to, e.g. if you have an internal forum for asking for help.
+
+## `rebaseAllOpenBranches`
+
+It has been designed with the intention of being run on one repository, in a one-off manner, e.g. to "force" the rebase of all open PRs.
+It is highly unlikely that you should ever need to add this to your permanent global config.
+
+Example: `renovate --rebase-all-open-branches=true renovate-reproductions/checked` will rebase all open PRs in the `renovate-reproductions/checked` repository.
 
 ## `redisPrefix`
 

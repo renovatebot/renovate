@@ -41,6 +41,7 @@ describe('modules/manager/mise/backends', () => {
       expect(createCargoToolConfig('eza', '')).toStrictEqual({
         packageName: 'eza',
         datasource: 'crate',
+        versioning: 'semver',
       });
     });
 
@@ -314,6 +315,7 @@ describe('modules/manager/mise/backends', () => {
 
     it('should ignore options unless tag_regex is provided', () => {
       expect(
+        // oxlint-disable-next-line renovate/prefer-partial-in-specs -- deliberately passes an unrecognized option to verify it is ignored
         createUbiToolConfig('cli/cli', '2.64.0', { exe: 'gh' } as any),
       ).toStrictEqual({
         packageName: 'cli/cli',

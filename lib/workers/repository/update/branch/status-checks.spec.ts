@@ -42,6 +42,29 @@ describe('workers/repository/update/branch/status-checks', () => {
       expect(platform.setBranchStatus).toHaveBeenCalledTimes(1);
     });
 
+    it('uses the productLinks documentation from GlobalConfig for the status url', async () => {
+      config.stabilityStatus = 'green';
+      await setStability(config);
+      expect(platform.setBranchStatus).toHaveBeenCalledWith(
+        expect.objectContaining({
+          url: 'https://docs.renovatebot.com/key-concepts/minimum-release-age/',
+        }),
+      );
+    });
+
+    it('honours a custom productLinks documentation url', async () => {
+      config.stabilityStatus = 'green';
+      GlobalConfig.set({
+        productLinks: { documentation: 'https://example.com/docs/' },
+      });
+      await setStability(config);
+      expect(platform.setBranchStatus).toHaveBeenCalledWith(
+        expect.objectContaining({
+          url: 'https://example.com/docs/key-concepts/minimum-release-age/',
+        }),
+      );
+    });
+
     it('skips status if already set', async () => {
       config.stabilityStatus = 'green';
       platform.getBranchStatusCheck.mockResolvedValueOnce('green');
@@ -84,7 +107,7 @@ describe('workers/repository/update/branch/status-checks', () => {
       config.stabilityStatus = 'green';
       await setStability({
         ...config,
-        statusCheckNames: undefined as never,
+        statusCheckNames: undefined,
       });
 
       expect(logger.debug).toHaveBeenCalledWith(
@@ -186,6 +209,17 @@ describe('workers/repository/update/branch/status-checks', () => {
       expect(platform.setBranchStatus).toHaveBeenCalledTimes(1);
     });
 
+    it('uses the productLinks documentation from GlobalConfig for the status url', async () => {
+      config.minimumConfidence = 'high';
+      config.confidenceStatus = 'green';
+      await setConfidence(config);
+      expect(platform.setBranchStatus).toHaveBeenCalledWith(
+        expect.objectContaining({
+          url: 'https://docs.renovatebot.com/merge-confidence',
+        }),
+      );
+    });
+
     it('skips status if already set', async () => {
       config.minimumConfidence = 'high';
       config.confidenceStatus = 'green';
@@ -232,7 +266,7 @@ describe('workers/repository/update/branch/status-checks', () => {
       config.confidenceStatus = 'green';
       await setConfidence({
         ...config,
-        statusCheckNames: undefined as never,
+        statusCheckNames: undefined,
       });
 
       expect(logger.debug).toHaveBeenCalledWith(
