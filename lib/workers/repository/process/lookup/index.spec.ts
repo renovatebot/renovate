@@ -4428,6 +4428,45 @@ describe('workers/repository/process/lookup/index', () => {
       });
     });
 
+    it('does not bump a floating major tag to an exact version when a global `rangeStrategy=pin` is combined with `helpers:pinGitHubActionDigests`', async () => {
+      const { config: presetConfig } = await resolveConfigPresets({
+        extends: ['helpers:pinGitHubActionDigests'],
+      });
+
+      config = await applyPackageRules({
+        ...config,
+        ...presetConfig,
+        abandonmentThreshold: presetConfig.abandonmentThreshold ?? undefined,
+        currentValue: 'v8',
+        currentDigest: fakeSha('current'),
+        packageName: 'actions/checkout',
+        depType: 'action',
+        rangeStrategy: 'pin',
+        versioning: githubActionsVersioningId,
+        datasource: GithubTagsDatasource.id,
+      });
+
+      getGithubTags.mockResolvedValueOnce({
+        releases: [{ version: 'v8.0.1' }, { version: 'v8' }],
+      });
+      vi.spyOn(
+        GithubTagsDatasource.prototype,
+        'getDigest',
+      ).mockResolvedValueOnce(fakeSha('new'));
+
+      const { updates } = await Result.wrap(
+        lookup.lookupUpdates(config),
+      ).unwrapOrThrow();
+
+      expect(updates).toEqual([
+        {
+          updateType: 'digest',
+          newValue: 'v8',
+          newDigest: fakeSha('new'),
+        },
+      ]);
+    });
+
     it('marks a too-new GitHub Actions major-tag digest update as pending when using `internalChecksFilter=strict`', async () => {
       config.currentValue = 'v7';
       config.currentDigest = fakeSha('current');
