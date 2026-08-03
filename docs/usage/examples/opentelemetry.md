@@ -22,7 +22,7 @@ services:
 
   # Prometheus for storing metrics
   prometheus:
-    image: prom/prometheus:v3.13.1
+    image: prom/prometheus:v3.13.2
     ports:
       - '9090:9090' # Web UI
       - '4318' # OTLP HTTP
