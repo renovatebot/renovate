@@ -286,46 +286,58 @@ describe('modules/manager/npm/artifacts', () => {
     expect(firstCwd).toBe(secondCwd);
   });
 
-  it('reuses a generated hash for matching packageManager updates', async () => {
-    const packageFileContent = JSON.stringify({
-      packageManager: 'pnpm@8.15.6',
-      devEngines: {
-        packageManager: { name: 'pnpm', version: '8.15.6' },
-      },
-    });
-    const corepackPackageFileContent = JSON.stringify({
-      ...JSON.parse(packageFileContent),
-      packageManager: `pnpm@${generatedVersion}`,
-    });
-    fs.readLocalFile.mockResolvedValue(corepackPackageFileContent);
-    const execSnapshots = mockExecAll();
-
-    const res = await updateArtifacts({
-      packageFileName: 'package.json',
-      updatedDeps: [
-        {
-          ...validDepUpdate,
-          depType: 'devEngines.packageManager',
+  it.each([
+    {
+      firstDepType: 'devEngines.packageManager',
+      packageManagerFirst: false,
+    },
+    { firstDepType: 'packageManager', packageManagerFirst: true },
+  ])(
+    'reuses a generated hash with $firstDepType first',
+    async ({ packageManagerFirst }) => {
+      const packageFileContent = JSON.stringify({
+        packageManager: 'pnpm@8.15.6',
+        devEngines: {
+          packageManager: { name: 'pnpm', version: '8.15.6' },
         },
-        validDepUpdate,
-      ],
-      newPackageFileContent: packageFileContent,
-      config,
-    });
+      });
+      const corepackPackageFileContent = JSON.stringify({
+        ...JSON.parse(packageFileContent),
+        packageManager: `pnpm@${generatedVersion}`,
+      });
+      fs.readLocalFile.mockResolvedValue(corepackPackageFileContent);
+      const execSnapshots = mockExecAll();
+      const devEnginesUpdate = {
+        ...validDepUpdate,
+        depType: 'devEngines.packageManager',
+      };
 
-    const contents = (res![0].file as FileAddition).contents?.toString();
-    expect(contents).toBeJsonString();
-    expect(JSON.parse(contents!)).toEqual({
-      packageManager: `pnpm@${generatedVersion}`,
-      devEngines: {
-        packageManager: { name: 'pnpm', version: generatedVersion },
-      },
-    });
-    expect(execSnapshots).toMatchObject([{ cmd: 'corepack use pnpm@8.15.6' }]);
-  });
+      const res = await updateArtifacts({
+        packageFileName: 'package.json',
+        updatedDeps: packageManagerFirst
+          ? [validDepUpdate, devEnginesUpdate]
+          : [devEnginesUpdate, validDepUpdate],
+        newPackageFileContent: packageFileContent,
+        config,
+      });
+
+      const contents = (res![0].file as FileAddition).contents?.toString();
+      expect(contents).toBeJsonString();
+      expect(JSON.parse(contents!)).toEqual({
+        packageManager: `pnpm@${generatedVersion}`,
+        devEngines: {
+          packageManager: { name: 'pnpm', version: generatedVersion },
+        },
+      });
+      expect(execSnapshots).toMatchObject([
+        { cmd: 'corepack use pnpm@8.15.6' },
+      ]);
+    },
+  );
 
   it.each([
     ['invalid JSON', 'not json'],
+    ['a missing package file', null],
     ['a missing packageManager', '{}'],
     [
       'a different package manager',
