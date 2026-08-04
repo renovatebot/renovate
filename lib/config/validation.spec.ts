@@ -502,7 +502,10 @@ describe('config/validation', () => {
         },
       };
       // @ts-expect-error invalid options
-      const { errors } = await configValidation.validateConfig('repo', config);
+      const { errors, warnings } = await configValidation.validateConfig(
+        'repo',
+        config,
+      );
       expect(errors).toMatchObject([
         {
           message:
@@ -514,6 +517,7 @@ describe('config/validation', () => {
         },
       ]);
       expect(errors).toHaveLength(2);
+      expect(warnings).toHaveLength(0);
     });
 
     it('catches invalid customDatasources record type', async () => {
