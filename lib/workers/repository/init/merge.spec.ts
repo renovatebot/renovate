@@ -115,7 +115,7 @@ describe('workers/repository/init/merge', () => {
         'package.json',
       );
       onboardingCache.getOnboardingConfigFromCache.mockReturnValueOnce(
-        undefined as never,
+        undefined,
       );
       scm.getFileList.mockResolvedValueOnce(['package.json']);
       const pJson = JSON.stringify({
@@ -358,7 +358,10 @@ describe('workers/repository/init/merge', () => {
         automerge: true,
         packageRules: [
           {
-            matchSourceUrls: ['https://github.com/facebook/react'],
+            matchSourceUrls: [
+              'https://github.com/facebook/react',
+              'https://github.com/react/react',
+            ],
           },
         ],
       });

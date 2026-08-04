@@ -1,8 +1,9 @@
 // TODO fix mocks
 import _timers from 'node:timers/promises';
 import { mockDeep } from 'vitest-mock-extended';
+import { hostRules } from '~test/host-rules.ts';
 import * as httpMock from '~test/http-mock.ts';
-import { git, hostRules, logger } from '~test/util.ts';
+import { fakeSha, git, logger } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import {
   CONFIG_GIT_URL_UNAVAILABLE,
@@ -15,13 +16,11 @@ import {
 import type { BranchStatus } from '../../../types/index.ts';
 import * as memCache from '../../../util/cache/memory/index.ts';
 import * as repoCache from '../../../util/cache/repository/index.ts';
-import type { LongCommitSha } from '../../../util/schema-utils/git.ts';
 import { toBase64 } from '../../../util/string.ts';
 import type { RepoParams } from '../index.ts';
 import * as prBodyModule from '../utils/pr-body.ts';
 import * as gitlab from './index.ts';
 
-vi.mock('../../../util/host-rules.ts', () => mockDeep());
 vi.mock('../../../util/git/index.ts', () => mockDeep());
 vi.mock('timers/promises');
 vi.mock('../utils/pr-body.ts', { spy: true });
@@ -30,15 +29,15 @@ const timers = vi.mocked(_timers);
 
 const gitlabApiHost = 'https://gitlab.com';
 
+const branchSha = fakeSha('branchSha');
+
 describe('modules/platform/gitlab/index', () => {
   beforeEach(() => {
     GlobalConfig.reset();
     git.branchExists.mockReturnValue(true);
     git.isBranchBehindBase.mockResolvedValue(true);
-    git.getBranchCommit.mockReturnValue(
-      '0d9c7726c3d628b7e28af234595cfd20febdbf8e' as LongCommitSha,
-    );
-    hostRules.find.mockReturnValue({
+    git.getBranchCommit.mockReturnValue(branchSha);
+    hostRules.add({
       token: '123test',
     });
     delete process.env.GITLAB_IGNORE_REPO_URL;
@@ -704,7 +703,7 @@ describe('modules/platform/gitlab/index', () => {
       const scope = await initRepo();
       scope
         .get(
-          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses',
+          `/api/v4/projects/some%2Frepo/repository/commits/${branchSha}/statuses`,
         )
         .reply(200, [])
         .get(
@@ -719,7 +718,7 @@ describe('modules/platform/gitlab/index', () => {
       const scope = await initRepo();
       scope
         .get(
-          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses',
+          `/api/v4/projects/some%2Frepo/repository/commits/${branchSha}/statuses`,
         )
         .reply(200, [])
         .get(
@@ -767,7 +766,7 @@ describe('modules/platform/gitlab/index', () => {
       const scope = await initRepo();
       scope
         .get(
-          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses',
+          `/api/v4/projects/some%2Frepo/repository/commits/${branchSha}/statuses`,
         )
         .reply(200, [
           { context: 'renovate/stability-days', status: 'success' },
@@ -785,7 +784,7 @@ describe('modules/platform/gitlab/index', () => {
       const scope = await initRepo();
       scope
         .get(
-          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses',
+          `/api/v4/projects/some%2Frepo/repository/commits/${branchSha}/statuses`,
         )
         .reply(200, [
           { name: 'renovate/stability-days', status: 'success' },
@@ -803,7 +802,7 @@ describe('modules/platform/gitlab/index', () => {
       const scope = await initRepo();
       scope
         .get(
-          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses',
+          `/api/v4/projects/some%2Frepo/repository/commits/${branchSha}/statuses`,
         )
         .reply(200, [])
         .get(
@@ -847,7 +846,7 @@ describe('modules/platform/gitlab/index', () => {
       const scope = await initRepo();
       scope
         .get(
-          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses',
+          `/api/v4/projects/some%2Frepo/repository/commits/${branchSha}/statuses`,
         )
         .reply(200, [
           { name: 'renovate/stability-days', status: 'success' },
@@ -898,7 +897,7 @@ describe('modules/platform/gitlab/index', () => {
       const scope = await initRepo();
       scope
         .get(
-          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses',
+          `/api/v4/projects/some%2Frepo/repository/commits/${branchSha}/statuses`,
         )
         .reply(200, [
           { name: 'renovate/stability-days', status: 'success' },
@@ -949,7 +948,7 @@ describe('modules/platform/gitlab/index', () => {
       const scope = await initRepo();
       scope
         .get(
-          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses',
+          `/api/v4/projects/some%2Frepo/repository/commits/${branchSha}/statuses`,
         )
         .reply(200, [
           { status: 'success' },
@@ -967,7 +966,7 @@ describe('modules/platform/gitlab/index', () => {
       const scope = await initRepo();
       scope
         .get(
-          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses',
+          `/api/v4/projects/some%2Frepo/repository/commits/${branchSha}/statuses`,
         )
         .reply(200, [{ status: 'failed', allow_failure: true }])
         .get(
@@ -982,7 +981,7 @@ describe('modules/platform/gitlab/index', () => {
       const scope = await initRepo();
       scope
         .get(
-          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses',
+          `/api/v4/projects/some%2Frepo/repository/commits/${branchSha}/statuses`,
         )
         .reply(200, [{ status: 'success' }, { status: 'skipped' }])
         .get(
@@ -997,7 +996,7 @@ describe('modules/platform/gitlab/index', () => {
       const scope = await initRepo();
       scope
         .get(
-          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses',
+          `/api/v4/projects/some%2Frepo/repository/commits/${branchSha}/statuses`,
         )
         .reply(200, [{ status: 'skipped' }])
         .get(
@@ -1012,7 +1011,7 @@ describe('modules/platform/gitlab/index', () => {
       const scope = await initRepo();
       scope
         .get(
-          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses',
+          `/api/v4/projects/some%2Frepo/repository/commits/${branchSha}/statuses`,
         )
         .reply(200, [{ status: 'skipped' }, { status: 'failed' }])
         .get(
@@ -1027,7 +1026,7 @@ describe('modules/platform/gitlab/index', () => {
       const scope = await initRepo();
       scope
         .get(
-          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses',
+          `/api/v4/projects/some%2Frepo/repository/commits/${branchSha}/statuses`,
         )
         .reply(200, [
           { status: 'success' },
@@ -1046,7 +1045,7 @@ describe('modules/platform/gitlab/index', () => {
       const scope = await initRepo();
       scope
         .get(
-          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses',
+          `/api/v4/projects/some%2Frepo/repository/commits/${branchSha}/statuses`,
         )
         .reply(200, [{ status: 'success' }, { status: 'foo' }])
         .get(
@@ -1072,7 +1071,7 @@ describe('modules/platform/gitlab/index', () => {
       const scope = await initRepo();
       scope
         .get(
-          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses',
+          `/api/v4/projects/some%2Frepo/repository/commits/${branchSha}/statuses`,
         )
         .reply(200, []);
       const res = await gitlab.getBranchStatusCheck(
@@ -1086,7 +1085,7 @@ describe('modules/platform/gitlab/index', () => {
       const scope = await initRepo();
       scope
         .get(
-          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses',
+          `/api/v4/projects/some%2Frepo/repository/commits/${branchSha}/statuses`,
         )
         .reply(200, [{ name: 'context-1', status: 'pending' }]);
       const res = await gitlab.getBranchStatusCheck(
@@ -1100,7 +1099,7 @@ describe('modules/platform/gitlab/index', () => {
       const scope = await initRepo();
       scope
         .get(
-          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses',
+          `/api/v4/projects/some%2Frepo/repository/commits/${branchSha}/statuses`,
         )
         .reply(200, [
           { name: 'context-1', status: 'pending' },
@@ -1118,7 +1117,7 @@ describe('modules/platform/gitlab/index', () => {
       const scope = await initRepo();
       scope
         .get(
-          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses',
+          `/api/v4/projects/some%2Frepo/repository/commits/${branchSha}/statuses`,
         )
         .reply(200, [
           { name: 'context-1', status: 'pending' },
@@ -1154,17 +1153,13 @@ describe('modules/platform/gitlab/index', () => {
     it('should log message that failed to retrieve commit pipeline', async () => {
       const scope = await initRepo();
       scope
-        .post(
-          '/api/v4/projects/some%2Frepo/statuses/0d9c7726c3d628b7e28af234595cfd20febdbf8e',
-        )
+        .post(`/api/v4/projects/some%2Frepo/statuses/${branchSha}`)
         .reply(200, {})
         .get(
-          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses',
+          `/api/v4/projects/some%2Frepo/repository/commits/${branchSha}/statuses`,
         )
         .reply(200, [])
-        .get(
-          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e',
-        )
+        .get(`/api/v4/projects/some%2Frepo/repository/commits/${branchSha}`)
         .reply(200, {});
 
       timers.setTimeout.mockImplementation(() => {
@@ -1186,17 +1181,13 @@ describe('modules/platform/gitlab/index', () => {
     it.each(states)('sets branch status %s', async (state) => {
       const scope = await initRepo();
       scope
-        .post(
-          '/api/v4/projects/some%2Frepo/statuses/0d9c7726c3d628b7e28af234595cfd20febdbf8e',
-        )
+        .post(`/api/v4/projects/some%2Frepo/statuses/${branchSha}`)
         .reply(200, {})
         .get(
-          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses',
+          `/api/v4/projects/some%2Frepo/repository/commits/${branchSha}/statuses`,
         )
         .reply(200, [])
-        .get(
-          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e',
-        )
+        .get(`/api/v4/projects/some%2Frepo/repository/commits/${branchSha}`)
         .times(3)
         .reply(200, {});
 
@@ -1217,9 +1208,7 @@ describe('modules/platform/gitlab/index', () => {
         process.env.RENOVATE_X_GITLAB_SKIP_STATUS_WITHOUT_PIPELINE = 'true';
         const scope = await initRepo();
         scope
-          .get(
-            '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e',
-          )
+          .get(`/api/v4/projects/some%2Frepo/repository/commits/${branchSha}`)
           .times(3)
           .reply(200, {});
 
@@ -1243,17 +1232,13 @@ describe('modules/platform/gitlab/index', () => {
       process.env.RENOVATE_X_GITLAB_SKIP_STATUS_WITHOUT_PIPELINE = 'false';
       const scope = await initRepo();
       scope
-        .post(
-          '/api/v4/projects/some%2Frepo/statuses/0d9c7726c3d628b7e28af234595cfd20febdbf8e',
-        )
+        .post(`/api/v4/projects/some%2Frepo/statuses/${branchSha}`)
         .reply(200, {})
         .get(
-          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses',
+          `/api/v4/projects/some%2Frepo/repository/commits/${branchSha}/statuses`,
         )
         .reply(200, [])
-        .get(
-          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e',
-        )
+        .get(`/api/v4/projects/some%2Frepo/repository/commits/${branchSha}`)
         .times(3)
         .reply(200, {});
 
@@ -1277,7 +1262,7 @@ describe('modules/platform/gitlab/index', () => {
       const scope = await initRepo();
       scope
         .post(
-          '/api/v4/projects/some%2Frepo/statuses/0d9c7726c3d628b7e28af234595cfd20febdbf8e',
+          `/api/v4/projects/some%2Frepo/statuses/${branchSha}`,
           (body: any): boolean => {
             expect(body.pipeline_id).toBe(123);
             return true;
@@ -1285,12 +1270,10 @@ describe('modules/platform/gitlab/index', () => {
         )
         .reply(200, {})
         .get(
-          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses',
+          `/api/v4/projects/some%2Frepo/repository/commits/${branchSha}/statuses`,
         )
         .reply(200, [])
-        .get(
-          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e',
-        )
+        .get(`/api/v4/projects/some%2Frepo/repository/commits/${branchSha}`)
         .reply(200, { last_pipeline: { id: 123 } });
 
       await expect(
@@ -1311,17 +1294,13 @@ describe('modules/platform/gitlab/index', () => {
     it('waits for 1000ms by default', async () => {
       const scope = await initRepo();
       scope
-        .post(
-          '/api/v4/projects/some%2Frepo/statuses/0d9c7726c3d628b7e28af234595cfd20febdbf8e',
-        )
+        .post(`/api/v4/projects/some%2Frepo/statuses/${branchSha}`)
         .reply(200, {})
         .get(
-          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses',
+          `/api/v4/projects/some%2Frepo/repository/commits/${branchSha}/statuses`,
         )
         .reply(200, [])
-        .get(
-          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e',
-        )
+        .get(`/api/v4/projects/some%2Frepo/repository/commits/${branchSha}`)
         .times(3)
         .reply(200, {});
 
@@ -1341,7 +1320,7 @@ describe('modules/platform/gitlab/index', () => {
       const scope = await initRepo();
       scope
         .post(
-          '/api/v4/projects/some%2Frepo/statuses/0d9c7726c3d628b7e28af234595cfd20febdbf8e',
+          `/api/v4/projects/some%2Frepo/statuses/${branchSha}`,
           (body: any): boolean => {
             expect(body.pipeline_id).toBe(123);
             return true;
@@ -1349,16 +1328,12 @@ describe('modules/platform/gitlab/index', () => {
         )
         .reply(200, {})
         .get(
-          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses',
+          `/api/v4/projects/some%2Frepo/repository/commits/${branchSha}/statuses`,
         )
         .reply(200, [])
-        .get(
-          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e',
-        )
+        .get(`/api/v4/projects/some%2Frepo/repository/commits/${branchSha}`)
         .reply(200, {})
-        .get(
-          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e',
-        )
+        .get(`/api/v4/projects/some%2Frepo/repository/commits/${branchSha}`)
         .reply(200, { last_pipeline: { id: 123 } });
 
       await expect(
@@ -1379,17 +1354,13 @@ describe('modules/platform/gitlab/index', () => {
 
       const scope = await initRepo();
       scope
-        .post(
-          '/api/v4/projects/some%2Frepo/statuses/0d9c7726c3d628b7e28af234595cfd20febdbf8e',
-        )
+        .post(`/api/v4/projects/some%2Frepo/statuses/${branchSha}`)
         .reply(200, {})
         .get(
-          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses',
+          `/api/v4/projects/some%2Frepo/repository/commits/${branchSha}/statuses`,
         )
         .reply(200, [])
-        .get(
-          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e',
-        )
+        .get(`/api/v4/projects/some%2Frepo/repository/commits/${branchSha}`)
         .times(3)
         .reply(200, {});
 
@@ -1424,17 +1395,13 @@ describe('modules/platform/gitlab/index', () => {
 
       const scope = await initRepo();
       scope
-        .post(
-          '/api/v4/projects/some%2Frepo/statuses/0d9c7726c3d628b7e28af234595cfd20febdbf8e',
-        )
+        .post(`/api/v4/projects/some%2Frepo/statuses/${branchSha}`)
         .reply(200, {})
         .get(
-          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses',
+          `/api/v4/projects/some%2Frepo/repository/commits/${branchSha}/statuses`,
         )
         .reply(200, [])
-        .get(
-          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e',
-        )
+        .get(`/api/v4/projects/some%2Frepo/repository/commits/${branchSha}`)
         .times(retry + 1)
         .reply(200, {});
 
@@ -1453,14 +1420,10 @@ describe('modules/platform/gitlab/index', () => {
     it('ignores status transition error', async () => {
       const scope = await initRepo();
       scope
-        .get(
-          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e',
-        )
+        .get(`/api/v4/projects/some%2Frepo/repository/commits/${branchSha}`)
         .times(3)
         .reply(200, {})
-        .post(
-          '/api/v4/projects/some%2Frepo/statuses/0d9c7726c3d628b7e28af234595cfd20febdbf8e',
-        )
+        .post(`/api/v4/projects/some%2Frepo/statuses/${branchSha}`)
         .reply(400, {
           message: 'Cannot transition status via :enqueue from :pending',
         });
@@ -1483,14 +1446,10 @@ describe('modules/platform/gitlab/index', () => {
     it('handles non-string error message', async () => {
       const scope = await initRepo();
       scope
-        .get(
-          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e',
-        )
+        .get(`/api/v4/projects/some%2Frepo/repository/commits/${branchSha}`)
         .times(3)
         .reply(200, {})
-        .post(
-          '/api/v4/projects/some%2Frepo/statuses/0d9c7726c3d628b7e28af234595cfd20febdbf8e',
-        )
+        .post(`/api/v4/projects/some%2Frepo/statuses/${branchSha}`)
         .reply(400, { message: { base: ['Some validation error'] } });
 
       await expect(
@@ -4285,17 +4244,9 @@ These updates have all been created already. To force a retry/rebase of any, cli
         .reply(200, [{ username: 'maria' }, { username: 'jimmy' }])
         .get('/api/v4/groups/group-b/members')
         .reply(200, [{ username: 'john' }]);
-      const expandedGroupMembers = await gitlab.expandGroupMembers?.([
-        'u@email.com',
-        '@group-a',
-        '@group-b',
-      ]);
-      expect(expandedGroupMembers).toEqual([
-        'u@email.com',
-        'maria',
-        'jimmy',
-        'john',
-      ]);
+      await expect(
+        gitlab.expandGroupMembers?.(['u@email.com', '@group-a', '@group-b']),
+      ).resolves.toEqual(['u@email.com', 'maria', 'jimmy', 'john']);
     });
 
     it('users are not expanded when 404', async () => {
@@ -4303,8 +4254,9 @@ These updates have all been created already. To force a retry/rebase of any, cli
         .scope(gitlabApiHost)
         .get('/api/v4/groups/john/members')
         .reply(404, { message: '404 Group Not Found' });
-      const expandedGroupMembers = await gitlab.expandGroupMembers?.(['john']);
-      expect(expandedGroupMembers).toEqual(['john']);
+      await expect(gitlab.expandGroupMembers?.(['john'])).resolves.toEqual([
+        'john',
+      ]);
     });
 
     it('users are not expanded when non 404', async () => {
@@ -4312,10 +4264,9 @@ These updates have all been created already. To force a retry/rebase of any, cli
         .scope(gitlabApiHost)
         .get('/api/v4/groups/group/members')
         .reply(403, { message: '403 Authorization' });
-      const expandedGroupMembers = await gitlab.expandGroupMembers?.([
-        '@group',
+      await expect(gitlab.expandGroupMembers?.(['@group'])).resolves.toEqual([
+        'group',
       ]);
-      expect(expandedGroupMembers).toEqual(['group']);
 
       expect(logger.logger.debug).toHaveBeenCalledWith(
         expect.any(Object),
@@ -4328,17 +4279,67 @@ These updates have all been created already. To force a retry/rebase of any, cli
         .scope(gitlabApiHost)
         .get('/api/v4/groups/group-c/members')
         .reply(200, []);
-      const expandedGroupMembers = await gitlab.expandGroupMembers?.([
-        '@group-c',
-      ]);
-      expect(expandedGroupMembers).toEqual([]);
+      await expect(gitlab.expandGroupMembers?.(['@group-c'])).resolves.toEqual(
+        [],
+      );
     });
 
     it('includes email in final result', async () => {
-      const expandedGroupMembers = await gitlab.expandGroupMembers?.([
-        'u@email.com',
-      ]);
-      expect(expandedGroupMembers).toEqual(['u@email.com']);
+      await expect(
+        gitlab.expandGroupMembers?.(['u@email.com']),
+      ).resolves.toEqual(['u@email.com']);
+    });
+
+    it('expands a role handle into members holding exactly that role', async () => {
+      httpMock
+        .scope(gitlabApiHost)
+        .get('/api/v4/projects/undefined/members')
+        .reply(200, [
+          { username: 'dev-one', access_level: 30 },
+          { username: 'maintainer', access_level: 40 },
+          { username: 'dev-two', access_level: 30 },
+          { username: 'owner', access_level: 50 },
+        ]);
+      await expect(
+        gitlab.expandGroupMembers?.(['@@developer']),
+      ).resolves.toEqual(['dev-one', 'dev-two']);
+    });
+
+    it('resolves roles, groups, emails and users together', async () => {
+      httpMock
+        .scope(gitlabApiHost)
+        .get('/api/v4/projects/undefined/members')
+        .reply(200, [
+          { username: 'alice', access_level: 40 },
+          { username: 'bob', access_level: 30 },
+        ])
+        .get('/api/v4/groups/group-a/members')
+        .reply(200, [{ username: 'maria' }])
+        .get('/api/v4/groups/john/members')
+        .reply(404, { message: '404 Group Not Found' });
+      await expect(
+        gitlab.expandGroupMembers?.([
+          '@@maintainer',
+          '@group-a',
+          'u@email.com',
+          'john',
+        ]),
+      ).resolves.toEqual(['alice', 'u@email.com', 'maria', 'john']);
+    });
+
+    it('swallows role member fetch errors', async () => {
+      httpMock
+        .scope(gitlabApiHost)
+        .get('/api/v4/projects/undefined/members')
+        .reply(403, { message: '403 Authorization' });
+      await expect(
+        gitlab.expandGroupMembers?.(['@@developer']),
+      ).resolves.toEqual([]);
+
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        expect.any(Object),
+        'Unable to fetch role members',
+      );
     });
   });
 });

@@ -147,8 +147,9 @@ describe('util/exec/docker/index', () => {
       cwd: '/tmp/foobar',
       envVars,
     };
-    const command = (img: string, vol?: string, opts?: string): string =>
-      `docker run --rm --name=renovate_${img} --label=renovate_child --user=some-user ${vol ? `${vol} ` : ''}${opts ? `${opts} ` : ''}-e FOO -e BAR -w "/tmp/foobar" ghcr.io/renovatebot/base-image bash -l -c "foo && bar"`;
+    function command(img: string, vol?: string, opts?: string): string {
+      return `docker run --rm --name=renovate_${img} --label=renovate_child --user=some-user ${vol ? `${vol} ` : ''}${opts ? `${opts} ` : ''}-e FOO -e BAR -w "/tmp/foobar" ghcr.io/renovatebot/base-image bash -l -c "foo && bar"`;
+    }
 
     beforeEach(() => {
       GlobalConfig.set({

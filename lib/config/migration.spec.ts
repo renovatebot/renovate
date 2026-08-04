@@ -431,7 +431,7 @@ describe('config/migration', () => {
       expect(res.isMigrated).toBeTrue();
       expect(res.migratedConfig).toMatchObject({ extends: ['foo'] });
 
-      config = { extends: ['foo', ':js-app', 'bar'] } as never;
+      config = { extends: ['foo', ':js-app', 'bar'] };
       res = configMigration.migrateConfig(config);
       expect(res.isMigrated).toBeTrue();
       expect(res.migratedConfig).toMatchObject({
@@ -541,7 +541,7 @@ describe('config/migration', () => {
         extends: ['security:minimumReleaseAgeNpm'],
       });
 
-      config = { extends: ['foo', 'npm:unpublishSafe'] } as never;
+      config = { extends: ['foo', 'npm:unpublishSafe'] };
       res = configMigration.migrateConfig(config);
       expect(res.isMigrated).toBeTrue();
       expect(res.migratedConfig).toMatchObject({
@@ -762,8 +762,9 @@ describe('config/migration', () => {
   });
 
   it('migrates azureAutoComplete', () => {
-    const migrate = (config: RenovateConfig): MigratedConfig =>
-      configMigration.migrateConfig(config);
+    function migrate(config: RenovateConfig): MigratedConfig {
+      return configMigration.migrateConfig(config);
+    }
 
     // @ts-expect-error -- TODO: fix me
     expect(migrate({ azureAutoComplete: true })).toEqual({
@@ -791,8 +792,9 @@ describe('config/migration', () => {
   });
 
   it('migrates gitLabAutomerge', () => {
-    const migrate = (config: RenovateConfig): MigratedConfig =>
-      configMigration.migrateConfig(config);
+    function migrate(config: RenovateConfig): MigratedConfig {
+      return configMigration.migrateConfig(config);
+    }
 
     // @ts-expect-error -- TODO: fix me
     expect(migrate({ gitLabAutomerge: true })).toEqual({

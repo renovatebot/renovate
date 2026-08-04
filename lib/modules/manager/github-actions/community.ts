@@ -2,6 +2,7 @@ import { z } from 'zod/v4';
 
 import { escapeRegExp, regEx } from '../../../util/regex.ts';
 import { DockerDatasource } from '../../datasource/docker/index.ts';
+import { GithubReleaseAttachmentsDatasource } from '../../datasource/github-release-attachments/index.ts';
 import { GithubReleasesDatasource } from '../../datasource/github-releases/index.ts';
 import { NpmDatasource } from '../../datasource/npm/index.ts';
 import { PypiDatasource } from '../../datasource/pypi/index.ts';
@@ -26,9 +27,9 @@ export interface CommunityActionConfig {
   withSchema?: z.ZodType<{ val: string | undefined } & Record<string, unknown>>;
 }
 
-type ActionSchema = z.ZodType<PackageDependency>;
+export type ActionSchema = z.ZodType<PackageDependency>;
 
-function actionSchema(
+export function actionSchema(
   name: string,
   { isInvalid, withSchema, ...cfg }: CommunityActionConfig,
 ): ActionSchema {
@@ -91,6 +92,17 @@ const VersionVal = z
 const InstallBinaryWith = z
   .object({ repo: z.string(), tag: z.string() })
   .transform(({ repo, tag }) => ({ packageName: repo, val: tag }));
+
+const sha256Regex = regEx(/^[a-f0-9]{64}$/);
+const MiseWith = z
+  .object({
+    version: z.string().optional(),
+    sha256: z.string().optional(),
+  })
+  .transform(({ version, sha256 }) => ({
+    val: version,
+    ...(sha256 && sha256Regex.test(sha256) ? { currentDigest: sha256 } : {}),
+  }));
 
 /**
  * Community contributed actions with known version input schemas.
@@ -168,8 +180,9 @@ export const communityActions: Record<string, CommunityActionConfig> = {
     withSchema: InstallBinaryWith,
   },
   'jdx/mise-action': {
-    datasource: GithubReleasesDatasource.id,
+    datasource: GithubReleaseAttachmentsDatasource.id,
     packageName: 'jdx/mise',
+    withSchema: MiseWith,
   },
   'oven-sh/setup-bun': {
     datasource: NpmDatasource.id,
@@ -207,14 +220,17 @@ export const communityActions: Record<string, CommunityActionConfig> = {
     packageName: '', // determined from `repo` input
     withSchema: InstallBinaryWith,
   },
+  'sigstore/cosign-installer': {
+    datasource: GithubReleasesDatasource.id,
+    packageName: 'sigstore/cosign',
+    withSchema: valSchema('cosign-release'),
+  },
+  'UpCloudLtd/upcloud-cli-action': {
+    datasource: GithubReleasesDatasource.id,
+    packageName: 'UpCloudLtd/upcloud-cli',
+  },
   'zizmorcore/zizmor-action': {
     datasource: DockerDatasource.id,
     packageName: 'ghcr.io/zizmorcore/zizmor',
   },
 };
-
-export const CommunityActions = z.union(
-  Object.entries(communityActions).map(([name, cfg]) =>
-    actionSchema(name, cfg),
-  ) as [ActionSchema, ActionSchema, ...ActionSchema[]],
-);

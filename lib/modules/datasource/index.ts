@@ -45,8 +45,12 @@ import type {
 export { isGetPkgReleasesConfig } from './common.ts';
 export * from './types.ts';
 
-export const getDatasources = (): Map<string, DatasourceApi> => datasources;
-export const getDatasourceList = (): string[] => Array.from(datasources.keys());
+export function getDatasources(): Map<string, DatasourceApi> {
+  return datasources;
+}
+export function getDatasourceList(): string[] {
+  return Array.from(datasources.keys());
+}
 
 type GetReleasesInternalConfig = GetReleasesConfig & GetPkgReleasesConfig;
 
