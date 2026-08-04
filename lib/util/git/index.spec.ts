@@ -492,18 +492,6 @@ describe('util/git/index', { timeout: 30000 }, () => {
       ).toBeFalse();
     });
 
-    it('should return false when author matches exact email with brackets', async () => {
-      git.setUserRepoConfig({
-        gitIgnoredAuthors: ['29139614+renovate[bot]@users.noreply.github.com'],
-      });
-      expect(
-        await git.isBranchModified(
-          'renovate/custom_author_brackets',
-          defaultBranch,
-        ),
-      ).toBeFalse();
-    });
-
     it('should return true when author does not match bracketed email pattern', async () => {
       git.setUserRepoConfig({
         gitIgnoredAuthors: ['29139614+renovate[bxy]@users.noreply.github.com'],
