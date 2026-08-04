@@ -54,6 +54,8 @@ Let's suppose we perform fetching for the first time.
 For simplicity, this example assumes that we are retrieving items in small batches of 5 at a time.
 The cache TTL is assumed to be 30 days.
 
+<!-- doc-fence-check-disable-next-block -->
+
 ```js
 // Page 1
 [
@@ -112,6 +114,8 @@ In the case where we already have items stored in the cache, we can model the fe
 Suppose we have a new release that changes the pagination of our items.
 Also note that versions `3.0.1` and `3.0.2` are deleted since last fetch.
 The resulting pagination would look like this:
+
+<!-- doc-fence-check-disable-next-block -->
 
 ```js
 // Page 1                                                   --- FETCHED AND RECONCILED ---
