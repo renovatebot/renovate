@@ -393,6 +393,33 @@ export function extractProxyUrls(
   return extractedProxyUrls;
 }
 
+// Finds named singleton objects of the form:
+//   object Name {
+//     val field = "version"
+//   }
+// and returns a map of `Name.field -> version` entries.
+// Uses a regex that only matches object bodies without nested braces, so
+// outer wrapper objects (e.g. `object Dependencies { ... }`) are naturally
+// skipped — only leaf-level version objects are captured.
+const namedSingletonObjectRegex = regEx(/object\s+(\w+)\s*\{([^{}]*)\}/g);
+const namedSingletonObjectFieldRegex = regEx(
+  /\bval\s+(\w+)(?:\s*:\s*String)?\s*=\s*"([^"]+)"/g,
+);
+
+function extractNamedSingletonObjectVars(content: string): Vars {
+  const vars: Vars = {};
+  namedSingletonObjectRegex.lastIndex = 0;
+  for (const objectMatch of content.matchAll(namedSingletonObjectRegex)) {
+    const objectName = objectMatch[1];
+    const body = objectMatch[2];
+    namedSingletonObjectFieldRegex.lastIndex = 0;
+    for (const fieldMatch of body.matchAll(namedSingletonObjectFieldRegex)) {
+      vars[`${objectName}.${fieldMatch[1]}`] = fieldMatch[2];
+    }
+  }
+  return vars;
+}
+
 export function extractPackageFile(
   content: string,
   packageFile: string,
@@ -435,7 +462,7 @@ function extractPackageFileInternal(
 
   try {
     parsedResult = scala.query(content, query, {
-      vars: {},
+      vars: extractNamedSingletonObjectVars(content),
       deps: [],
       registryUrls: [],
       scalaVersion: ctxScalaVersion,
