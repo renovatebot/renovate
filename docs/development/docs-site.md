@@ -7,11 +7,15 @@ If you have submitted a documentation PR and your changes are not published with
 
 ## Fenced code blocks
 
-JSON code blocks will be validated to ensure that they are:
+`json`, `jsonc`, `js` and `javascript` code blocks will be validated to ensure that they are:
 
-- well-formed JSON
+- well-formed JSON, JSONC, or JavaScript (`js`/`javascript` blocks are evaluated the same way Renovate loads a real `config.js` file)
 - Renovate config which does not need config migration
 - valid Renovate configuration (with no warnings or errors)
+
+`js`/`javascript` blocks default to being validated as [Global Self-Hosted config](../usage/self-hosted-configuration.md), since repository config files cannot be JavaScript. `json`/`jsonc` blocks default to Repository config.
+
+`js`/`javascript` validation only runs on files under `docs/` and `readme.md` files under `lib/`, since other `.md` files in `lib/` may contain arbitrary JavaScript examples unrelated to Renovate config.
 
 This is validated through `pnpm run doc-fence-check`.
 
