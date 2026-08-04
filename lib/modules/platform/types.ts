@@ -46,6 +46,8 @@ export interface RepoParams {
   cloneSubmodulesFilter?: string[];
   /** Azure only: work item type to use when creating issues. */
   azureWorkItemType?: string;
+  /** GitLab only: work item type to use when creating issues. */
+  gitlabWorkItemType?: string;
 }
 
 export interface PrDebugData {

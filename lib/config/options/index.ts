@@ -1441,6 +1441,14 @@ const options: Readonly<RenovateOptions>[] = [
     supportedPlatforms: ['azure'],
   },
   {
+    name: 'gitlabWorkItemType',
+    description:
+      'The work item type Renovate uses for its issues (e.g. the Dependency Dashboard) on GitLab.',
+    type: 'string',
+    default: 'Issue',
+    supportedPlatforms: ['gitlab'],
+  },
+  {
     name: 'autoApprove',
     description: 'Set to `true` to automatically approve PRs.',
     type: 'boolean',

@@ -7,6 +7,7 @@ import {
 } from '@sindresorhus/is';
 import pMap from 'p-map';
 import semver from 'semver';
+import { getConfig } from '../../../config/defaults.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import {
   REPOSITORY_ACCESS_FORBIDDEN,
@@ -91,6 +92,7 @@ export { extractRulesFromCodeOwnersLines } from './code-owners.ts';
 
 let config: {
   repository: string;
+  repositoryPath: string;
   email: EmailAddress;
   issueList: GitlabIssue[] | undefined;
   mergeMethod: MergeMethod;
@@ -100,11 +102,62 @@ let config: {
   cloneSubmodulesFilter: string[] | undefined;
   ignorePrAuthor: boolean | undefined;
   squash: boolean;
+  workItemType: string;
 } = {} as any;
+
+interface GitlabGraphqlIssue {
+  id: string;
+  iid: number;
+  title: string;
+  description: string;
+  labels: string[];
+}
+
+interface GitlabGraphqlIssueNode {
+  id: string;
+  iid: string;
+  title: string;
+  description?: string | null;
+  labels?: {
+    nodes?: {
+      title: string;
+    }[];
+  } | null;
+}
+
+interface GitlabGraphqlPageInfo {
+  endCursor?: string | null;
+  hasNextPage?: boolean;
+}
+
+interface GitlabGraphqlResponse<T> {
+  data?: T;
+  errors?: {
+    message: string;
+  }[];
+}
+
+interface FindGraphqlIssueVariables {
+  projectPath: string;
+  search: string;
+  authorUsername?: string;
+  after: string | null;
+}
+
+interface FindGraphqlIssueData {
+  project?: {
+    issues?: {
+      nodes?: GitlabGraphqlIssueNode[];
+      pageInfo?: GitlabGraphqlPageInfo | null;
+    } | null;
+  } | null;
+}
 
 export function resetPlatform(): void {
   config = {} as any;
   draftPrefix = DRAFT_PREFIX;
+  botUserName = '';
+  botUsername = undefined;
   defaults.hostType = 'gitlab';
   defaults.endpoint = 'https://gitlab.com/api/v4/';
   defaults.version = '0.0.0';
@@ -115,6 +168,7 @@ export const id = 'gitlab';
 
 let draftPrefix = DRAFT_PREFIX;
 let botUserName: string;
+let botUsername: string | undefined;
 
 export async function initPlatform({
   endpoint,
@@ -144,6 +198,7 @@ export async function initPlatform({
           email: EmailAddress;
           name: string;
           id: number;
+          username?: string;
           commit_email?: EmailAddress;
         }>(`user`, { token })
       ).body;
@@ -151,6 +206,7 @@ export async function initPlatform({
         user.commit_email ?? user.email
       }>`;
       botUserName = user.name;
+      botUsername = user.username;
     }
     const env = getEnv();
     /* v8 ignore next: experimental feature */
@@ -180,6 +236,7 @@ export async function initPlatform({
     : DRAFT_PREFIX;
 
   botUserName ??= username!;
+  botUsername ??= username;
 
   return platformConfig;
 }
@@ -278,12 +335,15 @@ export async function initRepo({
   cloneSubmodules,
   cloneSubmodulesFilter,
   gitUrl,
+  gitlabWorkItemType,
 }: RepoParams): Promise<RepoResult> {
   config = {} as any;
+  config.repositoryPath = repository;
   config.repository = urlEscape(repository);
   config.cloneSubmodules = cloneSubmodules;
   config.cloneSubmodulesFilter = cloneSubmodulesFilter;
   config.ignorePrAuthor = GlobalConfig.get('ignorePrAuthor');
+  config.workItemType = gitlabWorkItemType ?? getConfig().gitlabWorkItemType!;
 
   let res: HttpResponse<RepoResponse>;
   try {
@@ -334,10 +394,17 @@ export async function initRepo({
     logger.debug(`${repository} default branch = ${config.defaultBranch}`);
     logger.debug('Enabling Git FS');
     const url = getRepoUrl(repository, gitUrl, res);
-    await git.initRepo({
-      ...config,
+    const gitStorageConfig = {
+      cloneSubmodules: config.cloneSubmodules,
+      cloneSubmodulesFilter: config.cloneSubmodulesFilter,
+      defaultBranch: config.defaultBranch,
+      ignorePrAuthor: config.ignorePrAuthor,
+      mergeMethod: config.mergeMethod,
+      mergeTrainsEnabled: config.mergeTrainsEnabled,
+      repository: config.repository,
       url,
-    });
+    };
+    await git.initRepo(gitStorageConfig);
   } catch (err) /* v8 ignore next -- initRepo error mapping needs git-level failures not mocked in specs */ {
     logger.debug({ err }, 'Caught initRepo error');
     if (err.message.includes('HEAD is not a symbolic ref')) {
@@ -898,6 +965,304 @@ export function labelCharLimit(): number {
   return 255;
 }
 
+function useCustomWorkItemType(): boolean {
+  return (config.workItemType ?? 'Issue').toLowerCase() !== 'issue';
+}
+
+function getGraphqlEndpoint(): string {
+  return new URL('../graphql', defaults.endpoint).toString();
+}
+
+async function requestGraphql<T>(query: string, variables: object): Promise<T> {
+  const res = await gitlabApi.postJson<GitlabGraphqlResponse<T>>(
+    getGraphqlEndpoint(),
+    {
+      body: { query, variables },
+    },
+  );
+  if (isNonEmptyArray(res.body.errors)) {
+    throw new Error(
+      `GitLab GraphQL error: ${res.body.errors.map((err) => err.message).join('; ')}`,
+    );
+  }
+  if (!res.body.data) {
+    throw new Error('GitLab GraphQL error: missing data');
+  }
+  return res.body.data;
+}
+
+function parseGraphqlIssue(issue: GitlabGraphqlIssueNode): GitlabGraphqlIssue {
+  return {
+    id: issue.id,
+    iid: parseInteger(issue.iid),
+    title: issue.title,
+    description: issue.description ?? '',
+    labels: issue.labels?.nodes?.map((label) => label.title) ?? [],
+  };
+}
+
+async function findGraphqlIssueByTitle(
+  title: string,
+): Promise<GitlabGraphqlIssue | null> {
+  const query =
+    botUsername && !config.ignorePrAuthor
+      ? `
+        query FindProjectIssueByTitle(
+          $projectPath: ID!
+          $search: String!
+          $authorUsername: String!
+          $after: String
+        ) {
+          project(fullPath: $projectPath) {
+            issues(
+              first: 100
+              state: opened
+              search: $search
+              authorUsername: $authorUsername
+              after: $after
+            ) {
+              nodes {
+                id
+                iid
+                title
+                description
+                labels {
+                  nodes {
+                    title
+                  }
+                }
+              }
+              pageInfo {
+                endCursor
+                hasNextPage
+              }
+            }
+          }
+        }
+      `
+      : `
+        query FindProjectIssueByTitle(
+          $projectPath: ID!
+          $search: String!
+          $after: String
+        ) {
+          project(fullPath: $projectPath) {
+            issues(first: 100, state: opened, search: $search, after: $after) {
+              nodes {
+                id
+                iid
+                title
+                description
+                labels {
+                  nodes {
+                    title
+                  }
+                }
+              }
+              pageInfo {
+                endCursor
+                hasNextPage
+              }
+            }
+          }
+        }
+      `;
+  let after: string | null = null;
+  let hasNextPage = true;
+
+  while (hasNextPage) {
+    const variables: FindGraphqlIssueVariables =
+      botUsername && !config.ignorePrAuthor
+        ? {
+            projectPath: config.repositoryPath,
+            search: title,
+            authorUsername: botUsername,
+            after,
+          }
+        : {
+            projectPath: config.repositoryPath,
+            search: title,
+            after,
+          };
+    const data: FindGraphqlIssueData =
+      await requestGraphql<FindGraphqlIssueData>(query, variables);
+    const issues =
+      data.project?.issues?.nodes
+        ?.map(parseGraphqlIssue)
+        .filter((issue: GitlabGraphqlIssue) => issue.title === title) ?? [];
+    if (issues[0]) {
+      return issues[0];
+    }
+    after = data.project?.issues?.pageInfo?.endCursor ?? null;
+    hasNextPage = data.project?.issues?.pageInfo?.hasNextPage ?? false;
+  }
+
+  return null;
+}
+
+async function resolveGraphqlWorkItemTypeId(): Promise<string | null> {
+  const data = await requestGraphql<{
+    project?: {
+      workItemTypes?: {
+        nodes?: {
+          id: string;
+          name: string;
+        }[];
+      } | null;
+    } | null;
+  }>(
+    `
+      query ProjectWorkItemTypes($projectPath: ID!) {
+        project(fullPath: $projectPath) {
+          workItemTypes(first: 100) {
+            nodes {
+              id
+              name
+            }
+          }
+        }
+      }
+    `,
+    {
+      projectPath: config.repositoryPath,
+    },
+  );
+  const workItemType = data.project?.workItemTypes?.nodes?.find(
+    (item) => item.name === config.workItemType,
+  );
+  if (!workItemType) {
+    logger.warn(
+      {
+        repository: config.repositoryPath,
+        workItemType: config.workItemType,
+      },
+      'GitLab configured work item type does not exist in project; skipping issue creation',
+    );
+    return null;
+  }
+  return workItemType.id;
+}
+
+async function createGraphqlWorkItem(
+  title: string,
+  description: string,
+): Promise<{ iid: number } | null> {
+  const workItemTypeId = await resolveGraphqlWorkItemTypeId();
+  if (!workItemTypeId) {
+    return null;
+  }
+  const data = await requestGraphql<{
+    workItemCreate?: {
+      errors: string[];
+      workItem?: {
+        iid: string;
+      } | null;
+    } | null;
+  }>(
+    `
+      mutation CreateWorkItem($input: WorkItemCreateInput!) {
+        workItemCreate(input: $input) {
+          errors
+          workItem {
+            iid
+          }
+        }
+      }
+    `,
+    {
+      input: {
+        namespacePath: config.repositoryPath,
+        title,
+        workItemTypeId,
+        descriptionWidget: {
+          description,
+        },
+      },
+    },
+  );
+  if (isNonEmptyArray(data.workItemCreate?.errors)) {
+    throw new Error(
+      `GitLab GraphQL error: ${data.workItemCreate.errors.join('; ')}`,
+    );
+  }
+  const iid = data.workItemCreate?.workItem?.iid;
+  if (!iid) {
+    return null;
+  }
+  return { iid: parseInteger(iid) };
+}
+
+async function updateGraphqlIssue({
+  iid,
+  title,
+  description,
+  labels,
+  confidential,
+}: {
+  iid: number;
+  title: string;
+  description: string;
+  labels: string[];
+  confidential: boolean;
+}): Promise<void> {
+  const data = await requestGraphql<{
+    updateIssue?: {
+      errors: string[];
+    } | null;
+  }>(
+    `
+      mutation UpdateIssue($input: UpdateIssueInput!) {
+        updateIssue(input: $input) {
+          errors
+        }
+      }
+    `,
+    {
+      input: {
+        iid: String(iid),
+        projectPath: config.repositoryPath,
+        title,
+        description,
+        labels,
+        confidential,
+      },
+    },
+  );
+  if (isNonEmptyArray(data.updateIssue?.errors)) {
+    throw new Error(
+      `GitLab GraphQL error: ${data.updateIssue.errors.join('; ')}`,
+    );
+  }
+}
+
+async function closeGraphqlIssue(iid: number): Promise<void> {
+  const data = await requestGraphql<{
+    updateIssue?: {
+      errors: string[];
+    } | null;
+  }>(
+    `
+      mutation CloseIssue($input: UpdateIssueInput!) {
+        updateIssue(input: $input) {
+          errors
+        }
+      }
+    `,
+    {
+      input: {
+        iid: String(iid),
+        projectPath: config.repositoryPath,
+        stateEvent: 'CLOSE',
+      },
+    },
+  );
+  if (isNonEmptyArray(data.updateIssue?.errors)) {
+    throw new Error(
+      `GitLab GraphQL error: ${data.updateIssue.errors.join('; ')}`,
+    );
+  }
+}
+
 // Branch
 
 function matchesState(state: string, desiredState: string): boolean {
@@ -1127,6 +1492,21 @@ export async function getIssue(
 
 export async function findIssue(title: string): Promise<Issue | null> {
   logger.debug(`findIssue(${title})`);
+  if (useCustomWorkItemType()) {
+    try {
+      const issue = await findGraphqlIssueByTitle(title);
+      if (!issue) {
+        return null;
+      }
+      return {
+        number: issue.iid,
+        body: issue.description,
+      };
+    } catch /* v8 ignore next -- defensive: GraphQL issue lookup failures are logged and swallowed, not simulated in specs */ {
+      logger.warn('Error finding issue');
+      return null;
+    }
+  }
   try {
     const issueList = await getIssueList();
     const issue = issueList.find((i) => i.title === title);
@@ -1149,6 +1529,45 @@ export async function ensureIssue({
 }: EnsureIssueConfig): Promise<'updated' | 'created' | null> {
   logger.debug(`ensureIssue()`);
   const description = massageMarkdown(sanitize(body));
+  if (useCustomWorkItemType()) {
+    try {
+      let issue = await findGraphqlIssueByTitle(title);
+      issue ??= reuseTitle ? await findGraphqlIssueByTitle(reuseTitle) : null;
+      if (issue) {
+        if (issue.title !== title || issue.description !== description) {
+          logger.debug('Updating issue');
+          await updateGraphqlIssue({
+            iid: issue.iid,
+            title,
+            description,
+            labels: labels ?? issue.labels,
+            confidential: confidential ?? false,
+          });
+          return 'updated';
+        }
+      } else {
+        const createdIssue = await createGraphqlWorkItem(title, description);
+        if (!createdIssue) {
+          return null;
+        }
+        if (labels || confidential) {
+          await updateGraphqlIssue({
+            iid: createdIssue.iid,
+            title,
+            description,
+            labels: labels ?? [],
+            confidential: confidential ?? false,
+          });
+        }
+        logger.info('Issue created');
+        return 'created';
+      }
+    } catch (err) /* v8 ignore next -- GraphQL issue/work item failures are swallowed, not simulated in specs */ {
+      logger.warn({ err }, 'Could not ensure issue');
+      return null;
+    }
+    return null;
+  }
   try {
     const issueList = await getIssueList();
     let issue = issueList.find((i) => i.title === title);
@@ -1200,6 +1619,14 @@ export async function ensureIssue({
 
 export async function ensureIssueClosing(title: string): Promise<void> {
   logger.debug(`ensureIssueClosing()`);
+  if (useCustomWorkItemType()) {
+    const issue = await findGraphqlIssueByTitle(title);
+    if (issue) {
+      logger.debug({ issue }, 'Closing issue');
+      await closeGraphqlIssue(issue.iid);
+    }
+    return;
+  }
   const issueList = await getIssueList();
   for (const issue of issueList) {
     if (issue.title === title) {
