@@ -84,6 +84,8 @@ The cache TTL is assumed to be 30 days.
 
 As we retrieve items during the fetch process, we gradually construct a data structure in the following form:
 
+<!-- schema-validation-disable-next-block -->
+
 ```js
 {
   "items": {
@@ -145,6 +147,8 @@ The resulting pagination would look like this:
 ```
 
 Given we performed fetch at the day of latest release, new cache looks like:
+
+<!-- schema-validation-disable-next-block -->
 
 ```js
 {
