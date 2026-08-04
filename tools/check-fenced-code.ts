@@ -46,6 +46,14 @@ function reportWarning(file: string, token: Token, message: string): void {
   console.warn(format(warningLogFormat, file, start + 1, end + 1, message));
 }
 
+// Skips config/schema/migration validation for the next block, but the block
+// must still be well-formed JSON/JSONC/JavaScript.
+const schemaValidationDisableComment =
+  '<!-- schema-validation-disable-next-block -->';
+// Skips all validation for the next block, including well-formedness, while
+// keeping its language tag for syntax highlighting.
+const fenceCheckDisableComment = '<!-- doc-fence-check-disable-next-block -->';
+
 const markdownGlob = '{docs,lib}/**/*.md';
 const markdown = new MarkdownIt('zero');
 
@@ -181,7 +189,8 @@ async function processFile(file: string): Promise<void> {
     const isJsFamily = lang === 'js' || lang === 'javascript';
     if (
       !['json', 'jsonc', 'js', 'javascript'].includes(lang) ||
-      (isJsFamily && !isJsCheckAllowed(file))
+      (isJsFamily && !isJsCheckAllowed(file)) ||
+      tokens.at(index - 2)?.content === fenceCheckDisableComment
     ) {
       continue;
     }
@@ -189,8 +198,7 @@ async function processFile(file: string): Promise<void> {
     const parsedValue = await parseFenceValue(lang, file, token);
     if (
       parsedValue === undefined ||
-      tokens.at(index - 2)?.content ===
-        '<!-- schema-validation-disable-next-block -->'
+      tokens.at(index - 2)?.content === schemaValidationDisableComment
     ) {
       continue;
     }
