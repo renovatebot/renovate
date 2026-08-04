@@ -2886,6 +2886,119 @@ describe('config/validation', () => {
       expect(errors).toBeEmptyArray();
     });
 
+    it('allows `env` on repositories[] entries within the global `allowedEnv`', async () => {
+      const config: AllConfig = {
+        allowedEnv: ['PATH'],
+        repositories: [
+          {
+            repository: 'owner/repo1',
+            env: { PATH: '/home/ubuntu/bin' },
+          },
+        ],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'global',
+        config,
+      );
+      expect(errors).toBeEmptyArray();
+      expect(warnings).toBeEmptyArray();
+    });
+
+    it('errors on `env` on repositories[] entries outside the global `allowedEnv`', async () => {
+      const config: AllConfig = {
+        allowedEnv: ['PATH'],
+        repositories: [
+          {
+            repository: 'owner/repo1',
+            env: { NOT_ALLOWED: 'value' },
+          },
+        ],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'global',
+        config,
+      );
+      expect(warnings).toBeEmptyArray();
+      expect(errors).toMatchObject([
+        {
+          topic: 'Configuration Error',
+          message:
+            "Env variable name `NOT_ALLOWED` is not allowed by this bot's `allowedEnv`.",
+        },
+      ]);
+    });
+
+    it('lets a repositories[] entry set its own `allowedEnv`', async () => {
+      const config: AllConfig = {
+        allowedEnv: ['NOPE'],
+        repositories: [
+          {
+            repository: 'owner/repo1',
+            allowedEnv: ['PATH'],
+            env: { PATH: '/home/ubuntu/bin' },
+          },
+        ],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'global',
+        config,
+      );
+      expect(errors).toBeEmptyArray();
+      expect(warnings).toBeEmptyArray();
+    });
+
+    it('allows hostRules `headers` on repositories[] entries within the global `allowedHeaders`', async () => {
+      const config: AllConfig = {
+        allowedHeaders: ['X-Custom-*'],
+        repositories: [
+          {
+            repository: 'owner/repo1',
+            hostRules: [
+              {
+                matchHost: 'github.com',
+                headers: { 'X-Custom-Token': 'value' },
+              },
+            ],
+          },
+        ],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'global',
+        config,
+      );
+      expect(errors).toBeEmptyArray();
+      expect(warnings).toBeEmptyArray();
+    });
+
+    it('errors on hostRules `headers` on repositories[] entries outside the global `allowedHeaders`', async () => {
+      const config: AllConfig = {
+        allowedHeaders: ['X-Custom-*'],
+        repositories: [
+          {
+            repository: 'owner/repo1',
+            hostRules: [
+              {
+                matchHost: 'github.com',
+                headers: { Authorization: 'Bearer token' },
+              },
+            ],
+          },
+        ],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'global',
+        config,
+      );
+      expect(warnings).toBeEmptyArray();
+      expect(errors).toMatchObject([
+        {
+          topic: 'Configuration Error',
+          message:
+            "hostRules header `Authorization` is not allowed by this bot's `allowedHeaders`.",
+        },
+      ]);
+    });
+
     it('validates object type options', async () => {
       const config = {
         productLinks: {

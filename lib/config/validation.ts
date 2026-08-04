@@ -1183,9 +1183,17 @@ async function validateGlobalConfig(
               });
             }
             const { repository: _, ...repoEntryConfig } = subval;
+            // Each repository object entry is validated as its own global config, so it does not automatically see the top-level `allowedEnv`/`allowedHeaders`.
+            // Inherit them (unless the entry sets its own) so that entry-level `env`/`headers` are validated against the allowlists, rather than an empty one.
             const subValidation = await validateConfig(
               'global',
-              repoEntryConfig,
+              {
+                ...(config.allowedEnv ? { allowedEnv: config.allowedEnv } : {}),
+                ...(config.allowedHeaders
+                  ? { allowedHeaders: config.allowedHeaders }
+                  : {}),
+                ...repoEntryConfig,
+              },
               false,
               `${currentPath}[${subIndex}]`,
             );
