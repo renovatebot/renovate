@@ -1,6 +1,7 @@
 import type { DescribeImagesResult, Image } from '@aws-sdk/client-ec2';
 import { DescribeImagesCommand, EC2Client } from '@aws-sdk/client-ec2';
 import { mockClient } from 'aws-sdk-client-mock';
+import * as hostRules from '../../../util/host-rules.ts';
 import { getDigest, getPkgReleases } from '../index.ts';
 import { AwsMachineImageDatasource } from './index.ts';
 
@@ -133,6 +134,10 @@ function mockDescribeImagesCommand(result: DescribeImagesResult): void {
 }
 
 describe('modules/datasource/aws-machine-image/index', () => {
+  beforeEach(() => {
+    hostRules.clear();
+  });
+
   describe('getSortedAwsMachineImages()', () => {
     it('with 3 returned images', async () => {
       mockDescribeImagesCommand(mock3Images);
@@ -152,6 +157,31 @@ describe('modules/datasource/aws-machine-image/index', () => {
       );
       expect(res).toStrictEqual([image3]);
       expect(ec2Mock.calls()).toHaveLength(1);
+    });
+
+    it('prefers host rule credentials over the configured profile', async () => {
+      hostRules.add({
+        hostType: datasource,
+        username: 'access-key-id',
+        password: 'secret-access-key',
+        token: 'session-token',
+      });
+      mockDescribeImagesCommand(mock1Image);
+
+      const ec2DataSource = new AwsMachineImageDatasource();
+      await ec2DataSource.getSortedAwsMachineImages(
+        '[{"Name":"name","Values":["host-rule-credentials"]},{"profile":"ignored-profile"}]',
+      );
+
+      const ec2 = ec2Mock.call(0).thisValue as EC2Client;
+      expect(await ec2.config.credentials()).toEqual({
+        accessKeyId: 'access-key-id',
+        secretAccessKey: 'secret-access-key',
+        sessionToken: 'session-token',
+        $source: {
+          CREDENTIALS_CODE: 'e',
+        },
+      });
     });
 
     it('without returned images', async () => {
