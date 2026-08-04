@@ -70,11 +70,7 @@ runs:
       uses: pnpm/setup@5d160c5bc68a09337ad0d5654e237e03253b5879 # v1.0.0
       with:
         install: false
-
-    - name: Setup Node
-      uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
-      with:
-        node-version: ${{ inputs.node-version }}
+        runtime: node@${{ inputs.node-version }}
 
     - name: Calculate `PNPM_STORE`
       shell: bash
