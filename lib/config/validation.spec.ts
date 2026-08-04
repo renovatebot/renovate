@@ -501,8 +501,11 @@ describe('config/validation', () => {
           artifactError: 'always',
         },
       };
-      // @ts-expect-error invalid options
-      const { errors } = await configValidation.validateConfig('repo', config);
+      const { errors, warnings } = await configValidation.validateConfig(
+        'repo',
+        // @ts-expect-error invalid options
+        config,
+      );
       expect(errors).toMatchObject([
         {
           message:
@@ -513,7 +516,7 @@ describe('config/validation', () => {
             'Invalid `statusCheckWhen.statusCheckWhen.randomKey` configuration: key is not allowed.',
         },
       ]);
-      expect(errors).toHaveLength(2);
+      expect(warnings).toBeEmptyArray();
     });
 
     it('catches invalid customDatasources record type', async () => {
@@ -1811,11 +1814,33 @@ describe('config/validation', () => {
       );
 
       expect(warnings).toBeEmptyArray();
-      expect(errors).toHaveLength(5);
-      expect(errors[0]).toMatchObject({
-        topic: 'Configuration Error',
-        message: expect.stringContaining('Invalid commit trailer'),
-      });
+      expect(errors).toMatchObject([
+        {
+          topic: 'Configuration Error',
+          message:
+            'Invalid commit trailer: `"Bad key: value"`. Must be a single-line string in the form `Key: value`, where the key contains only letters, digits and `-`.',
+        },
+        {
+          topic: 'Configuration Error',
+          message:
+            'Invalid commit trailer: `"Key: multi\\nline"`. Must be a single-line string in the form `Key: value`, where the key contains only letters, digits and `-`.',
+        },
+        {
+          topic: 'Configuration Error',
+          message:
+            'Invalid commit trailer: `"Key:no-space"`. Must be a single-line string in the form `Key: value`, where the key contains only letters, digits and `-`.',
+        },
+        {
+          topic: 'Configuration Error',
+          message:
+            'Invalid commit trailer: `"no colon"`. Must be a single-line string in the form `Key: value`, where the key contains only letters, digits and `-`.',
+        },
+        {
+          topic: 'Configuration Error',
+          message:
+            'Invalid commit trailer: `42`. Must be a single-line string in the form `Key: value`, where the key contains only letters, digits and `-`.',
+        },
+      ]);
     });
 
     it('warns if only selectors in packageRules', async () => {
