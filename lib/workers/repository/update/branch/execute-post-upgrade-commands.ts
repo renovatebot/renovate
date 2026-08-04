@@ -51,7 +51,11 @@ async function detectExecutable(
   }
 
   const fileStats = await statLocalFile(relativePath);
-  if (!fileStats || (fileStats.mode & ownerExecutePermission) === 0) {
+  if (!fileStats?.isFile()) {
+    return undefined;
+  }
+
+  if ((fileStats.mode & ownerExecutePermission) === 0) {
     return undefined;
   }
 

@@ -27,6 +27,7 @@ import { isGithubFineGrainedPersonalAccessToken } from '../../../util/check-toke
 import { coerceToNull } from '../../../util/coerce.ts';
 import { parseJson } from '../../../util/common.ts';
 import { getEnv } from '../../../util/env.ts';
+import { formatCommitMessage } from '../../../util/git/commit-trailers.ts';
 import * as git from '../../../util/git/index.ts';
 import {
   diffCommitTree,
@@ -80,13 +81,14 @@ import {
   getIssuesQuery,
   repoInfoQuery,
 } from './graphql.ts';
-import { GithubIssueCache, GithubIssue as Issue } from './issue.ts';
+import { GithubIssueCache } from './issue.ts';
 import { massageMarkdownLinks } from './massage-markdown-links.ts';
 import { getPrCache, updatePrCache } from './pr.ts';
 import {
   GithubBranchProtection,
   GithubBranchRulesets,
   GithubVulnerabilityAlerts,
+  GithubIssue as Issue,
 } from './schema.ts';
 import type {
   AggregatedVulnerabilities,
@@ -2249,7 +2251,7 @@ export async function getVulnerabilityAlerts(): Promise<GithubVulnerabilityAlert
 }
 
 async function pushFiles(
-  { branchName, message }: CommitFilesConfig,
+  { branchName, message, trailers }: CommitFilesConfig,
   { parentCommitSha, commitSha }: CommitResult,
 ): Promise<LongCommitSha | null> {
   try {
@@ -2281,10 +2283,18 @@ async function pushFiles(
     );
     const treeSha = treeRes.body.sha;
 
+    const commitMessage = formatCommitMessage(message, trailers);
+
     // Now we recreate the commit using the tree we recreated the step before
     const commitRes = await githubApi.postJson<{ sha: string }>(
       `/repos/${config.repository}/git/commits`,
-      { body: { message, tree: treeSha, parents: [parentCommitSha] } },
+      {
+        body: {
+          message: commitMessage,
+          tree: treeSha,
+          parents: [parentCommitSha],
+        },
+      },
     );
     incLimitedValue('Commits');
     const remoteCommitSha = toLongCommitSha(commitRes.body.sha);

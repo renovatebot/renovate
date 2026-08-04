@@ -539,7 +539,7 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
           postUpgradeTasks: {
             executionMode: 'branch',
             commands: ['post-upgrade-command'],
-            fileFilters: ['*.txt'],
+            fileFilters: ['*'],
           },
         },
       ]);
@@ -595,7 +595,10 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
         git.isFileModeEnabled.mockResolvedValue(true);
         mockRepositoryChanges({ created: ['script.txt'] });
         fs.statLocalFile.mockResolvedValue(
-          partial<Stats>({ mode: ownerExecutableMode }),
+          partial<Stats>({
+            mode: ownerExecutableMode,
+            isFile: () => true,
+          }),
         );
 
         const result = await runPostUpgradeTask();
@@ -614,7 +617,10 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
         git.isFileModeEnabled.mockResolvedValue(true);
         mockRepositoryChanges({ modified: ['script.txt'] });
         fs.statLocalFile.mockResolvedValue(
-          partial<Stats>({ mode: ownerExecutableMode }),
+          partial<Stats>({
+            mode: ownerExecutableMode,
+            isFile: () => true,
+          }),
         );
 
         const result = await runPostUpgradeTask([
@@ -635,11 +641,36 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
         ]);
       });
 
+      it('does not mark a submodule directory executable', async () => {
+        git.isFileModeEnabled.mockResolvedValue(true);
+        mockRepositoryChanges({ modified: ['submodule'] });
+        fs.readLocalFile.mockResolvedValueOnce(null);
+        fs.statLocalFile.mockResolvedValue(
+          partial<Stats>({
+            mode: ownerExecutableMode,
+            isFile: () => false,
+          }),
+        );
+
+        const result = await runPostUpgradeTask();
+
+        expect(result.updatedArtifacts).toEqual([
+          {
+            type: 'addition',
+            path: 'submodule',
+            contents: null,
+          },
+        ]);
+      });
+
       it('does not infer executability from group or other execute bits', async () => {
         git.isFileModeEnabled.mockResolvedValue(true);
         mockRepositoryChanges({ created: ['script.txt'] });
         fs.statLocalFile.mockResolvedValue(
-          partial<Stats>({ mode: groupAndOtherExecutableMode }),
+          partial<Stats>({
+            mode: groupAndOtherExecutableMode,
+            isFile: () => true,
+          }),
         );
 
         const result = await runPostUpgradeTask();
@@ -657,7 +688,10 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
         git.isFileModeEnabled.mockResolvedValue(true);
         mockRepositoryChanges({ modified: ['script.txt'] });
         fs.statLocalFile.mockResolvedValue(
-          partial<Stats>({ mode: nonExecutableMode }),
+          partial<Stats>({
+            mode: nonExecutableMode,
+            isFile: () => true,
+          }),
         );
 
         const result = await runPostUpgradeTask([
