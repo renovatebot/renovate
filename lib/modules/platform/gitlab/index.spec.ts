@@ -1550,8 +1550,10 @@ describe('modules/platform/gitlab/index', () => {
         gitLabWorkItemType: 'Renovate',
       });
       scope
-        .post('/api/graphql', (requestBody) =>
-          requestBody.variables?.authorUsername === 'renovate-bot',
+        .post(
+          '/api/graphql',
+          (requestBody) =>
+            requestBody.variables?.authorUsername === 'renovate-bot',
         )
         .reply(200, {
           data: {
