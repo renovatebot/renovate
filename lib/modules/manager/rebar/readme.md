@@ -7,4 +7,6 @@ It supports the following dependency formats:
 - Git dependencies: `{app, {git, "url", {tag, "1.0"}}}`, `{app, {git, "url", {branch, "main"}}}`, `{app, {git, "url", {ref, "abc123"}}}`
 - Git subdirectory dependencies: `{app, {git_subdir, "url", {tag, "1.0"}, "path"}}`
 
-Dependencies from `profiles` (e.g., test profile) are also extracted with appropriate `depType`.
+Dependencies declared under `{profiles, [...]}` are extracted too, using the profile name as their `depType`.
+
+The rebar2-style 3-tuple forms `{app, "1.0", {git, "url", {tag, "1.0"}}}` and `{app, {git, "url"}, [raw]}` are not extracted.
