@@ -19,7 +19,7 @@ function extractToxConfig(
       );
       return null;
     }
-    return result.data.tool.tox;
+    return result.data.tool?.tox ?? null;
   }
 
   const result = ToxFile.safeParse(content);

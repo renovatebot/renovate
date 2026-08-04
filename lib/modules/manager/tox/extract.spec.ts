@@ -1,28 +1,42 @@
 import { codeBlock } from 'common-tags';
 import { describe, expect, it } from 'vitest';
+import { logger } from '~test/util.ts';
 import { extractPackageFile } from './extract.ts';
 
 describe('modules/manager/tox/extract', () => {
   describe('extractPackageFile()', () => {
-    it('returns null for invalid pyproject.toml', () => {
-      expect(extractPackageFile('{not valid}', 'pyproject.toml')).toBeNull();
+    it('returns null and logs for invalid pyproject.toml', () => {
+      expect(
+        extractPackageFile('{not valid}', '/path/to/pyproject.toml'),
+      ).toBeNull();
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        expect.objectContaining({ packageFile: '/path/to/pyproject.toml' }),
+        'Error parsing Tox configuration.',
+      );
     });
 
-    it('returns null for invalid tox.toml', () => {
-      expect(extractPackageFile('not valid toml {{', 'tox.toml')).toBeNull();
+    it('returns null and logs for invalid tox.toml', () => {
+      expect(
+        extractPackageFile('not valid toml {{', '/path/to/tox.toml'),
+      ).toBeNull();
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        expect.objectContaining({ packageFile: '/path/to/tox.toml' }),
+        'Error parsing Tox configuration.',
+      );
     });
 
     it('returns null for tox.toml with no extractable deps', () => {
       expect(extractPackageFile('env_list = ["py311"]', 'tox.toml')).toBeNull();
     });
 
-    it('returns null for pyproject.toml without [tool.tox]', () => {
+    it('returns null silently for pyproject.toml without [tool.tox]', () => {
       const content = codeBlock`
         [project]
         name = "foo"
         dependencies = ["requests"]
       `;
       expect(extractPackageFile(content, 'pyproject.toml')).toBeNull();
+      expect(logger.logger.debug).not.toHaveBeenCalled();
     });
 
     it('extracts requires from tox.toml', () => {

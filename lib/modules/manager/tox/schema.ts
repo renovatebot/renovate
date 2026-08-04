@@ -69,8 +69,10 @@ export const ToxFile = Toml.pipe(ToxConfig);
 
 export const ToxPyProject = Toml.pipe(
   z.object({
-    tool: z.object({
-      tox: ToxConfig,
-    }),
+    tool: z
+      .object({
+        tox: ToxConfig.optional(),
+      })
+      .optional(),
   }),
 );
