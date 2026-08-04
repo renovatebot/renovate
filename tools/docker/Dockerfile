@@ -5,23 +5,23 @@ ARG BASE_IMAGE_TYPE=slim
 # --------------------------------------
 # slim image
 # --------------------------------------
-FROM ghcr.io/renovatebot/base-image:13.79.0@sha256:fab68fb00e50e65251ab717c37e37d2b510910138dae9718c152fdac0eb244e9 AS slim-base
+FROM ghcr.io/renovatebot/base-image:13.81.1@sha256:66c0aec0a799df563fe18b2ef65ab0b5e91ffa3a556b0f13a5c45dcc1b98af5a AS slim-base
 
 # --------------------------------------
 # full image
 # --------------------------------------
-FROM ghcr.io/renovatebot/base-image:13.79.0-full@sha256:1c5fbf87877f457f53c96c85af38b0dc20dcb5c077c415ba02e1d6fc42299445 AS full-base
+FROM ghcr.io/renovatebot/base-image:13.81.1-full@sha256:66c914768b4890a4f5a9b119a8721c9696c43588e41048e96e7dbfa56fed1c92 AS full-base
 
 ENV RENOVATE_BINARY_SOURCE=global
 
 # --------------------------------------
 # build image
 # --------------------------------------
-FROM --platform=$BUILDPLATFORM ghcr.io/renovatebot/base-image:13.79.0@sha256:fab68fb00e50e65251ab717c37e37d2b510910138dae9718c152fdac0eb244e9 AS build
+FROM --platform=$BUILDPLATFORM ghcr.io/renovatebot/base-image:13.81.1@sha256:66c0aec0a799df563fe18b2ef65ab0b5e91ffa3a556b0f13a5c45dcc1b98af5a AS build
 
 # We want a specific node version here
 # renovate: datasource=github-releases packageName=containerbase/node-prebuild versioning=node
-RUN install-tool node 24.18.1
+RUN install-tool node 24.19.0
 
 # corepack is too buggy 😞
 # renovate: datasource=npm

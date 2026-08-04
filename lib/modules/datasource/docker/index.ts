@@ -26,7 +26,11 @@ import type {
   Release,
   ReleaseResult,
 } from '../types.ts';
-import { isArtifactoryServer } from '../util.ts';
+import {
+  isArtifactoryServer,
+  isCrossOriginPaginationAllowed,
+  resolvePaginationUrl,
+} from '../util.ts';
 import {
   DOCKER_HUB,
   dockerDatasourceId,
@@ -760,6 +764,7 @@ export class DockerDatasource extends Datasource {
       ? 1000
       : GlobalConfig.get('dockerMaxPages');
     logger.trace({ registryHost, dockerRepository, pages }, 'docker.getTags');
+    const allowCrossOrigin = isCrossOriginPaginationAllowed(dockerDatasourceId);
     let foundMaxResultsError = false;
     do {
       let res: HttpResponse<RegistryTagsList>;
@@ -802,8 +807,20 @@ export class DockerDatasource extends Datasource {
           url = null;
         }
       } else if (linkHeader?.next?.url) {
-        // for the normal case we can still use URL to resolve relative-next
-        url = new URL(linkHeader.next.url, url).href;
+        // Resolve the relative-or-absolute next link, not following cross-origin requests unless explicitly opted in
+        const nextUrl = resolvePaginationUrl(
+          url,
+          linkHeader.next.url,
+          allowCrossOrigin,
+        );
+        if (!nextUrl) {
+          // make sure that users are aware if there are any (potentially malicious, or misconfigured) pagination links being returned
+          logger.once.warn(
+            { registryHost, nextUrl: linkHeader.next.url },
+            'Ignoring cross-origin or invalid Docker registry tags pagination link',
+          );
+        }
+        url = nextUrl;
       } else {
         url = null;
       }
@@ -1125,6 +1142,7 @@ export class DockerDatasource extends Datasource {
 
     const cache = await DockerHubCache.init(dockerRepository);
     const maxPages = GlobalConfig.get('dockerMaxPages');
+    const allowCrossOrigin = isCrossOriginPaginationAllowed(dockerDatasourceId);
     let page = 0,
       needNextPage = true;
     while (needNextPage && page < maxPages) {
@@ -1145,7 +1163,17 @@ export class DockerDatasource extends Datasource {
         break;
       }
 
-      url = next;
+      // Only follow the `next` link when it's on the same origin, unless explicitly opted in
+      const nextUrl = resolvePaginationUrl(url, next, allowCrossOrigin);
+      if (!nextUrl) {
+        logger.once.warn(
+          { dockerRepository, nextUrl: next },
+          'Ignoring cross-origin or invalid Docker Hub tags pagination link',
+        );
+        break;
+      }
+
+      url = nextUrl;
     }
 
     await cache.save();
