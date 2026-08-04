@@ -2763,11 +2763,12 @@ describe('config/validation', () => {
           },
         ],
       };
-      const { warnings } = await configValidation.validateConfig(
+      const { warnings, errors } = await configValidation.validateConfig(
         'global',
         config,
       );
-      expect(warnings).toEqual([]);
+      expect(warnings).toBeEmptyArray();
+      expect(errors).toBeEmptyArray();
     });
 
     it('errors on repositories[] with invalid entries', async () => {
@@ -2806,6 +2807,83 @@ describe('config/validation', () => {
             'Invalid value `invalid` for `repositories[0].binarySource`. The allowed values are docker, global, install, hermit.',
         },
       ]);
+    });
+
+    it('allows repositories[] as string[]', async () => {
+      const config = {
+        repositories: ['owner/repo1', 'owner/repo2'],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'global',
+        config,
+      );
+      expect(warnings).toBeEmptyArray();
+      expect(errors).toBeEmptyArray();
+    });
+
+    it('errors on repositories[] with empty string values', async () => {
+      const config: AllConfig = {
+        repositories: ['', '  '],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'global',
+        config,
+      );
+      expect(warnings).toEqual([
+        {
+          message:
+            'repositories[0]: each repository string entry entry must be a non-empty string',
+          topic: 'Configuration Error',
+        },
+        {
+          message:
+            'repositories[1]: each repository string entry entry must be a non-empty string',
+          topic: 'Configuration Error',
+        },
+      ]);
+      expect(errors).toBeEmptyArray();
+    });
+
+    it('errors on repositories[] with non-string or non-object values', async () => {
+      const config = {
+        repositories: [
+          [
+            // this is invalid
+            'invalid',
+          ],
+          null,
+          123,
+          456,
+        ],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'global',
+        // @ts-expect-error: contains invalid values
+        config,
+      );
+      expect(warnings).toEqual([
+        {
+          message:
+            'repositories[0]: invalid type, should be either a string or an object',
+          topic: 'Configuration Error',
+        },
+        {
+          message:
+            'repositories[1]: invalid type, should be either a string or an object',
+          topic: 'Configuration Error',
+        },
+        {
+          message:
+            'repositories[2]: invalid type, should be either a string or an object',
+          topic: 'Configuration Error',
+        },
+        {
+          message:
+            'repositories[3]: invalid type, should be either a string or an object',
+          topic: 'Configuration Error',
+        },
+      ]);
+      expect(errors).toBeEmptyArray();
     });
 
     it('validates object type options', async () => {

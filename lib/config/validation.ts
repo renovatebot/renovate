@@ -3,6 +3,7 @@ import is, {
   isEmptyString,
   isNonEmptyArray,
   isNonEmptyString,
+  isNonEmptyStringAndNotWhitespace,
   isObject,
   isPlainObject,
   isString,
@@ -94,6 +95,7 @@ const ignoredNodes = [
   'npmToken',
   'packageFile',
   'forkToken',
+  'repository',
   'vulnerabilityAlertsOnly',
   'vulnerabilityAlert',
   'isVulnerabilityAlert',
@@ -1189,6 +1191,18 @@ async function validateGlobalConfig(
             );
             warnings.push(...subValidation.warnings);
             errors.push(...subValidation.errors);
+          } else if (isString(subval)) {
+            if (!isNonEmptyStringAndNotWhitespace(subval)) {
+              warnings.push({
+                topic: 'Configuration Error',
+                message: `${currentPath}[${subIndex}]: each repository string entry entry must be a non-empty string`,
+              });
+            }
+          } else {
+            warnings.push({
+              topic: 'Configuration Error',
+              message: `${currentPath}[${subIndex}]: invalid type, should be either a string or an object`,
+            });
           }
         }
       } else {
