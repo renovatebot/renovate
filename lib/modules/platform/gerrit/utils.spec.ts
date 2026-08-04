@@ -126,7 +126,7 @@ describe('modules/platform/gerrit/utils', () => {
       });
 
       it('ignores non-default HTTP port from the endpoint', () => {
-        hostRules.find.mockReturnValue({
+        vi.spyOn(hostRules, 'find').mockReturnValue({
           username: 'abc',
           password: '123',
         });
