@@ -212,7 +212,7 @@ async function processFile(file: string): Promise<void> {
         // JS config files (`config.js`) are only ever loaded as global/self-hosted
         // config, so default `js`/`javascript` blocks to `global` unlike `json`/`jsonc`.
         const defaultConfigType = isJsFamily ? 'global' : 'repo';
-        let configType = defaultConfigType;
+        let configType: 'global' | 'repo' = defaultConfigType;
         if (token.info.includes('configType=global')) {
           configType = 'global';
         } else if (token.info.includes('configType=repo')) {
