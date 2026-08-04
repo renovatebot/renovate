@@ -1,7 +1,4 @@
-import type { Category } from '../../../constants/index.ts';
 import { getEnv } from '../../../util/env.ts';
-
-export const categories: Category[] = ['python'];
 
 import { ForgejoTagsDatasource } from '../../datasource/forgejo-tags/index.ts';
 import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';

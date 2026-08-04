@@ -308,6 +308,24 @@ describe('util/http/github', () => {
       expect(res.body).toEqual(['a', 'b', 'c', 'd', 'e']);
     });
 
+    it('does not follow pagination links to a different origin', async () => {
+      // If a misconfigured/malicious host suggests pagination links across origins, ignore them by default
+      // In this case, only the first page of results is fetched, and a warning message is logged
+      const url = '/some-url?per_page=2';
+      httpMock.scope(githubApiHost).get(url).reply(200, ['a', 'b'], {
+        link: `<https://attacker.example.com/some-url?per_page=2&page=2>; rel="next", <https://attacker.example.com/some-url?per_page=2&page=3>; rel="last"`,
+      });
+      const res = await githubApi.getJsonUnchecked(url, { paginate: true });
+      expect(res.body).toEqual(['a', 'b']);
+      expect(logger.logger.once.warn).toHaveBeenCalledWith(
+        {
+          requestHost: 'api.github.com',
+          paginationHost: 'attacker.example.com',
+        },
+        'Ignoring cross-origin GitHub pagination link. Set RENOVATE_X_REBASE_PAGINATION_LINKS if this is a self-hosted instance that returns a different host in pagination links.',
+      );
+    });
+
     describe('handleGotError', () => {
       it('should log a once warning for github.com 401', async () => {
         await expect(

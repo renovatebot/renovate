@@ -1,6 +1,6 @@
 {
   "meta": {
-    "version": "2026.7.13 linux-x64 (2026-07-24)"
+    "version": "2026.8.0 linux-x64 (2026-08-01)"
   },
   "tools": {
     "1password": {
@@ -209,6 +209,9 @@
     "aws-amplify": {
       "asdf": "LozanoMatheus/asdf-aws-amplify-cli",
       "github": "aws-amplify/amplify-cli"
+    },
+    "aws-cdk": {
+      "npm": "aws-cdk"
     },
     "aws-cli": {
       "aqua": "aws/aws-cli",
@@ -476,6 +479,9 @@
       "asdf": "asdf-community/asdf-ccache",
       "github": "ccache/ccache"
     },
+    "cdk": {
+      "npm": "aws-cdk"
+    },
     "certstrap": {
       "asdf": "carnei-ro/asdf-certstrap",
       "github": "square/certstrap"
@@ -512,6 +518,9 @@
     "checkov": {
       "aqua": "bridgecrewio/checkov",
       "asdf": "bosmak/asdf-checkov"
+    },
+    "checkstyle": {
+      "aqua": "checkstyle/checkstyle"
     },
     "chezmoi": {
       "aqua": "twpayne/chezmoi",
@@ -1408,6 +1417,10 @@
       "asdf": "ouest/asdf-grex",
       "cargo": "grex"
     },
+    "grok": {
+      "aqua": "x.ai/cli/grok",
+      "http": "grok"
+    },
     "gron": {
       "aqua": "tomnomnom/gron"
     },
@@ -1512,8 +1525,8 @@
       "aqua": "helmwave/helmwave"
     },
     "herdr": {
-      "aqua": "ogulcancelik/herdr",
-      "github": "ogulcancelik/herdr"
+      "aqua": "herdrdev/herdr",
+      "github": "herdrdev/herdr"
     },
     "heroku": {
       "npm": "heroku"
@@ -2162,6 +2175,9 @@
       "asdf": "mise-plugins/mise-meson",
       "pipx": "meson"
     },
+    "micro": {
+      "aqua": "micro-editor/micro"
+    },
     "micromamba": {
       "github": "mamba-org/micromamba-releases"
     },
@@ -2371,6 +2387,9 @@
     "odo": {
       "aqua": "redhat-developer/odo",
       "asdf": "rm3l/asdf-odo"
+    },
+    "oh-my-pi": {
+      "github": "can1357/oh-my-pi"
     },
     "oh-my-posh": {
       "aqua": "JanDeDobbeleer/oh-my-posh"
@@ -3188,6 +3207,10 @@
     "tailpipe": {
       "aqua": "turbot/tailpipe"
     },
+    "tak": {
+      "cargo": "tak-cli",
+      "github": "jdx/tak"
+    },
     "talhelper": {
       "aqua": "budimanjojo/talhelper",
       "asdf": "bjw-s/asdf-talhelper"
@@ -3222,6 +3245,10 @@
     "tctl": {
       "aqua": "temporalio/tctl",
       "asdf": "eko/asdf-tctl"
+    },
+    "tealdeer": {
+      "aqua": "tealdeer-rs/tealdeer",
+      "github": "tealdeer-rs/tealdeer"
     },
     "tekton": {
       "aqua": "tektoncd/cli",
@@ -3651,6 +3678,9 @@
     },
     "werf": {
       "aqua": "werf/werf"
+    },
+    "witr": {
+      "aqua": "pranshuparmar/witr"
     },
     "workmux": {
       "cargo": "workmux",
