@@ -915,7 +915,7 @@ Otherwise, it queries all the supported datasources (check default value).
 Example:
 
 ```js
-modules.exports = {
+module.exports = {
   mergeConfidenceDatasources: ['npm'],
 };
 ```
@@ -947,7 +947,7 @@ Use an empty string to indicate that the preset should be ignored rather than re
 Example:
 
 ```js
-modules.exports = {
+module.exports = {
   migratePresets: {
     '@company': 'local>org/renovate-config',
   },
