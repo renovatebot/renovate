@@ -46,7 +46,7 @@ export class BaseGoDatasource {
 
     if (goModule.startsWith('github.com/')) {
       const split = goModule.split('/');
-      const packageName = split[1] + '/' + split[2];
+      const packageName = `${split[1]}/${split[2]}`;
       return {
         datasource: GithubTagsDatasource.id,
         packageName,
@@ -56,7 +56,7 @@ export class BaseGoDatasource {
 
     if (goModule.startsWith('bitbucket.org/')) {
       const split = goModule.split('/');
-      const packageName = split[1] + '/' + split[2];
+      const packageName = `${split[1]}/${split[2]}`;
       return {
         datasource: BitbucketTagsDatasource.id,
         packageName,
@@ -79,16 +79,7 @@ export class BaseGoDatasource {
     if (goModule.startsWith('dev.azure.com/')) {
       const split = goModule.split('/');
       if ((split.length > 4 && split[3] === '_git') || split.length > 3) {
-        const packageName =
-          'https://dev.azure.com/' +
-          split[1] +
-          '/' +
-          split[2] +
-          '/_git/' +
-          (split[3] === '_git' ? split[4] : split[3]).replace(
-            regEx(/\.git$/),
-            '',
-          );
+        const packageName = `https://dev.azure.com/${split[1]}/${split[2]}/_git/${(split[3] === '_git' ? split[4] : split[3]).replace(regEx(/\.git$/), '')}`;
         return {
           datasource: GitTagsDatasource.id,
           packageName,
@@ -205,7 +196,7 @@ export class BaseGoDatasource {
         const metadataPath = httpsRegExpName;
         const modulePath = gitlabModuleName;
 
-        if (modulePath.startsWith(metadataPath + '/')) {
+        if (modulePath.startsWith(`${metadataPath}/`)) {
           packageName = metadataPath;
         }
       }

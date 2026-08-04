@@ -7,7 +7,7 @@ export const id = 'azure-rest-api';
 export const displayName = 'azure-rest-api';
 
 export const urls = [
-  'https://github.com/microsoft/api-guidelines/blob/vNext/azure/Guidelines.md#api-versioning',
+  '[Microsoft Azure API versioning guidelines](https://github.com/microsoft/api-guidelines/blob/vNext/azure/Guidelines.md#api-versioning)',
 ];
 
 export const supportsRanges = false;

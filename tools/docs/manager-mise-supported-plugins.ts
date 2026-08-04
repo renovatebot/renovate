@@ -78,6 +78,14 @@ function generateCombinedTooling(): string {
     }
   }
 
+  const registrySupportedTools = Object.keys(parsedMiseRegistry.tools);
+  for (const t of allTools) {
+    if (!registrySupportedTools.includes(t.name)) {
+      t.supported = false;
+      t.supportNote = `No longer supported as of mise \`${parsedMiseRegistry.meta.version}\``;
+    }
+  }
+
   allTools = allTools.sort((a, b) => a.name.localeCompare(b.name));
 
   const total = allTools.length;
@@ -85,13 +93,13 @@ function generateCombinedTooling(): string {
   const maybeCount = allTools.filter((t) => t.supported === 'maybe').length;
   const unsupportedCount = allTools.filter((t) => t.supported === false).length;
 
-  content = `<!-- prettier-ignore -->\n!!! note\n    Renovate syncs the supported registry data with mise, and is periodically updated (currently using \`${parsedMiseRegistry.meta.version}\`.<br>Over time, this support may change and short tool names may be added / removed as per upstream mise.\n`;
+  content = `!!! note\n  Renovate syncs the supported registry data with mise, and is periodically updated (currently using \`${parsedMiseRegistry.meta.version}\`.<br>Over time, this support may change and short tool names may be added / removed as per upstream mise.\n`;
 
   content += `Renovate's \`mise\` manager can version the following tool short names.\nOut of ${total} known tools: ${supportedCount} supported, ${maybeCount} possibly supported, ${unsupportedCount} unsupported.\n`;
 
   content += `\n
-  | Name | Source | Supported |
-  | ---- | ------ | --------- |
+| Name | Source | Supported |
+| ---- | ------ | --------- |
   `;
 
   for (const { name, url, source, supported, supportNote } of allTools) {
@@ -100,6 +108,8 @@ function generateCombinedTooling(): string {
       supportedOutput = '✅';
     } else if (supported === 'maybe') {
       supportedOutput = `🤔 ${supportNote}`;
+    } else if (supported === false && supportNote) {
+      supportedOutput = `⚠️ ${supportNote}`;
     }
 
     if (url) {

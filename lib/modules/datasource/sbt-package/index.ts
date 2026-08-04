@@ -84,8 +84,9 @@ export class SbtPackageDatasource extends MavenDatasource {
     if (validRootUrl) {
       packageRootUrls.push(validRootUrl);
     } else {
-      const packageRootUrlWith = (sep: string): string =>
-        `${repoRootUrl}${groupIdSplit.join(sep)}`;
+      function packageRootUrlWith(sep: string): string {
+        return `${repoRootUrl}${groupIdSplit.join(sep)}`;
+      }
       packageRootUrls.push(ensureTrailingSlash(packageRootUrlWith('/')));
       packageRootUrls.push(ensureTrailingSlash(packageRootUrlWith('.')));
     }
@@ -271,7 +272,7 @@ export class SbtPackageDatasource extends MavenDatasource {
       ),
     );
 
-    const saveCache = async (): Promise<void> => {
+    async function saveCache(): Promise<void> {
       if (invalidPomFiles.size > 0) {
         await packageCache.set(
           'datasource-sbt-package',
@@ -280,7 +281,7 @@ export class SbtPackageDatasource extends MavenDatasource {
           30 * 24 * 60,
         );
       }
-    };
+    }
 
     for (const packageUrl of packageUrls) {
       const artifactDir = upath.basename(packageUrl);

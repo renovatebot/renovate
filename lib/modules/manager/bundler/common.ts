@@ -28,32 +28,32 @@ export async function getRubyConstraint(
   if (ruby) {
     logger.debug('Using ruby constraint from config');
     return ruby;
-  } else {
-    const rubyMatch = extractRubyVersion(newPackageFileContent);
-    if (rubyMatch) {
-      logger.debug('Using ruby version from gemfile');
-      return rubyMatch;
-    }
-    for (const file of ['.ruby-version', '.tool-versions']) {
-      const rubyVersion = (
-        await readLocalFile(getSiblingFileName(packageFileName, file), 'utf8')
-      )?.match(regEx(/^(?:ruby(?:-|\s+))?(\d[\d.]*)/m))?.[1];
-      if (rubyVersion) {
-        logger.debug(`Using ruby version specified in ${file}`);
-        return rubyVersion;
-      }
-    }
-    const lockFile = await getLockFilePath(packageFileName);
-    if (lockFile) {
-      const rubyVersion = (await readLocalFile(lockFile, 'utf8'))?.match(
-        regEx(/^ {3}ruby (\d[\d.]*)(?:[a-z]|\s|$)/m),
-      )?.[1];
-      if (rubyVersion) {
-        logger.debug(`Using ruby version specified in lock file`);
-        return rubyVersion;
-      }
+  }
+  const rubyMatch = extractRubyVersion(newPackageFileContent);
+  if (rubyMatch) {
+    logger.debug('Using ruby version from gemfile');
+    return rubyMatch;
+  }
+  for (const file of ['.ruby-version', '.tool-versions']) {
+    const rubyVersion = (
+      await readLocalFile(getSiblingFileName(packageFileName, file), 'utf8')
+    )?.match(regEx(/^(?:ruby(?:-|\s+))?(\d[\d.]*)/m))?.[1];
+    if (rubyVersion) {
+      logger.debug(`Using ruby version specified in ${file}`);
+      return rubyVersion;
     }
   }
+  const lockFile = await getLockFilePath(packageFileName);
+  if (lockFile) {
+    const rubyVersion = (await readLocalFile(lockFile, 'utf8'))?.match(
+      regEx(/^ {3}ruby (\d[\d.]*)(?:[a-z]|\s|$)/m),
+    )?.[1];
+    if (rubyVersion) {
+      logger.debug(`Using ruby version specified in lock file`);
+      return rubyVersion;
+    }
+  }
+
   return null;
 }
 
@@ -68,15 +68,15 @@ export function getBundlerConstraint(
   if (bundler) {
     logger.debug('Using bundler constraint from config');
     return bundler;
-  } else {
-    const bundledWith = regEx(/\nBUNDLED WITH\n\s+(.*?)(\n|$)/).exec(
-      existingLockFileContent,
-    );
-    if (bundledWith) {
-      logger.debug('Using bundler version specified in lockfile');
-      return bundledWith[1];
-    }
   }
+  const bundledWith = regEx(/\nBUNDLED WITH\n\s+(.*?)(\n|$)/).exec(
+    existingLockFileContent,
+  );
+  if (bundledWith) {
+    logger.debug('Using bundler version specified in lockfile');
+    return bundledWith[1];
+  }
+
   return null;
 }
 

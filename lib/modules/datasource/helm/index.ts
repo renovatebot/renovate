@@ -4,7 +4,6 @@ import { ensureTrailingSlash } from '../../../util/url.ts';
 import * as helmVersioning from '../../versioning/helm/index.ts';
 import { Datasource } from '../datasource.ts';
 import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
-import type { HelmRepositoryData } from './schema.ts';
 import { HelmRepository } from './schema.ts';
 
 export class HelmDatasource extends Datasource {
@@ -31,7 +30,7 @@ export class HelmDatasource extends Datasource {
 
   private async _getRepositoryData(
     helmRepository: string,
-  ): Promise<HelmRepositoryData> {
+  ): Promise<HelmRepository> {
     const { val, err } = await this.http
       .getYamlSafe(
         'index.yaml',
@@ -47,7 +46,7 @@ export class HelmDatasource extends Datasource {
     return val;
   }
 
-  getRepositoryData(helmRepository: string): Promise<HelmRepositoryData> {
+  getRepositoryData(helmRepository: string): Promise<HelmRepository> {
     return withCache(
       {
         namespace: `datasource-${HelmDatasource.id}`,

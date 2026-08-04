@@ -19,8 +19,7 @@ export function getChangelogs(config: BranchConfig): string {
     }
   }
 
-  releaseNotes +=
-    '\n\n---\n\n' + template.compile(releaseNotesHbs, config, false) + '\n\n';
+  releaseNotes += `\n\n---\n\n${template.compile(releaseNotesHbs, config, false)}\n\n`;
   releaseNotes = releaseNotes.replace(regEx(/### \[`vv/g), '### [`v');
   releaseNotes = sanitizeMarkdown(releaseNotes);
   releaseNotes = unemojify(releaseNotes);

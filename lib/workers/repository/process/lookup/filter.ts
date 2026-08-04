@@ -161,9 +161,7 @@ export function filterVersions(
       const error = new Error(CONFIG_VALIDATION);
       error.validationSource = 'config';
       error.validationError = 'Invalid `allowedVersions`';
-      error.validationMessage =
-        `The following allowedVersions does not parse as a valid version or range with versioning=${JSON.stringify(config.versioning)}: ` +
-        JSON.stringify(allowedVersions);
+      error.validationMessage = `The following allowedVersions does not parse as a valid version or range with versioning=${JSON.stringify(config.versioning)}: ${JSON.stringify(allowedVersions)}`;
       throw error;
     }
   }

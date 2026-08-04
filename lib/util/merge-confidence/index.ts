@@ -15,6 +15,7 @@ import { Http } from '../http/index.ts';
 import { regEx } from '../regex.ts';
 import { ensureTrailingSlash, joinUrlParts, parseUrl } from '../url.ts';
 import { MERGE_CONFIDENCE } from './common.ts';
+import { MergeConfidenceResponse } from './schema.ts';
 import type { MergeConfidence } from './types.ts';
 
 const hostType = 'merge-confidence';
@@ -193,9 +194,11 @@ async function queryApi(
   let confidence: MergeConfidence = 'neutral';
   try {
     const res = (
-      await http.getJsonUnchecked<{ confidence: MergeConfidence }>(url, {
-        cacheProvider: memCacheProvider,
-      })
+      await http.getJson(
+        url,
+        { cacheProvider: memCacheProvider },
+        MergeConfidenceResponse,
+      )
     ).body;
     if (isMergeConfidence(res.confidence)) {
       confidence = res.confidence;

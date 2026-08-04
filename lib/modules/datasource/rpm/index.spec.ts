@@ -1,5 +1,6 @@
 import { Readable } from 'node:stream';
-import { gzipSync } from 'node:zlib';
+import { promisify } from 'node:util';
+import { gzip as _gzip } from 'node:zlib';
 import { codeBlock } from 'common-tags';
 import type { DirectoryResult } from 'tmp-promise';
 import { dir as tmpDir } from 'tmp-promise';
@@ -15,6 +16,8 @@ const registryUrl = 'https://example.com/repo/repodata/';
 const primaryXmlUrl =
   'https://example.com/repo/repodata/somesha256-primary.xml.gz';
 const primaryXmlRegistryUrl = primaryXmlUrl.replace(/\/[^/]+$/, '');
+
+const gzip = promisify(_gzip);
 
 describe('modules/datasource/rpm/index', () => {
   let cacheDirResult: DirectoryResult | null;
@@ -199,17 +202,17 @@ describe('modules/datasource/rpm/index', () => {
       `;
     }
 
-    function mockPrimaryXmlResponse(primaryXml: string): void {
+    async function mockPrimaryXmlResponse(primaryXml: string): Promise<void> {
       httpMock
         .scope(primaryXmlRegistryUrl)
         .get('/somesha256-primary.xml.gz')
-        .reply(200, gzipSync(primaryXml), {
+        .reply(200, await gzip(primaryXml), {
           'Content-Type': 'application/gzip',
         });
     }
 
     it('returns the correct releases', async () => {
-      mockPrimaryXmlResponse(
+      await mockPrimaryXmlResponse(
         buildPrimaryXml(codeBlock`
           <package type="rpm">
             <name>example-package</name>
@@ -307,7 +310,7 @@ describe('modules/datasource/rpm/index', () => {
         .scope(primaryXmlRegistryUrl)
         .get('/somesha256-primary.xml.gz')
         .once()
-        .reply(200, gzipSync(primaryXml), {
+        .reply(200, await gzip(primaryXml), {
           'Content-Type': 'application/gzip',
         });
       httpMock
@@ -351,7 +354,7 @@ describe('modules/datasource/rpm/index', () => {
         .scope(primaryXmlRegistryUrl)
         .get('/somesha256-primary.xml.gz')
         .twice()
-        .reply(200, gzipSync(primaryXml), {
+        .reply(200, await gzip(primaryXml), {
           'Content-Type': 'application/gzip',
         });
       httpMock
@@ -385,7 +388,7 @@ describe('modules/datasource/rpm/index', () => {
         .get('/somesha256-primary.xml.gz')
         .reply(
           200,
-          gzipSync(
+          await gzip(
             buildPrimaryXml(codeBlock`
               <package type="rpm">
                 <name>example-package</name>
@@ -414,7 +417,7 @@ describe('modules/datasource/rpm/index', () => {
     it('keeps the previous extracted primary.xml if a refresh extract fails', async () => {
       const originalPipeline = cacheFs.pipeline;
 
-      mockPrimaryXmlResponse(
+      await mockPrimaryXmlResponse(
         buildPrimaryXml(codeBlock`
           <package type="rpm">
             <name>example-package</name>
@@ -438,7 +441,7 @@ describe('modules/datasource/rpm/index', () => {
         .head('/somesha256-primary.xml.gz')
         .once()
         .reply(200);
-      mockPrimaryXmlResponse(
+      await mockPrimaryXmlResponse(
         buildPrimaryXml(codeBlock`
           <package type="rpm">
             <name>example-package</name>
@@ -469,7 +472,7 @@ describe('modules/datasource/rpm/index', () => {
     });
 
     it('replaces the extracted primary.xml after a successful refresh', async () => {
-      mockPrimaryXmlResponse(
+      await mockPrimaryXmlResponse(
         buildPrimaryXml(codeBlock`
           <package type="rpm">
             <name>example-package</name>
@@ -493,7 +496,7 @@ describe('modules/datasource/rpm/index', () => {
         .head('/somesha256-primary.xml.gz')
         .once()
         .reply(200);
-      mockPrimaryXmlResponse(
+      await mockPrimaryXmlResponse(
         buildPrimaryXml(codeBlock`
           <package type="rpm">
             <name>example-package</name>
@@ -517,7 +520,7 @@ describe('modules/datasource/rpm/index', () => {
     });
 
     it('returns null if no element package is found in primary.xml', async () => {
-      mockPrimaryXmlResponse(
+      await mockPrimaryXmlResponse(
         buildPrimaryXml(codeBlock`
           <nonpackage type="rpm">
             <name>example-package</name>
@@ -536,7 +539,7 @@ describe('modules/datasource/rpm/index', () => {
     });
 
     it('returns null if the specific packageName is not found in primary.xml', async () => {
-      mockPrimaryXmlResponse(
+      await mockPrimaryXmlResponse(
         buildPrimaryXml(codeBlock`
           <package type="rpm">
             <name>wrong-package</name>
@@ -555,7 +558,7 @@ describe('modules/datasource/rpm/index', () => {
     });
 
     it('returns null if version is not found in a version element', async () => {
-      mockPrimaryXmlResponse(
+      await mockPrimaryXmlResponse(
         buildPrimaryXml(codeBlock`
           <package type="rpm">
             <name>example-package</name>
@@ -574,7 +577,7 @@ describe('modules/datasource/rpm/index', () => {
     });
 
     it('returns null if version element is missing the ver attribute', async () => {
-      mockPrimaryXmlResponse(
+      await mockPrimaryXmlResponse(
         buildPrimaryXml(codeBlock`
           <package type="rpm">
             <name>example-package</name>
@@ -593,7 +596,7 @@ describe('modules/datasource/rpm/index', () => {
     });
 
     it('returns an array of releases without duplicate versionWithRel', async () => {
-      mockPrimaryXmlResponse(
+      await mockPrimaryXmlResponse(
         buildPrimaryXml(codeBlock`
           <package type="rpm">
             <name>example-package</name>
@@ -619,7 +622,7 @@ describe('modules/datasource/rpm/index', () => {
     });
 
     it('handles parser error event in getReleasesByPackageName', async () => {
-      mockPrimaryXmlResponse(codeBlock`
+      await mockPrimaryXmlResponse(codeBlock`
         <?xml version="1.0" encoding="UTF-8"?>
         <%$#metadata xmlns="http://linux.duke.edu/metadata/common">
           <package type="rpm">

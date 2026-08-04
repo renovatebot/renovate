@@ -1,11 +1,11 @@
 import { ScmManagerHttp } from '../../../util/http/scm-manager.ts';
-import type { Link, PullRequest, Repo } from './schema.ts';
+import type { Link } from './schema.ts';
 import {
-  DefaultBranchSchema,
-  PagedPullRequestSchema,
-  PagedRepoSchema,
-  PullRequestSchema,
-  RepoSchema,
+  DefaultBranch,
+  PagedPullRequest,
+  PagedRepo,
+  PullRequest,
+  Repo,
   User,
 } from './schema.ts';
 import type {
@@ -55,7 +55,7 @@ export async function getRepo(repoPath: string): Promise<Repo> {
     {
       headers: { accept: CONTENT_TYPES.REPOSITORY },
     },
-    RepoSchema,
+    Repo,
   );
   return response.body;
 }
@@ -66,7 +66,7 @@ export async function getAllRepos(): Promise<Repo[]> {
     {
       headers: { accept: CONTENT_TYPES.REPOSITORIES },
     },
-    PagedRepoSchema,
+    PagedRepo,
   );
 
   return response.body._embedded.repositories;
@@ -79,7 +79,7 @@ export async function getDefaultBranch(repo: Repo): Promise<string> {
     {
       headers: { accept: CONTENT_TYPES.GIT_CONFIG },
     },
-    DefaultBranchSchema,
+    DefaultBranch,
   );
 
   return response.body.defaultBranch;
@@ -96,7 +96,7 @@ export async function getAllRepoPrs(
     {
       headers: { accept: CONTENT_TYPES.PULLREQUESTS },
     },
-    PagedPullRequestSchema,
+    PagedPullRequest,
   );
   return response.body._embedded.pullRequests;
 }
@@ -110,7 +110,7 @@ export async function getRepoPr(
     {
       headers: { accept: CONTENT_TYPES.PULLREQUEST },
     },
-    PullRequestSchema,
+    PullRequest,
   );
 
   return response.body;
@@ -136,7 +136,7 @@ export async function createScmPr(
     {
       headers: { accept: CONTENT_TYPES.PULLREQUEST },
     },
-    PullRequestSchema,
+    PullRequest,
   );
 
   return getCreatedPrResponse.body;

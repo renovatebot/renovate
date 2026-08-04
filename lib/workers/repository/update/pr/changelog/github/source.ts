@@ -14,7 +14,7 @@ export class GitHubChangeLogSource extends ChangeLogSource {
     const baseUrl = this.getBaseUrl(config);
     return baseUrl.startsWith('https://github.com/')
       ? 'https://api.github.com/'
-      : baseUrl + 'api/v3/';
+      : `${baseUrl}api/v3/`;
   }
 
   getCompareURL(
