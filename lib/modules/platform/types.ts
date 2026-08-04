@@ -47,7 +47,7 @@ export interface RepoParams {
   /** Azure only: work item type to use when creating issues. */
   azureWorkItemType?: string;
   /** GitLab only: work item type to use when creating issues. */
-  gitlabWorkItemType?: string;
+  gitLabWorkItemType?: string;
 }
 
 export interface PrDebugData {

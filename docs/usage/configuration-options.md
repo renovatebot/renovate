@@ -360,23 +360,6 @@ Set this to a work item type that exists in your project, such as `Task`.
   To switch an existing issue to the new type, either rename the old work item (so its title no longer matches) and close it, or close and delete the old work item.
   Renovate then creates a fresh work item of the configured type on the next run.
 
-## `gitlabWorkItemType`
-
-The work item type Renovate uses when creating its issues (such as the Dependency Dashboard) on GitLab.
-
-It defaults to `Issue`.
-Set this to a project work item type that exists in GitLab, such as `Task` or a custom type like `Renovate`.
-
-GitLab configurable work item types were introduced in GitLab `19.0` and became generally available in GitLab `19.1`.
-If your GitLab instance does not provide the configured type to the project, Renovate skips creating a new dashboard item for that run.
-
-<!-- prettier-ignore -->
-!!! note
-  Renovate finds its existing issues by title, not by work item type.
-  If you change `gitlabWorkItemType` while an issue (such as the Dependency Dashboard) already exists, Renovate keeps using the existing item and does _not_ recreate it with the new type.
-  To switch an existing issue to the new type, either rename the old item so its title no longer matches and close it, or close and delete the old item.
-  Renovate then creates a fresh work item of the configured type on the next run.
-
 ## `baseBranchPatterns`
 
 This configuration option was formerly known as `baseBranches`.
@@ -2040,6 +2023,23 @@ Ignore the default project level approval(s), so that Renovate bot can automerge
 Under the hood, it creates a MR-level approval rule where `approvals_required` is set to `0`.
 This option works only when `automerge=true` and either `automergeType=pr` or `automergeType=branch`.
 Also, approval rules overriding should not be [prevented in GitLab settings](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/settings.html#prevent-editing-approval-rules-in-merge-requests).
+
+## `gitLabWorkItemType`
+
+The work item type Renovate uses when creating its issues (such as the Dependency Dashboard) on GitLab.
+
+It defaults to `Issue`.
+Set this to a project work item type that exists in GitLab, such as `Task` or a custom type like `Renovate`.
+
+GitLab configurable work item types were introduced in GitLab `19.0` and became generally available in GitLab `19.1`.
+If your GitLab instance does not provide the configured type to the project, Renovate skips creating a new dashboard item for that run.
+
+<!-- prettier-ignore -->
+!!! note
+  Renovate finds its existing issues by title, not by work item type.
+  If you change `gitLabWorkItemType` while an issue (such as the Dependency Dashboard) already exists, Renovate keeps using the existing item and does _not_ recreate it with the new type.
+  To switch an existing issue to the new type, either rename the old item so its title no longer matches and close it, or close and delete the old item.
+  Renovate then creates a fresh work item of the configured type on the next run.
 
 ## `goGetDirs`
 

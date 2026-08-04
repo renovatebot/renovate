@@ -335,7 +335,7 @@ export async function initRepo({
   cloneSubmodules,
   cloneSubmodulesFilter,
   gitUrl,
-  gitlabWorkItemType,
+  gitLabWorkItemType,
 }: RepoParams): Promise<RepoResult> {
   config = {} as any;
   config.repositoryPath = repository;
@@ -343,7 +343,7 @@ export async function initRepo({
   config.cloneSubmodules = cloneSubmodules;
   config.cloneSubmodulesFilter = cloneSubmodulesFilter;
   config.ignorePrAuthor = GlobalConfig.get('ignorePrAuthor');
-  config.workItemType = gitlabWorkItemType ?? getConfig().gitlabWorkItemType!;
+  config.workItemType = gitLabWorkItemType ?? getConfig().gitLabWorkItemType!;
 
   let res: HttpResponse<RepoResponse>;
   try {

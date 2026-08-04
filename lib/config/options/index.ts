@@ -1441,7 +1441,7 @@ const options: Readonly<RenovateOptions>[] = [
     supportedPlatforms: ['azure'],
   },
   {
-    name: 'gitlabWorkItemType',
+    name: 'gitLabWorkItemType',
     description:
       'The work item type Renovate uses for its issues (e.g. the Dependency Dashboard) on GitLab.',
     type: 'string',
