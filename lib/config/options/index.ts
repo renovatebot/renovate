@@ -1223,7 +1223,8 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'repositories',
-    description: 'List of Repositories.',
+    description:
+      'List of Repositories, or an object that contains a `repository`, and any Global or Repo config to target that specific repository.',
     stage: 'global',
     type: 'array',
     subType: 'string',

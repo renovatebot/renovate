@@ -1278,13 +1278,22 @@ Defines how the report is exposed:
 
 ## `repositories`
 
-Elements in the `repositories` array can be an object if you wish to define more settings.
-Example:
+The `repositories` array can contain a mix of repository names, and objects which can override Global and Repo configuration for a specified repository.
+
+For instance:
 
 ```js
-{
-  repositories: [{ repository: 'g/r1', bumpVersion: 'patch' }, 'g/r2'];
-}
+module.exports = {
+  repositories: [
+    // we trust this repository's authors to run `make generate` in some cases
+    {
+      repository: 'g/r1',
+      allowedCommands: ['^make generate$'],
+    },
+    // this repository doesn't get any specific configuration
+    'g/r2',
+  ],
+};
 ```
 
 ## `repositoryCache`
