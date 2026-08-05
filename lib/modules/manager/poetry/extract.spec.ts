@@ -110,6 +110,35 @@ describe('modules/manager/poetry/extract', () => {
       ]);
     });
 
+    it('preserves optional and source metadata for split constraints', async () => {
+      const content = codeBlock`
+        [tool.poetry]
+        name = "test"
+        version = "0.1.0"
+
+        [tool.poetry.dependencies]
+        foo = [
+          { version = "^1.0", python = "^3.9", optional = true, source = "Private" },
+        ]
+      `;
+
+      const res = await extractPackageFile(content, filename, {
+        splitPythonMarkers: true,
+      });
+
+      expect(res?.deps).toMatchObject([
+        {
+          depName: 'foo',
+          depType: 'extras',
+          managerData: {
+            nestedVersion: true,
+            pythonConstraint: '^3.9',
+            sourceName: 'private',
+          },
+        },
+      ]);
+    });
+
     it('retains unsupported Poetry constraint arrays as skipped', async () => {
       const content = codeBlock`
         [tool.poetry]

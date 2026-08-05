@@ -170,6 +170,10 @@ describe('modules/manager/pep621/utils', () => {
         'py-caret-3-dot-8-and-lt-3-dot-12',
       );
     });
+
+    it('should use a generic slug when the constraint has no slug tokens', () => {
+      expect(pythonConstraintToMarkerSlug('')).toBe('py');
+    });
   });
 
   describe('applySplitPythonMarkers()', () => {
