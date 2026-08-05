@@ -140,6 +140,18 @@ steps:
 ```
 
 Renovate supports extracting some of these input(s) from the following Actions, and performing automagic dependency updates accordingly.
+
+A single step can yield more than one dependency.
+For example, `pnpm/setup` declares both the pnpm version and the JavaScript runtime to install:
+
+```yaml
+steps:
+  - uses: pnpm/setup@v1
+    with:
+      version: '12.0.0'
+      runtime: 'node@24.1.0'
+```
+
 The following third-party Actions have support for their `with:` blocks:
 
 <!-- Autogenerate in https://github.com/renovatebot/renovate -->

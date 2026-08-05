@@ -4,6 +4,7 @@ import { escapeRegExp, regEx } from '../../../util/regex.ts';
 import { DockerDatasource } from '../../datasource/docker/index.ts';
 import { GithubReleaseAttachmentsDatasource } from '../../datasource/github-release-attachments/index.ts';
 import { GithubReleasesDatasource } from '../../datasource/github-releases/index.ts';
+import { NodeVersionDatasource } from '../../datasource/node-version/index.ts';
 import { NpmDatasource } from '../../datasource/npm/index.ts';
 import { PypiDatasource } from '../../datasource/pypi/index.ts';
 import { RubyVersionDatasource } from '../../datasource/ruby-version/index.ts';
@@ -113,6 +114,47 @@ const MiseWith: ActionSchema = z
     },
   ]);
 
+// Runtimes installable by `pnpm/setup`, keyed by the name used in its
+// `runtime:` input. `bun` and `deno` reuse the datasources of their respective
+// `setup-*` actions below.
+const pnpmRuntimes: Record<string, PackageDependency | undefined> = {
+  node: { datasource: NodeVersionDatasource.id, packageName: 'node' },
+  bun: { datasource: NpmDatasource.id, packageName: 'bun' },
+  deno: { datasource: NpmDatasource.id, packageName: 'deno' },
+};
+
+function parsePnpmRuntime(runtime: string | undefined): PackageDependency[] {
+  if (!runtime) {
+    return [];
+  }
+
+  // `<name>` or `<name>@<version>`, matching pnpm's `packageManager` field syntax
+  const [name, version] = runtime.split('@');
+  const cfg = pnpmRuntimes[name];
+  if (!cfg) {
+    return [
+      {
+        packageName: name || runtime,
+        depType: 'uses-with',
+        skipStage: 'extract',
+        skipReason: 'invalid-name',
+      },
+    ];
+  }
+
+  return [{ ...cfg, ...parseValue(version) }];
+}
+
+const PnpmSetupWith: ActionSchema = z
+  .object({
+    version: z.string().optional(),
+    runtime: z.string().optional(),
+  })
+  .transform(({ version, runtime }) => [
+    parseValue(version),
+    ...parsePnpmRuntime(runtime),
+  ]);
+
 /**
  * Community contributed actions with known version input schemas.
  */
@@ -205,6 +247,11 @@ export const communityActions: Record<string, CommunityActionConfig> = {
   'pnpm/action-setup': {
     datasource: NpmDatasource.id,
     packageName: 'pnpm',
+  },
+  'pnpm/setup': {
+    datasource: NpmDatasource.id,
+    packageName: 'pnpm',
+    withSchema: PnpmSetupWith,
   },
   'prefix-dev/setup-pixi': {
     datasource: GithubReleasesDatasource.id,
