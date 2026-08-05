@@ -2775,6 +2775,255 @@ describe('config/validation', () => {
       expect(errors).toBeEmptyArray();
     });
 
+    it('validates repositories[]', async () => {
+      const config = {
+        repositories: [
+          'owner/repo1',
+          {
+            repository: 'owner/repo2',
+            extends: ['config:recommended'],
+            enabled: false, // options with parents=['.'] are allowed
+            binarySource: 'global' as const, // globalOnly options are allowed
+            npm: { enabled: false }, // manager configs are allowed
+          },
+        ],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'global',
+        config,
+      );
+      expect(warnings).toBeEmptyArray();
+      expect(errors).toBeEmptyArray();
+    });
+
+    it('errors on repositories[] with invalid entries', async () => {
+      const config = {
+        repositories: [
+          {
+            repository: 'owner/repo1',
+            binarySource: 'invalid' as never,
+            foo: 'bar',
+          },
+          {
+            extends: ['config:recommended'],
+          },
+        ],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'global',
+        // @ts-expect-error: contains invalid values
+        config,
+      );
+      expect(errors).toEqual([
+        {
+          topic: 'Configuration Error',
+          message: 'Invalid configuration option: repositories[0].foo',
+        },
+        {
+          topic: 'Configuration Error',
+          message:
+            'repositories[1]: each repository object entry must have a `repository` string property',
+        },
+      ]);
+      expect(warnings).toEqual([
+        {
+          topic: 'Configuration Error',
+          message:
+            'Invalid value `invalid` for `repositories[0].binarySource`. The allowed values are docker, global, install, hermit.',
+        },
+      ]);
+    });
+
+    it('allows repositories[] as string[]', async () => {
+      const config = {
+        repositories: ['owner/repo1', 'owner/repo2'],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'global',
+        config,
+      );
+      expect(warnings).toBeEmptyArray();
+      expect(errors).toBeEmptyArray();
+    });
+
+    it('errors on repositories[] with empty string values', async () => {
+      const config: AllConfig = {
+        repositories: ['', '  '],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'global',
+        config,
+      );
+      expect(warnings).toEqual([
+        {
+          message:
+            'repositories[0]: each repository string entry entry must be a non-empty string',
+          topic: 'Configuration Error',
+        },
+        {
+          message:
+            'repositories[1]: each repository string entry entry must be a non-empty string',
+          topic: 'Configuration Error',
+        },
+      ]);
+      expect(errors).toBeEmptyArray();
+    });
+
+    it('errors on repositories[] with non-string or non-object values', async () => {
+      const config = {
+        repositories: [
+          [
+            // this is invalid
+            'invalid',
+          ],
+          null,
+          123,
+          456,
+        ],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'global',
+        // @ts-expect-error: contains invalid values
+        config,
+      );
+      expect(warnings).toEqual([
+        {
+          message:
+            'repositories[0]: invalid type, should be either a string or an object',
+          topic: 'Configuration Error',
+        },
+        {
+          message:
+            'repositories[1]: invalid type, should be either a string or an object',
+          topic: 'Configuration Error',
+        },
+        {
+          message:
+            'repositories[2]: invalid type, should be either a string or an object',
+          topic: 'Configuration Error',
+        },
+        {
+          message:
+            'repositories[3]: invalid type, should be either a string or an object',
+          topic: 'Configuration Error',
+        },
+      ]);
+      expect(errors).toBeEmptyArray();
+    });
+
+    it('allows `env` on repositories[] entries within the global `allowedEnv`', async () => {
+      const config: AllConfig = {
+        allowedEnv: ['PATH'],
+        repositories: [
+          {
+            repository: 'owner/repo1',
+            env: { PATH: '/home/ubuntu/bin' },
+          },
+        ],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'global',
+        config,
+      );
+      expect(errors).toBeEmptyArray();
+      expect(warnings).toBeEmptyArray();
+    });
+
+    it('errors on `env` on repositories[] entries outside the global `allowedEnv`', async () => {
+      const config: AllConfig = {
+        allowedEnv: ['PATH'],
+        repositories: [
+          {
+            repository: 'owner/repo1',
+            env: { NOT_ALLOWED: 'value' },
+          },
+        ],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'global',
+        config,
+      );
+      expect(warnings).toBeEmptyArray();
+      expect(errors).toMatchObject([
+        {
+          topic: 'Configuration Error',
+          message:
+            "Env variable name `NOT_ALLOWED` is not allowed by this bot's `allowedEnv`.",
+        },
+      ]);
+    });
+
+    it('lets a repositories[] entry set its own `allowedEnv`', async () => {
+      const config: AllConfig = {
+        allowedEnv: ['NOPE'],
+        repositories: [
+          {
+            repository: 'owner/repo1',
+            allowedEnv: ['PATH'],
+            env: { PATH: '/home/ubuntu/bin' },
+          },
+        ],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'global',
+        config,
+      );
+      expect(errors).toBeEmptyArray();
+      expect(warnings).toBeEmptyArray();
+    });
+
+    it('allows hostRules `headers` on repositories[] entries within the global `allowedHeaders`', async () => {
+      const config: AllConfig = {
+        allowedHeaders: ['X-Custom-*'],
+        repositories: [
+          {
+            repository: 'owner/repo1',
+            hostRules: [
+              {
+                matchHost: 'github.com',
+                headers: { 'X-Custom-Token': 'value' },
+              },
+            ],
+          },
+        ],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'global',
+        config,
+      );
+      expect(errors).toBeEmptyArray();
+      expect(warnings).toBeEmptyArray();
+    });
+
+    it('errors on hostRules `headers` on repositories[] entries outside the global `allowedHeaders`', async () => {
+      const config: AllConfig = {
+        allowedHeaders: ['X-Custom-*'],
+        repositories: [
+          {
+            repository: 'owner/repo1',
+            hostRules: [
+              {
+                matchHost: 'github.com',
+                headers: { Authorization: 'Bearer token' },
+              },
+            ],
+          },
+        ],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'global',
+        config,
+      );
+      expect(warnings).toBeEmptyArray();
+      expect(errors).toMatchObject([
+        {
+          topic: 'Configuration Error',
+          message:
+            "hostRules header `Authorization` is not allowed by this bot's `allowedHeaders`.",
+        },
+      ]);
+    });
+
     it('validates object type options', async () => {
       const config = {
         productLinks: {
