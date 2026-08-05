@@ -1,5 +1,6 @@
 import { isTruthy } from '@sindresorhus/is';
 import {
+  applySplitPythonMarkers,
   extractPythonConstraintFromMarker,
   parsePEP508,
   pep508ToPackageDependency,
@@ -169,6 +170,38 @@ describe('modules/manager/pep621/utils', () => {
         'py-caret-3-dot-8-and-lt-3-dot-12',
       );
     });
+  });
+
+  describe('applySplitPythonMarkers()', () => {
+    it.each`
+      projectConstraint | markerConstraint | expectedConstraint
+      ${'>=3.10'}       | ${'==3.9'}       | ${'>=3.10,==3.9'}
+      ${'==3.10'}       | ${'>=3.9'}       | ${'3.10'}
+      ${'==3.8'}        | ${'>=3.9'}       | ${'==3.8,>=3.9'}
+      ${'>=3.10'}       | ${'>=3.9'}       | ${'>=3.10'}
+    `(
+      'intersects $projectConstraint with $markerConstraint',
+      ({ projectConstraint, markerConstraint, expectedConstraint }) => {
+        const deps = [
+          {
+            depName: 'example',
+            currentValue: '>=1',
+            managerData: { pythonConstraint: markerConstraint },
+          },
+        ];
+
+        expect(
+          applySplitPythonMarkers(
+            deps,
+            { splitPythonMarkers: true },
+            projectConstraint,
+          )[0],
+        ).toMatchObject({
+          extractedConstraints: { python: expectedConstraint },
+          constraintsFiltering: 'strict',
+        });
+      },
+    );
   });
 });
 
