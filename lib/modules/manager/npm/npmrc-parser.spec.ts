@@ -175,6 +175,8 @@ describe('modules/manager/npm/npmrc-parser', () => {
       ${'\t; key=value'}
       ${'\uFEFF# key=value'}
       ${'=value'}
+      ${"['true']"}
+      ${"'true'=value"}
     `('classifies $line as other', ({ line }) => {
       expect(parseNpmrc(line).lines).toEqual([
         { type: 'other', raw: line, lineEnding: '' },

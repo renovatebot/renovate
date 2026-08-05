@@ -33,10 +33,19 @@ export interface NpmrcDocument {
   trailingLineEnding: NpmrcLineEnding;
 }
 
-// This is the line shape used by `ini.parse`; notably, indented sections are keys.
-const npmrcLineRegex = /^\[([^\]]*)\]\s*$|^([^=]+)(=(.*))?$/i;
+/**
+ * Follow `ini.parse`: indented section-like lines are settings, not sections.
+ */
+const npmrcSectionRegex = /^\[(?<section>[^\]]*)\]\s*$/;
+const npmrcSettingRegex = /^(?<key>[^=]+)(?:=(?<value>.*))?$/;
 
-// `ini.unsafe` is the token decoder used internally by `ini.parse`.
+/**
+ * Reuse `ini.parse`'s token decoder while retaining raw lines for lossless
+ * rendering.
+ *
+ * `@types/ini` declares a string result, but single-quoted JSON literals can
+ * decode to other types, so callers must narrow it.
+ */
 function decodeNpmrcText(raw: string): unknown {
   return ini.unsafe(raw);
 }
@@ -55,6 +64,21 @@ function decodeNpmrcValue(raw: string): unknown {
   return value;
 }
 
+function parseNpmrcKey(decodedKey: string): {
+  key: string;
+  isArray: boolean;
+} {
+  if (!decodedKey.endsWith('[]')) {
+    return { key: decodedKey, isArray: false };
+  }
+
+  if (decodedKey === '[]') {
+    return { key: decodedKey, isArray: false };
+  }
+
+  return { key: decodedKey.slice(0, -2), isArray: true };
+}
+
 function parseNpmrcLine(
   raw: string,
   lineEnding: NpmrcLineEnding,
@@ -65,29 +89,44 @@ function parseNpmrcLine(
     return { type: 'other', raw, lineEnding };
   }
 
-  const match = npmrcLineRegex.exec(raw);
-  if (!match) {
-    return { type: 'other', raw, lineEnding };
-  }
+  const rawSectionName = npmrcSectionRegex.exec(raw)?.groups?.section;
+  if (rawSectionName !== undefined) {
+    const sectionName = decodeNpmrcText(rawSectionName);
+    if (typeof sectionName !== 'string') {
+      return { type: 'other', raw, lineEnding };
+    }
 
-  if (match[1] !== undefined) {
     return {
       type: 'section',
-      name: String(decodeNpmrcText(match[1])),
+      name: sectionName,
       raw,
       lineEnding,
     };
   }
 
-  const decodedKey = String(decodeNpmrcText(match[2]));
-  const isArray = decodedKey.length > 2 && decodedKey.endsWith('[]');
+  const setting = npmrcSettingRegex.exec(raw)?.groups;
+  if (!setting) {
+    return { type: 'other', raw, lineEnding };
+  }
+
+  const decodedKey = decodeNpmrcText(setting.key);
+  if (typeof decodedKey !== 'string') {
+    return { type: 'other', raw, lineEnding };
+  }
+
+  const { key, isArray } = parseNpmrcKey(decodedKey);
+
+  let value: unknown = true;
+  if (setting.value !== undefined) {
+    value = decodeNpmrcValue(setting.value);
+  }
 
   return {
     type: 'setting',
     section,
-    key: isArray ? decodedKey.slice(0, -2) : decodedKey,
+    key,
     isArray,
-    value: match[3] ? decodeNpmrcValue(match[4] ?? '') : true,
+    value,
     raw,
     lineEnding,
   };
