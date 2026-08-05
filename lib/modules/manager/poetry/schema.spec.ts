@@ -1,6 +1,22 @@
-import { PoetryPyProject, PoetrySection, PoetrySources } from './schema.ts';
+import {
+  Lockfile,
+  PoetryPyProject,
+  PoetrySection,
+  PoetrySources,
+} from './schema.ts';
 
 describe('modules/manager/poetry/schema', () => {
+  it('maps the lockfile format to its Poetry constraint', () => {
+    expect(
+      Lockfile.parse(`
+[metadata]
+lock-version = "1.1"
+`),
+    ).toMatchObject({
+      poetryConstraint: '<1.3.0',
+    });
+  });
+
   it('parses project version', () => {
     expect(PoetrySection.parse({ version: '1.2.3' }).version).toBe('1.2.3');
 
