@@ -7,6 +7,10 @@ import { hash } from '../../../util/hash.ts';
 import type { LongCommitSha } from '../../../util/schema-utils/git.ts';
 import { DefaultGitScm } from '../default-scm.ts';
 import { client } from './client.ts';
+import type { GerritLabels } from './schema.ts';
+import { mapBranchStatusToLabel } from './utils.ts';
+
+const CODE_REVIEW_LABEL = 'Code-Review';
 
 /**
  * Gerrit SCM strategy:
@@ -17,8 +21,27 @@ import { client } from './client.ts';
  */
 
 let repository: string;
-export function configureScm(repo: string): void {
+let projectLabels: GerritLabels = {};
+export function configureScm(repo: string, labels: GerritLabels = {}): void {
   repository = repo;
+  projectLabels = labels;
+}
+
+/**
+ * Returns the max vote value for the "Code-Review" label (some Gerrit
+ * projects only allow up to +1), or `null` if the label isn't defined on
+ * the project, so the caller can skip voting instead of failing the push.
+ */
+function getAutoApproveLabelValue(): number | null {
+  const codeReviewLabel = projectLabels[CODE_REVIEW_LABEL];
+  if (!codeReviewLabel) {
+    logger.warn(
+      { repository, label: CODE_REVIEW_LABEL },
+      'Cannot auto-approve: label is not defined on the project',
+    );
+    return null;
+  }
+  return mapBranchStatusToLabel('green', codeReviewLabel);
 }
 
 export async function pushForReview(options: {
@@ -30,7 +53,10 @@ export async function pushForReview(options: {
 }): Promise<boolean> {
   const pushOptions = ['notify=NONE', 'ready'];
   if (options.autoApprove) {
-    pushOptions.push('label=Code-Review+2');
+    const value = getAutoApproveLabelValue();
+    if (value !== null) {
+      pushOptions.push(`label=${CODE_REVIEW_LABEL}+${value}`);
+    }
   }
   if (isNonEmptyArray(options.labels)) {
     for (const label of options.labels) {
@@ -72,9 +98,15 @@ export class GerritScm extends DefaultGitScm {
     }
 
     const changeId = existingChange?.change_id ?? generateChangeId();
-    commit.message = [
-      ...message,
-      `Renovate-Branch: ${commit.branchName}\nChange-Id: ${changeId}`,
+    commit.message = message;
+    commit.trailers = [
+      ...(commit.trailers ?? []).filter(
+        (trailer) =>
+          !trailer.startsWith('Renovate-Branch:') &&
+          !trailer.startsWith('Change-Id:'),
+      ),
+      `Renovate-Branch: ${commit.branchName}`,
+      `Change-Id: ${changeId}`,
     ];
     // prepareCommit already checks hasDiff('HEAD', 'origin/<branchName>') when
     // force is not set, which works because virtual branches are fetched as

@@ -8,6 +8,7 @@ import type { RenovateConfig } from '~test/util.ts';
 import { logger, platform } from '~test/util.ts';
 import { getConfig } from '../../config/defaults.ts';
 import { GlobalConfig } from '../../config/global.ts';
+import { pkg } from '../../expose.ts';
 import type {
   PackageDependency,
   PackageFile,
@@ -520,6 +521,24 @@ describe('workers/repository/dependency-dashboard', () => {
 
       // same with dry run
       await dryRun(branches, platform, 0, 1);
+    });
+
+    it('supports renovateVersion templating in header and footer', async () => {
+      const branches: BranchConfig[] = [];
+      config.dependencyDashboard = true;
+      config.dependencyDashboardHeader =
+        'This is a header for renovateVersion:{{renovateVersion}}';
+      config.dependencyDashboardFooter =
+        'And this is a footer for renovateVersion:{{renovateVersion}}';
+      await dependencyDashboard.ensureDependencyDashboard(
+        config,
+        branches,
+        {},
+        { result: 'no-migration' },
+      );
+      expect(platform.ensureIssue.mock.calls[0][0].body).toMatch(
+        `renovateVersion:${pkg.version}`,
+      );
     });
 
     it('checks an issue with 2 Pending Approvals, 2 not scheduled, 2 pr-hourly-limit-reached, 2 in error, 1 pending automerge and 1 other', async () => {

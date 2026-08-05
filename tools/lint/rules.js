@@ -7,6 +7,7 @@ import noNewUrl from './rules/no-new-url.js';
 import noRedundantMockReset from './rules/no-redundant-mock-reset.js';
 import noStatefulGlobalRegex from './rules/no-stateful-global-regex.js';
 import noToolsImport from './rules/no-tools-import.js';
+import noUnvalidatedPaginationUrl from './rules/no-unvalidated-pagination-url.js';
 import preferFakeShaInSpecs from './rules/prefer-fake-sha-in-specs.js';
 import preferFsUtil from './rules/prefer-fs-util.js';
 import preferJsonPipe from './rules/prefer-json-pipe.js';
@@ -15,6 +16,7 @@ import preferNullishUtil from './rules/prefer-nullish-util.js';
 import preferPartialInSpecs from './rules/prefer-partial-in-specs.js';
 import testRootDescribe from './rules/test-root-describe.js';
 import v8IgnoreReason from './rules/v8-ignore-reason.js';
+import validateConfigWarningsAndErrors from './rules/validate-config-warnings-and-errors.js';
 import zodSchemaLocation from './rules/zod-schema-location.js';
 import zodSchemaNaming from './rules/zod-schema-naming.js';
 
@@ -32,6 +34,7 @@ export default {
     'no-redundant-mock-reset': noRedundantMockReset,
     'no-stateful-global-regex': noStatefulGlobalRegex,
     'no-tools-import': noToolsImport,
+    'no-unvalidated-pagination-url': noUnvalidatedPaginationUrl,
     'prefer-fake-sha-in-specs': preferFakeShaInSpecs,
     'prefer-fs-util': preferFsUtil,
     'prefer-json-pipe': preferJsonPipe,
@@ -40,6 +43,7 @@ export default {
     'prefer-partial-in-specs': preferPartialInSpecs,
     'test-root-describe': testRootDescribe,
     'v8-ignore-reason': v8IgnoreReason,
+    'validate-config-warnings-and-errors': validateConfigWarningsAndErrors,
     'zod-schema-location': zodSchemaLocation,
     'zod-schema-naming': zodSchemaNaming,
   },

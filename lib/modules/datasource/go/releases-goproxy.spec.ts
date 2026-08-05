@@ -160,6 +160,51 @@ describe('modules/datasource/go/releases-goproxy', () => {
       });
     });
 
+    it('resolves sourceUrl from goproxy Origin without calling the vanity domain', async () => {
+      process.env.GOPROXY = baseUrl;
+
+      httpMock
+        .scope(`${baseUrl}/k8s.io/api`)
+        .get('/@v/list')
+        .reply(
+          200,
+          codeBlock`
+            v0.28.0 2023-08-15T19:57:34Z
+            v0.36.3 2026-07-23T01:42:44Z
+          `,
+        )
+        .get('/@latest')
+        .reply(200, {
+          Version: 'v0.36.3',
+          Time: '2026-07-23T01:42:44Z',
+          Origin: {
+            VCS: 'git',
+            URL: 'https://github.com/kubernetes/api.git',
+          },
+        })
+        .get('/v2/@v/list')
+        .reply(404);
+
+      const res = await datasource.getReleases({
+        packageName: 'k8s.io/api',
+      });
+
+      expect(res).toEqual({
+        releases: [
+          {
+            version: 'v0.28.0',
+            releaseTimestamp: '2023-08-15T19:57:34.000Z',
+          },
+          {
+            version: 'v0.36.3',
+            releaseTimestamp: '2026-07-23T01:42:44.000Z',
+          },
+        ],
+        sourceUrl: 'https://github.com/kubernetes/api',
+        tags: { latest: 'v0.36.3' },
+      });
+    });
+
     it('handles timestamp fetch errors', async () => {
       process.env.GOPROXY = baseUrl;
 
