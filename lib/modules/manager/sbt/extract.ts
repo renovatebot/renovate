@@ -393,27 +393,18 @@ export function extractProxyUrls(
   return extractedProxyUrls;
 }
 
-// Finds named singleton objects of the form:
-//   object Name {
-//     val field = "version"
-//   }
-// and returns a map of `Name.field -> version` entries.
-// Uses a regex that only matches object bodies without nested braces, so
-// outer wrapper objects (e.g. `object Dependencies { ... }`) are naturally
-// skipped — only leaf-level version objects are captured.
-const namedSingletonObjectRegex = regEx(/object\s+(\w+)\s*\{([^{}]*)\}/g);
-const namedSingletonObjectFieldRegex = regEx(
-  /\bval\s+(\w+)(?:\s*:\s*String)?\s*=\s*"([^"]+)"/g,
-);
-
+// Extracts `Name.field -> version` entries from `object Name { val field = "version" }` blocks.
+// The `[^{}]*` body pattern naturally skips outer wrapper objects with nested braces.
 function extractNamedSingletonObjectVars(content: string): Vars {
   const vars: Vars = {};
-  namedSingletonObjectRegex.lastIndex = 0;
-  for (const objectMatch of content.matchAll(namedSingletonObjectRegex)) {
+  const objectRegex = regEx(/object\s+(\w+)\s*\{([^{}]*)\}/g);
+  for (const objectMatch of content.matchAll(objectRegex)) {
     const objectName = objectMatch[1];
     const body = objectMatch[2];
-    namedSingletonObjectFieldRegex.lastIndex = 0;
-    for (const fieldMatch of body.matchAll(namedSingletonObjectFieldRegex)) {
+    const fieldRegex = regEx(
+      /\bval\s+(\w+)(?:\s*:\s*String)?\s*=\s*"([^"]+)"/g,
+    );
+    for (const fieldMatch of body.matchAll(fieldRegex)) {
       vars[`${objectName}.${fieldMatch[1]}`] = fieldMatch[2];
     }
   }
