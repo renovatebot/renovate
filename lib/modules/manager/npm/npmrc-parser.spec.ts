@@ -183,7 +183,6 @@ describe('modules/manager/npm/npmrc-parser', () => {
 
     it.each`
       content              | detected  | trailing
-      ${''}                | ${null}   | ${''}
       ${'key=value'}       | ${null}   | ${''}
       ${'key=value\n'}     | ${'\n'}   | ${'\n'}
       ${'key=value\r\n'}   | ${'\r\n'} | ${'\r\n'}
@@ -207,6 +206,14 @@ describe('modules/manager/npm/npmrc-parser', () => {
           { raw: 'last=3', lineEnding: '\n' },
         ],
       );
+    });
+
+    it('parses an empty document', () => {
+      expect(parseNpmrc('')).toEqual({
+        lines: [],
+        detectedLineEnding: null,
+        trailingLineEnding: '',
+      });
     });
   });
 
