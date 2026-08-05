@@ -168,6 +168,31 @@ describe('modules/manager/gradle-wrapper/artifacts', () => {
       ]);
     });
 
+    it('quotes a distributionUrl containing shell metacharacters', async () => {
+      const execSnapshots = mockExecAll();
+      git.getRepoStatus.mockResolvedValue(
+        partial<StatusResult>({
+          modified: ['gradle/wrapper/gradle-wrapper.properties'],
+        }),
+      );
+
+      await updateArtifacts({
+        packageFileName: 'gradle/wrapper/gradle-wrapper.properties',
+        updatedDeps: [],
+        // distributionUrl as it would be parsed from an attacker-controlled
+        // gradle-wrapper.properties
+        newPackageFileContent:
+          'distributionUrl=https\\://example.com/gradle.zip;touch pwned',
+        config: { ...config, newValue: '6.3' },
+      });
+
+      expect(execSnapshots).toMatchObject([
+        {
+          cmd: './gradlew -Dorg.gradle.jvmargs="-Xms512m -Xmx512m" :wrapper --gradle-distribution-url \'https://example.com/gradle.zip;touch pwned\'',
+        },
+      ]);
+    });
+
     it('aborts if allowedUnsafeExecutions does not include `toolSettings`', async () => {
       GlobalConfig.set({
         ...adminConfig,
