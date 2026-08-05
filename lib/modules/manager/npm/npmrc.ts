@@ -5,6 +5,7 @@ import {
   findLocalSiblingOrParent,
   readLocalFile,
 } from '../../../util/fs/index.ts';
+import { regEx } from '../../../util/regex.ts';
 import type {
   NpmrcDocument,
   NpmrcLine,
@@ -23,14 +24,33 @@ interface SanitizedRepoNpmrc {
   detectedLineEnding: NpmrcDocument['detectedLineEnding'];
 }
 
-// npm substitutes references preceded by an even number of backslashes.
-const environmentVariableReferenceRegex =
-  /(?<!\\)(?:\\\\)*\$\{[^${}?]+(?:\?)?\}/;
+/**
+ * Mirrors npm's environment-reference grammar. Escape handling remains
+ * procedural because RE2 does not support lookbehind.
+ */
+const environmentVariableReferenceRegex = regEx(
+  /\$\{(?<name>[^${}?]+)(?<modifier>\?)?\}/g,
+);
 
 function containsEnvironmentVariableReference(value: unknown): boolean {
-  return (
-    typeof value === 'string' && environmentVariableReferenceRegex.test(value)
-  );
+  if (typeof value !== 'string') {
+    return false;
+  }
+
+  for (const match of value.matchAll(environmentVariableReferenceRegex)) {
+    let escapeCount = 0;
+    let escapeIndex = match.index - 1;
+    while (value[escapeIndex] === '\\') {
+      escapeCount += 1;
+      escapeIndex -= 1;
+    }
+
+    if (escapeCount % 2 === 0) {
+      return true;
+    }
+  }
+
+  return false;
 }
 
 function hasEnvironmentVariableReference(line: NpmrcSettingLine): boolean {

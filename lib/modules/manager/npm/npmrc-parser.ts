@@ -1,4 +1,5 @@
 import ini from 'ini';
+import { regEx } from '../../../util/regex.ts';
 
 export type NpmrcLineEnding = '\n' | '\r\n' | '\r' | '';
 type DetectedNpmrcLineEnding = Exclude<NpmrcLineEnding, ''>;
@@ -36,8 +37,8 @@ export interface NpmrcDocument {
 /**
  * Follow `ini.parse`: indented section-like lines are settings, not sections.
  */
-const npmrcSectionRegex = /^\[(?<section>[^\]]*)\]\s*$/;
-const npmrcSettingRegex = /^(?<key>[^=]+)(?:=(?<value>.*))?$/;
+const npmrcSectionRegex = regEx(/^\[(?<section>[^\]]*)\]\s*$/);
+const npmrcSettingRegex = regEx(/^(?<key>[^=]+)(?:=(?<value>.*))?$/);
 
 /**
  * Reuse `ini.parse`'s token decoder while retaining raw lines for lossless
@@ -136,7 +137,7 @@ export function parseNpmrc(content: string): NpmrcDocument {
   const lines: NpmrcLine[] = [];
   let detectedLineEnding: DetectedNpmrcLineEnding | null = null;
   let section: string | null = null;
-  const parts = content.split(/(\r\n|\r|\n)/);
+  const parts = content.split(regEx(/(\r\n|\r|\n)/));
 
   for (let index = 0; index < parts.length; index += 2) {
     const raw = parts[index];
