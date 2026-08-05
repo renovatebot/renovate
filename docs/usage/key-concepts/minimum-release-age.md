@@ -341,7 +341,9 @@ If you are using a custom registry, or unsure about a public registry, you can c
 
 <summary><code>packageFiles with updates</code> debug log example</summary>
 
-```jsonc
+<!-- doc-fence-check-disable-next-block -->
+
+```json
 DEBUG: packageFiles with updates
 {
   "baseBranch": "main",
