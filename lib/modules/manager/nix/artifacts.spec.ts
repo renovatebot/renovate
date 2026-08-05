@@ -176,6 +176,33 @@ describe('modules/manager/nix/artifacts', () => {
     expect(execSnapshots).toMatchObject([{ cmd: updateInputTokenCmd }]);
   });
 
+  it('quotes a GitHub token containing shell metacharacters', async () => {
+    fs.readLocalFile.mockResolvedValueOnce('current flake.lock');
+    const execSnapshots = mockExecAll();
+    git.getRepoStatus.mockResolvedValue(
+      partial<StatusResult>({
+        modified: ['flake.lock'],
+      }),
+    );
+    fs.readLocalFile.mockResolvedValueOnce('new flake.lock');
+    // hostRules can be set via a repo's own committed config, not only by a
+    // trusted platform admin, so the token itself isn't inherently trusted
+    hostRules.add({ matchHost: 'github.com', token: 'x$(touch pwned)y' });
+
+    await updateArtifacts({
+      packageFileName: 'flake.nix',
+      updatedDeps: [{ depName: 'nixpkgs' }],
+      newPackageFileContent: 'some new content',
+      config: { ...config, constraints: { python: '3.7' } },
+    });
+
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: `nix --extra-experimental-features 'nix-command flakes' --extra-access-tokens github.com='x$(touch pwned)y' flake update nixpkgs`,
+      },
+    ]);
+  });
+
   it('supports docker mode', async () => {
     GlobalConfig.set(dockerAdminConfig);
     const execSnapshots = mockExecAll();
