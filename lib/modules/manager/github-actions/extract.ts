@@ -289,7 +289,7 @@ function extractSteps(steps: UsesStep[]): PackageDependency[] {
   for (const step of steps) {
     const res = CommunityActions.safeParse(step);
     if (res.success) {
-      deps.push(res.data);
+      deps.push(...res.data);
       continue;
     }
 
