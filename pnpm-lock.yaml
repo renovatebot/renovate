@@ -131,11 +131,11 @@ importers:
         specifier: 8.1.0
         version: 8.1.0
       '@yarnpkg/core':
-        specifier: 4.9.0
-        version: 4.9.0(typanion@3.14.0)
+        specifier: 4.9.1
+        version: 4.9.1(typanion@3.14.0)
       '@yarnpkg/parsers':
-        specifier: 3.0.3
-        version: 3.0.3
+        specifier: 3.1.0
+        version: 3.1.0
       adm-zip:
         specifier: 0.6.0
         version: 0.6.0
@@ -2436,8 +2436,8 @@ packages:
   '@vitest/utils@4.1.10':
     resolution: {integrity: sha512-fy9am/HWxbaGt/Sawrp90vt6Y6jQwf1RX77cz3uwoJwJVMli/e1IEwRPnMNJ7vKfPTwo0diXifkpPvwH9v7nGA==}
 
-  '@yarnpkg/core@4.9.0':
-    resolution: {integrity: sha512-vhJEVo423jAZBtU5CDe2HEkyNkEYfgMfukNQk1uyYFkP3OmCsuLzpyqbJCEXIg6Fy3YTrQg7kSCnjHbLed3toA==}
+  '@yarnpkg/core@4.9.1':
+    resolution: {integrity: sha512-P8H10ehQBFWL5eR1y/8nLRzFHx1yumgE9P1DQjJ+EIVvqeWo0MjbwQ+ZJjPDT+HqVDslE+e6I/9GrJ7Arbx/8A==}
     engines: {node: '>=18.12.0'}
 
   '@yarnpkg/fslib@3.1.5':
@@ -2450,8 +2450,8 @@ packages:
     peerDependencies:
       '@yarnpkg/fslib': ^3.1.3
 
-  '@yarnpkg/parsers@3.0.3':
-    resolution: {integrity: sha512-mQZgUSgFurUtA07ceMjxrWkYz8QtDuYkvPlu0ZqncgjopQ0t6CNEo/OSealkmnagSUx8ZD5ewvezUwUuMqutQg==}
+  '@yarnpkg/parsers@3.1.0':
+    resolution: {integrity: sha512-WoxUM/Be4hfsX06FxsvpGgfYqwgivMV7/Ol7aFuSfSmY6rRaiju4QxOEe9RUS0iYcSHWl5i9AhB1cMoE0p+XiA==}
     engines: {node: '>=18.12.0'}
 
   '@yarnpkg/shell@4.1.3':
@@ -7687,14 +7687,14 @@ snapshots:
       convert-source-map: 2.0.0
       tinyrainbow: 3.1.0
 
-  '@yarnpkg/core@4.9.0(typanion@3.14.0)':
+  '@yarnpkg/core@4.9.1(typanion@3.14.0)':
     dependencies:
       '@arcanis/slice-ansi': 1.1.1
       '@types/semver': 7.7.1
       '@types/treeify': 1.0.3
       '@yarnpkg/fslib': 3.1.5
       '@yarnpkg/libzip': 3.2.2(@yarnpkg/fslib@3.1.5)
-      '@yarnpkg/parsers': 3.0.3
+      '@yarnpkg/parsers': 3.1.0
       '@yarnpkg/shell': 4.1.3(typanion@3.14.0)
       camelcase: 5.3.1
       chalk: 4.1.2
@@ -7728,15 +7728,15 @@ snapshots:
       '@yarnpkg/fslib': 3.1.5
       tslib: 2.8.1
 
-  '@yarnpkg/parsers@3.0.3':
+  '@yarnpkg/parsers@3.1.0':
     dependencies:
-      js-yaml: 3.15.0
+      js-yaml: 4.3.0
       tslib: 2.8.1
 
   '@yarnpkg/shell@4.1.3(typanion@3.14.0)':
     dependencies:
       '@yarnpkg/fslib': 3.1.5
-      '@yarnpkg/parsers': 3.0.3
+      '@yarnpkg/parsers': 3.1.0
       chalk: 4.1.2
       clipanion: 4.0.0-rc.4(typanion@3.14.0)
       cross-spawn: 7.0.6
