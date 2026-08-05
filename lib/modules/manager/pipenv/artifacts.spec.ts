@@ -571,13 +571,13 @@ describe('modules/manager/pipenv/artifacts', () => {
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
           'ghcr.io/renovatebot/base-image' +
-          ' bash -l -c "' +
+          " bash -l -c '" +
           'install-tool python 3.7.6' +
           ' && ' +
           'install-tool pipenv 2013.6.12' +
           ' && ' +
           'pipenv lock' +
-          '"',
+          "'",
         options: {
           cwd: upath.join('/tmp/github/some/repo'),
           env: {
@@ -874,13 +874,13 @@ describe('modules/manager/pipenv/artifacts', () => {
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
           'ghcr.io/renovatebot/base-image' +
-          ' bash -l -c "' +
+          " bash -l -c '" +
           'install-tool python 3.10.2' +
           ' && ' +
           'install-tool pipenv 2020.8.13' +
           ' && ' +
           'pipenv lock' +
-          '"',
+          "'",
         options: {
           cwd: upath.join('/tmp/github/some/repo'),
           env: {
@@ -961,13 +961,13 @@ describe('modules/manager/pipenv/artifacts', () => {
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
           'ghcr.io/renovatebot/base-image' +
-          ' bash -l -c "' +
+          " bash -l -c '" +
           'install-tool python 3.10.2' +
           ' && ' +
           'install-tool pipenv 2020.8.13' +
           ' && ' +
           'pipenv lock' +
-          '"',
+          "'",
         options: {
           cwd: upath.join('/tmp/github/some/repo'),
           env: {
@@ -1047,13 +1047,13 @@ describe('modules/manager/pipenv/artifacts', () => {
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
           'ghcr.io/renovatebot/base-image' +
-          ' bash -l -c "' +
+          " bash -l -c '" +
           'install-tool python 3.10.2' +
           ' && ' +
           'install-tool pipenv 2020.1.1' +
           ' && ' +
           'pipenv lock' +
-          '"',
+          "'",
         options: {
           cwd: upath.join('/tmp/github/some/repo'),
           env: {

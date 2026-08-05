@@ -193,13 +193,13 @@ describe('modules/manager/npm/artifacts', () => {
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
           'ghcr.io/renovatebot/base-image ' +
-          'bash -l -c "' +
+          "bash -l -c '" +
           'install-tool node 20.1.0 ' +
           '&& ' +
           'install-tool corepack 0.29.3 ' +
           '&& ' +
           'corepack use pnpm@8.15.6' +
-          '"',
+          "'",
       },
     ]);
   });

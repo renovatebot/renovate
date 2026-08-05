@@ -441,13 +441,13 @@ describe('modules/manager/poetry/artifacts', () => {
             '-e CONTAINERBASE_CACHE_DIR ' +
             '-w "/tmp/github/some/repo" ' +
             'ghcr.io/renovatebot/base-image ' +
-            'bash -l -c "' +
+            "bash -l -c '" +
             'install-tool python 3.4.2 ' +
             '&& ' +
             'install-tool poetry 1.2.0 ' +
             '&& ' +
             'poetry update --lock --no-interaction dep1' +
-            '"',
+            "'",
         },
       ]);
     });
@@ -528,13 +528,13 @@ describe('modules/manager/poetry/artifacts', () => {
             '-e CONTAINERBASE_CACHE_DIR ' +
             '-w "/tmp/github/some/repo" ' +
             'ghcr.io/renovatebot/base-image ' +
-            'bash -l -c "' +
+            "bash -l -c '" +
             'install-tool python 3.4.2 ' +
             '&& ' +
             'install-tool poetry 1.2.0 ' +
             '&& ' +
             'poetry update --lock --no-interaction dep1' +
-            '"',
+            "'",
         },
       ]);
     });
@@ -594,13 +594,13 @@ describe('modules/manager/poetry/artifacts', () => {
             '-e CONTAINERBASE_CACHE_DIR ' +
             '-w "/tmp/github/some/repo" ' +
             'ghcr.io/renovatebot/base-image ' +
-            'bash -l -c "' +
+            "bash -l -c '" +
             'install-tool python 2.7.5 ' +
             '&& ' +
             'install-tool poetry 1.2.0 ' +
             '&& ' +
             'poetry update --lock --no-interaction dep1' +
-            '"',
+            "'",
         },
       ]);
     });

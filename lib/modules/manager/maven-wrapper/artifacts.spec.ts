@@ -235,10 +235,10 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "../.." ' +
           'ghcr.io/renovatebot/base-image' +
-          ' bash -l -c "' +
+          " bash -l -c '" +
           'install-tool java 17.0.0 ' +
           '&& ' +
-          './mvnw wrapper:wrapper -Dtype=script"',
+          "./mvnw wrapper:wrapper -Dtype=script'",
         options: {
           cwd: '../..',
           env: {

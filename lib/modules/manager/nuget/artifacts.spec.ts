@@ -377,11 +377,11 @@ describe('modules/manager/nuget/artifacts', () => {
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
           'ghcr.io/renovatebot/base-image ' +
-          'bash -l -c "' +
+          "bash -l -c '" +
           'install-tool dotnet 7.0.100' +
           ' && ' +
           'dotnet restore project.csproj --force-evaluate --configfile /tmp/renovate/cache/__renovate-private-cache/nuget/nuget.config' +
-          '"',
+          "'",
         options: {
           env: {
             CONTAINERBASE_CACHE_DIR: '/tmp/renovate/cache/containerbase',

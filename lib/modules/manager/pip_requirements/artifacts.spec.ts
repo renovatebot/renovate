@@ -235,13 +235,13 @@ describe('modules/manager/pip_requirements/artifacts', () => {
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
           'ghcr.io/renovatebot/base-image ' +
-          'bash -l -c "' +
+          "bash -l -c '" +
           'install-tool python 3.10.2 ' +
           '&& ' +
           'install-tool hashin 0.17.0 ' +
           '&& ' +
           'hashin atomicwrites==1.4.0 -r requirements.txt' +
-          '"',
+          "'",
       },
     ]);
   });

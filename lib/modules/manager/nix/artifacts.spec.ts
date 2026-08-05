@@ -42,6 +42,11 @@ flake update nixpkgs`;
 const lockfileMaintenanceCmd = `nix \
 --extra-experimental-features 'nix-command flakes' \
 flake update`;
+// Under `binarySource=docker` the whole command becomes the single-quoted argument
+// of `bash -l -c`, so the manager's own single quotes are POSIX-escaped as '"'"'.
+const updateInputCmdInDocker = `nix \
+--extra-experimental-features '"'"'nix-command flakes'"'"' \
+flake update nixpkgs`;
 
 describe('modules/manager/nix/artifacts', () => {
   beforeEach(() => {
@@ -232,7 +237,7 @@ describe('modules/manager/nix/artifacts', () => {
       { cmd: 'docker pull ghcr.io/renovatebot/base-image' },
       { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
       {
-        cmd: `docker run --rm --name=renovate_sidecar --label=renovate_child -v "/tmp/github/some/repo":"/tmp/github/some/repo" -v "/tmp/renovate/cache":"/tmp/renovate/cache" -e CONTAINERBASE_CACHE_DIR -w "/tmp/github/some/repo" ghcr.io/renovatebot/base-image bash -l -c "install-tool nix 2.10.0 && ${updateInputCmd}"`,
+        cmd: `docker run --rm --name=renovate_sidecar --label=renovate_child -v "/tmp/github/some/repo":"/tmp/github/some/repo" -v "/tmp/renovate/cache":"/tmp/renovate/cache" -e CONTAINERBASE_CACHE_DIR -w "/tmp/github/some/repo" ghcr.io/renovatebot/base-image bash -l -c 'install-tool nix 2.10.0 && ${updateInputCmdInDocker}'`,
       },
     ]);
   });
@@ -351,7 +356,7 @@ describe('modules/manager/nix/artifacts', () => {
       { cmd: 'docker pull ghcr.io/renovatebot/base-image' },
       { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
       {
-        cmd: `docker run --rm --name=renovate_sidecar --label=renovate_child -v "/tmp/github/some/repo":"/tmp/github/some/repo" -v "/tmp/renovate/cache":"/tmp/renovate/cache" -e CONTAINERBASE_CACHE_DIR -w "/tmp/github/some/repo" ghcr.io/renovatebot/base-image bash -l -c "install-tool nix 2.10.0 && ${updateInputCmd}"`,
+        cmd: `docker run --rm --name=renovate_sidecar --label=renovate_child -v "/tmp/github/some/repo":"/tmp/github/some/repo" -v "/tmp/renovate/cache":"/tmp/renovate/cache" -e CONTAINERBASE_CACHE_DIR -w "/tmp/github/some/repo" ghcr.io/renovatebot/base-image bash -l -c 'install-tool nix 2.10.0 && ${updateInputCmdInDocker}'`,
       },
     ]);
   });
