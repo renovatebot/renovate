@@ -8,7 +8,9 @@ import {
 } from '@sindresorhus/is';
 import { logger } from '../../../logger/index.ts';
 import { readLocalFile } from '../../../util/fs/index.ts';
-import { regEx } from '../../../util/regex.ts';
+import { escapeRegExp, regEx } from '../../../util/regex.ts';
+import { JavaVersionDatasource } from '../../datasource/java-version/index.ts';
+import { NodeVersionDatasource } from '../../datasource/node-version/index.ts';
 import type { StaticTooling } from '../asdf/upgradeable-tooling.ts';
 import type { PackageDependency, PackageFileContent } from '../types.ts';
 import type { BackendToolingConfig } from './backends.ts';
@@ -38,6 +40,14 @@ import { parseTomlFile } from './utils.ts';
 // Tool names can have options in the tool name
 // e.g. ubi:tamasfe/taplo[matching=full,exe=taplo]
 const optionInToolNameRegex = regEx(/^(?<name>.+?)(?:\[(?<options>.+)\])?$/);
+const partialSelectorRegex = regEx(
+  /^(?<prefix>[^\d]*)(?<major>\d+)(?:\.(?<minor>\d+))?$/,
+);
+
+interface MiseSelectorConfig {
+  allowedVersions?: string;
+  ignoreUnstable?: boolean;
+}
 
 /**
  * Extracts mise tool dependencies from a mise configuration file.
@@ -55,46 +65,49 @@ export async function extractPackageFile(
     return null;
   }
 
-  const deps: PackageDependency[] = [];
+  const toolEntries: [string, MiseTool, string][] = [];
 
   for (const [name, toolData] of Object.entries(misefile.tools)) {
-    deps.push(extractToolEntry(name, toolData, 'tools'));
+    toolEntries.push([name, toolData, 'tools']);
   }
 
   for (const [taskName, taskData] of Object.entries(misefile.tasks)) {
     for (const [name, toolData] of Object.entries(taskData.tools ?? {})) {
-      deps.push(extractToolEntry(name, toolData, `task-${taskName}-tools`));
+      toolEntries.push([name, toolData, `task-${taskName}-tools`]);
     }
   }
 
-  if (!deps.length) {
+  if (!toolEntries.length) {
     return null;
   }
 
-  const result: PackageFileContent = { deps };
-
   const lockFileName = getLockFileName(packageFile);
   const lockFileContent = await readLocalFile(lockFileName, 'utf8');
-
+  let lockFileData: MiseLockFile | undefined;
   if (lockFileContent) {
     const lockFileParsed = MiseLockFile.safeParse(lockFileContent);
     if (lockFileParsed.success) {
-      result.lockFiles = [lockFileName];
-      for (const dep of deps) {
-        const lockedVersion = getLockedVersion(
-          lockFileParsed.data,
-          dep.depName!,
-        );
-        if (lockedVersion) {
-          dep.lockedVersion = lockedVersion;
-        }
-      }
+      lockFileData = lockFileParsed.data;
     } else {
       logger.debug(
         { lockFileName, error: lockFileParsed.error },
         'Failed to parse mise lock file',
       );
     }
+  }
+
+  const deps = toolEntries.map(([name, toolData, depType]) =>
+    extractToolEntry(
+      name,
+      toolData,
+      depType,
+      lockFileData ? getLockedVersion(lockFileData, name) : undefined,
+    ),
+  );
+  const result: PackageFileContent = { deps };
+
+  if (lockFileData) {
+    result.lockFiles = [lockFileName];
   }
 
   return result;
@@ -249,10 +262,110 @@ function getConfigFromTooling(
   ); // Ensure null is returned instead of undefined
 }
 
+function getLtsDatasource(
+  backend: string,
+  toolName: string,
+  datasource: string | undefined,
+): string | undefined {
+  if (datasource) {
+    return datasource;
+  }
+  if ((backend === '' || backend === 'core') && toolName === 'java') {
+    return JavaVersionDatasource.id;
+  }
+  return undefined;
+}
+
+function getSelectorConfig(
+  version: string,
+  backend: string,
+  toolName: string,
+  datasource: string | undefined,
+  lockedVersion: string | undefined,
+): MiseSelectorConfig | null {
+  if (version === 'latest') {
+    return {};
+  }
+
+  if (version === 'lts') {
+    const ltsDatasource = getLtsDatasource(backend, toolName, datasource);
+    if (ltsDatasource === NodeVersionDatasource.id) {
+      return { ignoreUnstable: true };
+    }
+    if (ltsDatasource === JavaVersionDatasource.id) {
+      return {
+        // Update this list when the OpenJDK release roadmap designates a new LTS.
+        allowedVersions: '/^(?:8|11|17|21|25)(?:\\.|-|$)/',
+        ignoreUnstable: true,
+      };
+    }
+    return null;
+  }
+
+  const match = partialSelectorRegex.exec(version);
+  if (!match?.groups || lockedVersion === version) {
+    return null;
+  }
+
+  const { prefix, major, minor } = match.groups;
+  const prefixPattern = prefix ? `(?:${escapeRegExp(prefix)})?` : '';
+  const precisionPattern = minor
+    ? `\\.${minor}(?:\\.|-|\\+|$)`
+    : `(?:\\.|-|\\+|$)`;
+  return {
+    allowedVersions: `/^${prefixPattern}${major}${precisionPattern}/`,
+  };
+}
+
+function extractSelectorLockedDependency(
+  depName: string,
+  version: string,
+  backend: string,
+  toolName: string,
+  options: MiseToolOptions,
+  toolConfig: StaticTooling | BackendToolingConfig | null,
+  lockedVersion: string,
+  depType: string,
+): PackageDependency | null {
+  const selectorConfig = getSelectorConfig(
+    version,
+    backend,
+    toolName,
+    toolConfig?.datasource,
+    lockedVersion,
+  );
+  if (!selectorConfig) {
+    return null;
+  }
+
+  const resolvedToolConfig = getToolConfig(
+    backend,
+    toolName,
+    lockedVersion,
+    options,
+  );
+  if (!resolvedToolConfig) {
+    return null;
+  }
+
+  const comparableLockedVersion =
+    resolvedToolConfig.currentValue ?? lockedVersion;
+  return {
+    ...createDependency(depName, version, resolvedToolConfig, depType),
+    currentValue: comparableLockedVersion,
+    currentRawValue: version,
+    lockedVersion: comparableLockedVersion,
+    rangeStrategy: 'update-lockfile',
+    isLockfileOnly: true,
+    ...selectorConfig,
+  };
+}
+
 function extractToolEntry(
   name: string,
   toolData: MiseTool,
   depType: string,
+  lockedVersion?: string,
 ): PackageDependency {
   const version = parseVersion(toolData);
   const { name: depName, options: optionsInName } = optionInToolNameRegex.exec(
@@ -269,7 +382,28 @@ function extractToolEntry(
     version === null
       ? null
       : getToolConfig(backend, toolName, version, options);
-  return createDependency(depName, version, toolConfig, depType);
+  const dependency = createDependency(depName, version, toolConfig, depType);
+
+  if (version !== null && lockedVersion) {
+    const selectorDependency = extractSelectorLockedDependency(
+      depName,
+      version,
+      backend,
+      toolName,
+      options,
+      toolConfig,
+      lockedVersion,
+      depType,
+    );
+    if (selectorDependency) {
+      return selectorDependency;
+    }
+  }
+
+  if (lockedVersion) {
+    return { ...dependency, lockedVersion };
+  }
+  return dependency;
 }
 
 function createDependency(
