@@ -1429,6 +1429,202 @@ describe('modules/manager/github-actions/extract', () => {
     },
     {
       step: {
+        uses: 'pnpm/setup@v1',
+        with: {
+          version: '12.0.0',
+          runtime: 'node@24.1.0',
+        },
+      },
+      expected: [
+        {
+          currentValue: '12.0.0',
+          datasource: 'npm',
+          depName: 'pnpm',
+          depType: 'uses-with',
+          packageName: 'pnpm',
+        },
+        {
+          currentValue: '24.1.0',
+          datasource: 'node-version',
+          depName: 'node',
+          depType: 'uses-with',
+          packageName: 'node',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'pnpm/setup@v1',
+        with: {
+          install: false,
+          runtime: 'bun@1.2.x',
+        },
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'npm',
+          depName: 'pnpm',
+          depType: 'uses-with',
+          packageName: 'pnpm',
+        },
+        {
+          currentValue: '1.2.x',
+          datasource: 'npm',
+          depName: 'bun',
+          depType: 'uses-with',
+          packageName: 'bun',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'pnpm/setup@v1',
+        with: {
+          runtime: 'deno@2',
+        },
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'npm',
+          depName: 'pnpm',
+          depType: 'uses-with',
+          packageName: 'pnpm',
+        },
+        {
+          currentValue: '2',
+          datasource: 'npm',
+          depName: 'deno',
+          depType: 'uses-with',
+          packageName: 'deno',
+        },
+      ],
+    },
+    {
+      // no version pinned: the runtime version comes from `devEngines.runtime`
+      step: {
+        uses: 'pnpm/setup@v1',
+        with: {
+          runtime: 'node',
+        },
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'npm',
+          depName: 'pnpm',
+          depType: 'uses-with',
+          packageName: 'pnpm',
+        },
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'node-version',
+          depName: 'node',
+          depType: 'uses-with',
+          packageName: 'node',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'pnpm/setup@v1',
+        with: {
+          version: '12.0.0',
+          runtime: 'python@3.13',
+        },
+      },
+      expected: [
+        {
+          currentValue: '12.0.0',
+          datasource: 'npm',
+          depName: 'pnpm',
+          depType: 'uses-with',
+          packageName: 'pnpm',
+        },
+        {
+          skipStage: 'extract',
+          skipReason: 'invalid-name',
+          depName: 'python',
+          depType: 'uses-with',
+          packageName: 'python',
+        },
+      ],
+    },
+    {
+      // missing name: reported under the raw input
+      step: {
+        uses: 'pnpm/setup@v1',
+        with: {
+          runtime: '@24',
+        },
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'npm',
+          depName: 'pnpm',
+          depType: 'uses-with',
+          packageName: 'pnpm',
+        },
+        {
+          skipStage: 'extract',
+          skipReason: 'invalid-name',
+          depName: '@24',
+          depType: 'uses-with',
+          packageName: '@24',
+        },
+      ],
+    },
+    {
+      // the runtime is not a literal, so there's no name to resolve
+      step: {
+        uses: 'pnpm/setup@v1',
+        with: {
+          runtime: '${{ env.RUNTIME }}',
+        },
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'npm',
+          depName: 'pnpm',
+          depType: 'uses-with',
+          packageName: 'pnpm',
+        },
+        {
+          skipStage: 'extract',
+          skipReason: 'invalid-name',
+          depName: '${{ env.RUNTIME }}',
+          depType: 'uses-with',
+          packageName: '${{ env.RUNTIME }}',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'pnpm/setup@v1',
+        with: {},
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'npm',
+          depName: 'pnpm',
+          depType: 'uses-with',
+          packageName: 'pnpm',
+        },
+      ],
+    },
+    {
+      step: {
         name: 'Install gotestsum',
         uses: 'jaxxstorm/action-install-gh-release@v1.10.0',
         with: {
