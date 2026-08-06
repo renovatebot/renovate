@@ -1102,6 +1102,7 @@ describe('util/exec/index', () => {
           'PATH',
           'LC_ALL',
           'LANG',
+          'CI',
         ],
       },
       'Executing command',
