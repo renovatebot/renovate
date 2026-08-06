@@ -316,10 +316,7 @@ export function extractPackageFile(content: string): PackageFileContent | null {
           state = null;
         } else if (label === COLON) {
           state = '.package(id:';
-        } else if (
-          /* v8 ignore next: defensive, mirrors the url-form's nested-`.package(` recovery path */
-          label === PACKAGE
-        ) {
+        } else if (label === PACKAGE) {
           yieldDep();
           state = '.package(';
         }

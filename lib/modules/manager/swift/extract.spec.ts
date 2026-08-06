@@ -459,6 +459,25 @@ describe('modules/manager/swift/extract', () => {
         ]);
       });
 
+      it('recovers when an id-form entry is immediately followed by another .package(', () => {
+        const content = codeBlock`
+          let package = Package(
+            dependencies: [
+              .package(id .package(id: "acme.somelib", from: "1.0.0"),
+            ]
+          )
+        `;
+        const result = extractPackageFile(content);
+        expect(result?.deps).toEqual([
+          {
+            datasource: SwiftPackageRegistryDatasource.id,
+            depName: 'acme.somelib',
+            packageName: 'acme.somelib',
+            currentValue: 'from: "1.0.0"',
+          },
+        ]);
+      });
+
       it('emits id-form deps without registryUrls (those are attached upstream)', () => {
         const content = codeBlock`
           let package = Package(
