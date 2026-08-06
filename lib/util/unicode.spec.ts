@@ -1,8 +1,13 @@
+import { GlobalConfig } from '~test/../lib/config/global.ts';
 import { logger } from '~test/util.ts';
 import { logWarningIfUnicodeHiddenCharactersInPackageFile } from './unicode.ts';
 
 describe('util/unicode', () => {
   describe('logWarningIfUnicodeHiddenCharactersInPackageFile', () => {
+    afterEach(() => {
+      GlobalConfig.reset();
+    });
+
     it('logs a warning for hidden Unicode characters in text files', () => {
       const content = 'some\u00A0content\u200Bfoo';
       logWarningIfUnicodeHiddenCharactersInPackageFile('file.txt', content);
@@ -62,6 +67,63 @@ describe('util/unicode', () => {
 
     it('does not log a warning when no hidden characters are present', () => {
       const content = 'normal text content';
+      logWarningIfUnicodeHiddenCharactersInPackageFile('file.txt', content);
+
+      expect(logger.logger.once.warn).toHaveBeenCalledTimes(0);
+      expect(logger.logger.once.trace).toHaveBeenCalledTimes(0);
+    });
+
+    it('does not log a warning when hidden characters are in ignoreHiddenUnicodeCharacters list (\\uXXXX format)', () => {
+      const content = 'some\u00A0content\u200Bfoo';
+      logWarningIfUnicodeHiddenCharactersInPackageFile('file.txt', content, [
+        '\\u00A0',
+        '\\u200B',
+      ]);
+
+      expect(logger.logger.once.warn).toHaveBeenCalledTimes(0);
+      expect(logger.logger.once.trace).toHaveBeenCalledTimes(0);
+    });
+
+    it('does not log a warning when hidden characters are in ignoreHiddenUnicodeCharacters list (U+XXXX format)', () => {
+      const content = 'some\u00A0content\u200Bfoo';
+      logWarningIfUnicodeHiddenCharactersInPackageFile('file.txt', content, [
+        'U+00A0',
+        'U+200B',
+      ]);
+
+      expect(logger.logger.once.warn).toHaveBeenCalledTimes(0);
+      expect(logger.logger.once.trace).toHaveBeenCalledTimes(0);
+    });
+
+    it('logs a warning only for non-allowed hidden characters', () => {
+      const content = 'some\u00A0content\u200Bfoo';
+      logWarningIfUnicodeHiddenCharactersInPackageFile('file.txt', content, [
+        '\\u00A0',
+      ]);
+
+      expect(logger.logger.once.warn).toHaveBeenCalledWith(
+        { file: 'file.txt', hiddenCharacters: '\\u200B' },
+        `Hidden Unicode characters have been discovered in file(s) in your repository. See your Renovate logs for more details. Please confirm that they are intended to be there, as they could be an attempt to "smuggle" text into your codebase, or used to confuse tools like Renovate or Large Language Models (LLMs)`,
+      );
+    });
+
+    it('does not log a warning when BOM is allowed', () => {
+      const content = '\uFEFF<Project Sdk="Microsoft.NET.Sdk">';
+      logWarningIfUnicodeHiddenCharactersInPackageFile(
+        'example.csproj',
+        content,
+        ['\\uFEFF'],
+      );
+
+      expect(logger.logger.once.warn).toHaveBeenCalledTimes(0);
+      expect(logger.logger.once.trace).toHaveBeenCalledTimes(0);
+    });
+
+    it('uses GlobalConfig when no explicit ignoreHiddenUnicodeCharacters provided', () => {
+      GlobalConfig.set({
+        ignoreHiddenUnicodeCharacters: ['\\u00A0', '\\u200B'],
+      });
+      const content = 'some\u00A0content\u200Bfoo';
       logWarningIfUnicodeHiddenCharactersInPackageFile('file.txt', content);
 
       expect(logger.logger.once.warn).toHaveBeenCalledTimes(0);
