@@ -103,6 +103,39 @@ export function applyVersionCompatibility(
   return releaseResult;
 }
 
+/**
+ * Extracts a version string from regex named capture groups.
+ *
+ * Supports two modes:
+ * 1. A `version` group: returned as-is.
+ * 2. SemVer-part groups (`major`, `minor`, `patch`, `prerelease`, `build`):
+ *    assembled into `MAJOR.MINOR.PATCH[-PRERELEASE][+BUILD]`.
+ */
+export function extractVersionFromGroups(
+  groups: Record<string, string> | undefined,
+): string | undefined {
+  if (!groups) {
+    return undefined;
+  }
+
+  if (groups.version) {
+    return groups.version;
+  }
+
+  if (!groups.major) {
+    return undefined;
+  }
+
+  let version = `${groups.major}.${groups.minor ?? '0'}.${groups.patch ?? '0'}`;
+  if (groups.prerelease) {
+    version += `-${groups.prerelease}`;
+  }
+  if (groups.build) {
+    version += `+${groups.build}`;
+  }
+  return version;
+}
+
 export function applyExtractVersion(
   releaseResult: ReleaseResult,
   extractVersion: string | undefined,
@@ -113,7 +146,8 @@ export function applyExtractVersion(
 
   const extractVersionRegEx = regEx(extractVersion);
   releaseResult.releases = filterMap(releaseResult.releases, (release) => {
-    const version = extractVersionRegEx.exec(release.version)?.groups?.version;
+    const groups = extractVersionRegEx.exec(release.version)?.groups;
+    const version = extractVersionFromGroups(groups);
     if (!version) {
       return null;
     }
