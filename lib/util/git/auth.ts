@@ -166,7 +166,27 @@ export function getAuthenticationRules(
     insteadOf: insteadUrl.toString(protocol),
   });
 
+  if (hostType === 'gerrit') {
+    // Gerrit requires /a/ prefix in the URL path for authenticated HTTP access.
+    // Modify replacement URLs to include /a/ and add an extra rule so URLs
+    // that already contain /a/ are not doubled (git uses longest-prefix match).
+    const httpsInsteadOf = authenticationRules[2].insteadOf;
+    for (const rule of authenticationRules) {
+      rule.url = addGerritAuthPrefix(rule.url);
+    }
+    authenticationRules.push({
+      url: authenticationRules[2].url,
+      insteadOf: addGerritAuthPrefix(httpsInsteadOf),
+    });
+  }
+
   return authenticationRules;
+}
+
+function addGerritAuthPrefix(urlStr: string): string {
+  const u = new URL(urlStr);
+  u.pathname = u.pathname.replace(/\/?$/, '/a/');
+  return u.href;
 }
 
 export function getGitEnvironmentVariables(
