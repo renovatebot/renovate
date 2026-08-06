@@ -72,6 +72,7 @@
 
     "renovate/enforce-ts-extension": "error",
     "renovate/logger-static-message": "error",
+    "renovate/no-exec-shell-option": "error",
     "renovate/no-hardcoded-docs-url": "error",
     "renovate/no-new-url": "error",
     "renovate/no-stateful-global-regex": "error",
