@@ -162,6 +162,18 @@ describe('config/options/index', () => {
     }
   });
 
+  describe('registryStrategy option', () => {
+    it('is defined with correct properties', () => {
+      const opts = getOptions();
+      const option = opts.find((o) => o.name === 'registryStrategy');
+      expect(option).toBeDefined();
+      expect(option?.type).toBe('string');
+      expect(option?.allowedValues).toEqual(['first', 'hunt', 'merge']);
+      expect(option?.cli).toBe(false);
+      expect(option?.env).toBe(false);
+    });
+  });
+
   describe('every option with a siblingProperties has a `property` that matches a known option', () => {
     const opts = getOptions();
     const optionNames = new Set(opts.map((o) => o.name));
