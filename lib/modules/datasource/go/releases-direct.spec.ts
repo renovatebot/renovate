@@ -236,6 +236,48 @@ describe('modules/datasource/go/releases-direct', () => {
       expect(res).toBeDefined();
     });
 
+    it('support gerrit tags', async () => {
+      getDatasourceSpy.mockResolvedValueOnce({
+        datasource: 'gerrit-tags',
+        packageName: 'my/module',
+        registryUrl: 'https://gerrit.example.com',
+      });
+      httpMock
+        .scope('https://gerrit.example.com')
+        .get('/projects/my%2Fmodule/tags/')
+        .reply(
+          200,
+          `)]}'\n${JSON.stringify([
+            {
+              ref: 'refs/tags/v1.0.0',
+              revision: 'abc123abc123abc123abc123abc123abc123abc1',
+            },
+            {
+              ref: 'refs/tags/v2.0.0',
+              revision: 'def456def456def456def456def456def456def4',
+            },
+          ])}`,
+        );
+      const res = await datasource.getReleases({
+        packageName: 'gerrit.example.com/my/module',
+      });
+      expect(res).toMatchObject({
+        registryUrl: 'https://gerrit.example.com',
+        releases: [
+          {
+            version: 'v1.0.0',
+            gitRef: 'v1.0.0',
+            newDigest: 'abc123abc123abc123abc123abc123abc123abc1',
+          },
+          {
+            version: 'v2.0.0',
+            gitRef: 'v2.0.0',
+            newDigest: 'def456def456def456def456def456def456def4',
+          },
+        ],
+      });
+    });
+
     it('support bitbucket tags', async () => {
       getDatasourceSpy.mockResolvedValueOnce({
         datasource: 'bitbucket-tags',
