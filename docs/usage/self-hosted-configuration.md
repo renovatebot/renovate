@@ -788,6 +788,20 @@ When provided, Renovate will automatically decrypt the SSH private key during th
 !!! warning
   Store this value securely as it provides access to decrypt your private key. Consider using environment variables or secure secret management systems rather than storing it in plain text configuration files.
 
+## `gitPushOptions`
+
+Use this option to pass one or more [Git push options](https://git-scm.com/docs/git-push#Documentation/git-push.txt--oltoptiongt) to the remote server when Renovate pushes a commit.
+For example, GitLab supports push options that can skip a CI pipeline or supply CI/CD variables:
+
+```json configType=global
+{
+  "gitPushOptions": ["ci.skip", "ci.variable=RENOVATE=true"]
+}
+```
+
+The supported options and their effects depend on the remote Git server.
+This option has no effect when Renovate uses a platform API to create commits instead of pushing them with Git.
+
 ## `gitTimeout`
 
 To handle the case where the underlying Git processes appear to hang, configure the timeout with the number of milliseconds to wait after last received content on either `stdOut` or `stdErr` streams before sending a `SIGINT` kill message.

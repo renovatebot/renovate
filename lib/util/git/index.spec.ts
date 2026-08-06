@@ -22,7 +22,7 @@ import * as _auth from './auth.ts';
 import * as _behindBaseCache from './behind-base-branch-cache.ts';
 import * as _conflictsCache from './conflicts-cache.ts';
 import * as git from './index.ts';
-import { setNoVerify } from './index.ts';
+import { setNoVerify, setPushOptions } from './index.ts';
 import * as _modifiedCache from './modified-cache.ts';
 import type { FileChange } from './types.ts';
 import * as _updateDateCache from './update-date-cache.ts';
@@ -182,6 +182,7 @@ describe('util/git/index', { timeout: 30000 }, () => {
     git.setGitAuthor('Jest <Jest@example.com>');
     git.setPlatformIgnoredAuthors([]);
     setNoVerify([]);
+    setPushOptions([]);
     await git.syncGit();
     // override some local git settings for better testing
     const local = simpleGit(tmpDir.path);
@@ -2054,6 +2055,7 @@ describe('util/git/index', { timeout: 30000 }, () => {
 
   describe('pushCommit', () => {
     it('should pass pushOptions to git.push', async () => {
+      setPushOptions(['ci.variable=GLOBAL=value']);
       const pushSpy = vi
         .spyOn(SimpleGit.prototype, 'push')
         .mockResolvedValue({} as PushResult);
@@ -2069,7 +2071,7 @@ describe('util/git/index', { timeout: 30000 }, () => {
         'origin',
         `${defaultBranch}:${defaultBranch}`,
         expect.objectContaining({
-          '--push-option': ['ci.skip', 'foo=bar'],
+          '--push-option': ['ci.variable=GLOBAL=value', 'ci.skip', 'foo=bar'],
         }),
       );
     });

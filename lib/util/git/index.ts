@@ -52,7 +52,7 @@ import {
   setCachedBehindBaseResult,
 } from './behind-base-branch-cache.ts';
 import { formatCommitMessage } from './commit-trailers.ts';
-import { getNoVerify, simpleGitConfig } from './config.ts';
+import { getNoVerify, getPushOptions, simpleGitConfig } from './config.ts';
 import {
   getCachedConflictResult,
   setCachedConflictResult,
@@ -85,7 +85,7 @@ import {
   setCachedUpdateDateResult,
 } from './update-date-cache.ts';
 
-export { setNoVerify } from './config.ts';
+export { setNoVerify, setPushOptions } from './config.ts';
 export { setPrivateKey } from './private-key.ts';
 
 // Retry parameters
@@ -1515,8 +1515,9 @@ export async function pushCommit({
     if (getNoVerify().includes('push')) {
       gitOptions['--no-verify'] = null;
     }
-    if (pushOptions) {
-      gitOptions['--push-option'] = pushOptions;
+    const allPushOptions = [...getPushOptions(), ...(pushOptions ?? [])];
+    if (allPushOptions.length > 0) {
+      gitOptions['--push-option'] = allPushOptions;
     }
 
     const pushRes = await gitRetry(() =>

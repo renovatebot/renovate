@@ -7,6 +7,7 @@ import {
   setGitAuthor,
   setNoVerify,
   setPrivateKey,
+  setPushOptions,
 } from '../../util/git/index.ts';
 import * as hostRules from '../../util/host-rules.ts';
 import { parseUrl } from '../../util/url.ts';
@@ -48,6 +49,7 @@ export function setPlatformApi(name: PlatformId): void {
 export async function initPlatform(config: AllConfig): Promise<AllConfig> {
   setPrivateKey(config.gitPrivateKey, config.gitPrivateKeyPassphrase);
   setNoVerify(config.gitNoVerify ?? []);
+  setPushOptions(config.gitPushOptions ?? []);
   // TODO: `platform` (#22198)
   setPlatformApi(config.platform!);
   // TODO: types

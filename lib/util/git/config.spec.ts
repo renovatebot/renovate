@@ -1,5 +1,10 @@
 import { GlobalConfig } from '../../config/global.ts';
-import { setNoVerify, simpleGitConfig } from './config.ts';
+import {
+  getPushOptions,
+  setNoVerify,
+  setPushOptions,
+  simpleGitConfig,
+} from './config.ts';
 
 describe('util/git/config', () => {
   beforeEach(() => {
@@ -38,6 +43,19 @@ describe('util/git/config', () => {
     // @ts-expect-error -- testing invalid input
     expect(() => setNoVerify(1)).toThrow(
       'config error: gitNoVerify should be an array of strings',
+    );
+  });
+
+  it('sets push options', () => {
+    setPushOptions(['ci.skip', 'ci.variable=FOO=bar']);
+
+    expect(getPushOptions()).toEqual(['ci.skip', 'ci.variable=FOO=bar']);
+  });
+
+  it('throws for invalid push options', () => {
+    // @ts-expect-error -- testing invalid input
+    expect(() => setPushOptions(1)).toThrow(
+      'config error: gitPushOptions should be an array of strings',
     );
   });
 });

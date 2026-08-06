@@ -1,4 +1,5 @@
 import * as httpMock from '~test/http-mock.ts';
+import { git } from '~test/util.ts';
 import { PLATFORM_NOT_FOUND } from '../../constants/error-messages.ts';
 import { PLATFORM_HOST_TYPES, type PlatformId } from '../../constants/index.ts';
 import { loadModules } from '../../util/modules.ts';
@@ -63,12 +64,14 @@ describe('modules/platform/index', () => {
     const config = {
       platform: 'bitbucket' as PlatformId,
       gitAuthor: 'user@domain.com',
+      gitPushOptions: ['ci.skip'],
       username: 'abc',
       password: '123',
     };
     expect(await platform.initPlatform(config)).toEqual({
       endpoint: 'https://api.bitbucket.org/',
       gitAuthor: 'user@domain.com',
+      gitPushOptions: ['ci.skip'],
       hostRules: [
         {
           hostType: 'bitbucket',
@@ -79,6 +82,7 @@ describe('modules/platform/index', () => {
       ],
       platform: 'bitbucket',
     });
+    expect(git.setPushOptions).toHaveBeenCalledExactlyOnceWith(['ci.skip']);
   });
 
   it('merges config hostRules with platform hostRules', async () => {
