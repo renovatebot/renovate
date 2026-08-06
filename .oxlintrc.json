@@ -5,6 +5,10 @@
   "options": {
     "typeAware": true
   },
+  "env": {
+    "node": true,
+    "es2025": true
+  },
   "categories": {
     "correctness": "error"
   },
@@ -63,6 +67,7 @@
       }
     ],
     "no-unassigned-vars": "error",
+    "no-undef": "error",
     "prefer-template": "error",
     "prefer-arrow-callback": ["error", { "allowUnboundThis": false }],
     "func-style": ["error", "declaration"],
@@ -200,6 +205,12 @@
     },
     {
       "files": ["**/*.spec.ts", "test/**"],
+      "env": {
+        "vitest": true
+      },
+      "globals": {
+        "fixtures": "readonly"
+      },
       "rules": {
         "no-template-curly-in-string": "off",
         "jest/valid-title": "error",
