@@ -397,6 +397,25 @@ export async function ensurePr(
         logger.debug(`Setting assignees and reviewers as status checks failed`);
         await addParticipants(config, existingPr);
       }
+      if (config.reRequestApprovedReviews && platform.getPrDismissedReviewers) {
+        const dismissedReviewers = await platform.getPrDismissedReviewers(
+          existingPr.number,
+        );
+        if (dismissedReviewers.length > 0) {
+          if (GlobalConfig.get('dryRun')) {
+            logger.info(
+              { dismissedReviewers },
+              `DRY-RUN: Would re-request review from reviewers with dismissed approvals for PR #${existingPr.number}`,
+            );
+          } else {
+            logger.debug(
+              { dismissedReviewers },
+              `Re-requesting review from reviewers with dismissed approvals for PR #${existingPr.number}`,
+            );
+            await platform.addReviewers(existingPr.number, dismissedReviewers);
+          }
+        }
+      }
       // Check if existing PR needs updating
       const existingPrTitle = stripEmojis(existingPr.title);
       const existingPrBodyHash = existingPr.bodyStruct?.hash;
