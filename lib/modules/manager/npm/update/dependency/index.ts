@@ -137,22 +137,43 @@ function updateDevEnginesDependency({
     const parsedContents: NpmPackage = JSON.parse(fileContent);
     const block = parsedContents.devEngines?.[subKey];
     if (!block) {
+      logger.warn(
+        { depName, depType },
+        'No devEngines block found; this is likely an extraction error.',
+      );
       return null;
     }
     let oldVersion: string | undefined;
     if (isArray(block)) {
       const idx = managerData?.devEnginesIndex;
       if (typeof idx !== 'number') {
+        logger.warn(
+          { depName, depType },
+          'No devEngines index found; this is likely an extraction error.',
+        );
         return null;
       }
       const item = block[idx];
       if (!item || item.name !== depName) {
+        logger.warn(
+          {
+            actualName: item?.name,
+            depName,
+            depType,
+            devEnginesIndex: idx,
+          },
+          'No matching devEngines dependency found; this is likely an extraction error.',
+        );
         return null;
       }
       oldVersion = item.version;
       item.version = newValue;
     } else {
       if (block.name !== depName) {
+        logger.warn(
+          { actualName: block.name, depName, depType },
+          'No matching devEngines dependency found; this is likely an extraction error.',
+        );
         return null;
       }
       oldVersion = block.version;
