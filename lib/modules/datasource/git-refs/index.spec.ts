@@ -187,5 +187,14 @@ describe('modules/datasource/git-refs/index', () => {
         },
       });
     });
+
+    it('returns null if remote call throws exception', async () => {
+      gitMock.listRemote.mockRejectedValue(new Error());
+
+      const digest = await new GitRefsDatasource().getDigest({
+        packageName,
+      });
+      expect(digest).toBeNull();
+    });
   });
 });
