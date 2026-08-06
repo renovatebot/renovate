@@ -656,6 +656,12 @@ export async function getAdditionalFiles(
         stderr: res.stderr || res.stdout,
       });
     } else {
+      if (res.maturityFallback) {
+        const message =
+          'pnpm `minimumReleaseAge` blocked one or more package versions that were already present in the base-branch lockfile (or are security remediation targets). Renovate retried lockfile generation with temporary CLI maturity excludes for those versions only so the PR lockfile can be updated. New selections that are not yet on the base branch remain subject to `minimumReleaseAge`.';
+        logger.warn({ pnpmShrinkwrap }, message);
+        artifactNotices.push({ file: pnpmShrinkwrap, message });
+      }
       const existingContent = await getFile(
         pnpmShrinkwrap,
         config.reuseExistingBranch ? config.branchName : config.baseBranch,
