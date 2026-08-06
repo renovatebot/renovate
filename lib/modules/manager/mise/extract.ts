@@ -18,6 +18,7 @@ import {
   createDotnetToolConfig,
   createGemToolConfig,
   createGithubToolConfig,
+  createGitlabToolConfig,
   createGoToolConfig,
   createNpmToolConfig,
   createPipxToolConfig,
@@ -201,6 +202,8 @@ function getToolConfig(
       return createGemToolConfig(toolName);
     case 'github':
       return createGithubToolConfig(toolName, version, toolOptions);
+    case 'gitlab':
+      return createGitlabToolConfig(toolName, version, toolOptions);
     case 'go':
       return createGoToolConfig(toolName);
     case 'npm':
