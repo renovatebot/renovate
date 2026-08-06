@@ -1,4 +1,5 @@
 import { createReadStream } from 'node:fs';
+import { codeBlock } from 'common-tags';
 import type { DirectoryResult } from 'tmp-promise';
 import { dir } from 'tmp-promise';
 import upath from 'upath';
@@ -14,18 +15,12 @@ const releaseBackendUrl = TerraformProviderDatasource.defaultRegistryUrls[1];
 const terraformCloudReleaseBackendUrl =
   TerraformProviderDatasource.defaultRegistryUrls[0];
 const releaseBackendAzurerm = Fixtures.get('releaseBackendAzurerm_2_56_0.json');
-const releaseBackendGoogleSha256 = Fixtures.get(
-  'releaseBackendGoogle_4_84_0_SHA256SUMS',
-);
 const terraformCloudSDCJson = Fixtures.get(
   'service-discovery.json',
   '../../../../modules/datasource/terraform-provider/',
 );
 const terraformCloudBackendAzurermVersions = Fixtures.get(
   'terraformCloudBackendAzurermVersions.json',
-);
-const terraformCloudBackendGoogleVersions = Fixtures.get(
-  'terraformCloudBackendGoogleVersions.json',
 );
 
 const log = logger.logger;
@@ -162,6 +157,45 @@ describe('modules/manager/terraform/lockfile/hash', () => {
   });
 
   it('full walkthrough on terraform cloud', async () => {
+    const releaseBackendGoogleSha256 = codeBlock`
+      1d47d00730fab764bddb6d548fed7e124739b0bcebb9f3b3c6aa247de55fb804  terraform-provider-google_4.84.0_linux_amd64.zip
+      29bff92b4375a35a7729248b3bc5db8991ca1b9ba640fc25b13700e12f99c195  terraform-provider-google_4.84.0_darwin_amd64.zip
+      f569b65999264a9416862bca5cd2a6177d94ccb0424f3a4ef424428912b9cb3c  terraform-provider-google_4.84.0_manifest.json
+    `;
+    const terraformCloudBackendGoogleVersions = {
+      id: 'hashicorp/google',
+      versions: [
+        {
+          version: '4.84.0',
+          protocols: ['5.0'],
+          platforms: [
+            {
+              os: 'linux',
+              arch: 'amd64',
+            },
+            {
+              os: 'darwin',
+              arch: 'amd64',
+            },
+          ],
+        },
+        {
+          version: '1.33.0',
+          protocols: ['4.0', '5.0'],
+          platforms: [
+            {
+              os: 'linux',
+              arch: 'amd64',
+            },
+            {
+              os: 'darwin',
+              arch: 'amd64',
+            },
+          ],
+        },
+      ],
+      warnings: null,
+    };
     const readStreamLinux = createReadStream(
       'lib/modules/manager/terraform/lockfile/__fixtures__/test.zip',
     );
