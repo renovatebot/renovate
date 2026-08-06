@@ -1,17 +1,18 @@
-import { isArray, isString } from '@sindresorhus/is';
+import { isArray, isPlainObject, isString } from '@sindresorhus/is';
 import { logger } from '../../../logger/index.ts';
 import {
   getParentDir,
   getSiblingFileName,
   readLocalFile,
 } from '../../../util/fs/index.ts';
-
 import { extractPackageJson } from '../npm/extract/common/package-file.ts';
 import type { NpmPackage } from '../npm/extract/types.ts';
 import { resolveNpmrc } from '../npm/npmrc.ts';
 import type { NpmManagerData } from '../npm/types.ts';
 import { filesMatchingWorkspaces } from '../npm/workspaces.ts';
 import type { ExtractConfig, PackageFile } from '../types.ts';
+
+const lockFileName = 'aube-lock.yaml';
 
 function matchesFileName(fileNameWithPath: string, fileName: string): boolean {
   return (
@@ -49,17 +50,17 @@ export async function processPackageFile(
     npmrc,
   };
 }
+
 export async function extractAllPackageFiles(
   config: ExtractConfig,
   matchedFiles: string[],
 ): Promise<PackageFile[]> {
   const packageFiles: PackageFile<NpmManagerData>[] = [];
-  const allLockFiles = matchedFiles.filter(
-    (file) =>
-      matchesFileName(file, 'bun.lock') || matchesFileName(file, 'bun.lockb'),
+  const allLockFiles = matchedFiles.filter((file) =>
+    matchesFileName(file, lockFileName),
   );
   if (allLockFiles.length === 0) {
-    logger.debug('No bun lockfiles found');
+    logger.debug('No aube lockfiles found');
     return packageFiles;
   }
   const allPackageJson = matchedFiles.filter((file) =>
@@ -74,8 +75,8 @@ export async function extractAllPackageFiles(
     // Check if package.json contains workspaces
     let workspaces = res?.managerData?.workspaces;
 
-    // Check for nested packages property https://bun.com/docs/pm/catalogs#1-define-catalogs-in-root-package-json
-    if (typeof workspaces === 'object' && 'packages' in workspaces) {
+    // Support the nested packages property shape
+    if (isPlainObject(workspaces) && 'packages' in workspaces) {
       workspaces = workspaces.packages;
     }
 
@@ -83,7 +84,7 @@ export async function extractAllPackageFiles(
       continue;
     }
 
-    logger.debug(`Found bun workspaces in ${packageFile}`);
+    logger.debug(`Found aube workspaces in ${packageFile}`);
     const pwd = getParentDir(packageFile);
     const workspacePackageFiles = filesMatchingWorkspaces(
       pwd,
@@ -91,11 +92,11 @@ export async function extractAllPackageFiles(
       workspaces,
     );
     if (workspacePackageFiles.length) {
-      logger.debug({ workspacePackageFiles }, 'Found bun workspace files');
+      logger.debug({ workspacePackageFiles }, 'Found aube workspace files');
       for (const workspaceFile of workspacePackageFiles) {
-        const res = await processPackageFile(workspaceFile, config);
-        if (res) {
-          packageFiles.push({ ...res, lockFiles: [lockFile] });
+        const workspaceRes = await processPackageFile(workspaceFile, config);
+        if (workspaceRes) {
+          packageFiles.push({ ...workspaceRes, lockFiles: [lockFile] });
         }
       }
     }
