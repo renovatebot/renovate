@@ -156,6 +156,11 @@ export const allToolConfig: Record<ToolName, ToolConfig> = {
     packageName: 'npm',
     versioning: 'npm',
   },
+  nub: {
+    datasource: 'npm',
+    packageName: '@nubjs/nub',
+    versioning: 'npm',
+  },
   pdm: {
     datasource: 'github-releases',
     packageName: 'pdm-project/pdm',
