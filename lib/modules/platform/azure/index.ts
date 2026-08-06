@@ -15,6 +15,7 @@ import {
 } from 'azure-devops-node-api/interfaces/GitInterfaces.js';
 import type { PolicyEvaluationRecord } from 'azure-devops-node-api/interfaces/PolicyInterfaces.js';
 import { PolicyEvaluationStatus } from 'azure-devops-node-api/interfaces/PolicyInterfaces.js';
+import { getConfig } from '../../../config/defaults.ts';
 import {
   REPOSITORY_ARCHIVED,
   REPOSITORY_EMPTY,
@@ -169,7 +170,7 @@ export async function getRawFile(
       }
     }
     return item?.content ?? null;
-  } catch (err) /* v8 ignore next */ {
+  } catch (err) /* v8 ignore next -- Azure API failure modes (service unavailable, malformed items) are not mocked in specs */ {
     if (
       err.message?.includes('<title>Azure DevOps Services Unavailable</title>')
     ) {
@@ -201,6 +202,7 @@ export async function initRepo({
   repository,
   cloneSubmodules,
   cloneSubmodulesFilter,
+  azureWorkItemType,
 }: RepoParams): Promise<RepoResult> {
   logger.debug(`initRepo("${repository}")`);
   config = { repository } as Config;
@@ -216,7 +218,7 @@ export async function initRepo({
     logger.debug('Repository is disabled- throwing error to abort renovation');
     throw new Error(REPOSITORY_ARCHIVED);
   }
-  /* v8 ignore next */
+  /* v8 ignore next -- defensive: Azure omits defaultBranch only for empty repos, which abort earlier in specs */
   if (!repo.defaultBranch) {
     logger.debug('Repo is empty');
     throw new Error(REPOSITORY_EMPTY);
@@ -226,6 +228,7 @@ export async function initRepo({
 
   config.project = repo.project!.name!;
   config.projectId = repo.project!.id!;
+  config.workItemType = azureWorkItemType ?? getConfig().azureWorkItemType!;
   issueService = new IssueService(config);
   config.owner = '?owner?';
   logger.debug(`${repository} owner = ${config.owner}`);

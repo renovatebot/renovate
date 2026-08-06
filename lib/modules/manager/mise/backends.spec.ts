@@ -41,6 +41,7 @@ describe('modules/manager/mise/backends', () => {
       expect(createCargoToolConfig('eza', '')).toStrictEqual({
         packageName: 'eza',
         datasource: 'crate',
+        versioning: 'semver',
       });
     });
 

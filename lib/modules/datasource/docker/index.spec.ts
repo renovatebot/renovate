@@ -170,6 +170,9 @@ describe('modules/datasource/docker/index', () => {
       password: 'some-password',
     });
     delete process.env.RENOVATE_X_DOCKER_HUB_TAGS_DISABLE;
+    delete process.env.RENOVATE_X_DOCKER_HUB_DISABLE_LABEL_LOOKUP;
+    delete process.env.RENOVATE_X_DOCKER_PAGINATION_ALLOW_CROSS_ORIGIN;
+    delete process.env.RENOVATE_X_NUGET_PAGINATION_ALLOW_CROSS_ORIGIN;
   });
 
   describe('getDigest', () => {
@@ -1755,21 +1758,11 @@ describe('modules/datasource/docker/index', () => {
         .get('/node/tags/list?n=10000')
         .reply(200, '', {})
         .get('/node/tags/list?n=10000')
-        .reply(
-          200,
-          { tags },
-          {
-            link: '<https://api.github.com/user/9287/repos?page=3&per_page=1000>; rel="next", ',
-          },
-        )
+        .reply(200, { tags }, {})
         .get('/')
         .reply(200)
-        .get('/node/manifests/latest')
+        .get('/node/manifests/1.0.0')
         .reply(200);
-      httpMock
-        .scope('https://api.github.com')
-        .get('/user/9287/repos?page=3&per_page=1000')
-        .reply(200, { tags: ['latest'] }, {});
       const config = {
         datasource: DockerDatasource.id,
         packageName: 'node',
@@ -1779,7 +1772,103 @@ describe('modules/datasource/docker/index', () => {
       expect(res?.releases).toHaveLength(1);
     });
 
+    // as this could lead to a Server-Side Request Forgery (SSRF), but could also be misconfiguration
+    it('does not follow pagination links to a different origin', async () => {
+      const tags = ['1.0.0'];
+      httpMock
+        .scope('https://registry.company.com/v2')
+        .get('/node/tags/list?n=10000')
+        .reply(200, '', {})
+        .get('/node/tags/list?n=10000')
+        .reply(
+          200,
+          { tags },
+          {
+            link: '<https://attacker.example.com/v2/steal/tags/list?n=10000>; rel="next", ',
+          },
+        )
+        .get('/')
+        .reply(200)
+        .get('/node/manifests/1.0.0')
+        .reply(200);
+      const config = {
+        datasource: DockerDatasource.id,
+        packageName: 'node',
+        registryUrls: ['https://registry.company.com'],
+      };
+      const res = await getPkgReleases(config);
+      expect(res?.releases).toHaveLength(1);
+      expect(logger.logger.once.warn).toHaveBeenCalledWith(
+        {
+          registryHost: 'https://registry.company.com',
+          nextUrl: 'https://attacker.example.com/v2/steal/tags/list?n=10000',
+        },
+        'Ignoring cross-origin or invalid Docker registry tags pagination link',
+      );
+    });
+
+    it('follows cross-origin tags pagination when the datasource is opted in', async () => {
+      process.env.RENOVATE_X_DOCKER_PAGINATION_ALLOW_CROSS_ORIGIN = 'true';
+      httpMock
+        .scope('https://registry.company.com/v2')
+        .get('/node/tags/list?n=10000')
+        .reply(200, '', {})
+        .get('/node/tags/list?n=10000')
+        .reply(
+          200,
+          { tags: ['1.0.0'] },
+          {
+            link: '<https://mirror.example.com/v2/node/tags/list?n=10000&last=1.0.0>; rel="next", ',
+          },
+        )
+        .get('/')
+        .reply(200)
+        .get('/node/manifests/2.0.0')
+        .reply(200);
+      httpMock
+        .scope('https://mirror.example.com/v2')
+        .get('/node/tags/list?n=10000&last=1.0.0')
+        .reply(200, { tags: ['2.0.0'] }, {});
+      const res = await getPkgReleases({
+        datasource: DockerDatasource.id,
+        packageName: 'node',
+        registryUrls: ['https://registry.company.com'],
+      });
+      expect(res?.releases).toMatchObject([
+        { version: '1.0.0' },
+        { version: '2.0.0' },
+      ]);
+      expect(logger.logger.once.warn).toHaveBeenCalledOnce();
+    });
+
+    it('does not opt docker in when only another datasource is opted in', async () => {
+      process.env.RENOVATE_X_NUGET_PAGINATION_ALLOW_CROSS_ORIGIN = 'true';
+      httpMock
+        .scope('https://registry.company.com/v2')
+        .get('/node/tags/list?n=10000')
+        .reply(200, '', {})
+        .get('/node/tags/list?n=10000')
+        .reply(
+          200,
+          { tags: ['1.0.0'] },
+          {
+            link: '<https://attacker.example.com/v2/steal/tags/list?n=10000>; rel="next", ',
+          },
+        )
+        .get('/')
+        .reply(200)
+        .get('/node/manifests/1.0.0')
+        .reply(200);
+      const res = await getPkgReleases({
+        datasource: DockerDatasource.id,
+        packageName: 'node',
+        registryUrls: ['https://registry.company.com'],
+      });
+      expect(res?.releases).toHaveLength(1);
+    });
+
     it('uses custom max pages', async () => {
+      process.env.RENOVATE_X_DOCKER_HUB_DISABLE_LABEL_LOOKUP = 'true';
       GlobalConfig.set({ dockerMaxPages: 2 });
       process.env.RENOVATE_X_DOCKER_HUB_TAGS_DISABLE = 'true';
       httpMock
@@ -2405,6 +2494,7 @@ describe('modules/datasource/docker/index', () => {
     });
 
     it('Uses Docker Hub tags for registry-1.docker.io', async () => {
+      process.env.RENOVATE_X_DOCKER_HUB_DISABLE_LABEL_LOOKUP = 'true';
       httpMock
         .scope(dockerHubUrl)
         .get('/library/node/tags?page_size=1000&ordering=last_updated')
@@ -2451,6 +2541,7 @@ describe('modules/datasource/docker/index', () => {
     });
 
     it('Uses custom page limit for Docker hub repository tags', async () => {
+      process.env.RENOVATE_X_DOCKER_HUB_DISABLE_LABEL_LOOKUP = 'true';
       GlobalConfig.set({ dockerMaxPages: 2 });
       httpMock
         .scope(dockerHubUrl)
@@ -2500,7 +2591,95 @@ describe('modules/datasource/docker/index', () => {
       });
     });
 
+    // as this could lead to a Server-Side Request Forgery (SSRF), but could also be misconfiguration
+    it('does not follow Docker Hub tags pagination to a different origin', async () => {
+      process.env.RENOVATE_X_DOCKER_HUB_DISABLE_LABEL_LOOKUP = 'true';
+      httpMock
+        .scope(dockerHubUrl)
+        .get('/library/node/tags?page_size=1000&ordering=last_updated')
+        .reply(200, {
+          count: 5,
+          next: 'https://attacker.example.com/v2/repositories/library/node/tags?page=2&page_size=1000&ordering=last_updated',
+          results: [
+            {
+              id: 5,
+              last_updated: '2021-01-01T00:00:00.000Z',
+              name: '1.0.0',
+              tag_last_pushed: '2021-01-01T00:00:00.000Z',
+              digest: 'aaa',
+            },
+          ],
+        });
+      const res = await getPkgReleases({
+        datasource: DockerDatasource.id,
+        packageName: 'registry-1.docker.io/library/node',
+      });
+      expect(res).toMatchObject({
+        releases: [
+          {
+            version: '1.0.0',
+            releaseTimestamp: '2021-01-01T00:00:00.000Z',
+          },
+        ],
+      });
+      expect(logger.logger.once.warn).toHaveBeenCalledWith(
+        {
+          dockerRepository: 'library/node',
+          nextUrl:
+            'https://attacker.example.com/v2/repositories/library/node/tags?page=2&page_size=1000&ordering=last_updated',
+        },
+        'Ignoring cross-origin or invalid Docker Hub tags pagination link',
+      );
+    });
+
+    it('follows cross-origin Docker Hub pagination when the datasource is opted in', async () => {
+      process.env.RENOVATE_X_DOCKER_PAGINATION_ALLOW_CROSS_ORIGIN = 'true';
+      process.env.RENOVATE_X_DOCKER_HUB_DISABLE_LABEL_LOOKUP = 'true';
+      httpMock
+        .scope(dockerHubUrl)
+        .get('/library/node/tags?page_size=1000&ordering=last_updated')
+        .reply(200, {
+          count: 2,
+          next: 'https://mirror.example.com/v2/repositories/library/node/tags?page=2&page_size=1000&ordering=last_updated',
+          results: [
+            {
+              id: 1,
+              last_updated: '2021-01-01T00:00:00.000Z',
+              name: '1.0.0',
+              tag_last_pushed: '2021-01-01T00:00:00.000Z',
+            },
+          ],
+        });
+      httpMock
+        .scope('https://mirror.example.com')
+        .get(
+          '/v2/repositories/library/node/tags?page=2&page_size=1000&ordering=last_updated',
+        )
+        .reply(200, {
+          count: 2,
+          next: null,
+          results: [
+            {
+              id: 2,
+              last_updated: '2022-01-01T00:00:00.000Z',
+              name: '2.0.0',
+              tag_last_pushed: '2022-01-01T00:00:00.000Z',
+            },
+          ],
+        });
+      const res = await getPkgReleases({
+        datasource: DockerDatasource.id,
+        packageName: 'registry-1.docker.io/library/node',
+      });
+      expect(res?.releases).toMatchObject([
+        { version: '1.0.0' },
+        { version: '2.0.0' },
+      ]);
+      expect(logger.logger.once.warn).toHaveBeenCalledOnce();
+    });
+
     it('adds library/ prefix for Docker Hub (implicit)', async () => {
+      process.env.RENOVATE_X_DOCKER_HUB_DISABLE_LABEL_LOOKUP = 'true';
       const tags = ['1.0.0'];
       httpMock
         .scope(dockerHubUrl)
@@ -2529,6 +2708,7 @@ describe('modules/datasource/docker/index', () => {
     });
 
     it('adds library/ prefix for Docker Hub (explicit)', async () => {
+      process.env.RENOVATE_X_DOCKER_HUB_DISABLE_LABEL_LOOKUP = 'true';
       httpMock
         .scope(dockerHubUrl)
         .get('/library/node/tags?page_size=1000&ordering=last_updated')
@@ -2575,6 +2755,7 @@ describe('modules/datasource/docker/index', () => {
     });
 
     it('sets releaseTimestamp on digests from Docker Hub', async () => {
+      process.env.RENOVATE_X_DOCKER_HUB_DISABLE_LABEL_LOOKUP = 'true';
       httpMock
         .scope(dockerHubUrl)
         .get('/library/node/tags?page_size=1000&ordering=last_updated')
@@ -3305,6 +3486,60 @@ describe('modules/datasource/docker/index', () => {
             'https://github.com/bitnami/charts/tree/main/bitnami/harbor',
         },
       );
+    });
+
+    it('uses descriptor annotations for docker hub library images', async () => {
+      httpMock
+        .scope('https://index.docker.io/v2')
+        .get('/')
+        .reply(200)
+        .get('/library/convertigo/manifests/8.4.3')
+        .reply(200, {
+          schemaVersion: 2,
+          mediaType: 'application/vnd.oci.image.index.v1+json',
+          manifests: [
+            {
+              digest: 'sha256:attestation',
+              mediaType: 'application/vnd.oci.image.manifest.v1+json',
+              platform: {
+                architecture: 'unknown',
+                os: 'unknown',
+              },
+              annotations: {
+                'vnd.docker.reference.type': 'attestation-manifest',
+              },
+            },
+            {
+              digest: 'sha256:amd64',
+              mediaType: 'application/vnd.oci.image.manifest.v1+json',
+              platform: {
+                architecture: 'amd64',
+                os: 'linux',
+              },
+              annotations: {
+                'org.opencontainers.image.source':
+                  'https://github.com/convertigo/convertigo.git#7b29f6f312a4582ccc7dd325dcf8f425ac8dfdbd:docker/default',
+                'org.opencontainers.image.revision':
+                  '7b29f6f312a4582ccc7dd325dcf8f425ac8dfdbd',
+                'org.opencontainers.image.version': '8.4.3',
+              },
+            },
+          ],
+        });
+
+      expect(
+        await ds.getLabels(
+          'https://index.docker.io',
+          'library/convertigo',
+          '8.4.3',
+        ),
+      ).toEqual({
+        'org.opencontainers.image.source':
+          'https://github.com/convertigo/convertigo.git#7b29f6f312a4582ccc7dd325dcf8f425ac8dfdbd:docker/default',
+        'org.opencontainers.image.revision':
+          '7b29f6f312a4582ccc7dd325dcf8f425ac8dfdbd',
+        'org.opencontainers.image.version': '8.4.3',
+      });
     });
 
     it('uses annotations for docker hub', async () => {

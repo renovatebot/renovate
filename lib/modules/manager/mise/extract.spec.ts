@@ -37,11 +37,13 @@ describe('modules/manager/mise/extract', () => {
         deps: [
           {
             depName: 'erlang',
+            depType: 'tools',
             currentValue: '23.3',
             datasource: 'github-tags',
           },
           {
             depName: 'node',
+            depType: 'tools',
             currentValue: '16',
             datasource: 'node-version',
           },
@@ -528,6 +530,7 @@ describe('modules/manager/mise/extract', () => {
             currentValue: '0.18.21',
             packageName: 'eza',
             datasource: 'crate',
+            versioning: 'semver',
           },
           {
             depName: 'cargo:https://github.com/username/demo1',
@@ -1322,7 +1325,7 @@ describe('modules/manager/mise/extract', () => {
           run = "cargo build"
           tools = {rust = "1.97.0"}
         `,
-        expectedDeps: [RUST_197],
+        expectedDeps: [{ ...RUST_197, depType: 'task-build-tools' }],
       },
       {
         description: 'dotted key tools under [tasks.build]',
@@ -1330,7 +1333,7 @@ describe('modules/manager/mise/extract', () => {
           [tasks.build]
           tools.rust = "1.97.0"
         `,
-        expectedDeps: [RUST_197],
+        expectedDeps: [{ ...RUST_197, depType: 'task-build-tools' }],
       },
       {
         description: 'subtable [tasks.<name>.tools]',
@@ -1339,7 +1342,10 @@ describe('modules/manager/mise/extract', () => {
           rust = "1.97.0"
           "cargo:zoxide" = "0.9.6"
         `,
-        expectedDeps: [RUST_197, ZOXIDE],
+        expectedDeps: [
+          { ...RUST_197, depType: 'task-build-tools' },
+          { ...ZOXIDE, depType: 'task-build-tools' },
+        ],
       },
       {
         description: 'top level and task tools',
@@ -1350,7 +1356,10 @@ describe('modules/manager/mise/extract', () => {
           [tasks.lint.tools]
           rust = "1.80.0"
         `,
-        expectedDeps: [RUST_197, { ...RUST_197, currentValue: '1.80.0' }],
+        expectedDeps: [
+          { ...RUST_197, depType: 'tools' },
+          { ...RUST_197, depType: 'task-lint-tools', currentValue: '1.80.0' },
+        ],
       },
       {
         description: 'inline table task with top level tools',
@@ -1361,7 +1370,7 @@ describe('modules/manager/mise/extract', () => {
           [tasks]
           build = { run = "cargo build" }
         `,
-        expectedDeps: [RUST_197],
+        expectedDeps: [{ ...RUST_197, depType: 'tools' }],
       },
       {
         description: 'string shorthand task with top level tools',
@@ -1372,7 +1381,7 @@ describe('modules/manager/mise/extract', () => {
           [tasks]
           build = "echo 'rust is a must'"
         `,
-        expectedDeps: [RUST_197],
+        expectedDeps: [{ ...RUST_197, depType: 'tools' }],
       },
       {
         description: 'array shorthand task with top level tools',
@@ -1383,7 +1392,7 @@ describe('modules/manager/mise/extract', () => {
           [tasks]
           test = ["echo '🦀🦀🦀'"]
         `,
-        expectedDeps: [RUST_197],
+        expectedDeps: [{ ...RUST_197, depType: 'tools' }],
       },
     ])(
       'extracts task tools - $description',

@@ -24,7 +24,7 @@ async function getUrl(
       `submodule.${submoduleName}.url`,
     ])
   )?.trim();
-  if (!path?.startsWith('../')) {
+  if (!path?.startsWith('../') && !path?.startsWith('./')) {
     return path;
   }
   const remoteUrl = (

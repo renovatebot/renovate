@@ -199,7 +199,7 @@ describe('util/exec/index', () => {
     ],
 
     [
-      'Low trust level',
+      'By default, exposeAllEnv=false',
       {
         processEnv,
         inCmd,
@@ -220,7 +220,7 @@ describe('util/exec/index', () => {
     ],
 
     [
-      'High trust level',
+      'When exposeAllEnv=true, all environment variables are passed to child',
       {
         processEnv: envMock.full,
         inCmd,
@@ -934,7 +934,7 @@ describe('util/exec/index', () => {
       getHermitEnvsMock.mockResolvedValue(hermitEnvs);
     }
 
-    await exec(cmd as string, inOpts);
+    await exec(cmd, inOpts);
 
     expect(actualCmd).toEqual(outCommand);
     expect(actualOpts).toEqual(outOpts);
