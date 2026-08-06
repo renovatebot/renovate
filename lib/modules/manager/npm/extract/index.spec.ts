@@ -1,6 +1,6 @@
 import { codeBlock } from 'common-tags';
 import { Fixtures } from '~test/fixtures.ts';
-import { fs } from '~test/util.ts';
+import { fs, partial } from '~test/util.ts';
 import { logger } from '../../../../logger/index.ts';
 import type { ExtractConfig } from '../../types.ts';
 import { extractAllPackageFiles } from '../index.ts';
@@ -1322,10 +1322,10 @@ describe('modules/manager/npm/extract/index', () => {
       const pJson = {
         name: 'demo',
         devEngines: {
-          packageManager: { version: '9.0.0' } as {
+          packageManager: partial<{
             name: string;
             version: string;
-          },
+          }>({ version: '9.0.0' }),
         },
       };
       const res = await npmExtract.extractPackageFile(
