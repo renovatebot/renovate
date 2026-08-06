@@ -52,6 +52,7 @@ export interface UpdateArtifactsConfig {
   newVersion?: string;
   newMajor?: number;
   registryAliases?: Record<string, string>;
+  defaultRegistryUrls?: string[];
   skipArtifactsUpdate?: boolean;
   lockFiles?: string[];
   toolSettings?: ToolSettingsOptions;
@@ -243,6 +244,7 @@ export interface Upgrade<
   isVulnerabilityAlert?: boolean;
   vulnerabilitySeverity?: string;
   registryUrls?: string[] | null;
+  defaultRegistryUrls?: string[];
   currentVersion?: string;
   replaceString?: string;
   replacementApproach?: 'replace' | 'alias';

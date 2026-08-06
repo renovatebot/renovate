@@ -40,9 +40,14 @@ async function createCachedNuGetConfigFile(
   nugetCacheDir: string,
   packageFileName: string,
   updatedDeps: Upgrade[],
+  config: UpdateArtifactsConfig,
 ): Promise<string> {
+  const fallbackRegistries = config.defaultRegistryUrls
+    ? config.defaultRegistryUrls.map((url) => ({ url }))
+    : getDefaultRegistries();
+
   const registries =
-    (await getConfiguredRegistries(packageFileName)) ?? getDefaultRegistries();
+    (await getConfiguredRegistries(packageFileName)) ?? fallbackRegistries;
 
   const updatedDepsRegistries: Registry[] = Array.from(
     new Set(
@@ -76,6 +81,7 @@ async function runDotnetRestore(
     nugetCacheDir,
     packageFileName,
     updatedDeps,
+    config,
   );
 
   const dotnetVersion =
