@@ -217,9 +217,17 @@ describe('workers/repository/update/branch/index', () => {
       const res = await branchWorker.processBranch(config);
       expect(res).toEqual({
         branchExists: false,
+        pendingChecksReasons: [
+          expect.stringContaining(
+            'minimum release age not met (1 day required,',
+          ),
+        ],
         prNo: undefined,
         result: 'pending',
       });
+      expect(logger.debug).toHaveBeenCalledWith(
+        expect.stringContaining('minimum release age not met (1 day required,'),
+      );
     });
 
     it('skips branch if minimumReleaseAge not met', async () => {
@@ -227,6 +235,7 @@ describe('workers/repository/update/branch/index', () => {
       config.prCreation = 'not-pending';
       config.upgrades = partial<BranchUpgradeConfig>([
         {
+          depName: 'some-dep-name',
           releaseTimestamp: '2099-12-31' as Timestamp,
           minimumReleaseAge: '1 day',
         },
@@ -234,6 +243,11 @@ describe('workers/repository/update/branch/index', () => {
       const res = await branchWorker.processBranch(config);
       expect(res).toEqual({
         branchExists: false,
+        pendingChecksReasons: [
+          expect.stringContaining(
+            'minimum release age not met (1 day required,',
+          ),
+        ],
         prNo: undefined,
         result: 'pending',
       });
@@ -254,6 +268,9 @@ describe('workers/repository/update/branch/index', () => {
         const res = await branchWorker.processBranch(config);
         expect(res).toEqual({
           branchExists: false,
+          pendingChecksReasons: [
+            '`undefined`: release timestamp unavailable - minimum release age (100 days) cannot be evaluated',
+          ],
           prNo: undefined,
           result: 'pending',
         });
@@ -856,9 +873,73 @@ describe('workers/repository/update/branch/index', () => {
       config.pendingChecks = true;
       expect(await branchWorker.processBranch(config)).toEqual({
         branchExists: false,
+        pendingChecksReasons: [
+          'Awaiting internal checks to pass before branch creation',
+        ],
         prNo: undefined,
         result: 'pending',
       });
+      expect(logger.debug).toHaveBeenCalledWith(
+        expect.stringContaining(
+          'Pending status check reason for branch renovate/some-branch: Awaiting internal checks to pass before branch creation',
+        ),
+      );
+    });
+
+    it('returns generic pending check reason before status-success is evaluated', async () => {
+      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
+        ...updatedPackageFiles,
+      });
+      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+        artifactErrors: [],
+        updatedArtifacts: [],
+      });
+      config.pendingChecks = true;
+      config.prCreation = 'status-success';
+      expect(await branchWorker.processBranch(config)).toEqual({
+        branchExists: false,
+        pendingChecksReasons: [
+          'Awaiting internal checks to pass before branch creation',
+        ],
+        prNo: undefined,
+        result: 'pending',
+      });
+      expect(logger.debug).toHaveBeenCalledWith(
+        expect.stringContaining(
+          'Pending status check reason for branch renovate/some-branch: Awaiting internal checks to pass before branch creation',
+        ),
+      );
+    });
+
+    it('returns generic pending check reason before status checks are evaluated', async () => {
+      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
+        ...updatedPackageFiles,
+      });
+      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+        artifactErrors: [],
+        updatedArtifacts: [],
+      });
+      config.pendingChecks = true;
+      config.upgrades = partial<BranchUpgradeConfig>([
+        {
+          depName: 'some-dep-name',
+          minimumConfidence: 'high',
+          pendingChecks: true,
+        },
+      ]);
+      expect(await branchWorker.processBranch(config)).toEqual({
+        branchExists: false,
+        pendingChecksReasons: [
+          'Awaiting internal checks to pass before branch creation',
+        ],
+        prNo: undefined,
+        result: 'pending',
+      });
+      expect(logger.debug).toHaveBeenCalledWith(
+        expect.stringContaining(
+          'Pending status check reason for branch renovate/some-branch: Awaiting internal checks to pass before branch creation',
+        ),
+      );
     });
 
     it('returns if pending checks - but branch exists', async () => {
@@ -880,8 +961,16 @@ describe('workers/repository/update/branch/index', () => {
       expect(await branchWorker.processBranch(config)).toEqual({
         branchExists: true,
         prNo: 5,
+        pendingChecksReasons: [
+          'Awaiting internal checks to pass before branch update',
+        ],
         result: 'pending',
       });
+      expect(logger.debug).toHaveBeenCalledWith(
+        expect.stringContaining(
+          'Pending status check reason for branch renovate/some-branch: Awaiting internal checks to pass before branch update',
+        ),
+      );
     });
 
     // automerge should respect only automergeSchedule
@@ -992,7 +1081,7 @@ describe('workers/repository/update/branch/index', () => {
     });
 
     it('returns if branch exists but pending', async () => {
-      expect.assertions(1);
+      expect.assertions(2);
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce(
         partial<PackageFilesResult>({
           updatedPackageFiles: [partial<FileChange>()],
@@ -1008,13 +1097,91 @@ describe('workers/repository/update/branch/index', () => {
       prWorker.ensurePr.mockResolvedValueOnce({
         type: 'without-pr',
         prBlockedBy: 'AwaitingTests',
+        pendingChecksReason: 'Awaiting status checks before PR creation',
       });
       expect(await branchWorker.processBranch(config)).toEqual({
         branchExists: true,
         prBlockedBy: 'AwaitingTests',
+        pendingChecksReasons: ['Awaiting status checks before PR creation'],
         result: 'pending',
         commitSha: null,
       });
+      expect(logger.debug).toHaveBeenCalledWith(
+        expect.stringContaining(
+          'Pending status check reason for branch renovate/some-branch: Awaiting status checks before PR creation',
+        ),
+      );
+    });
+
+    it('returns pending AwaitingTests reason for status-success PR creation', async () => {
+      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce(
+        partial<PackageFilesResult>({
+          updatedPackageFiles: [partial<FileChange>()],
+        }),
+      );
+      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+        artifactErrors: [],
+        updatedArtifacts: [partial<FileChange>()],
+      });
+      scm.branchExists.mockResolvedValue(true);
+      commit.commitFilesToBranch.mockResolvedValueOnce(null);
+      automerge.tryBranchAutomerge.mockResolvedValueOnce('failed');
+      prWorker.ensurePr.mockResolvedValueOnce({
+        type: 'without-pr',
+        prBlockedBy: 'AwaitingTests',
+        pendingChecksReason:
+          'Awaiting all status checks to pass before PR creation',
+      });
+      config.prCreation = 'status-success';
+      expect(await branchWorker.processBranch(config)).toEqual({
+        branchExists: true,
+        prBlockedBy: 'AwaitingTests',
+        pendingChecksReasons: [
+          'Awaiting all status checks to pass before PR creation',
+        ],
+        result: 'pending',
+        commitSha: null,
+      });
+      expect(logger.debug).toHaveBeenCalledWith(
+        expect.stringContaining(
+          'Pending status check reason for branch renovate/some-branch: Awaiting all status checks to pass before PR creation',
+        ),
+      );
+    });
+
+    it('returns pending AwaitingTests reason for not-pending PR creation', async () => {
+      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce(
+        partial<PackageFilesResult>({
+          updatedPackageFiles: [partial<FileChange>()],
+        }),
+      );
+      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+        artifactErrors: [],
+        updatedArtifacts: [partial<FileChange>()],
+      });
+      scm.branchExists.mockResolvedValue(true);
+      commit.commitFilesToBranch.mockResolvedValueOnce(null);
+      automerge.tryBranchAutomerge.mockResolvedValueOnce('failed');
+      prWorker.ensurePr.mockResolvedValueOnce({
+        type: 'without-pr',
+        prBlockedBy: 'AwaitingTests',
+        pendingChecksReason: 'Awaiting 25h status stability before PR creation',
+      });
+      config.prCreation = 'not-pending';
+      expect(await branchWorker.processBranch(config)).toEqual({
+        branchExists: true,
+        prBlockedBy: 'AwaitingTests',
+        pendingChecksReasons: [
+          'Awaiting 25h status stability before PR creation',
+        ],
+        result: 'pending',
+        commitSha: null,
+      });
+      expect(logger.debug).toHaveBeenCalledWith(
+        expect.stringContaining(
+          'Pending status check reason for branch renovate/some-branch: Awaiting 25h status stability before PR creation',
+        ),
+      );
     });
 
     it('returns if branch automerge is pending', async () => {
@@ -1038,10 +1205,15 @@ describe('workers/repository/update/branch/index', () => {
       prWorker.ensurePr.mockResolvedValueOnce({
         type: 'without-pr',
         prBlockedBy: 'BranchAutomerge',
+        pendingChecksReason:
+          'Awaiting status checks to pass before branch automerge',
       });
       expect(await branchWorker.processBranch(config)).toEqual({
         branchExists: true,
         prBlockedBy: 'BranchAutomerge',
+        pendingChecksReasons: [
+          'Awaiting status checks to pass before branch automerge',
+        ],
         result: 'done',
         commitSha: null,
       });
@@ -1170,7 +1342,7 @@ describe('workers/repository/update/branch/index', () => {
     });
 
     it('returns if branch exists but updated', async () => {
-      expect.assertions(4);
+      expect.assertions(5);
       const setArtifactErrorStatus = vi.spyOn(
         artifacts,
         'setArtifactErrorStatus',
@@ -1195,14 +1367,98 @@ describe('workers/repository/update/branch/index', () => {
       expect(await branchWorker.processBranch(inconfig)).toEqual({
         branchExists: true,
         updatesVerified: true,
-        prNo: undefined,
-        result: 'pending',
+        prNo: 5,
+        result: 'pr-created',
         commitSha,
       });
 
-      expect(automerge.tryBranchAutomerge).toHaveBeenCalledTimes(0);
-      expect(prWorker.ensurePr).toHaveBeenCalledTimes(0);
-      expect(setArtifactErrorStatus).toHaveBeenCalledTimes(1);
+      expect(automerge.tryBranchAutomerge).toHaveBeenCalledTimes(1);
+      expect(prWorker.ensurePr).toHaveBeenCalledTimes(1);
+      expect(setArtifactErrorStatus).toHaveBeenCalledTimes(2);
+      expect(logger.debug).not.toHaveBeenCalledWith(
+        expect.stringContaining(
+          'Pending status check reason for branch renovate/some-branch: Awaiting branch status checks for the new commit before PR creation',
+        ),
+      );
+    });
+
+    it.each([
+      {
+        description: 'PR creation is awaiting approval',
+        override: { prCreation: 'approval' },
+      },
+      {
+        description: 'PR creation is forced',
+        override: { forcePr: true, prCreation: 'not-pending' },
+      },
+      {
+        description: 'PR creation is approved in the Dependency Dashboard',
+        override: {
+          dependencyDashboardChecks: {
+            'renovate/some-branch': 'approvePr',
+          },
+          prCreation: 'not-pending',
+        },
+      },
+    ] satisfies {
+      description: string;
+      override: Partial<BranchConfig>;
+    }[])(
+      'continues after a new commit when $description',
+      async ({ override }) => {
+        getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce(
+          partial<PackageFilesResult>({
+            updatedPackageFiles: [partial<FileChange>()],
+          }),
+        );
+        npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+          artifactErrors: [],
+          updatedArtifacts: [partial<FileChange>()],
+        });
+
+        expect(
+          await branchWorker.processBranch({
+            ...config,
+            ...override,
+          }),
+        ).toEqual({
+          branchExists: true,
+          updatesVerified: true,
+          prNo: 5,
+          result: 'pr-created',
+          commitSha,
+        });
+        expect(prWorker.ensurePr).toHaveBeenCalledTimes(1);
+      },
+    );
+
+    it('still awaits successful status checks when PR creation is forced', async () => {
+      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce(
+        partial<PackageFilesResult>({
+          updatedPackageFiles: [partial<FileChange>()],
+        }),
+      );
+      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+        artifactErrors: [],
+        updatedArtifacts: [partial<FileChange>()],
+      });
+
+      expect(
+        await branchWorker.processBranch({
+          ...config,
+          forcePr: true,
+          prCreation: 'status-success',
+        }),
+      ).toEqual({
+        branchExists: true,
+        updatesVerified: true,
+        pendingChecksReasons: [
+          'Awaiting branch status checks for the new commit before PR creation',
+        ],
+        result: 'pending',
+        commitSha,
+      });
+      expect(prWorker.ensurePr).not.toHaveBeenCalled();
     });
 
     it('compiles commit trailers', async () => {
@@ -1297,14 +1553,14 @@ describe('workers/repository/update/branch/index', () => {
       expect(await branchWorker.processBranch(inconfig)).toEqual({
         branchExists: true,
         updatesVerified: true,
-        prNo: undefined,
-        result: 'pending',
+        prNo: 5,
+        result: 'pr-created',
         commitSha,
       });
 
-      expect(automerge.tryBranchAutomerge).toHaveBeenCalledTimes(0);
-      expect(prWorker.ensurePr).toHaveBeenCalledTimes(0);
-      expect(setArtifactErrorStatus).toHaveBeenCalledTimes(1);
+      expect(automerge.tryBranchAutomerge).toHaveBeenCalledTimes(1);
+      expect(prWorker.ensurePr).toHaveBeenCalledTimes(1);
+      expect(setArtifactErrorStatus).toHaveBeenCalledTimes(2);
     });
 
     it('updates branch when forceRebase=true', async () => {
@@ -1330,13 +1586,13 @@ describe('workers/repository/update/branch/index', () => {
       expect(await branchWorker.processBranch(inconfig, true)).toEqual({
         branchExists: true,
         updatesVerified: true,
-        prNo: undefined,
-        result: 'pending',
+        prNo: 5,
+        result: 'pr-created',
         commitSha,
       });
 
-      expect(automerge.tryBranchAutomerge).toHaveBeenCalledTimes(0);
-      expect(prWorker.ensurePr).toHaveBeenCalledTimes(0);
+      expect(automerge.tryBranchAutomerge).toHaveBeenCalledTimes(1);
+      expect(prWorker.ensurePr).toHaveBeenCalledTimes(1);
     });
 
     it('ensures PR and comments notice', async () => {

@@ -5,7 +5,7 @@ import { vi } from 'vitest';
 import { mock } from 'vitest-mock-extended';
 import { Fixtures } from '~test/fixtures.ts';
 import type { RenovateConfig } from '~test/util.ts';
-import { logger, platform } from '~test/util.ts';
+import { logger, partial, platform } from '~test/util.ts';
 import { getConfig } from '../../config/defaults.ts';
 import { GlobalConfig } from '../../config/global.ts';
 import { pkg } from '../../expose.ts';
@@ -21,7 +21,10 @@ import { regEx } from '../../util/regex.ts';
 import { asTimestamp } from '../../util/timestamp.ts';
 import type { BranchConfig, BranchUpgradeConfig } from '../types.ts';
 import * as dependencyDashboard from './dependency-dashboard.ts';
-import { getDashboardMarkdownVulnerabilities } from './dependency-dashboard.ts';
+import {
+  getDashboardMarkdownVulnerabilities,
+  getPendingReason,
+} from './dependency-dashboard.ts';
 import { PackageFiles } from './package-files.ts';
 
 const createVulnerabilitiesMock = vi.fn();
@@ -2202,6 +2205,146 @@ None detected
         packageFiles,
       );
       expect(result).toEqual('');
+    });
+  });
+
+  describe('getPendingReason()', () => {
+    it('returns null when no pending reasons exist', () => {
+      const branch = partial<BranchConfig>({
+        upgrades: [],
+      });
+
+      const result = getPendingReason(branch);
+
+      expect(result).toBeNull();
+    });
+
+    it('returns pending reasons from branch processing', () => {
+      const branch = partial<BranchConfig>({
+        pendingChecksReasons: [
+          '`react`: minimum release age not met (1 day required, 24h remaining)',
+        ],
+      });
+
+      const result = getPendingReason(branch);
+
+      expect(result).toBe(
+        '`react`: minimum release age not met (1 day required, 24h remaining)',
+      );
+    });
+
+    it('joins multiple pending reasons with semicolons', () => {
+      const branch = partial<BranchConfig>({
+        pendingChecksReasons: [
+          '`react`: minimum release age not met (1 day required, 24h remaining)',
+          '`eslint`: merge confidence too low (required: high)',
+        ],
+      });
+
+      const result = getPendingReason(branch);
+
+      expect(result).toBe(
+        '`react`: minimum release age not met (1 day required, 24h remaining); `eslint`: merge confidence too low (required: high)',
+      );
+    });
+
+    it('removes a dependency name already shown in the PR title', () => {
+      const branch = partial<BranchConfig>({
+        pendingChecksReasons: [
+          '`react`: minimum release age not met (1 day required, 24h remaining)',
+        ],
+        prTitle: 'chore(deps): update dependency react to v19',
+      });
+
+      const result = getPendingReason(branch);
+
+      expect(result).toBe(
+        'minimum release age not met (1 day required, 24h remaining)',
+      );
+    });
+
+    it('keeps dependency names for grouped updates', () => {
+      const branch = partial<BranchConfig>({
+        pendingChecksReasons: [
+          '`react`: minimum release age not met (1 day required, 24h remaining)',
+          '`eslint`: merge confidence too low (required: high)',
+        ],
+        prTitle: 'chore(deps): update frontend dependencies',
+      });
+
+      const result = getPendingReason(branch);
+
+      expect(result).toBe(
+        '`react`: minimum release age not met (1 day required, 24h remaining); `eslint`: merge confidence too low (required: high)',
+      );
+    });
+  });
+
+  describe('ensureDependencyDashboard() - verbose pending checks', () => {
+    beforeEach(() => {
+      PackageFiles.clear();
+      PackageFiles.add('main', null);
+      GlobalConfig.reset();
+      logger.getProblems.mockReturnValue([]);
+    });
+
+    it('keeps pending sections unchanged by default', async () => {
+      const branches: BranchConfig[] = [
+        partial<BranchConfig>({
+          branchName: 'pending-branch',
+          prTitle: 'pending pr',
+          result: 'pending',
+          pendingChecksReasons: [
+            '`eslint`: merge confidence too low (required: high)',
+          ],
+          upgrades: [
+            partial<BranchUpgradeConfig>({
+              depName: 'eslint',
+            }),
+          ],
+        }),
+      ];
+      config.dependencyDashboard = true;
+
+      await dependencyDashboard.ensureDependencyDashboard(
+        config,
+        branches,
+        {},
+        { result: 'no-migration' },
+      );
+
+      const body = platform.ensureIssue.mock.calls[0][0].body;
+
+      expect(body).toContain('## Pending Status Checks');
+      expect(body).toContain(
+        ' - [ ] <!-- approvePr-branch=pending-branch -->pending pr\n',
+      );
+      expect(body).not.toContain(
+        '`eslint`: merge confidence too low (required: high)',
+      );
+    });
+
+    it.each`
+      description                                      | branch                                                                                                                                                                                                                                                                                             | expectedSection                  | expectedReason
+      ${'shows release age reasons in pending checks'} | ${partial<BranchConfig>({ branchName: 'release-age-branch', prTitle: 'release age pr', result: 'pending', pendingChecksReasons: ['`react`: minimum release age not met (3 days required, 72h remaining)'], upgrades: [partial<BranchUpgradeConfig>({ depName: 'react' })] })}                      | ${'## Pending Status Checks'}    | ${'`react`: minimum release age not met (3 days required, 72h remaining)'}
+      ${'shows confidence reasons in pending checks'}  | ${partial<BranchConfig>({ branchName: 'confidence-branch', prTitle: 'confidence pr', result: 'pending', pendingChecksReasons: ['`eslint`: merge confidence too low (required: high)'], upgrades: [partial<BranchUpgradeConfig>({ depName: 'eslint' })] })}                                         | ${'## Pending Status Checks'}    | ${'`eslint`: merge confidence too low (required: high)'}
+      ${'shows branch automerge reasons'}              | ${partial<BranchConfig>({ branchName: 'automerge-branch', prTitle: 'automerge pr', result: 'done', prBlockedBy: 'BranchAutomerge', pendingChecksReasons: ['Awaiting status checks to pass before branch automerge'], upgrades: [partial<BranchUpgradeConfig>({ depName: 'typescript' })] })}       | ${'## Pending Branch Automerge'} | ${'Awaiting status checks to pass before branch automerge'}
+      ${'shows awaiting tests reasons'}                | ${partial<BranchConfig>({ branchName: 'awaiting-tests-branch', prTitle: 'awaiting tests pr', result: 'pending', prBlockedBy: 'AwaitingTests', pendingChecksReasons: ['Awaiting all status checks to pass before PR creation'], upgrades: [partial<BranchUpgradeConfig>({ depName: 'vitest' })] })} | ${'## Pending Status Checks'}    | ${'Awaiting all status checks to pass before PR creation'}
+    `('$description', async ({ branch, expectedReason, expectedSection }) => {
+      config.dependencyDashboard = true;
+      config.dependencyDashboardVerbosePendingChecks = true;
+
+      await dependencyDashboard.ensureDependencyDashboard(
+        config,
+        [branch],
+        {},
+        { result: 'no-migration' },
+      );
+
+      const body = platform.ensureIssue.mock.calls[0][0].body;
+
+      expect(body).toContain(expectedSection);
+      expect(body).toContain(expectedReason);
     });
   });
 });
