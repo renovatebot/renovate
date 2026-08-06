@@ -161,6 +161,7 @@ export async function postUpgradeCommandsExecutor(
             logger.trace({ cmd: compiledCmd }, 'Executing post-upgrade task');
 
             const execOpts: ExecOptions = {
+              // oxlint-disable-next-line renovate/no-exec-shell-option -- some self-hosted adminstrators allow their users to use shell features (pipes, globbing, sub-shells), so this is allowed for that purpose when it's opted in via allowShellExecutorForPostUpgradeCommands
               shell: GlobalConfig.get(
                 'allowShellExecutorForPostUpgradeCommands',
               ),
