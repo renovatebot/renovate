@@ -200,9 +200,7 @@ describe('modules/manager/swift/artifacts', () => {
   });
 
   it('parses lockfile with mixed source-control and registry pins', async () => {
-    // Regression test: SwiftPM Package Registry (SE-0292) registry pins have
-    // `kind: "registry"` and no `revision`; a lockfile mixing them with
-    // source-control pins must still parse and update correctly.
+    // Regression test: SwiftPM Package Registry (SE-0292)
     const v2MixedFixture = JSON.stringify(
       {
         pins: [
