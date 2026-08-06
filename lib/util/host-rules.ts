@@ -41,7 +41,15 @@ export function migrateRule(rule: LegacyHostRule & HostRule): HostRule {
 export function add(params: HostRule): void {
   const rule = migrateRule(params);
 
-  const confidentialFields: (keyof HostRule)[] = ['password', 'token'];
+  const confidentialFields: (keyof HostRule)[] = [
+    'password',
+    'token',
+    'httpsPrivateKey',
+    /* not actually sensitive, but redacted nonetheless */
+    'httpsCertificate',
+    /* not actually sensitive, but redacted nonetheless */
+    'httpsCertificateAuthority',
+  ];
   if (rule.matchHost) {
     rule.matchHost = massageHostUrl(rule.matchHost);
     const parsedUrl = parseUrl(rule.matchHost);

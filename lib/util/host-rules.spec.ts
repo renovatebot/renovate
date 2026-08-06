@@ -8,6 +8,7 @@ import {
   hostType,
   hosts,
 } from './host-rules.ts';
+import { sanitize } from './sanitize.ts';
 
 describe('util/host-rules', () => {
   beforeEach(() => {
@@ -106,6 +107,20 @@ describe('util/host-rules', () => {
         password: 'pass2',
         username: 'user2',
       });
+    });
+
+    it('sanitizes TLS credential values', () => {
+      add({
+        matchHost: 'https://some.endpoint',
+        httpsPrivateKey: 'private-key-value',
+        httpsCertificate: 'certificate-value',
+        httpsCertificateAuthority: 'certificate-authority-value',
+      });
+      expect(
+        sanitize(
+          'key=private-key-value cert=certificate-value ca=certificate-authority-value',
+        ),
+      ).toBe('key=**redacted** cert=**redacted** ca=**redacted**');
     });
   });
 
