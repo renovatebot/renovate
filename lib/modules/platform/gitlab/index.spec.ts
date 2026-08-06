@@ -1680,6 +1680,22 @@ describe('modules/platform/gitlab/index', () => {
       await expect(gitlab.findIssue('title-2')).resolves.toBeNull();
       expect(logger.logger.warn).toHaveBeenCalledWith('Error finding issue');
     });
+
+    it('returns null when custom work item GraphQL response omits nodes', async () => {
+      const scope = await initRepo({
+        repository: 'some/repo',
+        gitLabWorkItemType: 'Renovate',
+      });
+      scope.post('/api/graphql').reply(200, {
+        data: {
+          project: {
+            issues: {},
+          },
+        },
+      });
+      await expect(gitlab.findIssue('title-2')).resolves.toBeNull();
+      expect(scope.isDone()).toBeTrue();
+    });
   });
 
   describe('ensureIssue()', () => {
@@ -2063,6 +2079,251 @@ describe('modules/platform/gitlab/index', () => {
         { err: new Error('GitLab GraphQL error: boom') },
         'Could not ensure issue',
       );
+    });
+
+    it('creates custom work item without metadata update', async () => {
+      const scope = await initRepo({
+        repository: 'some/repo',
+        gitLabWorkItemType: 'Renovate',
+      });
+      scope
+        .post('/api/graphql')
+        .reply(200, {
+          data: {
+            project: {
+              issues: {
+                nodes: [],
+              },
+            },
+          },
+        })
+        .post('/api/graphql')
+        .reply(200, {
+          data: {
+            project: {
+              workItemTypes: {
+                nodes: [
+                  {
+                    id: 'gid://gitlab/WorkItems::Type/42',
+                    name: 'Renovate',
+                  },
+                ],
+              },
+            },
+          },
+        })
+        .post('/api/graphql')
+        .reply(200, {
+          data: {
+            workItemCreate: {
+              errors: [],
+              workItem: {
+                iid: '123',
+              },
+            },
+          },
+        });
+      const res = await gitlab.ensureIssue({
+        title: 'new-title',
+        body: 'new-content',
+      });
+      expect(res).toBe('created');
+      expect(scope.isDone()).toBeTrue();
+    });
+
+    it('creates custom work item with confidential metadata and default labels', async () => {
+      const scope = await initRepo({
+        repository: 'some/repo',
+        gitLabWorkItemType: 'Renovate',
+      });
+      scope
+        .post('/api/graphql')
+        .reply(200, {
+          data: {
+            project: {
+              issues: {
+                nodes: [],
+              },
+            },
+          },
+        })
+        .post('/api/graphql')
+        .reply(200, {
+          data: {
+            project: {
+              workItemTypes: {
+                nodes: [
+                  {
+                    id: 'gid://gitlab/WorkItems::Type/42',
+                    name: 'Renovate',
+                  },
+                ],
+              },
+            },
+          },
+        })
+        .post('/api/graphql')
+        .reply(200, {
+          data: {
+            workItemCreate: {
+              errors: [],
+              workItem: {
+                iid: '123',
+              },
+            },
+          },
+        })
+        .post(
+          '/api/graphql',
+          (requestBody) =>
+            requestBody.variables?.input?.confidential === true &&
+            requestBody.variables?.input?.labels?.length === 0,
+        )
+        .reply(200, {
+          data: {
+            updateIssue: {
+              errors: [],
+            },
+          },
+        });
+      const res = await gitlab.ensureIssue({
+        title: 'new-title',
+        body: 'new-content',
+        confidential: true,
+      });
+      expect(res).toBe('created');
+      expect(scope.isDone()).toBeTrue();
+    });
+
+    it('creates custom work item with label metadata and default confidentiality', async () => {
+      const scope = await initRepo({
+        repository: 'some/repo',
+        gitLabWorkItemType: 'Renovate',
+      });
+      scope
+        .post('/api/graphql')
+        .reply(200, {
+          data: {
+            project: {
+              issues: {
+                nodes: [],
+              },
+            },
+          },
+        })
+        .post('/api/graphql')
+        .reply(200, {
+          data: {
+            project: {
+              workItemTypes: {
+                nodes: [
+                  {
+                    id: 'gid://gitlab/WorkItems::Type/42',
+                    name: 'Renovate',
+                  },
+                ],
+              },
+            },
+          },
+        })
+        .post('/api/graphql')
+        .reply(200, {
+          data: {
+            workItemCreate: {
+              errors: [],
+              workItem: {
+                iid: '123',
+              },
+            },
+          },
+        })
+        .post(
+          '/api/graphql',
+          (requestBody) =>
+            requestBody.variables?.input?.confidential === false &&
+            requestBody.variables?.input?.labels?.includes('Renovate'),
+        )
+        .reply(200, {
+          data: {
+            updateIssue: {
+              errors: [],
+            },
+          },
+        });
+      const res = await gitlab.ensureIssue({
+        title: 'new-title',
+        body: 'new-content',
+        labels: ['Renovate'],
+      });
+      expect(res).toBe('created');
+      expect(scope.isDone()).toBeTrue();
+    });
+
+    it('reuses existing custom work item found by reuseTitle', async () => {
+      const scope = await initRepo({
+        repository: 'some/repo',
+        gitLabWorkItemType: 'Renovate',
+      });
+      scope
+        .post(
+          '/api/graphql',
+          (requestBody) => requestBody.variables?.search === 'new-title',
+        )
+        .reply(200, {
+          data: {
+            project: {
+              issues: {
+                nodes: [],
+                pageInfo: {
+                  endCursor: null,
+                  hasNextPage: false,
+                },
+              },
+            },
+          },
+        })
+        .post(
+          '/api/graphql',
+          (requestBody) => requestBody.variables?.search === 'old-title',
+        )
+        .reply(200, {
+          data: {
+            project: {
+              issues: {
+                nodes: [
+                  {
+                    id: 'gid://gitlab/Issue/2',
+                    iid: '2',
+                    title: 'old-title',
+                    description: 'old-content',
+                    labels: {
+                      nodes: [],
+                    },
+                  },
+                ],
+                pageInfo: {
+                  endCursor: null,
+                  hasNextPage: false,
+                },
+              },
+            },
+          },
+        })
+        .post('/api/graphql')
+        .reply(200, {
+          data: {
+            updateIssue: {
+              errors: [],
+            },
+          },
+        });
+      const res = await gitlab.ensureIssue({
+        title: 'new-title',
+        reuseTitle: 'old-title',
+        body: 'new-content',
+      });
+      expect(res).toBe('updated');
+      expect(scope.isDone()).toBeTrue();
     });
 
     it('updates existing issue when a custom work item type is configured', async () => {
