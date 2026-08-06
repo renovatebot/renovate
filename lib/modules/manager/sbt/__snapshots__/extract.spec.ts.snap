@@ -302,6 +302,8 @@ exports[`modules/manager/sbt/extract > extractPackageFile() > extracts deps when
         "https://example.com/repos/5/",
       ],
       "separateMinorPatch": true,
+      "sharedVariableName": "ScalaVersion",
+      "variableName": "ScalaVersion",
     },
     {
       "currentValue": "0.0.1",
@@ -444,6 +446,8 @@ exports[`modules/manager/sbt/extract > extractPackageFile() > extracts deps when
       "packageName": "org.scala-lang:scala-library",
       "registryUrls": [],
       "separateMinorPatch": true,
+      "sharedVariableName": "ScalaVersion",
+      "variableName": "ScalaVersion",
     },
     {
       "currentValue": "0.0.2",
@@ -470,6 +474,8 @@ exports[`modules/manager/sbt/extract > extractPackageFile() > extracts deps when
       "packageName": "org.scala-lang:scala-library",
       "registryUrls": [],
       "separateMinorPatch": true,
+      "sharedVariableName": "ScalaVersion",
+      "variableName": "ScalaVersion",
     },
     {
       "currentValue": "0.0.2",
