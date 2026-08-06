@@ -8,7 +8,10 @@ import type { AllConfig, RenovateConfig } from './config/types.ts';
 
 const CLI = path.resolve('lib/config-validator.ts');
 
-async function runValidator(args: string[], opts: { cwd?: string } = {}) {
+async function runValidator(
+  args: string[],
+  opts: { cwd?: string; env?: Record<string, string> } = {},
+) {
   return execa('node', [CLI, ...args], {
     cwd: opts.cwd,
     reject: false,
@@ -17,6 +20,7 @@ async function runValidator(args: string[], opts: { cwd?: string } = {}) {
       ...process.env,
       LOG_LEVEL: 'info',
       LOG_FORMAT: 'json',
+      ...opts.env,
     },
   });
 }
@@ -167,6 +171,19 @@ describe.concurrent('config-validator', () => {
         expect(exitCode).toBe(0);
         expect(all).toContain('Validating');
         expect(all).toContain('as repo config');
+      });
+    });
+  });
+
+  describe('regex engine', () => {
+    it('logs that validation may be inaccurate when RE2 is not used', async () => {
+      await withTmpDir(async (dirPath) => {
+        const { all } = await runValidator([], {
+          cwd: dirPath,
+          env: { LOG_LEVEL: 'debug', RENOVATE_X_IGNORE_RE2: 'true' },
+        });
+
+        expect(all).toContain('regex validation may be inaccurate');
       });
     });
   });

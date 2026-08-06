@@ -208,6 +208,7 @@ export interface PackageDependency<
 
   mostRecentTimestamp?: Timestamp;
   isAbandoned?: boolean;
+  extractedConstraints?: Partial<Record<ConstraintName, string>>;
   /**
    * Whether the package registry has attestation information for the given update.
    *
@@ -335,6 +336,13 @@ interface ManagerApiBase extends ModuleApi {
   /** Markdown note about dynamically generated depTypes not covered by `knownDepTypes` */
   supportsDynamicDepTypesNote?: string;
   supportsLockFileMaintenance?: boolean;
+  /**
+   * Whether Renovate delegates to external command(s)/package manager to perform lockFileMaintenance.
+   * A `string` value is a Markdown note describing the nuance of the support, e.g. when it's partial
+   * or conditional, instead of a plain `true`/`false`.
+   */
+  lockFileMaintenanceIsDelegatedToPackageManager?: boolean | string;
+
   lockFileNames?: string[];
   supersedesManagers?: string[];
   supportedDatasources: string[];
@@ -378,6 +386,16 @@ export type ManagerApi = ManagerApiBase &
   // this ensures at compile time that lockFileNames are set when manager has supportsLockFileMaintenance=true
   (| { supportsLockFileMaintenance: true; lockFileNames: string[] }
     | { supportsLockFileMaintenance?: false; lockFileNames?: string[] }
+  ) &
+  // this ensures at compile time that lockFileMaintenanceIsDelegatedToPackageManager is set when manager has supportsLockFileMaintenance=true
+  (| {
+        supportsLockFileMaintenance: true;
+        lockFileMaintenanceIsDelegatedToPackageManager: boolean | string;
+      }
+    | {
+        supportsLockFileMaintenance?: false;
+        lockFileMaintenanceIsDelegatedToPackageManager?: boolean | string;
+      }
   );
 
 // TODO: name and properties used by npm manager

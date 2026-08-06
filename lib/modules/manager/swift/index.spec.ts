@@ -189,21 +189,17 @@ describe('modules/manager/swift/index', () => {
     });
 
     it('returns null when no Package.swift files supplied', async () => {
-      expect(await extractAllPackageFiles({} as never, [])).toBeNull();
+      expect(await extractAllPackageFiles({}, [])).toBeNull();
     });
 
     it('skips unreadable Package.swift files', async () => {
       fs.readLocalFile.mockResolvedValueOnce(null);
-      expect(
-        await extractAllPackageFiles({} as never, ['Package.swift']),
-      ).toBeNull();
+      expect(await extractAllPackageFiles({}, ['Package.swift'])).toBeNull();
     });
 
     it('skips Package.swift files that have content but yield no deps', async () => {
       fs.readLocalFile.mockResolvedValueOnce('// no deps here');
-      expect(
-        await extractAllPackageFiles({} as never, ['Package.swift']),
-      ).toBeNull();
+      expect(await extractAllPackageFiles({}, ['Package.swift'])).toBeNull();
     });
 
     it('attaches discovered registry URLs to id-form deps', async () => {
@@ -217,9 +213,7 @@ describe('modules/manager/swift/index', () => {
         return Promise.resolve(null);
       });
 
-      const result = await extractAllPackageFiles({} as never, [
-        'Package.swift',
-      ]);
+      const result = await extractAllPackageFiles({}, ['Package.swift']);
       expect(result).toEqual([
         {
           packageFile: 'Package.swift',
@@ -244,9 +238,7 @@ describe('modules/manager/swift/index', () => {
         return Promise.resolve(null);
       });
 
-      const result = await extractAllPackageFiles({} as never, [
-        'Package.swift',
-      ]);
+      const result = await extractAllPackageFiles({}, ['Package.swift']);
       expect(result?.[0].deps[0]).toEqual({
         datasource: SwiftPackageRegistryDatasource.id,
         depName: 'acme.somelib',

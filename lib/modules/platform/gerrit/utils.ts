@@ -51,7 +51,7 @@ export function getGerritRepoUrl(
 }
 
 function createSshUrl(url: URL, repository: string, username: string): string {
-  return `ssh://${username}@${url.host}:${DEFAULT_SSH_PORT}/${repository}`;
+  return `ssh://${username}@${url.hostname}:${DEFAULT_SSH_PORT}/${repository}`;
 }
 
 function createHttpUrl(url: URL, endpoint: string, repository: string): string {
@@ -174,7 +174,7 @@ export function mapBranchStatusToLabel(
     case 'red':
       return Math.min(...numbers);
   }
-  /* v8 ignore next */
+  /* v8 ignore next -- only reachable for the artificial 'UNKNOWN' state, which callers never pass */
   return label.default_value;
 }
 

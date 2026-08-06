@@ -116,7 +116,7 @@ export class MetadataCache {
           'Rubygems: error fetching rubygems data, falling back to versions-only result',
         );
         const releases = versions.map((version) => ({ version }));
-        return Result.ok({ releases } as ReleaseResult);
+        return Result.ok({ releases });
       })
       .unwrapOrThrow();
   }

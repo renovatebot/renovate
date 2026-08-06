@@ -21,11 +21,10 @@ import type {
   PackageDependency,
   PackageFileContent,
 } from '../types.ts';
-import { CommunityActions } from './community.ts';
 import type { DockerReference, RepositoryReference } from './parse.ts';
 import { isSha, isShortSha, parseUsesLine, versionLikeRe } from './parse.ts';
 import type { UsesStep } from './schema.ts';
-import { Workflow } from './schema.ts';
+import { CommunityActions, Workflow } from './schema.ts';
 
 // detects if we run against a Github Enterprise Server and adds the URL to the beginning of the registryURLs for looking up Actions
 // This reflects the behavior of how GitHub looks up Actions
@@ -290,7 +289,7 @@ function extractSteps(steps: UsesStep[]): PackageDependency[] {
   for (const step of steps) {
     const res = CommunityActions.safeParse(step);
     if (res.success) {
-      deps.push(res.data);
+      deps.push(...res.data);
       continue;
     }
 

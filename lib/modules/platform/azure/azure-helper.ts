@@ -100,7 +100,7 @@ export async function getFile(
           return null;
         }
       }
-    } catch /* v8 ignore next */ {
+    } catch /* v8 ignore next -- non-JSON error body falls through to raw file content, parse failure not simulated in specs */ {
       // it 's not a JSON, so I send the content directly with the line under
     }
 

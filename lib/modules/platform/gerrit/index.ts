@@ -33,7 +33,7 @@ import { repoFingerprint } from '../util.ts';
 import { smartTruncate } from '../utils/pr-body.ts';
 import { readOnlyIssueBody } from '../utils/read-only-issue-body.ts';
 import { client } from './client.ts';
-import type { GerritLabelTypeInfo, GerritProjectInfo } from './schema.ts';
+import type { GerritLabels, GerritProjectInfo } from './schema.ts';
 import { configureScm, pushForReview } from './scm.ts';
 import {
   MAX_GERRIT_COMMENT_SIZE,
@@ -56,7 +56,7 @@ let config: {
   repository?: string;
   head?: string;
   config?: GerritProjectInfo;
-  labels: Record<string, GerritLabelTypeInfo>;
+  labels: GerritLabels;
   gerritUsername?: string;
 } = {
   labels: {},
@@ -197,7 +197,7 @@ export async function initRepo({
     gitUrl,
     config.gerritUsername!,
   );
-  configureScm(repository);
+  configureScm(repository, config.labels);
   await git.initRepo({
     url,
     cloneSubmodules,

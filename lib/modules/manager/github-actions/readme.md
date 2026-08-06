@@ -130,7 +130,7 @@ GitHub Actions maintained by the wider community have `with:` blocks such as:
 
 ```yaml
 steps:
-- uses: astral-sh/setup-uv@v8.3.2
+- uses: astral-sh/setup-uv@v9.0.0
   with:
     version: '0.4.x'
 
@@ -140,6 +140,18 @@ steps:
 ```
 
 Renovate supports extracting some of these input(s) from the following Actions, and performing automagic dependency updates accordingly.
+
+A single step can yield more than one dependency.
+For example, `pnpm/setup` declares both the pnpm version and the JavaScript runtime to install:
+
+```yaml
+steps:
+  - uses: pnpm/setup@v1
+    with:
+      version: '12.0.0'
+      runtime: 'node@24.1.0'
+```
+
 The following third-party Actions have support for their `with:` blocks:
 
 <!-- Autogenerate in https://github.com/renovatebot/renovate -->

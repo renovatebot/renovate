@@ -30,6 +30,7 @@ import { scm } from '../../../../modules/platform/scm.ts';
 import { ExternalHostError } from '../../../../types/errors/external-host-error.ts';
 import { getElapsedMs } from '../../../../util/date.ts';
 import { emojify } from '../../../../util/emoji.ts';
+import { filterValidCommitTrailers } from '../../../../util/git/commit-trailers.ts';
 import {
   getMergeConfidenceLevel,
   isActiveConfidenceLevel,
@@ -736,6 +737,18 @@ export async function processBranch(
         )}`;
 
         logger.trace(`commitMessage: ${JSON.stringify(config.commitMessage)}`);
+      }
+
+      if (config.commitTrailers) {
+        // Template expansions can produce broken trailers
+        config.commitTrailers = filterValidCommitTrailers(
+          config.commitTrailers.map((trailer) =>
+            template.compile(trailer, config),
+          ),
+        );
+        logger.trace(
+          `commitTrailers: ${JSON.stringify(config.commitTrailers)}`,
+        );
       }
 
       commitSha = await commitFilesToBranch(config);
