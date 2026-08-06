@@ -292,6 +292,7 @@
     "description": "`dev-oidc-provider` became unscoped.",
     "packageRules": [
       {
+        "matchCurrentVersion": ">=1.0.0",
         "matchDatasources": ["npm"],
         "matchPackageNames": ["@comet/dev-oidc-provider"],
         "replacementName": "dev-oidc-provider",
@@ -303,6 +304,7 @@
     "description": "`dev-process-manager` became unscoped.",
     "packageRules": [
       {
+        "matchCurrentVersion": ">=2.0.0",
         "matchDatasources": ["npm"],
         "matchPackageNames": ["@comet/dev-process-manager"],
         "replacementName": "dev-process-manager",
