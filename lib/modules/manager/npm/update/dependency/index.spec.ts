@@ -1,5 +1,6 @@
 import { codeBlock } from 'common-tags';
 import { Fixtures } from '~test/fixtures.ts';
+import { logger } from '~test/util.ts';
 import { type Upgrade } from '../../../types.ts';
 import * as npmUpdater from '../../index.ts';
 
@@ -706,6 +707,14 @@ describe('modules/manager/npm/update/dependency/index', () => {
         upgrade,
       });
       expect(res).toBeNull();
+      expect(logger.logger.warn).toHaveBeenCalledExactlyOnceWith(
+        {
+          actualName: 'pnpm',
+          depName: 'yarn',
+          depType: 'devEngines.packageManager',
+        },
+        'No matching devEngines dependency found; this is likely an extraction error.',
+      );
     });
 
     it('returns null if devEngines section missing', () => {
@@ -720,6 +729,13 @@ describe('modules/manager/npm/update/dependency/index', () => {
         upgrade,
       });
       expect(res).toBeNull();
+      expect(logger.logger.warn).toHaveBeenCalledExactlyOnceWith(
+        {
+          depName: 'pnpm',
+          depType: 'devEngines.packageManager',
+        },
+        'No devEngines block found; this is likely an extraction error.',
+      );
     });
 
     it('skips a wrong-position match when updating devEngines.packageManager array', () => {
@@ -777,6 +793,15 @@ describe('modules/manager/npm/update/dependency/index', () => {
         upgrade,
       });
       expect(res).toBeNull();
+      expect(logger.logger.warn).toHaveBeenCalledExactlyOnceWith(
+        {
+          actualName: 'pnpm',
+          depName: 'yarn',
+          depType: 'devEngines.packageManager',
+          devEnginesIndex: 0,
+        },
+        'No matching devEngines dependency found; this is likely an extraction error.',
+      );
     });
 
     it('returns null for devEngines array form when index missing', () => {
@@ -796,6 +821,13 @@ describe('modules/manager/npm/update/dependency/index', () => {
         upgrade,
       });
       expect(res).toBeNull();
+      expect(logger.logger.warn).toHaveBeenCalledExactlyOnceWith(
+        {
+          depName: 'pnpm',
+          depType: 'devEngines.packageManager',
+        },
+        'No devEngines index found; this is likely an extraction error.',
+      );
     });
 
     it('returns null if devEngines content throws error', () => {
