@@ -1,5 +1,6 @@
 import { isNumber, isString } from '@sindresorhus/is';
 import semver from 'semver';
+import { setTimeout } from 'timers/promises';
 import { GlobalConfig } from '../../../config/global.ts';
 import {
   REPOSITORY_ACCESS_FORBIDDEN,
@@ -16,6 +17,7 @@ import { parseJson } from '../../../util/common.ts';
 import { getEnv } from '../../../util/env.ts';
 import * as git from '../../../util/git/index.ts';
 import { setBaseUrl } from '../../../util/http/gitea.ts';
+import { parseInteger } from '../../../util/number.ts';
 import { map } from '../../../util/promises.ts';
 import { sanitize } from '../../../util/sanitize.ts';
 import { ensureTrailingSlash } from '../../../util/url.ts';
@@ -32,8 +34,10 @@ import type {
   MergePRConfig,
   Platform,
   PlatformParams,
+  PlatformPrOptions,
   PlatformResult,
   Pr,
+  ReattemptPlatformAutomergeConfig,
   RepoParams,
   RepoResult,
   RepoSortMethod,
@@ -200,6 +204,116 @@ async function fetchRepositories({
     }),
   });
   return repos.filter(usableRepo).map((r) => r.full_name);
+}
+
+/**
+ * Attempt Gitea-native automerge on a PR.
+ *
+ * Gitea computes the `mergeable` field asynchronously after a branch is pushed.
+ * Calling POST /pulls/{idx}/merge with `merge_when_checks_succeed=true` while
+ * the field is still being computed returns 405 with body
+ * `{"message":"Please try again later"}`. The earlier implementation issued a
+ * single merge call from `createPr` and gave up on any error, which meant
+ * automerge was effectively skipped for newly created PRs on Gitea.
+ *
+ * This helper polls the PR a small number of times until `mergeable` is true,
+ * then issues the merge call. Mirrors GitLab's `tryPrAutomerge` pattern.
+ * Tunable via the experimental env vars
+ *   RENOVATE_X_GITEA_AUTO_MERGEABLE_CHECK_ATTEMPTS   (default 5)
+ *   RENOVATE_X_GITEA_AUTO_MERGEABLE_CHECK_DELAY    (default 250 ms, exponential)
+ */
+async function tryPrAutomerge(
+  prNumber: number,
+  platformPrOptions: PlatformPrOptions | undefined,
+): Promise<void> {
+  if (!platformPrOptions?.usePlatformAutomerge) {
+    return;
+  }
+
+  // Gitea v1.24.0+ / Forgejo v10.0.0+ are required for the
+  // `delete_branch_after_merge` parameter passed below.
+  if (!semver.gte(defaults.version, defaults.isForgejo ? '10.0.0' : '1.24.0')) {
+    logger.debug(
+      { prNumber },
+      `Gitea-native automerge: not supported on this version of ${
+        defaults.isForgejo ? 'Forgejo' : 'Gitea'
+      }. Use ${defaults.isForgejo ? '10.0.0' : '1.24.0'} or newer.`,
+    );
+    return;
+  }
+
+  const env = getEnv();
+  const retryTimes = parseInteger(
+    env.RENOVATE_X_GITEA_AUTO_MERGEABLE_CHECK_ATTEMPTS,
+    5,
+  );
+  const baseDelay = parseInteger(
+    env.RENOVATE_X_GITEA_AUTO_MERGEABLE_CHECK_DELAY,
+    250,
+  );
+
+  // Wait for Gitea to finish computing mergeable before calling merge.
+  // Just after PR creation the field is false as a placeholder while the async
+  // check runs; a follow-up getPR returns the current value.
+  for (let attempt = 1; attempt <= retryTimes; attempt += 1) {
+    const pr = await helper.getPR(config.repository, prNumber, {
+      memCache: false,
+    });
+    if (pr.mergeable) {
+      break;
+    }
+    if (attempt === retryTimes) {
+      logger.debug(
+        { prNumber },
+        'Gitea-native automerge: mergeable still false after retries, attempting merge call anyway',
+      );
+      break;
+    }
+    logger.debug(
+      { prNumber, attempt },
+      'Gitea-native automerge: mergeable not yet computed, retrying',
+    );
+    await setTimeout(baseDelay * attempt ** 2);
+  }
+
+  try {
+    await helper.mergePR(config.repository, prNumber, {
+      Do:
+        getMergeMethod(platformPrOptions?.automergeStrategy) ??
+        config.mergeMethod,
+      merge_when_checks_succeed: true,
+      delete_branch_after_merge: true,
+    });
+    logger.debug({ prNumber }, 'Gitea-native automerge: success');
+  } catch (err) {
+    logger.warn({ err, prNumber }, 'Gitea-native automerge: fail');
+  }
+}
+
+/**
+ * Re-attempt Gitea-native automerge on an existing PR. Called by the worker
+ * after a branch update so that PRs which couldn't be auto-merged at creation
+ * time get another chance, and so that PRs created before a packageRules
+ * change enables automerge get retroactively flagged.
+ *
+ * Mirrors the GitHub / GitLab adapters' reattemptPlatformAutomerge contract.
+ */
+export async function reattemptPlatformAutomerge({
+  number,
+  platformPrOptions,
+}: ReattemptPlatformAutomergeConfig): Promise<void> {
+  try {
+    await tryPrAutomerge(number, platformPrOptions);
+    logger.debug(
+      { prNumber: number },
+      'Gitea-native automerge: re-attempt complete',
+    );
+  } catch (err) /* v8 ignore next */ {
+    logger.warn(
+      { err, prNumber: number },
+      'Error re-attempting Gitea-native automerge',
+    );
+  }
 }
 
 const platform: Platform = {
@@ -606,38 +720,7 @@ const platform: Platform = {
         labels: labels.filter(isNumber),
       });
 
-      if (platformPrOptions?.usePlatformAutomerge) {
-        // Only Gitea v1.24.0+ and Forgejo v10.0.0+ support delete_branch_after_merge.
-        // This is required to not have undesired behavior when renovate finds existing branches on next run.
-        if (
-          semver.gte(defaults.version, defaults.isForgejo ? '10.0.0' : '1.24.0')
-        ) {
-          try {
-            await helper.mergePR(config.repository, gpr.number, {
-              Do:
-                getMergeMethod(platformPrOptions?.automergeStrategy) ??
-                config.mergeMethod,
-              merge_when_checks_succeed: true,
-              delete_branch_after_merge: true,
-            });
-
-            logger.debug(
-              { prNumber: gpr.number },
-              'Gitea-native automerge: success',
-            );
-          } catch (err) {
-            logger.warn(
-              { err, prNumber: gpr.number },
-              'Gitea-native automerge: fail',
-            );
-          }
-        } else {
-          logger.debug(
-            { prNumber: gpr.number },
-            `Gitea-native automerge: not supported on this version of ${defaults.isForgejo ? 'Forgejo' : 'Gitea'}. Use ${defaults.isForgejo ? '10.0.0' : '1.24.0'} or newer.`,
-          );
-        }
-      }
+      await tryPrAutomerge(gpr.number, platformPrOptions);
 
       const pr = toRenovatePR(gpr, botUserName);
       if (!pr) {
