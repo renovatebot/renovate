@@ -73,6 +73,26 @@ This ensures existing lock files are never broken by the `--before` flag.
 
 After the next lock file maintenance run (which regenerates the lock file from scratch with `--before`), subsequent updates will fully enforce the `minimumReleaseAge` constraint.
 
+#### uv
+
+When `minimumReleaseAge` is configured, Renovate passes `--exclude-newer <date>` to `uv lock` during lock file generation.
+This restricts uv to package versions published before the cooldown threshold, protecting against newly published (and potentially malicious) transitive dependencies.
+
+The `--exclude-newer` date is calculated as `now - minimumReleaseAge` and passed as an RFC 3339 timestamp.
+
+If a [`[tool.uv].exclude-newer`](https://docs.astral.sh/uv/reference/settings/#exclude-newer) setting already exists in the project's `pyproject.toml`, Renovate uses the stricter (older) of the two dates.
+The `exclude-newer` setting accepts a friendly duration (for example, `"3 days"`), an ISO 8601 duration (for example, `"P7D"`), or an RFC 3339 timestamp; Renovate resolves all three formats to absolute dates before comparing.
+If the value in `pyproject.toml` cannot be parsed, Renovate falls back to the date derived from `minimumReleaseAge` and logs a debug message.
+
+For per-package overrides, use the native [`[tool.uv].exclude-newer-package`](https://docs.astral.sh/uv/reference/settings/#exclude-newer-package) setting in `pyproject.toml`.
+uv merges those per-package values with the global `--exclude-newer` flag, so per-package cooldowns take precedence for the listed packages while the global value still applies to the rest.
+
+If the existing lock file contains packages published after the `--exclude-newer` cutoff, uv will try to downgrade them to the most recent version that satisfies both `--exclude-newer` and the version specifiers declared in `pyproject.toml` (including those of transitive dependencies).
+Only when no such downgrade is possible across the full dependency tree (for example, when a version specifier in `pyproject.toml` allows only versions published after the cutoff, typically because it was tightened before `minimumReleaseAge` was configured) does uv fail with a `No solution found` error.
+In this case, Renovate automatically retries without `--exclude-newer` and logs a warning, so the existing lock file is never broken by the `--exclude-newer` flag.
+
+After the next lock file maintenance run (which regenerates the lock file from scratch with `--exclude-newer`), subsequent updates will fully enforce the `minimumReleaseAge` constraint.
+
 ### What happens if the datasource and/or registry does not provide a release timestamp, when using `minimumReleaseAge`?
 
 !!! warning
