@@ -24,6 +24,8 @@ function upper(str: string): string {
 
 export function sanitizeDepName(depName: string): string {
   return depName
+    .replace(regEx(/\$\{[^}]+\}/g), '')
+    .replace(regEx(/[${}]/g), '')
     .replace('@types/', '')
     .replace('@', '')
     .replace(regEx(/\//g), '-')

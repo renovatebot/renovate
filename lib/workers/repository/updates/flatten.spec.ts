@@ -22,6 +22,12 @@ describe('workers/repository/updates/flatten', () => {
         'https-some.host.name-a-path-to.git',
       );
     });
+
+    it('strips shell-style variable placeholders', () => {
+      expect(sanitizeDepName('${DEPENDENCY_PROXY}python')).toBe('python');
+      expect(sanitizeDepName('${DEPENDENCY_PROXY:-}python')).toBe('python');
+      expect(sanitizeDepName('$CI_REGISTRY/image')).toBe('ci_registry-image');
+    });
   });
 
   describe('flattenUpdates()', () => {
