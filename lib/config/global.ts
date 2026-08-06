@@ -107,6 +107,8 @@ export class GlobalConfig {
       delete result[option];
     }
 
+    GlobalConfig.config.containerbasePackageRules = config.packageRules;
+
     return result;
   }
 

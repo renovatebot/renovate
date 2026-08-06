@@ -279,6 +279,7 @@ export interface RepoGlobalConfig extends GlobalInheritableConfig {
   productLinks?: Record<string, string>;
   rebaseAllOpenBranches?: boolean;
   toolSettings?: ToolSettingsOptions;
+  containerbasePackageRules?: PackageRule[];
 }
 
 /**

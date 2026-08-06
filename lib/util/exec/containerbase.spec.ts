@@ -64,6 +64,10 @@ describe('util/exec/containerbase', () => {
   });
 
   describe('resolveConstraint()', () => {
+    beforeEach(() => {
+      GlobalConfig.reset();
+    });
+
     it('returns from config', async () => {
       expect(
         await resolveConstraint({ toolName: 'composer', constraint: '1.1.0' }),
@@ -257,6 +261,108 @@ describe('util/exec/containerbase', () => {
         );
       },
     );
+
+    it('applies packageRules to override datasource for tool-constraint', async () => {
+      GlobalConfig.set({
+        packageRules: [
+          {
+            matchDepNames: ['node'],
+            matchDepTypes: ['tool-constraint'],
+            overrideDatasource: 'node-version',
+            overridePackageName: 'node',
+          },
+        ],
+      });
+      datasource.getPkgReleases.mockResolvedValueOnce({
+        releases: [{ version: '18.0.0' }, { version: '20.0.0' }],
+      });
+      const result = await resolveConstraint({ toolName: 'node' });
+      expect(result).toBe('20.0.0');
+      expect(datasource.getPkgReleases).toHaveBeenCalledWith(
+        expect.objectContaining({
+          datasource: 'node-version',
+          packageName: 'node',
+        }),
+      );
+    });
+
+    it('passes registryUrls from packageRules to getPkgReleases for tool-constraint', async () => {
+      GlobalConfig.set({
+        packageRules: [
+          {
+            matchDepNames: ['node'],
+            matchDepTypes: ['tool-constraint'],
+            overrideDatasource: 'node-version',
+            overridePackageName: 'node',
+            registryUrls: ['https://artifactory.custom.domain/nodejs'],
+          },
+        ],
+      });
+      datasource.getPkgReleases.mockResolvedValueOnce({
+        releases: [{ version: '20.0.0' }],
+      });
+      await resolveConstraint({ toolName: 'node' });
+      expect(datasource.getPkgReleases).toHaveBeenCalledWith(
+        expect.objectContaining({
+          datasource: 'node-version',
+          packageName: 'node',
+          registryUrls: ['https://artifactory.custom.domain/nodejs'],
+        }),
+      );
+    });
+
+    it('applies packageRules versioning override for tool-constraint', async () => {
+      GlobalConfig.set({
+        packageRules: [
+          {
+            matchDepNames: ['golang'],
+            matchDepTypes: ['tool-constraint'],
+            versioning: 'semver',
+          },
+        ],
+      });
+      datasource.getPkgReleases.mockResolvedValueOnce({
+        releases: [{ version: '1.20.0' }, { version: '1.21.0' }],
+      });
+      const result = await resolveConstraint({ toolName: 'golang' });
+      expect(result).toBe('1.21.0');
+    });
+
+    it('does not apply non-matching packageRules to tool-constraint', async () => {
+      GlobalConfig.set({
+        packageRules: [
+          {
+            matchDepNames: ['python'],
+            matchDepTypes: ['tool-constraint'],
+            overrideDatasource: 'pypi',
+          },
+        ],
+      });
+      datasource.getPkgReleases.mockResolvedValueOnce({
+        releases: [{ version: '2.1.0' }],
+      });
+      await resolveConstraint({ toolName: 'composer' });
+      expect(datasource.getPkgReleases).toHaveBeenCalledWith(
+        expect.objectContaining({
+          datasource: 'github-releases',
+          packageName: 'containerbase/composer-prebuild',
+        }),
+      );
+    });
+
+    it('works without packageRules', async () => {
+      datasource.getPkgReleases.mockResolvedValueOnce({
+        releases: [{ version: '20.0.0' }],
+      });
+      const result = await resolveConstraint({ toolName: 'node' });
+      expect(result).toBe('20.0.0');
+      expect(datasource.getPkgReleases).toHaveBeenCalledWith(
+        expect.objectContaining({
+          datasource: 'github-releases',
+          packageName: 'containerbase/node-prebuild',
+        }),
+      );
+    });
   });
 
   describe('generateInstallCommands()', () => {
