@@ -1,3 +1,4 @@
+import type { Stats } from 'node:fs';
 import upath from 'upath';
 import { mockDeep } from 'vitest-mock-extended';
 import { mockExecAll } from '~test/exec-util.ts';
@@ -394,6 +395,14 @@ describe('modules/manager/copier/artifacts', () => {
       );
       fs.readLocalFile.mockResolvedValueOnce('new file contents');
       fs.readLocalFile.mockResolvedValueOnce('renamed file contents');
+      fs.statLocalFile.mockImplementation((path) =>
+        Promise.resolve(
+          partial<Stats>({
+            isFile: () => true,
+            mode: path === 'new_file.py' ? 0o755 : 0o644,
+          }),
+        ),
+      );
 
       const result = await updateArtifacts({
         packageFileName: '.copier-answers.yml',
@@ -415,6 +424,7 @@ describe('modules/manager/copier/artifacts', () => {
             type: 'addition',
             path: 'new_file.py',
             contents: 'new file contents',
+            isExecutable: true,
           },
         },
         {
