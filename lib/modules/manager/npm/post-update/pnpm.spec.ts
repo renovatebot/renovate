@@ -426,6 +426,92 @@ describe('modules/manager/npm/post-update/pnpm', () => {
     ]);
   });
 
+  it('uses inherited packageManager from ancestor package.json when sibling has none', async () => {
+    const execSnapshots = mockExecAll();
+    const configTemp = partial<PostUpdateConfig>();
+    fs.readLocalFile.mockImplementation(
+      (fileName: string): Promise<string | null> => {
+        // Sibling package.json has no packageManager / engines.
+        if (fileName === 'frontend/package.json') {
+          return Promise.resolve('{}');
+        }
+        // Ancestor package.json (repo root) pins pnpm via packageManager.
+        if (fileName === 'package.json') {
+          return Promise.resolve(
+            codeBlock`
+            {
+              "name": "monorepo-root",
+              "packageManager": "pnpm@10.33.4"
+            }
+          `,
+          );
+        }
+        return Promise.resolve('package-lock-contents');
+      },
+    );
+
+    const res = await pnpmHelper.generateLockFile('frontend', {}, configTemp, [
+      {
+        depType: 'packageManager',
+        depName: 'pnpm',
+      },
+    ]);
+
+    expect(res.lockFile).toBe('package-lock-contents');
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'pnpm install --lockfile-only --ignore-scripts --ignore-pnpmfile',
+        options: {
+          cwd: 'frontend',
+        },
+      },
+    ]);
+  });
+
+  it('does not walk up when sibling packageManager satisfies constraint', async () => {
+    const execSnapshots = mockExecAll();
+    const configTemp = partial<PostUpdateConfig>();
+    const siblingPackageJson = codeBlock`
+      {
+        "name": "frontend",
+        "packageManager": "pnpm@9.0.0"
+      }
+    `;
+    const ancestorPackageJson = codeBlock`
+      {
+        "name": "monorepo-root",
+        "packageManager": "pnpm@10.33.4"
+      }
+    `;
+    fs.readLocalFile.mockImplementation(
+      (fileName: string): Promise<string | null> => {
+        if (fileName === 'frontend/package.json') {
+          return Promise.resolve(siblingPackageJson);
+        }
+        if (fileName === 'package.json') {
+          return Promise.resolve(ancestorPackageJson);
+        }
+        return Promise.resolve('package-lock-contents');
+      },
+    );
+
+    const res = await pnpmHelper.generateLockFile('frontend', {}, configTemp, [
+      {
+        depType: 'packageManager',
+        depName: 'pnpm',
+      },
+    ]);
+
+    expect(res.lockFile).toBe('package-lock-contents');
+    // Sibling pin wins; the ancestor package.json should never be read.
+    expect(fs.readLocalFile).not.toHaveBeenCalledWith('package.json', 'utf8');
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'pnpm install --lockfile-only --ignore-scripts --ignore-pnpmfile',
+      },
+    ]);
+  });
+
   it('uses volta version and puts it into constraint', async () => {
     const execSnapshots = mockExecAll();
     const configTemp = partial<PostUpdateConfig>();
@@ -495,7 +581,9 @@ describe('modules/manager/npm/post-update/pnpm', () => {
       configTemp,
       [],
     );
-    expect(fs.readLocalFile).toHaveBeenCalledTimes(3);
+    // 1: sibling package.json, 2: ancestor package.json (walk-up),
+    // 3: lockfile for constraint derivation, 4: final lockfile read
+    expect(fs.readLocalFile).toHaveBeenCalledTimes(4);
     expect(res.lockFile).toBe('lockfileVersion: 5.3\n');
   });
 
