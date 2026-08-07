@@ -114,11 +114,25 @@ describe('util/exec/env', () => {
         TRACEPARENT: '00-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa-bbbbbbbbbbbbbbbb-01',
       });
     });
+
+    it('overrides OTEL_SERVICE_NAME with a name derived from the command, when given', () => {
+      expect(getChildProcessEnv([], 'git')).toMatchObject({
+        OTEL_SERVICE_NAME: 'renovate-git',
+      });
+    });
+
+    it('does not set OTEL_SERVICE_NAME when no command name is given', () => {
+      expect(getChildProcessEnv()).toMatchObject({
+        OTEL_SERVICE_NAME: 'renovate-test',
+      });
+    });
   });
 
   it('does not forward OTEL_* environment variables when tracing is disabled', () => {
     process.env.OTEL_SERVICE_NAME = 'renovate-test';
-    expect(getChildProcessEnv()).not.toHaveProperty('OTEL_SERVICE_NAME');
+    expect(getChildProcessEnv([], 'git')).not.toHaveProperty(
+      'OTEL_SERVICE_NAME',
+    );
     delete process.env.OTEL_SERVICE_NAME;
   });
 });

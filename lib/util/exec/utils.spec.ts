@@ -1,5 +1,9 @@
 import type { CommandWithOptions } from './types.ts';
-import { asRawCommands, isCommandWithOptions } from './utils.ts';
+import {
+  asRawCommands,
+  getExecutableName,
+  isCommandWithOptions,
+} from './utils.ts';
 
 describe('util/exec/utils', () => {
   describe('isCommandWithOptions', () => {
@@ -231,6 +235,38 @@ describe('util/exec/utils', () => {
         expect(res).toBeArrayOfSize(2);
         expect(res).toEqual(['ls', 'go mod tidy']);
       });
+    });
+  });
+
+  describe('getExecutableName', () => {
+    it('returns the executable name from a string command', () => {
+      expect(getExecutableName('git status')).toBe('git');
+    });
+
+    it('strips any path from the executable', () => {
+      expect(getExecutableName('/usr/bin/git status')).toBe('git');
+    });
+
+    it('returns the executable name from the first of an array of commands', () => {
+      expect(getExecutableName(['npm install', 'npm run build'])).toBe('npm');
+    });
+
+    it('returns the executable name from `CommandWithOptions`', () => {
+      expect(getExecutableName([{ command: ['go', 'mod', 'tidy'] }])).toBe(
+        'go',
+      );
+    });
+
+    it('returns undefined for an empty array', () => {
+      expect(getExecutableName([])).toBeUndefined();
+    });
+
+    it('returns undefined for an empty string', () => {
+      expect(getExecutableName('')).toBeUndefined();
+    });
+
+    it('returns undefined for a whitespace-only string', () => {
+      expect(getExecutableName('   ')).toBeUndefined();
     });
   });
 });

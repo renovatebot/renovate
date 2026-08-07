@@ -281,7 +281,7 @@ describe('util/exec/index', () => {
         outCmd: [
           dockerPullCmd,
           dockerRemoveCmd,
-          `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} -e CONTAINERBASE_CACHE_DIR -e OTEL_EXPORTER_OTLP_ENDPOINT ${defaultCwd} ${fullImage} bash -l -c '${inCmd}'`,
+          `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} -e CONTAINERBASE_CACHE_DIR -e OTEL_EXPORTER_OTLP_ENDPOINT -e OTEL_SERVICE_NAME ${defaultCwd} ${fullImage} bash -l -c '${inCmd}'`,
         ],
         outOpts: [
           dockerPullOpts,
@@ -291,6 +291,7 @@ describe('util/exec/index', () => {
             env: {
               ...containerbaseEnv,
               OTEL_EXPORTER_OTLP_ENDPOINT: 'http://localhost:4318',
+              OTEL_SERVICE_NAME: 'renovate-echo',
             },
             timeout: 900000,
             maxBuffer: 10485760,

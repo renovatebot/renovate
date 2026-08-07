@@ -54,6 +54,7 @@ export const basicEnvVars = [
 
 export function getChildProcessEnv(
   customEnvVars: string[] = [],
+  commandName?: string,
 ): NodeJS.ProcessEnv {
   const env: NodeJS.ProcessEnv = {};
   if (GlobalConfig.get('exposeAllEnv')) {
@@ -83,6 +84,13 @@ export function getChildProcessEnv(
       }
     }
     Object.assign(env, getTraceContextEnv());
+
+    // Give the child its own service name, distinct from Renovate's, so its
+    // spans don't get grouped under Renovate's own service in tools which
+    // read OTEL_SERVICE_NAME natively.
+    if (commandName) {
+      env.OTEL_SERVICE_NAME = `renovate-${commandName}`;
+    }
   }
 
   return env;
