@@ -1,7 +1,7 @@
 import { isNonEmptyString } from '@sindresorhus/is';
 import upath from 'upath';
 import { GlobalConfig } from '../../config/global.ts';
-import type { ToolSettingsOptions } from '../../config/types.ts';
+import type { RepoToolSettingsOptions } from '../../config/types.ts';
 import { TEMPORARY_ERROR } from '../../constants/error-messages.ts';
 import { logger } from '../../logger/index.ts';
 import { getCustomEnv, getUserEnv } from '../env.ts';
@@ -222,15 +222,15 @@ export async function exec(
 }
 
 export function getToolSettingsOptions(
-  repoConfig?: ToolSettingsOptions,
-): ToolSettingsOptions {
+  repoConfig?: RepoToolSettingsOptions,
+): RepoToolSettingsOptions {
   let defaults = GlobalConfig.get('toolSettings');
   defaults ??= {
     jvmMaxMemory: 512,
     jvmMemory: 512,
   };
 
-  const options: ToolSettingsOptions = {};
+  const options: RepoToolSettingsOptions = {};
 
   options.jvmMaxMemory = defaults?.jvmMaxMemory ?? 512;
   options.jvmMemory = defaults?.jvmMemory ?? options.jvmMaxMemory;
@@ -289,6 +289,6 @@ export function getToolSettingsOptions(
   return options;
 }
 
-export function gradleJvmArg(config: ToolSettingsOptions): string {
+export function gradleJvmArg(config: RepoToolSettingsOptions): string {
   return ` -Dorg.gradle.jvmargs="-Xms${config.jvmMemory}m -Xmx${config.jvmMaxMemory}m"`;
 }
