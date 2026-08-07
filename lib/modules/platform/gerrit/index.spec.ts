@@ -160,12 +160,14 @@ describe('modules/platform/gerrit/index', () => {
       await gerrit.initRepo({
         repository: 'test/repo',
         cloneSubmodules: true,
+        cloneSubmodulesRecursive: true,
         cloneSubmodulesFilter: ['test'],
       });
 
       expect(git.initRepo).toHaveBeenCalledExactlyOnceWith({
         url: 'https://user:pass@dev.gerrit.com/renovate/a/test%2Frepo',
         cloneSubmodules: true,
+        cloneSubmodulesRecursive: true,
         cloneSubmodulesFilter: ['test'],
         virtualBranches: {},
       });
