@@ -32,6 +32,11 @@ export interface RepoResult {
   repoFingerprint: string;
 }
 
+export interface PlatformRepoConfig {
+  azureWorkItemType?: string;
+  gitLabWorkItemType?: string;
+}
+
 export type GitUrlOption = 'default' | 'ssh' | 'endpoint';
 
 export interface RepoParams {
@@ -254,6 +259,7 @@ export interface Platform {
     branchOrTag?: string,
   ): Promise<any>;
   initRepo(config: RepoParams): Promise<RepoResult>;
+  setRepoContext?(config: PlatformRepoConfig): void;
   getPrList(): Promise<Pr[]>;
   ensureIssueClosing(title: string): Promise<void>;
   ensureIssue(

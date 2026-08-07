@@ -51,6 +51,7 @@ import type {
   MergePRConfig,
   PlatformParams,
   PlatformPrOptions,
+  PlatformRepoConfig,
   PlatformResult,
   Pr,
   ReattemptPlatformAutomergeConfig,
@@ -123,6 +124,13 @@ interface GitlabGraphqlIssueNode {
       title: string;
     }[];
   } | null;
+}
+
+interface GitlabGraphqlWorkItemTypeNode {
+  id: string;
+  name: string;
+  enabled?: boolean | null;
+  canUserCreateItems?: boolean | null;
 }
 
 interface GitlabGraphqlPageInfo {
@@ -431,6 +439,14 @@ export async function initRepo({
     repoFingerprint: repoFingerprint(res.body.id, defaults.endpoint),
   };
   return repoConfig;
+}
+
+export function setRepoContext({
+  gitLabWorkItemType,
+}: PlatformRepoConfig): void {
+  if (isString(gitLabWorkItemType)) {
+    config.workItemType = gitLabWorkItemType;
+  }
 }
 
 export function getBranchForceRebase(): Promise<boolean> {
@@ -1100,34 +1116,87 @@ async function findGraphqlIssueByTitle(
   return null;
 }
 
+function isUnsupportedWorkItemTypeFieldError(err: unknown): boolean {
+  return (
+    err instanceof Error &&
+    (err.message.includes("Field 'enabled' doesn't exist") ||
+      err.message.includes("Field 'canUserCreateItems' doesn't exist"))
+  );
+}
+
+function isGraphqlWorkItemTypeCreatable(
+  workItemType: GitlabGraphqlWorkItemTypeNode,
+): boolean {
+  return (
+    workItemType.enabled !== false && workItemType.canUserCreateItems !== false
+  );
+}
+
 async function resolveGraphqlWorkItemTypeId(): Promise<string | null> {
-  const data = await requestGraphql<{
-    namespace?: {
-      workItemTypes?: {
-        nodes?: {
-          id: string;
-          name: string;
-        }[];
+  let workItemTypes: GitlabGraphqlWorkItemTypeNode[] | undefined;
+  try {
+    const data = await requestGraphql<{
+      namespace?: {
+        workItemTypes?: {
+          nodes?: GitlabGraphqlWorkItemTypeNode[];
+        } | null;
       } | null;
-    } | null;
-  }>(
-    `
-      query NamespaceWorkItemTypes($namespacePath: ID!) {
-        namespace(fullPath: $namespacePath) {
-          workItemTypes(first: 100) {
-            nodes {
-              id
-              name
+    }>(
+      `
+        query NamespaceWorkItemTypes($namespacePath: ID!) {
+          namespace(fullPath: $namespacePath) {
+            workItemTypes(first: 100) {
+              nodes {
+                id
+                name
+                enabled
+                canUserCreateItems
+              }
             }
           }
         }
-      }
-    `,
-    {
-      namespacePath: config.repositoryPath,
-    },
-  );
-  const workItemType = data.namespace?.workItemTypes?.nodes?.find(
+      `,
+      {
+        namespacePath: config.repositoryPath,
+      },
+    );
+    workItemTypes = data.namespace?.workItemTypes?.nodes?.filter(
+      isGraphqlWorkItemTypeCreatable,
+    );
+  } catch (err) {
+    if (!isUnsupportedWorkItemTypeFieldError(err)) {
+      throw err;
+    }
+    logger.debug(
+      'GitLab GraphQL work item availability fields unsupported; falling back to legacy work item types query',
+    );
+    const data = await requestGraphql<{
+      namespace?: {
+        workItemTypes?: {
+          nodes?: GitlabGraphqlWorkItemTypeNode[];
+        } | null;
+      } | null;
+    }>(
+      `
+        query NamespaceWorkItemTypes($namespacePath: ID!) {
+          namespace(fullPath: $namespacePath) {
+            workItemTypes(first: 100) {
+              nodes {
+                id
+                name
+              }
+            }
+          }
+        }
+      `,
+      {
+        namespacePath: config.repositoryPath,
+      },
+    );
+    workItemTypes = data.namespace?.workItemTypes?.nodes;
+  }
+
+  const workItemType = workItemTypes?.find(
     (item) => item.name === config.workItemType,
   );
   if (!workItemType) {
@@ -1136,7 +1205,7 @@ async function resolveGraphqlWorkItemTypeId(): Promise<string | null> {
         repository: config.repositoryPath,
         workItemType: config.workItemType,
       },
-      'GitLab configured work item type does not exist in project; skipping issue creation',
+      'GitLab configured work item type does not exist or is not creatable in this project; skipping issue creation',
     );
     return null;
   }
@@ -1156,6 +1225,9 @@ async function createGraphqlWorkItem(
       errors: string[];
       workItem?: {
         iid: string;
+        workItemType?: {
+          name: string;
+        } | null;
       } | null;
     } | null;
   }>(
@@ -1165,6 +1237,9 @@ async function createGraphqlWorkItem(
           errors
           workItem {
             iid
+            workItemType {
+              name
+            }
           }
         }
       }
@@ -1188,6 +1263,17 @@ async function createGraphqlWorkItem(
   const iid = data.workItemCreate?.workItem?.iid;
   if (!iid) {
     return null;
+  }
+  const createdWorkItemType = data.workItemCreate?.workItem?.workItemType?.name;
+  if (createdWorkItemType && createdWorkItemType !== config.workItemType) {
+    logger.warn(
+      {
+        repository: config.repositoryPath,
+        requestedWorkItemType: config.workItemType,
+        createdWorkItemType,
+      },
+      'GitLab created a different work item type than requested',
+    );
   }
   return { iid: parseInteger(iid) };
 }

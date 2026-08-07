@@ -1935,6 +1935,59 @@ describe('modules/platform/gitlab/index', () => {
       expect(res).toBe('created');
     });
 
+    it('creates custom work item when repo config is applied after initRepo', async () => {
+      const scope = await initRepo({
+        repository: 'some/repo',
+      });
+      gitlab.setRepoContext?.({
+        gitLabWorkItemType: 'Renovate',
+      });
+      scope
+        .post('/api/graphql')
+        .reply(200, {
+          data: {
+            project: {
+              issues: {
+                nodes: [],
+              },
+            },
+          },
+        })
+        .post('/api/graphql')
+        .reply(200, {
+          data: {
+            namespace: {
+              workItemTypes: {
+                nodes: [
+                  {
+                    id: 'gid://gitlab/WorkItems::Type/42',
+                    name: 'Renovate',
+                  },
+                ],
+              },
+            },
+          },
+        })
+        .post('/api/graphql')
+        .reply(200, {
+          data: {
+            workItemCreate: {
+              errors: [],
+              workItem: {
+                iid: '123',
+              },
+            },
+          },
+        });
+      await expect(
+        gitlab.ensureIssue({
+          title: 'new-title',
+          body: 'new-content',
+        }),
+      ).resolves.toBe('created');
+      expect(scope.isDone()).toBeTrue();
+    });
+
     it('skips custom work item creation when configured type does not exist', async () => {
       const scope = await initRepo({
         repository: 'some/repo',
@@ -1977,7 +2030,55 @@ describe('modules/platform/gitlab/index', () => {
           repository: 'some/repo',
           workItemType: 'Renovate',
         },
-        'GitLab configured work item type does not exist in project; skipping issue creation',
+        'GitLab configured work item type does not exist or is not creatable in this project; skipping issue creation',
+      );
+    });
+
+    it('skips custom work item creation when configured type is not creatable in the project', async () => {
+      const scope = await initRepo({
+        repository: 'some/repo',
+        gitLabWorkItemType: 'Renovate',
+      });
+      scope
+        .post('/api/graphql')
+        .reply(200, {
+          data: {
+            project: {
+              issues: {
+                nodes: [],
+              },
+            },
+          },
+        })
+        .post('/api/graphql')
+        .reply(200, {
+          data: {
+            namespace: {
+              workItemTypes: {
+                nodes: [
+                  {
+                    id: 'gid://gitlab/WorkItems::Type/42',
+                    name: 'Renovate',
+                    enabled: false,
+                    canUserCreateItems: false,
+                  },
+                ],
+              },
+            },
+          },
+        });
+      await expect(
+        gitlab.ensureIssue({
+          title: 'new-title',
+          body: 'new-content',
+        }),
+      ).resolves.toBeNull();
+      expect(logger.logger.warn).toHaveBeenCalledWith(
+        {
+          repository: 'some/repo',
+          workItemType: 'Renovate',
+        },
+        'GitLab configured work item type does not exist or is not creatable in this project; skipping issue creation',
       );
     });
 
@@ -2081,6 +2182,68 @@ describe('modules/platform/gitlab/index', () => {
       );
     });
 
+    it('falls back to legacy work item types query when availability fields are unsupported', async () => {
+      const scope = await initRepo({
+        repository: 'some/repo',
+        gitLabWorkItemType: 'Renovate',
+      });
+      scope
+        .post('/api/graphql')
+        .reply(200, {
+          data: {
+            project: {
+              issues: {
+                nodes: [],
+              },
+            },
+          },
+        })
+        .post('/api/graphql')
+        .reply(200, {
+          errors: [
+            {
+              message:
+                "Field 'canUserCreateItems' doesn't exist on type 'WorkItemType'",
+            },
+          ],
+        })
+        .post('/api/graphql')
+        .reply(200, {
+          data: {
+            namespace: {
+              workItemTypes: {
+                nodes: [
+                  {
+                    id: 'gid://gitlab/WorkItems::Type/42',
+                    name: 'Renovate',
+                  },
+                ],
+              },
+            },
+          },
+        })
+        .post('/api/graphql')
+        .reply(200, {
+          data: {
+            workItemCreate: {
+              errors: [],
+              workItem: {
+                iid: '123',
+              },
+            },
+          },
+        });
+      await expect(
+        gitlab.ensureIssue({
+          title: 'new-title',
+          body: 'new-content',
+        }),
+      ).resolves.toBe('created');
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        'GitLab GraphQL work item availability fields unsupported; falling back to legacy work item types query',
+      );
+    });
+
     it('creates custom work item without metadata update', async () => {
       const scope = await initRepo({
         repository: 'some/repo',
@@ -2129,6 +2292,67 @@ describe('modules/platform/gitlab/index', () => {
       });
       expect(res).toBe('created');
       expect(scope.isDone()).toBeTrue();
+    });
+
+    it('warns when GitLab creates a different work item type than requested', async () => {
+      const scope = await initRepo({
+        repository: 'some/repo',
+        gitLabWorkItemType: 'Renovate',
+      });
+      scope
+        .post('/api/graphql')
+        .reply(200, {
+          data: {
+            project: {
+              issues: {
+                nodes: [],
+              },
+            },
+          },
+        })
+        .post('/api/graphql')
+        .reply(200, {
+          data: {
+            namespace: {
+              workItemTypes: {
+                nodes: [
+                  {
+                    id: 'gid://gitlab/WorkItems::Type/42',
+                    name: 'Renovate',
+                  },
+                ],
+              },
+            },
+          },
+        })
+        .post('/api/graphql')
+        .reply(200, {
+          data: {
+            workItemCreate: {
+              errors: [],
+              workItem: {
+                iid: '123',
+                workItemType: {
+                  name: 'Issue',
+                },
+              },
+            },
+          },
+        });
+      await expect(
+        gitlab.ensureIssue({
+          title: 'new-title',
+          body: 'new-content',
+        }),
+      ).resolves.toBe('created');
+      expect(logger.logger.warn).toHaveBeenCalledWith(
+        {
+          repository: 'some/repo',
+          requestedWorkItemType: 'Renovate',
+          createdWorkItemType: 'Issue',
+        },
+        'GitLab created a different work item type than requested',
+      );
     });
 
     it('creates custom work item with confidential metadata and default labels', async () => {
