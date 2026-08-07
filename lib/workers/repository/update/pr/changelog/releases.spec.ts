@@ -112,8 +112,9 @@ describe('workers/repository/update/pr/changelog/releases', () => {
         datasource: 'some-datasource',
         packageName: 'some-depname',
         versioning: dockerVersioning.id,
-        currentVersion: '1.0.1-rc0',
-        newVersion: '1.2.0-rc0',
+        currentValue: '1.0.1-rc0',
+        currentVersion: '1.0.1',
+        newVersion: '1.2.0',
       });
       const res = await releases.getInRangeReleases(config);
       expect(res).toEqual([
