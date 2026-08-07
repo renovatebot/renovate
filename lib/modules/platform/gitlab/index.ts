@@ -1102,7 +1102,7 @@ async function findGraphqlIssueByTitle(
 
 async function resolveGraphqlWorkItemTypeId(): Promise<string | null> {
   const data = await requestGraphql<{
-    project?: {
+    namespace?: {
       workItemTypes?: {
         nodes?: {
           id: string;
@@ -1112,8 +1112,8 @@ async function resolveGraphqlWorkItemTypeId(): Promise<string | null> {
     } | null;
   }>(
     `
-      query ProjectWorkItemTypes($projectPath: ID!) {
-        project(fullPath: $projectPath) {
+      query NamespaceWorkItemTypes($namespacePath: ID!) {
+        namespace(fullPath: $namespacePath) {
           workItemTypes(first: 100) {
             nodes {
               id
@@ -1124,10 +1124,10 @@ async function resolveGraphqlWorkItemTypeId(): Promise<string | null> {
       }
     `,
     {
-      projectPath: config.repositoryPath,
+      namespacePath: config.repositoryPath,
     },
   );
-  const workItemType = data.project?.workItemTypes?.nodes?.find(
+  const workItemType = data.namespace?.workItemTypes?.nodes?.find(
     (item) => item.name === config.workItemType,
   );
   if (!workItemType) {

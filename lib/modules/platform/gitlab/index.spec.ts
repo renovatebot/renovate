@@ -1895,7 +1895,7 @@ describe('modules/platform/gitlab/index', () => {
         .post('/api/graphql')
         .reply(200, {
           data: {
-            project: {
+            namespace: {
               workItemTypes: {
                 nodes: [
                   {
@@ -1954,7 +1954,7 @@ describe('modules/platform/gitlab/index', () => {
         .post('/api/graphql')
         .reply(200, {
           data: {
-            project: {
+            namespace: {
               workItemTypes: {
                 nodes: [
                   {
@@ -2000,7 +2000,7 @@ describe('modules/platform/gitlab/index', () => {
         .post('/api/graphql')
         .reply(200, {
           data: {
-            project: {
+            namespace: {
               workItemTypes: {
                 nodes: [
                   {
@@ -2048,7 +2048,7 @@ describe('modules/platform/gitlab/index', () => {
         .post('/api/graphql')
         .reply(200, {
           data: {
-            project: {
+            namespace: {
               workItemTypes: {
                 nodes: [
                   {
@@ -2100,7 +2100,7 @@ describe('modules/platform/gitlab/index', () => {
         .post('/api/graphql')
         .reply(200, {
           data: {
-            project: {
+            namespace: {
               workItemTypes: {
                 nodes: [
                   {
@@ -2150,7 +2150,7 @@ describe('modules/platform/gitlab/index', () => {
         .post('/api/graphql')
         .reply(200, {
           data: {
-            project: {
+            namespace: {
               workItemTypes: {
                 nodes: [
                   {
@@ -2214,7 +2214,7 @@ describe('modules/platform/gitlab/index', () => {
         .post('/api/graphql')
         .reply(200, {
           data: {
-            project: {
+            namespace: {
               workItemTypes: {
                 nodes: [
                   {
