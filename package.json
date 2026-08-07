@@ -333,7 +333,7 @@
     "markdownlint-cli2": "0.23.2",
     "markdownlint-cli2-formatter-template": "0.0.4",
     "memfs": "4.64.0",
-    "nock": "14.0.16",
+    "nock": "14.0.17",
     "npm-run-all2": "9.0.3",
     "nyc": "18.0.0",
     "oxlint": "1.72.0",
