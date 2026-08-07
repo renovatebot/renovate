@@ -16,13 +16,13 @@ import * as rules from './post-update/rules.ts';
 vi.mock('../../../util/exec/env.ts');
 vi.mock('../../../util/fs/index.ts');
 
-const adminConfig: RepoGlobalConfig & InternalGlobalConfigOptions = {
+const adminConfig = {
   // `join` fixes Windows CI
   localDir: upath.join('/tmp/github/some/repo'),
   cacheDir: upath.join('/tmp/renovate/cache'),
   containerbaseDir: upath.join('/tmp/renovate/cache/containerbase'),
   binarySource: 'global',
-};
+} satisfies RepoGlobalConfig & InternalGlobalConfigOptions;
 const dockerAdminConfig = {
   ...adminConfig,
   binarySource: 'docker',
@@ -39,6 +39,8 @@ const validDepUpdate = {
     '8.15.5+sha256.4b4efa12490e5055d59b9b9fc9438b7d581a6b7af3b5675eb5c5f447cee1a589',
   newVersion: '8.15.6',
 } satisfies Upgrade<Record<string, unknown>>;
+const generatedVersion =
+  '8.15.6+sha256.9d96d150c8a4659f375e954128f4f03f21bf7c67a5ea6c22e65f47e3d0f9f744';
 
 describe('modules/manager/npm/artifacts', () => {
   const spyProcessHostRules = vi.spyOn(rules, 'processHostRules');
@@ -55,6 +57,9 @@ describe('modules/manager/npm/artifacts', () => {
       additionalNpmrcContent: [],
       additionalYarnRcYml: undefined,
     });
+    fs.privateCacheDir.mockReturnValue(
+      upath.join(adminConfig.cacheDir, '__renovate-private-cache'),
+    );
   });
 
   it('returns null if no packageManager updates present', async () => {
@@ -91,13 +96,16 @@ describe('modules/manager/npm/artifacts', () => {
   });
 
   it('returns null if unchanged', async () => {
-    fs.readLocalFile.mockResolvedValueOnce('some content');
+    const packageFileContent = JSON.stringify({
+      packageManager: `pnpm@${generatedVersion}`,
+    });
+    fs.readLocalFile.mockResolvedValue(packageFileContent);
     const execSnapshots = mockExecAll();
 
     const res = await updateArtifacts({
       packageFileName: 'package.json',
       updatedDeps: [validDepUpdate],
-      newPackageFileContent: 'some content',
+      newPackageFileContent: packageFileContent,
       config: { ...config },
     });
 
@@ -106,10 +114,10 @@ describe('modules/manager/npm/artifacts', () => {
   });
 
   it('returns updated package.json', async () => {
-    fs.readLocalFile
-      .mockResolvedValueOnce('# dummy') // for npmrc
-      .mockResolvedValueOnce('{}') // for node constraints
-      .mockResolvedValue('some new content'); // for updated package.json
+    const corepackPackageFileContent = JSON.stringify({
+      packageManager: `pnpm@${generatedVersion}`,
+    });
+    fs.readLocalFile.mockResolvedValue(corepackPackageFileContent);
     const execSnapshots = mockExecAll();
 
     const res = await updateArtifacts({
@@ -122,7 +130,7 @@ describe('modules/manager/npm/artifacts', () => {
     expect(res).toEqual([
       {
         file: {
-          contents: 'some new content',
+          contents: corepackPackageFileContent,
           path: 'package.json',
           type: 'addition',
         },
@@ -131,12 +139,304 @@ describe('modules/manager/npm/artifacts', () => {
     expect(execSnapshots).toMatchObject([{ cmd: 'corepack use pnpm@8.15.6' }]);
   });
 
+  it('preserves a Corepack hash in devEngines.packageManager', async () => {
+    const packageFileContent = JSON.stringify(
+      {
+        devEngines: {
+          packageManager: {
+            name: 'pnpm',
+            version: '8.15.6',
+            onFail: 'error',
+          },
+        },
+      },
+      null,
+      2,
+    );
+    const corepackPackageFileContent = JSON.stringify({
+      private: true,
+      packageManager: `pnpm@${generatedVersion}`,
+    });
+    spyProcessHostRules.mockReturnValue({
+      additionalNpmrcContent: ['//registry.example/:_authToken=token'],
+      additionalYarnRcYml: undefined,
+    });
+    fs.readLocalFile.mockImplementation((fileName) =>
+      Promise.resolve(
+        fileName.endsWith('.npmrc')
+          ? 'registry=https://registry.example'
+          : null,
+      ),
+    );
+    fs.readCacheFile.mockResolvedValue(corepackPackageFileContent);
+    const execSnapshots = mockExecAll();
+
+    const res = await updateArtifacts({
+      packageFileName: 'package.json',
+      updatedDeps: [
+        {
+          ...validDepUpdate,
+          depType: 'devEngines.packageManager',
+        },
+      ],
+      newPackageFileContent: packageFileContent,
+      config,
+    });
+
+    const contents = (res![0].file as FileAddition).contents?.toString();
+    expect(contents).toBeJsonString();
+    expect(JSON.parse(contents!)).toEqual({
+      devEngines: {
+        packageManager: {
+          name: 'pnpm',
+          version: generatedVersion,
+          onFail: 'error',
+        },
+      },
+    });
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'corepack use pnpm@8.15.6',
+        options: {
+          cwd: expect.stringContaining(
+            '/__renovate-private-cache/npm-corepack/',
+          ),
+        },
+      },
+    ]);
+    expect(fs.outputCacheFile).toHaveBeenCalledWith(
+      expect.stringMatching(/\/npm-corepack\/.*\/package\.json$/),
+      JSON.stringify({ private: true }),
+    );
+    expect(fs.outputCacheFile).toHaveBeenCalledWith(
+      expect.stringMatching(/\/npm-corepack\/.*\/\.npmrc$/),
+      'registry=https://registry.example\n//registry.example/:_authToken=token\n',
+    );
+    expect(fs.rmCache).toHaveBeenCalledWith(
+      expect.stringContaining('/__renovate-private-cache/npm-corepack/'),
+    );
+  });
+
+  it('preserves Corepack hashes in a devEngines.packageManager array', async () => {
+    const yarnVersion =
+      '4.6.0+sha256.29b03c4fdc4c1a4e75a11d8d53cb7e0b27fd3a92cdf6a81973a8f00ec9e21757';
+    const packageFileContent = JSON.stringify({
+      devEngines: {
+        packageManager: [
+          { name: 'pnpm', version: '8.15.6' },
+          { name: 'yarn', version: '4.6.0' },
+        ],
+      },
+    });
+    const execSnapshots = mockExecAll();
+    fs.readCacheFile.mockImplementation(() => {
+      const corepackExecCount = execSnapshots.filter(({ cmd }) =>
+        cmd.startsWith('corepack use'),
+      ).length;
+      const packageManager =
+        corepackExecCount === 1
+          ? `pnpm@${generatedVersion}`
+          : `yarn@${yarnVersion}`;
+      return Promise.resolve(
+        JSON.stringify({
+          private: true,
+          packageManager,
+        }),
+      );
+    });
+
+    const res = await updateArtifacts({
+      packageFileName: 'package.json',
+      updatedDeps: [
+        {
+          ...validDepUpdate,
+          depType: 'devEngines.packageManager',
+          managerData: { devEnginesIndex: 0 },
+        },
+        {
+          depName: 'yarn',
+          depType: 'devEngines.packageManager',
+          currentValue:
+            '4.5.0+sha256.b3d75458d50d51567d44cdd8b2f9d59a2e2f3b6c60ac21884e8805f2755c1b40',
+          newVersion: '4.6.0',
+          managerData: { devEnginesIndex: 1 },
+        },
+      ],
+      newPackageFileContent: packageFileContent,
+      config,
+    });
+
+    const contents = (res![0].file as FileAddition).contents?.toString();
+    expect(contents).toBeJsonString();
+    expect(JSON.parse(contents!)).toEqual({
+      devEngines: {
+        packageManager: [
+          { name: 'pnpm', version: generatedVersion },
+          { name: 'yarn', version: yarnVersion },
+        ],
+      },
+    });
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'corepack use pnpm@8.15.6' },
+      { cmd: 'corepack use yarn@4.6.0' },
+    ]);
+    const firstCwd = execSnapshots[0]?.options?.cwd;
+    const secondCwd = execSnapshots[1]?.options?.cwd;
+    expect(firstCwd).toEqual(expect.any(String));
+    expect(firstCwd).toBe(secondCwd);
+  });
+
+  it.each([
+    {
+      firstDepType: 'devEngines.packageManager',
+      packageManagerFirst: false,
+    },
+    { firstDepType: 'packageManager', packageManagerFirst: true },
+  ])(
+    'reuses a generated hash with $firstDepType first',
+    async ({ packageManagerFirst }) => {
+      const packageFileContent = JSON.stringify({
+        packageManager: 'pnpm@8.15.6',
+        devEngines: {
+          packageManager: { name: 'pnpm', version: '8.15.6' },
+        },
+      });
+      const corepackPackageFileContent = JSON.stringify({
+        ...JSON.parse(packageFileContent),
+        packageManager: `pnpm@${generatedVersion}`,
+      });
+      fs.readLocalFile.mockResolvedValue(corepackPackageFileContent);
+      const execSnapshots = mockExecAll();
+      const devEnginesUpdate = {
+        ...validDepUpdate,
+        depType: 'devEngines.packageManager',
+      };
+
+      const res = await updateArtifacts({
+        packageFileName: 'package.json',
+        updatedDeps: packageManagerFirst
+          ? [validDepUpdate, devEnginesUpdate]
+          : [devEnginesUpdate, validDepUpdate],
+        newPackageFileContent: packageFileContent,
+        config,
+      });
+
+      const contents = (res![0].file as FileAddition).contents?.toString();
+      expect(contents).toBeJsonString();
+      expect(JSON.parse(contents!)).toEqual({
+        packageManager: `pnpm@${generatedVersion}`,
+        devEngines: {
+          packageManager: { name: 'pnpm', version: generatedVersion },
+        },
+      });
+      expect(execSnapshots).toMatchObject([
+        { cmd: 'corepack use pnpm@8.15.6' },
+      ]);
+    },
+  );
+
+  it.each([
+    ['invalid JSON', 'not json'],
+    ['a missing package file', null],
+    ['a missing packageManager', '{}'],
+    [
+      'a different package manager',
+      JSON.stringify({ packageManager: `yarn@${generatedVersion}` }),
+    ],
+    [
+      'a version without a hash',
+      JSON.stringify({ packageManager: 'pnpm@8.15.6' }),
+    ],
+  ])(
+    'returns an artifact error if Corepack generates %s',
+    async (_, output) => {
+      fs.readLocalFile.mockResolvedValue(output);
+      mockExecAll();
+
+      const res = await updateArtifacts({
+        packageFileName: 'package.json',
+        updatedDeps: [validDepUpdate],
+        newPackageFileContent: JSON.stringify({
+          packageManager: 'pnpm@8.15.6',
+        }),
+        config,
+      });
+
+      expect(res).toEqual([
+        {
+          artifactError: {
+            fileName: 'package.json',
+            stderr: 'Corepack did not generate a hash for pnpm@8.15.6',
+          },
+        },
+      ]);
+    },
+  );
+
+  it('returns an artifact error if the generated hash cannot be applied', async () => {
+    fs.readCacheFile.mockResolvedValue(
+      JSON.stringify({ packageManager: `pnpm@${generatedVersion}` }),
+    );
+    mockExecAll();
+
+    const res = await updateArtifacts({
+      packageFileName: 'package.json',
+      updatedDeps: [
+        {
+          ...validDepUpdate,
+          depType: 'devEngines.packageManager',
+        },
+      ],
+      newPackageFileContent: JSON.stringify({ name: 'demo' }),
+      config,
+    });
+
+    expect(res).toEqual([
+      {
+        artifactError: {
+          fileName: 'package.json',
+          stderr: 'Failed to apply Corepack hash for pnpm@8.15.6',
+        },
+      },
+    ]);
+  });
+
+  it('cleans up the isolated project if Corepack fails', async () => {
+    mockExecSequence([new Error('exec error')]);
+
+    const res = await updateArtifacts({
+      packageFileName: 'package.json',
+      updatedDeps: [
+        {
+          ...validDepUpdate,
+          depType: 'devEngines.packageManager',
+        },
+      ],
+      newPackageFileContent: JSON.stringify({
+        devEngines: {
+          packageManager: { name: 'pnpm', version: '8.15.6' },
+        },
+      }),
+      config,
+    });
+
+    expect(res).toEqual([
+      {
+        artifactError: { fileName: 'package.json', stderr: 'exec error' },
+      },
+    ]);
+    expect(fs.rmCache).toHaveBeenCalledWith(
+      expect.stringContaining('/__renovate-private-cache/npm-corepack/'),
+    );
+  });
+
   it('supports docker mode', async () => {
     GlobalConfig.set(dockerAdminConfig);
     const execSnapshots = mockExecAll();
-    fs.readLocalFile
-      .mockResolvedValueOnce('# dummy') // for npmrc
-      .mockResolvedValueOnce('some new content');
+    const corepackPackageFileContent = JSON.stringify({
+      packageManager: `pnpm@${generatedVersion}`,
+    });
+    fs.readLocalFile.mockResolvedValue(corepackPackageFileContent);
 
     const res = await updateArtifacts({
       packageFileName: 'package.json',
@@ -151,7 +451,7 @@ describe('modules/manager/npm/artifacts', () => {
     expect(res).toEqual([
       {
         file: {
-          contents: 'some new content',
+          contents: corepackPackageFileContent,
           path: 'package.json',
           type: 'addition',
         },
@@ -183,9 +483,10 @@ describe('modules/manager/npm/artifacts', () => {
   it('supports install mode', async () => {
     GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
     const execSnapshots = mockExecAll();
-    fs.readLocalFile
-      .mockResolvedValueOnce('# dummy') // for npmrc
-      .mockResolvedValueOnce('some new content');
+    const corepackPackageFileContent = JSON.stringify({
+      packageManager: `pnpm@${generatedVersion}`,
+    });
+    fs.readLocalFile.mockResolvedValue(corepackPackageFileContent);
 
     const res = await updateArtifacts({
       packageFileName: 'package.json',
@@ -200,7 +501,7 @@ describe('modules/manager/npm/artifacts', () => {
     expect(res).toEqual([
       {
         file: {
-          contents: 'some new content',
+          contents: corepackPackageFileContent,
           path: 'package.json',
           type: 'addition',
         },
