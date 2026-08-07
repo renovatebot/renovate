@@ -246,12 +246,12 @@ export function getToolSettingsOptions(
     jvmMemory: defaults?.jvmMemory ?? jvmMaxMemory,
     nodeMaxMemory: defaults?.nodeMaxMemory,
     // doesn't have a global override, only a default
-    gomodModPackage: 'github.com/marwan-at-work/mod/cmd/mod',
+    gomodModInstallPath: 'github.com/marwan-at-work/mod/cmd/mod',
   };
 
   if (repoConfig !== undefined) {
-    if (repoConfig.gomodModPackage) {
-      options.gomodModPackage = repoConfig.gomodModPackage;
+    if (repoConfig.gomodModInstallPath) {
+      options.gomodModInstallPath = repoConfig.gomodModInstallPath;
     }
 
     if (repoConfig.jvmMaxMemory) {

@@ -2211,7 +2211,7 @@ describe('modules/manager/gomod/artifacts', () => {
           updateType: 'major',
           postUpdateOptions: ['gomodUpdateImportPaths'],
           toolSettings: {
-            gomodModPackage: 'github.com/some-fork/mod/cmd/mod',
+            gomodModInstallPath: 'github.com/some-fork/mod/cmd/mod',
           },
         },
       }),
@@ -2270,7 +2270,7 @@ describe('modules/manager/gomod/artifacts', () => {
           updateType: 'major',
           postUpdateOptions: ['gomodUpdateImportPaths'],
           toolSettings: {
-            gomodModPackage: 'github.com/some-fork/mod/cmd/new-mod',
+            gomodModInstallPath: 'github.com/some-fork/mod/cmd/new-mod',
           },
         },
       }),

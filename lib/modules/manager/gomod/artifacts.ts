@@ -48,8 +48,8 @@ function getUpdateImportPathCmds(
     );
   }
 
-  const { gomodModPackage } = getToolSettingsOptions(toolSettings);
-  const modBinaryName = gomodModPackage.split('/').pop()!;
+  const { gomodModInstallPath } = getToolSettingsOptions(toolSettings);
+  const modBinaryName = gomodModInstallPath.split('/').pop()!;
 
   const updateImportCommands = updatedDeps
     .filter(
@@ -72,7 +72,7 @@ function getUpdateImportPathCmds(
     );
 
   if (updateImportCommands.length > 0) {
-    let installMarwanModArgs = `install ${gomodModPackage}@latest`;
+    let installMarwanModArgs = `install ${gomodModInstallPath}@latest`;
     const gomodModCompatibility = constraints?.gomodMod;
     if (gomodModCompatibility) {
       if (

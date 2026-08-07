@@ -878,5 +878,5 @@ export interface RepoToolSettingsOptions {
   jvmMemory?: number;
   /** The maximum memory child Node.JS processes can use. If greater than the Global Self-Hosted configuration setting, it will be set to that limit **/
   nodeMaxMemory?: number;
-  gomodModPackage?: string;
+  gomodModInstallPath?: string;
 }
