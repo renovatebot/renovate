@@ -5013,6 +5013,9 @@ go install ${toolSettings.gomodModPackage}@latest
 
 Use this if you're pointing Renovate to a fork of [`github.com/marwan-at-work/mod`](https://github.com/marwan-at-work/mod).
 
+The binary that's invoked is named after the last element of the module path.
+For example, setting this to `github.com/some-fork/mod/cmd/new-mod` installs and runs a binary named `new-mod`.
+
 ### `toolSettings.jvmMaxMemory`
 
 Maximum heap size in MB for Java VMs.

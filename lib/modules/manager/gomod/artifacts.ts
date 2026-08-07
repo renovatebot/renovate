@@ -48,6 +48,9 @@ function getUpdateImportPathCmds(
     );
   }
 
+  const { gomodModPackage } = getToolSettingsOptions(toolSettings);
+  const modBinaryName = gomodModPackage.split('/').pop()!;
+
   const updateImportCommands = updatedDeps
     .filter(
       ({ newVersion }) =>
@@ -65,11 +68,10 @@ function getUpdateImportPathCmds(
 
     .map(
       ({ depName, newMajor }) =>
-        `mod upgrade --mod-name=${quote(depName)} -t=${newMajor}`,
+        `${modBinaryName} upgrade --mod-name=${quote(depName)} -t=${newMajor}`,
     );
 
   if (updateImportCommands.length > 0) {
-    const { gomodModPackage } = getToolSettingsOptions(toolSettings);
     let installMarwanModArgs = `install ${gomodModPackage}@latest`;
     const gomodModCompatibility = constraints?.gomodMod;
     if (gomodModCompatibility) {
