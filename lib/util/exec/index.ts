@@ -102,9 +102,16 @@ async function prepareRawExec(
       ...userConfiguredEnv,
     };
     const childEnv = getChildEnv(opts);
+    const otelEnvVars = Object.keys(childEnv).filter(
+      (key) =>
+        key.startsWith('OTEL_') ||
+        key === 'TRACEPARENT' ||
+        key === 'TRACESTATE',
+    );
     const envVars = [
       ...dockerEnvVars(extraEnv, childEnv),
       'CONTAINERBASE_CACHE_DIR',
+      ...otelEnvVars,
     ];
     const cwd = getCwd(opts);
     const dockerOptions: DockerOptions = { ...docker, cwd, envVars };

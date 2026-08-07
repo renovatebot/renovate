@@ -1,4 +1,8 @@
 import { GlobalConfig } from '../../config/global.ts';
+import {
+  getTraceContextEnv,
+  isTracingEnabled,
+} from '../../instrumentation/utils.ts';
 
 export const basicEnvVars = [
   'CI',
@@ -68,5 +72,18 @@ export function getChildProcessEnv(
       env[key] = process.env[key];
     }
   }
+
+  if (isTracingEnabled()) {
+    // Forward the OpenTelemetry SDK configuration so that tools with native
+    // OTEL support export to the same collector, and propagate the current
+    // trace context so they can join the same trace.
+    for (const key of Object.keys(process.env)) {
+      if (key.startsWith('OTEL_')) {
+        env[key] = process.env[key];
+      }
+    }
+    Object.assign(env, getTraceContextEnv());
+  }
+
   return env;
 }
