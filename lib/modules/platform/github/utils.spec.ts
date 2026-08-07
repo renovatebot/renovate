@@ -11,7 +11,6 @@ describe('modules/platform/github/utils', () => {
           'ssh',
           'git@github.com:some/repo.git',
           parseUrl('https://api.github.com')!,
-          'token',
         ),
       ).toBe('git@github.com:some/repo.git');
     });
@@ -23,21 +22,19 @@ describe('modules/platform/github/utils', () => {
           'ssh',
           null,
           parseUrl('https://api.github.com')!,
-          'token',
         ),
       ).toThrow(CONFIG_GIT_URL_UNAVAILABLE);
     });
 
-    it('builds an endpoint URL with embedded credentials by default', () => {
+    it('builds a clean endpoint URL by default', () => {
       expect(
         getRepoUrl(
           'some/repo',
           undefined,
           'git@github.com:some/repo.git',
           parseUrl('https://api.github.com')!,
-          'x-access-token:abc123',
         ),
-      ).toBe('https://x-access-token:abc123@github.com/some/repo.git');
+      ).toBe('https://github.com/some/repo.git');
     });
 
     it('builds an endpoint URL when gitUrl is endpoint', () => {
@@ -47,19 +44,17 @@ describe('modules/platform/github/utils', () => {
           'endpoint',
           'git@github.com:some/repo.git',
           parseUrl('https://api.github.com')!,
-          'token',
         ),
-      ).toBe('https://token@github.com/some/repo.git');
+      ).toBe('https://github.com/some/repo.git');
     });
 
-    it('omits credentials when authToken is null', () => {
+    it('builds an endpoint URL without an sshUrl', () => {
       expect(
         getRepoUrl(
           'some/repo',
           undefined,
           null,
           parseUrl('https://api.github.com')!,
-          null,
         ),
       ).toBe('https://github.com/some/repo.git');
     });
@@ -71,9 +66,8 @@ describe('modules/platform/github/utils', () => {
           undefined,
           null,
           parseUrl('https://ghe.example.com/api/v3')!,
-          'token',
         ),
-      ).toBe('https://token@ghe.example.com/some/repo.git');
+      ).toBe('https://ghe.example.com/some/repo.git');
     });
   });
 });

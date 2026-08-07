@@ -108,12 +108,12 @@ describe('modules/datasource/git-tags/index', () => {
       expect(createSimpleGit).toHaveBeenCalledExactlyOnceWith({
         env: {
           GIT_CONFIG_COUNT: '3',
-          GIT_CONFIG_KEY_0: 'url.https://ssh:token123@github.com/.insteadOf',
-          GIT_CONFIG_KEY_1: 'url.https://git:token123@github.com/.insteadOf',
-          GIT_CONFIG_KEY_2: 'url.https://token123@github.com/.insteadOf',
+          GIT_CONFIG_KEY_0: 'url.https://github.com/.insteadOf',
+          GIT_CONFIG_KEY_1: 'url.https://github.com/.insteadOf',
+          GIT_CONFIG_KEY_2: 'http.https://github.com/.extraHeader',
           GIT_CONFIG_VALUE_0: 'ssh://git@github.com/',
           GIT_CONFIG_VALUE_1: 'git@github.com:',
-          GIT_CONFIG_VALUE_2: 'https://github.com/',
+          GIT_CONFIG_VALUE_2: 'Authorization: Basic dG9rZW4xMjM6',
         },
       });
     });
@@ -135,14 +135,12 @@ describe('modules/datasource/git-tags/index', () => {
       expect(createSimpleGit).toHaveBeenCalledExactlyOnceWith({
         env: {
           GIT_CONFIG_COUNT: '3',
-          GIT_CONFIG_KEY_0:
-            'url.https://ssh:token123@git.example.com/.insteadOf',
-          GIT_CONFIG_KEY_1:
-            'url.https://git:token123@git.example.com/.insteadOf',
-          GIT_CONFIG_KEY_2: 'url.https://token123@git.example.com/.insteadOf',
+          GIT_CONFIG_KEY_0: 'url.https://git.example.com/.insteadOf',
+          GIT_CONFIG_KEY_1: 'url.https://git.example.com/.insteadOf',
+          GIT_CONFIG_KEY_2: 'http.https://git.example.com/.extraHeader',
           GIT_CONFIG_VALUE_0: 'ssh://git@git.example.com/',
           GIT_CONFIG_VALUE_1: 'git@git.example.com:',
-          GIT_CONFIG_VALUE_2: 'https://git.example.com/',
+          GIT_CONFIG_VALUE_2: 'Authorization: Basic dG9rZW4xMjM6',
         },
       });
     });
