@@ -120,8 +120,10 @@ describe('modules/datasource/apk/url', () => {
       );
     });
 
-    it('returns an empty array for an unparseable registry URL', () => {
-      expect(constructComponentUrls('not-a-valid-url')).toEqual([]);
+    it('throws for an unparseable registry URL', () => {
+      expect(() => constructComponentUrls('not-a-valid-url')).toThrow(
+        'Cannot parse URL',
+      );
     });
   });
 });

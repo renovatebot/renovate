@@ -14,8 +14,9 @@ const validSegment = regEx(/^[A-Za-z0-9][A-Za-z0-9._+-]*$/);
  * Constructs the `APKINDEX` directory URLs from the given registry URL.
  *
  * @param registryUrl - The base URL of the registry, with the path segments encoded as query parameters.
- * @returns One URL per component, or an empty array if the registry URL cannot be parsed.
- * @throws Will throw an error if the query parameters are missing, unknown or malformed.
+ * @returns One URL per component.
+ * @throws Will throw an error if the registry URL cannot be parsed, or if the query
+ * parameters are missing, unknown or malformed.
  *
  * @example
  * // Returns ['https://dl-cdn.alpinelinux.org/alpine/v3.19/main/x86_64',
@@ -26,7 +27,7 @@ export function constructComponentUrls(registryUrl: string): string[] {
   try {
     const url = parseUrl(registryUrl);
     if (!url) {
-      return [];
+      throw new Error('Cannot parse URL');
     }
 
     validateParams(url);
