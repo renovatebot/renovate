@@ -3947,6 +3947,28 @@ describe('modules/platform/gitlab/index', () => {
       );
     });
 
+    it('echoes the source branch HEAD sha when arming automerge', async () => {
+      await initPlatform('13.3.6-ee');
+      httpMock
+        .scope(gitlabApiHost)
+        .get('/api/v4/projects/undefined/merge_requests/12345')
+        .reply(200, {
+          sha: 'abc123',
+          merge_status: 'can_be_merged',
+          pipeline: {
+            status: 'running',
+          },
+        })
+        .put('/api/v4/projects/undefined/merge_requests/12345/merge', {
+          should_remove_source_branch: true,
+          merge_when_pipeline_succeeds: true,
+          sha: 'abc123',
+        })
+        .reply(200);
+
+      await expect(gitlab.reattemptPlatformAutomerge?.(pr)).toResolve();
+    });
+
     it('should skip retries when merge_when_pipeline_succeeds is already enabled', async () => {
       await initPlatform('13.3.6-ee');
       httpMock
@@ -3969,10 +3991,15 @@ describe('modules/platform/gitlab/index', () => {
   });
 
   describe('mergePr(pr)', () => {
-    it('merges the PR', async () => {
+    it('merges the PR, echoing the source branch HEAD sha', async () => {
       httpMock
         .scope(gitlabApiHost)
-        .put('/api/v4/projects/undefined/merge_requests/1/merge')
+        .get('/api/v4/projects/undefined/merge_requests/1')
+        .reply(200, { sha: 'abc123' })
+        .put('/api/v4/projects/undefined/merge_requests/1/merge', {
+          should_remove_source_branch: true,
+          sha: 'abc123',
+        })
         .reply(200);
       expect(
         await gitlab.mergePr({
