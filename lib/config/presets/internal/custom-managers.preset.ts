@@ -102,6 +102,18 @@ export const presets: Record<string, Preset> = {
     ],
     description: 'Update `appVersion` value in Helm chart `Chart.yaml`.',
   },
+  javaPropertiesVersion: {
+    customManagers: [
+      {
+        customType: 'regex',
+        datasourceTemplate: 'java-version',
+        depNameTemplate: 'java',
+        managerFilePatterns: ['**/pom.xml'],
+        matchStrings: ['<java\\.version>(?<currentValue>.+?)</java\\.version>'],
+      },
+    ],
+    description: 'Update `java.version` properties in `pom.xml` files.',
+  },
   makefileVersions: {
     customManagers: [
       {
