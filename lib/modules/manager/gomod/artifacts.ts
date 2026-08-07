@@ -7,7 +7,7 @@ import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
 import { coerceArray } from '../../../util/array.ts';
 import { getEnv } from '../../../util/env.ts';
-import { exec } from '../../../util/exec/index.ts';
+import { exec, getToolSettingsOptions } from '../../../util/exec/index.ts';
 import type { ExecOptions } from '../../../util/exec/types.ts';
 import { filterMap } from '../../../util/filter-map.ts';
 import {
@@ -33,7 +33,7 @@ const { major, valid } = semver;
 
 function getUpdateImportPathCmds(
   updatedDeps: PackageDependency[],
-  { constraints }: UpdateArtifactsConfig,
+  { constraints, toolSettings }: UpdateArtifactsConfig,
 ): string[] {
   // Check if we fail to parse any major versions and log that they're skipped
   const invalidMajorDeps = updatedDeps.filter(
@@ -47,6 +47,9 @@ function getUpdateImportPathCmds(
       ),
     );
   }
+
+  const { gomodModInstallPath } = getToolSettingsOptions(toolSettings);
+  const modBinaryName = quote(gomodModInstallPath.split('/').pop()!);
 
   const updateImportCommands = updatedDeps
     .filter(
@@ -65,12 +68,11 @@ function getUpdateImportPathCmds(
 
     .map(
       ({ depName, newMajor }) =>
-        `mod upgrade --mod-name=${quote(depName)} -t=${newMajor}`,
+        `${modBinaryName} upgrade --mod-name=${quote(depName)} -t=${newMajor}`,
     );
 
   if (updateImportCommands.length > 0) {
-    let installMarwanModArgs =
-      'install github.com/marwan-at-work/mod/cmd/mod@latest';
+    let installMarwanModArgs = `install ${quote(gomodModInstallPath)}@latest`;
     const gomodModCompatibility = constraints?.gomodMod;
     if (gomodModCompatibility) {
       if (

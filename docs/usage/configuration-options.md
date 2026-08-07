@@ -5000,6 +5000,22 @@ This option can be used on the repository level and in the [Renovate configurati
 !!! note
   The JVM memory settings are considered for the `gradle` and `gradle-wrapper` manager.
 
+### `toolSettings.gomodModInstallPath`
+
+Used to specify the path to [the `mod` binary](https://github.com/marwan-at-work/mod) used to perform updates of import paths on major updates, when using [`postupdateoptions=["gomodUpdateImportPaths"]`](#postupdateoptions).
+
+Will be used verbatim as part of a `go install` command such as:
+
+```sh
+# i.e.
+go install ${toolSettings.gomodModInstallPath}@latest
+```
+
+Use this if you're pointing Renovate to a fork of [`github.com/marwan-at-work/mod`](https://github.com/marwan-at-work/mod).
+
+The binary that's invoked is named after the last element of the module path.
+For example, setting this to `github.com/some-fork/mod/cmd/new-mod` installs and runs a binary named `new-mod`.
+
 ### `toolSettings.jvmMaxMemory`
 
 Maximum heap size in MB for Java VMs.

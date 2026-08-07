@@ -221,22 +221,39 @@ export async function exec(
   return res;
 }
 
+/**
+ * When we resolve `toolSettings` in `getToolSettingsOptions`, we provide a stronger type than our input types, because we set defaults on config options.
+ *
+ * We do not have a default that is set for `nodeMaxMemory`, so it must remain as optional.
+ */
+type ResolvedToolSettingsOptions = Required<
+  Omit<RepoToolSettingsOptions, 'nodeMaxMemory'>
+> &
+  Pick<RepoToolSettingsOptions, 'nodeMaxMemory'>;
+
 export function getToolSettingsOptions(
   repoConfig?: RepoToolSettingsOptions,
-): RepoToolSettingsOptions {
+): ResolvedToolSettingsOptions {
   let defaults = GlobalConfig.get('toolSettings');
   defaults ??= {
     jvmMaxMemory: 512,
     jvmMemory: 512,
   };
 
-  const options: RepoToolSettingsOptions = {};
-
-  options.jvmMaxMemory = defaults?.jvmMaxMemory ?? 512;
-  options.jvmMemory = defaults?.jvmMemory ?? options.jvmMaxMemory;
-  options.nodeMaxMemory ??= defaults?.nodeMaxMemory;
+  const jvmMaxMemory = defaults?.jvmMaxMemory ?? 512;
+  const options: ResolvedToolSettingsOptions = {
+    jvmMaxMemory,
+    jvmMemory: defaults?.jvmMemory ?? jvmMaxMemory,
+    nodeMaxMemory: defaults?.nodeMaxMemory,
+    // doesn't have a global override, only a default
+    gomodModInstallPath: 'github.com/marwan-at-work/mod/cmd/mod',
+  };
 
   if (repoConfig !== undefined) {
+    if (repoConfig.gomodModInstallPath) {
+      options.gomodModInstallPath = repoConfig.gomodModInstallPath;
+    }
+
     if (repoConfig.jvmMaxMemory) {
       if (repoConfig.jvmMaxMemory > options.jvmMaxMemory) {
         logger.once.debug(

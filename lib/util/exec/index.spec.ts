@@ -1576,6 +1576,48 @@ describe('util/exec/index', () => {
         });
       });
     });
+
+    describe('for gomod mod package settings', () => {
+      beforeEach(() => {
+        GlobalConfig.set({});
+
+        // remove any test-specific overrides
+        delete config.toolSettings;
+      });
+
+      it('returns the default package if no repo config', () => {
+        const res = getToolSettingsOptions(undefined);
+
+        expect(res).toMatchObject({
+          gomodModInstallPath: 'github.com/marwan-at-work/mod/cmd/mod',
+        });
+      });
+
+      it('has no global config override - it is only settable at the repo config level', () => {
+        GlobalConfig.set({
+          // no `gomodModInstallPath` field exists on `GlobalToolSettingsOptions`
+          toolSettings: { jvmMaxMemory: 1024 },
+        });
+
+        const res = getToolSettingsOptions(undefined);
+
+        expect(res).toMatchObject({
+          gomodModInstallPath: 'github.com/marwan-at-work/mod/cmd/mod',
+        });
+      });
+
+      it('uses the repo config override if set', () => {
+        config.toolSettings = {
+          gomodModInstallPath: 'github.com/some-fork/mod/cmd/mod',
+        };
+
+        const res = getToolSettingsOptions(config.toolSettings);
+
+        expect(res).toMatchObject({
+          gomodModInstallPath: 'github.com/some-fork/mod/cmd/mod',
+        });
+      });
+    });
   });
 
   describe('gradleJvmArg()', () => {
