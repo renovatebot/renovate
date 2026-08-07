@@ -526,6 +526,10 @@ export interface AllConfig
   password?: string;
   token?: string;
   username?: string;
+  // `RenovateConfig` and `RepoGlobalConfig` declare `toolSettings` with
+  // different (repo-only vs global-only) shapes; this combines both since
+  // `AllConfig` is a superset of both.
+  toolSettings?: GlobalToolSettingsOptions & RepoToolSettingsOptions;
 }
 
 export interface AssigneesAndReviewersConfig {
@@ -874,4 +878,5 @@ export interface RepoToolSettingsOptions {
   jvmMemory?: number;
   /** The maximum memory child Node.JS processes can use. If greater than the Global Self-Hosted configuration setting, it will be set to that limit **/
   nodeMaxMemory?: number;
+  gomodModPackage?: string;
 }

@@ -7,7 +7,7 @@ import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
 import { coerceArray } from '../../../util/array.ts';
 import { getEnv } from '../../../util/env.ts';
-import { exec } from '../../../util/exec/index.ts';
+import { exec, getToolSettingsOptions } from '../../../util/exec/index.ts';
 import type { ExecOptions } from '../../../util/exec/types.ts';
 import { filterMap } from '../../../util/filter-map.ts';
 import {
@@ -33,7 +33,7 @@ const { major, valid } = semver;
 
 function getUpdateImportPathCmds(
   updatedDeps: PackageDependency[],
-  { constraints }: UpdateArtifactsConfig,
+  { constraints, toolSettings }: UpdateArtifactsConfig,
 ): string[] {
   // Check if we fail to parse any major versions and log that they're skipped
   const invalidMajorDeps = updatedDeps.filter(
@@ -69,8 +69,8 @@ function getUpdateImportPathCmds(
     );
 
   if (updateImportCommands.length > 0) {
-    let installMarwanModArgs =
-      'install github.com/marwan-at-work/mod/cmd/mod@latest';
+    const { gomodModPackage } = getToolSettingsOptions(toolSettings);
+    let installMarwanModArgs = `install ${gomodModPackage}@latest`;
     const gomodModCompatibility = constraints?.gomodMod;
     if (gomodModCompatibility) {
       if (
