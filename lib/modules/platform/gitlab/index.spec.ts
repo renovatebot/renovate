@@ -1724,6 +1724,23 @@ describe('modules/platform/gitlab/index', () => {
       expect(res).toBe('created');
     });
 
+    it('keeps default issue flow when repo context omits work item type', async () => {
+      gitlab.setRepoContext?.({});
+      httpMock
+        .scope(gitlabApiHost)
+        .get(
+          '/api/v4/projects/undefined/issues?per_page=100&scope=created_by_me&state=opened',
+        )
+        .reply(200, [])
+        .post('/api/v4/projects/undefined/issues')
+        .reply(200);
+      const res = await gitlab.ensureIssue({
+        title: 'new-title',
+        body: 'new-content',
+      });
+      expect(res).toBe('created');
+    });
+
     it('sets issue labels', async () => {
       httpMock
         .scope(gitlabApiHost)
