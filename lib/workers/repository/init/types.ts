@@ -1,6 +1,8 @@
 import type {
+  GlobalToolSettingsOptions,
   RenovateConfig,
   RepoGlobalConfig,
+  RepoToolSettingsOptions,
 } from '../../../config/types.ts';
 
 /**
@@ -14,6 +16,10 @@ import type {
 export interface RepositoryWorkerConfig
   extends RenovateConfig, RepoGlobalConfig {
   repositoryEntryConfig?: RenovateConfig;
+  // `RenovateConfig` and `RepoGlobalConfig` declare `toolSettings` with
+  // different (repo-only vs global-only) shapes; this combines both since
+  // this handoff config can carry either.
+  toolSettings?: GlobalToolSettingsOptions & RepoToolSettingsOptions;
 }
 
 export interface RepoConfigError {

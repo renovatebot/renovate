@@ -6,6 +6,7 @@ import { GlobalConfig } from '../../../config/global.ts';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
 import { getEnv } from '../../../util/env.ts';
+import { getToolSettingsOptions } from '../../../util/exec/index.ts';
 import type { ExecOptions } from '../../../util/exec/types.ts';
 import { filterMap } from '../../../util/filter-map.ts';
 import {
@@ -76,8 +77,8 @@ async function getUpdateImportPathCmds(
     );
 
   if (updateImportCommands.length > 0) {
-    let installMarwanModArgs =
-      'install github.com/marwan-at-work/mod/cmd/mod@latest';
+    const { gomodModPackage } = getToolSettingsOptions(config.toolSettings);
+    let installMarwanModArgs = `install ${gomodModPackage}@latest`;
     const gomodModCompatibility = await resolveToolConstraint(
       config,
       'gomodMod',
