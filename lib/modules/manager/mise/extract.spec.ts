@@ -468,8 +468,8 @@ describe('modules/manager/mise/extract', () => {
           {
             depName: 'asdf:rust',
             currentValue: '1.82.0',
-            packageName: 'rust-lang/rust',
-            datasource: 'github-tags',
+            packageName: 'rust',
+            datasource: 'rust-version',
           },
           {
             depName: 'vfox:scala',
