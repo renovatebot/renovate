@@ -2244,6 +2244,38 @@ describe('modules/platform/gitlab/index', () => {
       );
     });
 
+    it('returns null when work item types query returns an unrecoverable GraphQL error', async () => {
+      const scope = await initRepo({
+        repository: 'some/repo',
+        gitLabWorkItemType: 'Renovate',
+      });
+      scope
+        .post('/api/graphql')
+        .reply(200, {
+          data: {
+            project: {
+              issues: {
+                nodes: [],
+              },
+            },
+          },
+        })
+        .post('/api/graphql')
+        .reply(200, {
+          errors: [{ message: 'boom' }],
+        });
+      await expect(
+        gitlab.ensureIssue({
+          title: 'new-title',
+          body: 'new-content',
+        }),
+      ).resolves.toBeNull();
+      expect(logger.logger.warn).toHaveBeenCalledWith(
+        { err: new Error('GitLab GraphQL error: boom') },
+        'Could not ensure issue',
+      );
+    });
+
     it('creates custom work item without metadata update', async () => {
       const scope = await initRepo({
         repository: 'some/repo',
