@@ -38,6 +38,32 @@ Renovate looks up the package in every component you list, and aggregates the re
 
 The second URL points to the Wolfi repository, which has no branch or component in its path.
 
+### How Renovate builds the index URLs
+
+Say you set this `registryUrl` in your Renovate config:
+
+```json title="Set the apk registryUrl in renovate.json"
+{
+  "packageRules": [
+    {
+      "matchDatasources": ["apk"],
+      "registryUrls": [
+        "https://dl-cdn.alpinelinux.org/alpine?branch=v3.19&components=main,community&arch=x86_64"
+      ]
+    }
+  ]
+}
+```
+
+Renovate then fetches one index per component:
+
+```
+https://dl-cdn.alpinelinux.org/alpine/v3.19/main/x86_64/APKINDEX.tar.gz
+https://dl-cdn.alpinelinux.org/alpine/v3.19/community/x86_64/APKINDEX.tar.gz
+```
+
+<!-- TODO #43711 -->
+
 ## Usage example
 
 Say you pin Alpine packages in a `Dockerfile` and want Renovate to bump the versions.
