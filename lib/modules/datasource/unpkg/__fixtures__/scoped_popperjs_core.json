@@ -1,0 +1,31 @@
+{
+  "package": "@popperjs/core",
+  "version": "2.11.8",
+  "prefix": "/",
+  "files": [
+    {
+      "path": "/lib/index.js",
+      "size": 443,
+      "type": "text/javascript",
+      "integrity": "sha256-UqkAFbzZZwTVGU3Es2nAXtH0+jto8SgHJmKdKajwaFE="
+    },
+    {
+      "path": "/dist/umd/popper.js.map",
+      "size": 142165,
+      "type": "application/json",
+      "integrity": "sha256-gxTC44s+8qqYoCO/rXH5jSsp2lLnnJY/b4ddTqElNHA="
+    },
+    {
+      "path": "/dist/umd/popper.min.js",
+      "size": 20122,
+      "type": "text/javascript",
+      "integrity": "sha256-whL0tQWoY1Ku1iskqPFvmZ+CHsvmRWx/PIoEvIeWh4I="
+    },
+    {
+      "path": "/dist/umd/popper.min.js.flow",
+      "size": 46,
+      "type": "text/plain",
+      "integrity": "sha256-b/2A0ou/wX++eSKbp3tyP/MHkltx/rRhxxv412BX9Wc="
+    }
+  ]
+}
