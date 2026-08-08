@@ -1,4 +1,4 @@
-import { isEmptyArray } from '@sindresorhus/is';
+import { isEmptyArray, isString } from '@sindresorhus/is';
 import upath from 'upath';
 import { GlobalConfig } from '../../../config/global.ts';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
@@ -10,6 +10,7 @@ import {
   readLocalFile,
   writeLocalFile,
 } from '../../../util/fs/index.ts';
+import { resolveNpmrc } from '../npm/npmrc.ts';
 import { processHostRules } from '../npm/post-update/rules.ts';
 import {
   getNpmrcContent,
@@ -49,9 +50,22 @@ export async function updateArtifacts(
   }
 
   const pkgFileDir = upath.dirname(packageFileName);
-  const npmrcContent = await getNpmrcContent(pkgFileDir);
+  const originalNpmrcContent = await getNpmrcContent(pkgFileDir);
+  const { npmrc, npmrcFileName } = await resolveNpmrc(packageFileName, config);
+  // Use the resolved npmrc unless it came from a parent directory, so a
+  // workspace .npmrc is not materialized into the package directory
+  const baseNpmrcContent =
+    isString(npmrc) &&
+    (!npmrcFileName || npmrcFileName === upath.join(pkgFileDir, '.npmrc'))
+      ? npmrc
+      : originalNpmrcContent;
   const { additionalNpmrcContent } = processHostRules();
-  await updateNpmrcContent(pkgFileDir, npmrcContent, additionalNpmrcContent);
+  await updateNpmrcContent(
+    pkgFileDir,
+    originalNpmrcContent,
+    additionalNpmrcContent,
+    baseNpmrcContent,
+  );
 
   try {
     await writeLocalFile(packageFileName, newPackageFileContent);
@@ -77,7 +91,7 @@ export async function updateArtifacts(
     };
 
     await exec(cmd, execOptions);
-    await resetNpmrcContent(pkgFileDir, npmrcContent);
+    await resetNpmrcContent(pkgFileDir, originalNpmrcContent);
 
     const newLockFileContent = await readLocalFile(lockFileName);
     if (
@@ -100,6 +114,7 @@ export async function updateArtifacts(
       throw err;
     }
     logger.warn({ lockfile: lockFileName, err }, `Failed to update lock file`);
+    await resetNpmrcContent(pkgFileDir, originalNpmrcContent);
     return [
       {
         artifactError: {
