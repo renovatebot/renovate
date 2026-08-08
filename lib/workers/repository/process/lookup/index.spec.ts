@@ -4222,6 +4222,7 @@ describe('workers/repository/process/lookup/index', () => {
       ]);
 
       expect(res).toEqual({
+        currentCompatibility: '-alpine',
         currentVersion: '18.10.0',
         fixedVersion: '18.10.0',
         isSingleVersion: true,
@@ -4275,6 +4276,7 @@ describe('workers/repository/process/lookup/index', () => {
       ).unwrapOrThrow();
 
       expect(res).toMatchObject({
+        currentCompatibility: '.jre8',
         currentVersion: '12.4.2',
         updates: [
           {
@@ -4337,6 +4339,7 @@ describe('workers/repository/process/lookup/index', () => {
       ).unwrapOrThrow();
 
       expect(res).toEqual({
+        currentCompatibility: '-slim',
         currentVersion: 'bullseye',
         fixedVersion: 'bullseye',
         isSingleVersion: true,
