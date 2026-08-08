@@ -1,15 +1,17 @@
 import url from 'node:url';
-import { isNonEmptyArray, isNonEmptyString } from '@sindresorhus/is';
+import { isArray, isNonEmptyArray, isNonEmptyString } from '@sindresorhus/is';
 import { CONFIG_GIT_URL_UNAVAILABLE } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
 import { getEnv } from '../../../util/env.ts';
+import * as git from '../../../util/git/index.ts';
+import type { FileAddition } from '../../../util/git/types.ts';
 import * as hostRules from '../../../util/host-rules.ts';
 import type { HttpResponse } from '../../../util/http/types.ts';
 import { parseUrl } from '../../../util/url.ts';
 import { getPrBodyStruct } from '../pr-body.ts';
 import type { GitUrlOption } from '../types.ts';
 import type { GitLabMergeRequest } from './schema.ts';
-import type { GitlabPr, RepoResponse } from './types.ts';
+import type { GitlabCommitAction, GitlabPr, RepoResponse } from './types.ts';
 
 export const DRAFT_PREFIX = 'Draft: ';
 export const DRAFT_PREFIX_DEPRECATED = 'WIP: ';
@@ -118,4 +120,44 @@ export function getRepoUrl(
   repoUrl.username = 'oauth2';
   repoUrl.password = opts.token!;
   return repoUrl.toString();
+}
+
+export function toCommitMessage(message: string | string[]): string {
+  return isArray(message) ? message.join('\n\n') : message;
+}
+
+export async function toAdditionAction(
+  file: FileAddition,
+  startBranch: string,
+): Promise<GitlabCommitAction> {
+  // The GitLab API requires the caller to declare whether a file is being
+  // created or updated, so we check whether it already exists on the parent
+  // branch reference used by start_branch.
+  const fileExists = (await git.getFile(file.path, startBranch)) !== null;
+
+  const action: GitlabCommitAction = {
+    action: fileExists ? 'update' : 'create',
+    file_path: file.path,
+    content: Buffer.isBuffer(file.contents)
+      ? file.contents.toString('base64')
+      : (file.contents ?? ''),
+  };
+
+  // Binary content must be base64 encoded so it survives the JSON round-trip.
+  if (Buffer.isBuffer(file.contents)) {
+    action.encoding = 'base64';
+  }
+
+  if (file.isExecutable) {
+    action.execute_filemode = true;
+  }
+
+  return action;
+}
+
+export function toDeletionAction(filePath: string): GitlabCommitAction {
+  return {
+    action: 'delete',
+    file_path: filePath,
+  };
 }
