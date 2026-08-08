@@ -1869,7 +1869,11 @@ async function tryPrAutomerge(
   }
 
   try {
-    const mergeMethod = config.mergeMethod?.toUpperCase() || 'MERGE';
+    const mergeMethod =
+      (
+        mapMergeStartegy(platformPrOptions.automergeStrategy) ??
+        config.mergeMethod
+      )?.toUpperCase() || 'MERGE';
 
     let commitHeadline: string | undefined;
     let commitBody: string | undefined;
