@@ -4,6 +4,7 @@ import { buildTestJwt } from '~test/jwt-util.ts';
 import { partial } from '~test/util.ts';
 import { streamToString } from '../../../util/streams.ts';
 import {
+  encodeUrlPathSegments,
   getBranchNameWithoutRefsheadsPrefix,
   getGitStatusContextCombinedName,
   getGitStatusContextFromCombinedName,
@@ -268,6 +269,79 @@ describe('modules/platform/azure/util', () => {
       );
     });
   });
+
+  describe('encodeUrlPathSegments', () => {
+    it('encodes a space in a path segment (collection)', () => {
+      expect(
+        encodeUrlPathSegments(
+          'https://dev.azure.com/my org/my-project/_git/my-repo/',
+        ),
+      ).toBe('https://dev.azure.com/my%20org/my-project/_git/my-repo/');
+    });
+
+    it('encodes a space in a path segment (project)', () => {
+      expect(
+        encodeUrlPathSegments(
+          'https://dev.azure.com/my-org/my project/_git/my-repo/',
+        ),
+      ).toBe('https://dev.azure.com/my-org/my%20project/_git/my-repo/');
+    });
+
+    it('encodes a space in a path segment (repository)', () => {
+      expect(
+        encodeUrlPathSegments(
+          'https://dev.azure.com/my-org/my-project/_git/my repo/',
+        ),
+      ).toBe('https://dev.azure.com/my-org/my-project/_git/my%20repo/');
+    });
+
+    it('encodes a spaces in multiple path segments', () => {
+      expect(
+        encodeUrlPathSegments(
+          'https://dev.azure.com/my org/my project/_git/my repo/',
+        ),
+      ).toBe('https://dev.azure.com/my%20org/my%20project/_git/my%20repo/');
+    });
+
+    it('leaves the origin untouched', () => {
+      const origin = 'https://dev.azure.com:443/';
+      const encoded = encodeUrlPathSegments(
+        `${origin}my org/my project/_git/my repo`,
+      );
+      expect(encoded.startsWith('https://dev.azure.com/')).toBe(true);
+    });
+
+    it('prevserves non-default ports', () => {
+      const origin = 'https://azure-devops.interal.corp:8080/tfs/';
+      const encoded = encodeUrlPathSegments(
+        `${origin}my org/my project/_git/my repo`,
+      );
+      expect(encoded.startsWith(origin)).toBe(true);
+    });
+
+    it('handles credentials in the URL (PAT in userinfo)', () => {
+      expect(
+        encodeUrlPathSegments(
+          'https://pat123@dev.azure.com/my org/project name/_git/my repo',
+        ),
+      ).toBe(
+        'https://pat123@dev.azure.com/my%20org/project%20name/_git/my%20repo',
+      );
+    });
+
+    it('returns the input unchanged for an invalid URL', () => {
+      expect(encodeUrlPathSegments('not a url')).toBe('not a url');
+    });
+
+    it('is idempotent - does not double-encode an already-encoded segment', () => {
+      const once = encodeUrlPathSegments(
+        'https://dev.azure.com/my org/my proj/_git/my repo',
+      );
+      const twice = encodeUrlPathSegments(once);
+      expect(twice).toBe(once);
+    });
+  });
+
   it('returns the raw title if not a dependency dashboard', () => {
     expect(getWorkItemTitle('Some Issue', 'project/repo')).toBe('Some Issue');
   });
