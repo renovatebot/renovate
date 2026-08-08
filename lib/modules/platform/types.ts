@@ -32,6 +32,11 @@ export interface RepoResult {
   repoFingerprint: string;
 }
 
+export interface PlatformRepoConfig {
+  azureWorkItemType?: string;
+  gitLabWorkItemType?: string;
+}
+
 export type GitUrlOption = 'default' | 'ssh' | 'endpoint';
 
 export interface RepoParams {
@@ -46,6 +51,8 @@ export interface RepoParams {
   cloneSubmodulesFilter?: string[];
   /** Azure only: work item type to use when creating issues. */
   azureWorkItemType?: string;
+  /** GitLab only: work item type to use when creating issues. */
+  gitLabWorkItemType?: string;
 }
 
 export interface PrDebugData {
@@ -252,6 +259,7 @@ export interface Platform {
     branchOrTag?: string,
   ): Promise<any>;
   initRepo(config: RepoParams): Promise<RepoResult>;
+  setRepoContext?(config: PlatformRepoConfig): void;
   getPrList(): Promise<Pr[]>;
   ensureIssueClosing(title: string): Promise<void>;
   ensureIssue(

@@ -67,6 +67,7 @@ export async function initRepo(
   config = applySecretsAndVariablesToConfig({
     config,
   });
+  platform.setRepoContext?.(config);
   setUserRepoConfig(config);
   config = await detectVulnerabilityAlerts(config);
   // istanbul ignore if

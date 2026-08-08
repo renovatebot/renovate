@@ -79,6 +79,7 @@ export interface RenovateSharedConfig {
   automergeType?: AutoMergeType;
   azureWorkItemId?: number;
   azureWorkItemType?: string;
+  gitLabWorkItemType?: string;
   branchName?: string;
   branchNameStrict?: boolean;
   branchPrefix?: string;
