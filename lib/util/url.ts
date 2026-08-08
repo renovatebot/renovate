@@ -97,13 +97,23 @@ export function resolveSameOriginUrl(
   if (!base) {
     return null;
   }
+
   let resolved: URL;
   try {
     resolved = new URL(nextUrl.toString(), base);
   } catch {
     return null;
   }
-  return resolved.origin === base.origin ? resolved.href : null;
+
+  if (resolved.hostname !== base.hostname) {
+    return null;
+  }
+
+  if (base.protocol === 'https:' && resolved.protocol === 'http:') {
+    resolved.protocol = 'https:';
+  }
+
+  return resolved.href;
 }
 
 export function getQueryString(params: Record<string, any>): string {
