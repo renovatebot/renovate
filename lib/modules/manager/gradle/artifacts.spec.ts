@@ -4,7 +4,10 @@ import { mockDeep } from 'vitest-mock-extended';
 import { envMock, mockExecAll, mockExecSequence } from '~test/exec-util.ts';
 import { env, fs, git, logger, partial, scm } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
-import type { RepoGlobalConfig } from '../../../config/types.ts';
+import type {
+  InternalGlobalConfigOptions,
+  RepoGlobalConfig,
+} from '../../../config/types.ts';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
 import { resetPrefetchedImages } from '../../../util/exec/docker/index.ts';
 import { ExecError } from '../../../util/exec/exec-error.ts';
@@ -19,7 +22,7 @@ vi.mock('../../datasource/index.ts', () => mockDeep());
 
 process.env.CONTAINERBASE = 'true';
 
-const adminConfig: RepoGlobalConfig = {
+const adminConfig: RepoGlobalConfig & InternalGlobalConfigOptions = {
   // `join` fixes Windows CI
   localDir: upath.join('/tmp/github/some/repo'),
   cacheDir: upath.join('/tmp/cache'),
@@ -130,7 +133,8 @@ describe('modules/manager/gradle/artifacts', () => {
       isGradleExecutionAllowed('some_gradle-wrapper.command');
 
       expect(logger.logger.once.warn).toHaveBeenCalledWith(
-        'Gradle wrapper command, `some_gradle-wrapper.command`, was requested to run, but `gradleWrapper` is not permitted in the allowedUnsafeExecutions',
+        { command: 'some_gradle-wrapper.command' },
+        'Gradle wrapper command was requested to run, but `gradleWrapper` is not permitted in the allowedUnsafeExecutions',
       );
     });
   });
@@ -461,11 +465,11 @@ describe('modules/manager/gradle/artifacts', () => {
             '-e CONTAINERBASE_CACHE_DIR ' +
             '-w "/tmp/github/some/repo" ' +
             'ghcr.io/renovatebot/base-image' +
-            ' bash -l -c "' +
+            " bash -l -c '" +
             'install-tool java 16.0.1' +
             ' && ' +
-            './gradlew -Dorg.gradle.jvmargs=\\"-Xms512m -Xmx512m\\" --console=plain --dependency-verification lenient -q properties' +
-            '"',
+            './gradlew -Dorg.gradle.jvmargs="-Xms512m -Xmx512m" --console=plain --dependency-verification lenient -q properties' +
+            "'",
           options: { cwd: '/tmp/github/some/repo' },
         },
         { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
@@ -478,11 +482,11 @@ describe('modules/manager/gradle/artifacts', () => {
             '-e CONTAINERBASE_CACHE_DIR ' +
             '-w "/tmp/github/some/repo" ' +
             'ghcr.io/renovatebot/base-image' +
-            ' bash -l -c "' +
+            " bash -l -c '" +
             'install-tool java 16.0.1' +
             ' && ' +
-            './gradlew -Dorg.gradle.jvmargs=\\"-Xms512m -Xmx512m\\" --console=plain --dependency-verification lenient -q :dependencies --write-locks' +
-            '"',
+            './gradlew -Dorg.gradle.jvmargs="-Xms512m -Xmx512m" --console=plain --dependency-verification lenient -q :dependencies --write-locks' +
+            "'",
           options: {
             cwd: '/tmp/github/some/repo',
             stdin: 'pipe',

@@ -40,9 +40,9 @@ import type {
 
 const githubBaseUrl = 'https://api.github.com/';
 let baseUrl = githubBaseUrl;
-export const setBaseUrl = (url: string): void => {
+export function setBaseUrl(url: string): void {
   baseUrl = url;
-};
+}
 
 export interface GithubBaseHttpOptions extends HttpOptions {
   repository?: string;
@@ -148,11 +148,12 @@ function handleGotError(
           {
             documentationUrl: `${GlobalConfig.get('productLinks').documentation}getting-started/running/#githubcom-token-for-changelogs-and-tools`,
           },
-          `Rate limit exceeded for ${parsed.host}, as no hostRules set for this host. Please set a GITHUB_COM_TOKEN`,
+          'Rate limit exceeded for api.github.com, as no hostRules set for this host. Please set a GITHUB_COM_TOKEN',
         );
       } else {
         logger.once.warn(
-          `Rate limit exceeded for ${parsed!.host}, as no hostRules set for this host`,
+          { host: parsed!.host },
+          'Rate limit exceeded, as no hostRules set for this host',
         );
       }
     }
@@ -438,42 +439,54 @@ export class GithubHttp extends HttpBase<GithubHttpOptions> {
         const firstPageUrl = rebasePagination
           ? replaceUrlBase(parsedUrl, baseUrl)
           : parsedUrl;
-        const queue = [...range(2, lastPage)].map(
-          (pageNumber) => (): Promise<HttpResponse<T>> => {
-            // copy before modifying searchParams
-            const nextUrl = parseUrl(firstPageUrl.toString())!;
-            nextUrl.searchParams.set('page', String(pageNumber));
-            return super.requestJsonUnsafe<T>(method, {
-              ...opts,
-              url: nextUrl,
-            });
-          },
-        );
-        const pages = await p.all(queue);
-        // v8 ignore else -- TODO: add test #40625
-        if (httpOptions.paginationField && isPlainObject(result.body)) {
-          const paginatedResult = result.body[httpOptions.paginationField];
+        // Don't follow a cross-origin request, unless we've been explicitly requested to do so with `RENOVATE_X_REBASE_PAGINATION_LINKS`
+        if (firstPageUrl.origin === resolvedUrl.origin) {
+          const queue = [...range(2, lastPage)].map(
+            (pageNumber) => (): Promise<HttpResponse<T>> => {
+              // copy before modifying searchParams
+              const nextUrl = parseUrl(firstPageUrl.toString())!;
+              nextUrl.searchParams.set('page', String(pageNumber));
+              return super.requestJsonUnsafe<T>(method, {
+                ...opts,
+                url: nextUrl,
+              });
+            },
+          );
+          const pages = await p.all(queue);
           // v8 ignore else -- TODO: add test #40625
-          if (isArray<T>(paginatedResult)) {
-            for (const nextPage of pages) {
-              // v8 ignore else -- TODO: add test #40625
-              if (isPlainObject(nextPage.body)) {
-                const nextPageResults =
-                  nextPage.body[httpOptions.paginationField];
+          if (httpOptions.paginationField && isPlainObject(result.body)) {
+            const paginatedResult = result.body[httpOptions.paginationField];
+            // v8 ignore else -- TODO: add test #40625
+            if (isArray<T>(paginatedResult)) {
+              for (const nextPage of pages) {
                 // v8 ignore else -- TODO: add test #40625
-                if (isArray<T>(nextPageResults)) {
-                  paginatedResult.push(...nextPageResults);
+                if (isPlainObject(nextPage.body)) {
+                  const nextPageResults =
+                    nextPage.body[httpOptions.paginationField];
+                  // v8 ignore else -- TODO: add test #40625
+                  if (isArray<T>(nextPageResults)) {
+                    paginatedResult.push(...nextPageResults);
+                  }
                 }
               }
             }
-          }
-        } else if (isArray<T>(result.body)) {
-          for (const nextPage of pages) {
-            // v8 ignore else -- TODO: add test #40625
-            if (isArray<T>(nextPage.body)) {
-              result.body.push(...nextPage.body);
+          } else if (isArray<T>(result.body)) {
+            for (const nextPage of pages) {
+              // v8 ignore else -- TODO: add test #40625
+              if (isArray<T>(nextPage.body)) {
+                result.body.push(...nextPage.body);
+              }
             }
           }
+        } else {
+          // make sure that users are aware if there are any (potentially malicious, or misconfigured) pagination links being returned
+          logger.once.warn(
+            {
+              requestHost: resolvedUrl.host,
+              paginationHost: firstPageUrl.host,
+            },
+            'Ignoring cross-origin GitHub pagination link. Set RENOVATE_X_REBASE_PAGINATION_LINKS if this is a self-hosted instance that returns a different host in pagination links.',
+          );
         }
       }
     }

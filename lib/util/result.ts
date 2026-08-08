@@ -170,7 +170,7 @@ export class Result<T extends Val, E extends Val = Error> {
     }
 
     if (input instanceof Promise) {
-      return AsyncResult.wrap(input as never);
+      return AsyncResult.wrap(input);
     }
 
     try {

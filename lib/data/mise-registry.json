@@ -1,6 +1,6 @@
 {
   "meta": {
-    "version": "2026.7.5 linux-x64 (2026-07-09)"
+    "version": "2026.8.0 linux-x64 (2026-08-01)"
   },
   "tools": {
     "1password": {
@@ -209,6 +209,9 @@
     "aws-amplify": {
       "asdf": "LozanoMatheus/asdf-aws-amplify-cli",
       "github": "aws-amplify/amplify-cli"
+    },
+    "aws-cdk": {
+      "npm": "aws-cdk"
     },
     "aws-cli": {
       "aqua": "aws/aws-cli",
@@ -422,6 +425,9 @@
     "bun": {
       "core": "bun"
     },
+    "bundler": {
+      "gem": "bundler"
+    },
     "cabal": {
       "aqua": "haskell/cabal/cabal-install"
     },
@@ -473,6 +479,9 @@
       "asdf": "asdf-community/asdf-ccache",
       "github": "ccache/ccache"
     },
+    "cdk": {
+      "npm": "aws-cdk"
+    },
     "certstrap": {
       "asdf": "carnei-ro/asdf-certstrap",
       "github": "square/certstrap"
@@ -509,6 +518,9 @@
     "checkov": {
       "aqua": "bridgecrewio/checkov",
       "asdf": "bosmak/asdf-checkov"
+    },
+    "checkstyle": {
+      "aqua": "checkstyle/checkstyle"
     },
     "chezmoi": {
       "aqua": "twpayne/chezmoi",
@@ -888,7 +900,7 @@
       "aqua": "docker/cli"
     },
     "docker-compose": {
-      "aqua": "docker/compose"
+      "github": "docker/compose"
     },
     "docker-slim": {
       "aqua": "mintoolkit/mint",
@@ -1063,8 +1075,8 @@
     },
     "eza": {
       "aqua": "eza-community/eza",
-      "asdf": "mise-plugins/mise-eza",
-      "cargo": "eza"
+      "cargo": "eza",
+      "vfox": "jdx/vfox-eza"
     },
     "fastfetch": {
       "aqua": "fastfetch-cli/fastfetch"
@@ -1237,6 +1249,9 @@
     "git-lfs": {
       "aqua": "git-lfs/git-lfs"
     },
+    "git-town": {
+      "aqua": "git-town/git-town"
+    },
     "gitconfig": {
       "asdf": "0ghny/asdf-gitconfig",
       "github": "0ghny/gitconfig"
@@ -1402,6 +1417,10 @@
       "asdf": "ouest/asdf-grex",
       "cargo": "grex"
     },
+    "grok": {
+      "aqua": "x.ai/cli/grok",
+      "http": "grok"
+    },
     "gron": {
       "aqua": "tomnomnom/gron"
     },
@@ -1506,8 +1525,8 @@
       "aqua": "helmwave/helmwave"
     },
     "herdr": {
-      "aqua": "ogulcancelik/herdr",
-      "github": "ogulcancelik/herdr"
+      "aqua": "herdrdev/herdr",
+      "github": "herdrdev/herdr"
     },
     "heroku": {
       "npm": "heroku"
@@ -2156,12 +2175,18 @@
       "asdf": "mise-plugins/mise-meson",
       "pipx": "meson"
     },
+    "micro": {
+      "aqua": "micro-editor/micro"
+    },
     "micromamba": {
       "github": "mamba-org/micromamba-releases"
     },
     "micronaut": {
       "asdf": "mise-plugins/mise-micronaut",
       "github": "micronaut-projects/micronaut-starter"
+    },
+    "microsandbox": {
+      "aqua": "superradcompany/microsandbox"
     },
     "miller": {
       "aqua": "johnkerl/miller"
@@ -2362,6 +2387,9 @@
     "odo": {
       "aqua": "redhat-developer/odo",
       "asdf": "rm3l/asdf-odo"
+    },
+    "oh-my-pi": {
+      "github": "can1357/oh-my-pi"
     },
     "oh-my-posh": {
       "aqua": "JanDeDobbeleer/oh-my-posh"
@@ -3179,6 +3207,10 @@
     "tailpipe": {
       "aqua": "turbot/tailpipe"
     },
+    "tak": {
+      "cargo": "tak-cli",
+      "github": "jdx/tak"
+    },
     "talhelper": {
       "aqua": "budimanjojo/talhelper",
       "asdf": "bjw-s/asdf-talhelper"
@@ -3213,6 +3245,10 @@
     "tctl": {
       "aqua": "temporalio/tctl",
       "asdf": "eko/asdf-tctl"
+    },
+    "tealdeer": {
+      "aqua": "tealdeer-rs/tealdeer",
+      "github": "tealdeer-rs/tealdeer"
     },
     "tekton": {
       "aqua": "tektoncd/cli",
@@ -3643,6 +3679,9 @@
     "werf": {
       "aqua": "werf/werf"
     },
+    "witr": {
+      "aqua": "pranshuparmar/witr"
+    },
     "workmux": {
       "cargo": "workmux",
       "github": "raine/workmux"
@@ -3767,6 +3806,9 @@
     },
     "zls": {
       "aqua": "zigtools/zls"
+    },
+    "zmx": {
+      "github": "neurosnap/zmx"
     },
     "zola": {
       "aqua": "getzola/zola",

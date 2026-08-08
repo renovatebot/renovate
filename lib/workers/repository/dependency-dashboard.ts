@@ -197,14 +197,19 @@ export async function readDashboardBody(
     }
   }
 
-  if (config.checkedBranches) {
+  const checkedBranches = GlobalConfig.get('checkedBranches');
+  if (isNonEmptyArray(checkedBranches)) {
     const checkedBranchesRec: Record<string, string> = Object.fromEntries(
-      config.checkedBranches.map((branchName) => [branchName, 'global-config']),
+      checkedBranches.map((branchName) => [branchName, 'global-config']),
     );
     dashboardChecks.dependencyDashboardChecks = {
       ...dashboardChecks.dependencyDashboardChecks,
       ...checkedBranchesRec,
     };
+  }
+
+  if (GlobalConfig.get('rebaseAllOpenBranches')) {
+    dashboardChecks.dependencyDashboardRebaseAllOpen = true;
   }
 
   Object.assign(config, dashboardChecks);

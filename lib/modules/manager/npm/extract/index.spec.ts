@@ -405,6 +405,163 @@ describe('modules/manager/npm/extract/index', () => {
       ]);
     });
 
+    it('reads scoped registryUrls from pnpm-workspace.yaml', async () => {
+      fs.findLocalSiblingOrParent.mockImplementation(
+        (packageFile, otherFile): Promise<string | null> => {
+          if (
+            packageFile === 'package.json' &&
+            otherFile === 'pnpm-workspace.yaml'
+          ) {
+            return Promise.resolve('pnpm-workspace.yaml');
+          }
+          return Promise.resolve(null);
+        },
+      );
+      fs.readLocalFile.mockImplementation((fileName): Promise<any> => {
+        if (fileName === 'pnpm-workspace.yaml') {
+          return Promise.resolve(codeBlock`
+            registries:
+              "@babel": https://private.example.com/
+          `);
+        }
+        return Promise.resolve(null);
+      });
+      const res = await npmExtract.extractPackageFile(
+        input02Content,
+        'package.json',
+        {},
+      );
+      expect(res?.deps).toMatchObject([
+        {
+          depName: '@babel/core',
+          registryUrls: ['https://private.example.com/'],
+        },
+        { depName: 'config' },
+        { depName: 'express>cookie' },
+      ]);
+      expect(
+        res?.deps.flatMap((dep) => dep.registryUrls),
+      ).toBeArrayIncludingOnly(['https://private.example.com/', undefined]);
+    });
+
+    it('reads top-level registry from pnpm-workspace.yaml', async () => {
+      fs.findLocalSiblingOrParent.mockImplementation(
+        (packageFile, otherFile): Promise<string | null> => {
+          if (
+            packageFile === 'package.json' &&
+            otherFile === 'pnpm-workspace.yaml'
+          ) {
+            return Promise.resolve('pnpm-workspace.yaml');
+          }
+          return Promise.resolve(null);
+        },
+      );
+      fs.readLocalFile.mockImplementation((fileName): Promise<any> => {
+        if (fileName === 'pnpm-workspace.yaml') {
+          return Promise.resolve('registry: https://private.example.com/');
+        }
+        return Promise.resolve(null);
+      });
+      const res = await npmExtract.extractPackageFile(
+        input02Content,
+        'package.json',
+        {},
+      );
+      expect(res?.deps.flatMap((dep) => dep.registryUrls)).toEqual([
+        'https://private.example.com/',
+        'https://private.example.com/',
+        'https://private.example.com/',
+      ]);
+    });
+
+    it('skips pnpm-workspace.yaml registry values containing env vars', async () => {
+      fs.findLocalSiblingOrParent.mockImplementation(
+        (packageFile, otherFile): Promise<string | null> => {
+          if (
+            packageFile === 'package.json' &&
+            otherFile === 'pnpm-workspace.yaml'
+          ) {
+            return Promise.resolve('pnpm-workspace.yaml');
+          }
+          return Promise.resolve(null);
+        },
+      );
+      fs.readLocalFile.mockImplementation((fileName): Promise<any> => {
+        if (fileName === 'pnpm-workspace.yaml') {
+          return Promise.resolve(codeBlock`
+            registries:
+              "@babel": https://\${TOKEN}.example.com/
+          `);
+        }
+        return Promise.resolve(null);
+      });
+      const res = await npmExtract.extractPackageFile(
+        input02Content,
+        'package.json',
+        {},
+      );
+      expect(
+        res?.deps.flatMap((dep) => dep.registryUrls),
+      ).toBeArrayIncludingOnly([undefined]);
+    });
+
+    it('does not set pnpm-workspace.yaml registryUrls for non-npm deps', async () => {
+      fs.findLocalSiblingOrParent.mockImplementation(
+        (packageFile, otherFile): Promise<string | null> => {
+          if (
+            packageFile === 'package.json' &&
+            otherFile === 'pnpm-workspace.yaml'
+          ) {
+            return Promise.resolve('pnpm-workspace.yaml');
+          }
+          return Promise.resolve(null);
+        },
+      );
+      fs.readLocalFile.mockImplementation((fileName): Promise<any> => {
+        if (fileName === 'pnpm-workspace.yaml') {
+          return Promise.resolve('registry: https://private.example.com/');
+        }
+        return Promise.resolve(null);
+      });
+      const res = await npmExtract.extractPackageFile(
+        '{"dependencies":{"a":"github:owner/a#v1.1.0"}}',
+        'package.json',
+        defaultExtractConfig,
+      );
+      expect(res?.deps).toMatchObject([
+        { depName: 'a', datasource: 'github-tags' },
+      ]);
+      expect(res?.deps[0].registryUrls).toBeUndefined();
+    });
+
+    it('ignores an unparseable pnpm-workspace.yaml', async () => {
+      fs.findLocalSiblingOrParent.mockImplementation(
+        (packageFile, otherFile): Promise<string | null> => {
+          if (
+            packageFile === 'package.json' &&
+            otherFile === 'pnpm-workspace.yaml'
+          ) {
+            return Promise.resolve('pnpm-workspace.yaml');
+          }
+          return Promise.resolve(null);
+        },
+      );
+      fs.readLocalFile.mockImplementation((fileName): Promise<any> => {
+        if (fileName === 'pnpm-workspace.yaml') {
+          return Promise.resolve('registries: not-an-object');
+        }
+        return Promise.resolve(null);
+      });
+      const res = await npmExtract.extractPackageFile(
+        input02Content,
+        'package.json',
+        {},
+      );
+      expect(
+        res?.deps.flatMap((dep) => dep.registryUrls),
+      ).toBeArrayIncludingOnly([undefined]);
+    });
+
     it('finds complex yarn workspaces', async () => {
       fs.readLocalFile.mockImplementation((): Promise<any> => {
         return Promise.resolve(null);

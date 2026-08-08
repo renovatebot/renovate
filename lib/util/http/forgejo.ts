@@ -3,9 +3,9 @@ import { HttpBase, type InternalJsonUnsafeOptions } from './http.ts';
 import type { HttpMethod, HttpOptions, HttpResponse } from './types.ts';
 
 let baseUrl: string;
-export const setBaseUrl = (newBaseUrl: string): void => {
+export function setBaseUrl(newBaseUrl: string): void {
   baseUrl = newBaseUrl.replace(/\/*$/, '/'); // TODO #12875
-};
+}
 
 export interface ForgejoHttpOptions extends HttpOptions {
   paginate?: boolean;

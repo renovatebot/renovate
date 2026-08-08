@@ -246,14 +246,13 @@ Your `renovate.js` where you run Renovate cannot contain any `extends` definitio
 
 ```js
 module.exports = {
-    ...
-    onboardingConfig: {
-      "argocd": {
-        "fileMatch": [
-          "application\\.yaml$"
-        ]
-      },
-    };
+  // ...
+  onboardingConfig: {
+    argocd: {
+      managerFilePatterns: ['application\\.yaml$'],
+    },
+  },
+};
 ```
 
 The resulting onboarding config will be:

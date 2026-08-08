@@ -198,7 +198,7 @@ export async function getDependency(
       }
       throw err;
     }
-    logger.debug({ err }, 'Unknown npm lookup error');
+    logger.debug({ err, packageName, registryUrl }, 'Unknown npm lookup error');
     return null;
   }
 }
