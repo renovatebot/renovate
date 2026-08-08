@@ -10,6 +10,7 @@ import { ExternalHostError } from '../../../../types/errors/external-host-error.
 import { TerraformProviderDatasource } from '../../../datasource/terraform-provider/index.ts';
 import { TerraformProviderHash } from './hash.ts';
 
+const openTofuRegistryUrl = TerraformProviderDatasource.openTofuRegistryUrl;
 const releaseBackendUrl = TerraformProviderDatasource.defaultRegistryUrls[1];
 const terraformCloudReleaseBackendUrl =
   TerraformProviderDatasource.defaultRegistryUrls[0];
@@ -445,6 +446,114 @@ describe('modules/manager/terraform/lockfile/hash', () => {
       'h1:I2F2atKZqKEOYk1tTLe15Llf9rVqxz48ZL1eZB9g8zM=',
       'h1:I2F2atKZqKEOYk1tTLe15Llf9rVqxz48ZL1eZB9g8zM=',
     ]);
+  });
+
+  describe('OpenTofu fast path', () => {
+    it('uses packages API without downloading zips', async () => {
+      httpMock
+        .scope(openTofuRegistryUrl)
+        .get('/v1/providers/hashicorp/local/2.5.1/download/linux/amd64')
+        .reply(200, {
+          packages: {
+            linux_amd64: {
+              hashes: [
+                'zh:422ce45691b2f384dbd4596fdc8209d95cb43d85a82aaa0173089d38976d6e96',
+                'h1:GgW5qncKu4KnXLE1ZYv5iwmhSYtTNzsOvJAOQIyFR7E=',
+              ],
+            },
+            darwin_arm64: {
+              hashes: [
+                'zh:c66529133599a419123ad2e42874afbd9aba82bd1de2b15cc68d2a1e665d4c8e',
+                'h1:87L+rpGao062xifb1VuG9YVFwp9vbDP6G2fgfYxUkQs=',
+              ],
+            },
+          },
+        });
+
+      const result = await TerraformProviderHash.createHashes(
+        openTofuRegistryUrl,
+        'hashicorp/local',
+        '2.5.1',
+      );
+
+      expect(log.error.mock.calls).toBeEmptyArray();
+      expect(result).toEqual([
+        'h1:87L+rpGao062xifb1VuG9YVFwp9vbDP6G2fgfYxUkQs=',
+        'h1:GgW5qncKu4KnXLE1ZYv5iwmhSYtTNzsOvJAOQIyFR7E=',
+        'zh:422ce45691b2f384dbd4596fdc8209d95cb43d85a82aaa0173089d38976d6e96',
+        'zh:c66529133599a419123ad2e42874afbd9aba82bd1de2b15cc68d2a1e665d4c8e',
+      ]);
+    });
+
+    it('falls back to slow path when packages field is missing', async () => {
+      const readStreamLinux = createReadStream(
+        'lib/modules/manager/terraform/lockfile/__fixtures__/test.zip',
+      );
+      const readStreamDarwin = createReadStream(
+        'lib/modules/manager/terraform/lockfile/__fixtures__/test.zip',
+      );
+
+      httpMock
+        .scope(openTofuRegistryUrl)
+        // Fast-path attempt: response without `packages`
+        .get('/v1/providers/hashicorp/local/2.5.1/download/linux/amd64')
+        .reply(200, {
+          os: 'linux',
+          arch: 'amd64',
+          filename: 'terraform-provider-local_2.5.1_linux_amd64.zip',
+          download_url:
+            'https://example.com/terraform-provider-local_2.5.1_linux_amd64.zip',
+        })
+        // Slow-path: service discovery + versions + per-platform downloads
+        .get('/.well-known/terraform.json')
+        .reply(200, terraformCloudSDCJson)
+        .get('/v1/providers/hashicorp/local/versions')
+        .reply(200, {
+          id: 'hashicorp/local',
+          versions: [
+            {
+              version: '2.5.1',
+              platforms: [
+                { os: 'linux', arch: 'amd64' },
+                { os: 'darwin', arch: 'arm64' },
+              ],
+            },
+          ],
+        })
+        .get('/v1/providers/hashicorp/local/2.5.1/download/linux/amd64')
+        .reply(200, {
+          os: 'linux',
+          arch: 'amd64',
+          filename: 'terraform-provider-local_2.5.1_linux_amd64.zip',
+          download_url: 'https://example.com/linux.zip',
+        })
+        .get('/v1/providers/hashicorp/local/2.5.1/download/darwin/arm64')
+        .reply(200, {
+          os: 'darwin',
+          arch: 'arm64',
+          filename: 'terraform-provider-local_2.5.1_darwin_arm64.zip',
+          download_url: 'https://example.com/darwin.zip',
+        });
+
+      httpMock
+        .scope('https://example.com')
+        .get('/linux.zip')
+        .reply(200, readStreamLinux)
+        .get('/darwin.zip')
+        .reply(200, readStreamDarwin);
+
+      const result = await TerraformProviderHash.createHashes(
+        openTofuRegistryUrl,
+        'hashicorp/local',
+        '2.5.1',
+      );
+
+      expect(log.error.mock.calls).toBeEmptyArray();
+      expect(result).toMatchObject([
+        'h1:I2F2atKZqKEOYk1tTLe15Llf9rVqxz48ZL1eZB9g8zM=',
+        'h1:I2F2atKZqKEOYk1tTLe15Llf9rVqxz48ZL1eZB9g8zM=',
+      ]);
+    });
   });
 
   describe('hashOfZipContent', () => {

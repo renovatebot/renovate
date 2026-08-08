@@ -142,3 +142,24 @@ export const TerraformRegistryBuildResponse = z.object({
 export type TerraformRegistryBuildResponse = z.infer<
   typeof TerraformRegistryBuildResponse
 >;
+
+// OpenTofuProviderPackagesResponse — per-platform download endpoint exposes a
+// `packages` map containing the `zh:`/`h1:` hashes for every platform.
+const OpenTofuProviderPackage = z.object({
+  hashes: LooseArray(z.string()).catch([]),
+});
+
+export const OpenTofuProviderPackagesResponse = z
+  .object({
+    packages: z.record(z.string(), OpenTofuProviderPackage).optional(),
+  })
+  .transform(({ packages }): string[] | null => {
+    const allHashes = Object.values(packages ?? {}).flatMap(
+      ({ hashes }) => hashes,
+    );
+    return allHashes.length ? allHashes : null;
+  });
+
+export type OpenTofuProviderPackagesResponse = z.infer<
+  typeof OpenTofuProviderPackagesResponse
+>;
