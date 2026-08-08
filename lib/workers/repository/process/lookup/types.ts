@@ -61,6 +61,7 @@ export interface UpdateResult {
   homepage?: string;
   deprecationMessage?: string;
   sourceUrl?: string | null;
+  currentCompatibility?: string;
   currentVersion?: string;
   isSingleVersion?: boolean;
   lookupName?: string;
