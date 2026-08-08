@@ -137,6 +137,59 @@ describe('modules/manager/bun/artifacts', () => {
         );
       });
 
+      it('does not materialize a workspace npmrc from a parent directory', async () => {
+        updateArtifact.packageFileName = 'packages/workspace-a/package.json';
+        updateArtifact.updatedDeps = [
+          { manager: 'bun', lockFiles: ['bun.lockb'] },
+        ];
+        const oldLock = Buffer.from('old');
+        fs.readFile.mockResolvedValueOnce(oldLock as never);
+        // no sibling .npmrc in the package directory
+        fs.readFile.mockResolvedValueOnce(null as never);
+        // repository root .npmrc found by resolveNpmrc()
+        fs.stat.mockRejectedValueOnce(new Error('ENOENT'));
+        fs.stat.mockRejectedValueOnce(new Error('ENOENT'));
+        fs.stat.mockResolvedValueOnce({} as never);
+        fs.readFile.mockResolvedValueOnce(
+          'registry=https://registry.example.com/' as never,
+        );
+        const newLock = Buffer.from('new');
+        fs.readFile.mockResolvedValueOnce(newLock as never);
+
+        await updateArtifacts(updateArtifact);
+
+        expect(fs.outputFile).not.toHaveBeenCalledWith(
+          expect.stringMatching(/[/\\]\.npmrc$/),
+          expect.anything(),
+        );
+      });
+
+      it('resets npmrc when the bun command fails', async () => {
+        const execError = new ExecError('nope', {
+          cmd: '',
+          stdout: '',
+          stderr: '',
+          options: {},
+        });
+        updateArtifact.packageFileName = 'package.json';
+        updateArtifact.config.npmrc = 'registry=https://registry.example.com/';
+        updateArtifact.updatedDeps = [
+          { manager: 'bun', lockFiles: ['bun.lockb'] },
+        ];
+        const oldLock = Buffer.from('old');
+        fs.readFile.mockResolvedValueOnce(oldLock as never);
+        fs.readFile.mockResolvedValueOnce('# dummy' as never);
+        exec.mockRejectedValueOnce(execError);
+
+        expect(await updateArtifacts(updateArtifact)).toEqual([
+          { artifactError: { fileName: 'bun.lockb', stderr: 'nope' } },
+        ]);
+        expect(fs.outputFile).toHaveBeenCalledWith(
+          expect.stringMatching(/[/\\]\.npmrc$/),
+          '# dummy',
+        );
+      });
+
       it('supports lockFileMaintenance', async () => {
         updateArtifact.updatedDeps = [
           { manager: 'bun', lockFiles: ['bun.lockb'] },

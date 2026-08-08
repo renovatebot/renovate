@@ -1,4 +1,4 @@
-import { isEmptyArray } from '@sindresorhus/is';
+import { isEmptyArray, isString } from '@sindresorhus/is';
 import upath from 'upath';
 import { GlobalConfig } from '../../../config/global.ts';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
@@ -51,13 +51,20 @@ export async function updateArtifacts(
 
   const pkgFileDir = upath.dirname(packageFileName);
   const originalNpmrcContent = await getNpmrcContent(pkgFileDir);
-  const { npmrc } = await resolveNpmrc(packageFileName, config);
+  const { npmrc, npmrcFileName } = await resolveNpmrc(packageFileName, config);
+  // Use the resolved npmrc unless it came from a parent directory, so a
+  // workspace .npmrc is not materialized into the package directory
+  const baseNpmrcContent =
+    isString(npmrc) &&
+    (!npmrcFileName || npmrcFileName === upath.join(pkgFileDir, '.npmrc'))
+      ? npmrc
+      : originalNpmrcContent;
   const { additionalNpmrcContent } = processHostRules();
   await updateNpmrcContent(
     pkgFileDir,
     originalNpmrcContent,
     additionalNpmrcContent,
-    npmrc ?? originalNpmrcContent,
+    baseNpmrcContent,
   );
 
   try {
@@ -107,6 +114,7 @@ export async function updateArtifacts(
       throw err;
     }
     logger.warn({ lockfile: lockFileName, err }, `Failed to update lock file`);
+    await resetNpmrcContent(pkgFileDir, originalNpmrcContent);
     return [
       {
         artifactError: {

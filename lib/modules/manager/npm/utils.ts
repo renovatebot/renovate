@@ -54,7 +54,7 @@ export async function updateNpmrcContent(
     : additionalLines;
   try {
     const newContent = newNpmrc.length ? newNpmrc.join('\n') : null;
-    if (newContent !== originalContent) {
+    if (newContent && newContent !== originalContent) {
       logger.debug(`Writing updated .npmrc file to ${npmrcFilePath}`);
       await writeLocalFile(npmrcFilePath, `${newContent}\n`);
     }
