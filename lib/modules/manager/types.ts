@@ -41,6 +41,8 @@ export interface ExtractConfig extends CustomExtractConfig {
 export interface UpdateArtifactsConfig {
   isLockFileMaintenance?: boolean;
   constraints?: Partial<Record<ConstraintName, string>>;
+  npmrc?: string;
+  npmrcMerge?: boolean;
   composerIgnorePlatformReqs?: string[];
   goGetDirs?: string[];
   currentValue?: string;

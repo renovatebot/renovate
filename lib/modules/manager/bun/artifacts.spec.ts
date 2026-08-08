@@ -117,6 +117,26 @@ describe('modules/manager/bun/artifacts', () => {
         });
       });
 
+      it('writes configured npmrc for the bun artifact command', async () => {
+        updateArtifact.packageFileName = 'package.json';
+        updateArtifact.config.npmrc = 'registry=https://registry.example.com/';
+        updateArtifact.updatedDeps = [
+          { manager: 'bun', lockFiles: ['bun.lockb'] },
+        ];
+        const oldLock = Buffer.from('old');
+        fs.readFile.mockResolvedValueOnce(oldLock as never);
+        fs.readFile.mockResolvedValueOnce(null as never);
+        const newLock = Buffer.from('new');
+        fs.readFile.mockResolvedValueOnce(newLock as never);
+
+        await updateArtifacts(updateArtifact);
+
+        expect(fs.outputFile).toHaveBeenCalledWith(
+          expect.stringMatching(/[/\\]\.npmrc$/),
+          'registry=https://registry.example.com/\n',
+        );
+      });
+
       it('supports lockFileMaintenance', async () => {
         updateArtifact.updatedDeps = [
           { manager: 'bun', lockFiles: ['bun.lockb'] },

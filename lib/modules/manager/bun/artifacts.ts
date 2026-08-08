@@ -10,6 +10,7 @@ import {
   readLocalFile,
   writeLocalFile,
 } from '../../../util/fs/index.ts';
+import { resolveNpmrc } from '../npm/npmrc.ts';
 import { processHostRules } from '../npm/post-update/rules.ts';
 import {
   getNpmrcContent,
@@ -49,9 +50,15 @@ export async function updateArtifacts(
   }
 
   const pkgFileDir = upath.dirname(packageFileName);
-  const npmrcContent = await getNpmrcContent(pkgFileDir);
+  const originalNpmrcContent = await getNpmrcContent(pkgFileDir);
+  const { npmrc } = await resolveNpmrc(packageFileName, config);
   const { additionalNpmrcContent } = processHostRules();
-  await updateNpmrcContent(pkgFileDir, npmrcContent, additionalNpmrcContent);
+  await updateNpmrcContent(
+    pkgFileDir,
+    originalNpmrcContent,
+    additionalNpmrcContent,
+    npmrc ?? originalNpmrcContent,
+  );
 
   try {
     await writeLocalFile(packageFileName, newPackageFileContent);
@@ -77,7 +84,7 @@ export async function updateArtifacts(
     };
 
     await exec(cmd, execOptions);
-    await resetNpmrcContent(pkgFileDir, npmrcContent);
+    await resetNpmrcContent(pkgFileDir, originalNpmrcContent);
 
     const newLockFileContent = await readLocalFile(lockFileName);
     if (

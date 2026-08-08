@@ -46,10 +46,11 @@ export async function updateNpmrcContent(
   dir: string,
   originalContent: string | null,
   additionalLines: string[],
+  baseContent: string | null = originalContent,
 ): Promise<void> {
   const npmrcFilePath = upath.join(dir, '.npmrc');
-  const newNpmrc = originalContent
-    ? [originalContent, ...additionalLines]
+  const newNpmrc = baseContent
+    ? [baseContent, ...additionalLines]
     : additionalLines;
   try {
     const newContent = newNpmrc.length ? newNpmrc.join('\n') : null;
