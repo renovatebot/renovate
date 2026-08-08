@@ -160,10 +160,10 @@ export function reorderFiles(packageFiles: string[]): string[] {
     .sort((a, b) => {
       // Different directories: check parent-child relationship
       if (a.dir !== b.dir) {
-        if (a.dir.startsWith(b.dir + '/')) {
+        if (a.dir.startsWith(`${b.dir}/`)) {
           return 1;
         }
-        if (b.dir.startsWith(a.dir + '/')) {
+        if (b.dir.startsWith(`${a.dir}/`)) {
           return -1;
         }
         return a.dir.localeCompare(b.dir);

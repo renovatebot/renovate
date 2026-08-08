@@ -7,13 +7,13 @@ import { UnityReleasesJSON } from './schema.ts';
 
 describe('modules/datasource/unity3d/index', () => {
   const fixtures = Object.fromEntries(
-    [...Object.keys(Unity3dDatasource.streams)].map((fixture) => [
+    Object.keys(Unity3dDatasource.streams).map((fixture) => [
       fixture,
       Fixtures.get(`${fixture}.json`),
     ]),
   );
 
-  const mockUnityReleasesApi = (streams: Record<string, string>) => {
+  function mockUnityReleasesApi(streams: Record<string, string>) {
     for (const stream in streams) {
       const content = fixtures[stream];
 
@@ -23,7 +23,7 @@ describe('modules/datasource/unity3d/index', () => {
         .get(`${uri.pathname}${uri.search}`)
         .reply(200, content);
     }
-  };
+  }
 
   function createUnityReleases(
     total: number,

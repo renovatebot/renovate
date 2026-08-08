@@ -40,13 +40,15 @@ export function extractFromVectors(
   // Are we currently parsing a comment? If so, at what depth?
   let commentLevel: number | null = null;
 
-  const isSpace = (ch: string | null): boolean =>
-    !!ch && regEx(/[\s,]/).test(ch);
+  function isSpace(ch: string | null): boolean {
+    return !!ch && regEx(/[\s,]/).test(ch);
+  }
 
-  const cleanStrLiteral = (s: string): string =>
-    s.replace(regEx(/^"/), '').replace(regEx(/"$/), '');
+  function cleanStrLiteral(s: string): string {
+    return s.replace(regEx(/^"/), '').replace(regEx(/"$/), '');
+  }
 
-  const yieldDep = (): void => {
+  function yieldDep(): void {
     if (!commentLevel && artifactId && version) {
       const depName = expandDepName(cleanStrLiteral(artifactId));
       if (version.startsWith('~')) {
@@ -72,7 +74,7 @@ export function extractFromVectors(
     }
     artifactId = '';
     version = '';
-  };
+  }
 
   let prevChar: string | null = null;
   while (idx < str.length) {

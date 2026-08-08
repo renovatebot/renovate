@@ -42,7 +42,7 @@ export function extractPackageFile(
           const dep: PackageDependency = {
             depName: gitDepName,
             currentValue,
-            registryUrls: ['https://' + registry],
+            registryUrls: [`https://${registry}`],
             datasource,
           };
           deps.push(dep);

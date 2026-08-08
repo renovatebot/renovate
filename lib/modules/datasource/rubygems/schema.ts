@@ -1,5 +1,5 @@
 import { isEmptyArray, isEmptyObject } from '@sindresorhus/is';
-import { z } from 'zod/v3';
+import { z } from 'zod/v4';
 import type { ConstraintName } from '../../../util/exec/types.ts';
 import { filterMap } from '../../../util/filter-map.ts';
 import { newlineRegex } from '../../../util/regex.ts';

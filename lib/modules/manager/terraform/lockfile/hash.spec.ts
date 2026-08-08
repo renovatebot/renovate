@@ -122,7 +122,9 @@ describe('modules/manager/terraform/lockfile/hash', () => {
         'hashicorp/azurerm',
         '2.56.0',
       ),
-    ).rejects.toThrow();
+    ).rejects.toThrow(
+      'ADM-ZIP: Invalid or unsupported zip format. No END header found',
+    );
   });
 
   it('full walkthrough', async () => {

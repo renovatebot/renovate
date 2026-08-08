@@ -6,7 +6,7 @@ import type { VersioningApiConstructor } from '../types.ts';
 export const id = 'hermit';
 export const displayName = 'Hermit';
 export const urls = [
-  'https://cashapp.github.io/hermit/packaging/reference/#versions',
+  '[Hermit packaging reference - Versions](https://cashapp.github.io/hermit/packaging/reference/#versions)',
 ];
 export const supportsRanges = false;
 
@@ -164,9 +164,11 @@ export class HermitVersioning extends RegExpVersioningApi {
         verVal !== otherVal
       ) {
         return verVal - otherVal;
-      } else if (verVal === undefined) {
+      }
+      if (verVal === undefined) {
         return 1;
-      } else if (otherVal === undefined) {
+      }
+      if (otherVal === undefined) {
         return -1;
       }
     }

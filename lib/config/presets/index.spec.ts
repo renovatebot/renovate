@@ -303,6 +303,24 @@ describe('config/presets/index', () => {
       });
     });
 
+    it('resolves pin GitHub Action digests to SemVer', async () => {
+      config.extends = ['helpers:pinGitHubActionDigestsToSemver'];
+      const { config: res } = await presets.resolveConfigPresets(config);
+
+      expect(res.packageRules).toEqual([
+        {
+          matchDepTypes: ['action'],
+          pinDigests: true,
+        },
+        {
+          matchDepTypes: ['action'],
+          extractVersion: '^(?<version>v?\\d+\\.\\d+\\.\\d+)$',
+          versioning:
+            'regex:^v?(?<major>\\d+)(\\.(?<minor>\\d+)\\.(?<patch>\\d+))?$',
+        },
+      ]);
+    });
+
     it('resolves eslint', async () => {
       config.extends = ['packages:eslint'];
       const { config: res } = await presets.resolveConfigPresets(config);
@@ -1242,6 +1260,7 @@ describe('config/presets/index', () => {
           'helpers:gitlabDigestChangelogs',
           'helpers:goXPackagesChangelogLink',
           'helpers:goXPackagesNameLink',
+          'helpers:renovateChangelog',
         ],
       });
     });
@@ -1380,9 +1399,9 @@ describe('config/presets/index', () => {
         e = err;
       }
       expect(e).toBeDefined();
-      expect(e!.validationSource).toMatchSnapshot();
-      expect(e!.validationError).toMatchSnapshot();
-      expect(e!.validationMessage).toMatchSnapshot();
+      expect(e!.validationSource).toMatchSnapshot('validationSource');
+      expect(e!.validationError).toMatchSnapshot('validationError');
+      expect(e!.validationMessage).toMatchSnapshot('validationMessage');
     });
 
     it('handles no config', async () => {

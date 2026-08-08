@@ -21,11 +21,10 @@ import type {
   PackageDependency,
   PackageFileContent,
 } from '../types.ts';
-import { CommunityActions } from './community.ts';
 import type { DockerReference, RepositoryReference } from './parse.ts';
 import { isSha, isShortSha, parseUsesLine, versionLikeRe } from './parse.ts';
-import type { Steps } from './schema.ts';
-import { Workflow } from './schema.ts';
+import type { UsesStep } from './schema.ts';
+import { CommunityActions, Workflow } from './schema.ts';
 
 // detects if we run against a Github Enterprise Server and adds the URL to the beginning of the registryURLs for looking up Actions
 // This reflects the behavior of how GitHub looks up Actions
@@ -119,8 +118,7 @@ function extractRepositoryAction(
     const cleanComment = parsed.commentString.slice(1);
     const matchEndIndex = commentData.index + commentData.matchedString.length;
     const commentSuffix = cleanComment.slice(0, matchEndIndex);
-    dep.replaceString =
-      valueString + commentPrecedingWhitespace + '#' + commentSuffix;
+    dep.replaceString = `${valueString}${commentPrecedingWhitespace}#${commentSuffix}`;
   } else if (commentData.ratchetExclude) {
     dep.replaceString =
       valueString + commentPrecedingWhitespace + parsed.commentString;
@@ -259,7 +257,7 @@ const versionedActions: Record<string, string> = {
   // - java
 };
 
-function extractVersionedAction(step: Steps): PackageDependency | null {
+function extractVersionedAction(step: UsesStep): PackageDependency | null {
   for (const [action, versioning] of Object.entries(versionedActions)) {
     const actionName = `actions/setup-${action}`;
     if (step.uses !== actionName && !step.uses?.startsWith(`${actionName}@`)) {
@@ -285,13 +283,13 @@ function extractVersionedAction(step: Steps): PackageDependency | null {
   return null;
 }
 
-function extractSteps(steps: Steps[]): PackageDependency[] {
+function extractSteps(steps: UsesStep[]): PackageDependency[] {
   const deps: PackageDependency[] = [];
 
   for (const step of steps) {
     const res = CommunityActions.safeParse(step);
     if (res.success) {
-      deps.push(res.data);
+      deps.push(...res.data);
       continue;
     }
 

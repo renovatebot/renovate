@@ -28,7 +28,10 @@ import type {
 const markdown = new MarkdownIt('zero');
 markdown.enable(['heading', 'lheading', 'fence']);
 
-const repositoriesToSkipMdFetching = ['facebook/react-native'];
+const repositoriesToSkipMdFetching = [
+  'facebook/react-native',
+  'react/react-native',
+];
 
 export async function getReleaseList(
   project: ChangeLogProject,
@@ -194,7 +197,7 @@ function getExactReleaseMatch(
   releases: ChangeLogNotes[],
 ): ChangeLogNotes | undefined {
   const exactReleaseReg = regEx(
-    `(?:^|/)(?:${packageName}|${depName})[@_-]v?${version}`,
+    `(?:^|/)(?:${packageName}|${depName})[@_/-]v?${version}`,
   );
   const candidateReleases = releases.filter((r) => r.tag?.endsWith(version));
   const matchedRelease = candidateReleases.find((r) =>
@@ -397,7 +400,7 @@ export async function getReleaseNotesMd(
           // Look for version in title
           for (const word of title) {
             if (word.includes(version) && !isHttpUrl(word)) {
-              logger.trace({ body }, 'Found release notes for v' + version);
+              logger.trace({ body }, `Found release notes for v${version}`);
               return {
                 body: await linkifyBody(project, body),
                 url,
@@ -422,7 +425,7 @@ export async function getReleaseNotesMd(
                   !linkRefDefRegex.test(line),
               )
             ) {
-              logger.trace({ body }, 'Found release notes for v' + version);
+              logger.trace({ body }, `Found release notes for v${version}`);
               return {
                 body: await linkifyBody(project, body),
                 url,
@@ -491,7 +494,8 @@ export async function addReleaseNotes(
 
   for (const v of input.versions) {
     let releaseNotes: ChangeLogNotes | null | undefined;
-    const cacheKey = `${cacheKeyPrefix}:${v.version}`;
+    const gitRefCachePart = v.gitRef ? `:${v.gitRef}` : '';
+    const cacheKey = `${cacheKeyPrefix}:${v.version}${gitRefCachePart}`;
     releaseNotes = await packageCache.get(cacheNamespace, cacheKey);
     releaseNotes ??= await getReleaseNotesMd(input.project, v);
     releaseNotes ??= await getReleaseNotes(input.project, v, config);

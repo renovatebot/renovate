@@ -22,7 +22,7 @@ describe('modules/versioning/index', () => {
   it('matches the API contract', async () => {
     const versionings = allVersioning.getVersionings();
 
-    const VersioningApiSchema = z
+    const VersioningApi = z
       .string()
       .refine((name) => versionings.has(name), {
         error: 'Allowed in config but does not exist in the API',
@@ -61,13 +61,11 @@ describe('modules/versioning/index', () => {
 
     const config = getOptions().find(({ name }) => name === 'versioning');
 
-    const ValidVersioningSchema = z
+    const ValidVersioning = z
       .object({ allowedValues: z.string().array() })
       .transform(({ allowedValues }) => allowedValues)
-      .pipe(VersioningApiSchema.array());
+      .pipe(VersioningApi.array());
 
-    await expect(
-      ValidVersioningSchema.parseAsync(config),
-    ).resolves.toBeDefined();
+    await expect(ValidVersioning.parseAsync(config)).resolves.toBeDefined();
   });
 });

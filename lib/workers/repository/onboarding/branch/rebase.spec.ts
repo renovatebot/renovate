@@ -39,7 +39,7 @@ describe('workers/repository/onboarding/branch/rebase', () => {
     });
 
     it('does nothing if branch is up to date', async () => {
-      const contents = JSON.stringify(config.onboardingConfig, null, 2) + '\n';
+      const contents = `${JSON.stringify(config.onboardingConfig, null, 2)}\n`;
       configModule.getOnboardingConfigContents.mockResolvedValueOnce(contents);
       await rebaseOnboardingBranch(config, toSha256(contents));
       expect(scm.commitAndPush).toHaveBeenCalledTimes(0);
@@ -101,7 +101,7 @@ describe('workers/repository/onboarding/branch/rebase', () => {
     });
 
     it('does nothing if config hashes match', async () => {
-      const contents = JSON.stringify(config.onboardingConfig, null, 2) + '\n';
+      const contents = `${JSON.stringify(config.onboardingConfig, null, 2)}\n`;
       configModule.getOnboardingConfigContents.mockResolvedValueOnce(contents);
       await rebaseOnboardingBranch(config, toSha256(contents));
       expect(scm.commitAndPush).not.toHaveBeenCalled();

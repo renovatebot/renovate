@@ -24,7 +24,6 @@ describe('util/exec/hermit', () => {
   describe('findHermitCwd', () => {
     beforeEach(() => {
       GlobalConfig.set({ localDir });
-      findUp.mockClear();
     });
 
     it.each`
@@ -56,7 +55,6 @@ describe('util/exec/hermit', () => {
   describe('getHermitEnvs', () => {
     beforeEach(() => {
       GlobalConfig.set({ localDir });
-      findUp.mockClear();
     });
 
     it('should return hermit environment variables when hermit env returns successfully', async () => {
