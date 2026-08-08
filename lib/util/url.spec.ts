@@ -238,6 +238,15 @@ describe('util/url', () => {
       ).toBe('https://registry.example.com/v2/foo/tags/list?n=10&last=z');
     });
 
+    it('upgrades an HTTP URL to HTTPS when the host is the same', () => {
+      expect(
+        resolveSameOriginUrl(
+          'https://community.chocolatey.org/api/v2/FindPackagesById',
+          'http://community.chocolatey.org/api/v2/FindPackagesById?page=2',
+        ),
+      ).toBe('https://community.chocolatey.org/api/v2/FindPackagesById?page=2');
+    });
+
     it('resolves a relative next URL against the base', () => {
       expect(
         resolveSameOriginUrl(
