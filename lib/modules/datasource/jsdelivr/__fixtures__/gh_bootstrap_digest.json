@@ -1,0 +1,41 @@
+{
+  "type": "gh",
+  "name": "twbs/bootstrap",
+  "version": "5.3.8",
+  "default": null,
+  "files": [
+    {
+      "name": "/dist/js/bootstrap.esm.min.js.map",
+      "hash": "RZ9nL6a1RK3+kwGy770ixEe8SpTIc0DmYUPOI+wm6wM=",
+      "size": 222322
+    },
+    {
+      "name": "/dist/js/bootstrap.js",
+      "hash": "G26Fbopja83eRYjmOhBhztlu27RoEnslJDYpY01AIHk=",
+      "size": 145474
+    },
+    {
+      "name": "/dist/js/bootstrap.js.map",
+      "hash": "3k/sleEaQPgv1lzCQgVHuBrlJkFHQT0GCpKmcUL/W4w=",
+      "size": 298167
+    },
+    {
+      "name": "/dist/js/bootstrap.min.js",
+      "hash": "ew8UiV1pJH/YjpOEBInP1HxVvT/SfrCmwSoUzF9JIgc=",
+      "size": 60539
+    },
+    {
+      "name": "/dist/js/bootstrap.min.js.map",
+      "hash": "UrA9jZWcpT1pwfNME+YkIIDJrMu+AjfIKTSfd3ODwMs=",
+      "size": 220618
+    },
+    {
+      "name": "/js/dist/alert.js",
+      "hash": "4Vxv28zAfb1nHyU0cvkOJ0SPNHdufCtFdvcgxaZy2v4=",
+      "size": 2835
+    }
+  ],
+  "links": {
+    "stats": "https://data.jsdelivr.com/v1/stats/packages/gh/twbs/bootstrap@5.3.8"
+  }
+}

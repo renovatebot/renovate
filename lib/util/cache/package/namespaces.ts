@@ -76,6 +76,7 @@ export const packageCacheNamespaces = [
   'datasource-hexpm-bob',
   'datasource-java-version',
   'datasource-jenkins-plugins',
+  'datasource-jsdelivr',
   'datasource-jsr',
   'datasource-maven:cache-provider',
   'datasource-maven:metadata-not-found',
