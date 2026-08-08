@@ -1,4 +1,8 @@
 import { GlobalConfig } from '../../config/global.ts';
+import {
+  getTraceContextEnv,
+  isTracingEnabled,
+} from '../../instrumentation/utils.ts';
 
 export const basicEnvVars = [
   'CI',
@@ -50,6 +54,7 @@ export const basicEnvVars = [
 
 export function getChildProcessEnv(
   customEnvVars: string[] = [],
+  commandName?: string,
 ): NodeJS.ProcessEnv {
   const env: NodeJS.ProcessEnv = {};
   if (GlobalConfig.get('exposeAllEnv')) {
@@ -68,5 +73,25 @@ export function getChildProcessEnv(
       env[key] = process.env[key];
     }
   }
+
+  if (isTracingEnabled()) {
+    // Forward the OpenTelemetry SDK configuration so that tools with native
+    // OTEL support export to the same collector, and propagate the current
+    // trace context so they can join the same trace.
+    for (const key of Object.keys(process.env)) {
+      if (key.startsWith('OTEL_')) {
+        env[key] = process.env[key];
+      }
+    }
+    Object.assign(env, getTraceContextEnv());
+
+    // Give the child its own service name, distinct from Renovate's, so its
+    // spans don't get grouped under Renovate's own service in tools which
+    // read OTEL_SERVICE_NAME natively.
+    if (commandName) {
+      env.OTEL_SERVICE_NAME = `renovate-${commandName}`;
+    }
+  }
+
   return env;
 }

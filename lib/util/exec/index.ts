@@ -22,7 +22,7 @@ import type {
   Opt,
   RawExecOptions,
 } from './types.ts';
-import { getChildEnv } from './utils.ts';
+import { getChildEnv, getExecutableName } from './utils.ts';
 
 function dockerEnvVars(extraEnv: ExtraEnv, childEnv: ExtraEnv): string[] {
   const extraEnvKeys = Object.keys(extraEnv);
@@ -38,9 +38,12 @@ function getCwd({ cwd, cwdFile }: ExecOptions): string | undefined {
   return paramCwd ?? defaultCwd;
 }
 
-function getRawExecOptions(opts: ExecOptions): RawExecOptions {
+function getRawExecOptions(
+  opts: ExecOptions,
+  commandName?: string,
+): RawExecOptions {
   const defaultExecutionTimeout = GlobalConfig.get('executionTimeout');
-  const childEnv = getChildEnv(opts);
+  const childEnv = getChildEnv(opts, commandName);
   const cwd = getCwd(opts);
   let timeout = opts.timeout;
   timeout ??= defaultExecutionTimeout * 60 * 1000;
@@ -90,9 +93,10 @@ async function prepareRawExec(
     opts.env.CONTAINERBASE_CACHE_DIR = containerbaseDir;
   }
 
-  let rawOptions = getRawExecOptions(opts);
-
   let rawCommands = typeof cmd === 'string' ? [cmd] : cmd;
+  const commandName = getExecutableName(rawCommands);
+
+  let rawOptions = getRawExecOptions(opts, commandName);
 
   if (isDocker(docker)) {
     logger.debug({ image: sideCarImage }, 'Using docker to execute');
@@ -101,10 +105,17 @@ async function prepareRawExec(
       ...customEnvVariables,
       ...userConfiguredEnv,
     };
-    const childEnv = getChildEnv(opts);
+    const childEnv = getChildEnv(opts, commandName);
+    const otelEnvVars = Object.keys(childEnv).filter(
+      (key) =>
+        key.startsWith('OTEL_') ||
+        key === 'TRACEPARENT' ||
+        key === 'TRACESTATE',
+    );
     const envVars = [
       ...dockerEnvVars(extraEnv, childEnv),
       'CONTAINERBASE_CACHE_DIR',
+      ...otelEnvVars,
     ];
     const cwd = getCwd(opts);
     const dockerOptions: DockerOptions = { ...docker, cwd, envVars };

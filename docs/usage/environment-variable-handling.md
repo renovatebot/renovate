@@ -34,6 +34,13 @@ By default, Renovate will **always** pass the following environment variables to
   <br>
   This is not currently documented in full - you will need to review Renovate's code to see the full list.
 
+!!! note
+  When [OpenTelemetry tracing is enabled](./opentelemetry.md), Renovate also passes any `OTEL_*` environment variables, plus `TRACEPARENT` and `TRACESTATE` (containing the current trace context), to child processes.
+  <br>
+  This lets a child process with its own OpenTelemetry support export to the same collector, and join the same trace as the Renovate command that spawned it.
+  <br>
+  See [Child process propagation](./opentelemetry.md#child-process-propagation) for more details.
+
 As a self-hosted administrator, you can make it possible to specify other environment variables that repository owners can set, using:
 
 - [`allowedEnv`](./self-hosted-configuration.md#allowedenv): allows users to specify values for allowlisted environment variables in their repository configuration using [`env`](./configuration-options.md#env)
@@ -66,6 +73,7 @@ flowchart TD
     processEnvConfig["<strong><code>processEnv</code></strong><br/><small></small>"]
     processEnv["<strong><code>process.env</code></strong><br/><small>The original process' <code>process.env</code> and <code>processEnv</code></small>"]
     allowedEnv["<strong><code>allowedEnv</code></strong><br/><small>Admin-controlled allowlist gates which environment variables repo owners may set</small>"]
+    otelEnv["<strong><code>OTEL_*</code>, <code>TRACEPARENT</code>, <code>TRACESTATE</code></strong><br/><small>Only added when <a href='./opentelemetry.md'>tracing</a> is enabled<sup>2</sup></small>"]
 
     extraEnv -->|"overridden by"| parentEnv
     parentEnv -->|"overridden by"| globalConfigEnv
@@ -77,10 +85,13 @@ flowchart TD
     processEnvConfig -.->|"merged into"| processEnv
     processEnv -.->|"filtered with <code>basicEnvVars</code>"| parentEnv
     allowedEnv -.->|"restricts"| userConfiguredEnv
+    otelEnv -.->|"merged into"| parentEnv
 
 ```
 
 <sup>1</sup>: the list of environment variables [noted above](#with-child-processes) that are always passed to child processes
+<br/>
+<sup>2</sup>: see [Child process propagation](./opentelemetry.md#child-process-propagation)
 
 ## Templating
 

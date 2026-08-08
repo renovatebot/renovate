@@ -270,6 +270,41 @@ describe('util/exec/index', () => {
     ],
 
     [
+      'Docker with tracing enabled',
+      {
+        processEnv: {
+          ...processEnv,
+          OTEL_EXPORTER_OTLP_ENDPOINT: 'http://localhost:4318',
+        },
+        inCmd,
+        inOpts: { docker, cwd },
+        outCmd: [
+          dockerPullCmd,
+          dockerRemoveCmd,
+          `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} -e CONTAINERBASE_CACHE_DIR -e OTEL_EXPORTER_OTLP_ENDPOINT -e OTEL_SERVICE_NAME ${defaultCwd} ${fullImage} bash -l -c '${inCmd}'`,
+        ],
+        outOpts: [
+          dockerPullOpts,
+          dockerRemoveOpts,
+          {
+            cwd,
+            env: {
+              ...containerbaseEnv,
+              OTEL_EXPORTER_OTLP_ENDPOINT: 'http://localhost:4318',
+              OTEL_SERVICE_NAME: 'renovate-echo',
+            },
+            timeout: 900000,
+            maxBuffer: 10485760,
+            stdin: 'pipe',
+            stdout: 'pipe',
+            stderr: 'pipe',
+          },
+        ],
+        adminConfig: { binarySource: 'docker' },
+      },
+    ],
+
+    [
       'Extra env vars',
       {
         processEnv,
