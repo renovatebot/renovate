@@ -74,6 +74,14 @@ export interface Release {
   checksumUrl?: string;
   downloadUrl?: string;
   gitRef?: string;
+  /**
+   * For git-refs datasource releases: whether this release's `version`/`gitRef`
+   * resolves to a git tag or branch upstream. Consumers (e.g. the nix manager)
+   * use this to correctly qualify a `refs/tags/<ref>` vs `refs/heads/<ref>`
+   * URL when rewriting an unqualified or now-mismatched ref, since Nix's git
+   * fetcher does not fall back from one ref namespace to the other.
+   */
+  gitRefType?: 'tags' | 'heads';
   isDeprecated?: boolean;
   isStable?: boolean;
   releaseTimestamp?: Timestamp | null;

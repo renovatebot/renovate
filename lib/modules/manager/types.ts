@@ -132,6 +132,8 @@ export interface LookupUpdate {
   newVersionAgeInDays?: number;
   registryUrl?: string;
   libYears?: number;
+  /** See `Release.gitRefType` in `modules/datasource/types.ts`. */
+  gitRefType?: 'tags' | 'heads';
 
   version?: string;
   /**
@@ -246,6 +248,8 @@ export interface Upgrade<
   currentVersion?: string;
   replaceString?: string;
   replacementApproach?: 'replace' | 'alias';
+  /** See `Release.gitRefType` in `modules/datasource/types.ts`. */
+  gitRefType?: 'tags' | 'heads';
 }
 
 export interface ArtifactNotice {
