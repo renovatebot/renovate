@@ -245,6 +245,36 @@ describe('workers/repository/process/fetch', () => {
       );
     });
 
+    it('prefers dependency constraints over package file constraints', async () => {
+      config.rangeStrategy = 'auto';
+      const packageFiles: any = {
+        maven: [
+          {
+            packageFile: 'pom.xml',
+            extractedConstraints: { python: '>=3.9' },
+            deps: [
+              {
+                datasource: MavenDatasource.id,
+                depName: 'bbb',
+                extractedConstraints: { python: '>=3.10' },
+              },
+            ],
+          },
+        ],
+      };
+      lookupUpdates.mockResolvedValue({ updates: ['a', 'b'] } as never);
+
+      await fetchUpdates(config, packageFiles);
+
+      expect(lookupUpdates).toHaveBeenCalledWith(
+        expect.objectContaining({
+          constraints: { python: '>=3.10' },
+          datasource: 'maven',
+          depName: 'bbb',
+        }),
+      );
+    });
+
     it('skips deps with empty names', async () => {
       const packageFiles: Record<string, PackageFile[]> = {
         docker: [

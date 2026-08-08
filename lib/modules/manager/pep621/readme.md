@@ -15,6 +15,11 @@ See [pixi's security documentation](https://pixi.prefix.dev/latest/security/#4-t
 Self-hosted administrators must explicitly allow this path by including `pixi` in the global [`allowedUnsafeExecutions`](../../../self-hosted-configuration.md#allowedunsafeexecutions) setting.
 When `pixi` is not allowed, dependencies in `pyproject.toml` are still updated, but `pixi.lock` is left unchanged.
 
+### Dependencies with Python version markers
+
+By default, dependencies with the same name can be combined even when their PEP 508 declarations target different Python versions.
+Enable [`splitPythonMarkers`](../../../configuration-options.md#splitpythonmarkers) to extract standalone `python_version` and `python_full_version` variants independently and receive a separate update for each Python range.
+
 ### Private Modules Authentication
 
 Before running the `pdm` or `uv` commands to update the `pdm.lock` or `uv.lock` respectively, Renovate exports `git` [`insteadOf`](https://git-scm.com/docs/git-config#Documentation/git-config.txt-urlltbasegtinsteadOf) directives in environment variables.

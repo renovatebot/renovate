@@ -25,6 +25,28 @@ describe('workers/repository/updates/flatten', () => {
   });
 
   describe('flattenUpdates()', () => {
+    it('retains splitPythonMarkers for branch updates', async () => {
+      config.splitPythonMarkers = true;
+      const packageFiles = {
+        poetry: [
+          {
+            packageFile: 'pyproject.toml',
+            deps: [
+              {
+                depName: 'numpy',
+                currentValue: '^1.26',
+                updates: [{ newValue: '^2.0.0' }],
+              },
+            ],
+          },
+        ],
+      };
+
+      const res = await flattenUpdates(config, packageFiles);
+
+      expect(res[0].splitPythonMarkers).toBeTrue();
+    });
+
     it('flattens', async () => {
       // TODO #22198
       config.lockFileMaintenance!.enabled = true;

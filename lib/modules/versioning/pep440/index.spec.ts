@@ -334,4 +334,16 @@ describe('modules/versioning/pep440/index', () => {
       expect(pep440.isLessThanRange?.(version, range)).toBe(expected);
     },
   );
+
+  it.each`
+    subRange    | superRange  | expected
+    ${'>=3.10'} | ${'>=3.6'}  | ${true}
+    ${'>=3.10'} | ${'>=3.11'} | ${false}
+    ${'>=3.10'} | ${'!=3.11'} | ${undefined}
+  `(
+    'subset("$subRange", "$superRange") === $expected',
+    ({ subRange, superRange, expected }) => {
+      expect(pep440.subset?.(subRange, superRange)).toBe(expected);
+    },
+  );
 });

@@ -218,7 +218,10 @@ export function applyConstraintsFiltering<
       configConstraints,
     ) as [ConstraintName, string][]) {
       let constraintVersioningName = versioningName;
-      if (
+      // Python constraints describe interpreter versions, not dependency versions.
+      if (name === 'python') {
+        constraintVersioningName = 'python';
+      } else if (
         isAdditionalConstraintName(name) &&
         config.constraintsVersioning?.[name]
       ) {
