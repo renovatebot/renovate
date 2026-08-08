@@ -540,6 +540,47 @@ describe('modules/manager/pep621/processors/uv', () => {
       ]);
     });
 
+    it('pins the upgrade of a transitive dep to the new version', async () => {
+      const execSnapshots = mockExecAll();
+      GlobalConfig.set(adminConfig);
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce('uv.lock');
+      fs.readLocalFile.mockResolvedValueOnce('test content');
+      fs.readLocalFile.mockResolvedValueOnce('changed test content');
+
+      const updatedDeps = [
+        {
+          packageName: 'dep1',
+          depType: depTypes.uvTransitiveDependencies,
+          newVersion: '3.15',
+        },
+        // no version was determined, so let uv resolve it
+        { packageName: 'dep2', depType: depTypes.uvTransitiveDependencies },
+      ];
+      const result = await processor.updateArtifacts(
+        {
+          packageFileName: 'pyproject.toml',
+          newPackageFileContent: '',
+          config: {},
+          updatedDeps,
+        },
+        parsePyProject('')!,
+      );
+      expect(result).toEqual([
+        {
+          file: {
+            contents: 'changed test content',
+            path: 'uv.lock',
+            type: 'addition',
+          },
+        },
+      ]);
+      expect(execSnapshots).toMatchObject([
+        {
+          cmd: 'uv lock --upgrade-package dep1==3.15 --upgrade-package dep2',
+        },
+      ]);
+    });
+
     it('performs update on private package registry', async () => {
       const execSnapshots = mockExecAll();
       GlobalConfig.set(adminConfig);

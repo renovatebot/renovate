@@ -272,6 +272,13 @@ export class Vulnerabilities {
         }
       }
 
+      this.unskipLockfileOnlyDependency(
+        dep,
+        vulnerabilities,
+        packageFileConfig.manager,
+        packageFileConfig.packageFile,
+      );
+
       return { vulnerabilities, versioningApi };
     } catch (err) {
       logger.warn(
@@ -280,6 +287,53 @@ export class Vulnerabilities {
       );
       return null;
     }
+  }
+
+  /**
+   * Clears the `lockfile-only` skip reason, so a remediation can be looked up.
+   *
+   * Dependencies which only exist in a lockfile are surfaced with that reason
+   * purely so vulnerabilities in them can be found. The skip is only cleared
+   * once a fixed version is known; any other reason a dependency is skipped,
+   * e.g. the user's own config, is left untouched.
+   *
+   * @param dep Dependency to clear the skip reason of
+   * @param vulnerabilities Vulnerabilities found for that dependency
+   * @param manager Manager the dependency was extracted by, for logging
+   * @param packageFile Package file the dependency was extracted from, for logging
+   */
+  private unskipLockfileOnlyDependency(
+    dep: PackageDependency,
+    vulnerabilities: Vulnerability[],
+    manager: string | undefined,
+    packageFile: string | undefined,
+  ): void {
+    if (dep.skipReason !== 'lockfile-only') {
+      return;
+    }
+
+    const remediable = vulnerabilities.filter(({ fixedVersion }) =>
+      isNonEmptyString(fixedVersion),
+    );
+    if (isEmptyArray(remediable)) {
+      return;
+    }
+
+    logger.debug(
+      {
+        packageFile,
+        depName: dep.depName,
+        packageName: dep.packageName,
+        manager,
+        datasource: dep.datasource,
+        vulnerabilities: remediable.map(
+          ({ vulnerability }) => vulnerability.id,
+        ),
+      },
+      `Clearing skipReason=lockfile-only for ${dep.depName}, as a fixed version is available`,
+    );
+    delete dep.skipReason;
+    delete dep.skipStage;
   }
 
   private skipMaliciousPackages(
