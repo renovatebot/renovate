@@ -106,15 +106,18 @@ describe('modules/manager/bun/artifacts', () => {
           },
         ]);
 
-        expect(exec).toHaveBeenCalledWith('bun install --ignore-scripts', {
-          cwdFile: 'bun.lockb',
-          docker: {},
-          toolConstraints: [
-            {
-              toolName: 'bun',
-            },
-          ],
-        });
+        expect(exec).toHaveBeenCalledWith(
+          'bun install --lockfile-only --ignore-scripts',
+          {
+            cwdFile: 'bun.lockb',
+            docker: {},
+            toolConstraints: [
+              {
+                toolName: 'bun',
+              },
+            ],
+          },
+        );
       });
 
       it('supports lockFileMaintenance', async () => {
@@ -322,47 +325,47 @@ describe('modules/manager/bun/artifacts', () => {
         {
           allowScripts: undefined,
           ignoreScripts: undefined,
-          expectedCmd: 'bun install --ignore-scripts',
+          expectedCmd: 'bun install --lockfile-only --ignore-scripts',
         },
         {
           allowScripts: false,
           ignoreScripts: undefined,
-          expectedCmd: 'bun install --ignore-scripts',
+          expectedCmd: 'bun install --lockfile-only --ignore-scripts',
         },
         {
           allowScripts: true,
           ignoreScripts: undefined,
-          expectedCmd: 'bun install',
+          expectedCmd: 'bun install --lockfile-only',
         },
         {
           allowScripts: undefined,
           ignoreScripts: true,
-          expectedCmd: 'bun install --ignore-scripts',
+          expectedCmd: 'bun install --lockfile-only --ignore-scripts',
         },
         {
           allowScripts: undefined,
           ignoreScripts: false,
-          expectedCmd: 'bun install --ignore-scripts',
+          expectedCmd: 'bun install --lockfile-only --ignore-scripts',
         },
         {
           allowScripts: false,
           ignoreScripts: true,
-          expectedCmd: 'bun install --ignore-scripts',
+          expectedCmd: 'bun install --lockfile-only --ignore-scripts',
         },
         {
           allowScripts: false,
           ignoreScripts: false,
-          expectedCmd: 'bun install --ignore-scripts',
+          expectedCmd: 'bun install --lockfile-only --ignore-scripts',
         },
         {
           allowScripts: true,
           ignoreScripts: true,
-          expectedCmd: 'bun install --ignore-scripts',
+          expectedCmd: 'bun install --lockfile-only --ignore-scripts',
         },
         {
           allowScripts: true,
           ignoreScripts: false,
-          expectedCmd: 'bun install',
+          expectedCmd: 'bun install --lockfile-only',
         },
       ];
 
