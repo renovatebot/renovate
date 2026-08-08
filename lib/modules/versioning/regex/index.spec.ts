@@ -418,4 +418,101 @@ describe('modules/versioning/regex/index', () => {
       ).toBeNull();
     });
   });
+
+  describe('comparator ranges', () => {
+    // `-ee.N` is captured as an ordered `build` component (with `-ee` a
+    // literal), so ranges resolve through the inherited `_compare` without any
+    // semver prerelease involved.
+    const re = get(
+      'regex:^(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)-ee\\.(?<build>\\d+)$',
+    );
+    const tags = ['19.0.0-ee.0', '19.1.2-ee.0', '19.2.0-ee.0', '19.5.1-ee.0'];
+
+    it.each`
+      input                | expected
+      ${'19.1.2-ee.0'}     | ${true}
+      ${'<=19.1.2-ee.0'}   | ${true}
+      ${'=19.1.2-ee.0'}    | ${true}
+      ${'<=19.1.2-ee.foo'} | ${false}
+      ${'<=notaversion'}   | ${false}
+      ${'notaversion'}     | ${false}
+      ${''}                | ${false}
+    `('isValid("$input") === $expected', ({ input, expected }) => {
+      expect(re.isValid(input)).toBe(expected);
+    });
+
+    it('isValid is true for a compound range', () => {
+      expect(re.isValid('>=19.0.0-ee.0 <20.0.0-ee.0')).toBe(true);
+    });
+
+    it.each`
+      input              | expected
+      ${'19.1.2-ee.0'}   | ${true}
+      ${'=19.1.2-ee.0'}  | ${true}
+      ${'==19.1.2-ee.0'} | ${true}
+      ${'<=19.1.2-ee.0'} | ${false}
+      ${'notaversion'}   | ${false}
+    `('isSingleVersion("$input") === $expected', ({ input, expected }) => {
+      expect(re.isSingleVersion(input)).toBe(expected);
+    });
+
+    it('isSingleVersion is false for a compound range', () => {
+      expect(re.isSingleVersion('>=19.0.0-ee.0 <20.0.0-ee.0')).toBe(false);
+    });
+
+    it.each`
+      input              | expected
+      ${'19.1.2-ee.0'}   | ${true}
+      ${'<=19.1.2-ee.0'} | ${false}
+      ${'notaversion'}   | ${false}
+    `('isVersion("$input") === $expected', ({ input, expected }) => {
+      expect(re.isVersion(input)).toBe(expected);
+    });
+
+    it.each`
+      version          | range              | expected
+      ${'19.0.0-ee.0'} | ${'<=19.1.2-ee.0'} | ${true}
+      ${'19.1.2-ee.0'} | ${'<=19.1.2-ee.0'} | ${true}
+      ${'19.2.0-ee.0'} | ${'<=19.1.2-ee.0'} | ${false}
+      ${'19.0.0-ee.0'} | ${'<19.1.2-ee.0'}  | ${true}
+      ${'19.1.2-ee.0'} | ${'<19.1.2-ee.0'}  | ${false}
+      ${'19.2.0-ee.0'} | ${'>=19.1.2-ee.0'} | ${true}
+      ${'19.0.0-ee.0'} | ${'>19.0.0-ee.0'}  | ${false}
+      ${'19.2.0-ee.0'} | ${'>19.0.0-ee.0'}  | ${true}
+      ${'19.1.2-ee.0'} | ${'=19.1.2-ee.0'}  | ${true}
+      ${'19.1.2-ee.0'} | ${'==19.1.2-ee.0'} | ${true}
+      ${'19.1.2-ee.0'} | ${'19.1.2-ee.0'}   | ${true}
+      ${'19.1.3-ee.0'} | ${'19.1.2-ee.0'}   | ${false}
+    `(
+      'matches("$version", "$range") === $expected',
+      ({ version, range, expected }) => {
+        expect(re.matches(version, range)).toBe(expected);
+      },
+    );
+
+    it('matches compound ranges', () => {
+      expect(re.matches('19.1.0-ee.0', '>=19.0.0-ee.0 <20.0.0-ee.0')).toBe(
+        true,
+      );
+      expect(re.matches('20.1.0-ee.0', '>=19.0.0-ee.0 <20.0.0-ee.0')).toBe(
+        false,
+      );
+    });
+
+    it('getSatisfyingVersion caps at the required stop', () => {
+      expect(re.getSatisfyingVersion(tags, '<=19.1.2-ee.0')).toBe(
+        '19.1.2-ee.0',
+      );
+      expect(re.getSatisfyingVersion(tags, '19.2.0-ee.0')).toBe('19.2.0-ee.0');
+      expect(re.getSatisfyingVersion(tags, '<19.0.0-ee.0')).toBeNull();
+    });
+
+    it('minSatisfyingVersion returns the lowest match', () => {
+      expect(re.minSatisfyingVersion(tags, '>=19.1.2-ee.0')).toBe(
+        '19.1.2-ee.0',
+      );
+      expect(re.minSatisfyingVersion(tags, '19.0.0-ee.0')).toBe('19.0.0-ee.0');
+      expect(re.minSatisfyingVersion(tags, '>99.0.0-ee.0')).toBeNull();
+    });
+  });
 });
