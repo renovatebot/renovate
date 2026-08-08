@@ -459,8 +459,8 @@ importers:
         specifier: 1.0.3
         version: 1.0.3
       '@types/lodash':
-        specifier: 4.17.24
-        version: 4.17.24
+        specifier: 4.17.25
+        version: 4.17.25
       '@types/luxon':
         specifier: 3.7.2
         version: 3.7.2
@@ -2098,8 +2098,8 @@ packages:
   '@types/linkify-markdown@1.0.3':
     resolution: {integrity: sha512-BnuGqDmpzmXCDMXHzgle/vMRUnbFcWclts0+n7Or421exav3XG6efl9gsxamLET6QPhX+pMnxcsHgnAO/daj9w==}
 
-  '@types/lodash@4.17.24':
-    resolution: {integrity: sha512-gIW7lQLZbue7lRSWEFql49QJJWThrTFFeIMJdp3eH4tKoxm1OvEPg02rm4wCCSHS0cL3/Fizimb35b7k8atwsQ==}
+  '@types/lodash@4.17.25':
+    resolution: {integrity: sha512-+K1NIO8I+F9/wNulfVvu23QYd0Pe9/OCqRrim4NoYIf1VoEDL90Ve4ClzpyqBLc7NpGGWRvYNCKZ1BE/Jpf8dQ==}
 
   '@types/luxon@3.7.2':
     resolution: {integrity: sha512-gW+Oib+vUtGJBtNC8V9Reww0oIpusw+4m81uncg9REGZAJfqOQHfo/nkabnc7w0QReXyPqjrbWMJk6NuAkiX3Q==}
@@ -7322,7 +7322,7 @@ snapshots:
 
   '@types/linkify-markdown@1.0.3': {}
 
-  '@types/lodash@4.17.24': {}
+  '@types/lodash@4.17.25': {}
 
   '@types/luxon@3.7.2': {}
 
