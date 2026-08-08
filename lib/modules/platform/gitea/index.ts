@@ -1,6 +1,6 @@
+import { setTimeout } from 'node:timers/promises';
 import { isNumber, isString } from '@sindresorhus/is';
 import semver from 'semver';
-import { setTimeout } from 'timers/promises';
 import { GlobalConfig } from '../../../config/global.ts';
 import {
   REPOSITORY_ACCESS_FORBIDDEN,
@@ -264,16 +264,14 @@ async function tryPrAutomerge(
     }
     if (attempt === retryTimes) {
       logger.debug(
-        { prNumber },
-        'Gitea-native automerge: mergeable still false after retries, attempting merge call anyway',
+        `PR not mergeable after ${retryTimes} attempts, merging anyway...prNo: ${prNumber}`,
       );
       break;
     }
     logger.debug(
-      { prNumber, attempt },
-      'Gitea-native automerge: mergeable not yet computed, retrying',
+      `PR not yet in mergeable state. Retrying ${attempt}...prNo: ${prNumber}`,
     );
-    await setTimeout(baseDelay * attempt ** 2);
+    await setTimeout(baseDelay * attempt ** 2); // exponential backoff
   }
 
   try {
@@ -304,15 +302,10 @@ export async function reattemptPlatformAutomerge({
 }: ReattemptPlatformAutomergeConfig): Promise<void> {
   try {
     await tryPrAutomerge(number, platformPrOptions);
-    logger.debug(
-      { prNumber: number },
-      'Gitea-native automerge: re-attempt complete',
-    );
-  } catch (err) /* v8 ignore next */ {
-    logger.warn(
-      { err, prNumber: number },
-      'Error re-attempting Gitea-native automerge',
-    );
+
+    logger.debug(`PR platform automerge re-attempted...prNo: ${number}`);
+  } catch (err) /* v8 ignore next -- defensive: automerge re-attempt failures are logged and swallowed, not simulated in specs */ {
+    logger.warn({ err }, 'Error re-attempting PR platform automerge');
   }
 }
 

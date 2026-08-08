@@ -1973,8 +1973,7 @@ describe('modules/platform/gitea/index', () => {
 
       expect(res).toMatchObject({ number: 42 });
       expect(logger.logger.debug).toHaveBeenCalledWith(
-        expect.objectContaining({ prNumber: 42 }),
-        'Gitea-native automerge: mergeable still false after retries, attempting merge call anyway',
+        'PR not mergeable after 2 attempts, merging anyway...prNo: 42',
       );
       delete process.env.RENOVATE_X_GITEA_AUTO_MERGEABLE_CHECK_DELAY;
       delete process.env.RENOVATE_X_GITEA_AUTO_MERGEABLE_CHECK_ATTEMPTS;
@@ -2001,8 +2000,7 @@ describe('modules/platform/gitea/index', () => {
           'Gitea-native automerge: success',
         );
         expect(logger.logger.debug).toHaveBeenCalledWith(
-          expect.objectContaining({ prNumber: 42 }),
-          'Gitea-native automerge: re-attempt complete',
+          'PR platform automerge re-attempted...prNo: 42',
         );
       });
 
