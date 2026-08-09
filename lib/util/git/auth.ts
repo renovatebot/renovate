@@ -6,8 +6,12 @@ import { detectPlatform } from '../common.ts';
 import type { ResolvedChildEnv } from '../exec/utils.ts';
 import { find, getAll } from '../host-rules.ts';
 import { regEx } from '../regex.ts';
-import { createURLFromHostOrURL, isHttpUrl } from '../url.ts';
-import { addGitConfigEnvironmentVariables } from './config.ts';
+import { toBase64 } from '../string.ts';
+import { createURLFromHostOrURL, isHttpUrl, parseUrl } from '../url.ts';
+import {
+  type GitConfigEntry,
+  addGitConfigEnvironmentVariables,
+} from './config.ts';
 import type { AuthenticationRule } from './types.ts';
 import { parseGitUrl } from './url.ts';
 
@@ -20,6 +24,8 @@ const githubApiUrls = new Set([
 
 /**
  * Append Git authentication configuration to a resolved child environment.
+ * Credentials are passed as a URL-scoped HTTP header while URL rewrite rules
+ * remain credential-free.
  * @returns a new environment without modifying the input
  */
 export function getGitAuthenticatedEnvironmentVariables(
@@ -53,12 +59,31 @@ export function getGitAuthenticatedEnvironmentVariables(
     );
   }
 
+  const credentialRule = authenticationRules.at(-1)!;
+  const authenticatedUrl = parseUrl(credentialRule.url)!;
+  const authUsername = decodeURIComponent(authenticatedUrl.username);
+  const authPassword = decodeURIComponent(authenticatedUrl.password);
+  authenticatedUrl.username = '';
+  authenticatedUrl.password = '';
+  const cleanUrl = authenticatedUrl.href;
+
+  const gitConfigEntries: GitConfigEntry[] = [];
+  for (const rule of authenticationRules) {
+    if (rule.insteadOf !== cleanUrl) {
+      gitConfigEntries.push({
+        key: `url.${cleanUrl}.insteadOf`,
+        value: rule.insteadOf,
+      });
+    }
+  }
+  gitConfigEntries.push({
+    key: `http.${cleanUrl}.extraHeader`,
+    value: `Authorization: Basic ${toBase64(`${authUsername}:${authPassword}`)}`,
+  });
+
   return addGitConfigEnvironmentVariables(
     environmentVariables,
-    authenticationRules.map((rule) => ({
-      key: `url.${rule.url}.insteadOf`,
-      value: rule.insteadOf,
-    })),
+    gitConfigEntries,
   );
 }
 
