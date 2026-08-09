@@ -96,6 +96,14 @@ Renovate provides instrumentation through traces for (non-exhaustively):
 
 As well as following [OpenTelemetry's semantic conventions](https://opentelemetry.io/docs/specs/semconv/) where possible, Renovate defines several Custom Attributes, which can be found in [`lib/instrumentation/types.ts`](https://github.com/renovatebot/renovate/blob/main/lib/instrumentation/types.ts).
 
+#### Child process propagation
+
+When tracing is enabled, Renovate forwards its current trace context to any child process it spawns (for example `git`, `npm`, or a package manager run via Docker), using the `TRACEPARENT` and `TRACESTATE` environment variables from the [W3C Trace Context](https://www.w3.org/TR/trace-context/) specification.
+Renovate also forwards any `OTEL_*` environment variables it was started with, so that a child process with its own OpenTelemetry SDK can export to the same collector.
+
+This only has an effect on tools which read these environment variables themselves.
+Renovate does not modify third-party tools to add OpenTelemetry support.
+
 ### Metrics
 
 Renovate does not currently support metrics in an OTLP format.

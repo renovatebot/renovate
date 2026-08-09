@@ -3,15 +3,16 @@ import {
   isNonEmptyStringAndNotWhitespace,
   isString,
 } from '@sindresorhus/is';
-import { join } from 'shlex';
+import { join, split } from 'shlex';
+import upath from 'upath';
 import { getCustomEnv, getUserEnv } from '../env.ts';
 import { getChildProcessEnv } from './env.ts';
 import type { CommandWithOptions, ExecOptions } from './types.ts';
 
-export function getChildEnv({
-  extraEnv,
-  env: forcedEnv = {},
-}: Pick<ExecOptions, 'env' | 'extraEnv'> = {}): Record<string, string> {
+export function getChildEnv(
+  { extraEnv, env: forcedEnv = {} }: Pick<ExecOptions, 'env' | 'extraEnv'> = {},
+  commandName?: string,
+): Record<string, string> {
   const globalConfigEnv = getCustomEnv();
   const userConfiguredEnv = getUserEnv();
 
@@ -22,7 +23,7 @@ export function getChildEnv({
     }
   }
 
-  const parentEnv = getChildProcessEnv(inheritedKeys);
+  const parentEnv = getChildProcessEnv(inheritedKeys, commandName);
   const combinedEnv = {
     ...extraEnv,
     ...parentEnv,
@@ -87,4 +88,21 @@ export function asRawCommands(
     return [cmds];
   }
   return cmds.map((cmd) => asRawCommand(cmd));
+}
+
+/**
+ * Derives the name of the executable being run, from the first of the given
+ * commands, stripped of any path and arguments, e.g. `/usr/bin/git status` ->
+ * `git`. Used to give the child process its own OpenTelemetry `service.name`,
+ * distinct from Renovate's.
+ */
+export function getExecutableName(
+  cmds: string | (string | CommandWithOptions)[],
+): string | undefined {
+  const [firstCommand] = asRawCommands(cmds);
+  if (!firstCommand) {
+    return undefined;
+  }
+  const [executable] = split(firstCommand);
+  return executable ? upath.basename(executable) : undefined;
 }
