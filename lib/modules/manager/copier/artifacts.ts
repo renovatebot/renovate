@@ -4,9 +4,10 @@ import { GlobalConfig } from '../../../config/global.ts';
 import { logger } from '../../../logger/index.ts';
 import { exec } from '../../../util/exec/index.ts';
 import type { ExecOptions } from '../../../util/exec/types.ts';
-import { readLocalFile } from '../../../util/fs/index.ts';
+import { readLocalFile, statLocalFile } from '../../../util/fs/index.ts';
 import { getGitEnvironmentVariables } from '../../../util/git/auth.ts';
 import { getRepoStatus } from '../../../util/git/index.ts';
+import type { FileAddition } from '../../../util/git/types.ts';
 import type {
   UpdateArtifact,
   UpdateArtifactsConfig,
@@ -18,6 +19,20 @@ import {
 } from './utils.ts';
 
 const DEFAULT_COMMAND_OPTIONS = ['--skip-answered', '--defaults'];
+const ownerExecutePermission = 0o100;
+
+async function readFileAddition(path: string): Promise<FileAddition> {
+  const file: FileAddition = {
+    type: 'addition',
+    path,
+    contents: await readLocalFile(path),
+  };
+  const stats = await statLocalFile(path);
+  if (stats?.isFile() && (stats.mode & ownerExecutePermission) !== 0) {
+    file.isExecutable = true;
+  }
+  return file;
+}
 
 function buildCommand(
   config: UpdateArtifactsConfig,
@@ -116,11 +131,7 @@ export async function updateArtifacts({
     ...status.conflicted,
   ]) {
     const fileRes: UpdateArtifactsResult = {
-      file: {
-        type: 'addition',
-        path: f,
-        contents: await readLocalFile(f),
-      },
+      file: await readFileAddition(f),
     };
     if (status.conflicted.includes(f)) {
       // Make the reviewer aware of the conflicts.
@@ -151,11 +162,7 @@ export async function updateArtifacts({
       },
     });
     res.push({
-      file: {
-        type: 'addition',
-        path: f.to,
-        contents: await readLocalFile(f.to),
-      },
+      file: await readFileAddition(f.to),
     });
   }
   return res;
