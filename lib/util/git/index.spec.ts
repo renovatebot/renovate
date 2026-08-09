@@ -1366,6 +1366,21 @@ describe('util/git/index', { timeout: 30000 }, () => {
   });
 
   describe('initRepo())', () => {
+    it('uses a scoped environment for repository Git commands', async () => {
+      const envSpy = vi.spyOn(SimpleGit.prototype, 'env');
+
+      await git.initRepo(
+        { url: base.path },
+        { RENOVATE_TEST_SCOPED_GIT_ENV: 'scoped-value' },
+      );
+
+      expect(envSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          RENOVATE_TEST_SCOPED_GIT_ENV: 'scoped-value',
+        }),
+      );
+    });
+
     it('should fetch latest', async () => {
       const repo = simpleGit(base.path);
       await repo.checkout(['-b', 'test', defaultBranch]);
