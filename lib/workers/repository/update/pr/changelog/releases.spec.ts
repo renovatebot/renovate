@@ -134,6 +134,22 @@ describe('workers/repository/update/pr/changelog/releases', () => {
       ]);
     });
 
+    it('falls back to currentVersion for Docker compatibility', async () => {
+      const config = partial<BranchUpgradeConfig>({
+        datasource: 'some-datasource',
+        packageName: 'some-depname',
+        versioning: dockerVersioning.id,
+        currentVersion: '1.0.0',
+        newVersion: '1.1.0',
+      });
+      const res = await releases.getInRangeReleases(config);
+      expect(res).toEqual([
+        { version: '1.0.0' },
+        { version: '1.0.1' },
+        { version: '1.1.0' },
+      ]);
+    });
+
     it('should return any previous version if current version is non-existent', async () => {
       const config = partial<BranchUpgradeConfig>({
         datasource: 'some-datasource',
