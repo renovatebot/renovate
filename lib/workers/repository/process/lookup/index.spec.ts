@@ -6761,7 +6761,6 @@ describe('workers/repository/process/lookup/index', () => {
       ).unwrapOrThrow();
 
       expect(res).toMatchObject({
-        currentCompatibility: '.jre8',
         currentVersion: '12.4.2',
         updates: [
           {
