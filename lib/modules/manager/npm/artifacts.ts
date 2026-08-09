@@ -4,6 +4,7 @@ import upath from 'upath';
 import type { Scalar, YAMLSeq } from 'yaml';
 import { isScalar, isSeq, parseDocument } from 'yaml';
 import { logger } from '../../../logger/index.ts';
+import { getElapsedDays } from '../../../util/date.ts';
 import { exec } from '../../../util/exec/index.ts';
 import type { ExecOptions } from '../../../util/exec/types.ts';
 import {
@@ -186,6 +187,18 @@ async function updatePnpmWorkspace(
   let updated = false;
 
   for (const upgrade of upgrades) {
+    const minimumReleaseAge = doc.get('minimumReleaseAge');
+    if (
+      typeof minimumReleaseAge === 'number' &&
+      Number.isFinite(minimumReleaseAge)
+    ) {
+      const ageInDays = upgrade.releaseTimestamp
+        ? getElapsedDays(upgrade.releaseTimestamp, false)
+        : upgrade.newVersionAgeInDays;
+      if (ageInDays !== undefined && minimumReleaseAge / 1440 <= ageInDays) {
+        continue; // past the gate — pnpm won't block, exclude is a no-op
+      }
+    }
     let excludeNode = doc.getIn(['minimumReleaseAgeExclude']) as YAMLSeq | null;
     // v8 ignore next -- TODO: add test #40625
     const newVersion = upgrade.newVersion ?? upgrade.newValue;

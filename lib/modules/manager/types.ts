@@ -246,6 +246,8 @@ export interface Upgrade<
   currentVersion?: string;
   replaceString?: string;
   replacementApproach?: 'replace' | 'alias';
+  releaseTimestamp?: Timestamp;
+  newVersionAgeInDays?: number;
 }
 
 export interface ArtifactNotice {
