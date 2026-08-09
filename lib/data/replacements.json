@@ -1000,6 +1000,9 @@
         "matchPackageNames": [
           "/^(?:docker\\.io/)?pglombardo/pwpush-(?:ephemeral|mysql|postgres)$/"
         ],
+        "prBodyNotes": [
+          "⚠️ Follow Password Pusher's [universal-container migration guide](https://docs.pwpush.com/docs/how-to-universal/) before merging. Back up the database and validate existing data after migration."
+        ],
         "replacementName": "pglombardo/pwpush"
       }
     ]
