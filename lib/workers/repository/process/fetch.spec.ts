@@ -82,7 +82,7 @@ describe('workers/repository/process/fetch', () => {
       expect(packageFiles.npm[0].deps[1].updates).toHaveLength(0);
     });
 
-    it('fetches updates and preserves lookup compatibility', async () => {
+    it('fetches updates', async () => {
       config.rangeStrategy = 'auto';
       // @ts-expect-error -- intentionally using invalid constraint names
       config.constraints = { some: 'different' };
@@ -95,17 +95,13 @@ describe('workers/repository/process/fetch', () => {
           },
         ],
       };
-      lookupUpdates.mockResolvedValue({
-        currentCompatibility: 'distroless',
-        updates: ['a', 'b'],
-      } as never);
+      lookupUpdates.mockResolvedValue({ updates: ['a', 'b'] } as never);
       await fetchUpdates(config, packageFiles);
       expect(packageFiles).toEqual({
         maven: [
           {
             deps: [
               {
-                currentCompatibility: 'distroless',
                 datasource: 'maven',
                 depName: 'bbb',
                 packageName: 'bbb',
