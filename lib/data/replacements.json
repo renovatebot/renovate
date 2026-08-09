@@ -995,9 +995,10 @@
     "description": "Replace deprecated Password Pusher database-specific images with its universal image.",
     "packageRules": [
       {
+        "matchCurrentVersion": "1.35.0",
         "matchDatasources": ["docker"],
         "matchPackageNames": [
-          "/^(?:docker\\.io/)?pglombardo/pwpush-(?:ephemeral|mariadb|mysql|postgres)$/"
+          "/^(?:docker\\.io/)?pglombardo/pwpush-(?:ephemeral|mysql|postgres)$/"
         ],
         "replacementName": "pglombardo/pwpush"
       }
