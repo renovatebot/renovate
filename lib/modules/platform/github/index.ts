@@ -27,6 +27,7 @@ import { isGithubFineGrainedPersonalAccessToken } from '../../../util/check-toke
 import { coerceToNull } from '../../../util/coerce.ts';
 import { parseJson } from '../../../util/common.ts';
 import { getEnv } from '../../../util/env.ts';
+import { getGitAuthenticatedEnvironmentVariables } from '../../../util/git/auth.ts';
 import { formatCommitMessage } from '../../../util/git/commit-trailers.ts';
 import * as git from '../../../util/git/index.ts';
 import {
@@ -768,7 +769,6 @@ export async function initRepo({
     gitUrl,
     workingSshUrl,
     parsedEndpoint,
-    authToken,
   );
   let upstreamUrl: string | undefined;
   if (forkCreation && config.parentRepo) {
@@ -777,14 +777,33 @@ export async function initRepo({
       gitUrl,
       repo.sshUrl,
       parsedEndpoint,
-      authToken,
     );
   }
-  await git.initRepo({
+  const storageConfig = {
     ...config,
     url,
     upstreamUrl,
-  });
+  };
+  let gitEnvironmentVariables: NodeJS.ProcessEnv = {};
+  if (authToken && isHttpUrl(url)) {
+    gitEnvironmentVariables = getGitAuthenticatedEnvironmentVariables(
+      url,
+      { token: authToken, hostType: 'github', matchHost: url },
+      gitEnvironmentVariables,
+    );
+  }
+  if (authToken && upstreamUrl && isHttpUrl(upstreamUrl)) {
+    gitEnvironmentVariables = getGitAuthenticatedEnvironmentVariables(
+      upstreamUrl,
+      { token: authToken, hostType: 'github', matchHost: upstreamUrl },
+      gitEnvironmentVariables,
+    );
+  }
+  if (isNonEmptyObject(gitEnvironmentVariables)) {
+    await git.initRepo(storageConfig, gitEnvironmentVariables);
+  } else {
+    await git.initRepo(storageConfig);
+  }
   const repoConfig: RepoResult = {
     defaultBranch: config.defaultBranch,
     isFork: repo.isFork === true,

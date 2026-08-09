@@ -30,7 +30,6 @@ export function getRepoUrl(
   gitUrl: GitUrlOption | undefined,
   sshUrl: string | null,
   endpoint: URL,
-  authToken: string | null,
 ): string {
   if (gitUrl === 'ssh') {
     if (!sshUrl) {
@@ -42,11 +41,6 @@ export function getRepoUrl(
 
   // clone to avoid mutating the caller's URL; href is known-valid
   const url = parseUrl(endpoint.href)!;
-  if (authToken) {
-    const [username, password] = authToken.split(':');
-    url.username = username;
-    url.password = password ?? '';
-  }
   url.host = url.host.replace('api.github.com', 'github.com');
   url.pathname = `${repository}.git`;
   return url.href;
