@@ -247,6 +247,24 @@ describe('util/url', () => {
       ).toBe('https://community.chocolatey.org/api/v2/FindPackagesById?page=2');
     });
 
+    it('does not upgrade HTTP to HTTPS when the next URL has a non-standard port', () => {
+      expect(
+        resolveSameOriginUrl(
+          'https://community.chocolatey.org/api/v2/FindPackagesById',
+          'http://community.chocolatey.org:8080/api/v2/FindPackagesById?page=2',
+        ),
+      ).toBeNull();
+    });
+
+    it('rejects a different port on the same host', () => {
+      expect(
+        resolveSameOriginUrl(
+          'https://registry.example.com:8443/v2/foo',
+          'https://registry.example.com/v2/foo?page=2',
+        ),
+      ).toBeNull();
+    });
+
     it('resolves a relative next URL against the base', () => {
       expect(
         resolveSameOriginUrl(

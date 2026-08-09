@@ -109,11 +109,15 @@ export function resolveSameOriginUrl(
     return null;
   }
 
-  if (base.protocol === 'https:' && resolved.protocol === 'http:') {
+  if (
+    base.protocol === 'https:' &&
+    resolved.protocol === 'http:' &&
+    resolved.port === ''
+  ) {
     resolved.protocol = 'https:';
   }
 
-  return resolved.href;
+  return resolved.origin === base.origin ? resolved.href : null;
 }
 
 export function getQueryString(params: Record<string, any>): string {
