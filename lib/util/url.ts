@@ -105,10 +105,6 @@ export function resolveSameOriginUrl(
     return null;
   }
 
-  if (resolved.hostname !== base.hostname) {
-    return null;
-  }
-
   if (
     base.protocol === 'https:' &&
     resolved.protocol === 'http:' &&
