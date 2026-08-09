@@ -107,30 +107,30 @@ describe('workers/repository/update/pr/changelog/releases', () => {
       ]);
     });
 
-    it('preserves Docker tag compatibility while normalizing releases', async () => {
+    it('preserves Docker distro compatibility while normalizing releases', async () => {
       vi.mocked(datasource.getPkgReleases).mockReset();
       vi.mocked(datasource.getPkgReleases).mockResolvedValueOnce({
         releases: [
-          { version: '5.14.0-1-ce' },
-          { version: '5.14.1-1-ce' },
-          { version: '5.14.2-1-debian' },
-          { version: '5.14.3-1-ce' },
-          { version: '5.14.4-1-ce' },
+          { version: '1.0.0-alpine' },
+          { version: '1.0.1-alpine' },
+          { version: '1.0.2-bookworm' },
+          { version: '1.0.3-alpine' },
+          { version: '1.0.4-alpine' },
         ],
       });
       const config = partial<BranchUpgradeConfig>({
         datasource: 'some-datasource',
         packageName: 'some-depname',
         versioning: dockerVersioning.id,
-        currentValue: '5.14.0-1-ce',
-        currentVersion: '5.14.0',
-        newVersion: '5.14.3',
+        currentValue: '1.0.0-alpine',
+        currentVersion: '1.0.0',
+        newVersion: '1.0.3',
       });
       const res = await releases.getInRangeReleases(config);
       expect(res).toEqual([
-        { version: '5.14.0' },
-        { version: '5.14.1' },
-        { version: '5.14.3' },
+        { version: '1.0.0' },
+        { version: '1.0.1' },
+        { version: '1.0.3' },
       ]);
     });
 
