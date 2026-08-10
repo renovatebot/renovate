@@ -70,7 +70,7 @@ const CargoDep = z.union([
         if (skipReason) {
           dep.skipReason = skipReason;
         }
-        if (pkg) {
+        if (pkg && !git) {
           dep.packageName = pkg;
         }
         if (registry) {
