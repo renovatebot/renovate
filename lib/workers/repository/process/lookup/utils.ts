@@ -3,6 +3,7 @@ import { isNonEmptyString, isNullOrUndefined } from '@sindresorhus/is';
 import { getRangeStrategy } from '../../../../modules/manager/index.ts';
 import type { LookupUpdate } from '../../../../modules/manager/types.ts';
 import * as allVersioning from '../../../../modules/versioning/index.ts';
+import { coerceObject } from '../../../../util/object.ts';
 import * as template from '../../../../util/template/index.ts';
 import type { LookupUpdateConfig } from './types.ts';
 
@@ -13,7 +14,7 @@ export function resolveReplacementNameForAliases(
   if (!replacementName) {
     return replacementName;
   }
-  for (const [alias, value] of Object.entries(registryAliases ?? {})) {
+  for (const [alias, value] of Object.entries(coerceObject(registryAliases))) {
     if (replacementName.startsWith(`${alias}/`)) {
       return value + replacementName.slice(alias.length);
     }
