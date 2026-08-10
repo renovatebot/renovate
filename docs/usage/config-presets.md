@@ -242,6 +242,90 @@ This is especially helpful in self-hosted scenarios where public presets cannot 
 Local presets are specified either by leaving out any prefix, e.g. `owner/name`, or explicitly by adding a `local>` prefix, e.g. `local>owner/name`.
 Renovate will determine the current platform and look up the preset from there.
 
+## Relative preset references
+
+Presets can reference other presets from the same repository with a relative path.
+Renovate resolves the relative reference to the source, repository and tag of the preset which contains the reference.
+This means you can move or fork a preset repository, or pin it to a tag, without editing the references inside the presets.
+
+| Syntax | Resolves relative to                                       |
+| ------ | ---------------------------------------------------------- |
+| `./x`  | the directory of the preset file with the reference        |
+| `../x` | the parent directory of the preset file with the reference |
+| `/x`   | the root of the preset repository                          |
+
+For example, take a preset repository with this layout:
+
+```
+default.json
+system/registries.json
+security/base.json
+```
+
+The `default.json` file can reference the other presets like this:
+
+```json
+{
+  "extends": ["./system/registries", "/security/base"]
+}
+```
+
+If a repository extends `github>org/repo#v2.0.0`, then Renovate resolves the two references to `github>org/repo//system/registries#v2.0.0` and `github>org/repo//security/base#v2.0.0`.
+The tag `v2.0.0` is inherited, so all presets are read from the same tag.
+
+!!! note
+  Relative references only work inside presets.
+  Renovate does not accept them in a repository's own `renovate.json`, in an inherited config, or in `globalExtends`.
+  The `renovate-config-validator` accepts relative references in any file, so a relative reference in a repository's own config only fails when Renovate runs, and not during validation.
+
+Some more things to know about relative references:
+
+- You can not add a `#tag` to a relative reference, because the tag is always inherited from the referencing preset
+- A relative reference always points to a preset _file_, you can not reference a sub-preset key inside a file with a relative reference, this is the same limitation as for the `//path` syntax
+- A reference must stay inside the preset repository, so `../` may not escape the repository root
+- Relative references are supported for `github`, `gitlab`, `gitea`, `forgejo` and `local` presets
+- Relative references inside a preset which is hosted on an HTTP server are _not_ supported, because Renovate only resolves them for presets which are hosted in a Git repository
+- Parameters are supported, for example `./group(eslint)`, and the parameters may contain a Handlebars template like `./group({{ env.TEAM }})`
+- References whose _path_ contains a Handlebars template, like `./{{ env.SOME_VAR }}/base`, are not rewritten, so they fail to resolve
+- The `ignorePresets` entries of a preset may also use the relative form, Renovate resolves them in the same way as the `extends` entries of that preset
+- A relative reference must not have a source prefix, so strings like `local>./x` or `github>../x` are invalid
+- A reference which resolves to the `default` preset at the root of the repository, like `/default`, is resolved to the plain repository form such as `github>org/repo#v2.0.0`
+
+!!! note
+  Renovate deduplicates presets by their exact string.
+  A preset which is referenced under two different spellings, for example `github>org/repo#v2.0.0` and `github>org/repo//default#v2.0.0`, is therefore fetched and merged twice.
+  This is how preset resolution has always worked, and is not specific to relative references.
+
+!!! note
+  A preset can only ignore its own nested presets when the repository which extends it does not set `ignorePresets` itself.
+  Renovate uses the `ignorePresets` of the repository config when there is one, and falls back to the `ignorePresets` of the preset otherwise.
+  This is how preset resolution has always worked, and is not specific to relative references, so do not rely on a preset ignoring its own references.
+
+!!! note
+  Relative references inside an `onboardingConfig` are canonicalized as well, including the inherited tag.
+  This means an onboarded repository gets an absolute preset string like `github>org/repo//system/registries#v2.0.0`, which resolves from that repository.
+
+!!! warning
+  Any `extends` string which starts with `./`, `../` or `/`, like `./group/repo` or `/group/repo`, is now read as a relative preset reference.
+  Before this feature such a string was treated as a local repository name, which in rare cases could accidentally resolve to a real preset because the platform API normalized the dot segments in the request URL.
+  For the same reason a source-prefixed relative-looking string, like `local>/org/repo`, `github>./x` or `npm>./x`, is now rejected as an invalid preset.
+
+To ignore a relatively-referenced preset with `ignorePresets`, use the absolute preset string which Renovate resolved, including the inherited tag:
+
+```json
+{
+  "extends": ["github>org/repo#v2.0.0"],
+  "ignorePresets": ["github>org/repo//system/registries#v2.0.0"]
+}
+```
+
+If the reference itself is broken, for example because it escapes the repository root, then Renovate keeps the raw reference.
+In that case put the raw relative string like `../oops` in `ignorePresets`.
+
+!!! warning
+  A relative reference which cannot be resolved causes a configuration error in every repository which extends the preset.
+  Preset authors should therefore validate their preset repository in CI, for example with the `renovate-config-validator`.
+
 ## Fetching presets from an HTTP server
 
 If your desired platform is not yet supported, or if you want presets to work when you run Renovate with `--platform=local`, you can specify presets using HTTP URLs:

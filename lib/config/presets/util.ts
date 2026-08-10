@@ -10,8 +10,25 @@ export const PRESET_INVALID = 'invalid preset';
 export const PRESET_INVALID_JSON = 'invalid preset JSON';
 export const PRESET_NOT_FOUND = 'preset not found';
 export const PRESET_PROHIBITED_SUBPRESET = 'prohibited sub-preset';
+export const PRESET_RELATIVE_NO_PARENT = 'relative preset has no parent';
+export const PRESET_RELATIVE_OUTSIDE_REPO = 'relative preset outside repo';
 export const PRESET_RENOVATE_CONFIG_NOT_FOUND =
   'preset renovate-config not found';
+
+/**
+ * Preset sources which are hosted in a repository, so presets from them can
+ * reference other presets relatively.
+ *
+ * Must stay in sync with the repository hosted subset of `presetSourceLoaders`
+ * in `index.ts`.
+ */
+export const REPO_HOSTED_PRESET_SOURCES = [
+  'forgejo',
+  'gitea',
+  'github',
+  'gitlab',
+  'local',
+];
 
 export async function fetchPreset({
   repo,

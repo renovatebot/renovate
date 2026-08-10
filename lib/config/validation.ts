@@ -20,6 +20,7 @@ import { isCustomManager } from '../modules/manager/custom/index.ts';
 import type { CustomManager } from '../modules/manager/custom/types.ts';
 import type { HostRule } from '../types/index.ts';
 import { packageCacheNamespaces } from '../util/cache/package/namespaces.ts';
+import { clone } from '../util/clone.ts';
 import { getToolConfig } from '../util/exec/containerbase.ts';
 import { isConstraintName, isToolName } from '../util/exec/types.ts';
 import { isValidCommitTrailer } from '../util/git/commit-trailers.ts';
@@ -47,10 +48,11 @@ import { migrateConfig } from './migration.ts';
 import { getOptions } from './options/index.ts';
 import { resolveConfigPresets } from './presets/index.ts';
 import { supportedDatasources } from './presets/internal/merge-confidence.preset.ts';
-import { parsePreset } from './presets/parse.ts';
+import { isRelativePresetReference, parsePreset } from './presets/parse.ts';
 import type {
   AllConfig,
   AllowedParents,
+  RenovateConfig,
   RenovateOptions,
   StatusCheckKey,
   ValidationMessage,
@@ -194,6 +196,54 @@ function initOptions(): void {
   }
 
   optionsInitialized = true;
+}
+
+/**
+ * Removes every relative preset reference from a deep copy of the given
+ * `packageRules` entry, at any nesting depth.
+ *
+ * Relative references are only resolvable while the preset which contains them
+ * is fetched, so they must not be passed to `resolveConfigPresets()` during
+ * validation. They are still syntax checked by the `extends` validation.
+ */
+function stripRelativePresets(packageRule: RenovateConfig): {
+  rule: RenovateConfig;
+  hasRelativePresets: boolean;
+} {
+  const rule = clone(packageRule);
+  const hasRelativePresets = stripRelativePresetsFromValue(rule);
+  return { rule, hasRelativePresets };
+}
+
+function stripRelativePresetsFromValue(value: unknown): boolean {
+  if (isArray(value)) {
+    let stripped = false;
+    for (const element of value) {
+      stripped = stripRelativePresetsFromValue(element) || stripped;
+    }
+    return stripped;
+  }
+
+  if (!isPlainObject(value)) {
+    return false;
+  }
+
+  let stripped = false;
+  for (const [key, val] of Object.entries(value)) {
+    if (key === 'extends' && isArray(val)) {
+      const remaining = val.filter(
+        (preset) => !(isString(preset) && isRelativePresetReference(preset)),
+      );
+      if (remaining.length !== val.length) {
+        value[key] = remaining;
+        stripped = true;
+      }
+      continue;
+    }
+
+    stripped = stripRelativePresetsFromValue(val) || stripped;
+  }
+  return stripped;
 }
 
 export async function validateConfig(
@@ -493,8 +543,10 @@ export async function validateConfig(
                 if (key === 'packageRules') {
                   for (const [subIndex, packageRule] of val.entries()) {
                     if (isObject(packageRule)) {
+                      const { rule, hasRelativePresets } =
+                        stripRelativePresets(packageRule);
                       const { config: resolved } = await resolveConfigPresets(
-                        packageRule,
+                        rule,
                         config,
                       );
                       const resolvedRule = migrateConfig({
@@ -511,15 +563,32 @@ export async function validateConfig(
                         (ruleKey) => selectors.includes(ruleKey),
                       ).length;
                       if (!selectorLength) {
-                        const message = `${currentPath}[${subIndex}]: Each packageRule must contain at least one match* or exclude* selector. Rule: ${JSON.stringify(
-                          packageRule,
-                        )}`;
-                        errors.push({
-                          topic: 'Configuration Error',
-                          message,
-                        });
+                        if (hasRelativePresets) {
+                          // the stripped relative preset may still provide the
+                          // missing selectors, so this cannot be an error
+                          const message = `${currentPath}[${subIndex}]: this rule extends a relative preset that cannot be resolved during validation, so its selectors could not be checked. Rule: ${JSON.stringify(
+                            packageRule,
+                          )}`;
+                          warnings.push({
+                            topic: 'Configuration Error',
+                            message,
+                          });
+                        } else {
+                          const message = `${currentPath}[${subIndex}]: Each packageRule must contain at least one match* or exclude* selector. Rule: ${JSON.stringify(
+                            packageRule,
+                          )}`;
+                          errors.push({
+                            topic: 'Configuration Error',
+                            message,
+                          });
+                        }
                       }
-                      if (selectorLength === Object.keys(resolvedRule).length) {
+                      if (
+                        // the stripped relative preset legitimately provides
+                        // the non-selector field
+                        !hasRelativePresets &&
+                        selectorLength === Object.keys(resolvedRule).length
+                      ) {
                         const message = `${currentPath}[${subIndex}]: Each packageRule must contain at least one non-match* or non-exclude* field. Rule: ${JSON.stringify(
                           packageRule,
                         )}`;

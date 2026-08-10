@@ -22,6 +22,7 @@ import { mergeChildConfig } from '../utils.ts';
 import { removedPresets } from './common.ts';
 import * as internal from './internal/index.ts';
 import { parsePreset } from './parse.ts';
+import { canonicalizeRelativePresets } from './relative.ts';
 import type { Preset, PresetApi } from './types.ts';
 import {
   PRESET_DEP_NOT_FOUND,
@@ -29,7 +30,9 @@ import {
   PRESET_INVALID_JSON,
   PRESET_NOT_FOUND,
   PRESET_PROHIBITED_SUBPRESET,
+  PRESET_RELATIVE_NO_PARENT,
   PRESET_RENOVATE_CONFIG_NOT_FOUND,
+  REPO_HOSTED_PRESET_SOURCES,
 } from './util.ts';
 
 const presetSourceLoaders: Record<string, () => Promise<PresetApi>> = {
@@ -109,8 +112,13 @@ export async function getPreset(
   if (newPreset === null) {
     return {};
   }
+  const parsedPreset = parsePreset(preset);
   const { presetSource, repo, presetPath, presetName, tag, params, rawParams } =
-    parsePreset(preset);
+    parsedPreset;
+
+  if (presetSource === 'relative') {
+    throw new Error(PRESET_RELATIVE_NO_PARENT);
+  }
 
   let presetConfig: Preset | null | undefined;
 
@@ -185,7 +193,14 @@ export async function getPreset(
     delete presetConfig.description;
   }
   const { migratedConfig } = migration.migrateConfig(presetConfig);
-  return massage.massageConfig(migratedConfig);
+  const massagedConfig = massage.massageConfig(migratedConfig);
+  if (REPO_HOSTED_PRESET_SOURCES.includes(parsedPreset.presetSource)) {
+    // only presets which are hosted in a repository can contain relative
+    // references, in all other presets they are left as they are and fail
+    // when they are resolved
+    canonicalizeRelativePresets(massagedConfig, parsedPreset);
+  }
+  return massagedConfig;
 }
 
 export interface ResolveConfigPresetsResult {
@@ -383,6 +398,8 @@ async function fetchPreset(
       error.validationError = `Sub-presets cannot be combined with a custom path (${preset})`;
     } else if (err.message === PRESET_INVALID_JSON) {
       error.validationError = `Preset is invalid JSON (${preset})`;
+    } else if (err.message === PRESET_RELATIVE_NO_PARENT) {
+      error.validationError = `Relative preset reference cannot be resolved (${preset}). Relative presets can only be used within presets from a supported source, must stay inside their repository, and cannot be templated or used outside of a preset (for example in the repository config, inherited config, or globalExtends)`;
     } else {
       error.validationError = `Preset caused unexpected error (${preset})`;
     }
