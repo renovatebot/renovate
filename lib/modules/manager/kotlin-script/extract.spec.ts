@@ -6,7 +6,6 @@ const customRepositoriesFileContent = Fixtures.get(
   'custom-repositories.main.kts',
 );
 const missingPartsFileContent = Fixtures.get('missing-parts.main.kts');
-const varargsFileContent = Fixtures.get('varargs.main.kts');
 
 describe('modules/manager/kotlin-script/extract', () => {
   describe('extractPackageFile()', () => {
@@ -80,10 +79,11 @@ describe('modules/manager/kotlin-script/extract', () => {
     });
 
     it('extracts multiple dependencies and repositories from vararg annotations', () => {
-      // when
-      const packageFile = extractPackageFile(varargsFileContent);
+      const packageFile = extractPackageFile(`
+        #!/usr/bin/env kotlin
+        @file:Repository("https://jitpack.io", "https://some.other.repo")
+        @file:DependsOn("it.krzeminski:github-actions-kotlin-dsl:0.22.0", "org.eclipse.jgit:org.eclipse.jgit:4.6.0.201612231935-r")`);
 
-      // then
       expect(packageFile).toEqual({
         deps: [
           {
