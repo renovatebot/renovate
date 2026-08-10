@@ -111,6 +111,7 @@ export function resolveSameOriginUrl(
     resolved.protocol === 'http:' &&
     resolved.port === ''
   ) {
+    logger.debug(`Detected protocol downgrade and fixed it: ${resolved.href}`);
     resolved.protocol = 'https:';
   }
 
