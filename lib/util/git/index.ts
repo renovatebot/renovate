@@ -99,7 +99,7 @@ interface CreateSimpleGitOptions {
   config?: Partial<SimpleGitOptions>;
   env?: ExtraEnv;
   authentication?: {
-    additionalHostTypes?: readonly string[];
+    hostTypes?: readonly string[];
   };
 }
 
@@ -129,7 +129,7 @@ export function createSimpleGit({
     },
   });
   const gitEnv = authentication
-    ? getGitEnvironmentVariables(childEnv, authentication.additionalHostTypes)
+    ? getGitEnvironmentVariables(childEnv, authentication.hostTypes)
     : childEnv;
   return simpleGit({ ...simpleGitConfig(), ...config }).env(gitEnv);
 }

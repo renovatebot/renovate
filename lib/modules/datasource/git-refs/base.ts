@@ -25,7 +25,7 @@ export abstract class GitDatasource extends Datasource {
     packageName,
   }: GetReleasesConfig): Promise<RawRefs[] | null> {
     const git = createSimpleGit({
-      authentication: { additionalHostTypes: [this.id] },
+      authentication: { hostTypes: [this.id] },
     });
 
     // fetch remote tags

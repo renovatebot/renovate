@@ -12,7 +12,7 @@ export default async function updateDependency({
   // TODO: types (#22198)
   const localDir = GlobalConfig.get('localDir');
   const authentication = {
-    additionalHostTypes: ['git-tags', 'git-refs'],
+    hostTypes: ['git-tags', 'git-refs'],
   };
 
   const git = createSimpleGit({

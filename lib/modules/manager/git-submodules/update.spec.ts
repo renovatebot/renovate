@@ -84,13 +84,13 @@ describe('modules/manager/git-submodules/update', () => {
       expect(createSimpleGit).toHaveBeenNthCalledWith(1, {
         config: { baseDir },
         authentication: {
-          additionalHostTypes: ['git-tags', 'git-refs'],
+          hostTypes: ['git-tags', 'git-refs'],
         },
       });
       expect(createSimpleGit).toHaveBeenNthCalledWith(2, {
         config: { baseDir: upath.join(baseDir, 'renovate') },
         authentication: {
-          additionalHostTypes: ['git-tags', 'git-refs'],
+          hostTypes: ['git-tags', 'git-refs'],
         },
       });
     });

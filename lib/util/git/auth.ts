@@ -168,7 +168,7 @@ export function getAuthenticationRules(
 
 export function getGitEnvironmentVariables(
   environmentVariables: Readonly<ResolvedChildEnv>,
-  additionalHostTypes: readonly string[] = [],
+  hostTypes: readonly string[] = [],
 ): ResolvedChildEnv {
   let gitEnvironmentVariables: ResolvedChildEnv = { ...environmentVariables };
 
@@ -186,11 +186,10 @@ export function getGitEnvironmentVariables(
     );
   }
 
-  // construct the Set of allowed hostTypes consisting of the standard Git provides
-  // plus additionalHostTypes, which are provided as parameter
+  // Manager-scoped rules are opt-in so unrelated credentials are not exposed to Git.
   const gitAllowedHostTypes = new Set<string>([
     ...PLATFORM_HOST_TYPES,
-    ...additionalHostTypes,
+    ...hostTypes,
   ]);
 
   // filter rules without `matchHost` and `token` or username and password and github api github rules

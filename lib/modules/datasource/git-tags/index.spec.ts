@@ -96,7 +96,7 @@ describe('modules/datasource/git-tags/index', () => {
       );
       expect(digest).toBe('a9920c014aebc28dc1b23e7efcc006d0455cc710');
       expect(createSimpleGit).toHaveBeenCalledExactlyOnceWith({
-        authentication: { additionalHostTypes: ['git-tags'] },
+        authentication: { hostTypes: ['git-tags'] },
       });
     });
   });

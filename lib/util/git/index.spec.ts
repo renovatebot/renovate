@@ -220,7 +220,7 @@ describe('util/git/index', { timeout: 30000 }, () => {
       const envSpy = vi.spyOn(SimpleGit.prototype, 'env');
 
       git.createSimpleGit({
-        authentication: { additionalHostTypes: ['git-refs'] },
+        authentication: { hostTypes: ['git-refs'] },
       });
 
       expect(auth.getGitEnvironmentVariables).toHaveBeenCalledExactlyOnceWith(

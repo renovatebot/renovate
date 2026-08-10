@@ -126,7 +126,7 @@ describe('modules/datasource/git-refs/index', () => {
       );
       expect(digest).toBe('a9920c014aebc28dc1b23e7efcc006d0455cc710');
       expect(createSimpleGit).toHaveBeenCalledExactlyOnceWith({
-        authentication: { additionalHostTypes: ['git-refs'] },
+        authentication: { hostTypes: ['git-refs'] },
       });
     });
   });

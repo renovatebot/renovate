@@ -11,13 +11,10 @@ const gitConfigEnvironmentVariableRegex = regEx(
 
 function getGitExecOptions(
   execOptions: ExecOptions,
-  additionalHostTypes: readonly string[],
+  hostTypes: readonly string[],
 ): ExecOptions {
   const childEnv = getChildEnv(execOptions);
-  const environmentVariables = getGitEnvironmentVariables(
-    childEnv,
-    additionalHostTypes,
-  );
+  const environmentVariables = getGitEnvironmentVariables(childEnv, hostTypes);
   const gitConfigEnv: Record<string, string> = {};
 
   for (const [key, value] of Object.entries(environmentVariables)) {
@@ -50,8 +47,8 @@ function getGitExecOptions(
 }
 
 export function withGitEnvironment(
-  additionalHostTypes: readonly string[] = [],
+  hostTypes: readonly string[] = [],
 ): typeof exec {
   return (command, execOptions) =>
-    exec(command, getGitExecOptions(execOptions ?? {}, additionalHostTypes));
+    exec(command, getGitExecOptions(execOptions ?? {}, hostTypes));
 }
