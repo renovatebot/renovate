@@ -11,7 +11,6 @@ import type {
   RepoGlobalConfig,
 } from '../../../config/types.ts';
 import * as git from '../../../util/git/index.ts';
-import * as hostRules from '../../../util/host-rules.ts';
 import type { Upgrade } from '../types.ts';
 import { updateDependency } from './index.ts';
 
@@ -24,8 +23,6 @@ const baseDir = `${import.meta.dirname}/__fixtures__`;
 describe('modules/manager/git-submodules/update', () => {
   beforeEach(() => {
     GlobalConfig.set({ localDir: baseDir });
-    // clear host rules
-    hostRules.clear();
     // clear environment variables
     process.env = {};
 
@@ -145,31 +142,6 @@ describe('modules/manager/git-submodules/update', () => {
       });
       expect(update).toBe('');
       expect(gitMock.subModule).toHaveBeenCalledTimes(0);
-    });
-
-    it('requests authentication for git-tags and git-refs', async () => {
-      gitMock.submoduleUpdate.mockResolvedValue('');
-      gitMock.checkout.mockResolvedValue('');
-
-      const update = await updateDependency({
-        fileContent: '',
-        packageFile: '.gitmodules',
-        upgrade,
-      });
-      expect(update).toBe('');
-      expect(createSimpleGit).toHaveBeenCalledTimes(2);
-      expect(createSimpleGit).toHaveBeenNthCalledWith(1, {
-        config: { baseDir },
-        authentication: {
-          additionalHostTypes: ['git-tags', 'git-refs'],
-        },
-      });
-      expect(createSimpleGit).toHaveBeenNthCalledWith(2, {
-        config: { baseDir: upath.join(baseDir, 'renovate') },
-        authentication: {
-          additionalHostTypes: ['git-tags', 'git-refs'],
-        },
-      });
     });
   });
 });

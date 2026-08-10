@@ -3,7 +3,6 @@ import type { MockProxy } from 'vitest-mock-extended';
 import { mock } from 'vitest-mock-extended';
 import { Fixtures } from '~test/fixtures.ts';
 import * as git from '../../../util/git/index.ts';
-import { add, clear } from '../../../util/host-rules.ts';
 import { getPkgReleases } from '../index.ts';
 import { GitTagsDatasource } from './index.ts';
 
@@ -20,9 +19,6 @@ describe('modules/datasource/git-tags/index', () => {
   let gitMock: MockProxy<SimpleGit>;
 
   beforeEach(() => {
-    // clear host rules
-    clear();
-
     // clear environment variables
     process.env = {};
 
@@ -91,33 +87,8 @@ describe('modules/datasource/git-tags/index', () => {
       expect(digest).toBe('a9920c014aebc28dc1b23e7efcc006d0455cc710');
     });
 
-    it('returns digest for HEAD with authentication environment variables', async () => {
+    it('requests authentication for git-tags lookups', async () => {
       gitMock.listRemote.mockResolvedValue(lsRemote1);
-
-      add({
-        hostType: 'github',
-        matchHost: 'api.github.com',
-        token: 'token123',
-      });
-
-      const digest = await datasourceInstance.getDigest(
-        { packageName: 'another tag to look up' },
-        undefined,
-      );
-      expect(digest).toBe('a9920c014aebc28dc1b23e7efcc006d0455cc710');
-      expect(createSimpleGit).toHaveBeenCalledExactlyOnceWith({
-        authentication: { additionalHostTypes: ['git-tags'] },
-      });
-    });
-
-    it('returns digest for HEAD with authentication environment variables for datasource type git-tags', async () => {
-      gitMock.listRemote.mockResolvedValue(lsRemote1);
-
-      add({
-        hostType: 'git-tags',
-        matchHost: 'git.example.com',
-        token: 'token123',
-      });
 
       const digest = await datasourceInstance.getDigest(
         { packageName: 'another tag to look up' },
