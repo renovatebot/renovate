@@ -1,26 +1,10 @@
 import { logger } from '../../../logger/index.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { asTimestamp } from '../../../util/timestamp.ts';
-import { joinUrlParts } from '../../../util/url.ts';
+import { getQueryString, joinUrlParts } from '../../../util/url.ts';
 import { Datasource } from '../datasource.ts';
 import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
-import type { OrbResponse } from './types.ts';
-
-const MAX_VERSIONS = 100;
-
-const query = `
-query($packageName: String!, $maxVersions: Int!) {
-  orb(name: $packageName) {
-    name,
-    homeUrl,
-    isPrivate,
-    versions(count: $maxVersions) {
-      version,
-      createdAt
-    }
-  }
-}
-`;
+import type { OrbPackagesResponse } from './types.ts';
 
 export class OrbDatasource extends Datasource {
   static readonly id = 'orb';
@@ -36,7 +20,7 @@ export class OrbDatasource extends Datasource {
 
   override readonly releaseTimestampSupport = true;
   override readonly releaseTimestampNote =
-    'The release timestamp is determined from the `createdAt` field in the results.';
+    'The release timestamp is determined from the `created_at` field in the results.';
 
   private async _getReleases({
     packageName,
@@ -46,32 +30,30 @@ export class OrbDatasource extends Datasource {
     if (!registryUrl) {
       return null;
     }
-    const url = joinUrlParts(registryUrl, 'graphql-unstable');
-    const body = {
-      query,
-      variables: { packageName, maxVersions: MAX_VERSIONS },
-    };
-    const res = (
-      await this.http.postJson<OrbResponse>(url, {
-        body,
-      })
-    ).body;
-    if (!res?.data?.orb) {
-      logger.debug({ res }, `Failed to look up orb ${packageName}`);
+    const url = `${joinUrlParts(
+      registryUrl,
+      'api/v3/orb/packages',
+    )}?${getQueryString({ 'filter[name]': packageName })}`;
+    const res = (await this.http.getJsonUnchecked<OrbPackagesResponse>(url))
+      .body;
+    const pkg = res?.data?.[0];
+    if (!pkg) {
+      logger.debug({ packageName }, `Failed to look up orb ${packageName}`);
       return null;
     }
 
-    const { orb } = res.data;
     // Simplify response before caching and returning
-    const homepage = orb.homeUrl?.length
-      ? orb.homeUrl
+    const homepage = pkg.attributes.home_url?.length
+      ? pkg.attributes.home_url
       : `https://circleci.com/developer/orbs/orb/${packageName}`;
-    const releases = orb.versions.map(({ version, createdAt }) => ({
-      version,
-      releaseTimestamp: asTimestamp(createdAt),
-    }));
+    const releases = (pkg.references?.orb_versions ?? []).map(
+      ({ attributes }) => ({
+        version: attributes.version,
+        releaseTimestamp: asTimestamp(attributes.created_at),
+      }),
+    );
 
-    const dep = { homepage, isPrivate: !!orb.isPrivate, releases };
+    const dep = { homepage, isPrivate: !!pkg.attributes.is_private, releases };
     logger.trace({ dep }, 'dep');
     return dep;
   }
