@@ -321,7 +321,9 @@ jobs:
         with:
           path: .cache/tsbuildinfo
           key: tsbuildinfo-${{ hashFiles('pnpm-lock.yaml') }}
-          restore-keys: tsbuildinfo-${{ hashFiles('pnpm-lock.yaml') }}-
+          restore-keys: |
+            tsbuildinfo-${{ hashFiles('pnpm-lock.yaml') }}-
+            tsbuildinfo-
 
       - name: Type check
         run: pnpm type-check
