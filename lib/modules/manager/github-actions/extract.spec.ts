@@ -57,20 +57,20 @@ describe('modules/manager/github-actions/extract', () => {
   });
 
   describe('extractPackageFile()', () => {
-    it('returns null for empty', () => {
+    it('returns null for empty', async () => {
       expect(
-        extractPackageFile('nothing here', 'empty-workflow.yml'),
+        await extractPackageFile('nothing here', 'empty-workflow.yml'),
       ).toBeNull();
     });
 
-    it('returns null for invalid yaml', () => {
+    it('returns null for invalid yaml', async () => {
       expect(
-        extractPackageFile('nothing here: [', 'invalid-workflow.yml'),
+        await extractPackageFile('nothing here: [', 'invalid-workflow.yml'),
       ).toBeNull();
     });
 
-    it('extracts multiple docker image lines from yaml configuration file', () => {
-      const res = extractPackageFile(
+    it('extracts multiple docker image lines from yaml configuration file', async () => {
+      const res = await extractPackageFile(
         Fixtures.get('workflow_1.yml'),
         'workflow_1.yml',
       );
@@ -80,8 +80,8 @@ describe('modules/manager/github-actions/extract', () => {
       );
     });
 
-    it('extracts multiple action tag lines from yaml configuration file', () => {
-      const res = extractPackageFile(
+    it('extracts multiple action tag lines from yaml configuration file', async () => {
+      const res = await extractPackageFile(
         Fixtures.get('workflow_2.yml'),
         'workflow_2.yml',
       );
@@ -94,20 +94,20 @@ describe('modules/manager/github-actions/extract', () => {
       ).toHaveLength(1);
     });
 
-    it('use github.com as registry when no settings provided', () => {
-      const res = extractPackageFile(
+    it('use github.com as registry when no settings provided', async () => {
+      const res = await extractPackageFile(
         Fixtures.get('workflow_2.yml'),
         'workflow_2.yml',
       );
       expect(res?.deps[0].registryUrls).toBeUndefined();
     });
 
-    it('use github.enterprise.com first and then github.com as registry running against github.enterprise.com', () => {
+    it('use github.enterprise.com first and then github.com as registry running against github.enterprise.com', async () => {
       GlobalConfig.set({
         platform: 'github',
         endpoint: 'https://github.enterprise.com',
       });
-      const res = extractPackageFile(
+      const res = await extractPackageFile(
         Fixtures.get('workflow_2.yml'),
         'workflow_2.yml',
       );
@@ -117,12 +117,12 @@ describe('modules/manager/github-actions/extract', () => {
       ]);
     });
 
-    it('use github.enterprise.com first and then github.com as registry running against github.enterprise.com/api/v3', () => {
+    it('use github.enterprise.com first and then github.com as registry running against github.enterprise.com/api/v3', async () => {
       GlobalConfig.set({
         platform: 'github',
         endpoint: 'https://github.enterprise.com/api/v3',
       });
-      const res = extractPackageFile(
+      const res = await extractPackageFile(
         Fixtures.get('workflow_2.yml'),
         'workflow_2.yml',
       );
@@ -132,56 +132,56 @@ describe('modules/manager/github-actions/extract', () => {
       ]);
     });
 
-    it('use github.com only as registry when running against non-GitHub', () => {
+    it('use github.com only as registry when running against non-GitHub', async () => {
       GlobalConfig.set({
         platform: 'bitbucket',
         endpoint: 'https://bitbucket.enterprise.com',
       });
-      const res = extractPackageFile(
+      const res = await extractPackageFile(
         Fixtures.get('workflow_2.yml'),
         'workflow_2.yml',
       );
       expect(res?.deps[0].registryUrls).toBeUndefined();
     });
 
-    it('use github.com only as registry when running against github.com', () => {
+    it('use github.com only as registry when running against github.com', async () => {
       GlobalConfig.set({
         platform: 'github',
         endpoint: 'https://github.com',
       });
-      const res = extractPackageFile(
+      const res = await extractPackageFile(
         Fixtures.get('workflow_2.yml'),
         'workflow_2.yml',
       );
       expect(res?.deps[0].registryUrls).toBeUndefined();
     });
 
-    it('use github.com only as registry when running against api.github.com', () => {
+    it('use github.com only as registry when running against api.github.com', async () => {
       GlobalConfig.set({
         platform: 'github',
         endpoint: 'https://api.github.com',
       });
-      const res = extractPackageFile(
+      const res = await extractPackageFile(
         Fixtures.get('workflow_2.yml'),
         'workflow_2.yml',
       );
       expect(res?.deps[0].registryUrls).toBeUndefined();
     });
 
-    it('returns undefined registryUrls when endpoint is invalid URL', () => {
+    it('returns undefined registryUrls when endpoint is invalid URL', async () => {
       GlobalConfig.set({
         platform: 'github',
         endpoint: 'not-a-valid-url',
       });
-      const res = extractPackageFile(
+      const res = await extractPackageFile(
         Fixtures.get('workflow_2.yml'),
         'workflow_2.yml',
       );
       expect(res?.deps[0].registryUrls).toBeUndefined();
     });
 
-    it('extracts multiple action tag lines with double quotes and comments', () => {
-      const res = extractPackageFile(
+    it('extracts multiple action tag lines with double quotes and comments', async () => {
+      const res = await extractPackageFile(
         Fixtures.get('workflow_3.yml'),
         'workflow_3.yml',
       );
@@ -244,7 +244,7 @@ describe('modules/manager/github-actions/extract', () => {
       ]);
     });
 
-    it('maintains quotes', () => {
+    it('maintains quotes', async () => {
       const yamlContent = codeBlock`
       jobs:
         build:
@@ -260,7 +260,7 @@ describe('modules/manager/github-actions/extract', () => {
             - name: "quoted, no comment, outdated"
               uses: "actions/setup-java@v2"`;
 
-      const res = extractPackageFile(yamlContent, 'workflow.yml');
+      const res = await extractPackageFile(yamlContent, 'workflow.yml');
       expect(res?.deps).toMatchObject([
         {
           depName: 'actions/setup-node',
@@ -326,7 +326,7 @@ describe('modules/manager/github-actions/extract', () => {
       ]);
     });
 
-    it('maintains spaces between hash and comment', () => {
+    it('maintains spaces between hash and comment', async () => {
       const yamlContent = codeBlock`
       jobs:
         build:
@@ -348,7 +348,7 @@ describe('modules/manager/github-actions/extract', () => {
               uses: "actions/setup-node@1f8c6b94b26d0feae1e387ca63ccbdc44d27b561"  # tag=v2.5.1
 "`;
 
-      const res = extractPackageFile(yamlContent, 'workflow.yml');
+      const res = await extractPackageFile(yamlContent, 'workflow.yml');
       expect(res).toMatchObject({
         deps: [
           {
@@ -379,8 +379,8 @@ describe('modules/manager/github-actions/extract', () => {
       });
     });
 
-    it('extracts tags in different formats', () => {
-      const res = extractPackageFile(
+    it('extracts tags in different formats', async () => {
+      const res = await extractPackageFile(
         Fixtures.get('workflow_4.yml'),
         'workflow_4.yml',
       );
@@ -511,8 +511,8 @@ describe('modules/manager/github-actions/extract', () => {
       expect(res!.deps[14]).not.toHaveProperty('skipReason');
     });
 
-    it('extracts non-semver ref automatically', () => {
-      const res = extractPackageFile(
+    it('extracts non-semver ref automatically', async () => {
+      const res = await extractPackageFile(
         `
         jobs:
           build:
@@ -531,8 +531,8 @@ describe('modules/manager/github-actions/extract', () => {
       });
     });
 
-    it('extracts pinned non-semver ref with digest', () => {
-      const res = extractPackageFile(
+    it('extracts pinned non-semver ref with digest', async () => {
+      const res = await extractPackageFile(
         `
         jobs:
           build:
@@ -554,8 +554,8 @@ describe('modules/manager/github-actions/extract', () => {
       });
     });
 
-    it('disables naked SHA pins without version comment', () => {
-      const res = extractPackageFile(
+    it('disables naked SHA pins without version comment', async () => {
+      const res = await extractPackageFile(
         codeBlock`
         jobs:
           build:
@@ -573,8 +573,8 @@ describe('modules/manager/github-actions/extract', () => {
       });
     });
 
-    it('disables naked short SHA pins without version comment', () => {
-      const res = extractPackageFile(
+    it('disables naked short SHA pins without version comment', async () => {
+      const res = await extractPackageFile(
         codeBlock`
         jobs:
           build:
@@ -592,8 +592,8 @@ describe('modules/manager/github-actions/extract', () => {
       });
     });
 
-    it('does not disable SHA pins with version comment', () => {
-      const res = extractPackageFile(
+    it('does not disable SHA pins with version comment', async () => {
+      const res = await extractPackageFile(
         codeBlock`
         jobs:
           build:
@@ -617,8 +617,8 @@ describe('modules/manager/github-actions/extract', () => {
       });
     });
 
-    it('does not disable short SHA pins with version comment', () => {
-      const res = extractPackageFile(
+    it('does not disable short SHA pins with version comment', async () => {
+      const res = await extractPackageFile(
         codeBlock`
         jobs:
           build:
@@ -641,8 +641,8 @@ describe('modules/manager/github-actions/extract', () => {
       });
     });
 
-    it('extracts actions with fqdn', () => {
-      const res = extractPackageFile(
+    it('extracts actions with fqdn', async () => {
+      const res = await extractPackageFile(
         codeBlock`
         jobs:
           build:
@@ -700,8 +700,11 @@ describe('modules/manager/github-actions/extract', () => {
       expect(res!.deps[3]).not.toHaveProperty('registryUrls');
     });
 
-    it('extracts multiple macos action runners from yaml configuration file', () => {
-      const res = extractPackageFile(runnerTestWorkflowMacos, 'workflow.yml');
+    it('extracts multiple macos action runners from yaml configuration file', async () => {
+      const res = await extractPackageFile(
+        runnerTestWorkflowMacos,
+        'workflow.yml',
+      );
 
       expect(res?.deps).toMatchObject([
         {
@@ -743,8 +746,11 @@ describe('modules/manager/github-actions/extract', () => {
       ).toHaveLength(4);
     });
 
-    it('extracts multiple ubuntu action runners from yaml configuration file', () => {
-      const res = extractPackageFile(runnerTestWorkflowUbuntu, 'workflow.yml');
+    it('extracts multiple ubuntu action runners from yaml configuration file', async () => {
+      const res = await extractPackageFile(
+        runnerTestWorkflowUbuntu,
+        'workflow.yml',
+      );
 
       expect(res?.deps).toMatchObject([
         {
@@ -778,8 +784,11 @@ describe('modules/manager/github-actions/extract', () => {
       ).toHaveLength(3);
     });
 
-    it('extracts multiple windows action runners from yaml configuration file', () => {
-      const res = extractPackageFile(runnerTestWorkflowWindows, 'workflow.yml');
+    it('extracts multiple windows action runners from yaml configuration file', async () => {
+      const res = await extractPackageFile(
+        runnerTestWorkflowWindows,
+        'workflow.yml',
+      );
 
       expect(res?.deps).toMatchObject([
         {
@@ -828,7 +837,7 @@ describe('modules/manager/github-actions/extract', () => {
       ).toHaveLength(5);
     });
 
-    it('extracts x-version from actions/setup-x', () => {
+    it('extracts x-version from actions/setup-x', async () => {
       const yamlContent = codeBlock`
         jobs:
           build:
@@ -855,7 +864,7 @@ describe('modules/manager/github-actions/extract', () => {
                   node-version: 'latest'
         `;
 
-      const res = extractPackageFile(yamlContent, 'workflow.yml');
+      const res = await extractPackageFile(yamlContent, 'workflow.yml');
       expect(res?.deps).toMatchObject([
         {
           autoReplaceStringTemplate:
@@ -960,7 +969,7 @@ describe('modules/manager/github-actions/extract', () => {
       ]);
     });
 
-    it('handles actions/setup-x without x-version field', () => {
+    it('handles actions/setup-x without x-version field', async () => {
       const yamlContent = codeBlock`
         jobs:
           build:
@@ -970,7 +979,7 @@ describe('modules/manager/github-actions/extract', () => {
                 with:
                   registry-url: 'https://npm.pkg.github.com'
         `;
-      const res = extractPackageFile(yamlContent, 'workflow.yml');
+      const res = await extractPackageFile(yamlContent, 'workflow.yml');
       expect(res?.deps).toHaveLength(1);
       expect(res?.deps[0]).toMatchObject({
         depName: 'actions/setup-node',
@@ -978,7 +987,7 @@ describe('modules/manager/github-actions/extract', () => {
       });
     });
 
-    it('extracts x-version from actions/setup-x in composite action', () => {
+    it('extracts x-version from actions/setup-x in composite action', async () => {
       const yamlContent = codeBlock`
         runs:
           using: 'composite'
@@ -1005,7 +1014,7 @@ describe('modules/manager/github-actions/extract', () => {
                 node-version: 'latest'
         `;
 
-      const res = extractPackageFile(yamlContent, 'action.yml');
+      const res = await extractPackageFile(yamlContent, 'action.yml');
       expect(res?.deps).toMatchObject([
         {
           autoReplaceStringTemplate:
@@ -1110,16 +1119,16 @@ describe('modules/manager/github-actions/extract', () => {
       ]);
     });
 
-    it('logs unknown schema', () => {
+    it('logs unknown schema', async () => {
       const yamlContent = codeBlock`
         runs:
           using: 'node20'
           main: 'index.js'
         `;
-      expect(extractPackageFile(yamlContent, 'action.yml')).toBeNull();
+      expect(await extractPackageFile(yamlContent, 'action.yml')).toBeNull();
     });
 
-    it('extracts actions and with-version inputs nested in a parallel block', () => {
+    it('extracts actions and with-version inputs nested in a parallel block', async () => {
       const yamlContent = codeBlock`
         jobs:
           build:
@@ -1137,7 +1146,7 @@ describe('modules/manager/github-actions/extract', () => {
               - run: npm test
         `;
 
-      const res = extractPackageFile(yamlContent, 'workflow.yml');
+      const res = await extractPackageFile(yamlContent, 'workflow.yml');
       expect(res?.deps).toMatchObject([
         { depName: 'actions/checkout', depType: 'action' },
         { depName: 'actions/setup-node', depType: 'action' },
@@ -1147,7 +1156,7 @@ describe('modules/manager/github-actions/extract', () => {
       ]);
     });
 
-    it('extracts community action with-inputs nested in a parallel block', () => {
+    it('extracts community action with-inputs nested in a parallel block', async () => {
       const yamlContent = codeBlock`
         jobs:
           build:
@@ -1158,7 +1167,7 @@ describe('modules/manager/github-actions/extract', () => {
                       version: '0.4.x'
         `;
 
-      const res = extractPackageFile(yamlContent, 'workflow.yml');
+      const res = await extractPackageFile(yamlContent, 'workflow.yml');
       expect(res?.deps).toMatchObject([
         { depName: 'astral-sh/setup-uv', depType: 'action' },
         {
@@ -1178,7 +1187,7 @@ describe('modules/manager/github-actions/extract', () => {
       ${undefined}                                                          | ${undefined}
     `(
       'extracts the mise version and checksum from jdx/mise-action',
-      ({ sha256, currentDigest }) => {
+      async ({ sha256, currentDigest }) => {
         const yamlContent = codeBlock`
         jobs:
           build:
@@ -1190,7 +1199,7 @@ describe('modules/manager/github-actions/extract', () => {
                   install_args: cargo:cargo-deny
         `;
 
-        const res = extractPackageFile(yamlContent, 'workflow.yml');
+        const res = await extractPackageFile(yamlContent, 'workflow.yml');
         expect(res?.deps).toMatchObject([
           {
             currentDigest: 'e6a8b3978addb5a52f2b4cd9d91eafa7f0ab959d',
@@ -1211,7 +1220,7 @@ describe('modules/manager/github-actions/extract', () => {
       },
     );
 
-    it('extracts steps nested in nested parallel blocks', () => {
+    it('extracts steps nested in nested parallel blocks', async () => {
       const yamlContent = codeBlock`
         jobs:
           build:
@@ -1228,7 +1237,7 @@ describe('modules/manager/github-actions/extract', () => {
                           go-version: '1.22'
         `;
 
-      const res = extractPackageFile(yamlContent, 'workflow.yml');
+      const res = await extractPackageFile(yamlContent, 'workflow.yml');
       expect(res?.deps).toMatchObject([
         { depName: 'actions/setup-node', depType: 'action' },
         { depName: 'actions/setup-go', depType: 'action' },
@@ -2232,12 +2241,13 @@ describe('modules/manager/github-actions/extract', () => {
         },
       ],
     },
-  ])('extract from $step.uses', ({ step, expected }) => {
+  ])('extract from $step.uses', async ({ step, expected }) => {
     const yamlContent = yaml.dump({ jobs: { build: { steps: [step] } } });
 
-    const res = extractPackageFile(yamlContent, 'workflow.yml');
+    const res = await extractPackageFile(yamlContent, 'workflow.yml');
     expect(res?.deps.filter((pkg) => pkg.depType !== 'action')).toMatchObject(
       expected,
     );
   });
+
 });

@@ -354,11 +354,11 @@ function extractWithYAMLParser(
   return deps;
 }
 
-export function extractPackageFile(
+export async function extractPackageFile(
   content: string,
   packageFile: string,
   config: ExtractConfig = {}, // TODO: enforce ExtractConfig
-): PackageFileContent | null {
+): Promise<PackageFileContent | null> {
   logger.trace(`github-actions.extractPackageFile(${packageFile})`);
 
   const deps = [
