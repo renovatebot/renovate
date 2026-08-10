@@ -1007,15 +1007,15 @@ export async function isBranchModified(
   }
   const { gitAuthorEmail, ignoredAuthors } = config;
 
-  const includedAuthors = new Set(committedAuthors);
-
-  // v8 ignore else -- TODO: add test #40625
-  if (gitAuthorEmail) {
-    includedAuthors.delete(gitAuthorEmail);
-  }
-
-  for (const ignoredAuthor of ignoredAuthors) {
-    includedAuthors.delete(ignoredAuthor);
+  const includedAuthors = new Set<string>();
+  for (const committedAuthor of committedAuthors) {
+    if (
+      committedAuthor !== gitAuthorEmail &&
+      !ignoredAuthors.includes(committedAuthor) &&
+      !matchRegexOrGlobList(committedAuthor, ignoredAuthors)
+    ) {
+      includedAuthors.add(committedAuthor);
+    }
   }
 
   for (const ignoredAuthor of platformIgnoredAuthors) {
