@@ -882,6 +882,8 @@ jobs:
         with:
           node-version: ${{ needs.setup-build.outputs.node-version }}
           os: ${{ runner.os }}
+          # ensure that the release job installs fresh, with installed pacakges verified against the lockfile's integrity hashes
+          use-cache: false
 
       - name: Install newer npm if needed
         run: 'dpkg --compare-versions "$(npm -v)" lt 11.5.1 && (npm update -g npm; echo "updated npm to: $(npm -v)") || echo "npm is new enough: $(npm -v)"'
@@ -902,7 +904,8 @@ jobs:
         uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
         with:
           version: 0.12.5
-          enable-cache: true
+          # ensure that the release job installs fresh, with installed pacakges verified against the lockfile's integrity hashes
+          enable-cache: false
           cache-python: true
 
       - name: Install uv dependencies

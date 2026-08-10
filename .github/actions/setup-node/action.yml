@@ -18,6 +18,12 @@ inputs:
     description: 'Save cache when needed'
     required: false
     default: 'false'
+  use-cache:
+    description: >-
+      Set to `false` to skip restoring the `node_modules` and pnpm store caches, forcing a fresh `pnpm install --frozen-lockfile`. Use this in
+      privileged jobs (e.g. release), so that they never execute cache contents.
+    required: false
+    default: 'true'
 runs:
   using: 'composite'
   steps:
@@ -53,6 +59,7 @@ runs:
 
     - name: Restore `node_modules`
       id: node-modules-restore
+      if: inputs.use-cache == 'true'
       uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
       with:
         path: node_modules
@@ -78,7 +85,7 @@ runs:
         echo "PNPM_STORE=$(pnpm store path)" >> "$GITHUB_ENV"
 
     - name: Cache and restore `pnpm store`
-      if: env.CACHE_HIT != 'true'
+      if: inputs.use-cache == 'true' && env.CACHE_HIT != 'true'
       uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
       with:
         path: ${{ env.PNPM_STORE }}
