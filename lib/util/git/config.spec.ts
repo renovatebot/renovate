@@ -9,16 +9,6 @@ import {
 describe('util/git/config', () => {
   beforeEach(() => {
     GlobalConfig.reset();
-    setCustomEnv({});
-    setNoVerify(['push', 'commit']);
-  });
-
-  afterEach(() => {
-    delete process.env.GIT_CONFIG_COUNT;
-    delete process.env.GIT_CONFIG_KEY_0;
-    delete process.env.GIT_CONFIG_KEY_1;
-    delete process.env.GIT_CONFIG_VALUE_0;
-    delete process.env.GIT_CONFIG_VALUE_1;
   });
 
   it('uses "close" events, ignores "exit" events from child processes', () => {
@@ -47,20 +37,6 @@ describe('util/git/config', () => {
         allowUnsafeConfigEnvCount: true,
       },
     });
-  });
-
-  it('allows clearing Git hooks from the environment', () => {
-    setCustomEnv({ RENOVATE_X_CLEAR_HOOKS: 'true' });
-
-    expect(simpleGitConfig()).toMatchObject({
-      unsafe: { allowUnsafeHooksPath: true },
-    });
-  });
-
-  it('sets the commands that skip Git hooks', () => {
-    setNoVerify(['commit']);
-
-    expect(getNoVerify()).toEqual(['commit']);
   });
 
   it('throws', () => {

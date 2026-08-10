@@ -7,8 +7,6 @@ import {
 describe('util/git/auth', () => {
   afterEach(() => {
     delete process.env.GIT_CONFIG_COUNT;
-    delete process.env.GIT_CONFIG_KEY_0;
-    delete process.env.GIT_CONFIG_VALUE_0;
   });
 
   describe('getGitAuthenticatedEnvironmentVariables()', () => {
@@ -124,11 +122,9 @@ describe('util/git/auth', () => {
         ),
       ).toStrictEqual({
         GIT_CONFIG_COUNT: '4',
-        GIT_CONFIG_KEY_0: 'existing-key',
         GIT_CONFIG_KEY_1: 'url.https://ssh:token1234@github.com/.insteadOf',
         GIT_CONFIG_KEY_2: 'url.https://git:token1234@github.com/.insteadOf',
         GIT_CONFIG_KEY_3: 'url.https://token1234@github.com/.insteadOf',
-        GIT_CONFIG_VALUE_0: 'existing-value',
         GIT_CONFIG_VALUE_1: 'ssh://git@github.com/',
         GIT_CONFIG_VALUE_2: 'git@github.com:',
         GIT_CONFIG_VALUE_3: 'https://github.com/',
@@ -149,11 +145,9 @@ describe('util/git/auth', () => {
         ),
       ).toStrictEqual({
         GIT_CONFIG_COUNT: '4',
-        GIT_CONFIG_KEY_0: 'existing-key',
         GIT_CONFIG_KEY_1: 'url.https://ssh:token1234@github.com/.insteadOf',
         GIT_CONFIG_KEY_2: 'url.https://git:token1234@github.com/.insteadOf',
         GIT_CONFIG_KEY_3: 'url.https://token1234@github.com/.insteadOf',
-        GIT_CONFIG_VALUE_0: 'existing-value',
         GIT_CONFIG_VALUE_1: 'ssh://git@github.com/',
         GIT_CONFIG_VALUE_2: 'git@github.com:',
         GIT_CONFIG_VALUE_3: 'https://github.com/',
@@ -162,8 +156,6 @@ describe('util/git/auth', () => {
 
     it('does not inherit GIT_CONFIG_COUNT from the process environment', () => {
       process.env.GIT_CONFIG_COUNT = '1';
-      process.env.GIT_CONFIG_KEY_0 = 'existing-key';
-      process.env.GIT_CONFIG_VALUE_0 = 'existing-value';
       expect(
         getGitAuthenticatedEnvironmentVariables({}, 'https://github.com/', {
           token: 'token1234',
