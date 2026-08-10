@@ -74,6 +74,18 @@ describe('modules/versioning/loose/index', () => {
   });
 
   it.each`
+    type       | a                               | b                               | expected
+    ${'major'} | ${'2026051723231779060202'}     | ${'2026051723231779060208'}     | ${false}
+    ${'major'} | ${'1.2026051723231779060202'}   | ${'1.2026051723231779060208'}   | ${true}
+    ${'minor'} | ${'1.2026051723231779060202'}   | ${'1.2026051723231779060208'}   | ${false}
+    ${'minor'} | ${'1.1.2026051723231779060202'} | ${'1.1.2026051723231779060208'} | ${true}
+    ${'patch'} | ${'1.1.2026051723231779060202'} | ${'1.1.2026051723231779060208'} | ${false}
+    ${'major'} | ${''}                           | ${'1'}                          | ${false}
+  `('isSame("$type", "$a", "$b") === $expected', ({ type, a, b, expected }) => {
+    expect(loose.isSame?.(type, a, b)).toBe(expected);
+  });
+
+  it.each`
     version    | expected
     ${'1.2.0'} | ${true}
   `('isCompatible("$version") === $expected', ({ version, expected }) => {

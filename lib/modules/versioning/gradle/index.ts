@@ -21,6 +21,12 @@ export const urls = [
 export const supportsRanges = true;
 export const supportedRangeStrategies: RangeStrategy[] = ['bump'];
 
+const sectionIndexes = {
+  major: 0,
+  minor: 1,
+  patch: 2,
+} as const;
+
 const equals = (a: string, b: string): boolean => compare(a, b) === 0;
 
 const getMajor = (version: string): number | null => {
@@ -69,6 +75,42 @@ const getPatch = (version: string): number | null => {
 };
 
 const isGreaterThan = (a: string, b: string): boolean => compare(a, b) === 1;
+
+function getExactSection(
+  version: string,
+  type: keyof typeof sectionIndexes,
+): bigint | null {
+  const tokens = parse(version.replace(regEx(/^v/i), ''));
+  if (!tokens) {
+    return null;
+  }
+  const sectionIndex = sectionIndexes[type];
+  if (sectionIndex === 0) {
+    const token = tokens[sectionIndex];
+    return token?.type === TokenType.Number && typeof token.val === 'bigint'
+      ? token.val
+      : null;
+  }
+
+  for (let index = 0; index <= sectionIndex; index += 1) {
+    if (tokens[index]?.type !== TokenType.Number) {
+      return 0n;
+    }
+  }
+
+  return BigInt(tokens[sectionIndex].val);
+}
+
+function isSame(
+  type: keyof typeof sectionIndexes,
+  a: string,
+  b: string,
+): boolean {
+  if (!(isVersion(a) && isVersion(b))) {
+    return false;
+  }
+  return getExactSection(a, type) === getExactSection(b, type);
+}
 
 const unstable = new Set([
   'dev',
@@ -260,6 +302,7 @@ export const api: VersioningApi = {
   isCompatible: isVersion,
   isGreaterThan,
   isSingleVersion: isVersion,
+  isSame,
   isStable,
   isValid,
   isVersion,
