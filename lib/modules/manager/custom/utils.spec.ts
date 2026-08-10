@@ -14,6 +14,16 @@ describe('modules/manager/custom/utils', () => {
       expect(dep.registryUrls).toEqual(['https://bar.example.com/bar']);
     });
 
+    it('doesnt replace in registryUrls when not present', () => {
+      const dep = partial<PackageDependency>({
+        registryUrls: ['https://foo.example.com/bar'],
+      });
+      utils.substituteRegistryAliases(dep, {
+        'https://replace.example.com': 'https://bar.example.com',
+      });
+      expect(dep.registryUrls).toEqual(['https://foo.example.com/bar']);
+    });
+
     it('replaces in packageName when registryUrls absent', () => {
       const dep = partial<PackageDependency>({
         packageName: 'foo/bar',
