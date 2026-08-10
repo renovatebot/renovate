@@ -44,6 +44,7 @@ import type { LookupUpdateConfig, UpdateResult } from './types.ts';
 import {
   addReplacementUpdateIfValid,
   isReplacementRulesConfigured,
+  resolveReplacementNameForAliases,
 } from './utils.ts';
 
 async function getTimestamp(
@@ -869,7 +870,13 @@ export async function lookupUpdates(
           ) {
             delete getDigestConfig.lookupName;
             delete getDigestConfig.currentDigest;
-            getDigestConfig.replacementName = update.newName;
+            // `update.newName` may itself start with a configured registryAlias (e.g. when set via
+            // `replacementName`/`replacementNameTemplate`), so resolve it before using it for the digest
+            // lookup. The unresolved alias form is still used everywhere else (e.g. the replaced string).
+            getDigestConfig.replacementName = resolveReplacementNameForAliases(
+              update.newName,
+              config.registryAliases,
+            );
           }
 
           // Don't use current releases if replacement changes name, otherwise we use the wrong new digest.

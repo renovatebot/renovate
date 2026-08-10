@@ -5931,6 +5931,47 @@ describe('workers/repository/process/lookup/index', () => {
       );
     });
 
+    it('handles replacements - resolves registryAliases when looking up new digest', async () => {
+      config.packageName = 'path/to/old-image';
+      config.currentDigest = 'sha256:fedcba0987654321';
+      config.currentValue = '3.0.26';
+      config.datasource = DockerDatasource.id;
+      config.versioning = dockerVersioningId;
+      config.registryAliases = {
+        $CI_REGISTRY: 'registry.internal-gitlab.tld',
+      };
+      config.replacementName = '$CI_REGISTRY/path/to/my/image-name';
+      config.replacementVersion = '4.0.0';
+      getDockerReleases.mockResolvedValueOnce({
+        releases: [{ version: '3.0.26' }],
+      });
+      getDockerDigest.mockResolvedValueOnce('sha256:abcdef1234567890');
+      // Digest for the unrelated (non-replacement) digest-pin check on the current value; unchanged so it's filtered out of the result.
+      getDockerDigest.mockResolvedValueOnce('sha256:fedcba0987654321');
+
+      const { updates } = await Result.wrap(
+        lookup.lookupUpdates(config),
+      ).unwrapOrThrow();
+
+      expect(updates).toEqual([
+        {
+          newDigest: 'sha256:abcdef1234567890',
+          newName: '$CI_REGISTRY/path/to/my/image-name',
+          newValue: '4.0.0',
+          newVersion: undefined,
+          updateType: 'replacement',
+        },
+      ]);
+
+      expect(getDockerDigest).toHaveBeenNthCalledWith(
+        1,
+        expect.objectContaining({
+          packageName: 'registry.internal-gitlab.tld/path/to/my/image-name',
+        }),
+        '4.0.0',
+      );
+    });
+
     it('handles replacements - skips if package and replacement names match', async () => {
       config.packageName = 'openjdk';
       config.currentValue = undefined;

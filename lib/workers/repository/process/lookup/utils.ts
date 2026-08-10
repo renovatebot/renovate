@@ -6,6 +6,21 @@ import * as allVersioning from '../../../../modules/versioning/index.ts';
 import * as template from '../../../../util/template/index.ts';
 import type { LookupUpdateConfig } from './types.ts';
 
+export function resolveReplacementNameForAliases(
+  replacementName: string | undefined,
+  registryAliases: Record<string, string> | undefined,
+): string | undefined {
+  if (!replacementName) {
+    return replacementName;
+  }
+  for (const [alias, value] of Object.entries(registryAliases ?? {})) {
+    if (replacementName === alias || replacementName.startsWith(`${alias}/`)) {
+      return value + replacementName.slice(alias.length);
+    }
+  }
+  return replacementName;
+}
+
 export function addReplacementUpdateIfValid(
   updates: LookupUpdate[],
   config: LookupUpdateConfig,
