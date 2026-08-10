@@ -709,7 +709,6 @@ jobs:
 
   build-docs:
     needs:
-      - lint-docs
       - setup-build
     runs-on: ubuntu-latest
     timeout-minutes: 5
