@@ -3,6 +3,7 @@ import type { SimpleGitOptions } from 'simple-git';
 import { GlobalConfig } from '../../config/global.ts';
 import { logger } from '../../logger/index.ts';
 import { getEnv } from '../env.ts';
+import type { ResolvedChildEnv } from '../exec/utils.ts';
 import type { GitNoVerifyOption } from './types.ts';
 
 let noVerify: GitNoVerifyOption[] = ['push', 'commit'];
@@ -50,38 +51,21 @@ export interface GitConfigEntry {
   value: string;
 }
 
-/**
- * Add runtime Git configuration entries to an environment without modifying
- * the supplied environment or losing entries inherited from the process.
- */
 export function addGitConfigEnvironmentVariables(
+  environment: Readonly<ResolvedChildEnv>,
   entries: readonly GitConfigEntry[],
-  environmentVariables?: NodeJS.ProcessEnv,
-): NodeJS.ProcessEnv {
-  const sourceEnvironment =
-    environmentVariables?.GIT_CONFIG_COUNT === undefined
-      ? getEnv()
-      : environmentVariables;
-  let gitConfigCount = getGitConfigCount(sourceEnvironment.GIT_CONFIG_COUNT);
-  const newEnvironmentVariables = { ...environmentVariables };
-
-  for (let index = 0; index < gitConfigCount; index++) {
-    copyExistingGitConfigEntry(
-      sourceEnvironment,
-      newEnvironmentVariables,
-      gitConfigCount,
-      index,
-    );
-  }
+): ResolvedChildEnv {
+  let gitConfigCount = getGitConfigCount(environment.GIT_CONFIG_COUNT);
+  const newEnvironment = { ...environment };
 
   for (const entry of entries) {
-    newEnvironmentVariables[`GIT_CONFIG_KEY_${gitConfigCount}`] = entry.key;
-    newEnvironmentVariables[`GIT_CONFIG_VALUE_${gitConfigCount}`] = entry.value;
+    newEnvironment[`GIT_CONFIG_KEY_${gitConfigCount}`] = entry.key;
+    newEnvironment[`GIT_CONFIG_VALUE_${gitConfigCount}`] = entry.value;
     gitConfigCount++;
   }
-  newEnvironmentVariables.GIT_CONFIG_COUNT = gitConfigCount.toString();
+  newEnvironment.GIT_CONFIG_COUNT = gitConfigCount.toString();
 
-  return newEnvironmentVariables;
+  return newEnvironment;
 }
 
 function getGitConfigCount(value: string | undefined): number {
@@ -99,43 +83,4 @@ function getGitConfigCount(value: string | undefined): number {
   }
 
   return gitConfigCount;
-}
-
-function copyExistingGitConfigEntry(
-  sourceEnvironment: NodeJS.ProcessEnv,
-  targetEnvironment: NodeJS.ProcessEnv,
-  gitConfigCount: number,
-  index: number,
-): void {
-  const keyVariable = `GIT_CONFIG_KEY_${index}`;
-  const valueVariable = `GIT_CONFIG_VALUE_${index}`;
-  targetEnvironment[keyVariable] = getExistingGitConfigVariable(
-    sourceEnvironment[keyVariable],
-    gitConfigCount,
-    index,
-    'key',
-  );
-  targetEnvironment[valueVariable] = getExistingGitConfigVariable(
-    sourceEnvironment[valueVariable],
-    gitConfigCount,
-    index,
-    'value',
-  );
-}
-
-function getExistingGitConfigVariable(
-  value: string | undefined,
-  gitConfigCount: number,
-  index: number,
-  kind: 'key' | 'value',
-): string {
-  if (value !== undefined) {
-    return value;
-  }
-
-  logger.once.warn(
-    { gitConfigCount, index, kind },
-    'Missing runtime Git configuration entry; setting it to an empty string',
-  );
-  return '';
 }

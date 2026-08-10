@@ -29,6 +29,9 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
 
     beforeEach(async () => {
       GlobalConfig.reset();
+      gitAuth.getGitEnvironmentVariables.mockImplementation((env) => ({
+        ...env,
+      }));
 
       tmpDir = await dir({ unsafeCleanup: true });
     });
@@ -1053,7 +1056,7 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
         'some-command',
         expect.objectContaining({
           cwd: localDir,
-          extraEnv: gitEnvVars,
+          env: gitEnvVars,
         }),
       );
       expect(res.artifactErrors).toHaveLength(0);
