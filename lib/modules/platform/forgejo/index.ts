@@ -296,7 +296,7 @@ export async function reattemptPlatformAutomerge({
     await tryPrAutomerge(number, platformPrOptions);
 
     logger.debug(`PR platform automerge re-attempted...prNo: ${number}`);
-  } catch (err) /* v8 ignore next -- defensive: automerge re-attempt failures are logged and swallowed, not simulated in specs */ {
+  } catch (err) {
     logger.warn({ err }, 'Error re-attempting PR platform automerge');
   }
 }
