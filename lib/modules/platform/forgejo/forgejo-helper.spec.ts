@@ -225,7 +225,9 @@ describe('modules/platform/forgejo/forgejo-helper', () => {
       // uses cached result
       expect(await isOrg(mockRepo.owner.login)).toEqual(true);
       expect(await isOrg('user')).toEqual(false);
-      await expect(isOrg('error')).rejects.toThrow();
+      await expect(isOrg('error')).rejects.toThrow(
+        'Request failed with status code 503 (Service Unavailable)',
+      );
     });
   });
 
@@ -265,7 +267,9 @@ describe('modules/platform/forgejo/forgejo-helper', () => {
         data: [],
       });
 
-      await expect(searchRepos({})).rejects.toThrow();
+      await expect(searchRepos({})).rejects.toThrow(
+        'Unable to search for repositories, ok flag has not been set',
+      );
     });
   });
 

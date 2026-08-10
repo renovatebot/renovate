@@ -16,6 +16,7 @@ import { NugetDatasource } from '../../datasource/nuget/index.ts';
 import { normalizePythonDepName } from '../../datasource/pypi/common.ts';
 import { PypiDatasource } from '../../datasource/pypi/index.ts';
 import { RubygemsDatasource } from '../../datasource/rubygems/index.ts';
+import * as semverVersioning from '../../versioning/semver/index.ts';
 import type { PackageDependency } from '../types.ts';
 import type { MiseToolOptions } from './schema.ts';
 
@@ -59,6 +60,9 @@ export function createCargoToolConfig(
     return {
       packageName: name,
       datasource: CrateDatasource.id,
+      // A mise tool version is a concrete version, not a Cargo dependency requirement,
+      // so the crate datasource default of cargo versioning does not apply
+      versioning: semverVersioning.id,
     };
   }
   // tag: branch: or rev: is required for git repository url

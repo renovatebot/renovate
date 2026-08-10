@@ -94,15 +94,13 @@ export function findSatisfyingVersion(
       const cleanedVersion = cleanVersion(versionFromList);
       const options = getOptions(range);
       const cleanRange = cleanVersion(range);
-      if (matchesWithOptions(cleanedVersion, cleanRange, options)) {
-        if (
-          !cur ||
-          semver.compare(curSV, versionFromList, options) === compareRt
-        ) {
-          cur = versionFromList;
-          curIndex = index;
-          curSV = new semver.SemVer(cur, options);
-        }
+      if (
+        matchesWithOptions(cleanedVersion, cleanRange, options) &&
+        (!cur || semver.compare(curSV, versionFromList, options) === compareRt)
+      ) {
+        cur = versionFromList;
+        curIndex = index;
+        curSV = new semver.SemVer(cur, options);
       }
     }
     index += 1;

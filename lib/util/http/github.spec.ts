@@ -308,6 +308,24 @@ describe('util/http/github', () => {
       expect(res.body).toEqual(['a', 'b', 'c', 'd', 'e']);
     });
 
+    it('does not follow pagination links to a different origin', async () => {
+      // If a misconfigured/malicious host suggests pagination links across origins, ignore them by default
+      // In this case, only the first page of results is fetched, and a warning message is logged
+      const url = '/some-url?per_page=2';
+      httpMock.scope(githubApiHost).get(url).reply(200, ['a', 'b'], {
+        link: `<https://attacker.example.com/some-url?per_page=2&page=2>; rel="next", <https://attacker.example.com/some-url?per_page=2&page=3>; rel="last"`,
+      });
+      const res = await githubApi.getJsonUnchecked(url, { paginate: true });
+      expect(res.body).toEqual(['a', 'b']);
+      expect(logger.logger.once.warn).toHaveBeenCalledWith(
+        {
+          requestHost: 'api.github.com',
+          paginationHost: 'attacker.example.com',
+        },
+        'Ignoring cross-origin GitHub pagination link. Set RENOVATE_X_REBASE_PAGINATION_LINKS if this is a self-hosted instance that returns a different host in pagination links.',
+      );
+    });
+
     describe('handleGotError', () => {
       it('should log a once warning for github.com 401', async () => {
         await expect(
@@ -319,7 +337,7 @@ describe('util/http/github', () => {
       });
       async function fail(
         code: number,
-        body: any = undefined,
+        body?: any,
         headers: httpMock.ReplyHeaders = {},
       ) {
         const url = '/some-url';
@@ -436,7 +454,7 @@ describe('util/http/github', () => {
       it('when the rate limit is exceeded to GitHub Enterprise, but no host rules are set, a warn is logged', async () => {
         async function fail(
           code: number,
-          body: any = undefined,
+          body?: any,
           headers: httpMock.ReplyHeaders = {},
         ) {
           const url = '/some-url';
@@ -470,7 +488,8 @@ describe('util/http/github', () => {
         ).rejects.toThrow(PLATFORM_RATE_LIMIT_EXCEEDED);
 
         expect(logger.logger.once.warn).toHaveBeenCalledWith(
-          'Rate limit exceeded for github.enterprise.example.com, as no hostRules set for this host',
+          { host: 'github.enterprise.example.com' },
+          'Rate limit exceeded, as no hostRules set for this host',
         );
       });
 
@@ -553,6 +572,24 @@ describe('util/http/github', () => {
         await expect(
           fail(422, {
             message: 'foobar',
+          }),
+        ).rejects.toThrow(EXTERNAL_HOST_ERROR);
+      });
+
+      it('should throw on repository change with a non-array error with code `invalid`', async () => {
+        await expect(
+          fail(422, {
+            message: 'foobar',
+            errors: { code: 'invalid' },
+          }),
+        ).rejects.toThrow(REPOSITORY_CHANGED);
+      });
+
+      it('should throw platform failure on 422 response with an unrecognized non-array errors', async () => {
+        await expect(
+          fail(422, {
+            message: 'foobar',
+            errors: 'Validation Failed',
           }),
         ).rejects.toThrow(EXTERNAL_HOST_ERROR);
       });

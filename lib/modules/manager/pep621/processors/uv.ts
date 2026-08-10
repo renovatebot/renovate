@@ -293,9 +293,8 @@ async function getUsernamePassword(
     const hostRule = await getGoogleAuthHostRule();
     if (hostRule) {
       return hostRule;
-    } else {
-      logger.once.debug({ url }, 'Could not get Google access token');
     }
+    logger.once.debug({ url }, 'Could not get Google access token');
   }
 
   return {};

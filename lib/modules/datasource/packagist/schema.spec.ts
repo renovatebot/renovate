@@ -72,12 +72,24 @@ describe('modules/datasource/packagist/schema', () => {
 
   describe('ComposerRelease', () => {
     it('rejects ComposerRelease', () => {
-      expect(() => ComposerRelease.parse(null)).toThrow();
-      expect(() => ComposerRelease.parse(undefined)).toThrow();
-      expect(() => ComposerRelease.parse('')).toThrow();
-      expect(() => ComposerRelease.parse({})).toThrow();
-      expect(() => ComposerRelease.parse({ version: null })).toThrow();
-      expect(() => ComposerRelease.parse({ version: null })).toThrow();
+      expect(() => ComposerRelease.parse(null)).toThrow(
+        'Invalid input: expected object, received null',
+      );
+      expect(() => ComposerRelease.parse(undefined)).toThrow(
+        'Invalid input: expected object, received undefined',
+      );
+      expect(() => ComposerRelease.parse('')).toThrow(
+        'Invalid input: expected object, received string',
+      );
+      expect(() => ComposerRelease.parse({})).toThrow(
+        'Invalid input: expected string, received undefined',
+      );
+      expect(() => ComposerRelease.parse({ version: null })).toThrow(
+        'Invalid input: expected string, received null',
+      );
+      expect(() => ComposerRelease.parse({ version: null })).toThrow(
+        'Invalid input: expected string, received null',
+      );
     });
 
     it('parses ComposerRelease', () => {

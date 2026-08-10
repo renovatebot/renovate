@@ -1118,6 +1118,124 @@ describe('modules/manager/github-actions/extract', () => {
         `;
       expect(extractPackageFile(yamlContent, 'action.yml')).toBeNull();
     });
+
+    it('extracts actions and with-version inputs nested in a parallel block', () => {
+      const yamlContent = codeBlock`
+        jobs:
+          build:
+            steps:
+              - uses: actions/checkout@v4
+              - parallel:
+                  - name: Setup Node.js
+                    uses: actions/setup-node@v5
+                    with:
+                      node-version: '20.0.0'
+                  - name: Setup Go
+                    uses: actions/setup-go@v5
+                    with:
+                      go-version: '1.23'
+              - run: npm test
+        `;
+
+      const res = extractPackageFile(yamlContent, 'workflow.yml');
+      expect(res?.deps).toMatchObject([
+        { depName: 'actions/checkout', depType: 'action' },
+        { depName: 'actions/setup-node', depType: 'action' },
+        { depName: 'actions/setup-go', depType: 'action' },
+        { depName: 'node', depType: 'uses-with', currentValue: '20.0.0' },
+        { depName: 'go', depType: 'uses-with', currentValue: '1.23' },
+      ]);
+    });
+
+    it('extracts community action with-inputs nested in a parallel block', () => {
+      const yamlContent = codeBlock`
+        jobs:
+          build:
+            steps:
+              - parallel:
+                  - uses: astral-sh/setup-uv@v8.2.0
+                    with:
+                      version: '0.4.x'
+        `;
+
+      const res = extractPackageFile(yamlContent, 'workflow.yml');
+      expect(res?.deps).toMatchObject([
+        { depName: 'astral-sh/setup-uv', depType: 'action' },
+        {
+          depName: 'astral-sh/uv',
+          depType: 'uses-with',
+          currentValue: '0.4.x',
+          datasource: 'github-releases',
+        },
+      ]);
+    });
+
+    it.each`
+      sha256                                                                | currentDigest
+      ${'dad54e0b843908324282b8673f9c0ebc3a4da0c49ad2da309a49bfbc918ba180'} | ${'dad54e0b843908324282b8673f9c0ebc3a4da0c49ad2da309a49bfbc918ba180'}
+      ${'DAD54E0B843908324282B8673F9C0EBC3A4DA0C49AD2DA309A49BFBC918BA180'} | ${undefined}
+      ${'${{ inputs.mise-sha256 }}'}                                        | ${undefined}
+      ${undefined}                                                          | ${undefined}
+    `(
+      'extracts the mise version and checksum from jdx/mise-action',
+      ({ sha256, currentDigest }) => {
+        const yamlContent = codeBlock`
+        jobs:
+          build:
+            steps:
+              - uses: jdx/mise-action@e6a8b3978addb5a52f2b4cd9d91eafa7f0ab959d # v4.2.0
+                with:
+                  version: 2026.7.10
+                  ${sha256 ? `sha256: ${sha256}` : ''}
+                  install_args: cargo:cargo-deny
+        `;
+
+        const res = extractPackageFile(yamlContent, 'workflow.yml');
+        expect(res?.deps).toMatchObject([
+          {
+            currentDigest: 'e6a8b3978addb5a52f2b4cd9d91eafa7f0ab959d',
+            currentValue: 'v4.2.0',
+            datasource: 'github-tags',
+            depName: 'jdx/mise-action',
+            depType: 'action',
+          },
+          {
+            ...(currentDigest ? { currentDigest } : {}),
+            currentValue: '2026.7.10',
+            datasource: 'github-release-attachments',
+            depName: 'jdx/mise',
+            depType: 'uses-with',
+            packageName: 'jdx/mise',
+          },
+        ]);
+      },
+    );
+
+    it('extracts steps nested in nested parallel blocks', () => {
+      const yamlContent = codeBlock`
+        jobs:
+          build:
+            steps:
+              - parallel:
+                  - name: Setup Node.js
+                    uses: actions/setup-node@v5
+                    with:
+                      node-version: '18.0.0'
+                  - parallel:
+                      - name: Setup Go
+                        uses: actions/setup-go@v5
+                        with:
+                          go-version: '1.22'
+        `;
+
+      const res = extractPackageFile(yamlContent, 'workflow.yml');
+      expect(res?.deps).toMatchObject([
+        { depName: 'actions/setup-node', depType: 'action' },
+        { depName: 'actions/setup-go', depType: 'action' },
+        { depName: 'node', depType: 'uses-with', currentValue: '18.0.0' },
+        { depName: 'go', depType: 'uses-with', currentValue: '1.22' },
+      ]);
+    });
   });
 
   it.each([
@@ -1296,6 +1414,202 @@ describe('modules/manager/github-actions/extract', () => {
     {
       step: {
         uses: 'pnpm/action-setup@v4',
+        with: {},
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'npm',
+          depName: 'pnpm',
+          depType: 'uses-with',
+          packageName: 'pnpm',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'pnpm/setup@v1',
+        with: {
+          version: '12.0.0',
+          runtime: 'node@24.1.0',
+        },
+      },
+      expected: [
+        {
+          currentValue: '12.0.0',
+          datasource: 'npm',
+          depName: 'pnpm',
+          depType: 'uses-with',
+          packageName: 'pnpm',
+        },
+        {
+          currentValue: '24.1.0',
+          datasource: 'node-version',
+          depName: 'node',
+          depType: 'uses-with',
+          packageName: 'node',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'pnpm/setup@v1',
+        with: {
+          install: false,
+          runtime: 'bun@1.2.x',
+        },
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'npm',
+          depName: 'pnpm',
+          depType: 'uses-with',
+          packageName: 'pnpm',
+        },
+        {
+          currentValue: '1.2.x',
+          datasource: 'npm',
+          depName: 'bun',
+          depType: 'uses-with',
+          packageName: 'bun',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'pnpm/setup@v1',
+        with: {
+          runtime: 'deno@2',
+        },
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'npm',
+          depName: 'pnpm',
+          depType: 'uses-with',
+          packageName: 'pnpm',
+        },
+        {
+          currentValue: '2',
+          datasource: 'npm',
+          depName: 'deno',
+          depType: 'uses-with',
+          packageName: 'deno',
+        },
+      ],
+    },
+    {
+      // no version pinned: the runtime version comes from `devEngines.runtime`
+      step: {
+        uses: 'pnpm/setup@v1',
+        with: {
+          runtime: 'node',
+        },
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'npm',
+          depName: 'pnpm',
+          depType: 'uses-with',
+          packageName: 'pnpm',
+        },
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'node-version',
+          depName: 'node',
+          depType: 'uses-with',
+          packageName: 'node',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'pnpm/setup@v1',
+        with: {
+          version: '12.0.0',
+          runtime: 'python@3.13',
+        },
+      },
+      expected: [
+        {
+          currentValue: '12.0.0',
+          datasource: 'npm',
+          depName: 'pnpm',
+          depType: 'uses-with',
+          packageName: 'pnpm',
+        },
+        {
+          skipStage: 'extract',
+          skipReason: 'invalid-name',
+          depName: 'python',
+          depType: 'uses-with',
+          packageName: 'python',
+        },
+      ],
+    },
+    {
+      // missing name: reported under the raw input
+      step: {
+        uses: 'pnpm/setup@v1',
+        with: {
+          runtime: '@24',
+        },
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'npm',
+          depName: 'pnpm',
+          depType: 'uses-with',
+          packageName: 'pnpm',
+        },
+        {
+          skipStage: 'extract',
+          skipReason: 'invalid-name',
+          depName: '@24',
+          depType: 'uses-with',
+          packageName: '@24',
+        },
+      ],
+    },
+    {
+      // the runtime is not a literal, so there's no name to resolve
+      step: {
+        uses: 'pnpm/setup@v1',
+        with: {
+          runtime: '${{ env.RUNTIME }}',
+        },
+      },
+      expected: [
+        {
+          skipStage: 'extract',
+          skipReason: 'unspecified-version',
+          datasource: 'npm',
+          depName: 'pnpm',
+          depType: 'uses-with',
+          packageName: 'pnpm',
+        },
+        {
+          skipStage: 'extract',
+          skipReason: 'invalid-name',
+          depName: '${{ env.RUNTIME }}',
+          depType: 'uses-with',
+          packageName: '${{ env.RUNTIME }}',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'pnpm/setup@v1',
         with: {},
       },
       expected: [
@@ -1885,6 +2199,36 @@ describe('modules/manager/github-actions/extract', () => {
           depName: 'sigoden/argc',
           depType: 'uses-with',
           packageName: 'sigoden/argc',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'sigstore/cosign-installer@v4.1.2',
+        with: { 'cosign-release': 'v3.1.2' },
+      },
+      expected: [
+        {
+          currentValue: 'v3.1.2',
+          datasource: 'github-releases',
+          depName: 'sigstore/cosign',
+          depType: 'uses-with',
+          packageName: 'sigstore/cosign',
+        },
+      ],
+    },
+    {
+      step: {
+        uses: 'UpCloudLtd/upcloud-cli-action@main',
+        with: { version: 'v3.35.0' },
+      },
+      expected: [
+        {
+          currentValue: 'v3.35.0',
+          datasource: 'github-releases',
+          depName: 'UpCloudLtd/upcloud-cli',
+          depType: 'uses-with',
+          packageName: 'UpCloudLtd/upcloud-cli',
         },
       ],
     },

@@ -43,6 +43,15 @@ describe('modules/platform/forgejo/schema', () => {
     expect(user.email).toBeUndefined();
   });
 
+  it('User forwards GitHub app style email addresses', () => {
+    const user = User.parse({
+      id: 1,
+      email: '211370388+foo[bot]@users.noreply.github.com',
+      login: 'user',
+    });
+    expect(user.email).toBe('211370388+foo[bot]@users.noreply.github.com');
+  });
+
   it('User keeps a valid email address', () => {
     const user = User.parse({
       id: 1,

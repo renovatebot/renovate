@@ -345,9 +345,9 @@ describe('util/http/index', () => {
     let bar = false;
     let baz = false;
 
-    const dummyResolve = (_: unknown): void => {
+    function dummyResolve(_: unknown): void {
       return;
-    };
+    }
 
     interface MockedRequestResponse<T = unknown> {
       request: Promise<T>;
@@ -356,7 +356,7 @@ describe('util/http/index', () => {
       resolveResponse: (_?: T) => void;
     }
 
-    const mockRequestResponse = (): MockedRequestResponse => {
+    function mockRequestResponse(): MockedRequestResponse {
       let resolveRequest = dummyResolve;
       const request = new Promise((resolve) => {
         resolveRequest = resolve;
@@ -368,7 +368,7 @@ describe('util/http/index', () => {
       });
 
       return { request, resolveRequest, response, resolveResponse };
-    };
+    }
 
     const {
       request: fooReq,
@@ -657,7 +657,7 @@ describe('util/http/index', () => {
           .get('/')
           .reply(200, JSON.stringify({ x: 2, y: 2 }));
 
-        const { body }: HttpResponse<string> = await http.getJson(
+        const { body }: HttpResponse = await http.getJson(
           'http://renovate.com',
           { headers: { accept: 'application/json' } },
           Some,
@@ -731,7 +731,7 @@ describe('util/http/index', () => {
           .post('/')
           .reply(200, JSON.stringify({ x: 2, y: 2 }));
 
-        const { body }: HttpResponse<string> = await http.postJson(
+        const { body }: HttpResponse = await http.postJson(
           'http://renovate.com',
           Some,
         );
@@ -841,7 +841,9 @@ describe('util/http/index', () => {
         .get('/')
         .reply(200, '!@#$%^');
 
-      await expect(http.getToml('http://renovate.com')).rejects.toThrow();
+      await expect(http.getToml('http://renovate.com')).rejects.toThrow(
+        'Invalid TOML',
+      );
     });
   });
 });
