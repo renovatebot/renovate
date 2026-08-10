@@ -23,6 +23,8 @@ export function substituteRegistryAliases(
 ): void {
   for (const [original, replace] of Object.entries(registryAliases ?? {})) {
     if (dep.registryUrls) {
+      // packageName and depName are not modified if registryUrls exist
+      // because registryUrls will be used instead of dep/packageName
       dep.registryUrls = dep.registryUrls.map((s) => {
         if (s.startsWith(original)) {
           return replace + s.slice(replace.length);
