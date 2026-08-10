@@ -104,6 +104,7 @@ async function prepareRawExec(
     const childEnv = getChildEnv(opts);
     const envVars = [
       ...dockerEnvVars(extraEnv, childEnv),
+      ...(docker.envVars ?? []),
       'CONTAINERBASE_CACHE_DIR',
     ];
     const cwd = getCwd(opts);

@@ -1,4 +1,4 @@
-import { mockExecAll } from '~test/exec-util.ts';
+import { exec, mockExecAll } from '~test/exec-util.ts';
 import { hostRules, partial } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import { ExecError } from '../../../util/exec/exec-error.ts';
@@ -6,7 +6,6 @@ import {
   localPathIsSymbolicLink,
   readLocalSymlink,
 } from '../../../util/fs/index.ts';
-import * as gitAuth from '../../../util/git/auth.ts';
 import { getRepoStatus } from '../../../util/git/index.ts';
 import type { StatusResult } from '../../../util/git/types.ts';
 import type { UpdateArtifact } from '../types.ts';
@@ -625,11 +624,7 @@ describe('modules/manager/hermit/artifacts', () => {
     });
 
     it('returns generic error when a non-UpdateHermitError propagates from updateHermitPackage', async () => {
-      vi.spyOn(gitAuth, 'getGitEnvironmentVariables').mockImplementationOnce(
-        () => {
-          throw new Error('unexpected auth failure');
-        },
-      );
+      mockExecAll(new Error('unexpected execution failure'));
 
       const res = await updateArtifacts(
         partial<UpdateArtifact>({
@@ -647,19 +642,17 @@ describe('modules/manager/hermit/artifacts', () => {
       expect(res).toStrictEqual([
         {
           artifactError: {
-            stderr: 'unexpected auth failure',
+            stderr: 'unexpected execution failure',
           },
         },
       ]);
     });
 
     it('stringifies non-Error thrown values in the generic fallback', async () => {
-      vi.spyOn(gitAuth, 'getGitEnvironmentVariables').mockImplementationOnce(
-        () => {
-          // eslint-disable-next-line @typescript-eslint/only-throw-error -- deliberately testing non-Error throw path
-          throw 'raw string failure';
-        },
-      );
+      exec.mockImplementationOnce(() => {
+        // eslint-disable-next-line @typescript-eslint/only-throw-error -- deliberately testing non-Error throw path
+        throw 'raw string failure';
+      });
 
       const res = await updateArtifacts(
         partial<UpdateArtifact>({

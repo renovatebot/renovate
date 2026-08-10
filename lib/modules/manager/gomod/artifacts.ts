@@ -7,7 +7,6 @@ import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
 import { coerceArray } from '../../../util/array.ts';
 import { getEnv } from '../../../util/env.ts';
-import { exec } from '../../../util/exec/index.ts';
 import type { ExecOptions } from '../../../util/exec/types.ts';
 import { filterMap } from '../../../util/filter-map.ts';
 import {
@@ -17,7 +16,7 @@ import {
   readLocalFile,
   writeLocalFile,
 } from '../../../util/fs/index.ts';
-import { getGitEnvironmentVariables } from '../../../util/git/auth.ts';
+import { withGitEnvironment } from '../../../util/git/exec.ts';
 import { getRepoStatus } from '../../../util/git/index.ts';
 import { regEx } from '../../../util/regex.ts';
 import { isValid } from '../../versioning/semver/index.ts';
@@ -30,6 +29,7 @@ import type {
 import { getExtraDepsNotice } from './artifacts-extra.ts';
 
 const { major, valid } = semver;
+const gitExec = withGitEnvironment(['go']);
 
 function getUpdateImportPathCmds(
   updatedDeps: PackageDependency[],
@@ -213,7 +213,6 @@ export async function updateArtifacts({
         /* v8 ignore next -- TODO: add test */
         GOFLAGS: useModcacherw(goConstraints) ? '-modcacherw' : null,
         CGO_ENABLED: GlobalConfig.get('binarySource') === 'docker' ? '0' : null,
-        ...getGitEnvironmentVariables(['go']),
       },
       docker: {},
       toolConstraints: [
@@ -349,7 +348,7 @@ export async function updateArtifacts({
       }
     }
 
-    await exec(execCommands, execOptions);
+    await gitExec(execCommands, execOptions);
 
     const status = await getRepoStatus();
     if (
