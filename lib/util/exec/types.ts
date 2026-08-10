@@ -56,6 +56,9 @@ export const toolDefinitions = [
     name: 'flux',
   },
   {
+    name: 'gh',
+  },
+  {
     name: 'gleam',
   },
   {
