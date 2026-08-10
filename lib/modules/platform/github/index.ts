@@ -27,6 +27,7 @@ import { isGithubFineGrainedPersonalAccessToken } from '../../../util/check-toke
 import { coerceToNull } from '../../../util/coerce.ts';
 import { parseJson } from '../../../util/common.ts';
 import { getEnv } from '../../../util/env.ts';
+import type { ResolvedChildEnv } from '../../../util/exec/utils.ts';
 import { getGitAuthenticatedEnvironmentVariables } from '../../../util/git/auth.ts';
 import { formatCommitMessage } from '../../../util/git/commit-trailers.ts';
 import * as git from '../../../util/git/index.ts';
@@ -784,19 +785,19 @@ export async function initRepo({
     url,
     upstreamUrl,
   };
-  let gitEnvironmentVariables: NodeJS.ProcessEnv = {};
+  let gitEnvironmentVariables: ResolvedChildEnv = {};
   if (authToken && isHttpUrl(url)) {
     gitEnvironmentVariables = getGitAuthenticatedEnvironmentVariables(
+      gitEnvironmentVariables,
       url,
       { token: authToken, hostType: 'github', matchHost: url },
-      gitEnvironmentVariables,
     );
   }
   if (authToken && upstreamUrl && isHttpUrl(upstreamUrl)) {
     gitEnvironmentVariables = getGitAuthenticatedEnvironmentVariables(
+      gitEnvironmentVariables,
       upstreamUrl,
       { token: authToken, hostType: 'github', matchHost: upstreamUrl },
-      gitEnvironmentVariables,
     );
   }
   if (isNonEmptyObject(gitEnvironmentVariables)) {

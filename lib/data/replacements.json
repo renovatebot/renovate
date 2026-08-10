@@ -39,6 +39,7 @@
       "replacements:opencost-registry-move",
       "replacements:parcel-css-to-lightningcss",
       "replacements:passport-saml",
+      "replacements:pwpush-to-universal-container",
       "replacements:react-query-devtools-to-scoped",
       "replacements:react-query-to-scoped",
       "replacements:react-scripts-ts-to-react-scripts",
@@ -987,6 +988,22 @@
         "matchPackageNames": ["passport-saml"],
         "replacementName": "@node-saml/passport-saml",
         "replacementVersion": "4.0.4"
+      }
+    ]
+  },
+  "pwpush-to-universal-container": {
+    "description": "Replace deprecated Password Pusher database-specific images with its universal image.",
+    "packageRules": [
+      {
+        "matchCurrentVersion": "1.35.0",
+        "matchDatasources": ["docker"],
+        "matchPackageNames": [
+          "/^(?:docker\\.io/)?pglombardo/pwpush-(?:ephemeral|mysql|postgres)$/"
+        ],
+        "prBodyNotes": [
+          "⚠️ Follow Password Pusher's [universal-container migration guide](https://docs.pwpush.com/docs/how-to-universal/) before merging. Back up the database and validate existing data after migration."
+        ],
+        "replacementName": "pglombardo/pwpush"
       }
     ]
   },
