@@ -304,7 +304,7 @@
     "description": "`dev-process-manager` became unscoped.",
     "packageRules": [
       {
-        "matchCurrentVersion": ">=2.0.0",
+        "matchCurrentVersion": ">=3.0.0",
         "matchDatasources": ["npm"],
         "matchPackageNames": ["@comet/dev-process-manager"],
         "replacementName": "dev-process-manager",
