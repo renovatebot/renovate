@@ -31,6 +31,12 @@ export const supportedRangeStrategies: RangeStrategy[] = [
   'replace',
 ];
 
+const sectionIndexes = {
+  major: 0,
+  minor: 1,
+  patch: 2,
+} as const;
+
 const equals = (a: string, b: string): boolean => compare(a, b) === 0;
 
 function matches(a: string, b: string): boolean {
@@ -112,6 +118,41 @@ const getPatch = (version: string): number | null => {
 
 const isGreaterThan = (a: string, b: string): boolean => compare(a, b) === 1;
 
+function getExactSection(
+  version: string,
+  type: keyof typeof sectionIndexes,
+): bigint | null {
+  const tokens = tokenize(version);
+  const sectionIndex = sectionIndexes[type];
+  const token = tokens[sectionIndex];
+
+  if (sectionIndex === 0) {
+    return token?.type === TYPE_NUMBER ? token.val : null;
+  }
+  if (sectionIndex === 1) {
+    return token?.type === TYPE_NUMBER ? token.val : 0n;
+  }
+
+  const minorToken = tokens[1];
+  return minorToken?.type === TYPE_NUMBER && token?.type === TYPE_NUMBER
+    ? token.val
+    : 0n;
+}
+
+function isSame(
+  type: keyof typeof sectionIndexes,
+  a: string,
+  b: string,
+): boolean {
+  if (!(isVersion(a) && isVersion(b))) {
+    return false;
+  }
+
+  const left = getExactSection(a, type);
+  const right = getExactSection(b, type);
+  return left === right;
+}
+
 const isStable = (version: string): boolean => {
   if (isVersion(version)) {
     const tokens = tokenize(version);
@@ -169,6 +210,7 @@ export const api: VersioningApi = {
   isCompatible: isVersion,
   isGreaterThan,
   isSingleVersion,
+  isSame,
   isStable,
   isValid,
   isVersion,

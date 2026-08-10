@@ -279,6 +279,27 @@ describe('modules/versioning/gradle/index', () => {
     });
   });
 
+  describe('isSame', () => {
+    it.each`
+      type       | a                               | b                               | expected
+      ${'major'} | ${'2026051723231779060202'}     | ${'2026051723231779060208'}     | ${false}
+      ${'major'} | ${'1.2026051723231779060202'}   | ${'1.2026051723231779060208'}   | ${true}
+      ${'minor'} | ${'1.2026051723231779060202'}   | ${'1.2026051723231779060208'}   | ${false}
+      ${'minor'} | ${'1.1.2026051723231779060202'} | ${'1.1.2026051723231779060208'} | ${true}
+      ${'minor'} | ${'1'}                          | ${'1.0'}                        | ${true}
+      ${'patch'} | ${'1.1.2026051723231779060202'} | ${'1.1.2026051723231779060208'} | ${false}
+      ${'major'} | ${'foobar'}                     | ${'foobar'}                     | ${true}
+      ${'major'} | ${'v'}                          | ${'v'}                          | ${true}
+      ${'major'} | ${'v'}                          | ${'v1'}                         | ${false}
+      ${'major'} | ${''}                           | ${'1'}                          | ${false}
+    `(
+      'isSame("$type", "$a", "$b") === $expected',
+      ({ type, a, b, expected }) => {
+        expect(api.isSame?.(type, a, b)).toBe(expected);
+      },
+    );
+  });
+
   describe('minSatisfyingVersion', () => {
     it.each`
       versions                  | range    | expected

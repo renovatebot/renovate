@@ -12,6 +12,12 @@ const versionPattern = regEx(/^[vV]?(\d+(?:\.\d+)*)(.*)$/);
 const commitHashPattern = regEx(/^[a-f0-9]{7,40}$/);
 const numericPattern = regEx(/^[0-9]+$/);
 
+const sectionIndexes = {
+  major: 0,
+  minor: 1,
+  patch: 2,
+} as const;
+
 interface LooseVersion extends GenericVersion {
   /** Full-precision release parts, used for comparison to avoid float rounding */
   releaseBig: bigint[];
@@ -78,6 +84,23 @@ class LooseVersioningApi extends GenericVersioningApi<LooseVersion> {
 
     // istanbul ignore next
     return 0;
+  }
+
+  override isSame(
+    type: keyof typeof sectionIndexes,
+    a: string,
+    b: string,
+  ): boolean {
+    const parsedA = this._parse(a);
+    const parsedB = this._parse(b);
+    if (!(parsedA && parsedB)) {
+      return false;
+    }
+
+    const sectionIndex = sectionIndexes[type];
+    return (
+      parsedA.releaseBig[sectionIndex] === parsedB.releaseBig[sectionIndex]
+    );
   }
 }
 
