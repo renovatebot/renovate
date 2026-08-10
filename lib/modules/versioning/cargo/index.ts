@@ -159,6 +159,24 @@ function getNewValue({
   return newCargo;
 }
 
+function subset(subRange: string, superRange: string): boolean | undefined {
+  try {
+    return npm.subset!(cargo2npm(subRange), cargo2npm(superRange));
+  } catch (err) {
+    logger.debug({ err }, 'cargo.subset error');
+    return false;
+  }
+}
+
+function intersects(subRange: string, superRange: string): boolean {
+  try {
+    return npm.intersects!(cargo2npm(subRange), cargo2npm(superRange));
+  } catch (err) {
+    logger.debug({ err }, 'cargo.intersects error');
+    return false;
+  }
+}
+
 function isBreaking(current: string, version: string): boolean {
   // The change may be breaking if either version is unstable
   if (!semver.is(version) || !semver.is(current)) {
@@ -188,5 +206,7 @@ export const api: VersioningApi = {
   matches,
   getSatisfyingVersion,
   minSatisfyingVersion,
+  subset,
+  intersects,
 };
 export default api;
