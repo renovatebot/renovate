@@ -475,6 +475,20 @@ describe('util/git/index', { timeout: 30000 }, () => {
       ).toBeFalse();
     });
 
+    it('should return false when author matches ignored regex with escaped brackets', async () => {
+      git.setUserRepoConfig({
+        gitIgnoredAuthors: [
+          '/renovate\\[bot\\]@users\\.noreply\\.github\\.com$/',
+        ],
+      });
+      expect(
+        await git.isBranchModified(
+          'renovate/custom_author_brackets',
+          defaultBranch,
+        ),
+      ).toBeFalse();
+    });
+
     it('should return true when author does not match ignored regex', async () => {
       git.setUserRepoConfig({
         gitIgnoredAuthors: ['/^other@example\\.com$/'],

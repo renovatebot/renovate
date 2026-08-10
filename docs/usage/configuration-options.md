@@ -2015,7 +2015,7 @@ If you have other bots which commit on top of Renovate PRs, and don't want Renov
 ```
 
 `gitIgnoredAuthors` values can be exact [RFC5322](https://datatracker.ietf.org/doc/html/rfc5322)-compliant email strings, glob patterns, or regex patterns.
-For more details on the syntax and supported patterns, see Renovate's [String Pattern Matching documentation](./string-pattern-matching.md).
+For more details on the syntax and supported patterns, see Renovate's [string pattern matching documentation](./string-pattern-matching.md).
 
 ## `gitLabIgnoreApprovals`
 
