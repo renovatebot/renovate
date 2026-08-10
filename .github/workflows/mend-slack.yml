@@ -16,8 +16,10 @@ jobs:
     steps:
       - name: Calculate time ago
         id: timeago
+        env:
+          CREATED_AT: ${{ github.event.discussion.created_at }}
         run: |
-          created_at="${{ github.event.discussion.created_at }}"
+          created_at="$CREATED_AT"
           created_epoch=$(date -d "$created_at" "+%s")
           now_epoch=$(date +%s)
           diff=$((now_epoch - created_epoch))
