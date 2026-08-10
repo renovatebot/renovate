@@ -2494,7 +2494,6 @@ describe('workers/repository/update/branch/index', () => {
         'echo semver',
         expect.objectContaining({
           cwd: '/localDir',
-          extraEnv: {},
         }),
       );
     });
@@ -2626,7 +2625,6 @@ describe('workers/repository/update/branch/index', () => {
         'echo some-dep-name-1',
         expect.objectContaining({
           cwd: '/localDir',
-          extraEnv: {},
         }),
       );
       expect(exec.exec).toHaveBeenNthCalledWith(
@@ -2634,7 +2632,6 @@ describe('workers/repository/update/branch/index', () => {
         'echo some-dep-name-2',
         expect.objectContaining({
           cwd: '/localDir',
-          extraEnv: {},
         }),
       );
       expect(exec.exec).toHaveBeenCalledTimes(2);
@@ -2783,7 +2780,6 @@ describe('workers/repository/update/branch/index', () => {
         'echo hardcoded-string',
         expect.objectContaining({
           cwd: '/localDir',
-          extraEnv: {},
         }),
       );
       expect(exec.exec).toHaveBeenCalledTimes(1);
@@ -2992,7 +2988,6 @@ describe('workers/repository/update/branch/index', () => {
           'echo hardcoded-string',
           expect.objectContaining({
             cwd: '/localDir',
-            extraEnv: {},
           }),
         );
         expect(exec.exec).toHaveBeenCalledTimes(1);

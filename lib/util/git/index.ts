@@ -95,35 +95,43 @@ const delayFactor = 2;
 
 export const RENOVATE_FORK_UPSTREAM = 'renovate-fork-upstream';
 
+interface CreateSimpleGitOptions {
+  config?: Partial<SimpleGitOptions>;
+  env?: ExtraEnv;
+  authentication?: {
+    hostTypes?: readonly string[];
+  };
+}
+
 export function createSimpleGit({
   config,
   env,
-}: {
-  config?: Partial<SimpleGitOptions>;
-  env?: ExtraEnv;
-} = {}): SimpleGit {
-  return simpleGit({ ...simpleGitConfig(), ...config }).env(
-    getChildEnv({
-      extraEnv: {
-        // Git will prompt for known hosts or passwords, unless we activate BatchMode.
-        // Set as extraEnv (lowest priority) so that process.env and
-        // customEnvVariables can override it.
-        GIT_SSH_COMMAND: 'ssh -o BatchMode=yes',
-      },
-      env: {
-        ...env,
-        // To ensure the simple-git parsers match correctly, we need
-        // to set the `LANG` and `LC_ALL` environment variables to
-        // the `C.UTF-8` locale. See the docs for more details:
-        // https://github.com/steveukx/git-js/blob/1bb14df0595794a9353d28ccdaeeb06c0b9bf2a5/docs/NON_ENGLISH_LOCALE.md
-        //
-        // Use "C.UTF-8" instead of just "C" (as specified in docs) to handle special characters:
-        // https://github.com/renovatebot/renovate/pull/18963
-        LANG: 'C.UTF-8',
-        LC_ALL: 'C.UTF-8',
-      },
-    }),
-  );
+  authentication,
+}: CreateSimpleGitOptions = {}): SimpleGit {
+  const childEnv = getChildEnv({
+    extraEnv: {
+      // Git will prompt for known hosts or passwords, unless we activate BatchMode.
+      // Set as extraEnv (lowest priority) so that process.env and
+      // customEnvVariables can override it.
+      GIT_SSH_COMMAND: 'ssh -o BatchMode=yes',
+    },
+    env: {
+      ...env,
+      // To ensure the simple-git parsers match correctly, we need
+      // to set the `LANG` and `LC_ALL` environment variables to
+      // the `C.UTF-8` locale. See the docs for more details:
+      // https://github.com/steveukx/git-js/blob/1bb14df0595794a9353d28ccdaeeb06c0b9bf2a5/docs/NON_ENGLISH_LOCALE.md
+      //
+      // Use "C.UTF-8" instead of just "C" (as specified in docs) to handle special characters:
+      // https://github.com/renovatebot/renovate/pull/18963
+      LANG: 'C.UTF-8',
+      LC_ALL: 'C.UTF-8',
+    },
+  });
+  const gitEnv = authentication
+    ? getGitEnvironmentVariables(childEnv, authentication.hostTypes)
+    : childEnv;
+  return simpleGit({ ...simpleGitConfig(), ...config }).env(gitEnv);
 }
 
 // A generic wrapper for simpleGit.* calls to make them more fault-tolerant
@@ -433,7 +441,7 @@ export async function cloneSubmodules(
     return;
   }
   submodulesInitizialized = true;
-  const gitEnv = getChildEnv({ env: getGitEnvironmentVariables() });
+  const gitEnv = getGitEnvironmentVariables(getChildEnv());
   await syncGit();
   const submodules = await getSubmodules();
   for (const submodule of submodules) {

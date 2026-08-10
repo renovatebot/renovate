@@ -204,6 +204,37 @@ describe('util/git/index', { timeout: 30000 }, () => {
     await base?.cleanup();
   });
 
+  describe('createSimpleGit()', () => {
+    it('adds authentication to the approved child environment', () => {
+      setCustomEnv({
+        GIT_CONFIG_COUNT: '1',
+        GIT_CONFIG_KEY_0: 'existing-key',
+        GIT_CONFIG_VALUE_0: 'existing-value',
+      });
+      const authenticatedEnv = {
+        GIT_CONFIG_COUNT: '4',
+        GIT_CONFIG_KEY_0: 'existing-key',
+        GIT_CONFIG_VALUE_0: 'existing-value',
+      };
+      auth.getGitEnvironmentVariables.mockReturnValue(authenticatedEnv);
+      const envSpy = vi.spyOn(SimpleGit.prototype, 'env');
+
+      git.createSimpleGit({
+        authentication: { hostTypes: ['git-refs'] },
+      });
+
+      expect(auth.getGitEnvironmentVariables).toHaveBeenCalledExactlyOnceWith(
+        expect.objectContaining({
+          GIT_CONFIG_COUNT: '1',
+          GIT_CONFIG_KEY_0: 'existing-key',
+          GIT_CONFIG_VALUE_0: 'existing-value',
+        }),
+        ['git-refs'],
+      );
+      expect(envSpy).toHaveBeenCalledWith(authenticatedEnv);
+    });
+  });
+
   describe('gitRetry', () => {
     it('returns result if git returns successfully', async () => {
       const gitFunc = vi.fn().mockImplementation((args) => {
