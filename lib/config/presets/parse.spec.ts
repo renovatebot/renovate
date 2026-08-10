@@ -698,6 +698,18 @@ describe('config/presets/parse', () => {
       });
     });
 
+    it('parses scoped npm preset with explicit `npm>` prefix', () => {
+      expect(parsePreset('npm>@myorg/renovate-config')).toEqual({
+        repo: '@myorg/renovate-config',
+        params: undefined,
+        rawParams: undefined,
+        presetName: 'default',
+        presetPath: undefined,
+        presetSource: 'npm',
+        tag: undefined,
+      });
+    });
+
     it.each`
       input               | presetSource | repo
       ${'npm>owner/repo'} | ${'local'}   | ${'owner/repo'}
