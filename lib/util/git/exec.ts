@@ -2,6 +2,7 @@ import { deduplicateArray } from '../array.ts';
 import { exec } from '../exec/index.ts';
 import type { ExecOptions } from '../exec/types.ts';
 import { getChildEnv } from '../exec/utils.ts';
+import { coerceObject } from '../object.ts';
 import { regEx } from '../regex.ts';
 import { getGitEnvironmentVariables } from './auth.ts';
 
@@ -50,5 +51,5 @@ export function withGitEnvironment(
   hostTypes: readonly string[] = [],
 ): typeof exec {
   return (command, execOptions) =>
-    exec(command, getGitExecOptions(execOptions ?? {}, hostTypes));
+    exec(command, getGitExecOptions(coerceObject(execOptions), hostTypes));
 }
