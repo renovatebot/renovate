@@ -155,7 +155,7 @@ function isSame(
   return left === right;
 }
 
-const isStable = (version: string): boolean => {
+function isStable(version: string): boolean {
   if (isVersion(version)) {
     const tokens = tokenize(version);
     for (const token of tokens) {
