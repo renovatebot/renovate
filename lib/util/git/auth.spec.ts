@@ -366,6 +366,7 @@ describe('util/git/auth', () => {
         GIT_CONFIG_VALUE_2: 'Authorization: Basic dG9rZW4xMjM0Og==',
       });
     });
+  });
 
   describe('getGitEnvironmentVariables()', () => {
     beforeEach(() => {
