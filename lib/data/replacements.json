@@ -12,6 +12,8 @@
       "replacements:containerbase",
       "replacements:cpx-to-maintenance-fork",
       "replacements:cucumber-to-scoped",
+      "replacements:dev-oidc-provider-to-unscoped",
+      "replacements:dev-process-manager-to-unscoped",
       "replacements:docker-compose",
       "replacements:edb-jdbc-to-enterprisedb",
       "replacements:eslint-config-standard-with-typescript-to-eslint-config-love",
@@ -284,6 +286,30 @@
         "matchPackageNames": ["cucumber"],
         "replacementName": "@cucumber/cucumber",
         "replacementVersion": "7.0.0"
+      }
+    ]
+  },
+  "dev-oidc-provider-to-unscoped": {
+    "description": "`dev-oidc-provider` became unscoped.",
+    "packageRules": [
+      {
+        "matchCurrentVersion": ">=1.0.0",
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["@comet/dev-oidc-provider"],
+        "replacementName": "dev-oidc-provider",
+        "replacementVersion": "2.0.0"
+      }
+    ]
+  },
+  "dev-process-manager-to-unscoped": {
+    "description": "`dev-process-manager` became unscoped.",
+    "packageRules": [
+      {
+        "matchCurrentVersion": ">=3.0.0",
+        "matchDatasources": ["npm"],
+        "matchPackageNames": ["@comet/dev-process-manager"],
+        "replacementName": "dev-process-manager",
+        "replacementVersion": "4.0.0"
       }
     ]
   },
