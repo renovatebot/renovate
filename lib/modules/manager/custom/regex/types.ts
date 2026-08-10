@@ -1,4 +1,5 @@
 import type { MatchStringsStrategy } from '../../../../config/types.ts';
+import type { ExtractConfig } from '../../types.ts';
 
 export interface ExtractionTemplate {
   groups: Record<string, string>;
@@ -23,6 +24,13 @@ export interface RegexManagerConfig extends RegexManagerTemplates {
   autoReplaceStringTemplate?: string;
 }
 
+export interface RegexExtractConfig
+  extends RegexManagerTemplates, ExtractConfig {
+  matchStrings: string[];
+  matchStringsStrategy?: MatchStringsStrategy;
+  autoReplaceStringTemplate?: string;
+}
+
 export interface PackageFileInfo {
   /** full package file path ie. dir/folder/package.json */
   packageFile: string;
@@ -35,9 +43,8 @@ export interface PackageFileInfo {
 export interface RecursionParameter {
   content: string;
   packageFileInfo: PackageFileInfo;
-  config: RegexManagerConfig;
+  config: RegexExtractConfig;
   regexes: RegExp[];
   index: number;
   combinedGroups: Record<string, string>;
-  registryAliases: Record<string, string> | undefined;
 }

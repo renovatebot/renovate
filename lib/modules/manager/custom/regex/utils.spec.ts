@@ -1,10 +1,10 @@
 import { partial } from '~test/util.ts';
 import { logger } from '../../../../logger/index.ts';
 import { regEx } from '../../../../util/regex.ts';
-import type { PackageFileInfo, RegexManagerConfig } from './types.ts';
+import type { PackageFileInfo, RegexExtractConfig } from './types.ts';
 import * as utils from './utils.ts';
 
-const baseConfig = partial<RegexManagerConfig>({ matchStrings: [] });
+const baseConfig = partial<RegexExtractConfig>({ matchStrings: [] });
 const baseFileInfo = partial<PackageFileInfo>({
   packageFile: 'file.txt',
   packageFileName: 'file.txt',
@@ -86,9 +86,11 @@ describe('modules/manager/custom/regex/utils', () => {
           groups: { depName: 'foo/bar' },
           replaceString: undefined,
         },
-        baseConfig,
+        {
+          registryAliases: { foo: 'baz' },
+          ...baseConfig,
+        },
         baseFileInfo,
-        { foo: 'baz' },
       );
       expect(dep?.packageName).toBe('baz/bar');
     });
@@ -99,9 +101,11 @@ describe('modules/manager/custom/regex/utils', () => {
           groups: { depName: 'foo/dep', packageName: 'foo/pkg' },
           replaceString: undefined,
         },
-        baseConfig,
+        {
+          registryAliases: { foo: 'baz' },
+          ...baseConfig,
+        },
         baseFileInfo,
-        { foo: 'baz' },
       );
       expect(dep?.packageName).toBe('baz/pkg');
     });
@@ -115,9 +119,11 @@ describe('modules/manager/custom/regex/utils', () => {
           },
           replaceString: undefined,
         },
-        baseConfig,
+        {
+          registryAliases: { 'https://foo': 'https://baz' },
+          ...baseConfig,
+        },
         baseFileInfo,
-        { 'https://foo': 'https://baz' },
       );
       expect(dep?.registryUrls).toEqual(['https://baz/']);
     });

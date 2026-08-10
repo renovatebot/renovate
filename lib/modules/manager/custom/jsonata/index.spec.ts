@@ -356,22 +356,14 @@ describe('modules/manager/custom/jsonata/index', () => {
       },
     };
     const res = await extractPackageFile('{}', 'unused', config);
-    expect({
-      registryAliases: {
-        old: 'new',
+    expect(res?.deps).toEqual([
+      {
+        depName: 'old/bar',
+        packageName: 'new/bar',
+        currentValue: '1.0.0',
+        datasource: 'npm',
       },
-      ...res,
-    }).toMatchObject({
-      ...config,
-      deps: [
-        {
-          depName: 'old/bar',
-          packageName: 'new/bar',
-          currentValue: '1.0.0',
-          datasource: 'npm',
-        },
-      ],
-    });
+    ]);
   });
 
   it('replace registryUrl with registryAliases', async () => {
@@ -386,22 +378,14 @@ describe('modules/manager/custom/jsonata/index', () => {
       },
     };
     const res = await extractPackageFile('{}', 'unused', config);
-    expect({
-      registryAliases: {
-        'https://old.registry': 'https://new.registry',
+    expect(res?.deps).toEqual([
+      {
+        depName: 'foo',
+        registryUrls: ['https://new.registry/'],
+        currentValue: '1.0.0',
+        datasource: 'npm',
       },
-      ...res,
-    }).toMatchObject({
-      ...config,
-      deps: [
-        {
-          depName: 'foo',
-          registryUrls: ['https://new.registry/'],
-          currentValue: '1.0.0',
-          datasource: 'npm',
-        },
-      ],
-    });
+    ]);
   });
 
   it('extracts other matchStrings if one finds no match', async () => {

@@ -12,7 +12,7 @@ import { validMatchFields } from '../utils.ts';
 import { handleAny, handleCombination, handleRecursive } from './strategies.ts';
 import type {
   PackageFileInfo,
-  RegexManagerConfig,
+  RegexExtractConfig,
   RegexManagerTemplates,
 } from './types.ts';
 
@@ -44,25 +44,13 @@ export function extractPackageFile(
   switch (config.matchStringsStrategy) {
     default:
     case 'any':
-      deps = handleAny(
-        config as RegexManagerConfig,
-        packageFileInfo,
-        config.registryAliases,
-      );
+      deps = handleAny(config as RegexExtractConfig, packageFileInfo);
       break;
     case 'combination':
-      deps = handleCombination(
-        config as RegexManagerConfig,
-        packageFileInfo,
-        config.registryAliases,
-      );
+      deps = handleCombination(config as RegexExtractConfig, packageFileInfo);
       break;
     case 'recursive':
-      deps = handleRecursive(
-        config as RegexManagerConfig,
-        packageFileInfo,
-        config.registryAliases,
-      );
+      deps = handleRecursive(config as RegexExtractConfig, packageFileInfo);
       break;
   }
 

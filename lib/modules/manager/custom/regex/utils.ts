@@ -9,7 +9,7 @@ import { substituteRegistryAliases, validMatchFields } from '../utils.ts';
 import type {
   ExtractionTemplate,
   PackageFileInfo,
-  RegexManagerConfig,
+  RegexExtractConfig,
   RegexManagerTemplates,
 } from './types.ts';
 
@@ -43,9 +43,8 @@ function updateDependency(
 
 export function createDependency(
   extractionTemplate: ExtractionTemplate,
-  config: RegexManagerConfig,
+  config: RegexExtractConfig,
   packageFileInfo: PackageFileInfo,
-  registryAliases: Record<string, string> | undefined,
   dep?: PackageDependency,
 ): PackageDependency | null {
   const dependency = dep ?? {};
@@ -75,7 +74,7 @@ export function createDependency(
     }
   }
   dependency.replaceString = replaceString;
-  substituteRegistryAliases(dependency, registryAliases);
+  substituteRegistryAliases(dependency, config.registryAliases);
   return dependency;
 }
 
