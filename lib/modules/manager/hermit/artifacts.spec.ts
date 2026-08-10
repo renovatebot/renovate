@@ -318,20 +318,34 @@ describe('modules/manager/hermit/artifacts', () => {
       ]);
     });
 
-    it('should fail if uninstallation fails', async () => {
-      lstatsMock.mockResolvedValue(true);
-
-      readlinkMock.mockResolvedValue(null);
-      GlobalConfig.set({ localDir: '', binarySource: 'global' });
-
-      mockExecAll(
-        new ExecError('', {
+    it.each([
+      {
+        name: 'returns an update error when uninstallation execution fails',
+        error: new ExecError('', {
           stdout: '',
           stderr: 'error executing hermit uninstall',
           cmd: '',
           options: {},
         }),
-      );
+        artifactError: {
+          fileName: 'from: openjdk-17.0.3, to: openjdk',
+          stderr: 'error executing hermit uninstall',
+        },
+      },
+      {
+        name: 'returns a generic error when uninstallation setup fails',
+        error: new Error('unexpected environment preparation failure'),
+        artifactError: {
+          stderr: 'unexpected environment preparation failure',
+        },
+      },
+    ])('$name', async ({ error, artifactError }) => {
+      lstatsMock.mockResolvedValue(true);
+
+      readlinkMock.mockResolvedValue(null);
+      GlobalConfig.set({ localDir: '', binarySource: 'global' });
+
+      mockExecAll(error);
 
       getRepoStatusMock.mockResolvedValue(
         partial<StatusResult>({
@@ -360,10 +374,7 @@ describe('modules/manager/hermit/artifacts', () => {
 
       expect(res).toEqual([
         {
-          artifactError: {
-            fileName: 'from: openjdk-17.0.3, to: openjdk',
-            stderr: 'error executing hermit uninstall',
-          },
+          artifactError,
         },
       ]);
     });
