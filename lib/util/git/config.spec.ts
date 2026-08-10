@@ -97,10 +97,9 @@ describe('util/git/config', () => {
 
   it('ignores an invalid Git configuration count', () => {
     expect(
-      addGitConfigEnvironmentVariables(
-        { GIT_CONFIG_COUNT: 'invalid' },
-        [{ key: 'new-key', value: 'new-value' }],
-      ),
+      addGitConfigEnvironmentVariables({ GIT_CONFIG_COUNT: 'invalid' }, [
+        { key: 'new-key', value: 'new-value' },
+      ]),
     ).toStrictEqual({
       GIT_CONFIG_COUNT: '1',
       GIT_CONFIG_KEY_0: 'new-key',
