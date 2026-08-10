@@ -1,8 +1,11 @@
 import { codeBlock } from 'common-tags';
 import { Fixtures } from '~test/fixtures.ts';
+import { fs } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import * as yaml from '../../../util/yaml.ts';
 import { extractPackageFile } from './index.ts';
+
+vi.mock('../../../util/fs/index.ts');
 
 const runnerTestWorkflowMacos = codeBlock`
 jobs:
@@ -2250,4 +2253,108 @@ describe('modules/manager/github-actions/extract', () => {
     );
   });
 
+  describe('actions.lock', () => {
+    const workflow = codeBlock`
+      jobs:
+        build:
+          steps:
+            - uses: actions/checkout@v4.3.1
+            - uses: docker://alpine:3.20
+    `;
+
+    const lockfile = codeBlock`
+      version: 'v0.0.2'
+      workflows:
+          '.github/workflows/ci.yml':
+              - 'actions/checkout@v4.3.1'
+    `;
+
+    it('marks digests as externally managed for an onboarded workflow', async () => {
+      fs.readLocalFile.mockResolvedValueOnce(lockfile);
+
+      const res = await extractPackageFile(
+        workflow,
+        '.github/workflows/ci.yml',
+      );
+
+      // `gh actions-lock` strips an inline pin back out, so the lookup must not offer one
+      expect(res?.deps).toMatchObject([
+        { depName: 'actions/checkout', digestManagedExternally: true },
+        { depName: 'alpine' },
+      ]);
+      // the lockfile only records `OWNER/REPO@REF` pins, so a `docker://` image is still ours to pin
+      expect(res?.deps[1]).not.toHaveProperty('digestManagedExternally');
+    });
+
+    it('leaves a workflow which is not onboarded alone', async () => {
+      fs.readLocalFile.mockResolvedValueOnce(lockfile);
+
+      // a repository can deliberately keep workflows out of the lockfile
+      const res = await extractPackageFile(
+        workflow,
+        '.github/workflows/not-onboarded.yml',
+      );
+
+      expect(res?.deps[0]).not.toHaveProperty('digestManagedExternally');
+    });
+
+    it.each`
+      packageFile
+      ${'workflow-templates/ci.yml'}
+      ${'.gitea/workflows/ci.yml'}
+      ${'.forgejo/workflows/ci.yml'}
+      ${'.gitea/actions/build/action.yml'}
+    `(
+      'leaves $packageFile alone, as the tool never reads it',
+      async ({ packageFile }: { packageFile: string }) => {
+        fs.readLocalFile.mockResolvedValueOnce(lockfile);
+
+        const res = await extractPackageFile(workflow, packageFile);
+
+        expect(res?.deps[0]).not.toHaveProperty('digestManagedExternally');
+      },
+    );
+
+    it('marks a local composite action, which the lockfile does not key', async () => {
+      fs.readLocalFile.mockResolvedValueOnce(lockfile);
+
+      // composite actions are transitive dependencies of onboarded workflows, so the tool rewrites them too
+      const res = await extractPackageFile(
+        workflow,
+        '.github/actions/build/action.yml',
+      );
+
+      expect(res?.deps[0].digestManagedExternally).toBe(true);
+    });
+
+    it('leaves digests alone when there is no lockfile', async () => {
+      fs.readLocalFile.mockResolvedValueOnce(null);
+
+      const res = await extractPackageFile(
+        workflow,
+        '.github/workflows/ci.yml',
+      );
+
+      expect(res?.deps[0]).not.toHaveProperty('digestManagedExternally');
+    });
+
+    it('leaves the digests to the tool when the lockfile cannot be parsed', async () => {
+      fs.readLocalFile.mockResolvedValueOnce('workflows: [a, b]');
+
+      const res = await extractPackageFile(
+        workflow,
+        '.github/workflows/ci.yml',
+      );
+
+      // `updateActionsLockfile` refuses to regenerate a lockfile it cannot parse, so pinning inline would leave the lockfile stale
+      expect(res?.deps[0].digestManagedExternally).toBe(true);
+    });
+
+    it('does not read the lockfile when nothing was extracted', async () => {
+      const res = await extractPackageFile('nothing: here', 'workflow.yml');
+
+      expect(res).toBeNull();
+      expect(fs.readLocalFile).not.toHaveBeenCalled();
+    });
+  });
 });

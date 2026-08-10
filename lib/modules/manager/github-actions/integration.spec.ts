@@ -9,6 +9,8 @@ import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
 import type { PackageDependency } from '../types.ts';
 import { extractPackageFile } from './index.ts';
 
+vi.mock('../../../util/fs/index.ts');
+
 describe('modules/manager/github-actions/integration', () => {
   const getGithubTags = vi.spyOn(GithubTagsDatasource.prototype, 'getReleases');
   const getGithubDigest = vi.spyOn(GithubTagsDatasource.prototype, 'getDigest');

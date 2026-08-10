@@ -131,6 +131,13 @@
       "datasourceTemplate": "github-releases",
       "packageNameTemplate": "containerbase/erlang-prebuild",
       "versioningTemplate": "loose"
+    },
+    {
+      "customType": "regex",
+      "managerFilePatterns": ["lib/config/options/index.ts"],
+      "matchStrings": ["ghActionsLock: '(?<currentValue>.*)'"],
+      "datasourceTemplate": "github-releases",
+      "packageNameTemplate": "github/gh-actions-lock"
     }
   ]
 }

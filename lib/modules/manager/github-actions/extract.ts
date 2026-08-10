@@ -2,6 +2,7 @@ import is from '@sindresorhus/is';
 import { GlobalConfig } from '../../../config/global.ts';
 import { logger, withMeta } from '../../../logger/index.ts';
 import { detectPlatform } from '../../../util/common.ts';
+import { readLocalFile } from '../../../util/fs/index.ts';
 import { newlineRegex, regEx } from '../../../util/regex.ts';
 import { parseUrl } from '../../../util/url.ts';
 import { ForgejoTagsDatasource } from '../../datasource/forgejo-tags/index.ts';
@@ -21,10 +22,11 @@ import type {
   PackageDependency,
   PackageFileContent,
 } from '../types.ts';
+import { actionsLockFile, isLockfileManaged } from './common.ts';
 import type { DockerReference, RepositoryReference } from './parse.ts';
 import { isSha, isShortSha, parseUsesLine, versionLikeRe } from './parse.ts';
 import type { UsesStep } from './schema.ts';
-import { CommunityActions, Workflow } from './schema.ts';
+import { ActionsLockfile, CommunityActions, Workflow } from './schema.ts';
 
 // detects if we run against a Github Enterprise Server and adds the URL to the beginning of the registryURLs for looking up Actions
 // This reflects the behavior of how GitHub looks up Actions
@@ -354,6 +356,28 @@ function extractWithYAMLParser(
   return deps;
 }
 
+/**
+ * Whether `gh actions-lock` owns the digests in this file.
+ *
+ * It rewrites the workflows it manages back to plain refs when regenerating, so an inline digest pin would be stripped straight back out.
+ */
+async function isManagedByLockfile(packageFile: string): Promise<boolean> {
+  const content = await readLocalFile(actionsLockFile, 'utf8');
+  if (!content) {
+    return false;
+  }
+
+  const parsed = ActionsLockfile.safeParse(content);
+  if (!parsed.success) {
+    // `updateActionsLockfile` warns about this once per branch, so stay quiet.
+    // It refuses to regenerate a lock file which it cannot parse, so treat everything as managed: pinning inline here would raise a PR which pins the digests the tool owns and leaves the lock file stale.
+    logger.debug(`Failed to parse ${actionsLockFile}`);
+    return true;
+  }
+
+  return isLockfileManaged(packageFile, parsed.data.workflows ?? {});
+}
+
 export async function extractPackageFile(
   content: string,
   packageFile: string,
@@ -370,5 +394,17 @@ export async function extractPackageFile(
     return null;
   }
 
-  return { deps };
+  const res: PackageFileContent = { deps };
+
+  if (await isManagedByLockfile(packageFile)) {
+    // Deliberately no `lockFiles`: nothing here goes through `updateArtifacts`, and `matchFileNames` also tests `lockFiles`, so declaring it would make a negated rule such as `!.github/workflows/release.yml` match every workflow through the lock file path.
+    for (const dep of deps) {
+      // The lock file only records `OWNER/REPO@REF` pins, so a `docker://` image in a `uses:` is still ours to pin.
+      if (dep.depType === 'action') {
+        dep.digestManagedExternally = true;
+      }
+    }
+  }
+
+  return res;
 }

@@ -68,6 +68,19 @@ export const Workflow = Yaml.pipe(
   z.union([WorkFlowJobs, Actions, z.null()]),
 ).catch(withDebugMessage(null, 'Does not match schema'));
 
+/**
+ * The `actions.lock` schema is owned by the `gh actions-lock` CLI, and is still unstable, so don't rely on the structure too heavily.
+ *
+ * If `workflows` is reshaped/removed, we fail loudly to silently prevent lockfile updates.
+ *
+ * TODO #45191: after v1 of the schema, make this Typescript only
+ */
+export const ActionsLockfile = Yaml.pipe(
+  z.object({
+    workflows: z.record(z.string(), z.unknown()).optional(),
+  }),
+);
+
 export const CommunityActions = z.union(
   Object.entries(communityActions).map(([name, cfg]) =>
     actionSchema(name, cfg),
