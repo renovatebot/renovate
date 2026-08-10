@@ -499,7 +499,7 @@ jobs:
         with:
           use_oidc: true
           directory: coverage/lcov
-          fail_ci_if_error: github.event_name != 'pull_request'
+          fail_ci_if_error: ${{ github.event_name != 'pull_request' }}
           verbose: true
 
   coverage-threshold:
