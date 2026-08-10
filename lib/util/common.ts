@@ -158,11 +158,10 @@ export function getInheritedOrGlobal<Key extends keyof GlobalInheritableConfig>(
     if (
       key === 'onboardingAutoCloseAge' &&
       isNumber(inheritedValue) &&
-      isNumber(globalValue)
+      isNumber(globalValue) &&
+      globalValue < inheritedValue
     ) {
-      if (globalValue < inheritedValue) {
-        return globalValue;
-      }
+      return globalValue;
     }
 
     return inheritedValue;

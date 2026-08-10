@@ -1,7 +1,7 @@
 import rpm from './index.ts';
 
 describe('modules/versioning/rpm/index', () => {
-  test.each`
+  it.each`
     version                                        | expected
     ${'1.1'}                                       | ${true}
     ${'1.3.RC2'}                                   | ${true}
@@ -59,7 +59,7 @@ describe('modules/versioning/rpm/index', () => {
     expect(rpm.isValid(version)).toBe(expected);
   });
 
-  test.each`
+  it.each`
     a                         | b                        | expected
     ${''}                     | ${''}                    | ${true}
     ${'~a'}                   | ${'~~'}                  | ${false}
@@ -92,7 +92,7 @@ describe('modules/versioning/rpm/index', () => {
     expect(rpm.equals(a, b)).toBe(expected);
   });
 
-  test.each`
+  it.each`
     a                      | b                      | expected
     ${'2.4.0'}             | ${'2.4'}               | ${true}
     ${'2.4.2'}             | ${'2.4.1'}             | ${true}
@@ -148,7 +148,7 @@ describe('modules/versioning/rpm/index', () => {
     expect(rpm.isGreaterThan(a, b)).toBe(expected);
   });
 
-  test.each`
+  it.each`
     version              | expected
     ${'v1.3.0'}          | ${1}
     ${'2-0-1'}           | ${2}
@@ -161,7 +161,7 @@ describe('modules/versioning/rpm/index', () => {
     expect(rpm.getMajor(version)).toBe(expected);
   });
 
-  test.each`
+  it.each`
     version              | expected
     ${'v1.3.0'}          | ${3}
     ${'2-0-1'}           | ${0}
@@ -174,7 +174,7 @@ describe('modules/versioning/rpm/index', () => {
     expect(rpm.getMinor(version)).toBe(expected);
   });
 
-  test.each`
+  it.each`
     version              | expected
     ${'v1.3.0'}          | ${0}
     ${'2-0-1'}           | ${1}

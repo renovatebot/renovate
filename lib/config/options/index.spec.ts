@@ -146,6 +146,10 @@ describe('config/options/index', () => {
       'prBodyNotes', // prBodyNotes.map(note => template.compile(note, ...))
       'commands', // postUpgradeTasks.commands iterated and compiled
       'filePatterns', // bumpVersions.filePatterns iterated and compiled
+      'changelogUrl', // compiled via local var: template.compile(changelogUrl, ...)
+      'bumpType', // compiled via intermediate var rawBumpType
+      'matchStrings', // bumpVersions.matchStrings iterated and compiled
+      'transformTemplates', // customDatasources.transformTemplates iterated and compiled
     ];
     for (const name of indirectlyCompiled) {
       detectedOptions.add(name);

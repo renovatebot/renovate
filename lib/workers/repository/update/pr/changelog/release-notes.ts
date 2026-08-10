@@ -28,7 +28,10 @@ import type {
 const markdown = new MarkdownIt('zero');
 markdown.enable(['heading', 'lheading', 'fence']);
 
-const repositoriesToSkipMdFetching = ['facebook/react-native'];
+const repositoriesToSkipMdFetching = [
+  'facebook/react-native',
+  'react/react-native',
+];
 
 export async function getReleaseList(
   project: ChangeLogProject,
@@ -491,7 +494,8 @@ export async function addReleaseNotes(
 
   for (const v of input.versions) {
     let releaseNotes: ChangeLogNotes | null | undefined;
-    const cacheKey = `${cacheKeyPrefix}:${v.version}`;
+    const gitRefCachePart = v.gitRef ? `:${v.gitRef}` : '';
+    const cacheKey = `${cacheKeyPrefix}:${v.version}${gitRefCachePart}`;
     releaseNotes = await packageCache.get(cacheNamespace, cacheKey);
     releaseNotes ??= await getReleaseNotesMd(input.project, v);
     releaseNotes ??= await getReleaseNotes(input.project, v, config);
