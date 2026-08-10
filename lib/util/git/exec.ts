@@ -1,4 +1,4 @@
-import { deduplicateArray } from '../array.ts';
+import { coerceArray, deduplicateArray } from '../array.ts';
 import { exec } from '../exec/index.ts';
 import type { ExecOptions } from '../exec/types.ts';
 import { getChildEnv } from '../exec/utils.ts';
@@ -39,7 +39,7 @@ function getGitExecOptions(
       docker: {
         ...execOptions.docker,
         envVars: deduplicateArray([
-          ...(execOptions.docker.envVars ?? []),
+          ...coerceArray(execOptions.docker.envVars),
           ...gitConfigKeys,
         ]),
       },
