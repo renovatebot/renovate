@@ -14,7 +14,7 @@ export function resolveReplacementNameForAliases(
     return replacementName;
   }
   for (const [alias, value] of Object.entries(registryAliases ?? {})) {
-    if (replacementName === alias || replacementName.startsWith(`${alias}/`)) {
+    if (replacementName.startsWith(`${alias}/`)) {
       return value + replacementName.slice(alias.length);
     }
   }

@@ -68,12 +68,12 @@ describe('workers/repository/process/lookup/utils', () => {
       ).toBe('registry.example.com/foo/bar');
     });
 
-    it('resolves an exact alias match with no trailing path', () => {
+    it('does not resolve a bare alias with no trailing path', () => {
       expect(
         resolveReplacementNameForAliases('jfrogecosystem', {
           jfrogecosystem: 'some.jfrog.mirror',
         }),
-      ).toBe('some.jfrog.mirror');
+      ).toBe('jfrogecosystem');
     });
 
     it('does not partially match an alias that is a substring of another segment', () => {

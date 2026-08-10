@@ -7,6 +7,7 @@ import {
   getDatasourceFor,
   getDefaultVersioning,
 } from '../../../../modules/datasource/common.ts';
+import { DockerDatasource } from '../../../../modules/datasource/docker/index.ts';
 import type {
   GetDigestInputConfig,
   Release,
@@ -870,13 +871,20 @@ export async function lookupUpdates(
           ) {
             delete getDigestConfig.lookupName;
             delete getDigestConfig.currentDigest;
+            getDigestConfig.replacementName = update.newName;
+
             // `update.newName` may itself start with a configured registryAlias (e.g. when set via
             // `replacementName`/`replacementNameTemplate`), so resolve it before using it for the digest
             // lookup. The unresolved alias form is still used everywhere else (e.g. the replaced string).
-            getDigestConfig.replacementName = resolveReplacementNameForAliases(
-              update.newName,
-              config.registryAliases,
-            );
+            // `registryAliases` is repo-level config and its prefix-matching semantics are specific to
+            // registry-prefixed package names, so only apply it for the docker datasource
+            if (config.datasource === DockerDatasource.id) {
+              getDigestConfig.replacementName =
+                resolveReplacementNameForAliases(
+                  update.newName,
+                  config.registryAliases,
+                );
+            }
           }
 
           // Don't use current releases if replacement changes name, otherwise we use the wrong new digest.

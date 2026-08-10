@@ -5972,6 +5972,48 @@ describe('workers/repository/process/lookup/index', () => {
       );
     });
 
+    it('handles replacements - does not resolve registryAliases for non-docker datasources', async () => {
+      config.packageName = 'old-org/old-repo';
+      config.currentValue = 'v1.0.0';
+      config.currentDigest = 'digestOld';
+      config.datasource = GithubTagsDatasource.id;
+      config.registryAliases = {
+        'old-org': 'new-org',
+      };
+      config.replacementName = 'old-org/new-repo';
+      config.replacementVersion = 'v2.0.0';
+      getGithubTags.mockResolvedValueOnce({
+        releases: [{ version: 'v1.0.0' }],
+      });
+      const getGithubTagsDigest = vi.spyOn(
+        GithubTagsDatasource.prototype,
+        'getDigest',
+      );
+      getGithubTagsDigest.mockResolvedValueOnce('digest1234');
+      // Digest for the unrelated (non-replacement) digest-pin check on the current value; unchanged so it's filtered out of the result.
+      getGithubTagsDigest.mockResolvedValueOnce('digestOld');
+
+      const { updates } = await Result.wrap(
+        lookup.lookupUpdates(config),
+      ).unwrapOrThrow();
+
+      expect(updates).toEqual([
+        {
+          newDigest: 'digest1234',
+          newName: 'old-org/new-repo',
+          newValue: 'v2.0.0',
+          newVersion: undefined,
+          updateType: 'replacement',
+        },
+      ]);
+
+      expect(getGithubTagsDigest).toHaveBeenNthCalledWith(
+        1,
+        expect.objectContaining({ packageName: 'old-org/new-repo' }),
+        'v2.0.0',
+      );
+    });
+
     it('handles replacements - skips if package and replacement names match', async () => {
       config.packageName = 'openjdk';
       config.currentValue = undefined;
