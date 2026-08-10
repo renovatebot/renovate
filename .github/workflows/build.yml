@@ -359,7 +359,9 @@ jobs:
         with:
           persist-credentials: false
           show-progress: false
-          sparse-checkout: .github/workflows
+          # include local composite actions, so that actionlint validates
+          # their metadata, and zizmor audits them
+          sparse-checkout: .github/
 
       - name: Check workflow files
         uses: docker://rhysd/actionlint:1.7.12@sha256:b1934ee5f1c509618f2508e6eb47ee0d3520686341fec936f3b79331f9315667
