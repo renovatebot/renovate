@@ -11,7 +11,6 @@ import type {
   RepoGlobalConfig,
 } from '../../../config/types.ts';
 import * as git from '../../../util/git/index.ts';
-import * as hostRules from '../../../util/host-rules.ts';
 import type { Upgrade } from '../types.ts';
 import { updateDependency } from './index.ts';
 
@@ -24,8 +23,6 @@ const baseDir = `${import.meta.dirname}/__fixtures__`;
 describe('modules/manager/git-submodules/update', () => {
   beforeEach(() => {
     GlobalConfig.set({ localDir: baseDir });
-    // clear host rules
-    hostRules.clear();
     // clear environment variables
     process.env = {};
 
@@ -73,14 +70,9 @@ describe('modules/manager/git-submodules/update', () => {
       expect(update).toBe('');
     });
 
-    it('returns content on update and uses git environment variables', async () => {
+    it('requests Git authentication for submodule commands', async () => {
       gitMock.submoduleUpdate.mockResolvedValue('');
       gitMock.checkout.mockResolvedValue('');
-      hostRules.add({
-        hostType: 'github',
-        matchHost: 'github.com',
-        token: 'abc123',
-      });
 
       const update = await updateDependency({
         fileContent: '',
@@ -88,23 +80,18 @@ describe('modules/manager/git-submodules/update', () => {
         upgrade,
       });
       expect(update).toBe('');
-      const variables = {
-        GIT_CONFIG_COUNT: '3',
-        GIT_CONFIG_KEY_0: 'url.https://ssh:abc123@github.com/.insteadOf',
-        GIT_CONFIG_KEY_1: 'url.https://git:abc123@github.com/.insteadOf',
-        GIT_CONFIG_KEY_2: 'url.https://abc123@github.com/.insteadOf',
-        GIT_CONFIG_VALUE_0: 'ssh://git@github.com/',
-        GIT_CONFIG_VALUE_1: 'git@github.com:',
-        GIT_CONFIG_VALUE_2: 'https://github.com/',
-      };
       expect(createSimpleGit).toHaveBeenCalledTimes(2);
       expect(createSimpleGit).toHaveBeenNthCalledWith(1, {
         config: { baseDir },
-        env: variables,
+        authentication: {
+          hostTypes: ['git-tags', 'git-refs'],
+        },
       });
       expect(createSimpleGit).toHaveBeenNthCalledWith(2, {
         config: { baseDir: upath.join(baseDir, 'renovate') },
-        env: variables,
+        authentication: {
+          hostTypes: ['git-tags', 'git-refs'],
+        },
       });
     });
 
@@ -155,60 +142,6 @@ describe('modules/manager/git-submodules/update', () => {
       });
       expect(update).toBe('');
       expect(gitMock.subModule).toHaveBeenCalledTimes(0);
-    });
-
-    it('returns content on update and uses git environment variables for git-tags/git-refs', async () => {
-      gitMock.submoduleUpdate.mockResolvedValue('');
-      gitMock.checkout.mockResolvedValue('');
-      hostRules.add({
-        hostType: 'git-refs',
-        matchHost: 'gitrefs.com',
-        username: 'git-refs-user',
-        password: 'git-refs-password',
-      });
-      hostRules.add({
-        hostType: 'git-tags',
-        matchHost: 'gittags.com',
-        username: 'git-tags-user',
-        password: 'git-tags-password',
-      });
-
-      const update = await updateDependency({
-        fileContent: '',
-        packageFile: '.gitmodules',
-        upgrade,
-      });
-      expect(update).toBe('');
-      const variables = {
-        GIT_CONFIG_COUNT: '6',
-        GIT_CONFIG_KEY_0:
-          'url.https://git-refs-user:git-refs-password@gitrefs.com/.insteadOf',
-        GIT_CONFIG_KEY_1:
-          'url.https://git-refs-user:git-refs-password@gitrefs.com/.insteadOf',
-        GIT_CONFIG_KEY_2:
-          'url.https://git-refs-user:git-refs-password@gitrefs.com/.insteadOf',
-        GIT_CONFIG_KEY_3:
-          'url.https://git-tags-user:git-tags-password@gittags.com/.insteadOf',
-        GIT_CONFIG_KEY_4:
-          'url.https://git-tags-user:git-tags-password@gittags.com/.insteadOf',
-        GIT_CONFIG_KEY_5:
-          'url.https://git-tags-user:git-tags-password@gittags.com/.insteadOf',
-        GIT_CONFIG_VALUE_0: 'ssh://git@gitrefs.com/',
-        GIT_CONFIG_VALUE_1: 'git@gitrefs.com:',
-        GIT_CONFIG_VALUE_2: 'https://gitrefs.com/',
-        GIT_CONFIG_VALUE_3: 'ssh://git@gittags.com/',
-        GIT_CONFIG_VALUE_4: 'git@gittags.com:',
-        GIT_CONFIG_VALUE_5: 'https://gittags.com/',
-      };
-      expect(createSimpleGit).toHaveBeenCalledTimes(2);
-      expect(createSimpleGit).toHaveBeenNthCalledWith(1, {
-        config: { baseDir },
-        env: variables,
-      });
-      expect(createSimpleGit).toHaveBeenNthCalledWith(2, {
-        config: { baseDir: upath.join(baseDir, 'renovate') },
-        env: variables,
-      });
     });
   });
 });
