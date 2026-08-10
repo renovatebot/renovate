@@ -180,6 +180,13 @@ export interface PackageDependency<
   datasource?: string;
   deprecationMessage?: string;
   digestOneAndOnly?: boolean;
+  /**
+   * The digest for this dependency is managed externally (for instance in a lockfile) instead of alongside the package file's version,
+   * so Renovate must not pin the digest inline.
+   *
+   * As this is due to the package ecossytem/manager in use, this shouldn't be overridable by `packageRules`
+   */
+  digestManagedExternally?: boolean;
   fixedVersion?: string;
   currentVersion?: string;
   currentVersionTimestamp?: string;
