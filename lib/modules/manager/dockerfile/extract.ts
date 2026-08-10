@@ -192,7 +192,8 @@ export function getDep(
     const depName = currentFrom.slice(
       matchedWithSlash ? name.length + 1 : name.length,
     );
-    const valueWithSlash = ensureTrailingSlash(value);
+    // An empty alias value means "no registry prefix", i.e. Docker Hub.
+    const valueWithSlash = value ? ensureTrailingSlash(value) : '';
     const dep = getDep(`${valueWithSlash}${depName}`, false);
     // TODO: when the inner getDep strips a `library/` prefix (or similar)
     // the depName no longer starts with `valueWithSlash` and the alias-rooted

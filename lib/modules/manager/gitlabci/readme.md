@@ -19,7 +19,7 @@ If you use predefined GitLab CI variables like `CI_REGISTRY` or `CI_SERVER_FQDN`
 }
 ```
 
-Variables with default values (using the `:-` syntax) are also supported, which is useful for Docker Compose files or scripts:
+Variables with default values (using the `:-` syntax) are also supported:
 
 ```json
 {
@@ -29,7 +29,9 @@ Variables with default values (using the `:-` syntax) are also supported, which 
 }
 ```
 
-This supports both formats with and without slashes:
+Both image reference formats work:
 
-- `${DEPENDENCY_PROXY:-}/image:1.0`
-- `${DEPENDENCY_PROXY:-}image:1.0`
+- With a slash after the variable: `${CI_REGISTRY:-}/image:1.0`
+- Without a slash after the variable: `${CI_REGISTRY:-}image:1.0`
+
+The alias value works with or without a trailing slash.

@@ -4553,10 +4553,12 @@ This feature works with the following managers:
 }
 ```
 
-This example with default values supports both formats:
+Both image reference formats work:
 
-- Without slash in the variable: `${CI_REGISTRY:-}/image:1.0`
-- With slash in the variable: `${CI_REGISTRY:-}image:1.0`
+- With a slash after the variable: `${CI_REGISTRY:-}/image:1.0`
+- Without a slash after the variable: `${CI_REGISTRY:-}image:1.0`
+
+The alias value works with or without a trailing slash.
 
 If you are using a pull-through cache (for instance on Amazon Elastic Container Registry (ECR)):
 

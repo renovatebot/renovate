@@ -2,7 +2,7 @@ Extracts all Docker images from with Docker Compose YAML files.
 
 If you need to change the versioning format, read the [versioning](../../versioning/index.md) documentation to learn more.
 
-### Registry Aliases with Variable Defaults
+### Registry aliases with variable defaults
 
 Docker Compose files often use environment variables with default values:
 
@@ -22,7 +22,9 @@ To handle these variables, configure registry aliases with the default value syn
 }
 ```
 
-This works with both formats, regardless of whether the registry alias ends with a slash or not:
+Both image reference formats work:
 
-- Without slash in the variable: `${CI_REGISTRY:-}/image:1.0`
-- With slash in the variable: `${CI_REGISTRY:-}image:1.0`
+- With a slash after the variable: `${CI_REGISTRY:-}/image:1.0`
+- Without a slash after the variable: `${CI_REGISTRY:-}image:1.0`
+
+The alias value works with or without a trailing slash.
