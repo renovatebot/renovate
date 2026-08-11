@@ -1,5 +1,6 @@
 import type { z } from 'zod/v4';
 import * as httpMock from '~test/http-mock.ts';
+import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages.ts';
 import { getPkgReleases } from '../index.ts';
 import { OrbDatasource } from './index.ts';
 import type { OrbPackagesResponse } from './schema.ts';
@@ -8,7 +9,6 @@ const orbData: z.input<typeof OrbPackagesResponse> = {
   data: [
     {
       attributes: {
-        name: 'hutson/library-release-workflows',
         is_private: false,
       },
       references: {
@@ -135,6 +135,16 @@ describe('modules/datasource/orb/index', () => {
           packageName: 'hyper-expanse/library-release-workflows',
         }),
       ).toBeNull();
+    });
+
+    it('throws for 5xx', async () => {
+      httpMock.scope(baseUrl).get(packagesPath).query(packagesQuery).reply(502);
+      await expect(
+        getPkgReleases({
+          datasource,
+          packageName: 'hyper-expanse/library-release-workflows',
+        }),
+      ).rejects.toThrow(EXTERNAL_HOST_ERROR);
     });
 
     it('processes real data', async () => {
