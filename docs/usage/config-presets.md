@@ -292,12 +292,55 @@ Some more things to know about relative references:
   Relative references inside an `onboardingConfig` are canonicalized as well, including the inherited tag.
   This means an onboarded repository gets an absolute preset string like `github>org/repo//system/registries#v2.0.0`, which resolves from that repository.
 
-To ignore a relatively-referenced preset with `ignorePresets`, use the absolute preset string which Renovate resolved, including the inherited tag:
+### Ignoring relative references
+
+Renovate matches `ignorePresets` entries against the preset string which it resolved, and not against the relative reference which is written inside the preset.
+This means you must always use the absolute form, including the inherited tag.
+
+Take the repository from above.
+A repository which extends that catalog can skip `security/base.json` like this:
 
 ```json
 {
   "extends": ["github>org/repo#v2.0.0"],
-  "ignorePresets": ["github>org/repo//system/registries#v2.0.0"]
+  "ignorePresets": ["github>org/repo//security/base#v2.0.0"]
+}
+```
+
+This works at any depth, so a preset which is only reached through another preset, for example a `/security/base` reference inside `system/registries.json`, is skipped in the same way.
+
+Using the relative form does _not_ work, because the references are already resolved when the `ignorePresets` entries are matched:
+
+```json
+{
+  "extends": ["github>org/repo#v2.0.0"],
+  "ignorePresets": ["/security/base"]
+}
+```
+
+To find the absolute string of a preset, run Renovate with `LOG_LEVEL=debug` and read the `visitedPresets` field of the `Resolved shallow config, without merging internal presets` message.
+It lists every merged preset in its absolute form.
+
+A preset may also ignore the presets which it pulls in itself, and may use the relative form for that:
+
+```json
+{
+  "extends": ["./system/registries"],
+  "ignorePresets": ["/security/base"]
+}
+```
+
+!!! note
+  Renovate uses the `ignorePresets` of the repository config when there is one, and only falls back to the `ignorePresets` of a preset otherwise.
+  A preset can therefore only ignore its own references when the repository which extends it does not set `ignorePresets`.
+
+If a relative reference can not be resolved, for example because it escapes the repository root, then Renovate keeps the raw reference.
+Use that raw string to neutralize it:
+
+```json
+{
+  "extends": ["github>org/repo#v2.0.0"],
+  "ignorePresets": ["../oops"]
 }
 ```
 

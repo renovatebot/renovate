@@ -1,6 +1,7 @@
 import { isArray, isPlainObject, isString } from '@sindresorhus/is';
 import upath from 'upath';
 import { logger } from '../../logger/index.ts';
+import { coerceString } from '../../util/string.ts';
 import { isRelativePresetReference, parsePreset } from './parse.ts';
 import type { ParsedPreset } from './types.ts';
 import { PRESET_RELATIVE_OUTSIDE_REPO } from './util.ts';
@@ -27,7 +28,7 @@ function resolveRelativePreset(input: string, parent: ParsedPreset): string {
   } else {
     // relative to the directory of the preset file which references it
     resolved = upath.normalize(
-      upath.join(parent.presetPath ?? '', parsed.presetName),
+      upath.join(coerceString(parent.presetPath), parsed.presetName),
     );
   }
 
