@@ -32,17 +32,26 @@ import {
   PRESET_PROHIBITED_SUBPRESET,
   PRESET_RELATIVE_NO_PARENT,
   PRESET_RENOVATE_CONFIG_NOT_FOUND,
-  REPO_HOSTED_PRESET_SOURCES,
 } from './util.ts';
 
-const presetSourceLoaders: Record<string, () => Promise<PresetApi>> = {
-  forgejo: () => import('./forgejo/index.ts'),
-  gitea: () => import('./gitea/index.ts'),
-  github: () => import('./github/index.ts'),
-  gitlab: () => import('./gitlab/index.ts'),
-  http: () => import('./http/index.ts'),
-  local: () => import('./local/index.ts'),
-  npm: () => import('./npm/index.ts'),
+interface PresetSource {
+  load: () => Promise<PresetApi>;
+
+  /**
+   * Whether presets from this source are hosted in a repository, which is what
+   * allows them to reference other presets relatively.
+   */
+  repoHosted: boolean;
+}
+
+const presetSources: Record<string, PresetSource> = {
+  forgejo: { load: () => import('./forgejo/index.ts'), repoHosted: true },
+  gitea: { load: () => import('./gitea/index.ts'), repoHosted: true },
+  github: { load: () => import('./github/index.ts'), repoHosted: true },
+  gitlab: { load: () => import('./gitlab/index.ts'), repoHosted: true },
+  http: { load: () => import('./http/index.ts'), repoHosted: false },
+  local: { load: () => import('./local/index.ts'), repoHosted: true },
+  npm: { load: () => import('./npm/index.ts'), repoHosted: false },
 };
 
 const presetCacheNamespace = 'preset';
@@ -144,7 +153,7 @@ export async function getPreset(
     }
 
     if (isNullOrUndefined(presetConfig)) {
-      const source = await presetSourceLoaders[presetSource]();
+      const source = await presetSources[presetSource].load();
       presetConfig = await source.getPreset({
         repo,
         presetPath,
@@ -194,7 +203,7 @@ export async function getPreset(
   }
   const { migratedConfig } = migration.migrateConfig(presetConfig);
   const massagedConfig = massage.massageConfig(migratedConfig);
-  if (REPO_HOSTED_PRESET_SOURCES.includes(parsedPreset.presetSource)) {
+  if (presetSources[parsedPreset.presetSource]?.repoHosted) {
     // only presets which are hosted in a repository can contain relative
     // references, in all other presets they are left as they are and fail
     // when they are resolved
