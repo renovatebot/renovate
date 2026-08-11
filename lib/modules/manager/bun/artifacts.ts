@@ -49,19 +49,18 @@ export async function updateArtifacts(
     return null;
   }
 
-  const pkgFileDir = upath.dirname(packageFileName);
-  const originalNpmrcContent = await getNpmrcContent(pkgFileDir);
+  const lockFileDir = upath.dirname(lockFileName);
+  const originalNpmrcContent = await getNpmrcContent(lockFileDir);
   const { npmrc, npmrcFileName } = await resolveNpmrc(packageFileName, config);
-  // Use the resolved npmrc unless it came from a parent directory, so a
-  // workspace .npmrc is not materialized into the package directory
+  // Use the resolved npmrc unless it came from outside the lockfile directory.
   const baseNpmrcContent =
     isString(npmrc) &&
-    (!npmrcFileName || npmrcFileName === upath.join(pkgFileDir, '.npmrc'))
+    (!npmrcFileName || npmrcFileName === upath.join(lockFileDir, '.npmrc'))
       ? npmrc
       : originalNpmrcContent;
   const { additionalNpmrcContent } = processHostRules();
   await updateNpmrcContent(
-    pkgFileDir,
+    lockFileDir,
     originalNpmrcContent,
     additionalNpmrcContent,
     baseNpmrcContent,
@@ -91,7 +90,7 @@ export async function updateArtifacts(
     };
 
     await exec(cmd, execOptions);
-    await resetNpmrcContent(pkgFileDir, originalNpmrcContent);
+    await resetNpmrcContent(lockFileDir, originalNpmrcContent);
 
     const newLockFileContent = await readLocalFile(lockFileName);
     if (
@@ -114,7 +113,7 @@ export async function updateArtifacts(
       throw err;
     }
     logger.warn({ lockfile: lockFileName, err }, `Failed to update lock file`);
-    await resetNpmrcContent(pkgFileDir, originalNpmrcContent);
+    await resetNpmrcContent(lockFileDir, originalNpmrcContent);
     return [
       {
         artifactError: {

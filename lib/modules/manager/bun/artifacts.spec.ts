@@ -137,8 +137,11 @@ describe('modules/manager/bun/artifacts', () => {
         );
       });
 
-      it('does not materialize a workspace npmrc from a parent directory', async () => {
+      it('writes a workspace npmrc beside the root lockfile', async () => {
         updateArtifact.packageFileName = 'packages/workspace-a/package.json';
+        updateArtifact.config.npmrc =
+          '@scope:registry=https://registry.example.com/';
+        updateArtifact.config.npmrcMerge = true;
         updateArtifact.updatedDeps = [
           { manager: 'bun', lockFiles: ['bun.lockb'] },
         ];
@@ -158,8 +161,12 @@ describe('modules/manager/bun/artifacts', () => {
 
         await updateArtifacts(updateArtifact);
 
-        expect(fs.outputFile).not.toHaveBeenCalledWith(
+        expect(fs.outputFile).toHaveBeenCalledWith(
           expect.stringMatching(/[/\\]\.npmrc$/),
+          '@scope:registry=https://registry.example.com/\nregistry=https://registry.example.com/\n',
+        );
+        expect(fs.outputFile).not.toHaveBeenCalledWith(
+          expect.stringMatching(/workspace-a[/\\]\.npmrc$/),
           expect.anything(),
         );
       });
