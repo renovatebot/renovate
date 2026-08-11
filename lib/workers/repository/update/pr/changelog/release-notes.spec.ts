@@ -1,7 +1,6 @@
 import { GitObjectType } from 'azure-devops-node-api/interfaces/GitInterfaces.js';
 import { DateTime } from 'luxon';
 import { Fixtures } from '~test/fixtures.ts';
-import { hostRules } from '~test/host-rules.ts';
 import * as httpMock from '~test/http-mock.ts';
 import { hostRules, partial } from '~test/util.ts';
 import * as azureHelper from '../../../../../modules/platform/azure/azure-helper.ts';
