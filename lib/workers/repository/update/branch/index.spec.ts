@@ -13,6 +13,7 @@ import {
   REPOSITORY_CHANGED,
 } from '../../../../constants/error-messages.ts';
 import { logger } from '../../../../logger/index.ts';
+import * as _githubActionsArtifacts from '../../../../modules/manager/github-actions/artifacts.ts';
 import * as _npmPostExtract from '../../../../modules/manager/npm/post-update/index.ts';
 import type { WriteExistingFilesResult } from '../../../../modules/manager/npm/post-update/types.ts';
 import type { ArtifactError } from '../../../../modules/manager/types.ts';
@@ -53,6 +54,7 @@ vi.mock('./get-updated.ts');
 vi.mock('./schedule.ts');
 vi.mock('./check-existing.ts');
 vi.mock('./reuse.ts');
+vi.mock('../../../../modules/manager/github-actions/artifacts.ts');
 vi.mock('../../../../modules/manager/npm/post-update/index.ts');
 vi.mock('./automerge.ts');
 vi.mock('./commit.ts');
@@ -71,6 +73,7 @@ const schedule = vi.mocked(_schedule);
 const checkExisting = vi.mocked(_checkExisting);
 const reuse = vi.mocked(_reuse);
 const npmPostExtract = vi.mocked(_npmPostExtract);
+const githubActionsArtifacts = vi.mocked(_githubActionsArtifacts);
 const automerge = vi.mocked(_automerge);
 const commit = vi.mocked(_commit);
 const mergeConfidence = vi.mocked(_mergeConfidence);
@@ -112,6 +115,10 @@ describe('workers/repository/update/branch/index', () => {
     };
 
     beforeEach(() => {
+      githubActionsArtifacts.updateActionsLockfile.mockResolvedValue({
+        updatedArtifacts: [],
+        artifactErrors: [],
+      });
       scm.branchExists.mockResolvedValue(false);
       reuse.shouldReuseExistingBranch.mockImplementation((config) =>
         Promise.resolve(config),
@@ -3188,6 +3195,69 @@ describe('workers/repository/update/branch/index', () => {
       expect(logger.debug).toHaveBeenCalledWith('Found existing branch PR #5');
       expect(logger.debug).not.toHaveBeenCalledWith(
         'No package files need updating',
+      );
+    });
+
+    it('merges GitHub Actions lockfile artifacts into the commit', async () => {
+      const lockFile = partial<FileChange>({
+        type: 'addition',
+        path: '.github/workflows/actions.lock',
+      });
+      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce(
+        partial<PackageFilesResult>({
+          updatedPackageFiles: [partial<FileChange>()],
+          artifactErrors: [],
+          updatedArtifacts: [],
+        }),
+      );
+      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+        artifactErrors: [],
+        updatedArtifacts: [],
+      });
+      githubActionsArtifacts.updateActionsLockfile.mockResolvedValue({
+        artifactErrors: [],
+        updatedArtifacts: [lockFile],
+      });
+
+      await branchWorker.processBranch(config);
+
+      expect(commit.commitFilesToBranch).toHaveBeenCalledWith(
+        expect.objectContaining({ updatedArtifacts: [lockFile] }),
+      );
+    });
+
+    it('surfaces a GitHub Actions lockfile artifact error', async () => {
+      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce(
+        partial<PackageFilesResult>({
+          updatedPackageFiles: [partial<FileChange>()],
+          artifactErrors: [],
+          updatedArtifacts: [],
+        }),
+      );
+      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+        artifactErrors: [],
+        updatedArtifacts: [],
+      });
+      githubActionsArtifacts.updateActionsLockfile.mockResolvedValue({
+        artifactErrors: [{ fileName: '.github/workflows/actions.lock' }],
+        updatedArtifacts: [],
+      });
+      scm.branchExists.mockResolvedValue(true);
+      platform.getBranchPr.mockResolvedValueOnce(
+        partial<Pr>({
+          number: 5,
+          state: 'open',
+          bodyStruct: { hash: hashBody('') },
+        }),
+      );
+
+      await branchWorker.processBranch(config);
+
+      // the error has to reach the PR, not be swallowed alongside the artifacts
+      expect(platform.ensureComment).toHaveBeenCalledWith(
+        expect.objectContaining({
+          topic: expect.stringContaining('Artifact update problem'),
+        }),
       );
     });
 
