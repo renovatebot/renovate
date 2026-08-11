@@ -1205,6 +1205,71 @@ describe('workers/repository/update/branch/index', () => {
       expect(setArtifactErrorStatus).toHaveBeenCalledTimes(1);
     });
 
+    it('compiles commit trailers', async () => {
+      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce(
+        partial<PackageFilesResult>({
+          updatedPackageFiles: [partial<FileChange>()],
+        }),
+      );
+      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+        artifactErrors: [],
+        updatedArtifacts: [partial<FileChange>()],
+      });
+      const inconfig = {
+        ...config,
+        ignoreTests: true,
+        prCreation: 'not-pending',
+        commitTrailers: ['Signed-off-by: {{{gitAuthor}}}'],
+        gitAuthor: 'Renovate Bot <bot@renovateapp.com>',
+      } satisfies BranchConfig;
+      scm.getBranchCommit.mockResolvedValue(commitSha);
+
+      await branchWorker.processBranch(inconfig);
+
+      expect(commit.commitFilesToBranch).toHaveBeenCalledWith(
+        expect.objectContaining({
+          commitTrailers: ['Signed-off-by: Renovate Bot <bot@renovateapp.com>'],
+        }),
+      );
+    });
+
+    it('drops invalid commit trailers after template compilation', async () => {
+      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce(
+        partial<PackageFilesResult>({
+          updatedPackageFiles: [partial<FileChange>()],
+        }),
+      );
+      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+        artifactErrors: [],
+        updatedArtifacts: [partial<FileChange>()],
+      });
+      const inconfig = {
+        ...config,
+        ignoreTests: true,
+        prCreation: 'not-pending',
+        commitTrailers: [
+          'Signed-off-by: {{{gitAuthor}}}',
+          'Renovate-Update-Type: {{{updateType}}}',
+        ],
+        // empty gitAuthor expands to "Signed-off-by: " which is invalid
+        gitAuthor: '',
+        updateType: 'minor',
+      } satisfies BranchConfig;
+      scm.getBranchCommit.mockResolvedValue(commitSha);
+
+      await branchWorker.processBranch(inconfig);
+
+      expect(commit.commitFilesToBranch).toHaveBeenCalledWith(
+        expect.objectContaining({
+          commitTrailers: ['Renovate-Update-Type: minor'],
+        }),
+      );
+      expect(logger.warn).toHaveBeenCalledWith(
+        { invalid: ['Signed-off-by: '] },
+        'Ignoring invalid commit trailers (must be a single-line Key: value)',
+      );
+    });
+
     it('updates branch when no fingerprint match', async () => {
       expect.assertions(4);
       const setArtifactErrorStatus = vi.spyOn(
@@ -2429,7 +2494,6 @@ describe('workers/repository/update/branch/index', () => {
         'echo semver',
         expect.objectContaining({
           cwd: '/localDir',
-          extraEnv: {},
         }),
       );
     });
@@ -2486,10 +2550,10 @@ describe('workers/repository/update/branch/index', () => {
         );
 
       fs.readLocalFile
-        .mockResolvedValueOnce('modified file content' as never)
-        .mockResolvedValueOnce('this file will not exists' as never)
-        .mockResolvedValueOnce('modified file content again' as never)
-        .mockResolvedValueOnce('this file was once deleted' as never);
+        .mockResolvedValueOnce('modified file content')
+        .mockResolvedValueOnce('this file will not exists')
+        .mockResolvedValueOnce('modified file content again')
+        .mockResolvedValueOnce('this file was once deleted');
       fs.localPathExists.mockResolvedValue(true).mockResolvedValueOnce(true);
       fs.localPathIsFile
         .mockResolvedValueOnce(true)
@@ -2561,7 +2625,6 @@ describe('workers/repository/update/branch/index', () => {
         'echo some-dep-name-1',
         expect.objectContaining({
           cwd: '/localDir',
-          extraEnv: {},
         }),
       );
       expect(exec.exec).toHaveBeenNthCalledWith(
@@ -2569,7 +2632,6 @@ describe('workers/repository/update/branch/index', () => {
         'echo some-dep-name-2',
         expect.objectContaining({
           cwd: '/localDir',
-          extraEnv: {},
         }),
       );
       expect(exec.exec).toHaveBeenCalledTimes(2);
@@ -2718,7 +2780,6 @@ describe('workers/repository/update/branch/index', () => {
         'echo hardcoded-string',
         expect.objectContaining({
           cwd: '/localDir',
-          extraEnv: {},
         }),
       );
       expect(exec.exec).toHaveBeenCalledTimes(1);
@@ -2927,7 +2988,6 @@ describe('workers/repository/update/branch/index', () => {
           'echo hardcoded-string',
           expect.objectContaining({
             cwd: '/localDir',
-            extraEnv: {},
           }),
         );
         expect(exec.exec).toHaveBeenCalledTimes(1);

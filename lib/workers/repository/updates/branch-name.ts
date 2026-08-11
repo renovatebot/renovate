@@ -7,7 +7,7 @@ import { regEx } from '../../../util/regex.ts';
 import * as template from '../../../util/template/index.ts';
 import type { BranchUpgradeConfig } from '../../types.ts';
 
-const slugify = _slugify as unknown as typeof _slugify.default;
+const slugify = _slugify;
 
 const MIN_HASH_LENGTH = 6;
 

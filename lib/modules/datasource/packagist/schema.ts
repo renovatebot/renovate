@@ -253,16 +253,19 @@ export const RegistryMeta = z
       ['providers-url']: providersUrl,
       ['metadata-url']: metadataUrl,
       ['available-packages']: availablePackages,
-    }) => ({
-      packages,
-      includesFiles,
-      providerPackages,
-      files,
-      providersUrl,
-      providersLazyUrl,
-      metadataUrl,
-      includesPackages: {} as Record<string, ReleaseResult | null>,
-      availablePackages,
-    }),
+    }) => {
+      const includesPackages: Record<string, ReleaseResult | null> = {};
+      return {
+        packages,
+        includesFiles,
+        providerPackages,
+        files,
+        providersUrl,
+        providersLazyUrl,
+        metadataUrl,
+        includesPackages,
+        availablePackages,
+      };
+    },
   );
 export type RegistryMeta = z.infer<typeof RegistryMeta>;

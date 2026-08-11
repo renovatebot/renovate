@@ -130,7 +130,7 @@ describe('modules/manager/pipenv/artifacts', () => {
   });
 
   it('returns null if unchanged', async () => {
-    fsExtra.ensureDir.mockResolvedValue(undefined as never);
+    fsExtra.ensureDir.mockResolvedValue(undefined);
     fsExtra.stat.mockResolvedValueOnce({} as never);
 
     mockFiles({
@@ -195,7 +195,7 @@ describe('modules/manager/pipenv/artifacts', () => {
       } satisfies PipfileLock),
     });
 
-    fsExtra.ensureDir.mockResolvedValue(undefined as never);
+    fsExtra.ensureDir.mockResolvedValue(undefined);
 
     const execSnapshots = mockExecAll();
 
@@ -248,7 +248,7 @@ describe('modules/manager/pipenv/artifacts', () => {
       } satisfies PipfileLock),
     });
 
-    fsExtra.ensureDir.mockResolvedValue(undefined as never);
+    fsExtra.ensureDir.mockResolvedValue(undefined);
 
     const execSnapshots = mockExecAll();
 
@@ -297,7 +297,7 @@ describe('modules/manager/pipenv/artifacts', () => {
       '/.python-version': '3.7.6',
     });
 
-    fsExtra.ensureDir.mockResolvedValue(undefined as never);
+    fsExtra.ensureDir.mockResolvedValue(undefined);
 
     const execSnapshots = mockExecAll();
 
@@ -351,7 +351,7 @@ describe('modules/manager/pipenv/artifacts', () => {
     GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
     fsExtra.stat.mockResolvedValueOnce({} as never);
 
-    fsExtra.ensureDir.mockResolvedValue(undefined as never);
+    fsExtra.ensureDir.mockResolvedValue(undefined);
 
     mockFiles({
       '/Pipfile.lock': '{}',
@@ -406,7 +406,7 @@ describe('modules/manager/pipenv/artifacts', () => {
   });
 
   it('handles no constraint', async () => {
-    fsExtra.ensureDir.mockResolvedValue(undefined as never);
+    fsExtra.ensureDir.mockResolvedValue(undefined);
     fsExtra.stat.mockResolvedValueOnce({} as never);
 
     mockFiles({
@@ -462,7 +462,7 @@ describe('modules/manager/pipenv/artifacts', () => {
   });
 
   it('returns updated Pipfile.lock', async () => {
-    fsExtra.ensureDir.mockResolvedValue(undefined as never);
+    fsExtra.ensureDir.mockResolvedValue(undefined);
     fsExtra.stat.mockResolvedValueOnce({} as never);
 
     mockFiles({
@@ -535,7 +535,7 @@ describe('modules/manager/pipenv/artifacts', () => {
       '/Pipfile.lock': [pipFileLock, pipFileLock, 'new lock'],
     });
 
-    fsExtra.ensureDir.mockResolvedValue(undefined as never);
+    fsExtra.ensureDir.mockResolvedValue(undefined);
 
     // pipenv
     datasource.getPkgReleases.mockResolvedValueOnce({
@@ -571,13 +571,13 @@ describe('modules/manager/pipenv/artifacts', () => {
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
           'ghcr.io/renovatebot/base-image' +
-          ' bash -l -c "' +
+          " bash -l -c '" +
           'install-tool python 3.7.6' +
           ' && ' +
           'install-tool pipenv 2013.6.12' +
           ' && ' +
           'pipenv lock' +
-          '"',
+          "'",
         options: {
           cwd: upath.join('/tmp/github/some/repo'),
           env: {
@@ -623,7 +623,7 @@ describe('modules/manager/pipenv/artifacts', () => {
       '/Pipfile.lock': [pipFileLock, 'new lock'],
     });
 
-    fsExtra.ensureDir.mockResolvedValue(undefined as never);
+    fsExtra.ensureDir.mockResolvedValue(undefined);
 
     // pipenv
     datasource.getPkgReleases.mockResolvedValueOnce({
@@ -687,7 +687,7 @@ describe('modules/manager/pipenv/artifacts', () => {
   it('defaults to latest if no lock constraints', async () => {
     GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
     fsExtra.stat.mockResolvedValueOnce({} as never);
-    fsExtra.ensureDir.mockResolvedValue(undefined as never);
+    fsExtra.ensureDir.mockResolvedValue(undefined);
 
     mockFiles({
       '/Pipfile.lock': ['{}', 'new lock'],
@@ -757,16 +757,16 @@ describe('modules/manager/pipenv/artifacts', () => {
   });
 
   it('catches errors', async () => {
-    fsExtra.ensureDir.mockResolvedValue(undefined as never);
+    fsExtra.ensureDir.mockResolvedValue(undefined);
     fsExtra.stat.mockResolvedValueOnce({} as never);
 
     mockFiles({
       '/Pipfile.lock': 'Current Pipfile.lock',
     });
 
-    fsExtra.outputFile.mockImplementationOnce((() => {
+    fsExtra.outputFile.mockImplementationOnce(() => {
       throw new Error('not found');
-    }) as never);
+    });
 
     expect(
       await updateArtifacts({
@@ -784,7 +784,7 @@ describe('modules/manager/pipenv/artifacts', () => {
   });
 
   it('returns updated Pipenv.lock when doing lockfile maintenance', async () => {
-    fsExtra.ensureDir.mockResolvedValue(undefined as never);
+    fsExtra.ensureDir.mockResolvedValue(undefined);
     fsExtra.stat.mockResolvedValueOnce({} as never);
     fsExtra.remove.mockResolvedValue();
 
@@ -832,7 +832,7 @@ describe('modules/manager/pipenv/artifacts', () => {
   });
 
   it('uses pipenv version from Pipfile', async () => {
-    fsExtra.ensureDir.mockResolvedValue(undefined as never);
+    fsExtra.ensureDir.mockResolvedValue(undefined);
     fsExtra.stat.mockResolvedValueOnce({} as never);
 
     GlobalConfig.set(dockerAdminConfig);
@@ -874,13 +874,13 @@ describe('modules/manager/pipenv/artifacts', () => {
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
           'ghcr.io/renovatebot/base-image' +
-          ' bash -l -c "' +
+          " bash -l -c '" +
           'install-tool python 3.10.2' +
           ' && ' +
           'install-tool pipenv 2020.8.13' +
           ' && ' +
           'pipenv lock' +
-          '"',
+          "'",
         options: {
           cwd: upath.join('/tmp/github/some/repo'),
           env: {
@@ -922,7 +922,7 @@ describe('modules/manager/pipenv/artifacts', () => {
     GlobalConfig.set(dockerAdminConfig);
     fsExtra.stat.mockResolvedValueOnce({} as never);
 
-    fsExtra.ensureDir.mockResolvedValue(undefined as never);
+    fsExtra.ensureDir.mockResolvedValue(undefined);
 
     const oldLock = JSON.stringify({
       develop: { pipenv: { version: '==2020.8.13' } },
@@ -961,13 +961,13 @@ describe('modules/manager/pipenv/artifacts', () => {
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
           'ghcr.io/renovatebot/base-image' +
-          ' bash -l -c "' +
+          " bash -l -c '" +
           'install-tool python 3.10.2' +
           ' && ' +
           'install-tool pipenv 2020.8.13' +
           ' && ' +
           'pipenv lock' +
-          '"',
+          "'",
         options: {
           cwd: upath.join('/tmp/github/some/repo'),
           env: {
@@ -1008,7 +1008,7 @@ describe('modules/manager/pipenv/artifacts', () => {
   it('uses pipenv version from config', async () => {
     GlobalConfig.set(dockerAdminConfig);
     fsExtra.stat.mockResolvedValueOnce({} as never);
-    fsExtra.ensureDir.mockResolvedValue(undefined as never);
+    fsExtra.ensureDir.mockResolvedValue(undefined);
 
     const oldLock = JSON.stringify({
       default: { pipenv: { version: '==2020.8.13' } },
@@ -1047,13 +1047,13 @@ describe('modules/manager/pipenv/artifacts', () => {
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
           'ghcr.io/renovatebot/base-image' +
-          ' bash -l -c "' +
+          " bash -l -c '" +
           'install-tool python 3.10.2' +
           ' && ' +
           'install-tool pipenv 2020.1.1' +
           ' && ' +
           'pipenv lock' +
-          '"',
+          "'",
         options: {
           cwd: upath.join('/tmp/github/some/repo'),
           env: {
@@ -1087,7 +1087,7 @@ describe('modules/manager/pipenv/artifacts', () => {
   });
 
   it('passes private credential environment vars', async () => {
-    fsExtra.ensureDir.mockResolvedValue(undefined as never);
+    fsExtra.ensureDir.mockResolvedValue(undefined);
     fsExtra.stat.mockResolvedValueOnce({} as never);
 
     mockFiles({
@@ -1171,7 +1171,7 @@ describe('modules/manager/pipenv/artifacts', () => {
   });
 
   it('updates extraEnv if variable names differ from default', async () => {
-    fsExtra.ensureDir.mockResolvedValue(undefined as never);
+    fsExtra.ensureDir.mockResolvedValue(undefined);
     fsExtra.stat.mockResolvedValueOnce({} as never);
 
     mockFiles({

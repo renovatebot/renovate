@@ -1,6 +1,7 @@
 import type { Stats } from 'node:fs';
 import os from 'node:os';
 import { isTruthy } from '@sindresorhus/is';
+import { quote } from 'shlex';
 import upath from 'upath';
 import { GlobalConfig } from '../../../config/global.ts';
 import { logger } from '../../../logger/index.ts';
@@ -463,7 +464,7 @@ async function createWrapperCommand(
   // Use existing distributionType or default to 'script' to preserve JAR-based mode
   // (prevents Maven 3.3.x from defaulting to only-script which doesn't support checksums)
   const type = distributionType ?? 'script';
-  const args = `wrapper:wrapper -Dtype=${type}`;
+  const args = `wrapper:wrapper -Dtype=${quote(type)}`;
 
   return await prepareCommand(
     wrapperExecutableFileName,

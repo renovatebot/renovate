@@ -81,7 +81,7 @@ describe('modules/platform/azure/util', () => {
     });
 
     it('should log error and return undefined', () => {
-      const res = getBranchNameWithoutRefsheadsPrefix(undefined as any);
+      const res = getBranchNameWithoutRefsheadsPrefix(undefined);
       expect(res).toBeUndefined();
     });
 

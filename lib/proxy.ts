@@ -1,10 +1,20 @@
 import { isNonEmptyString } from '@sindresorhus/is';
 import { createGlobalProxyAgent } from 'global-agent';
 import { logger } from './logger/index.ts';
+import { addSecretForSanitizing } from './util/sanitize.ts';
+import { parseUrl } from './util/url.ts';
 
 const envVars = ['HTTP_PROXY', 'HTTPS_PROXY', 'NO_PROXY'];
+const proxyEnvVarsWithCredentials = ['HTTP_PROXY', 'HTTPS_PROXY'];
 
 let agent = false;
+
+function sanitizeProxyCredentials(envVar: string): void {
+  const uri = parseUrl(process.env[envVar]);
+  if (uri?.password) {
+    addSecretForSanitizing(uri.password, 'global');
+  }
+}
 
 export function bootstrap(): void {
   envVars.forEach((envVar) => {
@@ -21,6 +31,8 @@ export function bootstrap(): void {
       process.env[envVar.toLowerCase()] = process.env[envVar];
     }
   });
+
+  proxyEnvVarsWithCredentials.forEach(sanitizeProxyCredentials);
 
   if (
     isNonEmptyString(process.env.HTTP_PROXY) ||

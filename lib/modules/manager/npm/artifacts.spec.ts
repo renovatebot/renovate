@@ -131,6 +131,30 @@ describe('modules/manager/npm/artifacts', () => {
     expect(execSnapshots).toMatchObject([{ cmd: 'corepack use pnpm@8.15.6' }]);
   });
 
+  it('quotes the corepack package spec', async () => {
+    fs.readLocalFile
+      .mockResolvedValueOnce('# dummy') // for npmrc
+      .mockResolvedValueOnce('{}') // for node constraints
+      .mockResolvedValue('some new content'); // for updated package.json
+    const execSnapshots = mockExecAll();
+
+    await updateArtifacts({
+      packageFileName: 'package.json',
+      updatedDeps: [
+        {
+          ...validDepUpdate,
+          depName: 'pnpm; echo hello',
+        },
+      ],
+      newPackageFileContent: 'some content',
+      config: { ...config },
+    });
+
+    expect(execSnapshots).toMatchObject([
+      { cmd: `corepack use 'pnpm; echo hello@8.15.6'` },
+    ]);
+  });
+
   it('supports docker mode', async () => {
     GlobalConfig.set(dockerAdminConfig);
     const execSnapshots = mockExecAll();
@@ -169,13 +193,13 @@ describe('modules/manager/npm/artifacts', () => {
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
           'ghcr.io/renovatebot/base-image ' +
-          'bash -l -c "' +
+          "bash -l -c '" +
           'install-tool node 20.1.0 ' +
           '&& ' +
           'install-tool corepack 0.29.3 ' +
           '&& ' +
           'corepack use pnpm@8.15.6' +
-          '"',
+          "'",
       },
     ]);
   });
