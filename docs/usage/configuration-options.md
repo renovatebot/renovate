@@ -4638,6 +4638,7 @@ This feature works with the following managers:
 - [`helmfile`](modules/manager/helmfile/index.md)
 - [`helmv3`](modules/manager/helmv3/index.md)
 - [`kubernetes`](modules/manager/kubernetes/index.md)
+- [`mix`](modules/manager/mix/index.md)
 - [`terraform`](modules/manager/terraform/index.md)
 - [`woodpecker`](modules/manager/woodpecker/index.md)
 

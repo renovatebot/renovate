@@ -1,5 +1,6 @@
 import { isEmptyArray, isString } from '@sindresorhus/is';
 import { quote } from 'shlex';
+import upath from 'upath';
 import { GlobalConfig } from '../../../config/global.ts';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
@@ -8,21 +9,32 @@ import type { ExecOptions } from '../../../util/exec/types.ts';
 import {
   deleteLocalFile,
   ensureCacheDir,
+  ensureDir,
   findLocalSiblingOrParent,
   getSiblingFileName,
   localPathExists,
+  outputCacheFile,
+  privateCacheDir,
   readLocalFile,
   writeLocalFile,
 } from '../../../util/fs/index.ts';
 import * as hostRules from '../../../util/host-rules.ts';
+import { memCacheProvider } from '../../../util/http/cache/memory-http-cache-provider.ts';
+import { Http } from '../../../util/http/index.ts';
+import { coerceObject } from '../../../util/object.ts';
 import { regEx } from '../../../util/regex.ts';
+import { joinUrlParts } from '../../../util/url.ts';
+import { HexDatasource } from '../../datasource/hex/index.ts';
 
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
+
+const http = new Http(HexDatasource.id);
 
 const hexRepoUrl = 'https://hex.pm/';
 const hexRepoOrgUrlRegex = regEx(
   `^https://hex\\.pm/api/repos/(?<organization>[a-z0-9_]+)/$`,
 );
+const repoOptionRegex = regEx(/repo:\s*"(?<name>[^"]+)"/g);
 
 export async function updateArtifacts({
   packageFileName,
@@ -145,6 +157,13 @@ export async function updateArtifacts({
     return acc;
   }, [] as string[]);
 
+  preCommands.push(
+    ...(await getRepoAddCommands(
+      newPackageFileContent,
+      config.registryAliases,
+    )),
+  );
+
   // renovate: will update this
   const erlangVersion = '26';
 
@@ -153,6 +172,11 @@ export async function updateArtifacts({
       // https://hexdocs.pm/mix/1.15.0/Mix.Tasks.Archive.html
       // TODO: should include a version constraint
       MIX_ARCHIVES: await ensureCacheDir('mix_archives'),
+      // `mix hex.organization auth` and `mix hex.repo add` persist registry
+      // URLs and their credentials in `$HEX_HOME/hex.config`. Keep that under
+      // privateCacheDir, which is wiped between repositories, so credentials
+      // cannot leak into the next repository of the same run.
+      HEX_HOME: await hexHomeDir(),
     },
     cwdFile: packageFileName,
     docker: {},
@@ -222,6 +246,97 @@ export async function updateArtifacts({
       },
     },
   ];
+}
+
+async function hexHomeDir(): Promise<string> {
+  const dir = upath.join(privateCacheDir(), 'hex');
+  await ensureDir(dir);
+  return dir;
+}
+
+/**
+ * `mix` will not fetch from a third-party repo unless a registry public key is
+ * stored for it — with none, `:mix_hex_registry.key(nil)` raises and the fetch
+ * hangs until the registry timeout. `registryAliases` is a name-to-URL map with
+ * nowhere to put a key or its fingerprint, so we fetch the key from the registry
+ * ourselves. This is the same trust-on-first-use model the hex datasource
+ * already applies when it verifies V2 payloads.
+ *
+ * `registryAliases` is inherited from top-level config, so it may hold entries
+ * belonging to other managers. Only the repos `mix.exs` declares are added.
+ */
+async function getRepoAddCommands(
+  packageFileContent: string,
+  registryAliases: Record<string, string> | undefined,
+): Promise<string[]> {
+  const commands: string[] = [];
+  const declaredRepos = new Set(
+    Array.from(
+      packageFileContent.matchAll(repoOptionRegex),
+      ({ groups }) => groups!.name,
+    ),
+  );
+
+  for (const [name, url] of Object.entries(coerceObject(registryAliases))) {
+    // `hexpm` and `hexpm:<org>` are hex.pm itself, authenticated above through
+    // `mix hex.organization auth`.
+    if (
+      !declaredRepos.has(name) ||
+      name === 'hexpm' ||
+      name.startsWith('hexpm:')
+    ) {
+      continue;
+    }
+
+    const publicKey = await getRegistryPublicKey(url);
+    if (!publicKey) {
+      logger.warn(
+        { repo: name, url },
+        'Skipping hex repo, unable to fetch its registry public key',
+      );
+      continue;
+    }
+
+    const keyFile = upath.join(await hexHomeDir(), `${name}.pem`);
+    await outputCacheFile(keyFile, publicKey);
+
+    logger.debug(`Adding hex repo ${name}`);
+    const command = [
+      'mix',
+      'hex.repo',
+      'add',
+      quote(name),
+      quote(url),
+      '--public-key',
+      quote(keyFile),
+    ];
+
+    // An unauthenticated third-party registry still needs adding, so a missing
+    // token is not a reason to skip the repo.
+    const { token } = hostRules.find({ hostType: HexDatasource.id, url });
+    if (token) {
+      command.push('--auth-key', quote(token));
+    } else {
+      logger.debug(`No hostRules token found for hex repo ${name}`);
+    }
+
+    commands.push(command.join(' '));
+  }
+
+  return commands;
+}
+
+async function getRegistryPublicKey(url: string): Promise<string | null> {
+  const keyUrl = joinUrlParts(url, 'public_key');
+  try {
+    const { body } = await http.getText(keyUrl, {
+      cacheProvider: memCacheProvider,
+    });
+    return body.trim() || null;
+  } catch (err) {
+    logger.debug({ err, keyUrl }, 'Failed to fetch hex registry public key');
+    return null;
+  }
 }
 
 async function checkLockFileReadError(
