@@ -81,10 +81,20 @@ export function getExpectedPrList(
   if (!branches.length) {
     return `${prDesc}It looks like your repository dependencies are already up-to-date and no Pull Requests will be necessary right away.\n`;
   }
+  // Vulnerability alert branches bypass all rate/concurrency limits, so they shouldn't count towards them.
+  const securityBranchCount = branches.filter(
+    (b) => b.isVulnerabilityAlert,
+  ).length;
+  const throttledBranchCount = branches.length - securityBranchCount;
+
   const { limit: concurrentLimit, key: concurrentLimitKey } =
     resolveConcurrentLimit(config);
-  if (concurrentLimit > 0 && concurrentLimit < branches.length) {
-    prDesc += `With your current configuration, Renovate will create ${concurrentLimit} Pull Request${concurrentLimit > 1 ? 's' : ''}, up to a maximum of ${branches.length} over time (see [docs for \`${concurrentLimitKey}\`](${GlobalConfig.get('productLinks').documentation}configuration-options/#${concurrentLimitKey.toLowerCase()})):\n\n`;
+  if (concurrentLimit > 0 && concurrentLimit < throttledBranchCount) {
+    const securityNote =
+      securityBranchCount > 0
+        ? `, plus ${securityBranchCount} security update Pull Request${securityBranchCount > 1 ? 's' : ''} which ${securityBranchCount > 1 ? 'are' : 'is'} not subject to this limit`
+        : '';
+    prDesc += `With your current configuration, Renovate will create ${concurrentLimit} Pull Request${concurrentLimit > 1 ? 's' : ''}, up to a maximum of ${branches.length} over time (see [docs for \`${concurrentLimitKey}\`](${GlobalConfig.get('productLinks').documentation}configuration-options/#${concurrentLimitKey.toLowerCase()}))${securityNote}:\n\n`;
   } else {
     prDesc += `With your current configuration, Renovate will create ${branches.length} Pull Request`;
     prDesc += branches.length > 1 ? `s:\n\n` : `:\n\n`;
@@ -137,21 +147,25 @@ export function getExpectedPrList(
   }
   const prHourlyLimit = coerceNumber(config.prHourlyLimit);
   const commitHourlyLimit = coerceNumber(config.commitHourlyLimit);
+  const securityBypassNote =
+    securityBranchCount > 0
+      ? ` Security update Pull Request${securityBranchCount > 1 ? 's are' : ' is'} not subject to this limit and will be created straight away.`
+      : '';
   if (
     commitHourlyLimit > 0 &&
     commitHourlyLimit < 5 &&
-    commitHourlyLimit < branches.length
+    commitHourlyLimit < throttledBranchCount
   ) {
     prDesc += emojify(
-      `\n\n:children_crossing: Branch creation and rebasing will be limited to maximum ${commitHourlyLimit} per hour, so it doesn't swamp any CI resources or overwhelm the project. See [docs for \`commitHourlyLimit\`](${GlobalConfig.get('productLinks').documentation}configuration-options/#commithourlylimit) for details.\n\n`,
+      `\n\n:children_crossing: Branch creation and rebasing will be limited to maximum ${commitHourlyLimit} per hour, so it doesn't swamp any CI resources or overwhelm the project. See [docs for \`commitHourlyLimit\`](${GlobalConfig.get('productLinks').documentation}configuration-options/#commithourlylimit) for details.${securityBypassNote}\n\n`,
     );
   } else if (
     prHourlyLimit > 0 &&
     prHourlyLimit < 5 &&
-    prHourlyLimit < branches.length
+    prHourlyLimit < throttledBranchCount
   ) {
     prDesc += emojify(
-      `\n\n:children_crossing: PR creation will be limited to maximum ${prHourlyLimit} per hour, so it doesn't swamp any CI resources or overwhelm the project. See [docs for \`prHourlyLimit\`](${GlobalConfig.get('productLinks').documentation}configuration-options/#prhourlylimit) for details.\n\n`,
+      `\n\n:children_crossing: PR creation will be limited to maximum ${prHourlyLimit} per hour, so it doesn't swamp any CI resources or overwhelm the project. See [docs for \`prHourlyLimit\`](${GlobalConfig.get('productLinks').documentation}configuration-options/#prhourlylimit) for details.${securityBypassNote}\n\n`,
     );
   }
   return prDesc;
@@ -369,6 +383,8 @@ export function getExpectedPrListSummary(
   const prHourlyLimit = coerceNumber(config.prHourlyLimit);
   const commitHourlyLimit = coerceNumber(config.commitHourlyLimit);
   const concurrentLimit = resolveConcurrentLimit(config);
+  // Vulnerability alert branches bypass all rate/concurrency limits, so they shouldn't count towards them.
+  const securityCount = Object.keys(stats.securityGroups).length;
 
   if (hasMultipleBaseBranches) {
     let total = 0;
@@ -382,7 +398,8 @@ export function getExpectedPrListSummary(
       concurrentLimit,
       prHourlyLimit,
       commitHourlyLimit,
-      total,
+      total - securityCount,
+      securityCount,
     );
     prDesc += `With your current configuration, Renovate will create ${parts.join(' and ')}${limitsNotice}:\n\n`;
   } else {
@@ -390,7 +407,8 @@ export function getExpectedPrListSummary(
       concurrentLimit,
       prHourlyLimit,
       commitHourlyLimit,
-      stats.prCount,
+      stats.prCount - securityCount,
+      securityCount,
     );
     prDesc += `With your current configuration, Renovate will create ${stats.prCount} Pull Request${stats.prCount > 1 ? 's' : ''}${limitsNotice}:\n\n`;
   }
@@ -437,31 +455,37 @@ export function getExpectedPrListSummary(
     }
   }
 
-  if (concurrentLimit.limit > 0 && concurrentLimit.limit < stats.prCount) {
+  const throttledPrCount = stats.prCount - securityCount;
+  const securityBypassNote =
+    securityCount > 0
+      ? ` Security update Pull Request${securityCount > 1 ? 's are' : ' is'} not subject to this limit and will be created straight away.`
+      : '';
+
+  if (concurrentLimit.limit > 0 && concurrentLimit.limit < throttledPrCount) {
     const notice =
       concurrentLimit.key === 'branchConcurrentLimit'
         ? `Renovate will only work on ${concurrentLimit.limit} branch${concurrentLimit.limit > 1 ? 'es' : ''} at a time, so not all Pull Requests will be opened straight away`
         : `Renovate will only keep ${concurrentLimit.limit} Pull Request${concurrentLimit.limit > 1 ? 's' : ''} open at a time, so not all of the above will be opened straight away`;
     prDesc += emojify(
-      `\n\n:children_crossing: ${notice}. See [docs for \`${concurrentLimit.key}\`](${GlobalConfig.get('productLinks').documentation}configuration-options/#${concurrentLimit.key.toLowerCase()}) for details.\n\n`,
+      `\n\n:children_crossing: ${notice}. See [docs for \`${concurrentLimit.key}\`](${GlobalConfig.get('productLinks').documentation}configuration-options/#${concurrentLimit.key.toLowerCase()}) for details.${securityBypassNote}\n\n`,
     );
   }
 
   if (
     commitHourlyLimit > 0 &&
     commitHourlyLimit < 5 &&
-    commitHourlyLimit < stats.prCount
+    commitHourlyLimit < throttledPrCount
   ) {
     prDesc += emojify(
-      `\n\n:children_crossing: Branch creation and rebasing will be limited to maximum ${commitHourlyLimit} per hour, so it doesn't swamp any CI resources or overwhelm the project. See [docs for \`commitHourlyLimit\`](${GlobalConfig.get('productLinks').documentation}configuration-options/#commithourlylimit) for details.\n\n`,
+      `\n\n:children_crossing: Branch creation and rebasing will be limited to maximum ${commitHourlyLimit} per hour, so it doesn't swamp any CI resources or overwhelm the project. See [docs for \`commitHourlyLimit\`](${GlobalConfig.get('productLinks').documentation}configuration-options/#commithourlylimit) for details.${securityBypassNote}\n\n`,
     );
   } else if (
     prHourlyLimit > 0 &&
     prHourlyLimit < 5 &&
-    prHourlyLimit < stats.prCount
+    prHourlyLimit < throttledPrCount
   ) {
     prDesc += emojify(
-      `\n\n:children_crossing: PR creation will be limited to maximum ${prHourlyLimit} per hour, so it doesn't swamp any CI resources or overwhelm the project. See [docs for \`prHourlyLimit\`](${GlobalConfig.get('productLinks').documentation}configuration-options/#prhourlylimit) for details.\n\n`,
+      `\n\n:children_crossing: PR creation will be limited to maximum ${prHourlyLimit} per hour, so it doesn't swamp any CI resources or overwhelm the project. See [docs for \`prHourlyLimit\`](${GlobalConfig.get('productLinks').documentation}configuration-options/#prhourlylimit) for details.${securityBypassNote}\n\n`,
     );
   }
   return prDesc;
@@ -472,6 +496,7 @@ function determineLimitsNotice(
   prHourlyLimit: number,
   commitHourlyLimit: number,
   prCount: number,
+  securityCount: number,
 ): string {
   const clauses: string[] = [];
 
@@ -501,13 +526,17 @@ function determineLimitsNotice(
     );
   }
 
-  if (clauses.length) {
-    return emojify(` (at ${clauses.join(' and ')})`);
+  if (!clauses.length) {
+    if (commitHourlyLimit === 0 && prHourlyLimit === 0) {
+      return ' (with no configured maximum of PRs per hour)';
+    }
+    return '';
   }
 
-  if (commitHourlyLimit === 0 && prHourlyLimit === 0) {
-    return ' (with no configured maximum of PRs per hour)';
-  }
+  const securityNote =
+    securityCount > 0
+      ? `, plus ${securityCount} security update${securityCount > 1 ? 's' : ''} which ${securityCount > 1 ? "aren't" : "isn't"} subject to these limits`
+      : '';
 
-  return '';
+  return emojify(` (at ${clauses.join(' and ')}${securityNote})`);
 }

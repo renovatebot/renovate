@@ -338,6 +338,271 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
       expect(res).toContain('branchConcurrentLimit');
       expect(res).not.toContain('prConcurrentLimit');
     });
+
+    it('does not count security updates towards the concurrent limit, and notes they bypass it', () => {
+      const branches: BranchConfig[] = [
+        {
+          prTitle: 'Update a to v1',
+          branchName: 'renovate/a-1.x',
+          baseBranch: 'base',
+          manager: 'some-manager',
+          upgrades: [
+            {
+              manager: 'some-manager',
+              depName: 'a',
+              newValue: '1.0.0',
+              branchName: 'some-branch',
+            },
+          ],
+        },
+        {
+          prTitle: 'Update b to v1',
+          branchName: 'renovate/b-1.x',
+          baseBranch: 'base',
+          manager: 'some-manager',
+          upgrades: [
+            {
+              manager: 'some-manager',
+              depName: 'b',
+              newValue: '1.0.0',
+              branchName: 'some-branch',
+            },
+          ],
+        },
+        {
+          prTitle: 'Update c to v1',
+          branchName: 'renovate/c-1.x',
+          baseBranch: 'base',
+          manager: 'some-manager',
+          upgrades: [
+            {
+              manager: 'some-manager',
+              depName: 'c',
+              newValue: '1.0.0',
+              branchName: 'some-branch',
+            },
+          ],
+        },
+        {
+          prTitle: 'CVE fix for d',
+          branchName: 'renovate/d-cve',
+          baseBranch: 'base',
+          manager: 'some-manager',
+          isVulnerabilityAlert: true,
+          upgrades: [
+            {
+              manager: 'some-manager',
+              depName: 'd',
+              newValue: '1.0.1',
+              branchName: 'some-branch',
+            },
+          ],
+        },
+      ];
+      config.prConcurrentLimit = 1;
+      const res = getExpectedPrList(config, branches);
+      expect(res).toContain(
+        'Renovate will create 1 Pull Request, up to a maximum of 4 over time',
+      );
+      expect(res).toContain(
+        'plus 1 security update Pull Request which is not subject to this limit',
+      );
+    });
+
+    it('does not count multiple security updates towards the concurrent limit, and notes they bypass it (plural)', () => {
+      const branches: BranchConfig[] = [
+        {
+          prTitle: 'Update a to v1',
+          branchName: 'renovate/a-1.x',
+          baseBranch: 'base',
+          manager: 'some-manager',
+          upgrades: [
+            {
+              manager: 'some-manager',
+              depName: 'a',
+              newValue: '1.0.0',
+              branchName: 'some-branch',
+            },
+          ],
+        },
+        {
+          prTitle: 'Update b to v1',
+          branchName: 'renovate/b-1.x',
+          baseBranch: 'base',
+          manager: 'some-manager',
+          upgrades: [
+            {
+              manager: 'some-manager',
+              depName: 'b',
+              newValue: '1.0.0',
+              branchName: 'some-branch',
+            },
+          ],
+        },
+        {
+          prTitle: 'Update c to v1',
+          branchName: 'renovate/c-1.x',
+          baseBranch: 'base',
+          manager: 'some-manager',
+          upgrades: [
+            {
+              manager: 'some-manager',
+              depName: 'c',
+              newValue: '1.0.0',
+              branchName: 'some-branch',
+            },
+          ],
+        },
+        {
+          prTitle: 'CVE fix for d',
+          branchName: 'renovate/d-cve',
+          baseBranch: 'base',
+          manager: 'some-manager',
+          isVulnerabilityAlert: true,
+          upgrades: [
+            {
+              manager: 'some-manager',
+              depName: 'd',
+              newValue: '1.0.1',
+              branchName: 'some-branch',
+            },
+          ],
+        },
+        {
+          prTitle: 'CVE fix for e',
+          branchName: 'renovate/e-cve',
+          baseBranch: 'base',
+          manager: 'some-manager',
+          isVulnerabilityAlert: true,
+          upgrades: [
+            {
+              manager: 'some-manager',
+              depName: 'e',
+              newValue: '1.0.1',
+              branchName: 'some-branch',
+            },
+          ],
+        },
+      ];
+      config.prConcurrentLimit = 1;
+      const res = getExpectedPrList(config, branches);
+      expect(res).toContain(
+        'Renovate will create 1 Pull Request, up to a maximum of 5 over time',
+      );
+      expect(res).toContain(
+        'plus 2 security update Pull Requests which are not subject to this limit',
+      );
+    });
+
+    it('does not count security updates towards the hourly limit, and notes they bypass it (plural)', () => {
+      const branches: BranchConfig[] = [
+        {
+          prTitle: 'Update a to v1',
+          branchName: 'renovate/a-1.x',
+          baseBranch: 'base',
+          manager: 'some-manager',
+          upgrades: [
+            {
+              manager: 'some-manager',
+              depName: 'a',
+              newValue: '1.0.0',
+              branchName: 'some-branch',
+            },
+          ],
+        },
+        {
+          prTitle: 'Update b to v1',
+          branchName: 'renovate/b-1.x',
+          baseBranch: 'base',
+          manager: 'some-manager',
+          upgrades: [
+            {
+              manager: 'some-manager',
+              depName: 'b',
+              newValue: '1.0.0',
+              branchName: 'some-branch',
+            },
+          ],
+        },
+        {
+          prTitle: 'CVE fix for c',
+          branchName: 'renovate/c-cve',
+          baseBranch: 'base',
+          manager: 'some-manager',
+          isVulnerabilityAlert: true,
+          upgrades: [
+            {
+              manager: 'some-manager',
+              depName: 'c',
+              newValue: '1.0.1',
+              branchName: 'some-branch',
+            },
+          ],
+        },
+        {
+          prTitle: 'CVE fix for d',
+          branchName: 'renovate/d-cve',
+          baseBranch: 'base',
+          manager: 'some-manager',
+          isVulnerabilityAlert: true,
+          upgrades: [
+            {
+              manager: 'some-manager',
+              depName: 'd',
+              newValue: '1.0.1',
+              branchName: 'some-branch',
+            },
+          ],
+        },
+      ];
+      config.prHourlyLimit = 1;
+      const res = getExpectedPrList(config, branches);
+      expect(res).toContain(
+        'PR creation will be limited to maximum 1 per hour',
+      );
+      expect(res).toContain(
+        'Security update Pull Requests are not subject to this limit and will be created straight away.',
+      );
+    });
+
+    it('does not show a security bypass note when there are no security updates', () => {
+      const branches: BranchConfig[] = [
+        {
+          prTitle: 'Update a to v1',
+          branchName: 'renovate/a-1.x',
+          baseBranch: 'base',
+          manager: 'some-manager',
+          upgrades: [
+            {
+              manager: 'some-manager',
+              depName: 'a',
+              newValue: '1.0.0',
+              branchName: 'some-branch',
+            },
+          ],
+        },
+        {
+          prTitle: 'Update b to v1',
+          branchName: 'renovate/b-1.x',
+          baseBranch: 'base',
+          manager: 'some-manager',
+          upgrades: [
+            {
+              manager: 'some-manager',
+              depName: 'b',
+              newValue: '1.0.0',
+              branchName: 'some-branch',
+            },
+          ],
+        },
+      ];
+      config.prHourlyLimit = 1;
+      const res = getExpectedPrList(config, branches);
+      expect(res).toContain(
+        'PR creation will be limited to maximum 1 per hour',
+      );
+      expect(res).not.toContain('security update');
+    });
   });
 
   describe('getExpectedPrListSummary()', () => {
@@ -1115,7 +1380,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
           "
           ### What to Expect
 
-          With your current configuration, Renovate will create 3 Pull Requests (at a maximum of 2 PRs per hour):
+          With your current configuration, Renovate will create 3 Pull Requests:
 
           | Manager | security |
           | --- | --- |
@@ -1132,10 +1397,6 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
           - \`a\`, (some-manager, patch):
             - \`packages/examples/blah.json\`
             - \`packages/examples/another.json\`
-
-
-          🚸 PR creation will be limited to maximum 2 per hour, so it doesn't swamp any CI resources or overwhelm the project. See [docs for \`prHourlyLimit\`](https://docs.renovatebot.com/configuration-options/#prhourlylimit) for details.
-
           "
         `);
       });
@@ -1684,6 +1945,198 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
       const res = getExpectedPrListSummary(config, branches);
       expect(res).toContain(
         '(at a maximum of 1 Pull Request open at a time and a maximum of 1 PR per hour)',
+      );
+    });
+
+    it('shows the branchConcurrentLimit message with plurals when limit is greater than 1', () => {
+      const branches: BranchConfig[] = [
+        {
+          prTitle: 'Update a to v1',
+          branchName: 'renovate/a-1.x',
+          baseBranch: 'base',
+          manager: 'some-manager',
+          upgrades: [
+            {
+              manager: 'some-manager',
+              depName: 'a',
+              newValue: '1.0.0',
+              branchName: 'ignored',
+            },
+          ],
+        },
+        {
+          prTitle: 'Update b to v1',
+          branchName: 'renovate/b-1.x',
+          baseBranch: 'base',
+          manager: 'some-manager',
+          upgrades: [
+            {
+              manager: 'some-manager',
+              depName: 'b',
+              newValue: '1.0.0',
+              branchName: 'ignored',
+            },
+          ],
+        },
+        {
+          prTitle: 'Update c to v1',
+          branchName: 'renovate/c-1.x',
+          baseBranch: 'base',
+          manager: 'some-manager',
+          upgrades: [
+            {
+              manager: 'some-manager',
+              depName: 'c',
+              newValue: '1.0.0',
+              branchName: 'ignored',
+            },
+          ],
+        },
+      ];
+      config.branchConcurrentLimit = 2;
+      const res = getExpectedPrListSummary(config, branches);
+      expect(res).toContain('at a maximum of 2 branches open at a time');
+      expect(res).toContain('Renovate will only work on 2 branches at a time');
+    });
+
+    it('does not count a single security update towards the concurrent limit, and notes it bypasses it', () => {
+      const branches: BranchConfig[] = [
+        {
+          prTitle: 'Update a to v1',
+          branchName: 'renovate/a-1.x',
+          baseBranch: 'base',
+          manager: 'some-manager',
+          upgrades: [
+            {
+              manager: 'some-manager',
+              depName: 'a',
+              newValue: '1.0.0',
+              branchName: 'ignored',
+            },
+          ],
+        },
+        {
+          prTitle: 'Update b to v1',
+          branchName: 'renovate/b-1.x',
+          baseBranch: 'base',
+          manager: 'some-manager',
+          upgrades: [
+            {
+              manager: 'some-manager',
+              depName: 'b',
+              newValue: '1.0.0',
+              branchName: 'ignored',
+            },
+          ],
+        },
+        {
+          prTitle: 'Update c to v1',
+          branchName: 'renovate/c-1.x',
+          baseBranch: 'base',
+          manager: 'some-manager',
+          upgrades: [
+            {
+              manager: 'some-manager',
+              depName: 'c',
+              newValue: '1.0.0',
+              branchName: 'ignored',
+            },
+          ],
+        },
+        {
+          prTitle: 'CVE fix for d',
+          branchName: 'renovate/d-cve',
+          baseBranch: 'base',
+          manager: 'some-manager',
+          isVulnerabilityAlert: true,
+          upgrades: [
+            {
+              manager: 'some-manager',
+              depName: 'd',
+              newValue: '1.0.1',
+              branchName: 'ignored',
+            },
+          ],
+        },
+      ];
+      config.prConcurrentLimit = 1;
+      const res = getExpectedPrListSummary(config, branches);
+      expect(res).toContain(
+        "plus 1 security update which isn't subject to these limits",
+      );
+      expect(res).toContain(
+        'Security update Pull Request is not subject to this limit and will be created straight away.',
+      );
+    });
+
+    it('does not count multiple security updates towards the hourly limit, and notes they bypass it (plural)', () => {
+      const branches: BranchConfig[] = [
+        {
+          prTitle: 'Update a to v1',
+          branchName: 'renovate/a-1.x',
+          baseBranch: 'base',
+          manager: 'some-manager',
+          upgrades: [
+            {
+              manager: 'some-manager',
+              depName: 'a',
+              newValue: '1.0.0',
+              branchName: 'ignored',
+            },
+          ],
+        },
+        {
+          prTitle: 'Update b to v1',
+          branchName: 'renovate/b-1.x',
+          baseBranch: 'base',
+          manager: 'some-manager',
+          upgrades: [
+            {
+              manager: 'some-manager',
+              depName: 'b',
+              newValue: '1.0.0',
+              branchName: 'ignored',
+            },
+          ],
+        },
+        {
+          prTitle: 'CVE fix for c',
+          branchName: 'renovate/c-cve',
+          baseBranch: 'base',
+          manager: 'some-manager',
+          isVulnerabilityAlert: true,
+          upgrades: [
+            {
+              manager: 'some-manager',
+              depName: 'c',
+              newValue: '1.0.1',
+              branchName: 'ignored',
+            },
+          ],
+        },
+        {
+          prTitle: 'CVE fix for d',
+          branchName: 'renovate/d-cve',
+          baseBranch: 'base',
+          manager: 'some-manager',
+          isVulnerabilityAlert: true,
+          upgrades: [
+            {
+              manager: 'some-manager',
+              depName: 'd',
+              newValue: '1.0.1',
+              branchName: 'ignored',
+            },
+          ],
+        },
+      ];
+      config.prHourlyLimit = 1;
+      const res = getExpectedPrListSummary(config, branches);
+      expect(res).toContain(
+        "plus 2 security updates which aren't subject to these limits",
+      );
+      expect(res).toContain(
+        'Security update Pull Requests are not subject to this limit and will be created straight away.',
       );
     });
   });
