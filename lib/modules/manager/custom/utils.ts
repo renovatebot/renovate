@@ -27,14 +27,14 @@ export function substituteRegistryAliases(
       // because registryUrls will be used instead of dep/packageName
       dep.registryUrls = dep.registryUrls.map((s) => {
         if (s.startsWith(original)) {
-          return replace + s.slice(replace.length);
+          return replace + s.slice(original.length);
         }
         return s;
       });
     } else if (dep.packageName?.startsWith(original)) {
-      dep.packageName = replace + dep.packageName.slice(replace.length);
+      dep.packageName = replace + dep.packageName.slice(original.length);
     } else if (dep.depName?.startsWith(original)) {
-      dep.packageName = replace + dep.depName.slice(replace.length);
+      dep.packageName = replace + dep.depName.slice(original.length);
     }
   }
 }

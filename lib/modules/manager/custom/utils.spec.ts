@@ -40,6 +40,14 @@ describe('modules/manager/custom/utils', () => {
       expect(dep.packageName).toBe('baz/bar');
     });
 
+    it('replaces original length instead of replacement length', () => {
+      const dep = partial<PackageDependency>({
+        depName: 'short/bar',
+      });
+      utils.substituteRegistryAliases(dep, { short: 'longer' });
+      expect(dep.packageName).toBe('longer/bar');
+    });
+
     it('does nothing when registryUrls, packageName and depName are all absent', () => {
       const dep = partial<PackageDependency>({});
       utils.substituteRegistryAliases(dep, { foo: 'baz' });
