@@ -387,8 +387,8 @@ importers:
         specifier: 2.0.15
         version: 2.0.15
       '@containerbase/semantic-release-pnpm':
-        specifier: 1.4.2
-        version: 1.4.2(semantic-release@25.0.8)
+        specifier: 1.4.3
+        version: 1.4.3(semantic-release@25.0.8)
       '@hyrious/marshal':
         specifier: 0.3.3
         version: 0.3.3
@@ -896,8 +896,8 @@ packages:
     resolution: {integrity: sha512-WMRSlD5Xx6HSSvjOmQbduk5E389TcjcjJ0IWc3IGbQ9Y9WlFAGy7u2Op9J4Vcktx10H2W/y0E8KxjBocq0gBGA==}
     engines: {node: ^22.11.0 || >=24.0.0, pnpm: '>=10.0.0'}
 
-  '@containerbase/semantic-release-pnpm@1.4.2':
-    resolution: {integrity: sha512-Vr4KNax6jP1R3Th3pK3TKecsqQhrpQfEbe6NKWo7hSP4rejvv3URIuUKYmSFrTMpW3RYzXbA5ldsLZjw+bn7fA==}
+  '@containerbase/semantic-release-pnpm@1.4.3':
+    resolution: {integrity: sha512-dOMyBw+mzcKHt6OqYyRj6arFeszoINlNRq1eIR7oEE0TB0i0lhj8BsJ/2IFISJUPwf9lUxKbV8ES6vjqqMIQYg==}
     engines: {node: ^22.11.0 || ^24}
     peerDependencies:
       semantic-release: ^24.0.0 || ^25.0.0
@@ -6215,7 +6215,7 @@ snapshots:
     dependencies:
       istanbul-reports: 3.2.0
 
-  '@containerbase/semantic-release-pnpm@1.4.2(semantic-release@25.0.8)':
+  '@containerbase/semantic-release-pnpm@1.4.3(semantic-release@25.0.8)':
     dependencies:
       '@semantic-release/error': 4.0.0
       aggregate-error: 5.0.0
