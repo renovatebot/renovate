@@ -1,3 +1,4 @@
+import { codeBlock } from 'common-tags';
 import {
   countPackageNameLength,
   countPrecedingIndentation,
@@ -7,13 +8,15 @@ import {
   splitSingleDependency,
 } from './extract.ts';
 
-const commentCabalFile = `build-depends:
-  -- leading
- base,
--- middle
- other,
- -- trailing
- other2`;
+const commentCabalFile = codeBlock`
+  build-depends:
+    -- leading
+   base,
+  -- middle
+   other,
+   -- trailing
+   other2
+`;
 
 describe('modules/manager/haskell-cabal/extract', () => {
   describe('countPackageNameLength', () => {

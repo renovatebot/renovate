@@ -406,9 +406,14 @@ export class Vulnerabilities {
     osvPackageName: string,
     affected: Osv.Affected,
   ): boolean {
+    const pkg = affected.package;
+    if (pkg?.name !== osvPackageName) {
+      return false;
+    }
+
+    // Match exact ecosystems and OSV sub-ecosystems (e.g. Packagist:https://packages.drupal.org/8).
     return (
-      affected.package?.name === osvPackageName &&
-      affected.package?.ecosystem === ecosystem
+      pkg.ecosystem === ecosystem || pkg.ecosystem.startsWith(`${ecosystem}:`)
     );
   }
 
@@ -635,11 +640,14 @@ export class Vulnerabilities {
     aliases = aliases.map((id) => {
       if (id.startsWith('CVE-')) {
         return `[${id}](https://nvd.nist.gov/vuln/detail/${id})`;
-      } else if (id.startsWith('GHSA-')) {
+      }
+      if (id.startsWith('GHSA-')) {
         return `[${id}](https://github.com/advisories/${id})`;
-      } else if (id.startsWith('GO-')) {
+      }
+      if (id.startsWith('GO-')) {
         return `[${id}](https://pkg.go.dev/vuln/${id})`;
-      } else if (id.startsWith('RUSTSEC-')) {
+      }
+      if (id.startsWith('RUSTSEC-')) {
         return `[${id}](https://rustsec.org/advisories/${id}.html)`;
       }
 

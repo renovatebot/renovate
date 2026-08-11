@@ -1,16 +1,14 @@
+import { hostRules } from '~test/host-rules.ts';
 import type { AllConfig } from '../../config/types.ts';
 import * as _ghApi from '../../modules/platform/github/index.ts';
 import * as platform from '../../modules/platform/index.ts';
-import * as _hostRules from '../../util/host-rules.ts';
 import { autodiscoverRepositories } from './autodiscover.ts';
 
 vi.mock('../../modules/platform/github/index.ts');
-vi.mock('../../util/host-rules.ts');
 vi.unmock('../../modules/platform/index.ts');
 vi.unmock('../../modules/platform/scm.ts');
 
 // imports are readonly
-const hostRules = vi.mocked(_hostRules);
 const ghApi = vi.mocked(_ghApi);
 
 describe('workers/global/autodiscover', () => {
@@ -47,9 +45,7 @@ describe('workers/global/autodiscover', () => {
   it('autodiscovers github but empty', async () => {
     config.autodiscover = true;
     config.platform = 'github';
-    hostRules.find.mockImplementation(() => ({
-      token: 'abc',
-    }));
+    hostRules.add({ token: 'abc' });
     ghApi.getRepos.mockImplementation(() => Promise.resolve([]));
     const res = await autodiscoverRepositories(config);
     expect(res).toEqual(config);
@@ -58,9 +54,7 @@ describe('workers/global/autodiscover', () => {
   it('autodiscovers github repos', async () => {
     config.autodiscover = true;
     config.platform = 'github';
-    hostRules.find.mockImplementation(() => ({
-      token: 'abc',
-    }));
+    hostRules.add({ token: 'abc' });
     ghApi.getRepos.mockImplementation(() => Promise.resolve(['a', 'b']));
     const res = await autodiscoverRepositories(config);
     expect(res.repositories).toHaveLength(2);
@@ -70,9 +64,7 @@ describe('workers/global/autodiscover', () => {
     config.autodiscover = true;
     config.autodiscoverFilter = ['project/re*'];
     config.platform = 'github';
-    hostRules.find.mockImplementation(() => ({
-      token: 'abc',
-    }));
+    hostRules.add({ token: 'abc' });
     ghApi.getRepos.mockImplementation(() =>
       Promise.resolve(['project/repo', 'project/another-repo']),
     );
@@ -84,9 +76,7 @@ describe('workers/global/autodiscover', () => {
     config.autodiscover = true;
     config.autodiscoverFilter = ['project/*'];
     config.platform = 'github';
-    hostRules.find.mockImplementation(() => ({
-      token: 'abc',
-    }));
+    hostRules.add({ token: 'abc' });
     ghApi.getRepos.mockImplementation(() =>
       Promise.resolve(['project/repo', 'project/.github']),
     );
@@ -98,9 +88,7 @@ describe('workers/global/autodiscover', () => {
     config.autodiscover = true;
     config.autodiscoverFilter = ['project/re*'];
     config.platform = 'github';
-    hostRules.find.mockImplementation(() => ({
-      token: 'abc',
-    }));
+    hostRules.add({ token: 'abc' });
     ghApi.getRepos.mockImplementation(() =>
       Promise.resolve(['another-project/repo', 'another-project/another-repo']),
     );
@@ -112,9 +100,7 @@ describe('workers/global/autodiscover', () => {
     config.autodiscover = true;
     config.autodiscoverFilter = ['/project/RE*./i'];
     config.platform = 'github';
-    hostRules.find.mockImplementation(() => ({
-      token: 'abc',
-    }));
+    hostRules.add({ token: 'abc' });
     ghApi.getRepos.mockImplementation(() =>
       Promise.resolve(['project/repo', 'project/another-repo']),
     );
@@ -126,9 +112,7 @@ describe('workers/global/autodiscover', () => {
     config.autodiscover = true;
     config.autodiscoverFilter = ['!/project/re*./', '!project/yet*'];
     config.platform = 'github';
-    hostRules.find.mockImplementation(() => ({
-      token: 'abc',
-    }));
+    hostRules.add({ token: 'abc' });
     ghApi.getRepos.mockImplementation(() =>
       Promise.resolve([
         'project/repo',
@@ -144,9 +128,7 @@ describe('workers/global/autodiscover', () => {
     config.autodiscover = true;
     config.autodiscoverFilter = '!project/re*';
     config.platform = 'github';
-    hostRules.find.mockImplementation(() => ({
-      token: 'abc',
-    }));
+    hostRules.add({ token: 'abc' });
     ghApi.getRepos.mockImplementation(() =>
       Promise.resolve(['project/repo', 'project/another-repo']),
     );
@@ -158,9 +140,7 @@ describe('workers/global/autodiscover', () => {
     config.autodiscover = true;
     config.autodiscoverFilter = ['/project/re**./'];
     config.platform = 'github';
-    hostRules.find.mockImplementation(() => ({
-      token: 'abc',
-    }));
+    hostRules.add({ token: 'abc' });
     ghApi.getRepos.mockImplementation(() =>
       Promise.resolve(['project/repo', 'project/another-repo']),
     );
@@ -172,9 +152,7 @@ describe('workers/global/autodiscover', () => {
     config.autodiscover = true;
     config.autodiscoverFilter = ['another-project/re*', 'department/dev/*'];
     config.platform = 'github';
-    hostRules.find.mockImplementation(() => ({
-      token: 'abc',
-    }));
+    hostRules.add({ token: 'abc' });
     // retains order
     const expectedRepositories = [
       'department/dev/aProject',
@@ -195,9 +173,7 @@ describe('workers/global/autodiscover', () => {
     config.autodiscover = true;
     config.autodiscoverFilter = ['project/re*'];
     config.platform = 'github';
-    hostRules.find.mockImplementation(() => ({
-      token: 'abc',
-    }));
+    hostRules.add({ token: 'abc' });
     ghApi.getRepos.mockImplementation(() =>
       Promise.resolve(['project/repo', 'PROJECT/repo2']),
     );

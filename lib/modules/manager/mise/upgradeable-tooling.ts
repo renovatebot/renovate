@@ -7,6 +7,7 @@ import { JavaVersionDatasource } from '../../datasource/java-version/index.ts';
 import { NodeVersionDatasource } from '../../datasource/node-version/index.ts';
 import { NpmDatasource } from '../../datasource/npm/index.ts';
 import { RubyVersionDatasource } from '../../datasource/ruby-version/index.ts';
+import { RustVersionDatasource } from '../../datasource/rust-version/index.ts';
 import * as regexVersioning from '../../versioning/regex/index.ts';
 import * as semverVersioning from '../../versioning/semver/index.ts';
 import * as semverPartialVersioning from '../../versioning/semver-partial/index.ts';
@@ -178,8 +179,8 @@ const miseCoreTooling: Record<string, ToolingDefinition> = {
   rust: {
     misePluginUrl: 'https://mise.jdx.dev/lang/rust.html',
     config: {
-      packageName: 'rust-lang/rust',
-      datasource: GithubTagsDatasource.id,
+      packageName: 'rust',
+      datasource: RustVersionDatasource.id,
     },
   },
   swift: {

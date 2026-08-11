@@ -1,8 +1,11 @@
+import { codeBlock } from 'common-tags';
 import { Fixtures } from '~test/fixtures.ts';
 import { type Upgrade } from '../../../types.ts';
 import * as npmUpdater from '../../index.ts';
 
-const readFixture = (x: string): string => Fixtures.get(x, '../..');
+function readFixture(x: string): string {
+  return Fixtures.get(x, '../..');
+}
 
 const input01Content = readFixture('inputs/01.json');
 const input01GlobContent = readFixture('inputs/01-glob.json');
@@ -218,16 +221,20 @@ describe('modules/manager/npm/update/dependency/index', () => {
         newValue: '>=2.0.0',
         newName: 'got',
       };
-      const packageContent = `{
-        "peerDependencies": {
-          "request": ">=2.0.0"
-        }
-      }`;
-      const expected = `{
-        "peerDependencies": {
-          "got": ">=2.0.0"
-        }
-      }`;
+      const packageContent = codeBlock`
+        {
+                "peerDependencies": {
+                  "request": ">=2.0.0"
+                }
+              }
+      `;
+      const expected = codeBlock`
+        {
+                "peerDependencies": {
+                  "got": ">=2.0.0"
+                }
+              }
+      `;
       const testContent = npmUpdater.updateDependency({
         fileContent: packageContent,
         packageFile: 'package.json',
@@ -243,16 +250,20 @@ describe('modules/manager/npm/update/dependency/index', () => {
         newValue: '>=2.0.0',
         newName: 'got',
       };
-      const packageContent = `{
-        "peerDependencies": {
-          "got": ">=2.0.0"
-        }
-      }`;
-      const expected = `{
-        "peerDependencies": {
-          "got": ">=2.0.0"
-        }
-      }`;
+      const packageContent = codeBlock`
+        {
+                "peerDependencies": {
+                  "got": ">=2.0.0"
+                }
+              }
+      `;
+      const expected = codeBlock`
+        {
+                "peerDependencies": {
+                  "got": ">=2.0.0"
+                }
+              }
+      `;
       const testContent = npmUpdater.updateDependency({
         fileContent: packageContent,
         packageFile: 'package.json',
@@ -420,16 +431,20 @@ describe('modules/manager/npm/update/dependency/index', () => {
         depName: 'typescript',
         newValue: '0.60.0',
       };
-      const overrideDependencies = `{
-        "overrides": {
-          "typescript": "0.0.5"
-        }
-      }`;
-      const expected = `{
-        "overrides": {
-          "typescript": "0.60.0"
-        }
-      }`;
+      const overrideDependencies = codeBlock`
+        {
+                "overrides": {
+                  "typescript": "0.0.5"
+                }
+              }
+      `;
+      const expected = codeBlock`
+        {
+                "overrides": {
+                  "typescript": "0.60.0"
+                }
+              }
+      `;
       const testContent = npmUpdater.updateDependency({
         fileContent: overrideDependencies,
         packageFile: 'package.json',
@@ -445,20 +460,24 @@ describe('modules/manager/npm/update/dependency/index', () => {
         newValue: '0.60.0',
         managerData: { parents: ['awesome-typescript-loader'] },
       };
-      const overrideDependencies = `{
-        "overrides": {
-          "awesome-typescript-loader": {
-           "typescript": "3.0.0"
-         }
-        }
-      }`;
-      const expected = `{
-        "overrides": {
-          "awesome-typescript-loader": {
-           "typescript": "0.60.0"
-         }
-        }
-      }`;
+      const overrideDependencies = codeBlock`
+        {
+                "overrides": {
+                  "awesome-typescript-loader": {
+                   "typescript": "3.0.0"
+                 }
+                }
+              }
+      `;
+      const expected = codeBlock`
+        {
+                "overrides": {
+                  "awesome-typescript-loader": {
+                   "typescript": "0.60.0"
+                 }
+                }
+              }
+      `;
       const testContent = npmUpdater.updateDependency({
         fileContent: overrideDependencies,
         packageFile: 'package.json',
@@ -474,20 +493,24 @@ describe('modules/manager/npm/update/dependency/index', () => {
         newValue: '0.60.0',
         managerData: { parents: ['typescript'] },
       };
-      const overrideDependencies = `{
-        "overrides": {
-          "typescript": {
-           ".": "3.0.0"
-         }
-        }
-      }`;
-      const expected = `{
-        "overrides": {
-          "typescript": {
-           ".": "0.60.0"
-         }
-        }
-      }`;
+      const overrideDependencies = codeBlock`
+        {
+                "overrides": {
+                  "typescript": {
+                   ".": "3.0.0"
+                 }
+                }
+              }
+      `;
+      const expected = codeBlock`
+        {
+                "overrides": {
+                  "typescript": {
+                   ".": "0.60.0"
+                 }
+                }
+              }
+      `;
       const testContent = npmUpdater.updateDependency({
         fileContent: overrideDependencies,
         packageFile: 'package.json',
@@ -502,20 +525,24 @@ describe('modules/manager/npm/update/dependency/index', () => {
         depName: 'typescript',
         newValue: '0.60.0',
       };
-      const overrideDependencies = `{
-        "pnpm": {
-          "overrides": {
-            "typescript": "0.0.5"
-          }
-        }
-      }`;
-      const expected = `{
-        "pnpm": {
-          "overrides": {
-            "typescript": "0.60.0"
-          }
-        }
-      }`;
+      const overrideDependencies = codeBlock`
+        {
+                "pnpm": {
+                  "overrides": {
+                    "typescript": "0.0.5"
+                  }
+                }
+              }
+      `;
+      const expected = codeBlock`
+        {
+                "pnpm": {
+                  "overrides": {
+                    "typescript": "0.60.0"
+                  }
+                }
+              }
+      `;
       const testContent = npmUpdater.updateDependency({
         fileContent: overrideDependencies,
         packageFile: 'package.json',

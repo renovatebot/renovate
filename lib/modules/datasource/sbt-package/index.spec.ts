@@ -366,11 +366,12 @@ describe('modules/datasource/sbt-package/index', () => {
     it('extracts URL from Maven POM file', async () => {
       const registryUrl = 'https://repo.maven.apache.org/maven2/';
       const packageName = 'org.example:example';
-      packageCache.get.mockImplementation(((ns: string, k: string) =>
+      packageCache.get.mockImplementation((ns: string, k: string) =>
         ns === 'datasource-sbt-package' &&
         k === `package-urls:${registryUrl}:${packageName}`
           ? Promise.resolve([`${registryUrl}org/example/`])
-          : Promise.resolve(undefined)) as never);
+          : Promise.resolve(undefined),
+      );
 
       httpMock
         .scope(registryUrl)

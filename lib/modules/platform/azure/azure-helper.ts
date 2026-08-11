@@ -6,7 +6,10 @@ import type {
   GitTreeRef,
 } from 'azure-devops-node-api/interfaces/GitInterfaces.js';
 import { GitPullRequestMergeStrategy } from 'azure-devops-node-api/interfaces/GitInterfaces.js';
-import type { PolicyConfiguration } from 'azure-devops-node-api/interfaces/PolicyInterfaces.js';
+import type {
+  PolicyConfiguration,
+  PolicyEvaluationRecord,
+} from 'azure-devops-node-api/interfaces/PolicyInterfaces.js';
 import { logger } from '../../../logger/index.ts';
 import { streamToString } from '../../../util/streams.ts';
 import { getNewBranchName } from '../util.ts';
@@ -99,7 +102,7 @@ export async function getFile(
           return null;
         }
       }
-    } catch /* v8 ignore next */ {
+    } catch /* v8 ignore next -- non-JSON error body falls through to raw file content, parse failure not simulated in specs */ {
       // it 's not a JSON, so I send the content directly with the line under
     }
 
@@ -150,7 +153,7 @@ export async function getMergeMethod(
     refName?: string;
     matchKind: 'Prefix' | 'Exact' | 'DefaultBranch';
   }
-  const isRelevantScope = (scope: Scope): boolean => {
+  function isRelevantScope(scope: Scope): boolean {
     if (
       scope.matchKind === 'DefaultBranch' &&
       // TODO: types (#22198)
@@ -168,7 +171,7 @@ export async function getMergeMethod(
     return scope.matchKind === 'Exact'
       ? scope.refName === branchRef
       : branchRef.startsWith(scope.refName!);
-  };
+  }
 
   const policyConfigurations = (
     await (
@@ -202,6 +205,17 @@ export async function getMergeMethod(
     `getMergeMethod(branchRef=${branchRef!})=${GitPullRequestMergeStrategy[GitPullRequestMergeStrategy.NoFastForward]}`,
   );
   return GitPullRequestMergeStrategy.NoFastForward;
+}
+
+export async function getPolicyEvaluations(
+  project: string,
+  artifactId: string,
+): Promise<PolicyEvaluationRecord[]> {
+  logger.debug(`getPolicyEvaluations(${project}, ${artifactId})`);
+  const policyEvaluations = await (
+    await azureApi.policyApi()
+  ).getPolicyEvaluations(project, artifactId);
+  return policyEvaluations;
 }
 
 export async function getAllProjectTeams(

@@ -165,11 +165,11 @@ function isSame(
   }
   if (type === 'major') {
     return 'eq' === compareIntArray(aParts.major, bParts.major);
-  } else if (type === 'minor') {
-    return 'eq' === compareIntArray(aParts.minor, bParts.minor);
-  } else {
-    return 'eq' === compareIntArray(aParts.patch, bParts.patch);
   }
+  if (type === 'minor') {
+    return 'eq' === compareIntArray(aParts.minor, bParts.minor);
+  }
+  return 'eq' === compareIntArray(aParts.patch, bParts.patch);
 }
 
 function subset(subRange: string, superRange: string): boolean | undefined {

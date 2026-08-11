@@ -12,7 +12,7 @@ describe('util/git/auth', () => {
   describe('getGitAuthenticatedEnvironmentVariables()', () => {
     it('returns url with token', () => {
       expect(
-        getGitAuthenticatedEnvironmentVariables('https://github.com/', {
+        getGitAuthenticatedEnvironmentVariables({}, 'https://github.com/', {
           token: 'token1234',
           hostType: 'github',
           matchHost: 'github.com',
@@ -30,7 +30,7 @@ describe('util/git/auth', () => {
 
     it('returns url with username and password', () => {
       expect(
-        getGitAuthenticatedEnvironmentVariables('https://example.com/', {
+        getGitAuthenticatedEnvironmentVariables({}, 'https://example.com/', {
           username: 'username',
           password: 'password',
           hostType: 'github',
@@ -52,7 +52,7 @@ describe('util/git/auth', () => {
 
     it('prefers token over username and password', () => {
       expect(
-        getGitAuthenticatedEnvironmentVariables('https://github.com/', {
+        getGitAuthenticatedEnvironmentVariables({}, 'https://github.com/', {
           username: 'username',
           password: 'password',
           token: 'token1234',
@@ -72,7 +72,7 @@ describe('util/git/auth', () => {
 
     it('returns url with token for different protocols', () => {
       expect(
-        getGitAuthenticatedEnvironmentVariables('foobar://github.com/', {
+        getGitAuthenticatedEnvironmentVariables({}, 'foobar://github.com/', {
           token: 'token1234',
           hostType: 'github',
           matchHost: 'github.com',
@@ -90,7 +90,7 @@ describe('util/git/auth', () => {
 
     it('returns correct url if token already contains GitHub App username', () => {
       expect(
-        getGitAuthenticatedEnvironmentVariables('https://github.com/', {
+        getGitAuthenticatedEnvironmentVariables({}, 'https://github.com/', {
           token: 'x-access-token:token1234',
           hostType: 'github',
           matchHost: 'github.com',
@@ -112,13 +112,13 @@ describe('util/git/auth', () => {
     it('returns url with token and already existing GIT_CONFIG_COUNT from parameter', () => {
       expect(
         getGitAuthenticatedEnvironmentVariables(
+          { GIT_CONFIG_COUNT: '1' },
           'https://github.com/',
           {
             token: 'token1234',
             hostType: 'github',
             matchHost: 'github.com',
           },
-          { GIT_CONFIG_COUNT: '1' },
         ),
       ).toStrictEqual({
         GIT_CONFIG_COUNT: '4',
@@ -135,13 +135,13 @@ describe('util/git/auth', () => {
       process.env.GIT_CONFIG_COUNT = '54';
       expect(
         getGitAuthenticatedEnvironmentVariables(
+          { GIT_CONFIG_COUNT: '1' },
           'https://github.com/',
           {
             token: 'token1234',
             hostType: 'github',
             matchHost: 'github.com',
           },
-          { GIT_CONFIG_COUNT: '1' },
         ),
       ).toStrictEqual({
         GIT_CONFIG_COUNT: '4',
@@ -154,35 +154,35 @@ describe('util/git/auth', () => {
       });
     });
 
-    it('returns url with token and already existing GIT_CONFIG_COUNT from environment', () => {
+    it('does not inherit GIT_CONFIG_COUNT from the process environment', () => {
       process.env.GIT_CONFIG_COUNT = '1';
       expect(
-        getGitAuthenticatedEnvironmentVariables('https://github.com/', {
+        getGitAuthenticatedEnvironmentVariables({}, 'https://github.com/', {
           token: 'token1234',
           hostType: 'github',
           matchHost: 'github.com',
         }),
       ).toStrictEqual({
-        GIT_CONFIG_COUNT: '4',
-        GIT_CONFIG_KEY_1: 'url.https://ssh:token1234@github.com/.insteadOf',
-        GIT_CONFIG_KEY_2: 'url.https://git:token1234@github.com/.insteadOf',
-        GIT_CONFIG_KEY_3: 'url.https://token1234@github.com/.insteadOf',
-        GIT_CONFIG_VALUE_1: 'ssh://git@github.com/',
-        GIT_CONFIG_VALUE_2: 'git@github.com:',
-        GIT_CONFIG_VALUE_3: 'https://github.com/',
+        GIT_CONFIG_COUNT: '3',
+        GIT_CONFIG_KEY_0: 'url.https://ssh:token1234@github.com/.insteadOf',
+        GIT_CONFIG_KEY_1: 'url.https://git:token1234@github.com/.insteadOf',
+        GIT_CONFIG_KEY_2: 'url.https://token1234@github.com/.insteadOf',
+        GIT_CONFIG_VALUE_0: 'ssh://git@github.com/',
+        GIT_CONFIG_VALUE_1: 'git@github.com:',
+        GIT_CONFIG_VALUE_2: 'https://github.com/',
       });
     });
 
     it('returns url with token and passthrough existing variables', () => {
       expect(
         getGitAuthenticatedEnvironmentVariables(
+          { RANDOM_VARIABLE: 'random' },
           'https://github.com/',
           {
             token: 'token1234',
             hostType: 'github',
             matchHost: 'github.com',
           },
-          { RANDOM_VARIABLE: 'random' },
         ),
       ).toStrictEqual({
         GIT_CONFIG_COUNT: '3',
@@ -196,14 +196,17 @@ describe('util/git/auth', () => {
       });
     });
 
-    it('return url with token with invalid GIT_CONFIG_COUNT from environment', () => {
-      process.env.GIT_CONFIG_COUNT = 'notvalid';
+    it('ignores an invalid supplied GIT_CONFIG_COUNT', () => {
       expect(
-        getGitAuthenticatedEnvironmentVariables('https://github.com/', {
-          token: 'token1234',
-          hostType: 'github',
-          matchHost: 'github.com',
-        }),
+        getGitAuthenticatedEnvironmentVariables(
+          { GIT_CONFIG_COUNT: 'notvalid' },
+          'https://github.com/',
+          {
+            token: 'token1234',
+            hostType: 'github',
+            matchHost: 'github.com',
+          },
+        ),
       ).toStrictEqual({
         GIT_CONFIG_COUNT: '3',
         GIT_CONFIG_KEY_0: 'url.https://ssh:token1234@github.com/.insteadOf',
@@ -217,7 +220,7 @@ describe('util/git/auth', () => {
 
     it('returns url with token containing username for GitLab token', () => {
       expect(
-        getGitAuthenticatedEnvironmentVariables('https://gitlab.com/', {
+        getGitAuthenticatedEnvironmentVariables({}, 'https://gitlab.com/', {
           token: 'token1234',
           hostType: 'gitlab',
           matchHost: 'github.com',
@@ -238,7 +241,7 @@ describe('util/git/auth', () => {
 
     it('returns url with token containing username for GitLab token without hostType', () => {
       expect(
-        getGitAuthenticatedEnvironmentVariables('https://gitlab.com/', {
+        getGitAuthenticatedEnvironmentVariables({}, 'https://gitlab.com/', {
           token: 'token1234',
           matchHost: 'gitlab.com',
         }),
@@ -259,12 +262,12 @@ describe('util/git/auth', () => {
     it('returns original environment variables when no token is set', () => {
       expect(
         getGitAuthenticatedEnvironmentVariables(
+          { env: 'value' },
           'https://gitlab.com/',
           {
             hostType: 'gitlab',
             matchHost: 'gitlab.com',
           },
-          { env: 'value' },
         ),
       ).toStrictEqual({
         env: 'value',
@@ -273,7 +276,7 @@ describe('util/git/auth', () => {
 
     it('returns url with token for http hosts', () => {
       expect(
-        getGitAuthenticatedEnvironmentVariables('http://github.com/', {
+        getGitAuthenticatedEnvironmentVariables({}, 'http://github.com/', {
           token: 'token1234',
           hostType: 'github',
           matchHost: 'github.com',
@@ -291,7 +294,7 @@ describe('util/git/auth', () => {
 
     it('returns url with token for orgs', () => {
       expect(
-        getGitAuthenticatedEnvironmentVariables('https://github.com/org', {
+        getGitAuthenticatedEnvironmentVariables({}, 'https://github.com/org', {
           token: 'token1234',
           hostType: 'github',
           matchHost: 'github.com',
@@ -309,11 +312,15 @@ describe('util/git/auth', () => {
 
     it('returns url with token for orgs and projects', () => {
       expect(
-        getGitAuthenticatedEnvironmentVariables('https://github.com/org/repo', {
-          token: 'token1234',
-          hostType: 'github',
-          matchHost: 'github.com',
-        }),
+        getGitAuthenticatedEnvironmentVariables(
+          {},
+          'https://github.com/org/repo',
+          {
+            token: 'token1234',
+            hostType: 'github',
+            matchHost: 'github.com',
+          },
+        ),
       ).toStrictEqual({
         GIT_CONFIG_COUNT: '3',
         GIT_CONFIG_KEY_0:
@@ -330,6 +337,7 @@ describe('util/git/auth', () => {
     it('returns url with token for orgs and projects and ports', () => {
       expect(
         getGitAuthenticatedEnvironmentVariables(
+          {},
           'https://github.com:89/org/repo.git',
           {
             token: 'token1234',
@@ -353,11 +361,15 @@ describe('util/git/auth', () => {
 
     it('returns url with token for bitbucket-server', () => {
       expect(
-        getGitAuthenticatedEnvironmentVariables('https://git.mycompany.com/', {
-          token: 'token1234',
-          hostType: 'bitbucket-server',
-          matchHost: 'git.mycompany.com',
-        }),
+        getGitAuthenticatedEnvironmentVariables(
+          {},
+          'https://git.mycompany.com/',
+          {
+            token: 'token1234',
+            hostType: 'bitbucket-server',
+            matchHost: 'git.mycompany.com',
+          },
+        ),
       ).toStrictEqual({
         GIT_CONFIG_COUNT: '3',
         GIT_CONFIG_KEY_0:
@@ -379,7 +391,7 @@ describe('util/git/auth', () => {
     });
 
     it('returns empty object if no environment variables exist', () => {
-      expect(getGitEnvironmentVariables()).toStrictEqual({});
+      expect(getGitEnvironmentVariables({})).toStrictEqual({});
     });
 
     it('returns environment variables with token if hostRule for api.github.com exists', () => {
@@ -388,7 +400,7 @@ describe('util/git/auth', () => {
         matchHost: 'api.github.com',
         token: 'token123',
       });
-      expect(getGitEnvironmentVariables()).toStrictEqual({
+      expect(getGitEnvironmentVariables({})).toStrictEqual({
         GIT_CONFIG_COUNT: '3',
         GIT_CONFIG_KEY_0: 'url.https://ssh:token123@github.com/.insteadOf',
         GIT_CONFIG_KEY_1: 'url.https://git:token123@github.com/.insteadOf',
@@ -396,6 +408,31 @@ describe('util/git/auth', () => {
         GIT_CONFIG_VALUE_0: 'ssh://git@github.com/',
         GIT_CONFIG_VALUE_1: 'git@github.com:',
         GIT_CONFIG_VALUE_2: 'https://github.com/',
+      });
+    });
+
+    it('appends authentication to the supplied environment', () => {
+      add({
+        hostType: 'github',
+        matchHost: 'api.github.com',
+        token: 'token123',
+      });
+      expect(
+        getGitEnvironmentVariables({
+          GIT_CONFIG_COUNT: '1',
+          GIT_CONFIG_KEY_0: 'existing-key',
+          GIT_CONFIG_VALUE_0: 'existing-value',
+        }),
+      ).toStrictEqual({
+        GIT_CONFIG_COUNT: '4',
+        GIT_CONFIG_KEY_0: 'existing-key',
+        GIT_CONFIG_KEY_1: 'url.https://ssh:token123@github.com/.insteadOf',
+        GIT_CONFIG_KEY_2: 'url.https://git:token123@github.com/.insteadOf',
+        GIT_CONFIG_KEY_3: 'url.https://token123@github.com/.insteadOf',
+        GIT_CONFIG_VALUE_0: 'existing-value',
+        GIT_CONFIG_VALUE_1: 'ssh://git@github.com/',
+        GIT_CONFIG_VALUE_2: 'git@github.com:',
+        GIT_CONFIG_VALUE_3: 'https://github.com/',
       });
     });
 
@@ -415,7 +452,7 @@ describe('util/git/auth', () => {
         matchHost: 'https://github.example.com',
         token: 'token345',
       });
-      expect(getGitEnvironmentVariables()).toStrictEqual({
+      expect(getGitEnvironmentVariables({})).toStrictEqual({
         GIT_CONFIG_COUNT: '9',
         GIT_CONFIG_KEY_0: 'url.https://ssh:token123@github.com/.insteadOf',
         GIT_CONFIG_KEY_1: 'url.https://git:token123@github.com/.insteadOf',
@@ -449,7 +486,7 @@ describe('util/git/auth', () => {
         matchHost: 'https://gitlab.example.com',
         token: 'token123',
       });
-      expect(getGitEnvironmentVariables()).toStrictEqual({
+      expect(getGitEnvironmentVariables({})).toStrictEqual({
         GIT_CONFIG_COUNT: '3',
         GIT_CONFIG_KEY_0:
           'url.https://gitlab-ci-token:token123@gitlab.example.com/.insteadOf',
@@ -470,7 +507,7 @@ describe('util/git/auth', () => {
         username: 'user1234',
         password: 'pass1234',
       });
-      expect(getGitEnvironmentVariables()).toStrictEqual({
+      expect(getGitEnvironmentVariables({})).toStrictEqual({
         GIT_CONFIG_COUNT: '3',
         GIT_CONFIG_KEY_0:
           'url.https://user1234:pass1234@gitlab.example.com/.insteadOf',
@@ -491,7 +528,7 @@ describe('util/git/auth', () => {
         username: 'user @ :$ abc',
         password: 'abc @ blub pass0:',
       });
-      expect(getGitEnvironmentVariables()).toStrictEqual({
+      expect(getGitEnvironmentVariables({})).toStrictEqual({
         GIT_CONFIG_COUNT: '3',
         GIT_CONFIG_KEY_0:
           'url.https://user%20%40%20%3A%24%20abc:abc%20%40%20blub%20pass0%3A@gitlab.example.com/.insteadOf',
@@ -511,7 +548,7 @@ describe('util/git/auth', () => {
         matchHost: 'https://custom.example.com',
         token: 'token123',
       });
-      expect(getGitEnvironmentVariables()).toStrictEqual({});
+      expect(getGitEnvironmentVariables({})).toStrictEqual({});
     });
 
     it('returns no environment variables when only username is set', () => {
@@ -520,7 +557,7 @@ describe('util/git/auth', () => {
         matchHost: 'https://custom.example.com',
         username: 'user123',
       });
-      expect(getGitEnvironmentVariables()).toStrictEqual({});
+      expect(getGitEnvironmentVariables({})).toStrictEqual({});
     });
 
     it('returns no environment variables when only password is set', () => {
@@ -529,7 +566,7 @@ describe('util/git/auth', () => {
         matchHost: 'https://custom.example.com',
         password: 'pass123',
       });
-      expect(getGitEnvironmentVariables()).toStrictEqual({});
+      expect(getGitEnvironmentVariables({})).toStrictEqual({});
     });
 
     it('returns environment variables when hostType is explicitly set', () => {
@@ -538,7 +575,7 @@ describe('util/git/auth', () => {
         matchHost: 'https://custom.example.com',
         token: 'token123',
       });
-      expect(getGitEnvironmentVariables(['custom'])).toStrictEqual({
+      expect(getGitEnvironmentVariables({}, ['custom'])).toStrictEqual({
         GIT_CONFIG_COUNT: '3',
         GIT_CONFIG_KEY_0:
           'url.https://ssh:token123@custom.example.com/.insteadOf',
@@ -557,7 +594,7 @@ describe('util/git/auth', () => {
         matchHost: 'invalid://*.github.example.com',
         token: 'token123',
       });
-      expect(getGitEnvironmentVariables(['custom'])).toStrictEqual({});
+      expect(getGitEnvironmentVariables({}, ['custom'])).toStrictEqual({});
     });
 
     it('returns environment variables for bitbucket-server', () => {
@@ -566,7 +603,7 @@ describe('util/git/auth', () => {
         matchHost: 'git.mycompany.com',
         token: 'token123',
       });
-      expect(getGitEnvironmentVariables()).toStrictEqual({
+      expect(getGitEnvironmentVariables({})).toStrictEqual({
         GIT_CONFIG_COUNT: '3',
         GIT_CONFIG_KEY_0:
           'url.https://ssh:token123@git.mycompany.com/scm/.insteadOf',

@@ -575,6 +575,10 @@ describe('util/fs/index', () => {
       expect(await fs.pathExists(`${cacheDir}/foo/bar/file.txt`)).toBeFalse();
       expect(await fs.pathExists(`${cacheDir}/foo/bar`)).toBeFalse();
     });
+
+    it('ignores missing path', async () => {
+      await expect(rmCache(`foo/missing`)).resolves.toBeUndefined();
+    });
   });
 
   describe('cachePathExists', () => {
