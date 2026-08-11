@@ -1,3 +1,4 @@
+import _timers from 'node:timers/promises';
 import * as httpMock from '~test/http-mock.ts';
 import { fakeSha, git, hostRules, logger, partial } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
@@ -29,6 +30,10 @@ import type {
   RepoPermission,
   User,
 } from './types.ts';
+
+vi.mock('timers/promises');
+
+const timers = vi.mocked(_timers);
 
 /**
  * latest tested gitea version.
@@ -239,6 +244,8 @@ describe('modules/platform/gitea/index', () => {
     git.isBranchBehindBase.mockResolvedValue(false);
     git.getBranchCommit.mockReturnValue(mockCommitHash);
     hostRules.clear();
+    delete process.env.RENOVATE_X_GITEA_AUTO_MERGEABLE_CHECK_ATTEMPTS;
+    delete process.env.RENOVATE_X_GITEA_AUTO_MERGEABLE_CHECK_DELAY;
   });
 
   async function initFakePlatform(
@@ -1915,7 +1922,6 @@ describe('modules/platform/gitea/index', () => {
     );
 
     it('retries until mergeable is true before calling merge', async () => {
-      process.env.RENOVATE_X_GITEA_AUTO_MERGEABLE_CHECK_DELAY = '1';
       const scope = httpMock
         .scope('https://gitea.com/api/v1')
         .post('/repos/some/repo/pulls')
@@ -1944,11 +1950,11 @@ describe('modules/platform/gitea/index', () => {
         expect.objectContaining({ prNumber: 42 }),
         'Gitea-native automerge: success',
       );
-      delete process.env.RENOVATE_X_GITEA_AUTO_MERGEABLE_CHECK_DELAY;
+      // exponential backoff between polls, no sleep before the first poll
+      expect(timers.setTimeout.mock.calls).toMatchObject([[250], [1000]]);
     });
 
     it('attempts merge anyway if mergeable is still false after all retries', async () => {
-      process.env.RENOVATE_X_GITEA_AUTO_MERGEABLE_CHECK_DELAY = '1';
       process.env.RENOVATE_X_GITEA_AUTO_MERGEABLE_CHECK_ATTEMPTS = '2';
       const scope = httpMock
         .scope('https://gitea.com/api/v1')
@@ -1975,8 +1981,8 @@ describe('modules/platform/gitea/index', () => {
       expect(logger.logger.debug).toHaveBeenCalledWith(
         'PR not mergeable after 2 attempts, merging anyway...prNo: 42',
       );
-      delete process.env.RENOVATE_X_GITEA_AUTO_MERGEABLE_CHECK_DELAY;
-      delete process.env.RENOVATE_X_GITEA_AUTO_MERGEABLE_CHECK_ATTEMPTS;
+      // no sleep after the final poll
+      expect(timers.setTimeout.mock.calls).toMatchObject([[250]]);
     });
 
     describe('reattemptPlatformAutomerge', () => {
@@ -2058,6 +2064,25 @@ describe('modules/platform/gitea/index', () => {
         expect(logger.logger.warn).toHaveBeenCalledWith(
           expect.objectContaining({ prNumber: 42 }),
           'Gitea-native automerge: fail',
+        );
+      });
+
+      it('logs warning when the mergeable check throws', async () => {
+        const scope = httpMock
+          .scope('https://gitea.com/api/v1')
+          .get('/repos/some/repo/pulls/42')
+          .replyWithError('boom');
+        await initFakePlatform(scope, '1.24.0');
+        await initFakeRepo(scope);
+
+        await gitea.reattemptPlatformAutomerge({
+          number: 42,
+          platformPrOptions: { usePlatformAutomerge: true },
+        });
+
+        expect(logger.logger.warn).toHaveBeenCalledWith(
+          expect.objectContaining({ err: expect.any(Error) }),
+          'Error re-attempting PR platform automerge',
         );
       });
     });
