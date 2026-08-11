@@ -2,7 +2,9 @@ import { quote } from 'shlex';
 import { GlobalConfig } from '../../../config/global.ts';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
+import { coerceArray } from '../../../util/array.ts';
 import { findGithubToken } from '../../../util/check-token.ts';
+import { detectPlatform } from '../../../util/common.ts';
 import { exec } from '../../../util/exec/index.ts';
 import type { ExecOptions, ExtraEnv } from '../../../util/exec/types.ts';
 import { readLocalFile, writeLocalFile } from '../../../util/fs/index.ts';
@@ -10,40 +12,17 @@ import { getRepoStatus } from '../../../util/git/index.ts';
 import type { FileChange } from '../../../util/git/types.ts';
 import * as hostRules from '../../../util/host-rules.ts';
 import { parseUrl } from '../../../util/url.ts';
-import type { ArtifactError, PackageFile, PostUpdateConfig } from '../types.ts';
+import type { PackageFile, PostUpdateConfig } from '../types.ts';
+import { artifactErrorMessageFromExecError } from '../util.ts';
 import { actionsLockFile, isLockfileManaged } from './common.ts';
 import { ActionsLockfile } from './schema.ts';
+import type { ActionsLockfileResult, OnboardedWorkflows } from './types.ts';
 
 /** The `gh` CLI extension that generates and verifies the lockfile. */
 const extensionName = 'github/gh-actions-lock';
 
 /** The `uses:` dep types the lockfile graph is built from. */
 const lockedDepTypes = ['action', 'docker'];
-
-/** Mirrors the shape `processBranch` already concatenates onto its config for lock file updates. */
-export interface ActionsLockfileResult {
-  updatedArtifacts: FileChange[];
-  artifactErrors: ArtifactError[];
-}
-
-/**
- * An `ExecError` always carries a `stderr` property, so nullish coalescing would keep an empty string and render an artifact error with no message at all.
- */
-function execErrorMessage(err: {
-  stderr?: string;
-  stdout?: string;
-  message: string;
-}): string {
-  if (err.stderr?.trim()) {
-    return err.stderr;
-  }
-
-  if (err.stdout?.trim()) {
-    return err.stdout;
-  }
-
-  return err.message;
-}
 
 function findToken(url: string): string | undefined {
   return findGithubToken(hostRules.find({ hostType: 'github', url }));
@@ -56,10 +35,12 @@ function findToken(url: string): string | undefined {
  */
 function getTokenEnv(): ExtraEnv {
   const githubComEndpoint = 'https://api.github.com/';
+  const configuredEndpoint = GlobalConfig.get('endpoint');
+  // The configured endpoint only says where GitHub lives when Renovate is talking to GitHub: workflows mirrored onto another platform still resolve their actions against github.com.
   const endpoint =
-    (GlobalConfig.get('platform') === 'github'
-      ? GlobalConfig.get('endpoint')
-      : undefined) ?? githubComEndpoint;
+    configuredEndpoint && detectPlatform(configuredEndpoint) === 'github'
+      ? configuredEndpoint
+      : githubComEndpoint;
 
   const hostname = parseUrl(endpoint)?.hostname;
   const isEnterprise =
@@ -75,7 +56,7 @@ function getTokenEnv(): ExtraEnv {
     }
   }
 
-  const token = findToken(isEnterprise ? githubComEndpoint : endpoint);
+  const token = findToken(githubComEndpoint);
   if (token) {
     env.GH_TOKEN = token;
   }
@@ -92,7 +73,7 @@ function getTokenEnv(): ExtraEnv {
  */
 function hasLockedUpdate(
   config: PostUpdateConfig,
-  onboardedWorkflows: Record<string, unknown>,
+  onboardedWorkflows: OnboardedWorkflows,
 ): boolean {
   return config.upgrades.some((upgrade) => {
     if (upgrade.manager !== 'github-actions') {
@@ -152,17 +133,22 @@ export async function updateActionsLockfile(
     return empty;
   }
 
-  if (!hasLockedUpdate(config, parsedLockfile.data.workflows ?? {})) {
+  if (!hasLockedUpdate(config, parsedLockfile.data.workflows)) {
     logger.debug(`No locked dependencies updated for ${actionsLockFile}`);
     return empty;
   }
 
   logger.debug(`Regenerating ${actionsLockFile}`);
 
-  // Ensure that in-memory file contents are flushed to disk, so `actions-lock` can run against it
+  const ghaPackageFilePaths = new Set(
+    ghaPackageFiles.map((file) => file.packageFile),
+  );
+
+  // Ensure that in-memory file contents are flushed to disk, so `actions-lock` can run against it.
+  // A branch can group updates from other managers, whose contents may be binary - a Gradle wrapper JAR, say - so only write the workflows which the tool actually reads.
   const writtenContent = new Map<string, string>();
-  for (const file of config.updatedPackageFiles ?? []) {
-    if (file.type === 'addition') {
+  for (const file of coerceArray(config.updatedPackageFiles)) {
+    if (file.type === 'addition' && ghaPackageFilePaths.has(file.path)) {
       const contents = file.contents!.toString();
       await writeLocalFile(file.path, contents);
       writtenContent.set(file.path, contents);
@@ -182,22 +168,16 @@ export async function updateActionsLockfile(
     docker: {},
   };
 
-  // TODO #45191: after v1 of the schema, make this Typescript only
+  // `--no-interactive`: we have no terminal to answer prompts with
+  // `--no-narrow`: keep the ref that we wrote, to avoid a `@v4` being rewritten as `@v4.2.1`
+  // `--no-migrate-local-actions`: on-by-default, but unrelated to our lockfile updates
   const commands = [
-    'gh actions-lock' +
-      ' ' +
-      // we don't have a terminal to answer with
-      '--no-interactive' +
-      ' ' +
-      // keep the ref that we wrote, to avoid a `@v4` being rewritten as `@v4.2.1`
-      '--no-narrow' +
-      ' ' +
-      // on-by-default, but unrelated to our lockfile updates
-      '--no-migrate-local-actions',
+    'gh actions-lock --no-interactive --no-narrow --no-migrate-local-actions',
   ];
 
   // `binarySource=global` means the administrator provisions tooling, so we must not reach into their `gh` install to add or re-pin an extension.
   // They own the extension version, and `constraints.ghActionsLock` does not apply.
+  // TODO replace once containerbase/base#7279 is available
   if (GlobalConfig.get('binarySource') === 'global') {
     // Debug rather than warn: `constraints.ghActionsLock` ships with a default, so we cannot tell an explicit override from the default here, and warning would fire for every repository on this `binarySource`.
     logger.once.debug(
@@ -225,7 +205,11 @@ export async function updateActionsLockfile(
     return {
       updatedArtifacts: [],
       artifactErrors: [
-        { fileName: actionsLockFile, stderr: execErrorMessage(err) },
+        {
+          fileName: actionsLockFile,
+          // an `ExecError` always carries a `stderr`, so fall back to the message rather than rendering an artifact error with nothing in it
+          stderr: artifactErrorMessageFromExecError(err, err.message),
+        },
       ],
     };
   }
@@ -244,9 +228,6 @@ export async function updateActionsLockfile(
   // `actions-lock` may annotate workflows being managed with i.e. `# This workflow is managed by gh actions-lock.`, even if there were no updates to that workflow in this branch.
   // We should diff against Git, rather than against the branch's own updated package files, otherwise those annotations are left behind as uncommitted changes
   const status = await getRepoStatus();
-  const ghaPackageFilePaths = new Set(
-    ghaPackageFiles.map((file) => file.packageFile),
-  );
   for (const path of status.modified) {
     // ignore the lockfile, as we've already committed it above, and any file which another manager owns
     if (path === actionsLockFile || !ghaPackageFilePaths.has(path)) {

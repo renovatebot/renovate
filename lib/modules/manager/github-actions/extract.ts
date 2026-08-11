@@ -1,6 +1,7 @@
 import is from '@sindresorhus/is';
 import { GlobalConfig } from '../../../config/global.ts';
 import { logger, withMeta } from '../../../logger/index.ts';
+import * as memCache from '../../../util/cache/memory/index.ts';
 import { detectPlatform } from '../../../util/common.ts';
 import { readLocalFile } from '../../../util/fs/index.ts';
 import { newlineRegex, regEx } from '../../../util/regex.ts';
@@ -27,6 +28,7 @@ import type { DockerReference, RepositoryReference } from './parse.ts';
 import { isSha, isShortSha, parseUsesLine, versionLikeRe } from './parse.ts';
 import type { UsesStep } from './schema.ts';
 import { ActionsLockfile, CommunityActions, Workflow } from './schema.ts';
+import type { LockfileState } from './types.ts';
 
 // detects if we run against a Github Enterprise Server and adds the URL to the beginning of the registryURLs for looking up Actions
 // This reflects the behavior of how GitHub looks up Actions
@@ -356,26 +358,54 @@ function extractWithYAMLParser(
   return deps;
 }
 
+async function readLockfile(): Promise<LockfileState> {
+  const content = await readLocalFile(actionsLockFile, 'utf8');
+  if (!content) {
+    return { type: 'missing' };
+  }
+
+  const parsed = ActionsLockfile.safeParse(content);
+  if (!parsed.success) {
+    // `updateActionsLockfile` warns about this once per branch, so stay quiet
+    logger.debug(`Failed to parse ${actionsLockFile}`);
+    return { type: 'unparseable' };
+  }
+
+  return { type: 'parsed', onboardedWorkflows: parsed.data.workflows };
+}
+
+/**
+ * A repository has a single lock file, but can have any number of package files, so read and parse it only once.
+ */
+function getLockfile(): Promise<LockfileState> {
+  const cacheKey = `github-actions:${actionsLockFile}`;
+  const cached = memCache.get<Promise<LockfileState> | undefined>(cacheKey);
+  if (cached !== undefined) {
+    return cached;
+  }
+
+  const result = readLockfile();
+  memCache.set(cacheKey, result);
+  return result;
+}
+
 /**
  * Whether `gh actions-lock` owns the digests in this file.
  *
  * It rewrites the workflows it manages back to plain refs when regenerating, so an inline digest pin would be stripped straight back out.
  */
 async function isManagedByLockfile(packageFile: string): Promise<boolean> {
-  const content = await readLocalFile(actionsLockFile, 'utf8');
-  if (!content) {
-    return false;
-  }
+  const lockfile = await getLockfile();
 
-  const parsed = ActionsLockfile.safeParse(content);
-  if (!parsed.success) {
-    // `updateActionsLockfile` warns about this once per branch, so stay quiet.
-    // It refuses to regenerate a lock file which it cannot parse, so treat everything as managed: pinning inline here would raise a PR which pins the digests the tool owns and leaves the lock file stale.
-    logger.debug(`Failed to parse ${actionsLockFile}`);
-    return true;
+  switch (lockfile.type) {
+    case 'missing':
+      return false;
+    case 'unparseable':
+      // The tool refuses to regenerate a lock file which it cannot parse, so treat everything as managed: pinning inline here would raise a PR which pins the digests the tool owns and leaves the lock file stale.
+      return true;
+    case 'parsed':
+      return isLockfileManaged(packageFile, lockfile.onboardedWorkflows);
   }
-
-  return isLockfileManaged(packageFile, parsed.data.workflows ?? {});
 }
 
 export async function extractPackageFile(

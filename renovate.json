@@ -113,6 +113,11 @@
       "matchPackageNames": ["containerbase/erlang-prebuild"],
       "extractVersion": "^(?<version>\\d+)",
       "separateMultipleMajor": true
+    },
+    {
+      "matchPackageNames": ["github/gh-actions-lock"],
+      "matchFileNames": ["lib/config/options/index.ts"],
+      "semanticCommitType": "fix"
     }
   ],
   "customManagers": [

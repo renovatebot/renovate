@@ -71,15 +71,16 @@ export const Workflow = Yaml.pipe(
 /**
  * The `actions.lock` schema is owned by the `gh actions-lock` CLI, and is still unstable, so don't rely on the structure too heavily.
  *
- * If `workflows` is reshaped/removed, we fail loudly to silently prevent lockfile updates.
+ * `workflows` is deliberately required: if the tool renames or reshapes it, we want the parse to fail so that we stop touching the lockfile, rather than silently treating every workflow as un-onboarded.
  *
- * TODO #45191: after v1 of the schema, make this Typescript only
+ * TODO #45191: pin to a version of the schema, once it is v1
  */
 export const ActionsLockfile = Yaml.pipe(
   z.object({
-    workflows: z.record(z.string(), z.unknown()).optional(),
+    workflows: z.record(z.string(), z.unknown()),
   }),
 );
+export type ActionsLockfile = z.infer<typeof ActionsLockfile>;
 
 export const CommunityActions = z.union(
   Object.entries(communityActions).map(([name, cfg]) =>

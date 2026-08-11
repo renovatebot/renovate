@@ -640,7 +640,6 @@ export async function processBranch(
         config,
         branchConfig.packageFiles,
       );
-      // Both were just set to arrays above, by concatenating `additionalFiles`' results onto them.
       config.artifactErrors = config.artifactErrors.concat(
         actionsLockfile.artifactErrors,
       );

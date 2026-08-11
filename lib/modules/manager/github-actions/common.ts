@@ -1,4 +1,5 @@
 import { regEx } from '../../../util/regex.ts';
+import type { OnboardedWorkflows } from './types.ts';
 
 /**
  * `gh actions-lock` writes the locked graph of all onboarded workflows, including transitive dependencies of local composite actions, to a single lock file at a fixed location.
@@ -27,7 +28,7 @@ const giteaOrForgejoFileRe = regEx(/(^|\/)\.(?:gitea|forgejo)\//);
  */
 export function isLockfileManaged(
   packageFile: string,
-  onboardedWorkflows: Record<string, unknown>,
+  onboardedWorkflows: OnboardedWorkflows,
 ): boolean {
   if (githubWorkflowFileRe.test(packageFile)) {
     return packageFile in onboardedWorkflows;

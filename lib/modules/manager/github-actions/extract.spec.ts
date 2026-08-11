@@ -2,6 +2,7 @@ import { codeBlock } from 'common-tags';
 import { Fixtures } from '~test/fixtures.ts';
 import { fs } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
+import * as memCache from '../../../util/cache/memory/index.ts';
 import * as yaml from '../../../util/yaml.ts';
 import { extractPackageFile } from './index.ts';
 
@@ -2254,6 +2255,11 @@ describe('modules/manager/github-actions/extract', () => {
   });
 
   describe('actions.lock', () => {
+    beforeEach(() => {
+      // the lock file is read through the memory cache, which production initialises per repository
+      memCache.init();
+    });
+
     const workflow = codeBlock`
       jobs:
         build:
@@ -2328,7 +2334,9 @@ describe('modules/manager/github-actions/extract', () => {
     });
 
     it('marks a local composite action when the lockfile has onboarded nothing', async () => {
-      fs.readLocalFile.mockResolvedValueOnce("version: 'v0.0.2'\n");
+      fs.readLocalFile.mockResolvedValueOnce(
+        "version: 'v0.0.2'\nworkflows: {}",
+      );
 
       // a composite action isn't keyed by `workflows:`, so it's still managed even when that key is missing entirely
       const res = await extractPackageFile(
@@ -2367,6 +2375,21 @@ describe('modules/manager/github-actions/extract', () => {
 
       expect(res).toBeNull();
       expect(fs.readLocalFile).not.toHaveBeenCalled();
+    });
+
+    it('reads the lockfile once for all package files', async () => {
+      fs.readLocalFile.mockResolvedValue(lockfile);
+
+      const [onboarded, notOnboarded] = await Promise.all([
+        extractPackageFile(workflow, '.github/workflows/ci.yml'),
+        extractPackageFile(workflow, '.github/workflows/not-onboarded.yml'),
+      ]);
+
+      expect(onboarded?.deps[0].digestManagedExternally).toBe(true);
+      expect(notOnboarded?.deps[0]).not.toHaveProperty(
+        'digestManagedExternally',
+      );
+      expect(fs.readLocalFile).toHaveBeenCalledOnce();
     });
   });
 });
