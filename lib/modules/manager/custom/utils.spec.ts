@@ -48,6 +48,14 @@ describe('modules/manager/custom/utils', () => {
       expect(dep.packageName).toBe('longer/bar');
     });
 
+    it('only replaces a single alias', () => {
+      const dep = partial<PackageDependency>({
+        depName: 'a',
+      });
+      utils.substituteRegistryAliases(dep, { a: 'b', b: 'c' });
+      expect(dep.packageName).toBe('b');
+    });
+
     it('does nothing when registryUrls, packageName and depName are all absent', () => {
       const dep = partial<PackageDependency>({});
       utils.substituteRegistryAliases(dep, { foo: 'baz' });
