@@ -1,10 +1,9 @@
 import { logger } from '../../../logger/index.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
-import { asTimestamp } from '../../../util/timestamp.ts';
 import { getQueryString, joinUrlParts } from '../../../util/url.ts';
 import { Datasource } from '../datasource.ts';
 import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
-import type { OrbPackagesResponse } from './types.ts';
+import { OrbPackagesResponse } from './schema.ts';
 
 export class OrbDatasource extends Datasource {
   static readonly id = 'orb';
@@ -34,9 +33,8 @@ export class OrbDatasource extends Datasource {
       registryUrl,
       'api/v3/orb/packages',
     )}?${getQueryString({ 'filter[name]': packageName })}`;
-    const res = (await this.http.getJsonUnchecked<OrbPackagesResponse>(url))
-      .body;
-    const pkg = res?.data?.[0];
+    const { body } = await this.http.getJson(url, OrbPackagesResponse);
+    const pkg = body.data[0];
     if (!pkg) {
       logger.debug({ packageName }, `Failed to look up orb ${packageName}`);
       return null;
@@ -46,12 +44,7 @@ export class OrbDatasource extends Datasource {
     const homepage = pkg.attributes.home_url?.length
       ? pkg.attributes.home_url
       : `https://circleci.com/developer/orbs/orb/${packageName}`;
-    const releases = (pkg.references?.orb_versions ?? []).map(
-      ({ attributes }) => ({
-        version: attributes.version,
-        releaseTimestamp: asTimestamp(attributes.created_at),
-      }),
-    );
+    const releases = pkg.references?.orb_versions ?? [];
 
     const dep = { homepage, isPrivate: !!pkg.attributes.is_private, releases };
     logger.trace({ dep }, 'dep');

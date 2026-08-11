@@ -1,9 +1,10 @@
+import type { z } from 'zod/v4';
 import * as httpMock from '~test/http-mock.ts';
 import { getPkgReleases } from '../index.ts';
 import { OrbDatasource } from './index.ts';
-import type { OrbPackagesResponse } from './types.ts';
+import type { OrbPackagesResponse } from './schema.ts';
 
-const orbData: OrbPackagesResponse = {
+const orbData: z.input<typeof OrbPackagesResponse> = {
   data: [
     {
       attributes: {
