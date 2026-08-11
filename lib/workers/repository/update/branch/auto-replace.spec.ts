@@ -218,14 +218,11 @@ describe('workers/repository/update/branch/auto-replace', () => {
       upgrade.packageFile = '.gitlab-ci.yml';
       upgrade.autoReplaceStringTemplate =
         "'{{{depName}}}'\nref: {{{newValue}}}";
-      // @ts-expect-error -- TODO: improve typing
       upgrade.datasourceTemplate = 'docker';
-      // @ts-expect-error -- TODO: improve typing
       upgrade.matchStringsStrategy = 'combination';
 
       // If the new "name" is not added to the matchStrings, the regex matcher fails to extract from `newContent` as
       // there's nothing defined in there anymore that it can match
-      // @ts-expect-error -- TODO: improve typing
       upgrade.matchStrings = [
         '[\'"]?(?<depName>pipeline-fragments\\/docker-lint)[\'"]?\\s*ref:\\s[\'"]?(?<currentValue>[\\d-]*)[\'"]?',
         '[\'"]?(?<depName>pipeline-solutions\\/gitlab\\/fragments\\/docker-lint)[\'"]?\\s*ref:\\s[\'"]?(?<currentValue>[\\d-]*)[\'"]?',
@@ -253,11 +250,9 @@ describe('workers/repository/update/branch/auto-replace', () => {
       upgrade.replaceString =
         'image: "1111111111.dkr.ecr.us-east-1.amazonaws.com/my-repository:1"\n\n';
       upgrade.packageFile = 'k8s/base/defaults.yaml';
-      // @ts-expect-error -- TODO: improve typing
       upgrade.matchStrings = [
         'image:\\s*\\\'?\\"?(?<depName>[^:]+):(?<currentValue>[^\\s\\\'\\"]+)\\\'?\\"?\\s*',
       ];
-      // @ts-expect-error -- TODO: improve typing
       upgrade.datasourceTemplate = 'docker';
       const res = doAutoReplace(upgrade, yml, reuseExistingBranch);
       await expect(res).rejects.toThrow(WORKER_FILE_UPDATE_FAILED);
@@ -320,11 +315,9 @@ describe('workers/repository/update/branch/auto-replace', () => {
       upgrade.replaceString =
         'image: "1111111111.dkr.ecr.us-east-1.amazonaws.com/my-repository:1"\n\n';
       upgrade.packageFile = 'k8s/base/defaults.yaml';
-      // @ts-expect-error -- TODO: improve typing
       upgrade.matchStrings = [
         'image:\\s*\\\'?\\"?(?<depName>[^:]+):(?<currentValue>[^\\s\\\'\\"]+)\\\'?\\"?\\s*',
       ];
-      // @ts-expect-error -- TODO: improve typing
       upgrade.datasourceTemplate = 'docker';
       const res = await doAutoReplace(upgrade, yml, reuseExistingBranch);
       expect(res).toBe(yml);
@@ -1320,11 +1313,9 @@ describe('workers/repository/update/branch/auto-replace', () => {
       upgrade.newName = 'some.other.url.com/some-new-repo';
       upgrade.newValue = '3.16';
       upgrade.newDigest = 'sha256:p0o9i8u7z6t5r4e3w2q1';
-      // @ts-expect-error -- TODO: improve typing
       upgrade.matchStrings = [
         'image:\\s*?\\\'?\\"?(?<depName>[^:\\\'\\"]+):(?<currentValue>[^@\\\'\\"]+)@?(?<currentDigest>[^\\s\\\'\\"]+)?\\"?\\\'?\\s*',
       ];
-      // @ts-expect-error -- TODO: improve typing
       upgrade.datasourceTemplate = 'docker';
       const res = await doAutoReplace(upgrade, yml, reuseExistingBranch);
       expect(res).toBe('image: "some.other.url.com/some-new-repo:3.16"');
@@ -1346,11 +1337,9 @@ describe('workers/repository/update/branch/auto-replace', () => {
       upgrade.newName = 'some.other.url.com/some-new-repo';
       upgrade.newValue = '3.16';
       upgrade.newDigest = 'sha256:p0o9i8u7z6t5r4e3w2q1';
-      // @ts-expect-error -- TODO: improve typing
       upgrade.matchStrings = [
         'image:\\s*[\\\'\\"]?(?<depName>[^:]+):(?<currentValue>[^@]+)?@?(?<currentDigest>[^\\s\\\'\\"]+)?[\\\'\\"]?\\s*',
       ];
-      // @ts-expect-error -- TODO: improve typing
       upgrade.datasourceTemplate = 'docker';
       const res = await doAutoReplace(upgrade, yml, reuseExistingBranch);
       expect(res).toBe(
@@ -1367,11 +1356,8 @@ describe('workers/repository/update/branch/auto-replace', () => {
       upgrade.newValue = '1.2.4';
       upgrade.depIndex = 0;
       upgrade.packageFile = 'deps.json';
-      // @ts-expect-error -- TODO: improve typing
       upgrade.fileFormat = 'json';
-      // @ts-expect-error -- TODO: improve typing
       upgrade.datasourceTemplate = 'github-releases';
-      // @ts-expect-error -- TODO: improve typing
       upgrade.matchStrings = [
         '*.{"depName": package, "currentDigest": digest, "currentValue": version }',
       ];
@@ -1391,11 +1377,8 @@ describe('workers/repository/update/branch/auto-replace', () => {
       upgrade.newDigest = 'badbeef';
       upgrade.depIndex = 0;
       upgrade.packageFile = 'deps.json';
-      // @ts-expect-error -- TODO: improve typing
       upgrade.fileFormat = 'json';
-      // @ts-expect-error -- TODO: improve typing
       upgrade.datasourceTemplate = 'github-releases';
-      // @ts-expect-error -- TODO: improve typing
       upgrade.matchStrings = [
         '*.{"depName": package, "currentDigest": digest, "currentValue": version }',
       ];
@@ -1416,11 +1399,8 @@ describe('workers/repository/update/branch/auto-replace', () => {
       upgrade.newDigest = 'badbeef';
       upgrade.depIndex = 0;
       upgrade.packageFile = 'deps.json';
-      // @ts-expect-error -- TODO: improve typing
       upgrade.fileFormat = 'json';
-      // @ts-expect-error -- TODO: improve typing
       upgrade.datasourceTemplate = 'github-releases';
-      // @ts-expect-error -- TODO: improve typing
       upgrade.matchStrings = [
         '*.{"depName": package, "currentDigest": digest, "currentValue": version }',
       ];
@@ -1440,11 +1420,8 @@ describe('workers/repository/update/branch/auto-replace', () => {
       upgrade.newDigest = 'badbeef';
       upgrade.depIndex = 0;
       upgrade.packageFile = 'deps.json';
-      // @ts-expect-error -- TODO: improve typing
       upgrade.fileFormat = 'json';
-      // @ts-expect-error -- TODO: improve typing
       upgrade.datasourceTemplate = 'github-releases';
-      // @ts-expect-error -- TODO: improve typing
       upgrade.matchStrings = [
         '*.{"depName": package, "currentDigest": digest, "currentValue": version }',
       ];
@@ -1452,6 +1429,48 @@ describe('workers/repository/update/branch/auto-replace', () => {
       expect(res).toBe(
         '[ { "version": "1.2.3", "digest": "badbeef", "package": "foo" } ]',
       );
+    });
+
+    it('jsonata: reformats newValue via autoReplaceStringTemplate', async () => {
+      const source = '[ { "version": "26.0.0.1", "package": "foo" } ]';
+      upgrade.manager = 'jsonata';
+      upgrade.depName = 'foo';
+      upgrade.currentValue = '26.0.0.1';
+      upgrade.newValue = '27.0.0';
+      upgrade.depIndex = 0;
+      upgrade.packageFile = 'deps.json';
+      upgrade.fileFormat = 'json';
+      upgrade.datasourceTemplate = 'nuget';
+      upgrade.matchStrings = [
+        '*.{"depName": package, "currentValue": version }',
+      ];
+      upgrade.autoReplaceStringTemplate =
+        '{{replace "^(\\d+\\.\\d+\\.\\d+)$" "$1.0" newValue}}';
+
+      const res = await doAutoReplace(upgrade, source, reuseExistingBranch);
+      expect(res).toBe('[ { "version": "27.0.0.0", "package": "foo" } ]');
+    });
+
+    it('jsonata: rebases when autoReplaceStringTemplate fails to compile', async () => {
+      const source = '[ { "version": "26.0.0.1", "package": "foo" } ]';
+      upgrade.manager = 'jsonata';
+      upgrade.baseDeps = [{ depName: 'foo' }];
+      upgrade.depName = 'foo';
+      upgrade.currentValue = '26.0.0.1';
+      upgrade.newValue = '27.0.0';
+      upgrade.depIndex = 0;
+      upgrade.packageFile = 'deps.json';
+      upgrade.fileFormat = 'json';
+      upgrade.datasourceTemplate = 'nuget';
+      upgrade.matchStrings = [
+        '*.{"depName": package, "currentValue": version }',
+      ];
+      // invalid handlebars template throws during confirmIfDepUpdated
+      upgrade.autoReplaceStringTemplate = '{{#if}}';
+      reuseExistingBranch = true;
+
+      const res = await doAutoReplace(upgrade, source, reuseExistingBranch);
+      expect(res).toBeNull();
     });
 
     it('github-actions: updates with newValue only', async () => {

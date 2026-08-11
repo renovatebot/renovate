@@ -60,6 +60,26 @@ exports[`modules/manager/pre-commit/extract > extractPackageFile() > extracts fr
       ],
     },
     {
+      "currentValue": "v12.13.0",
+      "datasource": "forgejo-tags",
+      "depName": "forgejo/runner",
+      "depType": "repository",
+      "packageName": "forgejo/runner",
+      "registryUrls": [
+        "https://code.forgejo.org",
+      ],
+    },
+    {
+      "currentValue": "v0.6.37",
+      "datasource": "forgejo-tags",
+      "depName": "gherynos/pre-commit-java",
+      "depType": "repository",
+      "packageName": "gherynos/pre-commit-java",
+      "registryUrls": [
+        "https://codeberg.org",
+      ],
+    },
+    {
       "currentValue": "v2.1.2",
       "datasource": "github-tags",
       "depName": "prettier/pre-commit",

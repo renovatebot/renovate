@@ -1,17 +1,58 @@
 import { NugetDatasource } from '../modules/datasource/nuget/index.ts';
+import type { HostRule } from '../types/index.ts';
 import {
   add,
   clear,
+  confidentialFields,
   find,
   findAll,
   getAll,
   hostType,
   hosts,
 } from './host-rules.ts';
+import { redactedFields, sanitize } from './sanitize.ts';
 
 describe('util/host-rules', () => {
   beforeEach(() => {
     clear();
+  });
+
+  it('registers every redactedFields entry that is a HostRule field for value-level sanitizing', () => {
+    // exhaustive check for fields of `HostRule`, to introduce a compile-time error when adding a new field to `HostRule`
+    const allHostRuleFields: Record<keyof HostRule, true> = {
+      authType: true,
+      token: true,
+      username: true,
+      password: true,
+      insecureRegistry: true,
+      timeout: true,
+      abortOnError: true,
+      abortIgnoreStatusCodes: true,
+      enabled: true,
+      enableHttp2: true,
+      concurrentRequestLimit: true,
+      maxRequestsPerSecond: true,
+      headers: true,
+      maxRetryAfter: true,
+      keepAlive: true,
+      artifactAuth: true,
+      httpsCertificateAuthority: true,
+      httpsPrivateKey: true,
+      httpsCertificate: true,
+      encrypted: true,
+      hostType: true,
+      matchHost: true,
+      resolvedHost: true,
+      readOnly: true,
+    };
+
+    const expectedConfidentialFields = redactedFields.filter(
+      (field) => field in allHostRuleFields,
+    );
+
+    expect([...confidentialFields].sort()).toEqual(
+      expectedConfidentialFields.sort(),
+    );
   });
 
   describe('add()', () => {
@@ -22,7 +63,9 @@ describe('util/host-rules', () => {
           domainName: 'github.com',
           hostName: 'api.github.com',
         } as never),
-      ).toThrow();
+      ).toThrow(
+        'hostRules cannot contain more than one host-matching field - use',
+      );
     });
 
     it('throws if both domainName and baseUrl', () => {
@@ -32,7 +75,9 @@ describe('util/host-rules', () => {
           domainName: 'github.com',
           matchHost: 'https://api.github.com',
         } as never),
-      ).toThrow();
+      ).toThrow(
+        'hostRules cannot contain more than one host-matching field - use',
+      );
     });
 
     it('throws if both hostName and baseUrl', () => {
@@ -42,7 +87,9 @@ describe('util/host-rules', () => {
           hostName: 'api.github.com',
           matchHost: 'https://api.github.com',
         } as never),
-      ).toThrow();
+      ).toThrow(
+        'hostRules cannot contain more than one host-matching field - use',
+      );
     });
 
     it('supports baseUrl-only', () => {
@@ -101,6 +148,20 @@ describe('util/host-rules', () => {
         username: 'user2',
       });
     });
+
+    it('sanitizes TLS credential values', () => {
+      add({
+        matchHost: 'https://some.endpoint',
+        httpsPrivateKey: 'private-key-value',
+        httpsCertificate: 'certificate-value',
+        httpsCertificateAuthority: 'certificate-authority-value',
+      });
+      expect(
+        sanitize(
+          'key=private-key-value cert=certificate-value ca=certificate-authority-value',
+        ),
+      ).toBe('key=**redacted** cert=**redacted** ca=**redacted**');
+    });
   });
 
   describe('find()', () => {
@@ -109,6 +170,7 @@ describe('util/host-rules', () => {
     });
 
     it('warns and returns empty for bad search', () => {
+      // oxlint-disable-next-line renovate/prefer-partial-in-specs -- intentionally invalid search input
       expect(find({ abc: 'def' } as any)).toEqual({});
     });
 
@@ -391,6 +453,7 @@ describe('util/host-rules', () => {
 
   describe('findAll()', () => {
     it('warns and returns empty for bad search', () => {
+      // oxlint-disable-next-line renovate/prefer-partial-in-specs -- intentionally invalid search input
       expect(findAll({ abc: 'def' } as any)).toEqual([]);
     });
 

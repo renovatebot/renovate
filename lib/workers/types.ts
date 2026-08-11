@@ -8,6 +8,8 @@ import type {
   ValidationMessage,
 } from '../config/types.ts';
 import type { Release } from '../modules/datasource/types.ts';
+import type { JSONataManagerConfig } from '../modules/manager/custom/jsonata/types.ts';
+import type { RegexManagerConfig } from '../modules/manager/custom/regex/types.ts';
 import type {
   ArtifactError,
   ArtifactNotice,
@@ -33,6 +35,8 @@ export interface BranchUpgradeConfig
   extends
     Merge<RenovateConfig, PackageDependency>,
     Partial<LookupUpdate>,
+    Partial<RegexManagerConfig>,
+    Partial<JSONataManagerConfig>,
     RenovateSharedConfig {
   artifactErrors?: ArtifactError[];
   artifactNotices?: ArtifactNotice[];
