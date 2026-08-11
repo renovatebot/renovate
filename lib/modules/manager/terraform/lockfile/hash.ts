@@ -38,6 +38,18 @@ export class TerraformProviderHash {
 
   static hashCacheTTL = 10080; // in minutes == 1 week
 
+  /**
+   * Computes a provider H1 hash in Go's `dirhash.Hash1` format without
+   * extracting the archive.
+   *
+   * Go's `HashZip` includes explicit directory entries, while `HashDir` ignores
+   * them. This can produce different H1 values for the same files. See
+   * https://github.com/golang/go/issues/53448.
+   *
+   * Renovate historically extracted provider ZIPs and therefore returned the
+   * `HashDir` result. This method preserves that behavior while streaming each
+   * file directly from the ZIP.
+   */
   static async hashOfZipContent(zipFilePath: string): Promise<string> {
     const zipFile = await openPromise(zipFilePath, {
       autoClose: false,
