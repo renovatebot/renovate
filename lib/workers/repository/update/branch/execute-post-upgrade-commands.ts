@@ -154,7 +154,7 @@ export async function postUpgradeCommandsExecutor(
             'Post-upgrade command has been compiled',
           );
         }
-        if (compiledCmd === "") {
+        if (compiledCmd === '') {
           logger.trace({ rawCmd: cmd }, 'Skipping empty post-upgrade task');
           continue;
         }
