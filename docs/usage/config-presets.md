@@ -346,7 +346,7 @@ Use that raw string to neutralize it:
 
 !!! warning
   A relative reference which cannot be resolved causes a configuration error in every repository which extends the preset.
-  Preset authors should therefore validate their preset repository in CI, for example with the `renovate-config-validator`.
+  Preset authors should therefore validate their preset repository in CI, for example with the `renovate-config-validator` CLI.
 
 ## Fetching presets from an HTTP server
 
