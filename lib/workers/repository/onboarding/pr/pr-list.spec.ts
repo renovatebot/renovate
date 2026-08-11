@@ -269,6 +269,190 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
       expect(res).toContain('commitHourlyLimit');
       expect(res).not.toContain('prHourlyLimit');
     });
+
+    it('shows the branchConcurrentLimit message when it restricts the PR count', () => {
+      const branches: BranchConfig[] = [
+        {
+          prTitle: 'Update a to v1',
+          branchName: 'renovate/a-1.x',
+          baseBranch: 'base',
+          manager: 'some-manager',
+          upgrades: [
+            {
+              manager: 'some-manager',
+              depName: 'a',
+              newValue: '1.0.0',
+              branchName: 'some-branch',
+            },
+          ],
+        },
+        {
+          prTitle: 'Update b to v1',
+          branchName: 'renovate/b-1.x',
+          baseBranch: 'base',
+          manager: 'some-manager',
+          upgrades: [
+            {
+              manager: 'some-manager',
+              depName: 'b',
+              newValue: '1.0.0',
+              branchName: 'some-branch',
+            },
+          ],
+        },
+        {
+          prTitle: 'Update c to v1',
+          branchName: 'renovate/c-1.x',
+          baseBranch: 'base',
+          manager: 'some-manager',
+          upgrades: [
+            {
+              manager: 'some-manager',
+              depName: 'c',
+              newValue: '1.0.0',
+              branchName: 'some-branch',
+            },
+          ],
+        },
+      ];
+      config.branchConcurrentLimit = 1;
+      const res = getExpectedPrList(config, branches);
+      expect(res).toContain(
+        'Renovate will create 1 Pull Request, up to a maximum of 3 over time',
+      );
+      expect(res).toContain('branchConcurrentLimit');
+    });
+
+    it('shows the prConcurrentLimit message when branchConcurrentLimit does not restrict the count', () => {
+      const branches: BranchConfig[] = [
+        {
+          prTitle: 'Update a to v1',
+          branchName: 'renovate/a-1.x',
+          baseBranch: 'base',
+          manager: 'some-manager',
+          upgrades: [
+            {
+              manager: 'some-manager',
+              depName: 'a',
+              newValue: '1.0.0',
+              branchName: 'some-branch',
+            },
+          ],
+        },
+        {
+          prTitle: 'Update b to v1',
+          branchName: 'renovate/b-1.x',
+          baseBranch: 'base',
+          manager: 'some-manager',
+          upgrades: [
+            {
+              manager: 'some-manager',
+              depName: 'b',
+              newValue: '1.0.0',
+              branchName: 'some-branch',
+            },
+          ],
+        },
+        {
+          prTitle: 'Update c to v1',
+          branchName: 'renovate/c-1.x',
+          baseBranch: 'base',
+          manager: 'some-manager',
+          upgrades: [
+            {
+              manager: 'some-manager',
+              depName: 'c',
+              newValue: '1.0.0',
+              branchName: 'some-branch',
+            },
+          ],
+        },
+      ];
+      config.prConcurrentLimit = 2;
+      const res = getExpectedPrList(config, branches);
+      expect(res).toContain(
+        'Renovate will create 2 Pull Requests, up to a maximum of 3 over time',
+      );
+      expect(res).toContain('prConcurrentLimit');
+    });
+
+    it('does not show a concurrent limit message when the limit is not restrictive', () => {
+      const branches: BranchConfig[] = [
+        {
+          prTitle: 'Update a to v1',
+          branchName: 'renovate/a-1.x',
+          baseBranch: 'base',
+          manager: 'some-manager',
+          upgrades: [
+            {
+              manager: 'some-manager',
+              depName: 'a',
+              newValue: '1.0.0',
+              branchName: 'some-branch',
+            },
+          ],
+        },
+      ];
+      config.prConcurrentLimit = 10;
+      const res = getExpectedPrList(config, branches);
+      expect(res).not.toContain('up to a maximum of');
+      expect(res).not.toContain('prConcurrentLimit');
+    });
+
+    it('prioritizes branchConcurrentLimit over prConcurrentLimit when both restrict the count', () => {
+      const branches: BranchConfig[] = [
+        {
+          prTitle: 'Update a to v1',
+          branchName: 'renovate/a-1.x',
+          baseBranch: 'base',
+          manager: 'some-manager',
+          upgrades: [
+            {
+              manager: 'some-manager',
+              depName: 'a',
+              newValue: '1.0.0',
+              branchName: 'some-branch',
+            },
+          ],
+        },
+        {
+          prTitle: 'Update b to v1',
+          branchName: 'renovate/b-1.x',
+          baseBranch: 'base',
+          manager: 'some-manager',
+          upgrades: [
+            {
+              manager: 'some-manager',
+              depName: 'b',
+              newValue: '1.0.0',
+              branchName: 'some-branch',
+            },
+          ],
+        },
+        {
+          prTitle: 'Update c to v1',
+          branchName: 'renovate/c-1.x',
+          baseBranch: 'base',
+          manager: 'some-manager',
+          upgrades: [
+            {
+              manager: 'some-manager',
+              depName: 'c',
+              newValue: '1.0.0',
+              branchName: 'some-branch',
+            },
+          ],
+        },
+      ];
+      config.branchConcurrentLimit = 1;
+      config.prConcurrentLimit = 2;
+      const res = getExpectedPrList(config, branches);
+      expect(res).toContain(
+        'Renovate will create 1 Pull Request, up to a maximum of 3 over time',
+      );
+      expect(res).toContain('branchConcurrentLimit');
+      expect(res).not.toContain('prConcurrentLimit');
+    });
   });
 
   describe('getExpectedPrListSummary()', () => {
@@ -1549,6 +1733,244 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
       config.commitHourlyLimit = 0;
       const res = getExpectedPrListSummary(config, branches);
       expect(res).toContain('(with no configured maximum of PRs per hour)');
+    });
+
+    it('shows the branchConcurrentLimit message when it restricts the PR count', () => {
+      const branches: BranchConfig[] = [
+        {
+          prTitle: 'Update a to v1',
+          branchName: 'renovate/a-1.x',
+          baseBranch: 'base',
+          manager: 'some-manager',
+          upgrades: [
+            {
+              manager: 'some-manager',
+              depName: 'a',
+              newValue: '1.0.0',
+              branchName: 'ignored',
+            },
+          ],
+        },
+        {
+          prTitle: 'Update b to v1',
+          branchName: 'renovate/b-1.x',
+          baseBranch: 'base',
+          manager: 'some-manager',
+          upgrades: [
+            {
+              manager: 'some-manager',
+              depName: 'b',
+              newValue: '1.0.0',
+              branchName: 'ignored',
+            },
+          ],
+        },
+        {
+          prTitle: 'Update c to v1',
+          branchName: 'renovate/c-1.x',
+          baseBranch: 'base',
+          manager: 'some-manager',
+          upgrades: [
+            {
+              manager: 'some-manager',
+              depName: 'c',
+              newValue: '1.0.0',
+              branchName: 'ignored',
+            },
+          ],
+        },
+      ];
+      config.branchConcurrentLimit = 1;
+      const res = getExpectedPrListSummary(config, branches);
+      expect(res).toContain('at a maximum of 1 branch open at a time');
+      expect(res).toContain(
+        'Renovate will only work on 1 branch at a time, so not all Pull Requests will be opened straight away',
+      );
+      expect(res).toContain('branchConcurrentLimit');
+    });
+
+    it('shows the branchConcurrentLimit message with plurals when limit is greater than 1', () => {
+      const branches: BranchConfig[] = [
+        {
+          prTitle: 'Update a to v1',
+          branchName: 'renovate/a-1.x',
+          baseBranch: 'base',
+          manager: 'some-manager',
+          upgrades: [
+            {
+              manager: 'some-manager',
+              depName: 'a',
+              newValue: '1.0.0',
+              branchName: 'ignored',
+            },
+          ],
+        },
+        {
+          prTitle: 'Update b to v1',
+          branchName: 'renovate/b-1.x',
+          baseBranch: 'base',
+          manager: 'some-manager',
+          upgrades: [
+            {
+              manager: 'some-manager',
+              depName: 'b',
+              newValue: '1.0.0',
+              branchName: 'ignored',
+            },
+          ],
+        },
+        {
+          prTitle: 'Update c to v1',
+          branchName: 'renovate/c-1.x',
+          baseBranch: 'base',
+          manager: 'some-manager',
+          upgrades: [
+            {
+              manager: 'some-manager',
+              depName: 'c',
+              newValue: '1.0.0',
+              branchName: 'ignored',
+            },
+          ],
+        },
+      ];
+      config.branchConcurrentLimit = 2;
+      const res = getExpectedPrListSummary(config, branches);
+      expect(res).toContain('at a maximum of 2 branches open at a time');
+      expect(res).toContain(
+        'Renovate will only work on 2 branches at a time, so not all Pull Requests will be opened straight away',
+      );
+    });
+
+    it('shows the prConcurrentLimit message when branchConcurrentLimit does not restrict the count', () => {
+      const branches: BranchConfig[] = [
+        {
+          prTitle: 'Update a to v1',
+          branchName: 'renovate/a-1.x',
+          baseBranch: 'base',
+          manager: 'some-manager',
+          upgrades: [
+            {
+              manager: 'some-manager',
+              depName: 'a',
+              newValue: '1.0.0',
+              branchName: 'ignored',
+            },
+          ],
+        },
+        {
+          prTitle: 'Update b to v1',
+          branchName: 'renovate/b-1.x',
+          baseBranch: 'base',
+          manager: 'some-manager',
+          upgrades: [
+            {
+              manager: 'some-manager',
+              depName: 'b',
+              newValue: '1.0.0',
+              branchName: 'ignored',
+            },
+          ],
+        },
+        {
+          prTitle: 'Update c to v1',
+          branchName: 'renovate/c-1.x',
+          baseBranch: 'base',
+          manager: 'some-manager',
+          upgrades: [
+            {
+              manager: 'some-manager',
+              depName: 'c',
+              newValue: '1.0.0',
+              branchName: 'ignored',
+            },
+          ],
+        },
+      ];
+      config.prConcurrentLimit = 2;
+      const res = getExpectedPrListSummary(config, branches);
+      expect(res).toContain('at a maximum of 2 Pull Requests open at a time');
+      expect(res).toContain(
+        'Renovate will only keep 2 Pull Requests open at a time, so not all of the above will be opened straight away',
+      );
+      expect(res).toContain('prConcurrentLimit');
+      expect(res).not.toContain('branchConcurrentLimit');
+    });
+
+    it('does not show a concurrent limit message when the limit is not restrictive', () => {
+      const branches: BranchConfig[] = [
+        {
+          prTitle: 'Update a to v1',
+          branchName: 'renovate/a-1.x',
+          baseBranch: 'base',
+          manager: 'some-manager',
+          upgrades: [
+            {
+              manager: 'some-manager',
+              depName: 'a',
+              newValue: '1.0.0',
+              branchName: 'ignored',
+            },
+          ],
+        },
+      ];
+      config.prConcurrentLimit = 10;
+      const res = getExpectedPrListSummary(config, branches);
+      expect(res).not.toContain('open at a time');
+      expect(res).not.toContain('prConcurrentLimit');
+    });
+
+    it('combines the concurrent limit and hourly limit messages when both restrict the count', () => {
+      const branches: BranchConfig[] = [
+        {
+          prTitle: 'Update a to v1',
+          branchName: 'renovate/a-1.x',
+          baseBranch: 'base',
+          manager: 'some-manager',
+          upgrades: [
+            {
+              manager: 'some-manager',
+              depName: 'a',
+              newValue: '1.0.0',
+              branchName: 'ignored',
+            },
+          ],
+        },
+        {
+          prTitle: 'Update b to v1',
+          branchName: 'renovate/b-1.x',
+          baseBranch: 'base',
+          manager: 'some-manager',
+          upgrades: [
+            {
+              manager: 'some-manager',
+              depName: 'b',
+              newValue: '1.0.0',
+              branchName: 'ignored',
+            },
+          ],
+        },
+        {
+          prTitle: 'Update c to v1',
+          branchName: 'renovate/c-1.x',
+          baseBranch: 'base',
+          manager: 'some-manager',
+          upgrades: [
+            {
+              manager: 'some-manager',
+              depName: 'c',
+              newValue: '1.0.0',
+              branchName: 'ignored',
+            },
+          ],
+        },
+      ];
+      config.prConcurrentLimit = 1;
+      config.prHourlyLimit = 1;
+      const res = getExpectedPrListSummary(config, branches);
+      expect(res).toContain(
+        '(at a maximum of 1 Pull Request open at a time and a maximum of 1 PR per hour)',
+      );
     });
   });
 });

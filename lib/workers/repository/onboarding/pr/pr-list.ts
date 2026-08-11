@@ -8,7 +8,8 @@ import { logger } from '../../../../logger/index.ts';
 import { emojify } from '../../../../util/emoji.ts';
 import { coerceNumber } from '../../../../util/number.ts';
 import { regEx } from '../../../../util/regex.ts';
-import type { BranchConfig } from '../../../types.ts';
+import { calcLimit } from '../../../global/limits.ts';
+import type { BranchConfig, BranchUpgradeConfig } from '../../../types.ts';
 
 /**
  * The different categories of dependency updates to output, when providing the summary view.
@@ -30,6 +31,46 @@ const SUMMARY_CATEGORY_PRIORITY_ORDER: readonly SummaryCategory[] = [
   // ... anything else
 ];
 
+interface ConcurrentLimit {
+  limit: number;
+  key: 'prConcurrentLimit' | 'branchConcurrentLimit';
+}
+
+/**
+ * Resolves the concurrent limit that governs how many of the expected Pull Requests can be open at once,
+ * reusing the same `calcLimit()` used to enforce these limits (see `lib/workers/global/limits.ts`).
+ *
+ * `branchConcurrentLimit` only takes priority when it's been explicitly configured (it's `null` by default,
+ * in which case `calcLimit()` silently inherits the value of `prConcurrentLimit`) and is actually more
+ * restrictive - otherwise we'd misattribute the limit to a setting the user never touched.
+ */
+function resolveConcurrentLimit(config: RenovateConfig): ConcurrentLimit {
+  const configAsUpgrade: BranchUpgradeConfig = {
+    branchName: '',
+    manager: '',
+    prConcurrentLimit: config.prConcurrentLimit,
+    branchConcurrentLimit: config.branchConcurrentLimit,
+  };
+  const prConcurrentLimit = calcLimit([configAsUpgrade], 'prConcurrentLimit');
+  const branchConcurrentLimit = calcLimit(
+    [configAsUpgrade],
+    'branchConcurrentLimit',
+  );
+
+  if (
+    typeof config.branchConcurrentLimit === 'number' &&
+    branchConcurrentLimit > 0 &&
+    (prConcurrentLimit === 0 || branchConcurrentLimit < prConcurrentLimit)
+  ) {
+    return {
+      limit: branchConcurrentLimit,
+      key: 'branchConcurrentLimit',
+    };
+  }
+
+  return { limit: prConcurrentLimit, key: 'prConcurrentLimit' };
+}
+
 export function getExpectedPrList(
   config: RenovateConfig,
   branches: BranchConfig[],
@@ -40,8 +81,14 @@ export function getExpectedPrList(
   if (!branches.length) {
     return `${prDesc}It looks like your repository dependencies are already up-to-date and no Pull Requests will be necessary right away.\n`;
   }
-  prDesc += `With your current configuration, Renovate will create ${branches.length} Pull Request`;
-  prDesc += branches.length > 1 ? `s:\n\n` : `:\n\n`;
+  const { limit: concurrentLimit, key: concurrentLimitKey } =
+    resolveConcurrentLimit(config);
+  if (concurrentLimit > 0 && concurrentLimit < branches.length) {
+    prDesc += `With your current configuration, Renovate will create ${concurrentLimit} Pull Request${concurrentLimit > 1 ? 's' : ''}, up to a maximum of ${branches.length} over time (see [docs for \`${concurrentLimitKey}\`](${GlobalConfig.get('productLinks').documentation}configuration-options/#${concurrentLimitKey.toLowerCase()})):\n\n`;
+  } else {
+    prDesc += `With your current configuration, Renovate will create ${branches.length} Pull Request`;
+    prDesc += branches.length > 1 ? `s:\n\n` : `:\n\n`;
+  }
 
   for (const branch of branches) {
     const prTitleRe = regEx(/@([a-z]+\/[a-z]+)/);
@@ -321,6 +368,7 @@ export function getExpectedPrListSummary(
 
   const prHourlyLimit = coerceNumber(config.prHourlyLimit);
   const commitHourlyLimit = coerceNumber(config.commitHourlyLimit);
+  const concurrentLimit = resolveConcurrentLimit(config);
 
   if (hasMultipleBaseBranches) {
     let total = 0;
@@ -330,19 +378,21 @@ export function getExpectedPrListSummary(
       const label = base ? `the \`${base}\` branch` : 'the default branch';
       return `${count} Pull Request${count > 1 ? 's' : ''} to ${label}`;
     });
-    const hourlyLimitsNotice = determineHourlyLimitsNotice(
+    const limitsNotice = determineLimitsNotice(
+      concurrentLimit,
       prHourlyLimit,
       commitHourlyLimit,
       total,
     );
-    prDesc += `With your current configuration, Renovate will create ${parts.join(' and ')}${hourlyLimitsNotice}:\n\n`;
+    prDesc += `With your current configuration, Renovate will create ${parts.join(' and ')}${limitsNotice}:\n\n`;
   } else {
-    const hourlyLimitsNotice = determineHourlyLimitsNotice(
+    const limitsNotice = determineLimitsNotice(
+      concurrentLimit,
       prHourlyLimit,
       commitHourlyLimit,
       stats.prCount,
     );
-    prDesc += `With your current configuration, Renovate will create ${stats.prCount} Pull Request${stats.prCount > 1 ? 's' : ''}${hourlyLimitsNotice}:\n\n`;
+    prDesc += `With your current configuration, Renovate will create ${stats.prCount} Pull Request${stats.prCount > 1 ? 's' : ''}${limitsNotice}:\n\n`;
   }
 
   const categoryColumns = getCategoryColumns(stats.presentCategories);
@@ -387,6 +437,16 @@ export function getExpectedPrListSummary(
     }
   }
 
+  if (concurrentLimit.limit > 0 && concurrentLimit.limit < stats.prCount) {
+    const notice =
+      concurrentLimit.key === 'branchConcurrentLimit'
+        ? `Renovate will only work on ${concurrentLimit.limit} branch${concurrentLimit.limit > 1 ? 'es' : ''} at a time, so not all Pull Requests will be opened straight away`
+        : `Renovate will only keep ${concurrentLimit.limit} Pull Request${concurrentLimit.limit > 1 ? 's' : ''} open at a time, so not all of the above will be opened straight away`;
+    prDesc += emojify(
+      `\n\n:children_crossing: ${notice}. See [docs for \`${concurrentLimit.key}\`](${GlobalConfig.get('productLinks').documentation}configuration-options/#${concurrentLimit.key.toLowerCase()}) for details.\n\n`,
+    );
+  }
+
   if (
     commitHourlyLimit > 0 &&
     commitHourlyLimit < 5 &&
@@ -407,13 +467,20 @@ export function getExpectedPrListSummary(
   return prDesc;
 }
 
-function determineHourlyLimitsNotice(
+function determineLimitsNotice(
+  concurrentLimit: ConcurrentLimit,
   prHourlyLimit: number,
   commitHourlyLimit: number,
   prCount: number,
 ): string {
-  if (commitHourlyLimit === 0 && prHourlyLimit === 0) {
-    return ' (with no configured maximum of PRs per hour)';
+  const clauses: string[] = [];
+
+  if (concurrentLimit.limit > 0 && concurrentLimit.limit < prCount) {
+    clauses.push(
+      concurrentLimit.key === 'branchConcurrentLimit'
+        ? `a maximum of ${concurrentLimit.limit} branch${concurrentLimit.limit > 1 ? 'es' : ''} open at a time`
+        : `a maximum of ${concurrentLimit.limit} Pull Request${concurrentLimit.limit > 1 ? 's' : ''} open at a time`,
+    );
   }
 
   if (
@@ -421,15 +488,25 @@ function determineHourlyLimitsNotice(
     commitHourlyLimit < 5 &&
     commitHourlyLimit < prCount
   ) {
-    return emojify(
-      ` (at a maximum of ${commitHourlyLimit} PR${commitHourlyLimit > 1 ? 's' : ''}/rebase${commitHourlyLimit > 1 ? 's' : ''} per hour)`,
+    clauses.push(
+      `a maximum of ${commitHourlyLimit} PR${commitHourlyLimit > 1 ? 's' : ''}/rebase${commitHourlyLimit > 1 ? 's' : ''} per hour`,
+    );
+  } else if (
+    prHourlyLimit > 0 &&
+    prHourlyLimit < 5 &&
+    prHourlyLimit < prCount
+  ) {
+    clauses.push(
+      `a maximum of ${prHourlyLimit} PR${prHourlyLimit > 1 ? 's' : ''} per hour`,
     );
   }
 
-  if (prHourlyLimit > 0 && prHourlyLimit < 5 && prHourlyLimit < prCount) {
-    return emojify(
-      ` (at a maximum of ${prHourlyLimit} PR${prHourlyLimit > 1 ? 's' : ''} per hour)`,
-    );
+  if (clauses.length) {
+    return emojify(` (at ${clauses.join(' and ')})`);
+  }
+
+  if (commitHourlyLimit === 0 && prHourlyLimit === 0) {
+    return ' (with no configured maximum of PRs per hour)';
   }
 
   return '';
