@@ -2002,20 +2002,20 @@ Development Bot <dev-bot@my-software-company.com>
 
 ## `gitIgnoredAuthors`
 
-Specify commit authors ignored by Renovate.
-This field accepts [RFC5322](https://datatracker.ietf.org/doc/html/rfc5322)-compliant strings.
+Specify commit author emails ignored by Renovate.
 
 By default, Renovate will treat any PR as modified if another Git author has added to the branch.
 When a PR is considered modified, Renovate won't perform any further commits such as if it's conflicted or needs a version update.
 If you have other bots which commit on top of Renovate PRs, and don't want Renovate to treat these PRs as modified, then add the other Git author(s) to `gitIgnoredAuthors`.
-
-Example:
 
 ```json
 {
   "gitIgnoredAuthors": ["some-bot@example.org"]
 }
 ```
+
+`gitIgnoredAuthors` values can be exact [RFC5322](https://datatracker.ietf.org/doc/html/rfc5322)-compliant email strings, glob patterns, or regex patterns.
+For more details on the syntax and supported patterns, see Renovate's [string pattern matching documentation](./string-pattern-matching.md).
 
 ## `gitLabIgnoreApprovals`
 
@@ -2954,8 +2954,6 @@ Set `minimumReleaseAge` to `3 days` for npm packages to prevent relying on a pac
 #### Await X time duration before Automerging
 
 If you enable `automerge` _and_ `minimumReleaseAge`, Renovate Renovate will create PRs immediately, but only automerge them when the `minimumReleaseAge` time-duration has passed.
-
-It's recommended to also apply `prCreation="not-pending"` and `internalChecksFilter="strict"` to make sure that branches and PRs are only created after the `minimumReleaseAge` has passed.
 
 Renovate adds a "renovate/stability-days" pending status check to each branch/PR.
 This pending check prevents the branch going green to automerge before the time has passed.

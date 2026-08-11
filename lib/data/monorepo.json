@@ -163,6 +163,7 @@
     "datadog-browser-sdk": "https://github.com/DataDog/browser-sdk",
     "datafusion": "https://github.com/apache/datafusion",
     "datatables-net": [
+      "https://github.com/DataTables/DataTablesSrc",
       "https://github.com/DataTables/Dist-DataTables",
       "https://github.com/DataTables/Dist-DataTables-Bootstrap",
       "https://github.com/DataTables/Dist-DataTables-Bootstrap4",
@@ -174,6 +175,7 @@
       "https://github.com/DataTables/Dist-DataTables-jQueryUI"
     ],
     "datatables-net-autofill": [
+      "https://github.com/DataTables/AutoFill",
       "https://github.com/DataTables/Dist-DataTables-AutoFill",
       "https://github.com/DataTables/Dist-DataTables-AutoFill-Bootstrap",
       "https://github.com/DataTables/Dist-DataTables-AutoFill-Bootstrap4",
@@ -185,6 +187,7 @@
       "https://github.com/DataTables/Dist-DataTables-AutoFill-jQueryUI"
     ],
     "datatables-net-buttons": [
+      "https://github.com/DataTables/Buttons",
       "https://github.com/DataTables/Dist-DataTables-Buttons",
       "https://github.com/DataTables/Dist-DataTables-Buttons-Bootstrap",
       "https://github.com/DataTables/Dist-DataTables-Buttons-Bootstrap4",
@@ -196,6 +199,7 @@
       "https://github.com/DataTables/Dist-DataTables-Buttons-jQueryUI"
     ],
     "datatables-net-colreorder": [
+      "https://github.com/DataTables/ColReorder",
       "https://github.com/DataTables/Dist-DataTables-ColReorder",
       "https://github.com/DataTables/Dist-DataTables-ColReorder-Bootstrap",
       "https://github.com/DataTables/Dist-DataTables-ColReorder-Bootstrap4",
@@ -207,6 +211,7 @@
       "https://github.com/DataTables/Dist-DataTables-ColReorder-jQueryUI"
     ],
     "datatables-net-fixedcolumns": [
+      "https://github.com/DataTables/FixedColumns",
       "https://github.com/DataTables/Dist-DataTables-FixedColumns",
       "https://github.com/DataTables/Dist-DataTables-FixedColumns-Bootstrap",
       "https://github.com/DataTables/Dist-DataTables-FixedColumns-Bootstrap4",
@@ -218,6 +223,7 @@
       "https://github.com/DataTables/Dist-DataTables-FixedColumns-jQueryUI"
     ],
     "datatables-net-fixedheader": [
+      "https://github.com/DataTables/FixedHeader",
       "https://github.com/DataTables/Dist-DataTables-FixedHeader",
       "https://github.com/DataTables/Dist-DataTables-FixedHeader-Bootstrap",
       "https://github.com/DataTables/Dist-DataTables-FixedHeader-Bootstrap4",
@@ -229,6 +235,7 @@
       "https://github.com/DataTables/Dist-DataTables-FixedHeader-jQueryUI"
     ],
     "datatables-net-keytable": [
+      "https://github.com/DataTables/KeyTable",
       "https://github.com/DataTables/Dist-DataTables-KeyTable",
       "https://github.com/DataTables/Dist-DataTables-KeyTable-Bootstrap",
       "https://github.com/DataTables/Dist-DataTables-KeyTable-Bootstrap4",
@@ -240,6 +247,7 @@
       "https://github.com/DataTables/Dist-DataTables-KeyTable-jQueryUI"
     ],
     "datatables-net-responsive": [
+      "https://github.com/DataTables/Responsive",
       "https://github.com/DataTables/Dist-DataTables-Responsive",
       "https://github.com/DataTables/Dist-DataTables-Responsive-Bootstrap",
       "https://github.com/DataTables/Dist-DataTables-Responsive-Bootstrap4",
@@ -251,6 +259,7 @@
       "https://github.com/DataTables/Dist-DataTables-Responsive-jQueryUI"
     ],
     "datatables-net-rowgroup": [
+      "https://github.com/DataTables/RowGroup",
       "https://github.com/DataTables/Dist-DataTables-RowGroup",
       "https://github.com/DataTables/Dist-DataTables-RowGroup-Bootstrap",
       "https://github.com/DataTables/Dist-DataTables-RowGroup-Bootstrap4",
@@ -262,6 +271,7 @@
       "https://github.com/DataTables/Dist-DataTables-RowGroup-jQueryUI"
     ],
     "datatables-net-rowreorder": [
+      "https://github.com/DataTables/RowReorder",
       "https://github.com/DataTables/Dist-DataTables-RowReorder",
       "https://github.com/DataTables/Dist-DataTables-RowReorder-Bootstrap",
       "https://github.com/DataTables/Dist-DataTables-RowReorder-Bootstrap4",
@@ -273,6 +283,7 @@
       "https://github.com/DataTables/Dist-DataTables-RowReorder-jQueryUI"
     ],
     "datatables-net-scroller": [
+      "https://github.com/DataTables/Scroller",
       "https://github.com/DataTables/Dist-DataTables-Scroller",
       "https://github.com/DataTables/Dist-DataTables-Scroller-Bootstrap",
       "https://github.com/DataTables/Dist-DataTables-Scroller-Bootstrap4",
@@ -284,6 +295,7 @@
       "https://github.com/DataTables/Dist-DataTables-Scroller-jQueryUI"
     ],
     "datatables-net-searchbuilder": [
+      "https://github.com/DataTables/SearchBuilder",
       "https://github.com/DataTables/Dist-DataTables-SearchBuilder",
       "https://github.com/DataTables/Dist-DataTables-SearchBuilder-Bootstrap",
       "https://github.com/DataTables/Dist-DataTables-SearchBuilder-Bootstrap4",
@@ -295,6 +307,7 @@
       "https://github.com/DataTables/Dist-DataTables-SearchBuilder-jQueryUI"
     ],
     "datatables-net-searchpanes": [
+      "https://github.com/DataTables/SearchPanes",
       "https://github.com/DataTables/Dist-DataTables-SearchPanes",
       "https://github.com/DataTables/Dist-DataTables-SearchPanes-Bootstrap",
       "https://github.com/DataTables/Dist-DataTables-SearchPanes-Bootstrap4",
@@ -306,6 +319,7 @@
       "https://github.com/DataTables/Dist-DataTables-SearchPanes-jQueryUI"
     ],
     "datatables-net-select": [
+      "https://github.com/DataTables/Select",
       "https://github.com/DataTables/Dist-DataTables-Select",
       "https://github.com/DataTables/Dist-DataTables-Select-Bootstrap",
       "https://github.com/DataTables/Dist-DataTables-Select-Bootstrap4",
@@ -317,6 +331,7 @@
       "https://github.com/DataTables/Dist-DataTables-Select-jQueryUI"
     ],
     "datatables-net-staterestore": [
+      "https://github.com/DataTables/StateRestore",
       "https://github.com/DataTables/Dist-DataTables-StateRestore",
       "https://github.com/DataTables/Dist-DataTables-StateRestore-Bootstrap",
       "https://github.com/DataTables/Dist-DataTables-StateRestore-Bootstrap4",
@@ -389,6 +404,7 @@
     "fimbullinter": "https://github.com/fimbullinter/wotan",
     "flipper": "https://github.com/flippercloud/flipper",
     "flopflip": "https://github.com/tdeekens/flopflip",
+    "flue": "https://github.com/withastro/flue",
     "fontsource": [
       "https://github.com/fontsource/fontsource",
       "https://github.com/fontsource/font-files"

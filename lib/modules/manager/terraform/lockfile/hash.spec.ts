@@ -96,6 +96,51 @@ describe('modules/manager/terraform/lockfile/hash', () => {
     expect(result).toBeNull();
   });
 
+  it('deduplicates hashes from different shasum URLs and builds', async () => {
+    const builds = [
+      {
+        name: 'example/provider',
+        version: '1.0.0',
+        os: 'linux',
+        arch: 'amd64',
+        filename: 'terraform-provider-example_1.0.0_linux_amd64.zip',
+        url: 'https://example.com/linux.zip',
+        shasums_url: 'https://example.com/SHA256SUMS?signature=one',
+      },
+      {
+        name: 'example/provider',
+        version: '1.0.0',
+        os: 'darwin',
+        arch: 'arm64',
+        filename: 'terraform-provider-example_1.0.0_darwin_arm64.zip',
+        url: 'https://example.com/darwin.zip',
+        shasums_url: 'https://example.com/SHA256SUMS?signature=two',
+      },
+    ];
+    const getBuilds = vi
+      .spyOn(TerraformProviderHash.terraformDatasource, 'getBuilds')
+      .mockResolvedValueOnce(builds);
+    const getZipHashes = vi
+      .spyOn(TerraformProviderHash.terraformDatasource, 'getZipHashes')
+      .mockResolvedValue(['1234567890abcdef']);
+    const calculateHashScheme1Hashes = vi
+      .spyOn(TerraformProviderHash, 'calculateHashScheme1Hashes')
+      .mockResolvedValueOnce(['same-hash', 'same-hash']);
+
+    const result = await TerraformProviderHash.createHashes(
+      'https://registry.example.com',
+      'example/provider',
+      '1.0.0',
+    );
+
+    expect(getZipHashes).toHaveBeenCalledTimes(2);
+    expect(result).toEqual(['h1:same-hash', 'zh:1234567890abcdef']);
+
+    getBuilds.mockRestore();
+    getZipHashes.mockRestore();
+    calculateHashScheme1Hashes.mockRestore();
+  });
+
   it('fail to create hashes', async () => {
     const readStreamLinux = createReadStream(
       getFixturePath('releaseBackendAzurerm_2_56_0.json'),
@@ -154,9 +199,8 @@ describe('modules/manager/terraform/lockfile/hash', () => {
     );
     expect(log.error.mock.calls).toMatchSnapshot();
     expect(result).not.toBeNull();
-    expect(result).toBeArrayOfSize(2);
+    expect(result).toBeArrayOfSize(1);
     expect(result).toMatchObject([
-      'h1:I2F2atKZqKEOYk1tTLe15Llf9rVqxz48ZL1eZB9g8zM=',
       'h1:I2F2atKZqKEOYk1tTLe15Llf9rVqxz48ZL1eZB9g8zM=',
     ]);
   });
@@ -217,7 +261,6 @@ describe('modules/manager/terraform/lockfile/hash', () => {
     );
     expect(log.error.mock.calls).toBeEmptyArray();
     expect(result).toMatchObject([
-      'h1:I2F2atKZqKEOYk1tTLe15Llf9rVqxz48ZL1eZB9g8zM=',
       'h1:I2F2atKZqKEOYk1tTLe15Llf9rVqxz48ZL1eZB9g8zM=',
       'zh:1d47d00730fab764bddb6d548fed7e124739b0bcebb9f3b3c6aa247de55fb804',
       'zh:29bff92b4375a35a7729248b3bc5db8991ca1b9ba640fc25b13700e12f99c195',
@@ -325,7 +368,6 @@ describe('modules/manager/terraform/lockfile/hash', () => {
     expect(log.error.mock.calls).toBeEmptyArray();
     expect(result).toMatchObject([
       'h1:I2F2atKZqKEOYk1tTLe15Llf9rVqxz48ZL1eZB9g8zM=',
-      'h1:I2F2atKZqKEOYk1tTLe15Llf9rVqxz48ZL1eZB9g8zM=',
       'zh:1d47d00730fab764bddb6d548fed7e124739b0bcebb9f3b3c6aa247de55fb804',
       'zh:29bff92b4375a35a7729248b3bc5db8991ca1b9ba640fc25b13700e12f99c195',
     ]);
@@ -379,7 +421,6 @@ describe('modules/manager/terraform/lockfile/hash', () => {
     );
     expect(log.error.mock.calls).toBeEmptyArray();
     expect(result).toMatchObject([
-      'h1:I2F2atKZqKEOYk1tTLe15Llf9rVqxz48ZL1eZB9g8zM=',
       'h1:I2F2atKZqKEOYk1tTLe15Llf9rVqxz48ZL1eZB9g8zM=',
     ]);
   });
@@ -442,7 +483,6 @@ describe('modules/manager/terraform/lockfile/hash', () => {
 
     expect(log.error.mock.calls).toBeEmptyArray();
     expect(result).toMatchObject([
-      'h1:I2F2atKZqKEOYk1tTLe15Llf9rVqxz48ZL1eZB9g8zM=',
       'h1:I2F2atKZqKEOYk1tTLe15Llf9rVqxz48ZL1eZB9g8zM=',
     ]);
   });

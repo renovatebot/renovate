@@ -264,13 +264,13 @@ describe('modules/manager/cocoapods/artifacts', () => {
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
           'ghcr.io/renovatebot/base-image' +
-          ' bash -l -c "' +
+          " bash -l -c '" +
           'install-tool ruby 3.1.0' +
           ' && ' +
           'install-tool cocoapods 1.2.4' +
           ' && ' +
           'pod install' +
-          '"',
+          "'",
       },
     ]);
   });

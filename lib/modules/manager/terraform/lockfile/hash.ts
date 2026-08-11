@@ -204,7 +204,7 @@ export class TerraformProviderHash {
     hashes.push(...h1Hashes.map((hash) => `h1:${hash}`));
     hashes.push(...zhHashes.map((hash) => `zh:${hash}`));
 
-    // sorting the hash alphabetically as terraform does this as well
-    return hashes.sort();
+    // hashes are a logical set which Terraform deduplicates and sorts
+    return deduplicateArray(hashes).sort();
   }
 }

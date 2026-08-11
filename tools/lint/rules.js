@@ -1,12 +1,14 @@
 import codeblockInSpecFixtures from './rules/codeblock-in-spec-fixtures.js';
 import enforceTsExtension from './rules/enforce-ts-extension.js';
 import loggerStaticMessage from './rules/logger-static-message.js';
+import noExecShellOption from './rules/no-exec-shell-option.js';
 import noHardcodedDocsUrl from './rules/no-hardcoded-docs-url.js';
 import noHostRulesMock from './rules/no-host-rules-mock.js';
 import noNewUrl from './rules/no-new-url.js';
 import noRedundantMockReset from './rules/no-redundant-mock-reset.js';
 import noStatefulGlobalRegex from './rules/no-stateful-global-regex.js';
 import noToolsImport from './rules/no-tools-import.js';
+import noUnquotedExecInterpolation from './rules/no-unquoted-exec-interpolation.js';
 import noUnvalidatedPaginationUrl from './rules/no-unvalidated-pagination-url.js';
 import preferFakeShaInSpecs from './rules/prefer-fake-sha-in-specs.js';
 import preferFsUtil from './rules/prefer-fs-util.js';
@@ -28,12 +30,14 @@ export default {
     'codeblock-in-spec-fixtures': codeblockInSpecFixtures,
     'enforce-ts-extension': enforceTsExtension,
     'logger-static-message': loggerStaticMessage,
+    'no-exec-shell-option': noExecShellOption,
     'no-hardcoded-docs-url': noHardcodedDocsUrl,
     'no-host-rules-mock': noHostRulesMock,
     'no-new-url': noNewUrl,
     'no-redundant-mock-reset': noRedundantMockReset,
     'no-stateful-global-regex': noStatefulGlobalRegex,
     'no-tools-import': noToolsImport,
+    'no-unquoted-exec-interpolation': noUnquotedExecInterpolation,
     'no-unvalidated-pagination-url': noUnvalidatedPaginationUrl,
     'prefer-fake-sha-in-specs': preferFakeShaInSpecs,
     'prefer-fs-util': preferFsUtil,

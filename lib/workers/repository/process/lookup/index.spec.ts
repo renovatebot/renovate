@@ -3122,6 +3122,64 @@ describe('workers/repository/process/lookup/index', () => {
       ]);
     });
 
+    describe('digest managed externally', () => {
+      it('does not create a pinDigest update', async () => {
+        config.currentValue = 'v1.0.0';
+        config.packageName = 'angular/angular';
+        config.pinDigests = true;
+        // for instance, if a lockfile manages the digest instead of the package file
+        config.digestManagedExternally = true;
+        config.datasource = GithubTagsDatasource.id;
+
+        getGithubTags.mockResolvedValueOnce({
+          releases: [
+            {
+              version: 'v1.0.0',
+              gitRef: 'v1.0.0',
+              releaseTimestamp: '2022-01-01' as Timestamp,
+            },
+          ],
+        });
+        const getDigest = vi.spyOn(GithubTagsDatasource.prototype, 'getDigest');
+
+        const { updates } = await Result.wrap(
+          lookup.lookupUpdates(config),
+        ).unwrapOrThrow();
+
+        expect(updates).toBeEmptyArray();
+        expect(getDigest).not.toHaveBeenCalled();
+      });
+
+      it('still refreshes a digest that is already inline', async () => {
+        config.currentValue = 'v1.0.0';
+        config.currentDigest = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
+        config.packageName = 'angular/angular';
+        config.pinDigests = true;
+        config.digestManagedExternally = true;
+        config.datasource = GithubTagsDatasource.id;
+
+        getGithubTags.mockResolvedValueOnce({
+          releases: [
+            {
+              version: 'v1.0.0',
+              gitRef: 'v1.0.0',
+              releaseTimestamp: '2022-01-01' as Timestamp,
+            },
+          ],
+        });
+        vi.spyOn(
+          GithubTagsDatasource.prototype,
+          'getDigest',
+        ).mockResolvedValueOnce('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb');
+
+        const { updates } = await Result.wrap(
+          lookup.lookupUpdates(config),
+        ).unwrapOrThrow();
+
+        expect(updates).toMatchObject([{ updateType: 'digest' }]);
+      });
+    });
+
     describe('pinning enabled but no existing digest', () => {
       it('should not warn if no new digest could be found', async () => {
         config.currentValue = 'v1.0.0';

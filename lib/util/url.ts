@@ -97,12 +97,24 @@ export function resolveSameOriginUrl(
   if (!base) {
     return null;
   }
+
   let resolved: URL;
   try {
     resolved = new URL(nextUrl.toString(), base);
   } catch {
     return null;
   }
+
+  // If the base URL is HTTPS and the resolved URL is HTTP, but has no port specified, we can assume that the server intended to use HTTPS. This is a common misconfiguration in some registries.
+  if (
+    base.protocol === 'https:' &&
+    resolved.protocol === 'http:' &&
+    resolved.port === ''
+  ) {
+    logger.debug(`Detected protocol downgrade and fixed it: ${resolved.href}`);
+    resolved.protocol = 'https:';
+  }
+
   return resolved.origin === base.origin ? resolved.href : null;
 }
 
