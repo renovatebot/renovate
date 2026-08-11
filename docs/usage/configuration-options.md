@@ -4158,7 +4158,7 @@ Run `npm install` commands _twice_ to work around bugs where `npm` generates inv
 
 ### `pnpmDedupe`
 
-Run `pnpm dedupe --ignore-scripts` after `pnpm-lock.yaml` updates.
+Run `pnpm dedupe` after `pnpm-lock.yaml` updates.
 
 ### `yarnDedupeFewer`
 
