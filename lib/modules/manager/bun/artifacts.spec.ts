@@ -147,11 +147,36 @@ describe('modules/manager/bun/artifacts', () => {
         ];
         const oldLock = Buffer.from('old');
         fs.readFile.mockResolvedValueOnce(oldLock as never);
-        // no sibling .npmrc in the package directory
+        // no .npmrc in the lockfile directory
         fs.readFile.mockResolvedValueOnce(null as never);
-        // repository root .npmrc found by resolveNpmrc()
-        fs.stat.mockRejectedValueOnce(new Error('ENOENT'));
-        fs.stat.mockRejectedValueOnce(new Error('ENOENT'));
+        const newLock = Buffer.from('new');
+        fs.readFile.mockResolvedValueOnce(newLock as never);
+
+        await updateArtifacts(updateArtifact);
+
+        expect(fs.outputFile).toHaveBeenCalledWith(
+          expect.stringMatching(/[/\\]\.npmrc$/),
+          '@scope:registry=https://registry.example.com/\n',
+        );
+        expect(fs.outputFile).not.toHaveBeenCalledWith(
+          expect.stringMatching(/workspace-a[/\\]\.npmrc$/),
+          expect.anything(),
+        );
+      });
+
+      it('resolves npmrc from the lockfile directory', async () => {
+        updateArtifact.packageFileName = 'packages/workspace-a/package.json';
+        updateArtifact.config.npmrc =
+          '@scope:registry=https://registry.example.com/';
+        updateArtifact.config.npmrcMerge = true;
+        updateArtifact.updatedDeps = [
+          { manager: 'bun', lockFiles: ['bun.lockb'] },
+        ];
+        const oldLock = Buffer.from('old');
+        fs.readFile.mockResolvedValueOnce(oldLock as never);
+        fs.readFile.mockResolvedValueOnce(
+          'registry=https://registry.example.com/' as never,
+        );
         fs.stat.mockResolvedValueOnce({} as never);
         fs.readFile.mockResolvedValueOnce(
           'registry=https://registry.example.com/' as never,
@@ -164,10 +189,6 @@ describe('modules/manager/bun/artifacts', () => {
         expect(fs.outputFile).toHaveBeenCalledWith(
           expect.stringMatching(/[/\\]\.npmrc$/),
           '@scope:registry=https://registry.example.com/\nregistry=https://registry.example.com/\n',
-        );
-        expect(fs.outputFile).not.toHaveBeenCalledWith(
-          expect.stringMatching(/workspace-a[/\\]\.npmrc$/),
-          expect.anything(),
         );
       });
 
@@ -246,14 +267,21 @@ describe('modules/manager/bun/artifacts', () => {
           stderr: '',
           options: {},
         });
+        updateArtifact.packageFileName = 'package.json';
+        updateArtifact.config.npmrc = 'registry=https://registry.example.com/';
         updateArtifact.updatedDeps = [
           { manager: 'bun', lockFiles: ['bun.lockb'] },
         ];
         const oldLock = Buffer.from('old');
         fs.readFile.mockResolvedValueOnce(oldLock as never);
+        fs.readFile.mockResolvedValueOnce('# dummy' as never);
         exec.mockRejectedValueOnce(execError);
         await expect(updateArtifacts(updateArtifact)).rejects.toThrow(
           TEMPORARY_ERROR,
+        );
+        expect(fs.outputFile).toHaveBeenCalledWith(
+          expect.stringMatching(/[/\\]\.npmrc$/),
+          '# dummy',
         );
       });
 

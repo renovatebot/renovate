@@ -51,7 +51,7 @@ export async function updateArtifacts(
 
   const lockFileDir = upath.dirname(lockFileName);
   const originalNpmrcContent = await getNpmrcContent(lockFileDir);
-  const { npmrc, npmrcFileName } = await resolveNpmrc(packageFileName, config);
+  const { npmrc, npmrcFileName } = await resolveNpmrc(lockFileName, config);
   // Use the resolved npmrc unless it came from outside the lockfile directory.
   const baseNpmrcContent =
     isString(npmrc) &&
@@ -90,7 +90,6 @@ export async function updateArtifacts(
     };
 
     await exec(cmd, execOptions);
-    await resetNpmrcContent(lockFileDir, originalNpmrcContent);
 
     const newLockFileContent = await readLocalFile(lockFileName);
     if (
@@ -113,7 +112,6 @@ export async function updateArtifacts(
       throw err;
     }
     logger.warn({ lockfile: lockFileName, err }, `Failed to update lock file`);
-    await resetNpmrcContent(lockFileDir, originalNpmrcContent);
     return [
       {
         artifactError: {
@@ -122,5 +120,7 @@ export async function updateArtifacts(
         },
       },
     ];
+  } finally {
+    await resetNpmrcContent(lockFileDir, originalNpmrcContent);
   }
 }
