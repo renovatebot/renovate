@@ -11,6 +11,7 @@ import { addMeta, logger, removeMeta } from '../../../logger/index.ts';
 import type { PackageFile } from '../../../modules/manager/types.ts';
 import { platform } from '../../../modules/platform/index.ts';
 import { scm } from '../../../modules/platform/scm.ts';
+import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
 import { getCache } from '../../../util/cache/repository/index.ts';
 import { clone } from '../../../util/clone.ts';
 import { getBranchList } from '../../../util/git/index.ts';
@@ -21,6 +22,34 @@ import { readDashboardBody } from '../dependency-dashboard.ts';
 import type { ExtractResult } from './extract-update.ts';
 import { extract, lookup, update } from './extract-update.ts';
 import type { WriteUpdateResult } from './write.ts';
+
+async function resolveAndMerge(
+  config: RenovateConfig,
+  rawBranchConfig: RenovateConfig,
+  configFileName: string,
+  baseBranch: string,
+): Promise<RenovateConfig> {
+  const migratedConfig = await migrateAndValidate(config, rawBranchConfig);
+  if (migratedConfig.errors?.length) {
+    const error = new Error(CONFIG_VALIDATION);
+    error.validationSource = configFileName;
+    error.validationError = `The renovate configuration file of branch ${baseBranch} contains some invalid settings`;
+    error.validationMessage = migratedConfig.errors
+      .map((e) => e.message)
+      .join(', ');
+    throw error;
+  }
+  let result: RenovateConfig;
+  ({ config: result } = await resolveConfigPresets(migratedConfig, config));
+  result = mergeChildConfig(config, result);
+  result.baseBranchPatterns = config.baseBranchPatterns;
+  result.baseBranches = config.baseBranches;
+  /* v8 ignore next */
+  if (config.printConfig) {
+    logger.info({ config: result }, 'Base branch config after merge');
+  }
+  return result;
+}
 
 export async function getBaseBranchConfig(
   baseBranch: string,
@@ -64,34 +93,55 @@ export async function getBaseBranchConfig(
       throw error;
     }
 
-    baseBranchConfig = await migrateAndValidate(config, baseBranchConfig);
-    if (baseBranchConfig.errors?.length) {
-      const error = new Error(CONFIG_VALIDATION);
-      error.validationSource = configFileName;
-      error.validationError = `The renovate configuration file of branch ${baseBranch} contains some invalid settings`;
-      error.validationMessage = baseBranchConfig.errors
-        .map((e) => e.message)
-        .join(', ');
-      throw error;
-    }
-
-    ({ config: baseBranchConfig } = await resolveConfigPresets(
-      baseBranchConfig,
+    baseBranchConfig = await resolveAndMerge(
       config,
-    ));
-    baseBranchConfig = mergeChildConfig(config, baseBranchConfig);
+      baseBranchConfig,
+      configFileName,
+      baseBranch,
+    );
+  }
 
-    // istanbul ignore if
-    if (config.printConfig) {
-      logger.info(
-        { config: baseBranchConfig },
-        'Base branch config after merge',
-      );
+  if (
+    config.useBaseBranchConfig === 'fallback' &&
+    baseBranch !== config.defaultBranch
+  ) {
+    logger.debug(
+      { baseBranch },
+      'Attempting to read branch-specific config because useBaseBranchConfig=fallback',
+    );
+
+    const cache = getCache();
+    const configFileName = cache.configFileName;
+
+    if (configFileName && configFileName !== 'package.json') {
+      let rawBranchConfig: RenovateConfig | null = null;
+      try {
+        rawBranchConfig = await platform.getJsonFile(
+          configFileName,
+          config.repository,
+          baseBranch,
+        );
+      } catch (err) {
+        if (err instanceof ExternalHostError) {
+          throw err;
+        }
+        const error = new Error(CONFIG_VALIDATION);
+        error.validationSource = configFileName;
+        error.validationError = 'Error fetching config file';
+        error.validationMessage = `Error fetching config file \`${configFileName}\` from branch \`${baseBranch}\``;
+        throw error;
+      }
+
+      if (rawBranchConfig) {
+        baseBranchConfig = await resolveAndMerge(
+          config,
+          rawBranchConfig,
+          configFileName,
+          baseBranch,
+        );
+        logger.debug({ baseBranch }, 'Applied branch-specific renovate config');
+      }
     }
-
-    // baseBranches value should be based off the default branch
-    baseBranchConfig.baseBranchPatterns = config.baseBranchPatterns;
-    baseBranchConfig.baseBranches = config.baseBranches;
   }
 
   if (isMultiBaseBranch(config)) {
