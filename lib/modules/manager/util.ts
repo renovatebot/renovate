@@ -1,4 +1,5 @@
 import { detectPlatform } from '../../util/common.ts';
+import type { ExecError } from '../../util/exec/exec-error.ts';
 import { parseGitUrl } from '../../util/git/url.ts';
 import { GitRefsDatasource } from '../datasource/git-refs/index.ts';
 import { GitTagsDatasource } from '../datasource/git-tags/index.ts';
@@ -52,10 +53,7 @@ export function applyGitSource(
  *
  */
 export function artifactErrorMessageFromExecError(
-  err: {
-    stderr?: string;
-    stdout?: string;
-  },
+  err: Partial<ExecError>,
   message: string,
 ): string {
   if (err.stderr?.trim()) {
