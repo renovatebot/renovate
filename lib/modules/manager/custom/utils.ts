@@ -41,7 +41,7 @@ export function substituteRegistryAliases(
     }
   } else if (dep.depName) {
     for (const [original, replace] of Object.entries(registryAliases ?? {})) {
-      if (dep.depName?.startsWith(original)) {
+      if (dep.depName.startsWith(original)) {
         dep.packageName = replace + dep.depName.slice(original.length);
         break;
       }

@@ -32,6 +32,22 @@ describe('modules/manager/custom/utils', () => {
       expect(dep.packageName).toBe('baz/bar');
     });
 
+    it('doesnt replace packageName when not matching', () => {
+      const dep = partial<PackageDependency>({
+        packageName: 'foo/bar',
+      });
+      utils.substituteRegistryAliases(dep, { abc: 'def' });
+      expect(dep.packageName).toBe('foo/bar');
+    });
+
+    it('doesnt replace depName when not matching', () => {
+      const dep = partial<PackageDependency>({
+        depName: 'foo/bar',
+      });
+      utils.substituteRegistryAliases(dep, { abc: 'def' });
+      expect(dep.packageName).toBe(undefined);
+    });
+
     it('creates packageName from depName when neither registryUrls nor packageName present', () => {
       const dep = partial<PackageDependency>({
         depName: 'foo/bar',
