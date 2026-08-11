@@ -722,7 +722,7 @@ describe('modules/manager/gradle/artifacts', () => {
       ]);
       expect(execSnapshots).toMatchObject([
         {
-          cmd: './gradlew -Dorg.gradle.jvmargs="-Xms512m -Xmx512m" --console=plain --dependency-verification lenient -q --write-verification-metadata sha256 dependencies',
+          cmd: './gradlew -Dorg.gradle.jvmargs="-Xms512m -Xmx512m" --console=plain --dependency-verification lenient -q --write-verification-metadata sha256 dependencies --refresh-dependencies',
           options: {
             cwd: '/tmp/github/some/repo',
             stdin: 'pipe',
@@ -811,7 +811,7 @@ describe('modules/manager/gradle/artifacts', () => {
       ]);
       expect(execSnapshots).toMatchObject([
         {
-          cmd: './gradlew -Dorg.gradle.jvmargs="-Xms512m -Xmx512m" --console=plain --dependency-verification lenient -q --write-verification-metadata sha256 dependencies',
+          cmd: './gradlew -Dorg.gradle.jvmargs="-Xms512m -Xmx512m" --console=plain --dependency-verification lenient -q --write-verification-metadata sha256 dependencies --refresh-dependencies',
           options: {
             cwd: '/tmp/github/some/repo',
             stdin: 'pipe',
@@ -885,7 +885,7 @@ describe('modules/manager/gradle/artifacts', () => {
           },
         },
         {
-          cmd: './gradlew -Dorg.gradle.jvmargs="-Xms512m -Xmx512m" --console=plain --dependency-verification lenient -q --write-verification-metadata sha256 dependencies',
+          cmd: './gradlew -Dorg.gradle.jvmargs="-Xms512m -Xmx512m" --console=plain --dependency-verification lenient -q --write-verification-metadata sha256 dependencies --refresh-dependencies',
           options: {
             cwd: '/tmp/github/some/repo',
             stdin: 'pipe',
@@ -930,7 +930,7 @@ describe('modules/manager/gradle/artifacts', () => {
 
       expect(execSnapshots).toMatchObject([
         {
-          cmd: './gradlew -Dorg.gradle.jvmargs="-Xms512m -Xmx512m" --console=plain --dependency-verification lenient -q --write-verification-metadata sha256 dependencies',
+          cmd: './gradlew -Dorg.gradle.jvmargs="-Xms512m -Xmx512m" --console=plain --dependency-verification lenient -q --write-verification-metadata sha256 dependencies --refresh-dependencies',
           options: {
             cwd: '/tmp/github/some/repo',
             stdin: 'pipe',
@@ -974,7 +974,7 @@ describe('modules/manager/gradle/artifacts', () => {
 
       expect(execSnapshots).toMatchObject([
         {
-          cmd: './gradlew -Dorg.gradle.jvmargs="-Xms512m -Xmx512m" --console=plain --dependency-verification lenient -q --write-verification-metadata sha256,pgp dependencies',
+          cmd: './gradlew -Dorg.gradle.jvmargs="-Xms512m -Xmx512m" --console=plain --dependency-verification lenient -q --write-verification-metadata sha256,pgp dependencies --refresh-dependencies',
           options: {
             cwd: '/tmp/github/some/repo',
             stdin: 'pipe',
