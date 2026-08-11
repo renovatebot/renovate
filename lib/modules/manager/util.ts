@@ -44,3 +44,27 @@ export function applyGitSource(
     dep.skipReason = branch ? 'git-dependency' : 'unspecified-version';
   }
 }
+
+/**
+ * Given an {@link ExecError}, retrieve the message which will be used for an {@link ArtifactError}.
+ *
+ * An `ExecError` always carries a `stderr` property, so nullish coalescing would keep an empty string and render an artifact error with no message at all.
+ *
+ */
+export function artifactErrorMessageFromExecError(
+  err: {
+    stderr?: string;
+    stdout?: string;
+  },
+  message: string,
+): string {
+  if (err.stderr?.trim()) {
+    return err.stderr;
+  }
+
+  if (err.stdout?.trim()) {
+    return err.stdout;
+  }
+
+  return message;
+}
