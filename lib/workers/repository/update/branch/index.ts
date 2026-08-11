@@ -640,10 +640,11 @@ export async function processBranch(
         config,
         branchConfig.packageFiles,
       );
-      config.artifactErrors = (config.artifactErrors ?? []).concat(
+      // Both were just set to arrays above, by concatenating `additionalFiles`' results onto them.
+      config.artifactErrors = config.artifactErrors.concat(
         actionsLockfile.artifactErrors,
       );
-      config.updatedArtifacts = (config.updatedArtifacts ?? []).concat(
+      config.updatedArtifacts = config.updatedArtifacts.concat(
         actionsLockfile.updatedArtifacts,
       );
       if (config.updatedArtifacts?.length) {

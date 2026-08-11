@@ -2327,6 +2327,18 @@ describe('modules/manager/github-actions/extract', () => {
       expect(res?.deps[0].digestManagedExternally).toBe(true);
     });
 
+    it('marks a local composite action when the lockfile has onboarded nothing', async () => {
+      fs.readLocalFile.mockResolvedValueOnce("version: 'v0.0.2'\n");
+
+      // a composite action isn't keyed by `workflows:`, so it's still managed even when that key is missing entirely
+      const res = await extractPackageFile(
+        workflow,
+        '.github/actions/build/action.yml',
+      );
+
+      expect(res?.deps[0].digestManagedExternally).toBe(true);
+    });
+
     it('leaves digests alone when there is no lockfile', async () => {
       fs.readLocalFile.mockResolvedValueOnce(null);
 

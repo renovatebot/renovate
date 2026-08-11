@@ -260,6 +260,31 @@ describe('modules/manager/github-actions/artifacts', () => {
       expect(res.updatedArtifacts).toHaveLength(1);
       expect(execSnapshots).toHaveLength(2);
     });
+
+    it('runs for a local composite action when the lockfile has onboarded nothing', async () => {
+      const execSnapshots = mockExecAll();
+      fs.readLocalFile
+        .mockResolvedValueOnce("version: 'v0.0.2'\n")
+        .mockResolvedValueOnce("version: 'v0.0.2'\n# updated\n")
+        .mockResolvedValueOnce('updated workflow');
+      mockRepoStatus();
+
+      // a composite action isn't keyed by `workflows:`, so it still runs even when that key is missing entirely
+      const res = await updateActionsLockfile(
+        makeConfig({
+          upgrades: [
+            {
+              ...checkoutUpgrade,
+              packageFile: '.github/actions/build/action.yml',
+            },
+          ],
+        }),
+        packageFiles,
+      );
+
+      expect(res.updatedArtifacts).toHaveLength(1);
+      expect(execSnapshots).toHaveLength(2);
+    });
   });
 
   describe('regenerating', () => {
@@ -425,6 +450,22 @@ describe('modules/manager/github-actions/artifacts', () => {
         makeConfig({
           updatedPackageFiles: [{ type: 'deletion', path: packageFileName }],
         }),
+        packageFiles,
+      );
+
+      expect(fs.writeLocalFile).not.toHaveBeenCalled();
+      expect(res.updatedArtifacts).toHaveLength(1);
+    });
+
+    it('runs when there are no updated package files to flush', async () => {
+      mockExecAll();
+      fs.readLocalFile
+        .mockResolvedValueOnce(actionsLock)
+        .mockResolvedValueOnce(`${actionsLock}# updated\n`);
+      mockRepoStatus([lockFile]);
+
+      const res = await updateActionsLockfile(
+        makeConfig({ updatedPackageFiles: undefined }),
         packageFiles,
       );
 
@@ -656,6 +697,29 @@ describe('modules/manager/github-actions/artifacts', () => {
       expect(execSnapshots[0].options?.env).not.toHaveProperty(
         'GH_ENTERPRISE_TOKEN',
       );
+    });
+
+    it('resolves the token against github.com when the platform is not github', async () => {
+      GlobalConfig.set({
+        ...adminConfig,
+        platform: 'gitlab',
+        endpoint: 'https://gitlab.example.com/',
+      });
+      const execSnapshots = mockExecAll();
+      hostRules.add({
+        hostType: 'github',
+        matchHost: 'api.github.com',
+        token: 'some-token',
+      });
+      mockLockfileRegenerated();
+
+      await updateActionsLockfile(makeConfig(), packageFiles);
+
+      // the configured endpoint isn't a GitHub one, so `gh` still talks to github.com
+      expect(execSnapshots[0].options?.env).toMatchObject({
+        GH_TOKEN: 'some-token',
+      });
+      expect(execSnapshots[0].options?.env).not.toHaveProperty('GH_HOST');
     });
 
     it('runs unauthenticated when no token is configured', async () => {
