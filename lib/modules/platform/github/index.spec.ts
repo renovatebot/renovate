@@ -5392,11 +5392,11 @@ describe('modules/platform/github/index', () => {
             },
           ],
           {
-            link: `<${githubApiHost}/repos/some/repo/dependabot/alerts?state=open&direction=asc&per_page=100&page=2>; rel="next", <${githubApiHost}/repos/some/repo/dependabot/alerts?state=open&direction=asc&per_page=100&page=2>; rel="last"`,
+            link: `<${githubApiHost}/repos/some/repo/dependabot/alerts?state=open&direction=asc&per_page=100&after=cursor-1>; rel="next"`,
           },
         )
         .get(
-          '/repos/some/repo/dependabot/alerts?state=open&direction=asc&per_page=100&page=2',
+          '/repos/some/repo/dependabot/alerts?state=open&direction=asc&per_page=100&after=cursor-1',
         )
         .reply(200, [
           {
