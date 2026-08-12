@@ -1,5 +1,7 @@
+import type { Stats } from 'node:fs';
 import * as _fsExtra from 'fs-extra';
 import upath from 'upath';
+import type { MockInstance } from 'vitest';
 import { mockDeep } from 'vitest-mock-extended';
 import { envMock, mockExecAll } from '~test/exec-util.ts';
 import { Fixtures } from '~test/fixtures.ts';
@@ -27,9 +29,10 @@ import type { PipfileLock } from './types.ts';
 // mock for cjs require for `@renovatebot/detect-tools`
 // https://github.com/vitest-dev/vitest/discussions/3134
 vi.hoisted(() => {
-  require.cache[require.resolve('fs-extra')] = {
+  const fsExtraModule: Partial<NodeJS.Module> = {
     exports: fixtures.fsExtra(),
-  } as never;
+  };
+  require.cache[require.resolve('fs-extra')] = fsExtraModule as NodeJS.Module;
 });
 vi.mock('fs-extra', () => fixtures.fsExtra());
 vi.mock('../../../util/exec/env.ts', () => mockDeep());
@@ -39,6 +42,11 @@ vi.mock('../../datasource/index.ts', () => mockDeep());
 
 const datasource = vi.mocked(_datasource);
 const fsExtra = vi.mocked(_fsExtra);
+// vi.mocked() resolves stat() to its callback overload, so
+// mockResolvedValueOnce() would expect void; retype via the promise overload
+const statMock = fsExtra.stat as unknown as MockInstance<
+  (path: string) => Promise<Stats>
+>;
 
 process.env.CONTAINERBASE = 'true';
 
@@ -131,7 +139,7 @@ describe('modules/manager/pipenv/artifacts', () => {
 
   it('returns null if unchanged', async () => {
     fsExtra.ensureDir.mockResolvedValue(undefined);
-    fsExtra.stat.mockResolvedValueOnce({} as never);
+    statMock.mockResolvedValueOnce(partial<Stats>());
 
     mockFiles({
       '/Pipfile.lock': JSON.stringify({
@@ -184,7 +192,7 @@ describe('modules/manager/pipenv/artifacts', () => {
 
   it('gets python full version from Pipfile', async () => {
     GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
-    fsExtra.stat.mockResolvedValueOnce({} as never);
+    statMock.mockResolvedValueOnce(partial<Stats>());
 
     mockFiles({
       '/Pipfile': Fixtures.get('Pipfile1'),
@@ -237,7 +245,7 @@ describe('modules/manager/pipenv/artifacts', () => {
 
   it('gets python version from Pipfile', async () => {
     GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
-    fsExtra.stat.mockResolvedValueOnce({} as never);
+    statMock.mockResolvedValueOnce(partial<Stats>());
 
     mockFiles({
       '/Pipfile': Fixtures.get('Pipfile2'),
@@ -290,7 +298,7 @@ describe('modules/manager/pipenv/artifacts', () => {
 
   it('gets full python version from .python-version', async () => {
     GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
-    fsExtra.stat.mockResolvedValueOnce({} as never);
+    statMock.mockResolvedValueOnce(partial<Stats>());
 
     mockFiles({
       '/Pipfile.lock': '{}',
@@ -349,7 +357,7 @@ describe('modules/manager/pipenv/artifacts', () => {
 
   it('gets python stream, from .python-version', async () => {
     GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
-    fsExtra.stat.mockResolvedValueOnce({} as never);
+    statMock.mockResolvedValueOnce(partial<Stats>());
 
     fsExtra.ensureDir.mockResolvedValue(undefined);
 
@@ -407,7 +415,7 @@ describe('modules/manager/pipenv/artifacts', () => {
 
   it('handles no constraint', async () => {
     fsExtra.ensureDir.mockResolvedValue(undefined);
-    fsExtra.stat.mockResolvedValueOnce({} as never);
+    statMock.mockResolvedValueOnce(partial<Stats>());
 
     mockFiles({
       '/Pipfile.lock': 'unparseable pipfile lock',
@@ -463,7 +471,7 @@ describe('modules/manager/pipenv/artifacts', () => {
 
   it('returns updated Pipfile.lock', async () => {
     fsExtra.ensureDir.mockResolvedValue(undefined);
-    fsExtra.stat.mockResolvedValueOnce({} as never);
+    statMock.mockResolvedValueOnce(partial<Stats>());
 
     mockFiles({
       '/Pipfile.lock': ['current pipfile.lock', 'new pipfile.lock'],
@@ -526,7 +534,7 @@ describe('modules/manager/pipenv/artifacts', () => {
 
   it('supports docker mode', async () => {
     GlobalConfig.set(dockerAdminConfig);
-    fsExtra.stat.mockResolvedValueOnce({} as never);
+    statMock.mockResolvedValueOnce(partial<Stats>());
 
     const pipFileLock = JSON.stringify({
       _meta: { requires: { python_version: '3.7' } },
@@ -614,7 +622,7 @@ describe('modules/manager/pipenv/artifacts', () => {
 
   it('supports install mode', async () => {
     GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
-    fsExtra.stat.mockResolvedValueOnce({} as never);
+    statMock.mockResolvedValueOnce(partial<Stats>());
 
     const pipFileLock = JSON.stringify({
       _meta: { requires: { python_version: '3.6' } },
@@ -686,7 +694,7 @@ describe('modules/manager/pipenv/artifacts', () => {
 
   it('defaults to latest if no lock constraints', async () => {
     GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
-    fsExtra.stat.mockResolvedValueOnce({} as never);
+    statMock.mockResolvedValueOnce(partial<Stats>());
     fsExtra.ensureDir.mockResolvedValue(undefined);
 
     mockFiles({
@@ -758,7 +766,7 @@ describe('modules/manager/pipenv/artifacts', () => {
 
   it('catches errors', async () => {
     fsExtra.ensureDir.mockResolvedValue(undefined);
-    fsExtra.stat.mockResolvedValueOnce({} as never);
+    statMock.mockResolvedValueOnce(partial<Stats>());
 
     mockFiles({
       '/Pipfile.lock': 'Current Pipfile.lock',
@@ -785,7 +793,7 @@ describe('modules/manager/pipenv/artifacts', () => {
 
   it('returns updated Pipenv.lock when doing lockfile maintenance', async () => {
     fsExtra.ensureDir.mockResolvedValue(undefined);
-    fsExtra.stat.mockResolvedValueOnce({} as never);
+    statMock.mockResolvedValueOnce(partial<Stats>());
     fsExtra.remove.mockResolvedValue();
 
     mockFiles({
@@ -833,7 +841,7 @@ describe('modules/manager/pipenv/artifacts', () => {
 
   it('uses pipenv version from Pipfile', async () => {
     fsExtra.ensureDir.mockResolvedValue(undefined);
-    fsExtra.stat.mockResolvedValueOnce({} as never);
+    statMock.mockResolvedValueOnce(partial<Stats>());
 
     GlobalConfig.set(dockerAdminConfig);
 
@@ -920,7 +928,7 @@ describe('modules/manager/pipenv/artifacts', () => {
 
   it('uses pipenv version from Pipfile dev packages', async () => {
     GlobalConfig.set(dockerAdminConfig);
-    fsExtra.stat.mockResolvedValueOnce({} as never);
+    statMock.mockResolvedValueOnce(partial<Stats>());
 
     fsExtra.ensureDir.mockResolvedValue(undefined);
 
@@ -1007,7 +1015,7 @@ describe('modules/manager/pipenv/artifacts', () => {
 
   it('uses pipenv version from config', async () => {
     GlobalConfig.set(dockerAdminConfig);
-    fsExtra.stat.mockResolvedValueOnce({} as never);
+    statMock.mockResolvedValueOnce(partial<Stats>());
     fsExtra.ensureDir.mockResolvedValue(undefined);
 
     const oldLock = JSON.stringify({
@@ -1088,7 +1096,7 @@ describe('modules/manager/pipenv/artifacts', () => {
 
   it('passes private credential environment vars', async () => {
     fsExtra.ensureDir.mockResolvedValue(undefined);
-    fsExtra.stat.mockResolvedValueOnce({} as never);
+    statMock.mockResolvedValueOnce(partial<Stats>());
 
     mockFiles({
       '/Pipfile.lock': ['current Pipfile.lock', 'New Pipfile.lock'],
@@ -1172,7 +1180,7 @@ describe('modules/manager/pipenv/artifacts', () => {
 
   it('updates extraEnv if variable names differ from default', async () => {
     fsExtra.ensureDir.mockResolvedValue(undefined);
-    fsExtra.stat.mockResolvedValueOnce({} as never);
+    statMock.mockResolvedValueOnce(partial<Stats>());
 
     mockFiles({
       '/Pipfile.lock': ['current Pipfile.lock', 'New Pipfile.lock'],

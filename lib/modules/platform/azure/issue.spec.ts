@@ -24,12 +24,12 @@ describe('modules/platform/azure/issue', () => {
   let issueService: IssueService;
 
   beforeEach(() => {
-    config = {
+    config = partial<Config>({
       repository: 'test/repo',
       project: 'testProject',
       repoId: '123',
       workItemType: 'Issue',
-    } as Config;
+    });
 
     issueService = new IssueService(config);
   });
