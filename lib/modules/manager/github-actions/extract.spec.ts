@@ -558,6 +558,27 @@ describe('modules/manager/github-actions/extract', () => {
       });
     });
 
+    it('extracts ratchet pinned action in subdirectory', async () => {
+      const res = await extractPackageFile(
+        `
+        jobs:
+          build:
+            steps:
+              - uses: actions/cache/restore@b7e8d49f17405cc70c1c120101943203c98d3a4b # ratchet:actions/cache/restore@v4
+        `,
+        'workflow.yml',
+      );
+      expect(res?.deps[0]).toMatchObject({
+        depName: 'actions/cache',
+        currentValue: 'v4',
+        currentDigest: 'b7e8d49f17405cc70c1c120101943203c98d3a4b',
+        datasource: 'github-tags',
+        versioning: 'github-actions',
+        replaceString:
+          'actions/cache/restore@b7e8d49f17405cc70c1c120101943203c98d3a4b # ratchet:actions/cache/restore@v4',
+      });
+    });
+
     it('disables naked SHA pins without version comment', async () => {
       const res = await extractPackageFile(
         codeBlock`
