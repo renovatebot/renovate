@@ -44,6 +44,7 @@ const backendDatasources = {
     GithubTagsDatasource.id,
     JavaVersionDatasource.id,
     NodeVersionDatasource.id,
+    PypiDatasource.id,
     RubyVersionDatasource.id,
     RustVersionDatasource.id,
   ],

@@ -6,6 +6,7 @@ import { HexpmBobDatasource } from '../../datasource/hexpm-bob/index.ts';
 import { JavaVersionDatasource } from '../../datasource/java-version/index.ts';
 import { NodeVersionDatasource } from '../../datasource/node-version/index.ts';
 import { NpmDatasource } from '../../datasource/npm/index.ts';
+import { PypiDatasource } from '../../datasource/pypi/index.ts';
 import { RubyVersionDatasource } from '../../datasource/ruby-version/index.ts';
 import { RustVersionDatasource } from '../../datasource/rust-version/index.ts';
 import * as regexVersioning from '../../versioning/regex/index.ts';
@@ -371,6 +372,13 @@ const miseRegistryTooling: Record<string, ToolingDefinition> = {
     config: {
       packageName: 'npm',
       datasource: NpmDatasource.id,
+    },
+  },
+  oci: {
+    misePluginUrl: 'https://mise.jdx.dev/registry.html#tools',
+    config: {
+      packageName: 'oci-cli',
+      datasource: PypiDatasource.id,
     },
   },
   opentofu: {

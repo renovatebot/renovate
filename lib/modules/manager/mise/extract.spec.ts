@@ -75,6 +75,7 @@ describe('modules/manager/mise/extract', () => {
       localstack = "4.3.0"
       lychee = "0.19.1"
       npm = "11.2.0"
+      oci = "3.90.1"
       opentofu = "1.6.1"
       openfga = "1.14.0"
       packer = "1.15.0"
@@ -243,6 +244,12 @@ describe('modules/manager/mise/extract', () => {
             datasource: 'npm',
             depName: 'npm',
             packageName: 'npm',
+          },
+          {
+            currentValue: '3.90.1',
+            datasource: 'pypi',
+            depName: 'oci',
+            packageName: 'oci-cli',
           },
           {
             currentValue: '1.6.1',
