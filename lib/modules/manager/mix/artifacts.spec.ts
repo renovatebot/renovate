@@ -420,6 +420,30 @@ describe('modules/manager/mix/artifacts', () => {
       ]);
     });
 
+    it('ignores a commented-out repo option', async () => {
+      await updateArtifacts({
+        packageFileName: 'mix.exs',
+        updatedDeps: [{ depName: 'plug' }],
+        newPackageFileContent: `
+          defp deps do
+            # [{:oban_pro, "~> 1.7", repo: "oban"}]
+            [{:plug, "~> 1.0"}]
+          end
+        `,
+        config: {
+          ...config,
+          registryAliases: { oban: 'https://repo.oban.pro' },
+        },
+      });
+
+      expect(httpMock.getTrace()).toEqual([]);
+      expect(fs.outputCacheFile).not.toHaveBeenCalled();
+      expect(execSnapshots.map((s) => s.cmd)).toEqual([
+        ...installTools,
+        'mix deps.update plug',
+      ]);
+    });
+
     it('ignores an alias for hex.pm itself', async () => {
       await updateArtifacts({
         packageFileName: 'mix.exs',
