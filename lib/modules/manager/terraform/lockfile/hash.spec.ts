@@ -1,14 +1,54 @@
-import { createReadStream } from 'node:fs';
+import { createReadStream, createWriteStream } from 'node:fs';
+import { readFile, writeFile } from 'node:fs/promises';
+import { Readable } from 'node:stream';
+import { pipeline } from 'node:stream/promises';
 import type { DirectoryResult } from 'tmp-promise';
 import { dir } from 'tmp-promise';
 import upath from 'upath';
+import * as yauzl from 'yauzl';
+import { ZipFile } from 'yazl';
 import { Fixtures } from '~test/fixtures.ts';
 import * as httpMock from '~test/http-mock.ts';
-import { getFixturePath, logger } from '~test/util.ts';
+import { getFixturePath, logger, partial } from '~test/util.ts';
 import { GlobalConfig } from '../../../../config/global.ts';
 import { ExternalHostError } from '../../../../types/errors/external-host-error.ts';
+import * as fs from '../../../../util/fs/index.ts';
 import { TerraformProviderDatasource } from '../../../datasource/terraform-provider/index.ts';
+import type { TerraformBuild } from '../../../datasource/terraform-provider/schema.ts';
 import { TerraformProviderHash } from './hash.ts';
+
+async function writeZip(
+  zipFilePath: string,
+  addEntries: (archive: ZipFile) => void,
+): Promise<void> {
+  const archive = new ZipFile();
+  addEntries(archive);
+  const writePromise = pipeline(
+    archive.outputStream,
+    createWriteStream(zipFilePath),
+  );
+  archive.end();
+  await writePromise;
+}
+
+function replaceZipEntryName(
+  zip: Buffer,
+  originalName: string,
+  replacementName: string,
+): number {
+  const original = Buffer.from(originalName);
+  const replacement = Buffer.from(replacementName);
+  expect(replacement).toHaveLength(original.length);
+
+  let offset = 0;
+  let replacements = 0;
+  while ((offset = zip.indexOf(original, offset)) !== -1) {
+    replacement.copy(zip, offset);
+    offset += replacement.length;
+    replacements += 1;
+  }
+  return replacements;
+}
 
 const releaseBackendUrl = TerraformProviderDatasource.defaultRegistryUrls[1];
 const terraformCloudReleaseBackendUrl =
@@ -167,9 +207,7 @@ describe('modules/manager/terraform/lockfile/hash', () => {
         'hashicorp/azurerm',
         '2.56.0',
       ),
-    ).rejects.toThrow(
-      'ADM-ZIP: Invalid or unsupported zip format. No END header found',
-    );
+    ).rejects.toThrow('End of central directory record signature not found');
   });
 
   it('full walkthrough', async () => {
@@ -490,13 +528,216 @@ describe('modules/manager/terraform/lockfile/hash', () => {
   describe('hashOfZipContent', () => {
     const zipWithFolderPath = Fixtures.getPath('test_with_folder.zip');
 
-    it('return hash for content with subfolders', async () => {
+    it('streams the recursive directory fixture without extracting it', async () => {
+      const readCacheFile = vi.spyOn(fs, 'readCacheFile');
+
       await expect(
-        TerraformProviderHash.hashOfZipContent(
-          zipWithFolderPath,
-          upath.join(cacheDir.path, 'test'),
-        ),
+        TerraformProviderHash.hashOfZipContent(zipWithFolderPath),
       ).resolves.toBe('g92f/mR2hlVmeWBlplxxJyP2H3fdyPwYccr7uJhcRz8=');
+
+      expect(readCacheFile).not.toHaveBeenCalled();
+    });
+
+    it('hashes nested paths, empty files, and stored entries', async () => {
+      const zipFilePath = upath.join(cacheDir.path, 'streaming-fixture.zip');
+      await writeZip(zipFilePath, (archive) => {
+        archive.addBuffer(
+          Buffer.from('nested content'),
+          'nested/deeper/file.txt',
+        );
+        archive.addBuffer(Buffer.alloc(0), 'empty.txt');
+        archive.addBuffer(Buffer.from('stored content'), 'stored.txt', {
+          compress: false,
+        });
+      });
+
+      await expect(
+        TerraformProviderHash.hashOfZipContent(zipFilePath),
+      ).resolves.toBe('FmiOVJrRLyrSAUWoZdPZz6alBSnQ0S+2ZCBGdWls+Lg=');
+    });
+
+    it('ignores directory entries ending in a backslash', async () => {
+      const zipFilePath = upath.join(cacheDir.path, 'backslash-directory.zip');
+      await writeZip(zipFilePath, (archive) => {
+        archive.addEmptyDirectory('folder');
+      });
+
+      const zip = await readFile(zipFilePath);
+      expect(replaceZipEntryName(zip, 'folder/', 'folder\\')).toBe(2);
+      await writeFile(zipFilePath, zip);
+
+      await expect(
+        TerraformProviderHash.hashOfZipContent(zipFilePath),
+      ).resolves.toBe('47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=');
+    });
+
+    it('rejects entry names containing newlines', async () => {
+      const zipFilePath = upath.join(cacheDir.path, 'newline-path.zip');
+      await writeZip(zipFilePath, (archive) => {
+        archive.addBuffer(Buffer.from('provider content'), 'line-break.txt');
+      });
+
+      const zip = await readFile(zipFilePath);
+      expect(
+        replaceZipEntryName(zip, 'line-break.txt', 'line\nbreak.txt'),
+      ).toBe(2);
+      await writeFile(zipFilePath, zip);
+
+      await expect(
+        TerraformProviderHash.hashOfZipContent(zipFilePath),
+      ).rejects.toThrow('ZIP entry name contains a newline');
+    });
+
+    it('rejects duplicate normalized entry paths', async () => {
+      const zipFilePath = upath.join(cacheDir.path, 'duplicate-path.zip');
+      await writeZip(zipFilePath, (archive) => {
+        archive.addBuffer(Buffer.from('first'), 'a/file.txt');
+        archive.addBuffer(Buffer.from('second'), 'b/file.txt');
+      });
+
+      const zip = await readFile(zipFilePath);
+      expect(replaceZipEntryName(zip, 'b/file.txt', 'a/file.txt')).toBe(2);
+      await writeFile(zipFilePath, zip);
+
+      await expect(
+        TerraformProviderHash.hashOfZipContent(zipFilePath),
+      ).rejects.toThrow('Duplicate ZIP entry path: a/file.txt');
+    });
+
+    it('rejects an entry whose contents do not match its CRC-32', async () => {
+      const zipFilePath = upath.join(cacheDir.path, 'invalid-crc.zip');
+      await writeZip(zipFilePath, (archive) => {
+        archive.addBuffer(Buffer.from('original content'), 'corrupted.txt', {
+          compress: false,
+        });
+      });
+
+      const zip = await readFile(zipFilePath);
+      const fileNameLength = zip.readUInt16LE(26);
+      const extraFieldLength = zip.readUInt16LE(28);
+      zip[30 + fileNameLength + extraFieldLength] ^= 0xff;
+      await writeFile(zipFilePath, zip);
+
+      await expect(
+        TerraformProviderHash.hashOfZipContent(zipFilePath),
+      ).rejects.toThrow('CRC-32 mismatch for ZIP entry corrupted.txt');
+    });
+
+    it('preserves unflagged UTF-8 filename bytes', async () => {
+      const zipFilePath = upath.join(cacheDir.path, 'unflagged-utf8.zip');
+      const fileName = 'café.txt';
+      const content = Buffer.from('provider content');
+      await writeZip(zipFilePath, (archive) => {
+        archive.addBuffer(content, fileName);
+      });
+
+      const zip = await readFile(zipFilePath);
+      zip.writeUInt16LE(zip.readUInt16LE(6) & ~0x800, 6);
+      const centralDirectoryOffset = zip.indexOf(Buffer.from('PK\x01\x02'));
+      expect(centralDirectoryOffset).toBeGreaterThan(-1);
+      zip.writeUInt16LE(
+        zip.readUInt16LE(centralDirectoryOffset + 8) & ~0x800,
+        centralDirectoryOffset + 8,
+      );
+      await writeFile(zipFilePath, zip);
+
+      await expect(
+        TerraformProviderHash.hashOfZipContent(zipFilePath),
+      ).resolves.toBe('mhCPfNU/KjrNmtYY+P1iAT4o+PXmNLq8jJINomI60Jc=');
+    });
+
+    it('rejects unsafe entry paths', async () => {
+      const zipFilePath = upath.join(cacheDir.path, 'unsafe-path.zip');
+      await writeZip(zipFilePath, (archive) => {
+        archive.addBuffer(Buffer.from('provider content'), 'aa/outside.txt');
+      });
+
+      const zip = await readFile(zipFilePath);
+      expect(replaceZipEntryName(zip, 'aa/outside.txt', '../outside.txt')).toBe(
+        2,
+      );
+      await writeFile(zipFilePath, zip);
+
+      await expect(
+        TerraformProviderHash.hashOfZipContent(zipFilePath),
+      ).rejects.toThrow('invalid relative path');
+    });
+
+    it('isolates concurrent downloads that have the same filename', async () => {
+      const fileName = 'provider.zip';
+      const firstBuild = partial<TerraformBuild>({
+        name: 'first',
+        version: '1.0.0',
+        filename: fileName,
+        url: 'https://example.com/first/provider.zip',
+      });
+      const secondBuild = partial<TerraformBuild>({
+        name: 'second',
+        version: '1.0.0',
+        filename: fileName,
+        url: 'https://example.com/second/provider.zip',
+      });
+      vi.spyOn(TerraformProviderHash.http, 'stream')
+        .mockReturnValueOnce(createReadStream(zipWithFolderPath))
+        .mockReturnValueOnce(createReadStream(zipWithFolderPath));
+      const createCacheWriteStream = vi.spyOn(fs, 'createCacheWriteStream');
+
+      await expect(
+        Promise.all([
+          TerraformProviderHash.calculateSingleHash(firstBuild, cacheDir.path),
+          TerraformProviderHash.calculateSingleHash(secondBuild, cacheDir.path),
+        ]),
+      ).resolves.toEqual([
+        'g92f/mR2hlVmeWBlplxxJyP2H3fdyPwYccr7uJhcRz8=',
+        'g92f/mR2hlVmeWBlplxxJyP2H3fdyPwYccr7uJhcRz8=',
+      ]);
+
+      const downloadFileNames = createCacheWriteStream.mock.calls.map(
+        ([downloadFileName]) => downloadFileName,
+      );
+      expect(downloadFileNames).toHaveLength(2);
+      expect(new Set(downloadFileNames).size).toBe(2);
+      for (const downloadFileName of downloadFileNames) {
+        expect(upath.dirname(downloadFileName)).toBe(cacheDir.path);
+        expect(upath.basename(downloadFileName)).not.toBe(fileName);
+        await expect(fs.cachePathExists(downloadFileName)).resolves.toBeFalse();
+      }
+    });
+
+    it('closes the ZIP and removes the download after an entry stream error', async () => {
+      const fileName = 'entry-stream-error.zip';
+      const build = partial<TerraformBuild>({
+        name: 'test',
+        version: '1.0.0',
+        filename: fileName,
+        url: 'https://example.com/entry-stream-error.zip',
+      });
+      vi.spyOn(TerraformProviderHash.http, 'stream').mockReturnValue(
+        createReadStream(zipWithFolderPath),
+      );
+      const createCacheWriteStream = vi.spyOn(fs, 'createCacheWriteStream');
+      const close = vi.spyOn(yauzl.ZipFile.prototype, 'close');
+      vi.spyOn(
+        yauzl.ZipFile.prototype,
+        'openReadStreamPromise',
+      ).mockResolvedValue(
+        new Readable({
+          read() {
+            this.destroy(new Error('entry stream failed'));
+          },
+        }),
+      );
+
+      await expect(
+        TerraformProviderHash.calculateSingleHash(build, cacheDir.path),
+      ).rejects.toThrow('entry stream failed');
+
+      expect(close).toHaveBeenCalledOnce();
+      expect(createCacheWriteStream).toHaveBeenCalledOnce();
+      const downloadFileName = createCacheWriteStream.mock.calls[0][0];
+      expect(upath.dirname(downloadFileName)).toBe(cacheDir.path);
+      expect(upath.basename(downloadFileName)).not.toBe(fileName);
+      await expect(fs.cachePathExists(downloadFileName)).resolves.toBeFalse();
     });
   });
 });

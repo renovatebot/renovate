@@ -1,6 +1,9 @@
 import crypto from 'node:crypto';
-import AdmZip from 'adm-zip';
+import { once } from 'node:events';
+import { Transform, type TransformCallback } from 'node:stream';
+import { crc32 } from 'node:zlib';
 import upath from 'upath';
+import { openPromise, validateFileName } from 'yauzl';
 import { logger } from '../../../../logger/index.ts';
 import {
   coerceArray,
@@ -9,11 +12,24 @@ import {
 } from '../../../../util/array.ts';
 import { withCache } from '../../../../util/cache/package/with-cache.ts';
 import * as fs from '../../../../util/fs/index.ts';
-import { ensureCacheDir } from '../../../../util/fs/index.ts';
+import { hashStream } from '../../../../util/hash.ts';
 import { Http } from '../../../../util/http/index.ts';
 import * as p from '../../../../util/promises.ts';
 import { TerraformProviderDatasource } from '../../../datasource/terraform-provider/index.ts';
 import type { TerraformBuild } from '../../../datasource/terraform-provider/schema.ts';
+
+class Crc32Stream extends Transform {
+  checksum = 0;
+
+  override _transform(
+    chunk: Buffer,
+    _encoding: BufferEncoding,
+    callback: TransformCallback,
+  ): void {
+    this.checksum = crc32(chunk, this.checksum);
+    callback(null, chunk);
+  }
+}
 
 export class TerraformProviderHash {
   static http = new Http(TerraformProviderDatasource.id);
@@ -22,95 +38,84 @@ export class TerraformProviderHash {
 
   static hashCacheTTL = 10080; // in minutes == 1 week
 
-  private static async hashElementList(
-    basePath: string,
-    fileSystemEntries: string[],
-  ): Promise<string> {
-    const rootHash = crypto.createHash('sha256');
+  /**
+   * Computes the `h1:` checksum used in Terraform dependency lock files.
+   *
+   * Terraform verifies extracted providers with Go's `HashDir`, which ignores
+   * ZIP directory entries. Ignore them here so the archive produces the same
+   * checksum as the extracted provider.
+   *
+   * See https://github.com/golang/go/issues/53448.
+   */
+  static async hashOfZipContent(zipFilePath: string): Promise<string> {
+    const zipFile = await openPromise(zipFilePath, {
+      autoClose: false,
+      decodeStrings: false,
+    });
+    const entryHashes: { path: Buffer; hash: string }[] = [];
+    const entryPaths = new Set<string>();
 
-    for (const entryPath of fileSystemEntries) {
-      const absolutePath = upath.resolve(basePath, entryPath);
-      if (!(await fs.cachePathIsFile(absolutePath))) {
-        continue;
+    try {
+      for await (const entry of zipFile.eachEntry()) {
+        // Go's ZIP reader preserves the central-directory name bytes instead of decoding CP437 or Unicode path fields.
+        const fileName = entry.fileNameRaw
+          .toString('latin1')
+          .replaceAll('\\', '/');
+
+        // Terraform verifies extracted packages with Go HashDir semantics, which omit directory records.
+        if (fileName.endsWith('/')) {
+          continue;
+        }
+        if (fileName.includes('\n')) {
+          throw new Error('ZIP entry name contains a newline');
+        }
+        const fileNameError = validateFileName(fileName);
+        if (fileNameError) {
+          throw new Error(fileNameError);
+        }
+        const normalizedPath = upath.normalize(fileName);
+        if (entryPaths.has(normalizedPath)) {
+          throw new Error(`Duplicate ZIP entry path: ${normalizedPath}`);
+        }
+        entryPaths.add(normalizedPath);
+        const path = Buffer.from(normalizedPath, 'latin1');
+
+        const entryStream = await zipFile.openReadStreamPromise(entry);
+        const crc32Stream = new Crc32Stream();
+        const hash = await hashStream(
+          entryStream.compose(crc32Stream),
+          'sha256',
+        );
+        if (crc32Stream.checksum !== entry.crc32) {
+          throw new Error(
+            `CRC-32 mismatch for ZIP entry ${entry.fileNameRaw.toString('utf8')}`,
+          );
+        }
+        entryHashes.push({ path, hash });
       }
+    } finally {
+      const closePromise = once(zipFile, 'close');
+      zipFile.close();
+      await closePromise;
+    }
 
-      // build for every file a line looking like "aaaaaaaaaaaaaaa  file.txt\n"
+    entryHashes.sort((left, right) => Buffer.compare(left.path, right.path));
 
-      // get hash of specific file
-      const hash = crypto.createHash('sha256');
-      const fileBuffer = await fs.readCacheFile(absolutePath);
-      hash.update(fileBuffer);
-
-      const line = `${hash.digest('hex')}  ${upath.normalize(entryPath)}\n`;
-      rootHash.update(line);
+    const rootHash = crypto.createHash('sha256');
+    for (const entry of entryHashes) {
+      rootHash.update(`${entry.hash}  `);
+      rootHash.update(entry.path);
+      rootHash.update('\n');
     }
 
     return rootHash.digest('base64');
-  }
-
-  /**
-   * This is a reimplementation of the Go H1 hash algorithm found at https://github.com/golang/mod/blob/master/sumdb/dirhash/hash.go
-   * The package provides two function HashDir and HashZip where the first is for hashing the contents of a directory
-   * and the second for doing the same but implicitly extracting the contents first.
-   *
-   * The problem starts with that there is a bug which leads to the fact that HashDir and HashZip do not return the same
-   * hash if there are folders inside the content which should be hashed.
-   *
-   * In a folder structure such as
-   * .
-   * ├── Readme.md
-   * └── readme-assets/
-   *     └── image.jpg
-   *
-   * HashDir will create a list of following entries which in turn will hash again
-   * aaaaaaaaaaa  Readme.md\n
-   * ccccccccccc  readme-assets/image.jpg\n
-   *
-   * HashZip in contrast will not filter out the directory itself but rather includes it in the hash list
-   * aaaaaaaaaaa  Readme.md\n
-   * bbbbbbbbbbb  readme-assets/\n
-   * ccccccccccc  readme-assets/image.jpg\n
-   *
-   * As the resulting string is used to generate the final hash it will differ based on which function has been used.
-   * The issue is tracked here: https://github.com/golang/go/issues/53448
-   *
-   * This implementation follows the intended implementation and filters out folder entries.
-   * Terraform seems NOT to use HashZip for provider validation, but rather extracts it and then do the hash calculation
-   * even as both are set up in their code base.
-   * https://github.com/hashicorp/terraform/blob/3fdfbd69448b14a4982b3c62a5d36835956fcbaa/internal/getproviders/hash.go#L283-L305
-   *
-   * @param zipFilePath path to the zip file
-   * @param extractPath path to where to temporarily extract the data
-   */
-  static async hashOfZipContent(
-    zipFilePath: string,
-    extractPath: string,
-  ): Promise<string> {
-    const zip = new AdmZip(zipFilePath);
-    zip.extractAllTo(extractPath);
-    const hash = await this.hashOfDir(extractPath);
-    // delete extracted files
-    await fs.rmCache(extractPath);
-
-    return hash;
-  }
-
-  static async hashOfDir(dirPath: string): Promise<string> {
-    const elements = await fs.listCacheDir(dirPath, { recursive: true });
-
-    const sortedFileSystemObjects = elements.sort();
-    return await TerraformProviderHash.hashElementList(
-      dirPath,
-      sortedFileSystemObjects,
-    );
   }
 
   private static async _calculateSingleHash(
     build: TerraformBuild,
     cacheDir: string,
   ): Promise<string> {
-    const downloadFileName = upath.join(cacheDir, build.filename);
-    const extractPath = upath.join(cacheDir, 'extract', build.filename);
+    const downloadFileName = upath.join(cacheDir, crypto.randomUUID());
     logger.trace(
       `Downloading archive and generating hash for ${build.name}-${build.version}...`,
     );
@@ -121,13 +126,12 @@ export class TerraformProviderHash {
     try {
       await fs.pipeline(readStream, writeStream);
 
-      const hash = await this.hashOfZipContent(downloadFileName, extractPath);
+      const hash = await this.hashOfZipContent(downloadFileName);
       logger.debug(
         `Hash generation for ${build.url} took ${Date.now() - startTime}ms for ${build.name}-${build.version}`,
       );
       return hash;
     } finally {
-      // delete zip file
       await fs.rmCache(downloadFileName);
     }
   }
@@ -150,9 +154,8 @@ export class TerraformProviderHash {
     builds: TerraformBuild[],
   ): Promise<string[]> {
     logger.debug(`Calculating hashes for ${builds.length} builds`);
-    const cacheDir = await ensureCacheDir('terraform');
+    const cacheDir = await fs.ensureCacheDir('terraform');
 
-    // for each build download ZIP, extract content and generate hash for all containing files
     return p.map(builds, (build) => this.calculateSingleHash(build, cacheDir), {
       concurrency: 4,
     });
