@@ -15,7 +15,7 @@ export class AzureChangeLogSource extends ChangeLogSource {
     prevHead: string,
     nextHead: string,
   ): string {
-    const regex = regEx(`^refs/tags/`, undefined, false);
+    const regex = regEx(`^refs/tags/`, undefined);
     return `${baseUrl}_git/${repository}/branchCompare?baseVersion=GT${prevHead.replace(
       regex,
       '',
