@@ -13,6 +13,7 @@ import type {
   PackageDependency,
   PackageFileContent,
 } from '../types.ts';
+import { getRepoOptions, stripComments } from './utils.ts';
 
 const depSectionRegExp = regEx(/defp\s+deps.*do/g);
 const depMatchRegExp = regEx(
@@ -23,8 +24,6 @@ const githubRegexp = regEx(/github:\s*"(?<value>[^"]+)"/);
 const refRegexp = regEx(/ref:\s*"(?<value>[^"]+)"/);
 const branchOrTagRegexp = regEx(/(?:branch|tag):\s*"(?<value>[^"]+)"/);
 const organizationRegexp = regEx(/organization:\s*"(?<value>[^"]+)"/);
-const repoRegexp = regEx(/repo:\s*"(?<value>[^"]+)"/);
-const commentMatchRegExp = regEx(/#.*$/);
 const lockedVersionRegExp = regEx(
   /^\s+"(?<app>\w+)".*?"(?<lockedVersion>\d+\.\d+\.\d+)"/,
 );
@@ -39,9 +38,7 @@ export async function extractPackageFile(
 ): Promise<PackageFileContent | null> {
   logger.trace(`mix.extractPackageFile(${packageFile})`);
   const deps = new Map<string, PackageDependency>();
-  const contentArr = content
-    .split(newlineRegex)
-    .map((line) => line.replace(commentMatchRegExp, ''));
+  const contentArr = stripComments(content).split(newlineRegex);
   for (let lineNumber = 0; lineNumber < contentArr.length; lineNumber += 1) {
     if (contentArr[lineNumber].match(depSectionRegExp)) {
       let depBuffer = '';
@@ -58,7 +55,9 @@ export async function extractPackageFile(
         // `repo: "hexpm"` is the explicit default registry and
         // `repo: "hexpm:<org>"` is the canonical form of `organization:`.
         // Any other name refers to a third-party registry.
-        const repoOption = repoRegexp.exec(opts)?.groups?.value;
+        // `opts` is an optional match group, so it is absent for deps
+        // declared without any options.
+        const [repoOption] = getRepoOptions(opts ?? '');
         const [repoName, repoOrganization] = coerceArray(
           repoOption?.split(':'),
         );
