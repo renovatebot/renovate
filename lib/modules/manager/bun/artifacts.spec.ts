@@ -1,4 +1,6 @@
+import type { Stats } from 'node:fs';
 import _fs from 'fs-extra';
+import { partial } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import type {
   InternalGlobalConfigOptions,
@@ -7,6 +9,7 @@ import type {
 import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
 import { ExecError } from '../../../util/exec/exec-error.ts';
 import { exec as _exec } from '../../../util/exec/index.ts';
+import { regEx } from '../../../util/regex.ts';
 import type { UpdateArtifact } from '../types.ts';
 import { updateArtifacts } from './artifacts.ts';
 
@@ -15,6 +18,7 @@ vi.mock('fs-extra');
 
 const exec = vi.mocked(_exec);
 const fs = vi.mocked(_fs);
+const stat = vi.mocked(_fs.stat as typeof import('node:fs/promises').stat);
 
 const globalConfig: RepoGlobalConfig & InternalGlobalConfigOptions = {
   localDir: '',
@@ -131,8 +135,9 @@ describe('modules/manager/bun/artifacts', () => {
 
         await updateArtifacts(updateArtifact);
 
-        expect(fs.outputFile).toHaveBeenCalledWith(
-          expect.stringMatching(/[/\\]\.npmrc$/),
+        expect(fs.outputFile).toHaveBeenCalledTimes(2);
+        expect(fs.outputFile.mock.calls[0][0]).toMatch(regEx(/[/\\]\.npmrc$/));
+        expect(fs.outputFile.mock.calls[0][1]).toBe(
           'registry=https://registry.example.com/\n',
         );
       });
@@ -154,13 +159,13 @@ describe('modules/manager/bun/artifacts', () => {
 
         await updateArtifacts(updateArtifact);
 
-        expect(fs.outputFile).toHaveBeenCalledWith(
-          expect.stringMatching(/[/\\]\.npmrc$/),
-          '@scope:registry=https://registry.example.com/\n',
+        expect(fs.outputFile).toHaveBeenCalledTimes(2);
+        expect(fs.outputFile.mock.calls[0][0]).toMatch(regEx(/[/\\]\.npmrc$/));
+        expect(fs.outputFile.mock.calls[0][0]).not.toMatch(
+          regEx(/workspace-a[/\\]\.npmrc$/),
         );
-        expect(fs.outputFile).not.toHaveBeenCalledWith(
-          expect.stringMatching(/workspace-a[/\\]\.npmrc$/),
-          expect.anything(),
+        expect(fs.outputFile.mock.calls[0][1]).toBe(
+          '@scope:registry=https://registry.example.com/\n',
         );
       });
 
@@ -177,7 +182,7 @@ describe('modules/manager/bun/artifacts', () => {
         fs.readFile.mockResolvedValueOnce(
           'registry=https://registry.example.com/' as never,
         );
-        fs.stat.mockResolvedValueOnce({} as never);
+        stat.mockResolvedValueOnce(partial<Stats>());
         fs.readFile.mockResolvedValueOnce(
           'registry=https://registry.example.com/' as never,
         );
@@ -186,8 +191,9 @@ describe('modules/manager/bun/artifacts', () => {
 
         await updateArtifacts(updateArtifact);
 
-        expect(fs.outputFile).toHaveBeenCalledWith(
-          expect.stringMatching(/[/\\]\.npmrc$/),
+        expect(fs.outputFile).toHaveBeenCalledTimes(3);
+        expect(fs.outputFile.mock.calls[0][0]).toMatch(regEx(/[/\\]\.npmrc$/));
+        expect(fs.outputFile.mock.calls[0][1]).toBe(
           '@scope:registry=https://registry.example.com/\nregistry=https://registry.example.com/\n',
         );
       });
@@ -212,10 +218,9 @@ describe('modules/manager/bun/artifacts', () => {
         expect(await updateArtifacts(updateArtifact)).toEqual([
           { artifactError: { fileName: 'bun.lockb', stderr: 'nope' } },
         ]);
-        expect(fs.outputFile).toHaveBeenCalledWith(
-          expect.stringMatching(/[/\\]\.npmrc$/),
-          '# dummy',
-        );
+        expect(fs.outputFile).toHaveBeenCalledTimes(3);
+        expect(fs.outputFile.mock.calls[2][0]).toMatch(regEx(/[/\\]\.npmrc$/));
+        expect(fs.outputFile.mock.calls[2][1]).toBe('# dummy');
       });
 
       it('supports lockFileMaintenance', async () => {
@@ -279,10 +284,9 @@ describe('modules/manager/bun/artifacts', () => {
         await expect(updateArtifacts(updateArtifact)).rejects.toThrow(
           TEMPORARY_ERROR,
         );
-        expect(fs.outputFile).toHaveBeenCalledWith(
-          expect.stringMatching(/[/\\]\.npmrc$/),
-          '# dummy',
-        );
+        expect(fs.outputFile).toHaveBeenCalledTimes(3);
+        expect(fs.outputFile.mock.calls[2][0]).toMatch(regEx(/[/\\]\.npmrc$/));
+        expect(fs.outputFile.mock.calls[2][1]).toBe('# dummy');
       });
 
       it('handles full error', async () => {
