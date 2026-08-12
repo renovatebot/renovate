@@ -4646,6 +4646,15 @@ describe('modules/platform/github/index', () => {
   });
 
   describe('updatePr(prNo, title, body)', () => {
+    function mergeQueueCheckMock(
+      scope: httpMock.Scope,
+      isInMergeQueue = false,
+    ): void {
+      scope.post('/graphql').reply(200, {
+        data: { repository: { pullRequest: { isInMergeQueue } } },
+      });
+    }
+
     it('should update the PR', async () => {
       const pr: UpdatePrConfig = {
         number: 1234,
@@ -4655,6 +4664,7 @@ describe('modules/platform/github/index', () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
       await github.initRepo({ repository: 'some/repo' });
+      mergeQueueCheckMock(scope);
       scope.patch('/repos/some/repo/pulls/1234').reply(200, pr);
 
       await expect(github.updatePr(pr)).toResolve();
@@ -4670,6 +4680,7 @@ describe('modules/platform/github/index', () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
       await github.initRepo({ repository: 'some/repo' });
+      mergeQueueCheckMock(scope);
       scope.patch('/repos/some/repo/pulls/1234').reply(200, pr);
 
       await expect(github.updatePr(pr)).toResolve();
@@ -4685,6 +4696,86 @@ describe('modules/platform/github/index', () => {
       };
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
+      await github.initRepo({ repository: 'some/repo' });
+      mergeQueueCheckMock(scope);
+      scope.patch('/repos/some/repo/pulls/1234').reply(200, pr);
+
+      await expect(github.updatePr(pr)).toResolve();
+    });
+
+    it('should skip update if PR is in the merge queue', async () => {
+      const pr: UpdatePrConfig = {
+        number: 1234,
+        prTitle: 'The New Title',
+        prBody: 'Hello world again',
+      };
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      await github.initRepo({ repository: 'some/repo' });
+      mergeQueueCheckMock(scope, true);
+
+      await expect(github.updatePr(pr)).toResolve();
+
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        'PR #1234 is in the merge queue - skipping update',
+      );
+    });
+
+    it('should update if merge queue check returns errors', async () => {
+      const pr: UpdatePrConfig = {
+        number: 1234,
+        prTitle: 'The New Title',
+        prBody: 'Hello world again',
+      };
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      await github.initRepo({ repository: 'some/repo' });
+      scope
+        .post('/graphql')
+        .reply(200, { errors: [{ message: 'some error' }] })
+        .patch('/repos/some/repo/pulls/1234')
+        .reply(200, pr);
+
+      await expect(github.updatePr(pr)).toResolve();
+    });
+
+    it('should update if merge queue check fails', async () => {
+      const pr: UpdatePrConfig = {
+        number: 1234,
+        prTitle: 'The New Title',
+        prBody: 'Hello world again',
+      };
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      await github.initRepo({ repository: 'some/repo' });
+      scope
+        .post('/graphql')
+        .reply(500)
+        .patch('/repos/some/repo/pulls/1234')
+        .reply(200, pr);
+
+      await expect(github.updatePr(pr)).toResolve();
+    });
+
+    it('should skip merge queue check on GHE <3.12.0', async () => {
+      const pr: UpdatePrConfig = {
+        number: 1234,
+        prTitle: 'The New Title',
+        prBody: 'Hello world again',
+      };
+      const scope = httpMock
+        .scope('https://github.company.com')
+        .head('/')
+        .reply(200, '', { 'x-github-enterprise-version': '3.11.0' })
+        .get('/user')
+        .reply(200, { login: 'renovate-bot' })
+        .get('/user/emails')
+        .reply(200, {});
+      initRepoMock(scope, 'some/repo');
+      await github.initPlatform({
+        endpoint: 'https://github.company.com',
+        token: '123test',
+      });
       await github.initRepo({ repository: 'some/repo' });
       scope.patch('/repos/some/repo/pulls/1234').reply(200, pr);
 
@@ -4704,6 +4795,7 @@ describe('modules/platform/github/index', () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
       await github.initRepo({ repository: 'some/repo' });
+      mergeQueueCheckMock(scope);
       scope
         .patch('/repos/some/repo/pulls/1234')
         .reply(200, {

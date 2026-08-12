@@ -79,6 +79,7 @@ import { coerceRestPr, githubApi, mapMergeStartegy } from './common.ts';
 import {
   enableAutoMergeMutation,
   getIssuesQuery,
+  prIsInMergeQueueQuery,
   repoInfoQuery,
 } from './graphql.ts';
 import { GithubIssueCache } from './issue.ts';
@@ -1974,6 +1975,43 @@ export async function createPr({
   return result;
 }
 
+async function isPrInMergeQueue(prNo: number): Promise<boolean> {
+  // TODO #22198
+  // semver not null safe, accepts null and undefined
+  if (
+    platformConfig.isGhe &&
+    semver.satisfies(platformConfig.gheVersion!, '<3.12.0')
+  ) {
+    // Merge queues are only supported on GHES >=3.12.0
+    return false;
+  }
+
+  try {
+    const res = await githubApi.requestGraphql<{
+      repository: { pullRequest: { isInMergeQueue: boolean } | null };
+    }>(prIsInMergeQueueQuery, {
+      variables: {
+        owner: config.repositoryOwner,
+        name: config.repositoryName,
+        number: prNo,
+      },
+      readOnly: true,
+      count: 1, // bypass graphql check
+    });
+    if (res?.errors) {
+      logger.debug(
+        { prNo, errors: res.errors },
+        'Failed to fetch PR merge queue status',
+      );
+      return false;
+    }
+    return res?.data?.repository?.pullRequest?.isInMergeQueue === true;
+  } catch (err) {
+    logger.debug({ prNo, err }, 'Error fetching PR merge queue status');
+    return false;
+  }
+}
+
 export async function updatePr({
   number: prNo,
   prTitle: title,
@@ -1984,6 +2022,10 @@ export async function updatePr({
   targetBranch,
 }: UpdatePrConfig): Promise<void> {
   logger.debug(`updatePr(${prNo}, ${title}, body)`);
+  if (await isPrInMergeQueue(prNo)) {
+    logger.debug(`PR #${prNo} is in the merge queue - skipping update`);
+    return;
+  }
   const body = sanitize(rawBody);
   const patchBody: any = { title };
   // v8 ignore else -- TODO: add test #40625
