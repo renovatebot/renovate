@@ -161,7 +161,7 @@ describe('config/presets/relative', () => {
           list: [[{ extends: ['./deep'] }]],
           inner: { extends: ['./inner'] },
         },
-      } as RenovateConfig;
+      };
 
       canonicalizeRelativePresets(config, parent);
 
@@ -202,7 +202,7 @@ describe('config/presets/relative', () => {
           './{{ env.X }}/base',
           42,
         ],
-      } as RenovateConfig;
+      };
 
       canonicalizeRelativePresets(config, parent);
 
@@ -222,7 +222,7 @@ describe('config/presets/relative', () => {
     });
 
     it('ignores non-array extends', () => {
-      const config = { extends: './single' } as unknown as RenovateConfig;
+      const config = { extends: './single' };
 
       canonicalizeRelativePresets(config, parent);
 
