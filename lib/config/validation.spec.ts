@@ -44,6 +44,7 @@ describe('config/validation', () => {
     it('returns the deprecationMsg for `dnsCache` as a warning', async () => {
       const config: RenovateConfig = {
         hostRules: [
+          // oxlint-disable-next-line renovate/prefer-partial-in-specs -- intentionally invalid/removed HostRule property
           {
             dnsCache: true,
           } as HostRule,
@@ -1602,9 +1603,10 @@ describe('config/validation', () => {
     it('errors if registryAliases depth is more than 1', async () => {
       const config = {
         registryAliases: {
+          // oxlint-disable-next-line renovate/prefer-partial-in-specs -- intentional incorrect config to check error message
           sample: {
             example1: 'http://www.example.com',
-          } as unknown as string, // intentional incorrect config to check error message
+          } as unknown as string,
         },
       };
       const { warnings, errors } = await configValidation.validateConfig(
@@ -1685,6 +1687,7 @@ describe('config/validation', () => {
     });
 
     it('errors if manager objects are nested', async () => {
+      // oxlint-disable-next-line renovate/prefer-partial-in-specs -- intentionally invalid nested manager config
       const config = {
         pyenv: {
           enabled: false,
@@ -2127,6 +2130,7 @@ describe('config/validation', () => {
         hostRules: [
           {
             matchHost: 'https://domain.com/all-versions',
+            // oxlint-disable-next-line renovate/prefer-partial-in-specs -- intentionally invalid header value type
             headers: {
               'X-Auth-Token': 10,
             } as unknown as Record<string, string>,

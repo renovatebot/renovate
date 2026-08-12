@@ -219,6 +219,7 @@ describe('modules/datasource/maven/util', () => {
               Promise.reject(
                 httpError({
                   code: 'ECONNRESET',
+                  // oxlint-disable-next-line renovate/prefer-partial-in-specs -- statusCode belongs to got's response shape, not the global Response type used by this helper
                   response: { statusCode: 429 } as never,
                 }),
               ),
@@ -241,6 +242,7 @@ describe('modules/datasource/maven/util', () => {
             Promise.reject(
               httpError({
                 code: 'ECONNRESET',
+                // oxlint-disable-next-line renovate/prefer-partial-in-specs -- statusCode belongs to got's response shape, not the global Response type used by this helper
                 response: { statusCode: 429 } as never,
               }),
             ),
@@ -307,6 +309,7 @@ describe('modules/datasource/maven/util', () => {
         const http = partial<Http>({
           getText: () =>
             Promise.reject(
+              // oxlint-disable-next-line renovate/prefer-partial-in-specs -- statusCode belongs to got's response shape, not the global Response type used by this helper
               httpError({ response: { statusCode: 404 } as never }),
             ),
         });
@@ -332,6 +335,7 @@ describe('modules/datasource/maven/util', () => {
         const http = partial<Http>({
           getText: () =>
             Promise.reject(
+              // oxlint-disable-next-line renovate/prefer-partial-in-specs -- statusCode belongs to got's response shape, not the global Response type used by this helper
               httpError({ response: { statusCode: 404 } as never }),
             ),
         });

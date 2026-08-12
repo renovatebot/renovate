@@ -2171,7 +2171,7 @@ describe('util/git/index', { timeout: 30000 }, () => {
     it('should pass pushOptions to git.push', async () => {
       const pushSpy = vi
         .spyOn(SimpleGit.prototype, 'push')
-        .mockResolvedValue({} as PushResult);
+        .mockResolvedValue(partial<PushResult>());
       await expect(
         git.pushCommit({
           sourceRef: defaultBranch,

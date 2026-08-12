@@ -2340,6 +2340,7 @@ describe('workers/repository/update/branch/index', () => {
         updatedArtifacts: [],
         artifactNotices: [],
       } satisfies PackageFilesResult);
+      // oxlint-disable-next-line renovate/prefer-partial-in-specs -- updatedArtifacts entry intentionally uses a `name` field instead of `type`/`path`, which FileChange does not allow
       npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
         artifactErrors: [],
         updatedArtifacts: [
@@ -2392,6 +2393,7 @@ describe('workers/repository/update/branch/index', () => {
       await branchWorker.processBranch({
         ...config,
         upgrades: [
+          // oxlint-disable-next-line renovate/prefer-partial-in-specs -- spreading getConfig() (AllConfig) is not assignable to BranchUpgradeConfig due to a pre-existing type incompatibility (see TODO #22198 above)
           {
             ...getConfig(),
             depName: 'some-dep-name',
