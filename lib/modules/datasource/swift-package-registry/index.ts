@@ -1,4 +1,3 @@
-import * as hostRules from '../../../util/host-rules.ts';
 import type { HttpOptions } from '../../../util/http/types.ts';
 import { ensureTrailingSlash } from '../../../util/url.ts';
 import * as swiftVersioning from '../../versioning/swift/index.ts';
@@ -28,24 +27,6 @@ export class SwiftPackageRegistryDatasource extends Datasource {
 
   override readonly defaultVersioning = swiftVersioning.id;
 
-  private static getHostOpts(url: string): HttpOptions {
-    const { token, username, password } = hostRules.find({
-      hostType: SwiftPackageRegistryDatasource.id,
-      url,
-    });
-    const headers: Record<string, string> = {
-      Accept: SWIFT_REGISTRY_ACCEPT,
-    };
-    if (token) {
-      headers.Authorization = `Bearer ${token}`;
-      return { headers };
-    }
-    if (username && password) {
-      return { headers, username, password };
-    }
-    return { headers };
-  }
-
   async getReleases({
     packageName,
     registryUrl,
@@ -64,33 +45,34 @@ export class SwiftPackageRegistryDatasource extends Datasource {
     const name = packageName.slice(dotIndex + 1);
 
     const pkgUrl = `${ensureTrailingSlash(registryUrl)}${scope}/${name}`;
-    const opts = SwiftPackageRegistryDatasource.getHostOpts(pkgUrl);
+    // `hostRules` auth (bearer token / basic) is applied automatically by the
+    // http layer based on the datasource's hostType, so we only set `Accept`.
+    const opts: HttpOptions = { headers: { Accept: SWIFT_REGISTRY_ACCEPT } };
 
-    let body: SwiftRegistryReleases;
     try {
       const response = await this.http.getJsonUnchecked(pkgUrl, opts);
       const parsed = SwiftRegistryReleases.safeParse(response.body);
       if (!parsed.success) {
         return null;
       }
-      body = parsed.data;
+      const body = parsed.data;
+
+      const entries = Object.entries(body.releases ?? {});
+      if (!entries.length) {
+        return null;
+      }
+
+      const releases: Release[] = entries
+        .filter(([, entry]) => !entry.problem)
+        .map(([version]) => ({ version }));
+
+      if (!releases.length) {
+        return null;
+      }
+
+      return { releases };
     } catch (err) {
       this.handleGenericErrors(err);
     }
-
-    const entries = Object.entries(body!.releases ?? {});
-    if (!entries.length) {
-      return null;
-    }
-
-    const releases: Release[] = entries
-      .filter(([, entry]) => !entry.problem)
-      .map(([version]) => ({ version }));
-
-    if (!releases.length) {
-      return null;
-    }
-
-    return { releases };
   }
 }

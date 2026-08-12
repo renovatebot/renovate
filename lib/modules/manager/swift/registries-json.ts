@@ -55,11 +55,9 @@ export function parseRegistriesJson(content: string): ParsedRegistries {
 // Returns deduplicated registry URLs in priority order: the default registry
 // first, then any named scope registries (alphabetical for stability).
 //
-// Both the project-local (`<dir>/.swiftpm/configuration/registries.json`) and
-// any workspace-level locations (`<dir>/*.xcworkspace/xcshareddata/swiftpm/
-// configuration/registries.json`) are considered. The manager iterates one
-// Package.swift at a time so we only inspect files in or beside that file's
-// directory.
+// Only the project-local `<dir>/.swiftpm/configuration/registries.json` is
+// read. The manager iterates one Package.swift at a time, so we inspect the
+// registries.json in that file's directory.
 export async function discoverRegistryUrls(
   packageSwiftPath: string,
 ): Promise<string[]> {

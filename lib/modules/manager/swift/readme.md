@@ -33,6 +33,6 @@ Identity-form dependencies are resolved against the `swift-package-registry` dat
 }
 ```
 
-Configure authentication with a `hostRules` entry whose `hostType` matches the datasource ID — `swift-package-registry`. Bearer tokens and basic auth are both supported.
+Configure authentication with a `hostRules` entry whose `hostType` matches the datasource ID: `swift-package-registry`. Bearer tokens and basic auth are both supported.
 
 `Package.resolved` pins of `kind: "registry"` are updated in place (only the `state.version` field). Legacy `kind: "remoteSourceControl"` pins that correspond to a registry-form dependency are also matched by identity for the version update.
