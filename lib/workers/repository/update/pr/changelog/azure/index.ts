@@ -5,6 +5,7 @@ import upath from 'upath';
 import { logger } from '../../../../../../logger/index.ts';
 import * as azureHelper from '../../../../../../modules/platform/azure/azure-helper.ts';
 import { regEx } from '../../../../../../util/regex.ts';
+import { coerceString } from '../../../../../../util/string.ts';
 import { ensureTrailingSlash } from '../../../../../../util/url.ts';
 import { compareChangelogFilePath } from '../common.ts';
 import type {
@@ -28,19 +29,21 @@ export function getReleaseList(
 export async function getReleaseNotesMd(
   repository: string,
   apiBaseUrl: string,
-  sourceDirectory = '/',
+  sourceDirectory: string,
 ): Promise<ChangeLogFile | null> {
   logger.trace('azure.getReleaseNotesMd()');
+
+  const sourceDir = coerceString(sourceDirectory, '/');
 
   const urlEncodedRepo = encodeURIComponent(repository);
 
   // Extract project name from API base URL (last path segment before "_apis/")
   const projectMatch = regEx('/(?<project>[^/]+)/_apis/').exec(apiBaseUrl);
-  const project = projectMatch?.groups?.project ?? '';
+  const project = coerceString(projectMatch?.groups?.project);
 
   const sourceDirectoryId = await azureHelper.getItem(
     urlEncodedRepo,
-    sourceDirectory,
+    sourceDir,
     project,
   );
 
@@ -77,9 +80,9 @@ export async function getReleaseNotesMd(
 
   let changelogFile = files
     .sort((a, b) => compareChangelogFilePath(a.relativePath, b.relativePath))
-    .shift()?.relativePath;
+    .shift()!.relativePath;
 
-  changelogFile = `${sourceDirectory ? ensureTrailingSlash(sourceDirectory) : ''}${changelogFile}`;
+  changelogFile = `${sourceDir ? ensureTrailingSlash(sourceDir) : ''}${changelogFile}`;
 
   const fileRes = await azureHelper.getItem(
     urlEncodedRepo,
