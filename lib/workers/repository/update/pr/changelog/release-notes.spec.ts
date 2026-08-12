@@ -1783,6 +1783,38 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
       });
     });
 
+    it('handles azure sourceDirectory without leading slash', async () => {
+      const sourceDirectory = 'packages/foo';
+
+      vi.spyOn(azureHelper, 'getItem').mockResolvedValueOnce(
+        azureItemsResponseWithSourceDirectory,
+      );
+
+      vi.spyOn(azureHelper, 'getTrees').mockResolvedValue(azureTreeResponse);
+
+      vi.spyOn(azureHelper, 'getItem').mockResolvedValue({
+        content: adapterutilsChangelogMd,
+      });
+
+      // t/_apis/git/repositories/some-repo/items?path=CHANGELOG.md&includeContent=true&api-version=7.0
+      const res = await getReleaseNotesMd(
+        {
+          ...azureProject,
+          repository: 'some-repo',
+          sourceDirectory,
+        },
+        partial<ChangeLogRelease>({
+          version: '4.33.0',
+          gitRef: '4.33.0',
+        }),
+      );
+
+      expect(res).toMatchObject({
+        notesSourceUrl: `https://dev.azure.com/some-org/some-project/_git/some-repo?path=/${sourceDirectory}/CHANGELOG.md`,
+        url: `https://dev.azure.com/some-org/some-project/_git/some-repo?path=/${sourceDirectory}/CHANGELOG.md&anchor=4.33.0-%5B05-15-2020%5D`,
+      });
+    });
+
     it('parses js-yaml', async () => {
       httpMock
         .scope('https://api.github.com')
