@@ -33,6 +33,7 @@ import {
   fileAddition,
   resolveToolConstraint,
 } from '../util.ts';
+import { getRepoOptions } from './utils.ts';
 
 const http = new Http(HexDatasource.id);
 
@@ -40,7 +41,6 @@ const hexRepoUrl = 'https://hex.pm/';
 const hexRepoOrgUrlRegex = regEx(
   `^https://hex\\.pm/api/repos/(?<organization>[a-z0-9_]+)/$`,
 );
-const repoOptionRegex = regEx(/repo:\s*"(?<name>[^"]+)"/g);
 
 export async function updateArtifacts({
   packageFileName,
@@ -260,12 +260,7 @@ async function getRepoAddCommands(
   registryAliases: Record<string, string> | undefined,
 ): Promise<string[]> {
   const commands: string[] = [];
-  const declaredRepos = new Set(
-    Array.from(
-      packageFileContent.matchAll(repoOptionRegex),
-      ({ groups }) => groups!.name,
-    ),
-  );
+  const declaredRepos = new Set(getRepoOptions(packageFileContent));
 
   for (const [name, url] of Object.entries(coerceObject(registryAliases))) {
     // `hexpm` and `hexpm:<org>` are hex.pm itself, authenticated above through
