@@ -60,16 +60,16 @@ export async function extractPackageFile(
   }
 
   const mappedRoots: Record<string, string> = {};
-  Object.entries(rootInputs).flatMap((entry) => {
-    if (is.string(entry[1])) {
-      mappedRoots[entry[1]] = entry[0];
+  for (const [inputName, target] of Object.entries(rootInputs)) {
+    if (is.string(target)) {
+      mappedRoots[target] = inputName;
     } else {
       logger.debug(
-        { flakeLockFile, error: flakeLockParsed.error },
-        `input ${entry[0]} has a malformed mapping.`,
+        { flakeLockFile },
+        `input ${inputName} has a malformed mapping.`,
       );
     }
-  });
+  }
 
   for (const [tmpName, flakeInput] of Object.entries(flakeLock.nodes)) {
     const depName = mappedRoots[tmpName];
