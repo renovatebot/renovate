@@ -77,6 +77,7 @@ import { smartTruncate } from '../utils/pr-body.ts';
 import { remoteBranchExists } from './branch.ts';
 import { coerceRestPr, githubApi, mapMergeStartegy } from './common.ts';
 import {
+  dequeuePullRequestMutation,
   enableAutoMergeMutation,
   getIssuesQuery,
   prIsInMergeQueueQuery,
@@ -1975,7 +1976,7 @@ export async function createPr({
   return result;
 }
 
-async function isPrInMergeQueue(prNo: number): Promise<boolean> {
+async function tryDequeuePr(prNo: number): Promise<void> {
   // TODO #22198
   // semver not null safe, accepts null and undefined
   if (
@@ -1983,12 +1984,14 @@ async function isPrInMergeQueue(prNo: number): Promise<boolean> {
     semver.satisfies(platformConfig.gheVersion!, '<3.12.0')
   ) {
     // Merge queues are only supported on GHES >=3.12.0
-    return false;
+    return;
   }
 
   try {
     const res = await githubApi.requestGraphql<{
-      repository: { pullRequest: { isInMergeQueue: boolean } | null };
+      repository: {
+        pullRequest: { id: string; isInMergeQueue: boolean } | null;
+      };
     }>(prIsInMergeQueueQuery, {
       variables: {
         owner: config.repositoryOwner,
@@ -2003,12 +2006,30 @@ async function isPrInMergeQueue(prNo: number): Promise<boolean> {
         { prNo, errors: res.errors },
         'Failed to fetch PR merge queue status',
       );
-      return false;
+      return;
     }
-    return res?.data?.repository?.pullRequest?.isInMergeQueue === true;
+    const pullRequest = res?.data?.repository?.pullRequest;
+    if (!pullRequest?.isInMergeQueue) {
+      return;
+    }
+    logger.debug(
+      `PR #${prNo} is in the merge queue - dequeueing before update`,
+    );
+    const dequeueRes = await githubApi.requestGraphql(
+      dequeuePullRequestMutation,
+      {
+        variables: { pullRequestId: pullRequest.id },
+        count: 1, // bypass graphql check
+      },
+    );
+    if (dequeueRes?.errors) {
+      logger.debug(
+        { prNo, errors: dequeueRes.errors },
+        'Failed to dequeue PR from merge queue',
+      );
+    }
   } catch (err) {
-    logger.debug({ prNo, err }, 'Error fetching PR merge queue status');
-    return false;
+    logger.debug({ prNo, err }, 'Error dequeueing PR from merge queue');
   }
 }
 
@@ -2022,10 +2043,8 @@ export async function updatePr({
   targetBranch,
 }: UpdatePrConfig): Promise<void> {
   logger.debug(`updatePr(${prNo}, ${title}, body)`);
-  if (await isPrInMergeQueue(prNo)) {
-    logger.debug(`PR #${prNo} is in the merge queue - skipping update`);
-    return;
-  }
+  // a queued PR could otherwise merge before the update takes effect
+  await tryDequeuePr(prNo);
   const body = sanitize(rawBody);
   const patchBody: any = { title };
   // v8 ignore else -- TODO: add test #40625

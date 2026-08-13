@@ -4651,7 +4651,11 @@ describe('modules/platform/github/index', () => {
       isInMergeQueue = false,
     ): void {
       scope.post('/graphql').reply(200, {
-        data: { repository: { pullRequest: { isInMergeQueue } } },
+        data: {
+          repository: {
+            pullRequest: { id: 'abcd', isInMergeQueue },
+          },
+        },
       });
     }
 
@@ -4703,7 +4707,7 @@ describe('modules/platform/github/index', () => {
       await expect(github.updatePr(pr)).toResolve();
     });
 
-    it('should skip update if PR is in the merge queue', async () => {
+    it('should dequeue PR from the merge queue before update', async () => {
       const pr: UpdatePrConfig = {
         number: 1234,
         prTitle: 'The New Title',
@@ -4713,11 +4717,42 @@ describe('modules/platform/github/index', () => {
       initRepoMock(scope, 'some/repo');
       await github.initRepo({ repository: 'some/repo' });
       mergeQueueCheckMock(scope, true);
+      scope
+        .post('/graphql')
+        .reply(200, {
+          data: { dequeuePullRequest: { mergeQueueEntry: { id: 'efgh' } } },
+        })
+        .patch('/repos/some/repo/pulls/1234')
+        .reply(200, pr);
 
       await expect(github.updatePr(pr)).toResolve();
 
       expect(logger.logger.debug).toHaveBeenCalledWith(
-        'PR #1234 is in the merge queue - skipping update',
+        'PR #1234 is in the merge queue - dequeueing before update',
+      );
+    });
+
+    it('should update if dequeue returns errors', async () => {
+      const pr: UpdatePrConfig = {
+        number: 1234,
+        prTitle: 'The New Title',
+        prBody: 'Hello world again',
+      };
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      await github.initRepo({ repository: 'some/repo' });
+      mergeQueueCheckMock(scope, true);
+      scope
+        .post('/graphql')
+        .reply(200, { errors: [{ message: 'some error' }] })
+        .patch('/repos/some/repo/pulls/1234')
+        .reply(200, pr);
+
+      await expect(github.updatePr(pr)).toResolve();
+
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        { prNo: 1234, errors: [{ message: 'some error' }] },
+        'Failed to dequeue PR from merge queue',
       );
     });
 
