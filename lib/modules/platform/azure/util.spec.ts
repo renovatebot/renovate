@@ -319,6 +319,32 @@ describe('modules/platform/azure/util', () => {
       expect(encoded.startsWith(origin)).toBe(true);
     });
 
+    it('leaves a plain URL with no special characters unchanged (regression baseline)', () => {
+      expect(
+        encodeUrlPathSegments(
+          'https://dev.azure.com/renovate12345/some/_git/repo',
+        ),
+      ).toBe('https://dev.azure.com/renovate12345/some/_git/repo');
+    });
+
+    it('preserves an on-prem Azure DevOps Server collection path unchanged', () => {
+      const url =
+        'https://azure-devops.internal.corp:8080/tfs/DefaultCollection/my-project/_git/my-repo';
+      expect(encodeUrlPathSegments(url)).toBe(url);
+    });
+
+    it('encodes a literal "%" in a path segment instead of throwing', () => {
+      // A segment may contain a literal '%' that isn't part of a valid
+      // percent-encoded sequence (e.g. a project named "50% off"). This must
+      // not throw "URI malformed" and must behave like encodeURIComponent()
+      // would have on the raw name (turning '%' into '%25').
+      expect(
+        encodeUrlPathSegments(
+          'https://dev.azure.com/renovate12345/50% off/_git/repo',
+        ),
+      ).toBe('https://dev.azure.com/renovate12345/50%25%20off/_git/repo');
+    });
+
     it('handles credentials in the URL (PAT in userinfo)', () => {
       expect(
         encodeUrlPathSegments(
