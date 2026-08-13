@@ -3,7 +3,10 @@ import upath from 'upath';
 import { Fixtures } from '~test/fixtures.ts';
 import { fs } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
-import type { RepoGlobalConfig } from '../../../config/types.ts';
+import type {
+  InternalGlobalConfigOptions,
+  RepoGlobalConfig,
+} from '../../../config/types.ts';
 import * as hashicorp from '../../versioning/hashicorp/index.ts';
 import { extractPackageFile } from './index.ts';
 
@@ -29,7 +32,7 @@ const helmJSON = Fixtures.get('helm.tf.json');
 const lockedVersionJSON = Fixtures.get('lockedVersion.tf.json');
 const tfeWorkspaceBlockJSON = Fixtures.get('tfeWorkspace.tf.json');
 
-const adminConfig: RepoGlobalConfig = {
+const adminConfig: RepoGlobalConfig & InternalGlobalConfigOptions = {
   // `join` fixes Windows CI
   localDir: upath.join('/tmp/github/some/repo'),
   cacheDir: upath.join('/tmp/cache'),

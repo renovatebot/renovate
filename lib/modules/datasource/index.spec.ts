@@ -154,11 +154,12 @@ describe('modules/datasource/index', () => {
   });
 
   describe('Validations', () => {
-    it('returns datasources', () => {
+    it('returns datasources', async () => {
       expect(getDatasources()).toBeDefined();
 
-      const managerList = fs
-        .readdirSync(import.meta.dirname, { withFileTypes: true })
+      const managerList = (
+        await fs.readdir(import.meta.dirname, { withFileTypes: true })
+      )
         .filter(
           (dirent) => dirent.isDirectory() && !dirent.name.startsWith('_'),
         )
@@ -613,6 +614,22 @@ describe('modules/datasource/index', () => {
           class CachingDatasource extends DummyDatasource {
             override caching = true;
           }
+
+          it('returns cached result on cache hit', async () => {
+            const cachedResult: ReleaseResult = {
+              releases: [{ version: '0.0.1' }],
+            };
+            packageCache.get.mockResolvedValue(cachedResult);
+            datasources.set(datasource, new CachingDatasource());
+
+            const res = await getPkgReleases({
+              datasource,
+              packageName,
+              registryUrls: ['https://reg1.com'],
+            });
+            expect(res).toMatchObject({ releases: [{ version: '0.0.1' }] });
+            expect(packageCache.set).not.toHaveBeenCalled();
+          });
 
           it('caches by default', async () => {
             const registries = {

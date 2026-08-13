@@ -1,7 +1,6 @@
-<!-- prettier-ignore -->
 !!! warning
-    This datasource is experimental.
-    Its syntax and behavior may change at any time!
+  This datasource is experimental.
+  Its syntax and behavior may change at any time!
 
 This datasource returns the latest [Amazon Machine Image](https://docs.aws.amazon.com/en_en/AWSEC2/latest/UserGuide/AMIs.html) via the AWS API.
 
@@ -12,11 +11,30 @@ You can use common AWS configuration options, for example (partial list):
 - Provide credentials via `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` (environment variable) or your `~/.aws/credentials` file
 - Select the profile to use via `AWS_PROFILE` environment variable
 
+You can also provide credentials specifically for this datasource with a `hostRules` entry.
+Set `hostType` to `aws-machine-image`, `username` to the access key ID, `password` to the secret access key, and optionally `token` to the session token:
+
+```json
+{
+  "hostRules": [
+    {
+      "hostType": "aws-machine-image",
+      "username": "access-key-id",
+      "password": "secret-access-key",
+      "token": "session-token"
+    }
+  ]
+}
+```
+
+These credentials only apply to Amazon Machine Image lookups.
+When this host rule is absent or incomplete, Renovate uses the default AWS credential provider chain.
+
 Read the [Developer guide](https://docs.aws.amazon.com/sdk-for-javascript/v3/developer-guide/configuring-the-jssdk.html) for more information on configuration options.
 
 The least IAM privileges required for this datasource are:
 
-```json
+```json {configType=none}
 {
   "Sid": "AllowEc2ImageLookup",
   "Effect": "Allow",

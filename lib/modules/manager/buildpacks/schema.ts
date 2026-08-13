@@ -1,4 +1,4 @@
-import { z } from 'zod/v3';
+import { z } from 'zod/v4';
 import { Toml } from '../../../util/schema-utils/index.ts';
 
 const BuildpackByName = z.object({

@@ -1,6 +1,7 @@
 import {
   isBoolean,
   isNonEmptyStringAndNotWhitespace,
+  isObject,
   isString,
 } from '@sindresorhus/is';
 import { join } from 'shlex';
@@ -8,10 +9,12 @@ import { getCustomEnv, getUserEnv } from '../env.ts';
 import { getChildProcessEnv } from './env.ts';
 import type { CommandWithOptions, ExecOptions } from './types.ts';
 
+export type ResolvedChildEnv = Record<string, string>;
+
 export function getChildEnv({
   extraEnv,
   env: forcedEnv = {},
-}: Pick<ExecOptions, 'env' | 'extraEnv'> = {}): Record<string, string> {
+}: Pick<ExecOptions, 'env' | 'extraEnv'> = {}): ResolvedChildEnv {
   const globalConfigEnv = getCustomEnv();
   const userConfiguredEnv = getUserEnv();
 
@@ -42,7 +45,7 @@ export function getChildEnv({
 }
 
 export function isCommandWithOptions(cmd: unknown): cmd is CommandWithOptions {
-  if (!(typeof cmd === 'object' && cmd !== null && 'command' in cmd)) {
+  if (!(isObject(cmd) && 'command' in cmd)) {
     return false;
   }
 

@@ -1,4 +1,4 @@
-import { z } from 'zod/v3';
+import { z } from 'zod/v4';
 import type { SkipReason } from '../../../types/index.ts';
 import { Toml, withDepType } from '../../../util/schema-utils/index.ts';
 import { CrateDatasource } from '../../datasource/crate/index.ts';
@@ -70,7 +70,7 @@ const CargoDep = z.union([
         if (skipReason) {
           dep.skipReason = skipReason;
         }
-        if (pkg) {
+        if (pkg && !git) {
           dep.packageName = pkg;
         }
         if (registry) {

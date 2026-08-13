@@ -1,4 +1,4 @@
-import { isString } from '@sindresorhus/is';
+import { isString, isTruthy } from '@sindresorhus/is';
 import moo from 'moo';
 import * as memCache from '../../../util/cache/memory/index.ts';
 import { getEnv } from '../../../util/env.ts';
@@ -33,7 +33,7 @@ export function parseGoproxy(
 
   const result: GoproxyItem[] = input
     .split(regEx(/([^,|]*(?:,|\|))/))
-    .filter(Boolean)
+    .filter(isTruthy)
     .map((s) => s.split(/(?=,|\|)/)) // TODO: #12872 lookahead
     .map(([url, separator]) => ({
       url,

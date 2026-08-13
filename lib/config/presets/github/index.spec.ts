@@ -59,7 +59,9 @@ describe('config/presets/github/index', () => {
         .get(`${basePath}/renovate.json`)
         .reply(200, {});
 
-      await expect(github.getPreset({ repo: 'some/repo' })).rejects.toThrow();
+      await expect(github.getPreset({ repo: 'some/repo' })).rejects.toThrow(
+        'The first argument must be of type string or an instance of Buffer,',
+      );
     });
 
     it('throws if invalid content', async () => {
@@ -136,6 +138,20 @@ describe('config/presets/github/index', () => {
       const content = await github.getPreset({
         repo: 'some/repo',
         presetName: 'somefile.json5',
+      });
+      expect(content).toEqual({ foo: 'bar' });
+    });
+
+    it('should query preset within the file when .jsonc extension provided', async () => {
+      httpMock
+        .scope(githubApiHost)
+        .get(`${basePath}/somefile.jsonc`)
+        .reply(200, {
+          content: toBase64('{"foo":/* nothing to see here */"bar"}'),
+        });
+      const content = await github.getPreset({
+        repo: 'some/repo',
+        presetName: 'somefile.jsonc',
       });
       expect(content).toEqual({ foo: 'bar' });
     });

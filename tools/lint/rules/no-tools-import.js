@@ -22,10 +22,6 @@ export default {
     },
   },
   create(context) {
-    const filename = context.filename ?? context.physicalFilename ?? '';
-    if (!filename.includes('/lib/')) {
-      return {};
-    }
     return {
       ImportDeclaration(node) {
         check(context, node.source);

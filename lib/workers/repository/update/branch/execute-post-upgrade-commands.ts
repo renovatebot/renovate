@@ -1,13 +1,13 @@
 // TODO #22198
-import { isArray, isNonEmptyArray } from '@sindresorhus/is';
-import crypto from 'crypto';
+
+import crypto from 'node:crypto';
+import { isArray, isNonEmptyArray, isString } from '@sindresorhus/is';
 import upath from 'upath';
 import { GlobalConfig } from '../../../../config/global.ts';
 import { mergeChildConfig } from '../../../../config/index.ts';
 import { addMeta, logger } from '../../../../logger/index.ts';
 import type { ArtifactError } from '../../../../modules/manager/types.ts';
 import { coerceArray } from '../../../../util/array.ts';
-import { exec } from '../../../../util/exec/index.ts';
 import {
   type ExecOptions,
   isConstraintName,
@@ -19,10 +19,14 @@ import {
   outputCacheFile,
   privateCacheDir,
   readLocalFile,
+  statLocalFile,
   writeLocalFile,
 } from '../../../../util/fs/index.ts';
-import { getGitEnvironmentVariables } from '../../../../util/git/auth.ts';
-import { getRepoStatus } from '../../../../util/git/index.ts';
+import { withGitEnvironment } from '../../../../util/git/exec.ts';
+import {
+  getRepoStatus,
+  isFileModeEnabled,
+} from '../../../../util/git/index.ts';
 import type { FileChange } from '../../../../util/git/types.ts';
 import { minimatch } from '../../../../util/minimatch.ts';
 import { regEx } from '../../../../util/regex.ts';
@@ -33,6 +37,30 @@ import type { BranchConfig, BranchUpgradeConfig } from '../../../types.ts';
 export interface PostUpgradeCommandsExecutionResult {
   updatedArtifacts: FileChange[];
   artifactErrors: ArtifactError[];
+}
+
+const ownerExecutePermission = 0o100;
+const gitExec = withGitEnvironment();
+
+async function detectExecutable(
+  relativePath: string,
+  canReadFileMode: boolean,
+): Promise<true | undefined> {
+  if (!canReadFileMode) {
+    return undefined;
+  }
+
+  const fileStats = await statLocalFile(relativePath);
+  if (!fileStats?.isFile()) {
+    return undefined;
+  }
+
+  if ((fileStats.mode & ownerExecutePermission) === 0) {
+    return undefined;
+  }
+
+  // Git derives its executable flag from the owner's execute permission.
+  return true;
 }
 
 export async function postUpgradeCommandsExecutor(
@@ -63,7 +91,7 @@ export async function postUpgradeCommandsExecutor(
         const canWriteFile = await localPathIsFile(file.path);
         if (file.type === 'addition' && !file.isSymlink && canWriteFile) {
           let contents: Buffer | null;
-          if (typeof file.contents === 'string') {
+          if (isString(file.contents)) {
             contents = Buffer.from(file.contents);
           } else {
             contents = file.contents;
@@ -133,12 +161,12 @@ export async function postUpgradeCommandsExecutor(
             logger.trace({ cmd: compiledCmd }, 'Executing post-upgrade task');
 
             const execOpts: ExecOptions = {
+              // oxlint-disable-next-line renovate/no-exec-shell-option -- some self-hosted adminstrators allow their users to use shell features (pipes, globbing, sub-shells), so this is allowed for that purpose when it's opted in via allowShellExecutorForPostUpgradeCommands
               shell: GlobalConfig.get(
                 'allowShellExecutorForPostUpgradeCommands',
               ),
 
               cwd: workingDir,
-              extraEnv: getGitEnvironmentVariables(),
             };
             if (dataFilePath) {
               execOpts.env = {
@@ -160,7 +188,7 @@ export async function postUpgradeCommandsExecutor(
                       validTool,
                       validConstraint,
                     },
-                    `Skipping ${validConstraint ? 'valid' : 'invalid'} constraint that is not a tool that Containerbase knows`,
+                    'Skipping constraint that is not a tool that Containerbase knows',
                   );
                   continue;
                 }
@@ -171,7 +199,7 @@ export async function postUpgradeCommandsExecutor(
                 });
               }
             }
-            const execResult = await exec(compiledCmd, execOpts);
+            const execResult = await gitExec(compiledCmd, execOpts);
 
             logger.debug(
               { cmd: compiledCmd, ...execResult },
@@ -254,6 +282,7 @@ export async function postUpgradeCommandsExecutor(
       if (config.npmrc) {
         fileExcludes.push('.npmrc');
       }
+      const canReadFileMode = await isFileModeEnabled();
 
       for (const relativePath of addedOrModifiedFiles) {
         if (
@@ -273,17 +302,28 @@ export async function postUpgradeCommandsExecutor(
               'Post-upgrade file saved',
             );
             const existingContent = await readLocalFile(relativePath);
+            const isExecutable = await detectExecutable(
+              relativePath,
+              canReadFileMode,
+            );
             const existingUpdatedArtifacts = updatedArtifacts.find(
               (ua) => ua.path === relativePath,
             );
             if (existingUpdatedArtifacts?.type === 'addition') {
               existingUpdatedArtifacts.contents = existingContent;
+              if (isExecutable !== undefined) {
+                existingUpdatedArtifacts.isExecutable = isExecutable;
+              }
             } else {
-              updatedArtifacts.push({
+              const updatedArtifact: FileChange = {
                 type: 'addition',
                 path: relativePath,
                 contents: existingContent,
-              });
+              };
+              if (isExecutable !== undefined) {
+                updatedArtifact.isExecutable = isExecutable;
+              }
+              updatedArtifacts.push(updatedArtifact);
             }
             // If the file is deleted by a previous post-update command, remove the deletion from updatedArtifacts
             updatedArtifacts = updatedArtifacts.filter(

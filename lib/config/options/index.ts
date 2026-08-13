@@ -126,6 +126,7 @@ const options: Readonly<RenovateOptions>[] = [
     subType: 'string',
     default: [],
     globalOnly: true,
+    patternMatch: true,
   },
   {
     name: 'bumpVersions',
@@ -145,6 +146,7 @@ const options: Readonly<RenovateOptions>[] = [
     type: 'string',
     parents: ['bumpVersions'],
     allowedValues: ['major', 'minor', 'patch', 'sync'],
+    supportsTemplating: true,
   },
   {
     name: 'filePatterns',
@@ -380,6 +382,20 @@ const options: Readonly<RenovateOptions>[] = [
     },
   },
   {
+    name: 'statusCheckWhen',
+    description:
+      'Control when each Renovate status check is set on branches. Keys match `statusCheckNames`.',
+    type: 'object',
+    mergeable: true,
+    advancedUse: true,
+    default: {
+      artifactError: 'failed',
+      configValidation: 'always',
+      mergeConfidence: 'always',
+      minimumReleaseAge: 'always',
+    },
+  },
+  {
     name: 'extends',
     description: 'Configuration presets to use or extend.',
     stage: 'package',
@@ -547,6 +563,7 @@ const options: Readonly<RenovateOptions>[] = [
     default: false,
     supportedPlatforms: [
       'azure',
+      'bitbucket',
       'forgejo',
       'gitea',
       'github',
@@ -664,7 +681,7 @@ const options: Readonly<RenovateOptions>[] = [
     description:
       'Change this value to override the default Renovate sidecar image.',
     type: 'string',
-    default: 'ghcr.io/renovatebot/base-image:13.50.0',
+    default: 'ghcr.io/renovatebot/base-image:13.86.2',
     globalOnly: true,
     deprecationMsg:
       'The usage of `binarySource=docker` is deprecated, and will be removed in the future',
@@ -1160,6 +1177,7 @@ const options: Readonly<RenovateOptions>[] = [
     allowString: true,
     default: null,
     globalOnly: true,
+    patternMatch: true,
   },
   {
     name: 'autodiscoverNamespaces',
@@ -1205,7 +1223,8 @@ const options: Readonly<RenovateOptions>[] = [
   },
   {
     name: 'repositories',
-    description: 'List of Repositories.',
+    description:
+      'List of Repositories, or an object that contains a `repository`, and any Global or Repo config to target that specific repository.',
     stage: 'global',
     type: 'array',
     subType: 'string',
@@ -1219,7 +1238,7 @@ const options: Readonly<RenovateOptions>[] = [
     type: 'array',
     subType: 'string',
     stage: 'package',
-    cli: false,
+    patternMatch: true,
   },
   {
     name: 'useBaseBranchConfig',
@@ -1255,7 +1274,8 @@ const options: Readonly<RenovateOptions>[] = [
   {
     name: 'gitIgnoredAuthors',
     description:
-      'Git authors which are ignored by Renovate. Must conform to [RFC5322](https://datatracker.ietf.org/doc/html/rfc5322).',
+      'Git author emails ignored by Renovate. Entries can be exact [RFC5322](https://datatracker.ietf.org/doc/html/rfc5322) strings, glob patterns, or regex patterns using Renovate regex syntax.',
+    patternMatch: true,
     type: 'array',
     subType: 'string',
     stage: 'repository',
@@ -1284,6 +1304,7 @@ const options: Readonly<RenovateOptions>[] = [
     subType: 'string',
     stage: 'repository',
     default: [],
+    patternMatch: true,
   },
   {
     name: 'ignorePaths',
@@ -1294,6 +1315,7 @@ const options: Readonly<RenovateOptions>[] = [
     subType: 'string',
     stage: 'repository',
     default: ['**/node_modules/**', '**/bower_components/**'],
+    patternMatch: true,
   },
   {
     name: 'excludeCommitPaths',
@@ -1303,6 +1325,7 @@ const options: Readonly<RenovateOptions>[] = [
     subType: 'string',
     default: [],
     advancedUse: true,
+    patternMatch: true,
   },
   {
     name: 'executionTimeout',
@@ -1411,6 +1434,14 @@ const options: Readonly<RenovateOptions>[] = [
     supportedPlatforms: ['azure'],
   },
   {
+    name: 'azureWorkItemType',
+    description:
+      'The work item type Renovate uses for its issues (e.g. the Dependency Dashboard) on Azure DevOps.',
+    type: 'string',
+    default: 'Issue',
+    supportedPlatforms: ['azure'],
+  },
+  {
     name: 'autoApprove',
     description: 'Set to `true` to automatically approve PRs.',
     type: 'boolean',
@@ -1464,6 +1495,7 @@ const options: Readonly<RenovateOptions>[] = [
     mergeable: true,
     cli: false,
     env: false,
+    patternMatch: true,
   },
   {
     name: 'matchRepositories',
@@ -1491,6 +1523,7 @@ const options: Readonly<RenovateOptions>[] = [
     mergeable: true,
     cli: false,
     env: false,
+    patternMatch: true,
   },
   {
     name: 'matchManagers',
@@ -1518,6 +1551,7 @@ const options: Readonly<RenovateOptions>[] = [
     mergeable: true,
     cli: false,
     env: false,
+    patternMatch: true,
   },
   {
     name: 'matchDepTypes',
@@ -1531,6 +1565,7 @@ const options: Readonly<RenovateOptions>[] = [
     mergeable: true,
     cli: false,
     env: false,
+    patternMatch: true,
   },
   {
     name: 'matchPackageNames',
@@ -1544,6 +1579,7 @@ const options: Readonly<RenovateOptions>[] = [
     mergeable: true,
     cli: false,
     env: false,
+    patternMatch: true,
   },
   {
     name: 'matchDepNames',
@@ -1557,6 +1593,7 @@ const options: Readonly<RenovateOptions>[] = [
     mergeable: true,
     cli: false,
     env: false,
+    patternMatch: true,
   },
   {
     name: 'matchCurrentValue',
@@ -1568,6 +1605,7 @@ const options: Readonly<RenovateOptions>[] = [
     mergeable: true,
     cli: false,
     env: false,
+    patternMatch: true,
   },
   {
     name: 'matchCurrentVersion',
@@ -1590,6 +1628,7 @@ const options: Readonly<RenovateOptions>[] = [
     mergeable: true,
     cli: false,
     env: false,
+    patternMatch: true,
   },
   {
     name: 'sourceUrl',
@@ -1622,6 +1661,7 @@ const options: Readonly<RenovateOptions>[] = [
     mergeable: true,
     cli: false,
     env: false,
+    patternMatch: true,
   },
   {
     name: 'matchRegistryUrls',
@@ -1734,17 +1774,19 @@ const options: Readonly<RenovateOptions>[] = [
     mergeable: true,
     cli: false,
     env: false,
+    patternMatch: true,
   },
   {
     name: 'matchFileNames',
     description:
-      'List of strings to do an exact match against package and lock files with full path. Only works inside a `packageRules` object.',
+      'List of patterns to match against package and lock file paths. Valid only within a `packageRules` object.',
     type: 'array',
     subType: 'string',
     stage: 'repository',
     parents: ['packageRules'],
     cli: false,
     env: false,
+    patternMatch: true,
   },
   {
     name: 'matchJsonata',
@@ -1779,6 +1821,7 @@ const options: Readonly<RenovateOptions>[] = [
     parents: ['packageRules'],
     cli: false,
     env: false,
+    supportsTemplating: true,
   },
   {
     name: 'pinDigests',
@@ -2318,6 +2361,7 @@ const options: Readonly<RenovateOptions>[] = [
     subType: 'string',
     parents: ['customDatasources'],
     default: [],
+    supportsTemplating: true,
   },
   {
     name: 'vulnerabilityAlerts',
@@ -2418,6 +2462,17 @@ const options: Readonly<RenovateOptions>[] = [
     default: false,
   },
   {
+    name: 'commitTrailers',
+    description:
+      'Structured git trailers (`Key: value` lines) to add in the final block of the commit message.',
+    type: 'array',
+    subType: 'string',
+    default: null,
+    mergeable: true,
+    cli: false,
+    supportsTemplating: true,
+  },
+  {
     name: 'commitMessagePrefix',
     description:
       'Prefix to add to start of commit messages and PR titles. Uses a semantic prefix if `semanticCommits` is enabled.',
@@ -2505,7 +2560,7 @@ const options: Readonly<RenovateOptions>[] = [
     description:
       'Text added here will be placed last in the PR body, with a divider separator before it.',
     type: 'string',
-    default: `This PR has been generated by [Mend Renovate](https://github.com/renovatebot/renovate).`,
+    default: `This PR has been generated by [Mend Renovate CLI](https://github.com/renovatebot/renovate).`,
     supportsTemplating: true,
   },
   {
@@ -2526,7 +2581,6 @@ const options: Readonly<RenovateOptions>[] = [
     default: {
       enabled: false,
       recreateWhen: 'always',
-      rebaseStalePrs: true,
       branchTopic: 'lock-file-maintenance',
       commitMessageAction: 'Lock file maintenance',
       commitMessageTopic: null,
@@ -2578,6 +2632,15 @@ const options: Readonly<RenovateOptions>[] = [
     env: false,
     mergeable: true,
     advancedUse: true,
+  },
+  {
+    name: 'groupSingleUpdates',
+    description:
+      'Apply group settings even when the group contains only one update.',
+    type: 'boolean',
+    default: false,
+    cli: false,
+    env: false,
   },
   // Pull Request options
   {
@@ -2716,6 +2779,7 @@ const options: Readonly<RenovateOptions>[] = [
       'gomodMassage',
       'gomodTidy',
       'gomodTidy1.17',
+      'gomodTidyAll',
       'gomodTidyE',
       'gomodUpdateImportPaths',
       'gomodSkipVendor',
@@ -2738,12 +2802,13 @@ const options: Readonly<RenovateOptions>[] = [
     description:
       'Configuration object to define language or manager version constraints.',
     type: 'object',
-    default: {},
+    default: { ghActionsLock: 'v0.1.6' },
     mergeable: true,
     cli: false,
     supportedManagers: [
       'bundler',
       'composer',
+      'github-actions',
       'gomod',
       'mise',
       'npm',
@@ -3119,12 +3184,13 @@ const options: Readonly<RenovateOptions>[] = [
   {
     name: 'matchStrings',
     description:
-      'Queries to use. Valid only within `bumpVersions` or `customManagers` object.',
+      'Queries to use. Valid only within `bumpVersions` or `customManagers` object. Templating is supported within `bumpVersions` only.',
     type: 'array',
     subType: 'string',
     parents: ['bumpVersions', 'customManagers'],
     cli: false,
     env: false,
+    supportsTemplating: true,
   },
   {
     name: 'matchStringsStrategy',
@@ -3266,7 +3332,13 @@ const options: Readonly<RenovateOptions>[] = [
     type: 'array',
     subType: 'string',
     default: [],
-    allowedValues: ['bazelModDeps', 'goGenerate', 'gradleWrapper'],
+    allowedValues: [
+      'bazelModDeps',
+      'goGenerate',
+      'gradleWrapper',
+      'mise',
+      'pixi',
+    ],
     stage: 'repository',
     globalOnly: true,
   },
@@ -3299,6 +3371,7 @@ const options: Readonly<RenovateOptions>[] = [
       'forgejo',
       'gerrit',
       'gitea',
+      'github',
       'gitlab',
       'scm-manager',
     ],
@@ -3365,9 +3438,20 @@ const options: Readonly<RenovateOptions>[] = [
       'A list of branch names to mark for creation or rebasing as if it was selected in the Dependency Dashboard issue.',
     type: 'array',
     subType: 'string',
+    cli: true,
     experimental: true,
     globalOnly: true,
     default: [],
+  },
+  {
+    name: 'rebaseAllOpenBranches',
+    description:
+      'Rebase all open branches at once, as if the rebase-all-open-PRs checkbox was selected in the Dependency Dashboard issue.',
+    type: 'boolean',
+    cli: true,
+    experimental: true,
+    globalOnly: true,
+    default: false,
   },
   {
     name: 'maxRetryAfter',

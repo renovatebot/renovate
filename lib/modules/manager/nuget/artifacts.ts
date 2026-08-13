@@ -90,14 +90,12 @@ async function runDotnetRestore(
     toolConstraints: [{ toolName: 'dotnet', constraint: dotnetVersion }],
   };
 
-  const cmds = [
-    ...dependentPackageFileNames.map(
-      (fileName) =>
-        `dotnet restore ${quote(
-          fileName,
-        )} --force-evaluate --configfile ${quote(nugetConfigFile)}`,
-    ),
-  ];
+  const cmds = dependentPackageFileNames.map(
+    (fileName) =>
+      `dotnet restore ${quote(
+        fileName,
+      )} --force-evaluate --configfile ${quote(nugetConfigFile)}`,
+  );
 
   if (config.postUpdateOptions?.includes('dotnetWorkloadRestore')) {
     cmds.unshift(

@@ -9,8 +9,10 @@ permissions:
 
 jobs:
   slack:
-    if: contains(github.event.label.name, 'mend-app')
-    runs-on: ubuntu-latest
+    if: >
+      (github.event.action == 'created' && contains(github.event.discussion.labels.*.name, 'mend-app')) ||
+      (github.event.action == 'labeled' && github.event.label.name == 'mend-app')
+    runs-on: ubuntu-slim
     steps:
       - name: Calculate time ago
         id: timeago
@@ -30,11 +32,11 @@ jobs:
 
       - name: Post to Slack
         id: slack
-        uses: slackapi/slack-github-action@45a88b9581bfab2566dc881e2cd66d334e621e2c # v3.0.3
+        uses: slackapi/slack-github-action@dcb1066f776dd043e64d0e8ba94ca15cc7e1875d # v4.0.0
         with:
           method: chat.postMessage
           payload: |
             channel: 'C05NLTMGCJC'
-            text: '<${{ github.event.discussion.html_url }}|${{ github.event.discussion.title }}> (${{ github.event.discussion.created_at }}, ${{ steps.timeago.outputs.ago }})'
+            text: ${{ toJSON(format('<{0}|{1}> ({2}, {3})', github.event.discussion.html_url, github.event.discussion.title, github.event.discussion.created_at, steps.timeago.outputs.ago)) }}
           errors: true
           token: ${{ secrets.SLACK_BOT_TOKEN }}

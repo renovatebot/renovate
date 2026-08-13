@@ -1,3 +1,4 @@
+import { codeBlock } from 'common-tags';
 import { Fixtures } from '~test/fixtures.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import { extractPackageFile } from './index.ts';
@@ -48,8 +49,10 @@ describe('modules/manager/pip_requirements/extract', () => {
     });
 
     it('extracts dependencies with --index-url short code', () => {
-      const requirements = `-i http://example.com/private-pypi/
-some-package==0.3.1`;
+      const requirements = codeBlock`
+        -i http://example.com/private-pypi/
+        some-package==0.3.1
+      `;
 
       const res = extractPackageFile(requirements);
 
@@ -66,8 +69,10 @@ some-package==0.3.1`;
     });
 
     it('extracts --requirement short code option', () => {
-      const requirements = `-r base.txt
-some-package==0.3.1`;
+      const requirements = codeBlock`
+        -r base.txt
+        some-package==0.3.1
+      `;
 
       const res = extractPackageFile(requirements);
 
@@ -77,8 +82,10 @@ some-package==0.3.1`;
     });
 
     it('extracts --constraints short code option', () => {
-      const requirements = `-c constrain.txt
-some-package==0.3.1`;
+      const requirements = codeBlock`
+        -c constrain.txt
+        some-package==0.3.1
+      `;
 
       const res = extractPackageFile(requirements);
 

@@ -1,3 +1,4 @@
+import { isTruthy } from '@sindresorhus/is';
 import { regEx } from '../../../util/regex.ts';
 import type { GenericVersion } from '../generic.ts';
 import { GenericVersioningApi } from '../generic.ts';
@@ -6,8 +7,8 @@ import type { VersioningApi } from '../types.ts';
 export const id = 'apk';
 export const displayName = 'Alpine Package Keeper (APK)';
 export const urls = [
-  'https://wiki.alpinelinux.org/wiki/Package_policies',
-  'https://wiki.alpinelinux.org/wiki/Alpine_Package_Keeper#Package_pinning',
+  '[Alpine Linux package policies](https://wiki.alpinelinux.org/wiki/Package_policies)',
+  '[Alpine Package Keeper - Package pinning](https://wiki.alpinelinux.org/wiki/Alpine_Package_Keeper#Package_pinning)',
 ];
 export const supportsRanges = false;
 
@@ -82,7 +83,7 @@ class ApkVersioningApi extends GenericVersioningApi {
       const extraParts = extra
         .substring(1)
         .split('.')
-        .filter(Boolean)
+        .filter(isTruthy)
         .map(Number);
       release.push(...extraParts);
     }
@@ -195,13 +196,14 @@ class ApkVersioningApi extends GenericVersioningApi {
 
         if (matchv1 && /^\d+$/.test(matchv1)) {
           return 1;
-        } else if (matchv2 && /^\d+$/.test(matchv2)) {
-          return -1;
-        } else if (matchv1) {
-          return -1;
-        } else {
-          return 1;
         }
+        if (matchv2 && /^\d+$/.test(matchv2)) {
+          return -1;
+        }
+        if (matchv1) {
+          return -1;
+        }
+        return 1;
       }
     }
 

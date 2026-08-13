@@ -37,11 +37,13 @@ describe('modules/manager/mise/extract', () => {
         deps: [
           {
             depName: 'erlang',
+            depType: 'tools',
             currentValue: '23.3',
             datasource: 'github-tags',
           },
           {
             depName: 'node',
+            depType: 'tools',
             currentValue: '16',
             datasource: 'node-version',
           },
@@ -466,8 +468,8 @@ describe('modules/manager/mise/extract', () => {
           {
             depName: 'asdf:rust',
             currentValue: '1.82.0',
-            packageName: 'rust-lang/rust',
-            datasource: 'github-tags',
+            packageName: 'rust',
+            datasource: 'rust-version',
           },
           {
             depName: 'vfox:scala',
@@ -528,6 +530,7 @@ describe('modules/manager/mise/extract', () => {
             currentValue: '0.18.21',
             packageName: 'eza',
             datasource: 'crate',
+            versioning: 'semver',
           },
           {
             depName: 'cargo:https://github.com/username/demo1',
@@ -1293,5 +1296,110 @@ describe('modules/manager/mise/extract', () => {
         lockedVersion: '3.10.17',
       });
     });
+
+    it('skips kafka tool when version has no apache- prefix', async () => {
+      const content = codeBlock`
+        [tools]
+        kafka = "3.5.0"
+      `;
+      const result = await extractPackageFile(content, miseFilename);
+      expect(result?.deps).toEqual([
+        expect.objectContaining({
+          depName: 'kafka',
+          skipReason: 'unsupported-datasource',
+        }),
+      ]);
+    });
+  });
+
+  // https://mise.jdx.dev/tasks/task-configuration.html#task-properties
+  describe('extractPackageFile() with tasks', () => {
+    const RUST_197 = { depName: 'rust', currentValue: '1.97.0' };
+    const ZOXIDE = { depName: 'cargo:zoxide', currentValue: '0.9.6' };
+
+    it.each([
+      {
+        description: 'inline tools table on a task',
+        content: codeBlock`
+          [tasks.build]
+          run = "cargo build"
+          tools = {rust = "1.97.0"}
+        `,
+        expectedDeps: [{ ...RUST_197, depType: 'task-build-tools' }],
+      },
+      {
+        description: 'dotted key tools under [tasks.build]',
+        content: codeBlock`
+          [tasks.build]
+          tools.rust = "1.97.0"
+        `,
+        expectedDeps: [{ ...RUST_197, depType: 'task-build-tools' }],
+      },
+      {
+        description: 'subtable [tasks.<name>.tools]',
+        content: codeBlock`
+          [tasks.build.tools]
+          rust = "1.97.0"
+          "cargo:zoxide" = "0.9.6"
+        `,
+        expectedDeps: [
+          { ...RUST_197, depType: 'task-build-tools' },
+          { ...ZOXIDE, depType: 'task-build-tools' },
+        ],
+      },
+      {
+        description: 'top level and task tools',
+        content: codeBlock`
+          [tools]
+          rust = "1.97.0"
+
+          [tasks.lint.tools]
+          rust = "1.80.0"
+        `,
+        expectedDeps: [
+          { ...RUST_197, depType: 'tools' },
+          { ...RUST_197, depType: 'task-lint-tools', currentValue: '1.80.0' },
+        ],
+      },
+      {
+        description: 'inline table task with top level tools',
+        content: codeBlock`
+          [tools]
+          rust = "1.97.0"
+
+          [tasks]
+          build = { run = "cargo build" }
+        `,
+        expectedDeps: [{ ...RUST_197, depType: 'tools' }],
+      },
+      {
+        description: 'string shorthand task with top level tools',
+        content: codeBlock`
+          [tools]
+          rust = "1.97.0"
+
+          [tasks]
+          build = "echo 'rust is a must'"
+        `,
+        expectedDeps: [{ ...RUST_197, depType: 'tools' }],
+      },
+      {
+        description: 'array shorthand task with top level tools',
+        content: codeBlock`
+          [tools]
+          rust = "1.97.0"
+
+          [tasks]
+          test = ["echo '🦀🦀🦀'"]
+        `,
+        expectedDeps: [{ ...RUST_197, depType: 'tools' }],
+      },
+    ])(
+      'extracts task tools - $description',
+      async ({ content, expectedDeps }) => {
+        const result = await extractPackageFile(content, miseFilename);
+        expect(result).toMatchObject({ deps: expectedDeps });
+      },
+    );
   });
 });

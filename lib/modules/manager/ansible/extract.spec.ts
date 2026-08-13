@@ -1,3 +1,4 @@
+import { codeBlock } from 'common-tags';
 import { Fixtures } from '~test/fixtures.ts';
 import { extractPackageFile } from './index.ts';
 
@@ -21,11 +22,13 @@ describe('modules/manager/ansible/extract', () => {
 
     it('extracts image and replaces registry', () => {
       const res = extractPackageFile(
-        `---
-        - name: Re-create a redis container
-            docker_container:
-            name: myredis
-            image: quay.io/redis:0.0.1`,
+        codeBlock`
+          ---
+                  - name: Re-create a redis container
+                      docker_container:
+                      name: myredis
+                      image: quay.io/redis:0.0.1
+        `,
         '',
         {
           registryAliases: {
@@ -51,11 +54,13 @@ describe('modules/manager/ansible/extract', () => {
 
     it('extracts image but no replacement', () => {
       const res = extractPackageFile(
-        `---
-        - name: Re-create a redis container
-          docker_container:
-          name: myredis
-          image: quay.io/redis:0.0.1`,
+        codeBlock`
+          ---
+                  - name: Re-create a redis container
+                    docker_container:
+                    name: myredis
+                    image: quay.io/redis:0.0.1
+        `,
         '',
         {
           registryAliases: {
@@ -81,11 +86,13 @@ describe('modules/manager/ansible/extract', () => {
 
     it('extracts image and no double replacement', () => {
       const res = extractPackageFile(
-        `---
-        - name: Re-create a redis container
-          docker_container:
-          name: myredis
-          image: quay.io/redis:0.0.1`,
+        codeBlock`
+          ---
+                  - name: Re-create a redis container
+                    docker_container:
+                    name: myredis
+                    image: quay.io/redis:0.0.1
+        `,
         '',
         {
           registryAliases: {

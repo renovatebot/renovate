@@ -1,7 +1,9 @@
 import { codeBlock } from 'common-tags';
+import { describe } from 'vitest';
 import { Fixtures } from '~test/fixtures.ts';
 import { getDefaultVersioning } from '../../datasource/common.ts';
 import * as allVersioning from '../../versioning/index.ts';
+import { convertGoDirectiveToSemVerRange } from './extract.ts';
 import { extractPackageFile } from './index.ts';
 
 const gomod1 = Fixtures.get('1/go-mod');
@@ -568,17 +570,18 @@ describe('modules/manager/gomod/extract', () => {
     const datasourceVersioningName = getDefaultVersioning(
       res!.deps[0].datasource,
     );
-    // NOTE that this is not the `go-mod-directive` versioning, as that comes from `constraintsVersioning`
-    expect(datasourceVersioningName).toEqual('semver');
-
-    expect(res!.constraintsVersioning).toBeDefined();
     const versioningName = res!.constraintsVersioning!['%goMod'];
-    expect(versioningName).toBeDefined();
-
     const versioning = allVersioning.get(versioningName);
-    expect(versioning).toBeDefined();
-
     const constraint = res!.extractedConstraints!['%goMod']!;
+
+    it('extracts the expected versioning and constraints', () => {
+      // NOTE that this is not the `go-mod-directive` versioning, as that comes from `constraintsVersioning`
+      expect(datasourceVersioningName).toEqual('semver');
+      expect(res!.constraintsVersioning).toBeDefined();
+      expect(versioningName).toBeDefined();
+      expect(versioning).toBeDefined();
+    });
+
     it(`${constraint} is a valid constraint`, () => {
       expect(versioning.isValid(constraint)).toBeTrue();
     });
@@ -600,6 +603,14 @@ describe('modules/manager/gomod/extract', () => {
     it('does not match the previous SemVer minor', () => {
       expect(versioning.matches('1.18.0', constraint)).toBeFalse();
       expect(versioning.matches('1.18.5', constraint)).toBeFalse();
+    });
+  });
+
+  describe('convertGoDirectiveToSemVerRange()', () => {
+    it('handles undefined go directive', () => {
+      const goDirective = undefined;
+      const semVerRange = convertGoDirectiveToSemVerRange(goDirective);
+      expect(semVerRange.version).toBeUndefined();
     });
   });
 });
