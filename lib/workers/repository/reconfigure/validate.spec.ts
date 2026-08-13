@@ -130,7 +130,7 @@ describe('workers/repository/reconfigure/validate', () => {
     );
 
     expect(logger.debug).toHaveBeenCalledWith(
-      'Skipping validation check because status check already exists.',
+      'Skipping validation check because status check already exists',
     );
   });
 

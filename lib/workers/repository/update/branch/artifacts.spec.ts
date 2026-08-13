@@ -123,7 +123,7 @@ describe('workers/repository/update/branch/artifacts', () => {
         config.statusCheckWhen = { artifactError: 'never' };
         await setArtifactErrorStatus(config);
         expect(logger.debug).not.toHaveBeenCalledWith(
-          'statusCheckWhen.artifactError is set to "never", skipping artifacts status check.',
+          'statusCheckWhen.artifactError is set to "never", skipping artifacts status check',
         );
         expect(platform.getBranchStatusCheck).not.toHaveBeenCalled();
         expect(platform.setBranchStatus).not.toHaveBeenCalled();
@@ -134,7 +134,7 @@ describe('workers/repository/update/branch/artifacts', () => {
         config.artifactErrors = [{ fileName: 'some' }];
         await setArtifactErrorStatus(config);
         expect(logger.debug).toHaveBeenCalledWith(
-          'statusCheckWhen.artifactError is set to "never", skipping artifacts status check.',
+          'statusCheckWhen.artifactError is set to "never", skipping artifacts status check',
         );
         expect(platform.getBranchStatusCheck).not.toHaveBeenCalled();
         expect(platform.setBranchStatus).not.toHaveBeenCalled();
