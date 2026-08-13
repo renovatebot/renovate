@@ -509,7 +509,7 @@ describe('config/validation', () => {
       expect(errors).toMatchObject([
         {
           message:
-            'Invalid `statusCheckWhen.mergeConfidence` configuration: value must be one of "always", "never", or "failed"',
+            'Invalid `statusCheckWhen.mergeConfidence` configuration: value must be one of "always", "never", or "failed".',
         },
         {
           message:
