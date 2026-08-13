@@ -363,7 +363,8 @@ describe('modules/manager/nix/extract', () => {
         },
         "root": {
           "inputs": {
-            "flake-compat": "foobar"
+            "flake-compat": "foobar",
+            "nested-flake-compat": ["foobar", "flake-compat"]
           }
         }
       },
