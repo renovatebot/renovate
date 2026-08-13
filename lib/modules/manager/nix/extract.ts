@@ -18,6 +18,8 @@ const lockableChannelOriginalUrl = regEx(
   '^https://(?:channels\\.nixos\\.org|nixos\\.org/channels)/(?<channel>[^/]+)/nixexprs\\.tar\\.xz$',
 );
 
+const flakeHubOriginalUrl = regEx('^https://flakehub\\.com/f/');
+
 export async function extractPackageFile(
   content: string,
   packageFile: string,
@@ -41,12 +43,16 @@ export async function extractPackageFile(
   }
 
   const flakeLock = flakeLockParsed.data;
-  const rootInputs = new Map(
-    Object.entries(flakeLock.nodes.root?.inputs ?? {}).map(([key, value]) => [
-      value,
-      key,
-    ]),
-  );
+  // Lock node names can differ from the input names in flake.nix. Reverse the
+  // root mapping so updates use the user-facing input name as depName.
+  const rootInputs = new Map<string, string>();
+  for (const [inputName, nodeName] of Object.entries(
+    flakeLock.nodes.root?.inputs ?? {},
+  )) {
+    if (typeof nodeName === 'string') {
+      rootInputs.set(nodeName, inputName);
+    }
+  }
 
   if (!rootInputs.size) {
     logger.debug({ flakeLockFile }, 'flake.lock is missing "root" node');
@@ -154,6 +160,14 @@ export async function extractPackageFile(
         break;
 
       case 'tarball':
+        if (flakeOriginal.url && flakeHubOriginalUrl.test(flakeOriginal.url)) {
+          logger.debug(
+            { flakeLockFile, flakeInput },
+            'FlakeHub input is not supported, skipping',
+          );
+          continue;
+        }
+
         // set to nixpkgs if it is a lockable channel URL
         if (
           flakeOriginal.url &&
