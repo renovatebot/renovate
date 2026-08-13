@@ -4666,6 +4666,17 @@ describe('modules/platform/github/index', () => {
         .reply(200, prs);
     }
 
+    function mergeQueueEnabledMock(
+      scope: httpMock.Scope,
+      mergeQueue: { id: string } | null = { id: 'queue' },
+    ): void {
+      scope.post('/graphql').reply(200, {
+        data: {
+          repository: { mergeQueue },
+        },
+      });
+    }
+
     function mergeQueueCheckMock(
       scope: httpMock.Scope,
       isInMergeQueue = false,
@@ -4679,34 +4690,66 @@ describe('modules/platform/github/index', () => {
       });
     }
 
+    it('does nothing if merge queue is not enabled for the base branch', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      await github.initRepo({ repository: 'some/repo' });
+      mergeQueueEnabledMock(scope, null);
+
+      await expect(
+        github.assertPrNotInMergeQueue('somebranch', 'main'),
+      ).toResolve();
+
+      // cached, no new request
+      await expect(
+        github.assertPrNotInMergeQueue('somebranch', 'main'),
+      ).toResolve();
+    });
+
+    it('defaults to the default branch when no base branch is given', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      await github.initRepo({ repository: 'some/repo' });
+      mergeQueueEnabledMock(scope, null);
+
+      await expect(github.assertPrNotInMergeQueue('somebranch')).toResolve();
+    });
+
     it('does nothing if there is no open PR for the branch', async () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
       await github.initRepo({ repository: 'some/repo' });
+      mergeQueueEnabledMock(scope);
       prListMock(scope, []);
 
-      await expect(github.assertPrNotInMergeQueue('somebranch')).toResolve();
+      await expect(
+        github.assertPrNotInMergeQueue('somebranch', 'main'),
+      ).toResolve();
     });
 
     it('does nothing if the PR is not in the merge queue', async () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
       await github.initRepo({ repository: 'some/repo' });
+      mergeQueueEnabledMock(scope);
       prListMock(scope);
       mergeQueueCheckMock(scope);
 
-      await expect(github.assertPrNotInMergeQueue('somebranch')).toResolve();
+      await expect(
+        github.assertPrNotInMergeQueue('somebranch', 'main'),
+      ).toResolve();
     });
 
     it('throws if the PR is in the merge queue', async () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
       await github.initRepo({ repository: 'some/repo' });
+      mergeQueueEnabledMock(scope);
       prListMock(scope);
       mergeQueueCheckMock(scope, true);
 
       await expect(
-        github.assertPrNotInMergeQueue('somebranch'),
+        github.assertPrNotInMergeQueue('somebranch', 'main'),
       ).rejects.toThrow(PR_ALREADY_IN_MERGE_QUEUE);
 
       expect(logger.logger.debug).toHaveBeenCalledWith(
@@ -4714,16 +4757,52 @@ describe('modules/platform/github/index', () => {
       );
     });
 
+    it('assumes merge queue is enabled if the base branch check returns errors', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      await github.initRepo({ repository: 'some/repo' });
+      scope
+        .post('/graphql')
+        .reply(200, { errors: [{ message: 'some error' }] });
+      prListMock(scope);
+      mergeQueueCheckMock(scope, true);
+
+      await expect(
+        github.assertPrNotInMergeQueue('somebranch', 'main'),
+      ).rejects.toThrow(PR_ALREADY_IN_MERGE_QUEUE);
+
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        { baseBranch: 'main', errors: [{ message: 'some error' }] },
+        'Failed to fetch merge queue status - assuming merge queue is enabled',
+      );
+    });
+
+    it('assumes merge queue is enabled if the base branch check fails', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      await github.initRepo({ repository: 'some/repo' });
+      scope.post('/graphql').reply(500);
+      prListMock(scope);
+      mergeQueueCheckMock(scope, true);
+
+      await expect(
+        github.assertPrNotInMergeQueue('somebranch', 'main'),
+      ).rejects.toThrow(PR_ALREADY_IN_MERGE_QUEUE);
+    });
+
     it('logs if the merge queue check returns errors', async () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
       await github.initRepo({ repository: 'some/repo' });
+      mergeQueueEnabledMock(scope);
       prListMock(scope);
       scope
         .post('/graphql')
         .reply(200, { errors: [{ message: 'some error' }] });
 
-      await expect(github.assertPrNotInMergeQueue('somebranch')).toResolve();
+      await expect(
+        github.assertPrNotInMergeQueue('somebranch', 'main'),
+      ).toResolve();
 
       expect(logger.logger.debug).toHaveBeenCalledWith(
         { prNo: 1234, errors: [{ message: 'some error' }] },
@@ -4735,10 +4814,13 @@ describe('modules/platform/github/index', () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
       await github.initRepo({ repository: 'some/repo' });
+      mergeQueueEnabledMock(scope);
       prListMock(scope);
       scope.post('/graphql').reply(500);
 
-      await expect(github.assertPrNotInMergeQueue('somebranch')).toResolve();
+      await expect(
+        github.assertPrNotInMergeQueue('somebranch', 'main'),
+      ).toResolve();
     });
 
     it('skips merge queue check on GHE <3.12.0', async () => {
@@ -4757,7 +4839,9 @@ describe('modules/platform/github/index', () => {
       });
       await github.initRepo({ repository: 'some/repo' });
 
-      await expect(github.assertPrNotInMergeQueue('somebranch')).toResolve();
+      await expect(
+        github.assertPrNotInMergeQueue('somebranch', 'main'),
+      ).toResolve();
     });
   });
 

@@ -80,6 +80,7 @@ describe('modules/platform/github/scm', () => {
 
     expect(github.assertPrNotInMergeQueue).toHaveBeenCalledExactlyOnceWith(
       'branch',
+      'main',
     );
   });
 

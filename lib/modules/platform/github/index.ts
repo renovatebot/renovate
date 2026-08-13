@@ -81,6 +81,7 @@ import {
   enableAutoMergeMutation,
   getIssuesQuery,
   repoInfoQuery,
+  repoMergeQueueQuery,
 } from './graphql.ts';
 import { GithubIssueCache } from './issue.ts';
 import { massageMarkdownLinks } from './massage-markdown-links.ts';
@@ -525,6 +526,7 @@ export async function initRepo({
     cloneSubmodules,
     cloneSubmodulesFilter,
     ignorePrAuthor: GlobalConfig.get('ignorePrAuthor'),
+    mergeQueueEnabled: {},
   } as any;
   const opts = hostRules.find({
     hostType: 'github',
@@ -1975,9 +1977,12 @@ export async function createPr({
   return result;
 }
 
-export async function assertPrNotInMergeQueue(
-  branchName: string,
-): Promise<void> {
+async function isMergeQueueEnabled(baseBranch: string): Promise<boolean> {
+  const cachedResult = config.mergeQueueEnabled[baseBranch];
+  if (cachedResult !== undefined) {
+    return cachedResult;
+  }
+
   // TODO #22198
   // semver not null safe, accepts null and undefined
   if (
@@ -1985,6 +1990,49 @@ export async function assertPrNotInMergeQueue(
     semver.satisfies(platformConfig.gheVersion!, '<3.12.0')
   ) {
     // Merge queues are only supported on GHES >=3.12.0
+    config.mergeQueueEnabled[baseBranch] = false;
+    return false;
+  }
+
+  // Assume enabled unless proven otherwise, so the merge queue check is not
+  // skipped by mistake
+  let result = true;
+  try {
+    const res = await githubApi.requestGraphql<{
+      repository: { mergeQueue: { id: string } | null };
+    }>(repoMergeQueueQuery, {
+      variables: {
+        owner: config.repositoryOwner,
+        name: config.repositoryName,
+        branch: baseBranch,
+      },
+      readOnly: true,
+      count: 1, // bypass graphql check
+    });
+    if (res?.errors) {
+      logger.debug(
+        { baseBranch, errors: res.errors },
+        'Failed to fetch merge queue status - assuming merge queue is enabled',
+      );
+    } else {
+      result = isNonEmptyObject(res?.data?.repository?.mergeQueue);
+    }
+  } catch (err) {
+    logger.debug(
+      { baseBranch, err },
+      'Error fetching merge queue status - assuming merge queue is enabled',
+    );
+  }
+
+  config.mergeQueueEnabled[baseBranch] = result;
+  return result;
+}
+
+export async function assertPrNotInMergeQueue(
+  branchName: string,
+  baseBranch?: string,
+): Promise<void> {
+  if (!(await isMergeQueueEnabled(baseBranch ?? config.defaultBranch))) {
     return;
   }
 

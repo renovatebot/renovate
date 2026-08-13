@@ -120,6 +120,7 @@ export interface LocalRepoConfig {
   autoMergeAllowed: boolean;
   hasIssuesEnabled: boolean;
   hasVulnerabilityAlertsEnabled: boolean;
+  mergeQueueEnabled: Record<string, boolean>;
 }
 
 export interface GhRepo {

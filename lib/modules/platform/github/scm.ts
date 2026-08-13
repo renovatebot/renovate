@@ -14,7 +14,10 @@ export class GithubScm extends DefaultGitScm {
     }
 
     // a queued PR could otherwise merge before the pushed changes take effect
-    await assertPrNotInMergeQueue(commitConfig.branchName);
+    await assertPrNotInMergeQueue(
+      commitConfig.branchName,
+      commitConfig.baseBranch,
+    );
 
     return platformCommit === 'enabled'
       ? commitFiles(commitConfig)
