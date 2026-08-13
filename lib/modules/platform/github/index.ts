@@ -2044,6 +2044,7 @@ export async function updatePr({
 }: UpdatePrConfig): Promise<void> {
   logger.debug(`updatePr(${prNo}, ${title}, body)`);
   // a queued PR could otherwise merge before the update takes effect
+  // will be re-queued if automerge is enabled and the PR is still mergeable after the update
   await tryDequeuePr(prNo);
   const body = sanitize(rawBody);
   const patchBody: any = { title };
