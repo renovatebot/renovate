@@ -1238,7 +1238,6 @@ const options: Readonly<RenovateOptions>[] = [
     type: 'array',
     subType: 'string',
     stage: 'package',
-    cli: false,
     patternMatch: true,
   },
   {
