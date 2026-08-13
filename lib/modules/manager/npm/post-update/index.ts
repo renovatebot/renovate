@@ -26,6 +26,7 @@ import type {
   PostUpdateConfig,
   Upgrade,
 } from '../../types.ts';
+import { artifactErrorMessageFromExecError } from '../../util.ts';
 import {
   NPM_CACHE_DIR,
   PNPM_CACHE_BASE_DIR,
@@ -580,8 +581,7 @@ export async function getAdditionalFiles(
 
       artifactErrors.push({
         fileName: yarnLock,
-        // oxlint-disable-next-line typescript/prefer-nullish-coalescing
-        stderr: res.stderr || res.stdout,
+        stderr: artifactErrorMessageFromExecError(res, ''),
       });
     } else {
       const existingContent = await getFile(
@@ -652,8 +652,7 @@ export async function getAdditionalFiles(
 
       artifactErrors.push({
         fileName: pnpmShrinkwrap,
-        // oxlint-disable-next-line typescript/prefer-nullish-coalescing
-        stderr: res.stderr || res.stdout,
+        stderr: artifactErrorMessageFromExecError(res, ''),
       });
     } else {
       const existingContent = await getFile(

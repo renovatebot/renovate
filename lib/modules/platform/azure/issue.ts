@@ -49,15 +49,36 @@ function namesByCategory(
     .map((s) => s.name!);
 }
 
+/**
+ * Op that renders the issue body as Markdown. Only Azure DevOps Services
+ * (cloud) supports the `multilineFieldsFormat` field; Azure DevOps Server
+ * (on-premises) rejects it with a 400, so this is only included when the
+ * instance is hosted (see discussion #45068).
+ */
+function markdownFormatOp(op: 'add' | 'replace'): {
+  op: string;
+  path: string;
+  value: string;
+} {
+  return {
+    op,
+    path: '/multilineFieldsFormat/System.Description',
+    value: 'Markdown',
+  };
+}
+
 export class IssueService {
   private config: Config;
   private readonly workItemStates: Lazy<Promise<WorkItemStates>>;
+  private readonly hosted: Lazy<Promise<boolean>>;
 
   constructor(config: Config) {
     this.config = config;
     // Wrapped in `Lazy` so concurrent callers share a single resolution
     // instead of each firing a duplicate `getWorkItemTypeStates` request.
     this.workItemStates = new Lazy(() => this.resolveWorkItemStates());
+    // Same reason: resolve the deployment type once per run, not per issue.
+    this.hosted = new Lazy(() => azureApi.isHosted());
   }
 
   /**
@@ -226,6 +247,7 @@ export class IssueService {
       const finalTitle = getWorkItemTitle(title, this.config.repository);
       const issues = await this.getIssueList(finalTitle);
       const { open, closed } = await this.workItemStates.getValue();
+      const hosted = await this.hosted.getValue();
 
       // Close duplicate open issues if any
       const openIssues = issues.filter((issue) => issue.state === 'open');
@@ -278,11 +300,7 @@ export class IssueService {
                 path: '/fields/System.Description',
                 value: sanitize(body),
               },
-              {
-                op: 'replace',
-                path: '/multilineFieldsFormat/System.Description',
-                value: 'Markdown',
-              },
+              ...(hosted ? [markdownFormatOp('replace')] : []),
             ],
             existingIssue.number,
             this.config.project,
@@ -313,11 +331,7 @@ export class IssueService {
                   path: '/fields/System.Description',
                   value: sanitize(body),
                 },
-                {
-                  op: 'replace',
-                  path: '/multilineFieldsFormat/System.Description',
-                  value: 'Markdown',
-                },
+                ...(hosted ? [markdownFormatOp('replace')] : []),
               ],
               existingIssue.number,
               this.config.project,
@@ -368,11 +382,7 @@ export class IssueService {
             path: '/fields/System.Description',
             value: sanitize(body),
           },
-          {
-            op: 'add',
-            path: '/multilineFieldsFormat/System.Description',
-            value: 'Markdown',
-          },
+          ...(hosted ? [markdownFormatOp('add')] : []),
         ],
         this.config.project,
         this.config.workItemType,

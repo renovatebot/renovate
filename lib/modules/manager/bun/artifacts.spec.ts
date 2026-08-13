@@ -1,4 +1,4 @@
-import _fs from 'fs-extra';
+import { fs } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import type {
   InternalGlobalConfigOptions,
@@ -11,10 +11,9 @@ import type { UpdateArtifact } from '../types.ts';
 import { updateArtifacts } from './artifacts.ts';
 
 vi.mock('../../../util/exec/index.ts');
-vi.mock('fs-extra');
+vi.mock('../../../util/fs/index.ts');
 
 const exec = vi.mocked(_exec);
-const fs = vi.mocked(_fs);
 
 const globalConfig: RepoGlobalConfig & InternalGlobalConfigOptions = {
   localDir: '',
@@ -57,8 +56,8 @@ describe('modules/manager/bun/artifacts', () => {
           { manager: 'bun', lockFiles: ['bun.lockb'] },
         ];
         const oldLock = Buffer.from('old');
-        fs.readFile.mockResolvedValueOnce(oldLock as never);
-        fs.readFile.mockResolvedValueOnce(oldLock as never);
+        fs.readLocalFile.mockResolvedValueOnce(oldLock as never);
+        fs.readLocalFile.mockResolvedValueOnce(oldLock as never);
         expect(await updateArtifacts(updateArtifact)).toBeNull();
       });
 
@@ -67,11 +66,11 @@ describe('modules/manager/bun/artifacts', () => {
           { manager: 'bun', lockFiles: ['bun.lockb'] },
         ];
         const oldLock = Buffer.from('old');
-        fs.readFile.mockResolvedValueOnce(oldLock as never);
+        fs.readLocalFile.mockResolvedValueOnce(oldLock as never);
         // npmrc
-        fs.readFile.mockResolvedValueOnce('# dummy' as never);
+        fs.readLocalFile.mockResolvedValueOnce('# dummy');
         const newLock = Buffer.from('new');
-        fs.readFile.mockResolvedValueOnce(newLock as never);
+        fs.readLocalFile.mockResolvedValueOnce(newLock as never);
         expect(await updateArtifacts(updateArtifact)).toEqual([
           {
             file: {
@@ -89,10 +88,10 @@ describe('modules/manager/bun/artifacts', () => {
           { manager: 'bun', lockFiles: ['bun.lockb'] },
         ];
         const oldLock = Buffer.from('old');
-        fs.readFile.mockResolvedValueOnce(oldLock as never);
-        fs.readFile.mockResolvedValueOnce('# dummy' as never);
+        fs.readLocalFile.mockResolvedValueOnce(oldLock as never);
+        fs.readLocalFile.mockResolvedValueOnce('# dummy');
         const newLock = Buffer.from('new');
-        fs.readFile.mockResolvedValueOnce(newLock as never);
+        fs.readLocalFile.mockResolvedValueOnce(newLock as never);
 
         const result = await updateArtifacts(updateArtifact);
 
@@ -123,11 +122,11 @@ describe('modules/manager/bun/artifacts', () => {
         ];
         updateArtifact.config.isLockFileMaintenance = true;
         const oldLock = Buffer.from('old');
-        fs.readFile.mockResolvedValueOnce(oldLock as never);
+        fs.readLocalFile.mockResolvedValueOnce(oldLock as never);
         // npmrc
-        fs.readFile.mockResolvedValueOnce('# dummy' as never);
+        fs.readLocalFile.mockResolvedValueOnce('# dummy');
         const newLock = Buffer.from('new');
-        fs.readFile.mockResolvedValueOnce(newLock as never);
+        fs.readLocalFile.mockResolvedValueOnce(newLock as never);
         expect(await updateArtifacts(updateArtifact)).toEqual([
           {
             file: {
@@ -143,11 +142,11 @@ describe('modules/manager/bun/artifacts', () => {
         updateArtifact.config.lockFiles = ['bun.lockb'];
         updateArtifact.config.isLockFileMaintenance = true;
         const oldLock = Buffer.from('old');
-        fs.readFile.mockResolvedValueOnce(oldLock as never);
+        fs.readLocalFile.mockResolvedValueOnce(oldLock as never);
         // npmrc
-        fs.readFile.mockResolvedValueOnce('# dummy' as never);
+        fs.readLocalFile.mockResolvedValueOnce('# dummy');
         const newLock = Buffer.from('new');
-        fs.readFile.mockResolvedValueOnce(newLock as never);
+        fs.readLocalFile.mockResolvedValueOnce(newLock as never);
         expect(await updateArtifacts(updateArtifact)).toEqual([
           {
             file: {
@@ -170,7 +169,7 @@ describe('modules/manager/bun/artifacts', () => {
           { manager: 'bun', lockFiles: ['bun.lockb'] },
         ];
         const oldLock = Buffer.from('old');
-        fs.readFile.mockResolvedValueOnce(oldLock as never);
+        fs.readLocalFile.mockResolvedValueOnce(oldLock as never);
         exec.mockRejectedValueOnce(execError);
         await expect(updateArtifacts(updateArtifact)).rejects.toThrow(
           TEMPORARY_ERROR,
@@ -188,7 +187,7 @@ describe('modules/manager/bun/artifacts', () => {
           { manager: 'bun', lockFiles: ['bun.lockb'] },
         ];
         const oldLock = Buffer.from('old');
-        fs.readFile.mockResolvedValueOnce(oldLock as never);
+        fs.readLocalFile.mockResolvedValueOnce(oldLock as never);
         exec.mockRejectedValueOnce(execError);
         expect(await updateArtifacts(updateArtifact)).toEqual([
           { artifactError: { fileName: 'bun.lockb', stderr: 'nope' } },
@@ -209,8 +208,8 @@ describe('modules/manager/bun/artifacts', () => {
           { manager: 'bun', lockFiles: ['bun.lock'] },
         ];
         const oldLock = Buffer.from('old');
-        fs.readFile.mockResolvedValueOnce(oldLock as never);
-        fs.readFile.mockResolvedValueOnce(oldLock as never);
+        fs.readLocalFile.mockResolvedValueOnce(oldLock as never);
+        fs.readLocalFile.mockResolvedValueOnce(oldLock as never);
         expect(await updateArtifacts(updateArtifact)).toBeNull();
       });
 
@@ -219,11 +218,11 @@ describe('modules/manager/bun/artifacts', () => {
           { manager: 'bun', lockFiles: ['bun.lock'] },
         ];
         const oldLock = Buffer.from('old');
-        fs.readFile.mockResolvedValueOnce(oldLock as never);
+        fs.readLocalFile.mockResolvedValueOnce(oldLock as never);
         // npmrc
-        fs.readFile.mockResolvedValueOnce('# dummy' as never);
+        fs.readLocalFile.mockResolvedValueOnce('# dummy');
         const newLock = Buffer.from('new');
-        fs.readFile.mockResolvedValueOnce(newLock as never);
+        fs.readLocalFile.mockResolvedValueOnce(newLock as never);
         expect(await updateArtifacts(updateArtifact)).toEqual([
           {
             file: {
@@ -241,11 +240,11 @@ describe('modules/manager/bun/artifacts', () => {
         ];
         updateArtifact.config.isLockFileMaintenance = true;
         const oldLock = Buffer.from('old');
-        fs.readFile.mockResolvedValueOnce(oldLock as never);
+        fs.readLocalFile.mockResolvedValueOnce(oldLock as never);
         // npmrc
-        fs.readFile.mockResolvedValueOnce('# dummy' as never);
+        fs.readLocalFile.mockResolvedValueOnce('# dummy');
         const newLock = Buffer.from('new');
-        fs.readFile.mockResolvedValueOnce(newLock as never);
+        fs.readLocalFile.mockResolvedValueOnce(newLock as never);
         expect(await updateArtifacts(updateArtifact)).toEqual([
           {
             file: {
@@ -261,11 +260,11 @@ describe('modules/manager/bun/artifacts', () => {
         updateArtifact.config.lockFiles = ['bun.lock'];
         updateArtifact.config.isLockFileMaintenance = true;
         const oldLock = Buffer.from('old');
-        fs.readFile.mockResolvedValueOnce(oldLock as never);
+        fs.readLocalFile.mockResolvedValueOnce(oldLock as never);
         // npmrc
-        fs.readFile.mockResolvedValueOnce('# dummy' as never);
+        fs.readLocalFile.mockResolvedValueOnce('# dummy');
         const newLock = Buffer.from('new');
-        fs.readFile.mockResolvedValueOnce(newLock as never);
+        fs.readLocalFile.mockResolvedValueOnce(newLock as never);
         expect(await updateArtifacts(updateArtifact)).toEqual([
           {
             file: {
@@ -288,7 +287,7 @@ describe('modules/manager/bun/artifacts', () => {
           { manager: 'bun', lockFiles: ['bun.lock'] },
         ];
         const oldLock = Buffer.from('old');
-        fs.readFile.mockResolvedValueOnce(oldLock as never);
+        fs.readLocalFile.mockResolvedValueOnce(oldLock as never);
         exec.mockRejectedValueOnce(execError);
         await expect(updateArtifacts(updateArtifact)).rejects.toThrow(
           TEMPORARY_ERROR,
@@ -306,7 +305,7 @@ describe('modules/manager/bun/artifacts', () => {
           { manager: 'bun', lockFiles: ['bun.lock'] },
         ];
         const oldLock = Buffer.from('old');
-        fs.readFile.mockResolvedValueOnce(oldLock as never);
+        fs.readLocalFile.mockResolvedValueOnce(oldLock as never);
         exec.mockRejectedValueOnce(execError);
         expect(await updateArtifacts(updateArtifact)).toEqual([
           { artifactError: { fileName: 'bun.lock', stderr: 'nope' } },
@@ -380,9 +379,9 @@ describe('modules/manager/bun/artifacts', () => {
           };
 
           const oldLock = Buffer.from('old');
-          fs.readFile.mockResolvedValueOnce(oldLock as never);
+          fs.readLocalFile.mockResolvedValueOnce(oldLock as never);
           const newLock = Buffer.from('new');
-          fs.readFile.mockResolvedValueOnce(newLock as never);
+          fs.readLocalFile.mockResolvedValueOnce(newLock as never);
 
           await updateArtifacts(updateArtifact);
 

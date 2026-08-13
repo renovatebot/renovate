@@ -115,10 +115,7 @@ export function extractPackageJson(
               } else if (isObject(overridesVal)) {
                 // Older nested object syntax: `parent: { parent: { child: version } }`
                 deps.push(
-                  ...extractOverrideDepsRec(
-                    [overridesKey],
-                    overridesVal as unknown as NpmManagerData,
-                  ),
+                  ...extractOverrideDepsRec([overridesKey], overridesVal),
                 );
               }
             }

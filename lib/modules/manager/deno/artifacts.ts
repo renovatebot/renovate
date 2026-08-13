@@ -1,4 +1,5 @@
 import { isEmptyArray } from '@sindresorhus/is';
+import { quote } from 'shlex';
 import upath from 'upath';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
@@ -133,7 +134,7 @@ export async function updateArtifacts(
         ...new Set([...defaultImportHosts, ...additionalImportHosts]),
       ].join(',');
 
-      command += ` --allow-import=${importHosts}`;
+      command += ` --allow-import=${quote(importHosts)}`;
     }
 
     // TODO: appending `--lockfile-only` is better to reduce disk usage

@@ -289,7 +289,7 @@ describe('modules/manager/bundler/artifacts', () => {
               '-e CONTAINERBASE_CACHE_DIR ' +
               '-w "/tmp/github/some/repo" ' +
               'ghcr.io/renovatebot/base-image' +
-              ' bash -l -c "' +
+              " bash -l -c '" +
               'install-tool ruby 1.2.0' +
               ' && ' +
               'install-tool bundler 2.3.5' +
@@ -297,7 +297,7 @@ describe('modules/manager/bundler/artifacts', () => {
               'ruby --version' +
               ' && ' +
               'bundler lock --update foo bar' +
-              '"',
+              "'",
           },
         ]);
       });
@@ -348,7 +348,7 @@ describe('modules/manager/bundler/artifacts', () => {
               '-e CONTAINERBASE_CACHE_DIR ' +
               '-w "/tmp/github/some/repo" ' +
               'ghcr.io/renovatebot/base-image' +
-              ' bash -l -c "' +
+              " bash -l -c '" +
               'install-tool ruby 1.2.5' +
               ' && ' +
               'install-tool bundler 3.2.1' +
@@ -356,7 +356,7 @@ describe('modules/manager/bundler/artifacts', () => {
               'ruby --version' +
               ' && ' +
               'bundler lock --update foo bar' +
-              '"',
+              "'",
           },
         ]);
       });
@@ -409,7 +409,7 @@ describe('modules/manager/bundler/artifacts', () => {
               '-e CONTAINERBASE_CACHE_DIR ' +
               '-w "/tmp/github/some/repo" ' +
               'ghcr.io/renovatebot/base-image' +
-              ' bash -l -c "' +
+              " bash -l -c '" +
               'install-tool ruby 1.3.0' +
               ' && ' +
               'install-tool bundler 2.3.5' +
@@ -417,7 +417,7 @@ describe('modules/manager/bundler/artifacts', () => {
               'ruby --version' +
               ' && ' +
               'bundler lock --update foo bar' +
-              '"',
+              "'",
           },
         ]);
       });
@@ -464,7 +464,7 @@ describe('modules/manager/bundler/artifacts', () => {
               '-e CONTAINERBASE_CACHE_DIR ' +
               '-w "/tmp/github/some/repo" ' +
               'ghcr.io/renovatebot/base-image' +
-              ' bash -l -c "' +
+              " bash -l -c '" +
               'install-tool ruby 1.2.0' +
               ' && ' +
               'install-tool bundler 2.3.5' +
@@ -472,7 +472,7 @@ describe('modules/manager/bundler/artifacts', () => {
               'ruby --version' +
               ' && ' +
               'bundler lock --update foo bar' +
-              '"',
+              "'",
           },
         ]);
       });

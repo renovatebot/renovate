@@ -2,6 +2,7 @@ import { logger } from '../../../logger/index.ts';
 import * as nugetVersioning from '../../versioning/nuget/index.ts';
 import { Datasource } from '../datasource.ts';
 import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
+import { isCrossOriginPaginationAllowed } from '../util.ts';
 import { parseRegistryUrl } from './common.ts';
 import { NugetV2Api } from './v2.ts';
 import { NugetV3Api } from './v3.ts';
@@ -44,7 +45,12 @@ export class NugetDatasource extends Datasource {
     }
     const { feedUrl, protocolVersion } = parseRegistryUrl(registryUrl);
     if (protocolVersion === 2) {
-      return this.v2Api.getReleases(this.http, feedUrl, packageName);
+      return this.v2Api.getReleases(
+        this.http,
+        feedUrl,
+        packageName,
+        isCrossOriginPaginationAllowed(NugetDatasource.id),
+      );
     }
     if (protocolVersion === 3) {
       const queryUrl = await this.v3Api.getResourceUrl(this.http, feedUrl);

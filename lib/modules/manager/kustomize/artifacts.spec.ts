@@ -566,11 +566,11 @@ describe('modules/manager/kustomize/artifacts', () => {
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
           'ghcr.io/renovatebot/base-image ' +
-          'bash -l -c "' +
+          "bash -l -c '" +
           'install-tool helm 3.17.0' +
           ' && ' +
           'helm pull --untar --untardir charts/example-1.0.0 --version 1.0.0 oci://github.com/example/example/example' +
-          '"',
+          "'",
       },
     ]);
   });
