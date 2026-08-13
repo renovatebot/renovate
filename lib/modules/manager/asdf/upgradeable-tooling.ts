@@ -11,6 +11,7 @@ import { NodeVersionDatasource } from '../../datasource/node-version/index.ts';
 import { NpmDatasource } from '../../datasource/npm/index.ts';
 import { PypiDatasource } from '../../datasource/pypi/index.ts';
 import { RubyVersionDatasource } from '../../datasource/ruby-version/index.ts';
+import { RustVersionDatasource } from '../../datasource/rust-version/index.ts';
 import * as regexVersioning from '../../versioning/regex/index.ts';
 import * as semverVersioning from '../../versioning/semver/index.ts';
 import type { PackageDependency } from '../types.ts';
@@ -715,8 +716,8 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
   rust: {
     asdfPluginUrl: 'https://github.com/code-lever/asdf-rust',
     config: {
-      datasource: GithubTagsDatasource.id,
-      packageName: 'rust-lang/rust',
+      datasource: RustVersionDatasource.id,
+      packageName: 'rust',
     },
   },
   sbt: {

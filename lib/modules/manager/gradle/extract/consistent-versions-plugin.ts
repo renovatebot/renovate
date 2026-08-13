@@ -152,7 +152,7 @@ export function parseLockFile(input: string): Map<string, VersionWithDepType> {
         depVerMap.set(depName, {
           version: lockVersion,
           depType: isTestDepType ? 'test' : 'dependencies',
-        } as VersionWithDepType);
+        });
       }
     } else if (line === '[Test dependencies]') {
       isTestDepType = true; // We know that all lines below this header are test dependencies

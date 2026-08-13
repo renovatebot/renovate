@@ -8,6 +8,21 @@ import { isHttpUrl, massageHostUrl, parseUrl } from './url.ts';
 
 let hostRules: HostRule[] = [];
 
+/**
+ * Fields within `HostRule`s that must have their value registered for sanitising through `sanitize.addSecretForSanitizing()`.
+ *
+ * Kept in sync with `redactedFields` through tests.
+ */
+export const confidentialFields: (keyof HostRule)[] = [
+  'password',
+  'token',
+  'httpsPrivateKey',
+  /* not actually sensitive, but redacted nonetheless */
+  'httpsCertificate',
+  /* not actually sensitive, but redacted nonetheless */
+  'httpsCertificateAuthority',
+];
+
 export interface LegacyHostRule {
   hostName?: string;
   domainName?: string;
@@ -41,7 +56,6 @@ export function migrateRule(rule: LegacyHostRule & HostRule): HostRule {
 export function add(params: HostRule): void {
   const rule = migrateRule(params);
 
-  const confidentialFields: (keyof HostRule)[] = ['password', 'token'];
   if (rule.matchHost) {
     rule.matchHost = massageHostUrl(rule.matchHost);
     const parsedUrl = parseUrl(rule.matchHost);

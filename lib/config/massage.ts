@@ -31,9 +31,7 @@ export function massageConfig(config: RenovateConfig): RenovateConfig {
       val.forEach((item) => {
         if (isObject(item)) {
           // @ts-expect-error -- TODO: fix me
-          (massagedConfig[key] as RenovateConfig[]).push(
-            massageConfig(item as RenovateConfig),
-          );
+          (massagedConfig[key] as RenovateConfig[]).push(massageConfig(item));
         } else {
           // @ts-expect-error -- TODO: fix me
           (massagedConfig[key] as unknown[]).push(item);
@@ -41,7 +39,7 @@ export function massageConfig(config: RenovateConfig): RenovateConfig {
       });
     } else if (isObject(val) && key !== 'encrypted') {
       // @ts-expect-error -- TODO: fix me
-      massagedConfig[key] = massageConfig(val as RenovateConfig);
+      massagedConfig[key] = massageConfig(val);
     }
   }
   if (isNonEmptyArray(massagedConfig.packageRules)) {

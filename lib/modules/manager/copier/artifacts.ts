@@ -2,10 +2,9 @@ import { quote } from 'shlex';
 import upath from 'upath';
 import { GlobalConfig } from '../../../config/global.ts';
 import { logger } from '../../../logger/index.ts';
-import { exec } from '../../../util/exec/index.ts';
 import type { ExecOptions } from '../../../util/exec/types.ts';
 import { readLocalFile } from '../../../util/fs/index.ts';
-import { getGitEnvironmentVariables } from '../../../util/git/auth.ts';
+import { withGitEnvironment } from '../../../util/git/exec.ts';
 import { getRepoStatus } from '../../../util/git/index.ts';
 import type {
   UpdateArtifact,
@@ -18,6 +17,7 @@ import {
 } from './utils.ts';
 
 const DEFAULT_COMMAND_OPTIONS = ['--skip-answered', '--defaults'];
+const gitExec = withGitEnvironment(['git-tags']);
 
 function buildCommand(
   config: UpdateArtifactsConfig,
@@ -73,11 +73,9 @@ export async function updateArtifacts({
   }
 
   const command = buildCommand(config, packageFileName, newValue);
-  const gitEnv = getGitEnvironmentVariables(['git-tags']);
   const execOptions: ExecOptions = {
     cwdFile: packageFileName,
     docker: {},
-    extraEnv: gitEnv,
     toolConstraints: [
       {
         toolName: 'python',
@@ -90,7 +88,7 @@ export async function updateArtifacts({
     ],
   };
   try {
-    await exec(command, execOptions);
+    await gitExec(command, execOptions);
   } catch (err) {
     logger.debug({ err }, `Failed to update copier template: ${err.message}`);
     return artifactError(packageFileName, err.message);

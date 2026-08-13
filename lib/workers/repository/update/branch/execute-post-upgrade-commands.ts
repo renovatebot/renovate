@@ -8,7 +8,6 @@ import { mergeChildConfig } from '../../../../config/index.ts';
 import { addMeta, logger } from '../../../../logger/index.ts';
 import type { ArtifactError } from '../../../../modules/manager/types.ts';
 import { coerceArray } from '../../../../util/array.ts';
-import { exec } from '../../../../util/exec/index.ts';
 import {
   type ExecOptions,
   isConstraintName,
@@ -23,7 +22,7 @@ import {
   statLocalFile,
   writeLocalFile,
 } from '../../../../util/fs/index.ts';
-import { getGitEnvironmentVariables } from '../../../../util/git/auth.ts';
+import { withGitEnvironment } from '../../../../util/git/exec.ts';
 import {
   getRepoStatus,
   isFileModeEnabled,
@@ -41,6 +40,7 @@ export interface PostUpgradeCommandsExecutionResult {
 }
 
 const ownerExecutePermission = 0o100;
+const gitExec = withGitEnvironment();
 
 async function detectExecutable(
   relativePath: string,
@@ -51,7 +51,11 @@ async function detectExecutable(
   }
 
   const fileStats = await statLocalFile(relativePath);
-  if (!fileStats || (fileStats.mode & ownerExecutePermission) === 0) {
+  if (!fileStats?.isFile()) {
+    return undefined;
+  }
+
+  if ((fileStats.mode & ownerExecutePermission) === 0) {
     return undefined;
   }
 
@@ -157,12 +161,12 @@ export async function postUpgradeCommandsExecutor(
             logger.trace({ cmd: compiledCmd }, 'Executing post-upgrade task');
 
             const execOpts: ExecOptions = {
+              // oxlint-disable-next-line renovate/no-exec-shell-option -- some self-hosted adminstrators allow their users to use shell features (pipes, globbing, sub-shells), so this is allowed for that purpose when it's opted in via allowShellExecutorForPostUpgradeCommands
               shell: GlobalConfig.get(
                 'allowShellExecutorForPostUpgradeCommands',
               ),
 
               cwd: workingDir,
-              extraEnv: getGitEnvironmentVariables(),
             };
             if (dataFilePath) {
               execOpts.env = {
@@ -195,7 +199,7 @@ export async function postUpgradeCommandsExecutor(
                 });
               }
             }
-            const execResult = await exec(compiledCmd, execOpts);
+            const execResult = await gitExec(compiledCmd, execOpts);
 
             logger.debug(
               { cmd: compiledCmd, ...execResult },

@@ -88,4 +88,27 @@ describe('util/markdown', () => {
       `);
     });
   });
+
+  describe('.sanitizeMarkdown', () => {
+    it('should not add zero-width space to @ inside triple-backtick code blocks', () => {
+      const input = codeBlock`
+        \`\`\`
+          import foo from '@atlaskit/tokens';
+        \`\`\`
+      `;
+
+      expect(sanitizeMarkdown(input)).toEqual(input);
+    });
+
+    it('should not add zero-width space to @ inside inline code spans', () => {
+      const input = 'Use `@atlaskit/tokens` here';
+      expect(sanitizeMarkdown(input)).toEqual(input);
+    });
+
+    it('should add zero-width space to @ in regular text', () => {
+      expect(sanitizeMarkdown('mention @user here')).toEqual(
+        'mention @&#8203;user here',
+      );
+    });
+  });
 });

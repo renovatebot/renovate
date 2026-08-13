@@ -737,15 +737,7 @@ For example, To add `[skip ci]` to every commit you could configure:
 }
 ```
 
-Another example would be if you want to configure a DCO sign off to each commit.
-
-If you want Renovate to sign off its commits, add the [`:gitSignOff` preset](./presets-default.md#gitsignoff) to your `extends` array:
-
-```json
-{
-  "extends": [":gitSignOff"]
-}
-```
+To add [git trailers](https://git-scm.com/docs/git-interpret-trailers) like `Signed-off-by` to commits, use [`commitTrailers`](#committrailers) instead.
 
 ## `commitBodyTable`
 
@@ -818,6 +810,33 @@ We recommend you use `matchManagers` and `commitMessageTopic` in a `packageRules
       "commitMessageTopic": "{{depName}}"
     }
   ]
+}
+```
+
+## `commitTrailers`
+
+Use this option to add [git trailers](https://git-scm.com/docs/git-interpret-trailers) to the commits Renovate creates.
+Each entry must be a full trailer line in the form `Key: value`, where the key may only have letters, digits and `-`.
+Repeated keys are allowed.
+
+For example:
+
+```json
+{
+  "packageRules": [
+    {
+      "matchDepTypes": ["devDependencies"],
+      "commitTrailers": ["Changelog: skip"]
+    }
+  ]
+}
+```
+
+If you want Renovate to sign off its commits, you can add the [`:gitSignOff` preset](./presets-default.md#gitsignoff) to your `extends` array:
+
+```json
+{
+  "extends": [":gitSignOff"]
 }
 ```
 
@@ -1983,20 +2002,20 @@ Development Bot <dev-bot@my-software-company.com>
 
 ## `gitIgnoredAuthors`
 
-Specify commit authors ignored by Renovate.
-This field accepts [RFC5322](https://datatracker.ietf.org/doc/html/rfc5322)-compliant strings.
+Specify commit author emails ignored by Renovate.
 
 By default, Renovate will treat any PR as modified if another Git author has added to the branch.
 When a PR is considered modified, Renovate won't perform any further commits such as if it's conflicted or needs a version update.
 If you have other bots which commit on top of Renovate PRs, and don't want Renovate to treat these PRs as modified, then add the other Git author(s) to `gitIgnoredAuthors`.
-
-Example:
 
 ```json
 {
   "gitIgnoredAuthors": ["some-bot@example.org"]
 }
 ```
+
+`gitIgnoredAuthors` values can be exact [RFC5322](https://datatracker.ietf.org/doc/html/rfc5322)-compliant email strings, glob patterns, or regex patterns.
+For more details on the syntax and supported patterns, see Renovate's [string pattern matching documentation](./string-pattern-matching.md).
 
 ## `gitLabIgnoreApprovals`
 
@@ -2935,8 +2954,6 @@ Set `minimumReleaseAge` to `3 days` for npm packages to prevent relying on a pac
 #### Await X time duration before Automerging
 
 If you enable `automerge` _and_ `minimumReleaseAge`, Renovate Renovate will create PRs immediately, but only automerge them when the `minimumReleaseAge` time-duration has passed.
-
-It's recommended to also apply `prCreation="not-pending"` and `internalChecksFilter="strict"` to make sure that branches and PRs are only created after the `minimumReleaseAge` has passed.
 
 Renovate adds a "renovate/stability-days" pending status check to each branch/PR.
 This pending check prevents the branch going green to automerge before the time has passed.
@@ -4111,6 +4128,13 @@ This is implicitly enabled for major module updates when `gomodUpdateImportPaths
 
 Run `go mod tidy -compat=1.17` after Go module updates.
 
+### `gomodTidyAll`
+
+After running `go mod tidy` on the updated module, also run it on every other `go.mod` which references that module through a local `replace` directive, in dependency order.
+Use this in Go monorepos, where an update to a shared module must also reach the `go.sum` files of the modules which depend on it.
+Implies `gomodTidy`, and needs Go 1.20 or later.
+Avoid combining this with `gomodMassage`, which comments out the relative `replace` directives that this option follows.
+
 ### `gomodTidyE`
 
 Run `go mod tidy -e` after Go module updates.
@@ -4141,7 +4165,7 @@ Run `npm install` commands _twice_ to work around bugs where `npm` generates inv
 
 ### `pnpmDedupe`
 
-Run `pnpm dedupe --ignore-scripts` after `pnpm-lock.yaml` updates.
+Run `pnpm dedupe` after `pnpm-lock.yaml` updates.
 
 ### `yarnDedupeFewer`
 

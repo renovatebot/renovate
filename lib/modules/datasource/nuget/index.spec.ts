@@ -121,6 +121,7 @@ const configV3Deprecated = {
 describe('modules/datasource/nuget/index', () => {
   beforeEach(() => {
     GlobalConfig.reset();
+    delete process.env.RENOVATE_X_NUGET_PAGINATION_ALLOW_CROSS_ORIGIN;
   });
 
   describe('parseRegistryUrl', () => {
@@ -946,16 +947,57 @@ describe('modules/datasource/nuget/index', () => {
         .get(
           '/api/v2/FindPackagesById()?id=%27nunit%27&$select=Version,IsLatestVersion,ProjectUrl,Published',
         )
-        .reply(200, pkgListV2Page1of2);
-      httpMock
-        .scope('https://example.org')
-        .get('/')
+        .reply(200, pkgListV2Page1of2)
+        .get('/api/v2/PageTwo')
         .reply(200, pkgListV2Page2of2);
       const res = await getPkgReleases({
         ...configV2,
       });
       expect(res).not.toBeNull();
       expect(res).toMatchSnapshot();
+    });
+
+    // as this could lead to a Server-Side Request Forgery (SSRF), but could also be misconfiguration
+    it('does not follow pagination to a different origin (v2)', async () => {
+      httpMock
+        .scope('https://www.nuget.org')
+        .get(
+          '/api/v2/FindPackagesById()?id=%27nunit%27&$select=Version,IsLatestVersion,ProjectUrl,Published',
+        )
+        .reply(200, Fixtures.get('nunit/v2_paginated_cross_origin.xml'));
+      const res = await getPkgReleases({
+        ...configV2,
+      });
+      expect(res?.releases).toEqual([{ version: '1.0.0' }]);
+      expect(logger.logger.once.warn).toHaveBeenCalledWith(
+        {
+          feedUrl: 'https://www.nuget.org/api/v2',
+          nextUrl: 'https://attacker.example.com/api/v2/steal',
+        },
+        'Ignoring cross-origin or invalid NuGet feed pagination link',
+      );
+    });
+
+    it('follows cross-origin pagination when the datasource is opted in (v2)', async () => {
+      process.env.RENOVATE_X_NUGET_PAGINATION_ALLOW_CROSS_ORIGIN = 'true';
+      httpMock
+        .scope('https://www.nuget.org')
+        .get(
+          '/api/v2/FindPackagesById()?id=%27nunit%27&$select=Version,IsLatestVersion,ProjectUrl,Published',
+        )
+        .reply(200, Fixtures.get('nunit/v2_paginated_cross_origin.xml'));
+      httpMock
+        .scope('https://attacker.example.com')
+        .get('/api/v2/steal')
+        .reply(200, pkgListV2Page2of2);
+      const res = await getPkgReleases({
+        ...configV2,
+      });
+      expect(res?.releases).toEqual([
+        { version: '1.0.0' },
+        { version: '2.0.0' },
+      ]);
+      expect(logger.logger.once.warn).toHaveBeenCalledOnce();
     });
 
     it('should return deprecated', async () => {

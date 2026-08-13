@@ -53,6 +53,12 @@ async function lookup(
   const { depName } = dep;
   // TODO: fix types
   let depConfig = mergeChildConfig(packageFileConfig, dep);
+  if (dep.extractedConstraints) {
+    depConfig.constraints = {
+      ...dep.extractedConstraints,
+      ...depConfig.constraints,
+    };
+  }
   const datasourceDefaultConfig = await getDefaultConfig(depConfig.datasource!);
   depConfig = mergeChildConfig(depConfig, datasourceDefaultConfig);
   depConfig.versioning ??= getDefaultVersioning(depConfig.datasource);

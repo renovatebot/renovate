@@ -56,6 +56,9 @@ export const toolDefinitions = [
     name: 'flux',
   },
   {
+    name: 'gh',
+  },
+  {
     name: 'gleam',
   },
   {
@@ -169,6 +172,12 @@ export function isToolName(value: unknown): value is ToolName {
  * Additional constraints that can be specified for some Managers, but are **not** tools that Containerbase supports, with optional description.
  */
 export const additionalConstraintDefinitions = [
+  {
+    name: 'ghActionsLock',
+    description: `Used in the \`github-actions\` manager to specify a release tag for the [\`github/gh-actions-lock\`](https://github.com/github/gh-actions-lock) \`gh\` CLI extension, which regenerates \`.github/workflows/actions.lock\`.
+
+Must be a full release tag, prefixed with \`v\`, such as \`v0.1.7\`. Set it to an empty string to always install the latest release.`,
+  },
   /**
    * @deprecated TODO remove in #42600
    */
@@ -229,7 +238,7 @@ Must be prefixed with \`v\`.`,
   {
     name: '%goMod',
     description:
-      'Used in the `gomod` manager to determine the [minimum version of Go required to use this module](https://go.dev/ref/mod#go-mod-file-go).\n\nNote that this is prefixed with a `%` to explicilty note that this is not a tool that Containerbase knows.',
+      'Used in the `gomod` manager to determine the [minimum version of Go required to use this module](https://go.dev/ref/mod#go-mod-file-go).\n\nNote that this is prefixed with a `%` to explicitly note that this is not a tool that Containerbase knows.',
   },
 ] as const satisfies ConstraintDefinition[];
 
@@ -292,10 +301,21 @@ export interface OutputListeners {
   stderr?: DataListener[];
 }
 
+export interface OutputWriter {
+  write(chunk: Buffer): void;
+  toString(): string;
+}
+
+export interface OutputWriters {
+  stdout?: OutputWriter;
+  stderr?: OutputWriter;
+}
+
 export interface RawExecOptions extends ExecaOptions {
   maxBuffer?: number | undefined;
   cwd?: string;
   outputListeners?: OutputListeners;
+  outputWriters?: OutputWriters;
 }
 
 export interface ExecResult {

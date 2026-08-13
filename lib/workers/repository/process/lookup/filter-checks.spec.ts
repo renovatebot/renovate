@@ -15,6 +15,7 @@ import * as _mergeConfidence from '../../../../util/merge-confidence/index.ts';
 import { toMs } from '../../../../util/pretty-time.ts';
 import type { Timestamp } from '../../../../util/timestamp.ts';
 import {
+  checkMinimumConfidence,
   filterInternalChecks,
   isMinimumConfidenceApplicable,
   isMinimumReleaseAgeApplicable,
@@ -351,7 +352,7 @@ describe('workers/repository/process/lookup/filter-checks', () => {
       minor: true,
       patch: true,
       digest: true,
-      pinDigest: false,
+      pinDigest: true,
       pin: false,
       replacement: false,
       lockFileMaintenance: false,
@@ -401,6 +402,53 @@ describe('workers/repository/process/lookup/filter-checks', () => {
 
     it('returns true for updateType=undefined', () => {
       expect(isMinimumConfidenceApplicable(undefined)).toBeTrue();
+    });
+  });
+
+  describe('.checkMinimumConfidence()', () => {
+    it('is not pending if minimumConfidence is not active', async () => {
+      mergeConfidence.isActiveConfidenceLevel.mockReturnValue(false);
+      const res = await checkMinimumConfidence(
+        { minimumConfidence: 'high' },
+        '1.0.0',
+        '1.0.1',
+        'patch',
+      );
+      expect(res).toEqual({ isPending: false });
+    });
+
+    it('is pending if the confidence level does not satisfy minimumConfidence', async () => {
+      mergeConfidence.isActiveConfidenceLevel.mockReturnValue(true);
+      mergeConfidence.getMergeConfidenceLevel.mockResolvedValueOnce('low');
+      mergeConfidence.satisfiesConfidenceLevel.mockReturnValueOnce(false);
+      const res = await checkMinimumConfidence(
+        {
+          minimumConfidence: 'high',
+          datasource: 'npm',
+          packageName: 'some-package',
+        },
+        '1.0.0',
+        '1.0.1',
+        'patch',
+      );
+      expect(res).toEqual({ isPending: true });
+    });
+
+    it('is not pending if the confidence level satisfies minimumConfidence', async () => {
+      mergeConfidence.isActiveConfidenceLevel.mockReturnValue(true);
+      mergeConfidence.getMergeConfidenceLevel.mockResolvedValueOnce('high');
+      mergeConfidence.satisfiesConfidenceLevel.mockReturnValueOnce(true);
+      const res = await checkMinimumConfidence(
+        {
+          minimumConfidence: 'high',
+          datasource: 'npm',
+          packageName: 'some-package',
+        },
+        '1.0.0',
+        '1.0.1',
+        'patch',
+      );
+      expect(res).toEqual({ isPending: false });
     });
   });
 });

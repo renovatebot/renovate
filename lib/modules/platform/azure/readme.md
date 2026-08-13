@@ -264,6 +264,9 @@ Renovate resolves the correct open and closed state names from the process for t
 When creating the work item, Renovate does not set a state, so Azure DevOps applies the default initial state of the work item type.
 If the states cannot be read (for example on older Azure DevOps Server versions), Renovate falls back to the `New` and `Closed` state names.
 
+The work item description is rendered as Markdown only on Azure DevOps Services (cloud), which is the only product that supports the work item Markdown format field.
+On Azure DevOps Server (on-premises) Renovate omits that field, so the description is stored as plain text.
+
 ### Adding tags to Pull Requests
 
 Tags can be added to Pull Requests using the `labels` or `addLabels` configurations.
