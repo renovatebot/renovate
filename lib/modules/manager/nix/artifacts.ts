@@ -31,6 +31,8 @@ export async function updateArtifacts({
     return null;
   }
 
+  // Nix reads flake.nix from the working tree, while Renovate keeps package
+  // file updates in memory until artifact generation has finished.
   await writeLocalFile(packageFileName, newPackageFileContent);
 
   let cmd = `nix --extra-experimental-features 'nix-command flakes' `;
@@ -59,7 +61,7 @@ export async function updateArtifacts({
   const execOptions: ExecOptions = {
     cwdFile: packageFileName,
     extraEnv: {
-      ...getGitEnvironmentVariables(),
+      ...getGitEnvironmentVariables({}),
       NIX_CACHE_HOME: await ensureCacheDir('nix'),
     },
     toolConstraints: [

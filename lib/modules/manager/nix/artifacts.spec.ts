@@ -39,6 +39,9 @@ const lockfileMaintenanceCmd = `nix --extra-experimental-features 'nix-command f
 
 describe('modules/manager/nix/artifacts', () => {
   beforeEach(() => {
+    fs.getSiblingFileName.mockImplementation(
+      (fileName, siblingName) => siblingName,
+    );
     env.getChildProcessEnv.mockReturnValue({
       ...envMock.basic,
       LANG: 'en_US.UTF-8',

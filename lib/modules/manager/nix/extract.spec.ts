@@ -344,7 +344,7 @@ describe('modules/manager/nix/extract', () => {
     );
   });
 
-  it('matches dependency name to node name', async () => {
+  it('skips FlakeHub inputs', async () => {
     const flakeLock = codeBlock`{
       "nodes": {
         "foobar": {
@@ -371,19 +371,94 @@ describe('modules/manager/nix/extract', () => {
       "version": 7
     }`;
     fs.readLocalFile.mockResolvedValueOnce(flakeLock);
+    expect(await extractPackageFile('', 'flake.nix')).toBeNull();
+    expect(logger.logger.debug).toHaveBeenCalledExactlyOnceWith(
+      {
+        flakeLockFile: 'flake.lock',
+        flakeInput: {
+          locked: {
+            rev: 'ff81ac966bb2cae68946d5ed5fc4994f96d0ffec',
+            type: 'tarball',
+            url: 'https://api.flakehub.com/f/pinned/edolstra/flake-compat/1.1.0/01948eb7-9cba-704f-bbf3-3fa956735b52/source.tar.gz',
+          },
+          original: {
+            type: 'tarball',
+            url: 'https://flakehub.com/f/edolstra/flake-compat/1.tar.gz',
+          },
+        },
+      },
+      'FlakeHub input is not supported, skipping',
+    );
+  });
+
+  it('uses the root input name when the lock node name differs', async () => {
+    const flakeLock = codeBlock`{
+      "nodes": {
+        "foobar": {
+          "locked": {
+            "owner": "edolstra",
+            "repo": "flake-compat",
+            "rev": "ff81ac966bb2cae68946d5ed5fc4994f96d0ffec",
+            "type": "github"
+          },
+          "original": {
+            "owner": "edolstra",
+            "repo": "flake-compat",
+            "type": "github"
+          }
+        },
+        "root": {
+          "inputs": {
+            "flake-compat": "foobar"
+          }
+        }
+      },
+      "root": "root",
+      "version": 7
+    }`;
+    fs.readLocalFile.mockResolvedValueOnce(flakeLock);
     expect(await extractPackageFile('', 'flake.nix')).toEqual({
       deps: [
         {
           currentDigest: 'ff81ac966bb2cae68946d5ed5fc4994f96d0ffec',
           datasource: GitRefsDatasource.id,
           depName: 'flake-compat',
-          packageName: 'https://flakehub.com/f/edolstra/flake-compat/1.tar.gz',
+          packageName: 'https://github.com/edolstra/flake-compat',
+          sourceUrl: 'https://github.com/edolstra/flake-compat',
         },
       ],
     });
   });
 
   describe('Git inputs', () => {
+    it('skips local file inputs', async () => {
+      const flakeLock = codeBlock`{
+        "nodes": {
+          "local": {
+            "locked": {
+              "rev": "be97b37989f11b724197b5f4c7ffd78f12c8c4bf",
+              "type": "git",
+              "url": "file:///tmp/local-flake"
+            },
+            "original": {
+              "type": "git",
+              "url": "file:///tmp/local-flake"
+            }
+          },
+          "root": {
+            "inputs": {
+              "local": "local"
+            }
+          }
+        },
+        "root": "root",
+        "version": 7
+      }`;
+      fs.readLocalFile.mockResolvedValueOnce(flakeLock);
+
+      expect(await extractPackageFile('', 'flake.nix')).toBeNull();
+    });
+
     it('supports input with ref', async () => {
       const flakeNix = codeBlock`{
         inputs = {
