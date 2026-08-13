@@ -27,7 +27,9 @@ const sectionIndexes = {
   patch: 2,
 } as const;
 
-const equals = (a: string, b: string): boolean => compare(a, b) === 0;
+function equals(a: string, b: string): boolean {
+  return compare(a, b) === 0;
+}
 
 function getMajor(version: string): number | null {
   const tokens = parse(version?.replace(regEx(/^v/i), ''));
