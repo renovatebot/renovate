@@ -12,6 +12,8 @@ import noUnquotedExecInterpolation from './rules/no-unquoted-exec-interpolation.
 import noUnvalidatedPaginationUrl from './rules/no-unvalidated-pagination-url.js';
 import preferFakeShaInSpecs from './rules/prefer-fake-sha-in-specs.js';
 import preferFsUtil from './rules/prefer-fs-util.js';
+import preferIsHelpers from './rules/prefer-is-helpers.js';
+import preferIsObject from './rules/prefer-is-object.js';
 import preferJsonPipe from './rules/prefer-json-pipe.js';
 import preferLuxon from './rules/prefer-luxon.js';
 import preferNullishUtil from './rules/prefer-nullish-util.js';
@@ -43,6 +45,8 @@ export default {
     'prefer-fs-util': preferFsUtil,
     'prefer-json-pipe': preferJsonPipe,
     'prefer-luxon': preferLuxon,
+    'prefer-is-helpers': preferIsHelpers,
+    'prefer-is-object': preferIsObject,
     'prefer-nullish-util': preferNullishUtil,
     'prefer-partial-in-specs': preferPartialInSpecs,
     'test-root-describe': testRootDescribe,
