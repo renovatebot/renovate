@@ -546,6 +546,54 @@ replace-with = "mcorbin"
       expect(res?.deps[0].packageName).toBe('boolector');
     });
 
+    it('keeps the git source as packageName for renamed git dependencies', async () => {
+      const cargotoml = codeBlock`
+        [dependencies]
+        github-tag = { package = "real-crate", git = "https://github.com/foo/bar", tag = "v1.2.3" }
+        gitlab-tag = { package = "real-crate", git = "https://gitlab.com/foo/bar", tag = "v1.2.3" }
+        other-tag = { package = "real-crate", git = "https://gitea.example.com/foo/bar", tag = "v1.2.3" }
+        rev = { package = "real-crate", git = "https://github.com/foo/bar", rev = "abcdef0" }
+        crates-io = { package = "real-crate", version = "0.4.0" }
+        `;
+
+      const res = await extractPackageFile(cargotoml, 'Cargo.toml', config);
+
+      expect(res?.deps).toMatchObject([
+        {
+          depName: 'github-tag',
+          datasource: 'github-tags',
+          packageName: 'foo/bar',
+          registryUrls: ['https://github.com'],
+          currentValue: 'v1.2.3',
+        },
+        {
+          depName: 'gitlab-tag',
+          datasource: 'gitlab-tags',
+          packageName: 'foo/bar',
+          registryUrls: ['https://gitlab.com'],
+          currentValue: 'v1.2.3',
+        },
+        {
+          depName: 'other-tag',
+          datasource: 'git-tags',
+          packageName: 'https://gitea.example.com/foo/bar',
+          currentValue: 'v1.2.3',
+        },
+        {
+          depName: 'rev',
+          datasource: 'git-refs',
+          packageName: 'https://github.com/foo/bar',
+          currentDigest: 'abcdef0',
+        },
+        {
+          depName: 'crates-io',
+          datasource: 'crate',
+          packageName: 'real-crate',
+          currentValue: '0.4.0',
+        },
+      ]);
+    });
+
     it('extracts locked versions', async () => {
       const cargolock = Fixtures.get('lockfile-update/Cargo.3.lock');
       mockReadLocalFile({ 'Cargo.lock': cargolock });

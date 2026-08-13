@@ -8,7 +8,6 @@ describe('modules/datasource/azure-tags/index', () => {
   let mockGitApi: any;
 
   beforeEach(() => {
-    vi.resetAllMocks();
     azureTags = new AzureTagsDatasource();
     mockGitApi = {
       getRefs: vi.fn(),

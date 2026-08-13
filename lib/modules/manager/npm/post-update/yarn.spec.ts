@@ -1,3 +1,4 @@
+import { codeBlock } from 'common-tags';
 import fs from 'fs-extra';
 import { mockDeep } from 'vitest-mock-extended';
 import type { ExecSnapshots } from '~test/exec-util.ts';
@@ -26,11 +27,12 @@ vi.mock('../../../datasource/index.ts', () => mockDeep());
 delete process.env.NPM_CONFIG_CACHE;
 
 // TODO: figure out snapshot similarity for each CI platform (#9617)
-const fixSnapshots = (snapshots: ExecSnapshots): ExecSnapshots =>
-  snapshots.map((snapshot) => ({
+function fixSnapshots(snapshots: ExecSnapshots): ExecSnapshots {
+  return snapshots.map((snapshot) => ({
     ...snapshot,
     cmd: snapshot.cmd.replace(/^.*\/yarn.*?\.js\s+/, '<yarn> '),
   }));
+}
 
 const plocktest1PackageJson = Fixtures.get('plocktest1/package.json', '..');
 const plocktest1YarnLockV1 = Fixtures.get('plocktest1/yarn.lock', '..');
@@ -100,7 +102,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
       expect(fs.readFile).toHaveBeenCalledTimes(expectedFsCalls);
       expect(fs.remove).toHaveBeenCalledTimes(0);
       expect(res.lockFile).toBe('package-lock-contents');
-      expect(fixSnapshots(execSnapshots)).toMatchSnapshot();
+      expect(fixSnapshots(execSnapshots)).toMatchSnapshot('exec commands');
     },
   );
 
@@ -343,7 +345,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
         },
       ]);
       expect(res.lockFile).toBe('package-lock-contents');
-      expect(fixSnapshots(execSnapshots)).toMatchSnapshot();
+      expect(fixSnapshots(execSnapshots)).toMatchSnapshot('exec commands');
     },
   );
 
@@ -367,7 +369,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
         },
       ]);
       expect(res.lockFile).toBe('package-lock-contents');
-      expect(fixSnapshots(execSnapshots)).toMatchSnapshot();
+      expect(fixSnapshots(execSnapshots)).toMatchSnapshot('exec commands');
     },
   );
 
@@ -403,7 +405,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
 
       // expected the lock file not to be deleted.
       expect(res.lockFile).toBe('');
-      expect(fixSnapshots(execSnapshots)).toMatchSnapshot();
+      expect(fixSnapshots(execSnapshots)).toMatchSnapshot('exec commands');
     },
   );
 
@@ -454,7 +456,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
       expect(vi.mocked(fs.outputFile).mock.calls[0][0]).toEndWith(
         'some-dir/sub_workspace/yarn.lock',
       );
-      expect(fixSnapshots(execSnapshots)).toMatchSnapshot();
+      expect(fixSnapshots(execSnapshots)).toMatchSnapshot('exec commands');
     },
   );
 
@@ -487,7 +489,7 @@ describe('modules/manager/npm/post-update/yarn', () => {
         },
       ]);
       expect(res.lockFile).toBe('package-lock-contents');
-      expect(fixSnapshots(execSnapshots)).toMatchSnapshot();
+      expect(fixSnapshots(execSnapshots)).toMatchSnapshot('exec commands');
     },
   );
 
@@ -554,9 +556,11 @@ describe('modules/manager/npm/post-update/yarn', () => {
       binarySource: 'install',
       cacheDir: '/tmp/cache',
     });
-    const yarnLockContents = `__metadata:
-    version: 6
-    cacheKey: 8`;
+    const yarnLockContents = codeBlock`
+      __metadata:
+          version: 6
+          cacheKey: 8
+    `;
     Fixtures.mock(
       {
         'package.json':
@@ -901,15 +905,17 @@ describe('modules/manager/npm/post-update/yarn', () => {
       {
         cmd:
           `docker run --rm --name=renovate_sidecar --label=renovate_child -v ".":"." -v "/tmp/cache":"/tmp/cache" -e CI -e CONTAINERBASE_CACHE_DIR -w "some-dir" ghcr.io/renovatebot/base-image ` +
-          `bash -l -c "` +
+          `bash -l -c '` +
           `install-tool node 16.16.0` +
           ` && ` +
           `install-tool yarn-slim 1.22.18` +
           ` && ` +
-          `sed -i 's/ steps,/ steps.slice(0,1),/' some-dir/.yarn/cli.js || true` +
+          // the preCommand's own single quotes are POSIX-escaped, since the whole
+          // command is now the single-quoted argument of `bash -l -c`
+          `sed -i '"'"'s/ steps,/ steps.slice(0,1),/'"'"' some-dir/.yarn/cli.js || true` +
           ` && ` +
           `yarn install --ignore-engines --ignore-platform --network-timeout 100000 --ignore-scripts` +
-          `"`,
+          `'`,
         options: { ...options, cwd: 'some-dir' },
       },
     ]);

@@ -165,7 +165,7 @@ function getSatisfyingVersion(
     return null;
   }
 
-  return satisfiedVersions[satisfiedVersions.length - 1][1];
+  return satisfiedVersions.at(-1)![1];
 }
 
 function minSatisfyingVersion(

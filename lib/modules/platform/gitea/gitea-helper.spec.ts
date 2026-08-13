@@ -1,7 +1,6 @@
 import * as httpMock from '~test/http-mock.ts';
-import { logger, partial } from '~test/util.ts';
+import { fakeSha, logger, partial } from '~test/util.ts';
 import { setBaseUrl } from '../../../util/http/gitea.ts';
-import type { LongCommitSha } from '../../../util/schema-utils/git.ts';
 import { toBase64 } from '../../../util/string.ts';
 import {
   closeIssue,
@@ -52,8 +51,7 @@ describe('modules/platform/gitea/gitea-helper', () => {
   const giteaApiHost = 'https://gitea.renovatebot.com/';
   const baseUrl = `${giteaApiHost}api/v1`;
 
-  const mockCommitHash =
-    '0d9c7726c3d628b7e28af234595cfd20febdbf8e' as LongCommitSha;
+  const mockCommitHash = fakeSha('mockCommitHash');
 
   const mockUser: User = {
     id: 1,
@@ -251,7 +249,9 @@ describe('modules/platform/gitea/gitea-helper', () => {
         data: [],
       });
 
-      await expect(searchRepos({})).rejects.toThrow();
+      await expect(searchRepos({})).rejects.toThrow(
+        'Unable to search for repositories, ok flag has not been set',
+      );
     });
   });
 

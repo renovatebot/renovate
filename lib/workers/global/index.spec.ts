@@ -46,6 +46,8 @@ describe('workers/global/index', () => {
     initPlatform.mockImplementation((input) => Promise.resolve(input));
     delete process.env.AWS_SECRET_ACCESS_KEY;
     delete process.env.AWS_SESSION_TOKEN;
+    delete process.env.COREPACK_NPM_TOKEN;
+    delete process.env.COREPACK_NPM_PASSWORD;
   });
 
   describe('getRepositoryConfig', () => {
@@ -153,8 +155,10 @@ describe('workers/global/index', () => {
     });
     process.env.AWS_SECRET_ACCESS_KEY = 'key';
     process.env.AWS_SESSION_TOKEN = 'token';
+    process.env.COREPACK_NPM_TOKEN = 'corepack-token';
+    process.env.COREPACK_NPM_PASSWORD = 'corepack-password';
     await expect(globalWorker.start()).resolves.toBe(0);
-    expect(addSecretForSanitizing).toHaveBeenCalledTimes(2);
+    expect(addSecretForSanitizing).toHaveBeenCalledTimes(4);
   });
 
   it('handles zero repos', async () => {

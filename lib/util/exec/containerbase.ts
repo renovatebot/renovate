@@ -79,6 +79,11 @@ export const allToolConfig: Record<ToolName, ToolConfig> = {
     packageName: 'fluxcd/flux2',
     versioning: 'semver',
   },
+  gh: {
+    datasource: 'github-releases',
+    packageName: 'cli/cli',
+    versioning: 'semver',
+  },
   gleam: {
     datasource: 'github-releases',
     packageName: 'gleam-lang/gleam',
@@ -289,10 +294,8 @@ function isStable(
   if (!versioningApi.isStable(version)) {
     return false;
   }
-  if (isString(latest)) {
-    if (versioningApi.isGreaterThan(version, latest)) {
-      return false;
-    }
+  if (isString(latest) && versioningApi.isGreaterThan(version, latest)) {
+    return false;
   }
   return true;
 }

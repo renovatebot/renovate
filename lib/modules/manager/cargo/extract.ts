@@ -88,12 +88,11 @@ async function readCargoConfig(): Promise<CargoConfig | null> {
       const parsedCargoConfig = CargoConfig.safeParse(payload);
       if (parsedCargoConfig.success) {
         return parsedCargoConfig.data;
-      } else {
-        logger.debug(
-          { err: parsedCargoConfig.error, path },
-          `Error parsing cargo config`,
-        );
       }
+      logger.debug(
+        { err: parsedCargoConfig.error, path },
+        `Error parsing cargo config`,
+      );
     }
   }
 
@@ -155,15 +154,13 @@ function resolveRegistryIndex(
   const registryIndex = config.registries?.[registryName]?.index;
   if (registryIndex) {
     return registryIndex;
-  } else {
-    // we don't need an explicit index if we're using the default registry
-    if (registryName === DEFAULT_REGISTRY_ID) {
-      return DEFAULT_REGISTRY_URL;
-    } else {
-      logger.debug(`${registryName} cargo registry is missing index`);
-      return null;
-    }
   }
+  // we don't need an explicit index if we're using the default registry
+  if (registryName === DEFAULT_REGISTRY_ID) {
+    return DEFAULT_REGISTRY_URL;
+  }
+  logger.debug(`${registryName} cargo registry is missing index`);
+  return null;
 }
 
 export async function extractPackageFile(
