@@ -1,4 +1,4 @@
-import { isString } from '@sindresorhus/is';
+import { isString, isTruthy } from '@sindresorhus/is';
 import moo from 'moo';
 import * as memCache from '../../../util/cache/memory/index.ts';
 import { getEnv } from '../../../util/env.ts';
@@ -41,7 +41,7 @@ export function parseGoproxy(
     }))
     // Empty segments (`a||b`, `,a`) carry no url to query, and keeping them
     // would apply their separator as the fallback strategy for a bogus request
-    .filter(({ url }) => url !== '');
+    .filter(({ url }) => isTruthy(url));
 
   memCache.set(cacheKey, result);
   return result;
