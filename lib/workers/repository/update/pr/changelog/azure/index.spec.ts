@@ -559,20 +559,19 @@ describe('workers/repository/update/pr/changelog/azure/index', () => {
     });
 
     describe('getRepositoryFromUrl', () => {
-      it('extracts repository name from Azure URLs correctly', () => {
-        const testCases = [
-          // Format: [sourceUrl, expectedRepoName]
-          ['https://dev.azure.com/org/project/_git/repo', 'repo'],
-          [
-            'https://dev.azure.com/org/project/_git/complex-repo-name',
-            'complex-repo-name',
-          ],
-          ['https://dev.azure.com/org/project/_git/nested/repo', 'repo'],
-          ['https://dev.azure.com/org/multi/level/project/_git/repo', 'repo'],
-          ['https://dev.azure.com/org/project/_git/repo/', 'repo'],
-        ];
-
-        for (const [sourceUrl, expectedRepo] of testCases) {
+      it.each<[string, string]>([
+        // Format: [sourceUrl, expectedRepoName]
+        ['https://dev.azure.com/org/project/_git/repo', 'repo'],
+        [
+          'https://dev.azure.com/org/project/_git/complex-repo-name',
+          'complex-repo-name',
+        ],
+        ['https://dev.azure.com/org/project/_git/nested/repo', 'repo'],
+        ['https://dev.azure.com/org/multi/level/project/_git/repo', 'repo'],
+        ['https://dev.azure.com/org/project/_git/repo/', 'repo'],
+      ])(
+        'extracts repository name from Azure URLs correctly for %s',
+        (sourceUrl, expectedRepo) => {
           const config = partial<BranchUpgradeConfig>({
             sourceUrl,
           });
@@ -580,8 +579,8 @@ describe('workers/repository/update/pr/changelog/azure/index', () => {
           expect(changelogSource.getRepositoryFromUrl(config)).toBe(
             expectedRepo,
           );
-        }
-      });
+        },
+      );
     });
   });
 });
