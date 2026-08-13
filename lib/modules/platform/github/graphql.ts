@@ -73,18 +73,7 @@ export const prIsInMergeQueueQuery = `
 query($owner: String!, $name: String!, $number: Int!) {
   repository(owner: $owner, name: $name) {
     pullRequest(number: $number) {
-      id
       isInMergeQueue
-    }
-  }
-}
-`;
-
-export const dequeuePullRequestMutation = `
-mutation DequeuePullRequest($pullRequestId: ID!) {
-  dequeuePullRequest(input: { id: $pullRequestId }) {
-    mergeQueueEntry {
-      id
     }
   }
 }

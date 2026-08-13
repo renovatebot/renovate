@@ -10,6 +10,7 @@ import type {
 } from '../../../../config/types.ts';
 import {
   MANAGER_LOCKFILE_ERROR,
+  PR_ALREADY_IN_MERGE_QUEUE,
   REPOSITORY_CHANGED,
 } from '../../../../constants/error-messages.ts';
 import { logger } from '../../../../logger/index.ts';
@@ -1756,6 +1757,32 @@ describe('workers/repository/update/branch/index', () => {
         prNo: undefined,
         result: 'error',
       });
+    });
+
+    it('returns when the branch PR is in the merge queue', async () => {
+      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce(
+        partial<PackageFilesResult>({
+          updatedPackageFiles: [partial<FileChange>()],
+        }),
+      );
+      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+        artifactErrors: [],
+        updatedArtifacts: [partial<FileChange>()],
+      });
+      scm.branchExists.mockResolvedValue(true);
+      commit.commitFilesToBranch.mockRejectedValueOnce(
+        new Error(PR_ALREADY_IN_MERGE_QUEUE),
+      );
+      const processBranchResult = await branchWorker.processBranch(config);
+      expect(processBranchResult).toEqual({
+        branchExists: true,
+        commitSha: null,
+        prNo: undefined,
+        result: 'done',
+      });
+      expect(logger.debug).toHaveBeenCalledWith(
+        'Branch PR is in the merge queue - skipping branch update',
+      );
     });
 
     it('throws and swallows branch errors', async () => {

@@ -6,6 +6,7 @@ import {
   PLATFORM_INTEGRATION_UNAUTHORIZED,
   PLATFORM_RATE_LIMIT_EXCEEDED,
   PLATFORM_UNKNOWN_ERROR,
+  PR_ALREADY_IN_MERGE_QUEUE,
   REPOSITORY_ACCESS_FORBIDDEN,
   REPOSITORY_ARCHIVED,
   REPOSITORY_BLOCKED,
@@ -83,7 +84,7 @@ import {
 } from './graphql.ts';
 import { GithubIssueCache } from './issue.ts';
 import { massageMarkdownLinks } from './massage-markdown-links.ts';
-import { dequeuePr, getPrCache, updatePrCache } from './pr.ts';
+import { getPrCache, isPrInMergeQueue, updatePrCache } from './pr.ts';
 import {
   GithubBranchProtection,
   GithubBranchRulesets,
@@ -1974,7 +1975,9 @@ export async function createPr({
   return result;
 }
 
-export async function tryDequeuePr(branchName: string): Promise<void> {
+export async function assertPrNotInMergeQueue(
+  branchName: string,
+): Promise<void> {
   // TODO #22198
   // semver not null safe, accepts null and undefined
   if (
@@ -1990,12 +1993,17 @@ export async function tryDequeuePr(branchName: string): Promise<void> {
     return;
   }
 
-  await dequeuePr(
-    githubApi,
-    config.repositoryOwner,
-    config.repositoryName,
-    pr.number,
-  );
+  if (
+    await isPrInMergeQueue(
+      githubApi,
+      config.repositoryOwner,
+      config.repositoryName,
+      pr.number,
+    )
+  ) {
+    logger.debug(`PR #${pr.number} is in the merge queue - aborting push`);
+    throw new Error(PR_ALREADY_IN_MERGE_QUEUE);
+  }
 }
 
 export async function updatePr({

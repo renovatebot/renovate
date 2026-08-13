@@ -9,6 +9,7 @@ import {
   CONFIG_GIT_URL_UNAVAILABLE,
   PLATFORM_RATE_LIMIT_EXCEEDED,
   PLATFORM_UNKNOWN_ERROR,
+  PR_ALREADY_IN_MERGE_QUEUE,
   REPOSITORY_CANNOT_FORK,
   REPOSITORY_FORKED,
   REPOSITORY_FORK_MISSING,
@@ -4645,7 +4646,7 @@ describe('modules/platform/github/index', () => {
     });
   });
 
-  describe('tryDequeuePr()', () => {
+  describe('assertPrNotInMergeQueue()', () => {
     const prList = [
       {
         number: 1234,
@@ -4672,7 +4673,7 @@ describe('modules/platform/github/index', () => {
       scope.post('/graphql').reply(200, {
         data: {
           repository: {
-            pullRequest: { id: 'abcd', isInMergeQueue },
+            pullRequest: { isInMergeQueue },
           },
         },
       });
@@ -4684,7 +4685,7 @@ describe('modules/platform/github/index', () => {
       await github.initRepo({ repository: 'some/repo' });
       prListMock(scope, []);
 
-      await expect(github.tryDequeuePr('somebranch')).toResolve();
+      await expect(github.assertPrNotInMergeQueue('somebranch')).toResolve();
     });
 
     it('does nothing if the PR is not in the merge queue', async () => {
@@ -4694,41 +4695,22 @@ describe('modules/platform/github/index', () => {
       prListMock(scope);
       mergeQueueCheckMock(scope);
 
-      await expect(github.tryDequeuePr('somebranch')).toResolve();
+      await expect(github.assertPrNotInMergeQueue('somebranch')).toResolve();
     });
 
-    it('dequeues a queued PR', async () => {
+    it('throws if the PR is in the merge queue', async () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
       await github.initRepo({ repository: 'some/repo' });
       prListMock(scope);
       mergeQueueCheckMock(scope, true);
-      scope.post('/graphql').reply(200, {
-        data: { dequeuePullRequest: { mergeQueueEntry: { id: 'efgh' } } },
-      });
 
-      await expect(github.tryDequeuePr('somebranch')).toResolve();
-
-      expect(logger.logger.debug).toHaveBeenCalledWith(
-        'PR #1234 is in the merge queue - dequeueing before push',
-      );
-    });
-
-    it('logs if dequeue returns errors', async () => {
-      const scope = httpMock.scope(githubApiHost);
-      initRepoMock(scope, 'some/repo');
-      await github.initRepo({ repository: 'some/repo' });
-      prListMock(scope);
-      mergeQueueCheckMock(scope, true);
-      scope
-        .post('/graphql')
-        .reply(200, { errors: [{ message: 'some error' }] });
-
-      await expect(github.tryDequeuePr('somebranch')).toResolve();
+      await expect(
+        github.assertPrNotInMergeQueue('somebranch'),
+      ).rejects.toThrow(PR_ALREADY_IN_MERGE_QUEUE);
 
       expect(logger.logger.debug).toHaveBeenCalledWith(
-        { prNo: 1234, errors: [{ message: 'some error' }] },
-        'Failed to dequeue PR from merge queue',
+        'PR #1234 is in the merge queue - aborting push',
       );
     });
 
@@ -4741,7 +4723,7 @@ describe('modules/platform/github/index', () => {
         .post('/graphql')
         .reply(200, { errors: [{ message: 'some error' }] });
 
-      await expect(github.tryDequeuePr('somebranch')).toResolve();
+      await expect(github.assertPrNotInMergeQueue('somebranch')).toResolve();
 
       expect(logger.logger.debug).toHaveBeenCalledWith(
         { prNo: 1234, errors: [{ message: 'some error' }] },
@@ -4756,7 +4738,7 @@ describe('modules/platform/github/index', () => {
       prListMock(scope);
       scope.post('/graphql').reply(500);
 
-      await expect(github.tryDequeuePr('somebranch')).toResolve();
+      await expect(github.assertPrNotInMergeQueue('somebranch')).toResolve();
     });
 
     it('skips merge queue check on GHE <3.12.0', async () => {
@@ -4775,7 +4757,7 @@ describe('modules/platform/github/index', () => {
       });
       await github.initRepo({ repository: 'some/repo' });
 
-      await expect(github.tryDequeuePr('somebranch')).toResolve();
+      await expect(github.assertPrNotInMergeQueue('somebranch')).toResolve();
     });
   });
 
