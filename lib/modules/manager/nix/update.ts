@@ -103,13 +103,9 @@ function updateUrl(
   }
 
   if (queryModified) {
-    newUrl = updatedUrl.toString();
-    const queryStart = newUrl.indexOf('?');
-    if (queryStart !== -1) {
-      newUrl =
-        newUrl.slice(0, queryStart) +
-        newUrl.slice(queryStart).replace(/%2F/g, '/');
-    }
+    const query = updatedUrl.search.replace(/%2F/g, '/');
+    updatedUrl.search = '';
+    newUrl = `${updatedUrl.toString()}${query}`;
   }
 
   return newUrl;
