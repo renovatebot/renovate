@@ -236,10 +236,11 @@ export function encodeUrlPathSegments(inputUrl: string): string {
   // as usual.
   url.pathname = url.pathname
     .split('/')
-    .map((segment) => {
-      const sanitized = segment.replace(invalidPercentEncoding, '%25');
-      return encodeURIComponent(decodeURIComponent(sanitized));
-    })
+    .map((segment) =>
+      encodeURIComponent(
+        decodeURIComponent(segment.replace(invalidPercentEncoding, '%25')),
+      ),
+    )
     .join('/');
 
   return url.toString();
