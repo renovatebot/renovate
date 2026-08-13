@@ -21,14 +21,6 @@ export default {
     },
   },
   create(context) {
-    const filename = context.filename ?? context.physicalFilename ?? '';
-    if (
-      !filename.includes('/lib/') ||
-      filename.endsWith('.spec.ts') ||
-      filename.includes('/lib/util/exec/')
-    ) {
-      return {};
-    }
     return {
       Property(node) {
         if (node.parent.type !== 'ObjectExpression') {

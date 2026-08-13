@@ -1,7 +1,8 @@
-import { regEx } from '../../../util/regex.ts';
 /**
  * @fileoverview Contains classes that represent a Bazel module version.
  */
+import { isString } from '@sindresorhus/is';
+import { regEx } from '../../../util/regex.ts';
 
 /**
  * Represents a single value in a VersionPart. For example, the version string
@@ -81,7 +82,7 @@ export class VersionPart extends Array<Identifier> {
    */
   static create(...items: (Identifier | string)[]): VersionPart {
     const idents = items.map((item) => {
-      if (typeof item === 'string') {
+      if (isString(item)) {
         return new Identifier(item);
       }
       return item;

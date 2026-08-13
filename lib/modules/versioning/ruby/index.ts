@@ -6,6 +6,7 @@ import {
   satisfies,
   valid,
 } from '@renovatebot/ruby-semver';
+import { isString } from '@sindresorhus/is';
 import { logger } from '../../../logger/index.ts';
 import type { RangeStrategy } from '../../../types/versioning.ts';
 import { regEx } from '../../../util/regex.ts';
@@ -30,7 +31,7 @@ export const supportedRangeStrategies: RangeStrategy[] = [
 ];
 
 function vtrim<T = unknown>(version: T): string | T {
-  if (typeof version === 'string') {
+  if (isString(version)) {
     return version.replace(regEx(/^v/), '').replace(regEx(/('|")/g), '');
   }
   return version;

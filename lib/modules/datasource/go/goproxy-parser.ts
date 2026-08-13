@@ -33,7 +33,7 @@ export function parseGoproxy(
 
   const result: GoproxyItem[] = input
     .split(regEx(/([^,|]*(?:,|\|))/))
-    .filter(Boolean)
+    .filter(isTruthy)
     .map((s) => s.split(regEx(/(,|\|)/)))
     // Empty segments (`a||b`, `,a`) carry no url to query, and keeping them
     // would apply their separator as the fallback strategy for a bogus request
