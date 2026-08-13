@@ -1956,7 +1956,7 @@ describe('modules/platform/forgejo/index', () => {
 
       expect(logger.logger.debug).toHaveBeenCalledWith(
         expect.objectContaining({ prNumber: 42 }),
-        'Forgejo-native automerge: not supported on this version of Forgejo. Use 10.0.0 or newer.',
+        'Forgejo-native automerge: not supported on this version of Forgejo. Use 10.0.0 or newer',
       );
     });
 
@@ -2217,7 +2217,7 @@ describe('modules/platform/forgejo/index', () => {
       ).toResolve();
 
       expect(logger.logger.warn).toHaveBeenCalledWith(
-        'Some labels could not be looked up. Renovate may halt label updates assuming changes by others.',
+        'Some labels could not be looked up. Renovate may halt label updates assuming changes by others',
       );
     });
   });

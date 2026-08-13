@@ -12,7 +12,7 @@ describe('modules/manager/npm/update/dependency/pnpm', () => {
       ),
     ).toBeNull();
     expect(logger.logger.error).toHaveBeenCalledExactlyOnceWith(
-      'No catalogName or override was found; this is likely an extraction error.',
+      'No catalogName or override was found; this is likely an extraction error',
     );
   });
 

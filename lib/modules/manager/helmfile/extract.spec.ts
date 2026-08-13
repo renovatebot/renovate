@@ -559,7 +559,7 @@ describe('modules/manager/helmfile/extract', () => {
           },
           packageFile: 'helmfile.yaml',
         },
-        'Skipping unsupported helm-git repository.',
+        'Skipping unsupported helm-git repository',
       );
       expect(result).toMatchObject({
         datasource: 'helm',

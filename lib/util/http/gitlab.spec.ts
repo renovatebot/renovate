@@ -97,7 +97,7 @@ describe('util/http/gitlab', () => {
         requestHost: 'gitlab.com',
         paginationHost: 'other.host.com',
       },
-      'Ignoring cross-origin GitLab pagination link. Set GITLAB_IGNORE_REPO_URL if this is a self-hosted instance that returns a different host in pagination links.',
+      'Ignoring cross-origin GitLab pagination link. Set GITLAB_IGNORE_REPO_URL if this is a self-hosted instance that returns a different host in pagination links',
     );
   });
 

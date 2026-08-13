@@ -4111,7 +4111,7 @@ describe('modules/platform/github/index', () => {
 
         expect(logger.logger.debug).toHaveBeenCalledWith(
           { prNumber: 123 },
-          'GitHub-native automerge: not supported on this version of GHE. Use 3.3.0 or newer.',
+          'GitHub-native automerge: not supported on this version of GHE. Use 3.3.0 or newer',
         );
       });
 
@@ -4987,7 +4987,7 @@ describe('modules/platform/github/index', () => {
       expect(mergeResult).toBeTrue();
 
       expect(logger.logger.warn).toHaveBeenCalledWith(
-        'Fast-forward merge strategy is not supported by Github. Falling back to merge strategy set for the repository.',
+        'Fast-forward merge strategy is not supported by Github. Falling back to merge strategy set for the repository',
       );
     });
 

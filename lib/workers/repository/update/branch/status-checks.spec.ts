@@ -83,7 +83,7 @@ describe('workers/repository/update/branch/status-checks', () => {
       });
 
       expect(logger.debug).toHaveBeenCalledWith(
-        'Status check is null or an empty string, skipping status check addition.',
+        'Status check is null or an empty string, skipping status check addition',
       );
       expect(platform.setBranchStatus).not.toHaveBeenCalled();
     });
@@ -98,7 +98,7 @@ describe('workers/repository/update/branch/status-checks', () => {
       });
 
       expect(logger.debug).toHaveBeenCalledWith(
-        'Status check is null or an empty string, skipping status check addition.',
+        'Status check is null or an empty string, skipping status check addition',
       );
       expect(platform.setBranchStatus).not.toHaveBeenCalled();
     });
@@ -111,7 +111,7 @@ describe('workers/repository/update/branch/status-checks', () => {
       });
 
       expect(logger.debug).toHaveBeenCalledWith(
-        'Status check is null or an empty string, skipping status check addition.',
+        'Status check is null or an empty string, skipping status check addition',
       );
       expect(platform.setBranchStatus).not.toHaveBeenCalled();
     });
@@ -240,7 +240,7 @@ describe('workers/repository/update/branch/status-checks', () => {
       });
 
       expect(logger.debug).toHaveBeenCalledWith(
-        'Status check is null or an empty string, skipping status check addition.',
+        'Status check is null or an empty string, skipping status check addition',
       );
       expect(platform.setBranchStatus).not.toHaveBeenCalled();
     });
@@ -256,7 +256,7 @@ describe('workers/repository/update/branch/status-checks', () => {
       });
 
       expect(logger.debug).toHaveBeenCalledWith(
-        'Status check is null or an empty string, skipping status check addition.',
+        'Status check is null or an empty string, skipping status check addition',
       );
       expect(platform.setBranchStatus).not.toHaveBeenCalled();
     });
@@ -270,7 +270,7 @@ describe('workers/repository/update/branch/status-checks', () => {
       });
 
       expect(logger.debug).toHaveBeenCalledWith(
-        'Status check is null or an empty string, skipping status check addition.',
+        'Status check is null or an empty string, skipping status check addition',
       );
       expect(platform.setBranchStatus).not.toHaveBeenCalled();
     });
