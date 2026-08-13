@@ -5,7 +5,7 @@ description: Java versions support in Renovate
 
 # Java Dependency Updates
 
-Renovate can update Gradle and Maven dependencies.
+Renovate can update Gradle, Maven, and Ant dependencies.
 This includes libraries and plugins as well as the Gradle Wrapper.
 
 ## LTS releases
@@ -36,6 +36,7 @@ Renovate can update:
 - `*.versions.toml` files in any directory or `*.toml` files inside the `gradle`
   directory ([Gradle Version Catalogs docs](https://docs.gradle.org/current/userguide/platforms.html))
 - `versions.props` and `versions.lock` from the [gradle-consistent-versions](https://github.com/palantir/gradle-consistent-versions) plugin
+- `gradle/verification-metadata.xml` signatures and checksums for [dependency verification](./modules/manager/gradle/index.md#dependency-verification)
 
 Renovate does not support:
 
@@ -199,9 +200,13 @@ To avoid JSON-in-JSON wrapping, which can cause problems, encode the JSON servic
 
    ```json
    {
-     "matchManagers": ["maven", "gradle"],
-     "registryUrls": [
-       "https://europe-maven.pkg.dev/<my-gcp-project>/<my-repository>"
+     "packageRules": [
+       {
+         "matchManagers": ["maven", "gradle"],
+         "registryUrls": [
+           "https://europe-maven.pkg.dev/<my-gcp-project>/<my-repository>"
+         ]
+       }
      ]
    }
    ```

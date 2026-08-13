@@ -33,11 +33,12 @@ import {
 import { isGradleBuildFile } from './utils.ts';
 
 export function isGradleExecutionAllowed(command: string): boolean {
-  const allowlist = GlobalConfig.get('allowedUnsafeExecutions', []);
+  const allowlist = GlobalConfig.get('allowedUnsafeExecutions');
 
   if (!allowlist.includes('gradleWrapper')) {
     logger.once.warn(
-      `Gradle wrapper command, \`${command}\`, was requested to run, but \`gradleWrapper\` is not permitted in the allowedUnsafeExecutions`,
+      { command },
+      'Gradle wrapper command was requested to run, but `gradleWrapper` is not permitted in the allowedUnsafeExecutions',
     );
     return false;
   }
@@ -286,7 +287,7 @@ export async function updateArtifacts({
     return [
       {
         artifactError: {
-          lockFile: packageFileName,
+          fileName: packageFileName,
           stderr: err.message,
         },
       },

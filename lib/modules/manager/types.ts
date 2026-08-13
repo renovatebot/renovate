@@ -1,7 +1,7 @@
 import type { ReleaseType } from 'semver';
 import type {
   MatchStringsStrategy,
-  ToolSettingsOptions,
+  RepoToolSettingsOptions,
   UpdateType,
   ValidationMessage,
 } from '../../config/types.ts';
@@ -9,10 +9,15 @@ import type { Category } from '../../constants/index.ts';
 import type {
   MaybePromise,
   ModuleApi,
+  Nullish,
   RangeStrategy,
   SkipReason,
   StageName,
 } from '../../types/index.ts';
+import type {
+  AdditionalConstraintName,
+  ConstraintName,
+} from '../../util/exec/types.ts';
 import type { FileChange } from '../../util/git/types.ts';
 import type { MergeConfidence } from '../../util/merge-confidence/types.ts';
 import type { Timestamp } from '../../util/timestamp.ts';
@@ -30,12 +35,12 @@ export interface ExtractConfig extends CustomExtractConfig {
   skipInstalls?: boolean | null;
   repository?: string;
   currentDigest?: string;
-  newDigest?: string;
+  newDigest?: string | null;
 }
 
 export interface UpdateArtifactsConfig {
   isLockFileMaintenance?: boolean;
-  constraints?: Record<string, string>;
+  constraints?: Partial<Record<ConstraintName, string>>;
   composerIgnorePlatformReqs?: string[];
   goGetDirs?: string[];
   currentValue?: string;
@@ -49,7 +54,7 @@ export interface UpdateArtifactsConfig {
   registryAliases?: Record<string, string>;
   skipArtifactsUpdate?: boolean;
   lockFiles?: string[];
-  toolSettings?: ToolSettingsOptions;
+  toolSettings?: RepoToolSettingsOptions;
 }
 
 export interface RangeConfig<T = Record<string, any>> extends ManagerData<T> {
@@ -64,11 +69,15 @@ export interface PackageFileContent<
   T = Record<string, any>,
 > extends ManagerData<T> {
   autoReplaceStringTemplate?: string;
-  extractedConstraints?: Record<string, string>;
+  extractedConstraints?: Partial<Record<ConstraintName, string>>;
+  /**
+   * Any specific overrides for the versioning for the `AdditionalConstraintName`s.
+   */
+  constraintsVersioning?: Partial<Record<AdditionalConstraintName, string>>;
   datasource?: string;
   registryUrls?: string[];
   additionalRegistryUrls?: string[];
-  deps: PackageDependency[];
+  deps: PackageDependency<T>[];
   lockFiles?: string[];
   npmrc?: string;
   packageFileVersion?: string;
@@ -97,7 +106,7 @@ export interface LookupUpdate {
   isReplacement?: boolean;
   isSingleVersion?: boolean;
   isVulnerabilityAlert?: boolean;
-  newDigest?: string;
+  newDigest?: string | null;
   newMajor?: number;
   newMinor?: number;
   newPatch?: number;
@@ -125,6 +134,14 @@ export interface LookupUpdate {
   libYears?: number;
 
   version?: string;
+  /**
+   * Whether the package registry has attestation information for the given update.
+   *
+   * Renovate does NOT validate the attestation, only determine whether the field is present and set to a value.
+   */
+  hasAttestation?: boolean;
+
+  prBodyNotes?: string[];
 }
 
 /**
@@ -133,11 +150,12 @@ export interface LookupUpdate {
  */
 export interface PackageDependency<
   T = Record<string, any>,
+  DepType extends string = string,
 > extends ManagerData<T> {
   currentValue?: string | null;
   currentDigest?: string;
   depName?: string;
-  depType?: string;
+  depType?: DepType;
   fileReplacePosition?: number;
   sharedVariableName?: string;
   lineNumber?: number;
@@ -162,6 +180,13 @@ export interface PackageDependency<
   datasource?: string;
   deprecationMessage?: string;
   digestOneAndOnly?: boolean;
+  /**
+   * The digest for this dependency is managed externally (for instance in a lockfile) instead of alongside the package file's version,
+   * so Renovate must not pin the digest inline.
+   *
+   * As this is due to the package ecossytem/manager in use, this shouldn't be overridable by `packageRules`
+   */
+  digestManagedExternally?: boolean;
   fixedVersion?: string;
   currentVersion?: string;
   currentVersionTimestamp?: string;
@@ -190,9 +215,19 @@ export interface PackageDependency<
 
   mostRecentTimestamp?: Timestamp;
   isAbandoned?: boolean;
+  extractedConstraints?: Partial<Record<ConstraintName, string>>;
+  /**
+   * Whether the package registry has attestation information for the given update.
+   *
+   * Renovate does NOT validate the attestation, only determine whether the field is present and set to a value.
+   */
+  hasAttestation?: boolean;
 }
 
-export interface Upgrade<T = Record<string, any>> extends PackageDependency<T> {
+export interface Upgrade<
+  T = Record<string, any>,
+  DepType extends string = string,
+> extends PackageDependency<T, DepType> {
   workspace?: string;
   isLockfileUpdate?: boolean;
   currentRawValue?: any;
@@ -200,7 +235,7 @@ export interface Upgrade<T = Record<string, any>> extends PackageDependency<T> {
   lockFiles?: string[];
   manager?: string;
   name?: string;
-  newDigest?: string;
+  newDigest?: string | null;
   newFrom?: string;
   newMajor?: number;
   newName?: string;
@@ -227,7 +262,6 @@ export interface ArtifactNotice {
 
 export interface ArtifactError {
   fileName?: string;
-  lockFile?: string;
   stderr?: string;
 }
 
@@ -252,6 +286,7 @@ export interface UpdateArtifact<T = Record<string, unknown>> {
 
 export interface UpdateDependencyConfig<T = Record<string, any>> {
   fileContent: string;
+  packageFile: string;
   upgrade: Upgrade<T>;
 }
 
@@ -281,11 +316,40 @@ export interface GlobalManagerConfig {
   npmrcMerge?: boolean;
 }
 
+export interface DepTypeMetadata {
+  /**
+   * The raw depType set on a given PackageDependency
+   *
+   * @see PackageDependency
+   */
+  depType: string;
+  /**
+   * An alternate name for the `depType`, derived from the Manager's `prettyDepType` used.
+   *
+   * For instance, `optionalDependencies` may have a `prettyDepType` of `optionalDependency`
+   *
+   * Not supported by all Managers.
+   * */
+  prettyDepType?: string;
+  /** Human-readable description of what this depType represents */
+  description: string;
+}
+
 interface ManagerApiBase extends ModuleApi {
   defaultConfig: Record<string, unknown>;
 
   categories?: Category[];
+  knownDepTypes?: readonly DepTypeMetadata[];
+  /** Markdown note about dynamically generated depTypes not covered by `knownDepTypes` */
+  supportsDynamicDepTypesNote?: string;
   supportsLockFileMaintenance?: boolean;
+  /**
+   * Whether Renovate delegates to external command(s)/package manager to perform lockFileMaintenance.
+   * A `string` value is a Markdown note describing the nuance of the support, e.g. when it's partial
+   * or conditional, instead of a plain `true`/`false`.
+   */
+  lockFileMaintenanceIsDelegatedToPackageManager?: boolean | string;
+
   lockFileNames?: string[];
   supersedesManagers?: string[];
   supportedDatasources: string[];
@@ -329,13 +393,23 @@ export type ManagerApi = ManagerApiBase &
   // this ensures at compile time that lockFileNames are set when manager has supportsLockFileMaintenance=true
   (| { supportsLockFileMaintenance: true; lockFileNames: string[] }
     | { supportsLockFileMaintenance?: false; lockFileNames?: string[] }
+  ) &
+  // this ensures at compile time that lockFileMaintenanceIsDelegatedToPackageManager is set when manager has supportsLockFileMaintenance=true
+  (| {
+        supportsLockFileMaintenance: true;
+        lockFileMaintenanceIsDelegatedToPackageManager: boolean | string;
+      }
+    | {
+        supportsLockFileMaintenance?: false;
+        lockFileMaintenanceIsDelegatedToPackageManager?: boolean | string;
+      }
   );
 
 // TODO: name and properties used by npm manager
 export interface PostUpdateConfig<T = Record<string, any>>
   extends Record<string, any>, ManagerData<T> {
   // TODO: remove null
-  constraints?: Record<string, string> | null;
+  constraints?: Partial<Record<ConstraintName, string>> | null;
   updatedPackageFiles?: FileChange[];
   postUpdateOptions?: string[];
   skipArtifactsUpdate?: boolean;
@@ -349,7 +423,8 @@ export interface PostUpdateConfig<T = Record<string, any>>
   yarnLock?: string;
   branchName: string;
   reuseExistingBranch?: boolean;
-  toolSettings?: ToolSettingsOptions;
+  toolSettings?: RepoToolSettingsOptions;
 
+  minimumReleaseAge?: Nullish<string>;
   isLockFileMaintenance?: boolean;
 }

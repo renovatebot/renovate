@@ -5,7 +5,10 @@ import { envMock, mockExecAll, mockExecSequence } from '~test/exec-util.ts';
 import { Fixtures } from '~test/fixtures.ts';
 import { env, fs, git, partial } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
-import type { RepoGlobalConfig } from '../../../config/types.ts';
+import type {
+  InternalGlobalConfigOptions,
+  RepoGlobalConfig,
+} from '../../../config/types.ts';
 import { logger } from '../../../logger/index.ts';
 import * as docker from '../../../util/exec/docker/index.ts';
 import type { StatusResult } from '../../../util/git/types.ts';
@@ -19,7 +22,6 @@ const datasource = vi.mocked(_datasource);
 
 vi.mock('../../../util/exec/env.ts');
 vi.mock('../../../util/fs/index.ts');
-vi.mock('../../../util/host-rules.ts', () => mockDeep());
 vi.mock('../../../util/http/index.ts');
 vi.mock('../../datasource/index.ts', () => mockDeep());
 
@@ -53,17 +55,18 @@ function getCommandInUvHeader(command: string) {
 
 const simpleHeader = getCommandInHeader('pip-compile requirements.in');
 
-const adminConfig: RepoGlobalConfig = {
+const adminConfig: RepoGlobalConfig & InternalGlobalConfigOptions = {
   // `join` fixes Windows CI
   localDir: upath.join('/tmp/github/some/repo'),
   cacheDir: upath.join('/tmp/renovate/cache'),
   containerbaseDir: upath.join('/tmp/renovate/cache/containerbase'),
+  binarySource: 'global',
 };
 const dockerAdminConfig = {
   ...adminConfig,
   binarySource: 'docker',
   dockerSidecarImage: 'ghcr.io/renovatebot/base-image',
-} satisfies RepoGlobalConfig;
+} satisfies RepoGlobalConfig & InternalGlobalConfigOptions;
 
 process.env.CONTAINERBASE = 'true';
 
@@ -209,13 +212,13 @@ describe('modules/manager/pip-compile/artifacts', () => {
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
           'ghcr.io/renovatebot/base-image ' +
-          'bash -l -c "' +
+          "bash -l -c '" +
           'install-tool python 3.10.2 ' +
           '&& ' +
           'install-tool pip-tools 6.13.0 ' +
           '&& ' +
           'pip-compile requirements.in' +
-          '"',
+          "'",
       },
     ]);
   });
@@ -444,7 +447,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
       }),
     ).toEqual([
       {
-        artifactError: { lockFile: 'requirements.txt', stderr: 'not found' },
+        artifactError: { fileName: 'requirements.txt', stderr: 'not found' },
       },
     ]);
     expect(execSnapshots).toEqual([]);
@@ -545,13 +548,13 @@ describe('modules/manager/pip-compile/artifacts', () => {
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
           'ghcr.io/renovatebot/base-image ' +
-          'bash -l -c "' +
+          "bash -l -c '" +
           'install-tool python 3.10.2 ' +
           '&& ' +
           'install-tool pip-tools 6.13.0 ' +
           '&& ' +
           'pip-compile requirements.in' +
-          '"',
+          "'",
       },
     ]);
   });
@@ -594,6 +597,15 @@ describe('modules/manager/pip-compile/artifacts', () => {
       ).toBe(
         'uv pip compile --generate-hashes --output-file=requirements.txt --python-version=3.11 --no-emit-package=cffi --universal requirements.in',
       );
+    });
+
+    it('does not add --no-emit-index-url when PIP_INDEX_URL has no credentials', () => {
+      process.env.PIP_INDEX_URL = 'https://example.com/pypi/simple';
+      expect(
+        constructPipCompileCmd(
+          extractHeaderCommand(simpleHeader, 'subdir/requirements.txt'),
+        ),
+      ).toBe('pip-compile requirements.in');
     });
 
     it('returns --no-emit-index-url when credentials are found in PIP_INDEX_URL', () => {
@@ -737,6 +749,60 @@ describe('modules/manager/pip-compile/artifacts', () => {
       );
     });
 
+    it('skips source file package registry extraction when source file is not pip_requirements', async () => {
+      const header = getCommandInHeader(
+        'pip-compile --output-file=requirements.txt setup.cfg',
+      );
+      fs.readLocalFile.mockResolvedValueOnce(header);
+      const execSnapshots = mockExecAll();
+      git.getRepoStatus.mockResolvedValue(
+        partial<StatusResult>({
+          modified: ['requirements.txt'],
+        }),
+      );
+      fs.readLocalFile.mockResolvedValueOnce('new lock');
+      expect(
+        await updateArtifacts({
+          packageFileName: 'setup.cfg',
+          updatedDeps: [],
+          newPackageFileContent: 'some new content',
+          config: {
+            ...config,
+            lockFiles: ['requirements.txt'],
+          },
+        }),
+      ).not.toBeNull();
+      expect(execSnapshots).toMatchObject([
+        { cmd: 'pip-compile --output-file=requirements.txt setup.cfg' },
+      ]);
+    });
+
+    it('skips source file when readLocalFile returns null', async () => {
+      fs.readLocalFile.mockResolvedValueOnce(simpleHeader);
+      fs.readLocalFile.mockResolvedValueOnce(null); // source file read returns null
+      const execSnapshots = mockExecAll();
+      git.getRepoStatus.mockResolvedValue(
+        partial<StatusResult>({
+          modified: ['requirements.txt'],
+        }),
+      );
+      fs.readLocalFile.mockResolvedValueOnce('new lock');
+      expect(
+        await updateArtifacts({
+          packageFileName: 'requirements.in',
+          updatedDeps: [],
+          newPackageFileContent: 'some new content',
+          config: {
+            ...config,
+            lockFiles: ['requirements.txt'],
+          },
+        }),
+      ).not.toBeNull();
+      expect(execSnapshots).toMatchObject([
+        { cmd: 'pip-compile requirements.in' },
+      ]);
+    });
+
     it('reports errors when a lock file is unchanged', async () => {
       fs.readLocalFile.mockResolvedValue(simpleHeader);
       mockExecSequence([
@@ -759,7 +825,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
       });
       expect(results).toMatchObject([
         {
-          artifactError: { lockFile: 'requirements1.txt', stderr: 'Oh noes!' },
+          artifactError: { fileName: 'requirements1.txt', stderr: 'Oh noes!' },
         },
       ]);
     });

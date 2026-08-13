@@ -131,6 +131,7 @@ export class Ctx implements CtxCompatible {
         parent.items.push(current);
         return true;
       }
+      // v8 ignore else -- TODO: add test #40625
       if (
         (parent.type === 'rule' ||
           parent.type === 'extensionTag' ||

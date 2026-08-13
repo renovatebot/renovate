@@ -5,6 +5,8 @@ import {
   isPlainObject,
 } from '@sindresorhus/is';
 import { DateTime } from 'luxon';
+import { z } from 'zod/v4';
+import { GlobalConfig } from '../../config/global.ts';
 import {
   PLATFORM_BAD_CREDENTIALS,
   PLATFORM_INTEGRATION_UNAUTHORIZED,
@@ -20,6 +22,7 @@ import { maskToken } from '../mask.ts';
 import * as p from '../promises.ts';
 import { range } from '../range.ts';
 import { regEx } from '../regex.ts';
+import { LooseArray } from '../schema-utils/index.ts';
 import { joinUrlParts, parseLinkHeader, parseUrl } from '../url.ts';
 import { findMatchingRule } from './host-rules.ts';
 import {
@@ -37,9 +40,9 @@ import type {
 
 const githubBaseUrl = 'https://api.github.com/';
 let baseUrl = githubBaseUrl;
-export const setBaseUrl = (url: string): void => {
+export function setBaseUrl(url: string): void {
   baseUrl = url;
-};
+}
 
 export interface GithubBaseHttpOptions extends HttpOptions {
   repository?: string;
@@ -67,6 +70,20 @@ export type GithubGraphqlResponse<T = unknown> =
         message: string;
       }[];
     };
+
+const GithubError = z.object({
+  field: z.string().optional(),
+  code: z.string().optional(),
+  message: z.string().optional(),
+});
+
+/**
+ * GitHub usually returns `errors` as an array, but not always - normalize it
+ * into an array of error objects, dropping anything that doesn't fit.
+ */
+const GithubErrors = z
+  .union([LooseArray(GithubError), GithubError.transform((error) => [error])])
+  .catch([]);
 
 function handleGotError(
   err: GotLegacyError,
@@ -129,14 +146,14 @@ function handleGotError(
       if (parsed?.hostname === 'api.github.com') {
         logger.once.warn(
           {
-            documentationUrl:
-              'https://docs.renovatebot.com/getting-started/running/#githubcom-token-for-changelogs-and-tools',
+            documentationUrl: `${GlobalConfig.get('productLinks').documentation}getting-started/running/#githubcom-token-for-changelogs-and-tools`,
           },
-          `Rate limit exceeded for ${parsed.host}, as no hostRules set for this host. Please set a GITHUB_COM_TOKEN`,
+          'Rate limit exceeded for api.github.com, as no hostRules set for this host. Please set a GITHUB_COM_TOKEN',
         );
       } else {
         logger.once.warn(
-          `Rate limit exceeded for ${parsed!.host}, as no hostRules set for this host`,
+          { host: parsed!.host },
+          'Rate limit exceeded, as no hostRules set for this host',
         );
       }
     }
@@ -180,15 +197,18 @@ function handleGotError(
       message.includes('Review cannot be requested from pull request author')
     ) {
       return err;
-    } else if (err.body?.errors?.find((e: any) => e.field === 'milestone')) {
+    }
+
+    const errors = GithubErrors.parse(err.body?.errors);
+    if (errors.some((e) => e.field === 'milestone')) {
       return err;
-    } else if (err.body?.errors?.find((e: any) => e.code === 'invalid')) {
+    }
+    if (errors.some((e) => e.code === 'invalid')) {
       logger.debug({ err }, 'Received invalid response - aborting');
       return new Error(REPOSITORY_CHANGED);
-    } else if (
-      err.body?.errors?.find((e: any) =>
-        e.message?.startsWith('A pull request already exists'),
-      )
+    }
+    if (
+      errors.some((e) => e.message?.startsWith('A pull request already exists'))
     ) {
       return err;
     }
@@ -205,12 +225,12 @@ function handleGotError(
 }
 
 interface GraphqlPaginatedContent<T = unknown> {
-  nodes: T[];
-  edges: T[];
+  nodes?: T[];
+  edges?: T[];
   pageInfo: { hasNextPage: boolean; endCursor: string };
 }
 
-function constructAcceptString(input?: any): string {
+function constructAcceptString(input?: unknown): string {
   const defaultAccept = 'application/vnd.github.v3+json';
   const acceptStrings =
     typeof input === 'string' ? input.split(regEx(/\s*,\s*/)) : [];
@@ -338,7 +358,8 @@ export class GithubHttp extends HttpBase<GithubHttpOptions> {
     opts: InternalHttpOptions & GithubBaseHttpOptions,
   ): void {
     if (!opts.token) {
-      const authUrl = new URL(url);
+      // create a mutable copy of `url`
+      const authUrl = parseUrl(url.toString())!;
 
       if (opts.repository) {
         // set authUrl to https://api.github.com/repos/org/repo or https://gihub.domain.com/api/v3/repos/org/repo
@@ -418,42 +439,54 @@ export class GithubHttp extends HttpBase<GithubHttpOptions> {
         const firstPageUrl = rebasePagination
           ? replaceUrlBase(parsedUrl, baseUrl)
           : parsedUrl;
-        const queue = [...range(2, lastPage)].map(
-          (pageNumber) => (): Promise<HttpResponse<T>> => {
-            // copy before modifying searchParams
-            const nextUrl = new URL(firstPageUrl);
-            nextUrl.searchParams.set('page', String(pageNumber));
-            return super.requestJsonUnsafe<T>(method, {
-              ...opts,
-              url: nextUrl,
-            });
-          },
-        );
-        const pages = await p.all(queue);
-        // v8 ignore else -- TODO: add test #40625
-        if (httpOptions.paginationField && isPlainObject(result.body)) {
-          const paginatedResult = result.body[httpOptions.paginationField];
+        // Don't follow a cross-origin request, unless we've been explicitly requested to do so with `RENOVATE_X_REBASE_PAGINATION_LINKS`
+        if (firstPageUrl.origin === resolvedUrl.origin) {
+          const queue = [...range(2, lastPage)].map(
+            (pageNumber) => (): Promise<HttpResponse<T>> => {
+              // copy before modifying searchParams
+              const nextUrl = parseUrl(firstPageUrl.toString())!;
+              nextUrl.searchParams.set('page', String(pageNumber));
+              return super.requestJsonUnsafe<T>(method, {
+                ...opts,
+                url: nextUrl,
+              });
+            },
+          );
+          const pages = await p.all(queue);
           // v8 ignore else -- TODO: add test #40625
-          if (isArray<T>(paginatedResult)) {
-            for (const nextPage of pages) {
-              // v8 ignore else -- TODO: add test #40625
-              if (isPlainObject(nextPage.body)) {
-                const nextPageResults =
-                  nextPage.body[httpOptions.paginationField];
+          if (httpOptions.paginationField && isPlainObject(result.body)) {
+            const paginatedResult = result.body[httpOptions.paginationField];
+            // v8 ignore else -- TODO: add test #40625
+            if (isArray<T>(paginatedResult)) {
+              for (const nextPage of pages) {
                 // v8 ignore else -- TODO: add test #40625
-                if (isArray<T>(nextPageResults)) {
-                  paginatedResult.push(...nextPageResults);
+                if (isPlainObject(nextPage.body)) {
+                  const nextPageResults =
+                    nextPage.body[httpOptions.paginationField];
+                  // v8 ignore else -- TODO: add test #40625
+                  if (isArray<T>(nextPageResults)) {
+                    paginatedResult.push(...nextPageResults);
+                  }
                 }
               }
             }
-          }
-        } else if (isArray<T>(result.body)) {
-          for (const nextPage of pages) {
-            // v8 ignore else -- TODO: add test #40625
-            if (isArray<T>(nextPage.body)) {
-              result.body.push(...nextPage.body);
+          } else if (isArray<T>(result.body)) {
+            for (const nextPage of pages) {
+              // v8 ignore else -- TODO: add test #40625
+              if (isArray<T>(nextPage.body)) {
+                result.body.push(...nextPage.body);
+              }
             }
           }
+        } else {
+          // make sure that users are aware if there are any (potentially malicious, or misconfigured) pagination links being returned
+          logger.once.warn(
+            {
+              requestHost: resolvedUrl.host,
+              paginationHost: firstPageUrl.host,
+            },
+            'Ignoring cross-origin GitHub pagination link. Set RENOVATE_X_REBASE_PAGINATION_LINKS if this is a self-hosted instance that returns a different host in pagination links.',
+          );
         }
       }
     }

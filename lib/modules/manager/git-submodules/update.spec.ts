@@ -1,37 +1,37 @@
+import { codeBlock } from 'common-tags';
 import type { SimpleGit } from 'simple-git';
-import { simpleGit } from 'simple-git';
 import type { DirectoryResult } from 'tmp-promise';
 import { dir } from 'tmp-promise';
 import upath from 'upath';
 import { mock } from 'vitest-mock-extended';
 import { fs } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
-import type { RepoGlobalConfig } from '../../../config/types.ts';
-import * as hostRules from '../../../util/host-rules.ts';
+import type {
+  InternalGlobalConfigOptions,
+  RepoGlobalConfig,
+} from '../../../config/types.ts';
+import * as git from '../../../util/git/index.ts';
 import type { Upgrade } from '../types.ts';
 import { updateDependency } from './index.ts';
 
 vi.mock('../../../util/fs/index.ts');
 
-vi.mock('simple-git');
-const simpleGitFactoryMock = vi.mocked(simpleGit);
+const createSimpleGit = vi.mocked(git.createSimpleGit);
 const gitMock = mock<SimpleGit>();
+const baseDir = `${import.meta.dirname}/__fixtures__`;
 
 describe('modules/manager/git-submodules/update', () => {
   beforeEach(() => {
-    GlobalConfig.set({ localDir: `${import.meta.dirname}/__fixtures__` });
-    // clear host rules
-    hostRules.clear();
+    GlobalConfig.set({ localDir: baseDir });
     // clear environment variables
     process.env = {};
 
-    simpleGitFactoryMock.mockReturnValue(gitMock);
-    gitMock.env.mockReturnValue(gitMock);
+    createSimpleGit.mockReturnValue(gitMock);
   });
 
   describe('updateDependency', () => {
     let upgrade: Upgrade;
-    let adminConfig: RepoGlobalConfig;
+    let adminConfig: RepoGlobalConfig & InternalGlobalConfigOptions;
     let tmpDir: DirectoryResult;
 
     beforeAll(async () => {
@@ -52,6 +52,7 @@ describe('modules/manager/git-submodules/update', () => {
 
       const update = await updateDependency({
         fileContent: '',
+        packageFile: '.gitmodules',
         upgrade,
       });
       expect(update).toBeNull();
@@ -63,46 +64,46 @@ describe('modules/manager/git-submodules/update', () => {
 
       const update = await updateDependency({
         fileContent: '',
+        packageFile: '.gitmodules',
         upgrade,
       });
       expect(update).toBe('');
     });
 
-    it('returns content on update and uses git environment variables', async () => {
+    it('requests Git authentication for submodule commands', async () => {
       gitMock.submoduleUpdate.mockResolvedValue('');
       gitMock.checkout.mockResolvedValue('');
-      hostRules.add({
-        hostType: 'github',
-        matchHost: 'github.com',
-        token: 'abc123',
-      });
 
       const update = await updateDependency({
         fileContent: '',
+        packageFile: '.gitmodules',
         upgrade,
       });
       expect(update).toBe('');
-      const variables = {
-        GIT_CONFIG_COUNT: '3',
-        GIT_CONFIG_KEY_0: 'url.https://ssh:abc123@github.com/.insteadOf',
-        GIT_CONFIG_KEY_1: 'url.https://git:abc123@github.com/.insteadOf',
-        GIT_CONFIG_KEY_2: 'url.https://abc123@github.com/.insteadOf',
-        GIT_CONFIG_VALUE_0: 'ssh://git@github.com/',
-        GIT_CONFIG_VALUE_1: 'git@github.com:',
-        GIT_CONFIG_VALUE_2: 'https://github.com/',
-      };
-      expect(gitMock.env).toHaveBeenCalledTimes(2);
-      expect(gitMock.env).toHaveBeenNthCalledWith(1, variables);
-      expect(gitMock.env).toHaveBeenNthCalledWith(2, variables);
+      expect(createSimpleGit).toHaveBeenCalledTimes(2);
+      expect(createSimpleGit).toHaveBeenNthCalledWith(1, {
+        config: { baseDir },
+        authentication: {
+          hostTypes: ['git-tags', 'git-refs'],
+        },
+      });
+      expect(createSimpleGit).toHaveBeenNthCalledWith(2, {
+        config: { baseDir: upath.join(baseDir, 'renovate') },
+        authentication: {
+          hostTypes: ['git-tags', 'git-refs'],
+        },
+      });
     });
 
     it('update gitmodule branch value if value changed', async () => {
       gitMock.submoduleUpdate.mockResolvedValue('');
       gitMock.checkout.mockResolvedValue('');
-      const updatedGitModules = `[submodule "renovate"]
-      path = deps/renovate
-      url = https://github.com/renovatebot/renovate.git
-      branch = v0.0.2`;
+      const updatedGitModules = codeBlock`
+        [submodule "renovate"]
+              path = deps/renovate
+              url = https://github.com/renovatebot/renovate.git
+              branch = v0.0.2
+      `;
       fs.readLocalFile.mockResolvedValueOnce(updatedGitModules);
 
       upgrade = {
@@ -113,6 +114,7 @@ describe('modules/manager/git-submodules/update', () => {
       };
       const update = await updateDependency({
         fileContent: '',
+        packageFile: '.gitmodules',
         upgrade,
       });
       expect(update).toBe(updatedGitModules);
@@ -135,57 +137,11 @@ describe('modules/manager/git-submodules/update', () => {
       };
       const update = await updateDependency({
         fileContent: '',
+        packageFile: '.gitmodules',
         upgrade,
       });
       expect(update).toBe('');
       expect(gitMock.subModule).toHaveBeenCalledTimes(0);
-    });
-
-    it('returns content on update and uses git environment variables for git-tags/git-refs', async () => {
-      gitMock.submoduleUpdate.mockResolvedValue('');
-      gitMock.checkout.mockResolvedValue('');
-      hostRules.add({
-        hostType: 'git-refs',
-        matchHost: 'gitrefs.com',
-        username: 'git-refs-user',
-        password: 'git-refs-password',
-      });
-      hostRules.add({
-        hostType: 'git-tags',
-        matchHost: 'gittags.com',
-        username: 'git-tags-user',
-        password: 'git-tags-password',
-      });
-
-      const update = await updateDependency({
-        fileContent: '',
-        upgrade,
-      });
-      expect(update).toBe('');
-      const variables = {
-        GIT_CONFIG_COUNT: '6',
-        GIT_CONFIG_KEY_0:
-          'url.https://git-refs-user:git-refs-password@gitrefs.com/.insteadOf',
-        GIT_CONFIG_KEY_1:
-          'url.https://git-refs-user:git-refs-password@gitrefs.com/.insteadOf',
-        GIT_CONFIG_KEY_2:
-          'url.https://git-refs-user:git-refs-password@gitrefs.com/.insteadOf',
-        GIT_CONFIG_KEY_3:
-          'url.https://git-tags-user:git-tags-password@gittags.com/.insteadOf',
-        GIT_CONFIG_KEY_4:
-          'url.https://git-tags-user:git-tags-password@gittags.com/.insteadOf',
-        GIT_CONFIG_KEY_5:
-          'url.https://git-tags-user:git-tags-password@gittags.com/.insteadOf',
-        GIT_CONFIG_VALUE_0: 'ssh://git@gitrefs.com/',
-        GIT_CONFIG_VALUE_1: 'git@gitrefs.com:',
-        GIT_CONFIG_VALUE_2: 'https://gitrefs.com/',
-        GIT_CONFIG_VALUE_3: 'ssh://git@gittags.com/',
-        GIT_CONFIG_VALUE_4: 'git@gittags.com:',
-        GIT_CONFIG_VALUE_5: 'https://gittags.com/',
-      };
-      expect(gitMock.env).toHaveBeenCalledTimes(2);
-      expect(gitMock.env).toHaveBeenNthCalledWith(1, variables);
-      expect(gitMock.env).toHaveBeenNthCalledWith(2, variables);
     });
   });
 });

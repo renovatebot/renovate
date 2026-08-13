@@ -1,11 +1,15 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`workers/repository/onboarding/pr/index > ensureOnboardingPr() > creates PR with empty footer and header(onboardingRebaseCheckbox="false") 1`] = `
+exports[`workers/repository/onboarding/pr/index > ensureOnboardingPr() > creates PR with empty footer and header(onboardingRebaseCheckbox="false") > PR body 1`] = `
 "
 
 Welcome to [Renovate](https://github.com/renovatebot/renovate)! This is an onboarding PR to help you understand and configure settings before regular Pull Requests begin.
 
 🚦 To activate Renovate, merge this Pull Request. To disable Renovate, simply close this Pull Request unmerged.
+
+📚 See our [Reading List](https://docs.renovatebot.com/reading-list/) for relevant documentation you may be interested in reading.
+
+🔡 Do you want to change how Renovate upgrades your dependencies? Add your custom config to \`renovate.json\` in this branch. Renovate will update the Pull Request description the next time it runs.
 
 
 
@@ -32,12 +36,16 @@ If you need any further assistance then you can also [request help here](https:/
 "
 `;
 
-exports[`workers/repository/onboarding/pr/index > ensureOnboardingPr() > creates PR with empty footer and header(onboardingRebaseCheckbox="true") 1`] = `
+exports[`workers/repository/onboarding/pr/index > ensureOnboardingPr() > creates PR with empty footer and header(onboardingRebaseCheckbox="true") > PR body 1`] = `
 "
 
 Welcome to [Renovate](https://github.com/renovatebot/renovate)! This is an onboarding PR to help you understand and configure settings before regular Pull Requests begin.
 
 🚦 To activate Renovate, merge this Pull Request. To disable Renovate, simply close this Pull Request unmerged.
+
+📚 See our [Reading List](https://docs.renovatebot.com/reading-list/) for relevant documentation you may be interested in reading.
+
+🔡 Do you want to change how Renovate upgrades your dependencies? Add your custom config to \`renovate.json\` in this branch and select the Retry/Rebase checkbox below. Renovate will update the Pull Request description the next time it runs.
 
 
 
@@ -69,12 +77,16 @@ If you need any further assistance then you can also [request help here](https:/
 "
 `;
 
-exports[`workers/repository/onboarding/pr/index > ensureOnboardingPr() > creates PR with footer and header using templating(onboardingRebaseCheckbox="false") 1`] = `
+exports[`workers/repository/onboarding/pr/index > ensureOnboardingPr() > creates PR with footer and header using templating(onboardingRebaseCheckbox="false") > PR body 1`] = `
 "This is a header for platform:github
 
 Welcome to [Renovate](https://github.com/renovatebot/renovate)! This is an onboarding PR to help you understand and configure settings before regular Pull Requests begin.
 
 🚦 To activate Renovate, merge this Pull Request. To disable Renovate, simply close this Pull Request unmerged.
+
+📚 See our [Reading List](https://docs.renovatebot.com/reading-list/) for relevant documentation you may be interested in reading.
+
+🔡 Do you want to change how Renovate upgrades your dependencies? Add your custom config to \`renovate.json\` in this branch. Renovate will update the Pull Request description the next time it runs.
 
 
 
@@ -101,12 +113,16 @@ And this is a footer for repository:test baseBranch:some-branch
 "
 `;
 
-exports[`workers/repository/onboarding/pr/index > ensureOnboardingPr() > creates PR with footer and header using templating(onboardingRebaseCheckbox="true") 1`] = `
+exports[`workers/repository/onboarding/pr/index > ensureOnboardingPr() > creates PR with footer and header using templating(onboardingRebaseCheckbox="true") > PR body 1`] = `
 "This is a header for platform:github
 
 Welcome to [Renovate](https://github.com/renovatebot/renovate)! This is an onboarding PR to help you understand and configure settings before regular Pull Requests begin.
 
 🚦 To activate Renovate, merge this Pull Request. To disable Renovate, simply close this Pull Request unmerged.
+
+📚 See our [Reading List](https://docs.renovatebot.com/reading-list/) for relevant documentation you may be interested in reading.
+
+🔡 Do you want to change how Renovate upgrades your dependencies? Add your custom config to \`renovate.json\` in this branch and select the Retry/Rebase checkbox below. Renovate will update the Pull Request description the next time it runs.
 
 
 
@@ -138,7 +154,7 @@ And this is a footer for repository:test baseBranch:some-branch
 "
 `;
 
-exports[`workers/repository/onboarding/pr/index > ensureOnboardingPr() > creates PR with footer and header with trailing and leading newlines(onboardingRebaseCheckbox="false") 1`] = `
+exports[`workers/repository/onboarding/pr/index > ensureOnboardingPr() > creates PR with footer and header with trailing and leading newlines(onboardingRebaseCheckbox="false") > PR body 1`] = `
 "
 
 This should not be the first line of the PR
@@ -146,6 +162,10 @@ This should not be the first line of the PR
 Welcome to [Renovate](https://github.com/renovatebot/renovate)! This is an onboarding PR to help you understand and configure settings before regular Pull Requests begin.
 
 🚦 To activate Renovate, merge this Pull Request. To disable Renovate, simply close this Pull Request unmerged.
+
+📚 See our [Reading List](https://docs.renovatebot.com/reading-list/) for relevant documentation you may be interested in reading.
+
+🔡 Do you want to change how Renovate upgrades your dependencies? Add your custom config to \`renovate.json\` in this branch. Renovate will update the Pull Request description the next time it runs.
 
 
 
@@ -175,7 +195,7 @@ There should be several empty lines at the end of the PR
 "
 `;
 
-exports[`workers/repository/onboarding/pr/index > ensureOnboardingPr() > creates PR with footer and header with trailing and leading newlines(onboardingRebaseCheckbox="true") 1`] = `
+exports[`workers/repository/onboarding/pr/index > ensureOnboardingPr() > creates PR with footer and header with trailing and leading newlines(onboardingRebaseCheckbox="true") > PR body 1`] = `
 "
 
 This should not be the first line of the PR
@@ -183,6 +203,10 @@ This should not be the first line of the PR
 Welcome to [Renovate](https://github.com/renovatebot/renovate)! This is an onboarding PR to help you understand and configure settings before regular Pull Requests begin.
 
 🚦 To activate Renovate, merge this Pull Request. To disable Renovate, simply close this Pull Request unmerged.
+
+📚 See our [Reading List](https://docs.renovatebot.com/reading-list/) for relevant documentation you may be interested in reading.
+
+🔡 Do you want to change how Renovate upgrades your dependencies? Add your custom config to \`renovate.json\` in this branch and select the Retry/Rebase checkbox below. Renovate will update the Pull Request description the next time it runs.
 
 
 

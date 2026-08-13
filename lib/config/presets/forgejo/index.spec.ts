@@ -3,7 +3,11 @@ import * as httpMock from '~test/http-mock.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
 import { setBaseUrl } from '../../../util/http/forgejo.ts';
 import { toBase64 } from '../../../util/string.ts';
-import { PRESET_INVALID_JSON, PRESET_NOT_FOUND } from '../util.ts';
+import {
+  PRESET_INVALID,
+  PRESET_INVALID_JSON,
+  PRESET_NOT_FOUND,
+} from '../util.ts';
 import * as forgejo from './index.ts';
 
 const forgejoApiHost = forgejo.Endpoint;
@@ -21,6 +25,9 @@ describe('config/presets/forgejo/index', () => {
         .scope(forgejoApiHost)
         .get(`${basePath}/some-filename.json`)
         .reply(200, {
+          type: 'file',
+          name: 'some-filename.json',
+          path: 'some-filename.json',
           content: toBase64('{"from":"api"}'),
         });
 
@@ -38,6 +45,9 @@ describe('config/presets/forgejo/index', () => {
         .scope(forgejoApiHost)
         .get(`${basePath}/some-filename.json5`)
         .reply(200, {
+          type: 'file',
+          name: 'some-filename.json5',
+          path: 'some-filename.json5',
           content: toBase64('{from:"api"}'),
         });
 
@@ -48,6 +58,46 @@ describe('config/presets/forgejo/index', () => {
         null,
       );
       expect(res).toEqual({ from: 'api' });
+    });
+
+    it('returns JSONC', async () => {
+      httpMock
+        .scope(forgejoApiHost)
+        .get(`${basePath}/some-filename.jsonc`)
+        .reply(200, {
+          type: 'file',
+          name: 'some-filename.jsonc',
+          path: 'some-filename.jsonc',
+          content: toBase64('{"from": /* secret! */ "api"}'),
+        });
+
+      const res = await forgejo.fetchJSONFile(
+        'some/repo',
+        'some-filename.jsonc',
+        forgejoApiHost,
+        null,
+      );
+      expect(res).toEqual({ from: 'api' });
+    });
+
+    it('throws for non-file response', async () => {
+      httpMock
+        .scope(forgejoApiHost)
+        .get(`${basePath}/some-filename.json`)
+        .reply(200, {
+          type: 'dir',
+          name: 'some-filename.json',
+          path: 'some-filename.json',
+        });
+
+      await expect(
+        forgejo.fetchJSONFile(
+          'some/repo',
+          'some-filename.json',
+          forgejoApiHost,
+          null,
+        ),
+      ).rejects.toThrow(PRESET_INVALID);
     });
 
     it('throws external host error', async () => {
@@ -78,14 +128,21 @@ describe('config/presets/forgejo/index', () => {
         .get(`${basePath}/renovate.json`)
         .reply(200, {});
 
-      await expect(forgejo.getPreset({ repo: 'some/repo' })).rejects.toThrow();
+      await expect(forgejo.getPreset({ repo: 'some/repo' })).rejects.toThrow(
+        'dep not found',
+      );
     });
 
     it('throws if invalid content', async () => {
       httpMock
         .scope(forgejoApiHost)
         .get(`${basePath}/default.json`)
-        .reply(200, { content: toBase64('invalid') });
+        .reply(200, {
+          type: 'file',
+          name: 'default.json',
+          path: 'default.json',
+          content: toBase64('invalid'),
+        });
 
       await expect(forgejo.getPreset({ repo: 'some/repo' })).rejects.toThrow(
         PRESET_INVALID_JSON,
@@ -97,6 +154,9 @@ describe('config/presets/forgejo/index', () => {
         .scope(forgejoApiHost)
         .get(`${basePath}/default.json`)
         .reply(200, {
+          type: 'file',
+          name: 'default.json',
+          path: 'default.json',
           content: toBase64('not json'),
         });
 
@@ -110,6 +170,9 @@ describe('config/presets/forgejo/index', () => {
         .scope(forgejoApiHost)
         .get(`${basePath}/default.json`)
         .reply(200, {
+          type: 'file',
+          name: 'default.json',
+          path: 'default.json',
           content: toBase64('{"foo":"bar"}'),
         });
 
@@ -122,6 +185,9 @@ describe('config/presets/forgejo/index', () => {
         .scope(forgejoApiHost)
         .get(`${basePath}/somefile.json`)
         .reply(200, {
+          type: 'file',
+          name: 'somefile.json',
+          path: 'somefile.json',
           content: toBase64('{"somename":{"foo":"bar"}}'),
         });
       const content = await forgejo.getPreset({
@@ -136,6 +202,9 @@ describe('config/presets/forgejo/index', () => {
         .scope(forgejoApiHost)
         .get(`${basePath}/somefile.json`)
         .reply(200, {
+          type: 'file',
+          name: 'somefile.json',
+          path: 'somefile.json',
           content: Buffer.from(
             '{"somename":{"somesubname":{"foo":"bar"}}}',
           ).toString('base64'),
@@ -153,6 +222,9 @@ describe('config/presets/forgejo/index', () => {
         .scope(forgejoApiHost)
         .get(`${basePath}/custom.json`)
         .reply(200, {
+          type: 'file',
+          name: 'custom.json',
+          path: 'custom.json',
           content: toBase64('{"foo":"bar"}'),
         });
       const content = await forgejo.getPreset({
@@ -167,6 +239,9 @@ describe('config/presets/forgejo/index', () => {
         .scope(forgejoApiHost)
         .get(`${basePath}/path%2Fcustom.json`)
         .reply(200, {
+          type: 'file',
+          name: 'custom.json',
+          path: 'path/custom.json',
           content: toBase64('{"foo":"bar"}'),
         });
       const content = await forgejo.getPreset({
@@ -182,6 +257,9 @@ describe('config/presets/forgejo/index', () => {
         .scope(forgejoApiHost)
         .get(`${basePath}/somefile.json`)
         .reply(200, {
+          type: 'file',
+          name: 'somefile.json',
+          path: 'somefile.json',
           content: toBase64('{}'),
         });
       await expect(
@@ -199,6 +277,9 @@ describe('config/presets/forgejo/index', () => {
         .scope(forgejoApiHost)
         .get(`${basePath}/default.json`)
         .reply(200, {
+          type: 'file',
+          name: 'default.json',
+          path: 'default.json',
           content: toBase64('{"from":"api"}'),
         });
       expect(
@@ -211,6 +292,9 @@ describe('config/presets/forgejo/index', () => {
         .scope('https://api.forgejo.example.org')
         .get(`${basePath}/default.json`)
         .reply(200, {
+          type: 'file',
+          name: 'default.json',
+          path: 'default.json',
           content: toBase64('{"from":"api"}'),
         });
       expect(
@@ -230,6 +314,9 @@ describe('config/presets/forgejo/index', () => {
         .scope(forgejoApiHost)
         .get(`${basePath}/default.json?ref=someTag`)
         .reply(200, {
+          type: 'file',
+          name: 'default.json',
+          path: 'default.json',
           content: toBase64('{"from":"api"}'),
         });
       expect(
@@ -248,6 +335,9 @@ describe('config/presets/forgejo/index', () => {
         .scope('https://api.forgejo.example.org')
         .get(`${basePath}/default.json?ref=someTag`)
         .reply(200, {
+          type: 'file',
+          name: 'default.json',
+          path: 'default.json',
           content: toBase64('{"from":"api"}'),
         });
       expect(

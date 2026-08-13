@@ -1,21 +1,30 @@
+import type { Stats } from 'node:fs';
 import { codeBlock } from 'common-tags';
 import * as _fsExtra from 'fs-extra';
 import upath from 'upath';
+import type { MockInstance } from 'vitest';
 import { Fixtures } from '~test/fixtures.ts';
+import { partial } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import { extractPackageFile } from './index.ts';
 
 // mock for cjs require for `@renovatebot/detect-tools`
 // https://github.com/vitest-dev/vitest/discussions/3134
 vi.hoisted(() => {
-  require.cache[require.resolve('fs-extra')] = {
+  const fsExtraModule: Partial<NodeJS.Module> = {
     exports: fixtures.fsExtra(),
-  } as never;
+  };
+  require.cache[require.resolve('fs-extra')] = fsExtraModule as NodeJS.Module;
 });
 
 vi.mock('fs-extra', () => fixtures.fsExtra());
 
 const fsExtra = vi.mocked(_fsExtra);
+// vi.mocked() resolves stat() to its callback overload, so
+// mockResolvedValueOnce() would expect void; retype via the promise overload
+const statMock = fsExtra.stat as unknown as MockInstance<
+  (path: string) => Promise<Stats>
+>;
 
 const pipfile1 = Fixtures.get('Pipfile1');
 const pipfile2 = Fixtures.get('Pipfile2');
@@ -43,7 +52,7 @@ describe('modules/manager/pipenv/extract', () => {
     });
 
     it('extracts dependencies', async () => {
-      fsExtra.stat.mockResolvedValueOnce({} as never);
+      statMock.mockResolvedValueOnce(partial<Stats>());
       Fixtures.mock({ Pipfile: pipfile1 }, localDir);
       const res = await extractPackageFile(pipfile1, 'Pipfile');
       expect(res).toMatchObject({
@@ -140,7 +149,7 @@ describe('modules/manager/pipenv/extract', () => {
     });
 
     it('extracts multiple dependencies', async () => {
-      fsExtra.stat.mockResolvedValueOnce({} as never);
+      statMock.mockResolvedValueOnce(partial<Stats>());
       Fixtures.mock({ Pipfile: pipfile2 }, localDir);
       const res = await extractPackageFile(pipfile2, 'Pipfile');
       expect(res).toMatchObject({
@@ -245,7 +254,7 @@ describe('modules/manager/pipenv/extract', () => {
     });
 
     it('extracts example pipfile', async () => {
-      fsExtra.stat.mockResolvedValueOnce({} as never);
+      statMock.mockResolvedValueOnce(partial<Stats>());
       fsExtra.readFile.mockResolvedValueOnce(pipfile4 as never);
       const res = await extractPackageFile(pipfile4, 'Pipfile');
       expect(res).toMatchObject({
@@ -311,7 +320,7 @@ describe('modules/manager/pipenv/extract', () => {
     });
 
     it('supports custom index', async () => {
-      fsExtra.stat.mockResolvedValueOnce({} as never);
+      statMock.mockResolvedValueOnce(partial<Stats>());
       const res = await extractPackageFile(pipfile5, 'Pipfile');
       expect(res).toMatchObject({
         deps: [

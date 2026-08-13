@@ -32,7 +32,11 @@ import {
 } from '../common.ts';
 import { getBaseBranchDesc } from './base-branch.ts';
 import { getConfigDesc } from './config-description.ts';
-import { getExpectedPrList } from './pr-list.ts';
+import {
+  getPackageFilesDesc,
+  getPackageFilesSummary,
+} from './package-files.ts';
+import { getExpectedPrList, getExpectedPrListSummary } from './pr-list.ts';
 
 /**
  * Given an existing PR, if onboardingAutoCloseAge has passed, close the PR.
@@ -138,16 +142,31 @@ export async function ensureOnboardingPr(
   const rebaseCheckBox = getRebaseCheckbox(config.onboardingRebaseCheckbox);
   logger.debug('Filling in onboarding PR template');
   let prTemplate = `Welcome to [Renovate](${
-    config.productLinks!.homepage
+    GlobalConfig.get('productLinks').homepage
   })! This is an onboarding PR to help you understand and configure settings before regular Pull Requests begin.\n\n`;
   prTemplate +=
-    config.requireConfig === 'required'
+    getInheritedOrGlobal('requireConfig') === 'required'
       ? emojify(
           `:vertical_traffic_light: To activate Renovate, merge this Pull Request. To disable Renovate, simply close this Pull Request unmerged.\n\n`,
         )
       : emojify(
           `:vertical_traffic_light: Renovate will begin keeping your dependencies up-to-date only once you merge or close this Pull Request.\n\n`,
         );
+
+  prTemplate += emojify(
+    `:books: See our [Reading List](${GlobalConfig.get('productLinks').documentation}reading-list/) for relevant documentation you may be interested in reading.\n\n`,
+  );
+
+  const configFile = getDefaultConfigFileName();
+  prTemplate += emojify(
+    `:abcd: Do you want to change how Renovate upgrades your dependencies?`,
+  );
+  prTemplate += ` Add your custom config to \`${configFile}\` in this branch${
+    config.onboardingRebaseCheckbox
+      ? ' and select the Retry/Rebase checkbox below'
+      : ''
+  }. Renovate will update the Pull Request description the next time it runs.`;
+  prTemplate += '\n\n';
   // TODO #22198
   prTemplate += emojify(
     `
@@ -163,27 +182,18 @@ export async function ensureOnboardingPr(
 ---
 
 :question: Got questions? Check out Renovate's [Docs](${
-      config.productLinks!.documentation
+      GlobalConfig.get('productLinks').documentation
     }), particularly the Getting Started section.
 If you need any further assistance then you can also [request help here](${
-      config.productLinks!.help
+      GlobalConfig.get('productLinks').help
     }).
 `,
   );
   prTemplate += rebaseCheckBox;
   let prBody = prTemplate;
-  if (packageFiles && Object.entries(packageFiles).length) {
-    let files: string[] = [];
-    for (const [manager, managerFiles] of Object.entries(packageFiles)) {
-      files = files.concat(
-        managerFiles.map((file) => ` * \`${file.packageFile}\` (${manager})`),
-      );
-    }
-    prBody =
-      prBody.replace(
-        '{{PACKAGE FILES}}',
-        '### Detected Package Files\n\n' + files.join('\n'),
-      ) + '\n';
+  const packageFilesDesc = getPackageFilesDesc(packageFiles);
+  if (packageFilesDesc) {
+    prBody = `${prBody.replace('{{PACKAGE FILES}}', packageFilesDesc)}\n`;
   } else {
     prBody = prBody.replace('{{PACKAGE FILES}}\n', '');
   }
@@ -201,7 +211,8 @@ If you need any further assistance then you can also [request help here](${
   );
   prBody = prBody.replace('{{ERRORS}}\n', getErrors(config));
   prBody = prBody.replace('{{BASEBRANCH}}\n', getBaseBranchDesc(config));
-  prBody = prBody.replace('{{PRLIST}}\n', getExpectedPrList(config, branches));
+  const prList = getExpectedPrList(config, branches);
+  prBody = prBody.replace('{{PRLIST}}\n', prList);
   if (isString(config.prHeader)) {
     prBody = `${template.compile(config.prHeader, config)}\n\n${prBody}`;
   }
@@ -211,7 +222,20 @@ If you need any further assistance then you can also [request help here](${
 
   prBody += onboardingConfigHashComment;
 
-  logger.trace('prBody:\n' + prBody);
+  if (prBody.length > platform.maxBodyLength()) {
+    logger.debug(
+      'Onboarding PR body exceeds platform limit, switching to summary PR list and package files',
+    );
+    prBody = prBody.replace(prList, getExpectedPrListSummary(config, branches));
+    if (packageFilesDesc) {
+      prBody = prBody.replace(
+        packageFilesDesc,
+        `### Detected Package Files\n\n${getPackageFilesSummary(packageFiles)}`,
+      );
+    }
+  }
+
+  logger.trace(`prBody:\n${prBody}`);
 
   prBody = platform.massageMarkdown(prBody, config.rebaseLabel);
 

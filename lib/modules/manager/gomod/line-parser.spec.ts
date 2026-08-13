@@ -14,6 +14,7 @@ describe('modules/manager/gomod/line-parser', () => {
       depName: 'go',
       depType: 'golang',
       versioning: 'go-mod-directive',
+      commitMessageTopic: 'go module directive',
     });
   });
 
@@ -27,6 +28,7 @@ describe('modules/manager/gomod/line-parser', () => {
       depType: 'golang',
       skipReason: 'invalid-version',
       versioning: 'go-mod-directive',
+      commitMessageTopic: 'go module directive',
     });
   });
 
@@ -39,6 +41,7 @@ describe('modules/manager/gomod/line-parser', () => {
       depName: 'go',
       depType: 'toolchain',
       skipReason: 'invalid-version',
+      commitMessageTopic: 'go toolchain directive',
     });
   });
 
@@ -51,6 +54,7 @@ describe('modules/manager/gomod/line-parser', () => {
       depName: 'go',
       depType: 'toolchain',
       skipReason: 'invalid-version',
+      commitMessageTopic: 'go toolchain directive',
     });
   });
 

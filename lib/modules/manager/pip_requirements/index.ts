@@ -11,7 +11,7 @@ export const url =
 export const categories: Category[] = ['python'];
 
 export const defaultConfig = {
-  managerFilePatterns: ['/(^|/)[\\w-]*requirements([-.]\\w+)?\\.(txt|pip)$/'],
+  managerFilePatterns: ['/(^|/)[\\w-]*requirements([-._]\\w+)?\\.(txt|pip)$/'],
 };
 
 export const supportedDatasources = [PypiDatasource.id, GitTagsDatasource.id];

@@ -35,25 +35,25 @@ export function formatCompletedLine(
   const status = success ? styleText('green', '✓') : styleText('red', '✗');
   const secs = String(Math.round(duration)).padStart(3);
   // Visible: "  " + name(36) + " " + icon + " " + secs(3) + "s" = 45
-  return `  ${nameCol} ${status} ${secs}s` + ' '.repeat(TUI.LINE_WIDTH - 45);
+  return `  ${nameCol} ${status} ${secs}s${' '.repeat(TUI.LINE_WIDTH - 45)}`;
 }
 
 export function formatWaitingLine(name: string): string {
   const nameCol = `${name} `.padEnd(TUI.NAME_WIDTH, '.');
   // Visible: "  " + name(36) + " " + icon = 40
-  return `  ${nameCol} ${ICONS.WAITING}` + ' '.repeat(TUI.LINE_WIDTH - 40);
+  return `  ${nameCol} ${ICONS.WAITING}${' '.repeat(TUI.LINE_WIDTH - 40)}`;
 }
 
 function formatRunningLine(name: string, spinner: string): string {
   const nameCol = `${name} `.padEnd(TUI.NAME_WIDTH, '.');
   // Visible: "  " + name(36) + " " + spinner = 40
-  return `  ${nameCol} ${spinner}` + ' '.repeat(TUI.LINE_WIDTH - 40);
+  return `  ${nameCol} ${spinner}${' '.repeat(TUI.LINE_WIDTH - 40)}`;
 }
 
 function formatInterruptedLine(name: string): string {
   const nameCol = `${name} `.padEnd(TUI.NAME_WIDTH, '.');
   // Visible: "  " + name(36) + " " + "-" = 40
-  return `  ${nameCol} -` + ' '.repeat(TUI.LINE_WIDTH - 40);
+  return `  ${nameCol} -${' '.repeat(TUI.LINE_WIDTH - 40)}`;
 }
 
 export function formatDuration(seconds: number): string {
@@ -88,8 +88,7 @@ export function renderProgress(progress: ExecutionProgress): void {
   lines.push(' '.repeat(TUI.LINE_WIDTH));
   lines.push(`Total: ${elapsed}s`.padEnd(TUI.LINE_WIDTH));
 
-  const frame =
-    ANSI.moveUp(progress.displayLines) + '\r' + lines.join('\n') + '\n';
+  const frame = `${ANSI.moveUp(progress.displayLines)}\r${lines.join('\n')}\n`;
   process.stdout.write(frame);
 }
 
@@ -121,8 +120,7 @@ export function renderFinalState(
     lines.push(' '.repeat(TUI.LINE_WIDTH));
   }
 
-  const frame =
-    ANSI.moveUp(progress.displayLines) + '\r' + lines.join('\n') + '\n';
+  const frame = `${ANSI.moveUp(progress.displayLines)}\r${lines.join('\n')}\n`;
   process.stdout.write(frame);
 
   if (interrupted) {
@@ -179,22 +177,13 @@ export function printCoverageReport(coverage: CoverageInfo[]): void {
     return;
   }
 
-  console.log('Coverage:');
+  console.log('');
+  console.log('Not covered:');
 
-  const minDots = 3;
-  const longestPath = Math.max(...coverage.map((c) => c.file.length));
-  const coverageWidth = Math.max(TUI.NAME_WIDTH, longestPath + 1 + minDots);
+  const pathWidth = Math.max(...coverage.map((c) => c.file.length)) + 2;
 
   for (const info of coverage) {
-    const pct = Math.round(info.percentage);
-    const hasGaps = info.uncoveredLines.length > 0;
-    const status = hasGaps ? '✗' : '✓';
-    const nameCol = `${info.file} `.padEnd(coverageWidth, '.');
-    console.log(`  ${nameCol} ${status}  ${pct}%`);
-
-    if (hasGaps) {
-      const lineRefs = info.uncoveredLines.map((l) => `L${l}`).join(', ');
-      console.log(`    ${lineRefs}`);
-    }
+    const lineRefs = info.uncoveredLines.map((l) => `L${l}`).join(', ');
+    console.log(`  ${info.file.padEnd(pathWidth)}${lineRefs}`);
   }
 }

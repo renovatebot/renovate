@@ -7,7 +7,6 @@ import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
 import { coerceArray } from '../../../util/array.ts';
 import { getEnv } from '../../../util/env.ts';
-import { exec } from '../../../util/exec/index.ts';
 import type { ExecOptions } from '../../../util/exec/types.ts';
 import { filterMap } from '../../../util/filter-map.ts';
 import {
@@ -17,7 +16,7 @@ import {
   readLocalFile,
   writeLocalFile,
 } from '../../../util/fs/index.ts';
-import { getGitEnvironmentVariables } from '../../../util/git/auth.ts';
+import { withGitEnvironment } from '../../../util/git/exec.ts';
 import { getRepoStatus } from '../../../util/git/index.ts';
 import { regEx } from '../../../util/regex.ts';
 import { isValid } from '../../versioning/semver/index.ts';
@@ -30,6 +29,7 @@ import type {
 import { getExtraDepsNotice } from './artifacts-extra.ts';
 
 const { major, valid } = semver;
+const gitExec = withGitEnvironment(['go']);
 
 function getUpdateImportPathCmds(
   updatedDeps: PackageDependency[],
@@ -65,7 +65,7 @@ function getUpdateImportPathCmds(
 
     .map(
       ({ depName, newMajor }) =>
-        `mod upgrade --mod-name=${depName} -t=${newMajor}`,
+        `mod upgrade --mod-name=${quote(depName)} -t=${newMajor}`,
     );
 
   if (updateImportCommands.length > 0) {
@@ -178,8 +178,9 @@ export async function updateArtifacts({
      * @param match A string representing a golang replace directive block
      * @returns A commented out block with // renovate-replace
      */
-    const blockCommentOut = (match: string): string =>
-      match.replace(/(\r?\n)/g, '$1// renovate-replace ');
+    function blockCommentOut(match: string): string {
+      return match.replace(/(\r?\n)/g, '$1// renovate-replace ');
+    }
 
     // Comment out golang replace directives
     massagedGoMod = massagedGoMod
@@ -192,8 +193,7 @@ export async function updateArtifacts({
       );
     }
   }
-  const goConstraints =
-    config.constraints?.go ?? getGoConstraints(newGoModContent);
+  const goConstraints = deriveGoToolchainConstraints(config, newGoModContent);
 
   try {
     await writeLocalFile(goModFileName, massagedGoMod);
@@ -213,7 +213,6 @@ export async function updateArtifacts({
         /* v8 ignore next -- TODO: add test */
         GOFLAGS: useModcacherw(goConstraints) ? '-modcacherw' : null,
         CGO_ENABLED: GlobalConfig.get('binarySource') === 'docker' ? '0' : null,
-        ...getGitEnvironmentVariables(['go']),
       },
       docker: {},
       toolConstraints: [
@@ -349,7 +348,7 @@ export async function updateArtifacts({
       }
     }
 
-    await exec(execCommands, execOptions);
+    await gitExec(execCommands, execOptions);
 
     const status = await getRepoStatus();
     if (
@@ -498,7 +497,7 @@ export async function updateArtifacts({
     return [
       {
         artifactError: {
-          lockFile: sumFileName,
+          fileName: sumFileName,
           stderr: err.message,
         },
       },
@@ -539,4 +538,24 @@ function getGoConstraints(content: string): string | undefined {
     return undefined;
   }
   return `^${match.groups.gover}`;
+}
+
+/**
+ * Derive the version of the Go toolchain needed to run this project.
+ *
+ * This matches with the `golang` Containerbase tool.
+ *
+ * In precedence order:
+ *
+ * 1. config: \`constraints.go\`
+ * 1. \`go.mod\`: \`toolchain\` directive
+ * 1. \`go.mod\`: \`go\` directive
+ *
+ * NOTE that the \`constraints.golang\` is not used (TODO #42601)
+ */
+export function deriveGoToolchainConstraints(
+  config: UpdateArtifactsConfig,
+  newGoModContent: string,
+): string | undefined {
+  return config.constraints?.go ?? getGoConstraints(newGoModContent);
 }

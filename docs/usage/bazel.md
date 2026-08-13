@@ -171,6 +171,20 @@ archive_override(
 Renovate ignores [`multiple_version_override`](https://bazel.build/rules/lib/globals/module#multiple_version_override).
 `multiple_version_override` does not affect the processing of version updates for a module.
 
+### Lockfile support
+
+Renovate updates the `MODULE.bazel.lock` file after modifying dependencies in `MODULE.bazel`.
+When Renovate changes a `bazel_dep` version, it runs `bazel mod deps` to regenerate the lockfile.
+
+For this to work:
+
+1. Your repository must already have a `MODULE.bazel.lock` file
+1. [Bazelisk](https://github.com/bazelbuild/bazelisk) must be available in the environment, or Renovate must be configured to install tools via containerbase (`binarySource=install`)
+
+Renovate uses Bazelisk, which determines the correct Bazel version from the `.bazelversion` file in your repository.
+
+If no `MODULE.bazel.lock` file exists, Renovate skips the lockfile update step.
+
 ### `git_repository`
 
 If Renovate finds a [`git_repository`](https://bazel.build/rules/lib/repo/git#git_repository), it evaluates the `commit` value at the specified `remote`.

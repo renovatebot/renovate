@@ -4,7 +4,10 @@ import { envMock, mockExecAll } from '~test/exec-util.ts';
 import { Fixtures } from '~test/fixtures.ts';
 import { env, fs, git, partial } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
-import type { RepoGlobalConfig } from '../../../config/types.ts';
+import type {
+  InternalGlobalConfigOptions,
+  RepoGlobalConfig,
+} from '../../../config/types.ts';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
 import { ExecError } from '../../../util/exec/exec-error.ts';
 import type { StatusResult } from '../../../util/git/types.ts';
@@ -20,11 +23,12 @@ vi.mock('../../../util/http/index.ts', () => mockDeep());
 vi.mock('../../../util/fs/index.ts', () => mockDeep());
 vi.mock('../../../util/git/index.ts', () => mockDeep());
 
-const adminConfig: RepoGlobalConfig = {
+const adminConfig: RepoGlobalConfig & InternalGlobalConfigOptions = {
   localDir: upath.join('/tmp/github/some/repo'), // `join` fixes Windows CI
   cacheDir: upath.join('/tmp/renovate/cache'),
   containerbaseDir: upath.join('/tmp/cache/containerbase'),
   dockerSidecarImage: 'ghcr.io/renovatebot/base-image',
+  binarySource: 'global',
 };
 
 const config: UpdateArtifactsConfig = {};
@@ -178,7 +182,7 @@ describe('modules/manager/vendir/artifacts', () => {
     ).toEqual([
       {
         artifactError: {
-          lockFile: 'vendir.yml',
+          fileName: 'vendir.yml',
           stderr: 'not found',
         },
       },
@@ -586,13 +590,13 @@ describe('modules/manager/vendir/artifacts', () => {
             '-e CONTAINERBASE_CACHE_DIR ' +
             '-w "/tmp/github/some/repo" ' +
             'ghcr.io/renovatebot/base-image' +
-            ' bash -l -c "' +
+            " bash -l -c '" +
             'install-tool vendir 0.35.0' +
             ' && ' +
             'install-tool helm 3.17.0' +
             ' && ' +
             'vendir sync' +
-            '"',
+            "'",
         },
       ]);
     });

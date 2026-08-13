@@ -16,3 +16,5 @@ export const defaultConfig = {
 };
 
 export const supportedDatasources = [DockerDatasource.id, OrbDatasource.id];
+
+export { knownDepTypes } from './dep-types.ts';

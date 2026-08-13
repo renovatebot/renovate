@@ -1,4 +1,4 @@
-import { z } from 'zod/v3';
+import { z } from 'zod/v4';
 import type { Release } from '../types.ts';
 
 export const Homepage = z.string().optional().catch(undefined);
@@ -17,7 +17,7 @@ export const Versions = z
   .transform((version): Release => ({ version }))
   .array();
 
-export const Sri = z.record(z.string());
+export const Sri = z.record(z.string(), z.string());
 
 export const CdnjsAPIVersionResponse = z.object({
   homepage: Homepage,

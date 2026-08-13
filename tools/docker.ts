@@ -1,7 +1,9 @@
 import { Command } from 'commander';
-import { logger } from '../lib/logger/index.ts';
+import { init, logger } from '../lib/logger/index.ts';
 import { bake } from './utils/docker.ts';
 import { parsePositiveInt, parseVersion } from './utils/index.ts';
+
+await init();
 
 const program = new Command('pnpm build:docker');
 

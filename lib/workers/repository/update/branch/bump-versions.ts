@@ -143,22 +143,45 @@ async function bumpVersion(
       let newVersion: string | null = null;
       try {
         const bumpType = compile(rawBumpType, branchConfig);
-        const parts = regEx('^(?<major>\\d+)(?:\\.(?<minor>\\d+))?$').exec(
-          version,
-        );
-        if (parts?.groups) {
-          const { major, minor } = parts.groups;
-          if (bumpType === 'major') {
-            newVersion = `${parseInt(major, 10) + 1}${minor ? `.0` : ''}`;
-          } else if (bumpType === 'minor') {
-            newVersion = `${major}.${parseInt(minor, 10) + 1}`;
+
+        // Handle 'sync' type - use version from branch upgrades
+        if (bumpType === 'sync') {
+          if (branchConfig.upgrades?.length) {
+            // Use the newVersion from the first upgrade
+            newVersion = branchConfig.upgrades[0].newVersion ?? null;
+            if (!newVersion) {
+              logger.debug(
+                { file: filePath },
+                `${bumpVersionsDescr}: No newVersion found in branch upgrades for sync type`,
+              );
+              continue;
+            }
           } else {
-            throw new Error(
-              `Unsupported bump type for {major}.{minor} version: ${bumpType}`,
+            logger.debug(
+              { file: filePath },
+              `${bumpVersionsDescr}: No upgrades found in branch config for sync type`,
             );
+            continue;
           }
         } else {
-          newVersion = inc(version, bumpType as ReleaseType);
+          // Existing logic for major/minor/patch
+          const parts = regEx('^(?<major>\\d+)(?:\\.(?<minor>\\d+))?$').exec(
+            version,
+          );
+          if (parts?.groups) {
+            const { major, minor } = parts.groups;
+            if (bumpType === 'major') {
+              newVersion = `${parseInt(major, 10) + 1}${minor ? `.0` : ''}`;
+            } else if (bumpType === 'minor') {
+              newVersion = `${major}.${parseInt(minor, 10) + 1}`;
+            } else {
+              throw new Error(
+                `Unsupported bump type for {major}.{minor} version: ${bumpType}`,
+              );
+            }
+          } else {
+            newVersion = inc(version, bumpType as ReleaseType);
+          }
         }
       } catch (e) {
         addArtifactError(
@@ -300,8 +323,8 @@ async function getFileContent(
     return await readLocalFile(filePath, 'utf8');
   } catch (e) {
     logger.warn(
-      { file: filePath },
-      `${bumpVersionsDescr}: Could not read file: ${e.message}`,
+      { file: filePath, bumpVersionsDescr, err: e },
+      'bumpVersions: Could not read file',
     );
     return null;
   }
@@ -318,7 +341,7 @@ function parseFileChanges(
     return { state: 'unmodified' };
   }
 
-  const lastChange = changes[changes.length - 1];
+  const lastChange = changes.at(-1)!;
   if (lastChange.type === 'deletion') {
     return { state: 'deleted' };
   }

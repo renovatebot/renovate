@@ -83,6 +83,7 @@ export function extractPackageJson(
           if (depName !== key) {
             dep.managerData = { key };
           }
+          // v8 ignore else -- TODO: add test #40625
           if (depType === 'overrides' && !isString(val)) {
             // TODO: fix type #22198
             deps.push(
@@ -114,10 +115,7 @@ export function extractPackageJson(
               } else if (isObject(overridesVal)) {
                 // Older nested object syntax: `parent: { parent: { child: version } }`
                 deps.push(
-                  ...extractOverrideDepsRec(
-                    [overridesKey],
-                    overridesVal as unknown as NpmManagerData,
-                  ),
+                  ...extractOverrideDepsRec([overridesKey], overridesVal),
                 );
               }
             }
@@ -128,8 +126,8 @@ export function extractPackageJson(
             dep.prettyDepType = depTypes[depType];
             deps.push(dep);
           }
-        } /* v8 ignore next -- needs test */
-      } catch (err) {
+        }
+      } catch (err) /* v8 ignore next -- TODO: add test #40625 */ {
         logger.debug(
           { fileName: packageFile, depType, err },
           'Error parsing package.json',

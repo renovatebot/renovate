@@ -193,9 +193,7 @@ export function getNewValue({
       // Valid rangeStrategy values are: bump, extend, pin, replace.
       // https://docs.renovatebot.com/modules/versioning/#pep440-versioning
       logger.debug(
-        'Unsupported rangeStrategy: ' +
-          rangeStrategy +
-          '. Using "replace" instead.',
+        `Unsupported rangeStrategy: ${rangeStrategy}. Using "replace" instead.`,
       );
       return getNewValue({
         currentValue,
@@ -280,7 +278,7 @@ function handleLowerBound(range: Range, newVersion: string): string | null {
   if (['>', '>='].includes(range.operator)) {
     if (lte(newVersion, range.version)) {
       // this looks like a rollback
-      return '>=' + newVersion;
+      return `>=${newVersion}`;
     }
     // otherwise, treat it same as exclude
     return range.operator + range.version;
@@ -328,7 +326,7 @@ function updateRangeValue(
       newVersion,
       range.version,
     ).join('.');
-    return range.operator + futureVersion + '.*';
+    return `${range.operator}${futureVersion}.*`;
   }
   if (range.operator === '~=') {
     const baseVersion = coerceArray(parseVersion(range.version)?.release);
@@ -499,7 +497,7 @@ function handleReplaceStrategy(
     if (['>', '>='].includes(range.operator)) {
       if (lte(newVersion, range.version)) {
         // this looks like a rollback
-        return '>=' + newVersion;
+        return `>=${newVersion}`;
       }
       // update the lower bound to reflect the accepted new version
       const lowerBound = coerceArray(parseVersion(range.version)?.release);
@@ -511,10 +509,12 @@ function handleReplaceStrategy(
       // trim last element of the newBase when new accepted version is out of range.
       // example: let new bound be >8.2.5 & newVersion be 8.2.5
       // return value will be: >8.2
-      if (range.operator === '>') {
-        if (newVersion === newBase.join('.') && newBase.length > 1) {
-          newBase.pop();
-        }
+      if (
+        range.operator === '>' &&
+        newVersion === newBase.join('.') &&
+        newBase.length > 1
+      ) {
+        newBase.pop();
       }
       return range.operator + newBase.join('.');
     }
@@ -562,11 +562,10 @@ export function checkRangeAndRemoveUnnecessaryRangeLimit(
     if (
       newRes[0].includes('.*') &&
       newRes[0].includes('==') &&
-      newRes[1].includes('>=')
+      newRes[1].includes('>=') &&
+      satisfies(newVersion, newRes[0])
     ) {
-      if (satisfies(newVersion, newRes[0])) {
-        newRange = newRes[0];
-      }
+      newRange = newRes[0];
     }
   } else {
     return rangeInput;

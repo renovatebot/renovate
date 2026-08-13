@@ -4,7 +4,7 @@ It does not call `gradle` directly in order to extract a list of dependencies.
 ### Executing the Gradle Wrapper
 
 Renovate will only execute the Gradle Wrapper (via `./gradlew` or `gradlew.bat`) if the self-hosted administrator configures [`allowedUnsafeExecutions`](../../../self-hosted-configuration.md#allowedunsafeexecutions) to include the `gradleWrapper` option.
-This is required due to [possibly supply chain security attack vectors](../../../security-and-permissions.md#trusting-repository-developers) that can occur with the Gradle Wrapper being executed.
+This is required due to [possible supply chain security attack vectors](../../../security-and-permissions.md#trusting-repository-developers) that can occur with the Gradle Wrapper being executed.
 
 ### Updating lockfiles
 
@@ -19,8 +19,7 @@ As the output of these commands can be very large, any text other than errors (i
 If Renovate finds a `gradle/verification-metadata.xml` file and either `<verify-metadata>true</verify-metadata>` or `<verify-signatures>true</verify-signatures>` (or both), it updates the content by using the `./gradlew --write-verification-metadata <hashTypes> dependencies` command.
 Renovate will check the file for existing hash types (like `sha256`) and use them as `<hashTypes>`.
 
-<!-- prettier-ignore -->
 !!! warning
-    Gradle allows verification metadata to use the `md5` and `sha1` algorithms.
-    Because those algorithms are prone to collision attacks, Renovate ignores them.
-    If Renovate encounters hashes that are generated with `md5` or `sha1` algorithms, Renovate uses `sha256` instead.
+  Gradle allows verification metadata to use the `md5` and `sha1` algorithms.
+  Because those algorithms are prone to collision attacks, Renovate ignores them.
+  If Renovate encounters hashes that are generated with `md5` or `sha1` algorithms, Renovate uses `sha256` instead.
