@@ -47,7 +47,7 @@ export async function extractPackageFile(
   // root mapping so updates use the user-facing input name as depName.
   const rootInputs = new Map<string, string>();
   for (const [inputName, nodeName] of Object.entries(
-    flakeLock.nodes.root?.inputs ?? {},
+    flakeLock.nodes[flakeLock.root]?.inputs ?? {},
   )) {
     if (typeof nodeName === 'string') {
       rootInputs.set(nodeName, inputName);
@@ -60,8 +60,8 @@ export async function extractPackageFile(
   }
 
   for (const [node, flakeInput] of Object.entries(flakeLock.nodes)) {
-    // the root input is a magic string for the entrypoint and only references other flake inputs
-    if (node === 'root') {
+    // The root node is the entrypoint and only references other flake inputs.
+    if (node === flakeLock.root) {
       continue;
     }
 

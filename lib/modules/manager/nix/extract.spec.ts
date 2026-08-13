@@ -42,6 +42,47 @@ describe('modules/manager/nix/extract', () => {
     );
   });
 
+  it('uses the root pointer to find root inputs', async () => {
+    const flakeLock = codeBlock`{
+      "nodes": {
+        "nixpkgs_2": {
+          "locked": {
+            "rev": "fb7944c166a3b630f177938e478f0378e64ce108",
+            "type": "github"
+          },
+          "original": {
+            "owner": "NixOS",
+            "ref": "nixos-unstable",
+            "repo": "nixpkgs",
+            "type": "github"
+          }
+        },
+        "root_2": {
+          "inputs": {
+            "nixpkgs": "nixpkgs_2"
+          }
+        }
+      },
+      "root": "root_2",
+      "version": 7
+    }`;
+    fs.readLocalFile.mockResolvedValueOnce(flakeLock);
+
+    expect(await extractPackageFile('', 'flake.nix')).toEqual({
+      deps: [
+        {
+          currentDigest: 'fb7944c166a3b630f177938e478f0378e64ce108',
+          currentValue: 'nixos-unstable',
+          datasource: GitRefsDatasource.id,
+          depName: 'nixpkgs',
+          packageName: 'https://github.com/NixOS/nixpkgs',
+          sourceUrl: 'https://github.com/NixOS/nixpkgs',
+          versioning: nixpkgsVersioning,
+        },
+      ],
+    });
+  });
+
   it('skips transitive dependencies', async () => {
     const flakeLock = codeBlock`{
       "nodes": {
