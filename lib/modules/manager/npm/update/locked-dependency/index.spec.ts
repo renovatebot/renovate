@@ -1,8 +1,9 @@
-import { clone } from '../../../../../util/clone.ts';
-import type { UpdateLockedConfig } from '../../../types.ts';
-import { updateLockedDependency } from '../../index.ts';
 import { Fixtures } from '~test/fixtures.ts';
 import * as httpMock from '~test/http-mock.ts';
+import { clone } from '../../../../../util/clone.ts';
+import { defaultRegistryUrl } from '../../../../datasource/npm/common.ts';
+import type { UpdateLockedConfig } from '../../../types.ts';
+import { updateLockedDependency } from '../../index.ts';
 
 const packageFileContent = Fixtures.get('package.json', './package-lock');
 const lockFileContent = Fixtures.get('package-lock-v1.json', './package-lock');
@@ -120,11 +121,11 @@ describe('modules/manager/npm/update/locked-dependency/index', () => {
       const acceptsModified = clone(acceptsJson);
       acceptsModified.versions['2.0.0'] = {};
       httpMock
-        .scope('https://registry.npmjs.org')
+        .scope(defaultRegistryUrl)
         .get('/accepts')
         .reply(200, acceptsModified);
       httpMock
-        .scope('https://registry.npmjs.org')
+        .scope(defaultRegistryUrl)
         .get('/express')
         .reply(200, expressJson);
       const res = await updateLockedDependency({
@@ -205,22 +206,13 @@ describe('modules/manager/npm/update/locked-dependency/index', () => {
       config.depName = 'mime';
       config.currentVersion = '1.2.11';
       config.newVersion = '1.4.1';
+      httpMock.scope(defaultRegistryUrl).get('/mime').reply(200, mimeJson);
+      httpMock.scope(defaultRegistryUrl).get('/send').reply(200, sendJson);
       httpMock
-        .scope('https://registry.npmjs.org')
-        .get('/mime')
-        .reply(200, mimeJson);
-      httpMock
-        .scope('https://registry.npmjs.org')
-        .get('/send')
-        .reply(200, sendJson);
-      httpMock
-        .scope('https://registry.npmjs.org')
+        .scope(defaultRegistryUrl)
         .get('/serve-static')
         .reply(200, serveStaticJson);
-      httpMock
-        .scope('https://registry.npmjs.org')
-        .get('/type-is')
-        .reply(200, typeIsJson);
+      httpMock.scope(defaultRegistryUrl).get('/type-is').reply(200, typeIsJson);
       const res = await updateLockedDependency(config);
       const packageLock = JSON.parse(res.files!['package-lock.json']);
       expect(packageLock.dependencies.mime.version).toBe('1.4.1');

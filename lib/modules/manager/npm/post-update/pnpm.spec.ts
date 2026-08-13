@@ -1,11 +1,11 @@
 import { codeBlock } from 'common-tags';
+import { envMock, mockExecAll } from '~test/exec-util.ts';
+import { Fixtures } from '~test/fixtures.ts';
+import { env, fs, partial } from '~test/util.ts';
 import { GlobalConfig } from '../../../../config/global.ts';
 import type { PostUpdateConfig, Upgrade } from '../../types.ts';
 import { getNodeToolConstraint } from './node-version.ts';
 import * as pnpmHelper from './pnpm.ts';
-import { envMock, mockExecAll } from '~test/exec-util.ts';
-import { Fixtures } from '~test/fixtures.ts';
-import { env, fs, partial } from '~test/util.ts';
 
 vi.mock('../../../../util/exec/env.ts');
 vi.mock('../../../../util/fs/index.ts');
@@ -38,7 +38,7 @@ describe('modules/manager/npm/post-update/pnpm', () => {
   beforeEach(() => {
     config = partial<PostUpdateConfig>({ constraints: { pnpm: '^2.0.0' } });
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
-    GlobalConfig.set({ localDir: '' });
+    GlobalConfig.set({ localDir: '', binarySource: 'global' });
     vi.mocked(getNodeToolConstraint).mockResolvedValueOnce({
       toolName: 'node',
       constraint: '16.16.0',
@@ -316,7 +316,34 @@ describe('modules/manager/npm/post-update/pnpm', () => {
         cmd: 'pnpm install --lockfile-only --ignore-scripts --ignore-pnpmfile',
       },
       {
-        cmd: 'pnpm dedupe --ignore-scripts',
+        cmd: 'pnpm dedupe --lockfile-only --ignore-scripts --ignore-pnpmfile',
+      },
+    ]);
+  });
+
+  it('performs dedupe without --recursive for workspaces', async () => {
+    const execSnapshots = mockExecAll();
+    mockPnpmFiles(
+      codeBlock`
+        packages:
+          - pkg-a
+      `,
+    );
+    const postUpdateOptions = ['pnpmDedupe'];
+    const res = await pnpmHelper.generateLockFile(
+      'some-folder',
+      {},
+      { ...config, postUpdateOptions },
+      upgrades,
+    );
+    expect(fs.readLocalFile).toHaveBeenCalledTimes(2);
+    expect(res.lockFile).toBe('package-lock-contents');
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'pnpm install --lockfile-only --recursive --ignore-scripts --ignore-pnpmfile',
+      },
+      {
+        cmd: 'pnpm dedupe --lockfile-only --ignore-scripts --ignore-pnpmfile',
       },
     ]);
   });
@@ -527,11 +554,11 @@ describe('modules/manager/npm/post-update/pnpm', () => {
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "some-dir" ' +
           'ghcr.io/renovatebot/base-image ' +
-          'bash -l -c "' +
+          "bash -l -c '" +
           'install-tool node 16.16.0 ' +
           '&& install-tool pnpm 6.0.0 ' +
           '&& pnpm install --lockfile-only' +
-          '"',
+          "'",
       },
     ]);
   });
@@ -585,6 +612,66 @@ describe('modules/manager/npm/post-update/pnpm', () => {
         cmd: 'pnpm install --lockfile-only --ignore-scripts',
       },
     ]);
+  });
+
+  describe('passes NODE_OPTIONS', () => {
+    it('if nodeMaxMemory set on global config', async () => {
+      GlobalConfig.set({
+        localDir: '',
+        toolSettings: {
+          nodeMaxMemory: 1234,
+        },
+        binarySource: 'global',
+      });
+      const execSnapshots = mockExecAll();
+      fs.readLocalFile.mockResolvedValue('package-lock-contents');
+      const res = await pnpmHelper.generateLockFile(
+        'some-dir',
+        {},
+        {
+          ...config,
+        },
+        upgrades,
+      );
+      expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
+      expect(res.lockFile).toBe('package-lock-contents');
+      expect(execSnapshots).toMatchObject([
+        {
+          cmd: 'pnpm install --lockfile-only --ignore-scripts --ignore-pnpmfile',
+        },
+      ]);
+
+      expect(execSnapshots[0].options?.env?.NODE_OPTIONS).toEqual(
+        '--max-old-space-size=1234',
+      );
+    });
+
+    it('if nodeMaxMemory set on repo config', async () => {
+      const execSnapshots = mockExecAll();
+      fs.readLocalFile.mockResolvedValue('package-lock-contents');
+      const res = await pnpmHelper.generateLockFile(
+        'some-dir',
+        {},
+        {
+          ...config,
+          toolSettings: {
+            nodeMaxMemory: 1234,
+          },
+        },
+        upgrades,
+      );
+      expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
+      expect(res.lockFile).toBe('package-lock-contents');
+      expect(execSnapshots).toMatchObject([
+        {
+          cmd: 'pnpm install --lockfile-only --ignore-scripts --ignore-pnpmfile',
+        },
+      ]);
+
+      expect(execSnapshots[0].options?.env?.NODE_OPTIONS).toEqual(
+        '--max-old-space-size=1234',
+      );
+    });
   });
 
   describe('getConstraintsFromLockFile()', () => {

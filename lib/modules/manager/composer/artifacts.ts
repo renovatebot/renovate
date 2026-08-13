@@ -1,6 +1,6 @@
 import { isEmptyObject, isString } from '@sindresorhus/is';
 import { quote } from 'shlex';
-import { z } from 'zod';
+import { z } from 'zod/v4';
 import {
   SYSTEM_INSUFFICIENT_DISK_SPACE,
   TEMPORARY_ERROR,
@@ -169,8 +169,7 @@ export async function updateArtifacts({
     // Determine whether install is required before update
     if (requireComposerDependencyInstallation(lockfile)) {
       const preCmd = 'composer';
-      const preArgs =
-        'install' + getComposerArguments(config, composerToolConstraint);
+      const preArgs = `install${getComposerArguments(config, composerToolConstraint)}`;
       logger.trace({ preCmd, preArgs }, 'composer pre-update command');
       commands.push('git stash -- composer.json');
       commands.push(`${preCmd} ${preArgs}`);
@@ -271,7 +270,7 @@ export async function updateArtifacts({
     return [
       {
         artifactError: {
-          lockFile: lockFileName,
+          fileName: lockFileName,
           stderr: err.message,
         },
       },

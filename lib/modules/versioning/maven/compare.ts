@@ -2,6 +2,7 @@ import { regEx } from '../../../util/regex.ts';
 
 const PREFIX_DOT = 'PREFIX_DOT';
 const PREFIX_HYPHEN = 'PREFIX_HYPHEN';
+const ALPHA_SUFFIX = '-alpha';
 
 const TYPE_NUMBER = 'TYPE_NUMBER';
 const TYPE_QUALIFIER = 'TYPE_QUALIFIER';
@@ -55,7 +56,7 @@ function isTransition(prevChar: string, nextChar: string): boolean {
 }
 
 function iterateTokens(versionStr: string, cb: (token: Token) => void): void {
-  let currentPrefix = PREFIX_HYPHEN;
+  let currentPrefix = '';
   let currentVal = '';
 
   function yieldToken(transition = false): void {
@@ -64,7 +65,7 @@ function iterateTokens(versionStr: string, cb: (token: Token) => void): void {
       cb({
         prefix: currentPrefix,
         type: TYPE_NUMBER,
-        val: parseInt(val),
+        val: parseInt(val, 10),
         isTransition: transition,
       });
     } else {
@@ -88,12 +89,23 @@ function iterateTokens(versionStr: string, cb: (token: Token) => void): void {
       yieldToken();
       currentPrefix = PREFIX_DOT;
       currentVal = '';
-    } else if (prevChar !== null && isTransition(prevChar, nextChar)) {
-      yieldToken(true);
-      currentPrefix = PREFIX_HYPHEN;
-      currentVal = nextChar;
+    } else if (prevChar === null && (nextChar === 'v' || nextChar === 'V')) {
+      currentPrefix = nextChar;
     } else {
-      currentVal = currentVal.concat(nextChar);
+      if (currentVal !== '' && isTransition(prevChar!, nextChar)) {
+        yieldToken(true);
+        currentPrefix = PREFIX_HYPHEN;
+        currentVal = nextChar;
+      } else if (
+        currentVal === '' &&
+        (currentPrefix === 'v' || currentPrefix === 'V') &&
+        !isDigit(nextChar)
+      ) {
+        currentVal = currentVal.concat(currentPrefix, nextChar);
+        currentPrefix = '';
+      } else {
+        currentVal = currentVal.concat(nextChar);
+      }
     }
   });
 }
@@ -115,7 +127,7 @@ function tokenize(versionStr: string, preserveMinorZeroes = false): Token[] {
   let buf: Token[] = [];
   let result: Token[] = [];
   let leadingZero = true;
-  iterateTokens(versionStr.toLowerCase().replace(regEx(/^v/i), ''), (token) => {
+  iterateTokens(versionStr.toLowerCase(), (token) => {
     if (token.prefix === PREFIX_HYPHEN || token.type === TYPE_QUALIFIER) {
       buf = [];
     }
@@ -423,7 +435,9 @@ function rangeToStr(fullRange: Range[] | null): string | null {
     return null;
   }
 
-  const valToStr = (val: string | null): string => val ?? '';
+  function valToStr(val: string | null): string {
+    return val ?? '';
+  }
 
   if (fullRange.length === 1) {
     const { leftBracket, rightBracket, leftValue, rightValue } = fullRange[0];
@@ -449,11 +463,18 @@ function rangeToStr(fullRange: Range[] | null): string | null {
 }
 
 function tokensToStr(tokens: Token[]): string {
-  return tokens.reduce((result: string, token: Token, idx) => {
-    const prefix = token.prefix === PREFIX_DOT ? '.' : '-';
-    return `${result}${idx !== 0 && token.val !== '' ? prefix : ''}${
-      token.val
-    }`;
+  let isTransition: boolean | undefined = false;
+  return tokens.reduce((result: string, token: Token) => {
+    let prefix: string;
+    if (token.prefix === PREFIX_DOT) {
+      prefix = '.';
+    } else if (token.prefix === PREFIX_HYPHEN) {
+      prefix = isTransition === true ? '' : '-';
+    } else {
+      prefix = token.prefix;
+    }
+    isTransition = token.isTransition;
+    return `${result}${prefix}${token.val}`;
   }, '');
 }
 
@@ -470,7 +491,7 @@ function coerceRangeValue(prev: string, next: string): string {
 
 function incrementRangeValue(value: string): string {
   const tokens = tokenize(value);
-  const lastToken = tokens[tokens.length - 1];
+  const lastToken = tokens.at(-1)!;
   if (typeof lastToken.val === 'number') {
     lastToken.val += 1;
     return coerceRangeValue(value, tokensToStr(tokens));
@@ -486,7 +507,7 @@ function autoExtendMavenRange(
   if (!range) {
     return currentRepresentation;
   }
-  const isPoint = (vals: Range[]): boolean => {
+  function isPoint(vals: Range[]): boolean {
     if (vals.length !== 1) {
       return false;
     }
@@ -496,7 +517,7 @@ function autoExtendMavenRange(
       leftType === rightType &&
       leftValue === rightValue
     );
-  };
+  }
   if (isPoint(range)) {
     return `[${newValue}]`;
   }
@@ -520,14 +541,36 @@ function autoExtendMavenRange(
     rightValue !== null &&
     incrementRangeValue(leftValue) === rightValue
   ) {
+    // if a range was detected where incrementing the lower value once results in the upper value
+    // and the new version is outside the range, construct a new range that follows the same semantic
+    // [1,2) / 4.3.2 => [4,5)
     if (compare(newValue, leftValue) !== -1) {
       interval.leftValue = coerceRangeValue(leftValue, newValue);
       interval.rightValue = incrementRangeValue(interval.leftValue);
     }
+  } else if (
+    leftValue !== null &&
+    rightValue !== null &&
+    incrementRangeValue(leftValue) + ALPHA_SUFFIX === rightValue
+  ) {
+    // same as last if, but properly considering Maven ordering specification documented at
+    // https://maven.apache.org/pom.html#Version_Order_Specification
+    // 4-alpha is smaller than 4.0.0 for example
+    // while often people that intend to only match version 1.x use [1,2)
+    // this is not correct as it matches various 2.x versions, mostly pre-versions
+    // so the correct range definition would be [1,2-alpha) as nothing
+    // starting with 2 can be lower than 2-alpha in Maven version ordering logic
+    //
+    // so this if handles the conceptually same case as the last if
+    // just for the case when proper Maven ranges are used
+    // [1,2-alpha) / 4.3.2 => [4,5-alpha)
+    interval.leftValue = coerceRangeValue(leftValue, newValue);
+    interval.rightValue =
+      incrementRangeValue(interval.leftValue) + ALPHA_SUFFIX;
   } else if (rightValue !== null) {
     if (interval.rightType === INCLUDING_POINT) {
       const tokens = tokenize(rightValue);
-      const lastToken = tokens[tokens.length - 1];
+      const lastToken = tokens.at(-1)!;
       if (typeof lastToken.val === 'number') {
         interval.rightValue = coerceRangeValue(rightValue, newValue);
       } else {
@@ -564,19 +607,19 @@ function isSubversion(majorVersion: string, minorVersion: string): boolean {
 }
 
 export {
+  EXCLUDING_POINT,
+  INCLUDING_POINT,
   PREFIX_DOT,
   PREFIX_HYPHEN,
   TYPE_NUMBER,
   TYPE_QUALIFIER,
-  tokenize,
-  isSubversion,
+  autoExtendMavenRange,
   compare,
+  isSubversion,
+  isValid,
   isVersion,
   isVersion as isSingleVersion,
-  isValid,
   parseRange,
   rangeToStr,
-  INCLUDING_POINT,
-  EXCLUDING_POINT,
-  autoExtendMavenRange,
+  tokenize,
 };

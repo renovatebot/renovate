@@ -12,6 +12,7 @@ import { ensureCacheDir } from '../../../util/fs/index.ts';
 import { ensureLocalPath } from '../../../util/fs/util.ts';
 import * as hostRules from '../../../util/host-rules.ts';
 import { regEx } from '../../../util/regex.ts';
+import { parseUrl } from '../../../util/url.ts';
 import type { PackageFileContent, UpdateArtifactsConfig } from '../types.ts';
 import type {
   CommandType,
@@ -130,6 +131,7 @@ const pipOptionsWithArguments = [
 ];
 const uvOptionsWithArguments = [
   '--constraints',
+  '--constraint', // singular alias accepted by uv
   '--python-version',
   '--no-emit-package',
   '--prerelease',
@@ -138,6 +140,9 @@ const uvOptionsWithArguments = [
   '--fork-strategy',
   '--exclude-newer',
   '--exclude-newer-package',
+  '--group',
+  '--override',
+  '--overrides',
   ...commonOptionsWithArguments,
 ];
 export const optionsWithArguments = [
@@ -233,6 +238,9 @@ export function extractHeaderCommand(
       } else if (['--constraint', '--constraints'].includes(option)) {
         result.constraintsFiles = result.constraintsFiles ?? [];
         result.constraintsFiles.push(value);
+      } else if (['--override', '--overrides'].includes(option)) {
+        result.overridesFiles = result.overridesFiles ?? [];
+        result.overridesFiles.push(value);
       } else if (option === '--output-file') {
         if (result.outputFile) {
           throw new Error('Cannot use multiple --output-file options');
@@ -352,13 +360,13 @@ function getRegistryCredEnvVars(
 }
 
 function cleanUrl(url: string): URL | null {
-  try {
-    // Strip everything but protocol, host, and port
-    const urlObj = new URL(url);
-    return new URL(urlObj.origin);
-  } catch {
+  // Strip everything but protocol, host, and port
+  const urlObj = parseUrl(url);
+  if (!urlObj) {
     return null;
   }
+  // origin of a valid URL is always parseable
+  return parseUrl(urlObj.origin);
 }
 
 export function getRegistryCredVarsFromPackageFiles(

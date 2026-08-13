@@ -2,9 +2,9 @@ import { isNullOrUndefined, isString } from '@sindresorhus/is';
 import type { AllConfig, RenovateConfig } from '../../types.ts';
 import type { MigratableConfig, Migration } from '../types.ts';
 
-export abstract class AbstractMigration<T extends RenovateConfig = AllConfig>
-  implements Migration
-{
+export abstract class AbstractMigration<
+  T extends RenovateConfig = AllConfig,
+> implements Migration {
   readonly deprecated: boolean = false;
   abstract readonly propertyName: string | RegExp;
   private readonly originalConfig: MigratableConfig<T>;

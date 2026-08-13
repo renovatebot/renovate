@@ -7,6 +7,6 @@ metadata:
 spec:
   containers:
     - name: node
-    image: quay.io/node:0.0.1
-    ports:
-    - containerPort: 80
+      image: quay.io/node:0.0.1
+      ports:
+        - containerPort: 80

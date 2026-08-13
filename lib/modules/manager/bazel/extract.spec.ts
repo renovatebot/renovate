@@ -1,9 +1,10 @@
 import { codeBlock } from 'common-tags';
-import { extractPackageFile as _extractPackageFile } from './index.ts';
 import { Fixtures } from '~test/fixtures.ts';
+import { extractPackageFile as _extractPackageFile } from './index.ts';
 
-const extractPackageFile = (content: string) =>
-  _extractPackageFile(content, 'WORKSPACE');
+function extractPackageFile(content: string) {
+  return _extractPackageFile(content, 'WORKSPACE');
+}
 
 describe('modules/manager/bazel/extract', () => {
   describe('extractPackageFile()', () => {

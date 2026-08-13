@@ -1,7 +1,7 @@
 import { codeBlock } from 'common-tags';
+import { logger } from '~test/util.ts';
 import * as npmUpdater from '../../index.ts';
 import { updateYarnrcCatalogDependency } from './yarn.ts';
-import { logger } from '~test/util.ts';
 
 describe('modules/manager/npm/update/dependency/yarn', () => {
   describe('updateYarnrcCatalogDependency', () => {
@@ -20,6 +20,7 @@ describe('modules/manager/npm/update/dependency/yarn', () => {
     `;
       const testContent = updateYarnrcCatalogDependency({
         fileContent: yarnrcYaml,
+        packageFile: '.yarnrc.yml',
         upgrade,
       });
 
@@ -45,6 +46,7 @@ describe('modules/manager/npm/update/dependency/yarn', () => {
     `;
       const testContent = updateYarnrcCatalogDependency({
         fileContent: yarnrcYaml,
+        packageFile: '.yarnrc.yml',
         upgrade,
       });
       expect(testContent).toBeNull();
@@ -67,6 +69,7 @@ describe('modules/manager/npm/update/dependency/yarn', () => {
 
       const testContent = updateYarnrcCatalogDependency({
         fileContent: yarnrcYaml,
+        packageFile: '.yarnrc.yml',
         upgrade,
       });
       expect(testContent).toBeNull();
@@ -87,6 +90,7 @@ describe('modules/manager/npm/update/dependency/yarn', () => {
     `;
       updateYarnrcCatalogDependency({
         fileContent: yarnrcYaml,
+        packageFile: '.yarnrc.yml',
         upgrade,
       });
 
@@ -111,6 +115,7 @@ describe('modules/manager/npm/update/dependency/yarn', () => {
 
       const testContent = npmUpdater.updateDependency({
         fileContent: yarnrcYaml,
+        packageFile: '.yarnrc.yml',
         upgrade,
       });
 
@@ -131,6 +136,7 @@ describe('modules/manager/npm/update/dependency/yarn', () => {
     `;
       const testContent = npmUpdater.updateDependency({
         fileContent: yarnrcYaml,
+        packageFile: '.yarnrc.yml',
         upgrade,
       });
       expect(testContent).toEqual(codeBlock`
@@ -156,6 +162,7 @@ describe('modules/manager/npm/update/dependency/yarn', () => {
     `;
       const testContent = npmUpdater.updateDependency({
         fileContent: yarnrcYaml,
+        packageFile: '.yarnrc.yml',
         upgrade,
       });
       expect(testContent).toEqual(codeBlock`
@@ -181,6 +188,7 @@ describe('modules/manager/npm/update/dependency/yarn', () => {
     `;
       const testContent = npmUpdater.updateDependency({
         fileContent: yarnrcYaml,
+        packageFile: '.yarnrc.yml',
         upgrade,
       });
       expect(testContent).toEqual(yarnrcYaml);
@@ -202,6 +210,7 @@ describe('modules/manager/npm/update/dependency/yarn', () => {
 
       const testContent = npmUpdater.updateDependency({
         fileContent: yarnrcYaml,
+        packageFile: '.yarnrc.yml',
         upgrade,
       });
       expect(testContent).toEqual(codeBlock`
@@ -228,6 +237,7 @@ describe('modules/manager/npm/update/dependency/yarn', () => {
     `;
       const testContent = npmUpdater.updateDependency({
         fileContent: yarnrcYaml,
+        packageFile: '.yarnrc.yml',
         upgrade,
       });
       expect(testContent).toEqual(codeBlock`
@@ -255,6 +265,7 @@ describe('modules/manager/npm/update/dependency/yarn', () => {
     `;
       const testContent = npmUpdater.updateDependency({
         fileContent: yarnrcYaml,
+        packageFile: '.yarnrc.yml',
         upgrade,
       });
       expect(testContent).toEqual(codeBlock`
@@ -281,6 +292,7 @@ describe('modules/manager/npm/update/dependency/yarn', () => {
     `;
       const testContent = npmUpdater.updateDependency({
         fileContent: yarnrcYaml,
+        packageFile: '.yarnrc.yml',
         upgrade,
       });
       expect(testContent).toEqual(codeBlock`
@@ -307,6 +319,8 @@ describe('modules/manager/npm/update/dependency/yarn', () => {
     `;
       const testContent = npmUpdater.updateDependency({
         fileContent: yarnrcYaml,
+        packageFile: '.yarnrc.yml',
+
         upgrade,
       });
       expect(testContent).toEqual(codeBlock`
@@ -334,6 +348,7 @@ describe('modules/manager/npm/update/dependency/yarn', () => {
     `;
       const testContent = npmUpdater.updateDependency({
         fileContent: yarnrcYaml,
+        packageFile: '.yarnrc.yml',
         upgrade,
       });
       expect(testContent).toBeNull();
@@ -351,6 +366,7 @@ describe('modules/manager/npm/update/dependency/yarn', () => {
     `;
       const testContent = npmUpdater.updateDependency({
         fileContent: yarnrcYaml,
+        packageFile: '.yarnrc.yml',
         upgrade,
       });
       expect(testContent).toBeNull();
@@ -364,6 +380,7 @@ describe('modules/manager/npm/update/dependency/yarn', () => {
       };
       const testContent = npmUpdater.updateDependency({
         fileContent: null as never,
+        packageFile: '.yarnrc.yml',
         upgrade,
       });
       expect(testContent).toBeNull();
@@ -384,6 +401,7 @@ describe('modules/manager/npm/update/dependency/yarn', () => {
     `;
       const testContent = npmUpdater.updateDependency({
         fileContent: yarnrcYaml,
+        packageFile: '.yarnrc.yml',
         upgrade,
       });
       expect(testContent).toEqual(codeBlock`
@@ -408,6 +426,7 @@ describe('modules/manager/npm/update/dependency/yarn', () => {
     `;
       const testContent = npmUpdater.updateDependency({
         fileContent: yarnrcYaml,
+        packageFile: '.yarnrc.yml',
         upgrade,
       });
       expect(testContent).toEqual(codeBlock`
@@ -434,6 +453,7 @@ describe('modules/manager/npm/update/dependency/yarn', () => {
     `;
       const testContent = npmUpdater.updateDependency({
         fileContent: yarnrcYaml,
+        packageFile: '.yarnrc.yml',
         upgrade,
       });
       expect(testContent).toEqual(codeBlock`
@@ -460,6 +480,7 @@ describe('modules/manager/npm/update/dependency/yarn', () => {
     `;
       const testContent = npmUpdater.updateDependency({
         fileContent: yarnrcYaml,
+        packageFile: '.yarnrc.yml',
         upgrade,
       });
       expect(testContent).toEqual(codeBlock`
@@ -488,6 +509,7 @@ describe('modules/manager/npm/update/dependency/yarn', () => {
     `;
       const testContent = npmUpdater.updateDependency({
         fileContent: yarnrcYaml,
+        packageFile: '.yarnrc.yml',
         upgrade,
       });
       expect(testContent).toEqual(codeBlock`
@@ -513,6 +535,7 @@ describe('modules/manager/npm/update/dependency/yarn', () => {
     `;
       const testContent = npmUpdater.updateDependency({
         fileContent: yarnrcYaml,
+        packageFile: '.yarnrc.yml',
         upgrade,
       });
       expect(testContent).toEqual(codeBlock`
@@ -537,6 +560,7 @@ describe('modules/manager/npm/update/dependency/yarn', () => {
     `;
       const testContent = npmUpdater.updateDependency({
         fileContent: yarnrcYaml,
+        packageFile: '.yarnrc.yml',
         upgrade,
       });
       expect(testContent).toEqual(codeBlock`
@@ -563,6 +587,7 @@ describe('modules/manager/npm/update/dependency/yarn', () => {
     `;
       const testContent = npmUpdater.updateDependency({
         fileContent: yarnrcYaml,
+        packageFile: '.yarnrc.yml',
         upgrade,
       });
       expect(testContent).toEqual(codeBlock`
@@ -596,6 +621,7 @@ describe('modules/manager/npm/update/dependency/yarn', () => {
     `;
       const testContent = npmUpdater.updateDependency({
         fileContent: yarnrcYaml,
+        packageFile: '.yarnrc.yml',
         upgrade,
       });
       expect(testContent).toBeNull();
@@ -618,6 +644,7 @@ describe('modules/manager/npm/update/dependency/yarn', () => {
     `;
       const testContent = npmUpdater.updateDependency({
         fileContent: yarnrcYaml,
+        packageFile: '.yarnrc.yml',
         upgrade,
       });
       expect(testContent).toBeNull();

@@ -1,8 +1,9 @@
+import { codeBlock } from 'common-tags';
+import { Fixtures } from '~test/fixtures.ts';
+import * as httpMock from '~test/http-mock.ts';
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages.ts';
 import { getPkgReleases } from '../index.ts';
 import { HelmDatasource } from './index.ts';
-import { Fixtures } from '~test/fixtures.ts';
-import * as httpMock from '~test/http-mock.ts';
 
 // Truncated index.yaml file
 const indexYaml = Fixtures.get('index.yaml');
@@ -119,10 +120,12 @@ describe('modules/datasource/helm/index', () => {
 
     it('returns null if index.yaml in response is invalid', async () => {
       const res = {
-        body: `some
-                     invalid:
-                     [
-                     yaml`,
+        body: codeBlock`
+          some
+                               invalid:
+                               [
+                               yaml
+        `,
       };
       httpMock
         .scope('https://example-repository.com')

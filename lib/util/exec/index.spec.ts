@@ -1,11 +1,14 @@
 import { mockDeep } from 'vitest-mock-extended';
+import { exec as cpExec, envMock } from '~test/exec-util.ts';
+import { logger } from '~test/util.ts';
 import { GlobalConfig } from '../../config/global.ts';
 import type { RepoGlobalConfig } from '../../config/types.ts';
 import { TEMPORARY_ERROR } from '../../constants/error-messages.ts';
+import type { UpdateArtifactsConfig } from '../../modules/manager/types.ts';
 import { setCustomEnv } from '../env.ts';
 import * as dockerModule from './docker/index.ts';
 import { getHermitEnvs } from './hermit.ts';
-import { exec } from './index.ts';
+import { exec, getToolSettingsOptions, gradleJvmArg } from './index.ts';
 import type {
   CommandWithOptions,
   ExecOptions,
@@ -14,12 +17,11 @@ import type {
   VolumeOption,
 } from './types.ts';
 import { asRawCommand } from './utils.ts';
-import { exec as cpExec, envMock } from '~test/exec-util.ts';
 
 const getHermitEnvsMock = vi.mocked(getHermitEnvs);
 
 vi.mock('./hermit.ts', async () => ({
-  ...(await vi.importActual<typeof import('./hermit.ts')>('./hermit')),
+  ...(await vi.importActual<typeof import('./hermit.ts')>('./hermit.ts')),
   getHermitEnvs: vi.fn(),
 }));
 vi.mock('../../modules/datasource/index.ts', () => mockDeep());
@@ -197,7 +199,7 @@ describe('util/exec/index', () => {
     ],
 
     [
-      'Low trust level',
+      'By default, exposeAllEnv=false',
       {
         processEnv,
         inCmd,
@@ -218,7 +220,7 @@ describe('util/exec/index', () => {
     ],
 
     [
-      'High trust level',
+      'When exposeAllEnv=true, all environment variables are passed to child',
       {
         processEnv: envMock.full,
         inCmd,
@@ -248,7 +250,7 @@ describe('util/exec/index', () => {
         outCmd: [
           dockerPullCmd,
           dockerRemoveCmd,
-          `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} -e CONTAINERBASE_CACHE_DIR ${defaultCwd} ${fullImage} bash -l -c "${inCmd}"`,
+          `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} -e CONTAINERBASE_CACHE_DIR ${defaultCwd} ${fullImage} bash -l -c '${inCmd}'`,
         ],
         outOpts: [
           dockerPullOpts,
@@ -256,6 +258,41 @@ describe('util/exec/index', () => {
           {
             cwd,
             env: containerbaseEnv,
+            timeout: 900000,
+            maxBuffer: 10485760,
+            stdin: 'pipe',
+            stdout: 'pipe',
+            stderr: 'pipe',
+          },
+        ],
+        adminConfig: { binarySource: 'docker' },
+      },
+    ],
+
+    [
+      'Explicit Docker env vars',
+      {
+        processEnv,
+        inCmd,
+        inOpts: {
+          docker: { envVars: ['FORCED_ENV_VAR'] },
+          env: { FORCED_ENV_VAR: 'forced' },
+          cwd,
+        },
+        outCmd: [
+          dockerPullCmd,
+          dockerRemoveCmd,
+          `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} -e FORCED_ENV_VAR -e CONTAINERBASE_CACHE_DIR ${defaultCwd} ${fullImage} bash -l -c '${inCmd}'`,
+        ],
+        outOpts: [
+          dockerPullOpts,
+          dockerRemoveOpts,
+          {
+            cwd,
+            env: {
+              ...containerbaseEnv,
+              FORCED_ENV_VAR: 'forced',
+            },
             timeout: 900000,
             maxBuffer: 10485760,
             stdin: 'pipe',
@@ -314,7 +351,7 @@ describe('util/exec/index', () => {
         outCmd: [
           dockerPullCmd,
           dockerRemoveCmd,
-          `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} -e SELECTED_ENV_VAR -e CONTAINERBASE_CACHE_DIR ${defaultCwd} ${fullImage} bash -l -c "${inCmd}"`,
+          `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} -e SELECTED_ENV_VAR -e CONTAINERBASE_CACHE_DIR ${defaultCwd} ${fullImage} bash -l -c '${inCmd}'`,
         ],
         outOpts: [
           dockerPullOpts,
@@ -368,7 +405,7 @@ describe('util/exec/index', () => {
         outCmd: [
           dockerPullCmd,
           dockerRemoveCmd,
-          `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} -e SELECTED_ENV_VAR -e CONTAINERBASE_CACHE_DIR ${defaultCwd} ${fullImage} bash -l -c "${inCmd}"`,
+          `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} -e SELECTED_ENV_VAR -e CONTAINERBASE_CACHE_DIR ${defaultCwd} ${fullImage} bash -l -c '${inCmd}'`,
         ],
         outOpts: [
           dockerPullOpts,
@@ -396,7 +433,7 @@ describe('util/exec/index', () => {
         outCmd: [
           dockerPullCmd,
           dockerRemoveCmd,
-          `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} -v "${volume_1}":"${volume_1}" -v "${volume_2_from}":"${volume_2_to}" -e CONTAINERBASE_CACHE_DIR -w "${cwd}" ${fullImage} bash -l -c "${inCmd}"`,
+          `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} -v "${volume_1}":"${volume_1}" -v "${volume_2_from}":"${volume_2_to}" -e CONTAINERBASE_CACHE_DIR -w "${cwd}" ${fullImage} bash -l -c '${inCmd}'`,
         ],
         outOpts: [
           dockerPullOpts,
@@ -424,7 +461,7 @@ describe('util/exec/index', () => {
         outCmd: [
           dockerPullCmd,
           dockerRemoveCmd,
-          `docker run --rm --name=${name} --label=renovate_child --user=foobar ${defaultVolumes} -e CONTAINERBASE_CACHE_DIR -w "${cwd}" ${fullImage} bash -l -c "${inCmd}"`,
+          `docker run --rm --name=${name} --label=renovate_child --user=foobar ${defaultVolumes} -e CONTAINERBASE_CACHE_DIR -w "${cwd}" ${fullImage} bash -l -c '${inCmd}'`,
         ],
         outOpts: [
           dockerPullOpts,
@@ -455,7 +492,7 @@ describe('util/exec/index', () => {
         outCmd: [
           `docker pull ghcr.io/renovatebot/base-image`,
           dockerRemoveCmd,
-          `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} -e CONTAINERBASE_CACHE_DIR -w "${cwd}" ghcr.io/renovatebot/base-image bash -l -c "${inCmd}"`,
+          `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} -e CONTAINERBASE_CACHE_DIR -w "${cwd}" ghcr.io/renovatebot/base-image bash -l -c '${inCmd}'`,
         ],
         outOpts: [
           dockerPullOpts,
@@ -486,7 +523,7 @@ describe('util/exec/index', () => {
         outCmd: [
           dockerPullCmd,
           `docker ps --filter name=myprefix_${sideCarName} -aq`,
-          `docker run --rm --name=myprefix_${sideCarName} --label=myprefix_child ${defaultVolumes} -e CONTAINERBASE_CACHE_DIR -w "${cwd}" ${fullImage} bash -l -c "${inCmd}"`,
+          `docker run --rm --name=myprefix_${sideCarName} --label=myprefix_child ${defaultVolumes} -e CONTAINERBASE_CACHE_DIR -w "${cwd}" ${fullImage} bash -l -c '${inCmd}'`,
         ],
         outOpts: [
           dockerPullOpts,
@@ -520,7 +557,7 @@ describe('util/exec/index', () => {
         outCmd: [
           dockerPullCmd,
           dockerRemoveCmd,
-          `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} -e CONTAINERBASE_CACHE_DIR -w "${cwd}" ${fullImage} bash -l -c "preCommand1 && preCommand2 && ${inCmd}"`,
+          `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} -e CONTAINERBASE_CACHE_DIR -w "${cwd}" ${fullImage} bash -l -c 'preCommand1 && preCommand2 && ${inCmd}'`,
         ],
         outOpts: [
           dockerPullOpts,
@@ -548,7 +585,7 @@ describe('util/exec/index', () => {
         outCmd: [
           dockerPullCmd,
           dockerRemoveCmd,
-          `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} -e CONTAINERBASE_CACHE_DIR -w "${cwd}" ${fullImage} bash -l -c "${inCmd}"`,
+          `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} -e CONTAINERBASE_CACHE_DIR -w "${cwd}" ${fullImage} bash -l -c '${inCmd}'`,
         ],
         outOpts: [
           dockerPullOpts,
@@ -706,7 +743,7 @@ describe('util/exec/index', () => {
         outCmd: [
           dockerPullCmd,
           dockerRemoveCmd,
-          `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} -e CUSTOM_KEY -e CONTAINERBASE_CACHE_DIR ${defaultCwd} ${fullImage} bash -l -c "${inCmd}"`,
+          `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} -e CUSTOM_KEY -e CONTAINERBASE_CACHE_DIR ${defaultCwd} ${fullImage} bash -l -c '${inCmd}'`,
         ],
         outOpts: [
           dockerPullOpts,
@@ -742,7 +779,7 @@ describe('util/exec/index', () => {
         outCmd: [
           dockerPullCmd,
           dockerRemoveCmd,
-          `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} -e CUSTOM_KEY -e CONTAINERBASE_CACHE_DIR ${defaultCwd} ${fullImage} bash -l -c "${inCmd}"`,
+          `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} -e CUSTOM_KEY -e CONTAINERBASE_CACHE_DIR ${defaultCwd} ${fullImage} bash -l -c '${inCmd}'`,
         ],
         outOpts: [
           dockerPullOpts,
@@ -912,7 +949,7 @@ describe('util/exec/index', () => {
       inOpts,
       outCmd: outCommand,
       outOpts,
-      adminConfig = {} as any,
+      adminConfig = {},
       hermitEnvs,
     } = testOpts;
 
@@ -927,12 +964,12 @@ describe('util/exec/index', () => {
       return Promise.resolve({ stdout: '', stderr: '' });
     });
     GlobalConfig.set({ ...globalConfig, localDir: cwd, ...adminConfig });
-    setCustomEnv(adminConfig.customEnvVariables);
+    setCustomEnv(adminConfig.customEnvVariables ?? {});
     if (hermitEnvs !== undefined) {
       getHermitEnvsMock.mockResolvedValue(hermitEnvs);
     }
 
-    await exec(cmd as string, inOpts);
+    await exec(cmd, inOpts);
 
     expect(actualCmd).toEqual(outCommand);
     expect(actualOpts).toEqual(outOpts);
@@ -968,15 +1005,15 @@ describe('util/exec/index', () => {
       `echo hello`,
       `docker pull ${fullImage}`,
       `docker ps --filter name=renovate_${sideCarName} -aq`,
-      `docker run --rm --name=renovate_${sideCarName} --label=renovate_child ${defaultCacheVolume} -e CONTAINERBASE_CACHE_DIR ${fullImage} bash -l -c "echo hello"`,
+      `docker run --rm --name=renovate_${sideCarName} --label=renovate_child ${defaultCacheVolume} -e CONTAINERBASE_CACHE_DIR ${fullImage} bash -l -c 'echo hello'`,
       `docker ps --filter name=renovate_${sideCarName} -aq`,
-      `docker run --rm --name=renovate_${sideCarName} --label=renovate_child ${defaultCacheVolume} -e CONTAINERBASE_CACHE_DIR ${fullImage} bash -l -c "echo hello"`,
+      `docker run --rm --name=renovate_${sideCarName} --label=renovate_child ${defaultCacheVolume} -e CONTAINERBASE_CACHE_DIR ${fullImage} bash -l -c 'echo hello'`,
       `echo hello`,
       `echo hello`,
       `docker ps --filter name=renovate_${sideCarName} -aq`,
-      `docker run --rm --name=renovate_${sideCarName} --label=renovate_child ${defaultCacheVolume} -e CONTAINERBASE_CACHE_DIR ${fullImage} bash -l -c "echo hello"`,
+      `docker run --rm --name=renovate_${sideCarName} --label=renovate_child ${defaultCacheVolume} -e CONTAINERBASE_CACHE_DIR ${fullImage} bash -l -c 'echo hello'`,
       `docker ps --filter name=renovate_${sideCarName} -aq`,
-      `docker run --rm --name=renovate_${sideCarName} --label=renovate_child ${defaultCacheVolume} -e CONTAINERBASE_CACHE_DIR ${fullImage} bash -l -c "echo hello"`,
+      `docker run --rm --name=renovate_${sideCarName} --label=renovate_child ${defaultCacheVolume} -e CONTAINERBASE_CACHE_DIR ${fullImage} bash -l -c 'echo hello'`,
     ]);
   });
 
@@ -1082,6 +1119,41 @@ describe('util/exec/index', () => {
     await expect(promise).rejects.toThrow('No tool releases found.');
   });
 
+  it('logs "Executing command" with the command and environment variable names', async () => {
+    process.env = processEnv;
+    cpExec.mockResolvedValue({ stdout: '', stderr: '' });
+    GlobalConfig.set({ ...globalConfig, localDir: cwd });
+
+    await exec(inCmd);
+
+    expect(logger.logger.debug).toHaveBeenCalledWith(
+      {
+        command: inCmd,
+        env: [
+          'HTTP_PROXY',
+          'HTTPS_PROXY',
+          'NO_PROXY',
+          'HOME',
+          'PATH',
+          'LC_ALL',
+          'LANG',
+        ],
+      },
+      'Executing command',
+    );
+  });
+
+  it('logs ignored tool constraints for binarySource=global', async () => {
+    process.env = processEnv;
+    cpExec.mockResolvedValue({ stdout: '', stderr: '' });
+    GlobalConfig.set({ ...globalConfig, binarySource: 'global' });
+    await exec('foobar', { toolConstraints: [{ toolName: 'npm' }] });
+    expect(logger.logger.once.debug).toHaveBeenCalledWith(
+      { toolConstraints: [{ toolName: 'npm' }] },
+      'Ignoring tool contraints because of `binarySource=global`',
+    );
+  });
+
   it('Supports binarySource=install preCommands', async () => {
     process.env = processEnv;
     const actualCmd: string[] = [];
@@ -1161,5 +1233,390 @@ describe('util/exec/index', () => {
     const promise = exec('foobar', {});
     await expect(promise).rejects.toThrow(TEMPORARY_ERROR);
     expect(removeDockerContainerSpy).toHaveBeenCalledTimes(0);
+  });
+
+  describe('getToolSettingsOptions()', () => {
+    const config: UpdateArtifactsConfig = {
+      newValue: '5.6.4',
+    };
+
+    describe('for JVM settings', () => {
+      beforeEach(() => {
+        GlobalConfig.set({
+          toolSettings: { jvmMemory: 768, jvmMaxMemory: 800 },
+        });
+
+        // remove any test-specific overrides
+        delete config.toolSettings;
+      });
+
+      it('returns default values if no global or repo config', () => {
+        GlobalConfig.set({});
+
+        const res = getToolSettingsOptions(undefined);
+
+        expect(res).toMatchObject({
+          jvmMemory: 512,
+          jvmMaxMemory: 512,
+        });
+      });
+
+      it('returns default values if empty repo config', () => {
+        GlobalConfig.set({});
+
+        const res = getToolSettingsOptions({});
+
+        expect(res).toMatchObject({
+          jvmMemory: 512,
+          jvmMaxMemory: 512,
+        });
+      });
+
+      it('returns default values if empty global config', () => {
+        GlobalConfig.set({
+          toolSettings: {},
+        });
+
+        const res = getToolSettingsOptions(undefined);
+
+        expect(res).toMatchObject({
+          jvmMemory: 512,
+          jvmMaxMemory: 512,
+        });
+      });
+
+      describe('does not allow floating point numbers', () => {
+        it('in global config', () => {
+          GlobalConfig.set({
+            toolSettings: { jvmMemory: 512.5, jvmMaxMemory: 600.2 },
+          });
+
+          const res = getToolSettingsOptions(undefined);
+
+          expect(res).toMatchObject({
+            jvmMemory: 512,
+            jvmMaxMemory: 600,
+          });
+        });
+
+        it('in repo config', () => {
+          GlobalConfig.set({
+            toolSettings: { jvmMemory: 1024, jvmMaxMemory: 1024 },
+          });
+
+          config.toolSettings = {
+            jvmMemory: 556.8,
+            jvmMaxMemory: 600.4,
+          };
+
+          const res = getToolSettingsOptions(config.toolSettings);
+
+          expect(res).toMatchObject({
+            jvmMemory: 556,
+            jvmMaxMemory: 600,
+          });
+        });
+      });
+
+      describe('when using repo config to override memory limits', () => {
+        it('when below global settings, repo settings are used', () => {
+          config.toolSettings = {
+            jvmMemory: 512,
+            jvmMaxMemory: 700,
+          };
+
+          const res = getToolSettingsOptions(config.toolSettings);
+
+          expect(res).toMatchObject({
+            jvmMemory: 512,
+            jvmMaxMemory: 700,
+          });
+        });
+
+        it('when repo settings are the same as global settings, they are used', () => {
+          config.toolSettings = {
+            jvmMemory: 512,
+            jvmMaxMemory: 600,
+          };
+
+          const res = getToolSettingsOptions(config.toolSettings);
+
+          expect(res).toMatchObject({
+            jvmMemory: 512,
+            jvmMaxMemory: 600,
+          });
+        });
+
+        it('when repo jvmMemory setting is higher than global setting, but lower than global jvmMaxMemory, the repo config is used', () => {
+          config.toolSettings = {
+            jvmMemory: 600,
+          };
+
+          const res = getToolSettingsOptions(config.toolSettings);
+
+          expect(res).toMatchObject({
+            jvmMemory: 600,
+          });
+        });
+
+        it('when repo jvmMaxMemory setting is lower than global settings, it is applied', () => {
+          config.toolSettings = {
+            jvmMaxMemory: 680,
+          };
+
+          const res = getToolSettingsOptions(config.toolSettings);
+
+          expect(res).toMatchObject({
+            jvmMaxMemory: 680,
+          });
+        });
+
+        it('when repo jvmMaxMemory setting is lower than global jvmMemory, jvmMemory is set to the same value', () => {
+          config.toolSettings = {
+            jvmMaxMemory: 600,
+          };
+
+          const res = getToolSettingsOptions(config.toolSettings);
+
+          expect(res).toMatchObject({
+            jvmMemory: 600,
+            jvmMaxMemory: 600,
+          });
+        });
+
+        it('when repo jvmMaxMemory setting is lower than repo jvmMemory, jvmMemory is set to the same value', () => {
+          config.toolSettings = {
+            jvmMemory: 600,
+            jvmMaxMemory: 600,
+          };
+
+          const res = getToolSettingsOptions(config.toolSettings);
+
+          expect(res).toMatchObject({
+            jvmMemory: 600,
+            jvmMaxMemory: 600,
+          });
+        });
+
+        it('when repo jvmMaxMemory setting is higher than global settings, they are ignored', () => {
+          config.toolSettings = {
+            jvmMaxMemory: 8192,
+          };
+
+          const res = getToolSettingsOptions(config.toolSettings);
+
+          expect(res).toMatchObject({
+            jvmMemory: 768,
+            jvmMaxMemory: 800,
+          });
+        });
+
+        it('when repo jvmMaxMemory setting is higher than global settings, a debug log is logged', () => {
+          config.toolSettings = {
+            jvmMaxMemory: 8192,
+          };
+
+          const res = getToolSettingsOptions(config.toolSettings);
+
+          expect(logger.logger.once.debug).toHaveBeenCalledWith(
+            'A higher jvmMaxMemory (8192) than the global configuration (800) is not permitted for Java VM invocations. Using global configuration instead',
+          );
+
+          expect(res).toMatchObject({
+            jvmMemory: 768,
+            jvmMaxMemory: 800,
+          });
+        });
+      });
+
+      // to provide a bit more safety to users, so they can't specify too little memory for Gradle
+      describe('a minimum of 512M is enforced', () => {
+        it('when global settings are lower than 512M, they are overridden to 512M', () => {
+          GlobalConfig.set({
+            toolSettings: { jvmMemory: 100, jvmMaxMemory: 127 },
+          });
+
+          const res = getToolSettingsOptions(undefined);
+
+          expect(res).toMatchObject({
+            jvmMemory: 512,
+            jvmMaxMemory: 512,
+          });
+        });
+
+        it('when global settings are lower than 512M, a debug log is logged', () => {
+          GlobalConfig.set({
+            toolSettings: { jvmMemory: 200, jvmMaxMemory: 255 },
+          });
+
+          getToolSettingsOptions(undefined);
+
+          expect(logger.logger.once.debug).toHaveBeenCalledWith(
+            'Overriding low memory settings for Java VM invocations to a minimum of 512M',
+          );
+        });
+
+        it('when repo settings are lower than 512M, they are overridden to 512M', () => {
+          config.toolSettings = {
+            jvmMemory: 500,
+            jvmMaxMemory: 511,
+          };
+
+          const res = getToolSettingsOptions(config.toolSettings);
+
+          expect(res).toMatchObject({
+            jvmMemory: 512,
+            jvmMaxMemory: 512,
+          });
+        });
+
+        it('when repo settings are lower than 512M, a debug log is logged', () => {
+          config.toolSettings = {
+            jvmMemory: 500,
+            jvmMaxMemory: 511,
+          };
+
+          getToolSettingsOptions(config.toolSettings);
+
+          expect(logger.logger.once.debug).toHaveBeenCalledWith(
+            'Overriding low memory settings for Java VM invocations to a minimum of 512M',
+          );
+        });
+      });
+    });
+
+    describe('for Node settings', () => {
+      beforeEach(() => {
+        GlobalConfig.set({
+          toolSettings: { nodeMaxMemory: 1024 },
+        });
+
+        // remove any test-specific overrides
+        delete config.toolSettings;
+      });
+
+      it('does not return a default value if no global or repo config', () => {
+        GlobalConfig.set({});
+
+        const res = getToolSettingsOptions(undefined);
+
+        expect(res).toMatchObject({
+          nodeMaxMemory: undefined,
+        });
+      });
+
+      it('does not return default values if empty global config', () => {
+        GlobalConfig.set({
+          toolSettings: {},
+        });
+
+        const res = getToolSettingsOptions(undefined);
+
+        expect(res).toMatchObject({
+          nodeMaxMemory: undefined,
+        });
+      });
+
+      describe('does not allow floating point numbers', () => {
+        it('in global config', () => {
+          GlobalConfig.set({
+            toolSettings: { nodeMaxMemory: 1024.1536 },
+          });
+
+          const res = getToolSettingsOptions(undefined);
+
+          expect(res).toMatchObject({
+            nodeMaxMemory: 1024,
+          });
+        });
+
+        it('in repo config', () => {
+          GlobalConfig.set({});
+
+          config.toolSettings = {
+            nodeMaxMemory: 1024.1536,
+          };
+
+          const res = getToolSettingsOptions(config.toolSettings);
+
+          expect(res).toMatchObject({
+            nodeMaxMemory: 1024,
+          });
+        });
+      });
+
+      describe('when using repo config to override memory limits', () => {
+        it('when below global settings, repo settings are used', () => {
+          config.toolSettings = {
+            nodeMaxMemory: 700,
+          };
+
+          const res = getToolSettingsOptions(config.toolSettings);
+
+          expect(res).toMatchObject({
+            nodeMaxMemory: 700,
+          });
+        });
+
+        it('when repo settings are the same as global settings, they are used', () => {
+          config.toolSettings = {
+            nodeMaxMemory: 1024,
+          };
+
+          const res = getToolSettingsOptions(config.toolSettings);
+
+          expect(res).toMatchObject({
+            nodeMaxMemory: 1024,
+          });
+        });
+
+        it('when repo nodeMaxMemory setting is lower than global settings, it is applied', () => {
+          config.toolSettings = {
+            nodeMaxMemory: 128,
+          };
+
+          const res = getToolSettingsOptions(config.toolSettings);
+
+          expect(res).toMatchObject({
+            nodeMaxMemory: 128,
+          });
+        });
+
+        it('when repo nodeMaxMemory setting is higher than global settings, they are ignored', () => {
+          config.toolSettings = {
+            nodeMaxMemory: 8192,
+          };
+
+          const res = getToolSettingsOptions(config.toolSettings);
+
+          expect(res).toMatchObject({
+            nodeMaxMemory: 1024,
+          });
+        });
+
+        it('when repo nodeMaxMemory setting is higher than global settings, a debug log is logged', () => {
+          config.toolSettings = {
+            nodeMaxMemory: 8192,
+          };
+
+          const res = getToolSettingsOptions(config.toolSettings);
+
+          expect(logger.logger.once.debug).toHaveBeenCalledWith(
+            'A higher nodeMaxMemory (8192) than the global configuration (1024) is not permitted for Node invocations. Using global configuration instead',
+          );
+
+          expect(res).toMatchObject({
+            nodeMaxMemory: 1024,
+          });
+        });
+      });
+    });
+  });
+
+  describe('gradleJvmArg()', () => {
+    it('takes the values given to it, and returns the JVM arguments', () => {
+      const result = gradleJvmArg({ jvmMemory: 256, jvmMaxMemory: 768 });
+      expect(result).toBe(' -Dorg.gradle.jvmargs="-Xms256m -Xmx768m"');
+    });
   });
 });

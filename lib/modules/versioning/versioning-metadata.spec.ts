@@ -1,13 +1,17 @@
-import { readdirSync } from 'node:fs';
+import { readdir } from 'node:fs/promises';
 import { readFile } from 'fs-extra';
+import { z } from 'zod/v4';
+import { markdownLinkRegex } from './common.ts';
 
-describe('modules/versioning/versioning-metadata', () => {
-  const allVersioning = readdirSync('lib/modules/versioning', {
+const allVersioning = (
+  await readdir('lib/modules/versioning', {
     withFileTypes: true,
   })
-    .filter((item) => item.isDirectory())
-    .map((item) => item.name);
+)
+  .filter((item) => item.isDirectory())
+  .map((item) => item.name);
 
+describe('modules/versioning/versioning-metadata', () => {
   describe.each(allVersioning)('%s', (versioning) => {
     it('readme with no h1 or h2 markdown headers', async () => {
       let readme = '';
@@ -37,15 +41,26 @@ describe('modules/versioning/versioning-metadata', () => {
     });
 
     it('contains mandatory fields', async () => {
-      const versioningObj = await import(`./${versioning}/index.ts`);
+      const Base = z.object({
+        id: z.string(),
+        displayName: z.string(),
+        urls: z.array(
+          z.string().regex(markdownLinkRegex, 'url must be a markdown link'),
+        ),
+      });
+      const VersioningMetadata = z.discriminatedUnion('supportsRanges', [
+        Base.extend({
+          supportsRanges: z.literal(true),
+          supportedRangeStrategies: z.array(z.string()),
+        }),
+        Base.extend({
+          supportsRanges: z.literal(false),
+        }),
+      ]);
+      const versioningObj = VersioningMetadata.parse(
+        await import(`./${versioning}/index.ts`),
+      );
       expect(versioningObj.id).toEqual(versioning);
-      expect(versioningObj.displayName).toBeDefined();
-      expect(versioningObj.urls).toBeArray();
-      expect(versioningObj.supportsRanges).toBeBoolean();
-      if (versioningObj.supportsRanges === true) {
-        // eslint-disable-next-line vitest/no-conditional-expect
-        expect(versioningObj.supportedRangeStrategies).toBeArrayOfStrings();
-      }
     });
   });
 });

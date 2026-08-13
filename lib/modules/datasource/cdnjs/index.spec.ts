@@ -1,17 +1,19 @@
+import { Fixtures } from '~test/fixtures.ts';
+import * as httpMock from '~test/http-mock.ts';
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages.ts';
 import { HttpError } from '../../../util/http/index.ts';
 import { getDigest, getPkgReleases } from '../index.ts';
 import { CdnjsDatasource } from './index.ts';
-import { Fixtures } from '~test/fixtures.ts';
-import * as httpMock from '~test/http-mock.ts';
 
 const baseUrl = 'https://api.cdnjs.com/';
 
-const pathFor = (s: string): string =>
-  `/libraries/${s.split('/').shift()}?fields=homepage,repository,versions`;
+function pathFor(s: string): string {
+  return `/libraries/${s.split('/').shift()}?fields=homepage,repository,versions`;
+}
 
-const pathForDigest = (s: string, version: string): string =>
-  `/libraries/${s.split('/').shift()}/${version}?fields=sri`;
+function pathForDigest(s: string, version: string): string {
+  return `/libraries/${s.split('/').shift()}/${version}?fields=sri`;
+}
 
 describe('modules/datasource/cdnjs/index', () => {
   describe('getReleases', () => {

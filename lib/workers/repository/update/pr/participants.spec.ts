@@ -1,10 +1,10 @@
+import { partial, platform } from '~test/util.ts';
 import { GlobalConfig } from '../../../../config/global.ts';
 import type { RenovateConfig } from '../../../../config/types.ts';
 import type { Pr } from '../../../../modules/platform/types.ts';
 import * as _util from '../../../../util/sample.ts';
 import * as _codeOwners from './code-owners.ts';
 import { addParticipants } from './participants.ts';
-import { partial, platform } from '~test/util.ts';
 
 vi.mock('../../../../util/sample.ts');
 const util = vi.mocked(_util);
@@ -13,6 +13,7 @@ vi.mock('./code-owners.ts');
 const codeOwners = vi.mocked(_codeOwners);
 
 describe('workers/repository/update/pr/participants', () => {
+  // oxlint-disable-next-line renovate/prefer-partial-in-specs -- assigneesSampleSize/reviewersSampleSize intentionally set to null, which the type does not allow, to simulate an unset value
   const config: RenovateConfig = {
     assignees: ['a', 'b', '@c'],
     reviewers: ['x', 'y', '@z'],
@@ -201,6 +202,22 @@ describe('workers/repository/update/pr/participants', () => {
         'foo',
         'bar',
         'baz',
+      ]);
+    });
+
+    it('filters out bare @ from malformed CODEOWNERS entries', async () => {
+      codeOwners.codeOwnersForPr.mockResolvedValueOnce([
+        '@UserOne',
+        '@UserTwo',
+        '@',
+      ]);
+      await addParticipants(
+        { ...config, reviewers: [], reviewersFromCodeOwners: true },
+        pr,
+      );
+      expect(platform.addReviewers).toHaveBeenCalledExactlyOnceWith(123, [
+        'UserOne',
+        'UserTwo',
       ]);
     });
 

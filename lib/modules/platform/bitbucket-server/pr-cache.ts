@@ -9,7 +9,7 @@ import { getQueryString } from '../../../util/url.ts';
 import type { BbsPr, BbsPrCacheData, BbsRestPr } from './types.ts';
 import { prInfo } from './utils.ts';
 
-/* v8 ignore next */
+/* v8 ignore next -- one-off cache-schema migration shim, only runs against real legacy repo caches */
 function migrateBitbucketServerCache(platform: unknown): void {
   if (!isPlainObject(platform)) {
     return;
@@ -72,6 +72,7 @@ export class BbsPrCache {
     const res = new BbsPrCache(projectKey, repo, ignorePrAuthor, author);
     const isSynced = memCache.get<true | undefined>('bbs-pr-cache-synced');
 
+    // v8 ignore next -- TODO: add test #40625
     if (!isSynced) {
       await res.sync(http);
       memCache.set('bbs-pr-cache-synced', true);

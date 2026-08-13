@@ -124,12 +124,12 @@ export function replaceRange({
   newVersion,
 }: NewValueConfig): string {
   const parsedRange = parseRange(currentValue);
-  const element = parsedRange[parsedRange.length - 1];
+  const element = parsedRange.at(-1)!;
   const toVersionMajor = getMajor(newVersion);
   const toVersionMinor = getMinor(newVersion);
   const toVersionPatch = getPatch(newVersion);
   const suffix = semver.prerelease(newVersion)
-    ? '-' + String(semver.prerelease(newVersion)?.[0])
+    ? `-${String(semver.prerelease(newVersion)?.[0])}`
     : '';
 
   if (element.operator === '~>') {
@@ -218,7 +218,7 @@ export function widenRange(
   options: semver.Options,
 ): string | null {
   const parsedRange = parseRange(currentValue);
-  const element = parsedRange[parsedRange.length - 1];
+  const element = parsedRange.at(-1)!;
 
   if (matchesWithOptions(newVersion, currentValue, options)) {
     return currentValue;
@@ -235,11 +235,11 @@ export function widenRange(
     return splitCurrent.join(element.operator) + newValue;
   }
   if (parsedRange.length > 1) {
-    const previousElement = parsedRange[parsedRange.length - 2];
+    const previousElement = parsedRange.at(-2)!;
     if (previousElement.operator === '-') {
       const splitCurrent = currentValue.split('-');
       splitCurrent.pop();
-      return splitCurrent.join('-') + '- ' + newValue;
+      return `${splitCurrent.join('-')}- ${newValue}`;
     }
     if (element.operator?.startsWith('>')) {
       logger.warn(`Complex ranges ending in greater than are not supported`);
@@ -265,12 +265,12 @@ export function bumpRange(
     );
   }
   const parsedRange = parseRange(currentValue);
-  const element = parsedRange[parsedRange.length - 1];
+  const element = parsedRange.at(-1)!;
 
   const toVersionMajor = getMajor(newVersion);
   const toVersionMinor = getMinor(newVersion);
   const suffix = semver.prerelease(newVersion)
-    ? '-' + String(semver.prerelease(newVersion)?.[0])
+    ? `-${String(semver.prerelease(newVersion)?.[0])}`
     : '';
 
   if (parsedRange.length === 1) {
@@ -343,7 +343,7 @@ export function bumpRange(
     return versions.filter((x: any) => x !== null && x !== '').join(' ');
   }
   logger.debug(
-    'Unsupported range type for rangeStrategy=bump: ' + currentValue,
+    `Unsupported range type for rangeStrategy=bump: ${currentValue}`,
   );
   return null;
 }

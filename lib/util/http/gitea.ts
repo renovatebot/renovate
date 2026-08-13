@@ -3,9 +3,9 @@ import { HttpBase, type InternalJsonUnsafeOptions } from './http.ts';
 import type { HttpMethod, HttpOptions, HttpResponse } from './types.ts';
 
 let baseUrl: string;
-export const setBaseUrl = (newBaseUrl: string): void => {
+export function setBaseUrl(newBaseUrl: string): void {
   baseUrl = newBaseUrl.replace(/\/*$/, '/'); // TODO #12875
-};
+}
 
 export interface GiteaHttpOptions extends HttpOptions {
   paginate?: boolean;
@@ -32,6 +32,12 @@ export class GiteaHttp extends HttpBase<GiteaHttpOptions> {
     super(hostType ?? 'gitea', options);
   }
 
+  protected override extraOptions(): readonly string[] {
+    return super
+      .extraOptions()
+      .concat(['paginate'] as (keyof GiteaHttpOptions)[]);
+  }
+
   protected override async requestJsonUnsafe<T = unknown>(
     method: HttpMethod,
     options: InternalJsonUnsafeOptions<GiteaHttpOptions>,
@@ -48,8 +54,8 @@ export class GiteaHttp extends HttpBase<GiteaHttpOptions> {
       opts.httpOptions.memCache = false;
 
       delete opts.httpOptions.paginate;
-      const total = parseInt(res.headers['x-total-count'] as string);
-      let nextPage = parseInt(resolvedUrl.searchParams.get('page') ?? '1');
+      const total = parseInt(res.headers['x-total-count'] as string, 10);
+      let nextPage = parseInt(resolvedUrl.searchParams.get('page') ?? '1', 10);
 
       while (total && pc.length < total) {
         nextPage += 1;

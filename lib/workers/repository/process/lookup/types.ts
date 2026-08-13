@@ -24,19 +24,25 @@ export interface FilterConfig {
 
 export interface RollbackConfig {
   currentValue?: string;
+  packageName: string;
   depName?: string;
   packageFile?: string;
   versioning?: string;
+  datasource: string;
 }
 
 export interface LookupUpdateConfig
-  extends RollbackConfig,
-    FilterConfig,
-    RangeConfig,
-    RenovateConfig {
+  extends RollbackConfig, FilterConfig, RangeConfig, RenovateConfig {
   currentVersion?: string;
 
   digestOneAndOnly?: boolean;
+  /**
+   * The digest for this dependency is managed externally (for instance in a lockfile) instead of alongside the package file's version,
+   * so Renovate must not pin the digest inline.
+   *
+   * As this is due to the package ecossytem/manager in use, this shouldn't be overridable by `packageRules`
+   */
+  digestManagedExternally?: boolean;
   rollbackPrs?: boolean;
   currentDigest?: string;
   lockedVersion?: string;
@@ -72,7 +78,7 @@ export interface UpdateResult {
   warnings: ValidationMessage[];
   versioning?: string;
   currentVersionAgeInDays?: number;
-  currentVersionTimestamp?: string;
+  currentVersionTimestamp?: Timestamp;
   vulnerabilityFixVersion?: string;
   vulnerabilityFixStrategy?: string;
   mostRecentTimestamp?: Timestamp | null;

@@ -1,12 +1,12 @@
+import { partial } from '~test/util.ts';
 import { CONFIG_GIT_URL_UNAVAILABLE } from '../../../constants/error-messages.ts';
-import type { Repo } from './types.ts';
+import type { Repo } from './schema.ts';
 import {
   getMergeMethod,
   getRepoUrl,
   trimTrailingApiPath,
   usableRepo,
 } from './utils.ts';
-import { partial } from '~test/util.ts';
 
 describe('modules/platform/forgejo/utils', () => {
   const mockRepo = partial<Repo>({

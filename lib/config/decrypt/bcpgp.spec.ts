@@ -1,10 +1,10 @@
+import { Fixtures } from '~test/fixtures.ts';
+import { logger } from '~test/util.ts';
 import { CONFIG_VALIDATION } from '../../constants/error-messages.ts';
 import { decryptConfig, setPrivateKeys } from '../decrypt.ts';
 import { GlobalConfig } from '../global.ts';
 import type { AllConfig } from '../types.ts';
 import { tryDecryptBcPgp } from './bcpgp.ts';
-import { Fixtures } from '~test/fixtures.ts';
-import { logger } from '~test/util.ts';
 
 const privateKey = Fixtures.get('private-pgp.pem', '..');
 const privateKeyEcc = `

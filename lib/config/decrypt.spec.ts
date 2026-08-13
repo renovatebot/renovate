@@ -1,3 +1,4 @@
+import { logger } from '~test/util.ts';
 import {
   decryptConfig,
   getAzureCollection,
@@ -5,7 +6,6 @@ import {
 } from './decrypt.ts';
 import { GlobalConfig } from './global.ts';
 import type { RenovateConfig } from './types.ts';
-import { logger } from '~test/util.ts';
 
 const repository = 'abc/def';
 
@@ -53,9 +53,28 @@ describe('config/decrypt', () => {
 
       process.env.MEND_HOSTED = 'true';
       process.env.RENOVATE_X_ENCRYPTED_STRICT = 'true';
-      await expect(decryptConfig(config, repository)).rejects.toThrow(
-        'config-validation',
-      );
+
+      await expect(decryptConfig(config, repository)).rejects.toMatchObject({
+        message: 'config-validation',
+        validationMessage: expect.stringContaining(
+          'https://docs.renovatebot.com/mend-hosted/migrating-secrets/',
+        ),
+      });
+    });
+
+    it('uses productLinks.documentation in Mend Hosted error URL', async () => {
+      config.encrypted = { a: '1' };
+      GlobalConfig.set({
+        productLinks: { documentation: 'https://custom.example.com/' },
+      });
+      process.env.MEND_HOSTED = 'true';
+      process.env.RENOVATE_X_ENCRYPTED_STRICT = 'true';
+
+      await expect(decryptConfig(config, repository)).rejects.toMatchObject({
+        validationMessage: expect.stringContaining(
+          'https://custom.example.com/mend-hosted/migrating-secrets/',
+        ),
+      });
     });
   });
 

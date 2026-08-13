@@ -1,17 +1,14 @@
-import type {
-  CommitFilesConfig,
-  LongCommitSha,
-} from '../../../util/git/types.ts';
+import { fakeSha, git } from '~test/util.ts';
+import type { CommitFilesConfig } from '../../../util/git/types.ts';
 import * as _github from './index.ts';
 import { GithubScm } from './scm.ts';
-import { git } from '~test/util.ts';
 
 vi.mock('./index.ts');
 const github = vi.mocked(_github);
 
 describe('modules/platform/github/scm', () => {
   beforeEach(() => {
-    git.commitFiles.mockResolvedValue('sha' as LongCommitSha);
+    git.commitFiles.mockResolvedValue(fakeSha('sha'));
   });
 
   const githubScm = new GithubScm();

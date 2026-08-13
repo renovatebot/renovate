@@ -1,6 +1,6 @@
-import { checkIfConfigured } from './configured.ts';
 import type { RenovateConfig } from '~test/util.ts';
 import { partial } from '~test/util.ts';
+import { checkIfConfigured } from './configured.ts';
 
 let config: RenovateConfig;
 
@@ -19,13 +19,13 @@ describe('workers/repository/configured', () => {
 
     it('throws if disabled', () => {
       config.enabled = false;
-      expect(() => checkIfConfigured(config)).toThrow();
+      expect(() => checkIfConfigured(config)).toThrow('disabled-by-config');
     });
 
     it('throws if unconfigured fork', () => {
       config.enabled = true;
       config.isFork = true;
-      expect(() => checkIfConfigured(config)).toThrow();
+      expect(() => checkIfConfigured(config)).toThrow('fork');
     });
   });
 });

@@ -6,8 +6,8 @@ import type { VersioningApi } from '../types.ts';
 export const id = 'unity3d-packages';
 export const displayName = 'Unity3D Packages';
 export const urls = [
-  'https://docs.unity3d.com/Manual/upm-semver.html',
-  'https://docs.unity3d.com/Manual/upm-lifecycle.html',
+  '[Unity Package Manager - Versioning](https://docs.unity3d.com/Manual/upm-semver.html)',
+  '[Unity Package Manager - Lifecycle](https://docs.unity3d.com/Manual/upm-lifecycle.html)',
 ];
 export const supportsRanges = false;
 
@@ -24,7 +24,11 @@ class Unity3dPackagesVersioningApi extends GenericVersioningApi {
     }
     const { major, minor, patch, label } = matches.groups;
 
-    const release = [parseInt(major), parseInt(minor), parseInt(patch)];
+    const release = [
+      parseInt(major, 10),
+      parseInt(minor, 10),
+      parseInt(patch, 10),
+    ];
     const isStable = !Unity3dPackagesVersioningApi.unstableRegex.test(label);
 
     return { release, prerelease: isStable ? undefined : label };

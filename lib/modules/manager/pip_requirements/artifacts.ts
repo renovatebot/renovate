@@ -102,7 +102,7 @@ export async function updateArtifacts({
     return [
       {
         artifactError: {
-          lockFile: packageFileName,
+          fileName: packageFileName,
           stderr: `${String(err.stdout)}\n${String(err.stderr)}`,
         },
       },

@@ -44,7 +44,7 @@ export function parseRegistryUrl(registryUrl: string): ParsedRegistryUrl {
   if (protocolVersionMatch) {
     const { protocol } = protocolVersionMatch;
     parsedUrl.hash = '';
-    protocolVersion = Number.parseInt(protocol);
+    protocolVersion = Number.parseInt(protocol, 10);
   } else if (parsedUrl.pathname.endsWith('.json')) {
     protocolVersion = 3;
   }
@@ -63,12 +63,11 @@ export function sortNugetVersions(a: string, b: string): number {
   if (versioning.isValid(a)) {
     if (versioning.isValid(b)) {
       return versioning.sortVersions(a, b);
-    } else {
-      return 1;
     }
-  } else if (versioning.isValid(b)) {
-    return -1;
-  } else {
-    return 0;
+    return 1;
   }
+  if (versioning.isValid(b)) {
+    return -1;
+  }
+  return 0;
 }

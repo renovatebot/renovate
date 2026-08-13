@@ -3,17 +3,24 @@ import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
 import { NodeVersionDatasource } from '../../datasource/node-version/index.ts';
 import { NpmDatasource } from '../../datasource/npm/index.ts';
 
+export { updateArtifacts } from './artifacts.ts';
 export { detectGlobalConfig } from './detect.ts';
 export { extractAllPackageFiles } from './extract/index.ts';
+export { getRangeStrategy } from './range.ts';
 export {
   bumpPackageVersion,
   updateDependency,
   updateLockedDependency,
 } from './update/index.ts';
-export { getRangeStrategy } from './range.ts';
-export { updateArtifacts } from './artifacts.ts';
 
 export const supportsLockFileMaintenance = true;
+export const lockFileNames = [
+  'package-lock.json',
+  'pnpm-lock.yaml',
+  'yarn.lock',
+];
+export const lockFileMaintenanceIsDelegatedToPackageManager =
+  'Delegated to the underlying package manager CLI - `npm`, `pnpm`, or Yarn - depending on which lock file is present.';
 
 export const displayName = 'npm';
 export const url = 'https://docs.npmjs.com';
@@ -42,3 +49,5 @@ export const supportedDatasources = [
   NpmDatasource.id,
   NodeVersionDatasource.id,
 ];
+
+export { knownDepTypes, supportsDynamicDepTypesNote } from './dep-types.ts';

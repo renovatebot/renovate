@@ -26,7 +26,7 @@ export class GlasskubeVersioningApi extends GenericVersioningApi {
     const build = parsedVersion.build.at(0);
     if (build) {
       try {
-        result.release.push(parseInt(build));
+        result.release.push(parseInt(build, 10));
       } catch {
         /* noop */
       }

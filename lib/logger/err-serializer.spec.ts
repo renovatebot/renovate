@@ -1,9 +1,9 @@
+import * as httpMock from '~test/http-mock.ts';
+import { partial } from '~test/util.ts';
 import * as hostRules from '../util/host-rules.ts';
 import { Http } from '../util/http/index.ts';
 import errSerializer from './err-serializer.ts';
 import { sanitizeValue } from './utils.ts';
-import * as httpMock from '~test/http-mock.ts';
-import { partial } from '~test/util.ts';
 
 describe('logger/err-serializer', () => {
   it('expands errors', () => {

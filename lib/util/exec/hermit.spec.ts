@@ -1,11 +1,11 @@
 import { codeBlock } from 'common-tags';
 import { findUp as _findUp } from 'find-up';
 import upath from 'upath';
+import { mockExecAll } from '~test/exec-util.ts';
+import { partial } from '~test/util.ts';
 import { GlobalConfig } from '../../config/global.ts';
 import { findHermitCwd, getHermitEnvs, isHermit } from './hermit.ts';
 import type { RawExecOptions } from './types.ts';
-import { mockExecAll } from '~test/exec-util.ts';
-import { partial } from '~test/util.ts';
 
 vi.mock('find-up');
 const findUp = vi.mocked(_findUp);
@@ -24,7 +24,6 @@ describe('util/exec/hermit', () => {
   describe('findHermitCwd', () => {
     beforeEach(() => {
       GlobalConfig.set({ localDir });
-      findUp.mockClear();
     });
 
     it.each`
@@ -56,7 +55,6 @@ describe('util/exec/hermit', () => {
   describe('getHermitEnvs', () => {
     beforeEach(() => {
       GlobalConfig.set({ localDir });
-      findUp.mockClear();
     });
 
     it('should return hermit environment variables when hermit env returns successfully', async () => {

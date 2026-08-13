@@ -1,6 +1,6 @@
-import { getBaseBranchDesc } from './base-branch.ts';
 import type { RenovateConfig } from '~test/util.ts';
 import { partial } from '~test/util.ts';
+import { getBaseBranchDesc } from './base-branch.ts';
 
 describe('workers/repository/onboarding/pr/base-branch', () => {
   describe('getBaseBranchDesc()', () => {

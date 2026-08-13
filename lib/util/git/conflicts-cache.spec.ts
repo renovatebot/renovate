@@ -1,10 +1,10 @@
+import { partial } from '~test/util.ts';
 import * as _repositoryCache from '../cache/repository/index.ts';
 import type { BranchCache, RepoCacheData } from '../cache/repository/types.ts';
 import {
   getCachedConflictResult,
   setCachedConflictResult,
 } from './conflicts-cache.ts';
-import { partial } from '~test/util.ts';
 
 vi.mock('../cache/repository/index.ts');
 const repositoryCache = vi.mocked(_repositoryCache);

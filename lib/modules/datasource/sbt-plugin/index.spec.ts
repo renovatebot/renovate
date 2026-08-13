@@ -1,12 +1,12 @@
 import { codeBlock } from 'common-tags';
+import { Fixtures } from '~test/fixtures.ts';
+import * as httpMock from '~test/http-mock.ts';
 import { regEx } from '../../../util/regex.ts';
 import * as mavenVersioning from '../../versioning/maven/index.ts';
 import { getPkgReleases } from '../index.ts';
 import { MAVEN_REPO } from '../maven/common.ts';
 import { extractPageLinks } from '../sbt-package/util.ts';
 import { SbtPluginDatasource } from './index.ts';
-import { Fixtures } from '~test/fixtures.ts';
-import * as httpMock from '~test/http-mock.ts';
 
 const mavenIndexHtml = Fixtures.get(`maven-index.html`);
 const sbtPluginIndex = Fixtures.get(`sbt-plugins-index.html`);

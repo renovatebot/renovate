@@ -7,7 +7,7 @@ import { regEx } from '../../../util/regex.ts';
 import * as template from '../../../util/template/index.ts';
 import type { BranchUpgradeConfig } from '../../types.ts';
 
-const slugify = _slugify as unknown as typeof _slugify.default;
+const slugify = _slugify;
 
 const MIN_HASH_LENGTH = 6;
 
@@ -49,7 +49,7 @@ function cleanBranchName(
     .replace(regEx(/^\.|\.$/), '') // leading or trailing dot
     .replace(regEx(/\/\./g), '/') // leading dot after slash
     .replace(regEx(/\s/g), '') // whitespace
-    .replace(regEx(/[[\]?:\\^~]/g), '-') // massage out all these characters: [ ] ? : \ ^ ~
+    .replace(regEx(/[[\]?:\\^~<>]/g), '-') // massage out all these characters: [ ] ? : \ ^ ~ < >
     .replace(regEx(/(^|\/)-+/g), '$1') // leading dashes
     .replace(regEx(/-+(\/|$)/g), '$1') // trailing dashes
     .replace(RE_MULTIPLE_DASH, '-'); // chained dashes
@@ -67,7 +67,7 @@ export function generateBranchName(update: BranchUpgradeConfig): void {
   }
 
   if (update.groupName) {
-    if (['lockFileMaintenance', 'replacement'].includes(update.updateType!)) {
+    if (update.updateType === 'replacement') {
       logger.debug(
         { depName: update.depName },
         `Ignoring grouped branch name for ${update.updateType} update`,
@@ -100,6 +100,9 @@ export function generateBranchName(update: BranchUpgradeConfig): void {
       if (update.updateType === 'patch' && update.separateMinorPatch) {
         update.groupSlug = `patch-${update.groupSlug}`;
       }
+      if (update.updateType === 'lockFileMaintenance') {
+        update.groupSlug = `lock-file-maintenance-${update.groupSlug}`;
+      }
       update.branchTopic = update.group!.branchTopic ?? update.branchTopic;
       update.branchName = update.group!.branchName ?? update.branchName;
     }
@@ -109,7 +112,8 @@ export function generateBranchName(update: BranchUpgradeConfig): void {
     let hashLength = update.hashedBranchLength - update.branchPrefix!.length;
     if (hashLength < MIN_HASH_LENGTH) {
       logger.warn(
-        `\`hashedBranchLength\` must allow for at least ${MIN_HASH_LENGTH} characters hashing in addition to \`branchPrefix\`. Using ${MIN_HASH_LENGTH} character hash instead.`,
+        { minHashLength: MIN_HASH_LENGTH },
+        '`hashedBranchLength` must allow for at least the minimum hash length in addition to `branchPrefix`. Using the minimum hash length instead.',
       );
       hashLength = MIN_HASH_LENGTH;
     }

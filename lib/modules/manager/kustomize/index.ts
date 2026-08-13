@@ -3,6 +3,7 @@ import { DockerDatasource } from '../../datasource/docker/index.ts';
 import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
 import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
 import { HelmDatasource } from '../../datasource/helm/index.ts';
+
 export { updateArtifacts } from './artifacts.ts';
 export { extractPackageFile } from './extract.ts';
 
@@ -20,3 +21,5 @@ export const supportedDatasources = [
   GithubTagsDatasource.id,
   HelmDatasource.id,
 ];
+
+export { knownDepTypes } from './dep-types.ts';

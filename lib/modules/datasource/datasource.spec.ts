@@ -1,8 +1,8 @@
+import * as httpMock from '~test/http-mock.ts';
+import { partial } from '~test/util.ts';
 import { EXTERNAL_HOST_ERROR } from '../../constants/error-messages.ts';
 import { Datasource } from './datasource.ts';
 import type { GetReleasesConfig, ReleaseResult } from './types.ts';
-import * as httpMock from '~test/http-mock.ts';
-import { partial } from '~test/util.ts';
 
 const exampleUrl = 'https://example.com/';
 

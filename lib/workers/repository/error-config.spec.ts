@@ -1,4 +1,6 @@
 import { mock } from 'vitest-mock-extended';
+import type { RenovateConfig } from '~test/util.ts';
+import { partial, platform } from '~test/util.ts';
 import { GlobalConfig } from '../../config/global.ts';
 import { CONFIG_VALIDATION } from '../../constants/error-messages.ts';
 import { logger } from '../../logger/index.ts';
@@ -7,8 +9,6 @@ import {
   raiseConfigWarningIssue,
   raiseCredentialsWarningIssue,
 } from './error-config.ts';
-import { partial, platform } from '~test/util.ts';
-import type { RenovateConfig } from '~test/util.ts';
 
 let config: RenovateConfig;
 

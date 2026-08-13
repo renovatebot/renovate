@@ -1,8 +1,8 @@
+import { partial } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import type { RepositoryCacheConfig } from '../../../config/types.ts';
 import type { WorkerPlatformConfig } from './apis.ts';
 import { initializeCaches } from './cache.ts';
-import { partial } from '~test/util.ts';
 
 describe('workers/repository/init/cache', () => {
   describe('initializeCaches()', () => {

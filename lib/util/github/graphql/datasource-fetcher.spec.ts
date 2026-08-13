@@ -1,3 +1,5 @@
+import * as httpMock from '~test/http-mock.ts';
+import { partial } from '~test/util.ts';
 import * as _packageCache from '../../../util/cache/package/index.ts';
 import type { Timestamp } from '../../../util/timestamp.ts';
 import type { GithubGraphqlResponse } from '../../http/github.ts';
@@ -12,8 +14,6 @@ import type {
   GithubGraphqlDatasourceAdapter,
   GithubGraphqlRepoResponse,
 } from './types.ts';
-import * as httpMock from '~test/http-mock.ts';
-import { partial } from '~test/util.ts';
 
 vi.mock('../../../util/cache/package/index.ts');
 const packageCache = vi.mocked(_packageCache);
@@ -63,7 +63,7 @@ const adapter: GithubGraphqlDatasourceAdapter<
 function resp(
   isRepoPrivate: boolean | undefined,
   nodes: TestAdapterInput[],
-  cursor: string | undefined = undefined,
+  cursor?: string,
 ): GithubGraphqlResponse<GithubGraphqlRepoResponse<TestAdapterInput>> {
   const data: GithubGraphqlRepoResponse<TestAdapterInput> = {
     repository: {
@@ -326,7 +326,7 @@ describe('util/github/graphql/datasource-fetcher', () => {
         const pages = partitions.map((nodes, idx) =>
           resp(false, nodes, `page-${idx + 2}`),
         );
-        delete pages[pages.length - 1].data?.repository.payload.pageInfo;
+        delete pages.at(-1)!.data?.repository.payload.pageInfo;
         return pages;
       }
 

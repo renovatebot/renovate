@@ -1,6 +1,7 @@
 import type { Category } from '../../../constants/index.ts';
 import { GithubReleasesDatasource } from '../../datasource/github-releases/index.ts';
 
+export { knownDepTypes } from './dep-types.ts';
 export { extractPackageFile } from './extract.ts';
 
 export const displayName = 'TFLint Plugins';

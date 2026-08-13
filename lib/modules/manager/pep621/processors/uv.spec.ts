@@ -1,8 +1,13 @@
 import { codeBlock } from 'common-tags';
 import { GoogleAuth as _googleAuth } from 'google-auth-library';
 import upath from 'upath';
+import { mockExecAll } from '~test/exec-util.ts';
+import { fs, hostRules, logger, partial } from '~test/util.ts';
 import { GlobalConfig } from '../../../../config/global.ts';
-import type { RepoGlobalConfig } from '../../../../config/types.ts';
+import type {
+  InternalGlobalConfigOptions,
+  RepoGlobalConfig,
+} from '../../../../config/types.ts';
 import { TEMPORARY_ERROR } from '../../../../constants/error-messages.ts';
 import { GitRefsDatasource } from '../../../datasource/git-refs/index.ts';
 import { GitTagsDatasource } from '../../../datasource/git-tags/index.ts';
@@ -14,8 +19,6 @@ import type { UpdateArtifact, UpdateArtifactsConfig } from '../../types.ts';
 import { parsePyProject } from '../extract.ts';
 import { depTypes } from '../utils.ts';
 import { UvProcessor } from './uv.ts';
-import { mockExecAll } from '~test/exec-util.ts';
-import { fs, hostRules, logger, partial } from '~test/util.ts';
 
 vi.mock('google-auth-library');
 vi.mock('../../../../util/fs/index.ts');
@@ -25,10 +28,11 @@ const googleAuth = vi.mocked(_googleAuth);
 const getPkgReleases = vi.mocked(_getPkgReleases);
 
 const config: UpdateArtifactsConfig = {};
-const adminConfig: RepoGlobalConfig = {
+const adminConfig: RepoGlobalConfig & InternalGlobalConfigOptions = {
   localDir: upath.join('/tmp/github/some/repo'),
   cacheDir: upath.join('/tmp/cache'),
   containerbaseDir: upath.join('/tmp/cache/containerbase'),
+  binarySource: 'global',
 };
 
 const processor = new UvProcessor();
@@ -450,13 +454,13 @@ describe('modules/manager/pep621/processors/uv', () => {
             '-e CONTAINERBASE_CACHE_DIR ' +
             '-w "/tmp/github/some/repo" ' +
             'ghcr.io/renovatebot/base-image ' +
-            'bash -l -c "' +
+            "bash -l -c '" +
             'install-tool python 3.11.1 ' +
             '&& ' +
             'install-tool uv 0.2.35 ' +
             '&& ' +
             'uv lock --upgrade-package dep1' +
-            '"',
+            "'",
         },
       ]);
     });
@@ -480,7 +484,7 @@ describe('modules/manager/pep621/processors/uv', () => {
         parsePyProject('')!,
       );
       expect(result).toEqual([
-        { artifactError: { lockFile: 'uv.lock', stderr: 'test error' } },
+        { artifactError: { fileName: 'uv.lock', stderr: 'test error' } },
       ]);
       expect(execSnapshots).toEqual([]);
     });

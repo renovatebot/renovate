@@ -1,4 +1,4 @@
-import { setTimeout } from 'timers/promises';
+import { setTimeout } from 'node:timers/promises';
 import { RequestError } from 'got';
 import { DateTime } from 'luxon';
 import { logger } from '../../logger/index.ts';
@@ -101,7 +101,7 @@ export function getRetryAfter(err: unknown): number | null {
     return seconds;
   }
 
-  const seconds = parseInt(retryAfter);
+  const seconds = parseInt(retryAfter, 10);
   if (!Number.isNaN(seconds) && seconds >= 0) {
     return seconds;
   }

@@ -1,9 +1,9 @@
 import { codeBlock } from 'common-tags';
+import { Fixtures } from '~test/fixtures.ts';
+import { fs } from '~test/util.ts';
 import * as hostRules from '../../../util/host-rules.ts';
 import type { ExtractConfig } from '../types.ts';
 import { extractPackageFile } from './index.ts';
-import { Fixtures } from '~test/fixtures.ts';
-import { fs } from '~test/util.ts';
 
 vi.mock('../../../util/fs/index.ts');
 
@@ -544,6 +544,54 @@ replace-with = "mcorbin"
       expect(res?.deps).toMatchSnapshot();
       expect(res?.deps).toHaveLength(1);
       expect(res?.deps[0].packageName).toBe('boolector');
+    });
+
+    it('keeps the git source as packageName for renamed git dependencies', async () => {
+      const cargotoml = codeBlock`
+        [dependencies]
+        github-tag = { package = "real-crate", git = "https://github.com/foo/bar", tag = "v1.2.3" }
+        gitlab-tag = { package = "real-crate", git = "https://gitlab.com/foo/bar", tag = "v1.2.3" }
+        other-tag = { package = "real-crate", git = "https://gitea.example.com/foo/bar", tag = "v1.2.3" }
+        rev = { package = "real-crate", git = "https://github.com/foo/bar", rev = "abcdef0" }
+        crates-io = { package = "real-crate", version = "0.4.0" }
+        `;
+
+      const res = await extractPackageFile(cargotoml, 'Cargo.toml', config);
+
+      expect(res?.deps).toMatchObject([
+        {
+          depName: 'github-tag',
+          datasource: 'github-tags',
+          packageName: 'foo/bar',
+          registryUrls: ['https://github.com'],
+          currentValue: 'v1.2.3',
+        },
+        {
+          depName: 'gitlab-tag',
+          datasource: 'gitlab-tags',
+          packageName: 'foo/bar',
+          registryUrls: ['https://gitlab.com'],
+          currentValue: 'v1.2.3',
+        },
+        {
+          depName: 'other-tag',
+          datasource: 'git-tags',
+          packageName: 'https://gitea.example.com/foo/bar',
+          currentValue: 'v1.2.3',
+        },
+        {
+          depName: 'rev',
+          datasource: 'git-refs',
+          packageName: 'https://github.com/foo/bar',
+          currentDigest: 'abcdef0',
+        },
+        {
+          depName: 'crates-io',
+          datasource: 'crate',
+          packageName: 'real-crate',
+          currentValue: '0.4.0',
+        },
+      ]);
     });
 
     it('extracts locked versions', async () => {

@@ -1,10 +1,14 @@
 import type { Category } from '../../../constants/index.ts';
 import { PypiDatasource } from '../../datasource/pypi/index.ts';
-export { bumpPackageVersion } from './update.ts';
-export { extractPackageFile } from './extract.ts';
+
 export { updateArtifacts } from './artifacts.ts';
+export { extractPackageFile } from './extract.ts';
+export { bumpPackageVersion } from './update.ts';
 
 export const supportsLockFileMaintenance = true;
+export const lockFileNames = ['pdm.lock', 'uv.lock'];
+export const lockFileMaintenanceIsDelegatedToPackageManager =
+  'Delegated to the underlying package manager CLI - `pdm` or `uv` - depending on which lockfile format the project uses.';
 
 export const displayName = 'PEP 621';
 export const url = 'https://peps.python.org/pep-0621';
@@ -15,3 +19,5 @@ export const defaultConfig = {
 };
 
 export const supportedDatasources = [PypiDatasource.id];
+
+export { knownDepTypes, supportsDynamicDepTypesNote } from './dep-types.ts';

@@ -24,6 +24,28 @@ describe('modules/manager/index', () => {
     }
   });
 
+  describe('lockFileNames', () => {
+    for (const [name, mgr] of [...manager.getManagers()].filter(
+      ([_, mgr]) => mgr.supportsLockFileMaintenance,
+    )) {
+      it(`has lockFileNames for ${name}`, () => {
+        expect(mgr.lockFileNames).toBeNonEmptyArray();
+      });
+    }
+  });
+
+  describe('lockFileMaintenanceIsDelegatedToPackageManager', () => {
+    for (const [name, mgr] of [...manager.getManagers()].filter(
+      ([_, mgr]) => mgr.supportsLockFileMaintenance,
+    )) {
+      it(`has lockFileMaintenanceIsDelegatedToPackageManager for ${name}`, () => {
+        expect(mgr.lockFileMaintenanceIsDelegatedToPackageManager).toSatisfy(
+          (value) => typeof value === 'boolean' || typeof value === 'string',
+        );
+      });
+    }
+  });
+
   describe('get()', () => {
     it('gets something', () => {
       expect(manager.get('dockerfile', 'extractPackageFile')).not.toBeNull(); // gets built-in manager
@@ -107,11 +129,9 @@ describe('modules/manager/index', () => {
         supportedDatasources: [],
       });
       expect(
-        await manager.extractAllPackageFiles('unknown', {} as any, []),
+        await manager.extractAllPackageFiles('unknown', {}, []),
       ).toBeNull();
-      expect(
-        await manager.extractAllPackageFiles('dummy', {} as any, []),
-      ).toBeNull();
+      expect(await manager.extractAllPackageFiles('dummy', {}, [])).toBeNull();
     });
 
     it('returns non-null', async () => {
@@ -121,7 +141,7 @@ describe('modules/manager/index', () => {
         extractAllPackageFiles: () => Promise.resolve([]),
       });
       expect(
-        await manager.extractAllPackageFiles('dummy', {} as any, []),
+        await manager.extractAllPackageFiles('dummy', {}, []),
       ).not.toBeNull();
     });
 
@@ -248,6 +268,28 @@ describe('modules/manager/index', () => {
     it('returns false', () => {
       expect(manager.isKnownManager('npm-unkown')).toBeFalse();
       expect(manager.isKnownManager('custom.unknown')).toBeFalse();
+    });
+  });
+
+  describe('getPrettyDepType', () => {
+    it('when no manager found, returns undefined', () => {
+      expect(
+        manager.getPrettyDepType('invalid-manager', 'unused'),
+      ).toBeUndefined();
+    });
+
+    it('when manager found, but no prettyDepType found, returns undefined', () => {
+      expect(manager.getPrettyDepType('npm', 'foo-bar-baz')).toBeUndefined();
+    });
+
+    it('when manager found, but no prettyDepType found, returns undefined', () => {
+      expect(manager.getPrettyDepType('regex', 'foo-bar-baz')).toBeUndefined();
+    });
+
+    it('when manager found, and a prettyDepType found in knownDepTypes, returns the defined prettyDepType', () => {
+      expect(manager.getPrettyDepType('npm', 'dependencies')).toEqual(
+        'dependency',
+      );
     });
   });
 });

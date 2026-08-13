@@ -1,21 +1,3 @@
-import {
-  CodeCommitClient,
-  CreatePullRequestApprovalRuleCommand,
-  CreatePullRequestCommand,
-  DeleteCommentContentCommand,
-  GetCommentsForPullRequestCommand,
-  GetFileCommand,
-  GetPullRequestCommand,
-  GetRepositoryCommand,
-  ListPullRequestsCommand,
-  ListRepositoriesCommand,
-  PostCommentForPullRequestCommand,
-  PullRequestStatusEnum,
-  UpdateCommentCommand,
-  UpdatePullRequestDescriptionCommand,
-  UpdatePullRequestStatusCommand,
-  UpdatePullRequestTitleCommand,
-} from '@aws-sdk/client-codecommit';
 import type {
   CreatePullRequestApprovalRuleInput,
   CreatePullRequestApprovalRuleOutput,
@@ -47,6 +29,24 @@ import type {
   UpdatePullRequestTitleInput,
   UpdatePullRequestTitleOutput,
 } from '@aws-sdk/client-codecommit';
+import {
+  CodeCommitClient,
+  CreatePullRequestApprovalRuleCommand,
+  CreatePullRequestCommand,
+  DeleteCommentContentCommand,
+  GetCommentsForPullRequestCommand,
+  GetFileCommand,
+  GetPullRequestCommand,
+  GetRepositoryCommand,
+  ListPullRequestsCommand,
+  ListRepositoriesCommand,
+  PostCommentForPullRequestCommand,
+  PullRequestStatusEnum,
+  UpdateCommentCommand,
+  UpdatePullRequestDescriptionCommand,
+  UpdatePullRequestStatusCommand,
+  UpdatePullRequestTitleCommand,
+} from '@aws-sdk/client-codecommit';
 import { isString } from '@sindresorhus/is';
 import * as aws4 from 'aws4';
 import { REPOSITORY_UNINITIATED } from '../../../constants/error-messages.ts';
@@ -60,7 +60,7 @@ export function buildCodeCommitClient(): void {
     codeCommitClient = new CodeCommitClient({});
   }
 
-  /* v8 ignore next */
+  /* v8 ignore next -- unreachable: the client was just constructed above */
   if (!codeCommitClient) {
     throw new Error('Failed to initialize codecommit client');
   }
@@ -301,7 +301,7 @@ export function getCodeCommitUrl(
   });
   const dateTime = signer.getDateTime();
 
-  /* v8 ignore next */
+  /* v8 ignore next -- defensive: the SigV4 signer always returns a datetime string */
   if (!isString(dateTime)) {
     throw new Error(REPOSITORY_UNINITIATED);
   }
@@ -313,7 +313,7 @@ export function getCodeCommitUrl(
   }`;
 
   // massaging username with the session token,
-  /* v8 ignore next */
+  /* v8 ignore next -- only hit when an AWS session token contains '/', not present in spec env */
   if (username.includes('/')) {
     username = username.replace(/\//g, '%2F');
   }

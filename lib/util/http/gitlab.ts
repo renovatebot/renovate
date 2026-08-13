@@ -8,9 +8,9 @@ import { HttpBase, type InternalJsonUnsafeOptions } from './http.ts';
 import type { HttpMethod, HttpOptions, HttpResponse } from './types.ts';
 
 let baseUrl = 'https://gitlab.com/api/v4/';
-export const setBaseUrl = (url: string): void => {
+export function setBaseUrl(url: string): void {
   baseUrl = url;
-};
+}
 
 export interface GitlabHttpOptions extends HttpOptions {
   paginate?: boolean;
@@ -23,6 +23,12 @@ export class GitlabHttp extends HttpBase<GitlabHttpOptions> {
 
   constructor(type = 'gitlab', options?: GitlabHttpOptions) {
     super(type, options);
+  }
+
+  protected override extraOptions(): readonly string[] {
+    return super
+      .extraOptions()
+      .concat(['paginate'] as (keyof GitlabHttpOptions)[]);
   }
 
   protected override async requestJsonUnsafe<T = unknown>(
@@ -49,17 +55,26 @@ export class GitlabHttp extends HttpBase<GitlabHttpOptions> {
           : null;
         if (nextUrl) {
           if (getEnv().GITLAB_IGNORE_REPO_URL) {
-            const defaultEndpoint = new URL(baseUrl);
+            const defaultEndpoint = parseUrl(baseUrl)!;
             nextUrl.protocol = defaultEndpoint.protocol;
             nextUrl.host = defaultEndpoint.host;
           }
 
-          opts.url = nextUrl;
+          // Don't follow a cross-origin request, unless we've been explicitly requested to do so with `RENOVATE_X_REBASE_PAGINATION_LINKS`
+          if (nextUrl.origin === resolvedUrl.origin) {
+            opts.url = nextUrl;
 
-          const nextResult = await this.requestJsonUnsafe<T>(method, opts);
-          // v8 ignore else -- TODO: add test #40625
-          if (isArray(nextResult.body)) {
-            result.body.push(...nextResult.body);
+            const nextResult = await this.requestJsonUnsafe<T>(method, opts);
+            // v8 ignore else -- TODO: add test #40625
+            if (isArray(nextResult.body)) {
+              result.body.push(...nextResult.body);
+            }
+          } else {
+            // make sure that users are aware if there are any (potentially malicious, or misconfigured) pagination links being returned
+            logger.once.warn(
+              { requestHost: resolvedUrl.host, paginationHost: nextUrl.host },
+              'Ignoring cross-origin GitLab pagination link. Set GITLAB_IGNORE_REPO_URL if this is a self-hosted instance that returns a different host in pagination links.',
+            );
           }
         }
       } catch (err) {
@@ -113,8 +128,7 @@ export class GitlabHttp extends HttpBase<GitlabHttpOptions> {
     if (
       attemptCount <= retryOptions.limit &&
       error.options.method === 'POST' &&
-      error.response?.statusCode === 409 &&
-      error.response.rawBody.toString().includes('Resource lock')
+      isRetryablePostError(error)
     ) {
       const noise = Math.random() * 100;
       return 2 ** (attemptCount - 1) * 1000 + noise;
@@ -122,4 +136,29 @@ export class GitlabHttp extends HttpBase<GitlabHttpOptions> {
 
     return super.calculateRetryDelay(retryObject);
   }
+}
+
+/**
+ * Detects transient GitLab errors on POST requests that are safe to retry:
+ *
+ * - `409` with a `Resource lock` message, which happens when concurrent
+ *   requests conflict.
+ * - `400` with a `source_branch does not exist` message, which happens when a
+ *   freshly pushed branch is not yet visible to the API due to Gitaly eventual
+ *   consistency.
+ */
+function isRetryablePostError(error: RequestError): boolean {
+  const { response } = error;
+  if (response?.statusCode === 409) {
+    return response.rawBody.toString().includes('Resource lock');
+  }
+
+  if (response?.statusCode === 400) {
+    const rawBody = response.rawBody.toString();
+    return (
+      rawBody.includes('source_branch') && rawBody.includes('does not exist')
+    );
+  }
+
+  return false;
 }

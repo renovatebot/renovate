@@ -1,7 +1,7 @@
-import { GlobalConfig } from '../../../config/global.ts';
-import { updateArtifacts } from './index.ts';
 import { mockExecAll } from '~test/exec-util.ts';
 import { fs } from '~test/util.ts';
+import { GlobalConfig } from '../../../config/global.ts';
+import { updateArtifacts } from './index.ts';
 
 vi.mock('../../../util/fs/index.ts');
 
@@ -9,13 +9,13 @@ describe('modules/manager/flux/artifacts', () => {
   beforeAll(() => {
     GlobalConfig.set({
       localDir: '',
+      binarySource: 'global',
     });
   });
 
   it('replaces existing value', async () => {
-    const snapshots = mockExecAll({ stdout: '', stderr: '' });
+    const snapshots = mockExecAll({ stdout: 'test', stderr: '' });
     fs.readLocalFile.mockResolvedValueOnce('old');
-    fs.readLocalFile.mockResolvedValueOnce('test');
 
     const res = await updateArtifacts({
       packageFileName: 'clusters/my-cluster/flux-system/gotk-components.yaml',
@@ -41,20 +41,28 @@ describe('modules/manager/flux/artifacts', () => {
         },
       },
     ]);
+    expect(fs.writeLocalFile).toHaveBeenCalledWith(
+      'clusters/my-cluster/flux-system/gotk-components.yaml',
+      'test',
+    );
     expect(snapshots).toMatchObject([
       {
-        cmd: 'flux install --export --components source-controller,kustomize-controller,helm-controller,notification-controller > clusters/my-cluster/flux-system/gotk-components.yaml',
-        options: {
-          shell: true,
+        cmd: {
+          command: [
+            'flux',
+            'install',
+            '--export',
+            '--components',
+            'source-controller,kustomize-controller,helm-controller,notification-controller',
+          ],
         },
       },
     ]);
   });
 
   it('detects system manifests in subdirectories', async () => {
-    const snapshots = mockExecAll({ stdout: '', stderr: '' });
+    const snapshots = mockExecAll({ stdout: 'test', stderr: '' });
     fs.readLocalFile.mockResolvedValueOnce('old');
-    fs.readLocalFile.mockResolvedValueOnce('test');
 
     const res = await updateArtifacts({
       packageFileName:
@@ -83,7 +91,15 @@ describe('modules/manager/flux/artifacts', () => {
     ]);
     expect(snapshots).toMatchObject([
       {
-        cmd: 'flux install --export --components source-controller,kustomize-controller,helm-controller,notification-controller > clusters/my-cluster/flux-system/gitops-toolkit/gotk-components.yaml',
+        cmd: {
+          command: [
+            'flux',
+            'install',
+            '--export',
+            '--components',
+            'source-controller,kustomize-controller,helm-controller,notification-controller',
+          ],
+        },
       },
     ]);
   });
@@ -100,8 +116,7 @@ describe('modules/manager/flux/artifacts', () => {
   });
 
   it('ignores unchanged system manifests', async () => {
-    const execSnapshots = mockExecAll({ stdout: '', stderr: '' });
-    fs.readLocalFile.mockResolvedValueOnce('old');
+    const execSnapshots = mockExecAll({ stdout: 'old', stderr: '' });
     fs.readLocalFile.mockResolvedValueOnce('old');
     const res = await updateArtifacts({
       packageFileName: 'clusters/my-cluster/flux-system/gotk-components.yaml',
@@ -113,7 +128,7 @@ describe('modules/manager/flux/artifacts', () => {
     expect(res).toBeNull();
     expect(execSnapshots).toMatchObject([
       {
-        cmd: 'flux install --export > clusters/my-cluster/flux-system/gotk-components.yaml',
+        cmd: { command: ['flux', 'install', '--export'] },
       },
     ]);
   });
@@ -141,7 +156,7 @@ describe('modules/manager/flux/artifacts', () => {
     expect(res).toStrictEqual([
       {
         artifactError: {
-          lockFile: 'clusters/my-cluster/flux-system/gotk-components.yaml',
+          fileName: 'clusters/my-cluster/flux-system/gotk-components.yaml',
           stderr: 'failed',
         },
       },
@@ -151,7 +166,6 @@ describe('modules/manager/flux/artifacts', () => {
   it('failed to read system manifest', async () => {
     mockExecAll({ stdout: '', stderr: 'Error' });
     fs.readLocalFile.mockResolvedValueOnce('old');
-    fs.readLocalFile.mockResolvedValueOnce('');
     const res = await updateArtifacts({
       packageFileName: 'clusters/my-cluster/flux-system/gotk-components.yaml',
       updatedDeps: [{ newVersion: '1.0.1' }],
@@ -162,7 +176,7 @@ describe('modules/manager/flux/artifacts', () => {
     expect(res).toStrictEqual([
       {
         artifactError: {
-          lockFile: 'clusters/my-cluster/flux-system/gotk-components.yaml',
+          fileName: 'clusters/my-cluster/flux-system/gotk-components.yaml',
           stderr: 'Error',
         },
       },

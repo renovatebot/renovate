@@ -1,3 +1,4 @@
+import * as httpMock from '~test/http-mock.ts';
 import { reset as memCacheReset } from '../../../util/cache/memory/index.ts';
 import {
   getCache,
@@ -7,7 +8,6 @@ import { BitbucketHttp } from '../../../util/http/bitbucket.ts';
 import { BitbucketPrCache } from './pr-cache.ts';
 import type { PrResponse } from './types.ts';
 import { prInfo } from './utils.ts';
-import * as httpMock from '~test/http-mock.ts';
 
 const http = new BitbucketHttp();
 

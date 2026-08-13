@@ -1,7 +1,7 @@
 import { codeBlock } from 'common-tags';
+import { Fixtures } from '~test/fixtures.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import { extractPackageFile } from './index.ts';
-import { Fixtures } from '~test/fixtures.ts';
 
 const yamlFileMultiConfig = Fixtures.get('gitlab-ci.1.yaml');
 const yamlFileSingleConfig = Fixtures.get('gitlab-ci.2.yaml');
@@ -49,10 +49,12 @@ describe('modules/manager/gitlabci-include/extract', () => {
     });
 
     it('ignores includes without project and file keys', () => {
-      const includeWithoutProjectRef = `include:
-      - 'https://gitlab.com/mikebryant/include-source-example.yml'
-      - remote: 'https://gitlab.com/mikebryant/include-source-example.yml'
-      - local: mikebryant/include-source-example`;
+      const includeWithoutProjectRef = codeBlock`
+        include:
+              - 'https://gitlab.com/mikebryant/include-source-example.yml'
+              - remote: 'https://gitlab.com/mikebryant/include-source-example.yml'
+              - local: mikebryant/include-source-example
+      `;
       const res = extractPackageFile(includeWithoutProjectRef);
       expect(res).toBeNull();
     });

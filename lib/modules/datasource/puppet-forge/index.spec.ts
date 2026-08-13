@@ -1,7 +1,7 @@
-import { getPkgReleases } from '../index.ts';
-import { PuppetForgeDatasource } from './index.ts';
 import { Fixtures } from '~test/fixtures.ts';
 import * as httpMock from '~test/http-mock.ts';
+import { getPkgReleases } from '../index.ts';
+import { PuppetForgeDatasource } from './index.ts';
 
 const puppetforgeReleases = Fixtures.get('puppetforge-response.json');
 
@@ -211,6 +211,29 @@ describe('modules/datasource/puppet-forge/index', () => {
       .get('/v3/modules/foobar')
       .query({ exclude_fields: 'current_release' })
       .reply(200, Fixtures.get('puppetforge-no-releases.json'));
+
+    const res = await getPkgReleases({
+      datasource,
+      packageName: 'foobar',
+    });
+
+    expect(res).toBeNull();
+  });
+
+  it('only deleted releases available -> return null', async () => {
+    httpMock
+      .scope('https://forgeapi.puppet.com', {})
+      .get('/v3/modules/foobar')
+      .query({ exclude_fields: 'current_release' })
+      .reply(200, {
+        releases: [
+          {
+            version: '1.0.0',
+            created_at: '2021-10-11 07:47:24 -0700',
+            deleted_at: '2021-10-12 07:47:24 -0700',
+          },
+        ],
+      });
 
     const res = await getPkgReleases({
       datasource,

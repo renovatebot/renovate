@@ -138,7 +138,8 @@ export async function generateManagers(
       }
       md += `For details on how to extend a manager's \`managerFilePatterns\` value, please follow [this link](../index.md#file-matching).\n\n`;
       md += '## Supported datasources\n\n';
-      const escapedDatasources = (supportedDatasources || [])
+      const escapedDatasources = Array.from(new Set(supportedDatasources || []))
+        .sort()
         .map(
           (datasource) =>
             `[\`${datasource}\`](../../datasource/${datasource}/index.md)`,
@@ -146,9 +147,43 @@ export async function generateManagers(
         .join(', ');
       md += `This manager supports extracting the following datasources: ${escapedDatasources}.\n\n`;
       md += formatUrls(urls);
+      md += '## Dependency types\n\n';
+      if (definition.knownDepTypes?.length) {
+        const hasPrettyDepType = definition.knownDepTypes.some(
+          (m) => m.prettyDepType,
+        );
+        md += 'This manager extracts the following `depType` values:\n\n';
+        if (hasPrettyDepType) {
+          md += '| `depType` | `prettyDepType` | Description |\n';
+          md += '|-----------|-----------------|-------------|\n';
+          for (const {
+            depType,
+            prettyDepType,
+            description,
+          } of definition.knownDepTypes) {
+            md += `| \`${depType}\` | ${prettyDepType ? `\`${prettyDepType}\`` : ''} | ${description} |\n`;
+          }
+        } else {
+          md += '| `depType` | Description |\n';
+          md += '|-----------|-------------|\n';
+          for (const { depType, description } of definition.knownDepTypes) {
+            md += `| \`${depType}\` | ${description} |\n`;
+          }
+        }
+        md += '\n';
+      }
+      if (definition.supportsDynamicDepTypesNote) {
+        md += `${definition.supportsDynamicDepTypesNote}\n\n`;
+      }
+      if (
+        (!definition.knownDepTypes || definition.knownDepTypes.length === 0) &&
+        definition.supportsDynamicDepTypesNote === undefined
+      ) {
+        md += 'This manager has no documented `depType` values.\n';
+      }
       md += '## Default config\n\n';
       md += '```json\n';
-      md += JSON.stringify(definition.defaultConfig, null, 2) + '\n';
+      md += `${JSON.stringify(definition.defaultConfig, null, 2)}\n`;
       md += '```\n\n';
     }
     const managerReadmeContent = await readFile(
@@ -156,6 +191,31 @@ export async function generateManagers(
         isCustomMgr ? `custom/${manager}` : manager
       }/readme.md`,
     );
+
+    if (!isCustomMgr && definition.supportsLockFileMaintenance) {
+      md += '\n## Lock File Maintenance\n\n';
+
+      md +=
+        'This manager supports [`lockFileMaintenance`](../../../configuration-options.md#lockfilemaintenance) for the following file(s):\n';
+      md += '\n';
+      for (const lockFile of definition.lockFileNames) {
+        md += `- \`${lockFile}\`\n`;
+      }
+      md += '\n';
+
+      const delegated =
+        definition.lockFileMaintenanceIsDelegatedToPackageManager;
+      if (typeof delegated === 'string') {
+        md += `${delegated}\n\n`;
+      } else if (delegated === true) {
+        md +=
+          'Lock file maintenance is delegated to the underlying package manager, which Renovate runs as an external command.\n\n';
+      } else if (delegated === false) {
+        md +=
+          'Renovate performs lock file maintenance itself, without calling the underlying package manager.\n\n';
+      }
+    }
+
     if (!isCustomMgr) {
       md += '\n## Additional Information\n\n';
     }

@@ -1,16 +1,11 @@
-import { mockDeep } from 'vitest-mock-extended';
-import type { HostRule } from '../../../types/index.ts';
-import * as _hostRules from '../../../util/host-rules.ts';
+import { Fixtures } from '~test/fixtures.ts';
+import { hostRules } from '~test/host-rules.ts';
+import * as httpMock from '~test/http-mock.ts';
+import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
 import * as composerVersioning from '../../versioning/composer/index.ts';
 import { id as versioning } from '../../versioning/loose/index.ts';
 import { getPkgReleases } from '../index.ts';
 import { PackagistDatasource } from './index.ts';
-import { Fixtures } from '~test/fixtures.ts';
-import * as httpMock from '~test/http-mock.ts';
-
-vi.mock('../../../util/host-rules.ts', () => mockDeep());
-
-const hostRules = _hostRules;
 
 const includesJson = Fixtures.getJson('includes.json');
 const beytJson = Fixtures.getJson('1beyt.json');
@@ -25,8 +20,6 @@ describe('modules/datasource/packagist/index', () => {
     let config: any;
 
     beforeEach(() => {
-      hostRules.find = vi.fn((input: HostRule) => input);
-      hostRules.hosts = vi.fn(() => []);
       config = {
         versioning: composerVersioning.id,
         registryUrls: [
@@ -99,6 +92,100 @@ describe('modules/datasource/packagist/index', () => {
       expect(res).toBeNull();
     });
 
+    it('throws for default registry timeouts', async () => {
+      httpMock
+        .scope(baseUrl)
+        .get('/packages.json')
+        .replyWithError(httpMock.error({ code: 'ETIMEDOUT' }));
+      config.registryUrls = [baseUrl];
+
+      await expect(
+        getPkgReleases({
+          ...config,
+          datasource,
+          versioning,
+          packageName: 'vendor/default-timeout',
+        }),
+      ).rejects.toThrow(ExternalHostError);
+    });
+
+    it('throws for legacy default registry host timeouts', async () => {
+      const legacyBaseUrl = 'https://packagist.org';
+      httpMock
+        .scope(legacyBaseUrl)
+        .get('/packages.json')
+        .replyWithError(httpMock.error({ code: 'ETIMEDOUT' }));
+      config.registryUrls = [legacyBaseUrl];
+
+      await expect(
+        getPkgReleases({
+          ...config,
+          datasource,
+          versioning,
+          packageName: 'vendor/legacy-default-timeout',
+        }),
+      ).rejects.toThrow(ExternalHostError);
+    });
+
+    it('throws for default registry rate limiting', async () => {
+      httpMock.scope(baseUrl).get('/packages.json').reply(429);
+      config.registryUrls = [baseUrl];
+
+      await expect(
+        getPkgReleases({
+          ...config,
+          datasource,
+          versioning,
+          packageName: 'vendor/default-rate-limit',
+        }),
+      ).rejects.toThrow(ExternalHostError);
+    });
+
+    it('throws for default registry server errors', async () => {
+      httpMock.scope(baseUrl).get('/packages.json').reply(500);
+      config.registryUrls = [baseUrl];
+
+      await expect(
+        getPkgReleases({
+          ...config,
+          datasource,
+          versioning,
+          packageName: 'vendor/default-server-error',
+        }),
+      ).rejects.toThrow(ExternalHostError);
+    });
+
+    it('returns null for default registry not found responses', async () => {
+      httpMock.scope(baseUrl).get('/packages.json').reply(404);
+      config.registryUrls = [baseUrl];
+
+      const res = await getPkgReleases({
+        ...config,
+        datasource,
+        versioning,
+        packageName: 'vendor/default-not-found',
+      });
+
+      expect(res).toBeNull();
+    });
+
+    it('returns null for default registry unknown errors', async () => {
+      httpMock
+        .scope(baseUrl)
+        .get('/packages.json')
+        .replyWithError('unknown error');
+      config.registryUrls = [baseUrl];
+
+      const res = await getPkgReleases({
+        ...config,
+        datasource,
+        versioning,
+        packageName: 'vendor/default-unknown-error',
+      });
+
+      expect(res).toBeNull();
+    });
+
     it('handles auth rejections', async () => {
       httpMock
         .scope('https://composer.renovatebot.com')
@@ -144,10 +231,10 @@ describe('modules/datasource/packagist/index', () => {
     });
 
     it('supports includes packages', async () => {
-      hostRules.find = vi.fn(() => ({
+      hostRules.add({
         username: 'some-username',
         password: 'some-password',
-      }));
+      });
       const packagesJson = {
         packages: [],
         includes: {
@@ -177,10 +264,10 @@ describe('modules/datasource/packagist/index', () => {
     });
 
     it('supports older sha1 hashes', async () => {
-      hostRules.find = vi.fn(() => ({
+      hostRules.add({
         username: 'some-username',
         password: 'some-password',
-      }));
+      });
       const packagesJson = {
         packages: [],
         includes: {
@@ -540,6 +627,86 @@ describe('modules/datasource/packagist/index', () => {
       expect(res).toEqual({
         registryUrl: 'https://example.com',
         releases: [{ gitRef: 'v2.5.4', version: '2.5.4' }],
+      });
+    });
+
+    it('marks abandoned packages as deprecated with a replacement', async () => {
+      httpMock
+        .scope('https://example.com')
+        .get('/packages.json')
+        .reply(200, {
+          'metadata-url': 'https://example.com/p2/%package%.json',
+        })
+        .get('/p2/scheb/two-factor-bundle.json')
+        .reply(200, {
+          minified: 'composer/2.0',
+          packages: {
+            'scheb/two-factor-bundle': [
+              {
+                name: 'scheb/two-factor-bundle',
+                version: 'v4.18.4',
+                abandoned: 'scheb/2fa-bundle',
+              },
+            ],
+          },
+        })
+        .get('/p2/scheb/two-factor-bundle~dev.json')
+        .reply(404);
+      config.registryUrls = ['https://example.com'];
+
+      const res = await getPkgReleases({
+        ...config,
+        datasource,
+        versioning,
+        packageName: 'scheb/two-factor-bundle',
+      });
+
+      expect(res).toEqual({
+        registryUrl: 'https://example.com',
+        deprecationMessage:
+          'This package is abandoned and no longer maintained. The author suggests using the `scheb/2fa-bundle` package instead.',
+        releases: [
+          { gitRef: 'v4.18.4', version: '4.18.4', isDeprecated: true },
+        ],
+      });
+    });
+
+    it('marks abandoned packages as deprecated without a replacement', async () => {
+      httpMock
+        .scope('https://example.com')
+        .get('/packages.json')
+        .reply(200, {
+          'metadata-url': 'https://example.com/p2/%package%.json',
+        })
+        .get('/p2/sonata-project/core-bundle.json')
+        .reply(200, {
+          minified: 'composer/2.0',
+          packages: {
+            'sonata-project/core-bundle': [
+              {
+                name: 'sonata-project/core-bundle',
+                version: '3.20.0',
+                abandoned: true,
+              },
+            ],
+          },
+        })
+        .get('/p2/sonata-project/core-bundle~dev.json')
+        .reply(404);
+      config.registryUrls = ['https://example.com'];
+
+      const res = await getPkgReleases({
+        ...config,
+        datasource,
+        versioning,
+        packageName: 'sonata-project/core-bundle',
+      });
+
+      expect(res).toEqual({
+        registryUrl: 'https://example.com',
+        deprecationMessage:
+          'This package is abandoned and no longer maintained.',
+        releases: [{ gitRef: '3.20.0', version: '3.20.0', isDeprecated: true }],
       });
     });
 

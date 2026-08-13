@@ -1,3 +1,5 @@
+import type { RenovateConfig } from '~test/util.ts';
+import { logger, partial } from '~test/util.ts';
 import {
   CONFIG_SECRETS_EXPOSED,
   CONFIG_VALIDATION,
@@ -31,8 +33,6 @@ import {
 } from '../../constants/error-messages.ts';
 import { ExternalHostError } from '../../types/errors/external-host-error.ts';
 import handleError from './error.ts';
-import { logger, partial } from '~test/util.ts';
-import type { RenovateConfig } from '~test/util.ts';
 
 vi.mock('./error-config.ts');
 
@@ -121,7 +121,7 @@ describe('workers/repository/error', () => {
       const error = new Error(CONFIG_VALIDATION);
       await handleError(config, error);
       expect(logger.logger.warn).toHaveBeenCalledExactlyOnceWith(
-        { error },
+        { err: error },
         'Repository has invalid config',
       );
       expect(logger.logger.error).not.toHaveBeenCalled();
@@ -131,7 +131,7 @@ describe('workers/repository/error', () => {
       const error = new Error(CONFIG_VALIDATION);
       await handleError({ ...config, configValidationError: false }, error);
       expect(logger.logger.warn).toHaveBeenCalledExactlyOnceWith(
-        { error },
+        { err: error },
         'Repository has invalid config',
       );
       expect(logger.logger.error).not.toHaveBeenCalled();
@@ -141,7 +141,7 @@ describe('workers/repository/error', () => {
       const error = new Error(CONFIG_VALIDATION);
       await handleError({ ...config, configValidationError: true }, error);
       expect(logger.logger.error).toHaveBeenCalledExactlyOnceWith(
-        { error },
+        { err: error },
         'Repository has invalid config',
       );
       expect(logger.logger.warn).not.toHaveBeenCalled();

@@ -1,7 +1,7 @@
+import { type RenovateConfig, logger } from '~test/util.ts';
 import { getConfig } from './defaults.ts';
 import { migrateAndValidate } from './migrate-validate.ts';
 import * as configMigration from './migration.ts';
-import { type RenovateConfig, logger } from '~test/util.ts';
 
 let config: RenovateConfig;
 
@@ -52,6 +52,7 @@ describe('config/migrate-validate', () => {
         throw new Error('test error');
       });
       await expect(
+        // oxlint-disable-next-line renovate/prefer-partial-in-specs -- intentionally invalid config for error path
         migrateAndValidate(config, { invalid: 'config' } as any),
       ).rejects.toThrow('test error');
       expect(logger.logger.debug).toHaveBeenCalledTimes(2);

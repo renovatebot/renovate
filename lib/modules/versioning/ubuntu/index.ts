@@ -12,8 +12,8 @@ import {
 export const id = 'ubuntu';
 export const displayName = 'Ubuntu';
 export const urls = [
-  'https://changelogs.ubuntu.com/meta-release',
-  'https://debian.pages.debian.net/distro-info-data/ubuntu.csv',
+  '[Ubuntu meta-release](https://changelogs.ubuntu.com/meta-release)',
+  '[Ubuntu distro info data](https://debian.pages.debian.net/distro-info-data/ubuntu.csv)',
 ];
 export const supportsRanges = false;
 
@@ -74,7 +74,7 @@ function getMajor(version: string): null | number {
   const ver = getVersionByCodename(version);
   if (isValid(ver)) {
     const [major] = ver.split('.');
-    return parseInt(major);
+    return parseInt(major, 10);
   }
   return null;
 }
@@ -83,7 +83,7 @@ function getMinor(version: string): null | number {
   const ver = getVersionByCodename(version);
   if (isValid(ver)) {
     const [, minor] = ver.split('.');
-    return parseInt(minor);
+    return parseInt(minor, 10);
   }
   return null;
 }
@@ -92,7 +92,7 @@ function getPatch(version: string): null | number {
   const ver = getVersionByCodename(version);
   if (isValid(ver)) {
     const [, , patch] = ver.split('.');
-    return patch ? parseInt(patch) : null;
+    return patch ? parseInt(patch, 10) : null;
   }
   return null;
 }

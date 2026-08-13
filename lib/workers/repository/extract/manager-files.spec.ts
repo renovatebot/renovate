@@ -1,8 +1,8 @@
+import { fs, partial } from '~test/util.ts';
 import type { RenovateConfig } from '../../../config/types.ts';
 import * as _html from '../../../modules/manager/html/index.ts';
 import * as _fileMatch from './file-match.ts';
 import { getManagerPackageFiles } from './manager-files.ts';
-import { fs, partial } from '~test/util.ts';
 
 vi.mock('./file-match.ts');
 vi.mock('../../../modules/manager/html/index.ts');

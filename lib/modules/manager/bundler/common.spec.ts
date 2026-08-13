@@ -1,21 +1,24 @@
 import upath from 'upath';
+import { Fixtures } from '~test/fixtures.ts';
+import { fs, partial } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
-import type { RepoGlobalConfig } from '../../../config/types.ts';
+import type {
+  InternalGlobalConfigOptions,
+  RepoGlobalConfig,
+} from '../../../config/types.ts';
 import type { UpdateArtifact } from '../types.ts';
 import {
   getBundlerConstraint,
   getLockFilePath,
   getRubyConstraint,
 } from './common.ts';
-import { Fixtures } from '~test/fixtures.ts';
-import { fs, partial } from '~test/util.ts';
 
 vi.mock('../../../util/fs/index.ts');
 
 const gemfile = Fixtures.get('Gemfile.sourceGroup');
 const lockedContent = Fixtures.get('Gemfile.gitlab-foss.lock');
 
-const adminConfig: RepoGlobalConfig = {
+const adminConfig: RepoGlobalConfig & InternalGlobalConfigOptions = {
   // `join` fixes Windows CI
   localDir: upath.join('/tmp/github/some/repo'),
   cacheDir: upath.join('/tmp/cache'),

@@ -1,13 +1,13 @@
 import { codeBlock } from 'common-tags';
 import upath from 'upath';
 import { mockDeep } from 'vitest-mock-extended';
+import { fs } from '~test/util.ts';
 import { GlobalConfig } from '../../../../config/global.ts';
 import { getPkgReleases } from '../../../datasource/index.ts';
 import type { UpdateArtifactsConfig } from '../../types.ts';
 import { updateArtifacts } from '../index.ts';
 import { TerraformProviderHash } from './hash.ts';
 import { getNewConstraint } from './index.ts';
-import { fs } from '~test/util.ts';
 
 // auto-mock fs
 vi.mock('../../../../util/fs/index.ts');
@@ -46,7 +46,7 @@ describe('modules/manager/terraform/lockfile/index', () => {
     ).toEqual([
       {
         artifactError: {
-          lockFile: '.terraform.lock.hcl',
+          fileName: '.terraform.lock.hcl',
           stderr: 'File not found',
         },
       },
@@ -636,7 +636,7 @@ describe('modules/manager/terraform/lockfile/index', () => {
         ]
       }
 
-      provider "registry.terraform.io/hashicorp/random" {
+      provider "registry.opentofu.org/hashicorp/random" {
         version     = "2.2.1"
         constraints = "~> 2.2"
         hashes = [
@@ -709,7 +709,7 @@ describe('modules/manager/terraform/lockfile/index', () => {
               ]
             }
 
-            provider "registry.terraform.io/hashicorp/random" {
+            provider "registry.opentofu.org/hashicorp/random" {
               version     = "2.2.2"
               constraints = "~> 2.2"
               hashes = [
@@ -726,7 +726,31 @@ describe('modules/manager/terraform/lockfile/index', () => {
 
     expect(mockHash.mock.calls).toEqual([
       ['https://registry.terraform.io', 'hashicorp/azurerm', '2.56.0'],
-      ['https://registry.terraform.io', 'hashicorp/random', '2.2.2'],
+      ['https://registry.opentofu.org', 'hashicorp/random', '2.2.2'],
+    ]);
+
+    expect(mockGetPkgReleases.mock.calls).toEqual([
+      [
+        {
+          datasource: 'terraform-provider',
+          packageName: 'hashicorp/aws',
+          registryUrls: ['https://registry.terraform.io'],
+        },
+      ],
+      [
+        {
+          datasource: 'terraform-provider',
+          packageName: 'hashicorp/azurerm',
+          registryUrls: ['https://registry.terraform.io'],
+        },
+      ],
+      [
+        {
+          datasource: 'terraform-provider',
+          packageName: 'hashicorp/random',
+          registryUrls: ['https://registry.opentofu.org'],
+        },
+      ],
     ]);
   });
 
@@ -1239,7 +1263,8 @@ describe('modules/manager/terraform/lockfile/index', () => {
           },
           '>= 2.41.0, <= 2.41.0, >= 2.0.0',
         ),
-      ).toBe('>= 2.41.0, <= 2.46.0, >= 2.0.0');
+        // normalized: boundary version ascending
+      ).toBe('>= 2.0.0, >= 2.41.0, <= 2.46.0');
     });
 
     it('create constraint with full version', () => {
@@ -1253,6 +1278,48 @@ describe('modules/manager/terraform/lockfile/index', () => {
           '>= 4.0.0, < 4.12.0',
         ),
       ).toBe('< 4.21.0');
+    });
+
+    it('normalizes constraint order when a bumped exact pin overtakes a range', () => {
+      // A root module pins an exact version while a child module keeps a `~>`
+      // range; after the bump the exact pin must sort after the range.
+      // https://github.com/renovatebot/renovate/issues/37273
+      expect(
+        getNewConstraint(
+          {
+            currentValue: '5.0.0',
+            newValue: '5.9.0',
+            newVersion: '5.9.0',
+          },
+          '5.0.0, ~> 5.0',
+        ),
+      ).toBe('~> 5.0, 5.9.0');
+    });
+
+    it('normalizes constraint order for three-part pessimistic ranges', () => {
+      expect(
+        getNewConstraint(
+          {
+            currentValue: '0.0.176',
+            newValue: '0.0.186',
+            newVersion: '0.0.186',
+          },
+          '0.0.176, ~> 0.0.176',
+        ),
+      ).toBe('~> 0.0.176, 0.0.186');
+    });
+
+    it('normalizes constraint order when a range is widened past a lower bound', () => {
+      expect(
+        getNewConstraint(
+          {
+            currentValue: '~> 5.0',
+            newValue: '~> 6.0',
+            newVersion: '6.6.0',
+          },
+          '~> 5.0, >= 5.81.0',
+        ),
+      ).toBe('>= 5.81.0, ~> 6.0');
     });
   });
 });

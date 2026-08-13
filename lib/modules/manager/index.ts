@@ -10,11 +10,16 @@ import type {
   PackageFileContent,
   RangeConfig,
 } from './types.ts';
+
 export { hashMap } from './fingerprint.generated.ts';
 
 const managerList = Array.from(managers.keys()); // does not include custom managers
-export const getManagerList = (): string[] => managerList;
-export const getManagers = (): Map<string, ManagerApi> => managers;
+export function getManagerList(): string[] {
+  return managerList;
+}
+export function getManagers(): Map<string, ManagerApi> {
+  return managers;
+}
 export const allManagersList = [...managerList, ...customManagerList];
 
 export function get<T extends keyof ManagerApi>(
@@ -101,6 +106,15 @@ export function getRangeStrategy(config: RangeConfig): RangeStrategy | null {
   }
 
   return config.rangeStrategy!;
+}
+
+export function getPrettyDepType(
+  manager: string,
+  depType: string,
+): string | undefined {
+  const m = managers.get(manager) ?? customManagers.get(manager);
+  return m?.knownDepTypes?.find((meta) => meta.depType === depType)
+    ?.prettyDepType;
 }
 
 export function isKnownManager(mgr: string): boolean {

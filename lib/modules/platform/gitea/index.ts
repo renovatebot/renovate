@@ -216,16 +216,17 @@ const platform: Platform = {
       baseEndpoint = ensureTrailingSlash(baseEndpoint);
       defaults.endpoint = baseEndpoint;
     } else {
-      logger.debug('Using default Gitea endpoint: ' + defaults.endpoint);
+      logger.debug(`Using default Gitea endpoint: ${defaults.endpoint}`);
     }
     setBaseUrl(defaults.endpoint);
 
     let gitAuthor: string;
     try {
       const user = await helper.getCurrentUser({ token });
-      gitAuthor = `${user.full_name ?? user.username} <${user.email}>`;
+      // oxlint-disable-next-line typescript/prefer-nullish-coalescing -- `full_name` can be emtpy string
+      gitAuthor = `${user.full_name || user.login} <${user.email}>`;
       botUserID = user.id;
-      botUserName = user.username;
+      botUserName = user.login;
       const env = getEnv();
       /* v8 ignore next: experimental feature */
       if (semver.valid(env.RENOVATE_X_PLATFORM_VERSION)) {
@@ -288,7 +289,7 @@ const platform: Platform = {
     config.repository = repository;
     config.cloneSubmodules = !!cloneSubmodules;
     config.cloneSubmodulesFilter = cloneSubmodulesFilter;
-    config.ignorePrAuthor = GlobalConfig.get('ignorePrAuthor', false);
+    config.ignorePrAuthor = GlobalConfig.get('ignorePrAuthor');
 
     // Try to fetch information about repository
     try {
@@ -386,7 +387,8 @@ const platform: Platform = {
         );
         const repos = await map(fetchRepoArgs, fetchRepositories);
         return deduplicateArray(repos.flat());
-      } else if (config?.namespaces) {
+      }
+      if (config?.namespaces) {
         logger.debug(
           { namespaces: config.namespaces },
           'Auto-discovering by organization',
@@ -401,12 +403,11 @@ const platform: Platform = {
           },
         );
         return deduplicateArray(repos.flat());
-      } else {
-        return await fetchRepositories({
-          sort: config?.sort,
-          order: config?.order,
-        });
       }
+      return await fetchRepositories({
+        sort: config?.sort,
+        order: config?.order,
+      });
     } catch (err) {
       logger.error({ err }, 'Gitea getRepos() error');
       throw err;
@@ -472,7 +473,7 @@ const platform: Platform = {
       return 'yellow';
     }
 
-    /* v8 ignore next */
+    /* v8 ignore next -- the mapping covers every status Gitea returns, 'yellow' fallback is defensive */
     return helper.giteaToRenovateStatusMapping[ccs.worstStatus] ?? 'yellow';
   },
 
@@ -670,6 +671,7 @@ const platform: Platform = {
         });
 
         // If a valid PR was found, return and gracefully recover from the error. Otherwise, abort and throw error.
+        // v8 ignore else -- TODO: add test #40625
         if (pr?.bodyStruct) {
           if (pr.title !== title || pr.bodyStruct.hash !== hashBody(body)) {
             logger.debug(
@@ -792,7 +794,7 @@ const platform: Platform = {
         number,
         body,
       };
-    } catch (err) /* v8 ignore next */ {
+    } catch (err) /* v8 ignore next -- defensive: issue fetch failures are logged and swallowed, not simulated in specs */ {
       logger.debug({ err, number }, 'Error getting issue');
       return null;
     }
@@ -858,7 +860,7 @@ const platform: Platform = {
           }
 
           // Pick the last issue in the list as the active one
-          activeIssue = issues[issues.length - 1];
+          activeIssue = issues.at(-1)!;
         }
 
         // Close any duplicate issues
@@ -1018,6 +1020,7 @@ const platform: Platform = {
     const commentList = await helper.getComments(config.repository, issue);
 
     let comment: Comment | null = null;
+    // v8 ignore else -- TODO: add test #40625
     if (deleteConfig.type === 'by-topic') {
       comment = findCommentByTopic(commentList, deleteConfig.topic);
     } else if (deleteConfig.type === 'by-content') {
@@ -1083,7 +1086,7 @@ export function maxBodyLength(): number {
   return 1000000;
 }
 
-/* eslint-disable @typescript-eslint/unbound-method */
+/* oxlint-disable typescript/unbound-method */
 export const {
   addAssignees,
   addReviewers,

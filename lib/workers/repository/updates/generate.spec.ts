@@ -1,11 +1,11 @@
 import { codeBlock } from 'common-tags';
+import { logger } from '~test/util.ts';
 import { getConfig } from '../../../config/defaults.ts';
 import type { UpdateType } from '../../../config/types.ts';
 import { NpmDatasource } from '../../../modules/datasource/npm/index.ts';
 import type { Timestamp } from '../../../util/timestamp.ts';
 import type { BranchUpgradeConfig } from '../../types.ts';
 import { generateBranchConfig } from './generate.ts';
-import { logger } from '~test/util.ts';
 
 const {
   commitMessage,
@@ -28,7 +28,73 @@ beforeEach(() => {
 
 describe('workers/repository/updates/generate', () => {
   describe('generateBranchConfig()', () => {
-    it('does not group single upgrade', () => {
+    it('does not group single upgrade by default', () => {
+      const { groupSingleUpdates } = getConfig();
+      const branch = [
+        {
+          manager: 'some-manager',
+          branchName: 'some-branch',
+          depName: 'some-dep',
+          newVersion: '1.2.3',
+          commitMessageExtra: 'to 1.2.3',
+          groupName: 'some-group',
+          prTitle: 'some-title',
+          releaseTimestamp: '2017-02-07T20:01:41+00:00' as Timestamp,
+          groupSingleUpdates,
+          group: {
+            foo: 2,
+          },
+        },
+      ] satisfies BranchUpgradeConfig[];
+      const res = generateBranchConfig(branch);
+      expect(res.groupName).toBeUndefined();
+      expect(res.isGroup).toBeUndefined();
+      expect(res.recreateClosed).toBeFalse();
+      expect(res.commitMessageExtra).toEqual('to 1.2.3');
+    });
+
+    it('groups single upgrade across multiple files', () => {
+      const groupSingleUpdates = true;
+      const branch = [
+        {
+          manager: 'some-manager',
+          branchName: 'some-branch',
+          depName: 'some-dep',
+          newVersion: '2.0.0',
+          commitMessageExtra: 'to v2',
+          groupName: 'some-group',
+          prTitle: 'some-title',
+          releaseTimestamp: '2017-02-07T20:01:41+00:00' as Timestamp,
+          groupSingleUpdates,
+          group: {
+            foo: 2,
+          },
+          packageFile: 'package.json',
+        },
+        {
+          manager: 'some-manager',
+          branchName: 'some-branch',
+          depName: 'some-dep',
+          newVersion: '2.0.0',
+          commitMessageExtra: 'to v2',
+          groupName: 'some-group',
+          prTitle: 'some-title',
+          releaseTimestamp: '2017-02-07T20:01:41+00:00' as Timestamp,
+          groupSingleUpdates,
+          group: {
+            foo: 2,
+          },
+          packageFile: 'packages/core/package.json',
+        },
+      ] satisfies BranchUpgradeConfig[];
+      const res = generateBranchConfig(branch);
+      expect(res.groupName).toBe('some-group');
+      expect(res.isGroup).toBeTrue();
+      expect(res.recreateClosed).toBeTrue();
+      expect(res.commitMessageExtra).toBeUndefined();
+    });
+
+    it('does not group single upgrade when groupSingleUpdates is false', () => {
       const branch = [
         {
           manager: 'some-manager',
@@ -37,6 +103,7 @@ describe('workers/repository/updates/generate', () => {
           groupName: 'some-group',
           prTitle: 'some-title',
           releaseTimestamp: '2017-02-07T20:01:41+00:00' as Timestamp,
+          groupSingleUpdates: false,
           group: {
             foo: 2,
           },
@@ -44,9 +111,50 @@ describe('workers/repository/updates/generate', () => {
       ] satisfies BranchUpgradeConfig[];
       const res = generateBranchConfig(branch);
       expect(res.groupName).toBeUndefined();
-      expect(res.releaseTimestamp).toBeDefined();
-      expect(res.recreateClosed).toBe(false);
-      expect(res.minimumGroupSize).toBe(1);
+      expect(res.recreateClosed).toBeFalse();
+    });
+
+    it('does not group single upgrade without groupName even with groupSingleUpdates', () => {
+      const branch = [
+        {
+          manager: 'some-manager',
+          branchName: 'some-branch',
+          depName: 'some-dep',
+          prTitle: 'some-title',
+          releaseTimestamp: '2017-02-07T20:01:41+00:00' as Timestamp,
+          groupSingleUpdates: true,
+          group: {
+            foo: 2,
+          },
+        },
+      ] satisfies BranchUpgradeConfig[];
+      const res = generateBranchConfig(branch);
+      expect(res.groupName).toBeUndefined();
+    });
+
+    it('does not group single upgrade with sharedVariableName', () => {
+      const branch = [
+        {
+          manager: 'some-manager',
+          branchName: 'some-branch',
+          depName: 'some-dep',
+          newVersion: '3.2.1',
+          commitMessageExtra: 'to v3.2.1',
+          groupName: 'spring-boot.version',
+          sharedVariableName: 'spring-boot.version',
+          prTitle: 'some-title',
+          releaseTimestamp: '2017-02-07T20:01:41+00:00' as Timestamp,
+          groupSingleUpdates: true,
+          group: {
+            foo: 2,
+          },
+        },
+      ] satisfies BranchUpgradeConfig[];
+      const res = generateBranchConfig(branch);
+      expect(res.groupName).toBeUndefined();
+      expect(res.isGroup).toBeUndefined();
+      expect(res.commitMessageExtra).toBe('to v3.2.1');
+      expect(res.recreateClosed).toBeFalse();
     });
 
     it('handles lockFileMaintenance', () => {
@@ -169,7 +277,7 @@ describe('workers/repository/updates/generate', () => {
       ] satisfies BranchUpgradeConfig[];
       const res = generateBranchConfig(branch);
       expect(res.groupName).toBeUndefined();
-      expect(res.recreateClosed).toBe(false);
+      expect(res.recreateClosed).toBeFalse();
     });
 
     it('groups multiple upgrades same version', () => {
@@ -190,6 +298,7 @@ describe('workers/repository/updates/generate', () => {
           releaseTimestamp: '2017-02-07T20:01:41+00:00' as Timestamp,
           automerge: true,
           constraints: {
+            // @ts-expect-error -- intentionally using invalid constraint names
             foo: '1.0.0',
           },
         },
@@ -209,6 +318,7 @@ describe('workers/repository/updates/generate', () => {
           releaseTimestamp: '2017-02-06T20:01:41+00:00' as Timestamp,
           automerge: false,
           constraints: {
+            // @ts-expect-error -- intentionally using invalid constraint names
             foo: '1.0.0',
             bar: '2.0.0',
           },
@@ -1124,6 +1234,7 @@ describe('workers/repository/updates/generate', () => {
       const separateMinorUpdates = [
         {
           ...requiredDefaultOptions,
+          commitMessageExtra: '',
           manager: 'some-manager',
           depName: 'some-dep',
           branchName: 'some-branch',
@@ -1141,6 +1252,7 @@ describe('workers/repository/updates/generate', () => {
       const separateMajorUpdates = [
         {
           ...requiredDefaultOptions,
+          commitMessageExtra: '',
           manager: 'some-manager',
           depName: 'some-dep',
           branchName: 'some-branch',
@@ -1158,6 +1270,7 @@ describe('workers/repository/updates/generate', () => {
       const separatePatchUpdates = [
         {
           ...requiredDefaultOptions,
+          commitMessageExtra: '',
           manager: 'some-manager',
           depName: 'some-dep',
           branchName: 'some-branch',
@@ -1181,6 +1294,71 @@ describe('workers/repository/updates/generate', () => {
       ] satisfies BranchUpgradeConfig[];
       expect(generateBranchConfig(branch)).toMatchObject({
         prTitle: 'some-title (patch)',
+      });
+
+      // Does not append suffix when commitMessageExtra provides a version
+      const majorWithVersionInTitle = [
+        {
+          ...requiredDefaultOptions,
+          manager: 'some-manager',
+          depName: 'some-dep',
+          branchName: 'some-branch',
+          prTitle: 'some-title',
+          newValue: '2.0.0',
+          newVersion: '2.0.0',
+          newMajor: 2,
+          prettyNewMajor: 'v2',
+          commitMessageExtra: 'to v2',
+          isGroup: true,
+          separateMajorMinor: true,
+          updateType: 'major' as UpdateType,
+          fileReplacePosition: 0,
+        },
+      ];
+      expect(generateBranchConfig(majorWithVersionInTitle)).toMatchObject({
+        prTitle: 'some-title',
+      });
+      const minorWithVersionInTitle = [
+        {
+          ...requiredDefaultOptions,
+          manager: 'some-manager',
+          depName: 'some-dep',
+          branchName: 'some-branch',
+          prTitle: 'some-title',
+          newValue: '1.2.0',
+          newVersion: '1.2.0',
+          commitMessageExtra: 'to 1.2.0',
+          isGroup: true,
+          separateMinorPatch: true,
+          updateType: 'minor' as UpdateType,
+          fileReplacePosition: 0,
+        },
+      ];
+      expect(generateBranchConfig(minorWithVersionInTitle)).toMatchObject({
+        prTitle: 'some-title',
+      });
+
+      // Appends suffix when commitMessageExtra is non-version text
+      const majorWithNonVersionExtra = [
+        {
+          ...requiredDefaultOptions,
+          manager: 'some-manager',
+          depName: 'some-dep',
+          branchName: 'some-branch',
+          prTitle: 'some-title',
+          newValue: '2.0.0',
+          newVersion: '2.0.0',
+          newMajor: 2,
+          prettyNewMajor: 'v2',
+          commitMessageExtra: 'from upstream',
+          isGroup: true,
+          separateMajorMinor: true,
+          updateType: 'major' as UpdateType,
+          fileReplacePosition: 0,
+        },
+      ];
+      expect(generateBranchConfig(majorWithNonVersionExtra)).toMatchObject({
+        prTitle: 'some-title (major)',
       });
     });
 
@@ -1583,7 +1761,7 @@ describe('workers/repository/updates/generate', () => {
             '{{#each upgrades}}{{{prBodyDefinitions.Issue}}} {{/each}}',
           newVersion: '1.2.0',
           newValue: '1.2.0',
-          updateType: 'minor' as UpdateType,
+          updateType: 'minor',
           fileReplacePosition: 1,
           prBodyDefinitions: {
             Issue: 'I1',
@@ -1616,7 +1794,7 @@ describe('workers/repository/updates/generate', () => {
           depName: 'dep1',
           newVersion: '1.2.0',
           newValue: '1.2.0',
-          updateType: 'minor' as UpdateType,
+          updateType: 'minor',
           fileReplacePosition: 1,
           prBodyDefinitions: {
             Issue: 'I1',
@@ -1627,7 +1805,7 @@ describe('workers/repository/updates/generate', () => {
           depName: 'dep2',
           newVersion: '1.0.0',
           newValue: '1.0.0',
-          updateType: 'major' as UpdateType,
+          updateType: 'major',
           fileReplacePosition: 2,
           prBodyDefinitions: {
             Issue: 'I2',
@@ -1638,7 +1816,7 @@ describe('workers/repository/updates/generate', () => {
           depName: 'dep3',
           newVersion: '1.2.3',
           newValue: '1.2.3',
-          updateType: 'patch' as UpdateType,
+          updateType: 'patch',
           fileReplacePosition: 0,
           prBodyDefinitions: {
             Issue: 'I3',
@@ -1665,7 +1843,7 @@ describe('workers/repository/updates/generate', () => {
           depName: 'dep1',
           newVersion: '1.2.0',
           newValue: '1.2.0',
-          updateType: 'minor' as UpdateType,
+          updateType: 'minor',
           fileReplacePosition: 1,
           prBodyDefinitions: {
             Issue: 'I1',
@@ -1676,7 +1854,7 @@ describe('workers/repository/updates/generate', () => {
           depName: 'dep2',
           newVersion: '1.0.0',
           newValue: '1.0.0',
-          updateType: 'major' as UpdateType,
+          updateType: 'major',
           fileReplacePosition: 2,
           prBodyDefinitions: {
             Issue: 'I2',
@@ -1687,7 +1865,7 @@ describe('workers/repository/updates/generate', () => {
           depName: 'dep3',
           newVersion: '1.2.3',
           newValue: '1.2.3',
-          updateType: 'patch' as UpdateType,
+          updateType: 'patch',
           fileReplacePosition: 0,
           prBodyDefinitions: {
             Issue: 'I3',
@@ -1713,7 +1891,7 @@ describe('workers/repository/updates/generate', () => {
           depName: 'dep1',
           newVersion: '1.2.0',
           newValue: '1.2.0',
-          updateType: 'minor' as UpdateType,
+          updateType: 'minor',
           skipArtifactsUpdate: true,
           fileReplacePosition: 1,
           prBodyDefinitions: {
@@ -1725,7 +1903,7 @@ describe('workers/repository/updates/generate', () => {
           depName: 'dep2',
           newVersion: '1.0.0',
           newValue: '1.0.0',
-          updateType: 'major' as UpdateType,
+          updateType: 'major',
           skipArtifactsUpdate: true,
           fileReplacePosition: 2,
           prBodyDefinitions: {
@@ -1737,7 +1915,7 @@ describe('workers/repository/updates/generate', () => {
           depName: 'dep3',
           newVersion: '1.2.3',
           newValue: '1.2.3',
-          updateType: 'patch' as UpdateType,
+          updateType: 'patch',
           skipArtifactsUpdate: true,
           fileReplacePosition: 0,
           prBodyDefinitions: {
@@ -1766,7 +1944,7 @@ describe('workers/repository/updates/generate', () => {
             depName: 'dep1',
             newVersion: '1.2.0',
             newValue: '1.2.0',
-            updateType: 'minor' as UpdateType,
+            updateType: 'minor',
             skipArtifactsUpdate: first,
             fileReplacePosition: 1,
             prBodyDefinitions: {
@@ -1778,7 +1956,7 @@ describe('workers/repository/updates/generate', () => {
             depName: 'dep2',
             newVersion: '1.0.0',
             newValue: '1.0.0',
-            updateType: 'major' as UpdateType,
+            updateType: 'major',
             fileReplacePosition: 2,
             prBodyDefinitions: {
               Issue: 'I2',
@@ -1789,7 +1967,7 @@ describe('workers/repository/updates/generate', () => {
             depName: 'dep3',
             newVersion: '1.2.3',
             newValue: '1.2.3',
-            updateType: 'patch' as UpdateType,
+            updateType: 'patch',
             skipArtifactsUpdate: true,
             fileReplacePosition: 0,
             prBodyDefinitions: {
@@ -1814,5 +1992,44 @@ describe('workers/repository/updates/generate', () => {
         );
       },
     );
+
+    it('uses prettyDepType when already set', () => {
+      const branch = [
+        {
+          ...requiredDefaultOptions,
+          manager: 'some-manager',
+          branchName: 'deps',
+          prettyDepType: 'devDependency',
+          depType: 'dev',
+        },
+      ] satisfies BranchUpgradeConfig[];
+      const res = generateBranchConfig(branch);
+      expect(res.upgrades[0].prettyDepType).toBe('devDependency');
+    });
+
+    it('falls back to depType when prettyDepType is not set', () => {
+      const branch = [
+        {
+          ...requiredDefaultOptions,
+          manager: 'some-manager',
+          branchName: 'deps',
+          depType: 'dev',
+        },
+      ] satisfies BranchUpgradeConfig[];
+      const res = generateBranchConfig(branch);
+      expect(res.upgrades[0].prettyDepType).toBe('dev');
+    });
+
+    it('defaults prettyDepType to dependency when neither prettyDepType nor depType is set', () => {
+      const branch = [
+        {
+          ...requiredDefaultOptions,
+          manager: 'some-manager',
+          branchName: 'deps',
+        },
+      ] satisfies BranchUpgradeConfig[];
+      const res = generateBranchConfig(branch);
+      expect(res.upgrades[0].prettyDepType).toBe('dependency');
+    });
   });
 });

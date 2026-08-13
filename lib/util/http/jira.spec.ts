@@ -1,5 +1,5 @@
-import { JiraHttp, setBaseUrl } from './jira.ts';
 import * as httpMock from '~test/http-mock.ts';
+import { JiraHttp, setBaseUrl } from './jira.ts';
 
 describe('util/http/jira', () => {
   const api = new JiraHttp();

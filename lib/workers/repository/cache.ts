@@ -22,6 +22,7 @@ function generateBranchUpgradeCache(
     depName,
     depType,
     displayPending,
+    manager,
     packageName,
     fixedVersion,
     currentVersion,
@@ -34,12 +35,14 @@ function generateBranchUpgradeCache(
     sourceUrl,
     remediationNotPossible,
     updateType,
+    isVulnerabilityAlert,
   } = upgrade;
   const result: BranchUpgradeCache = {
     datasource,
     depName,
     depType,
     displayPending,
+    manager,
     fixedVersion,
     currentVersion,
     currentValue,
@@ -51,6 +54,7 @@ function generateBranchUpgradeCache(
     sourceUrl,
     remediationNotPossible,
     updateType,
+    isVulnerabilityAlert,
   };
   if (packageName) {
     result.packageName = packageName;
@@ -70,6 +74,7 @@ async function generateBranchCache(
     let isModified: boolean | undefined;
     let isBehindBase: boolean | undefined;
     let isConflicted: boolean | undefined;
+    let commitTimestamp: string | undefined;
     if (baseBranchSha && branchSha) {
       const branchPr = await platform.getBranchPr(branchName, baseBranch);
       if (branchPr) {
@@ -90,6 +95,11 @@ async function generateBranchCache(
           baseBranch,
           baseBranchSha,
         ) ?? undefined;
+      // Get commit timestamp for hourly limit tracking
+      const commitDate = await scm.getBranchUpdateDate(branchName);
+      if (commitDate) {
+        commitTimestamp = commitDate.toISO()!;
+      }
     } else if (baseBranchSha && !branchSha && branch.prNo) {
       // if branch was deleted/ PR exists and ignored
       prNo = branch.prNo;
@@ -107,6 +117,7 @@ async function generateBranchCache(
       baseBranchSha,
       baseBranch,
       commitFingerprint,
+      commitTimestamp,
       branchName,
       isBehindBase,
       isConflicted,

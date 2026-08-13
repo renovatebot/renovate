@@ -1,13 +1,13 @@
 import { Readable } from 'node:stream';
 import { GetObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { mockClient } from 'aws-sdk-client-mock';
+import { Fixtures } from '~test/fixtures.ts';
 import { logger } from '../../../logger/index.ts';
 import * as hostRules from '../../../util/host-rules.ts';
 import { id as versioning } from '../../versioning/maven/index.ts';
-import { getPkgReleases } from '../index.ts';
 import type { ReleaseResult } from '../index.ts';
+import { getPkgReleases } from '../index.ts';
 import { MavenDatasource } from './index.ts';
-import { Fixtures } from '~test/fixtures.ts';
 
 const datasource = MavenDatasource.id;
 

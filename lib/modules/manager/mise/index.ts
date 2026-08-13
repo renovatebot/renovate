@@ -12,11 +12,18 @@ import { NugetDatasource } from '../../datasource/nuget/index.ts';
 import { PypiDatasource } from '../../datasource/pypi/index.ts';
 import { RubyVersionDatasource } from '../../datasource/ruby-version/index.ts';
 import { RubygemsDatasource } from '../../datasource/rubygems/index.ts';
+import { RustVersionDatasource } from '../../datasource/rust-version/index.ts';
 import { supportedDatasources as asdfSupportedDatasources } from '../asdf/index.ts';
 
+export { updateArtifacts } from './artifacts.ts';
+export { knownDepTypes, supportsDynamicDepTypesNote } from './dep-types.ts';
 export { extractPackageFile } from './extract.ts';
+export { updateLockedDependency } from './update-locked.ts';
 
 export const displayName = 'mise-en-place';
+export const supportsLockFileMaintenance = true;
+export const lockFileNames = ['mise.lock'];
+export const lockFileMaintenanceIsDelegatedToPackageManager = true;
 export const url = 'https://mise.jdx.dev';
 
 export const defaultConfig = {
@@ -28,6 +35,7 @@ export const defaultConfig = {
     '**/.config/mise/conf.d/*.toml',
     '**/.rtx{,.*}.toml',
   ],
+  pinDigests: false,
 };
 
 const backendDatasources = {
@@ -37,6 +45,7 @@ const backendDatasources = {
     JavaVersionDatasource.id,
     NodeVersionDatasource.id,
     RubyVersionDatasource.id,
+    RustVersionDatasource.id,
   ],
   // Re-use the asdf datasources, as mise and asdf support the same plugins.
   asdf: asdfSupportedDatasources,
@@ -44,6 +53,7 @@ const backendDatasources = {
   cargo: [CrateDatasource.id, GitTagsDatasource.id, GitRefsDatasource.id],
   dotnet: [NugetDatasource.id],
   gem: [RubygemsDatasource.id],
+  github: [GithubReleasesDatasource.id],
   go: [GoDatasource.id],
   npm: [NpmDatasource.id],
   pipx: [PypiDatasource.id, GithubTagsDatasource.id, GitRefsDatasource.id],
@@ -52,6 +62,22 @@ const backendDatasources = {
   // not supported
   vfox: [],
 };
+
+/**
+ * Backends that are definitely supported out-of-the-box with Renovate.
+ */
+export const supportedBackendDatasources = new Set(
+  Object.keys(backendDatasources).filter((key) => key !== 'vfox'),
+);
+
+/**
+ * Backends that may require some additional work for users to configure Renovate to update them.
+ */
+export const maybeSupportedBackendDatasources = new Set<string>(
+  Object.keys(backendDatasources).filter(
+    (key) => key === 'vfox' || key === 'aqua',
+  ),
+);
 
 export const supportedDatasources = deduplicateArray(
   Object.values(backendDatasources).flat(),

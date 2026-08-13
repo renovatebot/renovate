@@ -1,6 +1,6 @@
-import { HermitDatasource } from './/index.ts';
-import type { HermitSearchResult } from './types.ts';
 import * as httpMock from '~test/http-mock.ts';
+import { HermitDatasource } from './index.ts';
+import type { HermitSearchResult } from './types.ts';
 
 const datasource = new HermitDatasource();
 const githubApiHost = 'https://api.github.com';
@@ -127,7 +127,7 @@ describe('modules/datasource/hermit/index', () => {
           packageName: 'go',
           registryUrl,
         }),
-      ).rejects.toThrow();
+      ).rejects.toThrow('Request failed with status code 404 (Not Found)');
     });
 
     it('should get null result on non github url given', async () => {

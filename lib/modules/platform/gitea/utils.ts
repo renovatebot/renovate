@@ -13,7 +13,9 @@ import type { GitUrlOption, Pr } from '../types.ts';
 import type { PR, PRMergeMethod, Repo } from './types.ts';
 
 export function smartLinks(body: string): string {
-  return body?.replace(regEx(/\]\(\.\.\/pull\//g), '](pulls/');
+  return body
+    ?.replace(regEx(/\]\(\.\.\/issues\//g), '](issues/')
+    .replace(regEx(/\]\(\.\.\/pull\//g), '](pulls/');
 }
 
 export function trimTrailingApiPath(url: string): string {
@@ -87,7 +89,7 @@ export function getMergeMethod(
 export const API_PATH = '/api/v1';
 
 export const DRAFT_PREFIX = 'WIP: ';
-const reconfigurePrRegex = regEx(/reconfigure$/g);
+const reconfigurePrRegex = regEx(/reconfigure$/);
 
 export function toRenovatePR(data: PR, author: string | null): Pr | null {
   if (!data) {
@@ -106,7 +108,7 @@ export function toRenovatePR(data: PR, author: string | null): Pr | null {
     return null;
   }
 
-  const createdBy = data.user?.username;
+  const createdBy = data.user?.login;
   if (
     createdBy &&
     author &&

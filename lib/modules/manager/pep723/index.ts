@@ -1,5 +1,6 @@
 import type { Category } from '../../../constants/index.ts';
 import { PypiDatasource } from '../../datasource/pypi/index.ts';
+
 export { extractPackageFile } from './extract.ts';
 
 export const displayName = 'PEP 723';
@@ -12,3 +13,5 @@ export const defaultConfig = {
 };
 
 export const supportedDatasources = [PypiDatasource.id];
+
+export { knownDepTypes } from './dep-types.ts';

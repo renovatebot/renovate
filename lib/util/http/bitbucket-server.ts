@@ -6,9 +6,9 @@ const MAX_LIMIT = 100;
 const MAX_PAGES = 100;
 
 let baseUrl: string;
-export const setBaseUrl = (url: string): void => {
+export function setBaseUrl(url: string): void {
   baseUrl = url;
-};
+}
 
 export interface BitbucketServerHttpOptions extends HttpOptions {
   paginate?: boolean;
@@ -28,6 +28,16 @@ export class BitbucketServerHttp extends HttpBase<BitbucketServerHttpOptions> {
 
   constructor(type = 'bitbucket-server', options?: BitbucketServerHttpOptions) {
     super(type, options);
+  }
+
+  protected override extraOptions(): readonly string[] {
+    return super
+      .extraOptions()
+      .concat([
+        'paginate',
+        'limit',
+        'maxPages',
+      ] as (keyof BitbucketServerHttpOptions)[]);
   }
 
   protected override async requestJsonUnsafe<T>(

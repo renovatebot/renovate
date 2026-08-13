@@ -1,5 +1,5 @@
-import { getLockedDependencies } from './get-locked.ts';
 import { Fixtures } from '~test/fixtures.ts';
+import { getLockedDependencies } from './get-locked.ts';
 
 vi.mock('../../../../../../util/fs/index.ts');
 

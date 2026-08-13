@@ -152,7 +152,7 @@ export function parseLockFile(input: string): Map<string, VersionWithDepType> {
         depVerMap.set(depName, {
           version: lockVersion,
           depType: isTestDepType ? 'test' : 'dependencies',
-        } as VersionWithDepType);
+        });
       }
     } else if (line === '[Test dependencies]') {
       isTestDepType = true; // We know that all lines below this header are test dependencies
@@ -209,5 +209,10 @@ export function parsePropsFile(
   logger.trace(
     `Found ${depVerExactMap.size} dependencies and ${depVerRegexMap.size} wildcard dependencies in ${VERSIONS_PROPS}.`,
   );
-  return [depVerExactMap, new Map([...depVerRegexMap].sort().reverse())];
+  return [
+    depVerExactMap,
+    new Map(
+      [...depVerRegexMap].sort(([ka], [kb]) => ka.localeCompare(kb)).reverse(),
+    ),
+  ];
 }

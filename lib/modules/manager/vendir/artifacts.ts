@@ -1,6 +1,5 @@
 import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
-import { exec } from '../../../util/exec/index.ts';
 import type { ExecOptions } from '../../../util/exec/types.ts';
 import {
   getParentDir,
@@ -8,8 +7,11 @@ import {
   readLocalFile,
   writeLocalFile,
 } from '../../../util/fs/index.ts';
+import { withGitEnvironment } from '../../../util/git/exec.ts';
 import { getRepoStatus } from '../../../util/git/index.ts';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
+
+const gitExec = withGitEnvironment();
 
 export async function updateArtifacts({
   packageFileName,
@@ -41,7 +43,7 @@ export async function updateArtifacts({
       ],
     };
 
-    await exec(`vendir sync`, execOptions);
+    await gitExec(`vendir sync`, execOptions);
 
     logger.debug('Returning updated Vendir artifacts');
 
@@ -103,7 +105,7 @@ export async function updateArtifacts({
     return [
       {
         artifactError: {
-          lockFile: lockFileName,
+          fileName: lockFileName,
           stderr: err.message,
         },
       },

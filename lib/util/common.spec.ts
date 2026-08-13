@@ -1,9 +1,9 @@
 import { codeBlock } from 'common-tags';
+import { logger } from '~test/util.ts';
 import { GlobalConfig } from '../config/global.ts';
 import { InheritConfig } from '../config/inherit.ts';
 import { detectPlatform, getInheritedOrGlobal, parseJson } from './common.ts';
 import * as hostRules from './host-rules.ts';
-import { logger } from '~test/util.ts';
 
 const validJsonString = `
 {
@@ -147,7 +147,9 @@ describe('util/common', () => {
     });
 
     it('throws error for invalid json', () => {
-      expect(() => parseJson(invalidJsonString, 'renovate.json')).toThrow();
+      expect(() => parseJson(invalidJsonString, 'renovate.json')).toThrow(
+        "JSON5: invalid character '\\\"' at 7:3",
+      );
     });
 
     it('catches and warns if content parsing failed with JSONC.parse but not with JSON5.parse', () => {
@@ -185,7 +187,9 @@ describe('util/common', () => {
     });
 
     it('throws error for invalid jsonc', () => {
-      expect(() => parseJson(invalidJsonString, 'renovate.jsonc')).toThrow();
+      expect(() => parseJson(invalidJsonString, 'renovate.jsonc')).toThrow(
+        'Parse error: Expected comma on line 6 column 47',
+      );
     });
   });
 
@@ -237,12 +241,61 @@ describe('util/common', () => {
     // is not possiblle as config validation will error out: only for coverage
     it('handles undefined inherited values', () => {
       InheritConfig.set({
-        configFileNames: undefined as never,
+        configFileNames: undefined,
       });
       GlobalConfig.set({
         configFileNames: ['global'],
       });
       expect(getInheritedOrGlobal('configFileNames')).toBeUndefined();
+    });
+
+    describe('when requesting onboardingAutoCloseAge, do not allow inherit config to override global config', () => {
+      it('returns inherited value when inherited < global', () => {
+        GlobalConfig.set({
+          onboardingAutoCloseAge: 10,
+        });
+        InheritConfig.set({
+          onboardingAutoCloseAge: 5,
+        });
+        expect(getInheritedOrGlobal('onboardingAutoCloseAge')).toBe(5);
+      });
+
+      it('returns global value when inherited > global value', () => {
+        GlobalConfig.set({
+          onboardingAutoCloseAge: 5,
+        });
+        InheritConfig.set({
+          onboardingAutoCloseAge: 10,
+        });
+        expect(getInheritedOrGlobal('onboardingAutoCloseAge')).toBe(5);
+      });
+
+      it('returns inherited value when inherited == global', () => {
+        GlobalConfig.set({
+          onboardingAutoCloseAge: 5,
+        });
+        InheritConfig.set({
+          onboardingAutoCloseAge: 5,
+        });
+        expect(getInheritedOrGlobal('onboardingAutoCloseAge')).toBe(5);
+      });
+
+      it('returns inherited value when global value is not set', () => {
+        GlobalConfig.set({
+          onboardingAutoCloseAge: undefined,
+        });
+        InheritConfig.set({
+          onboardingAutoCloseAge: 10,
+        });
+        expect(getInheritedOrGlobal('onboardingAutoCloseAge')).toBe(10);
+      });
+
+      it('returns global value when inherited value is not set', () => {
+        GlobalConfig.set({
+          onboardingAutoCloseAge: 10,
+        });
+        expect(getInheritedOrGlobal('onboardingAutoCloseAge')).toBe(10);
+      });
     });
   });
 });

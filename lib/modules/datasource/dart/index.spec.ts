@@ -1,8 +1,8 @@
+import { Fixtures } from '~test/fixtures.ts';
+import * as httpMock from '~test/http-mock.ts';
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages.ts';
 import { getPkgReleases } from '../index.ts';
 import { DartDatasource } from './index.ts';
-import { Fixtures } from '~test/fixtures.ts';
-import * as httpMock from '~test/http-mock.ts';
 
 const body = Fixtures.getJson('shared_preferences.json');
 
@@ -89,6 +89,61 @@ describe('modules/datasource/dart/index', () => {
         packageName: 'shared_preferences',
       });
       expect(res).toMatchSnapshot();
+    });
+
+    it('includes constraints from pubspec environment', async () => {
+      httpMock
+        .scope(baseUrl)
+        .get('/test_pkg')
+        .reply(200, {
+          versions: [
+            {
+              version: '1.0.0',
+              published: '2023-01-01T00:00:00.000Z',
+              pubspec: {
+                environment: {
+                  sdk: '>=2.19.0 <3.0.0',
+                },
+              },
+            },
+            {
+              version: '2.0.0',
+              published: '2024-01-01T00:00:00.000Z',
+              pubspec: {
+                environment: {
+                  sdk: '^3.0.0',
+                  flutter: '>=3.10.0',
+                },
+              },
+            },
+            {
+              version: '3.0.0',
+              published: '2024-06-01T00:00:00.000Z',
+            },
+          ],
+          latest: {
+            pubspec: {},
+          },
+        });
+      const res = await getPkgReleases({
+        datasource: DartDatasource.id,
+        packageName: 'test_pkg',
+        constraintsFiltering: 'strict',
+        constraints: { dart: '>=2.19.0 <3.0.0' },
+      });
+      expect(res).toEqual({
+        registryUrl: 'https://pub.dartlang.org',
+        releases: [
+          {
+            version: '1.0.0',
+            releaseTimestamp: '2023-01-01T00:00:00.000Z',
+          },
+          {
+            version: '3.0.0',
+            releaseTimestamp: '2024-06-01T00:00:00.000Z',
+          },
+        ],
+      });
     });
   });
 });

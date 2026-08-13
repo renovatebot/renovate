@@ -1,4 +1,4 @@
-import { InheritConfig, NOT_PRESET } from './inherit.ts';
+import { InheritConfig, NOT_PRESENT } from './inherit.ts';
 
 describe('config/inherit', () => {
   it('all values in OPTIONS are sorted', () => {
@@ -13,7 +13,7 @@ describe('config/inherit', () => {
 
   describe('InheritConfig.get()', () => {
     it('return NOT_PRESENT if key is not set', () => {
-      expect(InheritConfig.get('configFileNames')).toEqual(NOT_PRESET);
+      expect(InheritConfig.get('configFileNames')).toEqual(NOT_PRESENT);
       expect(InheritConfig.get('configFileNames')).not.toEqual('not-present');
     });
 

@@ -1,13 +1,14 @@
-import { isTruthy } from '@sindresorhus/is';
-import { DateTime } from 'luxon';
+import { isTruthy, isUndefined } from '@sindresorhus/is';
 import semver from 'semver';
 import { logger } from '../../../logger/index.ts';
 import type { BranchStatus } from '../../../types/index.ts';
 import { parseJson } from '../../../util/common.ts';
 import { getEnv } from '../../../util/env.ts';
 import * as git from '../../../util/git/index.ts';
+import type { VirtualBranch } from '../../../util/git/types.ts';
 import { setBaseUrl } from '../../../util/http/gerrit.ts';
 import { regEx } from '../../../util/regex.ts';
+import { toLongCommitSha } from '../../../util/schema-utils/git.ts';
 import { ensureTrailingSlash } from '../../../util/url.ts';
 import type {
   BranchStatusConfig,
@@ -32,18 +33,20 @@ import { repoFingerprint } from '../util.ts';
 import { smartTruncate } from '../utils/pr-body.ts';
 import { readOnlyIssueBody } from '../utils/read-only-issue-body.ts';
 import { client } from './client.ts';
-import { configureScm } from './scm.ts';
-import type { GerritLabelTypeInfo, GerritProjectInfo } from './types.ts';
+import type { GerritLabels, GerritProjectInfo } from './schema.ts';
+import { configureScm, pushForReview } from './scm.ts';
 import {
   MAX_GERRIT_COMMENT_SIZE,
   REQUEST_DETAILS_FOR_PRS,
   TAG_PULL_REQUEST_BODY,
+  extractSourceBranch,
   getGerritRepoUrl,
   mapBranchStatusToLabel,
   mapGerritChangeToPr,
 } from './utils.ts';
 
 export const id = 'gerrit';
+export const experimental = true;
 
 const defaults: {
   endpoint?: string;
@@ -53,7 +56,7 @@ let config: {
   repository?: string;
   head?: string;
   config?: GerritProjectInfo;
-  labels: Record<string, GerritLabelTypeInfo>;
+  labels: GerritLabels;
   gerritUsername?: string;
 } = {
   labels: {},
@@ -101,7 +104,7 @@ export async function initPlatform({
     throw new Error('Init: Authentication failure');
   }
 
-  logger.debug('Gerrit version is: ' + gerritVersion);
+  logger.debug(`Gerrit version is: ${gerritVersion}`);
   // Example: 3.13.0-rc3-148-gb478dbbb57
   const parsed = semver.parse(gerritVersion);
   if (!parsed) {
@@ -145,13 +148,9 @@ export async function initRepo({
     config: projectInfo,
     labels: projectInfo.labels ?? {},
   };
-  const baseUrl = defaults.endpoint!;
-  const url = getGerritRepoUrl(repository, baseUrl);
-  configureScm(repository, config.gerritUsername!);
-  await git.initRepo({ url, cloneSubmodules, cloneSubmodulesFilter });
 
   //abandon "open" and "rejected" changes at startup
-  const rejectedChanges = await client.findChanges(config.repository!, {
+  const rejectedChanges = await client.findChanges(repository, {
     branchName: '',
     state: 'open',
     label: '-2',
@@ -165,6 +164,47 @@ export async function initRepo({
       `Abandoned change ${change._number} with Code-Review -2 in repository ${repository}`,
     );
   }
+
+  // Collect open Gerrit changes to initialize as virtual branches.
+  // This allows DefaultGitScm to treat them as regular Git branches.
+  const openChanges = await client.findChanges(repository, {
+    branchName: '',
+    state: 'open',
+    requestDetails: ['CURRENT_REVISION', 'COMMIT_FOOTERS'],
+  });
+  const virtualBranches: Record<string, VirtualBranch> = {};
+  for (const change of openChanges) {
+    const branchName = extractSourceBranch(change);
+    if (!branchName) {
+      continue;
+    }
+    const sha = toLongCommitSha(change.current_revision);
+    const ref = change.revisions![sha].ref;
+    virtualBranches[branchName] = { ref, sha };
+  }
+
+  const virtualBranchCount = Object.keys(virtualBranches).length;
+  if (virtualBranchCount > 0) {
+    logger.debug(
+      `Will fetch ${virtualBranchCount} Gerrit changes as virtual branches`,
+    );
+  }
+
+  const baseUrl = defaults.endpoint!;
+  const url = getGerritRepoUrl(
+    repository,
+    baseUrl,
+    gitUrl,
+    config.gerritUsername!,
+  );
+  configureScm(repository, config.labels);
+  await git.initRepo({
+    url,
+    cloneSubmodules,
+    cloneSubmodulesFilter,
+    virtualBranches,
+  });
+
   const repoConfig: RepoResult = {
     defaultBranch: config.head!,
     isFork: false,
@@ -202,14 +242,17 @@ export async function getPr(number: number): Promise<Pr | null> {
 
 export async function updatePr(prConfig: UpdatePrConfig): Promise<void> {
   logger.debug(`updatePr(${prConfig.number}, ${prConfig.prTitle})`);
-  // prConfig.prBody will only be set if the body has changed
   if (prConfig.prBody) {
-    await client.addMessage(
+    await client.addMessageIfNotAlreadyExists(
       prConfig.number,
       prConfig.prBody,
       TAG_PULL_REQUEST_BODY,
     );
   }
+  await client.setHashtags(prConfig.number, {
+    add: prConfig.addLabels,
+    remove: prConfig.removeLabels,
+  });
   if (prConfig.targetBranch) {
     await client.moveChange(prConfig.number, prConfig.targetBranch);
   }
@@ -224,6 +267,24 @@ export async function createPr(prConfig: CreatePRConfig): Promise<Pr | null> {
       prConfig.labels?.toString() ?? ''
     })`,
   );
+
+  logger.debug(
+    `Pushing commit to refs/for/${prConfig.targetBranch} to create Gerrit change`,
+  );
+  const pushResult = await pushForReview({
+    sourceRef: prConfig.sourceBranch,
+    targetBranch: prConfig.targetBranch,
+    files: [],
+    autoApprove: prConfig.platformPrOptions?.autoApprove,
+    labels: prConfig.labels ?? undefined,
+  });
+
+  if (!pushResult) {
+    throw new Error(
+      `Failed to push commit to refs/for/${prConfig.targetBranch} to create Gerrit change`,
+    );
+  }
+
   const change = (
     await client.findChanges(config.repository!, {
       branchName: prConfig.sourceBranch,
@@ -233,18 +294,17 @@ export async function createPr(prConfig: CreatePRConfig): Promise<Pr | null> {
       requestDetails: REQUEST_DETAILS_FOR_PRS,
     })
   ).pop();
-  if (change === undefined) {
+  if (isUndefined(change)) {
     throw new Error(
-      `the change should be created automatically from previous push to refs/for/${prConfig.sourceBranch}`,
+      `Could not find the Gerrit change after pushing to refs/for/${prConfig.targetBranch}`,
     );
   }
-  const created = DateTime.fromISO(change.created.replace(' ', 'T'), {});
-  const fiveMinutesAgo = DateTime.utc().minus({ minutes: 5 });
-  if (created < fiveMinutesAgo) {
-    throw new Error(
-      `the change should have been created automatically from previous push to refs/for/${prConfig.sourceBranch}, but it was not created in the last 5 minutes (${change.created})`,
-    );
-  }
+
+  // Register the virtual branch now that the change exists and we have the ref.
+  const sha = toLongCommitSha(change.current_revision);
+  const ref = change.revisions![sha].ref;
+  await git.setVirtualBranch(prConfig.sourceBranch, ref, sha);
+
   await client.addMessage(
     change._number,
     prConfig.prBody,
@@ -328,6 +388,7 @@ export async function getBranchStatus(
     if (hasBlockingLabels) {
       return 'red';
     }
+    // v8 ignore else -- TODO: add test #40625
     if (change.submittable) {
       return 'green';
     }
@@ -355,13 +416,16 @@ export async function getBranchStatusCheck(
         requestDetails: ['LABELS'],
       })
     ).pop();
+    // v8 ignore else -- TODO: add test #40625
     if (change) {
       const label = change.labels![context];
+      // v8 ignore else -- TODO: add test #40625
       if (label) {
         // Check for rejected or blocking first, as a label could have both rejected and approved
         if (label.rejected || label.blocking) {
           return 'red';
         }
+        // v8 ignore else -- TODO: add test #40625
         if (label.approved) {
           return 'green';
         }
@@ -411,6 +475,7 @@ export async function getRawFile(
     logger.debug('No repo so cannot getRawFile');
     return null;
   }
+  // v8 ignore next -- TODO: add test #40625
   const branch =
     branchOrTag ??
     (repo === config.repository ? (config.head ?? 'HEAD') : 'HEAD');
@@ -441,7 +506,9 @@ export async function addAssignees(
   number: number,
   assignees: string[],
 ): Promise<void> {
+  // v8 ignore else -- TODO: add test #40625
   if (assignees.length) {
+    // v8 ignore else -- TODO: add test #40625
     if (assignees.length > 1) {
       logger.debug(
         `addAssignees(${number}, ${assignees.toString()}) called with more then one assignee! Gerrit only supports one assignee! Using the first from list.`,
@@ -506,7 +573,7 @@ export async function deleteLabel(
   number: number,
   label: string,
 ): Promise<void> {
-  await client.deleteHashtag(number, label);
+  await client.setHashtags(number, { remove: [label] });
 }
 
 export function ensureCommentRemoval(

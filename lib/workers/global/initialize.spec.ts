@@ -1,8 +1,8 @@
+import { git } from '~test/util.ts';
 import type { AllConfig, RenovateConfig } from '../../config/types.ts';
 import { initPlatform as _initPlatform } from '../../modules/platform/index.ts';
 import * as hostRules from '../../util/host-rules.ts';
 import { globalInitialize } from './initialize.ts';
-import { git } from '~test/util.ts';
 
 const initPlatform = vi.mocked(_initPlatform);
 
@@ -15,7 +15,9 @@ describe('workers/global/initialize', () => {
     it('throws if invalid version', async () => {
       const config: RenovateConfig = {};
       git.validateGitVersion.mockResolvedValueOnce(false);
-      await expect(globalInitialize(config)).rejects.toThrow();
+      await expect(globalInitialize(config)).rejects.toThrow(
+        'Init: git version needs upgrading',
+      );
     });
 
     it('returns if valid git version', async () => {

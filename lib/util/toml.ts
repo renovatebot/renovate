@@ -3,7 +3,7 @@ import { regEx } from './regex.ts';
 import { stripTemplates } from './string.ts';
 
 export function parse(input: string): unknown {
-  const ast = parseTOML(input);
+  const ast = parseTOML(input, { tomlVersion: '1.1' });
   return getStaticTOMLValue(ast);
 }
 

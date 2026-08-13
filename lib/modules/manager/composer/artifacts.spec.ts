@@ -1,7 +1,12 @@
 import upath from 'upath';
 import { mockDeep } from 'vitest-mock-extended';
+import { envMock, mockExecAll } from '~test/exec-util.ts';
+import { env, fs, git, partial } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
-import type { RepoGlobalConfig } from '../../../config/types.ts';
+import type {
+  InternalGlobalConfigOptions,
+  RepoGlobalConfig,
+} from '../../../config/types.ts';
 import * as docker from '../../../util/exec/docker/index.ts';
 import type { StatusResult } from '../../../util/git/types.ts';
 import * as hostRules from '../../../util/host-rules.ts';
@@ -10,8 +15,6 @@ import * as _datasource from '../../datasource/index.ts';
 import { PackagistDatasource } from '../../datasource/packagist/index.ts';
 import type { UpdateArtifactsConfig } from '../types.ts';
 import * as composer from './index.ts';
-import { envMock, mockExecAll } from '~test/exec-util.ts';
-import { env, fs, git, partial } from '~test/util.ts';
 
 vi.mock('../../../util/exec/env.ts');
 vi.mock('../../datasource/index.ts', () => mockDeep());
@@ -26,7 +29,7 @@ const config: UpdateArtifactsConfig = {
   ignoreScripts: false,
 };
 
-const adminConfig: RepoGlobalConfig = {
+const adminConfig: RepoGlobalConfig & InternalGlobalConfigOptions = {
   allowPlugins: false,
   allowScripts: false,
   // `join` fixes Windows CI
@@ -34,6 +37,7 @@ const adminConfig: RepoGlobalConfig = {
   cacheDir: upath.join('/tmp/renovate/cache'),
   containerbaseDir: upath.join('/tmp/renovate/cache/containerbase'),
   dockerSidecarImage: 'ghcr.io/renovatebot/base-image',
+  binarySource: 'global',
 };
 
 const repoStatus = partial<StatusResult>({
@@ -803,13 +807,13 @@ describe('modules/manager/composer/artifacts', () => {
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
           'ghcr.io/renovatebot/base-image' +
-          ' bash -l -c "' +
+          " bash -l -c '" +
           'install-tool php 7.3' +
           ' && ' +
           'install-tool composer 1.10.17' +
           ' && ' +
           'composer update --with-dependencies --ignore-platform-reqs --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins' +
-          '"',
+          "'",
         options: {
           cwd: '/tmp/github/some/repo',
           env: {
@@ -927,7 +931,7 @@ describe('modules/manager/composer/artifacts', () => {
     ).toEqual([
       {
         artifactError: {
-          lockFile: 'composer.lock',
+          fileName: 'composer.lock',
           stderr: 'not found',
         },
       },
@@ -950,7 +954,7 @@ describe('modules/manager/composer/artifacts', () => {
         newPackageFileContent: '{}',
         config,
       }),
-    ).toEqual([{ artifactError: { lockFile: 'composer.lock', stderr } }]);
+    ).toEqual([{ artifactError: { fileName: 'composer.lock', stderr } }]);
     expect(execSnapshots).toBeEmptyArray();
   });
 
@@ -969,7 +973,7 @@ describe('modules/manager/composer/artifacts', () => {
         newPackageFileContent: '{}',
         config,
       }),
-    ).rejects.toThrow();
+    ).rejects.toThrow('disk-space');
     expect(execSnapshots).toBeEmptyArray();
   });
 

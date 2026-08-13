@@ -1,13 +1,21 @@
+import type { Stats } from 'node:fs';
 import * as _fsExtra from 'fs-extra';
 import upath from 'upath';
+import type { MockInstance } from 'vitest';
 import { mockDeep } from 'vitest-mock-extended';
+import { envMock, mockExecAll } from '~test/exec-util.ts';
+import { Fixtures } from '~test/fixtures.ts';
+import { hostRules } from '~test/host-rules.ts';
+import { env, git, partial } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
-import type { RepoGlobalConfig } from '../../../config/types.ts';
+import type {
+  InternalGlobalConfigOptions,
+  RepoGlobalConfig,
+} from '../../../config/types.ts';
 import { logger } from '../../../logger/index.ts';
 import * as docker from '../../../util/exec/docker/index.ts';
 import type { ExtraEnv, Opt } from '../../../util/exec/types.ts';
 import type { StatusResult } from '../../../util/git/types.ts';
-import { find as _find } from '../../../util/host-rules.ts';
 import * as _datasource from '../../datasource/index.ts';
 import type { UpdateArtifactsConfig } from '../types.ts';
 import {
@@ -17,41 +25,43 @@ import {
 } from './artifacts.ts';
 import { updateArtifacts } from './index.ts';
 import type { PipfileLock } from './types.ts';
-import { envMock, mockExecAll } from '~test/exec-util.ts';
-import { Fixtures } from '~test/fixtures.ts';
-import { env, git, partial } from '~test/util.ts';
 
 // mock for cjs require for `@renovatebot/detect-tools`
 // https://github.com/vitest-dev/vitest/discussions/3134
 vi.hoisted(() => {
-  require.cache[require.resolve('fs-extra')] = {
+  const fsExtraModule: Partial<NodeJS.Module> = {
     exports: fixtures.fsExtra(),
-  } as never;
+  };
+  require.cache[require.resolve('fs-extra')] = fsExtraModule as NodeJS.Module;
 });
 vi.mock('fs-extra', () => fixtures.fsExtra());
 vi.mock('../../../util/exec/env.ts', () => mockDeep());
 vi.mock('../../../util/git/index.ts', () => mockDeep());
-vi.mock('../../../util/host-rules.ts', () => mockDeep());
 vi.mock('../../../util/http/index.ts', () => mockDeep());
 vi.mock('../../datasource/index.ts', () => mockDeep());
 
 const datasource = vi.mocked(_datasource);
-const find = vi.mocked(_find);
 const fsExtra = vi.mocked(_fsExtra);
+// vi.mocked() resolves stat() to its callback overload, so
+// mockResolvedValueOnce() would expect void; retype via the promise overload
+const statMock = fsExtra.stat as unknown as MockInstance<
+  (path: string) => Promise<Stats>
+>;
 
 process.env.CONTAINERBASE = 'true';
 
-const adminConfig: RepoGlobalConfig = {
+const adminConfig: RepoGlobalConfig & InternalGlobalConfigOptions = {
   // `join` fixes Windows CI
   localDir: upath.join(upath.join('/tmp/github/some/repo')),
   cacheDir: upath.join(upath.join('/tmp/renovate/cache')),
   containerbaseDir: upath.join(upath.join('/tmp/renovate/cache/containerbase')),
+  binarySource: 'global',
 };
 const dockerAdminConfig = {
   ...adminConfig,
   binarySource: 'docker',
   dockerSidecarImage: 'ghcr.io/renovatebot/base-image',
-} satisfies RepoGlobalConfig;
+} satisfies RepoGlobalConfig & InternalGlobalConfigOptions;
 
 const config: UpdateArtifactsConfig = {};
 const lockMaintenanceConfig = { ...config, isLockFileMaintenance: true };
@@ -128,8 +138,8 @@ describe('modules/manager/pipenv/artifacts', () => {
   });
 
   it('returns null if unchanged', async () => {
-    fsExtra.ensureDir.mockResolvedValue(undefined as never);
-    fsExtra.stat.mockResolvedValueOnce({} as never);
+    fsExtra.ensureDir.mockResolvedValue(undefined);
+    statMock.mockResolvedValueOnce(partial<Stats>());
 
     mockFiles({
       '/Pipfile.lock': JSON.stringify({
@@ -182,7 +192,7 @@ describe('modules/manager/pipenv/artifacts', () => {
 
   it('gets python full version from Pipfile', async () => {
     GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
-    fsExtra.stat.mockResolvedValueOnce({} as never);
+    statMock.mockResolvedValueOnce(partial<Stats>());
 
     mockFiles({
       '/Pipfile': Fixtures.get('Pipfile1'),
@@ -193,7 +203,7 @@ describe('modules/manager/pipenv/artifacts', () => {
       } satisfies PipfileLock),
     });
 
-    fsExtra.ensureDir.mockResolvedValue(undefined as never);
+    fsExtra.ensureDir.mockResolvedValue(undefined);
 
     const execSnapshots = mockExecAll();
 
@@ -235,7 +245,7 @@ describe('modules/manager/pipenv/artifacts', () => {
 
   it('gets python version from Pipfile', async () => {
     GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
-    fsExtra.stat.mockResolvedValueOnce({} as never);
+    statMock.mockResolvedValueOnce(partial<Stats>());
 
     mockFiles({
       '/Pipfile': Fixtures.get('Pipfile2'),
@@ -246,7 +256,7 @@ describe('modules/manager/pipenv/artifacts', () => {
       } satisfies PipfileLock),
     });
 
-    fsExtra.ensureDir.mockResolvedValue(undefined as never);
+    fsExtra.ensureDir.mockResolvedValue(undefined);
 
     const execSnapshots = mockExecAll();
 
@@ -288,14 +298,14 @@ describe('modules/manager/pipenv/artifacts', () => {
 
   it('gets full python version from .python-version', async () => {
     GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
-    fsExtra.stat.mockResolvedValueOnce({} as never);
+    statMock.mockResolvedValueOnce(partial<Stats>());
 
     mockFiles({
       '/Pipfile.lock': '{}',
       '/.python-version': '3.7.6',
     });
 
-    fsExtra.ensureDir.mockResolvedValue(undefined as never);
+    fsExtra.ensureDir.mockResolvedValue(undefined);
 
     const execSnapshots = mockExecAll();
 
@@ -347,9 +357,9 @@ describe('modules/manager/pipenv/artifacts', () => {
 
   it('gets python stream, from .python-version', async () => {
     GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
-    fsExtra.stat.mockResolvedValueOnce({} as never);
+    statMock.mockResolvedValueOnce(partial<Stats>());
 
-    fsExtra.ensureDir.mockResolvedValue(undefined as never);
+    fsExtra.ensureDir.mockResolvedValue(undefined);
 
     mockFiles({
       '/Pipfile.lock': '{}',
@@ -404,8 +414,8 @@ describe('modules/manager/pipenv/artifacts', () => {
   });
 
   it('handles no constraint', async () => {
-    fsExtra.ensureDir.mockResolvedValue(undefined as never);
-    fsExtra.stat.mockResolvedValueOnce({} as never);
+    fsExtra.ensureDir.mockResolvedValue(undefined);
+    statMock.mockResolvedValueOnce(partial<Stats>());
 
     mockFiles({
       '/Pipfile.lock': 'unparseable pipfile lock',
@@ -460,8 +470,8 @@ describe('modules/manager/pipenv/artifacts', () => {
   });
 
   it('returns updated Pipfile.lock', async () => {
-    fsExtra.ensureDir.mockResolvedValue(undefined as never);
-    fsExtra.stat.mockResolvedValueOnce({} as never);
+    fsExtra.ensureDir.mockResolvedValue(undefined);
+    statMock.mockResolvedValueOnce(partial<Stats>());
 
     mockFiles({
       '/Pipfile.lock': ['current pipfile.lock', 'new pipfile.lock'],
@@ -524,7 +534,7 @@ describe('modules/manager/pipenv/artifacts', () => {
 
   it('supports docker mode', async () => {
     GlobalConfig.set(dockerAdminConfig);
-    fsExtra.stat.mockResolvedValueOnce({} as never);
+    statMock.mockResolvedValueOnce(partial<Stats>());
 
     const pipFileLock = JSON.stringify({
       _meta: { requires: { python_version: '3.7' } },
@@ -533,7 +543,7 @@ describe('modules/manager/pipenv/artifacts', () => {
       '/Pipfile.lock': [pipFileLock, pipFileLock, 'new lock'],
     });
 
-    fsExtra.ensureDir.mockResolvedValue(undefined as never);
+    fsExtra.ensureDir.mockResolvedValue(undefined);
 
     // pipenv
     datasource.getPkgReleases.mockResolvedValueOnce({
@@ -569,13 +579,13 @@ describe('modules/manager/pipenv/artifacts', () => {
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
           'ghcr.io/renovatebot/base-image' +
-          ' bash -l -c "' +
+          " bash -l -c '" +
           'install-tool python 3.7.6' +
           ' && ' +
           'install-tool pipenv 2013.6.12' +
           ' && ' +
           'pipenv lock' +
-          '"',
+          "'",
         options: {
           cwd: upath.join('/tmp/github/some/repo'),
           env: {
@@ -612,7 +622,7 @@ describe('modules/manager/pipenv/artifacts', () => {
 
   it('supports install mode', async () => {
     GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
-    fsExtra.stat.mockResolvedValueOnce({} as never);
+    statMock.mockResolvedValueOnce(partial<Stats>());
 
     const pipFileLock = JSON.stringify({
       _meta: { requires: { python_version: '3.6' } },
@@ -621,7 +631,7 @@ describe('modules/manager/pipenv/artifacts', () => {
       '/Pipfile.lock': [pipFileLock, 'new lock'],
     });
 
-    fsExtra.ensureDir.mockResolvedValue(undefined as never);
+    fsExtra.ensureDir.mockResolvedValue(undefined);
 
     // pipenv
     datasource.getPkgReleases.mockResolvedValueOnce({
@@ -684,8 +694,8 @@ describe('modules/manager/pipenv/artifacts', () => {
 
   it('defaults to latest if no lock constraints', async () => {
     GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
-    fsExtra.stat.mockResolvedValueOnce({} as never);
-    fsExtra.ensureDir.mockResolvedValue(undefined as never);
+    statMock.mockResolvedValueOnce(partial<Stats>());
+    fsExtra.ensureDir.mockResolvedValue(undefined);
 
     mockFiles({
       '/Pipfile.lock': ['{}', 'new lock'],
@@ -755,16 +765,16 @@ describe('modules/manager/pipenv/artifacts', () => {
   });
 
   it('catches errors', async () => {
-    fsExtra.ensureDir.mockResolvedValue(undefined as never);
-    fsExtra.stat.mockResolvedValueOnce({} as never);
+    fsExtra.ensureDir.mockResolvedValue(undefined);
+    statMock.mockResolvedValueOnce(partial<Stats>());
 
     mockFiles({
       '/Pipfile.lock': 'Current Pipfile.lock',
     });
 
-    fsExtra.outputFile.mockImplementationOnce((() => {
+    fsExtra.outputFile.mockImplementationOnce(() => {
       throw new Error('not found');
-    }) as never);
+    });
 
     expect(
       await updateArtifacts({
@@ -774,7 +784,7 @@ describe('modules/manager/pipenv/artifacts', () => {
         config,
       }),
     ).toEqual([
-      { artifactError: { lockFile: 'Pipfile.lock', stderr: 'not found' } },
+      { artifactError: { fileName: 'Pipfile.lock', stderr: 'not found' } },
     ]);
 
     expect(fsExtra.ensureDir.mock.calls).toEqual([]);
@@ -782,8 +792,8 @@ describe('modules/manager/pipenv/artifacts', () => {
   });
 
   it('returns updated Pipenv.lock when doing lockfile maintenance', async () => {
-    fsExtra.ensureDir.mockResolvedValue(undefined as never);
-    fsExtra.stat.mockResolvedValueOnce({} as never);
+    fsExtra.ensureDir.mockResolvedValue(undefined);
+    statMock.mockResolvedValueOnce(partial<Stats>());
     fsExtra.remove.mockResolvedValue();
 
     mockFiles({
@@ -830,8 +840,8 @@ describe('modules/manager/pipenv/artifacts', () => {
   });
 
   it('uses pipenv version from Pipfile', async () => {
-    fsExtra.ensureDir.mockResolvedValue(undefined as never);
-    fsExtra.stat.mockResolvedValueOnce({} as never);
+    fsExtra.ensureDir.mockResolvedValue(undefined);
+    statMock.mockResolvedValueOnce(partial<Stats>());
 
     GlobalConfig.set(dockerAdminConfig);
 
@@ -872,13 +882,13 @@ describe('modules/manager/pipenv/artifacts', () => {
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
           'ghcr.io/renovatebot/base-image' +
-          ' bash -l -c "' +
+          " bash -l -c '" +
           'install-tool python 3.10.2' +
           ' && ' +
           'install-tool pipenv 2020.8.13' +
           ' && ' +
           'pipenv lock' +
-          '"',
+          "'",
         options: {
           cwd: upath.join('/tmp/github/some/repo'),
           env: {
@@ -918,9 +928,9 @@ describe('modules/manager/pipenv/artifacts', () => {
 
   it('uses pipenv version from Pipfile dev packages', async () => {
     GlobalConfig.set(dockerAdminConfig);
-    fsExtra.stat.mockResolvedValueOnce({} as never);
+    statMock.mockResolvedValueOnce(partial<Stats>());
 
-    fsExtra.ensureDir.mockResolvedValue(undefined as never);
+    fsExtra.ensureDir.mockResolvedValue(undefined);
 
     const oldLock = JSON.stringify({
       develop: { pipenv: { version: '==2020.8.13' } },
@@ -959,13 +969,13 @@ describe('modules/manager/pipenv/artifacts', () => {
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
           'ghcr.io/renovatebot/base-image' +
-          ' bash -l -c "' +
+          " bash -l -c '" +
           'install-tool python 3.10.2' +
           ' && ' +
           'install-tool pipenv 2020.8.13' +
           ' && ' +
           'pipenv lock' +
-          '"',
+          "'",
         options: {
           cwd: upath.join('/tmp/github/some/repo'),
           env: {
@@ -1005,8 +1015,8 @@ describe('modules/manager/pipenv/artifacts', () => {
 
   it('uses pipenv version from config', async () => {
     GlobalConfig.set(dockerAdminConfig);
-    fsExtra.stat.mockResolvedValueOnce({} as never);
-    fsExtra.ensureDir.mockResolvedValue(undefined as never);
+    statMock.mockResolvedValueOnce(partial<Stats>());
+    fsExtra.ensureDir.mockResolvedValue(undefined);
 
     const oldLock = JSON.stringify({
       default: { pipenv: { version: '==2020.8.13' } },
@@ -1045,13 +1055,13 @@ describe('modules/manager/pipenv/artifacts', () => {
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
           'ghcr.io/renovatebot/base-image' +
-          ' bash -l -c "' +
+          " bash -l -c '" +
           'install-tool python 3.10.2' +
           ' && ' +
           'install-tool pipenv 2020.1.1' +
           ' && ' +
           'pipenv lock' +
-          '"',
+          "'",
         options: {
           cwd: upath.join('/tmp/github/some/repo'),
           env: {
@@ -1085,8 +1095,8 @@ describe('modules/manager/pipenv/artifacts', () => {
   });
 
   it('passes private credential environment vars', async () => {
-    fsExtra.ensureDir.mockResolvedValue(undefined as never);
-    fsExtra.stat.mockResolvedValueOnce({} as never);
+    fsExtra.ensureDir.mockResolvedValue(undefined);
+    statMock.mockResolvedValueOnce(partial<Stats>());
 
     mockFiles({
       '/Pipfile.lock': ['current Pipfile.lock', 'New Pipfile.lock'],
@@ -1099,7 +1109,8 @@ describe('modules/manager/pipenv/artifacts', () => {
       }),
     );
 
-    find.mockReturnValueOnce({
+    hostRules.add({
+      matchHost: 'mypypi.example.com',
       username: 'usernameOne',
       password: 'passwordTwo',
     });
@@ -1168,8 +1179,8 @@ describe('modules/manager/pipenv/artifacts', () => {
   });
 
   it('updates extraEnv if variable names differ from default', async () => {
-    fsExtra.ensureDir.mockResolvedValue(undefined as never);
-    fsExtra.stat.mockResolvedValueOnce({} as never);
+    fsExtra.ensureDir.mockResolvedValue(undefined);
+    statMock.mockResolvedValueOnce(partial<Stats>());
 
     mockFiles({
       '/Pipfile.lock': ['current Pipfile.lock', 'New Pipfile.lock'],
@@ -1182,7 +1193,8 @@ describe('modules/manager/pipenv/artifacts', () => {
       }),
     );
 
-    find.mockReturnValueOnce({
+    hostRules.add({
+      matchHost: 'mypypi.example.com',
       username: 'usernameOne',
       password: 'passwordTwo',
     });

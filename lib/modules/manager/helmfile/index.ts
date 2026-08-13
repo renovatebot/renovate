@@ -1,10 +1,13 @@
 import type { Category } from '../../../constants/index.ts';
 import { DockerDatasource } from '../../datasource/docker/index.ts';
 import { HelmDatasource } from '../../datasource/helm/index.ts';
-export { extractPackageFile } from './extract.ts';
+
 export { updateArtifacts } from './artifacts.ts';
+export { extractPackageFile } from './extract.ts';
 
 export const supportsLockFileMaintenance = true;
+export const lockFileNames = ['helmfile.lock'];
+export const lockFileMaintenanceIsDelegatedToPackageManager = true;
 
 export const url = 'https://helmfile.readthedocs.io';
 export const categories: Category[] = ['cd', 'helm', 'kubernetes'];

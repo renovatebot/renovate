@@ -1,8 +1,8 @@
 import { codeBlock } from 'common-tags';
+import { Fixtures } from '~test/fixtures.ts';
 import type { PackageDependency } from '../types.ts';
 import { extractVariables, getDep } from './extract.ts';
 import { extractPackageFile } from './index.ts';
-import { Fixtures } from '~test/fixtures.ts';
 
 const d1 = Fixtures.get('1.Dockerfile');
 const d2 = Fixtures.get('2.Dockerfile');
@@ -953,6 +953,29 @@ describe('modules/manager/dockerfile/extract', () => {
           packageName: 'nginx',
           depType: 'final',
           replaceString: 'FROM nginx:1.20${patch1}$patch2\n',
+        },
+      ]);
+    });
+
+    it('handles FROM with single-quoted empty ARG default value', () => {
+      const res = extractPackageFile(
+        "ARG DOCKER_HUB_MIRROR=''\n" +
+          'ARG NODE_VERSION=21\n' +
+          'FROM ${DOCKER_HUB_MIRROR}node:${NODE_VERSION}-alpine\n',
+        '',
+        {},
+      )?.deps;
+      expect(res).toEqual([
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentDigest: undefined,
+          currentValue: '21-alpine',
+          datasource: 'docker',
+          depName: 'node',
+          packageName: 'node',
+          depType: 'final',
+          replaceString: 'node:21-alpine',
         },
       ]);
     });

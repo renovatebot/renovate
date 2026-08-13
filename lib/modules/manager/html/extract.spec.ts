@@ -1,5 +1,5 @@
-import { extractPackageFile } from './index.ts';
 import { Fixtures } from '~test/fixtures.ts';
+import { extractPackageFile } from './index.ts';
 
 const sample = Fixtures.get(`sample.html`);
 const nothing = Fixtures.get(`nothing.html`);

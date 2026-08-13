@@ -91,6 +91,7 @@ export async function ensureComment({
       logger.debug(`Ensuring comment "${topic}" in #${prNo}`);
       body = `### ${topic}\n\n${content}`;
       comments.forEach((comment) => {
+        // v8 ignore else -- TODO: add test #40625
         if (comment.content.raw.startsWith(`### ${topic}\n\n`)) {
           commentId = comment.id;
           commentNeedsUpdating = comment.content.raw !== body;
@@ -100,6 +101,7 @@ export async function ensureComment({
       logger.debug(`Ensuring content-only comment in #${prNo}`);
       body = `${content}`;
       comments.forEach((comment) => {
+        // v8 ignore else -- TODO: add test #40625
         if (comment.content.raw === body) {
           commentId = comment.id;
           commentNeedsUpdating = false;
@@ -120,10 +122,10 @@ export async function ensureComment({
       await editComment(config, prNo, commentId, body);
       logger.debug({ repository: config.repository, prNo }, 'Comment updated');
     } else {
-      logger.debug('Comment is already update-to-date');
+      logger.debug('Comment is already up-to-date');
     }
     return true;
-  } catch (err) /* v8 ignore next */ {
+  } catch (err) /* v8 ignore next -- defensive: comment API failures are logged and swallowed, not simulated in specs */ {
     logger.warn({ err }, 'Error ensuring comment');
     return false;
   }
@@ -142,6 +144,14 @@ export async function reopenComments(
   return reopenComments;
 }
 
+function byTopic(comment: Comment, topic: string): boolean {
+  return comment.content.raw.startsWith(`### ${topic}\n\n`);
+}
+
+function byContent(comment: Comment, content: string): boolean {
+  return comment.content.raw.trim() === content;
+}
+
 export async function ensureCommentRemoval(
   config: CommentsConfig,
   deleteConfig: EnsureCommentRemovalConfig,
@@ -157,20 +167,19 @@ export async function ensureCommentRemoval(
 
     let commentId: number | undefined = undefined;
 
+    // v8 ignore else -- TODO: add test #40625
     if (deleteConfig.type === 'by-topic') {
-      const byTopic = (comment: Comment): boolean =>
-        comment.content.raw.startsWith(`### ${deleteConfig.topic}\n\n`);
-      commentId = comments.find(byTopic)?.id;
+      const topic = deleteConfig.topic;
+      commentId = comments.find((comment) => byTopic(comment, topic))?.id;
     } else if (deleteConfig.type === 'by-content') {
-      const byContent = (comment: Comment): boolean =>
-        comment.content.raw.trim() === deleteConfig.content;
-      commentId = comments.find(byContent)?.id;
+      const content = deleteConfig.content;
+      commentId = comments.find((comment) => byContent(comment, content))?.id;
     }
 
     if (commentId) {
       await deleteComment(config, prNo, commentId);
     }
-  } catch (err) /* v8 ignore next */ {
+  } catch (err) /* v8 ignore next -- defensive: comment API failures are logged and swallowed, not simulated in specs */ {
     logger.warn({ err }, 'Error ensuring comment removal');
   }
 }

@@ -1,3 +1,4 @@
+import { fs } from '~test/util.ts';
 import { GlobalConfig } from '../../../../config/global.ts';
 import { logger } from '../../../../logger/index.ts';
 import { compressToBase64 } from '../../../compress.ts';
@@ -7,7 +8,6 @@ import type { RepoCacheRecord } from '../schema.ts';
 import type { RepoCacheData } from '../types.ts';
 import { CacheFactory } from './cache-factory.ts';
 import { RepoCacheLocal } from './local.ts';
-import { fs } from '~test/util.ts';
 
 vi.mock('../../../fs/index.ts');
 

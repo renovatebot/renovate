@@ -1,5 +1,10 @@
-import { isString, isUndefined, isUrlString } from '@sindresorhus/is';
-import { regEx } from '../../../util/regex.ts';
+import {
+  isNonEmptyString,
+  isString,
+  isUndefined,
+  isUrlString,
+} from '@sindresorhus/is';
+import { escapeRegExp, regEx } from '../../../util/regex.ts';
 import { CrateDatasource } from '../../datasource/crate/index.ts';
 import { GitRefsDatasource } from '../../datasource/git-refs/index.ts';
 import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
@@ -11,6 +16,7 @@ import { NugetDatasource } from '../../datasource/nuget/index.ts';
 import { normalizePythonDepName } from '../../datasource/pypi/common.ts';
 import { PypiDatasource } from '../../datasource/pypi/index.ts';
 import { RubygemsDatasource } from '../../datasource/rubygems/index.ts';
+import * as semverVersioning from '../../versioning/semver/index.ts';
 import type { PackageDependency } from '../types.ts';
 import type { MiseToolOptions } from './schema.ts';
 
@@ -54,6 +60,9 @@ export function createCargoToolConfig(
     return {
       packageName: name,
       datasource: CrateDatasource.id,
+      // A mise tool version is a concrete version, not a Cargo dependency requirement,
+      // so the crate datasource default of cargo versioning does not apply
+      versioning: semverVersioning.id,
     };
   }
   // tag: branch: or rev: is required for git repository url
@@ -107,6 +116,30 @@ export function createGemToolConfig(name: string): BackendToolingConfig {
   return {
     packageName: name,
     datasource: RubygemsDatasource.id,
+  };
+}
+
+/**
+ * Create a tooling config for github backend
+ * @link https://mise.jdx.dev/dev-tools/backends/github.html
+ */
+export function createGithubToolConfig(
+  name: string,
+  version: string,
+  toolOptions: MiseToolOptions,
+): BackendToolingConfig {
+  let extractVersion: string | undefined = undefined;
+  const prefix = toolOptions.version_prefix;
+
+  if (isNonEmptyString(prefix)) {
+    extractVersion = `^${escapeRegExp(prefix)}(?<version>.+)`;
+  }
+
+  return {
+    packageName: name,
+    datasource: GithubReleasesDatasource.id,
+    currentValue: version,
+    ...(extractVersion && { extractVersion }),
   };
 }
 

@@ -9,7 +9,7 @@ import type { VersioningApiConstructor } from '../types.ts';
 
 export const id = 'nixpkgs';
 export const displayName = 'Nixpkgs';
-export const urls = ['https://github.com/NixOS/nixpkgs'];
+export const urls = ['[Nixpkgs repository](https://github.com/NixOS/nixpkgs)'];
 export const supportsRanges = false;
 
 export class NixPkgsVersioning extends RegExpVersioningApi {
@@ -31,11 +31,11 @@ export class NixPkgsVersioning extends RegExpVersioningApi {
     const release = [];
 
     if (major) {
-      release.push(Number.parseInt(major));
+      release.push(Number.parseInt(major, 10));
     }
 
     if (minor) {
-      release.push(Number.parseInt(minor));
+      release.push(Number.parseInt(minor, 10));
     }
 
     const compatibility = isNonEmptyStringAndNotWhitespace(suffix)
