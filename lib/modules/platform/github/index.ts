@@ -563,6 +563,18 @@ export async function initRepo({
       );
     }
 
+    // GitHub Enterprise Server <3.12.0 doesn't support merge queues
+    if (
+      platformConfig.isGhe &&
+      // semver not null safe, accepts null and undefined
+      semver.satisfies(platformConfig.gheVersion!, '<3.12.0')
+    ) {
+      infoQuery = infoQuery.replace(
+        /\n\s*mergeQueue\s*\{\s*id\s*\}\s*\n/,
+        '\n',
+      );
+    }
+
     const res = await githubApi.requestGraphql<{
       repository: GhRepo;
     }>(infoQuery, {
@@ -632,6 +644,9 @@ export async function initRepo({
     config.autoMergeAllowed = repo.autoMergeAllowed;
     config.hasIssuesEnabled = repo.hasIssuesEnabled;
     config.hasVulnerabilityAlertsEnabled = repo.hasVulnerabilityAlertsEnabled;
+    config.mergeQueueEnabled[config.defaultBranch] = isNonEmptyObject(
+      repo.mergeQueue,
+    );
 
     const recentIssues = Issue.array()
       .catch([])

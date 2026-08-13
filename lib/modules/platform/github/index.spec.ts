@@ -4710,9 +4710,21 @@ describe('modules/platform/github/index', () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
       await github.initRepo({ repository: 'some/repo' });
-      mergeQueueEnabledMock(scope, null);
 
+      // default branch merge queue status is cached during initRepo
       await expect(github.assertPrNotInMergeQueue('somebranch')).toResolve();
+    });
+
+    it('uses merge queue status fetched during initRepo for the default branch', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo', { mergeQueue: { id: 'queue' } });
+      await github.initRepo({ repository: 'some/repo' });
+      prListMock(scope);
+      mergeQueueCheckMock(scope, true);
+
+      await expect(
+        github.assertPrNotInMergeQueue('somebranch', 'master'),
+      ).rejects.toThrow(PR_ALREADY_IN_MERGE_QUEUE);
     });
 
     it('does nothing if there is no open PR for the branch', async () => {
