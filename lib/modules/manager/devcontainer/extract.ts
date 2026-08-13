@@ -107,7 +107,7 @@ export function extractPackageFile(
   } catch (err) {
     logger.debug(
       { err, packageFile },
-      'Error extracting dev container JSON file.',
+      'Error extracting dev container JSON file',
     );
     return null;
   }

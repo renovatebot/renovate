@@ -82,11 +82,11 @@ export function getRepoUrl(
     res.body.http_url_to_repo === null
   ) {
     if (res.body.http_url_to_repo === null) {
-      logger.debug('no http_url_to_repo found. Falling back to old behavior.');
+      logger.debug('no http_url_to_repo found. Falling back to old behavior');
     }
     if (env.GITLAB_IGNORE_REPO_URL) {
       logger.warn(
-        'GITLAB_IGNORE_REPO_URL environment variable is deprecated. Please use "gitUrl" option.',
+        'GITLAB_IGNORE_REPO_URL environment variable is deprecated. Please use "gitUrl" option',
       );
     }
 

@@ -915,7 +915,7 @@ export async function mergePr({
     }
     return true;
   } catch (err) {
-    logger.debug({ err }, 'Failed to set the PR as completed.');
+    logger.debug({ err }, 'Failed to set the PR as completed');
     return false;
   }
 }

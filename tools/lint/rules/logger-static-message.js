@@ -4,6 +4,7 @@
  * See docs/development/best-practices.md ("Logging").
  */
 const flaggedLevels = new Set(['warn', 'error', 'fatal']);
+const logLevels = new Set(['debug', 'info', 'warn', 'error', 'fatal']);
 
 /**
  * Extract the log level from a `logger.<level>(...)` or
@@ -20,10 +21,13 @@ function getLoggerLevel(callee) {
   ) {
     return null;
   }
+
   const obj = callee.object;
+
   if (obj.type === 'Identifier' && obj.name === 'logger') {
     return callee.property.name;
   }
+
   if (
     obj.type === 'MemberExpression' &&
     !obj.computed &&
@@ -34,6 +38,7 @@ function getLoggerLevel(callee) {
   ) {
     return callee.property.name;
   }
+
   return null;
 }
 
@@ -47,12 +52,15 @@ function hasStringOperand(node) {
   if (node.type === 'Literal') {
     return typeof node.value === 'string';
   }
+
   if (node.type === 'TemplateLiteral') {
     return true;
   }
+
   if (node.type === 'BinaryExpression' && node.operator === '+') {
     return hasStringOperand(node.left) || hasStringOperand(node.right);
   }
+
   return false;
 }
 
@@ -61,6 +69,7 @@ function hasStringOperand(node) {
  * values include TS-specific wrapper expressions (`TSAsExpression`, ...)
  * that are absent from ESLint's estree typings, so the fields this rule
  * reads are described here.
+ *
  * @typedef {{ type: string, name?: string, computed?: boolean, expression?: ErrorValueNode, property?: ErrorValueNode, callee?: ErrorValueNode }} ErrorValueNode
  */
 
@@ -69,11 +78,13 @@ function hasStringOperand(node) {
  * identifier or member access named like an error (`err`, `error`,
  * `parseError`, ...) or a `new SomeError(...)` expression. TS-specific
  * wrapper expressions are unwrapped first.
+ *
  * @param {unknown} value
  * @returns {boolean}
  */
 function isErrorIsh(value) {
   const node = /** @type {ErrorValueNode} */ (value);
+
   if (
     (node.type === 'TSAsExpression' ||
       node.type === 'TSNonNullExpression' ||
@@ -82,9 +93,11 @@ function isErrorIsh(value) {
   ) {
     return isErrorIsh(node.expression);
   }
+
   if (node.type === 'Identifier') {
     return node.name !== undefined && /err(or)?$/i.test(node.name);
   }
+
   if (
     node.type === 'MemberExpression' &&
     !node.computed &&
@@ -94,12 +107,14 @@ function isErrorIsh(value) {
       node.property.name !== undefined && /err(or)?$/i.test(node.property.name)
     );
   }
+
   if (node.type === 'NewExpression') {
     return (
       node.callee?.type === 'Identifier' &&
       node.callee.name?.endsWith('Error') === true
     );
   }
+
   return false;
 }
 
@@ -111,30 +126,38 @@ export default {
       staticMessage:
         "WARN, ERROR and FATAL messages must have a static msg component so they can be grouped in metrics; move interpolated values into the metadata object, e.g. logger.{{level}}({ url }, 'Failed to fetch').",
       errKey: 'use the err key for errors in logger metadata',
+      trailingPeriod: 'Log messages must not end with a period.',
     },
   },
+
   create(context) {
     const filename = context.filename ?? context.physicalFilename ?? '';
+
     // Only enforce in lib/ production code
-    if (!filename.includes('/lib/')) {
+    if (!/[\\/]lib[\\/]/.test(filename)) {
       return {};
     }
+
     return {
       CallExpression(node) {
         const level = getLoggerLevel(node.callee);
-        if (!level || !flaggedLevels.has(level)) {
+
+        if (!level || !logLevels.has(level)) {
           return;
         }
 
         const [first, second] = node.arguments;
+
         if (!first) {
           return;
         }
 
         /** @type {import('estree').Node | undefined} */
         let messageArg = first;
+
         if (first.type === 'ObjectExpression') {
           messageArg = second;
+
           for (const property of first.properties) {
             if (
               property.type === 'Property' &&
@@ -145,7 +168,10 @@ export default {
                   property.key.value === 'error')) &&
               isErrorIsh(property.value)
             ) {
-              context.report({ node: property, messageId: 'errKey' });
+              context.report({
+                node: property,
+                messageId: 'errKey',
+              });
             }
           }
         }
@@ -153,6 +179,27 @@ export default {
         if (!messageArg) {
           return;
         }
+
+        // Log messages must not end with a period.
+        if (
+          (messageArg.type === 'Literal' &&
+            typeof messageArg.value === 'string' &&
+            messageArg.value.endsWith('.')) ||
+          (messageArg.type === 'TemplateLiteral' &&
+            messageArg.quasis.at(-1)?.value.raw.endsWith('.'))
+        ) {
+          context.report({
+            node: messageArg,
+            messageId: 'trailingPeriod',
+          });
+        }
+
+        // Preserve the existing static-message behavior for
+        // WARN, ERROR and FATAL only.
+        if (!flaggedLevels.has(level)) {
+          return;
+        }
+
         if (
           (messageArg.type === 'TemplateLiteral' &&
             messageArg.expressions.length > 0) ||

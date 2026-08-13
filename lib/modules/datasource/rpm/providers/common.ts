@@ -91,7 +91,7 @@ async function downloadGzipFile(
   }
 
   if (!needsToDownload) {
-    logger.debug(`No need to download ${url}, file is up to date.`);
+    logger.debug(`No need to download ${url}, file is up to date`);
     return false;
   }
 
@@ -101,7 +101,7 @@ async function downloadGzipFile(
 
   const compressedStats = await fs.statCacheFile(compressedFile);
   if (!compressedStats || compressedStats.size === 0) {
-    logger.debug(`Empty response body from getting ${url}.`);
+    logger.debug(`Empty response body from getting ${url}`);
     throw new Error(`Empty response body from getting ${url}.`);
   }
 

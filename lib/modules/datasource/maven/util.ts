@@ -185,12 +185,12 @@ export async function downloadHttpProtocol(
             if (packageCache.getCacheType() === 'redis') {
               logger.once.warn(
                 { failedUrl },
-                'Maven Central rate limiting detected despite Redis caching.',
+                'Maven Central rate limiting detected despite Redis caching',
               );
             } else {
               logger.once.warn(
                 { failedUrl },
-                'Maven Central rate limiting detected. Persistent caching required.',
+                'Maven Central rate limiting detected. Persistent caching required',
               );
             }
           }

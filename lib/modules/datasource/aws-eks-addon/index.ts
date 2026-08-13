@@ -27,7 +27,7 @@ export class AwsEKSAddonDataSource extends Datasource {
     if (!res.success) {
       logger.warn(
         { err: res.error, serializedFilter },
-        'Error parsing eks-addons config.',
+        'Error parsing eks-addons config',
       );
       return null;
     }

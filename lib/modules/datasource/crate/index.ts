@@ -385,7 +385,7 @@ export class CrateDatasource extends Datasource {
         if (cached?.err) {
           logger.warn(
             { err: cached.err, packageName, registryFetchUrl },
-            'Previous git clone failed, bailing out.',
+            'Previous git clone failed, bailing out',
           );
           return null;
         }
@@ -411,7 +411,7 @@ export class CrateDatasource extends Datasource {
         if (result.err) {
           logger.warn(
             { err: result.err, packageName, registryFetchUrl },
-            'Git clone failed, bailing out.',
+            'Git clone failed, bailing out',
           );
           return null;
         }

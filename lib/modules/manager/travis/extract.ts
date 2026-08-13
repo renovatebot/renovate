@@ -14,7 +14,7 @@ export function extractPackageFile(
     // TODO: use schema (#9610)
     doc = parseSingleYaml(content);
   } catch (err) {
-    logger.debug({ err, packageFile }, 'Failed to parse .travis.yml file.');
+    logger.debug({ err, packageFile }, 'Failed to parse .travis.yml file');
     return null;
   }
   let deps: PackageDependency[] = [];

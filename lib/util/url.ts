@@ -164,7 +164,7 @@ export function parseLinkHeader(
     return null;
   }
   if (linkHeader.length > 2000) {
-    logger.warn({ linkHeader }, 'Link header too long.');
+    logger.warn({ linkHeader }, 'Link header too long');
     return null;
   }
   return _parseLinkHeader(linkHeader);

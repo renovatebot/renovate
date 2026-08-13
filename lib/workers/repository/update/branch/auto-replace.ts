@@ -45,7 +45,7 @@ export async function confirmIfDepUpdated(
     // istanbul ignore if
     if (isNumber(depIndex) && depIndex >= newExtract.deps.length) {
       logger.debug(
-        `Extracted ${packageFile!} after autoreplace has fewer deps than expected.`,
+        `Extracted ${packageFile!} after autoreplace has fewer deps than expected`,
       );
       return false;
     }

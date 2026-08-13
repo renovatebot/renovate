@@ -27,7 +27,7 @@ export async function handleMatching(
     } catch (err) {
       logger.warn(
         { err, jsonataQuery: query, packageFile },
-        'Error executing jsonata query. Please check your query.',
+        'Error executing jsonata query. Please check your query',
       );
       continue;
     }

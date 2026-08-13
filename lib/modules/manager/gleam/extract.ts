@@ -82,7 +82,7 @@ export async function extractPackageFile(
 
   const lockFileExists = await localPathExists(lockFileName);
   if (!lockFileExists) {
-    logger.debug(`Lock file ${lockFileName} does not exist.`);
+    logger.debug(`Lock file ${lockFileName} does not exist`);
     return packageFileContent;
   }
 
@@ -104,7 +104,7 @@ export async function extractPackageFile(
       dep.lockedVersion = lockedVersion;
     } else {
       logger.debug(
-        `No locked version found for package ${dep.depName} in the range of ${dep.currentValue}.`,
+        `No locked version found for package ${dep.depName} in the range of ${dep.currentValue}`,
       );
     }
   }

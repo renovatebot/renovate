@@ -416,7 +416,7 @@ async function executeWrapperCommand(
   try {
     await exec(cmd, execOptions);
   } catch (err) {
-    logger.error({ err }, 'Error executing maven wrapper update command.');
+    logger.error({ err }, 'Error executing maven wrapper update command');
     throw err;
   }
 }

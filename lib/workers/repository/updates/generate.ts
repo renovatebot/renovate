@@ -181,7 +181,7 @@ function getMinimumGroupSize(upgrades: BranchUpgradeConfig[]): number {
 
   if (groupSizes.size > 1) {
     logger.debug(
-      'Multiple minimumGroupSize values found for this branch, using highest.',
+      'Multiple minimumGroupSize values found for this branch, using highest',
     );
   }
 
@@ -523,7 +523,7 @@ export function generateBranchConfig(
           skipArtifactsUpdate: upgrade.skipArtifactsUpdate,
         })),
       },
-      'Mixed `skipArtifactsUpdate` values in upgrades. Artifacts will be updated.',
+      'Mixed `skipArtifactsUpdate` values in upgrades. Artifacts will be updated',
     );
   }
 

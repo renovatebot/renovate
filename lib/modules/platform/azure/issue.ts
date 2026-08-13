@@ -349,7 +349,7 @@ export class IssueService {
             project: this.config.project,
             documentationUrl: `${GlobalConfig.get('productLinks').documentation}configuration-options/#azureworkitemtype`,
           },
-          'Azure: work item type does not exist in project (or the token lacks permission to it); skipping issue. The Dependency Dashboard needs a process that defines this work item type. Set one your project defines via the `azureWorkItemType` repo config option.',
+          'Azure: work item type does not exist in project (or the token lacks permission to it); skipping issue. The Dependency Dashboard needs a process that defines this work item type. Set one your project defines via the `azureWorkItemType` repo config option',
         );
         return null;
       }

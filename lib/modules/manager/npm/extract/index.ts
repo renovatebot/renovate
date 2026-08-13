@@ -94,7 +94,7 @@ export async function extractPackageFile(
 
   if (hasMultipleLockFiles(lockFiles)) {
     logger.warn(
-      'Updating multiple npm lock files is deprecated and support will be removed in future versions.',
+      'Updating multiple npm lock files is deprecated and support will be removed in future versions',
     );
   }
 

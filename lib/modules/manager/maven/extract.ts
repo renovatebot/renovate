@@ -40,7 +40,7 @@ function parsePom(raw: string, packageFile: string): XmlDocument | null {
     project = new XmlDocument(raw);
     if (raw.includes('\r\n')) {
       logger.warn(
-        'Your pom.xml contains windows line endings. This is not supported and may result in parsing issues.',
+        'Your pom.xml contains windows line endings. This is not supported and may result in parsing issues',
       );
     }
   } catch {

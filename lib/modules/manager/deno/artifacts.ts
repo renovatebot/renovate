@@ -37,13 +37,13 @@ export async function updateArtifacts(
   const lockFileName = updatedDeps[0]?.lockFiles?.[0] ?? config.lockFiles?.[0];
 
   if (!lockFileName) {
-    logger.debug('No lock file found. Skipping artifact update.');
+    logger.debug('No lock file found. Skipping artifact update');
     return null;
   }
 
   const oldLockFileContent = await readLocalFile(lockFileName);
   if (!oldLockFileContent) {
-    logger.debug(`Failed to read ${lockFileName}. Skipping artifact update.`);
+    logger.debug(`Failed to read ${lockFileName}. Skipping artifact update`);
     return [
       {
         artifactError: {

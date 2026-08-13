@@ -53,7 +53,7 @@ async function cleanUpBranches(
             'Branch is modified - skipping PR autoclosing',
           );
           if (GlobalConfig.get('dryRun')) {
-            logger.info(`DRY-RUN: Would update PR title and ensure comment.`);
+            logger.info(`DRY-RUN: Would update PR title and ensure comment`);
           } else {
             if (!pr.title.endsWith('- abandoned')) {
               const newPrTitle = `${pr.title} - abandoned`;

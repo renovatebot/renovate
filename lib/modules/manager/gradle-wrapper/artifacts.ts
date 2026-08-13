@@ -207,7 +207,7 @@ export async function updateArtifacts({
       }
       logger.warn(
         { err },
-        'Error executing gradle wrapper update command. This may not necessarily be a blocker to the update, so please verify with the gradle wrapper output logs.',
+        'Error executing gradle wrapper update command. This may not necessarily be a blocker to the update, so please verify with the gradle wrapper output logs',
       );
     }
 

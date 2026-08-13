@@ -68,7 +68,7 @@ export function mapMergeStartegy(
       return undefined;
     case 'fast-forward': {
       logger.warn(
-        'Fast-forward merge strategy is not supported by Github. Falling back to merge strategy set for the repository.',
+        'Fast-forward merge strategy is not supported by Github. Falling back to merge strategy set for the repository',
       );
       return undefined;
     }

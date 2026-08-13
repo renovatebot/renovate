@@ -269,9 +269,7 @@ export async function extractPackageFile(
 
     const versionsByPackage = await extractLockFileVersions(lockFileName);
     if (!versionsByPackage) {
-      logger.debug(
-        `Could not extract lock file versions from ${lockFileName}.`,
-      );
+      logger.debug(`Could not extract lock file versions from ${lockFileName}`);
       return res;
     }
 
@@ -293,7 +291,7 @@ export async function extractPackageFile(
         dep.lockedVersion = lockedVersion;
       } else {
         logger.debug(
-          `No locked version found for package ${dep.depName} in the range of ${dep.currentValue}.`,
+          `No locked version found for package ${dep.depName} in the range of ${dep.currentValue}`,
         );
       }
     }

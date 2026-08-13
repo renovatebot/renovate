@@ -42,7 +42,7 @@ const DevboxEntry = z
     ) {
       logger.debug(
         { depName },
-        'Devbox: skipping invalid devbox dependency in devbox JSON file.',
+        'Devbox: skipping invalid devbox dependency in devbox JSON file',
       );
       dep.skipReason = 'invalid-version';
       return dep;

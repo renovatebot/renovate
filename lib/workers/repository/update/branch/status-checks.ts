@@ -73,7 +73,7 @@ export async function setStability(config: StabilityConfig): Promise<void> {
   if (mode === 'never') {
     if (config.stabilityStatus) {
       logger.debug(
-        'statusCheckWhen.minimumReleaseAge is set to "never", skipping stability status check.',
+        'statusCheckWhen.minimumReleaseAge is set to "never", skipping stability status check',
       );
     }
     return;
@@ -90,7 +90,7 @@ export async function setStability(config: StabilityConfig): Promise<void> {
   const context = config.statusCheckNames?.minimumReleaseAge;
   if (!context) {
     logger.debug(
-      'Status check is null or an empty string, skipping status check addition.',
+      'Status check is null or an empty string, skipping status check addition',
     );
     return;
   }
@@ -125,7 +125,7 @@ export async function setConfidence(config: ConfidenceConfig): Promise<void> {
   if (mode === 'never') {
     if (config.branchName && config.confidenceStatus) {
       logger.debug(
-        'statusCheckWhen.mergeConfidence is set to "never", skipping merge confidence status check.',
+        'statusCheckWhen.mergeConfidence is set to "never", skipping merge confidence status check',
       );
     }
     return;
@@ -147,7 +147,7 @@ export async function setConfidence(config: ConfidenceConfig): Promise<void> {
   const context = config.statusCheckNames?.mergeConfidence;
   if (!context) {
     logger.debug(
-      'Status check is null or an empty string, skipping status check addition.',
+      'Status check is null or an empty string, skipping status check addition',
     );
     return;
   }

@@ -113,7 +113,7 @@ export function generateBranchName(update: BranchUpgradeConfig): void {
     if (hashLength < MIN_HASH_LENGTH) {
       logger.warn(
         { minHashLength: MIN_HASH_LENGTH },
-        '`hashedBranchLength` must allow for at least the minimum hash length in addition to `branchPrefix`. Using the minimum hash length instead.',
+        '`hashedBranchLength` must allow for at least the minimum hash length in addition to `branchPrefix`. Using the minimum hash length instead',
       );
       hashLength = MIN_HASH_LENGTH;
     }

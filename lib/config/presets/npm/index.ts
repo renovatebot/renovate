@@ -27,7 +27,7 @@ export async function getPreset({
     const registryUrl = resolveRegistryUrl(pkg);
     logger.once.warn(
       { registryUrl, pkg },
-      'Using npm packages for Renovate presets is now deprecated. Please migrate to repository-based presets instead.',
+      'Using npm packages for Renovate presets is now deprecated. Please migrate to repository-based presets instead',
     );
     const packageUrl = resolvePackageUrl(registryUrl, pkg);
     const body = (

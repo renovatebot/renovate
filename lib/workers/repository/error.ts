@@ -141,7 +141,7 @@ export default async function handleError(
     }
     if (err.message === MISSING_API_CREDENTIALS) {
       delete config.branchList;
-      logger.info({ error: err }, MISSING_API_CREDENTIALS);
+      logger.info({ err: err }, MISSING_API_CREDENTIALS);
       await raiseCredentialsWarningIssue(config, err);
       return err.message;
     }

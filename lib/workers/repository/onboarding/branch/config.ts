@@ -31,7 +31,7 @@ async function getOnboardingConfig(
   } else {
     // Organization preset did not exist
     logger.debug(
-      'No default org/owner preset found, so the default onboarding config will be used instead.',
+      'No default org/owner preset found, so the default onboarding config will be used instead',
     );
   }
 
@@ -43,7 +43,7 @@ async function searchDefaultOnboardingPreset(
   repository: string,
 ): Promise<string | undefined> {
   let foundPreset: string | undefined;
-  logger.debug('Checking for a default Renovate preset which can be used.');
+  logger.debug('Checking for a default Renovate preset which can be used');
 
   const repoPathParts = repository.split('/');
 

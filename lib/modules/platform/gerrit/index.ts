@@ -353,7 +353,7 @@ export async function mergePr(config: MergePRConfig): Promise<boolean> {
     if (err.statusCode === 409) {
       logger.warn(
         { err },
-        "Can't submit the change, because the submit rule doesn't allow it.",
+        "Can't submit the change, because the submit rule doesn't allow it",
       );
       return false;
     }
@@ -511,7 +511,7 @@ export async function addAssignees(
     // v8 ignore else -- TODO: add test #40625
     if (assignees.length > 1) {
       logger.debug(
-        `addAssignees(${number}, ${assignees.toString()}) called with more then one assignee! Gerrit only supports one assignee! Using the first from list.`,
+        `addAssignees(${number}, ${assignees.toString()}) called with more then one assignee! Gerrit only supports one assignee! Using the first from list`,
       );
     }
     await client.addAssignee(number, assignees[0]);

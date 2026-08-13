@@ -89,10 +89,10 @@ export function shouldUpdateLabels(
 
   // If the labels in the PR have been modified by the user, they should not be updated
   if (areLabelsModified(prInitialLabels, prCurrentLabels ?? [])) {
-    logger.debug('Labels have been modified by user - skipping labels update.');
+    logger.debug('Labels have been modified by user - skipping labels update');
     return false;
   }
 
-  logger.debug('Labels have been changed in repo config- updating labels.');
+  logger.debug('Labels have been changed in repo config- updating labels');
   return true;
 }

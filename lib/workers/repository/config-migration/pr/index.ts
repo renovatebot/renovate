@@ -123,7 +123,7 @@ ${
     ) {
       logger.warn(
         { err },
-        'Migration PR already exists but cannot find it. It was probably created by a different user.',
+        'Migration PR already exists but cannot find it. It was probably created by a different user',
       );
       await scm.deleteBranch(branchName);
       return null;

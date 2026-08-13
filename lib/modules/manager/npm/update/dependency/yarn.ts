@@ -16,7 +16,7 @@ export function updateYarnrcCatalogDependency({
 
   if (!isString(catalogName)) {
     logger.error(
-      'No catalogName was found; this is likely an extraction error.',
+      'No catalogName was found; this is likely an extraction error',
     );
     return null;
   }
@@ -43,7 +43,7 @@ export function updateYarnrcCatalogDependency({
     document = parseDocument(fileContent, { keepSourceTokens: true });
     parsedContents = YarnConfig.parse(document.toString());
   } catch (err) {
-    logger.debug({ err }, 'Could not parse yarnrc YAML file.');
+    logger.debug({ err }, 'Could not parse yarnrc YAML file');
     return null;
   }
 

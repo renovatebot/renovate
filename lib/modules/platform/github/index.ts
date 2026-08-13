@@ -574,7 +574,7 @@ export async function initRepo({
 
     if (res?.errors) {
       if (res.errors.find((err) => err.type === 'RATE_LIMITED')) {
-        logger.debug({ res }, 'GraphQL rate limit exceeded.');
+        logger.debug({ res }, 'GraphQL rate limit exceeded');
         throw new Error(PLATFORM_RATE_LIMIT_EXCEEDED);
       }
       logger.debug({ res }, 'Unexpected GraphQL errors');
@@ -1855,7 +1855,7 @@ async function tryPrAutomerge(
   ) {
     logger.debug(
       { prNumber },
-      'GitHub-native automerge: not supported on this version of GHE. Use 3.3.0 or newer.',
+      'GitHub-native automerge: not supported on this version of GHE. Use 3.3.0 or newer',
     );
     return;
   }
@@ -2206,7 +2206,7 @@ export async function getVulnerabilityAlerts(): Promise<GithubVulnerabilityAlert
       {
         url: `${GlobalConfig.get('productLinks').documentation}configuration-options/#vulnerabilityalerts`,
       },
-      'Cannot access vulnerability alerts. Please ensure permissions have been granted.',
+      'Cannot access vulnerability alerts. Please ensure permissions have been granted',
     );
   }
   try {

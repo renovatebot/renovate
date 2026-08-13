@@ -22,7 +22,7 @@ export function extractTFLintPlugin(
   do {
     // istanbul ignore if
     if (lineNumber > lines.length - 1) {
-      logger.debug(`Malformed TFLint configuration file detected.`);
+      logger.debug(`Malformed TFLint configuration file detected`);
     }
 
     const line = lines[lineNumber];

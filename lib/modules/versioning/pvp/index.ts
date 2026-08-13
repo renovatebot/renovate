@@ -117,7 +117,7 @@ function getNewValue({
   if (rangeStrategy !== 'widen') {
     logger.info(
       { rangeStrategy, currentValue, newVersion },
-      `PVP can't handle this range strategy.`,
+      `PVP can't handle this range strategy`,
     );
     return null;
   }
@@ -146,7 +146,7 @@ function getNewValue({
   if (!matches(newVersion, `>=${parsed.lower} && <${majorPlusOne}`)) {
     logger.warn(
       { newVersion },
-      "Even though the major bound was bumped, the newVersion still isn't accepted.",
+      "Even though the major bound was bumped, the newVersion still isn't accepted",
     );
     return null;
   }

@@ -296,7 +296,7 @@ If you need any further assistance then you can also [request help here](${
       )
     ) {
       logger.warn(
-        'Onboarding PR already exists but cannot find it. It was probably created by a different user.',
+        'Onboarding PR already exists but cannot find it. It was probably created by a different user',
       );
       await scm.deleteBranch(onboardingBranch);
       return;

@@ -110,7 +110,7 @@ function getGlobalConfig(): Promise<RenovateConfig> {
 
 function haveReachedLimits(): boolean {
   if (isLimitReached('Commits')) {
-    logger.info('Max commits created for this run.');
+    logger.info('Max commits created for this run');
     return true;
   }
   return false;
@@ -122,12 +122,12 @@ function checkEnv(): void {
   if (process.release?.name !== 'node' || !process.versions?.node) {
     logger.warn(
       { release: process.release, versions: process.versions },
-      'Unknown node environment detected.',
+      'Unknown node environment detected',
     );
   } else if (!semver.satisfies(process.versions?.node, range)) {
     logger.error(
       { versions: process.versions, range },
-      'Unsupported node environment detected. Please update your node version.',
+      'Unsupported node environment detected. Please update your node version',
     );
   }
 }
@@ -279,7 +279,7 @@ export async function start(): Promise<number> {
     await globalFinalize(config!);
     if (logLevel() === 'info') {
       logger.info(
-        `Renovate was run at log level "${logLevel()}". Set LOG_LEVEL=debug in environment variables to see extended debug logs.`,
+        `Renovate was run at log level "${logLevel()}". Set LOG_LEVEL=debug in environment variables to see extended debug logs`,
       );
     }
   }

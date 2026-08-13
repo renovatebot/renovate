@@ -108,7 +108,7 @@ export async function postUpgradeCommandsExecutor(
         );
         logger.debug(
           { dataFileTemplate },
-          'Processed post-upgrade commands data file template.',
+          'Processed post-upgrade commands data file template',
         );
 
         const dataFileName = `post-upgrade-data-file-${crypto.randomBytes(8).toString('hex')}.tmp`;
@@ -119,7 +119,7 @@ export async function postUpgradeCommandsExecutor(
 
           logger.debug(
             { dataFilePath, dataFileContent },
-            'Created post-upgrade commands data file.',
+            'Created post-upgrade commands data file',
           );
         } catch (error) {
           artifactErrors.push({
