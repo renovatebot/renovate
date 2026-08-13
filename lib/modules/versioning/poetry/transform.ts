@@ -34,6 +34,26 @@ function notEmpty(s: string): boolean {
   return s !== '';
 }
 
+function poetryRangePart2semver(part: string): string | null {
+  const unpaddedVersion = poetry2semver(part, false);
+  if (unpaddedVersion) {
+    return unpaddedVersion;
+  }
+
+  const groups = VERSION_PATTERN.exec(part)?.groups;
+  if (
+    !groups?.pre ||
+    groups.epoch ||
+    groups.post ||
+    groups.dev ||
+    groups.local
+  ) {
+    return null;
+  }
+
+  return poetry2semver(part);
+}
+
 /**
  * Parse versions like poetry.core.masonry.version.Version does (union of SemVer
  * and PEP440, with normalization of certain prerelease tags), and emit in SemVer
@@ -115,9 +135,9 @@ export function poetry2npm(input: string, throwOnUnsupported = false): string {
     .filter(notEmpty)
     .join(' ')
     .split(RANGE_COMPARATOR_PATTERN);
-  // do not pad versions with zeros in a range
+  // Only pad partial prereleases, which are invalid semver without a patch.
   const transformed = chunks
-    .map((chunk) => poetry2semver(chunk, false) ?? chunk)
+    .map((chunk) => poetryRangePart2semver(chunk) ?? chunk)
     .join('')
     .replace(/===/, '=');
   if (throwOnUnsupported) {
