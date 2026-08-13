@@ -8,11 +8,6 @@ export default {
     },
   },
   create(context) {
-    const filename = context.filename ?? context.physicalFilename ?? '';
-    // Only enforce in lib/, but not in the parseUrl implementation itself
-    if (!filename.includes('/lib/') || filename.endsWith('lib/util/url.ts')) {
-      return {};
-    }
     return {
       NewExpression(node) {
         if (

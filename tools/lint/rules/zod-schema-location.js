@@ -20,15 +20,6 @@ function getLeftmostIdentifier(node) {
   return null;
 }
 
-/**
- * Normalizes to forward slashes so the checks below work on Windows paths too.
- * @param {string} filename
- * @returns {string}
- */
-function toPosix(filename) {
-  return filename.replaceAll('\\', '/');
-}
-
 /** @type {Map<string, boolean>} */
 const schemaFileByDir = new Map();
 
@@ -59,22 +50,6 @@ export default {
     },
   },
   create(context) {
-    const filename = toPosix(
-      context.filename ?? context.physicalFilename ?? '',
-    );
-
-    // Only enforce for module implementation files, not schema-utils itself, not tests.
-    if (
-      !filename.includes('/lib/modules/') ||
-      filename.endsWith('.spec.ts') ||
-      filename.endsWith('/schema.ts') ||
-      // per-provider schema files colocated under a `schema/` directory follow the same convention
-      filename.includes('/schema/') ||
-      filename.includes('/lib/util/schema-utils/')
-    ) {
-      return {};
-    }
-
     // Only enforce in directories that already follow the colocated `schema.ts`
     // convention. The mined reviewer feedback is "move this to schema.ts",
     // which presumes a schema.ts exists next to the file and the schema is

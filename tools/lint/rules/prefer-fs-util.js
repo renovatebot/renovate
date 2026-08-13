@@ -11,11 +11,12 @@ const RESTRICTED_MODULES = new Set([
   'fs-extra/esm',
 ]);
 
-/**
- * Paths exempt from this rule. The `lib/util/fs` helpers scope file access to
- * the `localDir`/`cacheDir` from `GlobalConfig`, so they only make sense for
- * code that runs after those directories are configured and that operates
- * inside them. The following areas legitimately need raw `fs` access:
+/*
+ * Paths exempt from this rule (via overrides in `.oxlintrc.json`). The
+ * `lib/util/fs` helpers scope file access to the `localDir`/`cacheDir` from
+ * `GlobalConfig`, so they only make sense for code that runs after those
+ * directories are configured and that operates inside them. The following
+ * areas legitimately need raw `fs` access:
  *
  * - `lib/util/fs/` implements the helpers themselves.
  * - `lib/logger/` opens log-file streams at user-configured system paths
@@ -35,14 +36,6 @@ const RESTRICTED_MODULES = new Set([
  *   user-configured system path (`RENOVATE_TRACING_FILE_EXPORTER_PATH`)
  *   outside `localDir`/`cacheDir`, before any `GlobalConfig` exists.
  */
-const EXEMPT_PATHS = [
-  '/lib/util/fs/',
-  '/lib/logger/',
-  '/lib/workers/global/',
-  '/lib/config-validator.ts',
-  '/lib/util/git/',
-  '/lib/instrumentation/',
-];
 
 /** @type {import('eslint').Rule.RuleModule} */
 export default {
@@ -54,17 +47,6 @@ export default {
     },
   },
   create(context) {
-    const filename = context.filename ?? context.physicalFilename ?? '';
-    // Only enforce in lib/ source files; spec files legitimately manipulate
-    // temporary files directly, and the paths in EXEMPT_PATHS need raw
-    // filesystem access (see above).
-    if (
-      !filename.includes('/lib/') ||
-      filename.endsWith('.spec.ts') ||
-      EXEMPT_PATHS.some((path) => filename.includes(path))
-    ) {
-      return {};
-    }
     return {
       ImportDeclaration(node) {
         // type-only imports don't touch the filesystem; `importKind` is a
