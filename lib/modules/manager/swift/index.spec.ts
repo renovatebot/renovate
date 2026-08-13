@@ -230,6 +230,37 @@ describe('modules/manager/swift/index', () => {
       ]);
     });
 
+    it('skips registries.json read when there are no id-form deps', async () => {
+      fs.readLocalFile.mockImplementation((path: string) => {
+        if (path === 'Package.swift') {
+          return Promise.resolve(codeBlock`
+            let package = Package(
+              dependencies: [
+                .package(url: "https://github.com/vapor/vapor.git", from: "4.0.0"),
+              ]
+            )
+          `);
+        }
+        return Promise.resolve(null);
+      });
+
+      const result = await extractAllPackageFiles({}, ['Package.swift']);
+      expect(result).toEqual([
+        {
+          packageFile: 'Package.swift',
+          deps: [
+            {
+              datasource: 'github-tags',
+              depName: 'vapor/vapor',
+              currentValue: 'from: "4.0.0"',
+            },
+          ],
+        },
+      ]);
+      // Only Package.swift is read; registries.json discovery is skipped.
+      expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
+    });
+
     it('returns id-form deps with no registryUrls when registries.json is absent', async () => {
       fs.readLocalFile.mockImplementation((path: string) => {
         if (path === 'Package.swift') {

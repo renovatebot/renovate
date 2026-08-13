@@ -498,15 +498,19 @@ export async function extractAllPackageFiles(
     // Attach discovered registry URLs to id-form deps so the
     // swift-package-registry datasource knows where to look. URL-form deps
     // already carry their own registryUrls (set by parseDependencyUrl).
-    // If discoverRegistryUrls returns an empty list, the loop is a no-op.
-    const registryUrls = await discoverRegistryUrls(packageFile);
-    for (const dep of parsed.deps) {
-      if (
-        registryUrls.length &&
+    // Only read registries.json when a dep actually needs it, so Package.swift
+    // files with no id-form deps skip the file read entirely.
+    const registryDeps = parsed.deps.filter(
+      (dep) =>
         dep.datasource === SwiftPackageRegistryDatasource.id &&
-        !dep.registryUrls?.length
-      ) {
-        dep.registryUrls = registryUrls;
+        !dep.registryUrls?.length,
+    );
+    if (registryDeps.length) {
+      const registryUrls = await discoverRegistryUrls(packageFile);
+      for (const dep of registryDeps) {
+        if (registryUrls.length) {
+          dep.registryUrls = registryUrls;
+        }
       }
     }
 
