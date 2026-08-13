@@ -4645,7 +4645,26 @@ describe('modules/platform/github/index', () => {
     });
   });
 
-  describe('updatePr(prNo, title, body)', () => {
+  describe('tryDequeuePr()', () => {
+    const prList = [
+      {
+        number: 1234,
+        head: { ref: 'somebranch', repo: { full_name: 'some/repo' } },
+        state: 'open',
+        title: 'PR title',
+        updated_at: '01-09-2022',
+        node_id: 'abcd',
+      },
+    ];
+
+    function prListMock(scope: httpMock.Scope, prs: unknown[] = prList): void {
+      scope
+        .get(
+          '/repos/some/repo/pulls?per_page=100&state=all&sort=updated&direction=desc&page=1',
+        )
+        .reply(200, prs);
+    }
+
     function mergeQueueCheckMock(
       scope: httpMock.Scope,
       isInMergeQueue = false,
@@ -4659,6 +4678,108 @@ describe('modules/platform/github/index', () => {
       });
     }
 
+    it('does nothing if there is no open PR for the branch', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      await github.initRepo({ repository: 'some/repo' });
+      prListMock(scope, []);
+
+      await expect(github.tryDequeuePr('somebranch')).toResolve();
+    });
+
+    it('does nothing if the PR is not in the merge queue', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      await github.initRepo({ repository: 'some/repo' });
+      prListMock(scope);
+      mergeQueueCheckMock(scope);
+
+      await expect(github.tryDequeuePr('somebranch')).toResolve();
+    });
+
+    it('dequeues a queued PR', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      await github.initRepo({ repository: 'some/repo' });
+      prListMock(scope);
+      mergeQueueCheckMock(scope, true);
+      scope.post('/graphql').reply(200, {
+        data: { dequeuePullRequest: { mergeQueueEntry: { id: 'efgh' } } },
+      });
+
+      await expect(github.tryDequeuePr('somebranch')).toResolve();
+
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        'PR #1234 is in the merge queue - dequeueing before push',
+      );
+    });
+
+    it('logs if dequeue returns errors', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      await github.initRepo({ repository: 'some/repo' });
+      prListMock(scope);
+      mergeQueueCheckMock(scope, true);
+      scope
+        .post('/graphql')
+        .reply(200, { errors: [{ message: 'some error' }] });
+
+      await expect(github.tryDequeuePr('somebranch')).toResolve();
+
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        { prNo: 1234, errors: [{ message: 'some error' }] },
+        'Failed to dequeue PR from merge queue',
+      );
+    });
+
+    it('logs if the merge queue check returns errors', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      await github.initRepo({ repository: 'some/repo' });
+      prListMock(scope);
+      scope
+        .post('/graphql')
+        .reply(200, { errors: [{ message: 'some error' }] });
+
+      await expect(github.tryDequeuePr('somebranch')).toResolve();
+
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        { prNo: 1234, errors: [{ message: 'some error' }] },
+        'Failed to fetch PR merge queue status',
+      );
+    });
+
+    it('ignores merge queue check failures', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      await github.initRepo({ repository: 'some/repo' });
+      prListMock(scope);
+      scope.post('/graphql').reply(500);
+
+      await expect(github.tryDequeuePr('somebranch')).toResolve();
+    });
+
+    it('skips merge queue check on GHE <3.12.0', async () => {
+      const scope = httpMock
+        .scope('https://github.company.com')
+        .head('/')
+        .reply(200, '', { 'x-github-enterprise-version': '3.11.0' })
+        .get('/user')
+        .reply(200, { login: 'renovate-bot' })
+        .get('/user/emails')
+        .reply(200, {});
+      initRepoMock(scope, 'some/repo');
+      await github.initPlatform({
+        endpoint: 'https://github.company.com',
+        token: '123test',
+      });
+      await github.initRepo({ repository: 'some/repo' });
+
+      await expect(github.tryDequeuePr('somebranch')).toResolve();
+    });
+  });
+
+  describe('updatePr(prNo, title, body)', () => {
     it('should update the PR', async () => {
       const pr: UpdatePrConfig = {
         number: 1234,
@@ -4668,7 +4789,6 @@ describe('modules/platform/github/index', () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
       await github.initRepo({ repository: 'some/repo' });
-      mergeQueueCheckMock(scope);
       scope.patch('/repos/some/repo/pulls/1234').reply(200, pr);
 
       await expect(github.updatePr(pr)).toResolve();
@@ -4684,7 +4804,6 @@ describe('modules/platform/github/index', () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
       await github.initRepo({ repository: 'some/repo' });
-      mergeQueueCheckMock(scope);
       scope.patch('/repos/some/repo/pulls/1234').reply(200, pr);
 
       await expect(github.updatePr(pr)).toResolve();
@@ -4700,117 +4819,6 @@ describe('modules/platform/github/index', () => {
       };
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
-      await github.initRepo({ repository: 'some/repo' });
-      mergeQueueCheckMock(scope);
-      scope.patch('/repos/some/repo/pulls/1234').reply(200, pr);
-
-      await expect(github.updatePr(pr)).toResolve();
-    });
-
-    it('should dequeue PR from the merge queue before update', async () => {
-      const pr: UpdatePrConfig = {
-        number: 1234,
-        prTitle: 'The New Title',
-        prBody: 'Hello world again',
-      };
-      const scope = httpMock.scope(githubApiHost);
-      initRepoMock(scope, 'some/repo');
-      await github.initRepo({ repository: 'some/repo' });
-      mergeQueueCheckMock(scope, true);
-      scope
-        .post('/graphql')
-        .reply(200, {
-          data: { dequeuePullRequest: { mergeQueueEntry: { id: 'efgh' } } },
-        })
-        .patch('/repos/some/repo/pulls/1234')
-        .reply(200, pr);
-
-      await expect(github.updatePr(pr)).toResolve();
-
-      expect(logger.logger.debug).toHaveBeenCalledWith(
-        'PR #1234 is in the merge queue - dequeueing before update',
-      );
-    });
-
-    it('should update if dequeue returns errors', async () => {
-      const pr: UpdatePrConfig = {
-        number: 1234,
-        prTitle: 'The New Title',
-        prBody: 'Hello world again',
-      };
-      const scope = httpMock.scope(githubApiHost);
-      initRepoMock(scope, 'some/repo');
-      await github.initRepo({ repository: 'some/repo' });
-      mergeQueueCheckMock(scope, true);
-      scope
-        .post('/graphql')
-        .reply(200, { errors: [{ message: 'some error' }] })
-        .patch('/repos/some/repo/pulls/1234')
-        .reply(200, pr);
-
-      await expect(github.updatePr(pr)).toResolve();
-
-      expect(logger.logger.debug).toHaveBeenCalledWith(
-        { prNo: 1234, errors: [{ message: 'some error' }] },
-        'Failed to dequeue PR from merge queue',
-      );
-    });
-
-    it('should update if merge queue check returns errors', async () => {
-      const pr: UpdatePrConfig = {
-        number: 1234,
-        prTitle: 'The New Title',
-        prBody: 'Hello world again',
-      };
-      const scope = httpMock.scope(githubApiHost);
-      initRepoMock(scope, 'some/repo');
-      await github.initRepo({ repository: 'some/repo' });
-      scope
-        .post('/graphql')
-        .reply(200, { errors: [{ message: 'some error' }] })
-        .patch('/repos/some/repo/pulls/1234')
-        .reply(200, pr);
-
-      await expect(github.updatePr(pr)).toResolve();
-    });
-
-    it('should update if merge queue check fails', async () => {
-      const pr: UpdatePrConfig = {
-        number: 1234,
-        prTitle: 'The New Title',
-        prBody: 'Hello world again',
-      };
-      const scope = httpMock.scope(githubApiHost);
-      initRepoMock(scope, 'some/repo');
-      await github.initRepo({ repository: 'some/repo' });
-      scope
-        .post('/graphql')
-        .reply(500)
-        .patch('/repos/some/repo/pulls/1234')
-        .reply(200, pr);
-
-      await expect(github.updatePr(pr)).toResolve();
-    });
-
-    it('should skip merge queue check on GHE <3.12.0', async () => {
-      const pr: UpdatePrConfig = {
-        number: 1234,
-        prTitle: 'The New Title',
-        prBody: 'Hello world again',
-      };
-      const scope = httpMock
-        .scope('https://github.company.com')
-        .head('/')
-        .reply(200, '', { 'x-github-enterprise-version': '3.11.0' })
-        .get('/user')
-        .reply(200, { login: 'renovate-bot' })
-        .get('/user/emails')
-        .reply(200, {});
-      initRepoMock(scope, 'some/repo');
-      await github.initPlatform({
-        endpoint: 'https://github.company.com',
-        token: '123test',
-      });
       await github.initRepo({ repository: 'some/repo' });
       scope.patch('/repos/some/repo/pulls/1234').reply(200, pr);
 
@@ -4830,7 +4838,6 @@ describe('modules/platform/github/index', () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
       await github.initRepo({ repository: 'some/repo' });
-      mergeQueueCheckMock(scope);
       scope
         .patch('/repos/some/repo/pulls/1234')
         .reply(200, {

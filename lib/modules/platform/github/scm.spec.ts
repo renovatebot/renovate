@@ -73,4 +73,10 @@ describe('modules/platform/github/scm', () => {
       platformCommit: 'auto',
     });
   });
+
+  it('dequeues the branch PR from the merge queue before committing', async () => {
+    await githubScm.commitAndPush(commitObj);
+
+    expect(github.tryDequeuePr).toHaveBeenCalledExactlyOnceWith('branch');
+  });
 });

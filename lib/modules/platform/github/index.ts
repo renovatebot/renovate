@@ -1976,7 +1976,7 @@ export async function createPr({
   return result;
 }
 
-async function tryDequeuePr(prNo: number): Promise<void> {
+export async function tryDequeuePr(branchName: string): Promise<void> {
   // TODO #22198
   // semver not null safe, accepts null and undefined
   if (
@@ -1986,6 +1986,12 @@ async function tryDequeuePr(prNo: number): Promise<void> {
     // Merge queues are only supported on GHES >=3.12.0
     return;
   }
+
+  const pr = await findPr({ branchName, state: 'open' });
+  if (!pr) {
+    return;
+  }
+  const prNo = pr.number;
 
   try {
     const res = await githubApi.requestGraphql<{
@@ -2012,9 +2018,7 @@ async function tryDequeuePr(prNo: number): Promise<void> {
     if (!pullRequest?.isInMergeQueue) {
       return;
     }
-    logger.debug(
-      `PR #${prNo} is in the merge queue - dequeueing before update`,
-    );
+    logger.debug(`PR #${prNo} is in the merge queue - dequeueing before push`);
     const dequeueRes = await githubApi.requestGraphql(
       dequeuePullRequestMutation,
       {
@@ -2043,9 +2047,6 @@ export async function updatePr({
   targetBranch,
 }: UpdatePrConfig): Promise<void> {
   logger.debug(`updatePr(${prNo}, ${title}, body)`);
-  // a queued PR could otherwise merge before the update takes effect
-  // will be re-queued if automerge is enabled and the PR is still mergeable after the update
-  await tryDequeuePr(prNo);
   const body = sanitize(rawBody);
   const patchBody: any = { title };
   // v8 ignore else -- TODO: add test #40625
