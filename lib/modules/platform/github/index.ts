@@ -77,15 +77,13 @@ import { smartTruncate } from '../utils/pr-body.ts';
 import { remoteBranchExists } from './branch.ts';
 import { coerceRestPr, githubApi, mapMergeStartegy } from './common.ts';
 import {
-  dequeuePullRequestMutation,
   enableAutoMergeMutation,
   getIssuesQuery,
-  prIsInMergeQueueQuery,
   repoInfoQuery,
 } from './graphql.ts';
 import { GithubIssueCache } from './issue.ts';
 import { massageMarkdownLinks } from './massage-markdown-links.ts';
-import { getPrCache, updatePrCache } from './pr.ts';
+import { dequeuePr, getPrCache, updatePrCache } from './pr.ts';
 import {
   GithubBranchProtection,
   GithubBranchRulesets,
@@ -1991,50 +1989,13 @@ export async function tryDequeuePr(branchName: string): Promise<void> {
   if (!pr) {
     return;
   }
-  const prNo = pr.number;
 
-  try {
-    const res = await githubApi.requestGraphql<{
-      repository: {
-        pullRequest: { id: string; isInMergeQueue: boolean } | null;
-      };
-    }>(prIsInMergeQueueQuery, {
-      variables: {
-        owner: config.repositoryOwner,
-        name: config.repositoryName,
-        number: prNo,
-      },
-      readOnly: true,
-      count: 1, // bypass graphql check
-    });
-    if (res?.errors) {
-      logger.debug(
-        { prNo, errors: res.errors },
-        'Failed to fetch PR merge queue status',
-      );
-      return;
-    }
-    const pullRequest = res?.data?.repository?.pullRequest;
-    if (!pullRequest?.isInMergeQueue) {
-      return;
-    }
-    logger.debug(`PR #${prNo} is in the merge queue - dequeueing before push`);
-    const dequeueRes = await githubApi.requestGraphql(
-      dequeuePullRequestMutation,
-      {
-        variables: { pullRequestId: pullRequest.id },
-        count: 1, // bypass graphql check
-      },
-    );
-    if (dequeueRes?.errors) {
-      logger.debug(
-        { prNo, errors: dequeueRes.errors },
-        'Failed to dequeue PR from merge queue',
-      );
-    }
-  } catch (err) {
-    logger.debug({ prNo, err }, 'Error dequeueing PR from merge queue');
-  }
+  await dequeuePr(
+    githubApi,
+    config.repositoryOwner,
+    config.repositoryName,
+    pr.number,
+  );
 }
 
 export async function updatePr({

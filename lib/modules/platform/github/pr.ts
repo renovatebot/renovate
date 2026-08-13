@@ -13,6 +13,10 @@ import type {
 import { parseLinkHeader } from '../../../util/url.ts';
 import { ApiCache } from './api-cache.ts';
 import { coerceRestPr } from './common.ts';
+import {
+  dequeuePullRequestMutation,
+  prIsInMergeQueueQuery,
+} from './graphql.ts';
 import type { ApiPageCache, GhPr, GhRestPr } from './types.ts';
 
 function getPrApiCache(): ApiCache<GhPr> {
@@ -195,4 +199,51 @@ export async function getPrCache(
 export function updatePrCache(pr: GhPr): void {
   const cache = getPrApiCache();
   cache.updateItem(pr);
+}
+
+/**
+ * Cancel the PR's merge queue entry, if it has one.
+ * Fails open: errors are logged at debug level and swallowed.
+ */
+export async function dequeuePr(
+  http: GithubHttp,
+  owner: string,
+  name: string,
+  prNo: number,
+): Promise<void> {
+  try {
+    const res = await http.requestGraphql<{
+      repository: {
+        pullRequest: { id: string; isInMergeQueue: boolean } | null;
+      };
+    }>(prIsInMergeQueueQuery, {
+      variables: { owner, name, number: prNo },
+      readOnly: true,
+      count: 1, // bypass graphql check
+    });
+    if (res?.errors) {
+      logger.debug(
+        { prNo, errors: res.errors },
+        'Failed to fetch PR merge queue status',
+      );
+      return;
+    }
+    const pullRequest = res?.data?.repository?.pullRequest;
+    if (!pullRequest?.isInMergeQueue) {
+      return;
+    }
+    logger.debug(`PR #${prNo} is in the merge queue - dequeueing before push`);
+    const dequeueRes = await http.requestGraphql(dequeuePullRequestMutation, {
+      variables: { pullRequestId: pullRequest.id },
+      count: 1, // bypass graphql check
+    });
+    if (dequeueRes?.errors) {
+      logger.debug(
+        { prNo, errors: dequeueRes.errors },
+        'Failed to dequeue PR from merge queue',
+      );
+    }
+  } catch (err) {
+    logger.debug({ prNo, err }, 'Error dequeueing PR from merge queue');
+  }
 }
