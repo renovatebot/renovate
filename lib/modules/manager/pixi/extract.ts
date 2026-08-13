@@ -163,7 +163,7 @@ function orderChannels(channels: Channels = []): string[] {
         return { channel, priority: 0, index };
       }
 
-      return { ...channel, index: 0 };
+      return { ...channel, priority: channel.priority ?? 0, index };
     })
     .toSorted((a, b) => {
       // first based on priority then based on index
