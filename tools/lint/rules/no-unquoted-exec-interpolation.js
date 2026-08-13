@@ -302,10 +302,6 @@ export default {
     },
   },
   create(context) {
-    const filename = context.filename ?? context.physicalFilename ?? '';
-    if (!filename.includes('/lib/') || filename.endsWith('.spec.ts')) {
-      return {};
-    }
     return {
       TemplateLiteral(node) {
         if (!isCommandContext(node, /** @type {any} */ (node).parent)) {
