@@ -189,6 +189,7 @@ describe('modules/datasource/git-refs/index', () => {
         packageName,
       });
       expect(digest).toBeNull();
+      expect(logger.logger.debug).toHaveBeenCalledWith({ err: expect.any(Error), packageName }, 'Error getting git-refs');
     });
   });
 });
