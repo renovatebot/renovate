@@ -35,13 +35,13 @@ export function parseGoproxy(
     .split(regEx(/([^,|]*(?:,|\|))/))
     .filter(Boolean)
     .map((s) => s.split(regEx(/(,|\|)/)))
+    // Empty segments (`a||b`, `,a`) carry no url to query, and keeping them
+    // would apply their separator as the fallback strategy for a bogus request
+    .filter(([url]) => isTruthy(url))
     .map(([url, separator]) => ({
       url,
       fallback: separator === ',' ? ',' : '|',
-    }))
-    // Empty segments (`a||b`, `,a`) carry no url to query, and keeping them
-    // would apply their separator as the fallback strategy for a bogus request
-    .filter(({ url }) => isTruthy(url));
+    }));
 
   memCache.set(cacheKey, result);
   return result;
