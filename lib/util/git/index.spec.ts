@@ -1071,7 +1071,7 @@ describe('util/git/index', { timeout: 30000 }, () => {
         isSymlink: true,
       };
       const commit = await git.commitFiles({
-        branchName: 'renovate/symlink_branch',
+        branchName: 'renovate/future_branch',
         files: [file],
         message: 'Create a link',
       });
