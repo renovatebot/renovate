@@ -102,7 +102,7 @@ export async function getUpdatedPackageFiles(
   );
   let updatedFileContents: Record<string, string> = {};
   const nonUpdatedFileContents: Record<string, string> = {};
-  const artifactUpdateNeeded: Record<string, string> = {};
+  const artifactOnlyFileContents: Record<string, string> = {};
   const managerPackageFiles: Record<string, Set<string>> = {};
   const packageFileUpdatedDeps: Record<string, BranchUpgradeConfig[]> = {};
   const lockFileMaintenanceFiles: string[] = [];
@@ -260,11 +260,21 @@ export async function getUpdatedPackageFiles(
         logger.error({ packageFile, depName }, 'Could not autoReplace');
         throw new Error(WORKER_FILE_UPDATE_FAILED);
       }
-      let newContent = await updateDependency({
+      const updateResult = await updateDependency({
         packageFile,
         fileContent: packageFileContent!,
         upgrade,
       });
+      let newContent: string | null;
+      let updateArtifacts = false;
+      if (updateResult === null || updateResult === undefined) {
+        newContent = null;
+      } else if (typeof updateResult === 'string') {
+        newContent = updateResult;
+      } else {
+        newContent = updateResult.content;
+        updateArtifacts = updateResult.updateArtifacts ?? false;
+      }
       newContent = await applyManagerBumpPackageVersion(newContent, upgrade);
       if (!newContent) {
         if (reuseExistingBranch) {
@@ -299,6 +309,7 @@ export async function getUpdatedPackageFiles(
           `Updating ${depName} in ${coerceString(packageFile, lockFile)}`,
         );
         updatedFileContents[packageFile] = newContent;
+        delete artifactOnlyFileContents[packageFile];
         delete nonUpdatedFileContents[packageFile];
       }
       if (newContent === packageFileContent) {
@@ -306,18 +317,12 @@ export async function getUpdatedPackageFiles(
           updatedFileContents[packageFile] = newContent;
           delete nonUpdatedFileContents[packageFile];
         }
-        if (
-          manager === 'nix' &&
-          upgrade.currentValue === upgrade.newValue &&
-          upgrade.currentDigest &&
-          upgrade.newDigest &&
-          upgrade.currentDigest !== upgrade.newDigest
-        ) {
+        if (updateArtifacts && !updatedFileContents[packageFile]) {
           logger.debug(
             { packageFile, depName },
-            'Nix digest-only update - tracking for artifact update',
+            'Manager requested an artifact update without a package file change',
           );
-          artifactUpdateNeeded[packageFile] = newContent;
+          artifactOnlyFileContents[packageFile] = newContent;
         }
       }
     }
@@ -329,13 +334,12 @@ export async function getUpdatedPackageFiles(
     path: name,
     contents: updatedFileContents[name],
   }));
-  // For artifact processing, include both updated files and files needing artifact updates
   const filesForArtifacts: FileAddition[] = [
     ...updatedPackageFiles,
-    ...Object.keys(artifactUpdateNeeded).map((name) => ({
+    ...Object.keys(artifactOnlyFileContents).map((name) => ({
       type: 'addition' as const,
       path: name,
-      contents: artifactUpdateNeeded[name],
+      contents: artifactOnlyFileContents[name],
     })),
   ];
   const updatedArtifacts: FileChange[] = [];

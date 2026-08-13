@@ -1,6 +1,6 @@
 import { codeBlock } from 'common-tags';
-import { updateDependency } from './update.ts';
 import { logger } from '~test/util.ts';
+import { updateDependency } from './update.ts';
 
 describe('modules/manager/nix/update', () => {
   describe('updateDependency', () => {
@@ -301,7 +301,7 @@ describe('modules/manager/nix/update', () => {
       });
       expect(result).toBeNull();
       expect(logger.logger.trace).toHaveBeenNthCalledWith(
-        3,
+        2,
         {
           depName: 'mypackage',
           url: 'git+ssh://git@example.com/org/repo?ref=refs/tags/1.0.0',
@@ -346,7 +346,42 @@ describe('modules/manager/nix/update', () => {
       );
     });
 
-    it('returns unchanged content for digest-only updates', () => {
+    it('updates top-level input declarations', () => {
+      const fileContent = codeBlock`
+        {
+          inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-24.05";
+          inputs.cachix = {
+            url = "github:cachix/cachix?ref=refs/tags/v1.7.2";
+          };
+        }
+      `;
+
+      const updatedNixpkgs = updateDependency({
+        fileContent,
+        upgrade: {
+          depName: 'nixpkgs',
+          currentValue: '24.05',
+          newValue: '25.05',
+        },
+      });
+      expect(updatedNixpkgs).toContain(
+        'inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.05"',
+      );
+
+      const updatedCachix = updateDependency({
+        fileContent,
+        upgrade: {
+          depName: 'cachix',
+          currentValue: 'v1.7.2',
+          newValue: 'v1.8.0',
+        },
+      });
+      expect(updatedCachix).toContain(
+        'url = "github:cachix/cachix?ref=refs/tags/v1.8.0"',
+      );
+    });
+
+    it('requests an artifact update for digest-only updates', () => {
       const fileContent = codeBlock`
         {
           inputs = {
@@ -364,7 +399,10 @@ describe('modules/manager/nix/update', () => {
           newDigest: '88cef159e47c0dc56f151593e044453a39a6e547',
         },
       });
-      expect(result).toBe(fileContent);
+      expect(result).toEqual({
+        content: fileContent,
+        updateArtifacts: true,
+      });
       expect(logger.logger.debug).toHaveBeenCalledExactlyOnceWith(
         {
           depName: 'nixpkgs-tar',
@@ -372,8 +410,50 @@ describe('modules/manager/nix/update', () => {
           newDigest: '88cef159e47c0dc56f151593e044453a39a6e547',
           currentValue: 'nixpkgs-unstable',
         },
-        'Digest-only update detected, returning unchanged content for lock file update',
+        'Digest-only update detected, requesting lock file update',
       );
+    });
+
+    it('only replaces a version within the GitHub ref path', () => {
+      const fileContent = codeBlock`
+        {
+          inputs = {
+            mypackage.url = "github:release-1.0/repo/release-1.0";
+          };
+        }
+      `;
+      const result = updateDependency({
+        fileContent,
+        upgrade: {
+          depName: 'mypackage',
+          currentValue: '1.0',
+          newValue: '2.0',
+        },
+      });
+
+      expect(result).toContain('github:release-1.0/repo/release-2.0');
+      expect(result).not.toContain('github:release-2.0/repo');
+    });
+
+    it('only replaces a version within the ref query parameter', () => {
+      const fileContent = codeBlock`
+        {
+          inputs = {
+            mypackage.url = "git+https://example.com/release-1.0/repo?ref=release-1.0";
+          };
+        }
+      `;
+      const result = updateDependency({
+        fileContent,
+        upgrade: {
+          depName: 'mypackage',
+          currentValue: '1.0',
+          newValue: '2.0',
+        },
+      });
+
+      expect(result).toContain('example.com/release-1.0/repo?ref=release-2.0');
+      expect(result).not.toContain('example.com/release-2.0/repo');
     });
 
     it('updates only the specific matched occurrence when multiple exist', () => {
@@ -417,6 +497,29 @@ describe('modules/manager/nix/update', () => {
       );
     });
 
+    it('does not match complex attribute sets', () => {
+      const fileContent = codeBlock`
+        {
+          inputs = {
+            mypackage = {
+              inputs.nixpkgs.follows = "nixpkgs";
+              url = "github:owner/repo/release-1.0";
+            };
+          };
+        }
+      `;
+      const result = updateDependency({
+        fileContent,
+        upgrade: {
+          depName: 'mypackage',
+          currentValue: '1.0',
+          newValue: '2.0',
+        },
+      });
+
+      expect(result).toBeNull();
+    });
+
     it('returns null for digest-only updates when digests are the same', () => {
       const fileContent = codeBlock`
         {
@@ -437,7 +540,7 @@ describe('modules/manager/nix/update', () => {
       });
       expect(result).toBeNull();
       expect(logger.logger.trace).toHaveBeenNthCalledWith(
-        3,
+        2,
         {
           depName: 'nixpkgs-tar',
           url: 'https://nixos.org/channels/nixpkgs-unstable/nixexprs.tar.xz',

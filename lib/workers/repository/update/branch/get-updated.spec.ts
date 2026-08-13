@@ -515,23 +515,18 @@ describe('workers/repository/update/branch/get-updated', () => {
       });
     });
 
-    it('handles nix digest-only updates without including unchanged files in commit', async () => {
+    it('updates artifacts when requested without including the unchanged package file', async () => {
       const fileContent = 'existing content';
       config.upgrades.push({
         packageFile: 'flake.nix',
         manager: 'nix',
-        datasource: GitRefsDatasource.id,
-        branchName: 'renovate/nixpkgs-tar-digest',
-        depName: 'nixpkgs-tar',
-        currentValue: 'nixpkgs-unstable',
-        newValue: 'nixpkgs-unstable',
-        currentDigest: '58dcbf1ec551914c3756c267b8b9c8c86baa1b2f',
-        newDigest: '88cef159e47c0dc56f151593e044453a39a6e547',
-        updateType: 'digest',
+        branchName: 'renovate/flake-lock',
       } satisfies BranchUpgradeConfig);
 
-      // For digest-only updates, Nix returns unchanged content
-      nix.updateDependency.mockResolvedValueOnce(fileContent);
+      nix.updateDependency.mockResolvedValueOnce({
+        content: fileContent,
+        updateArtifacts: true,
+      });
       nix.updateArtifacts.mockResolvedValueOnce([
         {
           file: {
@@ -544,7 +539,6 @@ describe('workers/repository/update/branch/get-updated', () => {
 
       const res = await getUpdatedPackageFiles(config);
 
-      // The unchanged flake.nix should not be in updatedPackageFiles but the lock file should be updated via artifacts
       expect(res.updatedPackageFiles).toEqual([]);
       expect(res.updatedArtifacts).toEqual([
         {
@@ -555,20 +549,15 @@ describe('workers/repository/update/branch/get-updated', () => {
       ]);
     });
 
-    it('handles nix non-digest updates normally', async () => {
+    it('handles structured package file updates normally', async () => {
       const updatedContent = 'updated content';
       config.upgrades.push({
         packageFile: 'flake.nix',
         manager: 'nix',
-        datasource: GitRefsDatasource.id,
-        branchName: 'renovate/nixpkgs-branch',
-        depName: 'nixpkgs-branch',
-        currentValue: 'nixos-24.05',
-        newValue: 'nixos-24.11',
-        updateType: 'minor',
+        branchName: 'renovate/flake',
       } satisfies BranchUpgradeConfig);
 
-      nix.updateDependency.mockResolvedValueOnce(updatedContent);
+      nix.updateDependency.mockResolvedValueOnce({ content: updatedContent });
 
       const res = await getUpdatedPackageFiles(config);
       expect(res).toMatchObject({
@@ -580,6 +569,51 @@ describe('workers/repository/update/branch/get-updated', () => {
           },
         ],
       });
+    });
+
+    it('updates artifacts once for multiple upgrades of the same package file', async () => {
+      const updatedContent = 'updated content';
+      config.upgrades.push(
+        {
+          packageFile: 'flake.nix',
+          manager: 'nix',
+          branchName: 'renovate/flake',
+          depName: 'first',
+        },
+        {
+          packageFile: 'flake.nix',
+          manager: 'nix',
+          branchName: 'renovate/flake',
+          depName: 'second',
+        },
+        {
+          packageFile: 'flake.nix',
+          manager: 'nix',
+          branchName: 'renovate/flake',
+          depName: 'third',
+        },
+      );
+      nix.updateDependency
+        .mockResolvedValueOnce({
+          content: 'existing content',
+          updateArtifacts: true,
+        })
+        .mockResolvedValueOnce({ content: updatedContent })
+        .mockResolvedValueOnce({
+          content: updatedContent,
+          updateArtifacts: true,
+        });
+
+      const res = await getUpdatedPackageFiles(config);
+
+      expect(nix.updateArtifacts).toHaveBeenCalledOnce();
+      expect(res.updatedPackageFiles).toEqual([
+        {
+          contents: updatedContent,
+          path: 'flake.nix',
+          type: 'addition',
+        },
+      ]);
     });
 
     /*
