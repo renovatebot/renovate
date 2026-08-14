@@ -570,7 +570,7 @@ export async function initRepo({
       semver.satisfies(platformConfig.gheVersion!, '<3.12.0')
     ) {
       infoQuery = infoQuery.replace(
-        /\n\s*mergeQueue\s*\{\s*id\s*\}\s*\n/,
+        regEx(/\n\s*mergeQueue\s*\{\s*id\s*\}\s*\n/),
         '\n',
       );
     }
