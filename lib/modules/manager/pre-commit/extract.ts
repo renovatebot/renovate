@@ -9,6 +9,7 @@ import { detectPlatform } from '../../../util/common.ts';
 import { find } from '../../../util/host-rules.ts';
 import { newlineRegex, regEx } from '../../../util/regex.ts';
 import { parseSingleYaml } from '../../../util/yaml.ts';
+import { ForgejoTagsDatasource } from '../../datasource/forgejo-tags/index.ts';
 import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
 import { GitlabTagsDatasource } from '../../datasource/gitlab-tags/index.ts';
 import { parseLine } from '../gomod/line-parser.ts';
@@ -35,7 +36,19 @@ function determineDatasource(
   repository: string,
   hostname: string,
 ): { datasource?: string; registryUrls?: string[]; skipReason?: SkipReason } {
-  if (hostname === 'github.com' || detectPlatform(repository) === 'github') {
+  const platform = detectPlatform(repository);
+
+  if (platform === 'forgejo') {
+    logger.debug(
+      { repository, hostname },
+      'Found forgejo dependency with custom registryUrl',
+    );
+    return {
+      datasource: ForgejoTagsDatasource.id,
+      registryUrls: [`https://${hostname}`],
+    };
+  }
+  if (hostname === 'github.com' || platform === 'github') {
     logger.debug({ repository, hostname }, 'Found github dependency');
     return { datasource: GithubTagsDatasource.id };
   }
@@ -43,7 +56,7 @@ function determineDatasource(
     logger.debug({ repository, hostname }, 'Found gitlab dependency');
     return { datasource: GitlabTagsDatasource.id };
   }
-  if (detectPlatform(repository) === 'gitlab') {
+  if (platform === 'gitlab') {
     logger.debug(
       { repository, hostname },
       'Found gitlab dependency with custom registryUrl',
@@ -64,6 +77,7 @@ function determineDatasource(
     return { skipReason: 'unknown-registry', registryUrls: [hostname] };
   }
   for (const [hostType, sourceId] of [
+    ['forgejo', ForgejoTagsDatasource.id],
     ['github', GithubTagsDatasource.id],
     ['gitlab', GitlabTagsDatasource.id],
   ]) {
@@ -77,7 +91,7 @@ function determineDatasource(
   }
   logger.debug(
     { repository, registry: hostUrl },
-    'Provided hostname did not match any of the hostRules of hostType github nor gitlab',
+    'Provided hostname did not match any of the hostRules of hostType forgejo, github nor gitlab',
   );
   return { skipReason: 'unknown-registry', registryUrls: [hostname] };
 }

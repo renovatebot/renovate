@@ -51,6 +51,26 @@ To enable this replace massaging behavior, add `gomodMassage` to your `postUpdat
 Go Modules tidying is not enabled by default, and is opt-in via the [`postUpdateOptions`](./configuration-options.md#postupdateoptions) config option.
 The reason for this is that a `go mod tidy` command may make changes to `go.mod` and `go.sum` that are completely unrelated to the updated module(s) in the PR, and so may be confusing to some users.
 
+### Monorepo tidying for local `replace` directives
+
+In Go monorepos it is common for one module to depend on another in the same repo via a local `replace` directive, for example:
+
+```text
+// api/go.mod
+replace example.com/shared => ../shared
+```
+
+When Renovate updates the shared module, running `go mod tidy` only in that module leaves the dependent `go.sum` files stale.
+Add `gomodTidyAll` to [`postUpdateOptions`](./configuration-options.md#postupdateoptions) to also tidy every `go.mod` which transitively depends on the updated module, in dependency order.
+The `gomodTidy1.17` and `gomodTidyE` flags apply to those commands as well.
+`gomodTidyAll` implies `gomodTidy`, so you only need to set one of them.
+Renovate runs these commands with `go -C`, so this option needs Go 1.20 or later.
+
+Avoid combining `gomodTidyAll` with `gomodMassage`.
+Massaging comments out the relative `replace` directives that `gomodTidyAll` follows, so the two options work against each other.
+Massaging only rewrites the `go.mod` of the updated module, and Go ignores `replace` directives outside the main module, so the tidy commands for the dependent modules still behave correctly.
+But if the updated module itself uses a relative `replace`, then massaging removes that directive and `go mod tidy` fails for that module.
+
 ### Module Vendoring
 
 Vendoring of Go Modules is done automatically if `vendor/modules.txt` is present.

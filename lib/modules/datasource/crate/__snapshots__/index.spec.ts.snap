@@ -307,3 +307,26 @@ exports[`modules/datasource/crate/index > getReleases > processes real data: lib
   "sourceUrl": "https://github.com/rust-lang/libc",
 }
 `;
+
+exports[`modules/datasource/crate/index > getReleases > processes real data: sentry 1`] = `
+{
+  "dependencyUrl": "https://crates.io/crates/sentry",
+  "homepage": "https://sentry.io/welcome/",
+  "registryUrl": "sparse+https://index.crates.io",
+  "releases": [
+    {
+      "releaseTimestamp": "2016-05-20T17:24:17.000Z",
+      "version": "0.1.0",
+    },
+    {
+      "releaseTimestamp": "2016-05-22T17:14:04.000Z",
+      "version": "0.1.1",
+    },
+    {
+      "releaseTimestamp": "2016-05-29T18:29:40.000Z",
+      "version": "0.1.2",
+    },
+  ],
+  "sourceUrl": "https://github.com/getsentry/sentry-rust",
+}
+`;

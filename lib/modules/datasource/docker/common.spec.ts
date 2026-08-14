@@ -1,8 +1,7 @@
-import { mockDeep } from 'vitest-mock-extended';
+import { hostRules } from '~test/host-rules.ts';
 import * as httpMock from '~test/http-mock.ts';
 import { partial } from '~test/util.ts';
 import { PAGE_NOT_FOUND_ERROR } from '../../../constants/error-messages.ts';
-import * as _hostRules from '../../../util/host-rules.ts';
 import { Http } from '../../../util/http/index.ts';
 import {
   dockerDatasourceId,
@@ -13,11 +12,7 @@ import {
 } from './common.ts';
 import type { OciHelmConfig } from './schema.ts';
 
-const hostRules = vi.mocked(_hostRules);
-
 const http = new Http(dockerDatasourceId);
-
-vi.mock('../../../util/host-rules.ts', () => mockDeep());
 
 describe('modules/datasource/docker/common', () => {
   describe('getRegistryRepository', () => {
@@ -66,7 +61,7 @@ describe('modules/datasource/docker/common', () => {
     });
 
     it('supports insecure registryUrls', () => {
-      hostRules.find.mockReturnValueOnce({ insecureRegistry: true });
+      hostRules.add({ insecureRegistry: true });
       const res = getRegistryRepository(
         'prefix/image',
         'my.local.registry/prefix',
@@ -126,11 +121,10 @@ describe('modules/datasource/docker/common', () => {
 
   describe('getAuthHeaders', () => {
     beforeEach(() => {
-      hostRules.find.mockReturnValue({
+      hostRules.add({
         username: 'some-username',
         password: 'some-password',
       });
-      hostRules.hosts.mockReturnValue([]);
     });
 
     it('throw page not found exception', async () => {
@@ -149,13 +143,80 @@ describe('modules/datasource/docker/common', () => {
       ).rejects.toThrow(PAGE_NOT_FOUND_ERROR);
     });
 
+    it('falls back to base /v2/ auth probe when tags URL returns 405 ECR maxResults error', async () => {
+      httpMock
+        .scope('https://my.local.registry')
+        .get('/v2/repo/tags/list?n=10000')
+        .reply(
+          405,
+          {
+            errors: [
+              {
+                code: 'UNSUPPORTED',
+                message:
+                  "Invalid parameter at 'maxResults' failed to satisfy constraint: 'Member must have value less than or equal to 1000'",
+              },
+            ],
+          },
+          { 'docker-distribution-api-version': 'registry/2.0' },
+        )
+        .get('/v2/')
+        .reply(200, '');
+
+      const headers = await getAuthHeaders(
+        http,
+        'https://my.local.registry',
+        'repo',
+        'https://my.local.registry/v2/repo/tags/list?n=10000',
+      );
+
+      expect(headers).toEqual({});
+    });
+
+    it('falls back to base /v2/ auth probe and negotiates token when 405 ECR maxResults error is received', async () => {
+      httpMock
+        .scope('https://my.local.registry')
+        .get('/v2/repo/tags/list?n=10000')
+        .reply(
+          405,
+          {
+            errors: [
+              {
+                code: 'UNSUPPORTED',
+                message:
+                  "Invalid parameter at 'maxResults' failed to satisfy constraint: 'Member must have value less than or equal to 1000'",
+              },
+            ],
+          },
+          { 'docker-distribution-api-version': 'registry/2.0' },
+        )
+        .get('/v2/', undefined, { badheaders: ['authorization'] })
+        .reply(401, '', {
+          'www-authenticate':
+            'Bearer realm="https://my.local.registry/oauth2/token",service="my.local.registry"',
+        })
+        .get(
+          '/oauth2/token?service=my.local.registry&scope=repository:repo:pull',
+        )
+        .reply(200, { token: 'abc' });
+
+      const headers = await getAuthHeaders(
+        http,
+        'https://my.local.registry',
+        'repo',
+        'https://my.local.registry/v2/repo/tags/list?n=10000',
+      );
+
+      expect(headers).toEqual({ authorization: 'Bearer abc' });
+    });
+
     it('returns "authType token" if both provided', async () => {
       httpMock
         .scope('https://my.local.registry')
         .get('/v2/', undefined, { badheaders: ['authorization'] })
         .reply(401, '', { 'www-authenticate': 'Authenticate you must' });
-      hostRules.hosts.mockReturnValue([]);
-      hostRules.find.mockReturnValue({
+      hostRules.clear();
+      hostRules.add({
         authType: 'some-authType',
         token: 'some-token',
       });
@@ -179,8 +240,8 @@ describe('modules/datasource/docker/common', () => {
         .scope('https://my.local.registry')
         .get('/v2/', undefined, { badheaders: ['authorization'] })
         .reply(401, '', { 'www-authenticate': 'Authenticate you must' });
-      hostRules.hosts.mockReturnValue([]);
-      hostRules.find.mockReturnValue({
+      hostRules.clear();
+      hostRules.add({
         token: 'some-token',
       });
 
@@ -203,7 +264,6 @@ describe('modules/datasource/docker/common', () => {
         .scope('https://my.local.registry')
         .get('/v2/', undefined, { badheaders: ['authorization'] })
         .reply(401, '', { 'www-authenticate': 'Authenticate you must' });
-      hostRules.hosts.mockReturnValue([]);
       httpMock.clear(false);
 
       httpMock

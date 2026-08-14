@@ -2,6 +2,7 @@ export const repoInfoQuery = `
 query($owner: String!, $name: String!, $user: String) {
   repository(owner: $owner, name: $name) {
     id
+    sshUrl
     isFork
     parent {
       nameWithOwner
@@ -14,6 +15,7 @@ query($owner: String!, $name: String!, $user: String) {
     mergeCommitAllowed
     rebaseMergeAllowed
     squashMergeAllowed
+    mergeQueue { id }
     defaultBranchRef {
       name
       target {
@@ -63,6 +65,26 @@ query(
         body
         updatedAt
       }
+    }
+  }
+}
+`;
+
+export const repoMergeQueueQuery = `
+query($owner: String!, $name: String!, $branch: String!) {
+  repository(owner: $owner, name: $name) {
+    mergeQueue(branch: $branch) {
+      id
+    }
+  }
+}
+`;
+
+export const prIsInMergeQueueQuery = `
+query($owner: String!, $name: String!, $number: Int!) {
+  repository(owner: $owner, name: $name) {
+    pullRequest(number: $number) {
+      isInMergeQueue
     }
   }
 }

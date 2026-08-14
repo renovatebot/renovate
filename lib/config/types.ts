@@ -50,6 +50,7 @@ export interface GroupConfig extends Record<string, unknown> {
 }
 
 export type RecreateWhen = 'auto' | 'never' | 'always';
+export type StatusCheckWhen = 'always' | 'never' | 'failed';
 export type PlatformCommitOptions = 'auto' | 'disabled' | 'enabled';
 
 export type BinarySource = 'docker' | 'global' | 'install' | 'hermit';
@@ -77,6 +78,7 @@ export interface RenovateSharedConfig {
   automergeStrategy?: MergeStrategy;
   automergeType?: AutoMergeType;
   azureWorkItemId?: number;
+  azureWorkItemType?: string;
   branchName?: string;
   branchNameStrict?: boolean;
   branchPrefix?: string;
@@ -90,6 +92,7 @@ export interface RenovateSharedConfig {
   commitMessageLowerCase?: 'auto' | 'never';
   commitMessagePrefix?: string;
   commitMessageTopic?: string;
+  commitTrailers?: string[];
   confidential?: boolean;
   configValidationError?: boolean;
   changelogUrl?: string;
@@ -139,7 +142,6 @@ export interface RenovateSharedConfig {
   prPriority?: number;
   prTitle?: string;
   prTitleStrict?: boolean;
-  productLinks?: Record<string, string>;
   pruneBranchAfterAutomerge?: boolean;
   rangeStrategy?: RangeStrategy;
   rebaseLabel?: string;
@@ -242,6 +244,7 @@ export interface RepoGlobalConfig extends GlobalInheritableConfig {
   cacheDir?: string;
   cacheHardTtlMinutes?: number;
   cacheTtlOverride?: Record<string, number>;
+  checkedBranches?: string[];
   containerbaseDir?: string;
   customEnvVariables?: Record<string, string>;
   dockerChildPrefix?: string;
@@ -256,7 +259,6 @@ export interface RepoGlobalConfig extends GlobalInheritableConfig {
   gitTimeout?: number;
   githubTokenWarn?: boolean;
   includeMirrors?: boolean;
-  localDir?: string;
   migratePresets?: Record<string, string>;
   platform?: PlatformId;
   prCacheSyncMaxPages?: number;
@@ -274,7 +276,16 @@ export interface RepoGlobalConfig extends GlobalInheritableConfig {
   ignorePrAuthor?: boolean;
   allowedUnsafeExecutions?: AllowedUnsafeExecution[];
   onboardingAutoCloseAge?: number;
-  toolSettings?: ToolSettingsOptions;
+  productLinks?: Record<string, string>;
+  rebaseAllOpenBranches?: boolean;
+  toolSettings?: GlobalToolSettingsOptions;
+}
+
+/**
+ * Internal variables which are referenced from `GlobalConfig`, but are *not* user-configurable options.
+ */
+export interface InternalGlobalConfigOptions {
+  localDir?: string;
 }
 
 /**
@@ -323,11 +334,11 @@ export type UpdateConfig<
   T extends RenovateSharedConfig = RenovateSharedConfig,
 > = Partial<Record<UpdateType, T | null>>;
 
-export type RenovateRepository =
-  | string
-  | (RenovateConfig & {
-      repository: string;
-    });
+export type RenovateRepositoryEntry = AllConfig & {
+  repository: string;
+};
+
+export type RenovateRepository = string | RenovateRepositoryEntry;
 
 export type UseBaseBranchConfigType = 'merge' | 'none';
 export type ConstraintsFilter = 'strict' | 'none';
@@ -471,10 +482,10 @@ export interface RenovateConfig
 
   constraintsFiltering?: ConstraintsFilter;
 
-  checkedBranches?: string[];
   customizeDashboard?: Record<string, string>;
 
   statusCheckNames?: Record<StatusCheckKey, string | null>;
+  statusCheckWhen?: Partial<Record<StatusCheckKey, StatusCheckWhen>>;
   /**
    * User configured environment variables that Renovate uses when executing package manager commands
    */
@@ -487,7 +498,7 @@ export interface RenovateConfig
   minimumGroupSize?: number;
   configFileNames?: string[];
   minimumReleaseAgeBehaviour?: MinimumReleaseAgeBehaviour;
-  toolSettings?: ToolSettingsOptions;
+  toolSettings?: RepoToolSettingsOptions;
 }
 
 const CustomDatasourceFormats = [
@@ -575,7 +586,8 @@ export type AllowedUnsafeExecution =
   | 'bazelModDeps'
   | 'goGenerate'
   | 'gradleWrapper'
-  | 'mise';
+  | 'mise'
+  | 'pixi';
 
 // TODO: Proper typings
 export interface PackageRule
@@ -839,8 +851,27 @@ export interface BumpVersionConfig {
   name?: string;
 }
 
-export interface ToolSettingsOptions {
+/**
+ * Global Config for specified `toolSettings` options.
+ *
+ */
+export interface GlobalToolSettingsOptions {
+  /** An upper limit on what the Java Virtual Machine's maximum memory can be set to. Repositories can specify <= this value */
   jvmMaxMemory?: number;
+  /** An upper limit on what the Java Virtual Machine's starting memory can be set to. Repositories can specify <= this value */
   jvmMemory?: number;
+  /** An upper limit on what the Node.JS process' maximum memory can be set to. Repositories can specify <= this value */
+  nodeMaxMemory?: number;
+}
+
+/**
+ * Repository config options for `toolSettings` options.
+ */
+export interface RepoToolSettingsOptions {
+  /** The maximum memory the Java Virtual Machine can use. If greater than the Global Self-Hosted configuration setting, it will be set to that limit **/
+  jvmMaxMemory?: number;
+  /** The starting memory the Java Virtual Machine can use. If greater than the Global Self-Hosted configuration setting, it will be set to that limit **/
+  jvmMemory?: number;
+  /** The maximum memory child Node.JS processes can use. If greater than the Global Self-Hosted configuration setting, it will be set to that limit **/
   nodeMaxMemory?: number;
 }
