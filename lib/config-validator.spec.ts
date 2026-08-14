@@ -82,6 +82,7 @@ describe.concurrent('config-validator', () => {
 
     it('exits 1 for a config with an unknown option', async () => {
       await withTmpDir(async (dirPath) => {
+        // oxlint-disable-next-line renovate/prefer-partial-in-specs -- intentionally invalid unknown option to test validator error handling
         const file = await writeRepoConfig(dirPath, 'renovate.json', {
           notARealOption: true,
         } as RenovateConfig);

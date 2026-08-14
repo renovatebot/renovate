@@ -66,14 +66,6 @@ export default {
     },
   },
   create(context) {
-    const filename = context.filename ?? context.physicalFilename ?? '';
-    // Only enforce in datasources, where cross-origin pagination is never valid.
-    if (
-      !filename.includes('/lib/modules/datasource/') ||
-      filename.endsWith('.spec.ts')
-    ) {
-      return {};
-    }
     return {
       NewExpression(node) {
         if (

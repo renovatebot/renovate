@@ -11,16 +11,6 @@ export default {
     },
   },
   create(context) {
-    const filename = context.filename ?? context.physicalFilename ?? '';
-    // Only enforce in lib/ source files, not tests or the file that defines config option defaults
-    if (
-      !filename.includes('/lib/') ||
-      filename.includes('.spec.ts') ||
-      filename.endsWith('lib/config/options/index.ts')
-    ) {
-      return {};
-    }
-
     return {
       Literal(node) {
         // oxlint-disable-next-line typescript/prefer-includes -- regex avoids CodeQL js/incomplete-url-substring-sanitization

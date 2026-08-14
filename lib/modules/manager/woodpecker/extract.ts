@@ -1,4 +1,4 @@
-import { isString } from '@sindresorhus/is';
+import { isObject, isString } from '@sindresorhus/is';
 import { logger } from '../../../logger/index.ts';
 import { parseSingleYaml } from '../../../util/yaml.ts';
 import { getDep } from '../dockerfile/extract.ts';
@@ -31,7 +31,7 @@ export function extractPackageFile(
       );
       return null;
     }
-    if (typeof config !== 'object') {
+    if (!isObject(config)) {
       logger.debug(
         { packageFile, type: typeof config },
         'Unexpected type for Woodpecker Configuration content',

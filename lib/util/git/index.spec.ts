@@ -1,3 +1,4 @@
+import { isTruthy } from '@sindresorhus/is';
 import { codeBlock } from 'common-tags';
 import fs from 'fs-extra';
 import { DateTime } from 'luxon';
@@ -106,6 +107,15 @@ describe('util/git/index', { timeout: 30000 }, () => {
     await repo.addConfig('user.email', 'custom@example.com');
     await repo.commit('custom message');
 
+    await repo.checkoutBranch('renovate/custom_author_brackets', defaultBranch);
+    await fs.writeFile(`${base.path}/custom_brackets_file`, 'custom');
+    await repo.add(['custom_brackets_file']);
+    await repo.addConfig(
+      'user.email',
+      '29139614+renovate[bot]@users.noreply.github.com',
+    );
+    await repo.commit('custom brackets message');
+
     await repo.checkoutBranch('renovate/nested_files', defaultBranch);
     await fs.mkdirp(`${base.path}/bin/`);
     await fs.writeFile(`${base.path}/bin/nested`, 'nested');
@@ -202,6 +212,37 @@ describe('util/git/index', { timeout: 30000 }, () => {
     setCustomEnv({});
     process.env = OLD_ENV;
     await base?.cleanup();
+  });
+
+  describe('createSimpleGit()', () => {
+    it('adds authentication to the approved child environment', () => {
+      setCustomEnv({
+        GIT_CONFIG_COUNT: '1',
+        GIT_CONFIG_KEY_0: 'existing-key',
+        GIT_CONFIG_VALUE_0: 'existing-value',
+      });
+      const authenticatedEnv = {
+        GIT_CONFIG_COUNT: '4',
+        GIT_CONFIG_KEY_0: 'existing-key',
+        GIT_CONFIG_VALUE_0: 'existing-value',
+      };
+      auth.getGitEnvironmentVariables.mockReturnValue(authenticatedEnv);
+      const envSpy = vi.spyOn(SimpleGit.prototype, 'env');
+
+      git.createSimpleGit({
+        authentication: { hostTypes: ['git-refs'] },
+      });
+
+      expect(auth.getGitEnvironmentVariables).toHaveBeenCalledExactlyOnceWith(
+        expect.objectContaining({
+          GIT_CONFIG_COUNT: '1',
+          GIT_CONFIG_KEY_0: 'existing-key',
+          GIT_CONFIG_VALUE_0: 'existing-value',
+        }),
+        ['git-refs'],
+      );
+      expect(envSpy).toHaveBeenCalledWith(authenticatedEnv);
+    });
   });
 
   describe('gitRetry', () => {
@@ -436,6 +477,80 @@ describe('util/git/index', { timeout: 30000 }, () => {
       ).toBeFalse();
     });
 
+    it('should return false when author matches ignored regex', async () => {
+      git.setUserRepoConfig({
+        gitIgnoredAuthors: ['/^custom@e.+\\.com$/'],
+      });
+      expect(
+        await git.isBranchModified('renovate/custom_author', defaultBranch),
+      ).toBeFalse();
+    });
+
+    it('should return false when author matches ignored case-insensitive regex', async () => {
+      git.setUserRepoConfig({
+        gitIgnoredAuthors: ['/^CUSTOM@E.+\\.COM$/i'],
+      });
+      expect(
+        await git.isBranchModified('renovate/custom_author', defaultBranch),
+      ).toBeFalse();
+    });
+
+    it('should return false when ignored author contains literal brackets', async () => {
+      git.setUserRepoConfig({
+        gitIgnoredAuthors: ['29139614+renovate[bot]@users.noreply.github.com'],
+      });
+      expect(
+        await git.isBranchModified(
+          'renovate/custom_author_brackets',
+          defaultBranch,
+        ),
+      ).toBeFalse();
+    });
+
+    it('should return false when author matches ignored regex with escaped brackets', async () => {
+      git.setUserRepoConfig({
+        gitIgnoredAuthors: [
+          '/renovate\\[bot\\]@users\\.noreply\\.github\\.com$/',
+        ],
+      });
+      expect(
+        await git.isBranchModified(
+          'renovate/custom_author_brackets',
+          defaultBranch,
+        ),
+      ).toBeFalse();
+    });
+
+    it('should return true when author does not match ignored regex', async () => {
+      git.setUserRepoConfig({
+        gitIgnoredAuthors: ['/^other@example\\.com$/'],
+      });
+      expect(
+        await git.isBranchModified('renovate/custom_author', defaultBranch),
+      ).toBeTrue();
+    });
+
+    it('should return false when author matches ignored glob pattern', async () => {
+      git.setUserRepoConfig({
+        gitIgnoredAuthors: ['custom@*'],
+      });
+      expect(
+        await git.isBranchModified('renovate/custom_author', defaultBranch),
+      ).toBeFalse();
+    });
+
+    it('should return true when author does not match bracketed email pattern', async () => {
+      git.setUserRepoConfig({
+        gitIgnoredAuthors: ['29139614+renovate[bxy]@users.noreply.github.com'],
+      });
+      expect(
+        await git.isBranchModified(
+          'renovate/custom_author_brackets',
+          defaultBranch,
+        ),
+      ).toBeTrue();
+    });
+
     it('should return true when non-ignored authors commit followed by an ignored author', async () => {
       git.setUserRepoConfig({
         gitIgnoredAuthors: ['author1@example.com'],
@@ -647,6 +762,7 @@ describe('util/git/index', { timeout: 30000 }, () => {
         'renovate/binary-file',
         'renovate/branch_with_multiple_authors',
         'renovate/custom_author',
+        'renovate/custom_author_brackets',
         'renovate/deeply/nested',
         'renovate/different_committer',
         'renovate/equal_branch',
@@ -1601,7 +1717,7 @@ describe('util/git/index', { timeout: 30000 }, () => {
       )
         .split(newlineRegex)
         .map((line) => line.replace(regEx(/[0-9a-f]+\s+/i), ''))
-        .filter(Boolean);
+        .filter(isTruthy);
     }
 
     it('creates renovate ref in default section', async () => {
@@ -2056,7 +2172,7 @@ describe('util/git/index', { timeout: 30000 }, () => {
     it('should pass pushOptions to git.push', async () => {
       const pushSpy = vi
         .spyOn(SimpleGit.prototype, 'push')
-        .mockResolvedValue({} as PushResult);
+        .mockResolvedValue(partial<PushResult>());
       await expect(
         git.pushCommit({
           sourceRef: defaultBranch,

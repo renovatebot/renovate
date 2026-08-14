@@ -1,17 +1,19 @@
 import { quote } from 'shlex';
 import upath from 'upath';
 import { logger } from '../../../logger/index.ts';
-import { exec } from '../../../util/exec/index.ts';
+import { ExecError } from '../../../util/exec/exec-error.ts';
 import type { ExecOptions } from '../../../util/exec/types.ts';
 import {
   localPathIsSymbolicLink,
   readLocalSymlink,
 } from '../../../util/fs/index.ts';
-import { getGitEnvironmentVariables } from '../../../util/git/auth.ts';
+import { withGitEnvironment } from '../../../util/git/exec.ts';
 import { getRepoStatus } from '../../../util/git/index.ts';
 import * as p from '../../../util/promises.ts';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
 import type { ReadContentResult } from './types.ts';
+
+const gitExec = withGitEnvironment(['hermit']);
 
 /**
  * updateArtifacts runs hermit install for each updated dependencies
@@ -228,7 +230,6 @@ async function updateHermitPackage(update: UpdateArtifact): Promise<void> {
   const execOptions: ExecOptions = {
     docker: {},
     cwdFile: update.packageFileName,
-    extraEnv: getGitEnvironmentVariables(['hermit']),
   };
 
   const fromPackages = from.map(quote).join(' ');
@@ -239,13 +240,16 @@ async function updateHermitPackage(update: UpdateArtifact): Promise<void> {
     const uninstallCommands = `./hermit uninstall ${packagesToUninstall}`;
 
     try {
-      const result = await exec(uninstallCommands, execOptions);
+      const result = await gitExec(uninstallCommands, execOptions);
       logger.trace(
         { stdout: result.stdout },
         `hermit uninstall command stdout`,
       );
     } catch (e) {
       logger.warn({ err: e }, `error uninstall hermit package for replacement`);
+      if (!(e instanceof ExecError)) {
+        throw e;
+      }
       throw new UpdateHermitError(
         fromPackages,
         packagesToUninstall,
@@ -267,10 +271,13 @@ async function updateHermitPackage(update: UpdateArtifact): Promise<void> {
   );
 
   try {
-    const result = await exec(execCommands, execOptions);
+    const result = await gitExec(execCommands, execOptions);
     logger.trace({ stdout: result.stdout }, `hermit command stdout`);
   } catch (e) {
     logger.warn({ err: e }, `error updating hermit package`);
+    if (!(e instanceof ExecError)) {
+      throw e;
+    }
     throw new UpdateHermitError(
       fromPackages,
       packagesToInstall,

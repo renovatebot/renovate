@@ -817,6 +817,8 @@ export async function lookupUpdates(
         }
       } else if (
         config.pinDigests &&
+        // only update the digest in the package file if it's managed by us
+        !config.digestManagedExternally &&
         // Create a pin only if one doesn't already exists
         // v8 ignore else -- TODO: add test #40625
         !res.updates.some((update) => update.updateType === 'pin')
@@ -850,7 +852,11 @@ export async function lookupUpdates(
 
       // update digest for all
       for (const update of res.updates) {
-        if (config.pinDigests === true || config.currentDigest) {
+        // only update the digest in the package file if it's managed by us
+        if (
+          (config.pinDigests === true && !config.digestManagedExternally) ||
+          config.currentDigest
+        ) {
           const getDigestConfig: GetDigestInputConfig = {
             ...config,
             registryUrl: update.registryUrl ?? res.registryUrl,
