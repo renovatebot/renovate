@@ -9,6 +9,7 @@ import type {
   ExtractConfig,
   PackageDependency,
   PackageFile,
+  PackageFileContent,
 } from '../types.ts';
 import {
   parseCatalog,
@@ -40,6 +41,15 @@ import {
 } from './utils.ts';
 
 const mavenDatasource = MavenDatasource.id;
+
+interface GradleExtractConfig extends ExtractConfig {
+  packageFiles?: Record<string, PackageFile[]>;
+}
+
+interface FileContentOverride {
+  content: string;
+  packageFile: string;
+}
 
 function updatePackageRegistries(
   packageRegistries: PackageRegistry[],
@@ -176,9 +186,13 @@ async function parsePackageFiles(
   extractedDeps: PackageDependency<GradleManagerData>[],
   packageFilesByName: Record<string, PackageFile>,
   packageRegistries: PackageRegistry[],
+  fileContentOverride?: FileContentOverride,
 ): Promise<PackageDependency<GradleManagerData>[]> {
   const varRegistry: VariableRegistry = {};
   const fileContents = await getLocalFiles(packageFiles);
+  if (fileContentOverride) {
+    fileContents[fileContentOverride.packageFile] = fileContentOverride.content;
+  }
 
   for (const packageFile of packageFiles) {
     packageFilesByName[packageFile] = {
@@ -242,9 +256,10 @@ async function parsePackageFiles(
   return extractedDeps;
 }
 
-export async function extractAllPackageFiles(
+async function extractPackageFiles(
   config: ExtractConfig,
   packageFiles: string[],
+  fileContentOverride?: FileContentOverride,
 ): Promise<PackageFile[] | null> {
   const packageFilesByName: Record<string, PackageFile> = {};
   const packageRegistries: PackageRegistry[] = [];
@@ -260,6 +275,7 @@ export async function extractAllPackageFiles(
     extractedDeps,
     packageFilesByName,
     packageRegistries,
+    fileContentOverride,
   );
 
   if (!extractedDeps.length) {
@@ -312,4 +328,37 @@ export async function extractAllPackageFiles(
   }
 
   return Object.values(packageFilesByName);
+}
+
+export async function extractPackageFile(
+  content: string,
+  packageFile: string,
+  config: ExtractConfig,
+): Promise<PackageFileContent<GradleManagerData> | null> {
+  const configuredPackageFiles = (
+    config as GradleExtractConfig
+  ).packageFiles?.gradle?.map(({ packageFile }) => packageFile);
+  const packageFiles = [
+    ...new Set([...(configuredPackageFiles ?? []), packageFile]),
+  ];
+  const results = await extractPackageFiles(config, packageFiles, {
+    content,
+    packageFile,
+  });
+  const result = results?.find(
+    ({ packageFile: resultPackageFile }) => resultPackageFile === packageFile,
+  );
+  if (!result) {
+    return null;
+  }
+
+  const { packageFile: _packageFile, ...packageFileContent } = result;
+  return packageFileContent;
+}
+
+export async function extractAllPackageFiles(
+  config: ExtractConfig,
+  packageFiles: string[],
+): Promise<PackageFile[] | null> {
+  return extractPackageFiles(config, packageFiles);
 }

@@ -3,7 +3,7 @@ import { Fixtures } from '~test/fixtures.ts';
 import { fs, logger, partial } from '~test/util.ts';
 import type { ExtractConfig, PackageDependency } from '../types.ts';
 import { matchesContentDescriptor } from './extract.ts';
-import { extractAllPackageFiles } from './index.ts';
+import { extractAllPackageFiles, extractPackageFile } from './index.ts';
 import * as parser from './parser.ts';
 
 vi.mock('../../../util/fs/index.ts');
@@ -32,6 +32,63 @@ function mockFs(files: Record<string, string>): void {
 describe('modules/manager/gradle/extract', () => {
   beforeEach(() => {
     vi.restoreAllMocks();
+  });
+
+  describe('extractPackageFile()', () => {
+    it('extracts a dependency from updated content', async () => {
+      mockFs({
+        'build.gradle':
+          'dependencies { implementation "com.google.guava:guava:33.4.0-jre" }',
+      });
+
+      const res = await extractPackageFile(
+        'dependencies { implementation "com.google.guava:guava:33.4.8-jre" }',
+        'build.gradle',
+        partial<ExtractConfig>(),
+      );
+
+      expect(res).toMatchObject({
+        deps: [
+          {
+            currentValue: '33.4.8-jre',
+            depName: 'com.google.guava:guava',
+          },
+        ],
+      });
+    });
+
+    it('uses other configured package files to resolve variables', async () => {
+      const fsMock = {
+        'gradle.properties': 'guavaVersion=33.4.0-jre',
+        'build.gradle':
+          'dependencies { implementation "com.google.guava:guava:$guavaVersion" }',
+      };
+      mockFs(fsMock);
+      const config = partial<ExtractConfig>();
+      Object.assign(config, {
+        packageFiles: {
+          gradle: Object.keys(fsMock).map((packageFile) => ({
+            deps: [],
+            packageFile,
+          })),
+        },
+      });
+
+      const res = await extractPackageFile(
+        'guavaVersion=33.4.8-jre',
+        'gradle.properties',
+        config,
+      );
+
+      expect(res).toMatchObject({
+        deps: [
+          {
+            currentValue: '33.4.8-jre',
+            depName: 'com.google.guava:guava',
+          },
+        ],
+      });
+    });
   });
 
   it('returns null', async () => {

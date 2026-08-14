@@ -3,7 +3,10 @@ import { Fixtures } from '~test/fixtures.ts';
 import { fs } from '~test/util.ts';
 import { logger } from '../../../../logger/index.ts';
 import type { ExtractConfig } from '../../types.ts';
-import { extractAllPackageFiles } from '../index.ts';
+import {
+  extractAllPackageFiles,
+  extractPackageFile as extractPackageFileFromManager,
+} from '../index.ts';
 import * as npmExtract from './index.ts';
 import { postExtract } from './post/index.ts';
 
@@ -33,6 +36,24 @@ describe('modules/manager/npm/extract/index', () => {
       fs.readLocalFile.mockResolvedValue(null);
       fs.localPathExists.mockResolvedValue(false);
       fs.getSiblingFileName.mockImplementation(realFs.getSiblingFileName);
+    });
+
+    it('is exported by the manager', async () => {
+      const res = await extractPackageFileFromManager(
+        JSON.stringify({ packageManager: 'pnpm@10.14.0' }),
+        'package.json',
+        defaultExtractConfig,
+      );
+
+      expect(res).toMatchObject({
+        deps: [
+          {
+            currentValue: '10.14.0',
+            depName: 'pnpm',
+            depType: 'packageManager',
+          },
+        ],
+      });
     });
 
     it('returns null if cannot parse', async () => {

@@ -1,5 +1,5 @@
 import { fs } from '~test/util.ts';
-import { extractAllPackageFiles, extractPackageFile } from './extract.ts';
+import { extractAllPackageFiles, extractPackageFile } from './index.ts';
 
 vi.mock('../../../util/fs/index.ts');
 
