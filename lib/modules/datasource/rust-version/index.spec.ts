@@ -135,5 +135,37 @@ describe('modules/datasource/rust-version/index', () => {
         }),
       ).rejects.toThrow('external-host-error');
     });
+
+    it('supports registryUrl override', async () => {
+      const manifestsContent = codeBlock`
+        https://artifactory.company.com/static-rust-lang-org/dist/2025-11-24/channel-rust-nightly.toml
+        https://artifactory.company.com/static-rust-lang-org/dist/2024-10-17/channel-rust-1.82.0.toml
+      `;
+
+      httpMock
+        .scope('https://artifactory.company.com/static-rust-lang-org')
+        .get('/manifests.txt')
+        .reply(200, manifestsContent);
+
+      const res = await getPkgReleases({
+        datasource,
+        packageName: 'rust',
+        registryUrls: ['https://artifactory.company.com/static-rust-lang-org'],
+      });
+
+      expect(res?.releases).toEqual(
+        expect.arrayContaining([
+          {
+            version: 'nightly-2025-11-24',
+            releaseTimestamp: '2025-11-24T00:00:00.000Z',
+          },
+          {
+            version: '1.82.0',
+            releaseTimestamp: '2024-10-17T00:00:00.000Z',
+          },
+        ]),
+      );
+      expect(res?.releases).toHaveLength(2);
+    });
   });
 });
