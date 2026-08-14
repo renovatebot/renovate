@@ -29,6 +29,8 @@ export interface ManagerData<T> {
 }
 
 export interface ExtractConfig extends CustomExtractConfig {
+  /** Current in-memory file contents available during post-artifact extraction. */
+  fileContents?: Record<string, string>;
   registryAliases?: Record<string, string>;
   npmrc?: string;
   npmrcMerge?: boolean;

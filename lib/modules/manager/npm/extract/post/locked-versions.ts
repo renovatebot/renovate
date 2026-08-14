@@ -13,6 +13,7 @@ const pnpmCatalogDepTypeRe = /pnpm\.catalog\.(?<version>.*)/;
 
 export async function getLockedVersions(
   packageFiles: PackageFile<NpmManagerData>[],
+  fileContents?: Record<string, string>,
 ): Promise<void> {
   const lockFileCache: Record<string, LockFile> = {};
   logger.debug('Finding locked versions');
@@ -26,7 +27,10 @@ export async function getLockedVersions(
       // v8 ignore else -- TODO: add test #40625
       if (!lockFileCache[yarnLock]) {
         logger.trace(`Retrieving/parsing ${yarnLock}`);
-        lockFileCache[yarnLock] = await getYarnLock(yarnLock);
+        lockFileCache[yarnLock] = await getYarnLock(
+          yarnLock,
+          fileContents?.[yarnLock],
+        );
       }
       const { isYarn1 } = lockFileCache[yarnLock];
       let yarn: string | undefined;
@@ -56,7 +60,7 @@ export async function getLockedVersions(
       lockFiles.push(npmLock);
       if (!lockFileCache[npmLock]) {
         logger.trace(`Retrieving/parsing ${npmLock}`);
-        const cache = await getNpmLock(npmLock);
+        const cache = await getNpmLock(npmLock, fileContents?.[npmLock]);
         /* v8 ignore next 4 -- needs test */
         if (!cache) {
           logger.warn({ npmLock }, 'Npm: unable to get lockfile');
@@ -134,7 +138,10 @@ export async function getLockedVersions(
       lockFiles.push(pnpmShrinkwrap);
       if (!lockFileCache[pnpmShrinkwrap]) {
         logger.trace(`Retrieving/parsing ${pnpmShrinkwrap}`);
-        lockFileCache[pnpmShrinkwrap] = await getPnpmLock(pnpmShrinkwrap);
+        lockFileCache[pnpmShrinkwrap] = await getPnpmLock(
+          pnpmShrinkwrap,
+          fileContents?.[pnpmShrinkwrap],
+        );
       }
 
       const packageDir = upath.dirname(packageFile.packageFile);

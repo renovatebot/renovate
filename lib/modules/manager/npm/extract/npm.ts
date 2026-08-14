@@ -3,8 +3,11 @@ import { readLocalFile } from '../../../../util/fs/index.ts';
 import { PackageLock } from '../schema.ts';
 import type { LockFile } from './types.ts';
 
-export async function getNpmLock(filePath: string): Promise<LockFile> {
-  const lockfileContent = await readLocalFile(filePath, 'utf8');
+export async function getNpmLock(
+  filePath: string,
+  content?: string,
+): Promise<LockFile> {
+  const lockfileContent = content ?? (await readLocalFile(filePath, 'utf8'));
   if (!lockfileContent) {
     logger.debug({ filePath }, 'Npm: unable to read lockfile');
     return { lockedVersions: {} };

@@ -358,6 +358,11 @@ export async function getUpdatedPackageFiles(
             updatedDeps,
             artifactErrors,
             config,
+            getFileContentsForExtraction(
+              updatedFileContents,
+              updatedArtifacts,
+              packageFile,
+            ),
           );
         }
       }
@@ -410,6 +415,11 @@ export async function getUpdatedPackageFiles(
             updatedDeps,
             artifactErrors,
             config,
+            getFileContentsForExtraction(
+              updatedFileContents,
+              updatedArtifacts,
+              packageFile,
+            ),
           );
         }
       }
@@ -532,6 +542,27 @@ function processUpdateArtifactResults(
   }
 }
 
+function getFileContentsForExtraction(
+  updatedFileContents: Record<string, string>,
+  updatedArtifacts: FileChange[],
+  packageFile: FileAddition,
+): Record<string, string> {
+  const fileContents = {
+    ...updatedFileContents,
+    [packageFile.path]: packageFile.contents!.toString(),
+  };
+
+  for (const artifact of updatedArtifacts) {
+    if (artifact.type === 'deletion') {
+      delete fileContents[artifact.path];
+    } else if (artifact.contents !== null) {
+      fileContents[artifact.path] = artifact.contents.toString();
+    }
+  }
+
+  return fileContents;
+}
+
 /**
  * When using Minimum Release Age, and a package manager that doesn't support being told an explicit version to update to (#41624) it is possible that an artifact update leads to a different version of a dependency being used compared to what Renovate is expecting.
  *
@@ -544,6 +575,7 @@ async function checkForPendingVersions(
   updatedDeps: BranchUpgradeConfig[],
   artifactErrors: ArtifactError[],
   config: BranchConfig,
+  fileContents: Record<string, string>,
 ): Promise<void> {
   const depNameToUpgradeInfo = new Map<
     string,
@@ -568,7 +600,7 @@ async function checkForPendingVersions(
     manager,
     packageFileContent,
     packageFileName,
-    config,
+    { ...config, fileContents },
   );
   if (!extracted) {
     logger.warn(

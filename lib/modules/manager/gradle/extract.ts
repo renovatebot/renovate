@@ -46,11 +46,6 @@ interface GradleExtractConfig extends ExtractConfig {
   packageFiles?: Record<string, PackageFile[]>;
 }
 
-interface FileContentOverride {
-  content: string;
-  packageFile: string;
-}
-
 function updatePackageRegistries(
   packageRegistries: PackageRegistry[],
   urls: PackageRegistry[],
@@ -186,13 +181,10 @@ async function parsePackageFiles(
   extractedDeps: PackageDependency<GradleManagerData>[],
   packageFilesByName: Record<string, PackageFile>,
   packageRegistries: PackageRegistry[],
-  fileContentOverride?: FileContentOverride,
 ): Promise<PackageDependency<GradleManagerData>[]> {
   const varRegistry: VariableRegistry = {};
   const fileContents = await getLocalFiles(packageFiles);
-  if (fileContentOverride) {
-    fileContents[fileContentOverride.packageFile] = fileContentOverride.content;
-  }
+  Object.assign(fileContents, config.fileContents);
 
   for (const packageFile of packageFiles) {
     packageFilesByName[packageFile] = {
@@ -259,7 +251,6 @@ async function parsePackageFiles(
 async function extractPackageFiles(
   config: ExtractConfig,
   packageFiles: string[],
-  fileContentOverride?: FileContentOverride,
 ): Promise<PackageFile[] | null> {
   const packageFilesByName: Record<string, PackageFile> = {};
   const packageRegistries: PackageRegistry[] = [];
@@ -275,7 +266,6 @@ async function extractPackageFiles(
     extractedDeps,
     packageFilesByName,
     packageRegistries,
-    fileContentOverride,
   );
 
   if (!extractedDeps.length) {
@@ -330,6 +320,38 @@ async function extractPackageFiles(
   return Object.values(packageFilesByName);
 }
 
+function getGradleLockedVersions(
+  fileContents: Record<string, string> | undefined,
+): Map<string, Set<string>> {
+  const lockedVersions = new Map<string, Set<string>>();
+
+  for (const [fileName, content] of Object.entries(fileContents ?? {})) {
+    if (!fileName.endsWith('.lockfile')) {
+      continue;
+    }
+
+    for (const line of content.split('\n')) {
+      const equalsIndex = line.indexOf('=');
+      const versionSeparatorIndex = line.lastIndexOf(':', equalsIndex);
+      if (equalsIndex < 0 || versionSeparatorIndex < 0) {
+        continue;
+      }
+
+      const depName = line.slice(0, versionSeparatorIndex);
+      const lockedVersion = line.slice(versionSeparatorIndex + 1, equalsIndex);
+      if (!depName || !lockedVersion) {
+        continue;
+      }
+
+      const versions = lockedVersions.get(depName) ?? new Set<string>();
+      versions.add(lockedVersion);
+      lockedVersions.set(depName, versions);
+    }
+  }
+
+  return lockedVersions;
+}
+
 export async function extractPackageFile(
   content: string,
   packageFile: string,
@@ -341,10 +363,13 @@ export async function extractPackageFile(
   const packageFiles = [
     ...new Set([...(configuredPackageFiles ?? []), packageFile]),
   ];
-  const results = await extractPackageFiles(config, packageFiles, {
-    content,
-    packageFile,
-  });
+  const results = await extractPackageFiles(
+    {
+      ...config,
+      fileContents: { ...config.fileContents, [packageFile]: content },
+    },
+    packageFiles,
+  );
   const result = results?.find(
     ({ packageFile: resultPackageFile }) => resultPackageFile === packageFile,
   );
@@ -353,7 +378,22 @@ export async function extractPackageFile(
   }
 
   const { packageFile: _packageFile, ...packageFileContent } = result;
-  return packageFileContent;
+  const lockedVersions = getGradleLockedVersions(config.fileContents);
+  const deps: PackageDependency<GradleManagerData>[] = [];
+  for (const dep of packageFileContent.deps) {
+    const depName = dep.packageName ?? dep.depName;
+    const versions = depName ? lockedVersions.get(depName) : undefined;
+    if (!versions?.size) {
+      deps.push(dep);
+      continue;
+    }
+
+    for (const lockedVersion of versions) {
+      deps.push({ ...dep, lockedVersion });
+    }
+  }
+
+  return { ...packageFileContent, deps };
 }
 
 export async function extractAllPackageFiles(

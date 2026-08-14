@@ -89,6 +89,82 @@ describe('modules/manager/gradle/extract', () => {
         ],
       });
     });
+
+    it('uses in-memory content for every configured package file', async () => {
+      const fsMock = {
+        'gradle.properties': 'guavaVersion=33.4.0-jre',
+        'build.gradle': '',
+      };
+      const updatedBuildGradle =
+        'dependencies { implementation "com.google.guava:guava:$guavaVersion" }';
+      mockFs(fsMock);
+      const config = partial<ExtractConfig>({
+        fileContents: {
+          'gradle.properties': 'guavaVersion=33.4.8-jre',
+          'build.gradle': updatedBuildGradle,
+        },
+      });
+      Object.assign(config, {
+        packageFiles: {
+          gradle: Object.keys(fsMock).map((packageFile) => ({
+            deps: [],
+            packageFile,
+          })),
+        },
+      });
+
+      const res = await extractPackageFile(
+        'guavaVersion=33.4.8-jre',
+        'gradle.properties',
+        config,
+      );
+
+      expect(res).toMatchObject({
+        deps: [
+          {
+            currentValue: '33.4.8-jre',
+            depName: 'com.google.guava:guava',
+          },
+        ],
+      });
+    });
+
+    it('extracts resolved versions from Gradle lockfiles', async () => {
+      const buildGradle =
+        'dependencies { implementation "com.google.guava:guava:33.+" }';
+      mockFs({ 'build.gradle': buildGradle });
+      const config = partial<ExtractConfig>({
+        fileContents: {
+          'build.gradle': buildGradle,
+          'gradle.lockfile': codeBlock`
+            # This is a Gradle generated file for dependency locking.
+            :33.0.0-jre=compileClasspath
+            com.example:empty:=compileClasspath
+            com.google.guava:guava:33.5.0-jre=compileClasspath,runtimeClasspath
+          `,
+        },
+      });
+
+      const res = await extractPackageFile(buildGradle, 'build.gradle', config);
+
+      expect(res).toMatchObject({
+        deps: [
+          {
+            currentValue: '33.+',
+            depName: 'com.google.guava:guava',
+            lockedVersion: '33.5.0-jre',
+          },
+        ],
+      });
+    });
+
+    it('returns null when the target file has no dependencies', async () => {
+      mockFs({ 'build.gradle': '' });
+
+      expect(
+        await extractPackageFile('', 'build.gradle', partial<ExtractConfig>()),
+      ).toBeNull();
+    });
   });
 
   it('returns null', async () => {

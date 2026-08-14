@@ -13,9 +13,12 @@ import type { NpmManagerData } from '../types.ts';
 import { extractCatalogDeps } from './common/catalogs.ts';
 import type { Catalog, LockFile } from './types.ts';
 
-export async function getYarnLock(filePath: string): Promise<LockFile> {
+export async function getYarnLock(
+  filePath: string,
+  content?: string,
+): Promise<LockFile> {
   // TODO #22198
-  const yarnLockRaw = (await readLocalFile(filePath, 'utf8'))!;
+  const yarnLockRaw = content ?? (await readLocalFile(filePath, 'utf8'))!;
   try {
     const parsed = parseSyml(yarnLockRaw);
     const lockedVersions: Record<string, string> = {};

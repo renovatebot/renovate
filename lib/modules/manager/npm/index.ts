@@ -5,7 +5,10 @@ import { NpmDatasource } from '../../datasource/npm/index.ts';
 
 export { updateArtifacts } from './artifacts.ts';
 export { detectGlobalConfig } from './detect.ts';
-export { extractAllPackageFiles, extractPackageFile } from './extract/index.ts';
+export {
+  extractAllPackageFiles,
+  extractPackageFileWithLockfile as extractPackageFile,
+} from './extract/index.ts';
 export { getRangeStrategy } from './range.ts';
 export {
   bumpPackageVersion,

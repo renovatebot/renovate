@@ -1263,6 +1263,12 @@ describe('workers/repository/update/branch/get-updated', () => {
               contents: 'some lock contents',
             },
           },
+          {
+            file: {
+              type: 'deletion',
+              path: 'composer.old.lock',
+            },
+          },
         ]);
         composer.extractPackageFile.mockResolvedValueOnce({
           deps: [
@@ -1280,6 +1286,16 @@ describe('workers/repository/update/branch/get-updated', () => {
         });
         expect(res.artifactErrors[0].stderr).toContain(
           'Artifact update for some-dep resolved to version 1.3.0, which is a pending version that has not yet passed the Minimum Release Age threshold.\nRenovate was attempting to update to 1.2.3\nThis is (likely) not a bug in Renovate, but due to the way your project pins dependencies, _and_ how Renovate calls your package manager to update them.\nUntil Renovate supports specifying an exact update to your package manager (https://github.com/renovatebot/renovate/issues/41624), it is recommended to directly pin your dependencies (with `rangeStrategy=pin` for apps, or `rangeStrategy=widen` for libraries)\nSee also: https://docs.renovatebot.com/dependency-pinning/',
+        );
+        expect(composer.extractPackageFile).toHaveBeenCalledWith(
+          'some new content',
+          'composer.json',
+          expect.objectContaining({
+            fileContents: {
+              'composer.json': 'some new content',
+              'composer.lock': 'some lock contents',
+            },
+          }),
         );
       });
 

@@ -1,4 +1,6 @@
+import { codeBlock } from 'common-tags';
 import { fs } from '~test/util.ts';
+import type { ExtractConfig } from '../types.ts';
 import { extractAllPackageFiles, extractPackageFile } from './index.ts';
 
 vi.mock('../../../util/fs/index.ts');
@@ -22,6 +24,98 @@ describe('modules/manager/bun/extract', () => {
           },
         ],
       });
+    });
+
+    it('extracts the resolved version from bun.lock', async () => {
+      const result = await extractPackageFile(
+        JSON.stringify({
+          name: 'app',
+          dependencies: { lodash: '^4.17.0' },
+        }),
+        'package.json',
+        {
+          fileContents: {
+            'bun.lock': codeBlock`{
+              "lockfileVersion": 1,
+              "packages": {
+                "lodash": ["lodash@4.17.21", ""],
+              },
+            }`,
+          },
+        },
+      );
+
+      expect(result).toMatchObject({
+        deps: [
+          {
+            currentValue: '^4.17.0',
+            depName: 'lodash',
+            lockedVersion: '4.17.21',
+          },
+        ],
+      });
+    });
+
+    it('ignores invalid package entries in bun.lock', async () => {
+      const result = await extractPackageFile(
+        JSON.stringify({ dependencies: { lodash: '^4.17.0' } }),
+        'package.json',
+        {
+          fileContents: {
+            'bun.lock': JSON.stringify({ packages: { lodash: null } }),
+          },
+        },
+      );
+
+      expect(result).toMatchObject({
+        deps: [{ depName: 'lodash', lockedVersion: undefined }],
+      });
+    });
+
+    it.each(['{', '{}'])(
+      'returns null for invalid bun.lock content',
+      async (lock) => {
+        const result = await extractPackageFile(
+          JSON.stringify({ dependencies: { lodash: '^4.17.0' } }),
+          'package.json',
+          { fileContents: { 'bun.lock': lock } },
+        );
+
+        expect(result).toBeNull();
+      },
+    );
+
+    it('returns null when a configured text lockfile cannot be read', async () => {
+      const config: ExtractConfig = {};
+      Object.assign(config, {
+        packageFiles: {
+          bun: [
+            {
+              deps: [],
+              lockFiles: ['bun.lock'],
+              packageFile: 'package.json',
+            },
+          ],
+        },
+      });
+
+      const result = await extractPackageFile(
+        JSON.stringify({ dependencies: { lodash: '^4.17.0' } }),
+        'package.json',
+        config,
+      );
+
+      expect(result).toBeNull();
+    });
+
+    it('returns null when only a binary lockfile was updated', async () => {
+      const result = await extractPackageFile(
+        JSON.stringify({ dependencies: { lodash: '^4.17.0' } }),
+        'package.json',
+        { fileContents: { 'bun.lockb': 'binary lockfile' } },
+      );
+
+      expect(result).toBeNull();
     });
 
     it('returns null for invalid package.json content', async () => {

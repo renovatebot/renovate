@@ -56,6 +56,91 @@ describe('modules/manager/npm/extract/index', () => {
       });
     });
 
+    it('adds the resolved version from a package lock', async () => {
+      const packageLock = JSON.stringify({
+        name: 'test',
+        lockfileVersion: 3,
+        packages: {
+          '': { dependencies: { lodash: '^4.17.0' } },
+          'node_modules/lodash': { version: '4.17.21' },
+        },
+      });
+
+      const res = await extractPackageFileFromManager(
+        JSON.stringify({ dependencies: { lodash: '^4.17.0' } }),
+        'package.json',
+        {
+          ...defaultExtractConfig,
+          fileContents: { 'package-lock.json': packageLock },
+        },
+      );
+
+      expect(res).toMatchObject({
+        deps: [
+          {
+            currentValue: '^4.17.0',
+            depName: 'lodash',
+            lockedVersion: '4.17.21',
+          },
+        ],
+      });
+    });
+
+    it('extracts pnpm-workspace.yaml through the manager API', async () => {
+      const res = await extractPackageFileFromManager(
+        codeBlock`
+          catalog:
+            is-positive: 1.0.0
+        `,
+        'pnpm-workspace.yaml',
+        defaultExtractConfig,
+      );
+
+      expect(res).toMatchObject({
+        deps: [
+          {
+            currentValue: '1.0.0',
+            depName: 'is-positive',
+            depType: 'pnpm.catalog.default',
+          },
+        ],
+      });
+    });
+
+    it('extracts .yarnrc.yml through the manager API', async () => {
+      const res = await extractPackageFileFromManager(
+        codeBlock`
+          catalog:
+            is-positive: 1.0.0
+        `,
+        '.yarnrc.yml',
+        defaultExtractConfig,
+      );
+
+      expect(res).toMatchObject({
+        deps: [
+          {
+            currentValue: '1.0.0',
+            depName: 'is-positive',
+            depType: 'yarn.catalog.default',
+          },
+        ],
+      });
+    });
+
+    it.each([
+      { content: '', packageFile: 'package.json' },
+      { content: 'nodeLinker: node-modules', packageFile: '.yarnrc.yml' },
+    ])('returns null for unsupported manager content', async (input) => {
+      expect(
+        await extractPackageFileFromManager(
+          input.content,
+          input.packageFile,
+          defaultExtractConfig,
+        ),
+      ).toBeNull();
+    });
+
     it('returns null if cannot parse', async () => {
       const res = await npmExtract.extractPackageFile(
         'not json',

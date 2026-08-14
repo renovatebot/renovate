@@ -31,6 +31,7 @@ import {
   extractPnpmWorkspaceFile,
 } from './pnpm.ts';
 import { postExtract } from './post/index.ts';
+import { getLockedVersions } from './post/locked-versions.ts';
 import type { NpmPackage } from './types.ts';
 import { extractYarnCatalogs, isZeroInstall } from './yarn.ts';
 import {
@@ -82,7 +83,10 @@ export async function extractPackageFile(
     string,
   ][]) {
     const filePath = getSiblingFileName(packageFile, val);
-    if (await readLocalFile(filePath, 'utf8')) {
+    if (
+      config.fileContents?.[filePath] ??
+      (await readLocalFile(filePath, 'utf8'))
+    ) {
       lockFiles[key] = filePath;
     } else {
       lockFiles[key] = undefined;
@@ -230,6 +234,75 @@ export async function extractPackageFile(
   };
 }
 
+async function extractPackageFileContent(
+  content: string,
+  packageFile: string,
+  config: ExtractConfig,
+): Promise<PackageFileContent<NpmManagerData> | null> {
+  if (!content) {
+    return null;
+  }
+
+  if (packageFile.endsWith('pnpm-workspace.yaml')) {
+    logger.trace({ packageFile }, 'Extracting as a pnpm-workspace.yaml file');
+    const parsedPnpmWorkspaceYaml =
+      await PnpmWorkspaceFile.safeParseAsync(content);
+    if (!parsedPnpmWorkspaceYaml.success) {
+      logger.warn(
+        { packageFile, err: parsedPnpmWorkspaceYaml.error },
+        'Failed to parse pnpm-workspace.yaml file',
+      );
+      return null;
+    }
+
+    logger.trace(
+      { packageFile },
+      'Extracting file as a pnpm workspace YAML file',
+    );
+    return extractPnpmWorkspaceFile(parsedPnpmWorkspaceYaml.data, packageFile);
+  }
+
+  if (packageFile.endsWith('json')) {
+    logger.trace({ packageFile }, 'Extracting as a package.json file');
+    return extractPackageFile(content, packageFile, config);
+  }
+
+  logger.trace({ packageFile }, 'Extracting as a .yarnrc.yml file');
+  const yarnConfig = loadConfigFromYarnrcYml(content);
+  if (!yarnConfig?.catalogs && !yarnConfig?.catalog) {
+    return null;
+  }
+
+  const hasPackageManagerResult = await hasPackageManager(
+    upath.dirname(packageFile),
+  );
+  return extractYarnCatalogs(
+    { catalog: yarnConfig.catalog, catalogs: yarnConfig.catalogs },
+    packageFile,
+    hasPackageManagerResult,
+  );
+}
+
+export async function extractPackageFileWithLockfile(
+  content: string,
+  packageFile: string,
+  config: ExtractConfig,
+): Promise<PackageFileContent<NpmManagerData> | null> {
+  const result = await extractPackageFileContent(content, packageFile, config);
+  if (!result) {
+    return null;
+  }
+
+  const extractedPackageFile: PackageFile<NpmManagerData> = {
+    ...result,
+    packageFile,
+  };
+  await getLockedVersions([extractedPackageFile], config.fileContents);
+  const { packageFile: _packageFile, ...packageFileContent } =
+    extractedPackageFile;
+  return packageFileContent;
+}
+
 export async function extractAllPackageFiles(
   config: ExtractConfig,
   packageFiles: string[],
@@ -238,72 +311,14 @@ export async function extractAllPackageFiles(
   for (const packageFile of packageFiles) {
     const content = await readLocalFile(packageFile, 'utf8');
     if (content) {
-      // pnpm workspace files are their own package file, defined via managerFilePatterns.
-      if (packageFile.endsWith('pnpm-workspace.yaml')) {
-        logger.trace(
-          { packageFile },
-          `Extracting as a pnpm-workspace.yaml file`,
-        );
-        const parsedPnpmWorkspaceYaml =
-          await PnpmWorkspaceFile.safeParseAsync(content);
-        if (parsedPnpmWorkspaceYaml.success) {
-          logger.trace(
-            { packageFile },
-            `Extracting file as a pnpm workspace YAML file`,
-          );
-          const deps = await extractPnpmWorkspaceFile(
-            parsedPnpmWorkspaceYaml.data,
-            packageFile,
-          );
-          // v8 ignore else -- TODO: add test #40625
-          if (deps) {
-            npmFiles.push({
-              ...deps,
-              packageFile,
-            });
-          }
-        } else {
-          logger.warn(
-            { packageFile, err: parsedPnpmWorkspaceYaml.error },
-            `Failed to parse pnpm-workspace.yaml file`,
-          );
-        }
-      } else {
-        if (packageFile.endsWith('json')) {
-          logger.trace({ packageFile }, `Extracting as a package.json file`);
-
-          const deps = await extractPackageFile(content, packageFile, config);
-          // v8 ignore else -- TODO: add tests #40625
-          if (deps) {
-            npmFiles.push({
-              ...deps,
-              packageFile,
-            });
-          }
-        } else {
-          logger.trace({ packageFile }, `Extracting as a .yarnrc.yml file`);
-
-          const yarnConfig = loadConfigFromYarnrcYml(content);
-
-          // v8 ignore else -- TODO: add tests #40625
-          if (yarnConfig?.catalogs || yarnConfig?.catalog) {
-            const hasPackageManagerResult = await hasPackageManager(
-              upath.dirname(packageFile),
-            );
-            const catalogsDeps = await extractYarnCatalogs(
-              { catalog: yarnConfig.catalog, catalogs: yarnConfig.catalogs },
-              packageFile,
-              hasPackageManagerResult,
-            );
-            // v8 ignore else -- TODO: add tests #40625
-            if (catalogsDeps) {
-              npmFiles.push({
-                ...catalogsDeps,
-                packageFile,
-              });
-            }
-          }
-        }
+      const result = await extractPackageFileContent(
+        content,
+        packageFile,
+        config,
+      );
+      // v8 ignore else -- TODO: add tests #40625
+      if (result) {
+        npmFiles.push({ ...result, packageFile });
       }
     } else {
       logger.debug({ packageFile }, `No content found`);

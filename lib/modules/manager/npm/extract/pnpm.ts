@@ -158,9 +158,12 @@ export async function detectPnpmWorkspaces(
   }
 }
 
-export async function getPnpmLock(filePath: string): Promise<LockFile> {
+export async function getPnpmLock(
+  filePath: string,
+  content?: string,
+): Promise<LockFile> {
   try {
-    const pnpmLockRaw = await readLocalFile(filePath, 'utf8');
+    const pnpmLockRaw = content ?? (await readLocalFile(filePath, 'utf8'));
     if (!pnpmLockRaw) {
       throw new Error('Unable to read pnpm-lock.yaml');
     }
