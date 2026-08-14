@@ -1269,7 +1269,7 @@ export async function getBranchLastCommitTime(
     return time.toJSDate();
   } catch (err) {
     const errChecked = checkForPlatformFailure(err);
-    /* v8 ignore next 3 -- TODO: add test */
+    /* v8 ignore next -- TODO: add test */
     if (errChecked) {
       throw errChecked;
     }

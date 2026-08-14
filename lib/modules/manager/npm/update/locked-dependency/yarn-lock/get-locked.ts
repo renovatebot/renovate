@@ -30,7 +30,7 @@ export function getYarn1LockedDependencies(
   try {
     for (const [depNameConstraint, entry] of Object.entries(yarnLock)) {
       const parsed = parseEntry(depNameConstraint);
-      /* v8 ignore next 3 -- needs test */
+      /* v8 ignore next -- needs test */
       if (!parsed) {
         continue;
       }
@@ -59,7 +59,7 @@ export function getYarn2LockedDependencies(
       for (const subConstraint of fullConstraint.split(', ')) {
         const depNameConstraint = subConstraint;
         const parsed = parseEntry(depNameConstraint);
-        /* v8 ignore next 3 -- needs test */
+        /* v8 ignore next -- needs test */
         if (!parsed) {
           continue;
         }

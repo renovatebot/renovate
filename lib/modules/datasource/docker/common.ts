@@ -214,7 +214,7 @@ export async function getAuthHeaders(
     ).body;
 
     const token = authResponse.token ?? authResponse.access_token;
-    /* v8 ignore next 4 -- TODO: add test */
+    /* v8 ignore next -- TODO: add test */
     if (!token) {
       logger.warn('Failed to obtain docker registry token');
       return null;

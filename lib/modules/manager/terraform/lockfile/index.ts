@@ -177,7 +177,7 @@ export async function updateArtifacts({
         const updateLock = locks.find(
           (value) => value.packageName === packageName,
         );
-        /* v8 ignore next 4 -- needs test */
+        /* v8 ignore next -- needs test */
         if (!updateLock) {
           logger.debug(`Skipping. No lock found for "${packageName}"`);
           continue;
