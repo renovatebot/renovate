@@ -34,7 +34,10 @@ export function parseGoproxy(
   const result: GoproxyItem[] = input
     .split(regEx(/([^,|]*(?:,|\|))/))
     .filter(isTruthy)
-    .map((s) => s.split(/(?=,|\|)/)) // TODO: #12872 lookahead
+    .map((s) => s.split(regEx(/(,|\|)/)))
+    // Empty segments (`a||b`, `,a`) carry no url to query, and keeping them
+    // would apply their separator as the fallback strategy for a bogus request
+    .filter(([url]) => isTruthy(url))
     .map(([url, separator]) => ({
       url,
       fallback: separator === ',' ? ',' : '|',
@@ -45,6 +48,7 @@ export function parseGoproxy(
 }
 
 // https://golang.org/pkg/path/#Match
+/* oxlint-disable renovate/require-regex-util -- moo lexer patterns must be native RegExp: moo recompiles their source with the native engine and rejects RE2 instances (TODO #12870) */
 const noproxyLexer = moo.states({
   main: {
     separator: {
@@ -89,6 +93,7 @@ const noproxyLexer = moo.states({
     },
   },
 });
+/* oxlint-enable renovate/require-regex-util */
 
 export function parseNoproxy(
   input: unknown = (() => {

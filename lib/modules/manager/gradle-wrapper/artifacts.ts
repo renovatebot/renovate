@@ -18,7 +18,7 @@ import {
 import { getRepoStatus } from '../../../util/git/index.ts';
 import type { StatusResult } from '../../../util/git/types.ts';
 import { Http } from '../../../util/http/index.ts';
-import { newlineRegex } from '../../../util/regex.ts';
+import { newlineRegex, regEx } from '../../../util/regex.ts';
 import { replaceAt } from '../../../util/string.ts';
 import { isGradleExecutionAllowed } from '../gradle/artifacts.ts';
 import { updateArtifacts as gradleUpdateArtifacts } from '../gradle/index.ts';
@@ -175,7 +175,7 @@ export async function updateArtifacts({
         await writeLocalFile(
           packageFileName,
           newPackageFileContent.replace(
-            /distributionSha256Sum=.*/,
+            regEx(/distributionSha256Sum=.*/),
             `distributionSha256Sum=${checksum}`,
           ),
         );

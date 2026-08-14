@@ -18,6 +18,7 @@ import preferJsonPipe from './rules/prefer-json-pipe.js';
 import preferLuxon from './rules/prefer-luxon.js';
 import preferNullishUtil from './rules/prefer-nullish-util.js';
 import preferPartialInSpecs from './rules/prefer-partial-in-specs.js';
+import requireRegexUtil from './rules/require-regex-util.js';
 import testRootDescribe from './rules/test-root-describe.js';
 import v8IgnoreReason from './rules/v8-ignore-reason.js';
 import validateConfigWarningsAndErrors from './rules/validate-config-warnings-and-errors.js';
@@ -49,6 +50,7 @@ export default {
     'prefer-is-object': preferIsObject,
     'prefer-nullish-util': preferNullishUtil,
     'prefer-partial-in-specs': preferPartialInSpecs,
+    'require-regex-util': requireRegexUtil,
     'test-root-describe': testRootDescribe,
     'v8-ignore-reason': v8IgnoreReason,
     'validate-config-warnings-and-errors': validateConfigWarningsAndErrors,
