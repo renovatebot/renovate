@@ -55,6 +55,8 @@ async function disableGitAutoMaintenance(
   await repo.addConfig('gc.auto', '0');
   await repo.addConfig('maintenance.auto', 'false');
   await repo.addConfig('receive.autogc', 'false');
+  await repo.addConfig('gc.autodetach', 'false');
+  await repo.addConfig('pack.writeReverseIndex', 'false');
 }
 
 describe('util/git/index', { timeout: 30000 }, () => {
@@ -204,6 +206,8 @@ describe('util/git/index', { timeout: 30000 }, () => {
   });
 
   afterEach(async () => {
+    // Give Git operations time to fully complete and release file handles
+    await new Promise((resolve) => setTimeout(resolve, 100));
     await tmpDir?.cleanup();
     await origin?.cleanup();
     vi.restoreAllMocks();
