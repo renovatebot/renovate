@@ -10,6 +10,7 @@ import type {
 } from '../../../../config/types.ts';
 import {
   MANAGER_LOCKFILE_ERROR,
+  PR_ALREADY_IN_MERGE_QUEUE,
   REPOSITORY_CHANGED,
 } from '../../../../constants/error-messages.ts';
 import { logger } from '../../../../logger/index.ts';
@@ -1758,6 +1759,32 @@ describe('workers/repository/update/branch/index', () => {
       });
     });
 
+    it('returns when the branch PR is in the merge queue', async () => {
+      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce(
+        partial<PackageFilesResult>({
+          updatedPackageFiles: [partial<FileChange>()],
+        }),
+      );
+      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+        artifactErrors: [],
+        updatedArtifacts: [partial<FileChange>()],
+      });
+      scm.branchExists.mockResolvedValue(true);
+      commit.commitFilesToBranch.mockRejectedValueOnce(
+        new Error(PR_ALREADY_IN_MERGE_QUEUE),
+      );
+      const processBranchResult = await branchWorker.processBranch(config);
+      expect(processBranchResult).toEqual({
+        branchExists: true,
+        commitSha: null,
+        prNo: undefined,
+        result: 'done',
+      });
+      expect(logger.debug).toHaveBeenCalledWith(
+        'Branch PR is in the merge queue - skipping branch update',
+      );
+    });
+
     it('throws and swallows branch errors', async () => {
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce(
         partial<PackageFilesResult>({
@@ -2340,6 +2367,7 @@ describe('workers/repository/update/branch/index', () => {
         updatedArtifacts: [],
         artifactNotices: [],
       } satisfies PackageFilesResult);
+      // oxlint-disable-next-line renovate/prefer-partial-in-specs -- updatedArtifacts entry intentionally uses a `name` field instead of `type`/`path`, which FileChange does not allow
       npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
         artifactErrors: [],
         updatedArtifacts: [
@@ -2392,6 +2420,7 @@ describe('workers/repository/update/branch/index', () => {
       await branchWorker.processBranch({
         ...config,
         upgrades: [
+          // oxlint-disable-next-line renovate/prefer-partial-in-specs -- spreading getConfig() (AllConfig) is not assignable to BranchUpgradeConfig due to a pre-existing type incompatibility (see TODO #22198 above)
           {
             ...getConfig(),
             depName: 'some-dep-name',

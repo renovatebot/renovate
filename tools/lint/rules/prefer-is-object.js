@@ -8,11 +8,6 @@ export default {
     },
   },
   create(context) {
-    const filename = context.filename ?? context.physicalFilename ?? '';
-    // Only enforce in lib/ (sources and specs)
-    if (!filename.includes('/lib/')) {
-      return {};
-    }
     return {
       BinaryExpression(node) {
         if (!['===', '!==', '==', '!='].includes(node.operator)) {

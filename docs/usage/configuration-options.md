@@ -4128,6 +4128,13 @@ This is implicitly enabled for major module updates when `gomodUpdateImportPaths
 
 Run `go mod tidy -compat=1.17` after Go module updates.
 
+### `gomodTidyAll`
+
+After running `go mod tidy` on the updated module, also run it on every other `go.mod` which references that module through a local `replace` directive, in dependency order.
+Use this in Go monorepos, where an update to a shared module must also reach the `go.sum` files of the modules which depend on it.
+Implies `gomodTidy`, and needs Go 1.20 or later.
+Avoid combining this with `gomodMassage`, which comments out the relative `replace` directives that this option follows.
+
 ### `gomodTidyE`
 
 Run `go mod tidy -e` after Go module updates.
@@ -4158,7 +4165,7 @@ Run `npm install` commands _twice_ to work around bugs where `npm` generates inv
 
 ### `pnpmDedupe`
 
-Run `pnpm dedupe --ignore-scripts` after `pnpm-lock.yaml` updates.
+Run `pnpm dedupe` after `pnpm-lock.yaml` updates.
 
 ### `yarnDedupeFewer`
 

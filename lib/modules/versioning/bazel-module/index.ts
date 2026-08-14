@@ -1,4 +1,5 @@
 import { isNullOrUndefined } from '@sindresorhus/is';
+import { regEx } from '../../../util/regex.ts';
 import type { NewValueConfig, VersioningApi } from '../types.ts';
 import { BzlmodVersion } from './bzlmod-version.ts';
 
@@ -91,7 +92,7 @@ function getNewValue({
   newVersion,
 }: NewValueConfig): string {
   if (currentVersion === `v${currentValue}`) {
-    return newVersion.replace(/^v/, '');
+    return newVersion.replace(regEx(/^v/), '');
   }
   return newVersion;
 }

@@ -157,7 +157,7 @@ export function findPullRequestBody(change: GerritChange): string | undefined {
     .find((msg) => msg.tag === TAG_PULL_REQUEST_BODY);
   if (msg) {
     // Gerrit adds a "Patch Set X:" prefix to comments
-    return msg.message.replace(/^Patch Set \d+:\n\n/, '');
+    return msg.message.replace(regEx(/^Patch Set \d+:\n\n/), '');
   }
   return undefined;
 }
