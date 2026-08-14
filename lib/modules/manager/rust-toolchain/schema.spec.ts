@@ -38,7 +38,7 @@ describe('modules/manager/rust-toolchain/schema', () => {
     it('throws error for invalid TOML', () => {
       const toml = 'this is not valid toml [';
 
-      expect(() => RustToolchain.parse(toml)).toThrow();
+      expect(() => RustToolchain.parse(toml)).toThrow('Invalid TOML');
     });
 
     it('throws error for missing toolchain section', () => {
@@ -47,16 +47,22 @@ describe('modules/manager/rust-toolchain/schema', () => {
         channel = "1.89.1"
       `;
 
-      expect(() => RustToolchain.parse(toml)).toThrow();
+      expect(() => RustToolchain.parse(toml)).toThrow(
+        'Invalid input: expected object, received undefined',
+      );
     });
 
-    it('throws error for missing channel field', () => {
+    it('parses successfully when channel field is missing', () => {
       const toml = codeBlock`
         [toolchain]
         components = ["rustfmt"]
       `;
 
-      expect(() => RustToolchain.parse(toml)).toThrow();
+      const result = RustToolchain.parse(toml);
+
+      expect(result).toEqual({
+        toolchain: {},
+      });
     });
 
     it('throws error for non-string channel', () => {
@@ -65,16 +71,56 @@ describe('modules/manager/rust-toolchain/schema', () => {
         channel = 123
       `;
 
-      expect(() => RustToolchain.parse(toml)).toThrow();
+      expect(() => RustToolchain.parse(toml)).toThrow(
+        'Invalid input: expected string, received number',
+      );
     });
 
-    it('throws error for empty channel', () => {
+    it('parses successfully for empty channel', () => {
       const toml = codeBlock`
         [toolchain]
         channel = ""
       `;
 
-      expect(() => RustToolchain.parse(toml)).toThrow();
+      const result = RustToolchain.parse(toml);
+
+      expect(result).toEqual({
+        toolchain: {
+          channel: '',
+        },
+      });
+    });
+
+    it('parses TOML with path', () => {
+      const toml = codeBlock`
+        [toolchain]
+        path = "/path/to/toolchain"
+      `;
+
+      const result = RustToolchain.parse(toml);
+
+      expect(result).toEqual({
+        toolchain: {
+          path: '/path/to/toolchain',
+        },
+      });
+    });
+
+    it('parses TOML with both channel and path', () => {
+      const toml = codeBlock`
+        [toolchain]
+        channel = "1.89.1"
+        path = "/path/to/toolchain"
+      `;
+
+      const result = RustToolchain.parse(toml);
+
+      expect(result).toEqual({
+        toolchain: {
+          channel: '1.89.1',
+          path: '/path/to/toolchain',
+        },
+      });
     });
 
     it('parses nightly channel', () => {

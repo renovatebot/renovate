@@ -1,5 +1,10 @@
 import { ATTR_CODE_FUNCTION_NAME } from '@opentelemetry/semantic-conventions';
-import { isFunction, isNonEmptyArray, isString } from '@sindresorhus/is';
+import {
+  isFunction,
+  isNonEmptyArray,
+  isString,
+  isTruthy,
+} from '@sindresorhus/is';
 import { dequal } from 'dequal';
 import { GlobalConfig } from '../../config/global.ts';
 import { HOST_DISABLED } from '../../constants/error-messages.ts';
@@ -45,8 +50,12 @@ import type {
 export { isGetPkgReleasesConfig } from './common.ts';
 export * from './types.ts';
 
-export const getDatasources = (): Map<string, DatasourceApi> => datasources;
-export const getDatasourceList = (): string[] => Array.from(datasources.keys());
+export function getDatasources(): Map<string, DatasourceApi> {
+  return datasources;
+}
+export function getDatasourceList(): string[] {
+  return Array.from(datasources.keys());
+}
 
 type GetReleasesInternalConfig = GetReleasesConfig & GetPkgReleasesConfig;
 
@@ -288,7 +297,7 @@ async function mergeRegistries(
 }
 
 function massageRegistryUrls(registryUrls: string[]): string[] {
-  return registryUrls.filter(Boolean).map(trimTrailingSlash);
+  return registryUrls.filter(isTruthy).map(trimTrailingSlash);
 }
 
 function resolveRegistryUrls(
@@ -317,7 +326,7 @@ function resolveRegistryUrls(
       ? datasource.defaultRegistryUrls()
       : (datasource.defaultRegistryUrls ?? []);
   }
-  const customUrls = registryUrls?.filter(Boolean);
+  const customUrls = registryUrls?.filter(isTruthy);
   let resolvedUrls: string[] = [];
   if (isNonEmptyArray(customUrls)) {
     resolvedUrls = [...customUrls];

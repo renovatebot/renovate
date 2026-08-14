@@ -3,7 +3,10 @@ import upath from 'upath';
 import { envMock, mockExecAll, mockExecSequence } from '~test/exec-util.ts';
 import { env, fs } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
-import type { RepoGlobalConfig } from '../../../config/types.ts';
+import type {
+  InternalGlobalConfigOptions,
+  RepoGlobalConfig,
+} from '../../../config/types.ts';
 import * as docker from '../../../util/exec/docker/index.ts';
 import type { FileAddition } from '../../../util/git/types.ts';
 import type { UpdateArtifactsConfig, Upgrade } from '../types.ts';
@@ -13,7 +16,7 @@ import * as rules from './post-update/rules.ts';
 vi.mock('../../../util/exec/env.ts');
 vi.mock('../../../util/fs/index.ts');
 
-const adminConfig: RepoGlobalConfig = {
+const adminConfig: RepoGlobalConfig & InternalGlobalConfigOptions = {
   // `join` fixes Windows CI
   localDir: upath.join('/tmp/github/some/repo'),
   cacheDir: upath.join('/tmp/renovate/cache'),
@@ -128,6 +131,30 @@ describe('modules/manager/npm/artifacts', () => {
     expect(execSnapshots).toMatchObject([{ cmd: 'corepack use pnpm@8.15.6' }]);
   });
 
+  it('quotes the corepack package spec', async () => {
+    fs.readLocalFile
+      .mockResolvedValueOnce('# dummy') // for npmrc
+      .mockResolvedValueOnce('{}') // for node constraints
+      .mockResolvedValue('some new content'); // for updated package.json
+    const execSnapshots = mockExecAll();
+
+    await updateArtifacts({
+      packageFileName: 'package.json',
+      updatedDeps: [
+        {
+          ...validDepUpdate,
+          depName: 'pnpm; echo hello',
+        },
+      ],
+      newPackageFileContent: 'some content',
+      config: { ...config },
+    });
+
+    expect(execSnapshots).toMatchObject([
+      { cmd: `corepack use 'pnpm; echo hello@8.15.6'` },
+    ]);
+  });
+
   it('supports docker mode', async () => {
     GlobalConfig.set(dockerAdminConfig);
     const execSnapshots = mockExecAll();
@@ -166,13 +193,13 @@ describe('modules/manager/npm/artifacts', () => {
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
           'ghcr.io/renovatebot/base-image ' +
-          'bash -l -c "' +
+          "bash -l -c '" +
           'install-tool node 20.1.0 ' +
           '&& ' +
           'install-tool corepack 0.29.3 ' +
           '&& ' +
           'corepack use pnpm@8.15.6' +
-          '"',
+          "'",
       },
     ]);
   });

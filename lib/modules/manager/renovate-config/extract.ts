@@ -1,5 +1,6 @@
 import { isNonEmptyArray, isNullOrUndefined } from '@sindresorhus/is';
 import { parsePreset } from '../../../config/presets/parse.ts';
+import type { ParsedPreset } from '../../../config/presets/types.ts';
 import { logger } from '../../../logger/index.ts';
 import { getToolConfig } from '../../../util/exec/containerbase.ts';
 import { isToolName } from '../../../util/exec/types.ts';
@@ -29,13 +30,32 @@ export function extractPackageFile(
   const deps: PackageDependency[] = [];
 
   for (const preset of config.data.extends ?? []) {
-    const parsedPreset = parsePreset(preset);
+    if (preset.includes('{{')) {
+      // templated presets are only resolvable at runtime
+      continue;
+    }
+
+    let parsedPreset: ParsedPreset;
+    try {
+      parsedPreset = parsePreset(preset);
+    } catch (err) {
+      logger.debug({ preset, err }, 'Failed to parse preset');
+      deps.push({
+        depName: preset,
+        skipReason: 'invalid-value',
+      });
+      continue;
+    }
     const datasource = supportedPresetSources[parsedPreset.presetSource];
 
     if (isNullOrUndefined(datasource)) {
       if (parsedPreset.presetSource !== 'internal') {
         deps.push({
-          depName: parsedPreset.repo,
+          // relative references have no repository of their own
+          depName:
+            parsedPreset.presetSource === 'relative'
+              ? preset
+              : parsedPreset.repo,
           skipReason: 'unsupported-datasource',
         });
       }

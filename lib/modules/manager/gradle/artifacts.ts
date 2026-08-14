@@ -37,7 +37,8 @@ export function isGradleExecutionAllowed(command: string): boolean {
 
   if (!allowlist.includes('gradleWrapper')) {
     logger.once.warn(
-      `Gradle wrapper command, \`${command}\`, was requested to run, but \`gradleWrapper\` is not permitted in the allowedUnsafeExecutions`,
+      { command },
+      'Gradle wrapper command was requested to run, but `gradleWrapper` is not permitted in the allowedUnsafeExecutions',
     );
     return false;
   }

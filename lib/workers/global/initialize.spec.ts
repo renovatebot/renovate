@@ -15,7 +15,9 @@ describe('workers/global/initialize', () => {
     it('throws if invalid version', async () => {
       const config: RenovateConfig = {};
       git.validateGitVersion.mockResolvedValueOnce(false);
-      await expect(globalInitialize(config)).rejects.toThrow();
+      await expect(globalInitialize(config)).rejects.toThrow(
+        'Init: git version needs upgrading',
+      );
     });
 
     it('returns if valid git version', async () => {

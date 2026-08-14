@@ -1,4 +1,4 @@
-import { isArray, isNullOrUndefined } from '@sindresorhus/is';
+import { isArray, isNullOrUndefined, isString } from '@sindresorhus/is';
 import json5 from 'json5';
 import { coerce, satisfies } from 'semver';
 import { logger } from '../../../logger/index.ts';
@@ -62,7 +62,7 @@ export function extractPackageFile(
 
   // convert bundles to dependencies
   for (const entry of allBundles) {
-    const rawGav = typeof entry === 'string' ? entry : entry.id;
+    const rawGav = isString(entry) ? entry : entry.id;
     // skip invalid definitions, such as objects without an id set
     if (!rawGav) {
       continue;
@@ -83,7 +83,7 @@ export function extractPackageFile(
       continue;
     }
     // parsing should use the last entry for the version
-    const currentValue = parts[parts.length - 1];
+    const currentValue = parts.at(-1)!;
     const result: PackageDependency = {
       datasource: MavenDatasource.id,
       depName: `${parts[0]}:${parts[1]}`,

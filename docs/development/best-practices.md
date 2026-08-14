@@ -297,6 +297,7 @@ if (end) {
 - Avoid exporting functions purely for the purpose of testing unless you really need to
 - Avoid cast or prefer `x as T` instead of `<T>x` cast
   - Use `partial<T>()` from `test/util` if only a partial object is required
+  - Use `fakeSha(seed)` from `test/util` to generate deterministic, valid `LongCommitSha` values in tests
 
 ## Fixtures
 

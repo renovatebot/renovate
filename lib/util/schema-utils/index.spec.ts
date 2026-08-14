@@ -15,8 +15,10 @@ import {
   Toml,
   UtcDate,
   Yaml,
+  isEmailAdress,
   multidocYaml,
   withDebugMessage,
+  withDepType,
   withTraceMessage,
 } from './index.ts';
 
@@ -161,7 +163,9 @@ describe('util/schema-utils/index', () => {
 
     it('rejects wrong types', () => {
       const s = Nullish(z.string());
-      expect(() => s.parse(42)).toThrow();
+      expect(() => s.parse(42)).toThrow(
+        'Invalid input: expected string, received number',
+      );
     });
   });
 
@@ -179,7 +183,9 @@ describe('util/schema-utils/index', () => {
       });
 
       it('rejects wrong types', () => {
-        expect(() => s.parse({ a: 42 })).toThrow();
+        expect(() => s.parse({ a: 42 })).toThrow(
+          'Invalid input: expected string, received number',
+        );
       });
     });
 
@@ -288,7 +294,9 @@ describe('util/schema-utils/index', () => {
     });
 
     it('rejects wrong types on leaf', () => {
-      expect(() => DeepNullish(z.string()).parse(42)).toThrow();
+      expect(() => DeepNullish(z.string()).parse(42)).toThrow(
+        'Invalid input: expected string, received number',
+      );
     });
 
     it.each`
@@ -501,7 +509,7 @@ describe('util/schema-utils/index', () => {
     });
 
     it('rejects invalid date', () => {
-      expect(() => UtcDate.parse('foobar')).toThrow();
+      expect(() => UtcDate.parse('foobar')).toThrow('Invalid date');
     });
   });
 
@@ -616,6 +624,57 @@ describe('util/schema-utils/index', () => {
           foo: 222
         `),
       ).toEqual([{ foo: 111 }, { foo: 222 }]);
+    });
+
+    it('rejects invalid yaml', () => {
+      expect(multidocYaml().safeParse(': invalid: yaml: {')).toMatchObject({
+        success: false,
+        error: { issues: [{ code: 'custom', message: 'Invalid YAML' }] },
+      });
+    });
+  });
+
+  describe('withDepType()', () => {
+    const Base = z.array(
+      z.object({ depName: z.string(), depType: z.string().optional() }),
+    );
+
+    it('sets depType on all deps when force=true (default)', () => {
+      const result = withDepType(Base, 'devDependencies').parse([
+        { depName: 'foo' },
+        { depName: 'bar', depType: 'existing' },
+      ]);
+      expect(result).toEqual([
+        { depName: 'foo', depType: 'devDependencies' },
+        { depName: 'bar', depType: 'devDependencies' },
+      ]);
+    });
+
+    it('preserves existing depType when force=false', () => {
+      const result = withDepType(Base, 'devDependencies', false).parse([
+        { depName: 'foo' },
+        { depName: 'bar', depType: 'existing' },
+      ]);
+      expect(result).toEqual([
+        { depName: 'foo', depType: 'devDependencies' },
+        { depName: 'bar', depType: 'existing' },
+      ]);
+    });
+  });
+
+  describe('isEmailAdress()', () => {
+    it('returns true for valid email', () => {
+      expect(isEmailAdress('user@example.com')).toBe(true);
+    });
+
+    it('returns false for invalid email', () => {
+      expect(isEmailAdress('not-an-email')).toBe(false);
+    });
+
+    it('returns true for GitHub app style email', () => {
+      expect(isEmailAdress('211370388+foo[bot]@users.noreply.github.com')).toBe(
+        true,
+      );
     });
   });
 

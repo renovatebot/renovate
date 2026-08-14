@@ -1,4 +1,4 @@
-import type { LongCommitSha } from '../../../util/git/types.ts';
+import type { LongCommitSha } from '../../../util/schema-utils/git.ts';
 import type { EmailAddress } from '../../../util/schema-utils/index.ts';
 import type { Pr, PrBodyStruct } from '../types.ts';
 
@@ -120,6 +120,7 @@ export interface LocalRepoConfig {
   autoMergeAllowed: boolean;
   hasIssuesEnabled: boolean;
   hasVulnerabilityAlertsEnabled: boolean;
+  mergeQueueEnabled: Record<string, boolean>;
 }
 
 export interface GhRepo {
@@ -134,6 +135,7 @@ export interface GhRepo {
   autoMergeAllowed: boolean;
   hasIssuesEnabled: boolean;
   hasVulnerabilityAlertsEnabled: boolean;
+  mergeQueue?: { id: string } | null;
   mergeCommitAllowed: boolean;
   rebaseMergeAllowed: boolean;
   squashMergeAllowed: boolean;

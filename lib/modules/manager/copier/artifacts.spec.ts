@@ -3,7 +3,10 @@ import { mockDeep } from 'vitest-mock-extended';
 import { mockExecAll } from '~test/exec-util.ts';
 import { fs, git, hostRules, partial } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
-import type { RepoGlobalConfig } from '../../../config/types.ts';
+import type {
+  InternalGlobalConfigOptions,
+  RepoGlobalConfig,
+} from '../../../config/types.ts';
 import { logger } from '../../../logger/index.ts';
 import type { StatusResult } from '../../../util/git/types.ts';
 import * as _datasource from '../../datasource/index.ts';
@@ -29,7 +32,7 @@ const upgrades: Upgrade[] = [
   },
 ];
 
-const adminConfig: RepoGlobalConfig = {
+const adminConfig: RepoGlobalConfig & InternalGlobalConfigOptions = {
   localDir: upath.join('/tmp/github/some/repo'),
   cacheDir: upath.join('/tmp/cache'),
   containerbaseDir: upath.join('/tmp/renovate/cache/containerbase'),
@@ -52,11 +55,6 @@ describe('modules/manager/copier/artifacts', () => {
         renamed: [],
       }),
     );
-  });
-
-  afterEach(() => {
-    fs.readLocalFile.mockClear();
-    git.getRepoStatus.mockClear();
   });
 
   describe('updateArtifacts()', () => {
