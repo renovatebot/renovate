@@ -15,7 +15,7 @@ type RegExpEngineStatus =
 
 let status: RegExpEngineStatus;
 let RegEx: RegExpConstructor = RegExp;
-/* v8 ignore next 2 */
+/* v8 ignore if -- RE2 is always enabled in the test environment */
 if (getEnv().RENOVATE_X_IGNORE_RE2) {
   status = { type: 'ignored' };
 } else {

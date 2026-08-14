@@ -4,7 +4,10 @@ import { envMock, mockExecAll, mockExecSequence } from '~test/exec-util.ts';
 import { hostRules } from '~test/host-rules.ts';
 import { env, fs, git, partial } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
-import type { RepoGlobalConfig } from '../../../config/types.ts';
+import type {
+  InternalGlobalConfigOptions,
+  RepoGlobalConfig,
+} from '../../../config/types.ts';
 import * as docker from '../../../util/exec/docker/index.ts';
 import { ExecError } from '../../../util/exec/exec-error.ts';
 import { CrateDatasource } from '../../datasource/crate/index.ts';
@@ -18,7 +21,7 @@ vi.mock('../../../util/fs/index.ts');
 process.env.CONTAINERBASE = 'true';
 const config: UpdateArtifactsConfig = {};
 
-const adminConfig: RepoGlobalConfig = {
+const adminConfig: RepoGlobalConfig & InternalGlobalConfigOptions = {
   // `join` fixes Windows CI
   localDir: upath.join('/tmp/github/some/repo'),
   cacheDir: upath.join('/tmp/cache'),
@@ -543,11 +546,11 @@ describe('modules/manager/cargo/artifacts', () => {
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
           'ghcr.io/renovatebot/base-image ' +
-          'bash -l -c "' +
+          "bash -l -c '" +
           'install-tool rust 1.65.0' +
           ' && ' +
           'cargo update --config net.git-fetch-with-cli=true --manifest-path Cargo.toml --workspace' +
-          '"',
+          "'",
         options: {
           cwd: '/tmp/github/some/repo',
           env: {
@@ -620,11 +623,11 @@ describe('modules/manager/cargo/artifacts', () => {
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
           'ghcr.io/renovatebot/base-image ' +
-          'bash -l -c "' +
+          "bash -l -c '" +
           'install-tool rust 1.65.0' +
           ' && ' +
           'cargo update --config net.git-fetch-with-cli=true --manifest-path Cargo.toml --workspace' +
-          '"',
+          "'",
         options: {
           cwd: '/tmp/github/some/repo',
           env: {

@@ -473,7 +473,7 @@ const platform: Platform = {
       return 'yellow';
     }
 
-    /* v8 ignore next */
+    /* v8 ignore next -- the mapping covers every status Gitea returns, 'yellow' fallback is defensive */
     return helper.giteaToRenovateStatusMapping[ccs.worstStatus] ?? 'yellow';
   },
 
@@ -794,7 +794,7 @@ const platform: Platform = {
         number,
         body,
       };
-    } catch (err) /* v8 ignore next */ {
+    } catch (err) /* v8 ignore next -- defensive: issue fetch failures are logged and swallowed, not simulated in specs */ {
       logger.debug({ err, number }, 'Error getting issue');
       return null;
     }

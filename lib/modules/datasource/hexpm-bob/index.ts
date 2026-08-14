@@ -95,7 +95,7 @@ export class HexpmBobDatasource extends Datasource {
     if (packageName === 'elixir') {
       return 'elixir';
     }
-    if (/^otp\/\w+-\d+\.\d+$/.test(packageName)) {
+    if (regEx(/^otp\/\w+-\d+\.\d+$/).test(packageName)) {
       return 'erlang';
     }
     return null;
@@ -107,9 +107,9 @@ export class HexpmBobDatasource extends Datasource {
   ): string {
     switch (packageType) {
       case 'elixir':
-        return version.replace(/^v/, '');
+        return version.replace(regEx(/^v/), '');
       case 'erlang':
-        return version.replace(/^OTP-/, '');
+        return version.replace(regEx(/^OTP-/), '');
     }
   }
 

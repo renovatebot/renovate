@@ -4,7 +4,10 @@ import { envMock, mockExecAll } from '~test/exec-util.ts';
 import { hostRules } from '~test/host-rules.ts';
 import { env, fs, logger } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
-import type { RepoGlobalConfig } from '../../../config/types.ts';
+import type {
+  InternalGlobalConfigOptions,
+  RepoGlobalConfig,
+} from '../../../config/types.ts';
 import type { ConstraintName } from '../../../util/exec/types.ts';
 import { getPkgReleases as _getPkgReleases } from '../../datasource/index.ts';
 import type { UpdateArtifactsConfig } from '../types.ts';
@@ -16,7 +19,7 @@ vi.mock('../../datasource/index.ts', () => mockDeep());
 
 const getPkgReleases = vi.mocked(_getPkgReleases);
 
-const adminConfig: RepoGlobalConfig = {
+const adminConfig: RepoGlobalConfig & InternalGlobalConfigOptions = {
   // `join` fixes Windows CI
   localDir: upath.join('/tmp/github/some/repo'),
   cacheDir: upath.join('/tmp/cache'),
@@ -373,6 +376,49 @@ describe('modules/manager/mix/artifacts', () => {
         cmd: 'mix hex.organization auth other_organization --key other_org_token',
       },
       { cmd: 'mix deps.update some_package' },
+    ]);
+  });
+
+  it('quotes an organization value containing shell metacharacters', async () => {
+    GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
+    fs.readLocalFile.mockResolvedValueOnce('Old mix.lock');
+    fs.getSiblingFileName.mockReturnValueOnce('mix.lock');
+    const execSnapshots = mockExecAll();
+    fs.readLocalFile.mockResolvedValueOnce('New mix.lock');
+    // a broad host rule matching all of hex.pm, as opposed to one scoped to
+    // a specific organization's repo URL
+    hostRules.add({ matchHost: 'hex.pm', token: 'secret_token' });
+
+    // erlang
+    getPkgReleases.mockResolvedValueOnce({
+      releases: [{ version: '25.0.0.0' }],
+    });
+    // elixir
+    getPkgReleases.mockResolvedValueOnce({
+      releases: [{ version: 'v1.13.4' }],
+    });
+
+    await updateArtifacts({
+      packageFileName: 'mix.exs',
+      updatedDeps: [
+        {
+          depName: 'private_package',
+          // organization value as it would be parsed from an attacker-controlled
+          // `organization: "..."` field in mix.exs
+          packageName: 'private_package:evil --key leaked_or_arbitrary',
+        },
+      ],
+      newPackageFileContent: '{}',
+      config,
+    });
+
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'install-tool erlang 25.0.0.0' },
+      { cmd: 'install-tool elixir v1.13.4' },
+      {
+        cmd: "mix hex.organization auth 'evil --key leaked_or_arbitrary' --key secret_token",
+      },
+      { cmd: 'mix deps.update private_package' },
     ]);
   });
 

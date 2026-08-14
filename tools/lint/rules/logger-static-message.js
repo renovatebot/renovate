@@ -115,11 +115,6 @@ export default {
     },
   },
   create(context) {
-    const filename = context.filename ?? context.physicalFilename ?? '';
-    // Only enforce in lib/ production code
-    if (!filename.includes('/lib/')) {
-      return {};
-    }
     return {
       CallExpression(node) {
         const level = getLoggerLevel(node.callee);

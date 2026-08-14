@@ -5,7 +5,10 @@ import { envMock, mockExecAll, mockExecSequence } from '~test/exec-util.ts';
 import { Fixtures } from '~test/fixtures.ts';
 import { env, fs, git, partial } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
-import type { RepoGlobalConfig } from '../../../config/types.ts';
+import type {
+  InternalGlobalConfigOptions,
+  RepoGlobalConfig,
+} from '../../../config/types.ts';
 import { logger } from '../../../logger/index.ts';
 import * as docker from '../../../util/exec/docker/index.ts';
 import type { StatusResult } from '../../../util/git/types.ts';
@@ -52,7 +55,7 @@ function getCommandInUvHeader(command: string) {
 
 const simpleHeader = getCommandInHeader('pip-compile requirements.in');
 
-const adminConfig: RepoGlobalConfig = {
+const adminConfig: RepoGlobalConfig & InternalGlobalConfigOptions = {
   // `join` fixes Windows CI
   localDir: upath.join('/tmp/github/some/repo'),
   cacheDir: upath.join('/tmp/renovate/cache'),
@@ -63,7 +66,7 @@ const dockerAdminConfig = {
   ...adminConfig,
   binarySource: 'docker',
   dockerSidecarImage: 'ghcr.io/renovatebot/base-image',
-} satisfies RepoGlobalConfig;
+} satisfies RepoGlobalConfig & InternalGlobalConfigOptions;
 
 process.env.CONTAINERBASE = 'true';
 
@@ -209,13 +212,13 @@ describe('modules/manager/pip-compile/artifacts', () => {
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
           'ghcr.io/renovatebot/base-image ' +
-          'bash -l -c "' +
+          "bash -l -c '" +
           'install-tool python 3.10.2 ' +
           '&& ' +
           'install-tool pip-tools 6.13.0 ' +
           '&& ' +
           'pip-compile requirements.in' +
-          '"',
+          "'",
       },
     ]);
   });
@@ -545,13 +548,13 @@ describe('modules/manager/pip-compile/artifacts', () => {
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
           'ghcr.io/renovatebot/base-image ' +
-          'bash -l -c "' +
+          "bash -l -c '" +
           'install-tool python 3.10.2 ' +
           '&& ' +
           'install-tool pip-tools 6.13.0 ' +
           '&& ' +
           'pip-compile requirements.in' +
-          '"',
+          "'",
       },
     ]);
   });

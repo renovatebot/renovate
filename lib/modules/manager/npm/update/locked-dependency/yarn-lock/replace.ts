@@ -14,7 +14,7 @@ export function replaceConstraintVersion(
   }
   const depNameConstraint = `${depName}@${constraint}`;
   const escaped = depNameConstraint.replace(
-    /(?<special>@|\^|\.|\\|\|)/g,
+    regEx(/(?<special>@|\^|\.|\\|\|)/g),
     '\\$<special>',
   );
   const matchString = `(${escaped}(("|",|,)[^\n:]*)?:\n)(.*\n)*?(\\s+dependencies|\n[@a-z])`;

@@ -24,7 +24,7 @@ async function getUrl(
       `submodule.${submoduleName}.url`,
     ])
   )?.trim();
-  if (!path?.startsWith('../')) {
+  if (!path?.startsWith('../') && !path?.startsWith('./')) {
     return path;
   }
   const remoteUrl = (
@@ -114,7 +114,7 @@ export default async function extractPackageFile(
       deps.push({
         depName: path,
         packageName: httpSubModuleUrl,
-        sourceUrl: httpSubModuleUrl.replace(/\.git$/, ''),
+        sourceUrl: httpSubModuleUrl.replace(regEx(/\.git$/), ''),
         currentValue: branch ?? undefined,
         currentDigest,
         ...(semVerVersioning.api.isVersion(branch)

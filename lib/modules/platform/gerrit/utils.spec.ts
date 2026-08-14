@@ -124,6 +124,20 @@ describe('modules/platform/gerrit/utils', () => {
         );
         expect(repoUrl).toBe('ssh://abc@gerrit.example.com:29418/web/apps');
       });
+
+      it('ignores non-default HTTP port from the endpoint', () => {
+        vi.spyOn(hostRules, 'find').mockReturnValue({
+          username: 'abc',
+          password: '123',
+        });
+        const repoUrl = utils.getGerritRepoUrl(
+          'web/apps',
+          'http://gerrit.example.com:8080/',
+          'ssh',
+          'abc',
+        );
+        expect(repoUrl).toBe('ssh://abc@gerrit.example.com:29418/web/apps');
+      });
     });
   });
 
@@ -145,16 +159,15 @@ describe('modules/platform/gerrit/utils', () => {
 
   describe('mapGerritChangeStateToPrState()', () => {
     it.each([
-      ['NEW' as GerritChangeStatus, 'open'],
-      ['MERGED' as GerritChangeStatus, 'merged'],
-      ['ABANDONED' as GerritChangeStatus, 'closed'],
-      ['unknown' as GerritChangeStatus, undefined],
-    ])(
-      'maps gerrit change state %p to PrState %p',
-      (state: GerritChangeStatus, prState: any) => {
-        expect(utils.mapGerritChangeStateToPrState(state)).toEqual(prState);
-      },
-    );
+      ['NEW', 'open'],
+      ['MERGED', 'merged'],
+      ['ABANDONED', 'closed'],
+      ['unknown', undefined],
+    ])('maps gerrit change state %p to PrState %p', (state, prState) => {
+      expect(
+        utils.mapGerritChangeStateToPrState(state as GerritChangeStatus),
+      ).toEqual(prState);
+    });
   });
 
   describe('mapGerritChangeToPr()', () => {
@@ -405,15 +418,15 @@ describe('modules/platform/gerrit/utils', () => {
     };
 
     it.each([
-      ['red' as BranchStatus, -1],
-      ['yellow' as BranchStatus, -1],
-      ['green' as BranchStatus, 1],
+      ['red', -1],
+      ['yellow', -1],
+      ['green', 1],
     ])(
       'Label with +1/-1 map branchState=%p to %p',
       (branchState, expectedValue) => {
-        expect(mapBranchStatusToLabel(branchState, labelWithOne)).toEqual(
-          expectedValue,
-        );
+        expect(
+          mapBranchStatusToLabel(branchState as BranchStatus, labelWithOne),
+        ).toEqual(expectedValue);
       },
     );
 
@@ -429,15 +442,15 @@ describe('modules/platform/gerrit/utils', () => {
     };
 
     it.each([
-      ['red' as BranchStatus, -2],
-      ['yellow' as BranchStatus, -2],
-      ['green' as BranchStatus, 2],
+      ['red', -2],
+      ['yellow', -2],
+      ['green', 2],
     ])(
       'Label with +2/-2, map branchState=%p to %p',
       (branchState, expectedValue) => {
-        expect(mapBranchStatusToLabel(branchState, labelWithTwo)).toEqual(
-          expectedValue,
-        );
+        expect(
+          mapBranchStatusToLabel(branchState as BranchStatus, labelWithTwo),
+        ).toEqual(expectedValue);
       },
     );
   });

@@ -4,7 +4,10 @@ import { envMock, mockExecAll, mockExecSequence } from '~test/exec-util.ts';
 import { hostRules } from '~test/host-rules.ts';
 import { env, fs, git, partial } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
-import type { RepoGlobalConfig } from '../../../config/types.ts';
+import type {
+  InternalGlobalConfigOptions,
+  RepoGlobalConfig,
+} from '../../../config/types.ts';
 import * as docker from '../../../util/exec/docker/index.ts';
 import type { UpdateArtifactsConfig } from '../types.ts';
 import { updateArtifacts } from './index.ts';
@@ -12,7 +15,7 @@ import { updateArtifacts } from './index.ts';
 vi.mock('../../../util/exec/env.ts');
 vi.mock('../../../util/fs/index.ts');
 
-const adminConfig: RepoGlobalConfig = {
+const adminConfig: RepoGlobalConfig & InternalGlobalConfigOptions = {
   // `join` fixes Windows CI
   localDir: upath.join('/tmp/github/some/repo'),
   cacheDir: upath.join('/tmp/renovate/cache'),
@@ -39,6 +42,11 @@ flake update nixpkgs`;
 const lockfileMaintenanceCmd = `nix \
 --extra-experimental-features 'nix-command flakes' \
 flake update`;
+// Under `binarySource=docker` the whole command becomes the single-quoted argument
+// of `bash -l -c`, so the manager's own single quotes are POSIX-escaped as '"'"'.
+const updateInputCmdInDocker = `nix \
+--extra-experimental-features '"'"'nix-command flakes'"'"' \
+flake update nixpkgs`;
 
 describe('modules/manager/nix/artifacts', () => {
   beforeEach(() => {
@@ -173,6 +181,33 @@ describe('modules/manager/nix/artifacts', () => {
     expect(execSnapshots).toMatchObject([{ cmd: updateInputTokenCmd }]);
   });
 
+  it('quotes a GitHub token containing shell metacharacters', async () => {
+    fs.readLocalFile.mockResolvedValueOnce('current flake.lock');
+    const execSnapshots = mockExecAll();
+    git.getRepoStatus.mockResolvedValue(
+      partial<StatusResult>({
+        modified: ['flake.lock'],
+      }),
+    );
+    fs.readLocalFile.mockResolvedValueOnce('new flake.lock');
+    // hostRules can be set via a repo's own committed config, not only by a
+    // trusted platform admin, so the token itself isn't inherently trusted
+    hostRules.add({ matchHost: 'github.com', token: 'x$(touch pwned)y' });
+
+    await updateArtifacts({
+      packageFileName: 'flake.nix',
+      updatedDeps: [{ depName: 'nixpkgs' }],
+      newPackageFileContent: 'some new content',
+      config: { ...config, constraints: { python: '3.7' } },
+    });
+
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: `nix --extra-experimental-features 'nix-command flakes' --extra-access-tokens github.com='x$(touch pwned)y' flake update nixpkgs`,
+      },
+    ]);
+  });
+
   it('supports docker mode', async () => {
     GlobalConfig.set(dockerAdminConfig);
     const execSnapshots = mockExecAll();
@@ -202,7 +237,7 @@ describe('modules/manager/nix/artifacts', () => {
       { cmd: 'docker pull ghcr.io/renovatebot/base-image' },
       { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
       {
-        cmd: `docker run --rm --name=renovate_sidecar --label=renovate_child -v "/tmp/github/some/repo":"/tmp/github/some/repo" -v "/tmp/renovate/cache":"/tmp/renovate/cache" -e CONTAINERBASE_CACHE_DIR -w "/tmp/github/some/repo" ghcr.io/renovatebot/base-image bash -l -c "install-tool nix 2.10.0 && ${updateInputCmd}"`,
+        cmd: `docker run --rm --name=renovate_sidecar --label=renovate_child -v "/tmp/github/some/repo":"/tmp/github/some/repo" -v "/tmp/renovate/cache":"/tmp/renovate/cache" -e CONTAINERBASE_CACHE_DIR -w "/tmp/github/some/repo" ghcr.io/renovatebot/base-image bash -l -c 'install-tool nix 2.10.0 && ${updateInputCmdInDocker}'`,
       },
     ]);
   });
@@ -321,7 +356,7 @@ describe('modules/manager/nix/artifacts', () => {
       { cmd: 'docker pull ghcr.io/renovatebot/base-image' },
       { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
       {
-        cmd: `docker run --rm --name=renovate_sidecar --label=renovate_child -v "/tmp/github/some/repo":"/tmp/github/some/repo" -v "/tmp/renovate/cache":"/tmp/renovate/cache" -e CONTAINERBASE_CACHE_DIR -w "/tmp/github/some/repo" ghcr.io/renovatebot/base-image bash -l -c "install-tool nix 2.10.0 && ${updateInputCmd}"`,
+        cmd: `docker run --rm --name=renovate_sidecar --label=renovate_child -v "/tmp/github/some/repo":"/tmp/github/some/repo" -v "/tmp/renovate/cache":"/tmp/renovate/cache" -e CONTAINERBASE_CACHE_DIR -w "/tmp/github/some/repo" ghcr.io/renovatebot/base-image bash -l -c 'install-tool nix 2.10.0 && ${updateInputCmdInDocker}'`,
       },
     ]);
   });

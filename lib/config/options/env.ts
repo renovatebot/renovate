@@ -1,3 +1,4 @@
+import { regEx } from '../../util/regex.ts';
 import type { RenovateOptions } from '../types.ts';
 
 type EnvNameOption = Partial<RenovateOptions> & Pick<RenovateOptions, 'name'>;
@@ -10,7 +11,7 @@ export function getEnvName(option: EnvNameOption): string {
     return option.env;
   }
   const nameWithUnderscores = option.name.replace(
-    /(?<upper>[A-Z])/g,
+    regEx(/(?<upper>[A-Z])/g),
     '_$<upper>',
   );
   return `RENOVATE_${nameWithUnderscores.toUpperCase()}`;

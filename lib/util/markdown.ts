@@ -12,9 +12,14 @@ export function sanitizeMarkdown(markdown: string): string {
     regEx(/(?<pre>\W)#(?<digit>\d)/gi),
     '$<pre>#&#8203;$<digit>',
   );
-  // Put a zero width space after every @ symbol to prevent unintended hyperlinking
-  res = res.replace(regEx(/@/g), '@&#8203;');
-  res = res.replace(regEx(/(?<pre>`\[?@)&#8203;/g), '$<pre>');
+  // Put a zero width space after every @ symbol to prevent unintended hyperlinking,
+  // but leave code blocks (triple backticks) and inline code spans untouched
+  res = res
+    .split(regEx(/(?<code>```[\s\S]*?```|`[^`\n]*?`)/g))
+    .map((part) =>
+      part.startsWith('`') ? part : part.replace(regEx(/@/g), '@&#8203;'),
+    )
+    .join('');
   res = res.replace(regEx(/(?<pre>[a-z]@)&#8203;/gi), '$<pre>');
   res = res.replace(regEx(/\/compare\/@&#8203;/g), '/compare/@');
   res = res.replace(

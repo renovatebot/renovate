@@ -32,8 +32,11 @@ import {
 } from '../common.ts';
 import { getBaseBranchDesc } from './base-branch.ts';
 import { getConfigDesc } from './config-description.ts';
-import { getPackageFilesDesc } from './package-files.ts';
-import { getExpectedPrList } from './pr-list.ts';
+import {
+  getPackageFilesDesc,
+  getPackageFilesSummary,
+} from './package-files.ts';
+import { getExpectedPrList, getExpectedPrListSummary } from './pr-list.ts';
 
 /**
  * Given an existing PR, if onboardingAutoCloseAge has passed, close the PR.
@@ -208,7 +211,8 @@ If you need any further assistance then you can also [request help here](${
   );
   prBody = prBody.replace('{{ERRORS}}\n', getErrors(config));
   prBody = prBody.replace('{{BASEBRANCH}}\n', getBaseBranchDesc(config));
-  prBody = prBody.replace('{{PRLIST}}\n', getExpectedPrList(config, branches));
+  const prList = getExpectedPrList(config, branches);
+  prBody = prBody.replace('{{PRLIST}}\n', prList);
   if (isString(config.prHeader)) {
     prBody = `${template.compile(config.prHeader, config)}\n\n${prBody}`;
   }
@@ -217,6 +221,19 @@ If you need any further assistance then you can also [request help here](${
   }
 
   prBody += onboardingConfigHashComment;
+
+  if (prBody.length > platform.maxBodyLength()) {
+    logger.debug(
+      'Onboarding PR body exceeds platform limit, switching to summary PR list and package files',
+    );
+    prBody = prBody.replace(prList, getExpectedPrListSummary(config, branches));
+    if (packageFilesDesc) {
+      prBody = prBody.replace(
+        packageFilesDesc,
+        `### Detected Package Files\n\n${getPackageFilesSummary(packageFiles)}`,
+      );
+    }
+  }
 
   logger.trace(`prBody:\n${prBody}`);
 

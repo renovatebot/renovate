@@ -188,7 +188,7 @@ export async function getRepos(config: AutodiscoverConfig): Promise<string[]> {
     }
 
     return repos.map(({ owner, name }) => `${owner}/${name}`);
-  } catch (err) /* v8 ignore next */ {
+  } catch (err) /* v8 ignore next -- defensive: repo listing failures are logged and rethrown, not simulated in specs */ {
     logger.error({ err }, `bitbucket getRepos error`);
     throw err;
   }
@@ -276,7 +276,7 @@ export async function initRepo({
     };
 
     logger.debug(`${repository} owner = ${config.owner}`);
-  } catch (err) /* v8 ignore next */ {
+  } catch (err) /* v8 ignore next -- initRepo error mapping (404 to not-found) is not mocked in specs */ {
     if (err.statusCode === 404) {
       throw new Error(REPOSITORY_NOT_FOUND);
     }
@@ -328,7 +328,7 @@ export async function initRepo({
   return repoConfig;
 }
 
-/* v8 ignore next */
+/* v8 ignore next -- covered only through findPr callers, never invoked directly in specs */
 function matchesState(state: string, desiredState: string): boolean {
   if (desiredState === 'all') {
     return true;
@@ -425,7 +425,7 @@ export async function getPr(prNo: number): Promise<Pr | null> {
     )
   ).body;
 
-  /* v8 ignore next */
+  /* v8 ignore next -- defensive: the PR endpoint returns a body or throws, never an empty body */
   if (!pr) {
     return null;
   }
@@ -461,7 +461,7 @@ async function getBranchCommit(
       )
     ).body;
     return branch.target.hash;
-  } catch (err) /* v8 ignore next */ {
+  } catch (err) /* v8 ignore next -- defensive: missing branch is logged and mapped to undefined, not mocked in specs */ {
     logger.debug({ err }, `getBranchCommit('${branchName}') failed'`);
     return undefined;
   }
@@ -562,7 +562,7 @@ export async function setBranchStatus({
   const sha = await getBranchCommit(branchName);
 
   // TargetUrl can not be empty so default to bitbucket
-  /* v8 ignore next */
+  /* v8 ignore next -- specs always pass a targetUrl, fallback exists for direct API constraints */
   const url = targetUrl ?? 'https://bitbucket.org';
 
   const body = {
@@ -611,7 +611,7 @@ async function findOpenIssues(title: string): Promise<BbIssue[]> {
         )
       ).body.values || []
     );
-  } catch (err) /* v8 ignore next */ {
+  } catch (err) /* v8 ignore next -- defensive: issue search failures are logged and mapped to [], not simulated in specs */ {
     logger.warn({ err }, 'Error finding issues');
     return [];
   }
@@ -620,7 +620,7 @@ async function findOpenIssues(title: string): Promise<BbIssue[]> {
 export async function findIssue(title: string): Promise<Issue | null> {
   logger.debug(`findIssue(${title})`);
 
-  /* v8 ignore next */
+  /* v8 ignore next -- specs initialize repos with the issue tracker enabled */
   if (!config.has_issues) {
     logger.debug('Issues are disabled - cannot findIssue');
     return null;
@@ -759,7 +759,7 @@ function massageDetailSummaryHtmlToNestedLists(body: string): string {
       return result;
     })
     .join('')
-    .replace(/<\/?(?:summary|details|blockquote)>/g, '');
+    .replace(regEx(/<\/?(?:summary|details|blockquote)>/g), '');
 }
 
 export function maxBodyLength(): number {
@@ -772,7 +772,7 @@ export async function ensureIssue({
   body,
 }: EnsureIssueConfig): Promise<EnsureIssueResult | null> {
   logger.debug(`ensureIssue()`);
-  /* v8 ignore next */
+  /* v8 ignore next -- specs initialize repos with the issue tracker enabled */
   if (!config.has_issues) {
     logger.debug('Issues are disabled - cannot ensureIssue');
     logger.debug(`Failed to ensure Issue with title:${title}`);
@@ -830,7 +830,7 @@ export async function ensureIssue({
       );
       return 'created';
     }
-  } catch (err) /* v8 ignore next */ {
+  } catch (err) /* v8 ignore next -- issue creation failure handling is not mocked in specs */ {
     if (err.message.startsWith('Repository has no issue tracker.')) {
       logger.debug(`Issues are disabled, so could not create issue: ${title}`);
     } else {
@@ -840,7 +840,7 @@ export async function ensureIssue({
   return null;
 }
 
-/* v8 ignore next */
+/* v8 ignore next -- exercised only through the dependency dashboard flow, which specs mock at a higher level */
 export async function getIssueList(): Promise<Issue[]> {
   logger.debug(`getIssueList()`);
 
@@ -866,7 +866,7 @@ export async function getIssueList(): Promise<Issue[]> {
 }
 
 export async function ensureIssueClosing(title: string): Promise<void> {
-  /* v8 ignore next */
+  /* v8 ignore next -- specs initialize repos with the issue tracker enabled */
   if (!config.has_issues) {
     logger.debug('Issues are disabled - cannot ensureIssueClosing');
     return;
@@ -917,7 +917,7 @@ export async function addReviewers(
   );
 }
 
-/* v8 ignore next */
+/* v8 ignore next -- stub: Bitbucket Cloud has no PR labels, callers never reach this */
 export function deleteLabel(): never {
   throw new Error('deleteLabel not implemented');
 }
@@ -1113,7 +1113,7 @@ export async function createPr({
       await autoResolvePrTasks(pr);
     }
     return pr;
-  } catch (err) /* v8 ignore next */ {
+  } catch (err) /* v8 ignore next -- reviewer-sanitizing retry path depends on API error shapes not mocked in specs */ {
     // Try sanitizing reviewers
     const sanitizedReviewers = await sanitizeReviewers(reviewers, err);
 
@@ -1285,7 +1285,7 @@ export async function mergePr({
       },
     );
     logger.debug('Automerging succeeded');
-  } catch (err) /* v8 ignore next */ {
+  } catch (err) /* v8 ignore next -- defensive: merge failures are logged and mapped to false, not simulated in specs */ {
     logger.debug({ err }, `PR merge error`);
     logger.info({ pr: prNo }, 'PR automerge failed');
     return false;

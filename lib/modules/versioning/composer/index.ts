@@ -111,8 +111,9 @@ function calculateSatisfyingVersionIntenal(
  */
 function removeComposerSpecificPatchPart(input: string): [string, boolean] {
   // the regex is based on the original from composer implementation https://github.com/composer/semver/blob/fa1ec24f0ab1efe642671ec15c51a3ab879f59bf/src/VersionParser.php#L137
-  const pattern =
-    /^v?\d+(?:\.\d+(?:\.\d+(?:\.\d+)?)?)?(?<suffix>-p[1-9]\d*)$/gi;
+  const pattern = regEx(
+    /^v?\d+(?:\.\d+(?:\.\d+(?:\.\d+)?)?)?(?<suffix>-p[1-9]\d*)$/gi,
+  );
   const match = pattern.exec(input);
 
   return match
@@ -153,7 +154,10 @@ function composer2npm(input: string): string {
       return output + stability;
     })
     .map((part) =>
-      part.replace(/(?<letter>[a-z])(?<digit>[0-9])/gi, '$<letter>.$<digit>'),
+      part.replace(
+        regEx(/(?<letter>[a-z])(?<digit>[0-9])/gi),
+        '$<letter>.$<digit>',
+      ),
     )
     .join(' || ');
 }
