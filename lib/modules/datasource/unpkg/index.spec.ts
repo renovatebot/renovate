@@ -1,4 +1,3 @@
-import { Fixtures } from '~test/fixtures.ts';
 import * as httpMock from '~test/http-mock.ts';
 import { HttpError } from '../../../util/http/index.ts';
 import { getDigest, getPkgReleases } from '../index.ts';
@@ -130,7 +129,31 @@ describe('modules/datasource/unpkg/index', () => {
       httpMock
         .scope(baseUrl)
         .get(pathForDigest('jquery/dist/jquery.min.js', '4.0.0'))
-        .reply(200, Fixtures.get('unscoped_jquery.json'));
+        .reply(200, {
+          package: 'jquery',
+          version: '4.0.0',
+          prefix: '/',
+          files: [
+            {
+              path: '/dist/jquery.js',
+              size: 255967,
+              type: 'text/javascript',
+              integrity: 'sha256-9fsHeVnKBvqh3FB2HYu7g2xseAZ5MlN6Kz/qnkASV8U=',
+            },
+            {
+              path: '/src/jquery.js',
+              size: 978,
+              type: 'text/javascript',
+              integrity: 'sha256-TyqGpDScWhEDKuSRMWu9to6poNxOxXo9yRRqcmsCs6k=',
+            },
+            {
+              path: '/dist/jquery.min.js',
+              size: 78748,
+              type: 'text/javascript',
+              integrity: 'sha256-OaVG6prZf4v69dPg6PhVattBXkcOWQB62pdZ3ORyrao=',
+            },
+          ],
+        });
 
       const res = await getDigest(
         {
@@ -146,7 +169,37 @@ describe('modules/datasource/unpkg/index', () => {
       httpMock
         .scope(baseUrl)
         .get(pathForDigest('@popperjs/core/lib/index.js', '2.11.8'))
-        .reply(200, Fixtures.get('scoped_popperjs_core.json'));
+        .reply(200, {
+          package: '@popperjs/core',
+          version: '2.11.8',
+          prefix: '/',
+          files: [
+            {
+              path: '/lib/index.js',
+              size: 443,
+              type: 'text/javascript',
+              integrity: 'sha256-UqkAFbzZZwTVGU3Es2nAXtH0+jto8SgHJmKdKajwaFE=',
+            },
+            {
+              path: '/dist/umd/popper.js.map',
+              size: 142165,
+              type: 'application/json',
+              integrity: 'sha256-gxTC44s+8qqYoCO/rXH5jSsp2lLnnJY/b4ddTqElNHA=',
+            },
+            {
+              path: '/dist/umd/popper.min.js',
+              size: 20122,
+              type: 'text/javascript',
+              integrity: 'sha256-whL0tQWoY1Ku1iskqPFvmZ+CHsvmRWx/PIoEvIeWh4I=',
+            },
+            {
+              path: '/dist/umd/popper.min.js.flow',
+              size: 46,
+              type: 'text/plain',
+              integrity: 'sha256-b/2A0ou/wX++eSKbp3tyP/MHkltx/rRhxxv412BX9Wc=',
+            },
+          ],
+        });
 
       const res = await getDigest(
         {
