@@ -341,4 +341,42 @@ describe('config/presets/internal/workarounds', () => {
       });
     });
   });
+
+  describe('supportRedHatImageVersion', () => {
+    const preset = presets.supportRedHatImageVersion;
+    const packageRules = preset.packageRules!;
+
+    it.each`
+      packageName                               | expectedPackageName
+      ${'registry.access.redhat.com/hi/nodejs'} | ${'hi/nodejs'}
+      ${'registry.redhat.io/hi/nodejs'}         | ${'hi/nodejs'}
+    `(
+      'discovers $packageName from the Red Hat catalog',
+      async ({ packageName, expectedPackageName }) => {
+        const res = await applyPackageRules<PackageRuleInputConfig>({
+          datasource: 'docker',
+          depName: packageName,
+          packageName,
+          currentValue: '26.4.0-1783711702',
+          packageRules,
+        });
+
+        expect(res.datasource).toEqual('custom.redhat-hi');
+        expect(res.packageName).toEqual(expectedPackageName);
+        expect(res.versioning).toEqual('redhat');
+      },
+    );
+
+    it('configures the public catalog response transformation', () => {
+      expect(preset.customDatasources).toEqual({
+        'redhat-hi': {
+          defaultRegistryUrlTemplate:
+            'https://catalog.redhat.com/api/containers/v1/repositories/registry/registry.access.redhat.com/repository/{{packageName}}/images?page_size=100&sort_by=creation_date%5Bdesc%5D&include=data.repositories.tags.name',
+          transformTemplates: [
+            '{"releases": $map($distinct(data.repositories.tags.name), function($version) { {"version": $version} })}',
+          ],
+        },
+      });
+    });
+  });
 });
