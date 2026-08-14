@@ -196,11 +196,15 @@ describe('util/git/index', { timeout: 30000 }, () => {
     setNoVerify([]);
     await git.syncGit();
     // override some local git settings for better testing
-    const local = simpleGit(tmpDir.path);
+    const local = simpleGit(tmpDir.path, {
+      unsafe: { allowUnsafeHooksPath: true },
+    });
     await local.addConfig('commit.gpgsign', 'false');
     await local.addConfig('user.name', 'Jest');
     await local.addConfig('user.email', 'Jest@example.com');
     await disableGitAutoMaintenance(local);
+    // a developer's global core.hooksPath must not run hooks inside test repos
+    await local.addConfig('core.hooksPath', '/dev/null');
     behindBaseCache.getCachedBehindBaseResult.mockReturnValue(null);
     updateDateCache.getCachedUpdateDateResult.mockReturnValue(null);
   });
