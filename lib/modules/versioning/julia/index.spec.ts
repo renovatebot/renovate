@@ -167,7 +167,7 @@ describe('modules/versioning/julia/index', () => {
   `(
     'isLessThanRange("$version", "$range") === $expected',
     ({ version, range, expected }) => {
-      expect(julia.isLessThanRange!.(version, range)).toBe(expected);
+      expect(julia.isLessThanRange!(version, range)).toBe(expected);
     },
   );
 
@@ -185,12 +185,12 @@ describe('modules/versioning/julia/index', () => {
   `(
     'isBreaking("$current", "$version") === $expected',
     ({ current, version, expected }) => {
-      expect(julia.isBreaking!.(current, version)).toBe(expected);
+      expect(julia.isBreaking!(current, version)).toBe(expected);
     },
   );
 
   it('getPinnedValue formats with `=`', () => {
-    expect(julia.getPinnedValue!.('1.2.3')).toBe('=1.2.3');
+    expect(julia.getPinnedValue!('1.2.3')).toBe('=1.2.3');
   });
 
   it.each`
@@ -207,7 +207,7 @@ describe('modules/versioning/julia/index', () => {
     'getNewValue($currentValue, $rangeStrategy, $newVersion) === $expected',
     ({ currentValue, rangeStrategy, currentVersion, newVersion, expected }) => {
       expect(
-        julia.getNewValue!.({
+        julia.getNewValue({
           currentValue,
           rangeStrategy,
           currentVersion,
@@ -219,7 +219,7 @@ describe('modules/versioning/julia/index', () => {
 
   it('getNewValue returns currentValue for empty/star input', () => {
     expect(
-      julia.getNewValue!.({
+      julia.getNewValue({
         currentValue: '',
         rangeStrategy: 'bump',
         currentVersion: '1.2.3',
@@ -227,7 +227,7 @@ describe('modules/versioning/julia/index', () => {
       }),
     ).toBe('');
     expect(
-      julia.getNewValue!.({
+      julia.getNewValue({
         currentValue: '*',
         rangeStrategy: 'bump',
         currentVersion: '1.2.3',

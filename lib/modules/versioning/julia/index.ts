@@ -1,3 +1,4 @@
+import { isNonEmptyString } from '@sindresorhus/is';
 import { major as getMajor, minor as getMinor } from 'semver';
 import semver from 'semver-stable';
 import { logger } from '../../../logger/index.ts';
@@ -8,11 +9,15 @@ import type { NewValueConfig, VersioningApi } from '../types.ts';
 
 export const id = 'julia';
 export const displayName = 'Julia';
-export const urls = ['https://pkgdocs.julialang.org/v1/compatibility/'];
+export const urls = [
+  '[Pkg.jl - Compatibility](https://pkgdocs.julialang.org/v1/compatibility/)',
+];
 export const supportsRanges = true;
 export const supportedRangeStrategies: RangeStrategy[] = ['bump', 'replace'];
 
-const isVersion = (input: string): boolean => npm.isVersion(input);
+function isVersion(input: string): boolean {
+  return npm.isVersion(input);
+}
 
 function convertToCaret(item: string): string {
   // In Julia, caret is the default specifier — `1.2.3` means `^1.2.3`.
@@ -20,10 +25,10 @@ function convertToCaret(item: string): string {
   const trimmed = item.trim();
   if (
     isVersion(trimmed) ||
-    isVersion(trimmed + '.0') ||
-    isVersion(trimmed + '.0.0')
+    isVersion(`${trimmed}.0`) ||
+    isVersion(`${trimmed}.0.0`)
   ) {
-    return '^' + trimmed;
+    return `^${trimmed}`;
   }
   return trimmed;
 }
@@ -56,13 +61,17 @@ function npm2julia(input: string): string {
     .join(', ');
 }
 
-const isLessThanRange = (version: string, range: string): boolean =>
-  !!npm.isLessThanRange?.(version, julia2npm(range));
+function isLessThanRange(version: string, range: string): boolean {
+  return !!npm.isLessThanRange?.(version, julia2npm(range));
+}
 
-const isValid = (input: string): boolean => npm.isValid(julia2npm(input));
+function isValid(input: string): boolean {
+  return npm.isValid(julia2npm(input));
+}
 
-const matches = (version: string, range: string): boolean =>
-  npm.matches(version, julia2npm(range));
+function matches(version: string, range: string): boolean {
+  return npm.matches(version, julia2npm(range));
+}
 
 function getSatisfyingVersion(
   versions: string[],
