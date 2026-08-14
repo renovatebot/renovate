@@ -79,6 +79,11 @@ export const allToolConfig: Record<ToolName, ToolConfig> = {
     packageName: 'fluxcd/flux2',
     versioning: 'semver',
   },
+  gh: {
+    datasource: 'github-releases',
+    packageName: 'cli/cli',
+    versioning: 'semver',
+  },
   gleam: {
     datasource: 'github-releases',
     packageName: 'gleam-lang/gleam',

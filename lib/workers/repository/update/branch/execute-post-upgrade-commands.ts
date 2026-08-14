@@ -1,14 +1,13 @@
 // TODO #22198
 
 import crypto from 'node:crypto';
-import { isArray, isNonEmptyArray } from '@sindresorhus/is';
+import { isArray, isNonEmptyArray, isString } from '@sindresorhus/is';
 import upath from 'upath';
 import { GlobalConfig } from '../../../../config/global.ts';
 import { mergeChildConfig } from '../../../../config/index.ts';
 import { addMeta, logger } from '../../../../logger/index.ts';
 import type { ArtifactError } from '../../../../modules/manager/types.ts';
 import { coerceArray } from '../../../../util/array.ts';
-import { exec } from '../../../../util/exec/index.ts';
 import {
   type ExecOptions,
   isConstraintName,
@@ -23,7 +22,7 @@ import {
   statLocalFile,
   writeLocalFile,
 } from '../../../../util/fs/index.ts';
-import { getGitEnvironmentVariables } from '../../../../util/git/auth.ts';
+import { withGitEnvironment } from '../../../../util/git/exec.ts';
 import {
   getRepoStatus,
   isFileModeEnabled,
@@ -41,6 +40,7 @@ export interface PostUpgradeCommandsExecutionResult {
 }
 
 const ownerExecutePermission = 0o100;
+const gitExec = withGitEnvironment();
 
 async function detectExecutable(
   relativePath: string,
@@ -91,7 +91,7 @@ export async function postUpgradeCommandsExecutor(
         const canWriteFile = await localPathIsFile(file.path);
         if (file.type === 'addition' && !file.isSymlink && canWriteFile) {
           let contents: Buffer | null;
-          if (typeof file.contents === 'string') {
+          if (isString(file.contents)) {
             contents = Buffer.from(file.contents);
           } else {
             contents = file.contents;
@@ -167,7 +167,6 @@ export async function postUpgradeCommandsExecutor(
               ),
 
               cwd: workingDir,
-              extraEnv: getGitEnvironmentVariables(),
             };
             if (dataFilePath) {
               execOpts.env = {
@@ -200,7 +199,7 @@ export async function postUpgradeCommandsExecutor(
                 });
               }
             }
-            const execResult = await exec(compiledCmd, execOpts);
+            const execResult = await gitExec(compiledCmd, execOpts);
 
             logger.debug(
               { cmd: compiledCmd, ...execResult },

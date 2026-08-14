@@ -1,3 +1,4 @@
+import { isNullOrUndefined } from '@sindresorhus/is';
 import type { NewValueConfig, VersioningApi } from '../types.ts';
 import { BzlmodVersion } from './bzlmod-version.ts';
 
@@ -154,7 +155,7 @@ function isValid(input: string): boolean {
  * Check whether the `input` is a valid version string.
  */
 function isVersion(input: string | undefined | null): boolean {
-  if (input === undefined || input === null) {
+  if (isNullOrUndefined(input)) {
     return false;
   }
   return isValid(input);

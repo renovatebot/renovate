@@ -1,3 +1,4 @@
+import { isBoolean, isString } from '@sindresorhus/is';
 import upath from 'upath';
 import { loadModules } from '../../util/modules.ts';
 import { getDatasourceList } from '../datasource/index.ts';
@@ -40,7 +41,7 @@ describe('modules/manager/index', () => {
     )) {
       it(`has lockFileMaintenanceIsDelegatedToPackageManager for ${name}`, () => {
         expect(mgr.lockFileMaintenanceIsDelegatedToPackageManager).toSatisfy(
-          (value) => typeof value === 'boolean' || typeof value === 'string',
+          (value) => isBoolean(value) || isString(value),
         );
       });
     }

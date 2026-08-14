@@ -270,6 +270,41 @@ describe('util/exec/index', () => {
     ],
 
     [
+      'Explicit Docker env vars',
+      {
+        processEnv,
+        inCmd,
+        inOpts: {
+          docker: { envVars: ['FORCED_ENV_VAR'] },
+          env: { FORCED_ENV_VAR: 'forced' },
+          cwd,
+        },
+        outCmd: [
+          dockerPullCmd,
+          dockerRemoveCmd,
+          `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} -e FORCED_ENV_VAR -e CONTAINERBASE_CACHE_DIR ${defaultCwd} ${fullImage} bash -l -c '${inCmd}'`,
+        ],
+        outOpts: [
+          dockerPullOpts,
+          dockerRemoveOpts,
+          {
+            cwd,
+            env: {
+              ...containerbaseEnv,
+              FORCED_ENV_VAR: 'forced',
+            },
+            timeout: 900000,
+            maxBuffer: 10485760,
+            stdin: 'pipe',
+            stdout: 'pipe',
+            stderr: 'pipe',
+          },
+        ],
+        adminConfig: { binarySource: 'docker' },
+      },
+    ],
+
+    [
       'Extra env vars',
       {
         processEnv,

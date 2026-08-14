@@ -1,9 +1,10 @@
-import { isNonEmptyString } from '@sindresorhus/is';
+import { isNonEmptyString, isString } from '@sindresorhus/is';
 import upath from 'upath';
 import { GlobalConfig } from '../../config/global.ts';
 import type { RepoToolSettingsOptions } from '../../config/types.ts';
 import { TEMPORARY_ERROR } from '../../constants/error-messages.ts';
 import { logger } from '../../logger/index.ts';
+import { coerceArray } from '../array.ts';
 import { getCustomEnv, getUserEnv } from '../env.ts';
 import { coerceObject } from '../object.ts';
 import { rawExec } from './common.ts';
@@ -92,7 +93,7 @@ async function prepareRawExec(
 
   let rawOptions = getRawExecOptions(opts);
 
-  let rawCommands = typeof cmd === 'string' ? [cmd] : cmd;
+  let rawCommands = isString(cmd) ? [cmd] : cmd;
 
   if (isDocker(docker)) {
     logger.debug({ image: sideCarImage }, 'Using docker to execute');
@@ -104,6 +105,7 @@ async function prepareRawExec(
     const childEnv = getChildEnv(opts);
     const envVars = [
       ...dockerEnvVars(extraEnv, childEnv),
+      ...coerceArray(docker.envVars),
       'CONTAINERBASE_CACHE_DIR',
     ];
     const cwd = getCwd(opts);
