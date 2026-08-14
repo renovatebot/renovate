@@ -37,3 +37,7 @@ Release timestamps are derived from the date in the manifest URL and set to midn
 ## Versioning Scheme
 
 This datasource uses the `rust-release-channel` versioning scheme, which understands Rust's release channels, dated nightlies, and semantic versioning for stable and beta releases.
+
+## Custom registries
+
+This datasource supports overriding the default registry host. Point Renovate at a self-hosted mirror (for example Artifactory) by supplying a `registryUrl`/`registryUrls` entry in your package configuration. The datasource will fetch `manifests.txt` from the configured registry and extract versions from the manifest URLs as usual.
