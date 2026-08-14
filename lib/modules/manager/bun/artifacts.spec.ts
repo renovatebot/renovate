@@ -174,7 +174,14 @@ describe('modules/manager/bun/artifacts', () => {
         fs.readLocalFile.mockResolvedValueOnce(
           'registry=https://registry.example.com/',
         );
-        fs.findLocalSiblingOrParent.mockResolvedValueOnce('.npmrc');
+        fs.findLocalSiblingOrParent.mockImplementationOnce(
+          (fileName, otherFileName) =>
+            Promise.resolve(
+              fileName === 'bun.lockb' && otherFileName === '.npmrc'
+                ? '.npmrc'
+                : null,
+            ),
+        );
         fs.readLocalFile.mockResolvedValueOnce(
           'registry=https://registry.example.com/',
         );
