@@ -1,6 +1,6 @@
 import { z } from 'zod/v4';
 import { regEx } from '../../../util/regex.ts';
-import { LooseArray } from '../../../util/schema-utils/index.ts';
+import { LooseArray, LooseRecord } from '../../../util/schema-utils/index.ts';
 import { MaybeTimestamp } from '../../../util/timestamp.ts';
 import type { Release, ReleaseResult } from '../types.ts';
 
@@ -154,9 +154,7 @@ export const OpenTofuProviderPackagesResponse = z
     packages: LooseRecord(OpenTofuProviderPackage).catch({}),
   })
   .transform(({ packages }): string[] | null => {
-    const allHashes = Object.values(packages).flatMap(
-      ({ hashes }) => hashes,
-    );
+    const allHashes = Object.values(packages).flatMap(({ hashes }) => hashes);
     return allHashes.length ? allHashes : null;
   });
 
