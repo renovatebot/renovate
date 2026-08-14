@@ -35,7 +35,7 @@ function julia2npm(input: string): string {
     .replaceAll('≥', '>=')
     .split(',')
     .map(convertToCaret)
-    .filter((s) => s !== '')
+    .filter(isNonEmptyString)
     .join(' || ');
 }
 
@@ -52,7 +52,7 @@ function npm2julia(input: string): string {
   return input
     .split(regEx(/\s*\|\|\s*/))
     .map((part) => part.trim())
-    .filter((s) => s !== '')
+    .filter(isNonEmptyString)
     .join(', ');
 }
 
@@ -117,7 +117,7 @@ function getNewValue({
     currentVersion,
     newVersion,
   });
-  /* v8 ignore start: defensive — npm should always return a value for inputs julia2npm produces */
+  /* v8 ignore if: defensive — npm should always return a value for inputs julia2npm produces */
   if (!newSemver) {
     logger.warn(
       { currentValue, rangeStrategy, newVersion },
@@ -125,7 +125,6 @@ function getNewValue({
     );
     return currentValue;
   }
-  /* v8 ignore stop */
   let newJulia = npm2julia(newSemver);
   // Preserve precision (number of components) when current uses `^` or `~`.
   if (
