@@ -151,10 +151,10 @@ const OpenTofuProviderPackage = z.object({
 
 export const OpenTofuProviderPackagesResponse = z
   .object({
-    packages: z.record(z.string(), OpenTofuProviderPackage).optional(),
+    packages: LooseRecord(OpenTofuProviderPackage).catch({}),
   })
   .transform(({ packages }): string[] | null => {
-    const allHashes = Object.values(packages ?? {}).flatMap(
+    const allHashes = Object.values(packages).flatMap(
       ({ hashes }) => hashes,
     );
     return allHashes.length ? allHashes : null;
