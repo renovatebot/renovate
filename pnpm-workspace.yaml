@@ -12,6 +12,8 @@ allowBuilds:
   protobufjs: false
   unrs-resolver: false
   re2: true
+  cpu-features: false
+  ssh2: false
 
 dedupePeers: true
 
