@@ -157,10 +157,13 @@ export async function updateArtifacts({
     return acc;
   }, [] as string[]);
 
+  const hexHome = await hexHomeDir();
+
   preCommands.push(
     ...(await getRepoAddCommands(
       newPackageFileContent,
       config.registryAliases,
+      hexHome,
     )),
   );
 
@@ -176,7 +179,7 @@ export async function updateArtifacts({
       // URLs and their credentials in `$HEX_HOME/hex.config`. Keep that under
       // privateCacheDir, which is wiped between repositories, so credentials
       // cannot leak into the next repository of the same run.
-      HEX_HOME: await hexHomeDir(),
+      HEX_HOME: hexHome,
     },
     cwdFile: packageFileName,
     docker: {},
@@ -268,6 +271,7 @@ async function hexHomeDir(): Promise<string> {
 async function getRepoAddCommands(
   packageFileContent: string,
   registryAliases: Record<string, string> | undefined,
+  hexHome: string,
 ): Promise<string[]> {
   const commands: string[] = [];
   const declaredRepos = new Set(getRepoOptions(packageFileContent));
@@ -292,7 +296,7 @@ async function getRepoAddCommands(
       continue;
     }
 
-    const keyFile = upath.join(await hexHomeDir(), `${name}.pem`);
+    const keyFile = upath.join(hexHome, `${name}.pem`);
     await outputCacheFile(keyFile, publicKey);
 
     logger.debug(`Adding hex repo ${name}`);
