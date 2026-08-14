@@ -50,7 +50,7 @@ export async function extractPackageFile(
   };
 }
 
-export async function processPackageFile(
+async function processPackageFile(
   packageFile: string,
   config: ExtractConfig,
 ): Promise<PackageFile | null> {
