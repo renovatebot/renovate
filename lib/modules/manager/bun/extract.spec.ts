@@ -1,9 +1,46 @@
 import { fs } from '~test/util.ts';
-import { extractAllPackageFiles } from './extract.ts';
+import { extractAllPackageFiles, extractPackageFile } from './extract.ts';
 
 vi.mock('../../../util/fs/index.ts');
 
 describe('modules/manager/bun/extract', () => {
+  describe('extractPackageFile()', () => {
+    it('extracts dependencies from package.json content', async () => {
+      const result = await extractPackageFile(
+        JSON.stringify({ dependencies: { lodash: '^4.17.0' } }),
+        'package.json',
+        {},
+      );
+
+      expect(result).toMatchObject({
+        deps: [
+          {
+            currentValue: '^4.17.0',
+            datasource: 'npm',
+            depName: 'lodash',
+            depType: 'dependencies',
+          },
+        ],
+      });
+    });
+
+    it('returns null for invalid package.json content', async () => {
+      expect(
+        await extractPackageFile('invalid', 'package.json', {}),
+      ).toBeNull();
+    });
+
+    it('returns null when package.json is not a package manifest', async () => {
+      expect(
+        await extractPackageFile(
+          JSON.stringify({ _id: 1, _args: 1, _from: 1 }),
+          'package.json',
+          {},
+        ),
+      ).toBeNull();
+    });
+  });
+
   describe('extractAllPackageFiles()', () => {
     it('ignores non-bun files', async () => {
       expect(await extractAllPackageFiles({}, ['package.json'])).toEqual([]);

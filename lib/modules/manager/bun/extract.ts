@@ -10,13 +10,44 @@ import { extractPackageJson } from '../npm/extract/common/package-file.ts';
 import type { NpmPackage } from '../npm/extract/types.ts';
 import { resolveNpmrc } from '../npm/npmrc.ts';
 import type { NpmManagerData } from '../npm/types.ts';
-import type { ExtractConfig, PackageFile } from '../types.ts';
+import type {
+  ExtractConfig,
+  PackageFile,
+  PackageFileContent,
+} from '../types.ts';
 import { filesMatchingWorkspaces } from './utils.ts';
 
 function matchesFileName(fileNameWithPath: string, fileName: string): boolean {
   return (
     fileNameWithPath === fileName || fileNameWithPath.endsWith(`/${fileName}`)
   );
+}
+
+export async function extractPackageFile(
+  content: string,
+  packageFile: string,
+  config: ExtractConfig,
+): Promise<PackageFileContent<NpmManagerData> | null> {
+  let packageJson: NpmPackage;
+  try {
+    packageJson = JSON.parse(content);
+  } catch (err) {
+    logger.debug({ err }, 'Error parsing package.json');
+    return null;
+  }
+
+  const result = extractPackageJson(packageJson, packageFile);
+  if (!result) {
+    logger.debug({ packageFile }, 'No dependencies found');
+    return null;
+  }
+
+  const { npmrc } = await resolveNpmrc(packageFile, config);
+
+  return {
+    ...result,
+    npmrc,
+  };
 }
 
 export async function processPackageFile(
@@ -28,25 +59,14 @@ export async function processPackageFile(
     logger.warn({ fileName: packageFile }, 'Could not read file content');
     return null;
   }
-  let packageJson: NpmPackage;
-  try {
-    packageJson = JSON.parse(fileContent);
-  } catch (err) {
-    logger.debug({ err }, 'Error parsing package.json');
-    return null;
-  }
-  const result = extractPackageJson(packageJson, packageFile);
+  const result = await extractPackageFile(fileContent, packageFile, config);
   if (!result) {
-    logger.debug({ packageFile }, 'No dependencies found');
     return null;
   }
-
-  const { npmrc } = await resolveNpmrc(packageFile, config);
 
   return {
     ...result,
     packageFile,
-    npmrc,
   };
 }
 export async function extractAllPackageFiles(
