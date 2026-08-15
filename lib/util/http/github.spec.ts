@@ -327,6 +327,20 @@ describe('util/http/github', () => {
       );
     });
 
+    it('sets the x-github-api-version header)', async () => {
+      httpMock
+        .scope(githubApiHost)
+        .get('/foo/bar/contents/lore/ipsum.txt')
+        .matchHeader('x-github-api-version', '2022-11-28')
+        .reply(200, 'foo');
+
+      await expect(
+        githubApi.getRawTextFile(`foo/bar/contents/lore/ipsum.txt`),
+      ).resolves.toMatchObject({
+        body: 'foo',
+      });
+    });
+
     describe('handleGotError', () => {
       it('should log a once warning for github.com 401', async () => {
         await expect(
