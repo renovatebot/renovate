@@ -386,7 +386,7 @@ export abstract class HttpBase<
   }
 
   private resolveArgs<ResT = unknown>(
-    arg1: string,
+    arg1: string | URL,
     arg2: JSONOpts | ZodType<ResT> | undefined,
     arg3: ZodType<ResT> | undefined,
   ): InternalJsonOptions<JSONOpts, ResT> {
@@ -526,16 +526,16 @@ export abstract class HttpBase<
    * @param schema Zod schema for the response
    */
   getJson<Schema extends ZodType<any, any, any>>(
-    url: string,
+    url: string | URL,
     schema: Schema,
   ): Promise<HttpResponse<z.infer<Schema>>>;
   getJson<Schema extends ZodType<any, any, any>>(
-    url: string,
+    url: string | URL,
     options: JSONOpts,
     schema: Schema,
   ): Promise<HttpResponse<z.infer<Schema>>>;
   getJson<Schema extends ZodType<any, any, any>>(
-    arg1: string,
+    arg1: string | URL,
     arg2?: JSONOpts | Schema,
     arg3?: Schema,
   ): Promise<HttpResponse<z.infer<Schema>>> {
