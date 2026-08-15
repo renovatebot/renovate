@@ -331,7 +331,7 @@ describe('util/http/github', () => {
       httpMock
         .scope(githubApiHost)
         .get('/foo/bar/contents/lore/ipsum.txt')
-        .matchHeader('x-github-api-version', '2022-11-28')
+        .matchHeader('X-GitHub-Api-Version', '2022-11-28')
         .reply(200, 'foo');
 
       await expect(
