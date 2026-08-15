@@ -187,5 +187,25 @@ describe('modules/datasource/rust-version/index', () => {
 
       expect(res?.releases).toHaveLength(2);
     });
+
+    it('Fall back to default registry if registryUrl is not specified', async () => {
+      const manifestsContent = codeBlock`
+        static.rust-lang.org/dist/invalid.toml
+        static.rust-lang.org/dist/2024-10-17/channel-rust-1.82.0.toml
+      `;
+
+      httpMock
+        .scope('https://static.rust-lang.org')
+        .get('/manifests.txt')
+        .reply(200, manifestsContent);
+
+      const res = await getPkgReleases({
+        datasource,
+        packageName: 'rust',
+        registryUrls: [],
+      });
+
+      expect(res?.releases).toHaveLength(1);
+    });
   });
 });
