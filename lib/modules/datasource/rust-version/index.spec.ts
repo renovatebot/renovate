@@ -207,5 +207,15 @@ describe('modules/datasource/rust-version/index', () => {
 
       expect(res?.releases).toHaveLength(1);
     });
+
+    it('error when registry URL is invalid', async () => {
+      const res = await getPkgReleases({
+        datasource,
+        packageName: 'rust',
+        registryUrls: ['this/is-an;invalid$url'],
+      });
+
+      expect(res).toBeNull();
+    });
   });
 });

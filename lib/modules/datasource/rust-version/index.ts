@@ -1,10 +1,7 @@
 import { logger } from '../../../logger/index.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { asTimestamp } from '../../../util/timestamp.ts';
-import {
-  createURLFromHostOrURL,
-  ensureTrailingSlash,
-} from '../../../util/url.ts';
+import { ensureTrailingSlash, parseUrl } from '../../../util/url.ts';
 import * as rustVersioning from '../../versioning/rust-release-channel/index.ts';
 import { Datasource } from '../datasource.ts';
 import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
@@ -55,19 +52,20 @@ export class RustVersionDatasource extends Datasource {
   async _getReleases({
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
+    /* should never happen as there is a default registry URL */
     if (!registryUrl) {
-      logger.warn('rust-version datasource: No registryUrl specified');
       return null;
     }
 
-    const base = createURLFromHostOrURL(registryUrl);
-    if (!base) {
-      logger.debug({ registryUrl }, 'Could not parse registry URL');
+    const parsedUrl = parseUrl(ensureTrailingSlash(registryUrl));
+    if (!parsedUrl) {
+      logger.warn(
+        { registryUrl },
+        'rust-version datasource: Invalid registryUrl',
+      );
       return null;
     }
-
-    const baseWithSlash = ensureTrailingSlash(base.href);
-    const url = new URL('manifests.txt', baseWithSlash);
+    const url = new URL('manifests.txt', parsedUrl);
 
     let parsedResults: ParsedManifestUrl[];
     try {
