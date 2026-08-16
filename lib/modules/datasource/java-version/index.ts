@@ -2,6 +2,7 @@ import { logger } from '../../../logger/index.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
 import { HttpError } from '../../../util/http/index.ts';
+import { regEx } from '../../../util/regex.ts';
 import { Datasource } from '../datasource.ts';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types.ts';
 import {
@@ -61,7 +62,7 @@ export class JavaVersionDatasource extends Datasource {
       'fetching java release',
     );
 
-    let url = `${registryUrl.replace(/\/$/, '')}/v3/info/release_versions?page_size=${pageSize}&image_type=${pkgConfig.imageType}&project=jdk&release_type=ga&sort_method=DATE&sort_order=DESC`;
+    let url = `${registryUrl.replace(regEx(/\/$/), '')}/v3/info/release_versions?page_size=${pageSize}&image_type=${pkgConfig.imageType}&project=jdk&release_type=ga&sort_method=DATE&sort_order=DESC`;
 
     if (pkgConfig.architecture) {
       url += `&architecture=${pkgConfig.architecture}`;

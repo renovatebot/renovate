@@ -153,7 +153,15 @@ describe('modules/datasource/java-version/index', () => {
         registryUrls: [customRegistryUrl],
       });
 
-      expect(res).toMatchSnapshot();
+      expect(res).toMatchObject({
+        homepage: 'https://adoptium.net',
+        registryUrl: customRegistryUrl,
+        releases: [
+          { version: '8.0.302+8' },
+          { version: '11.0.12+7' },
+          { version: '16.0.2+7' },
+        ],
+      });
       expect(res?.releases).toHaveLength(3);
     });
   });

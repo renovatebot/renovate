@@ -191,21 +191,3 @@ exports[`modules/datasource/java-version/index > getReleases > processes real da
   ],
 }
 `;
-
-exports[`modules/datasource/java-version/index > getReleases > uses a custom registry URL 1`] = `
-{
-  "homepage": "https://adoptium.net",
-  "registryUrl": "https://custom.example.com",
-  "releases": [
-    {
-      "version": "8.0.302+8",
-    },
-    {
-      "version": "11.0.12+7",
-    },
-    {
-      "version": "16.0.2+7",
-    },
-  ],
-}
-`;
