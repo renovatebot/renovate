@@ -140,7 +140,7 @@ describe('modules/datasource/java-version/index', () => {
     });
 
     it('uses a custom registry URL', async () => {
-      const customRegistryUrl = 'https://custom.example.com/';
+      const customRegistryUrl = 'https://custom.example.com';
 
       httpMock
         .scope(customRegistryUrl)

@@ -60,11 +60,8 @@ export class JavaVersionDatasource extends Datasource {
       { registryUrl, packageName, pkgConfig },
       'fetching java release',
     );
-    const registryUrlWithSlash = registryUrl.endsWith('/')
-      ? registryUrl
-      : `${registryUrl}/`;
 
-    let url = `${registryUrlWithSlash}v3/info/release_versions?page_size=${pageSize}&image_type=${pkgConfig.imageType}&project=jdk&release_type=ga&sort_method=DATE&sort_order=DESC`;
+    let url = `${registryUrl.replace(/\/$/, '')}/v3/info/release_versions?page_size=${pageSize}&image_type=${pkgConfig.imageType}&project=jdk&release_type=ga&sort_method=DATE&sort_order=DESC`;
 
     if (pkgConfig.architecture) {
       url += `&architecture=${pkgConfig.architecture}`;
