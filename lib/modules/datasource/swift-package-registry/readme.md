@@ -7,7 +7,7 @@ GET <registry>/<scope>/<name>
 Accept: application/vnd.swift.registry.v1+json
 ```
 
-Registry URLs are typically auto-discovered by the `swift` manager from `.swiftpm/configuration/registries.json` in the repository (project- and workspace-level locations are both checked). You can also set `customRegistryUrls` or use `hostRules` to point Renovate at a specific registry.
+Registry URLs are auto-discovered by the `swift` manager from `.swiftpm/configuration/registries.json` in the same directory as the `Package.swift`. You can also set `registryUrls` or use `hostRules` to point Renovate at a specific registry.
 
 ### Authentication
 
