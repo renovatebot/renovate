@@ -19,7 +19,7 @@ export class JavaVersionDatasource extends Datasource {
     super(datasource);
   }
 
-  override readonly customRegistrySupport = false;
+  override readonly customRegistrySupport = true;
 
   override readonly defaultRegistryUrls = [defaultRegistryUrl];
 
@@ -60,7 +60,11 @@ export class JavaVersionDatasource extends Datasource {
       { registryUrl, packageName, pkgConfig },
       'fetching java release',
     );
-    let url = `${registryUrl}v3/info/release_versions?page_size=${pageSize}&image_type=${pkgConfig.imageType}&project=jdk&release_type=ga&sort_method=DATE&sort_order=DESC`;
+    const registryUrlWithSlash = registryUrl.endsWith('/')
+      ? registryUrl
+      : `${registryUrl}/`;
+
+    let url = `${registryUrlWithSlash}v3/info/release_versions?page_size=${pageSize}&image_type=${pkgConfig.imageType}&project=jdk&release_type=ga&sort_method=DATE&sort_order=DESC`;
 
     if (pkgConfig.architecture) {
       url += `&architecture=${pkgConfig.architecture}`;

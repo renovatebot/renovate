@@ -138,5 +138,23 @@ describe('modules/datasource/java-version/index', () => {
       });
       expect(res?.releases).toHaveLength(2);
     });
+
+    it('uses a custom registry URL', async () => {
+      const customRegistryUrl = 'https://custom.example.com/';
+
+      httpMock
+        .scope(customRegistryUrl)
+        .get(getPath(0))
+        .reply(200, Fixtures.get('page.json'));
+
+      const res = await getPkgReleases({
+        datasource,
+        packageName,
+        registryUrls: [customRegistryUrl],
+      });
+
+      expect(res).toMatchSnapshot();
+      expect(res?.releases).toHaveLength(3);
+    });
   });
 });
