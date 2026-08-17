@@ -3,6 +3,23 @@ import { partial } from '~test/util.ts';
 import type { BranchConfig } from '../../../types.ts';
 import { getExpectedPrList, getExpectedPrListSummary } from './pr-list.ts';
 
+function createBranch(letter: string): BranchConfig {
+  return {
+    prTitle: `Update ${letter} to v1`,
+    branchName: `renovate/${letter}-1.x`,
+    baseBranch: 'base',
+    manager: 'some-manager',
+    upgrades: [
+      {
+        manager: 'some-manager',
+        depName: letter,
+        newValue: '1.0.0',
+        branchName: 'some-branch',
+      },
+    ],
+  };
+}
+
 describe('workers/repository/onboarding/pr/pr-list', () => {
   describe('getExpectedPrList()', () => {
     let config: RenovateConfig;
@@ -272,48 +289,9 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
 
     it('shows the branchConcurrentLimit message when it restricts the PR count', () => {
       const branches: BranchConfig[] = [
-        {
-          prTitle: 'Update a to v1',
-          branchName: 'renovate/a-1.x',
-          baseBranch: 'base',
-          manager: 'some-manager',
-          upgrades: [
-            {
-              manager: 'some-manager',
-              depName: 'a',
-              newValue: '1.0.0',
-              branchName: 'some-branch',
-            },
-          ],
-        },
-        {
-          prTitle: 'Update b to v1',
-          branchName: 'renovate/b-1.x',
-          baseBranch: 'base',
-          manager: 'some-manager',
-          upgrades: [
-            {
-              manager: 'some-manager',
-              depName: 'b',
-              newValue: '1.0.0',
-              branchName: 'some-branch',
-            },
-          ],
-        },
-        {
-          prTitle: 'Update c to v1',
-          branchName: 'renovate/c-1.x',
-          baseBranch: 'base',
-          manager: 'some-manager',
-          upgrades: [
-            {
-              manager: 'some-manager',
-              depName: 'c',
-              newValue: '1.0.0',
-              branchName: 'some-branch',
-            },
-          ],
-        },
+        createBranch('a'),
+        createBranch('b'),
+        createBranch('c'),
       ];
       config.branchConcurrentLimit = 1;
       const res = getExpectedPrList(config, branches);
@@ -325,48 +303,9 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
 
     it('shows the prConcurrentLimit message when branchConcurrentLimit does not restrict the count', () => {
       const branches: BranchConfig[] = [
-        {
-          prTitle: 'Update a to v1',
-          branchName: 'renovate/a-1.x',
-          baseBranch: 'base',
-          manager: 'some-manager',
-          upgrades: [
-            {
-              manager: 'some-manager',
-              depName: 'a',
-              newValue: '1.0.0',
-              branchName: 'some-branch',
-            },
-          ],
-        },
-        {
-          prTitle: 'Update b to v1',
-          branchName: 'renovate/b-1.x',
-          baseBranch: 'base',
-          manager: 'some-manager',
-          upgrades: [
-            {
-              manager: 'some-manager',
-              depName: 'b',
-              newValue: '1.0.0',
-              branchName: 'some-branch',
-            },
-          ],
-        },
-        {
-          prTitle: 'Update c to v1',
-          branchName: 'renovate/c-1.x',
-          baseBranch: 'base',
-          manager: 'some-manager',
-          upgrades: [
-            {
-              manager: 'some-manager',
-              depName: 'c',
-              newValue: '1.0.0',
-              branchName: 'some-branch',
-            },
-          ],
-        },
+        createBranch('a'),
+        createBranch('b'),
+        createBranch('c'),
       ];
       config.prConcurrentLimit = 2;
       const res = getExpectedPrList(config, branches);
@@ -377,22 +316,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
     });
 
     it('does not show a concurrent limit message when the limit is not restrictive', () => {
-      const branches: BranchConfig[] = [
-        {
-          prTitle: 'Update a to v1',
-          branchName: 'renovate/a-1.x',
-          baseBranch: 'base',
-          manager: 'some-manager',
-          upgrades: [
-            {
-              manager: 'some-manager',
-              depName: 'a',
-              newValue: '1.0.0',
-              branchName: 'some-branch',
-            },
-          ],
-        },
-      ];
+      const branches: BranchConfig[] = [createBranch('a')];
       config.prConcurrentLimit = 10;
       const res = getExpectedPrList(config, branches);
       expect(res).not.toContain('up to a maximum of');
@@ -401,48 +325,9 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
 
     it('prioritizes branchConcurrentLimit over prConcurrentLimit when both restrict the count', () => {
       const branches: BranchConfig[] = [
-        {
-          prTitle: 'Update a to v1',
-          branchName: 'renovate/a-1.x',
-          baseBranch: 'base',
-          manager: 'some-manager',
-          upgrades: [
-            {
-              manager: 'some-manager',
-              depName: 'a',
-              newValue: '1.0.0',
-              branchName: 'some-branch',
-            },
-          ],
-        },
-        {
-          prTitle: 'Update b to v1',
-          branchName: 'renovate/b-1.x',
-          baseBranch: 'base',
-          manager: 'some-manager',
-          upgrades: [
-            {
-              manager: 'some-manager',
-              depName: 'b',
-              newValue: '1.0.0',
-              branchName: 'some-branch',
-            },
-          ],
-        },
-        {
-          prTitle: 'Update c to v1',
-          branchName: 'renovate/c-1.x',
-          baseBranch: 'base',
-          manager: 'some-manager',
-          upgrades: [
-            {
-              manager: 'some-manager',
-              depName: 'c',
-              newValue: '1.0.0',
-              branchName: 'some-branch',
-            },
-          ],
-        },
+        createBranch('a'),
+        createBranch('b'),
+        createBranch('c'),
       ];
       config.branchConcurrentLimit = 1;
       config.prConcurrentLimit = 2;
@@ -1737,48 +1622,9 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
 
     it('shows the branchConcurrentLimit message when it restricts the PR count', () => {
       const branches: BranchConfig[] = [
-        {
-          prTitle: 'Update a to v1',
-          branchName: 'renovate/a-1.x',
-          baseBranch: 'base',
-          manager: 'some-manager',
-          upgrades: [
-            {
-              manager: 'some-manager',
-              depName: 'a',
-              newValue: '1.0.0',
-              branchName: 'ignored',
-            },
-          ],
-        },
-        {
-          prTitle: 'Update b to v1',
-          branchName: 'renovate/b-1.x',
-          baseBranch: 'base',
-          manager: 'some-manager',
-          upgrades: [
-            {
-              manager: 'some-manager',
-              depName: 'b',
-              newValue: '1.0.0',
-              branchName: 'ignored',
-            },
-          ],
-        },
-        {
-          prTitle: 'Update c to v1',
-          branchName: 'renovate/c-1.x',
-          baseBranch: 'base',
-          manager: 'some-manager',
-          upgrades: [
-            {
-              manager: 'some-manager',
-              depName: 'c',
-              newValue: '1.0.0',
-              branchName: 'ignored',
-            },
-          ],
-        },
+        createBranch('a'),
+        createBranch('b'),
+        createBranch('c'),
       ];
       config.branchConcurrentLimit = 1;
       const res = getExpectedPrListSummary(config, branches);
@@ -1791,48 +1637,9 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
 
     it('shows the branchConcurrentLimit message with plurals when limit is greater than 1', () => {
       const branches: BranchConfig[] = [
-        {
-          prTitle: 'Update a to v1',
-          branchName: 'renovate/a-1.x',
-          baseBranch: 'base',
-          manager: 'some-manager',
-          upgrades: [
-            {
-              manager: 'some-manager',
-              depName: 'a',
-              newValue: '1.0.0',
-              branchName: 'ignored',
-            },
-          ],
-        },
-        {
-          prTitle: 'Update b to v1',
-          branchName: 'renovate/b-1.x',
-          baseBranch: 'base',
-          manager: 'some-manager',
-          upgrades: [
-            {
-              manager: 'some-manager',
-              depName: 'b',
-              newValue: '1.0.0',
-              branchName: 'ignored',
-            },
-          ],
-        },
-        {
-          prTitle: 'Update c to v1',
-          branchName: 'renovate/c-1.x',
-          baseBranch: 'base',
-          manager: 'some-manager',
-          upgrades: [
-            {
-              manager: 'some-manager',
-              depName: 'c',
-              newValue: '1.0.0',
-              branchName: 'ignored',
-            },
-          ],
-        },
+        createBranch('a'),
+        createBranch('b'),
+        createBranch('c'),
       ];
       config.branchConcurrentLimit = 2;
       const res = getExpectedPrListSummary(config, branches);
@@ -1844,48 +1651,9 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
 
     it('shows the prConcurrentLimit message when branchConcurrentLimit does not restrict the count', () => {
       const branches: BranchConfig[] = [
-        {
-          prTitle: 'Update a to v1',
-          branchName: 'renovate/a-1.x',
-          baseBranch: 'base',
-          manager: 'some-manager',
-          upgrades: [
-            {
-              manager: 'some-manager',
-              depName: 'a',
-              newValue: '1.0.0',
-              branchName: 'ignored',
-            },
-          ],
-        },
-        {
-          prTitle: 'Update b to v1',
-          branchName: 'renovate/b-1.x',
-          baseBranch: 'base',
-          manager: 'some-manager',
-          upgrades: [
-            {
-              manager: 'some-manager',
-              depName: 'b',
-              newValue: '1.0.0',
-              branchName: 'ignored',
-            },
-          ],
-        },
-        {
-          prTitle: 'Update c to v1',
-          branchName: 'renovate/c-1.x',
-          baseBranch: 'base',
-          manager: 'some-manager',
-          upgrades: [
-            {
-              manager: 'some-manager',
-              depName: 'c',
-              newValue: '1.0.0',
-              branchName: 'ignored',
-            },
-          ],
-        },
+        createBranch('a'),
+        createBranch('b'),
+        createBranch('c'),
       ];
       config.prConcurrentLimit = 2;
       const res = getExpectedPrListSummary(config, branches);
@@ -1898,22 +1666,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
     });
 
     it('does not show a concurrent limit message when the limit is not restrictive', () => {
-      const branches: BranchConfig[] = [
-        {
-          prTitle: 'Update a to v1',
-          branchName: 'renovate/a-1.x',
-          baseBranch: 'base',
-          manager: 'some-manager',
-          upgrades: [
-            {
-              manager: 'some-manager',
-              depName: 'a',
-              newValue: '1.0.0',
-              branchName: 'ignored',
-            },
-          ],
-        },
-      ];
+      const branches: BranchConfig[] = [createBranch('a')];
       config.prConcurrentLimit = 10;
       const res = getExpectedPrListSummary(config, branches);
       expect(res).not.toContain('open at a time');
@@ -1922,48 +1675,9 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
 
     it('combines the concurrent limit and hourly limit messages when both restrict the count', () => {
       const branches: BranchConfig[] = [
-        {
-          prTitle: 'Update a to v1',
-          branchName: 'renovate/a-1.x',
-          baseBranch: 'base',
-          manager: 'some-manager',
-          upgrades: [
-            {
-              manager: 'some-manager',
-              depName: 'a',
-              newValue: '1.0.0',
-              branchName: 'ignored',
-            },
-          ],
-        },
-        {
-          prTitle: 'Update b to v1',
-          branchName: 'renovate/b-1.x',
-          baseBranch: 'base',
-          manager: 'some-manager',
-          upgrades: [
-            {
-              manager: 'some-manager',
-              depName: 'b',
-              newValue: '1.0.0',
-              branchName: 'ignored',
-            },
-          ],
-        },
-        {
-          prTitle: 'Update c to v1',
-          branchName: 'renovate/c-1.x',
-          baseBranch: 'base',
-          manager: 'some-manager',
-          upgrades: [
-            {
-              manager: 'some-manager',
-              depName: 'c',
-              newValue: '1.0.0',
-              branchName: 'ignored',
-            },
-          ],
-        },
+        createBranch('a'),
+        createBranch('b'),
+        createBranch('c'),
       ];
       config.prConcurrentLimit = 1;
       config.prHourlyLimit = 1;
