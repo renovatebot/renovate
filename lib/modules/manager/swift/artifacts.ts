@@ -141,13 +141,13 @@ function updatePinInJson(
   let pinBlock = updated.slice(blockStart, blockEnd);
 
   // Replace version within the pin block
-  const versionPattern = regEx(/("version"\s*:\s*)"[^"]*"/);
-  pinBlock = pinBlock.replace(versionPattern, `$1"${newVersion}"`);
+  const versionPattern = regEx(/(?<prefix>"version"\s*:\s*)"[^"]*"/);
+  pinBlock = pinBlock.replace(versionPattern, `$<prefix>"${newVersion}"`);
 
   // Replace revision within the pin block if we have a new one
   if (newRevision) {
-    const revisionPattern = regEx(/("revision"\s*:\s*)"[^"]*"/);
-    pinBlock = pinBlock.replace(revisionPattern, `$1"${newRevision}"`);
+    const revisionPattern = regEx(/(?<prefix>"revision"\s*:\s*)"[^"]*"/);
+    pinBlock = pinBlock.replace(revisionPattern, `$<prefix>"${newRevision}"`);
   }
 
   updated = updated.slice(0, blockStart) + pinBlock + updated.slice(blockEnd);

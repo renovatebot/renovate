@@ -8,7 +8,7 @@ export const displayName = 'Loose';
 export const urls = [];
 export const supportsRanges = false;
 
-const versionPattern = regEx(/^[vV]?(\d+(?:\.\d+)*)(.*)$/);
+const versionPattern = regEx(/^[vV]?(?<prefix>\d+(?:\.\d+)*)(?<suffix>.*)$/);
 const commitHashPattern = regEx(/^[a-f0-9]{7,40}$/);
 const numericPattern = regEx(/^[0-9]+$/);
 
@@ -21,7 +21,7 @@ class LooseVersioningApi extends GenericVersioningApi {
     if (!matches) {
       return null;
     }
-    const [, prefix, suffix] = matches;
+    const { prefix, suffix } = matches.groups!;
     const release = prefix.split('.').map(Number);
     if (release.length > 6) {
       return null;

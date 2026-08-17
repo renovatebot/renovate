@@ -22,7 +22,7 @@ function envReplace(value: any, env = getEnv()): any {
     return value;
   }
 
-  const ENV_EXPR = regEx(/(\\*)\$\{([^}]+)\}/g);
+  const ENV_EXPR = regEx(/(?<esc>\\*)\$\{(?<envVarName>[^}]+)\}/g);
 
   return value.replace(ENV_EXPR, (match, _esc, envVarName) => {
     if (env[envVarName] === undefined) {

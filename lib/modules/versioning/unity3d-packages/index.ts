@@ -13,9 +13,9 @@ export const supportsRanges = false;
 
 class Unity3dPackagesVersioningApi extends GenericVersioningApi {
   private static readonly parsingRegex = regEx(
-    /^(?<major>\d+)\.(?<minor>\d+)\.(?<patch>\d+)(-?(?<label>.*))/,
+    /^(?<major>\d+)\.(?<minor>\d+)\.(?<patch>\d+)(?:-?(?<label>.*))/,
   );
-  private static readonly unstableRegex = regEx(/^(exp.|pre.|preview.)/);
+  private static readonly unstableRegex = regEx(/^(?:exp.|pre.|preview.)/);
 
   protected _parse(version: string): GenericVersion | null {
     const matches = Unity3dPackagesVersioningApi.parsingRegex.exec(version);

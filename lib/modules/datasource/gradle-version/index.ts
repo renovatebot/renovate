@@ -92,7 +92,7 @@ export class GradleVersionDatasource extends Datasource {
    */
   private static getGitRef(version: string): string {
     const [versionPart, typePart, unstablePart] = version.split(
-      regEx(/-([a-z]+)-/),
+      regEx(/-(?<type>[a-z]+)-/),
     );
 
     let suffix = '';

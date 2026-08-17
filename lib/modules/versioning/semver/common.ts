@@ -4,7 +4,9 @@ const SEMVER_X_RANGE = ['*', 'x', 'X', ''] as const;
 type SemVerXRangeArray = typeof SEMVER_X_RANGE;
 export type SemVerXRange = SemVerXRangeArray[number];
 
-const RANGE_SEPARATOR = regEx(/(\s+|,|\|\||[()])/);
+// Named so the delimiter capture survives the rule while `split()` still
+// includes the matched separator itself in its result array.
+const RANGE_SEPARATOR = regEx(/(?<separator>\s+|,|\|\||[()])/);
 const NUMERIC_RELEASE_PART = '(?:0|[1-9]\\d*)';
 const X_RELEASE_PART = '[xX*]';
 const RELEASE_PART = `(?:${NUMERIC_RELEASE_PART}|${X_RELEASE_PART})`;

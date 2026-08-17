@@ -10,10 +10,10 @@ function presetRefToLink(presetRef: string): string | null {
   // Separate base name from arguments: ":followTag(typescript, next)" -> base=":followTag", argCount=2
   let baseName = presetRef;
   let argCount = 0;
-  const parenMatch = /^([^(]+)\((.+)\)$/.exec(presetRef);
+  const parenMatch = /^(?<base>[^(]+)\((?<args>.+)\)$/.exec(presetRef);
   if (parenMatch) {
-    baseName = parenMatch[1];
-    argCount = parenMatch[2].split(/,\s*/).length;
+    baseName = parenMatch.groups!.base;
+    argCount = parenMatch.groups!.args.split(/,\s*/).length;
   }
 
   let group: string;
@@ -91,16 +91,16 @@ function generateCodeBlock(
         inExtends = false;
         return line;
       }
-      const match = /^(\s+"([^"]+)")(,?)$/.exec(line);
+      const match = /^(?<quoted>\s+"(?<ref>[^"]+)")(?<comma>,?)$/.exec(line);
       if (match) {
-        const presetRef = match[2];
+        const presetRef = match.groups!.ref;
         const link = presetRefToLink(presetRef);
         if (link) {
           counter++;
           const description = getPresetDescription(presetRef, descriptions);
           annotations.push({ num: counter, ref: presetRef, link, description });
           // note that we use a trailing `!` to strip the comment from the resulting code block
-          return `${match[1]}${match[3]} // (${counter})!`;
+          return `${match.groups!.quoted}${match.groups!.comma} // (${counter})!`;
         }
       }
     }
@@ -221,7 +221,7 @@ export async function generatePresets(dist: string): Promise<void> {
           }
         }
         header += ')';
-        body = body.replace(/{{(arg\d+)}}/g, '$1');
+        body = body.replace(/{{(?<arg>arg\d+)}}/g, '$<arg>');
       }
       content += header + body;
     }

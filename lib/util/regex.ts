@@ -98,7 +98,7 @@ export const newlineRegex = regEx(/\r?\n/);
  * - Soft hyphen (\u00AD)
  */
 export const hiddenUnicodeCharactersRegex = regEx(
-  /([\u00A0\u1680\u2000-\u200A\u2028\u2029\u202F\u205F\u3000\u200B\u200C\uFEFF\u200E\u200F\u202A-\u202E\u00AD])/g,
+  /(?<char>[\u00A0\u1680\u2000-\u200A\u2028\u2029\u202F\u205F\u3000\u200B\u200C\uFEFF\u200E\u200F\u202A-\u202E\u00AD])/g,
 );
 
 /**
