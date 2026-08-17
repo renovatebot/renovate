@@ -329,6 +329,8 @@ describe('modules/datasource/crate/index', () => {
         releases: [{ version: '1.2.0' }],
       });
       expect(res?.homepage).toBeUndefined();
+    });
+
     it('processes real data: sentry', async () => {
       mockCratesIoConfig();
       mockCratesApiCallFor('sentry', Fixtures.get('sentry.json'));
