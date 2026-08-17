@@ -6,6 +6,7 @@ import {
   PLATFORM_INTEGRATION_UNAUTHORIZED,
   PLATFORM_RATE_LIMIT_EXCEEDED,
   PLATFORM_UNKNOWN_ERROR,
+  PR_ALREADY_IN_MERGE_QUEUE,
   REPOSITORY_ACCESS_FORBIDDEN,
   REPOSITORY_ARCHIVED,
   REPOSITORY_BLOCKED,
@@ -80,10 +81,11 @@ import {
   enableAutoMergeMutation,
   getIssuesQuery,
   repoInfoQuery,
+  repoMergeQueueQuery,
 } from './graphql.ts';
 import { GithubIssueCache } from './issue.ts';
 import { massageMarkdownLinks } from './massage-markdown-links.ts';
-import { getPrCache, updatePrCache } from './pr.ts';
+import { getPrCache, isPrInMergeQueue, updatePrCache } from './pr.ts';
 import {
   GithubBranchProtection,
   GithubBranchRulesets,
@@ -166,7 +168,7 @@ export async function initPlatform({
   if (!token) {
     throw new Error('Init: You must configure a GitHub token');
   }
-  token = token.replace(/^ghs_/, 'x-access-token:ghs_');
+  token = token.replace(regEx(/^ghs_/), 'x-access-token:ghs_');
   platformConfig.isGHApp = token.startsWith('x-access-token:');
 
   if (endpoint) {
@@ -263,14 +265,14 @@ export async function initPlatform({
         matchHost: 'ghcr.io',
         hostType: 'docker',
         username: 'USERNAME',
-        password: token.replace(/^x-access-token:/, ''),
+        password: token.replace(regEx(/^x-access-token:/), ''),
       },
     ];
     logger.debug('Adding GitHub token as npm.pkg.github.com Basic token');
     platformResult.hostRules.push({
       matchHost: 'npm.pkg.github.com',
       hostType: 'npm',
-      token: token.replace(/^x-access-token:/, ''),
+      token: token.replace(regEx(/^x-access-token:/), ''),
     });
     const usernamePasswordHostTypes = ['rubygems', 'maven', 'nuget'];
     for (const hostType of usernamePasswordHostTypes) {
@@ -281,7 +283,7 @@ export async function initPlatform({
         hostType,
         matchHost: `${hostType}.pkg.github.com`,
         username: renovateUsername,
-        password: token.replace(/^x-access-token:/, ''),
+        password: token.replace(regEx(/^x-access-token:/), ''),
       });
     }
   }
@@ -524,6 +526,7 @@ export async function initRepo({
     cloneSubmodules,
     cloneSubmodulesFilter,
     ignorePrAuthor: GlobalConfig.get('ignorePrAuthor'),
+    mergeQueueEnabled: {},
   } as any;
   const opts = hostRules.find({
     hostType: 'github',
@@ -544,8 +547,8 @@ export async function initRepo({
       // semver not null safe, accepts null and undefined
       semver.satisfies(platformConfig.gheVersion!, '<3.3.0')
     ) {
-      infoQuery = infoQuery.replace(/\n\s*autoMergeAllowed\s*\n/, '\n');
-      infoQuery = infoQuery.replace(/\n\s*hasIssuesEnabled\s*\n/, '\n');
+      infoQuery = infoQuery.replace(regEx(/\n\s*autoMergeAllowed\s*\n/), '\n');
+      infoQuery = infoQuery.replace(regEx(/\n\s*hasIssuesEnabled\s*\n/), '\n');
     }
 
     // GitHub Enterprise Server <3.9.0 doesn't support hasVulnerabilityAlertsEnabled objects
@@ -555,7 +558,19 @@ export async function initRepo({
       semver.satisfies(platformConfig.gheVersion!, '<3.9.0')
     ) {
       infoQuery = infoQuery.replace(
-        /\n\s*hasVulnerabilityAlertsEnabled\s*\n/,
+        regEx(/\n\s*hasVulnerabilityAlertsEnabled\s*\n/),
+        '\n',
+      );
+    }
+
+    // GitHub Enterprise Server <3.12.0 doesn't support merge queues
+    if (
+      platformConfig.isGhe &&
+      // semver not null safe, accepts null and undefined
+      semver.satisfies(platformConfig.gheVersion!, '<3.12.0')
+    ) {
+      infoQuery = infoQuery.replace(
+        regEx(/\n\s*mergeQueue\s*\{\s*id\s*\}\s*\n/),
         '\n',
       );
     }
@@ -629,6 +644,9 @@ export async function initRepo({
     config.autoMergeAllowed = repo.autoMergeAllowed;
     config.hasIssuesEnabled = repo.hasIssuesEnabled;
     config.hasVulnerabilityAlertsEnabled = repo.hasVulnerabilityAlertsEnabled;
+    config.mergeQueueEnabled[config.defaultBranch] = isNonEmptyObject(
+      repo.mergeQueue,
+    );
 
     const recentIssues = Issue.array()
       .catch([])
@@ -1972,6 +1990,83 @@ export async function createPr({
 
   cachePr(result);
   return result;
+}
+
+async function isMergeQueueEnabled(baseBranch: string): Promise<boolean> {
+  const cachedResult = config.mergeQueueEnabled[baseBranch];
+  if (cachedResult !== undefined) {
+    return cachedResult;
+  }
+
+  // TODO #22198
+  // semver not null safe, accepts null and undefined
+  if (
+    platformConfig.isGhe &&
+    semver.satisfies(platformConfig.gheVersion!, '<3.12.0')
+  ) {
+    // Merge queues are only supported on GHES >=3.12.0
+    config.mergeQueueEnabled[baseBranch] = false;
+    return false;
+  }
+
+  // Assume enabled unless proven otherwise, so the merge queue check is not
+  // skipped by mistake
+  let result = true;
+  try {
+    const res = await githubApi.requestGraphql<{
+      repository: { mergeQueue: { id: string } | null };
+    }>(repoMergeQueueQuery, {
+      variables: {
+        owner: config.repositoryOwner,
+        name: config.repositoryName,
+        branch: baseBranch,
+      },
+      readOnly: true,
+      count: 1, // bypass graphql check
+    });
+    if (res?.errors) {
+      logger.debug(
+        { baseBranch, errors: res.errors },
+        'Failed to fetch merge queue status - assuming merge queue is enabled',
+      );
+    } else {
+      result = isNonEmptyObject(res?.data?.repository?.mergeQueue);
+    }
+  } catch (err) {
+    logger.debug(
+      { baseBranch, err },
+      'Error fetching merge queue status - assuming merge queue is enabled',
+    );
+  }
+
+  config.mergeQueueEnabled[baseBranch] = result;
+  return result;
+}
+
+export async function assertPrNotInMergeQueue(
+  branchName: string,
+  baseBranch?: string,
+): Promise<void> {
+  if (!(await isMergeQueueEnabled(baseBranch ?? config.defaultBranch))) {
+    return;
+  }
+
+  const pr = await findPr({ branchName, state: 'open' });
+  if (!pr) {
+    return;
+  }
+
+  if (
+    await isPrInMergeQueue(
+      githubApi,
+      config.repositoryOwner,
+      config.repositoryName,
+      pr.number,
+    )
+  ) {
+    logger.debug(`PR #${pr.number} is in the merge queue - aborting push`);
+    throw new Error(PR_ALREADY_IN_MERGE_QUEUE);
+  }
 }
 
 export async function updatePr({

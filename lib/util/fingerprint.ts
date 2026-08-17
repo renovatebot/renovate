@@ -15,6 +15,7 @@ function isEmittable(value: unknown, cache: WeakMap<object, boolean>): boolean {
   ) {
     return false;
   }
+  // oxlint-disable-next-line renovate/prefer-is-object -- byte-exact JSON canonicalization: functions are handled explicitly above and must not take the object path
   if (value === null || typeof value !== 'object') {
     return true;
   }
@@ -40,6 +41,7 @@ function fingerprintInto(
   seen: WeakSet<object>,
   emittableCache: WeakMap<object, boolean>,
 ): void {
+  // oxlint-disable-next-line renovate/prefer-is-object -- byte-exact JSON canonicalization: functions must take the JSON.stringify primitive path, but isObject() matches them
   if (value === null || typeof value !== 'object') {
     h.update(JSON.stringify(value));
     return;

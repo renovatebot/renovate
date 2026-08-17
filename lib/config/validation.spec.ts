@@ -44,6 +44,7 @@ describe('config/validation', () => {
     it('returns the deprecationMsg for `dnsCache` as a warning', async () => {
       const config: RenovateConfig = {
         hostRules: [
+          // oxlint-disable-next-line renovate/prefer-partial-in-specs -- intentionally invalid/removed HostRule property
           {
             dnsCache: true,
           } as HostRule,
@@ -501,8 +502,11 @@ describe('config/validation', () => {
           artifactError: 'always',
         },
       };
-      // @ts-expect-error invalid options
-      const { errors } = await configValidation.validateConfig('repo', config);
+      const { errors, warnings } = await configValidation.validateConfig(
+        'repo',
+        // @ts-expect-error invalid options
+        config,
+      );
       expect(errors).toMatchObject([
         {
           message:
@@ -513,7 +517,7 @@ describe('config/validation', () => {
             'Invalid `statusCheckWhen.statusCheckWhen.randomKey` configuration: key is not allowed.',
         },
       ]);
-      expect(errors).toHaveLength(2);
+      expect(warnings).toBeEmptyArray();
     });
 
     it('catches invalid customDatasources record type', async () => {
@@ -1599,9 +1603,10 @@ describe('config/validation', () => {
     it('errors if registryAliases depth is more than 1', async () => {
       const config = {
         registryAliases: {
+          // oxlint-disable-next-line renovate/prefer-partial-in-specs -- intentional incorrect config to check error message
           sample: {
             example1: 'http://www.example.com',
-          } as unknown as string, // intentional incorrect config to check error message
+          } as unknown as string,
         },
       };
       const { warnings, errors } = await configValidation.validateConfig(
@@ -1682,6 +1687,7 @@ describe('config/validation', () => {
     });
 
     it('errors if manager objects are nested', async () => {
+      // oxlint-disable-next-line renovate/prefer-partial-in-specs -- intentionally invalid nested manager config
       const config = {
         pyenv: {
           enabled: false,
@@ -1763,6 +1769,212 @@ describe('config/validation', () => {
       ]);
     });
 
+    it('accepts relative preset references', async () => {
+      const config = {
+        extends: ['./foo', '../foo/bar', '/foo'],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'repo',
+        config,
+        true,
+      );
+      expect(warnings).toEqual([]);
+      expect(errors).toEqual([]);
+    });
+
+    it('accepts relative preset references inside packageRules', async () => {
+      const config = {
+        packageRules: [
+          {
+            matchManagers: ['npm'],
+            extends: ['./rules/npm'],
+          },
+        ],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'repo',
+        config,
+        true,
+      );
+      expect(warnings).toEqual([]);
+      expect(errors).toEqual([]);
+    });
+
+    it('accepts relative preset references nested inside packageRules', async () => {
+      const config = {
+        packageRules: [
+          {
+            matchManagers: ['npm'],
+            minor: {
+              extends: ['./minor-rules'],
+            },
+          },
+        ],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'repo',
+        config,
+        true,
+      );
+      expect(warnings).toEqual([]);
+      expect(errors).toEqual([]);
+    });
+
+    it('accepts selectors-only packageRules which contain a relative preset', async () => {
+      const config = {
+        packageRules: [
+          {
+            matchManagers: ['npm'],
+            extends: ['./x'],
+          },
+        ],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'repo',
+        config,
+        true,
+      );
+      expect(warnings).toEqual([]);
+      expect(errors).toEqual([]);
+    });
+
+    it('warns about selectors-only packageRules which contain a non-relative preset', async () => {
+      const config = {
+        packageRules: [
+          {
+            extends: ['packages:eslint'],
+          },
+        ],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'repo',
+        config,
+        true,
+      );
+      expect(warnings).toEqual([
+        {
+          topic: 'Configuration Error',
+          message:
+            'packageRules[0]: Each packageRule must contain at least one non-match* or non-exclude* field. Rule: {"extends":["packages:eslint"]}',
+        },
+      ]);
+      expect(errors).toEqual([]);
+    });
+
+    it('warns about packageRules whose selectors may come from a relative preset', async () => {
+      const config = {
+        packageRules: [
+          {
+            extends: ['./selectors'],
+            automerge: true,
+          },
+        ],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'repo',
+        config,
+        true,
+      );
+      expect(warnings).toEqual([
+        {
+          topic: 'Configuration Error',
+          message:
+            'packageRules[0]: this rule extends a relative preset that cannot be resolved during validation, so its selectors could not be checked. Rule: {"extends":["./selectors"],"automerge":true}',
+        },
+      ]);
+      expect(errors).toEqual([]);
+    });
+
+    it('warns instead of erroring on packageRules which only contain a relative preset', async () => {
+      const config = {
+        packageRules: [
+          {
+            extends: ['./automerge'],
+          },
+        ],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'repo',
+        config,
+        true,
+      );
+      expect(warnings).toEqual([
+        {
+          topic: 'Configuration Error',
+          message:
+            'packageRules[0]: this rule extends a relative preset that cannot be resolved during validation, so its selectors could not be checked. Rule: {"extends":["./automerge"]}',
+        },
+      ]);
+      expect(errors).toEqual([]);
+    });
+
+    it('errors on packageRules without selectors and without relative presets', async () => {
+      const config = {
+        packageRules: [
+          {
+            automerge: true,
+          },
+        ],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'repo',
+        config,
+        true,
+      );
+      expect(warnings).toEqual([]);
+      expect(errors).toEqual([
+        {
+          topic: 'Configuration Error',
+          message:
+            'packageRules[0]: Each packageRule must contain at least one match* or exclude* selector. Rule: {"automerge":true}',
+        },
+      ]);
+    });
+
+    it('resolves absolute preset references inside packageRules which also contain relative ones', async () => {
+      const config = {
+        packageRules: [
+          {
+            matchManagers: ['npm'],
+            extends: ['./rel', ':pinVersions'],
+          },
+        ],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'repo',
+        config,
+        true,
+      );
+      expect(warnings).toEqual([]);
+      expect(errors).toEqual([]);
+    });
+
+    it('errors on invalid relative preset references', async () => {
+      const config = {
+        extends: ['./foo#v1', './foo:bar', './a//b'],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'repo',
+        config,
+        true,
+      );
+      expect(warnings).toEqual([]);
+      expect(errors).toEqual([
+        {
+          topic: 'Configuration Error',
+          message: 'extends: preset "./a//b" is not valid',
+        },
+        {
+          topic: 'Configuration Error',
+          message: 'extends: preset "./foo#v1" is not valid',
+        },
+        {
+          topic: 'Configuration Error',
+          message: 'extends: preset "./foo:bar" is not valid',
+        },
+      ]);
+    });
+
     it('skips preset syntax validation for templates', async () => {
       const config = {
         extends: ['local>{{ env.PRESET_REPO }}:python-312'],
@@ -1811,11 +2023,33 @@ describe('config/validation', () => {
       );
 
       expect(warnings).toBeEmptyArray();
-      expect(errors).toHaveLength(5);
-      expect(errors[0]).toMatchObject({
-        topic: 'Configuration Error',
-        message: expect.stringContaining('Invalid commit trailer'),
-      });
+      expect(errors).toMatchObject([
+        {
+          topic: 'Configuration Error',
+          message:
+            'Invalid commit trailer: `"Bad key: value"`. Must be a single-line string in the form `Key: value`, where the key contains only letters, digits and `-`.',
+        },
+        {
+          topic: 'Configuration Error',
+          message:
+            'Invalid commit trailer: `"Key: multi\\nline"`. Must be a single-line string in the form `Key: value`, where the key contains only letters, digits and `-`.',
+        },
+        {
+          topic: 'Configuration Error',
+          message:
+            'Invalid commit trailer: `"Key:no-space"`. Must be a single-line string in the form `Key: value`, where the key contains only letters, digits and `-`.',
+        },
+        {
+          topic: 'Configuration Error',
+          message:
+            'Invalid commit trailer: `"no colon"`. Must be a single-line string in the form `Key: value`, where the key contains only letters, digits and `-`.',
+        },
+        {
+          topic: 'Configuration Error',
+          message:
+            'Invalid commit trailer: `42`. Must be a single-line string in the form `Key: value`, where the key contains only letters, digits and `-`.',
+        },
+      ]);
     });
 
     it('warns if only selectors in packageRules', async () => {
@@ -2102,6 +2336,7 @@ describe('config/validation', () => {
         hostRules: [
           {
             matchHost: 'https://domain.com/all-versions',
+            // oxlint-disable-next-line renovate/prefer-partial-in-specs -- intentionally invalid header value type
             headers: {
               'X-Auth-Token': 10,
             } as unknown as Record<string, string>,
@@ -2748,6 +2983,255 @@ describe('config/validation', () => {
         },
       ]);
       expect(errors).toBeEmptyArray();
+    });
+
+    it('validates repositories[]', async () => {
+      const config = {
+        repositories: [
+          'owner/repo1',
+          {
+            repository: 'owner/repo2',
+            extends: ['config:recommended'],
+            enabled: false, // options with parents=['.'] are allowed
+            binarySource: 'global' as const, // globalOnly options are allowed
+            npm: { enabled: false }, // manager configs are allowed
+          },
+        ],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'global',
+        config,
+      );
+      expect(warnings).toBeEmptyArray();
+      expect(errors).toBeEmptyArray();
+    });
+
+    it('errors on repositories[] with invalid entries', async () => {
+      const config = {
+        repositories: [
+          {
+            repository: 'owner/repo1',
+            binarySource: 'invalid' as never,
+            foo: 'bar',
+          },
+          {
+            extends: ['config:recommended'],
+          },
+        ],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'global',
+        // @ts-expect-error: contains invalid values
+        config,
+      );
+      expect(errors).toEqual([
+        {
+          topic: 'Configuration Error',
+          message: 'Invalid configuration option: repositories[0].foo',
+        },
+        {
+          topic: 'Configuration Error',
+          message:
+            'repositories[1]: each repository object entry must have a `repository` string property',
+        },
+      ]);
+      expect(warnings).toEqual([
+        {
+          topic: 'Configuration Error',
+          message:
+            'Invalid value `invalid` for `repositories[0].binarySource`. The allowed values are docker, global, install, hermit.',
+        },
+      ]);
+    });
+
+    it('allows repositories[] as string[]', async () => {
+      const config = {
+        repositories: ['owner/repo1', 'owner/repo2'],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'global',
+        config,
+      );
+      expect(warnings).toBeEmptyArray();
+      expect(errors).toBeEmptyArray();
+    });
+
+    it('errors on repositories[] with empty string values', async () => {
+      const config: AllConfig = {
+        repositories: ['', '  '],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'global',
+        config,
+      );
+      expect(warnings).toEqual([
+        {
+          message:
+            'repositories[0]: each repository string entry entry must be a non-empty string',
+          topic: 'Configuration Error',
+        },
+        {
+          message:
+            'repositories[1]: each repository string entry entry must be a non-empty string',
+          topic: 'Configuration Error',
+        },
+      ]);
+      expect(errors).toBeEmptyArray();
+    });
+
+    it('errors on repositories[] with non-string or non-object values', async () => {
+      const config = {
+        repositories: [
+          [
+            // this is invalid
+            'invalid',
+          ],
+          null,
+          123,
+          456,
+        ],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'global',
+        // @ts-expect-error: contains invalid values
+        config,
+      );
+      expect(warnings).toEqual([
+        {
+          message:
+            'repositories[0]: invalid type, should be either a string or an object',
+          topic: 'Configuration Error',
+        },
+        {
+          message:
+            'repositories[1]: invalid type, should be either a string or an object',
+          topic: 'Configuration Error',
+        },
+        {
+          message:
+            'repositories[2]: invalid type, should be either a string or an object',
+          topic: 'Configuration Error',
+        },
+        {
+          message:
+            'repositories[3]: invalid type, should be either a string or an object',
+          topic: 'Configuration Error',
+        },
+      ]);
+      expect(errors).toBeEmptyArray();
+    });
+
+    it('allows `env` on repositories[] entries within the global `allowedEnv`', async () => {
+      const config: AllConfig = {
+        allowedEnv: ['PATH'],
+        repositories: [
+          {
+            repository: 'owner/repo1',
+            env: { PATH: '/home/ubuntu/bin' },
+          },
+        ],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'global',
+        config,
+      );
+      expect(errors).toBeEmptyArray();
+      expect(warnings).toBeEmptyArray();
+    });
+
+    it('errors on `env` on repositories[] entries outside the global `allowedEnv`', async () => {
+      const config: AllConfig = {
+        allowedEnv: ['PATH'],
+        repositories: [
+          {
+            repository: 'owner/repo1',
+            env: { NOT_ALLOWED: 'value' },
+          },
+        ],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'global',
+        config,
+      );
+      expect(warnings).toBeEmptyArray();
+      expect(errors).toMatchObject([
+        {
+          topic: 'Configuration Error',
+          message:
+            "Env variable name `NOT_ALLOWED` is not allowed by this bot's `allowedEnv`.",
+        },
+      ]);
+    });
+
+    it('lets a repositories[] entry set its own `allowedEnv`', async () => {
+      const config: AllConfig = {
+        allowedEnv: ['NOPE'],
+        repositories: [
+          {
+            repository: 'owner/repo1',
+            allowedEnv: ['PATH'],
+            env: { PATH: '/home/ubuntu/bin' },
+          },
+        ],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'global',
+        config,
+      );
+      expect(errors).toBeEmptyArray();
+      expect(warnings).toBeEmptyArray();
+    });
+
+    it('allows hostRules `headers` on repositories[] entries within the global `allowedHeaders`', async () => {
+      const config: AllConfig = {
+        allowedHeaders: ['X-Custom-*'],
+        repositories: [
+          {
+            repository: 'owner/repo1',
+            hostRules: [
+              {
+                matchHost: 'github.com',
+                headers: { 'X-Custom-Token': 'value' },
+              },
+            ],
+          },
+        ],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'global',
+        config,
+      );
+      expect(errors).toBeEmptyArray();
+      expect(warnings).toBeEmptyArray();
+    });
+
+    it('errors on hostRules `headers` on repositories[] entries outside the global `allowedHeaders`', async () => {
+      const config: AllConfig = {
+        allowedHeaders: ['X-Custom-*'],
+        repositories: [
+          {
+            repository: 'owner/repo1',
+            hostRules: [
+              {
+                matchHost: 'github.com',
+                headers: { Authorization: 'Bearer token' },
+              },
+            ],
+          },
+        ],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'global',
+        config,
+      );
+      expect(warnings).toBeEmptyArray();
+      expect(errors).toMatchObject([
+        {
+          topic: 'Configuration Error',
+          message:
+            "hostRules header `Authorization` is not allowed by this bot's `allowedHeaders`.",
+        },
+      ]);
     });
 
     it('validates object type options', async () => {

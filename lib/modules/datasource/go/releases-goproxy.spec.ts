@@ -287,6 +287,38 @@ describe('modules/datasource/go/releases-goproxy', () => {
       },
     );
 
+    it('handles pipe fallback across an empty segment', async () => {
+      process.env.GOPROXY = `https://example.com|,${baseUrl}`;
+
+      httpMock
+        .scope('https://example.com/github.com/google/btree')
+        .get('/@v/list')
+        .replyWithError('unknown');
+
+      httpMock
+        .scope(`${baseUrl}/github.com/google/btree`)
+        .get('/@v/list')
+        .reply(200, 'v1.0.0')
+        .get('/@v/v1.0.0.info')
+        .reply(200, { Version: 'v1.0.0', Time: '2018-08-13T15:31:12Z' })
+        .get('/@latest')
+        .reply(200, { Version: 'v1.0.0' })
+        .get('/v2/@v/list')
+        .reply(404);
+
+      const res = await datasource.getReleases({
+        packageName: 'github.com/google/btree',
+      });
+
+      expect(res).toEqual({
+        releases: [
+          { releaseTimestamp: '2018-08-13T15:31:12.000Z', version: 'v1.0.0' },
+        ],
+        sourceUrl: 'https://github.com/google/btree',
+        tags: { latest: 'v1.0.0' },
+      });
+    });
+
     it('handles comma fallback', async () => {
       process.env.GOPROXY = [
         'https://foo.example.com',

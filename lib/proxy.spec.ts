@@ -1,4 +1,7 @@
 import { bootstrap, hasProxy } from './proxy.ts';
+import * as sanitize from './util/sanitize.ts';
+
+const addSecretForSanitizing = vi.spyOn(sanitize, 'addSecretForSanitizing');
 
 describe('proxy', () => {
   const httpProxy = 'http://example.org/http-proxy';
@@ -56,5 +59,35 @@ describe('proxy', () => {
     process.env.no_proxy = noProxy;
     bootstrap();
     expect(hasProxy()).toBeFalse();
+  });
+
+  it('sanitizes password from HTTP_PROXY credentials', () => {
+    process.env.HTTP_PROXY = 'http://user:s3cr3t@example.org';
+    bootstrap();
+    expect(addSecretForSanitizing).toHaveBeenCalledWith('s3cr3t', 'global');
+  });
+
+  it('sanitizes password from HTTPS_PROXY credentials', () => {
+    process.env.HTTPS_PROXY = 'http://user:s3cr3t@example.org';
+    bootstrap();
+    expect(addSecretForSanitizing).toHaveBeenCalledWith('s3cr3t', 'global');
+  });
+
+  it('does not sanitize username-only proxy credentials', () => {
+    process.env.HTTP_PROXY = 'http://user@example.org';
+    bootstrap();
+    expect(addSecretForSanitizing).not.toHaveBeenCalled();
+  });
+
+  it('sanitizes password-only proxy credentials', () => {
+    process.env.HTTP_PROXY = 'http://:s3cr3t@example.org';
+    bootstrap();
+    expect(addSecretForSanitizing).toHaveBeenCalledWith('s3cr3t', 'global');
+  });
+
+  it('does not sanitize when proxy has no credentials', () => {
+    process.env.HTTP_PROXY = httpProxy;
+    bootstrap();
+    expect(addSecretForSanitizing).not.toHaveBeenCalled();
   });
 });

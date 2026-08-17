@@ -4,6 +4,7 @@ import { escapeRegExp, regEx } from '../../../util/regex.ts';
 import { DockerDatasource } from '../../datasource/docker/index.ts';
 import { GithubReleaseAttachmentsDatasource } from '../../datasource/github-release-attachments/index.ts';
 import { GithubReleasesDatasource } from '../../datasource/github-releases/index.ts';
+import { NodeVersionDatasource } from '../../datasource/node-version/index.ts';
 import { NpmDatasource } from '../../datasource/npm/index.ts';
 import { PypiDatasource } from '../../datasource/pypi/index.ts';
 import { RubyVersionDatasource } from '../../datasource/ruby-version/index.ts';
@@ -11,6 +12,12 @@ import { RustVersionDatasource } from '../../datasource/rust-version/index.ts';
 import * as condaVersioning from '../../versioning/conda/index.ts';
 import * as npmVersioning from '../../versioning/npm/index.ts';
 import type { PackageDependency } from '../types.ts';
+
+/**
+ * Parses a step - or just its `with:` block - into the dependencies it
+ * declares. Most actions declare a single one, but a step may yield several.
+ */
+export type ActionSchema = z.ZodType<PackageDependency[]>;
 
 export interface CommunityActionConfig {
   datasource: string;
@@ -20,35 +27,30 @@ export interface CommunityActionConfig {
   extractVersion?: string;
 
   /**
-   * should return `true` if the version is invalid and should be skipped
+   * Parses the `with:` block, defaulting to the `version:` input.
+   *
+   * The fields above are applied to every dependency it yields, so a schema
+   * which yields dependencies of more than one kind must set them itself.
    */
-  isInvalid?: (value: string) => boolean;
-
-  withSchema?: z.ZodType<{ val: string | undefined } & Record<string, unknown>>;
+  withSchema?: ActionSchema;
 }
-
-export type ActionSchema = z.ZodType<PackageDependency>;
 
 export function actionSchema(
   name: string,
-  { isInvalid, withSchema, ...cfg }: CommunityActionConfig,
+  { withSchema, ...cfg }: CommunityActionConfig,
 ): ActionSchema {
   return z
     .object({
       uses: matchAction(name),
       with: withSchema ?? VersionVal,
     })
-    .transform(
-      ({ with: { val, ...meta } }): PackageDependency => ({
-        ...cfg,
-        ...meta,
-        ...parseValue(val, isInvalid),
+    .transform(({ with: deps }) =>
+      deps.map((dep) => {
+        const merged = { ...cfg, ...dep };
+        merged.depName ??= merged.packageName;
+        return merged;
       }),
-    )
-    .transform((dep) => {
-      dep.depName ??= dep.packageName;
-      return dep;
-    });
+    );
 }
 
 function matchAction(action: string): z.ZodString {
@@ -79,30 +81,79 @@ function parseValue(
   return { currentValue, depType: 'uses-with' };
 }
 
-function valSchema(key: string): z.ZodType<{ val: string | undefined }> {
+/**
+ * A single dependency, versioned by the given `with:` input.
+ *
+ * @param isInvalid should return `true` if the version is invalid and should be skipped
+ */
+function valSchema(
+  key: string,
+  isInvalid?: (val: string) => boolean,
+): ActionSchema {
   return z
     .object({ [key]: z.string().optional() })
-    .transform((val) => ({ val: val[key] }));
+    .transform((val) => [parseValue(val[key], isInvalid)]);
 }
 
-const VersionVal = z
-  .object({ version: z.string().optional() })
-  .transform((val) => ({ val: val.version }));
+const VersionVal = valSchema('version');
 
-const InstallBinaryWith = z
+const InstallBinaryWith: ActionSchema = z
   .object({ repo: z.string(), tag: z.string() })
-  .transform(({ repo, tag }) => ({ packageName: repo, val: tag }));
+  .transform(({ repo, tag }) => [{ packageName: repo, ...parseValue(tag) }]);
 
 const sha256Regex = regEx(/^[a-f0-9]{64}$/);
-const MiseWith = z
+const MiseWith: ActionSchema = z
   .object({
     version: z.string().optional(),
     sha256: z.string().optional(),
   })
-  .transform(({ version, sha256 }) => ({
-    val: version,
-    ...(sha256 && sha256Regex.test(sha256) ? { currentDigest: sha256 } : {}),
-  }));
+  .transform(({ version, sha256 }) => [
+    {
+      ...parseValue(version),
+      ...(sha256 && sha256Regex.test(sha256) ? { currentDigest: sha256 } : {}),
+    },
+  ]);
+
+// Runtimes installable by `pnpm/setup`, keyed by the name used in its
+// `runtime:` input. `bun` and `deno` reuse the datasources of their respective
+// `setup-*` actions below.
+const pnpmRuntimes: Record<string, PackageDependency | undefined> = {
+  node: { datasource: NodeVersionDatasource.id, packageName: 'node' },
+  bun: { datasource: NpmDatasource.id, packageName: 'bun' },
+  deno: { datasource: NpmDatasource.id, packageName: 'deno' },
+};
+
+function parsePnpmRuntime(runtime: string | undefined): PackageDependency[] {
+  if (!runtime) {
+    return [];
+  }
+
+  // `<name>` or `<name>@<version>`, matching pnpm's `packageManager` field syntax
+  const [name, version] = runtime.split('@');
+  const cfg = pnpmRuntimes[name];
+  if (!cfg) {
+    return [
+      {
+        packageName: name || runtime,
+        depType: 'uses-with',
+        skipStage: 'extract',
+        skipReason: 'invalid-name',
+      },
+    ];
+  }
+
+  return [{ ...cfg, ...parseValue(version) }];
+}
+
+const PnpmSetupWith: ActionSchema = z
+  .object({
+    version: z.string().optional(),
+    runtime: z.string().optional(),
+  })
+  .transform(({ version, runtime }) => [
+    parseValue(version),
+    ...parsePnpmRuntime(runtime),
+  ]);
 
 /**
  * Community contributed actions with known version input schemas.
@@ -172,7 +223,7 @@ export const communityActions: Record<string, CommunityActionConfig> = {
   'jakebailey/pyright-action': {
     datasource: NpmDatasource.id,
     packageName: 'pyright',
-    isInvalid: (val) => val === 'PATH',
+    withSchema: valSchema('version', (val) => val === 'PATH'),
   },
   'jaxxstorm/action-install-gh-release': {
     datasource: GithubReleasesDatasource.id,
@@ -196,6 +247,11 @@ export const communityActions: Record<string, CommunityActionConfig> = {
   'pnpm/action-setup': {
     datasource: NpmDatasource.id,
     packageName: 'pnpm',
+  },
+  'pnpm/setup': {
+    datasource: NpmDatasource.id,
+    packageName: 'pnpm',
+    withSchema: PnpmSetupWith,
   },
   'prefix-dev/setup-pixi': {
     datasource: GithubReleasesDatasource.id,

@@ -168,6 +168,31 @@ describe('modules/manager/gradle-wrapper/artifacts', () => {
       ]);
     });
 
+    it('quotes a distributionUrl containing shell metacharacters', async () => {
+      const execSnapshots = mockExecAll();
+      git.getRepoStatus.mockResolvedValue(
+        partial<StatusResult>({
+          modified: ['gradle/wrapper/gradle-wrapper.properties'],
+        }),
+      );
+
+      await updateArtifacts({
+        packageFileName: 'gradle/wrapper/gradle-wrapper.properties',
+        updatedDeps: [],
+        // distributionUrl as it would be parsed from an attacker-controlled
+        // gradle-wrapper.properties
+        newPackageFileContent:
+          'distributionUrl=https\\://example.com/gradle.zip;touch pwned',
+        config: { ...config, newValue: '6.3' },
+      });
+
+      expect(execSnapshots).toMatchObject([
+        {
+          cmd: './gradlew -Dorg.gradle.jvmargs="-Xms512m -Xmx512m" :wrapper --gradle-distribution-url \'https://example.com/gradle.zip;touch pwned\'',
+        },
+      ]);
+    });
+
     it('aborts if allowedUnsafeExecutions does not include `toolSettings`', async () => {
       GlobalConfig.set({
         ...adminConfig,
@@ -292,11 +317,11 @@ describe('modules/manager/gradle-wrapper/artifacts', () => {
             '-e CONTAINERBASE_CACHE_DIR ' +
             '-w "/tmp/github/some/repo" ' +
             'ghcr.io/renovatebot/base-image' +
-            ' bash -l -c "' +
+            " bash -l -c '" +
             'install-tool java 11.0.1' +
             ' && ' +
-            './gradlew -Dorg.gradle.jvmargs=\\"-Xms512m -Xmx512m\\" :wrapper --gradle-distribution-url https://services.gradle.org/distributions/gradle-6.3-bin.zip --gradle-distribution-sha256-sum 038794feef1f4745c6347107b6726279d1c824f3fc634b60f86ace1e9fbd1768' +
-            '"',
+            './gradlew -Dorg.gradle.jvmargs="-Xms512m -Xmx512m" :wrapper --gradle-distribution-url https://services.gradle.org/distributions/gradle-6.3-bin.zip --gradle-distribution-sha256-sum 038794feef1f4745c6347107b6726279d1c824f3fc634b60f86ace1e9fbd1768' +
+            "'",
           options: { cwd: '/tmp/github/some/repo' },
         },
       ]);
