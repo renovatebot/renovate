@@ -1,7 +1,6 @@
 import { isTruthy } from '@sindresorhus/is';
 import { z } from 'zod/v4';
 import { DeepNullish, LooseArray } from '../../../util/schema-utils/index.ts';
-import { Timestamp } from '../../../util/timestamp.ts';
 
 export const PypiRelease = DeepNullish(
   z.object({
@@ -36,7 +35,10 @@ export const PypiSimpleFile = DeepNullish(
     'requires-python': z.string().optional(),
     yanked: z.union([z.boolean(), z.string()]).optional().default(false),
     // `upload-time` is specified by PEP 700
-    'upload-time': Timestamp.optional(),
+    // Parsed leniently as a string here; `asTimestamp` coerces it downstream,
+    // matching the JSON-API path so an unparseable value degrades to a
+    // missing timestamp instead of dropping the whole file entry.
+    'upload-time': z.string().optional(),
   }),
 ).transform(
   ({

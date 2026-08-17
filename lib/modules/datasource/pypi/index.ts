@@ -4,6 +4,7 @@ import { logger } from '../../../logger/index.ts';
 import { coerceArray, deduplicateArray } from '../../../util/array.ts';
 import { getEnv } from '../../../util/env.ts';
 import { parse } from '../../../util/html.ts';
+import { HttpError } from '../../../util/http/index.ts';
 import type { OutgoingHttpHeaders } from '../../../util/http/types.ts';
 import { regEx } from '../../../util/regex.ts';
 import { Json } from '../../../util/schema-utils/index.ts';
@@ -300,7 +301,7 @@ export class PypiDatasource extends Datasource {
   private static getSimpleReleasesFromJson(
     json: string,
     packageName: string,
-  ): Releases {
+  ): Releases | null {
     const releases: Releases = {};
     const parsed = Json.pipe(PypiSimpleResponse).safeParse(json);
     if (!parsed.success) {
@@ -308,7 +309,9 @@ export class PypiDatasource extends Datasource {
         { packageName, err: parsed.error },
         'Failed to parse JSON-based Simple API response',
       );
-      return releases;
+      // Distinguish a malformed response from a package with genuinely no
+      // files, so the caller doesn't mistake an error for an empty result.
+      return null;
     }
     for (const file of parsed.data.files) {
       const version = PypiDatasource.extractVersionFromLinkText(
@@ -341,7 +344,26 @@ export class PypiDatasource extends Datasource {
       accept:
         'application/vnd.pypi.simple.v1+json, application/vnd.pypi.simple.v1+html; q=0.1, text/html; q=0.01',
     };
-    const response = await this.http.getText(sanitizedUrl, { headers });
+    let response: Awaited<ReturnType<typeof this.http.getText>>;
+    try {
+      response = await this.http.getText(sanitizedUrl, { headers });
+    } catch (err) {
+      // A registry doing strict content negotiation may not honor the
+      // `text/html; q=0.01` fallback and reject the request outright.
+      // Retry once without the negotiated `accept` header to preserve the
+      // pre-PEP-691 behaviour of a plain request.
+      if (err instanceof HttpError && err.response?.statusCode === 406) {
+        logger.trace(
+          { packageName, hostUrl },
+          'Registry rejected negotiated Accept header, retrying without it',
+        );
+        response = await this.http.getText(sanitizedUrl, {
+          headers: authHeaders,
+        });
+      } else {
+        throw err;
+      }
+    }
     const dep = response?.body;
     if (!dep) {
       logger.trace({ dependency: packageName }, 'pip package not found');
@@ -351,17 +373,37 @@ export class PypiDatasource extends Datasource {
       dependency.isPrivate = true;
     }
 
-    // Dispatch deterministically on the negotiated content-type: JSON
-    // serialization (PEP 691) or the legacy HTML serialization (PEP 503).
+    // Dispatch on the response content-type: JSON serialization (PEP 691)
+    // or the legacy HTML serialization (PEP 503). Matched loosely (any
+    // `json` media type) rather than the exact vendor type, as some
+    // registries/proxies relabel or strip the vendor-specific media type
+    // while still returning JSON.
     const contentType = response.headers['content-type'];
-    const releases = contentType?.includes(
-      'application/vnd.pypi.simple.v1+json',
-    )
-      ? PypiDatasource.getSimpleReleasesFromJson(dep, packageName)
-      : PypiDatasource.getSimpleReleasesFromHtml(dep, packageName);
+    const isJson = !!contentType && contentType.includes('json');
+    if (isJson) {
+      const releases = PypiDatasource.getSimpleReleasesFromJson(
+        dep,
+        packageName,
+      );
+      // A parse failure is distinct from a package with genuinely no files;
+      // don't fall back to HTML-parsing a JSON body that failed schema
+      // validation, and don't report an empty release list as if it were
+      // a real (if empty) result.
+      if (releases === null) {
+        return null;
+      }
+      dependency.releases = PypiDatasource.toReleases(releases);
+      return dependency;
+    }
 
+    const releases = PypiDatasource.getSimpleReleasesFromHtml(dep, packageName);
+    dependency.releases = PypiDatasource.toReleases(releases);
+    return dependency;
+  }
+
+  private static toReleases(releases: Releases): Release[] {
     const versions = Object.keys(releases);
-    dependency.releases = versions.map((version) => {
+    return versions.map((version) => {
       const versionReleases = coerceArray(releases[version]);
       const isDeprecated = versionReleases.some(({ yanked }) => yanked);
       const result: Release = { version };
@@ -384,6 +426,5 @@ export class PypiDatasource extends Datasource {
       };
       return result;
     });
-    return dependency;
   }
 }
