@@ -581,6 +581,9 @@ importers:
       oxlint-tsgolint:
         specifier: 7.0.2001
         version: 7.0.2001
+      re2:
+        specifier: 1.26.1
+        version: 1.26.1
       rimraf:
         specifier: 6.1.3
         version: 6.1.3
@@ -621,9 +624,6 @@ importers:
       openpgp:
         specifier: 6.3.1
         version: 6.3.1(@openpgp/web-stream-tools@0.3.1)
-      re2:
-        specifier: 1.26.1
-        version: 1.26.1
 
 packages:
 
@@ -7697,8 +7697,7 @@ snapshots:
 
   '@yuku-toolchain/types@0.8.3': {}
 
-  abbrev@5.0.0:
-    optional: true
+  abbrev@5.0.0: {}
 
   adm-zip@0.6.0: {}
 
@@ -8367,8 +8366,7 @@ snapshots:
 
   expect-type@1.4.0: {}
 
-  exponential-backoff@3.1.3:
-    optional: true
+  exponential-backoff@3.1.3: {}
 
   extend@3.0.2: {}
 
@@ -8833,8 +8831,7 @@ snapshots:
 
   ini@6.0.0: {}
 
-  install-artifact-from-github@1.7.0:
-    optional: true
+  install-artifact-from-github@1.7.0: {}
 
   is-alphabetical@2.0.1: {}
 
@@ -9678,8 +9675,7 @@ snapshots:
       object-assign: 4.1.1
       thenify-all: 1.6.0
 
-  nan@2.28.0:
-    optional: true
+  nan@2.28.0: {}
 
   nanoid@3.3.16: {}
 
@@ -9729,7 +9725,6 @@ snapshots:
       tinyglobby: 0.2.17
       undici: 8.9.0
       which: 7.0.0
-    optional: true
 
   node-html-parser@7.1.0:
     dependencies:
@@ -9745,7 +9740,6 @@ snapshots:
   nopt@10.0.1:
     dependencies:
       abbrev: 5.0.0
-    optional: true
 
   normalize-package-data@6.0.2:
     dependencies:
@@ -10087,8 +10081,7 @@ snapshots:
     dependencies:
       parse-ms: 4.0.0
 
-  proc-log@7.0.0:
-    optional: true
+  proc-log@7.0.0: {}
 
   process-nextick-args@2.0.1: {}
 
@@ -10140,7 +10133,6 @@ snapshots:
       install-artifact-from-github: 1.7.0
       nan: 2.28.0
       node-gyp: 13.0.1
-    optional: true
 
   react-is@18.3.1: {}
 
@@ -10810,8 +10802,7 @@ snapshots:
 
   undici@7.29.0: {}
 
-  undici@8.9.0:
-    optional: true
+  undici@8.9.0: {}
 
   unicode-emoji-modifier-base@1.0.0: {}
 
