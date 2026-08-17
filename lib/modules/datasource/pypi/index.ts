@@ -219,6 +219,20 @@ export class PypiDatasource extends Datasource {
     return dependency;
   }
 
+  private static getEarliestTimestamp(
+    releases: PypiRelease[],
+  ): Timestamp | null {
+    let earliest: Timestamp | null = null;
+    for (const { upload_time } of releases) {
+      const timestamp = asTimestamp(upload_time);
+      // `asTimestamp` normalizes to UTC ISO 8601, so comparing the strings compares the instants
+      if (timestamp && (!earliest || timestamp < earliest)) {
+        earliest = timestamp;
+      }
+    }
+    return earliest;
+  }
+
   private static extractVersionFromLinkText(
     text: string,
     packageName: string,
@@ -436,21 +450,6 @@ export class PypiDatasource extends Datasource {
    * one: that is when the version was first published, which is what
    * `minimumReleaseAge` needs.
    */
-  private static getEarliestTimestamp(
-    releases: PypiRelease[],
-  ): Timestamp | null {
-    let earliest: Timestamp | null = null;
-    for (const { upload_time } of releases) {
-      const timestamp = asTimestamp(upload_time);
-      // `asTimestamp` normalizes to UTC ISO 8601, so comparing the strings
-      // compares the instants
-      if (timestamp && (!earliest || timestamp < earliest)) {
-        earliest = timestamp;
-      }
-    }
-    return earliest;
-  }
-
   private static toReleases(releases: Releases): Release[] {
     const versions = Object.keys(releases);
     return versions.map((version) => {

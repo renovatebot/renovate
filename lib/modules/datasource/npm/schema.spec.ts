@@ -192,6 +192,17 @@ describe('modules/datasource/npm/schema', () => {
       });
     });
 
+    it('drops an invalid package-level `homepage` (e.g. `null`)', () => {
+      const input = {
+        name: 'mypackage',
+        'dist-tags': { latest: '1.0.0' },
+        versions: { '1.0.0': {} },
+        homepage: null,
+      };
+      const result = NpmResponse.parse(input);
+      expect(result.homepage).toBeUndefined();
+    });
+
     describe('parses a response with an array of objects for the `repository`, and returns the first element', () => {
       // https://registry.npmjs.org/tmp
       it('as a package response', () => {

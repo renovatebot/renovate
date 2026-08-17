@@ -13,6 +13,7 @@ vi.mock('google-auth-library');
 const googleAuth = vi.mocked(_googleAuth);
 
 const res1 = Fixtures.get('azure-cli-monitor.json');
+const numpyResponse = Fixtures.get('numpy.json');
 const htmlResponse = Fixtures.get('versions-html.html');
 const mixedCaseResponse = Fixtures.get('versions-html-mixed-case.html');
 const withPeriodsResponse = Fixtures.get('versions-html-with-periods.html');
@@ -108,6 +109,53 @@ describe('modules/datasource/pypi/index', () => {
           packageName: 'azure-cli-monitor',
         }),
       ).toMatchSnapshot();
+    });
+
+    it('uses the earliest upload_time of the files of a version', async () => {
+      // The order of the files is not meaningful, so the timestamp must not
+      // depend on it: the wheel is listed first, but uploaded a week later
+      const json = codeBlock`
+        {
+          "info": { "name": "foo" },
+          "releases": {
+            "1.0.0": [
+              {
+                "filename": "foo-1.0.0-py3-none-any.whl",
+                "upload_time": "2024-01-08T00:00:00"
+              },
+              {
+                "filename": "foo-1.0.0.tar.gz",
+                "upload_time": "2024-01-01T00:00:00"
+              }
+            ]
+          }
+        }
+      `;
+      httpMock.scope(baseUrl).get('/foo/json').reply(200, json);
+
+      const res = await getPkgReleases({ datasource, packageName: 'foo' });
+
+      expect(res?.releases).toEqual([
+        {
+          releaseTimestamp: '2024-01-01T00:00:00.000Z',
+          version: '1.0.0',
+        },
+      ]);
+    });
+
+    it('uses the upload_time of the first file of real world data', async () => {
+      // `numpy` shows how far off that can be:
+      // - `1.5.1` was released in 2010
+      // - `1.5.1` gained a wheel in 2014, which PyPI lists first
+      // - `1.5.0` lists its sdist first, even though a Windows installer was uploaded earlier
+      httpMock.scope(baseUrl).get('/numpy/json').reply(200, numpyResponse);
+
+      const res = await getPkgReleases({ datasource, packageName: 'numpy' });
+
+      expect(res?.releases).toEqual([
+        { releaseTimestamp: '2010-08-31T18:15:09.000Z', version: '1.5.0' },
+        { releaseTimestamp: '2010-11-18T14:16:58.000Z', version: '1.5.1' },
+      ]);
     });
 
     it('supports custom datasource url', async () => {
@@ -1242,6 +1290,37 @@ describe('modules/datasource/pypi/index', () => {
       // `1.0.0` has a file installable on any Python version, `1.1.0` does not
       expect(res?.releases).toMatchObject([{ version: '1.0.0' }]);
     });
+  });
+
+  it('keeps versions with a file without data-requires-python under strict constraints filtering', async () => {
+    // if a release's files has at least one `data-requires-python`, and at least one without, we should use the present value, rather than losing both
+    const html = codeBlock`
+        <html>
+          <body>
+            <!-- no data-requires-python -->
+            <a href="https://example.com/dj_database_url-1.0.0-py3-none-any.whl">dj_database_url-1.0.0-py3-none-any.whl</a><br/>
+            <!-- has data-requires-python -->
+            <a href="https://example.com/dj-database-url-1.0.0.tar.gz" data-requires-python="&gt;=3.9">dj-database-url-1.0.0.tar.gz</a><br/>
+
+            <!-- a different release -->
+            <a href="https://example.com/dj-database-url-1.1.0.tar.gz" data-requires-python="&gt;=3.9">dj-database-url-1.1.0.tar.gz</a><br/>
+          </body>
+        </html>
+      `;
+    httpMock
+      .scope('https://some.registry.org/simple/')
+      .get('/dj-database-url/')
+      .reply(200, html);
+
+    const res = await getPkgReleases({
+      datasource,
+      registryUrls: ['https://some.registry.org/simple/'],
+      constraints: { python: '3.8.0' },
+      constraintsFiltering: 'strict',
+      packageName: 'dj-database-url',
+    });
+
+    expect(res?.releases).toEqual([{ version: '1.0.0' }]);
   });
 
   it('supports Google Auth with simple endpoint', async () => {

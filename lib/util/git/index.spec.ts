@@ -198,6 +198,7 @@ describe('util/git/index', { timeout: 30000 }, () => {
     await local.addConfig('commit.gpgsign', 'false');
     await local.addConfig('user.name', 'Jest');
     await local.addConfig('user.email', 'Jest@example.com');
+    await disableGitAutoMaintenance(local);
     behindBaseCache.getCachedBehindBaseResult.mockReturnValue(null);
     updateDateCache.getCachedUpdateDateResult.mockReturnValue(null);
   });
