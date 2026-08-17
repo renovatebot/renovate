@@ -576,7 +576,7 @@ export async function getDependencyInfo(
           'groupId',
           'artifactId',
           'version',
-        ].map((k) => parent.valueWithPath(k)?.replace(/\s+/g, ''));
+        ].map((k) => parent.valueWithPath(k)?.replace(regEx(/\s+/g), ''));
         if (parentGroupId && parentArtifactId && parentVersion) {
           const parentDisplayId = `${parentGroupId}:${parentArtifactId}`;
           const parentDependency = getDependencyParts(parentDisplayId);

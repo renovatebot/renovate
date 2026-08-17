@@ -44,6 +44,7 @@ describe('config/validation', () => {
     it('returns the deprecationMsg for `dnsCache` as a warning', async () => {
       const config: RenovateConfig = {
         hostRules: [
+          // oxlint-disable-next-line renovate/prefer-partial-in-specs -- intentionally invalid/removed HostRule property
           {
             dnsCache: true,
           } as HostRule,
@@ -1602,9 +1603,10 @@ describe('config/validation', () => {
     it('errors if registryAliases depth is more than 1', async () => {
       const config = {
         registryAliases: {
+          // oxlint-disable-next-line renovate/prefer-partial-in-specs -- intentional incorrect config to check error message
           sample: {
             example1: 'http://www.example.com',
-          } as unknown as string, // intentional incorrect config to check error message
+          } as unknown as string,
         },
       };
       const { warnings, errors } = await configValidation.validateConfig(
@@ -1685,6 +1687,7 @@ describe('config/validation', () => {
     });
 
     it('errors if manager objects are nested', async () => {
+      // oxlint-disable-next-line renovate/prefer-partial-in-specs -- intentionally invalid nested manager config
       const config = {
         pyenv: {
           enabled: false,
@@ -1762,6 +1765,212 @@ describe('config/validation', () => {
           message: expect.stringContaining(
             'github>owner/repo//path@commitHash',
           ),
+        },
+      ]);
+    });
+
+    it('accepts relative preset references', async () => {
+      const config = {
+        extends: ['./foo', '../foo/bar', '/foo'],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'repo',
+        config,
+        true,
+      );
+      expect(warnings).toEqual([]);
+      expect(errors).toEqual([]);
+    });
+
+    it('accepts relative preset references inside packageRules', async () => {
+      const config = {
+        packageRules: [
+          {
+            matchManagers: ['npm'],
+            extends: ['./rules/npm'],
+          },
+        ],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'repo',
+        config,
+        true,
+      );
+      expect(warnings).toEqual([]);
+      expect(errors).toEqual([]);
+    });
+
+    it('accepts relative preset references nested inside packageRules', async () => {
+      const config = {
+        packageRules: [
+          {
+            matchManagers: ['npm'],
+            minor: {
+              extends: ['./minor-rules'],
+            },
+          },
+        ],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'repo',
+        config,
+        true,
+      );
+      expect(warnings).toEqual([]);
+      expect(errors).toEqual([]);
+    });
+
+    it('accepts selectors-only packageRules which contain a relative preset', async () => {
+      const config = {
+        packageRules: [
+          {
+            matchManagers: ['npm'],
+            extends: ['./x'],
+          },
+        ],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'repo',
+        config,
+        true,
+      );
+      expect(warnings).toEqual([]);
+      expect(errors).toEqual([]);
+    });
+
+    it('warns about selectors-only packageRules which contain a non-relative preset', async () => {
+      const config = {
+        packageRules: [
+          {
+            extends: ['packages:eslint'],
+          },
+        ],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'repo',
+        config,
+        true,
+      );
+      expect(warnings).toEqual([
+        {
+          topic: 'Configuration Error',
+          message:
+            'packageRules[0]: Each packageRule must contain at least one non-match* or non-exclude* field. Rule: {"extends":["packages:eslint"]}',
+        },
+      ]);
+      expect(errors).toEqual([]);
+    });
+
+    it('warns about packageRules whose selectors may come from a relative preset', async () => {
+      const config = {
+        packageRules: [
+          {
+            extends: ['./selectors'],
+            automerge: true,
+          },
+        ],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'repo',
+        config,
+        true,
+      );
+      expect(warnings).toEqual([
+        {
+          topic: 'Configuration Error',
+          message:
+            'packageRules[0]: this rule extends a relative preset that cannot be resolved during validation, so its selectors could not be checked. Rule: {"extends":["./selectors"],"automerge":true}',
+        },
+      ]);
+      expect(errors).toEqual([]);
+    });
+
+    it('warns instead of erroring on packageRules which only contain a relative preset', async () => {
+      const config = {
+        packageRules: [
+          {
+            extends: ['./automerge'],
+          },
+        ],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'repo',
+        config,
+        true,
+      );
+      expect(warnings).toEqual([
+        {
+          topic: 'Configuration Error',
+          message:
+            'packageRules[0]: this rule extends a relative preset that cannot be resolved during validation, so its selectors could not be checked. Rule: {"extends":["./automerge"]}',
+        },
+      ]);
+      expect(errors).toEqual([]);
+    });
+
+    it('errors on packageRules without selectors and without relative presets', async () => {
+      const config = {
+        packageRules: [
+          {
+            automerge: true,
+          },
+        ],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'repo',
+        config,
+        true,
+      );
+      expect(warnings).toEqual([]);
+      expect(errors).toEqual([
+        {
+          topic: 'Configuration Error',
+          message:
+            'packageRules[0]: Each packageRule must contain at least one match* or exclude* selector. Rule: {"automerge":true}',
+        },
+      ]);
+    });
+
+    it('resolves absolute preset references inside packageRules which also contain relative ones', async () => {
+      const config = {
+        packageRules: [
+          {
+            matchManagers: ['npm'],
+            extends: ['./rel', ':pinVersions'],
+          },
+        ],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'repo',
+        config,
+        true,
+      );
+      expect(warnings).toEqual([]);
+      expect(errors).toEqual([]);
+    });
+
+    it('errors on invalid relative preset references', async () => {
+      const config = {
+        extends: ['./foo#v1', './foo:bar', './a//b'],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'repo',
+        config,
+        true,
+      );
+      expect(warnings).toEqual([]);
+      expect(errors).toEqual([
+        {
+          topic: 'Configuration Error',
+          message: 'extends: preset "./a//b" is not valid',
+        },
+        {
+          topic: 'Configuration Error',
+          message: 'extends: preset "./foo#v1" is not valid',
+        },
+        {
+          topic: 'Configuration Error',
+          message: 'extends: preset "./foo:bar" is not valid',
         },
       ]);
     });
@@ -2127,6 +2336,7 @@ describe('config/validation', () => {
         hostRules: [
           {
             matchHost: 'https://domain.com/all-versions',
+            // oxlint-disable-next-line renovate/prefer-partial-in-specs -- intentionally invalid header value type
             headers: {
               'X-Auth-Token': 10,
             } as unknown as Record<string, string>,

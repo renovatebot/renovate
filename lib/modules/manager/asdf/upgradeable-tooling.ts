@@ -36,7 +36,7 @@ const hugoDefinition: ToolingDefinition = {
     extractVersion: '^v(?<version>\\S+)',
     // The asdf hugo plugin supports prefixing the version with
     // `extended_`. Extended versions feature Sass support.
-    currentValue: version.replace(/^extended_/, ''),
+    currentValue: version.replace(regEx(/^extended_/), ''),
   }),
 };
 
@@ -411,7 +411,7 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
   java: {
     asdfPluginUrl: 'https://github.com/halcyon/asdf-java',
     config: (version) => {
-      const adoptOpenJdkMatches = /^adoptopenjdk-(?<version>\d\S+)/.exec(
+      const adoptOpenJdkMatches = regEx(/^adoptopenjdk-(?<version>\d\S+)/).exec(
         version,
       )?.groups;
       if (adoptOpenJdkMatches) {
@@ -421,9 +421,9 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
           currentValue: adoptOpenJdkMatches.version,
         };
       }
-      const adoptOpenJreMatches = /^adoptopenjdk-jre-(?<version>\d\S+)/.exec(
-        version,
-      )?.groups;
+      const adoptOpenJreMatches = regEx(
+        /^adoptopenjdk-jre-(?<version>\d\S+)/,
+      ).exec(version)?.groups;
       if (adoptOpenJreMatches) {
         return {
           datasource: JavaVersionDatasource.id,
@@ -431,7 +431,7 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
           currentValue: adoptOpenJreMatches.version,
         };
       }
-      const temurinJdkMatches = /^temurin-(?<version>\d\S+)/.exec(
+      const temurinJdkMatches = regEx(/^temurin-(?<version>\d\S+)/).exec(
         version,
       )?.groups;
       if (temurinJdkMatches) {
@@ -441,7 +441,7 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
           currentValue: temurinJdkMatches.version,
         };
       }
-      const temurinJreMatches = /^temurin-jre-(?<version>\d\S+)/.exec(
+      const temurinJreMatches = regEx(/^temurin-jre-(?<version>\d\S+)/).exec(
         version,
       )?.groups;
       if (temurinJreMatches) {

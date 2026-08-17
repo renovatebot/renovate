@@ -13,12 +13,14 @@ import {
   PLATFORM_BAD_CREDENTIALS,
   PLATFORM_INTEGRATION_UNAUTHORIZED,
   PLATFORM_RATE_LIMIT_EXCEEDED,
+  PR_ALREADY_IN_MERGE_QUEUE,
   REPOSITORY_CHANGED,
   SYSTEM_INSUFFICIENT_DISK_SPACE,
   TEMPORARY_ERROR,
   WORKER_FILE_UPDATE_FAILED,
 } from '../../../../constants/error-messages.ts';
 import { logger, removeMeta } from '../../../../logger/index.ts';
+import { updateActionsLockfile } from '../../../../modules/manager/github-actions/artifacts.ts';
 import { getAdditionalFiles } from '../../../../modules/manager/npm/post-update/index.ts';
 import {
   ensureComment,
@@ -634,6 +636,17 @@ export async function processBranch(
       config.updatedArtifacts = (config.updatedArtifacts ?? []).concat(
         additionalFiles.updatedArtifacts,
       );
+      // `gh actions-lock` rewrites the whole lockfile from the workflows on disk, so like the lock files above it runs once here, after every updated package file has been written, rather than per package file.
+      const actionsLockfile = await updateActionsLockfile(
+        config,
+        branchConfig.packageFiles,
+      );
+      config.artifactErrors = config.artifactErrors.concat(
+        actionsLockfile.artifactErrors,
+      );
+      config.updatedArtifacts = config.updatedArtifacts.concat(
+        actionsLockfile.updatedArtifacts,
+      );
       if (config.updatedArtifacts?.length) {
         logger.debug(
           {
@@ -912,6 +925,15 @@ export async function processBranch(
     if (err.message === MANAGER_LOCKFILE_ERROR) {
       logger.debug('Passing lockfile-error up');
       throw err;
+    }
+    if (err.message === PR_ALREADY_IN_MERGE_QUEUE) {
+      logger.debug('Branch PR is in the merge queue - skipping branch update');
+      return {
+        branchExists,
+        prNo: branchPr?.number,
+        result: 'done',
+        commitSha,
+      };
     }
     /* v8 ignore if -- needs test */
     if (err.message?.includes('space left on device')) {
