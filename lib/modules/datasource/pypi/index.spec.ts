@@ -1,3 +1,4 @@
+import { codeBlock } from 'common-tags';
 import { GoogleAuth as _googleAuth } from 'google-auth-library';
 import { Fixtures } from '~test/fixtures.ts';
 import * as httpMock from '~test/http-mock.ts';
@@ -805,6 +806,37 @@ describe('modules/datasource/pypi/index', () => {
         }),
       ).toMatchSnapshot();
     });
+  });
+
+  it('keeps versions with a file without data-requires-python under strict constraints filtering', async () => {
+    // if a release's files has at least one `data-requires-python`, and at least one without, we should use the present value, rather than losing both
+    const html = codeBlock`
+        <html>
+          <body>
+            <!-- no data-requires-python -->
+            <a href="https://example.com/dj_database_url-1.0.0-py3-none-any.whl">dj_database_url-1.0.0-py3-none-any.whl</a><br/>
+            <!-- has data-requires-python -->
+            <a href="https://example.com/dj-database-url-1.0.0.tar.gz" data-requires-python="&gt;=3.9">dj-database-url-1.0.0.tar.gz</a><br/>
+
+            <!-- a different release -->
+            <a href="https://example.com/dj-database-url-1.1.0.tar.gz" data-requires-python="&gt;=3.9">dj-database-url-1.1.0.tar.gz</a><br/>
+          </body>
+        </html>
+      `;
+    httpMock
+      .scope('https://some.registry.org/simple/')
+      .get('/dj-database-url/')
+      .reply(200, html);
+
+    const res = await getPkgReleases({
+      datasource,
+      registryUrls: ['https://some.registry.org/simple/'],
+      constraints: { python: '3.8.0' },
+      constraintsFiltering: 'strict',
+      packageName: 'dj-database-url',
+    });
+
+    expect(res?.releases).toEqual([{ version: '1.0.0' }]);
   });
 
   it('supports Google Auth with simple endpoint', async () => {
