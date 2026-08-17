@@ -1,2 +1,0 @@
-fastapi==0.110.0
-orjson>=3
