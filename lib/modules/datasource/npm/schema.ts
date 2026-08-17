@@ -1,5 +1,9 @@
 import { z } from 'zod/v4';
-import { DeepNullish, LooseRecord } from '../../../util/schema-utils/index.ts';
+import {
+  DeepNullish,
+  LooseRecord,
+  Nullish,
+} from '../../../util/schema-utils/index.ts';
 
 const Repository = z.union([
   z.string(),
@@ -26,7 +30,7 @@ const Distribution = z.object({
 
 export const NpmResponseVersion = z.object({
   repository: RepositoryNpmResponse.optional(),
-  homepage: z.string().optional().catch(undefined),
+  homepage: Nullish(z.string().optional()),
   deprecated: z.union([z.string(), z.boolean()]).optional(),
   gitHead: z.string().optional(),
   // `LooseRecord` drops non-string entries i.e. pre-1.0 npm's nested a full dependency tree under `devDependencies`
