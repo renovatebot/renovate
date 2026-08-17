@@ -1,0 +1,1 @@
+python_requirements(name="reqs", source="pyproject.toml", resolve="py311")

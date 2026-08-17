@@ -1,0 +1,44 @@
+python_requirement(
+    name="pytest-mock",
+    requirements=["pytest-mock>=3.12,<4"],
+    resolve=parametrize("py311"),
+)
+
+# A comment between targets, and a pin with a reason.
+python_requirement(
+    name="pinned",
+    requirements=[
+        "fancycompleter<=0.10.0",
+        "requests[security]==2.31.0",
+    ],
+)
+
+python_requirement(
+    name="no-version",
+    requirements=["types-protobuf"],
+)
+
+python_requirements(
+    name="app",
+    source="app-requirements.txt",
+    resolve="app",
+    module_mapping={
+        "fpdf2": ["fpdf"],
+        "pillow": ["PIL"],
+    },
+    overrides={
+        "fastapi": {
+            "dependencies": [
+                ":app#orjson",
+            ],
+        },
+    },
+)
+
+python_requirements(
+    name="default-source",
+)
+
+python_sources(
+    name="lib",
+)
