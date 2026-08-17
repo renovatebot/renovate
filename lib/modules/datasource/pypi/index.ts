@@ -6,6 +6,7 @@ import { getEnv } from '../../../util/env.ts';
 import { parse } from '../../../util/html.ts';
 import type { OutgoingHttpHeaders } from '../../../util/http/types.ts';
 import { regEx } from '../../../util/regex.ts';
+import type { Timestamp } from '../../../util/timestamp.ts';
 import { asTimestamp } from '../../../util/timestamp.ts';
 import { ensureTrailingSlash, parseUrl } from '../../../util/url.ts';
 import * as pep440 from '../../versioning/pep440/index.ts';
@@ -38,7 +39,7 @@ export class PypiDatasource extends Datasource {
 
   override readonly releaseTimestampSupport = true;
   override readonly releaseTimestampNote =
-    'The relase timestamp is determined from the `upload_time` field in the results. This field is not available when using the simple API.';
+    'The release timestamp is determined from the earliest `upload_time` field of the files of a version. This field is not available when using the simple API.';
   override readonly sourceUrlSupport = 'release';
   override readonly sourceUrlNote =
     'The source URL is determined from the `homepage` field if it is a github repository, else we use the `project_urls` field.';
@@ -188,11 +189,10 @@ export class PypiDatasource extends Datasource {
       const versions = Object.keys(dep.releases);
       dependency.releases = versions.map((version) => {
         const releases = coerceArray(dep.releases?.[version]);
-        const { upload_time: releaseTimestamp } = releases[0] || {};
         const isDeprecated = releases.some(({ yanked }) => yanked);
         const result: Release = {
           version,
-          releaseTimestamp: asTimestamp(releaseTimestamp),
+          releaseTimestamp: PypiDatasource.getEarliestTimestamp(releases),
         };
         if (isDeprecated) {
           result.isDeprecated = isDeprecated;
@@ -208,6 +208,20 @@ export class PypiDatasource extends Datasource {
       });
     }
     return dependency;
+  }
+
+  private static getEarliestTimestamp(
+    releases: PypiRelease[],
+  ): Timestamp | null {
+    let earliest: Timestamp | null = null;
+    for (const { upload_time } of releases) {
+      const timestamp = asTimestamp(upload_time);
+      // `asTimestamp` normalizes to UTC ISO 8601, so comparing the strings compares the instants
+      if (timestamp && (!earliest || timestamp < earliest)) {
+        earliest = timestamp;
+      }
+    }
+    return earliest;
   }
 
   private static extractVersionFromLinkText(
