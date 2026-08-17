@@ -126,7 +126,7 @@ exports[`modules/datasource/pypi/index > getReleases > processes real data 1`] =
   "registryUrl": "https://pypi.org/pypi",
   "releases": [
     {
-      "releaseTimestamp": "2017-04-03T16:55:14.000Z",
+      "releaseTimestamp": "2017-04-03T16:55:08.000Z",
       "version": "0.0.1",
     },
     {
@@ -134,7 +134,7 @@ exports[`modules/datasource/pypi/index > getReleases > processes real data 1`] =
       "version": "0.0.2",
     },
     {
-      "releaseTimestamp": "2017-04-28T21:18:54.000Z",
+      "releaseTimestamp": "2017-04-28T21:18:47.000Z",
       "version": "0.0.3",
     },
     {
@@ -146,7 +146,7 @@ exports[`modules/datasource/pypi/index > getReleases > processes real data 1`] =
       "version": "0.0.5",
     },
     {
-      "releaseTimestamp": "2017-06-13T22:21:05.000Z",
+      "releaseTimestamp": "2017-06-13T22:20:58.000Z",
       "version": "0.0.6",
     },
     {
@@ -154,15 +154,15 @@ exports[`modules/datasource/pypi/index > getReleases > processes real data 1`] =
       "version": "0.0.7",
     },
     {
-      "releaseTimestamp": "2017-07-07T16:22:26.000Z",
+      "releaseTimestamp": "2017-07-07T16:22:24.000Z",
       "version": "0.0.8",
     },
     {
-      "releaseTimestamp": "2017-08-28T20:14:33.000Z",
+      "releaseTimestamp": "2017-08-28T20:14:31.000Z",
       "version": "0.0.9",
     },
     {
-      "releaseTimestamp": "2017-09-22T23:47:59.000Z",
+      "releaseTimestamp": "2017-09-22T23:47:54.000Z",
       "version": "0.0.10",
     },
     {
@@ -241,7 +241,7 @@ exports[`modules/datasource/pypi/index > uses https://pypi.org/pypi/ instead of 
   "registryUrl": "https://pypi.org/simple",
   "releases": [
     {
-      "releaseTimestamp": "2017-04-03T16:55:14.000Z",
+      "releaseTimestamp": "2017-04-03T16:55:08.000Z",
       "version": "0.0.1",
     },
     {
@@ -249,7 +249,7 @@ exports[`modules/datasource/pypi/index > uses https://pypi.org/pypi/ instead of 
       "version": "0.0.2",
     },
     {
-      "releaseTimestamp": "2017-04-28T21:18:54.000Z",
+      "releaseTimestamp": "2017-04-28T21:18:47.000Z",
       "version": "0.0.3",
     },
     {
@@ -261,7 +261,7 @@ exports[`modules/datasource/pypi/index > uses https://pypi.org/pypi/ instead of 
       "version": "0.0.5",
     },
     {
-      "releaseTimestamp": "2017-06-13T22:21:05.000Z",
+      "releaseTimestamp": "2017-06-13T22:20:58.000Z",
       "version": "0.0.6",
     },
     {
@@ -269,15 +269,15 @@ exports[`modules/datasource/pypi/index > uses https://pypi.org/pypi/ instead of 
       "version": "0.0.7",
     },
     {
-      "releaseTimestamp": "2017-07-07T16:22:26.000Z",
+      "releaseTimestamp": "2017-07-07T16:22:24.000Z",
       "version": "0.0.8",
     },
     {
-      "releaseTimestamp": "2017-08-28T20:14:33.000Z",
+      "releaseTimestamp": "2017-08-28T20:14:31.000Z",
       "version": "0.0.9",
     },
     {
-      "releaseTimestamp": "2017-09-22T23:47:59.000Z",
+      "releaseTimestamp": "2017-09-22T23:47:54.000Z",
       "version": "0.0.10",
     },
     {

@@ -1,6 +1,7 @@
-import { isNonEmptyString } from '@sindresorhus/is';
+import { isNonEmptyString, isString } from '@sindresorhus/is';
 import changelogFilenameRegex from 'changelog-filename-regex';
 import { logger } from '../../../logger/index.ts';
+import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
 import { coerceArray, deduplicateArray } from '../../../util/array.ts';
 import { getEnv } from '../../../util/env.ts';
 import { parse } from '../../../util/html.ts';
@@ -8,6 +9,7 @@ import { HttpError } from '../../../util/http/index.ts';
 import type { OutgoingHttpHeaders } from '../../../util/http/types.ts';
 import { regEx } from '../../../util/regex.ts';
 import { Json } from '../../../util/schema-utils/index.ts';
+import type { Timestamp } from '../../../util/timestamp.ts';
 import { asTimestamp } from '../../../util/timestamp.ts';
 import { ensureTrailingSlash, parseUrl } from '../../../util/url.ts';
 import * as pep440 from '../../versioning/pep440/index.ts';
@@ -18,6 +20,11 @@ import { isGitHubRepo, normalizePythonDepName } from './common.ts';
 import type { PypiRelease } from './schema.ts';
 import { PypiResponse, PypiSimpleResponse } from './schema.ts';
 import type { Releases } from './types.ts';
+
+// Status codes which registries are known to use when they reject an `Accept`
+// header they don't understand. `406` is the correct one, but Artifactory,
+// Nexus and devpi builds have been seen to use these others instead.
+const acceptRejectedStatusCodes = [400, 403, 406, 415];
 
 export class PypiDatasource extends Datasource {
   static readonly id = 'pypi';
@@ -40,7 +47,7 @@ export class PypiDatasource extends Datasource {
 
   override readonly releaseTimestampSupport = true;
   override readonly releaseTimestampNote =
-    'The release timestamp is determined from the `upload_time` field in the results. When using the Simple API, timestamps are available if the server supports the JSON-based Simple API (PEP 691).';
+    'The release timestamp is determined from the earliest `upload_time` field of the files of a version. When using the Simple API, timestamps are available if the server supports the JSON-based Simple API (PEP 691).';
   override readonly sourceUrlSupport = 'release';
   override readonly sourceUrlNote =
     'The source URL is determined from the `homepage` field if it is a github repository, else we use the `project_urls` field.';
@@ -190,13 +197,10 @@ export class PypiDatasource extends Datasource {
       const versions = Object.keys(dep.releases);
       dependency.releases = versions.map((version) => {
         const releases = coerceArray(dep.releases?.[version]);
-        const releaseTimestamp = releases.find(
-          ({ upload_time }) => upload_time,
-        )?.upload_time;
         const isDeprecated = releases.some(({ yanked }) => yanked);
         const result: Release = {
           version,
-          releaseTimestamp: asTimestamp(releaseTimestamp),
+          releaseTimestamp: PypiDatasource.getEarliestTimestamp(releases),
         };
         if (isDeprecated) {
           result.isDeprecated = isDeprecated;
@@ -206,7 +210,7 @@ export class PypiDatasource extends Datasource {
           python: deduplicateArray(
             releases
               .map(({ requires_python }) => requires_python)
-              .filter(isNonEmptyString),
+              .filter(isString),
           ),
         };
         return result;
@@ -348,21 +352,26 @@ export class PypiDatasource extends Datasource {
     try {
       response = await this.http.getText(sanitizedUrl, { headers });
     } catch (err) {
+      // An `abortOnError` host rule makes `Http` wrap the original error, so
+      // unwrap it before looking at the status code.
+      const httpErr = err instanceof ExternalHostError ? err.err : err;
+      const statusCode =
+        httpErr instanceof HttpError ? httpErr.response?.statusCode : undefined;
       // A registry doing strict content negotiation may not honor the
       // `text/html; q=0.01` fallback and reject the request outright.
       // Retry once without the negotiated `accept` header to preserve the
       // pre-PEP-691 behaviour of a plain request.
-      if (err instanceof HttpError && err.response?.statusCode === 406) {
-        logger.trace(
-          { packageName, hostUrl },
-          'Registry rejected negotiated Accept header, retrying without it',
-        );
-        response = await this.http.getText(sanitizedUrl, {
-          headers: authHeaders,
-        });
-      } else {
+      if (!statusCode || !acceptRejectedStatusCodes.includes(statusCode)) {
         throw err;
       }
+
+      logger.trace(
+        { packageName, hostUrl, statusCode },
+        'Registry rejected negotiated Accept header, retrying without it',
+      );
+      response = await this.http.getText(sanitizedUrl, {
+        headers: authHeaders,
+      });
     }
     const dep = response?.body;
     if (!dep) {
@@ -396,9 +405,50 @@ export class PypiDatasource extends Datasource {
       return dependency;
     }
 
-    const releases = PypiDatasource.getSimpleReleasesFromHtml(dep, packageName);
-    dependency.releases = PypiDatasource.toReleases(releases);
+    const htmlReleases = PypiDatasource.getSimpleReleasesFromHtml(
+      dep,
+      packageName,
+    );
+    dependency.releases = PypiDatasource.toReleases(htmlReleases);
+    if (dependency.releases.length > 0 || !dep.trimStart().startsWith('{')) {
+      return dependency;
+    }
+
+    // The registry honored the `Accept` header but omitted or mislabeled the
+    // `content-type`, so a JSON body went through the HTML parser and found
+    // nothing. Parse it as JSON instead of silently reporting no releases.
+    logger.debug(
+      { packageName, hostUrl, contentType },
+      'Retrying Simple API response as JSON, as it is not labeled as JSON but looks like it',
+    );
+    const jsonReleases = PypiDatasource.getSimpleReleasesFromJson(
+      dep,
+      packageName,
+    );
+    if (jsonReleases) {
+      dependency.releases = PypiDatasource.toReleases(jsonReleases);
+    }
     return dependency;
+  }
+
+  /**
+   * The files of a version are not ordered by upload time, so use the earliest
+   * one: that is when the version was first published, which is what
+   * `minimumReleaseAge` needs.
+   */
+  private static getEarliestTimestamp(
+    releases: PypiRelease[],
+  ): Timestamp | null {
+    let earliest: Timestamp | null = null;
+    for (const { upload_time } of releases) {
+      const timestamp = asTimestamp(upload_time);
+      // `asTimestamp` normalizes to UTC ISO 8601, so comparing the strings
+      // compares the instants
+      if (timestamp && (!earliest || timestamp < earliest)) {
+        earliest = timestamp;
+      }
+    }
+    return earliest;
   }
 
   private static toReleases(releases: Releases): Release[] {
@@ -407,22 +457,30 @@ export class PypiDatasource extends Datasource {
       const versionReleases = coerceArray(releases[version]);
       const isDeprecated = versionReleases.some(({ yanked }) => yanked);
       const result: Release = { version };
-      const releaseTimestamp = asTimestamp(
-        versionReleases.find(({ upload_time }) => upload_time)?.upload_time,
-      );
+      const releaseTimestamp =
+        PypiDatasource.getEarliestTimestamp(versionReleases);
       if (releaseTimestamp) {
         result.releaseTimestamp = releaseTimestamp;
       }
       if (isDeprecated) {
         result.isDeprecated = isDeprecated;
       }
-      // There may be multiple releases with different requires_python, so we return all in an array
+      const pythonConstraints = versionReleases.map(
+        ({ requires_python }) => requires_python,
+      );
+      // A file without `requires_python` can be installed on any Python
+      // version, so the version as a whole is unconstrained
+      const isUnconstrained = pythonConstraints.some(
+        (constraint) => !isNonEmptyString(constraint),
+      );
+      // There may be multiple releases with different requires_python, so we return all in an array.
+      // Report no constraints at all for an unconstrained version, instead of
+      // only those of its other files, which would drop the version under
+      // `constraintsFiltering=strict`.
       result.constraints = {
-        python: deduplicateArray(
-          versionReleases
-            .map(({ requires_python }) => requires_python)
-            .filter(isNonEmptyString),
-        ),
+        python: isUnconstrained
+          ? []
+          : deduplicateArray(pythonConstraints.filter(isNonEmptyString)),
       };
       return result;
     });
