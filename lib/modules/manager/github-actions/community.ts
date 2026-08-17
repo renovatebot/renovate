@@ -1,6 +1,6 @@
 import { z } from 'zod/v4';
 
-import { escapeRegExp, regEx } from '../../../util/regex.ts';
+import { regEx } from '../../../util/regex.ts';
 import { DockerDatasource } from '../../datasource/docker/index.ts';
 import { GithubReleaseAttachmentsDatasource } from '../../datasource/github-release-attachments/index.ts';
 import { GithubReleasesDatasource } from '../../datasource/github-releases/index.ts';
@@ -56,7 +56,7 @@ export function actionSchema(
 function matchAction(action: string): z.ZodString {
   return z
     .string()
-    .regex(regEx(`(?:https?://[^/]+/)?${escapeRegExp(action)}(?:@.+)?$`));
+    .regex(regEx(`(?:https?://[^/]+/)?${RegExp.escape(action)}(?:@.+)?$`));
 }
 
 function parseValue(

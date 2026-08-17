@@ -133,6 +133,7 @@ export default defineConfig(() =>
           'tools/docs/test/**/*.test.mjs',
           '.worktrees/**/*',
           '.claude/worktrees/**/*',
+          '.pnpm-store/**/*',
         ],
       },
     }),
