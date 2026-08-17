@@ -12,6 +12,7 @@ vi.mock('google-auth-library');
 const googleAuth = vi.mocked(_googleAuth);
 
 const res1 = Fixtures.get('azure-cli-monitor.json');
+const numpyResponse = Fixtures.get('numpy.json');
 const htmlResponse = Fixtures.get('versions-html.html');
 const mixedCaseResponse = Fixtures.get('versions-html-mixed-case.html');
 const withPeriodsResponse = Fixtures.get('versions-html-with-periods.html');
@@ -107,6 +108,55 @@ describe('modules/datasource/pypi/index', () => {
           packageName: 'azure-cli-monitor',
         }),
       ).toMatchSnapshot();
+    });
+
+    it('uses the upload_time of the first file of a version', async () => {
+      // The wheel is listed first, but was uploaded a week after the sdist,
+      // so the timestamp we report depends on the order of the files
+      const json = codeBlock`
+        {
+          "info": { "name": "foo" },
+          "releases": {
+            "1.0.0": [
+              {
+                "filename": "foo-1.0.0-py3-none-any.whl",
+                "upload_time": "2024-01-08T00:00:00"
+              },
+              {
+                "filename": "foo-1.0.0.tar.gz",
+                "upload_time": "2024-01-01T00:00:00"
+              }
+            ]
+          }
+        }
+      `;
+      httpMock.scope(baseUrl).get('/foo/json').reply(200, json);
+
+      const res = await getPkgReleases({ datasource, packageName: 'foo' });
+
+      expect(res?.releases).toEqual([
+        {
+          releaseTimestamp: '2024-01-08T00:00:00.000Z',
+          version: '1.0.0',
+        },
+      ]);
+    });
+
+    // NOTE that this is incorrect, and being fixed as a follow-up
+    it('uses the upload_time of the first file of real world data', async () => {
+      // `numpy` shows how far off that can be:
+      // - `1.5.1` was released in 2010
+      // - `1.5.1` gained a wheel in 2014, which PyPI lists first
+      // - `1.5.0` lists its sdist first, even though a Windows installer was uploaded earlier
+      httpMock.scope(baseUrl).get('/numpy/json').reply(200, numpyResponse);
+
+      const res = await getPkgReleases({ datasource, packageName: 'numpy' });
+
+      expect(res?.releases).toEqual([
+        { releaseTimestamp: '2010-09-15T14:44:53.000Z', version: '1.5.0' },
+        // NOTE that this is incorrect, and being fixed as a follow-up
+        { releaseTimestamp: '2014-07-30T22:27:08.000Z', version: '1.5.1' },
+      ]);
     });
 
     it('supports custom datasource url', async () => {
