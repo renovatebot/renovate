@@ -7,8 +7,11 @@ These Pants targets are supported:
 - [`python_requirement`](https://www.pantsbuild.org/stable/reference/targets/python_requirement): every entry of its `requirements=[...]` field is extracted as a PEP 508 requirement, and updated in place in the build file.
 - [`python_requirements`](https://www.pantsbuild.org/stable/reference/targets/python_requirements): the file named by its `source` field, default `requirements.txt`.
 - [`poetry_requirements`](https://www.pantsbuild.org/stable/reference/targets/poetry_requirements): the file named by its `source` field, default `pyproject.toml`.
+- [`uv_requirements`](https://www.pantsbuild.org/stable/reference/targets/uv_requirements): the file named by its `source` field, default `pyproject.toml`.
 
-Both generator targets are handled the same way: the source is resolved relative to the build file, extracted, and updated in that file, and a source referenced by several targets is extracted once. The source's own format picks the extractor — Poetry for a `pyproject.toml` with a `[tool.poetry...]` table, PEP 621 for any other `pyproject.toml`, and a pip requirements file otherwise — so each dependency keeps the `depType` its format gives it, including Poetry dependency groups.
+The generator targets are handled the same way: the source is resolved relative to the build file, extracted, and updated in that file, and a source referenced by several targets is extracted once. The source's own format picks the extractor — Poetry for a `pyproject.toml` with a `[tool.poetry...]` table, PEP 621 for any other `pyproject.toml`, and a pip requirements file otherwise — so each dependency keeps the `depType` its format gives it, including Poetry and uv dependency groups.
+
+Pants reads a narrower slice of some sources than Renovate does: a `uv_requirements` target generates requirements only from `[tool.uv] dev-dependencies`, while the whole file is extracted here. The extra dependencies are real dependencies of that file, so updating them is still correct, but they are not the ones Pants turned into targets.
 
 Fields other than `name`, `requirements` and `source` are ignored, so string values in `module_mapping` or `overrides` are never mistaken for requirements.
 

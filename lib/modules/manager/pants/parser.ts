@@ -15,7 +15,7 @@ interface Ctx {
 }
 
 const targetNameRegex = regEx(
-  /^(?:python_requirement|python_requirements|poetry_requirements)$/,
+  /^(?:python_requirement|python_requirements|poetry_requirements|uv_requirements)$/,
 );
 
 // Only the attributes we consume. Anything else — `module_mapping`,

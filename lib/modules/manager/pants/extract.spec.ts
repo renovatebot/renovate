@@ -325,6 +325,31 @@ describe('modules/manager/pants/extract', () => {
       ]);
     });
 
+    it('extracts a uv_requirements source', async () => {
+      mockFiles({
+        'pkg/BUILD.pants': 'uv_requirements(name="reqs")\n',
+        'pkg/pyproject.toml': codeBlock`
+          [project]
+          name = "my-package"
+          dependencies = ["requests>=2.31.0"]
+
+          [tool.uv]
+          dev-dependencies = ["pytest>=8.0.0"]
+        `,
+      });
+
+      const res = await extractAllPackageFiles({}, ['pkg/BUILD.pants']);
+      expect(res).toMatchObject([
+        {
+          packageFile: 'pkg/pyproject.toml',
+          deps: [
+            { depName: 'requests', depType: 'project.dependencies' },
+            { depName: 'pytest', depType: 'tool.uv.dev-dependencies' },
+          ],
+        },
+      ]);
+    });
+
     it('extracts a shared source file once', async () => {
       mockFiles({
         'BUILD.pants': 'python_requirements(name="reqs")\n',

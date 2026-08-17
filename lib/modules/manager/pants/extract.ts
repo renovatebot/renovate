@@ -17,6 +17,7 @@ const defaultSources: Record<PantsTargetType, string> = {
   python_requirement: '',
   python_requirements: 'requirements.txt',
   poetry_requirements: 'pyproject.toml',
+  uv_requirements: 'pyproject.toml',
 };
 
 function isBuildFile(packageFile: string): boolean {
@@ -24,8 +25,8 @@ function isBuildFile(packageFile: string): boolean {
 }
 
 /**
- * A generator's `source` can be a pip requirements file, a PEP 621
- * `pyproject.toml` or a Poetry one, so the file's own content decides the
+ * A generator's `source` can be a pip requirements file, or a `pyproject.toml`
+ * in PEP 621, Poetry or uv form, so the file's own content decides the
  * extractor. Deciding on content rather than on which target pointed at the
  * file keeps extraction and re-extraction — which only knows the filename —
  * from ever disagreeing.

@@ -1,7 +1,8 @@
 export type PantsTargetType =
   | 'python_requirement'
   | 'python_requirements'
-  | 'poetry_requirements';
+  | 'poetry_requirements'
+  | 'uv_requirements';
 
 export interface PantsToken {
   value: string;
