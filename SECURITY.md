@@ -15,15 +15,16 @@ Please do not create GitHub issues for security-related doubts or problems.
 
 ## Publishing
 
-GitHub Security Advisories (GHSAs) will be made public roughly once month after the patch is introduced to Renovate.
-This allows time for Mend customers to apply the patch, as well as ensuring that Renovate users have also had the opportunity to receive a patch.
+GitHub Security Advisories (GHSAs) will be made public roughly one month after the patch is introduced to Renovate.
 
-If there is a timeline you are working towards for intended publishing, please let us know ahead-of-time, so we can determine if this would line up with our own timelines.
+This allows time for Mend customers to apply the patch, as well as ensuring that users across the Renovate ecosystem have also been able to receive the patch.
+
+If there is a timeline you are working towards for intended publishing, please let us know ahead of time, so we can determine if this would line up with our own timelines.
 
 ### Will we request a CVE ID?
 
-It is uncommon for the Renovate project to request a CVE.
+It is uncommon for the Renovate project to request a CVE ID.
 
 GHSA IDs are more than sufficient for the ecosystem's ability to reason about security advisories, and requesting a CVE ID on top of this generally doesn't add any additional benefit.
 
-It is at our discretion as to whether we will, there is no need to ask us to request one - we will if we feel we need one.
+Whether we request a CVE ID is at our discretion. There is no need to ask for us to request one - we will if we feel we need one.
