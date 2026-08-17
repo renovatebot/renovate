@@ -14,7 +14,9 @@ interface Ctx {
   attr?: string;
 }
 
-const targetNameRegex = regEx(/^python_requirements?$/);
+const targetNameRegex = regEx(
+  /^(?:python_requirement|python_requirements|poetry_requirements)$/,
+);
 
 // Only the attributes we consume. Anything else — `module_mapping`,
 // `overrides`, `resolve` — is skipped, so their string values can never be

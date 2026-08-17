@@ -171,6 +171,26 @@ describe('modules/manager/pants/extract', () => {
       ]);
     });
 
+    it('parses a Poetry pyproject.toml source', async () => {
+      const content = codeBlock`
+        [tool.poetry]
+        name = "my-package"
+
+        [tool.poetry.dependencies]
+        python = "^3.11"
+        requests = "^2.31.0"
+
+        [tool.poetry.group.dev.dependencies]
+        pytest = "^8.0.0"
+      `;
+      const res = await extractPackageFile(content, 'pyproject.toml');
+      expect(res?.deps).toMatchObject([
+        { depName: 'python', currentValue: '^3.11' },
+        { depName: 'requests', currentValue: '^2.31.0' },
+        { depName: 'pytest', currentValue: '^8.0.0', depType: 'dev' },
+      ]);
+    });
+
     it('parses a pyproject.toml source as PEP 621', async () => {
       const content = codeBlock`
         [project]
@@ -250,6 +270,57 @@ describe('modules/manager/pants/extract', () => {
               depType: 'project.dependencies',
             },
           ],
+        },
+      ]);
+    });
+
+    it('extracts a poetry_requirements source', async () => {
+      mockFiles({
+        'pkg/BUILD.pants': codeBlock`
+          poetry_requirements(
+              name="reqs",
+              module_mapping={"pillow": ["PIL"]},
+          )
+        `,
+        'pkg/pyproject.toml': codeBlock`
+          [tool.poetry]
+          name = "my-package"
+
+          [tool.poetry.dependencies]
+          requests = "^2.31.0"
+
+          [tool.poetry.group.dev.dependencies]
+          pytest = "^8.0.0"
+        `,
+      });
+
+      const res = await extractAllPackageFiles({}, ['pkg/BUILD.pants']);
+      expect(res).toMatchObject([
+        {
+          packageFile: 'pkg/pyproject.toml',
+          deps: [
+            { depName: 'requests', depType: 'dependencies' },
+            { depName: 'pytest', depType: 'dev' },
+          ],
+        },
+      ]);
+    });
+
+    it('extracts a poetry_requirements source from another directory', async () => {
+      mockFiles({
+        'BUILD.pants':
+          'poetry_requirements(name="reqs", source="subdir/pyproject.toml")\n',
+        'subdir/pyproject.toml': codeBlock`
+          [tool.poetry.dependencies]
+          requests = "^2.31.0"
+        `,
+      });
+
+      const res = await extractAllPackageFiles({}, ['BUILD.pants']);
+      expect(res).toMatchObject([
+        {
+          packageFile: 'subdir/pyproject.toml',
+          deps: [{ depName: 'requests' }],
         },
       ]);
     });

@@ -3,6 +3,7 @@ import { logger } from '../../../logger/index.ts';
 import { getSiblingFileName, readLocalFile } from '../../../util/fs/index.ts';
 import { extractPackageFile as extractPyProjectFile } from '../pep621/extract.ts';
 import { extractPackageFile as extractRequirementsFile } from '../pip_requirements/extract.ts';
+import { extractPackageFile as extractPoetryFile } from '../poetry/extract.ts';
 import type {
   ExtractConfig,
   PackageDependency,
@@ -10,25 +11,35 @@ import type {
   PackageFileContent,
 } from '../types.ts';
 import { parse } from './parser.ts';
-import type { PantsTarget } from './types.ts';
+import type { PantsTarget, PantsTargetType } from './types.ts';
 
-const defaultRequirementsSource = 'requirements.txt';
+const defaultSources: Record<PantsTargetType, string> = {
+  python_requirement: '',
+  python_requirements: 'requirements.txt',
+  poetry_requirements: 'pyproject.toml',
+};
 
 function isBuildFile(packageFile: string): boolean {
   return upath.basename(packageFile).startsWith('BUILD');
 }
 
 /**
- * `python_requirements` accepts either a pip requirements file or a PEP 621
- * `pyproject.toml`, so the source's own format decides the extractor.
+ * A generator's `source` can be a pip requirements file, a PEP 621
+ * `pyproject.toml` or a Poetry one, so the file's own content decides the
+ * extractor. Deciding on content rather than on which target pointed at the
+ * file keeps extraction and re-extraction — which only knows the filename —
+ * from ever disagreeing.
  */
 function extractSourceFile(
   content: string,
   packageFile: string,
 ): Promise<PackageFileContent | null> | PackageFileContent | null {
-  return upath.basename(packageFile) === 'pyproject.toml'
-    ? extractPyProjectFile(content, packageFile)
-    : extractRequirementsFile(content);
+  if (upath.basename(packageFile) !== 'pyproject.toml') {
+    return extractRequirementsFile(content);
+  }
+  return content.includes('[tool.poetry')
+    ? extractPoetryFile(content, packageFile)
+    : extractPyProjectFile(content, packageFile);
 }
 
 /**
@@ -76,8 +87,8 @@ export async function extractPackageFile(
   packageFile: string,
   _config?: ExtractConfig,
 ): Promise<PackageFileContent | null> {
-  // `python_requirements` targets point at a source file which is returned as
-  // its own package file, so re-extraction lands here too.
+  // A generator target points at a source file which is returned as its own
+  // package file, so re-extraction lands here too.
   if (!isBuildFile(packageFile)) {
     return await extractSourceFile(content, packageFile);
   }
@@ -91,9 +102,9 @@ export async function extractAllPackageFiles(
   packageFiles: string[],
 ): Promise<PackageFile[]> {
   const result: PackageFile[] = [];
-  // A requirements file may be shared by several targets, and by several
-  // BUILD files — extract it once.
-  const seenRequirementsFiles = new Set<string>();
+  // A source file may be shared by several targets, and by several build
+  // files — extract it once.
+  const seenSourceFiles = new Set<string>();
 
   for (const packageFile of packageFiles) {
     const content = await readLocalFile(packageFile, 'utf8');
@@ -110,23 +121,23 @@ export async function extractAllPackageFiles(
     }
 
     for (const target of targets) {
-      if (target.type !== 'python_requirements') {
+      if (target.type === 'python_requirement') {
         continue;
       }
       const source = getSiblingFileName(
         packageFile,
-        target.source?.value ?? defaultRequirementsSource,
+        target.source?.value ?? defaultSources[target.type],
       );
-      if (seenRequirementsFiles.has(source)) {
+      if (seenSourceFiles.has(source)) {
         continue;
       }
-      seenRequirementsFiles.add(source);
+      seenSourceFiles.add(source);
 
       const sourceContent = await readLocalFile(source, 'utf8');
       if (!sourceContent) {
         logger.debug(
-          { packageFile, source },
-          'pants: python_requirements source not found',
+          { packageFile, source, target: target.type },
+          'pants: generator source not found',
         );
         continue;
       }
@@ -138,10 +149,10 @@ export async function extractAllPackageFiles(
           packageFile: source,
           deps: extracted.deps.map((dep) => ({
             ...dep,
-            // Keep the delegate's own depType where it has one — `pep621`
-            // distinguishes `project.dependencies` from optional groups, and
-            // that detail is worth more in `packageRules` than uniformity.
-            depType: dep.depType ?? 'python_requirements',
+            // Keep the delegate's own depType where it has one — `pep621` and
+            // `poetry` distinguish dependency groups, and that detail is worth
+            // more in `packageRules` than uniformity.
+            depType: dep.depType ?? target.type,
           })),
         });
       }
