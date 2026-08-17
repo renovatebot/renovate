@@ -18,16 +18,16 @@ const mixedCaseResponse = Fixtures.get('versions-html-mixed-case.html');
 const withPeriodsResponse = Fixtures.get('versions-html-with-periods.html');
 
 const azureCliMonitorReleases = [
-  { releaseTimestamp: '2017-04-03T16:55:14.000Z', version: '0.0.1' },
+  { releaseTimestamp: '2017-04-03T16:55:08.000Z', version: '0.0.1' },
   { releaseTimestamp: '2017-04-17T20:32:30.000Z', version: '0.0.2' },
-  { releaseTimestamp: '2017-04-28T21:18:54.000Z', version: '0.0.3' },
+  { releaseTimestamp: '2017-04-28T21:18:47.000Z', version: '0.0.3' },
   { releaseTimestamp: '2017-05-09T21:36:51.000Z', version: '0.0.4' },
   { releaseTimestamp: '2017-05-30T23:13:49.000Z', version: '0.0.5' },
-  { releaseTimestamp: '2017-06-13T22:21:05.000Z', version: '0.0.6' },
+  { releaseTimestamp: '2017-06-13T22:20:58.000Z', version: '0.0.6' },
   { releaseTimestamp: '2017-06-21T22:12:36.000Z', version: '0.0.7' },
-  { releaseTimestamp: '2017-07-07T16:22:26.000Z', version: '0.0.8' },
-  { releaseTimestamp: '2017-08-28T20:14:33.000Z', version: '0.0.9' },
-  { releaseTimestamp: '2017-09-22T23:47:59.000Z', version: '0.0.10' },
+  { releaseTimestamp: '2017-07-07T16:22:24.000Z', version: '0.0.8' },
+  { releaseTimestamp: '2017-08-28T20:14:31.000Z', version: '0.0.9' },
+  { releaseTimestamp: '2017-09-22T23:47:54.000Z', version: '0.0.10' },
   { releaseTimestamp: '2017-10-24T02:14:07.000Z', version: '0.0.11' },
   { releaseTimestamp: '2017-11-14T18:31:57.000Z', version: '0.0.12' },
   { releaseTimestamp: '2017-12-05T18:57:54.000Z', version: '0.0.13' },
@@ -110,9 +110,9 @@ describe('modules/datasource/pypi/index', () => {
       ).toMatchSnapshot();
     });
 
-    it('uses the upload_time of the first file of a version', async () => {
-      // The wheel is listed first, but was uploaded a week after the sdist,
-      // so the timestamp we report depends on the order of the files
+    it('uses the earliest upload_time of the files of a version', async () => {
+      // The order of the files is not meaningful, so the timestamp must not
+      // depend on it: the wheel is listed first, but uploaded a week later
       const json = codeBlock`
         {
           "info": { "name": "foo" },
@@ -136,13 +136,12 @@ describe('modules/datasource/pypi/index', () => {
 
       expect(res?.releases).toEqual([
         {
-          releaseTimestamp: '2024-01-08T00:00:00.000Z',
+          releaseTimestamp: '2024-01-01T00:00:00.000Z',
           version: '1.0.0',
         },
       ]);
     });
 
-    // NOTE that this is incorrect, and being fixed as a follow-up
     it('uses the upload_time of the first file of real world data', async () => {
       // `numpy` shows how far off that can be:
       // - `1.5.1` was released in 2010
@@ -153,9 +152,8 @@ describe('modules/datasource/pypi/index', () => {
       const res = await getPkgReleases({ datasource, packageName: 'numpy' });
 
       expect(res?.releases).toEqual([
-        { releaseTimestamp: '2010-09-15T14:44:53.000Z', version: '1.5.0' },
-        // NOTE that this is incorrect, and being fixed as a follow-up
-        { releaseTimestamp: '2014-07-30T22:27:08.000Z', version: '1.5.1' },
+        { releaseTimestamp: '2010-08-31T18:15:09.000Z', version: '1.5.0' },
+        { releaseTimestamp: '2010-11-18T14:16:58.000Z', version: '1.5.1' },
       ]);
     });
 
