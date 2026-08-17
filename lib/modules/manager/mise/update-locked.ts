@@ -69,6 +69,10 @@ function astTableForTool(
 ): AST.TOMLTable | undefined {
   const ast = parseTOML(content, { tomlVersion: '1.0' });
   const topLevelTable = ast.body[0];
+  if (!topLevelTable) {
+    return undefined;
+  }
+
   return topLevelTable.body.find(
     (node): node is AST.TOMLTable =>
       node.type === 'TOMLTable' &&

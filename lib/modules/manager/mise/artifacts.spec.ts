@@ -1,3 +1,4 @@
+import * as tomlParser from 'toml-eslint-parser';
 import upath from 'upath';
 import { mockDeep } from 'vitest-mock-extended';
 import { envMock, mockExecAll, mockExecSequence } from '~test/exec-util.ts';
@@ -16,6 +17,17 @@ import * as lockfile from './lockfile.ts';
 import { updateLockedDependency } from './update-locked.ts';
 
 const datasource = vi.mocked(_datasource);
+
+vi.mock('toml-eslint-parser', async () => {
+  const actual =
+    await vi.importActual<typeof import('toml-eslint-parser')>(
+      'toml-eslint-parser',
+    );
+  return {
+    ...actual,
+    parseTOML: vi.fn(actual.parseTOML),
+  };
+});
 
 vi.mock('../../datasource/index.ts', () => mockDeep());
 vi.mock('../../../util/exec/env.ts');
@@ -799,6 +811,27 @@ foo.bar = "ignored"
         depName: 'node',
         currentVersion: '20.10.0',
         newVersion: '20.11.0',
+      });
+
+      expect(res).toEqual({ status: 'unsupported' });
+    });
+
+    it('returns unsupported when the TOML AST has no top-level table', () => {
+      const parseTOML = vi.mocked(tomlParser.parseTOML);
+      const parseTOMLImplementation = parseTOML.getMockImplementation();
+      parseTOML
+        .mockImplementationOnce(parseTOMLImplementation!)
+        .mockReturnValueOnce({
+          body: [],
+        } as ReturnType<typeof tomlParser.parseTOML>);
+
+      const res = updateLockedDependency({
+        packageFile: 'mise.toml',
+        lockFile: 'mise.lock',
+        lockFileContent,
+        depName: 'node',
+        currentVersion: '20.10.0',
+        newVersion: '20.12.0',
       });
 
       expect(res).toEqual({ status: 'unsupported' });
