@@ -1674,8 +1674,31 @@ describe('util/git/index', { timeout: 30000 }, () => {
       expect(isShallow).toBe('false');
     });
 
-    it('should unshallow repo on subsequent fetch', async () => {
-      // First run: shallow clone
+    it('should keep repo shallow across syncGit runs', async () => {
+      // syncGit must not eagerly unshallow; the clone stays shallow until a
+      // branch comparison actually needs deeper history.
+      tmpDir = await tmp.dir({ unsafeCleanup: true });
+      GlobalConfig.set({
+        localDir: tmpDir.path,
+        gitShallowCloneDepth: 1,
+      });
+      await git.initRepo({ url: `file://${origin.path}` });
+      await git.syncGit();
+
+      await git.initRepo({ url: `file://${origin.path}` });
+      await git.syncGit();
+
+      const tmpGit = simpleGit(tmpDir.path);
+      const isShallow = (
+        await tmpGit.raw(['rev-parse', '--is-shallow-repository'])
+      ).trim();
+      expect(isShallow).toBe('true');
+    });
+
+    it('should unshallow lazily when a branch needs history below the boundary', async () => {
+      // renovate/past_branch diverged from the base before the shallow
+      // boundary, so comparing it requires unshallowing.
+      modifiedCache.getCachedModifiedResult.mockReturnValue(null);
       tmpDir = await tmp.dir({ unsafeCleanup: true });
       GlobalConfig.set({
         localDir: tmpDir.path,
@@ -1685,37 +1708,77 @@ describe('util/git/index', { timeout: 30000 }, () => {
       await git.syncGit();
 
       const tmpGit = simpleGit(tmpDir.path);
-      let isShallow = (
-        await tmpGit.raw(['rev-parse', '--is-shallow-repository'])
-      ).trim();
-      expect(isShallow).toBe('true');
+      expect(
+        (await tmpGit.raw(['rev-parse', '--is-shallow-repository'])).trim(),
+      ).toBe('true');
 
-      // Second run: should fetch and unshallow
-      await git.initRepo({ url: `file://${origin.path}` });
-      await git.syncGit();
+      await git.isBranchModified('renovate/past_branch', defaultBranch);
 
-      isShallow = (
-        await tmpGit.raw(['rev-parse', '--is-shallow-repository'])
-      ).trim();
-      expect(isShallow).toBe('false');
+      expect(
+        (await tmpGit.raw(['rev-parse', '--is-shallow-repository'])).trim(),
+      ).toBe('false');
     });
 
-    it('should not unshallow when repo is not shallow', async () => {
-      // First run: normal blobless clone (no shallow)
+    it('should not unshallow when the branch history is within the boundary', async () => {
+      // The base branch tip is inside the shallow boundary, so its merge-base
+      // resolves and no unshallow is needed.
+      modifiedCache.getCachedModifiedResult.mockReturnValue(null);
       tmpDir = await tmp.dir({ unsafeCleanup: true });
       GlobalConfig.set({
         localDir: tmpDir.path,
+        gitShallowCloneDepth: 1,
       });
+      await git.initRepo({ url: `file://${origin.path}` });
+      await git.syncGit();
+
+      // Two comparisons: the second reuses the memoised shallow state and still
+      // finds the history in place, so the repo stays shallow.
+      await git.isBranchModified(defaultBranch, defaultBranch);
+      await git.isBranchBehindBase(defaultBranch, defaultBranch);
+
+      const tmpGit = simpleGit(tmpDir.path);
+      expect(
+        (await tmpGit.raw(['rev-parse', '--is-shallow-repository'])).trim(),
+      ).toBe('true');
+    });
+
+    it('should skip the unshallow probe when a branch does not exist', async () => {
+      // getBranchCommit returns null for unknown branches, so the probe bails
+      // out before touching the network.
+      modifiedCache.getCachedModifiedResult.mockReturnValue(null);
+      tmpDir = await tmp.dir({ unsafeCleanup: true });
+      GlobalConfig.set({
+        localDir: tmpDir.path,
+        gitShallowCloneDepth: 1,
+      });
+      await git.initRepo({ url: `file://${origin.path}` });
+      await git.syncGit();
+
+      const fetchSpy = vi.spyOn(SimpleGit.prototype, 'fetch');
+      await git.isBranchModified('renovate/equal_branch', 'not_a_branch');
+
+      const unshallowCalls = fetchSpy.mock.calls.filter(
+        (call) =>
+          Array.isArray(call[0]) &&
+          (call[0] as string[]).includes('--unshallow'),
+      );
+      expect(unshallowCalls).toHaveLength(0);
+    });
+
+    it('should not unshallow a non-shallow repo when comparing branches', async () => {
+      modifiedCache.getCachedModifiedResult.mockReturnValue(null);
+      tmpDir = await tmp.dir({ unsafeCleanup: true });
+      GlobalConfig.set({ localDir: tmpDir.path });
       await git.initRepo({ url: origin.path });
       await git.syncGit();
 
-      const rawSpy = vi.spyOn(SimpleGit.prototype, 'raw');
+      const fetchSpy = vi.spyOn(SimpleGit.prototype, 'fetch');
+      // Two comparisons: the first records the repo as full, the second takes
+      // the memoised fast path.
+      await git.isBranchModified('renovate/modified_branch', defaultBranch);
+      await git.isBranchModified('renovate/custom_author', defaultBranch);
 
-      // Second run: fetch existing repo
-      await git.initRepo({ url: origin.path });
-      await git.syncGit();
-
-      const unshallowCalls = rawSpy.mock.calls.filter(
+      const unshallowCalls = fetchSpy.mock.calls.filter(
         (call) =>
           Array.isArray(call[0]) &&
           (call[0] as string[]).includes('--unshallow'),

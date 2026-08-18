@@ -156,6 +156,11 @@ export type GitOperationType =
    */
   | 'fetch'
   /**
+   * A `git fetch --unshallow`, tracked separately from `fetch` so the cost of
+   * converting a shallow clone to a full one is visible in the statistics.
+   */
+  | 'unshallow'
+  /**
    * The `git pull` sub-command.
    */
   | 'pull'
