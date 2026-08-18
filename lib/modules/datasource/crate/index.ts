@@ -112,7 +112,7 @@ export class CrateDatasource extends Datasource {
     result.releases = lines
       .map((line) => {
         const versionOrig = line.vers;
-        const version = versionOrig.replace(/\+.*$/, '');
+        const version = versionOrig.replace(regEx(/\+.*$/), '');
         const release: Release = { version };
 
         if (versionOrig !== version) {
@@ -335,7 +335,7 @@ export class CrateDatasource extends Datasource {
 
     const isSparseRegistry = CrateDatasource.isSparseRegistry(registryUrl);
     const registryFetchUrl = isSparseRegistry
-      ? registryUrl.replace(/^sparse\+/, '')
+      ? registryUrl.replace(regEx(/^sparse\+/), '')
       : registryUrl;
 
     const url = parseUrl(registryFetchUrl);
@@ -508,7 +508,7 @@ export class CrateDatasource extends Datasource {
     }
 
     // Look up the registry config from cache (populated during getReleases)
-    const rawUrl = registryUrl?.replace(/^sparse\+/, '');
+    const rawUrl = registryUrl?.replace(regEx(/^sparse\+/), '');
     if (!rawUrl) {
       return release;
     }

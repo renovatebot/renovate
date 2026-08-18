@@ -379,6 +379,49 @@ describe('modules/manager/mix/artifacts', () => {
     ]);
   });
 
+  it('quotes an organization value containing shell metacharacters', async () => {
+    GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
+    fs.readLocalFile.mockResolvedValueOnce('Old mix.lock');
+    fs.getSiblingFileName.mockReturnValueOnce('mix.lock');
+    const execSnapshots = mockExecAll();
+    fs.readLocalFile.mockResolvedValueOnce('New mix.lock');
+    // a broad host rule matching all of hex.pm, as opposed to one scoped to
+    // a specific organization's repo URL
+    hostRules.add({ matchHost: 'hex.pm', token: 'secret_token' });
+
+    // erlang
+    getPkgReleases.mockResolvedValueOnce({
+      releases: [{ version: '25.0.0.0' }],
+    });
+    // elixir
+    getPkgReleases.mockResolvedValueOnce({
+      releases: [{ version: 'v1.13.4' }],
+    });
+
+    await updateArtifacts({
+      packageFileName: 'mix.exs',
+      updatedDeps: [
+        {
+          depName: 'private_package',
+          // organization value as it would be parsed from an attacker-controlled
+          // `organization: "..."` field in mix.exs
+          packageName: 'private_package:evil --key leaked_or_arbitrary',
+        },
+      ],
+      newPackageFileContent: '{}',
+      config,
+    });
+
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'install-tool erlang 25.0.0.0' },
+      { cmd: 'install-tool elixir v1.13.4' },
+      {
+        cmd: "mix hex.organization auth 'evil --key leaked_or_arbitrary' --key secret_token",
+      },
+      { cmd: 'mix deps.update private_package' },
+    ]);
+  });
+
   it('returns updated mix.lock in subdir', async () => {
     GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
     fs.getSiblingFileName.mockReturnValueOnce('subdir/mix.lock');

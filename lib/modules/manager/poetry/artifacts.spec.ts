@@ -441,13 +441,13 @@ describe('modules/manager/poetry/artifacts', () => {
             '-e CONTAINERBASE_CACHE_DIR ' +
             '-w "/tmp/github/some/repo" ' +
             'ghcr.io/renovatebot/base-image ' +
-            'bash -l -c "' +
+            "bash -l -c '" +
             'install-tool python 3.4.2 ' +
             '&& ' +
             'install-tool poetry 1.2.0 ' +
             '&& ' +
             'poetry update --lock --no-interaction dep1' +
-            '"',
+            "'",
         },
       ]);
     });
@@ -511,6 +511,7 @@ describe('modules/manager/poetry/artifacts', () => {
             'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
             '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
             '-v "/tmp/cache":"/tmp/cache" ' +
+            '-e PIP_CACHE_DIR ' +
             '-e GIT_CONFIG_KEY_0 ' +
             '-e GIT_CONFIG_VALUE_0 ' +
             '-e GIT_CONFIG_KEY_1 ' +
@@ -524,17 +525,16 @@ describe('modules/manager/poetry/artifacts', () => {
             '-e GIT_CONFIG_VALUE_4 ' +
             '-e GIT_CONFIG_KEY_5 ' +
             '-e GIT_CONFIG_VALUE_5 ' +
-            '-e PIP_CACHE_DIR ' +
             '-e CONTAINERBASE_CACHE_DIR ' +
             '-w "/tmp/github/some/repo" ' +
             'ghcr.io/renovatebot/base-image ' +
-            'bash -l -c "' +
+            "bash -l -c '" +
             'install-tool python 3.4.2 ' +
             '&& ' +
             'install-tool poetry 1.2.0 ' +
             '&& ' +
             'poetry update --lock --no-interaction dep1' +
-            '"',
+            "'",
         },
       ]);
     });
@@ -594,13 +594,13 @@ describe('modules/manager/poetry/artifacts', () => {
             '-e CONTAINERBASE_CACHE_DIR ' +
             '-w "/tmp/github/some/repo" ' +
             'ghcr.io/renovatebot/base-image ' +
-            'bash -l -c "' +
+            "bash -l -c '" +
             'install-tool python 2.7.5 ' +
             '&& ' +
             'install-tool poetry 1.2.0 ' +
             '&& ' +
             'poetry update --lock --no-interaction dep1' +
-            '"',
+            "'",
         },
       ]);
     });

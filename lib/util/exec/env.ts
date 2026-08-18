@@ -1,4 +1,5 @@
 import { GlobalConfig } from '../../config/global.ts';
+import { regEx } from '../regex.ts';
 
 export const basicEnvVars = [
   'CI',
@@ -64,7 +65,7 @@ export function getChildProcessEnv(
 
   // Copy containerbase url replacements
   for (const key of Object.keys(process.env)) {
-    if (/^URL_REPLACE_\d+_(?:FROM|TO)$/.test(key)) {
+    if (regEx(/^URL_REPLACE_\d+_(?:FROM|TO)$/).test(key)) {
       env[key] = process.env[key];
     }
   }

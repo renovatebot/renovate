@@ -100,6 +100,32 @@ describe('modules/datasource/npm/schema', () => {
     expect(result.time).toEqual({ '1.0.0': '2026-01-23T01:23:37.982Z' });
   });
 
+  it('drops non-string dependencies/devDependencies entries (e.g. old-style nested dependency trees)', () => {
+    const result = CachedPackument.parse({
+      name: 'deep-diff',
+      versions: {
+        '0.1.0': {
+          dependencies: { foo: '^1.0.0', bar: { version: '0.6.4' } },
+          devDependencies: { vows: { version: '0.6.4' } },
+        },
+      },
+    });
+    expect(result.versions).toEqual({
+      '0.1.0': {
+        dependencies: { foo: '^1.0.0' },
+        devDependencies: {},
+      },
+    });
+  });
+
+  it('drops an invalid package-level `homepage` (e.g. `null`)', () => {
+    const result = CachedPackument.parse({
+      homepage: null,
+      versions: { '1.0.0': {} },
+    });
+    expect(result.homepage).toBeUndefined();
+  });
+
   describe('NpmResponseSchema', () => {
     it('parses a full npm registry response and preserves extra version fields', () => {
       const input = {
@@ -164,6 +190,17 @@ describe('modules/datasource/npm/schema', () => {
         url: undefined,
         directory: 'test',
       });
+    });
+
+    it('drops an invalid package-level `homepage` (e.g. `null`)', () => {
+      const input = {
+        name: 'mypackage',
+        'dist-tags': { latest: '1.0.0' },
+        versions: { '1.0.0': {} },
+        homepage: null,
+      };
+      const result = NpmResponse.parse(input);
+      expect(result.homepage).toBeUndefined();
     });
 
     describe('parses a response with an array of objects for the `repository`, and returns the first element', () => {

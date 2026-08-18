@@ -1,3 +1,4 @@
+import { codeBlock } from 'common-tags';
 import { GoogleAuth as _googleAuth } from 'google-auth-library';
 import { Fixtures } from '~test/fixtures.ts';
 import * as httpMock from '~test/http-mock.ts';
@@ -11,21 +12,22 @@ vi.mock('google-auth-library');
 const googleAuth = vi.mocked(_googleAuth);
 
 const res1 = Fixtures.get('azure-cli-monitor.json');
+const numpyResponse = Fixtures.get('numpy.json');
 const htmlResponse = Fixtures.get('versions-html.html');
 const mixedCaseResponse = Fixtures.get('versions-html-mixed-case.html');
 const withPeriodsResponse = Fixtures.get('versions-html-with-periods.html');
 
 const azureCliMonitorReleases = [
-  { releaseTimestamp: '2017-04-03T16:55:14.000Z', version: '0.0.1' },
+  { releaseTimestamp: '2017-04-03T16:55:08.000Z', version: '0.0.1' },
   { releaseTimestamp: '2017-04-17T20:32:30.000Z', version: '0.0.2' },
-  { releaseTimestamp: '2017-04-28T21:18:54.000Z', version: '0.0.3' },
+  { releaseTimestamp: '2017-04-28T21:18:47.000Z', version: '0.0.3' },
   { releaseTimestamp: '2017-05-09T21:36:51.000Z', version: '0.0.4' },
   { releaseTimestamp: '2017-05-30T23:13:49.000Z', version: '0.0.5' },
-  { releaseTimestamp: '2017-06-13T22:21:05.000Z', version: '0.0.6' },
+  { releaseTimestamp: '2017-06-13T22:20:58.000Z', version: '0.0.6' },
   { releaseTimestamp: '2017-06-21T22:12:36.000Z', version: '0.0.7' },
-  { releaseTimestamp: '2017-07-07T16:22:26.000Z', version: '0.0.8' },
-  { releaseTimestamp: '2017-08-28T20:14:33.000Z', version: '0.0.9' },
-  { releaseTimestamp: '2017-09-22T23:47:59.000Z', version: '0.0.10' },
+  { releaseTimestamp: '2017-07-07T16:22:24.000Z', version: '0.0.8' },
+  { releaseTimestamp: '2017-08-28T20:14:31.000Z', version: '0.0.9' },
+  { releaseTimestamp: '2017-09-22T23:47:54.000Z', version: '0.0.10' },
   { releaseTimestamp: '2017-10-24T02:14:07.000Z', version: '0.0.11' },
   { releaseTimestamp: '2017-11-14T18:31:57.000Z', version: '0.0.12' },
   { releaseTimestamp: '2017-12-05T18:57:54.000Z', version: '0.0.13' },
@@ -106,6 +108,53 @@ describe('modules/datasource/pypi/index', () => {
           packageName: 'azure-cli-monitor',
         }),
       ).toMatchSnapshot();
+    });
+
+    it('uses the earliest upload_time of the files of a version', async () => {
+      // The order of the files is not meaningful, so the timestamp must not
+      // depend on it: the wheel is listed first, but uploaded a week later
+      const json = codeBlock`
+        {
+          "info": { "name": "foo" },
+          "releases": {
+            "1.0.0": [
+              {
+                "filename": "foo-1.0.0-py3-none-any.whl",
+                "upload_time": "2024-01-08T00:00:00"
+              },
+              {
+                "filename": "foo-1.0.0.tar.gz",
+                "upload_time": "2024-01-01T00:00:00"
+              }
+            ]
+          }
+        }
+      `;
+      httpMock.scope(baseUrl).get('/foo/json').reply(200, json);
+
+      const res = await getPkgReleases({ datasource, packageName: 'foo' });
+
+      expect(res?.releases).toEqual([
+        {
+          releaseTimestamp: '2024-01-01T00:00:00.000Z',
+          version: '1.0.0',
+        },
+      ]);
+    });
+
+    it('uses the upload_time of the first file of real world data', async () => {
+      // `numpy` shows how far off that can be:
+      // - `1.5.1` was released in 2010
+      // - `1.5.1` gained a wheel in 2014, which PyPI lists first
+      // - `1.5.0` lists its sdist first, even though a Windows installer was uploaded earlier
+      httpMock.scope(baseUrl).get('/numpy/json').reply(200, numpyResponse);
+
+      const res = await getPkgReleases({ datasource, packageName: 'numpy' });
+
+      expect(res?.releases).toEqual([
+        { releaseTimestamp: '2010-08-31T18:15:09.000Z', version: '1.5.0' },
+        { releaseTimestamp: '2010-11-18T14:16:58.000Z', version: '1.5.1' },
+      ]);
     });
 
     it('supports custom datasource url', async () => {
@@ -805,6 +854,37 @@ describe('modules/datasource/pypi/index', () => {
         }),
       ).toMatchSnapshot();
     });
+  });
+
+  it('keeps versions with a file without data-requires-python under strict constraints filtering', async () => {
+    // if a release's files has at least one `data-requires-python`, and at least one without, we should use the present value, rather than losing both
+    const html = codeBlock`
+        <html>
+          <body>
+            <!-- no data-requires-python -->
+            <a href="https://example.com/dj_database_url-1.0.0-py3-none-any.whl">dj_database_url-1.0.0-py3-none-any.whl</a><br/>
+            <!-- has data-requires-python -->
+            <a href="https://example.com/dj-database-url-1.0.0.tar.gz" data-requires-python="&gt;=3.9">dj-database-url-1.0.0.tar.gz</a><br/>
+
+            <!-- a different release -->
+            <a href="https://example.com/dj-database-url-1.1.0.tar.gz" data-requires-python="&gt;=3.9">dj-database-url-1.1.0.tar.gz</a><br/>
+          </body>
+        </html>
+      `;
+    httpMock
+      .scope('https://some.registry.org/simple/')
+      .get('/dj-database-url/')
+      .reply(200, html);
+
+    const res = await getPkgReleases({
+      datasource,
+      registryUrls: ['https://some.registry.org/simple/'],
+      constraints: { python: '3.8.0' },
+      constraintsFiltering: 'strict',
+      packageName: 'dj-database-url',
+    });
+
+    expect(res?.releases).toEqual([{ version: '1.0.0' }]);
   });
 
   it('supports Google Auth with simple endpoint', async () => {

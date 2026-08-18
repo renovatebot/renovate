@@ -53,6 +53,8 @@ You may use any of these items:
 
 When you configure a JSONata manager, use the following syntax:
 
+<!-- doc-fence-check-disable-next-block -->
+
 ```javascript
 {
   "customManagers": [

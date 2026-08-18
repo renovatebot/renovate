@@ -179,6 +179,24 @@ export const ProjectSection = z.object({
   ),
 });
 
+const PixiMinimalConfig = z
+  .object({
+    project: z
+      .object({ 'requires-pixi': z.string().optional() })
+      .optional()
+      .catch(undefined),
+    workspace: z
+      .object({ 'requires-pixi': z.string().optional() })
+      .optional()
+      .catch(undefined),
+  })
+  .transform((val) => ({
+    'requires-pixi':
+      val.project?.['requires-pixi'] ?? val.workspace?.['requires-pixi'],
+  }))
+  .optional()
+  .catch(undefined);
+
 export const PyProject = z.object({
   project: ProjectSection.optional().catch(undefined),
   'build-system': z
@@ -196,6 +214,7 @@ export const PyProject = z.object({
       pdm: PdmConfig.optional().catch(undefined),
       hatch: HatchConfig.optional().catch(undefined),
       uv: UvConfig.optional().catch(undefined),
+      pixi: PixiMinimalConfig,
     })
     .optional()
     .catch(undefined),

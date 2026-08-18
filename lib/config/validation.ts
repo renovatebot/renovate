@@ -3,6 +3,7 @@ import is, {
   isEmptyString,
   isNonEmptyArray,
   isNonEmptyString,
+  isNonEmptyStringAndNotWhitespace,
   isObject,
   isPlainObject,
   isString,
@@ -19,6 +20,7 @@ import { isCustomManager } from '../modules/manager/custom/index.ts';
 import type { CustomManager } from '../modules/manager/custom/types.ts';
 import type { HostRule } from '../types/index.ts';
 import { packageCacheNamespaces } from '../util/cache/package/namespaces.ts';
+import { clone } from '../util/clone.ts';
 import { getToolConfig } from '../util/exec/containerbase.ts';
 import { isConstraintName, isToolName } from '../util/exec/types.ts';
 import { isValidCommitTrailer } from '../util/git/commit-trailers.ts';
@@ -46,10 +48,11 @@ import { migrateConfig } from './migration.ts';
 import { getOptions } from './options/index.ts';
 import { resolveConfigPresets } from './presets/index.ts';
 import { supportedDatasources } from './presets/internal/merge-confidence.preset.ts';
-import { parsePreset } from './presets/parse.ts';
+import { isRelativePresetReference, parsePreset } from './presets/parse.ts';
 import type {
   AllConfig,
   AllowedParents,
+  RenovateConfig,
   RenovateOptions,
   StatusCheckKey,
   ValidationMessage,
@@ -105,6 +108,7 @@ const ignoredNodes = [
 ];
 const tzRe = regEx(/^:timezone\((.+)\)$/);
 const rulesRe = regEx(/p.*Rules\[\d+\]$/);
+const repoEntryRe = regEx(/^repositories\[\d+\]$/);
 
 function isIgnored(key: string): boolean {
   return ignoredNodes.includes(key);
@@ -194,6 +198,54 @@ function initOptions(): void {
   optionsInitialized = true;
 }
 
+/**
+ * Removes every relative preset reference from a deep copy of the given
+ * `packageRules` entry, at any nesting depth.
+ *
+ * Relative references are only resolvable while the preset which contains them
+ * is fetched, so they must not be passed to `resolveConfigPresets()` during
+ * validation. They are still syntax checked by the `extends` validation.
+ */
+function stripRelativePresets(packageRule: RenovateConfig): {
+  rule: RenovateConfig;
+  hasRelativePresets: boolean;
+} {
+  const rule = clone(packageRule);
+  const hasRelativePresets = stripRelativePresetsFromValue(rule);
+  return { rule, hasRelativePresets };
+}
+
+function stripRelativePresetsFromValue(value: unknown): boolean {
+  if (isArray(value)) {
+    let stripped = false;
+    for (const element of value) {
+      stripped = stripRelativePresetsFromValue(element) || stripped;
+    }
+    return stripped;
+  }
+
+  if (!isPlainObject(value)) {
+    return false;
+  }
+
+  let stripped = false;
+  for (const [key, val] of Object.entries(value)) {
+    if (key === 'extends' && isArray(val)) {
+      const remaining = val.filter(
+        (preset) => !(isString(preset) && isRelativePresetReference(preset)),
+      );
+      if (remaining.length !== val.length) {
+        value[key] = remaining;
+        stripped = true;
+      }
+      continue;
+    }
+
+    stripped = stripRelativePresetsFromValue(val) || stripped;
+  }
+  return stripped;
+}
+
 export async function validateConfig(
   configType: 'global' | 'inherit' | 'repo',
   config: AllConfig,
@@ -221,6 +273,7 @@ export async function validateConfig(
         if (
           parentPath &&
           parentPath !== 'onboardingConfig' &&
+          !repoEntryRe.test(parentPath) &&
           topLevelObjects.includes(key)
         ) {
           errors.push({
@@ -304,7 +357,10 @@ export async function validateConfig(
               });
             }
           }
-          const parentName = getParentName(parentPath);
+          const parentName =
+            parentPath && repoEntryRe.test(parentPath)
+              ? '.'
+              : getParentName(parentPath);
           if (
             !isPreset &&
             optionParents[key] &&
@@ -487,8 +543,10 @@ export async function validateConfig(
                 if (key === 'packageRules') {
                   for (const [subIndex, packageRule] of val.entries()) {
                     if (isObject(packageRule)) {
+                      const { rule, hasRelativePresets } =
+                        stripRelativePresets(packageRule);
                       const { config: resolved } = await resolveConfigPresets(
-                        packageRule,
+                        rule,
                         config,
                       );
                       const resolvedRule = migrateConfig({
@@ -505,15 +563,32 @@ export async function validateConfig(
                         (ruleKey) => selectors.includes(ruleKey),
                       ).length;
                       if (!selectorLength) {
-                        const message = `${currentPath}[${subIndex}]: Each packageRule must contain at least one match* or exclude* selector. Rule: ${JSON.stringify(
-                          packageRule,
-                        )}`;
-                        errors.push({
-                          topic: 'Configuration Error',
-                          message,
-                        });
+                        if (hasRelativePresets) {
+                          // the stripped relative preset may still provide the
+                          // missing selectors, so this cannot be an error
+                          const message = `${currentPath}[${subIndex}]: this rule extends a relative preset that cannot be resolved during validation, so its selectors could not be checked. Rule: ${JSON.stringify(
+                            packageRule,
+                          )}`;
+                          warnings.push({
+                            topic: 'Configuration Error',
+                            message,
+                          });
+                        } else {
+                          const message = `${currentPath}[${subIndex}]: Each packageRule must contain at least one match* or exclude* selector. Rule: ${JSON.stringify(
+                            packageRule,
+                          )}`;
+                          errors.push({
+                            topic: 'Configuration Error',
+                            message,
+                          });
+                        }
                       }
-                      if (selectorLength === Object.keys(resolvedRule).length) {
+                      if (
+                        // the stripped relative preset legitimately provides
+                        // the non-selector field
+                        !hasRelativePresets &&
+                        selectorLength === Object.keys(resolvedRule).length
+                      ) {
                         const message = `${currentPath}[${subIndex}]: Each packageRule must contain at least one non-match* or non-exclude* field. Rule: ${JSON.stringify(
                           packageRule,
                         )}`;
@@ -1121,7 +1196,7 @@ async function validateGlobalConfig(
         });
       }
     } else if (type === 'array') {
-      if (isArray(val)) {
+      if (isArray(val) && key !== 'repositories') {
         for (const [subIndex, subval] of val.entries()) {
           if (isObject(subval)) {
             const subValidation = await validateConfig(
@@ -1165,6 +1240,46 @@ async function validateGlobalConfig(
                 message: `Invalid value \`${value}\` for \`${currentPath}\`. The allowed values are ${allowedValues.join(', ')}.`,
               });
             }
+          }
+        }
+      } else if (isArray(val)) {
+        for (const [subIndex, subval] of val.entries()) {
+          if (isPlainObject(subval)) {
+            if (!isNonEmptyString(subval.repository)) {
+              errors.push({
+                topic: 'Configuration Error',
+                message: `${currentPath}[${subIndex}]: each repository object entry must have a \`repository\` string property`,
+              });
+            }
+            const { repository: _, ...repoEntryConfig } = subval;
+            // Each repository object entry is validated as its own global config, so it does not automatically see the top-level `allowedEnv`/`allowedHeaders`.
+            // Inherit them (unless the entry sets its own) so that entry-level `env`/`headers` are validated against the allowlists, rather than an empty one.
+            const subValidation = await validateConfig(
+              'global',
+              {
+                ...(config.allowedEnv ? { allowedEnv: config.allowedEnv } : {}),
+                ...(config.allowedHeaders
+                  ? { allowedHeaders: config.allowedHeaders }
+                  : {}),
+                ...repoEntryConfig,
+              },
+              false,
+              `${currentPath}[${subIndex}]`,
+            );
+            warnings.push(...subValidation.warnings);
+            errors.push(...subValidation.errors);
+          } else if (isString(subval)) {
+            if (!isNonEmptyStringAndNotWhitespace(subval)) {
+              warnings.push({
+                topic: 'Configuration Error',
+                message: `${currentPath}[${subIndex}]: each repository string entry entry must be a non-empty string`,
+              });
+            }
+          } else {
+            warnings.push({
+              topic: 'Configuration Error',
+              message: `${currentPath}[${subIndex}]: invalid type, should be either a string or an object`,
+            });
           }
         }
       } else {

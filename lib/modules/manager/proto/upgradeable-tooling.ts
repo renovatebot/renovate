@@ -3,6 +3,7 @@ import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
 import { NodeVersionDatasource } from '../../datasource/node-version/index.ts';
 import { NpmDatasource } from '../../datasource/npm/index.ts';
 import { RubyVersionDatasource } from '../../datasource/ruby-version/index.ts';
+import { RustVersionDatasource } from '../../datasource/rust-version/index.ts';
 import * as semverVersioning from '../../versioning/semver/index.ts';
 import type { StaticTooling } from '../asdf/upgradeable-tooling.ts';
 
@@ -97,8 +98,8 @@ export const protoTooling: Record<string, ToolingDefinition> = {
   },
   rust: {
     config: {
-      packageName: 'rust-lang/rust',
-      datasource: GithubTagsDatasource.id,
+      packageName: 'rust',
+      datasource: RustVersionDatasource.id,
     },
   },
   uv: {

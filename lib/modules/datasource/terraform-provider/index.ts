@@ -1,6 +1,7 @@
 import { logger } from '../../../logger/index.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
+import { HttpError } from '../../../util/http/index.ts';
 import * as p from '../../../util/promises.ts';
 import { regEx } from '../../../util/regex.ts';
 import { getQueryString, joinUrlParts } from '../../../util/url.ts';
@@ -10,6 +11,7 @@ import { createSDBackendURL } from '../terraform-module/utils.ts';
 import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
 import {
   OpenTofuProviderDocsResponse,
+  OpenTofuProviderPackagesResponse,
   type TerraformBuild,
   TerraformProviderReleaseBackend,
   TerraformProviderV2Response,
@@ -332,6 +334,88 @@ export class TerraformProviderDatasource extends TerraformDatasource {
     );
   }
 
+  /**
+   * A single platform's download endpoint returns the hashes for all platforms,
+   * so we query `linux/amd64` and fall back to `/versions` discovery only when a
+   * provider lacks that platform (404).
+   * See https://github.com/opentofu/opentofu/pull/3434
+   */
+  private async _getProviderPackages(
+    repository: string,
+    version: string,
+  ): Promise<string[] | null> {
+    const baseUrl = joinUrlParts(
+      TerraformProviderDatasource.openTofuRegistryUrl,
+      'v1/providers',
+      repository,
+    );
+
+    try {
+      try {
+        const { body } = await this.http.getJson(
+          `${baseUrl}/${version}/download/linux/amd64`,
+          OpenTofuProviderPackagesResponse,
+        );
+        return body;
+      } catch (err) {
+        if (!(err instanceof HttpError) || err.response?.statusCode !== 404) {
+          throw err;
+        }
+      }
+      return await this._getProviderPackagesForAvailablePlatform(
+        baseUrl,
+        version,
+      );
+    } catch (err) {
+      if (err instanceof ExternalHostError) {
+        throw err;
+      }
+      logger.debug(
+        { err, repository, version },
+        `Failed to retrieve provider packages for ${repository}@${version}`,
+      );
+      throw new ExternalHostError(err);
+    }
+  }
+
+  /**
+   * Some providers do not publish a `linux/amd64` build, so discover an
+   * available platform via `/versions` and fetch its download endpoint.
+   */
+  private async _getProviderPackagesForAvailablePlatform(
+    baseUrl: string,
+    version: string,
+  ): Promise<string[] | null> {
+    const { body: versionsResponse } = await this.http.getJson(
+      `${baseUrl}/versions`,
+      TerraformRegistryVersions,
+    );
+    const platform = versionsResponse.versions?.find(
+      (entry) => entry.version === version,
+    )?.platforms?.[0];
+    if (!platform) {
+      return null;
+    }
+    const { body: hashes } = await this.http.getJson(
+      `${baseUrl}/${version}/download/${platform.os}/${platform.arch}`,
+      OpenTofuProviderPackagesResponse,
+    );
+    return hashes;
+  }
+
+  getProviderPackages(
+    repository: string,
+    version: string,
+  ): Promise<string[] | null> {
+    return withCache(
+      {
+        namespace: `datasource-${TerraformProviderDatasource.id}`,
+        key: `getProviderPackages:${repository}/${version}`,
+      },
+      () => this._getProviderPackages(repository, version),
+    );
+  }
+
   private async _getZipHashes(
     zipHashUrl: string,
   ): Promise<string[] | undefined> {
@@ -354,7 +438,7 @@ export class TerraformProviderDatasource extends TerraformDatasource {
     return rawHashData
       .trimEnd()
       .split('\n')
-      .map((line) => line.split(/\s/)[0]);
+      .map((line) => line.split(regEx(/\s/))[0]);
   }
 
   getZipHashes(zipHashUrl: string): Promise<string[] | undefined> {

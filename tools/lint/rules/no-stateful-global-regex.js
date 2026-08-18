@@ -55,11 +55,6 @@ export default {
     },
   },
   create(context) {
-    const filename = context.filename ?? context.physicalFilename ?? '';
-    if (!filename.includes('/lib/')) {
-      return {};
-    }
-
     /**
      * Module-scope `const`/`let` bindings initialized with a stateful regex,
      * keyed by variable name.

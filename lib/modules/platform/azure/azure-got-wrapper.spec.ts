@@ -142,4 +142,44 @@ describe('modules/platform/azure/azure-got-wrapper', () => {
       );
     });
   });
+
+  describe('isHosted', () => {
+    let sdk: typeof import('azure-devops-node-api');
+
+    beforeEach(async () => {
+      sdk = await vi.importActual('azure-devops-node-api');
+      hostRules.add({
+        hostType: 'azure',
+        token: '123test',
+        matchHost: 'https://dev.azure.com/renovate7',
+      });
+      azure.setEndpoint('https://dev.azure.com/renovate7');
+    });
+
+    it('returns true when deployment type is Hosted', async () => {
+      // DeploymentFlags.Hosted === 1
+      vi.spyOn(sdk.WebApi.prototype, 'connect').mockResolvedValue({
+        deploymentType: 1,
+      });
+
+      expect(await azure.isHosted()).toBe(true);
+    });
+
+    it('returns false when deployment type is OnPremises', async () => {
+      // DeploymentFlags.OnPremises === 2
+      vi.spyOn(sdk.WebApi.prototype, 'connect').mockResolvedValue({
+        deploymentType: 2,
+      });
+
+      expect(await azure.isHosted()).toBe(false);
+    });
+
+    it('returns false when connectionData cannot be read', async () => {
+      vi.spyOn(sdk.WebApi.prototype, 'connect').mockRejectedValue(
+        new Error('boom'),
+      );
+
+      expect(await azure.isHosted()).toBe(false);
+    });
+  });
 });
