@@ -47,6 +47,7 @@ import {
   OnboardingState,
   getDefaultConfigFileName,
 } from '../onboarding/common.ts';
+import { filterAllowedEnv } from './filter-allowed-env.ts';
 import type { RepoFileConfig, RepositoryWorkerConfig } from './types.ts';
 
 export async function detectConfigFile(): Promise<string | null> {
@@ -219,6 +220,14 @@ export async function mergeRenovateConfig(
   const repoEntryConfig = returnConfig.repositoryEntryConfig;
   delete returnConfig.repositoryEntryConfig;
 
+  // self-hosted configuration is always allowed
+  const adminSuppliedEnv = {
+    // `env` settings the self-hosted admin supplied (via `config.js`, etc), `env`, etc
+    ...coerceObject(config.env),
+    // `repositories[]` entry for this repo
+    ...coerceObject(repoEntryConfig?.env),
+  };
+
   if (isNonEmptyObject(repoEntryConfig)) {
     const repoEntry = repoEntryConfig as RenovateConfig;
     const toResolve: RenovateConfig = {
@@ -336,7 +345,7 @@ export async function mergeRenovateConfig(
     );
   }
 
-  setUserEnv(returnConfig.env);
+  setUserEnv(filterAllowedEnv(returnConfig.env, adminSuppliedEnv));
   delete returnConfig.env;
 
   return returnConfig;

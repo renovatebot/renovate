@@ -658,6 +658,7 @@ const options: Readonly<RenovateOptions>[] = [
       'Environment variables that Renovate uses when executing package manager commands.',
     type: 'object',
     default: {},
+    requiresCheckAtTrustBoundary: true,
   },
   {
     name: 'customDatasources',
