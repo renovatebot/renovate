@@ -272,7 +272,10 @@ async function mergeRegistries(
         // Don't abort the merge if another registry already returned releases;
         // a single rate-limited registry shouldn't discard results we have
         externalHostError = err;
-        logger.trace({ err }, 'datasource merge external host error');
+        logger.debug(
+          { err, registryUrl },
+          'datasource merge: external host error from registry; continuing so releases from other registries are not discarded',
+        );
         continue;
       }
 
