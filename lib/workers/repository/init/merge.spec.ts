@@ -680,8 +680,8 @@ describe('workers/repository/init/merge', () => {
         expect(getUserEnv()).toEqual({ ADMIN_VAR: 'from-admin' });
       });
 
-      it('incorrectly applies `env` from the repository config, if it is NOT in `allowedEnv`', async () => {
-        // `allowedEnv` is currently only enforced in `validateConfig`, based on the repo config file content. We never re-validate the resolved config before calling `setUserEnv` which allows this bypass
+      it('drops `env` injected by a repository, if it is not in `allowedEnv`', async () => {
+        // previously this would apply due to a gap in re-validating `allowedEnv` against the resolved config
         GlobalConfig.set({ allowedEnv: ['SOME_*'] });
         fs.readLocalFile.mockResolvedValue(
           JSON.stringify({ env: { NOT_ALLOWED: 'from-repo' } }),
@@ -689,11 +689,11 @@ describe('workers/repository/init/merge', () => {
 
         await mergeRenovateConfig(config);
 
-        expect(getUserEnv()).toEqual({ NOT_ALLOWED: 'from-repo' });
+        expect(getUserEnv()).toEqual({});
       });
 
-      it('incorrectly applies `env` injected by a preset, even if it is NOT in `allowedEnv`', async () => {
-        // `allowedEnv` is currently only enforced in `validateConfig`, based on the file content, which does not take into account the full resolved config presets. We never re-validate the resolved config before calling `setUserEnv` which allows this bypass
+      it('drops `env` injected by a preset, if it is not in `allowedEnv`', async () => {
+        // previously this would apply due to a gap in re-validating `allowedEnv` against the resolved config
         GlobalConfig.set({ allowedEnv: ['SOME_*'] });
         memCache.set('preset:local>envPreset', {
           env: { NOT_ALLOWED: 'from-preset' },
@@ -704,7 +704,11 @@ describe('workers/repository/init/merge', () => {
 
         await mergeRenovateConfig(config);
 
-        expect(getUserEnv()).toEqual({ NOT_ALLOWED: 'from-preset' });
+        expect(getUserEnv()).toEqual({});
+        expect(logger.logger.warn).toHaveBeenCalledWith(
+          { denied: ['NOT_ALLOWED'] },
+          "Ignoring env variables not permitted by this Renovate instance's `allowedEnv`",
+        );
       });
 
       it('applies `env` from `GlobalConfig`, even if it is NOT in `allowedEnv`', async () => {
