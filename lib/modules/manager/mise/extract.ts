@@ -40,6 +40,7 @@ import { parseTomlFile } from './utils.ts';
 // Tool names can have options in the tool name
 // e.g. ubi:tamasfe/taplo[matching=full,exe=taplo]
 const optionInToolNameRegex = regEx(/^(?<name>.+?)(?:\[(?<options>.+)\])?$/);
+const nonVersionSelectorRegex = regEx(/^(?:ref:|path:|sub-\d+(?::|$))/);
 const partialSelectorRegex = regEx(
   /^(?<prefix>[^\d]*)(?<major>\d+)(?:\.(?<minor>\d+))?$/,
 );
@@ -47,6 +48,10 @@ const partialSelectorRegex = regEx(
 interface MiseSelectorConfig {
   allowedVersions?: string;
   ignoreUnstable?: boolean;
+}
+
+function getDependencyName(name: string): string {
+  return optionInToolNameRegex.exec(name.trim())!.groups!.name;
 }
 
 /**
@@ -101,7 +106,9 @@ export async function extractPackageFile(
       name,
       toolData,
       depType,
-      lockFileData ? getLockedVersion(lockFileData, name) : undefined,
+      lockFileData
+        ? getLockedVersion(lockFileData, getDependencyName(name))
+        : undefined,
     ),
   );
   const result: PackageFileContent = { deps };
@@ -295,10 +302,14 @@ function getSelectorConfig(
     if (ltsDatasource === JavaVersionDatasource.id) {
       return {
         // Update this list when the OpenJDK release roadmap designates a new LTS.
-        allowedVersions: '/^(?:8|11|17|21|25)(?:\\.|-|$)/',
+        allowedVersions: '/^(?:8|11|17|21|25)(?:\\.|-|\\+|$)/',
         ignoreUnstable: true,
       };
     }
+    return null;
+  }
+
+  if (nonVersionSelectorRegex.test(version)) {
     return null;
   }
 
@@ -353,7 +364,6 @@ function extractSelectorLockedDependency(
   return {
     ...createDependency(depName, version, resolvedToolConfig, depType),
     currentValue: comparableLockedVersion,
-    currentRawValue: version,
     lockedVersion: comparableLockedVersion,
     rangeStrategy: 'update-lockfile',
     isLockfileOnly: true,

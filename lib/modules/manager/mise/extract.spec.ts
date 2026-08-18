@@ -1260,6 +1260,28 @@ describe('modules/manager/mise/extract', () => {
       });
     });
 
+    it('uses the normalized tool name for lockfile lookup', async () => {
+      const ubiLockFileContent = codeBlock`
+        [[tools."ubi:cli/cli"]]
+        version = "2.63.0"
+      `;
+      fs.readLocalFile.mockResolvedValueOnce(ubiLockFileContent);
+      const content = codeBlock`
+        [tools]
+        " ubi:cli/cli[exe=gh] " = "2"
+      `;
+
+      const result = await extractPackageFile(content, 'mise.toml');
+
+      expect(result?.deps[0]).toMatchObject({
+        depName: 'ubi:cli/cli',
+        currentValue: '2.63.0',
+        lockedVersion: '2.63.0',
+        isLockfileOnly: true,
+        rangeStrategy: 'update-lockfile',
+      });
+    });
+
     it('skips lockedVersion when tool not in lock file', async () => {
       fs.readLocalFile.mockResolvedValueOnce(lockFileContent);
       const content = codeBlock`
@@ -1322,7 +1344,6 @@ describe('modules/manager/mise/extract', () => {
         {
           depName: 'node',
           currentValue: '22.14.0',
-          currentRawValue: 'lts',
           lockedVersion: '22.14.0',
           ignoreUnstable: true,
           isLockfileOnly: true,
@@ -1331,7 +1352,6 @@ describe('modules/manager/mise/extract', () => {
         {
           depName: 'java',
           currentValue: '25.0.3+9.0.LTS',
-          currentRawValue: 'temurin-25',
           lockedVersion: '25.0.3+9.0.LTS',
           allowedVersions: '/^(?:\\x74emurin\\x2d)?25(?:\\.|-|\\+|$)/',
           isLockfileOnly: true,
@@ -1340,7 +1360,6 @@ describe('modules/manager/mise/extract', () => {
         {
           depName: 'protoc',
           currentValue: '30.2',
-          currentRawValue: 'latest',
           lockedVersion: '30.2',
           isLockfileOnly: true,
           rangeStrategy: 'update-lockfile',
@@ -1377,9 +1396,8 @@ describe('modules/manager/mise/extract', () => {
         {
           depName: 'java',
           currentValue: '25.0.3+9.0.LTS',
-          currentRawValue: 'lts',
           lockedVersion: '25.0.3+9.0.LTS',
-          allowedVersions: '/^(?:8|11|17|21|25)(?:\\.|-|$)/',
+          allowedVersions: '/^(?:8|11|17|21|25)(?:\\.|-|\\+|$)/',
           ignoreUnstable: true,
           isLockfileOnly: true,
         },
@@ -1421,6 +1439,33 @@ describe('modules/manager/mise/extract', () => {
         skipReason: 'unsupported-datasource',
       });
       expect(result?.deps[0]).not.toHaveProperty('isLockfileOnly');
+    });
+
+    it('does not treat mise non-version selectors as partial versions', async () => {
+      const lockFile = codeBlock`
+        [[tools.node]]
+        version = "22.14.0"
+
+        [[tools.python]]
+        version = "3.13.0"
+
+        [[tools.ruby]]
+        version = "3.4.0"
+      `;
+      fs.readLocalFile.mockResolvedValueOnce(lockFile);
+      const content = codeBlock`
+        [tools]
+        node = "ref:main2"
+        python = "path:/opt/tools/1.2"
+        ruby = "sub-1"
+      `;
+
+      const result = await extractPackageFile(content, 'mise.toml');
+
+      for (const dep of result?.deps ?? []) {
+        expect(dep).not.toHaveProperty('isLockfileOnly');
+        expect(dep).not.toHaveProperty('allowedVersions');
+      }
     });
 
     it('does not reinterpret a value that is exact in the lockfile', async () => {
