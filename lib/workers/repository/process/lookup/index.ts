@@ -906,7 +906,7 @@ export async function lookupUpdates(
                 newValue: update.newValue,
                 bucket: update.bucket,
               },
-              'Could not determine new digest for update.',
+              'Could not determine new digest for update',
             );
 
             // Only report a warning if there is a current digest.

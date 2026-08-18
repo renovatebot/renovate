@@ -44,7 +44,7 @@ export function getGitAuthenticatedEnvironmentVariables(
         {
           GIT_CONFIG_COUNT: gitConfigCountEnvVariable,
         },
-        `Found GIT_CONFIG_COUNT env variable, but couldn't parse the value to an integer. Ignoring it.`,
+        `Found GIT_CONFIG_COUNT env variable, but couldn't parse the value to an integer. Ignoring it`,
       );
       gitConfigCount = 0;
     }

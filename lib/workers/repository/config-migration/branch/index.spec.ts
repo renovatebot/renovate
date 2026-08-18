@@ -43,7 +43,7 @@ describe('workers/repository/config-migration/branch/index', () => {
       ).resolves.toMatchObject({ result: 'no-migration-branch' });
 
       expect(logger.debug).toHaveBeenCalledWith(
-        'Config migration needed but config migration is disabled and checkbox not checked or not present.',
+        'Config migration needed but config migration is disabled and checkbox not checked or not present',
       );
     });
 
@@ -95,7 +95,7 @@ describe('workers/repository/config-migration/branch/index', () => {
       expect(platform.refreshPr).toHaveBeenCalledTimes(0);
 
       expect(logger.debug).toHaveBeenCalledWith(
-        'Config Migration branch has been modified. Skipping branch rebase.',
+        'Config Migration branch has been modified. Skipping branch rebase',
       );
     });
 

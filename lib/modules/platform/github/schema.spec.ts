@@ -173,7 +173,7 @@ describe('modules/platform/github/schema', () => {
     expect(data).toBeEmptyArray();
     expect(logger.logger.debug).toHaveBeenCalledWith(
       expect.objectContaining({
-        error: expect.any(ZodError),
+        err: expect.any(ZodError),
       }),
       'Vulnerability Alert: Failed to parse some alerts',
     );

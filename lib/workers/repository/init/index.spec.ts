@@ -64,12 +64,12 @@ describe('workers/repository/init/index', () => {
 
       expect(logger.logger.warn).toHaveBeenCalledWith(
         { platform: 'github' },
-        "Configuration option 'filterUnavailableUsers' is not supported on the current platform.",
+        "Configuration option 'filterUnavailableUsers' is not supported on the current platform",
       );
 
       expect(logger.logger.warn).toHaveBeenCalledWith(
         { platform: 'github' },
-        "Configuration option 'expandCodeOwnersGroups' is not supported on the current platform.",
+        "Configuration option 'expandCodeOwnersGroups' is not supported on the current platform",
       );
     });
   });

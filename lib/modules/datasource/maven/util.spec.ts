@@ -229,7 +229,7 @@ describe('modules/datasource/maven/util', () => {
 
           expect(logger.logger.once.warn).toHaveBeenCalledWith(
             { failedUrl: `${MAVEN_REPO}/some/path` },
-            'Maven Central rate limiting detected despite Redis caching.',
+            'Maven Central rate limiting detected despite Redis caching',
           );
         },
       );
@@ -251,7 +251,7 @@ describe('modules/datasource/maven/util', () => {
 
         expect(logger.logger.once.warn).toHaveBeenCalledWith(
           { failedUrl: `${MAVEN_REPO}/some/path` },
-          'Maven Central rate limiting detected. Persistent caching required.',
+          'Maven Central rate limiting detected. Persistent caching required',
         );
       });
 

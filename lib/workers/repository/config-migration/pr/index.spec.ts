@@ -262,7 +262,7 @@ describe('workers/repository/config-migration/pr/index', () => {
 
       expect(logger.warn).toHaveBeenCalledWith(
         { err },
-        'Migration PR already exists but cannot find it. It was probably created by a different user.',
+        'Migration PR already exists but cannot find it. It was probably created by a different user',
       );
       expect(scm.deleteBranch).toHaveBeenCalledTimes(1);
     });

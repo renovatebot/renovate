@@ -207,7 +207,7 @@ describe('workers/repository/updates/generate', () => {
       expect(res.minimumGroupSize).toBe(3);
 
       expect(logger.logger.debug).toHaveBeenCalledWith(
-        'Multiple minimumGroupSize values found for this branch, using highest.',
+        'Multiple minimumGroupSize values found for this branch, using highest',
       );
     });
 
@@ -1988,7 +1988,7 @@ describe('workers/repository/updates/generate', () => {
               { depName: 'dep1', skipArtifactsUpdate: first },
             ],
           },
-          'Mixed `skipArtifactsUpdate` values in upgrades. Artifacts will be updated.',
+          'Mixed `skipArtifactsUpdate` values in upgrades. Artifacts will be updated',
         );
       },
     );

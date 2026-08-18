@@ -9,6 +9,6 @@ export function parseTomlFile(
   if (res.success) {
     return res.data;
   }
-  logger.debug({ err: res.error, packageFile }, 'Error parsing Mise file.');
+  logger.debug({ err: res.error, packageFile }, 'Error parsing Mise file');
   return null;
 }

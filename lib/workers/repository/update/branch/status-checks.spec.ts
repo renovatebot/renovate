@@ -83,7 +83,7 @@ describe('workers/repository/update/branch/status-checks', () => {
       });
 
       expect(logger.debug).toHaveBeenCalledWith(
-        'Status check is null or an empty string, skipping status check addition.',
+        'Status check is null or an empty string, skipping status check addition',
       );
       expect(platform.setBranchStatus).not.toHaveBeenCalled();
     });
@@ -98,7 +98,7 @@ describe('workers/repository/update/branch/status-checks', () => {
       });
 
       expect(logger.debug).toHaveBeenCalledWith(
-        'Status check is null or an empty string, skipping status check addition.',
+        'Status check is null or an empty string, skipping status check addition',
       );
       expect(platform.setBranchStatus).not.toHaveBeenCalled();
     });
@@ -111,7 +111,7 @@ describe('workers/repository/update/branch/status-checks', () => {
       });
 
       expect(logger.debug).toHaveBeenCalledWith(
-        'Status check is null or an empty string, skipping status check addition.',
+        'Status check is null or an empty string, skipping status check addition',
       );
       expect(platform.setBranchStatus).not.toHaveBeenCalled();
     });
@@ -133,7 +133,7 @@ describe('workers/repository/update/branch/status-checks', () => {
         config.statusCheckWhen = { minimumReleaseAge: 'never' };
         await setStability(config);
         expect(logger.debug).toHaveBeenCalledWith(
-          'statusCheckWhen.minimumReleaseAge is set to "never", skipping stability status check.',
+          'statusCheckWhen.minimumReleaseAge is set to "never", skipping stability status check',
         );
         expect(platform.getBranchStatusCheck).not.toHaveBeenCalled();
         expect(platform.setBranchStatus).not.toHaveBeenCalled();
@@ -143,7 +143,7 @@ describe('workers/repository/update/branch/status-checks', () => {
         config.statusCheckWhen = { minimumReleaseAge: 'never' };
         await setStability(config);
         expect(logger.debug).not.toHaveBeenCalledWith(
-          'statusCheckWhen.minimumReleaseAge is set to "never", skipping stability status check.',
+          'statusCheckWhen.minimumReleaseAge is set to "never", skipping stability status check',
         );
         expect(platform.getBranchStatusCheck).not.toHaveBeenCalled();
         expect(platform.setBranchStatus).not.toHaveBeenCalled();
@@ -240,7 +240,7 @@ describe('workers/repository/update/branch/status-checks', () => {
       });
 
       expect(logger.debug).toHaveBeenCalledWith(
-        'Status check is null or an empty string, skipping status check addition.',
+        'Status check is null or an empty string, skipping status check addition',
       );
       expect(platform.setBranchStatus).not.toHaveBeenCalled();
     });
@@ -256,7 +256,7 @@ describe('workers/repository/update/branch/status-checks', () => {
       });
 
       expect(logger.debug).toHaveBeenCalledWith(
-        'Status check is null or an empty string, skipping status check addition.',
+        'Status check is null or an empty string, skipping status check addition',
       );
       expect(platform.setBranchStatus).not.toHaveBeenCalled();
     });
@@ -270,7 +270,7 @@ describe('workers/repository/update/branch/status-checks', () => {
       });
 
       expect(logger.debug).toHaveBeenCalledWith(
-        'Status check is null or an empty string, skipping status check addition.',
+        'Status check is null or an empty string, skipping status check addition',
       );
       expect(platform.setBranchStatus).not.toHaveBeenCalled();
     });
@@ -294,7 +294,7 @@ describe('workers/repository/update/branch/status-checks', () => {
         config.statusCheckWhen = { mergeConfidence: 'never' };
         await setConfidence(config);
         expect(logger.debug).toHaveBeenCalledWith(
-          'statusCheckWhen.mergeConfidence is set to "never", skipping merge confidence status check.',
+          'statusCheckWhen.mergeConfidence is set to "never", skipping merge confidence status check',
         );
         expect(platform.getBranchStatusCheck).not.toHaveBeenCalled();
         expect(platform.setBranchStatus).not.toHaveBeenCalled();
@@ -305,7 +305,7 @@ describe('workers/repository/update/branch/status-checks', () => {
         config.statusCheckWhen = { mergeConfidence: 'never' };
         await setConfidence(config);
         expect(logger.debug).not.toHaveBeenCalledWith(
-          'statusCheckWhen.mergeConfidence is set to "never", skipping merge confidence status check.',
+          'statusCheckWhen.mergeConfidence is set to "never", skipping merge confidence status check',
         );
         expect(platform.getBranchStatusCheck).not.toHaveBeenCalled();
         expect(platform.setBranchStatus).not.toHaveBeenCalled();

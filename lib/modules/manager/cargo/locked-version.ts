@@ -34,6 +34,6 @@ export function parseLockFile(lockFile: string): CargoLock | null {
   if (res.success) {
     return res.data;
   }
-  logger.debug({ err: res.error }, 'Error parsing Cargo lockfile.');
+  logger.debug({ err: res.error }, 'Error parsing Cargo lockfile');
   return null;
 }

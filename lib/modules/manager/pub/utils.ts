@@ -9,7 +9,7 @@ export function parsePubspec(
   if (res.success) {
     return res.data;
   }
-  logger.debug({ err: res.error, fileName }, 'Error parsing pubspec.');
+  logger.debug({ err: res.error, fileName }, 'Error parsing pubspec');
 
   return null;
 }
@@ -22,7 +22,7 @@ export function parsePubspecLock(
   if (res.success) {
     return res.data;
   }
-  logger.debug({ err: res.error, fileName }, 'Error parsing pubspec lockfile.');
+  logger.debug({ err: res.error, fileName }, 'Error parsing pubspec lockfile');
 
   return null;
 }

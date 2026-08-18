@@ -177,7 +177,7 @@ export async function updateArtifacts({
   try {
     if (updatedDeps.length === 0 && config.isLockFileMaintenance !== true) {
       logger.debug(
-        `Not updating lock file because no deps changed and no lock file maintenance.`,
+        `Not updating lock file because no deps changed and no lock file maintenance`,
       );
       return null;
     }

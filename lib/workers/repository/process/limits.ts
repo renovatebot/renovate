@@ -26,7 +26,7 @@ export async function getPrHourlyCount(
           DateTime.fromISO(pr.createdAt!).toUTC() > currentHourStart,
       );
       logger.debug(
-        `${soFarThisHour.length} PRs have been created so far in this hour.`,
+        `${soFarThisHour.length} PRs have been created so far in this hour`,
       );
       return soFarThisHour.length;
     } catch (err) {
@@ -116,7 +116,7 @@ export async function getCommitsHourlyCount(
           }
         }
       }
-      logger.debug(`${soFarThisHour} commits so far in this hour.`);
+      logger.debug(`${soFarThisHour} commits so far in this hour`);
       return soFarThisHour;
     } catch (err) {
       logger.error({ err }, 'Error checking commits per hour');
@@ -136,7 +136,7 @@ export async function getConcurrentBranchesCount(
       }
     }
 
-    logger.debug(`${existingBranchCount} already existing branches found.`);
+    logger.debug(`${existingBranchCount} already existing branches found`);
     return existingBranchCount;
   });
 }

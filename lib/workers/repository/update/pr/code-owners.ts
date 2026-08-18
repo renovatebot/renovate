@@ -171,7 +171,7 @@ export async function codeOwnersForPr(pr: Pr): Promise<string[]> {
 
     return userScore.map((u) => u.user);
   } catch (err) {
-    logger.warn({ err, pr }, 'Failed to determine CODEOWNERS for PR.');
+    logger.warn({ err, pr }, 'Failed to determine CODEOWNERS for PR');
     return [];
   }
 }

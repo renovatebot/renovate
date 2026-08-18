@@ -10,7 +10,7 @@ export function extractPackageFile(
   const deps = CloudbuildSteps.catch(({ error: err }) => {
     logger.debug(
       { err, packageFile },
-      'Cloud Build: error extracting Docker images from a configuration file.',
+      'Cloud Build: error extracting Docker images from a configuration file',
     );
     return [];
   })

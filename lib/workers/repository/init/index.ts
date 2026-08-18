@@ -31,7 +31,7 @@ function warnOnUnsupportedOptions(config: RenovateConfig): void {
     const platform = GlobalConfig.get('platform');
     logger.warn(
       { platform },
-      `Configuration option 'filterUnavailableUsers' is not supported on the current platform.`,
+      `Configuration option 'filterUnavailableUsers' is not supported on the current platform`,
     );
   }
 
@@ -39,7 +39,7 @@ function warnOnUnsupportedOptions(config: RenovateConfig): void {
     const platform = GlobalConfig.get('platform');
     logger.warn(
       { platform },
-      `Configuration option 'expandCodeOwnersGroups' is not supported on the current platform.`,
+      `Configuration option 'expandCodeOwnersGroups' is not supported on the current platform`,
     );
   }
 }

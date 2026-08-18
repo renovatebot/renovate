@@ -25,7 +25,7 @@ export async function updateArtifacts(
   try {
     await updateHermitPackage(update);
   } catch (err) {
-    logger.debug({ err }, `error updating hermit packages.`);
+    logger.debug({ err }, `error updating hermit packages`);
     if (err instanceof UpdateHermitError) {
       return [
         {

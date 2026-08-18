@@ -73,7 +73,7 @@ export async function extractPackageFile(
 
     return pfc.deps.length ? pfc : null;
   } catch (err) {
-    logger.debug({ err, packageFile }, 'Failed to parse bazel module file.');
+    logger.debug({ err, packageFile }, 'Failed to parse bazel module file');
     return null;
   }
 }

@@ -58,10 +58,7 @@ export function extractPackageFile(
 
   const res = QuadletFile.safeParse(content);
   if (!res.success) {
-    logger.debug(
-      { err: res.error, packageFile },
-      'Error parsing Quadlet file.',
-    );
+    logger.debug({ err: res.error, packageFile }, 'Error parsing Quadlet file');
     return null;
   }
 

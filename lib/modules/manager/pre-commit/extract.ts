@@ -84,7 +84,7 @@ function determineDatasource(
     if (isNonEmptyObject(find({ hostType, url: hostUrl }))) {
       logger.debug(
         { repository, hostUrl, hostType },
-        `Provided hostname matches a ${hostType} hostrule.`,
+        `Provided hostname matches a ${hostType} hostrule`,
       );
       return { datasource: sourceId, registryUrls: [hostname] };
     }
@@ -167,7 +167,7 @@ function extractDependency(tag: string, repository: string): PackageDependency {
   }
   logger.info(
     { repository },
-    'Could not separate hostname from full dependency url.',
+    'Could not separate hostname from full dependency url',
   );
   return {
     depName: undefined,

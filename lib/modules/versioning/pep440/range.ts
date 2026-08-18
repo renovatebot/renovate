@@ -194,7 +194,7 @@ export function getNewValue({
       // Valid rangeStrategy values are: bump, extend, pin, replace.
       // https://docs.renovatebot.com/modules/versioning/#pep440-versioning
       logger.debug(
-        `Unsupported rangeStrategy: ${rangeStrategy}. Using "replace" instead.`,
+        `Unsupported rangeStrategy: ${rangeStrategy}. Using "replace" instead`,
       );
       return getNewValue({
         currentValue,

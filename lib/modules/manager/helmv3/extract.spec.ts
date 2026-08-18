@@ -269,7 +269,7 @@ describe('modules/manager/helmv3/extract', () => {
             'git+https://github.com/codefresh-io/csdp-official@add-cluster/helm',
           packageFile: 'Chart.yaml',
         },
-        'Skipping unsupported helm-git repository.',
+        'Skipping unsupported helm-git repository',
       );
       expect(result).toMatchObject({
         datasource: 'helm',

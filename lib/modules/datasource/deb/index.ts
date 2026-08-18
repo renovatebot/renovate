@@ -173,7 +173,7 @@ export class DebDatasource extends Datasource {
             if (!releaseMetaInformationMatches(aggregatedRelease, newRelease)) {
               logger.warn(
                 { packageName },
-                'Package occurred in more than one repository with different meta information. Aggregating releases anyway.',
+                'Package occurred in more than one repository with different meta information. Aggregating releases anyway',
               );
             }
             aggregatedRelease.releases.push(...newRelease.releases);
@@ -181,7 +181,7 @@ export class DebDatasource extends Datasource {
         }
       } catch (error) {
         logger.debug(
-          { componentUrl, error },
+          { componentUrl, err: error },
           'Skipping component due to an error',
         );
       }

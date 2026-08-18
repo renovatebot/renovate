@@ -12,7 +12,7 @@ export async function setArtifactErrorStatus(
   if (mode === 'never') {
     if (hasErrors) {
       logger.debug(
-        'statusCheckWhen.artifactError is set to "never", skipping artifacts status check.',
+        'statusCheckWhen.artifactError is set to "never", skipping artifacts status check',
       );
     }
     return;
@@ -26,7 +26,7 @@ export async function setArtifactErrorStatus(
   const context = config.statusCheckNames?.artifactError;
   if (!context) {
     logger.debug(
-      'Status check is null or an empty string, skipping status check addition.',
+      'Status check is null or an empty string, skipping status check addition',
     );
     return;
   }

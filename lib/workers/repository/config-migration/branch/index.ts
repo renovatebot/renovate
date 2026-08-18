@@ -33,7 +33,7 @@ export async function checkConfigMigrationBranch(
       configMigrationCheckboxState === 'unchecked')
   ) {
     logger.debug(
-      'Config migration needed but config migration is disabled and checkbox not checked or not present.',
+      'Config migration needed but config migration is disabled and checkbox not checked or not present',
     );
     return { result: 'no-migration-branch' };
   }
@@ -63,20 +63,20 @@ export async function checkConfigMigrationBranch(
 
     // found closed migration PR
     if (closedPr) {
-      logger.debug('Closed config migration PR found.');
+      logger.debug('Closed config migration PR found');
 
       // if a closed pr exists and the checkbox for config migration is not checked
       // return no-migration-branch result so that the checkbox gets added again
       // we only want to create a config migration pr if the checkbox is checked
       if (configMigrationCheckboxState !== 'checked') {
         logger.debug(
-          'Config migration is enabled and needed. But a closed pr exists and checkbox is not checked. Skipping migration branch creation.',
+          'Config migration is enabled and needed. But a closed pr exists and checkbox is not checked. Skipping migration branch creation',
         );
         return { result: 'no-migration-branch' };
       }
 
       logger.debug(
-        'Closed migration PR found and checkbox is checked. Try to delete this old branch and create a new one.',
+        'Closed migration PR found and checkbox is checked. Try to delete this old branch and create a new one',
       );
       await handlePr(config, closedPr);
     }
@@ -89,7 +89,7 @@ export async function checkConfigMigrationBranch(
 
     if (await isMigrationBranchModified(config, configMigrationBranch)) {
       logger.debug(
-        'Config Migration branch has been modified. Skipping branch rebase.',
+        'Config Migration branch has been modified. Skipping branch rebase',
       );
       result = 'migration-branch-modified';
     } else {

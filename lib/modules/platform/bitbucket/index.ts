@@ -1272,7 +1272,7 @@ export async function mergePr({
 
   // Bitbucket Cloud does not support a rebase-alike; https://jira.atlassian.com/browse/BCLOUD-16610
   if (mergeStrategy === 'rebase') {
-    logger.warn('Bitbucket Cloud does not support a "rebase" strategy.');
+    logger.warn('Bitbucket Cloud does not support a "rebase" strategy');
     return false;
   }
 

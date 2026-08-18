@@ -47,7 +47,7 @@ export async function getAzureBranchObj(
   const fromBranchName = getNewBranchName(from);
   const refs = await getRefs(repoId, fromBranchName);
   if (refs.length === 0) {
-    logger.debug(`getAzureBranchObj without a valid from, so initial commit.`);
+    logger.debug(`getAzureBranchObj without a valid from, so initial commit`);
     // TODO: fix undefined
     return {
       name: getNewBranchName(branchName)!,

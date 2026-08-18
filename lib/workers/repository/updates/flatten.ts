@@ -253,7 +253,7 @@ export async function flattenUpdates(
     .map((update) => filterConfig(update, 'branch'));
   if (filteredUpdates.length < updates.length) {
     logger.debug(
-      `Filtered out ${updates.length - filteredUpdates.length} disabled update(s). ${filteredUpdates.length} update(s) remaining.`,
+      `Filtered out ${updates.length - filteredUpdates.length} disabled update(s). ${filteredUpdates.length} update(s) remaining`,
     );
   }
   return filteredUpdates;

@@ -500,7 +500,7 @@ describe('modules/manager/custom/jsonata/index', () => {
         jsonataQuery:
           '$each(`docker.io`.`images-by-semver`, function($v, $n) { { "depName": $n, "currentValue": $replace($v, ">=", "") } })',
       },
-      'Error executing jsonata query. Please check your query.',
+      'Error executing jsonata query. Please check your query',
     );
   });
 });

@@ -99,7 +99,7 @@ export async function downloadPackageFile(
   }
 
   if (!needsToDownload) {
-    logger.debug(`No need to download ${packageUrl}, file is up to date.`);
+    logger.debug(`No need to download ${packageUrl}, file is up to date`);
     return false;
   }
   const readStream = http.stream(packageUrl);

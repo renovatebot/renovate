@@ -485,7 +485,7 @@ export class GithubHttp extends HttpBase<GithubHttpOptions> {
               requestHost: resolvedUrl.host,
               paginationHost: firstPageUrl.host,
             },
-            'Ignoring cross-origin GitHub pagination link. Set RENOVATE_X_REBASE_PAGINATION_LINKS if this is a self-hosted instance that returns a different host in pagination links.',
+            'Ignoring cross-origin GitHub pagination link. Set RENOVATE_X_REBASE_PAGINATION_LINKS if this is a self-hosted instance that returns a different host in pagination links',
           );
         }
       }

@@ -34,7 +34,7 @@ export async function extractPackageFile(
     if (chart.apiVersion !== 'v2') {
       logger.debug(
         { packageFile },
-        'Unsupported Chart apiVersion. Only v2 is supported.',
+        'Unsupported Chart apiVersion. Only v2 is supported',
       );
       return null;
     }
@@ -68,7 +68,7 @@ export async function extractPackageFile(
     if (dep.repository.startsWith('git+')) {
       logger.debug(
         { repository: dep.repository, packageFile },
-        `Skipping unsupported helm-git repository.`,
+        `Skipping unsupported helm-git repository`,
       );
       res.skipReason = 'unknown-registry';
       return res;

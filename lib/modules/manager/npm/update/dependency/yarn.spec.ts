@@ -25,7 +25,7 @@ describe('modules/manager/npm/update/dependency/yarn', () => {
       });
 
       expect(logger.logger.error).toHaveBeenCalledWith(
-        'No catalogName was found; this is likely an extraction error.',
+        'No catalogName was found; this is likely an extraction error',
       );
       expect(testContent).toBeNull();
     });

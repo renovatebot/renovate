@@ -202,7 +202,7 @@ export async function processBranch(
     } else if (!branchPr && existingPr && !dependencyDashboardCheck) {
       logger.debug(
         { prTitle: config.prTitle },
-        `Closed PR #${existingPr.number} already exists. Skipping branch.`,
+        `Closed PR #${existingPr.number} already exists. Skipping branch`,
       );
       await handleClosedPr(config, existingPr);
       return {
@@ -556,15 +556,15 @@ export async function processBranch(
       userRebaseRequested = true;
     } else if (userApproveAllPendingPR) {
       logger.debug(
-        'A user manually approved all pending PRs via the Dependency Dashboard.',
+        'A user manually approved all pending PRs via the Dependency Dashboard',
       );
     } else if (userOpenAllRateLimtedPR) {
       logger.debug(
-        'A user manually approved all rate-limited PRs via the Dependency Dashboard.',
+        'A user manually approved all rate-limited PRs via the Dependency Dashboard',
       );
     } else if (userOpenAllSchedulePendingPR) {
       logger.debug(
-        'A user manually requested all awaiting schedule PRs via the Dependency Dashboard.',
+        'A user manually requested all awaiting schedule PRs via the Dependency Dashboard',
       );
     } else if (
       branchExists &&

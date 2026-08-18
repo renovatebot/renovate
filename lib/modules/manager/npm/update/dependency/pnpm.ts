@@ -18,7 +18,7 @@ export function updatePnpmWorkspaceDependency({
   // should never happen
   if (!isString(catalogName) && depType !== pnpmWorkspaceOverrides) {
     logger.error(
-      'No catalogName or override was found; this is likely an extraction error.',
+      'No catalogName or override was found; this is likely an extraction error',
     );
     return null;
   }
@@ -45,7 +45,7 @@ export function updatePnpmWorkspaceDependency({
     document = parseDocument(fileContent, { keepSourceTokens: true });
     parsedContents = PnpmWorkspaceFile.parse(fileContent);
   } catch (err) {
-    logger.debug({ err }, 'Could not parse pnpm-workspace YAML file.');
+    logger.debug({ err }, 'Could not parse pnpm-workspace YAML file');
     return null;
   }
 

@@ -82,7 +82,7 @@ export function getReleaseList(
 ): ChangeLogNotes[] {
   logger.trace('bitbucket.getReleaseList()');
   logger.info(
-    'Unsupported Bitbucket Cloud feature.  Skipping release fetching.',
+    'Unsupported Bitbucket Cloud feature.  Skipping release fetching',
   );
   return [];
 }

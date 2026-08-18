@@ -62,7 +62,7 @@ export function extractRepository(
         );
       } else {
         logger.debug(
-          'Renovate cannot update Azure pipelines in git repositories when neither the current repository nor the target repository contains the Azure DevOps project name.',
+          'Renovate cannot update Azure pipelines in git repositories when neither the current repository nor the target repository contains the Azure DevOps project name',
         );
       }
     }
@@ -128,7 +128,7 @@ export function parseAzurePipelines(
   }
   logger.debug(
     { err: res.error, packageFile },
-    'Error parsing pubspec lockfile.',
+    'Error parsing pubspec lockfile',
   );
 
   return null;

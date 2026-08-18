@@ -91,7 +91,7 @@ export async function extractPackageFile(
       }
     } else {
       logger.debug(
-        { lockFileName, error: lockFileParsed.error },
+        { lockFileName, err: lockFileParsed.error },
         'Failed to parse mise lock file',
       );
     }

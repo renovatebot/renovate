@@ -122,7 +122,7 @@ describe('modules/datasource/aws-eks-addon/index', () => {
           err: expect.anything(),
           serializedFilter: '{"kubernetesVersion":"1.30"}',
         },
-        'Error parsing eks-addons config.',
+        'Error parsing eks-addons config',
       );
     });
 

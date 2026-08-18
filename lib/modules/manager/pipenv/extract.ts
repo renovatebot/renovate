@@ -64,7 +64,7 @@ function extractFromSection(
           depName = packageMatches[1];
         } else {
           logger.debug(
-            `Skipping dependency with malformed package name "${packageNameString}".`,
+            `Skipping dependency with malformed package name "${packageNameString}"`,
           );
           skipReason = 'invalid-name';
         }
@@ -72,7 +72,7 @@ function extractFromSection(
         const specifierMatches = specifierRegex.exec(currentValue!);
         if (!specifierMatches) {
           logger.debug(
-            `Skipping dependency with malformed version specifier "${currentValue!}".`,
+            `Skipping dependency with malformed version specifier "${currentValue!}"`,
           );
           skipReason = 'invalid-version';
         }

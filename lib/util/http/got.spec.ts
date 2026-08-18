@@ -18,7 +18,7 @@ describe('util/http/got', () => {
     configureRejectUnauth(opts);
     expect(opts).toEqual({ https: { rejectUnauthorized: false } });
     expect(logger.logger.once.warn).toHaveBeenCalledExactlyOnceWith(
-      'NODE_TLS_REJECT_UNAUTHORIZED=0 found, this is strongly discouraged.',
+      'NODE_TLS_REJECT_UNAUTHORIZED=0 found, this is strongly discouraged',
     );
   });
 

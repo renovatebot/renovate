@@ -55,7 +55,7 @@ export async function extractPackageFile(
         if (repo.url?.startsWith('git+')) {
           logger.debug(
             { repo, packageFile },
-            `Skipping unsupported helm-git repository.`,
+            `Skipping unsupported helm-git repository`,
           );
           continue;
         }
@@ -63,7 +63,7 @@ export async function extractPackageFile(
       }
       logger.debug(
         { registryAliases: registryData, packageFile },
-        `repositories discovered.`,
+        `repositories discovered`,
       );
     }
 

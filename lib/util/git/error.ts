@@ -95,7 +95,7 @@ export function handleCommitError(
     )
   ) {
     logger.warn(
-      'App has not been granted permissions to update Workflows - aborting branch.',
+      'App has not been granted permissions to update Workflows - aborting branch',
     );
     return null;
   }
@@ -116,7 +116,7 @@ export function handleCommitError(
     files?.some((file) => file.path?.startsWith('.github/workflows/'))
   ) {
     logger.debug({ err }, 'commitFiles error');
-    logger.info('Workflows update rejection - aborting branch.');
+    logger.info('Workflows update rejection - aborting branch');
     return null;
   }
   if (err.message.includes('protected branch hook declined')) {
@@ -137,7 +137,7 @@ export function handleCommitError(
     throw error;
   }
   if (err.message.includes('remote: error: cannot lock ref')) {
-    logger.error({ err }, 'Error committing files.');
+    logger.error({ err }, 'Error committing files');
     return null;
   }
   if (

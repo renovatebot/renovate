@@ -634,7 +634,7 @@ const platform: Platform = {
         } else {
           logger.debug(
             { prNumber: gpr.number },
-            `Gitea-native automerge: not supported on this version of ${defaults.isForgejo ? 'Forgejo' : 'Gitea'}. Use ${defaults.isForgejo ? '10.0.0' : '1.24.0'} or newer.`,
+            `Gitea-native automerge: not supported on this version of ${defaults.isForgejo ? 'Forgejo' : 'Gitea'}. Use ${defaults.isForgejo ? '10.0.0' : '1.24.0'} or newer`,
           );
         }
       }
@@ -675,7 +675,7 @@ const platform: Platform = {
         if (pr?.bodyStruct) {
           if (pr.title !== title || pr.bodyStruct.hash !== hashBody(body)) {
             logger.debug(
-              `Recovered from 409 Conflict, but PR for ${sourceBranch} is outdated. Updating...`,
+              `Recovered from 409 Conflict, but PR for ${sourceBranch} is outdated. Updating`,
             );
             await platform.updatePr({
               number: pr.number,
@@ -733,7 +733,7 @@ const platform: Platform = {
       );
       if (labels.length !== prUpdateParams.labels.length) {
         logger.warn(
-          'Some labels could not be looked up. Renovate may halt label updates assuming changes by others.',
+          'Some labels could not be looked up. Renovate may halt label updates assuming changes by others',
         );
       }
     }
@@ -1064,7 +1064,7 @@ const platform: Platform = {
     if (semver.lt(defaults.version, '1.14.0')) {
       logger.debug(
         { version: defaults.version },
-        'Adding reviewer not yet supported.',
+        'Adding reviewer not yet supported',
       );
       return;
     }

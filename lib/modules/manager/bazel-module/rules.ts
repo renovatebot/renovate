@@ -203,7 +203,7 @@ export function processModulePkgDeps(
   const moduleName = packageDeps[0].depName;
   const bazelDep = packageDeps.find((pd) => pd.depType === 'bazel_dep');
   if (!bazelDep) {
-    logger.debug(`A 'bazel_dep' was not found for '${moduleName}'.`);
+    logger.debug(`A 'bazel_dep' was not found for '${moduleName}'`);
     return [];
   }
   // Create a new bazelDep that will be modified. We do not want to change the

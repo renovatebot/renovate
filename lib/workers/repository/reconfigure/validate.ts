@@ -32,13 +32,13 @@ export async function validateReconfigureBranch(
     // if old status check is present skip validation
     if (isNonEmptyString(validationStatus)) {
       logger.debug(
-        'Skipping validation check because status check already exists.',
+        'Skipping validation check because status check already exists',
       );
       return validationStatus === 'green';
     }
   } else {
     logger.debug(
-      'Status check is null or an empty string, skipping status check addition.',
+      'Status check is null or an empty string, skipping status check addition',
     );
   }
 

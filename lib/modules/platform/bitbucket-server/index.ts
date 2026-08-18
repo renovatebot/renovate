@@ -1277,7 +1277,7 @@ async function tryPrAutomerge(
   if (semver.lt(defaults.version, '8.15.0')) {
     logger.debug(
       { prNumber },
-      'Bitbucket Server-native automerge: not supported on this version of Bitbucket. Use 8.15.0 or newer.',
+      'Bitbucket Server-native automerge: not supported on this version of Bitbucket. Use 8.15.0 or newer',
     );
     return;
   }

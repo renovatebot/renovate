@@ -252,7 +252,7 @@ describe('workers/repository/init/inherited', () => {
           },
         ],
       },
-      'Found warnings in presets inside the inherited configuration.',
+      'Found warnings in presets inside the inherited configuration',
     );
   });
 
@@ -297,7 +297,7 @@ describe('workers/repository/init/inherited', () => {
           },
         ],
       },
-      'Found errors in presets inside the inherited configuration.',
+      'Found errors in presets inside the inherited configuration',
     );
   });
 
@@ -336,7 +336,7 @@ describe('workers/repository/init/inherited', () => {
           automerge: true,
         },
       },
-      'Removed global config from inherited config presets.',
+      'Removed global config from inherited config presets',
     );
   });
 

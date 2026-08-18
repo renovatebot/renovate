@@ -30,7 +30,7 @@ export async function getChangeLogJSON(
     if (isNullOrUndefined(platform)) {
       logger.info(
         { sourceUrl, hostType: platform },
-        'Unknown platform, skipping changelog fetching.',
+        'Unknown platform, skipping changelog fetching',
       );
       return null;
     }
@@ -40,7 +40,7 @@ export async function getChangeLogJSON(
     if (isNullOrUndefined(changeLogSource)) {
       logger.info(
         { sourceUrl, hostType: platform },
-        'Unknown changelog source, skipping changelog fetching.',
+        'Unknown changelog source, skipping changelog fetching',
       );
       return null;
     }

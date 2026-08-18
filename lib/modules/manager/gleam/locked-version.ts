@@ -31,6 +31,6 @@ export function parseLockFile(lockFileContent: string): ManifestToml | null {
   if (res.success) {
     return res.data;
   }
-  logger.debug({ err: res.error }, 'Error parsing manifest.toml.');
+  logger.debug({ err: res.error }, 'Error parsing manifest.toml');
   return null;
 }

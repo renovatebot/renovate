@@ -1836,7 +1836,7 @@ describe('modules/platform/gitea/index', () => {
 
       expect(logger.logger.debug).toHaveBeenCalledWith(
         expect.objectContaining({ prNumber: 42 }),
-        'Gitea-native automerge: not supported on this version of Gitea. Use 1.24.0 or newer.',
+        'Gitea-native automerge: not supported on this version of Gitea. Use 1.24.0 or newer',
       );
     });
 
@@ -2097,7 +2097,7 @@ describe('modules/platform/gitea/index', () => {
       ).toResolve();
 
       expect(logger.logger.warn).toHaveBeenCalledWith(
-        'Some labels could not be looked up. Renovate may halt label updates assuming changes by others.',
+        'Some labels could not be looked up. Renovate may halt label updates assuming changes by others',
       );
     });
   });

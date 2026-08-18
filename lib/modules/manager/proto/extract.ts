@@ -19,7 +19,7 @@ export function extractPackageFile(
   if (!parsed.success) {
     logger.debug(
       { err: parsed.error, packageFile },
-      'Error parsing proto .prototools file.',
+      'Error parsing proto .prototools file',
     );
     return null;
   }

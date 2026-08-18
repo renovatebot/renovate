@@ -17,7 +17,7 @@ function massageVersion(input: string): string {
   if (!semverCoerced.isSingleVersion(input)) {
     logger.warn(
       { version: input },
-      'Same major versioning expects a single version but got a range. Please switch to a different versioning as this may lead to unexpected behaviour.',
+      'Same major versioning expects a single version but got a range. Please switch to a different versioning as this may lead to unexpected behaviour',
     );
     return input;
   }

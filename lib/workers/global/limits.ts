@@ -61,7 +61,7 @@ export function getCount(key: CountName): number {
   const count = counts.get(key);
   // istanbul ignore if: should not happen
   if (!isInteger(count)) {
-    logger.debug(`Could not compute the count of ${key}, returning zero.`);
+    logger.debug(`Could not compute the count of ${key}, returning zero`);
     return 0;
   }
   return count;
@@ -139,7 +139,7 @@ export function calcLimit(
 
   if (hasMultipleLimits(upgrades, limitName)) {
     logger.once.debug(
-      `Branch has multiple ${limitName} limits. The lowest among these will be selected.`,
+      `Branch has multiple ${limitName} limits. The lowest among these will be selected`,
     );
   }
 
@@ -170,7 +170,7 @@ export function calcLimit(
   }
 
   logger.debug(
-    `Calculated lowest ${limitName} among the upgrades present in this branch is ${lowestLimit}.`,
+    `Calculated lowest ${limitName} among the upgrades present in this branch is ${lowestLimit}`,
   );
   return lowestLimit;
 }
