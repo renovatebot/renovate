@@ -66,6 +66,8 @@ describe('modules/platform/azure/index', () => {
     hostRules.clear();
     hostRules.add({ token: 'token' });
     azureHelper.getPolicyEvaluations.mockResolvedValue([]);
+    // Default to the hosted (cloud) endpoint used across these tests.
+    azureApi.isHosted.mockResolvedValue(true);
     await azure.initPlatform({
       endpoint: 'https://dev.azure.com/renovate12345',
       token: 'token',

@@ -9,7 +9,7 @@ vi.mock('../../../../util/fs/index.ts');
 describe('workers/repository/update/branch/bump-versions', () => {
   describe('bumpVersions', () => {
     it('should be noop if bumpVersions is undefined', async () => {
-      const config = {} as BranchConfig;
+      const config = partial<BranchConfig>();
       await bumpVersions(config);
 
       expect(config).toEqual({});

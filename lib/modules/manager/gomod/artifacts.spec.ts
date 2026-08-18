@@ -840,11 +840,11 @@ describe('modules/manager/gomod/artifacts', () => {
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
           'ghcr.io/renovatebot/base-image' +
-          ' bash -l -c "' +
+          " bash -l -c '" +
           'install-tool golang 1.23.3' +
           ' && ' +
           'go get -d -t ./...' +
-          '"',
+          "'",
         options: {
           cwd: '/tmp/github/some/repo',
           env: {},
@@ -1007,11 +1007,11 @@ describe('modules/manager/gomod/artifacts', () => {
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
           'ghcr.io/renovatebot/base-image' +
-          ' bash -l -c "' +
+          " bash -l -c '" +
           'install-tool golang 1.23.3' +
           ' && ' +
           'go get -d -t ./...' +
-          '"',
+          "'",
         options: {
           cwd: '/tmp/github/some/repo',
           env: {
@@ -1506,7 +1506,7 @@ describe('modules/manager/gomod/artifacts', () => {
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
           'ghcr.io/renovatebot/base-image' +
-          ' bash -l -c "' +
+          " bash -l -c '" +
           'install-tool golang 1.23.3' +
           ' && ' +
           'go get -d -t ./...' +
@@ -1514,7 +1514,7 @@ describe('modules/manager/gomod/artifacts', () => {
           'go mod tidy' +
           ' && ' +
           'go mod tidy' +
-          '"',
+          "'",
         options: { cwd: '/tmp/github/some/repo' },
       },
     ]);
@@ -1570,7 +1570,7 @@ describe('modules/manager/gomod/artifacts', () => {
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
           'ghcr.io/renovatebot/base-image' +
-          ' bash -l -c "' +
+          " bash -l -c '" +
           'install-tool golang 1.23.3' +
           ' && ' +
           'go get -d -t ./...' +
@@ -1578,7 +1578,7 @@ describe('modules/manager/gomod/artifacts', () => {
           'go mod tidy -compat=1.17' +
           ' && ' +
           'go mod tidy -compat=1.17' +
-          '"',
+          "'",
         options: { cwd: '/tmp/github/some/repo' },
       },
     ]);
@@ -1634,7 +1634,7 @@ describe('modules/manager/gomod/artifacts', () => {
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
           'ghcr.io/renovatebot/base-image' +
-          ' bash -l -c "' +
+          " bash -l -c '" +
           'install-tool golang 1.23.3' +
           ' && ' +
           'go get -d -t ./...' +
@@ -1642,7 +1642,7 @@ describe('modules/manager/gomod/artifacts', () => {
           'go mod tidy -compat=1.17 -e' +
           ' && ' +
           'go mod tidy -compat=1.17 -e' +
-          '"',
+          "'",
         options: { cwd: '/tmp/github/some/repo' },
       },
     ]);
@@ -1698,7 +1698,7 @@ describe('modules/manager/gomod/artifacts', () => {
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
           'ghcr.io/renovatebot/base-image' +
-          ' bash -l -c "' +
+          " bash -l -c '" +
           'install-tool golang 1.23.3' +
           ' && ' +
           'go get -d -t ./...' +
@@ -1706,7 +1706,7 @@ describe('modules/manager/gomod/artifacts', () => {
           'go mod tidy -e' +
           ' && ' +
           'go mod tidy -e' +
-          '"',
+          "'",
         options: { cwd: '/tmp/github/some/repo' },
       },
     ]);
@@ -1782,6 +1782,58 @@ describe('modules/manager/gomod/artifacts', () => {
       },
       {
         cmd: 'mod upgrade --mod-name=github.com/google/go-github/v24 -t=28',
+        options: { cwd: '/tmp/github/some/repo' },
+      },
+      {
+        cmd: 'go mod tidy',
+        options: { cwd: '/tmp/github/some/repo' },
+      },
+      {
+        cmd: 'go mod tidy',
+        options: { cwd: '/tmp/github/some/repo' },
+      },
+    ]);
+  });
+
+  it('quotes a depName containing shell metacharacters when updating import paths', async () => {
+    fs.findLocalSiblingOrParent.mockResolvedValueOnce('vendor');
+    fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
+    fs.readLocalFile.mockResolvedValueOnce(null); // vendor modules filename
+    const execSnapshots = mockExecAll();
+    git.getRepoStatus.mockResolvedValueOnce(
+      partial<StatusResult>({
+        modified: ['go.sum', 'main.go'],
+      }),
+    );
+    fs.readLocalFile
+      .mockResolvedValueOnce('New go.sum')
+      .mockResolvedValueOnce('New main.go')
+      .mockResolvedValueOnce('New go.mod');
+    await gomod.updateArtifacts({
+      packageFileName: 'go.mod',
+      updatedDeps: [
+        // depName as it would be parsed from an attacker-controlled `require`
+        // line in go.mod
+        { depName: 'github.com/foo;id', newVersion: 'v28.0.0' },
+      ],
+      newPackageFileContent: gomod1,
+      config: {
+        ...config,
+        updateType: 'major',
+        postUpdateOptions: ['gomodUpdateImportPaths'],
+      },
+    });
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'go get -d -t ./...',
+        options: { cwd: '/tmp/github/some/repo' },
+      },
+      {
+        cmd: 'go install github.com/marwan-at-work/mod/cmd/mod@latest',
+        options: { cwd: '/tmp/github/some/repo' },
+      },
+      {
+        cmd: "mod upgrade --mod-name='github.com/foo;id' -t=28",
         options: { cwd: '/tmp/github/some/repo' },
       },
       {
@@ -2366,7 +2418,7 @@ describe('modules/manager/gomod/artifacts', () => {
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
           'ghcr.io/renovatebot/base-image' +
-          ' bash -l -c "' +
+          " bash -l -c '" +
           'install-tool golang 1.23.3' +
           ' && ' +
           'go get -t ./...' +
@@ -2378,7 +2430,7 @@ describe('modules/manager/gomod/artifacts', () => {
           'go mod tidy ' +
           '&& ' +
           'go mod tidy' +
-          '"',
+          "'",
       },
     ];
     expect(execSnapshots).toMatchObject(expectedResult);
@@ -2564,7 +2616,7 @@ describe('modules/manager/gomod/artifacts', () => {
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
           'ghcr.io/renovatebot/base-image' +
-          ' bash -l -c "' +
+          " bash -l -c '" +
           'install-tool golang 1.23.3' +
           ' && ' +
           'go get -d -t ./...' +
@@ -2576,7 +2628,7 @@ describe('modules/manager/gomod/artifacts', () => {
           'go mod tidy ' +
           '&& ' +
           'go mod tidy' +
-          '"',
+          "'",
       },
     ];
     expect(execSnapshots).toMatchObject(expectedResult);

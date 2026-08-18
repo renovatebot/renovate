@@ -78,6 +78,7 @@ export interface RenovateSharedConfig {
   automergeStrategy?: MergeStrategy;
   automergeType?: AutoMergeType;
   azureWorkItemId?: number;
+  azureWorkItemType?: string;
   branchName?: string;
   branchNameStrict?: boolean;
   branchPrefix?: string;
@@ -91,6 +92,7 @@ export interface RenovateSharedConfig {
   commitMessageLowerCase?: 'auto' | 'never';
   commitMessagePrefix?: string;
   commitMessageTopic?: string;
+  commitTrailers?: string[];
   confidential?: boolean;
   configValidationError?: boolean;
   changelogUrl?: string;
@@ -276,7 +278,7 @@ export interface RepoGlobalConfig extends GlobalInheritableConfig {
   onboardingAutoCloseAge?: number;
   productLinks?: Record<string, string>;
   rebaseAllOpenBranches?: boolean;
-  toolSettings?: ToolSettingsOptions;
+  toolSettings?: GlobalToolSettingsOptions;
 }
 
 /**
@@ -496,7 +498,7 @@ export interface RenovateConfig
   minimumGroupSize?: number;
   configFileNames?: string[];
   minimumReleaseAgeBehaviour?: MinimumReleaseAgeBehaviour;
-  toolSettings?: ToolSettingsOptions;
+  toolSettings?: RepoToolSettingsOptions;
 }
 
 const CustomDatasourceFormats = [
@@ -584,7 +586,8 @@ export type AllowedUnsafeExecution =
   | 'bazelModDeps'
   | 'goGenerate'
   | 'gradleWrapper'
-  | 'mise';
+  | 'mise'
+  | 'pixi';
 
 // TODO: Proper typings
 export interface PackageRule
@@ -848,8 +851,27 @@ export interface BumpVersionConfig {
   name?: string;
 }
 
-export interface ToolSettingsOptions {
+/**
+ * Global Config for specified `toolSettings` options.
+ *
+ */
+export interface GlobalToolSettingsOptions {
+  /** An upper limit on what the Java Virtual Machine's maximum memory can be set to. Repositories can specify <= this value */
   jvmMaxMemory?: number;
+  /** An upper limit on what the Java Virtual Machine's starting memory can be set to. Repositories can specify <= this value */
   jvmMemory?: number;
+  /** An upper limit on what the Node.JS process' maximum memory can be set to. Repositories can specify <= this value */
+  nodeMaxMemory?: number;
+}
+
+/**
+ * Repository config options for `toolSettings` options.
+ */
+export interface RepoToolSettingsOptions {
+  /** The maximum memory the Java Virtual Machine can use. If greater than the Global Self-Hosted configuration setting, it will be set to that limit **/
+  jvmMaxMemory?: number;
+  /** The starting memory the Java Virtual Machine can use. If greater than the Global Self-Hosted configuration setting, it will be set to that limit **/
+  jvmMemory?: number;
+  /** The maximum memory child Node.JS processes can use. If greater than the Global Self-Hosted configuration setting, it will be set to that limit **/
   nodeMaxMemory?: number;
 }

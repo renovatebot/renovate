@@ -406,9 +406,14 @@ export class Vulnerabilities {
     osvPackageName: string,
     affected: Osv.Affected,
   ): boolean {
+    const pkg = affected.package;
+    if (pkg?.name !== osvPackageName) {
+      return false;
+    }
+
+    // Match exact ecosystems and OSV sub-ecosystems (e.g. Packagist:https://packages.drupal.org/8).
     return (
-      affected.package?.name === osvPackageName &&
-      affected.package?.ecosystem === ecosystem
+      pkg.ecosystem === ecosystem || pkg.ecosystem.startsWith(`${ecosystem}:`)
     );
   }
 

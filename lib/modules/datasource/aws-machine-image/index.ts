@@ -2,6 +2,7 @@ import type { Filter, Image } from '@aws-sdk/client-ec2';
 import { DescribeImagesCommand, EC2Client } from '@aws-sdk/client-ec2';
 import { fromNodeProviderChain } from '@aws-sdk/credential-providers';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
+import * as hostRules from '../../../util/host-rules.ts';
 import { asTimestamp } from '../../../util/timestamp.ts';
 import * as amazonMachineImageVersioning from '../../versioning/aws-machine-image/index.ts';
 import { Datasource } from '../datasource.ts';
@@ -49,9 +50,19 @@ export class AwsMachineImageDatasource extends Datasource {
 
   private getEC2Client(config: AwsClientConfig): EC2Client {
     const { profile, region } = config;
+    const { password, token, username } = hostRules.find({
+      hostType: AwsMachineImageDatasource.id,
+    });
     return new EC2Client({
       region,
-      credentials: fromNodeProviderChain({ profile }),
+      credentials:
+        username && password
+          ? {
+              accessKeyId: username,
+              secretAccessKey: password,
+              sessionToken: token,
+            }
+          : fromNodeProviderChain({ profile }),
     });
   }
 

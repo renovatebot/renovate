@@ -1,3 +1,4 @@
+import { isBoolean, isString } from '@sindresorhus/is';
 import upath from 'upath';
 import { loadModules } from '../../util/modules.ts';
 import { getDatasourceList } from '../datasource/index.ts';
@@ -30,6 +31,18 @@ describe('modules/manager/index', () => {
     )) {
       it(`has lockFileNames for ${name}`, () => {
         expect(mgr.lockFileNames).toBeNonEmptyArray();
+      });
+    }
+  });
+
+  describe('lockFileMaintenanceIsDelegatedToPackageManager', () => {
+    for (const [name, mgr] of [...manager.getManagers()].filter(
+      ([_, mgr]) => mgr.supportsLockFileMaintenance,
+    )) {
+      it(`has lockFileMaintenanceIsDelegatedToPackageManager for ${name}`, () => {
+        expect(mgr.lockFileMaintenanceIsDelegatedToPackageManager).toSatisfy(
+          (value) => isBoolean(value) || isString(value),
+        );
       });
     }
   });

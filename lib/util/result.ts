@@ -32,6 +32,7 @@ function isZodResult<Output extends Val>(
   input: unknown,
 ): input is ZodSafeParseResult<Output> {
   if (
+    // oxlint-disable-next-line renovate/prefer-is-object -- guards arbitrary callback results; isObject() matches functions, which must never be classified as zod results
     typeof input !== 'object' ||
     input === null ||
     Object.keys(input).length !== 2 ||
@@ -170,7 +171,7 @@ export class Result<T extends Val, E extends Val = Error> {
     }
 
     if (input instanceof Promise) {
-      return AsyncResult.wrap(input as never);
+      return AsyncResult.wrap(input);
     }
 
     try {

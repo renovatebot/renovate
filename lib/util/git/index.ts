@@ -5,6 +5,7 @@ import {
   isNonEmptyObject,
   isNonEmptyStringAndNotWhitespace,
   isString,
+  isTruthy,
 } from '@sindresorhus/is';
 import fs from 'fs-extra';
 import { DateTime } from 'luxon';
@@ -51,6 +52,7 @@ import {
   getCachedBehindBaseResult,
   setCachedBehindBaseResult,
 } from './behind-base-branch-cache.ts';
+import { formatCommitMessage } from './commit-trailers.ts';
 import { getNoVerify, simpleGitConfig } from './config.ts';
 import {
   getCachedConflictResult,
@@ -94,35 +96,43 @@ const delayFactor = 2;
 
 export const RENOVATE_FORK_UPSTREAM = 'renovate-fork-upstream';
 
+interface CreateSimpleGitOptions {
+  config?: Partial<SimpleGitOptions>;
+  env?: ExtraEnv;
+  authentication?: {
+    hostTypes?: readonly string[];
+  };
+}
+
 export function createSimpleGit({
   config,
   env,
-}: {
-  config?: Partial<SimpleGitOptions>;
-  env?: ExtraEnv;
-} = {}): SimpleGit {
-  return simpleGit({ ...simpleGitConfig(), ...config }).env(
-    getChildEnv({
-      extraEnv: {
-        // Git will prompt for known hosts or passwords, unless we activate BatchMode.
-        // Set as extraEnv (lowest priority) so that process.env and
-        // customEnvVariables can override it.
-        GIT_SSH_COMMAND: 'ssh -o BatchMode=yes',
-      },
-      env: {
-        ...env,
-        // To ensure the simple-git parsers match correctly, we need
-        // to set the `LANG` and `LC_ALL` environment variables to
-        // the `C.UTF-8` locale. See the docs for more details:
-        // https://github.com/steveukx/git-js/blob/1bb14df0595794a9353d28ccdaeeb06c0b9bf2a5/docs/NON_ENGLISH_LOCALE.md
-        //
-        // Use "C.UTF-8" instead of just "C" (as specified in docs) to handle special characters:
-        // https://github.com/renovatebot/renovate/pull/18963
-        LANG: 'C.UTF-8',
-        LC_ALL: 'C.UTF-8',
-      },
-    }),
-  );
+  authentication,
+}: CreateSimpleGitOptions = {}): SimpleGit {
+  const childEnv = getChildEnv({
+    extraEnv: {
+      // Git will prompt for known hosts or passwords, unless we activate BatchMode.
+      // Set as extraEnv (lowest priority) so that process.env and
+      // customEnvVariables can override it.
+      GIT_SSH_COMMAND: 'ssh -o BatchMode=yes',
+    },
+    env: {
+      ...env,
+      // To ensure the simple-git parsers match correctly, we need
+      // to set the `LANG` and `LC_ALL` environment variables to
+      // the `C.UTF-8` locale. See the docs for more details:
+      // https://github.com/steveukx/git-js/blob/1bb14df0595794a9353d28ccdaeeb06c0b9bf2a5/docs/NON_ENGLISH_LOCALE.md
+      //
+      // Use "C.UTF-8" instead of just "C" (as specified in docs) to handle special characters:
+      // https://github.com/renovatebot/renovate/pull/18963
+      LANG: 'C.UTF-8',
+      LC_ALL: 'C.UTF-8',
+    },
+  });
+  const gitEnv = authentication
+    ? getGitEnvironmentVariables(childEnv, authentication.hostTypes)
+    : childEnv;
+  return simpleGit({ ...simpleGitConfig(), ...config }).env(gitEnv);
 }
 
 // A generic wrapper for simpleGit.* calls to make them more fault-tolerant
@@ -272,7 +282,7 @@ async function fetchBranchCommits(preferUpstream = true): Promise<void> {
     logger.trace({ lsRemoteRes }, 'git ls-remote result');
     lsRemoteRes
       .split(newlineRegex)
-      .filter(Boolean)
+      .filter(isTruthy)
       .map((line) => line.trim().split(regEx(/\s+/)))
       .forEach(([sha, ref]) => {
         config.branchCommits[ref.replace('refs/heads/', '')] =
@@ -432,7 +442,7 @@ export async function cloneSubmodules(
     return;
   }
   submodulesInitizialized = true;
-  const gitEnv = getChildEnv({ env: getGitEnvironmentVariables() });
+  const gitEnv = getGitEnvironmentVariables(getChildEnv());
   await syncGit();
   const submodules = await getSubmodules();
   for (const submodule of submodules) {
@@ -998,15 +1008,15 @@ export async function isBranchModified(
   }
   const { gitAuthorEmail, ignoredAuthors } = config;
 
-  const includedAuthors = new Set(committedAuthors);
-
-  // v8 ignore else -- TODO: add test #40625
-  if (gitAuthorEmail) {
-    includedAuthors.delete(gitAuthorEmail);
-  }
-
-  for (const ignoredAuthor of ignoredAuthors) {
-    includedAuthors.delete(ignoredAuthor);
+  const includedAuthors = new Set<string>();
+  for (const committedAuthor of committedAuthors) {
+    if (
+      committedAuthor !== gitAuthorEmail &&
+      !ignoredAuthors.includes(committedAuthor) &&
+      !matchRegexOrGlobList(committedAuthor, ignoredAuthors)
+    ) {
+      includedAuthors.add(committedAuthor);
+    }
   }
 
   for (const ignoredAuthor of platformIgnoredAuthors) {
@@ -1263,7 +1273,7 @@ export async function getBranchLastCommitTime(
     if (errChecked) {
       throw errChecked;
     }
-    return new Date();
+    return DateTime.now().toJSDate();
   }
 }
 
@@ -1370,6 +1380,7 @@ export async function prepareCommit({
   branchName,
   files,
   message,
+  trailers,
   force = false,
 }: CommitFilesConfig): Promise<CommitResult | null> {
   const localDir = GlobalConfig.get('localDir');
@@ -1409,7 +1420,7 @@ export async function prepareCommit({
         } else {
           let contents: Buffer;
           /* v8 ignore else -- TODO: add test #40625 */
-          if (typeof file.contents === 'string') {
+          if (isString(file.contents)) {
             contents = Buffer.from(file.contents);
           } else {
             contents = file.contents;
@@ -1452,7 +1463,9 @@ export async function prepareCommit({
       commitOptions['--no-verify'] = null;
     }
 
-    const commitRes = await git.commit(message, [], commitOptions);
+    const commitMessage = formatCommitMessage(message, trailers);
+
+    const commitRes = await git.commit(commitMessage, [], commitOptions);
     if (
       isNonEmptyObject(commitRes.summary) &&
       commitRes.summary.changes === 0 &&

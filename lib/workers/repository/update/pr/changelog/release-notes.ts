@@ -1,4 +1,4 @@
-import { isDate, isUndefined } from '@sindresorhus/is';
+import { isDate, isTruthy, isUndefined } from '@sindresorhus/is';
 import { DateTime } from 'luxon';
 import MarkdownIt from 'markdown-it';
 import { logger } from '../../../../../logger/index.ts';
@@ -28,7 +28,10 @@ import type {
 const markdown = new MarkdownIt('zero');
 markdown.enable(['heading', 'lheading', 'fence']);
 
-const repositoriesToSkipMdFetching = ['facebook/react-native'];
+const repositoriesToSkipMdFetching = [
+  'facebook/react-native',
+  'react/react-native',
+];
 
 export async function getReleaseList(
   project: ChangeLogProject,
@@ -381,7 +384,7 @@ export async function getReleaseNotesMd(
           const title = heading
             .replace(regEx(/^\s*#*\s*/), '')
             .split(' ')
-            .filter(Boolean);
+            .filter(isTruthy);
           const body = section.replace(regEx(/.*?\n(-{3,}\n)?/), '').trim();
           const notesSourceUrl = getNotesSourceUrl(
             baseUrl,

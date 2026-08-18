@@ -590,13 +590,13 @@ describe('modules/manager/vendir/artifacts', () => {
             '-e CONTAINERBASE_CACHE_DIR ' +
             '-w "/tmp/github/some/repo" ' +
             'ghcr.io/renovatebot/base-image' +
-            ' bash -l -c "' +
+            " bash -l -c '" +
             'install-tool vendir 0.35.0' +
             ' && ' +
             'install-tool helm 3.17.0' +
             ' && ' +
             'vendir sync' +
-            '"',
+            "'",
         },
       ]);
     });
