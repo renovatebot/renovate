@@ -1,3 +1,4 @@
+import { isString } from '@sindresorhus/is';
 import { logger } from '../../../logger/index.ts';
 import type { RangeStrategy } from '../../../types/versioning.ts';
 import { regEx } from '../../../util/regex.ts';
@@ -165,11 +166,11 @@ function isSame(
   }
   if (type === 'major') {
     return 'eq' === compareIntArray(aParts.major, bParts.major);
-  } else if (type === 'minor') {
-    return 'eq' === compareIntArray(aParts.minor, bParts.minor);
-  } else {
-    return 'eq' === compareIntArray(aParts.patch, bParts.patch);
   }
+  if (type === 'minor') {
+    return 'eq' === compareIntArray(aParts.minor, bParts.minor);
+  }
+  return 'eq' === compareIntArray(aParts.patch, bParts.patch);
 }
 
 function subset(subRange: string, superRange: string): boolean | undefined {
@@ -200,7 +201,7 @@ function subset(subRange: string, superRange: string): boolean | undefined {
 }
 
 function isVersion(maybeRange: string | undefined | null): boolean {
-  return typeof maybeRange === 'string' && parseRange(maybeRange) === null;
+  return isString(maybeRange) && parseRange(maybeRange) === null;
 }
 
 function isValid(ver: string): boolean {

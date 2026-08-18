@@ -167,7 +167,7 @@ function tokenCmp(left: Token | null, right: Token | null): number {
     if (left.val > right.val) {
       return 1;
     }
-  } else if (typeof left.val === 'string' && typeof right.val === 'string') {
+  } else if (isString(left.val) && isString(right.val)) {
     return stringTokenCmp(left.val, right.val);
   } else if (right.type === TokenType.Number) {
     return -1;

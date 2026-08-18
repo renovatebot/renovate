@@ -89,7 +89,7 @@ export function getMergeMethod(
 export const API_PATH = '/api/v1';
 
 export const DRAFT_PREFIX = 'WIP: ';
-const reconfigurePrRegex = regEx(/reconfigure$/g);
+const reconfigurePrRegex = regEx(/reconfigure$/);
 
 export function toRenovatePR(data: PR, author: string | null): Pr | null {
   if (!data) {

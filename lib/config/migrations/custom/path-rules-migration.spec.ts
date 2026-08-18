@@ -32,7 +32,7 @@ describe('config/migrations/custom/path-rules-migration', () => {
             extends: ['foo'],
           },
         ],
-      } as any,
+      },
       {
         packageRules: [
           {

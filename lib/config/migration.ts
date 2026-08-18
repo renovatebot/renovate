@@ -93,7 +93,7 @@ export function migrateConfig(
           // @ts-expect-error -- TODO: fix me
           for (const item of migratedConfig[key]) {
             if (isObject(item) && !isArray(item)) {
-              const arrMigrate = migrateConfig(item as RenovateConfig);
+              const arrMigrate = migrateConfig(item);
               newArray.push(arrMigrate.migratedConfig);
             } else {
               newArray.push(item);
@@ -197,30 +197,31 @@ export function migrateConfig(
       ].managerFilePatterns.map((filePattern) => {
         const pattern = filePattern as string;
         if (pattern.endsWith('.in')) {
-          return pattern.replace(/\.in$/, '.txt');
+          return pattern.replace(regEx(/\.in$/), '.txt');
         }
         if (pattern.endsWith('.in/')) {
-          return pattern.replace(/\.in\/$/, '.txt/');
+          return pattern.replace(regEx(/\.in\/$/), '.txt/');
         }
-        return pattern.replace(/\.in\$\/$/, '.txt$/');
+        return pattern.replace(regEx(/\.in\$\/$/), '.txt$/');
       });
     }
-    // @ts-expect-error -- TODO: fix me
-    if (isNonEmptyArray(migratedConfig.matchManagers)) {
+    if (
       // @ts-expect-error -- TODO: fix me
-      if (migratedConfig.matchManagers.includes('gradle-lite')) {
+      isNonEmptyArray(migratedConfig.matchManagers) &&
+      // @ts-expect-error -- TODO: fix me
+      migratedConfig.matchManagers.includes('gradle-lite')
+    ) {
+      // @ts-expect-error -- TODO: fix me
+      // v8 ignore else -- TODO: add test #40625
+      if (!migratedConfig.matchManagers.includes('gradle')) {
         // @ts-expect-error -- TODO: fix me
-        // v8 ignore else -- TODO: add test #40625
-        if (!migratedConfig.matchManagers.includes('gradle')) {
-          // @ts-expect-error -- TODO: fix me
-          migratedConfig.matchManagers.push('gradle');
-        }
-        // @ts-expect-error -- TODO: fix me
-        migratedConfig.matchManagers = migratedConfig.matchManagers.filter(
-          // @ts-expect-error -- TODO: fix me
-          (manager) => manager !== 'gradle-lite',
-        );
+        migratedConfig.matchManagers.push('gradle');
       }
+      // @ts-expect-error -- TODO: fix me
+      migratedConfig.matchManagers = migratedConfig.matchManagers.filter(
+        // @ts-expect-error -- TODO: fix me
+        (manager) => manager !== 'gradle-lite',
+      );
     }
     // @ts-expect-error -- TODO: fix me
     if (isNonEmptyObject(migratedConfig['gradle-lite'])) {
