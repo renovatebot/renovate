@@ -1,4 +1,4 @@
-import { isNonEmptyString, isString } from '@sindresorhus/is';
+import { isNonEmptyString } from '@sindresorhus/is';
 import changelogFilenameRegex from 'changelog-filename-regex';
 import { logger } from '../../../logger/index.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
@@ -6,7 +6,10 @@ import { coerceArray, deduplicateArray } from '../../../util/array.ts';
 import { getEnv } from '../../../util/env.ts';
 import { parse } from '../../../util/html.ts';
 import { HttpError } from '../../../util/http/index.ts';
-import type { OutgoingHttpHeaders } from '../../../util/http/types.ts';
+import type {
+  HttpResponse,
+  OutgoingHttpHeaders,
+} from '../../../util/http/types.ts';
 import { regEx } from '../../../util/regex.ts';
 import { Json } from '../../../util/schema-utils/index.ts';
 import type { Timestamp } from '../../../util/timestamp.ts';
@@ -205,7 +208,7 @@ export class PypiDatasource extends Datasource {
           python: deduplicateArray(
             releases
               .map(({ requires_python }) => requires_python)
-              .filter(isString),
+              .filter(isNonEmptyString),
           ),
         };
         return result;
@@ -357,7 +360,7 @@ export class PypiDatasource extends Datasource {
       accept:
         'application/vnd.pypi.simple.v1+json, application/vnd.pypi.simple.v1+html; q=0.1, text/html; q=0.01',
     };
-    let response: Awaited<ReturnType<typeof this.http.getText>>;
+    let response: HttpResponse;
     try {
       response = await this.http.getText(sanitizedUrl, { headers });
     } catch (err) {
