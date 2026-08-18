@@ -480,6 +480,29 @@ describe('modules/datasource/pypi/index', () => {
       ).toMatchSnapshot();
     });
 
+    it('keeps versions with a file without requires_python under strict constraints filtering', async () => {
+      httpMock
+        .scope(baseUrl)
+        .get('/doit/json')
+        .reply(200, {
+          info: { name: 'doit' },
+          releases: {
+            '1.0.0': [{ requires_python: '>=3.9' }, { requires_python: null }],
+            '1.1.0': [{ requires_python: '>=3.9' }],
+          },
+        });
+
+      const res = await getPkgReleases({
+        datasource,
+        constraints: { python: '3.8.0' },
+        constraintsFiltering: 'strict',
+        packageName: 'doit',
+      });
+
+      // `1.0.0` has a file installable on any Python version, `1.1.0` does not
+      expect(res?.releases).toMatchObject([{ version: '1.0.0' }]);
+    });
+
     it('process data from simple endpoint', async () => {
       httpMock
         .scope('https://some.registry.org/simple/')
@@ -1101,8 +1124,41 @@ describe('modules/datasource/pypi/index', () => {
         packageName: 'dj-database-url',
       });
 
-      // Content-type is JSON, so HTML parsing is not attempted; no releases found
+      // The body is JSON, so HTML parsing is not attempted; no releases found
       expect(res).toBeNull();
+    });
+
+    it('parses HTML body served with a JSON content-type', async () => {
+      httpMock
+        .scope('https://some.registry.org/simple/')
+        .get('/dj-database-url/')
+        .reply(200, htmlResponse, {
+          // Some registries/proxies mislabel the HTML serialization as JSON
+          'content-type': 'application/vnd.pypi.simple.v1+json',
+        });
+      const config = {
+        registryUrls: ['https://some.registry.org/simple/'],
+      };
+
+      const res = await getPkgReleases({
+        datasource,
+        ...config,
+        packageName: 'dj-database-url',
+      });
+
+      expect(res?.releases).toMatchObject([
+        { version: '0.1.2' },
+        { version: '0.1.3' },
+        { version: '0.1.4' },
+        { version: '0.2.0' },
+        { version: '0.2.1' },
+        { version: '0.2.2' },
+        { version: '0.3.0' },
+        { version: '0.4.0' },
+        { version: '0.4.1' },
+        { version: '0.4.2' },
+        { version: '0.5.0', isDeprecated: true },
+      ]);
     });
 
     it('parses JSON-based Simple API response without upload-time', async () => {

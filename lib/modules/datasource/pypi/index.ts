@@ -192,27 +192,7 @@ export class PypiDatasource extends Datasource {
     }
 
     if (dep.releases) {
-      const versions = Object.keys(dep.releases);
-      dependency.releases = versions.map((version) => {
-        const releases = coerceArray(dep.releases?.[version]);
-        const isDeprecated = releases.some(({ yanked }) => yanked);
-        const result: Release = {
-          version,
-          releaseTimestamp: PypiDatasource.getEarliestTimestamp(releases),
-        };
-        if (isDeprecated) {
-          result.isDeprecated = isDeprecated;
-        }
-        // There may be multiple releases with different requires_python, so we return all in an array
-        result.constraints = {
-          python: deduplicateArray(
-            releases
-              .map(({ requires_python }) => requires_python)
-              .filter(isNonEmptyString),
-          ),
-        };
-        return result;
-      });
+      dependency.releases = PypiDatasource.toReleases(dep.releases);
     }
     return dependency;
   }
@@ -369,7 +349,8 @@ export class PypiDatasource extends Datasource {
       const httpErr = err instanceof ExternalHostError ? err.err : err;
       const statusCode =
         httpErr instanceof HttpError ? httpErr.response?.statusCode : undefined;
-      // A registry which cannot serve any of the negotiated types answers `406` (RFC 9110), rather than honoring the `text/html; q=0.01` fallback.
+      // A registry which cannot serve any of the negotiated types may pick a content type of its own, answer `406`, or answer `300`; the spec mandates none of them, but `406` is the common choice.
+      // https://packaging.python.org/en/latest/specifications/simple-repository-api/#version-format-selection
       // Retry once without the negotiated `accept` header to preserve the pre-PEP-691 behaviour of a plain request.
       if (statusCode !== 406) {
         throw err;
@@ -399,20 +380,30 @@ export class PypiDatasource extends Datasource {
     // while still returning JSON.
     const contentType = response.headers['content-type'];
     const isJson = !!contentType && contentType.includes('json');
+    const looksLikeJson = dep.trimStart().startsWith('{');
+
     if (isJson) {
-      const releases = PypiDatasource.getSimpleReleasesFromJson(
-        dep,
-        packageName,
-      );
-      // A parse failure is distinct from a package with genuinely no files;
-      // don't fall back to HTML-parsing a JSON body that failed schema
-      // validation, and don't report an empty release list as if it were
-      // a real (if empty) result.
-      if (releases === null) {
-        return null;
+      if (looksLikeJson) {
+        const releases = PypiDatasource.getSimpleReleasesFromJson(
+          dep,
+          packageName,
+        );
+        // A parse failure is distinct from a package with genuinely no files,
+        // so don't report an empty release list as if it were a real (if
+        // empty) result, which would be cached as such.
+        if (!releases) {
+          return null;
+        }
+        dependency.releases = PypiDatasource.toReleases(releases);
+        return dependency;
       }
-      dependency.releases = PypiDatasource.toReleases(releases);
-      return dependency;
+
+      // The registry mislabeled a non-JSON body as JSON, so fall through to
+      // the HTML parser instead of reporting the package as not found.
+      logger.debug(
+        { packageName, hostUrl, contentType },
+        'Parsing Simple API response as HTML, as it is labeled as JSON but does not look like it',
+      );
     }
 
     const htmlReleases = PypiDatasource.getSimpleReleasesFromHtml(
@@ -420,7 +411,7 @@ export class PypiDatasource extends Datasource {
       packageName,
     );
     dependency.releases = PypiDatasource.toReleases(htmlReleases);
-    if (dependency.releases.length > 0 || !dep.trimStart().startsWith('{')) {
+    if (dependency.releases.length > 0 || !looksLikeJson) {
       return dependency;
     }
 
@@ -435,9 +426,10 @@ export class PypiDatasource extends Datasource {
       dep,
       packageName,
     );
-    if (jsonReleases) {
-      dependency.releases = PypiDatasource.toReleases(jsonReleases);
+    if (!jsonReleases) {
+      return null;
     }
+    dependency.releases = PypiDatasource.toReleases(jsonReleases);
     return dependency;
   }
 
