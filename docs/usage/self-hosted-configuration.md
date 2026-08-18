@@ -107,6 +107,16 @@ module.exports = {
 `allowedEnv` values can be exact match header names, glob patterns, or regex patterns.
 For more details on the syntax and supported patterns, see Renovate's [String Pattern Matching documentation](./string-pattern-matching.md).
 
+!!! note
+  `allowedEnv` constrains what a repository, and the presets it extends, may set - it does not constrain you, the self-hosted administrator.
+  <br>
+  The `env` you set in your own config is always applied, as is any `env` set by a preset you chose to `extends`, whether in your global config or in a `repositories[]` entry.
+  <br>
+  A repository can override one of your environment variables only where its name is in the `allowedEnv` allowlist.
+  <br>
+  A repository could override an allowlisted environment variable's value to the empty string, which may or may not disable it, depending on how the tool(s) that consume that environment variable respond.
+  Where the name is not permitted by `allowedEnv`, the self-hosted administrator's value is always used.
+
 ## `allowedHeaders`
 
 `allowedHeaders` can be useful when a registry uses a authentication system that's not covered by Renovate's default credential handling in `hostRules`.
@@ -453,6 +463,12 @@ Example:
 ## `configValidationError`
 
 If enabled, config validation errors will be reported as errors instead of warnings, and Renovate will exit with a non-zero exit code.
+
+This applies to the repo configuration and any resolved `extends` presets - any validation issues in that resolved configuration will also abort the repository run.
+Leave this disabled if your repositories extend presets you do not control, as a problem introduced by a preset would then stop Renovate from running against your repository.
+
+!!! note
+  Violations of sensitive configuration options, like those governed by [`allowedEnv`](#allowedenv) and [`allowedHeaders`](#allowedheaders), will **always** abort the repository, regardless of the `configValidationError` setting.
 
 ## `containerbaseDir`
 
