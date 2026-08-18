@@ -9,7 +9,9 @@ import { GlobalConfig } from '../../../config/global.ts';
 import * as _migrateAndValidate from '../../../config/migrate-validate.ts';
 import * as _migrate from '../../../config/migration.ts';
 import type { AllConfig } from '../../../config/types.ts';
+import * as configValidation from '../../../config/validation.ts';
 import * as npmApi from '../../../modules/datasource/npm/index.ts';
+import type { HostRule } from '../../../types/index.ts';
 import * as memCache from '../../../util/cache/memory/index.ts';
 import * as repoCache from '../../../util/cache/repository/index.ts';
 import { initRepoCache } from '../../../util/cache/repository/init.ts';
@@ -684,20 +686,32 @@ describe('workers/repository/init/merge', () => {
         expect(getUserEnv()).toEqual({ ADMIN_VAR: 'from-admin' });
       });
 
-      it('drops `env` injected by a repository, if it is not in `allowedEnv`', async () => {
-        // previously this would apply due to a gap in re-validating `allowedEnv` against the resolved config
+      it('rejects `env` injected by a repository, if it is not in `allowedEnv`', async () => {
+        // previously this would be filtered (with a WARN log), but now leads to a config validation error
+        // the repo file's own violation is caught by the first validation pass (`migrateAndValidate`) - the resolved-config pass only re-runs when preset resolution or decryption changed something - so that pass must be real here
+        const { migrateAndValidate: actualMigrateAndValidate } =
+          await vi.importActual<typeof _migrateAndValidate>(
+            '../../../config/migrate-validate.ts',
+          );
+        migrateAndValidate.migrateAndValidate.mockImplementation(
+          actualMigrateAndValidate,
+        );
         GlobalConfig.set({ allowedEnv: ['SOME_*'] });
         fs.readLocalFile.mockResolvedValue(
           JSON.stringify({ env: { NOT_ALLOWED: 'from-repo' } }),
         );
 
-        await mergeRenovateConfig(config);
-
+        await expect(mergeRenovateConfig(config)).rejects.toMatchObject({
+          message: 'config-validation',
+          validationSource: 'renovate.json',
+          validationMessage:
+            "Env variable name `NOT_ALLOWED` is not allowed by this Renovate instance's `allowedEnv`.",
+        });
         expect(getUserEnv()).toEqual({});
       });
 
-      it('drops `env` injected by a preset, if it is not in `allowedEnv`', async () => {
-        // previously this would apply due to a gap in re-validating `allowedEnv` against the resolved config
+      it('rejects `env` injected by a preset, if it is not in `allowedEnv`', async () => {
+        // previously this would be filtered (with a WARN log), but now leads to a config validation error
         GlobalConfig.set({ allowedEnv: ['SOME_*'] });
         memCache.set('preset:local>envPreset', {
           env: { NOT_ALLOWED: 'from-preset' },
@@ -706,13 +720,13 @@ describe('workers/repository/init/merge', () => {
           JSON.stringify({ extends: ['local>envPreset'] }),
         );
 
-        await mergeRenovateConfig(config);
-
+        await expect(mergeRenovateConfig(config)).rejects.toMatchObject({
+          message: 'config-validation',
+          validationSource: 'renovate.json',
+          validationMessage:
+            "Env variable name `NOT_ALLOWED` is not allowed by this Renovate instance's `allowedEnv`.",
+        });
         expect(getUserEnv()).toEqual({});
-        expect(logger.logger.warn).toHaveBeenCalledWith(
-          { denied: ['NOT_ALLOWED'] },
-          "Ignoring env variables not permitted by this Renovate instance's `allowedEnv`",
-        );
       });
 
       it('applies `env` from `GlobalConfig`, even if it is NOT in `allowedEnv`', async () => {
@@ -821,9 +835,8 @@ describe('workers/repository/init/merge', () => {
         );
       });
 
-      it('drops `hostRules` headers injected by a preset, if it is not in `allowedHeaders`', async () => {
-        // previously this would apply due to a gap in re-validating `allowedHeaders` against the resolved config.
-        // `applyHostRules` filters by header name at request time, so this does not reach the final HTTP call, but we should make sure this also doesn't break
+      it('rejects `hostRules` headers injected by a preset, if it is not in `allowedHeaders`', async () => {
+        // previously this would be filtered (with a WARN log), but now leads to a config validation error
         GlobalConfig.set({ allowedHeaders: ['X-*'] });
         memCache.set('preset:local>headerPreset', {
           hostRules: [
@@ -837,14 +850,16 @@ describe('workers/repository/init/merge', () => {
           JSON.stringify({ extends: ['local>headerPreset'] }),
         );
 
-        await mergeRenovateConfig(config);
-
+        await expect(mergeRenovateConfig(config)).rejects.toMatchObject({
+          message: 'config-validation',
+          validationSource: 'renovate.json',
+          validationError:
+            'The Renovate configuration file contains some invalid settings',
+          validationMessage:
+            "hostRules header `Authorization` is not allowed by this Renovate instance's `allowedHeaders`.",
+        });
         expect(hostRules.find({ url: 'https://registry.example.com' })).toEqual(
-          { headers: {} },
-        );
-        expect(logger.logger.warn).toHaveBeenCalledWith(
-          { denied: ['Authorization'] },
-          "Ignoring hostRules headers not permitted by this Renovate instance's `allowedHeaders`",
+          {},
         );
       });
     });
@@ -904,6 +919,622 @@ describe('workers/repository/init/merge', () => {
       expect(setNpmrcSpy).toHaveBeenCalledExactlyOnceWith(
         'something_authToken=token',
       );
+    });
+  });
+
+  describe('resolved config validation', () => {
+    beforeEach(() => {
+      migrateAndValidate.migrateAndValidate.mockImplementation((_, c) =>
+        Promise.resolve({ ...c, warnings: [], errors: [] }),
+      );
+      migrate.migrateConfig.mockImplementation((c) => ({
+        isMigrated: false,
+        migratedConfig: c,
+      }));
+      scm.getFileList.mockResolvedValue(['renovate.json']);
+    });
+
+    it('applies env a repositories[] entry preset contributes', async () => {
+      // the entry, and everything the presets it extends contribute, is the self-hosted admin's own config, so `allowedEnv` does not constrain it
+      memCache.set('preset:local>entryInjectsEnv', {
+        env: { NODE_OPTIONS: '--require /tmp/from-admin.js' },
+      });
+      fs.readLocalFile.mockResolvedValue(JSON.stringify({}));
+
+      const res = await mergeRenovateConfig({
+        ...config,
+        repositoryEntryConfig: { extends: ['local>entryInjectsEnv'] },
+      });
+
+      expect(res).toBeDefined();
+      expect(getUserEnv()).toEqual({
+        NODE_OPTIONS: '--require /tmp/from-admin.js',
+      });
+      expect(logger.logger.warn).not.toHaveBeenCalledWith(
+        expect.anything(),
+        "Ignoring env variables not permitted by this Renovate instance's `allowedEnv`",
+      );
+    });
+
+    it("reports a repository preset replaying the admin's header to a host of its own choosing", async () => {
+      // the `matchHost` is part of a header's identity, so the same name and value against a different host is the preset's own header, not the self-hosted admin's
+      GlobalConfig.set({ allowedHeaders: ['X-*'] });
+      memCache.set('preset:local>replaysHeader', {
+        hostRules: [
+          {
+            matchHost: 'evil.example.com',
+            headers: { Authorization: 'admin-secret' },
+          },
+        ],
+      });
+      fs.readLocalFile.mockResolvedValue(
+        JSON.stringify({ extends: ['local>replaysHeader'] }),
+      );
+
+      await expect(
+        mergeRenovateConfig({
+          ...config,
+          hostRules: [
+            {
+              matchHost: 'admin.example.com',
+              headers: { Authorization: 'admin-secret' },
+            },
+          ],
+        }),
+      ).rejects.toMatchObject({
+        message: 'config-validation',
+        validationSource: 'renovate.json',
+        validationMessage:
+          "hostRules header `Authorization` is not allowed by this Renovate instance's `allowedHeaders`.",
+      });
+    });
+
+    it("exempts a repository preset narrowing the admin's host-less header to one host", async () => {
+      // the self-hosted admin's own catch-all header already reaches that host, so scoping it narrower is not the preset introducing one of its own
+      GlobalConfig.set({ allowedHeaders: ['X-*'] });
+      memCache.set('preset:local>narrowsHeader', {
+        hostRules: [
+          {
+            matchHost: 'registry.example.com',
+            headers: { Authorization: 'admin-secret' },
+          },
+        ],
+      });
+      fs.readLocalFile.mockResolvedValue(
+        JSON.stringify({ extends: ['local>narrowsHeader'] }),
+      );
+
+      await expect(
+        mergeRenovateConfig({
+          ...config,
+          hostRules: [{ headers: { Authorization: 'admin-secret' } }],
+        }),
+      ).toResolve();
+    });
+
+    it('migrates a legacy option name in a repositories[] entry before validating it', async () => {
+      // unmigrated, `renovateFork` is not a known option, so `validateConfig` reports it as invalid - and `configValidationError` turns that into a failed repository
+      const { migrateConfig } = await vi.importActual<typeof _migrate>(
+        '../../../config/migration.ts',
+      );
+      migrate.migrateConfig.mockImplementation(migrateConfig);
+      fs.readLocalFile.mockResolvedValue(JSON.stringify({}));
+
+      const res = await mergeRenovateConfig({
+        ...config,
+        configValidationError: true,
+        // oxlint-disable-next-line renovate/prefer-partial-in-specs -- a legacy option name, so deliberately absent from `RenovateConfig`
+        repositoryEntryConfig: { renovateFork: true } as RenovateConfig,
+      });
+
+      expect(res.forkProcessing).toBe('enabled');
+    });
+
+    it('validates a resolved config whose options migration left as strings', async () => {
+      // `validateConfig` assumes `allowString` options are already arrays, which only `massageConfig` guarantees
+      fs.readLocalFile.mockResolvedValue(
+        JSON.stringify({ schedule: 'before 5am' }),
+      );
+
+      const res = await mergeRenovateConfig({
+        ...config,
+        repositoryEntryConfig: {},
+      });
+
+      expect(res.schedule).toBe('before 5am');
+    });
+
+    it('applies only top-level env, and does not fail for a nested one', async () => {
+      // guards the claim the topic choice rests on: only the top-level value of a requiresCheckAtTrustBoundary option is ever applied, so a nested one is inert and must not abort the repository
+      GlobalConfig.set({ allowedEnv: ['ALLOWED_*'] });
+      memCache.set('preset:local>nestsEnv', {
+        env: { ALLOWED_VAR: 'top-level' },
+        packageRules: [
+          {
+            matchManagers: ['npm'],
+            env: { GIT_SSH_COMMAND: 'sh -c "malicious"' },
+          },
+        ],
+      });
+      fs.readLocalFile.mockResolvedValue(
+        JSON.stringify({ extends: ['local>nestsEnv'] }),
+      );
+
+      const res = await mergeRenovateConfig({
+        ...config,
+        repositoryEntryConfig: {},
+      });
+
+      expect(res).toBeDefined();
+      expect(getUserEnv()).toEqual({ ALLOWED_VAR: 'top-level' });
+    });
+
+    it('applies only top-level hostRules, and does not fail for a nested one', async () => {
+      GlobalConfig.set({ allowedHeaders: ['custom-*'] });
+      memCache.set('preset:local>nestsHostRules', {
+        hostRules: [
+          {
+            matchHost: 'top-level.example.com',
+            headers: { 'custom-token': 'token' },
+          },
+        ],
+        packageRules: [
+          {
+            matchManagers: ['npm'],
+            hostRules: [
+              {
+                matchHost: 'nested.example.com',
+                headers: { 'custom-token': 'token' },
+              },
+            ],
+          },
+        ],
+      });
+      fs.readLocalFile.mockResolvedValue(
+        JSON.stringify({ extends: ['local>nestsHostRules'] }),
+      );
+
+      const res = await mergeRenovateConfig({
+        ...config,
+        repositoryEntryConfig: {},
+      });
+
+      expect(res).toBeDefined();
+      expect(
+        hostRules.find({ url: 'https://top-level.example.com' }),
+      ).toMatchObject({ headers: { 'custom-token': 'token' } });
+      expect(
+        hostRules.find({ url: 'https://nested.example.com' }).headers,
+      ).toBeUndefined();
+    });
+
+    it('exempts env the self-hosted admin supplied from allowedEnv', async () => {
+      fs.readLocalFile.mockResolvedValue(JSON.stringify({}));
+
+      const res = await mergeRenovateConfig({
+        ...config,
+        env: { ADMIN_VAR: 'set-by-admin' },
+        repositoryEntryConfig: {},
+      });
+
+      expect(res).toBeDefined();
+      expect(getUserEnv()).toEqual({ ADMIN_VAR: 'set-by-admin' });
+      expect(logger.logger.warn).not.toHaveBeenCalledWith(
+        expect.anything(),
+        "Ignoring env variables not permitted by this Renovate instance's `allowedEnv`",
+      );
+    });
+
+    it('exempts env and headers supplied by the repositories[] entry itself', async () => {
+      fs.readLocalFile.mockResolvedValue(JSON.stringify({}));
+
+      const res = await mergeRenovateConfig({
+        ...config,
+        repositoryEntryConfig: {
+          env: { ENTRY_VAR: 'set-by-admin' },
+          hostRules: [
+            {
+              matchHost: 'registry.example.com',
+              headers: { 'custom-token': 'token' },
+            },
+          ],
+        },
+      });
+
+      expect(res).toBeDefined();
+      expect(getUserEnv()).toEqual({ ENTRY_VAR: 'set-by-admin' });
+    });
+
+    it('keeps going when a repositories[] entry carries a hostRule migration cannot migrate', async () => {
+      // `hostRules` migration throws for a rule with more than one host-matching field: `applyHostRules` drops just that rule and carries on, so migrating the entry as a whole must not abort the repository instead
+      const { migrateConfig } = await vi.importActual<typeof _migrate>(
+        '../../../config/migration.ts',
+      );
+      migrate.migrateConfig.mockImplementation(migrateConfig);
+      fs.readLocalFile.mockResolvedValue(JSON.stringify({}));
+
+      const res = await mergeRenovateConfig({
+        ...config,
+        repositoryEntryConfig: {
+          hostRules: [
+            // oxlint-disable-next-line renovate/prefer-partial-in-specs -- a legacy spelling, so deliberately absent from `HostRule`
+            {
+              matchHost: 'registry.example.com',
+              hostName: 'other.example.com',
+            } as HostRule,
+          ],
+        },
+      });
+
+      expect(res).toBeDefined();
+      expect(logger.logger.warn).toHaveBeenCalledWith(
+        expect.anything(),
+        'Error migrating config',
+      );
+      expect(logger.logger.warn).toHaveBeenCalledWith(
+        expect.anything(),
+        'Error setting hostRule from config',
+      );
+    });
+
+    it('treats non-security resolved-preset issues as advisory by default', async () => {
+      memCache.set('preset:local>injectsInvalid', { notARealOption: true });
+      fs.readLocalFile.mockResolvedValue(
+        JSON.stringify({ extends: ['local>injectsInvalid'] }),
+      );
+
+      const res = await mergeRenovateConfig({
+        ...config,
+        repositoryEntryConfig: {},
+      });
+
+      expect(res).toBeDefined();
+    });
+
+    it('escalates non-security resolved-preset issues to fatal under configValidationError', async () => {
+      memCache.set('preset:local>injectsInvalid', { notARealOption: true });
+      fs.readLocalFile.mockResolvedValue(
+        JSON.stringify({ extends: ['local>injectsInvalid'] }),
+      );
+
+      await expect(
+        mergeRenovateConfig({
+          ...config,
+          configValidationError: true,
+          repositoryEntryConfig: {},
+        }),
+      ).rejects.toMatchObject({
+        message: 'config-validation',
+        validationMessage: expect.stringContaining(
+          'Invalid configuration option: notARealOption',
+        ),
+      });
+    });
+
+    it("exempts the admin's own header when migration rewrites their matchHost", async () => {
+      // `adminSuppliedValues` must compare migrated spellings: the resolved config only ever contains the migrated `matchHost` (massaged to a full URL), so building the exemption keys from the admin's unmigrated config would report their own header as a violation
+      const { migrateConfig } = await vi.importActual<typeof _migrate>(
+        '../../../config/migration.ts',
+      );
+      migrate.migrateConfig.mockImplementation(migrateConfig);
+      GlobalConfig.set({ allowedHeaders: ['X-*'] });
+      memCache.set('preset:local>replaysAdminHost', {
+        hostRules: [
+          {
+            matchHost: 'nexus.example.com:8443',
+            headers: { Authorization: 'from-admin' },
+          },
+        ],
+      });
+      fs.readLocalFile.mockResolvedValue(
+        JSON.stringify({ extends: ['local>replaysAdminHost'] }),
+      );
+
+      await expect(
+        mergeRenovateConfig({
+          ...config,
+          hostRules: [
+            {
+              matchHost: 'nexus.example.com:8443',
+              headers: { Authorization: 'from-admin' },
+            },
+          ],
+        }),
+      ).toResolve();
+    });
+
+    it("reports a preset replaying the admin's legacy `hostName` header against a host of its own choosing", async () => {
+      // a legacy `hostName` migrates to a `matchHost`, so the exemption key must be host-scoped: indexing the admin's unmigrated config would record the header host-less, wrongly exempting a preset replaying it against another host
+      const { migrateConfig } = await vi.importActual<typeof _migrate>(
+        '../../../config/migration.ts',
+      );
+      migrate.migrateConfig.mockImplementation(migrateConfig);
+      GlobalConfig.set({ allowedHeaders: ['X-*'] });
+      memCache.set('preset:local>replaysLegacyHeader', {
+        hostRules: [
+          {
+            matchHost: 'evil.example.com',
+            headers: { Authorization: 'admin-secret' },
+          },
+        ],
+      });
+      fs.readLocalFile.mockResolvedValue(
+        JSON.stringify({ extends: ['local>replaysLegacyHeader'] }),
+      );
+
+      await expect(
+        mergeRenovateConfig({
+          ...config,
+          hostRules: [
+            // oxlint-disable-next-line renovate/prefer-partial-in-specs -- a legacy spelling, so deliberately absent from `HostRule`
+            {
+              hostName: 'admin.example.com',
+              headers: { Authorization: 'admin-secret' },
+            } as HostRule,
+          ],
+        }),
+      ).rejects.toMatchObject({
+        message: 'config-validation',
+        validationSource: 'renovate.json',
+        validationMessage:
+          "hostRules header `Authorization` is not allowed by this Renovate instance's `allowedHeaders`.",
+      });
+    });
+
+    it("applies env the admin's global `extends` contributes", async () => {
+      // presets in the global config's `extends` resolve on the repository path, mixed in with the repository's own, so they are resolved separately to tell them apart: what the admin chose to extend is their config, and a repository which merely inherits it must neither be blamed for it nor have it filtered out
+      memCache.set('preset:local>adminExtends', {
+        env: { CORP_VAR: 'from-admin-preset' },
+      });
+      fs.readLocalFile.mockResolvedValue(JSON.stringify({}));
+
+      const res = await mergeRenovateConfig({
+        ...config,
+        extends: ['local>adminExtends'],
+      });
+
+      expect(res).toBeDefined();
+      expect(getUserEnv()).toEqual({ CORP_VAR: 'from-admin-preset' });
+      expect(logger.logger.warn).not.toHaveBeenCalledWith(
+        expect.anything(),
+        "Ignoring env variables not permitted by this Renovate instance's `allowedEnv`",
+      );
+    });
+
+    it("still reports env a repository's own preset injects alongside the admin's global `extends`", async () => {
+      // the admin's exemption covers only what their own presets contributed
+      memCache.set('preset:local>adminExtends', {
+        env: { CORP_VAR: 'from-admin-preset' },
+      });
+      memCache.set('preset:local>repoExtends', {
+        env: { NOT_ALLOWED: 'from-repo-preset' },
+      });
+      fs.readLocalFile.mockResolvedValue(
+        JSON.stringify({ extends: ['local>repoExtends'] }),
+      );
+
+      await expect(
+        mergeRenovateConfig({ ...config, extends: ['local>adminExtends'] }),
+      ).rejects.toMatchObject({
+        message: 'config-validation',
+        validationSource: 'renovate.json',
+        validationMessage:
+          "Env variable name `NOT_ALLOWED` is not allowed by this Renovate instance's `allowedEnv`.",
+      });
+    });
+
+    it("continues without the exemption when the admin's global `extends` cannot be resolved", async () => {
+      // resolving them here only builds the exemption; the resolution whose result is actually used reports the failure, so it must not be reported twice - nor first
+      fs.readLocalFile.mockResolvedValue(JSON.stringify({}));
+
+      await expect(
+        mergeRenovateConfig({ ...config, extends: ['default:doesNotExist'] }),
+      ).rejects.toMatchObject({ message: 'config-validation' });
+
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        expect.anything(),
+        'Error resolving the self-hosted config presets - continuing without their exemption',
+      );
+    });
+
+    it("applies a repositories[] entry's env that uses entry-level secrets", async () => {
+      // the entry's secrets only interpolate as the entry is applied (there is no earlier global pass when the secrets are not defined globally), so the admin-supplied env snapshot must carry the interpolated value
+      fs.readLocalFile.mockResolvedValue(JSON.stringify({}));
+
+      const res = await mergeRenovateConfig({
+        ...config,
+        repositoryEntryConfig: {
+          env: { NPM_TOKEN: '{{ secrets.TOKEN }}' },
+          secrets: { TOKEN: 'real-value' },
+        },
+      });
+
+      expect(res).toBeDefined();
+      expect(getUserEnv()).toEqual({ NPM_TOKEN: 'real-value' });
+      expect(logger.logger.warn).not.toHaveBeenCalledWith(
+        expect.anything(),
+        "Ignoring env variables not permitted by this Renovate instance's `allowedEnv`",
+      );
+    });
+
+    it("exempts a preset re-spelling the admin's matchHost with a scheme", async () => {
+      // 'registry.example.com' and 'https://registry.example.com' match the same requests, so the same header against either spelling is still the admin's own
+      GlobalConfig.set({ allowedHeaders: ['X-*'] });
+      memCache.set('preset:local>respellsHost', {
+        hostRules: [
+          {
+            matchHost: 'https://registry.example.com',
+            headers: { Authorization: 'admin-secret' },
+          },
+        ],
+      });
+      fs.readLocalFile.mockResolvedValue(
+        JSON.stringify({ extends: ['local>respellsHost'] }),
+      );
+
+      await expect(
+        mergeRenovateConfig({
+          ...config,
+          hostRules: [
+            {
+              matchHost: 'registry.example.com',
+              headers: { Authorization: 'admin-secret' },
+            },
+          ],
+        }),
+      ).toResolve();
+    });
+
+    it("exempts a preset narrowing the admin's matchHost to a subpath", async () => {
+      // the admin's own header already reaches every request under the wider host, so a narrower scope introduces nothing new
+      GlobalConfig.set({ allowedHeaders: ['X-*'] });
+      memCache.set('preset:local>narrowsToPath', {
+        hostRules: [
+          {
+            matchHost: 'https://registry.example.com/npm/',
+            headers: { Authorization: 'admin-secret' },
+          },
+        ],
+      });
+      fs.readLocalFile.mockResolvedValue(
+        JSON.stringify({ extends: ['local>narrowsToPath'] }),
+      );
+
+      await expect(
+        mergeRenovateConfig({
+          ...config,
+          hostRules: [
+            {
+              matchHost: 'https://registry.example.com',
+              headers: { Authorization: 'admin-secret' },
+            },
+          ],
+        }),
+      ).toResolve();
+    });
+
+    it("reports a preset broadening the admin's header to a wider host", async () => {
+      // the admin scoped the header to a subpath; replaying it at the origin reaches requests the admin's rule does not
+      GlobalConfig.set({ allowedHeaders: ['X-*'] });
+      memCache.set('preset:local>broadensHost', {
+        hostRules: [
+          {
+            matchHost: 'https://registry.example.com',
+            headers: { Authorization: 'admin-secret' },
+          },
+        ],
+      });
+      fs.readLocalFile.mockResolvedValue(
+        JSON.stringify({ extends: ['local>broadensHost'] }),
+      );
+
+      await expect(
+        mergeRenovateConfig({
+          ...config,
+          hostRules: [
+            {
+              matchHost: 'https://registry.example.com/npm/',
+              headers: { Authorization: 'admin-secret' },
+            },
+          ],
+        }),
+      ).rejects.toMatchObject({
+        message: 'config-validation',
+        validationSource: 'renovate.json',
+        validationMessage:
+          "hostRules header `Authorization` is not allowed by this Renovate instance's `allowedHeaders`.",
+      });
+    });
+
+    it('attributes a resolved-config violation to `config` when the repository has no config file', async () => {
+      // the static repository config applies as repository config, but is not one of the repository's own files, so there is nothing to blame the failure on
+      memCache.set('preset:local>injectsEnvNoFile', {
+        env: { NOT_ALLOWED: 'from-preset' },
+      });
+      scm.getFileList.mockResolvedValue([]);
+      fs.readSystemFile.mockResolvedValue(
+        JSON.stringify({ extends: ['local>injectsEnvNoFile'] }),
+      );
+      vi.stubEnv('RENOVATE_X_STATIC_REPO_CONFIG_FILE', 'static-config.json');
+
+      await expect(mergeRenovateConfig({ ...config })).rejects.toMatchObject({
+        message: 'config-validation',
+        validationSource: 'config',
+        validationMessage:
+          "Env variable name `NOT_ALLOWED` is not allowed by this Renovate instance's `allowedEnv`.",
+      });
+    });
+
+    it('rejects env a preset nests under `force`', async () => {
+      // `validateConfig` demotes `force` sub-validation findings to warnings, but `mergeChildConfig` promotes `force` values into the applied config, so Security findings there must stay fatal
+      memCache.set('preset:local>forcesEnv', {
+        force: { env: { GIT_SSH_COMMAND: 'sh -c "malicious"' } },
+      });
+      fs.readLocalFile.mockResolvedValue(
+        JSON.stringify({ extends: ['local>forcesEnv'] }),
+      );
+
+      await expect(
+        mergeRenovateConfig({ ...config, repositoryEntryConfig: {} }),
+      ).rejects.toMatchObject({
+        message: 'config-validation',
+        validationSource: 'renovate.json',
+        validationMessage:
+          "Env variable name `GIT_SSH_COMMAND` is not allowed by this Renovate instance's `allowedEnv`.",
+      });
+    });
+
+    it('exempts `force` env supplied by the repositories[] entry itself', async () => {
+      // the harmless preset makes the resolved entry differ from the entry, so validation is not skipped as a no-op
+      memCache.set('preset:local>harmlessLabels', { labels: ['from-preset'] });
+      fs.readLocalFile.mockResolvedValue(JSON.stringify({}));
+
+      const res = await mergeRenovateConfig({
+        ...config,
+        repositoryEntryConfig: {
+          extends: ['local>harmlessLabels'],
+          force: { env: { ENTRY_FORCED: 'yes' } },
+        },
+      });
+
+      expect(res).toBeDefined();
+      expect(getUserEnv()).toEqual({ ENTRY_FORCED: 'yes' });
+    });
+
+    it("applies a repositories[] entry's `force.env` that uses entry-level secrets", async () => {
+      // as with the entry's top-level `env`, the entry's own secrets only interpolate as the entry is applied, so the admin-supplied env snapshot must carry the interpolated value rather than the literal template
+      fs.readLocalFile.mockResolvedValue(JSON.stringify({}));
+
+      const res = await mergeRenovateConfig({
+        ...config,
+        repositoryEntryConfig: {
+          force: { env: { NPM_TOKEN: '{{ secrets.TOKEN }}' } },
+          secrets: { TOKEN: 'real-value' },
+        },
+      });
+
+      expect(res).toBeDefined();
+      expect(getUserEnv()).toEqual({ NPM_TOKEN: 'real-value' });
+      expect(logger.logger.warn).not.toHaveBeenCalledWith(
+        expect.anything(),
+        "Ignoring env variables not permitted by this Renovate instance's `allowedEnv`",
+      );
+    });
+
+    it('skips re-validating a resolved config that resolution left unchanged', async () => {
+      // with no presets to resolve and nothing to decrypt, both the `repositories[]` entry and the repo file were already validated (at startup and by `migrateAndValidate` respectively), so no resolved-config validation walk should run
+      const validateConfigSpy = vi.spyOn(configValidation, 'validateConfig');
+      fs.readLocalFile.mockResolvedValue(
+        JSON.stringify({ labels: ['from-repo'] }),
+      );
+
+      const res = await mergeRenovateConfig({
+        ...config,
+        repositoryEntryConfig: { labels: ['from-entry'] },
+      });
+
+      expect(res).toBeDefined();
+      expect(validateConfigSpy).not.toHaveBeenCalled();
     });
   });
 
