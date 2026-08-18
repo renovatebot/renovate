@@ -21,6 +21,7 @@ export const presets: Record<string, Preset> = {
       'workarounds:containerbase',
       'workarounds:bitnamiDockerImageVersioning',
       'workarounds:clamavDockerImageVersioning',
+      'workarounds:grafanaDockerImageVersioning',
       'workarounds:k3sKubernetesVersioning',
       'workarounds:rke2KubernetesVersioning',
       'workarounds:libericaJdkDockerVersioning',
@@ -119,6 +120,22 @@ export const presets: Record<string, Preset> = {
       },
     ],
   },
+  grafanaDockerImageVersioning: {
+    description: 'Support security releases on Grafana (product) images',
+    packageRules: [
+      {
+        matchDatasources: ['docker'],
+        matchPackageNames: [
+          'grafana/grafana',
+          'docker.io/grafana/grafana',
+          'grafana/grafana-enterprise',
+          'docker.io/grafana/grafana-enterprise',
+        ],
+        versioning:
+          'regex:^(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)(?:-security-(?<build>\\d+))?(?:-(?<compatibility>.*))?$',
+      },
+    ],
+  },
   ignoreHttp4sDigestMilestones: {
     description: 'Ignore `http4s` digest-based `1.x` milestones.',
     packageRules: [
@@ -165,6 +182,7 @@ export const presets: Record<string, Preset> = {
           'adoptopenjdk',
           'openjdk',
           'java',
+          'java-jdk',
           'java-jre',
           'sapmachine',
           '/^azul/zulu-openjdk/',
@@ -192,11 +210,50 @@ export const presets: Record<string, Preset> = {
           'regex:^(?<major>\\d+)?(\\.(?<minor>\\d+))?(\\.(?<patch>\\d+))?([\\._+](?<build>(\\d\\.?)+)(LTS)?)?(-(?<compatibility>.*))?$',
       },
       {
+        description:
+          'Use docker versioning for major-only Java image tags so rolling tags (e.g. 21-jre) are not upgraded to full-precision tags (e.g. 21.0.11_10-jre).',
+        matchCurrentValue: '/^\\d+(-|$)/',
+        matchDatasources: ['docker'],
+        matchPackageNames: [
+          'eclipse-temurin',
+          'amazoncorretto',
+          'adoptopenjdk',
+          'openjdk',
+          'java',
+          'java-jdk',
+          'java-jre',
+          'sapmachine',
+          '/^azul/zulu-openjdk/',
+          '/^bellsoft/liberica-openj(dk|re)-/',
+          '/^cimg/openjdk/',
+        ],
+        versioning: 'docker',
+      },
+      {
+        description:
+          'Use docker versioning for major-only Java image tags so rolling tags (e.g. 21-jre) are not upgraded to full-precision tags (e.g. 21.0.11_10-jre).',
+        matchCurrentValue: '/^\\d+(-|$)/',
+        matchDatasources: ['docker'],
+        matchDepNames: [
+          'eclipse-temurin',
+          'amazoncorretto',
+          'adoptopenjdk',
+          'openjdk',
+          'java',
+          'java-jre',
+          'sapmachine',
+        ],
+        versioning: 'docker',
+      },
+      {
         allowedVersions: '/^(?:jdk|jdk-all|jre)-(?:8|11|17|21|25)(?:\\.|-|$)/',
         description:
           'Limit Java runtime versions to LTS releases. To receive all major releases add `workarounds:javaLTSVersions` to the `ignorePresets` array.',
         matchDatasources: ['docker'],
-        matchPackageNames: ['bellsoft/liberica-runtime-container'],
+        matchPackageNames: [
+          'bellsoft/hardened-liberica-runtime-container',
+          'bellsoft/liberica-runtime-container',
+        ],
       },
     ],
   },
@@ -219,7 +276,10 @@ export const presets: Record<string, Preset> = {
         description: 'Liberica JDK Lite version optimized for the Cloud',
         matchCurrentValue: '/^jdk-[^a][^l]{2}/',
         matchDatasources: ['docker'],
-        matchPackageNames: ['bellsoft/liberica-runtime-container'],
+        matchPackageNames: [
+          'bellsoft/hardened-liberica-runtime-container',
+          'bellsoft/liberica-runtime-container',
+        ],
         versioning:
           'regex:^jdk-(?<major>\\d+)?(\\.(?<minor>\\d+))?(\\.(?<patch>\\d+))?([\\._+](?<build>(\\d\\.?)+))?(-(?<compatibility>.*))?$',
       },
@@ -228,7 +288,10 @@ export const presets: Record<string, Preset> = {
           'Liberica JDK that can be used to create a custom runtime with a help of jlink tool',
         matchCurrentValue: '/^jdk-all/',
         matchDatasources: ['docker'],
-        matchPackageNames: ['bellsoft/liberica-runtime-container'],
+        matchPackageNames: [
+          'bellsoft/hardened-liberica-runtime-container',
+          'bellsoft/liberica-runtime-container',
+        ],
         versioning:
           'regex:^jdk-all-(?<major>\\d+)?(\\.(?<minor>\\d+))?(\\.(?<patch>\\d+))?([\\._+](?<build>(\\d\\.?)+))?(-(?<compatibility>.*))?$',
       },
@@ -237,7 +300,10 @@ export const presets: Record<string, Preset> = {
           'Liberica JRE (only the runtime without the rest of JDK tools) for running Java applications',
         matchCurrentValue: '/^jre-/',
         matchDatasources: ['docker'],
-        matchPackageNames: ['bellsoft/liberica-runtime-container'],
+        matchPackageNames: [
+          'bellsoft/hardened-liberica-runtime-container',
+          'bellsoft/liberica-runtime-container',
+        ],
         versioning:
           'regex:^jre-(?<major>\\d+)?(\\.(?<minor>\\d+))?(\\.(?<patch>\\d+))?([\\._+](?<build>(\\d\\.?)+))?(-(?<compatibility>.*))?$',
       },
@@ -265,6 +331,7 @@ export const presets: Record<string, Preset> = {
           '!docker.io/calico/node',
           '!ghcr.io/devcontainers/features/node',
           '!kindest/node',
+          '!docker.io/kindest/node',
         ],
         versionCompatibility: '^(?<version>[^-]+)(?<compatibility>-.*)?$',
         versioning: 'node',

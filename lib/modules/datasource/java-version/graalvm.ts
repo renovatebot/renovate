@@ -3,7 +3,8 @@ import { ExternalHostError } from '../../../types/errors/external-host-error.ts'
 import { type Http, HttpError } from '../../../util/http/index.ts';
 import { joinUrlParts } from '../../../util/url.ts';
 import type { ReleaseResult } from '../types.ts';
-import { MiseJavaRelease, type PackageConfig } from './types.ts';
+import { MiseJavaRelease } from './schema.ts';
+import type { PackageConfig } from './types.ts';
 
 export const graalvmRegistryUrl = 'https://mise-java.jdx.dev/';
 

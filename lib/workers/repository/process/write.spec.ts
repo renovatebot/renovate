@@ -1,6 +1,7 @@
 import { isString } from '@sindresorhus/is';
+import { DateTime } from 'luxon';
 import type { RenovateConfig } from '~test/util.ts';
-import { logger, partial, scm } from '~test/util.ts';
+import { fakeSha, logger, partial, scm } from '~test/util.ts';
 import { getConfig } from '../../../config/defaults.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import { addMeta } from '../../../logger/index.ts';
@@ -11,7 +12,6 @@ import type {
   RepoCacheData,
 } from '../../../util/cache/repository/types.ts';
 import { fingerprint } from '../../../util/fingerprint.ts';
-import type { LongCommitSha } from '../../../util/git/types.ts';
 import { counts } from '../../global/limits.ts';
 import type { BranchConfig, BranchUpgradeConfig } from '../../types.ts';
 import * as _branchWorker from '../update/branch/index.ts';
@@ -33,12 +33,18 @@ const repoCache = vi.mocked(_repoCache);
 
 let config: RenovateConfig;
 
+const branchSha = fakeSha('sha');
+const baseBranchSha = fakeSha('base_sha');
+const newBranchSha = fakeSha('new_sha');
+const newBaseBranchSha = fakeSha('new_base_sha');
+
 beforeEach(() => {
   config = getConfig();
   repoCache.getCache.mockReturnValue({});
   limits.getConcurrentPrsCount.mockResolvedValue(0);
   limits.getConcurrentBranchesCount.mockResolvedValue(0);
   limits.getPrHourlyCount.mockResolvedValue(0);
+  limits.getCommitsHourlyCount.mockResolvedValue(0);
 });
 
 describe('workers/repository/process/write', () => {
@@ -321,8 +327,8 @@ describe('workers/repository/process/write', () => {
         result: 'no-work',
       });
       scm.getBranchCommit
-        .mockResolvedValueOnce('sha' as LongCommitSha)
-        .mockResolvedValueOnce('base_sha' as LongCommitSha);
+        .mockResolvedValueOnce(branchSha)
+        .mockResolvedValueOnce(baseBranchSha);
       scm.branchExists.mockResolvedValueOnce(true);
       await writeUpdates(config, branches);
       expect(logger.logger.debug).not.toHaveBeenCalledWith(
@@ -333,8 +339,8 @@ describe('workers/repository/process/write', () => {
           {
             branchName: 'new/some-branch',
             baseBranch: 'base_branch',
-            baseBranchSha: 'base_sha',
-            sha: 'sha',
+            baseBranchSha,
+            sha: branchSha,
           },
         ],
       });
@@ -345,8 +351,8 @@ describe('workers/repository/process/write', () => {
     let branchCache: BranchCache = {
       branchName: 'branch',
       baseBranch: 'base',
-      baseBranchSha: 'base_sha',
-      sha: 'sha',
+      baseBranchSha,
+      sha: branchSha,
       upgrades: [],
       automerge: false,
       prNo: null,
@@ -388,15 +394,15 @@ describe('workers/repository/process/write', () => {
     it('creates minimal branch state when cache is not populated', () => {
       const repoCacheObj = partial<RepoCacheData>();
       repoCache.getCache.mockReturnValue(repoCacheObj);
-      scm.getBranchCommit.mockResolvedValueOnce('sha' as LongCommitSha);
-      scm.getBranchCommit.mockResolvedValueOnce('base_sha' as LongCommitSha);
+      scm.getBranchCommit.mockResolvedValueOnce(branchSha);
+      scm.getBranchCommit.mockResolvedValueOnce(baseBranchSha);
       return expect(
         syncBranchState('branch_name', 'base_branch'),
       ).resolves.toEqual({
         branchName: 'branch_name',
-        sha: 'sha',
+        sha: branchSha,
         baseBranch: 'base_branch',
-        baseBranchSha: 'base_sha',
+        baseBranchSha,
       });
     });
 
@@ -406,8 +412,8 @@ describe('workers/repository/process/write', () => {
           {
             branchName: 'branch_name',
             baseBranch: 'base_branch',
-            sha: 'sha',
-            baseBranchSha: 'base_sha',
+            sha: branchSha,
+            baseBranchSha,
             isModified: true,
             pristine: false,
             upgrades: [],
@@ -417,15 +423,15 @@ describe('workers/repository/process/write', () => {
         ],
       };
       repoCache.getCache.mockReturnValue(repoCacheObj);
-      scm.getBranchCommit.mockResolvedValueOnce('sha' as LongCommitSha);
-      scm.getBranchCommit.mockResolvedValueOnce('base_sha' as LongCommitSha);
+      scm.getBranchCommit.mockResolvedValueOnce(branchSha);
+      scm.getBranchCommit.mockResolvedValueOnce(baseBranchSha);
       return expect(
         syncBranchState('branch_name', 'new_base_branch'),
       ).resolves.toEqual({
         branchName: 'branch_name',
-        sha: 'sha',
+        sha: branchSha,
         baseBranch: 'new_base_branch',
-        baseBranchSha: 'base_sha',
+        baseBranchSha,
         pristine: false,
         upgrades: [],
         automerge: false,
@@ -438,9 +444,9 @@ describe('workers/repository/process/write', () => {
         branches: [
           {
             branchName: 'branch_name',
-            sha: 'sha',
+            sha: branchSha,
             baseBranch: 'base_branch',
-            baseBranchSha: 'base_sha',
+            baseBranchSha,
             isBehindBase: true,
             pristine: false,
             upgrades: [],
@@ -450,17 +456,15 @@ describe('workers/repository/process/write', () => {
         ],
       };
       repoCache.getCache.mockReturnValue(repoCacheObj);
-      scm.getBranchCommit.mockResolvedValueOnce('sha' as LongCommitSha);
-      scm.getBranchCommit.mockResolvedValueOnce(
-        'new_base_sha' as LongCommitSha,
-      );
+      scm.getBranchCommit.mockResolvedValueOnce(branchSha);
+      scm.getBranchCommit.mockResolvedValueOnce(newBaseBranchSha);
       return expect(
         syncBranchState('branch_name', 'base_branch'),
       ).resolves.toEqual({
         branchName: 'branch_name',
-        sha: 'sha',
+        sha: branchSha,
         baseBranch: 'base_branch',
-        baseBranchSha: 'new_base_sha',
+        baseBranchSha: newBaseBranchSha,
         upgrades: [],
         pristine: false,
         automerge: false,
@@ -473,9 +477,9 @@ describe('workers/repository/process/write', () => {
         branches: [
           {
             branchName: 'branch_name',
-            sha: 'sha',
+            sha: branchSha,
             baseBranch: 'base_branch',
-            baseBranchSha: 'base_sha',
+            baseBranchSha,
             isBehindBase: true,
             isModified: true,
             pristine: true,
@@ -488,15 +492,54 @@ describe('workers/repository/process/write', () => {
         ],
       };
       repoCache.getCache.mockReturnValue(repoCacheObj);
-      scm.getBranchCommit.mockResolvedValueOnce('new_sha' as LongCommitSha);
-      scm.getBranchCommit.mockResolvedValueOnce('base_sha' as LongCommitSha);
+      scm.getBranchCommit.mockResolvedValueOnce(newBranchSha);
+      scm.getBranchCommit.mockResolvedValueOnce(baseBranchSha);
       return expect(
         syncBranchState('branch_name', 'base_branch'),
       ).resolves.toEqual({
         branchName: 'branch_name',
-        sha: 'new_sha',
+        sha: newBranchSha,
         baseBranch: 'base_branch',
-        baseBranchSha: 'base_sha',
+        baseBranchSha,
+        upgrades: [],
+        pristine: false,
+        automerge: false,
+        prNo: null,
+      });
+    });
+
+    it('when branch sha is different updates it and sets commitTimestamp', async () => {
+      const repoCacheObj: RepoCacheData = {
+        branches: [
+          {
+            branchName: 'branch_name',
+            sha: branchSha,
+            baseBranch: 'base_branch',
+            baseBranchSha,
+            isBehindBase: true,
+            isModified: true,
+            pristine: true,
+            isConflicted: true,
+            commitFingerprint: '123',
+            upgrades: [],
+            automerge: false,
+            prNo: null,
+          },
+        ],
+      };
+      const commitDate = DateTime.fromISO('2023-05-20T14:25:30.123Z').toUTC();
+      repoCache.getCache.mockReturnValue(repoCacheObj);
+      scm.getBranchCommit.mockResolvedValueOnce(newBranchSha);
+      scm.getBranchCommit.mockResolvedValueOnce(baseBranchSha);
+      scm.getBranchUpdateDate.mockResolvedValueOnce(commitDate);
+      await expect(
+        syncBranchState('branch_name', 'base_branch'),
+      ).resolves.toEqual({
+        branchName: 'branch_name',
+        sha: newBranchSha,
+        baseBranch: 'base_branch',
+        baseBranchSha,
+        commitTimestamp: '2023-05-20T14:25:30.123Z',
         upgrades: [],
         pristine: false,
         automerge: false,
@@ -509,9 +552,9 @@ describe('workers/repository/process/write', () => {
         branches: [
           {
             branchName: 'branch_name',
-            sha: 'sha',
+            sha: branchSha,
             baseBranch: 'base_branch',
-            baseBranchSha: 'base_sha',
+            baseBranchSha,
             isBehindBase: true,
             isModified: true,
             isConflicted: true,
@@ -524,15 +567,15 @@ describe('workers/repository/process/write', () => {
         ],
       };
       repoCache.getCache.mockReturnValue(repoCacheObj);
-      scm.getBranchCommit.mockResolvedValueOnce('sha' as LongCommitSha);
-      scm.getBranchCommit.mockResolvedValueOnce('base_sha' as LongCommitSha);
+      scm.getBranchCommit.mockResolvedValueOnce(branchSha);
+      scm.getBranchCommit.mockResolvedValueOnce(baseBranchSha);
       return expect(
         syncBranchState('branch_name', 'base_branch'),
       ).resolves.toEqual({
         branchName: 'branch_name',
-        sha: 'sha',
+        sha: branchSha,
         baseBranch: 'base_branch',
-        baseBranchSha: 'base_sha',
+        baseBranchSha,
         isBehindBase: true,
         isModified: true,
         isConflicted: true,

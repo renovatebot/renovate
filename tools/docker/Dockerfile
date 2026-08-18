@@ -1,31 +1,31 @@
-# syntax=docker/dockerfile:1.21.0@sha256:27f9262d43452075f3c410287a2c43f5ef1bf7ec2bb06e8c9eeb1b8d453087bc
+# syntax=docker/dockerfile:1.26.0@sha256:ecfaec9ed6d810b56388c508f4121597bfbba70d41a6dfeee4d8cad5f295fc32
 
 ARG BASE_IMAGE_TYPE=slim
 
 # --------------------------------------
 # slim image
 # --------------------------------------
-FROM ghcr.io/renovatebot/base-image:13.2.0@sha256:bf0611b3d9b83b0d7f1f60197389b3c5338663a292fb6b1762b5c5199e2f5cdc AS slim-base
+FROM ghcr.io/renovatebot/base-image:13.87.3@sha256:896e3d249b519b32f972f23c7a921f9ddab8332da759ce818304c0970430e236 AS slim-base
 
 # --------------------------------------
 # full image
 # --------------------------------------
-FROM ghcr.io/renovatebot/base-image:13.2.0-full@sha256:a7457b9784dc8957a0c8df4f8fbfd4b56e304e0f3ef66dfdbd8170c51c301cdf AS full-base
+FROM ghcr.io/renovatebot/base-image:13.87.3-full@sha256:df774ea81f71d283348ae21ca59c1c7724e046240655aa82717719763aa7030a AS full-base
 
 ENV RENOVATE_BINARY_SOURCE=global
 
 # --------------------------------------
 # build image
 # --------------------------------------
-FROM --platform=$BUILDPLATFORM ghcr.io/renovatebot/base-image:13.2.0@sha256:bf0611b3d9b83b0d7f1f60197389b3c5338663a292fb6b1762b5c5199e2f5cdc AS build
+FROM --platform=$BUILDPLATFORM ghcr.io/renovatebot/base-image:13.87.3@sha256:896e3d249b519b32f972f23c7a921f9ddab8332da759ce818304c0970430e236 AS build
 
 # We want a specific node version here
 # renovate: datasource=github-releases packageName=containerbase/node-prebuild versioning=node
-RUN install-tool node 24.13.0
+RUN install-tool node 24.19.0
 
 # corepack is too buggy 😞
 # renovate: datasource=npm
-RUN install-tool pnpm 10.28.2
+RUN install-tool pnpm 11.21.0
 
 WORKDIR /usr/local/renovate
 
@@ -52,8 +52,8 @@ RUN set -ex; \
   true
 
 # prepare pnpm env
-ENV CI=1 npm_config_modules_cache_max_age=0 \
-  npm_config_loglevel=info
+ENV CI=1 pnpm_config_modules_cache_max_age=0 \
+  pnpm_config_loglevel=info
 
 # replace `amd64` with `x64` for `node`
 ENV ARCH=${TARGETARCH/amd64/x64}
@@ -61,9 +61,9 @@ ENV ARCH=${TARGETARCH/amd64/x64}
 # set `npm_config_platform_arch` for `install-artifact-from-github`
 ENV npm_config_arch=${ARCH} npm_config_platform_arch=${ARCH}
 
-COPY --link .npmrc ./
 COPY --link patches ./patches
 COPY --link pnpm-lock.yaml ./
+COPY --link pnpm-workspace.yaml ./
 
 # only fetch deps from lockfile https://pnpm.io/cli/fetch
 RUN set -ex; \
@@ -75,7 +75,7 @@ COPY --link . ./
 # install npm packages
 RUN set -ex; \
   pnpm install --prod --offline --ignore-scripts; \
-  pnpm rebuild re2 better-sqlite3; \
+  pnpm rebuild re2; \
   true
 
 # --------------------------------------
@@ -110,7 +110,7 @@ RUN mkdir -p /tmp/renovate/cache/renovate/repository /runner/cache/renovate/repo
 RUN set -ex; \
   renovate --version; \
   pushd /usr/local/renovate/; \
-  node -e "new require('re2')('.*').exec('test');new require('better-sqlite3')(':memory:')"; \
+  node -e "new require('re2')('.*').exec('test')"; \
   true
 
 LABEL \

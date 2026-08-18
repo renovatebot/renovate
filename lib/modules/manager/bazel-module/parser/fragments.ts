@@ -1,4 +1,5 @@
-import { z } from 'zod';
+import { isString } from '@sindresorhus/is';
+import { z } from 'zod/v4';
 import {
   LooseArray,
   LooseRecord,
@@ -126,7 +127,7 @@ export function boolean(value: string | boolean): BooleanFragment {
   return {
     type: 'boolean',
     isComplete: true,
-    value: typeof value === 'string' ? starlark.asBoolean(value) : value,
+    value: isString(value) ? starlark.asBoolean(value) : value,
   };
 }
 

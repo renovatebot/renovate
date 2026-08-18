@@ -1,12 +1,13 @@
+import { hostRules } from '~test/host-rules.ts';
 import * as httpMock from '~test/http-mock.ts';
-import { git, hostRules, logger } from '~test/util.ts';
+import { git, logger } from '~test/util.ts';
+import { GlobalConfig } from '../../../config/global.ts';
+import { InheritConfig } from '../../../config/inherit.ts';
 import * as memCache from '../../../util/cache/memory/index.ts';
 import { setBaseUrl } from '../../../util/http/bitbucket.ts';
 import type { PlatformResult, RepoParams } from '../types.ts';
 import * as bitbucket from './index.ts';
 import type { PrTask } from './schema.ts';
-
-vi.mock('../../../util/host-rules.ts');
 
 const baseUrl = 'https://api.bitbucket.org';
 
@@ -18,14 +19,14 @@ const pr = {
   summary: { raw: 'summary' },
   state: 'OPEN',
   created_on: '2018-07-02T07:02:25.275030+00:00',
+  draft: false,
 };
 
 describe('modules/platform/bitbucket/index', () => {
   beforeEach(() => {
     git.branchExists.mockReturnValue(true);
     git.isBranchBehindBase.mockResolvedValue(false);
-    hostRules.clear();
-    hostRules.find.mockReturnValue({
+    hostRules.add({
       username: 'abc',
       password: '123',
     });
@@ -34,6 +35,8 @@ describe('modules/platform/bitbucket/index', () => {
 
     setBaseUrl(baseUrl);
     memCache.init();
+    GlobalConfig.reset();
+    InheritConfig.reset();
   });
 
   async function initRepoMock(
@@ -63,7 +66,9 @@ describe('modules/platform/bitbucket/index', () => {
   describe('initPlatform()', () => {
     it('should throw if no token or username/password', async () => {
       expect.assertions(1);
-      await expect(bitbucket.initPlatform({})).rejects.toThrow();
+      await expect(bitbucket.initPlatform({})).rejects.toThrow(
+        'Init: You must configure either a Bitbucket token or username and',
+      );
     });
 
     it('should show warning message if custom endpoint', async () => {
@@ -74,7 +79,11 @@ describe('modules/platform/bitbucket/index', () => {
       });
 
       expect(logger.logger.warn).toHaveBeenCalledWith(
-        'Init: Bitbucket Cloud endpoint should generally be https://api.bitbucket.org/ but is being configured to a different value. Did you mean to use Bitbucket Server?',
+        {
+          endpoint: 'endpoint',
+          defaultEndpoint: 'https://api.bitbucket.org/',
+        },
+        'Init: Bitbucket Cloud endpoint should generally be the default but is being configured to a different value. Did you mean to use Bitbucket Server?',
       );
     });
 
@@ -122,7 +131,14 @@ describe('modules/platform/bitbucket/index', () => {
     it('returns repos', async () => {
       httpMock
         .scope(baseUrl)
-        .get('/2.0/repositories?role=contributor&pagelen=100')
+        .get('/2.0/user/workspaces?pagelen=100')
+        .reply(200, {
+          values: [
+            { workspace: { slug: 'foo' } },
+            { workspace: { slug: 'some' } },
+          ],
+        })
+        .get('/2.0/repositories/foo?pagelen=100')
         .reply(200, {
           values: [
             {
@@ -130,6 +146,11 @@ describe('modules/platform/bitbucket/index', () => {
               uuid: '111',
               full_name: 'foo/bar',
             },
+          ],
+        })
+        .get('/2.0/repositories/some?pagelen=100')
+        .reply(200, {
+          values: [
             {
               mainbranch: { name: 'master' },
               uuid: '222',
@@ -141,16 +162,37 @@ describe('modules/platform/bitbucket/index', () => {
       expect(res).toEqual(['foo/bar', 'some/repo']);
     });
 
-    it('filters repos based on autodiscoverProjects patterns', async () => {
+    it('uses configured namespaces directly without fetching workspaces', async () => {
       httpMock
         .scope(baseUrl)
-        .get('/2.0/repositories?role=contributor&pagelen=100')
+        .get('/2.0/repositories/foo?pagelen=100')
         .reply(200, {
           values: [
             {
               mainbranch: { name: 'master' },
               uuid: '111',
               full_name: 'foo/bar',
+            },
+          ],
+        });
+      const res = await bitbucket.getRepos({ namespaces: ['foo'] });
+      expect(res).toEqual(['foo/bar']);
+    });
+
+    it('filters repos based on autodiscoverProjects patterns', async () => {
+      httpMock
+        .scope(baseUrl)
+        .get('/2.0/user/workspaces?pagelen=100')
+        .reply(200, {
+          values: [{ workspace: { slug: 'some' } }],
+        })
+        .get('/2.0/repositories/some?pagelen=100')
+        .reply(200, {
+          values: [
+            {
+              mainbranch: { name: 'master' },
+              uuid: '111',
+              full_name: 'some/bar',
               project: { name: 'ignore' },
             },
             {
@@ -168,7 +210,11 @@ describe('modules/platform/bitbucket/index', () => {
     it('filters repos based on autodiscoverProjects patterns with negation', async () => {
       httpMock
         .scope(baseUrl)
-        .get('/2.0/repositories?role=contributor&pagelen=100')
+        .get('/2.0/user/workspaces?pagelen=100')
+        .reply(200, {
+          values: [{ workspace: { slug: 'foo' } }],
+        })
+        .get('/2.0/repositories/foo?pagelen=100')
         .reply(200, {
           values: [
             {
@@ -213,7 +259,7 @@ describe('modules/platform/bitbucket/index', () => {
 
     it('works with only API token', async () => {
       hostRules.clear();
-      hostRules.find.mockReturnValue({
+      hostRules.add({
         password: 'ATATIAMACONTAINERTOKEN3407361359',
       });
       httpMock
@@ -237,7 +283,7 @@ describe('modules/platform/bitbucket/index', () => {
 
     it('works with only access token', async () => {
       hostRules.clear();
-      hostRules.find.mockReturnValue({
+      hostRules.add({
         token: 'abc',
       });
       httpMock
@@ -262,6 +308,9 @@ describe('modules/platform/bitbucket/index', () => {
 
   describe('bbUseDevelopmentBranch', () => {
     it('not enabled: defaults to using main branch', async () => {
+      GlobalConfig.set({
+        bbUseDevelopmentBranch: false,
+      });
       httpMock
         .scope(baseUrl)
         .get('/2.0/repositories/some/repo')
@@ -273,13 +322,18 @@ describe('modules/platform/bitbucket/index', () => {
 
       const res = await bitbucket.initRepo({
         repository: 'some/repo',
-        bbUseDevelopmentBranch: false,
       });
 
       expect(res.defaultBranch).toBe('master');
     });
 
     it('enabled: uses development branch when development branch exists', async () => {
+      GlobalConfig.set({
+        bbUseDevelopmentBranch: false,
+      });
+      InheritConfig.set({
+        bbUseDevelopmentBranch: true,
+      });
       httpMock
         .scope(baseUrl)
         .get('/2.0/repositories/some/repo')
@@ -295,13 +349,15 @@ describe('modules/platform/bitbucket/index', () => {
 
       const res = await bitbucket.initRepo({
         repository: 'some/repo',
-        bbUseDevelopmentBranch: true,
       });
 
       expect(res.defaultBranch).toBe('develop');
     });
 
     it('enabled: falls back to mainbranch if development branch does not exist', async () => {
+      GlobalConfig.set({
+        bbUseDevelopmentBranch: true,
+      });
       httpMock
         .scope(baseUrl)
         .get('/2.0/repositories/some/repo')
@@ -317,7 +373,6 @@ describe('modules/platform/bitbucket/index', () => {
 
       const res = await bitbucket.initRepo({
         repository: 'some/repo',
-        bbUseDevelopmentBranch: true,
       });
 
       expect(res.defaultBranch).toBe('master');
@@ -1122,6 +1177,36 @@ describe('modules/platform/bitbucket/index', () => {
         platformPrOptions: {
           bbUseDefaultReviewers: true,
         },
+        draftPR: false,
+      });
+      expect(pr?.number).toBe(5);
+    });
+
+    it('posts draft PR', async () => {
+      const scope = await initRepoMock();
+      scope
+        .get(
+          '/2.0/repositories/some/repo/effective-default-reviewers?pagelen=100',
+        )
+        .reply(200, {
+          values: [],
+        })
+        .post('/2.0/repositories/some/repo/pullrequests')
+        .reply(200, { id: 5 })
+        .get(`/2.0/repositories/some/repo/pullrequests`)
+        .query(true)
+        .reply(200, {
+          values: [{ id: 5 }],
+        });
+      const pr = await bitbucket.createPr({
+        sourceBranch: 'branch',
+        targetBranch: 'master',
+        prTitle: 'title',
+        prBody: 'body',
+        platformPrOptions: {
+          bbUseDefaultReviewers: true,
+        },
+        draftPR: true,
       });
       expect(pr?.number).toBe(5);
     });
@@ -1315,7 +1400,9 @@ describe('modules/platform/bitbucket/index', () => {
             bbUseDefaultReviewers: true,
           },
         }),
-      ).rejects.toThrow('Response code 401 (Unauthorized)');
+      ).rejects.toThrow(
+        'Request failed with status code 401 (Unauthorized): GET https://api.bitbucket.org/2.0/workspaces/some/members/%7Bd2238482-2e9f-48b3-8630-de22ccb9e42f%7D',
+      );
     });
 
     it('removes reviewer if they are also the author of the pr', async () => {
@@ -1409,7 +1496,9 @@ describe('modules/platform/bitbucket/index', () => {
             bbUseDefaultReviewers: true,
           },
         }),
-      ).rejects.toThrow('Response code 400 (Bad Request)');
+      ).rejects.toThrow(
+        'Request failed with status code 400 (Bad Request): POST https://api.bitbucket.org/2.0/repositories/some/repo/pullrequests',
+      );
     });
 
     it('rethrows exception when PR create error not due to reviewers field', async () => {
@@ -1448,7 +1537,9 @@ describe('modules/platform/bitbucket/index', () => {
             bbUseDefaultReviewers: true,
           },
         }),
-      ).rejects.toThrow('Response code 400 (Bad Request)');
+      ).rejects.toThrow(
+        'Request failed with status code 400 (Bad Request): POST https://api.bitbucket.org/2.0/repositories/some/repo/pullrequests',
+      );
     });
 
     it('lists PR tasks and resolves the unresolved tasks', async () => {
@@ -1626,11 +1717,11 @@ describe('modules/platform/bitbucket/index', () => {
         })
         .get('/2.0/repositories/some/repo/pullrequests/5')
         .reply(200, pr);
-      expect(await bitbucket.getPr(3)).toMatchSnapshot();
+      expect(await bitbucket.getPr(3)).toMatchSnapshot('getPr(3)');
 
-      expect(await bitbucket.getPr(5)).toMatchSnapshot();
+      expect(await bitbucket.getPr(5)).toMatchSnapshot('getPr(5)');
 
-      expect(await bitbucket.getPr(5)).toMatchSnapshot();
+      expect(await bitbucket.getPr(5)).toMatchSnapshot('getPr(5) repeated');
     });
 
     it('reviewers', async () => {
@@ -1667,6 +1758,22 @@ describe('modules/platform/bitbucket/index', () => {
         '\n\n</details>\n\n</blockquote>\n</details>';
 
       expect(bitbucket.massageMarkdown(prBody)).toMatchSnapshot();
+    });
+
+    it('updates pull request url links', () => {
+      const prBody = '[Some pull request](../pull/123)';
+
+      expect(bitbucket.massageMarkdown(prBody)).toEqual(
+        '[Some pull request](../../pull-requests/123)',
+      );
+    });
+
+    it('updates issues url links', () => {
+      const prBody = '[Some issue](../issues/123)';
+
+      expect(bitbucket.massageMarkdown(prBody)).toEqual(
+        '[Some issue](../../issues/123)',
+      );
     });
 
     it('dependency dashboard: updates abandoned dependencies heading and place note inside', () => {
@@ -1971,7 +2078,9 @@ describe('modules/platform/bitbucket/index', () => {
         .reply(401);
       await expect(() =>
         bitbucket.updatePr({ number: 5, prTitle: 'title', prBody: 'body' }),
-      ).rejects.toThrow('Response code 401 (Unauthorized)');
+      ).rejects.toThrow(
+        'Request failed with status code 401 (Unauthorized): GET https://api.bitbucket.org/2.0/workspaces/some/members/%7Bd2238482-2e9f-48b3-8630-de22ccb9e42f%7D',
+      );
     });
 
     it('rethrows exception when PR update error due to unknown reviewers error', async () => {
@@ -2021,7 +2130,9 @@ describe('modules/platform/bitbucket/index', () => {
         });
       await expect(() =>
         bitbucket.updatePr({ number: 5, prTitle: 'title', prBody: 'body' }),
-      ).rejects.toThrow('Response code 400 (Bad Request)');
+      ).rejects.toThrow(
+        'Request failed with status code 400 (Bad Request): PUT https://api.bitbucket.org/2.0/repositories/some/repo/pullrequests/5',
+      );
     });
 
     it('throws an error on failure to get current list of reviewers', async () => {
@@ -2304,7 +2415,9 @@ describe('modules/platform/bitbucket/index', () => {
       scope
         .get('/2.0/repositories/some/repo/src/HEAD/file.json')
         .reply(200, '!@#');
-      await expect(bitbucket.getJsonFile('file.json')).rejects.toThrow();
+      await expect(bitbucket.getJsonFile('file.json')).rejects.toThrow(
+        "JSON5: invalid character '!' at 1:1",
+      );
     });
 
     it('throws on errors', async () => {
@@ -2312,7 +2425,9 @@ describe('modules/platform/bitbucket/index', () => {
       scope
         .get('/2.0/repositories/some/repo/src/HEAD/file.json')
         .replyWithError('some error');
-      await expect(bitbucket.getJsonFile('file.json')).rejects.toThrow();
+      await expect(bitbucket.getJsonFile('file.json')).rejects.toThrow(
+        'some error',
+      );
     });
   });
 });

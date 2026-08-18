@@ -29,6 +29,7 @@ async function getPackageJsonConstraint(
   const pkgJson = await pkg.getValue();
   if (pkgJson.volta?.node) {
     const constraint = pkgJson.volta.node;
+    // v8 ignore else -- TODO: add test #40625
     if (semver.validRange(constraint)) {
       logger.debug(
         `Using node constraint "${constraint}" from package.json volta`,
@@ -38,6 +39,7 @@ async function getPackageJsonConstraint(
   }
   if (pkgJson.engines?.node) {
     const constraint = pkgJson.engines.node;
+    // v8 ignore else -- TODO: add test #40625
     if (semver.validRange(constraint)) {
       logger.debug(
         `Using node constraint "${constraint}" from package.json engines`,

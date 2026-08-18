@@ -1,6 +1,7 @@
 import upath from 'upath';
 import { logger } from '../../../logger/index.ts';
 import { isNotNullOrUndefined } from '../../../util/array.ts';
+import { regEx } from '../../../util/regex.ts';
 import { LooseArray } from '../../../util/schema-utils/index.ts';
 import { getDep } from '../dockerfile/extract.ts';
 import type {
@@ -9,6 +10,7 @@ import type {
   PackageFileContent,
 } from '../types.ts';
 import * as bazelrc from './bazelrc.ts';
+import { RuleToCratePackageDep } from './parser/crate.ts';
 import type { ResultFragment } from './parser/fragments.ts';
 import { parse } from './parser/index.ts';
 import { RuleToMavenPackageDep, fillRegistryUrls } from './parser/maven.ts';
@@ -47,6 +49,7 @@ export async function extractPackageFile(
       )
       .parse(records);
     const rulesImgDeps = transformRulesImgCalls(records);
+    const crateDeps = LooseArray(RuleToCratePackageDep).parse(records);
 
     if (gitRepositoryDeps.length) {
       pfc.deps.push(...gitRepositoryDeps);
@@ -62,6 +65,10 @@ export async function extractPackageFile(
 
     if (rulesImgDeps.length) {
       pfc.deps.push(...rulesImgDeps);
+    }
+
+    if (crateDeps.length) {
+      pfc.deps.push(...crateDeps);
     }
 
     return pfc.deps.length ? pfc : null;
@@ -84,6 +91,7 @@ async function extractBazelPfc(
     // Ignore any entries for custom configurations
     .filter((ce) => ce.config === undefined)
     .map((ce) => ce.getOption('registry')?.value)
+    .map((url) => url?.replace(regEx(/^["']|["']$/g), ''))
     .filter(isNotNullOrUndefined);
   if (registryUrls.length) {
     pfc.registryUrls = registryUrls;

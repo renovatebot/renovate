@@ -5,7 +5,7 @@ import { logger } from '../../../../logger/index.ts';
 import { extractPackageFile } from '../../../../modules/manager/index.ts';
 import type { PackageDependency } from '../../../../modules/manager/types.ts';
 import { writeLocalFile } from '../../../../util/fs/index.ts';
-import { escapeRegExp, regEx } from '../../../../util/regex.ts';
+import { regEx } from '../../../../util/regex.ts';
 import { matchAt, replaceAt } from '../../../../util/string.ts';
 import { compile } from '../../../../util/template/index.ts';
 import type { BranchUpgradeConfig } from '../../../types.ts';
@@ -90,17 +90,37 @@ export async function confirmIfDepUpdated(
   }
 
   if (upgrade.newValue && upgrade.newValue !== newUpgrade.currentValue) {
-    logger.debug(
-      {
-        depName: upgrade.depName,
-        manager,
-        packageFile,
-        expectedValue: upgrade.newValue,
-        foundValue: newUpgrade.currentValue,
-      },
-      'Value is not updated',
-    );
-    return false;
+    // accept reshaped values produced by autoReplaceStringTemplate
+    let templateMatchesExtractedValue = false;
+    if (upgrade.autoReplaceStringTemplate) {
+      try {
+        const compiledValue = compile(
+          upgrade.autoReplaceStringTemplate,
+          upgrade,
+          false,
+        );
+        templateMatchesExtractedValue =
+          compiledValue === newUpgrade.currentValue;
+      } catch (err) {
+        logger.debug(
+          { err, manager, packageFile },
+          'Failed to compile autoReplaceStringTemplate in confirmIfDepUpdated',
+        );
+      }
+    }
+    if (!templateMatchesExtractedValue) {
+      logger.debug(
+        {
+          depName: upgrade.depName,
+          manager,
+          packageFile,
+          expectedValue: upgrade.newValue,
+          foundValue: newUpgrade.currentValue,
+        },
+        'Value is not updated',
+      );
+      return false;
+    }
   }
 
   if (
@@ -225,12 +245,31 @@ export async function doAutoReplace(
   if (reuseExistingBranch) {
     return await checkExistingBranch(upgrade, existingContent);
   }
-  const replaceWithoutReplaceString =
+  const valueChanging =
+    isString(currentValue) && isString(newValue) && currentValue !== newValue;
+  const digestChanging =
+    isString(currentDigest) &&
+    isString(newDigest) &&
+    currentDigest !== newDigest;
+  let replaceWithoutReplaceString =
     isString(newName) &&
     newName !== depName &&
     (isUndefined(upgrade.replaceString) ||
       !upgrade.replaceString?.includes(depName!));
-  const replaceString = upgrade.replaceString ?? currentValue ?? currentDigest;
+  // fallback must contain the field being updated, else the replacement is
+  // a no-op for managers where value and digest live in separate tokens
+  let replaceString = upgrade.replaceString;
+  if (isUndefined(replaceString)) {
+    if (valueChanging && digestChanging) {
+      // no single fallback covers both — use the per-field path
+      replaceWithoutReplaceString = true;
+      replaceString = currentValue;
+    } else if (digestChanging) {
+      replaceString = currentDigest;
+    } else {
+      replaceString = currentValue ?? currentDigest;
+    }
+  }
   logger.trace({ depName, replaceString }, 'autoReplace replaceString');
   let searchIndex: number;
   if (replaceWithoutReplaceString) {
@@ -261,7 +300,7 @@ export async function doAutoReplace(
           );
         }
         newString = newString.replace(
-          regEx(escapeRegExp(currentValue), autoReplaceRegExpFlag),
+          regEx(RegExp.escape(currentValue), autoReplaceRegExpFlag),
           newValue,
         );
       }
@@ -273,7 +312,7 @@ export async function doAutoReplace(
           );
         }
         newString = newString.replace(
-          regEx(escapeRegExp(depName), autoReplaceRegExpFlag),
+          regEx(RegExp.escape(depName), autoReplaceRegExpFlag),
           newName,
         );
       }
@@ -285,7 +324,7 @@ export async function doAutoReplace(
           );
         }
         newString = newString.replace(
-          regEx(escapeRegExp(currentDigest), autoReplaceRegExpFlag),
+          regEx(RegExp.escape(currentDigest), autoReplaceRegExpFlag),
           newDigest,
         );
       } else if (
@@ -304,7 +343,7 @@ export async function doAutoReplace(
           );
         }
         newString = newString.replace(
-          regEx(escapeRegExp(currentDigestShort), autoReplaceRegExpFlag),
+          regEx(RegExp.escape(currentDigestShort), autoReplaceRegExpFlag),
           newDigest,
         );
       }

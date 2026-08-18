@@ -1,4 +1,5 @@
-import { fs, git, hostRules } from '~test/util.ts';
+import { hostRules } from '~test/host-rules.ts';
+import { fs, git } from '~test/util.ts';
 import { GlobalConfig } from '../../../../../config/global.ts';
 import * as lockFiles from '../../../../../modules/manager/npm/post-update/index.ts';
 import * as npm from '../../../../../modules/manager/npm/post-update/npm.ts';
@@ -12,7 +13,6 @@ const config: PostUpdateConfig = {
 };
 
 vi.mock('../../../../../util/fs/index.ts');
-vi.mock('../../../../../util/host-rules.ts');
 
 const { writeUpdatedPackageFiles, getAdditionalFiles } = lockFiles;
 
@@ -22,9 +22,7 @@ describe('workers/repository/update/branch/lock-files/index', () => {
       GlobalConfig.set({
         localDir: 'some-tmp-dir',
       });
-      hostRules.find.mockImplementation((_) => ({
-        token: 'abc',
-      }));
+      hostRules.add({ token: 'abc' });
     });
 
     it('returns if no updated packageFiles', async () => {
@@ -90,7 +88,11 @@ describe('workers/repository/update/branch/lock-files/index', () => {
     it('returns no error and empty lockfiles if skipArtifactsUpdate is true', async () => {
       config.skipArtifactsUpdate = true;
       const res = await getAdditionalFiles(config, { npm: [{}] });
-      expect(res).toEqual({ artifactErrors: [], updatedArtifacts: [] });
+      expect(res).toEqual({
+        artifactErrors: [],
+        artifactNotices: [],
+        updatedArtifacts: [],
+      });
     });
 
     it('returns no error and empty lockfiles if lock file maintenance exists', async () => {
@@ -98,7 +100,11 @@ describe('workers/repository/update/branch/lock-files/index', () => {
       config.reuseExistingBranch = true;
       git.branchExists.mockReturnValueOnce(true);
       const res = await getAdditionalFiles(config, { npm: [{}] });
-      expect(res).toEqual({ artifactErrors: [], updatedArtifacts: [] });
+      expect(res).toEqual({
+        artifactErrors: [],
+        artifactNotices: [],
+        updatedArtifacts: [],
+      });
     });
   });
 });

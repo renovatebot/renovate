@@ -21,12 +21,12 @@ export async function extractAllDependencies(
   const extractList: WorkerExtractConfig[] = [];
   const fileList = await scm.getFileList();
 
-  const tryConfig = (managerConfig: ManagerConfig): void => {
+  function tryConfig(managerConfig: ManagerConfig): void {
     const matchingFileList = getMatchingFiles(managerConfig, fileList);
     if (matchingFileList.length) {
       extractList.push({ ...managerConfig, fileList: matchingFileList });
     }
-  };
+  }
 
   instrument('filter packageFiles for managers', () => {
     for (const manager of managerList) {
@@ -73,8 +73,16 @@ export async function extractAllDependencies(
   // De-duplicate results using supersedesManagers
   processSupersedesManagers(extractResults);
 
+  // Sort alphabetically for stable log output. See #40091
+  const sortedExtractDurations = Object.keys(extractDurations)
+    .sort()
+    .reduce<Record<string, number>>((acc, key) => {
+      acc[key] = extractDurations[key];
+      return acc;
+    }, {});
+
   logger.debug(
-    { managers: extractDurations },
+    { managers: sortedExtractDurations },
     'manager extract durations (ms)',
   );
   let fileCount = 0;

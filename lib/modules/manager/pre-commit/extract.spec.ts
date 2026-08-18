@@ -1,12 +1,10 @@
-import { mockDeep } from 'vitest-mock-extended';
+import { codeBlock } from 'common-tags';
 import { Fixtures } from '~test/fixtures.ts';
-import { hostRules } from '~test/util.ts';
+import { hostRules } from '~test/host-rules.ts';
 import { GoDatasource } from '../../datasource/go/index.ts';
 import { NpmDatasource } from '../../datasource/npm/index.ts';
 import { PypiDatasource } from '../../datasource/pypi/index.ts';
 import { extractPackageFile } from './index.ts';
-
-vi.mock('../../../util/host-rules.ts', () => mockDeep());
 
 const filename = '.pre-commit.yaml';
 
@@ -22,6 +20,29 @@ const invalidRepoPrecommitConfig = Fixtures.get(
 const enterpriseGitPrecommitConfig = Fixtures.get(
   'enterprise.pre-commit-config.yaml',
 );
+const pinnedPrecommitConfig = codeBlock`
+  failfast: true
+  repos:
+    - repo: https://github.com/pre-commit/pre-commit-hooks
+      rev: v4.4.0
+      hooks:
+        - id: check-yaml
+
+    - repo: https://github.com/pre-commit/mirrors-prettier
+      rev: 6fd1ced85fc139abd7f5ab4f3d78dab37592cd5e # frozen: v3.0.0-alpha.9-for-vscode
+      hooks:
+        - id: prettier
+
+    - repo: https://github.com/crate-ci/typos
+      rev: 20b36ca07fa1bfe124912287ac8502cf12f140e6  # frozen: v1.14.12
+      hooks:
+        - id: typos
+
+    - repo: https://github.com/python-jsonschema/check-jsonschema
+      rev: a00caac4f0cec045f7f67d222c3fcd0744285c51 # frozen: 0.23.1
+      hooks:
+        - id: check-renovate
+`;
 
 describe('modules/manager/pre-commit/extract', () => {
   describe('extractPackageFile()', () => {
@@ -104,6 +125,16 @@ describe('modules/manager/pre-commit/extract', () => {
             currentValue: 'v42.0',
             registryUrls: ['https://gitlab.mycompany.com'],
           },
+          {
+            depName: 'forgejo/runner',
+            currentValue: 'v12.13.0',
+            registryUrls: ['https://code.forgejo.org'],
+          },
+          {
+            depName: 'gherynos/pre-commit-java',
+            currentValue: 'v0.6.37',
+            registryUrls: ['https://codeberg.org'],
+          },
           { depName: 'prettier/pre-commit', currentValue: 'v2.1.2' },
           { depName: 'prettier/pre-commit', currentValue: 'v2.1.2' },
           { depName: 'pre-commit/pre-commit-hooks', currentValue: 'v5.0.0' },
@@ -135,12 +166,17 @@ describe('modules/manager/pre-commit/extract', () => {
     });
 
     it('can handle private git repos', () => {
+      // a real host rule cannot simultaneously match the url-only query and
+      // miss the github-scoped query, so spy to reach the gitlab loop branch
+      const find = vi.spyOn(hostRules, 'find');
       // url only
-      hostRules.find.mockReturnValueOnce({ token: 'value1' });
+      find.mockReturnValueOnce({ token: 'value1' });
+      // hostType=forgejo
+      find.mockReturnValueOnce({});
       // hostType=github
-      hostRules.find.mockReturnValueOnce({});
+      find.mockReturnValueOnce({});
       // hostType=gitlab
-      hostRules.find.mockReturnValueOnce({ token: 'value' });
+      find.mockReturnValueOnce({ token: 'value' });
       const result = extractPackageFile(enterpriseGitPrecommitConfig, filename);
       expect(result).toEqual({
         deps: [
@@ -157,7 +193,6 @@ describe('modules/manager/pre-commit/extract', () => {
     });
 
     it('can handle invalid private git repos', () => {
-      hostRules.find.mockReturnValue({});
       const result = extractPackageFile(enterpriseGitPrecommitConfig, filename);
       expect(result).toEqual({
         deps: [
@@ -174,10 +209,13 @@ describe('modules/manager/pre-commit/extract', () => {
     });
 
     it('can handle unknown private git repos', () => {
-      // First attemp returns a result
-      hostRules.find.mockReturnValueOnce({ token: 'value' });
+      // a real host rule cannot match the url-only query while missing all
+      // hostType-scoped queries, so spy to reach the loop fall-through
+      const find = vi.spyOn(hostRules, 'find');
+      // First attempt returns a result
+      find.mockReturnValueOnce({ token: 'value' });
       // But all subsequent checks (those with hostType), then fail:
-      hostRules.find.mockReturnValue({});
+      find.mockReturnValue({});
       const result = extractPackageFile(enterpriseGitPrecommitConfig, filename);
       expect(result).toEqual({
         deps: [
@@ -188,6 +226,54 @@ describe('modules/manager/pre-commit/extract', () => {
             packageName: 'pre-commit/pre-commit-hooks',
             registryUrls: ['enterprise.com'],
             skipReason: 'unknown-registry',
+          },
+        ],
+      });
+    });
+
+    it('can handle pinned repo versions', () => {
+      const result = extractPackageFile(pinnedPrecommitConfig, filename);
+      expect(result).toEqual({
+        deps: [
+          {
+            currentValue: 'v4.4.0',
+            datasource: 'github-tags',
+            depName: 'pre-commit/pre-commit-hooks',
+            depType: 'repository',
+            packageName: 'pre-commit/pre-commit-hooks',
+          },
+          {
+            autoReplaceStringTemplate: '{{newDigest}} # frozen: {{newValue}}',
+            currentValue: 'v3.0.0-alpha.9-for-vscode',
+            currentDigest: '6fd1ced85fc139abd7f5ab4f3d78dab37592cd5e',
+            datasource: 'github-tags',
+            depName: 'pre-commit/mirrors-prettier',
+            depType: 'repository',
+            packageName: 'pre-commit/mirrors-prettier',
+            replaceString:
+              '6fd1ced85fc139abd7f5ab4f3d78dab37592cd5e # frozen: v3.0.0-alpha.9-for-vscode',
+          },
+          {
+            autoReplaceStringTemplate: '{{newDigest}}  # frozen: {{newValue}}',
+            currentValue: 'v1.14.12',
+            currentDigest: '20b36ca07fa1bfe124912287ac8502cf12f140e6',
+            datasource: 'github-tags',
+            depName: 'crate-ci/typos',
+            depType: 'repository',
+            packageName: 'crate-ci/typos',
+            replaceString:
+              '20b36ca07fa1bfe124912287ac8502cf12f140e6  # frozen: v1.14.12',
+          },
+          {
+            autoReplaceStringTemplate: '{{newDigest}} # frozen: {{newValue}}',
+            currentValue: '0.23.1',
+            currentDigest: 'a00caac4f0cec045f7f67d222c3fcd0744285c51',
+            datasource: 'github-tags',
+            depName: 'python-jsonschema/check-jsonschema',
+            depType: 'repository',
+            packageName: 'python-jsonschema/check-jsonschema',
+            replaceString:
+              'a00caac4f0cec045f7f67d222c3fcd0744285c51 # frozen: 0.23.1',
           },
         ],
       });

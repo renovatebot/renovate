@@ -1,5 +1,6 @@
 import { Fixtures } from '~test/fixtures.ts';
 import * as httpMock from '~test/http-mock.ts';
+import { partial } from '~test/util.ts';
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages.ts';
 import type { Http } from '../../../util/http/index.ts';
 import { range } from '../../../util/range.ts';
@@ -562,11 +563,11 @@ describe('modules/datasource/java-version/index', () => {
   describe('getAdoptiumReleases', () => {
     it('re-throws non-HttpError', async () => {
       const mockHttp = {
-        getJsonUnchecked: vi.fn().mockRejectedValue(new Error('unexpected')),
-      } as unknown as Http;
+        getJson: vi.fn().mockRejectedValue(new Error('unexpected')),
+      };
 
       await expect(
-        getAdoptiumReleases(mockHttp, {
+        getAdoptiumReleases(partial<Http>(mockHttp), {
           vendor: 'adoptium',
           imageType: 'jdk',
           architecture: null,
@@ -580,11 +581,11 @@ describe('modules/datasource/java-version/index', () => {
     it('re-throws non-HttpError', async () => {
       const mockHttp = {
         getJson: vi.fn().mockRejectedValue(new Error('unexpected')),
-      } as unknown as Http;
+      };
 
       await expect(
         getGraalvmReleases(
-          mockHttp,
+          partial<Http>(mockHttp),
           {
             vendor: 'oracle-graalvm',
             imageType: 'jdk',

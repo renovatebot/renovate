@@ -6,7 +6,7 @@ import {
 } from 'emojibase';
 import emojibaseEmojiRegex from 'emojibase-regex/emoji.js';
 import SHORTCODE_REGEX from 'emojibase-regex/shortcode.js';
-import { z } from 'zod';
+import { z } from 'zod/v4';
 import type { RenovateConfig } from '../config/types.ts';
 import dataFiles from '../data-files.generated.ts';
 import { logger } from '../logger/index.ts';
@@ -27,14 +27,14 @@ const EmojiShortcodes = Json.pipe(
     z.union([z.string().transform((val) => [val]), z.array(z.string())]),
   ),
 );
-type EmojiShortcodeMapping = z.infer<typeof EmojiShortcodes>;
+type EmojiShortcodes = z.infer<typeof EmojiShortcodes>;
 
-const patchedEmojis: EmojiShortcodeMapping = {
+const patchedEmojis: EmojiShortcodes = {
   '26A0-FE0F': ['warning'], // Colorful warning (⚠️) instead of black and white (⚠)
   '2139-FE0F': ['information_source'], // Colorful info (ℹ️) instead of black and white (ℹ)
 };
 
-function initMapping(mapping: EmojiShortcodeMapping): void {
+function initMapping(mapping: EmojiShortcodes): void {
   for (const [hex, shortcodes] of Object.entries(mapping)) {
     const mainShortcode = `:${shortcodes[0]}:`;
 
@@ -61,8 +61,8 @@ function lazyInitMappings(): void {
       })
       .onError(
         /* istanbul ignore next */
-        (error) => {
-          logger.warn({ error }, 'Unable to parse emoji shortcodes');
+        (err) => {
+          logger.warn({ err }, 'Unable to parse emoji shortcodes');
         },
       );
   }
@@ -93,7 +93,8 @@ export function emojify(text: string): string {
 const emojiRegexSrc = [emojibaseEmojiRegex, mathiasBynensEmojiRegex()].map(
   (r) => (r as RegExp).source,
 );
-const emojiRegex = new RegExp(`(?:${emojiRegexSrc.join('|')})`, 'g'); // TODO #12875 cannot figure it out
+// oxlint-disable-next-line renovate/require-regex-util -- RE2 compiles this pattern but does not match astral-plane emoji correctly, TODO #12875
+const emojiRegex = new RegExp(`(?:${emojiRegexSrc.join('|')})`, 'g');
 const excludedModifiers = new Set([
   '20E3',
   '200D',

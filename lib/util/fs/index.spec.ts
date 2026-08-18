@@ -3,6 +3,7 @@ import fs from 'fs-extra';
 import type { DirectoryResult } from 'tmp-promise';
 import tmp from 'tmp-promise';
 import upath from 'upath';
+import { logger } from '~test/util.ts';
 import { GlobalConfig } from '../../config/global.ts';
 import {
   cachePathExists,
@@ -31,6 +32,7 @@ import {
   readLocalFile,
   readLocalSymlink,
   readSystemFile,
+  renameCacheFile,
   renameLocalFile,
   rmCache,
   statCacheFile,
@@ -123,6 +125,79 @@ describe('util/fs/index', () => {
     it('returns null if file is not found', async () => {
       expect(await readLocalFile('foobar')).toBeNull();
     });
+
+    it('logs a warning if hidden Unciode characters are found', async () => {
+      await fs.outputFile(`${localDir}/file.txt`, 'some\u00A0content\u200Bfoo');
+      await readLocalFile('file.txt', 'utf8');
+
+      // NOTE that we cannot test that this is called once across multiple `readLocalFile` as we're mocking the logger, so we're testing that it's called, not validating the nubmer of times
+      expect(logger.logger.once.warn).toHaveBeenCalledWith(
+        { file: 'file.txt', hiddenCharacters: '\\u00A0\\u200B' },
+        'Hidden Unicode characters have been discovered in file(s) in your repository. See your Renovate logs for more details. Please confirm that they are intended to be there, as they could be an attempt to "smuggle" text into your codebase, or used to confuse tools like Renovate or Large Language Models (LLMs)',
+      );
+    });
+
+    it('does not log the same hidden Unciode characters if found multiple times', async () => {
+      await fs.outputFile(
+        `${localDir}/file.txt`,
+        'some\u00A0content\u200Bfoo\u200Bbaz',
+      );
+      await readLocalFile('file.txt', 'utf8');
+
+      expect(logger.logger.once.warn).toHaveBeenCalledWith(
+        { file: 'file.txt', hiddenCharacters: '\\u00A0\\u200B' },
+        'Hidden Unicode characters have been discovered in file(s) in your repository. See your Renovate logs for more details. Please confirm that they are intended to be there, as they could be an attempt to "smuggle" text into your codebase, or used to confuse tools like Renovate or Large Language Models (LLMs)',
+      );
+    });
+
+    it('logs a trace message (not warning) if hidden Unicode characters are found in a binary file', async () => {
+      // Create a binary file with null bytes (making it binary) and zero-width space (U+200B)
+      const binaryContent = Buffer.from([
+        0x50, 0x4b, 0x03, 0x04, 0x00, 0x00, 0xe2, 0x80, 0x8b, 0x00,
+      ]); // 0xe2 0x80 0x8b is UTF-8 encoding of U+200B (zero-width space)
+      await fs.outputFile(`${localDir}/binary.zip`, binaryContent);
+      await readLocalFile('binary.zip');
+
+      expect(logger.logger.once.warn).toHaveBeenCalledTimes(0);
+      expect(logger.logger.trace).toHaveBeenCalledWith(
+        {
+          file: 'binary.zip',
+          hiddenCharacters: expect.stringContaining('\\u200B'),
+        },
+        'Hidden Unicode characters discovered in file `binary.zip`, but not logging higher than TRACE as it appears to be a binary file',
+      );
+    });
+
+    // Via https://github.com/renovatebot/renovate/discussions/41381 and https://github.com/renovatebot/renovate/pull/41353, the Byte Order Mark (BOM) character is common on Windows-based platforms
+    describe('if hidden Byte Order Mark (BOM) Unciode characters are found', () => {
+      it('but no other hidden characters, it logs a trace message', async () => {
+        // via https://github.com/Particular/Particular.Packaging/blob/be9e3f4cb60bba9a4dd06dbc9f25fb7ff152e126/src/Particular.Packaging.Tasks/Particular.Packaging.Tasks.csproj
+        await fs.outputFile(
+          `${localDir}/example.csproj`,
+          '\uFEFF<Project Sdk="Microsoft.NET.Sdk">',
+        );
+        await readLocalFile('example.csproj', 'utf8');
+
+        expect(logger.logger.once.warn).toHaveBeenCalledTimes(0);
+        expect(logger.logger.once.trace).toHaveBeenCalledWith(
+          { file: 'example.csproj', hiddenCharacters: '\\uFEFF' },
+          'Hidden Byte Order Mark (BOM) Unicode characters has been discovered in the file `example.csproj`. This is likely safe, if you are using Microsoft Windows, but please confirm that they are intended to be there, as they could be an attempt to "smuggle" text into your codebase, or used to confuse tools like Renovate or Large Language Models (LLMs)',
+        );
+      });
+
+      it('as well as other hidden characters, it logs a warning', async () => {
+        await fs.outputFile(
+          `${localDir}/example.csproj`,
+          '\uFEFF<Project Sdk="Microsoft.NET.Sdk">\u200B',
+        );
+        await readLocalFile('example.csproj', 'utf8');
+
+        expect(logger.logger.once.warn).toHaveBeenCalledWith(
+          { file: 'example.csproj', hiddenCharacters: '\\uFEFF\\u200B' },
+          'Hidden Unicode characters have been discovered in file(s) in your repository. See your Renovate logs for more details. Please confirm that they are intended to be there, as they could be an attempt to "smuggle" text into your codebase, or used to confuse tools like Renovate or Large Language Models (LLMs)',
+        );
+      });
+    });
   });
 
   describe('writeLocalFile', () => {
@@ -138,7 +213,9 @@ describe('util/fs/index', () => {
   describe('deleteLocalFile', () => {
     it('throws if platform is local', async () => {
       GlobalConfig.set({ platform: 'local' });
-      await expect(deleteLocalFile('foo/bar/file.txt')).rejects.toThrow();
+      await expect(deleteLocalFile('foo/bar/file.txt')).rejects.toThrow(
+        'Cannot delete file when platform=local',
+      );
     });
 
     it('deletes file', async () => {
@@ -162,6 +239,21 @@ describe('util/fs/index', () => {
       await renameLocalFile('foo.txt', 'bar.txt');
       expect(await fs.pathExists(sourcePath)).toBeFalse();
       expect(await fs.pathExists(targetPath)).toBeTrue();
+    });
+  });
+
+  describe('renameCacheFile', () => {
+    it('renames file and replaces existing target', async () => {
+      const sourcePath = `${cacheDir}/foo.txt`;
+      const targetPath = `${cacheDir}/bar.txt`;
+      await fs.outputFile(sourcePath, 'source');
+      await fs.outputFile(targetPath, 'target');
+
+      expect(await fs.pathExists(sourcePath)).toBeTrue();
+      expect(await fs.readFile(targetPath, 'utf8')).toBe('target');
+      await renameCacheFile('foo.txt', 'bar.txt');
+      expect(await fs.pathExists(sourcePath)).toBeFalse();
+      expect(await fs.readFile(targetPath, 'utf8')).toBe('source');
     });
   });
 
@@ -292,7 +384,7 @@ describe('util/fs/index', () => {
       const result = await readLocalDirectory('test');
       expect(result).not.toBeNull();
       expect(result).toBeArrayOfSize(2);
-      expect(result).toMatchSnapshot();
+      expect(result).toMatchSnapshot('two files');
 
       await writeLocalFile('Cargo.lock', '');
       await writeLocalFile('test/subdir/Cargo.lock', '');
@@ -300,11 +392,13 @@ describe('util/fs/index', () => {
       const resultWithAdditionalFiles = await readLocalDirectory('test');
       expect(resultWithAdditionalFiles).not.toBeNull();
       expect(resultWithAdditionalFiles).toBeArrayOfSize(3);
-      expect(resultWithAdditionalFiles).toMatchSnapshot();
+      expect(resultWithAdditionalFiles).toMatchSnapshot('three files');
     });
 
     it('return empty array for non existing directory', async () => {
-      await expect(readLocalDirectory('somedir')).rejects.toThrow();
+      await expect(readLocalDirectory('somedir')).rejects.toThrow(
+        'ENOENT: no such file or directory',
+      );
     });
 
     it('return empty array for a existing but empty directory', async () => {
@@ -480,6 +574,10 @@ describe('util/fs/index', () => {
       await rmCache(`foo/bar`);
       expect(await fs.pathExists(`${cacheDir}/foo/bar/file.txt`)).toBeFalse();
       expect(await fs.pathExists(`${cacheDir}/foo/bar`)).toBeFalse();
+    });
+
+    it('ignores missing path', async () => {
+      await expect(rmCache(`foo/missing`)).resolves.toBeUndefined();
     });
   });
 

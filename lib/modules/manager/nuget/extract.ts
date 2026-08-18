@@ -13,6 +13,7 @@ import type {
   PackageFileContent,
 } from '../types.ts';
 import { extractMsbuildGlobalManifest } from './extract/global-manifest.ts';
+import { extractPackagesFromSingleCsharpFile } from './extract/single-csharp-file.ts';
 import type { DotnetToolsManifest, NugetPackageDependency } from './types.ts';
 import {
   applyRegistries,
@@ -76,7 +77,7 @@ function extractDepsFromXml(xmlNode: XmlDocument): NugetPackageDependency[] {
 
       currentValue = currentValue
         ?.trim()
-        ?.replace(/^\$\((\w+)\)$/, (match, key) => {
+        ?.replace(regEx(/^\$\((\w+)\)$/), (match, key) => {
           sharedVariableName = key;
           const val = vars.get(key);
           if (val) {
@@ -202,6 +203,14 @@ export async function extractPackageFile(
 
   if (packageFile.endsWith('global.json')) {
     return extractMsbuildGlobalManifest(content, packageFile, registries);
+  }
+
+  if (packageFile.endsWith('.cs')) {
+    return extractPackagesFromSingleCsharpFile(
+      content,
+      packageFile,
+      registries,
+    );
   }
 
   // Simple xml validation.

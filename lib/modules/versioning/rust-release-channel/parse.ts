@@ -53,18 +53,18 @@ export function parse(input: string): ToolchainObject | null {
   } else {
     // Version channel
     channel = {
-      major: parseInt(major),
-      minor: parseInt(minor),
+      major: parseInt(major, 10),
+      minor: parseInt(minor, 10),
     };
 
     if (patch) {
-      channel.patch = parseInt(patch);
+      channel.patch = parseInt(patch, 10);
     }
 
     if (beta === 'beta') {
       channel.prerelease = { name: 'beta' };
       if (betaNumber) {
-        channel.prerelease.number = parseInt(betaNumber);
+        channel.prerelease.number = parseInt(betaNumber, 10);
       }
     }
   }
@@ -73,9 +73,9 @@ export function parse(input: string): ToolchainObject | null {
 
   if (year && month && day) {
     result.date = {
-      year: parseInt(year),
-      month: parseInt(month),
-      day: parseInt(day),
+      year: parseInt(year, 10),
+      month: parseInt(month, 10),
+      day: parseInt(day, 10),
     };
   }
 

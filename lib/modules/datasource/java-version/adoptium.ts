@@ -3,7 +3,8 @@ import { ExternalHostError } from '../../../types/errors/external-host-error.ts'
 import { type Http, HttpError } from '../../../util/http/index.ts';
 import type { Release, ReleaseResult } from '../types.ts';
 import { pageSize } from './common.ts';
-import type { AdoptiumJavaResponse, PackageConfig } from './types.ts';
+import { AdoptiumJavaResponse } from './schema.ts';
+import type { PackageConfig } from './types.ts';
 
 export const adoptiumRegistryUrl = 'https://api.adoptium.net/';
 
@@ -14,7 +15,7 @@ async function getPageReleases(
 ): Promise<Release[] | null> {
   const pgUrl = `${url}&page=${page}`;
   try {
-    const pgRes = await http.getJsonUnchecked<AdoptiumJavaResponse>(pgUrl);
+    const pgRes = await http.getJson(pgUrl, AdoptiumJavaResponse);
     return (
       pgRes?.body?.versions?.map(({ semver }) => ({
         version: semver,

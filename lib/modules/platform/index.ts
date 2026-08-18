@@ -16,7 +16,9 @@ import type { Platform } from './types.ts';
 
 export type * from './types.ts';
 
-export const getPlatformList = (): string[] => Array.from(platforms.keys());
+export function getPlatformList(): string[] {
+  return Array.from(platforms.keys());
+}
 
 let _platform: Platform | undefined;
 
@@ -58,6 +60,7 @@ export async function initPlatform(config: AllConfig): Promise<AllConfig> {
       ...(config.hostRules ?? []),
     ],
   };
+  // v8 ignore else -- TODO: add test #40625
   if (config?.gitAuthor) {
     logger.debug(`Using configured gitAuthor (${config.gitAuthor})`);
     returnConfig.gitAuthor = config.gitAuthor;

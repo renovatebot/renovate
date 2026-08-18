@@ -1,4 +1,4 @@
-import { isString } from '@sindresorhus/is';
+import { isNullOrUndefined, isString } from '@sindresorhus/is';
 import { logger } from '../../../../logger/index.ts';
 import * as hostRules from '../../../../util/host-rules.ts';
 import { regEx } from '../../../../util/regex.ts';
@@ -23,7 +23,7 @@ export function processHostRules(): HostRulesResult {
   // Include host rules without specific type to mimic the behavior used when determining dependencies with updates.
   const noTypeHostRules = hostRules
     .getAll()
-    .filter((rule) => rule.hostType === null || rule.hostType === undefined);
+    .filter((rule) => isNullOrUndefined(rule.hostType));
   logger.debug(
     `Found ${noTypeHostRules.length} host rule(s) without host type`,
   );
@@ -48,7 +48,7 @@ export function processHostRules(): HostRulesResult {
 
     const matchedHost = hostRule.matchHost;
     // Should never be necessary as if we have a resolvedHost, there has to be a matchHost
-    /* v8 ignore next 4 */
+    /* v8 ignore if -- unreachable: a resolvedHost implies matchHost is set (see comment above) */
     if (!matchedHost) {
       logger.debug('Skipping host rule without matchHost');
       continue;
@@ -84,6 +84,7 @@ export function processHostRules(): HostRulesResult {
       continue;
     }
 
+    // v8 ignore else -- TODO: add test #40625
     if (isString(hostRule.username) && isString(hostRule.password)) {
       logger.debug(
         `Adding npmrc entry for ${cleanedUri} with username/password`,

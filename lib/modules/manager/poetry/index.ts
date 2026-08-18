@@ -13,6 +13,8 @@ export { updateLockedDependency } from './update-locked.ts';
 
 export const supersedesManagers = ['pep621'];
 export const supportsLockFileMaintenance = true;
+export const lockFileNames = ['poetry.lock'];
+export const lockFileMaintenanceIsDelegatedToPackageManager = true;
 
 export const url = 'https://python-poetry.org/docs';
 export const categories: Category[] = ['python'];
@@ -29,3 +31,5 @@ export const supportedDatasources = [
   GitRefsDatasource.id,
   GitTagsDatasource.id,
 ];
+
+export { knownDepTypes, supportsDynamicDepTypesNote } from './dep-types.ts';

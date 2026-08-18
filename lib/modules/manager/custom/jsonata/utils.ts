@@ -20,8 +20,17 @@ export async function handleMatching(
   for (const query of jsonataQueries) {
     // won't fail as this is verified during config validation
     const jsonataExpression = jsonata(query);
-    // this does not throw error, just returns undefined if no matches
-    const queryResult = await jsonataExpression.evaluate(json);
+    let queryResult: unknown;
+    try {
+      // this now throws for unknown reasons
+      queryResult = await jsonataExpression.evaluate(json);
+    } catch (err) {
+      logger.warn(
+        { err, jsonataQuery: query, packageFile },
+        'Error executing jsonata query. Please check your query.',
+      );
+      continue;
+    }
 
     // allows empty dep object cause templates can be used to configure the required fields
     // if some issues arise then the isValidDependency call will catch them later on

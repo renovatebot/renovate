@@ -18,6 +18,7 @@ platformScmImpls.set('gitea', DefaultGitScm);
 platformScmImpls.set('github', GithubScm);
 platformScmImpls.set('gitlab', DefaultGitScm);
 platformScmImpls.set('local', LocalFs);
+platformScmImpls.set('scm-manager', DefaultGitScm);
 
 let _scm: PlatformScm | undefined;
 

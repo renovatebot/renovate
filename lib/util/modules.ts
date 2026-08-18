@@ -1,3 +1,4 @@
+// oxlint-disable-next-line renovate/prefer-fs-util -- synchronously enumerates Renovate's own installed module directories at import time; not repository or cache file access
 import fs from 'node:fs';
 import { pathToFileURL } from 'node:url';
 import upath from 'upath';

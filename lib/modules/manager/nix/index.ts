@@ -5,6 +5,8 @@ export { extractPackageFile } from './extract.ts';
 export { getRangeStrategy } from './range.ts';
 
 export const supportsLockFileMaintenance = true;
+export const lockFileNames = ['flake.lock'];
+export const lockFileMaintenanceIsDelegatedToPackageManager = true;
 
 export const url = 'https://nix.dev';
 

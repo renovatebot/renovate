@@ -1,5 +1,8 @@
 import { GlobalConfig } from '../../../config/global.ts';
-import type { RepoGlobalConfig } from '../../../config/types.ts';
+import type {
+  InternalGlobalConfigOptions,
+  RepoGlobalConfig,
+} from '../../../config/types.ts';
 import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
 import { id as semverVersioning } from '../../versioning/semver/index.ts';
 import { getDep } from '../dockerfile/extract.ts';
@@ -22,7 +25,7 @@ function createGitDependency(repo: string, version: string): PackageDependency {
   };
 }
 
-const adminConfig: RepoGlobalConfig = {
+const adminConfig: RepoGlobalConfig & InternalGlobalConfigOptions = {
   localDir: '',
 };
 

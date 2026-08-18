@@ -1,7 +1,9 @@
+import { isString } from '@sindresorhus/is';
 import * as semver from 'semver';
 import type { SemVer } from 'semver-utils';
 import { parseRange } from 'semver-utils';
 import { logger } from '../../../logger/index.ts';
+import { regEx } from '../../../util/regex.ts';
 import { coerceString } from '../../../util/string.ts';
 import type { NewValueConfig } from '../types.ts';
 import {
@@ -18,7 +20,7 @@ export function getMajor(version: string): null | number {
   const options = getOptions(version);
   options.includePrerelease = true;
   const cleanerVersion = makeVersion(cleanedVersion, options);
-  if (typeof cleanerVersion === 'string') {
+  if (isString(cleanerVersion)) {
     return Number(cleanerVersion.split('.')[0]);
   }
   return null;
@@ -30,7 +32,7 @@ export function getMinor(version: string): null | number {
   const options = getOptions(version);
   options.includePrerelease = true;
   const cleanerVersion = makeVersion(cleanedVersion, options);
-  if (typeof cleanerVersion === 'string') {
+  if (isString(cleanerVersion)) {
     return Number(cleanerVersion.split('.')[1]);
   }
   return null;
@@ -43,7 +45,7 @@ export function getPatch(version: string): null | number {
   options.includePrerelease = true;
   const cleanerVersion = makeVersion(cleanedVersion, options);
 
-  if (typeof cleanerVersion === 'string') {
+  if (isString(cleanerVersion)) {
     const newVersion = semver.valid(
       semver.coerce(cleanedVersion, {
         loose: false,
@@ -76,7 +78,7 @@ export function fixParsedRange(range: string): any {
   }
 
   const parsedRange = parseRange(range);
-  const cleanRange = range.replace(/([<=>^~])( )?/g, '');
+  const cleanRange = range.replace(regEx(/([<=>^~])( )?/g), '');
   const splitRange = cleanRange.split(' ');
   const semverRange: SemVer[] = [];
 
@@ -124,12 +126,12 @@ export function replaceRange({
   newVersion,
 }: NewValueConfig): string {
   const parsedRange = parseRange(currentValue);
-  const element = parsedRange[parsedRange.length - 1];
+  const element = parsedRange.at(-1)!;
   const toVersionMajor = getMajor(newVersion);
   const toVersionMinor = getMinor(newVersion);
   const toVersionPatch = getPatch(newVersion);
   const suffix = semver.prerelease(newVersion)
-    ? '-' + String(semver.prerelease(newVersion)?.[0])
+    ? `-${String(semver.prerelease(newVersion)?.[0])}`
     : '';
 
   if (element.operator === '~>') {
@@ -171,7 +173,7 @@ export function replaceRange({
       res = `<${toVersionMajor + 1}`;
     }
     if (currentValue.includes('< ')) {
-      res = res.replace(/</g, '< ');
+      res = res.replace(regEx(/</g), '< ');
     }
     return res;
   }
@@ -188,7 +190,7 @@ export function replaceRange({
       res = `>${toVersionMajor}`;
     }
     if (currentValue.includes('> ')) {
-      res = res.replace(/</g, '> ');
+      res = res.replace(regEx(/</g), '> ');
     }
     return res;
   }
@@ -218,7 +220,7 @@ export function widenRange(
   options: semver.Options,
 ): string | null {
   const parsedRange = parseRange(currentValue);
-  const element = parsedRange[parsedRange.length - 1];
+  const element = parsedRange.at(-1)!;
 
   if (matchesWithOptions(newVersion, currentValue, options)) {
     return currentValue;
@@ -235,11 +237,11 @@ export function widenRange(
     return splitCurrent.join(element.operator) + newValue;
   }
   if (parsedRange.length > 1) {
-    const previousElement = parsedRange[parsedRange.length - 2];
+    const previousElement = parsedRange.at(-2)!;
     if (previousElement.operator === '-') {
       const splitCurrent = currentValue.split('-');
       splitCurrent.pop();
-      return splitCurrent.join('-') + '- ' + newValue;
+      return `${splitCurrent.join('-')}- ${newValue}`;
     }
     if (element.operator?.startsWith('>')) {
       logger.warn(`Complex ranges ending in greater than are not supported`);
@@ -265,12 +267,12 @@ export function bumpRange(
     );
   }
   const parsedRange = parseRange(currentValue);
-  const element = parsedRange[parsedRange.length - 1];
+  const element = parsedRange.at(-1)!;
 
   const toVersionMajor = getMajor(newVersion);
   const toVersionMinor = getMinor(newVersion);
   const suffix = semver.prerelease(newVersion)
-    ? '-' + String(semver.prerelease(newVersion)?.[0])
+    ? `-${String(semver.prerelease(newVersion)?.[0])}`
     : '';
 
   if (parsedRange.length === 1) {
@@ -343,7 +345,7 @@ export function bumpRange(
     return versions.filter((x: any) => x !== null && x !== '').join(' ');
   }
   logger.debug(
-    'Unsupported range type for rangeStrategy=bump: ' + currentValue,
+    `Unsupported range type for rangeStrategy=bump: ${currentValue}`,
   );
   return null;
 }

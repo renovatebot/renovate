@@ -7,7 +7,7 @@ export function isSkipComment(comment?: string): boolean {
     if (command === 'ignore') {
       return true;
     }
-    logger.debug('Unknown comment command: ' + command);
+    logger.debug(`Unknown comment command: ${command}`);
   }
   return false;
 }

@@ -1,117 +1,83 @@
-import { randomUUID } from 'crypto';
+import { randomUUID } from 'node:crypto';
+import { isNonEmptyArray, isString } from '@sindresorhus/is';
 import { logger } from '../../../logger/index.ts';
 import * as git from '../../../util/git/index.ts';
-import type {
-  CommitFilesConfig,
-  LongCommitSha,
-} from '../../../util/git/types.ts';
+import type { CommitFilesConfig, FileChange } from '../../../util/git/types.ts';
 import { hash } from '../../../util/hash.ts';
+import type { LongCommitSha } from '../../../util/schema-utils/git.ts';
 import { DefaultGitScm } from '../default-scm.ts';
 import { client } from './client.ts';
-import type { GerritFindPRConfig } from './types.ts';
+import type { GerritLabels } from './schema.ts';
+import { mapBranchStatusToLabel } from './utils.ts';
+
+const CODE_REVIEW_LABEL = 'Code-Review';
+
+/**
+ * Gerrit SCM strategy:
+ * Instead of implementing custom branch operations, we fetch all open Gerrit changes
+ * as virtual branches (refs/remotes/origin/<branchName>) after repository initialization.
+ * This allows us to leverage DefaultGitScm for most operations, treating virtual branches
+ * as regular Git branches, while minimizing Gerrit API requests.
+ */
 
 let repository: string;
-let username: string;
-export function configureScm(repo: string, login: string): void {
+let projectLabels: GerritLabels = {};
+export function configureScm(repo: string, labels: GerritLabels = {}): void {
   repository = repo;
-  username = login;
+  projectLabels = labels;
+}
+
+/**
+ * Returns the max vote value for the "Code-Review" label (some Gerrit
+ * projects only allow up to +1), or `null` if the label isn't defined on
+ * the project, so the caller can skip voting instead of failing the push.
+ */
+function getAutoApproveLabelValue(): number | null {
+  const codeReviewLabel = projectLabels[CODE_REVIEW_LABEL];
+  if (!codeReviewLabel) {
+    logger.warn(
+      { repository, label: CODE_REVIEW_LABEL },
+      'Cannot auto-approve: label is not defined on the project',
+    );
+    return null;
+  }
+  return mapBranchStatusToLabel('green', codeReviewLabel);
+}
+
+export async function pushForReview(options: {
+  sourceRef: string;
+  targetBranch: string;
+  files: FileChange[];
+  autoApprove?: boolean;
+  labels?: string[];
+}): Promise<boolean> {
+  const pushOptions = ['notify=NONE', 'ready'];
+  if (options.autoApprove) {
+    const value = getAutoApproveLabelValue();
+    if (value !== null) {
+      pushOptions.push(`label=${CODE_REVIEW_LABEL}+${value}`);
+    }
+  }
+  if (isNonEmptyArray(options.labels)) {
+    for (const label of options.labels) {
+      pushOptions.push(`hashtag=${label}`);
+    }
+  }
+
+  return git.pushCommit({
+    sourceRef: options.sourceRef,
+    targetRef: `refs/for/${options.targetBranch}`,
+    files: options.files,
+    pushOptions,
+  });
 }
 
 export class GerritScm extends DefaultGitScm {
-  override async branchExists(branchName: string): Promise<boolean> {
-    const searchConfig: GerritFindPRConfig = {
-      state: 'open',
-      branchName,
-      singleChange: true,
-    };
-    const change = (await client.findChanges(repository, searchConfig)).pop();
-    if (change) {
-      return true;
-    }
-    return git.branchExists(branchName);
-  }
-
-  override async getBranchCommit(
-    branchName: string,
-  ): Promise<LongCommitSha | null> {
-    const searchConfig: GerritFindPRConfig = {
-      state: 'open',
-      branchName,
-      singleChange: true,
-      requestDetails: ['CURRENT_REVISION'],
-    };
-    const change = (await client.findChanges(repository, searchConfig)).pop();
-    if (change) {
-      return change.current_revision as LongCommitSha;
-    }
-    return git.getBranchCommit(branchName);
-  }
-
-  override async isBranchBehindBase(
-    branchName: string,
-    baseBranch: string,
-  ): Promise<boolean> {
-    const searchConfig: GerritFindPRConfig = {
-      state: 'open',
-      branchName,
-      targetBranch: baseBranch,
-      singleChange: true,
-      requestDetails: ['CURRENT_REVISION', 'CURRENT_ACTIONS'],
-    };
-    const change = (await client.findChanges(repository, searchConfig)).pop();
-    if (change) {
-      const currentRevision = change.revisions![change.current_revision!];
-      return currentRevision.actions!.rebase.enabled === true;
-    }
-    return true;
-  }
-
-  override async isBranchConflicted(
-    baseBranch: string,
-    branch: string,
-  ): Promise<boolean> {
-    const searchConfig: GerritFindPRConfig = {
-      state: 'open',
-      branchName: branch,
-      targetBranch: baseBranch,
-      singleChange: true,
-    };
-    const change = (await client.findChanges(repository, searchConfig)).pop();
-    if (change) {
-      const mergeInfo = await client.getMergeableInfo(change);
-      return !mergeInfo.mergeable;
-    } else {
-      logger.warn(
-        { branch, baseBranch },
-        'There is no open change with this branch',
-      );
-      return true;
-    }
-  }
-
-  override async isBranchModified(
-    branchName: string,
-    baseBranch: string,
-  ): Promise<boolean> {
-    const searchConfig: GerritFindPRConfig = {
-      state: 'open',
-      branchName,
-      targetBranch: baseBranch,
-      singleChange: true,
-      requestDetails: ['CURRENT_REVISION', 'DETAILED_ACCOUNTS'],
-    };
-    const change = (await client.findChanges(repository, searchConfig)).pop();
-    if (change) {
-      const currentRevision = change.revisions![change.current_revision!];
-      return currentRevision.uploader.username !== username;
-    }
-    return false;
-  }
-
   override async commitAndPush(
     commit: CommitFilesConfig,
   ): Promise<LongCommitSha | null> {
     logger.debug(`commitAndPush(${commit.branchName})`);
+
     const existingChange = await client.getBranchChange(repository, {
       branchName: commit.branchName,
       state: 'open',
@@ -119,11 +85,12 @@ export class GerritScm extends DefaultGitScm {
       requestDetails: ['CURRENT_REVISION'],
     });
 
-    let hasChanges = true;
-    const message =
-      typeof commit.message === 'string' ? [commit.message] : commit.message;
+    const message = isString(commit.message)
+      ? [commit.message]
+      : commit.message;
 
     // In Gerrit, the change subject/title is the first line of the commit message
+    // v8 ignore else -- TODO: add test #40625
     if (commit.prTitle) {
       const firstMessageLines = message[0].split('\n');
       firstMessageLines[0] = commit.prTitle;
@@ -131,67 +98,64 @@ export class GerritScm extends DefaultGitScm {
     }
 
     const changeId = existingChange?.change_id ?? generateChangeId();
-    commit.message = [
-      ...message,
-      `Renovate-Branch: ${commit.branchName}\nChange-Id: ${changeId}`,
+    commit.message = message;
+    commit.trailers = [
+      ...(commit.trailers ?? []).filter(
+        (trailer) =>
+          !trailer.startsWith('Renovate-Branch:') &&
+          !trailer.startsWith('Change-Id:'),
+      ),
+      `Renovate-Branch: ${commit.branchName}`,
+      `Change-Id: ${changeId}`,
     ];
-    const commitResult = await git.prepareCommit({ ...commit, force: true });
+    // prepareCommit already checks hasDiff('HEAD', 'origin/<branchName>') when
+    // force is not set, which works because virtual branches are fetched as
+    // refs/remotes/origin/<branchName> during init.  This avoids pushing empty
+    // patch sets without a separate diff check.
+    const commitResult = await git.prepareCommit(commit);
     if (commitResult) {
       const { commitSha } = commitResult;
       if (existingChange) {
-        const currentRevision =
-          existingChange.revisions![existingChange.current_revision!];
-        const fetchRefSpec = currentRevision.ref;
-        await git.fetchRevSpec(fetchRefSpec); // fetch current ChangeSet for git diff
-        hasChanges = await git.hasDiff('HEAD', 'FETCH_HEAD'); // avoid pushing empty patch sets
-      }
-      if (hasChanges || commit.force) {
-        const pushOptions = ['notify=NONE'];
-        if (commit.autoApprove) {
-          pushOptions.push('label=Code-Review+2');
-        }
-        if (commit.labels) {
-          for (const label of commit.labels) {
-            pushOptions.push(`hashtag=${label}`);
-          }
-        }
-        // If a change already exists, we push to the same target branch to
+        // Since the change already exists, we push to the same target branch to
         // avoid creating a new change if the base branch has changed.
-        // updatePr() will take care of moving the existing change to a different base
-        // branch if needed.
-        const changeBranch = existingChange?.branch ?? commit.baseBranch!;
-        const pushResult = await git.pushCommit({
+        // updatePr() will later take care of moving the existing change to a
+        // different base branch if needed.
+        const pushResult = await pushForReview({
           sourceRef: commit.branchName,
-          targetRef: `refs/for/${changeBranch}`,
+          targetBranch: existingChange.branch,
           files: commit.files,
-          pushOptions,
+          autoApprove: commit.autoApprove,
         });
+        /* v8 ignore else -- should never happen */
         if (pushResult) {
+          const currentRef =
+            existingChange.revisions![existingChange.current_revision!].ref;
+          await git.setVirtualBranch(
+            commit.branchName,
+            nextPatchSetRef(currentRef),
+            commitSha,
+          );
           return commitSha;
         }
+      } else {
+        logger.debug(`Commit prepared, push deferred to createPr()`);
+        return commitSha;
       }
     }
     return null; // empty commit, no changes in this Gerrit Change
   }
+}
 
-  override deleteBranch(branchName: string): Promise<void> {
-    return Promise.resolve();
-  }
-
-  override async mergeToLocal(branchName: string): Promise<void> {
-    const searchConfig: GerritFindPRConfig = {
-      state: 'open',
-      branchName,
-      singleChange: true,
-      requestDetails: ['CURRENT_REVISION'],
-    };
-    const change = (await client.findChanges(repository, searchConfig)).pop();
-    if (change) {
-      const currentRevision = change.revisions![change.current_revision!];
-      return super.mergeToLocal(currentRevision.ref);
-    }
-    return super.mergeToLocal(branchName);
-  }
+/**
+ * Derive the next patch-set ref from a Gerrit change ref.
+ * Gerrit refs follow the pattern `refs/changes/<NN>/<change>/<patchset>`.
+ * After a push, Gerrit creates the next patch-set, so we increment the
+ * trailing number to keep the virtual branch in sync.
+ */
+export function nextPatchSetRef(currentRef: string): string {
+  const lastSlash = currentRef.lastIndexOf('/');
+  const patchSet = Number(currentRef.slice(lastSlash + 1));
+  return `${currentRef.slice(0, lastSlash + 1)}${patchSet + 1}`;
 }
 
 /**
@@ -200,5 +164,5 @@ export class GerritScm extends DefaultGitScm {
  * TODO: Gerrit don't accept longer Change-IDs (sha256), but what happens with this https://git-scm.com/docs/hash-function-transition/ ?
  */
 function generateChangeId(): string {
-  return 'I' + hash(randomUUID(), 'sha1');
+  return `I${hash(randomUUID(), 'sha1')}`;
 }

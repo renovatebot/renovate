@@ -6,6 +6,7 @@
 #   - `env` can be specified per-step only
 #   - if `run` is used, `shell` must be explicitly specified
 name: 'Calculate matrix for `node_modules` prefetch'
+description: 'Calculate matrix for `node_modules` prefetch'
 inputs:
   repo:
     description: 'Repository name'
@@ -26,7 +27,7 @@ runs:
     - name: Calculate cache keys
       id: cache-keys
       env:
-        HASH: ${{ hashFiles('pnpm-lock.yaml') }}
+        HASH: ${{ hashFiles('pnpm-lock.yaml', 'package.json') }}
       shell: bash
       run: |
         echo 'MACOS_KEY=node_modules-macOS-${{ inputs.node-version }}-${{ env.HASH }}' >> "$GITHUB_ENV"
@@ -34,7 +35,7 @@ runs:
 
     - name: Check cache miss for MacOS
       id: macos-cache
-      uses: actions/cache/restore@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
+      uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
       with:
         path: node_modules
         key: ${{ env.MACOS_KEY }}

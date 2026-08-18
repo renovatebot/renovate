@@ -31,10 +31,10 @@ If you're self hosting Renovate, use the latest release if possible.
 
 ## Renovate core features not supported on all platforms
 
-| Feature               | Platforms which lack feature                    | See Renovate issue(s)                                        |
-| --------------------- | ----------------------------------------------- | ------------------------------------------------------------ |
-| Dependency Dashboard  | Azure, Bitbucket, Bitbucket Server, Gerrit      | [#9592](https://github.com/renovatebot/renovate/issues/9592) |
-| The Mend Renovate App | Azure, Bitbucket Server, Forgejo, Gitea, GitLab |                                                              |
+| Feature               | Platforms which lack feature                                 | See Renovate issue(s)                                        |
+| --------------------- | ------------------------------------------------------------ | ------------------------------------------------------------ |
+| Dependency Dashboard  | Azure, Bitbucket, Bitbucket Server, Gerrit, SCM-Manager      | [#9592](https://github.com/renovatebot/renovate/issues/9592) |
+| The Mend Renovate App | Azure, Bitbucket Server, Forgejo, Gitea, GitLab, SCM-Manager |                                                              |
 
 ## Major platform features not supported by Renovate
 
@@ -44,7 +44,6 @@ Some major platform features are not supported at all by Renovate.
 | --------------------------------------- | ----------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Jira issues                             | Bitbucket                                 | [#20568](https://github.com/renovatebot/renovate/issues/20568)                                                                                                                               |
 | Jira issues                             | Bitbucket Server                          | [#3796](https://github.com/renovatebot/renovate/issues/3796)                                                                                                                                 |
-| Merge trains                            | GitLab                                    | [#5573](https://github.com/renovatebot/renovate/issues/5573)                                                                                                                                 |
 | Configurable merge strategy and message | Only Bitbucket, Forgejo and Gitea for now | [#10867](https://github.com/renovatebot/renovate/issues/10867) [#10869](https://github.com/renovatebot/renovate/issues/10869) [#10870](https://github.com/renovatebot/renovate/issues/10870) |
 
 ## What is this `main` branch I see in the documentation?

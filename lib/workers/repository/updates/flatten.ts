@@ -1,3 +1,4 @@
+import { isUndefined } from '@sindresorhus/is';
 import {
   filterConfig,
   getManagerConfig,
@@ -14,10 +15,12 @@ import { regEx } from '../../../util/regex.ts';
 import * as template from '../../../util/template/index.ts';
 import { parseUrl } from '../../../util/url.ts';
 import type { BranchUpgradeConfig } from '../../types.ts';
+import { replacementAlreadyExists } from '../common.ts';
 import { generateBranchName } from './branch-name.ts';
 
-const upper = (str: string): string =>
-  str.charAt(0).toUpperCase() + str.substring(1);
+function upper(str: string): string {
+  return str.charAt(0).toUpperCase() + str.substring(1);
+}
 
 export function sanitizeDepName(depName: string): string {
   return depName
@@ -97,7 +100,7 @@ export async function flattenUpdates(
         packagePath.splice(-1, 1);
       }
       if (packagePath.length > 0) {
-        packageFileConfig.parentDir = packagePath[packagePath.length - 1];
+        packageFileConfig.parentDir = packagePath.at(-1);
         packageFileConfig.packageFileDir = packagePath.join('/');
       } else {
         packageFileConfig.parentDir = '';
@@ -111,6 +114,17 @@ export async function flattenUpdates(
           delete depConfig.deps;
           depConfig.depIndex = depIndex; // used for autoreplace
           for (const update of dep.updates!) {
+            if (
+              update.updateType === 'replacement' &&
+              update.newName &&
+              replacementAlreadyExists(packageFile.deps, dep, update.newName)
+            ) {
+              logger.debug(
+                { fileName: packageFile.packageFile },
+                `Skipping replacement of ${dep.depName} with ${update.newName}: replacement already exists in ${packageFile.packageFile}`,
+              );
+              continue;
+            }
             let updateConfig = mergeChildConfig(depConfig, update);
             delete updateConfig.updates;
             if (updateConfig.updateType) {
@@ -150,6 +164,10 @@ export async function flattenUpdates(
             updateConfig = applyUpdateConfig(updateConfig);
             updateConfig.baseDeps = packageFile.deps;
             update.branchName = updateConfig.branchName;
+
+            // make sure that we use the dependency's current state of attestation, rather than using the new update's value
+            updateConfig.hasAttestation = depConfig.hasAttestation;
+
             updates.push(updateConfig);
           }
         }
@@ -230,6 +248,7 @@ export async function flattenUpdates(
   }
   const filteredUpdates = updates
     .filter((update) => update.enabled !== false)
+    .filter((update) => isUndefined(update.skipReason))
     .map(({ vulnerabilityAlerts: _, ...update }) => update)
     .map((update) => filterConfig(update, 'branch'));
   if (filteredUpdates.length < updates.length) {

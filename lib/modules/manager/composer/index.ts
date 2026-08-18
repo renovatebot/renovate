@@ -9,11 +9,13 @@ import { updateLockedDependency } from './update-locked.ts';
 import { composerVersioningId } from './utils.ts';
 
 export const supportsLockFileMaintenance = true;
+export const lockFileNames = ['composer.lock'];
+export const lockFileMaintenanceIsDelegatedToPackageManager = true;
 
 export {
   extractPackageFile,
-  updateArtifacts,
   getRangeStrategy,
+  updateArtifacts,
   updateLockedDependency,
 };
 
@@ -30,3 +32,5 @@ export const supportedDatasources = [
   GitTagsDatasource.id,
   PackagistDatasource.id,
 ];
+
+export { knownDepTypes } from './dep-types.ts';

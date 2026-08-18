@@ -110,6 +110,9 @@ export const HOST_DISABLED = 'host-disabled';
 // Worker Error
 export const WORKER_FILE_UPDATE_FAILED = 'update-failure';
 
+// PR Error
+export const PR_ALREADY_IN_MERGE_QUEUE = 'pr-already-in-merge-queue';
+
 // Bundler Error
 export const BUNDLER_INVALID_CREDENTIALS = 'bundler-credentials';
 
@@ -124,3 +127,6 @@ export const PAGE_NOT_FOUND_ERROR = 'page-not-found';
 
 // Missing API required credentials
 export const MISSING_API_CREDENTIALS = 'missing-api-credentials';
+
+/** Logger not initialized */
+export const LOGGER_NOT_INITIALIZED = 'logger-not-initialized';

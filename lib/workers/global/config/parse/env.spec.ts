@@ -1,5 +1,6 @@
 import type { MockInstance } from 'vitest';
-import type { RequiredConfig } from '../../../../config/types.ts';
+import { getEnvName } from '../../../../config/options/env.ts';
+import { getOptions } from '../../../../config/options/index.ts';
 import { logger } from '../../../../logger/index.ts';
 import * as env from './env.ts';
 import type { ParseConfigOptions } from './types.ts';
@@ -28,7 +29,7 @@ describe('workers/global/config/parse/env', () => {
       };
       await expect(env.getConfig(envParam)).rejects.toThrow(
         Error(
-          "Invalid boolean value: expected 'true' or 'false', but got 'badvalue'",
+          "RENOVATE_CONFIG_MIGRATION was invalid: Error: Invalid boolean value: expected 'true' or 'false', but got 'badvalue'",
         ),
       );
     });
@@ -86,7 +87,7 @@ describe('workers/global/config/parse/env', () => {
       expect(res).toMatchObject({ hostRules: [{ foo: 'bar' }] });
     });
 
-    test.each`
+    it.each`
       envArg                                           | config
       ${{ RENOVATE_RECREATE_CLOSED: 'true' }}          | ${{ recreateWhen: 'always' }}
       ${{ RENOVATE_RECREATE_CLOSED: 'false' }}         | ${{ recreateWhen: 'auto' }}
@@ -314,6 +315,8 @@ describe('workers/global/config/parse/env', () => {
         RENOVATE_X_DELETE_CONFIG_FILE: 'true',
         RENOVATE_X_S3_ENDPOINT: 'endpoint',
         RENOVATE_X_S3_PATH_STYLE: 'true',
+        // NOTE that a non-empty string is treated as `true`
+        RENOVATE_X_REPO_CACHE_FORCE_LOCAL: 'enabled',
       };
       const config = await env.getConfig(envParam);
       expect(config).toMatchObject({
@@ -325,7 +328,16 @@ describe('workers/global/config/parse/env', () => {
         deleteConfigFile: true,
         s3Endpoint: 'endpoint',
         s3PathStyle: true,
+        repositoryCacheForceLocal: true,
       });
+    });
+
+    it('does not migrate empty RENOVATE_X_REPO_CACHE_FORCE_LOCAL', async () => {
+      const envParam: NodeJS.ProcessEnv = {
+        RENOVATE_X_REPO_CACHE_FORCE_LOCAL: '',
+      };
+      const config = await env.getConfig(envParam);
+      expect(config.repositoryCacheForceLocal).toBeUndefined();
     });
 
     describe('RENOVATE_CONFIG tests', () => {
@@ -380,13 +392,34 @@ describe('workers/global/config/parse/env', () => {
     });
   });
 
+  it('has no duplicate env names across options', () => {
+    const options = getOptions();
+    const envNameToOptions = new Map<string, string[]>();
+
+    for (const option of options) {
+      const envName = getEnvName(option);
+      if (envName === '') {
+        continue;
+      }
+      const existing = envNameToOptions.get(envName) ?? [];
+      existing.push(option.name);
+      envNameToOptions.set(envName, existing);
+    }
+
+    const duplicates = [...envNameToOptions.entries()]
+      .filter(([, names]) => names.length > 1)
+      .map(([envName, names]) => `${envName}: ${names.join(', ')}`);
+
+    expect(duplicates).toEqual([]);
+  });
+
   describe('.getEnvName(definition)', () => {
     it('returns empty', () => {
       const option: ParseConfigOptions = {
         name: 'foo',
         env: false,
       };
-      expect(env.getEnvName(option)).toBe('');
+      expect(getEnvName(option)).toBe('');
     });
 
     it('returns existing env', () => {
@@ -394,14 +427,14 @@ describe('workers/global/config/parse/env', () => {
         name: 'foo',
         env: 'FOO',
       };
-      expect(env.getEnvName(option)).toBe('FOO');
+      expect(getEnvName(option)).toBe('FOO');
     });
 
     it('generates RENOVATE_ env', () => {
       const option: ParseConfigOptions = {
         name: 'oneTwoThree',
       };
-      expect(env.getEnvName(option)).toBe('RENOVATE_ONE_TWO_THREE');
+      expect(getEnvName(option)).toBe('RENOVATE_ONE_TWO_THREE');
     });
 
     it('dryRun boolean true', async () => {
@@ -430,7 +463,7 @@ describe('workers/global/config/parse/env', () => {
 
     it('requireConfig boolean true', async () => {
       const envParam: NodeJS.ProcessEnv = {
-        RENOVATE_REQUIRE_CONFIG: 'true' as RequiredConfig,
+        RENOVATE_REQUIRE_CONFIG: 'true',
       };
       const config = await env.getConfig(envParam);
       expect(config.requireConfig).toBe('required');
@@ -438,7 +471,7 @@ describe('workers/global/config/parse/env', () => {
 
     it('requireConfig boolean false', async () => {
       const envParam: NodeJS.ProcessEnv = {
-        RENOVATE_REQUIRE_CONFIG: 'false' as RequiredConfig,
+        RENOVATE_REQUIRE_CONFIG: 'false',
       };
       const config = await env.getConfig(envParam);
       expect(config.requireConfig).toBe('optional');

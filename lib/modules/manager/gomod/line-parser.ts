@@ -14,7 +14,7 @@ const requireRegex = regEx(
 );
 
 const replaceRegex = regEx(
-  /^(?<keyword>replace)?\s+(?<module>[^\s]+\/[^\s]+)\s*=>\s*(?<replacement>[^\s]+)(?:\s+(?<version>[^\s]+))?(?:\s*\/\/\s*(?<comment>[^\s]+)\s*)?$/,
+  /^(?<keyword>replace)?\s+(?<module>[^\s]+\/?[^\s]+)\s*=>\s*(?<replacement>[^\s]+)(?:\s+(?<version>[^\s]+))?(?:\s*\/\/\s*(?<comment>[^\s]+)\s*)?$/,
 );
 
 export const excludeBlockStartRegex = regEx(/^(?<keyword>exclude)\s+\(\s*$/);
@@ -29,9 +29,15 @@ const toolchainVersionRegex = regEx(/^\s*toolchain\s+go(?<version>[^\s]+)\s*$/);
 
 const pseudoVersionRegex = regEx(GoDatasource.pversionRegexp);
 
+const placeholderPseudoVersion = 'v0.0.0-00010101000000-000000000000';
+
 function extractDigest(input: string): string | undefined {
   const match = pseudoVersionRegex.exec(input);
   return match?.groups?.digest;
+}
+
+function isPlaceholderPseudoVersion(version: string): boolean {
+  return version === placeholderPseudoVersion;
 }
 
 export function parseLine(input: string): PackageDependency | null {
@@ -45,6 +51,7 @@ export function parseLine(input: string): PackageDependency | null {
       depType: 'golang',
       depName: 'go',
       currentValue,
+      commitMessageTopic: 'go module directive',
     };
 
     if (!semver.validRange(currentValue)) {
@@ -63,6 +70,7 @@ export function parseLine(input: string): PackageDependency | null {
       depType: 'toolchain',
       depName: 'go',
       currentValue,
+      commitMessageTopic: 'go toolchain directive',
     };
 
     if (!semver.valid(currentValue)) {
@@ -91,6 +99,9 @@ export function parseLine(input: string): PackageDependency | null {
         dep.currentDigest = digest;
         dep.digestOneAndOnly = true;
         dep.versioning = 'loose';
+        if (isPlaceholderPseudoVersion(currentValue)) {
+          dep.skipReason = 'invalid-version';
+        }
       }
     } else {
       dep.skipReason = 'invalid-version';
@@ -132,6 +143,9 @@ export function parseLine(input: string): PackageDependency | null {
         dep.currentDigest = digest;
         dep.digestOneAndOnly = true;
         dep.versioning = 'loose';
+        if (isPlaceholderPseudoVersion(currentValue)) {
+          dep.skipReason = 'invalid-version';
+        }
       }
     } else if (currentValue) {
       dep.skipReason = 'invalid-version';

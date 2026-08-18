@@ -1,10 +1,5 @@
 Renovate can update `gleam.toml` and/or `manifest.toml` files.
 
-The `gleam` manager can update these `depTypes`:
-
-- `dependencies`
-- `dev-dependencies`
-
 ### How Renovate updates `gleam.toml` files
 
 The `gleam` manager extracts dependencies for the `hex` datasource, and uses Renovate's implementation of Hex SemVer to evaluate `gleam.toml` updates.

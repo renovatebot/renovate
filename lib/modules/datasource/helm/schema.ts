@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from 'zod/v4';
 import { detectPlatform } from '../../../util/common.ts';
 import { parseGitUrl } from '../../../util/git/url.ts';
 import { regEx } from '../../../util/regex.ts';
@@ -80,4 +80,4 @@ export const HelmRepository = z
   })
   .transform(({ entries }) => entries);
 
-export type HelmRepositoryData = z.infer<typeof HelmRepository>;
+export type HelmRepository = z.infer<typeof HelmRepository>;

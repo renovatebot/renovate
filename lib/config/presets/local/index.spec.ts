@@ -36,26 +36,14 @@ describe('config/presets/local/index', () => {
         // @ts-expect-error -- testing invalid platform
         platform: 'unsupported-platform',
       });
-      // eslint-disable-next-line vitest/no-unneeded-async-expect-function -- local isn't async
-      await expect(async () => {
-        await local.getPreset({
+      await expect(
+        local.getPreset({
           repo: 'some/repo',
           presetName: 'default',
-        });
-      }).rejects.toThrow();
-    });
-
-    it('throws for missing platform', async () => {
-      GlobalConfig.set({
-        platform: undefined,
-      });
-      // eslint-disable-next-line vitest/no-unneeded-async-expect-function -- local isn't async
-      await expect(async () => {
-        await local.getPreset({
-          repo: 'some/repo',
-          presetName: 'default',
-        });
-      }).rejects.toThrow();
+        }),
+      ).rejects.toThrow(
+        "The platform you're using (unsupported-platform) does not support",
+      );
     });
 
     it('forwards to azure', async () => {
@@ -80,6 +68,24 @@ describe('config/presets/local/index', () => {
       GlobalConfig.set({
         platform: 'bitbucket',
         endpoint: 'https://api.bitbucket.org',
+      });
+      const content = await local.getPreset({
+        repo: 'some/repo',
+        presetName: 'default',
+      });
+
+      expect(platform.getRawFile).toHaveBeenCalledExactlyOnceWith(
+        'default.json',
+        'some/repo',
+        undefined,
+      );
+      expect(content).toEqual({ resolved: 'preset' });
+    });
+
+    it('forwards to gerrit', async () => {
+      GlobalConfig.set({
+        platform: 'gerrit',
+        endpoint: 'https://gerrit.example.com',
       });
       const content = await local.getPreset({
         repo: 'some/repo',
@@ -340,6 +346,18 @@ describe('config/presets/local/index', () => {
         'someTag',
       );
       expect(content).toEqual({ resolved: 'preset' });
+    });
+
+    it('throws for platform that does not support local presets', async () => {
+      GlobalConfig.set({
+        platform: 'codecommit',
+      });
+      await expect(
+        local.getPreset({
+          repo: 'some/repo',
+          presetName: 'default',
+        }),
+      ).rejects.toThrow(`does not support local presets`);
     });
   });
 });

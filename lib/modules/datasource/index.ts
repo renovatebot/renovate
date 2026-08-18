@@ -1,7 +1,19 @@
-import { isFunction, isNonEmptyArray, isString } from '@sindresorhus/is';
+import { ATTR_CODE_FUNCTION_NAME } from '@opentelemetry/semantic-conventions';
+import {
+  isFunction,
+  isNonEmptyArray,
+  isString,
+  isTruthy,
+} from '@sindresorhus/is';
 import { dequal } from 'dequal';
 import { GlobalConfig } from '../../config/global.ts';
 import { HOST_DISABLED } from '../../constants/error-messages.ts';
+import { instrument } from '../../instrumentation/index.ts';
+import {
+  ATTR_RENOVATE_DATASOURCE,
+  ATTR_RENOVATE_PACKAGE_NAME,
+  ATTR_RENOVATE_REGISTRY_URL,
+} from '../../instrumentation/types.ts';
 import { logger } from '../../logger/index.ts';
 import { ExternalHostError } from '../../types/errors/external-host-error.ts';
 import { coerceArray } from '../../util/array.ts';
@@ -38,8 +50,12 @@ import type {
 export { isGetPkgReleasesConfig } from './common.ts';
 export * from './types.ts';
 
-export const getDatasources = (): Map<string, DatasourceApi> => datasources;
-export const getDatasourceList = (): string[] => Array.from(datasources.keys());
+export function getDatasources(): Map<string, DatasourceApi> {
+  return datasources;
+}
+export function getDatasourceList(): string[] {
+  return Array.from(datasources.keys());
+}
 
 type GetReleasesInternalConfig = GetReleasesConfig & GetPkgReleasesConfig;
 
@@ -69,7 +85,7 @@ async function getRegistryReleases(
   const cacheKey = `${registryUrl}:${config.packageName}`;
 
   const cacheEnabled = !!datasource.caching; // tells if `isPrivate` flag is supported in datasource result
-  const cacheForced = GlobalConfig.get('cachePrivatePackages', false); // tells if caching is forced via admin config
+  const cacheForced = GlobalConfig.get('cachePrivatePackages'); // tells if caching is forced via admin config
 
   if (cacheEnabled || cacheForced) {
     const cachedResult = await packageCache.get<ReleaseResult>(
@@ -86,7 +102,18 @@ async function getRegistryReleases(
     DatasourceCacheStats.miss(datasource.id, registryUrl, config.packageName);
   }
 
-  const res = await datasource.getReleases({ ...config, registryUrl });
+  const res = await instrument(
+    'getReleases',
+    () => datasource.getReleases({ ...config, registryUrl }),
+    {
+      attributes: {
+        [ATTR_CODE_FUNCTION_NAME]: 'getReleases',
+        [ATTR_RENOVATE_DATASOURCE]: datasource.id,
+        [ATTR_RENOVATE_REGISTRY_URL]: registryUrl,
+        [ATTR_RENOVATE_PACKAGE_NAME]: config.packageName,
+      },
+    },
+  );
   if (res?.releases.length) {
     res.registryUrl ??= registryUrl;
   }
@@ -170,6 +197,7 @@ async function mergeRegistries(
 ): Promise<ReleaseResult | null> {
   let combinedRes: ReleaseResult | undefined;
   let lastErr: Error | undefined;
+  let externalHostError: ExternalHostError | undefined;
   let singleRegistry = true;
   const releaseVersioning = versioning.get(config.versioning);
   for (const registryUrl of registryUrls) {
@@ -241,7 +269,14 @@ async function mergeRegistries(
       delete combinedRes.registryUrl;
     } catch (err) {
       if (err instanceof ExternalHostError) {
-        throw err;
+        // Don't abort the merge if another registry already returned releases;
+        // a single rate-limited registry shouldn't discard results we have
+        externalHostError = err;
+        logger.debug(
+          { err, registryUrl },
+          'datasource merge: external host error from registry; continuing so releases from other registries are not discarded',
+        );
+        continue;
       }
 
       lastErr = err;
@@ -250,6 +285,10 @@ async function mergeRegistries(
   }
 
   if (!combinedRes) {
+    if (externalHostError) {
+      throw externalHostError;
+    }
+
     if (lastErr) {
       throw lastErr;
     }
@@ -270,7 +309,7 @@ async function mergeRegistries(
 }
 
 function massageRegistryUrls(registryUrls: string[]): string[] {
-  return registryUrls.filter(Boolean).map(trimTrailingSlash);
+  return registryUrls.filter(isTruthy).map(trimTrailingSlash);
 }
 
 function resolveRegistryUrls(
@@ -299,7 +338,7 @@ function resolveRegistryUrls(
       ? datasource.defaultRegistryUrls()
       : (datasource.defaultRegistryUrls ?? []);
   }
-  const customUrls = registryUrls?.filter(Boolean);
+  const customUrls = registryUrls?.filter(isTruthy);
   let resolvedUrls: string[] = [];
   if (isNonEmptyArray(customUrls)) {
     resolvedUrls = [...customUrls];
@@ -371,7 +410,18 @@ async function fetchReleases(
         dep = await mergeRegistries(config, datasource, registryUrls);
       }
     } else {
-      dep = await datasource.getReleases(config);
+      dep = await instrument(
+        'getReleases',
+        () => datasource.getReleases(config),
+        {
+          attributes: {
+            [ATTR_CODE_FUNCTION_NAME]: 'getReleases',
+            [ATTR_RENOVATE_DATASOURCE]: datasource.id,
+            [ATTR_RENOVATE_REGISTRY_URL]: config.registryUrl ?? '',
+            [ATTR_RENOVATE_PACKAGE_NAME]: config.packageName,
+          },
+        },
+      );
     }
   } catch (err) {
     if (err.message === HOST_DISABLED || err.err?.message === HOST_DISABLED) {

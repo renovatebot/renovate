@@ -38,10 +38,10 @@
       "patternProperties": {
         "^[a-zA-Z0-9. -]+$": {
           "oneOf": [
-            { "type": "string", "pattern": "^/.+/$" },
+            { "type": "string" },
             {
               "type": "array",
-              "items": { "type": "string", "pattern": "^/.+/$" }
+              "items": { "type": "string" }
             }
           ]
         }

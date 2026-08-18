@@ -1,9 +1,8 @@
-import { logger, scm } from '~test/util.ts';
+import { fakeSha, logger, scm } from '~test/util.ts';
 import type { PackageFile } from '../../../modules/manager/types.ts';
 import * as _repositoryCache from '../../../util/cache/repository/index.ts';
 import type { BaseBranchCache } from '../../../util/cache/repository/types.ts';
 import { fingerprint } from '../../../util/fingerprint.ts';
-import type { LongCommitSha } from '../../../util/git/types.ts';
 import { generateFingerprintConfig } from '../extract/extract-fingerprint-config.ts';
 import * as _branchify from '../updates/branchify.ts';
 import {
@@ -13,6 +12,7 @@ import {
   lookup,
   update,
 } from './extract-update.ts';
+import * as _fetch from './fetch.ts';
 
 const createVulnerabilitiesMock = vi.fn();
 
@@ -35,8 +35,11 @@ vi.mock('../../../util/cache/repository/index.ts');
 
 const branchify = vi.mocked(_branchify);
 const repositoryCache = vi.mocked(_repositoryCache);
+const fetch = vi.mocked(_fetch);
 
 describe('workers/repository/process/extract-update', () => {
+  const branchSha = fakeSha('123test');
+
   beforeEach(() => {
     branchify.branchifyUpgrades.mockResolvedValue({
       branches: [
@@ -57,7 +60,7 @@ describe('workers/repository/process/extract-update', () => {
         repoIsOnboarded: true,
       };
       repositoryCache.getCache.mockReturnValueOnce({ scan: {} });
-      scm.checkoutBranch.mockResolvedValueOnce('123test' as LongCommitSha);
+      scm.checkoutBranch.mockResolvedValueOnce(branchSha);
       const packageFiles = await extract(config);
       const res = await lookup(config, packageFiles);
       expect(res).toEqual({
@@ -88,7 +91,7 @@ describe('workers/repository/process/extract-update', () => {
           addLabels: 'npm',
         },
       };
-      scm.checkoutBranch.mockResolvedValueOnce('123test' as LongCommitSha);
+      scm.checkoutBranch.mockResolvedValueOnce(branchSha);
       repositoryCache.getCache.mockReturnValueOnce({ scan: {} });
       const packageFiles = await extract(config);
       expect(packageFiles).toBeUndefined();
@@ -104,15 +107,15 @@ describe('workers/repository/process/extract-update', () => {
         scan: {
           master: {
             revision: EXTRACT_CACHE_REVISION,
-            sha: '123test',
+            sha: branchSha,
             configHash: fingerprint(generateFingerprintConfig(config)),
             extractionFingerprints: {},
             packageFiles,
           },
         },
       });
-      scm.getBranchCommit.mockResolvedValueOnce('123test' as LongCommitSha);
-      scm.checkoutBranch.mockResolvedValueOnce('123test' as LongCommitSha);
+      scm.getBranchCommit.mockResolvedValueOnce(branchSha);
+      scm.checkoutBranch.mockResolvedValueOnce(branchSha);
       const res = await extract(config);
       expect(res).toEqual(packageFiles);
     });
@@ -123,25 +126,17 @@ describe('workers/repository/process/extract-update', () => {
         osvVulnerabilityAlerts: true,
       };
       const appendVulnerabilityPackageRulesMock = vi.fn();
-      createVulnerabilitiesMock.mockResolvedValueOnce({
+      createVulnerabilitiesMock.mockResolvedValue({
         appendVulnerabilityPackageRules: appendVulnerabilityPackageRulesMock,
       });
       repositoryCache.getCache.mockReturnValueOnce({ scan: {} });
-      scm.checkoutBranch.mockResolvedValueOnce('123test' as LongCommitSha);
+      scm.checkoutBranch.mockResolvedValueOnce(branchSha);
 
       const packageFiles = await extract(config);
       await lookup(config, packageFiles);
 
-      expect(createVulnerabilitiesMock).toHaveBeenCalledExactlyOnceWith();
-      expect(
-        appendVulnerabilityPackageRulesMock,
-      ).toHaveBeenCalledExactlyOnceWith(
-        {
-          repoIsOnboarded: true,
-          osvVulnerabilityAlerts: true,
-        },
-        undefined,
-      );
+      expect(createVulnerabilitiesMock).toHaveBeenCalledTimes(2);
+      expect(appendVulnerabilityPackageRulesMock).toHaveBeenCalledTimes(2);
     });
 
     it('handles exception when fetching vulnerabilities', async () => {
@@ -151,12 +146,291 @@ describe('workers/repository/process/extract-update', () => {
       };
       createVulnerabilitiesMock.mockRejectedValueOnce(new Error());
       repositoryCache.getCache.mockReturnValueOnce({ scan: {} });
-      scm.checkoutBranch.mockResolvedValueOnce('123test' as LongCommitSha);
+      scm.checkoutBranch.mockResolvedValueOnce(branchSha);
 
       const packageFiles = await extract(config);
       await lookup(config, packageFiles);
 
-      expect(createVulnerabilitiesMock).toHaveBeenCalledExactlyOnceWith();
+      expect(createVulnerabilitiesMock).toHaveBeenCalledTimes(2);
+    });
+
+    describe('malicious package detection', () => {
+      // this follows how the calls should actually work, but as it's heavily mocked, this may end up changing from actual behaviour
+      describe('when using mocks', () => {
+        it('skips malicious package updates', async () => {
+          const packageFiles: Record<string, PackageFile[]> = {
+            npm: [
+              {
+                deps: [
+                  // has a malicious update
+                  {
+                    depType: 'devDependencies',
+                    depName: 'axios',
+                    currentValue: '1.14.0',
+                    datasource: 'npm',
+                    prettyDepType: 'devDependency',
+                    lockedVersion: '1.14.0',
+                    updates: [
+                      // will be populated by our mock
+                    ],
+                    packageName: 'axios',
+                  },
+                  // not malicious
+                  {
+                    depType: 'devDependencies',
+                    depName: 'axios',
+                    currentValue: '1.14.0',
+                    datasource: 'npm',
+                    prettyDepType: 'devDependency',
+                    lockedVersion: '1.14.0',
+                    updates: [],
+                    packageName: 'axios',
+                  },
+                ],
+                packageFile: 'package.json',
+              },
+            ],
+          };
+
+          const config = {
+            repoIsOnboarded: true,
+            baseBranch: 'main',
+            osvVulnerabilityAlerts: true,
+          };
+          const appendVulnerabilityPackageRulesMock = vi.fn();
+          createVulnerabilitiesMock.mockResolvedValue({
+            appendVulnerabilityPackageRules:
+              appendVulnerabilityPackageRulesMock,
+          });
+
+          // the first time, we're checking what updates are available, so don't modify anything
+          appendVulnerabilityPackageRulesMock.mockImplementationOnce(
+            async (
+              _config: any,
+              _packageFiles: Record<string, PackageFile[]>,
+            ): Promise<void> => {
+              // no-op
+            },
+          );
+
+          fetch.fetchUpdates.mockImplementation(
+            (
+              _config: any,
+              packageFiles: Record<string, PackageFile[]>,
+            ): Promise<void> => {
+              packageFiles.npm[0].deps[0].updates = [
+                // MAL-2026-2307
+                { newVersion: '1.14.1' },
+              ];
+              return Promise.resolve();
+            },
+          );
+
+          appendVulnerabilityPackageRulesMock.mockImplementationOnce(
+            (
+              _config: any,
+              packageFiles: Record<string, PackageFile[]>,
+            ): Promise<void> => {
+              const updates = packageFiles?.npm[0]?.deps[0]?.updates;
+
+              if (updates && updates[0]?.newVersion === '1.14.1') {
+                packageFiles.npm[0].deps[0].skipReason =
+                  'malicious-update-proposed';
+              }
+              return Promise.resolve();
+            },
+          );
+
+          await lookup(config, packageFiles);
+
+          expect(fetch.fetchUpdates).toHaveBeenCalled();
+          expect(appendVulnerabilityPackageRulesMock).toHaveBeenCalledTimes(2);
+
+          expect(packageFiles.npm).toHaveLength(1);
+          expect(packageFiles.npm[0].deps).toHaveLength(2);
+          expect(packageFiles.npm[0].deps[0].skipReason).toEqual(
+            'malicious-update-proposed',
+          );
+        });
+      });
+
+      // this
+      describe('when manually specifying the `skipReason`s', () => {
+        describe('when skipReason=malicious-version-in-use', () => {
+          it('logs a warning', async () => {
+            const packageFiles: Record<string, PackageFile[]> = {
+              npm: [
+                {
+                  deps: [
+                    {
+                      depType: 'devDependencies',
+                      depName: 'axios',
+                      currentValue: '1.14.1',
+                      datasource: 'npm',
+                      prettyDepType: 'devDependency',
+                      lockedVersion: '1.14.1',
+                      updates: [],
+                      packageName: 'axios',
+
+                      // most importantly
+                      skipReason: 'malicious-version-in-use',
+                    },
+                    // not malicious
+                    {
+                      depType: 'devDependencies',
+                      depName: 'axios',
+                      currentValue: '1.14.0',
+                      datasource: 'npm',
+                      prettyDepType: 'devDependency',
+                      lockedVersion: '1.14.0',
+                      updates: [],
+                      packageName: 'axios',
+                    },
+                  ],
+                  packageFile: 'package.json',
+                },
+              ],
+            };
+
+            const config = {
+              repoIsOnboarded: true,
+              baseBranch: 'main',
+            };
+
+            await lookup(config, packageFiles);
+
+            expect(logger.logger.warn).toHaveBeenCalledWith(
+              {
+                packageFile: 'package.json',
+                depName: 'axios',
+                packageName: 'axios',
+                manager: 'npm',
+                datasource: 'npm',
+              },
+              'Dependency is currently using a malicious version',
+            );
+          });
+
+          it('deletes the skipReason and skipStage, to allow the update phase to continue updating', async () => {
+            const packageFiles: Record<string, PackageFile[]> = {
+              npm: [
+                {
+                  deps: [
+                    {
+                      depType: 'devDependencies',
+                      depName: 'axios',
+                      currentValue: '1.14.1',
+                      datasource: 'npm',
+                      prettyDepType: 'devDependency',
+                      lockedVersion: '1.14.1',
+                      updates: [],
+                      packageName: 'axios',
+
+                      // most importantly
+                      skipReason: 'malicious-version-in-use',
+                      skipStage: 'lookup',
+                    },
+                    // not malicious
+                    {
+                      depType: 'devDependencies',
+                      depName: 'axios',
+                      currentValue: '1.14.0',
+                      datasource: 'npm',
+                      prettyDepType: 'devDependency',
+                      lockedVersion: '1.14.0',
+                      updates: [],
+                      packageName: 'axios',
+                    },
+                  ],
+                  packageFile: 'package.json',
+                },
+              ],
+            };
+
+            const config = {
+              repoIsOnboarded: true,
+              baseBranch: 'main',
+            };
+
+            await lookup(config, packageFiles);
+
+            expect(packageFiles.npm[0].deps[0].skipReason).toBeUndefined();
+            expect(packageFiles.npm[0].deps[0].skipStage).toBeUndefined();
+          });
+        });
+
+        it('when skipReason=malicious-version-in-use, it logs a warning for each skipReason', async () => {
+          const packageFiles: Record<string, PackageFile[]> = {
+            npm: [
+              {
+                deps: [
+                  {
+                    depType: 'devDependencies',
+                    depName: 'axios',
+                    currentValue: '1.14.0',
+                    datasource: 'npm',
+                    prettyDepType: 'devDependency',
+                    lockedVersion: '1.14.0',
+                    updates: [
+                      {
+                        newVersion: '1.14.1',
+                      },
+                      {
+                        // unrelated, using newValue
+                        newValue: '1.14.2',
+                      },
+                      {
+                        // unrelated
+                        newVersion: '2.0.0',
+                      },
+                      {
+                        // doesn't have a newVersion or newValue
+                        updateType: 'digest',
+                        newDigest: '1234',
+                      },
+                    ],
+                    packageName: 'axios',
+
+                    // most importantly
+                    skipReason: 'malicious-update-proposed',
+                  },
+                  // not malicious
+                  {
+                    depType: 'devDependencies',
+                    depName: 'axios',
+                    currentValue: '1.14.0',
+                    datasource: 'npm',
+                    prettyDepType: 'devDependency',
+                    lockedVersion: '1.14.0',
+                    updates: [],
+                    packageName: 'axios',
+                  },
+                ],
+                packageFile: 'package.json',
+              },
+            ],
+          };
+
+          const config = {
+            repoIsOnboarded: true,
+            baseBranch: 'main',
+          };
+
+          await lookup(config, packageFiles);
+
+          expect(logger.logger.warn).toHaveBeenCalledWith(
+            {
+              packageFile: 'package.json',
+              depName: 'axios',
+              packageName: 'axios',
+              manager: 'npm',
+              datasource: 'npm',
+              newVersions: ['1.14.1', '1.14.2', '2.0.0'],
+            },
+            'Dependency has update(s) proposed which would update you to a malicious version - skipping',
+          );
+        });
+      });
     });
   });
 

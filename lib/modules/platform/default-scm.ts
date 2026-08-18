@@ -1,5 +1,7 @@
+import type { DateTime } from 'luxon';
 import * as git from '../../util/git/index.ts';
-import type { CommitFilesConfig, LongCommitSha } from '../../util/git/types.ts';
+import type { CommitFilesConfig } from '../../util/git/types.ts';
+import type { LongCommitSha } from '../../util/schema-utils/git.ts';
 import type { PlatformScm } from './types.ts';
 
 export class DefaultGitScm implements PlatformScm {
@@ -19,6 +21,14 @@ export class DefaultGitScm implements PlatformScm {
 
   getBranchCommit(branchName: string): Promise<LongCommitSha | null> {
     return Promise.resolve(git.getBranchCommit(branchName));
+  }
+
+  getBranchUpdateDate(branchName: string): Promise<DateTime | null> {
+    return git.getBranchUpdateDate(branchName);
+  }
+
+  getAllBranchUpdateDates(): Promise<Record<string, DateTime>> {
+    return git.getAllBranchUpdateDates();
   }
 
   isBranchBehindBase(branchName: string, baseBranch: string): Promise<boolean> {

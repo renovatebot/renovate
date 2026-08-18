@@ -11,7 +11,7 @@ import { delimiters, extractRubyVersion, getLockFilePath } from './common.ts';
 import { extractLockFileEntries } from './locked-version.ts';
 
 function formatContent(input: string): string {
-  return input.replace(regEx(/^ {2}/), '') + '\n'; //remove leading whitespace and add a new line at the end
+  return `${input.replace(regEx(/^ {2}/), '')}\n`; //remove leading whitespace and add a new line at the end
 }
 
 const variableMatchRegex = regEx(
@@ -131,10 +131,8 @@ export async function extractPackageFile(
     }
 
     const variableMatch = variableMatchRegex.exec(line);
-    if (variableMatch) {
-      if (variableMatch.groups?.key) {
-        variables[variableMatch.groups?.key] = variableMatch.groups?.value;
-      }
+    if (variableMatch?.groups?.key) {
+      variables[variableMatch.groups?.key] = variableMatch.groups?.value;
     }
 
     const gemMatch = gemMatchRegex.exec(line)?.groups;
@@ -172,7 +170,7 @@ export async function extractPackageFile(
           dep.packageName = gitUrl;
 
           if (isHttpUrl(gitUrl)) {
-            dep.sourceUrl = gitUrl.replace(/\.git$/, '');
+            dep.sourceUrl = gitUrl.replace(regEx(/\.git$/), '');
           }
         } else if (gitRefsMatch.repoName) {
           dep.packageName = `https://github.com/${gitRefsMatch.repoName}`;
@@ -201,10 +199,11 @@ export async function extractPackageFile(
         if (sourceBlockMatch.groups?.registryUrl) {
           repositoryUrl = sourceBlockMatch.groups.registryUrl;
         }
-        if (sourceBlockMatch.groups?.sourceName) {
-          if (variables[sourceBlockMatch.groups.sourceName]) {
-            repositoryUrl = variables[sourceBlockMatch.groups.sourceName];
-          }
+        if (
+          sourceBlockMatch.groups?.sourceName &&
+          variables[sourceBlockMatch.groups.sourceName]
+        ) {
+          repositoryUrl = variables[sourceBlockMatch.groups.sourceName];
         }
         const sourceLineNumber = lineNumber;
         let sourceContent = '';

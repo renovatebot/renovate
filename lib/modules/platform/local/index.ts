@@ -8,10 +8,12 @@ import type {
 } from '../types.ts';
 
 export const id = 'local';
+export const experimental = true;
 
-export function initPlatform(_params: PlatformParams): Promise<PlatformResult> {
+export function initPlatform(params: PlatformParams): Promise<PlatformResult> {
+  const dryRun = params.dryRun === 'extract' ? 'extract' : 'lookup';
   return Promise.resolve({
-    dryRun: 'lookup',
+    dryRun,
     endpoint: 'local',
     persistRepoData: true,
     requireConfig: 'optional',

@@ -3,14 +3,18 @@ import upath from 'upath';
 import { Fixtures } from '~test/fixtures.ts';
 import { fs, logger } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
-import type { RepoGlobalConfig } from '../../../config/types.ts';
+import type {
+  InternalGlobalConfigOptions,
+  RepoGlobalConfig,
+} from '../../../config/types.ts';
 import { DotnetVersionDatasource } from '../../datasource/dotnet-version/index.ts';
 import type { ExtractConfig } from '../types.ts';
 import { extractPackageFile } from './index.ts';
+import * as nugetExtractUtil from './util.ts';
 
 const config: ExtractConfig = {};
 
-const adminConfig: RepoGlobalConfig = {
+const adminConfig: RepoGlobalConfig & InternalGlobalConfigOptions = {
   localDir: upath.resolve('lib/modules/manager/nuget/__fixtures__'),
 };
 
@@ -152,6 +156,24 @@ describe('modules/manager/nuget/extract', () => {
       expect(res?.deps).toHaveLength(1);
     });
 
+    it('extracts msbuild sdk from sqlproj Sdk element', async () => {
+      const packageFile = 'sample.sqlproj';
+      const sample = codeBlock`
+        <Project>
+          <Sdk Name="Microsoft.Build.Sql" Version="0.1.19-preview" />
+        </Project>
+      `;
+      const res = await extractPackageFile(sample, packageFile, config);
+      expect(res?.deps).toEqual([
+        {
+          depName: 'Microsoft.Build.Sql',
+          depType: 'msbuild-sdk',
+          currentValue: '0.1.19-preview',
+          datasource: 'nuget',
+        },
+      ]);
+    });
+
     it('does not extract msbuild sdk from the Sdk element if version is missing', async () => {
       const packageFile = 'sample.csproj';
       const sample = `
@@ -190,6 +212,26 @@ describe('modules/manager/nuget/extract', () => {
         },
       ]);
       expect(res?.deps).toHaveLength(1);
+    });
+
+    it('does not set versioning on PackageReference dependencies', async () => {
+      const packageFile = 'sample.csproj';
+      const sample = codeBlock`
+        <Project>
+          <ItemGroup>
+            <PackageReference Include="Autofac" Version="4.5.0" />
+          </ItemGroup>
+        </Project>
+      `;
+      const res = await extractPackageFile(sample, packageFile, config);
+      expect(res?.deps).toEqual([
+        {
+          currentValue: '4.5.0',
+          datasource: 'nuget',
+          depName: 'Autofac',
+          depType: 'nuget',
+        },
+      ]);
     });
 
     it('does not extract msbuild sdk from the Import element if version is missing', async () => {
@@ -575,6 +617,60 @@ describe('modules/manager/nuget/extract', () => {
 
       it('does not throw', async () => {
         expect(await extractPackageFile('{{', packageFile, config)).toBeNull();
+      });
+    });
+
+    describe('single-csharp-file', () => {
+      it('reads sdk and package directives', async () => {
+        const packageFile = 'single-csharp-file/singlefile.cs';
+        const contents = codeBlock`
+          #:sdk Some.Sdk@6.0.0
+          #:package Some.NuGet.Package@3.0.1
+
+          // https://devblogs.microsoft.com/dotnet/announcing-dotnet-run-app/
+
+          Console.WriteLine("Hello World!");
+          `;
+        expect(await extractPackageFile(contents, packageFile, config)).toEqual(
+          {
+            deps: [
+              {
+                datasource: 'nuget',
+                currentValue: '6.0.0',
+                depName: 'Some.Sdk',
+                depType: 'msbuild-sdk',
+              },
+              {
+                datasource: 'nuget',
+                currentValue: '3.0.1',
+                depName: 'Some.NuGet.Package',
+                depType: 'nuget',
+              },
+            ],
+          },
+        );
+      });
+    });
+
+    describe('single-csharp-file-nuget', () => {
+      it('calls applyRegistries to honor nuget.config files if present', async () => {
+        const packageFile = 'single-csharp-file-nuget/singlefile.cs';
+        const contents = codeBlock`
+          #:sdk Some.Sdk@6.0.0
+          #:package Some.NuGet.Package@3.0.1
+
+          // https://devblogs.microsoft.com/dotnet/announcing-dotnet-run-app/
+
+          Console.WriteLine("Hello World!");
+          `;
+
+        const applyRegistriesSpy = vi
+          .spyOn(nugetExtractUtil, 'applyRegistries')
+          .mockImplementation((deps: any) => deps);
+
+        await extractPackageFile(contents, packageFile, config);
+
+        expect(applyRegistriesSpy).toHaveBeenCalled();
       });
     });
   });
