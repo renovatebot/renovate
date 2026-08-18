@@ -964,34 +964,44 @@ describe('modules/datasource/pypi/index', () => {
       ]);
     });
 
-    it.each`
-      statusCode
-      ${400}
-      ${403}
-      ${406}
-      ${415}
-    `(
-      'retries without negotiated Accept header when registry responds $statusCode',
-      async ({ statusCode }: { statusCode: number }) => {
-        httpMock
-          .scope('https://some.registry.org/simple/')
-          .get('/dj-database-url/')
-          .reply(statusCode)
-          .get('/dj-database-url/')
-          .reply(200, htmlResponse);
-        const config = {
-          registryUrls: ['https://some.registry.org/simple/'],
-        };
+    it('retries without negotiated Accept header when registry responds 406', async () => {
+      httpMock
+        .scope('https://some.registry.org/simple/')
+        .get('/dj-database-url/')
+        .reply(406)
+        .get('/dj-database-url/')
+        .reply(200, htmlResponse);
+      const config = {
+        registryUrls: ['https://some.registry.org/simple/'],
+      };
 
-        const res = await getPkgReleases({
-          datasource,
-          ...config,
-          packageName: 'dj-database-url',
-        });
+      const res = await getPkgReleases({
+        datasource,
+        ...config,
+        packageName: 'dj-database-url',
+      });
 
-        expect(res?.releases).toMatchObject(djDatabaseUrlSimpleReleases);
-      },
-    );
+      expect(res?.releases).toMatchObject(djDatabaseUrlSimpleReleases);
+    });
+
+    it('does not retry for a status code which is not `406`', async () => {
+      // only `406` means the registry could not serve any of the negotiated types, so anything else is a real failure rather than a rejected `Accept` header
+      httpMock
+        .scope('https://some.registry.org/simple/')
+        .get('/dj-database-url/')
+        .reply(415);
+      const config = {
+        registryUrls: ['https://some.registry.org/simple/'],
+      };
+
+      const res = await getPkgReleases({
+        datasource,
+        ...config,
+        packageName: 'dj-database-url',
+      });
+
+      expect(res).toBeNull();
+    });
 
     it('retries without negotiated Accept header when abortOnError is set', async () => {
       hostRules.add({

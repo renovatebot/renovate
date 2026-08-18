@@ -21,11 +21,6 @@ import type { PypiRelease } from './schema.ts';
 import { PypiResponse, PypiSimpleResponse } from './schema.ts';
 import type { Releases } from './types.ts';
 
-// Status codes which registries are known to use when they reject an `Accept`
-// header they don't understand. `406` is the correct one, but Artifactory,
-// Nexus and devpi builds have been seen to use these others instead.
-const acceptRejectedStatusCodes = [400, 403, 406, 415];
-
 export class PypiDatasource extends Datasource {
   static readonly id = 'pypi';
 
@@ -371,11 +366,9 @@ export class PypiDatasource extends Datasource {
       const httpErr = err instanceof ExternalHostError ? err.err : err;
       const statusCode =
         httpErr instanceof HttpError ? httpErr.response?.statusCode : undefined;
-      // A registry doing strict content negotiation may not honor the
-      // `text/html; q=0.01` fallback and reject the request outright.
-      // Retry once without the negotiated `accept` header to preserve the
-      // pre-PEP-691 behaviour of a plain request.
-      if (!statusCode || !acceptRejectedStatusCodes.includes(statusCode)) {
+      // A registry which cannot serve any of the negotiated types answers `406` (RFC 9110), rather than honoring the `text/html; q=0.01` fallback.
+      // Retry once without the negotiated `accept` header to preserve the pre-PEP-691 behaviour of a plain request.
+      if (statusCode !== 406) {
         throw err;
       }
 
