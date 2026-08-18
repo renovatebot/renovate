@@ -1235,8 +1235,10 @@ describe('modules/datasource/pypi/index', () => {
     });
 
     it('uses the earliest upload-time of real world data', async () => {
-      // `numpy` 1.5.1 was released in 2010, but gained a wheel in 2014 which PyPI lists first, so the earliest `upload-time` is the only one which reflects when the version became installable
-      // Its Windows installers are not a format we can extract a version from, so they're dropped before we get here, which is why 1.5.0 reports its sdist rather than the installer uploaded a fortnight earlier
+      // `numpy` shows how far off that can be:
+      // - `1.5.1` was released in 2010
+      // - `1.5.1` gained a wheel in 2014, which PyPI lists first
+      // - `1.5.0` lists its sdist first, even though a Windows installer was uploaded earlier
       httpMock
         .scope('https://some.registry.org/simple/')
         .get('/numpy/')
