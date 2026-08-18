@@ -14,6 +14,7 @@ const googleAuth = vi.mocked(_googleAuth);
 
 const res1 = Fixtures.get('azure-cli-monitor.json');
 const numpyResponse = Fixtures.get('numpy.json');
+const numpySimpleResponse = Fixtures.get('numpy-simple.json');
 const htmlResponse = Fixtures.get('versions-html.html');
 const mixedCaseResponse = Fixtures.get('versions-html-mixed-case.html');
 const withPeriodsResponse = Fixtures.get('versions-html-with-periods.html');
@@ -1230,6 +1231,28 @@ describe('modules/datasource/pypi/index', () => {
           version: '0.4.1',
           releaseTimestamp: '2016-04-18T07:30:00.000Z',
         },
+      ]);
+    });
+
+    it('uses the earliest upload-time of real world data', async () => {
+      // `numpy` 1.5.1 was released in 2010, but gained a wheel in 2014 which PyPI lists first, so the earliest `upload-time` is the only one which reflects when the version became installable
+      // Its Windows installers are not a format we can extract a version from, so they're dropped before we get here, which is why 1.5.0 reports its sdist rather than the installer uploaded a fortnight earlier
+      httpMock
+        .scope('https://some.registry.org/simple/')
+        .get('/numpy/')
+        .reply(200, numpySimpleResponse, {
+          'content-type': 'application/vnd.pypi.simple.v1+json',
+        });
+
+      const res = await getPkgReleases({
+        datasource,
+        registryUrls: ['https://some.registry.org/simple/'],
+        packageName: 'numpy',
+      });
+
+      expect(res?.releases).toEqual([
+        { releaseTimestamp: '2010-09-15T14:44:53.723Z', version: '1.5.0' },
+        { releaseTimestamp: '2010-11-18T14:16:58.801Z', version: '1.5.1' },
       ]);
     });
 
