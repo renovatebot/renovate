@@ -197,6 +197,7 @@ async function mergeRegistries(
 ): Promise<ReleaseResult | null> {
   let combinedRes: ReleaseResult | undefined;
   let lastErr: Error | undefined;
+  let externalHostError: ExternalHostError | undefined;
   let singleRegistry = true;
   const releaseVersioning = versioning.get(config.versioning);
   for (const registryUrl of registryUrls) {
@@ -268,7 +269,14 @@ async function mergeRegistries(
       delete combinedRes.registryUrl;
     } catch (err) {
       if (err instanceof ExternalHostError) {
-        throw err;
+        // Don't abort the merge if another registry already returned releases;
+        // a single rate-limited registry shouldn't discard results we have
+        externalHostError = err;
+        logger.debug(
+          { err, registryUrl },
+          'datasource merge: external host error from registry; continuing so releases from other registries are not discarded',
+        );
+        continue;
       }
 
       lastErr = err;
@@ -277,6 +285,10 @@ async function mergeRegistries(
   }
 
   if (!combinedRes) {
+    if (externalHostError) {
+      throw externalHostError;
+    }
+
     if (lastErr) {
       throw lastErr;
     }
