@@ -1406,6 +1406,42 @@ describe('workers/repository/process/vulnerabilities', () => {
       expect(config.packageRules).toHaveLength(0);
     });
 
+    it('scopes remediation package rules to the vulnerable dependency depType', async () => {
+      const packageFiles: Record<string, PackageFile[]> = {
+        npm: [
+          {
+            deps: [
+              {
+                depName: 'lodash',
+                depType: 'dependencies',
+                currentValue: '4.17.10',
+                datasource: 'npm',
+              },
+            ],
+            packageFile: 'package.json',
+          },
+        ],
+      };
+      getVulnerabilitiesMock.mockResolvedValueOnce([lodashVulnerability]);
+
+      await vulnerabilities.appendVulnerabilityPackageRules(
+        config,
+        packageFiles,
+      );
+
+      expect(config.packageRules).toHaveLength(1);
+      expect(config.packageRules).toMatchObject([
+        {
+          matchDatasources: ['npm'],
+          matchPackageNames: ['lodash'],
+          matchDepTypes: ['dependencies'],
+          matchCurrentVersion: '4.17.10',
+          allowedVersions: '>= 4.17.11',
+          isVulnerabilityAlert: true,
+        },
+      ]);
+    });
+
     it('sets default datasource versioning to align with allowedVersions on packageRule', async () => {
       const packageFiles: Record<string, PackageFile[]> = {
         gomod: [
