@@ -819,11 +819,11 @@ foo.bar = "ignored"
     it('returns unsupported when the TOML AST has no top-level table', () => {
       const parseTOML = vi.mocked(tomlParser.parseTOML);
       const parseTOMLImplementation = parseTOML.getMockImplementation();
+      const emptyAst = parseTOMLImplementation!('foo = "bar"');
+      emptyAst.body.splice(0);
       parseTOML
         .mockImplementationOnce(parseTOMLImplementation!)
-        .mockReturnValueOnce({
-          body: [],
-        } as ReturnType<typeof tomlParser.parseTOML>);
+        .mockReturnValueOnce(emptyAst);
 
       const res = updateLockedDependency({
         packageFile: 'mise.toml',
