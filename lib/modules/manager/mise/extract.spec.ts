@@ -1332,7 +1332,7 @@ describe('modules/manager/mise/extract', () => {
           currentValue: '25.0.3+9.0.LTS',
           currentRawValue: 'temurin-25',
           lockedVersion: '25.0.3+9.0.LTS',
-          allowedVersions: '/^(?:temurin\\-)?25(?:\\.|-|\\+|$)/',
+          allowedVersions: '/^(?:\\x74emurin\\x2d)?25(?:\\.|-|\\+|$)/',
           isLockfileOnly: true,
           rangeStrategy: 'update-lockfile',
         },

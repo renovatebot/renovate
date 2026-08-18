@@ -8,7 +8,7 @@ import {
 } from '@sindresorhus/is';
 import { logger } from '../../../logger/index.ts';
 import { readLocalFile } from '../../../util/fs/index.ts';
-import { escapeRegExp, regEx } from '../../../util/regex.ts';
+import { regEx } from '../../../util/regex.ts';
 import { JavaVersionDatasource } from '../../datasource/java-version/index.ts';
 import { NodeVersionDatasource } from '../../datasource/node-version/index.ts';
 import type { StaticTooling } from '../asdf/upgradeable-tooling.ts';
@@ -308,7 +308,7 @@ function getSelectorConfig(
   }
 
   const { prefix, major, minor } = match.groups;
-  const prefixPattern = prefix ? `(?:${escapeRegExp(prefix)})?` : '';
+  const prefixPattern = prefix ? `(?:${RegExp.escape(prefix)})?` : '';
   const precisionPattern = minor
     ? `\\.${minor}(?:\\.|-|\\+|$)`
     : `(?:\\.|-|\\+|$)`;
