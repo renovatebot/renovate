@@ -790,7 +790,9 @@ describe('workers/repository/init/merge', () => {
         );
       });
 
-      it('incorrectly applies `repositories[]` entry headers, if it is NOT in `allowedHeaders`', async () => {
+      it('drops `repositories[]` entry headers, if it is not in `allowedHeaders`', async () => {
+        // previously this would apply due to a gap in re-validating `allowedHeaders` against the resolved config.
+        // `applyHostRules` filters by header name at request time, so this does not reach the final HTTP call, but we should make sure this also doesn't break
         GlobalConfig.set({ allowedHeaders: ['X-*'] });
         fs.readLocalFile.mockResolvedValue(JSON.stringify({}));
 
@@ -807,13 +809,17 @@ describe('workers/repository/init/merge', () => {
         });
 
         expect(hostRules.find({ url: 'https://registry.example.com' })).toEqual(
-          { headers: { Authorization: 'from-admin' } },
+          { headers: {} },
+        );
+        expect(logger.logger.warn).toHaveBeenCalledWith(
+          { denied: ['Authorization'] },
+          "Ignoring hostRules headers not permitted by this Renovate instance's `allowedHeaders`",
         );
       });
 
-      it('incorrectly applies `hostRules` headers injected by a preset, if it is NOT in `allowedHeaders`', async () => {
-        // `allowedHeaders` is only enforced by `validateConfig`, against the config as written, and nothing re-checks the resolved config before `hostRules.add`.
-        // `applyHostRules` filters by header name at request time, so this does not reach the final HTTP call - but it is applied here, and nothing reports it
+      it('drops `hostRules` headers injected by a preset, if it is not in `allowedHeaders`', async () => {
+        // previously this would apply due to a gap in re-validating `allowedHeaders` against the resolved config.
+        // `applyHostRules` filters by header name at request time, so this does not reach the final HTTP call, but we should make sure this also doesn't break
         GlobalConfig.set({ allowedHeaders: ['X-*'] });
         memCache.set('preset:local>headerPreset', {
           hostRules: [
@@ -830,7 +836,11 @@ describe('workers/repository/init/merge', () => {
         await mergeRenovateConfig(config);
 
         expect(hostRules.find({ url: 'https://registry.example.com' })).toEqual(
-          { headers: { Authorization: 'from-preset' } },
+          { headers: {} },
+        );
+        expect(logger.logger.warn).toHaveBeenCalledWith(
+          { denied: ['Authorization'] },
+          "Ignoring hostRules headers not permitted by this Renovate instance's `allowedHeaders`",
         );
       });
     });
@@ -924,6 +934,28 @@ describe('workers/repository/init/merge', () => {
       expect(clearQueueSpy).toHaveBeenCalledOnce();
       expect(clearThrottleSpy).toHaveBeenCalledOnce();
       expect(config.hostRules).toBeUndefined();
+    });
+
+    it('filters headers against allowedHeaders before adding', () => {
+      GlobalConfig.set({ allowedHeaders: ['X-*'] });
+      const addSpy = vi
+        .spyOn(hostRules, 'add')
+        .mockImplementation(() => undefined);
+      const config = {
+        hostRules: [
+          {
+            matchHost: 'registry.example.com',
+            headers: { 'X-Allowed': 'yes', Authorization: 'Bearer secret' },
+          },
+        ],
+      };
+
+      applyHostRules(config);
+
+      expect(addSpy).toHaveBeenCalledExactlyOnceWith({
+        matchHost: 'registry.example.com',
+        headers: { 'X-Allowed': 'yes' },
+      });
     });
 
     it('warns on invalid hostRule and continues applying others', () => {

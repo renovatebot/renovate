@@ -2842,6 +2842,7 @@ const options: Readonly<RenovateOptions>[] = [
     stage: 'repository',
     cli: true,
     mergeable: true,
+    requiresCheckAtTrustBoundary: true,
   },
   {
     name: 'hostType',

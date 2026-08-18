@@ -1300,7 +1300,15 @@ async function validateGlobalConfig(
             warnings.push(warning);
           }
         } else if (key === 'force') {
-          const subValidation = await validateConfig('global', val);
+          // `force` is validated as a global config of its own, so it does not automatically see the top-level `allowedEnv`/`allowedHeaders`.
+          // Inherit them (unless `force` sets its own) so that the self-hosted admin's own `force.env`/`force.hostRules[].headers` are validated against the allowlists they set, rather than an empty one.
+          const subValidation = await validateConfig('global', {
+            ...(config.allowedEnv ? { allowedEnv: config.allowedEnv } : {}),
+            ...(config.allowedHeaders
+              ? { allowedHeaders: config.allowedHeaders }
+              : {}),
+            ...val,
+          });
           for (const warning of subValidation.warnings.concat(
             subValidation.errors,
           )) {

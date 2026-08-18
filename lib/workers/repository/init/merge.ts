@@ -48,6 +48,7 @@ import {
   getDefaultConfigFileName,
 } from '../onboarding/common.ts';
 import { filterAllowedEnv } from './filter-allowed-env.ts';
+import { filterAllowedHeaders } from './filter-allowed-headers.ts';
 import type { RepoFileConfig, RepositoryWorkerConfig } from './types.ts';
 
 export async function detectConfigFile(): Promise<string | null> {
@@ -371,7 +372,7 @@ export function applyHostRules(config: RenovateConfig): void {
   }
 
   logger.debug('Setting hostRules from config');
-  for (const rule of config.hostRules) {
+  for (const rule of filterAllowedHeaders(config.hostRules)) {
     try {
       hostRules.add(rule);
     } catch (err) {

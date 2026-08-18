@@ -3245,6 +3245,58 @@ describe('config/validation', () => {
       expect(warnings).toBeEmptyArray();
     });
 
+    it('allows `env` within `force` inside the global `allowedEnv`', async () => {
+      const config: AllConfig = {
+        allowedEnv: ['PATH'],
+        force: { env: { PATH: '/home/ubuntu/bin' } },
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'global',
+        config,
+      );
+      expect(errors).toBeEmptyArray();
+      expect(warnings).toBeEmptyArray();
+    });
+
+    it('reports `env` within `force` outside the global `allowedEnv`', async () => {
+      const config: AllConfig = {
+        allowedEnv: ['PATH'],
+        force: { env: { NOT_ALLOWED: 'value' } },
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'global',
+        config,
+      );
+      expect(errors).toBeEmptyArray();
+      expect(warnings).toMatchObject([
+        {
+          topic: 'Configuration Error',
+          message:
+            "Env variable name `NOT_ALLOWED` is not allowed by this Renovate instance's `allowedEnv`.",
+        },
+      ]);
+    });
+
+    it('allows hostRules `headers` within `force` inside the global `allowedHeaders`', async () => {
+      const config: AllConfig = {
+        allowedHeaders: ['X-Custom-*'],
+        force: {
+          hostRules: [
+            {
+              matchHost: 'https://domain.com/all-versions',
+              headers: { 'X-Custom-Token': 'token' },
+            },
+          ],
+        },
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'global',
+        config,
+      );
+      expect(errors).toBeEmptyArray();
+      expect(warnings).toBeEmptyArray();
+    });
+
     it('allows hostRules `headers` on repositories[] entries within the global `allowedHeaders`', async () => {
       const config: AllConfig = {
         allowedHeaders: ['X-Custom-*'],
