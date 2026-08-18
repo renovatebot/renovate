@@ -966,8 +966,7 @@ describe('modules/datasource/pypi/index', () => {
         .scope('https://some.registry.org/simple/')
         .get('/dj-database-url/')
         .reply(200, simpleJson, {
-          // Some registries/proxies relabel or don't emit the exact vendor
-          // media type, while still returning a JSON body.
+          // Some registries/proxies relabel or don't emit the exact vendor media type, while still returning a JSON body.
           'content-type': 'application/json',
         });
       const config = {

@@ -305,8 +305,7 @@ export class PypiDatasource extends Datasource {
         { packageName, err: parsed.error },
         'Failed to parse JSON-based Simple API response',
       );
-      // Distinguish a malformed response from a package with genuinely no
-      // files, so the caller doesn't mistake an error for an empty result.
+      // Distinguish a malformed response from a package with genuinely no files, so the caller doesn't mistake an error for an empty result.
       return null;
     }
     for (const file of parsed.data.files) {
@@ -334,8 +333,7 @@ export class PypiDatasource extends Datasource {
       await this.getAuthHeaders(lookupUrl);
     const headers: OutgoingHttpHeaders = {
       ...authHeaders,
-      // Request the JSON serialization (PEP 691), falling back to the legacy
-      // HTML serialization (PEP 503) via content negotiation.
+      // Request the JSON serialization (PEP 691), falling back to the legacy HTML serialization (PEP 503) via content negotiation.
       // https://github.com/pypa/pip/blob/6b0011b49a068c62f65389bf4cea7af5d28cb002/src/pip/_internal/index/collector.py#L128-L134
       accept:
         'application/vnd.pypi.simple.v1+json, application/vnd.pypi.simple.v1+html; q=0.1, text/html; q=0.01',
@@ -344,8 +342,7 @@ export class PypiDatasource extends Datasource {
     try {
       response = await this.http.getText(sanitizedUrl, { headers });
     } catch (err) {
-      // An `abortOnError` host rule makes `Http` wrap the original error, so
-      // unwrap it before looking at the status code.
+      // An `abortOnError` host rule makes `Http` wrap the original error, so unwrap it before looking at the status code.
       const httpErr = err instanceof ExternalHostError ? err.err : err;
       const statusCode =
         httpErr instanceof HttpError ? httpErr.response?.statusCode : undefined;
@@ -373,11 +370,7 @@ export class PypiDatasource extends Datasource {
       dependency.isPrivate = true;
     }
 
-    // Dispatch on the response content-type: JSON serialization (PEP 691)
-    // or the legacy HTML serialization (PEP 503). Matched loosely (any
-    // `json` media type) rather than the exact vendor type, as some
-    // registries/proxies relabel or strip the vendor-specific media type
-    // while still returning JSON.
+    // Dispatch on the response content-type: JSON serialization (PEP 691) or the legacy HTML serialization (PEP 503). Matched loosely (any `json` media type) rather than the exact vendor type, as some registries/proxies relabel or strip the vendor-specific media type while still returning JSON.
     const contentType = response.headers['content-type'];
     const isJson = !!contentType && contentType.includes('json');
     const looksLikeJson = dep.trimStart().startsWith('{');
@@ -388,9 +381,7 @@ export class PypiDatasource extends Datasource {
           dep,
           packageName,
         );
-        // A parse failure is distinct from a package with genuinely no files,
-        // so don't report an empty release list as if it were a real (if
-        // empty) result, which would be cached as such.
+        // A parse failure is distinct from a package with genuinely no files, so don't report an empty release list as if it were a real (if empty) result, which would be cached as such.
         if (!releases) {
           return null;
         }
@@ -398,8 +389,7 @@ export class PypiDatasource extends Datasource {
         return dependency;
       }
 
-      // The registry mislabeled a non-JSON body as JSON, so fall through to
-      // the HTML parser instead of reporting the package as not found.
+      // The registry mislabeled a non-JSON body as JSON, so fall through to the HTML parser instead of reporting the package as not found.
       logger.debug(
         { packageName, hostUrl, contentType },
         'Parsing Simple API response as HTML, as it is labeled as JSON but does not look like it',
@@ -415,9 +405,7 @@ export class PypiDatasource extends Datasource {
       return dependency;
     }
 
-    // The registry honored the `Accept` header but omitted or mislabeled the
-    // `content-type`, so a JSON body went through the HTML parser and found
-    // nothing. Parse it as JSON instead of silently reporting no releases.
+    // The registry honored the `Accept` header but omitted or mislabeled the `content-type`, so a JSON body went through the HTML parser and found nothing. Parse it as JSON instead of silently reporting no releases.
     logger.debug(
       { packageName, hostUrl, contentType },
       'Retrying Simple API response as JSON, as it is not labeled as JSON but looks like it',
@@ -434,9 +422,7 @@ export class PypiDatasource extends Datasource {
   }
 
   /**
-   * The files of a version are not ordered by upload time, so use the earliest
-   * one: that is when the version was first published, which is what
-   * `minimumReleaseAge` needs.
+   * The files of a version are not ordered by upload time, so use the earliest one: that is when the version was first published, which is what `minimumReleaseAge` needs.
    */
   private static toReleases(releases: Releases): Release[] {
     const versions = Object.keys(releases);
@@ -455,15 +441,12 @@ export class PypiDatasource extends Datasource {
       const pythonConstraints = versionReleases.map(
         ({ requires_python }) => requires_python,
       );
-      // A file without `requires_python` can be installed on any Python
-      // version, so the version as a whole is unconstrained
+      // A file without `requires_python` can be installed on any Python version, so the version as a whole is unconstrained
       const isUnconstrained = pythonConstraints.some(
         (constraint) => !isNonEmptyString(constraint),
       );
       // There may be multiple releases with different requires_python, so we return all in an array.
-      // Report no constraints at all for an unconstrained version, instead of
-      // only those of its other files, which would drop the version under
-      // `constraintsFiltering=strict`.
+      // Report no constraints at all for an unconstrained version, instead of only those of its other files, which would drop the version under `constraintsFiltering=strict`.
       result.constraints = {
         python: isUnconstrained
           ? []
