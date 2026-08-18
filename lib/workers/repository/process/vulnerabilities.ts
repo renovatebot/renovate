@@ -264,6 +264,7 @@ export class Vulnerabilities {
             osvPackageName,
             vulnerability: osvVulnerability,
             affected,
+            depType: dep.depType,
             depVersion,
             fixedVersion,
             datasource: dep.datasource!,
@@ -570,6 +571,7 @@ export class Vulnerabilities {
       vulnerability,
       affected,
       packageName,
+      depType,
       depVersion,
       fixedVersion,
       datasource,
@@ -599,7 +601,7 @@ export class Vulnerabilities {
       affected,
     );
 
-    return {
+    const packageRule: PackageRule = {
       matchDatasources: [datasource],
       matchPackageNames: [packageName],
       matchCurrentVersion: depVersion,
@@ -612,6 +614,16 @@ export class Vulnerabilities {
         ...packageFileConfig.vulnerabilityAlerts,
       },
     };
+
+    // The Go module `go` directive shares datasource `golang-version` and
+    // packageName `go` with the toolchain, and `go-mod-directive` versioning
+    // treats `1.x.0` as `^1.x.0`, so `matchCurrentVersion` of the toolchain
+    // still matches the module directive. Scope remediation to the toolchain.
+    if (packageName === 'go' && depType === 'toolchain') {
+      packageRule.matchDepTypes = ['toolchain'];
+    }
+
+    return packageRule;
   }
 
   static evaluateCvssVector(vector: string): [string, string] {
