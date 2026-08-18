@@ -561,11 +561,15 @@ export async function lookupUpdates(
         inRangeOnlyStrategy ? allSatisfyingVersions : allVersions,
         versioningApi,
       ).filter((v) => {
-        // Leave only compatible versions
-        if (unconstrainedValue || config.isLockfileOnly) {
+        if (config.isLockfileOnly) {
           return true;
         }
-        return versioningApi.isCompatible(v.version, compareValue);
+
+        // Leave only compatible versions
+        return (
+          unconstrainedValue ||
+          versioningApi.isCompatible(v.version, compareValue)
+        );
       });
       let shrinkedViaVulnerability = false;
       if (config.isVulnerabilityAlert) {

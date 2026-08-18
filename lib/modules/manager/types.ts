@@ -180,7 +180,7 @@ export interface PackageDependency<
   allowedVersions?: string;
   /** Whether unstable releases should be excluded from update candidates. */
   ignoreUnstable?: boolean;
-  /** True when the dependency selector must remain unchanged in the source file. */
+  /** True when the dependency should only be updated in the lockfile, and the source file should remain untouched. */
   isLockfileOnly?: boolean;
   major?: { enabled?: boolean };
   prettyDepType?: string;
