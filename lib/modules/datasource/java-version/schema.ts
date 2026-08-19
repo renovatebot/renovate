@@ -12,14 +12,7 @@ export const AdoptiumJavaResponse = z.object({
 export type AdoptiumJavaResponse = z.infer<typeof AdoptiumJavaResponse>;
 
 export const MiseJavaRelease = z.object({
-  checksum: z.string().nullable(),
-  created_at: z.string(),
-  features: z.array(z.string()),
-  file_type: z.string(),
   image_type: z.string(),
-  java_version: z.string(),
-  jvm_impl: z.string(),
-  url: z.string(),
   vendor: z.string(),
   version: z.string(),
 });

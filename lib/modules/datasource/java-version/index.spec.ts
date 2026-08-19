@@ -430,6 +430,23 @@ describe('modules/datasource/java-version/index', () => {
         expect(versions).toContain('17.0.13');
       });
 
+      it('skips malformed releases while preserving valid releases', async () => {
+        httpMock
+          .scope(graalvmRegistryUrl)
+          .get(graalvmBasePath)
+          .reply(200, [
+            oracleGraalvmJdkReleases[0],
+            { image_type: 'jdk', vendor: 'oracle-graalvm' },
+          ]);
+        const res = await getPkgReleases({
+          datasource,
+          packageName: 'oracle-graalvm-jdk?os=linux&architecture=x86_64',
+          registryUrls: [graalvmRegistryUrl],
+        });
+
+        expect(res?.releases).toEqual([{ version: '23.0.1' }]);
+      });
+
       it('returns null for undefined response body', async () => {
         httpMock
           .scope(graalvmRegistryUrl)

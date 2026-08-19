@@ -1,6 +1,7 @@
 import { logger } from '../../../logger/index.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
 import { type Http, HttpError } from '../../../util/http/index.ts';
+import { LooseArray } from '../../../util/schema-utils/index.ts';
 import { joinUrlParts } from '../../../util/url.ts';
 import type { ReleaseResult } from '../types.ts';
 import { MiseJavaRelease } from './schema.ts';
@@ -43,7 +44,10 @@ export async function getGraalvmReleases(
   };
 
   try {
-    const response = await http.getJson(url, MiseJavaRelease.array().catch([]));
+    const response = await http.getJson(
+      url,
+      LooseArray(MiseJavaRelease).catch([]),
+    );
 
     // Filter by vendor and image_type
     const filteredReleases = response.body
