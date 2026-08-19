@@ -54,7 +54,6 @@ function mockProcessExitOnce(): [MockInstance<NodeJS.Process['exit']>, Error] {
 
 beforeEach(() => {
   memCache.init();
-  GlobalConfig.reset();
   config = getConfig();
   config.errors = [];
   config.warnings = [];
@@ -67,6 +66,7 @@ describe('workers/repository/init/merge', () => {
   afterEach(() => {
     vi.restoreAllMocks();
     hostRules.clear();
+    GlobalConfig.reset();
   });
 
   describe('detectRepoFileConfig()', () => {
@@ -468,6 +468,7 @@ describe('workers/repository/init/merge', () => {
     });
 
     it('deletes user conifgured env after setting in mem cache', async () => {
+      GlobalConfig.set({ allowedEnv: ['var'] });
       scm.getFileList.mockResolvedValue(['package.json', '.renovaterc.json']);
       fs.readLocalFile.mockResolvedValue('{"env": { "var": "value" }}');
       migrateAndValidate.migrateAndValidate.mockResolvedValue({
