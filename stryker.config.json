@@ -1,7 +1,7 @@
 {
   "$schema": "https://raw.githubusercontent.com/stryker-mutator/stryker-js/refs/tags/v9.6.1/packages/api/schema/stryker-core.json",
   "testRunner": "vitest",
-  "checkers": ["typescript"],
+  "plugins": ["@stryker-mutator/vitest-runner"],
   "tsconfigFile": "tsconfig.json",
   "mutate": [
     "lib/**/*.ts",

@@ -18,6 +18,9 @@ overrides:
   protobufjs@8.0.1: 8.7.2
   vite: 8.2.1
 
+patchedDependencies:
+  '@stryker-mutator/core@9.6.1': af6eede65d7932decce9612a012705d38cbd8fc730e2dfa554aec5e3e3ba81f7
+
 importers:
 
   .:
@@ -412,7 +415,7 @@ importers:
         version: 4.7.16
       '@stryker-mutator/core':
         specifier: 9.6.1
-        version: 9.6.1(@types/node@24.13.3)(supports-color@7.2.0)
+        version: 9.6.1(patch_hash=af6eede65d7932decce9612a012705d38cbd8fc730e2dfa554aec5e3e3ba81f7)(@types/node@24.13.3)(supports-color@7.2.0)
       '@stryker-mutator/typescript-checker':
         specifier: 9.6.1
         version: 9.6.1(@stryker-mutator/core@9.6.1)(typescript@7.0.2)
@@ -7829,7 +7832,7 @@ snapshots:
       tslib: 2.8.1
       typed-inject: 5.0.0
 
-  '@stryker-mutator/core@9.6.1(@types/node@24.13.3)(supports-color@7.2.0)':
+  '@stryker-mutator/core@9.6.1(patch_hash=af6eede65d7932decce9612a012705d38cbd8fc730e2dfa554aec5e3e3ba81f7)(@types/node@24.13.3)(supports-color@7.2.0)':
     dependencies:
       '@inquirer/prompts': 8.5.2(@types/node@24.13.3)
       '@stryker-mutator/api': 9.6.1
@@ -7881,7 +7884,7 @@ snapshots:
   '@stryker-mutator/typescript-checker@9.6.1(@stryker-mutator/core@9.6.1)(typescript@7.0.2)':
     dependencies:
       '@stryker-mutator/api': 9.6.1
-      '@stryker-mutator/core': 9.6.1(@types/node@24.13.3)(supports-color@7.2.0)
+      '@stryker-mutator/core': 9.6.1(patch_hash=af6eede65d7932decce9612a012705d38cbd8fc730e2dfa554aec5e3e3ba81f7)(@types/node@24.13.3)(supports-color@7.2.0)
       '@stryker-mutator/util': 9.6.1
       semver: 7.7.4
       typescript: 7.0.2
@@ -7891,7 +7894,7 @@ snapshots:
   '@stryker-mutator/vitest-runner@9.6.1(@stryker-mutator/core@9.6.1)(vitest@4.1.10)':
     dependencies:
       '@stryker-mutator/api': 9.6.1
-      '@stryker-mutator/core': 9.6.1(@types/node@24.13.3)(supports-color@7.2.0)
+      '@stryker-mutator/core': 9.6.1(patch_hash=af6eede65d7932decce9612a012705d38cbd8fc730e2dfa554aec5e3e3ba81f7)(@types/node@24.13.3)(supports-color@7.2.0)
       '@stryker-mutator/util': 9.6.1
       semver: 7.8.5
       tslib: 2.8.1
