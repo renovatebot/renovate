@@ -15,7 +15,8 @@ Renovate resolves the source relative to the build file, extracts it, and update
 A source that several targets refer to is extracted once.
 
 The format of the source file decides which extractor Renovate uses.
-A `pyproject.toml` with a `[tool.poetry]` table is read as Poetry, any other `pyproject.toml` is read as PEP 621, and every other source is read as a pip requirements file.
+Renovate parses a `pyproject.toml` and reads it as Poetry when the file has a `tool.poetry` table, and as PEP 621 when it does not.
+Every other source is read as a pip requirements file.
 Each dependency keeps the `depType` that its own format gives it, including Poetry and uv dependency groups.
 
 Pants reads a narrower part of some sources than Renovate does.

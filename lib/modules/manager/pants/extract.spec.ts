@@ -230,6 +230,65 @@ describe('modules/manager/pants/extract', () => {
       ]);
     });
 
+    it('reads Poetry written in other legal spellings', async () => {
+      // Table headers may carry spaces or quoted keys, the table may be
+      // inline, and the dependencies may be a dotted key. None of these say
+      // the literal `[tool.poetry]`.
+      const spellings = [
+        codeBlock`
+          [ tool.poetry ]
+          name = "my-package"
+
+          [ tool.poetry.dependencies ]
+          requests = "^2.31.0"
+        `,
+        codeBlock`
+          [tool."poetry"]
+          name = "my-package"
+
+          [tool."poetry".dependencies]
+          requests = "^2.31.0"
+        `,
+        codeBlock`
+          [tool]
+          poetry = { name = "my-package", dependencies = { requests = "^2.31.0" } }
+        `,
+        'tool.poetry.dependencies.requests = "^2.31.0"\n',
+      ];
+
+      for (const content of spellings) {
+        const res = await extractPackageFile(content, 'pyproject.toml');
+        expect(res?.deps).toMatchObject([
+          { depName: 'requests', currentValue: '^2.31.0' },
+        ]);
+      }
+    });
+
+    it('ignores a tool.poetry table that only appears inside a string', async () => {
+      const content = codeBlock`
+        [project]
+        name = "my-package"
+        description = """
+        Migrated away from [tool.poetry] a while ago.
+        """
+        dependencies = ["typing-extensions>=4.8.0,<5.0.0"]
+
+        [tool.uv]
+        dev-dependencies = ["ruff>=0.6.0"]
+      `;
+      const res = await extractPackageFile(content, 'pyproject.toml');
+      expect(res?.deps).toMatchObject([
+        { depName: 'typing-extensions', depType: 'project.dependencies' },
+        { depName: 'ruff', depType: 'tool.uv.dev-dependencies' },
+      ]);
+    });
+
+    it('leaves an unparseable pyproject.toml to the PEP 621 extractor', async () => {
+      expect(
+        await extractPackageFile('this is not toml [[[', 'pyproject.toml'),
+      ).toBeNull();
+    });
+
     it('parses a pyproject.toml source as PEP 621', async () => {
       const content = codeBlock`
         [project]

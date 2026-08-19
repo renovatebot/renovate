@@ -1,6 +1,12 @@
 import upath from 'upath';
+import { z } from 'zod/v4';
 import { logger } from '../../../logger/index.ts';
 import { getSiblingFileName, readLocalFile } from '../../../util/fs/index.ts';
+import { Result } from '../../../util/result.ts';
+import {
+  massage as massageToml,
+  parse as parseToml,
+} from '../../../util/toml.ts';
 import { extractPackageFile as extractPyProjectFile } from '../pep621/extract.ts';
 import { extractPackageFile as extractRequirementsFile } from '../pip_requirements/extract.ts';
 import { extractPackageFile as extractPoetryFile } from '../poetry/extract.ts';
@@ -24,16 +30,32 @@ function isBuildFile(packageFile: string): boolean {
   return upath.basename(packageFile).startsWith('BUILD');
 }
 
+const PoetryPyProject = z.object({
+  tool: z.object({ poetry: z.record(z.string(), z.unknown()) }),
+});
+
 /**
- * Poetry declares itself with a `[tool.poetry]` table, or with a table below
- * it such as `[tool.poetry.dependencies]`. Matching the `[tool.poetry` prefix
- * alone would also match an unrelated tool whose name merely starts the same
- * way, such as `[tool.poetry-dynamic-versioning]`, and would then route a
- * PEP 621 file to the Poetry extractor, which reads none of its `[project]`
- * dependencies.
+ * Poetry announces itself with a `tool.poetry` table. Deciding that by parsing
+ * the file, rather than by looking for the text of a table header, gets the
+ * legal spellings right: `[ tool.poetry ]`, `[tool."poetry"]`, an inline
+ * `poetry = {}` under `[tool]`, a dotted `tool.poetry.dependencies` key, an
+ * unrelated tool such as `[tool.poetry-dynamic-versioning]`, and a
+ * `[tool.poetry]` that only appears inside a string.
+ *
+ * A file that does not parse belongs to neither extractor, so it is left to
+ * `pep621`, which reports the parse failure itself.
  */
-function isPoetryPyProject(content: string): boolean {
-  return content.includes('[tool.poetry]') || content.includes('[tool.poetry.');
+function isPoetryPyProject(content: string, packageFile: string): boolean {
+  const { val: result, err } = Result.wrap(() =>
+    PoetryPyProject.safeParse(parseToml(massageToml(content))),
+  ).unwrap();
+
+  if (err) {
+    logger.debug({ err, packageFile }, 'pants: could not parse pyproject.toml');
+    return false;
+  }
+
+  return result.success;
 }
 
 /**
@@ -50,7 +72,7 @@ function extractSourceFile(
   if (upath.basename(packageFile) !== 'pyproject.toml') {
     return extractRequirementsFile(content);
   }
-  return isPoetryPyProject(content)
+  return isPoetryPyProject(content, packageFile)
     ? extractPoetryFile(content, packageFile)
     : extractPyProjectFile(content, packageFile);
 }
