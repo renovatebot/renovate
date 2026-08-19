@@ -12,9 +12,8 @@ import * as docker from '../../../util/exec/docker/index.ts';
 import type { UpdateArtifactsConfig } from '../types.ts';
 import { updateArtifacts } from './index.ts';
 
-vi.mock('../../../util/exec/env');
-vi.mock('../../../util/fs');
-vi.mock('../../../util/host-rules', () => mockDeep());
+vi.mock('../../../util/exec/env.ts');
+vi.mock('../../../util/fs/index.ts');
 
 const adminConfig: RepoGlobalConfig & InternalGlobalConfigOptions = {
   // `join` fixes Windows CI
@@ -33,9 +32,21 @@ process.env.CONTAINERBASE = 'true';
 
 const config: UpdateArtifactsConfig = {};
 const lockMaintenanceConfig = { ...config, isLockFileMaintenance: true };
-const updateInputCmd = `nix --extra-experimental-features 'nix-command flakes' flake update nixpkgs`;
-const updateInputTokenCmd = `nix --extra-experimental-features 'nix-command flakes' --extra-access-tokens github.com=token flake update nixpkgs`;
-const lockfileMaintenanceCmd = `nix --extra-experimental-features 'nix-command flakes' flake update`;
+const updateInputCmd = `nix \
+--extra-experimental-features 'nix-command flakes' \
+flake update nixpkgs`;
+const updateInputTokenCmd = `nix \
+--extra-experimental-features 'nix-command flakes' \
+--extra-access-tokens github.com=token \
+flake update nixpkgs`;
+const lockfileMaintenanceCmd = `nix \
+--extra-experimental-features 'nix-command flakes' \
+flake update`;
+// Under `binarySource=docker` the whole command becomes the single-quoted argument
+// of `bash -l -c`, so the manager's own single quotes are POSIX-escaped as '"'"'.
+const updateInputCmdInDocker = `nix \
+--extra-experimental-features '"'"'nix-command flakes'"'"' \
+flake update nixpkgs`;
 
 describe('modules/manager/nix/artifacts', () => {
   beforeEach(() => {
@@ -49,11 +60,6 @@ describe('modules/manager/nix/artifacts', () => {
     });
     GlobalConfig.set(adminConfig);
     docker.resetPrefetchedImages();
-    hostRules.find.mockReturnValue({ token: undefined });
-    hostRules.getAll.mockReturnValue([]);
-    fs.getSiblingFileName.mockImplementation(
-      (fileName, siblingName) => siblingName,
-    );
   });
 
   it('returns if no flake.lock found', async () => {
