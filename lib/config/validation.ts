@@ -1051,7 +1051,14 @@ export async function validateConfig(
               }
               if (!matchRegexOrGlobList(header, allowedHeaders)) {
                 errors.push({
-                  topic: ConfigValidationTopic.Error,
+                  // `Security` is always a fatal error that blocks the rest of the Renovate run.
+                  //
+                  // As `hostRules[]` is only applied when it's at the top-level (where `parentPath === undefined`), we should only report a security error there.
+                  //
+                  // If it's found to be set to a disallowed value - even if it's not going to be used - we should report as an error, which may block the run, but much less worryingly than Security.
+                  topic: parentPath
+                    ? ConfigValidationTopic.Error
+                    : ConfigValidationTopic.Security,
                   message: `hostRules header \`${header}\` is not allowed by this Renovate instance's \`allowedHeaders\`.`,
                 });
               }
