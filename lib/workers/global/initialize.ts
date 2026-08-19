@@ -12,6 +12,7 @@ import { validateGitVersion } from '../../util/git/index.ts';
 import * as hostRules from '../../util/host-rules.ts';
 import { setHttpRateLimits } from '../../util/http/rate-limits.ts';
 import { initMergeConfidence } from '../../util/merge-confidence/index.ts';
+import { filterAllowedHeaders } from '../repository/init/filter-allowed-headers.ts';
 import { setMaxLimit } from './limits.ts';
 
 async function setDirectories(input: AllConfig): Promise<AllConfig> {
@@ -65,7 +66,9 @@ function setGlobalHostRules(config: RenovateConfig): void {
       deleteVariables: false,
       deleteSecrets: false,
     });
-    config.hostRules.forEach((rule) => hostRules.add(rule));
+    for (const rule of filterAllowedHeaders(config.hostRules)) {
+      hostRules.add(rule);
+    }
   }
 }
 

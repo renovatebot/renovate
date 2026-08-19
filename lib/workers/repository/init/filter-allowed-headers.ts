@@ -8,10 +8,14 @@ import { matchRegexOrGlobList } from '../../../util/string-match.ts';
  *
  * Loudly remove anything that's not permitted, logging a WARN.
  *
+ * @param [allowedHeaders] the `allowedHeaders` as defined in `GlobalConfig`. Must be passed explicitly i.e. a `repositories[]` entry has an `allowedHeaders` override
+ *
  * Unlike {@link filterAllowedEnv}, it is not currently possible for a self-hosted admin's headers to take precedence, as we lean on the "merging" logic (which currently, incorrectly, takes only repo-level `headers` if they're set for a given host).
  */
-export function filterAllowedHeaders(rules: HostRule[]): HostRule[] {
-  const allowedHeaders = GlobalConfig.get('allowedHeaders');
+export function filterAllowedHeaders(
+  rules: HostRule[],
+  allowedHeaders: string[] | undefined = GlobalConfig.get('allowedHeaders'),
+): HostRule[] {
   const denied: string[] = [];
 
   const result = rules.map((rule) => {
