@@ -3,6 +3,7 @@ import {
   isFalsy,
   isNonEmptyString,
   isNullOrUndefined,
+  isTruthy,
 } from '@sindresorhus/is';
 import { logger } from '../../../../../logger/index.ts';
 import { getPkgReleases } from '../../../../../modules/datasource/index.ts';
@@ -331,7 +332,7 @@ export abstract class ChangeLogSource {
       .replace(regEx(/[[\]()]/g), ' ')
       .replace(regEx(/^\s*#*\s*/), '')
       .split(' ')
-      .filter(Boolean)
+      .filter(isTruthy)
       .filter((word) => !isHttpUrl(word))
       .join('-')
       .replace(regEx(/[^A-Za-z0-9-]/g), '');
