@@ -1,4 +1,4 @@
-import { isString } from '@sindresorhus/is';
+import { isNonEmptyString } from '@sindresorhus/is';
 import { z } from 'zod/v4';
 import { logger } from '../../../logger/index.ts';
 import { readLocalFile } from '../../../util/fs/index.ts';
@@ -77,7 +77,7 @@ export async function discoverRegistryUrls(
       ...Object.keys(parsed.named)
         .sort()
         .map((k) => parsed.named[k]),
-    ].filter((u): u is string => isString(u) && u.length > 0);
+    ].filter(isNonEmptyString);
     for (const url of ordered) {
       if (!seen.has(url)) {
         seen.add(url);
