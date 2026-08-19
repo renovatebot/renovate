@@ -1,7 +1,8 @@
-import { isArray, isNullOrUndefined } from '@sindresorhus/is';
+import { isArray, isNullOrUndefined, isString } from '@sindresorhus/is';
 import json5 from 'json5';
 import { coerce, satisfies } from 'semver';
 import { logger } from '../../../logger/index.ts';
+import { regEx } from '../../../util/regex.ts';
 import { MavenDatasource } from '../../datasource/maven/index.ts';
 import type {
   ExtractConfig,
@@ -62,7 +63,7 @@ export function extractPackageFile(
 
   // convert bundles to dependencies
   for (const entry of allBundles) {
-    const rawGav = typeof entry === 'string' ? entry : entry.id;
+    const rawGav = isString(entry) ? entry : entry.id;
     // skip invalid definitions, such as objects without an id set
     if (!rawGav) {
       continue;
@@ -70,7 +71,7 @@ export function extractPackageFile(
 
     // both '/' and ':' are valid separators, but the Maven datasource
     // expects the separator to be ':'
-    const gav = rawGav.replace(/\//g, ':');
+    const gav = rawGav.replace(regEx(/\//g), ':');
 
     // identifiers support 3-5 parts, see OSGi R8 - 159.2.1 Identifiers
     // groupId ':' artifactId ( ':' type ( ':' classifier )? )? ':' version

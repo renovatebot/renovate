@@ -1,3 +1,4 @@
+import { isTruthy } from '@sindresorhus/is';
 import { codeBlock } from 'common-tags';
 import fs from 'fs-extra';
 import { DateTime } from 'luxon';
@@ -197,6 +198,7 @@ describe('util/git/index', { timeout: 30000 }, () => {
     await local.addConfig('commit.gpgsign', 'false');
     await local.addConfig('user.name', 'Jest');
     await local.addConfig('user.email', 'Jest@example.com');
+    await disableGitAutoMaintenance(local);
     behindBaseCache.getCachedBehindBaseResult.mockReturnValue(null);
     updateDateCache.getCachedUpdateDateResult.mockReturnValue(null);
   });
@@ -1716,7 +1718,7 @@ describe('util/git/index', { timeout: 30000 }, () => {
       )
         .split(newlineRegex)
         .map((line) => line.replace(regEx(/[0-9a-f]+\s+/i), ''))
-        .filter(Boolean);
+        .filter(isTruthy);
     }
 
     it('creates renovate ref in default section', async () => {
@@ -2171,7 +2173,7 @@ describe('util/git/index', { timeout: 30000 }, () => {
     it('should pass pushOptions to git.push', async () => {
       const pushSpy = vi
         .spyOn(SimpleGit.prototype, 'push')
-        .mockResolvedValue({} as PushResult);
+        .mockResolvedValue(partial<PushResult>());
       await expect(
         git.pushCommit({
           sourceRef: defaultBranch,
