@@ -720,6 +720,115 @@ describe('workers/repository/init/merge', () => {
         expect(getUserEnv()).toEqual({ ADMIN_VAR: 'from-config.js' });
       });
     });
+
+    describe('allowedHeaders', () => {
+      beforeEach(() => {
+        migrateAndValidate.migrateAndValidate.mockImplementation((_, c) =>
+          Promise.resolve({ ...c, warnings: [], errors: [] }),
+        );
+        migrate.migrateConfig.mockImplementation((c) => ({
+          isMigrated: false,
+          migratedConfig: c,
+        }));
+        scm.getFileList.mockResolvedValue(['renovate.json']);
+      });
+
+      it('applies `hostRules` headers from the repository config within `allowedHeaders`', async () => {
+        GlobalConfig.set({ allowedHeaders: ['X-*'] });
+        fs.readLocalFile.mockResolvedValue(
+          JSON.stringify({
+            hostRules: [
+              {
+                matchHost: 'registry.example.com',
+                headers: { 'X-Allowed': 'from-repo' },
+              },
+            ],
+          }),
+        );
+
+        await mergeRenovateConfig(config);
+
+        expect(hostRules.find({ url: 'https://registry.example.com' })).toEqual(
+          { headers: { 'X-Allowed': 'from-repo' } },
+        );
+      });
+
+      it("applies a `repositories[]` entry's `hostRules` in full", async () => {
+        GlobalConfig.set({ allowedHeaders: ['X-*', 'custom-header'] });
+        fs.readLocalFile.mockResolvedValue(JSON.stringify({}));
+
+        await mergeRenovateConfig({
+          ...config,
+          secrets: { TOKEN: 'admin-secret' },
+          repositoryEntryConfig: {
+            hostRules: [
+              {
+                matchHost: 'registry.example.com',
+                token: '{{ secrets.TOKEN }}',
+                headers: {
+                  'custom-header': 'Bearer {{ secrets.TOKEN }}',
+                  'X-Allowed': 'yes',
+                },
+              },
+            ],
+          },
+        });
+
+        expect(hostRules.find({ url: 'https://registry.example.com' })).toEqual(
+          {
+            token: 'admin-secret',
+            headers: {
+              'custom-header': 'Bearer admin-secret',
+              'X-Allowed': 'yes',
+            },
+          },
+        );
+      });
+
+      it('incorrectly applies `repositories[]` entry headers, if it is NOT in `allowedHeaders`', async () => {
+        GlobalConfig.set({ allowedHeaders: ['X-*'] });
+        fs.readLocalFile.mockResolvedValue(JSON.stringify({}));
+
+        await mergeRenovateConfig({
+          ...config,
+          repositoryEntryConfig: {
+            hostRules: [
+              {
+                matchHost: 'registry.example.com',
+                headers: { Authorization: 'from-admin' },
+              },
+            ],
+          },
+        });
+
+        expect(hostRules.find({ url: 'https://registry.example.com' })).toEqual(
+          { headers: { Authorization: 'from-admin' } },
+        );
+      });
+
+      it('incorrectly applies `hostRules` headers injected by a preset, if it is NOT in `allowedHeaders`', async () => {
+        // `allowedHeaders` is only enforced by `validateConfig`, against the config as written, and nothing re-checks the resolved config before `hostRules.add`.
+        // `applyHostRules` filters by header name at request time, so this does not reach the final HTTP call - but it is applied here, and nothing reports it
+        GlobalConfig.set({ allowedHeaders: ['X-*'] });
+        memCache.set('preset:local>headerPreset', {
+          hostRules: [
+            {
+              matchHost: 'registry.example.com',
+              headers: { Authorization: 'from-preset' },
+            },
+          ],
+        });
+        fs.readLocalFile.mockResolvedValue(
+          JSON.stringify({ extends: ['local>headerPreset'] }),
+        );
+
+        await mergeRenovateConfig(config);
+
+        expect(hostRules.find({ url: 'https://registry.example.com' })).toEqual(
+          { headers: { Authorization: 'from-preset' } },
+        );
+      });
+    });
   });
 
   describe('setNpmTokenInNpmrc', () => {
