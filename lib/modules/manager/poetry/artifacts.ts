@@ -9,7 +9,6 @@ import { quote } from 'shlex';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
 import type { HostRule } from '../../../types/index.ts';
-import { exec } from '../../../util/exec/index.ts';
 import type { ExecOptions } from '../../../util/exec/types.ts';
 import {
   deleteLocalFile,
@@ -18,7 +17,7 @@ import {
   readLocalFile,
   writeLocalFile,
 } from '../../../util/fs/index.ts';
-import { getGitEnvironmentVariables } from '../../../util/git/auth.ts';
+import { withGitEnvironment } from '../../../util/git/exec.ts';
 import { find } from '../../../util/host-rules.ts';
 import { toMs } from '../../../util/pretty-time.ts';
 import { regEx } from '../../../util/regex.ts';
@@ -33,6 +32,8 @@ import { getGoogleAuthHostRule } from '../../datasource/util.ts';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types.ts';
 import { Lockfile, PoetryPyProject } from './schema.ts';
 import type { PoetryFile, PoetrySource } from './types.ts';
+
+const gitExec = withGitEnvironment(['poetry']);
 
 export function getPythonConstraint(
   pyProjectContent: string,
@@ -227,7 +228,6 @@ export async function updateArtifacts({
         newPackageFileContent,
         packageFileName,
       )),
-      ...getGitEnvironmentVariables(['poetry']),
       PIP_CACHE_DIR: await ensureCacheDir('pip'),
     };
 
@@ -253,7 +253,7 @@ export async function updateArtifacts({
         { toolName: 'poetry', constraint: poetryConstraint },
       ],
     };
-    await exec(cmd, execOptions);
+    await gitExec(cmd, execOptions);
     const newPoetryLockContent = await readLocalFile(lockFileName, 'utf8');
     if (existingLockFileContent === newPoetryLockContent) {
       logger.debug(`${lockFileName} is unchanged`);

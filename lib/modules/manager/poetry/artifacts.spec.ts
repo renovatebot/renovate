@@ -5,10 +5,13 @@ import { mockDeep } from 'vitest-mock-extended';
 import { envMock, mockExecAll } from '~test/exec-util.ts';
 import { Fixtures } from '~test/fixtures.ts';
 import { env, fs, logger } from '~test/util.ts';
+import { hostRules } from '~test/host-rules.ts';
 import { GlobalConfig } from '../../../config/global.ts';
-import type { RepoGlobalConfig } from '../../../config/types.ts';
+import type {
+  InternalGlobalConfigOptions,
+  RepoGlobalConfig,
+} from '../../../config/types.ts';
 import * as docker from '../../../util/exec/docker/index.ts';
-import * as _hostRules from '../../../util/host-rules.ts';
 import * as _datasource from '../../datasource/index.ts';
 import type { UpdateArtifactsConfig } from '../types.ts';
 import { getPoetryRequirement, getPythonConstraint } from './artifacts.ts';
@@ -28,16 +31,14 @@ build-backend = "poetry.masonry.api"
 vi.mock('../../../util/exec/env.ts');
 vi.mock('../../../util/fs/index.ts');
 vi.mock('../../datasource/index.ts', () => mockDeep());
-vi.mock('../../../util/host-rules.ts', () => mockDeep());
 vi.mock('google-auth-library');
 
 process.env.CONTAINERBASE = 'true';
 
 const datasource = vi.mocked(_datasource);
-const hostRules = vi.mocked(_hostRules);
 const googleAuth = vi.mocked(_googleAuth);
 
-const adminConfig: RepoGlobalConfig = {
+const adminConfig: RepoGlobalConfig & InternalGlobalConfigOptions = {
   localDir: upath.join('/tmp/github/some/repo'),
   cacheDir: upath.join('/tmp/cache'),
   containerbaseDir: upath.join('/tmp/cache/containerbase'),
@@ -92,7 +93,6 @@ describe('modules/manager/poetry/artifacts', () => {
   describe('updateArtifacts', () => {
     beforeEach(() => {
       env.getChildProcessEnv.mockReturnValue(envMock.basic);
-      hostRules.getAll.mockReturnValue([]);
       GlobalConfig.set(adminConfig);
       docker.resetPrefetchedImages();
     });
@@ -186,13 +186,21 @@ describe('modules/manager/poetry/artifacts', () => {
       fs.readLocalFile.mockResolvedValueOnce('[metadata]\n');
       const execSnapshots = mockExecAll();
       fs.readLocalFile.mockResolvedValueOnce('New poetry.lock');
-      hostRules.find.mockReturnValueOnce({
+      hostRules.add({
+        hostType: 'pypi',
+        matchHost: 'https://some.url',
         username: 'usernameOne',
         password: 'passwordOne',
       });
-      hostRules.find.mockReturnValueOnce({ username: 'usernameTwo' });
-      hostRules.find.mockReturnValueOnce({});
-      hostRules.find.mockReturnValueOnce({ password: 'passwordFour' });
+      hostRules.add({
+        hostType: 'pypi',
+        matchHost: 'https://another.url',
+        username: 'usernameTwo',
+      });
+      hostRules.add({
+        matchHost: 'https://last.url',
+        password: 'passwordFour',
+      });
       const updatedDeps = [{ depName: 'dep1' }];
       expect(
         await updateArtifacts({
@@ -210,7 +218,6 @@ describe('modules/manager/poetry/artifacts', () => {
           },
         },
       ]);
-      expect(hostRules.find.mock.calls).toHaveLength(7);
       expect(execSnapshots).toMatchObject([
         {
           cmd: 'poetry update --lock --no-interaction dep1',
@@ -243,7 +250,6 @@ describe('modules/manager/poetry/artifacts', () => {
           },
         ),
       );
-      hostRules.find.mockReturnValue({});
       const updatedDeps = [{ depName: 'dep1' }];
       expect(
         await updateArtifacts({
@@ -261,7 +267,6 @@ describe('modules/manager/poetry/artifacts', () => {
           },
         },
       ]);
-      expect(hostRules.find.mock.calls).toHaveLength(3);
       expect(execSnapshots).toMatchObject([
         {
           cmd: 'poetry update --lock --no-interaction dep1',
@@ -309,7 +314,6 @@ describe('modules/manager/poetry/artifacts', () => {
           },
         },
       ]);
-      expect(hostRules.find.mock.calls).toHaveLength(3);
       expect(execSnapshots).toMatchObject([
         { cmd: 'poetry update --lock --no-interaction dep1' },
       ]);
@@ -324,10 +328,8 @@ describe('modules/manager/poetry/artifacts', () => {
       fs.getSiblingFileName.mockReturnValueOnce('pyproject.lock');
       fs.readLocalFile.mockResolvedValueOnce('[metadata]\n');
       fs.readLocalFile.mockResolvedValueOnce('New poetry.lock');
-      hostRules.find.mockImplementation((search) => ({
-        password:
-          search.hostType === 'pypi' ? 'scoped-password' : 'unscoped-password',
-      }));
+      hostRules.add({ password: 'unscoped-password' });
+      hostRules.add({ hostType: 'pypi', password: 'scoped-password' });
       const updatedDeps = [{ depName: 'dep1' }];
       expect(
         await updateArtifacts({
@@ -439,13 +441,13 @@ describe('modules/manager/poetry/artifacts', () => {
             '-e CONTAINERBASE_CACHE_DIR ' +
             '-w "/tmp/github/some/repo" ' +
             'ghcr.io/renovatebot/base-image ' +
-            'bash -l -c "' +
+            "bash -l -c '" +
             'install-tool python 3.4.2 ' +
             '&& ' +
             'install-tool poetry 1.2.0 ' +
             '&& ' +
             'poetry update --lock --no-interaction dep1' +
-            '"',
+            "'",
         },
       ]);
     });
@@ -456,17 +458,15 @@ describe('modules/manager/poetry/artifacts', () => {
         binarySource: 'docker',
         dockerSidecarImage: 'ghcr.io/renovatebot/base-image',
       });
-      hostRules.find.mockReturnValueOnce({
+      hostRules.add({
         token: 'some-token',
+        hostType: 'github',
+        matchHost: 'api.github.com',
       });
-      hostRules.getAll.mockReturnValueOnce([
-        {
-          token: 'some-token',
-          hostType: 'github',
-          matchHost: 'api.github.com',
-        },
-        { token: 'some-other-token', matchHost: 'https://gitea.com' },
-      ]);
+      hostRules.add({
+        token: 'some-other-token',
+        matchHost: 'https://gitea.com',
+      });
       const execSnapshots = mockExecAll();
       fs.ensureCacheDir.mockResolvedValueOnce('/tmp/renovate/cache/others/pip');
       // poetry.lock
@@ -511,6 +511,7 @@ describe('modules/manager/poetry/artifacts', () => {
             'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
             '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
             '-v "/tmp/cache":"/tmp/cache" ' +
+            '-e PIP_CACHE_DIR ' +
             '-e GIT_CONFIG_KEY_0 ' +
             '-e GIT_CONFIG_VALUE_0 ' +
             '-e GIT_CONFIG_KEY_1 ' +
@@ -524,17 +525,16 @@ describe('modules/manager/poetry/artifacts', () => {
             '-e GIT_CONFIG_VALUE_4 ' +
             '-e GIT_CONFIG_KEY_5 ' +
             '-e GIT_CONFIG_VALUE_5 ' +
-            '-e PIP_CACHE_DIR ' +
             '-e CONTAINERBASE_CACHE_DIR ' +
             '-w "/tmp/github/some/repo" ' +
             'ghcr.io/renovatebot/base-image ' +
-            'bash -l -c "' +
+            "bash -l -c '" +
             'install-tool python 3.4.2 ' +
             '&& ' +
             'install-tool poetry 1.2.0 ' +
             '&& ' +
             'poetry update --lock --no-interaction dep1' +
-            '"',
+            "'",
         },
       ]);
     });
@@ -594,13 +594,13 @@ describe('modules/manager/poetry/artifacts', () => {
             '-e CONTAINERBASE_CACHE_DIR ' +
             '-w "/tmp/github/some/repo" ' +
             'ghcr.io/renovatebot/base-image ' +
-            'bash -l -c "' +
+            "bash -l -c '" +
             'install-tool python 2.7.5 ' +
             '&& ' +
             'install-tool poetry 1.2.0 ' +
             '&& ' +
             'poetry update --lock --no-interaction dep1' +
-            '"',
+            "'",
         },
       ]);
     });

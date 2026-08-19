@@ -1,7 +1,7 @@
 import { isTruthy } from '@sindresorhus/is';
 import { logger } from '../../../../logger/index.ts';
 import * as p from '../../../../util/promises.ts';
-import { escapeRegExp, regEx } from '../../../../util/regex.ts';
+import { regEx } from '../../../../util/regex.ts';
 import { getDefaultVersioning } from '../../../datasource/common.ts';
 import type { GetPkgReleasesConfig } from '../../../datasource/index.ts';
 import { getPkgReleases } from '../../../datasource/index.ts';
@@ -20,6 +20,7 @@ import {
   isPinnedVersion,
   massageNewValue,
   readLockFile,
+  sortConstraints,
   writeLockUpdates,
 } from './util.ts';
 
@@ -101,9 +102,11 @@ export function getNewConstraint(
       `Updating constraint "${oldConstraint}" to replace "${currentValue}" with "${newValue}" for "${packageName}"`,
     );
     //remove surplus .0 version
-    return oldConstraint.replace(
-      regEx(`(,\\s|^)${escapeRegExp(currentValue)}(\\.0)*`),
-      `$1${newValue}`,
+    return sortConstraints(
+      oldConstraint.replace(
+        regEx(`(,\\s|^)${RegExp.escape(currentValue)}(\\.0)*`),
+        `$1${newValue}`,
+      ),
     );
   }
 
@@ -116,7 +119,7 @@ export function getNewConstraint(
     logger.debug(
       `Updating constraint "${oldConstraint}" to replace "${currentVersion}" with "${newVersion}" for "${packageName}"`,
     );
-    return oldConstraint.replace(currentVersion, newVersion);
+    return sortConstraints(oldConstraint.replace(currentVersion, newVersion));
   }
 
   if (isPinnedVersion(newValue)) {

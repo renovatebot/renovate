@@ -21,13 +21,13 @@ import type {
   Release,
   ReleaseResult,
 } from '../types.ts';
-import { RegistryConfig, ReleaseTimestamp } from './schema.ts';
-import type {
-  CrateMetadata,
-  CrateRecord,
-  RegistryFlavor,
-  RegistryInfo,
-} from './types.ts';
+import type { CrateMetadata } from './schema.ts';
+import {
+  CrateMetadataResponse,
+  RegistryConfig,
+  ReleaseTimestamp,
+} from './schema.ts';
+import type { CrateRecord, RegistryFlavor, RegistryInfo } from './types.ts';
 
 type CloneResult =
   | {
@@ -112,7 +112,7 @@ export class CrateDatasource extends Datasource {
     result.releases = lines
       .map((line) => {
         const versionOrig = line.vers;
-        const version = versionOrig.replace(/\+.*$/, '');
+        const version = versionOrig.replace(regEx(/\+.*$/), '');
         const release: Release = { version };
 
         if (versionOrig !== version) {
@@ -220,11 +220,8 @@ export class CrateDatasource extends Datasource {
     );
 
     try {
-      interface Response {
-        crate: CrateMetadata;
-      }
-      const response = await this.http.getJsonUnchecked<Response>(crateUrl);
-      return response.body.crate;
+      const { body } = await this.http.getJson(crateUrl, CrateMetadataResponse);
+      return body.crate;
     } catch (err) {
       logger.debug(
         { err, packageName, registryUrl: info.rawUrl },
@@ -338,7 +335,7 @@ export class CrateDatasource extends Datasource {
 
     const isSparseRegistry = CrateDatasource.isSparseRegistry(registryUrl);
     const registryFetchUrl = isSparseRegistry
-      ? registryUrl.replace(/^sparse\+/, '')
+      ? registryUrl.replace(regEx(/^sparse\+/), '')
       : registryUrl;
 
     const url = parseUrl(registryFetchUrl);
@@ -511,7 +508,7 @@ export class CrateDatasource extends Datasource {
     }
 
     // Look up the registry config from cache (populated during getReleases)
-    const rawUrl = registryUrl?.replace(/^sparse\+/, '');
+    const rawUrl = registryUrl?.replace(regEx(/^sparse\+/), '');
     if (!rawUrl) {
       return release;
     }

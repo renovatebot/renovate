@@ -5,7 +5,7 @@ import type { VersioningApi } from '../types.ts';
 
 export const id = 'perl';
 export const displayName = 'Perl';
-export const urls = ['https://metacpan.org/pod/version'];
+export const urls = ['[Perl version module](https://metacpan.org/pod/version)'];
 export const supportsRanges = false;
 
 // https://metacpan.org/pod/version#Decimal-Versions
@@ -31,8 +31,8 @@ class PerlVersioningApi extends GenericVersioningApi {
 
     const decimalComponents =
       decimalPart
-        .replace(/_/g, '')
-        .match(/.{1,3}/g)
+        .replace(regEx(/_/g), '')
+        .match(regEx(/.{1,3}/g))
         ?.map((value) => {
           let component = value;
           while (component.length < 3) {

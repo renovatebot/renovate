@@ -391,6 +391,49 @@ describe('workers/repository/update/pr/changelog/forgejo/index', () => {
   });
 
   describe('getReleaseNotesMd', () => {
+    it('ignores symlink and submodule entries in directory listing', async () => {
+      httpMock
+        .scope('https://git.test.com/')
+        .get('/api/v1/repos/some/repo/contents/charts/some')
+        .reply(200, [
+          {
+            name: 'CHANGELOG.md',
+            path: 'charts/some/CHANGELOG.md',
+            type: 'file',
+            content: null,
+          },
+          {
+            name: 'link',
+            path: 'charts/some/link',
+            type: 'symlink',
+            content: null,
+          },
+          {
+            name: 'vendor',
+            path: 'charts/some/vendor',
+            type: 'submodule',
+            content: null,
+          },
+        ])
+        .get('/api/v1/repos/some/repo/contents/charts/some/CHANGELOG.md')
+        .reply(200, {
+          name: 'CHANGELOG.md',
+          path: 'charts/some/CHANGELOG.md',
+          type: 'file',
+          content: toBase64('some content'),
+        });
+      expect(
+        await getReleaseNotesMd(
+          'some/repo',
+          'https://git.test.com/api/v1/',
+          'charts/some',
+        ),
+      ).toEqual({
+        changelogFile: 'charts/some/CHANGELOG.md',
+        changelogMd: 'some content\n#\n##',
+      });
+    });
+
     it('works', async () => {
       httpMock
         .scope('https://git.test.com/')

@@ -46,6 +46,28 @@ vi.mock('../../../../modules/manager/pip-compile/index.ts');
 vi.mock('../../../../modules/manager/poetry/index.ts');
 vi.mock('./auto-replace.ts');
 
+function expectPipCompilePackageAndLockFile(
+  expectedPackageFileName: string,
+  expectedLockFileName: string,
+) {
+  expect(pipCompile.updateArtifacts).toSatisfy(
+    (updateArtifactsSpy) => {
+      return updateArtifactsSpy.mock.calls.some((args: any[]) => {
+        const updateArtifact: UpdateArtifact = args[0];
+        const updateArtifactLockfiles = updateArtifact?.config?.lockFiles;
+        return (
+          updateArtifact?.packageFileName === expectedPackageFileName &&
+          isArray(updateArtifactLockfiles) &&
+          updateArtifactLockfiles?.length === 1 &&
+          updateArtifactLockfiles?.[0] === expectedLockFileName
+        );
+      });
+    },
+    `pipCompile.updateArtifacts() must be called for package file ${expectedPackageFileName}` +
+      ` and with lock file ${expectedLockFileName}`,
+  );
+}
+
 describe('workers/repository/update/branch/get-updated', () => {
   describe('getUpdatedPackageFiles()', () => {
     let config: BranchConfig;
@@ -96,7 +118,9 @@ describe('workers/repository/update/branch/get-updated', () => {
     it('handles autoreplace failure', async () => {
       config.upgrades.push({ manager: 'html', branchName: '' });
       autoReplace.doAutoReplace.mockResolvedValueOnce(null);
-      await expect(getUpdatedPackageFiles(config)).rejects.toThrow();
+      await expect(getUpdatedPackageFiles(config)).rejects.toThrow(
+        'update-failure',
+      );
     });
 
     it('handles autoreplace branch needs update', async () => {
@@ -133,7 +157,9 @@ describe('workers/repository/update/branch/get-updated', () => {
         manager: 'npm',
         branchName: 'some-branch',
       } satisfies BranchUpgradeConfig);
-      await expect(getUpdatedPackageFiles(config)).rejects.toThrow();
+      await expect(getUpdatedPackageFiles(config)).rejects.toThrow(
+        'update-failure',
+      );
     });
 
     it('handles content change', async () => {
@@ -515,6 +541,7 @@ describe('workers/repository/update/branch/get-updated', () => {
      * is also updated by the regex manager in the same branch.
      * Cf. #34015.
      */
+    // oxlint-disable-next-line vitest/expect-expect -- assertions live in the module-level expectPipCompilePackageAndLockFile helper
     it('updates lock files in mixed-manager scenarios', async () => {
       const branchName = 'renovate/wheel-0.x';
       const updateType = 'patch';
@@ -614,28 +641,6 @@ describe('workers/repository/update/branch/get-updated', () => {
       autoReplace.doAutoReplace.mockResolvedValue('new content');
 
       await getUpdatedPackageFiles(config);
-
-      const expectPipCompilePackageAndLockFile = (
-        expectedPackageFileName: string,
-        expectedLockFileName: string,
-      ) => {
-        expect(pipCompile.updateArtifacts).toSatisfy(
-          (updateArtifactsSpy) => {
-            return updateArtifactsSpy.mock.calls.some((args: any[]) => {
-              const updateArtifact: UpdateArtifact = args[0];
-              const updateArtifactLockfiles = updateArtifact?.config?.lockFiles;
-              return (
-                updateArtifact?.packageFileName === expectedPackageFileName &&
-                isArray(updateArtifactLockfiles) &&
-                updateArtifactLockfiles?.length === 1 &&
-                updateArtifactLockfiles?.[0] === expectedLockFileName
-              );
-            });
-          },
-          `pipCompile.updateArtifacts() must be called for package file ${expectedPackageFileName}` +
-            ` and with lock file ${expectedLockFileName}`,
-        );
-      };
 
       expectPipCompilePackageAndLockFile(packageFileA, lockFileA);
       expectPipCompilePackageAndLockFile(packageFileB, lockFileB);
@@ -1041,27 +1046,28 @@ describe('workers/repository/update/branch/get-updated', () => {
     });
 
     describe('when some artifacts have changed and others have not', () => {
-      const pushGemUpgrade = (opts: Partial<BranchUpgradeConfig>) =>
-        config.upgrades.push({
+      function pushGemUpgrade(opts: Partial<BranchUpgradeConfig>) {
+        return config.upgrades.push({
           packageFile: 'Gemfile',
           lockFiles: ['Gemfile.lock'],
           branchName: '',
           manager: 'bundler',
           ...opts,
         });
+      }
 
-      const mockUpdated = () => {
+      function mockUpdated() {
         bundler.updateLockedDependency.mockReturnValueOnce({
           status: 'updated',
           files: { Gemfile: 'new contents' },
         });
-      };
+      }
 
-      const mockUnsupported = () => {
+      function mockUnsupported() {
         bundler.updateLockedDependency.mockReturnValueOnce({
           status: 'unsupported',
         });
-      };
+      }
 
       beforeEach(() => {
         git.getFile.mockResolvedValue('existing content');
@@ -1627,7 +1633,7 @@ describe('workers/repository/update/branch/get-updated', () => {
           branchName: 'renovate/pin',
           depName: undefined,
         },
-        "No depName found after updating 'composer.json'",
+        'No depName found after updating package file',
       );
     });
 
@@ -1707,7 +1713,7 @@ describe('workers/repository/update/branch/get-updated', () => {
           branchName: 'renovate/pin',
           depName: 'some-dep',
         },
-        "Could not determine resolved version for 'some-dep' after updating 'composer.json'; skipping pending-version check",
+        'Could not determine resolved version after updating package file; skipping pending-version check',
       );
     });
 

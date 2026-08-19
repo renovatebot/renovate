@@ -7,7 +7,7 @@ import { ensureComment } from '../../../modules/platform/comment.ts';
 import { platform } from '../../../modules/platform/index.ts';
 import { scm } from '../../../modules/platform/scm.ts';
 import { getBranchList, setUserRepoConfig } from '../../../util/git/index.ts';
-import { escapeRegExp, regEx } from '../../../util/regex.ts';
+import { regEx } from '../../../util/regex.ts';
 import { uniqueStrings } from '../../../util/string.ts';
 import { isMultiBaseBranch } from '../process/index.ts';
 import { getReconfigureBranchName } from '../reconfigure/utils.ts';
@@ -133,9 +133,11 @@ function calculateBaseBranchRegex(config: RenovateConfig): RegExp | null {
   const branchPrefixes = [config.branchPrefix, config.branchPrefixOld]
     .filter(isNonEmptyStringAndNotWhitespace)
     .filter(uniqueStrings)
-    .map(escapeRegExp);
+    .map((prefix) => RegExp.escape(prefix));
 
-  const baseBranches = config.baseBranches.map(escapeRegExp);
+  const baseBranches = config.baseBranches.map((branch) =>
+    RegExp.escape(branch),
+  );
 
   // create regex to extract base branche from branch name
   const baseBranchRe = regEx(
