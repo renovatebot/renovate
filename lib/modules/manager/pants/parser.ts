@@ -4,7 +4,7 @@ import { regEx } from '../../../util/regex.ts';
 import type { PantsTarget, PantsTargetType, PantsToken } from './types.ts';
 
 // BUILD.pants files are evaluated by Pants as Python, so the Python grammar
-// tokenizes them correctly — including comments, implicit string concatenation
+// tokenizes them correctly, including comments, implicit string concatenation
 // and calls such as `resolve=parametrize(...)`.
 const python = lang.createLang('python');
 
@@ -14,19 +14,22 @@ interface Ctx {
   attr?: string;
 }
 
-const targetNameRegex = regEx(
-  /^(?:python_requirement|python_requirements|poetry_requirements|uv_requirements)$/,
-);
+const targetTypes: PantsTargetType[] = [
+  'python_requirement',
+  'python_requirements',
+  'poetry_requirements',
+  'uv_requirements',
+];
 
-// Only the attributes we consume. Anything else — `module_mapping`,
-// `overrides`, `resolve` — is skipped, so their string values can never be
-// mistaken for requirements.
+// Only the attributes we consume. Anything else, such as `module_mapping`,
+// `overrides` or `resolve`, is skipped, so the string values in those fields
+// can never be mistaken for requirements.
 const attrNameRegex = regEx(/^(?:name|requirements|source)$/);
 
-function startTarget(ctx: Ctx, name: string): Ctx {
+function startTarget(ctx: Ctx, type: PantsTargetType): Ctx {
   return {
     ...ctx,
-    target: { type: name as PantsTargetType, requirements: [] },
+    target: { type, requirements: [] },
     attr: undefined,
   };
 }
@@ -93,16 +96,20 @@ const attribute = q
     }),
   );
 
-const targetCall = q
-  .sym<Ctx>(targetNameRegex, (ctx, token) => startTarget(ctx, token.value))
-  .join(
-    q.tree({
-      type: 'wrapped-tree',
-      maxDepth: 1,
-      search: attribute,
-      postHandler: endTarget,
-    }),
-  );
+const targetArgs = q.tree<Ctx>({
+  type: 'wrapped-tree',
+  maxDepth: 1,
+  search: attribute,
+  postHandler: endTarget,
+});
+
+// One matcher per target type, so the type carried into the context is the
+// literal that matched rather than whatever the file happened to say.
+const targetCall = q.alt<Ctx>(
+  ...targetTypes.map((type) =>
+    q.sym<Ctx>(type, (ctx) => startTarget(ctx, type)).join(targetArgs),
+  ),
+);
 
 const query = q.tree<Ctx>({
   type: 'root-tree',
