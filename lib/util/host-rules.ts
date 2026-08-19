@@ -146,6 +146,11 @@ function fromLowerToHigherRank(a: HostRule, b: HostRule): number {
   return hostRuleRank(a) - hostRuleRank(b);
 }
 
+// A single comparator, rather than two consecutive sorts: `fromShorterToLongerMatchHost` returns 0 for rules without a `matchHost`, which makes it non-transitive on its own, so a standalone length sort could leave two `matchHost` rules unordered when a host-less rule sits between them
+function fromLowerRankAndShorterMatchHost(a: HostRule, b: HostRule): number {
+  return fromLowerToHigherRank(a, b) || fromShorterToLongerMatchHost(a, b);
+}
+
 export function find(search: HostRuleSearch): CombinedHostRule {
   if ([search.hostType, search.url].every(isFalsy)) {
     logger.warn({ search }, 'Invalid hostRules search');
@@ -153,9 +158,7 @@ export function find(search: HostRuleSearch): CombinedHostRule {
   }
 
   // Sort primarily by rank, and secondarily by matchHost length
-  const sortedRules = hostRules
-    .sort(fromShorterToLongerMatchHost)
-    .sort(fromLowerToHigherRank);
+  const sortedRules = hostRules.sort(fromLowerRankAndShorterMatchHost);
 
   const matchedRules: HostRule[] = [];
   for (const rule of sortedRules) {
@@ -193,6 +196,16 @@ export function find(search: HostRuleSearch): CombinedHostRule {
   }
 
   const res: HostRule = Object.assign({}, ...matchedRules);
+
+  // `headers` is merged key by key, so that a rule setting a header of its own does not discard the headers of the rules it is combined with - notably a self-hosted admin's, which are registered before a repository's or a preset's
+  // This is deliberately scoped to `headers` alone, as combining any more of the fields than we already do has caused authentication regressions before: an inherited `token` and a specific rule's `username`/`password` are not meant to be used together
+  const matchedHeaders = matchedRules
+    .map((rule) => rule.headers)
+    .filter(isTruthy);
+  if (matchedHeaders.length) {
+    res.headers = Object.assign({}, ...matchedHeaders);
+  }
+
   delete res.hostType;
   delete res.resolvedHost;
   delete res.matchHost;

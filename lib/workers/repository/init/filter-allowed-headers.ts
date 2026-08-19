@@ -10,7 +10,7 @@ import { matchRegexOrGlobList } from '../../../util/string-match.ts';
  *
  * @param [allowedHeaders] the `allowedHeaders` as defined in `GlobalConfig`. Must be passed explicitly i.e. a `repositories[]` entry has an `allowedHeaders` override
  *
- * Unlike {@link filterAllowedEnv}, it is not currently possible for a self-hosted admin's headers to take precedence, as we lean on the "merging" logic (which currently, incorrectly, takes only repo-level `headers` if they're set for a given host).
+ * `headers` are merged key by key across matching host rules (see `find()` in `host-rules.ts`), so an admin's headers for a host survive even when a repo or preset rule also sets `headers` for the same host. Where both set the same header name, the more specific rule - or, when equally specific, the later-registered one - wins, which is the same precedence model {@link filterAllowedEnv} uses for `env`.
  */
 export function filterAllowedHeaders(
   rules: HostRule[],

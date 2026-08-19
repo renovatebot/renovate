@@ -407,8 +407,8 @@ describe('util/host-rules', () => {
       ).toEqual({ token: 'longest' });
     });
 
-    it('incorrectly replaces the headers of an earlier matching rule, rather than merging them', () => {
-      // when setting `headers` in global self-hosted configuration and a repo, `find()` combines the matches field by field, which means a repository setting `headers` incorrectly replaces the admin's object wholesale, rather than merging it key by key
+    it('merges the headers of every matching rule', () => {
+      // when setting `headers` in global self-hosted configuration and a repo, `find()` should combine the headers,
       add({
         matchHost: 'registry.example.com',
         token: 'from-admin',
@@ -421,12 +421,85 @@ describe('util/host-rules', () => {
 
       expect(find({ url: 'https://registry.example.com' })).toEqual({
         token: 'from-admin',
-        headers: { 'X-From-Repo': 'yes' },
+        headers: { 'X-From-Admin': 'yes', 'X-From-Repo': 'yes' },
       });
     });
 
+    it('prefers the last matching rule for a header they both set', () => {
+      add({
+        matchHost: 'registry.example.com',
+        headers: { 'X-Custom': 'from-admin' },
+      });
+      add({
+        matchHost: 'registry.example.com',
+        headers: { 'X-Custom': 'from-repo' },
+      });
+
+      expect(find({ url: 'https://registry.example.com' })).toEqual({
+        headers: { 'X-Custom': 'from-repo' },
+      });
+    });
+
+    it('prefers the longest matchHost for a header they both set', () => {
+      add({
+        matchHost: 'https://registry.example.com',
+        headers: { 'X-Custom': 'shortest', 'X-Only-Shortest': 'yes' },
+      });
+      add({
+        matchHost: 'https://registry.example.com/some/path',
+        headers: { 'X-Custom': 'longest' },
+      });
+
+      expect(
+        find({ url: 'https://registry.example.com/some/path/resource' }),
+      ).toEqual({
+        headers: { 'X-Custom': 'longest', 'X-Only-Shortest': 'yes' },
+      });
+    });
+
+    it('prefers the longest matchHost even when a host-less rule is added between them', () => {
+      // the sort comparator must stay transitive: a rule with no `matchHost` compares equal to any other, so a naive length sort could leave the two `matchHost` rules unordered relative to each other
+      add({
+        matchHost: 'https://registry.example.com/some/path',
+        headers: { 'X-Custom': 'longest' },
+      });
+      add({
+        hostType: NugetDatasource.id,
+        token: 'unrelated',
+      });
+      add({
+        matchHost: 'https://registry.example.com',
+        headers: { 'X-Custom': 'shortest' },
+      });
+
+      expect(
+        find({ url: 'https://registry.example.com/some/path/resource' }),
+      ).toEqual({
+        headers: { 'X-Custom': 'longest' },
+      });
+    });
+
+    it('prefers a `hostType` rule over one with a longer `matchHost`', () => {
+      // "most specific" is ranked before it is measured: a rule carrying both a `hostType` and a `matchHost` outranks a `matchHost`-only rule, however much more of the URL the latter matches
+      add({
+        matchHost: 'https://registry.example.com/some/path',
+        headers: { 'X-Custom': 'from-longer-matchHost' },
+      });
+      add({
+        hostType: NugetDatasource.id,
+        matchHost: 'https://registry.example.com',
+        headers: { 'X-Custom': 'from-hostType-rule' },
+      });
+
+      expect(
+        find({
+          url: 'https://registry.example.com/some/path/resource',
+          hostType: NugetDatasource.id,
+        }),
+      ).toEqual({ headers: { 'X-Custom': 'from-hostType-rule' } });
+    });
+
     it('keeps the headers of an earlier matching rule when a later one sets none', () => {
-      // `headers` is only incorrectly overwritten when multiple rules set `headers`- otherwise, they are not replaced
       add({
         matchHost: 'registry.example.com',
         headers: { 'X-From-Admin': 'yes' },

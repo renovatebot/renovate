@@ -22,6 +22,7 @@ import * as queue from '../../../util/http/queue.ts';
 import * as throttle from '../../../util/http/throttle.ts';
 import * as _onboardingCache from '../onboarding/branch/onboarding-branch-cache.ts';
 import { OnboardingState } from '../onboarding/common.ts';
+import { filterAllowedHeaders } from './filter-allowed-headers.ts';
 import {
   applyHostRules,
   applyNpmrc,
@@ -1590,6 +1591,32 @@ describe('workers/repository/init/merge', () => {
       expect(addSpy).toHaveBeenCalledExactlyOnceWith({
         matchHost: 'registry.example.com',
         headers: { 'X-Allowed': 'yes' },
+      });
+    });
+
+    it('merges with an already-registered admin hostRule instead of replacing its headers', () => {
+      GlobalConfig.set({ allowedHeaders: ['X-*'] });
+      // simulates the self-hosted admin's own `hostRules`, registered earlier via `globalInitialize` and filtered the same way
+      for (const rule of filterAllowedHeaders([
+        {
+          matchHost: 'registry.example.com',
+          headers: { 'X-From-Admin': 'yes', Authorization: 'from-admin' },
+        },
+      ])) {
+        hostRules.add(rule);
+      }
+
+      applyHostRules({
+        hostRules: [
+          {
+            matchHost: 'registry.example.com',
+            headers: { 'X-From-Repo': 'yes' },
+          },
+        ],
+      });
+
+      expect(hostRules.find({ url: 'https://registry.example.com' })).toEqual({
+        headers: { 'X-From-Admin': 'yes', 'X-From-Repo': 'yes' },
       });
     });
 
