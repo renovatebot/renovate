@@ -25,10 +25,22 @@ function isBuildFile(packageFile: string): boolean {
 }
 
 /**
+ * Poetry declares itself with a `[tool.poetry]` table, or with a table below
+ * it such as `[tool.poetry.dependencies]`. Matching the `[tool.poetry` prefix
+ * alone would also match an unrelated tool whose name merely starts the same
+ * way, such as `[tool.poetry-dynamic-versioning]`, and would then route a
+ * PEP 621 file to the Poetry extractor, which reads none of its `[project]`
+ * dependencies.
+ */
+function isPoetryPyProject(content: string): boolean {
+  return content.includes('[tool.poetry]') || content.includes('[tool.poetry.');
+}
+
+/**
  * A generator's `source` can be a pip requirements file, or a `pyproject.toml`
  * in PEP 621, Poetry or uv form, so the file's own content decides the
  * extractor. Deciding on content rather than on which target pointed at the
- * file keeps extraction and re-extraction — which only knows the filename —
+ * file keeps extraction and re-extraction, which only knows the filename,
  * from ever disagreeing.
  */
 function extractSourceFile(
@@ -38,7 +50,7 @@ function extractSourceFile(
   if (upath.basename(packageFile) !== 'pyproject.toml') {
     return extractRequirementsFile(content);
   }
-  return content.includes('[tool.poetry')
+  return isPoetryPyProject(content)
     ? extractPoetryFile(content, packageFile)
     : extractPyProjectFile(content, packageFile);
 }
@@ -104,7 +116,7 @@ export async function extractAllPackageFiles(
 ): Promise<PackageFile[]> {
   const result: PackageFile[] = [];
   // A source file may be shared by several targets, and by several build
-  // files — extract it once.
+  // files, so extract it once.
   const seenSourceFiles = new Set<string>();
 
   for (const packageFile of packageFiles) {
@@ -150,9 +162,9 @@ export async function extractAllPackageFiles(
           packageFile: source,
           deps: extracted.deps.map((dep) => ({
             ...dep,
-            // Keep the delegate's own depType where it has one — `pep621` and
-            // `poetry` distinguish dependency groups, and that detail is worth
-            // more in `packageRules` than uniformity.
+            // Keep the depType of the delegate where it has one. `pep621`
+            // and `poetry` distinguish dependency groups, and that detail is
+            // worth more in `packageRules` than uniformity.
             depType: dep.depType ?? target.type,
           })),
         });

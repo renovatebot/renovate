@@ -191,6 +191,45 @@ describe('modules/manager/pants/extract', () => {
       ]);
     });
 
+    it('reads a PEP 621 file that carries an unrelated poetry-prefixed table', async () => {
+      // The Poetry extractor reads `[project] dependencies` too, so the tables
+      // it does not know about are what a wrong route loses.
+      const content = codeBlock`
+        [project]
+        name = "my-package"
+        dependencies = ["typing-extensions>=4.8.0,<5.0.0"]
+
+        [dependency-groups]
+        test = ["pytest>=8.0.0"]
+
+        [tool.uv]
+        dev-dependencies = ["ruff>=0.6.0"]
+
+        [tool.poetry-dynamic-versioning]
+        enable = true
+      `;
+      const res = await extractPackageFile(content, 'pyproject.toml');
+      expect(res?.deps).toMatchObject([
+        { depName: 'typing-extensions', depType: 'project.dependencies' },
+        { depName: 'pytest', depType: 'dependency-groups' },
+        { depName: 'ruff', depType: 'tool.uv.dev-dependencies' },
+      ]);
+    });
+
+    it('reads a Poetry file that only has a dependency group table', async () => {
+      const content = codeBlock`
+        [project]
+        name = "my-package"
+
+        [tool.poetry.group.dev.dependencies]
+        pytest = "^8.0.0"
+      `;
+      const res = await extractPackageFile(content, 'pyproject.toml');
+      expect(res?.deps).toMatchObject([
+        { depName: 'pytest', currentValue: '^8.0.0', depType: 'dev' },
+      ]);
+    });
+
     it('parses a pyproject.toml source as PEP 621', async () => {
       const content = codeBlock`
         [project]
