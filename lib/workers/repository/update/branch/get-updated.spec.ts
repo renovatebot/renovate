@@ -1,17 +1,18 @@
 import { isArray } from '@sindresorhus/is';
 import { mockDeep } from 'vitest-mock-extended';
-import { GitRefsDatasource } from '../../../../modules/datasource/git-refs';
-import * as _batectWrapper from '../../../../modules/manager/batect-wrapper';
-import * as _bundler from '../../../../modules/manager/bundler';
-import * as _composer from '../../../../modules/manager/composer';
-import * as _gitSubmodules from '../../../../modules/manager/git-submodules';
-import * as _gomod from '../../../../modules/manager/gomod';
-import * as _helmv3 from '../../../../modules/manager/helmv3';
-import * as _nix from '../../../../modules/manager/nix';
-import * as _npm from '../../../../modules/manager/npm';
-import * as _pep621 from '../../../../modules/manager/pep621';
-import * as _pipCompile from '../../../../modules/manager/pip-compile';
-import * as _poetry from '../../../../modules/manager/poetry';
+import { git, logger } from '~test/util.ts';
+import { GitRefsDatasource } from '../../../../modules/datasource/git-refs/index.ts';
+import * as _batectWrapper from '../../../../modules/manager/batect-wrapper/index.ts';
+import * as _bundler from '../../../../modules/manager/bundler/index.ts';
+import * as _composer from '../../../../modules/manager/composer/index.ts';
+import * as _gitSubmodules from '../../../../modules/manager/git-submodules/index.ts';
+import * as _gomod from '../../../../modules/manager/gomod/index.ts';
+import * as _helmv3 from '../../../../modules/manager/helmv3/index.ts';
+import * as _nix from '../../../../modules/manager/nix/index.ts';
+import * as _npm from '../../../../modules/manager/npm/index.ts';
+import * as _pep621 from '../../../../modules/manager/pep621/index.ts';
+import * as _pipCompile from '../../../../modules/manager/pip-compile/index.ts';
+import * as _poetry from '../../../../modules/manager/poetry/index.ts';
 import type {
   LookupUpdate,
   PackageDependency,
@@ -35,18 +36,40 @@ const pep621 = vi.mocked(_pep621);
 const pipCompile = vi.mocked(_pipCompile);
 const poetry = vi.mocked(_poetry);
 
-vi.mock('../../../../modules/manager/bundler');
-vi.mock('../../../../modules/manager/composer');
-vi.mock('../../../../modules/manager/helmv3');
-vi.mock('../../../../modules/manager/npm');
-vi.mock('../../../../modules/manager/git-submodules');
-vi.mock('../../../../modules/manager/gomod', () => mockDeep());
-vi.mock('../../../../modules/manager/nix');
-vi.mock('../../../../modules/manager/batect-wrapper');
-vi.mock('../../../../modules/manager/pep621');
-vi.mock('../../../../modules/manager/pip-compile');
-vi.mock('../../../../modules/manager/poetry');
-vi.mock('./auto-replace');
+vi.mock('../../../../modules/manager/bundler/index.ts');
+vi.mock('../../../../modules/manager/composer/index.ts');
+vi.mock('../../../../modules/manager/helmv3/index.ts');
+vi.mock('../../../../modules/manager/npm/index.ts');
+vi.mock('../../../../modules/manager/git-submodules/index.ts');
+vi.mock('../../../../modules/manager/gomod/index.ts', () => mockDeep());
+vi.mock('../../../../modules/manager/nix/index.ts');
+vi.mock('../../../../modules/manager/batect-wrapper/index.ts');
+vi.mock('../../../../modules/manager/pep621/index.ts');
+vi.mock('../../../../modules/manager/pip-compile/index.ts');
+vi.mock('../../../../modules/manager/poetry/index.ts');
+vi.mock('./auto-replace.ts');
+
+function expectPipCompilePackageAndLockFile(
+  expectedPackageFileName: string,
+  expectedLockFileName: string,
+) {
+  expect(pipCompile.updateArtifacts).toSatisfy(
+    (updateArtifactsSpy) => {
+      return updateArtifactsSpy.mock.calls.some((args: any[]) => {
+        const updateArtifact: UpdateArtifact = args[0];
+        const updateArtifactLockfiles = updateArtifact?.config?.lockFiles;
+        return (
+          updateArtifact?.packageFileName === expectedPackageFileName &&
+          isArray(updateArtifactLockfiles) &&
+          updateArtifactLockfiles?.length === 1 &&
+          updateArtifactLockfiles?.[0] === expectedLockFileName
+        );
+      });
+    },
+    `pipCompile.updateArtifacts() must be called for package file ${expectedPackageFileName}` +
+      ` and with lock file ${expectedLockFileName}`,
+  );
+}
 
 describe('workers/repository/update/branch/get-updated', () => {
   describe('getUpdatedPackageFiles()', () => {

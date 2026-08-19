@@ -1,9 +1,9 @@
 import { isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
 import { quote } from 'shlex';
-import { logger } from '../../../logger';
-import { findGithubToken } from '../../../util/check-token';
-import { exec } from '../../../util/exec';
-import type { ExecOptions } from '../../../util/exec/types';
+import { logger } from '../../../logger/index.ts';
+import { findGithubToken } from '../../../util/check-token.ts';
+import { exec } from '../../../util/exec/index.ts';
+import type { ExecOptions } from '../../../util/exec/types.ts';
 import {
   ensureCacheDir,
   getSiblingFileName,
@@ -53,7 +53,7 @@ export async function updateArtifacts({
   } else {
     const inputs = updatedDeps
       .map(({ depName }) => depName)
-      .filter(is.nonEmptyStringAndNotWhitespace)
+      .filter(isNonEmptyStringAndNotWhitespace)
       .map((depName) => quote(depName))
       .join(' ');
     cmd += `flake update ${inputs}`;

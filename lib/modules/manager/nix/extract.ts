@@ -1,12 +1,12 @@
-import { logger } from '../../../logger';
-import { getSiblingFileName, readLocalFile } from '../../../util/fs';
-import { getHttpUrl, parseGitUrl } from '../../../util/git/url';
-import { regEx } from '../../../util/regex';
-import { GitRefsDatasource } from '../../datasource/git-refs';
-import { id as gitRefVersioning } from '../../versioning/git';
-import { id as nixpkgsVersioning } from '../../versioning/nixpkgs';
-import type { PackageDependency, PackageFileContent } from '../types';
-import { NixFlakeLock } from './schema';
+import { isString } from '@sindresorhus/is';
+import { logger } from '../../../logger/index.ts';
+import { getSiblingFileName, readLocalFile } from '../../../util/fs/index.ts';
+import { getHttpUrl, parseGitUrl } from '../../../util/git/url.ts';
+import { regEx } from '../../../util/regex.ts';
+import { GitRefsDatasource } from '../../datasource/git-refs/index.ts';
+import { id as nixpkgsVersioning } from '../../versioning/nixpkgs/index.ts';
+import type { PackageDependency, PackageFileContent } from '../types.ts';
+import { NixFlakeLock } from './schema.ts';
 
 // as documented upstream
 // https://github.com/NixOS/nix/blob/master/doc/manual/source/protocols/tarball-fetcher.md#gitea-and-forgejo-support
@@ -26,9 +26,6 @@ export async function extractPackageFile(
 ): Promise<PackageFileContent | null> {
   const flakeLockFile = getSiblingFileName(packageFile, 'flake.lock');
   const flakeLockContents = await readLocalFile(flakeLockFile, 'utf8');
-
-  logger.trace(`nix.extractPackageFile(${flakeLockFile})`);
-
   const deps: PackageDependency[] = [];
 
   logger.trace({ flakeLockFile }, 'nix.extractPackageFile()');
@@ -49,7 +46,7 @@ export async function extractPackageFile(
   for (const [inputName, nodeName] of Object.entries(
     flakeLock.nodes[flakeLock.root]?.inputs ?? {},
   )) {
-    if (typeof nodeName === 'string') {
+    if (isString(nodeName)) {
       rootInputs.set(nodeName, inputName);
     }
   }
@@ -93,7 +90,7 @@ export async function extractPackageFile(
     if (flakeOriginal.type === 'indirect' || flakeLocked.type === 'indirect') {
       logger.debug(
         { flakeLockFile, flakeInput },
-        `input is type indirect, skipping`,
+        'input is of type indirect, skipping',
       );
       continue;
     }
@@ -102,7 +99,7 @@ export async function extractPackageFile(
     if (flakeOriginal.type === 'path' || flakeLocked.type === 'path') {
       logger.debug(
         { flakeLockFile, flakeInput },
-        `input is type path, skipping`,
+        'input is of type path, skipping',
       );
       continue;
     }
@@ -119,10 +116,12 @@ export async function extractPackageFile(
     const dep: PackageDependency = {
       depName: rootInputs.get(node),
       datasource: GitRefsDatasource.id,
-      versioning: gitRefVersioning,
     };
 
-    dep.currentValue = flakeOriginal.ref?.replace(/^refs\/(heads|tags)\//, '');
+    dep.currentValue = flakeOriginal.ref?.replace(
+      regEx(/^refs\/(heads|tags)\//),
+      '',
+    );
     dep.currentDigest = flakeLocked.rev;
 
     switch (flakeLocked.type) {
@@ -190,7 +189,7 @@ export async function extractPackageFile(
     }
 
     if (flakeLocked.type !== 'tarball') {
-      dep.sourceUrl = getHttpUrl(dep.packageName!).replace(/\.git$/, '');
+      dep.sourceUrl = getHttpUrl(dep.packageName!).replace(regEx(/\.git$/), '');
     }
 
     deps.push(dep);
