@@ -1,21 +1,33 @@
 Renovate extracts Python third-party dependencies from [Pants](https://www.pantsbuild.org) build files.
 
-The manager parses the build file with a Python grammar instead of regular expressions, so comments, multi-line calls and expressions such as `resolve=parametrize("py311")` are handled.
+The manager parses the build file with a Python grammar instead of regular expressions.
+Comments, multi-line calls and expressions such as `resolve=parametrize("py311")` are all handled.
 
 These Pants targets are supported:
 
-- [`python_requirement`](https://www.pantsbuild.org/stable/reference/targets/python_requirement): every entry of its `requirements=[...]` field is extracted as a PEP 508 requirement, and updated in place in the build file.
-- [`python_requirements`](https://www.pantsbuild.org/stable/reference/targets/python_requirements): the file named by its `source` field, default `requirements.txt`.
-- [`poetry_requirements`](https://www.pantsbuild.org/stable/reference/targets/poetry_requirements): the file named by its `source` field, default `pyproject.toml`.
-- [`uv_requirements`](https://www.pantsbuild.org/stable/reference/targets/uv_requirements): the file named by its `source` field, default `pyproject.toml`.
+- [`python_requirement`](https://www.pantsbuild.org/stable/reference/targets/python_requirement), whose `requirements=[...]` entries are extracted as PEP 508 requirements and updated in place in the build file
+- [`python_requirements`](https://www.pantsbuild.org/stable/reference/targets/python_requirements), which reads the file named by the `source` field, `requirements.txt` by default
+- [`poetry_requirements`](https://www.pantsbuild.org/stable/reference/targets/poetry_requirements), which reads the file named by the `source` field, `pyproject.toml` by default
+- [`uv_requirements`](https://www.pantsbuild.org/stable/reference/targets/uv_requirements), which reads the file named by the `source` field, `pyproject.toml` by default
 
-The generator targets are handled the same way: the source is resolved relative to the build file, extracted, and updated in that file, and a source referenced by several targets is extracted once. The source's own format picks the extractor — Poetry for a `pyproject.toml` with a `[tool.poetry...]` table, PEP 621 for any other `pyproject.toml`, and a pip requirements file otherwise — so each dependency keeps the `depType` its format gives it, including Poetry and uv dependency groups.
+The three generator targets are handled the same way.
+Renovate resolves the source relative to the build file, extracts it, and updates the dependencies in that file.
+A source that several targets refer to is extracted once.
 
-Pants reads a narrower slice of some sources than Renovate does: a `uv_requirements` target generates requirements only from `[tool.uv] dev-dependencies`, while the whole file is extracted here. The extra dependencies are real dependencies of that file, so updating them is still correct, but they are not the ones Pants turned into targets.
+The format of the source file decides which extractor Renovate uses.
+A `pyproject.toml` with a `[tool.poetry]` table is read as Poetry, any other `pyproject.toml` is read as PEP 621, and every other source is read as a pip requirements file.
+Each dependency keeps the `depType` that its own format gives it, including Poetry and uv dependency groups.
 
-Fields other than `name`, `requirements` and `source` are ignored, so string values in `module_mapping` or `overrides` are never mistaken for requirements.
+Pants reads a narrower part of some sources than Renovate does.
+For example, a `uv_requirements` target generates requirements only from `[tool.uv] dev-dependencies`, while Renovate extracts the whole file.
+The extra dependencies are real dependencies of that file, so Renovate is right to update them, but Pants did not turn them into targets.
 
-The default `managerFilePatterns` follow Pants' own default `build_patterns`, `BUILD` and `BUILD.*`. These overlap with the file names Bazel uses, which is harmless — neither manager finds anything it understands in the other's build files. If your repository sets `build_patterns` in `pants.toml`, or you want to narrow the manager to one name, configure it:
+Renovate ignores all fields except `name`, `requirements` and `source`.
+This means string values in `module_mapping` or `overrides` are never mistaken for requirements.
+
+The default `managerFilePatterns` follow the default `build_patterns` of Pants, which are `BUILD` and `BUILD.*`.
+These patterns overlap with the file names that Bazel uses, which is harmless, because neither manager finds anything it understands in the build files of the other.
+Set `managerFilePatterns` yourself if your repository sets `build_patterns` in `pants.toml`, or if you want to narrow the manager to a single name:
 
 ```json
 {
@@ -25,7 +37,9 @@ The default `managerFilePatterns` follow Pants' own default `build_patterns`, `B
 }
 ```
 
-A file referenced by a generator target usually also matches the default `managerFilePatterns` of the manager that owns its format — `pip_requirements`, `pep621` or `poetry`. To avoid two managers proposing the same update, disable one of them, for example:
+A file that a generator target refers to usually also matches the default `managerFilePatterns` of the manager that owns that format, which is `pip_requirements`, `pep621` or `poetry`.
+Disable one of the two managers to stop them both proposing the same update.
+For example:
 
 ```json
 {
