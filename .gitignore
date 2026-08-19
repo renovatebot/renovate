@@ -47,3 +47,6 @@ test/datasource/nuget/_fixtures/obj
 ## Claude
 /.claude/settings.local.json
 /.claude/worktrees
+
+reports/mutation/
+.stryker-tmp/

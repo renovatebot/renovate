@@ -1,0 +1,44 @@
+{
+  "$schema": "https://raw.githubusercontent.com/stryker-mutator/stryker-js/refs/tags/v9.6.1/packages/api/schema/stryker-core.json",
+  "testRunner": "vitest",
+  "checkers": ["typescript"],
+  "tsconfigFile": "tsconfig.json",
+  "mutate": [
+    "lib/**/*.ts",
+    "!lib/**/*.spec.ts",
+    "!lib/**/*.generated.ts",
+    "!lib/**/*.d.ts"
+  ],
+  "ignorePatterns": [
+    "/.worktrees",
+    "/.claude",
+    "/.agents",
+    "/.opencode",
+    "/.venv",
+    "/.cache",
+    "/.clinic",
+    "/coverage",
+    "/dist",
+    "/tmp",
+    "/tools/dist",
+    "/tools/mkdocs/docs",
+    "/tools/mkdocs/site",
+    "/tools/mkdocs/.cache"
+  ],
+  "reporters": ["html", "json", "progress"],
+  "htmlReporter": {
+    "fileName": "reports/mutation/html/index.html"
+  },
+  "jsonReporter": {
+    "fileName": "reports/mutation/mutation.json"
+  },
+  "thresholds": {
+    "high": 80,
+    "low": 60,
+    "break": null
+  },
+  "incremental": true,
+  "incrementalFile": "reports/mutation/.stryker-incremental.json",
+  "timeoutMS": 60000,
+  "concurrency": 4
+}
