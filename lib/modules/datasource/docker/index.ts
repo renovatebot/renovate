@@ -922,10 +922,17 @@ export class DockerDatasource extends Datasource {
     registryHost: string,
     dockerRepository: string,
   ): Promise<string[] | null> {
+    // For private registries, avoid caching null so transient auth failures
+    // remain recoverable without waiting out the TTL.
+    function shouldCacheResult(tags: unknown): boolean {
+      return registryHost === DOCKER_HUB || tags !== null;
+    }
     return withCache(
       {
         namespace: 'datasource-docker-tags',
         key: `${registryHost}:${dockerRepository}`,
+        cacheable: registryHost === DOCKER_HUB,
+        shouldCacheResult,
       },
       () => this._getTags(registryHost, dockerRepository),
     );

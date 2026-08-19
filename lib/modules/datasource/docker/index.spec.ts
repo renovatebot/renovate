@@ -1772,6 +1772,66 @@ describe('modules/datasource/docker/index', () => {
       expect(res?.releases).toHaveLength(1);
     });
 
+    it('does not cache null tags for private registries by default', async () => {
+      httpMock
+        .scope('https://registry.company.com/v2')
+        .get('/cache-private-tags/tags/list?n=10000')
+        .reply(200, '', {})
+        .get('/cache-private-tags/tags/list?n=10000')
+        .reply(403);
+
+      httpMock
+        .scope('https://registry.company.com/v2')
+        .get('/cache-private-tags/tags/list?n=10000')
+        .reply(200, '', {})
+        .get('/cache-private-tags/tags/list?n=10000')
+        .reply(200, { tags: ['1.0.0'] }, {})
+        .get('/')
+        .reply(200)
+        .get('/cache-private-tags/manifests/1.0.0')
+        .reply(200);
+
+      const config = {
+        datasource: DockerDatasource.id,
+        packageName: 'cache-private-tags',
+        registryUrls: ['https://registry.company.com'],
+      };
+
+      expect(await getPkgReleases(config)).toBeNull();
+      expect((await getPkgReleases(config))?.releases).toHaveLength(1);
+    });
+
+    it('does not cache null tags for private registries when cachePrivatePackages is enabled', async () => {
+      GlobalConfig.set({ cachePrivatePackages: true });
+
+      httpMock
+        .scope('https://registry.company.com/v2')
+        .get('/cache-private-tags-opt-in/tags/list?n=10000')
+        .reply(200, '', {})
+        .get('/cache-private-tags-opt-in/tags/list?n=10000')
+        .reply(403);
+
+      httpMock
+        .scope('https://registry.company.com/v2')
+        .get('/cache-private-tags-opt-in/tags/list?n=10000')
+        .reply(200, '', {})
+        .get('/cache-private-tags-opt-in/tags/list?n=10000')
+        .reply(200, { tags: ['1.0.0'] }, {})
+        .get('/')
+        .reply(200)
+        .get('/cache-private-tags-opt-in/manifests/1.0.0')
+        .reply(200);
+
+      const config = {
+        datasource: DockerDatasource.id,
+        packageName: 'cache-private-tags-opt-in',
+        registryUrls: ['https://registry.company.com'],
+      };
+
+      expect(await getPkgReleases(config)).toBeNull();
+      expect((await getPkgReleases(config))?.releases).toHaveLength(1);
+    });
+
     // as this could lead to a Server-Side Request Forgery (SSRF), but could also be misconfiguration
     it('does not follow pagination links to a different origin', async () => {
       const tags = ['1.0.0'];
