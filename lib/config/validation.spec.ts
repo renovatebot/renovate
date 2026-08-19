@@ -2324,7 +2324,7 @@ describe('config/validation', () => {
         {
           message:
             "hostRules header `unallowedHeader` is not allowed by this Renovate instance's `allowedHeaders`.",
-          topic: 'Configuration Error',
+          topic: 'Config security error',
         },
       ]);
     });
@@ -2379,7 +2379,7 @@ describe('config/validation', () => {
         {
           message:
             "hostRules header `X-Auth-Token` is not allowed by this Renovate instance's `allowedHeaders`.",
-          topic: 'Configuration Error',
+          topic: 'Config security error',
         },
       ]);
     });
@@ -2640,7 +2640,7 @@ describe('config/validation', () => {
         {
           message:
             "hostRules header `X-Auth-Token` is not allowed by this Renovate instance's `allowedHeaders`.",
-          topic: 'Configuration Error',
+          topic: 'Config security error',
         },
       ]);
       expect(warnings).toBeEmptyArray();
