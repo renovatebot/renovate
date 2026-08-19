@@ -569,6 +569,8 @@ describe('workers/repository/update/pr/changelog/azure/index', () => {
         ['https://dev.azure.com/org/project/_git/nested/repo', 'repo'],
         ['https://dev.azure.com/org/multi/level/project/_git/repo', 'repo'],
         ['https://dev.azure.com/org/project/_git/repo/', 'repo'],
+        // Unparseable sourceUrl yields an empty repository
+        ['some-random-value', ''],
       ])(
         'extracts repository name from Azure URLs correctly for %s',
         (sourceUrl, expectedRepo) => {
