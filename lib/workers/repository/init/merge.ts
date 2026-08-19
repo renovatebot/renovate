@@ -37,6 +37,7 @@ import { maskToken } from '../../../util/mask.ts';
 import { coerceObject } from '../../../util/object.ts';
 import { regEx } from '../../../util/regex.ts';
 import { coerceString } from '../../../util/string.ts';
+import { quickStringify } from '../../../util/stringify.ts';
 import { getOnboardingConfig } from '../onboarding/branch/config.ts';
 import {
   getOnboardingConfigFromCache,
@@ -125,7 +126,7 @@ export async function detectRepoFileConfig(
     const cachedConfig = getOnboardingConfigFromCache();
     const parsedConfig = cachedConfig ? JSON.parse(cachedConfig) : undefined;
     if (parsedConfig) {
-      setOnboardingConfigDetails(configFileName, JSON.stringify(parsedConfig));
+      setOnboardingConfigDetails(configFileName, quickStringify(parsedConfig)!);
       return { configFileName, configFileParsed: parsedConfig };
     }
   }
@@ -171,7 +172,7 @@ export async function detectRepoFileConfig(
     );
   }
 
-  setOnboardingConfigDetails(configFileName, JSON.stringify(configFileParsed));
+  setOnboardingConfigDetails(configFileName, quickStringify(configFileParsed)!);
   return { configFileName, configFileParsed };
 }
 

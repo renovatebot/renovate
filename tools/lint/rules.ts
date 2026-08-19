@@ -19,6 +19,7 @@ import preferJsonPipe from './rules/prefer-json-pipe.ts';
 import preferLuxon from './rules/prefer-luxon.ts';
 import preferNullishUtil from './rules/prefer-nullish-util.ts';
 import preferPartialInSpecs from './rules/prefer-partial-in-specs.ts';
+import preferStringifyUtil from './rules/prefer-stringify-util.ts';
 import requireRegexUtil from './rules/require-regex-util.ts';
 import testRootDescribe from './rules/test-root-describe.ts';
 import v8IgnoreReason from './rules/v8-ignore-reason.ts';
@@ -51,6 +52,7 @@ export default definePlugin({
     'prefer-is-object': preferIsObject,
     'prefer-nullish-util': preferNullishUtil,
     'prefer-partial-in-specs': preferPartialInSpecs,
+    'prefer-stringify-util': preferStringifyUtil,
     'require-regex-util': requireRegexUtil,
     'test-root-describe': testRootDescribe,
     'v8-ignore-reason': v8IgnoreReason,

@@ -70,7 +70,9 @@ async function validate(
       'Config migration necessary',
     );
     const changedObjects = diffLines(
+      // oxlint-disable-next-line renovate/prefer-stringify-util -- diff display: must match plain JSON.stringify formatting exactly, not the util's stable-stringify output
       JSON.stringify(config, null, 2),
+      // oxlint-disable-next-line renovate/prefer-stringify-util -- diff display: must match plain JSON.stringify formatting exactly, not the util's stable-stringify output
       JSON.stringify(migratedConfig, null, 2),
       { ignoreWhitespace: false, newlineIsToken: false },
     );

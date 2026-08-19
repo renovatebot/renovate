@@ -221,6 +221,7 @@ export async function updateLockedDependency(
       delete dependency.resolved;
       delete dependency.integrity;
     }
+    // oxlint-disable-next-line renovate/prefer-stringify-util -- lockfile content committed to the PR diff: must match plain JSON.stringify formatting exactly
     let newLockFileContent = JSON.stringify(
       packageLockJson,
       null,

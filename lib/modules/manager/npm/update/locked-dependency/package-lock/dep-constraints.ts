@@ -1,6 +1,7 @@
 import type { PackageJson } from 'type-fest';
 import { logger } from '../../../../../../logger/index.ts';
 import { regEx } from '../../../../../../util/regex.ts';
+import { quickStringify } from '../../../../../../util/stringify.ts';
 import { api as semver } from '../../../../../versioning/npm/index.ts';
 import type { PackageLockOrEntry, ParentDependency } from './types.ts';
 
@@ -77,8 +78,8 @@ export function findDepConstraints(
   // dedupe
   const res: ParentDependency[] = [];
   for (const req of parents) {
-    const reqStringified = JSON.stringify(req);
-    if (!res.find((i) => JSON.stringify(i) === reqStringified)) {
+    const reqStringified = quickStringify(req);
+    if (!res.find((i) => quickStringify(i) === reqStringified)) {
       res.push(req);
     }
   }

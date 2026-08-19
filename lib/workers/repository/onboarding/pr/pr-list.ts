@@ -8,6 +8,7 @@ import { logger } from '../../../../logger/index.ts';
 import { emojify } from '../../../../util/emoji.ts';
 import { coerceNumber } from '../../../../util/number.ts';
 import { regEx } from '../../../../util/regex.ts';
+import { quickStringify } from '../../../../util/stringify.ts';
 import type { BranchConfig } from '../../../types.ts';
 
 /**
@@ -51,7 +52,7 @@ export function getExpectedPrList(
       '@&#8203;$1',
     )}</summary>\n\n`;
     if (branch.schedule?.length) {
-      prDesc += `  - Schedule: ${JSON.stringify(branch.schedule)}\n`;
+      prDesc += `  - Schedule: ${quickStringify(branch.schedule)}\n`;
     }
     prDesc += `  - Branch name: \`${branch.branchName}\`\n`;
     prDesc += branch.baseBranch

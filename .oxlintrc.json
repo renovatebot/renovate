@@ -223,7 +223,8 @@
         "renovate/no-hardcoded-docs-url": "error",
         "renovate/no-unquoted-exec-interpolation": "error",
         "renovate/prefer-fs-util": "error",
-        "renovate/prefer-luxon": "error"
+        "renovate/prefer-luxon": "error",
+        "renovate/prefer-stringify-util": "error"
       }
     },
     {
@@ -279,6 +280,18 @@
       ],
       "rules": {
         "renovate/prefer-luxon": "off"
+      }
+    },
+    {
+      "files": ["lib/util/fingerprint.ts"],
+      "rules": {
+        "renovate/prefer-stringify-util": "off"
+      }
+    },
+    {
+      "files": ["lib/util/cache/**"],
+      "rules": {
+        "renovate/prefer-stringify-util": "off"
       }
     },
     {

@@ -18,6 +18,7 @@ import * as promises from '../../../util/promises.ts';
 import { regEx } from '../../../util/regex.ts';
 import { sanitize } from '../../../util/sanitize.ts';
 import { UUIDRegex, matchRegexOrGlobList } from '../../../util/string-match.ts';
+import { quickStringify } from '../../../util/stringify.ts';
 import { parseUrl } from '../../../util/url.ts';
 import type {
   AutodiscoverConfig,
@@ -594,7 +595,7 @@ interface BbIssue {
 async function findOpenIssues(title: string): Promise<BbIssue[]> {
   try {
     const filters = [
-      `title=${JSON.stringify(title)}`,
+      `title=${quickStringify(title)}`,
       '(state = "new" OR state = "open")',
     ];
     if (renovateUserUuid) {

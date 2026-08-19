@@ -12,6 +12,7 @@ import { logger } from '../../logger/index.ts';
 import { toArray } from '../array.ts';
 import { getChildEnv } from '../exec/utils.ts';
 import { regEx } from '../regex.ts';
+import { quickStringify } from '../stringify.ts';
 
 // Missing in handlebars
 type Options = HelperOptions & {
@@ -24,7 +25,9 @@ const helpers: Record<string, handlebars.HelperDelegate> = {
   encodeBase64: (str: string) => Buffer.from(str ?? '').toString('base64'),
   decodeBase64: (str: string) => Buffer.from(str ?? '', 'base64').toString(),
   stringToPrettyJSON: (input: string): string =>
+    // oxlint-disable-next-line renovate/prefer-stringify-util -- user-facing template helper: output can land in commit messages/PR bodies and must match plain JSON.stringify formatting exactly
     JSON.stringify(JSON.parse(input), null, 2),
+  // oxlint-disable-next-line renovate/prefer-stringify-util -- user-facing template helper: output can land in commit messages/PR bodies and must match plain JSON.stringify formatting exactly
   toJSON: (input: unknown): string => JSON.stringify(input),
   toArray: (...args: unknown[]): unknown[] => {
     // Need to remove the 'options', as the last parameter
@@ -88,7 +91,7 @@ const helpers: Record<string, handlebars.HelperDelegate> = {
     const seen = new Set<string>();
 
     return toArray(obj).filter((value) => {
-      const str = JSON.stringify(value);
+      const str = quickStringify(value)!;
 
       if (seen.has(str)) {
         return false;

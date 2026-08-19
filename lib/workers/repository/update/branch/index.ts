@@ -40,6 +40,7 @@ import {
 } from '../../../../util/merge-confidence/index.ts';
 import { coerceNumber } from '../../../../util/number.ts';
 import { toMs } from '../../../../util/pretty-time.ts';
+import { quickStringify } from '../../../../util/stringify.ts';
 import * as template from '../../../../util/template/index.ts';
 import { getCount, isLimitReached } from '../../../global/limits.ts';
 import type {
@@ -749,7 +750,7 @@ export async function processBranch(
           },
         )}`;
 
-        logger.trace(`commitMessage: ${JSON.stringify(config.commitMessage)}`);
+        logger.trace(`commitMessage: ${quickStringify(config.commitMessage)}`);
       }
 
       if (config.commitTrailers) {
@@ -760,7 +761,7 @@ export async function processBranch(
           ),
         );
         logger.trace(
-          `commitTrailers: ${JSON.stringify(config.commitTrailers)}`,
+          `commitTrailers: ${quickStringify(config.commitTrailers)}`,
         );
       }
 

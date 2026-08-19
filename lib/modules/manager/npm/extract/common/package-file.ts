@@ -9,6 +9,7 @@ import {
 import { CONFIG_VALIDATION } from '../../../../../constants/error-messages.ts';
 import { logger } from '../../../../../logger/index.ts';
 import { regEx } from '../../../../../util/regex.ts';
+import { quickStringify } from '../../../../../util/stringify.ts';
 import type { PackageDependency, PackageFileContent } from '../../../types.ts';
 import type { NpmManagerData } from '../../types.ts';
 import { loadPackageJson } from '../../utils.ts';
@@ -41,7 +42,7 @@ export function extractPackageJson(
   }
   const packageJsonName = packageJson.name;
   logger.debug(
-    `npm file ${packageFile} has name ${JSON.stringify(packageJsonName)}`,
+    `npm file ${packageFile} has name ${quickStringify(packageJsonName)}`,
   );
   const packageFileVersion = packageJson.version;
 

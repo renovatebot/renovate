@@ -28,6 +28,7 @@ import { newlineRegex, regEx } from '../../../util/regex.ts';
 import { sampleSize } from '../../../util/sample.ts';
 import { sanitize } from '../../../util/sanitize.ts';
 import { isEmailAdress } from '../../../util/schema-utils/index.ts';
+import { quickStringify } from '../../../util/stringify.ts';
 import { ensureTrailingSlash, getQueryString } from '../../../util/url.ts';
 import type {
   BranchStatusConfig,
@@ -253,7 +254,7 @@ export async function initRepo({
   cloneSubmodulesFilter,
   gitUrl,
 }: RepoParams): Promise<RepoResult> {
-  logger.debug(`initRepo("${JSON.stringify({ repository }, null, 2)}")`);
+  logger.debug(`initRepo("${quickStringify({ repository }, null, 2)}")`);
   const opts = hostRules.find({
     hostType: defaults.hostType,
     url: defaults.endpoint,

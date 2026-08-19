@@ -9,6 +9,7 @@ import {
   getBranchFilesFromCommit,
 } from '../../../../util/git/index.ts';
 import { newlineRegex, regEx } from '../../../../util/regex.ts';
+import { quickStringify } from '../../../../util/stringify.ts';
 
 interface FileOwnersScore {
   file: string;
@@ -166,7 +167,7 @@ export async function codeOwnersForPr(pr: Pr): Promise<string[]> {
       .sort((a, b) => b.score - a.score);
 
     logger.debug(
-      `CODEOWNERS matched the following users: ${JSON.stringify(userScore)}`,
+      `CODEOWNERS matched the following users: ${quickStringify(userScore)}`,
     );
 
     return userScore.map((u) => u.user);

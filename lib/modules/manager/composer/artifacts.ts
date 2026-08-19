@@ -106,6 +106,7 @@ function getAuthJson(): string | null {
     }
   }
 
+  // oxlint-disable-next-line renovate/prefer-stringify-util -- external composer auth.json format: must match plain JSON.stringify output exactly
   return isEmptyObject(authJson) ? null : JSON.stringify(authJson);
 }
 

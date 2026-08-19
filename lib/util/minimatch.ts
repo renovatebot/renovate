@@ -1,5 +1,6 @@
 import type { MinimatchOptions } from 'minimatch';
 import { Minimatch } from 'minimatch';
+import { quickStringify } from './stringify.ts';
 
 const cache = new Map<string, Minimatch>();
 
@@ -8,7 +9,7 @@ export function minimatch(
   options?: MinimatchOptions,
   useCache = true,
 ): Minimatch {
-  const key = options ? `${pattern}:${JSON.stringify(options)}` : pattern;
+  const key = options ? `${pattern}:${quickStringify(options)}` : pattern;
 
   if (useCache) {
     const cachedResult = cache.get(key);
@@ -29,7 +30,7 @@ export function minimatchFilter(
   options?: MinimatchOptions,
   useCache = true,
 ): (fileName: string) => boolean {
-  const key = options ? `${pattern}:${JSON.stringify(options)}` : pattern;
+  const key = options ? `${pattern}:${quickStringify(options)}` : pattern;
 
   if (useCache) {
     const cachedResult = cache.get(key);

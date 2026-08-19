@@ -40,6 +40,7 @@ import * as throttle from '../../util/http/throttle.ts';
 import { regexEngineStatus } from '../../util/regex.ts';
 import { addSecretForSanitizing } from '../../util/sanitize.ts';
 import { coerceString } from '../../util/string.ts';
+import { quickStringify } from '../../util/stringify.ts';
 import * as repositoryWorker from '../repository/index.ts';
 import type { RepositoryWorkerConfig } from '../repository/init/types.ts';
 import { autodiscoverRepositories } from './autodiscover.ts';
@@ -208,7 +209,7 @@ export async function start(): Promise<number> {
     );
 
     if (isNonEmptyString(config.writeDiscoveredRepos)) {
-      const content = JSON.stringify(config.repositories);
+      const content = quickStringify(config.repositories)!;
       await fs.writeFile(config.writeDiscoveredRepos, content);
       logger.info(
         `Written discovered repositories to ${config.writeDiscoveredRepos}`,

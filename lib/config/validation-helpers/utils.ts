@@ -9,6 +9,7 @@ import { logger } from '../../logger/index.ts';
 import type { RegexManagerTemplates } from '../../modules/manager/custom/regex/types.ts';
 import type { CustomManager } from '../../modules/manager/custom/types.ts';
 import { regEx } from '../../util/regex.ts';
+import { quickStringify } from '../../util/stringify.ts';
 import type { ValidationMessage } from '../types.ts';
 import { ConfigValidationTopic } from './types.ts';
 
@@ -52,7 +53,7 @@ export function validateNumber(
   } else {
     errors.push({
       topic: ConfigValidationTopic.Error,
-      message: `Configuration option \`${path}\` should be an integer. Found: ${JSON.stringify(
+      message: `Configuration option \`${path}\` should be an integer. Found: ${quickStringify(
         val,
       )} (${typeof val}).`,
     });

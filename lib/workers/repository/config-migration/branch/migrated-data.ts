@@ -164,9 +164,11 @@ export class MigratedDataFactory {
             { err },
             'Error weaving JSONC to preserve comments, falling back to JSON.stringify',
           );
+          // oxlint-disable-next-line renovate/prefer-stringify-util -- migration output committed to the PR diff: must match plain JSON.stringify formatting exactly
           content = JSON.stringify(migratedConfig, undefined, indentSpace);
         }
       } else {
+        // oxlint-disable-next-line renovate/prefer-stringify-util -- migration output committed to the PR diff: must match plain JSON.stringify formatting exactly
         content = JSON.stringify(migratedConfig, undefined, indentSpace);
       }
 

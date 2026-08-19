@@ -5,6 +5,7 @@ import upath from 'upath';
 import { logger } from '../logger/index.ts';
 import { parseJson } from '../util/common.ts';
 import { regEx } from '../util/regex.ts';
+import { quickStringify } from '../util/stringify.ts';
 
 export function parseFileConfig(
   fileName: string,
@@ -59,7 +60,7 @@ export function parseFileConfig(
     );
     if (jsonValidationError) {
       const validationError = 'Duplicate keys in JSON';
-      const validationMessage = JSON.stringify(jsonValidationError);
+      const validationMessage = quickStringify(jsonValidationError);
       return {
         success: false,
         validationError,

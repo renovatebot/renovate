@@ -12,6 +12,7 @@ export class JSONWriter {
   }
 
   public write(json: unknown, newLineAtTheEnd = true): string {
+    // oxlint-disable-next-line renovate/prefer-stringify-util -- onboarding/migration output committed to the PR diff: must match plain JSON.stringify formatting exactly
     let content = JSON.stringify(json, null, this.indentation);
 
     if (newLineAtTheEnd) {

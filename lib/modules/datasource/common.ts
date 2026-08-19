@@ -9,6 +9,7 @@ import {
 } from '../../util/exec/types.ts';
 import { filterMap } from '../../util/filter-map.ts';
 import { regEx } from '../../util/regex.ts';
+import { quickStringify } from '../../util/stringify.ts';
 import * as allVersioning from '../versioning/index.ts';
 import { defaultVersioning } from '../versioning/index.ts';
 import datasources from './api.ts';
@@ -271,7 +272,7 @@ export function applyConstraintsFiltering<
           release,
           versioning: constraintVersioningName,
         },
-        `applyConstraintsFiltering(${release.version}): releaseConstraints[${name}]=${JSON.stringify(constraint)}`,
+        `applyConstraintsFiltering(${release.version}): releaseConstraints[${name}]=${quickStringify(constraint)}`,
       );
       if (!isNonEmptyArray(constraint)) {
         // A release with no constraints is OK

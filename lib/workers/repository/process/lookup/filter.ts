@@ -7,6 +7,7 @@ import * as npmVersioning from '../../../../modules/versioning/npm/index.ts';
 import * as pep440 from '../../../../modules/versioning/pep440/index.ts';
 import * as poetryVersioning from '../../../../modules/versioning/poetry/index.ts';
 import { getRegexPredicate } from '../../../../util/string-match.ts';
+import { quickStringify } from '../../../../util/stringify.ts';
 import * as template from '../../../../util/template/index.ts';
 import type { FilterConfig } from './types.ts';
 
@@ -161,7 +162,7 @@ export function filterVersions(
       const error = new Error(CONFIG_VALIDATION);
       error.validationSource = 'config';
       error.validationError = 'Invalid `allowedVersions`';
-      error.validationMessage = `The following allowedVersions does not parse as a valid version or range with versioning=${JSON.stringify(config.versioning)}: ${JSON.stringify(allowedVersions)}`;
+      error.validationMessage = `The following allowedVersions does not parse as a valid version or range with versioning=${quickStringify(config.versioning)}: ${quickStringify(allowedVersions)}`;
       throw error;
     }
   }

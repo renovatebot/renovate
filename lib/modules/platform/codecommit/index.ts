@@ -16,6 +16,7 @@ import { parseJson } from '../../../util/common.ts';
 import * as git from '../../../util/git/index.ts';
 import { regEx } from '../../../util/regex.ts';
 import { sanitize } from '../../../util/sanitize.ts';
+import { quickStringify } from '../../../util/stringify.ts';
 import type {
   BranchStatusConfig,
   CreatePRConfig,
@@ -532,7 +533,7 @@ export async function addReviewers(
   reviewers: string[],
 ): Promise<void> {
   const numberOfApprovers = reviewers.length;
-  const approvalRuleContents = `{"Version":"2018-11-08","Statements": [{"Type": "Approvers","NumberOfApprovalsNeeded":${numberOfApprovers},"ApprovalPoolMembers": ${JSON.stringify(
+  const approvalRuleContents = `{"Version":"2018-11-08","Statements": [{"Type": "Approvers","NumberOfApprovalsNeeded":${numberOfApprovers},"ApprovalPoolMembers": ${quickStringify(
     reviewers,
   )}}]}`;
   const res = await client.createPrApprovalRule(
