@@ -393,8 +393,8 @@ importers:
         specifier: 1.4.3
         version: 1.4.3(semantic-release@25.0.9)
       '@hyrious/marshal':
-        specifier: 0.3.3
-        version: 0.3.3
+        specifier: 0.3.4
+        version: 0.3.4
       '@ls-lint/ls-lint':
         specifier: 2.3.1
         version: 2.3.1
@@ -1083,8 +1083,8 @@ packages:
     resolution: {integrity: sha512-7bQW+gkKa2kKZPeJf6+c6gFK9ARxQfn+FKy9ScTBppyKRWH2KzsmweXUoklqeEiHiNVWaeP5csIdsNq6w7QhzA==}
     engines: {node: '>=12.20'}
 
-  '@hyrious/marshal@0.3.3':
-    resolution: {integrity: sha512-Sprz5CmX+V5MEbgOfXB0iqJS2i703RsV2cXSKC3++Y+4EeUvZPJlv0tgvoBRNT7mvb6aUu7UeOzfiowXlAOmew==}
+  '@hyrious/marshal@0.3.4':
+    resolution: {integrity: sha512-uemzn9T7HKYW3SLJAjLWO/jiSS+JsAApug4EcqWaWgZwKUakkMcE7wDosGHKn/D5N7g4pWBJ1vWjvEtvhkSFwA==}
     engines: {node: ^14.18.0 || >=16.0.0}
 
   '@isaacs/cliui@8.0.2':
@@ -6351,7 +6351,7 @@ snapshots:
 
   '@gwhitney/detect-indent@7.0.1': {}
 
-  '@hyrious/marshal@0.3.3': {}
+  '@hyrious/marshal@0.3.4': {}
 
   '@isaacs/cliui@8.0.2':
     dependencies:
