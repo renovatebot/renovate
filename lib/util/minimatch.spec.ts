@@ -39,5 +39,13 @@ describe('util/minimatch', () => {
       expect(filterFunc('test.js')).toBe(true);
       expect(filterFunc('test.txt')).toBe(false);
     });
+
+    it('should correctly match filenames with options', () => {
+      const filterFunc = minimatchFilter('*.js', { dot: true });
+      expect(filterFunc('test.js')).toBe(true);
+      expect(filterFunc('test.txt')).toBe(false);
+      // second call hits the cache for the same pattern+options key
+      expect(minimatchFilter('*.js', { dot: true })('test.js')).toBe(true);
+    });
   });
 });
