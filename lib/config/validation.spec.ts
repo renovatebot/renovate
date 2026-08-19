@@ -2702,7 +2702,7 @@ describe('config/validation', () => {
         {
           message:
             "Env variable name `SOME_VAR` is not allowed by this Renovate instance's `allowedEnv`.",
-          topic: 'Configuration Error',
+          topic: 'Config security error',
         },
       ]);
       expect(warnings).toBeEmptyArray();
@@ -3270,7 +3270,7 @@ describe('config/validation', () => {
       expect(errors).toBeEmptyArray();
       expect(warnings).toMatchObject([
         {
-          topic: 'Configuration Error',
+          topic: 'Config security error',
           message:
             "Env variable name `NOT_ALLOWED` is not allowed by this Renovate instance's `allowedEnv`.",
         },
