@@ -1,4 +1,4 @@
-import { isNonEmptyArray } from '@sindresorhus/is';
+import { isNonEmptyArray, isNullOrUndefined, isString } from '@sindresorhus/is';
 import { GlobalConfig } from '../../../../config/global.ts';
 import { WORKER_FILE_UPDATE_FAILED } from '../../../../constants/error-messages.ts';
 import { logger } from '../../../../logger/index.ts';
@@ -267,9 +267,9 @@ export async function getUpdatedPackageFiles(
       });
       let newContent: string | null;
       let updateArtifacts = false;
-      if (updateResult === null || updateResult === undefined) {
+      if (isNullOrUndefined(updateResult)) {
         newContent = null;
-      } else if (typeof updateResult === 'string') {
+      } else if (isString(updateResult)) {
         newContent = updateResult;
       } else {
         newContent = updateResult.content;
