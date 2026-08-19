@@ -642,6 +642,84 @@ describe('workers/repository/init/merge', () => {
 
       expect(res.packageRules).toMatchObject([repoEntryRule]);
     });
+
+    describe('allowedEnv', () => {
+      beforeEach(() => {
+        migrateAndValidate.migrateAndValidate.mockImplementation((_, c) =>
+          Promise.resolve({ ...c, warnings: [], errors: [] }),
+        );
+        migrate.migrateConfig.mockImplementation((c) => ({
+          isMigrated: false,
+          migratedConfig: c,
+        }));
+        scm.getFileList.mockResolvedValue(['renovate.json']);
+      });
+
+      it('applies `env` from the repository config, if in `allowedEnv`', async () => {
+        GlobalConfig.set({ allowedEnv: ['SOME_*'] });
+        fs.readLocalFile.mockResolvedValue(
+          JSON.stringify({ env: { SOME_VAR: 'from-repo' } }),
+        );
+
+        await mergeRenovateConfig(config);
+
+        expect(getUserEnv()).toEqual({ SOME_VAR: 'from-repo' });
+      });
+
+      it('applies `env` from a `repositories[]` entry, if it is NOT in `allowedEnv`', async () => {
+        // self-hosted administrators' `repositories[].env` are not restricted by `allowedEnv`, and are intentionally treated as "safe"
+        GlobalConfig.set({ allowedEnv: ['SOME_*'] });
+        fs.readLocalFile.mockResolvedValue(JSON.stringify({}));
+
+        await mergeRenovateConfig({
+          ...config,
+          repositoryEntryConfig: { env: { ADMIN_VAR: 'from-admin' } },
+        });
+
+        expect(getUserEnv()).toEqual({ ADMIN_VAR: 'from-admin' });
+      });
+
+      it('incorrectly applies `env` from the repository config, if it is NOT in `allowedEnv`', async () => {
+        // `allowedEnv` is currently only enforced in `validateConfig`, based on the repo config file content. We never re-validate the resolved config before calling `setUserEnv` which allows this bypass
+        GlobalConfig.set({ allowedEnv: ['SOME_*'] });
+        fs.readLocalFile.mockResolvedValue(
+          JSON.stringify({ env: { NOT_ALLOWED: 'from-repo' } }),
+        );
+
+        await mergeRenovateConfig(config);
+
+        expect(getUserEnv()).toEqual({ NOT_ALLOWED: 'from-repo' });
+      });
+
+      it('incorrectly applies `env` injected by a preset, even if it is NOT in `allowedEnv`', async () => {
+        // `allowedEnv` is currently only enforced in `validateConfig`, based on the file content, which does not take into account the full resolved config presets. We never re-validate the resolved config before calling `setUserEnv` which allows this bypass
+        GlobalConfig.set({ allowedEnv: ['SOME_*'] });
+        memCache.set('preset:local>envPreset', {
+          env: { NOT_ALLOWED: 'from-preset' },
+        });
+        fs.readLocalFile.mockResolvedValue(
+          JSON.stringify({ extends: ['local>envPreset'] }),
+        );
+
+        await mergeRenovateConfig(config);
+
+        expect(getUserEnv()).toEqual({ NOT_ALLOWED: 'from-preset' });
+      });
+
+      it('applies `env` from `GlobalConfig`, even if it is NOT in `allowedEnv`', async () => {
+        GlobalConfig.set({
+          allowedEnv: ['SOME_*'],
+        });
+        fs.readLocalFile.mockResolvedValue(JSON.stringify({}));
+
+        await mergeRenovateConfig({
+          ...config,
+          env: { ADMIN_VAR: 'from-config.js' },
+        });
+
+        expect(getUserEnv()).toEqual({ ADMIN_VAR: 'from-config.js' });
+      });
+    });
   });
 
   describe('setNpmTokenInNpmrc', () => {

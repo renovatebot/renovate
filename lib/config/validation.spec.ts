@@ -2384,6 +2384,38 @@ describe('config/validation', () => {
       ]);
     });
 
+    it('reports nested `env` with values not in `allowedEnv` as a configuration error', async () => {
+      // only top-level `env` is ever applied, so a nested copy must not be escalated to a security error - which callers treat as always fatal
+      GlobalConfig.set({ allowedEnv: [] });
+
+      const config = {
+        packageRules: [
+          {
+            matchManagers: ['npm'],
+            env: { SOME_VAR: 'some_value' },
+          },
+        ],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'repo',
+        config,
+      );
+
+      expect(warnings).toBeEmptyArray();
+      expect(errors).toMatchObject([
+        {
+          topic: 'Configuration Error',
+          message:
+            "Env variable name `SOME_VAR` is not allowed by this Renovate instance's `allowedEnv`.",
+        },
+        {
+          topic: 'Configuration Error',
+          message:
+            'The "env" object can only be configured at the top level of a config but was found inside "packageRules[0]"',
+        },
+      ]);
+    });
+
     it('catches invalid variable name in env config option', async () => {
       GlobalConfig.set({ allowedEnv: ['SOME*'] });
       const config = {
