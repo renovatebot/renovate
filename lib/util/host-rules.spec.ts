@@ -407,6 +407,41 @@ describe('util/host-rules', () => {
       ).toEqual({ token: 'longest' });
     });
 
+    it('incorrectly replaces the headers of an earlier matching rule, rather than merging them', () => {
+      // when setting `headers` in global self-hosted configuration and a repo, `find()` combines the matches field by field, which means a repository setting `headers` incorrectly replaces the admin's object wholesale, rather than merging it key by key
+      add({
+        matchHost: 'registry.example.com',
+        token: 'from-admin',
+        headers: { 'X-From-Admin': 'yes' },
+      });
+      add({
+        matchHost: 'registry.example.com',
+        headers: { 'X-From-Repo': 'yes' },
+      });
+
+      expect(find({ url: 'https://registry.example.com' })).toEqual({
+        token: 'from-admin',
+        headers: { 'X-From-Repo': 'yes' },
+      });
+    });
+
+    it('keeps the headers of an earlier matching rule when a later one sets none', () => {
+      // `headers` is only incorrectly overwritten when multiple rules set `headers`- otherwise, they are not replaced
+      add({
+        matchHost: 'registry.example.com',
+        headers: { 'X-From-Admin': 'yes' },
+      });
+      add({
+        matchHost: 'registry.example.com',
+        timeout: 10000,
+      });
+
+      expect(find({ url: 'https://registry.example.com' })).toEqual({
+        headers: { 'X-From-Admin': 'yes' },
+        timeout: 10000,
+      });
+    });
+
     it('matches readOnly requests', () => {
       add({
         matchHost: 'https://api.github.com/repos/',
