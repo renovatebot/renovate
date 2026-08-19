@@ -327,7 +327,7 @@ describe('util/http/github', () => {
       );
     });
 
-    it('sets the x-github-api-version header)', async () => {
+    it('sets the x-github-api-version header', async () => {
       httpMock
         .scope(githubApiHost)
         .get('/foo/bar/contents/lore/ipsum.txt')
