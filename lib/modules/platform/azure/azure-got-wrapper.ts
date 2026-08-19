@@ -59,6 +59,19 @@ export function workItemTrackingApi(): Promise<IWorkItemTrackingApi> {
   return azureObj().getWorkItemTrackingApi();
 }
 
+export async function getAuthenticatedUserId(): Promise<string | undefined> {
+  try {
+    const { authenticatedUser } = await azureObj().connect();
+    if (!authenticatedUser?.id) {
+      logger.debug('Azure: authenticated user ID is unavailable');
+    }
+    return authenticatedUser?.id;
+  } catch (err) {
+    logger.debug({ err }, 'Azure: could not determine authenticated user ID');
+    return undefined;
+  }
+}
+
 /**
  * Whether the endpoint is Azure DevOps Services (cloud) rather than Azure
  * DevOps Server (on-premises). Read from the location service's

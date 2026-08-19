@@ -16,6 +16,7 @@ import {
 import type { PolicyEvaluationRecord } from 'azure-devops-node-api/interfaces/PolicyInterfaces.js';
 import { PolicyEvaluationStatus } from 'azure-devops-node-api/interfaces/PolicyInterfaces.js';
 import { getConfig } from '../../../config/defaults.ts';
+import { GlobalConfig } from '../../../config/global.ts';
 import {
   REPOSITORY_ARCHIVED,
   REPOSITORY_EMPTY,
@@ -78,6 +79,7 @@ let issueService: IssueService;
 const defaults: {
   endpoint?: string;
   hostType: string;
+  renovateUserId?: string;
 } = {
   hostType: 'azure',
 };
@@ -104,10 +106,12 @@ export function initPlatform({
   };
   defaults.endpoint = res.endpoint;
   azureApi.setEndpoint(res.endpoint);
-  const platformConfig: PlatformResult = {
-    endpoint: defaults.endpoint,
-  };
-  return Promise.resolve(platformConfig);
+  return azureApi.getAuthenticatedUserId().then((renovateUserId) => {
+    defaults.renovateUserId = renovateUserId;
+    return {
+      endpoint: defaults.endpoint!,
+    } satisfies PlatformResult;
+  });
 }
 
 export async function getRepos(): Promise<string[]> {
@@ -205,7 +209,11 @@ export async function initRepo({
   azureWorkItemType,
 }: RepoParams): Promise<RepoResult> {
   logger.debug(`initRepo("${repository}")`);
-  config = { repository } as Config;
+  config = {
+    ignorePrAuthor: GlobalConfig.get('ignorePrAuthor'),
+    renovateUserId: defaults.renovateUserId,
+    repository,
+  } as Config;
   const azureApiGit = await azureApi.gitApi();
   const repos = await azureApiGit.getRepositories();
   const repo = getRepoByName(repository, repos);
@@ -274,9 +282,11 @@ export async function getPrList(): Promise<AzurePr[]> {
       fetchedPrs = await azureApiGit.getPullRequests(
         config.repoId,
         {
-          status: 4,
+          status: PullRequestStatus.All,
           // fetch only prs directly created on the repo and not by forks
-          sourceRepositoryId: config.project,
+          sourceRepositoryId: config.repoId,
+          ...(!config.ignorePrAuthor &&
+            config.renovateUserId && { creatorId: config.renovateUserId }),
         },
         config.project,
         0,
@@ -324,9 +334,30 @@ export async function findPr({
   prTitle,
   state = 'all',
   targetBranch,
+  includeOtherAuthors,
 }: FindPRConfig): Promise<Pr | null> {
   let prsFiltered: Pr[] = [];
   try {
+    if (includeOtherAuthors) {
+      const azureApiGit = await azureApi.gitApi();
+      const [pr] = await azureApiGit.getPullRequests(
+        config.repoId,
+        {
+          sourceRefName: getNewBranchName(branchName),
+          sourceRepositoryId: config.repoId,
+          status: PullRequestStatus.Active,
+          ...(targetBranch && {
+            targetRefName: getNewBranchName(targetBranch),
+          }),
+        },
+        config.project,
+        0,
+        0,
+        1,
+      );
+      return pr ? getRenovatePRFormat(pr) : null;
+    }
+
     const prs = await getPrList();
 
     prsFiltered = prs.filter(

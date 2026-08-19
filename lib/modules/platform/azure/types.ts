@@ -14,6 +14,7 @@ export const AzurePrVote = {
 } as const;
 
 export interface Config {
+  ignorePrAuthor: boolean;
   repoForceRebase: boolean;
   mergeMethods: Record<string, GitPullRequestMergeStrategy>;
   owner: string;
@@ -23,6 +24,7 @@ export interface Config {
   prList: AzurePr[];
   fileList: null;
   repository: string;
+  renovateUserId?: string;
   defaultBranch: string;
   /** Work item type for issues; from `azureWorkItemType`, defaults to `Issue`. */
   workItemType: string;
