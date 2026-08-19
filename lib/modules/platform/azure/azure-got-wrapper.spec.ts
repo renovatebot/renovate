@@ -182,4 +182,40 @@ describe('modules/platform/azure/azure-got-wrapper', () => {
       expect(await azure.isHosted()).toBe(false);
     });
   });
+
+  describe('getAuthenticatedUserId', () => {
+    let sdk: typeof import('azure-devops-node-api');
+
+    beforeEach(async () => {
+      sdk = await vi.importActual('azure-devops-node-api');
+      hostRules.add({
+        hostType: 'azure',
+        token: '123test',
+        matchHost: 'https://dev.azure.com/renovate8',
+      });
+      azure.setEndpoint('https://dev.azure.com/renovate8');
+    });
+
+    it('returns the authenticated user ID', async () => {
+      vi.spyOn(sdk.WebApi.prototype, 'connect').mockResolvedValue({
+        authenticatedUser: { id: 'user-id' },
+      });
+
+      expect(await azure.getAuthenticatedUserId()).toBe('user-id');
+    });
+
+    it('returns undefined when the authenticated user ID is unavailable', async () => {
+      vi.spyOn(sdk.WebApi.prototype, 'connect').mockResolvedValue({});
+
+      expect(await azure.getAuthenticatedUserId()).toBeUndefined();
+    });
+
+    it('returns undefined when connection data cannot be read', async () => {
+      vi.spyOn(sdk.WebApi.prototype, 'connect').mockRejectedValue(
+        new Error('boom'),
+      );
+
+      expect(await azure.getAuthenticatedUserId()).toBeUndefined();
+    });
+  });
 });
