@@ -1,5 +1,5 @@
 import { logger } from '../../../logger/index.ts';
-import { escapeRegExp, regEx } from '../../../util/regex.ts';
+import { regEx } from '../../../util/regex.ts';
 import { parseUrl } from '../../../util/url.ts';
 import type {
   UpdateDependencyConfig,
@@ -35,10 +35,9 @@ function updateGithubPath(
   currentDigest?: string,
   newDigest?: string,
 ): string {
-  const match =
-    /^(?<prefix>github:[^/?#]+\/[^/?#]+\/)(?<ref>[^?#]+)(?<suffix>[?#].*)?$/.exec(
-      url,
-    );
+  const match = regEx(
+    /^(?<prefix>github:[^/?#]+\/[^/?#]+\/)(?<ref>[^?#]+)(?<suffix>[?#].*)?$/,
+  ).exec(url);
   if (!match?.groups) {
     return url;
   }
@@ -103,7 +102,7 @@ function updateUrl(
   }
 
   if (queryModified) {
-    const query = updatedUrl.search.replace(/%2F/g, '/');
+    const query = updatedUrl.search.replace(regEx(/%2F/g), '/');
     updatedUrl.search = '';
     newUrl = `${updatedUrl.toString()}${query}`;
   }
@@ -125,13 +124,13 @@ export function updateDependency({
 
   const inputPrefix = '(?:inputs\\.)?';
   const directPattern = regEx(
-    `^\\s*${inputPrefix}${escapeRegExp(depName)}\\.url\\s*=\\s*"([^"]+)"`,
+    `^\\s*${inputPrefix}${RegExp.escape(depName)}\\.url\\s*=\\s*"([^"]+)"`,
     'gm',
   );
   // Only match simple attribute sets where `url` is the first member. This
   // intentionally avoids trying to parse arbitrary Nix expressions with regex.
   const attrSetPattern = regEx(
-    `^\\s*${inputPrefix}${escapeRegExp(depName)}\\s*=\\s*\\{\\s*url\\s*=\\s*"([^"]+)"`,
+    `^\\s*${inputPrefix}${RegExp.escape(depName)}\\s*=\\s*\\{\\s*url\\s*=\\s*"([^"]+)"`,
     'gm',
   );
   const match =
