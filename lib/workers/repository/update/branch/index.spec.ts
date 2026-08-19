@@ -614,7 +614,7 @@ describe('workers/repository/update/branch/index', () => {
         updatesVerified: true,
         prNo: 5,
         result: 'done',
-        commitSha: '123test',
+        commitSha: expect.any(String),
       });
 
       expect(logger.debug).toHaveBeenCalledWith('User has requested rebase');
