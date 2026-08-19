@@ -41,6 +41,7 @@ import { regexEngineStatus } from '../../util/regex.ts';
 import { addSecretForSanitizing } from '../../util/sanitize.ts';
 import { coerceString } from '../../util/string.ts';
 import * as repositoryWorker from '../repository/index.ts';
+import { filterAllowedHeaders } from '../repository/init/filter-allowed-headers.ts';
 import type { RepositoryWorkerConfig } from '../repository/init/types.ts';
 import { autodiscoverRepositories } from './autodiscover.ts';
 import { parseConfigs } from './config/parse/index.ts';
@@ -233,7 +234,15 @@ export async function start(): Promise<number> {
           if (repoConfig.hostRules) {
             logger.debug('Reinitializing hostRules for repo');
             hostRules.clear();
-            repoConfig.hostRules.forEach((rule) => hostRules.add(rule));
+            // we do not currently exempt the self-hosted admin's own headers, as `applyHostRule` performs the filtering based on header names (regardless of who set them)
+            // if they are dropped, we log a WARN, rather than leave them to be silently discarded at request time
+            for (const rule of filterAllowedHeaders(
+              repoConfig.hostRules,
+              // we haven't yet set `GlobalConfig`, so we need to explicitly pass these in
+              repoConfig.allowedHeaders,
+            )) {
+              hostRules.add(rule);
+            }
             repoConfig.hostRules = [];
           }
 

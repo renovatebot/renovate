@@ -61,6 +61,32 @@ describe('workers/repository/init/filter-allowed-headers', () => {
     expect(logger.logger.warn).not.toHaveBeenCalled();
   });
 
+  it('prefers an explicitly-passed allowlist over GlobalConfig', () => {
+    // used when filtering for a repository before `GlobalConfig` reflects it, i.e. a `repositories[]` entry's own `allowedHeaders` override
+    GlobalConfig.set({ allowedHeaders: ['X-*'] });
+
+    expect(
+      filterAllowedHeaders(
+        [
+          {
+            matchHost: 'registry.example.com',
+            headers: { Authorization: 'from-admin', 'X-Dropped': 'yes' },
+          },
+        ],
+        ['Authorization'],
+      ),
+    ).toEqual([
+      {
+        matchHost: 'registry.example.com',
+        headers: { Authorization: 'from-admin' },
+      },
+    ]);
+    expect(logger.logger.warn).toHaveBeenCalledWith(
+      { denied: ['X-Dropped'] },
+      "Ignoring hostRules headers not permitted by this Renovate instance's `allowedHeaders`",
+    );
+  });
+
   it('drops a header the self-hosted admin supplied themselves', () => {
     // `allowedHeaders` enforces the checks regardless of whether it's global self-hosted administrator config, or repo config
     expect(

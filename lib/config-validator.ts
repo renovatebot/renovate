@@ -22,6 +22,7 @@ import { regEx, regexEngineStatus } from './util/regex.ts';
 import { getConfig as getFileConfig } from './workers/global/config/parse/file.ts';
 import { parseConfigs } from './workers/global/config/parse/index.ts';
 import { getParsedContent } from './workers/global/config/parse/util.ts';
+import { filterAllowedHeaders } from './workers/repository/init/filter-allowed-headers.ts';
 
 await init();
 
@@ -42,7 +43,8 @@ async function partiallyGlobalInitialize(): Promise<void> {
   GlobalConfig.set(globalConfig);
 
   if (globalConfig.hostRules) {
-    for (const hostRule of globalConfig.hostRules) {
+    // the self-hosted admin's own headers get no exemption from `allowedHeaders` either, as `applyHostRule` filters the rule it matches by header name alone whoever set it - so we drop them here too, with a WARN, rather than leave them to be silently discarded at request time
+    for (const hostRule of filterAllowedHeaders(globalConfig.hostRules)) {
       addHostRule(hostRule);
     }
   }
@@ -56,7 +58,8 @@ async function validate(
   isPreset = false,
 ): Promise<void> {
   if (config.hostRules) {
-    for (const hostRule of config.hostRules) {
+    // `allowedHeaders` enforces the checks regardless of whether it's global self-hosted administrator config, or repo config
+    for (const hostRule of filterAllowedHeaders(config.hostRules)) {
       addHostRule(hostRule);
     }
   }
