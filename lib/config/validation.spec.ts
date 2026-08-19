@@ -2416,6 +2416,37 @@ describe('config/validation', () => {
       ]);
     });
 
+    it('reports nested `hostRules[].headers` with values not in `allowedHeaders` as a configuration error', async () => {
+      GlobalConfig.set({ allowedHeaders: [] });
+
+      const config = {
+        packageRules: [
+          {
+            matchManagers: ['npm'],
+            hostRules: [
+              {
+                matchHost: 'https://domain.com',
+                headers: { 'X-Auth-Token': 'token' },
+              },
+            ],
+          },
+        ],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'repo',
+        config,
+      );
+
+      expect(warnings).toBeEmptyArray();
+      expect(errors).toMatchObject([
+        {
+          topic: 'Configuration Error',
+          message:
+            "hostRules header `X-Auth-Token` is not allowed by this Renovate instance's `allowedHeaders`.",
+        },
+      ]);
+    });
+
     it('catches invalid variable name in env config option', async () => {
       GlobalConfig.set({ allowedEnv: ['SOME*'] });
       const config = {
