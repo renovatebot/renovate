@@ -252,7 +252,15 @@ export async function mergeRenovateConfig(
     returnConfig = mergeChildConfig(returnConfig, resolvedRepoEntryWithSecrets);
   }
 
-  if (isNonEmptyArray(returnConfig.extends)) {
+  // When requireConfig=ignored, no repo file is read, so resolvedRepoConfig is
+  // always empty. Copying global extends into it causes preset re-expansion
+  // without the global overrides present, making them lose to preset defaults.
+  // Keep extends in returnConfig instead; the final resolveConfigPresets call
+  // below will expand them with all global overrides intact.
+  if (
+    isNonEmptyArray(returnConfig.extends) &&
+    getInheritedOrGlobal('requireConfig') !== 'ignored'
+  ) {
     resolvedRepoConfig.extends = [
       ...coerceArray(returnConfig.extends),
       ...coerceArray(resolvedRepoConfig.extends),
