@@ -1,3 +1,4 @@
+import type { WebApi } from 'azure-devops-node-api';
 import type { MockedObject } from 'vitest';
 import { buildTestJwt } from '~test/jwt-util.ts';
 import type { logger as _logger } from '../../../logger/index.ts';
@@ -207,7 +208,8 @@ describe('modules/platform/azure/azure-got-wrapper', () => {
       expect(await azure.getAuthenticatedUserId({ token: '123test' })).toBe(
         'user-id',
       );
-      expect(connect.mock.contexts[0].authHandler.constructor.name).toBe(
+      const context = connect.mock.contexts[0] as WebApi;
+      expect(context.authHandler.constructor.name).toBe(
         'PersonalAccessTokenCredentialHandler',
       );
     });
@@ -223,7 +225,8 @@ describe('modules/platform/azure/azure-got-wrapper', () => {
         .mockResolvedValue({ authenticatedUser: { id: 'user-id' } });
 
       expect(await azure.getAuthenticatedUserId({ token })).toBe('user-id');
-      expect(connect.mock.contexts[0].authHandler.constructor.name).toBe(
+      const context = connect.mock.contexts[0] as WebApi;
+      expect(context.authHandler.constructor.name).toBe(
         'BearerCredentialHandler',
       );
     });
@@ -239,7 +242,8 @@ describe('modules/platform/azure/azure-got-wrapper', () => {
           password: 'pass',
         }),
       ).toBe('user-id');
-      expect(connect.mock.contexts[0].authHandler).toMatchObject({
+      const context = connect.mock.contexts[0] as WebApi;
+      expect(context.authHandler).toMatchObject({
         username: 'user',
         password: 'pass',
       });
