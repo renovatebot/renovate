@@ -1,4 +1,3 @@
-import { coerce } from 'semver';
 import vcpkg from './index.ts';
 
 describe('modules/versioning/vcpkg/index', () => {
@@ -36,8 +35,8 @@ describe('modules/versioning/vcpkg/index', () => {
       ${'#1'}                           | ${false}
       ${'1.2.3#'}                       | ${true}
       ${'1.2.3#abc'}                    | ${true}
-      ${null as unknown as string}      | ${false}
-      ${undefined as unknown as string} | ${false}
+      ${null}                           | ${false}
+      ${undefined}                      | ${false}
     `('isValid("$input") === $expected', ({ input, expected }) => {
       expect(vcpkg.isValid(input)).toBe(expected);
     });
@@ -55,8 +54,8 @@ describe('modules/versioning/vcpkg/index', () => {
       ${'1.2.3.4'}               | ${true}
       ${'2024-01-15'}            | ${true}
       ${'2024-01-15#3'}          | ${true}
-      ${'bla-bla-2024-08-fixed'} | ${false}
-      ${'opaque#3'}              | ${false}
+      ${'bla-bla-2024-08-fixed'} | ${true}
+      ${'opaque#3'}              | ${true}
       ${''}                      | ${false}
       ${null}                    | ${false}
       ${undefined}               | ${false}
@@ -75,11 +74,12 @@ describe('modules/versioning/vcpkg/index', () => {
   });
 
   describe('.isSingleVersion(version)', () => {
-    it('returns true for ordered schemes only', () => {
+    it('returns true for any valid version', () => {
       expect(vcpkg.isSingleVersion('1.2.3')).toBeTrue();
       expect(vcpkg.isSingleVersion('1.2.3.4')).toBeTrue();
       expect(vcpkg.isSingleVersion('2024-01-15')).toBeTrue();
-      expect(vcpkg.isSingleVersion('opaque')).toBeFalse();
+      expect(vcpkg.isSingleVersion('opaque')).toBeTrue();
+      expect(vcpkg.isSingleVersion('')).toBeFalse();
     });
   });
 
@@ -116,13 +116,6 @@ describe('modules/versioning/vcpkg/index', () => {
       expect(vcpkg.getMajor(input)).toBe(major);
       expect(vcpkg.getMinor(input)).toBe(minor);
       expect(vcpkg.getPatch(input)).toBe(patch);
-    });
-
-    it('accepts SemVer object input', () => {
-      const sv = coerce('1.2.3')!;
-      expect(vcpkg.getMajor(sv)).toBe(1);
-      expect(vcpkg.getMinor(sv)).toBe(2);
-      expect(vcpkg.getPatch(sv)).toBe(3);
     });
   });
 
@@ -170,7 +163,7 @@ describe('modules/versioning/vcpkg/index', () => {
       ${'2024-01-15'}   | ${'2024-01-16'} | ${false}
       ${'2024-01-15#1'} | ${'2024-01-15'} | ${true}
       ${'opaque'}       | ${'other'}      | ${false}
-      ${'opaque#2'}     | ${'opaque#1'}   | ${false}
+      ${'opaque#2'}     | ${'opaque#1'}   | ${true}
       ${'1.2.3'}        | ${'2024-01-15'} | ${false}
       ${'1.2.3'}        | ${'opaque'}     | ${false}
       ${''}             | ${'1.2.3'}      | ${false}

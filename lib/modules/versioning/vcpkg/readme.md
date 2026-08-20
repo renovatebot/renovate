@@ -13,4 +13,7 @@ A vcpkg port can also carry a `port-version` integer for changes that affect pac
 The canonical text form combines the base version and port-version with a `#` separator, like `1.2.3#1`, and the port-version is omitted when zero.
 Renovate treats the port-version as a tie-breaker after the base versions compare equal, so `1.2.3#1` is greater than `1.2.3#0`, while `1.2.4` is still greater than `1.2.3#1` because the base version wins.
 
-Vcpkg has no range expression syntax. Manifest `dependencies` carry a single `version>=` lower bound, and `overrides` carry an exact pin. Renovate treats `matches` as a `>=` comparison for the numeric and date schemes, so any candidate version at or above the constraint satisfies. Opaque strings have no ordering on the base, so only versions with the same base satisfy, with port-version still providing the `>=` comparison once the base matches.
+Vcpkg has no range expression syntax.
+Manifest `dependencies` carry a single `version>=` lower bound, and `overrides` carry an exact pin.
+Renovate treats `matches` as a `>=` comparison for the numeric and date schemes, so any candidate version at or above the constraint satisfies.
+Opaque strings have no ordering on the base, so only versions with the same base satisfy, with port-version still providing the `>=` comparison once the base matches.

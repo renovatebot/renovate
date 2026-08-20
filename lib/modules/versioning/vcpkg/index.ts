@@ -1,3 +1,5 @@
+import { isString } from '@sindresorhus/is';
+import { DateTime } from 'luxon';
 import type { SemVer } from 'semver';
 import { coerce } from 'semver';
 import { regEx } from '../../../util/regex.ts';
@@ -7,7 +9,9 @@ import type { NewValueConfig, VersioningApi } from '../types.ts';
 
 export const id = 'vcpkg';
 export const displayName = 'vcpkg';
-export const urls = ['https://learn.microsoft.com/vcpkg/users/versioning'];
+export const urls = [
+  '[vcpkg - Versioning](https://learn.microsoft.com/vcpkg/users/versioning)',
+];
 export const supportsRanges = false;
 
 type Scheme = 'date' | 'numeric' | 'string' | 'invalid';
@@ -49,18 +53,7 @@ function splitPortVersion(input: string): {
 }
 
 function isValidDateHead(head: string): boolean {
-  // Caller guarantees `head` matches the YYYY-MM-DD prefix, so the split
-  // always yields three numeric parts.
-  const [yearStr, monthStr, dayStr] = head.split('-');
-  const year = Number.parseInt(yearStr, 10);
-  const month = Number.parseInt(monthStr, 10);
-  const day = Number.parseInt(dayStr, 10);
-  if (month < 1 || month > 12 || day < 1) {
-    return false;
-  }
-  // Manually validate day-of-month against actual month length.
-  const daysInMonth = new Date(Date.UTC(year, month, 0)).getUTCDate();
-  return day <= daysInMonth;
+  return DateTime.fromISO(head, { zone: 'utc' }).isValid;
 }
 
 function matchDate(base: string): { head: string; tail: number[] } | null {
@@ -91,7 +84,7 @@ function detectScheme(base: string): Scheme {
 }
 
 function parse(input: string | undefined | null): ParsedVersion | null {
-  if (typeof input !== 'string') {
+  if (!isString(input)) {
     return null;
   }
   const trimmed = input.trim();
@@ -111,11 +104,8 @@ function parse(input: string | undefined | null): ParsedVersion | null {
     strictSemverRegex.test(base) &&
     semver.isValid(base);
   if (scheme === 'date') {
-    const dateParts = matchDate(base);
-    /* v8 ignore next 3 -- detectScheme guarantees matchDate succeeds */
-    if (!dateParts) {
-      return null;
-    }
+    // detectScheme guarantees matchDate succeeds
+    const dateParts = matchDate(base)!;
     return {
       base,
       portVersion,
@@ -128,11 +118,9 @@ function parse(input: string | undefined | null): ParsedVersion | null {
   return { base, portVersion, scheme, strictSemver };
 }
 
-function compareBase(a: ParsedVersion, b: ParsedVersion): number {
+function compareBase(a: ParsedVersion, b: ParsedVersion): number | null {
   if (a.scheme !== b.scheme) {
-    // Cross-scheme bases are not orderable in vcpkg, callers fall back to
-    // port-version which is also of limited meaning across schemes.
-    return 0;
+    return null;
   }
   if (a.scheme === 'date') {
     // `parse` guarantees `dateHead` and `dateTail` are populated for the
@@ -164,12 +152,15 @@ function compareBase(a: ParsedVersion, b: ParsedVersion): number {
     }
     return loose.sortVersions(a.base, b.base);
   }
-  // Opaque strings have no ordering.
-  return 0;
+  // Opaque strings order only against an identical base.
+  return a.base === b.base ? 0 : null;
 }
 
-function compare(a: ParsedVersion, b: ParsedVersion): number {
+function compare(a: ParsedVersion, b: ParsedVersion): number | null {
   const baseResult = compareBase(a, b);
+  if (baseResult === null) {
+    return null;
+  }
   if (baseResult !== 0) {
     return baseResult;
   }
@@ -181,11 +172,7 @@ function isValid(input: string): boolean {
 }
 
 function isVersion(input: string | undefined | null): boolean {
-  const parsed = parse(input ?? '');
-  if (!parsed) {
-    return false;
-  }
-  return parsed.scheme !== 'string';
+  return parse(input) !== null;
 }
 
 function isCompatible(version: string): boolean {
@@ -223,56 +210,37 @@ function coerceNumeric(base: string, strictSemver: boolean): SemVer | null {
   return coerce(stripped);
 }
 
-function getMajor(version: string | SemVer): number | null {
-  const input = typeof version === 'string' ? version : version.version;
-  const parsed = parse(input);
+function getMajor(version: string): number | null {
+  const parsed = parse(version);
   if (parsed?.scheme !== 'numeric') {
     return null;
   }
-  /* v8 ignore next -- coerce always succeeds for `numeric` bases */
-  return coerceNumeric(parsed.base, parsed.strictSemver)?.major ?? null;
+  /* coerce always succeeds for `numeric` bases */
+  return coerceNumeric(parsed.base, parsed.strictSemver)!.major;
 }
 
-function getMinor(version: string | SemVer): number | null {
-  const input = typeof version === 'string' ? version : version.version;
-  const parsed = parse(input);
+function getMinor(version: string): number | null {
+  const parsed = parse(version);
   if (parsed?.scheme !== 'numeric') {
     return null;
   }
-  /* v8 ignore next -- coerce always succeeds for `numeric` bases */
-  return coerceNumeric(parsed.base, parsed.strictSemver)?.minor ?? null;
+  /* coerce always succeeds for `numeric` bases */
+  return coerceNumeric(parsed.base, parsed.strictSemver)!.minor;
 }
 
-function getPatch(version: string | SemVer): number | null {
-  const input = typeof version === 'string' ? version : version.version;
-  const parsed = parse(input);
+function getPatch(version: string): number | null {
+  const parsed = parse(version);
   if (parsed?.scheme !== 'numeric') {
     return null;
   }
-  /* v8 ignore next -- coerce always succeeds for `numeric` bases */
-  return coerceNumeric(parsed.base, parsed.strictSemver)?.patch ?? null;
+  /* coerce always succeeds for `numeric` bases */
+  return coerceNumeric(parsed.base, parsed.strictSemver)!.patch;
 }
 
 function equals(version: string, other: string): boolean {
   const a = parse(version);
   const b = parse(other);
-  if (!a || !b) {
-    return false;
-  }
-  if (a.scheme !== b.scheme) {
-    return false;
-  }
-  if (a.portVersion !== b.portVersion) {
-    return false;
-  }
-  if (a.scheme === 'numeric') {
-    if (a.strictSemver && b.strictSemver) {
-      return semver.equals(a.base, b.base);
-    }
-    return loose.equals(a.base, b.base);
-  }
-  // Both date and opaque-string compare by exact string equality on the base.
-  return a.base === b.base;
+  return !!a && !!b && compare(a, b) === 0;
 }
 
 function isGreaterThan(version: string, other: string): boolean {
@@ -281,14 +249,8 @@ function isGreaterThan(version: string, other: string): boolean {
   if (!a || !b) {
     return false;
   }
-  if (a.scheme !== b.scheme) {
-    return false;
-  }
-  // Opaque strings have no ordering beyond equality.
-  if (a.scheme === 'string') {
-    return false;
-  }
-  return compare(a, b) > 0;
+  const result = compare(a, b);
+  return result !== null && result > 0;
 }
 
 function sortVersions(version: string, other: string): number {
@@ -297,26 +259,18 @@ function sortVersions(version: string, other: string): number {
   if (!a || !b) {
     return 0;
   }
-  return compare(a, b);
+  return compare(a, b) ?? 0;
 }
 
 function matches(version: string, range: string): boolean {
-  // vcpkg manifest dependencies use a `>=` lower-bound operator. For numeric
-  // and date schemes that is a real ordering; for opaque strings the base must
-  // match exactly because string ordering is undefined, but the port-version
-  // still provides a `>=` comparison once the base matches.
+  // vcpkg has no range syntax; manifest dependencies are a `>=` lower bound.
   const v = parse(version);
   const r = parse(range);
   if (!v || !r) {
     return false;
   }
-  if (v.scheme !== r.scheme) {
-    return false;
-  }
-  if (v.scheme === 'string') {
-    return v.base === r.base && v.portVersion >= r.portVersion;
-  }
-  return compare(v, r) >= 0;
+  const result = compare(v, r);
+  return result !== null && result >= 0;
 }
 
 function getSatisfyingVersion(
@@ -329,12 +283,9 @@ function getSatisfyingVersion(
     if (!matches(version, range)) {
       continue;
     }
-    const parsed = parse(version);
-    /* v8 ignore next 3 -- parse succeeds for any matches-accepted input */
-    if (!parsed) {
-      continue;
-    }
-    if (!bestParsed || compare(parsed, bestParsed) > 0) {
+    // parse succeeds for any matches-accepted input
+    const parsed = parse(version)!;
+    if (!bestParsed || compare(parsed, bestParsed)! > 0) {
       bestParsed = parsed;
       bestStr = version;
     }
@@ -352,12 +303,9 @@ function minSatisfyingVersion(
     if (!matches(version, range)) {
       continue;
     }
-    const parsed = parse(version);
-    /* v8 ignore next 3 -- parse succeeds for any matches-accepted input */
-    if (!parsed) {
-      continue;
-    }
-    if (!bestParsed || compare(parsed, bestParsed) < 0) {
+    // parse succeeds for any matches-accepted input
+    const parsed = parse(version)!;
+    if (!bestParsed || compare(parsed, bestParsed)! < 0) {
       bestParsed = parsed;
       bestStr = version;
     }
