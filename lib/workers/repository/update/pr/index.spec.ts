@@ -502,6 +502,94 @@ describe('workers/repository/update/pr/index', () => {
           'Pull Request #123 does not need updating',
         );
       });
+
+      it('re-requests review from users with dismissed reviews on existing PR', async () => {
+        const changedPr: Pr = { ...pr, title: 'Another title' };
+        platform.getBranchPr.mockResolvedValueOnce(changedPr);
+        platform.getPrDismissedReviewers = vi
+          .fn()
+          .mockResolvedValueOnce(['user1', 'user2']);
+
+        const res = await ensurePr({
+          ...config,
+          reRequestApprovedReviews: true,
+        });
+
+        expect(res).toEqual({ type: 'with-pr', pr });
+        expect(platform.getPrDismissedReviewers).toHaveBeenCalledWith(
+          pr.number,
+        );
+        expect(platform.addReviewers).toHaveBeenCalledWith(pr.number, [
+          'user1',
+          'user2',
+        ]);
+      });
+
+      it('re-requests review even when PR does not need updating', async () => {
+        platform.getBranchPr.mockResolvedValueOnce(pr);
+        platform.getPrDismissedReviewers = vi
+          .fn()
+          .mockResolvedValueOnce(['user1']);
+
+        const res = await ensurePr({
+          ...config,
+          reRequestApprovedReviews: true,
+        });
+
+        expect(res).toEqual({ type: 'with-pr', pr });
+        expect(platform.updatePr).not.toHaveBeenCalled();
+        expect(platform.getPrDismissedReviewers).toHaveBeenCalledWith(
+          pr.number,
+        );
+        expect(platform.addReviewers).toHaveBeenCalledWith(pr.number, [
+          'user1',
+        ]);
+      });
+
+      it('does not re-request review when reRequestApprovedReviews is disabled', async () => {
+        const changedPr: Pr = { ...pr, title: 'Another title' };
+        platform.getBranchPr.mockResolvedValueOnce(changedPr);
+        platform.getPrDismissedReviewers = vi.fn();
+
+        await ensurePr({
+          ...config,
+          reRequestApprovedReviews: false,
+        });
+
+        expect(platform.updatePr).toHaveBeenCalled();
+        expect(platform.getPrDismissedReviewers).not.toHaveBeenCalled();
+      });
+
+      it('does not re-request review when no dismissed reviews exist', async () => {
+        const changedPr: Pr = { ...pr, title: 'Another title' };
+        platform.getBranchPr.mockResolvedValueOnce(changedPr);
+        platform.getPrDismissedReviewers = vi.fn().mockResolvedValueOnce([]);
+
+        await ensurePr({
+          ...config,
+          reRequestApprovedReviews: true,
+        });
+
+        expect(platform.updatePr).toHaveBeenCalled();
+        expect(platform.getPrDismissedReviewers).toHaveBeenCalledWith(
+          pr.number,
+        );
+        expect(platform.addReviewers).not.toHaveBeenCalled();
+      });
+
+      it('does not re-request review when platform lacks getPrDismissedReviewers', async () => {
+        const changedPr: Pr = { ...pr, title: 'Another title' };
+        platform.getBranchPr.mockResolvedValueOnce(changedPr);
+        platform.getPrDismissedReviewers = undefined as never;
+
+        await ensurePr({
+          ...config,
+          reRequestApprovedReviews: true,
+        });
+
+        expect(platform.updatePr).toHaveBeenCalled();
+        expect(platform.addReviewers).not.toHaveBeenCalled();
+      });
     });
 
     describe('dry-run', () => {
@@ -539,6 +627,29 @@ describe('workers/repository/update/pr/index', () => {
 
         expect(logger.logger.info).toHaveBeenCalledWith(
           `DRY-RUN: Would update PR #${pr.number}`,
+        );
+      });
+
+      it('dry-runs re-request review from users with dismissed reviews', async () => {
+        const changedPr: Pr = { ...pr, title: 'Another title' };
+        platform.getBranchPr.mockResolvedValueOnce(changedPr);
+        platform.getPrDismissedReviewers = vi
+          .fn()
+          .mockResolvedValueOnce(['user1', 'user2']);
+
+        await ensurePr({
+          ...config,
+          reRequestApprovedReviews: true,
+        });
+
+        expect(platform.updatePr).not.toHaveBeenCalled();
+        expect(platform.getPrDismissedReviewers).toHaveBeenCalledWith(
+          pr.number,
+        );
+        expect(platform.addReviewers).not.toHaveBeenCalled();
+        expect(logger.logger.info).toHaveBeenCalledWith(
+          { dismissedReviewers: ['user1', 'user2'] },
+          `DRY-RUN: Would re-request review from reviewers with dismissed approvals for PR #${pr.number}`,
         );
       });
 
