@@ -219,7 +219,46 @@ function formatAsMarkdownLink(name: string, url?: string | null): string {
   return url ? `[${name}](${url})` : `\`${name}\``;
 }
 
-function getListItem(branch: BranchConfig, type: string): string {
+function getPendingReasonDepName(reason: string): string | null {
+  const prefixEnd = reason.indexOf('`: ');
+  return reason.startsWith('`') && prefixEnd > 1
+    ? reason.slice(1, prefixEnd)
+    : null;
+}
+
+export function getPendingReason(branch: BranchConfig): string | null {
+  if (!branch.pendingChecksReasons) {
+    return null;
+  }
+
+  const depNames = [
+    ...new Set(
+      branch.pendingChecksReasons
+        .map(getPendingReasonDepName)
+        .filter(isNonEmptyString),
+    ),
+  ];
+  const [depName] = depNames;
+  const repeatedDepName =
+    depName && depNames.length === 1 && branch.prTitle?.includes(depName)
+      ? depName
+      : null;
+  const reasonPrefix = repeatedDepName ? `\`${repeatedDepName}\`: ` : null;
+
+  return branch.pendingChecksReasons
+    .map((reason) =>
+      reasonPrefix && reason.startsWith(reasonPrefix)
+        ? reason.slice(reasonPrefix.length)
+        : reason,
+    )
+    .join('; ');
+}
+
+function getListItem(
+  branch: BranchConfig,
+  type: string,
+  reason?: string | null,
+): string {
   let item = getCheckbox(`${type}-branch=${branch.branchName}`);
   if (branch.prNo) {
     // TODO: types (#22198)
@@ -231,10 +270,13 @@ function getListItem(branch: BranchConfig, type: string): string {
     // TODO: types (#22198)
     ...new Set(branch.upgrades.map((upgrade) => `\`${upgrade.depName!}\``)),
   ];
-  if (uniquePackages.length < 2) {
-    return `${item}\n`;
+  if (uniquePackages.length >= 2) {
+    item += ` (${uniquePackages.join(', ')})`;
   }
-  return `${item} (${uniquePackages.join(', ')})\n`;
+  if (reason) {
+    item += ` - _${reason}_`;
+  }
+  return `${item}\n`;
 }
 
 function splitBranchesByCategory(filteredBranches: BranchConfig[]): {
@@ -260,9 +302,15 @@ function splitBranchesByCategory(filteredBranches: BranchConfig[]): {
   return { categories, uncategorized, hasCategorized, hasUncategorized };
 }
 
-function getBranchList(branches: BranchConfig[], listItemType: string): string {
+function getBranchList(
+  branches: BranchConfig[],
+  listItemType: string,
+  getReasonFn?: (branch: BranchConfig) => string | null,
+): string {
   return branches
-    .map((branch: BranchConfig): string => getListItem(branch, listItemType))
+    .map((branch: BranchConfig): string =>
+      getListItem(branch, listItemType, getReasonFn?.(branch)),
+    )
     .join('');
 }
 
@@ -279,6 +327,7 @@ function getBranchesListMd(
   bulkComment?: string,
   bulkMessage?: string,
   bulkIcon?: '🔐',
+  getReasonFn?: (branch: BranchConfig) => string | null,
 ): string {
   const filteredBranches = branches.filter(predicate);
   if (filteredBranches.length === 0) {
@@ -294,7 +343,7 @@ function getBranchesListMd(
     )) {
       result = `${result.trimEnd()}\n\n`;
       result += `### ${category}\n\n`;
-      result += getBranchList(branches, listItemType);
+      result += getBranchList(branches, listItemType, getReasonFn);
     }
     if (hasUncategorized) {
       result = `${result.trimEnd()}\n\n`;
@@ -302,7 +351,7 @@ function getBranchesListMd(
     }
   }
   result = `${result.trimEnd()}\n\n`;
-  result += getBranchList(uncategorized, listItemType);
+  result += getBranchList(uncategorized, listItemType, getReasonFn);
 
   if (bulkComment && bulkMessage && filteredBranches.length > 1) {
     if (hasCategorized) {
@@ -547,17 +596,30 @@ export async function ensureDependencyDashboard(
     'The following updates have been manually edited so Renovate will no longer make changes. To discard all commits and start over, click on a checkbox below.',
     'rebase',
   );
+  const verbosePendingFn = config.dependencyDashboardVerbosePendingChecks
+    ? getPendingReason
+    : undefined;
   issueBody += getBranchesListMd(
     branches,
     (branch) => branch.result === 'pending',
     'Pending Status Checks',
     'The following updates await pending status checks. To force their creation now, click on a checkbox below.',
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    verbosePendingFn,
   );
   issueBody += getBranchesListMd(
     branches,
     (branch) => branch.prBlockedBy === 'BranchAutomerge',
     'Pending Branch Automerge',
     'The following updates await pending status checks before automerging. To abort the branch automerge and create a PR instead, click on a checkbox below.',
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    verbosePendingFn,
   );
 
   const warn = getDepWarningsDashboard(packageFiles, config);

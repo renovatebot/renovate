@@ -1624,6 +1624,18 @@ Set this to `false` if you prefer not to see abandoned packages in your dependen
 
 Configure this option if you prefer a different title for the Dependency Dashboard.
 
+## `dependencyDashboardVerbosePendingChecks`
+
+Set this to `true` to show a human-readable reason next to each branch listed under the "Pending Status Checks" and "Pending Branch Automerge" sections of the Dependency Dashboard.
+
+When enabled, each entry shows _why_ the branch is pending — for example:
+
+- _"Waiting 18h until minimum release age of 3 days"_
+- _"Test coverage below minimum confidence threshold"_
+- _"Waiting for status checks before creating PR"_
+
+This is disabled by default to keep the dashboard compact for existing users.
+
 ## `description`
 
 The description field can be used inside any configuration object to add a human-readable description of the object's config purpose.

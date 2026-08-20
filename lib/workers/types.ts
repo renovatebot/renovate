@@ -194,6 +194,7 @@ export interface BranchConfig
   packageFiles?: Record<string, PackageFile[]>;
   prBlockedBy?: PrBlockedBy;
   prNo?: number;
+  pendingChecksReasons?: string[];
   stabilityStatus?: BranchStatus;
   stopUpdating?: boolean;
   isConflicted?: boolean;

@@ -882,6 +882,13 @@ const options: Readonly<RenovateOptions>[] = [
     default: false,
   },
   {
+    name: 'dependencyDashboardVerbosePendingChecks',
+    description:
+      'Set to `true` to show the reason why each update is listed under "Pending Status Checks" or "Pending Branch Automerge" on the Dependency Dashboard.',
+    type: 'boolean',
+    default: false,
+  },
+  {
     name: 'dependencyDashboardAutoclose',
     description:
       'Set to `true` to let Renovate close the Dependency Dashboard issue if there are no more updates.',
