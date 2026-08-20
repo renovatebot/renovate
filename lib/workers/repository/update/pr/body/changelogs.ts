@@ -26,3 +26,18 @@ export function getChangelogs(config: BranchConfig): string {
 
   return releaseNotes;
 }
+
+export const changelogsCommentTopic = 'Release Notes';
+
+/**
+ * Used in place of the release notes when they are posted as a PR comment, so
+ * that platforms which seed the squash commit message from the PR body don't
+ * put the whole changelog into the repository history.
+ */
+export function getChangelogsCommentNotice(config: BranchConfig): string {
+  if (!config.hasReleaseNotes) {
+    return '';
+  }
+
+  return '\n\n---\n\nRelease notes for this update are in a comment on this PR.\n\n';
+}

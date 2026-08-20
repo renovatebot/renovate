@@ -1,6 +1,6 @@
 import * as _template from '../../../../../util/template/index.ts';
 import type { BranchConfig } from '../../../../types.ts';
-import { getChangelogs } from './changelogs.ts';
+import { getChangelogs, getChangelogsCommentNotice } from './changelogs.ts';
 
 vi.mock('../../../../../util/template/index.ts');
 const template = vi.mocked(_template);
@@ -78,5 +78,39 @@ describe('workers/repository/update/pr/body/changelogs', () => {
 
       "
     `);
+  });
+
+  describe('getChangelogsCommentNotice', () => {
+    it('returns empty string when there is no release notes', () => {
+      const res = getChangelogsCommentNotice({
+        manager: 'some-manager',
+        branchName: 'some-branch',
+        baseBranch: 'base',
+        upgrades: [],
+        hasReleaseNotes: false,
+      });
+
+      expect(res).toBe('');
+    });
+
+    it('returns a notice pointing to the comment', () => {
+      const res = getChangelogsCommentNotice({
+        manager: 'some-manager',
+        branchName: 'some-branch',
+        baseBranch: 'base',
+        upgrades: [],
+        hasReleaseNotes: true,
+      });
+
+      expect(res).toMatchInlineSnapshot(`
+        "
+
+        ---
+
+        Release notes for this update are in a comment on this PR.
+
+        "
+      `);
+    });
   });
 });
