@@ -161,6 +161,33 @@ describe('modules/platform/azure/index', () => {
         }),
       ).toMatchSnapshot();
     });
+
+    it('passes token credentials to identity discovery', async () => {
+      await azure.initPlatform({
+        endpoint: 'https://dev.azure.com/renovate12345',
+        token: 'token',
+      });
+
+      expect(azureApi.getAuthenticatedUserId).toHaveBeenLastCalledWith({
+        token: 'token',
+        username: undefined,
+        password: undefined,
+      });
+    });
+
+    it('passes username and password to identity discovery', async () => {
+      await azure.initPlatform({
+        endpoint: 'https://dev.azure.com/renovate12345',
+        username: 'user',
+        password: 'pass',
+      });
+
+      expect(azureApi.getAuthenticatedUserId).toHaveBeenLastCalledWith({
+        token: undefined,
+        username: 'user',
+        password: 'pass',
+      });
+    });
   });
 
   describe('getRepos()', () => {

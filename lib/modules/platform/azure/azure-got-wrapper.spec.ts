@@ -1,15 +1,23 @@
+import type { MockedObject } from 'vitest';
 import { buildTestJwt } from '~test/jwt-util.ts';
+import type { logger as _logger } from '../../../logger/index.ts';
 import type * as _hostRules from '../../../util/host-rules.ts';
 
 describe('modules/platform/azure/azure-got-wrapper', () => {
   let azure: typeof import('./azure-got-wrapper.ts');
   let hostRules: typeof _hostRules;
+  let logger: MockedObject<typeof _logger>;
 
   beforeEach(async () => {
     // reset module
     vi.resetModules();
     hostRules = await vi.importActual('../../../util/host-rules.ts');
     azure = await vi.importActual('./azure-got-wrapper.ts');
+    logger = (
+      await vi.importMock<typeof import('../../../logger/index.ts')>(
+        '../../../logger/index.ts',
+      )
+    ).logger;
   });
 
   describe('gitApi', () => {
@@ -188,26 +196,61 @@ describe('modules/platform/azure/azure-got-wrapper', () => {
 
     beforeEach(async () => {
       sdk = await vi.importActual('azure-devops-node-api');
-      hostRules.add({
-        hostType: 'azure',
-        token: '123test',
-        matchHost: 'https://dev.azure.com/renovate8',
-      });
       azure.setEndpoint('https://dev.azure.com/renovate8');
     });
 
-    it('returns the authenticated user ID', async () => {
-      vi.spyOn(sdk.WebApi.prototype, 'connect').mockResolvedValue({
-        authenticatedUser: { id: 'user-id' },
-      });
+    it('returns the authenticated user ID using PAT credentials', async () => {
+      const connect = vi
+        .spyOn(sdk.WebApi.prototype, 'connect')
+        .mockResolvedValue({ authenticatedUser: { id: 'user-id' } });
 
-      expect(await azure.getAuthenticatedUserId()).toBe('user-id');
+      expect(await azure.getAuthenticatedUserId({ token: '123test' })).toBe(
+        'user-id',
+      );
+      expect(connect.mock.contexts[0].authHandler.constructor.name).toBe(
+        'PersonalAccessTokenCredentialHandler',
+      );
+    });
+
+    it('returns the authenticated user ID using JWT credentials', async () => {
+      const token = buildTestJwt(
+        { typ: 'JWT', alg: 'RS256' },
+        { aud: '499b84ac', sub: 'test', exp: 9999999999 },
+        'fake-sig',
+      );
+      const connect = vi
+        .spyOn(sdk.WebApi.prototype, 'connect')
+        .mockResolvedValue({ authenticatedUser: { id: 'user-id' } });
+
+      expect(await azure.getAuthenticatedUserId({ token })).toBe('user-id');
+      expect(connect.mock.contexts[0].authHandler.constructor.name).toBe(
+        'BearerCredentialHandler',
+      );
+    });
+
+    it('returns the authenticated user ID using username and password', async () => {
+      const connect = vi
+        .spyOn(sdk.WebApi.prototype, 'connect')
+        .mockResolvedValue({ authenticatedUser: { id: 'user-id' } });
+
+      expect(
+        await azure.getAuthenticatedUserId({
+          username: 'user',
+          password: 'pass',
+        }),
+      ).toBe('user-id');
+      expect(connect.mock.contexts[0].authHandler).toMatchObject({
+        username: 'user',
+        password: 'pass',
+      });
     });
 
     it('returns undefined when the authenticated user ID is unavailable', async () => {
       vi.spyOn(sdk.WebApi.prototype, 'connect').mockResolvedValue({});
 
-      expect(await azure.getAuthenticatedUserId()).toBeUndefined();
+      expect(
+        await azure.getAuthenticatedUserId({ token: '123test' }),
+      ).toBeUndefined();
     });
 
     it('returns undefined when connection data cannot be read', async () => {
@@ -215,7 +258,13 @@ describe('modules/platform/azure/azure-got-wrapper', () => {
         new Error('boom'),
       );
 
-      expect(await azure.getAuthenticatedUserId()).toBeUndefined();
+      expect(
+        await azure.getAuthenticatedUserId({ token: '123test' }),
+      ).toBeUndefined();
+      expect(logger.debug).toHaveBeenCalledWith(
+        { err: new Error('boom') },
+        'Azure: could not determine authenticated user ID',
+      );
     });
   });
 });

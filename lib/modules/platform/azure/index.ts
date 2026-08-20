@@ -106,12 +106,14 @@ export function initPlatform({
   };
   defaults.endpoint = res.endpoint;
   azureApi.setEndpoint(res.endpoint);
-  return azureApi.getAuthenticatedUserId().then((renovateUserId) => {
-    defaults.renovateUserId = renovateUserId;
-    return {
-      endpoint: defaults.endpoint!,
-    } satisfies PlatformResult;
-  });
+  return azureApi
+    .getAuthenticatedUserId({ token, username, password })
+    .then((renovateUserId) => {
+      defaults.renovateUserId = renovateUserId;
+      return {
+        endpoint: defaults.endpoint!,
+      } satisfies PlatformResult;
+    });
 }
 
 export async function getRepos(): Promise<string[]> {
