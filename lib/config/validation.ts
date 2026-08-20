@@ -1031,6 +1031,14 @@ export async function validateConfig(
               });
             }
 
+            if (rule.hostType && rule.hostTypes) {
+              errors.push({
+                topic: 'Configuration Error',
+                message:
+                  'hostRules cannot contain both `hostType` and `hostTypes` - use one or the other.',
+              });
+            }
+
             if (!rule.headers) {
               continue;
             }
