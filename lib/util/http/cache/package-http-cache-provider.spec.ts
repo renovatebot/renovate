@@ -2,6 +2,7 @@ import { DateTime, Settings } from 'luxon';
 import { mockDeep } from 'vitest-mock-extended';
 import { z } from 'zod/v4';
 import * as httpMock from '~test/http-mock.ts';
+import { partial } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import * as _packageCache from '../../cache/package/index.ts';
 import { Http, type HttpResponse } from '../index.ts';
@@ -55,20 +56,21 @@ describe('util/http/cache/package-http-cache-provider', () => {
     GlobalConfig.reset();
   });
 
-  const mockTime = (time: string) => {
+  function mockTime(time: string) {
     const value = DateTime.fromISO(time).valueOf();
     Settings.now = () => value;
-  };
+  }
 
-  const createCacheProvider = (
+  function createCacheProvider(
     options: Partial<PackageHttpCacheProviderOptions> = {},
-  ) =>
-    new PackageHttpCacheProvider({
+  ) {
+    return new PackageHttpCacheProvider({
       namespace,
       checkAuthorizationHeader: false,
       checkCacheControlHeader: false,
       ...options,
     });
+  }
 
   it('skips persisting null cache values', async () => {
     const cacheProvider = createCacheProvider();
@@ -516,7 +518,7 @@ describe('util/http/cache/package-http-cache-provider', () => {
           checkAuthorizationHeader,
         });
 
-        const response = { headers: {} } as HttpResponse;
+        const response = partial<HttpResponse>({ headers: {} });
 
         if (cacheControl !== undefined) {
           response.headers['cache-control'] = cacheControl;
@@ -537,9 +539,9 @@ describe('util/http/cache/package-http-cache-provider', () => {
         checkCacheControlHeader: true,
       });
 
-      const response = {
+      const response = partial<HttpResponse>({
         headers: { 'cache-control': 'PUBLIC, max-age=300' },
-      } as HttpResponse;
+      });
 
       expect(cacheProvider.cacheAllowed(response)).toBe(true);
     });

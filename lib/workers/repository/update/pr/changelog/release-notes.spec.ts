@@ -1,8 +1,8 @@
 import { DateTime } from 'luxon';
-import { mockDeep } from 'vitest-mock-extended';
 import { Fixtures } from '~test/fixtures.ts';
+import { hostRules } from '~test/host-rules.ts';
 import * as httpMock from '~test/http-mock.ts';
-import { hostRules, partial } from '~test/util.ts';
+import { partial } from '~test/util.ts';
 import * as packageCache from '../../../../../util/cache/package/index.ts';
 import { clone } from '../../../../../util/clone.ts';
 import * as githubGraphql from '../../../../../util/github/graphql/index.ts';
@@ -10,11 +10,12 @@ import type { GithubReleaseItem } from '../../../../../util/github/graphql/types
 import { toBase64 } from '../../../../../util/string.ts';
 import type { Timestamp } from '../../../../../util/timestamp.ts';
 import type { BranchUpgradeConfig } from '../../../../types.ts';
+import { getChangeLogSourceFor } from './index.ts';
 import {
-  addReleaseNotes,
+  addReleaseNotes as addReleaseNotesRaw,
   getReleaseList,
   getReleaseNotes,
-  getReleaseNotesMd,
+  getReleaseNotesMd as getReleaseNotesMdRaw,
   massageBody,
   releaseNotesCacheMinutes,
   shouldSkipChangelogMd,
@@ -26,7 +27,31 @@ import type {
   ChangeLogResult,
 } from './types.ts';
 
-vi.mock('../../../../../util/host-rules.ts', () => mockDeep());
+/**
+ * Test helpers that supply the `ChangeLogSource` the production code passes in
+ * (derived from `project.type`, mirroring `ChangeLogSource.getChangeLogJSON`).
+ */
+function getReleaseNotesMd(
+  project: ChangeLogProject,
+  release: ChangeLogRelease,
+): Promise<ChangeLogNotes | null> {
+  return getReleaseNotesMdRaw(
+    project,
+    release,
+    getChangeLogSourceFor(project.type)!,
+  );
+}
+
+function addReleaseNotes(
+  input: ChangeLogResult | null | undefined,
+  config: BranchUpgradeConfig,
+): Promise<ChangeLogResult | null> {
+  return addReleaseNotesRaw(
+    input,
+    config,
+    getChangeLogSourceFor(input?.project?.type ?? 'github')!,
+  );
+}
 
 const angularJsChangelogMd = Fixtures.get('angular-js.md');
 const jestChangelogMd = Fixtures.get('jest.md');
@@ -187,11 +212,6 @@ const gitlabProject = partial<ChangeLogProject>({
 describe('workers/repository/update/pr/changelog/release-notes', () => {
   const githubReleasesMock = vi.spyOn(githubGraphql, 'queryReleases');
 
-  beforeEach(() => {
-    hostRules.find.mockReturnValue({});
-    hostRules.hosts.mockReturnValue([]);
-  });
-
   describe('releaseNotesCacheMinutes', () => {
     const now = DateTime.local();
 
@@ -286,7 +306,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
       const firstInput = {
         project: partial<ChangeLogProject>({
           type: 'github',
-          repository: 'facebook/react-native',
+          repository: 'react/react-native',
           packageName: 'unrelated-package',
           apiBaseUrl: 'https://api.github.com/',
           baseUrl: 'https://github.com/',
@@ -303,7 +323,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
       const secondInput = {
         project: partial<ChangeLogProject>({
           type: 'github',
-          repository: 'facebook/react-native',
+          repository: 'react/react-native',
           packageName: 'unrelated-package',
           apiBaseUrl: 'https://api.github.com/',
           baseUrl: 'https://github.com/',
@@ -350,7 +370,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
       const input = {
         project: partial<ChangeLogProject>({
           type: 'github',
-          repository: 'facebook/react-native',
+          repository: 'react/react-native',
           packageName: 'unrelated-package',
           apiBaseUrl: 'https://api.github.com/',
           baseUrl: 'https://github.com/',
@@ -367,7 +387,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
 
       expect(packageCacheGetSpy).toHaveBeenCalledWith(
         'changelog-github-notes@v2',
-        'facebook/react-native:1.0.0',
+        'react/react-native:1.0.0',
       );
     });
 
@@ -387,7 +407,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
       const input = {
         project: partial<ChangeLogProject>({
           type: 'github',
-          repository: 'facebook/react-native',
+          repository: 'react/react-native',
           sourceDirectory: 'packages/core',
           packageName: 'unrelated-package',
           apiBaseUrl: 'https://api.github.com/',
@@ -406,7 +426,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
 
       expect(packageCacheGetSpy).toHaveBeenCalledWith(
         'changelog-github-notes@v2',
-        'facebook/react-native:packages/core:1.0.0:custom-a/1.0.0',
+        'react/react-native:packages/core:1.0.0:custom-a/1.0.0',
       );
     });
 
@@ -590,7 +610,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
     });
 
     it('should return release list for self hosted gitlab project', async () => {
-      hostRules.find.mockReturnValue({ token: 'some-token' });
+      hostRules.add({ token: 'some-token' });
       httpMock
         .scope('https://my.custom.domain/')
         .get(
@@ -1599,7 +1619,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
     });
 
     it('parses self hosted gitlab', async () => {
-      hostRules.find.mockReturnValue({ token: 'some-token' });
+      hostRules.add({ token: 'some-token' });
       httpMock
         .scope('https://my.custom.domain/')
         .get(
@@ -1926,7 +1946,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
         const res = await getReleaseNotesMd(
           {
             ...githubProject,
-            repository: 'facebook/react-native',
+            repository: 'react/react-native',
           },
           partial<ChangeLogRelease>({
             version: '0.72.3',
@@ -1970,9 +1990,12 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
     });
 
     describe('shouldSkipChangelogMd', () => {
-      it('should skip for flagged repository', () => {
-        expect(shouldSkipChangelogMd('facebook/react-native')).toBeTrue();
-      });
+      it.each(['facebook/react-native', 'react/react-native'])(
+        'should skip for flagged repository %s',
+        (repo: string) => {
+          expect(shouldSkipChangelogMd(repo)).toBeTrue();
+        },
+      );
 
       it('should continue for other repository', () => {
         expect(shouldSkipChangelogMd('some/repo')).toBeFalse();

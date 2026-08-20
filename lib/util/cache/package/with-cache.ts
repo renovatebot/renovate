@@ -70,10 +70,11 @@ export async function withCache<T>(
     return fn();
   }
 
-  let shouldCacheResult = (value: unknown): boolean => true;
-  if (options.shouldCacheResult) {
-    shouldCacheResult = options.shouldCacheResult;
+  function defaultShouldCacheResult(_value: unknown): boolean {
+    return true;
   }
+  const shouldCacheResult =
+    options.shouldCacheResult ?? defaultShouldCacheResult;
 
   // istanbul ignore if -- TODO: add test #40625
   if (!namespace || !key) {

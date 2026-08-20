@@ -1,10 +1,24 @@
 import { z } from 'zod/v4';
+import { regEx } from '../../../util/regex.ts';
 import {
   Json,
   LooseRecord,
   Nullish,
   Yaml,
 } from '../../../util/schema-utils/index.ts';
+
+// pnpm ignores registry URLs containing `${...}` env-var interpolation since v11.5.3
+function hasEnvVar(value: string): boolean {
+  return value.includes('${');
+}
+
+function withoutEnvVarRegistries(
+  registries: Record<string, string>,
+): Record<string, string> {
+  return Object.fromEntries(
+    Object.entries(registries).filter(([, url]) => !hasEnvVar(url)),
+  );
+}
 
 export const PnpmCatalogs = z.object({
   catalog: z.optional(z.record(z.string(), z.string())),
@@ -44,6 +58,10 @@ export const PnpmWorkspaceFile = Yaml.pipe(
       minimumReleaseAge: Nullish(z.number()),
       minimumReleaseAgeExclude: z.array(z.string()).optional(),
       overrides: z.record(z.string(), z.string()).optional(),
+      registry: Nullish(z.string()),
+      registries: Nullish(
+        z.record(z.string(), z.string()).transform(withoutEnvVarRegistries),
+      ),
     })
     .and(PnpmCatalogs),
 );
@@ -84,7 +102,7 @@ export const PackageLockV3 = z.object({
   packages: LooseRecord(
     z
       .string()
-      .transform((x) => x.replace(/^node_modules\//, ''))
+      .transform((x) => x.replace(regEx(/^node_modules\//), ''))
       .refine((x) => x.trim() !== ''),
     z.object({ version: z.string() }),
   ),

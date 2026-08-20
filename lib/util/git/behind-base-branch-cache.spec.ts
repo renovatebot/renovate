@@ -1,7 +1,6 @@
-import { logger, partial } from '~test/util.ts';
+import { fakeSha, logger, partial } from '~test/util.ts';
 import * as _repositoryCache from '../cache/repository/index.ts';
 import type { BranchCache, RepoCacheData } from '../cache/repository/types.ts';
-import type { LongCommitSha } from '../schema-utils/git.ts';
 import {
   getCachedBehindBaseResult,
   setCachedBehindBaseResult,
@@ -11,6 +10,9 @@ vi.mock('../cache/repository/index.ts');
 const repositoryCache = vi.mocked(_repositoryCache);
 
 describe('util/git/behind-base-branch-cache', () => {
+  const branchSha = fakeSha('branch_sha');
+  const baseBranchSha = fakeSha('base_branch_sha');
+
   let repoCache: RepoCacheData = {};
 
   beforeEach(() => {
@@ -23,9 +25,9 @@ describe('util/git/behind-base-branch-cache', () => {
       expect(
         getCachedBehindBaseResult(
           'branch',
-          'branch_sha' as LongCommitSha,
+          branchSha,
           'base_branch',
-          'base_branch_sha' as LongCommitSha,
+          baseBranchSha,
         ),
       ).toBeNull();
     });
@@ -35,9 +37,9 @@ describe('util/git/behind-base-branch-cache', () => {
         branches: [
           partial<BranchCache>({
             branchName: 'not_branch',
-            baseBranchSha: 'base_branch_sha',
+            baseBranchSha,
             baseBranch: 'base_branch',
-            sha: 'branch_sha',
+            sha: branchSha,
             isBehindBase: true,
           }),
         ],
@@ -46,9 +48,9 @@ describe('util/git/behind-base-branch-cache', () => {
       expect(
         getCachedBehindBaseResult(
           'branch',
-          'branch_sha' as LongCommitSha,
+          branchSha,
           'base_branch',
-          'base_branch_sha' as LongCommitSha,
+          baseBranchSha,
         ),
       ).toBeNull();
     });
@@ -60,7 +62,7 @@ describe('util/git/behind-base-branch-cache', () => {
             branchName: 'branch',
             baseBranchSha: 'not_base_branch_sha',
             baseBranch: 'base_branch',
-            sha: 'branch_sha',
+            sha: branchSha,
             isBehindBase: true,
           }),
         ],
@@ -69,9 +71,9 @@ describe('util/git/behind-base-branch-cache', () => {
       expect(
         getCachedBehindBaseResult(
           'branch',
-          'branch_sha' as LongCommitSha,
+          branchSha,
           'base_branch',
-          'base_branch_sha' as LongCommitSha,
+          baseBranchSha,
         ),
       ).toBeNull();
     });
@@ -81,7 +83,7 @@ describe('util/git/behind-base-branch-cache', () => {
         branches: [
           partial<BranchCache>({
             branchName: 'branch',
-            baseBranchSha: 'base_branch_sha',
+            baseBranchSha,
             baseBranch: 'base_branch',
             sha: 'not_branch_sha',
             isBehindBase: true,
@@ -92,9 +94,9 @@ describe('util/git/behind-base-branch-cache', () => {
       expect(
         getCachedBehindBaseResult(
           'branch',
-          'branch_sha' as LongCommitSha,
+          branchSha,
           'base_branch',
-          'base_branch_sha' as LongCommitSha,
+          baseBranchSha,
         ),
       ).toBeNull();
     });
@@ -104,7 +106,7 @@ describe('util/git/behind-base-branch-cache', () => {
         branches: [
           partial<BranchCache>({
             branchName: 'branch',
-            baseBranchSha: 'base_branch_sha',
+            baseBranchSha,
             baseBranch: 'base_branch',
             sha: 'not_branch_sha',
           }),
@@ -114,9 +116,9 @@ describe('util/git/behind-base-branch-cache', () => {
       expect(
         getCachedBehindBaseResult(
           'branch',
-          'branch_sha' as LongCommitSha,
+          branchSha,
           'base_branch',
-          'base_branch_sha' as LongCommitSha,
+          baseBranchSha,
         ),
       ).toBeNull();
     });
@@ -128,7 +130,7 @@ describe('util/git/behind-base-branch-cache', () => {
             branchName: 'branch',
             baseBranchSha: null,
             baseBranch: 'base_branch',
-            sha: 'branch_sha',
+            sha: branchSha,
             isBehindBase: true,
           }),
         ],
@@ -137,9 +139,9 @@ describe('util/git/behind-base-branch-cache', () => {
       expect(
         getCachedBehindBaseResult(
           'branch',
-          'branch_sha' as LongCommitSha,
+          branchSha,
           'base_branch',
-          'base_branch_sha' as LongCommitSha,
+          baseBranchSha,
         ),
       ).toBeNull();
     });
@@ -149,7 +151,7 @@ describe('util/git/behind-base-branch-cache', () => {
         branches: [
           partial<BranchCache>({
             branchName: 'branch',
-            baseBranchSha: 'base_branch_sha',
+            baseBranchSha,
             baseBranch: 'base_branch',
             sha: null,
             isBehindBase: true,
@@ -160,9 +162,9 @@ describe('util/git/behind-base-branch-cache', () => {
       expect(
         getCachedBehindBaseResult(
           'branch',
-          'branch_sha' as LongCommitSha,
+          branchSha,
           'base_branch',
-          'base_branch_sha' as LongCommitSha,
+          baseBranchSha,
         ),
       ).toBeNull();
     });
@@ -172,9 +174,9 @@ describe('util/git/behind-base-branch-cache', () => {
         branches: [
           partial<BranchCache>({
             branchName: 'branch',
-            baseBranchSha: 'base_branch_sha',
+            baseBranchSha,
             baseBranch: 'base_branch',
-            sha: 'branch_sha',
+            sha: branchSha,
             isBehindBase: true,
           }),
         ],
@@ -183,9 +185,9 @@ describe('util/git/behind-base-branch-cache', () => {
       expect(
         getCachedBehindBaseResult(
           'branch',
-          'branch_sha' as LongCommitSha,
+          branchSha,
           'base_branch',
-          'base_branch_sha' as LongCommitSha,
+          baseBranchSha,
         ),
       ).toBeTrue();
     });

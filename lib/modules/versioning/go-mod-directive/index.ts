@@ -43,13 +43,17 @@ function getSatisfyingVersion(
   return npm.getSatisfyingVersion(versions, toNpmRange(range));
 }
 
-const isLessThanRange = (version: string, range: string): boolean =>
-  npm.isLessThanRange!(version, toNpmRange(range));
+function isLessThanRange(version: string, range: string): boolean {
+  return npm.isLessThanRange!(version, toNpmRange(range));
+}
 
-export const isValid = (input: string): boolean => !!input.match(validRegex);
+export function isValid(input: string): boolean {
+  return !!input.match(validRegex);
+}
 
-const matches = (version: string, range: string): boolean =>
-  npm.matches(version, toNpmRange(range));
+function matches(version: string, range: string): boolean {
+  return npm.matches(version, toNpmRange(range));
+}
 
 function minSatisfyingVersion(
   versions: string[],

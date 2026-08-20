@@ -138,7 +138,7 @@ export async function updateArtifacts({
 
     if (token) {
       logger.debug(`Authenticating to hex organization ${organization}`);
-      const authCommand = `mix hex.organization auth ${organization} --key ${token}`;
+      const authCommand = `mix hex.organization auth ${quote(organization)} --key ${quote(token)}`;
       return [...acc, authCommand];
     }
 
@@ -187,7 +187,7 @@ export async function updateArtifacts({
   try {
     await exec(command, execOptions);
   } catch (err) {
-    /* v8 ignore next 3 */
+    /* v8 ignore if -- defensive rethrow of TEMPORARY_ERROR from exec, not reproduced in mix specs */
     if (err.message === TEMPORARY_ERROR) {
       throw err;
     }

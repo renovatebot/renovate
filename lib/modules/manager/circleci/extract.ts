@@ -1,3 +1,4 @@
+import { isString } from '@sindresorhus/is';
 import { logger } from '../../../logger/index.ts';
 import { Result } from '../../../util/result.ts';
 import { parseSingleYaml } from '../../../util/yaml.ts';
@@ -17,7 +18,7 @@ function extractDefinition(
   registryAliases: Record<string, string>,
 ): void {
   for (const [key, orb] of Object.entries(definition.orbs)) {
-    if (typeof orb === 'string') {
+    if (isString(orb)) {
       const [packageName, currentValue] = orb.split('@');
 
       deps.push({

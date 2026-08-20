@@ -5,6 +5,7 @@ import { getConfig } from '../../../config/defaults.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import { getManagerConfig, mergeChildConfig } from '../../../config/index.ts';
 import type {
+  InternalGlobalConfigOptions,
   RenovateConfig,
   RepoGlobalConfig,
 } from '../../../config/types.ts';
@@ -21,7 +22,7 @@ import { extractPackageFile } from './index.ts';
 
 vi.mock('../../../util/fs/index.ts');
 
-const adminConfig: RepoGlobalConfig = {
+const adminConfig: RepoGlobalConfig & InternalGlobalConfigOptions = {
   localDir: upath.resolve('/tmp/repo'),
 };
 
@@ -32,7 +33,7 @@ describe('modules/manager/nuget/integration', () => {
 
   beforeEach(() => {
     GlobalConfig.set(adminConfig);
-    baseConfig = getConfig() as RenovateConfig;
+    baseConfig = getConfig();
     baseConfig.rangeStrategy = 'replace';
   });
 
@@ -46,11 +47,12 @@ describe('modules/manager/nuget/integration', () => {
     const managerConfig = getManagerConfig(baseConfig, 'nuget');
     let depConfig = mergeChildConfig(managerConfig, dep);
     depConfig = await applyPackageRules(depConfig, 'pre-lookup');
-    return {
+    return partial<LookupUpdateConfig>({
       ...depConfig,
       currentValue: dep.currentValue ?? undefined,
       packageName: dep.packageName ?? dep.depName!,
-    } as LookupUpdateConfig;
+      abandonmentThreshold: depConfig.abandonmentThreshold ?? undefined,
+    });
   }
 
   it('proposes updates for Sdk elements in sqlproj files', async () => {

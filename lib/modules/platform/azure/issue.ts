@@ -1,16 +1,18 @@
+import { isNonEmptyString } from '@sindresorhus/is';
 import type {
   WorkItem,
   WorkItemStateColor,
 } from 'azure-devops-node-api/interfaces/WorkItemTrackingInterfaces.js';
+import type { IWorkItemTrackingApi } from 'azure-devops-node-api/WorkItemTrackingApi.js';
+import { GlobalConfig } from '../../../config/global.ts';
 import { logger } from '../../../logger/index.ts';
 import { Lazy } from '../../../util/lazy.ts';
+import { regEx } from '../../../util/regex.ts';
 import { sanitize } from '../../../util/sanitize.ts';
 import type { EnsureIssueConfig, EnsureIssueResult, Issue } from '../types.ts';
 import * as azureApi from './azure-got-wrapper.ts';
 import type { Config } from './types.ts';
 import { getWorkItemTitle } from './util.ts';
-
-const workItemType = 'Issue';
 
 // Historical fallbacks, used when the work item type's states cannot be
 // resolved from the API (e.g. Azure DevOps Server versions without the
@@ -48,15 +50,36 @@ function namesByCategory(
     .map((s) => s.name!);
 }
 
+/**
+ * Op that renders the issue body as Markdown. Only Azure DevOps Services
+ * (cloud) supports the `multilineFieldsFormat` field; Azure DevOps Server
+ * (on-premises) rejects it with a 400, so this is only included when the
+ * instance is hosted (see discussion #45068).
+ */
+function markdownFormatOp(op: 'add' | 'replace'): {
+  op: string;
+  path: string;
+  value: string;
+} {
+  return {
+    op,
+    path: '/multilineFieldsFormat/System.Description',
+    value: 'Markdown',
+  };
+}
+
 export class IssueService {
   private config: Config;
   private readonly workItemStates: Lazy<Promise<WorkItemStates>>;
+  private readonly hosted: Lazy<Promise<boolean>>;
 
   constructor(config: Config) {
     this.config = config;
     // Wrapped in `Lazy` so concurrent callers share a single resolution
     // instead of each firing a duplicate `getWorkItemTypeStates` request.
     this.workItemStates = new Lazy(() => this.resolveWorkItemStates());
+    // Same reason: resolve the deployment type once per run, not per issue.
+    this.hosted = new Lazy(() => azureApi.isHosted());
   }
 
   /**
@@ -76,7 +99,7 @@ export class IssueService {
       const azureApiWit = await azureApi.workItemTrackingApi();
       const stateColors = await azureApiWit.getWorkItemTypeStates(
         this.config.project,
-        workItemType,
+        this.config.workItemType,
       );
 
       if (stateColors?.length) {
@@ -126,20 +149,36 @@ export class IssueService {
     }
   }
 
+  /**
+   * The work item type names the project's process defines. Some processes
+   * (e.g. Scrum) do not define `Issue`, in which case creating one fails;
+   * checking up front lets us log an actionable message (including the types
+   * that *are* available) instead of a cryptic error.
+   */
+  private async getWorkItemTypeNames(
+    azureApiWit: IWorkItemTrackingApi,
+  ): Promise<string[]> {
+    const types = await azureApiWit.getWorkItemTypes(this.config.project);
+    return types.map((t) => t.name).filter(isNonEmptyString);
+  }
+
   async getIssueList(titleFilter?: string): Promise<Issue[]> {
     logger.debug('getIssueList()');
     try {
       const azureApiWit = await azureApi.workItemTrackingApi();
 
+      // Intentionally not filtering by [System.WorkItemType]: the type is
+      // configurable (`azureWorkItemType`) and a repo's Renovate issues have a
+      // unique title, so matching on title + project finds them regardless of
+      // which work item type they were created as.
       let wiql = `
         SELECT [System.Id]
         FROM WorkItems
-        WHERE [System.WorkItemType] = '${workItemType}'
-          AND [System.TeamProject] = '${this.config.project}'
+        WHERE [System.TeamProject] = '${this.config.project}'
       `;
 
       if (titleFilter) {
-        const escapedTitle = titleFilter.replace(/'/g, "''");
+        const escapedTitle = titleFilter.replace(regEx(/'/g), "''");
         wiql += ` AND [System.Title] = '${escapedTitle}'`;
       }
 
@@ -209,6 +248,7 @@ export class IssueService {
       const finalTitle = getWorkItemTitle(title, this.config.repository);
       const issues = await this.getIssueList(finalTitle);
       const { open, closed } = await this.workItemStates.getValue();
+      const hosted = await this.hosted.getValue();
 
       // Close duplicate open issues if any
       const openIssues = issues.filter((issue) => issue.state === 'open');
@@ -261,11 +301,7 @@ export class IssueService {
                 path: '/fields/System.Description',
                 value: sanitize(body),
               },
-              {
-                op: 'replace',
-                path: '/multilineFieldsFormat/System.Description',
-                value: 'Markdown',
-              },
+              ...(hosted ? [markdownFormatOp('replace')] : []),
             ],
             existingIssue.number,
             this.config.project,
@@ -296,11 +332,7 @@ export class IssueService {
                   path: '/fields/System.Description',
                   value: sanitize(body),
                 },
-                {
-                  op: 'replace',
-                  path: '/multilineFieldsFormat/System.Description',
-                  value: 'Markdown',
-                },
+                ...(hosted ? [markdownFormatOp('replace')] : []),
               ],
               existingIssue.number,
               this.config.project,
@@ -317,13 +349,33 @@ export class IssueService {
       // omitted so Azure DevOps applies the work item type's default initial
       // state for the project's process (e.g. `To Do` on Basic, `New`/`Active`
       // on Agile). Passing a hardcoded state fails on processes that lack it.
+
+      // The configured work item type (default `Issue`) only exists in some
+      // processes (Basic, Agile, CMMI) but not others (e.g. Scrum). Creating one
+      // on a process without it returns a 404 that the REST client surfaces as
+      // `null`, so check first and log an actionable message instead of failing
+      // cryptically.
+      const availableTypes = await this.getWorkItemTypeNames(azureApiWit);
+      if (!availableTypes.includes(this.config.workItemType)) {
+        logger.warn(
+          {
+            workItemType: this.config.workItemType,
+            availableTypes,
+            project: this.config.project,
+            documentationUrl: `${GlobalConfig.get('productLinks').documentation}configuration-options/#azureworkitemtype`,
+          },
+          'Azure: work item type does not exist in project (or the token lacks permission to it); skipping issue. The Dependency Dashboard needs a process that defines this work item type. Set one your project defines via the `azureWorkItemType` repo config option.',
+        );
+        return null;
+      }
+
       const newWorkItem = await azureApiWit.createWorkItem(
         undefined,
         [
           {
             op: 'add',
             path: '/fields/System.WorkItemType',
-            value: workItemType,
+            value: this.config.workItemType,
           },
           { op: 'add', path: '/fields/System.Title', value: finalTitle },
           {
@@ -331,15 +383,24 @@ export class IssueService {
             path: '/fields/System.Description',
             value: sanitize(body),
           },
-          {
-            op: 'add',
-            path: '/multilineFieldsFormat/System.Description',
-            value: 'Markdown',
-          },
+          ...(hosted ? [markdownFormatOp('add')] : []),
         ],
         this.config.project,
-        workItemType,
+        this.config.workItemType,
       );
+
+      // Azure DevOps normally returns the created work item, but the
+      // underlying REST client resolves to `null` instead of throwing for
+      // some responses: a 404, or any 2xx with an empty/non-JSON body (e.g. a
+      // 203 sign-in page from an expired token or an SSO/proxy in front of the
+      // instance). Guard the result so such a response does not crash the whole
+      // run with `Cannot read properties of null (reading 'id')`.
+      if (!newWorkItem?.id) {
+        logger.warn(
+          'Azure: work item creation returned no result; skipping issue',
+        );
+        return null;
+      }
 
       logger.debug(`Created new issue #${newWorkItem.id}`);
       return 'created';

@@ -1,3 +1,4 @@
+import { isString } from '@sindresorhus/is';
 import { codeBlock } from 'common-tags';
 import { Fixtures } from '~test/fixtures.ts';
 import * as httpMock from '~test/http-mock.ts';
@@ -300,7 +301,7 @@ describe('modules/datasource/sbt-package/index', () => {
         .spyOn(urlUtil, 'parseUrl')
         .mockImplementation((url) => {
           if (
-            typeof url === 'string' &&
+            isString(url) &&
             url === 'https://repo.maven.apache.org/maven2/org/example/'
           ) {
             return null;
@@ -339,7 +340,7 @@ describe('modules/datasource/sbt-package/index', () => {
         .spyOn(urlUtil, 'parseUrl')
         .mockImplementation((url) => {
           if (
-            typeof url === 'string' &&
+            isString(url) &&
             url === 'https://repo.maven.apache.org/maven2/org/example/example/'
           ) {
             return null;
@@ -366,11 +367,12 @@ describe('modules/datasource/sbt-package/index', () => {
     it('extracts URL from Maven POM file', async () => {
       const registryUrl = 'https://repo.maven.apache.org/maven2/';
       const packageName = 'org.example:example';
-      packageCache.get.mockImplementation(((ns: string, k: string) =>
+      packageCache.get.mockImplementation((ns: string, k: string) =>
         ns === 'datasource-sbt-package' &&
         k === `package-urls:${registryUrl}:${packageName}`
           ? Promise.resolve([`${registryUrl}org/example/`])
-          : Promise.resolve(undefined)) as never);
+          : Promise.resolve(undefined),
+      );
 
       httpMock
         .scope(registryUrl)

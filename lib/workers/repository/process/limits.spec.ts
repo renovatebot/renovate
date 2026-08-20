@@ -3,6 +3,10 @@ import type { RenovateConfig } from '~test/util.ts';
 import { partial, platform, scm } from '~test/util.ts';
 import type { Pr } from '../../../modules/platform/types.ts';
 import * as _repositoryCache from '../../../util/cache/repository/index.ts';
+import type {
+  BranchCache,
+  RepoCacheData,
+} from '../../../util/cache/repository/types.ts';
 import type { BranchConfig } from '../../types.ts';
 import * as limits from './limits.ts';
 
@@ -50,61 +54,96 @@ describe('workers/repository/process/limits', () => {
   });
 
   describe('getCommitHourlyCount()', () => {
-    it('calculates hourly commit count from SCM', async () => {
+    it('calculates hourly commit count from SCM in a single batched call', async () => {
       const time = DateTime.local();
-      scm.getBranchUpdateDate.mockResolvedValueOnce(time);
-      scm.getBranchUpdateDate.mockResolvedValueOnce(time);
-      scm.getBranchUpdateDate.mockResolvedValueOnce(time.minus({ hours: 1 }));
-      scm.getBranchUpdateDate.mockResolvedValueOnce(time);
+      scm.getAllBranchUpdateDates.mockResolvedValueOnce({
+        'foo/test-1': time,
+        'foo/test-2': time,
+        'foo/test-3': time.minus({ hours: 1 }),
+        'foo/test-4': time,
+      });
       const res = await limits.getCommitsHourlyCount([
-        { branchName: 'foo/test-1' },
-        { branchName: 'foo/test-2' },
-        { branchName: 'foo/test-3' },
-        { branchName: 'foo/test-4' },
-      ] as never);
+        partial<BranchConfig>({ branchName: 'foo/test-1' }),
+        partial<BranchConfig>({ branchName: 'foo/test-2' }),
+        partial<BranchConfig>({ branchName: 'foo/test-3' }),
+        partial<BranchConfig>({ branchName: 'foo/test-4' }),
+      ]);
       expect(res).toBe(3);
+      expect(scm.getAllBranchUpdateDates).toHaveBeenCalledTimes(1);
     });
 
-    it('uses cache when available and falls back to SCM when missing', async () => {
+    it('uses cache when available and falls back to a single batched SCM call when missing', async () => {
       const currentTime = DateTime.utc();
       const oldTime = currentTime.minus({ hours: 2 });
 
       // Mock cache with mixed data: some cached, some missing
-      repositoryCache.getCache.mockReturnValue({
-        branches: [
-          {
-            branchName: 'foo/test-1',
-            commitTimestamp: currentTime.toISO(),
-          },
-          {
-            branchName: 'foo/test-2',
-            commitTimestamp: oldTime.toISO(),
-          },
-          {
-            branchName: 'foo/test-3',
-            // no commitTimestamp - will fall back to SCM
-          },
-        ],
-      } as never);
+      repositoryCache.getCache.mockReturnValue(
+        partial<RepoCacheData>({
+          branches: [
+            partial<BranchCache>({
+              branchName: 'foo/test-1',
+              commitTimestamp: currentTime.toISO(),
+            }),
+            partial<BranchCache>({
+              branchName: 'foo/test-2',
+              commitTimestamp: oldTime.toISO(),
+            }),
+            partial<BranchCache>({
+              branchName: 'foo/test-3',
+              // no commitTimestamp - will fall back to SCM
+            }),
+          ],
+        }),
+      );
 
-      scm.getBranchUpdateDate.mockResolvedValueOnce(currentTime);
+      scm.getAllBranchUpdateDates.mockResolvedValueOnce({
+        'foo/test-3': currentTime,
+      });
 
       const res = await limits.getCommitsHourlyCount([
-        { branchName: 'foo/test-1' },
-        { branchName: 'foo/test-2' },
-        { branchName: 'foo/test-3' },
-      ] as never);
+        partial<BranchConfig>({ branchName: 'foo/test-1' }),
+        partial<BranchConfig>({ branchName: 'foo/test-2' }),
+        partial<BranchConfig>({ branchName: 'foo/test-3' }),
+      ]);
 
       // Should count 2 (test-1 from cache and test-3 from SCM are in current hour)
       expect(res).toBe(2);
-      // Should call SCM only for test-3 which has no cached timestamp
-      expect(scm.getBranchUpdateDate).toHaveBeenCalledExactlyOnceWith(
-        'foo/test-3',
+      // Should call the batched SCM lookup only once, regardless of how many branches are missing from the cache
+      expect(scm.getAllBranchUpdateDates).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not call SCM at all when every branch is already cached', async () => {
+      const currentTime = DateTime.utc();
+
+      repositoryCache.getCache.mockReturnValue(
+        partial<RepoCacheData>({
+          branches: [
+            partial<BranchCache>({
+              branchName: 'foo/test-1',
+              commitTimestamp: currentTime.toISO(),
+            }),
+          ],
+        }),
       );
+
+      const res = await limits.getCommitsHourlyCount([
+        partial<BranchConfig>({ branchName: 'foo/test-1' }),
+      ]);
+
+      expect(res).toBe(1);
+      expect(scm.getAllBranchUpdateDates).not.toHaveBeenCalled();
+    });
+
+    it('treats a branch missing from the batched result as having no commit this hour', async () => {
+      scm.getAllBranchUpdateDates.mockResolvedValueOnce({});
+      const res = await limits.getCommitsHourlyCount([
+        partial<BranchConfig>({ branchName: 'foo/test-1' }),
+      ]);
+      expect(res).toBe(0);
     });
 
     it('returns zero if errored', async () => {
-      scm.getBranchUpdateDate.mockRejectedValue('Unknown error');
+      scm.getAllBranchUpdateDates.mockRejectedValue('Unknown error');
       const res = await limits.getCommitsHourlyCount([
         { branchName: 'foo/test-1' },
       ] as never);

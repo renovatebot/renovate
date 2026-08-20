@@ -34,6 +34,7 @@ export function getGerritRepoUrl(
   repository: string,
   endpoint: string,
   gitUrl: GitUrlOption | undefined,
+  username: string,
 ): string {
   const endpointUrl = parseUrl(endpoint);
   if (!endpointUrl) {
@@ -42,15 +43,15 @@ export function getGerritRepoUrl(
 
   const url =
     gitUrl === 'ssh'
-      ? createSshUrl(endpointUrl, repository)
+      ? createSshUrl(endpointUrl, repository, username)
       : createHttpUrl(endpointUrl, endpoint, repository);
   logger.trace({ url }, 'using URL based on configured endpoint');
 
   return url;
 }
 
-function createSshUrl(url: URL, repository: string): string {
-  return `ssh://${url.host}:${DEFAULT_SSH_PORT}/${repository}`;
+function createSshUrl(url: URL, repository: string, username: string): string {
+  return `ssh://${username}@${url.hostname}:${DEFAULT_SSH_PORT}/${repository}`;
 }
 
 function createHttpUrl(url: URL, endpoint: string, repository: string): string {
@@ -156,7 +157,7 @@ export function findPullRequestBody(change: GerritChange): string | undefined {
     .find((msg) => msg.tag === TAG_PULL_REQUEST_BODY);
   if (msg) {
     // Gerrit adds a "Patch Set X:" prefix to comments
-    return msg.message.replace(/^Patch Set \d+:\n\n/, '');
+    return msg.message.replace(regEx(/^Patch Set \d+:\n\n/), '');
   }
   return undefined;
 }
@@ -173,7 +174,7 @@ export function mapBranchStatusToLabel(
     case 'red':
       return Math.min(...numbers);
   }
-  /* v8 ignore next */
+  /* v8 ignore next -- only reachable for the artificial 'UNKNOWN' state, which callers never pass */
   return label.default_value;
 }
 

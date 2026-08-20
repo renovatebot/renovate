@@ -186,7 +186,7 @@ describe('modules/platform/forgejo/index', () => {
       state: 'closed',
       body: 'other-content',
       assignees: [],
-      labels: undefined as never, // coverage
+      labels: undefined, // coverage
     },
     {
       number: 3,
@@ -978,14 +978,16 @@ describe('modules/platform/forgejo/index', () => {
   });
 
   describe('getBranchStatus', () => {
-    const commitStatus = (status: CommitStatusType): CommitStatus => ({
-      id: 1,
-      status,
-      context: '',
-      description: '',
-      target_url: '',
-      created_at: '',
-    });
+    function commitStatus(status: CommitStatusType): CommitStatus {
+      return {
+        id: 1,
+        status,
+        context: '',
+        description: '',
+        target_url: '',
+        created_at: '',
+      };
+    }
 
     it('should return yellow for unknown result', async () => {
       const scope = httpMock

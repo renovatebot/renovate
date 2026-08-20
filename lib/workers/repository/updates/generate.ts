@@ -26,14 +26,17 @@ function isTypesGroup(branchUpgrades: BranchUpgradeConfig[]): boolean {
   return (
     branchUpgrades.some(({ depName }) => depName?.startsWith('@types/')) &&
     new Set(
-      branchUpgrades.map(({ depName }) => depName?.replace(/^@types\//, '')),
+      branchUpgrades.map(({ depName }) =>
+        depName?.replace(regEx(/^@types\//), ''),
+      ),
     ).size === 1
   );
 }
 
 function sortTypesGroup(upgrades: BranchUpgradeConfig[]): void {
-  const isTypesUpgrade = ({ depName }: BranchUpgradeConfig): boolean =>
-    !!depName?.startsWith('@types/');
+  function isTypesUpgrade({ depName }: BranchUpgradeConfig): boolean {
+    return !!depName?.startsWith('@types/');
+  }
   const regularUpgrades = upgrades.filter(
     (upgrade) => !isTypesUpgrade(upgrade),
   );

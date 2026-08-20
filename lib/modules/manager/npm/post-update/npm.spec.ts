@@ -428,13 +428,13 @@ describe('modules/manager/npm/post-update/npm', () => {
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "some-dir" ' +
           'ghcr.io/renovatebot/base-image ' +
-          'bash -l -c "' +
+          "bash -l -c '" +
           'install-tool node 16.16.0 ' +
           '&& ' +
           'install-tool npm 6.0.0 ' +
           '&& ' +
           'npm install --package-lock-only --no-audit' +
-          '"',
+          "'",
       },
     ]);
   });
