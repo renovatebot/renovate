@@ -20,6 +20,7 @@ const azurePipelinesNoDependency = Fixtures.get(
 describe('modules/manager/azure-pipelines/extract', () => {
   afterEach(() => {
     GlobalConfig.reset();
+    delete process.env.SYSTEM_COLLECTIONURI;
   });
 
   it('should parse a valid azure-pipelines file', () => {
@@ -178,6 +179,110 @@ describe('modules/manager/azure-pipelines/extract', () => {
             ref: 'refs/tags/v1.0.0',
           },
           '',
+        ),
+      ).toBeNull();
+    });
+
+    it('should extract Azure repository information when platform is github and SYSTEM_COLLECTIONURI is set with project in name', () => {
+      GlobalConfig.set({ platform: 'github' });
+      process.env.SYSTEM_COLLECTIONURI = 'https://dev.azure.com/renovate-org';
+
+      expect(
+        extractRepository(
+          {
+            type: 'git',
+            name: 'project/repo',
+            ref: 'refs/tags/v1.0.0',
+          },
+          'otherProject/otherRepo',
+        ),
+      ).toMatchObject({
+        depName: 'project/repo',
+        packageName: 'https://dev.azure.com/renovate-org/project/_git/repo',
+      });
+    });
+
+    it('should extract Azure repository information when platform is github and SYSTEM_COLLECTIONURI is set with project from currentRepository', () => {
+      GlobalConfig.set({ platform: 'github' });
+      process.env.SYSTEM_COLLECTIONURI = 'https://dev.azure.com/renovate-org';
+
+      expect(
+        extractRepository(
+          {
+            type: 'git',
+            name: 'repo',
+            ref: 'refs/tags/v1.0.0',
+          },
+          'project/otherrepo',
+        ),
+      ).toMatchObject({
+        depName: 'project/repo',
+        packageName: 'https://dev.azure.com/renovate-org/project/_git/repo',
+      });
+    });
+
+    it('should return null when platform is github, SYSTEM_COLLECTIONURI is set, but project not in name or currentRepository', () => {
+      GlobalConfig.set({ platform: 'github' });
+      process.env.SYSTEM_COLLECTIONURI = 'https://dev.azure.com/renovate-org';
+
+      expect(
+        extractRepository(
+          {
+            type: 'git',
+            name: 'repo',
+            ref: 'refs/tags/v1.0.0',
+          },
+          '',
+        ),
+      ).toBeNull();
+    });
+
+    it('should return null when platform is github, SYSTEM_COLLECTIONURI is set, but currentRepository is undefined', () => {
+      GlobalConfig.set({ platform: 'github' });
+      process.env.SYSTEM_COLLECTIONURI = 'https://dev.azure.com/renovate-org';
+
+      expect(
+        extractRepository(
+          {
+            type: 'git',
+            name: 'repo',
+            ref: 'refs/tags/v1.0.0',
+          },
+          undefined,
+        ),
+      ).toBeNull();
+    });
+
+    it('should extract Azure repository information when platform is github and SYSTEM_COLLECTIONURI has a trailing slash', () => {
+      GlobalConfig.set({ platform: 'github' });
+      process.env.SYSTEM_COLLECTIONURI = 'https://dev.azure.com/renovate-org/';
+
+      expect(
+        extractRepository(
+          {
+            type: 'git',
+            name: 'project/repo',
+            ref: 'refs/tags/v1.0.0',
+          },
+          'otherProject/otherRepo',
+        ),
+      ).toMatchObject({
+        depName: 'project/repo',
+        packageName: 'https://dev.azure.com/renovate-org/project/_git/repo',
+      });
+    });
+
+    it('should return null for git repo type if platform is not azure or github', () => {
+      GlobalConfig.set({ platform: 'gitlab' });
+
+      expect(
+        extractRepository(
+          {
+            type: 'git',
+            name: 'project/repo',
+            ref: 'refs/tags/v1.0.0',
+          },
+          'project/otherRepo',
         ),
       ).toBeNull();
     });
