@@ -8,6 +8,7 @@ import {
   BitbucketServerHttp,
   setBaseUrl,
 } from '../../../util/http/bitbucket-server.ts';
+import { parseUrl } from '../../../util/url.ts';
 import { BbsPrCache } from './pr-cache.ts';
 import type { BbsRestPr } from './types.ts';
 import { prInfo } from './utils.ts';
@@ -51,7 +52,7 @@ const pr2: BbsRestPr = {
   description: 'a merge request',
 };
 
-const baseUrl = new URL('https://stash.renovatebot.com');
+const baseUrl = parseUrl('https://stash.renovatebot.com')!;
 setBaseUrl('https://stash.renovatebot.com');
 const urlHost = baseUrl.origin;
 const urlPath = baseUrl.pathname === '/' ? '' : baseUrl.pathname;

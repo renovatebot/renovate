@@ -8,6 +8,10 @@ export { PackageCache } from './package-cache.ts';
 
 export let packageCache = new PackageCache();
 
+export function getCacheType(): ReturnType<typeof backend.getCacheType> {
+  return backend.getCacheType();
+}
+
 export async function get<T = any>(
   namespace: PackageCacheNamespace,
   key: string,
@@ -47,9 +51,11 @@ export async function init(config: AllConfig): Promise<void> {
 
 export async function cleanup(_config: AllConfig): Promise<void> {
   try {
-    await packageCache.destroy();
+    packageCache.softReset();
+    await backend.destroy();
   } catch (err) {
     logger.warn({ err }, 'Package cache destroy failed');
+  } finally {
+    packageCache = new PackageCache();
   }
-  packageCache = new PackageCache();
 }

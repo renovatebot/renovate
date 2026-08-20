@@ -1,24 +1,51 @@
-import { isNonEmptyStringAndNotWhitespace, isTruthy } from '@sindresorhus/is';
+import {
+  isNonEmptyString,
+  isNonEmptyStringAndNotWhitespace,
+  isTruthy,
+} from '@sindresorhus/is';
+import type { ConstraintsFilter } from '../../../config/types.ts';
 import { logger } from '../../../logger/index.ts';
 import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
 import { withCache } from '../../../util/cache/package/with-cache.ts';
+import { detectPlatform } from '../../../util/common.ts';
 import { getEnv } from '../../../util/env.ts';
 import { filterMap } from '../../../util/filter-map.ts';
+import { queryReleases } from '../../../util/github/graphql/index.ts';
+import { GithubHttp } from '../../../util/http/github.ts';
 import { HttpError } from '../../../util/http/index.ts';
 import * as p from '../../../util/promises.ts';
 import { newlineRegex, regEx } from '../../../util/regex.ts';
+import type { Timestamp } from '../../../util/timestamp.ts';
 import { asTimestamp } from '../../../util/timestamp.ts';
-import { joinUrlParts } from '../../../util/url.ts';
+import {
+  joinUrlParts,
+  parseUrl,
+  trimLeadingSlash,
+  trimTrailingSlash,
+} from '../../../util/url.ts';
 import goVersioning from '../../versioning/go-mod-directive/index.ts';
 import { Datasource } from '../datasource.ts';
+import { GithubReleasesDatasource } from '../github-releases/index.ts';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types.ts';
 import { BaseGoDatasource } from './base.ts';
 import { getSourceUrl } from './common.ts';
 import { parseGoproxy, parseNoproxy } from './goproxy-parser.ts';
 import { GoDirectDatasource } from './releases-direct.ts';
-import type { VersionInfo } from './types.ts';
+import { VersionInfo } from './schema.ts';
+
+/** TODO #42566 */
+const goVersionRegex = regEx(/^\s*go\s+(?<version>[^\s]+)\s*$/);
 
 const modRegex = regEx(/^(?<baseMod>.*?)(?:[./]v(?<majorVersion>\d+))?$/);
+
+const versionTagRegex = regEx(/^v\d/);
+
+/**
+ * Modules with a major version of v2 or above which have no `go.mod` are reported by a Go proxy with a `+incompatible` suffix, which is absent from the tag they were published as.
+ *
+ * @see https://go.dev/ref/mod#non-module-compat
+ */
+const incompatibleSuffixRegex = regEx(/\+incompatible$/);
 
 /**
  * @see https://go.dev/ref/mod#pseudo-versions
@@ -43,6 +70,38 @@ export function pseudoVersionToRelease(pseudoVersion: string): Release | null {
   };
 }
 
+/**
+ * A Go module which lives in a subdirectory of its repository is tagged with that subdirectory as a prefix, so `github.com/aws/aws-sdk-go-v2/service/s3` publishes `v1.2.3` as the tag `service/s3/v1.2.3`.
+ *
+ * @see https://go.dev/ref/mod#vcs-version
+ *
+ * Because we can't tell from the module path alone where the repository ends and the subdirectory begins, we try each candidate prefix - longest first - against the tags we actually found, in the same way as `filterByPrefix` does for direct lookups.
+ */
+export function getTagPrefix(goModule: string, tags: Iterable<string>): string {
+  const nameParts = goModule
+    .replace(regEx(/\/v\d+$/), '')
+    .split('/')
+    .slice(1);
+  const tagNames = [...tags];
+
+  while (nameParts.length) {
+    const prefix = `${nameParts.join('/')}/`;
+
+    const isUsed = tagNames.some(
+      (tag) =>
+        tag.startsWith(prefix) &&
+        versionTagRegex.test(tag.slice(prefix.length)),
+    );
+    if (isUsed) {
+      return prefix;
+    }
+
+    nameParts.shift();
+  }
+
+  return '';
+}
+
 export class GoProxyDatasource extends Datasource {
   static readonly id = 'go-proxy';
 
@@ -51,6 +110,8 @@ export class GoProxyDatasource extends Datasource {
   }
 
   readonly direct = new GoDirectDatasource();
+
+  private readonly githubHttp = new GithubHttp(GithubReleasesDatasource.id);
 
   private async _getReleases(
     config: GetReleasesConfig,
@@ -65,6 +126,7 @@ export class GoProxyDatasource extends Datasource {
     const noproxy = parseNoproxy();
 
     let result: ReleaseResult | null = null;
+    let servedByProxy = false;
 
     if (noproxy?.test(packageName)) {
       logger.debug(`Fetching ${packageName} via GONOPROXY match`);
@@ -81,9 +143,14 @@ export class GoProxyDatasource extends Datasource {
           break;
         }
 
-        const res = await this.getVersionsWithInfo(url, packageName);
+        const res = await this.getVersionsWithInfo(
+          url,
+          packageName,
+          config.constraintsFiltering,
+        );
         if (res.releases.length) {
           result = res;
+          servedByProxy = true;
           break;
         }
       } catch (err) {
@@ -114,7 +181,73 @@ export class GoProxyDatasource extends Datasource {
       }
     }
 
+    if (result?.sourceUrl && servedByProxy) {
+      await this.addGithubReleaseTimestamps(
+        packageName,
+        result.sourceUrl,
+        result.releases,
+      );
+    }
+
     return result;
+  }
+
+  /**
+   * A Go proxy reports the commit time of the tagged commit as a version's `Time`, which can be much earlier than the point at which that version was released.
+   *
+   * When the module is hosted on GitHub and the version has a GitHub Release, the Release's publication time is a better indicator of when the version became available.
+   */
+  async addGithubReleaseTimestamps(
+    packageName: string,
+    sourceUrl: string,
+    releases: Release[],
+  ): Promise<void> {
+    if (detectPlatform(sourceUrl) !== 'github') {
+      return;
+    }
+
+    const parsedUrl = parseUrl(sourceUrl);
+    /* v8 ignore next 3 -- detectPlatform only returns a platform for parseable URLs */
+    if (!parsedUrl) {
+      return;
+    }
+
+    const repository = trimTrailingSlash(
+      trimLeadingSlash(parsedUrl.pathname),
+    ).replace(regEx(/\.git$/), '');
+
+    try {
+      const githubReleases = await queryReleases(
+        {
+          packageName: repository,
+          registryUrl: parsedUrl.origin,
+        },
+        this.githubHttp,
+      );
+
+      const timestamps = new Map<string, Timestamp>();
+      for (const { version, releaseTimestamp } of githubReleases) {
+        timestamps.set(version, releaseTimestamp);
+      }
+
+      const tagPrefix = getTagPrefix(packageName, timestamps.keys());
+      for (const release of releases) {
+        const version = release.version.replace(incompatibleSuffixRegex, '');
+        const releaseTimestamp = timestamps.get(`${tagPrefix}${version}`);
+        if (
+          releaseTimestamp &&
+          (!release.releaseTimestamp ||
+            releaseTimestamp > release.releaseTimestamp)
+        ) {
+          release.releaseTimestamp = releaseTimestamp;
+        }
+      }
+    } catch (err) {
+      logger.debug(
+        { err, packageName },
+        'Error fetching GitHub Releases for Go module',
+      );
+    }
   }
 
   getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
@@ -173,7 +306,7 @@ export class GoProxyDatasource extends Datasource {
       '@v',
       `${version}.info`,
     );
-    const res = await this.http.getJsonUnchecked<VersionInfo>(url);
+    const res = await this.http.getJson(url, VersionInfo);
 
     const result: Release = {
       version: res.body.Version,
@@ -187,18 +320,84 @@ export class GoProxyDatasource extends Datasource {
     return result;
   }
 
+  /**
+   * Retrieve the `go` directive for a given Go Module.
+   *
+   * NOTE that this means the `go` directive, not the `toolchain` directive.
+   */
+  async retrieveGoDirectiveForModule(
+    baseUrl: string,
+    packageName: string,
+    version: string,
+  ): Promise<string | undefined> {
+    return withCache(
+      {
+        namespace: `datasource-${GoProxyDatasource.id}`,
+        key: GoProxyDatasource.getVersionedCacheKey(packageName, version),
+        // a module's `go.mod` should /never/ change after it's published. If going via the Go Proxy and the Go Checksum Database, a change in this value will result in build failures.
+        ttlMinutes: 100 * 24 * 60,
+      },
+      () => this._retrieveGoDirectiveForModule(baseUrl, packageName, version),
+    );
+  }
+
+  async _retrieveGoDirectiveForModule(
+    baseUrl: string,
+    packageName: string,
+    version: string,
+  ): Promise<string | undefined> {
+    const url = joinUrlParts(
+      baseUrl,
+      this.encodeCase(packageName),
+      '@v',
+      `${version}.mod`,
+    );
+    const res = await this.http.getText(url);
+
+    let goDirective: string | undefined = undefined;
+
+    for (const line of res.body.split('\n')) {
+      const goVersionMatches = goVersionRegex.exec(line)?.groups;
+      if (goVersionMatches) {
+        goDirective = goVersionMatches.version;
+        break;
+      }
+    }
+
+    if (!goDirective) {
+      return goDirective;
+    }
+
+    // always return it in full SemVer format, which can then be matched on using `semver` or `semver-coerced`
+    const parts = goDirective.split('.');
+    if (parts.length === 1) {
+      return `${parts[0]}.0.0`;
+    }
+    if (parts.length === 2) {
+      return `${parts[0]}.${parts[1]}.0`;
+    }
+    return `${parts[0]}.${parts[1]}.${parts[2]}`;
+  }
+
   async getLatestVersion(
     baseUrl: string,
     packageName: string,
-  ): Promise<string | null> {
+  ): Promise<{ version: string; sourceUrl?: string } | null> {
     try {
       const url = joinUrlParts(
         baseUrl,
         this.encodeCase(packageName),
         '@latest',
       );
-      const res = await this.http.getJsonUnchecked<VersionInfo>(url);
-      return res.body.Version;
+      const res = await this.http.getJson(url, VersionInfo);
+      const { Version: version, Origin: origin } = res.body;
+      // Extract sourceUrl from GOPROXY Origin when present, avoiding go-get to
+      // vanity hosts (https://github.com/renovatebot/renovate/discussions/44898)
+      const sourceUrl =
+        origin?.VCS === 'git' && isNonEmptyString(origin.URL)
+          ? origin.URL.replace(regEx(/\.git$/), '')
+          : undefined;
+      return { version, sourceUrl };
     } catch (err) {
       logger.trace({ err }, 'Failed to get latest version');
       return null;
@@ -208,12 +407,15 @@ export class GoProxyDatasource extends Datasource {
   async getVersionsWithInfo(
     baseUrl: string,
     packageName: string,
+    constraintsFiltering: ConstraintsFilter | undefined,
   ): Promise<ReleaseResult> {
     const isGopkgin = packageName.startsWith('gopkg.in/');
     const majorSuffixSeparator = isGopkgin ? '.' : '/';
     const modParts = packageName.match(modRegex)?.groups;
-    const baseMod = modParts?.baseMod ?? /* v8 ignore next */ packageName;
-    const packageMajor = parseInt(modParts?.majorVersion ?? '0');
+    const baseMod =
+      modParts?.baseMod ??
+      /* v8 ignore next -- defensive: modRegex matches any non-empty package name, so baseMod is always set */ packageName;
+    const packageMajor = parseInt(modParts?.majorVersion ?? '0', 10);
 
     const result: ReleaseResult = { releases: [] };
     for (let major = packageMajor; ; major += 1) {
@@ -254,6 +456,31 @@ export class GoProxyDatasource extends Datasource {
             return { version };
           }
         });
+
+        if (constraintsFiltering === 'strict') {
+          releases = await p.map(releases, async (rel) => {
+            try {
+              const goDirective = await this.retrieveGoDirectiveForModule(
+                baseUrl,
+                pkg,
+                rel.version,
+              );
+              if (goDirective) {
+                rel.constraints ??= {};
+                rel.constraints['%goMod'] ??= [];
+                rel.constraints['%goMod'].push(goDirective);
+              }
+            } catch (err) {
+              logger.trace(
+                { err },
+                `Can't obtain \`go\` directive from ${baseUrl}`,
+              );
+            }
+
+            return rel;
+          });
+        }
+
         result.releases.push(...releases);
       } catch (err) {
         const potentialHttpError =
@@ -270,12 +497,16 @@ export class GoProxyDatasource extends Datasource {
         throw err;
       }
 
-      const latestVersion = await this.getLatestVersion(baseUrl, pkg);
-      if (latestVersion) {
+      const latest = await this.getLatestVersion(baseUrl, pkg);
+      if (latest) {
+        const { version: latestVersion, sourceUrl } = latest;
         result.tags ??= {};
         result.tags.latest ??= latestVersion;
         if (goVersioning.isGreaterThan(latestVersion, result.tags.latest)) {
           result.tags.latest = latestVersion;
+        }
+        if (sourceUrl) {
+          result.sourceUrl ??= sourceUrl;
         }
         if (!result.releases.length) {
           const releaseFromLatest = pseudoVersionToRelease(latestVersion);
@@ -293,10 +524,24 @@ export class GoProxyDatasource extends Datasource {
     return result;
   }
 
-  static getCacheKey({ packageName }: GetReleasesConfig): string {
+  static getCacheKey({
+    packageName,
+    constraintsFiltering,
+  }: GetReleasesConfig): string {
+    const goproxy = getEnv().GOPROXY;
+    const noproxy = parseNoproxy();
+    const constraintsFilteringKey =
+      constraintsFiltering && constraintsFiltering !== 'none'
+        ? `@@${constraintsFiltering}`
+        : '';
+    // TODO: types (#22198)
+    return `${packageName}@@${goproxy}@@${noproxy?.toString()}${constraintsFilteringKey}`;
+  }
+
+  static getVersionedCacheKey(packageName: string, version: string): string {
     const goproxy = getEnv().GOPROXY;
     const noproxy = parseNoproxy();
     // TODO: types (#22198)
-    return `${packageName}@@${goproxy}@@${noproxy?.toString()}`;
+    return `${packageName}@@${version}@@${goproxy}@@${noproxy?.toString()}`;
   }
 }

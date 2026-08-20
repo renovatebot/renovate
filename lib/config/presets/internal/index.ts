@@ -16,8 +16,6 @@ import * as schedulePreset from './schedule.preset.ts';
 import * as securityPreset from './security.preset.ts';
 import * as workaroundsPreset from './workarounds.preset.ts';
 
-/* eslint sort-keys: ["error", "asc", {caseSensitive: false, natural: true}] */
-
 export const groups: Record<string, Record<string, Preset>> = {
   abandonments: configAbandonments.presets,
   config: configPreset.presets,

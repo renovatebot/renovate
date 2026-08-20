@@ -30,7 +30,7 @@ Supports over [90 different package managers](https://docs.renovatebot.com/modul
 
 ### Platforms
 
-Renovate updates code repositories on the following platforms: GitHub, GitLab, Bitbucket, Azure DevOps, AWS Code Commit, Gitea, Forgejo, Gerrit (experimental)
+Renovate updates code repositories on the following platforms: GitHub, GitLab, Bitbucket, Azure DevOps, AWS Code Commit (experimental), Gitea, Forgejo, Gerrit (experimental), SCM-Manager (experimental)
 
 ## Ways to run Renovate
 
@@ -79,6 +79,8 @@ There are several ways to run the Renovate CLI directly.
 See docs: [Running Renovate](https://docs.renovatebot.com/getting-started/running/) for all options.
 
 **Supports: all platforms**
+
+For additional community-maintained options, see the [Community Tools](https://docs.renovatebot.com/community-tools/) page.
 
 ## Docs
 
@@ -134,8 +136,8 @@ Follow us on:
 
 ## Security / Disclosure
 
-If you find any bug with Renovate that may be a security problem, then e-mail us at: [renovate-disclosure@mend.io](mailto:renovate-disclosure@mend.io).
+If you find any bug with Renovate that may be a security problem, please report it through the [GitHub Security Advisories process](https://github.com/renovatebot/renovate/security/advisories).
 This way we can evaluate the bug and hopefully fix it before it gets abused.
 Please give us enough time to investigate the bug before you report it anywhere else.
 
-Please do not create GitHub issues for security-related doubts or problems.
+If you would like to discuss a potential finding before raising the Advisory, then e-mail us at: [renovate-disclosure@mend.io](mailto:renovate-disclosure@mend.io).

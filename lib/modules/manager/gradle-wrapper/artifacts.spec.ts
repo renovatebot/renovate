@@ -7,13 +7,16 @@ import { Fixtures } from '~test/fixtures.ts';
 import * as httpMock from '~test/http-mock.ts';
 import { env, fs, git, logger, partial } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
-import type { RepoGlobalConfig } from '../../../config/types.ts';
+import type {
+  InternalGlobalConfigOptions,
+  RepoGlobalConfig,
+} from '../../../config/types.ts';
 import { resetPrefetchedImages } from '../../../util/exec/docker/index.ts';
 import type { StatusResult } from '../../../util/git/types.ts';
 import { getPkgReleases } from '../../datasource/index.ts';
 import { updateArtifacts as gradleUpdateArtifacts } from '../gradle/index.ts';
 import type { UpdateArtifactsConfig, UpdateArtifactsResult } from '../types.ts';
-import { gradleJvmArg, updateBuildFile, updateLockFiles } from './artifacts.ts';
+import { updateBuildFile, updateLockFiles } from './artifacts.ts';
 import { updateArtifacts } from './index.ts';
 
 vi.mock('../../../util/fs/index.ts');
@@ -23,7 +26,7 @@ vi.mock('../gradle/index.ts');
 
 process.env.CONTAINERBASE = 'true';
 
-const adminConfig: RepoGlobalConfig = {
+const adminConfig: RepoGlobalConfig & InternalGlobalConfigOptions = {
   // `join` fixes Windows CI
   localDir: upath.join('/tmp/github/some/repo'),
   cacheDir: upath.join('/tmp/cache'),
@@ -31,6 +34,7 @@ const adminConfig: RepoGlobalConfig = {
 
   // although not enabled by default, let's assume it is
   allowedUnsafeExecutions: ['gradleWrapper'],
+  binarySource: 'global',
 };
 
 const config: UpdateArtifactsConfig = {
@@ -70,13 +74,6 @@ describe('modules/manager/gradle-wrapper/artifacts', () => {
         { version: '16.0.1' },
         { version: '17.0.0' },
       ],
-    });
-  });
-
-  describe('gradleJvmArg()', () => {
-    it('takes the values given to it, and returns the JVM arguments', () => {
-      const result = gradleJvmArg({ jvmMemory: 256, jvmMaxMemory: 768 });
-      expect(result).toBe(' -Dorg.gradle.jvmargs="-Xms256m -Xmx768m"');
     });
   });
 
@@ -167,6 +164,31 @@ describe('modules/manager/gradle-wrapper/artifacts', () => {
                 '-Dorg.gradle.parallel=true -Dorg.gradle.configureondemand=true -Dorg.gradle.daemon=false -Dorg.gradle.caching=false',
             },
           },
+        },
+      ]);
+    });
+
+    it('quotes a distributionUrl containing shell metacharacters', async () => {
+      const execSnapshots = mockExecAll();
+      git.getRepoStatus.mockResolvedValue(
+        partial<StatusResult>({
+          modified: ['gradle/wrapper/gradle-wrapper.properties'],
+        }),
+      );
+
+      await updateArtifacts({
+        packageFileName: 'gradle/wrapper/gradle-wrapper.properties',
+        updatedDeps: [],
+        // distributionUrl as it would be parsed from an attacker-controlled
+        // gradle-wrapper.properties
+        newPackageFileContent:
+          'distributionUrl=https\\://example.com/gradle.zip;touch pwned',
+        config: { ...config, newValue: '6.3' },
+      });
+
+      expect(execSnapshots).toMatchObject([
+        {
+          cmd: './gradlew -Dorg.gradle.jvmargs="-Xms512m -Xmx512m" :wrapper --gradle-distribution-url \'https://example.com/gradle.zip;touch pwned\'',
         },
       ]);
     });
@@ -295,11 +317,11 @@ describe('modules/manager/gradle-wrapper/artifacts', () => {
             '-e CONTAINERBASE_CACHE_DIR ' +
             '-w "/tmp/github/some/repo" ' +
             'ghcr.io/renovatebot/base-image' +
-            ' bash -l -c "' +
+            " bash -l -c '" +
             'install-tool java 11.0.1' +
             ' && ' +
-            './gradlew -Dorg.gradle.jvmargs=\\"-Xms512m -Xmx512m\\" :wrapper --gradle-distribution-url https://services.gradle.org/distributions/gradle-6.3-bin.zip --gradle-distribution-sha256-sum 038794feef1f4745c6347107b6726279d1c824f3fc634b60f86ace1e9fbd1768' +
-            '"',
+            './gradlew -Dorg.gradle.jvmargs="-Xms512m -Xmx512m" :wrapper --gradle-distribution-url https://services.gradle.org/distributions/gradle-6.3-bin.zip --gradle-distribution-sha256-sum 038794feef1f4745c6347107b6726279d1c824f3fc634b60f86ace1e9fbd1768' +
+            "'",
           options: { cwd: '/tmp/github/some/repo' },
         },
       ]);
@@ -363,7 +385,7 @@ describe('modules/manager/gradle-wrapper/artifacts', () => {
       expect(result).toEqual([
         {
           artifactError: {
-            lockFile: 'gradle/wrapper/gradle-wrapper.properties',
+            fileName: 'gradle/wrapper/gradle-wrapper.properties',
             stderr:
               'Request failed with status code 404 (Not Found): GET https://services.gradle.org/distributions/gradle-6.3-bin.zip.sha256',
           },

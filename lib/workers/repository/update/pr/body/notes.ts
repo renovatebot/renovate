@@ -22,7 +22,7 @@ export function getPrNotes(config: BranchConfig): string {
     }
   }
   const uniqueNotes = [...new Set(notes)];
-  return uniqueNotes.join('\n\n') + '\n\n';
+  return `${uniqueNotes.join('\n\n')}\n\n`;
 }
 
 export function getPrExtraNotes(config: BranchConfig): string {

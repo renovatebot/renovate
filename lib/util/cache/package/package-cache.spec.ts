@@ -3,6 +3,7 @@ import { partial } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import type { PackageCacheBase } from './impl/base.ts';
 import { PackageCacheFile } from './impl/file.ts';
+import { getCombinedKey } from './key.ts';
 import { PackageCache } from './package-cache.ts';
 
 vi.unmock('../../mutex.ts');
@@ -160,7 +161,9 @@ describe('util/cache/package/package-cache', () => {
         'backend failure',
       );
 
-      expect(cache.memory.has('_test-namespace:key')).toBe(false);
+      expect(cache.memory.has(getCombinedKey('_test-namespace', 'key'))).toBe(
+        false,
+      );
     });
 
     it('applies TTL override in set()', async () => {

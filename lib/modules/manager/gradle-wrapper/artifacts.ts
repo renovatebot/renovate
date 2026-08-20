@@ -2,10 +2,13 @@ import { lang, query as q } from '@renovatebot/good-enough-parser';
 import { isTruthy } from '@sindresorhus/is';
 import { quote } from 'shlex';
 import upath from 'upath';
-import type { ToolSettingsOptions } from '../../../config/types.ts';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
 import { logger } from '../../../logger/index.ts';
-import { exec, getToolSettingsOptions } from '../../../util/exec/index.ts';
+import {
+  exec,
+  getToolSettingsOptions,
+  gradleJvmArg,
+} from '../../../util/exec/index.ts';
 import type { ExecOptions } from '../../../util/exec/types.ts';
 import {
   localPathExists,
@@ -15,7 +18,7 @@ import {
 import { getRepoStatus } from '../../../util/git/index.ts';
 import type { StatusResult } from '../../../util/git/types.ts';
 import { Http } from '../../../util/http/index.ts';
-import { newlineRegex } from '../../../util/regex.ts';
+import { newlineRegex, regEx } from '../../../util/regex.ts';
 import { replaceAt } from '../../../util/string.ts';
 import { isGradleExecutionAllowed } from '../gradle/artifacts.ts';
 import { updateArtifacts as gradleUpdateArtifacts } from '../gradle/index.ts';
@@ -132,10 +135,6 @@ export async function updateLockFiles(
   });
 }
 
-export function gradleJvmArg(config: ToolSettingsOptions): string {
-  return ` -Dorg.gradle.jvmargs="-Xms${config.jvmMemory}m -Xmx${config.jvmMaxMemory}m"`;
-}
-
 export async function updateArtifacts({
   packageFileName,
   newPackageFileContent,
@@ -169,14 +168,14 @@ export async function updateArtifacts({
     let checksum: string | null = null;
     const distributionUrl = getDistributionUrl(newPackageFileContent);
     if (distributionUrl) {
-      cmd += ` --gradle-distribution-url ${distributionUrl}`;
+      cmd += ` --gradle-distribution-url ${quote(distributionUrl)}`;
       if (newPackageFileContent.includes('distributionSha256Sum=')) {
         //update checksum in case of distributionSha256Sum in properties then run wrapper
         checksum = await getDistributionChecksum(distributionUrl);
         await writeLocalFile(
           packageFileName,
           newPackageFileContent.replace(
-            /distributionSha256Sum=.*/,
+            regEx(/distributionSha256Sum=.*/),
             `distributionSha256Sum=${checksum}`,
           ),
         );
@@ -248,7 +247,7 @@ export async function updateArtifacts({
     return [
       {
         artifactError: {
-          lockFile: packageFileName,
+          fileName: packageFileName,
           stderr: err.message,
         },
       },

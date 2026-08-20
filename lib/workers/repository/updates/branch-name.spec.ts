@@ -473,6 +473,14 @@ describe('workers/repository/updates/branch-name', () => {
           upgrade: { branchName: 'renovate-/[start]-something-[end]' },
           expectedBranchName: 'renovate/start-something-end',
         },
+        {
+          upgrade: { branchName: 'renovate/eslint-eslintrc>minimatch-10.x' },
+          expectedBranchName: 'renovate/eslint-eslintrc-minimatch-10.x',
+        },
+        {
+          upgrade: { branchName: 'renovate/<<<hello>>>' },
+          expectedBranchName: 'renovate/hello',
+        },
       ];
       fixtures.forEach((fixture) => {
         generateBranchName(fixture.upgrade as BranchUpgradeConfig);

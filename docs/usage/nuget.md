@@ -9,6 +9,7 @@ Renovate can upgrade dependencies in these files:
 
 - `.csproj`
 - `.fsproj`
+- `.sqlproj` (SSDT SQL projects)
 - `.vbproj`
 
 ## Version Support
@@ -24,8 +25,8 @@ To convert your .NET Framework `.csproj`, `.fsproj` or `.vbproj` files into an S
 
 ## How it works
 
-1. Renovate searches in each repository for any files with a `.csproj`, `.fsproj`, or `.vbproj` extension
-1. Existing dependencies are extracted from `<PackageReference>` and `<PackageVersion>` tags
+1. Renovate searches in each repository for any files with a `.csproj`, `.fsproj`, `.sqlproj`, or `.vbproj` extension
+1. Existing dependencies are extracted from `<PackageReference>` and `<PackageVersion>` tags, and MSBuild SDK versions from `<Sdk>`, `<Import Sdk>`, and `<Project Sdk="name/version">` elements
 1. Renovate looks up the latest version on [nuget.org](https://nuget.org) (or an alternative feed if configured) to see if any upgrades are available
 1. If the source package includes a GitHub URL as its source, and has either:
    - a "changelog" file, or
@@ -63,9 +64,8 @@ In the example above we've set three NuGet feeds.
 The package resolving process uses the `merge` strategy to handle the three feeds.
 All feeds are checked for dependency updates, and duplicate updates are merged into a single dependency update.
 
-<!-- prettier-ignore -->
 !!! note
-    Some alternative feeds (e.g. Artifactory) do not implement the full set of [required NuGet resources](https://learn.microsoft.com/en-us/nuget/api/overview#resources-and-schema) for the V3 API. If the `PackageBaseAddress` resource does not exist, Renovate falls back to using the `projectUrl` from the dependency's catalog entry as the `sourceUrl` for the dependency, affecting [changelog detection](key-concepts/changelogs.md#how-renovate-detects-changelogs).
+  Some alternative feeds (e.g. Artifactory) do not implement the full set of [required NuGet resources](https://learn.microsoft.com/en-us/nuget/api/overview#resources-and-schema) for the V3 API. If the `PackageBaseAddress` resource does not exist, Renovate falls back to using the `projectUrl` from the dependency's catalog entry as the `sourceUrl` for the dependency, affecting [changelog detection](key-concepts/changelogs.md#how-renovate-detects-changelogs).
 
 ### Protocol versions
 
@@ -127,12 +127,11 @@ If you use Azure DevOps:
 - set `matchHost` to `pkgs.dev.azure.com`
 - set the username, so Renovate can build the project when it creates the PR
 
-<!-- prettier-ignore -->
 !!! note
-    Only Basic HTTP authentication (via username and password) is supported.
-    For Azure DevOps: use a PAT with `read` permissions on `Packaging`.
-    The username of the PAT must match the username of the _user of the PAT_.
-    The generated `nuget.config` forces the basic authentication, which cannot be overridden externally!
+  Only Basic HTTP authentication (via username and password) is supported.
+  For Azure DevOps: use a PAT with `read` permissions on `Packaging`.
+  The username of the PAT must match the username of the _user of the PAT_.
+  The generated `nuget.config` forces the basic authentication, which cannot be overridden externally!
 
 ## Ignoring package files when using presets
 

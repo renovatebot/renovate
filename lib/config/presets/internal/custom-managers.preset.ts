@@ -35,7 +35,7 @@ export const presets: Record<string, Preset> = {
     customManagers: [
       {
         customType: 'regex',
-        managerFilePatterns: ['**/bitbucket-pipelines.{yml,yaml}'],
+        managerFilePatterns: ['**/*-pipelines.yml'],
         matchStrings: [
           '# renovate: datasource=(?<datasource>[a-zA-Z0-9-._]+?) depName=(?<depName>[^\\s]+?)(?: (lookupName|packageName)=(?<packageName>[^\\s]+?))?(?: versioning=(?<versioning>[^\\s]+?))?(?: extractVersion=(?<extractVersion>[^\\s]+?))?(?: registryUrl=(?<registryUrl>[^\\s]+?))?\\s+.*\\s+[A-Za-z0-9_]+?_VERSION[ =:]\\s?["\']?(?<currentValue>.+?)["\']?\\s',
         ],
@@ -80,7 +80,7 @@ export const presets: Record<string, Preset> = {
     customManagers: [
       {
         customType: 'regex',
-        managerFilePatterns: ['.gitlab-ci.{yml,yaml}'],
+        managerFilePatterns: ['**/*.gitlab-ci.{yml,yaml}'],
         matchStrings: [
           '# renovate: datasource=(?<datasource>[a-zA-Z0-9-._]+?) depName=(?<depName>[^\\s]+?)(?: (?:packageName)=(?<packageName>[^\\s]+?))?(?: versioning=(?<versioning>[^\\s]+?))?(?: extractVersion=(?<extractVersion>[^\\s]+?))?(?: registryUrl=(?<registryUrl>[^\\s]+?))?\\s+[A-Za-z0-9_]+?_VERSION\\s*:\\s*["\']?(?<currentValue>.+?)["\']?\\s',
         ],
@@ -153,6 +153,14 @@ export const presets: Record<string, Preset> = {
         matchStrings: [
           '"(?<depName>@tsconfig/node(?<major>\\d+))/tsconfig\\.json"',
         ],
+      },
+      {
+        autoReplaceStringTemplate: '"@tsconfig/node{{{major}}}"',
+        currentValueTemplate: '{{{major}}}',
+        customType: 'regex',
+        datasourceTemplate: 'npm',
+        managerFilePatterns: ['**/{j,t}sconfig.json', '**/{j,t}sconfig.*.json'],
+        matchStrings: ['"(?<depName>@tsconfig/node(?<major>\\d+))"'],
       },
     ],
     description:

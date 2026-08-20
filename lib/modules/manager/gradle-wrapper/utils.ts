@@ -73,6 +73,9 @@ export async function getJavaConstraint(
         return `^${languageVersion}.0.0`;
       }
     }
+    if (major > 9 || (major === 9 && minor && minor >= 1)) {
+      return '^25.0.0';
+    }
     if (major > 8 || (major === 8 && minor && minor >= 5)) {
       return '^21.0.0';
     }

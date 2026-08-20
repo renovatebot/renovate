@@ -22,12 +22,15 @@ remote_branch: gh-pages
 
 hooks:
   - mkdocs-hooks/custom-edit-url.py
+  - mkdocs-hooks/markdown-tab-length.py
+  - mkdocs-hooks/sidebar-label.py
 
 # General site info
 
 # Metadata
 extra:
   version: !ENV RENOVATE_VERSION
+  include_announcement: !ENV MKDOCS_INCLUDE_ANNOUNCEMENT
 
 # Set the main title for the project.
 # Required setting.
@@ -204,7 +207,9 @@ plugins:
   - search:
       separator: '[\s\-,:!?=\[\]()<>{}"/\\]+|\.(?!\d)|&[lg]t;'
   - awesome-pages
-  - privacy
+  - privacy:
+      assets_exclude:
+        - asciinema.org/*
 
 # Page Tree/Sidebar
 # https://www.mkdocs.org/user-guide/writing-your-docs/#configure-pages-and-navigation

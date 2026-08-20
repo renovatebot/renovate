@@ -1,14 +1,12 @@
-import type {
-  SafeParseReturnType,
-  input as ZodInput,
-  output as ZodOutput,
-  ZodType,
-} from 'zod/v3';
-import { NEVER, ZodError, ZodIssueCode } from 'zod/v3';
+import type { ZodError, output as ZodOutput, ZodType } from 'zod/v4';
+import { NEVER } from 'zod/v4';
 import { logger } from '../logger/index.ts';
 import type { Nullish } from '../types/index.ts';
 
 type Val = NonNullable<unknown>;
+
+// ZodSafeParseResult is not exported from zod/v4 public API, derive from safeParse return type
+type ZodSafeParseResult<T> = ReturnType<ZodType<T>['safeParse']>;
 
 interface Ok<T extends Val> {
   readonly ok: true;
@@ -30,10 +28,11 @@ interface Err<E extends Val> {
 
 type Res<T extends Val, E extends Val> = Ok<T> | Err<E>;
 
-function isZodResult<Input, Output extends Val>(
+function isZodResult<Output extends Val>(
   input: unknown,
-): input is SafeParseReturnType<Input, Output> {
+): input is ZodSafeParseResult<Output> {
   if (
+    // oxlint-disable-next-line renovate/prefer-is-object -- guards arbitrary callback results; isObject() matches functions, which must never be classified as zod results
     typeof input !== 'object' ||
     input === null ||
     Object.keys(input).length !== 2 ||
@@ -49,14 +48,13 @@ function isZodResult<Input, Output extends Val>(
       typeof input.data !== 'undefined' &&
       input.data !== null
     );
-  } else {
-    return 'error' in input && input.error instanceof ZodError;
   }
+  return 'error' in input;
 }
 
-function fromZodResult<ZodInput, ZodOutput extends Val>(
-  input: SafeParseReturnType<ZodInput, ZodOutput>,
-): Result<ZodOutput, ZodError<ZodInput>> {
+function fromZodResult<ZodOutput extends Val>(
+  input: ZodSafeParseResult<ZodOutput>,
+): Result<ZodOutput, ZodError> {
   return input.success ? Result.ok(input.data) : Result.err(input.error);
 }
 
@@ -66,7 +64,7 @@ function fromZodResult<ZodInput, ZodOutput extends Val>(
  */
 type RawValue<T extends Val> = Exclude<
   T,
-  SafeParseReturnType<unknown, T> | Promise<unknown>
+  ZodSafeParseResult<T> | Promise<unknown>
 >;
 
 function fromNullable<
@@ -145,9 +143,9 @@ export class Result<T extends Val, E extends Val = Error> {
    *
    *   ```
    */
-  static wrap<T extends Val, Input = unknown>(
-    zodResult: SafeParseReturnType<Input, T>,
-  ): Result<T, ZodError<Input>>;
+  static wrap<T extends Val>(
+    zodResult: ZodSafeParseResult<T>,
+  ): Result<T, ZodError>;
   static wrap<T extends Val, E extends Val = Error>(
     callback: () => RawValue<T>,
   ): Result<T, E>;
@@ -160,25 +158,20 @@ export class Result<T extends Val, E extends Val = Error> {
   static wrap<T extends Val, E extends Val = Error>(
     promise: Promise<RawValue<T>>,
   ): AsyncResult<T, E>;
-  static wrap<
-    T extends Val,
-    E extends Val = Error,
-    EE extends Val = never,
-    Input = unknown,
-  >(
+  static wrap<T extends Val, E extends Val = Error, EE extends Val = never>(
     input:
-      | SafeParseReturnType<Input, T>
+      | ZodSafeParseResult<T>
       | (() => RawValue<T>)
       | (() => Promise<RawValue<T>>)
       | Promise<Result<T, EE>>
       | Promise<RawValue<T>>,
-  ): Result<T, ZodError<Input>> | Result<T, E | EE> | AsyncResult<T, E | EE> {
-    if (isZodResult<Input, T>(input)) {
-      return fromZodResult(input);
+  ): Result<T, ZodError> | Result<T, E | EE> | AsyncResult<T, E | EE> {
+    if (isZodResult<T>(input)) {
+      return fromZodResult<T>(input);
     }
 
     if (input instanceof Promise) {
-      return AsyncResult.wrap(input as never);
+      return AsyncResult.wrap(input);
     }
 
     try {
@@ -342,7 +335,7 @@ export class Result<T extends Val, E extends Val = Error> {
 
     if (this.res._uncaught) {
       // TODO: fix, should only allow `Error` type
-      // eslint-disable-next-line @typescript-eslint/only-throw-error
+      // oxlint-disable-next-line typescript/only-throw-error
       throw this.res.err;
     }
 
@@ -367,7 +360,7 @@ export class Result<T extends Val, E extends Val = Error> {
 
     if (this.res._uncaught) {
       // TODO: fix, should only allow `Error` type
-      // eslint-disable-next-line @typescript-eslint/only-throw-error
+      // oxlint-disable-next-line typescript/only-throw-error
       throw this.res.err;
     }
 
@@ -383,7 +376,7 @@ export class Result<T extends Val, E extends Val = Error> {
     }
 
     // TODO: fix, should only allow `Error` type
-    // eslint-disable-next-line @typescript-eslint/only-throw-error
+    // oxlint-disable-next-line typescript/only-throw-error
     throw this.res.err;
   }
 
@@ -398,7 +391,7 @@ export class Result<T extends Val, E extends Val = Error> {
 
     if (this.res._uncaught) {
       // TODO: fix, should only allow `Error` type
-      // eslint-disable-next-line @typescript-eslint/only-throw-error
+      // oxlint-disable-next-line typescript/only-throw-error
       throw this.res.err;
     }
 
@@ -437,12 +430,12 @@ export class Result<T extends Val, E extends Val = Error> {
   transform<U extends Val, EE extends Val>(
     fn: (value: T) => AsyncResult<U, E | EE>,
   ): AsyncResult<U, E | EE>;
-  transform<U extends Val, Input = unknown>(
-    fn: (value: T) => SafeParseReturnType<Input, NonNullable<U>>,
-  ): Result<U, E | ZodError<Input>>;
-  transform<U extends Val, Input = unknown>(
-    fn: (value: T) => Promise<SafeParseReturnType<Input, NonNullable<U>>>,
-  ): AsyncResult<U, E | ZodError<Input>>;
+  transform<U extends Val>(
+    fn: (value: T) => ZodSafeParseResult<NonNullable<U>>,
+  ): Result<U, E | ZodError>;
+  transform<U extends Val>(
+    fn: (value: T) => Promise<ZodSafeParseResult<NonNullable<U>>>,
+  ): AsyncResult<U, E | ZodError>;
   transform<U extends Val, EE extends Val>(
     fn: (value: T) => Promise<Result<U, E | EE>>,
   ): AsyncResult<U, E | EE>;
@@ -450,20 +443,18 @@ export class Result<T extends Val, E extends Val = Error> {
     fn: (value: T) => Promise<RawValue<U>>,
   ): AsyncResult<U, E>;
   transform<U extends Val>(fn: (value: T) => RawValue<U>): Result<U, E>;
-  transform<U extends Val, EE extends Val, Input = unknown>(
+  transform<U extends Val, EE extends Val>(
     fn: (
       value: T,
     ) =>
       | Result<U, E | EE>
       | AsyncResult<U, E | EE>
-      | SafeParseReturnType<Input, NonNullable<U>>
-      | Promise<SafeParseReturnType<Input, NonNullable<U>>>
+      | ZodSafeParseResult<NonNullable<U>>
+      | Promise<ZodSafeParseResult<NonNullable<U>>>
       | Promise<Result<U, E | EE>>
       | Promise<RawValue<U>>
       | RawValue<U>,
-  ):
-    | Result<U, E | EE | ZodError<Input>>
-    | AsyncResult<U, E | EE | ZodError<Input>> {
+  ): Result<U, E | EE | ZodError> | AsyncResult<U, E | EE | ZodError> {
     if (!this.res.ok) {
       return Result.err(this.res.err);
     }
@@ -479,8 +470,8 @@ export class Result<T extends Val, E extends Val = Error> {
         return result;
       }
 
-      if (isZodResult<Input, U>(result)) {
-        return fromZodResult(result);
+      if (isZodResult<U>(result)) {
+        return fromZodResult<U>(result);
       }
 
       if (result instanceof Promise) {
@@ -544,12 +535,12 @@ export class Result<T extends Val, E extends Val = Error> {
   static parse<Schema extends ZodType<any, any, any>>(
     input: unknown,
     schema: Schema,
-  ): Result<NonNullable<ZodOutput<Schema>>, ZodError<ZodInput<Schema>>> {
+  ): Result<NonNullable<ZodOutput<Schema>>, ZodError> {
     const parseResult = schema
       .transform((result, ctx): NonNullable<ZodOutput<Schema>> => {
         if (result === undefined) {
           ctx.addIssue({
-            code: ZodIssueCode.custom,
+            code: 'custom',
             message: `Result can't accept nullish values, but input was parsed by Zod schema to undefined`,
           });
           return NEVER;
@@ -557,7 +548,7 @@ export class Result<T extends Val, E extends Val = Error> {
 
         if (result === null) {
           ctx.addIssue({
-            code: ZodIssueCode.custom,
+            code: 'custom',
             message: `Result can't accept nullish values, but input was parsed by Zod schema to null`,
           });
           return NEVER;
@@ -567,7 +558,7 @@ export class Result<T extends Val, E extends Val = Error> {
       })
       .safeParse(input);
 
-    return fromZodResult(parseResult);
+    return fromZodResult<NonNullable<ZodOutput<Schema>>>(parseResult);
   }
 
   /**
@@ -576,7 +567,7 @@ export class Result<T extends Val, E extends Val = Error> {
    */
   parse<Schema extends ZodType<any, any, any>>(
     schema: Schema,
-  ): Result<NonNullable<ZodOutput<Schema>>, E | ZodError<ZodInput<Schema>>> {
+  ): Result<NonNullable<ZodOutput<Schema>>, E | ZodError> {
     if (this.res.ok) {
       return Result.parse(this.res.val, schema);
     }
@@ -636,6 +627,7 @@ export class AsyncResult<T extends Val, E extends Val> implements PromiseLike<
     this.asyncResult = asyncResult;
   }
 
+  // oxlint-disable-next-line unicorn/no-thenable -- required to implement PromiseLike
   then<TResult1 = Result<T, E>>(
     onfulfilled?:
       | ((value: Result<T, E>) => TResult1 | PromiseLike<TResult1>)
@@ -649,18 +641,12 @@ export class AsyncResult<T extends Val, E extends Val> implements PromiseLike<
   }
 
   static err<E extends Val>(err: NonNullable<E>): AsyncResult<never, E> {
-    // eslint-disable-next-line promise/no-promise-in-callback
     return new AsyncResult(Promise.resolve(Result.err(err)));
   }
 
-  static wrap<
-    T extends Val,
-    E extends Val = Error,
-    EE extends Val = never,
-    Input = unknown,
-  >(
+  static wrap<T extends Val, E extends Val = Error, EE extends Val = never>(
     promise:
-      | Promise<SafeParseReturnType<Input, T>>
+      | Promise<ZodSafeParseResult<T>>
       | Promise<Result<T, EE>>
       | Promise<RawValue<T>>,
     onErr?: (err: NonNullable<E>) => Result<T, E>,
@@ -672,8 +658,8 @@ export class AsyncResult<T extends Val, E extends Val> implements PromiseLike<
             return value;
           }
 
-          if (isZodResult<Input, T>(value)) {
-            return fromZodResult(value);
+          if (isZodResult<T>(value)) {
+            return fromZodResult<T>(value);
           }
 
           return Result.ok(value);
@@ -774,12 +760,12 @@ export class AsyncResult<T extends Val, E extends Val> implements PromiseLike<
   transform<U extends Val, EE extends Val>(
     fn: (value: T) => AsyncResult<U, E | EE>,
   ): AsyncResult<U, E | EE>;
-  transform<U extends Val, Input = unknown>(
-    fn: (value: T) => SafeParseReturnType<Input, NonNullable<U>>,
-  ): AsyncResult<U, E | ZodError<Input>>;
-  transform<U extends Val, Input = unknown>(
-    fn: (value: T) => Promise<SafeParseReturnType<Input, NonNullable<U>>>,
-  ): AsyncResult<U, E | ZodError<Input>>;
+  transform<U extends Val>(
+    fn: (value: T) => ZodSafeParseResult<NonNullable<U>>,
+  ): AsyncResult<U, E | ZodError>;
+  transform<U extends Val>(
+    fn: (value: T) => Promise<ZodSafeParseResult<NonNullable<U>>>,
+  ): AsyncResult<U, E | ZodError>;
   transform<U extends Val, EE extends Val>(
     fn: (value: T) => Promise<Result<U, E | EE>>,
   ): AsyncResult<U, E | EE>;
@@ -787,18 +773,18 @@ export class AsyncResult<T extends Val, E extends Val> implements PromiseLike<
     fn: (value: T) => Promise<RawValue<U>>,
   ): AsyncResult<U, E>;
   transform<U extends Val>(fn: (value: T) => RawValue<U>): AsyncResult<U, E>;
-  transform<U extends Val, EE extends Val, Input = unknown>(
+  transform<U extends Val, EE extends Val>(
     fn: (
       value: T,
     ) =>
       | Result<U, E | EE>
       | AsyncResult<U, E | EE>
-      | SafeParseReturnType<Input, NonNullable<U>>
-      | Promise<SafeParseReturnType<Input, NonNullable<U>>>
+      | ZodSafeParseResult<NonNullable<U>>
+      | Promise<ZodSafeParseResult<NonNullable<U>>>
       | Promise<Result<U, E | EE>>
       | Promise<RawValue<U>>
       | RawValue<U>,
-  ): AsyncResult<U, E | EE | ZodError<Input>> {
+  ): AsyncResult<U, E | EE | ZodError> {
     return new AsyncResult(
       this.asyncResult
         .then((oldResult) => {
@@ -818,8 +804,8 @@ export class AsyncResult<T extends Val, E extends Val> implements PromiseLike<
               return result;
             }
 
-            if (isZodResult<Input, U>(result)) {
-              return fromZodResult(result);
+            if (isZodResult<U>(result)) {
+              return fromZodResult<U>(result);
             }
 
             if (result instanceof Promise) {
@@ -860,9 +846,7 @@ export class AsyncResult<T extends Val, E extends Val> implements PromiseLike<
     ) => Result<U, EE> | AsyncResult<U, EE> | Promise<Result<U, EE>>,
   ): AsyncResult<T | U, EE> {
     const caughtAsyncResult: Promise<Result<T, EE>> = this.asyncResult.then(
-      (result) =>
-        // eslint-disable-next-line promise/no-nesting
-        result.catch(fn as never),
+      (result) => result.catch(fn as never),
     );
     return AsyncResult.wrap(caughtAsyncResult);
   }
@@ -873,10 +857,7 @@ export class AsyncResult<T extends Val, E extends Val> implements PromiseLike<
    */
   parse<Schema extends ZodType<any, any, any>>(
     schema: Schema,
-  ): AsyncResult<
-    NonNullable<ZodOutput<Schema>>,
-    E | ZodError<ZodInput<Schema>>
-  > {
+  ): AsyncResult<NonNullable<ZodOutput<Schema>>, E | ZodError> {
     return new AsyncResult(
       this.asyncResult
         .then((oldResult) => oldResult.parse(schema))

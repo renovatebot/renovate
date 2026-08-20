@@ -7,6 +7,7 @@ export { extractPackageFile } from './extract.ts';
 
 export const supportsLockFileMaintenance = true;
 export const lockFileNames = ['pixi.lock'];
+export const lockFileMaintenanceIsDelegatedToPackageManager = true;
 
 export const url = 'https://github.com/prefix-dev/pixi/';
 export const categories: Category[] = ['python'];
@@ -19,3 +20,5 @@ export const defaultConfig = {
 };
 
 export const supportedDatasources = [PypiDatasource.id, CondaDatasource.id];
+
+export { knownDepTypes, supportsDynamicDepTypesNote } from './dep-types.ts';

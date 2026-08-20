@@ -570,6 +570,53 @@ describe('util/http/host-rules', () => {
     });
   });
 
+  describe('GHE platform endpoint fallback', () => {
+    beforeEach(() => {
+      GlobalConfig.set({
+        platform: 'github',
+        endpoint: 'https://ghe.example.com/',
+      });
+      hostRules.clear();
+      hostRules.add({
+        hostType: 'github',
+        matchHost: 'ghe.example.com',
+        token: 'ghe-token',
+      });
+    });
+
+    it('fallback to github for non-listed hostType targeting GHE endpoint', () => {
+      // github-digest is NOT in GITHUB_API_USING_HOST_TYPES,
+      // but should still get credentials when targeting the GHE endpoint
+      const opts = { hostType: 'github-digest' };
+      const hostRule = findMatchingRule(
+        'https://ghe.example.com/api/v3/',
+        opts,
+      );
+      expect(hostRule).toEqual({
+        token: 'ghe-token',
+      });
+      expect(
+        applyHostRule('https://ghe.example.com/api/v3/', opts, hostRule),
+      ).toEqual({
+        context: {
+          authType: undefined,
+        },
+        hostType: 'github-digest',
+        token: 'ghe-token',
+      });
+    });
+
+    it('no fallback when request targets a different host', () => {
+      // Request targets a different host than the platform endpoint — no fallback
+      const opts = { hostType: 'github-digest' };
+      const hostRule = findMatchingRule(
+        'https://other-ghe.example.com/api/v3/',
+        opts,
+      );
+      expect(hostRule).toEqual({});
+    });
+  });
+
   it('no fallback to gitlab', () => {
     hostRules.add({
       hostType: 'gitlab-packages',

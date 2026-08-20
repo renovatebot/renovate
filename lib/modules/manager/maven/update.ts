@@ -69,7 +69,8 @@ export function updateAtPosition(
     // TODO: validate newValue (#22198)
     const replacedPart = versionPart.replace(version, newValue!);
     return leftPart + replacedPart + restPart;
-  } else if (
+  }
+  if (
     upgrade.datasource === 'docker' ||
     upgrade.datasource === 'buildpacks-registry'
   ) {
@@ -201,9 +202,9 @@ function updateValue(
   oldValue: string,
   newValue: string,
 ): string {
-  const elementStart = content.indexOf('<' + nodeName);
+  const elementStart = content.indexOf(`<${nodeName}`);
   const start = content.indexOf('>', elementStart) + 1;
-  const end = content.indexOf('</' + nodeName, start);
+  const end = content.indexOf(`</${nodeName}`, start);
   const elementContent = content.slice(start, end);
   if (elementContent.trim() === oldValue) {
     return (

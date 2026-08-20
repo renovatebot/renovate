@@ -1,5 +1,6 @@
-import { z } from 'zod/v3';
+import { z } from 'zod/v4';
 import { logger } from '../../../logger/index.ts';
+import { regEx } from '../../../util/regex.ts';
 import { LooseArray } from '../../../util/schema-utils/index.ts';
 
 const BitbucketSourceType = z.enum(['commit_directory', 'commit_file']);
@@ -36,7 +37,7 @@ export const RepoInfo = z
     full_name: z
       .string()
       .regex(
-        /^[^/]+\/[^/]+$/,
+        regEx(/^[^/]+\/[^/]+$/),
         'Expected repository full_name to be in the format "owner/repo"',
       ),
     is_private: z.boolean().catch(() => {
@@ -93,3 +94,15 @@ export const UnresolvedPrTasks = z
   .transform((data) =>
     data.values.filter((task) => task.state === 'UNRESOLVED'),
   );
+
+const WorkspaceAccess = z.object({
+  workspace: z.object({
+    slug: z.string(),
+  }),
+});
+
+export const WorkspaceAccesses = z
+  .object({
+    values: z.array(WorkspaceAccess),
+  })
+  .transform((body) => body.values.map(({ workspace }) => workspace.slug));

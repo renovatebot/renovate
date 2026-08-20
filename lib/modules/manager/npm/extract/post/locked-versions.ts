@@ -2,6 +2,7 @@ import { isString } from '@sindresorhus/is';
 import semver from 'semver';
 import upath from 'upath';
 import { logger } from '../../../../../logger/index.ts';
+import { regEx } from '../../../../../util/regex.ts';
 import type { PackageFile } from '../../../types.ts';
 import type { NpmManagerData } from '../../types.ts';
 import { getNpmLock } from '../npm.ts';
@@ -9,7 +10,7 @@ import { getPnpmLock } from '../pnpm.ts';
 import type { LockFile } from '../types.ts';
 import { getYarnLock, getYarnVersionFromLock } from '../yarn.ts';
 
-const pnpmCatalogDepTypeRe = /pnpm\.catalog\.(?<version>.*)/;
+const pnpmCatalogDepTypeRe = regEx(/pnpm\.catalog\.(?<version>.*)/);
 
 export async function getLockedVersions(
   packageFiles: PackageFile<NpmManagerData>[],
@@ -23,6 +24,7 @@ export async function getLockedVersions(
     if (yarnLock) {
       logger.trace('Found yarnLock');
       lockFiles.push(yarnLock);
+      // v8 ignore else -- TODO: add test #40625
       if (!lockFileCache[yarnLock]) {
         logger.trace(`Retrieving/parsing ${yarnLock}`);
         lockFileCache[yarnLock] = await getYarnLock(yarnLock);
@@ -54,7 +56,7 @@ export async function getLockedVersions(
       logger.debug(`Found ${npmLock} for ${packageFile.packageFile}`);
       lockFiles.push(npmLock);
       if (!lockFileCache[npmLock]) {
-        logger.trace('Retrieving/parsing ' + npmLock);
+        logger.trace(`Retrieving/parsing ${npmLock}`);
         const cache = await getNpmLock(npmLock);
         /* v8 ignore next 4 -- needs test */
         if (!cache) {
@@ -72,7 +74,7 @@ export async function getLockedVersions(
           if (
             semver.satisfies('6.14.18', packageFile.extractedConstraints.npm)
           ) {
-            npm = packageFile.extractedConstraints.npm + ' <7';
+            npm = `${packageFile.extractedConstraints.npm} <7`;
           }
         } else {
           npm = '<7';
@@ -83,7 +85,7 @@ export async function getLockedVersions(
           if (
             semver.satisfies('8.19.3', packageFile.extractedConstraints.npm)
           ) {
-            npm = packageFile.extractedConstraints.npm + ' <9';
+            npm = `${packageFile.extractedConstraints.npm} <9`;
           }
         } else {
           npm = '<9';
@@ -153,6 +155,7 @@ export async function getLockedVersions(
             ]?.[depName!],
           );
 
+          // v8 ignore else -- TODO: add test #40625
           if (isString(lockedVersion)) {
             dep.lockedVersion = lockedVersion;
           }
@@ -164,6 +167,7 @@ export async function getLockedVersions(
             ]?.[depType!]?.[depName!],
           );
 
+          // v8 ignore else -- TODO: add test #40625
           if (isString(lockedVersion)) {
             dep.lockedVersion = lockedVersion;
           }

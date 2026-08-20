@@ -1,11 +1,13 @@
 import { isArray, isPlainObject } from '@sindresorhus/is';
+import { regEx } from '../regex.ts';
 import { HttpBase, type InternalJsonUnsafeOptions } from './http.ts';
 import type { HttpMethod, HttpOptions, HttpResponse } from './types.ts';
 
 let baseUrl: string;
-export const setBaseUrl = (newBaseUrl: string): void => {
-  baseUrl = newBaseUrl.replace(/\/*$/, '/'); // TODO #12875
-};
+
+export function setBaseUrl(newBaseUrl: string): void {
+  baseUrl = newBaseUrl.replace(regEx(/\/*$/), '/'); // TODO #12875
+}
 
 export interface ForgejoHttpOptions extends HttpOptions {
   paginate?: boolean;
@@ -54,8 +56,8 @@ export class ForgejoHttp extends HttpBase<ForgejoHttpOptions> {
       opts.httpOptions.memCache = false;
 
       delete opts.httpOptions.paginate;
-      const total = parseInt(res.headers['x-total-count'] as string);
-      let nextPage = parseInt(resolvedUrl.searchParams.get('page') ?? '1');
+      const total = parseInt(res.headers['x-total-count'] as string, 10);
+      let nextPage = parseInt(resolvedUrl.searchParams.get('page') ?? '1', 10);
 
       while (total && pc.length < total) {
         nextPage += 1;

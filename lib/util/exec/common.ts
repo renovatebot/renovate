@@ -13,6 +13,7 @@ import type {
   CommandWithOptions,
   DataListener,
   ExecResult,
+  OutputWriter,
   RawExecOptions,
 } from './types.ts';
 import { asRawCommand, isCommandWithOptions } from './utils.ts';
@@ -34,8 +35,8 @@ const NONTERM = [
 
 const encoding = 'utf8';
 
-function stringify(list: Buffer[]): string {
-  return Buffer.concat(list).toString(encoding);
+function stringify(list: Buffer[], writer: OutputWriter | undefined): string {
+  return writer?.toString() ?? Buffer.concat(list).toString(encoding);
 }
 
 function initStreamListeners(
@@ -52,6 +53,11 @@ function initStreamListeners(
 
   cp.stdout?.on('data', (chunk: Buffer) => {
     // process.stdout.write(data.toString());
+    if (opts.outputWriters?.stdout) {
+      opts.outputWriters.stdout.write(chunk);
+      return;
+    }
+
     const len = Buffer.byteLength(chunk, encoding);
     stdoutLen += len;
     if (stdoutLen > opts.maxBuffer) {
@@ -63,6 +69,11 @@ function initStreamListeners(
 
   cp.stderr?.on('data', (chunk: Buffer) => {
     // process.stderr.write(data.toString());
+    if (opts.outputWriters?.stderr) {
+      opts.outputWriters.stderr.write(chunk);
+      return;
+    }
+
     const len = Buffer.byteLength(chunk, encoding);
     stderrLen += len;
     if (stderrLen > opts.maxBuffer) {
@@ -167,7 +178,7 @@ export function exec(
         if (ignoreFailure === undefined || ignoreFailure === false) {
           reject(
             new ExecError(
-              `Command failed: ${cp.spawnargs.join(' ')}\n${stringify(stderr)}`,
+              `Command failed: ${cp.spawnargs.join(' ')}\n${stringify(stderr, opts.outputWriters?.stderr)}`,
               {
                 ...rejectInfo(),
                 exitCode: code,
@@ -180,23 +191,23 @@ export function exec(
         logger.once.debug(
           {
             command: cp.spawnargs.join(' '),
-            stdout: stringify(stdout),
-            stderr: stringify(stderr),
+            stdout: stringify(stdout, opts.outputWriters?.stdout),
+            stderr: stringify(stderr, opts.outputWriters?.stderr),
             exitCode: code,
           },
           `Ignoring failure to execute comamnd \`${cp.spawnargs.join(' ')}\`, as ignoreFailure=true is set`,
         );
 
         resolve({
-          stderr: stringify(stderr),
-          stdout: stringify(stdout),
+          stderr: stringify(stderr, opts.outputWriters?.stderr),
+          stdout: stringify(stdout, opts.outputWriters?.stdout),
           exitCode: code,
         });
         return;
       }
       resolve({
-        stderr: stringify(stderr),
-        stdout: stringify(stdout),
+        stderr: stringify(stderr, opts.outputWriters?.stderr),
+        stdout: stringify(stdout, opts.outputWriters?.stdout),
       });
     });
 
@@ -204,8 +215,8 @@ export function exec(
       return {
         cmd: cp.spawnargs.join(' '),
         options: opts,
-        stdout: stringify(stdout),
-        stderr: stringify(stderr),
+        stdout: stringify(stdout, opts.outputWriters?.stdout),
+        stderr: stringify(stderr, opts.outputWriters?.stderr),
       };
     }
   });
@@ -221,26 +232,25 @@ function kill(cp: ChildProcess, signal: NodeJS.Signals): boolean {
        * and for which the process has permission to send a signal.
        */
       return process.kill(-cp.pid, signal);
-    } else {
-      // destroying stdio is needed for unref to work
-      // https://nodejs.org/api/child_process.html#subprocessunref
-      // https://github.com/nodejs/node/blob/4d5ff25a813fd18939c9f76b17e36291e3ea15c3/lib/child_process.js#L412-L426
-      cp.stderr?.destroy();
-      cp.stdout?.destroy();
-      cp.unref();
-      return cp.kill(signal);
     }
+    // destroying stdio is needed for unref to work
+    // https://nodejs.org/api/child_process.html#subprocessunref
+    // https://github.com/nodejs/node/blob/4d5ff25a813fd18939c9f76b17e36291e3ea15c3/lib/child_process.js#L412-L426
+    cp.stderr?.destroy();
+    cp.stdout?.destroy();
+    cp.unref();
+    return cp.kill(signal);
   } catch {
     // cp is a single node tree, therefore -pid is invalid as there is no such pgid,
     return false;
   }
 }
 
-export const rawExec: (
+export function rawExec(
   cmd: string | CommandWithOptions,
   opts: RawExecOptions,
-) => Promise<ExecResult> = (
-  cmd: string | CommandWithOptions,
-  opts: RawExecOptions,
-) =>
-  instrument(`rawExec: ${sanitize(asRawCommand(cmd))}`, () => exec(cmd, opts));
+): Promise<ExecResult> {
+  return instrument(`rawExec: ${sanitize(asRawCommand(cmd))}`, () =>
+    exec(cmd, opts),
+  );
+}

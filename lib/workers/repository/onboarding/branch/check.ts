@@ -79,11 +79,14 @@ export async function isOnboarded(config: RenovateConfig): Promise<boolean> {
   // - An onboarding cache is present, and
   // - The current default branch SHA matches the default SHA found in the cache
   // Also if there is a closed pr skip using cache as it is outdated
-  if (config.requireConfig === 'optional' && config.onboarding === false) {
+  if (
+    getInheritedOrGlobal('requireConfig') === 'optional' &&
+    getInheritedOrGlobal('onboarding') === false
+  ) {
     // Return early and avoid checking for config files
     return true;
   }
-  if (config.requireConfig === 'ignored') {
+  if (getInheritedOrGlobal('requireConfig') === 'ignored') {
     logger.debug('Config file will be ignored');
     return true;
   }
@@ -94,7 +97,7 @@ export async function isOnboarded(config: RenovateConfig): Promise<boolean> {
   // if onboarding cache is present and base branch has not been updated; branch is not onboarded
   // if closed pr exists then presence of onboarding cache doesn't matter as we need to skip onboarding
   if (
-    config.onboarding &&
+    getInheritedOrGlobal('onboarding') &&
     !closedOnboardingPr &&
     isNonEmptyObject(onboardingBranchCache) &&
     onboardingBranchCache.defaultBranchSha ===
@@ -112,18 +115,16 @@ export async function isOnboarded(config: RenovateConfig): Promise<boolean> {
       const configFileContent = await platform.getJsonFile(
         cache.configFileName,
       );
-      if (configFileContent) {
-        if (
-          cache.configFileName !== 'package.json' ||
-          configFileContent.renovate
-        ) {
-          logger.debug('Existing config file confirmed');
-          logger.debug(
-            { fileName: cache.configFileName, config: configFileContent },
-            'Repository config',
-          );
-          return true;
-        }
+      if (
+        configFileContent &&
+        (cache.configFileName !== 'package.json' || configFileContent.renovate)
+      ) {
+        logger.debug('Existing config file confirmed');
+        logger.debug(
+          { fileName: cache.configFileName, config: configFileContent },
+          'Repository config',
+        );
+        return true;
       }
     } catch {
       // probably file doesn't exist
@@ -144,7 +145,10 @@ export async function isOnboarded(config: RenovateConfig): Promise<boolean> {
 
   // If onboarding has been disabled and config files are required then the
   // repository has not been onboarded yet
-  if (config.requireConfig === 'required' && config.onboarding === false) {
+  if (
+    getInheritedOrGlobal('requireConfig') === 'required' &&
+    getInheritedOrGlobal('onboarding') === false
+  ) {
     throw new Error(REPOSITORY_NO_CONFIG);
   }
 
@@ -153,7 +157,7 @@ export async function isOnboarded(config: RenovateConfig): Promise<boolean> {
     return false;
   }
   logger.debug('Found closed onboarding PR');
-  if (config.requireConfig === 'optional') {
+  if (getInheritedOrGlobal('requireConfig') === 'optional') {
     logger.debug('Config not mandatory so repo is considered onboarded');
     return true;
   }

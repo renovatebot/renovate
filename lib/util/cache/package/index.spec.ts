@@ -9,6 +9,7 @@ vi.mock('./backend.ts');
 describe('util/cache/package/index', () => {
   beforeEach(async () => {
     vi.mocked(backend.getBackend).mockReturnValue(undefined);
+    vi.mocked(backend.destroy).mockResolvedValue(undefined);
     await index.cleanup({});
   });
 
@@ -42,7 +43,7 @@ describe('util/cache/package/index', () => {
     expect(result).toBe('backend-value');
   });
 
-  it('delegates cleanup to packageCache.destroy', async () => {
+  it('delegates cleanup to backend.destroy', async () => {
     const mockBackend = partial<PackageCacheBase>({
       get: vi.fn(),
       set: vi.fn(),
@@ -54,7 +55,7 @@ describe('util/cache/package/index', () => {
 
     await index.cleanup({});
 
-    expect(mockBackend.destroy).toHaveBeenCalled();
+    expect(backend.destroy).toHaveBeenCalled();
   });
 
   it('resets packageCache to backendless instance on cleanup', async () => {
@@ -84,10 +85,13 @@ describe('util/cache/package/index', () => {
     const mockBackend = partial<PackageCacheBase>({
       get: vi.fn(),
       set: vi.fn(),
-      destroy: vi.fn().mockRejectedValue(new Error('destroy failed')),
+      destroy: vi.fn(),
     });
     vi.mocked(backend.init).mockResolvedValue(undefined);
     vi.mocked(backend.getBackend).mockReturnValue(mockBackend);
+    vi.mocked(backend.destroy).mockRejectedValueOnce(
+      new Error('destroy failed'),
+    );
     await index.init({});
 
     await expect(index.cleanup({})).resolves.toBeUndefined();

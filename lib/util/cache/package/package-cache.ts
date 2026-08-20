@@ -1,18 +1,18 @@
 import { withTimeout } from 'async-mutex';
 import { getMutex } from '../../mutex.ts';
 import { PackageCacheStats } from '../../stats.ts';
-import { PackageCacheBase } from './impl/base.ts';
+import type { PackageCacheBase } from './impl/base.ts';
+import { getCombinedKey } from './key.ts';
 import { getTtlOverride } from './ttl.ts';
 import type { PackageCacheNamespace } from './types.ts';
 
 const DEFAULT_TIMEOUT_MS = 2 * 60 * 1000;
 
-export class PackageCache extends PackageCacheBase {
+export class PackageCache {
   readonly memory = new Map<string, unknown>();
   private readonly backend: PackageCacheBase | undefined;
 
   constructor(backend?: PackageCacheBase) {
-    super();
     this.backend = backend;
   }
 
@@ -20,7 +20,7 @@ export class PackageCache extends PackageCacheBase {
     namespace: PackageCacheNamespace,
     key: string,
   ): Promise<T | undefined> {
-    const combinedKey = `${namespace}:${key}`;
+    const combinedKey = getCombinedKey(namespace, key);
     if (this.memory.has(combinedKey)) {
       return this.memory.get(combinedKey) as T;
     }
@@ -50,7 +50,7 @@ export class PackageCache extends PackageCacheBase {
       backend.get<T>(namespace, key),
     );
 
-    this.memory.set(`${namespace}:${key}`, value);
+    this.memory.set(getCombinedKey(namespace, key), value);
 
     return value;
   }
@@ -62,7 +62,7 @@ export class PackageCache extends PackageCacheBase {
     hardTtlMinutes: number,
   ): Promise<void> {
     const rawTtl = getTtlOverride(namespace) ?? hardTtlMinutes;
-    const combinedKey = `${namespace}:${key}`;
+    const combinedKey = getCombinedKey(namespace, key);
 
     await withTimeout(
       getMutex(combinedKey, 'package-cache'),
@@ -78,7 +78,7 @@ export class PackageCache extends PackageCacheBase {
     value: unknown,
     hardTtlMinutes: number,
   ): Promise<void> {
-    const combinedKey = `${namespace}:${key}`;
+    const combinedKey = getCombinedKey(namespace, key);
 
     await withTimeout(
       getMutex(combinedKey, 'package-cache'),
@@ -94,7 +94,7 @@ export class PackageCache extends PackageCacheBase {
     value: unknown,
     hardTtlMinutes: number,
   ): Promise<void> {
-    this.memory.set(`${namespace}:${key}`, value);
+    this.memory.set(getCombinedKey(namespace, key), value);
 
     const backend = this.backend;
     if (backend) {

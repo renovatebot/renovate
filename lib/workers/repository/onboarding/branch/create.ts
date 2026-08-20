@@ -2,9 +2,14 @@ import { GlobalConfig } from '../../../../config/global.ts';
 import type { RenovateConfig } from '../../../../config/types.ts';
 import { logger } from '../../../../logger/index.ts';
 import { scm } from '../../../../modules/platform/scm.ts';
+import { coerceArray } from '../../../../util/array.ts';
 import { getInheritedOrGlobal } from '../../../../util/common.ts';
+import { filterValidCommitTrailers } from '../../../../util/git/commit-trailers.ts';
 import { compile } from '../../../../util/template/index.ts';
-import { getDefaultConfigFileName } from '../common.ts';
+import {
+  getDefaultConfigFileName,
+  getSemanticCommitPrTitle,
+} from '../common.ts';
 import { OnboardingCommitMessageFactory } from './commit-message.ts';
 import { getOnboardingConfigContents } from './config.ts';
 
@@ -12,7 +17,7 @@ export async function createOnboardingBranch(
   config: Partial<RenovateConfig>,
 ): Promise<string | null> {
   logger.debug('createOnboardingBranch()');
-  const configFile = getDefaultConfigFileName(config);
+  const configFile = getDefaultConfigFileName();
   // TODO #22198
   const contents = await getOnboardingConfigContents(config, configFile);
   logger.debug('Creating onboarding branch');
@@ -33,11 +38,22 @@ export async function createOnboardingBranch(
     logger.trace(`commitMessage: ${commitMessage}`);
   }
 
+  // only allow gitAuthor template value in the commitTrailers
+  const compiledTrailers = coerceArray(config.commitTrailers).map((trailer) =>
+    compile(trailer, { gitAuthor: config.gitAuthor }),
+  );
+  const trailers = filterValidCommitTrailers(compiledTrailers);
+
   // istanbul ignore if
   if (GlobalConfig.get('dryRun')) {
     logger.info('DRY-RUN: Would commit files to onboarding branch');
     return null;
   }
+
+  const prTitle =
+    config.semanticCommits === 'enabled'
+      ? getSemanticCommitPrTitle(config)
+      : getInheritedOrGlobal('onboardingPrTitle')!;
 
   return scm.commitAndPush({
     baseBranch: config.baseBranch,
@@ -51,8 +67,10 @@ export async function createOnboardingBranch(
       },
     ],
     message: commitMessage,
+    trailers,
     platformCommit: config.platformCommit,
     force: true,
-    labels: config.labels,
+    // Only needed by Gerrit platform
+    prTitle,
   });
 }
