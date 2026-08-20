@@ -10,6 +10,7 @@ import {
   writeLocalFile,
 } from '../../../util/fs/index.ts';
 import { getRepoStatus } from '../../../util/git/index.ts';
+import { quickStringify } from '../../../util/stringify.ts';
 import { parseUrl } from '../../../util/url.ts';
 import { extractPackageFileFlags as extractRequirementsFileFlags } from '../pip_requirements/common.ts';
 import type {
@@ -99,7 +100,7 @@ export async function updateArtifacts({
     return null;
   }
   logger.debug(
-    `pipCompile.updateArtifacts(${inputFileName}->${JSON.stringify(
+    `pipCompile.updateArtifacts(${inputFileName}->${quickStringify(
       config.lockFiles,
     )})`,
   );

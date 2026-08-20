@@ -59,6 +59,7 @@ export async function createConfigMigrationBranch(
     }
     const pJsonContent = await applyPrettierFormatting(
       'package.json',
+      // oxlint-disable-next-line renovate/prefer-stringify-util -- migration output committed to the PR diff: must match plain JSON.stringify formatting exactly
       JSON.stringify(pJson, undefined, migratedConfigData.indent.indent),
       'json',
       migratedConfigData.indent,

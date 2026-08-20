@@ -1,6 +1,7 @@
 import { logger } from '../../logger/index.ts';
 import { getCache } from '../../util/cache/repository/index.ts';
 import { regEx } from '../regex.ts';
+import { quickStringify } from '../stringify.ts';
 import { getCommitMessages } from './index.ts';
 
 type DetectedSemanticCommit = 'enabled' | 'disabled';
@@ -15,7 +16,7 @@ export async function detectSemanticCommits(): Promise<DetectedSemanticCommit> {
     return cache.semanticCommits;
   }
   const commitMessages = await getCommitMessages();
-  logger.trace(`commitMessages=${JSON.stringify(commitMessages)}`);
+  logger.trace(`commitMessages=${quickStringify(commitMessages)}`);
   const score = detectSemanticCommitScore(commitMessages);
   logger.debug(`semanticCommits: score=${score}`);
   if (score > 0) {

@@ -112,7 +112,7 @@ function compileCommitMessage(upgrade: BranchUpgradeConfig): string {
     upgrade.commitMessage = splitMessage.join('\n');
   }
 
-  logger.trace(`commitMessage: ${JSON.stringify(upgrade.commitMessage)}`);
+  logger.trace(`commitMessage: ${safeStringify(upgrade.commitMessage)}`);
   return upgrade.commitMessage;
 }
 
@@ -165,7 +165,7 @@ function compilePrTitle(
   }
   // Compile again to allow for nested templates
   upgrade.prTitle = template.compile(upgrade.prTitle, upgrade);
-  logger.trace(`prTitle: ${JSON.stringify(upgrade.prTitle)}`);
+  logger.trace(`prTitle: ${safeStringify(upgrade.prTitle)}`);
 }
 
 function getMinimumGroupSize(upgrades: BranchUpgradeConfig[]): number {

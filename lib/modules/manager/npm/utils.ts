@@ -6,7 +6,6 @@ import {
   readLocalFile,
   writeLocalFile,
 } from '../../../util/fs/index.ts';
-
 import { PackageJson } from './schema.ts';
 import type { LockFile, ParseLockFileResult } from './types.ts';
 
@@ -24,6 +23,7 @@ export function parseLockFile(lockFile: string): ParseLockFileResult {
 }
 
 export function composeLockFile(lockFile: LockFile, indent: string): string {
+  // oxlint-disable-next-line renovate/prefer-stringify-util -- lockfile content committed to the PR diff: must match plain JSON.stringify formatting exactly
   return `${JSON.stringify(lockFile, null, indent)}\n`;
 }
 

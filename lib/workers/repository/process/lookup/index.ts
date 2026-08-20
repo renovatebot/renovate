@@ -31,6 +31,7 @@ import { checkMinimumReleaseAge } from '../../../../util/minimum-release-age.ts'
 import { applyPackageRules } from '../../../../util/package-rules/index.ts';
 import { regEx } from '../../../../util/regex.ts';
 import { Result } from '../../../../util/result.ts';
+import { quickStringify } from '../../../../util/stringify.ts';
 import type { Timestamp } from '../../../../util/timestamp.ts';
 import { calculateAbandonment } from './abandonment.ts';
 import { getBucket } from './bucket.ts';
@@ -214,7 +215,7 @@ export async function lookupUpdates(
       // v8 ignore else -- TODO: add test #40625
       if (config.currentValue) {
         logger.debug(
-          `Invalid currentValue for ${config.packageName}: ${JSON.stringify(config.currentValue)} (${typeof config.currentValue})`,
+          `Invalid currentValue for ${config.packageName}: ${quickStringify(config.currentValue)} (${typeof config.currentValue})`,
         );
       }
       res.skipReason = 'invalid-value';

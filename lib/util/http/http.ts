@@ -15,6 +15,7 @@ import { acquireLock } from '../mutex.ts';
 import { type AsyncResult, Result } from '../result.ts';
 import { Toml } from '../schema-utils/index.ts';
 import { ObsoleteCacheHitLogger } from '../stats.ts';
+import { quickStringify } from '../stringify.ts';
 import { compile } from '../template/index.ts';
 import { isHttpUrl, parseUrl, resolveBaseUrl } from '../url.ts';
 import { parseSingleYaml } from '../yaml.ts';
@@ -168,7 +169,7 @@ export abstract class HttpBase<
       options.memCache !== false &&
       isReadMethod
         ? hash(
-            `got-${JSON.stringify({
+            `got-${quickStringify({
               url,
               headers: options.headers,
               method,

@@ -79,6 +79,7 @@ export function finalizeReport(): void {
 }
 
 async function getReportBody(config: RenovateConfig): Promise<string> {
+  // oxlint-disable-next-line renovate/prefer-stringify-util -- keep this consistently created
   const json = JSON.stringify(report);
   if (!config.reportFormatting) {
     return json;

@@ -15,6 +15,7 @@ import { coerceArray } from '../../util/array.ts';
 import { emojify } from '../../util/emoji.ts';
 import { regEx } from '../../util/regex.ts';
 import { coerceString } from '../../util/string.ts';
+import { quickStringify } from '../../util/stringify.ts';
 import * as template from '../../util/template/index.ts';
 import type { BranchConfig, SelectAllConfig } from '../types.ts';
 import { extractRepoProblems, replacementAlreadyExists } from './common.ts';
@@ -182,7 +183,7 @@ export async function readDashboardBody(
     dependencyDashboardAllPending: false,
     dependencyDashboardAllRateLimited: false,
   };
-  const stringifiedConfig = JSON.stringify(config);
+  const stringifiedConfig = quickStringify(config);
   if (
     config.dependencyDashboard === true ||
     stringifiedConfig.includes('"dependencyDashboardApproval":true') ||

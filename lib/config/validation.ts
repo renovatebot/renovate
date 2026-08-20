@@ -32,6 +32,7 @@ import {
   isRegexMatch,
   matchRegexOrGlobList,
 } from '../util/string-match.ts';
+import { quickStringify } from '../util/stringify.ts';
 import * as template from '../util/template/index.ts';
 import { parseUrl } from '../util/url.ts';
 import {
@@ -254,7 +255,7 @@ export async function validateConfig(
   parentPath?: string,
 ): Promise<ValidationResult> {
   return instrument(
-    `validateConfig(${configType}, ${JSON.stringify(parentPath)})`,
+    `validateConfig(${configType}, ${quickStringify(parentPath)})`,
     async () => {
       initOptions();
 
@@ -423,7 +424,7 @@ export async function validateConfig(
               if (val !== true && val !== false) {
                 errors.push({
                   topic: ConfigValidationTopic.Error,
-                  message: `Configuration option \`${currentPath}\` should be boolean. Found: ${JSON.stringify(
+                  message: `Configuration option \`${currentPath}\` should be boolean. Found: ${quickStringify(
                     val,
                   )} (${typeof val})`,
                 });
@@ -512,7 +513,7 @@ export async function validateConfig(
                     if (!isValidCommitTrailer(subval)) {
                       errors.push({
                         topic: ConfigValidationTopic.Error,
-                        message: `Invalid commit trailer: \`${JSON.stringify(
+                        message: `Invalid commit trailer: \`${quickStringify(
                           subval,
                         )}\`. Must be a single-line string in the form \`Key: value\`, where the key contains only letters, digits and \`-\`.`,
                       });
@@ -567,7 +568,7 @@ export async function validateConfig(
                         if (hasRelativePresets) {
                           // the stripped relative preset may still provide the
                           // missing selectors, so this cannot be an error
-                          const message = `${currentPath}[${subIndex}]: this rule extends a relative preset that cannot be resolved during validation, so its selectors could not be checked. Rule: ${JSON.stringify(
+                          const message = `${currentPath}[${subIndex}]: this rule extends a relative preset that cannot be resolved during validation, so its selectors could not be checked. Rule: ${quickStringify(
                             packageRule,
                           )}`;
                           warnings.push({
@@ -575,7 +576,7 @@ export async function validateConfig(
                             message,
                           });
                         } else {
-                          const message = `${currentPath}[${subIndex}]: Each packageRule must contain at least one match* or exclude* selector. Rule: ${JSON.stringify(
+                          const message = `${currentPath}[${subIndex}]: Each packageRule must contain at least one match* or exclude* selector. Rule: ${quickStringify(
                             packageRule,
                           )}`;
                           errors.push({
@@ -590,7 +591,7 @@ export async function validateConfig(
                         !hasRelativePresets &&
                         selectorLength === Object.keys(resolvedRule).length
                       ) {
-                        const message = `${currentPath}[${subIndex}]: Each packageRule must contain at least one non-match* or non-exclude* field. Rule: ${JSON.stringify(
+                        const message = `${currentPath}[${subIndex}]: Each packageRule must contain at least one non-match* or non-exclude* field. Rule: ${quickStringify(
                           packageRule,
                         )}`;
                         warnings.push({
@@ -618,7 +619,7 @@ export async function validateConfig(
                       if (isNonEmptyArray(resolvedRule.matchUpdateTypes)) {
                         for (const option of preLookupOptions) {
                           if (resolvedRule[option] !== undefined) {
-                            const message = `${currentPath}[${subIndex}]: packageRules cannot combine both matchUpdateTypes and ${option}. Rule: ${JSON.stringify(
+                            const message = `${currentPath}[${subIndex}]: packageRules cannot combine both matchUpdateTypes and ${option}. Rule: ${quickStringify(
                               packageRule,
                             )}`;
                             errors.push({
@@ -1191,7 +1192,7 @@ async function validateGlobalConfig(
       if (val !== true && val !== false) {
         warnings.push({
           topic: ConfigValidationTopic.Error,
-          message: `Configuration option \`${currentPath}\` should be a boolean. Found: ${JSON.stringify(
+          message: `Configuration option \`${currentPath}\` should be a boolean. Found: ${quickStringify(
             val,
           )} (${typeof val}).`,
         });
