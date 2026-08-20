@@ -29,6 +29,55 @@ describe('config/migrate-validate', () => {
       });
     });
 
+    it('migrates a legacy dependency match-all without creating an invalid regex', async () => {
+      const input = {
+        packageRules: [
+          {
+            matchDepPatterns: ['*'],
+            automerge: true,
+          },
+        ],
+      } as unknown as RenovateConfig;
+
+      const res = await migrateAndValidate(config, input);
+
+      expect(res).toEqual({
+        packageRules: [
+          {
+            automerge: true,
+            matchDepNames: ['*'],
+          },
+        ],
+        errors: [],
+        warnings: [],
+      });
+    });
+
+    it('validates a legacy package match-all combined with an exclusion', async () => {
+      const input = {
+        packageRules: [
+          {
+            packagePatterns: ['*'],
+            excludePackageNames: ['some-package'],
+            automerge: true,
+          },
+        ],
+      } as unknown as RenovateConfig;
+
+      const res = await migrateAndValidate(config, input);
+
+      expect(res).toEqual({
+        packageRules: [
+          {
+            automerge: true,
+            matchPackageNames: ['!some-package'],
+          },
+        ],
+        errors: [],
+        warnings: [],
+      });
+    });
+
     it('handles invalid', async () => {
       // @ts-expect-error -- invalid option
       const input: RenovateConfig = { foo: 'none' };
