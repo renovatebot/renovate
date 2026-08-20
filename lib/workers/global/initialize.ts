@@ -12,7 +12,6 @@ import { validateGitVersion } from '../../util/git/index.ts';
 import * as hostRules from '../../util/host-rules.ts';
 import { setHttpRateLimits } from '../../util/http/rate-limits.ts';
 import { initMergeConfidence } from '../../util/merge-confidence/index.ts';
-import { filterAllowedHeaders } from '../repository/init/filter-allowed-headers.ts';
 import { setMaxLimit } from './limits.ts';
 
 async function setDirectories(input: AllConfig): Promise<AllConfig> {
@@ -58,7 +57,7 @@ async function checkVersions(): Promise<void> {
   }
 }
 
-function setGlobalHostRules(config: RenovateConfig): void {
+function setGlobalHostRules(config: AllConfig, warnOnDenied = true): void {
   if (config.hostRules) {
     logger.debug('Setting global hostRules');
     applySecretsAndVariablesToConfig({
@@ -66,8 +65,16 @@ function setGlobalHostRules(config: RenovateConfig): void {
       deleteVariables: false,
       deleteSecrets: false,
     });
-    for (const rule of filterAllowedHeaders(config.hostRules)) {
-      hostRules.add(rule);
+    // filtered here, rather than left to `add()`, so that the WARN about any dropped header can be suppressed when the same rules are registered again
+    // `config.hostRules` is deliberately left as it is: a `repositories[]` entry can widen `allowedHeaders` for its own repository, and `start()` re-filters these rules with the entry's allowlist to honour that
+    const rules = hostRules.filterAllowedHeaders(
+      config.hostRules,
+      config.allowedHeaders,
+      warnOnDenied,
+    );
+    for (const rule of rules) {
+      // already filtered above, so `add()`'s own enforcement has nothing left to drop
+      hostRules.add(rule, { allowedHeaders: config.allowedHeaders });
     }
   }
 }
@@ -94,7 +101,8 @@ export async function globalInitialize(
   await packageCache.init(config);
   limitCommitsPerRun(config);
   setEmojiConfig(config);
-  setGlobalHostRules(config);
+  // registered a second time in case initialization changed them; anything `allowedHeaders` drops was already warned about by the call above
+  setGlobalHostRules(config, false);
   configureThirdPartyLibraries(config);
   await initMergeConfidence(config);
   return config;

@@ -1,9 +1,11 @@
 import { isFalsy, isString, isTruthy, isUndefined } from '@sindresorhus/is';
+import { GlobalConfig } from '../config/global.ts';
 import { logger } from '../logger/index.ts';
 import type { CombinedHostRule, HostRule } from '../types/index.ts';
 import { clone } from './clone.ts';
 import * as sanitize from './sanitize.ts';
 import { toBase64 } from './string.ts';
+import { matchRegexOrGlobList } from './string-match.ts';
 import { isHttpUrl, massageHostUrl, parseUrl } from './url.ts';
 
 let hostRules: HostRule[] = [];
@@ -55,8 +57,70 @@ export function migrateRule(rule: LegacyHostRule & HostRule): HostRule {
   return result;
 }
 
-export function add(params: HostRule): void {
-  const rule = migrateRule(params);
+/**
+ * Enforce the `allowedHeaders` allowlist on a set of host rules.
+ *
+ * Loudly remove anything that's not permitted, logging a WARN.
+ *
+ * `add()` applies this to every rule it registers, so callers only need it themselves to pre-filter - e.g. to avoid repeating the WARN when the same rules are registered again and again.
+ *
+ * @param [allowedHeaders] the effective allowlist. Defaults to `GlobalConfig`, but must be passed explicitly when filtering before `GlobalConfig` reflects the repository being processed, i.e. for a `repositories[]` entry's own `allowedHeaders` override
+ * @param [warnOnDenied=true] whether to log the WARN. Pass `false` where the very same rules are filtered again, so that it is logged once rather than repeated
+ *
+ * `headers` are merged key by key across matching host rules (see {@link find}), so an admin's headers for a host survive even when a repo or preset rule also sets `headers` for the same host. Where both set the same header name, the more specific rule - or, when equally specific, the later-registered one - wins, which is the same precedence model `filterAllowedEnv` uses for `env`.
+ */
+export function filterAllowedHeaders(
+  rules: HostRule[],
+  allowedHeaders?: string[],
+  warnOnDenied = true,
+): HostRule[] {
+  // `??`, rather than a parameter default: a default only applies to `undefined`, and a `null` can reach us from user config
+  const allowlist = allowedHeaders ?? GlobalConfig.get('allowedHeaders');
+  const denied: string[] = [];
+
+  const result = rules.map((rule) => {
+    if (!rule.headers) {
+      return rule;
+    }
+
+    const allowed: Record<string, string> = {};
+    const ruleDenied: string[] = [];
+    for (const [name, value] of Object.entries(rule.headers)) {
+      if (matchRegexOrGlobList(name, allowlist)) {
+        allowed[name] = value;
+      } else {
+        ruleDenied.push(name);
+      }
+    }
+
+    if (!ruleDenied.length) {
+      return rule;
+    }
+    denied.push(...ruleDenied);
+    return { ...rule, headers: allowed };
+  });
+
+  if (denied.length && warnOnDenied) {
+    logger.warn(
+      { denied },
+      "Ignoring hostRules headers not permitted by this Renovate instance's `allowedHeaders`",
+    );
+  }
+  return result;
+}
+
+export interface AddHostRuleOptions {
+  /** the effective allowlist. Defaults to `GlobalConfig`; pass it explicitly when `GlobalConfig` does not yet reflect the repository the rule is registered for */
+  allowedHeaders?: string[];
+}
+
+export function add(params: HostRule, options?: AddHostRuleOptions): void {
+  let rule = migrateRule(params);
+
+  if (rule.headers) {
+    // enforced here, at the single registration chokepoint, so that no current or future caller can register a rule whose headers bypass `allowedHeaders`; `applyHostRule` filters by header name again at request time as defence in depth
+    [rule] = filterAllowedHeaders([rule], options?.allowedHeaders);
+  }
 
   if (rule.matchHost) {
     rule.matchHost = massageHostUrl(rule.matchHost);

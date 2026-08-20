@@ -255,6 +255,30 @@ describe('workers/global/index', () => {
     expect(headersSeenPerRepo).toEqual(['from-admin', undefined]);
   });
 
+  it('warns about disallowed admin hostRules headers once, not once per repository', async () => {
+    parseConfigs.mockResolvedValueOnce({
+      enabled: true,
+      allowedHeaders: ['X-*'],
+      repositories: ['a', 'b', 'c'],
+      hostRules: [
+        {
+          matchHost: 'registry.example.com',
+          headers: { Authorization: 'from-admin' },
+        },
+      ],
+    });
+
+    await expect(globalWorker.start()).resolves.toBe(0);
+
+    const denialWarnings = logger.logger.warn.mock.calls.filter(
+      ([, message]) =>
+        message ===
+        "Ignoring hostRules headers not permitted by this Renovate instance's `allowedHeaders`",
+    );
+    // once from `setGlobalHostRules` during initialization, and not again for its second registration nor for any repository in the loop
+    expect(denialWarnings).toHaveLength(1);
+  });
+
   it('processes repositories break', async () => {
     const isLimitReached = vi.spyOn(limits, 'isLimitReached');
     isLimitReached.mockReturnValue(true);

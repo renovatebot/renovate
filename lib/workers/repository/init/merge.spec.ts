@@ -22,7 +22,6 @@ import * as queue from '../../../util/http/queue.ts';
 import * as throttle from '../../../util/http/throttle.ts';
 import * as _onboardingCache from '../onboarding/branch/onboarding-branch-cache.ts';
 import { OnboardingState } from '../onboarding/common.ts';
-import { filterAllowedHeaders } from './filter-allowed-headers.ts';
 import {
   applyHostRules,
   applyNpmrc,
@@ -1572,11 +1571,9 @@ describe('workers/repository/init/merge', () => {
       expect(config.hostRules).toBeUndefined();
     });
 
-    it('filters headers against allowedHeaders before adding', () => {
+    it('filters headers against allowedHeaders when adding', () => {
+      // the filtering lives within `hostRules.add` itself, so no registration path can bypass it
       GlobalConfig.set({ allowedHeaders: ['X-*'] });
-      const addSpy = vi
-        .spyOn(hostRules, 'add')
-        .mockImplementation(() => undefined);
       const config = {
         hostRules: [
           {
@@ -1588,23 +1585,22 @@ describe('workers/repository/init/merge', () => {
 
       applyHostRules(config);
 
-      expect(addSpy).toHaveBeenCalledExactlyOnceWith({
-        matchHost: 'registry.example.com',
+      expect(hostRules.find({ url: 'https://registry.example.com' })).toEqual({
         headers: { 'X-Allowed': 'yes' },
       });
+      expect(logger.logger.warn).toHaveBeenCalledWith(
+        { denied: ['Authorization'] },
+        "Ignoring hostRules headers not permitted by this Renovate instance's `allowedHeaders`",
+      );
     });
 
     it('merges with an already-registered admin hostRule instead of replacing its headers', () => {
       GlobalConfig.set({ allowedHeaders: ['X-*'] });
-      // simulates the self-hosted admin's own `hostRules`, registered earlier via `globalInitialize` and filtered the same way
-      for (const rule of filterAllowedHeaders([
-        {
-          matchHost: 'registry.example.com',
-          headers: { 'X-From-Admin': 'yes', Authorization: 'from-admin' },
-        },
-      ])) {
-        hostRules.add(rule);
-      }
+      // simulates the self-hosted admin's own `hostRules`, registered earlier via `globalInitialize` - `hostRules.add` filters them against `allowedHeaders` itself
+      hostRules.add({
+        matchHost: 'registry.example.com',
+        headers: { 'X-From-Admin': 'yes', Authorization: 'from-admin' },
+      });
 
       applyHostRules({
         hostRules: [
