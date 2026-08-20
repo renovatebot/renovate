@@ -1,5 +1,6 @@
 import { isString } from '@sindresorhus/is';
 import { quote } from 'shlex';
+import upath from 'upath';
 import { TEMPORARY_ERROR } from '../../../../constants/error-messages.ts';
 import { logger } from '../../../../logger/index.ts';
 import type { HostRule } from '../../../../types/index.ts';
@@ -232,6 +233,16 @@ export class UvProcessor extends BasePyProjectProcessor {
         logger.debug('uv.lock is unchanged');
       }
 
+      if (
+        isLockFileChanged &&
+        config.postUpdateOptions?.includes('uvExportRequirements')
+      ) {
+        const exportResult = await runUvExport(packageFileName, execOptions);
+        if (exportResult) {
+          fileChanges.push(exportResult);
+        }
+      }
+
       return fileChanges.length ? fileChanges : null;
     } catch (err) {
       if (err.message === TEMPORARY_ERROR) {
@@ -274,6 +285,172 @@ function generateCMD(updatedDeps: Upgrade[]): string {
   }
 
   return `${uvUpdateCMD} ${deps.map((dep) => `--upgrade-package ${quote(dep)}`).join(' ')}`;
+}
+
+// PEP 508 normalised package / extra / group names.
+const PEP508_NAME_RE = /^[a-zA-Z0-9]([a-zA-Z0-9._-]*[a-zA-Z0-9])?$/;
+
+// Flags that take no value.
+const UV_EXPORT_BOOLEAN_FLAGS = new Set([
+  '--frozen',
+  '--no-dev',
+  '--only-dev',
+  '--no-editable',
+  '--no-emit-workspace',
+  '--no-hashes',
+  '--no-header',
+  '--all-extras',
+]);
+
+// Flags that take a value, mapped to a validation pattern for that value.
+const UV_EXPORT_VALUE_FLAGS: Record<string, RegExp> = {
+  '--python': /^\d+(\.\d+){1,2}$/,
+  // Filenames only; no path separators or traversal.
+  '--output-file': /^[a-zA-Z0-9._-]+$/,
+  '--no-emit-package': PEP508_NAME_RE,
+  '--extra': PEP508_NAME_RE,
+  '--group': PEP508_NAME_RE,
+  '--only-group': PEP508_NAME_RE,
+  '--no-group': PEP508_NAME_RE,
+  '--format': /^(requirements-txt|json)$/,
+};
+
+type UvExportParseResult =
+  | { status: 'not-found' }
+  | { status: 'rejected' }
+  | { status: 'ok'; cmd: string; outputFile: string };
+
+// Parses the `uv export` command from a requirements.txt header.
+function parseUvExportCmd(content: string): UvExportParseResult {
+  for (const line of content.split('\n')) {
+    if (!/^#\s+uv export\s/.exec(line)) {
+      continue;
+    }
+
+    // Strip the leading comment marker and split into tokens.
+    const rest = line.replace(/^#\s+uv export\s+/, '').trim();
+    const tokens = rest.split(/\s+/);
+    const safeArgs: string[] = [];
+    let outputFile: string | null = null;
+    let i = 0;
+
+    while (i < tokens.length) {
+      const token = tokens[i];
+
+      // --flag=value form (e.g. --python=3.12)
+      const eqIdx = token.indexOf('=');
+      if (eqIdx > 0) {
+        const flag = token.slice(0, eqIdx);
+        const value = token.slice(eqIdx + 1);
+        const pattern = UV_EXPORT_VALUE_FLAGS[flag];
+        if (!pattern?.test(value)) {
+          return { status: 'rejected' };
+        }
+        if (flag === '--output-file') {
+          outputFile = value;
+        }
+        safeArgs.push(`${flag}=${value}`);
+        i += 1;
+        continue;
+      }
+
+      // Boolean flag
+      if (UV_EXPORT_BOOLEAN_FLAGS.has(token)) {
+        safeArgs.push(token);
+        i += 1;
+        continue;
+      }
+
+      // --flag value form
+      if (token in UV_EXPORT_VALUE_FLAGS) {
+        const value = tokens[i + 1];
+        if (!value || !UV_EXPORT_VALUE_FLAGS[token].test(value)) {
+          return { status: 'rejected' };
+        }
+        if (token === '--output-file') {
+          outputFile = value;
+        }
+        safeArgs.push(token, value);
+        i += 2;
+        continue;
+      }
+
+      // Unknown token — reject the whole header.
+      return { status: 'rejected' };
+    }
+
+    if (!outputFile) {
+      return { status: 'rejected' };
+    }
+
+    return { status: 'ok', cmd: `uv export ${safeArgs.join(' ')}`, outputFile };
+  }
+  return { status: 'not-found' };
+}
+
+async function runUvExport(
+  packageFileName: string,
+  execOptions: ExecOptions,
+): Promise<UpdateArtifactsResult | null> {
+  const requirementsFileName = await findLocalSiblingOrParent(
+    packageFileName,
+    'requirements.txt',
+  );
+  if (!requirementsFileName) {
+    return null;
+  }
+
+  const existingRequirements = await readLocalFile(
+    requirementsFileName,
+    'utf8',
+  );
+  if (!existingRequirements) {
+    logger.debug(
+      { requirementsFileName },
+      'uv export: requirements.txt is empty',
+    );
+    return null;
+  }
+
+  const parsed = parseUvExportCmd(existingRequirements);
+  if (parsed.status === 'not-found') {
+    logger.debug(
+      { requirementsFileName },
+      'uv export: no uv export header found in requirements.txt',
+    );
+    return null;
+  }
+  if (parsed.status === 'rejected') {
+    logger.debug(
+      { requirementsFileName },
+      'uv export: header command rejected due to unknown or unsafe arguments',
+    );
+    return null;
+  }
+
+  const { cmd, outputFile } = parsed;
+  if (outputFile !== upath.basename(requirementsFileName)) {
+    logger.debug(
+      { requirementsFileName, outputFile },
+      'uv export: --output-file does not match requirements.txt filename',
+    );
+    return null;
+  }
+
+  await exec(cmd, execOptions);
+  const newRequirements = await readLocalFile(requirementsFileName, 'utf8');
+  if (newRequirements === existingRequirements) {
+    logger.debug(`${requirementsFileName} is unchanged`);
+    return null;
+  }
+
+  return {
+    file: {
+      type: 'addition',
+      path: requirementsFileName,
+      contents: newRequirements,
+    },
+  };
 }
 
 function getMatchingHostRule(url: string | undefined): HostRule {
