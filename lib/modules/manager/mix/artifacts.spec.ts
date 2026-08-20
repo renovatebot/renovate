@@ -487,7 +487,7 @@ describe('modules/manager/mix/artifacts', () => {
       { cmd: 'install-tool elixir v1.13.4' },
       {
         cmd: 'mix deps.update plug',
-        options: { cwd: '/tmp/github/some/repo/apps/foo' },
+        options: { cwd: '/tmp/github/some/repo' },
       },
     ]);
   });
