@@ -827,7 +827,7 @@ describe('workers/repository/init/merge', () => {
         });
 
         expect(hostRules.find({ url: 'https://registry.example.com' })).toEqual(
-          { headers: {} },
+          {},
         );
         expect(logger.logger.warn).toHaveBeenCalledWith(
           { denied: ['Authorization'] },
@@ -1145,6 +1145,36 @@ describe('workers/repository/init/merge', () => {
       expect(getUserEnv()).toEqual({ ENTRY_VAR: 'set-by-admin' });
     });
 
+    it("applies a repositories[] entry's header over one the admin set globally", async () => {
+      // the entry is the admin's own config, so its rules are registered `trusted` too - otherwise an admin could not override, for a single repository, a header they set for every one of them
+      GlobalConfig.set({ allowedHeaders: ['X-*'] });
+      hostRules.add(
+        {
+          matchHost: 'registry.example.com',
+          headers: { 'X-Token': 'for-every-repo' },
+        },
+        { trusted: true },
+      );
+      fs.readLocalFile.mockResolvedValue(JSON.stringify({}));
+
+      const res = await mergeRenovateConfig({
+        ...config,
+        repositoryEntryConfig: {
+          hostRules: [
+            {
+              matchHost: 'registry.example.com',
+              headers: { 'X-Token': 'for-this-repo' },
+            },
+          ],
+        },
+      });
+
+      expect(res).toBeDefined();
+      expect(
+        hostRules.find({ url: 'https://registry.example.com' }),
+      ).toMatchObject({ headers: { 'X-Token': 'for-this-repo' } });
+    });
+
     it('keeps going when a repositories[] entry carries a hostRule migration cannot migrate', async () => {
       // `hostRules` migration throws for a rule with more than one host-matching field: `applyHostRules` drops just that rule and carries on, so migrating the entry as a whole must not abort the repository instead
       const { migrateConfig } = await vi.importActual<typeof _migrate>(
@@ -1174,6 +1204,39 @@ describe('workers/repository/init/merge', () => {
       expect(logger.logger.warn).toHaveBeenCalledWith(
         expect.anything(),
         'Error setting hostRule from config',
+      );
+    });
+
+    it('drops, rather than rejects, a header a repositories[] entry preset contributes outside `allowedHeaders`', async () => {
+      // the entry's presets are the admin's own config, so this is not a violation to abort the repository over - but `allowedHeaders` binds the admin too, and `applyHostRule` would drop the header at request time regardless, so it is dropped at registration with a WARN
+      GlobalConfig.set({ allowedHeaders: ['X-*'] });
+      memCache.set('preset:local>entryInjectsHeader', {
+        hostRules: [
+          { matchHost: 'github.com', headers: { Authorization: 'Bearer x' } },
+        ],
+      });
+      fs.readLocalFile.mockResolvedValue(JSON.stringify({}));
+
+      const res = await mergeRenovateConfig({
+        ...config,
+        repositoryEntryConfig: {
+          extends: ['local>entryInjectsHeader'],
+          hostRules: [
+            {
+              matchHost: 'registry.example.com',
+              headers: { 'X-Token': 'token' },
+            },
+          ],
+        },
+      });
+
+      expect(res).toBeDefined();
+      expect(
+        hostRules.find({ url: 'https://github.com' }).headers,
+      ).toBeUndefined();
+      expect(logger.logger.warn).toHaveBeenCalledWith(
+        { denied: ['Authorization'] },
+        "Ignoring hostRules headers not permitted by this Renovate instance's `allowedHeaders`",
       );
     });
 
@@ -1563,9 +1626,10 @@ describe('workers/repository/init/merge', () => {
 
       applyHostRules(config);
 
-      expect(addSpy).toHaveBeenCalledExactlyOnceWith({
-        matchHost: 'registry.npmjs.org',
-      });
+      expect(addSpy).toHaveBeenCalledExactlyOnceWith(
+        { matchHost: 'registry.npmjs.org' },
+        undefined,
+      );
       expect(clearQueueSpy).toHaveBeenCalledOnce();
       expect(clearThrottleSpy).toHaveBeenCalledOnce();
       expect(config.hostRules).toBeUndefined();
@@ -1596,11 +1660,14 @@ describe('workers/repository/init/merge', () => {
 
     it('merges with an already-registered admin hostRule instead of replacing its headers', () => {
       GlobalConfig.set({ allowedHeaders: ['X-*'] });
-      // simulates the self-hosted admin's own `hostRules`, registered earlier via `globalInitialize` - `hostRules.add` filters them against `allowedHeaders` itself
-      hostRules.add({
-        matchHost: 'registry.example.com',
-        headers: { 'X-From-Admin': 'yes', Authorization: 'from-admin' },
-      });
+      // simulates the self-hosted admin's own `hostRules`, registered earlier via `globalInitialize` - `hostRules.add` filters them against `allowedHeaders` itself, and registers them as `trusted`
+      hostRules.add(
+        {
+          matchHost: 'registry.example.com',
+          headers: { 'X-From-Admin': 'yes', Authorization: 'from-admin' },
+        },
+        { trusted: true },
+      );
 
       applyHostRules({
         hostRules: [
@@ -1613,6 +1680,34 @@ describe('workers/repository/init/merge', () => {
 
       expect(hostRules.find({ url: 'https://registry.example.com' })).toEqual({
         headers: { 'X-From-Admin': 'yes', 'X-From-Repo': 'yes' },
+      });
+    });
+
+    it('does not let a repo hostRule mask an admin hostRule with a narrower match', () => {
+      GlobalConfig.set({ allowedHeaders: ['X-*'] });
+      hostRules.add(
+        {
+          matchHost: 'example.com',
+          headers: { 'X-Api-Key': 'from-admin' },
+        },
+        { trusted: true },
+      );
+
+      applyHostRules({
+        hostRules: [
+          {
+            matchHost: 'https://registry.example.com/some/path',
+            headers: { 'X-Api-Key': 'from-repo' },
+          },
+        ],
+      });
+
+      expect(
+        hostRules.find({
+          url: 'https://registry.example.com/some/path/resource',
+        }),
+      ).toEqual({
+        headers: { 'X-Api-Key': 'from-admin' },
       });
     });
 

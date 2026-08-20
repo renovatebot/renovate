@@ -2349,13 +2349,15 @@ A self-hosted administrator may configure an override for [`allowedHeaders`](./s
 `headers` are checked against `allowedHeaders` wherever they are configured, including in the self-hosted administrator's own `hostRules` (for example in a `config.js` file).
 Any header which is not permitted is dropped, and a warning is logged.
 
-When more than one host rule matches a request, their `headers` are merged key by key, so each matching rule contributes its own headers.
-If two matching rules set the same header, the value from the more specific rule - or, where they are equally specific, the one configured last - is used.
+When more than one of your host rules matches a request, the `headers` of the most specific matching rule are used, and replace the `headers` of the broader rules it matched alongside.
 
-!!! warning
-  In earlier versions of Renovate, the `headers` of the most specific matching rule replaced the `headers` of broader matching rules entirely.
-  This no longer happens: a header set by a broad rule is now also sent to hosts where a more specific rule previously masked it.
-  If a header (for example, a credential) must only reach certain hosts, scope the rule that sets it to those hosts with `matchHost`.
+A self-hosted administrator's own host rules are resolved the same way, and whichever `headers` that leaves them sending to the host are then applied on top of yours:
+
+- your host rules cannot stop one of those headers from being sent, and
+- where one of those headers has a name you also set, the administrator's value is used.
+
+This covers the headers the administrator actually sends to that host.
+One they set in a broader rule of their own, but masked with a narrower rule of their own, is not sent there - and so is yours to set.
 
 For example:
 

@@ -576,7 +576,8 @@ export async function mergeRenovateConfig(
       coerceObject(resolvedRepoEntryWithSecrets.force?.env),
     );
 
-    applyHostRules(resolvedRepoEntryWithSecrets);
+    // the `repositories[]` entry is the self-hosted admin's own config - as its `env` is already treated as admin-supplied, its rules are `trusted` too, so that an admin can still override a header they set globally for just this repository
+    applyHostRules(resolvedRepoEntryWithSecrets, { trusted: true });
     returnConfig = mergeChildConfig(returnConfig, resolvedRepoEntryWithSecrets);
   }
 
@@ -695,7 +696,10 @@ export function applyNpmrc(
   npmApi.setNpmrc(config.npmrc);
 }
 
-export function applyHostRules(config: RenovateConfig): void {
+export function applyHostRules(
+  config: RenovateConfig,
+  options?: hostRules.AddHostRuleOptions,
+): void {
   if (!config.hostRules) {
     return;
   }
@@ -704,7 +708,7 @@ export function applyHostRules(config: RenovateConfig): void {
   // `hostRules.add` enforces `allowedHeaders` on every rule it registers
   for (const rule of config.hostRules) {
     try {
-      hostRules.add(rule);
+      hostRules.add(rule, options);
     } catch (err) {
       logger.warn({ err, config: rule }, 'Error setting hostRule from config');
     }

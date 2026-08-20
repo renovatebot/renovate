@@ -74,7 +74,11 @@ function setGlobalHostRules(config: AllConfig, warnOnDenied = true): void {
     );
     for (const rule of rules) {
       // already filtered above, so `add()`'s own enforcement has nothing left to drop
-      hostRules.add(rule, { allowedHeaders: config.allowedHeaders });
+      // the self-hosted admin's own rules: `trusted`, so that their `headers` are applied over any a repository or preset sets for the same host
+      hostRules.add(rule, {
+        allowedHeaders: config.allowedHeaders,
+        trusted: true,
+      });
     }
   }
 }

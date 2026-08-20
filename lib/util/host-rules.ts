@@ -8,7 +8,17 @@ import { toBase64 } from './string.ts';
 import { matchRegexOrGlobList } from './string-match.ts';
 import { isHttpUrl, massageHostUrl, parseUrl } from './url.ts';
 
-let hostRules: HostRule[] = [];
+/**
+ * A host rule as registered through {@link add}.
+ *
+ * `trusted` is deliberately not a field of `HostRule`: it is set from {@link AddHostRuleOptions} at registration time and must never be settable through configuration.
+ */
+interface RegisteredHostRule extends HostRule {
+  /** whether the rule came from the self-hosted administrator's own global config, rather than from repository or preset config */
+  trusted?: boolean;
+}
+
+let hostRules: RegisteredHostRule[] = [];
 
 /**
  * Fields within `HostRule`s that must have their value registered for sanitising through `sanitize.addSecretForSanitizing()`.
@@ -67,7 +77,7 @@ export function migrateRule(rule: LegacyHostRule & HostRule): HostRule {
  * @param [allowedHeaders] the effective allowlist. Defaults to `GlobalConfig`, but must be passed explicitly when filtering before `GlobalConfig` reflects the repository being processed, i.e. for a `repositories[]` entry's own `allowedHeaders` override
  * @param [warnOnDenied=true] whether to log the WARN. Pass `false` where the very same rules are filtered again, so that it is logged once rather than repeated
  *
- * `headers` are merged key by key across matching host rules (see {@link find}), so an admin's headers for a host survive even when a repo or preset rule also sets `headers` for the same host. Where both set the same header name, the more specific rule - or, when equally specific, the later-registered one - wins, which is the same precedence model `filterAllowedEnv` uses for `env`.
+ * Headers that survive this allowlist are still subject to how {@link find} combines them: an admin's headers for a host are applied over those of any repository or preset rule matching the same request, so a repository can neither drop nor substitute them.
  */
 export function filterAllowedHeaders(
   rules: HostRule[],
@@ -97,7 +107,13 @@ export function filterAllowedHeaders(
       return rule;
     }
     denied.push(...ruleDenied);
-    return { ...rule, headers: allowed };
+
+    const filtered: HostRule = { ...rule, headers: allowed };
+    if (!Object.keys(allowed).length) {
+      // drop the key rather than leave an empty object behind: `find()` treats any rule that sets `headers` as replacing the headers of the broader rules of its own tier, so a rule left with none would suppress them
+      delete filtered.headers;
+    }
+    return filtered;
   });
 
   if (denied.length && warnOnDenied) {
@@ -112,10 +128,23 @@ export function filterAllowedHeaders(
 export interface AddHostRuleOptions {
   /** the effective allowlist. Defaults to `GlobalConfig`; pass it explicitly when `GlobalConfig` does not yet reflect the repository the rule is registered for */
   allowedHeaders?: string[];
+
+  /**
+   * Whether this rule comes from the self-hosted administrator's own global config, rather than from repository or preset config.
+   *
+   * Only affects how `headers` are combined (see {@link find}), and is deliberately opt-in: a caller that says nothing registers into the untrusted tier, so a new call site cannot grant itself the administrator's precedence by omission.
+   */
+  trusted?: boolean;
 }
 
 export function add(params: HostRule, options?: AddHostRuleOptions): void {
-  let rule = migrateRule(params);
+  let rule: RegisteredHostRule = migrateRule(params);
+
+  // set only from `options`, and dropped first so that it cannot be carried over from `params`: `HostRule` has no `trusted` field, but configuration is parsed from JSON, so a repository could otherwise smuggle one in and have its headers treated as the administrator's
+  delete rule.trusted;
+  if (options?.trusted) {
+    rule.trusted = true;
+  }
 
   if (rule.headers) {
     // enforced here, at the single registration chokepoint, so that no current or future caller can register a rule whose headers bypass `allowedHeaders`; `applyHostRule` filters by header name again at request time as defence in depth
@@ -215,6 +244,20 @@ function fromLowerRankAndShorterMatchHost(a: HostRule, b: HostRule): number {
   return fromLowerToHigherRank(a, b) || fromShorterToLongerMatchHost(a, b);
 }
 
+/**
+ * The `headers` that apply from a set of matching rules of the same trust tier.
+ *
+ * The last rule to set any wins outright, as `find()`'s callers receive them sorted from least to most specific. That is the behaviour every matching rule had before `headers` were combined across tiers, and it is what lets a broad rule's headers be masked by a narrower rule from the same source.
+ */
+function headersOfLastRuleToSetThem(
+  rules: RegisteredHostRule[],
+): Record<string, string> | undefined {
+  return rules
+    .map((rule) => rule.headers)
+    .filter(isTruthy)
+    .pop();
+}
+
 export function find(search: HostRuleSearch): CombinedHostRule {
   if ([search.hostType, search.url].every(isFalsy)) {
     logger.warn({ search }, 'Invalid hostRules search');
@@ -224,7 +267,7 @@ export function find(search: HostRuleSearch): CombinedHostRule {
   // Sort primarily by rank, and secondarily by matchHost length
   const sortedRules = hostRules.sort(fromLowerRankAndShorterMatchHost);
 
-  const matchedRules: HostRule[] = [];
+  const matchedRules: RegisteredHostRule[] = [];
   for (const rule of sortedRules) {
     let hostTypeMatch = true;
     let hostMatch = true;
@@ -259,21 +302,27 @@ export function find(search: HostRuleSearch): CombinedHostRule {
     }
   }
 
-  const res: HostRule = Object.assign({}, ...matchedRules);
+  const res: RegisteredHostRule = Object.assign({}, ...matchedRules);
 
-  // `headers` is merged key by key, so that a rule setting a header of its own does not discard the headers of the rules it is combined with - notably a self-hosted admin's, which are registered before a repository's or a preset's
+  // `headers` are resolved per trust tier and then combined key by key, so that repository or preset config can no longer discard - or substitute - the headers a self-hosted admin configured for the same host
+  // Within a tier nothing changes: the most specific rule's `headers` still replace those of the broader rules it is combined with, so an admin masking their own broad rule with a narrower one keeps working, as does a repository doing the same among its own rules
   // This is deliberately scoped to `headers` alone, as combining any more of the fields than we already do has caused authentication regressions before: an inherited `token` and a specific rule's `username`/`password` are not meant to be used together
-  const matchedHeaders = matchedRules
-    .map((rule) => rule.headers)
-    .filter(isTruthy);
-  if (matchedHeaders.length) {
-    res.headers = Object.assign({}, ...matchedHeaders);
+  const untrustedHeaders = headersOfLastRuleToSetThem(
+    matchedRules.filter((rule) => !rule.trusted),
+  );
+  const trustedHeaders = headersOfLastRuleToSetThem(
+    matchedRules.filter((rule) => rule.trusted),
+  );
+  if (untrustedHeaders ?? trustedHeaders) {
+    // the admin's own headers are applied last, so a repository cannot override one they set for this host either
+    res.headers = { ...untrustedHeaders, ...trustedHeaders };
   }
 
   delete res.hostType;
   delete res.resolvedHost;
   delete res.matchHost;
   delete res.readOnly;
+  delete res.trusted;
   return res;
 }
 

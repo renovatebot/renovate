@@ -255,9 +255,11 @@ export async function start(): Promise<number> {
                   );
             for (const rule of rules) {
               // already filtered: pass the same allowlist through so `add()` does not re-filter against a stale `GlobalConfig`
+              // the self-hosted admin's own rules: `trusted`, so that their `headers` are applied over any a repository or preset sets for the same host
               hostRules.add(rule, {
                 // we haven't yet set `GlobalConfig`, so we need to explicitly pass these in
                 allowedHeaders: repoConfig.allowedHeaders,
+                trusted: true,
               });
             }
             repoConfig.hostRules = [];
