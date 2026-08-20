@@ -5,7 +5,7 @@ import { checkIsValidDependency } from '../utils.ts';
 import type {
   PackageFileInfo,
   RecursionParameter,
-  RegexManagerConfig,
+  RegexExtractConfig,
 } from './types.ts';
 import {
   createDependency,
@@ -15,7 +15,7 @@ import {
 } from './utils.ts';
 
 export function handleAny(
-  config: RegexManagerConfig,
+  config: RegexExtractConfig,
   packageFileInfo: PackageFileInfo,
 ): PackageDependency[] {
   const { content, packageFile } = packageFileInfo;
@@ -41,7 +41,7 @@ export function handleAny(
 }
 
 export function handleCombination(
-  config: RegexManagerConfig,
+  config: RegexExtractConfig,
   packageFileInfo: PackageFileInfo,
 ): PackageDependency[] {
   const { content, packageFile } = packageFileInfo;
@@ -70,7 +70,7 @@ export function handleCombination(
 }
 
 export function handleRecursive(
-  config: RegexManagerConfig,
+  config: RegexExtractConfig,
   packageFileInfo: PackageFileInfo,
 ): PackageDependency[] {
   const { content, packageFile } = packageFileInfo;

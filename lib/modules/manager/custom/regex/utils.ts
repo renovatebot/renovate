@@ -5,11 +5,11 @@ import * as template from '../../../../util/template/index.ts';
 import { parseUrl } from '../../../../util/url.ts';
 import type { PackageDependency } from '../../types.ts';
 import type { ValidMatchFields } from '../utils.ts';
-import { validMatchFields } from '../utils.ts';
+import { substituteRegistryAliases, validMatchFields } from '../utils.ts';
 import type {
   ExtractionTemplate,
   PackageFileInfo,
-  RegexManagerConfig,
+  RegexExtractConfig,
   RegexManagerTemplates,
 } from './types.ts';
 
@@ -43,7 +43,7 @@ function updateDependency(
 
 export function createDependency(
   extractionTemplate: ExtractionTemplate,
-  config: RegexManagerConfig,
+  config: RegexExtractConfig,
   packageFileInfo: PackageFileInfo,
   dep?: PackageDependency,
 ): PackageDependency | null {
@@ -74,6 +74,7 @@ export function createDependency(
     }
   }
   dependency.replaceString = replaceString;
+  substituteRegistryAliases(dependency, config.registryAliases);
   return dependency;
 }
 

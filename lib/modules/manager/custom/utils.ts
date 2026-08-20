@@ -17,6 +17,38 @@ export const validMatchFields = [
 
 export type ValidMatchFields = (typeof validMatchFields)[number];
 
+export function substituteRegistryAliases(
+  dep: PackageDependency,
+  registryAliases: Record<string, string> | undefined,
+): void {
+  // packageName and depName are not modified if registryUrls exist
+  // because registryUrls will be used instead of dep/packageName
+  if (dep.registryUrls) {
+    dep.registryUrls = dep.registryUrls.map((s) => {
+      for (const [original, replace] of Object.entries(registryAliases ?? {})) {
+        if (s.startsWith(original)) {
+          return replace + s.slice(original.length);
+        }
+      }
+      return s;
+    });
+  } else if (dep.packageName) {
+    for (const [original, replace] of Object.entries(registryAliases ?? {})) {
+      if (dep.packageName.startsWith(original)) {
+        dep.packageName = replace + dep.packageName.slice(original.length);
+        break;
+      }
+    }
+  } else if (dep.depName) {
+    for (const [original, replace] of Object.entries(registryAliases ?? {})) {
+      if (dep.depName.startsWith(original)) {
+        dep.packageName = replace + dep.depName.slice(original.length);
+        break;
+      }
+    }
+  }
+}
+
 export function isValidDependency({
   depName,
   currentValue,
