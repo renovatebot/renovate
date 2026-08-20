@@ -799,6 +799,63 @@ describe('util/http/host-rules', () => {
     });
   });
 
+  it('no fallback to gerrit', () => {
+    hostRules.add({
+      hostType: 'gerrit-tags',
+      matchHost: 'gerrit.example.com',
+      username: 'specific-user',
+      password: 'specific-pass',
+    });
+    hostRules.add({
+      hostType: 'gerrit',
+      matchHost: 'gerrit.example.com',
+      username: 'user',
+      password: 'pass',
+    });
+    const gerritUrl = 'https://gerrit.example.com/a/projects/some%2Frepo/tags/';
+    const opts: GotOptions = { hostType: 'gerrit-tags' };
+    const hostRule = findMatchingRule(gerritUrl, opts);
+    // gerrit-tags rule found first → early return, gerrit fallback not reached
+    expect(hostRule).toMatchObject({
+      username: 'specific-user',
+      password: 'specific-pass',
+    });
+  });
+
+  it('fallback to gerrit', () => {
+    hostRules.add({
+      hostType: 'gerrit',
+      matchHost: 'gerrit.example.com',
+      username: 'user',
+      password: 'pass',
+    });
+    const gerritUrl = 'https://gerrit.example.com/a/projects/some%2Frepo/tags/';
+    const opts: GotOptions = { hostType: 'gerrit-tags' };
+    const hostRule = findMatchingRule(gerritUrl, opts);
+    expect(hostRule).toMatchObject({ username: 'user', password: 'pass' });
+    expect(applyHostRule(gerritUrl, opts, hostRule)).toMatchObject({
+      username: 'user',
+      password: 'pass',
+    });
+  });
+
+  it('fallback to gerrit on subpath', () => {
+    hostRules.add({
+      hostType: 'gerrit',
+      matchHost: 'https://example.com/gerrit',
+      username: 'subuser',
+      password: 'subpass',
+    });
+    const subpathUrl =
+      'https://example.com/gerrit/a/projects/some%2Frepo/tags/';
+    const opts: GotOptions = { hostType: 'gerrit-tags' };
+    const hostRule = findMatchingRule(subpathUrl, opts);
+    expect(hostRule).toMatchObject({
+      username: 'subuser',
+      password: 'subpass',
+    });
+  });
+
   it('no fallback to gitea', () => {
     hostRules.add({
       hostType: 'gitea-tags',

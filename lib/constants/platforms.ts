@@ -62,3 +62,5 @@ export const BITBUCKET_SERVER_API_USING_HOST_TYPES = [
   'bitbucket-server-changelog',
   'bitbucket-server-tags',
 ];
+
+export const GERRIT_API_USING_HOST_TYPES = ['gerrit', 'gerrit-tags'];
