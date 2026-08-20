@@ -3355,6 +3355,16 @@ const options: Readonly<RenovateOptions>[] = [
     globalOnly: true,
   },
   {
+    name: 'gitPushOptions',
+    description: 'Git push options to pass to the remote server.',
+    type: 'array',
+    subType: 'string',
+    allowString: true,
+    default: [],
+    stage: 'global',
+    globalOnly: true,
+  },
+  {
     name: 'updatePinnedDependencies',
     description:
       'Whether to update pinned (single version) dependencies or not.',

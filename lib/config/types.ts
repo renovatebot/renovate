@@ -208,6 +208,7 @@ export interface GlobalOnlyConfigLegacy {
   gitNoVerify?: GitNoVerifyOption[];
   gitPrivateKey?: string;
   gitPrivateKeyPassphrase?: string;
+  gitPushOptions?: string[];
   globalExtends?: string[];
   mergeConfidenceDatasources?: string[];
   mergeConfidenceEndpoint?: string;
