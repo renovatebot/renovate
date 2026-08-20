@@ -14,6 +14,7 @@ import type { HostRule, PrState } from '../../../types/index.ts';
 import { isProbablyJwt } from '../../../util/http/jwt.ts';
 import { addSecretForSanitizing } from '../../../util/sanitize.ts';
 import { toBase64 } from '../../../util/string.ts';
+import { parseUrl } from '../../../util/url.ts';
 import { getPrBodyStruct } from '../pr-body.ts';
 import type { AzurePr } from './types.ts';
 
@@ -212,4 +213,35 @@ export function getWorkItemTitle(rawTitle: string, repository: string): string {
     return `[${repoName}] ${rawTitle}`;
   }
   return rawTitle;
+}
+
+// Matches a '%' that is NOT the start of a valid percent-encoded triplet
+// (i.e. not followed by two hex digits), e.g. the literal '%' in "50% off".
+const invalidPercentEncoding = /%(?![0-9a-fA-F]{2})/g;
+
+export function encodeUrlPathSegments(inputUrl: string): string {
+  // Parsing the URL is not enough. URL doesn't encode
+  // every reserved character.
+  const url: URL | null = parseUrl(inputUrl);
+  if (!url) {
+    return inputUrl;
+  }
+
+  // Decode each segment, re-encode it and join them together.
+  // A segment may contain a literal '%' that isn't part of a valid
+  // percent-encoded sequence (e.g. a project named "50% off"). The WHATWG
+  // URL parser accepts such a bare '%' in a path without error, but
+  // decodeURIComponent() throws "URI malformed" on it. Escape any such
+  // stray '%' first so decoding never throws, then decode and re-encode
+  // as usual.
+  url.pathname = url.pathname
+    .split('/')
+    .map((segment) =>
+      encodeURIComponent(
+        decodeURIComponent(segment.replace(invalidPercentEncoding, '%25')),
+      ),
+    )
+    .join('/');
+
+  return url.toString();
 }

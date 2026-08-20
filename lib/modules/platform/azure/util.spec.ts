@@ -4,6 +4,7 @@ import { buildTestJwt } from '~test/jwt-util.ts';
 import { partial } from '~test/util.ts';
 import { streamToString } from '../../../util/streams.ts';
 import {
+  encodeUrlPathSegments,
   getBranchNameWithoutRefsheadsPrefix,
   getGitStatusContextCombinedName,
   getGitStatusContextFromCombinedName,
@@ -268,6 +269,105 @@ describe('modules/platform/azure/util', () => {
       );
     });
   });
+
+  describe('encodeUrlPathSegments', () => {
+    it('encodes a space in a path segment (collection)', () => {
+      expect(
+        encodeUrlPathSegments(
+          'https://dev.azure.com/my org/my-project/_git/my-repo/',
+        ),
+      ).toBe('https://dev.azure.com/my%20org/my-project/_git/my-repo/');
+    });
+
+    it('encodes a space in a path segment (project)', () => {
+      expect(
+        encodeUrlPathSegments(
+          'https://dev.azure.com/my-org/my project/_git/my-repo/',
+        ),
+      ).toBe('https://dev.azure.com/my-org/my%20project/_git/my-repo/');
+    });
+
+    it('encodes a space in a path segment (repository)', () => {
+      expect(
+        encodeUrlPathSegments(
+          'https://dev.azure.com/my-org/my-project/_git/my repo/',
+        ),
+      ).toBe('https://dev.azure.com/my-org/my-project/_git/my%20repo/');
+    });
+
+    it('encodes a spaces in multiple path segments', () => {
+      expect(
+        encodeUrlPathSegments(
+          'https://dev.azure.com/my org/my project/_git/my repo/',
+        ),
+      ).toBe('https://dev.azure.com/my%20org/my%20project/_git/my%20repo/');
+    });
+
+    it('leaves the origin untouched', () => {
+      const origin = 'https://dev.azure.com:443/';
+      const encoded = encodeUrlPathSegments(
+        `${origin}my org/my project/_git/my repo`,
+      );
+      expect(encoded.startsWith('https://dev.azure.com/')).toBe(true);
+    });
+
+    it('prevserves non-default ports', () => {
+      const origin = 'https://azure-devops.interal.corp:8080/tfs/';
+      const encoded = encodeUrlPathSegments(
+        `${origin}my org/my project/_git/my repo`,
+      );
+      expect(encoded.startsWith(origin)).toBe(true);
+    });
+
+    it('leaves a plain URL with no special characters unchanged (regression baseline)', () => {
+      expect(
+        encodeUrlPathSegments(
+          'https://dev.azure.com/renovate12345/some/_git/repo',
+        ),
+      ).toBe('https://dev.azure.com/renovate12345/some/_git/repo');
+    });
+
+    it('preserves an on-prem Azure DevOps Server collection path unchanged', () => {
+      const url =
+        'https://azure-devops.internal.corp:8080/tfs/DefaultCollection/my-project/_git/my-repo';
+      expect(encodeUrlPathSegments(url)).toBe(url);
+    });
+
+    it('encodes a literal "%" in a path segment instead of throwing', () => {
+      // A segment may contain a literal '%' that isn't part of a valid
+      // percent-encoded sequence (e.g. a project named "50% off"). This must
+      // not throw "URI malformed" and must behave like encodeURIComponent()
+      // would have on the raw name (turning '%' into '%25').
+      expect(
+        encodeUrlPathSegments(
+          'https://dev.azure.com/renovate12345/50% off/_git/repo',
+        ),
+      ).toBe('https://dev.azure.com/renovate12345/50%25%20off/_git/repo');
+    });
+
+    it('handles credentials in the URL (PAT in userinfo)', () => {
+      expect(
+        encodeUrlPathSegments(
+          'https://pat123@dev.azure.com/my org/project name/_git/my repo',
+        ),
+      ).toBe(
+        'https://pat123@dev.azure.com/my%20org/project%20name/_git/my%20repo',
+      );
+    });
+
+    it('returns the input unchanged for an invalid URL', () => {
+      expect(encodeUrlPathSegments('not a url')).toBe('not a url');
+    });
+
+    it('is idempotent - does not double-encode an already-encoded segment', () => {
+      const once = encodeUrlPathSegments(
+        'https://dev.azure.com/my org/my proj/_git/my repo',
+      );
+      const twice = encodeUrlPathSegments(once);
+      expect(twice).toBe(once);
+    });
+  });
+
   it('returns the raw title if not a dependency dashboard', () => {
     expect(getWorkItemTitle('Some Issue', 'project/repo')).toBe('Some Issue');
   });
