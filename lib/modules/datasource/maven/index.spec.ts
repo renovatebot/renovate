@@ -789,6 +789,41 @@ describe('modules/datasource/maven/index', () => {
         sourceUrl: 'https://github.com/child-scm/child',
       });
     });
+
+    it('should not inherit parent scm.tag when it is HEAD', async () => {
+      const childPom = codeBlock`
+        <project>
+          <parent>
+            <groupId>org.example</groupId>
+            <artifactId>parent</artifactId>
+            <version>1.0.0</version>
+          </parent>
+        </project>
+      `;
+      const parentPom = codeBlock`
+        <project>
+          <scm>
+            <tag>HEAD</tag>
+            <url>https://github.com/parent-scm/parent</url>
+          </scm>
+          <url>https://parent-home.example.com</url>
+        </project>
+      `;
+      mockGenericPackage({ pom: childPom });
+      mockGenericPackage({
+        dep: 'org.example:parent',
+        meta: null,
+        pom: parentPom,
+        latest: '1.0.0',
+      });
+
+      const res = await get();
+
+      expect(res).toMatchObject({
+        sourceUrl: 'https://github.com/parent-scm/parent',
+        homepage: 'https://parent-home.example.com',
+      });
+    });
   });
 
   describe('post-fetch release validation', () => {
@@ -873,6 +908,150 @@ describe('modules/datasource/maven/index', () => {
         version: '1.2.3',
         releaseTimestamp: '2024-01-01T00:00:00.000Z',
       });
+    });
+
+    it('extracts gitRef from scm.tag', async () => {
+      const pom = codeBlock`
+        <project>
+          <scm>
+            <tag>release/v1.2.3</tag>
+          </scm>
+        </project>
+      `;
+      httpMock
+        .scope(MAVEN_REPO)
+        .get('/foo/bar/1.2.3/bar-1.2.3.pom')
+        .reply(200, pom);
+
+      const res = await postprocessRelease(
+        { datasource, packageName: 'foo:bar', registryUrl: MAVEN_REPO },
+        { version: '1.2.3' },
+      );
+
+      expect(res).toEqual({
+        version: '1.2.3',
+        gitRef: 'release/v1.2.3',
+      });
+    });
+
+    it('inherits gitRef from parent scm.tag when child scm.tag is missing', async () => {
+      const childPom = codeBlock`
+        <project>
+          <parent>
+            <groupId>org.example</groupId>
+            <artifactId>parent</artifactId>
+            <version>1.0.0</version>
+          </parent>
+        </project>
+      `;
+      const parentPom = codeBlock`
+        <project>
+          <scm>
+            <tag>parent-release/1.0.0</tag>
+          </scm>
+        </project>
+      `;
+      httpMock
+        .scope(MAVEN_REPO)
+        .get('/foo/bar/1.2.3/bar-1.2.3.pom')
+        .reply(200, childPom)
+        .get('/org/example/parent/1.0.0/parent-1.0.0.pom')
+        .reply(200, parentPom);
+
+      const res = await postprocessRelease(
+        { datasource, packageName: 'foo:bar', registryUrl: MAVEN_REPO },
+        { version: '1.2.3' },
+      );
+
+      expect(res).toEqual({
+        version: '1.2.3',
+        gitRef: 'parent-release/1.0.0',
+      });
+    });
+
+    it('prefers child scm.tag over parent scm.tag', async () => {
+      const childPom = codeBlock`
+        <project>
+          <parent>
+            <groupId>org.example</groupId>
+            <artifactId>parent</artifactId>
+            <version>1.0.0</version>
+          </parent>
+          <scm>
+            <tag>child-release/1.2.3</tag>
+          </scm>
+        </project>
+      `;
+      httpMock
+        .scope(MAVEN_REPO)
+        .get('/foo/bar/1.2.3/bar-1.2.3.pom')
+        .reply(200, childPom);
+
+      const res = await postprocessRelease(
+        { datasource, packageName: 'foo:bar', registryUrl: MAVEN_REPO },
+        { version: '1.2.3' },
+      );
+
+      expect(res).toEqual({
+        version: '1.2.3',
+        gitRef: 'child-release/1.2.3',
+      });
+    });
+
+    it('does not set gitRef when scm.tag is HEAD', async () => {
+      const pom = codeBlock`
+        <project>
+          <scm>
+            <tag>HEAD</tag>
+          </scm>
+        </project>
+      `;
+      httpMock
+        .scope(MAVEN_REPO)
+        .get('/foo/bar/1.2.3/bar-1.2.3.pom')
+        .reply(200, pom);
+
+      const res = await postprocessRelease(
+        { datasource, packageName: 'foo:bar', registryUrl: MAVEN_REPO },
+        { version: '1.2.3' },
+      );
+
+      expect(res).not.toHaveProperty('gitRef');
+    });
+
+    it('does not set gitRef when scm.tag is missing', async () => {
+      const pom = codeBlock`
+        <project>
+          <scm>
+            <url>https://github.com/example/test</url>
+          </scm>
+        </project>
+      `;
+      httpMock
+        .scope(MAVEN_REPO)
+        .get('/foo/bar/1.2.3/bar-1.2.3.pom')
+        .reply(200, pom);
+
+      const res = await postprocessRelease(
+        { datasource, packageName: 'foo:bar', registryUrl: MAVEN_REPO },
+        { version: '1.2.3' },
+      );
+
+      expect(res).not.toHaveProperty('gitRef');
+    });
+
+    it('does not set gitRef for invalid XML', async () => {
+      httpMock
+        .scope(MAVEN_REPO)
+        .get('/foo/bar/1.2.3/bar-1.2.3.pom')
+        .reply(200, 'not xml at all');
+
+      const res = await postprocessRelease(
+        { datasource, packageName: 'foo:bar', registryUrl: MAVEN_REPO },
+        { version: '1.2.3' },
+      );
+
+      expect(res).not.toHaveProperty('gitRef');
     });
 
     describe('S3', () => {
