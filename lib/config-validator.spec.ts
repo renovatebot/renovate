@@ -351,6 +351,27 @@ describe.concurrent('config-validator', () => {
       });
     });
 
+    it("honors a CLI-arg global config file's own allowedHeaders", async () => {
+      // a global config file brings its own `allowedHeaders`, and its hostRules should be filtered against those - not the surrounding environment's - as a real run would after parsing it
+      await withTmpDir(async (dirPath) => {
+        const configFile = await writeGlobalConfig(dirPath, 'config.json', {
+          allowedHeaders: ['Authorization'],
+          hostRules: [
+            {
+              matchHost: 'registry.example.com',
+              headers: { Authorization: 'Bearer token' },
+            },
+          ],
+        });
+
+        const { all } = await runValidator([configFile], { cwd: dirPath });
+
+        expect(all).not.toContain(
+          "Ignoring hostRules headers not permitted by this Renovate instance's `allowedHeaders`",
+        );
+      });
+    });
+
     it('filters hostRules headers of a validated config file against allowedHeaders', async () => {
       await withTmpDir(async (dirPath) => {
         const file = await writeRepoConfig(dirPath, 'renovate.json', {

@@ -1,4 +1,5 @@
-import { partial } from '~test/util.ts';
+import { logger, partial } from '~test/util.ts';
+import { GlobalConfig } from '../config/global.ts';
 import { NugetDatasource } from '../modules/datasource/nuget/index.ts';
 import type { HostRule } from '../types/index.ts';
 import {
@@ -6,6 +7,7 @@ import {
   add,
   clear,
   confidentialFields,
+  filterAllowedHeaders,
   find,
   findAll,
   getAll,
@@ -17,6 +19,8 @@ import { redactedFields, sanitize } from './sanitize.ts';
 describe('util/host-rules', () => {
   beforeEach(() => {
     clear();
+    // `add()` filters `headers` against `allowedHeaders`
+    GlobalConfig.set({ allowedHeaders: ['X-*'] });
   });
 
   it('registers every redactedFields entry that is a HostRule field for value-level sanitizing', () => {
@@ -169,6 +173,140 @@ describe('util/host-rules', () => {
           'key=private-key-value cert=certificate-value ca=certificate-authority-value',
         ),
       ).toBe('key=**redacted** cert=**redacted** ca=**redacted**');
+    });
+
+    it('drops headers not permitted by allowedHeaders, with a warning', () => {
+      // enforced within `add()` itself, so that no registration path (config, .npmrc, a future caller) can bypass `allowedHeaders`
+      add({
+        matchHost: 'registry.example.com',
+        headers: { 'X-Allowed': 'yes', Authorization: 'denied' },
+      });
+
+      expect(find({ url: 'https://registry.example.com' })).toEqual({
+        headers: { 'X-Allowed': 'yes' },
+      });
+      expect(logger.logger.warn).toHaveBeenCalledWith(
+        { denied: ['Authorization'] },
+        "Ignoring hostRules headers not permitted by this Renovate instance's `allowedHeaders`",
+      );
+    });
+
+    it('drops all headers when allowedHeaders is unset (deny by default)', () => {
+      GlobalConfig.reset();
+
+      add({
+        matchHost: 'registry.example.com',
+        headers: { anything: 'x' },
+      });
+
+      expect(find({ url: 'https://registry.example.com' })).toEqual({
+        headers: {},
+      });
+    });
+
+    it('prefers an explicitly-passed allowlist over GlobalConfig', () => {
+      // used when registering rules for a repository before `GlobalConfig` reflects it, i.e. a `repositories[]` entry's own `allowedHeaders` override
+      add(
+        {
+          matchHost: 'registry.example.com',
+          headers: { Authorization: 'from-admin', 'X-Dropped': 'yes' },
+        },
+        { allowedHeaders: ['Authorization'] },
+      );
+
+      expect(find({ url: 'https://registry.example.com' })).toEqual({
+        headers: { Authorization: 'from-admin' },
+      });
+      expect(logger.logger.warn).toHaveBeenCalledWith(
+        { denied: ['X-Dropped'] },
+        "Ignoring hostRules headers not permitted by this Renovate instance's `allowedHeaders`",
+      );
+    });
+  });
+
+  describe('filterAllowedHeaders()', () => {
+    it('leaves rules without headers untouched', () => {
+      const rules = [{ matchHost: 'registry.example.com' }];
+
+      expect(filterAllowedHeaders(rules)).toEqual(rules);
+      expect(logger.logger.warn).not.toHaveBeenCalled();
+    });
+
+    it('keeps headers matching allowedHeaders and drops the rest with a warning', () => {
+      expect(
+        filterAllowedHeaders([
+          {
+            matchHost: 'registry.example.com',
+            headers: { 'X-Allowed': 'yes', Authorization: 'Bearer secret' },
+          },
+        ]),
+      ).toEqual([
+        {
+          matchHost: 'registry.example.com',
+          headers: { 'X-Allowed': 'yes' },
+        },
+      ]);
+      expect(logger.logger.warn).toHaveBeenCalledWith(
+        { denied: ['Authorization'] },
+        "Ignoring hostRules headers not permitted by this Renovate instance's `allowedHeaders`",
+      );
+    });
+
+    it('leaves everything but the headers untouched', () => {
+      const rules = [
+        {
+          matchHost: 'registry.example.com',
+          hostType: 'npm',
+          username: 'user',
+          password: 'pass',
+          token: 'token',
+          headers: { 'X-Allowed': 'yes' },
+        },
+      ];
+
+      expect(filterAllowedHeaders(rules)).toEqual(rules);
+      expect(logger.logger.warn).not.toHaveBeenCalled();
+    });
+
+    it('drops a header the self-hosted admin supplied themselves', () => {
+      // `allowedHeaders` enforces the checks regardless of whether it's global self-hosted administrator config, or repo config
+      GlobalConfig.reset();
+
+      expect(
+        filterAllowedHeaders([
+          {
+            matchHost: 'registry.example.com',
+            headers: { Authorization: 'set-by-admin' },
+          },
+        ]),
+      ).toEqual([{ matchHost: 'registry.example.com', headers: {} }]);
+      expect(logger.logger.warn).toHaveBeenCalledWith(
+        { denied: ['Authorization'] },
+        "Ignoring hostRules headers not permitted by this Renovate instance's `allowedHeaders`",
+      );
+    });
+
+    it('prefers an explicitly-passed allowlist over GlobalConfig', () => {
+      expect(
+        filterAllowedHeaders(
+          [
+            {
+              matchHost: 'registry.example.com',
+              headers: { Authorization: 'from-admin', 'X-Dropped': 'yes' },
+            },
+          ],
+          ['Authorization'],
+        ),
+      ).toEqual([
+        {
+          matchHost: 'registry.example.com',
+          headers: { Authorization: 'from-admin' },
+        },
+      ]);
+      expect(logger.logger.warn).toHaveBeenCalledWith(
+        { denied: ['X-Dropped'] },
+        "Ignoring hostRules headers not permitted by this Renovate instance's `allowedHeaders`",
+      );
     });
   });
 

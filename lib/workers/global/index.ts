@@ -33,6 +33,7 @@ import {
 } from '../../instrumentation/reporting.ts';
 import { getProblems, logLevel, logger, setMeta } from '../../logger/index.ts';
 import { setGlobalLogLevelRemaps } from '../../logger/remap.ts';
+import type { HostRule } from '../../types/index.ts';
 import { getEnv } from '../../util/env.ts';
 import * as hostRules from '../../util/host-rules.ts';
 import * as queue from '../../util/http/queue.ts';
@@ -41,7 +42,6 @@ import { regexEngineStatus } from '../../util/regex.ts';
 import { addSecretForSanitizing } from '../../util/sanitize.ts';
 import { coerceString } from '../../util/string.ts';
 import * as repositoryWorker from '../repository/index.ts';
-import { filterAllowedHeaders } from '../repository/init/filter-allowed-headers.ts';
 import type { RepositoryWorkerConfig } from '../repository/init/types.ts';
 import { autodiscoverRepositories } from './autodiscover.ts';
 import { parseConfigs } from './config/parse/index.ts';
@@ -217,6 +217,10 @@ export async function start(): Promise<number> {
       return 0;
     }
 
+    // the self-hosted admin's own headers get no exemption from `allowedHeaders` either, as `applyHostRule` filters the rule it matches by header name alone whoever set it - so we drop them here too, with a WARN, rather than leave them to be silently discarded at request time
+    // filtered once, outside the loop, rather than for every repository it processes
+    let filteredGlobalHostRules: HostRule[] | undefined;
+
     // Iterate through repositories sequentially
     for (const repository of config.repositories!) {
       if (haveReachedLimits()) {
@@ -234,14 +238,27 @@ export async function start(): Promise<number> {
           if (repoConfig.hostRules) {
             logger.debug('Reinitializing hostRules for repo');
             hostRules.clear();
-            // we do not currently exempt the self-hosted admin's own headers, as `applyHostRule` performs the filtering based on header names (regardless of who set them)
-            // if they are dropped, we log a WARN, rather than leave them to be silently discarded at request time
-            for (const rule of filterAllowedHeaders(
-              repoConfig.hostRules,
-              // we haven't yet set `GlobalConfig`, so we need to explicitly pass these in
-              repoConfig.allowedHeaders,
-            )) {
-              hostRules.add(rule);
+            // `GlobalConfig` still reflects the previous repository at this point, so filter with this repository's own `allowedHeaders`: usually the global allowlist (filtered once, above), re-filtered only for a `repositories[]` entry carrying an override of its own
+            const rules =
+              // reuse the memo only for the exact global inputs it was computed from - today `repoConfig.hostRules` is always the global array, but nothing should break if that ever changes
+              repoConfig.hostRules === config.hostRules &&
+              repoConfig.allowedHeaders === config.allowedHeaders
+                ? (filteredGlobalHostRules ??= hostRules.filterAllowedHeaders(
+                    repoConfig.hostRules,
+                    config.allowedHeaders,
+                    // `globalInitialize` already registered these very rules against this very allowlist, and warned about whatever it dropped
+                    false,
+                  ))
+                : hostRules.filterAllowedHeaders(
+                    repoConfig.hostRules,
+                    repoConfig.allowedHeaders,
+                  );
+            for (const rule of rules) {
+              // already filtered: pass the same allowlist through so `add()` does not re-filter against a stale `GlobalConfig`
+              hostRules.add(rule, {
+                // we haven't yet set `GlobalConfig`, so we need to explicitly pass these in
+                allowedHeaders: repoConfig.allowedHeaders,
+              });
             }
             repoConfig.hostRules = [];
           }

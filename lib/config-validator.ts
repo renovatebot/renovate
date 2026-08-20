@@ -12,7 +12,7 @@ import { getConfigFileNames } from './config/app-strings.ts';
 import { GlobalConfig } from './config/global.ts';
 import { massageConfig } from './config/massage.ts';
 import { migrateConfig } from './config/migration.ts';
-import type { RenovateConfig } from './config/types.ts';
+import type { AllConfig, RenovateConfig } from './config/types.ts';
 import { validateConfig } from './config/validation.ts';
 import { pkg } from './expose.ts';
 import { init, logger } from './logger/index.ts';
@@ -22,7 +22,6 @@ import { regEx, regexEngineStatus } from './util/regex.ts';
 import { getConfig as getFileConfig } from './workers/global/config/parse/file.ts';
 import { parseConfigs } from './workers/global/config/parse/index.ts';
 import { getParsedContent } from './workers/global/config/parse/util.ts';
-import { filterAllowedHeaders } from './workers/repository/init/filter-allowed-headers.ts';
 
 await init();
 
@@ -43,8 +42,8 @@ async function partiallyGlobalInitialize(): Promise<void> {
   GlobalConfig.set(globalConfig);
 
   if (globalConfig.hostRules) {
-    // the self-hosted admin's own headers get no exemption from `allowedHeaders` either, as `applyHostRule` filters the rule it matches by header name alone whoever set it - so we drop them here too, with a WARN, rather than leave them to be silently discarded at request time
-    for (const hostRule of filterAllowedHeaders(globalConfig.hostRules)) {
+    // the self-hosted admin's own headers get no exemption from `allowedHeaders` either, as `applyHostRule` filters the rule it matches by header name alone whoever set it - so `addHostRule` drops them here too, with a WARN, rather than leave them to be silently discarded at request time
+    for (const hostRule of globalConfig.hostRules) {
       addHostRule(hostRule);
     }
   }
@@ -59,8 +58,14 @@ async function validate(
 ): Promise<void> {
   if (config.hostRules) {
     // `allowedHeaders` enforces the checks regardless of whether it's global self-hosted administrator config, or repo config
-    for (const hostRule of filterAllowedHeaders(config.hostRules)) {
-      addHostRule(hostRule);
+    // a global config file being validated brings its own `allowedHeaders`, and should be validated against it, like a real run would after parsing it
+    const allowedHeaders =
+      configType === 'global'
+        ? ((config as AllConfig).allowedHeaders ??
+          GlobalConfig.get('allowedHeaders'))
+        : GlobalConfig.get('allowedHeaders');
+    for (const hostRule of config.hostRules) {
+      addHostRule(hostRule, { allowedHeaders });
     }
   }
   const { isMigrated, migratedConfig } = migrateConfig(config);
