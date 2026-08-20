@@ -128,7 +128,10 @@ describe('modules/datasource/go/releases-direct', () => {
       httpMock
         .scope('https://gitlab.com/')
         .get('/api/v4/projects/golang%2Ftext/repository/tags?per_page=100')
-        .reply(200, [{ name: 'v1.0.0' }, { name: 'v2.0.0' }]);
+        .reply(200, [
+          { name: 'v1.0.0', commit: { id: 'aaa100', created_at: '' } },
+          { name: 'v2.0.0', commit: { id: 'aaa200', created_at: '' } },
+        ]);
       const res = await datasource.getReleases({
         packageName: 'golang.org/x/text',
       });
@@ -227,7 +230,10 @@ describe('modules/datasource/go/releases-direct', () => {
       httpMock
         .scope('https://my.custom.domain/')
         .get('/api/v4/projects/golang%2Fmyrepo/repository/tags?per_page=100')
-        .reply(200, [{ name: 'v1.0.0' }, { name: 'v2.0.0' }]);
+        .reply(200, [
+          { name: 'v1.0.0', commit: { id: 'aaa100', created_at: '' } },
+          { name: 'v2.0.0', commit: { id: 'aaa200', created_at: '' } },
+        ]);
       const res = await datasource.getReleases({
         packageName: 'my.custom.domain/golang/myrepo',
       });
@@ -327,7 +333,10 @@ describe('modules/datasource/go/releases-direct', () => {
         .get(
           '/api/v4/projects/group%2Fsubgroup%2Frepo/repository/tags?per_page=100',
         )
-        .reply(200, [{ name: 'v1.0.0' }, { name: 'v2.0.0' }]);
+        .reply(200, [
+          { name: 'v1.0.0', commit: { id: 'aaa100', created_at: '' } },
+          { name: 'v2.0.0', commit: { id: 'aaa200', created_at: '' } },
+        ]);
       const res = await datasource.getReleases({
         packageName: 'gitlab.com/group/subgroup/repo',
       });
