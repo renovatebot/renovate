@@ -4,7 +4,8 @@ import { isNullOrUndefined } from '@sindresorhus/is';
 import * as manager from '../../modules/manager/index.ts';
 import * as platform from '../../modules/platform/index.ts';
 import { migrateConfig } from '../migration.ts';
-import { getOptions } from './index.ts';
+import { getOption, getOptions } from './index.ts';
+import { configOptionNames } from '../../config-options.generated.ts';
 
 vi.unmock('../../modules/platform/index.ts');
 
@@ -202,4 +203,18 @@ describe('config/options/index', () => {
       });
     }
   });
+
+  describe('getOption()', () => {
+    // TODO
+    for (const option of configOptionNames) {
+      it(`has a value for ${option}`, () => {
+        expect(getOption(option)).toBeDefined()
+      })
+    }
+
+    it('returns undefined for an option that does not exist', () => {
+      // @ts-expect-error -- using an invalid config option name
+      expect(getOption('wibble-foo-bar')).toBeUndefined()
+    })
+  })
 });
