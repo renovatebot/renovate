@@ -135,6 +135,82 @@ describe('modules/manager/sbt/extract', () => {
       });
     });
 
+    it('extracts deps when versions are defined in a named singleton object', () => {
+      const content = codeBlock`
+        object Version {
+          val scala = "2.12.10"
+          val example = "0.0.8"
+        }
+        scalaVersion := Version.scala
+        version := "3.2.1"
+        libraryDependencies += "org.example" % "foo" % Version.example
+      `;
+      expect(extractPackageFile(content)).toEqual({
+        deps: [
+          {
+            datasource: 'maven',
+            depName: 'scala',
+            packageName: 'org.scala-lang:scala-library',
+            currentValue: '2.12.10',
+            registryUrls: [],
+            separateMinorPatch: true,
+          },
+          {
+            datasource: 'sbt-package',
+            depName: 'org.example:foo',
+            packageName: 'org.example:foo',
+            currentValue: '0.0.8',
+            registryUrls: [],
+            sharedVariableName: 'Version.example',
+            variableName: 'Version.example',
+          },
+        ],
+        packageFileVersion: '3.2.1',
+        managerData: {
+          scalaVersion: '2.12',
+        },
+      });
+    });
+
+    it('extracts deps when named singleton object is nested inside another object', () => {
+      const content = codeBlock`
+        object Dependencies {
+          object Version {
+            val scala = "2.12.10"
+            val example = "0.0.8"
+          }
+          scalaVersion := Version.scala
+          version := "3.2.1"
+          libraryDependencies += "org.example" % "foo" % Version.example
+        }
+      `;
+      expect(extractPackageFile(content)).toEqual({
+        deps: [
+          {
+            datasource: 'maven',
+            depName: 'scala',
+            packageName: 'org.scala-lang:scala-library',
+            currentValue: '2.12.10',
+            registryUrls: [],
+            separateMinorPatch: true,
+          },
+          {
+            datasource: 'sbt-package',
+            depName: 'org.example:foo',
+            packageName: 'org.example:foo',
+            currentValue: '0.0.8',
+            registryUrls: [],
+            sharedVariableName: 'Version.example',
+            variableName: 'Version.example',
+          },
+        ],
+        packageFileVersion: '3.2.1',
+        managerData: {
+          scalaVersion: '2.12',
+        },
+      });
+    });
+
     it('skips deps when dotted symbolds do not resolve to anything', () => {
       const content = codeBlock`
         scalaVersion := versions.scala

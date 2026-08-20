@@ -393,6 +393,24 @@ export function extractProxyUrls(
   return extractedProxyUrls;
 }
 
+// Extracts `Name.field -> version` entries from `object Name { val field = "version" }` blocks.
+// The `[^{}]*` body pattern naturally skips outer wrapper objects with nested braces.
+function extractNamedSingletonObjectVars(content: string): Vars {
+  const vars: Vars = {};
+  const objectRegex = regEx(/object\s+(\w+)\s*\{([^{}]*)\}/g);
+  for (const objectMatch of content.matchAll(objectRegex)) {
+    const objectName = objectMatch[1];
+    const body = objectMatch[2];
+    const fieldRegex = regEx(
+      /\bval\s+(\w+)(?:\s*:\s*String)?\s*=\s*"([^"]+)"/g,
+    );
+    for (const fieldMatch of body.matchAll(fieldRegex)) {
+      vars[`${objectName}.${fieldMatch[1]}`] = fieldMatch[2];
+    }
+  }
+  return vars;
+}
+
 export function extractPackageFile(
   content: string,
   packageFile: string,
@@ -435,7 +453,7 @@ function extractPackageFileInternal(
 
   try {
     parsedResult = scala.query(content, query, {
-      vars: {},
+      vars: extractNamedSingletonObjectVars(content),
       deps: [],
       registryUrls: [],
       scalaVersion: ctxScalaVersion,
