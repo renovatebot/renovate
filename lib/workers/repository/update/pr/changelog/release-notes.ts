@@ -94,6 +94,8 @@ export function getCachedReleaseList(
 export function massageBody(
   input: string | undefined | null,
   baseUrl: string,
+  repository: string,
+  type?: string,
 ): string {
   let body = coerceString(input);
   // Convert line returns
@@ -125,6 +127,26 @@ export function massageBody(
             .replace(regEx(/\n\s*# /g), '\n### '),
     )
     .join('');
+  // Escape GitLab auto-link references (!MR and #issue) to prevent them from
+  // linking to the wrong project when release notes are embedded in a target repo
+  if (type === 'gitlab') {
+    body = body
+      .split(regEx(/(```[\s\S]*?```)/g))
+      .map((part) =>
+        part.startsWith('```')
+          ? part
+          : part
+              .replace(
+                regEx(/(^|\s)!([0-9]+)/gm),
+                `$1[!$2](${baseUrl}${repository}/-/merge_requests/$2)`,
+              )
+              .replace(
+                regEx(/(^|\s)#([0-9]+)/gm),
+                `$1[#$2](${baseUrl}${repository}/-/work_items/$2)`,
+              ),
+      )
+      .join('');
+  }
   // Trim whitespace
   return body.trim();
 }
@@ -214,7 +236,7 @@ async function releaseNotesResult(
   if (!releaseMatch) {
     return null;
   }
-  const { baseUrl, repository } = project;
+  const { baseUrl, repository, type } = project;
   const releaseNotes: ChangeLogNotes = releaseMatch;
   if (detectPlatform(baseUrl) === 'gitlab') {
     releaseNotes.url = `${baseUrl}${repository}/tags/${releaseMatch.tag!}`;
@@ -225,7 +247,7 @@ async function releaseNotesResult(
         `${baseUrl}${repository}/releases/${releaseMatch.tag!}`;
   }
   // set body for release notes
-  releaseNotes.body = massageBody(releaseNotes.body, baseUrl);
+  releaseNotes.body = massageBody(releaseNotes.body, baseUrl, repository, type);
   releaseNotes.name = massageName(releaseNotes.name, releaseNotes.tag);
   if (releaseNotes.body.length || releaseNotes.name?.length) {
     try {
@@ -535,10 +557,10 @@ export function shouldSkipChangelogMd(repository: string): boolean {
 }
 
 async function linkifyBody(
-  { baseUrl, repository }: ChangeLogProject,
+  { baseUrl, repository, type }: ChangeLogProject,
   bodyStr: string,
 ): Promise<string> {
-  const body = massageBody(bodyStr, baseUrl);
+  const body = massageBody(bodyStr, baseUrl, repository, type);
   if (body?.length) {
     try {
       return await linkify(body, {
