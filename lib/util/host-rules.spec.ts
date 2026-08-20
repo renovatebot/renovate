@@ -199,9 +199,7 @@ describe('util/host-rules', () => {
         headers: { anything: 'x' },
       });
 
-      expect(find({ url: 'https://registry.example.com' })).toEqual({
-        headers: {},
-      });
+      expect(find({ url: 'https://registry.example.com' })).toEqual({});
     });
 
     it('prefers an explicitly-passed allowlist over GlobalConfig', () => {
@@ -279,7 +277,8 @@ describe('util/host-rules', () => {
             headers: { Authorization: 'set-by-admin' },
           },
         ]),
-      ).toEqual([{ matchHost: 'registry.example.com', headers: {} }]);
+        // `headers` is dropped rather than left empty, so that the rule does not go on to suppress the headers of the broader rules it is combined with
+      ).toEqual([{ matchHost: 'registry.example.com' }]);
       expect(logger.logger.warn).toHaveBeenCalledWith(
         { denied: ['Authorization'] },
         "Ignoring hostRules headers not permitted by this Renovate instance's `allowedHeaders`",
@@ -545,13 +544,16 @@ describe('util/host-rules', () => {
       ).toEqual({ token: 'longest' });
     });
 
-    it('merges the headers of every matching rule', () => {
+    it('combines the headers of a trusted and an untrusted matching rule', () => {
       // when setting `headers` in global self-hosted configuration and a repo, `find()` should combine the headers,
-      add({
-        matchHost: 'registry.example.com',
-        token: 'from-admin',
-        headers: { 'X-From-Admin': 'yes' },
-      });
+      add(
+        {
+          matchHost: 'registry.example.com',
+          token: 'from-admin',
+          headers: { 'X-From-Admin': 'yes' },
+        },
+        { trusted: true },
+      );
       add({
         matchHost: 'registry.example.com',
         headers: { 'X-From-Repo': 'yes' },
@@ -563,18 +565,128 @@ describe('util/host-rules', () => {
       });
     });
 
-    it('prefers the last matching rule for a header they both set', () => {
+    it('prefers a trusted rule for a header an untrusted rule also sets', () => {
+      // a repository must not be able to substitute the value the admin set, even with a more specific rule
+      add(
+        {
+          matchHost: 'registry.example.com',
+          headers: { 'X-Custom': 'from-admin' },
+        },
+        { trusted: true },
+      );
+      add({
+        matchHost: 'https://registry.example.com/some/path',
+        headers: { 'X-Custom': 'from-repo' },
+      });
+
+      expect(
+        find({ url: 'https://registry.example.com/some/path/resource' }),
+      ).toEqual({
+        headers: { 'X-Custom': 'from-admin' },
+      });
+    });
+
+    it('ignores a `trusted` smuggled in through the rule itself', () => {
       add({
         matchHost: 'registry.example.com',
         headers: { 'X-Custom': 'from-admin' },
       });
-      add({
+      // `trusted` is not a `HostRule` field, but config is parsed from JSON, so a repository can still put one there
+      const smuggled: HostRule = {
         matchHost: 'registry.example.com',
         headers: { 'X-Custom': 'from-repo' },
+      };
+      add(Object.assign(smuggled, { trusted: true }));
+
+      // both rules are untrusted, so the second masks the first rather than being applied over it
+      expect(find({ url: 'https://registry.example.com' })).toEqual({
+        headers: { 'X-Custom': 'from-repo' },
+      });
+    });
+
+    it('lets the last matching rule of a tier mask the headers of a broader one', () => {
+      // the masking pattern: a broad rule carrying a credential, and a narrower rule that keeps it away from one host
+      add(
+        {
+          matchHost: 'example.com',
+          headers: { 'X-Api-Key': 'secret' },
+        },
+        { trusted: true },
+      );
+      add(
+        {
+          matchHost: 'https://untrusted.example.com',
+          headers: { 'X-Other': 'yes' },
+        },
+        { trusted: true },
+      );
+
+      expect(find({ url: 'https://untrusted.example.com' })).toEqual({
+        headers: { 'X-Other': 'yes' },
+      });
+      expect(find({ url: 'https://trusted.example.com' })).toEqual({
+        headers: { 'X-Api-Key': 'secret' },
+      });
+    });
+
+    it('masks within a tier without affecting the other tier', () => {
+      add(
+        {
+          matchHost: 'example.com',
+          headers: { 'X-From-Admin': 'yes' },
+        },
+        { trusted: true },
+      );
+      add({
+        matchHost: 'example.com',
+        headers: { 'X-From-Repo': 'yes' },
+      });
+      add({
+        matchHost: 'https://untrusted.example.com',
+        headers: { 'X-Other-Repo-Header': 'yes' },
+      });
+
+      // the repo's narrower rule masks its own broader one, but cannot mask the admin's
+      expect(find({ url: 'https://untrusted.example.com' })).toEqual({
+        headers: { 'X-Other-Repo-Header': 'yes', 'X-From-Admin': 'yes' },
+      });
+    });
+
+    it('leaves a header name the admin masked from their own tier to the repository', () => {
+      // the admin's narrower rule masks their own broader one, so `X-From-Admin` is not among the headers they send to this host - which leaves the repository's value for that name the only one there is
+      add({ headers: { 'X-From-Admin': 'yes' } }, { trusted: true });
+      add(
+        {
+          matchHost: 'https://registry.example.com',
+          headers: { 'X-Other-Admin-Header': 'yes' },
+        },
+        { trusted: true },
+      );
+      add({
+        matchHost: 'https://registry.example.com',
+        headers: { 'X-From-Admin': 'from-repo' },
       });
 
       expect(find({ url: 'https://registry.example.com' })).toEqual({
-        headers: { 'X-Custom': 'from-repo' },
+        headers: { 'X-From-Admin': 'from-repo', 'X-Other-Admin-Header': 'yes' },
+      });
+    });
+
+    it('does not let a rule whose headers were all denied suppress another rule of its tier', () => {
+      GlobalConfig.set({ allowedHeaders: ['X-*'] });
+      add({
+        matchHost: 'registry.example.com',
+        headers: { 'X-Custom': 'yes' },
+      });
+      add({
+        matchHost: 'https://registry.example.com/some/path',
+        headers: { Authorization: 'denied' },
+      });
+
+      expect(
+        find({ url: 'https://registry.example.com/some/path/resource' }),
+      ).toEqual({
+        headers: { 'X-Custom': 'yes' },
       });
     });
 
@@ -591,7 +703,7 @@ describe('util/host-rules', () => {
       expect(
         find({ url: 'https://registry.example.com/some/path/resource' }),
       ).toEqual({
-        headers: { 'X-Custom': 'longest', 'X-Only-Shortest': 'yes' },
+        headers: { 'X-Custom': 'longest' },
       });
     });
 

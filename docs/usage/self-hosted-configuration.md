@@ -126,6 +126,11 @@ Any set `allowedHeaders` overrides the default "X-" allowed headers, so you shou
 The `allowedHeaders` config option takes an array of minimatch-compatible globs or re2-compatible regex strings.
 For more details on this syntax see Renovate's [string pattern matching documentation](./string-pattern-matching.md).
 
+!!! note
+  Where more than one of your own rules matches a request, the `headers` of the most specific rule are used, and replace those of the broader rules it matched alongside.
+  So to keep a header away from a host that a broader rule of yours also matches, give that host a rule of its own which sets `headers`.
+  Whichever of your `headers` that leaves for a request are then applied over any a repository set, and always with the value you set: a repository's `hostRules` - or those of a preset it extends - can neither stop one of them being sent, nor replace its value.
+
 Examples:
 
 | Example header | Kind of pattern  | Explanation                                 |
