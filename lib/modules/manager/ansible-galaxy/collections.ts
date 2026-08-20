@@ -17,7 +17,7 @@ function interpretLine(
 ): void {
   const localDependency = dependency;
   const key = lineMatch[2];
-  const value = lineMatch[3].replace(regEx(/["']/g), '');
+  const value = lineMatch[3].replace(regEx(/["']/g), '').split(' ', 2)[0];
   switch (key) {
     case 'name': {
       localDependency.managerData.name = value;
