@@ -79,6 +79,9 @@ describe('modules/versioning/gradle/index', () => {
       ${'1.0-sp-2'}                | ${'1.0-sp-1'}                | ${1}
       ${''}                        | ${''}                        | ${0}
       ${'384.vf35b_f26814ec'}      | ${'400.v35420b_922dcb_'}     | ${-1}
+      ${'2026051723231779060202'}  | ${'2026051723231779060202'}  | ${0}
+      ${'2026051723231779060202'}  | ${'2026051723231779060208'}  | ${-1}
+      ${'2026051723231779060208'}  | ${'2026051723231779060202'}  | ${1}
       ${'___'}                     | ${'...'}                     | ${0}
     `('compare("$a", "$b") === $expected', ({ a, b, expected }) => {
       expect(compare(a, b)).toEqual(expected);
@@ -274,6 +277,27 @@ describe('modules/versioning/gradle/index', () => {
     `('isGreaterThan("$a", "$b") === $expected', ({ a, b, expected }) => {
       expect(api.isGreaterThan(a, b)).toBe(expected);
     });
+  });
+
+  describe('isSame', () => {
+    it.each`
+      type       | a                               | b                               | expected
+      ${'major'} | ${'2026051723231779060202'}     | ${'2026051723231779060208'}     | ${false}
+      ${'major'} | ${'1.2026051723231779060202'}   | ${'1.2026051723231779060208'}   | ${true}
+      ${'minor'} | ${'1.2026051723231779060202'}   | ${'1.2026051723231779060208'}   | ${false}
+      ${'minor'} | ${'1.1.2026051723231779060202'} | ${'1.1.2026051723231779060208'} | ${true}
+      ${'minor'} | ${'1'}                          | ${'1.0'}                        | ${true}
+      ${'patch'} | ${'1.1.2026051723231779060202'} | ${'1.1.2026051723231779060208'} | ${false}
+      ${'major'} | ${'foobar'}                     | ${'foobar'}                     | ${true}
+      ${'major'} | ${'v'}                          | ${'v'}                          | ${true}
+      ${'major'} | ${'v'}                          | ${'v1'}                         | ${false}
+      ${'major'} | ${''}                           | ${'1'}                          | ${false}
+    `(
+      'isSame("$type", "$a", "$b") === $expected',
+      ({ type, a, b, expected }) => {
+        expect(api.isSame?.(type, a, b)).toBe(expected);
+      },
+    );
   });
 
   describe('minSatisfyingVersion', () => {

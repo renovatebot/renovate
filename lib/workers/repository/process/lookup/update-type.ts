@@ -26,9 +26,14 @@ export function getUpdateType(
   ) {
     return 'major';
   }
+  const newMinor = versioningApi.getMinor(newVersion) ?? 0;
+  const currentMinor = versioningApi.getMinor(currentVersion) ?? 0;
+  if (newMinor > currentMinor) {
+    return 'minor';
+  }
   if (
-    versioningApi.getMinor(newVersion)! >
-    versioningApi.getMinor(currentVersion)!
+    versioningApi.isSame &&
+    !versioningApi.isSame('minor', newVersion, currentVersion)
   ) {
     return 'minor';
   }

@@ -31,6 +31,12 @@ export const supportedRangeStrategies: RangeStrategy[] = [
   'replace',
 ];
 
+const sectionIndexes = {
+  major: 0,
+  minor: 1,
+  patch: 2,
+} as const;
+
 function equals(a: string, b: string): boolean {
   return compare(a, b) === 0;
 }
@@ -78,7 +84,7 @@ function getMajor(version: string): number | null {
   if (isVersion(version)) {
     const tokens = tokenize(version);
     const majorToken = tokens[0];
-    return +majorToken.val;
+    return Number(majorToken.val);
   }
   return null;
 }
@@ -88,7 +94,7 @@ function getMinor(version: string): number | null {
     const tokens = tokenize(version);
     const minorToken = tokens[1];
     if (minorToken?.type === TYPE_NUMBER) {
-      return +minorToken.val;
+      return Number(minorToken.val);
     }
     return 0;
   }
@@ -105,7 +111,7 @@ function getPatch(version: string): number | null {
       minorToken.type === TYPE_NUMBER &&
       patchToken.type === TYPE_NUMBER
     ) {
-      return +patchToken.val;
+      return Number(patchToken.val);
     }
     return 0;
   }
@@ -114,6 +120,41 @@ function getPatch(version: string): number | null {
 
 function isGreaterThan(a: string, b: string): boolean {
   return compare(a, b) === 1;
+}
+
+function getExactSection(
+  version: string,
+  type: keyof typeof sectionIndexes,
+): bigint | null {
+  const tokens = tokenize(version);
+  const sectionIndex = sectionIndexes[type];
+  const token = tokens[sectionIndex];
+
+  if (sectionIndex === 0) {
+    return token?.type === TYPE_NUMBER ? token.val : null;
+  }
+  if (sectionIndex === 1) {
+    return token?.type === TYPE_NUMBER ? token.val : 0n;
+  }
+
+  const minorToken = tokens[1];
+  return minorToken?.type === TYPE_NUMBER && token?.type === TYPE_NUMBER
+    ? token.val
+    : 0n;
+}
+
+function isSame(
+  type: keyof typeof sectionIndexes,
+  a: string,
+  b: string,
+): boolean {
+  if (!(isVersion(a) && isVersion(b))) {
+    return false;
+  }
+
+  const left = getExactSection(a, type);
+  const right = getExactSection(b, type);
+  return left === right;
 }
 
 function isStable(version: string): boolean {
@@ -174,6 +215,7 @@ export const api: VersioningApi = {
   isCompatible: isVersion,
   isGreaterThan,
   isSingleVersion,
+  isSame,
   isStable,
   isValid,
   isVersion,

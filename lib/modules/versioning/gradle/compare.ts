@@ -8,7 +8,7 @@ export const TokenType = {
 
 interface Token {
   type: number;
-  val: string | number;
+  val: string | bigint;
 }
 
 function iterateChars(
@@ -54,7 +54,7 @@ export function tokenize(versionStr: string): Token[] | null {
       if (regEx(/^\d+$/).test(val)) {
         result.push({
           type: TokenType.Number,
-          val: parseInt(val, 10),
+          val: BigInt(val),
         });
       } else {
         result.push({
