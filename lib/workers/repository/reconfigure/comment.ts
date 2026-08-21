@@ -24,16 +24,37 @@ import {
 } from '../onboarding/pr/pr-list.ts';
 import type { ReconfigurePrCommentSections } from '../onboarding/pr/types.ts';
 
-// TODO #22198
-const RECONFIGURE_PR_COMMENT_TEMPLATE = `This is a reconfigure PR comment to help you understand and re-configure your renovate bot settings. If this Reconfigure PR were to be merged, we'd expect to see the following outcome:\n\n
+// Full reconfigure PR comments list package files before the PR list.
+const SECTION_ORDER = [
+  'PACKAGE FILES',
+  'CONFIG',
+  'BASEBRANCH',
+  'PRLIST',
+  'WARNINGS',
+  'ERRORS',
+] as const;
+// Once the body is summarised, "What to Expect" should render before "Detected Package Files".
+const SUMMARY_SECTION_ORDER = [
+  'PRLIST',
+  'CONFIG',
+  'BASEBRANCH',
+  'PACKAGE FILES',
+  'WARNINGS',
+  'ERRORS',
+] as const;
+
+function buildReconfigurePrCommentTemplate(
+  sectionOrder: readonly string[],
+): string {
+  let prCommentTemplate = `This is a reconfigure PR comment to help you understand and re-configure your renovate bot settings. If this Reconfigure PR were to be merged, we'd expect to see the following outcome:\n\n`;
+
+  // TODO #22198
+  prCommentTemplate += `
 ---
-{{PACKAGE FILES}}
-{{CONFIG}}
-{{BASEBRANCH}}
-{{PRLIST}}
-{{WARNINGS}}
-{{ERRORS}}
+${sectionOrder.map((section) => `{{${section}}}`).join('\n')}
 `;
+  return prCommentTemplate;
+}
 
 function fillReconfigurePrCommentBody(
   prCommentTemplate: string,
@@ -76,25 +97,40 @@ export async function ensureReconfigurePrComment(
   const baseBranchDesc = getBaseBranchDesc(config);
   const prList = getExpectedPrList(config, branches);
 
-  let prBody = fillReconfigurePrCommentBody(RECONFIGURE_PR_COMMENT_TEMPLATE, {
-    packageFiles: packageFilesDesc,
-    config: configDesc,
-    baseBranch: baseBranchDesc,
-    prList,
-    warnings,
-    errors,
-  });
+  let prBody = fillReconfigurePrCommentBody(
+    buildReconfigurePrCommentTemplate(SECTION_ORDER),
+    {
+      packageFiles: packageFilesDesc,
+      config: configDesc,
+      baseBranch: baseBranchDesc,
+      prList,
+      warnings,
+      errors,
+    },
+  );
 
   if (prBody.length > platform.maxBodyLength()) {
     logger.debug(
       'Reconfigure PR body exceeds platform limit, switching to summary PR list and package files',
     );
-    prBody = prBody.replace(prList, getExpectedPrListSummary(config, branches));
+    const prListSummary = getExpectedPrListSummary(config, branches);
     if (packageFilesDesc) {
-      prBody = prBody.replace(
-        packageFilesDesc,
-        `### Detected Package Files\n\n${getPackageFilesSummary(packageFiles)}`,
+      const packageFilesSummary = `### Detected Package Files\n\n${getPackageFilesSummary(packageFiles)}`;
+      // "What to Expect" should render before "Detected Package Files" in the summary view,
+      // so rebuild from a template with that section order rather than reordering the rendered body.
+      prBody = fillReconfigurePrCommentBody(
+        buildReconfigurePrCommentTemplate(SUMMARY_SECTION_ORDER),
+        {
+          packageFiles: packageFilesSummary,
+          config: configDesc,
+          baseBranch: baseBranchDesc,
+          prList: prListSummary,
+          warnings,
+          errors,
+        },
       );
+    } else {
+      prBody = prBody.replace(prList, prListSummary);
     }
   }
 
