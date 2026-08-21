@@ -46,6 +46,8 @@ const partialSelectorRegex = regEx(
 );
 const versionPrefixRegex = regEx(/^(?<prefix>[^\d]*)\d/);
 
+type MiseDependency = PackageDependency & { depName: string };
+
 interface MiseSelectorConfig {
   allowedVersions?: string;
   ignoreUnstable?: boolean;
@@ -388,7 +390,7 @@ function extractToolEntry(
       : getToolConfig(backend, toolName, version, options);
   const dependency = createDependency(depName, version, toolConfig, depType);
   const lockedVersion = lockFileData
-    ? getLockedVersion(lockFileData, dependency.depName ?? depName)
+    ? getLockedVersion(lockFileData, dependency.depName)
     : undefined;
 
   if (version !== null && lockedVersion) {
@@ -418,7 +420,7 @@ function createDependency(
   version: string | null,
   config: StaticTooling | BackendToolingConfig | null,
   depType: string,
-): PackageDependency {
+): MiseDependency {
   if (version === null) {
     return {
       depName: name,
@@ -434,11 +436,12 @@ function createDependency(
     };
   }
 
-  return {
+  const dependency = {
     depName: name,
     depType,
     currentValue: version,
     // Spread the config last to override other properties
     ...config,
   };
+  return { ...dependency, depName: dependency.depName ?? name };
 }
