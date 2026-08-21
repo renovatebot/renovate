@@ -1,7 +1,9 @@
 import upath from 'upath';
 import { mockDeep } from 'vitest-mock-extended';
+import type { ExecSnapshots } from '~test/exec-util.ts';
 import { envMock, mockExecAll } from '~test/exec-util.ts';
 import { hostRules } from '~test/host-rules.ts';
+import * as httpMock from '~test/http-mock.ts';
 import { env, fs, logger } from '~test/util.ts';
 import { GlobalConfig } from '../../../config/global.ts';
 import type {
@@ -10,7 +12,7 @@ import type {
 } from '../../../config/types.ts';
 import type { ConstraintName } from '../../../util/exec/types.ts';
 import { getPkgReleases as _getPkgReleases } from '../../datasource/index.ts';
-import type { UpdateArtifactsConfig } from '../types.ts';
+import type { UpdateArtifactsConfig, UpdateArtifactsResult } from '../types.ts';
 import { updateArtifacts } from './index.ts';
 
 vi.mock('../../../util/exec/env.ts');
@@ -30,6 +32,8 @@ const adminConfig: RepoGlobalConfig & InternalGlobalConfigOptions = {
 // support install mode
 process.env.CONTAINERBASE = 'true';
 
+const privateCacheDir = upath.join('/tmp/cache/__renovate-private-cache');
+
 const config: UpdateArtifactsConfig = {};
 const constraints: Partial<Record<ConstraintName, string>> = {
   erlang: '25.0.0.0',
@@ -40,6 +44,7 @@ describe('modules/manager/mix/artifacts', () => {
   beforeEach(() => {
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
     GlobalConfig.set(adminConfig);
+    fs.privateCacheDir.mockReturnValue(privateCacheDir);
   });
 
   afterEach(() => {
@@ -306,6 +311,198 @@ describe('modules/manager/mix/artifacts', () => {
       'mix hex.organization auth renovate_test --key valid_test_token && ' +
         'mix deps.update private_package other_package',
     );
+  });
+
+  describe('private registries via registryAliases', () => {
+    const publicKey =
+      '-----BEGIN RSA PUBLIC KEY-----\nabc\n-----END RSA PUBLIC KEY-----';
+    const hexHome = upath.join(privateCacheDir, 'hex');
+    const keyFile = upath.join(hexHome, 'oban.pem');
+    const mixExs = `
+      defp deps do
+        [{:oban_pro, "~> 1.7", repo: "oban"}]
+      end
+    `;
+    const installTools = [
+      'install-tool erlang 25.0.0.0',
+      'install-tool elixir v1.13.4',
+    ];
+
+    let execSnapshots: ExecSnapshots;
+
+    beforeEach(() => {
+      GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
+      // erlang
+      getPkgReleases.mockResolvedValueOnce({
+        releases: [{ version: '25.0.0.0' }],
+      });
+      // elixir
+      getPkgReleases.mockResolvedValueOnce({
+        releases: [{ version: 'v1.13.4' }],
+      });
+      fs.getSiblingFileName.mockReturnValueOnce('mix.lock');
+      fs.readLocalFile.mockResolvedValueOnce('Old mix.lock');
+      fs.readLocalFile.mockResolvedValueOnce('New mix.lock');
+      execSnapshots = mockExecAll();
+    });
+
+    function updateObanPro(
+      registryAliases: Record<string, string>,
+    ): Promise<UpdateArtifactsResult[] | null> {
+      return updateArtifacts({
+        packageFileName: 'mix.exs',
+        updatedDeps: [{ depName: 'oban_pro' }],
+        newPackageFileContent: mixExs,
+        config: { ...config, registryAliases },
+      });
+    }
+
+    it('adds the repo with its public key and auth key', async () => {
+      hostRules.add({
+        matchHost: 'https://repo.oban.pro',
+        token: 'oban_license_key',
+        authType: 'Token-Only',
+      });
+      httpMock
+        .scope('https://repo.oban.pro')
+        .get('/public_key')
+        .reply(200, publicKey);
+
+      const result = await updateObanPro({ oban: 'https://repo.oban.pro' });
+
+      expect(result).toEqual([
+        {
+          file: {
+            type: 'addition',
+            path: 'mix.lock',
+            contents: 'New mix.lock',
+          },
+        },
+      ]);
+      expect(fs.outputCacheFile).toHaveBeenCalledWith(keyFile, publicKey);
+      expect(execSnapshots.map((s) => s.cmd)).toEqual([
+        ...installTools,
+        `mix hex.repo add oban https://repo.oban.pro --public-key ${keyFile} --auth-key oban_license_key`,
+        'mix deps.update oban_pro',
+      ]);
+    });
+
+    it('adds an unauthenticated repo without an auth key', async () => {
+      httpMock
+        .scope('https://repo.oban.pro')
+        .get('/public_key')
+        .reply(200, publicKey);
+
+      await updateObanPro({ oban: 'https://repo.oban.pro' });
+
+      expect(execSnapshots.map((s) => s.cmd)).toEqual([
+        ...installTools,
+        `mix hex.repo add oban https://repo.oban.pro --public-key ${keyFile}`,
+        'mix deps.update oban_pro',
+      ]);
+      expect(execSnapshots.at(-1)?.options?.env).toMatchObject({
+        HEX_HOME: hexHome,
+      });
+    });
+
+    it('ignores registryAliases that mix.exs does not declare', async () => {
+      // inherited from top-level config, meant for another manager
+      await updateObanPro({ 'jfrog.com': 'some.jfrog.mirror' });
+
+      expect(fs.outputCacheFile).not.toHaveBeenCalled();
+      expect(logger.logger.warn).not.toHaveBeenCalledWith(
+        expect.anything(),
+        'Skipping hex repo, unable to fetch its registry public key',
+      );
+      expect(execSnapshots.map((s) => s.cmd)).toEqual([
+        ...installTools,
+        'mix deps.update oban_pro',
+      ]);
+    });
+
+    it('ignores a commented-out repo option', async () => {
+      await updateArtifacts({
+        packageFileName: 'mix.exs',
+        updatedDeps: [{ depName: 'plug' }],
+        newPackageFileContent: `
+          defp deps do
+            # [{:oban_pro, "~> 1.7", repo: "oban"}]
+            [{:plug, "~> 1.0"}]
+          end
+        `,
+        config: {
+          ...config,
+          registryAliases: { oban: 'https://repo.oban.pro' },
+        },
+      });
+
+      expect(httpMock.getTrace()).toEqual([]);
+      expect(fs.outputCacheFile).not.toHaveBeenCalled();
+      expect(execSnapshots.map((s) => s.cmd)).toEqual([
+        ...installTools,
+        'mix deps.update plug',
+      ]);
+    });
+
+    it('ignores an alias for hex.pm itself', async () => {
+      await updateArtifacts({
+        packageFileName: 'mix.exs',
+        updatedDeps: [{ depName: 'secret' }],
+        newPackageFileContent: `
+          defp deps do
+            [{:secret, "~> 1.0", repo: "hexpm:acme"}, {:plug, "~> 1.0", repo: "hexpm"}]
+          end
+        `,
+        config: {
+          ...config,
+          registryAliases: {
+            hexpm: 'https://repo.hex.pm',
+            'hexpm:acme': 'https://repo.hex.pm',
+          },
+        },
+      });
+
+      expect(fs.outputCacheFile).not.toHaveBeenCalled();
+      expect(execSnapshots.map((s) => s.cmd)).toEqual([
+        ...installTools,
+        'mix deps.update secret',
+      ]);
+    });
+
+    it('skips a repo whose public key cannot be fetched', async () => {
+      hostRules.add({
+        matchHost: 'https://repo.oban.pro',
+        token: 'oban_license_key',
+      });
+      httpMock.scope('https://repo.oban.pro').get('/public_key').reply(404);
+
+      await updateObanPro({ oban: 'https://repo.oban.pro' });
+
+      expect(fs.outputCacheFile).not.toHaveBeenCalled();
+      expect(logger.logger.warn).toHaveBeenCalledWith(
+        { repo: 'oban', url: 'https://repo.oban.pro' },
+        'Skipping hex repo, unable to fetch its registry public key',
+      );
+      expect(execSnapshots.map((s) => s.cmd)).toEqual([
+        ...installTools,
+        'mix deps.update oban_pro',
+      ]);
+    });
+
+    it('skips a repo serving an empty public key', async () => {
+      httpMock
+        .scope('https://repo.oban.pro')
+        .get('/public_key')
+        .reply(200, '   ');
+
+      await updateObanPro({ oban: 'https://repo.oban.pro' });
+
+      expect(fs.outputCacheFile).not.toHaveBeenCalled();
+      expect(execSnapshots.map((s) => s.cmd)).toEqual([
+        ...installTools,
+        'mix deps.update oban_pro',
+      ]);
+    });
   });
 
   it('authenticates to private repositories configured in hostRules', async () => {
