@@ -81,6 +81,7 @@ describe('modules/versioning/loose/index', () => {
     ${'minor'} | ${'1.1.2026051723231779060202'} | ${'1.1.2026051723231779060208'} | ${true}
     ${'patch'} | ${'1.1.2026051723231779060202'} | ${'1.1.2026051723231779060208'} | ${false}
     ${'major'} | ${''}                           | ${'1'}                          | ${false}
+    ${'minor'} | ${'1'}                          | ${'1.0.1'}                      | ${true}
   `('isSame("$type", "$a", "$b") === $expected', ({ type, a, b, expected }) => {
     expect(loose.isSame?.(type, a, b)).toBe(expected);
   });
