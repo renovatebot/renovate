@@ -448,6 +448,7 @@ jq '
     | to_entries[] as $ent
     | $ent.value[] as $group
     | $group.deps[] as $dep
+    | select($dep.enabled != false)
     | select($dep.currentVersionTimestamp == null)
     | {
         manager: $ent.key,
