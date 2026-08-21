@@ -32,6 +32,7 @@ describe('modules/manager/npm/extract/index', () => {
       );
       fs.readLocalFile.mockResolvedValue(null);
       fs.localPathExists.mockResolvedValue(false);
+      fs.findLocalSiblingAndParents.mockResolvedValue([]);
       fs.getSiblingFileName.mockImplementation(realFs.getSiblingFileName);
     });
 
@@ -318,14 +319,7 @@ describe('modules/manager/npm/extract/index', () => {
     });
 
     it('reads registryUrls from .yarnrc.yml', async () => {
-      fs.findLocalSiblingOrParent.mockImplementation(
-        (packageFile, otherFile): Promise<string | null> => {
-          if (packageFile === 'package.json' && otherFile === '.yarnrc.yml') {
-            return Promise.resolve('.yarnrc.yml');
-          }
-          return Promise.resolve(null);
-        },
-      );
+      fs.findLocalSiblingAndParents.mockResolvedValue(['.yarnrc.yml']);
 
       fs.readLocalFile.mockImplementation((fileName): Promise<any> => {
         if (fileName === '.yarnrc.yml') {
@@ -343,6 +337,58 @@ describe('modules/manager/npm/extract/index', () => {
       expect(
         res?.deps.flatMap((dep) => dep.registryUrls),
       ).toBeArrayIncludingOnly(['https://registry.example.com']);
+    });
+
+    it('reads registryUrls from inherited .yarnrc.yml files', async () => {
+      fs.findLocalSiblingAndParents.mockResolvedValue([
+        'nested/.yarnrc.yml',
+        '.yarnrc.yml',
+      ]);
+
+      fs.readLocalFile.mockImplementation((fileName): Promise<any> => {
+        if (fileName === '.yarnrc.yml') {
+          return Promise.resolve(
+            codeBlock`
+              npmRegistryServer: https://default.example.com
+              npmScopes:
+                parent:
+                  npmRegistryServer: https://parent.example.com
+            `,
+          );
+        }
+        if (fileName === 'nested/.yarnrc.yml') {
+          return Promise.resolve(
+            codeBlock`
+              npmScopes:
+                leaf:
+                  npmRegistryServer: https://leaf.example.com
+            `,
+          );
+        }
+        return Promise.resolve(null);
+      });
+
+      const res = await npmExtract.extractPackageFile(
+        JSON.stringify({
+          dependencies: {
+            '@leaf/pkg': '1.0.0',
+            '@parent/pkg': '1.0.0',
+            lodash: '1.0.0',
+          },
+        }),
+        'nested/package.json',
+        {},
+      );
+
+      const depRegistryUrls = Object.fromEntries(
+        (res?.deps ?? []).map((dep) => [dep.depName, dep.registryUrls]),
+      );
+
+      expect(depRegistryUrls).toEqual({
+        '@leaf/pkg': ['https://leaf.example.com'],
+        '@parent/pkg': ['https://parent.example.com'],
+        lodash: ['https://default.example.com'],
+      });
     });
 
     it('reads registryUrls from .yarnrc', async () => {
@@ -373,14 +419,7 @@ describe('modules/manager/npm/extract/index', () => {
     });
 
     it('resolves registry URLs using the package name if set', async () => {
-      fs.findLocalSiblingOrParent.mockImplementation(
-        (packageFile, otherFile): Promise<string | null> => {
-          if (packageFile === 'package.json' && otherFile === '.yarnrc.yml') {
-            return Promise.resolve('.yarnrc.yml');
-          }
-          return Promise.resolve(null);
-        },
-      );
+      fs.findLocalSiblingAndParents.mockResolvedValue(['.yarnrc.yml']);
 
       fs.readLocalFile.mockImplementation((fileName): Promise<any> => {
         if (fileName === '.yarnrc.yml') {
@@ -1386,6 +1425,7 @@ describe('modules/manager/npm/extract/index', () => {
 
   describe('.extractAllPackageFiles()', () => {
     it('runs', async () => {
+      fs.findLocalSiblingAndParents.mockResolvedValue([]);
       fs.readLocalFile.mockResolvedValueOnce(input02Content);
       const res = await extractAllPackageFiles(defaultExtractConfig, [
         'package.json',
