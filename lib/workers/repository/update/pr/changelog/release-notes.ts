@@ -11,6 +11,7 @@ import { newlineRegex, regEx } from '../../../../../util/regex.ts';
 import { coerceString } from '../../../../../util/string.ts';
 import { isHttpUrl } from '../../../../../util/url.ts';
 import type { BranchUpgradeConfig } from '../../../../types.ts';
+import * as azure from './azure/index.ts';
 import * as bitbucket from './bitbucket/index.ts';
 import * as bitbucketServer from './bitbucket-server/index.ts';
 import * as forgejo from './forgejo/index.ts';
@@ -42,6 +43,8 @@ export async function getReleaseList(
   const { apiBaseUrl, repository, type } = project;
   try {
     switch (type) {
+      case 'azure':
+        return azure.getReleaseList(project, release);
       case 'bitbucket':
         return bitbucket.getReleaseList(project, release);
       case 'bitbucket-server':
@@ -95,6 +98,7 @@ export function massageBody(
   input: string | undefined | null,
   baseUrl: string,
 ): string {
+  const baseUrlForRegex = RegExp.escape(baseUrl);
   let body = coerceString(input);
   // Convert line returns
   body = body.replace(regEx(/\r\n/g), '\n');
@@ -102,7 +106,7 @@ export function massageBody(
   body = body.replace(regEx(/^<a name="[^"]*"><\/a>\n/), '');
   body = body.replace(
     regEx(
-      `^##? \\[[^\\]]*\\]\\(${baseUrl}[^/]*/[^/]*/compare/.*?\\n`,
+      `^##? \\[[^\\]]*\\]\\(${baseUrlForRegex}[^/]*/[^/]*/compare/.*?\\n`,
       undefined,
       false,
     ),
@@ -110,7 +114,7 @@ export function massageBody(
   );
   // Clean-up unnecessary commits link
   body = `\n${body}\n`.replace(
-    regEx(`\\n${baseUrl}[^/]+/[^/]+/compare/[^\\n]+(\\n|$)`),
+    regEx(`\\n${baseUrlForRegex}[^/]+/[^/]+/compare/[^\\n]+(\\n|$)`),
     '\n',
   );
   // Reduce headings size
@@ -276,6 +280,12 @@ export async function getReleaseNotesMdFileInner(
   const sourceDirectory = project.sourceDirectory!;
   try {
     switch (type) {
+      case 'azure':
+        return await azure.getReleaseNotesMd(
+          repository,
+          apiBaseUrl,
+          sourceDirectory,
+        );
       case 'bitbucket':
         return await bitbucket.getReleaseNotesMd(
           repository,
