@@ -1,7 +1,15 @@
 import { codeBlock } from 'common-tags';
-import { massage, parse as parseToml } from './toml.ts';
+import { massage, parseTOMLDocument, parse as parseToml } from './toml.ts';
 
 describe('util/toml', () => {
+  it('exposes source ranges from the TOML AST', () => {
+    const document = parseTOMLDocument('[[tools.node]]\nversion = "20.11.0"\n');
+
+    expect(document.body[0].body[0]).toMatchObject({
+      range: [0, 34],
+    });
+  });
+
   it('works', () => {
     const input = codeBlock`
       [tool.poetry]

@@ -1,6 +1,8 @@
-import { type AST, parseTOML } from 'toml-eslint-parser';
+import type { AST } from 'toml-eslint-parser';
 import { logger } from '../../../logger/index.ts';
 import { regEx } from '../../../util/regex.ts';
+import { safeStringify } from '../../../util/stringify.ts';
+import { parseTOMLDocument } from '../../../util/toml.ts';
 import type { UpdateLockedConfig, UpdateLockedResult } from '../types.ts';
 import * as lockfile from './lockfile.ts';
 import { MiseLockFile } from './schema.ts';
@@ -67,7 +69,7 @@ function astTableForTool(
   content: string,
   toolName: string,
 ): AST.TOMLTable | undefined {
-  const ast = parseTOML(content, { tomlVersion: '1.0' });
+  const ast = parseTOMLDocument(content);
   return ast.body[0].body.find(
     (node): node is AST.TOMLTable =>
       node.type === 'TOMLTable' &&
@@ -122,7 +124,7 @@ export function updateLockedDependency(
 
     const quote = currentLockedVersion.startsWith("'") ? "'" : '"';
     const replacement =
-      quote === "'" ? `'${updatedVersion}'` : JSON.stringify(updatedVersion);
+      quote === "'" ? `'${updatedVersion}'` : safeStringify(updatedVersion);
     const files = {
       [lockFile]:
         lockFileContent.slice(0, versionNode.range[0]) +
