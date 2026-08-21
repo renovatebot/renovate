@@ -1,0 +1,89 @@
+name: Mutation Testing
+
+on:
+  schedule:
+    - cron: '0 3 * * 0' # Weekly on Sundays at 3am
+  workflow_dispatch:
+  pull_request:
+    types: [opened, synchronize]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  mutation-full:
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+      - run: pnpm install
+      - run: pnpm mutation
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mutation-report
+          path: reports/mutation/
+
+  mutation-pr:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    permissions:
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+      - run: pnpm install
+
+      - name: Get changed source files
+        id: changed
+        run: |
+          FILES=$(git diff --name-only origin/${{ github.base_ref }}...HEAD -- 'lib/**/*.ts' ':!lib/**/*.spec.ts' ':!lib/**/*.generated.ts' | tr '\n' ',')
+          echo "files=$FILES" >> "$GITHUB_OUTPUT"
+          echo "has_files=$( [ -n "$FILES" ] && echo true || echo false )" >> "$GITHUB_OUTPUT"
+
+      - name: Run mutation tests on changed files
+        if: steps.changed.outputs.has_files == 'true'
+        run: pnpm stryker run --mutate "${{ steps.changed.outputs.files }}"
+
+      - name: Post PR comment
+        if: always() && steps.changed.outputs.has_files == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            let body = '## 🧬 Mutation Testing Results\n\n';
+            try {
+              const report = JSON.parse(fs.readFileSync('reports/mutation/mutation.json', 'utf8'));
+              const score = report.schemaVersion ?
+                (report.files ? Object.values(report.files).reduce((acc, f) => acc + f.mutationScore, 0) / Object.keys(report.files).length : 0) : 0;
+              body += `**Mutation Score:** ${score.toFixed(1)}%\n\n`;
+              body += '| File | Score | Survived | Killed | Total |\n|------|-------|----------|--------|-------|\n';
+              for (const [file, data] of Object.entries(report.files || {})) {
+                body += `| ${file} | ${data.mutationScore.toFixed(1)}% | ${data.survived || 0} | ${data.killed || 0} | ${data.totalMutants || 0} |\n`;
+              }
+            } catch (e) {
+              body += '_No mutation report generated (possibly no mutants in changed files)._\n';
+            }
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner, repo: context.repo.repo, issue_number: context.issue.number
+            });
+            const existing = comments.find(c => c.body.includes('🧬 Mutation Testing Results'));
+            if (existing) {
+              await github.rest.issues.updateComment({ owner: context.repo.owner, repo: context.repo.repo, comment_id: existing.id, body });
+            } else {
+              await github.rest.issues.createComment({ owner: context.repo.owner, repo: context.repo.repo, issue_number: context.issue.number, body });
+            }
