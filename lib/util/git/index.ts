@@ -44,6 +44,7 @@ import { getChildEnv } from '../exec/utils.ts';
 import { newlineRegex, regEx } from '../regex.ts';
 import type { LongCommitSha } from '../schema-utils/git.ts';
 import { toLongCommitSha } from '../schema-utils/git.ts';
+import { GitOperationStats } from '../stats.ts';
 import { matchRegexOrGlobList } from '../string-match.ts';
 import { logWarningIfUnicodeHiddenCharactersInPackageFile } from '../unicode.ts';
 import { getGitEnvironmentVariables } from './auth.ts';
@@ -229,6 +230,10 @@ let config: LocalConfig = {} as any;
 let git: InstrumentedSimpleGit;
 let gitInitialized: boolean;
 let submodulesInitizialized: boolean;
+// Memoises whether the local clone is shallow (only true with
+// gitShallowCloneDepth). `undefined` until first checked; set to `false` once
+// we know the repo has full history so branch comparisons skip the probe.
+let repoIsShallow: boolean | undefined;
 
 let privateKeySet = false;
 
@@ -324,6 +329,7 @@ export async function initRepo(args: StorageConfig): Promise<void> {
   );
   gitInitialized = false;
   submodulesInitizialized = false;
+  repoIsShallow = undefined;
   await fetchBranchCommits();
 }
 
@@ -534,8 +540,20 @@ export const syncGit = withInstrumenting(
           if (config.defaultBranch) {
             opts.push('-b', config.defaultBranch);
           }
+          const { gitShallowCloneDepth } = GlobalConfig.get();
           if (config.fullClone) {
             logger.debug('Performing full clone');
+            if (gitShallowCloneDepth) {
+              logger.warn(
+                'gitShallowCloneDepth is ignored when fullClone is required by the platform',
+              );
+            }
+          } else if (gitShallowCloneDepth) {
+            logger.debug({ gitShallowCloneDepth }, 'Performing shallow clone');
+            // `--no-single-branch` keeps the full refspec so that existing
+            // Renovate branches are fetched (a `--depth` clone is single-branch
+            // by default, which would hide them and break branch management).
+            opts.push(`--depth=${gitShallowCloneDepth}`, '--no-single-branch');
           } else {
             logger.debug('Performing blobless clone');
             opts.push('--filter=blob:none');
@@ -564,6 +582,11 @@ export const syncGit = withInstrumenting(
             throw err;
           }
           throw new ExternalHostError(err, 'git');
+        }
+        GitOperationStats.setCloned();
+        const { gitShallowCloneDepth: shallowDepth } = GlobalConfig.get();
+        if (shallowDepth) {
+          GitOperationStats.setGitShallowCloneDepth(shallowDepth);
         }
         const durationMs = Math.round(Date.now() - cloneStart);
         logger.debug({ durationMs }, 'git clone completed');
@@ -910,6 +933,47 @@ export function getBranchList(): string[] {
   return Object.keys(config.branchCommits ?? {});
 }
 
+/**
+ * Ensure enough history is present to compare `branchName` against `baseBranch`.
+ *
+ * A `gitShallowCloneDepth` clone omits older commits, which makes range
+ * operations like `git log base..branch` silently return wrong results when the
+ * branch's merge-base with the base branch lies below the shallow boundary. We
+ * unshallow lazily, only when the merge-base is actually missing, so most runs
+ * on a persistent shallow clone never pay the unshallow cost.
+ */
+async function ensureBranchHistory(
+  branchName: string,
+  baseBranch: string,
+): Promise<void> {
+  if (repoIsShallow === false) {
+    return;
+  }
+  repoIsShallow ??=
+    (await git.raw(['rev-parse', '--is-shallow-repository'])).trim() === 'true';
+  if (!repoIsShallow) {
+    return;
+  }
+  const baseSha = getBranchCommit(baseBranch);
+  const branchSha = getBranchCommit(branchName);
+  if (!baseSha || !branchSha) {
+    return;
+  }
+  // `git merge-base` returns an empty result when no common ancestor is within
+  // the shallow boundary, which is exactly when we need to unshallow.
+  const mergeBase = (await git.raw(['merge-base', baseSha, branchSha])).trim();
+  if (mergeBase) {
+    return;
+  }
+  logger.debug(
+    { branchName, baseBranch },
+    'Unshallowing repository to compare branch against base',
+  );
+  await gitRetry(() => git.unshallow('origin'));
+  GitOperationStats.setUnshallowed();
+  repoIsShallow = false;
+}
+
 export async function isBranchBehindBase(
   branchName: string,
   baseBranch: string,
@@ -932,6 +996,7 @@ export async function isBranchBehindBase(
   );
 
   await syncGit();
+  await ensureBranchHistory(branchName, baseBranch);
   try {
     const behindCount = (
       await git.raw(['rev-list', '--count', `${branchSha!}..${baseBranchSha!}`])
@@ -980,6 +1045,7 @@ export async function isBranchModified(
   );
 
   await syncGit();
+  await ensureBranchHistory(branchName, baseBranch);
   const committedAuthors = new Set<string>();
   try {
     const commits = await git.log({
@@ -1096,6 +1162,7 @@ export async function isBranchConflicted(
 
   let result = false;
   await syncGit();
+  await ensureBranchHistory(branch, baseBranch);
   await writeGitAuthor();
 
   const origBranch = config.currentBranch;

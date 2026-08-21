@@ -53,6 +53,7 @@ const knownGitOperationTypesBySubcommand: GitOperationType[] = [
   'clone',
   'commit',
   'fetch',
+  'unshallow',
   'merge',
   'pull',
   'push',
@@ -181,6 +182,15 @@ export class InstrumentedSimpleGit {
     const { spanName, options } = prepareInstrumentation('fetch');
 
     return await instrument(spanName, () => this.git.fetch(args), options);
+  }
+  async unshallow(remote: string): Promise<any> {
+    const { spanName, options } = prepareInstrumentation('unshallow');
+
+    return await instrument(
+      spanName,
+      () => this.git.fetch(['--unshallow', remote]),
+      options,
+    );
   }
   async clone(repo: string, dir: string, options: string[]): Promise<void> {
     const { spanName, options: spanOptions } = prepareInstrumentation('clone');
