@@ -69,6 +69,27 @@ function hasAny(set: Set<string>, targets: Iterable<string>): boolean {
   return false;
 }
 
+function getMiseUpdatedLockFileContent(
+  manager: string,
+  updatedDeps: BranchUpgradeConfig[],
+  updatedFileContents: Record<string, string>,
+): string | undefined {
+  if (manager !== 'mise') {
+    return undefined;
+  }
+
+  for (const upgrade of updatedDeps) {
+    const lockFiles = [upgrade.lockFile, ...(upgrade.lockFiles ?? [])];
+    for (const lockFile of lockFiles) {
+      if (lockFile && updatedFileContents[lockFile] !== undefined) {
+        return updatedFileContents[lockFile];
+      }
+    }
+  }
+
+  return undefined;
+}
+
 type FilePath = Pick<FileChange, 'path'>;
 
 function getManagersForPackageFiles<T extends FilePath>(
@@ -338,6 +359,11 @@ export async function getUpdatedPackageFiles(
           updatedDeps,
           // TODO #22198
           newPackageFileContent: packageFile.contents!.toString(),
+          newLockFileContent: getMiseUpdatedLockFileContent(
+            manager,
+            updatedDeps,
+            updatedFileContents,
+          ),
           config: patchConfigForArtifactsUpdate(
             config,
             manager,
@@ -389,6 +415,11 @@ export async function getUpdatedPackageFiles(
           updatedDeps,
           // TODO #22198
           newPackageFileContent: packageFile.contents!.toString(),
+          newLockFileContent: getMiseUpdatedLockFileContent(
+            manager,
+            updatedDeps,
+            updatedFileContents,
+          ),
           config: patchConfigForArtifactsUpdate(
             config,
             manager,

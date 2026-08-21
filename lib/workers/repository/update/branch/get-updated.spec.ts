@@ -8,6 +8,7 @@ import * as _composer from '../../../../modules/manager/composer/index.ts';
 import * as _gitSubmodules from '../../../../modules/manager/git-submodules/index.ts';
 import * as _gomod from '../../../../modules/manager/gomod/index.ts';
 import * as _helmv3 from '../../../../modules/manager/helmv3/index.ts';
+import * as _mise from '../../../../modules/manager/mise/index.ts';
 import * as _npm from '../../../../modules/manager/npm/index.ts';
 import * as _pep621 from '../../../../modules/manager/pep621/index.ts';
 import * as _pipCompile from '../../../../modules/manager/pip-compile/index.ts';
@@ -27,6 +28,7 @@ const composer = vi.mocked(_composer);
 const gitSubmodules = vi.mocked(_gitSubmodules);
 const gomod = vi.mocked(_gomod);
 const helmv3 = vi.mocked(_helmv3);
+const mise = vi.mocked(_mise);
 const npm = vi.mocked(_npm);
 const batectWrapper = vi.mocked(_batectWrapper);
 const autoReplace = vi.mocked(_autoReplace);
@@ -37,6 +39,7 @@ const poetry = vi.mocked(_poetry);
 vi.mock('../../../../modules/manager/bundler/index.ts');
 vi.mock('../../../../modules/manager/composer/index.ts');
 vi.mock('../../../../modules/manager/helmv3/index.ts');
+vi.mock('../../../../modules/manager/mise/index.ts');
 vi.mock('../../../../modules/manager/npm/index.ts');
 vi.mock('../../../../modules/manager/git-submodules/index.ts');
 vi.mock('../../../../modules/manager/gomod/index.ts', () => mockDeep());
@@ -216,6 +219,36 @@ describe('workers/repository/update/branch/get-updated', () => {
           },
         ],
       });
+    });
+
+    it('passes mise lockfile updates to the artifact refresh', async () => {
+      config.upgrades.push({
+        packageFile: 'mise.toml',
+        manager: 'mise',
+        branchName: '',
+        lockFile: 'mise.lock',
+        isLockfileUpdate: true,
+        depName: 'node',
+        currentVersion: '20.0.0',
+        newVersion: '22.0.0',
+      });
+      git.getFile.mockResolvedValue('existing content');
+      mise.updateLockedDependency.mockReturnValueOnce({
+        status: 'updated',
+        files: {
+          'mise.toml': '[tools]\nnode = "22"\n',
+          'mise.lock': 'updated lock with target version',
+        },
+      });
+      mise.updateArtifacts.mockResolvedValueOnce([]);
+
+      await getUpdatedPackageFiles(config);
+
+      expect(mise.updateArtifacts).toHaveBeenCalledWith(
+        expect.objectContaining({
+          newLockFileContent: 'updated lock with target version',
+        }),
+      );
     });
 
     it('handles artifact notices', async () => {

@@ -1282,6 +1282,28 @@ describe('modules/manager/mise/extract', () => {
       });
     });
 
+    it('uses a tooling depName override for lockfile lookup', async () => {
+      const asdfLockFileContent = codeBlock`
+        [[tools.node]]
+        version = "22.14.0"
+        backend = "asdf:nodejs"
+      `;
+      fs.readLocalFile.mockResolvedValueOnce(asdfLockFileContent);
+      const content = codeBlock`
+        [tools]
+        "asdf:nodejs" = "22"
+      `;
+
+      const result = await extractPackageFile(content, 'mise.toml');
+
+      expect(result?.deps[0]).toMatchObject({
+        depName: 'node',
+        currentValue: '22.14.0',
+        lockedVersion: '22.14.0',
+        isLockfileOnly: true,
+      });
+    });
+
     it('skips lockedVersion when tool not in lock file', async () => {
       fs.readLocalFile.mockResolvedValueOnce(lockFileContent);
       const content = codeBlock`
@@ -1365,6 +1387,28 @@ describe('modules/manager/mise/extract', () => {
           rangeStrategy: 'update-lockfile',
         },
       ]);
+    });
+
+    it('allows a datasource prefix from the locked version', async () => {
+      const lockFileContent = codeBlock`
+        [[tools."github:cli/cli"]]
+        version = "v2.64.0"
+      `;
+      fs.readLocalFile.mockResolvedValueOnce(lockFileContent);
+      const content = codeBlock`
+        [tools]
+        "github:cli/cli" = "2"
+      `;
+
+      const result = await extractPackageFile(content, 'mise.toml');
+
+      expect(result?.deps[0]).toMatchObject({
+        depName: 'github:cli/cli',
+        currentValue: 'v2.64.0',
+        lockedVersion: 'v2.64.0',
+        allowedVersions: '/^(?:\\x76)?2(?:\\.|-|\\+|$)/',
+        isLockfileOnly: true,
+      });
     });
 
     it('supports Java LTS selectors and leaves unsupported LTS tools unchanged', async () => {

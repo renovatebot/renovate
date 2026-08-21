@@ -44,14 +44,11 @@ const nonVersionSelectorRegex = regEx(/^(?:ref:|path:|sub-\d+(?::|$))/);
 const partialSelectorRegex = regEx(
   /^(?<prefix>[^\d]*)(?<major>\d+)(?:\.(?<minor>\d+))?$/,
 );
+const versionPrefixRegex = regEx(/^(?<prefix>[^\d]*)\d/);
 
 interface MiseSelectorConfig {
   allowedVersions?: string;
   ignoreUnstable?: boolean;
-}
-
-function getDependencyName(name: string): string {
-  return optionInToolNameRegex.exec(name.trim())!.groups!.name;
 }
 
 /**
@@ -102,14 +99,7 @@ export async function extractPackageFile(
   }
 
   const deps = toolEntries.map(([name, toolData, depType]) =>
-    extractToolEntry(
-      name,
-      toolData,
-      depType,
-      lockFileData
-        ? getLockedVersion(lockFileData, getDependencyName(name))
-        : undefined,
-    ),
+    extractToolEntry(name, toolData, depType, lockFileData),
   );
   const result: PackageFileContent = { deps };
 
@@ -319,7 +309,11 @@ function getSelectorConfig(
   }
 
   const { prefix, major, minor } = match.groups;
-  const prefixPattern = prefix ? `(?:${RegExp.escape(prefix)})?` : '';
+  const lockedPrefix = versionPrefixRegex.exec(lockedVersion)?.groups?.prefix;
+  const effectivePrefix = prefix || lockedPrefix;
+  const prefixPattern = effectivePrefix
+    ? `(?:${RegExp.escape(effectivePrefix)})?`
+    : '';
   const precisionPattern = minor
     ? `\\.${minor}(?:\\.|-|\\+|$)`
     : `(?:\\.|-|\\+|$)`;
@@ -375,7 +369,7 @@ function extractToolEntry(
   name: string,
   toolData: MiseTool,
   depType: string,
-  lockedVersion?: string,
+  lockFileData?: MiseLockFile,
 ): PackageDependency {
   const version = parseVersion(toolData);
   const { name: depName, options: optionsInName } = optionInToolNameRegex.exec(
@@ -393,6 +387,9 @@ function extractToolEntry(
       ? null
       : getToolConfig(backend, toolName, version, options);
   const dependency = createDependency(depName, version, toolConfig, depType);
+  const lockedVersion = lockFileData
+    ? getLockedVersion(lockFileData, dependency.depName ?? depName)
+    : undefined;
 
   if (version !== null && lockedVersion) {
     const selectorDependency = extractSelectorLockedDependency(

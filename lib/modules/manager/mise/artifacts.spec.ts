@@ -236,6 +236,33 @@ describe('modules/manager/mise/artifacts', () => {
     ]);
   });
 
+  it('refreshes metadata from the updated in-memory lockfile', async () => {
+    const updatedLockFile =
+      '[[tools.node]]\nversion = "22.0.0"\nplatforms = { linux = { checksum = "new" } }\n';
+    const refreshedLockFile =
+      '[[tools.node]]\nversion = "22.0.0"\nplatforms = { linux = { checksum = "refreshed" } }\n';
+    fs.readLocalFile.mockResolvedValueOnce(refreshedLockFile);
+    const execSnapshots = mockExecAll();
+
+    const res = await updateArtifacts({
+      packageFileName: 'mise.toml',
+      updatedDeps: [{ depName: 'node' }],
+      newPackageFileContent: '[tools]\nnode = "22"\n',
+      newLockFileContent: updatedLockFile,
+      config,
+    });
+
+    expect(fs.writeLocalFile).toHaveBeenCalledWith(
+      'mise.lock',
+      updatedLockFile,
+    );
+    expect(res?.[0].file?.contents).toContain('checksum = "refreshed"');
+    expect(execSnapshots).toMatchObject([
+      { cmd: trustCmd },
+      { cmd: updateToolCmd },
+    ]);
+  });
+
   it('returns artifactError on exec failure with combined output', async () => {
     fs.readLocalFile.mockResolvedValueOnce('existing content');
     const error = new Error('exec error');
@@ -733,6 +760,26 @@ version = "3.10.17"
           'mise.lock': expect.stringContaining('version = "22.0.0"'),
         },
       });
+    });
+
+    it('does not add a null package file to the update set', () => {
+      const res = updateLockedDependency({
+        packageFile: 'mise.toml',
+        packageFileContent: null as never,
+        lockFile: 'mise.lock',
+        lockFileContent,
+        depName: 'node',
+        currentVersion: '20.10.0',
+        newVersion: '22.0.0',
+      });
+
+      expect(res).toMatchObject({
+        status: 'updated',
+        files: {
+          'mise.lock': expect.stringContaining('version = "22.0.0"'),
+        },
+      });
+      expect(res.files).not.toHaveProperty('mise.toml');
     });
 
     it('preserves a vendor prefix in the lockfile version', () => {

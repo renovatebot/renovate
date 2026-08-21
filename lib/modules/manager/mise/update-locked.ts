@@ -1,3 +1,4 @@
+import { isNullOrUndefined } from '@sindresorhus/is';
 import type { AST } from 'toml-eslint-parser';
 import { logger } from '../../../logger/index.ts';
 import { regEx } from '../../../util/regex.ts';
@@ -131,7 +132,7 @@ export function updateLockedDependency(
         replacement +
         lockFileContent.slice(versionNode.range[1]),
     };
-    if (config.packageFileContent !== undefined) {
+    if (!isNullOrUndefined(config.packageFileContent)) {
       // Keep the package file in the update set so mise's artifact refresh runs
       // for selector lockfile updates and regenerates platform metadata.
       files[config.packageFile] = config.packageFileContent;

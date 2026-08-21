@@ -292,6 +292,8 @@ export interface UpdateArtifact<T = Record<string, unknown>> {
   packageFileName: string;
   updatedDeps: Upgrade<T>[];
   newPackageFileContent: string;
+  /** Updated lockfile content that is not yet present on disk. */
+  newLockFileContent?: string;
   config: UpdateArtifactsConfig;
 }
 

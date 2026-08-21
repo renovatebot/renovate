@@ -10,6 +10,16 @@ describe('util/toml', () => {
     });
   });
 
+  it('parses TOML 1.1 syntax with source ranges', () => {
+    const document = parseTOMLDocument(
+      '[[tools.node]]\nplatforms = { linux = { checksum = "abc", }, }\n',
+    );
+
+    expect(document.body[0].body[0]).toMatchObject({
+      type: 'TOMLTable',
+    });
+  });
+
   it('works', () => {
     const input = codeBlock`
       [tool.poetry]
