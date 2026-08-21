@@ -1772,7 +1772,9 @@ describe('modules/datasource/docker/index', () => {
       expect(res?.releases).toHaveLength(1);
     });
 
-    it('does not cache null tags for private registries by default', async () => {
+    // Covers the `cacheable` guard: private registries are not cached at all
+    // by default, so a failed lookup cannot be replayed from the cache.
+    it('does not cache failed tag lookups for private registries by default', async () => {
       httpMock
         .scope('https://registry.company.com/v2')
         .get('/cache-private-tags/tags/list?n=10000')
@@ -1801,7 +1803,9 @@ describe('modules/datasource/docker/index', () => {
       expect((await getPkgReleases(config))?.releases).toHaveLength(1);
     });
 
-    it('does not cache null tags for private registries when cachePrivatePackages is enabled', async () => {
+    // Distinct from the test above: here caching *is* active, so this covers
+    // `withCache` skipping writes of the `undefined` returned by a failed lookup.
+    it('does not cache failed tag lookups when cachePrivatePackages is enabled', async () => {
       GlobalConfig.set({ cachePrivatePackages: true });
 
       httpMock
