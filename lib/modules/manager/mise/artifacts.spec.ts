@@ -824,7 +824,7 @@ foo.bar = "ignored"
       expect(res).toEqual({ status: 'unsupported' });
     });
 
-    it('returns unsupported when the TOML AST has no top-level table', () => {
+    it('returns unsupported when the lockfile schema is invalid', () => {
       const res = updateLockedDependency({
         packageFile: 'mise.toml',
         lockFile: 'mise.lock',
