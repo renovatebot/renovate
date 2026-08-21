@@ -8,6 +8,7 @@ import * as _composer from '../../../../modules/manager/composer/index.ts';
 import * as _gitSubmodules from '../../../../modules/manager/git-submodules/index.ts';
 import * as _gomod from '../../../../modules/manager/gomod/index.ts';
 import * as _helmv3 from '../../../../modules/manager/helmv3/index.ts';
+import * as _nix from '../../../../modules/manager/nix/index.ts';
 import * as _npm from '../../../../modules/manager/npm/index.ts';
 import * as _pep621 from '../../../../modules/manager/pep621/index.ts';
 import * as _pipCompile from '../../../../modules/manager/pip-compile/index.ts';
@@ -27,6 +28,7 @@ const composer = vi.mocked(_composer);
 const gitSubmodules = vi.mocked(_gitSubmodules);
 const gomod = vi.mocked(_gomod);
 const helmv3 = vi.mocked(_helmv3);
+const nix = vi.mocked(_nix);
 const npm = vi.mocked(_npm);
 const batectWrapper = vi.mocked(_batectWrapper);
 const autoReplace = vi.mocked(_autoReplace);
@@ -40,6 +42,7 @@ vi.mock('../../../../modules/manager/helmv3/index.ts');
 vi.mock('../../../../modules/manager/npm/index.ts');
 vi.mock('../../../../modules/manager/git-submodules/index.ts');
 vi.mock('../../../../modules/manager/gomod/index.ts', () => mockDeep());
+vi.mock('../../../../modules/manager/nix/index.ts');
 vi.mock('../../../../modules/manager/batect-wrapper/index.ts');
 vi.mock('../../../../modules/manager/pep621/index.ts');
 vi.mock('../../../../modules/manager/pip-compile/index.ts');
@@ -533,6 +536,107 @@ describe('workers/repository/update/branch/get-updated', () => {
           },
         ],
       });
+    });
+
+    it('updates artifacts when requested without including the unchanged package file', async () => {
+      const fileContent = 'existing content';
+      config.upgrades.push({
+        packageFile: 'flake.nix',
+        manager: 'nix',
+        branchName: 'renovate/flake-lock',
+      } satisfies BranchUpgradeConfig);
+
+      nix.updateDependency.mockResolvedValueOnce({
+        content: fileContent,
+        updateArtifacts: true,
+      });
+      nix.updateArtifacts.mockResolvedValueOnce([
+        {
+          file: {
+            type: 'addition',
+            path: 'flake.lock',
+            contents: 'updated lock file content',
+          },
+        },
+      ]);
+
+      const res = await getUpdatedPackageFiles(config);
+
+      expect(res.updatedPackageFiles).toEqual([]);
+      expect(res.updatedArtifacts).toEqual([
+        {
+          type: 'addition',
+          path: 'flake.lock',
+          contents: 'updated lock file content',
+        },
+      ]);
+    });
+
+    it('handles structured package file updates normally', async () => {
+      const updatedContent = 'updated content';
+      config.upgrades.push({
+        packageFile: 'flake.nix',
+        manager: 'nix',
+        branchName: 'renovate/flake',
+      } satisfies BranchUpgradeConfig);
+
+      nix.updateDependency.mockResolvedValueOnce({ content: updatedContent });
+
+      const res = await getUpdatedPackageFiles(config);
+      expect(res).toMatchObject({
+        updatedPackageFiles: [
+          {
+            contents: updatedContent,
+            path: 'flake.nix',
+            type: 'addition',
+          },
+        ],
+      });
+    });
+
+    it('updates artifacts once for multiple upgrades of the same package file', async () => {
+      const updatedContent = 'updated content';
+      config.upgrades.push(
+        {
+          packageFile: 'flake.nix',
+          manager: 'nix',
+          branchName: 'renovate/flake',
+          depName: 'first',
+        },
+        {
+          packageFile: 'flake.nix',
+          manager: 'nix',
+          branchName: 'renovate/flake',
+          depName: 'second',
+        },
+        {
+          packageFile: 'flake.nix',
+          manager: 'nix',
+          branchName: 'renovate/flake',
+          depName: 'third',
+        },
+      );
+      nix.updateDependency
+        .mockResolvedValueOnce({
+          content: 'existing content',
+          updateArtifacts: true,
+        })
+        .mockResolvedValueOnce({ content: updatedContent })
+        .mockResolvedValueOnce({
+          content: updatedContent,
+          updateArtifacts: true,
+        });
+
+      const res = await getUpdatedPackageFiles(config);
+
+      expect(nix.updateArtifacts).toHaveBeenCalledOnce();
+      expect(res.updatedPackageFiles).toEqual([
+        {
+          contents: updatedContent,
+          path: 'flake.nix',
+          type: 'addition',
+        },
+      ]);
     });
 
     /*
