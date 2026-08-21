@@ -350,12 +350,22 @@ export const presets: Record<string, Preset> = {
     ],
   },
   supportRedHatImageVersion: {
+    customDatasources: {
+      'redhat-hi': {
+        defaultRegistryUrlTemplate:
+          'https://catalog.redhat.com/api/containers/v1/repositories/registry/registry.access.redhat.com/repository/{{packageName}}/images?page_size=100&sort_by=creation_date%5Bdesc%5D&include=data.repositories.tags.name',
+        transformTemplates: [
+          '{"releases": $map($distinct(data.repositories.tags.name), function($version) { {"version": $version} })}',
+        ],
+      },
+    },
     description:
       'Use specific versioning for Red Hat-maintained container images.',
     packageRules: [
       {
         matchDatasources: ['docker'],
         matchPackageNames: [
+          'registry.access.redhat.com/hi{,/}**',
           'registry.access.redhat.com/rhel',
           'registry.access.redhat.com/rhel-atomic',
           'registry.access.redhat.com/rhel-init',
@@ -367,9 +377,27 @@ export const presets: Record<string, Preset> = {
           'registry.access.redhat.com/rhel9/**',
           'registry.access.redhat.com/rhscl/**',
           'registry.access.redhat.com/ubi*{,/}**',
+          'registry.redhat.io/hi{,/}**',
           'redhat/**',
         ],
         versioning: 'redhat',
+      },
+      {
+        description:
+          'Discover Red Hat Hardened Image tags from the public catalog',
+        matchDatasources: ['docker'],
+        matchPackageNames: ['registry.access.redhat.com/hi{,/}**'],
+        overrideDatasource: 'custom.redhat-hi',
+        overridePackageName:
+          "{{replace 'registry.access.redhat.com/' '' packageName}}",
+      },
+      {
+        description:
+          'Discover terms-based Red Hat Hardened Image tags from the public catalog',
+        matchDatasources: ['docker'],
+        matchPackageNames: ['registry.redhat.io/hi{,/}**'],
+        overrideDatasource: 'custom.redhat-hi',
+        overridePackageName: "{{replace 'registry.redhat.io/' '' packageName}}",
       },
     ],
   },
