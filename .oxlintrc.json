@@ -1,7 +1,7 @@
 {
   "$schema": "https://raw.githubusercontent.com/oxc-project/oxc/main/npm/oxlint/configuration_schema.json",
   "plugins": ["import", "node", "promise", "unicorn", "typescript", "vitest"],
-  "jsPlugins": ["./tools/lint/rules.js"],
+  "jsPlugins": ["./tools/lint/rules.ts"],
   "options": {
     "typeAware": true
   },

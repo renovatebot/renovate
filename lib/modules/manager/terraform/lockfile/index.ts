@@ -1,7 +1,7 @@
 import { isTruthy } from '@sindresorhus/is';
 import { logger } from '../../../../logger/index.ts';
 import * as p from '../../../../util/promises.ts';
-import { escapeRegExp, regEx } from '../../../../util/regex.ts';
+import { regEx } from '../../../../util/regex.ts';
 import { getDefaultVersioning } from '../../../datasource/common.ts';
 import type { GetPkgReleasesConfig } from '../../../datasource/index.ts';
 import { getPkgReleases } from '../../../datasource/index.ts';
@@ -104,7 +104,7 @@ export function getNewConstraint(
     //remove surplus .0 version
     return sortConstraints(
       oldConstraint.replace(
-        regEx(`(,\\s|^)${escapeRegExp(currentValue)}(\\.0)*`),
+        regEx(`(,\\s|^)${RegExp.escape(currentValue)}(\\.0)*`),
         `$1${newValue}`,
       ),
     );

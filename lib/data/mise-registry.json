@@ -1,6 +1,6 @@
 {
   "meta": {
-    "version": "2026.8.3 linux-x64 (2026-08-07)"
+    "version": "2026.8.6 linux-x64 (2026-08-14)"
   },
   "tools": {
     "1password": {
@@ -94,6 +94,9 @@
     "amplify": {
       "asdf": "LozanoMatheus/asdf-aws-amplify-cli",
       "github": "aws-amplify/amplify-cli"
+    },
+    "android-cli": {
+      "http": "android-cli"
     },
     "android-sdk": {
       "vfox": "mise-plugins/vfox-android-sdk"
@@ -1518,8 +1521,9 @@
       "asdf": "feniix/asdf-helmfile"
     },
     "helmsman": {
+      "aqua": "mkubaczyk/helmsman",
       "asdf": "luisdavim/asdf-helmsman",
-      "github": "Praqma/helmsman"
+      "github": "mkubaczyk/helmsman"
     },
     "helmwave": {
       "aqua": "helmwave/helmwave"
@@ -2110,6 +2114,9 @@
     "mago": {
       "aqua": "carthage-software/mago"
     },
+    "mailpit": {
+      "aqua": "axllent/mailpit"
+    },
     "make": {
       "asdf": "mise-plugins/mise-make",
       "conda": "make"
@@ -2279,6 +2286,9 @@
     "nancy": {
       "aqua": "sonatype-nexus-community/nancy",
       "asdf": "iilyak/asdf-nancy"
+    },
+    "native-sdk": {
+      "github": "vercel-labs/native"
     },
     "navi": {
       "aqua": "denisidoro/navi",
@@ -2791,6 +2801,15 @@
       "aqua": "release-plz/release-plz",
       "cargo": "release-plz",
       "github": "release-plz/release-plz"
+    },
+    "restate": {
+      "github": "restatedev/restate"
+    },
+    "restate-server": {
+      "github": "restatedev/restate"
+    },
+    "restatectl": {
+      "github": "restatedev/restate"
     },
     "restic": {
       "aqua": "restic/restic",
@@ -3803,6 +3822,9 @@
     "zizmor": {
       "aqua": "zizmorcore/zizmor",
       "cargo": "zizmor"
+    },
+    "zk": {
+      "aqua": "zk-org/zk"
     },
     "zls": {
       "aqua": "zigtools/zls"

@@ -2187,7 +2187,10 @@ export async function mergePr({
         if (
           isNonEmptyString(body?.message) &&
           (body.message.includes('approving review') ||
-            body.message.includes('code owner review'))
+            body.message.includes('code owner review') ||
+            body.message.includes(
+              'New changes require approval from someone other than the last pusher',
+            ))
         ) {
           logger.debug(
             { response: body },

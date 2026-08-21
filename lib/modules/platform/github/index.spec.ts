@@ -5162,11 +5162,15 @@ describe('modules/platform/github/index', () => {
       ).toBeFalse();
     });
 
-    it('should handle approvers required', async () => {
+    it.each([
+      'Waiting on code owner review from org/team.',
+      'At least 1 approving review is required by reviewers with write access',
+      'Repository rule violations found\n\nNew changes require approval from someone other than the last pusher.\n\n',
+    ])('should handle approvers required: %j', async (message) => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
       scope.put('/repos/some/repo/pulls/1234/merge').reply(405, {
-        message: 'Waiting on code owner review from org/team.',
+        message,
       });
       await github.initRepo({ repository: 'some/repo' });
       const pr = {

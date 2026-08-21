@@ -170,6 +170,7 @@ export class Vulnerabilities {
 
     const packageName = dep.packageName ?? dep.depName!;
     let osvPackageName = packageName;
+    let depType: string | undefined;
     if (ecosystem === 'PyPI') {
       // https://peps.python.org/pep-0503/#normalized-names
       osvPackageName = osvPackageName
@@ -181,6 +182,7 @@ export class Vulnerabilities {
         return null;
       }
       osvPackageName = 'stdlib';
+      depType = dep.depType;
     }
 
     try {
@@ -264,6 +266,7 @@ export class Vulnerabilities {
             osvPackageName,
             vulnerability: osvVulnerability,
             affected,
+            depType,
             depVersion,
             fixedVersion,
             datasource: dep.datasource!,
@@ -570,6 +573,7 @@ export class Vulnerabilities {
       vulnerability,
       affected,
       packageName,
+      depType,
       depVersion,
       fixedVersion,
       datasource,
@@ -602,6 +606,7 @@ export class Vulnerabilities {
     return {
       matchDatasources: [datasource],
       matchPackageNames: [packageName],
+      ...(depType ? { matchDepTypes: [depType] } : {}),
       matchCurrentVersion: depVersion,
       versioning,
       allowedVersions: fixedVersion,
