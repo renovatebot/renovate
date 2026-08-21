@@ -27,6 +27,27 @@ To enable the `pre-commit` manager, add the following config:
 
 Alternatively, add `:enablePreCommit` to your `extends` array.
 
+### Digest pinning and updating
+
+Instead of a version tag, the `rev` field can pin a hook repository to an exact commit SHA.
+If you pin hooks this way, include the version in a `# frozen:` comment so Renovate can track updates:
+
+<!-- prettier-ignore -->
+```yaml
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: cef0300fd0fc4d2a87a85fa2093c6b283ea36f4b  # frozen: v5.0.0
+    hooks:
+      - id: check-yaml
+```
+
+Renovate updates the SHA and frozen version together when a new release is available.
+This matches the format that `pre-commit autoupdate --freeze` writes.
+Renovate can update digests that use SHA1 and SHA256 algorithms, as well as short commit SHAs.
+
+Repositories pinned to a bare SHA without a `# frozen:` comment are skipped, because Renovate cannot determine which tag the SHA belongs to.
+To enable updates, add the version as a `# frozen:` comment, as shown above.
+
 ### Additional Dependencies
 
 Renovate has partial support for `additional_dependencies`, currently Go, Node.js and Python only.
