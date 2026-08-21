@@ -178,5 +178,71 @@ describe('modules/datasource/python-version/index', () => {
         }
       });
     });
+
+    it('supports registryUrl override', async () => {
+      httpMock
+        .scope(
+          'https://artifactory.company.com/static-python-org/api/v2/downloads/release',
+        )
+        .get('')
+        .reply(200, Fixtures.get('release.json'));
+
+      const res = await getPkgReleases({
+        datasource,
+        packageName: 'python',
+        registryUrls: [
+          'https://artifactory.company.com/static-python-org/api/v2/downloads/release',
+        ],
+      });
+
+      expect(res?.releases).toHaveLength(2);
+    });
+
+    it('support host-level registry override', async () => {
+      httpMock
+        .scope(
+          'https://static-python-org.artifactory.company.com/api/v2/downloads/release',
+        )
+        .get('')
+        .reply(200, Fixtures.get('release.json'));
+
+      const res = await getPkgReleases({
+        datasource,
+        packageName: 'python',
+        registryUrls: [
+          'https://static-python-org.artifactory.company.com/api/v2/downloads/release',
+        ],
+      });
+
+      expect(res?.releases).toHaveLength(2);
+    });
+
+    it('Fall back to default registry if registryUrl is not specified', async () => {
+      httpMock
+        .scope(defaultRegistryUrl)
+        .get('')
+        .reply(200, Fixtures.get('release.json'));
+
+      const res = await getPkgReleases({
+        datasource,
+        packageName: 'python',
+        registryUrls: [],
+      });
+
+      expect(res?.releases).toHaveLength(2);
+    });
+
+    it('error when registry URL is invalid', async () => {
+      // consume the global EOL mock which is set in beforeEach
+      await new PythonVersionDatasource().getEolReleases();
+
+      const res = await getPkgReleases({
+        datasource,
+        packageName: 'python',
+        registryUrls: ['this/is-an;invalid$url'],
+      });
+
+      expect(res).toBeNull();
+    });
   });
 });
