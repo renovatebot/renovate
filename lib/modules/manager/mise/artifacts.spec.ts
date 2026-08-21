@@ -256,7 +256,15 @@ describe('modules/manager/mise/artifacts', () => {
       'mise.lock',
       updatedLockFile,
     );
-    expect(res?.[0].file?.contents).toContain('checksum = "refreshed"');
+    expect(res).toEqual([
+      {
+        file: {
+          type: 'addition',
+          path: 'mise.lock',
+          contents: expect.stringContaining('checksum = "refreshed"'),
+        },
+      },
+    ]);
     expect(execSnapshots).toMatchObject([
       { cmd: trustCmd },
       { cmd: updateToolCmd },

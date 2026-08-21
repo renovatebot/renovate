@@ -251,6 +251,53 @@ describe('workers/repository/update/branch/get-updated', () => {
       );
     });
 
+    it.each([
+      {
+        name: 'an upgrade without a lockfile',
+        lockFile: undefined,
+        lockFiles: undefined,
+      },
+      {
+        name: 'a lockfile with no updated content',
+        lockFile: 'mise.lock',
+        lockFiles: undefined,
+      },
+      {
+        name: 'a lockfile list with no matching content',
+        lockFile: undefined,
+        lockFiles: ['other.lock'],
+      },
+    ])(
+      'leaves the mise artifact lock content undefined for $name',
+      async ({ lockFile, lockFiles }) => {
+        config.upgrades.push({
+          packageFile: 'mise.toml',
+          manager: 'mise',
+          branchName: '',
+          lockFile,
+          lockFiles,
+          isLockfileUpdate: true,
+          depName: 'node',
+          currentVersion: '20.0.0',
+          newVersion: '22.0.0',
+        });
+        git.getFile.mockResolvedValue('existing content');
+        mise.updateLockedDependency.mockReturnValueOnce({
+          status: 'updated',
+          files: { 'mise.toml': '[tools]\nnode = "22"\n' },
+        });
+        mise.updateArtifacts.mockResolvedValueOnce([]);
+
+        await getUpdatedPackageFiles(config);
+
+        expect(mise.updateArtifacts).toHaveBeenCalledWith(
+          expect.objectContaining({
+            newLockFileContent: undefined,
+          }),
+        );
+      },
+    );
+
     it('handles artifact notices', async () => {
       config.reuseExistingBranch = true;
       config.upgrades.push({

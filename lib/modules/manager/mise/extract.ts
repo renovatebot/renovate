@@ -278,7 +278,7 @@ function getSelectorConfig(
   backend: string,
   toolName: string,
   datasource: string | undefined,
-  lockedVersion: string | undefined,
+  lockedVersion: string,
 ): MiseSelectorConfig | null {
   if (version === 'latest') {
     return {};
