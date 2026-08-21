@@ -2327,7 +2327,11 @@ describe('workers/repository/update/branch/index', () => {
             depName: 'some-dep-name',
             postUpgradeTasks: {
               executionMode: 'update',
-              commands: ['echo {{{versioning}}}', 'disallowed task'],
+              commands: [
+                'echo {{{versioning}}}',
+                'disallowed task',
+                '{{#if (equals manager "non-existing")}}empty task{{/if}}',
+              ],
               fileFilters: ['modified_file', 'deleted_file'],
             },
             branchName: 'renovate/some-branch',
