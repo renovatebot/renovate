@@ -1406,7 +1406,7 @@ describe('workers/repository/process/vulnerabilities', () => {
       expect(config.packageRules).toHaveLength(0);
     });
 
-    it('scopes remediation package rules to the vulnerable dependency depType', async () => {
+    it('does not scope npm remediation rules by depType', async () => {
       const packageFiles: Record<string, PackageFile[]> = {
         npm: [
           {
@@ -1430,11 +1430,11 @@ describe('workers/repository/process/vulnerabilities', () => {
       );
 
       expect(config.packageRules).toHaveLength(1);
+      expect(config.packageRules?.[0]).not.toHaveProperty('matchDepTypes');
       expect(config.packageRules).toMatchObject([
         {
           matchDatasources: ['npm'],
           matchPackageNames: ['lodash'],
-          matchDepTypes: ['dependencies'],
           matchCurrentVersion: '4.17.10',
           allowedVersions: '>= 4.17.11',
           isVulnerabilityAlert: true,
