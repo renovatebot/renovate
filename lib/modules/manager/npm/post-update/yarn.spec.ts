@@ -63,9 +63,9 @@ describe('modules/manager/npm/post-update/yarn', () => {
 
   it.each([
     ['1.22.0', '^1.10.0', 2],
-    ['2.1.0', '>= 2.0.0', 1],
-    ['2.2.0', '2.2.0', 1],
-    ['3.0.0', '3.0.0', 1],
+    ['2.1.0', '>= 2.0.0', 2],
+    ['2.2.0', '2.2.0', 2],
+    ['3.0.0', '3.0.0', 2],
   ])(
     'generates lock files using yarn v%s',
     async (yarnVersion, yarnCompatibility, expectedFsCalls) => {
@@ -375,8 +375,8 @@ describe('modules/manager/npm/post-update/yarn', () => {
 
   it.each([
     ['1.22.0', '^1.10.0', 2],
-    ['2.1.0', '>= 2.0.0', 1],
-    ['2.2.0', '2.2.0', 1],
+    ['2.1.0', '>= 2.0.0', 2],
+    ['2.2.0', '2.2.0', 2],
   ])(
     'performs lock file maintenance using yarn v%s',
     async (yarnVersion, yarnCompatibility, expectedFsCalls) => {
@@ -411,9 +411,9 @@ describe('modules/manager/npm/post-update/yarn', () => {
 
   it.each([
     ['1.22.0', '^1.10.0', 2],
-    ['2.1.0', '>= 2.0.0', 1],
-    ['2.2.0', '2.2.0', 1],
-    ['3.0.0', '3.0.0', 1],
+    ['2.1.0', '>= 2.0.0', 2],
+    ['2.2.0', '2.2.0', 2],
+    ['3.0.0', '3.0.0', 2],
   ])(
     'performs lock file maintenance in subdirectory independent workspaces using yarn v%s',
     async (yarnVersion, yarnCompatibility, expectedFsReadCalls) => {
@@ -529,6 +529,50 @@ describe('modules/manager/npm/post-update/yarn', () => {
       constraints: {
         yarn: '^3.0.0',
       },
+    });
+    const res = await yarnHelper.generateLockFile('some-dir', {}, config);
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'install-tool node 16.16.0', options: { cwd: 'some-dir' } },
+      { cmd: 'install-tool corepack 0.10.0', options: { cwd: 'some-dir' } },
+      {
+        cmd: 'yarn install --mode=update-lockfile',
+        options: {
+          cwd: 'some-dir',
+          env: {
+            YARN_ENABLE_GLOBAL_CACHE: '1',
+            YARN_ENABLE_IMMUTABLE_INSTALLS: 'false',
+            YARN_HTTP_TIMEOUT: '100000',
+          },
+        },
+      },
+    ]);
+    expect(res.lockFile).toBe('package-lock-contents');
+  });
+
+  it('supports corepack even if managerData is missing the hasPackageManager flag', async () => {
+    // nested resolutions clobber the managerData flag, see #25853
+    process.env.CONTAINERBASE = 'true';
+    GlobalConfig.set({
+      localDir: '.',
+      binarySource: 'install',
+      cacheDir: '/tmp/cache',
+    });
+    Fixtures.mock(
+      {
+        'package.json': '{ "packageManager": "yarn@3.0.0" }',
+        'yarn.lock': 'package-lock-contents',
+      },
+      'some-dir',
+    );
+    vi.mocked(getPkgReleases).mockResolvedValueOnce({
+      releases: [{ version: '0.10.0' }],
+    });
+    const execSnapshots = mockExecAll({
+      stdout: '2.1.0',
+      stderr: '',
+    });
+    const config = util.partial<PostUpdateConfig<NpmManagerData>>({
+      managerData: { key: 'some-dep/some-transitive-dep' },
     });
     const res = await yarnHelper.generateLockFile('some-dir', {}, config);
     expect(execSnapshots).toMatchObject([
