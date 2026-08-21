@@ -3571,6 +3571,7 @@ const options: Readonly<RenovateOptions>[] = [
     type: 'boolean',
     default: false,
     globalOnly: true,
+    inheritConfigSupport: true,
   },
   {
     name: 'toolSettings',
