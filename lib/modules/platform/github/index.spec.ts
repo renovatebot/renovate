@@ -834,8 +834,7 @@ describe('modules/platform/github/index', () => {
       await expect(github.initRepo({ repository: 'some/repo' })).toResolve();
     });
 
-    // for coverage
-    it('app token', async () => {
+    it('passes app-token Git authentication outside the repository URL', async () => {
       hostRules.clear();
       hostRules.add({
         token: 'x-access-token:123test',
@@ -843,6 +842,22 @@ describe('modules/platform/github/index', () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
       await expect(github.initRepo({ repository: 'some/repo' })).toResolve();
+      expect(git.initRepo).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          url: 'https://github.com/some/repo.git',
+          upstreamUrl: undefined,
+        }),
+        {
+          GIT_CONFIG_COUNT: '3',
+          GIT_CONFIG_KEY_0: 'url.https://github.com/some/repo.git.insteadOf',
+          GIT_CONFIG_KEY_1: 'url.https://github.com/some/repo.git.insteadOf',
+          GIT_CONFIG_KEY_2: 'http.https://github.com/some/repo.git.extraHeader',
+          GIT_CONFIG_VALUE_0: 'ssh://git@github.com/some/repo.git',
+          GIT_CONFIG_VALUE_1: 'git@github.com:some/repo.git',
+          GIT_CONFIG_VALUE_2:
+            'Authorization: Basic eC1hY2Nlc3MtdG9rZW46MTIzdGVzdA==',
+        },
+      );
     });
 
     it('should fork when using forkToken', async () => {

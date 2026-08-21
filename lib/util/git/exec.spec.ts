@@ -50,13 +50,13 @@ describe('util/git/exec', () => {
         FORCED_VARIABLE: 'forced',
         GIT_CONFIG_COUNT: '4',
         GIT_CONFIG_KEY_0: 'existing-key',
-        GIT_CONFIG_KEY_1: 'url.https://ssh:token123@github.com/.insteadOf',
-        GIT_CONFIG_KEY_2: 'url.https://git:token123@github.com/.insteadOf',
-        GIT_CONFIG_KEY_3: 'url.https://token123@github.com/.insteadOf',
+        GIT_CONFIG_KEY_1: 'url.https://github.com/.insteadOf',
+        GIT_CONFIG_KEY_2: 'url.https://github.com/.insteadOf',
+        GIT_CONFIG_KEY_3: 'http.https://github.com/.extraHeader',
         GIT_CONFIG_VALUE_0: 'existing-value',
         GIT_CONFIG_VALUE_1: 'ssh://git@github.com/',
         GIT_CONFIG_VALUE_2: 'git@github.com:',
-        GIT_CONFIG_VALUE_3: 'https://github.com/',
+        GIT_CONFIG_VALUE_3: 'Authorization: Basic dG9rZW4xMjM6',
       },
       docker: {
         envVars: [
@@ -92,12 +92,12 @@ describe('util/git/exec', () => {
     expect(exec).toHaveBeenCalledExactlyOnceWith('command', {
       env: {
         GIT_CONFIG_COUNT: '3',
-        GIT_CONFIG_KEY_0: 'url.https://ssh:token123@github.com/.insteadOf',
-        GIT_CONFIG_KEY_1: 'url.https://git:token123@github.com/.insteadOf',
-        GIT_CONFIG_KEY_2: 'url.https://token123@github.com/.insteadOf',
+        GIT_CONFIG_KEY_0: 'url.https://github.com/.insteadOf',
+        GIT_CONFIG_KEY_1: 'url.https://github.com/.insteadOf',
+        GIT_CONFIG_KEY_2: 'http.https://github.com/.extraHeader',
         GIT_CONFIG_VALUE_0: 'ssh://git@github.com/',
         GIT_CONFIG_VALUE_1: 'git@github.com:',
-        GIT_CONFIG_VALUE_2: 'https://github.com/',
+        GIT_CONFIG_VALUE_2: 'Authorization: Basic dG9rZW4xMjM6',
       },
     });
   });
