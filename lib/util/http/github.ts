@@ -40,6 +40,8 @@ import type {
 } from './types.ts';
 
 const githubBaseUrl = 'https://api.github.com/';
+const apiVersion = '2022-11-28';
+
 let baseUrl = githubBaseUrl;
 export function setBaseUrl(url: string): void {
   baseUrl = url;
@@ -392,6 +394,7 @@ export class GithubHttp extends HttpBase<GithubHttpOptions> {
     opts.headers = {
       ...opts.headers,
       accept,
+      'X-GitHub-Api-Version': apiVersion,
     };
   }
 
