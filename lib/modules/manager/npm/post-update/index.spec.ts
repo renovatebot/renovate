@@ -203,6 +203,97 @@ describe('modules/manager/npm/post-update/index', () => {
       expect(git.getFile).toHaveBeenCalledExactlyOnceWith('package-lock.json');
     });
 
+    it('massages out lockstep siblings pinning the old version', async () => {
+      git.getFile.mockResolvedValueOnce(
+        JSON.stringify({
+          name: 'update-lockfile-massage-2',
+          version: '1.0.0',
+          lockfileVersion: 3,
+          requires: true,
+          packages: {
+            '': {
+              name: 'update-lockfile-massage-2',
+              version: '1.0.0',
+              dependencies: { vue: '^3.3.10' },
+              devDependencies: { '@vue/test-utils': '^2.4.3' },
+            },
+            'node_modules/vue': {
+              version: '3.5.39',
+              dependencies: {
+                '@vue/server-renderer': '3.5.39',
+                '@vue/shared': '3.5.39',
+              },
+            },
+            // lockstep sibling pinning vue via peerDependencies
+            'node_modules/@vue/server-renderer': {
+              version: '3.5.39',
+              dependencies: { '@vue/shared': '3.5.39' },
+              peerDependencies: { vue: '3.5.39' },
+            },
+            // lockstep sibling pinning vue via dependencies
+            'node_modules/@vue/compiler-sfc': {
+              version: '3.5.39',
+              dependencies: { vue: '3.5.39' },
+            },
+            // lockstep sibling pinning vue via optionalDependencies
+            'node_modules/@vue/optional-consumer': {
+              version: '3.5.39',
+              optionalDependencies: { vue: '3.5.39' },
+            },
+            'node_modules/@vue/shared': {
+              version: '3.5.39',
+            },
+            // range peer pin on vue, must stay
+            'node_modules/@vue/test-utils': {
+              version: '2.4.11',
+              dev: true,
+              peerDependencies: { vue: '3.x' },
+            },
+          },
+        }),
+      );
+      const config = {
+        ...baseConfig,
+        upgrades: [
+          {
+            depName: 'vue',
+            lockedVersion: '3.5.39',
+            newVersion: '3.5.40',
+            managerData: { npmLock: 'package-lock.json' },
+          },
+        ],
+      };
+
+      await writeExistingFiles(config, {
+        npm: [
+          {
+            packageFile: 'package.json',
+            managerData: { npmLock: 'package-lock.json' },
+          },
+        ],
+      });
+
+      const lockWrite = fs.writeLocalFile.mock.calls.find(
+        (call) => call[0] === 'package-lock.json',
+      );
+      expect(lockWrite).toBeDefined();
+      const written = JSON.parse(lockWrite![1] as string);
+      // the updated dep itself and its exact-pinned lockstep siblings go
+      expect(written.packages['node_modules/vue']).toBeUndefined();
+      expect(
+        written.packages['node_modules/@vue/server-renderer'],
+      ).toBeUndefined();
+      expect(
+        written.packages['node_modules/@vue/compiler-sfc'],
+      ).toBeUndefined();
+      expect(
+        written.packages['node_modules/@vue/optional-consumer'],
+      ).toBeUndefined();
+      // packages without an exact pin on the updated dep stay
+      expect(written.packages['node_modules/@vue/test-utils']).toBeDefined();
+      expect(written.packages['node_modules/@vue/shared']).toBeDefined();
+    });
+
     it('writes .npmrc files', async () => {
       await writeExistingFiles(updateConfig, {
         npm: [
