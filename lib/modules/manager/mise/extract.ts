@@ -415,6 +415,15 @@ function extractToolEntry(
   return dependency;
 }
 
+function getConfiguredDepName(
+  config: StaticTooling | BackendToolingConfig,
+): string | undefined {
+  if ('depName' in config) {
+    return config.depName;
+  }
+  return undefined;
+}
+
 function createDependency(
   name: string,
   version: string | null,
@@ -436,12 +445,11 @@ function createDependency(
     };
   }
 
-  const dependency = {
-    depName: name,
+  return {
     depType,
     currentValue: version,
-    // Spread the config last to override other properties
     ...config,
+    // Allow tooling definitions to override the parsed mise tool name.
+    depName: getConfiguredDepName(config) ?? name,
   };
-  return { ...dependency, depName: dependency.depName ?? name };
 }
