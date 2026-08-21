@@ -79,7 +79,6 @@ let issueService: IssueService;
 const defaults: {
   endpoint?: string;
   hostType: string;
-  renovateUserId?: string;
 } = {
   hostType: 'azure',
 };
@@ -106,14 +105,7 @@ export function initPlatform({
   };
   defaults.endpoint = res.endpoint;
   azureApi.setEndpoint(res.endpoint);
-  return azureApi
-    .getAuthenticatedUserId({ token, username, password })
-    .then((renovateUserId) => {
-      defaults.renovateUserId = renovateUserId;
-      return {
-        endpoint: defaults.endpoint!,
-      } satisfies PlatformResult;
-    });
+  return Promise.resolve({ endpoint: defaults.endpoint });
 }
 
 export async function getRepos(): Promise<string[]> {
@@ -213,7 +205,6 @@ export async function initRepo({
   logger.debug(`initRepo("${repository}")`);
   config = {
     ignorePrAuthor: GlobalConfig.get('ignorePrAuthor'),
-    renovateUserId: defaults.renovateUserId,
     repository,
   } as Config;
   const azureApiGit = await azureApi.gitApi();
@@ -275,8 +266,19 @@ export async function initRepo({
 
 export async function getPrList(): Promise<AzurePr[]> {
   logger.debug('getPrList()');
-  if (!config.prList) {
-    const azureApiGit = await azureApi.gitApi();
+  const authenticationContext = azureApi.getAuthenticationContext();
+  if (config.prListAuthKey !== authenticationContext.key) {
+    let renovateUserId: string | undefined;
+    if (!config.ignorePrAuthor) {
+      renovateUserId = await azureApi.getAuthenticatedUserId(
+        authenticationContext.credentials,
+      );
+    }
+
+    const azureApiGit = await azureApi.gitApi(
+      authenticationContext.credentials,
+    );
+
     let prs: GitPullRequest[] = [];
     let fetchedPrs: GitPullRequest[];
     let skip = 0;
@@ -288,7 +290,7 @@ export async function getPrList(): Promise<AzurePr[]> {
           // fetch only prs directly created on the repo and not by forks
           sourceRepositoryId: config.repoId,
           ...(!config.ignorePrAuthor &&
-            config.renovateUserId && { creatorId: config.renovateUserId }),
+            renovateUserId && { creatorId: renovateUserId }),
         },
         config.project,
         0,
@@ -300,6 +302,7 @@ export async function getPrList(): Promise<AzurePr[]> {
     } while (fetchedPrs.length > 0);
 
     config.prList = prs.map(getRenovatePRFormat);
+    config.prListAuthKey = authenticationContext.key;
     logger.debug(`Retrieved Pull Requests count: ${config.prList.length}`);
   }
   return config.prList;

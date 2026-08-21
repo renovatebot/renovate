@@ -69,6 +69,10 @@ describe('modules/platform/azure/index', () => {
     hostRules.clear();
     hostRules.add({ token: 'token' });
     azureHelper.getPolicyEvaluations.mockResolvedValue([]);
+    azureApi.getAuthenticationContext.mockReturnValue({
+      credentials: { token: 'token' },
+      key: 'token-key',
+    });
     azureApi.getAuthenticatedUserId.mockResolvedValue('renovate-user-id');
     // Default to the hosted (cloud) endpoint used across these tests.
     azureApi.isHosted.mockResolvedValue(true);
@@ -160,33 +164,6 @@ describe('modules/platform/azure/index', () => {
           token: 'token',
         }),
       ).toMatchSnapshot();
-    });
-
-    it('passes token credentials to identity discovery', async () => {
-      await azure.initPlatform({
-        endpoint: 'https://dev.azure.com/renovate12345',
-        token: 'token',
-      });
-
-      expect(azureApi.getAuthenticatedUserId).toHaveBeenLastCalledWith({
-        token: 'token',
-        username: undefined,
-        password: undefined,
-      });
-    });
-
-    it('passes username and password to identity discovery', async () => {
-      await azure.initPlatform({
-        endpoint: 'https://dev.azure.com/renovate12345',
-        username: 'user',
-        password: 'pass',
-      });
-
-      expect(azureApi.getAuthenticatedUserId).toHaveBeenLastCalledWith({
-        token: undefined,
-        username: 'user',
-        password: 'pass',
-      });
     });
   });
 
@@ -629,6 +606,10 @@ describe('modules/platform/azure/index', () => {
         }),
       );
       expect(await azure.getPrList()).toEqual([]);
+      expect(azureApi.getAuthenticatedUserId).toHaveBeenCalledExactlyOnceWith({
+        token: 'token',
+      });
+      expect(azureApi.gitApi).toHaveBeenLastCalledWith({ token: 'token' });
       expect(getPullRequests).toHaveBeenCalledExactlyOnceWith(
         '1',
         {
@@ -654,6 +635,7 @@ describe('modules/platform/azure/index', () => {
       );
 
       expect(await azure.getPrList()).toEqual([]);
+      expect(azureApi.getAuthenticatedUserId).not.toHaveBeenCalled();
       expect(getPullRequests).toHaveBeenCalledExactlyOnceWith(
         '1',
         {
@@ -669,10 +651,6 @@ describe('modules/platform/azure/index', () => {
 
     it('does not filter by authenticated user when the ID is unavailable', async () => {
       azureApi.getAuthenticatedUserId.mockResolvedValueOnce(undefined);
-      await azure.initPlatform({
-        endpoint: 'https://dev.azure.com/renovate12345',
-        token: 'token',
-      });
       await initRepo();
       const getPullRequests = vi.fn().mockResolvedValue([]);
       azureApi.gitApi.mockResolvedValueOnce(
@@ -688,6 +666,63 @@ describe('modules/platform/azure/index', () => {
           sourceRepositoryId: '1',
           status: PullRequestStatus.All,
         },
+        'some',
+        0,
+        0,
+        100,
+      );
+    });
+
+    it('refetches PRs when effective credentials change', async () => {
+      await initRepo();
+      const firstCredentials = { token: 'first-token' };
+      const secondCredentials = { token: 'second-token' };
+      azureApi.getAuthenticationContext
+        .mockReturnValueOnce({
+          credentials: firstCredentials,
+          key: 'first-key',
+        })
+        .mockReturnValueOnce({
+          credentials: secondCredentials,
+          key: 'second-key',
+        });
+      azureApi.getAuthenticatedUserId
+        .mockResolvedValueOnce('first-user-id')
+        .mockResolvedValueOnce('second-user-id');
+      const firstGetPullRequests = vi.fn().mockResolvedValue([]);
+      const secondGetPullRequests = vi.fn().mockResolvedValue([]);
+      azureApi.gitApi
+        .mockResolvedValueOnce(
+          partial<IGitApi>({ getPullRequests: firstGetPullRequests }),
+        )
+        .mockResolvedValueOnce(
+          partial<IGitApi>({ getPullRequests: secondGetPullRequests }),
+        );
+
+      await azure.getPrList();
+      await azure.getPrList();
+
+      expect(azureApi.getAuthenticatedUserId).toHaveBeenNthCalledWith(
+        1,
+        firstCredentials,
+      );
+      expect(azureApi.getAuthenticatedUserId).toHaveBeenNthCalledWith(
+        2,
+        secondCredentials,
+      );
+      expect(azureApi.gitApi).toHaveBeenNthCalledWith(2, firstCredentials);
+      expect(azureApi.gitApi).toHaveBeenNthCalledWith(3, secondCredentials);
+      expect(firstGetPullRequests).toHaveBeenCalledWith(
+        '1',
+        expect.objectContaining({ creatorId: 'first-user-id' }),
+        'some',
+        0,
+        0,
+        100,
+      );
+      expect(secondGetPullRequests).toHaveBeenCalledWith(
+        '1',
+        expect.objectContaining({ creatorId: 'second-user-id' }),
         'some',
         0,
         0,

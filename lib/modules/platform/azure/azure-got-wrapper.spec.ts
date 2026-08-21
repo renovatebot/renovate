@@ -152,6 +152,48 @@ describe('modules/platform/azure/azure-got-wrapper', () => {
     });
   });
 
+  describe('getAuthenticationContext', () => {
+    it('uses the most specific matching host rule', () => {
+      hostRules.add({
+        hostType: 'azure',
+        token: 'platform-token',
+        matchHost: 'dev.azure.com',
+      });
+      hostRules.add({
+        hostType: 'azure',
+        token: 'endpoint-token',
+        matchHost: 'https://dev.azure.com/renovate9',
+      });
+      azure.setEndpoint('https://dev.azure.com/renovate9');
+
+      const context = azure.getAuthenticationContext();
+      const client = azure.azureObj(context.credentials);
+
+      expect(context.credentials).toMatchObject({ token: 'endpoint-token' });
+      expect(client.authHandler).toHaveProperty('token', 'endpoint-token');
+    });
+
+    it('changes the key when effective credentials change', () => {
+      hostRules.add({
+        hostType: 'azure',
+        token: 'first-token',
+        matchHost: 'https://dev.azure.com/renovate10',
+      });
+      azure.setEndpoint('https://dev.azure.com/renovate10');
+      const first = azure.getAuthenticationContext();
+      hostRules.add({
+        hostType: 'azure',
+        token: 'second-token',
+        matchHost: 'https://dev.azure.com/renovate10',
+      });
+
+      const second = azure.getAuthenticationContext();
+
+      expect(second.credentials).toMatchObject({ token: 'second-token' });
+      expect(second.key).not.toBe(first.key);
+    });
+  });
+
   describe('isHosted', () => {
     let sdk: typeof import('azure-devops-node-api');
 

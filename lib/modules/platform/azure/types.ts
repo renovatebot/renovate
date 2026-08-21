@@ -22,9 +22,9 @@ export interface Config {
   project: string;
   projectId: string;
   prList: AzurePr[];
+  prListAuthKey?: string;
   fileList: null;
   repository: string;
-  renovateUserId?: string;
   defaultBranch: string;
   /** Work item type for issues; from `azureWorkItemType`, defaults to `Issue`. */
   workItemType: string;
