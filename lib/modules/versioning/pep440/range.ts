@@ -347,7 +347,10 @@ function updateRangeValue(
       }
       return range.operator + futureVersion.join('.');
     }
-    return range.operator + newVersion;
+    // A local version segment is not allowed in a `~=` specifier, so keeping it
+    // would build a range that matches nothing. Everything else, including a
+    // post release, stays.
+    return range.operator + newVersion.replace(regEx(/\+.*$/), '');
   }
   if (['==', '<='].includes(range.operator)) {
     if (lte(newVersion, range.version)) {
