@@ -22,6 +22,36 @@ import {
   getExpectedPrList,
   getExpectedPrListSummary,
 } from '../onboarding/pr/pr-list.ts';
+import type { ReconfigurePrCommentSections } from '../onboarding/pr/types.ts';
+
+// TODO #22198
+const RECONFIGURE_PR_COMMENT_TEMPLATE = `This is a reconfigure PR comment to help you understand and re-configure your renovate bot settings. If this Reconfigure PR were to be merged, we'd expect to see the following outcome:\n\n
+---
+{{PACKAGE FILES}}
+{{CONFIG}}
+{{BASEBRANCH}}
+{{PRLIST}}
+{{WARNINGS}}
+{{ERRORS}}
+`;
+
+function fillReconfigurePrCommentBody(
+  prCommentTemplate: string,
+  sections: ReconfigurePrCommentSections,
+): string {
+  let prBody = prCommentTemplate;
+  if (sections.packageFiles) {
+    prBody = `${prBody.replace('{{PACKAGE FILES}}', sections.packageFiles)}\n`;
+  } else {
+    prBody = prBody.replace('{{PACKAGE FILES}}\n', '');
+  }
+  prBody = prBody.replace('{{CONFIG}}\n', sections.config);
+  prBody = prBody.replace('{{WARNINGS}}\n', sections.warnings);
+  prBody = prBody.replace('{{ERRORS}}\n', sections.errors);
+  prBody = prBody.replace('{{BASEBRANCH}}\n', sections.baseBranch);
+  prBody = prBody.replace('{{PRLIST}}\n', sections.prList);
+  return prBody;
+}
 
 export async function ensureReconfigurePrComment(
   config: RenovateConfig,
@@ -32,40 +62,28 @@ export async function ensureReconfigurePrComment(
 ): Promise<boolean> {
   logger.debug('ensureReconfigurePrComment()');
   logger.trace({ config });
-  let prCommentTemplate = `This is a reconfigure PR comment to help you understand and re-configure your renovate bot settings. If this Reconfigure PR were to be merged, we'd expect to see the following outcome:\n\n`;
 
-  // TODO #22198
-  prCommentTemplate += `
----
-{{PACKAGE FILES}}
-{{CONFIG}}
-{{BASEBRANCH}}
-{{PRLIST}}
-{{WARNINGS}}
-{{ERRORS}}
-`;
-  let prBody = prCommentTemplate;
   const packageFilesDesc = getPackageFilesDesc(packageFiles);
-  if (packageFilesDesc) {
-    prBody = `${prBody.replace('{{PACKAGE FILES}}', packageFilesDesc)}\n`;
-  } else {
-    prBody = prBody.replace('{{PACKAGE FILES}}\n', '');
-  }
   let configDesc = '';
   if (GlobalConfig.get('dryRun')) {
     logger.info(`DRY-RUN: Would check branch ${branchName}`);
   } else {
     configDesc = getConfigDesc(config);
   }
-  prBody = prBody.replace('{{CONFIG}}\n', configDesc);
-  prBody = prBody.replace(
-    '{{WARNINGS}}\n',
-    getWarnings(config) + getDepWarningsOnboardingPR(packageFiles!, config),
-  );
-  prBody = prBody.replace('{{ERRORS}}\n', getErrors(config));
-  prBody = prBody.replace('{{BASEBRANCH}}\n', getBaseBranchDesc(config));
+  const warnings =
+    getWarnings(config) + getDepWarningsOnboardingPR(packageFiles!, config);
+  const errors = getErrors(config);
+  const baseBranchDesc = getBaseBranchDesc(config);
   const prList = getExpectedPrList(config, branches);
-  prBody = prBody.replace('{{PRLIST}}\n', prList);
+
+  let prBody = fillReconfigurePrCommentBody(RECONFIGURE_PR_COMMENT_TEMPLATE, {
+    packageFiles: packageFilesDesc,
+    config: configDesc,
+    baseBranch: baseBranchDesc,
+    prList,
+    warnings,
+    errors,
+  });
 
   if (prBody.length > platform.maxBodyLength()) {
     logger.debug(
