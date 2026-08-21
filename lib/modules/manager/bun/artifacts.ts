@@ -1,4 +1,4 @@
-import { isEmptyArray } from '@sindresorhus/is';
+import { isEmptyArray, isString } from '@sindresorhus/is';
 import upath from 'upath';
 import { GlobalConfig } from '../../../config/global.ts';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages.ts';
@@ -10,6 +10,7 @@ import {
   readLocalFile,
   writeLocalFile,
 } from '../../../util/fs/index.ts';
+import { resolveNpmrc } from '../npm/npmrc.ts';
 import { processHostRules } from '../npm/post-update/rules.ts';
 import {
   getNpmrcContent,
@@ -48,10 +49,22 @@ export async function updateArtifacts(
     return null;
   }
 
-  const pkgFileDir = upath.dirname(packageFileName);
-  const npmrcContent = await getNpmrcContent(pkgFileDir);
+  const lockFileDir = upath.dirname(lockFileName);
+  const originalNpmrcContent = await getNpmrcContent(lockFileDir);
+  const { npmrc, npmrcFileName } = await resolveNpmrc(lockFileName, config);
+  // Use the resolved npmrc unless it came from outside the lockfile directory.
+  const baseNpmrcContent =
+    isString(npmrc) &&
+    (!npmrcFileName || npmrcFileName === upath.join(lockFileDir, '.npmrc'))
+      ? npmrc
+      : originalNpmrcContent;
   const { additionalNpmrcContent } = processHostRules();
-  await updateNpmrcContent(pkgFileDir, npmrcContent, additionalNpmrcContent);
+  await updateNpmrcContent(
+    lockFileDir,
+    originalNpmrcContent,
+    additionalNpmrcContent,
+    baseNpmrcContent,
+  );
 
   try {
     await writeLocalFile(packageFileName, newPackageFileContent);
@@ -77,7 +90,6 @@ export async function updateArtifacts(
     };
 
     await exec(cmd, execOptions);
-    await resetNpmrcContent(pkgFileDir, npmrcContent);
 
     const newLockFileContent = await readLocalFile(lockFileName);
     if (
@@ -108,5 +120,7 @@ export async function updateArtifacts(
         },
       },
     ];
+  } finally {
+    await resetNpmrcContent(lockFileDir, originalNpmrcContent);
   }
 }
