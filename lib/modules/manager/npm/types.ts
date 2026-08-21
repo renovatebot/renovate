@@ -75,7 +75,7 @@ export interface NpmLockFiles {
   yarnLock?: string;
   packageLock?: string;
   shrinkwrapJson?: string;
-  pnpmShrinkwrap?: string;
+  pnpmLockFile?: string;
   npmLock?: string;
 }
 
