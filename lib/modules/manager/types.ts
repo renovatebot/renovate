@@ -36,6 +36,7 @@ export interface ExtractConfig extends CustomExtractConfig {
   repository?: string;
   currentDigest?: string;
   newDigest?: string | null;
+  osvVulnerabilityAlerts?: boolean;
 }
 
 export interface UpdateArtifactsConfig {

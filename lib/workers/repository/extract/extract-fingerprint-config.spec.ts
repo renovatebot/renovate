@@ -50,6 +50,7 @@ describe('workers/repository/extract/extract-fingerprint-config', () => {
       manager: 'npm',
       npmrc: null,
       npmrcMerge: false,
+      osvVulnerabilityAlerts: false,
       registryAliases: {
         notStable: 'http://some.link.2',
         stable: 'http://some.link',
@@ -70,6 +71,7 @@ describe('workers/repository/extract/extract-fingerprint-config', () => {
       manager: 'regex',
       npmrc: null,
       npmrcMerge: false,
+      osvVulnerabilityAlerts: false,
       registryAliases: {
         stable: 'http://some.link',
       },
@@ -101,6 +103,7 @@ describe('workers/repository/extract/extract-fingerprint-config', () => {
       manager: 'npm',
       npmrc: 'some-string',
       npmrcMerge: true,
+      osvVulnerabilityAlerts: false,
       registryAliases: {},
       skipInstalls: null,
     });
@@ -120,6 +123,7 @@ describe('workers/repository/extract/extract-fingerprint-config', () => {
       manager: 'dockerfile',
       npmrc: 'some-string',
       npmrcMerge: true,
+      osvVulnerabilityAlerts: false,
       registryAliases: {},
       skipInstalls: null,
     });

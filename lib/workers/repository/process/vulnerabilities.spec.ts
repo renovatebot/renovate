@@ -4,7 +4,10 @@ import { mockFn } from 'vitest-mock-extended';
 import type { RenovateConfig } from '~test/util.ts';
 import { logger } from '~test/util.ts';
 import { getConfig } from '../../../config/defaults.ts';
-import type { PackageFile } from '../../../modules/manager/types.ts';
+import type {
+  PackageDependency,
+  PackageFile,
+} from '../../../modules/manager/types.ts';
 import { Vulnerabilities } from './vulnerabilities.ts';
 
 const getVulnerabilitiesMock =
@@ -1452,6 +1455,145 @@ describe('workers/repository/process/vulnerabilities', () => {
           isVulnerabilityAlert: true,
         },
       ]);
+    });
+
+    it('clears skipReason of a lockfile-only dependency when a fix exists', async () => {
+      const dep: PackageDependency = {
+        depName: 'django',
+        packageName: 'django',
+        depType: 'uv.lock',
+        lockedVersion: '3.2',
+        datasource: 'pypi',
+        skipReason: 'lockfile-only',
+        skipStage: 'extract',
+      };
+      const packageFiles: Record<string, PackageFile[]> = {
+        pep621: [{ deps: [dep], packageFile: 'pyproject.toml' }],
+      };
+      getVulnerabilitiesMock.mockResolvedValueOnce([
+        {
+          id: 'GHSA-qrw5-5h28-modded',
+          modified: '',
+          affected: [
+            {
+              package: {
+                name: 'django',
+                ecosystem: 'PyPI',
+                purl: 'pkg:pypi/django',
+              },
+              ranges: [
+                {
+                  type: 'ECOSYSTEM',
+                  events: [{ introduced: '3.2' }, { fixed: '3.2.16' }],
+                },
+              ],
+            },
+          ],
+        },
+      ]);
+
+      await vulnerabilities.appendVulnerabilityPackageRules(
+        config,
+        packageFiles,
+      );
+
+      expect(dep.skipReason).toBeUndefined();
+      expect(dep.skipStage).toBeUndefined();
+      expect(config.packageRules).toMatchObject([
+        {
+          matchDatasources: ['pypi'],
+          matchPackageNames: ['django'],
+          matchCurrentVersion: '3.2',
+          allowedVersions: '>= 3.2.16',
+          isVulnerabilityAlert: true,
+        },
+      ]);
+    });
+
+    it('keeps skipReason of a lockfile-only dependency when no fix exists', async () => {
+      const dep: PackageDependency = {
+        depName: 'django',
+        packageName: 'django',
+        depType: 'uv.lock',
+        lockedVersion: '3.2',
+        datasource: 'pypi',
+        skipReason: 'lockfile-only',
+        skipStage: 'extract',
+      };
+      const packageFiles: Record<string, PackageFile[]> = {
+        pep621: [{ deps: [dep], packageFile: 'pyproject.toml' }],
+      };
+      getVulnerabilitiesMock.mockResolvedValueOnce([
+        {
+          id: 'GHSA-qrw5-5h28-modded',
+          modified: '',
+          affected: [
+            {
+              package: {
+                name: 'django',
+                ecosystem: 'PyPI',
+                purl: 'pkg:pypi/django',
+              },
+              ranges: [
+                {
+                  type: 'ECOSYSTEM',
+                  events: [{ introduced: '3.2' }],
+                },
+              ],
+            },
+          ],
+        },
+      ]);
+
+      await vulnerabilities.appendVulnerabilityPackageRules(
+        config,
+        packageFiles,
+      );
+
+      expect(dep.skipReason).toBe('lockfile-only');
+      expect(dep.skipStage).toBe('extract');
+      expect(config.packageRules).toBeEmptyArray();
+    });
+
+    it('leaves other skipped dependencies untouched', async () => {
+      const dep: PackageDependency = {
+        depName: 'django',
+        packageName: 'django',
+        currentValue: '3.2',
+        datasource: 'pypi',
+        skipReason: 'ignored',
+      };
+      const packageFiles: Record<string, PackageFile[]> = {
+        poetry: [{ deps: [dep], packageFile: 'pyproject.toml' }],
+      };
+      getVulnerabilitiesMock.mockResolvedValueOnce([
+        {
+          id: 'GHSA-qrw5-5h28-modded',
+          modified: '',
+          affected: [
+            {
+              package: {
+                name: 'django',
+                ecosystem: 'PyPI',
+                purl: 'pkg:pypi/django',
+              },
+              ranges: [
+                {
+                  type: 'ECOSYSTEM',
+                  events: [{ introduced: '3.2' }, { fixed: '3.2.16' }],
+                },
+              ],
+            },
+          ],
+        },
+      ]);
+
+      await vulnerabilities.appendVulnerabilityPackageRules(
+        config,
+        packageFiles,
+      );
+
+      expect(dep.skipReason).toBe('ignored');
     });
 
     it('package rules are sorted by fixed version even if affected is unsorted', async () => {

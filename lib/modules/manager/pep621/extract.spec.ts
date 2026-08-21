@@ -658,6 +658,147 @@ describe('modules/manager/pep621/extract', () => {
       });
     });
 
+    it('should surface transitive deps from uv.lock when osvVulnerabilityAlerts is enabled', async () => {
+      fs.readLocalFile.mockResolvedValue(
+        codeBlock`
+          version = 1
+          requires-python = ">=3.11"
+
+          [[package]]
+          name = "attrs"
+          version = "24.2.0"
+          source = { registry = "https://pypi.org/simple" }
+
+          [[package]]
+          name = "idna"
+          version = "3.10"
+          source = { registry = "https://pypi.org/simple" }
+
+          [[package]]
+          name = "internal-lib"
+          version = "1.2.3"
+          source = { registry = "https://example.com/simple" }
+
+          [[package]]
+          name = "local-pkg"
+          version = "0.1.0"
+          source = { editable = "../local-pkg" }
+
+          [[package]]
+          name = "pep621-uv"
+          version = "0.1.0"
+          source = { virtual = "." }
+          dependencies = [
+              { name = "attrs" },
+          ]
+        `,
+      );
+
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce(null);
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce('uv.lock');
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce('uv.lock');
+
+      const res = await extractPackageFile(
+        codeBlock`
+          [project]
+          name = "pep621-uv"
+          version = "0.1.0"
+          dependencies = ["attrs>=24.1.0"]
+          requires-python = ">=3.11"
+        `,
+        'pyproject.toml',
+        { osvVulnerabilityAlerts: true },
+      );
+
+      // attrs (direct) keeps its lockedVersion; idna and internal-lib are
+      // surfaced as skipped transitive deps; the editable local-pkg and the
+      // virtual workspace root are ignored.
+      expect(res).toMatchObject({
+        deps: [
+          { packageName: 'python', depType: 'requires-python' },
+          {
+            packageName: 'attrs',
+            depType: 'project.dependencies',
+            currentValue: '>=24.1.0',
+            lockedVersion: '24.2.0',
+          },
+          {
+            packageName: 'idna',
+            depName: 'idna',
+            depType: 'uv.lock',
+            datasource: 'pypi',
+            lockedVersion: '3.10',
+            skipReason: 'lockfile-only',
+            skipStage: 'extract',
+          },
+          {
+            packageName: 'internal-lib',
+            depType: 'uv.lock',
+            lockedVersion: '1.2.3',
+            skipReason: 'lockfile-only',
+            registryUrls: ['https://example.com/simple'],
+          },
+        ],
+        lockFiles: ['uv.lock'],
+      });
+      // default-PyPI transitive deps don't carry registryUrls
+      expect(res?.deps[2].registryUrls).toBeUndefined();
+    });
+
+    it('should not surface transitive deps from uv.lock by default', async () => {
+      fs.readLocalFile.mockResolvedValue(
+        codeBlock`
+          version = 1
+          requires-python = ">=3.11"
+
+          [[package]]
+          name = "attrs"
+          version = "24.2.0"
+          source = { registry = "https://pypi.org/simple" }
+
+          [[package]]
+          name = "idna"
+          version = "3.10"
+          source = { registry = "https://pypi.org/simple" }
+
+          [[package]]
+          name = "pep621-uv"
+          version = "0.1.0"
+          source = { virtual = "." }
+          dependencies = [
+              { name = "attrs" },
+          ]
+        `,
+      );
+
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce(null);
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce('uv.lock');
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce('uv.lock');
+
+      const res = await extractPackageFile(
+        codeBlock`
+          [project]
+          name = "pep621-uv"
+          version = "0.1.0"
+          dependencies = ["attrs>=24.1.0"]
+          requires-python = ">=3.11"
+        `,
+        'pyproject.toml',
+      );
+
+      expect(res).toMatchObject({
+        deps: [
+          { packageName: 'python', depType: 'requires-python' },
+          {
+            packageName: 'attrs',
+            depType: 'project.dependencies',
+            lockedVersion: '24.2.0',
+          },
+        ],
+        lockFiles: ['uv.lock'],
+      });
+    });
+
     it('should resolve dependencies without locked versions on invalid uv.lock', async () => {
       fs.readLocalFile.mockResolvedValue(codeBlock`invalid_toml`);
 
