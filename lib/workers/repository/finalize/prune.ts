@@ -165,7 +165,7 @@ export async function pruneStaleBranches(
     // An empty branchPrefix matches every branch in the repo, so Renovate
     // cannot reliably tell its own branches apart from unrelated ones. Skip
     // pruning to avoid deleting non-Renovate branches as orphans.
-    logger.debug(
+    logger.warn(
       'config.branchPrefix is empty - skipping branch pruning to avoid treating all branches as Renovate-managed',
     );
     return;
