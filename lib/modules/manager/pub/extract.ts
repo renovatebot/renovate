@@ -1,0 +1,154 @@
+import { isObject, isString } from '@sindresorhus/is';
+import type { SkipReason } from '../../../types/index.ts';
+import type { ConstraintName } from '../../../util/exec/types.ts';
+import { DartDatasource } from '../../datasource/dart/index.ts';
+import { DartVersionDatasource } from '../../datasource/dart-version/index.ts';
+import { FlutterVersionDatasource } from '../../datasource/flutter-version/index.ts';
+import { GitRefsDatasource } from '../../datasource/git-refs/index.ts';
+import type { PackageDependency, PackageFileContent } from '../types.ts';
+import type { Pubspec } from './schema.ts';
+import { parsePubspec } from './utils.ts';
+
+function extractFromSection(
+  pubspec: Pubspec,
+  sectionKey: keyof Pick<Pubspec, 'dependencies' | 'dev_dependencies'>,
+): PackageDependency[] {
+  const sectionContent = pubspec[sectionKey];
+  if (!sectionContent) {
+    return [];
+  }
+
+  const skippedPackages = [
+    'flutter_driver',
+    'flutter_localizations',
+    'flutter_test',
+    'flutter_web_plugins',
+    'meta',
+  ];
+  const deps: PackageDependency[] = [];
+  for (const depName of Object.keys(sectionContent)) {
+    if (skippedPackages.includes(depName)) {
+      continue;
+    }
+
+    let currentValue = sectionContent[depName];
+    let skipReason: SkipReason | undefined;
+    let registryUrls: string[] | undefined;
+    let gitUrl: string | undefined;
+
+    if (!isString(currentValue)) {
+      const version = currentValue.version;
+      const path = currentValue.path;
+      const hosted = currentValue.hosted;
+      const git = currentValue.git;
+
+      if (isString(hosted)) {
+        registryUrls = [hosted];
+      } else if (isString(hosted?.url)) {
+        registryUrls = [hosted.url];
+      }
+
+      if (isObject(git)) {
+        gitUrl = git?.url;
+      } else if (isString(git)) {
+        gitUrl = git;
+      }
+
+      if (version) {
+        currentValue = version;
+      } else if (path) {
+        currentValue = '';
+        skipReason = 'path-dependency';
+      } else if (isObject(git) && isString(git?.ref)) {
+        currentValue = git.ref;
+      } else if (isObject(git) && !isString(git?.ref) && !isString(version)) {
+        currentValue = '';
+        skipReason = 'unspecified-version';
+      } else {
+        currentValue = '';
+      }
+    }
+
+    if (gitUrl === undefined) {
+      deps.push({
+        depName,
+        depType: sectionKey,
+        currentValue,
+        datasource: DartDatasource.id,
+        ...(registryUrls && { registryUrls }),
+        skipReason,
+      });
+    } else {
+      deps.push({
+        depName,
+        depType: sectionKey,
+        packageName: gitUrl,
+        datasource: GitRefsDatasource.id,
+        currentValue,
+        skipReason,
+      });
+    }
+  }
+
+  return deps;
+}
+
+function extractDart(pubspec: Pubspec): PackageDependency[] {
+  return [
+    {
+      depName: 'dart',
+      currentValue: pubspec.environment.sdk,
+      datasource: DartVersionDatasource.id,
+    },
+  ];
+}
+
+function extractFlutter(pubspec: Pubspec): PackageDependency[] {
+  const currentValue = pubspec.environment.flutter;
+  if (!currentValue) {
+    return [];
+  }
+
+  return [
+    {
+      depName: 'flutter',
+      currentValue,
+      datasource: FlutterVersionDatasource.id,
+    },
+  ];
+}
+
+function extractConstraints(
+  pubspec: Pubspec,
+): Partial<Record<ConstraintName, string>> {
+  const extractedConstraints: Partial<Record<ConstraintName, string>> = {
+    // environment.sdk is a required field in a pubspec
+    dart: pubspec.environment.sdk,
+  };
+
+  if (pubspec.environment.flutter) {
+    extractedConstraints.flutter = pubspec.environment.flutter;
+  }
+
+  return extractedConstraints;
+}
+
+export function extractPackageFile(
+  content: string,
+  packageFile: string,
+): PackageFileContent | null {
+  const pubspec = parsePubspec(packageFile, content);
+  if (!pubspec) {
+    return null;
+  }
+
+  return {
+    deps: [
+      ...extractFromSection(pubspec, 'dependencies'),
+      ...extractFromSection(pubspec, 'dev_dependencies'),
+      ...extractDart(pubspec),
+      ...extractFlutter(pubspec),
+    ],
+    extractedConstraints: extractConstraints(pubspec),
+  };
+}

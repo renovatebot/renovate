@@ -1,0 +1,49 @@
+import upath from 'upath';
+import { GlobalConfig } from '../../../config/global.ts';
+import { logger } from '../../../logger/index.ts';
+import { readLocalFile } from '../../../util/fs/index.ts';
+import { createSimpleGit } from '../../../util/git/index.ts';
+import type { UpdateDependencyConfig } from '../types.ts';
+
+export default async function updateDependency({
+  fileContent,
+  upgrade,
+}: UpdateDependencyConfig): Promise<string | null> {
+  // TODO: types (#22198)
+  const localDir = GlobalConfig.get('localDir');
+  const authentication = {
+    hostTypes: ['git-tags', 'git-refs'],
+  };
+
+  const git = createSimpleGit({
+    config: { baseDir: localDir },
+    authentication,
+  });
+  const submoduleGit = createSimpleGit({
+    // TODO: types (#22198)
+    config: { baseDir: upath.join(localDir, upgrade.depName!) },
+    authentication,
+  });
+
+  try {
+    await git.submoduleUpdate(['--checkout', '--init', upgrade.depName!]);
+    await submoduleGit.checkout([upgrade.newDigest!]);
+    if (upgrade.newValue && upgrade.currentValue !== upgrade.newValue) {
+      await git.subModule([
+        'set-branch',
+        '--branch',
+        upgrade.newValue,
+        upgrade.depName!,
+      ]);
+      const updatedPackageContent = await readLocalFile(
+        upgrade.packageFile!,
+        'utf8',
+      );
+      return updatedPackageContent!;
+    }
+    return fileContent;
+  } catch (err) {
+    logger.debug({ err }, 'submodule checkout error');
+    return null;
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "dependencies": {
+    "kgabis/parson": "0.0.0"
+  },
+  "development": {
+    "silentbicycle/greatest": "v1.2.1"
+  }
+}

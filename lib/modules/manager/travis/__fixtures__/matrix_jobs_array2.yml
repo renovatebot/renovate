@@ -1,0 +1,7 @@
+jobs: 
+  include: 
+    - env: js-tests 
+      language: node_js 
+      node_js: 
+        - '11.10.1' 
+        - '11.10.2'

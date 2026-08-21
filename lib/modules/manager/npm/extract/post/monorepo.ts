@@ -1,0 +1,79 @@
+import { isArray, isString, isTruthy } from '@sindresorhus/is';
+import { logger } from '../../../../../logger/index.ts';
+import {
+  getParentDir,
+  getSiblingFileName,
+} from '../../../../../util/fs/index.ts';
+import type { PackageFile } from '../../../types.ts';
+import type { NpmManagerData } from '../../types.ts';
+import { detectPnpmWorkspaces } from '../pnpm.ts';
+import { matchesAnyPattern } from '../utils.ts';
+
+export async function detectMonorepos(
+  packageFiles: Partial<PackageFile<NpmManagerData>>[],
+): Promise<void> {
+  await detectPnpmWorkspaces(packageFiles);
+  logger.debug('Detecting workspaces');
+  for (const p of packageFiles) {
+    const { packageFile, npmrc, managerData = {}, skipInstalls } = p;
+    const {
+      npmLock,
+      yarnZeroInstall,
+      hasPackageManager,
+      workspacesPackages,
+      yarnLock,
+    } = managerData;
+
+    const packages = workspacesPackages as string[] | undefined;
+    if (packages?.length) {
+      const internalPackagePatterns = (
+        isArray(packages) ? packages : [packages]
+      ).map((pattern) => getSiblingFileName(packageFile!, pattern));
+      const internalPackageFiles = packageFiles.filter((sp) =>
+        matchesAnyPattern(
+          getParentDir(sp.packageFile!),
+          internalPackagePatterns,
+        ),
+      );
+      const internalPackageNames = internalPackageFiles
+        .map((sp) => sp.managerData?.packageJsonName)
+        .filter(isTruthy);
+
+      p.deps?.forEach((dep) => {
+        if (
+          isString(dep.depName) &&
+          internalPackageNames.includes(dep.depName)
+        ) {
+          dep.isInternal = true;
+        }
+      });
+
+      for (const subPackage of internalPackageFiles) {
+        subPackage.managerData = subPackage.managerData ?? {};
+        subPackage.managerData.yarnZeroInstall = yarnZeroInstall;
+        subPackage.managerData.hasPackageManager = hasPackageManager;
+        subPackage.managerData.yarnLock ??= yarnLock;
+        subPackage.managerData.npmLock ??= npmLock;
+        subPackage.skipInstalls = skipInstalls && subPackage.skipInstalls; // skip if both are true
+        subPackage.managerData.workspacesPackages = workspacesPackages;
+        subPackage.npmrc ??= npmrc;
+
+        if (p.extractedConstraints) {
+          subPackage.extractedConstraints = {
+            ...p.extractedConstraints,
+            ...subPackage.extractedConstraints,
+          };
+        }
+
+        subPackage.deps?.forEach((dep) => {
+          if (
+            isString(dep.depName) &&
+            internalPackageNames.includes(dep.depName)
+          ) {
+            dep.isInternal = true;
+          }
+        });
+      }
+    }
+  }
+}

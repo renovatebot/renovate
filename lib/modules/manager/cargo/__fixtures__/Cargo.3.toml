@@ -1,0 +1,13 @@
+[package]
+name = "inline-tables-example"
+version = "0.1.2"
+
+[dependencies]
+pcap-sys = { version = "0.1", path = "pcap-sys" }
+pnet = { version = "0.21.0", optional = true, default-features = false}
+dep1 = {optional=true,path="./foo/bar",default-features   = true,        version="1.2"}
+dep2 ={  optional=false, path="./foo/bar",      default-features=    true, version    ="3.4"}
+dep3 ={ version=     "~12.3.1",      default-features=    true, path    ="./foo/bar"}
+dep4 = { version = "INVALID 3.3.1 VERSION" }
+dep5 = { brk = { x = 1, y = 2, z = 3 }, version = "3.2.1", foo    = { bar = '3.2', baz = '3' } }
+dep6 = { vesion = "1.2.3" } # Intentional typo

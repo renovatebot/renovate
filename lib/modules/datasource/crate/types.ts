@@ -1,0 +1,29 @@
+export type RegistryFlavor =
+  /** https://crates.io, supports rawgit access */
+  | 'crates.io'
+
+  /** https://cloudsmith.io, needs git clone */
+  | 'cloudsmith'
+
+  /** unknown, assuming private git repository */
+  | 'other';
+
+export interface RegistryInfo {
+  flavor: RegistryFlavor;
+
+  /** raw URL of the registry, as specified in cargo config */
+  rawUrl: string;
+
+  /** parsed URL of the registry */
+  url: URL;
+
+  /** path where the registry is cloned, otherwise a sparse registry */
+  clonePath?: string;
+}
+
+export interface CrateRecord {
+  vers: string;
+  yanked: boolean;
+  rust_version?: string;
+  pubtime?: string;
+}

@@ -1,0 +1,22 @@
+---
+apiVersion: pkg.crossplane.io/v1
+kind: Provider
+metadata:
+  name: provider-nop
+spec:
+  package: xpkg.upbound.io/crossplane-contrib/provider-nop:v0.2.0
+  ignoreCrossplaneConstraints: true
+---
+apiVersion: pkg.crossplane.io/v1beta1
+kind: Function
+metadata:
+  name: function-dummy
+spec:
+  package: xpkg.upbound.io/crossplane-contrib/function-dummy:v0.2.1
+---
+apiVersion: pkg.crossplane.io/v1
+kind: Configuration
+metadata:
+  name: platform-ref-aws
+spec:
+  package: xpkg.upbound.io/upbound/platform-ref-aws:v0.6.0

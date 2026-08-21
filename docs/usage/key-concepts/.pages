@@ -1,0 +1,9 @@
+nav:
+  - 'How Renovate works': 'how-renovate-works.md'
+  - 'Presets': 'presets.md'
+  - 'Dependency Dashboard': 'dashboard.md'
+  - 'Pull Requests': 'pull-requests.md'
+  - 'Renovate Scheduling': 'scheduling.md'
+  - 'Automerge': 'automerge.md'
+  - 'Minimum Release Age': 'minimum-release-age.md'
+  - 'Renovate and changelogs': 'changelogs.md'

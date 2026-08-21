@@ -1,0 +1,52 @@
+import { remark } from 'remark';
+import gfm from 'remark-gfm';
+import type { Options as RemarkGithubOptions } from 'remark-github';
+import github from 'remark-github';
+import { regEx } from './regex.ts';
+
+// Generic replacements/link-breakers
+export function sanitizeMarkdown(markdown: string): string {
+  let res = markdown;
+  // Put a zero width space after every # followed by a digit
+  res = res.replace(regEx(/(\W)#(\d)/gi), '$1#&#8203;$2');
+  // Put a zero width space after every @ symbol to prevent unintended hyperlinking,
+  // but leave code blocks (triple backticks) and inline code spans untouched
+  res = res
+    .split(regEx(/(```[\s\S]*?```|`[^`\n]*?`)/g))
+    .map((part) =>
+      part.startsWith('`') ? part : part.replace(regEx(/@/g), '@&#8203;'),
+    )
+    .join('');
+  res = res.replace(regEx(/([a-z]@)&#8203;/gi), '$1');
+  res = res.replace(regEx(/\/compare\/@&#8203;/g), '/compare/@');
+  res = res.replace(regEx(/(\(https:\/\/[^)]*?)\.\.\.@&#8203;/g), '$1...@');
+  res = res.replace(regEx(/([\s(])#(\d+)([)\s]?)/g), '$1#&#8203;$2$3');
+  // convert escaped backticks back to `
+  const backTickRe = regEx(/&#x60;([^/]*?)&#x60;/g);
+  res = res.replace(backTickRe, '`$1`');
+  res = res.replace(regEx(/`#&#8203;(\d+)`/g), '`#$1`');
+  res = res.replace(
+    regEx(/(?<before>[^\n]\n)(?<title>#.*)/g),
+    '$<before>\n$<title>',
+  );
+  return res;
+}
+
+/**
+ *
+ * @param content content to process
+ * @param options github options
+ * @returns linkified content
+ */
+export async function linkify(
+  content: string,
+  options: RemarkGithubOptions,
+): Promise<string> {
+  // https://github.com/syntax-tree/mdast-util-to-markdown#optionsbullet
+  const output = await remark()
+    .use({ settings: { bullet: '-' } })
+    .use(gfm)
+    .use(github, { mentionStrong: false, ...options })
+    .process(content);
+  return output.toString();
+}

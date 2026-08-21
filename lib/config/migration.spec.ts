@@ -1,0 +1,863 @@
+import { logger } from '~test/util.ts';
+import { GlobalConfig } from './global.ts';
+import * as configMigration from './migration.ts';
+import { MigrationsService } from './migrations/index.ts';
+import type {
+  MigratedConfig,
+  RenovateConfig,
+  RenovateSharedConfig,
+} from './types.ts';
+
+interface TestRenovateConfig extends RenovateConfig {
+  node?: RenovateSharedConfig;
+}
+
+describe('config/migration', () => {
+  describe('migrateConfig(config, parentConfig)', () => {
+    it('migrates config', () => {
+      // oxlint-disable-next-line renovate/prefer-partial-in-specs -- legacy config with removed options for migration test
+      const config: TestRenovateConfig = {
+        endpoints: [{}] as never,
+        enabled: true,
+        platform: 'github',
+        hostRules: [
+          {
+            platform: 'docker',
+            endpoint: 'https://docker.io',
+            username: 'some-username',
+            password: 'some-password',
+          },
+        ],
+        compatibility: {
+          python: '3.7',
+        },
+        extends: [
+          ':automergeBranchMergeCommit',
+          ':disableLockFiles',
+          'default:js-app',
+          'config:library',
+          ':masterIssue',
+          'helpers:oddIsUnstable',
+        ],
+        maintainYarnLock: true,
+        onboarding: 'false' as never,
+        multipleMajorPrs: true,
+        gitFs: false,
+        deepExtract: true,
+        ignoreNpmrcFile: true,
+        separateMajorReleases: true,
+        separatePatchReleases: true,
+        suppressNotifications: ['lockFileErrors', 'prEditNotification'],
+        automerge: 'none' as never,
+        automergeMajor: false,
+        binarySource: 'auto',
+        automergeMinor: true,
+        automergePatch: true,
+        masterIssue: 'true',
+        masterIssueTitle: 'foo',
+        gomodTidy: true,
+        upgradeInRange: true,
+        trustLevel: 'high',
+        updateLockFiles: false,
+        automergeType: 'branch-push',
+        branchName:
+          '{{{branchPrefix}}}{{{managerBranchPrefix}}}{{{branchTopic}}}{{{baseDir}}}',
+        baseBranch: 'next',
+        managerBranchPrefix: 'foo',
+        branchPrefix: 'renovate/{{parentDir}}-',
+        renovateFork: true,
+        ignoreNodeModules: true,
+        node: {
+          enabled: true,
+        },
+        poetry: {
+          rebaseStalePrs: true,
+          versionScheme: 'pep440',
+        },
+        pipenv: {
+          rebaseStalePrs: false,
+          rebaseConflictedPrs: true,
+        },
+        pip_setup: {
+          rebaseConflictedPrs: false,
+        },
+        rebaseStalePrs: null,
+        rebaseConflictedPrs: true,
+        meteor: true,
+        autodiscover: 'true' as never,
+        schedule: 'on the last day of the month' as never,
+        commitMessage:
+          '{{semanticPrefix}}some commit message {{depNameShort}} {{lookupName}}',
+        prTitle: '{{semanticPrefix}}some pr title',
+        semanticPrefix: 'fix(deps): ',
+        pathRules: [
+          {
+            paths: ['examples/**'],
+            extends: ['foo'],
+          },
+        ],
+        peerDependencies: {
+          versionStrategy: 'widen',
+        },
+        packageRules: [
+          {
+            packagePatterns: '^(@angular|typescript)' as never,
+            groupName: ['angular packages'] as never,
+            excludedPackageNames: 'foo',
+          },
+          {
+            packagePatterns: ['^foo'],
+            groupName: ['foo'] as never,
+          },
+          {
+            packageName: 'angular',
+            packagePattern: 'ang',
+            enabled: false,
+          },
+          {
+            packageNames: ['guava'],
+            versionScheme: 'maven',
+          },
+          {
+            packageNames: ['foo'],
+            packageRules: [
+              {
+                depTypeList: ['bar'],
+                automerge: true,
+              },
+            ],
+          },
+        ],
+        dotnet: {
+          enabled: false,
+        },
+        exposeEnv: true,
+        lockFileMaintenance: {
+          exposeEnv: false,
+          gitFs: true,
+          automerge: 'any' as never,
+          schedule: 'before 5am every day' as never,
+        },
+        devDependencies: {
+          automerge: 'minor',
+          schedule: null,
+        },
+        python: {
+          packageRules: [
+            {
+              matchPackageNames: ['foo'],
+              enabled: false,
+            },
+          ],
+        },
+        nvmrc: {
+          pathRules: [
+            {
+              paths: ['node/**'],
+              extends: 'node',
+            },
+          ],
+        },
+        depTypes: [
+          'dependencies',
+          {
+            depType: 'optionalDependencies',
+            respectLatest: false,
+            automerge: 'minor',
+            schedule: 'before 5am on Mondays',
+          },
+        ],
+        raiseDeprecationWarnings: false,
+        enabledManagers: ['yarn'],
+      } as any;
+      const { isMigrated, migratedConfig } =
+        configMigration.migrateConfig(config);
+      expect(migratedConfig).toMatchSnapshot();
+      expect(isMigrated).toBeTrue();
+      // @ts-expect-error -- TODO: fix me
+      expect(migratedConfig.depTypes).toBeUndefined();
+      expect(migratedConfig.automerge).toBe(false);
+      expect(migratedConfig.packageRules).toHaveLength(11);
+      expect(migratedConfig.hostRules).toHaveLength(1);
+      expect(migratedConfig.baseBranchPatterns).toMatchObject(['next']);
+    });
+
+    it('migrates before and after schedules', () => {
+      const config = {
+        major: {
+          schedule: 'after 10pm and before 7am' as never,
+        },
+        minor: {
+          schedule: 'after 10pm and before 7am on every weekday' as never,
+        },
+      };
+      const { isMigrated, migratedConfig } =
+        configMigration.migrateConfig(config);
+      expect(migratedConfig).toMatchSnapshot();
+      expect(isMigrated).toBeTrue();
+      expect(migratedConfig.major).toMatchObject({
+        schedule: ['after 10pm', 'before 7am'],
+      });
+      expect(migratedConfig.minor).toMatchObject({
+        schedule: ['after 10pm every weekday', 'before 7am every weekday'],
+      });
+    });
+
+    it('migrates every friday', () => {
+      const config = {
+        schedule: 'every friday' as never,
+      };
+      const { isMigrated, migratedConfig } =
+        configMigration.migrateConfig(config);
+      expect(isMigrated).toBeTrue();
+      expect(migratedConfig.schedule).toBe('on friday');
+    });
+
+    it('migrates semantic prefix with no scope', () => {
+      const config = {
+        semanticPrefix: 'fix',
+      };
+      const { isMigrated, migratedConfig } =
+        // @ts-expect-error -- TODO: fix me
+        configMigration.migrateConfig(config);
+      expect(isMigrated).toBeTrue();
+      expect(migratedConfig.semanticCommitScope).toBeNull();
+    });
+
+    it('does not migrate every weekday', () => {
+      const config = {
+        schedule: 'every weekday' as never,
+      };
+      const { isMigrated, migratedConfig } =
+        configMigration.migrateConfig(config);
+      expect(isMigrated).toBeFalse();
+      expect(migratedConfig.schedule).toEqual(config.schedule);
+    });
+
+    it('does not migrate multi days', () => {
+      const config = {
+        schedule: 'after 5:00pm on wednesday and thursday' as never,
+      };
+      const { isMigrated, migratedConfig } =
+        configMigration.migrateConfig(config);
+      expect(migratedConfig).toMatchSnapshot();
+      expect(isMigrated).toBeFalse();
+      expect(migratedConfig.schedule).toEqual(config.schedule);
+    });
+
+    it('does not migrate hour range', () => {
+      const config = {
+        schedule: 'after 1:00pm and before 5:00pm' as never,
+      };
+      const { isMigrated, migratedConfig } =
+        configMigration.migrateConfig(config);
+      expect(migratedConfig.schedule).toEqual(config.schedule);
+      expect(isMigrated).toBeFalse();
+    });
+
+    it('migrates packages', () => {
+      // oxlint-disable-next-line renovate/prefer-partial-in-specs -- intentionally invalid legacy packages config for migration test
+      const config = {
+        packages: [
+          {
+            packagePatterns: '^(@angular|typescript)',
+            groupName: ['angular packages'],
+          },
+        ],
+      } as unknown as RenovateConfig;
+      const { isMigrated, migratedConfig } =
+        configMigration.migrateConfig(config);
+      expect(isMigrated).toBeTrue();
+      expect(migratedConfig).toEqual({
+        packageRules: [
+          {
+            matchPackageNames: ['/^(@angular|typescript)/'],
+            groupName: 'angular packages',
+          },
+        ],
+      });
+    });
+
+    it('overrides existing automerge setting', () => {
+      const config: TestRenovateConfig = {
+        automerge: 'minor' as never,
+        // @ts-expect-error -- TODO: fix me
+        packages: [
+          {
+            packagePatterns: '^(@angular|typescript)',
+            automerge: 'patch',
+          },
+        ],
+      };
+      const { isMigrated, migratedConfig } =
+        configMigration.migrateConfig(config);
+      expect(isMigrated).toBeTrue();
+      expect(migratedConfig).toMatchSnapshot();
+      expect(migratedConfig.packageRules?.[0].minor?.automerge).toBeFalse();
+    });
+
+    it('does not migrate config', () => {
+      const config: TestRenovateConfig = {
+        enabled: true,
+        separateMinorPatch: true,
+      };
+      const { isMigrated, migratedConfig } =
+        configMigration.migrateConfig(config);
+      expect(isMigrated).toBeFalse();
+      expect(migratedConfig).toMatchObject(config);
+    });
+
+    it('migrates subconfig', () => {
+      const config: TestRenovateConfig = {
+        lockFileMaintenance: {
+          // @ts-expect-error -- TODO: fix me
+          depTypes: [
+            'dependencies',
+            {
+              depType: 'optionalDependencies',
+              respectLatest: false,
+            },
+          ],
+        },
+      };
+      const { isMigrated, migratedConfig } =
+        configMigration.migrateConfig(config);
+      expect(isMigrated).toBeTrue();
+      expect(migratedConfig).toMatchSnapshot();
+      // @ts-expect-error -- TODO: fix me
+      expect(migratedConfig.lockFileMaintenance?.packageRules).toHaveLength(1);
+      // TODO: fix types #22198
+      expect(
+        (migratedConfig.lockFileMaintenance as RenovateConfig)
+          ?.packageRules?.[0].respectLatest,
+      ).toBeFalse();
+    });
+
+    it('migrates packageFiles', () => {
+      const config: TestRenovateConfig = {
+        // @ts-expect-error -- TODO: fix me
+        packageFiles: [
+          'package.json',
+          { packageFile: 'backend/package.json', pinVersions: false },
+          { packageFile: 'frontend/package.json', pinVersions: true },
+          {
+            packageFile: 'other/package.json',
+            devDependencies: { pinVersions: true },
+            dependencies: { pinVersions: true },
+          },
+        ],
+      };
+      const { isMigrated, migratedConfig } =
+        configMigration.migrateConfig(config);
+      expect(migratedConfig).toMatchSnapshot();
+      expect(isMigrated).toBeTrue();
+      expect(migratedConfig.includePaths).toHaveLength(4);
+      // @ts-expect-error -- TODO: fix me
+      expect(migratedConfig.packageFiles).toBeUndefined();
+      expect(migratedConfig.packageRules).toHaveLength(4);
+      expect(migratedConfig.packageRules?.[0].rangeStrategy).toBe('replace');
+      expect(migratedConfig.packageRules?.[1].rangeStrategy).toBe('pin');
+    });
+
+    it('migrates more packageFiles', () => {
+      const config: TestRenovateConfig = {
+        // @ts-expect-error -- TODO: fix me
+        packageFiles: [
+          {
+            packageFile: 'package.json',
+            packageRules: [
+              {
+                pinVersions: true,
+                depTypeList: ['devDependencies'],
+              },
+              {
+                pinVersions: true,
+                depTypeList: ['dependencies'],
+              },
+            ],
+          },
+        ],
+      };
+      const { isMigrated, migratedConfig } =
+        configMigration.migrateConfig(config);
+      expect(migratedConfig).toMatchSnapshot();
+      expect(isMigrated).toBeTrue();
+      expect(migratedConfig.includePaths).toHaveLength(1);
+      // @ts-expect-error -- TODO: fix me
+      expect(migratedConfig.packageFiles).toBeUndefined();
+      expect(migratedConfig.packageRules).toHaveLength(2);
+    });
+
+    it('removes invalid configs', () => {
+      const config: TestRenovateConfig = {
+        // @ts-expect-error -- TODO: fix me
+        pathRules: {},
+        packageFiles: [{ packageFile: 'test' }],
+        gomodTidy: false,
+        pinVersions: undefined,
+        rebaseStalePrs: true,
+        rebaseWhen: 'auto',
+        exposeEnv: undefined,
+        upgradeInRange: false,
+        versionStrategy: undefined,
+        ignoreNodeModules: undefined,
+        baseBranch: [] as never,
+        depTypes: [{}],
+        commitMessage: 'test',
+        raiseDeprecationWarnings: undefined,
+      };
+      const { isMigrated, migratedConfig } =
+        configMigration.migrateConfig(config);
+      expect(migratedConfig).toEqual({
+        baseBranchPatterns: [],
+        commitMessage: 'test',
+        ignorePaths: [],
+        includePaths: ['test'],
+        rebaseWhen: 'auto',
+      });
+      expect(isMigrated).toBeTrue();
+    });
+
+    it('migrates preset strings to array', () => {
+      let config: TestRenovateConfig;
+      let res: MigratedConfig;
+
+      // oxlint-disable-next-line renovate/prefer-partial-in-specs -- intentionally invalid string `extends` for migration test
+      config = { extends: ':js-app' } as never;
+      res = configMigration.migrateConfig(config);
+      expect(res.isMigrated).toBeTrue();
+      expect(res.migratedConfig).toMatchObject({ extends: ['config:js-app'] });
+
+      // oxlint-disable-next-line renovate/prefer-partial-in-specs -- intentionally invalid string `extends` for migration test
+      config = { extends: 'foo' } as never;
+      res = configMigration.migrateConfig(config);
+      expect(res.isMigrated).toBeTrue();
+      expect(res.migratedConfig).toMatchObject({ extends: ['foo'] });
+
+      config = { extends: ['foo', ':js-app', 'bar'] };
+      res = configMigration.migrateConfig(config);
+      expect(res.isMigrated).toBeTrue();
+      expect(res.migratedConfig).toMatchObject({
+        extends: ['foo', 'config:js-app', 'bar'],
+      });
+    });
+
+    it('migrates unpublishSafe', () => {
+      let config: TestRenovateConfig;
+      let res: MigratedConfig;
+
+      // @ts-expect-error -- TODO: fix me
+      config = { unpublishSafe: true };
+      res = configMigration.migrateConfig(config);
+      expect(res.isMigrated).toBeTrue();
+      expect(res.migratedConfig).toMatchObject({
+        extends: ['security:minimumReleaseAgeNpm'],
+      });
+
+      // oxlint-disable-next-line renovate/prefer-partial-in-specs -- intentionally invalid legacy unpublishSafe/string extends for migration test
+      config = { unpublishSafe: true, extends: 'foo' } as never;
+      res = configMigration.migrateConfig(config);
+      expect(res.isMigrated).toBeTrue();
+      expect(res.migratedConfig).toMatchObject({
+        extends: ['foo', 'security:minimumReleaseAgeNpm'],
+      });
+
+      // @ts-expect-error -- TODO: fix me
+      config = { unpublishSafe: true, extends: [] };
+      res = configMigration.migrateConfig(config);
+      expect(res.isMigrated).toBeTrue();
+      expect(res.migratedConfig).toMatchObject({
+        extends: ['security:minimumReleaseAgeNpm'],
+      });
+
+      // @ts-expect-error -- TODO: fix me
+      config = { unpublishSafe: true, extends: ['foo', 'bar'] };
+      res = configMigration.migrateConfig(config);
+      expect(res.isMigrated).toBeTrue();
+      expect(res.migratedConfig).toMatchObject({
+        extends: ['foo', 'bar', 'security:minimumReleaseAgeNpm'],
+      });
+
+      config = {
+        // @ts-expect-error -- TODO: fix me
+        unpublishSafe: true,
+        extends: ['foo', ':unpublishSafe', 'bar'],
+      };
+      res = configMigration.migrateConfig(config);
+      expect(res.isMigrated).toBeTrue();
+      expect(res.migratedConfig).toMatchObject({
+        extends: ['foo', 'security:minimumReleaseAgeNpm', 'bar'],
+      });
+
+      config = {
+        // @ts-expect-error -- TODO: fix me
+        unpublishSafe: true,
+        extends: ['foo', 'default:unpublishSafe', 'bar'],
+      };
+      res = configMigration.migrateConfig(config);
+      expect(res.isMigrated).toBeTrue();
+      expect(res.migratedConfig).toMatchObject({
+        extends: ['foo', 'security:minimumReleaseAgeNpm', 'bar'],
+      });
+
+      config = {
+        // @ts-expect-error -- TODO: fix me
+        unpublishSafe: false,
+        extends: ['foo', 'bar'],
+      };
+      res = configMigration.migrateConfig(config);
+      expect(res.isMigrated).toBeTrue();
+      expect(res.migratedConfig).toMatchObject({
+        extends: ['foo', 'bar'],
+      });
+
+      config = {
+        // @ts-expect-error -- TODO: fix me
+        unpublishSafe: true,
+        extends: ['foo', 'bar'],
+      };
+      res = configMigration.migrateConfig(config);
+      expect(res.isMigrated).toBeTrue();
+      expect(res.migratedConfig).toMatchObject({
+        extends: ['foo', 'bar', 'security:minimumReleaseAgeNpm'],
+      });
+
+      config = {
+        // @ts-expect-error -- TODO: fix me
+        unpublishSafe: true,
+        extends: [':unpublishSafeDisabled'],
+      };
+      res = configMigration.migrateConfig(config);
+      expect(res.isMigrated).toBeTrue();
+      expect(res.migratedConfig).toMatchObject({
+        extends: [':unpublishSafeDisabled', 'security:minimumReleaseAgeNpm'],
+      });
+    });
+
+    it('migrates npm:unpublishSafe', () => {
+      let config: TestRenovateConfig;
+      let res: MigratedConfig;
+
+      config = { extends: ['npm:unpublishSafe'] };
+      res = configMigration.migrateConfig(config);
+      expect(res.isMigrated).toBeTrue();
+      expect(res.migratedConfig).toMatchObject({
+        extends: ['security:minimumReleaseAgeNpm'],
+      });
+
+      config = { extends: ['foo', 'npm:unpublishSafe'] };
+      res = configMigration.migrateConfig(config);
+      expect(res.isMigrated).toBeTrue();
+      expect(res.migratedConfig).toMatchObject({
+        extends: ['foo', 'security:minimumReleaseAgeNpm'],
+      });
+    });
+
+    it('migrates packageRules', () => {
+      const config: TestRenovateConfig = {
+        packageRules: [
+          {
+            // @ts-expect-error -- TODO: fix me
+            paths: ['package.json'],
+            languages: ['python'],
+            baseBranchList: ['master'],
+            managers: ['dockerfile'],
+            datasources: ['orb'],
+            depTypeList: ['peerDependencies'],
+            packageNames: ['foo'],
+            packagePatterns: ['^bar'],
+            excludePackageNames: ['baz'],
+            excludePackagePatterns: ['^baz'],
+            excludeRepositories: ['abc/def'],
+            sourceUrlPrefixes: ['https://github.com/lodash'],
+            updateTypes: ['major'],
+          },
+        ],
+      };
+      const { isMigrated, migratedConfig } =
+        configMigration.migrateConfig(config);
+      expect(isMigrated).toBeTrue();
+      expect(migratedConfig).toEqual({
+        packageRules: [
+          {
+            matchBaseBranches: ['master'],
+            matchDatasources: ['orb'],
+            matchDepTypes: ['peerDependencies'],
+            matchCategories: ['python'],
+            matchManagers: ['dockerfile'],
+            matchPackageNames: ['foo', '/^bar/', '!baz', '!/^baz/'],
+            matchRepositories: ['!abc/def'],
+            matchFileNames: ['package.json'],
+            matchSourceUrls: ['https://github.com/lodash{/,}**'],
+            matchUpdateTypes: ['major'],
+          },
+        ],
+      });
+    });
+
+    it('migrates in order of precedence', () => {
+      const config: TestRenovateConfig = {
+        packageRules: [
+          {
+            // @ts-expect-error -- TODO: fix me
+            matchFiles: ['matchFiles'],
+            matchPaths: ['matchPaths'],
+          },
+          {
+            // @ts-expect-error -- TODO: fix me
+            matchPaths: ['matchPaths'],
+            matchFiles: ['matchFiles'],
+          },
+        ],
+      };
+      const { isMigrated, migratedConfig } =
+        configMigration.migrateConfig(config);
+      expect(isMigrated).toBeTrue();
+      expect(migratedConfig).toEqual({
+        packageRules: [
+          {
+            matchFileNames: ['matchPaths'],
+          },
+          {
+            matchFileNames: ['matchFiles'],
+          },
+        ],
+      });
+    });
+  });
+
+  it('migrates nested packageRules', () => {
+    const config: TestRenovateConfig = {
+      packageRules: [
+        {
+          matchDepTypes: ['devDependencies'],
+          enabled: false,
+        },
+        {
+          automerge: true,
+          // @ts-expect-error -- TODO: fix me
+          excludePackageNames: ['@types/react-table'],
+          packageRules: [
+            {
+              groupName: 'definitelyTyped',
+              matchPackageNames: ['@types/**'],
+            },
+            {
+              matchDepTypes: ['dependencies'],
+              automerge: false,
+            },
+          ],
+        },
+      ],
+    };
+    const { isMigrated, migratedConfig } =
+      configMigration.migrateConfig(config);
+    expect(isMigrated).toBeTrue();
+    expect(migratedConfig).toMatchSnapshot();
+    expect(migratedConfig.packageRules).toHaveLength(3);
+  });
+
+  it('migrates presets', () => {
+    GlobalConfig.set({
+      migratePresets: {
+        '@org': 'local>org/renovate-config',
+        '@org2/foo': '',
+      },
+    });
+    const config: RenovateConfig = {
+      extends: ['@org', '@org2/foo'],
+    };
+    const { isMigrated, migratedConfig } =
+      configMigration.migrateConfig(config);
+    expect(isMigrated).toBeTrue();
+    expect(migratedConfig).toEqual({ extends: ['local>org/renovate-config'] });
+  });
+
+  it('migrates customManagers', () => {
+    const config: RenovateConfig = {
+      customManagers: [
+        {
+          customType: 'regex',
+          fileMatch: ['(^|/|\\.)Dockerfile$', '(^|/)Dockerfile[^/]*$'],
+          matchStrings: [
+            '# renovate: datasource=(?<datasource>[a-z-]+?) depName=(?<depName>[^\\s]+?)(?: lookupName=(?<lookupName>[^\\s]+?))?(?: versioning=(?<versioning>[a-z-0-9]+?))?\\s(?:ENV|ARG) .+?_VERSION="?(?<currentValue>.+?)"?\\s',
+          ],
+        },
+        // oxlint-disable-next-line renovate/prefer-partial-in-specs -- legacy lookupNameTemplate field for migration test
+        {
+          fileMatch: ['(^|/|\\.)Dockerfile$', '(^|/)Dockerfile[^/]*$'],
+          matchStrings: [
+            '# renovate: datasource=(?<datasource>[a-z-]+?) depName=(?<depName>[^\\s]+?)(?: lookupName=(?<holder>[^\\s]+?))?(?: versioning=(?<versioning>[a-z-0-9]+?))?\\s(?:ENV|ARG) .+?_VERSION="?(?<currentValue>.+?)"?\\s',
+          ],
+          lookupNameTemplate: '{{{holder}}}',
+        } as any,
+      ],
+    };
+    const { isMigrated, migratedConfig } =
+      configMigration.migrateConfig(config);
+    expect(isMigrated).toBeTrue();
+    expect(migratedConfig).toMatchSnapshot();
+  });
+
+  it('migrates pip-compile', () => {
+    const config: RenovateConfig = {
+      // @ts-expect-error -- TODO: fix me
+      'pip-compile': {
+        enabled: true,
+        fileMatch: [
+          '(^|/)requirements\\.in$',
+          '(^|/)requirements-fmt\\.in$',
+          '(^|/)requirements-lint\\.in$',
+          '.github/workflows/requirements.in',
+          '(^|/)debian_packages/private/third_party/requirements\\.in$',
+          '(^|/).*?requirements.*?\\.in$',
+        ],
+        managerFilePatterns: ['requirements.in'],
+      },
+    };
+    const { isMigrated, migratedConfig } =
+      configMigration.migrateConfig(config);
+    expect(isMigrated).toBeTrue();
+    expect(migratedConfig).toEqual({
+      'pip-compile': {
+        enabled: true,
+        managerFilePatterns: [
+          'requirements.txt',
+          '/(^|/)requirements\\.txt$/',
+          '/(^|/)requirements-fmt\\.txt$/',
+          '/(^|/)requirements-lint\\.txt$/',
+          '/.github/workflows/requirements.txt/',
+          '/(^|/)debian_packages/private/third_party/requirements\\.txt$/',
+          '/(^|/).*?requirements.*?\\.txt$/',
+        ],
+      },
+    });
+  });
+
+  it('migrates gradle-lite', () => {
+    const config: RenovateConfig = {
+      // @ts-expect-error -- TODO: fix me
+      'gradle-lite': {
+        enabled: true,
+        fileMatch: ['foo'],
+      },
+      packageRules: [
+        {
+          matchManagers: ['gradle-lite'],
+          separateMinorPatch: true,
+        },
+      ],
+    };
+    const { isMigrated, migratedConfig } =
+      configMigration.migrateConfig(config);
+    expect(isMigrated).toBeTrue();
+    expect(migratedConfig).toMatchSnapshot();
+  });
+
+  it('migrates empty requiredStatusChecks', () => {
+    const config: RenovateConfig = {
+      // @ts-expect-error -- TODO: fix me
+      requiredStatusChecks: [],
+    };
+    const { isMigrated, migratedConfig } =
+      configMigration.migrateConfig(config);
+    expect(isMigrated).toBe(true);
+    expect(migratedConfig).toMatchInlineSnapshot(`{}`);
+  });
+
+  it('migrates azureAutoComplete', () => {
+    function migrate(config: RenovateConfig): MigratedConfig {
+      return configMigration.migrateConfig(config);
+    }
+
+    // @ts-expect-error -- TODO: fix me
+    expect(migrate({ azureAutoComplete: true })).toEqual({
+      isMigrated: true,
+      migratedConfig: { platformAutomerge: true },
+    });
+
+    // @ts-expect-error -- TODO: fix me
+    expect(migrate({ azureAutoComplete: false })).toEqual({
+      isMigrated: true,
+      migratedConfig: { platformAutomerge: false },
+    });
+
+    // @ts-expect-error -- TODO: fix me
+    expect(migrate({ automerge: false, azureAutoComplete: true })).toEqual({
+      isMigrated: true,
+      migratedConfig: { automerge: false, platformAutomerge: true },
+    });
+
+    // @ts-expect-error -- TODO: fix me
+    expect(migrate({ automerge: true, azureAutoComplete: true })).toEqual({
+      isMigrated: true,
+      migratedConfig: { automerge: true, platformAutomerge: true },
+    });
+  });
+
+  it('migrates gitLabAutomerge', () => {
+    function migrate(config: RenovateConfig): MigratedConfig {
+      return configMigration.migrateConfig(config);
+    }
+
+    // @ts-expect-error -- TODO: fix me
+    expect(migrate({ gitLabAutomerge: true })).toEqual({
+      isMigrated: true,
+      migratedConfig: { platformAutomerge: true },
+    });
+
+    // @ts-expect-error -- TODO: fix me
+    expect(migrate({ gitLabAutomerge: false })).toEqual({
+      isMigrated: true,
+      migratedConfig: { platformAutomerge: false },
+    });
+
+    // @ts-expect-error -- TODO: fix me
+    expect(migrate({ automerge: false, gitLabAutomerge: true })).toEqual({
+      isMigrated: true,
+      migratedConfig: { automerge: false, platformAutomerge: true },
+    });
+
+    // @ts-expect-error -- TODO: fix me
+    expect(migrate({ automerge: true, gitLabAutomerge: true })).toEqual({
+      isMigrated: true,
+      migratedConfig: { automerge: true, platformAutomerge: true },
+    });
+  });
+
+  it('migrates dryRun', () => {
+    let config: TestRenovateConfig;
+    let res: MigratedConfig;
+
+    // @ts-expect-error -- TODO: fix me
+    config = { dryRun: true };
+    res = configMigration.migrateConfig(config);
+    expect(res.isMigrated).toBeTrue();
+
+    // @ts-expect-error -- TODO: fix me
+    config = { dryRun: false };
+    res = configMigration.migrateConfig(config);
+    expect(res.isMigrated).toBeTrue();
+  });
+
+  it('migrates baseBranches and baseBranch', () => {
+    const config = { baseBranches: ['main', 'dev'] };
+    const res = configMigration.migrateConfig(config);
+    expect(res.isMigrated).toBeTrue();
+    expect(res.migratedConfig).toEqual({
+      baseBranchPatterns: ['main', 'dev'],
+    });
+  });
+
+  it('logs errors', () => {
+    vi.spyOn(MigrationsService, 'run').mockImplementation(() => {
+      throw new Error('test error');
+    });
+    const config = { baseBranches: ['main', 'dev'] };
+    expect(() => configMigration.migrateConfig(config)).toThrow('test error');
+    expect(logger.logger.debug).toHaveBeenCalledExactlyOnceWith(
+      { config, err: expect.any(Error) },
+      'migrateConfig() error',
+    );
+  });
+});

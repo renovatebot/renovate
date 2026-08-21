@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0">
+  <parent>
+    <groupId>org.example</groupId>
+    <artifactId>parent</artifactId>
+    <version>42</version>
+    <relativePath>parent.pom.xml</relativePath>
+  </parent>
+
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.example</groupId>
+  <artifactId>ExamplePomChild</artifactId>
+
+  <name>Example</name>
+  <version>0.0.1</version>
+  <description>Minimal example</description>
+  <url>http://example.org/index.html</url>
+
+  <scm>
+    <url>http://example.org/src.git</url>
+  </scm>
+
+  <issueManagement>
+    <url>http://example.org/</url>
+  </issueManagement>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.example</groupId>
+        <artifactId>foo</artifactId>
+        <version>0.0.1</version>
+      </dependency>
+      <dependency>
+        <groupId>org.example</groupId>
+        <artifactId>bar</artifactId>
+        <version>1.0.0</version>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
+  <build>
+    <finalName>SamplePomfile</finalName>
+    <plugins>
+      <plugin>
+        <artifactId>maven-release-plugin</artifactId>
+        <version>2.4.2</version>
+        <dependencies>
+          <dependency>
+            <groupId>org.apache.maven.scm</groupId>
+            <artifactId>maven-scm-provider-gitexe</artifactId>
+            <version>1.8.1</version>
+          </dependency>
+        </dependencies>
+      </plugin>
+      <plugin>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <configuration>
+          <source>1.8</source>
+          <target>1.8</target>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.jasig.maven</groupId>
+        <artifactId>maven-notice-plugin</artifactId>
+        <configuration>
+          <noticeTemplate>NOTICE.template</noticeTemplate>
+          <generateChildNotices>false</generateChildNotices>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
+
+  <dependencies>
+    <dependency>
+      <groupId>org.example</groupId>
+      <artifactId>${artifact-id-placeholder}</artifactId>
+      <version>0.0.1</version>
+    </dependency>
+    <dependency>
+      <groupId>${group-id-placeholder}</groupId>
+      <artifactId>baz</artifactId>
+      <version>0.0.1</version>
+    </dependency>
+    <dependency>
+      <groupId>${quuxGroup}</groupId>
+      <artifactId>${quuxId}</artifactId>
+      <version>${quuxVersion}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.example</groupId>
+      <artifactId>quuz</artifactId>
+      <version>1.2.3</version>
+    </dependency>
+    <dependency>
+      <groupId>org.example</groupId>
+      <artifactId>quuuz</artifactId>
+      <version>it's not a version</version>
+    </dependency>
+    <dependency>
+      <groupId>org.example</groupId>
+      <artifactId>hard-range</artifactId>
+      <version>[1.0.0]</version>
+    </dependency>
+  </dependencies>
+
+  <profiles>
+    <profile>
+      <id>profile-id</id>
+      <dependencies>
+        <dependency>
+          <groupId>org.example</groupId>
+          <artifactId>profile-artifact</artifactId>
+          <version>${profile-placeholder}</version>
+        </dependency>
+      </dependencies>
+    </profile>
+  </profiles>
+
+  <reporting>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-checkstyle-plugin</artifactId>
+        <version>2.17</version>
+        <configuration>
+          <configLocation>google_checks.xml</configLocation>
+        </configuration>
+      </plugin>
+    </plugins>
+  </reporting>
+
+  <repositories>
+    <repository>
+      <id>atlassian</id>
+      <name>Atlassian Repository</name>
+      <url>${repoUrl}</url>
+    </repository>
+    <repository>
+      <id>nonsense</id>
+      <name>The item without url</name>
+    </repository>
+  </repositories>
+</project>

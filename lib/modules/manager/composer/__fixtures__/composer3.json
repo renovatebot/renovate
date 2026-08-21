@@ -1,0 +1,79 @@
+{
+  "name": "asha23/arlo-timber-framework",
+  "type": "project",
+  "license": "MIT",
+  "description": "A Composer Framework to help you get WordPress with Timber up and running in around a minute",
+  "authors": [
+    {
+      "name": "Ash Whiting",
+      "email": "ash_whiting@hotmail.com"
+    }
+  ],
+  "keywords": [
+    "Arlo",
+    "wordpress framework",
+    "base theme",
+    "wordpress",
+    "composer",
+    "vagrant",
+    "wp"
+  ],
+  "repositories": {
+    "packagist.org": false,
+    "wp-packagist": {
+      "type": "composer",
+      "url": "https://wpackagist.org"
+    },
+    "theme": {
+      "type": "package",
+      "package": {
+        "name": "asha23/wp-seed-timber",
+        "type": "wordpress-theme",
+        "version": "1.2.6",
+        "dist": {
+          "type": "zip",
+          "url": "https://github.com/asha23/wp-seed-timber/archive/v1.2.6.zip"
+        }
+      }
+    },
+    "wp-sync-db": {
+      "type": "package",
+      "package": {
+        "name": "wp-sync-db/wp-sync-db",
+        "type": "wordpress-plugin",
+        "version": "1.5",
+        "dist": {
+          "type": "zip",
+          "url": "https://github.com/corysimmons/wp-sync-db/archive/1.6.zip"
+        }
+      }
+    }
+  },
+  "require": {
+    "php": ">=5.5",
+    "composer/installers": "~1.0.12",
+    "johnpbloch/wordpress": "*",
+    "vlucas/phpdotenv": "^2.0.1",
+    "oscarotero/env": "^1.0",
+    "wpackagist-plugin/tinymce-advanced": "*",
+    "wpackagist-plugin/acf-content-analysis-for-yoast-seo": "*",
+    "wpackagist-plugin/duplicate-post": "*",
+    "wpackagist-plugin/simple-image-sizes": "*",
+    "wpackagist-plugin/wordpress-seo": "*",
+    "wpackagist-plugin/timber-library": "*",
+    "wp-sync-db/wp-sync-db": "*",
+    "asha23/wp-seed-timber": "*"
+  },
+  "extra": {
+    "installer-paths": {
+      "web/content/plugins/{$name}/": [
+        "type:wordpress-plugin"
+      ],
+      "web/content/themes/{$name}/": [
+        "type:wordpress-theme"
+      ]
+    },
+    "wordpress-install-dir": "web/wp",
+    "content-install-dir": "web/content"
+  }
+}

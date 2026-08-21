@@ -1,0 +1,96 @@
+import semver from 'semver';
+import stable from 'semver-stable';
+import type { RangeStrategy } from '../../../types/versioning.ts';
+import { regEx } from '../../../util/regex.ts';
+import type { VersioningApi } from '../types.ts';
+import { getNewValue, toSemverRange } from './range.ts';
+
+export const id = 'swift';
+export const displayName = 'Swift';
+export const urls = [
+  '[Swift Package Manager](https://swift.org/package-manager/)',
+];
+export const supportsRanges = true;
+export const supportedRangeStrategies: RangeStrategy[] = [
+  'bump',
+  'widen',
+  'replace',
+];
+
+const { is: isStable } = stable;
+
+const {
+  compare: sortVersions,
+  maxSatisfying,
+  minSatisfying,
+  major: getMajor,
+  minor: getMinor,
+  patch: getPatch,
+  satisfies,
+  valid,
+  validRange,
+  ltr,
+  gt: isGreaterThan,
+  eq: equals,
+} = semver;
+
+export function isValid(input: string): boolean {
+  return !!valid(input) || !!validRange(toSemverRange(input));
+}
+
+export function isVersion(input: string): boolean {
+  return !!valid(input);
+}
+
+function getSatisfyingVersion(
+  versions: string[],
+  range: string,
+): string | null {
+  const normalizedVersions = versions.map((v) => v.replace(regEx(/^v/), ''));
+  const semverRange = toSemverRange(range);
+  return semverRange ? maxSatisfying(normalizedVersions, semverRange) : null;
+}
+
+function minSatisfyingVersion(
+  versions: string[],
+  range: string,
+): string | null {
+  const normalizedVersions = versions.map((v) => v.replace(regEx(/^v/), ''));
+  const semverRange = toSemverRange(range);
+  return semverRange ? minSatisfying(normalizedVersions, semverRange) : null;
+}
+
+function isLessThanRange(version: string, range: string): boolean {
+  const semverRange = toSemverRange(range);
+  return semverRange ? ltr(version, semverRange) : false;
+}
+
+function matches(version: string, range: string): boolean {
+  // Check if both are an exact version
+  if (isVersion(range) && equals(version, range)) {
+    return true;
+  }
+  const semverRange = toSemverRange(range);
+  return semverRange ? satisfies(version, semverRange) : false;
+}
+
+export const api: VersioningApi = {
+  equals,
+  getMajor,
+  getMinor,
+  getNewValue,
+  getPatch,
+  isCompatible: isVersion,
+  isGreaterThan,
+  isLessThanRange,
+  isSingleVersion: isVersion,
+  isStable,
+  isValid,
+  isVersion,
+  matches,
+  getSatisfyingVersion,
+  minSatisfyingVersion,
+  sortVersions,
+};
+
+export default api;

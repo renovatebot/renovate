@@ -1,0 +1,29 @@
+{
+  "name": "Renovate",
+  "build": {
+    "dockerfile": "Dockerfile"
+  },
+  "init": true,
+  "hostRequirements": {
+    "cpus": 4,
+    "memory": "8gb",
+    "storage": "32gb"
+  },
+  "customizations": {
+    "vscode": {
+      "terminal.integrated.defaultProfile.linux": "bash",
+      "extensions": [
+        "oxc.oxc-vscode",
+        "esbenp.prettier-vscode",
+        "vitest.explorer",
+        "editorconfig.editorconfig",
+        "github.vscode-github-actions",
+        "github.vscode-pull-request-github",
+        "TypeScriptTeam.native-preview"
+      ]
+    }
+  },
+  "postCreateCommand": [".devcontainer/post-create.sh"],
+  // Otherwise vitest extension fails because deps were not installed yet
+  "waitFor": "postCreateCommand"
+}

@@ -1,0 +1,236 @@
+import type { WebApiTeam } from 'azure-devops-node-api/interfaces/CoreInterfaces.js';
+import type {
+  GitCommit,
+  GitRef,
+} from 'azure-devops-node-api/interfaces/GitInterfaces.js';
+import { GitPullRequestMergeStrategy } from 'azure-devops-node-api/interfaces/GitInterfaces.js';
+import type {
+  PolicyConfiguration,
+  PolicyEvaluationRecord,
+} from 'azure-devops-node-api/interfaces/PolicyInterfaces.js';
+import { logger } from '../../../logger/index.ts';
+import { streamToString } from '../../../util/streams.ts';
+import { getNewBranchName } from '../util.ts';
+import * as azureApi from './azure-got-wrapper.ts';
+import { WrappedException } from './schema.ts';
+import {
+  getBranchNameWithoutRefsPrefix,
+  getBranchNameWithoutRefsheadsPrefix,
+} from './util.ts';
+
+const mergePolicyGuid = 'fa4e907d-c16b-4a4c-9dfa-4916e5d171ab'; // Magic GUID for merge strategy policy configurations
+
+export async function getRefs(
+  repoId: string,
+  branchName?: string,
+): Promise<GitRef[]> {
+  logger.debug(`getRefs(${repoId}, ${branchName!})`);
+  const azureApiGit = await azureApi.gitApi();
+  const refs = await azureApiGit.getRefs(
+    repoId,
+    undefined,
+    getBranchNameWithoutRefsPrefix(branchName),
+  );
+  return refs;
+}
+
+export interface AzureBranchObj {
+  name: string;
+  oldObjectId: string;
+}
+
+export async function getAzureBranchObj(
+  repoId: string,
+  branchName: string,
+  from?: string,
+): Promise<AzureBranchObj> {
+  const fromBranchName = getNewBranchName(from);
+  const refs = await getRefs(repoId, fromBranchName);
+  if (refs.length === 0) {
+    logger.debug(`getAzureBranchObj without a valid from, so initial commit.`);
+    // TODO: fix undefined
+    return {
+      name: getNewBranchName(branchName)!,
+      oldObjectId: '0000000000000000000000000000000000000000',
+    };
+  }
+  return {
+    // TODO: fix undefined (#22198)
+    name: getNewBranchName(branchName)!,
+    oldObjectId: refs[0].objectId!,
+  };
+}
+
+// if no branchName, look globally
+export async function getFile(
+  repoId: string,
+  filePath: string,
+  branchName: string,
+): Promise<string | null> {
+  logger.trace(`getFile(filePath=${filePath}, branchName=${branchName})`);
+  const azureApiGit = await azureApi.gitApi();
+  const item = await azureApiGit.getItemText(
+    repoId,
+    filePath,
+    undefined,
+    undefined,
+    0, // because we look for 1 file
+    false,
+    false,
+    true,
+    {
+      versionType: 0, // branch
+      versionOptions: 0,
+      version: getBranchNameWithoutRefsheadsPrefix(branchName),
+    },
+  );
+
+  if (item?.readable) {
+    const fileContent = await streamToString(item);
+    try {
+      const result = WrappedException.safeParse(fileContent);
+      if (result.success) {
+        if (result.data.typeKey === 'GitItemNotFoundException') {
+          logger.warn({ filePath }, 'Unable to find file');
+          return null;
+        }
+        // v8 ignore else -- TODO: add test #40625
+        if (result.data.typeKey === 'GitUnresolvableToCommitException') {
+          logger.warn({ branchName }, 'Unable to find branch');
+          return null;
+        }
+      }
+    } catch /* v8 ignore next -- non-JSON error body falls through to raw file content, parse failure not simulated in specs */ {
+      // it 's not a JSON, so I send the content directly with the line under
+    }
+
+    return fileContent;
+  }
+
+  return null; // no file found
+}
+
+export async function getCommitDetails(
+  commit: string,
+  repoId: string,
+): Promise<GitCommit> {
+  logger.debug(`getCommitDetails(${commit}, ${repoId})`);
+  const azureApiGit = await azureApi.gitApi();
+  const results = await azureApiGit.getCommit(commit, repoId);
+  return results;
+}
+
+interface MergeStrategyPolicyConfiguration {
+  allowNoFastForward?: boolean;
+  allowSquash?: boolean;
+  allowRebase?: boolean;
+  allowRebaseMerge?: boolean;
+}
+
+const policyKeyByStrategy: Record<
+  GitPullRequestMergeStrategy,
+  keyof MergeStrategyPolicyConfiguration
+> = {
+  [GitPullRequestMergeStrategy.NoFastForward]: 'allowNoFastForward',
+  [GitPullRequestMergeStrategy.Squash]: 'allowSquash',
+  [GitPullRequestMergeStrategy.Rebase]: 'allowRebase',
+  [GitPullRequestMergeStrategy.RebaseMerge]: 'allowRebaseMerge',
+};
+
+export async function getMergeMethod(
+  repoId: string,
+  project: string,
+  branchRef?: string | null,
+  defaultBranch?: string,
+): Promise<GitPullRequestMergeStrategy> {
+  logger.debug(
+    `getMergeMethod(branchRef=${branchRef}, defaultBranch=${defaultBranch})`,
+  );
+  interface Scope {
+    repositoryId: string;
+    refName?: string;
+    matchKind: 'Prefix' | 'Exact' | 'DefaultBranch';
+  }
+  function isRelevantScope(scope: Scope): boolean {
+    if (
+      scope.matchKind === 'DefaultBranch' &&
+      // TODO: types (#22198)
+      (!branchRef || branchRef === `refs/heads/${defaultBranch!}`)
+    ) {
+      return true;
+    }
+    if (scope.repositoryId !== repoId && scope.repositoryId !== null) {
+      return false;
+    }
+    if (!branchRef) {
+      return true;
+    }
+    // TODO #22198
+    return scope.matchKind === 'Exact'
+      ? scope.refName === branchRef
+      : branchRef.startsWith(scope.refName!);
+  }
+
+  const policyConfigurations = (
+    await (
+      await azureApi.policyApi()
+    ).getPolicyConfigurations(project, undefined, mergePolicyGuid)
+  )
+    .filter((p: PolicyConfiguration) => p.settings.scope.some(isRelevantScope))
+    .map((p: PolicyConfiguration) => p.settings)[0];
+
+  logger.debug(
+    { policyConfigurations },
+    // TODO: types (#22198)
+    `getMergeMethod(branchRef=${branchRef!}) determining mergeMethod from matched policy`,
+  );
+
+  // Note that this will iterate in the order of GitPullRequestMergeStrategy
+  for (const [key, policyKey] of Object.entries(policyKeyByStrategy)) {
+    if (policyConfigurations?.[policyKey] === true) {
+      const method = parseInt(key, 10) satisfies GitPullRequestMergeStrategy;
+      logger.debug(
+        { policyConfigurations },
+        `getMergeMethod(branchRef=${branchRef!})=${GitPullRequestMergeStrategy[method]}`,
+      );
+      return method;
+    }
+  }
+
+  logger.debug(
+    { policyConfigurations },
+    // TODO: types (#22198)
+    `getMergeMethod(branchRef=${branchRef!})=${GitPullRequestMergeStrategy[GitPullRequestMergeStrategy.NoFastForward]}`,
+  );
+  return GitPullRequestMergeStrategy.NoFastForward;
+}
+
+export async function getPolicyEvaluations(
+  project: string,
+  artifactId: string,
+): Promise<PolicyEvaluationRecord[]> {
+  logger.debug(`getPolicyEvaluations(${project}, ${artifactId})`);
+  const policyEvaluations = await (
+    await azureApi.policyApi()
+  ).getPolicyEvaluations(project, artifactId);
+  return policyEvaluations;
+}
+
+export async function getAllProjectTeams(
+  projectId: string,
+): Promise<WebApiTeam[]> {
+  const allTeams: WebApiTeam[] = [];
+  const azureApiCore = await azureApi.coreApi();
+  const top = 100;
+  let skip = 0;
+  let length = 0;
+
+  do {
+    const teams = await azureApiCore.getTeams(projectId, undefined, top, skip);
+    length = teams.length;
+    allTeams.push(...teams);
+    skip += top;
+  } while (top <= length);
+
+  return allTeams;
+}

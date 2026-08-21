@@ -1,0 +1,28 @@
+import { Command } from 'commander';
+import { init, logger } from '../lib/logger/index.ts';
+import { generateDocs } from './docs/index.ts';
+
+await init();
+
+process.on('unhandledRejection', (err) => {
+  // Will print "unhandledRejection err is not defined"
+  logger.error({ err }, 'unhandledRejection');
+  process.exit(-1);
+});
+
+const program = new Command('pnpm build:docs')
+  .description('Generate docs')
+  .option('--mkdocs', 'generate docs for mkdocs')
+  .option('--version <version>', 'the current version of the Renovate CLI')
+  .action(async (opts) => {
+    if (opts.mkdocs) {
+      logger.info('Generating for mkdocs');
+      await generateDocs('tools/mkdocs', false, opts.version);
+    } else {
+      logger.info('Generating docs for testing');
+      await generateDocs(undefined, undefined, opts.version);
+    }
+    logger.info('Generation completed');
+  });
+
+void program.parseAsync();

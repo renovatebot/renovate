@@ -1,0 +1,119 @@
+image: 'ruby:2.5.0'
+
+.executor-docker: &executor-docker
+    tags:
+        - docker
+
+.executor-docker-in-docker: &executor-docker-privileged
+    tags:
+        - docker-privileged
+
+.executor-docker-in-docker: &executor-docker-in-docker
+    tags:
+        - docker-in-docker
+
+.docker-login: &docker-login
+    before_script:
+        - echo $CI_JOB_TOKEN | docker login -u gitlab-ci-token --password-stdin $CI_REGISTRY
+
+.docker-logout: &docker-logout
+    after_script:
+        - docker logout $CI_REGISTRY
+
+.build-image: &build-image
+    export BUILD_IMAGE=$CI_REGISTRY_IMAGE:${CI_COMMIT_TAG:-$CI_COMMIT_REF_SLUG}
+
+stages:
+    - compliance-tests
+    - build
+    - sast
+    - unit-tests
+    - release
+
+variables:
+    LATEST_IMAGE: $CI_REGISTRY_IMAGE:latest
+
+hadolint:
+    stage: compliance-tests
+    <<: *executor-docker
+    image: hadolint/hadolint:latest
+    script:
+        - hadolint Dockerfile
+
+build:
+    stage: build
+    <<: *executor-docker-privileged
+    <<: *docker-login
+    script:
+        - *build-image
+        - docker build --label "org.label-schema.build-date=$(date +%Y-%m-%dT%T%z)" --label "org.label-schema.version=$CI_COMMIT_REF_NAME" --tag $BUILD_IMAGE .
+        - docker push $BUILD_IMAGE
+    <<: *docker-logout
+
+sast:container:
+    stage: sast
+    <<: *executor-docker-in-docker
+    image: docker:latest
+    services:
+        - docker:dind
+    <<: *docker-login
+    script:
+        - *build-image
+        - docker run -d --name db arminc/clair-db:latest
+        - docker run -p 6060:6060 --link db:postgres -d --name clair arminc/clair-local-scan:v2.0.1
+        - apk add -U wget ca-certificates
+        - docker pull $BUILD_IMAGE
+        - wget https://github.com/arminc/clair-scanner/releases/download/v8/clair-scanner_linux_amd64
+        - mv clair-scanner_linux_amd64 clair-scanner
+        - chmod +x clair-scanner
+        - touch clair-whitelist.yml
+        - ./clair-scanner -c http://docker:6060 --ip $(hostname -i) -r gl-sast-container-report.json -l clair.log -w clair-whitelist.yml $BUILD_IMAGE || true
+    <<: *docker-logout
+    artifacts:
+        paths: [gl-sast-container-report.json]
+
+constainer-structure-test:
+    stage: unit-tests
+    <<: *executor-docker-in-docker
+    image: docker:latest
+    services:
+        - docker:dind
+    <<: *docker-login
+    script:
+        - *build-image
+        - docker pull $BUILD_IMAGE
+        - echo "container-structure-test test --verbose --image $BUILD_IMAGE --config /tests/container/*.json" | docker run --rm -i --volume /var/run/docker.sock:/var/run/docker.sock --volume $CI_PROJECT_DIR/tests/container:/tests/container:ro $LATEST_IMAGE /bin/sh; exit $?
+    <<: *docker-logout
+
+release:
+    stage: release
+    <<: *executor-docker-privileged
+    <<: *docker-login
+    script:
+        - *build-image
+        - docker pull $BUILD_IMAGE
+        - docker tag $BUILD_IMAGE $LATEST_IMAGE
+        - docker push $LATEST_IMAGE
+    <<: *docker-logout
+    only:
+      - tags
+
+image-name-test:
+    stage: build
+    <<: *executor-docker
+    image:
+      name: image-name-test:1.15
+      entrypoint: [""]
+    script:
+        - image-name-test Dockerfile
+
+image-name-with-entrypoint-as-list-test:
+  stage: build
+  <<: *executor-docker
+  image:
+    entrypoint:
+    - ""
+    # test comment
+    name: image-name-test:1.15
+  script:
+    - image-name-test Dockerfile

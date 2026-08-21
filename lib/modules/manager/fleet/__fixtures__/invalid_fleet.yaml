@@ -1,0 +1,26 @@
+defaultNamespace: cert-manager
+helm:
+  chart: cert-manager
+  repo: https://charts.jetstack.io
+  releaseName: cert-manager
+  values:
+    installCRDs: true
+---
+defaultNamespace: logging-system
+helm:
+  chart: logging-operator
+  releaseName: logging-operator
+  version: 3.17.7
+  values:
+---
+defaultNamespace: monitoring
+helm:
+  repo: https://prometheus-community.github.io/helm-charts
+  releaseName: kube-prometheus
+  version: 35.4.2
+---
+defaultNamespace: monitoring
+helm:
+  chart: './charts/example'
+  releaseName: anExample
+  version: 35.4.2

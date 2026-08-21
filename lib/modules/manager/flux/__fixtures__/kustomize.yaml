@@ -1,0 +1,16 @@
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: podinfo
+  namespace: flux-system
+spec:
+  images:
+  - name: podinfo
+    newName: my-registry/podinfo
+    newTag: v1
+  - name: podinfo
+    newTag: 1.8.0
+  - name: podinfo
+    newName: my-podinfo
+  - name: podinfo
+    digest: sha256:24a0c4b4a4c0eb97a1aabb8e29f18e917d05abfe1b7a7c07857230879ce7d3d3

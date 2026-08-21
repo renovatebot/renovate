@@ -1,0 +1,3 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`modules/manager/terraform/lockfile/hash > full walkthrough 1`] = `[]`;

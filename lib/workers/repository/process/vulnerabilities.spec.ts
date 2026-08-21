@@ -1,0 +1,2472 @@
+import type { Osv, OsvOffline } from '@renovatebot/osv-offline';
+import { codeBlock } from 'common-tags';
+import { mockFn } from 'vitest-mock-extended';
+import type { RenovateConfig } from '~test/util.ts';
+import { logger } from '~test/util.ts';
+import { getConfig } from '../../../config/defaults.ts';
+import type { PackageFile } from '../../../modules/manager/types.ts';
+import { Vulnerabilities } from './vulnerabilities.ts';
+
+const getVulnerabilitiesMock =
+  mockFn<typeof OsvOffline.prototype.getVulnerabilities>();
+const createMock = vi.fn();
+
+vi.mock('@renovatebot/osv-offline', () => {
+  return {
+    __esModule: true,
+    OsvOffline: class {
+      static create() {
+        return createMock();
+      }
+    },
+  };
+});
+
+describe('workers/repository/process/vulnerabilities', () => {
+  describe('create()', () => {
+    beforeEach(resetOsv);
+
+    it('works, and is a singleton', async () => {
+      createMock.mockResolvedValue({
+        getVulnerabilities: getVulnerabilitiesMock,
+      });
+      await expect(Vulnerabilities.create()).resolves.not.toThrow();
+      await expect(Vulnerabilities.create()).resolves.not.toThrow();
+      expect(createMock).toHaveBeenCalledTimes(1);
+    });
+
+    it('throws when osv-offline error', async () => {
+      createMock.mockRejectedValue(new Error());
+
+      await expect(Vulnerabilities.create()).rejects.toThrow(Error);
+    });
+  });
+
+  describe('fetchVulnerabilities()', () => {
+    let config: RenovateConfig;
+    let vulnerabilities: Vulnerabilities;
+
+    beforeAll(async () => {
+      resetOsv();
+      createMock.mockResolvedValue({
+        getVulnerabilities: getVulnerabilitiesMock,
+      });
+      vulnerabilities = await Vulnerabilities.create();
+    });
+
+    beforeEach(() => {
+      config = getConfig();
+      config.packageRules = [];
+    });
+
+    it('return list of Vulnerabilities', async () => {
+      const packageFiles: Record<string, PackageFile[]> = {
+        poetry: [
+          {
+            deps: [
+              { depName: 'django', currentValue: '3.2', datasource: 'pypi' },
+            ],
+            packageFile: 'some-file',
+          },
+        ],
+      };
+      getVulnerabilitiesMock.mockResolvedValueOnce([
+        {
+          id: 'GHSA-qrw5-5h28-modded',
+          modified: '',
+          affected: [
+            {
+              package: {
+                name: 'django',
+                ecosystem: 'PyPI',
+                purl: 'pkg:pypi/django',
+              },
+              ranges: [
+                {
+                  type: 'ECOSYSTEM',
+                  events: [{ introduced: '3.0' }, { fixed: '3.3.8' }],
+                },
+              ],
+            },
+            {
+              package: {
+                name: 'django',
+                ecosystem: 'PyPI',
+                purl: 'pkg:pypi/django',
+              },
+              ranges: [
+                {
+                  type: 'ECOSYSTEM',
+                  events: [{ introduced: '3.2' }, { fixed: '3.2.16' }],
+                },
+              ],
+            },
+          ],
+        },
+      ]);
+
+      const vulnerabilityList = await vulnerabilities.fetchVulnerabilities(
+        config,
+        packageFiles,
+      );
+      expect(vulnerabilityList).toMatchObject([
+        {
+          packageName: 'django',
+          depVersion: '3.2',
+          fixedVersion: '>= 3.3.8',
+          datasource: 'pypi',
+        },
+        {
+          packageName: 'django',
+          depVersion: '3.2',
+          fixedVersion: '>= 3.2.16',
+          datasource: 'pypi',
+        },
+      ]);
+    });
+
+    describe('malicious packages', () => {
+      it('are marked for dependencies with a MAL- advisory ID against their current version with malicious-version-in-use', async () => {
+        const packageFiles: Record<string, PackageFile[]> = {
+          npm: [
+            {
+              deps: [
+                {
+                  depType: 'devDependencies',
+                  depName: 'axios',
+                  currentValue: '1.14.1',
+                  datasource: 'npm',
+                  prettyDepType: 'devDependency',
+                  lockedVersion: '1.14.1',
+                  updates: [],
+                  packageName: 'axios',
+                },
+              ],
+              packageFile: 'package.json',
+            },
+          ],
+          pip: [
+            {
+              deps: [
+                {
+                  depName: 'num2words',
+                  currentValue: '0.5.15',
+                  datasource: 'pypi',
+                  updates: [],
+                  packageName: 'num2words',
+                },
+              ],
+              packageFile: 'go.mod',
+            },
+          ],
+        };
+
+        getVulnerabilitiesMock.mockResolvedValueOnce([
+          {
+            modified: '2026-04-07T14:41:20Z',
+            published: '2026-03-31T03:15:49Z',
+            schema_version: '1.7.4',
+            id: 'MAL-2026-2307',
+            aliases: ['GHSA-fw8c-xr5c-95f9'],
+            affected: [
+              {
+                package: {
+                  ecosystem: 'npm',
+                  name: 'axios',
+                },
+                versions: ['0.30.4', '1.14.1'],
+                database_specific: {
+                  cwes: [
+                    {
+                      cweId: 'CWE-506',
+                      description:
+                        'The product contains code that appears to be malicious in nature.',
+                      name: 'Embedded Malicious Code',
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+        ]);
+
+        // GHSA-jxr6-qrxx-2ph2 has a corresponding MAL-2025-6794, but because this isn't literally MAL-2025-6794, we don't apply it
+        getVulnerabilitiesMock.mockResolvedValueOnce([
+          {
+            affected: [
+              {
+                database_specific: {
+                  source:
+                    'https://github.com/github/advisory-database/blob/main/advisories/github-reviewed/2025/07/GHSA-jxr6-qrxx-2ph2/GHSA-jxr6-qrxx-2ph2.json',
+                },
+                package: {
+                  ecosystem: 'PyPI',
+                  name: 'num2words',
+                  purl: 'pkg:pypi/num2words',
+                },
+                ranges: [
+                  {
+                    events: [
+                      {
+                        introduced: '0.5.15',
+                      },
+                      {
+                        last_affected: '0.5.16',
+                      },
+                    ],
+                    type: 'ECOSYSTEM',
+                  },
+                ],
+              },
+            ],
+            aliases: ['MAL-2025-6794', 'PYSEC-2025-72'],
+            id: 'GHSA-jxr6-qrxx-2ph2',
+            modified: '2025-08-06T04:27:26.046626Z',
+            published: '2025-07-31T19:33:29Z',
+          },
+        ]);
+
+        await vulnerabilities.appendVulnerabilityPackageRules(
+          config,
+          packageFiles,
+        );
+
+        expect(packageFiles.npm[0].deps[0].skipReason).toEqual(
+          'malicious-version-in-use',
+        );
+        expect(packageFiles.npm[0].deps[0].skipStage).toEqual('lookup');
+        // and it does not apply to the dependency that doesn't match
+        expect(packageFiles.pip[0].deps[0].skipReason).toBeUndefined();
+        expect(packageFiles.pip[0].deps[0].skipStage).toBeUndefined();
+
+        // validation to make sure that these were both valid advisories
+        expect(logger.logger.debug).toHaveBeenCalledWith(
+          'Vulnerability MAL-2026-2307 affects axios 1.14.1',
+        );
+        expect(logger.logger.debug).toHaveBeenCalledWith(
+          'Vulnerability GHSA-jxr6-qrxx-2ph2 affects num2words 0.5.15',
+        );
+      });
+
+      it('are logged', async () => {
+        const packageFiles: Record<string, PackageFile[]> = {
+          npm: [
+            {
+              deps: [
+                {
+                  depType: 'devDependencies',
+                  depName: 'axios',
+                  currentValue: '1.14.1',
+                  datasource: 'npm',
+                  prettyDepType: 'devDependency',
+                  lockedVersion: '1.14.1',
+                  updates: [],
+                  packageName: 'axios',
+                },
+              ],
+              packageFile: 'package.json',
+            },
+          ],
+          pip: [
+            {
+              deps: [
+                {
+                  depName: 'num2words',
+                  currentValue: '0.5.15',
+                  datasource: 'pypi',
+                  updates: [],
+                  packageName: 'num2words',
+                },
+              ],
+              packageFile: 'go.mod',
+            },
+          ],
+        };
+
+        getVulnerabilitiesMock.mockResolvedValueOnce([
+          {
+            modified: '2026-04-07T14:41:20Z',
+            published: '2026-03-31T03:15:49Z',
+            schema_version: '1.7.4',
+            id: 'MAL-2026-2307',
+            aliases: ['GHSA-fw8c-xr5c-95f9'],
+            affected: [
+              {
+                package: {
+                  ecosystem: 'npm',
+                  name: 'axios',
+                },
+                versions: ['0.30.4', '1.14.1'],
+                database_specific: {
+                  cwes: [
+                    {
+                      cweId: 'CWE-506',
+                      description:
+                        'The product contains code that appears to be malicious in nature.',
+                      name: 'Embedded Malicious Code',
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+        ]);
+
+        // GHSA-jxr6-qrxx-2ph2 has a corresponding MAL-2025-6794, but because this isn't literally MAL-2025-6794, we don't apply it
+        getVulnerabilitiesMock.mockResolvedValueOnce([
+          {
+            affected: [
+              {
+                database_specific: {
+                  source:
+                    'https://github.com/github/advisory-database/blob/main/advisories/github-reviewed/2025/07/GHSA-jxr6-qrxx-2ph2/GHSA-jxr6-qrxx-2ph2.json',
+                },
+                package: {
+                  ecosystem: 'PyPI',
+                  name: 'num2words',
+                  purl: 'pkg:pypi/num2words',
+                },
+                ranges: [
+                  {
+                    events: [
+                      {
+                        introduced: '0.5.15',
+                      },
+                      {
+                        last_affected: '0.5.16',
+                      },
+                    ],
+                    type: 'ECOSYSTEM',
+                  },
+                ],
+              },
+            ],
+            aliases: ['MAL-2025-6794', 'PYSEC-2025-72'],
+            id: 'GHSA-jxr6-qrxx-2ph2',
+            modified: '2025-08-06T04:27:26.046626Z',
+            published: '2025-07-31T19:33:29Z',
+          },
+        ]);
+
+        await vulnerabilities.appendVulnerabilityPackageRules(
+          config,
+          packageFiles,
+        );
+
+        expect(logger.logger.debug).toHaveBeenCalledWith(
+          {
+            packageFile: 'package.json',
+            depName: 'axios',
+            packageName: 'axios',
+            manager: 'npm',
+            datasource: 'npm',
+            currentVersion: '1.14.1',
+          },
+          'Marking axios as skipReason=malicious-version-in-use, as it is affected by MAL-2026-2307',
+        );
+      });
+
+      it('are not counted if the affected versions do not match', async () => {
+        const packageFiles: Record<string, PackageFile[]> = {
+          npm: [
+            {
+              deps: [
+                {
+                  depType: 'devDependencies',
+                  depName: 'axios',
+                  currentValue: '1.14.0',
+                  datasource: 'npm',
+                  prettyDepType: 'devDependency',
+                  lockedVersion: '1.14.0',
+                  updates: [],
+                  packageName: 'axios',
+                },
+              ],
+              packageFile: 'package.json',
+            },
+          ],
+        };
+        getVulnerabilitiesMock.mockResolvedValueOnce([
+          {
+            modified: '2026-04-07T14:41:20Z',
+            published: '2026-03-31T03:15:49Z',
+            schema_version: '1.7.4',
+            id: 'MAL-2026-2307',
+            aliases: ['GHSA-fw8c-xr5c-95f9'],
+            affected: [
+              {
+                package: {
+                  ecosystem: 'npm',
+                  name: 'axios',
+                },
+                versions: ['0.30.4', '1.14.1'],
+                database_specific: {
+                  cwes: [
+                    {
+                      cweId: 'CWE-506',
+                      description:
+                        'The product contains code that appears to be malicious in nature.',
+                      name: 'Embedded Malicious Code',
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+        ]);
+
+        await vulnerabilities.appendVulnerabilityPackageRules(
+          config,
+          packageFiles,
+        );
+
+        expect(packageFiles.npm[0].deps[0].skipReason).toBeUndefined();
+      });
+
+      it('handles a MAL- advisory with no affected field', async () => {
+        const packageFiles: Record<string, PackageFile[]> = {
+          npm: [
+            {
+              deps: [
+                {
+                  depType: 'devDependencies',
+                  depName: 'axios',
+                  currentValue: '1.14.1',
+                  datasource: 'npm',
+                  prettyDepType: 'devDependency',
+                  lockedVersion: '1.14.1',
+                  updates: [],
+                  packageName: 'axios',
+                },
+              ],
+              packageFile: 'package.json',
+            },
+          ],
+        };
+        getVulnerabilitiesMock.mockResolvedValueOnce([
+          {
+            modified: '2026-04-07T14:41:20Z',
+            published: '2026-03-31T03:15:49Z',
+            schema_version: '1.7.4',
+            id: 'MAL-2026-2307',
+            aliases: ['GHSA-fw8c-xr5c-95f9'],
+            affected: [
+              {
+                package: {
+                  ecosystem: 'npm',
+                  name: 'axios',
+                },
+                versions: ['1.14.1'],
+              },
+            ],
+          },
+          {
+            modified: '2026-04-07T14:41:20Z',
+            published: '2026-03-31T03:15:49Z',
+            schema_version: '1.7.4',
+            id: 'MAL-2026-9999',
+            aliases: [],
+          },
+        ]);
+
+        await expect(
+          vulnerabilities.appendVulnerabilityPackageRules(config, packageFiles),
+        ).resolves.not.toThrow();
+      });
+
+      it('handles a malicious dependency where updates is undefined', async () => {
+        const packageFiles: Record<string, PackageFile[]> = {
+          npm: [
+            {
+              deps: [
+                {
+                  depType: 'devDependencies',
+                  depName: 'axios',
+                  currentValue: '1.14.1',
+                  datasource: 'npm',
+                  prettyDepType: 'devDependency',
+                  lockedVersion: '1.14.1',
+                  packageName: 'axios',
+                },
+              ],
+              packageFile: 'package.json',
+            },
+          ],
+        };
+        getVulnerabilitiesMock.mockResolvedValueOnce([
+          {
+            modified: '2026-04-07T14:41:20Z',
+            published: '2026-03-31T03:15:49Z',
+            schema_version: '1.7.4',
+            id: 'MAL-2026-2307',
+            aliases: ['GHSA-fw8c-xr5c-95f9'],
+            affected: [
+              {
+                package: {
+                  ecosystem: 'npm',
+                  name: 'axios',
+                },
+                versions: ['1.14.1'],
+              },
+            ],
+          },
+        ]);
+
+        await vulnerabilities.appendVulnerabilityPackageRules(
+          config,
+          packageFiles,
+        );
+
+        expect(packageFiles.npm[0].deps[0].skipReason).toEqual(
+          'malicious-version-in-use',
+        );
+      });
+
+      describe('when a malicious dependency update is proposed', () => {
+        it('applies to dependency updates, and sets malicious-update-proposed', async () => {
+          const packageFiles: Record<string, PackageFile[]> = {
+            npm: [
+              {
+                deps: [
+                  {
+                    depType: 'devDependencies',
+                    depName: 'axios',
+                    currentValue: '1.14.0',
+                    datasource: 'npm',
+                    prettyDepType: 'devDependency',
+                    lockedVersion: '1.14.0',
+                    updates: [
+                      {
+                        newVersion: '1.14.1',
+                      },
+                    ],
+                    packageName: 'axios',
+                  },
+                ],
+                packageFile: 'package.json',
+              },
+            ],
+          };
+          getVulnerabilitiesMock.mockResolvedValueOnce([
+            {
+              modified: '2026-04-07T14:41:20Z',
+              published: '2026-03-31T03:15:49Z',
+              schema_version: '1.7.4',
+              id: 'MAL-2026-2307',
+              aliases: ['GHSA-fw8c-xr5c-95f9'],
+              affected: [
+                {
+                  package: {
+                    ecosystem: 'npm',
+                    name: 'axios',
+                  },
+                  versions: ['0.30.4', '1.14.1'],
+                  database_specific: {
+                    cwes: [
+                      {
+                        cweId: 'CWE-506',
+                        description:
+                          'The product contains code that appears to be malicious in nature.',
+                        name: 'Embedded Malicious Code',
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          ]);
+
+          await vulnerabilities.appendVulnerabilityPackageRules(
+            config,
+            packageFiles,
+          );
+
+          expect(packageFiles.npm[0].deps[0].skipReason).toEqual(
+            'malicious-update-proposed',
+          );
+          expect(packageFiles.npm[0].deps[0].skipStage).toEqual('lookup');
+        });
+
+        it('logs', async () => {
+          const packageFiles: Record<string, PackageFile[]> = {
+            npm: [
+              {
+                deps: [
+                  {
+                    depType: 'devDependencies',
+                    depName: 'axios',
+                    currentValue: '1.14.0',
+                    datasource: 'npm',
+                    prettyDepType: 'devDependency',
+                    lockedVersion: '1.14.0',
+                    updates: [
+                      {
+                        newVersion: '1.14.1',
+                      },
+                    ],
+                    packageName: 'axios',
+                  },
+                ],
+                packageFile: 'package.json',
+              },
+            ],
+          };
+          getVulnerabilitiesMock.mockResolvedValueOnce([
+            {
+              modified: '2026-04-07T14:41:20Z',
+              published: '2026-03-31T03:15:49Z',
+              schema_version: '1.7.4',
+              id: 'MAL-2026-2307',
+              aliases: ['GHSA-fw8c-xr5c-95f9'],
+              affected: [
+                {
+                  package: {
+                    ecosystem: 'npm',
+                    name: 'axios',
+                  },
+                  versions: ['0.30.4', '1.14.1'],
+                  database_specific: {
+                    cwes: [
+                      {
+                        cweId: 'CWE-506',
+                        description:
+                          'The product contains code that appears to be malicious in nature.',
+                        name: 'Embedded Malicious Code',
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          ]);
+
+          await vulnerabilities.appendVulnerabilityPackageRules(
+            config,
+            packageFiles,
+          );
+
+          expect(logger.logger.debug).toHaveBeenCalledWith(
+            {
+              packageFile: 'package.json',
+              depName: 'axios',
+              packageName: 'axios',
+              manager: 'npm',
+              datasource: 'npm',
+              currentVersion: '1.14.0',
+              newVersion: '1.14.1',
+            },
+            "Marking axios's update to 1.14.1 as skipReason=malicious-update-proposed, as it is affected by MAL-2026-2307",
+          );
+        });
+
+        it('falls back to update.newValue when newVersion is missing, and skips updates that are not malicious', async () => {
+          const packageFiles: Record<string, PackageFile[]> = {
+            npm: [
+              {
+                deps: [
+                  {
+                    depType: 'devDependencies',
+                    depName: 'axios',
+                    currentValue: '1.14.0',
+                    datasource: 'npm',
+                    prettyDepType: 'devDependency',
+                    lockedVersion: '1.14.0',
+                    updates: [
+                      {
+                        newValue: '1.14.2',
+                      },
+                      {
+                        newValue: '1.14.1',
+                      },
+                    ],
+                    packageName: 'axios',
+                  },
+                ],
+                packageFile: 'package.json',
+              },
+            ],
+          };
+          getVulnerabilitiesMock.mockResolvedValueOnce([
+            {
+              modified: '2026-04-07T14:41:20Z',
+              published: '2026-03-31T03:15:49Z',
+              schema_version: '1.7.4',
+              id: 'MAL-2026-2307',
+              aliases: ['GHSA-fw8c-xr5c-95f9'],
+              affected: [
+                {
+                  package: {
+                    ecosystem: 'npm',
+                    name: 'axios',
+                  },
+                  versions: ['1.14.1'],
+                },
+              ],
+            },
+          ]);
+
+          await vulnerabilities.appendVulnerabilityPackageRules(
+            config,
+            packageFiles,
+          );
+
+          expect(packageFiles.npm[0].deps[0].skipReason).toEqual(
+            'malicious-update-proposed',
+          );
+          expect(packageFiles.npm[0].deps[0].skipStage).toEqual('lookup');
+        });
+      });
+    });
+
+    it('handles sub-ecosystems (e.g. Packagist:drupal)', async () => {
+      const packageFiles: Record<string, PackageFile[]> = {
+        composer: [
+          {
+            deps: [
+              {
+                depName: 'drupal/ai',
+                currentValue: '1.0.6',
+                datasource: 'packagist',
+              },
+            ],
+            packageFile: 'composer.json',
+          },
+        ],
+      };
+      getVulnerabilitiesMock.mockResolvedValueOnce([
+        {
+          id: 'DRUPAL-CONTRIB-2025-119',
+          modified: '',
+          affected: [
+            {
+              package: {
+                name: 'drupal/ai',
+                ecosystem: 'Packagist:https://packages.drupal.org/8',
+              },
+              ranges: [
+                {
+                  type: 'ECOSYSTEM',
+                  events: [{ introduced: '0' }, { fixed: '1.0.7' }],
+                },
+              ],
+            },
+          ],
+        },
+      ]);
+
+      const vulnerabilityList = await vulnerabilities.fetchVulnerabilities(
+        config,
+        packageFiles,
+      );
+      expect(vulnerabilityList).toMatchObject([
+        {
+          packageName: 'drupal/ai',
+          depVersion: '1.0.6',
+          fixedVersion: '>= 1.0.7',
+          datasource: 'packagist',
+        },
+      ]);
+    });
+
+    it('does not match unrelated ecosystem prefixes', async () => {
+      const packageFiles: Record<string, PackageFile[]> = {
+        composer: [
+          {
+            deps: [
+              {
+                depName: 'drupal/ai',
+                currentValue: '1.0.6',
+                datasource: 'packagist',
+              },
+            ],
+            packageFile: 'composer.json',
+          },
+        ],
+      };
+      getVulnerabilitiesMock.mockResolvedValueOnce([
+        {
+          id: 'FAKE-PACKAGISTSOMETHING-1',
+          modified: '',
+          affected: [
+            {
+              package: {
+                name: 'drupal/ai',
+                ecosystem: 'PackagistSomething',
+              },
+              ranges: [
+                {
+                  type: 'ECOSYSTEM',
+                  events: [{ introduced: '0' }, { fixed: '1.0.7' }],
+                },
+              ],
+            },
+          ],
+        },
+      ]);
+
+      const vulnerabilityList = await vulnerabilities.fetchVulnerabilities(
+        config,
+        packageFiles,
+      );
+      expect(vulnerabilityList).toEqual([]);
+    });
+  });
+
+  describe('appendVulnerabilityPackageRules()', () => {
+    let config: RenovateConfig;
+    let vulnerabilities: Vulnerabilities;
+    const lodashVulnerability: Osv.Vulnerability = {
+      id: 'GHSA-x5rq-j2xg-h7qm',
+      modified: '',
+      affected: [
+        {
+          ranges: [
+            {
+              type: 'SEMVER',
+              events: [{ introduced: '0.0.0' }, { fixed: '4.17.11' }],
+            },
+          ],
+          package: { name: 'lodash', ecosystem: 'npm' },
+        },
+      ],
+      references: [
+        {
+          type: 'ADVISORY',
+          url: 'https://nvd.nist.gov/vuln/detail/CVE-2019-1010266',
+        },
+      ],
+    };
+
+    beforeAll(async () => {
+      resetOsv();
+      createMock.mockResolvedValue({
+        getVulnerabilities: getVulnerabilitiesMock,
+      });
+      vulnerabilities = await Vulnerabilities.create();
+    });
+
+    beforeEach(() => {
+      config = getConfig();
+      config.packageRules = [];
+    });
+
+    it('unsupported datasource', async () => {
+      const packageFiles: Record<string, PackageFile[]> = {
+        dockerfile: [
+          {
+            deps: [{ depName: 'node', datasource: 'docker' }],
+            packageFile: 'some-file',
+          },
+        ],
+      };
+
+      await vulnerabilities.appendVulnerabilityPackageRules(
+        config,
+        packageFiles,
+      );
+
+      expect(logger.logger.trace).toHaveBeenCalledWith(
+        'Cannot map datasource docker to OSV ecosystem',
+      );
+    });
+
+    it('package found but no vulnerabilities', async () => {
+      const packageFiles: Record<string, PackageFile[]> = {
+        npm: [
+          {
+            deps: [{ depName: 'lodash', datasource: 'npm' }],
+            packageFile: 'some-file',
+          },
+        ],
+      };
+      getVulnerabilitiesMock.mockResolvedValueOnce([]);
+
+      await vulnerabilities.appendVulnerabilityPackageRules(
+        config,
+        packageFiles,
+      );
+
+      expect(logger.logger.trace).toHaveBeenCalledWith(
+        'No vulnerabilities found in OSV database for lodash',
+      );
+    });
+
+    it('vulnerability without affected field', async () => {
+      const packageFiles: Record<string, PackageFile[]> = {
+        npm: [
+          {
+            deps: [
+              { depName: 'lodash', currentValue: '4.17.11', datasource: 'npm' },
+            ],
+            packageFile: 'some-file',
+          },
+        ],
+      };
+      getVulnerabilitiesMock.mockResolvedValueOnce([
+        {
+          id: 'GHSA-p6mc-m468-83gw',
+          modified: '',
+        },
+      ]);
+
+      await vulnerabilities.appendVulnerabilityPackageRules(
+        config,
+        packageFiles,
+      );
+      expect(config.packageRules).toHaveLength(0);
+    });
+
+    it('withdrawn vulnerability', async () => {
+      const packageFiles: Record<string, PackageFile[]> = {
+        npm: [
+          {
+            deps: [
+              { depName: 'lodash', currentValue: '4.17.10', datasource: 'npm' },
+            ],
+            packageFile: 'some-file',
+          },
+        ],
+      };
+      getVulnerabilitiesMock.mockResolvedValueOnce([
+        {
+          ...lodashVulnerability,
+          withdrawn: '2021-11-29T18:17:00Z',
+        },
+      ]);
+
+      await vulnerabilities.appendVulnerabilityPackageRules(
+        config,
+        packageFiles,
+      );
+
+      expect(logger.logger.trace).toHaveBeenCalledWith(
+        'Skipping withdrawn vulnerability GHSA-x5rq-j2xg-h7qm',
+      );
+      expect(config.packageRules).toHaveLength(0);
+    });
+
+    it('invalid dep version', async () => {
+      const packageFiles: Record<string, PackageFile[]> = {
+        npm: [
+          {
+            deps: [
+              {
+                depName: 'lodash',
+                currentValue: '#4.17.11',
+                datasource: 'npm',
+              },
+            ],
+            packageFile: 'some-file',
+          },
+        ],
+      };
+      getVulnerabilitiesMock.mockResolvedValueOnce([lodashVulnerability]);
+
+      await vulnerabilities.appendVulnerabilityPackageRules(
+        config,
+        packageFiles,
+      );
+
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        'Skipping vulnerability lookup for package lodash due to unsupported version #4.17.11',
+      );
+    });
+
+    it('exception while fetching vulnerabilities', async () => {
+      const err = new Error('unknown');
+      const packageFiles: Record<string, PackageFile[]> = {
+        npm: [
+          {
+            packageFile: 'some-file',
+            deps: [
+              {
+                depName: 'lodash',
+                currentValue: '4.17.11',
+                datasource: 'npm',
+              },
+            ],
+          },
+        ],
+      };
+      getVulnerabilitiesMock.mockRejectedValueOnce(err);
+
+      await vulnerabilities.appendVulnerabilityPackageRules(
+        config,
+        packageFiles,
+      );
+
+      expect(logger.logger.warn).toHaveBeenCalledWith(
+        { err, packageName: 'lodash' },
+        'Error fetching vulnerability information for package',
+      );
+    });
+
+    it('log event with invalid version', async () => {
+      const event = { fixed: '^6.0' };
+      const packageFiles: Record<string, PackageFile[]> = {
+        npm: [
+          {
+            deps: [
+              {
+                depName: 'lodash',
+                currentValue: '4.17.11',
+                datasource: 'npm',
+              },
+            ],
+            packageFile: 'some-file',
+          },
+        ],
+      };
+      getVulnerabilitiesMock.mockResolvedValueOnce([
+        {
+          id: 'GHSA-xxxx-yyyy-zzzz',
+          modified: '',
+          affected: [
+            {
+              package: {
+                name: 'lodash',
+                ecosystem: 'npm',
+                purl: 'pkg:npm/lodash',
+              },
+              ranges: [
+                {
+                  type: 'SEMVER',
+                  events: [{ introduced: '0' }, event],
+                },
+              ],
+            },
+          ],
+        },
+      ]);
+
+      await vulnerabilities.appendVulnerabilityPackageRules(
+        config,
+        packageFiles,
+      );
+
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        { event },
+        'Skipping OSV event with invalid version',
+      );
+    });
+
+    it('no version or range affected', async () => {
+      const packageFiles: Record<string, PackageFile[]> = {
+        npm: [
+          {
+            deps: [
+              { depName: 'fake', currentValue: '4.17.11', datasource: 'npm' },
+            ],
+            packageFile: 'some-file',
+          },
+        ],
+      };
+      getVulnerabilitiesMock.mockResolvedValueOnce([
+        {
+          id: 'GHSA-xxxx-yyyy-zzzz',
+          modified: '',
+          affected: [
+            {
+              package: { name: 'fake', ecosystem: 'npm', purl: 'pkg:npm/fake' },
+            },
+          ],
+        },
+      ]);
+
+      await vulnerabilities.appendVulnerabilityPackageRules(
+        config,
+        packageFiles,
+      );
+      expect(config.packageRules).toHaveLength(0);
+    });
+
+    it('no fixed version available', async () => {
+      const packageFiles: Record<string, PackageFile[]> = {
+        npm: [
+          {
+            deps: [
+              { depName: 'fake', currentValue: '4.17.11', datasource: 'npm' },
+            ],
+            packageFile: 'some-file',
+          },
+        ],
+      };
+      getVulnerabilitiesMock.mockResolvedValueOnce([
+        {
+          id: 'GHSA-xxxx-yyyy-zzzz',
+          modified: '',
+          affected: [
+            {
+              package: { name: 'fake', ecosystem: 'npm', purl: 'pkg:npm/fake' },
+              versions: ['4.17.11'],
+            },
+          ],
+        },
+      ]);
+
+      await vulnerabilities.appendVulnerabilityPackageRules(
+        config,
+        packageFiles,
+      );
+
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        'No fixed version available for vulnerability GHSA-xxxx-yyyy-zzzz in fake 4.17.11',
+      );
+    });
+
+    it('does not accidentally downgrade versions due to fixed version for other range', async () => {
+      const packageFiles: Record<string, PackageFile[]> = {
+        npm: [
+          {
+            deps: [
+              { depName: 'fake', currentValue: '1.5.1', datasource: 'npm' },
+            ],
+            packageFile: 'some-file',
+          },
+        ],
+      };
+      getVulnerabilitiesMock.mockResolvedValueOnce([
+        {
+          id: 'GHSA-xxxx-yyyy-zzzz',
+          modified: '',
+          affected: [
+            {
+              ranges: [
+                {
+                  type: 'SEMVER',
+                  events: [{ introduced: '0' }, { fixed: '1.1.0' }],
+                },
+                {
+                  type: 'SEMVER',
+                  events: [{ introduced: '1.3.0' }],
+                },
+              ],
+              package: { name: 'fake', ecosystem: 'npm' },
+            },
+          ],
+        },
+      ]);
+
+      await vulnerabilities.appendVulnerabilityPackageRules(
+        config,
+        packageFiles,
+      );
+
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        'No fixed version available for vulnerability GHSA-xxxx-yyyy-zzzz in fake 1.5.1',
+      );
+    });
+
+    it('vulnerability with multiple unsorted events', async () => {
+      const packageFiles: Record<string, PackageFile[]> = {
+        gomod: [
+          {
+            deps: [
+              { depName: 'stdlib', currentValue: '1.7.5', datasource: 'go' },
+            ],
+            packageFile: 'some-file',
+          },
+        ],
+      };
+
+      getVulnerabilitiesMock.mockResolvedValueOnce([
+        {
+          id: 'GO-2022-0187',
+          modified: '',
+          aliases: ['CVE-2017-8932'],
+          affected: [
+            {
+              package: {
+                name: 'stdlib',
+                ecosystem: 'Go',
+                purl: 'pkg:golang/stdlib',
+              },
+              ranges: [
+                {
+                  type: 'SEMVER',
+                  events: [
+                    { introduced: '1.6.0' },
+                    { fixed: '1.8.5' },
+                    { introduced: '1.8.3' },
+                    { fixed: '1.7.6' },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      ]);
+
+      await vulnerabilities.appendVulnerabilityPackageRules(
+        config,
+        packageFiles,
+      );
+
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        'Vulnerability GO-2022-0187 affects stdlib 1.7.5',
+      );
+
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        {
+          datasource: 'go',
+          versioning: 'semver',
+        },
+        'Setting allowed version >= 1.7.6 to fix vulnerability GO-2022-0187 in stdlib 1.7.5',
+      );
+      expect(config.packageRules).toHaveLength(1);
+      expect(config.packageRules).toMatchObject([
+        {
+          matchDatasources: ['go'],
+          matchPackageNames: ['stdlib'],
+          matchCurrentVersion: '1.7.5',
+          allowedVersions: '>= 1.7.6',
+          isVulnerabilityAlert: true,
+        },
+      ]);
+    });
+
+    it('creates vulnerability alert for go toolchain directive using stdlib', async () => {
+      const packageFiles: Record<string, PackageFile[]> = {
+        gomod: [
+          {
+            deps: [
+              {
+                depName: 'go',
+                depType: 'toolchain',
+                currentValue: '1.23.6',
+                datasource: 'golang-version',
+              },
+            ],
+            packageFile: 'go.mod',
+          },
+        ],
+      };
+
+      getVulnerabilitiesMock.mockResolvedValueOnce([
+        {
+          id: 'GO-2025-3563',
+          modified: '',
+          aliases: ['CVE-2025-22871'],
+          affected: [
+            {
+              package: {
+                name: 'stdlib',
+                ecosystem: 'Go',
+                purl: 'pkg:golang/stdlib',
+              },
+              ranges: [
+                {
+                  type: 'SEMVER',
+                  events: [{ introduced: '1.23.0' }, { fixed: '1.23.8' }],
+                },
+              ],
+            },
+          ],
+        },
+      ]);
+
+      await vulnerabilities.appendVulnerabilityPackageRules(
+        config,
+        packageFiles,
+      );
+
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        'Vulnerability GO-2025-3563 affects go 1.23.6',
+      );
+
+      expect(config.packageRules).toHaveLength(1);
+      expect(config.packageRules).toMatchObject([
+        {
+          matchDatasources: ['golang-version'],
+          matchPackageNames: ['go'],
+          matchCurrentVersion: '1.23.6',
+          allowedVersions: '>= 1.23.8',
+          isVulnerabilityAlert: true,
+        },
+      ]);
+    });
+
+    it('skips vulnerability lookup for go module directive', async () => {
+      const packageFiles: Record<string, PackageFile[]> = {
+        gomod: [
+          {
+            deps: [
+              {
+                depName: 'go',
+                depType: 'golang',
+                currentValue: '1.23.5',
+                datasource: 'golang-version',
+              },
+            ],
+            packageFile: 'go.mod',
+          },
+        ],
+      };
+
+      await vulnerabilities.appendVulnerabilityPackageRules(
+        config,
+        packageFiles,
+      );
+
+      expect(config.packageRules).toHaveLength(0);
+    });
+
+    it('sets default datasource versioning to align with allowedVersions on packageRule', async () => {
+      const packageFiles: Record<string, PackageFile[]> = {
+        gomod: [
+          {
+            deps: [
+              {
+                depName:
+                  'software.amazon.encryption.s3:amazon-s3-encryption-client-java',
+                currentValue: '3.4.0',
+                datasource: 'maven',
+              },
+            ],
+            packageFile: 'pom.xml',
+          },
+        ],
+      };
+
+      getVulnerabilitiesMock.mockResolvedValueOnce([
+        {
+          id: 'GHSA-x44p-gvrj-pj2r',
+          modified: '',
+          aliases: ['CVE-2025-14763'],
+          affected: [
+            {
+              package: {
+                ecosystem: 'Maven',
+                name: 'software.amazon.encryption.s3:amazon-s3-encryption-client-java',
+                purl: 'pkg:maven/software.amazon.encryption.s3/amazon-s3-encryption-client-java',
+              },
+              ranges: [
+                {
+                  type: 'ECOSYSTEM',
+                  events: [{ introduced: '0' }, { fixed: '4.0.0' }],
+                },
+              ],
+            },
+          ],
+        },
+      ]);
+
+      await vulnerabilities.appendVulnerabilityPackageRules(
+        config,
+        packageFiles,
+      );
+
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        'Vulnerability GHSA-x44p-gvrj-pj2r affects software.amazon.encryption.s3:amazon-s3-encryption-client-java 3.4.0',
+      );
+
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        {
+          datasource: 'maven',
+          versioning: 'maven',
+        },
+        'Setting allowed version [4.0.0,) to fix vulnerability GHSA-x44p-gvrj-pj2r in software.amazon.encryption.s3:amazon-s3-encryption-client-java 3.4.0',
+      );
+      expect(config.packageRules).toHaveLength(1);
+      expect(config.packageRules).toMatchObject([
+        {
+          matchDatasources: ['maven'],
+          matchPackageNames: [
+            'software.amazon.encryption.s3:amazon-s3-encryption-client-java',
+          ],
+          matchCurrentVersion: '3.4.0',
+          allowedVersions: '[4.0.0,)',
+          versioning: 'maven',
+          isVulnerabilityAlert: true,
+        },
+      ]);
+    });
+
+    it('vulnerability with multiple affected entries and version ranges', async () => {
+      const packageFiles: Record<string, PackageFile[]> = {
+        poetry: [
+          {
+            deps: [
+              { depName: 'django', currentValue: '3.2', datasource: 'pypi' },
+            ],
+            packageFile: 'some-file',
+          },
+        ],
+      };
+      getVulnerabilitiesMock.mockResolvedValueOnce([
+        {
+          id: 'GHSA-qrw5-5h28-modded',
+          modified: '',
+          affected: [
+            {
+              package: {
+                name: 'django',
+                ecosystem: 'PyPI',
+                purl: 'pkg:pypi/django',
+              },
+              ranges: [
+                {
+                  type: 'GIT',
+                  repo: 'https://github.com/django/django',
+                  events: [
+                    { introduced: '0' },
+                    { fixed: '5b6b257fa7ec37ff27965358800c67e2dd11c924' },
+                  ],
+                },
+                {
+                  type: 'ECOSYSTEM',
+                  events: [{ introduced: '3.2' }, { fixed: '3.2.16' }],
+                },
+              ],
+              versions: ['3.2.1', '3.2.10', '3.2.9'],
+            },
+            {
+              package: {
+                name: 'django',
+                ecosystem: 'PyPI',
+                purl: 'pkg:pypi/django',
+              },
+              ranges: [
+                {
+                  type: 'ECOSYSTEM',
+                  events: [{ introduced: '4.0' }, { fixed: '4.0.8' }],
+                },
+              ],
+              versions: ['4.0', '4.0.1', '4.0.6', '4.0.7'],
+            },
+          ],
+        },
+      ]);
+
+      await vulnerabilities.appendVulnerabilityPackageRules(
+        config,
+        packageFiles,
+      );
+      expect(config.packageRules).toHaveLength(1);
+      expect(config.packageRules).toMatchObject([
+        {
+          matchDatasources: ['pypi'],
+          matchPackageNames: ['django'],
+          matchCurrentVersion: '3.2',
+          allowedVersions: '>= 3.2.16',
+          isVulnerabilityAlert: true,
+        },
+      ]);
+    });
+
+    it('package rules are sorted by fixed version even if affected is unsorted', async () => {
+      const packageFiles: Record<string, PackageFile[]> = {
+        poetry: [
+          {
+            deps: [
+              { depName: 'django', currentValue: '3.2', datasource: 'pypi' },
+            ],
+            packageFile: 'some-file',
+          },
+        ],
+      };
+      getVulnerabilitiesMock.mockResolvedValueOnce([
+        {
+          id: 'GHSA-qrw5-5h28-modded',
+          modified: '',
+          affected: [
+            {
+              package: {
+                name: 'django',
+                ecosystem: 'PyPI',
+                purl: 'pkg:pypi/django',
+              },
+              ranges: [
+                {
+                  type: 'ECOSYSTEM',
+                  events: [{ introduced: '3.0' }, { fixed: '3.3.8' }],
+                },
+              ],
+            },
+            {
+              package: {
+                name: 'django',
+                ecosystem: 'PyPI',
+                purl: 'pkg:pypi/django',
+              },
+              ranges: [
+                {
+                  type: 'ECOSYSTEM',
+                  events: [{ introduced: '3.2' }, { fixed: '3.2.16' }],
+                },
+              ],
+            },
+          ],
+        },
+      ]);
+
+      await vulnerabilities.appendVulnerabilityPackageRules(
+        config,
+        packageFiles,
+      );
+      expect(config.packageRules).toHaveLength(2);
+      expect(config.packageRules).toMatchObject([
+        {
+          matchDatasources: ['pypi'],
+          matchPackageNames: ['django'],
+          matchCurrentVersion: '3.2',
+          allowedVersions: '>= 3.2.16',
+          isVulnerabilityAlert: true,
+        },
+        {
+          matchDatasources: ['pypi'],
+          matchPackageNames: ['django'],
+          matchCurrentVersion: '3.2',
+          allowedVersions: '>= 3.3.8',
+          isVulnerabilityAlert: true,
+        },
+      ]);
+    });
+
+    it('filters not applicable vulnerability', async () => {
+      const packageFiles: Record<string, PackageFile[]> = {
+        npm: [
+          {
+            deps: [
+              { depName: 'lodash', currentValue: '4.17.11', datasource: 'npm' },
+            ],
+            packageFile: 'some-file',
+          },
+        ],
+      };
+      getVulnerabilitiesMock.mockResolvedValueOnce([lodashVulnerability]);
+
+      await vulnerabilities.appendVulnerabilityPackageRules(
+        config,
+        packageFiles,
+      );
+      expect(config.packageRules).toHaveLength(0);
+    });
+
+    it('returns a single packageRule for regex manager', async () => {
+      const packageFiles: Record<string, PackageFile[]> = {
+        regex: [
+          {
+            deps: [
+              {
+                depName: 'tiny_http',
+                currentValue: '0.1.2',
+                datasource: 'crate',
+              },
+            ],
+            packageFile: 'some-file',
+          },
+        ],
+      };
+      getVulnerabilitiesMock.mockResolvedValueOnce([
+        {
+          id: 'RUSTSEC-2020-0031',
+          summary:
+            'HTTP Request smuggling through malformed Transfer Encoding headers',
+          details:
+            'HTTP pipelining issues and request smuggling attacks are possible due to incorrect Transfer encoding header parsing.\n\nIt is possible conduct HTTP request smuggling attacks (CL:TE/TE:TE) by sending invalid Transfer Encoding headers.\n\nBy manipulating the HTTP response the attacker could poison a web-cache, perform an XSS attack, or obtain sensitive information from requests other than their own.',
+          aliases: ['CVE-2020-35884', 'SOME-1234-5678'],
+          modified: '',
+          affected: [
+            {
+              package: {
+                name: 'tiny_http',
+                ecosystem: 'crates.io',
+                purl: 'pkg:cargo/tiny_http',
+              },
+              ranges: [
+                {
+                  type: 'SEMVER',
+                  events: [
+                    { introduced: '0' },
+                    { fixed: '0.6.3' },
+                    { introduced: '0.7.0-0' },
+                    { fixed: '0.8.0' },
+                  ],
+                },
+              ],
+            },
+          ],
+          severity: [
+            {
+              type: 'CVSS_V2',
+              score: 'AV:N/AC:L/Au:N/C:P/I:P/A:N',
+            },
+            {
+              type: 'CVSS_V3',
+              score: 'CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:L/A:N',
+            },
+          ],
+        },
+      ]);
+
+      await vulnerabilities.appendVulnerabilityPackageRules(
+        config,
+        packageFiles,
+      );
+
+      expect(config.packageRules).toHaveLength(1);
+      expect(config.packageRules).toMatchObject([
+        {
+          matchDatasources: ['crate'],
+          matchPackageNames: ['tiny_http'],
+          matchCurrentVersion: '0.1.2',
+          allowedVersions: '>= 0.6.3',
+          isVulnerabilityAlert: true,
+          prBodyNotes: [
+            // oxlint-disable-next-line prefer-template
+            '\n\n' +
+              codeBlock`
+              ---
+
+              ### HTTP Request smuggling through malformed Transfer Encoding headers
+              [CVE-2020-35884](https://nvd.nist.gov/vuln/detail/CVE-2020-35884) / [RUSTSEC-2020-0031](https://rustsec.org/advisories/RUSTSEC-2020-0031.html) / SOME-1234-5678
+
+              <details>
+              <summary>More information</summary>
+
+              #### Details
+              HTTP pipelining issues and request smuggling attacks are possible due to incorrect Transfer encoding header parsing.
+
+              It is possible conduct HTTP request smuggling attacks (CL:TE/TE:TE) by sending invalid Transfer Encoding headers.
+
+              By manipulating the HTTP response the attacker could poison a web-cache, perform an XSS attack, or obtain sensitive information from requests other than their own.
+
+              #### Severity
+              - CVSS Score: 6.5 / 10 (Medium)
+              - Vector String: \`CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:L/A:N\`
+
+              #### References
+              No references.
+
+              This data is provided by [OSV](https://osv.dev/vulnerability/RUSTSEC-2020-0031) and the [Rust Advisory Database](https://github.com/RustSec/advisory-db) ([CC0 1.0](https://github.com/rustsec/advisory-db/blob/main/LICENSE.txt)).
+              </details>
+            `,
+          ],
+        },
+      ]);
+    });
+
+    it('returns multiple packageRules for different vulnerabilities', async () => {
+      const packageFiles: Record<string, PackageFile[]> = {
+        npm: [
+          {
+            deps: [
+              { depName: 'lodash', currentValue: '4.17.10', datasource: 'npm' },
+            ],
+            packageFile: 'some-file',
+          },
+        ],
+      };
+      getVulnerabilitiesMock.mockResolvedValueOnce([
+        lodashVulnerability,
+        {
+          id: 'GHSA-p6mc-m468-83gw',
+          modified: '',
+          affected: [
+            {
+              ranges: [
+                {
+                  type: 'SEMVER',
+                  events: [{ introduced: '0' }, { fixed: '4.17.20' }],
+                },
+              ],
+              package: { name: 'lodash', ecosystem: 'npm' },
+            },
+          ],
+          severity: [
+            {
+              type: 'CVSS_V3',
+              score: 'CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:H/A:H',
+            },
+          ],
+        },
+      ]);
+
+      await vulnerabilities.appendVulnerabilityPackageRules(
+        config,
+        packageFiles,
+      );
+
+      expect(config.packageRules).toHaveLength(2);
+      expect(config.packageRules).toMatchObject([
+        {
+          matchDatasources: ['npm'],
+          matchPackageNames: ['lodash'],
+          matchCurrentVersion: '4.17.10',
+          allowedVersions: '>= 4.17.11',
+          isVulnerabilityAlert: true,
+        },
+        {
+          matchDatasources: ['npm'],
+          matchPackageNames: ['lodash'],
+          matchCurrentVersion: '4.17.10',
+          allowedVersions: '>= 4.17.20',
+          isVulnerabilityAlert: true,
+        },
+      ]);
+    });
+
+    it('returns packageRules for Hackage', async () => {
+      const packageFiles: Record<string, PackageFile[]> = {
+        hackage: [
+          {
+            deps: [
+              {
+                depName: 'aeson',
+                currentValue: '0.4.0.0',
+                datasource: 'hackage',
+              },
+            ],
+            packageFile: 'some-file',
+          },
+        ],
+      };
+      getVulnerabilitiesMock.mockResolvedValueOnce([
+        {
+          id: 'HSEC-2023-0001',
+          summary: 'Hash flooding vulnerability in aeson',
+          details:
+            '# Hash flooding vulnerability in aeson\n\n*aeson* was vulnerable to hash flooding (a.k.a. hash DoS).  The\nissue is a consequence of the HashMap implementation from\n*unordered-containers*.  It results in a denial of service through\nCPU consumption.  This technique has been used in real-world attacks\nagainst a variety of languages, libraries and frameworks over the\nyears.\n',
+          aliases: ['CVE-2022-3433'],
+          modified: '2023-06-13T09:03:52Z',
+          affected: [
+            {
+              package: {
+                ecosystem: 'Hackage',
+                name: 'aeson',
+              },
+              ranges: [
+                {
+                  type: 'ECOSYSTEM',
+                  events: [{ introduced: '0.4.0.0' }, { fixed: '2.0.1.0' }],
+                },
+              ],
+            },
+          ],
+        },
+      ]);
+
+      await vulnerabilities.appendVulnerabilityPackageRules(
+        config,
+        packageFiles,
+      );
+
+      expect(config.packageRules).toHaveLength(1);
+      expect(config.packageRules).toMatchObject([
+        {
+          matchDatasources: ['hackage'],
+          matchPackageNames: ['aeson'],
+          matchCurrentVersion: '0.4.0.0',
+          allowedVersions: '>= 2.0.1.0',
+          isVulnerabilityAlert: true,
+        },
+      ]);
+    });
+
+    it('filters not applicable vulnerability based on last_affected version', async () => {
+      const packageFiles: Record<string, PackageFile[]> = {
+        poetry: [
+          {
+            deps: [
+              { depName: 'quokka', currentValue: '1.2.3', datasource: 'pypi' },
+            ],
+            packageFile: 'some-file',
+          },
+        ],
+      };
+      getVulnerabilitiesMock.mockResolvedValueOnce([
+        {
+          id: 'GHSA-xxxx-yyyy-zzzz',
+          modified: '',
+          affected: [
+            {
+              package: {
+                name: 'quokka',
+                ecosystem: 'PyPI',
+                purl: 'pkg:pypi/quokka',
+              },
+              ranges: [
+                {
+                  type: 'ECOSYSTEM',
+                  events: [{ introduced: '0' }, { last_affected: '0.4.0' }],
+                },
+              ],
+            },
+          ],
+        },
+      ]);
+
+      await vulnerabilities.appendVulnerabilityPackageRules(
+        config,
+        packageFiles,
+      );
+      expect(logger.logger.debug).not.toHaveBeenCalledExactlyOnceWith(
+        'OSV advisory GHSA-xxxx-yyyy-zzzz lists quokka 1.2.3 as vulnerable',
+      );
+      expect(config.packageRules).toHaveLength(0);
+    });
+
+    it('describe fixed version as ecosystem-specific version constraint', async () => {
+      const packageFiles: Record<string, PackageFile[]> = {
+        maven: [
+          {
+            deps: [
+              {
+                depName: 'com.guicedee.services:log4j-core',
+                currentValue: '1.0.10.1',
+                datasource: 'maven',
+              },
+            ],
+            packageFile: 'some-file1',
+          },
+        ],
+        nuget: [
+          {
+            deps: [
+              {
+                depName: 'SharpZipLib',
+                currentValue: '1.3.0',
+                datasource: 'nuget',
+              },
+            ],
+            packageFile: 'some-file2',
+          },
+        ],
+        npm: [
+          {
+            deps: [
+              {
+                depName: 'lodash',
+                currentValue: '4.17.15',
+                datasource: 'npm',
+              },
+            ],
+            packageFile: 'some-file3',
+          },
+        ],
+      };
+      getVulnerabilitiesMock.mockResolvedValue([
+        {
+          id: 'GHSA-jfh8-c2jp-5v3q',
+          modified: '',
+          affected: [
+            {
+              package: {
+                name: 'com.guicedee.services:log4j-core',
+                ecosystem: 'Maven',
+                purl: 'pkg:maven/com.guicedee.services/log4j-core',
+              },
+              ranges: [
+                {
+                  type: 'ECOSYSTEM',
+                  events: [{ introduced: '0' }, { fixed: '1.2.1.2-jre17' }],
+                },
+              ],
+            },
+          ],
+        },
+        {
+          id: ' GHSA-mm6g-mmq6-53ff',
+          modified: '',
+          affected: [
+            {
+              package: {
+                name: 'SharpZipLib',
+                ecosystem: 'NuGet',
+                purl: 'pkg:nuget/SharpZipLib',
+              },
+              ranges: [
+                {
+                  type: 'ECOSYSTEM',
+                  events: [{ introduced: '0' }, { fixed: '1.3.3' }],
+                },
+              ],
+            },
+          ],
+        },
+        {
+          id: 'GHSA-29mw-wpgm-hmr9',
+          modified: '',
+          affected: [
+            {
+              package: {
+                name: 'lodash',
+                ecosystem: 'npm',
+                purl: 'pkg:npm/lodash',
+              },
+              ranges: [
+                {
+                  type: 'SEMVER',
+                  events: [{ introduced: '0' }, { fixed: '4.17.21' }],
+                },
+              ],
+            },
+          ],
+        },
+      ]);
+
+      await vulnerabilities.appendVulnerabilityPackageRules(
+        config,
+        packageFiles,
+      );
+      expect(config.packageRules).toMatchObject([
+        {
+          matchDatasources: ['maven'],
+          matchPackageNames: ['com.guicedee.services:log4j-core'],
+          matchCurrentVersion: '1.0.10.1',
+          allowedVersions: '[1.2.1.2-jre17,)',
+        },
+        {
+          matchDatasources: ['nuget'],
+          matchPackageNames: ['SharpZipLib'],
+          matchCurrentVersion: '1.3.0',
+          allowedVersions: '[1.3.3,)',
+        },
+        {
+          matchDatasources: ['npm'],
+          matchPackageNames: ['lodash'],
+          matchCurrentVersion: '4.17.15',
+          allowedVersions: '>= 4.17.21',
+        },
+      ]);
+    });
+
+    it('describe last_affected version as ecosystem-specific version constraint', async () => {
+      const packageFiles: Record<string, PackageFile[]> = {
+        maven: [
+          {
+            deps: [
+              {
+                depName: 'com.guicedee.services:log4j-core',
+                currentValue: '1.0.10.1',
+                datasource: 'maven',
+              },
+            ],
+            packageFile: 'some-file',
+          },
+        ],
+      };
+      getVulnerabilitiesMock.mockResolvedValueOnce([
+        {
+          id: 'GHSA-jfh8-c2jp-5v3q',
+          modified: '',
+          affected: [
+            {
+              package: {
+                name: 'com.guicedee.services:log4j-core',
+                ecosystem: 'Maven',
+                purl: 'pkg:maven/com.guicedee.services/log4j-core',
+              },
+              ranges: [
+                {
+                  type: 'ECOSYSTEM',
+                  events: [
+                    { introduced: '0' },
+                    { last_affected: '1.2.1.2-jre17' },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      ]);
+
+      await vulnerabilities.appendVulnerabilityPackageRules(
+        config,
+        packageFiles,
+      );
+      expect(config.packageRules).toMatchObject([
+        {
+          matchDatasources: ['maven'],
+          matchPackageNames: ['com.guicedee.services:log4j-core'],
+          matchCurrentVersion: '1.0.10.1',
+          allowedVersions: '(1.2.1.2-jre17,)',
+        },
+      ]);
+    });
+
+    it('returns packageRule for deps-edn package using OSV Maven ecosystem', async () => {
+      const packageFiles: Record<string, PackageFile[]> = {
+        'deps-edn': [
+          {
+            deps: [
+              {
+                depName: 'org.clojure/clojure',
+                packageName: 'org.clojure:clojure',
+                currentValue: '1.10.0',
+                datasource: 'clojure',
+              },
+            ],
+            packageFile: 'deps.edn',
+          },
+        ],
+      };
+      getVulnerabilitiesMock.mockResolvedValueOnce([
+        {
+          id: 'GHSA-jfh8-c2jp-clj1',
+          modified: '',
+          affected: [
+            {
+              package: {
+                name: 'org.clojure:clojure',
+                ecosystem: 'Maven',
+                purl: 'pkg:maven/org.clojure/clojure',
+              },
+              ranges: [
+                {
+                  type: 'ECOSYSTEM',
+                  events: [{ introduced: '0' }, { fixed: '1.11.0' }],
+                },
+              ],
+            },
+          ],
+        },
+      ]);
+
+      await vulnerabilities.appendVulnerabilityPackageRules(
+        config,
+        packageFiles,
+      );
+      expect(config.packageRules).toMatchObject([
+        {
+          matchDatasources: ['clojure'],
+          matchPackageNames: ['org.clojure:clojure'],
+          matchCurrentVersion: '1.10.0',
+          allowedVersions: '[1.11.0,)',
+        },
+      ]);
+    });
+
+    it('returns packageRule based on last_affected version', async () => {
+      const packageFiles: Record<string, PackageFile[]> = {
+        npm: [
+          {
+            deps: [
+              { depName: 'lodash', currentValue: '0.5.0', datasource: 'npm' },
+            ],
+            packageFile: 'some-file',
+          },
+        ],
+      };
+      getVulnerabilitiesMock.mockResolvedValueOnce([
+        {
+          id: 'GHSA-xxxx-yyyy-zzzz',
+          modified: '',
+          affected: [
+            {
+              package: {
+                name: 'lodash',
+                ecosystem: 'npm',
+                purl: 'pkg:npm/lodash',
+              },
+              ranges: [
+                {
+                  type: 'SEMVER',
+                  events: [{ introduced: '0' }, { last_affected: '0.2.0' }],
+                },
+                {
+                  type: 'SEMVER',
+                  events: [{ introduced: '0.4.0' }, { last_affected: '0.8.0' }],
+                },
+              ],
+            },
+          ],
+        },
+      ]);
+
+      await vulnerabilities.appendVulnerabilityPackageRules(
+        config,
+        packageFiles,
+      );
+      expect(config.packageRules).toHaveLength(1);
+      expect(config.packageRules).toMatchObject([
+        {
+          matchDatasources: ['npm'],
+          matchPackageNames: ['lodash'],
+          matchCurrentVersion: '0.5.0',
+          allowedVersions: '> 0.8.0',
+          isVulnerabilityAlert: true,
+          prBodyNotes: [
+            // oxlint-disable-next-line prefer-template
+            '\n\n' +
+              codeBlock`
+              ---
+
+              ### [GHSA-xxxx-yyyy-zzzz](https://github.com/advisories/GHSA-xxxx-yyyy-zzzz)
+
+              <details>
+              <summary>More information</summary>
+
+              #### Details
+              No details.
+
+              #### Severity
+              Unknown
+
+              #### References
+              No references.
+
+              This data is provided by [OSV](https://osv.dev/vulnerability/GHSA-xxxx-yyyy-zzzz) and the [GitHub Advisory Database](https://github.com/github/advisory-database) ([CC-BY 4.0](https://github.com/github/advisory-database/blob/main/LICENSE.md)).
+              </details>
+            `,
+          ],
+        },
+      ]);
+    });
+
+    it('handles invalid CVSS scores gracefully', async () => {
+      const packageFiles: Record<string, PackageFile[]> = {
+        poetry: [
+          {
+            deps: [
+              {
+                depName: 'django-mfa2',
+                currentValue: '2.5.0',
+                datasource: 'pypi',
+              },
+            ],
+            packageFile: 'some-file',
+          },
+        ],
+      };
+      getVulnerabilitiesMock.mockResolvedValueOnce([
+        {
+          id: 'PYSEC-2022-303',
+          modified: '',
+          affected: [
+            {
+              ranges: [
+                {
+                  type: 'ECOSYSTEM',
+                  events: [{ introduced: '0' }, { fixed: '2.5.1' }],
+                },
+              ],
+              package: { name: 'django-mfa2', ecosystem: 'PyPI' },
+            },
+          ],
+          severity: [
+            {
+              type: 'CVSS_V3',
+              score: 'some-invalid-score',
+            },
+          ],
+        },
+      ]);
+
+      await vulnerabilities.appendVulnerabilityPackageRules(
+        config,
+        packageFiles,
+      );
+
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        'Error processing CVSS vector some-invalid-score',
+      );
+      expect(config.packageRules).toHaveLength(1);
+      expect(config.packageRules).toMatchObject([
+        {
+          matchDatasources: ['pypi'],
+          matchPackageNames: ['django-mfa2'],
+          matchCurrentVersion: '2.5.0',
+          allowedVersions: '>= 2.5.1',
+          isVulnerabilityAlert: true,
+          prBodyNotes: [
+            // oxlint-disable-next-line prefer-template
+            '\n\n' +
+              codeBlock`
+              ---
+
+              ### PYSEC-2022-303
+
+              <details>
+              <summary>More information</summary>
+
+              #### Details
+              No details.
+
+              #### Severity
+              - CVSS Score: Unknown
+              - Vector String: \`some-invalid-score\`
+
+              #### References
+              No references.
+
+              This data is provided by [OSV](https://osv.dev/vulnerability/PYSEC-2022-303) and the [PyPI Advisory Database](https://github.com/pypa/advisory-database) ([CC-BY 4.0](https://github.com/pypa/advisory-database/blob/main/LICENSE)).
+              </details>
+            `,
+          ],
+        },
+      ]);
+    });
+
+    it('prefer CVSS_V4 scores over CVSS_V3', async () => {
+      const packageFiles: Record<string, PackageFile[]> = {
+        npm: [
+          {
+            deps: [
+              {
+                depName: 'mattermost-desktop',
+                currentValue: '5.8.0',
+                datasource: 'npm',
+              },
+            ],
+            packageFile: 'some-file',
+          },
+        ],
+      };
+      getVulnerabilitiesMock.mockResolvedValueOnce([
+        {
+          id: 'GHSA-xgq9-7gw6-jr5r',
+          modified: '',
+          affected: [
+            {
+              ranges: [
+                {
+                  type: 'SEMVER',
+                  events: [{ introduced: '0' }, { fixed: '5.9.0' }],
+                },
+              ],
+              package: { name: 'mattermost-desktop', ecosystem: 'npm' },
+            },
+          ],
+          severity: [
+            {
+              type: 'CVSS_V3',
+              score: 'CVSS:3.1/AV:L/AC:H/PR:L/UI:N/S:U/C:L/I:N/A:N',
+            },
+            {
+              type: 'CVSS_V4',
+              score:
+                'CVSS:4.0/AV:L/AC:H/AT:N/PR:L/UI:N/VC:L/VI:N/VA:N/SC:N/SI:N/SA:N',
+            },
+          ],
+          references: [
+            {
+              type: 'ADVISORY',
+              url: 'https://nvd.nist.gov/vuln/detail/CVE-2024-45835',
+            },
+          ],
+        },
+      ]);
+
+      await vulnerabilities.appendVulnerabilityPackageRules(
+        config,
+        packageFiles,
+      );
+
+      expect(config.packageRules).toHaveLength(1);
+      expect(config.packageRules).toMatchObject([
+        {
+          matchDatasources: ['npm'],
+          matchPackageNames: ['mattermost-desktop'],
+          matchCurrentVersion: '5.8.0',
+          allowedVersions: '>= 5.9.0',
+          isVulnerabilityAlert: true,
+          prBodyNotes: [
+            // oxlint-disable-next-line prefer-template
+            '\n\n' +
+              codeBlock`
+              ---
+
+              ### [GHSA-xgq9-7gw6-jr5r](https://github.com/advisories/GHSA-xgq9-7gw6-jr5r)
+
+              <details>
+              <summary>More information</summary>
+
+              #### Details
+              No details.
+
+              #### Severity
+              - CVSS Score: 2.0 / 10 (Low)
+              - Vector String: \`CVSS:4.0/AV:L/AC:H/AT:N/PR:L/UI:N/VC:L/VI:N/VA:N/SC:N/SI:N/SA:N\`
+
+              #### References
+              - [https://nvd.nist.gov/vuln/detail/CVE-2024-45835](https://nvd.nist.gov/vuln/detail/CVE-2024-45835)
+
+              This data is provided by [OSV](https://osv.dev/vulnerability/GHSA-xgq9-7gw6-jr5r) and the [GitHub Advisory Database](https://github.com/github/advisory-database) ([CC-BY 4.0](https://github.com/github/advisory-database/blob/main/LICENSE.md)).
+              </details>
+            `,
+          ],
+        },
+      ]);
+    });
+
+    it('show severity text in GHSA advisories without CVSS score', async () => {
+      const packageFiles: Record<string, PackageFile[]> = {
+        npm: [
+          {
+            deps: [
+              { depName: 'lodash', currentValue: '4.17.10', datasource: 'npm' },
+            ],
+            packageFile: 'some-file',
+          },
+        ],
+      };
+
+      getVulnerabilitiesMock.mockResolvedValueOnce([
+        {
+          ...lodashVulnerability,
+          database_specific: {
+            severity: 'MODERATE',
+          },
+        },
+      ]);
+
+      await vulnerabilities.appendVulnerabilityPackageRules(
+        config,
+        packageFiles,
+      );
+
+      expect(config.packageRules).toHaveLength(1);
+      expect(config.packageRules).toMatchObject([
+        {
+          matchDatasources: ['npm'],
+          matchPackageNames: ['lodash'],
+          matchCurrentVersion: '4.17.10',
+          allowedVersions: '>= 4.17.11',
+          isVulnerabilityAlert: true,
+          prBodyNotes: [
+            // oxlint-disable-next-line prefer-template
+            '\n\n' +
+              codeBlock`
+              ---
+
+              ### [GHSA-x5rq-j2xg-h7qm](https://github.com/advisories/GHSA-x5rq-j2xg-h7qm)
+
+              <details>
+              <summary>More information</summary>
+
+              #### Details
+              No details.
+
+              #### Severity
+              Moderate
+
+              #### References
+              - [https://nvd.nist.gov/vuln/detail/CVE-2019-1010266](https://nvd.nist.gov/vuln/detail/CVE-2019-1010266)
+
+              This data is provided by [OSV](https://osv.dev/vulnerability/GHSA-x5rq-j2xg-h7qm) and the [GitHub Advisory Database](https://github.com/github/advisory-database) ([CC-BY 4.0](https://github.com/github/advisory-database/blob/main/LICENSE.md)).
+              </details>
+            `,
+          ],
+        },
+      ]);
+    });
+
+    it('formats headings of vulnerability details', async () => {
+      const packageFiles: Record<string, PackageFile[]> = {
+        regex: [
+          {
+            deps: [
+              {
+                depName: 'sys-info',
+                currentValue: '0.6.0',
+                datasource: 'crate',
+              },
+            ],
+            packageFile: 'some-file',
+          },
+        ],
+      };
+      getVulnerabilitiesMock.mockResolvedValueOnce([
+        {
+          id: 'RUSTSEC-2020-0100',
+          summary:
+            'Double free when calling `sys_info::disk_info` from multiple threads',
+          details:
+            'Affected versions of `sys-info` use a static, global, list to store temporary disk information while running. The function that cleans up this list,\n`DFCleanup`, assumes a single threaded environment and will try to free the same memory twice in a multithreaded environment.\n\nThis results in consistent double-frees and segfaults when calling `sys_info::disk_info` from multiple threads at once.\n\nThe issue was fixed by moving the global variable into a local scope.\n\n## Safer Alternatives:\n - [`sysinfo`](https://crates.io/crates/sysinfo)',
+          aliases: ['CVE-2020-36434'],
+          modified: '',
+          affected: [
+            {
+              package: {
+                name: 'sys-info',
+                ecosystem: 'crates.io',
+                purl: 'pkg:cargo/sys-info',
+              },
+              ranges: [
+                {
+                  type: 'SEMVER',
+                  events: [{ introduced: '0.0.0-0' }, { fixed: '0.8.0' }],
+                },
+              ],
+              database_specific: {
+                cvss: 'CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H',
+              },
+            },
+          ],
+        },
+      ]);
+
+      await vulnerabilities.appendVulnerabilityPackageRules(
+        config,
+        packageFiles,
+      );
+
+      expect(config.packageRules).toHaveLength(1);
+      expect(config.packageRules).toMatchObject([
+        {
+          matchDatasources: ['crate'],
+          matchPackageNames: ['sys-info'],
+          matchCurrentVersion: '0.6.0',
+          allowedVersions: '>= 0.8.0',
+          isVulnerabilityAlert: true,
+          prBodyNotes: [
+            // oxlint-disable-next-line prefer-template
+            '\n\n' +
+              codeBlock`
+              ---
+
+              ### Double free when calling \`sys_info::disk_info\` from multiple threads
+              [CVE-2020-36434](https://nvd.nist.gov/vuln/detail/CVE-2020-36434) / [RUSTSEC-2020-0100](https://rustsec.org/advisories/RUSTSEC-2020-0100.html)
+
+              <details>
+              <summary>More information</summary>
+
+              #### Details
+              Affected versions of \`sys-info\` use a static, global, list to store temporary disk information while running. The function that cleans up this list,
+              \`DFCleanup\`, assumes a single threaded environment and will try to free the same memory twice in a multithreaded environment.
+
+              This results in consistent double-frees and segfaults when calling \`sys_info::disk_info\` from multiple threads at once.
+
+              The issue was fixed by moving the global variable into a local scope.
+
+              ##### Safer Alternatives:
+               - [\`sysinfo\`](https://crates.io/crates/sysinfo)
+
+              #### Severity
+              - CVSS Score: 9.8 / 10 (Critical)
+              - Vector String: \`CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H\`
+
+              #### References
+              No references.
+
+              This data is provided by [OSV](https://osv.dev/vulnerability/RUSTSEC-2020-0100) and the [Rust Advisory Database](https://github.com/RustSec/advisory-db) ([CC0 1.0](https://github.com/rustsec/advisory-db/blob/main/LICENSE.txt)).
+              </details>
+            `,
+          ],
+        },
+      ]);
+    });
+  });
+
+  describe('evaluateCvssVector', () => {
+    it.each`
+      input                                                                | output
+      ${'some-invalid-vector'}                                             | ${['', '']}
+      ${'CVSS:4.0/AV:N/AC:L/AT:N/PR:L/UI:N/VC:N/VI:L/VA:N/SC:N/SI:L/SA:N'} | ${['5.3', 'MEDIUM']}
+      ${'CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H'}                    | ${['9.8', 'CRITICAL']}
+      ${'CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:L'}                    | ${['5.3', 'MEDIUM']}
+      ${'AV:N/AC:L/Au:N/C:P/I:P/A:P'}                                      | ${['7.5', 'UNKNOWN']}
+      ${'AV:N'}                                                            | ${['0.0', 'UNKNOWN']}
+      ${'CVSS:3.1/AV:N'}                                                   | ${['0.0', 'NONE']}
+    `('$input', ({ input, output }) => {
+      expect(Vulnerabilities.evaluateCvssVector(input)).toMatchObject(output);
+    });
+  });
+});
+
+function resetOsv() {
+  // @ts-expect-error - reset the cached OSV client to avoid state leak between tests
+  Vulnerabilities.osvOffline = undefined;
+}

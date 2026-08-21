@@ -1,0 +1,42 @@
+{
+  "dockerfile": [
+    {
+      "packageFile": "ver-and-digest/Dockerfile",
+      "deps": [
+        {
+          "depName": "ubuntu",
+          "currentValue": "18.04",
+          "currentDigest": "sha256:a7ed45c4a95fbe19f9c5fb9d1ca58b2431b2a4984754be2f50ccec99d9428b79"
+        }
+      ]
+    },
+    {
+      "packageFile": "no-ver-no-digest/Dockerfile",
+      "deps": [
+        {
+          "depName": "ubuntu",
+          "replaceString": "ubuntu",
+          "skipReason": "invalid-value"
+        }
+      ]
+    },
+    {
+      "packageFile": "ver-only/Dockerfile",
+      "deps": [
+        {
+          "depName": "ubuntu",
+          "currentValue": "20.04"
+        }
+      ]
+    },
+    {
+      "packageFile": "digest-only/Dockerfile",
+      "deps": [
+        {
+          "depName": "ubuntu",
+          "currentDigest": "sha256:06b5d30fabc1fc574f2ecab87375692299d45f8f190d9b71f512deb494114e1f"
+        }
+      ]
+    }
+  ]
+}

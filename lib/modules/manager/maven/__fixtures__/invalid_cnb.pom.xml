@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<groupId>test.example</groupId>
+	<artifactId>demo</artifactId>
+	<version>1.0.0</version>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+				<configuration>
+					<image>
+						<name>repository.local/demo-spring-boot</name>
+						<builder>invalid-builder</builder>
+						<runImage>invalid-run</runImage>
+						<buildpacks>
+							<buildpack>invalid-image</buildpack>
+							<buildpack>urn:cnb:builder:buildpacks:invalid@2.13.1</buildpack>
+							<buildpack>invalid://identifier/type:1.8.0</buildpack>
+						</buildpacks>
+					</image>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+</project>

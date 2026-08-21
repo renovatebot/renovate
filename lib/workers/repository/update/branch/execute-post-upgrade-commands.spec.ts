@@ -1,0 +1,1433 @@
+import type { Stats } from 'node:fs';
+import type { DirectoryResult } from 'tmp-promise';
+import { dir } from 'tmp-promise';
+import upath from 'upath';
+import { fs, git, logger, partial } from '~test/util.ts';
+import { GlobalConfig } from '../../../../config/global.ts';
+import * as _exec from '../../../../util/exec/index.ts';
+import type { ConstraintName, ToolName } from '../../../../util/exec/types.ts';
+import * as _gitAuth from '../../../../util/git/auth.ts';
+import type { FileChange, StatusResult } from '../../../../util/git/types.ts';
+import type { BranchConfig, BranchUpgradeConfig } from '../../../types.ts';
+import * as postUpgradeCommands from './execute-post-upgrade-commands.ts';
+
+vi.mock('../../../../util/exec/index.ts');
+vi.mock('../../../../util/fs/index.ts');
+vi.mock('../../../../util/git/auth.ts');
+
+const exec = vi.mocked(_exec);
+const gitAuth = vi.mocked(_gitAuth);
+
+interface RepositoryChanges {
+  created?: string[];
+  modified?: string[];
+}
+
+describe('workers/repository/update/branch/execute-post-upgrade-commands', () => {
+  describe('postUpgradeCommandsExecutor', () => {
+    let tmpDir: DirectoryResult;
+
+    beforeEach(async () => {
+      GlobalConfig.reset();
+      gitAuth.getGitEnvironmentVariables.mockImplementation((env) => ({
+        ...env,
+      }));
+
+      tmpDir = await dir({ unsafeCleanup: true });
+    });
+
+    afterEach(async () => {
+      await tmpDir.cleanup();
+    });
+
+    it('handles an artifact which is a directory', async () => {
+      const commands = partial<BranchUpgradeConfig>([
+        {
+          manager: 'some-manager',
+          branchName: 'main',
+          postUpgradeTasks: {
+            executionMode: 'update',
+            commands: ['disallowed_command'],
+          },
+        },
+      ]);
+      const config: BranchConfig = {
+        manager: 'some-manager',
+        updatedPackageFiles: [],
+        updatedArtifacts: [
+          { type: 'addition', path: 'some-existing-dir', contents: '' },
+          { type: 'addition', path: 'artifact', contents: '' },
+          {
+            type: 'addition',
+            path: 'symlink',
+            contents: 'dest',
+            isSymlink: true,
+          },
+        ],
+        artifactErrors: [],
+        upgrades: [],
+        branchName: 'main',
+        baseBranch: 'base',
+      };
+      git.getRepoStatus.mockResolvedValueOnce(
+        partial<StatusResult>({
+          modified: [],
+          not_added: [],
+          deleted: [],
+        }),
+      );
+      GlobalConfig.set({
+        localDir: import.meta.dirname,
+        allowedCommands: ['some-command'],
+      });
+      fs.localPathIsFile
+        .mockResolvedValueOnce(true)
+        .mockResolvedValueOnce(false)
+        .mockResolvedValueOnce(true);
+      fs.localPathExists
+        .mockResolvedValueOnce(true)
+        .mockResolvedValueOnce(true)
+        .mockResolvedValueOnce(true);
+
+      const res = await postUpgradeCommands.postUpgradeCommandsExecutor(
+        commands,
+        config,
+      );
+
+      expect(res.updatedArtifacts).toHaveLength(3);
+      expect(fs.writeLocalFile).toHaveBeenCalledTimes(1);
+    });
+
+    it('executes commands on update package files', async () => {
+      const commands = partial<BranchUpgradeConfig>([
+        {
+          manager: 'some-manager',
+          branchName: 'main',
+          postUpgradeTasks: {
+            executionMode: 'update',
+            commands: ['disallowed_command'],
+          },
+        },
+      ]);
+      const config: BranchConfig = {
+        manager: 'some-manager',
+        updatedPackageFiles: [
+          { type: 'addition', path: 'some-existing-dir', contents: '' },
+          { type: 'addition', path: 'artifact', contents: '' },
+        ],
+        upgrades: [],
+        branchName: 'main',
+        baseBranch: 'base',
+      };
+      git.getRepoStatus.mockResolvedValueOnce(
+        partial<StatusResult>({
+          modified: [],
+          not_added: [],
+          deleted: [],
+        }),
+      );
+      GlobalConfig.set({
+        localDir: import.meta.dirname,
+        allowedCommands: ['some-command'],
+      });
+      fs.localPathIsFile
+        .mockResolvedValueOnce(true)
+        .mockResolvedValueOnce(false);
+      fs.localPathExists
+        .mockResolvedValueOnce(true)
+        .mockResolvedValueOnce(true);
+
+      const res = await postUpgradeCommands.postUpgradeCommandsExecutor(
+        commands,
+        config,
+      );
+
+      expect(res.updatedArtifacts).toHaveLength(0);
+      expect(fs.writeLocalFile).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not execute command with shell mode by default', async () => {
+      const commands = partial<BranchUpgradeConfig>([
+        {
+          manager: 'some-manager',
+          branchName: 'main',
+          postUpgradeTasks: {
+            commands: ['some-command'],
+            executionMode: 'update',
+          },
+        },
+      ]);
+      const config: BranchConfig = {
+        manager: 'some-manager',
+        updatedPackageFiles: [
+          { type: 'addition', path: 'some-existing-dir', contents: '' },
+          { type: 'addition', path: 'artifact', contents: '' },
+        ],
+        upgrades: [
+          { manager: 'some-manager', branchName: 'main', depName: 'some-dep1' },
+          { manager: 'some-manager', branchName: 'main', depName: 'some-dep2' },
+        ],
+        branchName: 'main',
+        baseBranch: 'base',
+      };
+      exec.exec.mockResolvedValueOnce({
+        stdout: 'success',
+        stderr: '',
+      });
+      git.getRepoStatus.mockResolvedValueOnce(
+        partial<StatusResult>({
+          modified: [],
+          not_added: [],
+          deleted: [],
+        }),
+      );
+      const localDir = upath.join(tmpDir.path, 'local');
+      GlobalConfig.set({
+        localDir,
+        allowedCommands: ['some-command'],
+      });
+      fs.localPathIsFile.mockResolvedValueOnce(true);
+
+      const res = await postUpgradeCommands.postUpgradeCommandsExecutor(
+        commands,
+        config,
+      );
+
+      expect(exec.exec).toHaveBeenCalledExactlyOnceWith(
+        'some-command',
+        expect.objectContaining({
+          cwd: localDir,
+          shell: false,
+        }),
+      );
+      expect(res.artifactErrors).toHaveLength(0);
+    });
+
+    it('executes command with shell mode when allowShellExecutorForPostUpgradeCommands=true', async () => {
+      const commands = partial<BranchUpgradeConfig>([
+        {
+          manager: 'some-manager',
+          branchName: 'main',
+          postUpgradeTasks: {
+            commands: ['some-command'],
+            executionMode: 'update',
+          },
+        },
+      ]);
+      const config: BranchConfig = {
+        manager: 'some-manager',
+        updatedPackageFiles: [
+          { type: 'addition', path: 'some-existing-dir', contents: '' },
+          { type: 'addition', path: 'artifact', contents: '' },
+        ],
+        upgrades: [
+          { manager: 'some-manager', branchName: 'main', depName: 'some-dep1' },
+          { manager: 'some-manager', branchName: 'main', depName: 'some-dep2' },
+        ],
+        branchName: 'main',
+        baseBranch: 'base',
+      };
+      exec.exec.mockResolvedValueOnce({
+        stdout: 'success',
+        stderr: '',
+      });
+      git.getRepoStatus.mockResolvedValueOnce(
+        partial<StatusResult>({
+          modified: [],
+          not_added: [],
+          deleted: [],
+        }),
+      );
+      const localDir = upath.join(tmpDir.path, 'local');
+      GlobalConfig.set({
+        localDir,
+        allowedCommands: ['some-command'],
+        allowShellExecutorForPostUpgradeCommands: true,
+      });
+      fs.localPathIsFile.mockResolvedValueOnce(true);
+
+      const res = await postUpgradeCommands.postUpgradeCommandsExecutor(
+        commands,
+        config,
+      );
+
+      expect(exec.exec).toHaveBeenCalledExactlyOnceWith(
+        'some-command',
+        expect.objectContaining({
+          cwd: localDir,
+          shell: true,
+        }),
+      );
+      expect(res.artifactErrors).toHaveLength(0);
+    });
+
+    it('does not execute command with shell mode when allowShellExecutorForPostUpgradeCommands=false', async () => {
+      const commands = partial<BranchUpgradeConfig>([
+        {
+          manager: 'some-manager',
+          branchName: 'main',
+          postUpgradeTasks: {
+            commands: ['some-command'],
+            executionMode: 'update',
+          },
+        },
+      ]);
+      const config: BranchConfig = {
+        manager: 'some-manager',
+        updatedPackageFiles: [
+          { type: 'addition', path: 'some-existing-dir', contents: '' },
+          { type: 'addition', path: 'artifact', contents: '' },
+        ],
+        upgrades: [
+          { manager: 'some-manager', branchName: 'main', depName: 'some-dep1' },
+          { manager: 'some-manager', branchName: 'main', depName: 'some-dep2' },
+        ],
+        branchName: 'main',
+        baseBranch: 'base',
+      };
+      exec.exec.mockResolvedValueOnce({
+        stdout: 'success',
+        stderr: '',
+      });
+      git.getRepoStatus.mockResolvedValueOnce(
+        partial<StatusResult>({
+          modified: [],
+          not_added: [],
+          deleted: [],
+        }),
+      );
+      const localDir = upath.join(tmpDir.path, 'local');
+      GlobalConfig.set({
+        localDir,
+        allowedCommands: ['some-command'],
+        allowShellExecutorForPostUpgradeCommands: false,
+      });
+      fs.localPathIsFile.mockResolvedValueOnce(true);
+
+      const res = await postUpgradeCommands.postUpgradeCommandsExecutor(
+        commands,
+        config,
+      );
+
+      expect(exec.exec).toHaveBeenCalledExactlyOnceWith(
+        'some-command',
+        expect.objectContaining({
+          cwd: localDir,
+          shell: false,
+        }),
+      );
+      expect(res.artifactErrors).toHaveLength(0);
+    });
+
+    it('creates data file for commands', async () => {
+      const commands = partial<BranchUpgradeConfig>([
+        {
+          manager: 'some-manager',
+          branchName: 'main',
+          postUpgradeTasks: {
+            commands: ['some-command'],
+            dataFileTemplate:
+              '[{{#each upgrades}}{"depName": "{{{depName}}}"}{{#unless @last}},{{/unless}}{{/each}}]',
+            executionMode: 'update',
+          },
+        },
+      ]);
+      const config: BranchConfig = {
+        manager: 'some-manager',
+        updatedPackageFiles: [
+          { type: 'addition', path: 'some-existing-dir', contents: '' },
+          { type: 'addition', path: 'artifact', contents: '' },
+        ],
+        upgrades: [
+          { manager: 'some-manager', branchName: 'main', depName: 'some-dep1' },
+          { manager: 'some-manager', branchName: 'main', depName: 'some-dep2' },
+        ],
+        branchName: 'main',
+        baseBranch: 'base',
+      };
+      git.getRepoStatus.mockResolvedValueOnce(
+        partial<StatusResult>({
+          modified: [],
+          not_added: [],
+          deleted: [],
+        }),
+      );
+      const cacheDir = upath.join(tmpDir.path, 'cache');
+      GlobalConfig.set({
+        localDir: upath.join(tmpDir.path, 'local'),
+        cacheDir,
+        allowedCommands: ['some-command'],
+      });
+      fs.localPathIsFile
+        .mockResolvedValueOnce(true)
+        .mockResolvedValueOnce(false);
+      fs.localPathExists
+        .mockResolvedValueOnce(true)
+        .mockResolvedValueOnce(true);
+      fs.privateCacheDir.mockReturnValue(cacheDir);
+
+      const res = await postUpgradeCommands.postUpgradeCommandsExecutor(
+        commands,
+        config,
+      );
+
+      expect(res.updatedArtifacts).toHaveLength(0);
+      expect(fs.outputCacheFile).toHaveBeenCalledTimes(1);
+      expect(fs.outputCacheFile).toHaveBeenCalledExactlyOnceWith(
+        expect.stringMatching(
+          `^.*${upath.sep}post-upgrade-data-file-[a-f0-9]{16}.tmp$`,
+        ),
+        '[{"depName": "some-dep1"},{"depName": "some-dep2"}]',
+      );
+    });
+
+    it('should not create data file if no commands given', async () => {
+      const commands = partial<BranchUpgradeConfig>([
+        {
+          manager: 'some-manager',
+          branchName: 'main',
+          postUpgradeTasks: {
+            executionMode: 'update',
+            commands: [],
+          },
+        },
+      ]);
+      const config: BranchConfig = {
+        manager: 'some-manager',
+        updatedPackageFiles: [
+          { type: 'addition', path: 'some-existing-dir', contents: '' },
+          { type: 'addition', path: 'artifact', contents: '' },
+        ],
+        upgrades: [],
+        branchName: 'main',
+        baseBranch: 'base',
+      };
+      git.getRepoStatus.mockResolvedValueOnce(
+        partial<StatusResult>({
+          modified: [],
+          not_added: [],
+          deleted: [],
+        }),
+      );
+      const cacheDir = upath.join(tmpDir.path, 'cache');
+      GlobalConfig.set({
+        localDir: upath.join(tmpDir.path, 'local'),
+        cacheDir,
+        allowedCommands: ['some-command'],
+      });
+      fs.localPathIsFile
+        .mockResolvedValueOnce(true)
+        .mockResolvedValueOnce(false);
+      fs.localPathExists
+        .mockResolvedValueOnce(true)
+        .mockResolvedValueOnce(true);
+      fs.privateCacheDir.mockReturnValue(cacheDir);
+
+      const res = await postUpgradeCommands.postUpgradeCommandsExecutor(
+        commands,
+        config,
+      );
+
+      expect(res.updatedArtifacts).toHaveLength(0);
+      expect(fs.outputCacheFile).not.toHaveBeenCalled();
+    });
+
+    it('logs files which do not match fileFilters', async () => {
+      const commands = partial<BranchUpgradeConfig>([
+        {
+          manager: 'some-manager',
+          branchName: 'main',
+          postUpgradeTasks: {
+            executionMode: 'branch',
+            commands: ['command'],
+            fileFilters: ['*.txt'],
+          },
+        },
+      ]);
+      const config: BranchConfig = {
+        manager: 'some-manager',
+        updatedPackageFiles: [
+          { type: 'addition', path: 'some-existing-dir', contents: '' },
+          { type: 'addition', path: 'artifact', contents: '' },
+        ],
+        upgrades: [],
+        branchName: 'main',
+        baseBranch: 'base',
+      };
+      git.getRepoStatus.mockResolvedValueOnce(
+        partial<StatusResult>({
+          modified: ['not-a-txt-file'],
+          not_added: [],
+          deleted: [],
+        }),
+      );
+      GlobalConfig.set({
+        localDir: import.meta.dirname,
+        allowedCommands: ['some-command'],
+      });
+      fs.localPathIsFile
+        .mockResolvedValueOnce(true)
+        .mockResolvedValueOnce(false);
+      fs.localPathExists
+        .mockResolvedValueOnce(true)
+        .mockResolvedValueOnce(true);
+
+      const res = await postUpgradeCommands.postUpgradeCommandsExecutor(
+        commands,
+        config,
+      );
+
+      expect(res.updatedArtifacts).toHaveLength(0);
+      expect(fs.writeLocalFile).toHaveBeenCalledTimes(1);
+
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        { file: 'not-a-txt-file' },
+        'Post-upgrade file did not match any file filters',
+      );
+    });
+
+    it('excludes .npmrc files when npmrc config is present', async () => {
+      const commands = partial<BranchUpgradeConfig>([
+        {
+          manager: 'npm',
+          branchName: 'main',
+          postUpgradeTasks: {
+            executionMode: 'update',
+            commands: ['echo test'],
+            fileFilters: ['**/*'],
+          },
+        },
+      ]);
+      const config: BranchConfig = {
+        manager: 'npm',
+        updatedPackageFiles: [
+          { type: 'addition', path: 'package.json', contents: '{}' },
+        ],
+        npmrc: 'registry=https://example.com',
+        upgrades: [],
+        branchName: 'main',
+        baseBranch: 'base',
+      };
+
+      git.getRepoStatus.mockResolvedValueOnce(
+        partial<StatusResult>({
+          modified: [],
+          not_added: ['.npmrc', 'other-file.txt'],
+          deleted: [],
+        }),
+      );
+
+      const localDir = upath.join(tmpDir.path, 'local');
+      GlobalConfig.set({ localDir, allowedCommands: ['echo test'] });
+
+      fs.localPathIsFile.mockResolvedValue(true);
+      fs.localPathExists.mockResolvedValue(true);
+      fs.readLocalFile.mockResolvedValueOnce('some content');
+
+      const res = await postUpgradeCommands.postUpgradeCommandsExecutor(
+        commands,
+        config,
+      );
+
+      expect(res.updatedArtifacts).toHaveLength(1);
+      expect(res.updatedArtifacts[0].path).toBe('other-file.txt');
+      expect(res.updatedArtifacts[0].type).toBe('addition');
+    });
+
+    describe('executable file modes', () => {
+      const postUpgradeTask = partial<BranchUpgradeConfig>([
+        {
+          manager: 'some-manager',
+          branchName: 'main',
+          postUpgradeTasks: {
+            executionMode: 'branch',
+            commands: ['post-upgrade-command'],
+            fileFilters: ['*'],
+          },
+        },
+      ]);
+      const ownerExecutableMode = 0o744;
+      const groupAndOtherExecutableMode = 0o655;
+      const nonExecutableMode = 0o644;
+      const updatedContents = 'updated contents';
+
+      function createBranchConfig(
+        updatedArtifacts: FileChange[] = [],
+      ): BranchConfig {
+        return {
+          manager: 'some-manager',
+          updatedPackageFiles: [],
+          updatedArtifacts,
+          upgrades: [],
+          branchName: 'main',
+          baseBranch: 'base',
+        };
+      }
+
+      function mockRepositoryChanges({
+        created = [],
+        modified = [],
+      }: RepositoryChanges): void {
+        git.getRepoStatus.mockResolvedValueOnce(
+          partial<StatusResult>({
+            not_added: created,
+            modified,
+            deleted: [],
+          }),
+        );
+      }
+
+      async function runPostUpgradeTask(updatedArtifacts: FileChange[] = []) {
+        return postUpgradeCommands.postUpgradeCommandsExecutor(
+          postUpgradeTask,
+          createBranchConfig(updatedArtifacts),
+        );
+      }
+
+      beforeEach(() => {
+        GlobalConfig.set({
+          localDir: import.meta.dirname,
+          allowedCommands: ['post-upgrade-command'],
+        });
+        exec.exec.mockResolvedValue({ stdout: '', stderr: '' });
+        fs.localPathIsFile.mockResolvedValue(true);
+        fs.readLocalFile.mockResolvedValue(updatedContents);
+      });
+
+      it('marks a new file executable when the owner execute bit is set', async () => {
+        git.isFileModeEnabled.mockResolvedValue(true);
+        mockRepositoryChanges({ created: ['script.txt'] });
+        fs.statLocalFile.mockResolvedValue(
+          partial<Stats>({
+            mode: ownerExecutableMode,
+            isFile: () => true,
+          }),
+        );
+
+        const result = await runPostUpgradeTask();
+
+        expect(result.updatedArtifacts).toEqual([
+          {
+            type: 'addition',
+            path: 'script.txt',
+            contents: updatedContents,
+            isExecutable: true,
+          },
+        ]);
+      });
+
+      it('marks an existing artifact executable when the owner execute bit is set', async () => {
+        git.isFileModeEnabled.mockResolvedValue(true);
+        mockRepositoryChanges({ modified: ['script.txt'] });
+        fs.statLocalFile.mockResolvedValue(
+          partial<Stats>({
+            mode: ownerExecutableMode,
+            isFile: () => true,
+          }),
+        );
+
+        const result = await runPostUpgradeTask([
+          {
+            type: 'addition',
+            path: 'script.txt',
+            contents: 'old contents',
+          },
+        ]);
+
+        expect(result.updatedArtifacts).toEqual([
+          {
+            type: 'addition',
+            path: 'script.txt',
+            contents: updatedContents,
+            isExecutable: true,
+          },
+        ]);
+      });
+
+      it('does not mark a submodule directory executable', async () => {
+        git.isFileModeEnabled.mockResolvedValue(true);
+        mockRepositoryChanges({ modified: ['submodule'] });
+        fs.readLocalFile.mockResolvedValueOnce(null);
+        fs.statLocalFile.mockResolvedValue(
+          partial<Stats>({
+            mode: ownerExecutableMode,
+            isFile: () => false,
+          }),
+        );
+
+        const result = await runPostUpgradeTask();
+
+        expect(result.updatedArtifacts).toEqual([
+          {
+            type: 'addition',
+            path: 'submodule',
+            contents: null,
+          },
+        ]);
+      });
+
+      it('does not infer executability from group or other execute bits', async () => {
+        git.isFileModeEnabled.mockResolvedValue(true);
+        mockRepositoryChanges({ created: ['script.txt'] });
+        fs.statLocalFile.mockResolvedValue(
+          partial<Stats>({
+            mode: groupAndOtherExecutableMode,
+            isFile: () => true,
+          }),
+        );
+
+        const result = await runPostUpgradeTask();
+
+        expect(result.updatedArtifacts).toEqual([
+          {
+            type: 'addition',
+            path: 'script.txt',
+            contents: updatedContents,
+          },
+        ]);
+      });
+
+      it('preserves a known executable state when the owner bit is absent', async () => {
+        git.isFileModeEnabled.mockResolvedValue(true);
+        mockRepositoryChanges({ modified: ['script.txt'] });
+        fs.statLocalFile.mockResolvedValue(
+          partial<Stats>({
+            mode: nonExecutableMode,
+            isFile: () => true,
+          }),
+        );
+
+        const result = await runPostUpgradeTask([
+          {
+            type: 'addition',
+            path: 'script.txt',
+            contents: 'old contents',
+            isExecutable: true,
+          },
+        ]);
+
+        expect(result.updatedArtifacts).toEqual([
+          {
+            type: 'addition',
+            path: 'script.txt',
+            contents: updatedContents,
+            isExecutable: true,
+          },
+        ]);
+      });
+
+      it('preserves a known executable state when stat is unavailable', async () => {
+        git.isFileModeEnabled.mockResolvedValue(true);
+        mockRepositoryChanges({ modified: ['script.txt'] });
+        fs.statLocalFile.mockResolvedValue(null);
+
+        const result = await runPostUpgradeTask([
+          {
+            type: 'addition',
+            path: 'script.txt',
+            contents: 'old contents',
+            isExecutable: true,
+          },
+        ]);
+
+        expect(result.updatedArtifacts).toEqual([
+          {
+            type: 'addition',
+            path: 'script.txt',
+            contents: updatedContents,
+            isExecutable: true,
+          },
+        ]);
+      });
+
+      it('does not inspect modes when file mode tracking is disabled', async () => {
+        git.isFileModeEnabled.mockResolvedValue(false);
+        mockRepositoryChanges({
+          created: ['new.txt'],
+          modified: ['known-executable.txt'],
+        });
+
+        const result = await runPostUpgradeTask([
+          {
+            type: 'addition',
+            path: 'known-executable.txt',
+            contents: 'old contents',
+            isExecutable: true,
+          },
+        ]);
+
+        expect(result.updatedArtifacts).toEqual([
+          {
+            type: 'addition',
+            path: 'known-executable.txt',
+            contents: updatedContents,
+            isExecutable: true,
+          },
+          {
+            type: 'addition',
+            path: 'new.txt',
+            contents: updatedContents,
+          },
+        ]);
+        expect(fs.statLocalFile).not.toHaveBeenCalled();
+      });
+    });
+
+    it('handles previously-deleted files which are re-added', async () => {
+      const commands = partial<BranchUpgradeConfig>([
+        {
+          manager: 'some-manager',
+          branchName: 'main',
+          postUpgradeTasks: {
+            executionMode: 'branch',
+            commands: ['command'],
+            fileFilters: ['*.txt'],
+          },
+        },
+      ]);
+      const config: BranchConfig = {
+        manager: 'some-manager',
+        updatedPackageFiles: [
+          { type: 'addition', path: 'unchanged.txt', contents: 'changed' },
+          { type: 'deletion', path: 'was-deleted.txt' },
+        ],
+        upgrades: [],
+        branchName: 'main',
+        baseBranch: 'base',
+      };
+      git.getRepoStatus.mockResolvedValueOnce(
+        partial<StatusResult>({
+          modified: [],
+          not_added: [],
+          deleted: [],
+        }),
+      );
+      GlobalConfig.set({
+        localDir: import.meta.dirname,
+        allowedCommands: ['some-command'],
+      });
+      fs.localPathIsFile
+        .mockResolvedValueOnce(true)
+        .mockResolvedValueOnce(false);
+      fs.localPathExists
+        .mockResolvedValueOnce(true)
+        .mockResolvedValueOnce(true);
+
+      const res = await postUpgradeCommands.postUpgradeCommandsExecutor(
+        commands,
+        config,
+      );
+
+      expect(res.updatedArtifacts).toHaveLength(0);
+    });
+
+    it('does not add back files that are renamed', async () => {
+      const commands = partial<BranchUpgradeConfig>([
+        {
+          manager: 'some-manager',
+          branchName: 'main',
+          postUpgradeTasks: {
+            executionMode: 'branch',
+            commands: ['command'],
+            fileFilters: ['*.txt'],
+          },
+        },
+      ]);
+      const config: BranchConfig = {
+        manager: 'some-manager',
+        updatedPackageFiles: [
+          {
+            type: 'addition',
+            path: 'bin/orc',
+            contents: '[content]',
+          },
+        ],
+        updatedArtifacts: [
+          {
+            type: 'addition',
+            path: 'bin/orc',
+            contents: '[content]',
+          },
+          {
+            type: 'addition',
+            path: 'bin/.orc-1.96.1.pkg',
+            contents: '',
+          },
+          {
+            type: 'deletion',
+            path: 'bin/.orc-1.96.0.pkg',
+          },
+        ],
+        upgrades: [],
+        branchName: 'main',
+        baseBranch: 'base',
+      };
+      git.getRepoStatus.mockResolvedValueOnce(
+        partial<StatusResult>({
+          not_added: [],
+          conflicted: [],
+          created: [],
+          deleted: [],
+          modified: ['bin/orc'],
+          renamed: [
+            {
+              from: 'bin/.orc-1.96.0.pkg',
+              to: 'bin/.orc-1.96.1.pkg',
+            },
+          ],
+        }),
+      );
+      GlobalConfig.set({
+        localDir: import.meta.dirname,
+        allowedCommands: ['some-command'],
+      });
+      fs.localPathIsFile
+        .mockResolvedValueOnce(true)
+        .mockResolvedValueOnce(false);
+      fs.localPathExists
+        .mockResolvedValueOnce(true)
+        .mockResolvedValueOnce(true);
+
+      const res = await postUpgradeCommands.postUpgradeCommandsExecutor(
+        commands,
+        config,
+      );
+
+      expect(res.updatedArtifacts).toMatchObject([
+        {
+          type: 'addition',
+          path: 'bin/orc',
+          contents: '[content]',
+        },
+        {
+          type: 'addition',
+          path: 'bin/.orc-1.96.1.pkg',
+          contents: '',
+        },
+        {
+          type: 'deletion',
+          path: 'bin/.orc-1.96.0.pkg',
+        },
+      ]);
+    });
+
+    it('retains previously deleted files too', async () => {
+      const commands = partial<BranchUpgradeConfig>([
+        {
+          manager: 'some-manager',
+          branchName: 'main',
+          postUpgradeTasks: {
+            executionMode: 'branch',
+            commands: ['command'],
+            fileFilters: ['*.txt'],
+          },
+        },
+      ]);
+      const config: BranchConfig = {
+        manager: 'some-manager',
+        updatedPackageFiles: [
+          {
+            type: 'addition',
+            path: 'dependencies/Chart.yaml',
+            contents: '[content]',
+          },
+        ],
+        updatedArtifacts: [
+          {
+            type: 'addition',
+            path: 'dependencies/Chart.lock',
+            contents: '[content]',
+          },
+          {
+            type: 'addition',
+            path: 'dependencies/charts/ingress-nginx-4.12.2.tgz',
+            contents: '[content]',
+          },
+          {
+            type: 'deletion',
+            path: 'dependencies/charts/ingress-nginx-4.12.0.tgz',
+          },
+        ],
+        upgrades: [],
+        branchName: 'main',
+        baseBranch: 'base',
+      };
+      git.getRepoStatus.mockResolvedValueOnce(
+        partial<StatusResult>({
+          not_added: ['dependencies/charts/ingress-nginx-4.12.2.tgz'],
+          conflicted: [],
+          created: [],
+          deleted: ['dependencies/charts/ingress-nginx-4.12.0.tgz'],
+          modified: [
+            'dependencies/Chart.lock',
+            'dependencies/Chart.yaml',
+            'resources/helmfile.yaml',
+          ],
+        }),
+      );
+      GlobalConfig.set({
+        localDir: import.meta.dirname,
+        allowedCommands: ['some-command'],
+      });
+      fs.localPathIsFile
+        .mockResolvedValueOnce(true)
+        .mockResolvedValueOnce(false);
+      fs.localPathExists
+        .mockResolvedValueOnce(true)
+        .mockResolvedValueOnce(true);
+
+      const res = await postUpgradeCommands.postUpgradeCommandsExecutor(
+        commands,
+        config,
+      );
+
+      expect(res.updatedArtifacts).toMatchObject([
+        {
+          type: 'addition',
+          path: 'dependencies/Chart.lock',
+          contents: '[content]',
+        },
+        {
+          type: 'addition',
+          path: 'dependencies/charts/ingress-nginx-4.12.2.tgz',
+          contents: '[content]',
+        },
+        {
+          type: 'deletion',
+          path: 'dependencies/charts/ingress-nginx-4.12.0.tgz',
+        },
+      ]);
+    });
+
+    it('passes git environment variables to exec', async () => {
+      const commands = partial<BranchUpgradeConfig>([
+        {
+          manager: 'some-manager',
+          branchName: 'main',
+          postUpgradeTasks: {
+            commands: ['some-command'],
+            executionMode: 'update',
+          },
+        },
+      ]);
+      const config: BranchConfig = {
+        manager: 'some-manager',
+        updatedPackageFiles: [
+          { type: 'addition', path: 'some-existing-dir', contents: '' },
+          { type: 'addition', path: 'artifact', contents: '' },
+        ],
+        upgrades: [
+          { manager: 'some-manager', branchName: 'main', depName: 'some-dep1' },
+          { manager: 'some-manager', branchName: 'main', depName: 'some-dep2' },
+        ],
+        branchName: 'main',
+        baseBranch: 'base',
+      };
+      const gitEnvVars = {
+        GIT_CONFIG_COUNT: '1',
+        GIT_CONFIG_KEY_0: 'url.https://token@github.com/.insteadOf',
+        GIT_CONFIG_VALUE_0: 'ssh://git@github.com/',
+      };
+      gitAuth.getGitEnvironmentVariables.mockReturnValue(gitEnvVars);
+      exec.exec.mockResolvedValueOnce({
+        stdout: 'success',
+        stderr: '',
+      });
+      git.getRepoStatus.mockResolvedValueOnce(
+        partial<StatusResult>({
+          modified: [],
+          not_added: [],
+          deleted: [],
+        }),
+      );
+      const localDir = upath.join(tmpDir.path, 'local');
+      GlobalConfig.set({
+        localDir,
+        allowedCommands: ['some-command'],
+      });
+      fs.localPathIsFile.mockResolvedValueOnce(true);
+
+      const res = await postUpgradeCommands.postUpgradeCommandsExecutor(
+        commands,
+        config,
+      );
+
+      expect(exec.exec).toHaveBeenCalledExactlyOnceWith(
+        'some-command',
+        expect.objectContaining({
+          cwd: localDir,
+          env: gitEnvVars,
+        }),
+      );
+      expect(res.artifactErrors).toHaveLength(0);
+    });
+
+    it('uses workingDirTemplate when provided', async () => {
+      const commands = partial<BranchUpgradeConfig>([
+        {
+          manager: 'npm',
+          branchName: 'renovate/jest-29.x',
+          depName: 'jest',
+          newVersion: '29.5.0',
+          postUpgradeTasks: {
+            commands: ['some-command'],
+            workingDirTemplate:
+              'projects/{{manager}}/{{depName}}-{{newVersion}}',
+            executionMode: 'update',
+          },
+        },
+      ]);
+      const config: BranchConfig = {
+        manager: 'npm',
+        updatedPackageFiles: [],
+        updatedArtifacts: [],
+        upgrades: [],
+        branchName: 'renovate/jest-29.x',
+        baseBranch: 'main',
+      };
+      git.getRepoStatus.mockResolvedValueOnce(
+        partial<StatusResult>({
+          modified: [],
+          not_added: [],
+          deleted: [],
+        }),
+      );
+      GlobalConfig.set({
+        localDir: '/default/dir',
+        allowedCommands: ['some-command'],
+      });
+      exec.exec.mockResolvedValue({ stdout: '', stderr: '' });
+      fs.ensureLocalDir.mockResolvedValue(
+        '/default/dir/projects/npm/jest-29.5.0',
+      );
+
+      await postUpgradeCommands.postUpgradeCommandsExecutor(commands, config);
+
+      expect(fs.ensureLocalDir).toHaveBeenCalledExactlyOnceWith(
+        'projects/npm/jest-29.5.0',
+      );
+      expect(exec.exec).toHaveBeenCalledExactlyOnceWith(
+        'some-command',
+        expect.objectContaining({
+          cwd: '/default/dir/projects/npm/jest-29.5.0',
+        }),
+      );
+    });
+
+    it('uses localDir when workingDirTemplate is not provided', async () => {
+      const commands = partial<BranchUpgradeConfig>([
+        {
+          manager: 'some-manager',
+          branchName: 'main',
+          postUpgradeTasks: {
+            commands: ['some-command'],
+            executionMode: 'update',
+          },
+        },
+      ]);
+      const config: BranchConfig = {
+        manager: 'some-manager',
+        updatedPackageFiles: [],
+        updatedArtifacts: [],
+        upgrades: [],
+        branchName: 'main',
+        baseBranch: 'base',
+      };
+      git.getRepoStatus.mockResolvedValueOnce(
+        partial<StatusResult>({
+          modified: [],
+          not_added: [],
+          deleted: [],
+        }),
+      );
+      GlobalConfig.set({
+        localDir: '/default/dir',
+        allowedCommands: ['some-command'],
+      });
+      exec.exec = vi.fn().mockResolvedValue({ stdout: '', stderr: '' });
+
+      await postUpgradeCommands.postUpgradeCommandsExecutor(commands, config);
+
+      expect(exec.exec).toHaveBeenCalledExactlyOnceWith(
+        'some-command',
+        expect.objectContaining({
+          cwd: '/default/dir',
+        }),
+      );
+    });
+
+    describe('when using installTools', () => {
+      interface TestCase {
+        description: string;
+        constraints?: Partial<Record<ConstraintName, string>>;
+        installTools: Partial<Record<ToolName, Record<never, never>>>;
+        expected: { toolName: string; constraint: string | undefined }[];
+      }
+
+      it.each<TestCase>([
+        {
+          description: 'constraints are passed',
+          constraints: { npm: '10.2.3' },
+          installTools: { npm: {} },
+          expected: [{ toolName: 'npm', constraint: '10.2.3' }],
+        },
+        {
+          description:
+            'constraints are passed for only the tools specified in installTools',
+          constraints: { composer: '> 2.3', npm: '10.2.3' },
+          installTools: { npm: {} },
+          expected: [
+            // but not composer
+            { toolName: 'npm', constraint: '10.2.3' },
+          ],
+        },
+        {
+          description: 'tools without a constraint are still used',
+          constraints: {
+            // node does not have a constraint
+          },
+          installTools: { node: {} },
+          expected: [{ toolName: 'node', constraint: undefined }],
+        },
+        {
+          description: 'tools with undefined `constraints` are still used',
+          constraints: undefined,
+          installTools: { node: {} },
+          expected: [{ toolName: 'node', constraint: undefined }],
+        },
+        {
+          description: `a constraint that isn't a valid tool is ignored (without being referenced by \`installTools\`)`,
+          constraints: {
+            // jenkins is a valid value for a constraint, but isn't a valid tool for Containerbase
+            jenkins: '1.566.0',
+          },
+          installTools: {},
+          expected: [],
+        },
+        {
+          description: `a constraint that isn't a valid tool is ignored (when referenced by \`installTools\`)`,
+          constraints: {
+            // jenkins is a valid value for a constraint, but isn't a valid tool for Containerbase
+            jenkins: '2.541.3',
+          },
+          // oxlint-disable-next-line renovate/prefer-partial-in-specs -- intentionally uses `jenkins`, which is not a valid ToolName, to test that invalid tools are ignored
+          installTools: {
+            jenkins: {},
+          } as never, // TODO can't tighten the type constraints, as the arguments to the test function don't match
+          expected: [],
+        },
+      ])('$description', async ({ constraints, installTools, expected }) => {
+        const commands = partial<BranchUpgradeConfig>([
+          {
+            constraints,
+            manager: 'some-manager',
+            branchName: 'main',
+            postUpgradeTasks: {
+              commands: ['some-command'],
+              executionMode: 'update',
+              installTools,
+            },
+          },
+        ]);
+        const config: BranchConfig = {
+          manager: 'some-manager',
+          updatedPackageFiles: [
+            { type: 'addition', path: 'some-existing-dir', contents: '' },
+            { type: 'addition', path: 'artifact', contents: '' },
+          ],
+          upgrades: [
+            {
+              manager: 'some-manager',
+              branchName: 'main',
+              depName: 'some-dep1',
+            },
+            {
+              manager: 'some-manager',
+              branchName: 'main',
+              depName: 'some-dep2',
+            },
+          ],
+          branchName: 'main',
+          baseBranch: 'base',
+        };
+        exec.exec.mockResolvedValueOnce({
+          stdout: 'success',
+          stderr: '',
+        });
+        git.getRepoStatus.mockResolvedValueOnce(
+          partial<StatusResult>({
+            modified: [],
+            not_added: [],
+            deleted: [],
+          }),
+        );
+        const localDir = upath.join(tmpDir.path, 'local');
+        GlobalConfig.set({
+          localDir,
+          allowedCommands: ['some-command'],
+        });
+        fs.localPathIsFile.mockResolvedValueOnce(true);
+
+        const res = await postUpgradeCommands.postUpgradeCommandsExecutor(
+          commands,
+          config,
+        );
+
+        expect(exec.exec).toHaveBeenCalledExactlyOnceWith(
+          'some-command',
+          expect.objectContaining({
+            toolConstraints: expected,
+          }),
+        );
+        expect(res.artifactErrors).toHaveLength(0);
+      });
+
+      it(`logs when skipping a constraint that isn't a known tool`, async () => {
+        const commands = partial<BranchUpgradeConfig>([
+          {
+            constraints: {
+              jenkins: '2.541.3',
+            },
+            manager: 'some-manager',
+            branchName: 'main',
+            postUpgradeTasks: {
+              commands: ['some-command'],
+              executionMode: 'update',
+              installTools: {
+                // @ts-expect-error -- installTools.jenkins is not valid
+                jenkins: {},
+              },
+            },
+          },
+        ]);
+        const config: BranchConfig = {
+          manager: 'some-manager',
+          updatedPackageFiles: [
+            { type: 'addition', path: 'some-existing-dir', contents: '' },
+            { type: 'addition', path: 'artifact', contents: '' },
+          ],
+          upgrades: [
+            {
+              manager: 'some-manager',
+              branchName: 'main',
+              depName: 'some-dep1',
+            },
+            {
+              manager: 'some-manager',
+              branchName: 'main',
+              depName: 'some-dep2',
+            },
+          ],
+          branchName: 'main',
+          baseBranch: 'base',
+        };
+        exec.exec.mockResolvedValueOnce({
+          stdout: 'success',
+          stderr: '',
+        });
+        git.getRepoStatus.mockResolvedValueOnce(
+          partial<StatusResult>({
+            modified: [],
+            not_added: [],
+            deleted: [],
+          }),
+        );
+        const localDir = upath.join(tmpDir.path, 'local');
+        GlobalConfig.set({
+          localDir,
+          allowedCommands: ['some-command'],
+        });
+        fs.localPathIsFile.mockResolvedValueOnce(true);
+
+        await postUpgradeCommands.postUpgradeCommandsExecutor(
+          // @ts-expect-error -- installTools.jenkins is not valid
+          commands,
+          config,
+        );
+
+        expect(logger.logger.warn).toHaveBeenCalledWith(
+          {
+            tool: 'jenkins',
+            validTool: false,
+            validConstraint: true,
+          },
+          'Skipping constraint that is not a tool that Containerbase knows',
+        );
+      });
+
+      it(`logs when skipping a value that isn't a known constraint`, async () => {
+        const commands = partial<BranchUpgradeConfig>([
+          {
+            constraints: {
+              // @ts-expect-error -- not a valid constraint
+              'not-valid': '1.2.3',
+            },
+            manager: 'some-manager',
+            branchName: 'main',
+            postUpgradeTasks: {
+              commands: ['some-command'],
+              executionMode: 'update',
+              installTools: {
+                // @ts-expect-error -- not a valid installTools value
+                'not-valid': {},
+              },
+            },
+          },
+        ]);
+        const config: BranchConfig = {
+          manager: 'some-manager',
+          updatedPackageFiles: [
+            { type: 'addition', path: 'some-existing-dir', contents: '' },
+            { type: 'addition', path: 'artifact', contents: '' },
+          ],
+          upgrades: [
+            {
+              manager: 'some-manager',
+              branchName: 'main',
+              depName: 'some-dep1',
+            },
+            {
+              manager: 'some-manager',
+              branchName: 'main',
+              depName: 'some-dep2',
+            },
+          ],
+          branchName: 'main',
+          baseBranch: 'base',
+        };
+        exec.exec.mockResolvedValueOnce({
+          stdout: 'success',
+          stderr: '',
+        });
+        git.getRepoStatus.mockResolvedValueOnce(
+          partial<StatusResult>({
+            modified: [],
+            not_added: [],
+            deleted: [],
+          }),
+        );
+        const localDir = upath.join(tmpDir.path, 'local');
+        GlobalConfig.set({
+          localDir,
+          allowedCommands: ['some-command'],
+        });
+        fs.localPathIsFile.mockResolvedValueOnce(true);
+
+        await postUpgradeCommands.postUpgradeCommandsExecutor(
+          // @ts-expect-error -- installTools.jenkins is not valid
+          commands,
+          config,
+        );
+
+        expect(logger.logger.warn).toHaveBeenCalledWith(
+          {
+            tool: 'not-valid',
+            validTool: false,
+            validConstraint: false,
+          },
+          'Skipping constraint that is not a tool that Containerbase knows',
+        );
+      });
+    });
+  });
+});

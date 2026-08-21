@@ -1,0 +1,184 @@
+import { CONFIG_GIT_URL_UNAVAILABLE } from '../../../constants/error-messages.ts';
+import { logger } from '../../../logger/index.ts';
+import type { BranchStatus, PrState } from '../../../types/index.ts';
+import * as hostRules from '../../../util/host-rules.ts';
+import { regEx } from '../../../util/regex.ts';
+import { toLongCommitSha } from '../../../util/schema-utils/git.ts';
+import { joinUrlParts, parseUrl } from '../../../util/url.ts';
+import { hashBody } from '../pr-body.ts';
+import type { GitUrlOption, Pr } from '../types.ts';
+import type { GerritChange, GerritLabelTypeInfo } from './schema.ts';
+import type { GerritChangeStatus, GerritRequestDetail } from './types.ts';
+
+export const MIN_GERRIT_VERSION = '3.0.0';
+
+export const TAG_PULL_REQUEST_BODY = 'pull-request';
+
+const DEFAULT_SSH_PORT = `29418`;
+
+/**
+ * Max comment size in Gerrit (16kiB by default)
+ * https://gerrit-review.googlesource.com/Documentation/config-gerrit.html#change:~:text=change.commentSizeLimit
+ */
+export const MAX_GERRIT_COMMENT_SIZE = 16 * 1024;
+
+export const REQUEST_DETAILS_FOR_PRS: GerritRequestDetail[] = [
+  'MESSAGES', // to get the pr body
+  'LABELS', // to get the reviewers
+  'DETAILED_ACCOUNTS', // to get the reviewers usernames
+  'CURRENT_REVISION', // to get the commit message
+  'COMMIT_FOOTERS', // to get the commit message
+] as const;
+
+export function getGerritRepoUrl(
+  repository: string,
+  endpoint: string,
+  gitUrl: GitUrlOption | undefined,
+  username: string,
+): string {
+  const endpointUrl = parseUrl(endpoint);
+  if (!endpointUrl) {
+    throw new Error(CONFIG_GIT_URL_UNAVAILABLE);
+  }
+
+  const url =
+    gitUrl === 'ssh'
+      ? createSshUrl(endpointUrl, repository, username)
+      : createHttpUrl(endpointUrl, endpoint, repository);
+  logger.trace({ url }, 'using URL based on configured endpoint');
+
+  return url;
+}
+
+function createSshUrl(url: URL, repository: string, username: string): string {
+  return `ssh://${username}@${url.hostname}:${DEFAULT_SSH_PORT}/${repository}`;
+}
+
+function createHttpUrl(url: URL, endpoint: string, repository: string): string {
+  // Find options for current host and determine Git endpoint
+  const opts = hostRules.find({
+    hostType: 'gerrit',
+    url: endpoint,
+  });
+
+  if (!(opts.username && opts.password)) {
+    throw new Error(
+      'Init: You must configure a Gerrit Server username/password',
+    );
+  }
+
+  url.username = opts.username;
+  url.password = opts.password;
+  url.pathname = joinUrlParts(
+    url.pathname,
+    'a',
+    encodeURIComponent(repository),
+  );
+  return url.toString();
+}
+
+export function mapPrStateToGerritFilter(state?: PrState): string | null {
+  switch (state) {
+    case 'merged':
+      return 'status:merged';
+    case 'open':
+      return 'status:open';
+    case 'closed':
+      return 'status:abandoned';
+    case '!open':
+      return '-status:open';
+    case 'all':
+    default:
+      return null;
+  }
+}
+
+export function mapGerritChangeToPr(
+  change: GerritChange,
+  knownProperties?: {
+    sourceBranch?: string;
+    prBody?: string;
+  },
+): Pr | null {
+  const sourceBranch =
+    knownProperties?.sourceBranch ?? extractSourceBranch(change);
+  if (!sourceBranch) {
+    return null;
+  }
+  return {
+    number: change._number,
+    state: mapGerritChangeStateToPrState(change.status),
+    sourceBranch,
+    targetBranch: change.branch,
+    title: change.subject,
+    createdAt: convertGerritDateToISO(change.created),
+    labels: change.hashtags,
+    reviewers:
+      change.reviewers?.REVIEWER?.map((reviewer) => reviewer.username!) ?? [],
+    bodyStruct: {
+      hash: hashBody(knownProperties?.prBody ?? findPullRequestBody(change)),
+    },
+    sha: toLongCommitSha(change.current_revision),
+  };
+}
+
+export function mapGerritChangeStateToPrState(
+  state: GerritChangeStatus,
+): 'merged' | 'open' | 'closed' {
+  switch (state) {
+    case 'NEW':
+      return 'open';
+    case 'MERGED':
+      return 'merged';
+    case 'ABANDONED':
+      return 'closed';
+  }
+}
+
+export function extractSourceBranch(change: GerritChange): string | undefined {
+  let sourceBranch: string | undefined = undefined;
+
+  if (change.current_revision) {
+    const re = regEx(/^Renovate-Branch: (.+)$/m);
+    const currentRevision = change.revisions![change.current_revision];
+    const message = currentRevision.commit_with_footers;
+    // v8 ignore else -- TODO: add test #40625
+    if (message) {
+      sourceBranch = re.exec(message)?.[1];
+    }
+  }
+
+  return sourceBranch ?? undefined;
+}
+
+export function findPullRequestBody(change: GerritChange): string | undefined {
+  const msg = Array.from(change.messages ?? [])
+    .reverse()
+    .find((msg) => msg.tag === TAG_PULL_REQUEST_BODY);
+  if (msg) {
+    // Gerrit adds a "Patch Set X:" prefix to comments
+    return msg.message.replace(regEx(/^Patch Set \d+:\n\n/), '');
+  }
+  return undefined;
+}
+
+export function mapBranchStatusToLabel(
+  state: BranchStatus | 'UNKNOWN', // suppress default path code removal
+  label: GerritLabelTypeInfo,
+): number {
+  const numbers = Object.keys(label.values).map((x) => parseInt(x, 10));
+  switch (state) {
+    case 'green':
+      return Math.max(...numbers);
+    case 'yellow':
+    case 'red':
+      return Math.min(...numbers);
+  }
+  /* v8 ignore next -- only reachable for the artificial 'UNKNOWN' state, which callers never pass */
+  return label.default_value;
+}
+
+// Convert Gerrit date format to ISO format
+export function convertGerritDateToISO(date: string): string {
+  return date.replace(' ', 'T');
+}

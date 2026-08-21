@@ -1,0 +1,214 @@
+import { isString, isUndefined } from '@sindresorhus/is';
+import { logger } from '../../../logger/index.ts';
+import { withCache } from '../../../util/cache/package/with-cache.ts';
+import { GithubHttp } from '../../../util/http/github.ts';
+import { regEx } from '../../../util/regex.ts';
+import { ensureTrailingSlash, joinUrlParts } from '../../../util/url.ts';
+import * as allVersioning from '../../versioning/index.ts';
+import { Datasource } from '../datasource.ts';
+import type {
+  DigestConfig,
+  GetReleasesConfig,
+  Release,
+  ReleaseResult,
+} from '../types.ts';
+import { isArtifactoryServer } from '../util.ts';
+import { datasource, defaultRegistryUrl, getConanPackage } from './common.ts';
+import {
+  ConanCenterReleases,
+  ConanJSON,
+  ConanLatestRevision,
+  ConanProperties,
+  ConanRevisionJSON,
+} from './schema.ts';
+
+export class ConanDatasource extends Datasource {
+  static readonly id = datasource;
+
+  override readonly defaultRegistryUrls = [defaultRegistryUrl];
+
+  override readonly caching = true;
+
+  override readonly registryStrategy = 'merge';
+
+  githubHttp: GithubHttp;
+
+  override readonly sourceUrlSupport = 'package';
+  override readonly sourceUrlNote =
+    'The source URL is supported only if the package is served from the Artifactory servers. In which case we determine it from the `properties[conan.package.url]` field in the results.';
+
+  constructor(id = ConanDatasource.id) {
+    super(id);
+    this.githubHttp = new GithubHttp(id);
+  }
+
+  async getConanCenterReleases(
+    conanName: string,
+    userAndChannel: string,
+  ): Promise<ReleaseResult | null> {
+    if (userAndChannel && userAndChannel !== '@_/_') {
+      logger.debug(
+        { conanName, userAndChannel },
+        'User/channel not supported for Conan Center lookups',
+      );
+      return null;
+    }
+    const url = `https://api.github.com/repos/conan-io/conan-center-index/contents/recipes/${conanName}/config.yml`;
+    const { body: result } = await this.githubHttp.getYaml(
+      url,
+      { headers: { accept: 'application/vnd.github.v3.raw' } },
+      ConanCenterReleases,
+    );
+    return result;
+  }
+
+  private async _getDigest(
+    { registryUrl, packageName }: DigestConfig,
+    newValue?: string,
+  ): Promise<string | null> {
+    if (isUndefined(newValue) || isUndefined(registryUrl)) {
+      return null;
+    }
+    const url = ensureTrailingSlash(registryUrl);
+    const conanPackage = getConanPackage(packageName);
+    const revisionLookUp = joinUrlParts(
+      url,
+      'v2/conans/',
+      conanPackage.conanName,
+      newValue,
+      conanPackage.userAndChannel,
+      '/revisions',
+    );
+    const { body: digest } = await this.http.getJson(
+      revisionLookUp,
+      ConanLatestRevision,
+    );
+    return digest;
+  }
+
+  override getDigest(
+    config: DigestConfig,
+    newValue?: string,
+  ): Promise<string | null> {
+    return withCache(
+      {
+        namespace: `datasource-${datasource}`,
+        // TODO: types (#22198)
+        key: `getDigest:${config.registryUrl!}:${config.packageName}:${newValue!}`,
+        fallback: true,
+      },
+      () => this._getDigest(config, newValue),
+    );
+  }
+
+  private async _getReleases({
+    registryUrl,
+    packageName,
+  }: GetReleasesConfig): Promise<ReleaseResult | null> {
+    const conanPackage = getConanPackage(packageName);
+    const userAndChannel = `@${conanPackage.userAndChannel}`;
+    if (
+      isString(registryUrl) &&
+      ensureTrailingSlash(registryUrl) === defaultRegistryUrl
+    ) {
+      return this.getConanCenterReleases(
+        conanPackage.conanName,
+        userAndChannel,
+      );
+    }
+
+    logger.trace(
+      { packageName, registryUrl },
+      'Looking up conan api dependency',
+    );
+
+    if (registryUrl) {
+      const url = ensureTrailingSlash(registryUrl);
+      const lookupUrl = joinUrlParts(
+        url,
+        `v2/conans/search?q=${conanPackage.conanName}`,
+      );
+
+      try {
+        const rep = await this.http.getJson(lookupUrl, ConanJSON);
+        const conanJson = rep.body;
+        if (conanJson) {
+          logger.trace({ lookupUrl }, 'Got conan api result');
+          const dep: ReleaseResult = { releases: [] };
+
+          const conanJsonReleases: Release[] = conanJson
+            .filter(({ userChannel }) => userChannel === userAndChannel)
+            .map(({ version }) => ({ version }));
+          dep.releases.push(...conanJsonReleases);
+
+          try {
+            if (isArtifactoryServer(rep)) {
+              const conanApiRegexp = regEx(
+                /(?<host>.*)\/artifactory\/api\/conan\/(?<repo>[^/]+)/,
+              );
+              const groups = conanApiRegexp.exec(url)?.groups;
+              if (!groups) {
+                return dep;
+              }
+              const semver = allVersioning.get('semver');
+
+              const sortedReleases = dep.releases
+                .filter((release) => semver.isVersion(release.version))
+                .sort((a, b) => semver.sortVersions(a.version, b.version));
+
+              const latestVersion = sortedReleases.at(-1)?.version;
+
+              if (!latestVersion) {
+                return dep;
+              }
+              logger.debug(
+                `Conan package ${packageName} has latest version ${latestVersion}`,
+              );
+
+              const latestRevisionUrl = joinUrlParts(
+                url,
+                `v2/conans/${conanPackage.conanName}/${latestVersion}/${conanPackage.userAndChannel}/latest`,
+              );
+              const {
+                body: { revision: packageRev },
+              } = await this.http.getJson(latestRevisionUrl, ConanRevisionJSON);
+
+              const [user, channel] = conanPackage.userAndChannel.split('/');
+              const packageUrl = joinUrlParts(
+                `${groups.host}/artifactory/api/storage/${groups.repo}`,
+                `${user}/${conanPackage.conanName}/${latestVersion}/${channel}/${packageRev}/export/conanfile.py?properties=conan.package.url`,
+              );
+              const { body: conanProperties } = await this.http.getJson(
+                packageUrl,
+                ConanProperties,
+              );
+              const { sourceUrl } = conanProperties;
+              if (sourceUrl) {
+                dep.sourceUrl = sourceUrl;
+              }
+            }
+          } catch (err) {
+            logger.debug({ err }, "Couldn't determine Conan package url");
+          }
+          return dep;
+        }
+      } catch (err) {
+        this.handleGenericErrors(err);
+      }
+    }
+
+    return null;
+  }
+
+  getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+    return withCache(
+      {
+        namespace: `datasource-${datasource}`,
+        // TODO: types (#22198)
+        key: `getReleases:${config.registryUrl}:${config.packageName}`,
+        fallback: true,
+      },
+      () => this._getReleases(config),
+    );
+  }
+}

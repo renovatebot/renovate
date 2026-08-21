@@ -1,0 +1,95 @@
+import { isNonEmptyObject, isNullOrUndefined } from '@sindresorhus/is';
+import type { PagedResult } from '../../modules/platform/bitbucket/types.ts';
+import { HttpBase, type InternalJsonUnsafeOptions } from './http.ts';
+import type { HttpMethod, HttpOptions, HttpResponse } from './types.ts';
+
+const MAX_PAGES = 100;
+const MAX_PAGELEN = 100;
+
+let baseUrl = 'https://api.bitbucket.org/';
+
+export function setBaseUrl(url: string): void {
+  baseUrl = url;
+}
+
+export interface BitbucketHttpOptions extends HttpOptions {
+  paginate?: boolean;
+  pagelen?: number;
+}
+
+export class BitbucketHttp extends HttpBase<BitbucketHttpOptions> {
+  protected override get baseUrl(): string | undefined {
+    return baseUrl;
+  }
+
+  constructor(type = 'bitbucket', options?: BitbucketHttpOptions) {
+    super(type, options);
+  }
+
+  protected override extraOptions(): readonly string[] {
+    return super
+      .extraOptions()
+      .concat(['paginate', 'pagelen'] as (keyof BitbucketHttpOptions)[]);
+  }
+
+  protected override async requestJsonUnsafe<T>(
+    method: HttpMethod,
+    options: InternalJsonUnsafeOptions<BitbucketHttpOptions>,
+  ): Promise<HttpResponse<T>> {
+    const resolvedUrl = this.resolveUrl(options.url, options.httpOptions);
+    const opts: InternalJsonUnsafeOptions<BitbucketHttpOptions> = {
+      ...options,
+      url: resolvedUrl,
+    };
+    const paginate = opts.httpOptions?.paginate;
+
+    if (paginate && !hasPagelen(resolvedUrl)) {
+      const pagelen = opts.httpOptions!.pagelen ?? MAX_PAGELEN;
+      resolvedUrl.searchParams.set('pagelen', pagelen.toString());
+    }
+
+    const result = await super.requestJsonUnsafe<T | PagedResult<T>>(
+      method,
+      opts,
+    );
+
+    if (paginate && isPagedResult(result.body)) {
+      // v8 ignore else -- TODO: add test #40625
+      if (opts.httpOptions) {
+        opts.httpOptions.memCache = false;
+      }
+      const resultBody = result.body;
+      let nextURL = result.body.next;
+      let page = 1;
+
+      for (; nextURL && page <= MAX_PAGES; page++) {
+        opts.url = nextURL;
+        const nextResult = await super.requestJsonUnsafe<PagedResult<T>>(
+          method,
+          opts,
+        );
+
+        resultBody.values.push(...nextResult.body.values);
+        nextURL = nextResult.body.next;
+      }
+
+      // Override other page-related attributes
+      resultBody.pagelen = resultBody.values.length;
+      /* v8 ignore next -- hard to test all branches */
+      resultBody.size =
+        page <= MAX_PAGES ? resultBody.values.length : undefined;
+      // v8 ignore next -- hard to test all branches
+      resultBody.next = page <= MAX_PAGES ? nextURL : undefined;
+    }
+
+    return result as HttpResponse<T>;
+  }
+}
+
+function hasPagelen(url: URL): boolean {
+  return !isNullOrUndefined(url.searchParams.get('pagelen'));
+}
+
+function isPagedResult<T>(obj: any): obj is PagedResult<T> {
+  return isNonEmptyObject(obj) && Array.isArray(obj.values);
+}

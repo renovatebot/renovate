@@ -1,0 +1,73 @@
+import { z } from 'zod/v4';
+import { regEx } from '../../../util/regex.ts';
+import { LooseArray } from '../../../util/schema-utils/index.ts';
+
+export const VendirResource = z.object({
+  apiVersion: z.literal('vendir.k14s.io/v1alpha1'),
+  kind: z.literal('Config'),
+});
+
+export const GitRef = z.object({
+  ref: z.string(),
+  url: z.string().regex(regEx(/^(?:ssh|https?):\/\/.+/)),
+  depth: z.number().optional(),
+});
+
+export const GithubRelease = z.object({
+  slug: z.string(),
+  tag: z.string(),
+});
+
+export const HelmChart = z.object({
+  name: z.string(),
+  version: z.string(),
+  repository: z.object({
+    url: z.string().regex(regEx(/^(?:oci|https?):\/\/.+/)),
+  }),
+});
+
+export const HelmChartContent = z.object({
+  path: z.string(),
+  helmChart: HelmChart,
+});
+
+export const GitRefContent = z.object({
+  path: z.string(),
+  git: GitRef,
+});
+
+export const GithubReleaseContent = z.object({
+  path: z.string(),
+  githubRelease: GithubRelease,
+});
+
+export const HttpRelease = z.object({
+  url: z.string(),
+});
+
+export const HttpContent = z.object({
+  path: z.string(),
+  http: HttpRelease,
+});
+
+export const Contents = z.union([
+  HelmChartContent,
+  GitRefContent,
+  GithubReleaseContent,
+  HttpContent,
+]);
+
+export const Vendir = VendirResource.extend({
+  directories: z.array(
+    z.object({
+      path: z.string(),
+      contents: LooseArray(Contents),
+    }),
+  ),
+});
+
+export type Vendir = z.infer<typeof Vendir>;
+export type HelmChart = z.infer<typeof HelmChart>;
+export type GitRef = z.infer<typeof GitRef>;
+export type GithubRelease = z.infer<typeof GithubRelease>;
+export type HttpRelease = z.infer<typeof HttpRelease>;

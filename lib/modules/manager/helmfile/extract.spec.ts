@@ -1,0 +1,618 @@
+import { codeBlock } from 'common-tags';
+import { Fixtures } from '~test/fixtures.ts';
+import { fs, logger } from '~test/util.ts';
+import { GlobalConfig } from '../../../config/global.ts';
+import { FILE_ACCESS_VIOLATION_ERROR } from '../../../constants/error-messages.ts';
+import { extractPackageFile } from './index.ts';
+
+vi.mock('../../../util/fs/index.ts');
+
+const localDir = '/tmp/github/some/repo';
+
+describe('modules/manager/helmfile/extract', () => {
+  describe('extractPackageFile()', () => {
+    beforeEach(() => {
+      GlobalConfig.set({ localDir });
+    });
+
+    it('skip null YAML document', async () => {
+      const content = codeBlock`
+        ~
+        `;
+      const fileName = 'helmfile.yaml';
+      const result = await extractPackageFile(content, fileName, {
+        registryAliases: {
+          stable: 'https://charts.helm.sh/stable',
+        },
+      });
+      expect(result).toBeNull();
+    });
+
+    it('returns null if no releases', async () => {
+      const content = `
+      repositories:
+        - name: kiwigrid
+          url: https://kiwigrid.github.io
+      `;
+      const fileName = 'helmfile.yaml';
+      const result = await extractPackageFile(content, fileName, {
+        registryAliases: {
+          stable: 'https://charts.helm.sh/stable',
+        },
+      });
+      expect(result).toBeNull();
+    });
+
+    it('do not crash on invalid helmfile.yaml', async () => {
+      const content = `
+      repositories:
+        - name: kiwigrid
+          url: https://kiwigrid.github.io
+
+      releases: [
+      `;
+      const fileName = 'helmfile.yaml';
+      const result = await extractPackageFile(content, fileName, {
+        registryAliases: {
+          stable: 'https://charts.helm.sh/stable',
+        },
+      });
+      expect(result).toBeNull();
+    });
+
+    it('skip if repository details are not specified', async () => {
+      const content = `
+      repositories:
+        - name: kiwigrid
+          url: https://kiwigrid.github.io
+      releases:
+        - name: example
+          version: 1.0.0
+          chart: experimental/example
+      `;
+      const fileName = 'helmfile.yaml';
+      const result = await extractPackageFile(content, fileName, {
+        registryAliases: {
+          stable: 'https://charts.helm.sh/stable',
+        },
+      });
+      expect(result).not.toBeNull();
+      expect(result).toMatchSnapshot();
+      expect(result?.deps.every((dep) => dep.skipReason)).toBeTruthy();
+    });
+
+    it('skip templetized release with invalid characters', async () => {
+      const content = `
+      repositories:
+        - name: kiwigrid
+          url: https://kiwigrid.github.io
+      releases:
+        - name: example
+          version: 1.0.0
+          chart: stable/!!!!--!
+        - name: example-internal
+          version: 1.0.0
+          chart: stable/example
+      `;
+      const fileName = 'helmfile.yaml';
+      const result = await extractPackageFile(content, fileName, {
+        registryAliases: {
+          stable: 'https://charts.helm.sh/stable',
+        },
+      });
+      expect(result).toMatchSnapshot({
+        datasource: 'helm',
+        deps: [
+          {
+            currentValue: '1.0.0',
+            skipReason: 'unsupported-chart-type',
+          },
+          {
+            currentValue: '1.0.0',
+            depName: 'example',
+          },
+        ],
+      });
+    });
+
+    it('skip local charts', async () => {
+      const content = `
+      repositories:
+        - name: kiwigrid
+          url: https://kiwigrid.github.io
+      releases:
+        - name: example
+          version: 1.0.0
+          chart: ./charts/example
+      `;
+      const fileName = 'helmfile.yaml';
+      const result = await extractPackageFile(content, fileName, {
+        registryAliases: {
+          stable: 'https://charts.helm.sh/stable',
+        },
+      });
+      expect(result).not.toBeNull();
+      expect(result).toMatchSnapshot();
+      expect(result?.deps.every((dep) => dep.skipReason)).toBeTruthy();
+    });
+
+    it('skip chart with unknown repository', async () => {
+      const content = `
+      repositories:
+        - name: kiwigrid
+          url: https://kiwigrid.github.io
+      releases:
+        - name: example
+          version: 1.0.0
+          chart: example
+      `;
+      const fileName = 'helmfile.yaml';
+      const result = await extractPackageFile(content, fileName, {
+        registryAliases: {
+          stable: 'https://charts.helm.sh/stable',
+        },
+      });
+      expect(result).not.toBeNull();
+      expect(result).toMatchSnapshot();
+      expect(result?.deps.every((dep) => dep.skipReason)).toBeTruthy();
+    });
+
+    it('skip chart with special character in the name', async () => {
+      const content = `
+      repositories:
+        - name: kiwigrid
+          url: https://kiwigrid.github.io
+      releases:
+        - name: example
+          version: 1.0.0
+          chart: kiwigrid/example/example
+        - name: example2
+          version: 1.0.0
+          chart: kiwigrid/example?example
+      `;
+      const fileName = 'helmfile.yaml';
+      const result = await extractPackageFile(content, fileName, {
+        registryAliases: {
+          stable: 'https://charts.helm.sh/stable',
+        },
+      });
+      expect(result).not.toBeNull();
+      expect(result).toMatchSnapshot();
+      expect(result?.deps.every((dep) => dep.skipReason)).toBeTruthy();
+    });
+
+    it('skip chart that does not have specified version', async () => {
+      const content = `
+      repositories:
+        - name: kiwigrid
+          url: https://kiwigrid.github.io
+      releases:
+        - name: example
+          chart: stable/example
+      `;
+      const fileName = 'helmfile.yaml';
+      const result = await extractPackageFile(content, fileName, {
+        registryAliases: {
+          stable: 'https://charts.helm.sh/stable',
+        },
+      });
+      expect(result).not.toBeNull();
+      expect(result).toMatchSnapshot();
+      expect(result?.deps.every((dep) => dep.skipReason)).toBeTruthy();
+    });
+
+    it('parses multidoc yaml', async () => {
+      const fileName = 'helmfile.yaml';
+      const result = await extractPackageFile(
+        Fixtures.get('multidoc.yaml'),
+        fileName,
+        {
+          registryAliases: {
+            stable: 'https://charts.helm.sh/stable',
+          },
+        },
+      );
+      expect(result).toMatchObject({
+        datasource: 'helm',
+        deps: [
+          { depName: 'manifests', skipReason: 'local-chart' },
+          {
+            depName: 'rabbitmq',
+            currentValue: '7.4.3',
+            registryUrls: ['https://charts.bitnami.com/bitnami'],
+          },
+          {
+            depName: 'kube-prometheus-stack',
+            currentValue: '13.7',
+            registryUrls: [
+              'https://prometheus-community.github.io/helm-charts',
+            ],
+          },
+          { depName: 'external-dns', skipReason: 'invalid-version' },
+          {
+            depName: 'raw',
+            currentValue: '0.1.0',
+            registryUrls: ['https://charts.helm.sh/incubator/'],
+          },
+        ],
+        managerData: { needKustomize: true },
+      });
+    });
+
+    it('parses a chart with a go templating', async () => {
+      const content = `
+      repositories:
+        - name: kiwigrid
+          url: https://kiwigrid.github.io
+      releases:
+        - name: example
+      {{- if neq .Values.example.version  "" }}
+          version: {{ .Values.example.version }}
+      {{- else }}
+          version: 1.0.0
+      {{- end }}
+          chart: stable/example
+        - name: example-internal
+          version: 1.0.0
+          chart: stable/example
+      `;
+      const fileName = 'helmfile.yaml';
+      const result = await extractPackageFile(content, fileName, {
+        registryAliases: {
+          stable: 'https://charts.helm.sh/stable',
+        },
+      });
+      expect(result).toMatchObject({
+        datasource: 'helm',
+        deps: [
+          {
+            currentValue: '1.0.0',
+            depName: 'example',
+          },
+          {
+            currentValue: '1.0.0',
+            depName: 'example',
+          },
+        ],
+      });
+    });
+
+    it('parses a chart with empty strings for template values', async () => {
+      const content = `
+      repositories:
+        - name: kiwigrid
+          url: https://kiwigrid.github.io
+      releases:
+        - name: example
+          version: {{ .Values.example.version }}
+          chart: stable/example
+        - name: example-external
+          version: 1.0.0
+          chart: {{ .Values.example.repository }}
+        - name: example-internal
+          version: 1.0.0
+          chart: stable/example
+      `;
+      const fileName = 'helmfile.yaml';
+      const result = await extractPackageFile(content, fileName, {
+        registryAliases: {
+          stable: 'https://charts.helm.sh/stable',
+        },
+      });
+      expect(result).toMatchObject({
+        datasource: 'helm',
+        deps: [
+          {
+            skipReason: 'invalid-version',
+          },
+          {
+            currentValue: '1.0.0',
+            depName: 'example',
+          },
+        ],
+      });
+    });
+
+    it('parses a chart with an oci repository and non-oci one', async () => {
+      const content = `
+      repositories:
+        - name: oci-repo
+          url: ghcr.io/example/oci-repo
+          oci: true
+        - name: jenkins
+          url: https://charts.jenkins.io
+
+      releases:
+        - name: example
+          version: 0.1.0
+          chart: oci-repo/example
+        - name: jenkins
+          chart: jenkins/jenkins
+          version: 3.3.0
+        - name: oci-url
+          version: 0.4.2
+          chart: oci://ghcr.io/example/oci-repo/url-example
+      `;
+      const fileName = 'helmfile.yaml';
+      const result = await extractPackageFile(content, fileName, {
+        registryAliases: {
+          stable: 'https://charts.helm.sh/stable',
+        },
+      });
+      expect(result).toStrictEqual({
+        datasource: 'helm',
+        deps: [
+          {
+            currentValue: '0.1.0',
+            depName: 'example',
+            datasource: 'docker',
+            packageName: 'ghcr.io/example/oci-repo/example',
+          },
+          {
+            currentValue: '3.3.0',
+            depName: 'jenkins',
+            registryUrls: ['https://charts.jenkins.io'],
+          },
+          {
+            currentValue: '0.4.2',
+            depName: 'ghcr.io/example/oci-repo/url-example',
+            datasource: 'docker',
+            packageName: 'ghcr.io/example/oci-repo/url-example',
+          },
+        ],
+      });
+    });
+
+    it('allows OCI chart names containing forward slashes', async () => {
+      const content = `
+      repositories:
+        - name: oci-repo
+          url: ghcr.io/example/oci-repo
+          oci: true
+      releases:
+        - name: nested-example
+          version: 1.2.3
+          chart: oci-repo/nested/path/chart
+      `;
+      const fileName = 'helmfile.yaml';
+      const result = await extractPackageFile(content, fileName, {});
+      expect(result).toMatchObject({
+        datasource: 'helm',
+        deps: [
+          {
+            currentValue: '1.2.3',
+            depName: 'nested/path/chart',
+            datasource: 'docker',
+            packageName: 'ghcr.io/example/oci-repo/nested/path/chart',
+          },
+        ],
+      });
+    });
+
+    it('parses a chart with an oci repository with ---', async () => {
+      const content = codeBlock`
+      repositories:
+        - name: oci-repo
+          url: ghcr.io/example/oci-repo
+          oci: true
+      ---
+      releases:
+        - name: example
+          version: 0.1.0
+          chart: oci-repo/example
+      `;
+      const fileName = 'helmfile.yaml';
+      const result = await extractPackageFile(content, fileName, {
+        registryAliases: {
+          stable: 'https://charts.helm.sh/stable',
+        },
+      });
+      expect(result).toMatchObject({
+        datasource: 'helm',
+        deps: [
+          {
+            currentValue: '0.1.0',
+            depName: 'example',
+            datasource: 'docker',
+            packageName: 'ghcr.io/example/oci-repo/example',
+          },
+        ],
+      });
+    });
+
+    it('parses and replaces templating strings', async () => {
+      const filename = 'helmfile.yaml';
+      fs.localPathExists.mockReturnValue(Promise.resolve(true));
+      const result = await extractPackageFile(
+        Fixtures.get('go-template.yaml'),
+        filename,
+        {
+          registryAliases: {
+            stable: 'https://charts.helm.sh/stable',
+          },
+        },
+      );
+      expect(result).toMatchObject({
+        datasource: 'helm',
+        deps: [
+          {
+            depName: '',
+            skipReason: 'local-chart',
+          },
+          {
+            depName: '',
+            skipReason: 'local-chart',
+          },
+          {
+            depName: '',
+            skipReason: 'local-chart',
+          },
+          {
+            depName: 'ingress-nginx',
+            currentValue: '3.37.0',
+            registryUrls: [],
+            skipReason: 'unknown-registry',
+          },
+          {
+            depName: 'memcached',
+            currentValue: '6.0.0',
+            registryUrls: ['https://charts.bitnami.com/bitnami'],
+          },
+          {
+            depName: 'example',
+            currentValue: '1.30.0',
+            registryUrls: ['https://charts.helm.sh/stable'],
+          },
+          { depName: 'kube-prometheus-stack', skipReason: 'invalid-version' },
+          {
+            depName: 'external-dns',
+            currentValue: '2.0.0',
+            registryUrls: ['https://charts.helm.sh/stable'],
+          },
+        ],
+        managerData: { needKustomize: true },
+      });
+    });
+
+    it('detects kustomize and respects relative paths', async () => {
+      fs.localPathExists.mockImplementationOnce((path) => {
+        if (!path.startsWith(GlobalConfig.get('localDir'))) {
+          throw new Error(FILE_ACCESS_VIOLATION_ERROR);
+        }
+        return Promise.resolve(true);
+      });
+
+      const parentDir = `${localDir}/project`;
+      fs.getParentDir.mockReturnValue(parentDir);
+      const result = await extractPackageFile(
+        Fixtures.get('uses-kustomization.yaml'),
+        `${parentDir}/helmfile.yaml`, // In subdir
+        {
+          registryAliases: {
+            stable: 'https://charts.helm.sh/stable',
+          },
+        },
+      );
+      expect(result).toMatchObject({
+        datasource: 'helm',
+        deps: [
+          {
+            depName: 'my-chart',
+            skipReason: 'local-chart',
+          },
+          {
+            depName: 'memcached',
+            currentValue: '6.0.0',
+            registryUrls: ['https://charts.bitnami.com/bitnami'],
+          },
+        ],
+        managerData: { needKustomize: true },
+      });
+    });
+
+    it('makes sure url joiner works correctly', async () => {
+      const content = codeBlock`
+      releases:
+        - name: argocd
+          version: 0.4.2
+          chart: oci://gitlab.example.com:5000/group/subgroup
+      `;
+      const fileName = 'helmfile.yaml';
+      const result = await extractPackageFile(content, fileName, {
+        registryAliases: {
+          stable: 'https://charts.helm.sh/stable',
+        },
+      });
+      expect(result).toMatchObject({
+        datasource: 'helm',
+        deps: [
+          {
+            currentValue: '0.4.2',
+            datasource: 'docker',
+            depName: 'gitlab.example.com:5000/group/subgroup',
+            packageName: 'gitlab.example.com:5000/group/subgroup',
+          },
+        ],
+      });
+    });
+
+    it('skips helm-git repos', async () => {
+      const content = codeBlock`
+        repositories:
+          # Official codefresh helm chart
+          - name: gitops-external-cluster
+            url: git+https://github.com/codefresh-io/csdp-official@add-cluster/helm
+
+        releases:
+          - name: gitops-external-cluster
+            namespace: gitops-runtime
+            chart: gitops-external-cluster/csdp-add-cluster
+            version: 0.4.0
+      `;
+      const result = await extractPackageFile(content, 'helmfile.yaml', {});
+
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        {
+          repo: {
+            name: 'gitops-external-cluster',
+            url: 'git+https://github.com/codefresh-io/csdp-official@add-cluster/helm',
+          },
+          packageFile: 'helmfile.yaml',
+        },
+        'Skipping unsupported helm-git repository.',
+      );
+      expect(result).toMatchObject({
+        datasource: 'helm',
+        deps: [
+          {
+            currentValue: '0.4.0',
+            depName: 'csdp-add-cluster',
+            skipReason: 'unknown-registry',
+          },
+        ],
+      });
+    });
+
+    it('parses templates key alongside releases', async () => {
+      const content = codeBlock`
+        repositories:
+          - name: kiwigrid
+            url: https://kiwigrid.github.io
+
+        templates:
+          common:
+            name: common
+            version: 1.0.0
+            chart: kiwigrid/common
+          shared:
+            name: shared
+            version: 2.0.0
+            chart: kiwigrid/shared
+
+        releases:
+          - name: my-release
+            version: 3.0.0
+            chart: kiwigrid/my-chart
+      `;
+      const result = await extractPackageFile(content, 'helmfile.yaml', {});
+
+      expect(result).toMatchObject({
+        datasource: 'helm',
+        deps: [
+          {
+            currentValue: '3.0.0',
+            depName: 'my-chart',
+          },
+          {
+            currentValue: '1.0.0',
+            depName: 'common',
+          },
+          {
+            currentValue: '2.0.0',
+            depName: 'shared',
+          },
+        ],
+      });
+    });
+  });
+});

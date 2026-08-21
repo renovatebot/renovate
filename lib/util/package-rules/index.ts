@@ -1,0 +1,125 @@
+import { isNullOrUndefined, isString, isTruthy } from '@sindresorhus/is';
+import _slugify from 'slugify';
+import type {
+  PackageRule,
+  PackageRuleInputConfig,
+} from '../../config/types.ts';
+import { mergeChildConfig } from '../../config/utils.ts';
+import { logger } from '../../logger/index.ts';
+import type { StageName } from '../../types/skip-reason.ts';
+import { compile } from '../template/index.ts';
+import matchers from './matchers.ts';
+
+const slugify = _slugify;
+
+async function matchesRule(
+  inputConfig: PackageRuleInputConfig,
+  packageRule: PackageRule,
+): Promise<boolean> {
+  for (const matcher of matchers) {
+    const isMatch = await matcher.matches(inputConfig, packageRule);
+
+    // no rules are defined
+    if (isNullOrUndefined(isMatch)) {
+      continue;
+    }
+
+    if (!isTruthy(isMatch)) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+export async function applyPackageRules<T extends PackageRuleInputConfig>(
+  inputConfig: T,
+  stageName?: StageName,
+): Promise<T> {
+  let config = { ...inputConfig };
+  const packageRules = config.packageRules ?? [];
+  logger.trace(
+    { dependency: config.depName, packageRules },
+    `Checking against ${packageRules.length} packageRules`,
+  );
+  for (const packageRule of packageRules) {
+    // This rule is considered matched if there was at least one positive match and no negative matches
+    if (await matchesRule(config, packageRule)) {
+      // Package rule config overrides any existing config
+      const toApply = removeMatchers({ ...packageRule });
+      if (config.groupSlug && packageRule.groupName && !packageRule.groupSlug) {
+        // Need to apply groupSlug otherwise the existing one will take precedence
+        toApply.groupSlug = slugify(packageRule.groupName, {
+          lower: true,
+        });
+      }
+
+      if (
+        // if it's got higher precedence, as it's a force'd config option
+        // multiple force'd config options are "last defined wins"
+        toApply.force?.enabled === false ||
+        // otherwise, if it has regular precedence, compare
+        (toApply.enabled === false && config.enabled !== false)
+      ) {
+        config.skipReason = 'package-rules';
+        if (stageName) {
+          config.skipStage = stageName;
+        }
+      }
+
+      if (toApply.force?.enabled || toApply.enabled) {
+        delete config.skipReason;
+        delete config.skipStage;
+      }
+      if (
+        isString(toApply.overrideDatasource) &&
+        toApply.overrideDatasource !== config.datasource
+      ) {
+        logger.debug(
+          `Overriding datasource from ${config.datasource} to ${toApply.overrideDatasource} for ${config.depName}`,
+        );
+        config.datasource = toApply.overrideDatasource;
+      }
+      if (
+        isString(toApply.overrideDepName) &&
+        toApply.overrideDepName !== config.depName
+      ) {
+        logger.debug(
+          `Overriding depName from ${config.depName} to ${toApply.overrideDepName}`,
+        );
+        config.depName = compile(toApply.overrideDepName, config);
+      }
+      if (
+        isString(toApply.overridePackageName) &&
+        toApply.overridePackageName !== config.packageName
+      ) {
+        logger.debug(
+          `Overriding packageName from ${config.packageName} to ${toApply.overridePackageName} for ${config.depName}`,
+        );
+        config.packageName = compile(toApply.overridePackageName, config);
+      }
+      if (isString(toApply.sourceUrl)) {
+        toApply.sourceUrl = compile(toApply.sourceUrl, config);
+      }
+      delete toApply.overrideDatasource;
+      delete toApply.overrideDepName;
+      delete toApply.overridePackageName;
+      config = mergeChildConfig(config, toApply);
+    }
+  }
+  return config;
+}
+
+function removeMatchers<T extends Record<string, unknown>>(
+  packageRule: T,
+): Record<string, unknown> & {
+  force?: Record<string, unknown>;
+} {
+  for (const key of Object.keys(packageRule)) {
+    if (key.startsWith('match') || key.startsWith('exclude')) {
+      delete packageRule[key];
+    }
+  }
+
+  return packageRule;
+}

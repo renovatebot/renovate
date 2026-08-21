@@ -1,0 +1,145 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+spec:
+  template:
+    spec:
+      source:
+        chart: kube-state-metrics
+        repoURL: https://prometheus-community.github.io/helm-charts
+        targetRevision: 2.4.1
+---
+# applicationset with helm values
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+spec:
+  template:
+    spec:
+      source:
+        chart: {{ .Values.chart }}
+        repoURL: {{ .Values.repoUrl}}
+        targetRevision: {{ .Values.targetRevision }}
+---
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+spec:
+  template:
+    spec:
+      source:
+        chart: traefik
+        helm:
+          values: |
+            traefik:
+              service:
+                spec:
+                  loadBalancerIP: 1.2.3.4
+        repoURL: https://helm.traefik.io/traefik
+        targetRevision: 10.14.2
+---
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+spec:
+  template:
+    spec:
+      source:
+        repoURL: https://git.example.com/foo/bar.git
+        targetRevision: v1.2.0
+---
+# malformed applicationset as the source section is missing
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+spec:
+  template:
+    spec:
+      target:
+        namespace: testing
+---
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: podinfo
+spec:
+  generators:
+  - clusters: {}
+  template:
+    metadata:
+      name: '{{name}}-podinfo'
+    spec:
+      project: default
+      source:
+        repoURL: https://stefanprodan.github.io/podinfo
+        targetRevision: 6.0.0
+        chart: podinfo
+      destination:
+        name: '{{server}}'
+        namespace: podinfo
+---
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: podinfo
+spec:
+  generators:
+  - clusters: {}
+  template:
+    metadata:
+      name: '{{name}}-podinfo'
+    spec:
+      project: default
+      sources:
+        - chart: some/image3
+          repoURL: somecontainer.registry.io:443/
+          targetRevision: 1.0.0
+      destination:
+        name: '{{server}}'
+        namespace: podinfo
+---
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: podinfo
+spec:
+  generators:
+  - clusters: {}
+  template:
+    metadata:
+      name: '{{name}}-podinfo'
+    spec:
+      project: default
+      sources:
+        - ref: foo
+          repoURL: https://git.example.com/foo/bar.git
+          targetRevision: v1.2.0
+        - chart: some/image3
+          repoURL: somecontainer.registry.io:443/
+          targetRevision: 1.0.0
+      destination:
+        name: '{{server}}'
+        namespace: podinfo
+---
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: podinfo
+spec:
+  generators:
+  - clusters: {}
+  template:
+    metadata:
+      name: '{{name}}-podinfo'
+    spec:
+      project: default
+      sources:
+        - ref: foo
+          repoURL: https://git.example.com/foo/bar.git
+          targetRevision: v1.2.0
+          path: bar
+        - chart: somechart
+          repoURL: https://foo.io/repo
+          targetRevision: 0.0.2
+          helm:
+            valueFiles:
+              - $foo/values.yaml
+      destination:
+        name: '{{server}}'
+        namespace: podinfo

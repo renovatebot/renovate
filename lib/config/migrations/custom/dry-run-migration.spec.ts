@@ -1,0 +1,25 @@
+import { DryRunMigration } from './dry-run-migration.ts';
+
+describe('config/migrations/custom/dry-run-migration', () => {
+  it('should migrate dryRun=true to dryRun=full', async () => {
+    await expect(DryRunMigration).toMigrate(
+      {
+        dryRun: true,
+      },
+      {
+        dryRun: 'full',
+      },
+    );
+  });
+
+  it('should migrate dryRun=false to dryRun=null', async () => {
+    await expect(DryRunMigration).toMigrate(
+      {
+        dryRun: false,
+      },
+      {
+        dryRun: null,
+      },
+    );
+  });
+});

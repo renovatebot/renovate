@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "dependencies": [
+    {
+      "source": {
+        "git": {
+          "remote": "https://github.com/prometheus-operator/prometheus-operator",
+          "subdir": "jsonnet/mixin"
+        }
+      },
+      "version": "v0.50.0",
+      "name": "prometheus-operator-mixin"
+    }
+  ],
+  "legacyImports": true
+}

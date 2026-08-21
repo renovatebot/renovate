@@ -1,0 +1,129 @@
+import { z } from 'zod/v4';
+import { regEx } from '../../../util/regex.ts';
+import {
+  Json,
+  LooseRecord,
+  Nullish,
+  Yaml,
+} from '../../../util/schema-utils/index.ts';
+
+// pnpm ignores registry URLs containing `${...}` env-var interpolation since v11.5.3
+function hasEnvVar(value: string): boolean {
+  return value.includes('${');
+}
+
+function withoutEnvVarRegistries(
+  registries: Record<string, string>,
+): Record<string, string> {
+  return Object.fromEntries(
+    Object.entries(registries).filter(([, url]) => !hasEnvVar(url)),
+  );
+}
+
+export const PnpmCatalogs = z.object({
+  catalog: z.optional(z.record(z.string(), z.string())),
+  catalogs: z.optional(z.record(z.string(), z.record(z.string(), z.string()))),
+});
+export type PnpmCatalogs = z.infer<typeof PnpmCatalogs>;
+
+export const YarnCatalogs = z.object({
+  catalog: z.optional(z.record(z.string(), z.string())),
+  catalogs: z
+    .optional(z.record(z.string(), z.record(z.string(), z.string())))
+    .catch(undefined),
+});
+export type YarnCatalogs = z.infer<typeof YarnCatalogs>;
+
+export const YarnConfig = Yaml.pipe(
+  z
+    .object({
+      npmRegistryServer: z.string().optional(),
+      npmScopes: z
+        .record(
+          z.string(),
+          z.object({
+            npmRegistryServer: z.string().optional(),
+          }),
+        )
+        .optional(),
+    })
+    .and(YarnCatalogs),
+);
+export type YarnConfig = z.infer<typeof YarnConfig>;
+
+export const PnpmWorkspaceFile = Yaml.pipe(
+  z
+    .object({
+      packages: z.array(z.string()).optional(),
+      minimumReleaseAge: Nullish(z.number()),
+      minimumReleaseAgeExclude: z.array(z.string()).optional(),
+      overrides: z.record(z.string(), z.string()).optional(),
+      registry: Nullish(z.string()),
+      registries: Nullish(
+        z.record(z.string(), z.string()).transform(withoutEnvVarRegistries),
+      ),
+    })
+    .and(PnpmCatalogs),
+);
+export type PnpmWorkspaceFile = z.infer<typeof PnpmWorkspaceFile>;
+
+export const PackageManager = z
+  .string()
+  .transform((val) => val.split('@'))
+  .transform(([name, ...version]) => ({ name, version: version.join('@') }));
+
+const DevEngineDependency = z.object({
+  name: z.string(),
+  version: z.string().optional(),
+});
+
+const DevEngine = z.object({
+  packageManager: DevEngineDependency.or(
+    z.array(DevEngineDependency),
+  ).optional(),
+});
+
+export const PackageJson = Json.pipe(
+  z.object({
+    devEngines: DevEngine.optional(),
+    engines: LooseRecord(z.string()).optional(),
+    dependencies: LooseRecord(z.string()).optional(),
+    devDependencies: LooseRecord(z.string()).optional(),
+    peerDependencies: LooseRecord(z.string()).optional(),
+    packageManager: PackageManager.optional(),
+    volta: LooseRecord(z.string()).optional(),
+  }),
+);
+
+export type PackageJson = z.infer<typeof PackageJson>;
+
+export const PackageLockV3 = z.object({
+  lockfileVersion: z.literal(3),
+  packages: LooseRecord(
+    z
+      .string()
+      .transform((x) => x.replace(regEx(/^node_modules\//), ''))
+      .refine((x) => x.trim() !== ''),
+    z.object({ version: z.string() }),
+  ),
+});
+
+export const PackageLockPreV3 = z
+  .object({
+    lockfileVersion: z.union([z.literal(2), z.literal(1)]),
+    dependencies: LooseRecord(z.object({ version: z.string() })),
+  })
+  .transform(({ lockfileVersion, dependencies: packages }) => ({
+    lockfileVersion,
+    packages,
+  }));
+
+export const PackageLock = Json.pipe(
+  z.union([PackageLockV3, PackageLockPreV3]),
+).transform(({ packages, lockfileVersion }) => {
+  const lockedVersions: Record<string, string> = {};
+  for (const [entry, val] of Object.entries(packages)) {
+    lockedVersions[entry] = val.version;
+  }
+  return { lockedVersions, lockfileVersion };
+});

@@ -1,0 +1,78 @@
+import { isArray, isPlainObject } from '@sindresorhus/is';
+import { regEx } from '../regex.ts';
+import { HttpBase, type InternalJsonUnsafeOptions } from './http.ts';
+import type { HttpMethod, HttpOptions, HttpResponse } from './types.ts';
+
+let baseUrl: string;
+
+export function setBaseUrl(newBaseUrl: string): void {
+  baseUrl = newBaseUrl.replace(regEx(/\/*$/), '/'); // TODO #12875
+}
+
+export interface ForgejoHttpOptions extends HttpOptions {
+  paginate?: boolean;
+}
+
+function getPaginationContainer<T = unknown>(body: unknown): T[] | null {
+  if (isArray(body) && body.length) {
+    return body as T[];
+  }
+
+  if (isPlainObject(body) && isArray(body?.data) && body.data.length) {
+    return body.data as T[];
+  }
+
+  return null;
+}
+
+export class ForgejoHttp extends HttpBase<ForgejoHttpOptions> {
+  protected override get baseUrl(): string | undefined {
+    return baseUrl;
+  }
+
+  constructor(hostType?: string, options?: HttpOptions) {
+    super(hostType ?? 'forgejo', options);
+  }
+
+  protected override extraOptions(): readonly string[] {
+    return super
+      .extraOptions()
+      .concat(['paginate'] as (keyof ForgejoHttpOptions)[]);
+  }
+
+  protected override async requestJsonUnsafe<T = unknown>(
+    method: HttpMethod,
+    options: InternalJsonUnsafeOptions<ForgejoHttpOptions>,
+  ): Promise<HttpResponse<T>> {
+    const resolvedUrl = this.resolveUrl(options.url, options.httpOptions);
+    const opts = {
+      ...options,
+      url: resolvedUrl,
+    };
+    const res = await super.requestJsonUnsafe<T>(method, opts);
+    const pc = getPaginationContainer<T>(res.body);
+    if (opts.httpOptions?.paginate && pc) {
+      delete opts.httpOptions.cacheProvider;
+      opts.httpOptions.memCache = false;
+
+      delete opts.httpOptions.paginate;
+      const total = parseInt(res.headers['x-total-count'] as string, 10);
+      let nextPage = parseInt(resolvedUrl.searchParams.get('page') ?? '1', 10);
+
+      while (total && pc.length < total) {
+        nextPage += 1;
+        resolvedUrl.searchParams.set('page', nextPage.toString());
+
+        const nextRes = await super.requestJsonUnsafe<T>(method, opts);
+        const nextPc = getPaginationContainer<T>(nextRes.body);
+        if (nextPc === null) {
+          break;
+        }
+
+        pc.push(...nextPc);
+      }
+    }
+
+    return res;
+  }
+}

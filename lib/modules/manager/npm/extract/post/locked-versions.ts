@@ -1,0 +1,181 @@
+import { isString } from '@sindresorhus/is';
+import semver from 'semver';
+import upath from 'upath';
+import { logger } from '../../../../../logger/index.ts';
+import { regEx } from '../../../../../util/regex.ts';
+import type { PackageFile } from '../../../types.ts';
+import type { NpmManagerData } from '../../types.ts';
+import { getNpmLock } from '../npm.ts';
+import { getPnpmLock } from '../pnpm.ts';
+import type { LockFile } from '../types.ts';
+import { getYarnLock, getYarnVersionFromLock } from '../yarn.ts';
+
+const pnpmCatalogDepTypeRe = regEx(/pnpm\.catalog\.(?<version>.*)/);
+
+export async function getLockedVersions(
+  packageFiles: PackageFile<NpmManagerData>[],
+): Promise<void> {
+  const lockFileCache: Record<string, LockFile> = {};
+  logger.debug('Finding locked versions');
+  for (const packageFile of packageFiles) {
+    const { managerData = {} } = packageFile;
+    const { yarnLock, npmLock, pnpmShrinkwrap } = managerData;
+    const lockFiles: string[] = [];
+    if (yarnLock) {
+      logger.trace('Found yarnLock');
+      lockFiles.push(yarnLock);
+      // v8 ignore else -- TODO: add test #40625
+      if (!lockFileCache[yarnLock]) {
+        logger.trace(`Retrieving/parsing ${yarnLock}`);
+        lockFileCache[yarnLock] = await getYarnLock(yarnLock);
+      }
+      const { isYarn1 } = lockFileCache[yarnLock];
+      let yarn: string | undefined;
+      if (!isYarn1 && !packageFile.extractedConstraints?.yarn) {
+        yarn = getYarnVersionFromLock(lockFileCache[yarnLock]);
+      }
+      if (yarn) {
+        packageFile.extractedConstraints ??= {};
+        packageFile.extractedConstraints.yarn = yarn;
+      }
+      for (const dep of packageFile.deps) {
+        dep.lockedVersion =
+          lockFileCache[yarnLock].lockedVersions?.[
+            // TODO: types (#22198)
+            `${dep.depName}@${dep.currentValue}`
+          ];
+        if (
+          (dep.depType === 'engines' || dep.depType === 'packageManager') &&
+          dep.depName === 'yarn' &&
+          !isYarn1
+        ) {
+          dep.packageName = '@yarnpkg/cli';
+        }
+      }
+    } else if (npmLock) {
+      logger.debug(`Found ${npmLock} for ${packageFile.packageFile}`);
+      lockFiles.push(npmLock);
+      if (!lockFileCache[npmLock]) {
+        logger.trace(`Retrieving/parsing ${npmLock}`);
+        const cache = await getNpmLock(npmLock);
+        /* v8 ignore next 4 -- needs test */
+        if (!cache) {
+          logger.warn({ npmLock }, 'Npm: unable to get lockfile');
+          return;
+        }
+        lockFileCache[npmLock] = cache;
+      }
+
+      const { lockfileVersion } = lockFileCache[npmLock];
+      let npm: string | undefined;
+      if (lockfileVersion === 1) {
+        if (packageFile.extractedConstraints?.npm) {
+          // Add a <7 constraint if it's not already a fixed version
+          if (
+            semver.satisfies('6.14.18', packageFile.extractedConstraints.npm)
+          ) {
+            npm = `${packageFile.extractedConstraints.npm} <7`;
+          }
+        } else {
+          npm = '<7';
+        }
+      } else if (lockfileVersion === 2) {
+        if (packageFile.extractedConstraints?.npm) {
+          // Add a <9 constraint if the latest 8.x is compatible
+          if (
+            semver.satisfies('8.19.3', packageFile.extractedConstraints.npm)
+          ) {
+            npm = `${packageFile.extractedConstraints.npm} <9`;
+          }
+        } else {
+          npm = '<9';
+        }
+      } else if (lockfileVersion === 3) {
+        if (!packageFile.extractedConstraints?.npm) {
+          npm = '>=7';
+        }
+      } else {
+        logger.warn(
+          { lockfileVersion, npmLock },
+          'Found unsupported npm lockfile version',
+        );
+        return;
+      }
+      if (npm) {
+        packageFile.extractedConstraints ??= {};
+        packageFile.extractedConstraints.npm = npm;
+      }
+
+      const packageDir = upath.dirname(packageFile.packageFile);
+      const npmRootDir = upath.dirname(npmLock);
+      const relativeDir = upath.relative(npmRootDir, packageDir);
+
+      for (const dep of packageFile.deps) {
+        // Skip dependency types which are not locked in the lock file
+        if (
+          dep.depType === 'engines' ||
+          dep.depType === 'packageManager' ||
+          dep.depType === 'volta'
+        ) {
+          continue;
+        }
+
+        // TODO: types (#22198)
+        let lockedDepName = dep.depName!;
+        if (relativeDir && relativeDir !== '.') {
+          lockedDepName = `${relativeDir}/node_modules/${dep.depName}`;
+        }
+
+        dep.lockedVersion = semver.valid(
+          lockFileCache[npmLock].lockedVersions?.[lockedDepName],
+        )!;
+      }
+    } else if (pnpmShrinkwrap) {
+      logger.debug('Found pnpm lock-file');
+      lockFiles.push(pnpmShrinkwrap);
+      if (!lockFileCache[pnpmShrinkwrap]) {
+        logger.trace(`Retrieving/parsing ${pnpmShrinkwrap}`);
+        lockFileCache[pnpmShrinkwrap] = await getPnpmLock(pnpmShrinkwrap);
+      }
+
+      const packageDir = upath.dirname(packageFile.packageFile);
+      const pnpmRootDir = upath.dirname(pnpmShrinkwrap);
+      const relativeDir = upath.relative(pnpmRootDir, packageDir) || '.';
+
+      for (const dep of packageFile.deps) {
+        const { depName, depType } = dep;
+
+        const catalogName = pnpmCatalogDepTypeRe.exec(depType!)?.groups
+          ?.version;
+
+        if (catalogName) {
+          const lockedVersion = semver.valid(
+            lockFileCache[pnpmShrinkwrap].lockedVersionsWithCatalog?.[
+              catalogName
+            ]?.[depName!],
+          );
+
+          // v8 ignore else -- TODO: add test #40625
+          if (isString(lockedVersion)) {
+            dep.lockedVersion = lockedVersion;
+          }
+        } else {
+          // TODO: types (#22198)
+          const lockedVersion = semver.valid(
+            lockFileCache[pnpmShrinkwrap].lockedVersionsWithPath?.[
+              relativeDir
+            ]?.[depType!]?.[depName!],
+          );
+
+          // v8 ignore else -- TODO: add test #40625
+          if (isString(lockedVersion)) {
+            dep.lockedVersion = lockedVersion;
+          }
+        }
+      }
+    }
+    if (lockFiles.length) {
+      packageFile.lockFiles = lockFiles;
+    }
+  }
+}

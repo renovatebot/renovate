@@ -1,0 +1,80 @@
+[options]
+zip_safe = true
+include_package_data = true
+python_requires = >= 2.7, != 3.0.*, != 3.1.*, != 3.2.*, != 3.5.1
+packages = find:
+test_suite = tests
+install_requires = coloredlogs ~=14.0
+install_requires = first ~=1.0;second==2.2 ; third>=3.0  # 1,2 and 3
+install_requires =
+    quux >=5.5.5
+    python-dateutil ~=2.1
+    foo >=1.1.1
+    baz >=3.3.3.
+    docopt ~=0.4
+    fs ~=2.1
+    nmspc.pkg ==1.0
+
+    requests[security] ~=2.18
+    compact~=1.2.3;python>'3.10'
+install_requires= 
+    responses >=2.27.0
+
+setup_requires =
+    six ~=1.4
+    tqdm ~=4.19
+    tenacity ~=6.0
+tests_require =
+    typing ~=3.6    ; python_version < '3.6'
+    verboselogs ~=1.7  # verboselogs
+    instalooter[test]
+
+
+[options.extras_require]
+# add EXIF metadata to downloaded pictures
+metadata =
+    piexif
+    Pillow  # Python Image Library
+# all features
+all =
+    %(metadata)s
+# bar and qux
+bar = bar >=2.2.2  # bar
+qux = qux >=4.4.4  # qux
+# test dependencies
+test =
+    contexter ~=0.1
+    mock ~=2.0 ; python_version < '3.4'
+    parameterized ~=0.6
+    green ~=2.12
+    %(metadata)s
+# coverage dependencies
+coverage =
+    coverage
+    codecov
+    codacy-coverage
+# documentation dependencies
+doc = sphinx ~=1.7
+doc =
+    sphinx-bootstrap-theme ~=0.6
+    semantic-version ~=2.6
+# development dependencies
+dev =
+    docutils
+    Pygments
+    %(test)s
+    %(coverage)s
+
+
+[options]
+packages = find_namespace:
+install_requires =
+	aiortc>=0.9
+	websockets>=8.1
+	aiohttp>=3.6
+	pyee>=6.0
+	websockets>=8.1
+	dataclasses_json>=0.3
+	coloredlogs>=10.0
+python_requires = >=3.7
+install_requires = av~=8.0.0

@@ -1,0 +1,59 @@
+import { Lazy } from './lazy.ts';
+
+describe('util/lazy', () => {
+  describe('.getValue()', () => {
+    it('gets a value', () => {
+      const spy = vi.fn().mockReturnValue(0);
+      const lazy = new Lazy(() => spy());
+      const value = lazy.getValue();
+      expect(value).toBe(0);
+      expect(spy).toHaveBeenCalledTimes(1);
+    });
+
+    it('caches the value', () => {
+      const spy = vi.fn().mockReturnValue(0);
+      const lazy = new Lazy(() => spy());
+      lazy.getValue();
+      lazy.getValue();
+      expect(spy).toHaveBeenCalledTimes(1);
+    });
+
+    it('throws an error', () => {
+      const spy = vi.fn().mockImplementation(() => {
+        throw new Error();
+      });
+      const lazy = new Lazy(() => spy());
+      expect(() => lazy.getValue()).toThrow(Error);
+      expect(spy).toHaveBeenCalledTimes(1);
+    });
+
+    it('caches the error', () => {
+      const spy = vi.fn().mockImplementation(() => {
+        throw new Error();
+      });
+      const lazy = new Lazy(() => spy());
+      expect(() => lazy.getValue()).toThrow(Error);
+      expect(() => lazy.getValue()).toThrow(Error);
+      expect(spy).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('.hasValue()', () => {
+    it('has a value', () => {
+      const spy = vi.fn().mockReturnValue(0);
+      const lazy = new Lazy(() => spy());
+      lazy.getValue();
+      const hasValue = lazy.hasValue();
+      expect(hasValue).toBeTrue();
+      expect(spy).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not have a value', () => {
+      const spy = vi.fn().mockReturnValue(0);
+      const lazy = new Lazy(() => spy());
+      const hasValue = lazy.hasValue();
+      expect(hasValue).toBeFalse();
+      expect(spy).toHaveBeenCalledTimes(0);
+    });
+  });
+});

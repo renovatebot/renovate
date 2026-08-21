@@ -1,0 +1,75 @@
+import { partial, scm } from '~test/util.ts';
+import { getConfig } from '../../../config/defaults.ts';
+import type { RenovateConfig } from '../../../config/types.ts';
+import { logger } from '../../../logger/index.ts';
+import type { PackageFile } from '../../../modules/manager/types.ts';
+import { extractAllDependencies } from './index.ts';
+import * as _managerFiles from './manager-files.ts';
+
+vi.mock('./manager-files.ts');
+
+const managerFiles = vi.mocked(_managerFiles);
+
+describe('workers/repository/extract/index', () => {
+  describe('extractAllDependencies()', () => {
+    let config: RenovateConfig;
+    const fileList = ['README', 'package.json', 'tasks/ansible.yaml'];
+
+    beforeEach(() => {
+      scm.getFileList.mockResolvedValue(fileList);
+      config = getConfig();
+    });
+
+    it('runs', async () => {
+      managerFiles.getManagerPackageFiles.mockResolvedValue([
+        partial<PackageFile>({}),
+      ]);
+      delete config.customManagers; // for coverage
+      const res = await extractAllDependencies(config);
+      expect(Object.keys(res.packageFiles)).toContain('ansible');
+    });
+
+    it('skips non-enabled managers', async () => {
+      config.enabledManagers = ['npm'];
+      managerFiles.getManagerPackageFiles.mockResolvedValue([
+        partial<PackageFile>({}),
+      ]);
+      const res = await extractAllDependencies(config);
+      expect(res).toMatchObject({
+        packageFiles: { npm: [{}] },
+      });
+    });
+
+    it('warns if no packages found for a enabled manager', async () => {
+      config.enabledManagers = ['npm', 'custom.regex'];
+      managerFiles.getManagerPackageFiles.mockResolvedValue([]);
+      expect((await extractAllDependencies(config)).packageFiles).toEqual({});
+
+      expect(logger.debug).toHaveBeenCalledWith(
+        { manager: 'custom.regex' },
+        `Manager explicitly enabled in "enabledManagers" config, but found no results. Possible config error?`,
+      );
+    });
+
+    it('warns if packageFiles is null', async () => {
+      config.enabledManagers = ['npm'];
+      managerFiles.getManagerPackageFiles.mockResolvedValue(null);
+      expect((await extractAllDependencies(config)).packageFiles).toEqual({});
+    });
+
+    it('checks custom managers', async () => {
+      managerFiles.getManagerPackageFiles.mockResolvedValue([
+        partial<PackageFile>({}),
+      ]);
+      config.customManagers = [
+        {
+          customType: 'regex',
+          managerFilePatterns: ['README'],
+          matchStrings: [''],
+        },
+      ];
+      const res = await extractAllDependencies(config);
+      expect(Object.keys(res.packageFiles)).toContain('regex');
+    });
+  });
+});

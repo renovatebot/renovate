@@ -1,0 +1,100 @@
+import { isNonEmptyArray, isNonEmptyString } from '@sindresorhus/is';
+import { logger } from '../../../logger/index.ts';
+import { getSiblingFileName, localPathExists } from '../../../util/fs/index.ts';
+import { parseSingleYaml } from '../../../util/yaml.ts';
+import { HelmDatasource } from '../../datasource/helm/index.ts';
+import type {
+  ExtractConfig,
+  PackageDependency,
+  PackageFileContent,
+} from '../types.ts';
+import { parseRepository, resolveAlias } from './utils.ts';
+
+export async function extractPackageFile(
+  content: string,
+  packageFile: string,
+  config: ExtractConfig,
+): Promise<PackageFileContent | null> {
+  let chart: {
+    apiVersion: string;
+    name: string;
+    version: string;
+    dependencies: { name: string; version: string; repository: string }[];
+  };
+  try {
+    // TODO: use schema (#9610)
+    chart = parseSingleYaml(content);
+    if (!(chart?.apiVersion && chart.name && chart.version)) {
+      logger.debug(
+        { packageFile },
+        'Failed to find required fields in Chart.yaml',
+      );
+      return null;
+    }
+    if (chart.apiVersion !== 'v2') {
+      logger.debug(
+        { packageFile },
+        'Unsupported Chart apiVersion. Only v2 is supported.',
+      );
+      return null;
+    }
+  } catch {
+    logger.debug({ packageFile }, `Failed to parse helm Chart.yaml`);
+    return null;
+  }
+  const packageFileVersion = chart.version;
+  let deps: PackageDependency[] = [];
+  if (!isNonEmptyArray(chart?.dependencies)) {
+    logger.debug(`Chart has no dependencies in ${packageFile}`);
+    return null;
+  }
+  const validDependencies = chart.dependencies.filter(
+    (dep) => isNonEmptyString(dep.name) && isNonEmptyString(dep.version),
+  );
+  if (!isNonEmptyArray(validDependencies)) {
+    logger.debug('Name and/or version missing for all dependencies');
+    return null;
+  }
+  deps = validDependencies.map((dep) => {
+    const res: PackageDependency = {
+      depName: dep.name,
+      currentValue: dep.version,
+    };
+    if (!dep.repository) {
+      res.skipReason = 'no-repository';
+      return res;
+    }
+
+    if (dep.repository.startsWith('git+')) {
+      logger.debug(
+        { repository: dep.repository, packageFile },
+        `Skipping unsupported helm-git repository.`,
+      );
+      res.skipReason = 'unknown-registry';
+      return res;
+    }
+
+    const repository = resolveAlias(dep.repository, config.registryAliases!);
+    if (!repository) {
+      res.skipReason = 'placeholder-url';
+      return res;
+    }
+
+    const result: PackageDependency = {
+      ...res,
+      ...parseRepository(dep.name, repository),
+    };
+    return result;
+  });
+  const res: PackageFileContent = {
+    deps,
+    datasource: HelmDatasource.id,
+    packageFileVersion,
+  };
+  const lockFileName = getSiblingFileName(packageFile, 'Chart.lock');
+  // istanbul ignore if
+  if (await localPathExists(lockFileName)) {
+    res.lockFiles = [lockFileName];
+  }
+  return res;
+}

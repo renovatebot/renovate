@@ -1,0 +1,31 @@
+name: lock-threads
+
+on:
+  # run daily
+  schedule:
+    - cron: '0 0 * * *'
+
+  # allow manual trigger
+  workflow_dispatch:
+
+permissions:
+  discussions: write
+  issues: write
+  pull-requests: write
+
+# Ensure only one lock action can run at a time
+concurrency:
+  group: lock
+
+jobs:
+  lock:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: dessant/lock-threads@89ae32b08ed1a541efecbab17912962a5e38981c # v6.0.2
+        if: github.repository == 'renovatebot/renovate'
+        with:
+          github-token: ${{ github.token }}
+          discussion-inactive-days: 30
+          issue-inactive-days: 30
+          pr-inactive-days: 30
+          process-only: 'issues, prs, discussions'

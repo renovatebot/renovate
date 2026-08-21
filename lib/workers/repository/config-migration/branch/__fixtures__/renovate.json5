@@ -1,0 +1,18 @@
+{
+  extends: [
+    ':separateMajorReleases',
+    ':prImmediately',
+    ':renovatePrefix',
+    ':semanticPrefixFixDepsChoreOthers',
+    ':updateNotScheduled',
+    ':automergeDisabled',
+    ':maintainLockFilesDisabled',
+    'group:monorepos',
+    'helpers:oddIsUnstablePackages'
+  ],
+  onboarding: false,
+  pinVersions: false,
+  semanticCommits: true,
+  timezone: 'US/Central',
+  baseBranch: 'main' // thats a comment
+}

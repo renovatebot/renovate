@@ -1,0 +1,4 @@
+{
+  "singleQuote": true,
+  "plugins": ["./tools/prettier/plugins/mkdocs-admonitions/index.mjs"]
+}

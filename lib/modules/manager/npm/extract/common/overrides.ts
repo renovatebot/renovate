@@ -1,0 +1,45 @@
+import { isEmptyObject, isString } from '@sindresorhus/is';
+import type { PackageDependency } from '../../../types.ts';
+import type { NpmManagerData } from '../../types.ts';
+import { extractDependency } from './dependency.ts';
+import { setNodeCommitTopic } from './node.ts';
+
+/**
+ * Used when there is a json object as a value in overrides block.
+ * @param parents
+ * @param child
+ * @returns PackageDependency array
+ */
+export function extractOverrideDepsRec(
+  parents: string[],
+  child: NpmManagerData,
+): PackageDependency[] {
+  const deps: PackageDependency[] = [];
+  if (!child || isEmptyObject(child)) {
+    return deps;
+  }
+  for (const [overrideName, versionValue] of Object.entries(child)) {
+    if (isString(versionValue)) {
+      // special handling for "." override dependency name
+      // "." means the constraint is applied to the parent dep
+      const currDepName = overrideName === '.' ? parents.at(-1)! : overrideName;
+      const dep: PackageDependency<NpmManagerData> = {
+        depName: currDepName,
+        depType: 'overrides',
+        managerData: { parents: parents.slice() }, // set parents for dependency
+      };
+      setNodeCommitTopic(dep);
+      deps.push({
+        ...dep,
+        ...extractDependency('overrides', currDepName, versionValue),
+      });
+    } else {
+      // versionValue is an object, run recursively.
+      parents.push(overrideName);
+      const depsOfObject = extractOverrideDepsRec(parents, versionValue);
+      deps.push(...depsOfObject);
+    }
+  }
+  parents.pop();
+  return deps;
+}

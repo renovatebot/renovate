@@ -1,0 +1,249 @@
+import * as httpMock from '../../../../test/http-mock.ts';
+import { reset as memCacheReset } from '../../../util/cache/memory/index.ts';
+import {
+  getCache,
+  resetCache as repoCacheReset,
+} from '../../../util/cache/repository/index.ts';
+import {
+  BitbucketServerHttp,
+  setBaseUrl,
+} from '../../../util/http/bitbucket-server.ts';
+import { parseUrl } from '../../../util/url.ts';
+import { BbsPrCache } from './pr-cache.ts';
+import type { BbsRestPr } from './types.ts';
+import { prInfo } from './utils.ts';
+
+const http = new BitbucketServerHttp();
+const ignorePrAuthor = false;
+
+const pr1: BbsRestPr = {
+  id: 1,
+  title: 'title',
+  state: 'OPEN',
+  createdDate: '1547853840016',
+  updatedDate: 1547853840016,
+  fromRef: {
+    id: 'refs/heads/userName1/pullRequest5',
+    displayId: 'userName1/pullRequest5',
+  },
+  toRef: {
+    id: 'refs/heads/master',
+    displayId: 'master',
+  },
+  reviewers: [],
+  description: 'a merge request',
+};
+
+const pr2: BbsRestPr = {
+  id: 2,
+  title: 'title',
+  state: 'OPEN',
+  createdDate: '1547853840016',
+  updatedDate: 1547853840016,
+  fromRef: {
+    id: 'refs/heads/userName1/pullRequest5',
+    displayId: 'userName1/pullRequest5',
+  },
+  toRef: {
+    id: 'refs/heads/master',
+    displayId: 'master',
+  },
+  reviewers: [],
+  description: 'a merge request',
+};
+
+const baseUrl = parseUrl('https://stash.renovatebot.com')!;
+setBaseUrl('https://stash.renovatebot.com');
+const urlHost = baseUrl.origin;
+const urlPath = baseUrl.pathname === '/' ? '' : baseUrl.pathname;
+describe('modules/platform/bitbucket-server/pr-cache', () => {
+  let cache = getCache();
+
+  beforeEach(() => {
+    memCacheReset();
+    repoCacheReset();
+    cache = getCache();
+  });
+
+  it('fetches cache - author defined', async () => {
+    httpMock
+      .scope(urlHost)
+      .get(`${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests`)
+      .query(true)
+      .reply(200, { values: [pr1], nextPageStart: 2 })
+      .get(`${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests`)
+      .query(true)
+      .reply(200, { values: [pr2] });
+
+    const res = await BbsPrCache.getPrs(
+      http,
+      'SOME',
+      'repo',
+      ignorePrAuthor,
+      'some-author',
+    );
+
+    expect(res).toMatchObject([
+      {
+        number: 2,
+        title: 'title',
+      },
+      {
+        number: 1,
+        title: 'title',
+      },
+    ]);
+    expect(cache).toEqual({
+      platform: {
+        'bitbucket-server': {
+          pullRequestsCache: {
+            author: 'some-author',
+            items: {
+              '1': prInfo(pr1),
+              '2': prInfo(pr2),
+            },
+            updatedDate: 1547853840016,
+          },
+        },
+      },
+    });
+  });
+
+  it('fetches cache - author undefined', async () => {
+    httpMock
+      .scope(urlHost)
+      .get(`${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests`)
+      .query(true)
+      .reply(200, { values: [pr1], nextPageStart: 2 })
+      .get(`${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests`)
+      .query(true)
+      .reply(200, { values: [pr2] });
+
+    const res = await BbsPrCache.getPrs(
+      http,
+      'SOME',
+      'repo',
+      ignorePrAuthor,
+      undefined as never,
+    );
+
+    expect(res).toMatchObject([
+      {
+        number: 2,
+        title: 'title',
+      },
+      {
+        number: 1,
+        title: 'title',
+      },
+    ]);
+    expect(cache).toEqual({
+      platform: {
+        'bitbucket-server': {
+          pullRequestsCache: {
+            items: {
+              '1': prInfo(pr1),
+              '2': prInfo(pr2),
+            },
+            updatedDate: 1547853840016,
+          },
+        },
+      },
+    });
+  });
+
+  it('resets cache for not matching authors', async () => {
+    cache.platform = {
+      'bitbucket-server': {
+        pullRequestsCache: {
+          items: {
+            '1': prInfo(pr1),
+          },
+          author: 'some-other-author',
+          updatedDate: 1547853840016,
+        },
+      },
+    };
+
+    httpMock
+      .scope(urlHost)
+      .get(`${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests`)
+      .query(true)
+      .reply(200, { values: [pr1] });
+
+    const res = await BbsPrCache.getPrs(
+      http,
+      'SOME',
+      'repo',
+      ignorePrAuthor,
+      'some-author',
+    );
+
+    expect(res).toMatchObject([
+      {
+        number: 1,
+        title: 'title',
+      },
+    ]);
+    expect(cache).toEqual({
+      platform: {
+        'bitbucket-server': {
+          pullRequestsCache: {
+            author: 'some-author',
+            items: {
+              '1': prInfo(pr1),
+            },
+            updatedDate: 1547853840016,
+          },
+        },
+      },
+    });
+  });
+
+  it('syncs cache', async () => {
+    cache.platform = {
+      'bitbucket-server': {
+        pullRequestsCache: {
+          items: {
+            '1': prInfo(pr1),
+          },
+          author: 'some-author',
+          updatedDate: 1547853840016,
+        },
+      },
+    };
+
+    httpMock
+      .scope(urlHost)
+      .get(`${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests`)
+      .query(true)
+      .reply(200, { values: [pr2, pr1] });
+
+    const res = await BbsPrCache.getPrs(
+      http,
+      'SOME',
+      'repo',
+      ignorePrAuthor,
+      'some-author',
+    );
+
+    expect(res).toMatchObject([
+      { number: 2, title: 'title' },
+      { number: 1, title: 'title' },
+    ]);
+    expect(cache).toEqual({
+      platform: {
+        'bitbucket-server': {
+          pullRequestsCache: {
+            items: {
+              '1': prInfo(pr1),
+              '2': prInfo(pr2),
+            },
+            author: 'some-author',
+            updatedDate: 1547853840016,
+          },
+        },
+      },
+    });
+  });
+});

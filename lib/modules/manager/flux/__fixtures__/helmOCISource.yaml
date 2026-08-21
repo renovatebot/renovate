@@ -1,0 +1,10 @@
+apiVersion: source.toolkit.fluxcd.io/v1beta2
+kind: HelmRepository
+metadata:
+  name: actions-runner-controller
+  namespace: flux-system
+spec:
+  type: oci
+  interval: 30m
+  url: oci://ghcr.io/actions
+  timeout: 3m

@@ -1,0 +1,80 @@
+import { isNonEmptyArray, isNonEmptyString, isString } from '@sindresorhus/is';
+import { logger } from '../../../logger/index.ts';
+import { GithubHttp } from '../../../util/http/github.ts';
+import { getPrBodyStruct } from '../pr-body.ts';
+import type { MergePRConfig } from '../types.ts';
+import type { GhPr, GhRestPr } from './types.ts';
+
+export const githubApi = new GithubHttp();
+
+/**
+ * @see https://docs.github.com/en/rest/reference/pulls#list-pull-requests
+ */
+export function coerceRestPr(pr: GhRestPr): GhPr {
+  const bodyStruct = pr.bodyStruct ?? getPrBodyStruct(pr.body);
+  const result: GhPr = {
+    number: pr.number,
+    sourceBranch: pr.head?.ref,
+    title: pr.title,
+    state:
+      pr.state === 'closed' && isString(pr.merged_at) ? 'merged' : pr.state,
+    bodyStruct,
+    updated_at: pr.updated_at,
+    node_id: pr.node_id,
+  };
+
+  if (pr.head?.sha) {
+    result.sha = pr.head.sha;
+  }
+
+  if (pr.head?.repo?.full_name) {
+    result.sourceRepo = pr.head.repo.full_name;
+  }
+
+  if (pr.labels) {
+    result.labels = pr.labels.map(({ name }) => name);
+  }
+
+  if (!!pr.assignee || isNonEmptyArray(pr.assignees)) {
+    result.hasAssignees = true;
+  }
+
+  if (pr.requested_reviewers) {
+    result.reviewers = pr.requested_reviewers
+      .map(({ login }) => login)
+      .filter(isNonEmptyString);
+  }
+
+  if (pr.created_at) {
+    result.createdAt = pr.created_at;
+  }
+
+  if (pr.closed_at) {
+    result.closedAt = pr.closed_at;
+  }
+
+  if (pr.base?.ref) {
+    result.targetBranch = pr.base.ref;
+  }
+
+  return result;
+}
+
+export function mapMergeStartegy(
+  strategy: MergePRConfig['strategy'],
+): string | undefined {
+  switch (strategy) {
+    case 'auto':
+      return undefined;
+    case 'fast-forward': {
+      logger.warn(
+        'Fast-forward merge strategy is not supported by Github. Falling back to merge strategy set for the repository.',
+      );
+      return undefined;
+    }
+    case 'merge-commit':
+      return 'merge';
+    default:
+      return strategy;
+  }
+}

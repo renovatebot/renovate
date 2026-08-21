@@ -1,0 +1,79 @@
+import { logger } from '../../../logger/index.ts';
+import { withCache } from '../../../util/cache/package/with-cache.ts';
+import { ensureTrailingSlash } from '../../../util/url.ts';
+import * as helmVersioning from '../../versioning/helm/index.ts';
+import { Datasource } from '../datasource.ts';
+import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
+import { HelmRepository } from './schema.ts';
+
+export class HelmDatasource extends Datasource {
+  static readonly id = 'helm';
+
+  constructor() {
+    super(HelmDatasource.id);
+  }
+
+  override readonly defaultRegistryUrls = ['https://charts.helm.sh/stable'];
+
+  override readonly defaultConfig = {
+    commitMessageTopic: 'Helm release {{depName}}',
+  };
+
+  override readonly defaultVersioning = helmVersioning.id;
+
+  override readonly releaseTimestampSupport = true;
+  override readonly releaseTimestampNote =
+    'The release timstamp is determined from the `created` field in the results.';
+  override readonly sourceUrlSupport = 'package';
+  override readonly sourceUrlNote =
+    'The source URL is determined from the `home` field or the `sources` field in the results.';
+
+  private async _getRepositoryData(
+    helmRepository: string,
+  ): Promise<HelmRepository> {
+    const { val, err } = await this.http
+      .getYamlSafe(
+        'index.yaml',
+        { baseUrl: ensureTrailingSlash(helmRepository) },
+        HelmRepository,
+      )
+      .unwrap();
+
+    if (err) {
+      this.handleGenericErrors(err);
+    }
+
+    return val;
+  }
+
+  getRepositoryData(helmRepository: string): Promise<HelmRepository> {
+    return withCache(
+      {
+        namespace: `datasource-${HelmDatasource.id}`,
+        key: `repository-data:${helmRepository}`,
+      },
+      () => this._getRepositoryData(helmRepository),
+    );
+  }
+
+  async getReleases({
+    packageName,
+    registryUrl: helmRepository,
+  }: GetReleasesConfig): Promise<ReleaseResult | null> {
+    /* v8 ignore next 3 -- should never happen */
+    if (!helmRepository) {
+      return null;
+    }
+
+    const repositoryData = await this.getRepositoryData(helmRepository);
+    const releases = repositoryData[packageName];
+    if (!releases) {
+      logger.debug(
+        { dependency: packageName },
+        `Entry ${packageName} doesn't exist in index.yaml from ${helmRepository}`,
+      );
+      return null;
+    }
+    return releases;
+  }
+}

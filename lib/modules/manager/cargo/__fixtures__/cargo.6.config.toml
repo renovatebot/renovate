@@ -1,0 +1,5 @@
+[registries]
+private-crates = { index = "https://dl.cloudsmith.io/basic/my-org/my-repo/cargo/index.git" }
+
+[registries.mcorbin]
+index = "https://github.com/mcorbin/testregistry"

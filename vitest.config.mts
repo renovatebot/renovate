@@ -1,0 +1,141 @@
+import type { ViteUserConfig } from 'vitest/config';
+import {
+  coverageConfigDefaults,
+  defaultExclude,
+  defineConfig,
+  mergeConfig,
+} from 'vitest/config';
+import { testShards } from './tools/test/shards.ts';
+import {
+  getCoverageIgnorePatterns,
+  normalizePattern,
+} from './tools/test/utils.ts';
+
+const ci = !!process.env.CI;
+const agentHook = !!process.env.RENOVATE_AGENT_HOOK;
+
+let reporters: string[] = ['default'];
+if (ci) {
+  reporters = ['default', 'github-actions', 'junit'];
+} else if (agentHook) {
+  reporters = ['minimal'];
+}
+
+/**
+ * Generates Vitest config for sharded test run.
+ *
+ * If `TEST_SHARD` environment variable is not set,
+ * it falls back to the provided config.
+ *
+ * Otherwise, `fallback` value is used to determine some defaults.
+ */
+function configureShardingOrFallbackTo(
+  fallback: ViteUserConfig,
+): ViteUserConfig {
+  const shardKey = process.env.TEST_SHARD;
+  if (!shardKey) {
+    return fallback;
+  }
+
+  if (!testShards[shardKey]) {
+    const keys = Object.keys(testShards).join(', ');
+    throw new Error(
+      `Unknown value for TEST_SHARD: ${shardKey} (possible values: ${keys})`,
+    );
+  }
+
+  const include: string[] = [];
+  const exclude: string[] = [...defaultExclude];
+
+  for (const [key, { matchPaths: patterns }] of Object.entries(testShards)) {
+    if (key === shardKey) {
+      const testMatchPatterns = patterns.map((pattern) => {
+        const filePattern = normalizePattern(pattern, '.spec.ts');
+        return filePattern;
+      });
+      include.push(...testMatchPatterns);
+      break;
+    }
+
+    const testMatchPatterns = patterns.map((pattern) => {
+      const filePattern = normalizePattern(pattern, '.spec.ts');
+      return `**/${filePattern}`;
+    });
+    exclude.push(...testMatchPatterns);
+  }
+
+  const reportsDirectory = `./coverage/shard/${shardKey}`;
+  return {
+    test: {
+      include,
+      exclude,
+      outputFile: `./coverage/shard/${shardKey}/junit.xml`,
+      coverage: {
+        reportsDirectory,
+      },
+    },
+  };
+}
+
+// https://vitejs.dev/config/
+export default defineConfig(() =>
+  mergeConfig(
+    {
+      resolve: { tsconfigPaths: true },
+      oxc: { include: /\.([cm]?ts|[jt]sx)$/ }, // Fixes .cts fixtures not being transformed
+      cacheDir: ci ? '.cache/vitest' : undefined,
+      test: {
+        globals: true,
+        setupFiles: [
+          'jest-extended/all',
+          'expect-more-jest',
+          './test/setup.ts',
+          'test/to-migrate.ts',
+        ],
+        reporters,
+        mockReset: true,
+        coverage: {
+          provider: 'v8',
+          skipFull: !ci,
+          reporter: ci
+            ? ['text-summary', 'lcovonly', 'json']
+            : ['text-summary', '@containerbase/istanbul-reports-html', 'json'],
+          enabled: true,
+          exclude: [
+            ...coverageConfigDefaults.exclude,
+            ...getCoverageIgnorePatterns(),
+            '**/*.spec.ts', // should work from defaults
+            'lib/**/{__fixtures__,__mocks__,__testutil__,test}/**',
+            'lib/**/types.ts',
+            'lib/types/**',
+            'test/**',
+            'tools/**',
+            '+(config.js)',
+            '__mocks__/**',
+            // fully ignored files
+            '*.config.{mts,mjs}',
+            '*.json',
+            'lib/config-validator.ts',
+            'lib/constants/category.ts',
+            'lib/modules/datasource/hex/v2/package.ts',
+            'lib/modules/datasource/hex/v2/signed.ts',
+            'lib/util/http/legacy.ts',
+            'lib/workers/repository/cache.ts',
+          ],
+        },
+      },
+    } satisfies ViteUserConfig,
+    configureShardingOrFallbackTo({
+      test: {
+        exclude: [
+          ...defaultExclude,
+          'dist/**/*',
+          'tools/docs/test/**/*.test.mjs',
+          '.worktrees/**/*',
+          '.claude/worktrees/**/*',
+          '.pnpm-store/**/*',
+        ],
+      },
+    }),
+  ),
+);

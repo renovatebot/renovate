@@ -1,0 +1,23 @@
+---
+# malformed application as the source section is missing
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+spec:
+  target:
+    namespace: testing
+---
+# malformed application as the source section is missing
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+---
+# malformed application as the sources array is empty
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+spec:
+  sources: []
+---
+# malformed application as the source is null
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+spec:
+  source: null

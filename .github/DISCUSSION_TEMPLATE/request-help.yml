@@ -1,0 +1,69 @@
+body:
+  - type: dropdown
+    id: how-are-you-running-renovate
+    attributes:
+      label: How are you running Renovate?
+      description: |
+        Note that if you're using the Mend Renovate Self-Hosted Community/Enterprise Edition (aka "Renovate CE"/"Renovate EE"), please raise an issue on the [mend/renovate-ce-ee issue tracker](https://github.com/mend/renovate-ce-ee/issues/new?template=request-help.yml).
+
+        If it happens to be a Renovate CLI issue, we can continue to support it over there.
+      options:
+        - 'A Mend.io-hosted app'
+        - 'Self-hosted Renovate CLI'
+
+  - type: dropdown
+    id: self-hosted-platform
+    attributes:
+      label: Which platform you running Renovate on?
+      options:
+        - 'GitHub.com'
+        - 'GitHub Enterprise Server'
+        - 'GitLab (.com or self-hosted)'
+        - 'Gitea'
+        - 'Forgejo'
+        - 'Other (please specify)'
+    validations:
+      required: false
+
+  - type: input
+    id: self-hosted-version
+    attributes:
+      label: Which version of Renovate are you using?
+      description: |
+        Please do not say 'latest' version (as Renovate ships many updates daily) or the major version number, but instead note the exact version.
+        You can find it by checking the `INFO: Repository started` log line.
+    validations:
+      required: false
+
+  - type: textarea
+    id: the-question
+    attributes:
+      label: Please tell us more about your question or problem
+      description: |
+        Remember to [follow these guidelines](https://github.com/renovatebot/renovate/blob/main/docs/development/help-us-help-you.md) for maximum effectiveness.
+        Include a [minimal reproduction](https://github.com/renovatebot/renovate/blob/main/docs/development/minimal-reproductions.md) if you think you found a bug.
+    validations:
+      required: true
+
+  - type: textarea
+    id: debug-logs
+    attributes:
+      label: Logs (if relevant)
+      description: |
+        If you're running self-hosted, run with `LOG_LEVEL=debug` in your environment variables and search for whatever dependency/branch/PR that is causing the problem.
+        If you are using the Renovate App, log into [Renovate's app dashboard](https://developer.mend.io) and locate the correct job log for when the problem occurred (e.g. when the PR was created).
+        Try to paste the *relevant* logs here, not the entire thing and not just a link to the dashboard (others don't have permissions to view them).
+        If you're not sure about the relevant parts of the log, then feel free to post the full log to a [Github Gist](https://gist.github.com/) and link to it.
+        Try to highlight the important logs into the issue itself.
+      value: |
+        <details><summary>Logs</summary>
+
+        ```
+
+        Replace this text with your logs, between the starting and ending triple backticks
+
+        ```
+
+        </details>
+    validations:
+      required: false

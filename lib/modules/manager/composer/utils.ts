@@ -1,0 +1,145 @@
+// TODO: types (#22198)
+import { isString } from '@sindresorhus/is';
+import { quote } from 'shlex';
+import { GlobalConfig } from '../../../config/global.ts';
+import { logger } from '../../../logger/index.ts';
+import type { CombinedHostRule } from '../../../types/index.ts';
+import type {
+  ConstraintName,
+  ToolConstraint,
+} from '../../../util/exec/types.ts';
+import { coerceNumber } from '../../../util/number.ts';
+import {
+  api,
+  id as composerVersioningId,
+} from '../../versioning/composer/index.ts';
+import type { UpdateArtifactsConfig } from '../types.ts';
+import type { Lockfile, PackageFile } from './schema.ts';
+
+export { composerVersioningId };
+
+const depRequireInstall = new Set(['symfony/flex']);
+
+export function getComposerArguments(
+  config: UpdateArtifactsConfig,
+  toolConstraint: ToolConstraint,
+): string {
+  let args = '';
+
+  if (config.composerIgnorePlatformReqs) {
+    if (config.composerIgnorePlatformReqs.length === 0) {
+      if (
+        isString(toolConstraint.constraint) &&
+        api.intersects!(toolConstraint.constraint, '^2.2')
+      ) {
+        args += " --ignore-platform-req='ext-*' --ignore-platform-req='lib-*'";
+      } else {
+        args += ' --ignore-platform-reqs';
+      }
+    } else {
+      config.composerIgnorePlatformReqs.forEach((req) => {
+        args += ` --ignore-platform-req ${quote(req)}`;
+      });
+    }
+  }
+
+  args += ' --no-ansi --no-interaction';
+  if (!GlobalConfig.get('allowScripts') || config.ignoreScripts) {
+    args += ' --no-scripts --no-autoloader';
+  }
+
+  if (!GlobalConfig.get('allowPlugins') || config.ignorePlugins) {
+    args += ' --no-plugins';
+  }
+
+  return args;
+}
+
+export function getComposerUpdateArguments(
+  config: UpdateArtifactsConfig,
+  toolConstraint: ToolConstraint,
+): string {
+  let args = getComposerArguments(config, toolConstraint);
+
+  if (
+    !config.isLockFileMaintenance &&
+    !config.postUpdateOptions?.includes('composerNoMinimalChanges') &&
+    isString(toolConstraint.constraint) &&
+    api.intersects!(toolConstraint.constraint, '>=2.7')
+  ) {
+    args += ' --minimal-changes';
+  }
+
+  return args;
+}
+
+export function getPhpConstraint(
+  constraints: Partial<Record<ConstraintName, string>>,
+): string | null {
+  const { php } = constraints;
+
+  if (php) {
+    logger.debug('Using php constraint from config');
+    return php;
+  }
+
+  return null;
+}
+
+export function requireComposerDependencyInstallation({
+  packages,
+  packagesDev,
+}: Lockfile): boolean {
+  return (
+    packages.some((p) => depRequireInstall.has(p.name)) === true ||
+    packagesDev.some((p) => depRequireInstall.has(p.name)) === true
+  );
+}
+
+export function extractConstraints(
+  { config, require, requireDev }: PackageFile,
+  { pluginApiVersion }: Lockfile,
+): Partial<Record<ConstraintName, string>> {
+  const res: Record<string, string> = { composer: '1.*' };
+
+  // extract php
+  const phpVersion = config?.platform.php;
+  if (phpVersion) {
+    const major = api.getMajor(phpVersion);
+    const minor = coerceNumber(api.getMinor(phpVersion));
+    const patch = coerceNumber(api.getPatch(phpVersion));
+    res.php = `<=${major}.${minor}.${patch}`;
+  } else if (require.php) {
+    res.php = require.php;
+  }
+
+  // extract direct composer dependency
+  if (require['composer/composer']) {
+    res.composer = require['composer/composer'];
+  } else if (requireDev['composer/composer']) {
+    res.composer = requireDev['composer/composer'];
+  }
+  // composer platform package
+  else if (require.composer) {
+    res.composer = require.composer;
+  } else if (requireDev.composer) {
+    res.composer = requireDev.composer;
+  }
+  // check last used composer version
+  else if (pluginApiVersion) {
+    const major = api.getMajor(pluginApiVersion);
+    const minor = api.getMinor(pluginApiVersion);
+    res.composer = `^${major}.${minor}`;
+  }
+  // check composer api dependency
+  else if (require['composer-runtime-api']) {
+    const major = api.getMajor(require['composer-runtime-api']);
+    const minor = api.getMinor(require['composer-runtime-api']);
+    res.composer = `^${major}.${minor}`;
+  }
+  return res;
+}
+
+export function isArtifactAuthEnabled(rule: CombinedHostRule): boolean {
+  return !rule.artifactAuth || rule.artifactAuth.includes('composer');
+}

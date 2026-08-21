@@ -1,0 +1,21 @@
+dist: trusty
+language: node_js
+node_js:
+  - '8'
+  - '6'
+  - '4'
+services:
+  - redis-server
+  - mongodb
+  - mysql
+addons:
+  postgresql: '9.5'
+before_script:
+  - psql -c 'create database keyv_test;' -U postgres
+  - mysql -u root -e 'CREATE DATABASE keyv_test;'
+  - mysql -u root -e 'GRANT ALL PRIVILEGES ON keyv_test.* TO 'mysql'@'localhost';'
+script: npm run test:full
+after_success: npm run coverage
+notifications:
+  email:
+    on_success: never

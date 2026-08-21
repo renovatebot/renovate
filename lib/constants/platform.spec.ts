@@ -1,0 +1,100 @@
+import { BitbucketServerTagsDatasource } from '../modules/datasource/bitbucket-server-tags/index.ts';
+import { BitbucketTagsDatasource } from '../modules/datasource/bitbucket-tags/index.ts';
+import { GiteaTagsDatasource } from '../modules/datasource/gitea-tags/index.ts';
+import { GithubReleasesDatasource } from '../modules/datasource/github-releases/index.ts';
+import { GithubTagsDatasource } from '../modules/datasource/github-tags/index.ts';
+import { GitlabPackagesDatasource } from '../modules/datasource/gitlab-packages/index.ts';
+import { GitlabReleasesDatasource } from '../modules/datasource/gitlab-releases/index.ts';
+import { GitlabTagsDatasource } from '../modules/datasource/gitlab-tags/index.ts';
+import { HermitDatasource } from '../modules/datasource/hermit/index.ts';
+import { PodDatasource } from '../modules/datasource/pod/index.ts';
+import { id as GITHUB_CHANGELOG_ID } from '../workers/repository/update/pr/changelog/github/index.ts';
+import { id as GITLAB_CHANGELOG_ID } from '../workers/repository/update/pr/changelog/gitlab/index.ts';
+import {
+  BITBUCKET_API_USING_HOST_TYPES,
+  BITBUCKET_SERVER_API_USING_HOST_TYPES,
+  FORGEJO_API_USING_HOST_TYPES,
+  GITEA_API_USING_HOST_TYPES,
+  GITHUB_API_USING_HOST_TYPES,
+  GITLAB_API_USING_HOST_TYPES,
+} from './platforms.ts';
+
+describe('constants/platform', () => {
+  it('should be part of the GITEA_API_USING_HOST_TYPES', () => {
+    expect(
+      GITEA_API_USING_HOST_TYPES.includes(GiteaTagsDatasource.id),
+    ).toBeTrue();
+    expect(GITEA_API_USING_HOST_TYPES.includes('gitea')).toBeTrue();
+  });
+
+  it('should be part of the FORGEJO_API_USING_HOST_TYPES', () => {
+    expect(FORGEJO_API_USING_HOST_TYPES.includes('forgejo')).toBeTrue();
+    expect(FORGEJO_API_USING_HOST_TYPES.includes('forgejo-tags')).toBeTrue();
+    expect(
+      FORGEJO_API_USING_HOST_TYPES.includes('forgejo-releases'),
+    ).toBeTrue();
+    expect(
+      FORGEJO_API_USING_HOST_TYPES.includes('forgejo-changelog'),
+    ).toBeTrue();
+    expect(FORGEJO_API_USING_HOST_TYPES).toHaveLength(4);
+  });
+
+  it('should be part of the GITLAB_API_USING_HOST_TYPES', () => {
+    expect(
+      GITLAB_API_USING_HOST_TYPES.includes(GitlabTagsDatasource.id),
+    ).toBeTrue();
+    expect(
+      GITLAB_API_USING_HOST_TYPES.includes(GitlabReleasesDatasource.id),
+    ).toBeTrue();
+    expect(
+      GITLAB_API_USING_HOST_TYPES.includes(GitlabPackagesDatasource.id),
+    ).toBeTrue();
+    expect(
+      GITLAB_API_USING_HOST_TYPES.includes(GITLAB_CHANGELOG_ID),
+    ).toBeTrue();
+    expect(GITLAB_API_USING_HOST_TYPES.includes('gitlab')).toBeTrue();
+  });
+
+  it('should be not part of the GITLAB_API_USING_HOST_TYPES', () => {
+    expect(GITLAB_API_USING_HOST_TYPES.includes('github')).toBeFalse();
+  });
+
+  it('should be part of the GITHUB_API_USING_HOST_TYPES', () => {
+    expect(
+      GITHUB_API_USING_HOST_TYPES.includes(GithubTagsDatasource.id),
+    ).toBeTrue();
+    expect(
+      GITHUB_API_USING_HOST_TYPES.includes(GithubReleasesDatasource.id),
+    ).toBeTrue();
+    expect(GITHUB_API_USING_HOST_TYPES.includes(PodDatasource.id)).toBeTrue();
+    expect(
+      GITHUB_API_USING_HOST_TYPES.includes(HermitDatasource.id),
+    ).toBeTrue();
+    expect(
+      GITHUB_API_USING_HOST_TYPES.includes(GITHUB_CHANGELOG_ID),
+    ).toBeTrue();
+    expect(GITHUB_API_USING_HOST_TYPES.includes('github')).toBeTrue();
+  });
+
+  it('should be not part of the GITHUB_API_USING_HOST_TYPES', () => {
+    expect(GITHUB_API_USING_HOST_TYPES.includes('gitlab')).toBeFalse();
+  });
+
+  it('should be part of the BITBUCKET_API_USING_HOST_TYPES', () => {
+    expect(
+      BITBUCKET_API_USING_HOST_TYPES.includes(BitbucketTagsDatasource.id),
+    ).toBeTrue();
+    expect(BITBUCKET_API_USING_HOST_TYPES.includes('bitbucket')).toBeTrue();
+  });
+
+  it('should be part of the BITBUCKET_SERVER_API_USING_HOST_TYPES', () => {
+    expect(
+      BITBUCKET_SERVER_API_USING_HOST_TYPES.includes(
+        BitbucketServerTagsDatasource.id,
+      ),
+    ).toBeTrue();
+    expect(
+      BITBUCKET_SERVER_API_USING_HOST_TYPES.includes('bitbucket-server'),
+    ).toBeTrue();
+  });
+});

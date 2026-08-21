@@ -1,0 +1,37 @@
+name: Run linters
+
+on: [push]
+
+jobs:
+  shell_lint:
+    name: Shell lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Shell lint
+        # Isn't supported current
+        uses: actions/bin/shellcheck@master
+        run: ./entrypoint.sh
+      - uses: docker/setup-qemu-action@c308fdd69d26ed66f4506ebd74b180abe5362145 # renovate: tag=v1.1.0
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@1.0.0
+      - uses: docker/setup-qemu-action@c308fdd69d26ed66f4506ebd74b180abe5362145
+      - name: Build
+        uses: docker/build-push-action@v2
+  rustfmt:
+    name: Run Rustfmt
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@ec3a7ce113134d7a93b817d10a8272cb61118579 # tag=v2.4.0
+      - uses: actions-rs/toolchain@16499b5e05bf2e26879000db0c1d13f7e13fa3af # renovate: tag=v1.0.7
+        with:
+          profile: minimal
+          toolchain: stable
+          components: rustfmt
+          override: true
+      - uses: actions-rs/cargo@v1.0.3
+        with:
+          command: fmt
+          args: --all -- --check

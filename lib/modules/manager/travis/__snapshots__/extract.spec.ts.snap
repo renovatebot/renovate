@@ -1,0 +1,18 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`modules/manager/travis/extract > extractPackageFile() > returns results 1`] = `
+{
+  "deps": [
+    {
+      "currentValue": "6",
+      "datasource": "node-version",
+      "depName": "node",
+    },
+    {
+      "currentValue": "8",
+      "datasource": "node-version",
+      "depName": "node",
+    },
+  ],
+}
+`;

@@ -1,0 +1,35 @@
+import type { DirectoryResult } from 'tmp-promise';
+import { dir } from 'tmp-promise';
+import upath from 'upath';
+import { Fixtures } from '~test/fixtures.ts';
+import { fs } from '~test/util.ts';
+import { GlobalConfig } from '../../../config/global.ts';
+import { extract } from './utils.ts';
+
+const fixturePackagesArchivePath = Fixtures.getPath(`Packages.gz`);
+
+describe('modules/datasource/deb/utils', () => {
+  let cacheDir: DirectoryResult | null;
+  let extractedPackageFile: string;
+
+  beforeEach(async () => {
+    cacheDir = await dir({ unsafeCleanup: true });
+    GlobalConfig.set({ cacheDir: cacheDir.path });
+
+    const extractionFolder = await fs.ensureCacheDir('file');
+    extractedPackageFile = upath.join(extractionFolder, `package.txt`);
+  });
+
+  afterEach(async () => {
+    await cacheDir?.cleanup();
+    cacheDir = null;
+  });
+
+  describe('extract', () => {
+    it('should throw error for unsupported compression', async () => {
+      await expect(
+        extract(fixturePackagesArchivePath, 'xz', extractedPackageFile),
+      ).rejects.toThrow('Unsupported compression standard');
+    });
+  });
+});

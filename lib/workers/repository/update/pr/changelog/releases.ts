@@ -1,0 +1,101 @@
+// TODO #22198
+import { logger } from '../../../../../logger/index.ts';
+import type { Release } from '../../../../../modules/datasource/index.ts';
+import {
+  getPkgReleases,
+  isGetPkgReleasesConfig,
+} from '../../../../../modules/datasource/index.ts';
+import type { VersioningApi } from '../../../../../modules/versioning/index.ts';
+import { get } from '../../../../../modules/versioning/index.ts';
+import { coerceArray } from '../../../../../util/array.ts';
+import type { BranchUpgradeConfig } from '../../../../types.ts';
+
+function matchesMMP(
+  versioningApi: VersioningApi,
+  v1: string,
+  v2: string,
+): boolean {
+  return (
+    versioningApi.getMajor(v1) === versioningApi.getMajor(v2) &&
+    versioningApi.getMinor(v1) === versioningApi.getMinor(v2) &&
+    versioningApi.getPatch(v1) === versioningApi.getPatch(v2)
+  );
+}
+
+function matchesUnstable(
+  versioningApi: VersioningApi,
+  v1: string,
+  v2: string,
+): boolean {
+  return !versioningApi.isStable(v1) && matchesMMP(versioningApi, v1, v2);
+}
+
+export async function getInRangeReleases(
+  config: BranchUpgradeConfig,
+): Promise<Release[] | null> {
+  const versioning = config.versioning!;
+  const currentVersion = config.currentVersion!;
+  const newVersion = config.newVersion!;
+  const depName = config.depName!;
+  const datasource = config.datasource!;
+  // istanbul ignore if
+  if (!isGetPkgReleasesConfig(config)) {
+    return null;
+  }
+  try {
+    const pkgReleases = (await getPkgReleases(config))!.releases;
+    const version = get(versioning);
+
+    const previousReleases = pkgReleases
+      .filter((release) =>
+        version.isCompatible(release.version, currentVersion),
+      )
+      .filter((release) => !version.isGreaterThan(release.version, newVersion))
+      .filter(
+        (release) =>
+          version.isStable(release.version) ||
+          matchesUnstable(version, currentVersion, release.version) ||
+          matchesUnstable(version, newVersion, release.version),
+      );
+
+    const releases = previousReleases.filter(
+      (release) =>
+        version.equals(release.version, currentVersion) ||
+        version.isGreaterThan(release.version, currentVersion),
+    );
+
+    /**
+     * If there is only one release, it can be one of two things:
+     *
+     *   1. There really is only one release
+     *
+     *   2. Pinned version doesn't actually exist, i.e pinning `^1.2.3` to `1.2.3`
+     *      while only `1.2.2` and `1.2.4` exist.
+     */
+    if (releases.length === 1) {
+      const newRelease = releases[0];
+      const closestPreviousRelease = previousReleases
+        .filter((release) => !version.equals(release.version, newVersion))
+        .sort((b, a) => version.sortVersions(a.version, b.version))
+        .shift();
+
+      if (
+        closestPreviousRelease &&
+        closestPreviousRelease.version !== newRelease.version
+      ) {
+        releases.unshift(closestPreviousRelease);
+      }
+    }
+
+    if (version.valueToVersion) {
+      for (const release of coerceArray(releases)) {
+        release.version = version.valueToVersion(release.version);
+      }
+    }
+    return releases;
+  } catch (err) /* istanbul ignore next */ {
+    logger.debug({ err }, 'getInRangeReleases err');
+    logger.debug(`Error getting releases for ${depName} from ${datasource}`);
+    return null;
+  }
+}

@@ -1,0 +1,94 @@
+import { fakeSha, logger, scm } from '~test/util.ts';
+import { GlobalConfig } from '../../../../config/global.ts';
+import type { BranchConfig } from '../../../types.ts';
+import { commitFilesToBranch } from './commit.ts';
+
+describe('workers/repository/update/branch/commit', () => {
+  describe('commitFilesToBranch', () => {
+    let config: BranchConfig;
+
+    beforeEach(() => {
+      config = {
+        baseBranch: 'base-branch',
+        manager: 'some-manager',
+        branchName: 'renovate/some-branch',
+        commitMessage: 'some commit message',
+        semanticCommits: 'disabled',
+        semanticCommitType: 'a',
+        semanticCommitScope: 'b',
+        updatedPackageFiles: [],
+        updatedArtifacts: [],
+        upgrades: [],
+        platformCommit: 'auto',
+      } satisfies BranchConfig;
+      scm.commitAndPush.mockResolvedValueOnce(fakeSha('123test'));
+      GlobalConfig.reset();
+    });
+
+    it('handles empty files', async () => {
+      await commitFilesToBranch(config);
+      expect(scm.commitAndPush).toHaveBeenCalledTimes(0);
+    });
+
+    it('commits files', async () => {
+      config.updatedPackageFiles?.push({
+        type: 'addition',
+        path: 'package.json',
+        contents: 'some contents',
+      });
+      await commitFilesToBranch(config);
+      expect(scm.commitAndPush).toHaveBeenCalledTimes(1);
+      expect(scm.commitAndPush.mock.calls).toEqual([
+        [
+          {
+            baseBranch: 'base-branch',
+            branchName: 'renovate/some-branch',
+            files: [
+              {
+                contents: 'some contents',
+                path: 'package.json',
+                type: 'addition',
+              },
+            ],
+            force: false,
+            message: 'some commit message',
+            platformCommit: 'auto',
+          },
+        ],
+      ]);
+    });
+
+    it('passes commit trailers', async () => {
+      config.updatedPackageFiles?.push({
+        type: 'addition',
+        path: 'package.json',
+        contents: 'some contents',
+      });
+      config.commitTrailers = [
+        'Signed-off-by: Renovate Bot <bot@renovateapp.com>',
+      ];
+
+      await commitFilesToBranch(config);
+
+      expect(scm.commitAndPush).toHaveBeenCalledExactlyOnceWith(
+        expect.objectContaining({
+          trailers: ['Signed-off-by: Renovate Bot <bot@renovateapp.com>'],
+        }),
+      );
+    });
+
+    it('dry runs', async () => {
+      GlobalConfig.set({ dryRun: 'full' });
+      config.updatedPackageFiles?.push({
+        type: 'addition',
+        path: 'package.json',
+        contents: 'some contents',
+      });
+      await commitFilesToBranch(config);
+      expect(scm.commitAndPush).toHaveBeenCalledTimes(0);
+      expect(logger.logger.info).toHaveBeenCalledWith(
+        'DRY-RUN: Would commit files to branch renovate/some-branch. See debug logs for raw commit information',
+      );
+    });
+  });
+});

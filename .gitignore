@@ -1,0 +1,49 @@
+/node_modules
+/.pnpm-store
+/coverage
+/dist
+/tmp
+.DS_Store
+.cache
+/*.log
+/.idea
+/package-lock.json
+*.pyc
+renovate-0.0.0-semantic-release.tgz
+renovate-v0.0.0-semantic-release.tgz
+/test/e2e/node_modules
+.eslintcache
+junit.xml
+/test-results
+renovate-schema.json
+renovate-inherited-schema.json
+renovate-global-schema.json
+**/gradle-wrapper/__fixtures__/**/.gradle
+.clinic/
+
+# generated code
+**/*.generated.ts
+tools/dist
+test/datasource/nuget/_fixtures/obj
+
+# testing
+/.env
+/.envrc
+/config.js*
+/config.ts*
+/docker-compose.yml
+/report*.json
+
+# uv
+/.venv
+
+# For old checkouts
+/.pdm-python
+/pdm.lock
+
+# local development directories
+/.agents
+/.opencode
+## Claude
+/.claude/settings.local.json
+/.claude/worktrees

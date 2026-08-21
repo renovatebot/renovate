@@ -1,0 +1,4 @@
+{
+  "configFileName": "renovate.json",
+  "migratedContent": "{\n  \"extends\": [\n    \":separateMajorReleases\",\n    \":prImmediately\",\n    \":renovatePrefix\",\n    \":semanticPrefixFixDepsChoreOthers\",\n    \":updateNotScheduled\",\n    \":automergeDisabled\",\n    \":maintainLockFilesDisabled\",\n    \"group:monorepos\"\n  ],\n  \"onboarding\": false,\n  \"rangeStrategy\": \"replace\",\n  \"semanticCommits\": \"enabled\",\n  \"timezone\": \"US/Central\",\n  \"baseBranches\": [\n    \"main\"\n  ]\n}\n"
+}

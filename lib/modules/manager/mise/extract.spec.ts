@@ -1,0 +1,1405 @@
+import { codeBlock } from 'common-tags';
+import { Fixtures } from '~test/fixtures.ts';
+import { fs } from '~test/util.ts';
+import { extractPackageFile } from './index.ts';
+
+vi.mock('../../../util/fs/index.ts');
+
+const miseFilename = 'mise.toml';
+
+const mise1toml = Fixtures.get('Mise.1.toml');
+
+describe('modules/manager/mise/extract', () => {
+  describe('extractPackageFile()', () => {
+    it('returns null for empty', async () => {
+      expect(await extractPackageFile('', miseFilename)).toBeNull();
+    });
+
+    it('returns null for invalid TOML', async () => {
+      expect(await extractPackageFile('foo', miseFilename)).toBeNull();
+    });
+
+    it('returns null for empty tools section', async () => {
+      const content = codeBlock`
+      [tools]
+    `;
+      expect(await extractPackageFile(content, miseFilename)).toBeNull();
+    });
+
+    it('extracts tools - mise core plugins', async () => {
+      const content = codeBlock`
+      [tools]
+      erlang = '23.3'
+      node = '16'
+    `;
+      const result = await extractPackageFile(content, miseFilename);
+      expect(result).toMatchObject({
+        deps: [
+          {
+            depName: 'erlang',
+            depType: 'tools',
+            currentValue: '23.3',
+            datasource: 'github-tags',
+          },
+          {
+            depName: 'node',
+            depType: 'tools',
+            currentValue: '16',
+            datasource: 'node-version',
+          },
+        ],
+      });
+    });
+
+    it('extracts tools - mise registry tools', async () => {
+      const content = codeBlock`
+      [tools]
+      actionlint = "1.7.7"
+      astro = "1.34.0"
+      aws-cli = "2.25.10"
+      aws-vault = "6.6.1"
+      buf = "1.27.0"
+      caddy = "2.10.2"
+      ccache = "4.11.3"
+      clang-format = "20.1.0"
+      committed = "1.1.7"
+      conan = "2.24.0"
+      consul = "1.14.3"
+      gh = "2.87.0"
+      dotenv-linter = "3.3.0"
+      hivemind = "1.1.0"
+      hk = "1.1.2"
+      jq = "1.7.1"
+      kafka = "apache-3.9.0"
+      lefthook = "1.11.13"
+      localstack = "4.3.0"
+      lychee = "0.19.1"
+      npm = "11.2.0"
+      opentofu = "1.6.1"
+      openfga = "1.14.0"
+      packer = "1.15.0"
+      pipx = "1.7.1"
+      pkl = "0.28.2"
+      protoc = "30.2"
+      redis = "8.0.1"
+      ruff = "0.11.12"
+      rumdl = "0.1.58"
+      shellcheck = "0.10.0"
+      skeema = "1.12.3"
+      sops = "3.10.2"
+      sqlite = "3.50.1"
+      stripe = "1.25.0"
+      swiftformat = "0.58.0"
+      swiftlint = "0.55.1"
+      taplo = "0.10.0"
+      tart = "2.31.0"
+      terragrunt = "0.72.6"
+      tilt = "0.34.0"
+      tusd = "2.8.0"
+      usage = "2.1.1"
+    `;
+      const result = await extractPackageFile(content, miseFilename);
+      expect(result).toMatchObject({
+        deps: [
+          {
+            currentValue: '1.7.7',
+            datasource: 'github-releases',
+            depName: 'actionlint',
+            extractVersion: '^v(?<version>\\S+)',
+            packageName: 'rhysd/actionlint',
+          },
+          {
+            currentValue: '1.34.0',
+            datasource: 'github-releases',
+            depName: 'astro',
+            extractVersion: '^v(?<version>\\S+)',
+            packageName: 'astronomer/astro-cli',
+          },
+          {
+            currentValue: '2.25.10',
+            datasource: 'github-tags',
+            depName: 'aws-cli',
+            packageName: 'aws/aws-cli',
+          },
+          {
+            currentValue: '6.6.1',
+            datasource: 'github-releases',
+            depName: 'aws-vault',
+            extractVersion: '^v(?<version>\\S+)',
+            packageName: '99designs/aws-vault',
+          },
+          {
+            currentValue: '1.27.0',
+            datasource: 'github-releases',
+            depName: 'buf',
+            extractVersion: '^v(?<version>\\S+)',
+            packageName: 'bufbuild/buf',
+          },
+          {
+            currentValue: '2.10.2',
+            datasource: 'github-releases',
+            depName: 'caddy',
+            extractVersion: '^v(?<version>\\S+)',
+            packageName: 'caddyserver/caddy',
+          },
+          {
+            currentValue: '4.11.3',
+            datasource: 'github-releases',
+            depName: 'ccache',
+            extractVersion: '^v(?<version>\\S+)',
+            packageName: 'ccache/ccache',
+          },
+          {
+            currentValue: '20.1.0',
+            datasource: 'github-releases',
+            depName: 'clang-format',
+            extractVersion: '^llvmorg-(?<version>\\S+)',
+            packageName: 'llvm/llvm-project',
+          },
+          {
+            currentValue: '1.1.7',
+            datasource: 'github-releases',
+            depName: 'committed',
+            extractVersion: '^v(?<version>\\S+)',
+            packageName: 'crate-ci/committed',
+          },
+          {
+            currentValue: '2.24.0',
+            datasource: 'github-releases',
+            depName: 'conan',
+            packageName: 'conan-io/conan',
+          },
+          {
+            currentValue: '1.14.3',
+            datasource: 'github-releases',
+            depName: 'consul',
+            extractVersion: '^v(?<version>\\S+)',
+            packageName: 'hashicorp/consul',
+          },
+          {
+            currentValue: '2.87.0',
+            datasource: 'github-releases',
+            depName: 'gh',
+            extractVersion: '^v(?<version>\\S+)',
+            packageName: 'cli/cli',
+          },
+          {
+            currentValue: '3.3.0',
+            datasource: 'github-releases',
+            depName: 'dotenv-linter',
+            extractVersion: '^v(?<version>\\S+)',
+            packageName: 'dotenv-linter/dotenv-linter',
+          },
+          {
+            currentValue: '1.1.0',
+            datasource: 'github-releases',
+            depName: 'hivemind',
+            extractVersion: '^v(?<version>\\S+)',
+            packageName: 'DarthSim/hivemind',
+          },
+          {
+            currentValue: '1.1.2',
+            datasource: 'github-releases',
+            depName: 'hk',
+            extractVersion: '^v(?<version>\\S+)',
+            packageName: 'jdx/hk',
+          },
+          {
+            currentValue: '1.7.1',
+            datasource: 'github-releases',
+            depName: 'jq',
+            extractVersion: '^jq-(?<version>\\S+)',
+            packageName: 'jqlang/jq',
+          },
+          {
+            currentValue: '3.9.0',
+            datasource: 'github-tags',
+            depName: 'kafka',
+            packageName: 'apache/kafka',
+          },
+          {
+            currentValue: '1.11.13',
+            datasource: 'github-releases',
+            depName: 'lefthook',
+            extractVersion: '^v(?<version>\\S+)',
+            packageName: 'evilmartians/lefthook',
+          },
+          {
+            currentValue: '4.3.0',
+            datasource: 'github-releases',
+            depName: 'localstack',
+            extractVersion: '^v(?<version>\\S+)',
+            packageName: 'localstack/localstack',
+          },
+          {
+            currentValue: '0.19.1',
+            datasource: 'github-releases',
+            depName: 'lychee',
+            extractVersion: '^lychee-v(?<version>\\S+)',
+            packageName: 'lycheeverse/lychee',
+          },
+          {
+            currentValue: '11.2.0',
+            datasource: 'npm',
+            depName: 'npm',
+            packageName: 'npm',
+          },
+          {
+            currentValue: '1.6.1',
+            datasource: 'github-releases',
+            depName: 'opentofu',
+            extractVersion: '^v(?<version>\\S+)',
+            packageName: 'opentofu/opentofu',
+          },
+          {
+            currentValue: '1.14.0',
+            datasource: 'github-releases',
+            depName: 'openfga',
+            extractVersion: '^v(?<version>\\S+)',
+            packageName: 'openfga/openfga',
+          },
+          {
+            currentValue: '1.15.0',
+            datasource: 'github-releases',
+            depName: 'packer',
+            extractVersion: '^v(?<version>\\S+)',
+            packageName: 'hashicorp/packer',
+          },
+          {
+            currentValue: '1.7.1',
+            datasource: 'github-releases',
+            depName: 'pipx',
+            packageName: 'pypa/pipx',
+          },
+          {
+            currentValue: '0.28.2',
+            datasource: 'github-releases',
+            depName: 'pkl',
+            packageName: 'apple/pkl',
+          },
+          {
+            currentValue: '30.2',
+            datasource: 'github-releases',
+            depName: 'protoc',
+            extractVersion: '^v(?<version>\\S+)',
+            packageName: 'protocolbuffers/protobuf',
+          },
+          {
+            currentValue: '8.0.1',
+            datasource: 'github-releases',
+            depName: 'redis',
+            packageName: 'redis/redis',
+          },
+          {
+            currentValue: '0.11.12',
+            datasource: 'github-releases',
+            depName: 'ruff',
+            packageName: 'astral-sh/ruff',
+          },
+          {
+            currentValue: '0.1.58',
+            datasource: 'github-releases',
+            depName: 'rumdl',
+            packageName: 'rvben/rumdl',
+          },
+          {
+            currentValue: '0.10.0',
+            datasource: 'github-releases',
+            depName: 'shellcheck',
+            extractVersion: '^v(?<version>\\S+)',
+            packageName: 'koalaman/shellcheck',
+          },
+          {
+            currentValue: '1.12.3',
+            datasource: 'github-releases',
+            depName: 'skeema',
+            extractVersion: '^v(?<version>\\S+)',
+            packageName: 'skeema/skeema',
+          },
+          {
+            currentValue: '3.10.2',
+            datasource: 'github-releases',
+            depName: 'sops',
+            extractVersion: '^v(?<version>\\S+)',
+            packageName: 'getsops/sops',
+          },
+          {
+            currentValue: '3.50.1',
+            datasource: 'github-tags',
+            depName: 'sqlite',
+            extractVersion: '^version-(?<version>\\S+)',
+            packageName: 'sqlite/sqlite',
+          },
+          {
+            currentValue: '1.25.0',
+            datasource: 'github-releases',
+            depName: 'stripe',
+            extractVersion: '^v(?<version>\\S+)',
+            packageName: 'stripe/stripe-cli',
+          },
+          {
+            currentValue: '0.58.0',
+            datasource: 'github-releases',
+            depName: 'swiftformat',
+            packageName: 'nicklockwood/SwiftFormat',
+          },
+          {
+            currentValue: '0.55.1',
+            datasource: 'github-releases',
+            depName: 'swiftlint',
+            packageName: 'realm/SwiftLint',
+          },
+          {
+            currentValue: '0.10.0',
+            datasource: 'github-releases',
+            depName: 'taplo',
+            packageName: 'tamasfe/taplo',
+          },
+          {
+            currentValue: '2.31.0',
+            datasource: 'github-releases',
+            depName: 'tart',
+            packageName: 'cirruslabs/tart',
+          },
+          {
+            currentValue: '0.72.6',
+            datasource: 'github-releases',
+            depName: 'terragrunt',
+            extractVersion: '^v(?<version>\\S+)',
+            packageName: 'gruntwork-io/terragrunt',
+          },
+          {
+            currentValue: '0.34.0',
+            datasource: 'github-releases',
+            depName: 'tilt',
+            extractVersion: '^v(?<version>\\S+)',
+            packageName: 'tilt-dev/tilt',
+          },
+          {
+            currentValue: '2.8.0',
+            datasource: 'github-releases',
+            depName: 'tusd',
+            extractVersion: '^v(?<version>\\S+)',
+            packageName: 'tus/tusd',
+          },
+          {
+            currentValue: '2.1.1',
+            datasource: 'github-releases',
+            depName: 'usage',
+            extractVersion: '^v(?<version>\\S+)',
+            packageName: 'jdx/usage',
+          },
+        ],
+      });
+    });
+
+    it('extracts tools - asdf plugins', async () => {
+      const content = codeBlock`
+      [tools]
+      terraform = '1.8.0'
+    `;
+      const result = await extractPackageFile(content, miseFilename);
+      expect(result).toMatchObject({
+        deps: [
+          {
+            depName: 'terraform',
+            currentValue: '1.8.0',
+          },
+        ],
+      });
+    });
+
+    it('extracts tools with multiple versions', async () => {
+      const content = codeBlock`
+      [tools]
+      erlang = ['23.3', '24.0']
+      node = ['16', 'prefix:20', 'ref:master', 'path:~/.nodes/14']
+    `;
+      const result = await extractPackageFile(content, miseFilename);
+      expect(result).toMatchObject({
+        deps: [
+          {
+            depName: 'erlang',
+            currentValue: '23.3',
+            datasource: 'github-tags',
+          },
+          {
+            depName: 'node',
+            currentValue: '16',
+            datasource: 'node-version',
+          },
+        ],
+      });
+    });
+
+    it('extracts tools with plugin options', async () => {
+      const content = codeBlock`
+      [tools]
+      python = {version='3.11', virtualenv='.venv'}
+    `;
+      const result = await extractPackageFile(content, miseFilename);
+      expect(result).toMatchObject({
+        deps: [
+          {
+            depName: 'python',
+            currentValue: '3.11',
+          },
+        ],
+      });
+    });
+
+    it('extracts tools in the default registry with backends', async () => {
+      const content = codeBlock`
+      [tools]
+      "core:node" = "16"
+      "asdf:rust" = "1.82.0"
+      "vfox:scala" = "3.5.2"
+      "aqua:act" = "0.2.70"
+    `;
+      const result = await extractPackageFile(content, miseFilename);
+      expect(result).toMatchObject({
+        deps: [
+          {
+            depName: 'core:node',
+            currentValue: '16',
+            packageName: 'node',
+            datasource: 'node-version',
+          },
+          {
+            depName: 'asdf:rust',
+            currentValue: '1.82.0',
+            packageName: 'rust',
+            datasource: 'rust-version',
+          },
+          {
+            depName: 'vfox:scala',
+            currentValue: '3.5.2',
+            packageName: 'lampepfl/dotty',
+            datasource: 'github-tags',
+          },
+          {
+            depName: 'aqua:act',
+            currentValue: '0.2.70',
+            packageName: 'nektos/act',
+            datasource: 'github-releases',
+          },
+        ],
+      });
+    });
+
+    it('extracts aqua backend tool', async () => {
+      const content = codeBlock`
+      [tools]
+      "aqua:BurntSushi/ripgrep" = "14.1.0"
+      "aqua:cli/cli" = "v2.64.0"
+    `;
+      const result = await extractPackageFile(content, miseFilename);
+      expect(result).toMatchObject({
+        deps: [
+          {
+            depName: 'aqua:BurntSushi/ripgrep',
+            currentValue: '14.1.0',
+            packageName: 'BurntSushi/ripgrep',
+            datasource: 'github-tags',
+            extractVersion: '^v?(?<version>.+)',
+          },
+          {
+            depName: 'aqua:cli/cli',
+            currentValue: '2.64.0',
+            packageName: 'cli/cli',
+            datasource: 'github-tags',
+            extractVersion: '^v?(?<version>.+)',
+          },
+        ],
+      });
+    });
+
+    it('extracts cargo backend tools', async () => {
+      const content = codeBlock`
+      [tools]
+      "cargo:eza" = "0.18.21"
+      "cargo:https://github.com/username/demo1" = "tag:v0.1.0"
+      "cargo:https://github.com/username/demo2" = "branch:main"
+      "cargo:https://github.com/username/demo3" = "rev:abcdef"
+    `;
+      const result = await extractPackageFile(content, miseFilename);
+      expect(result).toMatchObject({
+        deps: [
+          {
+            depName: 'cargo:eza',
+            currentValue: '0.18.21',
+            packageName: 'eza',
+            datasource: 'crate',
+            versioning: 'semver',
+          },
+          {
+            depName: 'cargo:https://github.com/username/demo1',
+            currentValue: 'v0.1.0',
+            packageName: 'https://github.com/username/demo1',
+            datasource: 'git-tags',
+          },
+          {
+            depName: 'cargo:https://github.com/username/demo2',
+            currentValue: 'main',
+            packageName: 'https://github.com/username/demo2',
+            datasource: 'git-refs',
+          },
+          {
+            depName: 'cargo:https://github.com/username/demo3',
+            currentValue: 'abcdef',
+            packageName: 'https://github.com/username/demo3',
+            datasource: 'git-refs',
+          },
+        ],
+      });
+    });
+
+    it('extracts dotnet backend tool', async () => {
+      const content = codeBlock`
+      [tools]
+      "dotnet:GitVersion.Tool" = "5.12.0"
+    `;
+      const result = await extractPackageFile(content, miseFilename);
+      expect(result).toMatchObject({
+        deps: [
+          {
+            depName: 'dotnet:GitVersion.Tool',
+            currentValue: '5.12.0',
+            packageName: 'GitVersion.Tool',
+            datasource: 'nuget',
+          },
+        ],
+      });
+    });
+
+    it('extracts gem backend tool', async () => {
+      const content = codeBlock`
+      [tools]
+      "gem:rubocop" = "1.69.2"
+    `;
+      const result = await extractPackageFile(content, miseFilename);
+      expect(result).toMatchObject({
+        deps: [
+          {
+            depName: 'gem:rubocop',
+            currentValue: '1.69.2',
+            packageName: 'rubocop',
+            datasource: 'rubygems',
+          },
+        ],
+      });
+    });
+
+    it('extracts go backend tool', async () => {
+      const content = codeBlock`
+      [tools]
+      "go:github.com/DarthSim/hivemind" = "1.0.6"
+    `;
+      const result = await extractPackageFile(content, miseFilename);
+      expect(result).toMatchObject({
+        deps: [
+          {
+            depName: 'go:github.com/DarthSim/hivemind',
+            currentValue: '1.0.6',
+            packageName: 'github.com/DarthSim/hivemind',
+            datasource: 'go',
+          },
+        ],
+      });
+    });
+
+    it('extracts npm backend tool', async () => {
+      const content = codeBlock`
+      [tools]
+      "npm:prettier" = "3.3.2"
+    `;
+      const result = await extractPackageFile(content, miseFilename);
+      expect(result).toMatchObject({
+        deps: [
+          {
+            depName: 'npm:prettier',
+            currentValue: '3.3.2',
+            packageName: 'prettier',
+            datasource: 'npm',
+          },
+        ],
+      });
+    });
+
+    it('extracts pipx backend tools', async () => {
+      const content = codeBlock`
+      [tools]
+      "pipx:yamllint" = "1.35.0"
+      "pipx:psf/black" = "24.4.1"
+      "pipx:git+https://github.com/psf/black.git" = "24.4.1"
+    `;
+      const result = await extractPackageFile(content, miseFilename);
+      expect(result).toMatchObject({
+        deps: [
+          {
+            depName: 'pipx:yamllint',
+            currentValue: '1.35.0',
+            packageName: 'yamllint',
+            datasource: 'pypi',
+          },
+          {
+            depName: 'pipx:psf/black',
+            currentValue: '24.4.1',
+            packageName: 'psf/black',
+            datasource: 'github-tags',
+          },
+          {
+            depName: 'pipx:git+https://github.com/psf/black.git',
+            currentValue: '24.4.1',
+            packageName: 'psf/black',
+            datasource: 'github-tags',
+          },
+        ],
+      });
+    });
+
+    it('extracts spm backend tools', async () => {
+      const content = codeBlock`
+      [tools]
+      "spm:tuist/tuist" = "4.15.0"
+      "spm:https://github.com/tuist/tuist.git" = "4.13.0"
+    `;
+      const result = await extractPackageFile(content, miseFilename);
+      expect(result).toMatchObject({
+        deps: [
+          {
+            depName: 'spm:tuist/tuist',
+            currentValue: '4.15.0',
+            packageName: 'tuist/tuist',
+            datasource: 'github-releases',
+          },
+          {
+            depName: 'spm:https://github.com/tuist/tuist.git',
+            currentValue: '4.13.0',
+            packageName: 'tuist/tuist',
+            datasource: 'github-releases',
+          },
+        ],
+      });
+    });
+
+    it('extracts ubi backend tools', async () => {
+      const content = codeBlock`
+      [tools]
+      "ubi:nekto/act" = "v0.2.70"
+      "ubi:cli/cli" = { exe = "gh", version = "1.14.0" }
+      "ubi:cli/cli[exe=gh]" = "1.14.0"
+      "ubi:cargo-bins/cargo-binstall" = { tag_regex = "^\\\\d+\\\\.\\\\d+\\\\.", version = "1.0.0" }
+      "ubi:cargo-bins/cargo-binstall[tag_regex=^\\\\d+\\\\.]" = "1.0.0"
+      'ubi:cargo-bins/cargo-binstall[tag_regex=^\\d+\\.\\d+\\.]' = { tag_regex = '^\\d+\\.', version = "1.0.0" }
+    `;
+      const result = await extractPackageFile(content, miseFilename);
+      expect(result).toMatchObject({
+        deps: [
+          {
+            depName: 'ubi:nekto/act',
+            currentValue: 'v0.2.70',
+            packageName: 'nekto/act',
+            datasource: 'github-releases',
+          },
+          {
+            depName: 'ubi:cli/cli',
+            currentValue: '1.14.0',
+            packageName: 'cli/cli',
+            datasource: 'github-releases',
+            extractVersion: '^v?(?<version>.+)',
+          },
+          {
+            depName: 'ubi:cli/cli',
+            currentValue: '1.14.0',
+            packageName: 'cli/cli',
+            datasource: 'github-releases',
+            extractVersion: '^v?(?<version>.+)',
+          },
+          {
+            depName: 'ubi:cargo-bins/cargo-binstall',
+            currentValue: '1.0.0',
+            packageName: 'cargo-bins/cargo-binstall',
+            datasource: 'github-releases',
+            extractVersion: '^v?(?<version>\\d+\\.\\d+\\.)',
+          },
+          {
+            depName: 'ubi:cargo-bins/cargo-binstall',
+            currentValue: '1.0.0',
+            packageName: 'cargo-bins/cargo-binstall',
+            datasource: 'github-releases',
+            extractVersion: '^v?(?<version>\\d+\\.)',
+          },
+          {
+            depName: 'ubi:cargo-bins/cargo-binstall',
+            currentValue: '1.0.0',
+            packageName: 'cargo-bins/cargo-binstall',
+            datasource: 'github-releases',
+            extractVersion: '^v?(?<version>\\d+\\.)',
+          },
+        ],
+      });
+    });
+
+    it('extracts github backend tools', async () => {
+      const content = codeBlock`
+      [tools]
+      "github:BurntSushi/ripgrep" = "14.1.1"
+      "github:cli/cli" = "v2.64.0"
+      "github:some/repo" = { version_prefix = "release-", version = "1.0.0" }
+      "github:other/repo[version_prefix=v]" = "2.0.0"
+    `;
+      const result = await extractPackageFile(content, miseFilename);
+      expect(result).toMatchObject({
+        deps: [
+          {
+            depName: 'github:BurntSushi/ripgrep',
+            currentValue: '14.1.1',
+            packageName: 'BurntSushi/ripgrep',
+            datasource: 'github-releases',
+          },
+          {
+            depName: 'github:cli/cli',
+            currentValue: 'v2.64.0',
+            packageName: 'cli/cli',
+            datasource: 'github-releases',
+          },
+          {
+            depName: 'github:some/repo',
+            currentValue: '1.0.0',
+            packageName: 'some/repo',
+            datasource: 'github-releases',
+            extractVersion: '^\\x72elease\\x2d(?<version>.+)',
+          },
+          {
+            depName: 'github:other/repo',
+            currentValue: '2.0.0',
+            packageName: 'other/repo',
+            datasource: 'github-releases',
+            extractVersion: '^\\x76(?<version>.+)',
+          },
+        ],
+      });
+    });
+
+    it('provides skipReason for lines with unsupported tooling', async () => {
+      const content = codeBlock`
+      [tools]
+      fake-tool = '1.0.0'
+      'fake:tool' = '1.0.0'
+    `;
+      const result = await extractPackageFile(content, miseFilename);
+      expect(result).toMatchObject({
+        deps: [
+          {
+            depName: 'fake-tool',
+            skipReason: 'unsupported-datasource',
+          },
+          {
+            depName: 'fake:tool',
+            skipReason: 'unsupported-datasource',
+          },
+        ],
+      });
+    });
+
+    it('provides skipReason for missing version - empty string', async () => {
+      const content = codeBlock`
+      [tools]
+      python = ''
+    `;
+      const result = await extractPackageFile(content, miseFilename);
+      expect(result).toMatchObject({
+        deps: [
+          {
+            depName: 'python',
+            skipReason: 'unspecified-version',
+          },
+        ],
+      });
+    });
+
+    it('provides skipReason for missing version - missing version in object', async () => {
+      const content = codeBlock`
+      [tools]
+      python = {virtualenv='.venv'}
+    `;
+      const result = await extractPackageFile(content, miseFilename);
+      expect(result).toMatchObject({
+        deps: [
+          {
+            depName: 'python',
+            skipReason: 'unspecified-version',
+          },
+        ],
+      });
+    });
+
+    it('provides skipReason for missing version - empty array', async () => {
+      const content = codeBlock`
+      [tools]
+      java = '21.0.2'
+      erlang = []
+    `;
+      const result = await extractPackageFile(content, miseFilename);
+      expect(result).toMatchObject({
+        deps: [
+          {
+            depName: 'java',
+            currentValue: '21.0.2',
+          },
+          {
+            depName: 'erlang',
+            skipReason: 'unspecified-version',
+          },
+        ],
+      });
+    });
+
+    it('complete mise.toml example', async () => {
+      const result = await extractPackageFile(mise1toml, miseFilename);
+      expect(result).toMatchObject({
+        deps: [
+          {
+            depName: 'java',
+            currentValue: '21.0.2',
+            datasource: 'java-version',
+          },
+          {
+            depName: 'erlang',
+            currentValue: '23.3',
+            datasource: 'github-tags',
+          },
+          {
+            depName: 'node',
+            currentValue: '16',
+            datasource: 'node-version',
+          },
+        ],
+      });
+    });
+
+    it('complete example with skip', async () => {
+      const content = codeBlock`
+      [tools]
+      java = '21.0.2'
+      erlang = ['23.3', '24.0']
+      terraform = {version='1.8.0'}
+      fake-tool = '1.6.2'
+    `;
+      const result = await extractPackageFile(content, miseFilename);
+      expect(result).toMatchObject({
+        deps: [
+          {
+            depName: 'java',
+            currentValue: '21.0.2',
+            datasource: 'java-version',
+          },
+          {
+            depName: 'erlang',
+            currentValue: '23.3',
+            datasource: 'github-tags',
+          },
+          {
+            depName: 'terraform',
+            currentValue: '1.8.0',
+          },
+          {
+            depName: 'fake-tool',
+            skipReason: 'unsupported-datasource',
+          },
+        ],
+      });
+    });
+
+    it('core java plugin function', async () => {
+      const content = codeBlock`
+      [tools]
+      java = "21.0.2"
+    `;
+      const result = await extractPackageFile(content, miseFilename);
+      expect(result).toMatchObject({
+        deps: [
+          {
+            depName: 'java',
+            currentValue: '21.0.2',
+            datasource: 'java-version',
+          },
+        ],
+      });
+
+      const content2 = codeBlock`
+      [tools]
+      java = "openjdk-21.0.2"
+    `;
+      const result2 = await extractPackageFile(content2, miseFilename);
+      expect(result2).toMatchObject({
+        deps: [
+          {
+            depName: 'java',
+            currentValue: '21.0.2',
+            datasource: 'java-version',
+          },
+        ],
+      });
+
+      const content3 = codeBlock`
+      [tools]
+      java = "temurin-21.0.2"
+    `;
+      const result3 = await extractPackageFile(content3, miseFilename);
+      expect(result3).toMatchObject({
+        deps: [
+          {
+            depName: 'java',
+            currentValue: '21.0.2',
+            datasource: 'java-version',
+          },
+        ],
+      });
+
+      const content4 = codeBlock`
+      [tools]
+      java = "zulu-21.0.2"
+    `;
+      const result4 = await extractPackageFile(content4, miseFilename);
+      expect(result4).toMatchObject({
+        deps: [
+          {
+            depName: 'java',
+            currentValue: '21.0.2',
+            datasource: 'java-version',
+          },
+        ],
+      });
+
+      const content5 = codeBlock`
+      [tools]
+      java = "corretto-21.0.2"
+    `;
+      const result5 = await extractPackageFile(content5, miseFilename);
+      expect(result5).toMatchObject({
+        deps: [
+          {
+            depName: 'java',
+            currentValue: '21.0.2',
+            datasource: 'java-version',
+          },
+        ],
+      });
+
+      const content6 = codeBlock`
+      [tools]
+      java = "oracle-graalvm-21.0.2"
+    `;
+      const result6 = await extractPackageFile(content6, miseFilename);
+      expect(result6).toMatchObject({
+        deps: [
+          {
+            depName: 'java',
+            currentValue: '21.0.2',
+            datasource: 'java-version',
+          },
+        ],
+      });
+
+      const content7 = codeBlock`
+      [tools]
+      java = "adoptopenjdk-21.0.2"
+    `;
+      const result7 = await extractPackageFile(content7, miseFilename);
+      expect(result7).toMatchObject({
+        deps: [
+          {
+            depName: 'java',
+            currentValue: '21.0.2',
+            datasource: 'java-version',
+          },
+        ],
+      });
+
+      // Test that fallback to asdf Plugin works
+      const content8 = codeBlock`
+      [tools]
+      java = "adoptopenjdk-jre-16.0.0+36"
+    `;
+      const result8 = await extractPackageFile(content8, miseFilename);
+      expect(result8).toMatchObject({
+        deps: [
+          {
+            depName: 'java',
+            currentValue: '16.0.0+36',
+            datasource: 'java-version',
+          },
+        ],
+      });
+    });
+
+    it.each`
+      version            | currentValue
+      ${'21'}            | ${'21'}
+      ${'21.0'}          | ${'21.0'}
+      ${'temurin-21'}    | ${'21'}
+      ${'corretto-21.0'} | ${'21.0'}
+    `(
+      'uses semver-partial versioning for short java version $version',
+      async ({ version, currentValue }) => {
+        const content = codeBlock`
+        [tools]
+        java = "${version}"
+      `;
+        const result = await extractPackageFile(content, miseFilename);
+        expect(result).toMatchObject({
+          deps: [
+            {
+              depName: 'java',
+              currentValue,
+              datasource: 'java-version',
+              versioning: 'semver-partial',
+            },
+          ],
+        });
+      },
+    );
+
+    it.each`
+      version             | currentValue
+      ${'21.0.2'}         | ${'21.0.2'}
+      ${'temurin-21.0.2'} | ${'21.0.2'}
+    `(
+      'does not use semver-partial for full java version $version',
+      async ({ version, currentValue }) => {
+        const content = codeBlock`
+        [tools]
+        java = "${version}"
+      `;
+        const result = await extractPackageFile(content, miseFilename);
+        expect(result).toMatchObject({
+          deps: [
+            {
+              depName: 'java',
+              currentValue,
+              datasource: 'java-version',
+            },
+          ],
+        });
+        expect(result?.deps[0]).not.toHaveProperty('versioning');
+      },
+    );
+
+    it('resolves tools from the mise registry data file via aqua backend', async () => {
+      const content = codeBlock`
+      [tools]
+      zola = "0.19.2"
+    `;
+      const result = await extractPackageFile(content, miseFilename);
+      expect(result).toMatchObject({
+        deps: [
+          {
+            depName: 'zola',
+            currentValue: '0.19.2',
+            datasource: 'github-tags',
+            packageName: 'getzola/zola',
+          },
+        ],
+      });
+    });
+
+    it('resolves tools from the mise registry data file via cargo backend', async () => {
+      const content = codeBlock`
+      [tools]
+      magika = "0.3.1"
+    `;
+      const result = await extractPackageFile(content, miseFilename);
+      expect(result).toMatchObject({
+        deps: [
+          {
+            depName: 'magika',
+            currentValue: '0.3.1',
+            datasource: 'crate',
+            packageName: 'magika-cli',
+          },
+        ],
+      });
+    });
+
+    it('resolves tools from the mise registry data file via github backend', async () => {
+      const content = codeBlock`
+      [tools]
+      allurectl = "2.14.0"
+    `;
+      const result = await extractPackageFile(content, miseFilename);
+      expect(result).toMatchObject({
+        deps: [
+          {
+            depName: 'allurectl',
+            currentValue: '2.14.0',
+            datasource: 'github-releases',
+            packageName: 'allure-framework/allurectl',
+          },
+        ],
+      });
+    });
+
+    it('resolves a tool from the mise registry, prioritising the github backend over others', async () => {
+      const content = codeBlock`
+      [tools]
+      bitwarden-secrets-manager = "1.2.3"
+    `;
+      const result = await extractPackageFile(content, miseFilename);
+      expect(result).toMatchObject({
+        deps: [
+          {
+            depName: 'bitwarden-secrets-manager',
+            currentValue: '1.2.3',
+            datasource: 'github-releases',
+            packageName: 'bitwarden/sdk',
+          },
+        ],
+      });
+    });
+  });
+
+  describe('extractPackageFile() with lock files', () => {
+    const lockFileContent = codeBlock`
+      [[tools.node]]
+      version = "20.11.0"
+      backend = "core:node"
+
+      [[tools.python]]
+      version = "3.10.17"
+    `;
+
+    it('extracts lockedVersion when lock file present', async () => {
+      fs.readLocalFile.mockResolvedValueOnce(lockFileContent);
+      const content = codeBlock`
+        [tools]
+        node = "20"
+        python = "3.10"
+      `;
+      const result = await extractPackageFile(content, 'mise.toml');
+      expect(result).toMatchObject({
+        deps: [
+          {
+            depName: 'node',
+            currentValue: '20',
+            lockedVersion: '20.11.0',
+          },
+          {
+            depName: 'python',
+            currentValue: '3.10',
+            lockedVersion: '3.10.17',
+          },
+        ],
+        lockFiles: ['mise.lock'],
+      });
+    });
+
+    it('sets lockFiles array when lock file present', async () => {
+      fs.readLocalFile.mockResolvedValueOnce(lockFileContent);
+      const content = codeBlock`
+        [tools]
+        node = "20"
+      `;
+      const result = await extractPackageFile(content, 'mise.toml');
+      expect(result?.lockFiles).toEqual(['mise.lock']);
+    });
+
+    it('handles missing lock file gracefully', async () => {
+      fs.readLocalFile.mockResolvedValueOnce(null);
+      const content = codeBlock`
+        [tools]
+        node = "20"
+      `;
+      const result = await extractPackageFile(content, 'mise.toml');
+      expect(result?.deps[0]).not.toHaveProperty('lockedVersion');
+      expect(result?.lockFiles).toBeUndefined();
+    });
+
+    it('handles malformed lock file gracefully', async () => {
+      fs.readLocalFile.mockResolvedValueOnce('invalid toml {{{{');
+      const content = codeBlock`
+        [tools]
+        node = "20"
+      `;
+      const result = await extractPackageFile(content, 'mise.toml');
+      expect(result?.deps[0]).not.toHaveProperty('lockedVersion');
+      expect(result?.lockFiles).toBeUndefined();
+    });
+
+    it('works with environment-specific lock files', async () => {
+      const testLockFileContent = codeBlock`
+        [[tools.node]]
+        version = "18.19.0"
+      `;
+      fs.readLocalFile.mockResolvedValueOnce(testLockFileContent);
+      const content = codeBlock`
+        [tools]
+        node = "18"
+      `;
+      const result = await extractPackageFile(content, 'mise.test.toml');
+      expect(result?.lockFiles).toEqual(['mise.test.lock']);
+      expect(result?.deps[0]).toMatchObject({
+        depName: 'node',
+        currentValue: '18',
+        lockedVersion: '18.19.0',
+      });
+    });
+
+    it('extracts lockedVersion for tools with backend prefix', async () => {
+      fs.readLocalFile.mockResolvedValueOnce(lockFileContent);
+      const content = codeBlock`
+        [tools]
+        "core:node" = "20"
+      `;
+      const result = await extractPackageFile(content, 'mise.toml');
+      expect(result?.deps[0]).toMatchObject({
+        depName: 'core:node',
+        currentValue: '20',
+        lockedVersion: '20.11.0',
+      });
+    });
+
+    it('skips lockedVersion when tool not in lock file', async () => {
+      fs.readLocalFile.mockResolvedValueOnce(lockFileContent);
+      const content = codeBlock`
+        [tools]
+        node = "20"
+        ruby = "3.3"
+      `;
+      const result = await extractPackageFile(content, 'mise.toml');
+      expect(result?.lockFiles).toEqual(['mise.lock']);
+      expect(result?.deps[0]).toMatchObject({
+        depName: 'node',
+        lockedVersion: '20.11.0',
+      });
+      expect(result?.deps[1]).not.toHaveProperty('lockedVersion');
+    });
+
+    it('extracts first lockedVersion when multiple versions exist', async () => {
+      const multiVersionLockFileContent = codeBlock`
+        [[tools.python]]
+        version = "3.10.17"
+
+        [[tools.python]]
+        version = "3.11.12"
+      `;
+      fs.readLocalFile.mockResolvedValueOnce(multiVersionLockFileContent);
+      const content = codeBlock`
+        [tools]
+        python = ["3.10", "3.11"]
+      `;
+      const result = await extractPackageFile(content, 'mise.toml');
+      expect(result?.deps[0]).toMatchObject({
+        depName: 'python',
+        currentValue: '3.10',
+        lockedVersion: '3.10.17',
+      });
+    });
+
+    it('skips kafka tool when version has no apache- prefix', async () => {
+      const content = codeBlock`
+        [tools]
+        kafka = "3.5.0"
+      `;
+      const result = await extractPackageFile(content, miseFilename);
+      expect(result?.deps).toEqual([
+        expect.objectContaining({
+          depName: 'kafka',
+          skipReason: 'unsupported-datasource',
+        }),
+      ]);
+    });
+  });
+
+  // https://mise.jdx.dev/tasks/task-configuration.html#task-properties
+  describe('extractPackageFile() with tasks', () => {
+    const RUST_197 = { depName: 'rust', currentValue: '1.97.0' };
+    const ZOXIDE = { depName: 'cargo:zoxide', currentValue: '0.9.6' };
+
+    it.each([
+      {
+        description: 'inline tools table on a task',
+        content: codeBlock`
+          [tasks.build]
+          run = "cargo build"
+          tools = {rust = "1.97.0"}
+        `,
+        expectedDeps: [{ ...RUST_197, depType: 'task-build-tools' }],
+      },
+      {
+        description: 'dotted key tools under [tasks.build]',
+        content: codeBlock`
+          [tasks.build]
+          tools.rust = "1.97.0"
+        `,
+        expectedDeps: [{ ...RUST_197, depType: 'task-build-tools' }],
+      },
+      {
+        description: 'subtable [tasks.<name>.tools]',
+        content: codeBlock`
+          [tasks.build.tools]
+          rust = "1.97.0"
+          "cargo:zoxide" = "0.9.6"
+        `,
+        expectedDeps: [
+          { ...RUST_197, depType: 'task-build-tools' },
+          { ...ZOXIDE, depType: 'task-build-tools' },
+        ],
+      },
+      {
+        description: 'top level and task tools',
+        content: codeBlock`
+          [tools]
+          rust = "1.97.0"
+
+          [tasks.lint.tools]
+          rust = "1.80.0"
+        `,
+        expectedDeps: [
+          { ...RUST_197, depType: 'tools' },
+          { ...RUST_197, depType: 'task-lint-tools', currentValue: '1.80.0' },
+        ],
+      },
+      {
+        description: 'inline table task with top level tools',
+        content: codeBlock`
+          [tools]
+          rust = "1.97.0"
+
+          [tasks]
+          build = { run = "cargo build" }
+        `,
+        expectedDeps: [{ ...RUST_197, depType: 'tools' }],
+      },
+      {
+        description: 'string shorthand task with top level tools',
+        content: codeBlock`
+          [tools]
+          rust = "1.97.0"
+
+          [tasks]
+          build = "echo 'rust is a must'"
+        `,
+        expectedDeps: [{ ...RUST_197, depType: 'tools' }],
+      },
+      {
+        description: 'array shorthand task with top level tools',
+        content: codeBlock`
+          [tools]
+          rust = "1.97.0"
+
+          [tasks]
+          test = ["echo '🦀🦀🦀'"]
+        `,
+        expectedDeps: [{ ...RUST_197, depType: 'tools' }],
+      },
+    ])(
+      'extracts task tools - $description',
+      async ({ content, expectedDeps }) => {
+        const result = await extractPackageFile(content, miseFilename);
+        expect(result).toMatchObject({ deps: expectedDeps });
+      },
+    );
+  });
+});

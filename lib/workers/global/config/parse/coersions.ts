@@ -1,0 +1,42 @@
+import { isNonEmptyString } from '@sindresorhus/is';
+import JSON5 from 'json5';
+import { regEx } from '../../../../util/regex.ts';
+
+export const coersions: Record<string, (arg: string) => unknown> = {
+  boolean: (val: string): boolean => {
+    if (val === 'true' || val === '') {
+      return true;
+    }
+    if (val === 'false') {
+      return false;
+    }
+    throw new Error(
+      `Invalid boolean value: expected 'true' or 'false', but got '${val}'`,
+    );
+  },
+  array: (val: string): string[] => {
+    if (val === '') {
+      return [];
+    }
+    try {
+      return JSON5.parse(val);
+    } catch {
+      return val
+        .split(',')
+        .map((el) => el.trim())
+        .filter(isNonEmptyString);
+    }
+  },
+  object: (val: string): any => {
+    if (val === '') {
+      return {};
+    }
+    try {
+      return JSON5.parse(val);
+    } catch {
+      throw new Error(`Invalid JSON value: '${val}'`);
+    }
+  },
+  string: (val: string): string => val.replace(regEx(/\\n/g), '\n'),
+  integer: parseInt,
+};

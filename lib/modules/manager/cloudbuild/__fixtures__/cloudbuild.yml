@@ -1,0 +1,17 @@
+steps:
+  - name: 'gcr.io/cloud-builders/docker:19.03.8'
+    args: ['build', '-t', 'gcr.io/my-project/my-image', '.']
+    timeout: 500s
+  - name: 'node:12'
+    entrypoint: npm
+    args: ['test']
+  - name: 'gcr.io/cloud-builders/kubectl'
+    args: ['set', 'image', 'deployment/my-deployment', 'my-container=gcr.io/my-project/my-image']
+    env:
+      - 'CLOUDSDK_COMPUTE_ZONE=us-east4-b'
+      - 'CLOUDSDK_CONTAINER_CLUSTER=my-cluster'
+options:
+  machineType: 'N1_HIGHCPU_8'
+timeout: 660s
+tags: ['mytag1', 'mytag2']
+images: ['gcr.io/my-project/myimage']

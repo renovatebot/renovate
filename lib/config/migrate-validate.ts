@@ -1,0 +1,52 @@
+import { isNonEmptyArray } from '@sindresorhus/is';
+import { dequal } from 'dequal';
+import { logger } from '../logger/index.ts';
+import * as configMassage from './massage.ts';
+import * as configMigration from './migration.ts';
+import type { RenovateConfig, ValidationMessage } from './types.ts';
+import * as configValidation from './validation.ts';
+
+export async function migrateAndValidate(
+  config: RenovateConfig,
+  input: RenovateConfig,
+): Promise<RenovateConfig> {
+  logger.debug('migrateAndValidate()');
+  try {
+    const { isMigrated, migratedConfig } = configMigration.migrateConfig(input);
+    if (isMigrated) {
+      logger.debug(
+        { oldConfig: input, newConfig: migratedConfig },
+        'Config migration necessary',
+      );
+    } else {
+      logger.debug('No config migration necessary');
+    }
+    const massagedConfig = configMassage.massageConfig(migratedConfig);
+    // log only if it's changed
+    if (!dequal(input, massagedConfig)) {
+      logger.debug({ config: massagedConfig }, 'Post-massage config');
+    }
+    const {
+      warnings,
+      errors,
+    }: {
+      warnings: ValidationMessage[];
+      errors: ValidationMessage[];
+    } = await configValidation.validateConfig('repo', massagedConfig);
+    /* v8 ignore if -- hard to test */
+    if (isNonEmptyArray(warnings)) {
+      logger.warn({ warnings }, 'Found renovate config warnings');
+    }
+    if (isNonEmptyArray(errors)) {
+      logger.info({ errors }, 'Found renovate config errors');
+    }
+    massagedConfig.errors = (config.errors ?? []).concat(errors);
+    if (!config.repoIsOnboarded) {
+      massagedConfig.warnings = (config.warnings ?? []).concat(warnings);
+    }
+    return massagedConfig;
+  } catch (err) {
+    logger.debug({ config: input }, 'migrateAndValidate error');
+    throw err;
+  }
+}

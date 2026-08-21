@@ -1,0 +1,32 @@
+clone:
+  git:
+    image: woodpeckerci/plugin-git:2.0.3
+
+steps:
+  redis:
+    image: quay.io/something/redis:alpine
+
+  worker:
+    image: "node:10.0.0"
+
+  db:
+    image: "postgres:9.4.0"
+
+  vote:
+    image: dockersamples/examplevotingapp_vote:before
+
+  result:
+    image: 'dockersamples/examplevotingapp_result:before'
+
+  votingworker:
+    image: dockersamples/examplevotingapp_worker
+
+  visualizer:
+    image: dockersamples/visualizer:stable
+
+  debugapp:
+    image: app-local-debug
+
+services:
+  service-postgres:
+    image: postgres:9.5.0

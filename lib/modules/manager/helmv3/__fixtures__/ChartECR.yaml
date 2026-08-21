@@ -1,0 +1,7 @@
+apiVersion: v2
+name: app
+version: 0.1.0
+dependencies:
+  - name: some-ecr-chart
+    version: 1.2.3
+    repository: oci://123456789.dkr.ecr.us-east-1.amazonaws.com

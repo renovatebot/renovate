@@ -1,0 +1,11 @@
+*
+!tools/docker/bin
+!dist/
+!package.json
+!pnpm-lock.yaml
+!pnpm-workspace.yaml
+!patches/
+!renovate-schema.json
+!renovate-global-schema.json
+!renovate-inherited-schema.json
+!license

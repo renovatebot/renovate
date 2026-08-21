@@ -1,0 +1,116 @@
+import { isEmptyStringOrWhitespace } from '@sindresorhus/is';
+import { migrateDatasource } from '../../../../config/migrations/custom/datasource-migration.ts';
+import { logger } from '../../../../logger/index.ts';
+import * as template from '../../../../util/template/index.ts';
+import { parseUrl } from '../../../../util/url.ts';
+import type { PackageDependency } from '../../types.ts';
+import type { ValidMatchFields } from '../utils.ts';
+import { validMatchFields } from '../utils.ts';
+import type {
+  ExtractionTemplate,
+  PackageFileInfo,
+  RegexManagerConfig,
+  RegexManagerTemplates,
+} from './types.ts';
+
+function updateDependency(
+  dependency: PackageDependency,
+  field: ValidMatchFields,
+  value: string,
+): void {
+  switch (field) {
+    case 'registryUrl': {
+      // check if URL is valid and pack inside an array
+      const url = parseUrl(value)?.toString();
+      if (url) {
+        dependency.registryUrls = [url];
+      } else {
+        logger.warn({ value }, 'Invalid regex manager registryUrl');
+      }
+      break;
+    }
+    case 'datasource':
+      dependency.datasource = migrateDatasource(value);
+      break;
+    case 'indentation':
+      dependency.indentation = isEmptyStringOrWhitespace(value) ? value : '';
+      break;
+    default:
+      dependency[field] = value;
+      break;
+  }
+}
+
+export function createDependency(
+  extractionTemplate: ExtractionTemplate,
+  config: RegexManagerConfig,
+  packageFileInfo: PackageFileInfo,
+  dep?: PackageDependency,
+): PackageDependency | null {
+  const dependency = dep ?? {};
+  const { groups, replaceString } = extractionTemplate;
+  const { packageFileName, packageFileDir } = packageFileInfo;
+
+  for (const field of validMatchFields) {
+    const fieldTemplate = `${field}Template` as keyof RegexManagerTemplates;
+    const tmpl = config[fieldTemplate];
+    if (tmpl) {
+      try {
+        const compiled = template.compile(
+          tmpl,
+          { ...groups, packageFile: packageFileName, packageFileDir },
+          false,
+        );
+        updateDependency(dependency, field, compiled);
+      } catch {
+        logger.warn(
+          { template: tmpl },
+          'Error compiling template for custom manager',
+        );
+        return null;
+      }
+    } else if (groups[field]) {
+      updateDependency(dependency, field, groups[field]);
+    }
+  }
+  dependency.replaceString = replaceString;
+  return dependency;
+}
+
+export function regexMatchAll(
+  regex: RegExp,
+  content: string,
+): RegExpMatchArray[] {
+  const matches: RegExpMatchArray[] = [];
+  let matchResult: RegExpMatchArray | null;
+  let iterations = 0;
+  const maxIterations = 10000;
+  do {
+    matchResult = regex.exec(content);
+    if (matchResult) {
+      matches.push(matchResult);
+    }
+    iterations += 1;
+  } while (matchResult && iterations < maxIterations);
+  if (iterations === maxIterations) {
+    logger.warn('Max iterations reached for matchStrings');
+  }
+  return matches;
+}
+
+export function mergeGroups(
+  mergedGroup: Record<string, string>,
+  secondGroup: Record<string, string>,
+): Record<string, string> {
+  return { ...mergedGroup, ...secondGroup };
+}
+
+export function mergeExtractionTemplate(
+  base: ExtractionTemplate,
+  addition: ExtractionTemplate,
+): ExtractionTemplate {
+  return {
+    groups: mergeGroups(base.groups, addition.groups),
+    replaceString: addition.replaceString ?? base.replaceString,
+  };
+}

@@ -1,0 +1,73 @@
+Package: album
+Version: 4.15-1
+Installed-Size: 288
+Maintainer: Salvo 'LtWorf' Tomaselli <tiposchi@tiscali.it>
+Architecture: all
+Depends: perl:any, imagemagick
+Recommends: album-data
+Suggests: httpd, jhead, libav-tools
+Description: HTML photo album generator with theme support
+Homepage: http://marginalhacks.com/Hacks/album
+Description-md5: 3eaaefa453087570fb45ac51eeccbe7c
+Tag: implemented-in::perl, interface::commandline, interface::web,
+ role::program, scope::application, use::browsing, use::organizing,
+ web::application, works-with-format::html, works-with::image,
+ works-with::image:raster, works-with::text
+Section: non-free/web
+Priority: optional
+Filename: pool/non-free/a/album/album_4.15-1_all.deb
+Size: 89962
+MD5sum: 7ed9561371bc198dab9f88741b3386ae
+SHA256: 336d96db2998e9a80d00fef36ad38756463cfbd516d1f89b97ecdff22f2b6ec1
+
+Package: album-data
+Version: 4.05-7.2
+Installed-Size: 7936
+Maintainer: Salvo 'LtWorf' Tomaselli <tiposchi@tiscali.it>
+Architecture: all
+Depends: album
+Description: themes, plugins and translations for album
+Homepage: http://marginalhacks.com/Hacks/album
+Description-md5: 34adea76df6b2c02712e3838461edbb2
+Tag: role::app-data
+Section: non-free/web
+Priority: optional
+Filename: pool/non-free/a/album-data/album-data_4.05-7.2_all.deb
+Size: 5469888
+MD5sum: bfecda545171260a755ab5b4acd97aa6
+SHA256: 8e16c340d46e53752d5916c7f8aca665aa81a78614bcae0ad7b9decf555c114e
+
+Package: album-data
+Version: 4.05-7.3
+Installed-Size: 7936
+Maintainer: Salvo 'LtWorf' Tomaselli <tiposchi@tiscali.it>
+Architecture: all
+Depends: album
+Description: themes, plugins and translations for album
+Homepage: http://marginalhacks.com/Hacks/album
+Description-md5: 34adea76df6b2c02712e3838461edbb2
+Tag: role::app-data
+Section: non-free/web
+Priority: optional
+Filename: pool/non-free/a/album-data/album-data_4.05-7.2_all.deb
+Size: 5469888
+MD5sum: bfecda545171260a755ab5b4acd97aa6
+SHA256: 8e16c340d46e53752d5916c7f8aca665aa81a78614bcae0ad7b9decf555c114e
+
+Package: alien-arena-data
+Version: 7.71.3+ds-1
+Installed-Size: 1918877
+Maintainer: Debian Games Team <pkg-games-devel@lists.alioth.debian.org>
+Architecture: all
+Depends: fonts-freefont-ttf, fonts-aenigma
+Enhances: alien-arena (>= 7.71.3+ds), alien-arena-server (>= 7.71.3+ds)
+Description: Game data files for Alien Arena
+Homepage: https://martianbackup.com
+Description-md5: f930829d2a1207940bee317dc2015735
+Tag: game::fps, role::app-data, use::gameplaying
+Section: non-free/games
+Priority: optional
+Filename: pool/non-free/a/alien-arena-data/alien-arena-data_7.71.3+ds-1_all.deb
+Size: 766655844
+MD5sum: 447e0d3a42973dbf3d87df28359501d2
+SHA256: a3fdaf2b0b9e969149642300f0781f7cfdd3ed33f49be38afe58e89531a21b70

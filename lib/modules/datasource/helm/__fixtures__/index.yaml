@@ -1,0 +1,1874 @@
+apiVersion: v1
+entries:
+  acs-engine-autoscaler:
+  - apiVersion: v1
+    appVersion: 2.1.1
+    created: 2019-06-02T08:56:36.116031089Z
+    deprecated: true
+    description: DEPRECATED Scales worker nodes within agent pools
+    digest: 93f924d4498d588bcdda88c7401e27c6fa0f50ff0601e78885eca13eb683c1e2
+    home: https://github.com/wbuchwalter/Kubernetes-acs-engine-autoscaler
+    icon: https://github.com/kubernetes/kubernetes/blob/master/logo/logo.png
+    name: acs-engine-autoscaler
+    sources:
+    - https://github.com/wbuchwalter/Kubernetes-acs-engine-autoscaler
+    urls:
+    - https://charts.helm.sh/stable/packages/acs-engine-autoscaler-2.2.2.tgz
+    version: 2.2.2
+  - apiVersion: v1
+    appVersion: 2.1.1
+    created: 2018-12-11T02:55:17.96986758Z
+    description: Scales worker nodes within agent pools
+    digest: 3232999ebabc42cd7c5475251b5cd2e0c6bf4363551cff13ebe3a78cee1dfba6
+    home: https://github.com/wbuchwalter/Kubernetes-acs-engine-autoscaler
+    icon: https://github.com/kubernetes/kubernetes/blob/master/logo/logo.png
+    maintainers:
+    - email: ritazh@microsoft.com
+      name: ritazh
+    - email: wibuch@microsoft.com
+      name: wbuchwalter
+    name: acs-engine-autoscaler
+    sources:
+    - https://github.com/wbuchwalter/Kubernetes-acs-engine-autoscaler
+    urls:
+    - https://charts.helm.sh/stable/packages/acs-engine-autoscaler-2.2.1.tgz
+    version: 2.2.1
+  - apiVersion: v1
+    appVersion: 2.1.1
+    created: 2018-11-28T23:56:19.641278965Z
+    description: Scales worker nodes within agent pools
+    digest: 5904caae456eecd1fed0a5d58f4a6f46e1fe97f954c4467e49fc80f91d912a10
+    home: https://github.com/wbuchwalter/Kubernetes-acs-engine-autoscaler
+    icon: https://github.com/kubernetes/kubernetes/blob/master/logo/logo.png
+    maintainers:
+    - email: ritazh@microsoft.com
+      name: ritazh
+    - email: wibuch@microsoft.com
+      name: wbuchwalter
+    name: acs-engine-autoscaler
+    sources:
+    - https://github.com/wbuchwalter/Kubernetes-acs-engine-autoscaler
+    urls:
+    - https://charts.helm.sh/stable/packages/acs-engine-autoscaler-2.2.0.tgz
+    version: 2.2.0
+  - apiVersion: v1
+    appVersion: 2.1.1
+    created: 2018-05-24T20:26:32.448882784Z
+    description: Scales worker nodes within agent pools
+    digest: 8b4e05fd9357296ba20d20ff4f163d25abd511fc0db9aee8e34b6de17a7d6bc0
+    home: https://github.com/wbuchwalter/Kubernetes-acs-engine-autoscaler
+    icon: https://github.com/kubernetes/kubernetes/blob/master/logo/logo.png
+    maintainers:
+    - email: ritazh@microsoft.com
+      name: ritazh
+    - email: wibuch@microsoft.com
+      name: wbuchwalter
+    name: acs-engine-autoscaler
+    sources:
+    - https://github.com/wbuchwalter/Kubernetes-acs-engine-autoscaler
+    urls:
+    - https://charts.helm.sh/stable/packages/acs-engine-autoscaler-2.1.5.tgz
+    version: 2.1.5
+  - apiVersion: v1
+    appVersion: 2.1.1
+    created: 2018-05-17T21:41:20.048576102Z
+    description: Scales worker nodes within agent pools
+    digest: 1e86ff353b82a832c88d05bf73c6cef3dea3673c4cb93d4816aa0d2e75929e5e
+    home: https://github.com/wbuchwalter/Kubernetes-acs-engine-autoscaler
+    icon: https://github.com/kubernetes/kubernetes/blob/master/logo/logo.png
+    maintainers:
+    - email: ritazh@microsoft.com
+      name: ritazh
+    - email: wibuch@microsoft.com
+      name: wbuchwalter
+    name: acs-engine-autoscaler
+    sources:
+    - https://github.com/wbuchwalter/Kubernetes-acs-engine-autoscaler
+    urls:
+    - https://charts.helm.sh/stable/packages/acs-engine-autoscaler-2.1.4.tgz
+    version: 2.1.4
+  - apiVersion: v1
+    appVersion: 2.1.1
+    created: 2018-04-07T09:56:31.271617864Z
+    description: Scales worker nodes within agent pools
+    digest: 5c016fefd8942b008abf41f282906d055f4a61f650ad125746843e62efc01bd0
+    icon: https://github.com/kubernetes/kubernetes/blob/master/logo/logo.png
+    maintainers:
+    - email: ritazh@microsoft.com
+      name: ritazh
+    - email: wibuch@microsoft.com
+      name: wbuchwalter
+    name: acs-engine-autoscaler
+    sources:
+    - https://github.com/wbuchwalter/Kubernetes-acs-engine-autoscaler
+    urls:
+    - https://charts.helm.sh/stable/packages/acs-engine-autoscaler-2.1.3.tgz
+    version: 2.1.3
+  - apiVersion: v1
+    appVersion: 2.1.1
+    created: 2018-02-28T19:04:23.819056988Z
+    description: Scales worker nodes within agent pools
+    digest: c3d0aa9f61913913735a0904577681328ae9374ff30d2bfa0ee33348b069cb7d
+    icon: https://github.com/kubernetes/kubernetes/blob/master/logo/logo.png
+    maintainers:
+    - email: ritazh@microsoft.com
+      name: ritazh
+    - email: wibuch@microsoft.com
+      name: wbuchwalter
+    name: acs-engine-autoscaler
+    sources:
+    - https://github.com/wbuchwalter/Kubernetes-acs-engine-autoscaler
+    urls:
+    - https://charts.helm.sh/stable/packages/acs-engine-autoscaler-2.1.2.tgz
+    version: 2.1.2
+  - apiVersion: v1
+    appVersion: 2.1.1
+    created: 2018-02-13T23:19:19.729122896Z
+    description: Scales worker nodes within agent pools
+    digest: 39e66eb53c310529bd9dd19776f8ba662e063a4ebd51fc5ec9f2267e2e073e3e
+    icon: https://github.com/kubernetes/kubernetes/blob/master/logo/logo.png
+    maintainers:
+    - email: ritazh@microsoft.com
+      name: ritazh
+    - email: wibuch@microsoft.com
+      name: wbuchwalter
+    name: acs-engine-autoscaler
+    sources:
+    - https://github.com/wbuchwalter/Kubernetes-acs-engine-autoscaler
+    urls:
+    - https://charts.helm.sh/stable/packages/acs-engine-autoscaler-2.1.1.tgz
+    version: 2.1.1
+  - apiVersion: v1
+    appVersion: 2.1.1
+    created: 2017-11-17T16:18:51.210952699Z
+    description: Scales worker nodes within agent pools
+    digest: 4295248d9c9bdc0455197b584525cbaf181b88293aef2b8bd7ca82a081642d85
+    icon: https://github.com/kubernetes/kubernetes/blob/master/logo/logo.png
+    maintainers:
+    - email: ritazh@microsoft.com
+      name: ritazh
+    - email: wibuch@microsoft.com
+      name: wbuchwalter
+    name: acs-engine-autoscaler
+    sources:
+    - https://github.com/wbuchwalter/Kubernetes-acs-engine-autoscaler
+    urls:
+    - https://charts.helm.sh/stable/packages/acs-engine-autoscaler-2.1.0.tgz
+    version: 2.1.0
+  - apiVersion: v1
+    created: 2017-10-09T19:34:08.355467969Z
+    description: Scales worker nodes within agent pools
+    digest: 4514cdd7ae86186ab2b9b56e31753b7e2ec90d745fb550dee53a90a042a20ac4
+    icon: https://github.com/kubernetes/kubernetes/blob/master/logo/logo.png
+    maintainers:
+    - email: ritazh@microsoft.com
+      name: Rita Zhang
+    - email: wibuch@microsoft.com
+      name: William Buchwalter
+    name: acs-engine-autoscaler
+    sources:
+    - https://github.com/wbuchwalter/Kubernetes-acs-engine-autoscaler
+    urls:
+    - https://charts.helm.sh/stable/packages/acs-engine-autoscaler-2.0.0.tgz
+    version: 2.0.0
+  - apiVersion: v1
+    created: 2017-09-10T16:34:04.515113086Z
+    description: Scales worker nodes within agent pools
+    digest: d3e77659da2b22b6dcb6990ab71ee443b48ac79323473e74e6bb5667e07f14a7
+    icon: https://github.com/kubernetes/kubernetes/blob/master/logo/logo.png
+    maintainers:
+    - email: ritazh@microsoft.com
+      name: Rita Zhang
+    - email: wibuch@microsoft.com
+      name: William Buchwalter
+    name: acs-engine-autoscaler
+    sources:
+    - https://github.com/wbuchwalter/Kubernetes-acs-engine-autoscaler
+    urls:
+    - https://charts.helm.sh/stable/packages/acs-engine-autoscaler-1.0.0.tgz
+    version: 1.0.0
+  - apiVersion: v1
+    created: 2017-08-02T01:33:51.76928059Z
+    description: Scales worker nodes within agent pools
+    digest: a6505719ff0efb8c1d26f8d8de7129c6d5c05572cdbdb1cadd79f0c7e42ce4d5
+    icon: https://github.com/kubernetes/kubernetes/blob/master/logo/logo.png
+    maintainers:
+    - email: ritazh@microsoft.com
+      name: Rita Zhang
+    name: acs-engine-autoscaler
+    sources:
+    - https://github.com/wbuchwalter/Kubernetes-acs-engine-autoscaler
+    urls:
+    - https://charts.helm.sh/stable/packages/acs-engine-autoscaler-0.1.0.tgz
+    version: 0.1.0
+  aerospike:
+  - apiVersion: v1
+    appVersion: v4.5.0.5
+    created: 2019-06-02T08:56:36.116406737Z
+    description: A Helm chart for Aerospike in Kubernetes
+    digest: 009a0d08fdbf33c1cd51732cbecb116c57a9e7d3d2b88a8038005b819bc301ca
+    home: http://aerospike.com
+    icon: https://s3-us-west-1.amazonaws.com/aerospike-fd/wp-content/uploads/2016/06/Aerospike_square_logo.png
+    keywords:
+    - aerospike
+    - big-data
+    maintainers:
+    - email: kavehmz@gmail.com
+      name: kavehmz
+    - email: okgolove@markeloff.net
+      name: okgolove
+    name: aerospike
+    sources:
+    - https://github.com/aerospike/aerospike-server
+    urls:
+    - https://charts.helm.sh/stable/packages/aerospike-0.2.8.tgz
+    version: 0.2.8
+  - apiVersion: v1
+    appVersion: v4.5.0.5
+    created: 2019-05-26T05:57:40.573981632Z
+    description: A Helm chart for Aerospike in Kubernetes
+    digest: 1b871d5d8d3adb54d29383ffde7bbb3392bd37001d06c429b130a95cdd400321
+    home: http://aerospike.com
+    icon: https://s3-us-west-1.amazonaws.com/aerospike-fd/wp-content/uploads/2016/06/Aerospike_square_logo.png
+    keywords:
+    - aerospike
+    - big-data
+    maintainers:
+    - email: kavehmz@gmail.com
+      name: kavehmz
+    - email: okgolove@markeloff.net
+      name: okgolove
+    name: aerospike
+    sources:
+    - https://github.com/aerospike/aerospike-server
+    urls:
+    - https://charts.helm.sh/stable/packages/aerospike-0.2.7.tgz
+    version: 0.2.7
+  - apiVersion: v1
+    appVersion: v4.5.0.5
+    created: 2019-05-21T08:56:17.921705915Z
+    description: A Helm chart for Aerospike in Kubernetes
+    digest: be68d75430ae391f80cca6b54a22db0492709485a0d3d10db0b7900f6167b9c0
+    home: http://aerospike.com
+    icon: https://s3-us-west-1.amazonaws.com/aerospike-fd/wp-content/uploads/2016/06/Aerospike_square_logo.png
+    keywords:
+    - aerospike
+    - big-data
+    maintainers:
+    - email: kavehmz@gmail.com
+      name: kavehmz
+    - email: okgolove@markeloff.net
+      name: okgolove
+    name: aerospike
+    sources:
+    - https://github.com/aerospike/aerospike-server
+    urls:
+    - https://charts.helm.sh/stable/packages/aerospike-0.2.6.tgz
+    version: 0.2.6
+  - apiVersion: v1
+    appVersion: v4.5.0.5
+    created: 2019-05-21T05:56:32.547310258Z
+    description: A Helm chart for Aerospike in Kubernetes
+    digest: 11a41d66bcc6b4a60efe8d36f3df51b029a516d78bcb7f1586b2754131347bd8
+    home: http://aerospike.com
+    icon: https://s3-us-west-1.amazonaws.com/aerospike-fd/wp-content/uploads/2016/06/Aerospike_square_logo.png
+    keywords:
+    - aerospike
+    - big-data
+    maintainers:
+    - email: kavehmz@gmail.com
+      name: kavehmz
+    name: aerospike
+    sources:
+    - https://github.com/aerospike/aerospike-server
+    urls:
+    - https://charts.helm.sh/stable/packages/aerospike-0.2.5.tgz
+    version: 0.2.5
+  - appVersion: v4.5.0.5
+    created: 2019-05-14T19:56:18.413729387Z
+    description: A Helm chart for Aerospike in Kubernetes
+    digest: a0a1b0af91761b7175a644344dc12f141d0f5f5e1219fbd5f8458a7c9ce8b09f
+    home: http://aerospike.com
+    icon: https://s3-us-west-1.amazonaws.com/aerospike-fd/wp-content/uploads/2016/06/Aerospike_square_logo.png
+    keywords:
+    - aerospike
+    - big-data
+    maintainers:
+    - email: kavehmz@gmail.com
+      name: kavehmz
+    name: aerospike
+    sources:
+    - https://github.com/aerospike/aerospike-server
+    urls:
+    - https://charts.helm.sh/stable/packages/aerospike-0.2.4.tgz
+    version: 0.2.4
+  - appVersion: v4.5.0.5
+    created: 2019-05-06T20:56:39.728865535Z
+    description: A Helm chart for Aerospike in Kubernetes
+    digest: be9abde8a99e7dee157c0df42135910c6fcf65fc4b1b26441275e1fd410a2f72
+    home: http://aerospike.com
+    icon: https://s3-us-west-1.amazonaws.com/aerospike-fd/wp-content/uploads/2016/06/Aerospike_square_logo.png
+    keywords:
+    - aerospike
+    - big-data
+    maintainers:
+    - email: kavehmz@gmail.com
+      name: kavehmz
+    name: aerospike
+    sources:
+    - https://github.com/aerospike/aerospike-server
+    urls:
+    - https://charts.helm.sh/stable/packages/aerospike-0.2.3.tgz
+    version: 0.2.3
+  - appVersion: v3.14.1.2
+    created: 2019-03-18T09:29:12.447335953Z
+    description: A Helm chart for Aerospike in Kubernetes
+    digest: ca2889e7542a67d12480d950b9b8291da0a620bafb0604666e0e52d6247da74b
+    home: http://aerospike.com
+    icon: https://s3-us-west-1.amazonaws.com/aerospike-fd/wp-content/uploads/2016/06/Aerospike_square_logo.png
+    keywords:
+    - aerospike
+    - big-data
+    maintainers:
+    - email: kavehmz@gmail.com
+      name: kavehmz
+    name: aerospike
+    sources:
+    - https://github.com/aerospike/aerospike-server
+    urls:
+    - https://charts.helm.sh/stable/packages/aerospike-0.2.1.tgz
+    version: 0.2.1
+  - appVersion: v3.14.1.2
+    created: 2018-12-17T20:55:58.28236604Z
+    description: A Helm chart for Aerospike in Kubernetes
+    digest: 4e30c6619f40411529ff6622f155b5fd833feba2b54c8e358a5792a96765764d
+    home: http://aerospike.com
+    icon: https://s3-us-west-1.amazonaws.com/aerospike-fd/wp-content/uploads/2016/06/Aerospike_square_logo.png
+    keywords:
+    - aerospike
+    - big-data
+    maintainers:
+    - email: kavehmz@gmail.com
+      name: kavehmz
+    name: aerospike
+    sources:
+    - https://github.com/aerospike/aerospike-server
+    urls:
+    - https://charts.helm.sh/stable/packages/aerospike-0.2.0.tgz
+    version: 0.2.0
+  - appVersion: v3.14.1.2
+    created: 2018-12-17T18:55:34.258699519Z
+    description: A Helm chart for Aerospike in Kubernetes
+    digest: 298cdd1f148e7962ee36b9cf9accff22b15fbb587e44ddaa59c8e0374739b47e
+    home: http://aerospike.com
+    icon: https://s3-us-west-1.amazonaws.com/aerospike-fd/wp-content/uploads/2016/06/Aerospike_square_logo.png
+    keywords:
+    - aerospike
+    - big-data
+    maintainers:
+    - email: kavehmz@gmail.com
+      name: kavehmz
+    name: aerospike
+    sources:
+    - https://github.com/aerospike/aerospike-server
+    urls:
+    - https://charts.helm.sh/stable/packages/aerospike-0.1.7.tgz
+    version: 0.1.7
+  - appVersion: v3.14.1.2
+    created: 2018-02-25T19:49:20.935510612Z
+    description: A Helm chart for Aerospike in Kubernetes
+    digest: 0ea6a93098ddb2016f9adb6da1e6a6076f1750a9ac5222e6a4e5f0ca0c9e625e
+    home: http://aerospike.com
+    icon: https://s3-us-west-1.amazonaws.com/aerospike-fd/wp-content/uploads/2016/06/Aerospike_square_logo.png
+    keywords:
+    - aerospike
+    - big-data
+    maintainers:
+    - email: k.mousavizamani@travelaudience.com
+      name: kavehmzta
+    name: aerospike
+    sources:
+    - https://github.com/aerospike/aerospike-server
+    urls:
+    - https://charts.helm.sh/stable/packages/aerospike-0.1.6.tgz
+    version: 0.1.6
+  - appVersion: v3.14.1.2
+    created: 2018-01-24T15:49:08.893862195Z
+    description: A Helm chart for Aerospike in Kubernetes
+    digest: 9b21417f989f4beba7174ffcbeeb34e91254f7494ed39f61905b3f3b8cfae002
+    home: http://aerospike.com
+    icon: https://s3-us-west-1.amazonaws.com/aerospike-fd/wp-content/uploads/2016/06/Aerospike_square_logo.png
+    keywords:
+    - aerospike
+    - big-data
+    maintainers:
+    - email: k.mousavizamani@travelaudience.com
+      name: kavehmzta
+    name: aerospike
+    sources:
+    - https://github.com/aerospike/aerospike-server
+    urls:
+    - https://charts.helm.sh/stable/packages/aerospike-0.1.5.tgz
+    version: 0.1.5
+  airflow:
+  - apiVersion: v1
+    appVersion: 1.10.2
+    created: 2019-06-02T08:56:36.118847528Z
+    description: Airflow is a platform to programmatically author, schedule and monitor
+      workflows
+    digest: 81caa34a84678d642cc5ccf83f3583419c8f1125c701dc6f0a653e287d2291bd
+    home: https://airflow.apache.org/
+    icon: https://airflow.apache.org/_images/pin_large.png
+    keywords:
+    - workflow
+    - dag
+    maintainers:
+    - email: gaetan@xeberon.net
+      name: gsemet
+    name: airflow
+    sources:
+    - https://airflow.apache.org/
+    urls:
+    - https://charts.helm.sh/stable/packages/airflow-2.8.6.tgz
+    version: 2.8.6
+  - apiVersion: v1
+    appVersion: 1.10.2
+    created: 2019-05-30T20:27:02.601142438Z
+    description: Airflow is a platform to programmatically author, schedule and monitor
+      workflows
+    digest: 621a1e180fafd3d9cd8faab31bfb44a4db49b7b13272c444956a6ebff50688dc
+    home: https://airflow.apache.org/
+    icon: https://airflow.apache.org/_images/pin_large.png
+    keywords:
+    - workflow
+    - dag
+    maintainers:
+    - email: gaetan@xeberon.net
+      name: gsemet
+    name: airflow
+    sources:
+    - https://airflow.apache.org/
+    urls:
+    - https://charts.helm.sh/stable/packages/airflow-2.8.5.tgz
+    version: 2.8.5
+  - apiVersion: v1
+    appVersion: 1.10.2
+    created: 2019-05-30T11:26:40.627345464Z
+    description: Airflow is a platform to programmatically author, schedule and monitor
+      workflows
+    digest: a27a76924fa4a9b6022d6fe5cedd4abb81eda1e4eb48c03dbeab992aac063621
+    home: https://airflow.apache.org/
+    icon: https://airflow.apache.org/_images/pin_large.png
+    keywords:
+    - workflow
+    - dag
+    maintainers:
+    - email: gaetan@xeberon.net
+      name: gsemet
+    name: airflow
+    sources:
+    - https://airflow.apache.org/
+    urls:
+    - https://charts.helm.sh/stable/packages/airflow-2.8.4.tgz
+    version: 2.8.4
+  - apiVersion: v1
+    appVersion: 1.10.2
+    created: 2019-05-29T15:27:10.653960824Z
+    description: Airflow is a platform to programmatically author, schedule and monitor
+      workflows
+    digest: a17762aa99ff2df65c3a7f0303ebbb414aa2d15a25986d4da80027a1c8c1227e
+    home: https://airflow.apache.org/
+    icon: https://airflow.apache.org/_images/pin_large.png
+    keywords:
+    - workflow
+    - dag
+    maintainers:
+    - email: gaetan@xeberon.net
+      name: gsemet
+    name: airflow
+    sources:
+    - https://airflow.apache.org/
+    urls:
+    - https://charts.helm.sh/stable/packages/airflow-2.8.3.tgz
+    version: 2.8.3
+  - apiVersion: v1
+    appVersion: 1.10.2
+    created: 2019-05-28T21:57:26.935508643Z
+    description: Airflow is a platform to programmatically author, schedule and monitor
+      workflows
+    digest: 0e0e79c5ca5519b322fc6e6ab3a5ee51b64d2731655188e7c6a7b3ae8abf1f91
+    home: https://airflow.apache.org/
+    icon: https://airflow.apache.org/_images/pin_large.png
+    keywords:
+    - workflow
+    - dag
+    maintainers:
+    - email: gaetan@xeberon.net
+      name: gsemet
+    name: airflow
+    sources:
+    - https://airflow.apache.org/
+    urls:
+    - https://charts.helm.sh/stable/packages/airflow-2.8.2.tgz
+    version: 2.8.2
+  - appVersion: 1.10.2
+    created: 2019-05-14T20:56:18.316517075Z
+    description: Airflow is a platform to programmatically author, schedule and monitor
+      workflows
+    digest: 4ae6f67f883d6ef2fea9ea5605e4f4b60529a31d415f5f01e5dbccb5409f11ec
+    home: https://airflow.apache.org/
+    icon: https://airflow.apache.org/_images/pin_large.png
+    keywords:
+    - workflow
+    - dag
+    maintainers:
+    - email: gaetan@xeberon.net
+      name: gsemet
+    name: airflow
+    sources:
+    - https://airflow.apache.org/
+    urls:
+    - https://charts.helm.sh/stable/packages/airflow-2.8.1.tgz
+    version: 2.8.1
+  - appVersion: 1.10.2
+    created: 2019-05-10T14:26:52.105929603Z
+    description: Airflow is a platform to programmatically author, schedule and monitor
+      workflows
+    digest: d879fa54b3499c32fadc9d480d917db38dd3eba6cd0ae3658c3e28771e649794
+    home: https://airflow.apache.org/
+    icon: https://airflow.apache.org/_images/pin_large.png
+    keywords:
+    - workflow
+    - dag
+    maintainers:
+    - email: gaetan@xeberon.net
+      name: gsemet
+    name: airflow
+    sources:
+    - https://airflow.apache.org/
+    urls:
+    - https://charts.helm.sh/stable/packages/airflow-2.8.0.tgz
+    version: 2.8.0
+  - appVersion: 1.10.2
+    created: 2019-05-09T20:57:10.982943956Z
+    description: Airflow is a platform to programmatically author, schedule and monitor
+      workflows
+    digest: a6c14d15e78b00e2ebae6367ca7007ba3983b0a2155aaaba7ccc0574e960c0f1
+    home: https://airflow.apache.org/
+    icon: https://airflow.apache.org/_images/pin_large.png
+    keywords:
+    - workflow
+    - dag
+    maintainers:
+    - email: gaetan@xeberon.net
+      name: gsemet
+    name: airflow
+    sources:
+    - https://airflow.apache.org/
+    urls:
+    - https://charts.helm.sh/stable/packages/airflow-2.7.1.tgz
+    version: 2.7.1
+  - appVersion: 1.10.2
+    created: 2019-05-02T12:57:23.336007074Z
+    description: Airflow is a platform to programmatically author, schedule and monitor
+      workflows
+    digest: 83f14a99b3509d596e816caac87bf1e40d04b1f60190e8b68cc827efffba9d7f
+    home: https://airflow.apache.org/
+    icon: https://airflow.apache.org/_images/pin_large.png
+    keywords:
+    - workflow
+    - dag
+    maintainers:
+    - email: gaetan@xeberon.net
+      name: gsemet
+    name: airflow
+    sources:
+    - https://airflow.apache.org/
+    urls:
+    - https://charts.helm.sh/stable/packages/airflow-2.7.0.tgz
+    version: 2.7.0
+  - appVersion: 1.10.2
+    created: 2019-05-01T15:00:20.703005999Z
+    description: Airflow is a platform to programmatically author, schedule and monitor
+      workflows
+    digest: dfd7e2441334ffb4e029212e6dc345e4257c3f9decbff57d505efdda06265429
+    home: https://airflow.apache.org/
+    icon: https://airflow.apache.org/_images/pin_large.png
+    keywords:
+    - workflow
+    - dag
+    maintainers:
+    - email: gaetan@xeberon.net
+      name: gsemet
+    name: airflow
+    sources:
+    - https://airflow.apache.org/
+    urls:
+    - https://charts.helm.sh/stable/packages/airflow-2.6.0.tgz
+    version: 2.6.0
+  - appVersion: 1.10.2
+    created: 2019-04-27T13:29:23.158449514Z
+    description: Airflow is a platform to programmatically author, schedule and monitor
+      workflows
+    digest: 81006dd61e3d00ff956d5d6180728ae1a8bfbe93515b8f7bd081b14d6ce94598
+    home: https://airflow.apache.org/
+    icon: https://airflow.apache.org/_images/pin_large.png
+    keywords:
+    - workflow
+    - dag
+    maintainers:
+    - email: gaetan@xeberon.net
+      name: gsemet
+    name: airflow
+    sources:
+    - https://airflow.apache.org/
+    urls:
+    - https://charts.helm.sh/stable/packages/airflow-2.5.0.tgz
+    version: 2.5.0
+  - appVersion: 1.10.0
+    created: 2019-04-26T15:27:19.503529711Z
+    description: Airflow is a platform to programmatically author, schedule and monitor
+      workflows
+    digest: d282abf7a9e41df7f276c70113af050f0b58cc884ebd56b1e093b6f1c2b74efa
+    home: https://airflow.apache.org/
+    icon: https://airflow.apache.org/_images/pin_large.png
+    keywords:
+    - workflow
+    - dag
+    maintainers:
+    - email: gaetan@xeberon.net
+      name: gsemet
+    name: airflow
+    sources:
+    - https://airflow.apache.org/
+    urls:
+    - https://charts.helm.sh/stable/packages/airflow-2.4.4.tgz
+    version: 2.4.4
+  - appVersion: 1.10.0
+    created: 2019-04-06T19:56:20.369848811Z
+    description: Airflow is a platform to programmatically author, schedule and monitor
+      workflows
+    digest: a0f62f05b246b38a8a579946a9edfe8d5ce5d6071522941b26bd6d0bc1656e66
+    home: https://airflow.apache.org/
+    icon: https://airflow.apache.org/_images/pin_large.png
+    keywords:
+    - workflow
+    - dag
+    maintainers:
+    - email: gaetan@xeberon.net
+      name: gsemet
+    name: airflow
+    sources:
+    - https://airflow.apache.org/
+    urls:
+    - https://charts.helm.sh/stable/packages/airflow-2.4.3.tgz
+    version: 2.4.3
+  - appVersion: 1.10.0
+    created: 2019-04-03T17:56:25.12245166Z
+    description: Airflow is a platform to programmatically author, schedule and monitor
+      workflows
+    digest: b643867f87a00a08498bde662c065a5cd4ec394b84973fb6b4cc810b7b147745
+    home: https://airflow.apache.org/
+    icon: https://airflow.apache.org/_images/pin_large.png
+    keywords:
+    - workflow
+    - dag
+    maintainers:
+    - email: gaetan@xeberon.net
+      name: gsemet
+    name: airflow
+    sources:
+    - https://airflow.apache.org/
+    urls:
+    - https://charts.helm.sh/stable/packages/airflow-2.4.2.tgz
+    version: 2.4.2
+  - appVersion: 1.10.0
+    created: 2019-04-03T15:26:00.331861518Z
+    description: Airflow is a platform to programmatically author, schedule and monitor
+      workflows
+    digest: f1418b67700116d206a7ff640bb6c494cc5e42775c70e1849a607d6e1f937230
+    home: https://airflow.apache.org/
+    icon: https://airflow.apache.org/_images/pin_large.png
+    keywords:
+    - workflow
+    - dag
+    maintainers:
+    - email: gaetan@xeberon.net
+      name: gsemet
+    name: airflow
+    sources:
+    - https://airflow.apache.org/
+    urls:
+    - https://charts.helm.sh/stable/packages/airflow-2.4.1.tgz
+    version: 2.4.1
+  - appVersion: 1.10.0
+    created: 2019-04-03T09:26:11.517169425Z
+    description: Airflow is a platform to programmatically author, schedule and monitor
+      workflows
+    digest: b86009e7023596302d99301f88a5542d95dac09d981d8c835079dc6335d88cf4
+    home: https://airflow.apache.org/
+    icon: https://airflow.apache.org/_images/pin_large.png
+    keywords:
+    - workflow
+    - dag
+    maintainers:
+    - email: gaetan@xeberon.net
+      name: gsemet
+    name: airflow
+    sources:
+    - https://airflow.apache.org/
+    urls:
+    - https://charts.helm.sh/stable/packages/airflow-2.4.0.tgz
+    version: 2.4.0
+  - appVersion: 1.10.0
+    created: 2019-03-30T07:56:19.59176903Z
+    description: Airflow is a platform to programmatically author, schedule and monitor
+      workflows
+    digest: 4bc29c7b6a734f897e1a5a2fc1e8a156383ac2fbe94f555056fa011b18e39d5d
+    home: https://airflow.apache.org/
+    icon: https://airflow.apache.org/_images/pin_large.png
+    keywords:
+    - workflow
+    - dag
+    maintainers:
+    - email: gaetan@xeberon.net
+      name: gsemet
+    name: airflow
+    sources:
+    - https://airflow.apache.org/
+    urls:
+    - https://charts.helm.sh/stable/packages/airflow-2.3.0.tgz
+    version: 2.3.0
+  - appVersion: 1.10.0
+    created: 2019-03-15T13:56:12.86312058Z
+    description: Airflow is a platform to programmatically author, schedule and monitor
+      workflows
+    digest: 9c5b888726326c16d7495f91dda37d72f43a1feee891c94fab36cb0693e13db7
+    home: https://airflow.apache.org/
+    icon: https://airflow.apache.org/_images/pin_large.png
+    keywords:
+    - workflow
+    - dag
+    maintainers:
+    - email: gaetan@xeberon.net
+      name: gsemet
+    name: airflow
+    sources:
+    - https://airflow.apache.org/
+    urls:
+    - https://charts.helm.sh/stable/packages/airflow-2.2.1.tgz
+    version: 2.2.1
+  - appVersion: 1.10.0
+    created: 2019-03-14T13:55:58.320346594Z
+    description: Airflow is a platform to programmatically author, schedule and monitor
+      workflows
+    digest: d72ad5303cea3d7d24c02345914f267e4cd5db59933957e758234dbf407337f7
+    home: https://airflow.apache.org/
+    icon: https://airflow.apache.org/_images/pin_large.png
+    keywords:
+    - workflow
+    - dag
+    maintainers:
+    - email: gaetan@xeberon.net
+      name: gsemet
+    name: airflow
+    sources:
+    - https://airflow.apache.org/
+    urls:
+    - https://charts.helm.sh/stable/packages/airflow-2.2.0.tgz
+    version: 2.2.0
+  - appVersion: 1.10.0
+    created: 2019-03-14T00:55:53.375781592Z
+    description: Airflow is a platform to programmatically author, schedule and monitor
+      workflows
+    digest: 4bc7440faf0a4c3dddaff8541840b4b9681ffc27dccb61c79de2990df70fff98
+    home: https://airflow.apache.org/
+    icon: https://airflow.apache.org/_images/pin_large.png
+    keywords:
+    - workflow
+    - dag
+    maintainers:
+    - email: gaetan@xeberon.net
+      name: gsemet
+    name: airflow
+    sources:
+    - https://airflow.apache.org/
+    urls:
+    - https://charts.helm.sh/stable/packages/airflow-2.1.0.tgz
+    version: 2.1.0
+  - appVersion: 1.10.0
+    created: 2019-02-27T15:56:28.248164679Z
+    description: Airflow is a platform to programmatically author, schedule and monitor
+      workflows
+    digest: d41fd574e0e8ef35e6d4fbbcac1e52862f9ffd50612c0225bd40bd16196ed35d
+    home: https://airflow.apache.org/
+    icon: https://airflow.apache.org/_images/pin_large.png
+    keywords:
+    - workflow
+    - dag
+    maintainers:
+    - email: gaetan@xeberon.net
+      name: gsemet
+    name: airflow
+    sources:
+    - https://airflow.apache.org/
+    urls:
+    - https://charts.helm.sh/stable/packages/airflow-2.0.2.tgz
+    version: 2.0.2
+  - appVersion: 1.10.0
+    created: 2019-02-26T23:25:43.766793946Z
+    description: Airflow is a platform to programmatically author, schedule and monitor
+      workflows
+    digest: d877fee104ec1354c50816b135c374deb3e72114d0ecb4f1027693c88a2c348c
+    home: https://airflow.apache.org/
+    icon: https://airflow.apache.org/_images/pin_large.png
+    keywords:
+    - workflow
+    - dag
+    maintainers:
+    - email: gaetan@xeberon.net
+      name: gsemet
+    name: airflow
+    sources:
+    - https://airflow.apache.org/
+    urls:
+    - https://charts.helm.sh/stable/packages/airflow-2.0.1.tgz
+    version: 2.0.1
+  - appVersion: 1.10.0
+    created: 2019-02-25T14:56:12.675816282Z
+    description: Airflow is a platform to programmatically author, schedule and monitor
+      workflows
+    digest: 990f1a9de1973673167be252426542b8df3a3dae529bb424f1bfaa9818c95aa3
+    home: https://airflow.apache.org/
+    icon: https://airflow.apache.org/_images/pin_large.png
+    keywords:
+    - workflow
+    - dag
+    maintainers:
+    - email: gaetan@xeberon.net
+      name: gsemet
+    name: airflow
+    sources:
+    - https://airflow.apache.org/
+    urls:
+    - https://charts.helm.sh/stable/packages/airflow-2.0.0.tgz
+    version: 2.0.0
+  - appVersion: 1.10.0
+    created: 2019-02-24T20:56:29.55445913Z
+    description: Airflow is a platform to programmatically author, schedule and monitor
+      workflows
+    digest: be85241b1d2fb8e3167211605e6b2c53b5a458053d9f92dd13c56defa3a78da8
+    home: https://airflow.apache.org/
+    icon: https://airflow.apache.org/_images/pin_large.png
+    keywords:
+    - workflow
+    - dag
+    maintainers:
+    - email: gaetan@xeberon.net
+      name: gsemet
+    name: airflow
+    sources:
+    - https://airflow.apache.org/
+    urls:
+    - https://charts.helm.sh/stable/packages/airflow-1.0.1.tgz
+    version: 1.0.1
+  - appVersion: 1.10.0
+    created: 2019-02-23T19:55:57.905294125Z
+    description: Airflow is a platform to programmatically author, schedule and monitor
+      workflows
+    digest: 6769f802d5b1a3f8bcc2c513d7257ee8e5b2698f2b7db54669c838185e79abfe
+    home: https://airflow.apache.org/
+    icon: https://airflow.apache.org/_images/pin_large.png
+    keywords:
+    - workflow
+    - dag
+    maintainers:
+    - email: gaetan@xeberon.net
+      name: gsemet
+    name: airflow
+    sources:
+    - https://airflow.apache.org/
+    urls:
+    - https://charts.helm.sh/stable/packages/airflow-1.0.0.tgz
+    version: 1.0.0
+  - appVersion: 1.10.0
+    created: 2019-02-22T16:28:27.39780529Z
+    description: Airflow is a platform to programmatically author, schedule and monitor
+      workflows
+    digest: 57973bb800dd2112f1849766891bb11ade8b32c50f8b2bdf11c17c1aa9d5b0f1
+    home: https://airflow.apache.org/
+    icon: https://airflow.apache.org/_images/pin_large.png
+    keywords:
+    - workflow
+    - dag
+    maintainers:
+    - email: gaetan@xeberon.net
+      name: gsemet
+    name: airflow
+    sources:
+    - https://airflow.apache.org/
+    urls:
+    - https://charts.helm.sh/stable/packages/airflow-0.17.4.tgz
+    version: 0.17.4
+  - appVersion: 1.10.0
+    created: 2019-02-18T16:25:43.319764468Z
+    description: Airflow is a platform to programmatically author, schedule and monitor
+      workflows
+    digest: 24d7912e9486fce35a5fec2b7526d63ad8fd797bddc2310cff9e27f7fd70d873
+    home: https://airflow.apache.org/
+    icon: https://airflow.apache.org/_images/pin_large.png
+    keywords:
+    - workflow
+    - dag
+    maintainers:
+    - email: gaetan@xeberon.net
+      name: gsemet
+    name: airflow
+    sources:
+    - https://airflow.apache.org/
+    urls:
+    - https://charts.helm.sh/stable/packages/airflow-0.17.3.tgz
+    version: 0.17.3
+  - appVersion: 1.10.0
+    created: 2019-02-14T17:25:50.814935714Z
+    description: Airflow is a platform to programmatically author, schedule and monitor
+      workflows
+    digest: 1af7136326c6ef171ed7abf91e700d732e65243be070ea6160cb45e237c04fc2
+    home: https://airflow.apache.org/
+    icon: https://airflow.apache.org/_images/pin_large.png
+    keywords:
+    - workflow
+    - dag
+    maintainers:
+    - email: gaetan@xeberon.net
+      name: gsemet
+    name: airflow
+    sources:
+    - https://airflow.apache.org/
+    urls:
+    - https://charts.helm.sh/stable/packages/airflow-0.17.2.tgz
+    version: 0.17.2
+  - appVersion: 1.10.0
+    created: 2019-02-12T16:55:32.3672359Z
+    description: Airflow is a platform to programmatically author, schedule and monitor
+      workflows
+    digest: 684f2c0ecf7dac6d05b0665ea4ca10b4c466130ccf915fe5f31ca922a742adc9
+    home: https://airflow.apache.org/
+    icon: https://airflow.apache.org/_images/pin_large.png
+    keywords:
+    - workflow
+    - dag
+    maintainers:
+    - email: gaetan@xeberon.net
+      name: gsemet
+    name: airflow
+    sources:
+    - https://airflow.apache.org/
+    urls:
+    - https://charts.helm.sh/stable/packages/airflow-0.17.1.tgz
+    version: 0.17.1
+  - appVersion: 1.10.0
+    created: 2019-02-12T16:26:17.092387253Z
+    description: Airflow is a platform to programmatically author, schedule and monitor
+      workflows
+    digest: f80919b409a2cc7fe1b6b6fe63985752c18f7cebcfeabeb81b0167494583fe0b
+    home: https://airflow.apache.org/
+    icon: https://airflow.apache.org/_images/pin_large.png
+    keywords:
+    - workflow
+    - dag
+    maintainers:
+    - email: gaetan@xeberon.net
+      name: gsemet
+    name: airflow
+    sources:
+    - https://airflow.apache.org/
+    urls:
+    - https://charts.helm.sh/stable/packages/airflow-0.17.0.tgz
+    version: 0.17.0
+  - appVersion: 1.10.0
+    created: 2019-02-11T20:26:21.078586168Z
+    description: Airflow is a platform to programmatically author, schedule and monitor
+      workflows
+    digest: b830cd4e38d7165ebf8200e557cca384ab4cdd1a50832889e4370b94cb3b1378
+    home: https://airflow.apache.org/
+    icon: https://airflow.apache.org/_images/pin_large.png
+    keywords:
+    - workflow
+    - dag
+    maintainers:
+    - email: gaetan@xeberon.net
+      name: gsemet
+    name: airflow
+    sources:
+    - https://airflow.apache.org/
+    urls:
+    - https://charts.helm.sh/stable/packages/airflow-0.16.0.tgz
+    version: 0.16.0
+  - appVersion: 1.10.0
+    created: 2019-02-09T16:56:03.198944399Z
+    description: Airflow is a platform to programmatically author, schedule and monitor
+      workflows
+    digest: 8988257e504c848e50173b27b3ebfe141f8d24f1ed2950eae989f2089a7f2d93
+    home: https://airflow.apache.org/
+    icon: https://airflow.apache.org/_images/pin_large.png
+    keywords:
+    - workflow
+    - dag
+    maintainers:
+    - email: gaetan@xeberon.net
+      name: gsemet
+    name: airflow
+    sources:
+    - https://airflow.apache.org/
+    urls:
+    - https://charts.helm.sh/stable/packages/airflow-0.15.0.tgz
+    version: 0.15.0
+  - appVersion: 1.10.0
+    created: 2019-01-30T16:25:43.262863813Z
+    description: Airflow is a platform to programmatically author, schedule and monitor
+      workflows
+    digest: 4e95a74099831bf14b7ac57146b463d1ae68ccfa437ac9f83bb706888ccc50e9
+    home: https://airflow.apache.org/
+    icon: https://airflow.apache.org/_images/pin_large.png
+    keywords:
+    - workflow
+    - dag
+    maintainers:
+    - email: gaetan@xeberon.net
+      name: gsemet
+    name: airflow
+    sources:
+    - https://airflow.apache.org/
+    urls:
+    - https://charts.helm.sh/stable/packages/airflow-0.14.0.tgz
+    version: 0.14.0
+  - appVersion: 1.10.0
+    created: 2019-01-25T20:56:10.906599294Z
+    description: Airflow is a platform to programmatically author, schedule and monitor
+      workflows
+    digest: f106d9fb7e8d3dde0084ce3b3b6090f3b2a1d527449647f8f3147f3cbc011a86
+    home: https://airflow.apache.org/
+    icon: https://airflow.apache.org/_images/pin_large.png
+    keywords:
+    - workflow
+    - dag
+    maintainers:
+    - email: gaetan@xeberon.net
+      name: gsemet
+    name: airflow
+    sources:
+    - https://airflow.apache.org/
+    urls:
+    - https://charts.helm.sh/stable/packages/airflow-0.13.0.tgz
+    version: 0.13.0
+  - appVersion: 1.10.0
+    created: 2019-01-15T20:25:33.538917073Z
+    description: Airflow is a platform to programmatically author, schedule and monitor
+      workflows
+    digest: e6460ed59ca074feff0e7e84f87916a95f03c09ebfcc165f0e3dcf2d0aa6f9e0
+    home: https://airflow.apache.org/
+    icon: https://airflow.apache.org/_images/pin_large.png
+    keywords:
+    - workflow
+    - dag
+    maintainers:
+    - email: gaetan@xeberon.net
+      name: gsemet
+    name: airflow
+    sources:
+    - https://airflow.apache.org/
+    urls:
+    - https://charts.helm.sh/stable/packages/airflow-0.12.0.tgz
+    version: 0.12.0
+  - appVersion: 1.10.0
+    created: 2019-01-07T11:55:25.852726039Z
+    description: Airflow is a platform to programmatically author, schedule and monitor
+      workflows
+    digest: fed02ef01f05f7b2412a374c9694a2d40be5b1515d636cd65da40b9c98c557bf
+    home: https://airflow.apache.org/
+    icon: https://airflow.apache.org/_images/pin_large.png
+    keywords:
+    - workflow
+    - dag
+    maintainers:
+    - email: gaetan@xeberon.net
+      name: gsemet
+    name: airflow
+    sources:
+    - https://airflow.apache.org/
+    urls:
+    - https://charts.helm.sh/stable/packages/airflow-0.11.0.tgz
+    version: 0.11.0
+  - appVersion: 1.10.0
+    created: 2019-01-03T17:26:21.38369729Z
+    description: Airflow is a platform to programmatically author, schedule and monitor
+      workflows
+    digest: cd338423a09b71d9166cc1ddb688ffbbed9e4efee828b7f206851f1bc6c7bbe2
+    home: https://airflow.apache.org/
+    icon: https://airflow.apache.org/_images/pin_large.png
+    keywords:
+    - workflow
+    - dag
+    maintainers:
+    - email: gaetan@xeberon.net
+      name: gsemet
+    name: airflow
+    sources:
+    - https://airflow.apache.org/
+    urls:
+    - https://charts.helm.sh/stable/packages/airflow-0.10.0.tgz
+    version: 0.10.0
+  - appVersion: 1.10.0
+    created: 2018-12-21T14:25:30.471733522Z
+    description: Airflow is a platform to programmatically author, schedule and monitor
+      workflows
+    digest: 9bb74fce1a611c81a098722201b608e78fc4bc464aec584f847bb9f62d74cf9d
+    home: https://airflow.apache.org/
+    icon: https://airflow.apache.org/_images/pin_large.png
+    keywords:
+    - workflow
+    - dag
+    maintainers:
+    - email: gaetan@xeberon.net
+      name: gsemet
+    name: airflow
+    sources:
+    - https://airflow.apache.org/
+    urls:
+    - https://charts.helm.sh/stable/packages/airflow-0.9.1.tgz
+    version: 0.9.1
+  - appVersion: 1.10.0
+    created: 2018-12-11T12:55:33.837615422Z
+    description: Airflow is a platform to programmatically author, schedule and monitor
+      workflows
+    digest: 0d2c965f5412309df0514660e212753099c7b61e74fd04bba8520e86adf02ca0
+    home: https://airflow.apache.org/
+    icon: https://airflow.apache.org/_images/pin_large.png
+    keywords:
+    - workflow
+    - dag
+    maintainers:
+    - email: gaetan@xeberon.net
+      name: gsemet
+    name: airflow
+    sources:
+    - https://airflow.apache.org/
+    urls:
+    - https://charts.helm.sh/stable/packages/airflow-0.9.0.tgz
+    version: 0.9.0
+  ambassador:
+  - apiVersion: v1
+    appVersion: 0.70.1
+    created: 2019-06-02T08:56:36.119470813Z
+    description: A Helm chart for Datawire Ambassador
+    digest: 880002d74accfc9dab1debcc78c134fb4989e73ff84b137ce7aa92bf4d726297
+    engine: gotpl
+    home: https://www.getambassador.io/
+    icon: https://www.getambassador.io/images/logo.png
+    keywords:
+    - api gateway
+    - ambassador
+    - datawire
+    - envoy
+    maintainers:
+    - email: markus@maga.se
+      name: flydiverny
+    - email: flynn@datawire.io
+      name: kflynn
+    - email: nkrause@datawire.io
+      name: nbkrause
+    name: ambassador
+    sources:
+    - https://github.com/datawire/ambassador
+    - https://github.com/prometheus/statsd_exporter
+    urls:
+    - https://charts.helm.sh/stable/packages/ambassador-2.7.0.tgz
+    version: 2.7.0
+  - apiVersion: v1
+    appVersion: 0.70.1
+    created: 2019-05-31T18:57:01.540843138Z
+    description: A Helm chart for Datawire Ambassador
+    digest: ba549d35ca7827573343fe1613dcad31f258bfcc2959f6005220bfb300030a21
+    engine: gotpl
+    home: https://www.getambassador.io/
+    icon: https://www.getambassador.io/images/logo.png
+    keywords:
+    - api gateway
+    - ambassador
+    - datawire
+    - envoy
+    maintainers:
+    - email: markus@maga.se
+      name: flydiverny
+    - email: flynn@datawire.io
+      name: kflynn
+    - email: nkrause@datawire.io
+      name: nbkrause
+    name: ambassador
+    sources:
+    - https://github.com/datawire/ambassador
+    - https://github.com/prometheus/statsd_exporter
+    urls:
+    - https://charts.helm.sh/stable/packages/ambassador-2.6.2.tgz
+    version: 2.6.2
+  - apiVersion: v1
+    appVersion: 0.70.1
+    created: 2019-05-27T23:28:25.443876576Z
+    description: A Helm chart for Datawire Ambassador
+    digest: 8d708cb991f3b577f311d8bb5420a834ce12f4aee103e9bceddca045e714773d
+    engine: gotpl
+    home: https://www.getambassador.io/
+    icon: https://www.getambassador.io/images/logo.png
+    keywords:
+    - api gateway
+    - ambassador
+    - datawire
+    - envoy
+    maintainers:
+    - email: markus@maga.se
+      name: flydiverny
+    - email: flynn@datawire.io
+      name: kflynn
+    - email: nkrause@datawire.io
+      name: nbkrause
+    name: ambassador
+    sources:
+    - https://github.com/datawire/ambassador
+    - https://github.com/prometheus/statsd_exporter
+    urls:
+    - https://charts.helm.sh/stable/packages/ambassador-2.6.1.tgz
+    version: 2.6.1
+  - apiVersion: v1
+    appVersion: 0.70.0
+    created: 2019-05-24T10:56:37.781153897Z
+    description: A Helm chart for Datawire Ambassador
+    digest: b83dc819502aed7b180021900483fab6745de022393ad6a24023024aeac832f3
+    engine: gotpl
+    home: https://www.getambassador.io/
+    icon: https://www.getambassador.io/images/logo.png
+    keywords:
+    - api gateway
+    - ambassador
+    - datawire
+    - envoy
+    maintainers:
+    - email: markus@maga.se
+      name: flydiverny
+    - email: flynn@datawire.io
+      name: kflynn
+    - email: nkrause@datawire.io
+      name: nbkrause
+    name: ambassador
+    sources:
+    - https://github.com/datawire/ambassador
+    - https://github.com/prometheus/statsd_exporter
+    urls:
+    - https://charts.helm.sh/stable/packages/ambassador-2.6.0.tgz
+    version: 2.6.0
+  - apiVersion: v1
+    appVersion: 0.61.1
+    created: 2019-05-20T23:56:32.309733302Z
+    description: A Helm chart for Datawire Ambassador
+    digest: 03f60a9a1bf88b64948bfdf45fd6d923c636fb129249f1d60f7459aeebfe1146
+    engine: gotpl
+    home: https://www.getambassador.io/
+    icon: https://www.getambassador.io/images/logo.png
+    keywords:
+    - api gateway
+    - ambassador
+    - datawire
+    - envoy
+    maintainers:
+    - email: markus@maga.se
+      name: flydiverny
+    - email: flynn@datawire.io
+      name: kflynn
+    - email: nkrause@datawire.io
+      name: nbkrause
+    name: ambassador
+    sources:
+    - https://github.com/datawire/ambassador
+    - https://github.com/prometheus/statsd_exporter
+    urls:
+    - https://charts.helm.sh/stable/packages/ambassador-2.5.1.tgz
+    version: 2.5.1
+  - apiVersion: v1
+    appVersion: 0.61.0
+    created: 2019-05-16T21:56:48.001283539Z
+    description: A Helm chart for Datawire Ambassador
+    digest: a450b5215116728a208062d18973f06df56e72f588475d54bffd58ec7969bcc7
+    engine: gotpl
+    home: https://www.getambassador.io/
+    icon: https://www.getambassador.io/images/logo.png
+    keywords:
+    - api gateway
+    - ambassador
+    - datawire
+    - envoy
+    maintainers:
+    - email: markus@maga.se
+      name: flydiverny
+    - email: flynn@datawire.io
+      name: kflynn
+    - email: nkrause@datawire.io
+      name: nbkrause
+    name: ambassador
+    sources:
+    - https://github.com/datawire/ambassador
+    - https://github.com/prometheus/statsd_exporter
+    urls:
+    - https://charts.helm.sh/stable/packages/ambassador-2.5.0.tgz
+    version: 2.5.0
+  - apiVersion: v1
+    appVersion: 0.61.0
+    created: 2019-05-15T07:56:25.942650316Z
+    description: A Helm chart for Datawire Ambassador
+    digest: 56848d5e13ea2f511fb79fd03a9a61cf4ed72eaeabe7377a7dbd89bc4ac7ad73
+    engine: gotpl
+    home: https://www.getambassador.io/
+    icon: https://www.getambassador.io/images/logo.png
+    keywords:
+    - api gateway
+    - ambassador
+    - datawire
+    - envoy
+    maintainers:
+    - email: markus@maga.se
+      name: flydiverny
+    - email: flynn@datawire.io
+      name: kflynn
+    - email: nkrause@datawire.io
+      name: nbkrause
+    name: ambassador
+    sources:
+    - https://github.com/datawire/ambassador
+    - https://github.com/prometheus/statsd_exporter
+    urls:
+    - https://charts.helm.sh/stable/packages/ambassador-2.4.1.tgz
+    version: 2.4.1
+  - apiVersion: v1
+    appVersion: 0.60.3
+    created: 2019-05-09T17:29:35.612030611Z
+    description: A Helm chart for Datawire Ambassador
+    digest: 10c3112683f0c14e8888b7d1e2e1711c1f64527fcbaf1ba8de27dfe60805bf40
+    engine: gotpl
+    home: https://www.getambassador.io/
+    icon: https://www.getambassador.io/images/logo.png
+    keywords:
+    - api gateway
+    - ambassador
+    - datawire
+    - envoy
+    maintainers:
+    - email: markus@maga.se
+      name: flydiverny
+    - email: flynn@datawire.io
+      name: kflynn
+    - email: nkrause@datawire.io
+      name: nbkrause
+    name: ambassador
+    sources:
+    - https://github.com/datawire/ambassador
+    - https://github.com/prometheus/statsd_exporter
+    urls:
+    - https://charts.helm.sh/stable/packages/ambassador-2.4.0.tgz
+    version: 2.4.0
+  - apiVersion: v1
+    appVersion: 0.60.3
+    created: 2019-05-08T19:26:25.92530371Z
+    description: A Helm chart for Datawire Ambassador
+    digest: b4575a5c0bc7973e5b4a12e55563649799a525a90d90c43d4fc88ce3a49f9fee
+    engine: gotpl
+    home: https://www.getambassador.io/
+    icon: https://www.getambassador.io/images/logo.png
+    keywords:
+    - api gateway
+    - ambassador
+    - datawire
+    - envoy
+    maintainers:
+    - email: markus@maga.se
+      name: flydiverny
+    - email: flynn@datawire.io
+      name: kflynn
+    - email: nkrause@datawire.io
+      name: nbkrause
+    name: ambassador
+    sources:
+    - https://github.com/datawire/ambassador
+    - https://github.com/prometheus/statsd_exporter
+    urls:
+    - https://charts.helm.sh/stable/packages/ambassador-2.3.1.tgz
+    version: 2.3.1
+  - apiVersion: v1
+    appVersion: 0.60.3
+    created: 2019-05-06T21:28:21.342554124Z
+    description: A Helm chart for Datawire Ambassador
+    digest: 64e464330965ab7a9265f0b31eaa42307ad3aa29752ee0876222e1737b525e13
+    engine: gotpl
+    home: https://www.getambassador.io/
+    icon: https://www.getambassador.io/images/logo.png
+    keywords:
+    - api gateway
+    - ambassador
+    - datawire
+    - envoy
+    maintainers:
+    - email: markus@maga.se
+      name: flydiverny
+    - email: flynn@datawire.io
+      name: kflynn
+    - email: nkrause@datawire.io
+      name: nbkrause
+    name: ambassador
+    sources:
+    - https://github.com/datawire/ambassador
+    - https://github.com/prometheus/statsd_exporter
+    urls:
+    - https://charts.helm.sh/stable/packages/ambassador-2.3.0.tgz
+    version: 2.3.0
+  - apiVersion: v1
+    appVersion: 0.60.3
+    created: 2019-05-06T20:56:39.732495798Z
+    description: A Helm chart for Datawire Ambassador
+    digest: d1ce5b399ac81b69eda85a9c5d80162d00577c0346f7121b7191054c7b679b35
+    engine: gotpl
+    home: https://www.getambassador.io/
+    icon: https://www.getambassador.io/images/logo.png
+    keywords:
+    - api gateway
+    - ambassador
+    - datawire
+    - envoy
+    maintainers:
+    - email: markus@maga.se
+      name: flydiverny
+    - email: flynn@datawire.io
+      name: kflynn
+    - email: nkrause@datawire.io
+      name: nbkrause
+    name: ambassador
+    sources:
+    - https://github.com/datawire/ambassador
+    - https://github.com/prometheus/statsd_exporter
+    urls:
+    - https://charts.helm.sh/stable/packages/ambassador-2.2.5.tgz
+    version: 2.2.5
+  - apiVersion: v1
+    appVersion: 0.60.2
+    created: 2019-05-01T19:56:23.829282637Z
+    description: A Helm chart for Datawire Ambassador
+    digest: 598c9ffe847830bcd661c990f8e5355f17486c8cd43723f01b25473c7f76ac87
+    engine: gotpl
+    home: https://www.getambassador.io/
+    icon: https://www.getambassador.io/images/logo.png
+    keywords:
+    - api gateway
+    - ambassador
+    - datawire
+    - envoy
+    maintainers:
+    - email: markus@maga.se
+      name: flydiverny
+    - email: flynn@datawire.io
+      name: kflynn
+    - email: nkrause@datawire.io
+      name: nbkrause
+    name: ambassador
+    sources:
+    - https://github.com/datawire/ambassador
+    - https://github.com/prometheus/statsd_exporter
+    urls:
+    - https://charts.helm.sh/stable/packages/ambassador-2.2.4.tgz
+    version: 2.2.4
+  - apiVersion: v1
+    appVersion: 0.60.2
+    created: 2019-05-01T14:27:55.475396885Z
+    description: A Helm chart for Datawire Ambassador
+    digest: 2d1a3e63421af8d898895fc53b84a6a3aa37172a0a76361f78dbe4f4dc19742f
+    engine: gotpl
+    home: https://www.getambassador.io/
+    icon: https://www.getambassador.io/images/logo.png
+    keywords:
+    - api gateway
+    - ambassador
+    - datawire
+    - envoy
+    maintainers:
+    - email: markus@maga.se
+      name: flydiverny
+    - email: flynn@datawire.io
+      name: kflynn
+    - email: nkrause@datawire.io
+      name: nbkrause
+    name: ambassador
+    sources:
+    - https://github.com/datawire/ambassador
+    - https://github.com/prometheus/statsd_exporter
+    urls:
+    - https://charts.helm.sh/stable/packages/ambassador-2.2.3.tgz
+    version: 2.2.3
+  - apiVersion: v1
+    appVersion: 0.60.1
+    created: 2019-04-29T20:56:20.987054555Z
+    description: A Helm chart for Datawire Ambassador
+    digest: 0c7fa331637ecc35cd697f2d9fa4ec1f36e9f89696fe19582fb5f571a6c62b2c
+    engine: gotpl
+    home: https://www.getambassador.io/
+    icon: https://www.getambassador.io/images/logo.png
+    keywords:
+    - api gateway
+    - ambassador
+    - datawire
+    - envoy
+    maintainers:
+    - email: markus@maga.se
+      name: flydiverny
+    - email: flynn@datawire.io
+      name: kflynn
+    - email: nkrause@datawire.io
+      name: nbkrause
+    name: ambassador
+    sources:
+    - https://github.com/datawire/ambassador
+    - https://github.com/prometheus/statsd_exporter
+    urls:
+    - https://charts.helm.sh/stable/packages/ambassador-2.2.2.tgz
+    version: 2.2.2
+  - apiVersion: v1
+    appVersion: 0.60.0
+    created: 2019-04-27T01:56:41.1471595Z
+    description: A Helm chart for Datawire Ambassador
+    digest: 12699763b9eb0e2d4e478447da90d563021e54229ccb51dcba55d989c05272c7
+    engine: gotpl
+    home: https://www.getambassador.io/
+    icon: https://www.getambassador.io/images/logo.png
+    keywords:
+    - api gateway
+    - ambassador
+    - datawire
+    - envoy
+    maintainers:
+    - email: markus@maga.se
+      name: flydiverny
+    - email: flynn@datawire.io
+      name: kflynn
+    - email: nkrause@datawire.io
+      name: nbkrause
+    name: ambassador
+    sources:
+    - https://github.com/datawire/ambassador
+    - https://github.com/prometheus/statsd_exporter
+    urls:
+    - https://charts.helm.sh/stable/packages/ambassador-2.2.1.tgz
+    version: 2.2.1
+  - apiVersion: v1
+    appVersion: 0.60.0
+    created: 2019-04-23T19:56:09.380610551Z
+    description: A Helm chart for Datawire Ambassador
+    digest: 699d014803339626be22408acd03e196026ed371a98814c54abd5e72300a8f2c
+    engine: gotpl
+    home: https://www.getambassador.io/
+    icon: https://www.getambassador.io/images/logo.png
+    keywords:
+    - api gateway
+    - ambassador
+    - datawire
+    - envoy
+    maintainers:
+    - email: markus@maga.se
+      name: flydiverny
+    - email: flynn@datawire.io
+      name: kflynn
+    - email: nkrause@datawire.io
+      name: nbkrause
+    name: ambassador
+    sources:
+    - https://github.com/datawire/ambassador
+    - https://github.com/prometheus/statsd_exporter
+    urls:
+    - https://charts.helm.sh/stable/packages/ambassador-2.2.0.tgz
+    version: 2.2.0
+  - apiVersion: v1
+    appVersion: 0.53.1
+    created: 2019-04-23T14:57:59.089379619Z
+    description: A Helm chart for Datawire Ambassador
+    digest: 2fd8e0e8a7cfe58ccd37c44279ff6acff975c0bcdf499d80a436cb66b68f9f75
+    engine: gotpl
+    home: https://www.getambassador.io/
+    icon: https://www.getambassador.io/images/logo.png
+    keywords:
+    - api gateway
+    - ambassador
+    - datawire
+    - envoy
+    maintainers:
+    - email: markus@maga.se
+      name: flydiverny
+    - email: flynn@datawire.io
+      name: kflynn
+    - email: nkrause@datawire.io
+      name: nbkrause
+    name: ambassador
+    sources:
+    - https://github.com/datawire/ambassador
+    - https://github.com/prometheus/statsd_exporter
+    urls:
+    - https://charts.helm.sh/stable/packages/ambassador-2.1.0.tgz
+    version: 2.1.0
+  - apiVersion: v1
+    appVersion: 0.53.1
+    created: 2019-04-08T13:26:12.863877112Z
+    description: A Helm chart for Datawire Ambassador
+    digest: 1d9fbec1224e1aa5636dd71bb6981afd31b91fb151fd436762e8948d9b2618a9
+    engine: gotpl
+    home: https://www.getambassador.io/
+    icon: https://www.getambassador.io/images/logo.png
+    keywords:
+    - api gateway
+    - ambassador
+    - datawire
+    - envoy
+    maintainers:
+    - email: markus@maga.se
+      name: flydiverny
+    - email: flynn@datawire.io
+      name: kflynn
+    - email: nkrause@datawire.io
+      name: nbkrause
+    name: ambassador
+    sources:
+    - https://github.com/datawire/ambassador
+    - https://github.com/prometheus/statsd_exporter
+    urls:
+    - https://charts.helm.sh/stable/packages/ambassador-2.0.2.tgz
+    version: 2.0.2
+  - apiVersion: v1
+    appVersion: 0.52.0
+    created: 2019-04-06T13:26:04.916200257Z
+    description: A Helm chart for Datawire Ambassador
+    digest: e70ed72282c8f10e37ed2c186f7eb4a8baed8de07a0106b78e5170e20430fd12
+    engine: gotpl
+    home: https://www.getambassador.io/
+    icon: https://www.getambassador.io/images/logo.png
+    keywords:
+    - api gateway
+    - ambassador
+    - datawire
+    - envoy
+    maintainers:
+    - email: markus@maga.se
+      name: flydiverny
+    - email: flynn@datawire.io
+      name: kflynn
+    - email: nkrause@datawire.io
+      name: nbkrause
+    name: ambassador
+    sources:
+    - https://github.com/datawire/ambassador
+    - https://github.com/prometheus/statsd_exporter
+    urls:
+    - https://charts.helm.sh/stable/packages/ambassador-2.0.1.tgz
+    version: 2.0.1
+  - apiVersion: v1
+    appVersion: 0.51.2
+    created: 2019-03-22T14:26:18.094560396Z
+    description: A Helm chart for Datawire Ambassador
+    digest: 0dadee414d80ace6fe8abf466fc7d61180a6f9a494125c414470618045d891e7
+    engine: gotpl
+    home: https://www.getambassador.io/
+    icon: https://www.getambassador.io/images/logo.png
+    keywords:
+    - api gateway
+    - ambassador
+    - datawire
+    - envoy
+    maintainers:
+    - email: markus@maga.se
+      name: flydiverny
+    - email: flynn@datawire.io
+      name: kflynn
+    - email: nkrause@datawire.io
+      name: nbkrause
+    name: ambassador
+    sources:
+    - https://github.com/datawire/ambassador
+    - https://github.com/prometheus/statsd_exporter
+    urls:
+    - https://charts.helm.sh/stable/packages/ambassador-2.0.0.tgz
+    version: 2.0.0
+  - apiVersion: v1
+    appVersion: 0.50.3
+    created: 2019-03-21T15:25:53.910742044Z
+    description: A Helm chart for Datawire Ambassador
+    digest: 9458188fa8598710b73a5dfb7a1f5bca8e1582a22fb48b912541ab2950155a1c
+    engine: gotpl
+    home: https://www.getambassador.io/
+    icon: https://www.getambassador.io/images/logo.png
+    keywords:
+    - api gateway
+    - ambassador
+    - datawire
+    - envoy
+    maintainers:
+    - email: markus@maga.se
+      name: flydiverny
+    - email: flynn@datawire.io
+      name: kflynn
+    - email: nkrause@datawire.io
+      name: nbkrause
+    name: ambassador
+    sources:
+    - https://github.com/datawire/ambassador
+    - https://github.com/prometheus/statsd_exporter
+    urls:
+    - https://charts.helm.sh/stable/packages/ambassador-1.1.5.tgz
+    version: 1.1.5
+  - apiVersion: v1
+    appVersion: 0.50.2
+    created: 2019-02-24T04:55:38.454246159Z
+    description: A Helm chart for Datawire Ambassador
+    digest: 6f525332a530cd76f25dfa509d4f10dd5742ed760e870d3db641d057df84c277
+    engine: gotpl
+    home: https://www.getambassador.io/
+    icon: https://www.getambassador.io/images/logo.png
+    keywords:
+    - api gateway
+    - ambassador
+    - datawire
+    - envoy
+    maintainers:
+    - email: markus@maga.se
+      name: flydiverny
+    - email: flynn@datawire.io
+      name: Flynn
+    name: ambassador
+    sources:
+    - https://github.com/datawire/ambassador
+    - https://github.com/prometheus/statsd_exporter
+    urls:
+    - https://charts.helm.sh/stable/packages/ambassador-1.1.4.tgz
+    version: 1.1.4
+  - apiVersion: v1
+    appVersion: 0.50.2
+    created: 2019-02-22T16:28:27.398329741Z
+    description: A Helm chart for Datawire Ambassador
+    digest: e587be5680edebbef2456ff8b5c1ccc066dbec42f6d530592a0b019e0df3ca3a
+    engine: gotpl
+    home: https://www.getambassador.io/
+    icon: https://www.getambassador.io/images/logo.png
+    keywords:
+    - api gateway
+    - ambassador
+    - datawire
+    - envoy
+    maintainers:
+    - email: markus@maga.se
+      name: flydiverny
+    - email: flynn@datawire.io
+      name: Flynn
+    name: ambassador
+    sources:
+    - https://github.com/datawire/ambassador
+    - https://github.com/prometheus/statsd_exporter
+    urls:
+    - https://charts.helm.sh/stable/packages/ambassador-1.1.3.tgz
+    version: 1.1.3
+  - apiVersion: v1
+    appVersion: 0.50.1
+    created: 2019-02-15T23:56:28.304219139Z
+    description: A Helm chart for Datawire Ambassador
+    digest: 6ebb8fe1688cba9b5a1457e0a4d2f0817239c480b4437d1ad438b42bedafb6ce
+    engine: gotpl
+    home: https://www.getambassador.io/
+    icon: https://www.getambassador.io/images/logo.png
+    keywords:
+    - api gateway
+    - ambassador
+    - datawire
+    - envoy
+    maintainers:
+    - email: markus@maga.se
+      name: flydiverny
+    - email: flynn@datawire.io
+      name: Flynn
+    name: ambassador
+    sources:
+    - https://github.com/datawire/ambassador
+    - https://github.com/prometheus/statsd_exporter
+    urls:
+    - https://charts.helm.sh/stable/packages/ambassador-1.1.2.tgz
+    version: 1.1.2
+  - apiVersion: v1
+    appVersion: 0.50.1
+    created: 2019-02-14T16:55:51.519137859Z
+    description: A Helm chart for Datawire Ambassador
+    digest: 23a11f42860d9165f0d816216237f3bd0498893034ef89f8a4a9bea3610d9440
+    engine: gotpl
+    home: https://www.getambassador.io/
+    icon: https://www.getambassador.io/images/logo.png
+    keywords:
+    - api gateway
+    - ambassador
+    - datawire
+    - envoy
+    maintainers:
+    - email: markus@maga.se
+      name: flydiverny
+    - email: flynn@datawire.io
+      name: Flynn
+    name: ambassador
+    sources:
+    - https://github.com/datawire/ambassador
+    - https://github.com/prometheus/statsd_exporter
+    urls:
+    - https://charts.helm.sh/stable/packages/ambassador-1.1.1.tgz
+    version: 1.1.1
+  - apiVersion: v1
+    appVersion: 0.50.1
+    created: 2019-02-14T15:25:43.743494162Z
+    description: A Helm chart for Datawire Ambassador
+    digest: 01da3c15cdec999b5afd73ee9186c62859c35a716688359c425fc04100a22144
+    engine: gotpl
+    home: https://www.getambassador.io/
+    keywords:
+    - api gateway
+    - ambassador
+    - datawire
+    - envoy
+    maintainers:
+    - email: markus@maga.se
+      name: flydiverny
+    - email: flynn@datawire.io
+      name: kflynn
+    name: ambassador
+    sources:
+    - https://github.com/datawire/ambassador
+    - https://github.com/prometheus/statsd_exporter
+    urls:
+    - https://charts.helm.sh/stable/packages/ambassador-1.1.0.tgz
+    version: 1.1.0
+  - apiVersion: v1
+    appVersion: 0.50.1
+    description: A Helm chart for Datawire Ambassador
+    digest: aa09c62be843190cc85736ba59d6411579d83ba30e9305e6b2420ea013bb5979
+    engine: gotpl
+    home: https://www.getambassador.io/
+    keywords:
+    - api gateway
+    - ambassador
+    - datawire
+    - envoy
+    maintainers:
+    - email: markus@maga.se
+      name: flydiverny
+    - email: flynn@datawire.io
+      name: kflynn
+    name: ambassador
+    sources:
+    - https://github.com/datawire/ambassador
+    - https://github.com/prometheus/statsd_exporter
+    urls:
+    - https://charts.helm.sh/stable/packages/ambassador-1.0.0.tgz
+    version: 1.0.0

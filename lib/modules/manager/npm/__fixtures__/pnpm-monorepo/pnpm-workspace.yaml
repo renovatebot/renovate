@@ -1,0 +1,10 @@
+packages:
+  # all packages in subdirs of packages/
+  - 'nested-packages/**'
+  - 'non-nested-packages/*'
+  - 'solo-package'
+  - 'solo-package-trailing-slash/'
+  - './solo-package-leading-dot-slash'
+  - '../pnpm-monorepo/solo-package-leading-double-dot-slash'
+  - 'test/*'
+  - 'tests/*'

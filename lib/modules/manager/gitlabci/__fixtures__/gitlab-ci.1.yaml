@@ -1,0 +1,9 @@
+image:
+  # comment
+  name: renovate/renovate:19.70.8-slim
+
+services:
+  # comment
+  - mariadb:10.4.11
+  # another comment
+  - other/image:1.0.0

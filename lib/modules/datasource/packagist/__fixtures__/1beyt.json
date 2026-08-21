@@ -1,0 +1,127 @@
+{
+  "packages": {
+    "wpackagist-plugin/1beyt": {
+      "1.0": {
+        "name": "wpackagist-plugin/1beyt",
+        "version": "1.0",
+        "version_normalized": "1.0.0.0",
+        "uid": 590,
+        "dist": {
+          "type": "zip",
+          "url": "https://downloads.wordpress.org/plugin/1beyt.1.0.zip"
+        },
+        "source": {
+          "type": "svn",
+          "url": "https://plugins.svn.wordpress.org/1beyt/",
+          "reference": "tags/1.0"
+        },
+        "homepage": "https://wordpress.org/plugins/1beyt/",
+        "require": {
+          "composer/installers": "~1.0"
+        },
+        "type": "wordpress-plugin"
+      },
+      "1.1": {
+        "name": "wpackagist-plugin/1beyt",
+        "version": "1.1",
+        "version_normalized": "1.1.0.0",
+        "uid": 591,
+        "dist": {
+          "type": "zip",
+          "url": "https://downloads.wordpress.org/plugin/1beyt.1.1.zip"
+        },
+        "source": {
+          "type": "svn",
+          "url": "https://plugins.svn.wordpress.org/1beyt/",
+          "reference": "tags/1.1"
+        },
+        "homepage": "https://wordpress.org/plugins/1beyt/",
+        "require": {
+          "composer/installers": "~1.0"
+        },
+        "type": "wordpress-plugin"
+      },
+      "1.4": {
+        "name": "wpackagist-plugin/1beyt",
+        "version": "1.4",
+        "version_normalized": "1.4.0.0",
+        "uid": 592,
+        "dist": {
+          "type": "zip",
+          "url": "https://downloads.wordpress.org/plugin/1beyt.1.4.zip"
+        },
+        "source": {
+          "type": "svn",
+          "url": "https://plugins.svn.wordpress.org/1beyt/",
+          "reference": "tags/1.4"
+        },
+        "homepage": "https://wordpress.org/plugins/1beyt/",
+        "require": {
+          "composer/installers": "~1.0"
+        },
+        "type": "wordpress-plugin"
+      },
+      "1.5": {
+        "name": "wpackagist-plugin/1beyt",
+        "version": "1.5",
+        "version_normalized": "1.5.0.0",
+        "uid": 593,
+        "dist": {
+          "type": "zip",
+          "url": "https://downloads.wordpress.org/plugin/1beyt.1.5.zip"
+        },
+        "source": {
+          "type": "svn",
+          "url": "https://plugins.svn.wordpress.org/1beyt/",
+          "reference": "tags/1.5"
+        },
+        "homepage": "https://wordpress.org/plugins/1beyt/",
+        "require": {
+          "composer/installers": "~1.0"
+        },
+        "type": "wordpress-plugin"
+      },
+      "1.5.1": {
+        "name": "wpackagist-plugin/1beyt",
+        "version": "1.5.1",
+        "version_normalized": "1.5.1.0",
+        "uid": 594,
+        "dist": {
+          "type": "zip",
+          "url": "https://downloads.wordpress.org/plugin/1beyt.1.5.1.zip"
+        },
+        "source": {
+          "type": "svn",
+          "url": "https://plugins.svn.wordpress.org/1beyt/",
+          "reference": "tags/1.5.1"
+        },
+        "homepage": "https://wordpress.org/plugins/1beyt/",
+        "require": {
+          "composer/installers": "~1.0"
+        },
+        "type": "wordpress-plugin"
+      },
+      "dev-trunk": {
+        "name": "wpackagist-plugin/1beyt",
+        "version": "dev-trunk",
+        "version_normalized": "9999999-dev",
+        "uid": 595,
+        "time": "2018-09-03 21:31:30",
+        "dist": {
+          "type": "zip",
+          "url": "https://downloads.wordpress.org/plugin/1beyt.zip?timestamp=1536010290"
+        },
+        "source": {
+          "type": "svn",
+          "url": "https://plugins.svn.wordpress.org/1beyt/",
+          "reference": "trunk"
+        },
+        "homepage": "https://wordpress.org/plugins/1beyt/",
+        "require": {
+          "composer/installers": "~1.0"
+        },
+        "type": "wordpress-plugin"
+      }
+    }
+  }
+}

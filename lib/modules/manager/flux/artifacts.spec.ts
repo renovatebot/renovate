@@ -1,0 +1,185 @@
+import { mockExecAll } from '~test/exec-util.ts';
+import { fs } from '~test/util.ts';
+import { GlobalConfig } from '../../../config/global.ts';
+import { updateArtifacts } from './index.ts';
+
+vi.mock('../../../util/fs/index.ts');
+
+describe('modules/manager/flux/artifacts', () => {
+  beforeAll(() => {
+    GlobalConfig.set({
+      localDir: '',
+      binarySource: 'global',
+    });
+  });
+
+  it('replaces existing value', async () => {
+    const snapshots = mockExecAll({ stdout: 'test', stderr: '' });
+    fs.readLocalFile.mockResolvedValueOnce('old');
+
+    const res = await updateArtifacts({
+      packageFileName: 'clusters/my-cluster/flux-system/gotk-components.yaml',
+      updatedDeps: [
+        {
+          newVersion: '1.0.1',
+          managerData: {
+            components:
+              'source-controller,kustomize-controller,helm-controller,notification-controller',
+          },
+        },
+      ],
+      newPackageFileContent: '',
+      config: {},
+    });
+
+    expect(res).toEqual([
+      {
+        file: {
+          type: 'addition',
+          path: 'clusters/my-cluster/flux-system/gotk-components.yaml',
+          contents: 'test',
+        },
+      },
+    ]);
+    expect(fs.writeLocalFile).toHaveBeenCalledWith(
+      'clusters/my-cluster/flux-system/gotk-components.yaml',
+      'test',
+    );
+    expect(snapshots).toMatchObject([
+      {
+        cmd: {
+          command: [
+            'flux',
+            'install',
+            '--export',
+            '--components',
+            'source-controller,kustomize-controller,helm-controller,notification-controller',
+          ],
+        },
+      },
+    ]);
+  });
+
+  it('detects system manifests in subdirectories', async () => {
+    const snapshots = mockExecAll({ stdout: 'test', stderr: '' });
+    fs.readLocalFile.mockResolvedValueOnce('old');
+
+    const res = await updateArtifacts({
+      packageFileName:
+        'clusters/my-cluster/flux-system/gitops-toolkit/gotk-components.yaml',
+      updatedDeps: [
+        {
+          newVersion: '1.0.1',
+          managerData: {
+            components:
+              'source-controller,kustomize-controller,helm-controller,notification-controller',
+          },
+        },
+      ],
+      newPackageFileContent: '',
+      config: {},
+    });
+
+    expect(res).toEqual([
+      {
+        file: {
+          type: 'addition',
+          path: 'clusters/my-cluster/flux-system/gitops-toolkit/gotk-components.yaml',
+          contents: 'test',
+        },
+      },
+    ]);
+    expect(snapshots).toMatchObject([
+      {
+        cmd: {
+          command: [
+            'flux',
+            'install',
+            '--export',
+            '--components',
+            'source-controller,kustomize-controller,helm-controller,notification-controller',
+          ],
+        },
+      },
+    ]);
+  });
+
+  it('ignores non-system manifests', async () => {
+    const res = await updateArtifacts({
+      packageFileName: 'not-a-system-manifest.yaml',
+      updatedDeps: [{ newVersion: '1.0.1' }],
+      newPackageFileContent: '',
+      config: {},
+    });
+
+    expect(res).toBeNull();
+  });
+
+  it('ignores unchanged system manifests', async () => {
+    const execSnapshots = mockExecAll({ stdout: 'old', stderr: '' });
+    fs.readLocalFile.mockResolvedValueOnce('old');
+    const res = await updateArtifacts({
+      packageFileName: 'clusters/my-cluster/flux-system/gotk-components.yaml',
+      updatedDeps: [{ newVersion: '1.0.1' }],
+      newPackageFileContent: '',
+      config: {},
+    });
+
+    expect(res).toBeNull();
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: { command: ['flux', 'install', '--export'] },
+      },
+    ]);
+  });
+
+  it('ignores system manifests without a new version', async () => {
+    const res = await updateArtifacts({
+      packageFileName: 'clusters/my-cluster/flux-system/gotk-components.yaml',
+      updatedDeps: [{ newVersion: undefined }],
+      newPackageFileContent: '',
+      config: {},
+    });
+
+    expect(res).toBeNull();
+  });
+
+  it('failed to generate system manifest', async () => {
+    mockExecAll(new Error('failed'));
+    const res = await updateArtifacts({
+      packageFileName: 'clusters/my-cluster/flux-system/gotk-components.yaml',
+      updatedDeps: [{ newVersion: '1.0.1' }],
+      newPackageFileContent: '',
+      config: {},
+    });
+
+    expect(res).toStrictEqual([
+      {
+        artifactError: {
+          fileName: 'clusters/my-cluster/flux-system/gotk-components.yaml',
+          stderr: 'failed',
+        },
+      },
+    ]);
+  });
+
+  it('failed to read system manifest', async () => {
+    mockExecAll({ stdout: '', stderr: 'Error' });
+    fs.readLocalFile.mockResolvedValueOnce('old');
+    const res = await updateArtifacts({
+      packageFileName: 'clusters/my-cluster/flux-system/gotk-components.yaml',
+      updatedDeps: [{ newVersion: '1.0.1' }],
+      newPackageFileContent: '',
+      config: {},
+    });
+
+    expect(res).toStrictEqual([
+      {
+        artifactError: {
+          fileName: 'clusters/my-cluster/flux-system/gotk-components.yaml',
+          stderr: 'Error',
+        },
+      },
+    ]);
+  });
+});

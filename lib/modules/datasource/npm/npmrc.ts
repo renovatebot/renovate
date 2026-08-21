@@ -1,0 +1,191 @@
+import { isNonEmptyString, isString } from '@sindresorhus/is';
+import ini from 'ini';
+import { GlobalConfig } from '../../../config/global.ts';
+import type { PackageRule } from '../../../config/types.ts';
+import { logger } from '../../../logger/index.ts';
+import type { HostRule } from '../../../types/index.ts';
+import { getEnv } from '../../../util/env.ts';
+import * as hostRules from '../../../util/host-rules.ts';
+import { regEx } from '../../../util/regex.ts';
+import { fromBase64 } from '../../../util/string.ts';
+import { ensureTrailingSlash, isHttpUrl } from '../../../util/url.ts';
+import { defaultRegistryUrl } from './common.ts';
+import type { NpmrcRules } from './types.ts';
+
+let npmrc: Record<string, any> = {};
+let npmrcRaw = '';
+let packageRules: PackageRule[] = [];
+
+function envReplace(value: any, env = getEnv()): any {
+  /* v8 ignore next 3 -- TODO: add test */
+  if (!isString(value)) {
+    return value;
+  }
+
+  const ENV_EXPR = regEx(/(\\*)\$\{([^}]+)\}/g);
+
+  return value.replace(ENV_EXPR, (match, _esc, envVarName) => {
+    if (env[envVarName] === undefined) {
+      logger.warn({ match }, 'Failed to replace env in config');
+      throw new Error('env-replace');
+    }
+    return env[envVarName];
+  });
+}
+
+export function getMatchHostFromNpmrcHost(input: string): string {
+  if (input.startsWith('//')) {
+    const matchHost = input.replace('//', '');
+    if (matchHost.includes('/')) {
+      return `https://${matchHost}`;
+    }
+    return matchHost;
+  }
+  return input;
+}
+
+export function convertNpmrcToRules(npmrc: Record<string, any>): NpmrcRules {
+  const rules: NpmrcRules = {
+    hostRules: [],
+    packageRules: [],
+  };
+  // Generate hostRules
+  const hostType = 'npm';
+  const hosts: Record<string, HostRule> = {};
+  for (const [key, value] of Object.entries(npmrc)) {
+    if (!isNonEmptyString(value)) {
+      continue;
+    }
+    const keyParts = key.split(':');
+    const keyType = keyParts.pop();
+    let matchHost = '';
+    if (keyParts.length) {
+      matchHost = getMatchHostFromNpmrcHost(keyParts.join(':'));
+    }
+    const rule: HostRule = hosts[matchHost] || {};
+    if (keyType === '_authToken' || keyType === '_auth') {
+      rule.token = value;
+      if (keyType === '_auth') {
+        rule.authType = 'Basic';
+      }
+    } else if (keyType === 'username') {
+      rule.username = value;
+    } else if (keyType === '_password') {
+      rule.password = fromBase64(value);
+    } else {
+      continue; // don't add the rule
+    }
+    hosts[matchHost] = rule;
+  }
+  for (const [matchHost, rule] of Object.entries(hosts)) {
+    const hostRule = { ...rule, hostType };
+    if (matchHost) {
+      hostRule.matchHost = matchHost;
+    }
+    rules.hostRules?.push(hostRule);
+  }
+  // Generate packageRules
+  const matchDatasources = ['npm'];
+  const { registry } = npmrc;
+  // packageRules order matters, so look for a default registry first
+  if (isNonEmptyString(registry)) {
+    if (isHttpUrl(registry)) {
+      // Default registry
+      rules.packageRules?.push({
+        matchDatasources,
+        registryUrls: [registry],
+      });
+    } else {
+      logger.warn({ registry }, 'Invalid npmrc registry= URL');
+    }
+  }
+  // Now look for scoped registries
+  for (const [key, value] of Object.entries(npmrc)) {
+    if (!isNonEmptyString(value)) {
+      continue;
+    }
+    const keyParts = key.split(':');
+    const keyType = keyParts.pop();
+    if (keyType === 'registry' && keyParts.length && isNonEmptyString(value)) {
+      const scope = keyParts.join(':');
+      if (isHttpUrl(value)) {
+        rules.packageRules?.push({
+          matchDatasources,
+          matchPackageNames: [`${scope}/**`],
+          registryUrls: [value],
+        });
+      } else {
+        logger.warn({ scope, registry: value }, 'Invalid npmrc registry= URL');
+      }
+    }
+  }
+  return rules;
+}
+
+export function setNpmrc(input?: string): void {
+  if (input) {
+    if (input === npmrcRaw) {
+      return;
+    }
+    const existingNpmrc = npmrc;
+    npmrcRaw = input;
+    logger.debug('Setting npmrc');
+    npmrc = ini.parse(input.replace(regEx(/\\n/g), '\n'));
+    const exposeAllEnv = GlobalConfig.get('exposeAllEnv');
+    for (const [key, val] of Object.entries(npmrc)) {
+      if (
+        !exposeAllEnv &&
+        key.endsWith('registry') &&
+        isString(val) &&
+        val.includes('localhost')
+      ) {
+        logger.debug(
+          { key, val },
+          'Detected localhost registry - rejecting npmrc file',
+        );
+        npmrc = existingNpmrc;
+        return;
+      }
+    }
+    if (exposeAllEnv) {
+      for (const key of Object.keys(npmrc)) {
+        npmrc[key] = envReplace(npmrc[key]);
+      }
+    }
+    const npmrcRules = convertNpmrcToRules(npmrc);
+    if (npmrcRules.hostRules?.length) {
+      npmrcRules.hostRules.forEach((hostRule) => hostRules.add(hostRule));
+    }
+    packageRules = npmrcRules.packageRules;
+  } else if (npmrc) {
+    logger.debug('Resetting npmrc');
+    npmrc = {};
+    npmrcRaw = '';
+    packageRules = [];
+  }
+}
+
+export function resolveRegistryUrl(packageName: string): string {
+  let registryUrl = defaultRegistryUrl;
+  for (const rule of packageRules) {
+    const { matchPackageNames, registryUrls } = rule;
+    if (
+      !matchPackageNames ||
+      packageName.startsWith(matchPackageNames[0].replace(regEx(/\*\*$/), ''))
+    ) {
+      // TODO: fix types #22198
+      registryUrl = registryUrls![0];
+    }
+  }
+  return registryUrl;
+}
+
+export function resolvePackageUrl(
+  registryUrl: string,
+  packageName: string,
+): string {
+  return new URL(
+    encodeURIComponent(packageName).replace(regEx(/^%40/), '@'),
+    ensureTrailingSlash(registryUrl),
+  ).href;
+}

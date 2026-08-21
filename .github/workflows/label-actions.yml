@@ -1,0 +1,23 @@
+name: 'Label Actions'
+
+on:
+  issues:
+    types: [labeled]
+  discussion:
+    types: [labeled]
+  pull_request_target:
+    types: [labeled]
+
+permissions:
+  contents: read
+  issues: write
+  discussions: write
+  pull-requests: write
+
+jobs:
+  reaction:
+    runs-on: ubuntu-slim
+    steps:
+      - uses: dessant/label-actions@65225c179d3b2502f6eda7b3d15101a3f412366b # v5.0.3
+        with:
+          github-token: ${{ github.token }}

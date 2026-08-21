@@ -1,0 +1,25 @@
+[[tool.poetry.source]]
+name = "one"
+url = "https://some.url"
+
+[[tool.poetry.source]]
+name = "two"
+url = "https://another.url"
+
+[[tool.poetry.source]]
+url = "https://missingname.url"
+
+[[tool.poetry.source]]
+name = "four-oh.four"
+url = "https://last.url"
+
+[[tool.poetry.source]]
+name = "five"
+
+[[tool.poetry.source]]
+name = "invalid-url"
+url = "invalid-url"
+
+[build-system]
+requires = ["poetry_core>=1.0", "wheel"]
+build-backend = "poetry.masonry.api"

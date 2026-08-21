@@ -1,0 +1,70 @@
+import { logger } from '../../logger/index.ts';
+import type {
+  LookupUpdateConfig,
+  UpdateResult,
+} from '../../workers/repository/process/lookup/types.ts';
+import { getDatasourceFor } from './common.ts';
+import { Datasource } from './datasource.ts';
+import type { Release } from './types.ts';
+
+type Config = Partial<LookupUpdateConfig & UpdateResult>;
+
+export async function postprocessRelease(
+  config: Config,
+  release: Release,
+): Promise<Release | null> {
+  const { datasource } = config;
+
+  const ds = datasource && getDatasourceFor(datasource);
+  if (!ds) {
+    logger.once.warn(
+      { datasource },
+      'Failed to resolve datasource during release postprocessing',
+    );
+    return release;
+  }
+
+  if (
+    ds.constructor.prototype.postprocessRelease ===
+    Datasource.prototype.postprocessRelease
+  ) {
+    return release;
+  }
+
+  const { packageName } = config;
+  if (!packageName) {
+    logger.once.warn(
+      { datasource },
+      'Release postprocessing is not supported for empty `packageName` field',
+    );
+    return release;
+  }
+
+  const registryUrl = config.registryUrl ?? config.registryUrls?.at(0) ?? null;
+
+  try {
+    const result = await ds.postprocessRelease(
+      { packageName, registryUrl },
+      release,
+    );
+
+    if (result === 'reject') {
+      logger.debug(
+        {
+          datasource,
+          packageName,
+          registryUrl,
+          version: release.version,
+          versionOrig: release.versionOrig,
+        },
+        'Rejected release',
+      );
+      return null;
+    }
+
+    return result;
+  } catch (err) {
+    logger.once.warn({ err, datasource }, 'Release interceptor failed');
+    return release;
+  }
+}

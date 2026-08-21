@@ -1,0 +1,114 @@
+import { isString } from '@sindresorhus/is';
+import type { AllConfig } from '../../config/types.ts';
+import { logger } from '../../logger/index.ts';
+import {
+  type AutodiscoverConfig,
+  platform,
+} from '../../modules/platform/index.ts';
+import { matchRegexOrGlobList } from '../../util/string-match.ts';
+
+// istanbul ignore next
+function repoName(value: string | { repository: string }): string {
+  return String(isString(value) ? value : value.repository).toLowerCase();
+}
+
+export async function autodiscoverRepositories(
+  config: AllConfig,
+): Promise<AllConfig> {
+  const { autodiscoverFilter } = config;
+  if (config.platform === 'local') {
+    if (config.repositories?.length) {
+      logger.debug(
+        { repositories: config.repositories },
+        'Found repositories when in local mode',
+      );
+      throw new Error(
+        'Invalid configuration: repositories list not supported when platform=local',
+      );
+    }
+    config.repositories = ['local'];
+    return config;
+  }
+  if (!config.autodiscover) {
+    if (!config.repositories?.length) {
+      logger.warn(
+        'No repositories found - did you want to run with flag --autodiscover?',
+      );
+    }
+    return config;
+  }
+  // Autodiscover list of repositories
+  const autodiscoverConfig: AutodiscoverConfig = {
+    topics: config.autodiscoverTopics,
+    sort: config.autodiscoverRepoSort,
+    order: config.autodiscoverRepoOrder,
+    includeMirrors: config.includeMirrors,
+    namespaces: config.autodiscoverNamespaces,
+    projects: config.autodiscoverProjects,
+  };
+  logger.debug(
+    { autodiscoverConfig },
+    `Attempting to autodiscover ${config.platform} repositories`,
+  );
+  let discovered = await platform.getRepos(autodiscoverConfig);
+  if (!discovered?.length) {
+    // Soft fail (no error thrown) if no accessible repositories
+    logger.debug('No repositories were autodiscovered');
+    return config;
+  }
+
+  logger.debug(`Autodiscovered ${discovered.length} repositories`);
+  logger.trace(
+    { length: discovered.length, repositories: discovered },
+    `Autodiscovered repositories`,
+  );
+
+  if (autodiscoverFilter) {
+    logger.debug({ autodiscoverFilter }, 'Applying autodiscoverFilter');
+    discovered = applyFilters(
+      discovered,
+      isString(autodiscoverFilter) ? [autodiscoverFilter] : autodiscoverFilter,
+    );
+
+    if (!discovered.length) {
+      // Soft fail (no error thrown) if no accessible repositories match the filter
+      logger.debug('None of the discovered repositories matched the filter');
+      return config;
+    }
+  }
+
+  logger.info(
+    { length: discovered.length, repositories: discovered },
+    `Autodiscovered repositories`,
+  );
+
+  // istanbul ignore if
+  if (config.repositories?.length) {
+    logger.debug(
+      'Checking autodiscovered repositories against configured repositories',
+    );
+    for (const configuredRepo of config.repositories) {
+      const repository = repoName(configuredRepo);
+      let found = false;
+      for (let i = discovered.length - 1; i > -1; i -= 1) {
+        if (repository === repoName(discovered[i])) {
+          found = true;
+          logger.debug({ repository }, 'Using configured repository settings');
+          // TODO: fix typings
+          discovered[i] = configuredRepo as never;
+        }
+      }
+      if (!found) {
+        logger.warn(
+          { repository },
+          'Configured repository is in not in autodiscover list',
+        );
+      }
+    }
+  }
+  return { ...config, repositories: discovered };
+}
+
+export function applyFilters(repos: string[], filters: string[]): string[] {
+  return repos.filter((repo) => matchRegexOrGlobList(repo, filters));
+}

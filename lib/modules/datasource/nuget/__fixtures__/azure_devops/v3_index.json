@@ -1,0 +1,14 @@
+{
+  "resources": [
+    {
+      "@id": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2-semver2/",
+      "@type": "RegistrationsBaseUrl/3.6.0",
+      "comment": "This base URL includes SemVer 2.0.0 packages."
+    },
+    {
+      "@id": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/flat2/",
+      "@type": "PackageBaseAddress/3.0.0"
+    }
+  ],
+  "version": "3.0.0-beta"
+}

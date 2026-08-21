@@ -1,0 +1,340 @@
+{
+  "base_url": "https://storage.googleapis.com/flutter_infra_release/releases",
+  "current_release": {
+    "beta": "680962aa75a3c0ea8a55c57adc98944f5558bafd",
+    "dev": "b101bfe32f634566e7cb2791a9efe19cf8828b15",
+    "stable": "7e9793dee1b85a243edd0e06cb1658e98b077561"
+  },
+  "releases": [
+    {
+      "hash": "680962aa75a3c0ea8a55c57adc98944f5558bafd",
+      "channel": "beta",
+      "version": "2.12.0-4.1.pre",
+      "dart_sdk_version": "2.17.0 (build 2.17.0-182.1.beta)",
+      "dart_sdk_arch": "x64",
+      "release_date": "2022-03-17T23:45:13.673618Z",
+      "archive": "beta/linux/flutter_linux_2.12.0-4.1.pre-beta.tar.xz",
+      "sha256": "20e47459bcaade0d9bb850e30fc3525bb48183e32819ec85f244d99ce4e0b9be"
+    },
+    {
+      "hash": "7e9793dee1b85a243edd0e06cb1658e98b077561",
+      "channel": "stable",
+      "version": "2.10.3",
+      "dart_sdk_version": "2.16.1",
+      "dart_sdk_arch": "x64",
+      "release_date": "2022-03-03T02:51:02.356833Z",
+      "archive": "stable/linux/flutter_linux_2.10.3-stable.tar.xz",
+      "sha256": "7e2a28d14d7356a5bbfe516f8a7c9fc0353f85fe69e5cf6af22be2c7c8b45566"
+    },
+    {
+      "hash": "097d3313d8e2c7f901932d63e537c1acefb87800",
+      "channel": "stable",
+      "version": "2.10.2",
+      "dart_sdk_version": "2.16.1",
+      "dart_sdk_arch": "x64",
+      "release_date": "2022-02-19T04:37:38.591434Z",
+      "archive": "stable/linux/flutter_linux_2.10.2-stable.tar.xz",
+      "sha256": "03de160d1c30730a248cb5e168ec2de60f883d7e365e6cf57b27786e85436c0f"
+    },
+    {
+      "hash": "b101bfe32f634566e7cb2791a9efe19cf8828b15",
+      "channel": "beta",
+      "version": "2.11.0-0.1.pre",
+      "dart_sdk_version": "2.17.0 (build 2.17.0-69.2.beta)",
+      "dart_sdk_arch": "x64",
+      "release_date": "2022-02-16T18:34:51.633640Z",
+      "archive": "beta/linux/flutter_linux_2.11.0-0.1.pre-beta.tar.xz",
+      "sha256": "bec1059e76b08c8e083ca1305125994265a7037c09fe9e64c7516b99eb2ed8f9"
+    },
+    {
+      "hash": "b101bfe32f634566e7cb2791a9efe19cf8828b15",
+      "channel": "dev",
+      "version": "2.11.0-0.1.pre",
+      "dart_sdk_version": "2.17.0 (build 2.17.0-69.2.beta)",
+      "dart_sdk_arch": "x64",
+      "release_date": "2022-02-16T18:34:15.586108Z",
+      "archive": "dev/linux/flutter_linux_2.11.0-0.1.pre-dev.tar.xz",
+      "sha256": "d7511ebd1d978105022828b1690dd9d4e28fbb80f1b2dc83a33e463107d1bbd7"
+    },
+    {
+      "hash": "db747aa1331bd95bc9b3874c842261ca2d302cd5",
+      "channel": "stable",
+      "version": "2.10.1",
+      "dart_sdk_version": "2.16.1",
+      "dart_sdk_arch": "x64",
+      "release_date": "2022-02-10T01:18:38.655778Z",
+      "archive": "stable/linux/flutter_linux_2.10.1-stable.tar.xz",
+      "sha256": "ad27f0720943576aef265d748fb141c805a6821776158c6b9648189ef44ee786"
+    },
+    {
+      "hash": "5f105a6ca7a5ac7b8bc9b241f4c2d86f4188cf5c",
+      "channel": "stable",
+      "version": "2.10.0",
+      "dart_sdk_version": "2.16.0",
+      "dart_sdk_arch": "x64",
+      "release_date": "2022-02-03T16:29:13.224211Z",
+      "archive": "stable/linux/flutter_linux_2.10.0-stable.tar.xz",
+      "sha256": "e1912964f1959e2b272bd413d68e06d86e8289f95812587e7b7f97f28767c755"
+    },
+    {
+      "hash": "fdd0af78bbda27e1084ec859b27765d927cbe27e",
+      "channel": "beta",
+      "version": "2.10.0-0.3.pre",
+      "dart_sdk_version": "2.16.0 (build 2.16.0-134.5.beta)",
+      "release_date": "2022-01-27T01:12:24.134119Z",
+      "archive": "beta/linux/flutter_linux_2.10.0-0.3.pre-beta.tar.xz",
+      "sha256": "eee2e893b1ed49935cfe5b2aaf1a86dbc71ed5c4ba116a968e4ee23ad5b2d222"
+    },
+    {
+      "hash": "fdd0af78bbda27e1084ec859b27765d927cbe27e",
+      "channel": "dev",
+      "version": "2.10.0-0.3.pre",
+      "dart_sdk_version": "2.16.0 (build 2.16.0-134.5.beta)",
+      "release_date": "2022-01-26T17:38:52.793908Z",
+      "archive": "dev/linux/flutter_linux_2.10.0-0.3.pre-dev.tar.xz",
+      "sha256": "df91f71201533c88bfb40e24a22f53d35e7c72f6812463fcf2a9ec3db590bf1a"
+    },
+    {
+      "hash": "73adb1406a9cff796e2203ad16fd285220a6ec97",
+      "channel": "dev",
+      "version": "2.10.0-0.2.pre",
+      "dart_sdk_version": "2.16.0 (build 2.16.0-134.1.beta)",
+      "release_date": "2022-01-20T21:48:07.280310Z",
+      "archive": "dev/linux/flutter_linux_2.10.0-0.2.pre-dev.tar.xz",
+      "sha256": "645c726f079392088ba1e16fb865e4cf8ef4bb8533262816a29b8d331765afc4"
+    },
+    {
+      "hash": "73adb1406a9cff796e2203ad16fd285220a6ec97",
+      "channel": "beta",
+      "version": "2.10.0-0.2.pre",
+      "dart_sdk_version": "2.16.0 (build 2.16.0-134.1.beta)",
+      "release_date": "2022-01-20T21:46:01.134110Z",
+      "archive": "beta/linux/flutter_linux_2.10.0-0.2.pre-beta.tar.xz",
+      "sha256": "4976263f58c88340e694c837693f91b38fd98c2f9d082e2dcd87cecc802ed468"
+    },
+    {
+      "hash": "628f0e3f3a01d6e6b5fd8c2d7b8f0d58883b6673",
+      "channel": "dev",
+      "version": "2.10.0-0.1.pre",
+      "dart_sdk_version": "2.16.0 (build 2.16.0-134.1.beta)",
+      "release_date": "2022-01-12T20:49:45.416529Z",
+      "archive": "dev/linux/flutter_linux_2.10.0-0.1.pre-dev.tar.xz",
+      "sha256": "631ca3179bf9cb306f8a1f80306b2c1ee434adae0d151bc56459b91297c66b1d"
+    },
+    {
+      "hash": "628f0e3f3a01d6e6b5fd8c2d7b8f0d58883b6673",
+      "channel": "beta",
+      "version": "2.10.0-0.1.pre",
+      "dart_sdk_version": "2.16.0 (build 2.16.0-134.1.beta)",
+      "release_date": "2022-01-12T20:48:23.538023Z",
+      "archive": "beta/linux/flutter_linux_2.10.0-0.1.pre-beta.tar.xz",
+      "sha256": "420aff6a8648182aa3857d548bf46d88cff4f92bc58a56dd3af4ead4c4b5e31c"
+    },
+    {
+      "hash": "77d935af4db863f6abd0b9c31c7e6df2a13de57b",
+      "channel": "stable",
+      "version": "2.8.1",
+      "dart_sdk_version": "2.15.1",
+      "dart_sdk_arch": "x64",
+      "release_date": "2021-12-16T19:49:49.658346Z",
+      "archive": "stable/linux/flutter_linux_2.8.1-stable.tar.xz",
+      "sha256": "47ecdcc5481c51a8fb323f154f8044cb309d55fa8614a97c89bc7c08e43abe01"
+    },
+    {
+      "hash": "8f1f9c10f04b8f106d78275e93ceead8ea837d8b",
+      "channel": "beta",
+      "version": "2.9.0-0.1.pre",
+      "release_date": "2021-12-15T00:49:29.119269Z",
+      "archive": "beta/linux/flutter_linux_2.9.0-0.1.pre-beta.tar.xz",
+      "sha256": "9eb744cba77e7e7ce1c25635a13b78d7517f93d2f65aed710b2f84762363a12f"
+    },
+    {
+      "hash": "8f1f9c10f04b8f106d78275e93ceead8ea837d8b",
+      "channel": "dev",
+      "version": "2.9.0-0.1.pre",
+      "release_date": "2021-12-15T00:44:54.161431Z",
+      "archive": "dev/linux/flutter_linux_2.9.0-0.1.pre-dev.tar.xz",
+      "sha256": "ee374ccea5ba7fd55a29497cd77613ce8d9b10b9277718eadcc2f57c57a3f1eb"
+    },
+    {
+      "hash": "cf4400006550b70f28e4b4af815151d1e74846c6",
+      "channel": "stable",
+      "version": "2.8.0",
+      "dart_sdk_version": "2.15.0",
+      "dart_sdk_arch": "x64",
+      "release_date": "2021-12-09T01:20:18.536950Z",
+      "archive": "stable/linux/flutter_linux_2.8.0-stable.tar.xz",
+      "sha256": "b12cffa3019d08c0796fdf9c016bcb92b7c570822ae7aeb95e8a5de092afd46e"
+    },
+    {
+      "hash": "262b70ece1aebf84f132c51ec4cf90be605ce61b",
+      "channel": "beta",
+      "version": "2.8.0-3.3.pre",
+      "release_date": "2021-12-01T23:27:03.890556Z",
+      "archive": "beta/linux/flutter_linux_2.8.0-3.3.pre-beta.tar.xz",
+      "sha256": "1547e6aea3063e432d3950fe5b845cd2d62f4102691d8f5811f2542102136911"
+    },
+    {
+      "hash": "2901cd720879ba3d7ba7cbd7d447ec9e80f937b6",
+      "channel": "beta",
+      "version": "2.8.0-3.2.pre",
+      "release_date": "2021-11-18T19:56:24.033984Z",
+      "archive": "beta/linux/flutter_linux_2.8.0-3.2.pre-beta.tar.xz",
+      "sha256": "053853352da8bbe503d2b2a4ab02fa45563b31b02654ffaab295e6a123a9634f"
+    },
+    {
+      "hash": "3dab5550407a2c2fe70a762acfdfde93311148de",
+      "channel": "beta",
+      "version": "2.8.0-3.1.pre",
+      "release_date": "2021-11-12T22:37:32.489308Z",
+      "archive": "beta/linux/flutter_linux_2.8.0-3.1.pre-beta.tar.xz",
+      "sha256": "bd1055db762bb8ca3bec0b30ee0364c1a790a67cbe4544cd6d0f0cf7e1890326"
+    },
+    {
+      "hash": "fc7015e35aac7ab785e7ae15a47db5c9e669ec7f",
+      "channel": "beta",
+      "version": "2.7.0-3.1.pre",
+      "release_date": "2021-10-28T01:23:19.625915Z",
+      "archive": "beta/linux/flutter_linux_2.7.0-3.1.pre-beta.tar.xz",
+      "sha256": "f601bfac32ca67729fa86e91a061e230732572285d878480fdeff42de880eed6"
+    },
+    {
+      "hash": "c19845a8c347adebc2c672f5e51b74855e645be2",
+      "channel": "beta",
+      "version": "2.7.0-3.0.pre",
+      "release_date": "2021-10-20T15:31:44.689523Z",
+      "archive": "beta/linux/flutter_linux_2.7.0-3.0.pre-beta.tar.xz",
+      "sha256": "1dbc4da6c23b0ab4f445779fcd370d83f1ee9dee99e569e704552bf23cbcf125"
+    },
+    {
+      "hash": "18116933e77adc82f80866c928266a5b4f1ed645",
+      "channel": "stable",
+      "version": "2.5.3",
+      "dart_sdk_version": "2.14.4",
+      "dart_sdk_arch": "x64",
+      "release_date": "2021-10-15T20:49:17.899307Z",
+      "archive": "stable/linux/flutter_linux_2.5.3-stable.tar.xz",
+      "sha256": "b32d04a9fa5709326b4e724e0de64ff1b2b70268f89dd3c748e6360ac937fe01"
+    },
+    {
+      "hash": "3595343e20a61ff16d14e8ecc25f364276bb1b8b",
+      "channel": "stable",
+      "version": "2.5.2",
+      "dart_sdk_version": "2.14.3",
+      "dart_sdk_arch": "x64",
+      "release_date": "2021-09-30T23:48:47.983504Z",
+      "archive": "stable/linux/flutter_linux_2.5.2-stable.tar.xz",
+      "sha256": "371234b5b9c127fcd3053b4b04e45c0024657d95f7371eb9d9422a7da5297717"
+    },
+    {
+      "hash": "4b330ddbedab445481cc73d50a4695b9154b4e4f",
+      "channel": "dev",
+      "version": "2.6.0-11.0.pre",
+      "release_date": "2021-09-25T04:23:04.133746Z",
+      "archive": "dev/linux/flutter_linux_2.6.0-11.0.pre-dev.tar.xz",
+      "sha256": "e0ecdd71671aa5cfabc4ff951fd33c47c89edce375d4bb203c7dc9a882941c94"
+    },
+    {
+      "hash": "ffb2ecea5223acdd139a5039be2f9c796962833d",
+      "channel": "stable",
+      "version": "2.5.1",
+      "dart_sdk_version": "2.14.2",
+      "dart_sdk_arch": "x64",
+      "release_date": "2021-09-17T21:54:22.188763Z",
+      "archive": "stable/linux/flutter_linux_2.5.1-stable.tar.xz",
+      "sha256": "6267b686d8d1c9297265a8eb3788fa234a4fa9a125e56f58ba8965ade2f9cc8b"
+    },
+    {
+      "hash": "400608f101bcfb21db99ac4d5df763a80c279337",
+      "channel": "beta",
+      "version": "2.6.0-5.2.pre",
+      "release_date": "2021-09-16T01:31:55.213255Z",
+      "archive": "beta/linux/flutter_linux_2.6.0-5.2.pre-beta.tar.xz",
+      "sha256": "1a2d82b9a7934d00d680b6a0a9e09697264dd86ba37d984812c73297f33458e2"
+    },
+    {
+      "hash": "f2903d3da5710368d169577ae4682937fb4f7bc9",
+      "channel": "dev",
+      "version": "2.6.0-5.1.pre",
+      "release_date": "2021-09-13T19:01:48.167401Z",
+      "archive": "dev/linux/flutter_linux_2.6.0-5.1.pre-dev.tar.xz",
+      "sha256": "fbf606acbe6929dadf55a57fe2e9dbfa1e5db877a4db1fdae776ef5079212637"
+    },
+    {
+      "hash": "4cc385b4b84ac2f816d939a49ea1f328c4e0b48e",
+      "channel": "beta",
+      "version": "2.5.0",
+      "dart_sdk_version": "2.14.0",
+      "dart_sdk_arch": "x64",
+      "release_date": "2021-09-10T22:05:24.891384Z",
+      "archive": "beta/linux/flutter_linux_2.5.0-beta.tar.xz",
+      "sha256": "dfbeb9ff78af162f4ae7b14bf863d9e9619cf55fcedf0eb6e396211caeb270fb"
+    },
+    {
+      "hash": "4cc385b4b84ac2f816d939a49ea1f328c4e0b48e",
+      "channel": "stable",
+      "version": "2.5.0",
+      "dart_sdk_version": "2.14.0",
+      "dart_sdk_arch": "x64",
+      "release_date": "2021-09-08T15:47:00.801389Z",
+      "archive": "stable/linux/flutter_linux_2.5.0-stable.tar.xz",
+      "sha256": "ede0f3e947be5b83a2593804b0aeef6f170ca333abc8fefb8b318d9603b9ffda"
+    },
+    {
+      "hash": "a7fb06d6faa2f0ad0da124c79a4eb26ae091baa5",
+      "channel": "beta",
+      "version": "2.5.0-5.3.pre",
+      "release_date": "2021-09-02T17:36:07.377135Z",
+      "archive": "beta/linux/flutter_linux_2.5.0-5.3.pre-beta.tar.xz",
+      "sha256": "ea44bead8c6928e0c1ff5fb4cc943ef35393f6df42ffe1da049d859679137dc7"
+    },
+    {
+      "hash": "83b9e99cfbb8be5215514d7fa21191961b4a620d",
+      "channel": "dev",
+      "version": "2.6.0-0.0.pre",
+      "release_date": "2021-08-26T00:01:48.631915Z",
+      "archive": "dev/linux/flutter_linux_2.6.0-0.0.pre-dev.tar.xz",
+      "sha256": "732dcd19b7abb1d011442331e9a4c3718203ab5d368d377717f38a5ec289f6bb"
+    },
+    {
+      "hash": "19c61fed0da681ba2068c97e22add3bde38e51e4",
+      "channel": "beta",
+      "version": "2.5.0-5.2.pre",
+      "release_date": "2021-08-19T18:36:51.976322Z",
+      "archive": "beta/linux/flutter_linux_2.5.0-5.2.pre-beta.tar.xz",
+      "sha256": "40a09f6393ef5d2cfa0bdcc02981b4cfadc7aba4703b50b84d26f26f380c328d"
+    },
+    {
+      "hash": "225a43d941ddd1753765fec3682011e9ddffb11d",
+      "channel": "dev",
+      "version": "2.5.0-6.0.pre",
+      "release_date": "2021-08-12T23:48:47.162540Z",
+      "archive": "dev/linux/flutter_linux_2.5.0-6.0.pre-dev.tar.xz",
+      "sha256": "960184953bb5ab7371e444acdc7bc3be12ec81e6891a51286ab8e45a0549fe7a"
+    },
+    {
+      "hash": "65cf7de5f45140010a5d2989f5abbbf530708a6b",
+      "channel": "beta",
+      "version": "2.5.0-5.1.pre",
+      "release_date": "2021-08-12T00:33:41.428591Z",
+      "archive": "beta/linux/flutter_linux_2.5.0-5.1.pre-beta.tar.xz",
+      "sha256": "042dccbbf51837c253a7588dc334de0d5e30f4ac6e674938356e64d5d5755512"
+    },
+    {
+      "hash": "0f465e5b2a3ed2431321b490a614c3d15089854c",
+      "channel": "dev",
+      "version": "2.5.0-5.0.pre",
+      "release_date": "2021-08-05T18:54:18.003234Z",
+      "archive": "dev/linux/flutter_linux_2.5.0-5.0.pre-dev.tar.xz",
+      "sha256": "b2c0d6076c9250c2873b61f8518bfc07e4af3dbb1a3e9937d46d20921421428f"
+    },
+    {
+      "hash": "184e5871beea4a9b1cbd65dcc57118a7d97285f3",
+      "channel": "dev",
+      "version": "2.5.0-1.0.pre",
+      "release_date": "2021-07-27T21:03:05.871866Z",
+      "archive": "dev/linux/flutter_linux_2.5.0-1.0.pre-dev.tar.xz",
+      "sha256": "7741b4950a414a1e70d3afb1bbdd5e485476e0afd4a399b8f3be93f6bebdae49"
+    }
+  ]
+}

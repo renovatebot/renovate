@@ -1,0 +1,521 @@
+import { logger, partial } from '~test/util.ts';
+import type { BranchUpgradeConfig } from '../../types.ts';
+import { generateBranchName } from './branch-name.ts';
+
+describe('workers/repository/updates/branch-name', () => {
+  describe('getBranchName()', () => {
+    it('falls back to sharedVariableName if no groupName', () => {
+      const upgrade = partial<BranchUpgradeConfig>({
+        sharedVariableName: 'some variable name',
+        group: {
+          branchName: '{{groupSlug}}-{{branchTopic}}',
+          branchTopic: 'grouptopic',
+        },
+      });
+      generateBranchName(upgrade);
+      expect(upgrade.branchName).toBe('some-variable-name-grouptopic');
+    });
+
+    it('ignores grouping of replacement update', () => {
+      const upgrade = partial<BranchUpgradeConfig>({
+        groupName: 'grouptopic',
+        updateType: 'replacement',
+        depName: 'axios',
+        depNameSanitized: 'axios',
+        branchTopic: '{{depNameSanitized}}-replacement', // default for replacements
+        branchName: '{{branchPrefix}}{{additionalBranchPrefix}}{{branchTopic}}', // default
+      });
+      generateBranchName(upgrade);
+      expect(upgrade.branchName).toBe('axios-replacement');
+      expect(logger.logger.debug).toHaveBeenCalledExactlyOnceWith(
+        { depName: 'axios' },
+        'Ignoring grouped branch name for replacement update',
+      );
+    });
+
+    it('applies grouping for lockfile maintenance update', () => {
+      const upgrade = partial<BranchUpgradeConfig>({
+        groupName: 'my lockfiles',
+        updateType: 'lockFileMaintenance',
+        depName: 'axios',
+        group: {
+          branchName: '{{groupSlug}}-{{branchTopic}}',
+          branchTopic: 'grouptopic',
+        },
+      });
+      generateBranchName(upgrade);
+      expect(upgrade.branchName).toBe(
+        'lock-file-maintenance-my-lockfiles-grouptopic',
+      );
+    });
+
+    it('uses default branch name for lockfile maintenance without groupName', () => {
+      const upgrade = partial<BranchUpgradeConfig>({
+        updateType: 'lockFileMaintenance',
+        depName: 'axios',
+        branchTopic: 'lock-file-maintenance',
+        branchName: '{{branchPrefix}}{{additionalBranchPrefix}}{{branchTopic}}',
+      });
+      generateBranchName(upgrade);
+      expect(upgrade.branchName).toBe('lock-file-maintenance');
+    });
+
+    it('separates lockFileMaintenance from non-lockFileMaintenance with same groupName', () => {
+      const groupConfig = {
+        branchName: '{{groupSlug}}-{{branchTopic}}',
+        branchTopic: 'grouptopic',
+      };
+      const lockFileUpdate = partial<BranchUpgradeConfig>({
+        groupName: 'all',
+        updateType: 'lockFileMaintenance',
+        depName: 'lock-file',
+        group: groupConfig,
+      });
+      const regularUpdate = partial<BranchUpgradeConfig>({
+        groupName: 'all',
+        updateType: 'minor',
+        depName: 'axios',
+        group: groupConfig,
+      });
+      generateBranchName(lockFileUpdate);
+      generateBranchName(regularUpdate);
+      expect(lockFileUpdate.branchName).toBe(
+        'lock-file-maintenance-all-grouptopic',
+      );
+      expect(regularUpdate.branchName).toBe('all-grouptopic');
+      expect(lockFileUpdate.branchName).not.toBe(regularUpdate.branchName);
+    });
+
+    it('uses groupName if no slug defined, ignores sharedVariableName', () => {
+      const upgrade = partial<BranchUpgradeConfig>({
+        groupName: 'some group name',
+        sharedVariableName: 'some variable name',
+        group: {
+          branchName: '{{groupSlug}}-{{branchTopic}}',
+          branchTopic: 'grouptopic',
+        },
+      });
+      generateBranchName(upgrade);
+      expect(upgrade.branchName).toBe('some-group-name-grouptopic');
+    });
+
+    it('compile groupName before slugging', () => {
+      const upgrade = partial<BranchUpgradeConfig>({
+        groupName: '{{parentDir}}',
+        parentDir: 'myService',
+        group: {
+          branchName: '{{groupSlug}}-{{branchTopic}}',
+          branchTopic: 'grouptopic',
+        },
+      });
+      generateBranchName(upgrade);
+      expect(upgrade.branchName).toBe('myservice-grouptopic');
+    });
+
+    it('uses groupSlug if defined', () => {
+      const upgrade = partial<BranchUpgradeConfig>({
+        groupName: 'some group name',
+        groupSlug: 'some group {{parentDir}}',
+        parentDir: 'abc',
+        group: {
+          branchName: '{{groupSlug}}-{{branchTopic}}',
+          branchTopic: 'grouptopic',
+        },
+      });
+      generateBranchName(upgrade);
+      expect(upgrade.branchName).toBe('some-group-abc-grouptopic');
+    });
+
+    it('separates major with groups', () => {
+      const upgrade = partial<BranchUpgradeConfig>({
+        groupName: 'some group name',
+        groupSlug: 'some group slug',
+        updateType: 'major',
+        separateMajorMinor: true,
+        separateMultipleMajor: true,
+        newMajor: 2,
+        group: {
+          branchName: '{{groupSlug}}-{{branchTopic}}',
+          branchTopic: 'grouptopic',
+        },
+      });
+      generateBranchName(upgrade);
+      expect(upgrade.branchName).toBe('major-2-some-group-slug-grouptopic');
+    });
+
+    it('separates minor with groups', () => {
+      const upgrade = partial<BranchUpgradeConfig>({
+        groupName: 'some group name',
+        groupSlug: 'some group slug',
+        updateType: 'minor',
+        separateMultipleMinor: true,
+        newMinor: 1,
+        newMajor: 2,
+        group: {
+          branchName: '{{groupSlug}}-{{branchTopic}}',
+          branchTopic: 'grouptopic',
+        },
+      });
+      generateBranchName(upgrade);
+      expect(upgrade.branchName).toBe('minor-2.1-some-group-slug-grouptopic');
+    });
+
+    it('separates minor when separateMultipleMinor=true', () => {
+      const upgrade = partial<BranchUpgradeConfig>({
+        branchName:
+          '{{{branchPrefix}}}{{{additionalBranchPrefix}}}{{{branchTopic}}}',
+        branchPrefix: 'renovate/',
+        additionalBranchPrefix: '',
+        depNameSanitized: 'lodash',
+        newMajor: 4,
+        separateMinorPatch: true,
+        isPatch: true,
+        newMinor: 17,
+        branchTopic:
+          '{{{depNameSanitized}}}-{{{newMajor}}}{{#if separateMinorPatch}}{{#if isPatch}}.{{{newMinor}}}{{/if}}{{/if}}{{#if separateMultipleMinor}}{{#if isMinor}}.{{{newMinor}}}{{/if}}{{/if}}.x{{#if isLockfileUpdate}}-lockfile{{/if}}',
+        depName: 'dep',
+        group: {},
+      });
+      generateBranchName(upgrade);
+      expect(upgrade.branchName).toBe('renovate/lodash-4.17.x');
+    });
+
+    it('uses single major with groups', () => {
+      const upgrade = partial<BranchUpgradeConfig>({
+        groupName: 'some group name',
+        groupSlug: 'some group slug',
+        updateType: 'major',
+        separateMajorMinor: true,
+        separateMultipleMajor: false,
+        newMajor: 2,
+        group: {
+          branchName: '{{groupSlug}}-{{branchTopic}}',
+          branchTopic: 'grouptopic',
+        },
+      });
+      generateBranchName(upgrade);
+      expect(upgrade.branchName).toBe('major-some-group-slug-grouptopic');
+    });
+
+    it('separates patch groups and uses update topic', () => {
+      const upgrade = partial<BranchUpgradeConfig>({
+        branchName: 'update-branch-{{groupSlug}}-{{branchTopic}}',
+        branchTopic: 'update-topic',
+        groupName: 'some group name',
+        groupSlug: 'some group slug',
+        updateType: 'patch',
+        separateMajorMinor: true,
+        separateMinorPatch: true,
+        newMajor: 2,
+        group: {},
+      });
+      generateBranchName(upgrade);
+      expect(upgrade.branchName).toBe(
+        'update-branch-patch-some-group-slug-update-topic',
+      );
+    });
+
+    it('compiles multiple times', () => {
+      const upgrade = partial<BranchUpgradeConfig>({
+        branchName: '{{branchTopic}}',
+        branchTopic: '{{depName}}',
+        depName: 'dep',
+        group: {},
+      });
+      generateBranchName(upgrade);
+      expect(upgrade.branchName).toBe('dep');
+    });
+
+    it('separates patches when separateMinorPatch=true', () => {
+      const upgrade = partial<BranchUpgradeConfig>({
+        branchName:
+          '{{{branchPrefix}}}{{{additionalBranchPrefix}}}{{{branchTopic}}}',
+        branchPrefix: 'renovate/',
+        additionalBranchPrefix: '',
+        depNameSanitized: 'lodash',
+        newMajor: 4,
+        separateMinorPatch: true,
+        isPatch: true,
+        newMinor: 17,
+        branchTopic:
+          '{{{depNameSanitized}}}-{{{newMajor}}}{{#if separateMinorPatch}}{{#if isPatch}}.{{{newMinor}}}{{/if}}{{/if}}{{#if separateMultipleMinor}}{{#if isMinor}}.{{{newMinor}}}{{/if}}{{/if}}.x{{#if isLockfileUpdate}}-lockfile{{/if}}',
+        depName: 'dep',
+        group: {},
+      });
+      generateBranchName(upgrade);
+      expect(upgrade.branchName).toBe('renovate/lodash-4.17.x');
+    });
+
+    it('does not separate patches when separateMinorPatch=false', () => {
+      const upgrade = partial<BranchUpgradeConfig>({
+        branchName:
+          '{{{branchPrefix}}}{{{additionalBranchPrefix}}}{{{branchTopic}}}',
+        branchPrefix: 'renovate/',
+        additionalBranchPrefix: '',
+        depNameSanitized: 'lodash',
+        newMajor: 4,
+        separateMinorPatch: false,
+        isPatch: true,
+        newMinor: 17,
+        branchTopic:
+          '{{{depNameSanitized}}}-{{{newMajor}}}{{#if separateMinorPatch}}{{#if isPatch}}.{{{newMinor}}}{{/if}}{{/if}}{{#if separateMultipleMinor}}{{#if isMinor}}.{{{newMinor}}}{{/if}}{{/if}}.x{{#if isLockfileUpdate}}-lockfile{{/if}}',
+        depName: 'dep',
+        group: {},
+      });
+      generateBranchName(upgrade);
+      expect(upgrade.branchName).toBe('renovate/lodash-4.x');
+    });
+
+    it('realistic defaults', () => {
+      const upgrade = partial<BranchUpgradeConfig>({
+        branchName:
+          '{{{branchPrefix}}}{{{additionalBranchPrefix}}}{{{branchTopic}}}',
+        branchTopic:
+          '{{{depNameSanitized}}}-{{{newMajor}}}{{#if separateMinorPatch}}{{#if isPatch}}.{{{newMinor}}}{{/if}}{{/if}}{{#if separateMultipleMinor}}{{#if isMinor}}.{{{newMinor}}}{{/if}}{{/if}}.x{{#if isLockfileUpdate}}-lockfile{{/if}}',
+        branchPrefix: 'renovate/',
+        depNameSanitized: 'jest',
+        newMajor: 42,
+        group: {},
+      });
+      generateBranchName(upgrade);
+      expect(upgrade.branchName).toBe('renovate/jest-42.x');
+    });
+
+    it('realistic defaults with strict branch name enabled', () => {
+      const upgrade = partial<BranchUpgradeConfig>({
+        branchNameStrict: true,
+        branchName:
+          '{{{branchPrefix}}}{{{additionalBranchPrefix}}}{{{branchTopic}}}',
+        branchTopic:
+          '{{{depNameSanitized}}}-{{{newMajor}}}{{#if separateMinorPatch}}{{#if isPatch}}.{{{newMinor}}}{{/if}}{{/if}}{{#if separateMultipleMinor}}{{#if isMinor}}.{{{newMinor}}}{{/if}}{{/if}}.x{{#if isLockfileUpdate}}-lockfile{{/if}}',
+        branchPrefix: 'renovate/',
+        depNameSanitized: 'jest',
+        newMajor: 42,
+        group: {},
+      });
+      generateBranchName(upgrade);
+      expect(upgrade.branchName).toBe('renovate/jest-42-x');
+    });
+
+    it('removes slashes from the non-suffix part', () => {
+      const upgrade = partial<BranchUpgradeConfig>({
+        branchNameStrict: true,
+        branchName:
+          '{{{branchPrefix}}}{{{additionalBranchPrefix}}}{{{branchTopic}}}',
+        branchTopic:
+          '{{{depNameSanitized}}}-{{{newMajor}}}{{#if separateMinorPatch}}{{#if isPatch}}.{{{newMinor}}}{{/if}}{{/if}}{{#if separateMultipleMinor}}{{#if isMinor}}.{{{newMinor}}}{{/if}}{{/if}}.x{{#if isLockfileUpdate}}-lockfile{{/if}}',
+        branchPrefix: 'renovate/',
+        depNameSanitized: '@foo/jest',
+        newMajor: 42,
+        group: {},
+      });
+      generateBranchName(upgrade);
+      expect(upgrade.branchName).toBe('renovate/foo-jest-42-x');
+    });
+
+    it('hashedBranchLength hashing', () => {
+      const upgrade = partial<BranchUpgradeConfig>({
+        branchName:
+          '{{{branchPrefix}}}{{{additionalBranchPrefix}}}{{{branchTopic}}}',
+        branchTopic:
+          '{{{depNameSanitized}}}-{{{newMajor}}}{{#if separateMinorPatch}}{{#if isPatch}}.{{{newMinor}}}{{/if}}{{/if}}{{#if separateMultipleMinor}}{{#if isMinor}}.{{{newMinor}}}{{/if}}{{/if}}.x{{#if isLockfileUpdate}}-lockfile{{/if}}',
+        hashedBranchLength: 14,
+        branchPrefix: 'dep-',
+        depNameSanitized: 'jest',
+        newMajor: 42,
+        group: {},
+      });
+      generateBranchName(upgrade);
+      expect(upgrade.branchName).toBe('dep-df9ca0f348');
+    });
+
+    it('hashedBranchLength hashing with group name', () => {
+      const upgrade = partial<BranchUpgradeConfig>({
+        hashedBranchLength: 20,
+        branchPrefix: 'dep-',
+        depNameSanitized: 'jest',
+        newMajor: 42,
+        groupName: 'some group name',
+        group: {
+          branchName:
+            '{{{branchPrefix}}}{{{additionalBranchPrefix}}}{{{branchTopic}}}',
+          branchTopic:
+            '{{{depNameSanitized}}}-{{{newMajor}}}{{#if separateMinorPatch}}{{#if isPatch}}.{{{newMinor}}}{{/if}}{{/if}}{{#if separateMultipleMinor}}{{#if isMinor}}.{{{newMinor}}}{{/if}}{{/if}}.x{{#if isLockfileUpdate}}-lockfile{{/if}}',
+        },
+      });
+      generateBranchName(upgrade);
+      expect(upgrade.branchName).toBe('dep-df9ca0f34833f3e0');
+    });
+
+    it('hashedBranchLength too short', () => {
+      const upgrade = partial<BranchUpgradeConfig>({
+        hashedBranchLength: 3,
+        branchPrefix: 'dep-',
+        depNameSanitized: 'jest',
+        newMajor: 42,
+        groupName: 'some group name',
+        group: {
+          branchName:
+            '{{{branchPrefix}}}{{{additionalBranchPrefix}}}{{{branchTopic}}}',
+          branchTopic:
+            '{{{depNameSanitized}}}-{{{newMajor}}}{{#if separateMinorPatch}}{{#if isPatch}}.{{{newMinor}}}{{/if}}{{/if}}{{#if separateMultipleMinor}}{{#if isMinor}}.{{{newMinor}}}{{/if}}{{/if}}.x{{#if isLockfileUpdate}}-lockfile{{/if}}',
+        },
+      });
+      generateBranchName(upgrade);
+      expect(upgrade.branchName).toBe('dep-df9ca0');
+    });
+
+    it('hashedBranchLength no topic', () => {
+      const upgrade = partial<BranchUpgradeConfig>({
+        hashedBranchLength: 3,
+        branchPrefix: 'dep-',
+        depNameSanitized: 'jest',
+        newMajor: 42,
+        groupName: 'some group name',
+        group: {
+          branchName:
+            '{{{branchPrefix}}}{{{additionalBranchPrefix}}}{{{branchTopic}}}',
+          additionalBranchPrefix:
+            '{{{depNameSanitized}}}-{{{newMajor}}}{{#if separateMinorPatch}}{{#if isPatch}}.{{{newMinor}}}{{/if}}{{/if}}{{#if separateMultipleMinor}}{{#if isMinor}}.{{{newMinor}}}{{/if}}{{/if}}.x{{#if isLockfileUpdate}}-lockfile{{/if}}',
+        },
+      });
+      generateBranchName(upgrade);
+      expect(upgrade.branchName).toBe('dep-cf83e1');
+    });
+
+    it('hashedBranchLength separates minor when separateMultipleMinor=true', () => {
+      const upgrade = partial<BranchUpgradeConfig>({
+        branchName:
+          '{{{branchPrefix}}}{{{additionalBranchPrefix}}}{{{branchTopic}}}',
+        branchTopic:
+          '{{{depNameSanitized}}}-{{{newMajor}}}{{#if separateMinorPatch}}{{#if isPatch}}.{{{newMinor}}}{{/if}}{{/if}}{{#if separateMultipleMinor}}{{#if isMinor}}.{{{newMinor}}}{{/if}}{{/if}}.x{{#if isLockfileUpdate}}-lockfile{{/if}}',
+        hashedBranchLength: 14,
+        branchPrefix: 'dep-',
+        depNameSanitized: 'jest',
+        newMajor: 42,
+        separateMultipleMinor: true,
+        isMinor: true,
+        newMinor: 3,
+        group: {},
+      });
+      generateBranchName(upgrade);
+      expect(upgrade.branchName).toBe('dep-2e27927800');
+    });
+
+    it('enforces valid git branch name', () => {
+      const fixtures = [
+        {
+          upgrade: {
+            groupName: '/My Group/',
+            group: { branchName: 'renovate/{{groupSlug}}' },
+          },
+          expectedBranchName: 'renovate/my-group',
+        },
+        {
+          upgrade: {
+            groupName: 'invalid branch name.lock',
+            group: { branchName: 'renovate/{{groupSlug}}' },
+          },
+          expectedBranchName: 'renovate/invalid-branch-name',
+        },
+        {
+          upgrade: {
+            groupName: '.a-bad-  name:@.lock',
+            group: { branchName: 'renovate/{{groupSlug}}' },
+          },
+          expectedBranchName: 'renovate/a-bad-name-@',
+        },
+        {
+          upgrade: { branchName: 'renovate/bad-branch-name1..' },
+          expectedBranchName: 'renovate/bad-branch-name1',
+        },
+        {
+          upgrade: { branchName: 'renovate/~bad-branch-name2' },
+          expectedBranchName: 'renovate/bad-branch-name2',
+        },
+        {
+          upgrade: { branchName: 'renovate/bad-branch-^-name3' },
+          expectedBranchName: 'renovate/bad-branch-name3',
+        },
+        {
+          upgrade: { branchName: 'renovate/bad-branch-name : 4' },
+          expectedBranchName: 'renovate/bad-branch-name-4',
+        },
+        {
+          upgrade: { branchName: 'renovate/bad-branch-name5/' },
+          expectedBranchName: 'renovate/bad-branch-name5',
+        },
+        {
+          upgrade: { branchName: '.bad-branch-name6' },
+          expectedBranchName: 'bad-branch-name6',
+        },
+        {
+          upgrade: { branchName: 'renovate/.bad-branch-name7' },
+          expectedBranchName: 'renovate/bad-branch-name7',
+        },
+        {
+          upgrade: { branchName: 'renovate/.bad-branch-name8' },
+          expectedBranchName: 'renovate/bad-branch-name8',
+        },
+        {
+          upgrade: { branchName: 'renovate/bad-branch-name9.' },
+          expectedBranchName: 'renovate/bad-branch-name9',
+        },
+        {
+          upgrade: { branchName: 'renovate/bad-branch--name10' },
+          expectedBranchName: 'renovate/bad-branch-name10',
+        },
+        {
+          upgrade: { branchName: 'renovate/bad--branch---name11' },
+          expectedBranchName: 'renovate/bad-branch-name11',
+        },
+        {
+          upgrade: { branchName: 'renovate-/[start]-something-[end]' },
+          expectedBranchName: 'renovate/start-something-end',
+        },
+        {
+          upgrade: { branchName: 'renovate/eslint-eslintrc>minimatch-10.x' },
+          expectedBranchName: 'renovate/eslint-eslintrc-minimatch-10.x',
+        },
+        {
+          upgrade: { branchName: 'renovate/<<<hello>>>' },
+          expectedBranchName: 'renovate/hello',
+        },
+      ];
+      fixtures.forEach((fixture) => {
+        generateBranchName(fixture.upgrade as BranchUpgradeConfig);
+        expect(fixture.upgrade.branchName).toEqual(fixture.expectedBranchName);
+      });
+    });
+
+    it('strict branch name enabled group', () => {
+      const upgrade = partial<BranchUpgradeConfig>({
+        branchNameStrict: true,
+        groupName: 'some group name `~#$%^&*()-_=+[]{}|;,./<>? .version',
+        group: {
+          branchName: '{{groupSlug}}-{{branchTopic}}',
+          branchTopic: 'grouptopic',
+        },
+      });
+      generateBranchName(upgrade);
+      expect(upgrade.branchName).toBe(
+        'some-group-name-dollarpercentand-or-lessgreater-version-grouptopic',
+      );
+    });
+
+    it('strict branch name disabled', () => {
+      const upgrade = partial<BranchUpgradeConfig>({
+        branchNameStrict: false,
+        groupName: '[some] group name.#$%version',
+        group: {
+          branchName: '{{groupSlug}}-{{branchTopic}}',
+          branchTopic: 'grouptopic',
+        },
+      });
+      generateBranchName(upgrade);
+      expect(upgrade.branchName).toBe(
+        'some-group-name.dollarpercentversion-grouptopic',
+      );
+    });
+  });
+});

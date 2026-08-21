@@ -1,0 +1,109 @@
+import * as pep440 from '@renovatebot/pep440';
+import type { RangeStrategy } from '../../../types/versioning.ts';
+import type { VersioningApi } from '../types.ts';
+import { getNewValue, getPinnedValue, isLessThanRange } from './range.ts';
+
+export const id = 'pep440';
+export const displayName = 'PEP440';
+export const urls = [
+  '[PEP 440 - Version Identification](https://www.python.org/dev/peps/pep-0440/)',
+];
+export const supportsRanges = true;
+export const supportedRangeStrategies: RangeStrategy[] = [
+  'bump',
+  'widen',
+  'replace',
+];
+
+const {
+  compare: sortVersions,
+  satisfies,
+  valid,
+  validRange,
+  explain,
+  gt: isGreaterThan,
+  major: getMajor,
+  minor: getMinor,
+  patch: getPatch,
+  eq,
+} = pep440;
+
+function isVersion(input: string | undefined | null): boolean {
+  // @renovatebot/pep440 isn't strict null save
+  // oxlint-disable-next-line typescript/no-unnecessary-type-assertion
+  return !!valid(input!);
+}
+
+function isStable(input: string): boolean {
+  const version = explain(input);
+  if (!version) {
+    return false;
+  }
+  return !version.is_prerelease;
+}
+
+// If this is left as an alias, inputs like "17.04.0" throw errors
+export function isValid(input: string): boolean {
+  return validRange(input) || isVersion(input);
+}
+
+function getSatisfyingVersion(
+  versions: string[],
+  range: string,
+): string | null {
+  const found = pep440.filter(versions, range).sort(sortVersions);
+  return found.length === 0 ? null : found.at(-1)!;
+}
+
+function minSatisfyingVersion(
+  versions: string[],
+  range: string,
+): string | null {
+  const found = pep440.filter(versions, range).sort(sortVersions);
+  return found.length === 0 ? null : found[0];
+}
+
+export function isSingleVersion(constraint: string): boolean {
+  return (
+    isVersion(constraint) ||
+    (constraint?.startsWith('==') && isVersion(constraint.substring(2).trim()))
+  );
+}
+
+export { isVersion, matches };
+
+function equals(version1: string, version2: string): boolean {
+  return isVersion(version1) && isVersion(version2) && eq(version1, version2);
+}
+
+function matches(version: string, range: string): boolean {
+  if (!isVersion(version)) {
+    return false;
+  }
+  if (isVersion(range)) {
+    return equals(version, range);
+  }
+  return isValid(range) && satisfies(version, range, { prereleases: true });
+}
+
+export const api: VersioningApi = {
+  equals,
+  getMajor,
+  getMinor,
+  getPatch,
+  isCompatible: isVersion,
+  isGreaterThan,
+  isSingleVersion,
+  isStable,
+  isValid,
+  isVersion,
+  matches,
+  getSatisfyingVersion,
+  minSatisfyingVersion,
+  getNewValue,
+  getPinnedValue,
+  sortVersions,
+  isLessThanRange,
+};
+
+export default api;

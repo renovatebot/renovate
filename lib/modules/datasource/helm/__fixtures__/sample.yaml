@@ -1,0 +1,107 @@
+apiVersion: v1
+entries:
+  airflow:
+  - annotations:
+      category: WorkFlow
+    apiVersion: v2
+    appVersion: 2.1.3
+    created: "2021-09-15T23:14:58.888273096Z"
+    dependencies:
+    - name: common
+      repository: https://charts.bitnami.com/bitnami
+      tags:
+      - bitnami-common
+      version: 1.x.x
+    - condition: postgresql.enabled
+      name: postgresql
+      repository: https://charts.bitnami.com/bitnami
+      version: 10.x.x
+    - condition: redis.enabled
+      name: redis
+      repository: https://charts.bitnami.com/bitnami
+      version: 15.x.x
+    description: Apache Airflow is a platform to programmatically author, schedule
+      and monitor workflows.
+    digest: a651914c82b5aa5d005b24591c2474245942e6bede1a434ea74227d1a58a269c
+    home: https://github.com/bitnami/charts/tree/master/bitnami/airflow
+    icon: https://bitnami.com/assets/stacks/airflow/img/airflow-stack-220x234.png
+    keywords:
+    - apache
+    - airflow
+    - workflow
+    - dag
+    maintainers:
+    - email: containers@bitnami.com
+      name: Bitnami
+    name: airflow
+    sources:
+    - https://github.com/bitnami/bitnami-docker-airflow
+    - https://airflow.apache.org/
+    urls:
+    - https://charts.bitnami.com/bitnami/airflow-11.0.1.tgz
+    version: 11.0.1
+  coredns:
+  - annotations:
+      artifacthub.io/changes: |
+        - Initial helm chart changelog
+    apiVersion: v2
+    appVersion: 1.8.4
+    created: "2021-07-24T17:35:31.367313224Z"
+    description: CoreDNS is a DNS server that chains plugins and provides Kubernetes
+      DNS Services
+    digest: d7015cc7970f7304d8b023d12a854f1684f5b79b120e3eea22b78ac590d05b35
+    home: https://coredns.io
+    icon: https://coredns.io/images/CoreDNS_Colour_Horizontal.png
+    keywords:
+    - coredns
+    - dns
+    - kubedns
+    maintainers:
+    - name: mrueg
+    - name: haad
+    name: coredns
+    sources:
+    - https://github.com/coredns/coredns
+    type: application
+    urls:
+    - https://github.com/coredns/helm/releases/download/coredns-1.16.3/coredns-1.16.3.tgz
+    version: 1.16.3
+  pgadmin4:
+  - apiVersion: v1
+    appVersion: "5.5"
+    created: "2021-08-23T07:25:42.700577873Z"
+    description: pgAdmin4 is a web based administration tool for PostgreSQL database
+    digest: b15e5de91fcbe8c2cc896af8448e41ad94a9bfae9592fc13d3e5805d4cb707b0
+    home: https://www.pgadmin.org/
+    icon: https://wiki.postgresql.org/images/3/30/PostgreSQL_logo.3colors.120x120.png
+    keywords:
+    - pgadmin
+    - postgres
+    - database
+    - sql
+    maintainers:
+    - email: rowanruseler@gmail.com
+      name: rowanruseler
+    name: pgadmin4
+    sources:
+    - https://some.test
+    - https://github.com/rowanruseler/helm-charts
+    urls:
+    - pgadmin4-1.7.2.tgz
+    version: 1.7.2
+  private-chart-github:
+    - description: Some private chart from a self-hosted GitHub Enterprise server
+      home: https://github.example.com/some-org/charts/tree/master/private-chart
+      urls:
+        - https://charts.example.com/private-chart-1.2.3.tgz
+      version: 1.2.3
+  private-chart-gitlab:
+    - description: Some private chart from a self-hosted GitLab server
+      home: https://gitlab.example.com/some/group/charts/-/tree/master/private-chart
+      urls:
+        - https://charts.example.com/private-chart-1.2.3.tgz
+      version: 1.2.3
+  dummy:
+  - home:
+    urls:
+    - some.tgz

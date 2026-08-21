@@ -1,0 +1,123 @@
+import fs from 'node:fs/promises';
+import os from 'node:os';
+import path from 'node:path';
+import { setTimeout } from 'node:timers/promises';
+import type { SemVer } from 'semver';
+import { logger } from '../../lib/logger/index.ts';
+import { toMs } from '../../lib/util/pretty-time.ts';
+import { exec } from './exec.ts';
+
+const file = 'tools/docker/bake.hcl';
+const tmp = fs.mkdtemp(path.join(os.tmpdir(), 'renovate-docker-bake-'));
+
+export interface MetaDataItem {
+  'containerimage.digest'?: string;
+}
+export interface MetaData {
+  'push-slim'?: MetaDataItem;
+  'push-full'?: MetaDataItem;
+}
+
+export async function bake(
+  target: string,
+  opts: {
+    platform?: string;
+    version?: SemVer;
+    args?: string[];
+    delay?: string;
+    exitOnError?: boolean;
+    tries?: number;
+    channel?: string;
+  },
+): Promise<MetaData | null> {
+  if (opts.version) {
+    console.log(`Using version: ${opts.version.version}`);
+    process.env.RENOVATE_VERSION = opts.version.version;
+    if (!opts.version.prerelease.length) {
+      process.env.RENOVATE_MAJOR_VERSION = `${opts.version.major}`;
+      process.env.RENOVATE_MAJOR_MINOR_VERSION = `${opts.version.major}.${opts.version.minor}`;
+    }
+  }
+
+  if (opts.channel) {
+    process.env.CHANNEL = opts.channel.replace('maint/', '');
+  }
+
+  const metadataFile = path.join(await tmp, 'metadata.json');
+  const args = [
+    'buildx',
+    'bake',
+    '--file',
+    file,
+    '--metadata-file',
+    metadataFile,
+  ];
+
+  if (opts.platform) {
+    console.log(`Using platform: ${opts.platform}`);
+    args.push('--set', `settings.platform=${opts.platform}`);
+  }
+
+  if (Array.isArray(opts.args)) {
+    console.log(`Using args: ${opts.args.join(' ')}`);
+    args.push(...opts.args);
+  }
+
+  args.push(target);
+
+  for (let tries = opts.tries ?? 0; tries >= 0; tries--) {
+    const result = await exec(`docker`, args, { reject: false });
+    if (result.signal) {
+      logger.error(`Signal received: ${result.signal}`);
+      process.exit(-1);
+    } else if (result.exitCode) {
+      if (tries > 0) {
+        logger.debug(`Error occured:\n ${result.stderr}`);
+        const delay = opts.delay ? toMs(opts.delay) : null;
+        if (delay) {
+          logger.info(`Retrying in ${opts.delay} ...`);
+          await setTimeout(delay);
+        }
+      } else {
+        logger.error(`Error occured:\n${result.stderr}`);
+        if (opts.exitOnError !== false) {
+          process.exit(result.exitCode);
+        }
+        return null;
+      }
+    } else {
+      logger.debug(`${target} succeeded:\n${result.stdout || result.stderr}`);
+      break;
+    }
+  }
+
+  const meta = JSON.parse(await fs.readFile(metadataFile, 'utf8'));
+  logger.debug({ meta }, 'metadata');
+
+  return meta;
+}
+
+export async function sign(
+  image: string,
+  opts: {
+    args?: string[];
+    exitOnError?: boolean;
+  },
+): Promise<void> {
+  logger.info(`Signing ${image} ...`);
+  const result = await exec('cosign', ['sign', '--yes', image], {
+    reject: false,
+  });
+
+  if (result.signal) {
+    logger.error(`Signal received: ${result.signal}`);
+    process.exit(-1);
+  } else if (result.exitCode) {
+    logger.error(`Error occured:\n${result.stderr}`);
+    if (opts.exitOnError !== false) {
+      process.exit(result.exitCode);
+    }
+  } else {
+    logger.debug(`Succeeded:\n${result.stdout || result.stderr}`);
+  }
+}

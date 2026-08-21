@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+
+{
+    VERSION="0.60.1"
+    VERSION="0.63.0"
+}

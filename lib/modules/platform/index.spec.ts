@@ -1,0 +1,260 @@
+import * as httpMock from '~test/http-mock.ts';
+import { PLATFORM_NOT_FOUND } from '../../constants/error-messages.ts';
+import { PLATFORM_HOST_TYPES, type PlatformId } from '../../constants/index.ts';
+import { loadModules } from '../../util/modules.ts';
+import api from './api.ts';
+import * as platform from './index.ts';
+import type { Platform } from './types.ts';
+
+vi.unmock('./index.ts');
+vi.unmock('./scm.ts');
+
+describe('modules/platform/index', () => {
+  beforeEach(() => {
+    process.env.RENOVATE_X_GITHUB_HOST_RULES = 'true';
+  });
+
+  it('validates', async () => {
+    function validate(module: Platform | undefined, name: string): boolean {
+      // TODO: test required api (#9650)
+      if (!module?.initPlatform) {
+        throw Error(`Missing api on ${name}`);
+      }
+      return true;
+    }
+    const platforms = api;
+
+    const loadedMgr = await loadModules(
+      import.meta.dirname,
+      undefined,
+      (m) => !['utils', 'git'].includes(m),
+    );
+    expect(Array.from(platforms.keys())).toEqual(Object.keys(loadedMgr));
+
+    for (const name of platforms.keys()) {
+      const value = platforms.get(name);
+      expect(validate(value, name)).toBeTrue();
+    }
+  });
+
+  it('throws if no platform', () => {
+    expect(() => platform.platform.initPlatform({})).toThrow(
+      PLATFORM_NOT_FOUND,
+    );
+  });
+
+  it('throws if wrong platform', async () => {
+    const config = {
+      platform: 'wrong' as PlatformId,
+      username: 'abc',
+      password: '123',
+    };
+    await expect(platform.initPlatform(config)).rejects.toThrow(
+      'Init: Platform "wrong" not found. Must be one of: azure, bitbucket,',
+    );
+  });
+
+  it('initializes', async () => {
+    httpMock
+      .scope('https://api.bitbucket.org')
+      .get('/2.0/user')
+      .basicAuth({ user: 'abc', pass: '123' })
+      .reply(200, { uuid: 123 });
+    const config = {
+      platform: 'bitbucket' as PlatformId,
+      gitAuthor: 'user@domain.com',
+      username: 'abc',
+      password: '123',
+    };
+    expect(await platform.initPlatform(config)).toEqual({
+      endpoint: 'https://api.bitbucket.org/',
+      gitAuthor: 'user@domain.com',
+      hostRules: [
+        {
+          hostType: 'bitbucket',
+          matchHost: 'api.bitbucket.org',
+          password: '123',
+          username: 'abc',
+        },
+      ],
+      platform: 'bitbucket',
+    });
+  });
+
+  it('merges config hostRules with platform hostRules', async () => {
+    httpMock
+      .scope('https://ghe.renovatebot.com')
+      .head('/')
+      .reply(200)
+      .get('/user')
+      .reply(200, { login: 'abc', name: 'some', id: 123 })
+      .get('/user/emails')
+      .reply(200, [{ email: 'user@domain.com' }]);
+
+    const config = {
+      platform: 'github' as PlatformId,
+      endpoint: 'https://ghe.renovatebot.com',
+      token: '123',
+      hostRules: [
+        {
+          hostType: 'github',
+          matchHost: 'github.com',
+          token: '456',
+          username: 'def',
+        },
+      ],
+    };
+
+    expect(await platform.initPlatform(config)).toEqual({
+      endpoint: 'https://ghe.renovatebot.com/',
+      gitAuthor: 'some <user@domain.com>',
+      hostRules: [
+        {
+          hostType: 'github',
+          matchHost: 'github.com',
+          token: '456',
+          username: 'def',
+        },
+        {
+          hostType: 'github',
+          matchHost: 'ghe.renovatebot.com',
+          token: '123',
+        },
+      ],
+      platform: 'github',
+      renovateUsername: 'abc',
+    });
+  });
+
+  describe('when platform endpoint is https://api.github.com/', () => {
+    it('merges config hostRules with platform hostRules', async () => {
+      const config = {
+        platform: 'github' as PlatformId,
+        endpoint: 'https://api.github.com',
+        gitAuthor: 'user@domain.com',
+        username: 'abc',
+        token: '123',
+        hostRules: [
+          {
+            hostType: 'github',
+            matchHost: 'github.com',
+            token: '456',
+            username: 'def',
+          },
+        ],
+      };
+
+      expect(await platform.initPlatform(config)).toEqual({
+        endpoint: 'https://api.github.com/',
+        gitAuthor: 'user@domain.com',
+        hostRules: [
+          {
+            hostType: 'docker',
+            matchHost: 'ghcr.io',
+            password: '123',
+            username: 'USERNAME',
+          },
+          {
+            hostType: 'npm',
+            matchHost: 'npm.pkg.github.com',
+            token: '123',
+          },
+          {
+            hostType: 'rubygems',
+            matchHost: 'rubygems.pkg.github.com',
+            password: '123',
+            username: 'abc',
+          },
+          {
+            hostType: 'maven',
+            matchHost: 'maven.pkg.github.com',
+            password: '123',
+            username: 'abc',
+          },
+          {
+            hostType: 'nuget',
+            matchHost: 'nuget.pkg.github.com',
+            password: '123',
+            username: 'abc',
+          },
+          {
+            hostType: 'github',
+            matchHost: 'github.com',
+            token: '456',
+            username: 'def',
+          },
+          {
+            hostType: 'github',
+            matchHost: 'api.github.com',
+            token: '123',
+            username: 'abc',
+          },
+        ],
+        platform: 'github',
+        renovateUsername: 'abc',
+      });
+    });
+
+    it('merges platform hostRules with additionalHostRules', async () => {
+      const config = {
+        platform: 'github' as PlatformId,
+        endpoint: 'https://api.github.com',
+        gitAuthor: 'user@domain.com',
+        username: 'abc',
+        token: '123',
+      };
+
+      expect(await platform.initPlatform(config)).toEqual({
+        endpoint: 'https://api.github.com/',
+        gitAuthor: 'user@domain.com',
+        hostRules: [
+          {
+            hostType: 'docker',
+            matchHost: 'ghcr.io',
+            password: '123',
+            username: 'USERNAME',
+          },
+          {
+            hostType: 'npm',
+            matchHost: 'npm.pkg.github.com',
+            token: '123',
+          },
+          {
+            hostType: 'rubygems',
+            matchHost: 'rubygems.pkg.github.com',
+            password: '123',
+            username: 'abc',
+          },
+          {
+            hostType: 'maven',
+            matchHost: 'maven.pkg.github.com',
+            password: '123',
+            username: 'abc',
+          },
+          {
+            hostType: 'nuget',
+            matchHost: 'nuget.pkg.github.com',
+            password: '123',
+            username: 'abc',
+          },
+          {
+            hostType: 'github',
+            matchHost: 'api.github.com',
+            token: '123',
+            username: 'abc',
+          },
+        ],
+        platform: 'github',
+        renovateUsername: 'abc',
+      });
+    });
+  });
+
+  describe('getPlatformList', () => {
+    it('has the same values as PLATFORM_HOST_TYPES', () => {
+      expect(new Set(platform.getPlatformList())).toEqual(
+        new Set(PLATFORM_HOST_TYPES),
+      );
+    });
+  });
+});

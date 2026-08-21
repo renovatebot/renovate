@@ -1,0 +1,47 @@
+{
+  "compilerOptions": {
+    "incremental": true,
+    "tsBuildInfoFile": ".cache/tsbuildinfo",
+    "strict": true,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "noEmit": true,
+    /* https://github.com/microsoft/TypeScript/wiki/Node-Target-Mapping */
+    "target": "es2024",
+    "moduleResolution": "nodenext",
+    "module": "nodenext",
+    "allowImportingTsExtensions": true,
+    "sourceMap": true,
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "noUnusedLocals": true,
+    "noImplicitOverride": true,
+    "useUnknownInCatchVariables": false /* we aren't prepared for enabling this by default since ts 4.4*/,
+    "isolatedModules": true /* required for tsdown */,
+    "lib": ["ES2025"] /* node v24.11.0+ supports ES2025 */,
+    "types": ["node", "vitest/globals"],
+    "checkJs": true,
+    "skipLibCheck": true, // https://github.com/vitejs/vite/discussions/12466#discussioncomment-7596971
+    "paths": {
+      "~test/*": ["./test/*"]
+    }
+  },
+  "include": ["**/*.mts", "**/*.ts", "**/*.js", "**/*.mjs", "**/*.cjs"],
+  "exclude": [
+    "**/node_modules",
+    "./.cache",
+    "./dist",
+    "./.pnpm-store/",
+    "./.venv/",
+    "**/__mocks__/*",
+    "**/__fixtures__/*",
+    "coverage",
+    "config.js",
+    "tmp",
+    "tools/mkdocs/docs",
+    "tools/mkdocs/site",
+    ".github/workflows/**/*.js",
+    ".worktrees/**/*"
+  ]
+}

@@ -1,0 +1,413 @@
+import type { RenovateConfig } from '~test/util.ts';
+import { scm } from '~test/util.ts';
+import { getConfig } from '../../../../config/defaults.ts';
+import { GlobalConfig } from '../../../../config/global.ts';
+import { createOnboardingBranch } from './create.ts';
+
+vi.mock('./config.ts', () => ({
+  getOnboardingConfigContents: () =>
+    JSON.stringify({
+      foo: 'bar',
+    }),
+}));
+
+describe('workers/repository/onboarding/branch/create', () => {
+  let config: RenovateConfig;
+
+  beforeEach(() => {
+    config = getConfig();
+    GlobalConfig.set({
+      onboardingBranch: config.onboardingBranch,
+      onboardingConfigFileName: config.onboardingConfigFileName,
+      onboardingPrTitle: 'Configure Renovate',
+    });
+  });
+
+  describe('createOnboardingBranch', () => {
+    it('applies the default commit message', async () => {
+      await createOnboardingBranch(config);
+      expect(scm.commitAndPush).toHaveBeenCalledExactlyOnceWith({
+        branchName: 'renovate/configure',
+        files: [
+          {
+            type: 'addition',
+            path: 'renovate.json',
+            contents: '{"foo":"bar"}',
+          },
+        ],
+        force: true,
+        message: 'Add renovate.json',
+        trailers: [],
+        platformCommit: 'auto',
+        prTitle: 'Configure Renovate',
+      });
+    });
+
+    it('applies supplied commit message', async () => {
+      const message =
+        'We can Renovate if we want to, we can leave PRs in decline';
+
+      GlobalConfig.set({
+        onboardingCommitMessage: message,
+        onboardingBranch: config.onboardingBranch,
+        onboardingPrTitle: 'Configure Renovate',
+      });
+
+      await createOnboardingBranch(config);
+
+      expect(scm.commitAndPush).toHaveBeenCalledExactlyOnceWith({
+        branchName: 'renovate/configure',
+        files: [
+          {
+            type: 'addition',
+            path: 'renovate.json',
+            contents: '{"foo":"bar"}',
+          },
+        ],
+        force: true,
+        message,
+        trailers: [],
+        platformCommit: 'auto',
+        prTitle: 'Configure Renovate',
+      });
+    });
+
+    describe('applies the commitBody value', () => {
+      it('to the default commit message', async () => {
+        await createOnboardingBranch({
+          ...config,
+          commitBody: 'some commit body',
+        });
+        expect(scm.commitAndPush).toHaveBeenCalledExactlyOnceWith({
+          branchName: 'renovate/configure',
+          files: [
+            {
+              type: 'addition',
+              path: 'renovate.json',
+              contents: '{"foo":"bar"}',
+            },
+          ],
+          force: true,
+          message: `Add renovate.json\n\nsome commit body`,
+          trailers: [],
+          platformCommit: 'auto',
+          prTitle: 'Configure Renovate',
+        });
+      });
+
+      it('to the supplied commit message', async () => {
+        const message =
+          'We can Renovate if we want to, we can leave PRs in decline';
+
+        GlobalConfig.set({
+          onboardingCommitMessage: message,
+          onboardingBranch: config.onboardingBranch,
+          onboardingPrTitle: 'Configure Renovate',
+        });
+
+        await createOnboardingBranch({
+          ...config,
+          commitBody: 'Signed Off: {{{gitAuthor}}}',
+          gitAuthor: '<Bot bot@botland.com>',
+        });
+        expect(scm.commitAndPush).toHaveBeenCalledExactlyOnceWith({
+          branchName: 'renovate/configure',
+          files: [
+            {
+              type: 'addition',
+              path: 'renovate.json',
+              contents: '{"foo":"bar"}',
+            },
+          ],
+          force: true,
+          message: `We can Renovate if we want to, we can leave PRs in decline\n\nSigned Off: <Bot bot@botland.com>`,
+          trailers: [],
+          platformCommit: 'auto',
+          prTitle: 'Configure Renovate',
+        });
+      });
+    });
+
+    describe('applies the commitTrailers value', () => {
+      it('compiles gitAuthor and passes trailers', async () => {
+        await createOnboardingBranch({
+          ...config,
+          commitTrailers: ['Signed-off-by: {{{gitAuthor}}}'],
+          gitAuthor: 'Bot <bot@botland.com>',
+        });
+
+        expect(scm.commitAndPush).toHaveBeenCalledExactlyOnceWith({
+          branchName: 'renovate/configure',
+          files: [
+            {
+              type: 'addition',
+              path: 'renovate.json',
+              contents: '{"foo":"bar"}',
+            },
+          ],
+          force: true,
+          message: 'Add renovate.json',
+          trailers: ['Signed-off-by: Bot <bot@botland.com>'],
+          platformCommit: 'auto',
+          prTitle: 'Configure Renovate',
+        });
+      });
+
+      it('drops trailers that are invalid after compilation', async () => {
+        await createOnboardingBranch({
+          ...config,
+          commitTrailers: [
+            'Signed-off-by: {{{gitAuthor}}}',
+            'Static-Trailer: kept',
+          ],
+          gitAuthor: '',
+        });
+
+        expect(scm.commitAndPush).toHaveBeenCalledExactlyOnceWith(
+          expect.objectContaining({
+            trailers: ['Static-Trailer: kept'],
+          }),
+        );
+      });
+    });
+
+    describe('applies the commitMessagePrefix value', () => {
+      it('to the default commit message', async () => {
+        const prefix = 'RENOV-123';
+        const message = `${prefix}: add renovate.json`;
+
+        config.commitMessagePrefix = prefix;
+
+        await createOnboardingBranch(config);
+
+        expect(scm.commitAndPush).toHaveBeenCalledExactlyOnceWith({
+          branchName: 'renovate/configure',
+          files: [
+            {
+              type: 'addition',
+              path: 'renovate.json',
+              contents: '{"foo":"bar"}',
+            },
+          ],
+          force: true,
+          message,
+          trailers: [],
+          platformCommit: 'auto',
+          prTitle: 'Configure Renovate',
+        });
+      });
+
+      it('to the supplied commit message', async () => {
+        const prefix = 'RENOV-123';
+        const text =
+          "Cause your deps need an update and if they dont update, well they're no deps of mine";
+        const message = `${prefix}: ${text.charAt(0).toLowerCase()}${text.slice(
+          1,
+        )}`;
+
+        config.commitMessagePrefix = prefix;
+        GlobalConfig.set({
+          onboardingCommitMessage: text,
+          onboardingBranch: config.onboardingBranch,
+          onboardingPrTitle: 'Configure Renovate',
+        });
+
+        await createOnboardingBranch(config);
+
+        expect(scm.commitAndPush).toHaveBeenCalledExactlyOnceWith({
+          branchName: 'renovate/configure',
+          files: [
+            {
+              type: 'addition',
+              path: 'renovate.json',
+              contents: '{"foo":"bar"}',
+            },
+          ],
+          force: true,
+          message,
+          trailers: [],
+          platformCommit: 'auto',
+          prTitle: 'Configure Renovate',
+        });
+      });
+    });
+
+    describe('applies semanticCommit prefix', () => {
+      it('to the default commit message', async () => {
+        const prefix = 'chore(deps)';
+        const message = `${prefix}: add renovate.json`;
+
+        config.semanticCommits = 'enabled';
+
+        await createOnboardingBranch(config);
+
+        expect(scm.commitAndPush).toHaveBeenCalledExactlyOnceWith({
+          branchName: 'renovate/configure',
+          files: [
+            {
+              type: 'addition',
+              path: 'renovate.json',
+              contents: '{"foo":"bar"}',
+            },
+          ],
+          force: true,
+          message,
+          trailers: [],
+          platformCommit: 'auto',
+          prTitle: 'chore: Configure Renovate',
+        });
+      });
+
+      it('to the supplied commit message', async () => {
+        const prefix = 'chore(deps)';
+        const text =
+          'I say, we can update when we want to, a commit they will never mind';
+        const message = `${prefix}: ${text.charAt(0).toLowerCase()}${text.slice(
+          1,
+        )}`;
+
+        config.semanticCommits = 'enabled';
+        GlobalConfig.set({
+          onboardingCommitMessage: text,
+          onboardingBranch: config.onboardingBranch,
+          onboardingPrTitle: 'Configure Renovate',
+        });
+
+        await createOnboardingBranch(config);
+
+        expect(scm.commitAndPush).toHaveBeenCalledExactlyOnceWith({
+          branchName: 'renovate/configure',
+          files: [
+            {
+              type: 'addition',
+              path: 'renovate.json',
+              contents: '{"foo":"bar"}',
+            },
+          ],
+          force: true,
+          message,
+          trailers: [],
+          platformCommit: 'auto',
+          prTitle: 'chore: Configure Renovate',
+        });
+      });
+    });
+
+    describe('setting the onboarding configuration file name', () => {
+      it('falls back to the default option if not present', async () => {
+        const prefix = 'chore(deps)';
+        const message = `${prefix}: add renovate.json`;
+
+        config.semanticCommits = 'enabled';
+        GlobalConfig.set({
+          onboardingBranch: config.onboardingBranch,
+          onboardingPrTitle: 'Configure Renovate',
+        });
+
+        await createOnboardingBranch(config);
+
+        expect(scm.commitAndPush).toHaveBeenCalledExactlyOnceWith({
+          branchName: 'renovate/configure',
+          files: [
+            {
+              type: 'addition',
+              path: 'renovate.json',
+              contents: '{"foo":"bar"}',
+            },
+          ],
+          force: true,
+          message,
+          trailers: [],
+          platformCommit: 'auto',
+          prTitle: 'chore: Configure Renovate',
+        });
+      });
+
+      it('falls back to the default option if in list of allowed names', async () => {
+        const prefix = 'chore(deps)';
+        const message = `${prefix}: add renovate.json`;
+
+        config.semanticCommits = 'enabled';
+        GlobalConfig.set({
+          onboardingBranch: config.onboardingBranch,
+          onboardingConfigFileName: 'superConfigFile.yaml',
+          onboardingPrTitle: 'Configure Renovate',
+        });
+
+        await createOnboardingBranch(config);
+
+        expect(scm.commitAndPush).toHaveBeenCalledExactlyOnceWith({
+          branchName: 'renovate/configure',
+          files: [
+            {
+              type: 'addition',
+              path: 'renovate.json',
+              contents: '{"foo":"bar"}',
+            },
+          ],
+          force: true,
+          message,
+          trailers: [],
+          platformCommit: 'auto',
+          prTitle: 'chore: Configure Renovate',
+        });
+      });
+
+      it('uses the given name if valid', async () => {
+        const prefix = 'chore(deps)';
+        const path = '.gitlab/renovate.json';
+        const message = `${prefix}: add ${path}`;
+
+        config.semanticCommits = 'enabled';
+        GlobalConfig.set({
+          onboardingBranch: config.onboardingBranch,
+          onboardingConfigFileName: path,
+          onboardingPrTitle: 'Configure Renovate',
+        });
+
+        await createOnboardingBranch(config);
+
+        expect(scm.commitAndPush).toHaveBeenCalledExactlyOnceWith({
+          branchName: 'renovate/configure',
+          files: [
+            {
+              type: 'addition',
+              path,
+              contents: '{"foo":"bar"}',
+            },
+          ],
+          force: true,
+          message,
+          trailers: [],
+          platformCommit: 'auto',
+          prTitle: 'chore: Configure Renovate',
+        });
+      });
+
+      it('applies to the default commit message', async () => {
+        const prefix = 'chore(deps)';
+        const path = `.renovaterc`;
+        const message = `${prefix}: add ${path}`;
+
+        config.semanticCommits = 'enabled';
+        GlobalConfig.set({
+          onboardingBranch: config.onboardingBranch,
+          onboardingConfigFileName: path,
+          onboardingPrTitle: 'Configure Renovate',
+        });
+
+        await createOnboardingBranch(config);
+
+        expect(scm.commitAndPush).toHaveBeenCalledExactlyOnceWith({
+          branchName: 'renovate/configure',
+          files: [{ type: 'addition', path, contents: '{"foo":"bar"}' }],
+          message,
+          trailers: [],
+          force: true,
+          platformCommit: 'auto',
+          prTitle: 'chore: Configure Renovate',
+        });
+      });
+    });
+  });
+});

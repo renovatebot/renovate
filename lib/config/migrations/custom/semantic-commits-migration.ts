@@ -1,0 +1,14 @@
+import { isBoolean } from '@sindresorhus/is';
+import { AbstractMigration } from '../base/abstract-migration.ts';
+
+export class SemanticCommitsMigration extends AbstractMigration {
+  override readonly propertyName = 'semanticCommits';
+
+  override run(value: unknown): void {
+    if (isBoolean(value)) {
+      this.rewrite(value ? 'enabled' : 'disabled');
+    } else if (value !== 'enabled' && value !== 'disabled') {
+      this.rewrite('auto');
+    }
+  }
+}

@@ -1,0 +1,46 @@
+repositories:
+- name: incubator
+  url: https://charts.helm.sh/incubator/
+- name: bitnami
+  url: https://charts.bitnami.com/bitnami
+- name: prometheus-community
+  url: https://prometheus-community.github.io/helm-charts
+
+releases:
+  - name: "{{ requiredEnv \"RELEASE_NAME\" }}"
+    namespace: default
+    chart: ./foo
+  - name: "{{ requiredEnv \"RELEASE_NAME\" }}"
+    namespace: default
+    chart: ../repo/bar
+  - name: "{{ requiredEnv \"RELEASE_NAME\" }}"
+    namespace: default
+    chart: /tmp/github/some/repo/baz
+  - name: {{ requiredEnv "RELEASE_NAME" }}
+    namespace: default
+    chart: ./foo
+{{ if .Values.nginx.intranet.enabled }}
+  - name: nginx-intranet
+    chart: ingress-nginx/ingress-nginx
+    version: 3.37.0
+{{ end }}
+  - name: example
+{{- if neq .Values.example.version  "" }}
+    version: {{ .Values.example.version }}
+{{- else }}
+    version: 6.0.0
+{{- end }}
+    chart: bitnami/memcached
+  - name: example-internal
+    version: 1.30.0
+    chart: stable/example
+  - name: example-private
+    version: {{ .Values.example.version }}
+    chart: prometheus-community/kube-prometheus-stack
+  - name: example-external
+    version: 1.48.0
+    chart: {{ .Values.example.repository }}
+  - name: example-public
+    version: 2.0.0
+    chart: stable/external-dns
+    namespace: "{{ env "NAMESPACE" }}"

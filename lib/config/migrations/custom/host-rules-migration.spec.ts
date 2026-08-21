@@ -1,0 +1,91 @@
+import { CONFIG_VALIDATION } from '../../../constants/error-messages.ts';
+import { HostRulesMigration } from './host-rules-migration.ts';
+
+describe('config/migrations/custom/host-rules-migration', () => {
+  it('should migrate array', async () => {
+    await expect(HostRulesMigration).toMigrate(
+      {
+        hostRules: [
+          {
+            hostType: 'dotnet',
+            baseUrl: 'https://some.domain.com',
+            token: '123test',
+          },
+          {
+            hostType: 'dotnet',
+            baseUrl: 'https://some.domain.com',
+            matchHost: 'https://some.domain.com',
+            token: '123test',
+          },
+          {
+            hostType: 'adoptium-java',
+            domainName: 'domain.com',
+            token: '123test',
+          },
+          { domainName: 'domain.com/', token: '123test' },
+          { hostType: 'docker', matchHost: 'domain.com/', token: '123test' },
+          { hostName: 'some.domain.com', token: '123test' },
+          { endpoint: 'domain.com/', token: '123test' },
+          { host: 'some.domain.com', token: '123test' },
+          { matchHost: 'some.domain.com:8080', token: '123test' },
+        ],
+      },
+      {
+        hostRules: [
+          {
+            hostType: 'dotnet-version',
+            matchHost: 'https://some.domain.com',
+            token: '123test',
+          },
+          {
+            hostType: 'dotnet-version',
+            matchHost: 'https://some.domain.com',
+            token: '123test',
+          },
+          {
+            hostType: 'java-version',
+            matchHost: 'domain.com',
+            token: '123test',
+          },
+          {
+            matchHost: 'https://domain.com/',
+            token: '123test',
+          },
+          {
+            hostType: 'docker',
+            matchHost: 'https://domain.com/',
+            token: '123test',
+          },
+          { matchHost: 'some.domain.com', token: '123test' },
+          { matchHost: 'https://domain.com/', token: '123test' },
+          { matchHost: 'some.domain.com', token: '123test' },
+          { matchHost: 'https://some.domain.com:8080', token: '123test' },
+        ],
+      },
+    );
+  });
+
+  it('throws when multiple hosts are present', () => {
+    expect(() =>
+      new HostRulesMigration(
+        // oxlint-disable-next-line renovate/prefer-partial-in-specs -- legacy baseUrl hostRule field is intentionally invalid for this migration test
+        {
+          hostRules: [
+            {
+              matchHost: 'https://some-diff.domain.com',
+              baseUrl: 'https://some.domain.com',
+              token: '123test',
+            },
+          ],
+        } as any,
+        {},
+      ).run([
+        {
+          matchHost: 'https://some-diff.domain.com',
+          baseUrl: 'https://some.domain.com',
+          token: '123test',
+        },
+      ]),
+    ).toThrow(CONFIG_VALIDATION);
+  });
+});

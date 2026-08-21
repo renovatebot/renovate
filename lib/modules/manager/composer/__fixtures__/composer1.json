@@ -1,0 +1,63 @@
+{
+  "autoload": {
+    "psr-0": {
+      "": "src/"
+    }
+  },
+  "require": {
+    "php": ">=5.3.2",
+    "ext-intl": "*",
+    "symfony/assetic-bundle": "dev-master",
+    "symfony/monolog-bundle": "dev-master",
+    "symfony/swiftmailer-bundle": "dev-master",
+    "symfony/symfony": "2.1.*",
+    "doctrine/common": "2.2.2",
+    "doctrine/doctrine-bundle": "dev-master",
+    "doctrine/doctrine-fixtures-bundle": "dev-master",
+    "doctrine/orm": "2.2.x-dev",
+    "exercise/elastica-bundle": "dev-master",
+    "friendsofsymfony/rest-bundle": "dev-master",
+    "friendsofsymfony/user-bundle": "*",
+    "fzaninotto/faker": "*",
+    "jms/di-extra-bundle": "1.0.1",
+    "jms/payment-core-bundle": "*",
+    "jms/security-extra-bundle": "1.1.0",
+    "knplabs/knp-menu-bundle": "dev-master",
+    "knplabs/knp-paginator-bundle": "dev-master",
+    "liip/imagine-bundle": "dev-master",
+    "merk/dough-bundle": "dev-master",
+    "sensio/distribution-bundle": "dev-master",
+    "sensio/framework-extra-bundle": "dev-master",
+    "sensio/generator-bundle": "dev-master",
+    "simplethings/entity-audit-bundle": "dev-master",
+    "stof/doctrine-extensions-bundle": "dev-master",
+    "twig/extensions": "dev-master"
+  },
+  "require-dev": {
+    "behat/behat": "2.3.*",
+    "behat/behat-bundle": "*",
+    "behat/mink-bundle": "*",
+    "behat/sahi-client": "*",
+    "behat/common-contexts": "*",
+    "composer/composer": "^1.10.0"
+  },
+  "scripts": {
+    "post-install-cmd": [
+      "Sensio\\Bundle\\DistributionBundle\\Composer\\ScriptHandler::buildBootstrap",
+      "Sensio\\Bundle\\DistributionBundle\\Composer\\ScriptHandler::clearCache",
+      "Sensio\\Bundle\\DistributionBundle\\Composer\\ScriptHandler::installAssets"
+    ],
+    "post-update-cmd": [
+      "Sensio\\Bundle\\DistributionBundle\\Composer\\ScriptHandler::buildBootstrap",
+      "Sensio\\Bundle\\DistributionBundle\\Composer\\ScriptHandler::clearCache",
+      "Sensio\\Bundle\\DistributionBundle\\Composer\\ScriptHandler::installAssets"
+    ]
+  },
+  "config": {
+    "bin-dir": "bin"
+  },
+  "extra": {
+    "symfony-app-dir": "app",
+    "symfony-web-dir": "web"
+  }
+}

@@ -1,0 +1,86 @@
+import type { parser } from '@renovatebot/good-enough-parser';
+import { query as q } from '@renovatebot/good-enough-parser';
+import type { Ctx } from '../types.ts';
+import { qKotlinMultiMapOfVarAssignment } from './assignments.ts';
+import {
+  cleanupTempVars,
+  coalesceVariable,
+  increaseNestingDepth,
+  prependNestingDepth,
+  qValueMatcher,
+  qVariableAssignmentIdentifier,
+  reduceNestingDepth,
+  storeInTokenMap,
+  storeVarToken,
+} from './common.ts';
+import { qDependencyStrings } from './dependencies.ts';
+import { handleAssignment } from './handlers.ts';
+
+const qKotlinListOfAssignment = q.sym<Ctx>('listOf').tree({
+  type: 'wrapped-tree',
+  startsWith: '(',
+  endsWith: ')',
+  search: qDependencyStrings,
+});
+
+// const val VARIABLE = "value"
+const qKotlinConstValAssignment = q
+  .sym<Ctx>('const')
+  .sym('val')
+  .sym(storeVarToken)
+  .handler(prependNestingDepth)
+  .handler(coalesceVariable)
+  .handler((ctx) => storeInTokenMap(ctx, 'keyToken'))
+  .op('=')
+  .join(qValueMatcher)
+  .handler((ctx) => storeInTokenMap(ctx, 'valToken'))
+  .handler(handleAssignment)
+  .handler(cleanupTempVars);
+
+const qKotlinSingleObjectVarAssignment = q.alt(
+  // const val RETROFIT = "2.9.0"
+  qKotlinConstValAssignment,
+  // val dep = mapOf("qux" to "foo:bar:\${Versions.baz}")
+  qKotlinMultiMapOfVarAssignment,
+  qVariableAssignmentIdentifier
+    .opt(q.op<Ctx>(':').sym('String'))
+    .op('=')
+    .handler(prependNestingDepth)
+    .handler(coalesceVariable)
+    .handler((ctx) => storeInTokenMap(ctx, 'keyToken'))
+    .alt(
+      // val deps = listOf("androidx.appcompat:appcompat:$baz", listOf("androidx.webkit:webkit:${Versions.baz}"))
+      qKotlinListOfAssignment,
+      // val dep: String = "foo:bar:" + Versions.baz
+      qValueMatcher
+        .handler((ctx) => storeInTokenMap(ctx, 'valToken'))
+        .handler(handleAssignment),
+    )
+    .handler(cleanupTempVars),
+);
+
+// object foo { ... }
+function qKotlinMultiObjectExpr(
+  search: q.QueryBuilder<Ctx, parser.Node>,
+): q.QueryBuilder<Ctx, parser.Node> {
+  return q.alt(
+    q.sym<Ctx>('object').sym(storeVarToken).tree({
+      type: 'wrapped-tree',
+      maxDepth: 1,
+      startsWith: '{',
+      endsWith: '}',
+      preHandler: increaseNestingDepth,
+      search,
+      postHandler: reduceNestingDepth,
+    }),
+    qKotlinSingleObjectVarAssignment,
+  );
+}
+
+export const qKotlinMultiObjectVarAssignment = qKotlinMultiObjectExpr(
+  qKotlinMultiObjectExpr(
+    qKotlinMultiObjectExpr(
+      qKotlinMultiObjectExpr(qKotlinSingleObjectVarAssignment),
+    ),
+  ),
+).handler(cleanupTempVars);

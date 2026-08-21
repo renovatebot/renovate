@@ -1,0 +1,32 @@
+import { GalaxyCollectionDatasource } from '../../datasource/galaxy-collection/index.ts';
+import type { PackageDependency } from '../types.ts';
+import { dependencyRegex, galaxyRegEx } from './util.ts';
+
+export function extractCollectionsMetaDataFile(
+  lines: string[],
+): PackageDependency[] {
+  const deps: PackageDependency[] = [];
+  // in a galaxy.yml the dependency map is inside a `dependencies:` block
+  let foundDependencyBlock = false;
+  for (const line of lines) {
+    if (dependencyRegex.exec(line)) {
+      foundDependencyBlock = true;
+    } else if (foundDependencyBlock) {
+      // expects a line like this `  ansible.windows: "1.4.0"`
+      const galaxyRegExResult = galaxyRegEx.exec(line);
+      if (galaxyRegExResult?.groups) {
+        const dep: PackageDependency = {
+          depType: 'galaxy-collection',
+          datasource: GalaxyCollectionDatasource.id,
+          depName: galaxyRegExResult.groups.packageName,
+          currentValue: galaxyRegExResult.groups.version,
+        };
+        deps.push(dep);
+      } else {
+        // if we can not match additional lines, the block has ended.
+        break;
+      }
+    }
+  }
+  return deps;
+}

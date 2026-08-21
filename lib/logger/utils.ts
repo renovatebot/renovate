@@ -1,0 +1,276 @@
+import {
+  isArray,
+  isBuffer,
+  isDate,
+  isEmptyObject,
+  isError,
+  isFunction,
+  isNonEmptyObject,
+  isNonEmptyStringAndNotWhitespace,
+  isObject,
+  isPlainObject,
+  isString,
+} from '@sindresorhus/is';
+import { RequestError as HttpError } from 'got';
+import { DateTime } from 'luxon';
+import { ZodError } from 'zod/v4';
+import { ExecError } from '../util/exec/exec-error.ts';
+import { regEx } from '../util/regex.ts';
+import { redactedFields, sanitize } from '../util/sanitize.ts';
+
+const contentFields = [
+  'content',
+  'contents',
+  'packageLockParsed',
+  'yarnLockParsed',
+];
+
+type ZodShortenedIssue =
+  | null
+  | string
+  | string[]
+  | {
+      [key: string]: ZodShortenedIssue;
+    };
+
+export function prepareZodIssues(input: unknown): ZodShortenedIssue {
+  if (!isPlainObject(input)) {
+    return null;
+  }
+
+  let err: null | string | string[] = null;
+  // v8 ignore else -- TODO: add test #40625
+  if (isArray(input._errors, isString)) {
+    if (input._errors.length === 1) {
+      err = input._errors[0];
+    } else if (input._errors.length > 1) {
+      err = input._errors;
+    } else {
+      err = null;
+    }
+  }
+  delete input._errors;
+
+  if (isEmptyObject(input)) {
+    return err;
+  }
+
+  const output: Record<string, ZodShortenedIssue> = {};
+  const entries = Object.entries(input);
+  for (const [key, value] of entries.slice(0, 3)) {
+    const child = prepareZodIssues(value);
+    // v8 ignore else -- TODO: add test #40625
+    if (child !== null) {
+      output[key] = child;
+    }
+  }
+
+  if (entries.length > 3) {
+    output.___ = `... ${entries.length - 3} more`;
+  }
+
+  return output;
+}
+
+export function prepareZodError(err: ZodError): Record<string, unknown> {
+  Object.defineProperty(err, 'message', {
+    get: () => 'Schema error',
+    /* v8 ignore start -- TODO: drop set? */
+    set: () => {
+      /* intentionally empty */
+    },
+    // v8 ignore stop -- TODO: drop set? */
+  });
+
+  return {
+    message: err.message,
+    stack: err.stack,
+    issues: prepareZodIssues(err.format()),
+  };
+}
+
+export default function prepareError(err: Error): Record<string, unknown> {
+  if (err instanceof ZodError) {
+    return prepareZodError(err);
+  }
+
+  const response: Record<string, unknown> = {
+    // We want to loose class information, but keep enumerable properties of the error
+    // oxlint-disable-next-line typescript/no-misused-spread
+    ...err,
+  };
+
+  // Required as message is non-enumerable
+  if (!response.message && err.message) {
+    response.message = err.message;
+  }
+
+  // Required as stack is non-enumerable
+  if (!response.stack && err.stack) {
+    response.stack = err.stack;
+  }
+
+  if (err instanceof AggregateError) {
+    response.errors = err.errors.map((error) => prepareError(error));
+  }
+
+  // handle rawExec error
+  if (err instanceof ExecError && isNonEmptyObject(err.options?.env)) {
+    const env = Object.keys(err.options.env);
+    response.options = { ...err.options, env };
+  }
+
+  // handle got error
+  if (err instanceof HttpError) {
+    const options: Record<string, unknown> = {
+      headers: structuredClone(err.options.headers),
+      url: err.options.url?.toString(),
+      hostType: err.options.context.hostType,
+    };
+    response.options = options;
+
+    options.username = err.options.username;
+    options.password = err.options.password;
+    options.method = err.options.method;
+    options.http2 = err.options.http2;
+
+    // v8 ignore else -- TODO: add test #40625
+    if (err.response) {
+      response.response = {
+        statusCode: err.response.statusCode,
+        statusMessage: err.response.statusMessage,
+        body:
+          err.name === 'TimeoutError'
+            ? undefined
+            : structuredClone(err.response.body),
+        headers: structuredClone(err.response.headers),
+        httpVersion: err.response.httpVersion,
+        retryCount: err.response.retryCount,
+      };
+    }
+  }
+
+  return response;
+}
+
+type NestedValue = unknown[] | object;
+
+function isNested(value: unknown): value is NestedValue {
+  return isArray(value) || isObject(value);
+}
+
+export function sanitizeValue(
+  value: unknown,
+  seen = new WeakMap<NestedValue, unknown>(),
+): any {
+  if (isString(value)) {
+    return sanitize(sanitizeUrls(value));
+  }
+
+  // Handle boxed String objects (e.g. from `new String()`), which `isString`
+  // rejects but `isObject` would iterate character-by-character producing
+  // `{"0":"h","1":"e",...}` in log output.
+  if (value instanceof String) {
+    return sanitize(sanitizeUrls(value.toString()));
+  }
+
+  if (isDate(value)) {
+    return value;
+  }
+
+  if (DateTime.isDateTime(value)) {
+    return value.toISO();
+  }
+
+  if (isFunction(value)) {
+    return '[function]';
+  }
+
+  if (isBuffer(value)) {
+    return '[content]';
+  }
+
+  if (isError(value)) {
+    const err = prepareError(value);
+    return sanitizeValue(err, seen);
+  }
+
+  if (isArray(value)) {
+    const length = value.length;
+    const arrayResult = Array(length);
+    seen.set(value, arrayResult);
+    for (let idx = 0; idx < length; idx += 1) {
+      const val = value[idx];
+      arrayResult[idx] =
+        isNested(val) && seen.has(val)
+          ? seen.get(val)
+          : sanitizeValue(val, seen);
+    }
+    return arrayResult;
+  }
+
+  if (isObject(value)) {
+    const objectResult: Record<string, any> = {};
+    seen.set(value, objectResult);
+    for (const [key, val] of Object.entries<any>(value)) {
+      let curValue: any;
+      if (!val) {
+        curValue = val;
+      } else if (redactedFields.includes(key)) {
+        // Do not mask/sanitize secrets templates
+        if (isString(val) && regEx(/^{{\s*secrets\..*}}$/).test(val)) {
+          curValue = val;
+        } else {
+          curValue = '***********';
+        }
+      } else if (contentFields.includes(key)) {
+        curValue = '[content]';
+      } else if (key === 'secrets') {
+        curValue = {};
+        Object.keys(val).forEach((secretKey) => {
+          curValue[secretKey] = '***********';
+        });
+      } else {
+        curValue = seen.has(val) ? seen.get(val) : sanitizeValue(val, seen);
+      }
+
+      const sanitizedKey = sanitizeValue(key, seen);
+      objectResult[sanitizedKey] = curValue;
+    }
+
+    return objectResult;
+  }
+
+  return value;
+}
+
+const urlRe = regEx(/[a-z]{3,9}:\/\/[^@/]+@[a-z0-9.-]+/gi);
+const urlCredRe = regEx(/\/\/[^@]+@/g);
+const dataUriCredRe = regEx(/^(data:[0-9a-z-]+\/[0-9a-z-]+;).+/i);
+
+export function sanitizeUrls(text: string): string {
+  return text
+    .replace(urlRe, (url) => {
+      return url.replace(urlCredRe, '//**redacted**@');
+    })
+    .replace(dataUriCredRe, '$1**redacted**');
+}
+
+export function getEnv(key: string): string | undefined {
+  return [process.env[`RENOVATE_${key}`], process.env[key]]
+    .map((v) => v?.toLowerCase().trim())
+    .find(isNonEmptyStringAndNotWhitespace);
+}
+
+export function getMessage(
+  p1: string | Record<string, any>,
+  p2?: string,
+): string | undefined {
+  return isString(p1) ? p1 : p2;
+}
+
+export function toMeta(
+  p1: string | Record<string, any>,
+): Record<string, unknown> {
+  return isObject(p1) ? p1 : {};
+}

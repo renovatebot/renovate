@@ -1,0 +1,183 @@
+import os from 'node:os';
+import { isNonEmptyStringAndNotWhitespace } from '@sindresorhus/is';
+import fs from 'fs-extra';
+import upath from 'upath';
+import { PLATFORM_GPG_FAILED } from '../../constants/error-messages.ts';
+import { logger } from '../../logger/index.ts';
+import { exec } from '../exec/index.ts';
+import { newlineRegex, regEx } from '../regex.ts';
+import { addSecretForSanitizing } from '../sanitize.ts';
+import { fromBase64, toBase64 } from '../string.ts';
+
+type PrivateKeyFormat = 'gpg' | 'ssh';
+
+const sshKeyRegex = regEx(
+  /-----BEGIN (?:[A-Z ]+ )?PRIVATE KEY-----.*?-----END (?:[A-Z]+ )?PRIVATE KEY-----/,
+  's',
+);
+
+let gitPrivateKey: PrivateKey | undefined;
+
+/**
+ * Decodes Base64 string if roundtrip encoding matches
+ */
+function tryBase64(value: string): string | null {
+  const decodedValue = fromBase64(value);
+  const encodedValue = toBase64(decodedValue);
+  if (value !== encodedValue) {
+    return null;
+  }
+
+  return decodedValue;
+}
+
+abstract class PrivateKey {
+  protected readonly key: string;
+  protected readonly passphrase: string | undefined;
+  protected keyId: string | undefined;
+  protected abstract readonly gpgFormat: string;
+
+  constructor(key: string, passphrase: string | undefined) {
+    const decodedKey = tryBase64(key);
+
+    if (decodedKey) {
+      this.key = decodedKey;
+      addSecretForSanitizing(key, 'global');
+      logger.debug('gitPrivateKey: decoded key from Base64');
+    } else {
+      this.key = key;
+    }
+    addSecretForSanitizing(this.key, 'global');
+
+    this.passphrase = passphrase;
+    if (this.passphrase) {
+      addSecretForSanitizing(this.passphrase, 'global');
+    }
+    logger.debug(
+      'gitPrivateKey: successfully set (but not yet written/configured)',
+    );
+  }
+
+  async writeKey(): Promise<void> {
+    try {
+      this.keyId ??= await this.importKey();
+      logger.debug('gitPrivateKey: imported');
+    } catch (err) {
+      logger.warn({ err }, 'gitPrivateKey: error importing');
+      throw new Error(PLATFORM_GPG_FAILED);
+    }
+  }
+
+  async configSigningKey(cwd: string): Promise<void> {
+    logger.debug('gitPrivateKey: configuring commit signing');
+    // TODO: types (#22198)
+    await exec(`git config user.signingkey ${this.keyId!}`, { cwd });
+    await exec(`git config commit.gpgsign true`, { cwd });
+    await exec(`git config gpg.format ${this.gpgFormat}`, { cwd });
+  }
+
+  protected abstract importKey(): Promise<string | undefined>;
+}
+
+class GPGKey extends PrivateKey {
+  protected readonly gpgFormat = 'openpgp';
+
+  constructor(key: string, passphrase: string | undefined) {
+    super(key.trim(), passphrase);
+    if (passphrase) {
+      logger.warn(
+        'Passphrase is not yet supported for GPG keys, it will be ignored',
+      );
+    }
+  }
+
+  protected async importKey(): Promise<string | undefined> {
+    const keyFileName = upath.join(`${os.tmpdir()}/git-private-gpg.key`);
+    await fs.outputFile(keyFileName, this.key);
+    const { stdout, stderr } = await exec(
+      // --batch --no-tty flags allow Renovate to skip warnings about unsupported algorithms in the key
+      `gpg --batch --no-tty --import ${keyFileName}`,
+    );
+    logger.debug({ stdout, stderr }, 'Private key import result');
+    await fs.remove(keyFileName);
+    return `${stdout}${stderr}`
+      .split(newlineRegex)
+      .find((line) => line.includes('secret key imported'))
+      ?.replace('gpg: key ', '')
+      .split(':')
+      .shift();
+  }
+}
+
+class SSHKey extends PrivateKey {
+  protected readonly gpgFormat = 'ssh';
+
+  protected async importKey(): Promise<string | undefined> {
+    const keyFileName = upath.join(`${os.tmpdir()}/git-private-ssh.key`);
+    await fs.outputFile(keyFileName, this.key.replace(regEx(/\n?$/), '\n'));
+    /* v8 ignore next -- not easily testable */
+    process.on('exit', () => fs.rmSync(keyFileName, { force: true }));
+    await fs.chmod(keyFileName, 0o600);
+
+    // If there's a passphrase, decrypt the private key and save without passphrase
+    if (this.passphrase) {
+      await exec(
+        // -p: change passphrase
+        // -f: key file
+        // -P: old passphrase
+        // -N: new passphrase (empty = no passphrase)
+        `ssh-keygen -p -f ${keyFileName} -P "${this.passphrase}" -N ""`,
+      );
+    }
+
+    // HACK: `git` calls `ssh-keygen -Y sign ...` internally for SSH-based
+    // commit signing. Technically, only the private key is needed for signing,
+    // but `ssh-keygen` has an implementation quirk which requires also the
+    // public key file to exist. Therefore, we derive the public key from the
+    // private key just to satisfy `ssh-keygen` until the problem has been
+    // resolved.
+    // https://github.com/renovatebot/renovate/issues/18197#issuecomment-2152333710
+    const { stdout } = await exec(`ssh-keygen -y -f ${keyFileName}`);
+    const pubFileName = `${keyFileName}.pub`;
+    await fs.outputFile(pubFileName, stdout);
+    /* v8 ignore next -- not easily testable */
+    process.on('exit', () => fs.rmSync(pubFileName, { force: true }));
+    return keyFileName;
+  }
+}
+
+function getPrivateKeyFormat(key: string): PrivateKeyFormat {
+  return sshKeyRegex.test(key) ? 'ssh' : 'gpg';
+}
+
+function createPrivateKey(
+  key: string,
+  passphrase: string | undefined,
+): PrivateKey {
+  switch (getPrivateKeyFormat(key)) {
+    case 'gpg':
+      logger.debug('gitPrivateKey: GPG key detected');
+      return new GPGKey(key, passphrase);
+    case 'ssh':
+      logger.debug('gitPrivateKey: SSH key detected');
+      return new SSHKey(key, passphrase);
+  }
+}
+
+export function setPrivateKey(
+  key: string | undefined,
+  passphrase: string | undefined,
+): void {
+  if (!isNonEmptyStringAndNotWhitespace(key)) {
+    return;
+  }
+  gitPrivateKey = createPrivateKey(key, passphrase);
+}
+
+export async function writePrivateKey(): Promise<void> {
+  await gitPrivateKey?.writeKey();
+}
+
+export async function configSigningKey(cwd: string): Promise<void> {
+  await gitPrivateKey?.configSigningKey(cwd);
+}

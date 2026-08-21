@@ -1,0 +1,95 @@
+import { isTruthy } from '@sindresorhus/is';
+import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
+import { withCache } from '../../../util/cache/package/with-cache.ts';
+import { isValidLocalPath, readLocalFile } from '../../../util/fs/index.ts';
+import { HttpError } from '../../../util/http/index.ts';
+import { Json } from '../../../util/schema-utils/index.ts';
+import { joinUrlParts } from '../../../util/url.ts';
+import { BzlmodVersion } from '../../versioning/bazel-module/bzlmod-version.ts';
+import { id as bazelVersioningId } from '../../versioning/bazel-module/index.ts';
+import { Datasource } from '../datasource.ts';
+import type { GetReleasesConfig, Release, ReleaseResult } from '../types.ts';
+import { BazelModuleMetadata } from './schema.ts';
+
+export class BazelDatasource extends Datasource {
+  static readonly id = 'bazel';
+
+  static readonly bazelCentralRepoUrl =
+    'https://raw.githubusercontent.com/bazelbuild/bazel-central-registry/main';
+
+  override readonly defaultRegistryUrls = [BazelDatasource.bazelCentralRepoUrl];
+  override readonly registryStrategy = 'hunt';
+  override readonly customRegistrySupport = true;
+  override readonly caching = true;
+  override readonly defaultVersioning = bazelVersioningId;
+
+  static packageMetadataPath(packageName: string): string {
+    return `/modules/${packageName}/metadata.json`;
+  }
+
+  constructor() {
+    super(BazelDatasource.id);
+  }
+
+  private async _getReleases({
+    registryUrl,
+    packageName,
+  }: GetReleasesConfig): Promise<ReleaseResult | null> {
+    const path = BazelDatasource.packageMetadataPath(packageName);
+    const url = joinUrlParts(registryUrl!, path);
+    const result: ReleaseResult = { releases: [] };
+    try {
+      let metadata: BazelModuleMetadata;
+      const FILE_PREFIX = 'file://';
+      if (url.startsWith(FILE_PREFIX)) {
+        const filePath = url.slice(FILE_PREFIX.length);
+        if (!isValidLocalPath(filePath)) {
+          return null;
+        }
+        const fileContent = await readLocalFile(filePath, 'utf8');
+        if (!fileContent) {
+          return null;
+        }
+        metadata = Json.pipe(BazelModuleMetadata).parse(fileContent);
+      } else {
+        const response = await this.http.getJson(url, BazelModuleMetadata);
+        metadata = response.body;
+      }
+
+      result.releases = metadata.versions
+        .map((v) => new BzlmodVersion(v))
+        .sort(BzlmodVersion.defaultCompare)
+        .map((bv) => {
+          const release: Release = { version: bv.original };
+          if (isTruthy(metadata.yanked_versions?.[bv.original])) {
+            release.isDeprecated = true;
+          }
+          return release;
+        });
+      if (metadata.homepage) {
+        result.homepage = metadata.homepage;
+      }
+    } catch (err) {
+      if (err instanceof HttpError) {
+        if (err.response?.statusCode === 404) {
+          return null;
+        }
+        throw new ExternalHostError(err);
+      }
+      this.handleGenericErrors(err);
+    }
+
+    return result.releases.length ? result : null;
+  }
+
+  getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+    return withCache(
+      {
+        namespace: `datasource-${BazelDatasource.id}`,
+        key: `${config.registryUrl!}:${config.packageName}`,
+        fallback: true,
+      },
+      () => this._getReleases(config),
+    );
+  }
+}

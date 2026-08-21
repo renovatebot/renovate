@@ -1,0 +1,115 @@
+---
+title: Config Validation
+description: How to validate Renovate's configuration.
+---
+
+# Config Validation
+
+You can check your Renovate configuration with a standalone program called `renovate-config-validator`.
+All [`renovate` distributions](getting-started/running.md#available-distributions) include this program.
+
+## Default behavior
+
+When you run `renovate-config-validator` with no arguments it will check:
+
+- all [default locations](configuration-options.md) (if files exist)
+- the `RENOVATE_CONFIG_FILE` environment variable
+
+For example:
+
+```console
+$ npx --yes --package renovate -- renovate-config-validator
+ INFO: Validating renovate.json
+ INFO: Config validated successfully
+```
+
+If you want to run `renovate-config-validator` while using a custom filename for your renovate config file, you will need to pass the filename as cli argument.
+
+### Strict mode
+
+By default, the validator program fails with a non-zero exit code if there are any validation warnings or errors.
+You can pass the `--strict` flag to make it fail if a scanned config needs migration:
+
+```console title="Strict mode validation"
+$ npx --yes --package renovate -- renovate-config-validator --strict
+ INFO: Validating renovate.json
+ WARN: Config migration necessary
+       "oldConfig": {
+         "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+         "extends": [ "config:base" ]
+       },
+       "newConfig": {
+         "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+         "extends": [ "config:recommended" ]
+       },
+```
+
+### Pass file to check as CLI arguments
+
+You can pass the file you want to check to the `renovate-config-validator` program with a CLI argument.
+This can be handy to check a config file with a non-default name, like when you're using preset repositories.
+For example:
+
+```console
+$ npx --yes --package renovate -- renovate-config-validator first_config.json
+ INFO: Validating first_config_.json
+ INFO: Config validated successfully
+```
+
+!!! note
+  If you specify the filename, `renovate-config-validator` treats the file(s) as global self-hosted configuration instead of repo-level configuration.
+  If this isn't intentional - for instance if you're validating a [shared config preset](./config-presets.md) or a non-standard filename - make sure you specify `--no-global`, i.e. `renovate-config-validator --no-global go-presets.json`.
+
+### Providing global configuration
+
+If `renovate-config-validator` detects a `config.js`, or any [global self-hosed environment variables](./self-hosted-configuration.md), they will be set as global configuration.
+
+For instance, if you had a `config.js`:
+
+```javascript
+module.exports = {
+  // to mirror the Mend-hosted Renovate
+  globalExtends: ['global:safeEnv'],
+};
+```
+
+And a `renovate.json`:
+
+```json
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "env": {
+    "GONOSUMDB": "off"
+  }
+}
+```
+
+The `renovate-config-validator` would allow this to pass.
+
+## Validate your config automatically
+
+You can create a [pre-commit](https://pre-commit.com) hook to validate your configuration automatically.
+Go to the [`renovatebot/pre-commit-hooks` repository](https://github.com/renovatebot/pre-commit-hooks) for more information.
+
+### Validation of Renovate config change PRs
+
+!!! tip
+  Using the Mend-hosted apps? Push a branch to `renovate/reconfigure` for feedback (via status check), and if there's a PR, Renovate will add comments to it!
+
+Renovate can validate configuration changes in Pull Requests when you use a special branch name.
+
+Follow these steps to validate your configuration:
+
+1. Create a new Git branch that matches the `{{branchPrefix}}reconfigure` pattern. For example, if you're using the default prefix `renovate/`, your branch name must be `renovate/reconfigure`.
+1. Commit your updated Renovate config file to this branch, and push it to your Git hosting platform.
+
+The next time Renovate runs on that repo it will:
+
+1. Search for a branch that matches the special reconfigure pattern.
+1. Check for a config file in the reconfigure branch. Renovate can even find a renamed configuration file (compared to the config file in the default branch).
+1. Add a passing or failing status to the branch, depending on the outcome of the config validation run.
+1. If there's an _open_ pull request with validation errors from the _reconfigure_ branch then Renovate comments in the PR with details.
+1. Validate each commit the next time Renovate runs on the repository, until the PR is merged.
+
+!!! note
+  The reconfigure branch **must** be pushed to the source repository that Renovate runs against, not a fork.

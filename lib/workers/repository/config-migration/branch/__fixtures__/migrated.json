@@ -1,0 +1,19 @@
+{
+  "extends": [
+    ":separateMajorReleases",
+    ":prImmediately",
+    ":renovatePrefix",
+    ":semanticPrefixFixDepsChoreOthers",
+    ":updateNotScheduled",
+    ":automergeDisabled",
+    ":maintainLockFilesDisabled",
+    "group:monorepos"
+  ],
+  "onboarding": false,
+  "rangeStrategy": "replace",
+  "semanticCommits": "enabled",
+  "timezone": "US/Central",
+  "baseBranches": [
+    "main"
+  ]
+}

@@ -1,0 +1,26 @@
+import { isUndefined } from '@sindresorhus/is';
+import type {
+  PackageRule,
+  PackageRuleInputConfig,
+} from '../../config/types.ts';
+import { anyMatchRegexOrGlobList } from '../string-match.ts';
+import { Matcher } from './base.ts';
+
+export class UpdateTypesMatcher extends Matcher {
+  override matches(
+    { updateType, isBump }: PackageRuleInputConfig,
+    { matchUpdateTypes }: PackageRule,
+  ): boolean | null {
+    if (isUndefined(matchUpdateTypes)) {
+      return null;
+    }
+    if (!updateType) {
+      return false;
+    }
+    const toMatch = [updateType];
+    if (isBump) {
+      toMatch.push('bump');
+    }
+    return anyMatchRegexOrGlobList(toMatch, matchUpdateTypes);
+  }
+}

@@ -1,0 +1,205 @@
+import { codeBlock } from 'common-tags';
+import type { BranchConfig } from '../../../../types.ts';
+import { getPrConfigDescription } from './config-description.ts';
+
+describe('workers/repository/update/pr/body/config-description', () => {
+  describe('getPrConfigDescription', () => {
+    const config: BranchConfig = {
+      manager: 'some-manager',
+      baseBranch: 'base',
+      branchName: 'some-branch',
+      upgrades: [],
+    };
+
+    it('renders stopUpdating=true', () => {
+      const res = getPrConfigDescription({
+        ...config,
+        stopUpdating: true,
+      });
+
+      expect(res).toContain(
+        `**Rebasing**: Never, or you tick the rebase/retry checkbox.`,
+      );
+    });
+
+    it('renders rebaseWhen="never"', () => {
+      const res = getPrConfigDescription({
+        ...config,
+        rebaseWhen: 'never',
+      });
+
+      expect(res).toContain(
+        `**Rebasing**: Never, or you tick the rebase/retry checkbox.`,
+      );
+    });
+
+    it('renders rebaseWhen="behind-base-branch"', () => {
+      const res = getPrConfigDescription({
+        ...config,
+        rebaseWhen: 'behind-base-branch',
+      });
+
+      expect(res).toContain(`Whenever PR is behind base branch`);
+    });
+
+    it('renders timezone', () => {
+      const res = getPrConfigDescription({
+        ...config,
+        schedule: ['* 1 * * * *'],
+        timezone: 'Europe/Istanbul',
+      });
+      expect(res).toContain(`(in timezone Europe/Istanbul)`);
+    });
+
+    it('renders UTC as the default timezone', () => {
+      const res = getPrConfigDescription({
+        ...config,
+        schedule: ['* 1 * * *'],
+      });
+      expect(res).toContain('Between 01:00 AM and 01:59 AM (`* 1 * * *`)');
+    });
+
+    it('summarizes cron schedules', () => {
+      const res = getPrConfigDescription({
+        ...config,
+        schedule: ['* 1 * * *', '* * 2 * 1'],
+      });
+      expect(res).toContain('- Between 01:00 AM and 01:59 AM (`* 1 * * *`)');
+      expect(res).toContain(
+        '- On day 2 of the month, and on Monday (`* * 2 * 1`)',
+      );
+    });
+
+    it('displays later schedules', () => {
+      const res = getPrConfigDescription({
+        ...config,
+        schedule: ['before 6am on Monday', 'after 3pm on Tuesday'],
+      });
+      expect(res).toContain('"before 6am on Monday,after 3pm on Tuesday"');
+    });
+
+    it('renders undefined schedule', () => {
+      const res = getPrConfigDescription(config);
+
+      const expected = codeBlock`
+        - Branch creation
+          - At any time (no schedule defined)
+        - Automerge
+          - At any time (no schedule defined)
+      `;
+
+      expect(res).toContain(expected);
+    });
+
+    it('renders empty schedule', () => {
+      const res = getPrConfigDescription({
+        ...config,
+        // for instance when set on a vulnerability alert overrides the
+        schedule: [],
+      });
+
+      const expected = codeBlock`
+        - Branch creation
+          - At any time (no schedule defined)
+        - Automerge
+          - At any time (no schedule defined)
+      `;
+
+      expect(res).toContain(expected);
+    });
+
+    // because the merging of `force` should have happened before this function, this clarifies that ?
+    it('does not take into account `force`', () => {
+      const res = getPrConfigDescription({
+        ...config,
+        force: {
+          schedule: ['before 6am on Monday', 'after 3pm on Tuesday'],
+          automergeSchedule: ['after 6pm on Friday'],
+        },
+      });
+
+      const expected = codeBlock`
+        - Branch creation
+          - At any time (no schedule defined)
+        - Automerge
+          - At any time (no schedule defined)
+      `;
+
+      expect(res).toContain(expected);
+    });
+
+    it('summarizes cron schedules (for automergeSchedule)', () => {
+      const res = getPrConfigDescription({
+        ...config,
+        automergeSchedule: ['* 1 * * *', '* * 2 * 1'],
+      });
+      expect(res).toContain('- Between 01:00 AM and 01:59 AM (`* 1 * * *`)');
+      expect(res).toContain(
+        '- On day 2 of the month, and on Monday (`* * 2 * 1`)',
+      );
+    });
+
+    it('summarizes both branch creation and automerge schedules', () => {
+      const res = getPrConfigDescription({
+        ...config,
+        schedule: ['* 1 * * *', '* * 2 * 1'],
+        automergeSchedule: ['before 6am on Monday', 'after 3pm on Tuesday'],
+      });
+      const expected = codeBlock`
+        **Schedule**: (UTC)
+
+        - Branch creation
+          - Between 01:00 AM and 01:59 AM (\`* 1 * * *\`)
+          - On day 2 of the month, and on Monday (\`* * 2 * 1\`)
+        - Automerge
+          - "before 6am on Monday,after 3pm on Tuesday"
+      `;
+
+      expect(res).toContain(expected);
+    });
+
+    it('renders recreateClosed=true', () => {
+      const res = getPrConfigDescription({
+        ...config,
+        recreateClosed: true,
+      });
+      expect(res).toContain(`**Immortal**`);
+    });
+
+    it('does not render recreateClosed=false', () => {
+      const res = getPrConfigDescription({
+        ...config,
+        recreateClosed: false,
+      });
+      expect(res).not.toContain(`**Immortal**`);
+    });
+
+    it('does not render recreateClosed=undefined', () => {
+      const res = getPrConfigDescription(config);
+      expect(res).not.toContain(`**Immortal**`);
+    });
+
+    it('renders singular', () => {
+      const res = getPrConfigDescription({
+        ...config,
+        upgrades: [config],
+      });
+      expect(res).toContain(`this update`);
+    });
+
+    it('renders automerge', () => {
+      const res = getPrConfigDescription({ ...config, automerge: true });
+      expect(res).toContain(`**Automerge**: Enabled.`);
+    });
+
+    it('renders blocked automerge', () => {
+      const res = getPrConfigDescription({
+        ...config,
+        automergedPreviously: true,
+      });
+      expect(res).toContain(
+        `**Automerge**: Disabled because a matching PR was automerged previously.`,
+      );
+    });
+  });
+});

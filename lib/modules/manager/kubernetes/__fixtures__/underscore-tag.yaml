@@ -1,0 +1,16 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: litellm
+  namespace: kube-system
+  labels:
+    app: litellm
+spec:
+  selector:
+    matchLabels:
+      app: litellm
+  template:
+    spec:
+      containers:
+      - name: litellm
+        image: "ghcr.io/berriai/litellm:litellm_stable_release_branch-v1.67.0-stable"

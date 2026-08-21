@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>org.example</groupId>
+    <artifactId>ExamplePomFile</artifactId>
+
+    <properties>
+        <foo>${bar}</foo>
+        <bar>${baz}</bar>
+        <baz>${foo}</baz>
+        <var1>${var2}</var1>
+        <var2>${var1}</var2>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.apache.lucene</groupId>
+            <artifactId>lucene-core</artifactId>
+            <version>${foo}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.lucene</groupId>
+            <artifactId>lucene-core-${var1}</artifactId>
+            <version>1.2</version>
+        </dependency>
+    </dependencies>
+</project>

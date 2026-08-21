@@ -1,0 +1,16 @@
+# .bazelrc
+
+build --registry=https://example.com/custom_registry.git
+build --registry=https://github.com/bazelbuild/bazel-central-registry
+build --registry='http://example.com/registry-with-single-quotes.git'
+build --registry="http://example.com/registry-with-double-quotes.git"
+
+import %workspace%/shared.bazelrc
+
+build --jobs 600
+
+# This file does not exist.
+try-import %workspace%/local.bazelrc
+
+# This file does not exist/is outside of the basePath
+try-import /does-not-exist/.bazelrc

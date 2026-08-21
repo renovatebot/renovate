@@ -1,0 +1,5 @@
+source 'https://hub.tech.my.domain.de/artifactory/api/gems/my-gems-prod-local/' do
+    gem 'sfn_my_dep1', "~> 1"
+    gem 'sfn_my_dep2', "~> 1"
+
+end

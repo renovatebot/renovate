@@ -1,0 +1,9 @@
+{- if .Values.configMap.enabled | default false }
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-config
+  labels:
+    app: nginx
+data: {}
+{- end }

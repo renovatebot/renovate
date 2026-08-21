@@ -1,0 +1,42 @@
+import { partial } from '~test/util.ts';
+import type { Timestamp } from '../../../../util/timestamp.ts';
+import type { GithubGraphqlRelease } from './releases-query-adapter.ts';
+import { adapter } from './releases-query-adapter.ts';
+
+const item: GithubGraphqlRelease = {
+  version: '1.2.3',
+  releaseTimestamp: '2024-09-24' as Timestamp,
+  isDraft: false,
+  isPrerelease: false,
+  url: 'https://example.com',
+  id: 123,
+  name: 'name',
+  description: 'description',
+};
+
+describe('util/github/graphql/query-adapters/releases-query-adapter', () => {
+  it('transforms items', () => {
+    expect(adapter.transform(item)).toEqual({
+      description: 'description',
+      id: 123,
+      name: 'name',
+      releaseTimestamp: '2024-09-24T00:00:00.000Z' as Timestamp,
+      url: 'https://example.com',
+      version: '1.2.3',
+    });
+  });
+
+  it('filters out drafts', () => {
+    expect(adapter.transform({ ...item, isDraft: true })).toBeNull();
+  });
+
+  it('handles invalid items', () => {
+    expect(adapter.transform(partial<GithubGraphqlRelease>())).toBeNull();
+  });
+
+  it('marks prereleases as unstable', () => {
+    expect(adapter.transform({ ...item, isPrerelease: true })).toMatchObject({
+      isStable: false,
+    });
+  });
+});

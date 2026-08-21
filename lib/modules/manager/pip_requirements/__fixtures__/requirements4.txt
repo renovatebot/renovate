@@ -1,0 +1,4 @@
+--index-url https://artifactory.company.com/artifactory/api/pypi/python/simple --trusted-host artifactory.company.com --default-timeout 600
+Django[argon2]==2.0.12
+celery [redis]==4.1.1
+foo [bar] == 3.2.1 # handles extra white space

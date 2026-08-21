@@ -1,0 +1,48 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "debug",
+      "program": "${workspaceFolder}/lib/renovate.ts",
+      "env": {
+        "LOG_LEVEL": "debug"
+      },
+      "console": "integratedTerminal",
+      "skipFiles": ["<node_internals>/**", "${workspaceFolder}/node_modules/**"]
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "debug (clean cache)",
+      "program": "${workspaceFolder}/lib/renovate.ts",
+      "env": {
+        "LOG_LEVEL": "debug"
+      },
+      "preLaunchTask": "npm: clean-cache",
+      "console": "integratedTerminal",
+      "skipFiles": ["<node_internals>/**", "${workspaceFolder}/node_modules/**"]
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Debug Current Test File",
+      "autoAttachChildProcesses": true,
+      "skipFiles": ["<node_internals>/**", "**/node_modules/**"],
+      "program": "${workspaceRoot}/node_modules/vitest/vitest.mjs",
+      "args": [
+        "run",
+        "--no-file-parallelism",
+        "--no-coverage",
+        "--test-timeout=0",
+        "--hook-timeout=0",
+        "${relativeFile}"
+      ],
+      "env": {
+        "LOG_LEVEL": "debug"
+      },
+      "console": "integratedTerminal"
+    }
+  ]
+}

@@ -1,0 +1,63 @@
+# from galaxy
+- src: yatesr.timezone
+  version: "0.1.0"
+
+- name: 'cloudalchemy.node-exporter'
+  version: '0.19.0'
+
+# GitHub repo, accessible by http(s)
+- version: master
+  src: https://github.com/bennojoy/nginx
+  name: nginx_role
+
+# Git repo, accessible by git+http(s)
+- src: git+http://bitbucket.org/willthames/git-ansible-galaxy
+  version: "v1.4"
+
+# Git repo, accessible by git protocol
+- scm: git
+  src: git@gitlab.company.com:mygroup/ansible-base.git
+  version: "0.1"
+
+# Git repo, url with protocol prefix
+## with user
+- scm: git
+  src:  ssh://git@gitlab.company.com/testGroup/testProject.git
+  version: "0.1"
+## without user
+- scm: git
+  src:  ssh://gitlab.company.com/testGroup/testProject2.git
+  version: "0.1"
+## with custom port
+- scm: git
+  src:  ssh://git@gitlab.company.com:23/testGroup/testProject3.git
+  version: "3.1"
+
+# include
+- include: <path_to_requirements>/webserver.yml
+
+# Test quotes
+- scm: "git"
+  src: 'git@gitlab.company.com:mygroup/ansible-base.git'
+  version: "0.14"
+
+# Test quotes
+- scm: "git"
+  src: "company.com:mygroup/ansible-base.git"
+  version: "0.14"
+
+# not fitting release
+- test: yatesr.timezone
+  version: "0.1.0"
+
+# not valid src string
+- src: timezone
+  version: "0.1.0"
+
+# git protocol
+- src: git+git://github.com/org/repo.git
+  version: "47.11"
+
+# including . character
+- src: git+git://github.com/org/re.po.git
+  version: "47.11"

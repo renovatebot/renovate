@@ -1,0 +1,377 @@
+import {
+  isArray,
+  isNumber,
+  isPlainObject,
+  isPrimitive,
+  isString,
+} from '@sindresorhus/is';
+import handlebars, { type HelperOptions } from 'handlebars';
+import { GlobalConfig } from '../../config/global.ts';
+import { pkg } from '../../expose.ts';
+import { logger } from '../../logger/index.ts';
+import { toArray } from '../array.ts';
+import { getChildEnv } from '../exec/utils.ts';
+import { regEx } from '../regex.ts';
+
+// Missing in handlebars
+type Options = HelperOptions & {
+  lookupProperty: (element: unknown, key: unknown) => unknown;
+};
+
+const helpers: Record<string, handlebars.HelperDelegate> = {
+  encodeURIComponent,
+  decodeURIComponent,
+  encodeBase64: (str: string) => Buffer.from(str ?? '').toString('base64'),
+  decodeBase64: (str: string) => Buffer.from(str ?? '', 'base64').toString(),
+  stringToPrettyJSON: (input: string): string =>
+    JSON.stringify(JSON.parse(input), null, 2),
+  toJSON: (input: unknown): string => JSON.stringify(input),
+  toArray: (...args: unknown[]): unknown[] => {
+    // Need to remove the 'options', as the last parameter
+    // https://handlebarsjs.com/api-reference/helpers.html
+    args.pop();
+    return args;
+  },
+  toObject: (...args: unknown[]): unknown => {
+    // Need to remove the 'options', as the last parameter
+    // https://handlebarsjs.com/api-reference/helpers.html
+    args.pop();
+
+    if (args.length % 2 !== 0) {
+      throw new Error(`Must contain an even number of elements`);
+    }
+
+    const keys = args.filter((_, index) => index % 2 === 0);
+    const values = args.filter((_, index) => index % 2 === 1);
+
+    return Object.fromEntries(keys.map((key, index) => [key, values[index]]));
+  },
+  replace: (find, replace, context) =>
+    (context ?? '').replace(regEx(find, 'g'), replace),
+  lowercase: (str: string) => str?.toLowerCase(),
+  containsString: (str, subStr) => str?.includes(subStr),
+  equals: (arg1, arg2) => arg1 === arg2,
+  includes: (arg1: string[], arg2: string) => {
+    if (isArray(arg1, isString) && isString(arg2)) {
+      return arg1.includes(arg2);
+    }
+    return false;
+  },
+  split: (str: unknown, separator: unknown): string[] => {
+    if (isString(str) && isString(separator)) {
+      return str.split(separator);
+    }
+    return [];
+  },
+  and: (...args: unknown[]) => {
+    // Need to remove the 'options', as the last parameter
+    // https://handlebarsjs.com/api-reference/helpers.html
+    args.pop();
+    return args.every(Boolean);
+  },
+  or: (...args: unknown[]) => {
+    // Need to remove the 'options', as the last parameter
+    // https://handlebarsjs.com/api-reference/helpers.html
+    args.pop();
+    return args.some(Boolean);
+  },
+  lookupArray: (obj: unknown, key: unknown, options: Options): unknown[] => {
+    return (
+      toArray(obj)
+        // skip elements like #with does
+        .filter((element) => !handlebars.Utils.isEmpty(element))
+        .map((element) => options.lookupProperty(element, key))
+        .filter((value) => value !== undefined)
+    );
+  },
+  distinct: (obj: unknown): unknown[] => {
+    const seen = new Set<string>();
+
+    return toArray(obj).filter((value) => {
+      const str = JSON.stringify(value);
+
+      if (seen.has(str)) {
+        return false;
+      }
+
+      seen.add(str);
+      return true;
+    });
+  },
+  add: (a, b) => {
+    if (isNumber(a) && isNumber(b)) {
+      return a + b;
+    }
+
+    throw new Error('add: inputs are not valid');
+  },
+};
+
+// Register all helpers from the single source of truth
+for (const [name, fn] of Object.entries(helpers)) {
+  handlebars.registerHelper(name, fn);
+}
+
+// Export helper names derived from the same source used to register them
+export const templateHelperNames = Object.keys(helpers) as readonly string[];
+
+/**
+ * Config options whose **values** are exposed as template variables.
+ * e.g. `groupName` is in this list because you can write `{{groupName}}` inside a template.
+ * This is distinct from `supportsTemplating`, which marks options whose values
+ * are themselves *compiled* as Handlebars templates via `template.compile()`.
+ */
+export const exposedConfigOptions = [
+  'additionalBranchPrefix',
+  'addLabels',
+  'allowedVersions',
+  'branchName',
+  'branchPrefix',
+  'branchTopic',
+  'commitBody',
+  'commitMessage',
+  'commitMessageAction',
+  'commitMessageExtra',
+  'commitMessagePrefix',
+  'commitMessageSuffix',
+  'commitMessageTopic',
+  'gitAuthor',
+  'group',
+  'groupName',
+  'groupSlug',
+  'labels',
+  'prBodyColumns',
+  'prBodyDefinitions',
+  'prBodyNotes',
+  'prTitle',
+  'semanticCommitScope',
+  'semanticCommitType',
+  'separateMajorMinor',
+  'separateMinorPatch',
+  'separateMultipleMinor',
+  'sourceDirectory',
+];
+
+/**
+ * Runtime-generated fields available as template variables.
+ * These are not config options — they are computed during Renovate's run
+ * (e.g. `depName`, `newVersion`, `isMajor`) and made available in templates.
+ */
+export const allowedFields = {
+  baseBranch: 'The baseBranch for this branch/PR',
+  body: 'The body of the release notes',
+  categories: 'The categories of the manager of the dependency being updated',
+  currentValue: 'The extracted current value of the dependency being updated',
+  currentVersion:
+    'The version that would be currently installed. For example, if currentValue is ^3.0.0 then currentVersion might be 3.1.0.',
+  currentVersionAgeInDays: 'The age of the current version in days',
+  currentVersionTimestamp: 'The timestamp of the current version',
+  currentDigest: 'The extracted current digest of the dependency being updated',
+  currentDigestShort:
+    'The extracted current short digest of the dependency being updated',
+  datasource: 'The datasource used to look up the upgrade',
+  depName: 'The name of the dependency being updated',
+  depNameLinked:
+    'The dependency name already linked to its home page using markdown',
+  depNameSanitized:
+    'The depName field sanitized for use in branches after removing spaces and special characters',
+  depType: 'The dependency type (if extracted - manager-dependent)',
+  depTypes:
+    'A deduplicated array of dependency types (if extracted - manager-dependent) in a branch',
+  displayFrom: 'The current value, formatted for display',
+  displayPending: 'Latest pending update, if internalChecksFilter is in use',
+  displayTo: 'The to value, formatted for display',
+  hasReleaseNotes: 'true if the upgrade has release notes',
+  indentation: 'The indentation of the dependency being updated',
+  isGroup: 'true if the upgrade is part of a group',
+  isLockfileUpdate: 'true if the branch is a lock file update',
+  isMajor: 'true if the upgrade is major',
+  isMinor: 'true if the upgrade is minor',
+  isPatch: 'true if the upgrade is a patch upgrade',
+  isPin: 'true if the upgrade is pinning dependencies',
+  isPinDigest: 'true if the upgrade is pinning digests',
+  isRollback: 'true if the upgrade is a rollback PR',
+  isReplacement: 'true if the upgrade is a replacement',
+  isRange: 'true if the new value is a range',
+  isSingleVersion:
+    'true if the upgrade is to a single version rather than a range',
+  isVulnerabilityAlert: 'true if the upgrade is a vulnerability alert',
+  logJSON: 'ChangeLogResult object for the upgrade',
+  manager: 'The (package) manager which detected the dependency',
+  newDigest: 'The new digest value',
+  newDigestShort:
+    'A shortened version of newDigest, for use when the full digest is too long to be conveniently displayed',
+  newMajor:
+    'The major version of the new version. e.g. "3" if the new version is "3.1.0"',
+  newMinor:
+    'The minor version of the new version. e.g. "1" if the new version is "3.1.0"',
+  newPatch:
+    'The patch version of the new version. e.g. "0" if the new version is "3.1.0"',
+  newName:
+    'The name of the new dependency that replaces the current deprecated dependency',
+  newNameLinked:
+    'The new dependency name already linked to its home page using markdown',
+  newValue:
+    'The new value in the upgrade. Can be a range or version e.g. "^3.0.0" or "3.1.0"',
+  newVersion: 'The new version in the upgrade, e.g. "3.1.0"',
+  newVersionAgeInDays: 'The age of the new version in days',
+  major:
+    'The major version of the current version. e.g. "3" if the current version is "3.1.0"',
+  minor:
+    'The minor version of the current version. e.g. "1" if the current version is "3.1.0"',
+  patch:
+    'The patch version of the current version. e.g. "0" if the current version is "3.1.0"',
+  packageFile: 'The filename that the dependency was found in',
+  packageFileDir:
+    'The directory with full path where the packageFile was found',
+  packageName: 'The full name that was used to look up the dependency',
+  packageScope: 'The scope of the package name. Supports Maven group ID only',
+  parentDir:
+    'The name of the directory that the dependency was found in, without full path',
+  parentOrg: 'The name of the parent organization for the current repository',
+  platform: 'VCS platform in use, e.g. "github", "gitlab", etc.',
+  prettyDepType: 'Massaged depType',
+  prettyNewMajor: 'The new major value with v prepended to it.',
+  prettyNewVersion: 'The new version value with v prepended to it.',
+  project: 'ChangeLogProject object',
+  recreateClosed: 'If true, this PR will be recreated if closed',
+  references: 'A list of references for the upgrade',
+  releases: 'An array of releases for an upgrade',
+  releaseNotes: 'A ChangeLogNotes object for the release',
+  releaseTimestamp: 'The timestamp of the release',
+  renovateVersion: 'The currently running Renovate version.',
+  repository: 'The current repository',
+  semanticPrefix: 'The fully generated semantic prefix for commit messages',
+  sourceRepo: 'The repository in the sourceUrl, if present',
+  sourceRepoName: 'The repository name in the sourceUrl, if present',
+  sourceRepoOrg: 'The repository organization in the sourceUrl, if present',
+  sourceRepoSlug: 'The slugified pathname of the sourceUrl, if present',
+  sourceUrl: 'The source URL for the package',
+  topLevelOrg:
+    'The name of the top-level organization for the current repository',
+  updateType:
+    'One of digest, pin, rollback, patch, minor, major, replacement, pinDigest',
+  upgrades: 'An array of upgrade objects in the branch',
+  url: 'The url of the release notes',
+  version: 'The version number of the changelog',
+  versioning: 'The versioning scheme in use',
+  versions: 'An array of ChangeLogRelease objects in the upgrade',
+  vulnerabilitySeverity:
+    'The severity for a vulnerability alert upgrade (LOW, MEDIUM, MODERATE, HIGH, CRITICAL, UNKNOWN)',
+};
+
+type CompileInput<T = Record<string, unknown>> = T;
+
+/**
+ * The complete set of field names that may be referenced inside a Handlebars template.
+ * Union of runtime fields (`allowedFields`) and config options (`exposedConfigOptions`).
+ * Used by the compile proxy to warn on unknown variable references.
+ */
+const allowedTemplateFields = new Set([
+  ...Object.keys(allowedFields),
+  ...exposedConfigOptions,
+]);
+
+class CompileInputProxyHandler implements ProxyHandler<CompileInput> {
+  private warnVariables: Set<string>;
+
+  constructor(warnVariables: Set<string>) {
+    this.warnVariables = warnVariables;
+  }
+
+  get(target: CompileInput, prop: keyof CompileInput): unknown {
+    if (prop === 'env') {
+      return target[prop];
+    }
+
+    if (!allowedTemplateFields.has(prop)) {
+      this.warnVariables.add(prop);
+      return undefined;
+    }
+
+    const value = target[prop];
+
+    if (prop === 'prBodyDefinitions') {
+      // Expose all prBodyDefinitions.*
+      return value;
+    }
+
+    if (isArray(value)) {
+      return value.map((element) =>
+        isPrimitive(element)
+          ? element
+          : proxyCompileInput(element as CompileInput, this.warnVariables),
+      );
+    }
+
+    if (isPlainObject(value)) {
+      return proxyCompileInput(value, this.warnVariables);
+    }
+
+    return value;
+  }
+}
+
+export function proxyCompileInput(
+  input: CompileInput,
+  warnVariables: Set<string>,
+): CompileInput {
+  return new Proxy<CompileInput>(
+    input,
+    new CompileInputProxyHandler(warnVariables),
+  );
+}
+
+export function compile<T>(
+  template: string,
+  input: CompileInput<T>,
+  filterFields = true,
+): string {
+  const env = getChildEnv({});
+  const data = {
+    ...GlobalConfig.get(),
+    renovateVersion: pkg.version,
+    ...input,
+    env,
+  };
+  const warnVariables = new Set<string>();
+  const filteredInput = filterFields
+    ? proxyCompileInput(data, warnVariables)
+    : data;
+
+  logger.trace({ template, filteredInput }, 'Compiling template');
+  const result = handlebars.compile(template, { noEscape: true })(
+    filteredInput,
+  );
+
+  if (warnVariables.size > 0) {
+    logger.info(
+      { varNames: Array.from(warnVariables), template },
+      'Disallowed variable names in template',
+    );
+  }
+
+  return result;
+}
+
+export function safeCompile<T>(
+  template: string,
+  input: CompileInput<T>,
+  filterFields = true,
+): string {
+  try {
+    return compile(template, input, filterFields);
+  } catch (err) {
+    logger.warn({ err, template }, 'Error compiling template');
+    return '';
+  }
+}
+
+/**
+ * Validate that the template is a valid Handlebars template string.
+ *
+ * NOTE: Does not validate that fields are set to valid field names.
+ */
+export function validate(template: string): void {
+  handlebars.parse(template);
+}

@@ -1,0 +1,199 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`modules/datasource/clojure/index > falls back to next registry url 1`] = `
+{
+  "display": "org.example:package",
+  "group": "org.example",
+  "homepage": "https://package.example.org/about",
+  "name": "package",
+  "packageScope": "org.example",
+  "registryUrl": "https://clojars.org/repo",
+  "releases": [
+    {
+      "version": "0.0.1",
+    },
+    {
+      "version": "1.0.0",
+    },
+    {
+      "version": "1.0.1",
+    },
+    {
+      "version": "1.0.2",
+    },
+    {
+      "version": "1.0.3-SNAPSHOT",
+    },
+    {
+      "version": "1.0.4-SNAPSHOT",
+    },
+    {
+      "version": "1.0.5-SNAPSHOT",
+    },
+    {
+      "version": "2.0.0",
+    },
+  ],
+  "respectLatest": false,
+  "tags": {
+    "latest": "2.0.0",
+    "release": "2.0.0",
+  },
+}
+`;
+
+exports[`modules/datasource/clojure/index > ignores unsupported protocols 1`] = `
+[
+  {
+    "version": "0.0.1",
+  },
+  {
+    "version": "1.0.0",
+  },
+  {
+    "version": "1.0.1",
+  },
+  {
+    "version": "1.0.2",
+  },
+  {
+    "version": "1.0.3-SNAPSHOT",
+  },
+  {
+    "version": "1.0.4-SNAPSHOT",
+  },
+  {
+    "version": "1.0.5-SNAPSHOT",
+  },
+  {
+    "version": "2.0.0",
+  },
+]
+`;
+
+exports[`modules/datasource/clojure/index > returns releases from custom repository 1`] = `
+{
+  "display": "org.example:package",
+  "group": "org.example",
+  "homepage": "https://package.example.org/about",
+  "isPrivate": true,
+  "name": "package",
+  "packageScope": "org.example",
+  "registryUrl": "https://custom.registry.renovatebot.com",
+  "releases": [
+    {
+      "version": "0.0.1",
+    },
+    {
+      "version": "1.0.0",
+    },
+    {
+      "version": "1.0.1",
+    },
+    {
+      "version": "1.0.2",
+    },
+    {
+      "version": "1.0.3-SNAPSHOT",
+    },
+    {
+      "version": "1.0.4-SNAPSHOT",
+    },
+    {
+      "version": "1.0.5-SNAPSHOT",
+    },
+    {
+      "version": "2.0.0",
+    },
+  ],
+  "respectLatest": false,
+  "tags": {
+    "latest": "2.0.0",
+    "release": "2.0.0",
+  },
+}
+`;
+
+exports[`modules/datasource/clojure/index > skips registry with invalid XML 1`] = `
+{
+  "display": "org.example:package",
+  "group": "org.example",
+  "homepage": "https://package.example.org/about",
+  "name": "package",
+  "packageScope": "org.example",
+  "registryUrl": "https://clojars.org/repo",
+  "releases": [
+    {
+      "version": "0.0.1",
+    },
+    {
+      "version": "1.0.0",
+    },
+    {
+      "version": "1.0.1",
+    },
+    {
+      "version": "1.0.2",
+    },
+    {
+      "version": "1.0.3-SNAPSHOT",
+    },
+    {
+      "version": "1.0.4-SNAPSHOT",
+    },
+    {
+      "version": "1.0.5-SNAPSHOT",
+    },
+    {
+      "version": "2.0.0",
+    },
+  ],
+  "respectLatest": false,
+  "tags": {
+    "latest": "2.0.0",
+    "release": "2.0.0",
+  },
+}
+`;
+
+exports[`modules/datasource/clojure/index > skips registry with invalid metadata structure 1`] = `
+{
+  "display": "org.example:package",
+  "group": "org.example",
+  "homepage": "https://package.example.org/about",
+  "name": "package",
+  "packageScope": "org.example",
+  "registryUrl": "https://clojars.org/repo",
+  "releases": [
+    {
+      "version": "0.0.1",
+    },
+    {
+      "version": "1.0.0",
+    },
+    {
+      "version": "1.0.1",
+    },
+    {
+      "version": "1.0.2",
+    },
+    {
+      "version": "1.0.3-SNAPSHOT",
+    },
+    {
+      "version": "1.0.4-SNAPSHOT",
+    },
+    {
+      "version": "1.0.5-SNAPSHOT",
+    },
+    {
+      "version": "2.0.0",
+    },
+  ],
+  "respectLatest": false,
+  "tags": {
+    "latest": "2.0.0",
+    "release": "2.0.0",
+  },
+}
+`;

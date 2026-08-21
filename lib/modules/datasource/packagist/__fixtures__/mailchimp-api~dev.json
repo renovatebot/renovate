@@ -1,0 +1,118 @@
+{
+    "minified": "composer/2.0",
+    "packages": {
+        "drewm/mailchimp-api": [
+            {
+                "name": "drewm/mailchimp-api",
+                "description": "Super-simple, minimum abstraction MailChimp API v3 wrapper",
+                "keywords": [],
+                "homepage": "https://github.com/drewm/mailchimp-api",
+                "version": "dev-master",
+                "version_normalized": "dev-master",
+                "license": [
+                    "MIT"
+                ],
+                "authors": [
+                    {
+                        "name": "Drew McLellan",
+                        "email": "drew.mclellan@gmail.com",
+                        "homepage": "http://allinthehead.com/"
+                    }
+                ],
+                "source": {
+                    "type": "git",
+                    "url": "https://github.com/drewm/mailchimp-api.git",
+                    "reference": "62da03fa38a0d3d855486f059c1f917976d02372"
+                },
+                "dist": {
+                    "type": "zip",
+                    "url": "https://api.github.com/repos/drewm/mailchimp-api/zipball/62da03fa38a0d3d855486f059c1f917976d02372",
+                    "reference": "62da03fa38a0d3d855486f059c1f917976d02372",
+                    "shasum": ""
+                },
+                "type": "library",
+                "time": "2021-02-02T16:29:03+00:00",
+                "autoload": {
+                    "psr-4": {
+                        "DrewM\\MailChimp\\": "src"
+                    }
+                },
+                "default-branch": true,
+                "require": {
+                    "php": ">=5.3",
+                    "ext-curl": "*",
+                    "ext-json": "*"
+                },
+                "require-dev": {
+                    "phpunit/phpunit": "7.0.*",
+                    "vlucas/phpdotenv": "^2.0"
+                },
+                "support": {
+                    "issues": "https://github.com/drewm/mailchimp-api/issues",
+                    "source": "https://github.com/drewm/mailchimp-api/tree/master"
+                }
+            },
+            {
+                "version": "dev-api-v3",
+                "version_normalized": "dev-api-v3",
+                "source": {
+                    "type": "git",
+                    "url": "https://github.com/drewm/mailchimp-api.git",
+                    "reference": "268dca3f0e35bdc263ceb8114b24c7496c3b46f5"
+                },
+                "dist": {
+                    "type": "zip",
+                    "url": "https://api.github.com/repos/drewm/mailchimp-api/zipball/268dca3f0e35bdc263ceb8114b24c7496c3b46f5",
+                    "reference": "268dca3f0e35bdc263ceb8114b24c7496c3b46f5",
+                    "shasum": ""
+                },
+                "time": "2016-01-17T15:59:26+00:00",
+                "require": {
+                    "php": ">=5.3"
+                },
+                "require-dev": {
+                    "phpunit/phpunit": "4.0.*",
+                    "vlucas/phpdotenv": "^2.0"
+                },
+                "support": {
+                    "issues": "https://github.com/drewm/mailchimp-api/issues",
+                    "source": "https://github.com/drewm/mailchimp-api/tree/api-v3"
+                },
+                "default-branch": "__unset"
+            },
+            {
+                "description": "Super-simple, minimum abstraction MailChimp API v2 wrapper",
+                "version": "dev-api-v2",
+                "version_normalized": "dev-api-v2",
+                "authors": [
+                    {
+                        "name": "Drew McLellan",
+                        "homepage": "http://allinthehead.com/"
+                    }
+                ],
+                "source": {
+                    "type": "git",
+                    "url": "https://github.com/drewm/mailchimp-api.git",
+                    "reference": "2ace9cf087bea43d0bf9c7207d94ce93642e6262"
+                },
+                "dist": {
+                    "type": "zip",
+                    "url": "https://api.github.com/repos/drewm/mailchimp-api/zipball/2ace9cf087bea43d0bf9c7207d94ce93642e6262",
+                    "reference": "2ace9cf087bea43d0bf9c7207d94ce93642e6262",
+                    "shasum": ""
+                },
+                "time": "2016-01-17T15:57:27+00:00",
+                "autoload": {
+                    "psr-0": {
+                        "Drewm": "src/"
+                    }
+                },
+                "support": {
+                    "issues": "https://github.com/drewm/mailchimp-api/issues",
+                    "source": "https://github.com/drewm/mailchimp-api/tree/api-v2"
+                },
+                "require-dev": "__unset"
+            }
+        ]
+    }
+}

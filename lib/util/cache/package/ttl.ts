@@ -1,0 +1,65 @@
+import { isNumber } from '@sindresorhus/is';
+import { GlobalConfig } from '../../../config/global.ts';
+import { matchRegexOrGlob } from '../../string-match.ts';
+import type { PackageCacheNamespace } from './types.ts';
+
+/**
+ * This MUST NOT be used outside of cache implementation
+ *
+ * @param namespace
+ */
+export function getTtlOverride(
+  namespace: PackageCacheNamespace,
+): number | undefined {
+  const overrides = GlobalConfig.get('cacheTtlOverride');
+  let ttl: number | undefined = overrides[namespace];
+  if (isNumber(ttl)) {
+    return ttl;
+  }
+
+  let maxLen = 0;
+  for (const [key, value] of Object.entries(overrides)) {
+    if (!isNumber(value)) {
+      continue;
+    }
+
+    const keyLen = key.length;
+    if (keyLen > maxLen && matchRegexOrGlob(namespace, key)) {
+      maxLen = keyLen;
+      ttl = value;
+    }
+  }
+
+  if (isNumber(ttl)) {
+    return ttl;
+  }
+
+  return undefined;
+}
+
+export interface TTLValues {
+  /** TTL for serving cached value without hitting the server */
+  softTtlMinutes: number;
+
+  /** TTL for serving stale cache when upstream responds with errors */
+  hardTtlMinutes: number;
+}
+
+/**
+ * Apply user-configured overrides and return the final values for soft/hard TTL.
+ *
+ * @param namespace Cache namespace
+ * @param ttlMinutes TTL value configured in Renovate codebase
+ * @returns
+ */
+export function resolveTtlValues(
+  namespace: PackageCacheNamespace,
+  ttlMinutes: number,
+): TTLValues {
+  const softTtlMinutes = getTtlOverride(namespace) ?? ttlMinutes;
+
+  const cacheHardTtlMinutes = GlobalConfig.get('cacheHardTtlMinutes');
+  const hardTtlMinutes = Math.max(softTtlMinutes, cacheHardTtlMinutes);
+
+  return { softTtlMinutes, hardTtlMinutes };
+}

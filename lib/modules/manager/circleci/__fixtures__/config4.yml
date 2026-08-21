@@ -1,0 +1,9 @@
+version: 2.1
+
+orbs:
+  nodejs: circleci/node@5.2.0
+
+workflows:
+  Test:
+    jobs:
+      - nodejs/test

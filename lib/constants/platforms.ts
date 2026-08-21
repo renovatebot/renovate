@@ -1,0 +1,64 @@
+export const PLATFORM_HOST_TYPES = [
+  'azure',
+  'bitbucket',
+  'bitbucket-server',
+  'codecommit',
+  'forgejo',
+  'gerrit',
+  'gitea',
+  'github',
+  'gitlab',
+  'local',
+  'scm-manager',
+] as const;
+
+export type PlatformId = (typeof PLATFORM_HOST_TYPES)[number];
+
+export const AZURE_API_USING_HOST_TYPES = ['azure', 'azure-tags'];
+
+export const GITEA_API_USING_HOST_TYPES = [
+  'gitea',
+  'gitea-changelog',
+  'gitea-releases',
+  'gitea-tags',
+];
+
+export const FORGEJO_API_USING_HOST_TYPES = [
+  'forgejo',
+  'forgejo-changelog',
+  'forgejo-releases',
+  'forgejo-tags',
+];
+
+export const GITHUB_API_USING_HOST_TYPES = [
+  'github',
+  'github-releases',
+  'github-release-attachments',
+  'github-tags',
+  'pod',
+  'hermit',
+  'github-changelog',
+  'conan',
+  // DEPRECATED: do not add additional datasource-specific entries here, if they use `api.github.com` to look up new versions
+];
+
+export const GITLAB_API_USING_HOST_TYPES = [
+  'gitlab',
+  'gitlab-releases',
+  'gitlab-tags',
+  'gitlab-packages',
+  'gitlab-changelog',
+  'pypi',
+];
+
+export const BITBUCKET_API_USING_HOST_TYPES = [
+  'bitbucket',
+  'bitbucket-changelog',
+  'bitbucket-tags',
+];
+
+export const BITBUCKET_SERVER_API_USING_HOST_TYPES = [
+  'bitbucket-server',
+  'bitbucket-server-changelog',
+  'bitbucket-server-tags',
+];

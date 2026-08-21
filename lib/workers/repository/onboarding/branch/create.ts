@@ -1,0 +1,76 @@
+import { GlobalConfig } from '../../../../config/global.ts';
+import type { RenovateConfig } from '../../../../config/types.ts';
+import { logger } from '../../../../logger/index.ts';
+import { scm } from '../../../../modules/platform/scm.ts';
+import { coerceArray } from '../../../../util/array.ts';
+import { getInheritedOrGlobal } from '../../../../util/common.ts';
+import { filterValidCommitTrailers } from '../../../../util/git/commit-trailers.ts';
+import { compile } from '../../../../util/template/index.ts';
+import {
+  getDefaultConfigFileName,
+  getSemanticCommitPrTitle,
+} from '../common.ts';
+import { OnboardingCommitMessageFactory } from './commit-message.ts';
+import { getOnboardingConfigContents } from './config.ts';
+
+export async function createOnboardingBranch(
+  config: Partial<RenovateConfig>,
+): Promise<string | null> {
+  logger.debug('createOnboardingBranch()');
+  const configFile = getDefaultConfigFileName();
+  // TODO #22198
+  const contents = await getOnboardingConfigContents(config, configFile);
+  logger.debug('Creating onboarding branch');
+
+  const commitMessageFactory = new OnboardingCommitMessageFactory(
+    config,
+    configFile,
+  );
+  let commitMessage = commitMessageFactory.create().toString();
+
+  if (config.commitBody) {
+    commitMessage = `${commitMessage}\n\n${compile(
+      config.commitBody,
+      // only allow gitAuthor template value in the commitBody
+      { gitAuthor: config.gitAuthor },
+    )}`;
+
+    logger.trace(`commitMessage: ${commitMessage}`);
+  }
+
+  // only allow gitAuthor template value in the commitTrailers
+  const compiledTrailers = coerceArray(config.commitTrailers).map((trailer) =>
+    compile(trailer, { gitAuthor: config.gitAuthor }),
+  );
+  const trailers = filterValidCommitTrailers(compiledTrailers);
+
+  // istanbul ignore if
+  if (GlobalConfig.get('dryRun')) {
+    logger.info('DRY-RUN: Would commit files to onboarding branch');
+    return null;
+  }
+
+  const prTitle =
+    config.semanticCommits === 'enabled'
+      ? getSemanticCommitPrTitle(config)
+      : getInheritedOrGlobal('onboardingPrTitle')!;
+
+  return scm.commitAndPush({
+    baseBranch: config.baseBranch,
+    branchName: getInheritedOrGlobal('onboardingBranch')!,
+    files: [
+      {
+        type: 'addition',
+        // TODO #22198
+        path: configFile,
+        contents,
+      },
+    ],
+    message: commitMessage,
+    trailers,
+    platformCommit: config.platformCommit,
+    force: true,
+    // Only needed by Gerrit platform
+    prTitle,
+  });
+}

@@ -1,0 +1,135 @@
+import { Command } from 'commander';
+import type { ExecaChildProcess, ExecaReturnValue } from 'execa';
+import { execa } from 'execa';
+import fs from 'fs-extra';
+import { init, logger } from '../lib/logger/index.ts';
+import { generateDocs } from './docs/index.ts';
+import { exec } from './utils/exec.ts';
+
+await init();
+
+process.on('unhandledRejection', (err) => {
+  // Will print "unhandledRejection err is not defined"
+  logger.error({ err }, 'unhandledRejection');
+  process.exit(-1);
+});
+
+const program = new Command('pnpm mkdocs').description('Run mkdocs');
+
+program
+  .command('build', { isDefault: true })
+  .description('Build mkdocs')
+  .option('--version <version>', 'the current version of the Renovate CLI')
+  .option('--no-build', 'do not build docs from source')
+  .option('--no-strict', 'do not build in strict mode')
+  .option('--no-announcement', 'do not include the announcement bar')
+  .action(async (opts) => {
+    await prepareDocs(opts);
+    if (opts.announcement) {
+      logger.info('* running mkdocs build');
+    } else {
+      logger.info('* running mkdocs build (without announcement bar)');
+    }
+    const args = ['run', 'mkdocs', 'build'];
+    if (opts.strict) {
+      args.push('--strict');
+    }
+    const res = await exec('uv', args, {
+      cwd: 'tools/mkdocs',
+      stdio: 'inherit',
+      env: {
+        ...process.env,
+        RENOVATE_VERSION: opts.version ?? '',
+        MKDOCS_INCLUDE_ANNOUNCEMENT: opts.announcement ? 'true' : '',
+      },
+      reject: false,
+    });
+    checkResult(res);
+  });
+
+program
+  .command('serve')
+  .description('serve mkdocs')
+  .option('--no-build', 'do not build docs from source')
+  .option('--no-strict', 'do not build in strict mode')
+  .action(async (opts) => {
+    logger.info('serving docs');
+    const mkdocsArgs = ['run', 'mkdocs', 'serve'];
+    if (opts.strict) {
+      mkdocsArgs.push('--strict');
+    }
+    function spawnServe(): ExecaChildProcess {
+      return execa('uv', mkdocsArgs, {
+        cwd: 'tools/mkdocs',
+        stdio: 'inherit',
+        reject: false,
+        maxBuffer: 20 * 1024 * 1024,
+        encoding: 'utf8',
+      });
+    }
+
+    if (!opts.build) {
+      await prepareDocs(opts);
+      checkResult(await spawnServe());
+      return;
+    }
+
+    let activeChild: ExecaChildProcess | null = null;
+    let shouldRestart = false;
+    let debounceTimer: ReturnType<typeof setTimeout> | undefined;
+
+    fs.watch('docs', { recursive: true }, () => {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => {
+        logger.info('docs changed, restarting mkdocs...');
+        shouldRestart = true;
+        activeChild?.kill();
+      }, 300);
+    });
+
+    while (true) {
+      shouldRestart = false;
+      await prepareDocs(opts);
+      logger.info('* running mkdocs serve');
+      activeChild = spawnServe();
+      const res = await activeChild;
+      if (!shouldRestart) {
+        checkResult(res);
+        break;
+      }
+    }
+  });
+
+async function prepareDocs(opts: any): Promise<void> {
+  logger.info('Building docs');
+  if (opts.build) {
+    logger.info('* generate docs');
+    await generateDocs('tools/mkdocs', false, opts.version);
+  } else {
+    logger.info('* using prebuild docs from build step');
+    await fs.copy('tmp/docs', 'tools/mkdocs/docs');
+  }
+}
+
+function checkResult(res: ExecaReturnValue): void {
+  if (res.signal) {
+    logger.error(`Signal received: ${res.signal}`);
+    process.exit(-1);
+  } else if (res.exitCode) {
+    logger.error(`Error occured:\n${res.stderr || res.stdout}`);
+    process.exit(res.exitCode);
+  } else if (res.timedOut) {
+    logger.error({ res }, 'Process timed out');
+    process.exit(-1);
+  } else if (res.killed) {
+    logger.error({ res }, 'Process was killed');
+    process.exit(-1);
+  } else if (res.failed) {
+    logger.error({ res }, 'Process call failed');
+    process.exit(-1);
+  } else {
+    logger.debug(`Build completed:\n${res.stdout || res.stderr}`);
+  }
+}
+
+void program.parseAsync();

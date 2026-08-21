@@ -1,0 +1,15 @@
+mod 'puppetlabs/stdlib', '8.0.0'
+mod 'puppetlabs/apache', '6.5.1' # This is a "comment"
+# mod 'puppetlabs/puppetdb', '7.9.0'
+
+mod 'apache',
+  :git => 'https://github.com/puppetlabs/puppetlabs-apache',
+#  :tag => '0.9.0'
+
+mod 'stdlib',
+#  :git => 'git@github.com:puppetlabs/puppetlabs-stdlib.git',
+  :tag => '5.0.0'
+
+mod 'stdlib2', :git => 'git@github.com:puppetlabs/puppetlabs-stdlib2.git' # This is a "comment"
+  # :tag => '5.0.0'
+

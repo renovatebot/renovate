@@ -1,0 +1,6 @@
+title: Renovate Modules
+nav:
+  - Introduction: index.md
+  - ...
+order: asc
+sort_type: natural

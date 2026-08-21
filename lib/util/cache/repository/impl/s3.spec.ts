@@ -1,0 +1,227 @@
+import { Readable } from 'node:stream';
+import type {
+  GetObjectCommandInput,
+  PutObjectCommandInput,
+  PutObjectCommandOutput,
+} from '@aws-sdk/client-s3';
+import {
+  GetObjectCommand,
+  PutObjectCommand,
+  S3Client,
+} from '@aws-sdk/client-s3';
+import { mockClient } from 'aws-sdk-client-mock';
+import { fs, partial } from '~test/util.ts';
+import { GlobalConfig } from '../../../../config/global.ts';
+import { logger } from '../../../../logger/index.ts';
+import { parseS3Url } from '../../../s3.ts';
+import type { RepoCacheRecord } from '../schema.ts';
+import { CacheFactory } from './cache-factory.ts';
+import { RepoCacheS3 } from './s3.ts';
+
+vi.mock('../../../fs/index.ts');
+
+function createGetObjectCommandInput(
+  repository: string,
+  url: string,
+  folder = '',
+): GetObjectCommandInput {
+  const platform = GlobalConfig.get('platform');
+  return {
+    Bucket: parseS3Url(url)?.Bucket,
+    Key: `${folder}${platform}/${repository}/cache.json`,
+  };
+}
+
+function createPutObjectCommandInput(
+  repository: string,
+  url: string,
+  data: RepoCacheRecord,
+  folder = '',
+): PutObjectCommandInput {
+  return {
+    ...createGetObjectCommandInput(repository, url, folder),
+    Body: JSON.stringify(data),
+    ContentType: 'application/json',
+  };
+}
+
+/*
+ * Note: MockedClient.on(Command, input) will match input (using Sinon matchers) to the actual
+ *       'new Command(actualInput)' call within the tested code segment.
+ */
+
+describe('util/cache/repository/impl/s3', () => {
+  const s3Mock = mockClient(S3Client);
+  const repository = 'org/repo';
+  const repoCache = partial<RepoCacheRecord>({ payload: 'payload' });
+  const url = 's3://bucket-name';
+  const err = new Error('error');
+  let getObjectCommandInput: GetObjectCommandInput;
+  let putObjectCommandInput: PutObjectCommandInput;
+  let s3Cache: RepoCacheS3;
+
+  beforeEach(() => {
+    GlobalConfig.set({ cacheDir: '/tmp/cache', platform: 'github' });
+    s3Mock.reset();
+    s3Cache = new RepoCacheS3(repository, '0123456789abcdef', url);
+    getObjectCommandInput = createGetObjectCommandInput(repository, url);
+    putObjectCommandInput = createPutObjectCommandInput(
+      repository,
+      url,
+      repoCache,
+    );
+  });
+
+  it('successfully reads from s3', async () => {
+    const json = '{}';
+    s3Mock
+      .on(GetObjectCommand, getObjectCommandInput)
+      .resolvesOnce({ Body: Readable.from([json]) as never });
+    await expect(s3Cache.read()).resolves.toBe(json);
+    expect(logger.warn).toHaveBeenCalledTimes(0);
+
+    expect(logger.debug).toHaveBeenCalledWith('RepoCacheS3.read() - success');
+  });
+
+  it('successfully reads from s3://bucket/dir1/.../dirN/', async () => {
+    const json = '{}';
+    const folder = 'dir1/dir2/dir3/';
+    s3Cache = new RepoCacheS3(
+      repository,
+      '0123456789abcdef',
+      `${url}/${folder}`,
+    );
+    s3Mock
+      .on(
+        GetObjectCommand,
+        createGetObjectCommandInput(repository, url, folder),
+      )
+      .resolvesOnce({ Body: Readable.from([json]) as never });
+    await expect(s3Cache.read()).resolves.toBe(json);
+    expect(logger.warn).toHaveBeenCalledTimes(0);
+    expect(logger.error).toHaveBeenCalledTimes(0);
+
+    expect(logger.debug).toHaveBeenCalledWith('RepoCacheS3.read() - success');
+  });
+
+  it('appends a missing traling slash to pathname when instantiating RepoCacheS3', async () => {
+    const json = '{}';
+    const pathname = 'dir1/dir2/dir3/file.ext';
+    s3Cache = new RepoCacheS3(
+      repository,
+      '0123456789abcdef',
+      `${url}/${pathname}`,
+    );
+    s3Mock
+      .on(
+        GetObjectCommand,
+        createGetObjectCommandInput(repository, url, `${pathname}/`),
+      )
+      .resolvesOnce({ Body: Readable.from([json]) as never });
+    await expect(s3Cache.read()).resolves.toBe(json);
+
+    expect(logger.debug).toHaveBeenCalledWith('RepoCacheS3.read() - success');
+    expect(logger.warn).toHaveBeenCalledTimes(1);
+
+    expect(logger.warn).toHaveBeenCalledWith(
+      { pathname },
+      'RepoCacheS3.getCacheFolder() - appending missing trailing slash to pathname',
+    );
+  });
+
+  it('gets an unexpected response from s3', async () => {
+    s3Mock.on(GetObjectCommand, getObjectCommandInput).resolvesOnce({});
+    await expect(s3Cache.read()).resolves.toBeNull();
+
+    expect(logger.warn).toHaveBeenCalledWith(
+      { returnType: 'undefined' },
+      'RepoCacheS3.read() - failure - got unexpected return type',
+    );
+  });
+
+  it('doesnt warn when no cache is found', async () => {
+    const NoSuchKeyErr = new Error('NoSuchKey');
+    NoSuchKeyErr.name = 'NoSuchKey';
+    s3Mock
+      .on(GetObjectCommand, getObjectCommandInput)
+      .rejectsOnce(NoSuchKeyErr);
+    await expect(s3Cache.read()).resolves.toBeNull();
+    expect(logger.warn).toHaveBeenCalledTimes(0);
+
+    expect(logger.debug).toHaveBeenCalledWith(
+      `RepoCacheS3.read() - No cached file found`,
+    );
+  });
+
+  it('fails to read from s3', async () => {
+    s3Mock.on(GetObjectCommand, getObjectCommandInput).rejectsOnce(err);
+    await expect(s3Cache.read()).resolves.toBeNull();
+
+    expect(logger.warn).toHaveBeenCalledWith(
+      { err },
+      'RepoCacheS3.read() - failure',
+    );
+  });
+
+  it('successfully writes to s3', async () => {
+    const putObjectCommandOutput: PutObjectCommandOutput = {
+      $metadata: { attempts: 1, httpStatusCode: 200, totalRetryDelay: 0 },
+    };
+    s3Mock
+      .on(PutObjectCommand, putObjectCommandInput)
+      .resolvesOnce(putObjectCommandOutput);
+    await expect(s3Cache.write(repoCache)).toResolve();
+    expect(logger.warn).toHaveBeenCalledTimes(0);
+  });
+
+  it('successfully writes to s3://bucket/dir1/.../dirN/', async () => {
+    const putObjectCommandOutput: PutObjectCommandOutput = {
+      $metadata: { attempts: 1, httpStatusCode: 200, totalRetryDelay: 0 },
+    };
+    const folder = 'dir1/dir2/dir3/';
+    s3Cache = new RepoCacheS3(
+      repository,
+      '0123456789abcdef',
+      `${url}/${folder}`,
+    );
+    s3Mock
+      .on(
+        PutObjectCommand,
+        createPutObjectCommandInput(repository, url, repoCache, folder),
+      )
+      .resolvesOnce(putObjectCommandOutput);
+    await expect(s3Cache.write(repoCache)).toResolve();
+    expect(logger.warn).toHaveBeenCalledTimes(0);
+    expect(logger.error).toHaveBeenCalledTimes(0);
+  });
+
+  it('fails to write to s3', async () => {
+    s3Mock.on(PutObjectCommand, putObjectCommandInput).rejectsOnce(err);
+    await expect(s3Cache.write(repoCache)).toResolve();
+
+    expect(logger.warn).toHaveBeenCalledWith(
+      { err },
+      'RepoCacheS3.write() - failure',
+    );
+  });
+
+  it('creates an S3 client using the cache factory', () => {
+    const cache = CacheFactory.get(repository, '0123456789abcdef', url);
+    expect(cache instanceof RepoCacheS3).toBeTrue();
+  });
+
+  it('should persists data locally after uploading to s3', async () => {
+    GlobalConfig.set({ repositoryCacheForceLocal: true });
+    const putObjectCommandOutput: PutObjectCommandOutput = {
+      $metadata: { attempts: 1, httpStatusCode: 200, totalRetryDelay: 0 },
+    };
+    s3Mock
+      .on(PutObjectCommand, putObjectCommandInput)
+      .resolvesOnce(putObjectCommandOutput);
+    await s3Cache.write(repoCache);
+    expect(fs.outputCacheFile).toHaveBeenCalledExactlyOnceWith(
+      'renovate/repository/github/org/repo.json',
+      JSON.stringify(repoCache),
+    );
+  });
+});

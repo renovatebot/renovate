@@ -1,0 +1,380 @@
+import { parsePkgAndParentSelector } from '@pnpm/parse-overrides';
+import {
+  isNonEmptyObject,
+  isNumber,
+  isObject,
+  isPlainObject,
+  isString,
+} from '@sindresorhus/is';
+import { findPackages } from 'find-packages';
+import upath from 'upath';
+import { GlobalConfig } from '../../../../config/global.ts';
+import { logger } from '../../../../logger/index.ts';
+import {
+  findLocalSiblingOrParent,
+  getSiblingFileName,
+  localPathExists,
+  readLocalFile,
+} from '../../../../util/fs/index.ts';
+import { parseSingleYaml, parseYaml } from '../../../../util/yaml.ts';
+import { NpmDatasource } from '../../../datasource/npm/index.ts';
+import type {
+  PackageDependency,
+  PackageFile,
+  PackageFileContent,
+} from '../../types.ts';
+import { pnpmWorkspaceOverrides } from '../dep-types.ts';
+import type { PnpmDependency, PnpmLockFile } from '../post-update/types.ts';
+import type { PnpmCatalogs, PnpmWorkspaceFile } from '../schema.ts';
+import type { NpmManagerData } from '../types.ts';
+import { extractCatalogDeps } from './common/catalogs.ts';
+import { extractDependency } from './common/dependency.ts';
+import type { Catalog, LockFile } from './types.ts';
+
+function isPnpmLockfile(obj: any): obj is PnpmLockFile {
+  return isPlainObject(obj) && 'lockfileVersion' in obj;
+}
+
+export async function extractPnpmFilters(
+  fileName: string,
+): Promise<string[] | undefined> {
+  try {
+    // TODO: use schema (#9610,#22198)
+    const contents = parseSingleYaml<PnpmWorkspaceFile>(
+      (await readLocalFile(fileName, 'utf8'))!,
+    );
+    if (
+      !Array.isArray(contents.packages) ||
+      !contents.packages.every((item) => isString(item))
+    ) {
+      logger.trace(
+        { fileName },
+        'Failed to find required "packages" array in pnpm-workspace.yaml',
+      );
+      return undefined;
+    }
+    return contents.packages;
+  } catch (err) {
+    logger.trace({ fileName, err }, 'Failed to parse pnpm-workspace.yaml');
+    return undefined;
+  }
+}
+
+export async function findPnpmWorkspace(
+  packageFile: string,
+): Promise<{ lockFilePath: string; workspaceYamlPath: string } | null> {
+  // search for pnpm-workspace.yaml
+  const workspaceYamlPath = await findLocalSiblingOrParent(
+    packageFile,
+    'pnpm-workspace.yaml',
+  );
+  if (!workspaceYamlPath) {
+    logger.trace(
+      { packageFile },
+      'Failed to locate pnpm-workspace.yaml in a parent directory.',
+    );
+    return null;
+  }
+
+  // search for pnpm-lock.yaml next to pnpm-workspace.yaml
+  const pnpmLockfilePath = getSiblingFileName(
+    workspaceYamlPath,
+    'pnpm-lock.yaml',
+  );
+  if (!(await localPathExists(pnpmLockfilePath))) {
+    logger.trace(
+      { workspaceYamlPath, packageFile },
+      'Failed to find a pnpm-lock.yaml sibling for the workspace.',
+    );
+    return null;
+  }
+
+  return {
+    lockFilePath: pnpmLockfilePath,
+    workspaceYamlPath,
+  };
+}
+
+export async function detectPnpmWorkspaces(
+  packageFiles: Partial<PackageFile<NpmManagerData>>[],
+): Promise<void> {
+  logger.debug(`Detecting pnpm Workspaces`);
+  const packagePathCache = new Map<string, string[] | null>();
+
+  for (const p of packageFiles) {
+    const { packageFile, managerData } = p;
+    const pnpmShrinkwrap = managerData?.pnpmShrinkwrap;
+
+    // check if pnpmShrinkwrap-file has already been provided
+    if (pnpmShrinkwrap) {
+      logger.trace(
+        { packageFile, pnpmShrinkwrap },
+        'Found an existing pnpm shrinkwrap file; skipping pnpm monorepo check.',
+      );
+      continue;
+    }
+
+    // search for corresponding pnpm workspace
+    // TODO #22198
+    const pnpmWorkspace = await findPnpmWorkspace(packageFile!);
+    if (pnpmWorkspace === null) {
+      continue;
+    }
+    const { workspaceYamlPath, lockFilePath } = pnpmWorkspace;
+
+    // check if package matches workspace filter
+    if (!packagePathCache.has(workspaceYamlPath)) {
+      const filters = await extractPnpmFilters(workspaceYamlPath);
+      // TODO: types (#22198)
+      const localDir = GlobalConfig.get('localDir');
+      const packages = await findPackages(
+        upath.dirname(upath.join(localDir, workspaceYamlPath)),
+        {
+          patterns: filters,
+          // Match the ignores used in @pnpm/find-workspace-packages
+          ignore: ['**/node_modules/**', '**/bower_components/**'],
+        },
+      );
+      const packagePaths = packages.map((pkg) =>
+        upath.join(pkg.dir, 'package.json'),
+      );
+      packagePathCache.set(workspaceYamlPath, packagePaths);
+    }
+    const packagePaths = packagePathCache.get(workspaceYamlPath);
+
+    const isPackageInWorkspace = packagePaths?.some((p) =>
+      p.endsWith(packageFile!),
+    );
+
+    if (isPackageInWorkspace) {
+      p.managerData ??= {};
+      p.managerData.pnpmShrinkwrap = lockFilePath;
+    } else {
+      logger.trace(
+        { packageFile, workspaceYamlPath },
+        `Didn't find the package in the pnpm workspace`,
+      );
+    }
+  }
+}
+
+export async function getPnpmLock(filePath: string): Promise<LockFile> {
+  try {
+    const pnpmLockRaw = await readLocalFile(filePath, 'utf8');
+    if (!pnpmLockRaw) {
+      throw new Error('Unable to read pnpm-lock.yaml');
+    }
+
+    // pnpm writes a multi-document YAML lockfile when `pnpm-workspace.yaml`
+    // declares `configDependencies`; the env document (config-deps + integrity
+    // metadata) is unconditionally prepended before the main lockfile, so the
+    // main lockfile is always the last document.
+    // https://pnpm.io/config-dependencies.
+    const parsedDocs = parseYaml(pnpmLockRaw);
+    const lockParsed = parsedDocs.at(-1);
+    if (!isPnpmLockfile(lockParsed)) {
+      throw new Error('Invalid or empty lockfile');
+    }
+    logger.trace({ lockParsed }, 'pnpm lockfile parsed');
+
+    // field lockfileVersion is type string in lockfileVersion = 6 and type number in < 6
+    const lockfileVersion: number = isNumber(lockParsed.lockfileVersion)
+      ? lockParsed.lockfileVersion
+      : parseFloat(lockParsed.lockfileVersion);
+
+    const lockedVersions = getLockedVersions(lockParsed);
+    const lockedCatalogVersions = getLockedCatalogVersions(lockParsed);
+
+    return {
+      lockedVersionsWithPath: lockedVersions,
+      lockedVersionsWithCatalog: lockedCatalogVersions,
+      lockfileVersion,
+    };
+  } catch (err) {
+    logger.debug({ filePath, err }, 'Warning: Exception parsing pnpm lockfile');
+    return { lockedVersions: {} };
+  }
+}
+
+function getLockedCatalogVersions(
+  lockParsed: PnpmLockFile,
+): Record<string, Record<string, string>> {
+  const lockedVersions: Record<string, Record<string, string>> = {};
+
+  if (isNonEmptyObject(lockParsed.catalogs)) {
+    for (const [catalog, dependencies] of Object.entries(lockParsed.catalogs)) {
+      const versions: Record<string, string> = {};
+
+      for (const [dep, versionCarrier] of Object.entries(dependencies)) {
+        versions[dep] = versionCarrier.version;
+      }
+
+      lockedVersions[catalog] = versions;
+    }
+  }
+
+  return lockedVersions;
+}
+
+function getLockedVersions(
+  lockParsed: PnpmLockFile,
+): Record<string, Record<string, Record<string, string>>> {
+  const lockedVersions: Record<
+    string,
+    Record<string, Record<string, string>>
+  > = {};
+
+  // monorepo
+  if (isNonEmptyObject(lockParsed.importers)) {
+    for (const [importer, imports] of Object.entries(lockParsed.importers)) {
+      lockedVersions[importer] = getLockedDependencyVersions(imports);
+    }
+  }
+  // normal repo
+  else {
+    lockedVersions['.'] = getLockedDependencyVersions(lockParsed);
+  }
+
+  return lockedVersions;
+}
+
+function getLockedDependencyVersions(
+  obj: PnpmLockFile | Record<string, PnpmDependency>,
+): Record<string, Record<string, string>> {
+  const dependencyTypes = [
+    'dependencies',
+    'devDependencies',
+    'optionalDependencies',
+  ] as const;
+
+  const res: Record<string, Record<string, string>> = {};
+  for (const depType of dependencyTypes) {
+    res[depType] = {};
+    for (const [pkgName, versionCarrier] of Object.entries(
+      obj[depType] ?? {},
+    )) {
+      let version: string;
+      if (isObject(versionCarrier)) {
+        version = versionCarrier.version;
+      } else {
+        version = versionCarrier;
+      }
+
+      const pkgVersion = version.split('(')[0].trim();
+      res[depType][pkgName] = pkgVersion;
+    }
+  }
+
+  return res;
+}
+
+export async function extractPnpmWorkspaceFile(
+  workspaceFile: PnpmWorkspaceFile,
+  packageFile: string,
+): Promise<PackageFileContent<NpmManagerData> | null> {
+  logger.trace(`pnpm.extractPnpmWorkspaceFile(${packageFile})`);
+
+  const pnpmCatalogs = pnpmCatalogsToArray(workspaceFile);
+
+  const deps = extractCatalogDeps(pnpmCatalogs);
+
+  if (workspaceFile.overrides) {
+    for (const [overridesKey, overridesVal] of Object.entries(
+      workspaceFile.overrides,
+    )) {
+      // flat syntax: `parent>parent>child`
+      const packageName =
+        parsePkgAndParentSelector(overridesKey).targetPkg.name;
+      const depType = pnpmWorkspaceOverrides;
+      deps.push({
+        depName: overridesKey,
+        packageName,
+        depType,
+        ...extractDependency(depType, packageName, overridesVal),
+      });
+    }
+  }
+
+  const { registry, registries } = workspaceFile;
+  applyPnpmWorkspaceRegistries(deps, registries, registry);
+
+  let pnpmShrinkwrap;
+  const filePath = getSiblingFileName(packageFile, 'pnpm-lock.yaml');
+
+  if (await readLocalFile(filePath, 'utf8')) {
+    pnpmShrinkwrap = filePath;
+  }
+
+  return {
+    deps,
+    managerData: {
+      pnpmShrinkwrap,
+    },
+  };
+}
+
+function pnpmCatalogsToArray({
+  catalog: defaultCatalogDeps,
+  catalogs: namedCatalogs,
+}: PnpmCatalogs): Catalog[] {
+  const result: Catalog[] = [];
+
+  if (defaultCatalogDeps !== undefined) {
+    result.push({ name: 'default', dependencies: defaultCatalogDeps });
+  }
+
+  if (!namedCatalogs) {
+    return result;
+  }
+
+  for (const [name, dependencies] of Object.entries(namedCatalogs)) {
+    result.push({
+      name,
+      dependencies,
+    });
+  }
+
+  return result;
+}
+
+export function applyPnpmWorkspaceRegistries(
+  deps: PackageDependency[],
+  registries: Record<string, string> | undefined,
+  registry: string | undefined,
+): void {
+  if (!(registry ?? registries)) {
+    return;
+  }
+  for (const dep of deps) {
+    const lookupName = dep.packageName ?? dep.depName;
+    if (lookupName && dep.datasource === NpmDatasource.id) {
+      const registryUrl = resolveRegistryUrl(lookupName, registries, registry);
+      if (registryUrl) {
+        dep.registryUrls = [registryUrl];
+      }
+    }
+  }
+}
+
+export function resolveRegistryUrl(
+  packageName: string,
+  registries: Record<string, string> | undefined,
+  defaultRegistry: string | undefined,
+): string | null {
+  if (registries) {
+    for (const scope in registries) {
+      // `default` is the fallback registry, not a scope
+      if (scope === 'default') {
+        continue;
+      }
+      // pnpm scope keys keep the leading `@`, e.g. `@my-org`
+      if (packageName.startsWith(`${scope}/`)) {
+        return registries[scope];
+      }
+    }
+    if (registries.default) {
+      return registries.default;
+    }
+  }
+  return defaultRegistry ?? null;
+}

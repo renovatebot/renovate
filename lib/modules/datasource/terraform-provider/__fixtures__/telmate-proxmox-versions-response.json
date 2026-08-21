@@ -1,0 +1,102 @@
+{
+  "id": "Telmate/proxmox",
+  "versions": [
+    {
+      "version": "2.6.1",
+      "protocols": [
+        "5.0"
+      ],
+      "platforms": [
+        {
+          "os": "darwin",
+          "arch": "arm64"
+        },
+        {
+          "os": "linux",
+          "arch": "amd64"
+        },
+        {
+          "os": "linux",
+          "arch": "arm"
+        },
+        {
+          "os": "windows",
+          "arch": "amd64"
+        }
+      ]
+    },
+    {
+      "version": "2.6.2-pre",
+      "protocols": [
+        "5.0"
+      ],
+      "platforms": [
+        {
+          "os": "darwin",
+          "arch": "arm64"
+        },
+        {
+          "os": "linux",
+          "arch": "amd64"
+        },
+        {
+          "os": "linux",
+          "arch": "arm"
+        },
+        {
+          "os": "windows",
+          "arch": "amd64"
+        }
+      ]
+    },
+    {
+      "version": "2.6.2",
+      "protocols": [
+        "5.0"
+      ],
+      "platforms": [
+        {
+          "os": "darwin",
+          "arch": "arm64"
+        },
+        {
+          "os": "linux",
+          "arch": "amd64"
+        },
+        {
+          "os": "linux",
+          "arch": "arm"
+        },
+        {
+          "os": "windows",
+          "arch": "amd64"
+        }
+      ]
+    },
+    {
+      "version": "2.7.1",
+      "protocols": [
+        "5.0"
+      ],
+      "platforms": [
+        {
+          "os": "darwin",
+          "arch": "arm64"
+        },
+        {
+          "os": "linux",
+          "arch": "amd64"
+        },
+        {
+          "os": "linux",
+          "arch": "arm"
+        },
+        {
+          "os": "windows",
+          "arch": "amd64"
+        }
+      ]
+    }
+  ],
+  "warnings": null
+}

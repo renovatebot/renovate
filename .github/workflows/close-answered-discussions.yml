@@ -1,0 +1,30 @@
+name: Close answered discussions
+
+permissions:
+  discussions: write
+
+on:
+  # run daily
+  schedule:
+    - cron: '0 0 * * *'
+
+  # allow manual trigger
+  workflow_dispatch:
+
+jobs:
+  close-answered-discussions:
+    runs-on: ubuntu-latest
+    if: github.repository == 'renovatebot/renovate'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          show-progress: false
+
+      - uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        with:
+          script: |
+            const script = require('.github/workflows/close-answered-discussions/script.cjs')
+            console.log(await script({github, context, discussionAnsweredDays: 30}))

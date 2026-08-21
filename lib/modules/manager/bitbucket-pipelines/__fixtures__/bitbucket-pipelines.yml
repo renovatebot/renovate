@@ -1,0 +1,69 @@
+image: node:10.15.1
+
+definitions:
+  steps:
+    - step: &build-test
+        name: Build and test
+        image:
+          # comment
+          name: node:18.15.0
+        script:
+          - mvn package
+        artifacts:
+          - target/**
+
+    - step: &build-test1
+        image:
+          username: xxxx
+          name: node:18.15.1
+
+    - step: &build-test2
+        image:
+          username: xxx
+          password: xxx
+
+          name: node:18.15.2
+
+    - step:
+        image:
+        test:
+          name: malformed
+
+    - step:
+        image:
+          username: xxx
+        test:
+          name: malformed
+
+    - step:
+        image:
+          username: xxx
+          password: xxx
+        test:
+          name: malformed
+
+
+pipelines:
+  default:
+    - step:
+        name: Build and Test
+        image: node:10.15.2
+        script:
+          - step: *build-test
+          - pipe: docker://jfrogecosystem/jfrog-setup-cli:2.0.2
+          - npm install
+          - npm test
+          - npm run dist
+        artifacts:
+          - dist/**
+    - step:
+        name: Deploy
+        deployment: production
+        script:
+          - pipe: atlassian/aws-s3-deploy:0.2.1
+            variables:
+              AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID
+              AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY
+              AWS_DEFAULT_REGION: "us-east-1"
+              S3_BUCKET: "my-bucket-name"
+              LOCAL_PATH: "dist"

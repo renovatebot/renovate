@@ -1,0 +1,27 @@
+{
+  "sri": {
+      "css/bootstrap-grid.css": "sha512-Fxj/xUyzF1sPpG8bmkIT/Rh4tAHwPn3roK9DwsoBoglSt2tfNpYWF+vWiwVw0SVhXVEjxmdDwkCzD/wtFOIAUg==",
+      "css/bootstrap-grid.min.css": "sha512-JQksK36WdRekVrvdxNyV3B0Q1huqbTkIQNbz1dlcFVgNynEMRl0F8OSqOGdVppLUDIvsOejhr/W5L3G/b3J+8w==",
+      "css/bootstrap-grid.rtl.css": "sha512-kDjyCDssHgTQcTtM8Dwe+mzK0NbM28pXKC17zAWZ8fxiok4pWtB4V0ve92sdG/urSLky9gi8AHyCsiYBrjMWCQ==",
+      "css/bootstrap-grid.rtl.min.css": "sha512-TVEh7Wv2VL7denA2jjLclu/YHda8TiwmLZBhUqmJa+PVhIgbOs4mkx4nGQw+ok1f+3tf/NpbVDIuPKIHcSyEhw==",
+      "css/bootstrap-reboot.css": "sha512-OHLj7fFQzMuQeBvepMhoFo2xEVTEWyxRFNc42DOd+Jjwcko8LW7GjN9y91POlKkl8Ivzc9a0ZfIhD4HDIjCGxA==",
+      "css/bootstrap-reboot.min.css": "sha512-IS8Z2ZgFvTz/yLxE6H07ip/Ad+yAGswoD1VliOeC2T4WaPFNPC1TwmQ5zomGS+syaR2oO3aXJGKaHv21Dspx0g==",
+      "css/bootstrap-reboot.rtl.css": "sha512-YJ7dzM3VK2DJiSkfp9zrN8OrJgYQUJTv7m+WCr7geqqeDD5daxvd7MUzaVUBgkWM/Yl/PtV511SmYi/AS34yLg==",
+      "css/bootstrap-reboot.rtl.min.css": "sha512-MWXegIfPaJ2ht1ccssKjDqUk4DDiTyoKQqb4zGNEAXqUfP8ukuEtxraKdo7nko3m+4mY+ZXlPOUX6y4SV0VXPA==",
+      "css/bootstrap-utilities.css": "sha512-nUciEVa4bEB5Ct7WEC1mVgN0+i5iMZQK8mrhc9qjyw3FhpIsYYPl1Qhh1zQUHaPq1rzqspA+CTkyKp3NzWBs+g==",
+      "css/bootstrap-utilities.min.css": "sha512-DEGBrwaCF4lkKzMKNwt8Qe/V54bmJctk7I1HyfINGAIugDvsdBeuWzAWZmXAmm49P6EBfl/OeUM01U3r7cW4jg==",
+      "css/bootstrap-utilities.rtl.css": "sha512-yHpTyYQws1/5DtDZm0KBhJaMVPHoSp+bwCOCXj7EL+asqQHnIH5VaBxBqA2PiOc8k6knFwvqkPvLHKAhE2IigA==",
+      "css/bootstrap-utilities.rtl.min.css": "sha512-1W/oJs3Mky37ftCexP/qGfEA5rEjkxtZb6dbxfqr2lGUSJzbrqYkIPZPrQdrsnZbH0Rj9Y6nsxyp4mgmvGbZew==",
+      "css/bootstrap.css": "sha512-bR79Bg78Wmn33N5nvkEyg66hNg+xF/Q8NA8YABbj+4sBngYhv9P8eum19hdjYcY7vXk/vRkhM3v/ZndtgEXRWw==",
+      "css/bootstrap.min.css": "sha512-SbiR/eusphKoMVVXysTKG/7VseWii+Y3FdHrt0EpKgpToZeemhqHeZeLWLhJutz/2ut2Vw1uQEj2MbRF+TVBUA==",
+      "css/bootstrap.rtl.css": "sha512-Om2bVDiRJwpT9sJcj95YLYdECykFzo5dicv/8fzrFhm/uHQRYkapARZb6Ioer8+4KJGL2T1lKIfWxk+LlhfbqQ==",
+      "css/bootstrap.rtl.min.css": "sha512-tC3gnye8BsHmrW3eRP3Nrj/bs+CSVUfzkjOlfLNrfvcbKXFxk5+b8dQCZi9rgVFjDudwipXfqEhsKMMgRZGCDw==",
+      "js/bootstrap.bundle.js": "sha512-gMrnU9iM+azBQtrSC8kTJy6+g+hjaIHnElQmb41QeHNTGYjbbtm0BptpIMgXYpS6iyWq9bPkxrcqgK8aqRsjAg==",
+      "js/bootstrap.bundle.min.js": "sha512-i9cEfJwUwViEPFKdC1enz4ZRGBj8YQo6QByFTF92YXHi7waCqyexvRD75S5NVTsSiTv7rKWqG9Y5eFxmRsOn0A==",
+      "js/bootstrap.esm.js": "sha512-Usuu2Q6MtOYYaCc10FhONUvYeYZagj4i85fsXe09ZQyRtIdwBSHXWt5PQpAyGjrFcbQy2//LTsqZkdgzzcBBbg==",
+      "js/bootstrap.esm.min.js": "sha512-ruQ4xI8Jfep9W+qJQ8FLbxsjPVR0WvEt31XNw0mZxri2Nya9eQr7VTFsi+S7OvW0bIUI7vxF8zoaPNSq/PsvxA==",
+      "js/bootstrap.js": "sha512-L6XANV6sOsx9N9c787eDN1pjB2Pzautd3xDgn4cMKuoleHSuCJi5pCDGPCtwE3Bd4A1Olnr0k0aQXbczYzg+wg==",
+      "js/bootstrap.min.js": "sha512-1/RvZTcCDEUjY/CypiMz+iqqtaoQfAITmNSJY17Myp4Ms5mdxPS5UV7iOfdZoxcGhzFbOm6sntTKJppjvuhg4g=="
+  },
+  "version": "5.2.3"
+}

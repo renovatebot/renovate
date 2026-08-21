@@ -1,0 +1,1038 @@
+import { isNullOrUndefined } from '@sindresorhus/is';
+import { codeBlock } from 'common-tags';
+import type { MockInstance } from 'vitest';
+import type { RenovateConfig } from '~test/util.ts';
+import { fs, logger, partial, platform, scm } from '~test/util.ts';
+import * as decrypt from '../../../config/decrypt.ts';
+import { getConfig } from '../../../config/defaults.ts';
+import { GlobalConfig } from '../../../config/global.ts';
+import * as _migrateAndValidate from '../../../config/migrate-validate.ts';
+import * as _migrate from '../../../config/migration.ts';
+import type { AllConfig } from '../../../config/types.ts';
+import * as npmApi from '../../../modules/datasource/npm/index.ts';
+import * as memCache from '../../../util/cache/memory/index.ts';
+import * as repoCache from '../../../util/cache/repository/index.ts';
+import { initRepoCache } from '../../../util/cache/repository/init.ts';
+import type { RepoCacheData } from '../../../util/cache/repository/types.ts';
+import { getUserEnv } from '../../../util/env.ts';
+import * as hostRules from '../../../util/host-rules.ts';
+import * as queue from '../../../util/http/queue.ts';
+import * as throttle from '../../../util/http/throttle.ts';
+import * as _onboardingCache from '../onboarding/branch/onboarding-branch-cache.ts';
+import { OnboardingState } from '../onboarding/common.ts';
+import {
+  applyHostRules,
+  applyNpmrc,
+  checkForRepoConfigError,
+  detectRepoFileConfig,
+  mergeRenovateConfig,
+  resolveStaticRepoConfig,
+  setNpmTokenInNpmrc,
+} from './merge.ts';
+import type { RepositoryWorkerConfig } from './types.ts';
+
+vi.mock('../../../util/fs/index.ts');
+vi.mock('../onboarding/branch/config.ts');
+vi.mock('../onboarding/branch/onboarding-branch-cache.ts');
+
+const migrate = vi.mocked(_migrate);
+const migrateAndValidate = vi.mocked(_migrateAndValidate);
+const onboardingCache = vi.mocked(_onboardingCache);
+
+let config: RenovateConfig;
+
+function mockProcessExitOnce(): [MockInstance<NodeJS.Process['exit']>, Error] {
+  const mockedError = new Error('mocked exit called');
+
+  return [
+    vi.spyOn(process, 'exit').mockImplementationOnce(() => {
+      throw mockedError;
+    }),
+    mockedError,
+  ];
+}
+
+beforeEach(() => {
+  memCache.init();
+  GlobalConfig.reset();
+  config = getConfig();
+  config.errors = [];
+  config.warnings = [];
+});
+
+vi.mock('../../../config/migration.ts');
+vi.mock('../../../config/migrate-validate.ts');
+
+describe('workers/repository/init/merge', () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+    hostRules.clear();
+  });
+
+  describe('detectRepoFileConfig()', () => {
+    beforeEach(async () => {
+      await initRepoCache({ repoFingerprint: '0123456789abcdef' });
+    });
+
+    it('returns config if not found', async () => {
+      scm.getFileList.mockResolvedValue(['package.json']);
+      fs.readLocalFile.mockResolvedValue('{}');
+      expect(await detectRepoFileConfig()).toEqual({});
+    });
+
+    it('returns config if not found - uses cache', async () => {
+      vi.spyOn(repoCache, 'getCache').mockReturnValueOnce(
+        partial<RepoCacheData>({ configFileName: 'renovate.json' }),
+      );
+      platform.getRawFile.mockRejectedValueOnce(new Error());
+      scm.getFileList.mockResolvedValue(['package.json']);
+      fs.readLocalFile.mockResolvedValue('{}');
+      expect(await detectRepoFileConfig()).toEqual({});
+
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        'Existing config file no longer exists',
+      );
+    });
+
+    it('returns cache config from onboarding cache - package.json', async () => {
+      const pJson = JSON.stringify({
+        schema: 'https://docs.renovate.com',
+      });
+      OnboardingState.onboardingCacheValid = true;
+      onboardingCache.getOnboardingFileNameFromCache.mockReturnValueOnce(
+        'package.json',
+      );
+      onboardingCache.getOnboardingConfigFromCache.mockReturnValueOnce(pJson);
+      expect(await detectRepoFileConfig()).toEqual({
+        configFileName: 'package.json',
+        configFileParsed: { schema: 'https://docs.renovate.com' },
+      });
+    });
+
+    it('clones, if onboarding cache is valid but parsed config is undefined', async () => {
+      OnboardingState.onboardingCacheValid = true;
+      onboardingCache.getOnboardingFileNameFromCache.mockReturnValueOnce(
+        'package.json',
+      );
+      onboardingCache.getOnboardingConfigFromCache.mockReturnValueOnce(
+        undefined,
+      );
+      scm.getFileList.mockResolvedValueOnce(['package.json']);
+      const pJson = JSON.stringify({
+        name: 'something',
+        renovate: {
+          prHourlyLimit: 10,
+        },
+      });
+      fs.readLocalFile.mockResolvedValueOnce(pJson);
+      platform.getRawFile.mockResolvedValueOnce(pJson);
+      expect(await detectRepoFileConfig()).toEqual({
+        configFileName: 'package.json',
+        configFileParsed: { prHourlyLimit: 10 },
+      });
+    });
+
+    it('returns cache config from onboarding cache - renovate.json', async () => {
+      const configParsed = JSON.stringify({
+        schema: 'https://docs.renovate.com',
+      });
+      OnboardingState.onboardingCacheValid = true;
+      onboardingCache.getOnboardingFileNameFromCache.mockReturnValueOnce(
+        'renovate.json',
+      );
+      onboardingCache.getOnboardingConfigFromCache.mockReturnValueOnce(
+        configParsed,
+      );
+      expect(await detectRepoFileConfig()).toEqual({
+        configFileName: 'renovate.json',
+        configFileParsed: {
+          schema: 'https://docs.renovate.com',
+        },
+      });
+    });
+
+    it('uses package.json config if found', async () => {
+      scm.getFileList.mockResolvedValue(['package.json']);
+      const pJson = JSON.stringify({
+        name: 'something',
+        renovate: {
+          prHourlyLimit: 10,
+        },
+      });
+      fs.readLocalFile.mockResolvedValue(pJson);
+      platform.getRawFile.mockResolvedValueOnce(pJson);
+      expect(await detectRepoFileConfig()).toEqual({
+        configFileName: 'package.json',
+        configFileParsed: { prHourlyLimit: 10 },
+      });
+      // get from repoCache
+      expect(await detectRepoFileConfig()).toEqual({
+        configFileName: 'package.json',
+        configFileParsed: { prHourlyLimit: 10 },
+      });
+    });
+
+    it('massages package.json renovate string', async () => {
+      scm.getFileList.mockResolvedValue(['package.json']);
+      const pJson = JSON.stringify({
+        name: 'something',
+        renovate: 'github>renovatebot/renovate',
+      });
+      fs.readLocalFile.mockResolvedValue(pJson);
+      platform.getRawFile.mockResolvedValueOnce(pJson);
+      expect(await detectRepoFileConfig()).toEqual({
+        configFileName: 'package.json',
+        configFileParsed: { extends: ['github>renovatebot/renovate'] },
+      });
+    });
+
+    it('returns error if cannot parse', async () => {
+      scm.getFileList.mockResolvedValue(['package.json', 'renovate.json']);
+      fs.readLocalFile.mockResolvedValue('cannot parse');
+      expect(await detectRepoFileConfig()).toEqual({
+        configFileName: 'renovate.json',
+        configFileParseError: {
+          validationError: 'Invalid JSON (parsing failed)',
+          validationMessage: 'Syntax error near cannot par',
+        },
+      });
+    });
+
+    it('throws error if duplicate keys', async () => {
+      scm.getFileList.mockResolvedValue(['package.json', '.renovaterc']);
+      fs.readLocalFile.mockResolvedValue(
+        '{ "enabled": true, "enabled": false }',
+      );
+      expect(await detectRepoFileConfig()).toEqual({
+        configFileName: '.renovaterc',
+        configFileParseError: {
+          validationError: 'Duplicate keys in JSON',
+          validationMessage:
+            '"Syntax error: duplicated keys \\"enabled\\" near \\": false }"',
+        },
+      });
+    });
+
+    it('finds and parse renovate.json5', async () => {
+      const configFileRaw = codeBlock`
+        {
+                // this is json5 format
+              }
+      `;
+      scm.getFileList.mockResolvedValue(['package.json', 'renovate.json5']);
+      fs.readLocalFile.mockResolvedValue(configFileRaw);
+      expect(await detectRepoFileConfig()).toEqual({
+        configFileName: 'renovate.json5',
+        configFileParsed: {},
+      });
+    });
+
+    it('finds .github/renovate.json', async () => {
+      scm.getFileList.mockResolvedValue([
+        'package.json',
+        '.github/renovate.json',
+      ]);
+      fs.readLocalFile.mockResolvedValue('{}');
+      expect(await detectRepoFileConfig()).toEqual({
+        configFileName: '.github/renovate.json',
+        configFileParsed: {},
+      });
+    });
+
+    it('finds .gitlab/renovate.json', async () => {
+      scm.getFileList.mockResolvedValue([
+        'package.json',
+        '.gitlab/renovate.json',
+      ]);
+      fs.readLocalFile.mockResolvedValue('{}');
+      expect(await detectRepoFileConfig()).toEqual({
+        configFileName: '.gitlab/renovate.json',
+        configFileParsed: {},
+      });
+    });
+
+    it('finds .renovaterc.json', async () => {
+      scm.getFileList.mockResolvedValue(['package.json', '.renovaterc.json']);
+      fs.readLocalFile.mockResolvedValue('{}');
+      platform.getRawFile.mockResolvedValueOnce('{"something":"new"}');
+      expect(await detectRepoFileConfig()).toEqual({
+        configFileName: '.renovaterc.json',
+        configFileParsed: {},
+      });
+      expect(await detectRepoFileConfig()).toEqual({
+        configFileName: '.renovaterc.json',
+        configFileParsed: {
+          something: 'new',
+        },
+      });
+    });
+
+    it('finds .renovaterc.json5', async () => {
+      scm.getFileList.mockResolvedValue(['package.json', '.renovaterc.json5']);
+      fs.readLocalFile.mockResolvedValue('{}');
+      platform.getRawFile.mockResolvedValueOnce('{"something":"new"}');
+      expect(await detectRepoFileConfig()).toEqual({
+        configFileName: '.renovaterc.json5',
+        configFileParsed: {},
+      });
+      expect(await detectRepoFileConfig()).toEqual({
+        configFileName: '.renovaterc.json5',
+        configFileParsed: {
+          something: 'new',
+        },
+      });
+    });
+  });
+
+  describe('checkForRepoConfigError', () => {
+    it('returns if no error', () => {
+      expect(checkForRepoConfigError({})).toBeUndefined();
+    });
+
+    it('throws on error', () => {
+      expect(() =>
+        checkForRepoConfigError({
+          configFileParseError: { validationError: '', validationMessage: '' },
+        }),
+      ).toThrow('config-validation');
+    });
+  });
+
+  describe('mergeRenovateConfig()', () => {
+    beforeEach(() => {
+      migrate.migrateConfig.mockReturnValue({
+        isMigrated: false,
+        migratedConfig: {},
+      });
+    });
+
+    it('uses onboarding config if silent', async () => {
+      scm.getFileList.mockResolvedValue([]);
+      migrateAndValidate.migrateAndValidate.mockResolvedValue({
+        warnings: [],
+        errors: [],
+      });
+      config.mode = 'silent';
+      config.repository = 'some-org/some-repo';
+      const res = await mergeRenovateConfig(config);
+      expect(res).toBeDefined();
+    });
+
+    it('throws error if misconfigured', async () => {
+      scm.getFileList.mockResolvedValue(['package.json', '.renovaterc.json']);
+      fs.readLocalFile.mockResolvedValue('{}');
+      migrateAndValidate.migrateAndValidate.mockResolvedValueOnce({
+        errors: [{ topic: 'dep', message: 'test error' }],
+      });
+      let e: Error | undefined;
+      try {
+        await mergeRenovateConfig(config);
+      } catch (err) {
+        e = err;
+      }
+      expect(e).toBeDefined();
+      expect(e?.toString()).toBe('Error: config-validation');
+    });
+
+    it('migrates nested config', async () => {
+      scm.getFileList.mockResolvedValue(['renovate.json']);
+      fs.readLocalFile.mockResolvedValue('{}');
+      migrateAndValidate.migrateAndValidate.mockImplementation((_, c) => {
+        // We shouldn't see packageRules here (avoids #14827).
+        // (someday the validation should probably be reworked to know about `sourceUrl` from the repo config, but that day isn't today)
+        expect(c).not.toHaveProperty('packageRules');
+        return Promise.resolve({
+          ...c,
+          warnings: [],
+          errors: [],
+        });
+      });
+      migrate.migrateConfig.mockImplementation((c) => ({
+        isMigrated: true,
+        migratedConfig: c,
+      }));
+      config.extends = [':automergeAll'];
+      config.packageRules = [{ extends: ['monorepo:react'] }];
+      const ret = await mergeRenovateConfig(config);
+      expect(ret).toMatchObject({
+        automerge: true,
+        packageRules: [
+          {
+            matchSourceUrls: [
+              'https://github.com/facebook/react',
+              'https://github.com/react/react',
+            ],
+          },
+        ],
+      });
+    });
+
+    it('ignores presets', async () => {
+      scm.getFileList.mockResolvedValue(['renovate.json']);
+      fs.readLocalFile.mockResolvedValue('{}');
+      migrateAndValidate.migrateAndValidate.mockResolvedValue({
+        extends: ['config:recommended'],
+        warnings: [],
+        errors: [],
+      });
+      migrate.migrateConfig.mockImplementation((c) => ({
+        isMigrated: true,
+        migratedConfig: c,
+      }));
+      config.extends = ['config:recommended'];
+      config.ignorePresets = [':ignoreModulesAndTests'];
+      config.ignorePaths = ['**/examples/**'];
+      const res = await mergeRenovateConfig(config);
+      expect(res.ignorePaths).toEqual(config.ignorePaths);
+    });
+
+    it('continues if no errors', async () => {
+      scm.getFileList.mockResolvedValue(['package.json', '.renovaterc.json']);
+      fs.readLocalFile.mockResolvedValue('{}');
+      migrateAndValidate.migrateAndValidate.mockResolvedValue({
+        warnings: [],
+        errors: [],
+      });
+      config.extends = [':automergeDisabled'];
+      expect(await mergeRenovateConfig(config)).toBeDefined();
+    });
+
+    it('continues if no errors-2', async () => {
+      scm.getFileList.mockResolvedValue(['package.json', '.renovaterc.json']);
+      fs.readLocalFile.mockResolvedValue('{}');
+      migrateAndValidate.migrateAndValidate.mockResolvedValue({
+        warnings: [],
+        errors: [],
+      });
+      GlobalConfig.set({ requireConfig: 'ignored' });
+      expect(
+        await mergeRenovateConfig({
+          ...config,
+          requireConfig: 'ignored',
+          // @ts-expect-error -- TODO: do we still need this?
+          configFileParsed: undefined,
+          warnings: undefined,
+          secrets: undefined,
+        }),
+      ).toBeDefined();
+    });
+
+    it('sets npmToken to npmrc when it is not inside encrypted', async () => {
+      scm.getFileList.mockResolvedValue(['package.json', '.renovaterc.json']);
+      fs.readLocalFile.mockResolvedValue(
+        '{"npmToken": "{{ secrets.NPM_TOKEN }}", "npmrc": "something_authToken=${NPM_TOKEN}"}',
+      );
+      migrateAndValidate.migrateAndValidate.mockResolvedValue({
+        ...config,
+        npmToken: '{{ secrets.NPM_TOKEN }}',
+        npmrc: 'something_authToken=${NPM_TOKEN}',
+        warnings: [],
+        errors: [],
+      });
+      migrate.migrateConfig.mockImplementation((c) => ({
+        isMigrated: true,
+        migratedConfig: c,
+      }));
+      config.secrets = {
+        NPM_TOKEN: 'confidential',
+      };
+      const res = await mergeRenovateConfig(config);
+      expect(res.npmrc).toBe('something_authToken=confidential');
+    });
+
+    it('sets npmToken to npmrc when it is inside encrypted', async () => {
+      scm.getFileList.mockResolvedValue(['package.json', '.renovaterc.json']);
+      fs.readLocalFile.mockResolvedValue(
+        '{"encrypted": { "npmToken": "encrypted-token" }, "npmrc": "something_authToken=${NPM_TOKEN}"}',
+      );
+      migrateAndValidate.migrateAndValidate.mockResolvedValue({
+        ...config,
+        npmrc: 'something_authToken=${NPM_TOKEN}',
+        encrypted: {
+          npmToken: 'encrypted-token',
+        },
+        warnings: [],
+        errors: [],
+      });
+      migrate.migrateConfig.mockImplementation((c) => ({
+        isMigrated: true,
+        migratedConfig: c,
+      }));
+      vi.spyOn(decrypt, 'decryptConfig').mockResolvedValueOnce({
+        ...config,
+        npmrc: 'something_authToken=${NPM_TOKEN}',
+        npmToken: 'token',
+      });
+      const res = await mergeRenovateConfig(config);
+      expect(res.npmrc).toBe('something_authToken=token');
+    });
+
+    it('deletes user conifgured env after setting in mem cache', async () => {
+      scm.getFileList.mockResolvedValue(['package.json', '.renovaterc.json']);
+      fs.readLocalFile.mockResolvedValue('{"env": { "var": "value" }}');
+      migrateAndValidate.migrateAndValidate.mockResolvedValue({
+        ...config,
+        env: {
+          var: 'value',
+        },
+        warnings: [],
+        errors: [],
+      });
+      migrate.migrateConfig.mockImplementation((c) => ({
+        isMigrated: true,
+        migratedConfig: c,
+      }));
+      const res = await mergeRenovateConfig(config);
+      expect(res.env).toBeUndefined();
+      expect(getUserEnv()).toEqual({
+        var: 'value',
+      });
+    });
+
+    it('applies repositoryEntryConfig between global and repo file config', async () => {
+      migrateAndValidate.migrateAndValidate.mockImplementation((_, c) =>
+        Promise.resolve({ ...c, warnings: [], errors: [] }),
+      );
+      migrate.migrateConfig.mockImplementation((c) => ({
+        isMigrated: true,
+        migratedConfig: c,
+      }));
+
+      const setNpmrcSpy = vi.spyOn(npmApi, 'setNpmrc');
+      const npmrcValue = '//registry.npmjs.org/:_authToken=preset-token\n';
+
+      const globalPresetRule = {
+        matchPackageNames: ['globalPresetDep'],
+        enabled: false,
+      };
+      const ignoredByGlobalRule = {
+        matchPackageNames: ['ignoredByGlobalDep'],
+        enabled: false,
+      };
+      const ignoredByEntryRule = {
+        matchPackageNames: ['ignoredByEntryDep'],
+        enabled: false,
+      };
+      const ignoredByRepoRule = {
+        matchPackageNames: ['ignoredByRepoDep'],
+        enabled: false,
+      };
+      const repoEntryPresetRule = {
+        matchPackageNames: ['repoEntryPresetDep'],
+        enabled: false,
+      };
+      const repoFilePresetRule = {
+        matchPackageNames: ['repoFilePresetDep'],
+        enabled: false,
+      };
+      const globalRule = {
+        matchPackageNames: ['globalDep'],
+        enabled: false,
+      };
+      const repoEntryRule = {
+        matchPackageNames: ['repoEntryDep'],
+        enabled: false,
+      };
+      const repoFileRule = {
+        matchPackageNames: ['repoFileDep'],
+        enabled: false,
+      };
+
+      memCache.set('preset:local>globalPreset', {
+        packageRules: [globalPresetRule],
+        hostRules: [
+          {
+            matchHost: 'https://npm.example.com',
+            token: '{{ secrets.HOST_TOKEN }}',
+          },
+        ],
+        npmrc: npmrcValue,
+      });
+      memCache.set('preset:local>ignoredByGlobal', {
+        packageRules: [ignoredByGlobalRule],
+      });
+      memCache.set('preset:local>ignoredByEntry', {
+        packageRules: [ignoredByEntryRule],
+      });
+      memCache.set('preset:local>ignoredByRepo', {
+        packageRules: [ignoredByRepoRule],
+      });
+      memCache.set('preset:local>repoEntryPreset', {
+        packageRules: [repoEntryPresetRule],
+      });
+      memCache.set('preset:local>repoFilePreset', {
+        packageRules: [repoFilePresetRule],
+      });
+
+      scm.getFileList.mockResolvedValue(['renovate.json']);
+      fs.readLocalFile.mockResolvedValue(
+        JSON.stringify({
+          extends: ['local>repoFilePreset'],
+          ignorePresets: ['local>ignoredByRepo'],
+          packageRules: [repoFileRule],
+        }),
+      );
+
+      const inputConfig: RepositoryWorkerConfig = {
+        ...config,
+        extends: [
+          'local>globalPreset',
+          'local>ignoredByGlobal',
+          'local>ignoredByEntry',
+          'local>ignoredByRepo',
+        ],
+        ignorePresets: ['local>ignoredByGlobal'],
+        packageRules: [globalRule],
+        secrets: { HOST_TOKEN: 'resolved-secret-token' },
+        repositoryEntryConfig: {
+          extends: ['local>repoEntryPreset'],
+          ignorePresets: ['local>ignoredByEntry'],
+          packageRules: [repoEntryRule],
+        },
+      };
+
+      const res = await mergeRenovateConfig(inputConfig);
+
+      expect(res.packageRules).toMatchObject([
+        globalRule,
+        globalPresetRule,
+        // ignoredByGlobalRule should not be here
+        // ignoredByEntryRule should not be here
+        // ignoredByRepoRule should not be here
+        repoEntryPresetRule,
+        repoEntryRule,
+        repoFilePresetRule,
+        repoFileRule,
+      ]);
+
+      expect(hostRules.find({ url: 'https://npm.example.com' })).toMatchObject({
+        token: 'resolved-secret-token',
+      });
+
+      expect(setNpmrcSpy).toHaveBeenCalledWith(npmrcValue);
+    });
+
+    it('supports repositoryEntryConfig without extends or ignorePresets', async () => {
+      migrateAndValidate.migrateAndValidate.mockImplementation((_, c) =>
+        Promise.resolve({ ...c, warnings: [], errors: [] }),
+      );
+      migrate.migrateConfig.mockImplementation((c) => ({
+        isMigrated: true,
+        migratedConfig: c,
+      }));
+
+      const repoEntryRule = {
+        matchPackageNames: ['repoEntryDep'],
+        enabled: false,
+      };
+
+      scm.getFileList.mockResolvedValue([]);
+      fs.readLocalFile.mockResolvedValue(null);
+
+      const inputConfig: RepositoryWorkerConfig = {
+        ...config,
+        extends: undefined,
+        ignorePresets: undefined,
+        repositoryEntryConfig: {
+          packageRules: [repoEntryRule],
+        },
+      };
+
+      const res = await mergeRenovateConfig(inputConfig);
+
+      expect(res.packageRules).toMatchObject([repoEntryRule]);
+    });
+  });
+
+  describe('setNpmTokenInNpmrc', () => {
+    it('skips in no npmToken found', () => {
+      const config = {};
+      setNpmTokenInNpmrc(config);
+      expect(config).toMatchObject({});
+    });
+
+    it('adds default npmrc registry if it does not exist', () => {
+      const config = { npmToken: 'token' };
+      setNpmTokenInNpmrc(config);
+      expect(config).toMatchObject({
+        npmrc: '//registry.npmjs.org/:_authToken=token\n',
+      });
+    });
+
+    it('adds npmToken at end of npmrc string if ${NPM_TOKEN} string not found', () => {
+      const config = { npmToken: 'token', npmrc: 'something\n' };
+      setNpmTokenInNpmrc(config);
+      expect(config).toMatchObject({ npmrc: 'something\n_authToken=token\n' });
+    });
+
+    it('replaces ${NPM_TOKEN} with npmToken value', () => {
+      const config = {
+        npmToken: 'token',
+        npmrc: 'something_auth=${NPM_TOKEN}\n',
+      };
+      setNpmTokenInNpmrc(config);
+      expect(config).toMatchObject({ npmrc: 'something_auth=token\n' });
+    });
+  });
+
+  describe('applyNpmrc', () => {
+    it('does nothing if npmrc is missing after token migration', () => {
+      const setNpmrcSpy = vi.spyOn(npmApi, 'setNpmrc');
+
+      applyNpmrc({});
+
+      expect(setNpmrcSpy).not.toHaveBeenCalled();
+    });
+
+    it('migrates npmToken and sets npmrc', () => {
+      const setNpmrcSpy = vi.spyOn(npmApi, 'setNpmrc');
+      const config = {
+        npmToken: 'token',
+        npmrc: 'something_authToken=${NPM_TOKEN}',
+      };
+
+      applyNpmrc(config);
+
+      expect(config.npmToken).toBeUndefined();
+      expect(config.npmrc).toBe('something_authToken=token');
+      expect(setNpmrcSpy).toHaveBeenCalledExactlyOnceWith(
+        'something_authToken=token',
+      );
+    });
+  });
+
+  describe('applyHostRules', () => {
+    it('does nothing when hostRules is not configured', () => {
+      const addSpy = vi.spyOn(hostRules, 'add');
+      const clearQueueSpy = vi.spyOn(queue, 'clear');
+      const clearThrottleSpy = vi.spyOn(throttle, 'clear');
+
+      applyHostRules({});
+
+      expect(addSpy).not.toHaveBeenCalled();
+      expect(clearQueueSpy).not.toHaveBeenCalled();
+      expect(clearThrottleSpy).not.toHaveBeenCalled();
+    });
+
+    it('adds hostRules and clears queue and throttle', () => {
+      const addSpy = vi
+        .spyOn(hostRules, 'add')
+        .mockImplementation(() => undefined);
+      const clearQueueSpy = vi.spyOn(queue, 'clear');
+      const clearThrottleSpy = vi.spyOn(throttle, 'clear');
+      const config = {
+        hostRules: [{ matchHost: 'registry.npmjs.org' }],
+      };
+
+      applyHostRules(config);
+
+      expect(addSpy).toHaveBeenCalledExactlyOnceWith({
+        matchHost: 'registry.npmjs.org',
+      });
+      expect(clearQueueSpy).toHaveBeenCalledOnce();
+      expect(clearThrottleSpy).toHaveBeenCalledOnce();
+      expect(config.hostRules).toBeUndefined();
+    });
+
+    it('warns on invalid hostRule and continues applying others', () => {
+      const addSpy = vi
+        .spyOn(hostRules, 'add')
+        .mockImplementationOnce(() => {
+          throw new Error('invalid host rule');
+        })
+        .mockImplementation(() => undefined);
+      const clearQueueSpy = vi.spyOn(queue, 'clear');
+      const clearThrottleSpy = vi.spyOn(throttle, 'clear');
+      const config = {
+        hostRules: [{ matchHost: 'one.example' }, { matchHost: 'two.example' }],
+      };
+
+      applyHostRules(config);
+
+      expect(addSpy).toHaveBeenCalledTimes(2);
+      expect(logger.logger.warn).toHaveBeenCalledOnce();
+      expect(clearQueueSpy).toHaveBeenCalledOnce();
+      expect(clearThrottleSpy).toHaveBeenCalledOnce();
+      expect(config.hostRules).toBeUndefined();
+    });
+  });
+
+  describe('static repository config', () => {
+    const repoStaticConfigFileKey = 'RENOVATE_X_STATIC_REPO_CONFIG_FILE';
+
+    beforeEach(() => {
+      migrate.migrateConfig.mockImplementation((c) => ({
+        isMigrated: true,
+        migratedConfig: c,
+      }));
+      migrateAndValidate.migrateAndValidate.mockImplementationOnce((_, c) => {
+        return Promise.resolve({
+          ...c,
+          warnings: [],
+          errors: [],
+        });
+      });
+    });
+
+    describe('resolveStaticRepoConfig()', () => {
+      interface MergeRepoEnvTestCase {
+        name: string;
+        currentConfig: AllConfig;
+        staticConfig: AllConfig | undefined;
+        want: AllConfig;
+      }
+
+      const testCases: MergeRepoEnvTestCase[] = [
+        {
+          name: 'it does nothing',
+          staticConfig: undefined,
+          currentConfig: { repositories: ['some/repo'] },
+          want: { repositories: ['some/repo'] },
+        },
+        {
+          name: 'it merges static config with the current config',
+          staticConfig: { dependencyDashboard: true },
+          currentConfig: { repositories: ['some/repo'] },
+          want: {
+            dependencyDashboard: true,
+            repositories: ['some/repo'],
+          },
+        },
+      ];
+
+      it.each(testCases)(
+        '$name',
+        async ({ currentConfig, staticConfig, want }: MergeRepoEnvTestCase) => {
+          const [exitMock] = mockProcessExitOnce();
+          let configFileName: string | undefined;
+
+          if (!isNullOrUndefined(staticConfig)) {
+            configFileName = 'static_config.json5';
+            fs.readSystemFile.mockResolvedValueOnce(
+              JSON.stringify(staticConfig),
+            );
+          }
+
+          const got = await resolveStaticRepoConfig(
+            currentConfig,
+            configFileName,
+          );
+
+          expect(got).toEqual(want);
+          expect(exitMock).not.toHaveBeenCalled();
+        },
+      );
+
+      describe('resolveStaticRepoConfig termination cases', () => {
+        it.each([
+          {
+            name: 'should terminate when static config is missing',
+            setup: () => fs.readSystemFile.mockRejectedValueOnce('missing'),
+          },
+          {
+            name: 'should terminate when static config is invalid JSON',
+            setup: () => fs.readSystemFile.mockResolvedValue('invalid json'),
+          },
+        ])('$name', async ({ setup }) => {
+          const [exitMock, error] = mockProcessExitOnce();
+          setup();
+
+          await expect(
+            resolveStaticRepoConfig({}, 'static_config.json'),
+          ).rejects.toThrow(error);
+
+          expect(exitMock).toHaveBeenCalledExactlyOnceWith(1);
+        });
+
+        it('should log static config validation errors and warnings', async () => {
+          const invalidConfig = { foo: 'bar' };
+
+          fs.readSystemFile.mockResolvedValue(JSON.stringify(invalidConfig));
+
+          const resolved = await resolveStaticRepoConfig(
+            {},
+            'static_config.json',
+          );
+
+          expect(resolved).toStrictEqual(invalidConfig);
+
+          expect(logger.logger.info).toHaveBeenCalledWith(
+            {
+              errors: [
+                {
+                  message: 'Invalid configuration option: foo',
+                  topic: 'Configuration Error',
+                },
+              ],
+              warnings: [],
+            },
+            'Static repo config validation issues detected',
+          );
+        });
+      });
+    });
+
+    describe('mergeRenovateConfig() with a static repository config', () => {
+      beforeEach(() => {
+        scm.getFileList.mockResolvedValueOnce(['renovate.json']);
+      });
+
+      interface MergeRepoFileAndEnvConfigTestCase {
+        name: string;
+        currentConfig: AllConfig;
+        repoFileConfig: AllConfig;
+        staticConfig: AllConfig;
+        wantConfig: AllConfig;
+      }
+
+      it.each<MergeRepoFileAndEnvConfigTestCase>([
+        {
+          name: 'it does nothing',
+          currentConfig: {},
+          repoFileConfig: {},
+          staticConfig: {},
+          wantConfig: {
+            renovateJsonPresent: true,
+            warnings: [],
+          },
+        },
+        {
+          name: 'it should resolve and use the repo file config when the static config is not set',
+          currentConfig: {},
+          repoFileConfig: {
+            extends: ['group:socketio'],
+          },
+          staticConfig: {},
+          wantConfig: {
+            description: ['Group socket.io packages.'],
+            packageRules: [
+              {
+                groupName: 'socket.io packages',
+                matchPackageNames: ['socket.io**'],
+              },
+            ],
+            renovateJsonPresent: true,
+            warnings: [],
+          },
+        },
+        {
+          name: 'it should resolve and use the static config when no repo file present',
+          currentConfig: {},
+          repoFileConfig: {},
+          staticConfig: { extends: ['group:socketio'] },
+          wantConfig: {
+            description: ['Group socket.io packages.'],
+            packageRules: [
+              {
+                groupName: 'socket.io packages',
+                matchPackageNames: ['socket.io**'],
+              },
+            ],
+            renovateJsonPresent: true,
+            warnings: [],
+          },
+        },
+        {
+          name: 'it should merge both configs and and repo config is higher priority',
+          currentConfig: {},
+          repoFileConfig: {
+            extends: ['group:socketio'],
+            packageRules: [
+              {
+                matchConfidence: ['high', 'very high'],
+                groupName: 'high merge confidence',
+              },
+            ],
+          },
+          staticConfig: {
+            dependencyDashboard: true,
+            packageRules: [
+              {
+                groupName: 'my-custom-socketio-override',
+                matchPackageNames: ['socket.io**'],
+              },
+            ],
+          },
+          wantConfig: {
+            dependencyDashboard: true,
+            description: ['Group socket.io packages.'],
+            packageRules: [
+              {
+                groupName: 'socket.io packages',
+                matchPackageNames: ['socket.io**'],
+              },
+              {
+                groupName: 'my-custom-socketio-override',
+                matchPackageNames: ['socket.io**'],
+              },
+              {
+                groupName: 'high merge confidence',
+                matchConfidence: ['high', 'very high'],
+              },
+            ],
+            renovateJsonPresent: true,
+            warnings: [],
+          },
+        },
+        {
+          name: 'it should merge extends from both a repo config and static repo config by appending it',
+          currentConfig: {},
+          repoFileConfig: {
+            extends: ['group:springAndroid'],
+          },
+          staticConfig: {
+            dependencyDashboard: true,
+            extends: ['group:springAmqp'],
+            packageRules: [
+              {
+                groupName: 'some-package-rule',
+                matchPackageNames: ['anything**'],
+              },
+            ],
+          },
+          wantConfig: {
+            dependencyDashboard: true,
+            description: [
+              'Group Java Spring AMQP packages.',
+              'Group Java Spring Android packages.',
+            ],
+            packageRules: [
+              {
+                groupName: 'spring amqp',
+                matchPackageNames: ['org.springframework.amqp:**'],
+              },
+              {
+                groupName: 'spring android',
+                matchPackageNames: ['org.springframework.android:**'],
+              },
+              {
+                groupName: 'some-package-rule',
+                matchPackageNames: ['anything**'],
+              },
+            ],
+            renovateJsonPresent: true,
+            warnings: [],
+          },
+        },
+      ])(
+        '$name',
+        async ({
+          staticConfig,
+          repoFileConfig,
+          currentConfig,
+          wantConfig,
+        }: MergeRepoFileAndEnvConfigTestCase) => {
+          fs.readLocalFile.mockResolvedValueOnce(
+            JSON.stringify(repoFileConfig),
+          );
+          process.env[repoStaticConfigFileKey] = 'static_config.json';
+          fs.readSystemFile.mockResolvedValueOnce(JSON.stringify(staticConfig));
+
+          const got = await mergeRenovateConfig(currentConfig);
+
+          expect(got).toStrictEqual(wantConfig);
+        },
+      );
+    });
+  });
+});

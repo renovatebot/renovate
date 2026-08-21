@@ -1,0 +1,41 @@
+import { AbstractMigration } from './abstract-migration.ts';
+
+describe('config/migrations/base/abstract-migration', () => {
+  it('should not allow to use method rewrite', () => {
+    class CustomMigration extends AbstractMigration {
+      override readonly propertyName = /^foo/;
+
+      override run(): void {
+        this.rewrite(false);
+      }
+    }
+    const customMigration = new CustomMigration(
+      {
+        // @ts-expect-error -- testing invalid usage
+        fooBar: true,
+      },
+      {},
+    );
+
+    expect(() => customMigration.run()).toThrow(Error);
+  });
+
+  it('should not allow to use method delete', () => {
+    class CustomMigration extends AbstractMigration {
+      override readonly propertyName = /^foo/;
+
+      override run(): void {
+        this.delete();
+      }
+    }
+    const customMigration = new CustomMigration(
+      {
+        // @ts-expect-error -- testing invalid usage
+        fooBar: true,
+      },
+      {},
+    );
+
+    expect(() => customMigration.run()).toThrow(Error);
+  });
+});

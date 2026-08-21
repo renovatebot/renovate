@@ -1,0 +1,283 @@
+import querystring from 'node:querystring';
+import { isString } from '@sindresorhus/is';
+import { logger } from '../../../logger/index.ts';
+import { coerceArray } from '../../../util/array.ts';
+import { regEx } from '../../../util/regex.ts';
+import { parseSingleYaml } from '../../../util/yaml.ts';
+import { GitTagsDatasource } from '../../datasource/git-tags/index.ts';
+import { GithubTagsDatasource } from '../../datasource/github-tags/index.ts';
+import { HelmDatasource } from '../../datasource/helm/index.ts';
+import { getDep } from '../dockerfile/extract.ts';
+import { isOCIRegistry, removeOCIPrefix } from '../helmv3/oci.ts';
+import type {
+  ExtractConfig,
+  PackageDependency,
+  PackageFileContent,
+} from '../types.ts';
+import type { HelmChart, Image, Kustomize } from './types.ts';
+
+// URL specifications should follow the hashicorp URL format
+// https://github.com/hashicorp/go-getter#url-format
+const gitUrl = regEx(
+  /^(?:git::)?(?<url>(?:(?:(?:http|https|ssh):\/\/)?(?:.*@)?)?(?<path>(?:[^:/\s]+(?::[0-9]+)?[:/])?(?<project>[^/\s]+\/[^/\s]+)))(?<subdir>[^?\s]*)\?(?<queryString>.+)$/,
+);
+// regex to match URLs with ".git" delimiter
+const dotGitRegex = regEx(
+  /^(?:git::)?(?<url>(?:(?:(?:http|https|ssh):\/\/)?(?:.*@)?)?(?<path>(?:[^:/\s]+(?::[0-9]+)?[:/])?(?<project>[^?\s]*(\.git))))(?<subdir>[^?\s]*)\?(?<queryString>.+)$/,
+);
+// regex to match URLs with "_git" delimiter
+const underscoreGitRegex = regEx(
+  /^(?:git::)?(?<url>(?:(?:(?:http|https|ssh):\/\/)?(?:.*@)?)?(?<path>(?:[^:/\s]+(?::[0-9]+)?[:/])?(?<project>[^?\s]*)(_git\/[^/\s]+)))(?<subdir>[^?\s]*)\?(?<queryString>.+)$/,
+);
+// regex to match URLs having an extra "//"
+const gitUrlWithPath = regEx(
+  /^(?:git::)?(?<url>(?:(?:(?:http|https|ssh):\/\/)?(?:.*@)?)?(?<path>(?:[^:/\s]+(?::[0-9]+)?[:/])(?<project>[^?\s]+)))(?:\/\/)(?<subdir>[^?\s]+)\?(?<queryString>.+)$/,
+);
+
+export function extractResource(base: string): PackageDependency | null {
+  let match: RegExpExecArray | null;
+
+  if (base.includes('_git')) {
+    match = underscoreGitRegex.exec(base);
+  } else if (base.includes('.git')) {
+    match = dotGitRegex.exec(base);
+  } else if (gitUrlWithPath.test(base)) {
+    match = gitUrlWithPath.exec(base);
+  } else {
+    match = gitUrl.exec(base);
+  }
+
+  if (!match?.groups) {
+    return null;
+  }
+
+  const { path, queryString } = match.groups;
+  const params = querystring.parse(queryString);
+  const refParam = Array.isArray(params.ref) ? params.ref[0] : params.ref;
+  const versionParam = Array.isArray(params.version)
+    ? params.version[0]
+    : params.version;
+  const currentValue = refParam ?? versionParam;
+  if (!currentValue) {
+    return null;
+  }
+
+  if (regEx(/(?:github\.com)(:|\/)/).test(path)) {
+    return {
+      currentValue,
+      datasource: GithubTagsDatasource.id,
+      depName: match.groups.project.replace('.git', ''),
+    };
+  }
+
+  return {
+    datasource: GitTagsDatasource.id,
+    depName: path.replace('.git', ''),
+    packageName: match.groups.url,
+    currentValue,
+  };
+}
+
+export function extractImage(
+  image: Image,
+  aliases?: Record<string, string>,
+): PackageDependency | null {
+  if (!image.name) {
+    return null;
+  }
+  const nameToSplit = image.newName ?? image.name;
+  if (!isString(nameToSplit)) {
+    logger.debug({ image }, 'Invalid image name');
+    return null;
+  }
+  const nameDep = getDep(nameToSplit, false, aliases);
+  const { depName } = nameDep;
+  const { digest, newTag } = image;
+  if (digest && newTag) {
+    logger.debug(
+      { newTag, digest },
+      'Kustomize ignores newTag when digest is provided. Pick one, or use `newTag: tag@digest`',
+    );
+    return {
+      depName,
+      currentValue: newTag,
+      currentDigest: digest,
+      skipReason: 'invalid-dependency-specification',
+    };
+  }
+
+  if (digest) {
+    if (!isString(digest) || !digest.startsWith('sha256:')) {
+      return {
+        depName,
+        currentValue: digest,
+        skipReason: 'invalid-value',
+      };
+    }
+
+    return {
+      ...nameDep,
+      currentDigest: digest,
+      replaceString: digest,
+    };
+  }
+
+  if (newTag) {
+    if (!isString(newTag) || newTag.startsWith('sha256:')) {
+      return {
+        depName,
+        currentValue: newTag,
+        skipReason: 'invalid-value',
+      };
+    }
+
+    const dep = getDep(`${depName}:${newTag}`, false, aliases);
+    return {
+      ...dep,
+      replaceString: newTag,
+      autoReplaceStringTemplate:
+        '{{newValue}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+    };
+  }
+
+  if (image.newName) {
+    return {
+      ...nameDep,
+      replaceString: image.newName,
+    };
+  }
+
+  return null;
+}
+
+export function extractHelmChart(
+  helmChart: HelmChart,
+  aliases?: Record<string, string>,
+): PackageDependency | null {
+  if (!helmChart.name) {
+    return null;
+  }
+
+  if (isOCIRegistry(helmChart.repo)) {
+    const dep = getDep(
+      `${removeOCIPrefix(helmChart.repo)}/${helmChart.name}:${helmChart.version}`,
+      false,
+      aliases,
+    );
+    delete dep.replaceString;
+    return {
+      ...dep,
+      depName: helmChart.name,
+      // https://github.com/helm/helm/issues/10312
+      // https://github.com/helm/helm/issues/10678
+      pinDigests: false,
+    };
+  }
+
+  return {
+    depName: helmChart.name,
+    currentValue: helmChart.version,
+    registryUrls: [helmChart.repo],
+    datasource: HelmDatasource.id,
+  };
+}
+
+export function parseKustomize(
+  content: string,
+  packageFile?: string,
+): Kustomize | null {
+  let pkg: Kustomize | null = null;
+  try {
+    // TODO: use schema (#9610)
+    pkg = parseSingleYaml(content);
+  } catch /* istanbul ignore next */ {
+    logger.debug({ packageFile }, 'Error parsing kustomize file');
+    return null;
+  }
+
+  if (!pkg || isString(pkg)) {
+    return null;
+  }
+
+  pkg.kind ??= 'Kustomization';
+
+  if (!['Kustomization', 'Component'].includes(pkg.kind)) {
+    return null;
+  }
+
+  return pkg;
+}
+
+export function extractPackageFile(
+  content: string,
+  packageFile: string,
+  config: ExtractConfig,
+): PackageFileContent | null {
+  logger.trace(`kustomize.extractPackageFile(${packageFile})`);
+  const deps: PackageDependency[] = [];
+
+  const pkg = parseKustomize(content, packageFile);
+  if (!pkg) {
+    return null;
+  }
+
+  // grab the remote bases
+  for (const base of coerceArray(pkg.bases).filter(isString)) {
+    const dep = extractResource(base);
+    if (dep) {
+      deps.push({
+        ...dep,
+        depType: pkg.kind,
+      });
+    }
+  }
+
+  // grab the remote resources
+  for (const resource of coerceArray(pkg.resources).filter(isString)) {
+    const dep = extractResource(resource);
+    if (dep) {
+      deps.push({
+        ...dep,
+        depType: pkg.kind,
+      });
+    }
+  }
+
+  // grab the remote components
+  for (const component of coerceArray(pkg.components).filter(isString)) {
+    const dep = extractResource(component);
+    if (dep) {
+      deps.push({
+        ...dep,
+        depType: pkg.kind,
+      });
+    }
+  }
+
+  // grab the image tags
+  for (const image of coerceArray(pkg.images)) {
+    const dep = extractImage(image, config.registryAliases);
+    if (dep) {
+      deps.push({
+        ...dep,
+        depType: pkg.kind,
+      });
+    }
+  }
+
+  // grab the helm charts
+  for (const helmChart of coerceArray(pkg.helmCharts)) {
+    const dep = extractHelmChart(helmChart, config.registryAliases);
+    if (dep) {
+      deps.push({
+        ...dep,
+        depType: 'HelmChart',
+      });
+    }
+  }
+
+  if (!deps.length) {
+    return null;
+  }
+  return { deps };
+}

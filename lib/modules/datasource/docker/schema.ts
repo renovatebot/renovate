@@ -1,0 +1,234 @@
+import { z } from 'zod/v4';
+import { logger } from '../../../logger/index.ts';
+import {
+  DeepNullish,
+  Json,
+  LooseArray,
+  Nullish,
+} from '../../../util/schema-utils/index.ts';
+
+// OCI manifests
+
+/**
+ *  OCI manifest object
+ */
+export const ManifestObject = z.object({
+  schemaVersion: z.literal(2),
+  mediaType: Nullish(z.string()),
+});
+
+/**
+ * Oci descriptor
+ * https://github.com/opencontainers/image-spec/blob/main/descriptor.md
+ */
+export const Descriptor = z.object({
+  mediaType: z.string(),
+  digest: z.string(),
+  size: Nullish(z.number().int().gte(0)),
+  annotations: Nullish(z.record(z.string(), z.string())),
+});
+/**
+ * OCI platform properties
+ * https://github.com/opencontainers/image-spec/blob/main/image-index.md
+ */
+const OciPlatform = Nullish(
+  DeepNullish(
+    z.object({
+      architecture: z.string().optional(),
+    }),
+  ),
+);
+
+/**
+ * OCI Image Configuration.
+ *
+ * Compatible with old docker configiguration.
+ * https://github.com/opencontainers/image-spec/blob/main/config.md
+ */
+export const OciImageConfig = DeepNullish(
+  z.object({
+    // This is required by the spec, but probably not present in the wild.
+    architecture: z.string().optional(),
+    config: z
+      .object({ Labels: z.record(z.string(), z.string()).optional() })
+      .optional(),
+  }),
+);
+export type OciImageConfig = z.infer<typeof OciImageConfig>;
+
+/**
+ * OCI Helm Configuration
+ * https://helm.sh/docs/topics/charts/#the-chartyaml-file
+ */
+export const OciHelmConfig = DeepNullish(
+  z.object({
+    name: z.string(),
+    version: z.string(),
+    home: z.string().optional(),
+    sources: z.array(z.string()).optional(),
+  }),
+);
+export type OciHelmConfig = z.infer<typeof OciHelmConfig>;
+
+/**
+ * OCI Image Manifest
+ * The same structure as docker image manifest, but mediaType is not required and is not present in the wild.
+ * https://github.com/opencontainers/image-spec/blob/main/manifest.md
+ */
+export const OciImageManifest = ManifestObject.extend({
+  mediaType: z.literal('application/vnd.oci.image.manifest.v1+json'),
+  config: Descriptor.extend({
+    mediaType: z.enum([
+      'application/vnd.oci.image.config.v1+json',
+      'application/vnd.cncf.helm.config.v1+json',
+      'application/vnd.devcontainers',
+      'application/vnd.oci.empty.v1+json',
+      'application/vnd.cncf.flux.config.v1+json',
+    ]),
+  }),
+  annotations: Nullish(z.record(z.string(), z.string())),
+});
+export type OciImageManifest = z.infer<typeof OciImageManifest>;
+
+/**
+ * OCI Image List
+ * mediaType is not required.
+ * https://github.com/opencontainers/image-spec/blob/main/image-index.md
+ */
+export const OciImageIndexManifest = ManifestObject.extend({
+  mediaType: z.literal('application/vnd.oci.image.index.v1+json'),
+  manifests: LooseArray(
+    Descriptor.extend({
+      mediaType: z.enum([
+        'application/vnd.oci.image.manifest.v1+json',
+        'application/vnd.oci.image.index.v1+json',
+      ]),
+      platform: OciPlatform,
+    }),
+  ),
+  annotations: Nullish(z.record(z.string(), z.string())),
+});
+
+// Old Docker manifests
+
+/**
+ * Image Manifest
+ * https://docs.docker.com/registry/spec/manifest-v2-2/#image-manifest
+ */
+export const DistributionManifest = ManifestObject.extend({
+  mediaType: z.literal('application/vnd.docker.distribution.manifest.v2+json'),
+  config: Descriptor.extend({
+    mediaType: z.literal('application/vnd.docker.container.image.v1+json'),
+  }),
+});
+export type DistributionManifest = z.infer<typeof DistributionManifest>;
+
+/**
+ * Manifest List
+ * https://docs.docker.com/registry/spec/manifest-v2-2/#manifest-list
+ */
+export const DistributionListManifest = ManifestObject.extend({
+  mediaType: z.literal(
+    'application/vnd.docker.distribution.manifest.list.v2+json',
+  ),
+  manifests: z.array(
+    Descriptor.extend({
+      mediaType: z.literal(
+        'application/vnd.docker.distribution.manifest.v2+json',
+      ),
+      platform: OciPlatform,
+    }),
+  ),
+});
+
+// Combined manifests
+export const Manifest = ManifestObject.passthrough()
+  .transform((value, ctx) => {
+    if (value.mediaType === undefined) {
+      if ('config' in value) {
+        value.mediaType = 'application/vnd.oci.image.manifest.v1+json';
+      } else if ('manifests' in value) {
+        value.mediaType = 'application/vnd.oci.image.index.v1+json';
+      } else {
+        ctx.addIssue({
+          code: 'custom',
+          message: 'Invalid manifest, missing mediaType.',
+        });
+        return z.NEVER;
+      }
+    }
+    return value;
+  })
+  .pipe(
+    z.discriminatedUnion('mediaType', [
+      DistributionManifest,
+      DistributionListManifest,
+      OciImageManifest,
+      OciImageIndexManifest,
+    ]),
+  );
+
+export type Manifest = z.infer<typeof Manifest>;
+export const ManifestJson = Json.pipe(Manifest);
+
+export const DockerHubTagImage = z.object({
+  architecture: z.string().nullable().catch(null),
+  digest: z.string().nullable().catch(null),
+});
+export type DockerHubTagImage = z.infer<typeof DockerHubTagImage>;
+
+export const DockerHubTag = z.object({
+  id: z.number(),
+  last_updated: z.string().datetime(),
+  name: z.string(),
+  tag_last_pushed: z.string().datetime().nullable().catch(null),
+  digest: z.string().nullable().catch(null),
+  images: z.array(DockerHubTagImage).catch([]),
+});
+export type DockerHubTag = z.infer<typeof DockerHubTag>;
+
+export const DockerHubTagsPage = z.object({
+  count: z.number(),
+  next: z.string().nullable().catch(null),
+  results: LooseArray(DockerHubTag, {
+    /* v8 ignore next -- TODO: add test */
+    onError: ({ error }) => {
+      logger.debug(
+        { error },
+        'Docker: Failed to parse some tags from Docker Hub',
+      );
+    },
+  }),
+});
+
+/**
+ * Docker registry auth token response.
+ * https://distribution.github.io/distribution/spec/auth/token/
+ */
+export const RegistryAuthToken = z.object({
+  token: z.string().optional(),
+  access_token: z.string().optional(),
+});
+export type RegistryAuthToken = z.infer<typeof RegistryAuthToken>;
+
+/**
+ * Docker registry tags list response.
+ * https://distribution.github.io/distribution/spec/api/#listing-image-tags
+ */
+export const RegistryTagsList = z.object({
+  tags: z.array(z.string()),
+});
+export type RegistryTagsList = z.infer<typeof RegistryTagsList>;
+
+/**
+ * Quay registry tags list response (Quay v1 API).
+ */
+export const QuayTagsResponse = z.object({
+  tags: LooseArray(
+    z.object({
+      name: z.string(),
+    }),
+  ),
+  has_additional: z.boolean().default(false),
+});
+export type QuayTagsResponse = z.infer<typeof QuayTagsResponse>;

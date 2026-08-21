@@ -1,0 +1,44 @@
+import { isString } from '@sindresorhus/is';
+import { AbstractMigration } from '../base/abstract-migration.ts';
+
+export class UnpublishSafeMigration extends AbstractMigration {
+  private static readonly SUPPORTED_VALUES = [
+    ':unpublishSafe',
+    'default:unpublishSafe',
+    'npm:unpublishSafe',
+    'security:minimumReleaseAgeNpm',
+  ];
+
+  override readonly deprecated = true;
+  override readonly propertyName = 'unpublishSafe';
+
+  override run(value: unknown): void {
+    const extendsValue = this.get('extends');
+    const newExtendsValue = Array.isArray(extendsValue) ? extendsValue : [];
+
+    if (value === true) {
+      if (isString(extendsValue)) {
+        newExtendsValue.push(extendsValue);
+      }
+
+      if (newExtendsValue.every((item) => !this.isSupportedValue(item))) {
+        newExtendsValue.push('security:minimumReleaseAgeNpm');
+      }
+
+      this.setHard(
+        'extends',
+        newExtendsValue.map((item) => {
+          if (this.isSupportedValue(item)) {
+            return 'security:minimumReleaseAgeNpm';
+          }
+
+          return item;
+        }),
+      );
+    }
+  }
+
+  private isSupportedValue(value: string): boolean {
+    return UnpublishSafeMigration.SUPPORTED_VALUES.includes(value);
+  }
+}

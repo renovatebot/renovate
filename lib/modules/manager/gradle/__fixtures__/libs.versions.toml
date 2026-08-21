@@ -1,0 +1,22 @@
+[versions]
+detekt = "1.17.0"
+kotest = { require = "4.6.0" }
+publish-on-central = "0.5.0"
+
+[libraries]
+detekt-formatting = { module = "io.gitlab.arturbosch.detekt:detekt-formatting", version.ref = "detekt" }
+kotest-assertions-core-jvm = { module = "io.kotest:kotest-assertions-core-jvm", version.ref = "kotest" }
+kotest-runner-junit5 = { module = "io.kotest:kotest-runner-junit5", version.ref = "kotest" }
+mockito = { group = "org.mockito", name = "mockito-core", version = "3.10.0" }
+japicmp = { module = "com.github.siom79.japicmp:japicmp", version.require = "0.15.+" }
+guava = { module = "com.google.guava:guava", version.require = "30.1.1-jre", version.prefer = "31.1-jre" }
+gson = { group = "com.google.code.gson", name = "gson", version = { reject = [ "2.8.7" ]}}
+
+[bundles]
+kotest = [ "kotest-runner-junit5", "kotest-assertions-core-jvm" ]
+
+[plugins]
+detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
+publish-on-central = { id = "org.danilopianini.publish-on-central", version.ref = "publish_on.central" }
+grgit = { id = "org.ajoberstar.grgit", version.unknown = "this will fail" }
+grgit2 = { id = "org.ajoberstar.grgit2", version.ref = "unknown-ref" }

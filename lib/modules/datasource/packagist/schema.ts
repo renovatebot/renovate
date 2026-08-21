@@ -1,0 +1,272 @@
+import { isString, isUndefined } from '@sindresorhus/is';
+import { z } from 'zod/v4';
+import { logger } from '../../../logger/index.ts';
+import { regEx } from '../../../util/regex.ts';
+import {
+  LooseArray,
+  LooseRecord,
+  Nullish,
+} from '../../../util/schema-utils/index.ts';
+import { MaybeTimestamp } from '../../../util/timestamp.ts';
+import type { Release, ReleaseResult } from '../types.ts';
+
+export const MinifiedArray = z
+  .array(z.record(z.string(), z.unknown()))
+  .transform((xs) => {
+    // Ported from: https://github.com/composer/metadata-minifier/blob/main/src/MetadataMinifier.php#L17
+    if (xs.length === 0) {
+      return xs;
+    }
+
+    const prevVals: Record<string, unknown> = {};
+    for (const x of xs) {
+      for (const key of Object.keys(x)) {
+        prevVals[key] ??= undefined;
+      }
+
+      for (const key of Object.keys(prevVals)) {
+        const val = x[key];
+        if (val === '__unset') {
+          delete x[key];
+          prevVals[key] = undefined;
+          continue;
+        }
+
+        if (!isUndefined(val)) {
+          prevVals[key] = val;
+          continue;
+        }
+
+        if (!isUndefined(prevVals[key])) {
+          x[key] = prevVals[key];
+          continue;
+        }
+      }
+    }
+
+    return xs;
+  });
+export type MinifiedArray = z.infer<typeof MinifiedArray>;
+
+export const ComposerRelease = z.object({
+  version: z.union([z.string(), z.number().transform((v) => v.toString())]),
+  homepage: z.string().nullable().catch(null),
+  source: z.object({ url: z.string() }).nullable().catch(null),
+  time: MaybeTimestamp,
+  ['published-time']: Nullish(MaybeTimestamp),
+  require: z.object({ php: z.string() }).nullable().catch(null),
+  abandoned: z.union([z.string(), z.boolean()]).optional().catch(undefined),
+});
+export type ComposerRelease = z.infer<typeof ComposerRelease>;
+
+export const ComposerReleases = z
+  .union([
+    MinifiedArray.pipe(LooseArray(ComposerRelease)),
+    LooseRecord(ComposerRelease).transform((map) => Object.values(map)),
+  ])
+  .catch([]);
+export type ComposerReleases = z.infer<typeof ComposerReleases>;
+
+export const ComposerPackagesResponse = z
+  .object({
+    packageName: z.string(),
+    packagesResponse: z.object({
+      packages: z.record(z.string(), z.unknown()),
+    }),
+  })
+  .transform(
+    ({ packageName, packagesResponse }) =>
+      packagesResponse.packages[packageName],
+  )
+  .transform((xs) => ComposerReleases.parse(xs));
+export type ComposerPackagesResponse = z.infer<typeof ComposerPackagesResponse>;
+
+export function parsePackagesResponse(
+  packageName: string,
+  packagesResponse: unknown,
+): ComposerReleases {
+  try {
+    return ComposerPackagesResponse.parse({ packageName, packagesResponse });
+  } catch (err) {
+    logger.debug(
+      { packageName, err },
+      `Error parsing packagist response for ${packageName}`,
+    );
+    return [];
+  }
+}
+
+export function extractReleaseResult(
+  ...composerReleasesArrays: ComposerReleases[]
+): ReleaseResult | null {
+  const releases: Release[] = [];
+  let homepage: string | null | undefined;
+  let sourceUrl: string | null | undefined;
+  let deprecationMessage: string | undefined;
+
+  for (const composerReleasesArray of composerReleasesArrays) {
+    for (const composerRelease of composerReleasesArray) {
+      const version = composerRelease.version.replace(regEx(/^v/), '');
+      const gitRef = composerRelease.version;
+
+      const dep: Release = { version, gitRef };
+
+      // Packagist's `published-time` reflects when the version was actually published to the registry;
+      // prefer it over `time` (the git tag's `releasedAt`, which could be when the commit that the tag points at was pushed, not the time the release itself was made public to the world), falling back when absent.
+      const releaseTimestamp =
+        composerRelease['published-time'] ?? composerRelease.time;
+      if (releaseTimestamp) {
+        dep.releaseTimestamp = releaseTimestamp;
+      }
+
+      if (composerRelease.require?.php) {
+        dep.constraints = { php: [composerRelease.require.php] };
+      }
+
+      if (composerRelease.abandoned) {
+        dep.isDeprecated = true;
+        deprecationMessage ??= getAbandonedMessage(composerRelease.abandoned);
+        // TODO #44060 when `abandoned` is a package name, emit replacementName/replacementVersion to open a replacement PR
+      }
+
+      releases.push(dep);
+
+      if (!homepage && composerRelease.homepage) {
+        homepage = composerRelease.homepage;
+      }
+
+      if (!sourceUrl && composerRelease.source?.url) {
+        sourceUrl = composerRelease.source.url;
+      }
+    }
+  }
+
+  if (releases.length === 0) {
+    return null;
+  }
+
+  const result: ReleaseResult = { releases };
+
+  if (homepage) {
+    result.homepage = homepage;
+  }
+
+  if (sourceUrl) {
+    result.sourceUrl = sourceUrl;
+  }
+
+  if (deprecationMessage) {
+    result.deprecationMessage = deprecationMessage;
+  }
+
+  return result;
+}
+
+function getAbandonedMessage(abandoned: string | boolean): string {
+  const message = 'This package is abandoned and no longer maintained.';
+  if (isString(abandoned)) {
+    return `${message} The author suggests using the \`${abandoned}\` package instead.`;
+  }
+  return message;
+}
+
+export function extractDepReleases(
+  composerReleases: unknown,
+): ReleaseResult | null {
+  const parsedReleases = ComposerReleases.parse(composerReleases);
+  return extractReleaseResult(parsedReleases);
+}
+
+export function parsePackagesResponses(
+  packageName: string,
+  packagesResponses: unknown[],
+): ReleaseResult | null {
+  const releaseArrays = packagesResponses.map((pkgResp) =>
+    parsePackagesResponse(packageName, pkgResp),
+  );
+  return extractReleaseResult(...releaseArrays);
+}
+
+export const HashSpec = z.union([
+  z
+    .object({ sha256: z.string().nullable() })
+    .transform(({ sha256 }) => ({ hash: sha256 })),
+  z
+    .object({ sha1: z.string().nullable() })
+    .transform(({ sha1 }) => ({ hash: sha1 })),
+]);
+export type HashSpec = z.infer<typeof HashSpec>;
+
+export const RegistryFile = z.intersection(
+  HashSpec,
+  z.object({ key: z.string() }),
+);
+export type RegistryFile = z.infer<typeof RegistryFile>;
+
+export const PackagesResponse = z.object({
+  packages: LooseRecord(ComposerReleases).catch({}),
+});
+export type PackagesResponse = z.infer<typeof PackagesResponse>;
+
+export const PackagistFile = PackagesResponse.merge(
+  z.object({
+    providers: LooseRecord(HashSpec)
+      .transform((x) =>
+        Object.fromEntries(
+          Object.entries(x).map(([key, { hash }]) => [key, hash]),
+        ),
+      )
+      .catch({}),
+  }),
+);
+export type PackagistFile = z.infer<typeof PackagistFile>;
+
+export const RegistryMeta = z
+  .record(z.string(), z.unknown())
+  .catch({})
+  .pipe(
+    PackagistFile.merge(
+      z.object({
+        ['includes']: LooseRecord(HashSpec)
+          .transform((x) =>
+            Object.entries(x).map(([name, { hash }]) => ({ key: name, hash })),
+          )
+          .catch([]),
+        ['provider-includes']: LooseRecord(HashSpec)
+          .transform((x) =>
+            Object.entries(x).map(([key, { hash }]) => ({ key, hash })),
+          )
+          .catch([]),
+        ['providers-lazy-url']: z.string().nullable().catch(null),
+        ['providers-url']: z.string().nullable().catch(null),
+        ['metadata-url']: z.string().nullable().catch(null),
+        ['available-packages']: z.array(z.string()).nullable().catch(null),
+      }),
+    ),
+  )
+  .transform(
+    ({
+      ['includes']: includesFiles,
+      ['packages']: packages,
+      ['provider-includes']: files,
+      ['providers']: providerPackages,
+      ['providers-lazy-url']: providersLazyUrl,
+      ['providers-url']: providersUrl,
+      ['metadata-url']: metadataUrl,
+      ['available-packages']: availablePackages,
+    }) => {
+      const includesPackages: Record<string, ReleaseResult | null> = {};
+      return {
+        packages,
+        includesFiles,
+        providerPackages,
+        files,
+        providersUrl,
+        providersLazyUrl,
+        metadataUrl,
+        includesPackages,
+        availablePackages,
+      };
+    },
+  );
+export type RegistryMeta = z.infer<typeof RegistryMeta>;

@@ -1,0 +1,137 @@
+import { isNonEmptyString } from '@sindresorhus/is';
+import { Graph, hasCycle } from 'graph-data-structure';
+import upath from 'upath';
+import { logger } from '../../../logger/index.ts';
+import {
+  getMatchingFiles,
+  resolveRelativePathToRoot,
+} from '../../../util/fs/util.ts';
+import { scm } from '../../platform/scm.ts';
+import type { ProjectFile } from './types.ts';
+import { readFileAsXmlDocument } from './util.ts';
+
+export const GLOBAL_JSON = 'global.json';
+export const NUGET_CENTRAL_FILE = 'Directory.Packages.props';
+export const MSBUILD_CENTRAL_FILE = 'Packages.props';
+export const DIRECTORY_BUILD_PROPS = 'Directory.Build.props';
+
+/**
+ * Get all leaf package files of ancestry that depend on packageFileName.
+ */
+export async function getDependentPackageFiles(
+  packageFileName: string,
+  isPropsFile = false,
+  isGlobalJson = false,
+): Promise<ProjectFile[]> {
+  const packageFiles = await getAllPackageFiles();
+  const graph = new Graph();
+
+  if (isPropsFile) {
+    graph.addNode(packageFileName);
+  }
+
+  if (isGlobalJson) {
+    graph.addNode(GLOBAL_JSON);
+  }
+
+  const parentDir =
+    packageFileName === NUGET_CENTRAL_FILE ||
+    packageFileName === MSBUILD_CENTRAL_FILE ||
+    packageFileName === GLOBAL_JSON ||
+    packageFileName === DIRECTORY_BUILD_PROPS
+      ? ''
+      : upath.dirname(packageFileName);
+
+  for (const f of packageFiles) {
+    graph.addNode(f);
+
+    if (
+      (isPropsFile || isGlobalJson) &&
+      upath.dirname(f).startsWith(parentDir)
+    ) {
+      graph.addEdge(packageFileName, f);
+    }
+  }
+
+  for (const f of packageFiles) {
+    const doc = await readFileAsXmlDocument(f);
+    if (!doc) {
+      continue;
+    }
+
+    const projectReferenceAttributes = doc
+      .childrenNamed('ItemGroup')
+      .map((ig) => ig.childrenNamed('ProjectReference'))
+      .flat()
+      .map((pf) => pf.attr.Include)
+      .filter(isNonEmptyString);
+
+    const projectReferences = projectReferenceAttributes.map((a) =>
+      upath.normalize(a),
+    );
+    const normalizedRelativeProjectReferences = projectReferences.map((r) =>
+      resolveRelativePathToRoot(f, r),
+    );
+
+    for (const ref of normalizedRelativeProjectReferences) {
+      graph.addEdge(ref, f);
+    }
+
+    if (hasCycle(graph)) {
+      throw new Error('Circular reference detected in NuGet package files');
+    }
+  }
+
+  const deps = new Map<string, boolean>();
+  recursivelyGetDependentPackageFiles(packageFileName, graph, deps);
+
+  if (isPropsFile || isGlobalJson) {
+    // remove props file, as we don't need it
+    deps.delete(packageFileName);
+  }
+
+  // deduplicate
+  return Array.from(deps).map(([name, isLeaf]) => ({ name, isLeaf }));
+}
+
+/**
+ * Traverse graph and find dependent package files at any level of ancestry
+ */
+function recursivelyGetDependentPackageFiles(
+  packageFileName: string,
+  graph: Graph,
+  deps: Map<string, boolean>,
+): void {
+  if (deps.has(packageFileName)) {
+    // we have already visited this package file
+    return;
+  }
+
+  const dependents = graph.adjacent(packageFileName);
+
+  if (!dependents || dependents.size === 0) {
+    deps.set(packageFileName, true);
+    return;
+  }
+
+  deps.set(packageFileName, false);
+
+  for (const dep of dependents) {
+    recursivelyGetDependentPackageFiles(dep, graph, deps);
+  }
+}
+
+/**
+ * Get a list of package files in localDir
+ */
+async function getAllPackageFiles(): Promise<string[]> {
+  const allFiles = await scm.getFileList();
+  const filteredPackageFiles = getMatchingFiles(
+    '**/*.{cs,vb,fs}proj',
+    allFiles,
+  );
+
+  logger.trace({ filteredPackageFiles }, 'Found package files');
+
+  return filteredPackageFiles;
+}

@@ -1,0 +1,249 @@
+import { TimeoutError } from 'got';
+import { z } from 'zod/v4';
+import { ExecError } from '../util/exec/exec-error.ts';
+import prepareError, { prepareZodIssues, sanitizeValue } from './utils.ts';
+
+describe('logger/utils', () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it.each`
+    input                                                                 | output
+    ${' https://somepw@domain.com/gitlab/org/repo?go-get'}                | ${' https://**redacted**@domain.com/gitlab/org/repo?go-get'}
+    ${'https://someuser:somepw@domain.com'}                               | ${'https://**redacted**@domain.com'}
+    ${'https://someuser:pass%word_with-speci(a)l&chars@domain.com'}       | ${'https://**redacted**@domain.com'}
+    ${'https://someuser:@domain.com'}                                     | ${'https://**redacted**@domain.com'}
+    ${'redis://:somepw@172.32.11.71:6379/0'}                              | ${'redis://**redacted**@172.32.11.71:6379/0'}
+    ${'some text with\r\n url: https://somepw@domain.com\nand some more'} | ${'some text with\r\n url: https://**redacted**@domain.com\nand some more'}
+    ${'[git://domain.com](git://pw@domain.com)'}                          | ${'[git://domain.com](git://**redacted**@domain.com)'}
+    ${'data:text/vnd-example;foo=bar;base64,R0lGODdh'}                    | ${'data:text/vnd-example;**redacted**'}
+    ${'user@domain.com'}                                                  | ${'user@domain.com'}
+  `('sanitizeValue("$input") == "$output"', ({ input, output }) => {
+    expect(sanitizeValue(input)).toBe(output);
+  });
+
+  it('sanitizes boxed String objects as strings', () => {
+    const input = {
+      commands: [
+        'clone',
+        new String('https://token@domain.com/repo.git'),
+        new String('.'),
+      ],
+    };
+    expect(sanitizeValue(input)).toEqual({
+      commands: ['clone', 'https://**redacted**@domain.com/repo.git', '.'],
+    });
+  });
+
+  it('preserves secret template strings in redacted fields', () => {
+    const input = {
+      normal: 'value',
+      token: '{{ secrets.MY_SECRET }}',
+      password: '{{secrets.ANOTHER_SECRET}}',
+      content: '{{ secrets.CONTENT_SECRET }}',
+      npmToken: '{{ secrets.NPM_TOKEN }}',
+      forkToken: 'some-token',
+      nested: {
+        authorization: '{{ secrets.NESTED_SECRET }}',
+        password: 'some-password',
+      },
+    };
+    const expected = {
+      normal: 'value',
+      token: '{{ secrets.MY_SECRET }}',
+      password: '{{secrets.ANOTHER_SECRET}}',
+      content: '[content]',
+      npmToken: '{{ secrets.NPM_TOKEN }}',
+      forkToken: '***********',
+      nested: {
+        authorization: '{{ secrets.NESTED_SECRET }}',
+        password: '***********',
+      },
+    };
+    expect(sanitizeValue(input)).toEqual(expected);
+  });
+
+  describe('prepareError', () => {
+    function getError<T extends z.ZodType>(
+      schema: T,
+      input: unknown,
+    ): z.ZodError | null {
+      try {
+        schema.parse(input);
+      } catch (error) {
+        if (error instanceof z.ZodError) {
+          return error;
+        }
+      }
+      throw new Error('Expected error');
+    }
+
+    function prepareIssues<T extends z.ZodType>(
+      schema: T,
+      input: unknown,
+    ): unknown {
+      const error = getError(schema, input);
+      return error ? prepareZodIssues(error.format()) : null;
+    }
+
+    it('prepareZodIssues', () => {
+      expect(prepareZodIssues(null)).toBe(null);
+      expect(prepareZodIssues({ _errors: ['a', 'b'] })).toEqual(['a', 'b']);
+
+      expect(prepareIssues(z.string(), 42)).toBe(
+        'Invalid input: expected string, received number',
+      );
+
+      expect(prepareIssues(z.string().array(), 42)).toBe(
+        'Invalid input: expected array, received number',
+      );
+
+      expect(
+        prepareIssues(z.string().array(), ['foo', 'bar', 42, 42, 42, 42, 42]),
+      ).toEqual({
+        '2': 'Invalid input: expected string, received number',
+        '3': 'Invalid input: expected string, received number',
+        '4': 'Invalid input: expected string, received number',
+        ___: '... 2 more',
+      });
+
+      expect(
+        prepareIssues(z.record(z.string(), z.string()), {
+          foo: 'foo',
+          bar: 'bar',
+          key1: 42,
+          key2: 42,
+          key3: 42,
+          key4: 42,
+          key5: 42,
+        }),
+      ).toEqual({
+        key1: 'Invalid input: expected string, received number',
+        key2: 'Invalid input: expected string, received number',
+        key3: 'Invalid input: expected string, received number',
+        ___: '... 2 more',
+      });
+
+      expect(
+        prepareIssues(
+          z.object({
+            foo: z.object({
+              bar: z.string(),
+            }),
+          }),
+          { foo: { bar: [], baz: 42 } },
+        ),
+      ).toEqual({
+        foo: {
+          bar: 'Invalid input: expected string, received array',
+        },
+      });
+
+      expect(
+        prepareIssues(
+          z.discriminatedUnion('type', [
+            z.object({ type: z.literal('foo') }),
+            z.object({ type: z.literal('bar') }),
+          ]),
+          { type: 'baz' },
+        ),
+      ).toEqual({
+        type: "Invalid discriminator value. Expected 'foo' | 'bar'",
+      });
+
+      expect(
+        prepareIssues(
+          z.discriminatedUnion('type', [
+            z.object({ type: z.literal('foo') }),
+            z.object({ type: z.literal('bar') }),
+          ]),
+          {},
+        ),
+      ).toEqual({
+        type: "Invalid discriminator value. Expected 'foo' | 'bar'",
+      });
+
+      expect(
+        prepareIssues(
+          z.discriminatedUnion('type', [
+            z.object({ type: z.literal('foo') }),
+            z.object({ type: z.literal('bar') }),
+          ]),
+          42,
+        ),
+      ).toBe('Invalid input: expected object, received number');
+    });
+
+    it('prepareError', () => {
+      const err = getError(
+        z.object({
+          foo: z.object({
+            bar: z.object({
+              baz: z.string(),
+            }),
+          }),
+        }),
+        { foo: { bar: { baz: 42 } } },
+      );
+
+      expect(prepareError(err!)).toEqual({
+        issues: {
+          foo: {
+            bar: {
+              baz: 'Invalid input: expected string, received number',
+            },
+          },
+        },
+        message: 'Schema error',
+        stack: expect.stringMatching(/^ZodError: Schema error/),
+      });
+    });
+
+    it('handles HTTP timout error', () => {
+      const err = new TimeoutError(
+        // @ts-expect-error some types are private
+        new Error('timeout'),
+        {},
+        { context: { hostType: 'foo' } },
+      );
+      Object.assign(err, {
+        response: {},
+      });
+      expect(prepareError(err)).toMatchObject({
+        message: 'timeout',
+        name: 'TimeoutError',
+      });
+    });
+
+    it('handles rawExec error', () => {
+      const execError = new ExecError('exec-error', {
+        cmd: '',
+        stdout: '',
+        stderr: '',
+        options: { env: { key: 'val' } },
+      });
+
+      expect(prepareError(execError)).toMatchObject({
+        options: { env: ['key'] },
+      });
+    });
+
+    it('handles AggregateError', () => {
+      const err = new Error('err');
+      err.stack = 'err stack';
+      const aggregateErr = new AggregateError([err], 'aggregate');
+      aggregateErr.stack = 'aggregate stack';
+      expect(prepareError(aggregateErr)).toMatchObject({
+        message: 'aggregate',
+        stack: 'aggregate stack',
+        errors: [
+          {
+            message: 'err',
+            stack: 'err stack',
+          },
+        ],
+      });
+    });
+  });
+});

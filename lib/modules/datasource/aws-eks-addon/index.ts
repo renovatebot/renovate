@@ -1,0 +1,90 @@
+import { DescribeAddonVersionsCommand, EKSClient } from '@aws-sdk/client-eks';
+import { fromNodeProviderChain } from '@aws-sdk/credential-providers';
+import { isTruthy } from '@sindresorhus/is';
+import { logger } from '../../../logger/index.ts';
+import { coerceArray } from '../../../util/array.ts';
+import { withCache } from '../../../util/cache/package/with-cache.ts';
+import * as awsEksAddonVersioning from '../../versioning/aws-eks-addon/index.ts';
+import { Datasource } from '../datasource.ts';
+import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
+import { EksAddonsFilter } from './schema.ts';
+
+export class AwsEKSAddonDataSource extends Datasource {
+  static readonly id = 'aws-eks-addon';
+
+  override readonly defaultVersioning = awsEksAddonVersioning.id;
+  override readonly caching = true;
+  private readonly clients: Record<string, EKSClient> = {};
+
+  constructor() {
+    super(AwsEKSAddonDataSource.id);
+  }
+
+  private async _getReleases({
+    packageName: serializedFilter,
+  }: GetReleasesConfig): Promise<ReleaseResult | null> {
+    const res = EksAddonsFilter.safeParse(serializedFilter);
+    if (!res.success) {
+      logger.warn(
+        { err: res.error, serializedFilter },
+        'Error parsing eks-addons config.',
+      );
+      return null;
+    }
+
+    const filter = res.data;
+
+    const cmd = new DescribeAddonVersionsCommand({
+      kubernetesVersion: filter.kubernetesVersion,
+      addonName: filter.addonName,
+      maxResults: 1,
+    });
+    const response = await this.getClient(filter).send(cmd);
+    const addons = coerceArray(response.addons);
+    return {
+      releases: addons
+        .flatMap((addon) => {
+          return addon.addonVersions;
+        })
+        .filter(isTruthy)
+        .map((versionInfo) => ({
+          version: versionInfo.addonVersion ?? '',
+          default:
+            versionInfo.compatibilities?.some((comp) => comp.defaultVersion) ??
+            false,
+          compatibleWith: versionInfo.compatibilities?.flatMap(
+            (comp) => comp.clusterVersion,
+          ),
+        }))
+        .filter((release) => release.version && release.version !== '')
+        .filter((release) => {
+          if (filter.default) {
+            return release.default && release.default === filter.default;
+          }
+          return true;
+        }),
+    };
+  }
+
+  getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+    return withCache(
+      {
+        namespace: `datasource-${AwsEKSAddonDataSource.id}`,
+        key: `getReleases:${config.packageName}`,
+        fallback: true,
+      },
+      () => this._getReleases(config),
+    );
+  }
+
+  private getClient({ region, profile }: EksAddonsFilter): EKSClient {
+    const cacheKey = `${region ?? 'default'}#${profile ?? 'default'}`;
+    if (!(cacheKey in this.clients)) {
+      this.clients[cacheKey] = new EKSClient({
+        ...(region && { region }),
+        credentials: fromNodeProviderChain(profile ? { profile } : undefined),
+      });
+    }
+    return this.clients[cacheKey];
+  }
+}

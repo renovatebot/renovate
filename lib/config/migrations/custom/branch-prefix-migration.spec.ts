@@ -1,0 +1,39 @@
+import { BranchPrefixMigration } from './branch-prefix-migration.ts';
+
+describe('config/migrations/custom/branch-prefix-migration', () => {
+  it('should migrate template', async () => {
+    await expect(BranchPrefixMigration).toMigrate(
+      {
+        branchPrefix: 'renovate/{{parentDir}}-',
+      },
+      {
+        additionalBranchPrefix: '{{parentDir}}-',
+        branchPrefix: 'renovate/',
+      },
+    );
+  });
+
+  it('should ignore string without template', async () => {
+    await expect(BranchPrefixMigration).toMigrate(
+      {
+        branchPrefix: 'test',
+      },
+      {
+        branchPrefix: 'test',
+      },
+      false,
+    );
+  });
+
+  it('should ignore non string without template', async () => {
+    await expect(BranchPrefixMigration).toMigrate(
+      {
+        branchPrefix: true,
+      },
+      {
+        branchPrefix: true,
+      },
+      false,
+    );
+  });
+});

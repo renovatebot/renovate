@@ -1,0 +1,131 @@
+# This is the composite action:
+#   https://docs.github.com/en/actions/creating-actions/creating-a-composite-action
+#
+# Composite actions have some limitations:
+#   - many contexts are unavailable, e.g. `runner`
+#   - `env` can be specified per-step only
+#   - if `run` is used, `shell` must be explicitly specified
+name: 'Setup Node and install dependencies'
+description: 'Setup Node and install dependencies using cache'
+inputs:
+  node-version:
+    description: 'Node version'
+    required: true
+  os:
+    description: 'Composite actions do not support `runner.os`, so it must be passed in as an input'
+    required: true
+  save-cache:
+    description: 'Save cache when needed'
+    required: false
+    default: 'false'
+  use-cache:
+    description: >-
+      Set to `false` to skip restoring the `node_modules` and pnpm store caches, forcing a fresh `pnpm install --frozen-lockfile`. Use this in
+      privileged jobs (e.g. release), so that they never execute cache contents.
+    required: false
+    default: 'true'
+runs:
+  using: 'composite'
+  steps:
+    # Per #41288 and #41289, make sure that we fail if the values are provided as an empty string
+    - name: Make sure that required parameters aren't an empty string
+      shell: bash
+      run: |
+        error=0
+        if [[ -z "${{ inputs.node-version }}" ]]; then
+          >&2 echo 'Error: `node-version` is a required argument, but it was empty'
+          error=1
+        fi
+
+        if [[ -z "${{ inputs.os }}" ]]; then
+          >&2 echo 'Error: `os` is a required argument, but it was empty'
+          error=1
+        fi
+
+        if [[ $error -ne 0 ]]; then
+          exit 1
+        fi
+
+    - name: Calculate `CACHE_KEY`
+      shell: bash
+      run: |
+        echo 'CACHE_KEY=node_modules-${{
+          inputs.os
+        }}-${{
+          inputs.node-version
+        }}-${{
+          hashFiles('pnpm-lock.yaml', 'package.json')
+        }}' >> "$GITHUB_ENV"
+
+    - name: Restore `node_modules`
+      id: node-modules-restore
+      if: inputs.use-cache == 'true'
+      uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      with:
+        path: node_modules
+        key: ${{ env.CACHE_KEY }}
+        enableCrossOsArchive: true
+
+    - name: Calculate `CACHE_HIT`
+      shell: bash
+      run: |
+        echo 'CACHE_HIT=${{
+          (steps.node-modules-restore.outputs.cache-hit == 'true') && 'true' || ''
+        }}' >> "$GITHUB_ENV"
+
+    - name: Setup pnpm
+      uses: pnpm/setup@84cb39b217b10273981911c288cd62326dc7c6d2 # v2.0.2
+      with:
+        install: false
+        runtime: node@${{ inputs.node-version }}
+
+    - name: Calculate `PNPM_STORE`
+      shell: bash
+      run: |
+        echo "PNPM_STORE=$(pnpm store path)" >> "$GITHUB_ENV"
+
+    - name: Cache and restore `pnpm store`
+      if: inputs.use-cache == 'true' && env.CACHE_HIT != 'true'
+      uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      with:
+        path: ${{ env.PNPM_STORE }}
+        key: |
+          pnpm_store-${{
+          inputs.os
+          }}-${{
+            inputs.node-version
+          }}-${{
+            hashFiles('pnpm-lock.yaml', 'package.json')
+          }}
+        enableCrossOsArchive: true
+
+    - name: Install dependencies
+      uses: nick-fields/retry@ad984534de44a9489a53aefd81eb77f87c70dc60 # v4.0.0
+      if: env.CACHE_HIT != 'true'
+      with:
+        timeout_minutes: 10
+        max_attempts: 3
+        command: pnpm install --frozen-lockfile
+
+    - name: Write `node_modules` cache
+      if: inputs.save-cache == 'true' && env.CACHE_HIT != 'true'
+      uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      with:
+        path: node_modules
+        key: ${{ env.CACHE_KEY }}
+        enableCrossOsArchive: true
+
+    - name: Generate files
+      shell: bash
+      run: >
+        if [[ -d lib ]]; then
+          pnpm prepare:generate;
+        fi
+
+    - name: Git config
+      shell: bash
+      run: |
+        git config --global core.autocrlf false
+        git config --global core.symlinks true
+        git config --global user.email 'renovate@whitesourcesoftware.com'
+        git config --global user.name  'Renovate Bot'

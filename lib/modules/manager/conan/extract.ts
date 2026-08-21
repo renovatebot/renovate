@@ -1,0 +1,83 @@
+import { isNonEmptyString } from '@sindresorhus/is';
+import { regEx } from '../../../util/regex.ts';
+import type { PackageDependency, PackageFileContent } from '../types.ts';
+import { isComment } from './common.ts';
+
+const regex = regEx(
+  `(?:^|["'])(?<name>[-\\w]+)/(?<version>[^@#\n{*"']+)(?<userChannel>@[-\\w]+(?:/[^#\n.{*"' ]+|))?#?(?<revision>[-_a-f0-9]+[^\n{*"'])?`,
+);
+
+function setDepType(content: string, originalType: string): string {
+  let depType = originalType;
+  if (content.includes('python_requires')) {
+    depType = 'python_requires';
+  } else if (content.includes('build_require')) {
+    depType = 'build_requires';
+  } else if (content.includes('requires')) {
+    depType = 'requires';
+  }
+  return depType;
+}
+
+export function extractPackageFile(content: string): PackageFileContent | null {
+  // only process sections where requirements are defined
+  const sections = content.split(regEx(/def |\n\[/)).filter(
+    (part) =>
+      part.includes('python_requires') || // only matches python_requires
+      part.includes('build_require') || // matches [build_requires], build_requirements(), and build_requires
+      part.includes('require'), // matches [requires], requirements(), and requires
+  );
+
+  const deps: PackageDependency[] = [];
+  for (const section of sections) {
+    let depType = setDepType(section, 'requires');
+    const rawLines = section.split('\n').filter(isNonEmptyString);
+
+    for (const rawLine of rawLines) {
+      if (!isComment(rawLine)) {
+        depType = setDepType(rawLine, depType);
+        // extract all dependencies from each line
+        const lines = rawLine.split(regEx(/["'],/));
+        for (const line of lines) {
+          const matches = regex.exec(line.trim());
+          if (matches?.groups) {
+            let dep: PackageDependency = {};
+            const depName = matches.groups?.name;
+            const currentValue = matches.groups?.version.trim();
+
+            let replaceString = `${depName}/${currentValue}`;
+            // conan uses @_/_ as a placeholder for no userChannel
+            let userAndChannel = '@_/_';
+
+            if (matches.groups.userChannel) {
+              userAndChannel = matches.groups.userChannel;
+              replaceString = `${depName}/${currentValue}${userAndChannel}`;
+              if (!userAndChannel.includes('/')) {
+                userAndChannel = `${userAndChannel}/_`;
+              }
+            }
+            const packageName = `${depName}/${currentValue}${userAndChannel}`;
+
+            dep = {
+              ...dep,
+              depName,
+              packageName,
+              currentValue,
+              replaceString,
+              depType,
+            };
+            if (matches.groups.revision) {
+              dep.currentDigest = matches.groups.revision;
+              dep.autoReplaceStringTemplate = `{{depName}}/{{newValue}}${userAndChannel}{{#if newDigest}}#{{newDigest}}{{/if}}`;
+              dep.replaceString = `${replaceString}#${dep.currentDigest}`;
+            }
+
+            deps.push(dep);
+          }
+        }
+      }
+    }
+  }
+
+  return deps.length ? { deps } : null;
+}

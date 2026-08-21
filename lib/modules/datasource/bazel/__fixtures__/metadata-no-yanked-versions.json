@@ -1,0 +1,10 @@
+{
+    "homepage": "https://github.com/foo/bar",
+    "versions": [
+        "0.14.8",
+        "0.14.9",
+        "0.15.0",
+        "0.16.0"
+    ],
+    "yanked_versions": {}
+}

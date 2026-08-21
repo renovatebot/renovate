@@ -1,0 +1,68 @@
+import { logger } from '../../../logger/index.ts';
+import * as nugetVersioning from '../../versioning/nuget/index.ts';
+import { Datasource } from '../datasource.ts';
+import type { GetReleasesConfig, ReleaseResult } from '../types.ts';
+import { isCrossOriginPaginationAllowed } from '../util.ts';
+import { parseRegistryUrl } from './common.ts';
+import { NugetV2Api } from './v2.ts';
+import { NugetV3Api } from './v3.ts';
+
+// https://api.nuget.org/v3/index.json is a default official nuget feed
+export const nugetOrg = 'https://api.nuget.org/v3/index.json';
+
+export class NugetDatasource extends Datasource {
+  static readonly id = 'nuget';
+
+  override readonly defaultRegistryUrls = [nugetOrg];
+
+  override readonly defaultVersioning = nugetVersioning.id;
+
+  override readonly registryStrategy = 'merge';
+
+  override readonly releaseTimestampSupport = true;
+  override readonly releaseTimestampNote =
+    'For the v2 API, the release timestamp is determined from the `Published` tag. And, for the v3 API, the release timestamp is determined from the `published` field in the results.';
+  override readonly sourceUrlSupport = 'package';
+  override readonly sourceUrlNote =
+    'For the v2 API, the source URL is determined from the `ProjectUrl` tag. And, for the v3 API, the source URL is determined from the `metadata.repository@url` field in the results.';
+
+  readonly v2Api = new NugetV2Api();
+
+  readonly v3Api = new NugetV3Api();
+
+  constructor() {
+    super(NugetDatasource.id);
+  }
+
+  async getReleases({
+    packageName,
+    registryUrl,
+  }: GetReleasesConfig): Promise<ReleaseResult | null> {
+    logger.trace(`nuget.getReleases(${packageName})`);
+    /* v8 ignore next 3 -- should never happen */
+    if (!registryUrl) {
+      return null;
+    }
+    const { feedUrl, protocolVersion } = parseRegistryUrl(registryUrl);
+    if (protocolVersion === 2) {
+      return this.v2Api.getReleases(
+        this.http,
+        feedUrl,
+        packageName,
+        isCrossOriginPaginationAllowed(NugetDatasource.id),
+      );
+    }
+    if (protocolVersion === 3) {
+      const queryUrl = await this.v3Api.getResourceUrl(this.http, feedUrl);
+      if (queryUrl) {
+        return this.v3Api.getReleases(
+          this.http,
+          feedUrl,
+          queryUrl,
+          packageName,
+        );
+      }
+    }
+    return null;
+  }
+}

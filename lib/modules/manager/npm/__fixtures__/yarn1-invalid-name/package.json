@@ -1,0 +1,17 @@
+{
+  "name": "yarn1-invalid-name",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@fluentui/node_modules/react": "npm:react@^17.0.0",
+    "@fluentui/react-focus": "^8.8.5",
+    "react": "^18.2.0"
+  }
+}

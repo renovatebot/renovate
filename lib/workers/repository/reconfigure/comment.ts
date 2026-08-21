@@ -1,0 +1,121 @@
+import { isArray, isString } from '@sindresorhus/is';
+import { GlobalConfig } from '../../../config/global.ts';
+import type { RenovateConfig } from '../../../config/types.ts';
+import { logger } from '../../../logger/index.ts';
+import type { PackageFile } from '../../../modules/manager/types.ts';
+import { ensureComment } from '../../../modules/platform/comment.ts';
+import type { Pr } from '../../../modules/platform/index.ts';
+import { platform } from '../../../modules/platform/index.ts';
+import type { BranchConfig } from '../../types.ts';
+import {
+  getDepWarningsOnboardingPR,
+  getErrors,
+  getWarnings,
+} from '../errors-warnings.ts';
+import { getBaseBranchDesc } from '../onboarding/pr/base-branch.ts';
+import { getScheduleDesc } from '../onboarding/pr/config-description.ts';
+import {
+  getPackageFilesDesc,
+  getPackageFilesSummary,
+} from '../onboarding/pr/package-files.ts';
+import {
+  getExpectedPrList,
+  getExpectedPrListSummary,
+} from '../onboarding/pr/pr-list.ts';
+
+export async function ensureReconfigurePrComment(
+  config: RenovateConfig,
+  packageFiles: Record<string, PackageFile[]> | null,
+  branches: BranchConfig[],
+  branchName: string,
+  pr: Pr,
+): Promise<boolean> {
+  logger.debug('ensureReconfigurePrComment()');
+  logger.trace({ config });
+  let prCommentTemplate = `This is a reconfigure PR comment to help you understand and re-configure your renovate bot settings. If this Reconfigure PR were to be merged, we'd expect to see the following outcome:\n\n`;
+
+  // TODO #22198
+  prCommentTemplate += `
+---
+{{PACKAGE FILES}}
+{{CONFIG}}
+{{BASEBRANCH}}
+{{PRLIST}}
+{{WARNINGS}}
+{{ERRORS}}
+`;
+  let prBody = prCommentTemplate;
+  const packageFilesDesc = getPackageFilesDesc(packageFiles);
+  if (packageFilesDesc) {
+    prBody = `${prBody.replace('{{PACKAGE FILES}}', packageFilesDesc)}\n`;
+  } else {
+    prBody = prBody.replace('{{PACKAGE FILES}}\n', '');
+  }
+  let configDesc = '';
+  if (GlobalConfig.get('dryRun')) {
+    logger.info(`DRY-RUN: Would check branch ${branchName}`);
+  } else {
+    configDesc = getConfigDesc(config);
+  }
+  prBody = prBody.replace('{{CONFIG}}\n', configDesc);
+  prBody = prBody.replace(
+    '{{WARNINGS}}\n',
+    getWarnings(config) + getDepWarningsOnboardingPR(packageFiles!, config),
+  );
+  prBody = prBody.replace('{{ERRORS}}\n', getErrors(config));
+  prBody = prBody.replace('{{BASEBRANCH}}\n', getBaseBranchDesc(config));
+  const prList = getExpectedPrList(config, branches);
+  prBody = prBody.replace('{{PRLIST}}\n', prList);
+
+  if (prBody.length > platform.maxBodyLength()) {
+    logger.debug(
+      'Reconfigure PR body exceeds platform limit, switching to summary PR list and package files',
+    );
+    prBody = prBody.replace(prList, getExpectedPrListSummary(config, branches));
+    if (packageFilesDesc) {
+      prBody = prBody.replace(
+        packageFilesDesc,
+        `### Detected Package Files\n\n${getPackageFilesSummary(packageFiles)}`,
+      );
+    }
+  }
+
+  logger.trace(`prBody:\n${prBody}`);
+
+  prBody = platform.massageMarkdown(prBody);
+
+  if (GlobalConfig.get('dryRun')) {
+    logger.info('DRY-RUN: Would ensure comment');
+    return true;
+  }
+
+  return await ensureComment({
+    number: pr.number,
+    topic: 'Reconfigure PR Results',
+    content: prBody,
+  });
+}
+
+function getDescriptionArray(config: RenovateConfig): string[] {
+  logger.debug('getDescriptionArray()');
+  logger.trace({ config });
+  const desc = isArray(config.description, isString) ? config.description : [];
+  return desc.concat(getScheduleDesc(config));
+}
+
+export function getConfigDesc(config: RenovateConfig): string {
+  logger.debug('getConfigDesc()');
+  logger.trace({ config });
+  const descriptionArr = getDescriptionArray(config);
+  if (!descriptionArr.length) {
+    logger.debug('No config description found');
+    return '';
+  }
+  logger.debug(`Found description array with length:${descriptionArr.length}`);
+  let desc = `\n### Configuration Summary\n\nBased on the default config's presets, Renovate will:\n\n`;
+  descriptionArr.forEach((d) => {
+    desc += `  - ${d}\n`;
+  });
+  desc += '\n\n---\n';
+  return desc;
+}

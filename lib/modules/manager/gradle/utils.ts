@@ -1,0 +1,228 @@
+import upath from 'upath';
+import { regEx } from '../../../util/regex.ts';
+import { api as gradleVersioning } from '../../versioning/gradle/index.ts';
+import type { PackageDependency } from '../types.ts';
+import type {
+  GradleManagerData,
+  PackageVariables,
+  VariableRegistry,
+} from './types.ts';
+
+const artifactRegex = regEx(
+  '^[a-zA-Z][-_a-zA-Z0-9]*(?:\\.[a-zA-Z0-9][-_a-zA-Z0-9]*?)*$',
+);
+
+const versionLikeRegex = regEx('^(?<version>[-_.\\[\\](),a-zA-Z0-9+! ]+)');
+
+// Extracts version-like and range-like strings from the beginning of input
+export function versionLikeSubstring(
+  input: string | null | undefined,
+): string | null {
+  if (!input) {
+    return null;
+  }
+
+  const match = versionLikeRegex.exec(input);
+  const version = match?.groups?.version?.trim();
+  if (!version || !regEx(/\d/).test(version)) {
+    return null;
+  }
+
+  if (!gradleVersioning.isValid(version)) {
+    return null;
+  }
+
+  return version;
+}
+
+export function isDependencyString(input: string): boolean {
+  const [depNotation, ...extra] = input.split('@');
+  if (extra.length > 1) {
+    return false;
+  }
+
+  const parts = depNotation.split(':');
+  if (parts.length !== 3 && parts.length !== 4) {
+    return false;
+  }
+
+  const [groupId, artifactId, version, classifier] = parts;
+
+  return !!(
+    groupId &&
+    artifactId &&
+    version &&
+    artifactRegex.test(groupId) &&
+    artifactRegex.test(artifactId) &&
+    (!classifier || artifactRegex.test(classifier)) &&
+    version === versionLikeSubstring(version)
+  );
+}
+
+export function parseDependencyString(
+  input: string,
+): PackageDependency<GradleManagerData> | null {
+  if (!isDependencyString(input)) {
+    return null;
+  }
+
+  const [depNotation, dataType] = input.split('@');
+  const [groupId, artifactId, currentValue] = depNotation.split(':');
+
+  return {
+    depName: `${groupId}:${artifactId}`,
+    currentValue,
+    ...(dataType && { dataType }),
+  };
+}
+
+const gradleVersionsFileRegex = regEx('^versions\\.gradle(?:\\.kts)?$', 'i');
+const gradleBuildFileRegex = regEx('^build\\.gradle(?:\\.kts)?$', 'i');
+const gradleSettingsFileRegex = regEx('^settings\\.gradle(?:\\.kts)?$', 'i');
+
+export function isGradleScriptFile(path: string): boolean {
+  const filename = upath.basename(path).toLowerCase();
+  return filename.endsWith('.gradle.kts') || filename.endsWith('.gradle');
+}
+
+export function isGradleVersionsFile(path: string): boolean {
+  const filename = upath.basename(path);
+  return gradleVersionsFileRegex.test(filename);
+}
+
+export function isGradleBuildFile(path: string): boolean {
+  const filename = upath.basename(path);
+  return gradleBuildFileRegex.test(filename);
+}
+
+export function isGradleSettingsFile(path: string): boolean {
+  const filename = upath.basename(path);
+  return gradleSettingsFileRegex.test(filename);
+}
+
+export function isGradleDefaultCatalogFile(path: string): boolean {
+  return path.endsWith('/gradle/libs.versions.toml');
+}
+
+export function isPropsFile(path: string): boolean {
+  const filename = upath.basename(path).toLowerCase();
+  return filename === 'gradle.properties';
+}
+
+export function isKotlinSourceFile(path: string): boolean {
+  const filename = upath.basename(path).toLowerCase();
+  return filename.endsWith('.kt');
+}
+
+export function isTOMLFile(path: string): boolean {
+  const filename = upath.basename(path).toLowerCase();
+  return filename.endsWith('.toml');
+}
+
+export function toAbsolutePath(packageFile: string): string {
+  return upath.join(packageFile.replace(regEx(/^[/\\]*/), '/'));
+}
+
+function getFileRank(filename: string): number {
+  if (isPropsFile(filename)) {
+    return 0;
+  }
+  if (isGradleSettingsFile(filename)) {
+    return 1;
+  }
+  if (isGradleDefaultCatalogFile(filename)) {
+    return 2;
+  }
+  if (isGradleVersionsFile(filename)) {
+    return 3;
+  }
+  if (isGradleBuildFile(filename)) {
+    return 5;
+  }
+  return 4;
+}
+
+export function reorderFiles(packageFiles: string[]): string[] {
+  return packageFiles
+    .map((path) => {
+      const absPath = toAbsolutePath(path);
+      const currentDir = upath.dirname(absPath);
+
+      return {
+        path,
+        absPath,
+        dir: isGradleDefaultCatalogFile(absPath)
+          ? upath.dirname(currentDir)
+          : currentDir,
+        rank: getFileRank(absPath),
+      };
+    })
+    .sort((a, b) => {
+      // Different directories: check parent-child relationship
+      if (a.dir !== b.dir) {
+        if (a.dir.startsWith(`${b.dir}/`)) {
+          return 1;
+        }
+        if (b.dir.startsWith(`${a.dir}/`)) {
+          return -1;
+        }
+        return a.dir.localeCompare(b.dir);
+      }
+
+      // Same effective directory: rank, if equal sort alphabetically
+      return a.rank - b.rank || a.absPath.localeCompare(b.absPath);
+    })
+    .map((entry) => entry.path);
+}
+
+export function getVars(
+  registry: VariableRegistry,
+  dir: string,
+  vars: PackageVariables = registry[dir] || {},
+): PackageVariables {
+  const dirAbs = toAbsolutePath(dir);
+  const parentDir = upath.dirname(dirAbs);
+  if (parentDir === dirAbs) {
+    return vars;
+  }
+  const parentVars = registry[parentDir] || {};
+  return getVars(registry, parentDir, { ...parentVars, ...vars });
+}
+
+export function updateVars(
+  registry: VariableRegistry,
+  dir: string,
+  newVars: PackageVariables,
+): void {
+  const oldVars = registry[dir] ?? {};
+  registry[dir] = { ...oldVars, ...newVars };
+}
+
+export function updateVarsFromDefaultCatalog(
+  registry: VariableRegistry,
+  dir: string,
+  packageFile: string,
+  newVars: PackageVariables,
+): void {
+  if (!isGradleDefaultCatalogFile(toAbsolutePath(packageFile))) {
+    return;
+  }
+
+  const rootDir = upath.dirname(dir);
+  const oldVars = registry[rootDir] ?? {};
+  let defaultLibsExtName = 'libs';
+  if (
+    oldVars.defaultLibrariesExtensionName?.packageFile &&
+    isGradleSettingsFile(oldVars.defaultLibrariesExtensionName.packageFile)
+  ) {
+    defaultLibsExtName = oldVars.defaultLibrariesExtensionName.value;
+  }
+
+  const newVarsRemapped: PackageVariables = {};
+  for (const [oldKey, variableData] of Object.entries(newVars)) {
+    const key = `${defaultLibsExtName}.versions.${oldKey}`;
+    newVarsRemapped[key] = { ...variableData, key };
+  }
+
+  registry[rootDir] = { ...oldVars, ...newVarsRemapped };
+}

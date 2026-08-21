@@ -1,0 +1,873 @@
+import * as httpMock from '~test/http-mock.ts';
+import { ExternalHostError } from '../../../types/errors/external-host-error.ts';
+import * as _packageCache from '../../../util/cache/package/index.ts';
+import * as hostRules from '../../../util/host-rules.ts';
+import { Http } from '../../../util/http/index.ts';
+import type { HttpResponse } from '../../../util/http/types.ts';
+import { parseUrl } from '../../../util/url.ts';
+import { defaultRegistryUrl } from './common.ts';
+import { getDependency } from './get.ts';
+import { resolveRegistryUrl, setNpmrc } from './npmrc.ts';
+
+vi.mock('../../../util/cache/package/index.ts');
+
+const packageCache = vi.mocked(_packageCache);
+
+function getPath(s = ''): string {
+  const [x] = s.split('\n');
+  const prePath = x.replace(/^.*https:\/\/test\.org/, '');
+  return `${prePath}/@myco%2Ftest`;
+}
+
+const http = new Http('npm');
+
+describe('modules/datasource/npm/get', () => {
+  beforeEach(() => {
+    hostRules.clear();
+    setNpmrc();
+  });
+
+  describe('has bearer auth', () => {
+    const configs = [
+      `registry=https://test.org\n//test.org/:_authToken=XXX`,
+      `registry=https://test.org/sub\n//test.org/:_authToken=XXX`,
+      `registry=https://test.org/sub\n//test.org/sub/:_authToken=XXX`,
+      `registry=https://test.org/sub\n_authToken=XXX`,
+      `registry=https://test.org\n_authToken=XXX`,
+      `registry=https://test.org\n_authToken=XXX`,
+      `@myco:registry=https://test.org\n//test.org/:_authToken=XXX`,
+    ];
+
+    it.each(configs)('%p', async (npmrc) => {
+      expect.assertions(2);
+      httpMock
+        .scope('https://test.org', {
+          reqheaders: {
+            authorization: 'Bearer XXX',
+          },
+        })
+        .get(getPath(npmrc))
+        .reply(200, { name: '@myco/test' });
+
+      setNpmrc(npmrc);
+      const registryUrl = resolveRegistryUrl('@myco/test');
+      expect(await getDependency(http, registryUrl, '@myco/test')).toBeNull();
+
+      const trace = httpMock.getTrace();
+      expect(trace[0].headers.authorization).toBe('Bearer XXX');
+    });
+  });
+
+  describe('has basic auth', () => {
+    const configs = [
+      `registry=https://test.org\n//test.org/:_auth=dGVzdDp0ZXN0`,
+      `registry=https://test.org\n//test.org/:username=test\n//test.org/:_password=dGVzdA==`,
+      `registry=https://test.org/sub\n//test.org/:_auth=dGVzdDp0ZXN0`,
+      `registry=https://test.org/sub\n//test.org/sub/:_auth=dGVzdDp0ZXN0`,
+      `registry=https://test.org/sub\n_auth=dGVzdDp0ZXN0`,
+      `registry=https://test.org\n_auth=dGVzdDp0ZXN0`,
+      `registry=https://test.org\n_auth=dGVzdDp0ZXN0`,
+      `@myco:registry=https://test.org\n//test.org/:_auth=dGVzdDp0ZXN0`,
+      `@myco:registry=https://test.org\n_auth=dGVzdDp0ZXN0`,
+    ];
+
+    it.each(configs)('%p', async (npmrc) => {
+      expect.assertions(2);
+      httpMock
+        .scope('https://test.org', {
+          reqheaders: {
+            authorization: 'Basic dGVzdDp0ZXN0',
+          },
+        })
+        .get(getPath(npmrc))
+        .reply(200, { name: '@myco/test' });
+      setNpmrc(npmrc);
+      const registryUrl = resolveRegistryUrl('@myco/test');
+      expect(await getDependency(http, registryUrl, '@myco/test')).toBeNull();
+
+      const trace = httpMock.getTrace();
+      expect(trace[0].headers.authorization).toBe('Basic dGVzdDp0ZXN0');
+    });
+  });
+
+  describe('no auth', () => {
+    const configs = [
+      `@myco:registry=https://test.org\n//test.org/sub/:_authToken=XXX`,
+      `@myco:registry=https://test.org\n//test.org/sub/:_auth=dGVzdDp0ZXN0`,
+      `@myco:registry=https://test.org`,
+      `registry=https://test.org`,
+    ];
+
+    it.each(configs)('%p', async (npmrc) => {
+      expect.assertions(2);
+      httpMock
+        .scope('https://test.org', { badheaders: ['authorization'] })
+        .get(getPath(npmrc))
+        .reply(200, { name: '@myco/test' });
+      setNpmrc(npmrc);
+      const registryUrl = resolveRegistryUrl('@myco/test');
+      expect(await getDependency(http, registryUrl, '@myco/test')).toBeNull();
+
+      const trace = httpMock.getTrace();
+      expect(trace[0].headers.authorization).toBeUndefined();
+    });
+  });
+
+  it('uses hostRules basic auth', async () => {
+    expect.assertions(1);
+    const npmrc = `registry=https://test.org`;
+    hostRules.add({
+      matchHost: 'https://test.org',
+      username: 'test',
+      password: 'test',
+    });
+
+    httpMock
+      .scope('https://test.org', {
+        reqheaders: {
+          authorization: 'Basic dGVzdDp0ZXN0',
+        },
+      })
+      .get(getPath(npmrc))
+      .reply(200, { name: '@myco/test' });
+    setNpmrc(npmrc);
+    const registryUrl = resolveRegistryUrl('@myco/test');
+    expect(await getDependency(http, registryUrl, '@myco/test')).toBeNull();
+  });
+
+  it('uses hostRules token auth', async () => {
+    expect.assertions(1);
+    const npmrc = ``;
+    hostRules.add({
+      matchHost: defaultRegistryUrl,
+      token: 'XXX',
+    });
+
+    httpMock
+      .scope(defaultRegistryUrl, {
+        reqheaders: {
+          authorization: 'Bearer XXX',
+        },
+      })
+      .get('/renovate')
+      .reply(200, { name: 'renovate' });
+    setNpmrc(npmrc);
+    const registryUrl = resolveRegistryUrl('renovate');
+    expect(await getDependency(http, registryUrl, 'renovate')).toBeNull();
+  });
+
+  it('uses hostRules basic token auth', async () => {
+    expect.assertions(1);
+    const npmrc = ``;
+    hostRules.add({
+      matchHost: defaultRegistryUrl,
+      token: 'abc',
+      authType: 'Basic',
+    });
+
+    httpMock
+      .scope(defaultRegistryUrl, {
+        reqheaders: {
+          authorization: 'Basic abc',
+        },
+      })
+      .get('/renovate')
+      .reply(200, { name: 'renovate' });
+    setNpmrc(npmrc);
+    const registryUrl = resolveRegistryUrl('renovate');
+    expect(await getDependency(http, registryUrl, 'renovate')).toBeNull();
+  });
+
+  it('cover all paths', async () => {
+    expect.assertions(9);
+
+    setNpmrc('registry=https://test.org\n_authToken=XXX');
+
+    httpMock
+      .scope('https://test.org')
+      .get('/none')
+      .reply(200, { name: '@myco/test' });
+    let registryUrl = resolveRegistryUrl('none');
+    expect(await getDependency(http, registryUrl, 'none')).toBeNull();
+
+    httpMock
+      .scope('https://test.org')
+      .get('/@myco%2Ftest')
+      .reply(200, {
+        name: '@myco/test',
+        repository: {},
+        versions: { '1.0.0': {} },
+        'dist-tags': { latest: '1.0.0' },
+      });
+    registryUrl = resolveRegistryUrl('@myco/test');
+    expect(await getDependency(http, registryUrl, '@myco/test')).toBeDefined();
+
+    httpMock
+      .scope('https://test.org')
+      .get('/@myco%2Ftest2')
+      .reply(200, {
+        name: '@myco/test2',
+        versions: { '1.0.0': {} },
+        'dist-tags': { latest: '1.0.0' },
+      });
+    registryUrl = resolveRegistryUrl('@myco/test2');
+    expect(await getDependency(http, registryUrl, '@myco/test2')).toBeDefined();
+
+    httpMock.scope('https://test.org').get('/error-401').reply(401);
+    registryUrl = resolveRegistryUrl('error-401');
+    expect(await getDependency(http, registryUrl, 'error-401')).toBeNull();
+
+    httpMock.scope('https://test.org').get('/error-402').reply(402);
+    registryUrl = resolveRegistryUrl('error-402');
+    expect(await getDependency(http, registryUrl, 'error-402')).toBeNull();
+
+    httpMock.scope('https://test.org').get('/error-404').reply(404);
+    registryUrl = resolveRegistryUrl('error-404');
+    expect(await getDependency(http, registryUrl, 'error-404')).toBeNull();
+
+    // return invalid json to get coverage
+    httpMock.scope('https://test.org').get('/error4').reply(200, '{');
+    registryUrl = resolveRegistryUrl('error4');
+    expect(await getDependency(http, registryUrl, 'error4')).toBeNull();
+
+    setNpmrc();
+    httpMock
+      .scope(defaultRegistryUrl)
+      .get('/npm-parse-error')
+      .reply(200, 'not-a-json');
+    registryUrl = resolveRegistryUrl('npm-parse-error');
+    await expect(
+      getDependency(http, registryUrl, 'npm-parse-error'),
+    ).rejects.toThrow(ExternalHostError);
+
+    httpMock.scope(defaultRegistryUrl).get('/npm-error-402').reply(402);
+    expect(await getDependency(http, registryUrl, 'npm-error-402')).toBeNull();
+  });
+
+  it('throw ExternalHostError when error happens on registry.npmjs.org', async () => {
+    httpMock
+      .scope(defaultRegistryUrl)
+      .get('/npm-parse-error')
+      .reply(200, 'not-a-json');
+    const registryUrl = resolveRegistryUrl('npm-parse-error');
+    await expect(
+      getDependency(http, registryUrl, 'npm-parse-error'),
+    ).rejects.toThrow(ExternalHostError);
+  });
+
+  it('redact body for ExternalHostError when error happens on registry.npmjs.org', async () => {
+    httpMock
+      .scope(defaultRegistryUrl)
+      .get('/npm-parse-error')
+      .reply(200, 'not-a-json');
+    const registryUrl = resolveRegistryUrl('npm-parse-error');
+    let thrownError;
+    try {
+      await getDependency(http, registryUrl, 'npm-parse-error');
+    } catch (error) {
+      thrownError = error;
+    }
+    expect(thrownError.err.name).toBe('ParseError');
+    expect(thrownError.err.body).toBe('err.body deleted by Renovate');
+  });
+
+  it('do not throw ExternalHostError when error happens on custom host', async () => {
+    setNpmrc('registry=https://test.org');
+    httpMock
+      .scope('https://test.org')
+      .get('/npm-parse-error')
+      .reply(200, 'not-a-json');
+    const registryUrl = resolveRegistryUrl('npm-parse-error');
+    expect(
+      await getDependency(http, registryUrl, 'npm-parse-error'),
+    ).toBeNull();
+  });
+
+  it('do not throw ExternalHostError when error happens on registry.npmjs.org when hostRules disables abortOnError', async () => {
+    hostRules.add({
+      matchHost: defaultRegistryUrl,
+      abortOnError: false,
+    });
+    httpMock
+      .scope(defaultRegistryUrl)
+      .get('/npm-parse-error')
+      .reply(200, 'not-a-json');
+    const registryUrl = resolveRegistryUrl('npm-parse-error');
+    expect(
+      await getDependency(http, registryUrl, 'npm-parse-error'),
+    ).toBeNull();
+  });
+
+  it('do not throw ExternalHostError when error happens on registry.npmjs.org when hostRules without protocol disables abortOnError', async () => {
+    const host = parseUrl(defaultRegistryUrl)!.host;
+    hostRules.add({
+      matchHost: host,
+      abortOnError: false,
+    });
+    httpMock
+      .scope(defaultRegistryUrl)
+      .get('/npm-parse-error')
+      .reply(200, 'not-a-json');
+    const registryUrl = resolveRegistryUrl('npm-parse-error');
+    expect(
+      await getDependency(http, registryUrl, 'npm-parse-error'),
+    ).toBeNull();
+  });
+
+  it('throw ExternalHostError when error happens on custom host when hostRules enables abortOnError', async () => {
+    setNpmrc('registry=https://test.org');
+    hostRules.add({
+      matchHost: 'https://test.org',
+      abortOnError: true,
+    });
+    httpMock
+      .scope('https://test.org')
+      .get('/npm-parse-error')
+      .reply(200, 'not-a-json');
+    const registryUrl = resolveRegistryUrl('npm-parse-error');
+    await expect(
+      getDependency(http, registryUrl, 'npm-parse-error'),
+    ).rejects.toThrow(ExternalHostError);
+  });
+
+  it('massages non-compliant repository urls', async () => {
+    setNpmrc('registry=https://test.org\n_authToken=XXX');
+
+    httpMock
+      .scope('https://test.org', {
+        reqheaders: { authorization: 'Bearer XXX' },
+      })
+      .get('/@neutrinojs%2Freact')
+      .reply(200, {
+        name: '@neutrinojs/react',
+        repository: {
+          type: 'git',
+          url: 'https://github.com/neutrinojs/neutrino/tree/master/packages/react',
+        },
+        versions: { '1.0.0': {} },
+        'dist-tags': { latest: '1.0.0' },
+      });
+    const registryUrl = resolveRegistryUrl('@neutrinojs/react');
+    const dep = await getDependency(http, registryUrl, '@neutrinojs/react');
+
+    expect(dep?.sourceUrl).toBe(
+      'https://github.com/neutrinojs/neutrino/tree/master/packages/react',
+    );
+    expect(dep?.sourceDirectory).toBeUndefined();
+
+    expect(httpMock.getTrace()).toMatchInlineSnapshot(`
+      [
+        {
+          "headers": {
+            "accept": "application/json",
+            "accept-encoding": "gzip, deflate, br, zstd",
+            "authorization": "Bearer XXX",
+            "connection": "close",
+            "host": "test.org",
+            "user-agent": "Renovate/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+          },
+          "method": "GET",
+          "status": 200,
+          "url": "https://test.org/@neutrinojs%2Freact",
+        },
+      ]
+    `);
+  });
+
+  it('handles missing dist-tags latest', async () => {
+    setNpmrc('registry=https://test.org\n_authToken=XXX');
+
+    httpMock
+      .scope('https://test.org')
+      .get('/@neutrinojs%2Freact')
+      .reply(200, {
+        name: '@neutrinojs/react',
+        repository: {
+          type: 'git',
+          url: 'https://github.com/neutrinojs/neutrino/tree/master/packages/react',
+        },
+        versions: { '1.0.0': {} },
+      });
+    const registryUrl = resolveRegistryUrl('@neutrinojs/react');
+    const dep = await getDependency(http, registryUrl, '@neutrinojs/react');
+
+    expect(dep?.sourceUrl).toBe(
+      'https://github.com/neutrinojs/neutrino/tree/master/packages/react',
+    );
+    expect(dep?.sourceDirectory).toBeUndefined();
+  });
+
+  it('handles mixed sourceUrls in releases', async () => {
+    setNpmrc('registry=https://test.org\n_authToken=XXX');
+
+    httpMock
+      .scope('https://test.org')
+      .get('/vue')
+      .reply(200, {
+        name: 'vue',
+        repository: {
+          type: 'git',
+          url: 'https://github.com/vuejs/vue.git',
+        },
+        versions: {
+          '2.0.0': {
+            repository: {
+              type: 'git',
+              url: 'https://github.com/vuejs/vue.git',
+            },
+          },
+          '3.0.0': {
+            repository: {
+              type: 'git',
+              url: 'https://github.com/vuejs/vue-next.git',
+            },
+            engines: {
+              node: '>= 8.9.0',
+            },
+          },
+        },
+        'dist-tags': { latest: '2.0.0' },
+      });
+    const registryUrl = resolveRegistryUrl('vue');
+    const dep = await getDependency(http, registryUrl, 'vue');
+
+    expect(dep?.sourceUrl).toBe('https://github.com/vuejs/vue.git');
+    expect(dep?.releases[0].sourceUrl).toBeUndefined();
+    expect(dep?.releases[1].sourceUrl).toBe(
+      'https://github.com/vuejs/vue-next.git',
+    );
+  });
+
+  it('handles short sourceUrls in releases', async () => {
+    setNpmrc('registry=https://test.org\n_authToken=XXX');
+
+    httpMock
+      .scope('https://test.org')
+      .get('/vue')
+      .reply(200, {
+        name: 'vue',
+        repository: {
+          type: 'git',
+          url: 'https://github.com/vuejs/vue',
+        },
+        versions: {
+          '2.0.0': {
+            repository: 'vuejs/vue',
+          },
+          '3.0.0': {
+            repository: 'github:vuejs/vue-next',
+          },
+          '4.0.0': {
+            repository: 'gitlab:vuejs/vue',
+          },
+          '5.0.0': {
+            repository: 'bitbucket:vuejs/vue',
+          },
+        },
+        'dist-tags': { latest: '2.0.0' },
+      });
+    const registryUrl = resolveRegistryUrl('vue');
+    const dep = await getDependency(http, registryUrl, 'vue');
+    expect(dep).toMatchObject({
+      sourceUrl: 'https://github.com/vuejs/vue',
+      releases: [
+        {},
+        { sourceUrl: 'https://github.com/vuejs/vue-next' },
+        { sourceUrl: 'https://gitlab.com/vuejs/vue' },
+        { sourceUrl: 'https://bitbucket.org/vuejs/vue' },
+      ],
+    });
+  });
+
+  it('does not override sourceDirectory', async () => {
+    setNpmrc('registry=https://test.org\n_authToken=XXX');
+
+    httpMock
+      .scope('https://test.org')
+      .get('/@neutrinojs%2Freact')
+      .reply(200, {
+        name: '@neutrinojs/react',
+        repository: {
+          type: 'git',
+          url: 'https://github.com/neutrinojs/neutrino/tree/master/packages/react',
+          directory: 'packages/foo',
+        },
+        versions: { '1.0.0': {} },
+        'dist-tags': { latest: '1.0.0' },
+      });
+    const registryUrl = resolveRegistryUrl('@neutrinojs/react');
+    const dep = await getDependency(http, registryUrl, '@neutrinojs/react');
+
+    expect(dep?.sourceUrl).toBe(
+      'https://github.com/neutrinojs/neutrino/tree/master/packages/react',
+    );
+    expect(dep?.sourceDirectory).toBe('packages/foo');
+
+    expect(httpMock.getTrace()).toMatchInlineSnapshot(`
+      [
+        {
+          "headers": {
+            "accept": "application/json",
+            "accept-encoding": "gzip, deflate, br, zstd",
+            "authorization": "Bearer XXX",
+            "connection": "close",
+            "host": "test.org",
+            "user-agent": "Renovate/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+          },
+          "method": "GET",
+          "status": 200,
+          "url": "https://test.org/@neutrinojs%2Freact",
+        },
+      ]
+    `);
+  });
+
+  it('handles full repository urls with release source directories', async () => {
+    httpMock
+      .scope('https://test.org')
+      .get('/some-package')
+      .reply(200, {
+        name: 'some-package',
+        repository: 'https://example.com/octocat/Hello-World',
+        versions: {
+          '1.0.0': {
+            repository: {
+              url: 'https://example.com/octocat/Hello-World',
+              directory: 'packages/foo',
+            },
+          },
+        },
+        'dist-tags': { latest: '1.0.0' },
+      });
+
+    const dep = await getDependency(http, 'https://test.org', 'some-package');
+
+    expect(dep).toMatchObject({
+      sourceUrl: 'https://example.com/octocat/Hello-World',
+      releases: [{ sourceDirectory: 'packages/foo' }],
+    });
+  });
+
+  it('does not massage non-github non-compliant repository urls', async () => {
+    setNpmrc('registry=https://test.org\n_authToken=XXX');
+
+    httpMock
+      .scope('https://test.org')
+      .get('/@neutrinojs%2Freact')
+      .reply(200, {
+        name: '@neutrinojs/react',
+        repository: {
+          type: 'git',
+          url: 'https://bitbucket.org/neutrinojs/neutrino/tree/master/packages/react',
+        },
+        versions: { '1.0.0': {} },
+        'dist-tags': { latest: '1.0.0' },
+      });
+    const registryUrl = resolveRegistryUrl('@neutrinojs/react');
+    const dep = await getDependency(http, registryUrl, '@neutrinojs/react');
+
+    expect(dep?.sourceUrl).toBe(
+      'https://bitbucket.org/neutrinojs/neutrino/tree/master/packages/react',
+    );
+    expect(dep?.sourceDirectory).toBeUndefined();
+
+    expect(httpMock.getTrace()).toMatchInlineSnapshot(`
+      [
+        {
+          "headers": {
+            "accept": "application/json",
+            "accept-encoding": "gzip, deflate, br, zstd",
+            "authorization": "Bearer XXX",
+            "connection": "close",
+            "host": "test.org",
+            "user-agent": "Renovate/0.0.0-semantic-release (https://github.com/renovatebot/renovate)",
+          },
+          "method": "GET",
+          "status": 200,
+          "url": "https://test.org/@neutrinojs%2Freact",
+        },
+      ]
+    `);
+  });
+
+  describe('cache', () => {
+    const httpResponse: HttpResponse<unknown> = {
+      statusCode: 200,
+      body: {
+        repository: {
+          url: 'https://github.com/octocat/Hello-World/tree/master/packages/test',
+          directory: 'packages/foo',
+        },
+        versions: { '1.0.0': {} },
+        'dist-tags': { latest: '1.0.0' },
+      },
+      headers: { 'cache-control': 'max-age=180, public' },
+    };
+
+    it('stores a trimmed packument body in cache', async () => {
+      httpMock
+        .scope('https://example.com')
+        .get('/some-package')
+        .reply(
+          200,
+          {
+            _id: 'some-package',
+            name: 'some-package',
+            repository: {
+              type: 'git',
+              url: 'https://github.com/octocat/Hello-World/tree/master/packages/test',
+              directory: 'packages/foo',
+            },
+            homepage: 'https://example.com/package',
+            time: {
+              created: '2024-06-01T00:00:00.000Z',
+              '1.0.0': '2024-06-02T00:00:00.000Z',
+            },
+            'dist-tags': { latest: '1.0.0' },
+            versions: {
+              '1.0.0': {
+                repository: {
+                  type: 'git',
+                  url: 'https://github.com/octocat/Hello-World/tree/master/packages/test',
+                },
+                homepage: 'https://example.com/package/v1',
+                deprecated: 'use 2.0.0',
+                gitHead: 'abc123',
+                dependencies: { foo: '^1.0.0' },
+                devDependencies: { bar: '^2.0.0' },
+                engines: { node: '>=18', bun: '>=1.0.0' },
+                dist: {
+                  attestations: {
+                    url: 'https://example.com/attestations',
+                    issuer: 'ignore me',
+                  },
+                  tarball: 'https://example.com/some-package.tgz',
+                },
+                scripts: { test: 'vitest' },
+              },
+            },
+            readme: 'huge',
+          },
+          { 'cache-control': 'max-age=180, public' },
+        );
+
+      const dep = await getDependency(
+        http,
+        'https://example.com',
+        'some-package',
+      );
+
+      expect(dep).toMatchObject({
+        homepage: 'https://example.com/package',
+        sourceDirectory: 'packages/foo',
+        sourceUrl:
+          'https://github.com/octocat/Hello-World/tree/master/packages/test',
+        tags: { latest: '1.0.0' },
+      });
+      expect(packageCache.setWithRawTtl).toHaveBeenCalledWith(
+        'datasource-npm:cache-provider',
+        'https://example.com/some-package',
+        expect.objectContaining({
+          httpResponse: expect.objectContaining({
+            body: {
+              repository: {
+                url: 'https://github.com/octocat/Hello-World/tree/master/packages/test',
+                directory: 'packages/foo',
+              },
+              homepage: 'https://example.com/package',
+              time: {
+                created: '2024-06-01T00:00:00.000Z',
+                '1.0.0': '2024-06-02T00:00:00.000Z',
+              },
+              'dist-tags': { latest: '1.0.0' },
+              versions: {
+                '1.0.0': {
+                  repository: {
+                    url: 'https://github.com/octocat/Hello-World/tree/master/packages/test',
+                  },
+                  homepage: 'https://example.com/package/v1',
+                  deprecated: 'use 2.0.0',
+                  gitHead: 'abc123',
+                  dependencies: { foo: '^1.0.0' },
+                  devDependencies: { bar: '^2.0.0' },
+                  engines: { node: '>=18' },
+                  dist: {
+                    attestations: {
+                      url: 'https://example.com/attestations',
+                    },
+                  },
+                },
+              },
+            },
+          }),
+        }),
+        expect.any(Number),
+      );
+    });
+
+    it('skips cache write when registry omits cache-control', async () => {
+      httpMock
+        .scope('https://npm.pkg.github.com')
+        .get('/@org%2Fpackage')
+        .reply(200, {
+          name: '@org/package',
+          'dist-tags': { latest: '1.0.0' },
+          versions: { '1.0.0': {} },
+        });
+
+      const dep = await getDependency(
+        http,
+        'https://npm.pkg.github.com',
+        '@org/package',
+      );
+
+      expect(dep).toMatchObject({ tags: { latest: '1.0.0' } });
+      expect(packageCache.setWithRawTtl).not.toHaveBeenCalled();
+    });
+
+    it('returns releases when `time` contains non-string entries', async () => {
+      // JFrog Artifactory emits `"unpublished": null` under `time`, which
+      // previously caused the whole packument to fail schema validation.
+      httpMock
+        .scope('https://example.com')
+        .get('/some-package')
+        .reply(200, {
+          name: 'some-package',
+          'dist-tags': { latest: '1.1.0' },
+          versions: { '1.0.0': {}, '1.1.0': {} },
+          time: {
+            unpublished: null,
+            created: '2026-01-22T23:58:45.285Z',
+            modified: '2026-06-02T00:59:50.138Z',
+            '1.0.0': '2026-01-23T01:23:37.982Z',
+            '1.1.0': '2026-04-15T18:50:36.431Z',
+          },
+        });
+
+      const dep = await getDependency(
+        http,
+        'https://example.com',
+        'some-package',
+      );
+
+      expect(dep?.releases).toEqual([
+        {
+          version: '1.0.0',
+          releaseTimestamp: '2026-01-23T01:23:37.982Z',
+          attestation: false,
+          dependencies: undefined,
+          devDependencies: undefined,
+          gitRef: undefined,
+        },
+        {
+          version: '1.1.0',
+          releaseTimestamp: '2026-04-15T18:50:36.431Z',
+          attestation: false,
+          dependencies: undefined,
+          devDependencies: undefined,
+          gitRef: undefined,
+        },
+      ]);
+    });
+
+    it('returns unexpired cache', async () => {
+      vi.setSystemTime('2024-06-15T00:14:59.999Z');
+      packageCache.get.mockResolvedValue({
+        etag: 'some-etag',
+        timestamp: '2024-06-15T00:00:00.000Z',
+        httpResponse,
+      });
+
+      const dep = await getDependency(
+        http,
+        'https://example.com',
+        'some-package',
+      );
+
+      expect(dep).toEqual({
+        registryUrl: 'https://example.com',
+        releases: [
+          {
+            attestation: false,
+            dependencies: undefined,
+            devDependencies: undefined,
+            gitRef: undefined,
+            version: '1.0.0',
+          },
+        ],
+        sourceDirectory: 'packages/foo',
+        sourceUrl:
+          'https://github.com/octocat/Hello-World/tree/master/packages/test',
+        tags: { latest: '1.0.0' },
+      });
+    });
+
+    it('returns soft expired cache if revalidated', async () => {
+      vi.setSystemTime('2024-06-15T00:15:00.000Z');
+      packageCache.get.mockResolvedValue({
+        etag: 'some-etag',
+        timestamp: '2024-06-15T00:00:00.000Z',
+        httpResponse,
+      });
+      setNpmrc('registry=https://example.com\n_authToken=XXX');
+      httpMock.scope('https://example.com').get('/some-package').reply(304);
+
+      const dep = await getDependency(
+        http,
+        'https://example.com',
+        'some-package',
+      );
+
+      expect(dep).toEqual({
+        registryUrl: 'https://example.com',
+        releases: [
+          {
+            attestation: false,
+            dependencies: undefined,
+            devDependencies: undefined,
+            gitRef: undefined,
+            version: '1.0.0',
+          },
+        ],
+        sourceDirectory: 'packages/foo',
+        sourceUrl:
+          'https://github.com/octocat/Hello-World/tree/master/packages/test',
+        tags: { latest: '1.0.0' },
+      });
+    });
+
+    it('returns soft expired cache on npmjs error', async () => {
+      vi.setSystemTime('2024-06-15T00:15:00.000Z');
+      packageCache.get.mockResolvedValue({
+        etag: 'some-etag',
+        timestamp: '2024-06-15T00:00:00.000Z',
+        httpResponse,
+      });
+      setNpmrc('registry=https://example.com\n_authToken=XXX');
+      httpMock.scope('https://example.com').get('/some-package').reply(500);
+
+      const dep = await getDependency(
+        http,
+        'https://example.com',
+        'some-package',
+      );
+
+      expect(dep).toEqual({
+        registryUrl: 'https://example.com',
+        releases: [
+          {
+            attestation: false,
+            dependencies: undefined,
+            devDependencies: undefined,
+            gitRef: undefined,
+            version: '1.0.0',
+          },
+        ],
+        sourceDirectory: 'packages/foo',
+        sourceUrl:
+          'https://github.com/octocat/Hello-World/tree/master/packages/test',
+        tags: { latest: '1.0.0' },
+      });
+    });
+  });
+});

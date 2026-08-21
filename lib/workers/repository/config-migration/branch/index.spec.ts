@@ -1,0 +1,328 @@
+import { mock } from 'vitest-mock-extended';
+import { Fixtures } from '~test/fixtures.ts';
+import type { RenovateConfig } from '~test/util.ts';
+import { git, partial, platform, scm } from '~test/util.ts';
+import { getConfig } from '../../../../config/defaults.ts';
+import { GlobalConfig } from '../../../../config/global.ts';
+import { logger } from '../../../../logger/index.ts';
+import type { Pr } from '../../../../modules/platform/index.ts';
+import { createConfigMigrationBranch } from './create.ts';
+import { checkConfigMigrationBranch } from './index.ts';
+import type { MigratedData } from './migrated-data.ts';
+import { rebaseMigrationBranch } from './rebase.ts';
+
+vi.mock('./migrated-data.ts');
+vi.mock('./rebase.ts');
+vi.mock('./create.ts');
+vi.mock('../../update/branch/handle-existing.ts');
+
+const migratedData = Fixtures.getJson<MigratedData>('./migrated-data.json');
+
+describe('workers/repository/config-migration/branch/index', () => {
+  describe('checkConfigMigrationBranch', () => {
+    let config: RenovateConfig;
+
+    beforeEach(() => {
+      GlobalConfig.reset();
+      config = getConfig();
+      config.branchPrefix = 'some/';
+    });
+
+    it('does nothing when migration disabled and checkbox unchecked', async () => {
+      await expect(
+        checkConfigMigrationBranch(
+          {
+            ...config,
+            configMigration: false,
+            dependencyDashboardChecks: {
+              configMigrationCheckboxState: 'unchecked',
+            },
+          },
+          migratedData,
+        ),
+      ).resolves.toMatchObject({ result: 'no-migration-branch' });
+
+      expect(logger.debug).toHaveBeenCalledWith(
+        'Config migration needed but config migration is disabled and checkbox not checked or not present.',
+      );
+    });
+
+    it('creates migration branch when migration disabled but checkbox checked', async () => {
+      vi.mocked(createConfigMigrationBranch).mockResolvedValueOnce('committed');
+      await expect(
+        checkConfigMigrationBranch(
+          {
+            ...config,
+            configMigration: false,
+            dependencyDashboardChecks: {
+              configMigrationCheckboxState: 'checked',
+            },
+          },
+          migratedData,
+        ),
+      ).resolves.toMatchObject({
+        result: 'migration-branch-exists',
+        migrationBranch: `${config.branchPrefix!}migrate-config`,
+      });
+
+      expect(logger.debug).toHaveBeenCalledWith('Need to create migration PR');
+    });
+
+    it('does not create a branch if migration branch is modified', async () => {
+      platform.getBranchPr.mockResolvedValue(
+        mock<Pr>({
+          number: 1,
+        }),
+      );
+      scm.isBranchModified.mockResolvedValueOnce(true);
+      const res = await checkConfigMigrationBranch(
+        {
+          ...config,
+          configMigration: false,
+          dependencyDashboardChecks: {
+            configMigrationCheckboxState: 'migration-pr-exists',
+          },
+        },
+        migratedData,
+      );
+      // TODO: types (#22198)
+      expect(res).toMatchObject({
+        result: 'migration-branch-modified',
+        migrationBranch: `${config.branchPrefix!}migrate-config`,
+      });
+      expect(scm.checkoutBranch).toHaveBeenCalledTimes(1);
+      expect(git.commitFiles).toHaveBeenCalledTimes(0);
+      expect(platform.refreshPr).toHaveBeenCalledTimes(0);
+
+      expect(logger.debug).toHaveBeenCalledWith(
+        'Config Migration branch has been modified. Skipping branch rebase.',
+      );
+    });
+
+    it('updates migration branch & refreshes pr when migration disabled but open pr exists', async () => {
+      platform.getBranchPr.mockResolvedValue(
+        mock<Pr>({
+          number: 1,
+        }),
+      );
+      platform.refreshPr = vi.fn().mockResolvedValueOnce(null);
+      vi.mocked(rebaseMigrationBranch).mockResolvedValueOnce('committed');
+      const res = await checkConfigMigrationBranch(
+        {
+          ...config,
+          configMigration: false,
+          dependencyDashboardChecks: {
+            configMigrationCheckboxState: 'migration-pr-exists',
+          },
+        },
+        migratedData,
+      );
+      // TODO: types (#22198)
+      expect(res).toMatchObject({
+        result: 'migration-branch-exists',
+        migrationBranch: `${config.branchPrefix!}migrate-config`,
+      });
+      expect(scm.checkoutBranch).toHaveBeenCalledTimes(1);
+      expect(git.commitFiles).toHaveBeenCalledTimes(0);
+      expect(platform.refreshPr).toHaveBeenCalledTimes(1);
+
+      expect(logger.debug).toHaveBeenCalledWith(
+        'Config Migration PR already exists',
+      );
+    });
+
+    it('creates migration branch when migration enabled but no pr exists', async () => {
+      vi.mocked(createConfigMigrationBranch).mockResolvedValueOnce('committed');
+      const res = await checkConfigMigrationBranch(
+        {
+          ...config,
+          configMigration: true,
+          dependencyDashboardChecks: {
+            configMigrationCheckboxState: 'no-checkbox',
+          },
+        },
+        migratedData,
+      );
+      // TODO: types (#22198)
+      expect(res).toMatchObject({
+        result: 'migration-branch-exists',
+        migrationBranch: `${config.branchPrefix!}migrate-config`,
+      });
+      expect(scm.checkoutBranch).toHaveBeenCalledTimes(1);
+      expect(git.commitFiles).toHaveBeenCalledTimes(0);
+
+      expect(logger.debug).toHaveBeenCalledWith('Need to create migration PR');
+    });
+
+    it('updates migration branch & refresh PR when migration enabled and open pr exists', async () => {
+      platform.getBranchPr.mockResolvedValue(mock<Pr>());
+      platform.refreshPr = vi.fn().mockResolvedValueOnce(null);
+      vi.mocked(rebaseMigrationBranch).mockResolvedValueOnce('committed');
+      const res = await checkConfigMigrationBranch(
+        {
+          ...config,
+          configMigration: true,
+          dependencyDashboardChecks: {
+            configMigrationCheckboxState: 'migration-pr-exists',
+          },
+        },
+        migratedData,
+      );
+      // TODO: types (#22198)
+      expect(res).toMatchObject({
+        result: 'migration-branch-exists',
+        migrationBranch: `${config.branchPrefix!}migrate-config`,
+      });
+      expect(scm.checkoutBranch).toHaveBeenCalledTimes(1);
+      expect(git.commitFiles).toHaveBeenCalledTimes(0);
+
+      expect(logger.debug).toHaveBeenCalledWith(
+        'Config Migration PR already exists',
+      );
+    });
+
+    it('Dry runs update migration branch', async () => {
+      GlobalConfig.set({
+        dryRun: 'full',
+      });
+      platform.getBranchPr.mockResolvedValueOnce(mock<Pr>());
+      vi.mocked(rebaseMigrationBranch).mockResolvedValueOnce('committed');
+      const res = await checkConfigMigrationBranch(
+        {
+          ...config,
+          configMigration: true,
+          dependencyDashboardChecks: {
+            configMigrationCheckboxState: 'migration-pr-exists',
+          },
+        },
+        migratedData,
+      );
+      // TODO: types (#22198)
+      expect(res).toMatchObject({
+        result: 'migration-branch-exists',
+        migrationBranch: `${config.branchPrefix!}migrate-config`,
+      });
+      expect(scm.checkoutBranch).toHaveBeenCalledTimes(0);
+      expect(git.commitFiles).toHaveBeenCalledTimes(0);
+    });
+
+    it('Dry runs create migration PR', async () => {
+      GlobalConfig.set({
+        dryRun: 'full',
+      });
+      vi.mocked(createConfigMigrationBranch).mockResolvedValueOnce('committed');
+      const res = await checkConfigMigrationBranch(
+        {
+          ...config,
+          dependencyDashboardChecks: {
+            configMigrationCheckboxState: 'checked',
+          },
+        },
+        migratedData,
+      );
+      // TODO: types (#22198)
+      expect(res).toMatchObject({
+        result: 'migration-branch-exists',
+        migrationBranch: `${config.branchPrefix!}migrate-config`,
+      });
+      expect(scm.checkoutBranch).toHaveBeenCalledTimes(0);
+      expect(git.commitFiles).toHaveBeenCalledTimes(0);
+    });
+
+    describe('handle closed PR', () => {
+      const title = 'PR title';
+      const pr = partial<Pr>({ title, state: 'closed', number: 1 });
+
+      it('does not create a branch when migration is disabled but needed and a closed pr exists', async () => {
+        platform.findPr.mockResolvedValueOnce(pr);
+        platform.getBranchPr.mockResolvedValue(null);
+        scm.branchExists.mockResolvedValueOnce(true);
+        const res = await checkConfigMigrationBranch(
+          {
+            ...config,
+            configMigration: false,
+            dependencyDashboardChecks: {
+              configMigrationCheckboxState: 'no-checkbox',
+            },
+          },
+          migratedData,
+        );
+        expect(res).toMatchObject({
+          result: 'no-migration-branch',
+        });
+      });
+
+      it('deletes old branch and creates new migration branch when migration is disabled but needed, a closed pr exists and checkbox is checked', async () => {
+        platform.findPr.mockResolvedValueOnce(pr);
+        platform.getBranchPr.mockResolvedValue(null);
+        scm.branchExists.mockResolvedValueOnce(true);
+        vi.mocked(createConfigMigrationBranch).mockResolvedValueOnce(
+          'committed',
+        );
+        const res = await checkConfigMigrationBranch(
+          {
+            ...config,
+            configMigration: false,
+            dependencyDashboardChecks: {
+              configMigrationCheckboxState: 'checked',
+            },
+          },
+          migratedData,
+        );
+        expect(scm.deleteBranch).toHaveBeenCalledTimes(1);
+        expect(res).toMatchObject({
+          result: 'migration-branch-exists',
+          migrationBranch: `${config.branchPrefix!}migrate-config`,
+        });
+        expect(scm.checkoutBranch).toHaveBeenCalledTimes(1);
+      });
+
+      it('does not create a branch when migration is enabled and a closed pr exists', async () => {
+        platform.findPr.mockResolvedValueOnce(pr);
+        platform.getBranchPr.mockResolvedValue(null);
+        scm.branchExists.mockResolvedValueOnce(true);
+        const res = await checkConfigMigrationBranch(
+          {
+            ...config,
+            configMigration: true,
+            dependencyDashboardChecks: {
+              configMigrationCheckboxState: 'no-checkbox',
+            },
+          },
+          migratedData,
+        );
+        expect(res).toMatchObject({
+          result: 'no-migration-branch',
+        });
+      });
+
+      it('dry run:deletes old branch and creates new migration branch when migration is disabled but needed, a closed pr exists and checkbox is checked', async () => {
+        GlobalConfig.set({
+          dryRun: 'full',
+        });
+        platform.findPr.mockResolvedValueOnce(pr);
+        platform.getBranchPr.mockResolvedValue(null);
+        scm.branchExists.mockResolvedValueOnce(true);
+        vi.mocked(createConfigMigrationBranch).mockResolvedValueOnce(
+          'committed',
+        );
+        const res = await checkConfigMigrationBranch(
+          {
+            ...config,
+            configMigration: false,
+            dependencyDashboardChecks: {
+              configMigrationCheckboxState: 'checked',
+            },
+          },
+          migratedData,
+        );
+        expect(scm.deleteBranch).toHaveBeenCalledTimes(0);
+        expect(res).toMatchObject({
+          result: 'migration-branch-exists',
+          migrationBranch: `${config.branchPrefix!}migrate-config`,
+        });
+        expect(scm.checkoutBranch).toHaveBeenCalledTimes(0);
+      });
+    });
+  });
+});

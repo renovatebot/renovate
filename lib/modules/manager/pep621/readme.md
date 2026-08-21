@@ -1,0 +1,33 @@
+This manager supports updating dependencies inside `pyproject.toml` files.
+
+In addition to standard dependencies, these toolsets are also supported:
+
+- `pdm` (including `pdm.lock` files)
+- `uv` (including `uv.lock` files and `uv` workspaces)
+- `hatch`
+- `pixi` (including `pixi.lock` files)
+
+### Trust model for pixi lock file updates
+
+Running `pixi lock` can execute arbitrary code from conda package hooks, so Renovate treats `pixi.lock` refreshes as an unsafe execution.
+See [pixi's security documentation](https://pixi.prefix.dev/latest/security/#4-treat-package-hooks-as-code-execution) for details.
+
+Self-hosted administrators must explicitly allow this path by including `pixi` in the global [`allowedUnsafeExecutions`](../../../self-hosted-configuration.md#allowedunsafeexecutions) setting.
+When `pixi` is not allowed, dependencies in `pyproject.toml` are still updated, but `pixi.lock` is left unchanged.
+
+### Private Modules Authentication
+
+Before running the `pdm` or `uv` commands to update the `pdm.lock` or `uv.lock` respectively, Renovate exports `git` [`insteadOf`](https://git-scm.com/docs/git-config#Documentation/git-config.txt-urlltbasegtinsteadOf) directives in environment variables.
+
+Renovate uses this logic before it updates any "artifacts":
+
+The token from the `hostRules` entry matching `hostType=github` and `matchHost=api.github.com` is added as the default authentication for `github.com`.
+For those running against `github.com`, this token will be the default platform token.
+
+Next, all `hostRules` with both a token or username/password and `matchHost` will be fetched, except for any `github.com` one from above.
+
+Rules from this list are converted to environment variable directives if they match _any_ of these characteristics:
+
+- No `hostType` is defined, or
+- `hostType` is `pep621`, or
+- `hostType` is a platform (`github`, `gitlab`, `azure`, etc.)

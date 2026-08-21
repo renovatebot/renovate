@@ -1,0 +1,119 @@
+import { isEmptyArray, isTruthy } from '@sindresorhus/is';
+import jsonata from 'jsonata';
+import { migrateDatasource } from '../../../../config/migrations/custom/datasource-migration.ts';
+import { logger } from '../../../../logger/index.ts';
+import * as template from '../../../../util/template/index.ts';
+import { parseUrl } from '../../../../util/url.ts';
+import type { PackageDependency } from '../../types.ts';
+import type { ValidMatchFields } from '../utils.ts';
+import { checkIsValidDependency, validMatchFields } from '../utils.ts';
+import { QueryResultZod } from './schema.ts';
+import type { JSONataManagerTemplates, JsonataExtractConfig } from './types.ts';
+
+export async function handleMatching(
+  json: unknown,
+  packageFile: string,
+  config: JsonataExtractConfig,
+): Promise<PackageDependency[]> {
+  let results: Record<string, string>[] = [];
+  const { matchStrings: jsonataQueries } = config;
+  for (const query of jsonataQueries) {
+    // won't fail as this is verified during config validation
+    const jsonataExpression = jsonata(query);
+    let queryResult: unknown;
+    try {
+      // this now throws for unknown reasons
+      queryResult = await jsonataExpression.evaluate(json);
+    } catch (err) {
+      logger.warn(
+        { err, jsonataQuery: query, packageFile },
+        'Error executing jsonata query. Please check your query.',
+      );
+      continue;
+    }
+
+    // allows empty dep object cause templates can be used to configure the required fields
+    // if some issues arise then the isValidDependency call will catch them later on
+    if (!queryResult || isEmptyArray(queryResult)) {
+      logger.debug(
+        {
+          jsonataQuery: query,
+          packageFile,
+        },
+        'The jsonata query returned no matches. Possible error, please check your query. Skipping',
+      );
+      continue;
+    }
+
+    const parsed = QueryResultZod.safeParse(queryResult);
+    if (parsed.success) {
+      results = results.concat(parsed.data);
+    } else {
+      logger.warn(
+        { err: parsed.error, jsonataQuery: query, packageFile, queryResult },
+        'Query results failed schema validation',
+      );
+      continue;
+    }
+  }
+
+  return results
+    .map((dep) => createDependency(dep, config))
+    .filter(isTruthy)
+    .filter((dep) =>
+      checkIsValidDependency(dep, packageFile, 'custom.jsonata'),
+    );
+}
+
+export function createDependency(
+  queryResult: Record<string, string>,
+  config: JsonataExtractConfig,
+): PackageDependency | null {
+  const dependency: PackageDependency = {};
+
+  for (const field of validMatchFields) {
+    const fieldTemplate = `${field}Template` as keyof JSONataManagerTemplates;
+    const tmpl = config[fieldTemplate];
+    if (tmpl) {
+      try {
+        const compiled = template.compile(tmpl, queryResult, false);
+        updateDependency(field, compiled, dependency);
+      } catch {
+        logger.debug(
+          { template: tmpl },
+          'Error compiling template for JSONata manager',
+        );
+        return null;
+      }
+    } else if (queryResult[field]) {
+      updateDependency(field, queryResult[field], dependency);
+    }
+  }
+  return dependency;
+}
+
+function updateDependency(
+  field: ValidMatchFields,
+  value: string,
+  dependency: PackageDependency,
+): PackageDependency {
+  switch (field) {
+    case 'registryUrl': {
+      const url = parseUrl(value)?.toString();
+      if (!url) {
+        logger.debug({ url: value }, 'Invalid JSONata manager registryUrl');
+        break;
+      }
+      dependency.registryUrls = [url];
+      break;
+    }
+    case 'datasource':
+      dependency.datasource = migrateDatasource(value);
+      break;
+    default:
+      dependency[field] = value;
+      break;
+  }
+
+  return dependency;
+}

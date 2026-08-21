@@ -1,0 +1,69 @@
+name: 'Code scanning'
+
+on:
+  push:
+    branches: [main]
+
+  pull_request:
+    # The branches below must be a subset of the branches above
+    branches: [main]
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - ready_for_review
+
+  schedule:
+    - cron: '0 13 * * 1'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  CodeQL-Build:
+    runs-on: ubuntu-latest
+    if: github.repository == 'renovatebot/renovate' && github.event.pull_request.draft != true
+    permissions:
+      security-events: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          show-progress: false
+
+      - name: Delete fixtures to suppress false positives
+        run: |
+          find ./lib -type d -name '__fixtures__' -exec rm -rf {} \; || true
+
+      # Initializes the CodeQL tools for scanning.
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@ff2f1c621b7f889edc0d3c761ac2e6a3f8cdb0dd # v4.37.7
+        with:
+          languages: javascript
+
+        # Override language selection by uncommenting this and choosing your languages
+        # with:
+        #   languages: go, javascript, csharp, python, cpp, java
+      # Autobuild attempts to build any compiled languages  (C/C++, C#, or Java).
+      # If this step fails, then you should remove it and run the build manually (see below)
+      - name: Autobuild
+        uses: github/codeql-action/autobuild@ff2f1c621b7f889edc0d3c761ac2e6a3f8cdb0dd # v4.37.7
+
+      # ℹ️ Command-line programs to run using the OS shell.
+      # 📚 https://git.io/JvXDl
+
+      # ✏️ If the Autobuild fails above, remove it and uncomment the following three lines
+      #    and modify them (or add more) to build your code if your project
+      #    uses a compiled language
+
+      #- run: |
+      #   make bootstrap
+      #   make release
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@ff2f1c621b7f889edc0d3c761ac2e6a3f8cdb0dd # v4.37.7

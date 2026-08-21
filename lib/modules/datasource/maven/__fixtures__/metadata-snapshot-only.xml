@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<metadata>
+  <groupId>org.example</groupId>
+  <artifactId>package</artifactId>
+  <versioning>
+    <latest>1.0.3-SNAPSHOT</latest>
+    <release>1.0.3-SNAPSHOT</release>
+    <versions>
+      <version>1.0.3-SNAPSHOT</version>
+    </versions>
+    <lastUpdated>20210101000000</lastUpdated>
+  </versioning>
+</metadata>

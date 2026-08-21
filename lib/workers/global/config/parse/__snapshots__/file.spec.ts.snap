@@ -1,0 +1,7 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`workers/global/config/parse/file > .getConfig() > migrates 1`] = `
+{
+  "rangeStrategy": "bump",
+}
+`;

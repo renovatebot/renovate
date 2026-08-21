@@ -1,0 +1,14 @@
+import { isString } from '@sindresorhus/is';
+import { AbstractMigration } from '../base/abstract-migration.ts';
+
+export class BranchNameMigration extends AbstractMigration {
+  override readonly propertyName = 'branchName';
+
+  override run(value: unknown): void {
+    if (isString(value) && value.includes('{{managerBranchPrefix}}')) {
+      this.rewrite(
+        value.replace('{{managerBranchPrefix}}', '{{additionalBranchPrefix}}'),
+      );
+    }
+  }
+}

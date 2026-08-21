@@ -1,0 +1,34 @@
+import { isArray, isUndefined } from '@sindresorhus/is';
+import type {
+  PackageRule,
+  PackageRuleInputConfig,
+} from '../../config/types.ts';
+import {
+  anyMatchRegexOrGlobList,
+  matchRegexOrGlobList,
+} from '../string-match.ts';
+import { Matcher } from './base.ts';
+
+export class FileNamesMatcher extends Matcher {
+  override matches(
+    { packageFile, lockFiles }: PackageRuleInputConfig,
+    { matchFileNames }: PackageRule,
+  ): boolean | null {
+    if (isUndefined(matchFileNames)) {
+      return null;
+    }
+    if (isUndefined(packageFile)) {
+      return false;
+    }
+
+    if (matchRegexOrGlobList(packageFile, matchFileNames)) {
+      return true;
+    }
+
+    if (isArray(lockFiles)) {
+      return anyMatchRegexOrGlobList(lockFiles, matchFileNames);
+    }
+
+    return false;
+  }
+}

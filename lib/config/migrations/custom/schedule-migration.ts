@@ -1,0 +1,83 @@
+import later from '@breejs/later';
+import { isArray, isString } from '@sindresorhus/is';
+import { regEx } from '../../../util/regex.ts';
+import { AbstractMigration } from '../base/abstract-migration.ts';
+
+const shortHoursRegex = regEx(/( \d?\d)((a|p)m)/g);
+const afterBeforeRegex = regEx(
+  /^(.*?)(after|before) (.*?) and (after|before) (.*?)( |$)(.*)/,
+);
+const dayRegex1 = regEx(/every (mon|tues|wednes|thurs|fri|satur|sun)day$/);
+const dayRegex2 = regEx(/every ([a-z]*day)$/);
+export class ScheduleMigration extends AbstractMigration {
+  override readonly propertyName = 'schedule';
+
+  override run(value: unknown): void {
+    if (value) {
+      // massage to array first
+      let schedules: string[] = [];
+      if (isString(value)) {
+        schedules = [value];
+      }
+      if (isArray<string>(value)) {
+        schedules = [...value];
+      }
+      // split 'and'
+      const schedulesLength = schedules.length;
+      for (let i = 0; i < schedulesLength; i += 1) {
+        if (
+          schedules[i].includes(' and ') &&
+          schedules[i].includes('before ') &&
+          schedules[i].includes('after ')
+        ) {
+          const parsedSchedule = later.parse.text(
+            // We need to massage short hours first before we can parse it
+            schedules[i].replace(shortHoursRegex, '$1:00$2'),
+          ).schedules[0];
+          // Only migrate if the after time is greater than before, e.g. "after 10pm and before 5am"
+          if (!parsedSchedule?.t_a || !parsedSchedule.t_b) {
+            continue;
+          }
+
+          if (parsedSchedule.t_a[0] > parsedSchedule.t_b[0]) {
+            const toSplit = schedules[i];
+            schedules[i] = toSplit
+              .replace(afterBeforeRegex, '$1$2 $3 $7')
+              .trim();
+            schedules.push(
+              toSplit.replace(afterBeforeRegex, '$1$4 $5 $7').trim(),
+            );
+          }
+        }
+      }
+      for (let i = 0; i < schedules.length; i += 1) {
+        if (schedules[i].includes('on the last day of the month')) {
+          schedules[i] = schedules[i].replace(
+            'on the last day of the month',
+            'on the first day of the month',
+          );
+        }
+        if (schedules[i].includes('on every weekday')) {
+          schedules[i] = schedules[i].replace(
+            'on every weekday',
+            'every weekday',
+          );
+        }
+        if (schedules[i].endsWith(' every day')) {
+          schedules[i] = schedules[i].replace(' every day', '');
+        }
+        if (dayRegex1.test(schedules[i])) {
+          schedules[i] = schedules[i].replace(dayRegex2, 'on $1');
+        }
+        if (schedules[i].endsWith('days')) {
+          schedules[i] = schedules[i].replace('days', 'day');
+        }
+      }
+      if (isString(value) && schedules.length === 1) {
+        this.rewrite(schedules[0]);
+      } else {
+        this.rewrite(schedules);
+      }
+    }
+  }
+}

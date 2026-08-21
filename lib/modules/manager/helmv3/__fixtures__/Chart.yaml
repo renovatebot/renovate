@@ -1,0 +1,18 @@
+
+apiVersion: v2
+name: app
+version: 0.1.0
+dependencies:
+  - name: renovate-test
+    version: 0.1.0
+    repository: oci://registry.gitlab.com/user/oci-helm-test
+    import-values:
+      - defaults
+  - name: repo-test
+    version: 0.1.0
+    repository: https://gitlab.com/api/v4/projects/xxxxxxx/packages/helm/stable
+  - name: cert-manager
+    version: v1.7.1
+  - name: dask
+    version: 2.2.2
+    repository: file://../dependency_chart/dask

@@ -1,0 +1,180 @@
+import { isString } from '@sindresorhus/is';
+import { DateTime } from 'luxon';
+import type { ZodType } from 'zod/v4';
+import { GlobalConfig } from '../../../config/global.ts';
+import { logger } from '../../../logger/index.ts';
+import * as packageCache from '../../cache/package/index.ts';
+import { resolveTtlValues } from '../../cache/package/ttl.ts';
+import type { PackageCacheNamespace } from '../../cache/package/types.ts';
+import { regEx } from '../../regex.ts';
+import { HttpCacheStats } from '../../stats.ts';
+import type { HttpResponse } from '../types.ts';
+import { copyResponse } from '../util.ts';
+import { AbstractHttpCacheProvider } from './abstract-http-cache-provider.ts';
+import type { HttpCache } from './schema.ts';
+
+export interface PackageHttpCacheProviderOptions {
+  namespace: PackageCacheNamespace;
+  softTtlMinutes?: number;
+  checkCacheControlHeader: boolean;
+  checkAuthorizationHeader: boolean;
+  writeSchema?: ZodType;
+}
+
+export class PackageHttpCacheProvider extends AbstractHttpCacheProvider {
+  private namespace: PackageCacheNamespace;
+  private defaultTtlMinutes: number;
+  private writeSchema?: ZodType;
+
+  checkCacheControlHeader: boolean;
+  checkAuthorizationHeader: boolean;
+
+  constructor({
+    namespace,
+    softTtlMinutes = 15,
+    checkCacheControlHeader,
+    checkAuthorizationHeader,
+    writeSchema,
+  }: PackageHttpCacheProviderOptions) {
+    super();
+    this.namespace = namespace;
+    this.defaultTtlMinutes = softTtlMinutes;
+    this.checkCacheControlHeader = checkCacheControlHeader;
+    this.checkAuthorizationHeader = checkAuthorizationHeader;
+    this.writeSchema = writeSchema;
+  }
+
+  private get softTtlMinutes(): number {
+    const { softTtlMinutes } = resolveTtlValues(
+      this.namespace,
+      this.defaultTtlMinutes,
+    );
+    return softTtlMinutes;
+  }
+
+  private get hardTtlMinutes(): number {
+    const { hardTtlMinutes } = resolveTtlValues(
+      this.namespace,
+      this.defaultTtlMinutes,
+    );
+    return hardTtlMinutes;
+  }
+
+  private cacheKey(method: string, url: string): string {
+    if (method !== 'get') {
+      return `${method}:${url}`;
+    }
+    return url;
+  }
+
+  async load(method: string, url: string): Promise<unknown> {
+    return await packageCache.get(this.namespace, this.cacheKey(method, url));
+  }
+
+  async persist(method: string, url: string, data: HttpCache): Promise<void> {
+    if (!data) {
+      return;
+    }
+
+    if (!this.writeSchema) {
+      await packageCache.setWithRawTtl(
+        this.namespace,
+        this.cacheKey(method, url),
+        data,
+        this.hardTtlMinutes,
+      );
+      return;
+    }
+
+    const httpResponse = copyResponse(
+      data.httpResponse as HttpResponse<unknown>,
+      false,
+    );
+
+    const { data: body, error: err } = this.writeSchema.safeParse(
+      httpResponse.body,
+    );
+
+    if (err) {
+      logger.once.debug(
+        { err, method, namespace: this.namespace, url },
+        'http cache: writeSchema validation failed for response body, skipping cache write',
+      );
+      return;
+    }
+
+    httpResponse.body = body;
+
+    await packageCache.setWithRawTtl(
+      this.namespace,
+      this.cacheKey(method, url),
+      { ...data, httpResponse },
+      this.hardTtlMinutes,
+    );
+  }
+
+  override async bypassServer<T>(
+    method: string,
+    url: string,
+    ignoreSoftTtl = false,
+  ): Promise<HttpResponse<T> | null> {
+    const cached = await this.get(method, url);
+    if (!cached) {
+      return null;
+    }
+
+    if (ignoreSoftTtl) {
+      return cached.httpResponse as HttpResponse<T>;
+    }
+
+    const cachedAt = DateTime.fromISO(cached.timestamp);
+    const deadline = cachedAt.plus({ minutes: this.softTtlMinutes });
+    const now = DateTime.now();
+    if (now >= deadline) {
+      HttpCacheStats.incLocalMisses(url);
+      return null;
+    }
+
+    HttpCacheStats.incLocalHits(url);
+    return cached.httpResponse as HttpResponse<T>;
+  }
+
+  cacheAllowed<T>(resp: HttpResponse<T>): boolean {
+    const allowedViaGlobalConfig = GlobalConfig.get('cachePrivatePackages');
+    if (allowedViaGlobalConfig) {
+      return true;
+    }
+
+    if (this.checkCacheControlHeader) {
+      const cacheControl = resp.headers['cache-control'];
+      const isPublic =
+        isString(cacheControl) &&
+        cacheControl
+          .toLocaleLowerCase()
+          .split(regEx(/\s*,\s*/))
+          .includes('public');
+
+      if (!isPublic) {
+        return false;
+      }
+    }
+
+    if (this.checkAuthorizationHeader && resp.authorization) {
+      return false;
+    }
+
+    return true;
+  }
+
+  override async wrapServerResponse<T>(
+    method: string,
+    url: string,
+    resp: HttpResponse<T>,
+  ): Promise<HttpResponse<T>> {
+    if (resp.statusCode === 200 && !this.cacheAllowed(resp)) {
+      return resp;
+    }
+
+    return await super.wrapServerResponse(method, url, resp);
+  }
+}

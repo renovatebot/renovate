@@ -1,0 +1,19 @@
+<div class="md-copyright">
+  {% if config.extra.version %}
+  <p>
+    These docs correspond to Mend Renovate
+    <a
+      href="https://github.com/renovatebot/renovate/releases/tag/{{ config.extra.version }}"
+      >{{ config.extra.version }}</a
+    >.
+  </p>
+  {% endif %} {% if not config.extra.generator == false %} Made with
+  <a
+    href="https://squidfunk.github.io/mkdocs-material/"
+    target="_blank"
+    rel="noopener"
+  >
+    Material for MkDocs
+  </a>
+  {% endif %}
+</div>

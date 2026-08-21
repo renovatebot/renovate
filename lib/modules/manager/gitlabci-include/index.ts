@@ -1,0 +1,17 @@
+import type { Category } from '../../../constants/index.ts';
+import { GitlabTagsDatasource } from '../../datasource/gitlab-tags/index.ts';
+import { extractPackageFile } from './extract.ts';
+
+export { extractPackageFile };
+
+export const displayName = 'GitLab CI/CD include';
+export const url = 'https://docs.gitlab.com/ee/ci/yaml/includes.html';
+export const categories: Category[] = ['ci'];
+
+export const defaultConfig = {
+  managerFilePatterns: ['/\\.gitlab-ci\\.ya?ml$/'],
+};
+
+export const supportedDatasources = [GitlabTagsDatasource.id];
+
+export { knownDepTypes } from './dep-types.ts';

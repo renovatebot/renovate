@@ -1,0 +1,21 @@
+import type { UpgradeFingerprintConfig } from '../../types.ts';
+
+type CommitFingerprintFields = keyof UpgradeFingerprintConfig;
+
+export const upgradeFingerprintFields = [
+  'autoReplaceStringTemplate',
+  'currentDigest',
+  'currentValue',
+  'currentVersion',
+  'datasource',
+  'depName',
+  'lockFile',
+  'lockedVersion',
+  'manager',
+  'newName',
+  'newDigest',
+  'newValue',
+  'newVersion',
+  'packageFile',
+  'replaceString',
+] as const satisfies CommitFingerprintFields[];

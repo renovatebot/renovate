@@ -1,0 +1,123 @@
+import { logger } from '../../../logger/index.ts';
+import * as packageCache from '../../../util/cache/package/index.ts';
+import { toSha256 } from '../../../util/hash.ts';
+import type { Http } from '../../../util/http/index.ts';
+import type { AsyncResult } from '../../../util/result.ts';
+import { Result } from '../../../util/result.ts';
+import { parseUrl } from '../../../util/url.ts';
+import type { ReleaseResult } from '../types.ts';
+import { getV1Releases } from './common.ts';
+
+interface CacheRecord {
+  hash: string;
+  data: ReleaseResult;
+  isFallback?: true;
+}
+
+function hashVersions(versions: string[]): string {
+  return toSha256(versions.sort().join(','));
+}
+
+function hashReleases(releases: ReleaseResult): string {
+  return hashVersions(releases.releases.map((release) => release.version));
+}
+
+interface CacheNotFoundError {
+  type: 'cache-not-found';
+}
+interface CacheStaleError {
+  type: 'cache-stale';
+  cache: CacheRecord;
+}
+interface CacheInvalidError {
+  type: 'cache-invalid';
+}
+type CacheLoadError = CacheNotFoundError | CacheStaleError;
+type CacheError = CacheNotFoundError | CacheStaleError | CacheInvalidError;
+
+export class MetadataCache {
+  private readonly http: Http;
+
+  constructor(http: Http) {
+    this.http = http;
+  }
+
+  async getRelease(
+    registryUrl: string,
+    packageName: string,
+    versions: string[],
+  ): Promise<ReleaseResult> {
+    const cacheNs = `datasource-rubygems`;
+    const cacheKey = `metadata-cache:${registryUrl}:${packageName}`;
+    const versionsHash = hashVersions(versions);
+
+    function loadCache(): AsyncResult<ReleaseResult, CacheLoadError> {
+      return Result.wrapNullable<CacheRecord, CacheLoadError, CacheLoadError>(
+        packageCache.get<CacheRecord>(cacheNs, cacheKey),
+        { type: 'cache-not-found' },
+      ).transform((cache) => {
+        return versionsHash === cache.hash
+          ? Result.ok(cache.data)
+          : Result.err({ type: 'cache-stale', cache });
+      });
+    }
+
+    async function saveCache(
+      cache: CacheRecord,
+      ttlMinutes = 100 * 24 * 60,
+      ttlDelta = 10 * 24 * 60,
+    ): Promise<void> {
+      const registryHostname = parseUrl(registryUrl)?.hostname;
+      if (registryHostname === 'rubygems.org') {
+        const ttlRandomDelta = Math.floor(Math.random() * ttlDelta);
+        const ttl = ttlMinutes + ttlRandomDelta;
+        await packageCache.set(cacheNs, cacheKey, cache, ttl);
+      }
+    }
+
+    return await loadCache()
+      .catch((err) =>
+        getV1Releases(this.http, registryUrl, packageName).transform(
+          async (
+            data: ReleaseResult,
+          ): Promise<Result<ReleaseResult, CacheError>> => {
+            const dataHash = hashReleases(data);
+            if (dataHash === versionsHash) {
+              await saveCache({
+                hash: dataHash,
+                data,
+              });
+              return Result.ok(data);
+            }
+
+            /**
+             * Return stale cache for 24 hours,
+             * if metadata is inconsistent with versions list.
+             */
+            if (err.type === 'cache-stale') {
+              const staleCache = err.cache;
+              if (!staleCache.isFallback) {
+                await saveCache(
+                  { ...staleCache, isFallback: true },
+                  24 * 60,
+                  0,
+                );
+              }
+              return Result.ok(staleCache.data);
+            }
+
+            return Result.err({ type: 'cache-invalid' });
+          },
+        ),
+      )
+      .catch((err) => {
+        logger.debug(
+          { err },
+          'Rubygems: error fetching rubygems data, falling back to versions-only result',
+        );
+        const releases = versions.map((version) => ({ version }));
+        return Result.ok({ releases });
+      })
+      .unwrapOrThrow();
+  }
+}

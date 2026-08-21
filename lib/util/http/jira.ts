@@ -1,0 +1,18 @@
+import { HttpBase } from './http.ts';
+import type { HttpOptions } from './types.ts';
+
+let baseUrl: string;
+
+export function setBaseUrl(url: string): void {
+  baseUrl = url;
+}
+
+export class JiraHttp extends HttpBase {
+  protected override get baseUrl(): string | undefined {
+    return baseUrl;
+  }
+
+  constructor(type = 'jira', options?: HttpOptions) {
+    super(type, options);
+  }
+}

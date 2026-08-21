@@ -1,0 +1,136 @@
+import {
+  isArray,
+  isNonEmptyObject,
+  isNonEmptyString,
+  isNullOrUndefined,
+} from '@sindresorhus/is';
+import { getDep } from '../../../dockerfile/extract.ts';
+import type { ExtractConfig, PackageDependency } from '../../../types.ts';
+import { DependencyExtractor } from '../../base.ts';
+import type { TerraformDefinitionFile } from '../../hcl/types.ts';
+import type { ProviderLock } from '../../lockfile/types.ts';
+import type { GenericImageResourceDef } from '../../types.ts';
+import { generic_image_datasource, generic_image_resource } from './utils.ts';
+
+export class GenericDockerImageRefExtractor extends DependencyExtractor {
+  getCheckList(): string[] {
+    return [...generic_image_resource, ...generic_image_datasource].map(
+      (value) => `"${value.type}"`,
+    );
+  }
+
+  extract(
+    hclMap: TerraformDefinitionFile,
+    _locks: ProviderLock[],
+    config: ExtractConfig,
+  ): PackageDependency[] {
+    const dependencies = [];
+
+    dependencies.push(
+      ...this.extractResources(hclMap.resource, generic_image_resource, config),
+    );
+
+    dependencies.push(
+      ...this.extractResources(hclMap.data, generic_image_datasource, config),
+    );
+
+    return dependencies;
+  }
+
+  private extractResources(
+    typeMap: Record<string, unknown> | undefined,
+    image_definitions: GenericImageResourceDef[],
+    config: ExtractConfig,
+  ): PackageDependency[] {
+    if (isNullOrUndefined(typeMap)) {
+      return [];
+    }
+
+    const dependencies = [];
+
+    for (const image_resource_def of image_definitions) {
+      const { type, path } = image_resource_def;
+      const resourceInstancesMap = typeMap[type];
+      // is there a resource with current looked at type ( `image_resource_def` )
+      if (!isNonEmptyObject(resourceInstancesMap)) {
+        continue;
+      }
+
+      // loop over instances of a resource type
+      for (const instance of Object.values(resourceInstancesMap).flat()) {
+        dependencies.push(
+          ...this.walkPath({ depType: type }, instance, path, config),
+        );
+      }
+    }
+
+    return dependencies;
+  }
+
+  /**
+   * Recursively follow the path to find elements on the path.
+   * If a path element is '*' the parentElement will be interpreted as a list
+   * and each element will be followed
+   * @param abstractDep dependency which will used as basis for adding attributes
+   * @param parentElement element from which the next element will be extracted
+   * @param leftPath path elements left to walk down
+   */
+  private walkPath(
+    abstractDep: PackageDependency,
+    parentElement: unknown,
+    leftPath: string[],
+    config: ExtractConfig,
+  ): PackageDependency[] {
+    const dependencies: PackageDependency[] = [];
+    // if there are no path elements left, we have reached the end of the path
+    if (leftPath.length === 0) {
+      /* v8 ignore next 8 -- needs test */
+      if (!isNonEmptyString(parentElement)) {
+        return [
+          {
+            ...abstractDep,
+            skipReason: 'invalid-dependency-specification',
+          },
+        ];
+      }
+      const test = getDep(parentElement, true, config.registryAliases);
+      const dep: PackageDependency = {
+        ...abstractDep,
+        ...test,
+      };
+      return [dep];
+    }
+
+    // is this a list iterator
+    const pathElement = leftPath[0];
+
+    // get sub element
+    const element = isNonEmptyObject(parentElement)
+      ? parentElement[pathElement]
+      : null;
+    if (isNullOrUndefined(element)) {
+      return leftPath.length === 1 // if this is the last element assume a false defined dependency
+        ? [
+            {
+              ...abstractDep,
+              skipReason: 'invalid-dependency-specification',
+            },
+          ]
+        : [];
+    }
+    if (isArray(element)) {
+      for (const arrayElement of element) {
+        dependencies.push(
+          ...this.walkPath(
+            abstractDep,
+            arrayElement,
+            leftPath.slice(1),
+            config,
+          ),
+        );
+      }
+      return dependencies;
+    }
+    return this.walkPath(abstractDep, element, leftPath.slice(1), config);
+  }
+}
