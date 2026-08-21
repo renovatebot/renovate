@@ -39,6 +39,7 @@ import type {
 } from './types.ts';
 
 const githubBaseUrl = 'https://api.github.com/';
+const MAX_PAGINATION_PAGES = 100;
 let baseUrl = githubBaseUrl;
 export function setBaseUrl(url: string): void {
   baseUrl = url;
@@ -333,6 +334,20 @@ function replaceUrlBase(url: URL, baseUrl: string): URL {
   return new URL(relativeUrl, baseUrl);
 }
 
+function resolvePaginationUrl(
+  url: string,
+  baseUrl: string | undefined,
+  rebasePaginationLinks: boolean,
+): URL {
+  const parsedUrl = new URL(url, baseUrl);
+  const rebasePagination =
+    !!baseUrl &&
+    rebasePaginationLinks &&
+    // Preserve github.com URLs for use cases like release notes
+    parsedUrl.origin !== 'https://api.github.com';
+  return rebasePagination ? replaceUrlBase(parsedUrl, baseUrl) : parsedUrl;
+}
+
 export class GithubHttp extends HttpBase<GithubHttpOptions> {
   protected override get baseUrl(): string | undefined {
     return baseUrl;
@@ -425,18 +440,12 @@ export class GithubHttp extends HttpBase<GithubHttpOptions> {
       const env = getEnv();
       if (next?.url) {
         const baseUrl = httpOptions.baseUrl ?? this.baseUrl;
-        function resolvePaginationUrl(url: string): URL {
-          const parsedUrl = new URL(url, baseUrl);
-          const rebasePagination =
-            !!baseUrl &&
-            !!env.RENOVATE_X_REBASE_PAGINATION_LINKS &&
-            // Preserve github.com URLs for use cases like release notes
-            parsedUrl.origin !== 'https://api.github.com';
-          return rebasePagination
-            ? replaceUrlBase(parsedUrl, baseUrl)
-            : parsedUrl;
-        }
-        const firstPageUrl = resolvePaginationUrl(next.url);
+        const rebasePaginationLinks = !!env.RENOVATE_X_REBASE_PAGINATION_LINKS;
+        const firstPageUrl = resolvePaginationUrl(
+          next.url,
+          baseUrl,
+          rebasePaginationLinks,
+        );
         // Don't follow a cross-origin request, unless we've been explicitly requested to do so with `RENOVATE_X_REBASE_PAGINATION_LINKS`
         if (firstPageUrl.origin === resolvedUrl.origin) {
           let pages: HttpResponse<T>[];
@@ -462,12 +471,12 @@ export class GithubHttp extends HttpBase<GithubHttpOptions> {
             pages = [];
             const paginateAll =
               !!env.RENOVATE_PAGINATE_ALL || httpOptions.paginate === 'all';
+            const cursorPageLimit = paginateAll
+              ? MAX_PAGINATION_PAGES
+              : pageLimit;
             let nextUrl: URL | null = firstPageUrl;
-            for (
-              let pageNumber = 2;
-              nextUrl && (paginateAll || pageNumber <= pageLimit);
-              pageNumber += 1
-            ) {
+            let pageNumber = 2;
+            for (; nextUrl && pageNumber <= cursorPageLimit; pageNumber += 1) {
               if (nextUrl.origin !== resolvedUrl.origin) {
                 logger.once.warn(
                   {
@@ -486,8 +495,18 @@ export class GithubHttp extends HttpBase<GithubHttpOptions> {
               pages.push(nextPage);
               const nextLink = parseLinkHeader(nextPage.headers.link)?.next;
               nextUrl = nextLink?.url
-                ? resolvePaginationUrl(nextLink.url)
+                ? resolvePaginationUrl(
+                    nextLink.url,
+                    baseUrl,
+                    rebasePaginationLinks,
+                  )
                 : null;
+            }
+            if (paginateAll && nextUrl && pageNumber > cursorPageLimit) {
+              logger.warn(
+                { maxPages: MAX_PAGINATION_PAGES },
+                'GitHub cursor pagination limit reached',
+              );
             }
           }
           // v8 ignore else -- TODO: add test #40625

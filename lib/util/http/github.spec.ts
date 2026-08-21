@@ -170,6 +170,23 @@ describe('util/http/github', () => {
       expect(res.body).toEqual(['a', 'b', 'c', 'd', 'e']);
     });
 
+    it('limits full cursor pagination', async () => {
+      const url = '/some-url?per_page=1';
+      httpMock
+        .scope(githubApiHost)
+        .get(url)
+        .times(100)
+        .reply(200, ['a'], {
+          link: `<${url}>; rel="next"`,
+        });
+      const res = await githubApi.getJsonUnchecked(url, { paginate: 'all' });
+      expect(res.body).toHaveLength(100);
+      expect(logger.logger.warn).toHaveBeenCalledWith(
+        { maxPages: 100 },
+        'GitHub cursor pagination limit reached',
+      );
+    });
+
     it('does not follow cursor pagination links to a different origin', async () => {
       const url = '/some-url?per_page=2';
       httpMock
