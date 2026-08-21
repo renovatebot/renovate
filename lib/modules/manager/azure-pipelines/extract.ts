@@ -87,9 +87,7 @@ export function extractRepository(
   };
 }
 
-export function extractContainer(
-  container: Container,
-): PackageDependency | null {
+export function extractContainer(container: Container): PackageDependency {
   const dep = getDep(container.image);
   logger.debug(
     {
@@ -128,14 +126,14 @@ export function parseAzurePipelines(
   }
   logger.debug(
     { err: res.error, packageFile },
-    'Error parsing pubspec lockfile.',
+    'Error parsing Azure Pipelines file.',
   );
 
   return null;
 }
 
 function extractSteps(steps: Step[] | undefined): PackageDependency[] {
-  const deps = [];
+  const deps: PackageDependency[] = [];
   for (const step of coerceArray(steps)) {
     const task = extractAzurePipelinesTasks(step.task);
     if (task) {
@@ -197,10 +195,7 @@ export function extractPackageFile(
   }
 
   for (const container of coerceArray(pkg.resources?.containers)) {
-    const dep = extractContainer(container);
-    if (dep) {
-      deps.push(dep);
-    }
+    deps.push(extractContainer(container));
   }
 
   for (const { jobs } of coerceArray(pkg.stages)) {
