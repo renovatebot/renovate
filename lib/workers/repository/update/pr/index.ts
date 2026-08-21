@@ -35,7 +35,10 @@ import type {
 } from '../../../types.ts';
 import { embedChangelogs } from '../../changelog/index.ts';
 import { resolveBranchStatus } from '../branch/status-checks.ts';
-import { changelogsCommentTopic, getChangelogs } from './body/changelogs.ts';
+import {
+  changelogsCommentTopic,
+  getChangelogsCommentContent,
+} from './body/changelogs.ts';
 import { getPrBody } from './body/index.ts';
 import {
   getChangedLabels,
@@ -161,7 +164,7 @@ async function ensureChangelogsComment(
   }
 
   const content = platform.massageMarkdown(
-    getChangelogs(config),
+    getChangelogsCommentContent(config),
     config.rebaseLabel,
   );
 

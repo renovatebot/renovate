@@ -1,6 +1,10 @@
 import * as _template from '../../../../../util/template/index.ts';
 import type { BranchConfig } from '../../../../types.ts';
-import { getChangelogs, getChangelogsCommentNotice } from './changelogs.ts';
+import {
+  getChangelogs,
+  getChangelogsCommentContent,
+  getChangelogsCommentNotice,
+} from './changelogs.ts';
 
 vi.mock('../../../../../util/template/index.ts');
 const template = vi.mocked(_template);
@@ -111,6 +115,44 @@ describe('workers/repository/update/pr/body/changelogs', () => {
 
         "
       `);
+    });
+  });
+  describe('getChangelogsCommentContent', () => {
+    it('returns empty string when there is no release notes', () => {
+      const res = getChangelogsCommentContent({
+        manager: 'some-manager',
+        branchName: 'some-branch',
+        baseBranch: 'base',
+        upgrades: [],
+        hasReleaseNotes: false,
+      });
+
+      expect(res).toBe('');
+      expect(template.compile).not.toHaveBeenCalled();
+    });
+
+    it('drops the heading which the comment topic already provides', () => {
+      template.compile.mockImplementationOnce(
+        (): string => '### Release Notes\n\nsome/repo (dep-1)',
+      );
+
+      const res = getChangelogsCommentContent({
+        manager: 'some-manager',
+        branchName: 'some-branch',
+        baseBranch: 'base',
+        upgrades: [
+          {
+            manager: 'some-manager',
+            depName: 'dep-1',
+            repoName: 'some/repo',
+            branchName: 'some-branch',
+            hasReleaseNotes: true,
+          },
+        ],
+        hasReleaseNotes: true,
+      });
+
+      expect(res).toBe('some/repo (dep-1)');
     });
   });
 });
