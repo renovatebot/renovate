@@ -715,6 +715,26 @@ version = "3.10.17"
       });
     });
 
+    it('keeps the package file in the update set for artifact refresh', () => {
+      const res = updateLockedDependency({
+        packageFile: 'mise.toml',
+        packageFileContent: '[[tools.node]]\nversion = "22"\n',
+        lockFile: 'mise.lock',
+        lockFileContent,
+        depName: 'node',
+        currentVersion: '20.10.0',
+        newVersion: '22.0.0',
+      });
+
+      expect(res).toMatchObject({
+        status: 'updated',
+        files: {
+          'mise.toml': '[[tools.node]]\nversion = "22"\n',
+          'mise.lock': expect.stringContaining('version = "22.0.0"'),
+        },
+      });
+    });
+
     it('preserves a vendor prefix in the lockfile version', () => {
       const javaLockFileContent = `
 [[tools.java]]

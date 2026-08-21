@@ -219,11 +219,6 @@ export async function getUpdatedPackageFiles(
             Object.keys(files).forEach(
               (file) => delete nonUpdatedFileContents[file],
             );
-            if (!updatedFileContents[packageFile]) {
-              // A lockfile-only update must retain the unchanged package file so its manager's
-              // artifact update is scheduled when only the lockfile was changed.
-              nonUpdatedFileContents[packageFile] = packageFileContent!;
-            }
           }
         }
       } else {

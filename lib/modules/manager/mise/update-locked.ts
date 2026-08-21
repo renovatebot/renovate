@@ -134,6 +134,11 @@ export function updateLockedDependency(
         replacement +
         lockFileContent.slice(versionNode.range[1]),
     };
+    if (config.packageFileContent !== undefined) {
+      // Keep the package file in the update set so mise's artifact refresh runs
+      // for selector lockfile updates and regenerates platform metadata.
+      files[config.packageFile] = config.packageFileContent;
+    }
     return { status: 'updated', files };
   } catch (err) {
     logger.debug({ err }, 'mise.updateLockedDependency() error');

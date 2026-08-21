@@ -8,7 +8,6 @@ import * as _composer from '../../../../modules/manager/composer/index.ts';
 import * as _gitSubmodules from '../../../../modules/manager/git-submodules/index.ts';
 import * as _gomod from '../../../../modules/manager/gomod/index.ts';
 import * as _helmv3 from '../../../../modules/manager/helmv3/index.ts';
-import * as _mise from '../../../../modules/manager/mise/index.ts';
 import * as _npm from '../../../../modules/manager/npm/index.ts';
 import * as _pep621 from '../../../../modules/manager/pep621/index.ts';
 import * as _pipCompile from '../../../../modules/manager/pip-compile/index.ts';
@@ -28,7 +27,6 @@ const composer = vi.mocked(_composer);
 const gitSubmodules = vi.mocked(_gitSubmodules);
 const gomod = vi.mocked(_gomod);
 const helmv3 = vi.mocked(_helmv3);
-const mise = vi.mocked(_mise);
 const npm = vi.mocked(_npm);
 const batectWrapper = vi.mocked(_batectWrapper);
 const autoReplace = vi.mocked(_autoReplace);
@@ -39,7 +37,6 @@ const poetry = vi.mocked(_poetry);
 vi.mock('../../../../modules/manager/bundler/index.ts');
 vi.mock('../../../../modules/manager/composer/index.ts');
 vi.mock('../../../../modules/manager/helmv3/index.ts');
-vi.mock('../../../../modules/manager/mise/index.ts');
 vi.mock('../../../../modules/manager/npm/index.ts');
 vi.mock('../../../../modules/manager/git-submodules/index.ts');
 vi.mock('../../../../modules/manager/gomod/index.ts', () => mockDeep());
@@ -685,44 +682,6 @@ describe('workers/repository/update/branch/get-updated', () => {
           },
         ],
       });
-    });
-
-    it('updates artifacts when only the lockfile changes', async () => {
-      config.upgrades.push({
-        packageFile: 'mise.toml',
-        manager: 'mise',
-        branchName: '',
-        isLockfileUpdate: true,
-      });
-      mise.updateLockedDependency.mockReturnValueOnce({
-        status: 'updated',
-        files: { 'mise.lock': 'new contents' },
-      });
-      mise.updateArtifacts.mockResolvedValueOnce([
-        {
-          file: {
-            type: 'addition',
-            path: 'mise.lock',
-            contents: 'refreshed contents',
-          },
-        },
-      ]);
-
-      const res = await getUpdatedPackageFiles(config);
-
-      expect(mise.updateArtifacts).toHaveBeenCalledExactlyOnceWith(
-        expect.objectContaining({
-          packageFileName: 'mise.toml',
-          newPackageFileContent: 'existing content',
-        }),
-      );
-      expect(res.updatedArtifacts).toEqual([
-        {
-          type: 'addition',
-          path: 'mise.lock',
-          contents: 'refreshed contents',
-        },
-      ]);
     });
 
     it('update artifacts on update-lockfile strategy with no updateLockedDependency', async () => {
