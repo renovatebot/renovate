@@ -144,6 +144,14 @@ export function exec(
       extendEnv: false,
     });
 
+    // Suppress execa's internal promise rejection (e.g., from timeout).
+    // We handle all exit scenarios via 'exit' and 'error' event listeners below,
+    // so the promise rejection would otherwise surface as an unhandledRejection.
+    // v8 ignore next 3 -- execa returns a thenable in production but not in mocked tests
+    if (typeof cp.catch === 'function') {
+      cp.catch(() => undefined);
+    }
+
     // handle streams
     const [stdout, stderr] = initStreamListeners(cp, {
       ...opts,
