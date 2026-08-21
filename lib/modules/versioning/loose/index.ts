@@ -99,7 +99,9 @@ class LooseVersioningApi extends GenericVersioningApi<LooseVersion> {
 
     const sectionIndex = sectionIndexes[type];
     return (
-      parsedA.releaseBig[sectionIndex] === parsedB.releaseBig[sectionIndex]
+      // a missing section counts as zero, so `1` and `1.0` share a minor
+      (parsedA.releaseBig[sectionIndex] ?? 0n) ===
+      (parsedB.releaseBig[sectionIndex] ?? 0n)
     );
   }
 }
