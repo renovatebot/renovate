@@ -9,6 +9,7 @@ import type {
 } from '../../../config/types.ts';
 import * as docker from '../../../util/exec/docker/index.ts';
 import type { FileAddition } from '../../../util/git/types.ts';
+import type { Timestamp } from '../../../util/timestamp.ts';
 import type { UpdateArtifactsConfig, Upgrade } from '../types.ts';
 import { updateArtifacts } from './index.ts';
 import * as rules from './post-update/rules.ts';
@@ -397,6 +398,63 @@ minimumReleaseAgeExclude:
             currentValue: '8.15.5',
             managerData: { pnpmShrinkwrap: 'pnpm-lock.yaml' },
             isVulnerabilityAlert: true,
+          },
+        ],
+        newPackageFileContent: 'some new content',
+        config,
+      });
+      expect(res).toStrictEqual([
+        {
+          file: {
+            type: 'addition',
+            path: 'pnpm-workspace.yaml',
+            contents:
+              'minimumReleaseAge: 10080\nminimumReleaseAgeExclude:\n  # Renovate security update: pnpm@8.15.6\n  - pnpm@8.15.6\n',
+          },
+        },
+      ]);
+    });
+
+    it('returns null if security update is past the minimumReleaseAge gate', async () => {
+      fs.getSiblingFileName.mockReturnValueOnce('pnpm-workspace.yaml');
+      fs.localPathExists.mockResolvedValueOnce(true);
+      fs.readLocalFile.mockResolvedValueOnce(
+        codeBlock`minimumReleaseAge: 1440`,
+      ); // for pnpm-workspace.yaml
+      const res = await updateArtifacts({
+        packageFileName: 'package.json',
+        updatedDeps: [
+          {
+            ...validDepUpdate,
+            currentValue: '8.15.5',
+            managerData: { pnpmShrinkwrap: 'pnpm-lock.yaml' },
+            isVulnerabilityAlert: true,
+            releaseTimestamp: '2020-01-01T00:00:00Z' as Timestamp,
+          },
+        ],
+        newPackageFileContent: 'some new content',
+        config,
+      });
+
+      expect(res).toBeNull();
+      expect(fs.writeLocalFile).not.toHaveBeenCalled();
+    });
+
+    it('writes minimumReleaseAgeExclude when security update is within the gate', async () => {
+      fs.getSiblingFileName.mockReturnValueOnce('pnpm-workspace.yaml');
+      fs.localPathExists.mockResolvedValueOnce(true);
+      fs.readLocalFile.mockResolvedValueOnce(
+        codeBlock`minimumReleaseAge: 10080`,
+      ); // for pnpm-workspace.yaml
+      const res = await updateArtifacts({
+        packageFileName: 'package.json',
+        updatedDeps: [
+          {
+            ...validDepUpdate,
+            currentValue: '8.15.5',
+            managerData: { pnpmShrinkwrap: 'pnpm-lock.yaml' },
+            isVulnerabilityAlert: true,
+            releaseTimestamp: new Date().toISOString() as Timestamp,
           },
         ],
         newPackageFileContent: 'some new content',
