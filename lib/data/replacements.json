@@ -1,7 +1,6 @@
 {
   "$schema": "../../tools/schemas/replacements-schema.json",
   "all": {
-    "overrideDescription": "Apply crowd-sourced package replacement rules.",
     "extends": [
       "replacements:actions-attest-build-provenance-to-actions-attest",
       "replacements:airbnb-prop-types-to-prop-types-tools",
@@ -66,7 +65,8 @@
       "replacements:wuchale-vite-plugin-to-wuchale",
       "replacements:xmldom-to-scoped",
       "replacements:zap"
-    ]
+    ],
+    "overrideDescription": "Apply crowd-sourced package replacement rules."
   },
   "actions-attest-build-provenance-to-actions-attest": {
     "description": "`actions/attest-build-provenance` was renamed to `actions/attest`.",
