@@ -588,7 +588,7 @@ export async function initRepo({
     });
 
     if (res?.errors) {
-      if (res.errors.find((err) => err.type === 'RATE_LIMITED')) {
+      if (githubHttp.isGraphqlRateLimited(res.errors)) {
         logger.debug({ res }, 'GraphQL rate limit exceeded.');
         throw new Error(PLATFORM_RATE_LIMIT_EXCEEDED);
       }
