@@ -287,7 +287,7 @@ describe('modules/manager/npm/artifacts', () => {
           {
             ...validDepUpdate,
             currentValue: '8.15.5',
-            managerData: { pnpmShrinkwrap: 'pnpm-lock.yaml' },
+            managerData: { pnpmLockFile: 'pnpm-lock.yaml' },
             isVulnerabilityAlert: true,
           },
         ],
@@ -298,7 +298,7 @@ describe('modules/manager/npm/artifacts', () => {
       expect(res).toBeNull();
     });
 
-    it('returns null if the pnpmShrinkwrap file is not found', async () => {
+    it('returns null if the pnpmLockFile file is not found', async () => {
       fs.getSiblingFileName.mockReturnValueOnce('pnpm-workspace.yaml');
       fs.localPathExists.mockResolvedValueOnce(true);
       fs.readLocalFile.mockResolvedValueOnce(
@@ -312,7 +312,7 @@ describe('modules/manager/npm/artifacts', () => {
             currentValue: '8.15.5',
             managerData: {
               // to be super explicit it's not set
-              pnpmShrinkwrap: undefined,
+              pnpmLockFile: undefined,
 
               // data from testing in https://github.com/JamieTanna-Mend-testing/pnpm-test-mra-no-workspace/pull/3
               hasPackageManager: false,
@@ -339,7 +339,7 @@ describe('modules/manager/npm/artifacts', () => {
           {
             ...validDepUpdate,
             currentValue: '8.15.5',
-            managerData: { pnpmShrinkwrap: 'pnpm-lock.yaml' },
+            managerData: { pnpmLockFile: 'pnpm-lock.yaml' },
             isVulnerabilityAlert: true,
           },
         ],
@@ -365,14 +365,14 @@ minimumReleaseAgeExclude:
           {
             ...validDepUpdate,
             currentValue: '8.15.5',
-            managerData: { pnpmShrinkwrap: 'pnpm-lock.yaml' },
+            managerData: { pnpmLockFile: 'pnpm-lock.yaml' },
             isVulnerabilityAlert: true,
           },
           {
             ...validDepUpdate,
             depName: '@myorg/fs-alternative',
             currentValue: '8.15.5',
-            managerData: { pnpmShrinkwrap: 'pnpm-lock.yaml' },
+            managerData: { pnpmLockFile: 'pnpm-lock.yaml' },
             isVulnerabilityAlert: true,
           },
         ],
@@ -395,7 +395,7 @@ minimumReleaseAgeExclude:
           {
             ...validDepUpdate,
             currentValue: '8.15.5',
-            managerData: { pnpmShrinkwrap: 'pnpm-lock.yaml' },
+            managerData: { pnpmLockFile: 'pnpm-lock.yaml' },
             isVulnerabilityAlert: true,
           },
         ],
@@ -428,7 +428,7 @@ minimumReleaseAgeExclude:
           {
             ...validDepUpdate,
             currentValue: '8.15.5',
-            managerData: { pnpmShrinkwrap: 'pnpm-lock.yaml' },
+            managerData: { pnpmLockFile: 'pnpm-lock.yaml' },
             isVulnerabilityAlert: true,
           },
         ],
@@ -462,7 +462,7 @@ minimumReleaseAgeExclude:
           {
             ...validDepUpdate,
             currentValue: '8.15.5',
-            managerData: { pnpmShrinkwrap: 'pnpm-lock.yaml' },
+            managerData: { pnpmLockFile: 'pnpm-lock.yaml' },
             isVulnerabilityAlert: true,
           },
           {
@@ -471,7 +471,7 @@ minimumReleaseAgeExclude:
             depType: 'dependency',
             currentValue: '16.0.9',
             newVersion: '16.0.10',
-            managerData: { pnpmShrinkwrap: 'pnpm-lock.yaml' },
+            managerData: { pnpmLockFile: 'pnpm-lock.yaml' },
             isVulnerabilityAlert: true,
           },
         ],
@@ -510,7 +510,7 @@ minimumReleaseAgeExclude:
             currentValue: '^4.17.15',
             currentVersion: '4.17.21',
             newVersion: '4.17.23',
-            managerData: { pnpmShrinkwrap: 'pnpm-lock.yaml' },
+            managerData: { pnpmLockFile: 'pnpm-lock.yaml' },
             isVulnerabilityAlert: true,
           },
         ],
@@ -541,7 +541,7 @@ minimumReleaseAgeExclude:
             currentValue: '^4.17.15',
             currentVersion: '4.17.21',
             newVersion: '4.17.23',
-            managerData: { pnpmShrinkwrap: 'pnpm-lock.yaml' },
+            managerData: { pnpmLockFile: 'pnpm-lock.yaml' },
             isVulnerabilityAlert: true,
           },
         ],
@@ -578,7 +578,7 @@ minimumReleaseAgeExclude:
             currentVersion: '4.17.21',
             newVersion: '4.17.23',
             newValue: '^4.17.15',
-            managerData: { pnpmShrinkwrap: 'pnpm-lock.yaml' },
+            managerData: { pnpmLockFile: 'pnpm-lock.yaml' },
             isVulnerabilityAlert: true,
           },
         ],
@@ -614,7 +614,7 @@ minimumReleaseAgeExclude:
             depType: 'dependencies',
             currentValue: '4.17.20',
             newVersion: '4.17.21',
-            managerData: { pnpmShrinkwrap: 'pnpm-lock.yaml' },
+            managerData: { pnpmLockFile: 'pnpm-lock.yaml' },
             isVulnerabilityAlert: true,
           },
         ],
@@ -649,7 +649,7 @@ minimumReleaseAgeExclude:
             depType: 'devDependencies',
             currentValue: '4.17.20',
             newVersion: '4.17.23',
-            managerData: { pnpmShrinkwrap: 'pnpm-lock.yaml' },
+            managerData: { pnpmLockFile: 'pnpm-lock.yaml' },
             isVulnerabilityAlert: true,
           },
         ],
@@ -685,7 +685,7 @@ minimumReleaseAgeExclude:
             depType: 'dependencies',
             currentValue: '4.17.20',
             newVersion: '4.17.21',
-            managerData: { pnpmShrinkwrap: 'pnpm-lock.yaml' },
+            managerData: { pnpmLockFile: 'pnpm-lock.yaml' },
             isVulnerabilityAlert: true,
           },
         ],
@@ -720,7 +720,7 @@ minimumReleaseAgeExclude:
             depType: 'devDependencies',
             currentValue: '4.17.20',
             newVersion: '4.17.21',
-            managerData: { pnpmShrinkwrap: 'pnpm-lock.yaml' },
+            managerData: { pnpmLockFile: 'pnpm-lock.yaml' },
             isVulnerabilityAlert: true,
           },
         ],
@@ -749,7 +749,7 @@ minimumReleaseAgeExclude:
             depType: 'pnpm.overrides',
             currentValue: '5.3.5',
             newVersion: '5.5.7',
-            managerData: { pnpmShrinkwrap: 'pnpm-lock.yaml' },
+            managerData: { pnpmLockFile: 'pnpm-lock.yaml' },
             isVulnerabilityAlert: true,
           },
         ],
@@ -791,7 +791,7 @@ minimumReleaseAgeExclude:
             depType: 'pnpm.overrides',
             currentValue: '5.5.6',
             newVersion: '5.5.7',
-            managerData: { pnpmShrinkwrap: 'pnpm-lock.yaml' },
+            managerData: { pnpmLockFile: 'pnpm-lock.yaml' },
             isVulnerabilityAlert: true,
           },
         ],
@@ -830,7 +830,7 @@ minimumReleaseAgeExclude:
             depType: 'pnpm.overrides',
             currentValue: '5.3.5',
             newVersion: '5.5.7',
-            managerData: { pnpmShrinkwrap: 'pnpm-lock.yaml' },
+            managerData: { pnpmLockFile: 'pnpm-lock.yaml' },
             isVulnerabilityAlert: true,
           },
         ],
@@ -874,7 +874,7 @@ minimumReleaseAgeExclude:
             depType: 'pnpm.catalog.default',
             currentValue: '^3.19.0',
             newVersion: '3.20.0',
-            managerData: { pnpmShrinkwrap: 'pnpm-lock.yaml' },
+            managerData: { pnpmLockFile: 'pnpm-lock.yaml' },
             isVulnerabilityAlert: true,
           },
         ],
@@ -907,7 +907,7 @@ minimumReleaseAgeExclude:
             depName: 'lodash',
             currentValue: '4.17.20',
             newVersion: '4.17.21',
-            managerData: { pnpmShrinkwrap: 'pnpm-lock.yaml' },
+            managerData: { pnpmLockFile: 'pnpm-lock.yaml' },
             isVulnerabilityAlert: true,
           },
           {
@@ -915,7 +915,7 @@ minimumReleaseAgeExclude:
             depName: 'axios',
             currentValue: '0.21.0',
             newVersion: '0.21.1',
-            managerData: { pnpmShrinkwrap: 'pnpm-lock.yaml' },
+            managerData: { pnpmLockFile: 'pnpm-lock.yaml' },
             isVulnerabilityAlert: true,
           },
         ],

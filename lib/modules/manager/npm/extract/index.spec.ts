@@ -1422,7 +1422,7 @@ describe('modules/manager/npm/extract/index', () => {
             hasPackageManager: false,
             npmLock: undefined,
             packageJsonName: 'renovate',
-            pnpmShrinkwrap: undefined,
+            pnpmLockFile: undefined,
             workspacesPackages: undefined,
             yarnLock: undefined,
             yarnZeroInstall: false,
@@ -1484,7 +1484,7 @@ describe('modules/manager/npm/extract/index', () => {
             },
           ],
           managerData: {
-            pnpmShrinkwrap: undefined,
+            pnpmLockFile: undefined,
           },
           packageFile: 'pnpm-workspace.yaml',
         },

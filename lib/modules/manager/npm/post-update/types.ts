@@ -9,7 +9,7 @@ import type { NpmManagerData } from '../types.ts';
 export interface DetermineLockFileDirsResult {
   yarnLockDirs: string[];
   npmLockDirs: string[];
-  pnpmShrinkwrapDirs: string[];
+  pnpmLockFileDirs: string[];
 }
 
 export interface AdditionalPackageFiles {

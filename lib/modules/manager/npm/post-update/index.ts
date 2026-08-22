@@ -64,7 +64,7 @@ export function determineLockFileDirs(
 ): DetermineLockFileDirsResult {
   const npmLockDirs: (string | undefined)[] = [];
   const yarnLockDirs: (string | undefined)[] = [];
-  const pnpmShrinkwrapDirs: (string | undefined)[] = [];
+  const pnpmLockFileDirs: (string | undefined)[] = [];
 
   for (const upgrade of config.upgrades) {
     // v8 ignore else -- TODO: add test #40625
@@ -75,7 +75,7 @@ export function determineLockFileDirs(
     ) {
       yarnLockDirs.push(upgrade.managerData?.yarnLock);
       npmLockDirs.push(upgrade.managerData?.npmLock);
-      pnpmShrinkwrapDirs.push(upgrade.managerData?.pnpmShrinkwrap);
+      pnpmLockFileDirs.push(upgrade.managerData?.pnpmLockFile);
     }
   }
 
@@ -89,7 +89,7 @@ export function determineLockFileDirs(
     return {
       yarnLockDirs: getDirs(yarnLockDirs),
       npmLockDirs: getDirs(npmLockDirs),
-      pnpmShrinkwrapDirs: getDirs(pnpmShrinkwrapDirs),
+      pnpmLockFileDirs: getDirs(pnpmLockFileDirs),
     };
   }
 
@@ -119,13 +119,13 @@ export function determineLockFileDirs(
     // push full lock file names and convert them later
     yarnLockDirs.push(packageFile.managerData.yarnLock);
     npmLockDirs.push(packageFile.managerData.npmLock);
-    pnpmShrinkwrapDirs.push(packageFile.managerData.pnpmShrinkwrap);
+    pnpmLockFileDirs.push(packageFile.managerData.pnpmLockFile);
   }
 
   return {
     yarnLockDirs: getDirs(yarnLockDirs),
     npmLockDirs: getDirs(npmLockDirs),
-    pnpmShrinkwrapDirs: getDirs(pnpmShrinkwrapDirs),
+    pnpmLockFileDirs: getDirs(pnpmLockFileDirs),
   };
 }
 
@@ -618,13 +618,13 @@ export async function getAdditionalFiles(
     }
   }
 
-  for (const pnpmShrinkwrap of dirs.pnpmShrinkwrapDirs) {
-    const lockFileDir = upath.dirname(pnpmShrinkwrap);
+  for (const pnpmLockFile of dirs.pnpmLockFileDirs) {
+    const lockFileDir = upath.dirname(pnpmLockFile);
     const npmrcContent = await getNpmrcContent(lockFileDir);
     await updateNpmrcContent(lockFileDir, npmrcContent, additionalNpmrcContent);
     logger.debug(`Generating pnpm-lock.yaml for ${lockFileDir}`);
     const upgrades = config.upgrades.filter(
-      (upgrade) => upgrade.managerData?.pnpmShrinkwrap === pnpmShrinkwrap,
+      (upgrade) => upgrade.managerData?.pnpmLockFile === pnpmLockFile,
     );
     const res = await pnpm.generateLockFile(lockFileDir, env, config, upgrades);
     if (res.error) {
@@ -651,12 +651,12 @@ export async function getAdditionalFiles(
       }
 
       artifactErrors.push({
-        fileName: pnpmShrinkwrap,
+        fileName: pnpmLockFile,
         stderr: artifactErrorMessageFromExecError(res, ''),
       });
     } else {
       const existingContent = await getFile(
-        pnpmShrinkwrap,
+        pnpmLockFile,
         config.reuseExistingBranch ? config.branchName : config.baseBranch,
       );
       if (res.lockFile === existingContent) {
@@ -665,7 +665,7 @@ export async function getAdditionalFiles(
         logger.debug('pnpm-lock.yaml needs updating');
         updatedArtifacts.push({
           type: 'addition',
-          path: pnpmShrinkwrap,
+          path: pnpmLockFile,
           // TODO: can be undefined? (#22198)
           contents: res.lockFile!,
         });
