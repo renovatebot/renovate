@@ -1966,6 +1966,25 @@ describe('modules/platform/gitlab/index', () => {
       ).toResolve();
     });
 
+    it('adds a comment as a discussion when configured', async () => {
+      const scope = await initRepo();
+      gitlab.configureRepo({
+        gitlabMergeRequestCommentType: 'discussion',
+      });
+      scope
+        .get('/api/v4/projects/some%2Frepo/merge_requests/42/notes')
+        .reply(200, [])
+        .post('/api/v4/projects/some%2Frepo/merge_requests/42/discussions')
+        .reply(200);
+      await expect(
+        gitlab.ensureComment({
+          number: 42,
+          topic: 'some-subject',
+          content: 'some\ncontent',
+        }),
+      ).toResolve();
+    });
+
     it('add updates comment if necessary', async () => {
       const scope = await initRepo();
       scope

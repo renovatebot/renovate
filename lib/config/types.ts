@@ -4,6 +4,7 @@ import type { ManagerName } from '../manager-list.generated.ts';
 import type { CustomManager } from '../modules/manager/custom/types.ts';
 import type {
   GitUrlOption,
+  GitlabMergeRequestCommentType,
   RepoSortMethod,
   SortMethod,
 } from '../modules/platform/types.ts';
@@ -408,6 +409,7 @@ export interface RenovateConfig
   forkModeDisallowMaintainerEdits?: boolean;
   forkProcessing?: 'auto' | 'enabled' | 'disabled';
   forkToken?: string;
+  gitlabMergeRequestCommentType?: GitlabMergeRequestCommentType;
 
   gitAuthor?: string;
 

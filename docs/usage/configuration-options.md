@@ -2017,6 +2017,13 @@ If you have other bots which commit on top of Renovate PRs, and don't want Renov
 `gitIgnoredAuthors` values can be exact [RFC5322](https://datatracker.ietf.org/doc/html/rfc5322)-compliant email strings, glob patterns, or regex patterns.
 For more details on the syntax and supported patterns, see Renovate's [string pattern matching documentation](./string-pattern-matching.md).
 
+## `gitlabMergeRequestCommentType`
+
+By default, Renovate posts comments on GitLab merge requests as regular notes.
+Set this option to `discussion` to post new comments as resolvable discussions instead.
+GitLab can be configured to [prevent merging while threads remain unresolved](https://docs.gitlab.com/user/project/merge_requests/#prevent-merge-unless-all-threads-are-resolved).
+When this GitLab setting is enabled, Renovate discussions prevent the merge request from being merged until someone resolves them.
+
 ## `gitLabIgnoreApprovals`
 
 Ignore the default project level approval(s), so that Renovate bot can automerge its merge requests, without needing approval(s).
